@@ -1,7 +1,7 @@
 use crate::file_handlers::{
     javascript, AnalyzerCapabilities, Capabilities, CodeActionsParams, DebugCapabilities,
-    ExtensionHandler, FixAllParams, FormatterCapabilities, LintParams, LintResults, Mime,
-    ParseResult, ParserCapabilities,
+    ExtensionHandler, FixAllParams, FormatterCapabilities, LintParams, LintResults, ParseResult,
+    ParserCapabilities,
 };
 use crate::settings::SettingsHandle;
 use crate::workspace::{
@@ -86,10 +86,6 @@ impl VueFileHandler {
 }
 
 impl ExtensionHandler for VueFileHandler {
-    fn mime(&self) -> Mime {
-        Mime::Javascript
-    }
-
     fn capabilities(&self) -> Capabilities {
         Capabilities {
             parser: ParserCapabilities { parse: Some(parse) },

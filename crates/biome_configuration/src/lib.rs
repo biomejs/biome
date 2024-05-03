@@ -296,7 +296,7 @@ mod test {
             Test {},
             ResolveOptions {
                 condition_names: vec!["node".to_string(), "import".to_string()],
-                extensions: vec!["*.json".to_string()],
+                extensions: vec![".json".to_string()],
                 ..ResolveOptions::default()
             },
         );

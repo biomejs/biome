@@ -1,8 +1,9 @@
 use crate::keywords::{
     BASIC_KEYWORDS, FONT_FAMILY_KEYWORDS, FONT_SIZE_KEYWORDS, FONT_STRETCH_KEYWORDS,
     FONT_STYLE_KEYWORDS, FONT_VARIANTS_KEYWORDS, FONT_WEIGHT_ABSOLUTE_KEYWORDS,
-    FONT_WEIGHT_NUMERIC_KEYWORDS, FUNCTION_KEYWORDS, LINE_HEIGHT_KEYWORDS,
-    SYSTEM_FAMILY_NAME_KEYWORDS,
+    FONT_WEIGHT_NUMERIC_KEYWORDS, FUNCTION_KEYWORDS, LEVEL_ONE_AND_TWO_PSEUDO_ELEMENTS,
+    LINE_HEIGHT_KEYWORDS, OTHER_PSEUDO_ELEMENTS, SHADOW_TREE_PSEUDO_ELEMENTS,
+    SYSTEM_FAMILY_NAME_KEYWORDS, VENDER_PREFIXES, VENDOR_SPECIFIC_PSEUDO_ELEMENTS,
 };
 use biome_css_syntax::{AnyCssGenericComponentValue, AnyCssValue, CssGenericComponentValueList};
 use biome_rowan::{AstNode, SyntaxNodeCast};
@@ -108,4 +109,21 @@ pub fn is_function_keyword(value: &str) -> bool {
 /// Check if the value is a double-dashed custom function.
 pub fn is_custom_function(value: &str) -> bool {
     value.starts_with("--")
+}
+
+// Returns the vendor prefix extracted from an input string.
+pub fn vender_prefix(prop: &str) -> String {
+    for prefix in VENDER_PREFIXES.iter() {
+        if prop.starts_with(prefix) {
+            return (*prefix).to_string();
+        }
+    }
+    String::new()
+}
+
+pub fn is_pseudo_elements(prop: &str) -> bool {
+    LEVEL_ONE_AND_TWO_PSEUDO_ELEMENTS.contains(&prop)
+        || VENDOR_SPECIFIC_PSEUDO_ELEMENTS.contains(&prop)
+        || SHADOW_TREE_PSEUDO_ELEMENTS.contains(&prop)
+        || OTHER_PSEUDO_ELEMENTS.contains(&prop)
 }

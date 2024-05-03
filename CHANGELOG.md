@@ -32,6 +32,39 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 #### Bug fixes
 
+- [noBlankTarget](https://biomejs.dev/linter/rules/no-blank-target/) no longer hangs when applying a code fix ([#2675](https://github.com/biomejs/biome/issues/2675)).
+
+  Previously, the following code made Biome hangs when applying a code fix.
+
+  ```jsx
+  <a href="https://example.com" rel="" target="_blank"></a>
+  ```
+
+  Contributed by @Conaclos
+
+- [noRedeclare](https://biomejs.dev/linter/rules/no-redeclare/) no longer panics on conditional type ([#2659](https://github.com/biomejs/biome/issues/2659)).
+
+  This is a regression introduced by [#2394](https://github.com/biomejs/biome/issues/2394).
+  This regression makes `noRedeclare` panics on every conditional types with `infer` bindings.
+
+  Contributed by @Conaclos
+
+- [useExportType](https://biomejs.dev/linter/rules/use-export-type/) no longer removes leading comments ([#2685](https://github.com/biomejs/biome/issues/2685)).
+
+  Previously, `useExportType` removed leading comments when it factorized the `type` qualifier.
+  It now provides a code fix that preserves the leading comments:
+
+  ```diff
+  - export {
+  + export type {
+      /**leading comment*/
+  -   type T
+  +   T
+    }
+  ```
+
+  Contributed by @Conaclos
+
 - Fix typo by renaming `useConsistentBuiltinInstatiation` to `useConsistentBuiltinInstantiation`
   Contributed by @minht11
 
@@ -113,7 +146,7 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 - [noRedeclare](https://biomejs.dev/linter/rules/no-redeclare/) now reports redeclarations of parameters in a functions body ([#2394](https://github.com/biomejs/biome/issues/2394)).
 
-  The rule was unable to detect redeclarations of a parameter or type parameter in the function body.
+  The rule was unable to detect redeclarations of a parameter or a type parameter in the function body.
   The following two redeclarations are now reported:
 
   ```ts
@@ -152,7 +185,7 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 - [noUndeclaredVariables](https://biomejs.dev/linter/rules/no-undeclared-variables/) no longer reports variable-only and type-only exports ([#2637](https://github.com/biomejs/biome/issues/2637)).
   Contributed by @Conaclos
 
-- [noUnusedVariables] no longer crash Biome when encountering a malformed conditional type ([#1695](https://github.com/biomejs/biome/issues/1695)).
+- [noUnusedVariables](https://biomejs.dev/linter/rules/no-unused-variables/) no longer crash Biome when encountering a malformed conditional type ([#1695](https://github.com/biomejs/biome/issues/1695)).
   Contributed by @Conaclos
 
 - [useConst](https://biomejs.dev/linter/rules/use-const/) now ignores a variable that is read before its assignment.

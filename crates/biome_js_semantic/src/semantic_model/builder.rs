@@ -1,5 +1,5 @@
 use super::*;
-use biome_js_syntax::{AnyJsRoot, JsSyntaxNode, TextRange};
+use biome_js_syntax::{AnyJsRoot, JsSyntaxNode, TextRange, TsConditionalType};
 use rustc_hash::{FxHashMap, FxHashSet};
 use std::collections::hash_map::Entry;
 
@@ -99,7 +99,14 @@ impl SemanticModelBuilder {
             | TS_MAPPED_TYPE => {
                 self.node_by_range.insert(node.text_range(), node.clone());
             }
-            _ => {}
+            _ => {
+                if let Some(conditional_type) = TsConditionalType::cast_ref(node) {
+                    if let Ok(conditional_true_type) = conditional_type.true_type() {
+                        let syntax = conditional_true_type.into_syntax();
+                        self.node_by_range.insert(syntax.text_range(), syntax);
+                    }
+                }
+            }
         }
     }
 

@@ -30,14 +30,6 @@ impl<'source> GraphqlParser<'source> {
         }
     }
 
-    pub fn lookahead(&mut self) -> GraphqlSyntaxKind {
-        self.source.lookahead()
-    }
-
-    pub fn lookahead_at(&mut self, kind: GraphqlSyntaxKind) -> bool {
-        self.source.lookahead_at(kind)
-    }
-
     pub fn finish(
         self,
     ) -> (

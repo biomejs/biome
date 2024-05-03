@@ -1468,6 +1468,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noDuplicateAtImportRules": {
+					"description": "Disallow duplicate @import rules.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noDuplicateElseIf": {
 					"description": "Disallow duplicate conditions in if-else-if chains",
 					"anyOf": [
@@ -1554,6 +1561,13 @@
 				},
 				"noUnknownFunction": {
 					"description": "Disallow unknown CSS value functions.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noUnknownSelectorPseudoElement": {
+					"description": "Disallow unknown pseudo-element selectors.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }

@@ -713,11 +713,11 @@ impl SemanticAssertions {
         // Check every no event assertion
 
         for assertion in self.no_events.iter() {
-            if events_by_pos.get(&assertion.range.start()).is_some() {
+            if events_by_pos.contains_key(&assertion.range.start()) {
                 panic!("unexpected event at this position")
             }
 
-            if events_by_pos.get(&assertion.range.end()).is_some() {
+            if events_by_pos.contains_key(&assertion.range.end()) {
                 panic!("unexpected event at this position")
             }
         }

@@ -1,6 +1,6 @@
 use super::{
     AnalyzerCapabilities, CodeActionsParams, DebugCapabilities, ExtensionHandler,
-    FormatterCapabilities, LintParams, LintResults, Mime, ParseResult, ParserCapabilities,
+    FormatterCapabilities, LintParams, LintResults, ParseResult, ParserCapabilities,
 };
 use crate::configuration::to_analyzer_rules;
 use crate::diagnostics::extension_error;
@@ -170,14 +170,6 @@ impl ServiceLanguage for JsLanguage {
 pub(crate) struct JsFileHandler;
 
 impl ExtensionHandler for JsFileHandler {
-    fn mime(&self) -> Mime {
-        Mime::Javascript
-    }
-
-    fn may_use_tabs(&self) -> bool {
-        true
-    }
-
     fn capabilities(&self) -> super::Capabilities {
         super::Capabilities {
             parser: ParserCapabilities { parse: Some(parse) },

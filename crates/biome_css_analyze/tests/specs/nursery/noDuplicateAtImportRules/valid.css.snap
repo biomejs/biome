@@ -1,0 +1,17 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: valid.css
+---
+# Input
+```css
+/* should not generate diagnostics */
+@import "a.css";
+@import "b.css";
+
+@import url("c.css");
+@import url("d.css");
+
+@import url("e.css") tv;
+@import url("e.css") projection;
+
+```

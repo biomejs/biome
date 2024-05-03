@@ -1,5 +1,9 @@
+mod field;
 mod fragment;
+mod interface;
+mod object;
 mod operation;
+mod scalar;
 mod schema;
 
 use crate::parser::{parse_error::expected_any_definition, GraphqlParser};
@@ -11,7 +15,9 @@ use biome_parser::{
 
 use self::{
     fragment::{is_at_fragment_definition, parse_fragment_definition},
+    object::{is_at_object_type_definition, parse_object_type_definition},
     operation::{is_at_operation, parse_operation_definition},
+    scalar::{is_at_scalar_type_definition, parse_scalar_type_definition},
     schema::{is_at_schema_definition, parse_schema_definition},
 };
 pub(crate) use operation::is_at_selection_set_end;
@@ -63,6 +69,10 @@ fn parse_definition(p: &mut GraphqlParser) -> ParsedSyntax {
         parse_fragment_definition(p)
     } else if is_at_schema_definition(p) {
         parse_schema_definition(p)
+    } else if is_at_scalar_type_definition(p) {
+        parse_scalar_type_definition(p)
+    } else if is_at_object_type_definition(p) {
+        parse_object_type_definition(p)
     } else {
         Absent
     }
@@ -71,5 +81,9 @@ fn parse_definition(p: &mut GraphqlParser) -> ParsedSyntax {
 #[inline]
 fn is_at_definition(p: &mut GraphqlParser<'_>) -> bool {
     // TODO: recover at any definition
-    is_at_operation(p) || is_at_fragment_definition(p) || is_at_schema_definition(p)
+    is_at_operation(p)
+        || is_at_fragment_definition(p)
+        || is_at_schema_definition(p)
+        || is_at_scalar_type_definition(p)
+        || is_at_object_type_definition(p)
 }

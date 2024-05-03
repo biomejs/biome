@@ -929,6 +929,10 @@ export interface Nursery {
 	 */
 	noDoneCallback?: RuleConfiguration_for_Null;
 	/**
+	 * Disallow duplicate @import rules.
+	 */
+	noDuplicateAtImportRules?: RuleConfiguration_for_Null;
+	/**
 	 * Disallow duplicate conditions in if-else-if chains
 	 */
 	noDuplicateElseIf?: RuleConfiguration_for_Null;
@@ -980,6 +984,10 @@ export interface Nursery {
 	 * Disallow unknown CSS value functions.
 	 */
 	noUnknownFunction?: RuleConfiguration_for_Null;
+	/**
+	 * Disallow unknown pseudo-element selectors.
+	 */
+	noUnknownSelectorPseudoElement?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow unknown CSS units.
 	 */
@@ -1990,6 +1998,7 @@ export type Category =
 	| "lint/nursery/noConstantMathMinMaxClamp"
 	| "lint/nursery/noCssEmptyBlock"
 	| "lint/nursery/noDoneCallback"
+	| "lint/nursery/noDuplicateAtImportRules"
 	| "lint/nursery/noDuplicateElseIf"
 	| "lint/nursery/noDuplicateFontNames"
 	| "lint/nursery/noDuplicateJsonKeys"
@@ -2005,12 +2014,16 @@ export type Category =
 	| "lint/nursery/noTypeOnlyImportAttributes"
 	| "lint/nursery/noUndeclaredDependencies"
 	| "lint/nursery/noUnknownFunction"
+	| "lint/nursery/noUnknownSelectorPseudoElement"
 	| "lint/nursery/noUnknownUnit"
+	| "lint/nursery/noUselessUndefinedInitialization"
+	| "lint/nursery/useArrayLiterals"
 	| "lint/nursery/noUselessUndefinedInitialization"
 	| "lint/nursery/useArrayLiterals"
 	| "lint/nursery/useBiomeSuppressionComment"
 	| "lint/nursery/useConsistentBuiltinInstantiation"
 	| "lint/nursery/useDefaultSwitchClause"
+	| "lint/nursery/useGenericFontNames"
 	| "lint/nursery/useGenericFontNames"
 	| "lint/nursery/useImportRestrictions"
 	| "lint/nursery/useSortedClasses"
