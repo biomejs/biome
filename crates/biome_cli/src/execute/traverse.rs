@@ -140,7 +140,12 @@ fn traverse_inputs(fs: &dyn FileSystem, inputs: Vec<OsString>, ctx: &TraversalOp
     let start = Instant::now();
     fs.traversal(Box::new(move |scope: &dyn TraversalScope| {
         for input in inputs {
-            scope.spawn(ctx, PathBuf::from(input));
+            scope.spawn(
+                ctx,
+                fs.working_directory()
+                    .map(|path| path.join(input.clone()))
+                    .unwrap_or(PathBuf::from(input)),
+            );
         }
     }));
 
