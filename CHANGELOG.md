@@ -15,6 +15,14 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 ### CLI
 
+#### Bug fixes
+
+- The [stdin-file-path](https://biomejs.dev/guides/integrate-in-editor/#use-stdin) option now works correctly for Astro/Svelte/Vue files ([#2686](https://github.com/biomejs/biome/pull/2686))
+
+  Fix [#2225](https://github.com/biomejs/biome/issues/2225) where lint output become empty for Vue files.
+
+  Contributed by @tasshi-me
+
 ### Configuration
 
 ### Editors
@@ -190,7 +198,7 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
   Contributed by @Conaclos
 
 - [noMisplacedAssertion](https://biomejs.dev/linter/rules/no-misplaced-assertion/) now allow these matchers
-  
+
   - `expect.any()`
   - `expect.anything()`
   - `expect.closeTo`
