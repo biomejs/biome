@@ -7,7 +7,7 @@ use biome_diagnostics::{
 };
 use biome_formatter::{FormatError, PrintError};
 use biome_fs::{BiomePath, FileSystemDiagnostic};
-use biome_grit_patterns::ParseError;
+use biome_grit_patterns::CompileError;
 use biome_js_analyze::utils::rename::RenameError;
 use biome_js_analyze::RuleError;
 use serde::{Deserialize, Serialize};
@@ -315,8 +315,8 @@ impl Diagnostic for SourceFileNotSupported {
 
 #[derive(Debug, Serialize, Deserialize, Diagnostic)]
 pub enum SearchError {
-    /// An invalid patterns was given
-    ParsePatternError(ParseError),
+    /// An invalid pattern was given
+    PatternCompilationError(CompileError),
     /// No pattern with the given ID
     InvalidPattern(InvalidPattern),
 }
@@ -415,9 +415,9 @@ impl From<VcsDiagnostic> for WorkspaceError {
     }
 }
 
-impl From<ParseError> for WorkspaceError {
-    fn from(value: ParseError) -> Self {
-        Self::SearchError(SearchError::ParsePatternError(value))
+impl From<CompileError> for WorkspaceError {
+    fn from(value: CompileError) -> Self {
+        Self::SearchError(SearchError::PatternCompilationError(value))
     }
 }
 

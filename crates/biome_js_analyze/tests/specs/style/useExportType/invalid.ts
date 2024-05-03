@@ -29,3 +29,11 @@ export { Interface, TypeAlias, Enum, func as f, Class };
 export /*0*/ { /*1*/ type /*2*/ func /*3*/, /*4*/ type Class as C /*5*/ } /*6*/;
 
 export {}
+
+import { type T7, type T8 } from "./mod.ts";
+export {
+  /*1*/
+  type T7,
+  /*2*/
+  type T8,
+};

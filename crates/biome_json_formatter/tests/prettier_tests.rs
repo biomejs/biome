@@ -4,11 +4,6 @@ use biome_formatter::IndentStyle;
 use biome_formatter_test::test_prettier_snapshot::{PrettierSnapshot, PrettierTestFile};
 use biome_json_formatter::context::JsonFormatOptions;
 
-#[derive(serde::Serialize)]
-struct TestInfo {
-    test_file: String,
-}
-
 mod language;
 
 tests_macros::gen_tests! {"tests/specs/prettier/{json}/**/*.{json}", crate::test_snapshot, ""}

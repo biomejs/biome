@@ -28,7 +28,6 @@ use std::{
     time::{Duration, Instant},
 };
 
-///
 pub(crate) fn traverse(
     execution: &Execution,
     session: &mut CliSession,

@@ -84,9 +84,9 @@ impl AnalyzerOptions {
         self.configuration.jsx_runtime
     }
 
-    pub fn rule_options<R: 'static>(&self) -> Option<R::Options>
+    pub fn rule_options<R>(&self) -> Option<R::Options>
     where
-        R: Rule,
+        R: Rule + 'static,
         R::Options: Clone,
     {
         self.configuration

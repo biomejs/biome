@@ -210,7 +210,6 @@ impl<'a> CallStack for FitsCallStack<'a> {
 /// When ElementKind is [suffix], push the current indention onto the SuffixStack.
 pub(super) trait SuffixStack {
     type SuffixStack: Stack<Indention> + Debug;
-    fn suffix_stack(&self) -> &Self::SuffixStack;
     fn suffix_stack_mut(&mut self) -> &mut Self::SuffixStack;
     fn push_suffix(&mut self, indention: Indention) {
         self.suffix_stack_mut().push(indention);
@@ -227,14 +226,10 @@ pub(super) trait IndentStack {
     type HistoryStack: Stack<Indention> + Debug;
 
     fn current_stack(&self) -> &Self::Stack;
-    fn history_stack(&self) -> &Self::HistoryStack;
 
     fn current_stack_mut(&mut self) -> &mut Self::Stack;
     fn history_stack_mut(&mut self) -> &mut Self::HistoryStack;
 
-    fn push(&mut self, indention: Indention) {
-        self.current_stack_mut().push(indention);
-    }
     fn start_dedent(&mut self) {
         if let Some(indent) = self.current_stack_mut().pop() {
             self.history_stack_mut().push(indent);
@@ -292,9 +287,6 @@ impl IndentStack for PrintIndentStack {
     fn current_stack(&self) -> &Self::Stack {
         &self.indentions
     }
-    fn history_stack(&self) -> &Self::HistoryStack {
-        &self.history_indentions
-    }
 
     fn current_stack_mut(&mut self) -> &mut Self::Stack {
         &mut self.indentions
@@ -305,9 +297,6 @@ impl IndentStack for PrintIndentStack {
 }
 impl SuffixStack for PrintIndentStack {
     type SuffixStack = Vec<Indention>;
-    fn suffix_stack(&self) -> &Self::SuffixStack {
-        &self.suffix_indentions
-    }
     fn suffix_stack_mut(&mut self) -> &mut Self::SuffixStack {
         &mut self.suffix_indentions
     }
@@ -343,9 +332,6 @@ impl<'a> IndentStack for FitsIndentStack<'a> {
 
     fn current_stack(&self) -> &Self::Stack {
         &self.indentions
-    }
-    fn history_stack(&self) -> &Self::HistoryStack {
-        &self.history_indentions
     }
 
     fn current_stack_mut(&mut self) -> &mut Self::Stack {

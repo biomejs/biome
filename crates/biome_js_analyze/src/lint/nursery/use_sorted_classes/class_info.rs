@@ -140,7 +140,7 @@ fn get_utility_info(
                     // regardless of the order in which the targets are defined.
                     let target_size = target.chars().count();
                     if target_size > last_size {
-                        layer = &layer_data.name;
+                        layer = layer_data.name;
                         match_index = index;
                         last_size = target_size;
                     }
