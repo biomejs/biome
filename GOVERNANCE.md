@@ -192,7 +192,7 @@ You can also sponsor the project through [GitHub](https://github.com/sponsors/bi
 
 Bounties are the second approach towards funding Biome development. Unlike a sponsorship, bounties are directed towards the completion of a specific task. Tasks include, but are not limited to, the development of a feature or the fixing of a bug.
 
-Compared to sponsorship, bounties come with a few risks, both for Biome as a project, as well as the persons or entities offering and collecting the bounty. To minimize these risks, we only sanction bounties under the following conditions:
+Compared to sponsorship, bounties come with a few risks, both for Biome as a project and for the people or entities offering and collecting the bounty. To minimize these risks, we only sanction bounties under the following conditions:
 
 - Bounties must be pledged through Polar.sh on an issue that is opened in our issue tracker.
   - Unless otherwise specified, Biome reserves 30% of the payment amount, meaning contributors receive 70% of the pledged amount.
