@@ -227,7 +227,7 @@ Additionally, there is a strict process for assigning project-funded bounties:
   - The waiting period is not necessary if a lead approves the request.
 - There is a maximum amount of issues with pledges someone can have assigned to them. The limit is 2 for core contributors, and 1 for anyone else.
 
-Finally, there is one more important distinction from community-funded bounties: Since Biome is the one funding the issue, 100% of the pledged amount will go to the contributor completing the task.
+Finally, there is one more important distinction from community-funded bounties: Since Biome is the one funding the issue, **100% of the pledged amount will go to the contributor completing the task**.
 
 ### Fund Allocation
 
