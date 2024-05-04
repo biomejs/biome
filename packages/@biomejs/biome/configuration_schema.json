@@ -1612,6 +1612,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useExplicitLengthCheck": {
+					"description": "Enforce explicitly comparing the length, size, byteLength or byteOffset property of a value.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useGenericFontNames": {
 					"description": "Disallow a missing generic family keyword within font families.",
 					"anyOf": [

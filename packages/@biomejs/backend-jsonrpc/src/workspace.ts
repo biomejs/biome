@@ -1013,6 +1013,10 @@ export interface Nursery {
 	 */
 	useDefaultSwitchClause?: RuleConfiguration_for_Null;
 	/**
+	 * Enforce explicitly comparing the length, size, byteLength or byteOffset property of a value.
+	 */
+	useExplicitLengthCheck?: RuleConfiguration_for_Null;
+	/**
 	 * Disallow a missing generic family keyword within font families.
 	 */
 	useGenericFontNames?: RuleConfiguration_for_Null;
@@ -2015,6 +2019,7 @@ export type Category =
 	| "lint/nursery/noUselessUndefinedInitialization"
 	| "lint/nursery/useArrayLiterals"
 	| "lint/nursery/useBiomeSuppressionComment"
+	| "lint/nursery/useExplicitLengthCheck"
 	| "lint/nursery/useConsistentBuiltinInstantiation"
 	| "lint/nursery/useDefaultSwitchClause"
 	| "lint/nursery/useGenericFontNames"
