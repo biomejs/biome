@@ -1,0 +1,43 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: content
+---
+# Input messages
+
+```block
+<script setup lang="ts">
+import {      Button  as Button  }   from  "./components/Button.vue"   ;
+import *     as         vueUse  from  "vue-use"   ;
+
+delete a.c;
+</script>
+<template></template>
+```
+
+# Emitted Messages
+
+```block
+<script setup lang="ts">
+import * as vueUse from "vue-use";
+import { Button } from "./components/Button.vue";
+
+delete a.c;
+</script>
+<template></template>
+```
+
+```block
+file.vue lint/performance/noDelete  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Avoid the delete operator which can impact performance.
+  
+  i Unsafe fix: Use an undefined assignment instead.
+  
+    2 2 │   import { Button } from "./components/Button.vue";
+    3 3 │   
+    4   │ - delete·a.c;
+      4 │ + a.c·=·undefined;
+    5 5 │   
+  
+
+```

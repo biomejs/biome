@@ -1,0 +1,21 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: content
+---
+# Input messages
+
+```block
+---
+import {a as a} from 'mod';
+---
+<div></div>
+```
+
+# Emitted Messages
+
+```block
+---
+import {a} from 'mod';
+---
+<div></div>
+```
