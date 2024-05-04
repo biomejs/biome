@@ -23,6 +23,8 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
   Contributed by @tasshi-me
 
+- `biome migrate eslint` now correctly resolve `@scope/eslint-config` ([#2705](https://github.com/biomejs/biome/issues/2705)). Contributed by @Conaclos
+
 ### Configuration
 
 ### Editors
