@@ -1,7 +1,9 @@
 use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
-use biome_css_syntax::{AnyCssPseudoClassNth, CssPseudoClassNthSelector};
-use biome_rowan::AstNode;
+use biome_css_syntax::{
+    AnyCssPseudoClassNth, CssPseudoClassFunctionSelectorList, CssPseudoClassNthSelector,
+};
+use biome_rowan::{AstNode, SyntaxNodeCast};
 
 declare_rule! {
     /// Succinct description of the rule.
@@ -46,10 +48,7 @@ impl Rule for NoUnmatchableAnbSelector {
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let node = ctx.query();
         let nth = node.nth().ok()?;
-        if is_unmatchable(&nth) {
-            for n in nth.syntax().ancestors() {
-                dbg!(n);
-            }
+        if is_unmatchable(&nth) && !is_in_not(&nth) {
             return Some(node.clone());
         }
         None
@@ -90,4 +89,15 @@ fn is_unmatchable(nth: &AnyCssPseudoClassNth) -> bool {
         }
         AnyCssPseudoClassNth::CssPseudoClassNthNumber(nth) => nth.text() == "0",
     }
+}
+
+fn is_in_not(node: &AnyCssPseudoClassNth) -> bool {
+    let number_of_not = node
+        .syntax()
+        .ancestors()
+        .filter_map(|n| n.cast::<CssPseudoClassFunctionSelectorList>())
+        .filter_map(|n| n.name().ok())
+        .filter(|n| n.text() == "not")
+        .count();
+    number_of_not % 2 == 1
 }
