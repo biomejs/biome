@@ -25,14 +25,16 @@ a:nth-last-child(0),a:nth-last-child(n+5) ~ li {}
 ```
 invalid.css:1:13 lint/nursery/noUnmatchableAnbSelector ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected empty block is not allowed
+  ! This selector will never match any elements.
   
   > 1 │ a:nth-child(0) {}
       │             ^
     2 │ a:nth-child(0n) {}
     3 │ a:nth-child(+0n) {}
   
-  i This note will give you more information.
+  i Avoid using An+B selectors that always evaluate to 0.
+  
+  i See this doc for more details.
   
 
 ```
@@ -40,7 +42,7 @@ invalid.css:1:13 lint/nursery/noUnmatchableAnbSelector ━━━━━━━━�
 ```
 invalid.css:2:13 lint/nursery/noUnmatchableAnbSelector ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected empty block is not allowed
+  ! This selector will never match any elements.
   
     1 │ a:nth-child(0) {}
   > 2 │ a:nth-child(0n) {}
@@ -48,7 +50,9 @@ invalid.css:2:13 lint/nursery/noUnmatchableAnbSelector ━━━━━━━━�
     3 │ a:nth-child(+0n) {}
     4 │ a:nth-child(-0n) {}
   
-  i This note will give you more information.
+  i Avoid using An+B selectors that always evaluate to 0.
+  
+  i See this doc for more details.
   
 
 ```
@@ -56,7 +60,7 @@ invalid.css:2:13 lint/nursery/noUnmatchableAnbSelector ━━━━━━━━�
 ```
 invalid.css:3:13 lint/nursery/noUnmatchableAnbSelector ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected empty block is not allowed
+  ! This selector will never match any elements.
   
     1 │ a:nth-child(0) {}
     2 │ a:nth-child(0n) {}
@@ -65,7 +69,9 @@ invalid.css:3:13 lint/nursery/noUnmatchableAnbSelector ━━━━━━━━�
     4 │ a:nth-child(-0n) {}
     5 │ a:nth-child(0n+0) {}
   
-  i This note will give you more information.
+  i Avoid using An+B selectors that always evaluate to 0.
+  
+  i See this doc for more details.
   
 
 ```
@@ -73,7 +79,7 @@ invalid.css:3:13 lint/nursery/noUnmatchableAnbSelector ━━━━━━━━�
 ```
 invalid.css:4:13 lint/nursery/noUnmatchableAnbSelector ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected empty block is not allowed
+  ! This selector will never match any elements.
   
     2 │ a:nth-child(0n) {}
     3 │ a:nth-child(+0n) {}
@@ -82,7 +88,9 @@ invalid.css:4:13 lint/nursery/noUnmatchableAnbSelector ━━━━━━━━�
     5 │ a:nth-child(0n+0) {}
     6 │ a:nth-child(0n-0) {}
   
-  i This note will give you more information.
+  i Avoid using An+B selectors that always evaluate to 0.
+  
+  i See this doc for more details.
   
 
 ```
@@ -90,7 +98,7 @@ invalid.css:4:13 lint/nursery/noUnmatchableAnbSelector ━━━━━━━━�
 ```
 invalid.css:8:13 lint/nursery/noUnmatchableAnbSelector ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected empty block is not allowed
+  ! This selector will never match any elements.
   
      6 │ a:nth-child(0n-0) {}
      7 │ a:nth-child(-0n-0) {}
@@ -99,7 +107,9 @@ invalid.css:8:13 lint/nursery/noUnmatchableAnbSelector ━━━━━━━━�
      9 │ a:nth-child(0), a:nth-child(1) {}
     10 │ a:nth-last-child(0) {}
   
-  i This note will give you more information.
+  i Avoid using An+B selectors that always evaluate to 0.
+  
+  i See this doc for more details.
   
 
 ```
@@ -107,7 +117,7 @@ invalid.css:8:13 lint/nursery/noUnmatchableAnbSelector ━━━━━━━━�
 ```
 invalid.css:9:13 lint/nursery/noUnmatchableAnbSelector ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected empty block is not allowed
+  ! This selector will never match any elements.
   
      7 │ a:nth-child(-0n-0) {}
      8 │ a:nth-child(0 of a) {}
@@ -116,7 +126,9 @@ invalid.css:9:13 lint/nursery/noUnmatchableAnbSelector ━━━━━━━━�
     10 │ a:nth-last-child(0) {}
     11 │ a:nth-of-type(0) {}
   
-  i This note will give you more information.
+  i Avoid using An+B selectors that always evaluate to 0.
+  
+  i See this doc for more details.
   
 
 ```
@@ -124,7 +136,7 @@ invalid.css:9:13 lint/nursery/noUnmatchableAnbSelector ━━━━━━━━�
 ```
 invalid.css:10:18 lint/nursery/noUnmatchableAnbSelector ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected empty block is not allowed
+  ! This selector will never match any elements.
   
      8 │ a:nth-child(0 of a) {}
      9 │ a:nth-child(0), a:nth-child(1) {}
@@ -133,7 +145,9 @@ invalid.css:10:18 lint/nursery/noUnmatchableAnbSelector ━━━━━━━━
     11 │ a:nth-of-type(0) {}
     12 │ a:nth-last-of-type(0) {}
   
-  i This note will give you more information.
+  i Avoid using An+B selectors that always evaluate to 0.
+  
+  i See this doc for more details.
   
 
 ```
@@ -141,7 +155,7 @@ invalid.css:10:18 lint/nursery/noUnmatchableAnbSelector ━━━━━━━━
 ```
 invalid.css:11:15 lint/nursery/noUnmatchableAnbSelector ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected empty block is not allowed
+  ! This selector will never match any elements.
   
      9 │ a:nth-child(0), a:nth-child(1) {}
     10 │ a:nth-last-child(0) {}
@@ -150,7 +164,9 @@ invalid.css:11:15 lint/nursery/noUnmatchableAnbSelector ━━━━━━━━
     12 │ a:nth-last-of-type(0) {}
     13 │ a:nth-child(0n):nth-child(-n+5) {}
   
-  i This note will give you more information.
+  i Avoid using An+B selectors that always evaluate to 0.
+  
+  i See this doc for more details.
   
 
 ```
@@ -158,7 +174,7 @@ invalid.css:11:15 lint/nursery/noUnmatchableAnbSelector ━━━━━━━━
 ```
 invalid.css:12:20 lint/nursery/noUnmatchableAnbSelector ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected empty block is not allowed
+  ! This selector will never match any elements.
   
     10 │ a:nth-last-child(0) {}
     11 │ a:nth-of-type(0) {}
@@ -167,7 +183,9 @@ invalid.css:12:20 lint/nursery/noUnmatchableAnbSelector ━━━━━━━━
     13 │ a:nth-child(0n):nth-child(-n+5) {}
     14 │ a:nth-last-child(0),a:nth-last-child(n+5) ~ li {}
   
-  i This note will give you more information.
+  i Avoid using An+B selectors that always evaluate to 0.
+  
+  i See this doc for more details.
   
 
 ```
@@ -175,7 +193,7 @@ invalid.css:12:20 lint/nursery/noUnmatchableAnbSelector ━━━━━━━━
 ```
 invalid.css:13:13 lint/nursery/noUnmatchableAnbSelector ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected empty block is not allowed
+  ! This selector will never match any elements.
   
     11 │ a:nth-of-type(0) {}
     12 │ a:nth-last-of-type(0) {}
@@ -184,7 +202,9 @@ invalid.css:13:13 lint/nursery/noUnmatchableAnbSelector ━━━━━━━━
     14 │ a:nth-last-child(0),a:nth-last-child(n+5) ~ li {}
     15 │ 
   
-  i This note will give you more information.
+  i Avoid using An+B selectors that always evaluate to 0.
+  
+  i See this doc for more details.
   
 
 ```
@@ -192,7 +212,7 @@ invalid.css:13:13 lint/nursery/noUnmatchableAnbSelector ━━━━━━━━
 ```
 invalid.css:14:18 lint/nursery/noUnmatchableAnbSelector ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected empty block is not allowed
+  ! This selector will never match any elements.
   
     12 │ a:nth-last-of-type(0) {}
     13 │ a:nth-child(0n):nth-child(-n+5) {}
@@ -200,7 +220,9 @@ invalid.css:14:18 lint/nursery/noUnmatchableAnbSelector ━━━━━━━━
        │                  ^
     15 │ 
   
-  i This note will give you more information.
+  i Avoid using An+B selectors that always evaluate to 0.
+  
+  i See this doc for more details.
   
 
 ```

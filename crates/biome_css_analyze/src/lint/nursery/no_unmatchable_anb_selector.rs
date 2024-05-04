@@ -6,29 +6,47 @@ use biome_css_syntax::{
 use biome_rowan::{AstNode, SyntaxNodeCast};
 
 declare_rule! {
-    /// Succinct description of the rule.
+    /// Disallow unmatchable An+B selectors.
     ///
-    /// Put context and details about the rule.
-    /// As a starting point, you can take the description of the corresponding _ESLint_ rule (if any).
-    ///
-    /// Try to stay consistent with the descriptions of implemented rules.
-    ///
-    /// Add a link to the corresponding stylelint rule (if any):
+    /// Selectors that always evaluate to 0 will not match any elements.
+    /// see more about: https://www.w3.org/TR/css-syntax-3/#anb-microsyntax
     ///
     /// ## Examples
     ///
     /// ### Invalid
     ///
     /// ```css,expect_diagnostic
-    /// p {}
+    /// a:nth-child(0) {}
+    /// ```
+    ///
+    /// ```css,expect_diagnostic
+    /// a:nth-last-child(0n) {}
+    /// ```
+    ///
+    /// ```css,expect_diagnostic
+    /// a:nth-of-type(0n+0) {}
+    /// ```
+    ///
+    /// ```css,expect_diagnostic
+    /// a:nth-last-of-type(0 of a) {}
     /// ```
     ///
     /// ### Valid
     ///
     /// ```css
-    /// p {
-    ///   color: red;
-    /// }
+    /// a:nth-child(1) {}
+    /// ```
+    ///
+    /// ```css
+    /// a:nth-last-child(1n) {}
+    /// ```
+    ///
+    /// ```css
+    /// a:nth-of-type(1n+0) {}
+    /// ```
+    ///
+    /// ```css
+    /// a:nth-last-of-type(1 of a) {}
     /// ```
     ///
     pub NoUnmatchableAnbSelector {
@@ -55,22 +73,20 @@ impl Rule for NoUnmatchableAnbSelector {
     }
 
     fn diagnostic(_: &RuleContext<Self>, node: &Self::State) -> Option<RuleDiagnostic> {
-        //
-        // Read our guidelines to write great diagnostics:
-        // https://docs.rs/biome_analyze/latest/biome_analyze/#what-a-rule-should-say-to-the-user
-        //
         let span = node.range();
         Some(
             RuleDiagnostic::new(
                 rule_category!(),
                 span,
                 markup! {
-                    "Unexpected empty block is not allowed"
+                    "This selector will never match any elements."
                 },
             )
             .note(markup! {
-                    "This note will give you more information."
-            }),
+                    "Avoid using An+B selectors that always evaluate to 0."
+            }).note(markup! {
+                "See "<Hyperlink href="https://www.w3.org/TR/css-syntax-3/#anb-microsyntax">"this doc"</Hyperlink>" for more details."
+            })
         )
     }
 }
