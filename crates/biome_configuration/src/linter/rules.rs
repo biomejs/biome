@@ -2712,7 +2712,7 @@ pub struct Nursery {
     #[doc = "Disallow unknown CSS units."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_unknown_unit: Option<RuleConfiguration<NoUnknownUnit>>,
-    #[doc = "Succinct description of the rule."]
+    #[doc = "Disallow unmatchable An+B selectors."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_unmatchable_anb_selector: Option<RuleConfiguration<NoUnmatchableAnbSelector>>,
     #[doc = "Disallow initializing variables to undefined."]
@@ -2804,6 +2804,7 @@ impl Nursery {
         "noUnknownFunction",
         "noUnknownSelectorPseudoElement",
         "noUnknownUnit",
+        "noUnmatchableAnbSelector",
         "useGenericFontNames",
     ];
     const RECOMMENDED_RULES_AS_FILTERS: &'static [RuleFilter<'static>] = &[
@@ -2820,6 +2821,7 @@ impl Nursery {
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[18]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[19]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[20]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[21]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[26]),
     ];
     const ALL_RULES_AS_FILTERS: &'static [RuleFilter<'static>] = &[

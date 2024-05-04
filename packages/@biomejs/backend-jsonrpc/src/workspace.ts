@@ -993,7 +993,7 @@ export interface Nursery {
 	 */
 	noUnknownUnit?: RuleConfiguration_for_Null;
 	/**
-	 * Succinct description of the rule.
+	 * Disallow unmatchable An+B selectors.
 	 */
 	noUnmatchableAnbSelector?: RuleConfiguration_for_Null;
 	/**

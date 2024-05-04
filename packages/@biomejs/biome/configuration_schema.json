@@ -1581,7 +1581,7 @@
 					]
 				},
 				"noUnmatchableAnbSelector": {
-					"description": "Succinct description of the rule.",
+					"description": "Disallow unmatchable An+B selectors.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
