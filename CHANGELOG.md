@@ -33,6 +33,10 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 ### Linter
 
+#### New features
+
+- Add [nursery/useExplicitLengthCheck](https://biomejs.dev/linter/rules/use-explicit-length-check/).
+
 #### Bug fixes
 
 - [noBlankTarget](https://biomejs.dev/linter/rules/no-blank-target/) no longer hangs when applying a code fix ([#2675](https://github.com/biomejs/biome/issues/2675)).

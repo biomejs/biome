@@ -15,6 +15,7 @@ use biome_parser::{
 
 use self::{
     fragment::{is_at_fragment_definition, parse_fragment_definition},
+    interface::{is_at_interface_type_definition, parse_interface_type_definition},
     object::{is_at_object_type_definition, parse_object_type_definition},
     operation::{is_at_operation, parse_operation_definition},
     scalar::{is_at_scalar_type_definition, parse_scalar_type_definition},
@@ -73,6 +74,8 @@ fn parse_definition(p: &mut GraphqlParser) -> ParsedSyntax {
         parse_scalar_type_definition(p)
     } else if is_at_object_type_definition(p) {
         parse_object_type_definition(p)
+    } else if is_at_interface_type_definition(p) {
+        parse_interface_type_definition(p)
     } else {
         Absent
     }
@@ -86,4 +89,5 @@ fn is_at_definition(p: &mut GraphqlParser<'_>) -> bool {
         || is_at_schema_definition(p)
         || is_at_scalar_type_definition(p)
         || is_at_object_type_definition(p)
+        || is_at_interface_type_definition(p)
 }

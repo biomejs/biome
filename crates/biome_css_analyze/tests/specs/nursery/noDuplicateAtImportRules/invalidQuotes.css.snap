@@ -1,0 +1,26 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: invalidQuotes.css
+---
+# Input
+```css
+@import "a.css";
+@import 'a.css';
+
+```
+
+# Diagnostics
+```
+invalidQuotes.css:2:2 lint/nursery/noDuplicateAtImportRules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Each @import should be unique unless differing by media queries.
+  
+    1 │ @import "a.css";
+  > 2 │ @import 'a.css';
+      │  ^^^^^^^^^^^^^^^
+    3 │ 
+  
+  i Consider removing one of the duplicated imports.
+  
+
+```
