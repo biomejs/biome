@@ -48,7 +48,7 @@ impl Rule for NoUnmatchableAnbSelector {
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let node = ctx.query();
         let nth = node.nth().ok()?;
-        if is_unmatchable(&nth) && !is_in_not(&nth) {
+        if is_unmatchable(&nth) && !is_within_not_pseudo_class(&nth) {
             return Some(node.clone());
         }
         None
@@ -82,8 +82,8 @@ fn is_unmatchable(nth: &AnyCssPseudoClassNth) -> bool {
             let coefficient = nth.value();
             let constant = nth.offset();
             match (coefficient, constant) {
-                (Some(coeff), Some(cons)) => coeff.text() == "0" && cons.text() == "0",
-                (Some(coeff), None) => coeff.text() == "0",
+                (Some(a), Some(b)) => a.text() == "0" && b.text() == "0",
+                (Some(a), None) => a.text() == "0",
                 _ => false,
             }
         }
@@ -91,7 +91,7 @@ fn is_unmatchable(nth: &AnyCssPseudoClassNth) -> bool {
     }
 }
 
-fn is_in_not(node: &AnyCssPseudoClassNth) -> bool {
+fn is_within_not_pseudo_class(node: &AnyCssPseudoClassNth) -> bool {
     let number_of_not = node
         .syntax()
         .ancestors()
