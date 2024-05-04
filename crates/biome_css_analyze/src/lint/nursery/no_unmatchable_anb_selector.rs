@@ -47,6 +47,9 @@ impl Rule for NoUnmatchableAnbSelector {
         let node = ctx.query();
         let nth = node.nth().ok()?;
         if is_unmatchable(&nth) {
+            for n in nth.syntax().ancestors() {
+                dbg!(n);
+            }
             return Some(node.clone());
         }
         None
