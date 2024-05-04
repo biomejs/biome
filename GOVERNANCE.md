@@ -207,7 +207,7 @@ Compared to sponsorship, bounties come with a few risks, both for Biome as a pro
 - Terms and conditions of Polar.sh apply to all pledges.
   - For the FAQ, please see: https://docs.polar.sh/maintainers/faq/
   - For the legal terms, please see: https://polar.sh/legal/terms
-- If you are receiving money as part of a bounty, please consider whether you need to pay taxes in your country.
+- If you are receiving money as part of a bounty, please consider whether you need to pay taxes in your country. Core contributors and Maintainers aren't obligated to give tax advice over the money received.
 
 ### Project-Funded Bounties
 
