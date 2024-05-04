@@ -178,7 +178,7 @@ We have a reasonably liberal approach to code review and merging. We value quick
 
 Biome is in the fortunate position that people care enough about it that they want to invest financially in its future. However, with money comes responsibility, so we are committed to the following.
 
-There are two ways to fund Biome and its development: sponsorship and funded bounties, although we strongly prefer sponsorship.
+There are two ways to fund Biome and its development: sponsorship and funded bounties, although we strongly prefer and recommend sponsorship.
 
 ### Sponsorship
 
