@@ -65,3 +65,6 @@ A: {
  * "A: class Foo { foo() { break A; } }",
  * "A: { A: { break A; } }"
  */
+
+// We are not in a Svelte component
+$: {}

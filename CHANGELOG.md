@@ -58,6 +58,18 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
   Contributed by @Conaclos
 
+- [noUnusedLabels](https://biomejs.dev/linter/rules/no-unused-labels/) and [noConfusingLabels](https://biomejs.dev/linter/rules/no-confusing-labels/) now ignore svelte reactive statements ([#2571](https://github.com/biomejs/biome/issues/2571)).
+
+  The rules now ignore reactive Svelte blocks in Svelte components.
+
+  ```svelte
+  <script>
+  $: { /* reactive block */ }
+  </script>
+  ```
+
+  Contributed by @Conaclos
+
 - [useExportType](https://biomejs.dev/linter/rules/use-export-type/) no longer removes leading comments ([#2685](https://github.com/biomejs/biome/issues/2685)).
 
   Previously, `useExportType` removed leading comments when it factorized the `type` qualifier.
