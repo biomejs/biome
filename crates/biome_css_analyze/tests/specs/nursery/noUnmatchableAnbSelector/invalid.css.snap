@@ -34,7 +34,7 @@ invalid.css:1:13 lint/nursery/noUnmatchableAnbSelector ━━━━━━━━�
   
   i Avoid using An+B selectors that always evaluate to 0.
   
-  i See this doc for more details.
+  i For more details, see this document.
   
 
 ```
@@ -52,7 +52,7 @@ invalid.css:2:13 lint/nursery/noUnmatchableAnbSelector ━━━━━━━━�
   
   i Avoid using An+B selectors that always evaluate to 0.
   
-  i See this doc for more details.
+  i For more details, see this document.
   
 
 ```
@@ -71,7 +71,7 @@ invalid.css:3:13 lint/nursery/noUnmatchableAnbSelector ━━━━━━━━�
   
   i Avoid using An+B selectors that always evaluate to 0.
   
-  i See this doc for more details.
+  i For more details, see this document.
   
 
 ```
@@ -90,7 +90,7 @@ invalid.css:4:13 lint/nursery/noUnmatchableAnbSelector ━━━━━━━━�
   
   i Avoid using An+B selectors that always evaluate to 0.
   
-  i See this doc for more details.
+  i For more details, see this document.
   
 
 ```
@@ -109,7 +109,7 @@ invalid.css:8:13 lint/nursery/noUnmatchableAnbSelector ━━━━━━━━�
   
   i Avoid using An+B selectors that always evaluate to 0.
   
-  i See this doc for more details.
+  i For more details, see this document.
   
 
 ```
@@ -128,7 +128,7 @@ invalid.css:9:13 lint/nursery/noUnmatchableAnbSelector ━━━━━━━━�
   
   i Avoid using An+B selectors that always evaluate to 0.
   
-  i See this doc for more details.
+  i For more details, see this document.
   
 
 ```
@@ -147,7 +147,7 @@ invalid.css:10:18 lint/nursery/noUnmatchableAnbSelector ━━━━━━━━
   
   i Avoid using An+B selectors that always evaluate to 0.
   
-  i See this doc for more details.
+  i For more details, see this document.
   
 
 ```
@@ -166,7 +166,7 @@ invalid.css:11:15 lint/nursery/noUnmatchableAnbSelector ━━━━━━━━
   
   i Avoid using An+B selectors that always evaluate to 0.
   
-  i See this doc for more details.
+  i For more details, see this document.
   
 
 ```
@@ -185,7 +185,7 @@ invalid.css:12:20 lint/nursery/noUnmatchableAnbSelector ━━━━━━━━
   
   i Avoid using An+B selectors that always evaluate to 0.
   
-  i See this doc for more details.
+  i For more details, see this document.
   
 
 ```
@@ -204,7 +204,7 @@ invalid.css:13:13 lint/nursery/noUnmatchableAnbSelector ━━━━━━━━
   
   i Avoid using An+B selectors that always evaluate to 0.
   
-  i See this doc for more details.
+  i For more details, see this document.
   
 
 ```
@@ -222,7 +222,7 @@ invalid.css:14:18 lint/nursery/noUnmatchableAnbSelector ━━━━━━━━
   
   i Avoid using An+B selectors that always evaluate to 0.
   
-  i See this doc for more details.
+  i For more details, see this document.
   
 
 ```

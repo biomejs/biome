@@ -9,7 +9,8 @@ declare_rule! {
     /// Disallow unmatchable An+B selectors.
     ///
     /// Selectors that always evaluate to 0 will not match any elements.
-    /// see more about: https://www.w3.org/TR/css-syntax-3/#anb-microsyntax
+    /// For more details about the An+B syntax, see:
+    /// https://www.w3.org/TR/css-syntax-3/#anb-microsyntax
     ///
     /// ## Examples
     ///
@@ -85,7 +86,7 @@ impl Rule for NoUnmatchableAnbSelector {
             .note(markup! {
                     "Avoid using An+B selectors that always evaluate to 0."
             }).note(markup! {
-                "See "<Hyperlink href="https://www.w3.org/TR/css-syntax-3/#anb-microsyntax">"this doc"</Hyperlink>" for more details."
+                "For more details, see "<Hyperlink href="https://www.w3.org/TR/css-syntax-3/#anb-microsyntax">"this document"</Hyperlink>"."
             })
         )
     }
