@@ -185,7 +185,8 @@ There are two ways to fund Biome and its development: sponsorship and funded bou
 Sponsorship is the first and foremost way of making financial contributions to Biome. Sponsorship can be
 done through a one-time donation, or through recurring donations. We offer incentives for certain levels of recurring donations.
 
-To learn more about sponsorship incentives, or to make a donation, please visit our Open Collective page: https://opencollective.com/biome
+To learn more about sponsorship incentives, or to make a donation, please visit our [Open Collective page](https://opencollective.com/biome).
+You can also sponsor the project with [GitHub](https://github.com/sponsors/biomejs).
 
 ### Community-Funded Bounties
 
