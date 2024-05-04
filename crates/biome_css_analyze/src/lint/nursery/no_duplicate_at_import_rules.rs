@@ -70,7 +70,8 @@ impl Rule for NoDuplicateAtImportRules {
                             .text()
                             .to_lowercase()
                             .replace("url(", "")
-                            .replace(')', "");
+                            .replace(')', "")
+                            .replace('"', "'");
                         if let Some(media_query_set) = import_url_map.get_mut(&import_url) {
                             // if the current import_rule has no media queries or there are no queries saved in the
                             // media_query_set, this is always a duplicate
