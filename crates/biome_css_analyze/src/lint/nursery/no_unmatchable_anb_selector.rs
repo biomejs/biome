@@ -1,6 +1,6 @@
 use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
-use biome_css_syntax::CssDeclarationOrRuleBlock;
+use biome_css_syntax::{AnyCssPseudoClassNth, CssPseudoClassNthSelector};
 use biome_rowan::AstNode;
 
 declare_rule! {
@@ -38,14 +38,15 @@ declare_rule! {
 }
 
 impl Rule for NoUnmatchableAnbSelector {
-    type Query = Ast<CssDeclarationOrRuleBlock>;
-    type State = CssDeclarationOrRuleBlock;
+    type Query = Ast<CssPseudoClassNthSelector>;
+    type State = CssPseudoClassNthSelector;
     type Signals = Option<Self::State>;
     type Options = ();
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let node = ctx.query();
-        if node.items().into_iter().next().is_none() {
+        let nth = node.nth().ok()?;
+        if is_unmatchable(&nth) {
             return Some(node.clone());
         }
         None
@@ -69,5 +70,21 @@ impl Rule for NoUnmatchableAnbSelector {
                     "This note will give you more information."
             }),
         )
+    }
+}
+
+fn is_unmatchable(nth: &AnyCssPseudoClassNth) -> bool {
+    match nth {
+        AnyCssPseudoClassNth::CssPseudoClassNthIdentifier(_) => false,
+        AnyCssPseudoClassNth::CssPseudoClassNth(nth) => {
+            let coefficient = nth.value();
+            let constant = nth.offset();
+            match (coefficient, constant) {
+                (Some(coeff), Some(cons)) => coeff.text() == "0" && cons.text() == "0",
+                (Some(coeff), None) => coeff.text() == "0",
+                _ => false,
+            }
+        }
+        AnyCssPseudoClassNth::CssPseudoClassNthNumber(nth) => nth.text() == "0",
     }
 }
