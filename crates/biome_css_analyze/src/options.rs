@@ -16,5 +16,6 @@ pub type NoUnknownFunction =
 pub type NoUnknownSelectorPseudoElement = < lint :: nursery :: no_unknown_selector_pseudo_element :: NoUnknownSelectorPseudoElement as biome_analyze :: Rule > :: Options ;
 pub type NoUnknownUnit =
     <lint::nursery::no_unknown_unit::NoUnknownUnit as biome_analyze::Rule>::Options;
+pub type NoUnmatchableAnbSelector = < lint :: nursery :: no_unmatchable_anb_selector :: NoUnmatchableAnbSelector as biome_analyze :: Rule > :: Options ;
 pub type UseGenericFontNames =
     <lint::nursery::use_generic_font_names::UseGenericFontNames as biome_analyze::Rule>::Options;

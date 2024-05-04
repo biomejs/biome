@@ -1580,6 +1580,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noUnmatchableAnbSelector": {
+					"description": "Succinct description of the rule.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noUselessUndefinedInitialization": {
 					"description": "Disallow initializing variables to undefined.",
 					"anyOf": [

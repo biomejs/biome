@@ -993,6 +993,10 @@ export interface Nursery {
 	 */
 	noUnknownUnit?: RuleConfiguration_for_Null;
 	/**
+	 * Succinct description of the rule.
+	 */
+	noUnmatchableAnbSelector?: RuleConfiguration_for_Null;
+	/**
 	 * Disallow initializing variables to undefined.
 	 */
 	noUselessUndefinedInitialization?: RuleConfiguration_for_Null;
@@ -2016,6 +2020,7 @@ export type Category =
 	| "lint/nursery/noUnknownFunction"
 	| "lint/nursery/noUnknownSelectorPseudoElement"
 	| "lint/nursery/noUnknownUnit"
+	| "lint/nursery/noUnmatchableAnbSelector"
 	| "lint/nursery/noUselessUndefinedInitialization"
 	| "lint/nursery/useArrayLiterals"
 	| "lint/nursery/useBiomeSuppressionComment"
