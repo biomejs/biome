@@ -176,7 +176,7 @@ We have a reasonably liberal approach to code review and merging. We value quick
 
 ## Financial Contributions
 
-Biome is in the fortunate position that people care enough about it that they want to invest in its future financially. However, with money comes responsibility, so we are setting the following around
+Biome is in the fortunate position that people care enough about it that they want to invest financially in its future. However, with money comes responsibility, so we are committed to the following.
 
 There are two ways of funding Biome and its development, though we greatly prefer the first.
 
