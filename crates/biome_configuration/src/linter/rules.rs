@@ -2822,7 +2822,7 @@ impl Nursery {
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[19]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[20]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[21]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[26]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[27]),
     ];
     const ALL_RULES_AS_FILTERS: &'static [RuleFilter<'static>] = &[
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[0]),
@@ -2854,6 +2854,7 @@ impl Nursery {
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[26]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[27]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[28]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[29]),
     ];
     #[doc = r" Retrieves the recommended rules"]
     pub(crate) fn is_recommended_true(&self) -> bool {
@@ -2995,28 +2996,29 @@ impl Nursery {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[24]));
             }
         }
-<<<<<<< HEAD
-        if let Some(rule) = self.use_explicit_length_check.as_ref() {
-=======
         if let Some(rule) = self.use_default_switch_clause.as_ref() {
->>>>>>> 726bc6b32c (feat: init rule)
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[25]));
             }
         }
-        if let Some(rule) = self.use_generic_font_names.as_ref() {
+        if let Some(rule) = self.use_explicit_length_check.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[26]));
             }
         }
-        if let Some(rule) = self.use_import_restrictions.as_ref() {
+        if let Some(rule) = self.use_generic_font_names.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[27]));
             }
         }
-        if let Some(rule) = self.use_sorted_classes.as_ref() {
+        if let Some(rule) = self.use_import_restrictions.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[28]));
+            }
+        }
+        if let Some(rule) = self.use_sorted_classes.as_ref() {
+            if rule.is_enabled() {
+                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[29]));
             }
         }
         index_set
@@ -3148,24 +3150,29 @@ impl Nursery {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[24]));
             }
         }
-        if let Some(rule) = self.use_explicit_length_check.as_ref() {
+        if let Some(rule) = self.use_default_switch_clause.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[25]));
             }
         }
-        if let Some(rule) = self.use_generic_font_names.as_ref() {
+        if let Some(rule) = self.use_explicit_length_check.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[26]));
             }
         }
-        if let Some(rule) = self.use_import_restrictions.as_ref() {
+        if let Some(rule) = self.use_generic_font_names.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[27]));
             }
         }
-        if let Some(rule) = self.use_sorted_classes.as_ref() {
+        if let Some(rule) = self.use_import_restrictions.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[28]));
+            }
+        }
+        if let Some(rule) = self.use_sorted_classes.as_ref() {
+            if rule.is_disabled() {
+                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[29]));
             }
         }
         index_set

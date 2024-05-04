@@ -86,7 +86,7 @@ impl Rule for NoUnmatchableAnbSelector {
             .note(markup! {
                     "Avoid using An+B selectors that always evaluate to 0."
             }).note(markup! {
-                "For more details, see "<Hyperlink href="https://www.w3.org/TR/css-syntax-3/#anb-microsyntax">"this document"</Hyperlink>"."
+                "For more details, see "<Hyperlink href="https://www.w3.org/TR/css-syntax-3/#anb-microsyntax">"the official spec for An+B selectors"</Hyperlink>"."
             })
         )
     }
@@ -108,6 +108,9 @@ fn is_unmatchable(nth: &AnyCssPseudoClassNth) -> bool {
     }
 }
 
+// Check if the nth selector is effective within a `not` pseudo class
+// Example: a:not(:nth-child(0)) returns true
+//          a:not(:not(:nth-child(0))) returns false
 fn is_within_not_pseudo_class(node: &AnyCssPseudoClassNth) -> bool {
     let number_of_not = node
         .syntax()
