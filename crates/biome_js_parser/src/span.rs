@@ -6,52 +6,6 @@ use std::{fmt::Debug, ops::Range};
 /// This is essentially a hack to allow us to use SyntaxElement, SyntaxNode, etc directly
 pub trait Span {
     fn as_range(&self) -> TextRange;
-
-    /// Make a new span which extends to another span
-    ///
-    /// ```text
-    /// from      to
-    /// ^^^^^^^^^^^^
-    /// ```
-    fn join<T: Span>(&self, other: T) -> TextRange {
-        TextRange::new(self.as_range().start(), other.as_range().end())
-    }
-
-    /// Make a new span which is between another span
-    ///
-    /// ```text
-    /// from      to
-    ///     ^^^^^^
-    /// ```
-    fn between<T: Span>(&self, other: T) -> TextRange {
-        TextRange::new(self.as_range().end(), other.as_range().start())
-    }
-
-    /// Make a new span which extends until another span
-    ///
-    /// ```text
-    /// from      to
-    /// ^^^^^^^^^^
-    /// ```
-    fn until<T: Span>(&self, other: T) -> TextRange {
-        TextRange::new(self.as_range().start(), other.as_range().start())
-    }
-
-    fn sub_start(&self, amount: TextSize) -> TextRange {
-        self.as_range().sub_start(amount)
-    }
-
-    fn add_start(&self, amount: TextSize) -> TextRange {
-        self.as_range().add_start(amount)
-    }
-
-    fn sub_end(&self, amount: TextSize) -> TextRange {
-        self.as_range().sub_end(amount)
-    }
-
-    fn add_end(&self, amount: TextSize) -> TextRange {
-        self.as_range().add_end(amount)
-    }
 }
 
 impl<T: Span> Span for &T {

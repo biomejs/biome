@@ -1,0 +1,32 @@
+a:before { }
+a:Before { }
+a:bEfOrE { }
+a:BEFORE { }
+a:after { }
+a:first-letter { }
+a:first-line { }
+a::before { }
+a::Before { }
+a::bEfOrE { }
+a::BEFORE { }
+a::after { }
+a::first-letter { }
+a::first-line { }
+::selection { }
+a::spelling-error { }
+a::grammar-error { }
+li::marker { }
+div::shadow { }
+div::content { }
+input::-moz-placeholder { }
+input::-moz-test { }
+a:hover { }
+a:focus { }
+a:hover::before { }
+a:hover::-moz-placeholder { }
+a,\nb > .foo::before { }
+:root { --foo: 1px; }
+html { --foo: 1px; }
+:root { --custom-property-set: {} }
+html { --custom-property-set: {} }
+a::part(shadow-part) { }

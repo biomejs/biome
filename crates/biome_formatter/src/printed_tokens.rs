@@ -66,7 +66,7 @@ impl PrintedTokens {
         let mut offsets = self.offsets.clone();
 
         for token in root.descendants_tokens(Direction::Next) {
-            if !offsets.remove(&token.text_trimmed_range().start()) {
+            if !offsets.shift_remove(&token.text_trimmed_range().start()) {
                 panic!("token has not been seen by the formatter: {token:#?}.\
                         \nUse `format_replaced` if you want to replace a token from the formatted output.\
                         \nUse `format_removed` if you want to remove a token from the formatted output.\n\

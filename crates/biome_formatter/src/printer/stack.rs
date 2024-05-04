@@ -8,9 +8,6 @@ pub(super) trait Stack<T> {
 
     /// Returns the last element if any
     fn top(&self) -> Option<&T>;
-
-    /// Returns `true` if the stack is empty
-    fn is_empty(&self) -> bool;
 }
 
 impl<T> Stack<T> for Vec<T> {
@@ -24,10 +21,6 @@ impl<T> Stack<T> for Vec<T> {
 
     fn top(&self) -> Option<&T> {
         self.last()
-    }
-
-    fn is_empty(&self) -> bool {
-        self.is_empty()
     }
 }
 
@@ -78,10 +71,6 @@ where
 
     fn top(&self) -> Option<&T> {
         self.stack.last().or_else(|| self.original.last())
-    }
-
-    fn is_empty(&self) -> bool {
-        self.original.is_empty() && self.stack.is_empty()
     }
 }
 

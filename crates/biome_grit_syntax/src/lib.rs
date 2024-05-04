@@ -7,12 +7,12 @@ mod generated;
 mod syntax_ext;
 mod syntax_node;
 
-use biome_rowan::{AstNode, RawSyntaxKind};
 pub use biome_rowan::{TextLen, TextRange, TextSize, TokenAtOffset, TriviaPieceKind, WalkEvent};
 pub use generated::*;
 pub use syntax_ext::*;
 pub use syntax_node::*;
 
+use biome_rowan::{AstNode, RawSyntaxKind};
 use GritSyntaxKind::*;
 
 impl From<u16> for GritSyntaxKind {

@@ -1,4 +1,4 @@
-//! This module defines the Concrete Syntax Tree used by Biome.
+//! This module defines the Concrete Syntax Tree for Grit used by Biome.
 //!
 //! The tree is entirely lossless, whitespace, comments, and errors are preserved.
 //! It also provides traversal methods including parent, children, and siblings of nodes.

@@ -1,0 +1,112 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: content
+---
+# Input messages
+
+```block
+---
+import {a as a} from 'mod';
+import {    something } from "file.astro";
+debugger;
+statement ( ) ;
+var foo: string = "";
+---
+<div></div>
+```
+
+# Emitted Messages
+
+```block
+---
+import {a as a} from 'mod';
+import {    something } from "file.astro";
+debugger;
+statement ( ) ;
+var foo: string = "";
+---
+<div></div>
+```
+
+```block
+file.astro lint/complexity/noUselessRename  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Useless rename.
+  
+  i Safe fix: Remove the renaming.
+  
+    2 │ import·{a·as·a}·from·'mod';
+      │          -----             
+
+```
+
+```block
+file.astro lint/suspicious/noDebugger  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This is an unexpected use of the debugger statement.
+  
+  i Unsafe fix: Remove debugger statement
+  
+    2 2 │   import {a as a} from 'mod';
+    3 3 │   import {    something } from "file.astro";
+    4   │ - debugger;
+    5 4 │   statement ( ) ;
+    6 5 │   var foo: string = "";
+  
+
+```
+
+```block
+file.astro lint/style/noInferrableTypes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This type annotation is trivially inferred from its initialization.
+  
+  i Safe fix: Remove the type annotation.
+  
+    4 4 │   debugger;
+    5 5 │   statement ( ) ;
+    6   │ - var·foo:·string·=·"";
+      6 │ + var·foo·=·"";
+    7 7 │   
+  
+
+```
+
+```block
+file.astro lint/style/noVar  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Use let or const instead of var.
+  
+  i A variable declared with var is accessible in the whole module. Thus, the variable can be accessed before its initialization and outside the block where it is declared.
+  
+  i See MDN web docs for more details.
+  
+  i Unsafe fix: Use 'const' instead.
+  
+    4 4 │   debugger;
+    5 5 │   statement ( ) ;
+    6   │ - var·foo:·string·=·"";
+      6 │ + const·foo:·string·=·"";
+    7 7 │   
+  
+
+```
+
+```block
+file.astro format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Formatter would have printed the following content:
+  
+    1 1 │   ---
+    2   │ - import·{a·as·a}·from·'mod';
+    3   │ - import·{····something·}·from·"file.astro";
+      2 │ + import·{·a·as·a·}·from·"mod";
+      3 │ + import·{·something·}·from·"file.astro";
+    4 4 │   debugger;
+    5   │ - statement·(·)·;
+      5 │ + statement();
+    6 6 │   var foo: string = "";
+    7 7 │   ---
+  
+
+```

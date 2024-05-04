@@ -1,0 +1,71 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: content
+---
+# Input messages
+
+```block
+<script setup lang="ts">
+import {      Button  as Button  }   from  "./components/Button.vue"   ;
+import *     as         vueUse  from  "vue-use"   ;
+
+delete a.c;
+</script>
+<template></template>
+```
+
+# Emitted Messages
+
+```block
+<script setup lang="ts">
+import {      Button  as Button  }   from  "./components/Button.vue"   ;
+import *     as         vueUse  from  "vue-use"   ;
+
+delete a.c;
+</script>
+<template></template>
+```
+
+```block
+file.vue lint/complexity/noUselessRename  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Useless rename.
+  
+  i Safe fix: Remove the renaming.
+  
+    1 │ import·{······Button··as·Button··}···from··"./components/Button.vue"···;
+      │                       -----------                                       
+
+```
+
+```block
+file.vue lint/performance/noDelete  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Avoid the delete operator which can impact performance.
+  
+  i Unsafe fix: Use an undefined assignment instead.
+  
+    2 2 │   import *     as         vueUse  from  "vue-use"   ;
+    3 3 │   
+    4   │ - delete·a.c;
+      4 │ + a.c·=·undefined;
+    5 5 │   
+  
+
+```
+
+```block
+file.vue format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Formatter would have printed the following content:
+  
+    1 1 │   <script setup lang="ts">
+    2   │ - import·{······Button··as·Button··}···from··"./components/Button.vue"···;
+    3   │ - import·*·····as·········vueUse··from··"vue-use"···;
+      2 │ + import·{·Button·as·Button·}·from·"./components/Button.vue";
+      3 │ + import·*·as·vueUse·from·"vue-use";
+    4 4 │   
+    5 5 │   delete a.c;
+  
+
+```

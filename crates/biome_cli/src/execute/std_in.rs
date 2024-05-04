@@ -7,6 +7,7 @@ use biome_console::{markup, ConsoleExt};
 use biome_diagnostics::Diagnostic;
 use biome_diagnostics::PrintDiagnostic;
 use biome_fs::BiomePath;
+use biome_service::file_handlers::{AstroFileHandler, SvelteFileHandler, VueFileHandler};
 use biome_service::workspace::{
     ChangeFileParams, DropPatternParams, FeaturesBuilder, FixFileParams, FormatFileParams,
     OpenFileParams, OrganizeImportsParams, PullDiagnosticsParams, RuleCategories,
@@ -51,16 +52,25 @@ pub(crate) fn run<'a>(
                 content: content.into(),
                 document_file_source: None,
             })?;
-            let printed = workspace.format_file(FormatFileParams { path: biome_path })?;
+            let printed = workspace.format_file(FormatFileParams {
+                path: biome_path.clone(),
+            })?;
 
+            let code = printed.into_code();
+            let output = match biome_path.extension_as_str() {
+                "astro" => AstroFileHandler::output(content, code.as_str()),
+                "vue" => VueFileHandler::output(content, code.as_str()),
+                "svelte" => SvelteFileHandler::output(content, code.as_str()),
+                _ => code,
+            };
             console.append(markup! {
-                {printed.as_code()}
+                {output}
             });
         } else {
             console.append(markup! {
                 {content}
             });
-            console.error(markup!{
+            console.error(markup! {
                     <Warn>"The content was not formatted because the formatter is currently disabled."</Warn>
                 })
         }
@@ -105,14 +115,21 @@ pub(crate) fn run<'a>(
                     path: biome_path.clone(),
                     should_format: mode.is_check() && file_features.supports_format(),
                 })?;
-                if fix_file_result.code != new_content {
+                let code = fix_file_result.code;
+                let output = match biome_path.extension_as_str() {
+                    "astro" => AstroFileHandler::output(&new_content, code.as_str()),
+                    "vue" => VueFileHandler::output(&new_content, code.as_str()),
+                    "svelte" => SvelteFileHandler::output(&new_content, code.as_str()),
+                    _ => code,
+                };
+                if output != new_content {
                     version += 1;
                     workspace.change_file(ChangeFileParams {
-                        content: fix_file_result.code.clone(),
+                        content: output.clone(),
                         path: biome_path.clone(),
                         version,
                     })?;
-                    new_content = Cow::Owned(fix_file_result.code);
+                    new_content = Cow::Owned(output);
                 }
             }
 
@@ -120,14 +137,21 @@ pub(crate) fn run<'a>(
                 let result = workspace.organize_imports(OrganizeImportsParams {
                     path: biome_path.clone(),
                 })?;
-                if result.code != new_content {
+                let code = result.code;
+                let output = match biome_path.extension_as_str() {
+                    "astro" => AstroFileHandler::output(&new_content, code.as_str()),
+                    "vue" => VueFileHandler::output(&new_content, code.as_str()),
+                    "svelte" => SvelteFileHandler::output(&new_content, code.as_str()),
+                    _ => code,
+                };
+                if output != new_content {
                     version += 1;
                     workspace.change_file(ChangeFileParams {
-                        content: result.code.clone(),
+                        content: output.clone(),
                         path: biome_path.clone(),
                         version,
                     })?;
-                    new_content = Cow::Owned(result.code);
+                    new_content = Cow::Owned(output);
                 }
             }
         }
@@ -145,15 +169,22 @@ pub(crate) fn run<'a>(
             let printed = workspace.format_file(FormatFileParams {
                 path: biome_path.clone(),
             })?;
+            let code = printed.into_code();
+            let output = match biome_path.extension_as_str() {
+                "astro" => AstroFileHandler::output(&new_content, code.as_str()),
+                "vue" => VueFileHandler::output(&new_content, code.as_str()),
+                "svelte" => SvelteFileHandler::output(&new_content, code.as_str()),
+                _ => code,
+            };
             if mode.is_check_apply() || mode.is_check_apply_unsafe() {
-                if printed.as_code() != new_content {
-                    new_content = Cow::Owned(printed.into_code());
+                if output != new_content {
+                    new_content = Cow::Owned(output);
                 }
             } else {
                 let diagnostic = FormatDiffDiagnostic {
                     file_name: biome_path.display().to_string(),
                     diff: ContentDiffAdvice {
-                        new: printed.as_code().to_string(),
+                        new: output,
                         old: content.to_string(),
                     },
                 };
