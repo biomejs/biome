@@ -186,7 +186,7 @@ Sponsorship is the first and foremost way of making financial contributions to B
 done through a one-time donation, or through recurring donations. We offer incentives for certain levels of recurring donations.
 
 To learn more about sponsorship incentives, or to make a donation, please visit our [Open Collective page](https://opencollective.com/biome).
-You can also sponsor the project with [GitHub](https://github.com/sponsors/biomejs).
+You can also sponsor the project through [GitHub](https://github.com/sponsors/biomejs).
 
 ### Community-Funded Bounties
 
@@ -202,6 +202,7 @@ Compared to sponsorship, bounties come with a few risks, both for Biome as a pro
   - Implementation of the task is (currently) technically infeasible.
   - The suggested pledge is deemed inappropriate for the amount of work involved.
 - The person making the pledge acknowledges their pledge does not come with a guarantee of work done.
+- A task is only completed when a Biome maintainer merges the pull request that closes the task. The person trying to complete the task is responsible for addressing review comments to make sure the work meets the quality standards of the Biome project.
 - There is a 6 month expiration on pledges, as managed by Polar.sh.
 - Terms and conditions of Polar.sh apply to all pledges.
   - For the FAQ, please see: https://docs.polar.sh/maintainers/faq/
@@ -218,6 +219,7 @@ In some cases, Biome funds bounties on its own issues. For project-funded bounti
   - `F-Anyone`: Anyone is free to pick up this task. This task should be of low complexity and has a maximum bounty of $50 (USD).
   - `F-Maintainers`: Any Biome maintainer is free to pick up this task. This task may be of medium complexity and has a maximum bounty of $200 (USD).
   - `F-Core-Contributors`: Only core contributors are eligible for picking this task. There is no upper limit to the complexity, but the maximum bounty is $1000 (USD).
+- For Biome-funded tasks assigned to core contributors, we ask the contributor to take the money directly from our Open Collective account, instead of using Polar.sh. This will help us avoid paying commission over the larger bounties.
 
 Additionally, there is a strict process for assigning project-funded bounties:
 
