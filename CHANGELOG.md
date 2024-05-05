@@ -29,6 +29,7 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 - Fix typo by renaming `useConsistentBuiltinInstatiation` to `useConsistentBuiltinInstantiation`
   Contributed by @minht11
+- Fix the rule `useSingleCaseStatement` including `break` statements when counting the number of statements in a `switch` statement (#2696)
 
 ### Parser
 
@@ -183,7 +184,7 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
   Contributed by @Conaclos
 
 - [noMisplacedAssertion](https://biomejs.dev/linter/rules/no-misplaced-assertion/) now allow these matchers
-  
+
   - `expect.any()`
   - `expect.anything()`
   - `expect.closeTo`
