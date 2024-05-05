@@ -38,9 +38,21 @@ pub(crate) fn traverse(
     init_thread_pool();
 
     if inputs.is_empty() {
-        match current_dir() {
-            Ok(current_dir) => inputs.push(current_dir.into_os_string()),
-            Err(err) => return Err(CliDiagnostic::io_error(err)),
+        match execution.traversal_mode {
+            TraversalMode::Check { .. }
+            | TraversalMode::Lint { .. }
+            | TraversalMode::Format { .. } => match current_dir() {
+                Ok(current_dir) => inputs.push(current_dir.into_os_string()),
+                Err(err) => return Err(CliDiagnostic::io_error(err)),
+            },
+            _ => {
+                if execution.as_stdin_file().is_none() && !cli_options.no_errors_on_unmatched {
+                    return Err(CliDiagnostic::missing_argument(
+                        "INPUT",
+                        "No valid input found and operation requires specific input",
+                    ));
+                }
+            }
         }
     }
 
