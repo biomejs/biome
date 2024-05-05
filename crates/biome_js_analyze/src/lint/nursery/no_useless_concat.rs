@@ -99,7 +99,7 @@ impl Rule for NoUselessConcat {
                 },
             )
             .note(markup! {
-                "Consider turn the expression into a single string to improve readability and runtime performance."
+                "Consider turning the expression into a single string to improve readability and runtime performance."
             }),
         )
     }
@@ -127,6 +127,7 @@ impl Rule for NoUselessConcat {
                 mutation.replace_element(node.clone().into(), string_literal_expression.into());
                 Some(())
             }
+
             // Handle nested concatenations like "a" + "b" + "c"
             (
                 Some(AnyJsExpression::JsBinaryExpression(left_binary_expression)),
@@ -139,6 +140,7 @@ impl Rule for NoUselessConcat {
                 mutation.replace_element(node.clone().into(), binary_expression.into());
                 Some(())
             }
+
             // Handle concatenations where the left part is a parenthesized expression, like ("a" + "b") + "c"
             (
                 Some(AnyJsExpression::JsParenthesizedExpression(left_parenthesized_expression)),
@@ -154,6 +156,7 @@ impl Rule for NoUselessConcat {
                 }
                 _ => None,
             },
+
             _ => None,
         };
 
