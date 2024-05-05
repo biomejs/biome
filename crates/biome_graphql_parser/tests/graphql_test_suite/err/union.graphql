@@ -1,0 +1,14 @@
+union SearchResult = Photo |
+
+union SearchResult
+	| Photo
+	| Person
+
+
+union SearchResult |
+
+union SearchResult =
+
+union SearchResult = |
+
+union SearchResult @ =
