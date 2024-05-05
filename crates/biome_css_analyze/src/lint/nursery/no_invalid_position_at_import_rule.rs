@@ -1,7 +1,7 @@
 use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
-use biome_css_syntax::{AnyCssRule, CssImportAtRule, CssRuleList};
-use biome_rowan::AstNode;
+use biome_css_syntax::{AnyCssRule, CssRuleList};
+use biome_rowan::{AstNode, TextRange};
 
 declare_rule! {
     /// Disallow the use of `@import` at-rules in invalid positions.
@@ -32,9 +32,13 @@ declare_rule! {
     }
 }
 
+pub struct RuleState {
+    span: TextRange,
+}
+
 impl Rule for NoInvalidPositionAtImportRule {
     type Query = Ast<CssRuleList>;
-    type State = CssImportAtRule;
+    type State = RuleState;
     type Signals = Option<Self::State>;
     type Options = ();
 
@@ -57,10 +61,12 @@ impl Rule for NoInvalidPositionAtImportRule {
                     continue;
                 }
 
-                let import_rule = any_css_at_rule.as_css_import_at_rule().cloned();
+                let import_rule = any_css_at_rule.as_css_import_at_rule();
                 if let Some(import_rule) = import_rule {
                     if is_invalid_position {
-                        return Some(import_rule);
+                        return Some(RuleState {
+                            span: import_rule.range(),
+                        });
                     }
                 } else {
                     is_invalid_position = true;
@@ -73,8 +79,8 @@ impl Rule for NoInvalidPositionAtImportRule {
         None
     }
 
-    fn diagnostic(_: &RuleContext<Self>, node: &Self::State) -> Option<RuleDiagnostic> {
-        let span = node.range();
+    fn diagnostic(_: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
+        let span = state.span;
         Some(
             RuleDiagnostic::new(
                 rule_category!(),
