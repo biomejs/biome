@@ -80,13 +80,13 @@ impl Rule for NoInvalidPositionAtImportRule {
                 rule_category!(),
                 span,
                 markup! {
-                    "This @import is in the wrong position."
+                    "This "<Emphasis>"@import"</Emphasis>" is in the wrong position."
                 },
             )
             .note(markup! {
                     "Consider moving import position."
             }).note(markup! {
-                "Any @import rules must precede all other valid at-rules and style rules in a stylesheet (ignoring @charset and @layer), or else the @import rule is invalid."
+                "Any "<Emphasis>"@import"</Emphasis>" rules must precede all other valid at-rules and style rules in a stylesheet (ignoring @charset and @layer), or else the "<Emphasis>"@import"</Emphasis>" rule is invalid."
             }),
         )
     }
