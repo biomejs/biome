@@ -74,10 +74,6 @@ impl Rule for NoInvalidPositionAtImportRule {
     }
 
     fn diagnostic(_: &RuleContext<Self>, node: &Self::State) -> Option<RuleDiagnostic> {
-        //
-        // Read our guidelines to write great diagnostics:
-        // https://docs.rs/biome_analyze/latest/biome_analyze/#what-a-rule-should-say-to-the-user
-        //
         let span = node.range();
         Some(
             RuleDiagnostic::new(
