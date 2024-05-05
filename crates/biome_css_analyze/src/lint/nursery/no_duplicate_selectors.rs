@@ -1,17 +1,36 @@
+use std::borrow::Borrow;
 use std::collections::HashSet;
+use std::hash::{Hash, Hasher};
 use std::vec;
 
 use biome_analyze::Ast;
 use biome_analyze::{context::RuleContext, declare_rule, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
 use biome_deserialize_macros::Deserializable;
-use biome_css_syntax::{AnyCssAtRule, AnyCssRelativeSelector, AnyCssRule, AnyCssSelector, CssComplexSelector, CssRelativeSelector, CssRelativeSelectorList, CssRuleList, CssSelectorList, CssSyntaxNode};
+use biome_css_syntax::{AnyCssAtRule, AnyCssRelativeSelector, AnyCssRule, AnyCssSelector, CssComplexSelector, CssRelativeSelector, CssRelativeSelectorList, CssRoot, CssRuleList, CssSelectorList, CssSyntaxNode};
 use biome_rowan::{AstNode, SyntaxNodeCast};
 
 use serde::{Deserialize, Serialize};
 
 declare_rule! {
+    /// Disallow duplicate selectors.
     /// 
+    /// ## Examples
+    /// 
+    /// ### Invalid
+    /// 
+    /// ```css,expect_diagnostic
+    /// .abc,
+    /// .def,
+    /// .abc {}
+    /// ```
+    /// 
+    /// ### Valid
+    /// 
+    /// ```
+    /// .foo {}
+    /// .bar {}
+    /// ```
     /// 
     pub NoDuplicateSelectors {
         version: "next",
@@ -36,9 +55,36 @@ impl Default for NoDuplicateSelectorsOptions {
     }
 }
 
+#[derive(Debug, Eq)]
+struct ResolvedSelector {
+    selector_text: String,
+    selector_node: CssSyntaxNode,
+}
+
+impl PartialEq for ResolvedSelector {
+    fn eq(&self, other: &ResolvedSelector) -> bool {
+        self.selector_text == other.selector_text
+    }
+}
+impl Hash for ResolvedSelector {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        self.selector_text.hash(state);
+    }
+}
+impl Borrow<String> for ResolvedSelector {
+    fn borrow(&self) -> &String {
+        &self.selector_text
+    }
+}
+
+pub struct DuplicateSelector {
+    first: CssSyntaxNode,
+    duplicate: CssSyntaxNode
+}
+
 impl Rule for NoDuplicateSelectors {
-    type Query = Ast<CssRuleList>;
-    type State = CssSyntaxNode;
+    type Query = Ast<CssRoot>;
+    type State = DuplicateSelector;
     type Signals = Vec<Self::State>;
     type Options = NoDuplicateSelectorsOptions;
 
@@ -46,11 +92,12 @@ impl Rule for NoDuplicateSelectors {
         let node = ctx.query();
         let options = ctx.options();
 
-        let mut resolved_list = HashSet::new();
-        let mut output: Vec<CssSyntaxNode> = vec!();
+        let mut resolved_list: HashSet<ResolvedSelector> = HashSet::new();
+        let mut output: Vec<DuplicateSelector> = vec!();
 
         if options.disallow_in_list {
             let selectors = node
+            .rules()
             .syntax()
             .descendants()
             .filter_map(|x|{
@@ -92,14 +139,23 @@ impl Rule for NoDuplicateSelectors {
                 for r in resolved {
                     let split: Vec<&str> = r.split_whitespace().collect();
                     let normalized = split.join(" ").to_lowercase();
-                    println!("resolved: {:?}", normalized);
-                    if !resolved_list.insert(normalized) {
-                        output.push(selector.clone());
+                    if !resolved_list.insert(ResolvedSelector {
+                        selector_text: normalized.clone(),
+                        selector_node: selector.clone(),
+                    }) {
+                        let first = resolved_list.get(&normalized);
+                        if let Some(first) = first {
+                            output.push(DuplicateSelector {
+                                first: first.selector_node.clone(),
+                                duplicate: selector.clone()
+                            });
+                        }
                     }
                 }
             }
         } else {
             let select_lists = node
+            .rules()
             .syntax()
             .descendants()
             .filter_map(|x|{
@@ -113,7 +169,7 @@ impl Rule for NoDuplicateSelectors {
             });
 
             for selector_list in select_lists {
-                let mut this_list_resolved_list = HashSet::new();
+                let mut this_list_resolved_list: HashSet<ResolvedSelector> = HashSet::new();
 
                 let this_rule = selector_list.parent().unwrap();
                 let mut selector_list_mapped: Vec<String> = selector_list
@@ -121,14 +177,36 @@ impl Rule for NoDuplicateSelectors {
                     .into_iter()
                     .filter_map(|child|{
                         if let Some(selector) = AnyCssSelector::cast_ref(&child) {
-                            let selector_text = normalize_complex_selector(selector);
-                            if !this_list_resolved_list.insert(selector_text.clone()) {
-                                output.push(child.clone());
+                            let selector_text = normalize_complex_selector(selector.clone());
+                            if !this_list_resolved_list.insert(ResolvedSelector {
+                                selector_text: selector_text.clone(),
+                                selector_node: selector.clone().into(),
+                            }) {
+                                let first = this_list_resolved_list.get(&selector_text);
+                                if let Some(first) = first {
+                                    output.push(DuplicateSelector {
+                                        first: first.selector_node.clone(),
+                                        duplicate: selector.into()
+                                    });
+                                    // Return a none, since we already addressed this case
+                                    return None
+                                }
                             }
                             return Some(selector_text);
                         } else if let Some(selector) = AnyCssRelativeSelector::cast_ref(&child) {
-                            if !this_list_resolved_list.insert(selector.text()) {
-                                output.push(child.clone());
+                            if !this_list_resolved_list.insert(ResolvedSelector {
+                                selector_text: selector.clone().text(),
+                                selector_node: selector.clone().into(),
+                            }) {
+                                let first = this_list_resolved_list.get(&selector.text());
+                                if let Some(first) = first {
+                                    output.push(DuplicateSelector {
+                                        first: first.selector_node.clone(),
+                                        duplicate: selector.into()
+                                    });
+                                    // Return a none, since we already addressed this case
+                                    return None;
+                                }
                             }
                             return Some(selector.text());
                         }
@@ -143,9 +221,17 @@ impl Rule for NoDuplicateSelectors {
                 for r in resolved {
                     let split: Vec<&str> = r.split_whitespace().collect();
                     let normalized = split.join(" ").to_lowercase();
-                    println!("resolved: {:?}", normalized);
-                    if !resolved_list.insert(normalized) {
-                        output.push(selector_list.clone());
+                    if !resolved_list.insert(ResolvedSelector {
+                        selector_text: normalized.clone(),
+                        selector_node: selector_list.clone().into(),
+                    }) {
+                        let first = resolved_list.get(&normalized);
+                        if let Some(first) = first {
+                            output.push(DuplicateSelector {
+                                first: first.selector_node.clone(),
+                                duplicate: selector_list.clone()
+                            });
+                        }
                     }
                 }
             }
@@ -158,16 +244,16 @@ impl Rule for NoDuplicateSelectors {
         // Read our guidelines to write great diagnostics:
         // https://docs.rs/biome_analyze/latest/biome_analyze/#what-a-rule-should-say-to-the-user
         //
+        let first_seen = node.first.to_string();
+        let duplicate = node.duplicate.to_string();
         Some(
             RuleDiagnostic::new(
                 rule_category!(),
-                node.text_range(),
+                node.duplicate.text_range(),
                 markup! {
-                    "Duplicate selector."
-                },
-            ).note(markup! {
-                "Please fix it."
-            }),
+                    "Duplicate selector \""<Emphasis>{duplicate}</Emphasis>"\", first seen at"<Emphasis>{first_seen}</Emphasis>"."
+                }
+            )
         )
     }
 }
@@ -179,17 +265,15 @@ fn resolve_nested_selectors(selector: String, this_rule: CssSyntaxNode) -> Vec<S
 
     match &parent_rule {
         None => {
-            println!(" parent = none");
             return vec!(selector)
         },
         Some(parent_rule) => {
             if let Some(parent_rule) = AnyCssAtRule::cast_ref(&parent_rule) {
-                println!(" parent is any css at rule: {:?}", parent_rule.clone().text());
                 // resolve
                 match parent_rule {
-                    AnyCssAtRule::CssContainerAtRule(rule) => todo!(),
-                    AnyCssAtRule::CssKeyframesAtRule(rule) => todo!(),
-                    AnyCssAtRule::CssLayerAtRule(rule) => todo!(),
+                    AnyCssAtRule::CssContainerAtRule(_rule) => todo!(),
+                    AnyCssAtRule::CssKeyframesAtRule(_rule) => todo!(),
+                    AnyCssAtRule::CssLayerAtRule(_rule) => todo!(),
                     AnyCssAtRule::CssMediaAtRule(rule) => {
                         let mut resolved = "@".to_string();
                         resolved.push_str(&rule.media_token().unwrap().text());
@@ -198,10 +282,10 @@ fn resolve_nested_selectors(selector: String, this_rule: CssSyntaxNode) -> Vec<S
                         let resolved = resolved.replace(char::is_whitespace, "-");
                         parent_selectors.push(resolved);
                     },
-                    AnyCssAtRule::CssPageAtRule(rule) => todo!(),
-                    AnyCssAtRule::CssScopeAtRule(rule) => todo!(),
-                    AnyCssAtRule::CssStartingStyleAtRule(rule) => todo!(),
-                    AnyCssAtRule::CssSupportsAtRule(rule) => todo!(),
+                    AnyCssAtRule::CssPageAtRule(_rule) => todo!(),
+                    AnyCssAtRule::CssScopeAtRule(_rule) => todo!(),
+                    AnyCssAtRule::CssStartingStyleAtRule(_rule) => todo!(),
+                    AnyCssAtRule::CssSupportsAtRule(_rule) => todo!(),
                     _ => {}
                 }
             }
@@ -211,23 +295,18 @@ fn resolve_nested_selectors(selector: String, this_rule: CssSyntaxNode) -> Vec<S
                     AnyCssRule::CssAtRule(parent_rule) => {
                         // Treat the AtRule as a selector
                         let rule = parent_rule.rule().unwrap();
-                        println!("  selectors = {:?}", rule.clone().text());
                         parent_selectors.push(rule.text());
                     },
                     AnyCssRule::CssNestedQualifiedRule(parent_rule) => {
-                        println!(" parent = NQR");
                         for selector in parent_rule.prelude() {
                             if let Ok(selector) = selector {
-                                println!("  selectors = {:?}", selector.clone().text());
                                 parent_selectors.push(selector.text());
                             }
                         }
                     },
                     AnyCssRule::CssQualifiedRule(parent_rule) => {
-                        println!(" parent = QR");
                         for selector in parent_rule.prelude() {
                             if let Ok(selector) = selector {
-                                println!("  selectors = {:?}", selector.clone().text());
                                 parent_selectors.push(selector.text());
                             }
                         }

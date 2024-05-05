@@ -62,7 +62,8 @@ x { & {} }
 ```
 invalid.css:2:4 lint/nursery/noDuplicateSelectors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Duplicate selector.
+  ! Duplicate selector, first seen at/* duplicate within one rule's selector list */
+    a
   
     1 │ /* duplicate within one rule's selector list */
   > 2 │ a, a {}
@@ -78,7 +79,10 @@ invalid.css:2:4 lint/nursery/noDuplicateSelectors ━━━━━━━━━━
 ```
 invalid.css:5:3 lint/nursery/noDuplicateSelectors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Duplicate selector.
+  ! Duplicate selector, first seen at
+    
+    /* duplicate within one rule's selector list. multiline */
+    b
   
     4 │ /* duplicate within one rule's selector list. multiline */
   > 5 │ b,
@@ -96,7 +100,8 @@ invalid.css:5:3 lint/nursery/noDuplicateSelectors ━━━━━━━━━━
 ```
 invalid.css:10:3 lint/nursery/noDuplicateSelectors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Duplicate selector.
+  ! Duplicate selector, first seen at
+    d
   
      8 │ /* duplicate within one rule's selector list. multiline */
      9 │ c,
@@ -115,7 +120,10 @@ invalid.css:10:3 lint/nursery/noDuplicateSelectors ━━━━━━━━━�
 ```
 invalid.css:14:4 lint/nursery/noDuplicateSelectors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Duplicate selector.
+  ! Duplicate selector, first seen at
+    
+    /* duplicated selectors within one rule's selector list. 3 duplicates */
+    .e
   
     13 │ /* duplicated selectors within one rule's selector list. 3 duplicates */
   > 14 │ .e,
@@ -133,7 +141,10 @@ invalid.css:14:4 lint/nursery/noDuplicateSelectors ━━━━━━━━━�
 ```
 invalid.css:15:4 lint/nursery/noDuplicateSelectors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Duplicate selector.
+  ! Duplicate selector, first seen at
+    
+    /* duplicated selectors within one rule's selector list. 3 duplicates */
+    .e
   
     13 │ /* duplicated selectors within one rule's selector list. 3 duplicates */
     14 │ .e,
@@ -152,7 +163,10 @@ invalid.css:15:4 lint/nursery/noDuplicateSelectors ━━━━━━━━━�
 ```
 invalid.css:19:11 lint/nursery/noDuplicateSelectors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Duplicate selector.
+  ! Duplicate selector, first seen at
+    
+    /* duplicate simple selectors with another rule between */
+    f 
   
     18 │ /* duplicate simple selectors with another rule between */
   > 19 │ f {} g {} f {}
@@ -168,7 +182,10 @@ invalid.css:19:11 lint/nursery/noDuplicateSelectors ━━━━━━━━━�
 ```
 invalid.css:23:5 lint/nursery/noDuplicateSelectors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Duplicate selector.
+  ! Duplicate selector, first seen at
+    
+    /* duplicate simple selectors with another rule between */
+    h 
   
     21 │ /* duplicate simple selectors with another rule between */
     22 │ h {}
@@ -187,7 +204,10 @@ invalid.css:23:5 lint/nursery/noDuplicateSelectors ━━━━━━━━━�
 ```
 invalid.css:27:9 lint/nursery/noDuplicateSelectors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Duplicate selector.
+  ! Duplicate selector, first seen at
+    
+    /* duplicate selector lists with different order */
+    j, k 
   
     26 │ /* duplicate selector lists with different order */
   > 27 │ j, k {} k, j {}
@@ -203,7 +223,10 @@ invalid.css:27:9 lint/nursery/noDuplicateSelectors ━━━━━━━━━�
 ```
 invalid.css:30:7 lint/nursery/noDuplicateSelectors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Duplicate selector.
+  ! Duplicate selector, first seen at
+    
+    /* duplicate selectors with multiple components */
+    m n 
   
     29 │ /* duplicate selectors with multiple components */
   > 30 │ m n {}
@@ -221,7 +244,11 @@ invalid.css:30:7 lint/nursery/noDuplicateSelectors ━━━━━━━━━�
 ```
 invalid.css:35:8 lint/nursery/noDuplicateSelectors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Duplicate selector.
+  ! Duplicate selector, first seen at
+    
+    /* essentially duplicate selector lists with varied spacing */
+    .foo   p, q > .bar,
+    #baz 
   
     33 │ /* essentially duplicate selector lists with varied spacing */
     34 │ .foo   p, q > .bar,
@@ -241,24 +268,7 @@ invalid.css:35:8 lint/nursery/noDuplicateSelectors ━━━━━━━━━�
 ```
 invalid.css:41:19 lint/nursery/noDuplicateSelectors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Duplicate selector.
-  
-    39 │ /* duplicate within a media query, in the same rule */
-    40 │ s {}
-  > 41 │ @media print { s, s {} }
-       │                   ^^
-    42 │ 
-    43 │ /* duplicate within a media query, in different rules */
-  
-  i Please fix it.
-  
-
-```
-
-```
-invalid.css:41:19 lint/nursery/noDuplicateSelectors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! Duplicate selector.
+  ! Duplicate selector, first seen ats
   
     39 │ /* duplicate within a media query, in the same rule */
     40 │ s {}
@@ -275,24 +285,7 @@ invalid.css:41:19 lint/nursery/noDuplicateSelectors ━━━━━━━━━�
 ```
 invalid.css:45:45 lint/nursery/noDuplicateSelectors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Duplicate selector.
-  
-    43 │ /* duplicate within a media query, in different rules */
-    44 │ t {}
-  > 45 │ @media screen and (min-width: 900px) { t {} t {} }
-       │                                             ^^
-    46 │ 
-    47 │ /* duplicate caused by nesting */
-  
-  i Please fix it.
-  
-
-```
-
-```
-invalid.css:45:45 lint/nursery/noDuplicateSelectors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! Duplicate selector.
+  ! Duplicate selector, first seen att 
   
     43 │ /* duplicate within a media query, in different rules */
     44 │ t {}
@@ -309,7 +302,10 @@ invalid.css:45:45 lint/nursery/noDuplicateSelectors ━━━━━━━━━�
 ```
 invalid.css:48:12 lint/nursery/noDuplicateSelectors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Duplicate selector.
+  ! Duplicate selector, first seen at
+    
+    /* duplicate caused by nesting */
+    v w 
   
     47 │ /* duplicate caused by nesting */
   > 48 │ v w {} v { w {} }
@@ -325,7 +321,10 @@ invalid.css:48:12 lint/nursery/noDuplicateSelectors ━━━━━━━━━�
 ```
 invalid.css:51:5 lint/nursery/noDuplicateSelectors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Duplicate selector.
+  ! Duplicate selector, first seen at
+    
+    /* duplicate caused by &-parent selector */
+    x 
   
     50 │ /* duplicate caused by &-parent selector */
   > 51 │ x { & {} }

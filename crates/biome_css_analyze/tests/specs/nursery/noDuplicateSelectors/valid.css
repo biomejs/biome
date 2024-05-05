@@ -20,6 +20,7 @@ i { i { i {} } }
 
 /* selectors reused in other non-equivalent selector lists */
 j {} j, k {}
+u {} v, u {}
 
 /* nested resolution */
 m n { top: 0; } m { n, p { color: pink; } }	
