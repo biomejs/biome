@@ -1587,7 +1587,7 @@
 						{ "type": "null" }
 					]
 				},
-				"noUselessConcat": {
+				"noUselessStringConcat": {
 					"description": "Disallow unnecessary concatenation of literals or template literals.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },

@@ -2717,7 +2717,7 @@ pub struct Nursery {
     pub no_unmatchable_anb_selector: Option<RuleConfiguration<NoUnmatchableAnbSelector>>,
     #[doc = "Disallow unnecessary concatenation of literals or template literals."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_useless_concat: Option<RuleConfiguration<NoUselessConcat>>,
+    pub no_useless_string_concat: Option<RuleConfiguration<NoUselessStringConcat>>,
     #[doc = "Disallow initializing variables to undefined."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_useless_undefined_initialization:
@@ -2784,7 +2784,7 @@ impl Nursery {
         "noUnknownSelectorPseudoElement",
         "noUnknownUnit",
         "noUnmatchableAnbSelector",
-        "noUselessConcat",
+        "noUselessStringConcat",
         "noUselessUndefinedInitialization",
         "useArrayLiterals",
         "useConsistentBuiltinInstantiation",
@@ -2986,7 +2986,7 @@ impl Nursery {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[21]));
             }
         }
-        if let Some(rule) = self.no_useless_concat.as_ref() {
+        if let Some(rule) = self.no_useless_string_concat.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[22]));
             }
@@ -3145,7 +3145,7 @@ impl Nursery {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[21]));
             }
         }
-        if let Some(rule) = self.no_useless_concat.as_ref() {
+        if let Some(rule) = self.no_useless_string_concat.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[22]));
             }
@@ -3314,8 +3314,8 @@ impl Nursery {
                 .no_unmatchable_anb_selector
                 .as_ref()
                 .map(|conf| (conf.level(), conf.get_options())),
-            "noUselessConcat" => self
-                .no_useless_concat
+            "noUselessStringConcat" => self
+                .no_useless_string_concat
                 .as_ref()
                 .map(|conf| (conf.level(), conf.get_options())),
             "noUselessUndefinedInitialization" => self

@@ -215,8 +215,6 @@ pub type NoUnusedVariables =
     <lint::correctness::no_unused_variables::NoUnusedVariables as biome_analyze::Rule>::Options;
 pub type NoUselessCatch =
     <lint::complexity::no_useless_catch::NoUselessCatch as biome_analyze::Rule>::Options;
-pub type NoUselessConcat =
-    <lint::nursery::no_useless_concat::NoUselessConcat as biome_analyze::Rule>::Options;
 pub type NoUselessConstructor = < lint :: complexity :: no_useless_constructor :: NoUselessConstructor as biome_analyze :: Rule > :: Options ;
 pub type NoUselessElse =
     <lint::style::no_useless_else::NoUselessElse as biome_analyze::Rule>::Options;
@@ -228,6 +226,7 @@ pub type NoUselessLabel =
 pub type NoUselessLoneBlockStatements = < lint :: complexity :: no_useless_lone_block_statements :: NoUselessLoneBlockStatements as biome_analyze :: Rule > :: Options ;
 pub type NoUselessRename =
     <lint::complexity::no_useless_rename::NoUselessRename as biome_analyze::Rule>::Options;
+pub type NoUselessStringConcat = < lint :: nursery :: no_useless_string_concat :: NoUselessStringConcat as biome_analyze :: Rule > :: Options ;
 pub type NoUselessSwitchCase =
     <lint::complexity::no_useless_switch_case::NoUselessSwitchCase as biome_analyze::Rule>::Options;
 pub type NoUselessTernary =

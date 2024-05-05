@@ -61,15 +61,15 @@ declare_rule! {
     /// const a = 'foo' +
     ///           'bar'
     /// ```
-    pub NoUselessConcat {
+    pub NoUselessStringConcat {
         version: "next",
-        name: "noUselessConcat",
+        name: "noUselessStringConcat",
         sources: &[RuleSource::Eslint("no-useless-concat")],
         recommended: false,
     }
 }
 
-impl Rule for NoUselessConcat {
+impl Rule for NoUselessStringConcat {
     type Query = Ast<JsBinaryExpression>;
     type State = TextRange;
     type Signals = Option<Self::State>;
