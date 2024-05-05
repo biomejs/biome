@@ -11,7 +11,7 @@ use biome_js_syntax::{
     JsLogicalExpression, JsLogicalOperator, JsStaticMemberExpression, JsSyntaxKind, JsSyntaxNode,
     JsUnaryExpression, JsUnaryOperator, T,
 };
-use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt};
+use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt, TokenText};
 
 use crate::JsRuleAction;
 
@@ -138,17 +138,22 @@ impl Rule for UseExplicitLengthCheck {
     type Options = ();
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
-        let node = ctx.query();
-        let member_name = node.member().ok()?.text();
+        let member_expr = ctx.query();
+        let member_name = member_expr.member().ok()?;
+        let member_name = member_name
+            .as_js_name()?
+            .value_token()
+            .ok()?
+            .token_text_trimmed();
 
-        if !LENGTH_MEMBER_NAMES.contains(&member_name.as_str()) {
+        if !LENGTH_MEMBER_NAMES.contains(&member_name.text()) {
             return None;
         }
 
         // TODO. Handle cases when `length` property is not numeric
         // That requires type inference. Example: `{ length: "not a number" }`
 
-        let member_expr_syntax = node.syntax();
+        let member_expr_syntax = member_expr.syntax();
         let parent_syntax = member_expr_syntax.parent()?;
 
         if let Some((binary_expr, mut len_check, is_possibly_valid)) =
@@ -174,8 +179,8 @@ impl Rule for UseExplicitLengthCheck {
 
                     Some(UseExplicitLengthCheckState {
                         check: len_check,
-                        node: AnyJsExpression::cast_ref(binary_expr.syntax())?,
-                        member_name: member_name.clone(),
+                        node: AnyJsExpression::from(binary_expr),
+                        member_name,
                     })
                 });
         }
@@ -188,7 +193,7 @@ impl Rule for UseExplicitLengthCheck {
             });
         }
 
-        if let Some(logical_expr) = is_logical_expr(&parent_syntax) {
+        if let Some(logical_expr) = is_logical_expr(parent_syntax) {
             // `const x = foo.length || 0` is valid case
             // TODO. This handles simple cases. To know if right side is a number, we need type inference.
             if logical_expr.operator().ok()? == JsLogicalOperator::LogicalOr
@@ -227,12 +232,12 @@ impl Rule for UseExplicitLengthCheck {
             LengthCheck::Zero => ("=== 0", "zero"),
             LengthCheck::NonZero => ("> 0", "not zero"),
         };
-
+        let member_name = state.member_name.text();
         Some(RuleDiagnostic::new(
             rule_category!(),
             state.node.range(),
             markup! {
-                "Use "<Emphasis>"."{state.member_name}" "{code}</Emphasis>" when checking "<Emphasis>"."{state.member_name}</Emphasis>" is "{type_text}"."
+                "Use "<Emphasis>"."{member_name}" "{code}</Emphasis>" when checking "<Emphasis>"."{member_name}</Emphasis>" is "{type_text}"."
             },
         ))
     }
@@ -240,7 +245,6 @@ impl Rule for UseExplicitLengthCheck {
     fn action(ctx: &RuleContext<Self>, state: &Self::State) -> Option<JsRuleAction> {
         let member_expr = ctx.query();
         let mut mutation = ctx.root().begin();
-
         let operator_kind = match state.check {
             LengthCheck::Zero => T![===],
             LengthCheck::NonZero => T![>],
@@ -295,23 +299,23 @@ impl Rule for UseExplicitLengthCheck {
             LengthCheck::Zero => "=== 0",
             LengthCheck::NonZero => "> 0",
         };
-
+        let member_name = state.member_name.text();
         Some(JsRuleAction {
             category: ActionCategory::QuickFix,
             applicability: Applicability::MaybeIncorrect,
-            message: markup! { "Replace "<Emphasis>"."{state.member_name}</Emphasis>" with "<Emphasis>"."{state.member_name}" "{code}</Emphasis> }.to_owned(),
+            message: markup! { "Replace "<Emphasis>"."{member_name}</Emphasis>" with "<Emphasis>"."{member_name}" "{code}</Emphasis> }.to_owned(),
             mutation,
         })
     }
 }
 
 /// Sorted by how common they are in the wild
-const LENGTH_MEMBER_NAMES: &[&str] = &["length", "size", "byteLength", "byteOffset"];
+const LENGTH_MEMBER_NAMES: [&str; 4] = ["length", "size", "byteLength", "byteOffset"];
 
 pub struct UseExplicitLengthCheckState {
     check: LengthCheck,
     node: AnyJsExpression,
-    member_name: String,
+    member_name: TokenText,
 }
 
 enum MemberPosition {
@@ -418,11 +422,11 @@ fn get_boolean_ancestor(node: &JsSyntaxNode) -> Option<(AnyJsExpression, bool)> 
 
     loop {
         if let Some(expr) = is_boolean_call(&current_node) {
-            let syntax = expr.syntax().clone();
+            let syntax = expr.into_syntax();
             current_node = syntax.parent()?;
             boolean_node = Some(syntax);
         } else if let Some(expr) = is_negation(&current_node) {
-            let syntax = expr.syntax().clone();
+            let syntax = expr.into_syntax();
             current_node = syntax.parent()?;
             boolean_node = Some(syntax);
             is_negative = !is_negative;
@@ -445,17 +449,12 @@ pub fn is_boolean_call(node: &JsSyntaxNode) -> Option<JsCallExpression> {
     let expr = JsCallArgumentList::cast_ref(node)?
         .parent::<JsCallArguments>()?
         .parent::<JsCallExpression>()?;
-
-    if expr.has_callee("Boolean") && expr.arguments().ok()?.args().len() < 2 {
-        Some(expr)
-    } else {
-        None
-    }
+    (expr.has_callee("Boolean") && expr.arguments().ok()?.args().len() < 2).then_some(expr)
 }
 
 /// Checks if expression is a logical expression with `&&` or `||` operator
-fn is_logical_expr(node: &JsSyntaxNode) -> Option<JsLogicalExpression> {
-    let expr: JsLogicalExpression = JsLogicalExpression::cast_ref(node)?;
+fn is_logical_expr(node: JsSyntaxNode) -> Option<JsLogicalExpression> {
+    let expr: JsLogicalExpression = JsLogicalExpression::cast(node)?;
 
     match expr.operator().ok()? {
         JsLogicalOperator::LogicalAnd | JsLogicalOperator::LogicalOr => Some(expr),
@@ -464,11 +463,10 @@ fn is_logical_expr(node: &JsSyntaxNode) -> Option<JsLogicalExpression> {
 }
 
 fn does_unary_expr_needs_space(node: &JsSyntaxNode) -> bool {
-    JsUnaryExpression::cast_ref(node)
-        .and_then(|expr| expr.operator().ok())
-        .and_then(|operator| match operator {
-            JsUnaryOperator::Typeof | JsUnaryOperator::Void | JsUnaryOperator::Delete => Some(()),
-            _ => None,
-        })
-        .is_some()
+    JsUnaryExpression::cast_ref(node).is_some_and(|expr| {
+        matches!(
+            expr.operator(),
+            Ok(JsUnaryOperator::Typeof | JsUnaryOperator::Void | JsUnaryOperator::Delete)
+        )
+    })
 }
