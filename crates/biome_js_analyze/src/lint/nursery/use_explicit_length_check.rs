@@ -121,7 +121,7 @@ declare_rule! {
     /// We recommend disabling this rule when working with non-numeric `length` properties.
     ///
     pub UseExplicitLengthCheck {
-        version: "next",
+        version: "1.7.3",
         name: "useExplicitLengthCheck",
         recommended: false,
         sources: &[RuleSource::EslintUnicorn("explicit-length-check")],
