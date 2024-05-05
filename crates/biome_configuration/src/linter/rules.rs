@@ -2715,7 +2715,7 @@ pub struct Nursery {
     #[doc = "Disallow unmatchable An+B selectors."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_unmatchable_anb_selector: Option<RuleConfiguration<NoUnmatchableAnbSelector>>,
-    #[doc = "Disallow unnecessary concatenation of literals or template literals."]
+    #[doc = "Disallow unnecessary concatenation of string or template literals."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_useless_string_concat: Option<RuleConfiguration<NoUselessStringConcat>>,
     #[doc = "Disallow initializing variables to undefined."]

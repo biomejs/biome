@@ -14,10 +14,10 @@ use biome_rowan::{AstNode, BatchMutationExt, TextRange, TextSize};
 use crate::JsRuleAction;
 
 declare_rule! {
-    /// Disallow unnecessary concatenation of literals or template literals.
+    /// Disallow unnecessary concatenation of string or template literals.
     ///
     /// This rule aims to flag the concatenation of 2 literals when they could be combined into a single literal. Literals can be strings or template literals.
-    /// Concatenation of multiple strings in different lines to prevent big line widths are allowed.
+    /// Concatenation of multiple strings is allowed when the strings are spread over multiple lines in order to prevent exceeding the maximum line width.
     ///
     /// ## Examples
     ///
@@ -79,7 +79,7 @@ impl Rule for NoUselessStringConcat {
         let node = ctx.query();
         let parent_binary_expression = get_parent_binary_expression(node);
 
-        // Prevent duplicated error reportings when the parent is an useless concatenation too, i.e.: "a" + "b" + "c"
+        // Prevent duplicated error reportings when the parent is a useless concatenation too, i.e.: "a" + "b" + "c"
         if parent_binary_expression.is_some()
             && get_useless_concat(&parent_binary_expression.unwrap()).is_some()
         {

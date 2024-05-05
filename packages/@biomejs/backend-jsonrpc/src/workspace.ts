@@ -997,7 +997,7 @@ export interface Nursery {
 	 */
 	noUnmatchableAnbSelector?: RuleConfiguration_for_Null;
 	/**
-	 * Disallow unnecessary concatenation of literals or template literals.
+	 * Disallow unnecessary concatenation of string or template literals.
 	 */
 	noUselessStringConcat?: RuleConfiguration_for_Null;
 	/**
