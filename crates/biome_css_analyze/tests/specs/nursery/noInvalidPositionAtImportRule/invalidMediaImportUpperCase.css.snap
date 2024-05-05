@@ -13,16 +13,16 @@ expression: invalidMediaImportUpperCase.css
 ```
 invalidMediaImportUpperCase.css:2:2 lint/nursery/noInvalidPositionAtImportRule ━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected import position.
+  ! This @import is in the wrong position.
   
     1 │ @media print {}
   > 2 │ @imPort URl('foo.css');
       │  ^^^^^^^^^^^^^^^^^^^^^^
     3 │ 
   
-  i Consider moving import position.
-  
   i Any @import rules must precede all other valid at-rules and style rules in a stylesheet (ignoring @charset and @layer), or else the @import rule is invalid.
+  
+  i Consider moving import position.
   
 
 ```
