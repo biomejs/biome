@@ -48,8 +48,8 @@ pub(crate) fn traverse(
             _ => {
                 if execution.as_stdin_file().is_none() && !cli_options.no_errors_on_unmatched {
                     return Err(CliDiagnostic::missing_argument(
-                        "INPUT",
-                        "No valid input found and operation requires specific input",
+                        "<INPUT>",
+                        format!("{}", execution.traversal_mode),
                     ));
                 }
             }
