@@ -32,13 +32,9 @@ declare_rule! {
     }
 }
 
-pub struct RuleState {
-    span: TextRange,
-}
-
 impl Rule for NoInvalidPositionAtImportRule {
     type Query = Ast<CssRuleList>;
-    type State = RuleState;
+    type State = TextRange;
     type Signals = Option<Self::State>;
     type Options = ();
 
@@ -64,9 +60,7 @@ impl Rule for NoInvalidPositionAtImportRule {
                 let import_rule = any_css_at_rule.as_css_import_at_rule();
                 if let Some(import_rule) = import_rule {
                     if is_invalid_position {
-                        return Some(RuleState {
-                            span: import_rule.range(),
-                        });
+                        return Some(import_rule.range());
                     }
                 } else {
                     is_invalid_position = true;
@@ -80,11 +74,10 @@ impl Rule for NoInvalidPositionAtImportRule {
     }
 
     fn diagnostic(_: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
-        let span = state.span;
         Some(
             RuleDiagnostic::new(
                 rule_category!(),
-                span,
+                state,
                 markup! {
                     "This "<Emphasis>"@import"</Emphasis>" is in the wrong position."
                 },
