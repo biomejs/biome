@@ -15,8 +15,6 @@ declare_rule! {
     /// ```css,expect_diagnostic
     /// a {}
     /// @import 'foo.css';
-    /// /** ↑
-    /// * This @import */
     /// ```
     ///
     /// ### Valid
