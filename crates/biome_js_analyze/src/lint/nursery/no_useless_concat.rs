@@ -9,7 +9,7 @@ use biome_js_factory::make::{
 use biome_js_syntax::{
     AnyJsExpression, AnyJsLiteralExpression, JsBinaryExpression, JsBinaryOperator,
 };
-use biome_rowan::{AstNode, BatchMutationExt};
+use biome_rowan::{AstNode, BatchMutationExt, TextRange, TextSize};
 
 use crate::JsRuleAction;
 
@@ -29,10 +29,6 @@ declare_rule! {
     ///
     /// ```js,expect_diagnostic
     /// const a = "a" + "b" + "c";
-    /// ```
-    ///
-    /// ```js,expect_diagnostic
-    /// const a = foo + "a" + "b";
     /// ```
     ///
     /// ```js,expect_diagnostic
@@ -75,7 +71,7 @@ declare_rule! {
 
 impl Rule for NoUselessConcat {
     type Query = Ast<JsBinaryExpression>;
-    type State = ();
+    type State = TextRange;
     type Signals = Option<Self::State>;
     type Options = ();
 
@@ -85,20 +81,19 @@ impl Rule for NoUselessConcat {
 
         // Prevent duplicated error reportings when the parent is an useless concatenation too, i.e.: "a" + "b" + "c"
         if parent_binary_expression.is_some()
-            && has_useless_concat(&parent_binary_expression.unwrap())
+            && get_useless_concat(&parent_binary_expression.unwrap()).is_some()
         {
             return None;
         }
 
-        has_useless_concat(node).then_some(())
+        get_useless_concat(node)
     }
 
-    fn diagnostic(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<RuleDiagnostic> {
-        let node = ctx.query();
+    fn diagnostic(_ctx: &RuleContext<Self>, range: &Self::State) -> Option<RuleDiagnostic> {
         Some(
             RuleDiagnostic::new(
                 rule_category!(),
-                node.range(),
+                range,
                 markup! {
                     "Useless string concatenation."
                 },
@@ -171,8 +166,12 @@ impl Rule for NoUselessConcat {
     }
 }
 
-fn has_useless_concat(node: &JsBinaryExpression) -> bool {
-    is_concatenation(node) && !is_stylistic_concatenation(node)
+fn get_useless_concat(node: &JsBinaryExpression) -> Option<TextRange> {
+    if is_stylistic_concatenation(node) {
+        return None;
+    }
+
+    is_concatenation(node)
 }
 
 fn is_string_expression(expression: &Option<AnyJsExpression>) -> bool {
@@ -213,13 +212,20 @@ fn is_numeric_calculation(expression: &Option<AnyJsExpression>) -> bool {
 
 fn is_binary_expression_with_literal_string(expression: &Option<AnyJsExpression>) -> bool {
     if let Some(AnyJsExpression::JsBinaryExpression(binary_expression)) = expression {
-        return is_string_expression(&binary_expression.right().ok());
+        // If the binary expression has an identifier expression inside, we can't statically ensure the type of the operation
+        let has_left_identifier_expression = matches!(
+            &binary_expression.left().ok(),
+            Some(AnyJsExpression::JsIdentifierExpression(_))
+        );
+        let has_right_string_expression = is_string_expression(&binary_expression.right().ok());
+
+        return !has_left_identifier_expression && has_right_string_expression;
     }
 
     false
 }
 
-fn is_concatenation(binary_expression: &JsBinaryExpression) -> bool {
+fn is_concatenation(binary_expression: &JsBinaryExpression) -> Option<TextRange> {
     let left = binary_expression.left().ok();
     let right = binary_expression.right().ok();
     let has_left_string_expression = is_string_expression(&left)
@@ -233,8 +239,8 @@ fn is_concatenation(binary_expression: &JsBinaryExpression) -> bool {
         is_numeric_expression(&right) || is_numeric_calculation(&right);
     let operator = binary_expression.operator().ok();
 
-    let is_plus_operator = matches!(operator, Some(JsBinaryOperator::Plus));
-    let is_string_expression = match (
+    let has_plus_operator = matches!(operator, Some(JsBinaryOperator::Plus));
+    let has_string_expression = match (
         has_left_string_expression,
         has_left_numeric_expression,
         has_right_string_expression,
@@ -246,7 +252,26 @@ fn is_concatenation(binary_expression: &JsBinaryExpression) -> bool {
         _ => false,
     };
 
-    is_plus_operator && is_string_expression
+    if has_plus_operator && has_string_expression {
+        let range_start = if is_binary_expression_with_literal_string(&left) {
+            match left {
+                Some(AnyJsExpression::JsBinaryExpression(left_binary_expression)) => {
+                    extract_concat_range(&left_binary_expression)
+                }
+                _ => None,
+            }
+        } else {
+            left.map(|left| left.range().start())
+        };
+        let range_end = right.map(|right| right.range().end());
+
+        return match (range_start, range_end) {
+            (Some(range_start), Some(range_end)) => Some(TextRange::new(range_start, range_end)),
+            _ => None,
+        };
+    }
+
+    None
 }
 
 /// Returns if the passed `JsBinaryExpression` has a multiline string concatenation
@@ -344,6 +369,19 @@ fn extract_string_value(expression: &Option<AnyJsExpression>) -> Option<String> 
     }
 }
 
+fn extract_concat_range(binary_expression: &JsBinaryExpression) -> Option<TextSize> {
+    match (
+        binary_expression.left().ok(),
+        binary_expression.right().ok(),
+    ) {
+        (Some(AnyJsExpression::JsBinaryExpression(left_binary_expression)), Some(right)) => {
+            extract_concat_range(&left_binary_expression).or(Some(right.range().start()))
+        }
+        (Some(left_expression), _) => Some(left_expression.range().start()),
+        _ => None,
+    }
+}
+
 fn get_parent_binary_expression(node: &JsBinaryExpression) -> Option<JsBinaryExpression> {
     let mut current_node = node.parent();
 
@@ -371,17 +409,21 @@ fn concat_binary_expression(
             AnyJsExpression::AnyJsLiteralExpression(AnyJsLiteralExpression::from(
                 js_string_literal_expression(js_string_literal(&concatenated_string)),
             ));
-
         let left = left_binary_expression.left().unwrap();
         let operator = left_binary_expression.operator_token().unwrap();
-        let binary_expression =
-            js_binary_expression(left.clone(), operator, string_literal_expression);
 
         return match left {
             AnyJsExpression::JsBinaryExpression(binary_expression) => {
-                concat_binary_expression(&binary_expression, concatenated_string.as_str())
+                let expression: AnyJsExpression = binary_expression.clone().into();
+
+                // Only concatenating strings when we are sure that the evaluated expression will turn into a string
+                if is_binary_expression_with_literal_string(&Some(expression.clone())) {
+                    concat_binary_expression(&binary_expression, concatenated_string.as_str())
+                } else {
+                    js_binary_expression(expression.clone(), operator, string_literal_expression)
+                }
             }
-            _ => binary_expression,
+            _ => js_binary_expression(left.clone(), operator, string_literal_expression),
         };
     }
 
