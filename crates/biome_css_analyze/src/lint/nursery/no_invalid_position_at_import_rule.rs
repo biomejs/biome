@@ -46,25 +46,21 @@ impl Rule for NoInvalidPositionAtImportRule {
 
         for rule in node {
 
-            let any_css_at_rule_result = match rule {
-                AnyCssRule::CssAtRule(item) => {
-                    item.rule().ok()
-                },
-                _ => {
-                    None
-                }
+            let any_css_at_rule = match rule {
+                AnyCssRule::CssAtRule(item) => item.rule().ok(),
+                _ => None
             };
 
-            if let Some(any_css_at_rule) = any_css_at_rule_result {
+            if let Some(any_css_at_rule) = any_css_at_rule {
 
                     // Ignore @charset, @layer
                     if any_css_at_rule.as_css_charset_at_rule().is_some() { continue;}
                     if any_css_at_rule.as_css_layer_at_rule().is_some() { continue;}
 
                     let import_rule = any_css_at_rule.as_css_import_at_rule().cloned();
-                    if let Some(current_import_rule) = import_rule {
+                    if let Some(import_rule) = import_rule {
                         if is_invalid_position {
-                            return Some(current_import_rule);
+                            return Some(import_rule);
                         }
                     } else {
                         is_invalid_position = true;
