@@ -4,7 +4,7 @@ use biome_css_syntax::{AnyCssRule, CssImportAtRule, CssRuleList};
 use biome_rowan::AstNode;
 
 declare_rule! {
-    /// Disallow invalid position @import rules.
+    /// Disallow the use of `@import` at-rules in invalid positions.
     ///
     /// Any @import rules must precede all other valid at-rules and style rules in a stylesheet (ignoring @charset and @layer), or else the @import rule is invalid.
     ///
