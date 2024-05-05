@@ -1,0 +1,10 @@
+/* duplicate within a grouping selector */
+input, textarea {}; textarea {}
+
+/* duplicate within a grouping selector, reversed */
+button {}; selector, button {}
+
+/* duplicate within a grouping selector. multiline */
+span, div {};
+ h1, section {};
+h1 {}

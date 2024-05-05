@@ -1,0 +1,19 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+assertion_line: 83
+expression: disallowInList.css
+---
+# Input
+```css
+/* duplicate within a grouping selector */
+input, textarea {}; textarea {}
+
+/* duplicate within a grouping selector, reversed */
+button {}; selector, button {}
+
+/* duplicate within a grouping selector. multiline */
+span, div {};
+ h1, section {};
+h1 {}
+
+```

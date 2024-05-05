@@ -32,6 +32,20 @@ declare_rule! {
     /// .bar {}
     /// ```
     /// 
+    /// ## Options
+    ///
+    /// If true, disallow duplicate selectors within selector lists.
+    ///
+    /// ```json
+    /// {
+    ///     "noDuplicateSelectors": {
+    ///         "options": {
+    ///           "disallowInList": true
+    ///         }
+    ///     }
+    /// }
+    /// ```
+    ///
     pub NoDuplicateSelectors {
         version: "next",
         name: "noDuplicateSelectors",
@@ -244,16 +258,15 @@ impl Rule for NoDuplicateSelectors {
         // Read our guidelines to write great diagnostics:
         // https://docs.rs/biome_analyze/latest/biome_analyze/#what-a-rule-should-say-to-the-user
         //
-        let first_seen = node.first.to_string();
         let duplicate = node.duplicate.to_string();
         Some(
             RuleDiagnostic::new(
                 rule_category!(),
                 node.duplicate.text_range(),
                 markup! {
-                    "Duplicate selector \""<Emphasis>{duplicate}</Emphasis>"\", first seen at"<Emphasis>{first_seen}</Emphasis>"."
+                    "Duplicate selector \""<Emphasis>{duplicate}</Emphasis>"\","
                 }
-            )
+            ).detail(node.first.text_range(), "first occurence:")
         )
     }
 }

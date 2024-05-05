@@ -1425,6 +1425,18 @@
 			"properties": { "allowComments": { "type": "boolean" } },
 			"additionalProperties": false
 		},
+		"NoDuplicateSelectorsConfiguration": {
+			"anyOf": [
+				{"$ref": "#/definitions/RulePlainConfiguration"},
+				{"$ref": "#/definitions/RuleWithNoDuplicateSelectorsOptions"}
+			]
+		},
+		"NoDuplicateSelectorsOptions": {
+			"type": "object",
+			"required": ["disallowInList"],
+			"properties": { "disallowInList": { "type": "boolean" } },
+			"additionalProperties": false
+		},
 		"Nursery": {
 			"description": "A list of rules that belong to this group",
 			"type": "object",
@@ -1486,6 +1498,13 @@
 					"description": "Disallow two keys with the same name inside a JSON object.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noDuplicateSelectors": {
+					"description": "Disallow duplicate selectors.",
+					"anyOf": [
+						{ "$ref": "#/definitions/NoDuplicateSelectorsConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -1895,6 +1914,14 @@
 				"options": { "$ref": "#/definitions/NoCssEmptyBlockOptions" }
 			},
 			"additionalProperties": false
+		},
+		"RuleWithNoDuplicateSelectorsOptions": {
+			"type": "object",
+			"required": ["level", "options"],
+			"properties": {
+				"level": { "$ref": "#/definitions/RulePlainConfiguration"},
+				"options": { "$ref": "#/definitions/NoDuplicateSelectorsOptions"}
+			}
 		},
 		"RuleWithNoOptions": {
 			"type": "object",
