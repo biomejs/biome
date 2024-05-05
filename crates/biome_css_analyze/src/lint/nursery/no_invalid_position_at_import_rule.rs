@@ -80,7 +80,7 @@ impl Rule for NoInvalidPositionAtImportRule {
                 rule_category!(),
                 span,
                 markup! {
-                    "Unexpected import position."
+                    "This @import is in the wrong position."
                 },
             )
             .note(markup! {
