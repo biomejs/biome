@@ -5,11 +5,10 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_diagnostics::Applicability;
 use biome_js_syntax::{
-    AnyJsExpression, JsCallArgumentList, JsCallArguments, JsCallExpression,
-    JsConditionalExpression, JsDoWhileStatement, JsForStatement, JsIfStatement, JsNewExpression,
-    JsSyntaxKind, JsSyntaxNode, JsUnaryExpression, JsUnaryOperator, JsWhileStatement,
+    is_in_boolean_context, is_negation, AnyJsExpression, JsCallArgumentList, JsCallArguments,
+    JsCallExpression, JsNewExpression, JsSyntaxNode, JsUnaryOperator,
 };
-use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt, SyntaxNodeCast};
+use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt};
 
 use crate::JsRuleAction;
 
@@ -65,52 +64,17 @@ declare_rule! {
     }
 }
 
-/// Check if this node is in the position of `test` slot of parent syntax node.
-/// ## Example
-/// ```js
-/// if (!!x) {
-///     ^^^ this is a boolean context
-/// }
-/// ```
-fn is_in_boolean_context(node: &JsSyntaxNode) -> Option<bool> {
-    let parent = node.parent()?;
-    match parent.kind() {
-        JsSyntaxKind::JS_IF_STATEMENT => {
-            Some(parent.cast::<JsIfStatement>()?.test().ok()?.syntax() == node)
-        }
-        JsSyntaxKind::JS_DO_WHILE_STATEMENT => {
-            Some(parent.cast::<JsDoWhileStatement>()?.test().ok()?.syntax() == node)
-        }
-        JsSyntaxKind::JS_WHILE_STATEMENT => {
-            Some(parent.cast::<JsWhileStatement>()?.test().ok()?.syntax() == node)
-        }
-        JsSyntaxKind::JS_FOR_STATEMENT => {
-            Some(parent.cast::<JsForStatement>()?.test()?.syntax() == node)
-        }
-        JsSyntaxKind::JS_CONDITIONAL_EXPRESSION => Some(
-            parent
-                .cast::<JsConditionalExpression>()?
-                .test()
-                .ok()?
-                .syntax()
-                == node,
-        ),
-        _ => None,
-    }
-}
-
 /// Checks if the node is a `Boolean` Constructor Call
 /// # Example
 /// ```js
 /// new Boolean(x);
 /// ```
-/// The checking algorithm of [JsNewExpression] is a little different from [JsCallExpression] due to
-/// two nodes have different shapes
-fn is_boolean_constructor_call(node: &JsSyntaxNode) -> Option<bool> {
+pub fn is_boolean_constructor_call(node: &JsSyntaxNode) -> Option<JsNewExpression> {
     let expr = JsCallArgumentList::cast_ref(node)?
         .parent::<JsCallArguments>()?
         .parent::<JsNewExpression>()?;
-    Some(expr.has_callee("Boolean"))
+
+    expr.has_callee("Boolean").then_some(expr)
 }
 
 /// Check if the SyntaxNode is a `Boolean` Call Expression
@@ -121,20 +85,6 @@ fn is_boolean_constructor_call(node: &JsSyntaxNode) -> Option<bool> {
 fn is_boolean_call(node: &JsSyntaxNode) -> Option<bool> {
     let expr = JsCallExpression::cast_ref(node)?;
     Some(expr.has_callee("Boolean"))
-}
-
-/// Check if the SyntaxNode is a Negate Unary Expression
-/// ## Example
-/// ```js
-/// !!x
-/// ```
-fn is_negation(node: &JsSyntaxNode) -> Option<JsUnaryExpression> {
-    let unary_expr = JsUnaryExpression::cast_ref(node)?;
-    if unary_expr.operator().ok()? == JsUnaryOperator::LogicalNot {
-        Some(unary_expr)
-    } else {
-        None
-    }
 }
 
 impl Rule for NoExtraBooleanCast {
@@ -151,7 +101,7 @@ impl Rule for NoExtraBooleanCast {
         // reference https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean
         let parent_node_in_boolean_cast_context = is_in_boolean_context(n.syntax())
             .unwrap_or(false)
-            || is_boolean_constructor_call(&parent).unwrap_or(false)
+            || is_boolean_constructor_call(&parent).is_some()
             || is_negation(&parent).is_some()
             || is_boolean_call(&parent).unwrap_or(false);
         // Convert `!!x` -> `x` if parent `SyntaxNode` in any boolean `Type Coercion` context

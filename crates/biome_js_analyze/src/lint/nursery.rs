@@ -17,6 +17,7 @@ pub mod no_useless_undefined_initialization;
 pub mod use_array_literals;
 pub mod use_consistent_builtin_instantiation;
 pub mod use_default_switch_clause;
+pub mod use_explicit_length_check;
 pub mod use_import_restrictions;
 pub mod use_sorted_classes;
 pub mod use_throw_new_error;
@@ -40,6 +41,7 @@ declare_group! {
             self :: use_array_literals :: UseArrayLiterals ,
             self :: use_consistent_builtin_instantiation :: UseConsistentBuiltinInstantiation ,
             self :: use_default_switch_clause :: UseDefaultSwitchClause ,
+            self :: use_explicit_length_check :: UseExplicitLengthCheck ,
             self :: use_import_restrictions :: UseImportRestrictions ,
             self :: use_sorted_classes :: UseSortedClasses ,
             self :: use_throw_new_error :: UseThrowNewError ,

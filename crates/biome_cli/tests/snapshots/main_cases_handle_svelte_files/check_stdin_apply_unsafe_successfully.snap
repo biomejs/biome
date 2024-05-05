@@ -1,0 +1,28 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: content
+---
+# Input messages
+
+```block
+<script context="module" lang="ts">
+import { Form as   Form }     from './components/Form.svelte' ;
+import     Button     from "./components/Button.svelte";
+debugger;
+statement ( ) ;
+var foo: string = "";
+</script>
+<div></div>
+```
+
+# Emitted Messages
+
+```block
+<script context="module" lang="ts">
+import Button from "./components/Button.svelte";
+import { Form } from "./components/Form.svelte";
+statement();
+const foo = "";
+</script>
+<div></div>
+```

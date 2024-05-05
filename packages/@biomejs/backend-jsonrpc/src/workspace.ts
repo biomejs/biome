@@ -993,6 +993,10 @@ export interface Nursery {
 	 */
 	noUnknownUnit?: RuleConfiguration_for_Null;
 	/**
+	 * Disallow unmatchable An+B selectors.
+	 */
+	noUnmatchableAnbSelector?: RuleConfiguration_for_Null;
+	/**
 	 * Disallow initializing variables to undefined.
 	 */
 	noUselessUndefinedInitialization?: RuleConfiguration_for_Null;
@@ -1012,6 +1016,10 @@ export interface Nursery {
 	 * Require the default clause in switch statements.
 	 */
 	useDefaultSwitchClause?: RuleConfiguration_for_Null;
+	/**
+	 * Enforce explicitly comparing the length, size, byteLength or byteOffset property of a value.
+	 */
+	useExplicitLengthCheck?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow a missing generic family keyword within font families.
 	 */
@@ -2016,9 +2024,11 @@ export type Category =
 	| "lint/nursery/noUnknownFunction"
 	| "lint/nursery/noUnknownSelectorPseudoElement"
 	| "lint/nursery/noUnknownUnit"
+	| "lint/nursery/noUnmatchableAnbSelector"
 	| "lint/nursery/noUselessUndefinedInitialization"
 	| "lint/nursery/useArrayLiterals"
 	| "lint/nursery/useBiomeSuppressionComment"
+	| "lint/nursery/useExplicitLengthCheck"
 	| "lint/nursery/useConsistentBuiltinInstantiation"
 	| "lint/nursery/useDefaultSwitchClause"
 	| "lint/nursery/useGenericFontNames"

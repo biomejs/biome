@@ -11,8 +11,8 @@ use biome_test_utils::{
 };
 use std::{ffi::OsStr, fs::read_to_string, path::Path, slice};
 
-tests_macros::gen_tests! {"tests/specs/**/*.{cjs,js,jsx,tsx,ts,json,jsonc}", crate::run_test, "module"}
-tests_macros::gen_tests! {"tests/suppression/**/*.{cjs,js,jsx,tsx,ts,json,jsonc}", crate::run_suppression_test, "module"}
+tests_macros::gen_tests! {"tests/specs/**/*.{cjs,js,jsx,tsx,ts,json,jsonc,svelte}", crate::run_test, "module"}
+tests_macros::gen_tests! {"tests/suppression/**/*.{cjs,js,jsx,tsx,ts,json,jsonc,svelte}", crate::run_suppression_test, "module"}
 
 fn run_test(input: &'static str, _: &str, _: &str, _: &str) {
     register_leak_checker();

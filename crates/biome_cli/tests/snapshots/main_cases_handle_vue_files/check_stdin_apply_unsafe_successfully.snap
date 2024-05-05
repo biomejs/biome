@@ -1,0 +1,27 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: content
+---
+# Input messages
+
+```block
+<script setup lang="ts">
+import {      Button  as Button  }   from  "./components/Button.vue"   ;
+import *     as         vueUse  from  "vue-use"   ;
+
+delete a.c;
+</script>
+<template></template>
+```
+
+# Emitted Messages
+
+```block
+<script setup lang="ts">
+import * as vueUse from "vue-use";
+import { Button } from "./components/Button.vue";
+
+a.c = undefined;
+</script>
+<template></template>
+```

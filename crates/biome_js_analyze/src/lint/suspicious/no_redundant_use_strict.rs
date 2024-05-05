@@ -13,6 +13,17 @@ use biome_rowan::{declare_node_union, AstNode, BatchMutationExt};
 declare_rule! {
  /// Prevents from having redundant `"use strict"`.
  ///
+ /// The directive `"use strict"` **isn't** needed in `.mjs` files, or in `.js` files inside projects where the `package.json` defines library as module:
+ ///
+ ///
+ /// ```json,ignore
+ /// {
+ ///    "type": "module"
+ /// }
+ /// ```
+ ///
+ /// Instead, `.cjs` files are considered "scripts" and the directive `"use strict"` is accepted and advised.
+ ///
  /// Note that the leading trivia, e.g., comments or newlines preceding
  /// the redundant `"use strict"` will also be removed. So that comment
  /// directives won't be transferred to a wrong place.

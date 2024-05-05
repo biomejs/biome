@@ -14,5 +14,8 @@
 
 	// switches
 	"A: switch (a) { case 0: break A; default: break; };",
-	"A: switch (a) { case 0: break A; default: break; };"
+	"A: switch (a) { case 0: break A; default: break; };",
+
+	// We are not in a Svelte component
+	"$: {}"
 ]

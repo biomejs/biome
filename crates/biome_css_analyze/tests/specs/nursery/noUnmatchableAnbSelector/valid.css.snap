@@ -1,0 +1,23 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: valid.css
+---
+# Input
+```css
+a:nth-child(1) {}
+a:nth-child(2n) {}
+a:nth-child(0n+1) {}
+a:nth-child(0n-1) {}
+a:nth-child(2n+0) {}
+a:nth-child(2n+2) {}
+a:nth-child(2n-0) {}
+a:nth-child(1 of a) {}
+a:nth-last-child(1) {}
+a:nth-of-type(1) {}
+a:nth-last-of-type(1) {}
+a:nth-child(even) {}
+a:nth-child(odd) {}
+a:not(:nth-child(0)) {}
+a:nth-child(n+1):nth-child(-n+5) {}
+a:nth-last-child(n+5),a:nth-last-child(n+5) ~ li {}
+```
