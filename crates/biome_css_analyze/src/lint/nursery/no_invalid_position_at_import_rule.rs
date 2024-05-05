@@ -84,10 +84,10 @@ impl Rule for NoInvalidPositionAtImportRule {
                 },
             )
             .note(markup! {
-                    "Consider moving import position."
-            }).note(markup! {
                 "Any "<Emphasis>"@import"</Emphasis>" rules must precede all other valid at-rules and style rules in a stylesheet (ignoring @charset and @layer), or else the "<Emphasis>"@import"</Emphasis>" rule is invalid."
-            }),
+            }).note(markup! {
+                "Consider moving import position."
+            })
         )
     }
 }
