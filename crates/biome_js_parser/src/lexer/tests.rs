@@ -1455,7 +1455,10 @@ fn lookahead() {
     );
 
     {
-        let lookahead = buffered.lookahead().map(|l| l.kind()).collect::<Vec<_>>();
+        let lookahead = buffered
+            .lookahead_iter()
+            .map(|l| l.kind())
+            .collect::<Vec<_>>();
 
         assert_eq!(
             lookahead,
@@ -1476,7 +1479,7 @@ fn lookahead() {
     assert_eq!(buffered.next_token(JsLexContext::default()), WHITESPACE);
 
     {
-        let mut lookahead = buffered.lookahead();
+        let mut lookahead = buffered.lookahead_iter();
         let nth1 = lookahead.next().unwrap();
         let nth2 = lookahead.next().unwrap();
         let nth3 = lookahead.next().unwrap();
