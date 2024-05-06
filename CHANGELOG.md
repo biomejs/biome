@@ -23,7 +23,7 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
   - biome check .
   + biome check    # You can run the command without the path
   ```
-  
+
 ### Configuration
 
 ### Editors
@@ -37,6 +37,21 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 ### JavaScript APIs
 
 ### Linter
+
+#### Bug fixes
+
+- `useJsxKeyInIterable` now handles more cases involving fragments. See the snippets below. Contributed by @dyc3
+```jsx
+// valid
+[].map((item) => {
+	return <>{item.condition ? <div key={item.id} /> : <div key={item.id}>foo</div>}</>;
+});
+
+// invalid
+[].map((item) => {
+	return <>{item.condition ? <div /> : <div>foo</div>}</>;
+});
+```
 
 ### Parser
 

@@ -6,10 +6,10 @@ use biome_console::markup;
 use biome_js_semantic::SemanticModel;
 use biome_js_syntax::{
     AnyJsExpression, AnyJsFunctionBody, AnyJsMemberExpression, AnyJsObjectMember, AnyJsxAttribute,
-    AnyJsxTag, JsArrayExpression, JsCallExpression, JsObjectExpression, JsxAttributeList,
+    AnyJsxChild, JsArrayExpression, JsCallExpression, JsObjectExpression, JsxAttributeList,
     JsxExpressionChild, JsxTagExpression,
 };
-use biome_rowan::{declare_node_union, AstNode, AstSeparatedList, TextRange};
+use biome_rowan::{declare_node_union, AstNode, AstNodeList, AstSeparatedList, TextRange};
 
 declare_rule! {
     /// Disallow missing key props in iterators/collection literals.
@@ -222,24 +222,26 @@ fn handle_potential_react_component(
     if is_inside_jsx {
         if let Some(node) = ReactComponentExpression::cast_ref(node.syntax()) {
             let range = handle_react_component(node, model)?;
-            Some(vec![range])
+            Some(range)
         } else {
             None
         }
     } else {
         let range =
             handle_react_component(ReactComponentExpression::cast_ref(node.syntax())?, model)?;
-        Some(vec![range])
+        Some(range)
     }
 }
 
 fn handle_react_component(
     node: ReactComponentExpression,
     model: &SemanticModel,
-) -> Option<TextRange> {
+) -> Option<Vec<TextRange>> {
     match node {
-        ReactComponentExpression::JsxTagExpression(node) => handle_jsx_tag(&node),
-        ReactComponentExpression::JsCallExpression(node) => handle_react_non_jsx(&node, model),
+        ReactComponentExpression::JsxTagExpression(node) => handle_jsx_tag(&node, model),
+        ReactComponentExpression::JsCallExpression(node) => {
+            handle_react_non_jsx(&node, model).map(|r| vec![r])
+        }
     }
 }
 
@@ -250,25 +252,60 @@ fn handle_react_component(
 /// ```js
 /// <Hello></Hello>
 /// ```
-fn handle_jsx_tag(node: &JsxTagExpression) -> Option<TextRange> {
+fn handle_jsx_tag(node: &JsxTagExpression, model: &SemanticModel) -> Option<Vec<TextRange>> {
     let tag = node.tag().ok()?;
-    match tag {
-        AnyJsxTag::JsxElement(node) => {
-            let open_node = node.opening_element().ok()?;
-            if !has_key_attribute(&open_node.attributes()) {
-                Some(open_node.range())
-            } else {
-                None
+    let tag = AnyJsxChild::cast_ref(tag.syntax())?;
+    handle_jsx_child(&tag, model)
+}
+
+fn handle_jsx_child(node: &AnyJsxChild, model: &SemanticModel) -> Option<Vec<TextRange>> {
+    let mut stack: Vec<AnyJsxChild> = vec![node.clone()];
+    let mut ranges: Vec<TextRange> = vec![];
+
+    while let Some(current) = stack.pop() {
+        match current {
+            AnyJsxChild::JsxElement(node) => {
+                let open_node = node.opening_element().ok()?;
+                if !has_key_attribute(&open_node.attributes()) {
+                    ranges.push(open_node.range());
+                }
             }
-        }
-        AnyJsxTag::JsxSelfClosingElement(node) => {
-            if !has_key_attribute(&node.attributes()) {
-                Some(node.range())
-            } else {
-                None
+            AnyJsxChild::JsxSelfClosingElement(node) => {
+                if !has_key_attribute(&node.attributes()) {
+                    ranges.push(node.range());
+                }
             }
+            AnyJsxChild::JsxExpressionChild(node) => {
+                let expr = node.expression()?;
+                if let Some(child_ranges) = handle_potential_react_component(expr, model, true) {
+                    ranges.extend(child_ranges);
+                }
+            }
+            AnyJsxChild::JsxFragment(node) => {
+                let has_any_tags = node.children().iter().any(|child| match &child {
+                    AnyJsxChild::JsxElement(_) | AnyJsxChild::JsxSelfClosingElement(_) => true,
+                    // HACK: don't flag the entire fragment if there's a conditional expression
+                    AnyJsxChild::JsxExpressionChild(node) => node
+                        .expression()
+                        .map_or(false, |n| n.as_js_conditional_expression().is_some()),
+                    _ => false,
+                });
+
+                if !has_any_tags {
+                    ranges.push(node.range());
+                    break;
+                }
+
+                stack.extend(node.children());
+            }
+            _ => {}
         }
-        AnyJsxTag::JsxFragment(node) => Some(node.range()),
+    }
+
+    if ranges.is_empty() {
+        None
+    } else {
+        Some(ranges)
     }
 }
 
