@@ -41,7 +41,8 @@ pub(crate) fn traverse(
         match execution.traversal_mode {
             TraversalMode::Check { .. }
             | TraversalMode::Lint { .. }
-            | TraversalMode::Format { .. } => match current_dir() {
+            | TraversalMode::Format { .. }
+            | TraversalMode::CI { .. } => match current_dir() {
                 Ok(current_dir) => inputs.push(current_dir.into_os_string()),
                 Err(err) => return Err(CliDiagnostic::io_error(err)),
             },
