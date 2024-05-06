@@ -35,12 +35,13 @@ declare_rule! {
 impl Rule for NoInvalidPositionAtImportRule {
     type Query = Ast<CssRuleList>;
     type State = TextRange;
-    type Signals = Option<Self::State>;
+    type Signals = Vec<Self::State>;
     type Options = ();
 
-    fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
+    fn run(ctx: &RuleContext<Self>) -> Vec<Self::State> {
         let node = ctx.query();
         let mut is_invalid_position = false;
+        let mut invalid_import_list = Vec::new();
 
         for rule in node {
             let any_css_at_rule = match rule {
@@ -60,7 +61,7 @@ impl Rule for NoInvalidPositionAtImportRule {
                 let import_rule = any_css_at_rule.as_css_import_at_rule();
                 if let Some(import_rule) = import_rule {
                     if is_invalid_position {
-                        return Some(import_rule.range());
+                        invalid_import_list.push(import_rule.range());
                     }
                 } else {
                     is_invalid_position = true;
@@ -69,8 +70,7 @@ impl Rule for NoInvalidPositionAtImportRule {
                 is_invalid_position = true;
             }
         }
-
-        None
+        invalid_import_list
     }
 
     fn diagnostic(_: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {

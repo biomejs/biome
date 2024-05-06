@@ -6,7 +6,11 @@ expression: invalidBetweenImport.css
 ```css
 @import 'foo.css';
 a {}
-@import 'bar.css';
+@import 'bar1.css';
+@import 'bar2.css';
+a {}
+@import 'bar3.css';
+@import 'bar4.css';
 
 ```
 
@@ -18,9 +22,66 @@ invalidBetweenImport.css:3:2 lint/nursery/noInvalidPositionAtImportRule ━━�
   
     1 │ @import 'foo.css';
     2 │ a {}
-  > 3 │ @import 'bar.css';
-      │  ^^^^^^^^^^^^^^^^^
-    4 │ 
+  > 3 │ @import 'bar1.css';
+      │  ^^^^^^^^^^^^^^^^^^
+    4 │ @import 'bar2.css';
+    5 │ a {}
+  
+  i Any @import rules must precede all other valid at-rules and style rules in a stylesheet (ignoring @charset and @layer), or else the @import rule is invalid.
+  
+  i Consider moving import position.
+  
+
+```
+
+```
+invalidBetweenImport.css:4:2 lint/nursery/noInvalidPositionAtImportRule ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This @import is in the wrong position.
+  
+    2 │ a {}
+    3 │ @import 'bar1.css';
+  > 4 │ @import 'bar2.css';
+      │  ^^^^^^^^^^^^^^^^^^
+    5 │ a {}
+    6 │ @import 'bar3.css';
+  
+  i Any @import rules must precede all other valid at-rules and style rules in a stylesheet (ignoring @charset and @layer), or else the @import rule is invalid.
+  
+  i Consider moving import position.
+  
+
+```
+
+```
+invalidBetweenImport.css:6:2 lint/nursery/noInvalidPositionAtImportRule ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This @import is in the wrong position.
+  
+    4 │ @import 'bar2.css';
+    5 │ a {}
+  > 6 │ @import 'bar3.css';
+      │  ^^^^^^^^^^^^^^^^^^
+    7 │ @import 'bar4.css';
+    8 │ 
+  
+  i Any @import rules must precede all other valid at-rules and style rules in a stylesheet (ignoring @charset and @layer), or else the @import rule is invalid.
+  
+  i Consider moving import position.
+  
+
+```
+
+```
+invalidBetweenImport.css:7:2 lint/nursery/noInvalidPositionAtImportRule ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This @import is in the wrong position.
+  
+    5 │ a {}
+    6 │ @import 'bar3.css';
+  > 7 │ @import 'bar4.css';
+      │  ^^^^^^^^^^^^^^^^^^
+    8 │ 
   
   i Any @import rules must precede all other valid at-rules and style rules in a stylesheet (ignoring @charset and @layer), or else the @import rule is invalid.
   
