@@ -745,7 +745,7 @@ impl Workspace for WorkspaceServer {
     ) -> Result<ParsePatternResult, WorkspaceError> {
         let pattern = biome_grit_patterns::compile_pattern(
             &params.pattern,
-            biome_grit_patterns::GritTargetLanguage,
+            biome_grit_patterns::JsTargetLanguage.into(),
         )?;
         let pattern_id = PatternId::from("1234"); // TODO: Generate a real ID.
         self.patterns.insert(pattern_id.clone(), pattern);
