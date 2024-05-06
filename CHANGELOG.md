@@ -28,6 +28,10 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 ### Editors
 
+#### New features
+
+- Add support for LSP Workspaces
+
 ### Formatter
 
 ### JavaScript APIs

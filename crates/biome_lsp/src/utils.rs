@@ -13,6 +13,7 @@ use biome_rowan::{TextRange, TextSize};
 use biome_service::workspace::CodeAction;
 use biome_text_edit::{CompressedOp, DiffOp, TextEdit};
 use std::any::Any;
+use std::borrow::Cow;
 use std::collections::HashMap;
 use std::fmt::{Debug, Display};
 use std::ops::{Add, Range};
@@ -309,7 +310,7 @@ fn print_markup(markup: &MarkupBuf) -> String {
 pub(crate) fn into_lsp_error(msg: impl Display + Debug) -> LspError {
     let mut error = LspError::internal_error();
     error!("Error: {}", msg);
-    error.message = msg.to_string();
+    error.message = Cow::Owned(msg.to_string());
     error.data = Some(format!("{msg:?}").into());
     error
 }
@@ -319,14 +320,14 @@ pub(crate) fn panic_to_lsp_error(err: Box<dyn Any + Send>) -> LspError {
 
     match err.downcast::<String>() {
         Ok(msg) => {
-            error.message = *msg;
+            error.message = Cow::Owned(msg.to_string());
         }
         Err(err) => match err.downcast::<&str>() {
             Ok(msg) => {
-                error.message = msg.to_string();
+                error.message = Cow::Owned(msg.to_string());
             }
             Err(_) => {
-                error.message = String::from("Biome encountered an unknown error");
+                error.message = Cow::Owned(String::from("Biome encountered an unknown error"));
             }
         },
     }
