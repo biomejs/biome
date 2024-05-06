@@ -171,7 +171,7 @@ rayon              = "1.8.1"
 regex              = "1.10.4"
 rustc-hash         = "1.1.0"
 schemars           = "0.8.17"
-serde              = { version = "1.0.199", features = ["derive"] }
+serde              = { version = "1.0.200", features = ["derive"] }
 serde_json         = "1.0.116"
 similar            = "2.5.0"
 slotmap            = "1.0.7"
