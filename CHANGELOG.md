@@ -21,7 +21,7 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
   ```diff
   - biome check .
-  + biome check    // You can run the command without the path
+  + biome check    # You can run the command without the path
   ```
   
 #### Bug fixes
