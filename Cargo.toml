@@ -153,7 +153,7 @@ tests_macros         = { path = "./crates/tests_macros" }
 # Crates needed in the workspace
 anyhow             = "1.0.82"
 bitflags           = "2.5.0"
-bpaf               = { version = "0.9.9", features = ["derive"] }
+bpaf               = { version = "0.9.12", features = ["derive"] }
 countme            = "3.0.1"
 crossbeam          = "0.8.4"
 dashmap            = "5.4.0"
