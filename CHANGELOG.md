@@ -9,6 +9,25 @@ New entries must be placed in a section entitled `Unreleased`.
 Read
 our [guidelines for writing a good changelog entry](https://github.com/biomejs/biome/blob/main/CONTRIBUTING.md#changelog).
 
+## Unreleased
+
+### Analyzer
+
+### CLI
+
+### Configuration
+
+### Editors
+
+### Formatter
+
+### JavaScript APIs
+
+### Linter
+
+### Parser
+
+
 ## 1.7.3 (2024-05-06)
 
 ### CLI
@@ -22,8 +41,6 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
   Contributed by @tasshi-me
 
 - `biome migrate eslint` now correctly resolve `@scope/eslint-config` ([#2705](https://github.com/biomejs/biome/issues/2705)). Contributed by @Conaclos
-
-### Formatter
 
 ### Linter
 
