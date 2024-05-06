@@ -87,7 +87,7 @@ declare_rule! {
     /// const isNotEmpty = !(foo.length === 0);
     /// ```
     /// ```js,expect_diagnostic
-    /// if (foo.length || bar.length) {}
+    /// if (foo.length) {}
     /// ```
     /// ```js,expect_diagnostic
     /// const biome = foo.length ? 1 : 2
@@ -112,13 +112,13 @@ declare_rule! {
     /// ```
     ///
     /// ## Caveats
-    /// This rule assumes that the `length` property is always numeric, even if it actually is not.
-    /// In the example below the rule will trigger a warning, even though the `length` property is a string.
-    /// ```js
+    /// This rule assumes that the `length`/`size` property is always numeric, even if it actually is not.
+    /// In the example below the rule will trigger a warning, even though the `size` property is a string.
+    /// ```js,expect_diagnostic
     /// const foo1 = { size: "small" }; if (foo1.size) {}
     /// ```
     /// To properly handle this case, type inference would be required, which is not supported by Biome at the moment.
-    /// We recommend disabling this rule when working with non-numeric `length` properties.
+    /// We recommend disabling this rule when working with non-numeric `length`/`size` properties.
     ///
     pub UseExplicitLengthCheck {
         version: "next",
