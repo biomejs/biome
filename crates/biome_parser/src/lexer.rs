@@ -350,10 +350,10 @@ struct Lookahead<Kind> {
 
 impl<K: SyntaxKind> Lookahead<K> {
     /// Creates a new instance of `BufferedLookahead` with specified capacity for both buffers.
-    fn with_capacity(capacity: usize) -> Self {
+    fn new() -> Self {
         Self {
-            all_checkpoints: VecDeque::with_capacity(capacity),
-            non_trivia_checkpoints: VecDeque::with_capacity(capacity),
+            all_checkpoints: VecDeque::new(),
+            non_trivia_checkpoints: VecDeque::new(),
         }
     }
 
@@ -420,7 +420,7 @@ impl<'l, Lex: Lexer<'l>> BufferedLexer<Lex::Kind, Lex> {
         Self {
             inner: lexer,
             current: None,
-            lookahead: Lookahead::with_capacity(5),
+            lookahead: Lookahead::new(),
         }
     }
 
