@@ -6,8 +6,8 @@ use biome_console::markup;
 use biome_js_semantic::SemanticModel;
 use biome_js_syntax::{
     AnyJsExpression, AnyJsFunctionBody, AnyJsMemberExpression, AnyJsObjectMember, AnyJsxAttribute,
-    AnyJsxChild, JsArrayExpression, JsCallExpression, JsObjectExpression, JsxAttributeList,
-    JsxExpressionChild, JsxTagExpression,
+    AnyJsxChild, JsArrayExpression, JsCallExpression, JsFunctionBody, JsObjectExpression,
+    JsxAttributeList, JsxExpressionChild, JsxTagExpression,
 };
 use biome_rowan::{declare_node_union, AstNode, AstNodeList, AstSeparatedList, TextRange};
 
@@ -160,18 +160,7 @@ fn handle_iterators(node: &JsCallExpression, model: &SemanticModel) -> Option<Ve
     match callback_argument {
         AnyJsExpression::JsFunctionExpression(callback) => {
             let body = callback.body().ok()?;
-            let res = body
-                .statements()
-                .into_iter()
-                .filter_map(|statement| {
-                    let statement = statement.as_js_return_statement()?;
-                    let returned_value = statement.argument()?;
-                    handle_potential_react_component(returned_value, model, is_inside_jsx)
-                })
-                .flatten()
-                .collect::<Vec<_>>();
-
-            Some(res)
+            Some(handle_function_body(&body, model, is_inside_jsx))
         }
         AnyJsExpression::JsArrowFunctionExpression(callback) => {
             let body = callback.body().ok()?;
@@ -180,22 +169,46 @@ fn handle_iterators(node: &JsCallExpression, model: &SemanticModel) -> Option<Ve
                     handle_potential_react_component(expr, model, is_inside_jsx)
                 }
                 AnyJsFunctionBody::JsFunctionBody(body) => {
-                    let res = body
-                        .statements()
-                        .into_iter()
-                        .filter_map(|statement| {
-                            let statement = statement.as_js_return_statement()?;
-                            let returned_value = statement.argument()?;
-                            handle_potential_react_component(returned_value, model, is_inside_jsx)
-                        })
-                        .flatten()
-                        .collect::<Vec<_>>();
-                    Some(res)
+                    Some(handle_function_body(&body, model, is_inside_jsx))
                 }
             }
         }
         _ => None,
     }
+}
+
+/// Inspects each statement for variable declarations and return statements to find potential React components.
+fn handle_function_body(
+    node: &JsFunctionBody,
+    model: &SemanticModel,
+    is_inside_jsx: bool,
+) -> Vec<TextRange> {
+    node.statements()
+        .iter()
+        .filter_map(|statement| {
+            if let Some(statement) = statement.as_js_variable_statement() {
+                let declaration = statement.declaration().ok()?;
+                Some(
+                    declaration
+                        .declarators()
+                        .iter()
+                        .filter_map(|declarator| {
+                            let decl = declarator.ok()?;
+                            let init = decl.initializer()?.expression().ok()?;
+                            handle_potential_react_component(init, model, is_inside_jsx)
+                        })
+                        .flatten()
+                        .collect(),
+                )
+            } else if let Some(statement) = statement.as_js_return_statement() {
+                let returned_value = statement.argument()?;
+                handle_potential_react_component(returned_value, model, is_inside_jsx)
+            } else {
+                None
+            }
+        })
+        .flatten()
+        .collect()
 }
 
 fn handle_potential_react_component(
