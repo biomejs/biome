@@ -45,13 +45,9 @@ declare_rule! {
     }
 }
 
-pub struct RuleState {
-    role_name: String,
-}
-
 impl Rule for UseFocusableInteractive {
     type Query = Aria<AnyJsxElement>;
-    type State = RuleState;
+    type State = String;
     type Signals = Option<Self::State>;
     type Options = ();
 
@@ -73,9 +69,7 @@ impl Rule for UseFocusableInteractive {
                 if attribute_has_interactive_role(&role_attribute_value, aria_roles)?
                     && tabindex_attribute.is_none()
                 {
-                    return Some(RuleState {
-                        role_name: role_attribute_value.text(),
-                    });
+                    return Some(role_attribute_value.text());
                 }
             }
         }
@@ -89,11 +83,13 @@ impl Rule for UseFocusableInteractive {
                 rule_category!(),
                 node.range(),
                 markup! {
-                    "The HTML element with the interactive role "<Emphasis>{state.role_name}</Emphasis>" is not focusable."
+                    "The HTML element with the interactive role "<Emphasis>{state}</Emphasis>" is not focusable."
                 },
-            )
+            ).note(markup! {
+                "A non-interactive HTML element that is not focusable may not be reachable for users that rely on keyboard navigation, even with an added role like "<Emphasis>{state}</Emphasis>"."
+            })
             .note(markup! {
-                "Adding a tabIndex attribute will make this element focusable."
+                "Add a "<Emphasis>"tabIndex"</Emphasis>" attribute to make this element focusable."
             }),
         )
     }

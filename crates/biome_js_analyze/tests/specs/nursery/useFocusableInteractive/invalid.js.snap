@@ -23,7 +23,9 @@ invalid.js:2:2 lint/nursery/useFocusableInteractive ━━━━━━━━━�
     3 │ 	<div role="tab" />
     4 │ </div>;
   
-  i Adding a tabIndex attribute will make this element focusable.
+  i A non-interactive HTML element that is not focusable may not be reachable for users that rely on keyboard navigation, even with an added role like "button".
+  
+  i Add a tabIndex attribute to make this element focusable.
   
 
 ```
@@ -40,7 +42,9 @@ invalid.js:3:2 lint/nursery/useFocusableInteractive ━━━━━━━━━�
     4 │ </div>;
     5 │ 
   
-  i Adding a tabIndex attribute will make this element focusable.
+  i A non-interactive HTML element that is not focusable may not be reachable for users that rely on keyboard navigation, even with an added role like "tab".
+  
+  i Add a tabIndex attribute to make this element focusable.
   
 
 ```
