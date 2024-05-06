@@ -1,4 +1,4 @@
-use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic};
+use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
 use biome_js_syntax::{
     AnyJsClassMember, AnyJsModuleItem, AnyJsStatement, JsExport, JsIdentifierBinding,
@@ -79,6 +79,9 @@ declare_rule! {
     pub NoAdjacentOverloadSignatures {
         version: "next",
         name: "noAdjacentOverloadSignatures",
+        sources: &[
+            RuleSource::EslintTypeScript("adjacent-overload-signatures")
+        ],
         recommended: false,
     }
 }
