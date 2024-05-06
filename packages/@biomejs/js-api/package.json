@@ -1,6 +1,6 @@
 {
 	"name": "@biomejs/js-api",
-	"version": "0.5.0",
+	"version": "0.6.0",
 	"description": "JavaScript APIs for the Biome package",
 	"scripts": {
 		"tsc": "tsc --noEmit",
@@ -30,7 +30,12 @@
 	],
 	"main": "./dist/index.js",
 	"types": "./dist/index.d.ts",
-	"keywords": ["JavaScript", "bindings", "APIs", "biome"],
+	"keywords": [
+		"JavaScript",
+		"bindings",
+		"APIs",
+		"biome"
+	],
 	"license": "MIT OR Apache-2.0",
 	"homepage": "https://biomejs.dev",
 	"repository": {
