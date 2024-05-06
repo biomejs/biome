@@ -113,23 +113,6 @@ fn ok_read_only() {
 }
 
 #[test]
-fn ok_without_file_paths() {
-    let mut fs = MemoryFileSystem::default();
-    let mut console = BufferConsole::default();
-
-    let file_path = Path::new("check.js");
-    fs.insert(file_path.into(), FORMATTED.as_bytes());
-
-    let result: Result<(), biome_cli::CliDiagnostic> = run_cli(
-        DynRef::Borrowed(&mut fs),
-        &mut console,
-        Args::from([("check"), ""].as_slice()),
-    );
-
-    assert!(result.is_ok(), "run_cli returned {result:?}");
-}
-
-#[test]
 fn parse_error() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
@@ -2909,6 +2892,31 @@ fn print_json_pretty() {
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "print_json_pretty",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn lint_error_without_file_paths() {
+    let mut fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let file_path = Path::new("check.js");
+    fs.insert(file_path.into(), LINT_ERROR.as_bytes());
+
+    let result: Result<(), biome_cli::CliDiagnostic> = run_cli(
+        DynRef::Borrowed(&mut fs),
+        &mut console,
+        Args::from([("check"), ""].as_slice()),
+    );
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "lint_error_without_file_paths",
         fs,
         console,
         result,
