@@ -72,7 +72,7 @@ impl FormatTemplateElement {
 
 impl Format<JsFormatContext> for FormatTemplateElement {
     fn fmt(&self, f: &mut JsFormatter) -> FormatResult<()> {
-        let mut format_expression = format_with(|f| match &self.element {
+        let format_expression = format_with(|f| match &self.element {
             AnyTemplateElement::JsTemplateElement(template) => match template.expression()? {
                 AnyJsExpression::JsArrayExpression(expression) => {
                     let option = FormatJsArrayExpressionOptions {
@@ -86,17 +86,13 @@ impl Format<JsFormatContext> for FormatTemplateElement {
             AnyTemplateElement::TsTemplateElement(template) => {
                 write!(f, [template.ty().format()])
             }
-        })
-        .memoized();
+        });
 
-        let layout =
-            if !self.element.has_new_line_in_range() && 
-            // to make sure the expression won't break to avoid reformatting issue
-            !format_expression.inspect(f)?.will_break() {
-                TemplateElementLayout::SingleLine
-            } else {
-                TemplateElementLayout::Fit
-            };
+        let layout = if !self.element.has_new_line_in_range() {
+            TemplateElementLayout::SingleLine
+        } else {
+            TemplateElementLayout::Fit
+        };
 
         let format_inner = format_with(|f: &mut JsFormatter| match layout {
             TemplateElementLayout::SingleLine => {

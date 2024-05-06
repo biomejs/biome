@@ -638,6 +638,13 @@ impl<Context> Buffer for RemoveSoftLinesBuffer<'_, Context> {
             FormatElement::Interned(interned) => {
                 FormatElement::Interned(self.clean_interned(&interned))
             }
+            FormatElement::BestFitting(best_fitting) => {
+                let most_flat = best_fitting.most_flat();
+                for element in most_flat {
+                    self.write_element(element.clone())?;
+                }
+                return Ok(());
+            }
             element => element,
         };
 
