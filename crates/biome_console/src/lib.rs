@@ -9,7 +9,7 @@ mod markup;
 mod write;
 
 pub use self::markup::{Markup, MarkupBuf, MarkupElement, MarkupNode};
-use crate::fmt::Formatter;
+use crate::fmt::{Display, Formatter};
 pub use biome_markup::markup;
 
 /// Determines the "output stream" a message should get printed to
@@ -241,8 +241,50 @@ impl HorizontalLine {
     }
 }
 
-impl fmt::Display for HorizontalLine {
+impl Display for HorizontalLine {
     fn fmt(&self, fmt: &mut Formatter) -> io::Result<()> {
         fmt.write_str(&"\u{2501}".repeat(self.width))
+    }
+}
+
+// It prints `\n`
+pub struct Softline;
+
+pub const SOFT_LINE: Softline = Softline;
+
+impl Display for Softline {
+    fn fmt(&self, fmt: &mut Formatter) -> io::Result<()> {
+        fmt.write_str(&"\n")
+    }
+}
+
+// It prints `\n\n`
+pub struct Hardline;
+
+pub const HARD_LINE: Hardline = Hardline;
+
+impl Display for Hardline {
+    fn fmt(&self, fmt: &mut Formatter) -> io::Result<()> {
+        fmt.write_str(&"\n\n")
+    }
+}
+
+/// It prints N whitespaces, where N is the `width` provided by [Padding::new]
+pub struct Padding {
+    width: usize,
+}
+
+impl Padding {
+    pub fn new(width: usize) -> Self {
+        Self { width }
+    }
+}
+
+impl Display for Padding {
+    fn fmt(&self, fmt: &mut Formatter) -> io::Result<()> {
+        for _ in 0..self.width {
+            fmt.write_str(" ")?;
+        }
+        Ok(())
     }
 }

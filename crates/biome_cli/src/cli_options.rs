@@ -51,7 +51,7 @@ pub struct CliOptions {
     /// Allows to change how diagnostics and summary are reported.
     #[bpaf(
         long("reporter"),
-        argument("json|json-pretty"),
+        argument("json|json-pretty|summary"),
         fallback(CliReporter::default())
     )]
     pub reporter: CliReporter,
@@ -125,6 +125,8 @@ pub enum CliReporter {
     Json,
     /// Reports information using the JSON format, formatted.
     JsonPretty,
+    /// TODO
+    Summary,
 }
 
 impl FromStr for CliReporter {
@@ -134,6 +136,7 @@ impl FromStr for CliReporter {
         match s {
             "json" => Ok(Self::Json),
             "json-pretty" => Ok(Self::JsonPretty),
+            "summary" => Ok(Self::Summary),
             _ => Err(format!(
                 "value {s:?} is not valid for the --reporter argument"
             )),
@@ -147,6 +150,7 @@ impl Display for CliReporter {
             CliReporter::Default => f.write_str("default"),
             CliReporter::Json => f.write_str("json"),
             CliReporter::JsonPretty => f.write_str("json-pretty"),
+            CliReporter::Summary => f.write_str("summary"),
         }
     }
 }
