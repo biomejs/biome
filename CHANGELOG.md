@@ -9,9 +9,7 @@ New entries must be placed in a section entitled `Unreleased`.
 Read
 our [guidelines for writing a good changelog entry](https://github.com/biomejs/biome/blob/main/CONTRIBUTING.md#changelog).
 
-## Unreleased
-
-### Analyzer
+## 1.7.3 (2024-05-06)
 
 ### CLI
 
@@ -25,13 +23,7 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 - `biome migrate eslint` now correctly resolve `@scope/eslint-config` ([#2705](https://github.com/biomejs/biome/issues/2705)). Contributed by @Conaclos
 
-### Configuration
-
-### Editors
-
 ### Formatter
-
-### JavaScript APIs
 
 ### Linter
 
@@ -86,10 +78,18 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
   Contributed by @Conaclos
 
+- [useJsxKeyInIterable](https://biomejs.dev/linter/rules/use-jsx-key-in-iterable/) no longer reports false positive when iterating on non-jsx items ([#2590](https://github.com/biomejs/biome/issues/2590)).
+
+  The following snipet of code no longer triggers the rule:
+
+  ```jsx
+  <>{data.reduce((total, next) => total + next, 0)}</>
+  ```
+
+  Contributed by @dyc3
+
 - Fix typo by renaming `useConsistentBuiltinInstatiation` to `useConsistentBuiltinInstantiation`
   Contributed by @minht11
-
-### Parser
 
 
 ## 1.7.2 (2024-04-30)
