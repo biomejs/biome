@@ -188,14 +188,13 @@ You can also sponsor the project through [GitHub](https://github.com/sponsors/bi
 
 ### Community-Funded Bounties
 
-Bounties are the second approach towards funding Biome development. Unlike a sponsorship, bounties are directed towards the completion of a specific task. Tasks include, but are not limited to, the development of a feature or the fixing of a bug.
-
-Compared to sponsorship, bounties come with a few risks, both for Biome as a project and for the people or entities offering and collecting the bounty. To minimize these risks, we only sanction bounties under the following conditions:
+Bounties are the second approach towards funding Biome development. Unlike a sponsorship, bounties are directed towards the implementation of a specific feature. Compared to sponsorship, bounties come with a few risks, both for Biome as a project and for the people or entities offering and collecting the bounty. To minimize these risks, we only sanction bounties under the following conditions:
 
 - Bounties must be pledged through Polar.sh on an issue that is opened in our issue tracker.
   - Unless otherwise specified, Biome reserves 30% of the payment amount, meaning contributors receive 70% of the pledged amount.
   - The commission charged by Polar.sh is split accordingly.
   - We reserve the right to decide on a different split in the future.
+- Bounties cannot be opened for bug fixes. Users who wish to see bugs fixed are advised to consider [sponsorship](#sponsorship) instead, in order to give the project a better long-term ability to fix bugs as well.
 - If an issue in our issue tracker is not yet open for pledges, the person who wishes to pledge should indicate their desire in the comments of the issue, or do so through the `Community > #funding` channel on Discord. A [Core Contributor](#core-contributor) can then **accept** or **reject** the request for the bounty. Reasons for rejection include, but are not limited to: 
   - Implementation of the task would conflict with the project direction or [its values](https://biomejs.dev/internals/philosophy/).
   - Implementation of the task is (currently) technically infeasible.
