@@ -2671,7 +2671,7 @@ pub struct Nursery {
     #[doc = "Disallow two keys with the same name inside a JSON object."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_duplicate_json_keys: Option<RuleConfiguration<NoDuplicateJsonKeys>>,
-    #[doc = ""]
+    #[doc = "Disallow duplicate selectors."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_duplicate_selectors: Option<RuleConfiguration<NoDuplicateSelectors>>,
     #[doc = "Disallow duplicate selectors within keyframe blocks."]
@@ -3113,7 +3113,7 @@ impl Nursery {
                 .as_ref()
                 .map(|conf| (conf.level(), conf.get_options())),
             "noDuplicateSelectors" => self
-                .no_duplicate_selectors_keyframe_block
+                .no_duplicate_selectors
                 .as_ref()
                 .map(|conf| (conf.level(), conf.get_options())),
             "noDuplicateSelectorsKeyframeBlock" => self
