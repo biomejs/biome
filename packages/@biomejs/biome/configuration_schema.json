@@ -1594,6 +1594,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noUselessStringConcat": {
+					"description": "Disallow unnecessary concatenation of string or template literals.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noUselessUndefinedInitialization": {
 					"description": "Disallow initializing variables to undefined.",
 					"anyOf": [
