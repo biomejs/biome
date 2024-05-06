@@ -176,8 +176,6 @@ We have a reasonably liberal approach to code review and merging. We value quick
 
 ## Financial Contributions
 
-Biome is in the fortunate position that people care enough about it that they want to invest financially in its future. However, with money comes responsibility, so we are committed to the following.
-
 There are two ways to fund Biome and its development: sponsorship and funded bounties, although we strongly prefer and recommend sponsorship.
 
 ### Sponsorship
@@ -197,7 +195,8 @@ Compared to sponsorship, bounties come with a few risks, both for Biome as a pro
 - Bounties must be pledged through Polar.sh on an issue that is opened in our issue tracker.
   - Unless otherwise specified, Biome reserves 30% of the payment amount, meaning contributors receive 70% of the pledged amount.
   - The commission charged by Polar.sh is split accordingly.
-- If an issue in our issue tracker is not yet open for pledges, the person who wishes to pledge should indicate their desire in the comments of the issue, or do so through the `Community > #bounties` channel on Discord. A core contributor can then **accept** or **reject** the request for the bounty. Reasons for rejection include, but are not limited to: 
+  - We reserve the right to decide on a different split in the future.
+- If an issue in our issue tracker is not yet open for pledges, the person who wishes to pledge should indicate their desire in the comments of the issue, or do so through the `Community > #funding` channel on Discord. A [Core Contributor](#core-contributor) can then **accept** or **reject** the request for the bounty. Reasons for rejection include, but are not limited to: 
   - Implementation of the task would conflict with the project direction or [its values](https://biomejs.dev/internals/philosophy/).
   - Implementation of the task is (currently) technically infeasible.
   - The suggested pledge is deemed inappropriate for the amount of work involved.
@@ -211,25 +210,21 @@ Compared to sponsorship, bounties come with a few risks, both for Biome as a pro
 
 ### Project-Funded Bounties
 
-In some cases, Biome funds bounties on its own issues. For project-funded bounties, the same conditions apply as for community-funded bounties. But given that these issues are funded by money from our sponsors, we have additional restrictions in place:
+In some cases, Biome funds bounties on its own issues in order to further the project goals as laid out in its [roadmap](#roadmap). Because Biome is the one funding these issues, it also means **100% of the pledged amount will go to the contributor completing the task**. Project-Funded Bounties have the same conditions applied to them as [Community-Funded Bounties](#community-funded-bounties). But given that these issues are funded using money that ultimately comes from our sponsors, we have additional restrictions in place:
 
-- Implementation of the task funded by Biome must advance [our roadmap](#roadmap) or help with essential infrastructure.
+- Implementation of the task funded by Biome must advance our [roadmap](#roadmap) or help with essential infrastructure.
   - The description of the task must include a clear rationale for why this task is eligible for funding.
-- Each Biome-funded task will be either assigned directly to a contributor, or assigned a label to indicate who is eligible for picking up that task:
-  - `F-Anyone`: Anyone is free to pick up this task. This task should be of low complexity and has a maximum bounty of $50 (USD).
-  - `F-Maintainers`: Any Biome maintainer is free to pick up this task. This task may be of medium complexity and has a maximum bounty of $200 (USD).
-  - `F-Core-Contributors`: Only core contributors are eligible for picking this task. There is no upper limit to the complexity, but the maximum bounty is $1000 (USD).
-- For Biome-funded tasks assigned to core contributors, we ask the contributor to take the money directly from our Open Collective account, instead of using Polar.sh. This will help us avoid paying commission over the larger bounties.
+- To avoid paying commission on our own bounties, we do not assign funds through Polar.sh. Instead, we ask contributors to take the money directly from our Open Collective account upon completion of the task.
+  - Unfortunately, this means Project-Funded Bounties can only be assigned to [Core Contributors](#core-contributor) at this moment, since they have access to our Open Collective account.
 
-Additionally, there is a strict process for assigning project-funded bounties:
+Additionally, there is a strict process for assigning Project-Funded Bounties:
 
-- To request Biome funding for a task, a request with a clear rationale must be made in the `Community > #bounties` channel on Discord.
-  - Merely commenting on a GitHub issue is not sufficient, to make sure project members have a better chance at monitoring requests.
-- If the request is approved by at least 2 maintainers and not vetoed by any core contributor within 7 days, then a core contributor can assign the pledge to the issue and assign the requester or a corresponding label to it.
-  - The waiting period is not necessary if a lead approves the request.
-- There is a maximum amount of issues with pledges someone can have assigned to them. The limit is 2 for core contributors, and 1 for anyone else.
-
-Finally, there is one more important distinction from community-funded bounties: Since Biome is the one funding the issue, **100% of the pledged amount will go to the contributor completing the task**.
+- To request Biome funding for a task, a request with a clear rationale must be made in the `Community > #funding` channel on Discord.
+  - To make sure our Core Contributors don't have to worry about overlooking Biome-funding-related decisions, requests made on GitHub issues are not sufficient for a funding request.
+- If no Core Contributor raises objections within 7 days, then any Core Contributor can assign the pledge to the issue and assign the requester to it.
+  - The waiting period is not necessary if a Lead approves the request.
+  - If an objection is raised, the request is put on hold until a Lead makes the final decision.
+- There is a maximum amount of issues with pledges someone can have assigned to them. The limit is 2 for core contributors, and 1 for anyone else. By limiting the amount of issues with pledges that someone can have assigned, we make sure the bounties remain available for others to pick up.
 
 ### Fund Allocation
 
@@ -237,6 +232,8 @@ Finally, there is one more important distinction from community-funded bounties:
   - Domain registrations
   - Website hosting
   - Password manager to manage secrets and passwords among Lead members
+
+Additionally, we may use funds for assigning [Project-Funded Bounties](#project-funded-bounties).
 
 #### Expenses
 
@@ -247,7 +244,7 @@ Core contributors are allowed to claim expenses related to conferences where the
     - If a conference lasts multiple days and the member decides to attend *both* days, and the member speaks only the first day, only the expenses of the first day should be taken in consideration. In this example, if the member booked three nights in a hotel to attend these two days, the expense should be divided by 3  - three nights - and only expense 2 days: night before the conference, plus the night of the day the member speaks.
     - If a conference lasts one day and the member decides to make their performance longer, all the expenses afforded in the other days won't be accepted. Only 2 nights of accommodation are accepted.
 
-Expenses must be approved by at least one [lead](#lead). In the presence of one single lead, the lead will ask one core contributor to fact-check the honesty of expenses, and leave a comment in the Open Collective expense page. In case of multiple leads, the lead submitting the expense must seek the approval of at least one other lead.
+Expenses must be approved by at least one [Lead](#lead). In the presence of one single Lead, the Lead will ask one Core Contributor to fact-check the honesty of expenses, and leave a comment in the Open Collective expense page. In case of multiple leads, the Lead submitting the expense must seek the approval of at least one other Lead.
 
 > [!NOTE]
 > Other usage of funds has yet to be decided.
