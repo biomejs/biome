@@ -8,3 +8,6 @@ button {}; selector, button {}
 span, div {};
  h1, section {};
 h1 {}
+
+/* test regular case for regression */
+v w, x>test {} v { w {} } x > test {}

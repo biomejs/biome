@@ -1,6 +1,7 @@
+use core::hash;
 use std::borrow::Borrow;
 use std::collections::HashSet;
-use std::hash::{Hash, Hasher};
+use std::hash::{DefaultHasher, Hash, Hasher};
 use std::vec;
 
 use biome_analyze::Ast;
@@ -145,8 +146,7 @@ impl Rule for NoDuplicateSelectors {
                     selector_text = selector.clone().text();
                 }
                 if let Some(selector) = AnyCssSelector::cast_ref(&selector) {
-                    // TODO: test if this needs to be normalized
-                    selector_text = selector.clone().text();
+                    selector_text = normalize_complex_selector(selector);
                 }
                 let resolved = resolve_nested_selectors(selector_text, this_rule);
 
@@ -277,29 +277,15 @@ fn resolve_nested_selectors(selector: String, this_rule: CssSyntaxNode) -> Vec<S
         None => return vec![selector],
         Some(parent_rule) => {
             if let Some(parent_rule) = AnyCssAtRule::cast_ref(&parent_rule) {
-                // resolve
-                match parent_rule {
-                    AnyCssAtRule::CssContainerAtRule(_rule) => todo!(),
-                    AnyCssAtRule::CssKeyframesAtRule(_rule) => todo!(),
-                    AnyCssAtRule::CssLayerAtRule(_rule) => todo!(),
-                    AnyCssAtRule::CssMediaAtRule(rule) => {
-                        let mut resolved = "@".to_string();
-                        resolved.push_str(&rule.media_token().unwrap().text());
-                        resolved.push_str(&rule.queries().text());
-                        // Replace the spaces with something that is not valid in CSS
-                        let resolved = resolved.replace(char::is_whitespace, "-");
-                        parent_selectors.push(resolved);
-                    }
-                    AnyCssAtRule::CssPageAtRule(_rule) => todo!(),
-                    AnyCssAtRule::CssScopeAtRule(_rule) => todo!(),
-                    AnyCssAtRule::CssStartingStyleAtRule(_rule) => todo!(),
-                    AnyCssAtRule::CssSupportsAtRule(_rule) => todo!(),
-                    _ => {}
-                }
+                let mut hasher = DefaultHasher::new();
+                let _hashed = &parent_rule.range().hash(&mut hasher);
+                // Each @rule is unique scope
+                // Use a hash to create the comparable scope
+                parent_selectors.push(hasher.finish().to_string());
             }
             if let Some(parent_rule) = AnyCssRule::cast_ref(&parent_rule) {
                 match parent_rule {
-                    AnyCssRule::CssBogusRule(_) => todo!(),
+                    AnyCssRule::CssBogusRule(_) => {}
                     AnyCssRule::CssAtRule(parent_rule) => {
                         // Treat the AtRule as a selector
                         let rule = parent_rule.rule().unwrap();

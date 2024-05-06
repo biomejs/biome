@@ -16,4 +16,124 @@ span, div {};
  h1, section {};
 h1 {}
 
+/* test regular case for regression */
+v w, x>test {} v { w {} } x > test {}
+```
+
+# Diagnostics
+```
+disallowInList.css:2:21 lint/nursery/noDuplicateSelectors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate selector "textarea ",
+  
+    1 │ /* duplicate within a grouping selector */
+  > 2 │ input, textarea {}; textarea {}
+      │                     ^^^^^^^^^
+    3 │ 
+    4 │ /* duplicate within a grouping selector, reversed */
+  
+  i first occurence:
+  
+    1 │ /* duplicate within a grouping selector */
+  > 2 │ input, textarea {}; textarea {}
+      │        ^^^^^^^^^
+    3 │ 
+    4 │ /* duplicate within a grouping selector, reversed */
+  
+
+```
+
+```
+disallowInList.css:5:22 lint/nursery/noDuplicateSelectors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate selector "button ",
+  
+    4 │ /* duplicate within a grouping selector, reversed */
+  > 5 │ button {}; selector, button {}
+      │                      ^^^^^^^
+    6 │ 
+    7 │ /* duplicate within a grouping selector. multiline */
+  
+  i first occurence:
+  
+    1 │ /* duplicate within a grouping selector */
+  > 2 │ input, textarea {}; textarea {}
+      │                                
+  > 3 │ 
+  > 4 │ /* duplicate within a grouping selector, reversed */
+  > 5 │ button {}; selector, button {}
+      │ ^^^^^^^
+    6 │ 
+    7 │ /* duplicate within a grouping selector. multiline */
+  
+
+```
+
+```
+disallowInList.css:9:17 lint/nursery/noDuplicateSelectors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate selector "
+    h1 ",
+  
+     7 │ /* duplicate within a grouping selector. multiline */
+     8 │ span, div {};
+   > 9 │  h1, section {};
+       │                 
+  > 10 │ h1 {}
+       │ ^^^
+    11 │ 
+    12 │ /* test regular case for regression */
+  
+  i first occurence:
+  
+     7 │ /* duplicate within a grouping selector. multiline */
+   > 8 │ span, div {};
+       │              
+   > 9 │  h1, section {};
+       │  ^^
+    10 │ h1 {}
+    11 │ 
+  
+
+```
+
+```
+disallowInList.css:13:20 lint/nursery/noDuplicateSelectors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate selector "w ",
+  
+    12 │ /* test regular case for regression */
+  > 13 │ v w, x>test {} v { w {} } x > test {}
+       │                    ^^
+  
+  i first occurence:
+  
+     8 │ span, div {};
+     9 │  h1, section {};
+  > 10 │ h1 {}
+       │      
+  > 11 │ 
+  > 12 │ /* test regular case for regression */
+  > 13 │ v w, x>test {} v { w {} } x > test {}
+       │ ^^^
+  
+
+```
+
+```
+disallowInList.css:13:27 lint/nursery/noDuplicateSelectors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate selector "x > test ",
+  
+    12 │ /* test regular case for regression */
+  > 13 │ v w, x>test {} v { w {} } x > test {}
+       │                           ^^^^^^^^^
+  
+  i first occurence:
+  
+    12 │ /* test regular case for regression */
+  > 13 │ v w, x>test {} v { w {} } x > test {}
+       │      ^^^^^^^
+  
+
 ```

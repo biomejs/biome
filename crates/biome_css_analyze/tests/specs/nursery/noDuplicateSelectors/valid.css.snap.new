@@ -12,6 +12,14 @@ a {} b {} c {} d, e, f {}
 g {}
 @media print { g {} }	
 
+/* duplicates inside separate media query */
+@media print {
+    gg.dev {}
+}
+@media print {
+    gg.dev {}
+}
+
 /* duplicate inside keyframes */
 @keyframes h { 0% {} }
 @keyframes h { 0% {} }
