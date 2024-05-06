@@ -1,0 +1,26 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: content
+---
+# Input messages
+
+```block
+---
+import {    something } from "file.astro";
+
+statement ( ) ;
+
+---
+<div></div>
+```
+
+# Emitted Messages
+
+```block
+---
+import { something } from "file.astro";
+
+statement();
+---
+<div></div>
+```

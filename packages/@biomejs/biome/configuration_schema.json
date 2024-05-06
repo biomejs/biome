@@ -1580,6 +1580,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noUnmatchableAnbSelector": {
+					"description": "Disallow unmatchable An+B selectors.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noUselessUndefinedInitialization": {
 					"description": "Disallow initializing variables to undefined.",
 					"anyOf": [
@@ -1607,6 +1614,13 @@
 				},
 				"useDefaultSwitchClause": {
 					"description": "Require the default clause in switch statements.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useExplicitLengthCheck": {
+					"description": "Enforce explicitly comparing the length, size, byteLength or byteOffset property of a value.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }

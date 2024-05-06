@@ -15,12 +15,24 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 ### CLI
 
-- Execute biome commands (lint, format, check) on the working directory by default. [#2266](https://github.com/biomejs/biome/issues/2266) Contributed by @unvalley
+#### Enhancements
+
+- Biome now executes commands (lint, format, check) on the working directory by default. [#2266](https://github.com/biomejs/biome/issues/2266) Contributed by @unvalley
 
   ```diff
   - biome check .
   + biome check    // You can run the command without the path
   ```
+  
+#### Bug fixes
+
+- The [stdin-file-path](https://biomejs.dev/guides/integrate-in-editor/#use-stdin) option now works correctly for Astro/Svelte/Vue files ([#2686](https://github.com/biomejs/biome/pull/2686))
+
+  Fix [#2225](https://github.com/biomejs/biome/issues/2225) where lint output become empty for Vue files.
+
+  Contributed by @tasshi-me
+
+- `biome migrate eslint` now correctly resolve `@scope/eslint-config` ([#2705](https://github.com/biomejs/biome/issues/2705)). Contributed by @Conaclos
 
 ### Configuration
 
@@ -31,6 +43,10 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 ### JavaScript APIs
 
 ### Linter
+
+#### New features
+
+- Add [nursery/useExplicitLengthCheck](https://biomejs.dev/linter/rules/use-explicit-length-check/).
 
 #### Bug fixes
 
@@ -48,6 +64,18 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
   This is a regression introduced by [#2394](https://github.com/biomejs/biome/issues/2394).
   This regression makes `noRedeclare` panics on every conditional types with `infer` bindings.
+
+  Contributed by @Conaclos
+
+- [noUnusedLabels](https://biomejs.dev/linter/rules/no-unused-labels/) and [noConfusingLabels](https://biomejs.dev/linter/rules/no-confusing-labels/) now ignore svelte reactive statements ([#2571](https://github.com/biomejs/biome/issues/2571)).
+
+  The rules now ignore reactive Svelte blocks in Svelte components.
+
+  ```svelte
+  <script>
+  $: { /* reactive block */ }
+  </script>
+  ```
 
   Contributed by @Conaclos
 

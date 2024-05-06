@@ -370,11 +370,10 @@ impl EslintPackage {
             EslintPackage::Config => "eslint-config-",
             EslintPackage::Plugin => "eslint-plugin-",
         };
-        debug_assert!(matches!(artifact, "eslint-plugin-" | "eslint-config-"));
         if name.starts_with('@') {
             // handle scoped module
             if let Some((scope, scoped)) = name.split_once('/') {
-                if scoped.starts_with(artifact) {
+                if scoped.starts_with(artifact) || scoped == artifact.trim_end_matches('-') {
                     Cow::Borrowed(name)
                 } else {
                     Cow::Owned(format!("{scope}/{artifact}{scoped}"))
