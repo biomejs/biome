@@ -17,7 +17,7 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 #### Enhancements
 
-- Biome now executes commands (lint, format, check) on the working directory by default. [#2266](https://github.com/biomejs/biome/issues/2266) Contributed by @unvalley
+- Biome now executes commands (lint, format, check and ci) on the working directory by default. [#2266](https://github.com/biomejs/biome/issues/2266) Contributed by @unvalley
 
   ```diff
   - biome check .
