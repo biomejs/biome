@@ -1,5 +1,6 @@
 use biome_analyze::{
-    context::RuleContext, declare_rule, ActionCategory, Ast, Rule, RuleDiagnostic, RuleSource,
+    context::RuleContext, declare_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic,
+    RuleSource,
 };
 use biome_console::markup;
 use biome_diagnostics::Applicability;
@@ -66,6 +67,7 @@ declare_rule! {
         name: "noUselessStringConcat",
         sources: &[RuleSource::Eslint("no-useless-concat")],
         recommended: false,
+        fix_kind: FixKind::Unsafe,
     }
 }
 
