@@ -4,6 +4,26 @@ use biome_rowan::{SyntaxNodeText, TextRange};
 use grit_util::{AstCursor, AstNode as GritAstNode, ByteRange, CodeRange};
 use std::{borrow::Cow, str::Utf8Error};
 
+/// Generates the `GritTargetNode`, `GritTargetToken`, and
+/// `GritTargetSyntaxKind` enums.
+///
+/// These enums can represent nodes, tokens and kinds for all the languages we
+/// support running Grit queries on.
+///
+/// We intentionally use enums for these types, rather than using generics for
+/// specifying specific types:
+/// - If we used generics instead, those would infest all code using these
+///   types, and we would end up with an explosion of generics all over the Grit
+///   runtime.
+/// - Using generics wouldn't only make the code itself a lot more complex, it
+///   would inflate compile times and binary size as well. It's hard to say how
+///   much this would matter, but there will be quite some code in the Grit
+///   runtime, and each supported language would effectively require its own
+///   binary instance of the entire runtime.
+/// - Theoretically, this may enable us to run queries on mixed-language trees
+///   in the future. Even though GritQL does not currently have syntax support
+///   for this, it may allow us to one day query CSS rules inside a JS template
+///   literal, for instance.
 macro_rules! generate_target_node {
     ($([$lang_node:ident, $lang_token:ident, $lang_kind:ident]),+) => {
         #[derive(Clone, Debug, PartialEq)]

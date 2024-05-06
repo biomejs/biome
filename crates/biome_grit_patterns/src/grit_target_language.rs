@@ -6,6 +6,12 @@ use crate::grit_target_node::{GritTargetNode, GritTargetSyntaxKind};
 use biome_rowan::SyntaxKind;
 use grit_util::Language;
 
+/// Generates the `GritTargetLanguage` enum.
+///
+/// This enum contains a variant for every language that we support running Grit
+/// queries on. We implement Grit's [`Language`] trait on this enum, and
+/// implement the slightly more convenient [`GritTargetLanguageImpl`] for
+/// creating language-specific implementations.
 macro_rules! generate_target_language {
     ($($language:ident),+) => {
         #[derive(Clone, Debug)]
