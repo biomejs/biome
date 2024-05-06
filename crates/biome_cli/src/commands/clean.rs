@@ -1,4 +1,4 @@
-pub use crate::commands::daemon::biome_log_dir;
+use crate::commands::daemon::biome_log_dir;
 use crate::{CliDiagnostic, CliSession};
 use std::fs::{create_dir, remove_dir_all};
 
