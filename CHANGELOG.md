@@ -15,6 +15,13 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 ### CLI
 
+- Execute biome commands (lint, format, check) on the working directory by default. [#2266](https://github.com/biomejs/biome/issues/2266) Contributed by @unvalley
+
+  ```diff
+  - biome check .
+  + biome check    // You can run the command without the path
+  ```
+
 ### Configuration
 
 ### Editors
@@ -216,7 +223,7 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
   Contributed by @Conaclos
 
 - [noMisplacedAssertion](https://biomejs.dev/linter/rules/no-misplaced-assertion/) now allow these matchers
-  
+
   - `expect.any()`
   - `expect.anything()`
   - `expect.closeTo`
