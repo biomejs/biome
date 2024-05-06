@@ -62,13 +62,13 @@ macro_rules! generate_target_node {
                 }
             }
 
-            fn text_trimmed(&self) -> SyntaxNodeText {
+            pub fn text_trimmed(&self) -> SyntaxNodeText {
                 match self {
                     $(Self::$lang_node(node) => node.text_trimmed()),+
                 }
             }
 
-            fn text_trimmed_range(&self) -> TextRange {
+            pub fn text_trimmed_range(&self) -> TextRange {
                 match self {
                     $(Self::$lang_node(node) => node.text_trimmed_range()),+
                 }
