@@ -3,9 +3,16 @@ use biome_analyze::context::RuleContext;
 use biome_analyze::{ActionCategory, Ast, Rule, RuleAction, RuleDiagnostic};
 use biome_console::markup;
 use biome_diagnostics::{category, Applicability};
-use biome_json_factory::make::{ident, json_member_name};
-use biome_json_syntax::{JsonMember, JsonMemberList, JsonMemberName, JsonObjectValue, JsonRoot};
-use biome_rowan::{AstNode, BatchMutationExt, TextRange, WalkEvent};
+use biome_json_factory::make::{
+    ident, json_member, json_member_list, json_member_name, json_object_value, json_string_literal,
+    token,
+};
+use biome_json_syntax::{
+    AnyJsonValue, JsonMember, JsonMemberList, JsonMemberName, JsonObjectValue, JsonRoot, T,
+};
+use biome_rowan::{
+    AstNode, AstSeparatedList, BatchMutationExt, TextRange, TriviaPiece, TriviaPieceKind, WalkEvent,
+};
 use std::collections::HashMap;
 
 declare_migration! {
@@ -18,19 +25,64 @@ declare_migration! {
 #[derive(Debug)]
 pub(crate) struct MigrateRuleState {
     /// The member of the new rule
-    nursery_rule_range: TextRange,
+    nursery_rule: JsonMember,
     /// The member of the group where the new rule should be moved
     nursery_group: JsonMember,
     /// The name of the new rule
-    rule_name: &'static str,
+    new_rule_name: &'static str,
 
-    group_name: &'static str,
+    new_group_name: &'static str,
 }
 
 impl MigrateRuleState {
     fn as_rule_name_range(&self) -> TextRange {
-        self.nursery_rule_range
+        self.nursery_rule.range()
     }
+}
+
+fn find_rule_by_group(group: &JsonMember, rule: &str) -> Option<JsonMember> {
+    let object_value = group
+        .value()
+        .ok()
+        .and_then(|node| node.as_json_object_value().cloned())?;
+
+    let mut rule_member = None;
+    for member in object_value.json_member_list() {
+        let member = member.ok()?;
+        let member_name = member.name().ok()?;
+        let member_name_text = member_name.inner_string_text().ok()?;
+        if member_name_text.text() == rule {
+            rule_member = Some(member);
+            break;
+        }
+    }
+
+    rule_member
+}
+
+fn find_member_by_name(root: &JsonRoot, group_name: &str) -> Option<JsonMember> {
+    let preorder = root.syntax().preorder();
+    let mut group = None;
+    for event in preorder {
+        match event {
+            WalkEvent::Enter(node) => {
+                if let Some(member) = JsonMember::cast(node) {
+                    let member_name = member.name();
+                    if let Ok(member_name) = member_name {
+                        if let Ok(text) = member_name.inner_string_text() {
+                            if text.text() == group_name {
+                                group = Some(member);
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+            _ => {}
+        }
+    }
+
+    group
 }
 
 const RULES_TO_MIGRATE: [(&'static str, (&'static str, &'static str)); 1] =
@@ -46,26 +98,7 @@ impl Rule for NurseryRules {
         let node = ctx.query();
         let mut rules_to_migrate = vec![];
 
-        let mut nursery_group = None;
-        let preorder = node.syntax().preorder();
-        for event in preorder {
-            match event {
-                WalkEvent::Enter(node) => {
-                    if let Some(member) = JsonMember::cast(node) {
-                        let member_name = member.name();
-                        if let Ok(member_name) = member_name {
-                            if let Ok(text) = member_name.inner_string_text() {
-                                if text.text() == "nursery" {
-                                    nursery_group = Some(member);
-                                    break;
-                                }
-                            }
-                        }
-                    }
-                }
-                _ => {}
-            }
-        }
+        let nursery_group = find_member_by_name(node, "nursery");
 
         if let Some(nursery_member) = nursery_group {
             let rules = HashMap::from(RULES_TO_MIGRATE);
@@ -83,10 +116,10 @@ impl Rule for NurseryRules {
                                 let new_rule = rules.get(text.text()).copied();
                                 if let Some((new_group, new_rule)) = new_rule {
                                     rules_to_migrate.push(MigrateRuleState {
-                                        rule_name: new_rule,
-                                        nursery_rule_range: group_member.clone().range(),
+                                        new_rule_name: new_rule,
+                                        nursery_rule: group_member.clone(),
                                         nursery_group: nursery_member.clone(),
-                                        group_name: new_group,
+                                        new_group_name: new_group,
                                     })
                                 }
                             }
@@ -95,8 +128,6 @@ impl Rule for NurseryRules {
                 }
             }
         }
-
-        dbg!(&rules_to_migrate);
 
         rules_to_migrate
     }
@@ -107,7 +138,7 @@ impl Rule for NurseryRules {
                 category!("migrate"),
                 state.as_rule_name_range(),
                 markup! {
-                    "This rule is has been promoted to "<Emphasis>{state.group_name}"/"{state.rule_name}</Emphasis>"."
+                    "This rule is has been promoted to "<Emphasis>{state.new_group_name}"/"{state.new_rule_name}</Emphasis>"."
                 }
                 .to_owned(),
             )
@@ -116,15 +147,61 @@ impl Rule for NurseryRules {
     }
 
     fn action(ctx: &RuleContext<Self>, state: &Self::State) -> Option<MigrationAction> {
-        let MigrateRuleState {
-            nursery_group: group_member,
-            rule_name,
-            ..
-        } = state;
         let node = ctx.query();
+        let MigrateRuleState {
+            new_group_name,
+            new_rule_name,
+            nursery_group,
+            nursery_rule,
+        } = state;
         let mut mutation = ctx.root().begin();
 
-        None
+        let new_group = find_member_by_name(node, new_group_name);
+        let rules = nursery_group
+            .syntax()
+            .ancestors()
+            .find_map(JsonMemberList::cast)?;
+
+        if let Some(group) = new_group {
+        } else {
+            let member = json_member(
+                json_member_name(
+                    json_string_literal(new_group_name)
+                        .with_leading_trivia([(TriviaPieceKind::Whitespace, "\n")]),
+                ),
+                token(T![:]),
+                AnyJsonValue::JsonObjectValue(json_object_value(
+                    token(T!['{']),
+                    json_member_list(vec![nursery_rule.clone()], vec![]),
+                    token(T!['}']),
+                )),
+            );
+
+            let mut new_members: Vec<_> = rules.iter().filter_map(|node| node.ok()).collect();
+
+            new_members.push(member);
+            let mut separators = vec![];
+            for (index, _) in new_members.iter().enumerate() {
+                if index < new_members.len() - 1 {
+                    separators.push(token(T![,]))
+                }
+            }
+
+            dbg!(&rules);
+            dbg!(&new_members);
+
+            mutation.replace_node(rules, json_member_list(new_members, separators));
+        };
+
+        Some(MigrationAction {
+            mutation,
+            message: markup! {
+                "Move the rule to the new stable group."
+            }
+            .to_owned(),
+            category: ActionCategory::QuickFix,
+            applicability: Applicability::MaybeIncorrect,
+        })
         //
         // let new_node = json_member_name(ident("\"indentWidth\""));
         // mutation.replace_node(node.clone(), new_node);
