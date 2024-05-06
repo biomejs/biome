@@ -3585,3 +3585,30 @@ fn print_json_pretty() {
         result,
     ));
 }
+
+#[test]
+fn format_without_file_paths() {
+    let mut fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let file_path = Path::new("format.js");
+    fs.insert(file_path.into(), UNFORMATTED.as_bytes());
+
+    let result: Result<(), biome_cli::CliDiagnostic> = run_cli(
+        DynRef::Borrowed(&mut fs),
+        &mut console,
+        Args::from([("format"), ""].as_slice()),
+    );
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+
+    assert_file_contents(&fs, file_path, UNFORMATTED);
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "format_without_file_paths",
+        fs,
+        console,
+        result,
+    ));
+}
