@@ -97,6 +97,7 @@ impl Format<JsFormatContext> for FormatTemplateElement {
                 false
             };
 
+            // make sure the expression won't break to prevent reformat issue
             if will_break {
                 TemplateElementLayout::Fit
             } else {
@@ -110,8 +111,8 @@ impl Format<JsFormatContext> for FormatTemplateElement {
             TemplateElementLayout::SingleLine => {
                 let mut buffer = RemoveSoftLinesBuffer::new(f);
 
-                match interned_expression.clone() {
-                    Some(element) => buffer.write_element(element),
+                match &interned_expression {
+                    Some(element) => buffer.write_element(element.clone()),
                     None => Ok(()),
                 }
             }

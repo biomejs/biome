@@ -509,6 +509,7 @@ impl<'a, Context> RemoveSoftLinesBuffer<'a, Context> {
         clean_interned(interned, &mut self.interned_cache)
     }
 
+    /// Extracts the most flat variant of a best fitting element and removes the soft line breaks
     fn clean_best_fitting(&mut self, best_fitting: &BestFittingElement) -> Vec<FormatElement> {
         clean_best_fitting(best_fitting, &mut self.interned_cache)
     }
