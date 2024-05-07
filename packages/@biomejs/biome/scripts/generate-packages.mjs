@@ -1,7 +1,7 @@
 import * as fs from "node:fs";
-import {resolve} from "node:path";
-import {fileURLToPath} from "node:url";
-import {format} from "node:util";
+import { resolve } from "node:path";
+import { fileURLToPath } from "node:url";
+import { format } from "node:util";
 
 const CLI_ROOT = resolve(fileURLToPath(import.meta.url), "../..");
 const PACKAGES_ROOT = resolve(CLI_ROOT, "..");
@@ -41,7 +41,7 @@ function updateWasmPackage(target) {
 	const manifestPath = resolve(packageRoot, "package.json");
 	const manifest = JSON.parse(fs.readFileSync(manifestPath).toString("utf-8"));
 
-	const {version} = rootManifest;
+	const { version } = rootManifest;
 	manifest.name = packageName;
 	manifest.version = version;
 
