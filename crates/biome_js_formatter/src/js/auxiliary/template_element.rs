@@ -88,8 +88,20 @@ impl Format<JsFormatContext> for FormatTemplateElement {
             }
         });
 
+        let interned_expression = f.intern(&format_expression)?;
+
         let layout = if !self.element.has_new_line_in_range() {
-            TemplateElementLayout::SingleLine
+            let will_break = if let Some(element) = &interned_expression {
+                element.will_break()
+            } else {
+                false
+            };
+
+            if will_break {
+                TemplateElementLayout::Fit
+            } else {
+                TemplateElementLayout::SingleLine
+            }
         } else {
             TemplateElementLayout::Fit
         };
@@ -97,7 +109,11 @@ impl Format<JsFormatContext> for FormatTemplateElement {
         let format_inner = format_with(|f: &mut JsFormatter| match layout {
             TemplateElementLayout::SingleLine => {
                 let mut buffer = RemoveSoftLinesBuffer::new(f);
-                write!(buffer, [format_expression])
+
+                match interned_expression.clone() {
+                    Some(element) => buffer.write_element(element),
+                    None => Ok(()),
+                }
             }
             TemplateElementLayout::Fit => {
                 use AnyJsExpression::*;
@@ -127,10 +143,17 @@ impl Format<JsFormatContext> for FormatTemplateElement {
                         )
                     );
 
-                if indent {
-                    write!(f, [soft_block_indent(&format_expression)])
-                } else {
-                    write!(f, [format_expression])
+                match &interned_expression {
+                    Some(element) if indent => {
+                        write!(
+                            f,
+                            [soft_block_indent(&format_with(
+                                |f| f.write_element(element.clone())
+                            ))]
+                        )
+                    }
+                    Some(element) => f.write_element(element.clone()),
+                    None => Ok(()),
                 }
             }
         });
