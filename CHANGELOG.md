@@ -121,6 +121,7 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 - Fix typo by renaming `useConsistentBuiltinInstatiation` to `useConsistentBuiltinInstantiation`
   Contributed by @minht11
+- Fix the rule `useSingleCaseStatement` including `break` statements when counting the number of statements in a `switch` statement (#2696)
 
 
 ## 1.7.2 (2024-04-30)
