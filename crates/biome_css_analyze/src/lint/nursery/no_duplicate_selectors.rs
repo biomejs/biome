@@ -8,8 +8,7 @@ use biome_analyze::{context::RuleContext, declare_rule, Rule, RuleDiagnostic, Ru
 use biome_console::markup;
 use biome_css_syntax::{
     AnyCssAtRule, AnyCssRelativeSelector, AnyCssRule, AnyCssSelector, CssComplexSelector,
-    CssRelativeSelector, CssRelativeSelectorList, CssRoot, CssSelectorList,
-    CssSyntaxNode,
+    CssRelativeSelector, CssRelativeSelectorList, CssRoot, CssSelectorList, CssSyntaxNode,
 };
 use biome_deserialize_macros::Deserializable;
 use biome_rowan::{AstNode, SyntaxNodeCast};
@@ -225,16 +224,19 @@ impl Rule for NoDuplicateSelectors {
         // Read our guidelines to write great diagnostics:
         // https://docs.rs/biome_analyze/latest/biome_analyze/#what-a-rule-should-say-to-the-user
         //
-        let duplicate = node.duplicate.to_string();
+        let duplicate_text = node.duplicate.to_string();
         Some(
             RuleDiagnostic::new(
                 rule_category!(),
                 node.duplicate.text_range(),
                 markup! {
-                    "Duplicate selector \""<Emphasis>{duplicate}</Emphasis>"\","
+                    "Duplicate selectors may result in unintentionally overriding rules:"<Emphasis>{ duplicate_text }</Emphasis>
                 },
             )
-            .detail(node.first.text_range(), "first occurence:"),
+            .detail(node.first.text_range(), "Please consider moving the rule's contents to the first occurence:")
+            .note(markup! {
+                "Remove duplicate selectors within the rule"
+            }),
         )
     }
 }

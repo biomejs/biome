@@ -62,7 +62,7 @@ x { & {} }
 ```
 invalid.css:2:4 lint/nursery/noDuplicateSelectors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Duplicate selector "a ",
+  ! Duplicate selectors may result in unintentionally overriding rules:a 
   
     1 │ /* duplicate within one rule's selector list */
   > 2 │ a, a {}
@@ -70,7 +70,7 @@ invalid.css:2:4 lint/nursery/noDuplicateSelectors ━━━━━━━━━━
     3 │ 
     4 │ /* duplicate within one rule's selector list. multiline */
   
-  i first occurence:
+  i Please consider moving the rule's contents to the first occurence:
   
   > 1 │ /* duplicate within one rule's selector list */
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -79,14 +79,16 @@ invalid.css:2:4 lint/nursery/noDuplicateSelectors ━━━━━━━━━━
     3 │ 
     4 │ /* duplicate within one rule's selector list. multiline */
   
+  i Remove duplicate selectors within the rule
+  
 
 ```
 
 ```
 invalid.css:5:3 lint/nursery/noDuplicateSelectors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Duplicate selector "
-    b ",
+  ! Duplicate selectors may result in unintentionally overriding rules:
+    b 
   
     4 │ /* duplicate within one rule's selector list. multiline */
   > 5 │ b,
@@ -96,7 +98,7 @@ invalid.css:5:3 lint/nursery/noDuplicateSelectors ━━━━━━━━━━
     7 │ 
     8 │ /* duplicate within one rule's selector list. multiline */
   
-  i first occurence:
+  i Please consider moving the rule's contents to the first occurence:
   
     1 │ /* duplicate within one rule's selector list */
   > 2 │ a, a {}
@@ -108,14 +110,16 @@ invalid.css:5:3 lint/nursery/noDuplicateSelectors ━━━━━━━━━━
     6 │ b {}
     7 │ 
   
+  i Remove duplicate selectors within the rule
+  
 
 ```
 
 ```
 invalid.css:10:3 lint/nursery/noDuplicateSelectors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Duplicate selector "
-    d ",
+  ! Duplicate selectors may result in unintentionally overriding rules:
+    d 
   
      8 │ /* duplicate within one rule's selector list. multiline */
      9 │ c,
@@ -126,7 +130,7 @@ invalid.css:10:3 lint/nursery/noDuplicateSelectors ━━━━━━━━━�
     12 │ 
     13 │ /* duplicated selectors within one rule's selector list. 3 duplicates */
   
-  i first occurence:
+  i Please consider moving the rule's contents to the first occurence:
   
      8 │ /* duplicate within one rule's selector list. multiline */
    > 9 │ c,
@@ -136,14 +140,16 @@ invalid.css:10:3 lint/nursery/noDuplicateSelectors ━━━━━━━━━�
     11 │ d {}
     12 │ 
   
+  i Remove duplicate selectors within the rule
+  
 
 ```
 
 ```
 invalid.css:14:4 lint/nursery/noDuplicateSelectors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Duplicate selector "
-    .e",
+  ! Duplicate selectors may result in unintentionally overriding rules:
+    .e
   
     13 │ /* duplicated selectors within one rule's selector list. 3 duplicates */
   > 14 │ .e,
@@ -153,7 +159,7 @@ invalid.css:14:4 lint/nursery/noDuplicateSelectors ━━━━━━━━━�
     16 │ .e {}
     17 │ 
   
-  i first occurence:
+  i Please consider moving the rule's contents to the first occurence:
   
      9 │ c,
     10 │ d,
@@ -166,14 +172,16 @@ invalid.css:14:4 lint/nursery/noDuplicateSelectors ━━━━━━━━━�
     15 │ .e,
     16 │ .e {}
   
+  i Remove duplicate selectors within the rule
+  
 
 ```
 
 ```
 invalid.css:15:4 lint/nursery/noDuplicateSelectors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Duplicate selector "
-    .e ",
+  ! Duplicate selectors may result in unintentionally overriding rules:
+    .e 
   
     13 │ /* duplicated selectors within one rule's selector list. 3 duplicates */
     14 │ .e,
@@ -184,7 +192,7 @@ invalid.css:15:4 lint/nursery/noDuplicateSelectors ━━━━━━━━━�
     17 │ 
     18 │ /* duplicate simple selectors with another rule between */
   
-  i first occurence:
+  i Please consider moving the rule's contents to the first occurence:
   
      9 │ c,
     10 │ d,
@@ -197,13 +205,15 @@ invalid.css:15:4 lint/nursery/noDuplicateSelectors ━━━━━━━━━�
     15 │ .e,
     16 │ .e {}
   
+  i Remove duplicate selectors within the rule
+  
 
 ```
 
 ```
 invalid.css:19:11 lint/nursery/noDuplicateSelectors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Duplicate selector "f ",
+  ! Duplicate selectors may result in unintentionally overriding rules:f 
   
     18 │ /* duplicate simple selectors with another rule between */
   > 19 │ f {} g {} f {}
@@ -211,7 +221,7 @@ invalid.css:19:11 lint/nursery/noDuplicateSelectors ━━━━━━━━━�
     20 │ 
     21 │ /* duplicate simple selectors with another rule between */
   
-  i first occurence:
+  i Please consider moving the rule's contents to the first occurence:
   
     14 │ .e,
     15 │ .e,
@@ -224,14 +234,16 @@ invalid.css:19:11 lint/nursery/noDuplicateSelectors ━━━━━━━━━�
     20 │ 
     21 │ /* duplicate simple selectors with another rule between */
   
+  i Remove duplicate selectors within the rule
+  
 
 ```
 
 ```
 invalid.css:23:5 lint/nursery/noDuplicateSelectors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Duplicate selector "
-    h ",
+  ! Duplicate selectors may result in unintentionally overriding rules:
+    h 
   
     21 │ /* duplicate simple selectors with another rule between */
     22 │ h {}
@@ -242,7 +254,7 @@ invalid.css:23:5 lint/nursery/noDuplicateSelectors ━━━━━━━━━�
     25 │ 
     26 │ /* duplicate selector lists with different order */
   
-  i first occurence:
+  i Please consider moving the rule's contents to the first occurence:
   
     18 │ /* duplicate simple selectors with another rule between */
   > 19 │ f {} g {} f {}
@@ -254,13 +266,15 @@ invalid.css:23:5 lint/nursery/noDuplicateSelectors ━━━━━━━━━�
     23 │ i {}
     24 │ h {}
   
+  i Remove duplicate selectors within the rule
+  
 
 ```
 
 ```
 invalid.css:27:9 lint/nursery/noDuplicateSelectors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Duplicate selector "k, j ",
+  ! Duplicate selectors may result in unintentionally overriding rules:k, j 
   
     26 │ /* duplicate selector lists with different order */
   > 27 │ j, k {} k, j {}
@@ -268,7 +282,7 @@ invalid.css:27:9 lint/nursery/noDuplicateSelectors ━━━━━━━━━�
     28 │ 
     29 │ /* duplicate selectors with multiple components */
   
-  i first occurence:
+  i Please consider moving the rule's contents to the first occurence:
   
     22 │ h {}
     23 │ i {}
@@ -281,14 +295,16 @@ invalid.css:27:9 lint/nursery/noDuplicateSelectors ━━━━━━━━━�
     28 │ 
     29 │ /* duplicate selectors with multiple components */
   
+  i Remove duplicate selectors within the rule
+  
 
 ```
 
 ```
 invalid.css:30:7 lint/nursery/noDuplicateSelectors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Duplicate selector "
-    m n ",
+  ! Duplicate selectors may result in unintentionally overriding rules:
+    m n 
   
     29 │ /* duplicate selectors with multiple components */
   > 30 │ m n {}
@@ -298,7 +314,7 @@ invalid.css:30:7 lint/nursery/noDuplicateSelectors ━━━━━━━━━�
     32 │ 
     33 │ /* essentially duplicate selector lists with varied spacing */
   
-  i first occurence:
+  i Please consider moving the rule's contents to the first occurence:
   
     26 │ /* duplicate selector lists with different order */
   > 27 │ j, k {} k, j {}
@@ -310,15 +326,17 @@ invalid.css:30:7 lint/nursery/noDuplicateSelectors ━━━━━━━━━�
     31 │ m n {}
     32 │ 
   
+  i Remove duplicate selectors within the rule
+  
 
 ```
 
 ```
 invalid.css:35:8 lint/nursery/noDuplicateSelectors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Duplicate selector "
+  ! Duplicate selectors may result in unintentionally overriding rules:
       #baz,
-      .foo     p,q>.bar ",
+      .foo     p,q>.bar 
   
     33 │ /* essentially duplicate selector lists with varied spacing */
     34 │ .foo   p, q > .bar,
@@ -330,7 +348,7 @@ invalid.css:35:8 lint/nursery/noDuplicateSelectors ━━━━━━━━━�
     38 │ 
     39 │ /* duplicate within a media query, in the same rule */
   
-  i first occurence:
+  i Please consider moving the rule's contents to the first occurence:
   
     29 │ /* duplicate selectors with multiple components */
     30 │ m n {}
@@ -344,13 +362,15 @@ invalid.css:35:8 lint/nursery/noDuplicateSelectors ━━━━━━━━━�
     36 │   #baz,
     37 │   .foo     p,q>.bar {}
   
+  i Remove duplicate selectors within the rule
+  
 
 ```
 
 ```
 invalid.css:41:19 lint/nursery/noDuplicateSelectors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Duplicate selector "s ",
+  ! Duplicate selectors may result in unintentionally overriding rules:s 
   
     39 │ /* duplicate within a media query, in the same rule */
     40 │ s {}
@@ -359,7 +379,7 @@ invalid.css:41:19 lint/nursery/noDuplicateSelectors ━━━━━━━━━�
     42 │ 
     43 │ /* duplicate within a media query, in different rules */
   
-  i first occurence:
+  i Please consider moving the rule's contents to the first occurence:
   
     39 │ /* duplicate within a media query, in the same rule */
     40 │ s {}
@@ -368,13 +388,15 @@ invalid.css:41:19 lint/nursery/noDuplicateSelectors ━━━━━━━━━�
     42 │ 
     43 │ /* duplicate within a media query, in different rules */
   
+  i Remove duplicate selectors within the rule
+  
 
 ```
 
 ```
 invalid.css:45:45 lint/nursery/noDuplicateSelectors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Duplicate selector "t ",
+  ! Duplicate selectors may result in unintentionally overriding rules:t 
   
     43 │ /* duplicate within a media query, in different rules */
     44 │ t {}
@@ -383,7 +405,7 @@ invalid.css:45:45 lint/nursery/noDuplicateSelectors ━━━━━━━━━�
     46 │ 
     47 │ /* duplicate caused by nesting */
   
-  i first occurence:
+  i Please consider moving the rule's contents to the first occurence:
   
     43 │ /* duplicate within a media query, in different rules */
     44 │ t {}
@@ -392,13 +414,15 @@ invalid.css:45:45 lint/nursery/noDuplicateSelectors ━━━━━━━━━�
     46 │ 
     47 │ /* duplicate caused by nesting */
   
+  i Remove duplicate selectors within the rule
+  
 
 ```
 
 ```
 invalid.css:48:12 lint/nursery/noDuplicateSelectors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Duplicate selector "w ",
+  ! Duplicate selectors may result in unintentionally overriding rules:w 
   
     47 │ /* duplicate caused by nesting */
   > 48 │ v w {} v { w {} }
@@ -406,7 +430,7 @@ invalid.css:48:12 lint/nursery/noDuplicateSelectors ━━━━━━━━━�
     49 │ 
     50 │ /* duplicate caused by &-parent selector */
   
-  i first occurence:
+  i Please consider moving the rule's contents to the first occurence:
   
     43 │ /* duplicate within a media query, in different rules */
     44 │ t {}
@@ -419,19 +443,21 @@ invalid.css:48:12 lint/nursery/noDuplicateSelectors ━━━━━━━━━�
     49 │ 
     50 │ /* duplicate caused by &-parent selector */
   
+  i Remove duplicate selectors within the rule
+  
 
 ```
 
 ```
 invalid.css:51:5 lint/nursery/noDuplicateSelectors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Duplicate selector "& ",
+  ! Duplicate selectors may result in unintentionally overriding rules:& 
   
     50 │ /* duplicate caused by &-parent selector */
   > 51 │ x { & {} }
        │     ^^
   
-  i first occurence:
+  i Please consider moving the rule's contents to the first occurence:
   
     47 │ /* duplicate caused by nesting */
   > 48 │ v w {} v { w {} }
@@ -440,6 +466,8 @@ invalid.css:51:5 lint/nursery/noDuplicateSelectors ━━━━━━━━━�
   > 50 │ /* duplicate caused by &-parent selector */
   > 51 │ x { & {} }
        │ ^^
+  
+  i Remove duplicate selectors within the rule
   
 
 ```

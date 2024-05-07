@@ -1,3 +1,9 @@
+/* valid cases: should not error */
+th, td {}; tr {}
+*::a {}; a {}
+*::c, b {}; c {}
+d e, f {}; d {}
+
 /* duplicate within a grouping selector */
 input, textarea {}; textarea {}
 
