@@ -115,133 +115,91 @@ impl Rule for NoDuplicateSelectors {
         let mut output: Vec<DuplicateSelector> = vec![];
 
         if options.disallow_in_list {
-            let selectors = node.rules().syntax().descendants().filter_map(|x| {
-                if let Some(_selector) = x.clone().cast::<AnyCssSelector>() {
-                    return Some(x);
-                }
-                if let Some(_relative_selector) = x.clone().cast::<AnyCssRelativeSelector>() {
-                    return Some(x);
-                }
-                None
-            });
+            let selectors = node.rules().syntax().descendants().filter(
+                |x| x.clone().cast::<AnyCssSelector>().is_some() || x.clone().cast::<AnyCssRelativeSelector>().is_some()
+            );
 
-            for selector in selectors {
-                let this_list = selector.clone().parent().unwrap();
-
+            // selector_list unwrap should never fail due to the structure of the AST
+            for (selector, selector_list) in selectors.map(|selector| (selector.clone(), selector.parent().unwrap())).filter(|(_, parent)|{
                 // i.e not actually a list
-                if let Some(_parent_sel) = CssComplexSelector::cast_ref(&this_list) {
-                    // Don't handle the children of complex selectors
-                    // this_selctor_list = parent_selector.into_syntax().parent().unwrap()
-                    continue;
-                } else if let Some(_parent_sel) = CssRelativeSelector::cast_ref(&this_list) {
-                    // Don't handle the children of complex relative
-                    // this_selctor_list = parent_selector.into_syntax().parent().unwrap();
-                    continue;
-                }
+                return !(parent.clone().cast::<CssComplexSelector>().is_some() || parent.clone().cast::<CssRelativeSelector>().is_some())
+            }){
+                // this_rule unwrap should never fail due to the structure of the AST
+                let this_rule = selector_list.parent().unwrap();
 
-                let this_rule = this_list.parent().unwrap();
+                let selector_text = if let Some(selector) = CssRelativeSelector::cast_ref(&selector) {
+                    selector.clone().text()
+                } else {
+                    // selector is either AnyCssSelector or AnyCssRelativeSelector
+                    normalize_complex_selector(selector.clone().cast::<AnyCssSelector>().unwrap())
+                };
 
-                let mut selector_text = String::new();
-                if let Some(selector) = CssRelativeSelector::cast_ref(&selector) {
-                    selector_text = selector.clone().text();
-                }
-                if let Some(selector) = AnyCssSelector::cast_ref(&selector) {
-                    selector_text = normalize_complex_selector(selector);
-                }
-                let resolved = resolve_nested_selectors(selector_text, this_rule);
-
-                for r in resolved {
+                for r in resolve_nested_selectors(selector_text, this_rule) {
                     let split: Vec<&str> = r.split_whitespace().collect();
                     let normalized = split.join(" ").to_lowercase();
-                    if !resolved_list.insert(ResolvedSelector {
-                        selector_text: normalized.clone(),
-                        selector_node: selector.clone(),
-                    }) {
-                        let first = resolved_list.get(&normalized);
-                        if let Some(first) = first {
-                            output.push(DuplicateSelector {
-                                first: first.selector_node.clone(),
-                                duplicate: selector.clone(),
-                            });
-                        }
+
+                    if let Some(first) = resolved_list.get(&normalized) {
+                        output.push(DuplicateSelector {
+                            first: first.selector_node.clone(),
+                            duplicate: selector.clone(),
+                        });
+                    } else {
+                        resolved_list.insert(ResolvedSelector {
+                            selector_text: normalized.clone(),
+                            selector_node: selector.clone(),
+                        });
                     }
                 }
             }
         } else {
-            let select_lists = node.rules().syntax().descendants().filter_map(|x| {
-                if let Some(_selector) = x.clone().cast::<CssSelectorList>() {
-                    return Some(x);
-                }
-                if let Some(_relative_selector) = x.clone().cast::<CssRelativeSelectorList>() {
-                    return Some(x);
-                }
-                None
-            });
+            let selector_lists = node.rules().syntax().descendants().filter(
+                |x| x.clone().cast::<CssSelectorList>().is_some() || x.clone().cast::<CssRelativeSelectorList>().is_some()
+            );
 
-            for selector_list in select_lists {
+            // this_rule unwrap should never fail due to the structure of the AST
+            for (selector_list, rule) in selector_lists.map(|selector_list| (selector_list.clone(), selector_list.parent().unwrap())) {
                 let mut this_list_resolved_list: HashSet<ResolvedSelector> = HashSet::new();
 
-                let this_rule = selector_list.parent().unwrap();
                 let mut selector_list_mapped: Vec<String> = selector_list
                     .children()
                     .into_iter()
                     .filter_map(|child| {
-                        if let Some(selector) = AnyCssSelector::cast_ref(&child) {
-                            let selector_text = normalize_complex_selector(selector.clone());
-                            if !this_list_resolved_list.insert(ResolvedSelector {
-                                selector_text: selector_text.clone(),
-                                selector_node: selector.clone().into(),
-                            }) {
-                                let first = this_list_resolved_list.get(&selector_text);
-                                if let Some(first) = first {
-                                    output.push(DuplicateSelector {
-                                        first: first.selector_node.clone(),
-                                        duplicate: selector.into(),
-                                    });
-                                    // Return a none, since we already addressed this case
-                                    return None;
-                                }
-                            }
-                            return Some(selector_text);
-                        } else if let Some(selector) = AnyCssRelativeSelector::cast_ref(&child) {
-                            if !this_list_resolved_list.insert(ResolvedSelector {
-                                selector_text: selector.clone().text(),
-                                selector_node: selector.clone().into(),
-                            }) {
-                                let first = this_list_resolved_list.get(&selector.text());
-                                if let Some(first) = first {
-                                    output.push(DuplicateSelector {
-                                        first: first.selector_node.clone(),
-                                        duplicate: selector.into(),
-                                    });
-                                    // Return a none, since we already addressed this case
-                                    return None;
-                                }
-                            }
-                            return Some(selector.text());
+                        let selector_text = if let Some(selector) = AnyCssSelector::cast_ref(&child) {
+                            normalize_complex_selector(selector.clone())
+                        } else {
+                            child.clone().cast::<AnyCssRelativeSelector>().unwrap().text()
+                        };
+
+                        if let Some(first) = this_list_resolved_list.get(&selector_text) {
+                            output.push(DuplicateSelector {
+                                first: first.selector_node.clone(),
+                                duplicate: child.clone()
+                            });
+                            return None;
                         }
-                        None
+
+                        this_list_resolved_list.insert(ResolvedSelector {
+                            selector_text: selector_text.clone(),
+                            selector_node: child,
+                        });
+                        Some(selector_text)
                     })
                     .collect();
                 selector_list_mapped.sort();
-                let selector_list_text = selector_list_mapped.join(",");
 
-                let resolved = resolve_nested_selectors(selector_list_text, this_rule);
-
-                for r in resolved {
+                for r in resolve_nested_selectors(selector_list_mapped.join(","), rule) {
                     let split: Vec<&str> = r.split_whitespace().collect();
                     let normalized = split.join(" ").to_lowercase();
-                    if !resolved_list.insert(ResolvedSelector {
-                        selector_text: normalized.clone(),
-                        selector_node: selector_list.clone().into(),
-                    }) {
-                        let first = resolved_list.get(&normalized);
-                        if let Some(first) = first {
-                            output.push(DuplicateSelector {
-                                first: first.selector_node.clone(),
-                                duplicate: selector_list.clone(),
-                            });
-                        }
+                    if let Some(first) = resolved_list.get(&normalized) {
+                        output.push(DuplicateSelector {
+                            first: first.selector_node.clone(),
+                            duplicate: selector_list.clone(),
+                        });
+                    } else {
+                        resolved_list.insert(ResolvedSelector {
+                            selector_text: normalized.clone(),
+                            selector_node: selector_list.clone().into(),
+                        });
                     }
                 }
             }
@@ -270,27 +228,20 @@ impl Rule for NoDuplicateSelectors {
 
 fn resolve_nested_selectors(selector: String, this_rule: CssSyntaxNode) -> Vec<String> {
     let mut parent_selectors: Vec<String> = vec![];
-
-    let parent_rule = get_parent_rule(this_rule);
+    let parent_rule = this_rule.parent().and_then(|parent| parent.grand_parent());
 
     match &parent_rule {
         None => return vec![selector],
         Some(parent_rule) => {
             if let Some(parent_rule) = AnyCssAtRule::cast_ref(&parent_rule) {
                 let mut hasher = DefaultHasher::new();
-                let _hashed = &parent_rule.range().hash(&mut hasher);
+                parent_rule.range().hash(&mut hasher);
                 // Each @rule is unique scope
                 // Use a hash to create the comparable scope
                 parent_selectors.push(hasher.finish().to_string());
             }
             if let Some(parent_rule) = AnyCssRule::cast_ref(&parent_rule) {
                 match parent_rule {
-                    AnyCssRule::CssBogusRule(_) => {}
-                    AnyCssRule::CssAtRule(parent_rule) => {
-                        // Treat the AtRule as a selector
-                        let rule = parent_rule.rule().unwrap();
-                        parent_selectors.push(rule.text());
-                    }
                     AnyCssRule::CssNestedQualifiedRule(parent_rule) => {
                         for selector in parent_rule.prelude() {
                             if let Ok(selector) = selector {
@@ -304,6 +255,10 @@ fn resolve_nested_selectors(selector: String, this_rule: CssSyntaxNode) -> Vec<S
                                 parent_selectors.push(selector.text());
                             }
                         }
+                    }
+                    _ => {
+                        // Bogus rules are not handled
+                        // AtRule is handled by AnyCssAtRule above
                     }
                 }
             }
@@ -335,14 +290,6 @@ fn resolve_nested_selectors(selector: String, this_rule: CssSyntaxNode) -> Vec<S
             return vec![selector];
         }
     }
-}
-
-// This does not handle the highest level rules
-fn get_parent_rule(this_rule: CssSyntaxNode) -> Option<CssSyntaxNode> {
-    if let Some(parent_list) = this_rule.parent() {
-        return parent_list.grand_parent();
-    }
-    return None;
 }
 
 fn normalize_complex_selector(selector: AnyCssSelector) -> String {
