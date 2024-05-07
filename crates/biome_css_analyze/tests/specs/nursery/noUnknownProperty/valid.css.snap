@@ -1,0 +1,52 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: valid.css
+---
+# Input
+```css
+/* General properties */
+a {
+  color: green;
+}
+
+a {
+  fill: black;
+}
+
+/* Firefox-specific property */
+a {
+  -moz-align-self: center;
+}
+
+/* WebKit (Safari, Chrome, etc.) specific property */
+a {
+  -webkit-align-self: center;
+}
+
+/* Standard property */
+a {
+  align-self: center;
+}
+
+/* Additional examples of browser-specific properties */
+/* Internet Explorer specific property */
+a {
+  -ms-flex-align: center;
+}
+
+/* Opera specific property */
+a {
+  -o-link: #FF0000;
+}
+
+/* Microsoft Edge specific property */
+a {
+  -ms-scroll-limit: 5px 5px 0px 0px;
+}
+
+/* Chrome/Safari specific property */
+a {
+  -webkit-mask-image: url(mask.png);
+}
+
+```

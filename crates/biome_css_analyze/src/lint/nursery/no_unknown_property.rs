@@ -1,0 +1,86 @@
+use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic};
+use biome_console::markup;
+use biome_css_syntax::CssGenericProperty;
+use biome_rowan::{AstNode, TextRange};
+
+use crate::utils::{is_kown_properties, vendor_prefixed};
+
+declare_rule! {
+    /// Disallow unknown properties.
+    ///
+    /// This rule considers properties defined in the `CSS Specifications and browser specific properties` to be known.
+    /// https://github.com/known-css/known-css-properties#source
+    ///
+    ///
+    /// This rule ignores:
+    ///
+    /// variables ($sass, @less, --custom-property)
+    /// vendor-prefixed properties (e.g., -moz-align-self, -webkit-align-self)
+    ///
+    /// ## Examples
+    ///
+    /// ### Invalid
+    ///
+    /// ```css,expect_diagnostic
+    /// a {
+    ///   colr: blue;
+    /// }
+    ///
+    /// a {
+    ///   my-property: 1;
+    /// }
+    /// ```
+    ///
+    /// ### Valid
+    ///
+    /// ```css,expect_diagnostic
+    /// a {
+    ///   color: green;
+    /// }
+    ///
+    /// a {
+    ///   fill: black;
+    /// }
+    ///
+    /// a {
+    ///   -moz-align-self: center;
+    /// }
+    /// ```
+    ///
+    pub NoUnknownProperty {
+        version: "next",
+        name: "noUnknownProperty",
+        recommended: false,
+    }
+}
+
+impl Rule for NoUnknownProperty {
+    type Query = Ast<CssGenericProperty>;
+    type State = TextRange;
+    type Signals = Option<Self::State>;
+    type Options = ();
+
+    fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
+        let node = ctx.query();
+        let property_name = node.name().ok()?.text().to_lowercase();
+        if !is_kown_properties(&property_name) && !vendor_prefixed(&property_name) {
+            return Some(node.name().ok()?.range());
+        }
+        None
+    }
+
+    fn diagnostic(_: &RuleContext<Self>, range: &Self::State) -> Option<RuleDiagnostic> {
+        Some(
+            RuleDiagnostic::new(
+                rule_category!(),
+                range,
+                markup! {
+                    "Unknown property is not allowed"
+                },
+            )
+            .note(markup! {
+                "See "<Hyperlink href="https://stylelint.io/user-guide/rules/property-no-unknown/">"CSS Specifications and browser specific properties"</Hyperlink>" for more details."
+            }),
+        )
+    }
+}
