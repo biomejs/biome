@@ -41,12 +41,12 @@ function updateWasmPackage(target) {
 	const manifestPath = resolve(packageRoot, "package.json");
 	const manifest = JSON.parse(fs.readFileSync(manifestPath).toString("utf-8"));
 
-	const {version, repository} = rootManifest;
+	const {version} = rootManifest;
 	manifest.name = packageName;
 	manifest.version = version;
 
 	console.log(`Update manifest ${manifestPath}`);
-	fs.writeFileSync(manifestPath, JSON.stringify(manifest));
+	fs.writeFileSync(manifestPath, JSON.stringify(manifest, null, 2));
 }
 
 function writeManifest(packagePath) {
@@ -67,7 +67,7 @@ function writeManifest(packagePath) {
 	manifestData.optionalDependencies = Object.fromEntries(nativePackages);
 
 	console.log(`Update manifest ${manifestPath}`);
-	const content = JSON.stringify(manifestData);
+	const content = JSON.stringify(manifestData, null, 2);
 	fs.writeFileSync(manifestPath, content);
 }
 

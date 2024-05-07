@@ -1,6 +1,8 @@
 {
 	"$schema": "./packages/@biomejs/biome/configuration_schema.json",
-	"extends": ["@biomejs/shared/biome"],
+	"extends": [
+		"@biomejs/shared/biome"
+	],
 	"files": {
 		"ignore": [
 			"crates/**",
@@ -15,6 +17,13 @@
 		]
 	},
 	"formatter": {
-		"ignore": ["configuration-schema.json"]
+		"ignore": [
+			"configuration-schema.json"
+		]
+	},
+	"json": {
+		"formatter": {
+			"indentStyle": "space"
+		}
 	}
 }
