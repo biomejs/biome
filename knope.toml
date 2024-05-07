@@ -207,7 +207,7 @@ type = "CreateChangeFile"
 [[workflows]]
 name = "prepare-release"
 [[workflows.steps]]
-command = "git switch -c release"
+command = "git switch -c release/automated-ci"
 type = "Command"
 
 [[workflows.steps]]
@@ -232,7 +232,7 @@ type = "Command"
 command = "git commit -m \"chore: prepare release\""
 
 [[workflows.steps]]
-command = "git push --force --set-upstream origin release/automated-ci"
+command = "git push --force-with-lease --set-upstream origin release/automated-ci"
 type = "Command"
 
 [[workflows.steps]]
