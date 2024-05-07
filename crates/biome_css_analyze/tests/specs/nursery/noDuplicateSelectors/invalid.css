@@ -10,7 +10,7 @@ c,
 d,
 d {}
 
-/* duplicated selectors within one rule's selector list. 3 duplicates */
+/* duplicated selectors within one rule's selector list. 2 duplicates */
 .e,
 .e,
 .e {}
