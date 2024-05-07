@@ -32,7 +32,7 @@ pub(crate) use binary_like_expression::{
 use biome_formatter::{format_args, write, Buffer};
 use biome_js_syntax::JsSyntaxToken;
 use biome_js_syntax::{
-    AnyJsExpression, AnyJsStatement, JsCallExpression, JsInitializerClause, JsLanguage, Modifiers,
+    AnyJsExpression, AnyJsStatement, JsCallExpression, JsInitializerClause, JsLanguage, Modifier,
 };
 use biome_rowan::{AstNode, AstNodeList};
 use biome_text_size::TextSize;
@@ -206,11 +206,11 @@ pub(crate) fn sort_modifiers_by_precedence<List, Node>(list: &List) -> Vec<Node>
 where
     Node: AstNode<Language = JsLanguage>,
     List: AstNodeList<Language = JsLanguage, Node = Node>,
-    Modifiers: for<'a> From<&'a Node>,
+    Modifier: for<'a> From<&'a Node>,
 {
     let mut nodes_and_modifiers = list.iter().collect::<Vec<Node>>();
 
-    nodes_and_modifiers.sort_unstable_by_key(|node| Modifiers::from(node));
+    nodes_and_modifiers.sort_unstable_by_key(|node| Modifier::from(node));
 
     nodes_and_modifiers
 }

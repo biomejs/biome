@@ -45,6 +45,40 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 #### New features
 
+- [useNamingConvention](https://biomejs.dev/linter/rules/use-naming-convention/) now supports an option to enforce custom conventions ([#1900](https://github.com/biomejs/biome/issues/1900)).
+
+  For example, you can enforce the use of a prefix for private class members:
+
+  ```json
+  {
+  	"linter": {
+  		"rules": {
+  			"style": {
+  				"useNamingConvention": {
+  					"level": "error",
+  					"options": {
+  						"custom": [
+  							{
+  								"selector": {
+  									"kind": "classMember",
+  									"modifiers": ["private"]
+  								},
+  								"match": "_(.*)",
+                  "formats": ["camelCase"]
+  							}
+  						]
+  					}
+  				}
+  			}
+  		}
+  	}
+  }
+  ```
+
+  Please, find more details in the [rule documentation](https://biomejs.dev/linter/rules/use-naming-convention/#conventions).
+
+  Contributed by @Conaclos
+
 - Add [nursery/useThrowNewError](https://biomejs.dev/linter/rules/use-throw-new-error/).
   Contributed by @minht11
 

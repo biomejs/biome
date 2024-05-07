@@ -157,6 +157,7 @@ bpaf               = { version = "0.9.9", features = ["derive"] }
 countme            = "3.0.1"
 crossbeam          = "0.8.4"
 dashmap            = "5.4.0"
+enumflags2         = "0.7.3"
 getrandom          = "0.2.14"
 ignore             = "0.4.21"
 indexmap           = { version = "2.2.6", features = ["serde"] }
@@ -170,12 +171,12 @@ quote              = "1.0.36"
 rayon              = "1.8.1"
 regex              = "1.10.4"
 rustc-hash         = "1.1.0"
-schemars           = "0.8.17"
+schemars           = { version = "0.8.17", features = ["indexmap2", "smallvec"] }
 serde              = { version = "1.0.200", features = ["derive"] }
 serde_json         = "1.0.116"
 similar            = "2.5.0"
 slotmap            = "1.0.7"
-smallvec           = { version = "1.10.0", features = ["union", "const_new"] }
+smallvec           = { version = "1.10.0", features = ["union", "const_new", "serde"] }
 syn                = "1.0.109"
 termcolor          = "1.4.1"
 tokio              = "1.36.0"

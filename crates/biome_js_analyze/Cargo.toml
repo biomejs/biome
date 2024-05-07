@@ -15,7 +15,7 @@ biome_analyze            = { workspace = true }
 biome_aria               = { workspace = true }
 biome_console            = { workspace = true }
 biome_control_flow       = { workspace = true }
-biome_deserialize        = { workspace = true }
+biome_deserialize        = { workspace = true, features = ["smallvec"] }
 biome_deserialize_macros = { workspace = true }
 biome_diagnostics        = { workspace = true }
 biome_js_factory         = { workspace = true }
@@ -26,8 +26,11 @@ biome_rowan              = { workspace = true }
 biome_string_case        = { workspace = true }
 biome_suppression        = { workspace = true }
 biome_unicode_table      = { workspace = true }
+bitflags                 = { workspace = true }
+enumflags2               = { workspace = true }
 lazy_static              = { workspace = true }
 natord                   = "1.0.9"
+regex                    = { workspace = true }
 roaring                  = "0.10.4"
 rustc-hash               = { workspace = true }
 schemars                 = { workspace = true, optional = true }

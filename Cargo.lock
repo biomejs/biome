@@ -329,6 +329,7 @@ dependencies = [
  "indexmap 2.2.6",
  "schemars",
  "serde",
+ "smallvec",
 ]
 
 [[package]]
@@ -597,9 +598,12 @@ dependencies = [
  "biome_suppression",
  "biome_test_utils",
  "biome_unicode_table",
+ "bitflags 2.5.0",
+ "enumflags2",
  "insta",
  "lazy_static",
  "natord",
+ "regex",
  "roaring",
  "rustc-hash",
  "schemars",
@@ -692,6 +696,7 @@ dependencies = [
  "biome_js_factory",
  "biome_js_parser",
  "biome_rowan",
+ "enumflags2",
  "schemars",
  "serde",
 ]
@@ -1553,6 +1558,26 @@ name = "encode_unicode"
 version = "0.3.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a357d28ed41a50f9c765dbfe56cbc04a64e53e5fc58ba79fbc34c10ef3df831f"
+
+[[package]]
+name = "enumflags2"
+version = "0.7.9"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "3278c9d5fb675e0a51dabcf4c0d355f692b064171535ba72361be1528a9d8e8d"
+dependencies = [
+ "enumflags2_derive",
+]
+
+[[package]]
+name = "enumflags2_derive"
+version = "0.7.9"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "5c785274071b1b420972453b306eeca06acf4633829db4223b58a2a8c5953bc4"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn 2.0.59",
+]
 
 [[package]]
 name = "env_logger"
@@ -2882,9 +2907,11 @@ checksum = "7f55c82c700538496bdc329bb4918a81f87cc8888811bd123cf325a0f2f8d309"
 dependencies = [
  "dyn-clone",
  "indexmap 1.9.3",
+ "indexmap 2.2.6",
  "schemars_derive",
  "serde",
  "serde_json",
+ "smallvec",
 ]
 
 [[package]]
@@ -3073,6 +3100,9 @@ name = "smallvec"
 version = "1.10.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a507befe795404456341dfab10cef66ead4c041f62b8b11bbb92bffe5d0953e0"
+dependencies = [
+ "serde",
+]
 
 [[package]]
 name = "socket2"

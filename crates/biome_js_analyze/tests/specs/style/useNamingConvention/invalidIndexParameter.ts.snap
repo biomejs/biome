@@ -25,8 +25,6 @@ invalidIndexParameter.ts:2:6 lint/style/useNamingConvention  FIXABLE  ━━━�
     3 │ 
     4 │     [CONSTANT_CASE: number]: unknown
   
-  i The name could be renamed to `pascalCase`.
-  
   i Safe fix: Rename this symbol in camelCase.
   
     1 1 │   export interface X {
@@ -49,8 +47,6 @@ invalidIndexParameter.ts:4:6 lint/style/useNamingConvention  FIXABLE  ━━━�
       │      ^^^^^^^^^^^^^
     5 │ 
     6 │     [snake_case: symbol]: unknown
-  
-  i The name could be renamed to `constantCase`.
   
   i Safe fix: Rename this symbol in camelCase.
   
@@ -75,8 +71,6 @@ invalidIndexParameter.ts:6:6 lint/style/useNamingConvention  FIXABLE  ━━━�
       │      ^^^^^^^^^^
     7 │ }
   
-  i The name could be renamed to `snakeCase`.
-  
   i Safe fix: Rename this symbol in camelCase.
   
     4 4 │       [CONSTANT_CASE: number]: unknown
@@ -87,5 +81,3 @@ invalidIndexParameter.ts:6:6 lint/style/useNamingConvention  FIXABLE  ━━━�
   
 
 ```
-
-

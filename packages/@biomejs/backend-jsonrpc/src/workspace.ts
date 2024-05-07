@@ -1743,9 +1743,13 @@ export interface FilenamingConventionOptions {
  */
 export interface NamingConventionOptions {
 	/**
+	 * Custom conventions.
+	 */
+	conventions: Convention[];
+	/**
 	 * Allowed cases for _TypeScript_ `enum` member names.
 	 */
-	enumMemberCase: EnumMemberCase;
+	enumMemberCase: Format;
 	/**
 	 * If `false`, then non-ASCII characters are allowed.
 	 */
@@ -1783,10 +1787,28 @@ For example, for React's `useRef()` hook the value would be `true`, while for `u
 }
 export type ConsistentArrayType = "shorthand" | "generic";
 export type FilenameCases = FilenameCase[];
+export interface Convention {
+	/**
+	 * String cases to enforce
+	 */
+	formats: Formats;
+	/**
+	 * Regular expression to enforce
+	 */
+	match?: Regex;
+	/**
+	 * Declarations concerned by this convention
+	 */
+	selector: Selector;
+}
 /**
- * Supported cases for TypeScript `enum` member names.
+ * Supported cases.
  */
-export type EnumMemberCase = "PascalCase" | "CONSTANT_CASE" | "camelCase";
+export type Format =
+	| "camelCase"
+	| "CONSTANT_CASE"
+	| "PascalCase"
+	| "snake_case";
 export type StableHookResult = boolean | number[];
 /**
  * Supported cases for file names.
@@ -1797,6 +1819,69 @@ export type FilenameCase =
 	| "kebab-case"
 	| "PascalCase"
 	| "snake_case";
+export type Formats = Format[];
+export type Regex = string;
+export interface Selector {
+	/**
+	 * Declaration kind
+	 */
+	kind: Kind;
+	/**
+	 * Modifiers used on the declaration
+	 */
+	modifiers: Modifiers;
+	/**
+	 * Scope of the declaration
+	 */
+	scope: Scope;
+}
+export type Kind =
+	| "class"
+	| "enum"
+	| "interface"
+	| "enumMember"
+	| "importNamespace"
+	| "exportNamespace"
+	| "variable"
+	| "const"
+	| "let"
+	| "using"
+	| "var"
+	| "catchParameter"
+	| "indexParameter"
+	| "exportAlias"
+	| "importAlias"
+	| "classGetter"
+	| "classSetter"
+	| "classMethod"
+	| "objectLiteralProperty"
+	| "objectLiteralGetter"
+	| "objectLiteralSetter"
+	| "objectLiteralMethod"
+	| "typeAlias"
+	| "any"
+	| "typeLike"
+	| "function"
+	| "namespaceLike"
+	| "namespace"
+	| "functionParameter"
+	| "typeParameter"
+	| "classMember"
+	| "classProperty"
+	| "objectLiteralMember"
+	| "typeMember"
+	| "typeGetter"
+	| "typeProperty"
+	| "typeSetter"
+	| "typeMethod";
+export type Modifiers = RestrictedModifier[];
+export type Scope = "any" | "global";
+export type RestrictedModifier =
+	| "abstract"
+	| "private"
+	| "protected"
+	| "readonly"
+	| "static";
 export interface RegisterProjectFolderParams {
 	path?: string;
 	setAsCurrentWorkspace: boolean;
