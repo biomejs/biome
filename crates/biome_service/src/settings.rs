@@ -119,7 +119,7 @@ impl WorkspaceSettings {
             !self.data.is_empty(),
             "You must have at least one workspace."
         );
-        debug!("Current key: {:?}", self.current_project);
+        trace!("Current key: {:?}", self.current_project);
         let iter = self.data.iter();
         for (key, path_to_settings) in iter {
             trace!(
@@ -127,12 +127,12 @@ impl WorkspaceSettings {
                 path_to_settings.path,
                 path
             );
-            debug!("Iter key: {:?}", key);
+            trace!("Iter key: {:?}", key);
             if key == self.current_project {
                 continue;
             }
             if path.strip_prefix(path_to_settings.path.as_path()).is_ok() {
-                debug!("Update workspace to {:?}", key);
+                trace!("Update workspace to {:?}", key);
                 return Some(key);
             }
         }
