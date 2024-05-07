@@ -35,6 +35,9 @@ pub struct StructFieldAttrs {
 
     /// Optional validation function to be called on the field value.
     pub validate: Option<Path>,
+
+    /// Flattens the field into the parent object.
+    pub flatten: bool,
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -62,6 +65,8 @@ impl TryFrom<&Vec<Attribute>> for StructFieldAttrs {
                                 opts.passthrough_name = true;
                             } else if path.is_ident("bail_on_error") {
                                 opts.bail_on_error = true;
+                            } else if path.is_ident("flatten") {
+                                opts.flatten = true;
                             } else {
                                 let path_str = path.to_token_stream().to_string();
                                 return Err(Error::new(

@@ -71,6 +71,7 @@ impl DeriveInput {
                 }
                 Data::Struct(data) => {
                     if data.fields.iter().all(|field| field.ident.is_some()) {
+                        let mut flatten_field = None;
                         let fields = data
                             .fields
                             .into_iter()
@@ -83,6 +84,16 @@ impl DeriveInput {
                                 let key = attrs
                                     .rename
                                     .unwrap_or_else(|| Case::Camel.convert(&ident.to_string()));
+
+                                if flatten_field.is_some() && attrs.flatten {
+                                    abort!(
+                                        ident,
+                                        "Cannot have multiple fields with #[deserializable(flatten)]"
+                                    )
+                                }
+                                if attrs.flatten {
+                                    flatten_field = Some(ident.clone());
+                                }
 
                                 DeserializableFieldData {
                                     bail_on_error: attrs.bail_on_error,
@@ -99,6 +110,7 @@ impl DeriveInput {
 
                         DeserializableData::Struct(DeserializableStructData {
                             fields,
+                            flatten_field,
                             with_validator: attrs.with_validator,
                             unknown_fields: attrs.unknown_fields.unwrap_or_default(),
                         })
@@ -151,6 +163,7 @@ pub struct DeserializableNewtypeData {
 #[derive(Debug)]
 pub struct DeserializableStructData {
     fields: Vec<DeserializableFieldData>,
+    flatten_field: Option<Ident>,
     with_validator: bool,
     unknown_fields: UnknownFields,
 }
@@ -415,26 +428,50 @@ fn generate_deserializable_struct(
     } else {
         validator
     };
-    let unknown_key_handler = match data.unknown_fields {
-        UnknownFields::Warn | UnknownFields::Deny => {
-            let with_customseverity = if data.unknown_fields == UnknownFields::Warn {
-                quote! { .with_custom_severity(biome_diagnostics::Severity::Warning) }
-            } else {
-                quote! {}
-            };
-            quote! {
-                unknown_key => {
-                    const ALLOWED_KEYS: &[&str] = &[#(#allowed_keys),*];
-                    diagnostics.push(DeserializationDiagnostic::new_unknown_key(
-                        unknown_key,
-                        key.range(),
-                        ALLOWED_KEYS,
-                    )#with_customseverity)
-                }
+    let unknown_key_handler = if data.flatten_field.is_some() {
+        quote! {
+            unknown_key => {
+                let key_text = Text::deserialize(&key, "", diagnostics)?;
+                let value = Deserializable::deserialize(&value, key_text.text(), diagnostics)?;
+                unknown_fields.push((key_text, value));
             }
         }
-        UnknownFields::Allow => quote! { _ => {} },
+    } else {
+        match data.unknown_fields {
+            UnknownFields::Warn | UnknownFields::Deny => {
+                let with_customseverity = if data.unknown_fields == UnknownFields::Warn {
+                    quote! { .with_custom_severity(biome_diagnostics::Severity::Warning) }
+                } else {
+                    quote! {}
+                };
+                quote! {
+                    unknown_key => {
+                        const ALLOWED_KEYS: &[&str] = &[#(#allowed_keys),*];
+                        diagnostics.push(DeserializationDiagnostic::new_unknown_key(
+                            unknown_key,
+                            key.range(),
+                            ALLOWED_KEYS,
+                        )#with_customseverity)
+                    }
+                }
+            }
+            UnknownFields::Allow => quote! { _ => {} },
+        }
     };
+
+    let (unknown_fields_initializer, collect_unknown_fields) =
+        if let Some(field) = data.flatten_field {
+            (
+                quote! {
+                    let mut unknown_fields = vec![];
+                },
+                quote! {
+                    result.#field = unknown_fields.into_iter().collect();
+                },
+            )
+        } else {
+            (quote! {}, quote! {})
+        };
 
     let tuple_type = generate_generics_tuple(&generics);
     let trait_bounds = generate_trait_bounds(&generics);
@@ -463,6 +500,7 @@ fn generate_deserializable_struct(
                     ) -> Option<Self::Output> {
                         use biome_deserialize::{Deserializable, DeserializationDiagnostic, Text};
                         let mut result: Self::Output = Self::Output::default();
+                        #unknown_fields_initializer
                         for (key, value) in members.flatten() {
                             let Some(key_text) = Text::deserialize(&key, "", diagnostics) else {
                                 continue;
@@ -473,6 +511,7 @@ fn generate_deserializable_struct(
                             }
                         }
                         #validator
+                        #collect_unknown_fields
                         Some(result)
                     }
                 }
