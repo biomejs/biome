@@ -19,6 +19,8 @@ declare_rule! {
     /// Switch clauses in `switch` statements fall through by default.
     /// This can lead to unexpected behavior when forgotten.
     ///
+    /// > The rule doesn't take `process.exit()` in consideration.
+    ///
     /// ## Examples
     ///
     /// ### Invalid

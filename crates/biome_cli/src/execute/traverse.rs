@@ -17,6 +17,7 @@ use crossbeam::channel::{unbounded, Receiver, Sender};
 use rustc_hash::FxHashSet;
 use std::sync::atomic::AtomicU32;
 use std::{
+    env::current_dir,
     ffi::OsString,
     panic::catch_unwind,
     path::{Path, PathBuf},
@@ -28,22 +29,32 @@ use std::{
     time::{Duration, Instant},
 };
 
-///
 pub(crate) fn traverse(
     execution: &Execution,
     session: &mut CliSession,
     cli_options: &CliOptions,
-    inputs: Vec<OsString>,
+    mut inputs: Vec<OsString>,
 ) -> Result<(TraversalSummary, Vec<Error>), CliDiagnostic> {
     init_thread_pool();
-    if inputs.is_empty()
-        && execution.as_stdin_file().is_none()
-        && !cli_options.no_errors_on_unmatched
-    {
-        return Err(CliDiagnostic::missing_argument(
-            "<INPUT>",
-            format!("{}", execution.traversal_mode),
-        ));
+
+    if inputs.is_empty() {
+        match execution.traversal_mode {
+            TraversalMode::Check { .. }
+            | TraversalMode::Lint { .. }
+            | TraversalMode::Format { .. }
+            | TraversalMode::CI { .. } => match current_dir() {
+                Ok(current_dir) => inputs.push(current_dir.into_os_string()),
+                Err(err) => return Err(CliDiagnostic::io_error(err)),
+            },
+            _ => {
+                if execution.as_stdin_file().is_none() && !cli_options.no_errors_on_unmatched {
+                    return Err(CliDiagnostic::missing_argument(
+                        "<INPUT>",
+                        format!("{}", execution.traversal_mode),
+                    ));
+                }
+            }
+        }
     }
 
     let (interner, recv_files) = PathInterner::new();

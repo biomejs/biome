@@ -278,6 +278,7 @@ The following commit prefixes are supported:
 - `perf:`, project performance
 - `refactor:`, refactor of the code without change in functionality
 - `release:`, release of a new version
+- `revert:`, revert a previous change
 - `test:`, a test update
 
 Below are examples of well-formatted commits:

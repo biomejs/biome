@@ -237,12 +237,18 @@ pub struct ConfigurationPayload {
     pub external_resolution_base_path: PathBuf,
 }
 
-#[derive(Debug, Default, PartialEq)]
+#[derive(Debug, Default, PartialEq, Clone)]
 pub enum ConfigurationPathHint {
     /// The default mode, not having a configuration file is not an error.
     /// The path will be filled with the working directory if it is not filled at the time of usage.
     #[default]
     None,
+
+    /// Very similar to [ConfigurationPathHint::None]. However, the path provided by this variant
+    /// will be used as **working directory**, which means that all globs defined in the configuration
+    /// will use **this path** as base path.
+    FromWorkspace(PathBuf),
+
     /// The configuration path provided by the LSP, not having a configuration file is not an error.
     /// The path will always be a directory path.
     FromLsp(PathBuf),
@@ -296,7 +302,7 @@ mod test {
             Test {},
             ResolveOptions {
                 condition_names: vec!["node".to_string(), "import".to_string()],
-                extensions: vec!["*.json".to_string()],
+                extensions: vec![".json".to_string()],
                 ..ResolveOptions::default()
             },
         );

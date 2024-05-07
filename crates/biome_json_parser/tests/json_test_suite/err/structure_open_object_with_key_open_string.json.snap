@@ -1,0 +1,114 @@
+---
+source: crates/biome_json_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```json
+{
+    "key": 0,
+    "a
+}
+```
+
+
+## AST
+
+```
+JsonRoot {
+    bom_token: missing (optional),
+    value: JsonArrayValue {
+        l_brack_token: missing (required),
+        elements: JsonArrayElementList [
+            JsonObjectValue {
+                l_curly_token: L_CURLY@0..1 "{" [] [],
+                json_member_list: JsonMemberList [
+                    JsonMember {
+                        name: JsonMemberName {
+                            value_token: JSON_STRING_LITERAL@1..11 "\"key\"" [Newline("\n"), Whitespace("    ")] [],
+                        },
+                        colon_token: COLON@11..13 ":" [] [Whitespace(" ")],
+                        value: JsonNumberValue {
+                            value_token: JSON_NUMBER_LITERAL@13..14 "0" [] [],
+                        },
+                    },
+                    COMMA@14..15 "," [] [],
+                ],
+                r_curly_token: missing (required),
+            },
+            missing separator,
+            JsonBogusValue {
+                items: [
+                    ERROR_TOKEN@15..22 "\"a" [Newline("\n"), Whitespace("    ")] [],
+                ],
+            },
+            missing separator,
+            JsonBogusValue {
+                items: [
+                    R_CURLY@22..24 "}" [Newline("\n")] [],
+                ],
+            },
+        ],
+        r_brack_token: missing (required),
+    },
+    eof_token: EOF@24..24 "" [] [],
+}
+```
+
+## CST
+
+```
+0: JSON_ROOT@0..24
+  0: (empty)
+  1: JSON_ARRAY_VALUE@0..24
+    0: (empty)
+    1: JSON_ARRAY_ELEMENT_LIST@0..24
+      0: JSON_OBJECT_VALUE@0..15
+        0: L_CURLY@0..1 "{" [] []
+        1: JSON_MEMBER_LIST@1..15
+          0: JSON_MEMBER@1..14
+            0: JSON_MEMBER_NAME@1..11
+              0: JSON_STRING_LITERAL@1..11 "\"key\"" [Newline("\n"), Whitespace("    ")] []
+            1: COLON@11..13 ":" [] [Whitespace(" ")]
+            2: JSON_NUMBER_VALUE@13..14
+              0: JSON_NUMBER_LITERAL@13..14 "0" [] []
+          1: COMMA@14..15 "," [] []
+        2: (empty)
+      1: (empty)
+      2: JSON_BOGUS_VALUE@15..22
+        0: ERROR_TOKEN@15..22 "\"a" [Newline("\n"), Whitespace("    ")] []
+      3: (empty)
+      4: JSON_BOGUS_VALUE@22..24
+        0: R_CURLY@22..24 "}" [Newline("\n")] []
+    2: (empty)
+  2: EOF@24..24 "" [] []
+
+```
+
+## Diagnostics
+
+```
+structure_open_object_with_key_open_string.json:3:5 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Missing closing quote
+  
+    1 │ {
+    2 │     "key": 0,
+  > 3 │     "a
+      │     ^^
+    4 │ }
+  
+  i The closing quote must be on the same line.
+  
+structure_open_object_with_key_open_string.json:4:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × End of file expected
+  
+    2 │     "key": 0,
+    3 │     "a
+  > 4 │ }
+      │ ^
+  
+  i Use an array for a sequence of values: `[1, 2]`
+  
+```

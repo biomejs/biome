@@ -120,7 +120,6 @@ function inlineComment() {
   ) || 42
 }
 
-
 function multilineBlockSameLine() {
   return (
     /**

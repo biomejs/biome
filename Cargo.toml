@@ -1,7 +1,7 @@
 [workspace]
 # Use the newer version of the cargo resolver
 # https://doc.rust-lang.org/cargo/reference/resolver.html#resolver-versions
-members  = ["crates/*", "xtask/bench", "xtask/codegen", "xtask/coverage", "xtask/libs_bench", "xtask/contributors"]
+members  = ["crates/*", "xtask/bench", "xtask/codegen", "xtask/coverage", "xtask/libs_bench"]
 resolver = "2"
 
 [workspace.lints.rust]
@@ -14,6 +14,7 @@ unused_macro_rules                     = "warn"
 
 [workspace.lints.clippy]
 cargo_common_metadata   = "allow"
+empty_docs              = "allow" # there are some false positives inside biome_wasm
 multiple_crate_versions = "allow"
 
 # pedantic
@@ -65,11 +66,12 @@ float_cmp_const                 = "warn"
 get_unwrap                      = "warn"
 infinite_loop                   = "warn"
 lossy_float_literal             = "warn"
-mem_forget                      = "warn"
 rc_buffer                       = "warn"
 rc_mutex                        = "warn"
 rest_pat_in_fully_bound_structs = "warn"
 verbose_file_reads              = "warn"
+# https://github.com/rustwasm/wasm-bindgen/issues/3944
+#mem_forget                      = "warn"
 
 [workspace.package]
 authors    = ["Biome Developers and Contributors"]
@@ -149,16 +151,18 @@ biome_ungrammar      = { path = "./crates/biome_ungrammar" }
 tests_macros         = { path = "./crates/tests_macros" }
 
 # Crates needed in the workspace
+anyhow             = "1.0.82"
 bitflags           = "2.5.0"
 bpaf               = { version = "0.9.9", features = ["derive"] }
 countme            = "3.0.1"
 crossbeam          = "0.8.4"
 dashmap            = "5.4.0"
+getrandom          = "0.2.14"
 ignore             = "0.4.21"
-indexmap           = "1.9.3"
+indexmap           = { version = "2.2.6", features = ["serde"] }
 insta              = "1.38.0"
 lazy_static        = "1.4.0"
-oxc_resolver       = "1.4.0"
+oxc_resolver       = "1.7.0"
 proc-macro2        = "1.0.81"
 quickcheck         = "1.0.3"
 quickcheck_macros  = "1.0.0"
@@ -166,17 +170,19 @@ quote              = "1.0.36"
 rayon              = "1.8.1"
 regex              = "1.10.4"
 rustc-hash         = "1.1.0"
-schemars           = { version = "0.8.12" }
-serde              = { version = "1.0.198", features = ["derive"] }
+schemars           = "0.8.17"
+serde              = { version = "1.0.200", features = ["derive"] }
 serde_json         = "1.0.116"
 similar            = "2.5.0"
 slotmap            = "1.0.7"
 smallvec           = { version = "1.10.0", features = ["union", "const_new"] }
 syn                = "1.0.109"
-tokio              = { version = "1.36.0" }
-tracing            = { version = "0.1.37", default-features = false, features = ["std"] }
+termcolor          = "1.4.1"
+tokio              = "1.36.0"
+tracing            = { version = "0.1.40", default-features = false, features = ["std"] }
 tracing-subscriber = "0.3.18"
 unicode-bom        = "2.0.3"
+unicode-width      = "0.1.12"
 
 [profile.dev.package.biome_wasm]
 debug     = true
@@ -189,3 +195,7 @@ opt-level = "s"
 [profile.release.package.biome_wasm]
 debug     = false
 opt-level = 3
+
+#[patch.crates-io]
+#grit-pattern-matcher = { path = "../gritql/crates/grit-pattern-matcher" }
+#grit-util            = { path = "../gritql/crates/grit-util" }

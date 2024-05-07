@@ -1,0 +1,8 @@
+a::pseudo { }
+a::Pseudo { }
+a::pSeUdO { }
+a::PSEUDO { }
+a::element { }
+a:hover::element { }
+a,
+b > .foo::error { }

@@ -7,12 +7,12 @@ mod generated;
 mod syntax_ext;
 mod syntax_node;
 
-use biome_rowan::{AstNode, RawSyntaxKind};
 pub use biome_rowan::{TextLen, TextRange, TextSize, TokenAtOffset, TriviaPieceKind, WalkEvent};
 pub use generated::*;
 pub use syntax_ext::*;
 pub use syntax_node::*;
 
+use biome_rowan::{AstNode, RawSyntaxKind, SyntaxKind};
 use GritSyntaxKind::*;
 
 impl From<u16> for GritSyntaxKind {
@@ -29,13 +29,6 @@ impl From<GritSyntaxKind> for u16 {
 }
 
 impl GritSyntaxKind {
-    pub fn is_trivia(self) -> bool {
-        matches!(
-            self,
-            GritSyntaxKind::NEWLINE | GritSyntaxKind::WHITESPACE | GritSyntaxKind::COMMENT
-        )
-    }
-
     /// Returns `true` for any contextual (await) or non-contextual keyword
     #[inline]
     pub const fn is_keyword(self) -> bool {
@@ -98,6 +91,13 @@ impl biome_rowan::SyntaxKind for GritSyntaxKind {
 
     fn is_list(&self) -> bool {
         GritSyntaxKind::is_list(*self)
+    }
+
+    fn is_trivia(self) -> bool {
+        matches!(
+            self,
+            GritSyntaxKind::NEWLINE | GritSyntaxKind::WHITESPACE | GritSyntaxKind::COMMENT
+        )
     }
 
     fn to_string(&self) -> Option<&'static str> {

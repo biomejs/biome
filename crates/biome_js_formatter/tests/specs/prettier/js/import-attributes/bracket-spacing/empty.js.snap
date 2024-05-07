@@ -1,0 +1,26 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: js/import-attributes/bracket-spacing/empty.js
+---
+# Input
+
+```js
+export * as bar from "bar.json" with { }
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1 +1 @@
+-export * as bar from "bar.json" with {};
++export * as bar from "bar.json";
+```
+
+# Output
+
+```js
+export * as bar from "bar.json";
+```

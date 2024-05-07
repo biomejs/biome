@@ -8,6 +8,7 @@ use biome_html_syntax::HtmlSyntaxKind::{
 use biome_html_syntax::{HtmlSyntaxKind, TextLen, TextSize, T};
 use biome_parser::diagnostic::ParseDiagnostic;
 use biome_parser::lexer::{Lexer, LexerCheckpoint, LexerWithCheckpoint, TokenFlags};
+use biome_rowan::SyntaxKind;
 use biome_unicode_table::lookup_byte;
 use biome_unicode_table::Dispatch::{BSL, QOT, UNI, WHS};
 use std::ops::Add;
@@ -207,7 +208,7 @@ impl<'src> HtmlLexer<'src> {
                 WHS if matches!(chr, b'\n' | b'\r') => {
                     let unterminated =
                         ParseDiagnostic::new("Missing closing quote", start..self.text_position())
-                            .with_detail(self.position..self.position + 1, "line breaks here");
+                            .with_hint("The closing quote must be on the same line.");
 
                     self.diagnostics.push(unterminated);
 

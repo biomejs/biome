@@ -23,7 +23,7 @@ expression: content
 
     function SubmitButton() {
         return <button>Submit</button>;
-    }    
+    }
     
 ```
 
@@ -48,7 +48,7 @@ fix.jsx:3:16 lint/a11y/useButtonType ━━━━━━━━━━━━━━�
     2 │     function SubmitButton() {
   > 3 │         return <button>Submit</button>;
       │                ^^^^^^^^
-    4 │     }····
+    4 │     }
     5 │     
   
   i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.

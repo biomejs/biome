@@ -2,7 +2,6 @@
 source: crates/biome_json_parser/tests/spec_test.rs
 expression: snapshot
 ---
-
 ## Input
 
 ```json
@@ -19,8 +18,10 @@ JsonRoot {
     value: JsonArrayValue {
         l_brack_token: L_BRACK@0..1 "[" [] [],
         elements: JsonArrayElementList [
-            JsonStringValue {
-                value_token: JSON_STRING_LITERAL@1..5 "\"new" [] [],
+            JsonBogusValue {
+                items: [
+                    ERROR_TOKEN@1..5 "\"new" [] [],
+                ],
             },
             missing separator,
             JsonBogusValue {
@@ -29,8 +30,10 @@ JsonRoot {
                 ],
             },
             missing separator,
-            JsonStringValue {
-                value_token: JSON_STRING_LITERAL@10..12 "\"]" [] [],
+            JsonBogusValue {
+                items: [
+                    ERROR_TOKEN@10..12 "\"]" [] [],
+                ],
             },
         ],
         r_brack_token: missing (required),
@@ -47,14 +50,14 @@ JsonRoot {
   1: JSON_ARRAY_VALUE@0..12
     0: L_BRACK@0..1 "[" [] []
     1: JSON_ARRAY_ELEMENT_LIST@1..12
-      0: JSON_STRING_VALUE@1..5
-        0: JSON_STRING_LITERAL@1..5 "\"new" [] []
+      0: JSON_BOGUS_VALUE@1..5
+        0: ERROR_TOKEN@1..5 "\"new" [] []
       1: (empty)
       2: JSON_BOGUS_VALUE@5..10
         0: IDENT@5..10 "line" [Newline("\n")] []
       3: (empty)
-      4: JSON_STRING_VALUE@10..12
-        0: JSON_STRING_LITERAL@10..12 "\"]" [] []
+      4: JSON_BOGUS_VALUE@10..12
+        0: ERROR_TOKEN@10..12 "\"]" [] []
     2: (empty)
   2: EOF@12..12 "" [] []
 
@@ -71,12 +74,7 @@ string_unescaped_newline.json:1:2 parse ━━━━━━━━━━━━━�
       │  ^^^^
     2 │ line"]
   
-  i line breaks here
-  
-  > 1 │ ["new
-      │      
-  > 2 │ line"]
-      │ 
+  i The closing quote must be on the same line.
   
 string_unescaped_newline.json:2:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -117,5 +115,3 @@ string_unescaped_newline.json:2:7 parse ━━━━━━━━━━━━━�
       │       
   
 ```
-
-

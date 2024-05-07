@@ -914,8 +914,7 @@ mod tests {
     type MappedElement = Vec<(Option<f64>, Option<String>)>;
 
     fn map_elements<'a>(
-        actual: impl Iterator<Item = AstSeparatedElement<RawLanguage, LiteralExpression>>
-            + DoubleEndedIterator,
+        actual: impl DoubleEndedIterator<Item = AstSeparatedElement<RawLanguage, LiteralExpression>>,
         expected: impl IntoIterator<Item = (Option<f64>, Option<&'a str>)>,
         revert: bool,
     ) -> (MappedElement, MappedElement) {
@@ -947,8 +946,7 @@ mod tests {
     }
 
     fn assert_elements<'a>(
-        actual: impl Iterator<Item = AstSeparatedElement<RawLanguage, LiteralExpression>>
-            + DoubleEndedIterator,
+        actual: impl DoubleEndedIterator<Item = AstSeparatedElement<RawLanguage, LiteralExpression>>,
         expected: impl IntoIterator<Item = (Option<f64>, Option<&'a str>)>,
     ) {
         let (actual, expected) = map_elements(actual, expected, false);
@@ -957,8 +955,7 @@ mod tests {
     }
 
     fn assert_rev_elements<'a>(
-        actual: impl Iterator<Item = AstSeparatedElement<RawLanguage, LiteralExpression>>
-            + DoubleEndedIterator,
+        actual: impl DoubleEndedIterator<Item = AstSeparatedElement<RawLanguage, LiteralExpression>>,
         expected: impl IntoIterator<Item = (Option<f64>, Option<&'a str>)>,
     ) {
         let (actual, expected) = map_elements(actual, expected, true);

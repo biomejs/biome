@@ -4,7 +4,8 @@ mod tests;
 
 use biome_graphql_syntax::{GraphqlSyntaxKind, GraphqlSyntaxKind::*, TextLen, TextSize, T};
 use biome_parser::diagnostic::ParseDiagnostic;
-use biome_parser::lexer::{Lexer, LexerCheckpoint, TokenFlags};
+use biome_parser::lexer::{Lexer, LexerCheckpoint, LexerWithCheckpoint, TokenFlags};
+use biome_rowan::SyntaxKind;
 use std::ops::Add;
 
 #[derive(Debug)]
@@ -14,6 +15,9 @@ pub struct GraphqlLexer<'src> {
 
     /// The start byte position in the source text of the next token.
     position: usize,
+
+    /// If the source starts with a Unicode BOM, this is the number of bytes for that token.
+    unicode_bom_length: usize,
 
     /// Byte offset of the current token from the start of the source
     /// The range of the current token can be computed by
@@ -116,6 +120,20 @@ impl<'src> Lexer<'src> for GraphqlLexer<'src> {
     }
 }
 
+impl<'src> LexerWithCheckpoint<'src> for GraphqlLexer<'src> {
+    fn checkpoint(&self) -> LexerCheckpoint<Self::Kind> {
+        LexerCheckpoint {
+            position: TextSize::from(self.position as u32),
+            current_start: self.current_start,
+            current_flags: self.current_flags,
+            current_kind: self.current_kind,
+            after_line_break: self.has_preceding_line_break(),
+            unicode_bom_length: self.unicode_bom_length,
+            diagnostics_pos: self.diagnostics.len() as u32,
+        }
+    }
+}
+
 impl<'src> GraphqlLexer<'src> {
     /// Make a new lexer from a str, this is safe because strs are valid utf8
     pub fn from_str(source: &'src str) -> Self {
@@ -126,6 +144,7 @@ impl<'src> GraphqlLexer<'src> {
             current_flags: TokenFlags::empty(),
             position: 0,
             diagnostics: vec![],
+            unicode_bom_length: 0,
         }
     }
 
@@ -161,8 +180,12 @@ impl<'src> GraphqlLexer<'src> {
             b'#' => self.consume_comment(),
             _ if is_name_start(current) => self.consume_name(current),
             _ if is_number_start(current) => self.consume_number(current),
-            _ if self.position == 0 && self.consume_potential_bom(UNICODE_BOM).is_some() => {
-                UNICODE_BOM
+            _ if self.position == 0 => {
+                if let Some((bom, bom_size)) = self.consume_potential_bom(UNICODE_BOM) {
+                    self.unicode_bom_length = bom_size;
+                    return bom;
+                }
+                self.consume_unexpected_character()
             }
             _ => self.consume_unexpected_character(),
         }

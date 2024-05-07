@@ -17,6 +17,18 @@ declare_rule! {
     /// - `assert`
     /// - `assertEquals`
     ///
+    /// However, the rule will ignore the following assertion calls:
+    /// - `expect.any`
+    /// - `expect.anything`
+    /// - `expect.closeTo`
+    /// - `expect.arrayContaining`
+    /// - `expect.objectContaining`
+    /// - `expect.stringContaining`
+    /// - `expect.stringMatching`
+    /// - `expect.extend`
+    /// - `expect.addEqualityTesters`
+    /// - `expect.addSnapshotSerializer`
+    ///
     /// If the assertion function is imported, the rule will check if they are imported from:
     /// - `"chai"`
     /// - `"node:assert"`
@@ -91,7 +103,7 @@ declare_rule! {
     /// ```
     ///
     pub NoMisplacedAssertion {
-        version: "1.6.4",
+        version: "next",
         name: "noMisplacedAssertion",
         recommended: false,
         sources: &[RuleSource::EslintJest("no-standalone-expect")],
@@ -107,6 +119,18 @@ const SPECIFIERS: [&str; 6] = [
     "bun:test",
     "vitest",
     "/assert/mod.ts",
+];
+const EXCEPTION_MEMBERS_FOR_EXPECT: [&str; 10] = [
+    "any",
+    "anything",
+    "closeTo",
+    "arrayContaining",
+    "objectContaining",
+    "stringContaining",
+    "stringMatching",
+    "extend",
+    "addEqualityTesters",
+    "addSnapshotSerializer",
 ];
 
 impl Rule for NoMisplacedAssertion {
@@ -152,6 +176,7 @@ impl Rule for NoMisplacedAssertion {
                 return None;
             }
 
+            let is_exeption = is_exception_for_expect(node);
             let binding = model.binding(&assertion_call);
             if let Some(binding) = binding {
                 let ident = JsIdentifierBinding::cast_ref(binding.syntax())?;
@@ -167,10 +192,11 @@ impl Rule for NoMisplacedAssertion {
                             *specifier == source_text.text()
                         }
                     }))
+                    && !is_exeption
                 {
                     return Some(assertion_call.range());
                 }
-            } else if ASSERTION_FUNCTION_NAMES.contains(&call_text.text()) {
+            } else if ASSERTION_FUNCTION_NAMES.contains(&call_text.text()) && !is_exeption {
                 return Some(assertion_call.range());
             }
         }
@@ -203,5 +229,25 @@ fn may_extract_nested_expr(callee: AnyJsExpression) -> Option<AnyJsExpression> {
         AnyJsExpression::JsCallExpression(call_expr) => call_expr.callee().ok(),
         AnyJsExpression::JsTemplateExpression(template_expr) => template_expr.tag(),
         _ => Some(callee),
+    }
+}
+
+/// Returns whether the assertion call is an exception for the `expect` assertion function.
+fn is_exception_for_expect(node: &AnyJsExpression) -> bool {
+    let assertion_call = node.get_callee_object_identifier().unwrap();
+    let callee_text = assertion_call.syntax().parent().unwrap().text_trimmed();
+
+    let parent = node.syntax().parent().unwrap();
+    let last_token = parent.last_token().unwrap();
+    let last_token_text = last_token.text();
+
+    let member = node.get_callee_member_name().unwrap();
+    let member_text = member.text_trimmed();
+
+    if callee_text == "expect" {
+        EXCEPTION_MEMBERS_FOR_EXPECT.contains(&member_text)
+            || EXCEPTION_MEMBERS_FOR_EXPECT.contains(&last_token_text)
+    } else {
+        false
     }
 }

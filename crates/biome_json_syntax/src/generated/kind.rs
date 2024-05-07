@@ -44,6 +44,7 @@ pub enum JsonSyntaxKind {
     JSON_MEMBER_NAME,
     JSON_ARRAY_ELEMENT_LIST,
     JSON_BOGUS,
+    JSON_BOGUS_MEMBER_NAME,
     JSON_BOGUS_VALUE,
     #[doc(hidden)]
     __LAST,

@@ -7,6 +7,7 @@ use crate::constants::SUPPORTED_LANGUAGE_SET_STR;
 use biome_grit_syntax::{GritSyntaxKind, GritSyntaxKind::*, TextLen, TextRange, TextSize, T};
 use biome_parser::diagnostic::ParseDiagnostic;
 use biome_parser::lexer::{Lexer, LexerCheckpoint};
+use biome_rowan::SyntaxKind;
 use std::ops::Add;
 
 /// An extremely fast, lookup table based, lossless Grit lexer
@@ -536,7 +537,7 @@ impl<'src> GritLexer<'src> {
                 b'\n' | b'\r' => {
                     let unterminated =
                         ParseDiagnostic::new("Missing closing quote", start..self.text_position())
-                            .with_detail(self.position..self.position + 1, "line breaks here");
+                            .with_hint("The closing quote must be on the same line.");
 
                     self.diagnostics.push(unterminated);
 
@@ -861,7 +862,7 @@ impl<'src> GritLexer<'src> {
                 b'\n' | b'\r' => {
                     let unterminated =
                         ParseDiagnostic::new("Missing closing quote", start..self.text_position())
-                            .with_detail(self.position..self.position + 1, "line breaks here");
+                            .with_hint("The closing quote must be on the same line.");
 
                     self.diagnostics.push(unterminated);
 

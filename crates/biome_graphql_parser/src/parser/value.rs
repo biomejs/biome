@@ -100,6 +100,18 @@ impl ParseNodeList for ObjectValueMemberList {
 }
 
 #[inline]
+pub(crate) fn parse_default_value(p: &mut GraphqlParser) -> ParsedSyntax {
+    if !p.at(T![=]) {
+        return Absent;
+    }
+
+    let m = p.start();
+    p.bump(T![=]);
+    parse_value(p).or_add_diagnostic(p, expected_value);
+    Present(m.complete(p, GRAPHQL_DEFAULT_VALUE))
+}
+
+#[inline]
 pub(crate) fn parse_value(p: &mut GraphqlParser) -> ParsedSyntax {
     if is_at_variable(p) {
         parse_variable(p)
@@ -145,7 +157,7 @@ fn parse_float(p: &mut GraphqlParser) -> ParsedSyntax {
 }
 
 #[inline]
-fn parse_string(p: &mut GraphqlParser) -> ParsedSyntax {
+pub(crate) fn parse_string(p: &mut GraphqlParser) -> ParsedSyntax {
     if !is_at_string(p) {
         return Absent;
     }
@@ -244,7 +256,7 @@ fn is_at_float(p: &GraphqlParser) -> bool {
 }
 
 #[inline]
-fn is_at_string(p: &GraphqlParser) -> bool {
+pub(crate) fn is_at_string(p: &GraphqlParser) -> bool {
     p.at(GRAPHQL_STRING_LITERAL)
 }
 
@@ -272,7 +284,7 @@ fn is_at_list(p: &GraphqlParser) -> bool {
 fn is_at_list_end(p: &mut GraphqlParser) -> bool {
     p.at(T![']'])
     // at next argument
-    || p.lookahead() == T![:]
+    || p.nth_at(1, T![:])
     // value is only used in argument
     || is_at_argument_list_end(p)
 }
@@ -288,7 +300,7 @@ fn is_at_object_field(p: &GraphqlParser) -> bool {
 }
 
 #[inline]
-fn is_at_object_end(p: &GraphqlParser) -> bool {
+fn is_at_object_end(p: &mut GraphqlParser) -> bool {
     p.at(T!['}'])
     // value is only used in argument
     || is_at_argument_list_end(p)

@@ -45,7 +45,14 @@ JsonRoot =
     value: AnyJsonValue
     eof: 'EOF'
 
-AnyJsonValue =  JsonStringValue | JsonBooleanValue | JsonNullValue | JsonNumberValue | JsonArrayValue | JsonObjectValue | JsonBogusValue
+AnyJsonValue =
+    JsonStringValue
+    | JsonBooleanValue
+    | JsonNullValue
+    | JsonNumberValue
+    | JsonArrayValue
+    | JsonObjectValue
+    | JsonBogusValue
 
 JsonObjectValue = '{' JsonMemberList '}'
 

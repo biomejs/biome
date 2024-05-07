@@ -15,6 +15,8 @@ use biome_parser::token_source::Trivia;
 use biome_parser::ParserContext;
 use definitions::DefinitionList;
 
+use self::value::{is_at_string, parse_string};
+
 pub(crate) struct GraphqlParser<'source> {
     context: ParserContext<GraphqlSyntaxKind>,
     source: GraphqlTokenSource<'source>,
@@ -26,10 +28,6 @@ impl<'source> GraphqlParser<'source> {
             context: ParserContext::default(),
             source: GraphqlTokenSource::from_str(source),
         }
-    }
-
-    pub fn lookahead(&mut self) -> GraphqlSyntaxKind {
-        self.source.lookahead()
     }
 
     pub fn finish(
@@ -90,6 +88,19 @@ fn parse_name(p: &mut GraphqlParser) -> ParsedSyntax {
     let m = p.start();
     p.bump(GRAPHQL_NAME);
     Present(m.complete(p, GRAPHQL_NAME))
+}
+
+#[inline]
+fn parse_description(p: &mut GraphqlParser) -> ParsedSyntax {
+    if !is_at_string(p) {
+        return Absent;
+    }
+
+    let m = p.start();
+    // already checked for in `is_at_string`
+    parse_string(p).ok();
+
+    Present(m.complete(p, GRAPHQL_DESCRIPTION))
 }
 
 #[inline]

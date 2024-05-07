@@ -6,7 +6,7 @@
 mod generated;
 mod syntax_node;
 
-use biome_rowan::{AstNode, RawSyntaxKind};
+use biome_rowan::{AstNode, RawSyntaxKind, SyntaxKind};
 pub use biome_rowan::{TextLen, TextRange, TextSize, TokenAtOffset, TriviaPieceKind, WalkEvent};
 pub use generated::*;
 pub use syntax_node::*;
@@ -27,16 +27,6 @@ impl From<GraphqlSyntaxKind> for u16 {
 }
 
 impl GraphqlSyntaxKind {
-    pub fn is_trivia(self) -> bool {
-        matches!(
-            self,
-            GraphqlSyntaxKind::NEWLINE
-                | GraphqlSyntaxKind::WHITESPACE
-                | GraphqlSyntaxKind::COMMENT
-                | GraphqlSyntaxKind::COMMA
-        )
-    }
-
     /// Returns `true` for any contextual (await) or non-contextual keyword
     #[inline]
     pub const fn is_keyword(self) -> bool {
@@ -93,6 +83,16 @@ impl biome_rowan::SyntaxKind for GraphqlSyntaxKind {
 
     fn is_list(&self) -> bool {
         GraphqlSyntaxKind::is_list(*self)
+    }
+
+    fn is_trivia(self) -> bool {
+        matches!(
+            self,
+            GraphqlSyntaxKind::NEWLINE
+                | GraphqlSyntaxKind::WHITESPACE
+                | GraphqlSyntaxKind::COMMENT
+                | GraphqlSyntaxKind::COMMA
+        )
     }
 
     fn to_string(&self) -> Option<&'static str> {

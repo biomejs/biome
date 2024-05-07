@@ -17,41 +17,36 @@ pub fn escape<'a>(
     needs_escaping: &[&str],
     escaping_char: char,
 ) -> std::borrow::Cow<'a, str> {
+    debug_assert!(!needs_escaping.is_empty());
     let mut escaped = String::new();
     let mut iter = unescaped_string.char_indices();
-    let mut is_escaped = false;
-    'unescaped: while let Some((idx, chr)) = iter.next() {
+    let mut last_copied_idx = 0;
+    while let Some((idx, chr)) = iter.next() {
         if chr == escaping_char {
-            is_escaped = !is_escaped;
+            // The next character is esacaped
+            iter.next();
         } else {
             for candidate in needs_escaping {
                 if unescaped_string[idx..].starts_with(candidate) {
-                    if !is_escaped {
-                        if escaped.is_empty() {
-                            escaped = String::with_capacity(unescaped_string.len() * 2);
-                            escaped.push_str(&unescaped_string[0..idx]);
-                        }
-                        escaped.push(escaping_char);
-                        escaped.push_str(candidate);
-                        for _ in candidate.chars().skip(1) {
-                            iter.next();
-                        }
-                        continue 'unescaped;
-                    } else {
-                        is_escaped = false;
+                    if escaped.is_empty() {
+                        escaped = String::with_capacity(unescaped_string.len() * 2 - idx);
                     }
+                    escaped.push_str(&unescaped_string[last_copied_idx..idx]);
+                    escaped.push(escaping_char);
+                    escaped.push_str(candidate);
+                    for _ in candidate.chars().skip(1) {
+                        iter.next();
+                    }
+                    last_copied_idx = idx + candidate.len();
+                    break;
                 }
             }
         }
-
-        if !escaped.is_empty() {
-            escaped.push(chr);
-        }
     }
-
     if escaped.is_empty() {
         std::borrow::Cow::Borrowed(unescaped_string)
     } else {
+        escaped.push_str(&unescaped_string[last_copied_idx..unescaped_string.len()]);
         std::borrow::Cow::Owned(escaped)
     }
 }
@@ -87,5 +82,7 @@ mod tests {
         );
         assert_eq!(escape(r"abc \${bca}", &["${", "`"], '\\'), r"abc \${bca}");
         assert_eq!(escape(r"abc \`bca", &["${", "`"], '\\'), r"abc \`bca");
+
+        assert_eq!(escape(r"\n`", &["`"], '\\'), r"\n\`");
     }
 }

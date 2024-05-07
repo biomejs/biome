@@ -929,6 +929,10 @@ export interface Nursery {
 	 */
 	noDoneCallback?: RuleConfiguration_for_Null;
 	/**
+	 * Disallow duplicate @import rules.
+	 */
+	noDuplicateAtImportRules?: RuleConfiguration_for_Null;
+	/**
 	 * Disallow duplicate conditions in if-else-if chains
 	 */
 	noDuplicateElseIf?: RuleConfiguration_for_Null;
@@ -981,17 +985,53 @@ export interface Nursery {
 	 */
 	noUndeclaredDependencies?: RuleConfiguration_for_Null;
 	/**
+	 * Disallow unknown CSS value functions.
+	 */
+	noUnknownFunction?: RuleConfiguration_for_Null;
+	/**
+	 * Disallow unknown pseudo-element selectors.
+	 */
+	noUnknownSelectorPseudoElement?: RuleConfiguration_for_Null;
+	/**
 	 * Disallow unknown CSS units.
 	 */
 	noUnknownUnit?: RuleConfiguration_for_Null;
+	/**
+	 * Disallow unmatchable An+B selectors.
+	 */
+	noUnmatchableAnbSelector?: RuleConfiguration_for_Null;
+	/**
+	 * Disallow unnecessary concatenation of string or template literals.
+	 */
+	noUselessStringConcat?: RuleConfiguration_for_Null;
+	/**
+	 * Disallow initializing variables to undefined.
+	 */
+	noUselessUndefinedInitialization?: RuleConfiguration_for_Null;
 	/**
 	 * It enables the recommended rules for this group
 	 */
 	recommended?: boolean;
 	/**
+	 * Disallow Array constructors.
+	 */
+	useArrayLiterals?: RuleConfiguration_for_Null;
+	/**
 	 * Enforce the use of new for all builtins, except String, Number, Boolean, Symbol and BigInt.
 	 */
-	useConsistentNewBuiltin?: RuleConfiguration_for_Null;
+	useConsistentBuiltinInstantiation?: RuleConfiguration_for_Null;
+	/**
+	 * Require the default clause in switch statements.
+	 */
+	useDefaultSwitchClause?: RuleConfiguration_for_Null;
+	/**
+	 * Enforce explicitly comparing the length, size, byteLength or byteOffset property of a value.
+	 */
+	useExplicitLengthCheck?: RuleConfiguration_for_Null;
+	/**
+	 * Disallow a missing generic family keyword within font families.
+	 */
+	useGenericFontNames?: RuleConfiguration_for_Null;
 	/**
 	 * Disallows package private imports.
 	 */
@@ -1980,6 +2020,7 @@ export type Category =
 	| "lint/nursery/noConstantMathMinMaxClamp"
 	| "lint/nursery/noCssEmptyBlock"
 	| "lint/nursery/noDoneCallback"
+	| "lint/nursery/noDuplicateAtImportRules"
 	| "lint/nursery/noDuplicateElseIf"
 	| "lint/nursery/noDuplicateFontNames"
 	| "lint/nursery/noDuplicateJsonKeys"
@@ -1989,14 +2030,24 @@ export type Category =
 	| "lint/nursery/noFlatMapIdentity"
 	| "lint/nursery/noImportantInKeyframe"
 	| "lint/nursery/noMisplacedAssertion"
+	| "lint/nursery/noMissingGenericFamilyKeyword"
 	| "lint/nursery/noNodejsModules"
 	| "lint/nursery/noReactSpecificProps"
 	| "lint/nursery/noRestrictedImports"
 	| "lint/nursery/noTypeOnlyImportAttributes"
 	| "lint/nursery/noUndeclaredDependencies"
+	| "lint/nursery/noUnknownFunction"
+	| "lint/nursery/noUnknownSelectorPseudoElement"
 	| "lint/nursery/noUnknownUnit"
+	| "lint/nursery/noUnmatchableAnbSelector"
+	| "lint/nursery/noUselessStringConcat"
+	| "lint/nursery/noUselessUndefinedInitialization"
+	| "lint/nursery/useArrayLiterals"
 	| "lint/nursery/useBiomeSuppressionComment"
-	| "lint/nursery/useConsistentNewBuiltin"
+	| "lint/nursery/useExplicitLengthCheck"
+	| "lint/nursery/useConsistentBuiltinInstantiation"
+	| "lint/nursery/useDefaultSwitchClause"
+	| "lint/nursery/useGenericFontNames"
 	| "lint/nursery/useImportRestrictions"
 	| "lint/nursery/useSortedClasses"
 	| "lint/performance/noAccumulatingSpread"

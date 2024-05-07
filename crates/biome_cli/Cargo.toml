@@ -18,7 +18,7 @@ name = "biome"
 path = "src/main.rs"
 
 [dependencies]
-anyhow                   = "1.0.52"
+anyhow                   = { workspace = true }
 biome_analyze            = { workspace = true }
 biome_configuration      = { workspace = true }
 biome_console            = { workspace = true }
@@ -40,7 +40,7 @@ biome_text_edit          = { workspace = true }
 bpaf                     = { workspace = true, features = ["bright-color"] }
 crossbeam                = { workspace = true }
 dashmap                  = { workspace = true }
-hdrhistogram             = { version = "7.5.0", default-features = false }
+hdrhistogram             = { version = "7.5.4", default-features = false }
 indexmap                 = { workspace = true }
 lazy_static              = { workspace = true }
 rayon                    = { workspace = true }
@@ -50,16 +50,16 @@ serde_json               = { workspace = true }
 smallvec                 = { workspace = true }
 tokio                    = { workspace = true, features = ["io-std", "io-util", "net", "time", "rt", "sync", "rt-multi-thread", "macros"] }
 tracing                  = { workspace = true }
-tracing-appender         = "0.2"
+tracing-appender         = "0.2.3"
 tracing-subscriber       = { workspace = true, features = ["env-filter", "json"] }
 tracing-tree             = "0.3.0"
 
 [target.'cfg(unix)'.dependencies]
-libc  = "0.2.127"
+libc  = "0.2.154"
 tokio = { workspace = true, features = ["process"] }
 
 [target.'cfg(windows)'.dependencies]
-mimalloc = "0.1.29"
+mimalloc = "0.1.41"
 
 [target.'cfg(all(target_family="unix", not(all(target_arch = "aarch64", target_env = "musl"))))'.dependencies]
 tikv-jemallocator = "0.5.1"

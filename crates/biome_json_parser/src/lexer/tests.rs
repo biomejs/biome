@@ -243,7 +243,7 @@ fn single_quote_string() {
 fn unterminated_string() {
     assert_lex! {
         r#""A string without the closing quote"#,
-        JSON_STRING_LITERAL:35,
+        ERROR_TOKEN:35,
         EOF:0
     }
 }

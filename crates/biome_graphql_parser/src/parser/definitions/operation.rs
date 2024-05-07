@@ -3,12 +3,11 @@ use crate::parser::{
     directive::{is_at_directive, DirectiveList},
     is_at_name,
     parse_error::{
-        expected_any_selection, expected_name, expected_type, expected_value,
-        expected_variable_definition,
+        expected_any_selection, expected_name, expected_type, expected_variable_definition,
     },
     parse_name,
     r#type::parse_type,
-    value::parse_value,
+    value::parse_default_value,
     variable::{is_at_variable, parse_variable},
     GraphqlParser,
 };
@@ -26,7 +25,7 @@ use super::{
     is_at_definition,
 };
 
-const OPERATION_TYPE: TokenSet<GraphqlSyntaxKind> =
+pub(crate) const OPERATION_TYPE: TokenSet<GraphqlSyntaxKind> =
     token_set![T![query], T![mutation], T![subscription]];
 
 #[derive(Default)]
@@ -164,13 +163,10 @@ fn parse_field(p: &mut GraphqlParser) -> ParsedSyntax {
         return Absent;
     }
     let m = p.start();
-    // This is currently the only time we need to lookahead
-    // so there is no need to implement NthToken to use nth_at
-    let next_token = p.lookahead();
 
     // alias is optional, so if there is a colon, we parse it as an alias
     // otherwise we parse it as a normal field name
-    if next_token == T![:] {
+    if p.nth_at(1, T![:]) {
         let m = p.start();
 
         // name is checked for in `is_at_field`
@@ -252,18 +248,6 @@ fn parse_variable_definition(p: &mut GraphqlParser) -> ParsedSyntax {
 }
 
 #[inline]
-fn parse_default_value(p: &mut GraphqlParser) -> ParsedSyntax {
-    if !p.at(T![=]) {
-        return Absent;
-    }
-
-    let m = p.start();
-    p.bump(T![=]);
-    parse_value(p).or_add_diagnostic(p, expected_value);
-    Present(m.complete(p, GRAPHQL_DEFAULT_VALUE))
-}
-
-#[inline]
 pub(crate) fn is_at_operation(p: &GraphqlParser<'_>) -> bool {
     p.at_ts(OPERATION_TYPE) || is_at_selection_set(p)
 }
@@ -279,7 +263,7 @@ fn is_at_selection_set(p: &GraphqlParser) -> bool {
 }
 
 #[inline]
-pub(crate) fn is_at_selection_set_end(p: &GraphqlParser) -> bool {
+pub(crate) fn is_at_selection_set_end(p: &mut GraphqlParser) -> bool {
     // stop at closing brace or at the start of a new definition
     p.at(T!['}']) || is_at_definition(p)
 }

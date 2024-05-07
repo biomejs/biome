@@ -1,0 +1,48 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: js/import-attributes/empty.js
+---
+# Input
+
+```js
+export * as foo from "foo.json"
+export * as bar from "bar.json" with { }
+export * as baz from "baz.json" with { /* comment */ }
+
+import * as foo from "foo.json"
+import * as bar from "bar.json" with { }
+import * as baz from "baz.json" with { /* comment */ }
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,7 +1,7 @@
+ export * as foo from "foo.json";
+-export * as bar from "bar.json" with {};
+-export * as baz from "baz.json" /* comment */ with {};
++export * as bar from "bar.json";
++export * as baz from "baz.json" /* comment */;
+ 
+ import * as foo from "foo.json";
+-import * as bar from "bar.json" with {};
+-import * as baz from "baz.json" /* comment */ with {};
++import * as bar from "bar.json";
++import * as baz from "baz.json" /* comment */;
+```
+
+# Output
+
+```js
+export * as foo from "foo.json";
+export * as bar from "bar.json";
+export * as baz from "baz.json" /* comment */;
+
+import * as foo from "foo.json";
+import * as bar from "bar.json";
+import * as baz from "baz.json" /* comment */;
+```

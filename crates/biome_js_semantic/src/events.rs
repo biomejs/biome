@@ -171,6 +171,15 @@ enum BindingName {
     Type(TokenText),
     Value(TokenText),
 }
+impl BindingName {
+    /// Turn a type into a value and a value into a type.
+    fn dual(self) -> Self {
+        match self {
+            BindingName::Type(name) => BindingName::Value(name),
+            BindingName::Value(name) => BindingName::Type(name),
+        }
+    }
+}
 
 #[derive(Debug, Clone)]
 struct BindingInfo {
@@ -289,6 +298,7 @@ impl SemanticEventExtractor {
     #[inline]
     pub fn enter(&mut self, node: &JsSyntaxNode) {
         // If you push a scope for a given node type, don't forget to also update `Self::leave`.
+        // You should also edit [SemanticModelBuilder::push_node].
         match node.kind() {
             JS_IDENTIFIER_BINDING | TS_IDENTIFIER_BINDING | TS_TYPE_PARAMETER_NAME => {
                 self.enter_identifier_binding(&AnyJsIdentifierBinding::unwrap_cast(node.clone()));
@@ -334,6 +344,7 @@ impl SemanticEventExtractor {
             | TS_TYPE_ALIAS_DECLARATION
             | TS_DECLARE_FUNCTION_DECLARATION
             | TS_DECLARE_FUNCTION_EXPORT_DEFAULT_DECLARATION
+            | TS_CALL_SIGNATURE_TYPE_MEMBER
             | TS_METHOD_SIGNATURE_CLASS_MEMBER
             | TS_METHOD_SIGNATURE_TYPE_MEMBER
             | TS_INDEX_SIGNATURE_CLASS_MEMBER
@@ -364,7 +375,12 @@ impl SemanticEventExtractor {
 
     fn enter_any_type(&mut self, node: &AnyTsType) {
         if node.in_conditional_true_type() {
-            self.push_conditional_true_scope(node);
+            self.push_scope(
+                node.syntax().text_range(),
+                ScopeHoisting::DontHoistDeclarationsToParent,
+                false,
+            );
+            self.push_infers_in_scope();
             return;
         }
         let node = node.syntax();
@@ -634,6 +650,7 @@ impl SemanticEventExtractor {
             | JS_STATIC_INITIALIZATION_BLOCK_CLASS_MEMBER
             | TS_DECLARE_FUNCTION_DECLARATION
             | TS_DECLARE_FUNCTION_EXPORT_DEFAULT_DECLARATION
+            | TS_CALL_SIGNATURE_TYPE_MEMBER
             | TS_METHOD_SIGNATURE_CLASS_MEMBER
             | TS_METHOD_SIGNATURE_TYPE_MEMBER
             | TS_INDEX_SIGNATURE_CLASS_MEMBER
@@ -665,6 +682,14 @@ impl SemanticEventExtractor {
         ) {
             self.pop_scope(node.text_range());
         }
+        // FALLBACK
+        // If the conditional type has a bogus true type,
+        // then infer declarations was never pushed into any scope.
+        // To ensure that every declaration has a binding,
+        // we bind the declaration directly in the scope of the conditional type.
+        if matches!(node.kind(), JsSyntaxKind::TS_CONDITIONAL_TYPE) && !self.infers.is_empty() {
+            self.push_infers_in_scope()
+        }
     }
 
     /// Return any previous extracted [SemanticEvent].
@@ -673,13 +698,7 @@ impl SemanticEventExtractor {
         self.stash.pop_front()
     }
 
-    fn push_conditional_true_scope(&mut self, node: &AnyTsType) {
-        self.push_scope(
-            node.syntax().text_range(),
-            ScopeHoisting::DontHoistDeclarationsToParent,
-            false,
-        );
-
+    fn push_infers_in_scope(&mut self) {
         let infers = mem::take(&mut self.infers);
         for infer in infers {
             if let Ok(name_token) = infer.ident_token() {
@@ -788,13 +807,17 @@ impl SemanticEventExtractor {
                     };
                     self.stash.push_back(event);
                 }
+            } else if references.iter().all(|r| matches!(r, Reference::Export(_)))
+                && self.bindings.contains_key(&name.clone().dual())
+            {
+                // Don't report an export that exports at least a binding.
             } else if let Some(parent) = self.scopes.last_mut() {
                 // ... if not, promote these references to the parent scope ...
                 let parent_references = parent.references.entry(name).or_default();
                 parent_references.append(&mut references);
             } else {
                 // ... or raise UnresolvedReference if this is the global scope.
-                let dual_binding = self.dual_binding_info(name).cloned();
+                let dual_binding = self.bindings.get(&name.dual()).cloned();
                 for reference in references {
                     match reference {
                         Reference::Export(_) if dual_binding.is_some() => {
@@ -838,14 +861,6 @@ impl SemanticEventExtractor {
             range,
             scope_id: scope.scope_id,
         });
-    }
-
-    fn dual_binding_info(&self, binding_name: BindingName) -> Option<&BindingInfo> {
-        let dual_binding_name = match binding_name {
-            BindingName::Type(name) => BindingName::Value(name),
-            BindingName::Value(name) => BindingName::Type(name),
-        };
-        self.bindings.get(&dual_binding_name)
     }
 
     fn current_scope_mut(&mut self) -> &mut Scope {

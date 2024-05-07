@@ -1,13 +1,19 @@
 use crate::keywords::{
     BASIC_KEYWORDS, FONT_FAMILY_KEYWORDS, FONT_SIZE_KEYWORDS, FONT_STRETCH_KEYWORDS,
     FONT_STYLE_KEYWORDS, FONT_VARIANTS_KEYWORDS, FONT_WEIGHT_ABSOLUTE_KEYWORDS,
-    FONT_WEIGHT_NUMERIC_KEYWORDS, LINE_HEIGHT_KEYWORDS,
+    FONT_WEIGHT_NUMERIC_KEYWORDS, FUNCTION_KEYWORDS, LEVEL_ONE_AND_TWO_PSEUDO_ELEMENTS,
+    LINE_HEIGHT_KEYWORDS, OTHER_PSEUDO_ELEMENTS, SHADOW_TREE_PSEUDO_ELEMENTS,
+    SYSTEM_FAMILY_NAME_KEYWORDS, VENDER_PREFIXES, VENDOR_SPECIFIC_PSEUDO_ELEMENTS,
 };
 use biome_css_syntax::{AnyCssGenericComponentValue, AnyCssValue, CssGenericComponentValueList};
 use biome_rowan::{AstNode, SyntaxNodeCast};
 
 pub fn is_font_family_keyword(value: &str) -> bool {
     BASIC_KEYWORDS.contains(&value) || FONT_FAMILY_KEYWORDS.contains(&value)
+}
+
+pub fn is_system_family_name_keyword(value: &str) -> bool {
+    BASIC_KEYWORDS.contains(&value) || SYSTEM_FAMILY_NAME_KEYWORDS.contains(&value)
 }
 
 // check if the value is a shorthand keyword used in `font` property
@@ -27,7 +33,7 @@ pub fn is_css_variable(value: &str) -> bool {
     value.to_lowercase().starts_with("var(")
 }
 
-// Get the font-families within a `font` shorthand property value.
+/// Get the font-families within a `font` shorthand property value.
 pub fn find_font_family(value: CssGenericComponentValueList) -> Vec<AnyCssValue> {
     let mut font_families: Vec<AnyCssValue> = Vec::new();
     for v in value {
@@ -91,4 +97,33 @@ pub fn find_font_family(value: CssGenericComponentValueList) -> Vec<AnyCssValue>
         }
     }
     font_families
+}
+
+/// Check if the value is a known CSS value function.
+pub fn is_function_keyword(value: &str) -> bool {
+    FUNCTION_KEYWORDS
+        .binary_search(&value.to_lowercase().as_str())
+        .is_ok()
+}
+
+/// Check if the value is a double-dashed custom function.
+pub fn is_custom_function(value: &str) -> bool {
+    value.starts_with("--")
+}
+
+// Returns the vendor prefix extracted from an input string.
+pub fn vender_prefix(prop: &str) -> String {
+    for prefix in VENDER_PREFIXES.iter() {
+        if prop.starts_with(prefix) {
+            return (*prefix).to_string();
+        }
+    }
+    String::new()
+}
+
+pub fn is_pseudo_elements(prop: &str) -> bool {
+    LEVEL_ONE_AND_TWO_PSEUDO_ELEMENTS.contains(&prop)
+        || VENDOR_SPECIFIC_PSEUDO_ELEMENTS.contains(&prop)
+        || SHADOW_TREE_PSEUDO_ELEMENTS.contains(&prop)
+        || OTHER_PSEUDO_ELEMENTS.contains(&prop)
 }

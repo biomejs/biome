@@ -15,7 +15,6 @@ biome_text_edit = { workspace = true }
 biome_text_size = { workspace = true }
 countme         = { workspace = true }
 hashbrown       = { version = "0.12.3", features = ["inline-more"], default-features = false }
-memoffset       = "0.8.0"
 rustc-hash      = { workspace = true }
 serde           = { workspace = true, optional = true }
 tracing         = { workspace = true }

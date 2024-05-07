@@ -2,7 +2,6 @@
 source: crates/biome_json_parser/tests/spec_test.rs
 expression: snapshot
 ---
-
 ## Input
 
 ```json
@@ -15,42 +14,42 @@ expression: snapshot
 ```
 JsonRoot {
     bom_token: missing (optional),
-    value: JsonObjectValue {
-        l_curly_token: L_CURLY@0..1 "{" [] [],
-        json_member_list: JsonMemberList [
-            JsonMember {
-                name: missing (required),
-                colon_token: missing (required),
-                value: JsonNullValue {
-                    value_token: NULL_KW@1..5 "null" [] [],
-                },
+    value: JsonBogusValue {
+        items: [
+            L_CURLY@0..1 "{" [] [],
+            JsonBogus {
+                items: [
+                    JsonBogus {
+                        items: [
+                            JsonBogus {
+                                items: [
+                                    IDENT@1..5 "null" [] [],
+                                ],
+                            },
+                            COLON@5..6 ":" [] [],
+                            JsonNullValue {
+                                value_token: NULL_KW@6..10 "null" [] [],
+                            },
+                        ],
+                    },
+                    COMMA@10..11 "," [] [],
+                    JsonBogus {
+                        items: [
+                            JsonBogus {
+                                items: [
+                                    IDENT@11..15 "null" [] [],
+                                ],
+                            },
+                            COLON@15..16 ":" [] [],
+                            JsonNullValue {
+                                value_token: NULL_KW@16..20 "null" [] [],
+                            },
+                        ],
+                    },
+                ],
             },
-            missing separator,
-            JsonMember {
-                name: missing (required),
-                colon_token: COLON@5..6 ":" [] [],
-                value: JsonNullValue {
-                    value_token: NULL_KW@6..10 "null" [] [],
-                },
-            },
-            COMMA@10..11 "," [] [],
-            JsonMember {
-                name: missing (required),
-                colon_token: missing (required),
-                value: JsonNullValue {
-                    value_token: NULL_KW@11..15 "null" [] [],
-                },
-            },
-            missing separator,
-            JsonMember {
-                name: missing (required),
-                colon_token: COLON@15..16 ":" [] [],
-                value: JsonNullValue {
-                    value_token: NULL_KW@16..20 "null" [] [],
-                },
-            },
+            R_CURLY@20..21 "}" [] [],
         ],
-        r_curly_token: R_CURLY@20..21 "}" [] [],
     },
     eof_token: EOF@21..21 "" [] [],
 }
@@ -61,29 +60,19 @@ JsonRoot {
 ```
 0: JSON_ROOT@0..21
   0: (empty)
-  1: JSON_OBJECT_VALUE@0..21
+  1: JSON_BOGUS_VALUE@0..21
     0: L_CURLY@0..1 "{" [] []
-    1: JSON_MEMBER_LIST@1..20
-      0: JSON_MEMBER@1..5
-        0: (empty)
-        1: (empty)
-        2: JSON_NULL_VALUE@1..5
-          0: NULL_KW@1..5 "null" [] []
-      1: (empty)
-      2: JSON_MEMBER@5..10
-        0: (empty)
+    1: JSON_BOGUS@1..20
+      0: JSON_BOGUS@1..10
+        0: JSON_BOGUS@1..5
+          0: IDENT@1..5 "null" [] []
         1: COLON@5..6 ":" [] []
         2: JSON_NULL_VALUE@6..10
           0: NULL_KW@6..10 "null" [] []
-      3: COMMA@10..11 "," [] []
-      4: JSON_MEMBER@11..15
-        0: (empty)
-        1: (empty)
-        2: JSON_NULL_VALUE@11..15
-          0: NULL_KW@11..15 "null" [] []
-      5: (empty)
-      6: JSON_MEMBER@15..20
-        0: (empty)
+      1: COMMA@10..11 "," [] []
+      2: JSON_BOGUS@11..20
+        0: JSON_BOGUS@11..15
+          0: IDENT@11..15 "null" [] []
         1: COLON@15..16 ":" [] []
         2: JSON_NULL_VALUE@16..20
           0: NULL_KW@16..20 "null" [] []
@@ -97,46 +86,16 @@ JsonRoot {
 ```
 object_repeated_null_null.json:1:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Expected a property but instead found 'null'.
+  × Property key must be double quoted
   
   > 1 │ {null:null,null:null}
       │  ^^^^
-  
-  i Expected a property here.
-  
-  > 1 │ {null:null,null:null}
-      │  ^^^^
-  
-object_repeated_null_null.json:1:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `:`
-  
-  > 1 │ {null:null,null:null}
-      │      ^
-  
-  i Remove :
   
 object_repeated_null_null.json:1:12 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Expected a property but instead found 'null'.
+  × Property key must be double quoted
   
   > 1 │ {null:null,null:null}
       │            ^^^^
-  
-  i Expected a property here.
-  
-  > 1 │ {null:null,null:null}
-      │            ^^^^
-  
-object_repeated_null_null.json:1:16 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `:`
-  
-  > 1 │ {null:null,null:null}
-      │                ^
-  
-  i Remove :
   
 ```
-
-

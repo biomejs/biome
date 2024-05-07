@@ -315,6 +315,16 @@ pub(crate) fn migrate_eslint_any_rule(
             let rule = group.use_block_statements.get_or_insert(Default::default());
             rule.set_level(rule_severity.into());
         }
+        "default-case" => {
+            if !options.include_nursery {
+                return false;
+            }
+            let group = rules.nursery.get_or_insert_with(Default::default);
+            let rule = group
+                .use_default_switch_clause
+                .get_or_insert(Default::default());
+            rule.set_level(rule_severity.into());
+        }
         "default-case-last" => {
             let group = rules.suspicious.get_or_insert_with(Default::default);
             let rule = group
@@ -513,6 +523,11 @@ pub(crate) fn migrate_eslint_any_rule(
             let rule = group.use_iframe_title.get_or_insert(Default::default());
             rule.set_level(rule_severity.into());
         }
+        "jsx-a11y/img-redundant-alt" => {
+            let group = rules.a11y.get_or_insert_with(Default::default);
+            let rule = group.no_redundant_alt.get_or_insert(Default::default());
+            rule.set_level(rule_severity.into());
+        }
         "jsx-a11y/lang" => {
             let group = rules.a11y.get_or_insert_with(Default::default);
             let rule = group.use_valid_lang.get_or_insert(Default::default());
@@ -595,6 +610,14 @@ pub(crate) fn migrate_eslint_any_rule(
         "jsx-a11y/tabindex-no-positive" => {
             let group = rules.a11y.get_or_insert_with(Default::default);
             let rule = group.no_positive_tabindex.get_or_insert(Default::default());
+            rule.set_level(rule_severity.into());
+        }
+        "no-array-constructor" => {
+            if !options.include_nursery {
+                return false;
+            }
+            let group = rules.nursery.get_or_insert_with(Default::default);
+            let rule = group.use_array_literals.get_or_insert(Default::default());
             rule.set_level(rule_severity.into());
         }
         "no-async-promise-executor" => {
@@ -862,7 +885,7 @@ pub(crate) fn migrate_eslint_any_rule(
             }
             let group = rules.nursery.get_or_insert_with(Default::default);
             let rule = group
-                .use_consistent_new_builtin
+                .use_consistent_builtin_instantiation
                 .get_or_insert(Default::default());
             rule.set_level(rule_severity.into());
         }
@@ -965,6 +988,20 @@ pub(crate) fn migrate_eslint_any_rule(
                 .get_or_insert(Default::default());
             rule.set_level(rule_severity.into());
         }
+        "no-undef-init" => {
+            if !options.include_inspired {
+                results.has_inspired_rules = true;
+                return false;
+            }
+            if !options.include_nursery {
+                return false;
+            }
+            let group = rules.nursery.get_or_insert_with(Default::default);
+            let rule = group
+                .no_useless_undefined_initialization
+                .get_or_insert(Default::default());
+            rule.set_level(rule_severity.into());
+        }
         "no-unneeded-ternary" => {
             let group = rules.complexity.get_or_insert_with(Default::default);
             let rule = group.no_useless_ternary.get_or_insert(Default::default());
@@ -1019,6 +1056,16 @@ pub(crate) fn migrate_eslint_any_rule(
         "no-useless-catch" => {
             let group = rules.complexity.get_or_insert_with(Default::default);
             let rule = group.no_useless_catch.get_or_insert(Default::default());
+            rule.set_level(rule_severity.into());
+        }
+        "no-useless-concat" => {
+            if !options.include_nursery {
+                return false;
+            }
+            let group = rules.nursery.get_or_insert_with(Default::default);
+            let rule = group
+                .no_useless_string_concat
+                .get_or_insert(Default::default());
             rule.set_level(rule_severity.into());
         }
         "no-useless-constructor" => {
@@ -1217,6 +1264,20 @@ pub(crate) fn migrate_eslint_any_rule(
                 .get_or_insert(Default::default());
             rule.set_level(rule_severity.into());
         }
+        "unicorn/explicit-length-check" => {
+            if !options.include_inspired {
+                results.has_inspired_rules = true;
+                return false;
+            }
+            if !options.include_nursery {
+                return false;
+            }
+            let group = rules.nursery.get_or_insert_with(Default::default);
+            let rule = group
+                .use_explicit_length_check
+                .get_or_insert(Default::default());
+            rule.set_level(rule_severity.into());
+        }
         "unicorn/filename-case" => {
             if !options.include_inspired {
                 results.has_inspired_rules = true;
@@ -1234,7 +1295,7 @@ pub(crate) fn migrate_eslint_any_rule(
             }
             let group = rules.nursery.get_or_insert_with(Default::default);
             let rule = group
-                .use_consistent_new_builtin
+                .use_consistent_builtin_instantiation
                 .get_or_insert(Default::default());
             rule.set_level(rule_severity.into());
         }

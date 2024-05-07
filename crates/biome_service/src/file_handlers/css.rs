@@ -1,4 +1,4 @@
-use super::{ExtensionHandler, Mime, ParseResult};
+use super::{ExtensionHandler, ParseResult};
 use crate::file_handlers::DebugCapabilities;
 use crate::file_handlers::{
     AnalyzerCapabilities, Capabilities, FormatterCapabilities, ParserCapabilities,
@@ -92,14 +92,6 @@ impl ServiceLanguage for CssLanguage {
 pub(crate) struct CssFileHandler;
 
 impl ExtensionHandler for CssFileHandler {
-    fn mime(&self) -> super::Mime {
-        Mime::Css
-    }
-
-    fn may_use_tabs(&self) -> bool {
-        true
-    }
-
     fn capabilities(&self) -> Capabilities {
         Capabilities {
             parser: ParserCapabilities { parse: Some(parse) },

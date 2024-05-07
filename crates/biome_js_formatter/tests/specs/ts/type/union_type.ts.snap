@@ -2,7 +2,6 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: ts/type/union_type.ts
 ---
-
 # Input
 
 ```ts
@@ -253,6 +252,9 @@ type SuperLongTypeNameLoremIpsumLoremIpsumBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBla =
 | Baz2000
 | BarLoooooooooooooooooooooooooooooooooooooooooooooooooLong;
 
+type Foo = | ( /* A */ | A
+// B
+| B )
 ```
 
 
@@ -607,6 +609,10 @@ type SuperLongTypeNameLoremIpsumLoremIpsumBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBla =
 	| Fooo1000
 	| Baz2000
 	| BarLoooooooooooooooooooooooooooooooooooooooooooooooooLong;
+
+type Foo =
+	/* A */
+	| A
+	// B
+	| B;
 ```
-
-

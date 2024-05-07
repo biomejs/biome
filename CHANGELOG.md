@@ -13,6 +13,120 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 ### Analyzer
 
+### CLI
+
+#### Enhancements
+
+- Biome now executes commands (lint, format, check and ci) on the working directory by default. [#2266](https://github.com/biomejs/biome/issues/2266) Contributed by @unvalley
+
+  ```diff
+  - biome check .
+  + biome check    # You can run the command without the path
+  ```
+  
+### Configuration
+
+### Editors
+
+#### New features
+
+- Add support for LSP Workspaces
+
+### Formatter
+
+### JavaScript APIs
+
+### Linter
+
+### Parser
+
+
+## 1.7.3 (2024-05-06)
+
+### CLI
+
+#### Bug fixes
+
+- The [stdin-file-path](https://biomejs.dev/guides/integrate-in-editor/#use-stdin) option now works correctly for Astro/Svelte/Vue files ([#2686](https://github.com/biomejs/biome/pull/2686))
+
+  Fix [#2225](https://github.com/biomejs/biome/issues/2225) where lint output become empty for Vue files.
+
+  Contributed by @tasshi-me
+
+- `biome migrate eslint` now correctly resolve `@scope/eslint-config` ([#2705](https://github.com/biomejs/biome/issues/2705)). Contributed by @Conaclos
+
+### Linter
+
+#### New features
+
+- Add [nursery/noUselessStringConcat](https://biomejs.dev/linter/rules/no-useless-string-concat/).
+- Add [nursery/useExplicitLengthCheck](https://biomejs.dev/linter/rules/use-explicit-length-check/).
+
+#### Bug fixes
+
+- [noBlankTarget](https://biomejs.dev/linter/rules/no-blank-target/) no longer hangs when applying a code fix ([#2675](https://github.com/biomejs/biome/issues/2675)).
+
+  Previously, the following code made Biome hangs when applying a code fix.
+
+  ```jsx
+  <a href="https://example.com" rel="" target="_blank"></a>
+  ```
+
+  Contributed by @Conaclos
+
+- [noRedeclare](https://biomejs.dev/linter/rules/no-redeclare/) no longer panics on conditional type ([#2659](https://github.com/biomejs/biome/issues/2659)).
+
+  This is a regression introduced by [#2394](https://github.com/biomejs/biome/issues/2394).
+  This regression makes `noRedeclare` panics on every conditional types with `infer` bindings.
+
+  Contributed by @Conaclos
+
+- [noUnusedLabels](https://biomejs.dev/linter/rules/no-unused-labels/) and [noConfusingLabels](https://biomejs.dev/linter/rules/no-confusing-labels/) now ignore svelte reactive statements ([#2571](https://github.com/biomejs/biome/issues/2571)).
+
+  The rules now ignore reactive Svelte blocks in Svelte components.
+
+  ```svelte
+  <script>
+  $: { /* reactive block */ }
+  </script>
+  ```
+
+  Contributed by @Conaclos
+
+- [useExportType](https://biomejs.dev/linter/rules/use-export-type/) no longer removes leading comments ([#2685](https://github.com/biomejs/biome/issues/2685)).
+
+  Previously, `useExportType` removed leading comments when it factorized the `type` qualifier.
+  It now provides a code fix that preserves the leading comments:
+
+  ```diff
+  - export {
+  + export type {
+      /**leading comment*/
+  -   type T
+  +   T
+    }
+  ```
+
+  Contributed by @Conaclos
+
+- [useJsxKeyInIterable](https://biomejs.dev/linter/rules/use-jsx-key-in-iterable/) no longer reports false positive when iterating on non-jsx items ([#2590](https://github.com/biomejs/biome/issues/2590)).
+
+  The following snipet of code no longer triggers the rule:
+
+  ```jsx
+  <>{data.reduce((total, next) => total + next, 0)}</>
+  ```
+
+  Contributed by @dyc3
+
+- Fix typo by renaming `useConsistentBuiltinInstatiation` to `useConsistentBuiltinInstantiation`
+  Contributed by @minht11
+
+
+## 1.7.2 (2024-04-30)
+
+### Analyzer
+
 #### Bug fixes
 
 - Import sorting now ignores side effect imports ([#817](https://github.com/biomejs/biome/issues/817)).
@@ -37,6 +151,9 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
   Contributed by @Conaclos
 
+- Import sorting now adds spaces where needed ([#1665](https://github.com/biomejs/biome/issues/1665))
+  Contributed by @Conaclos
+
 ### CLI
 
 #### Bug fixes
@@ -49,21 +166,79 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
   Contributed by @Conaclos
 
-### Configuration
-
-### Editors
-
 ### Formatter
 
 #### Bug fixes
 
 - Correctly handle placement of comments inside named import clauses. [#2566](https://github.com/biomejs/biome/pull/2566). Contributed by @ah-yu
 
-### JavaScript APIs
-
 ### Linter
 
+#### New features
+
+- Add [nursery/noReactSpecificProps](https://biomejs.dev/linter/rules/no-react-specific-props/).
+  Contributed by @marvin-j97
+
+- Add [noUselessUndefinedInitialization](https://biomejs.dev/linter/rules/no-useless-undefined-initialization/).
+  Contributed by @lutaok
+
+- Add [nursery/useArrayLiterals](https://biomejs.dev/linter/rules/use-array-literals/).
+  Contributed by @Kazuhiro-Mimaki
+
+- Add [nursery/useConsistentBuiltinInstatiation](https://biomejs.dev/linter/rules/use-consistent-builtin-instantiation/).
+  Contributed by @minht11
+
+- Add [nursery/useDefaultSwitchClause](https://biomejs.dev/linter/rules/use-default-switch-clause/).
+  Contributed by @michellocana
+
 #### Bug fixes
+
+- [noDuplicateJsonKeys](https://biomejs.dev/linter/rules/no-duplicate-json-keys/) no longer crashes when a JSON file contains an unterminated string ([#2357](https://github.com/biomejs/biome/issues/2357)).
+  Contributed by @Conaclos
+
+- [noRedeclare](https://biomejs.dev/linter/rules/no-redeclare/) now reports redeclarations of parameters in a functions body ([#2394](https://github.com/biomejs/biome/issues/2394)).
+
+  The rule was unable to detect redeclarations of a parameter or a type parameter in the function body.
+  The following two redeclarations are now reported:
+
+  ```ts
+  function f<T>(a) {
+    type T = number; // redeclaration
+    const a = 0; // redeclaration
+  }
+  ```
+
+  Contributed by @Conaclos
+
+- [noRedeclare](https://biomejs.dev/linter/rules/no-redeclare/) no longer reports overloads in object types ([#2608](https://github.com/biomejs/biome/issues/2608)).
+
+  The rule no longer report redeclarations in the following code:
+
+  ```ts
+  type Overloads = {
+    ({ a }: { a: number }): number,
+    ({ a }: { a: string }): string,
+  };
+  ```
+
+  Contributed by @Conaclos
+
+- [noRedeclare](https://biomejs.dev/linter/rules/no-redeclare/) now merge default function export declarations and types ([#2372](https://github.com/biomejs/biome/issues/2372)).
+
+  The following code is no longer reported as a redeclaration:
+
+  ```ts
+  interface Foo {}
+  export default function Foo() {}
+  ```
+
+  Contributed by @Conaclos
+
+- [noUndeclaredVariables](https://biomejs.dev/linter/rules/no-undeclared-variables/) no longer reports variable-only and type-only exports ([#2637](https://github.com/biomejs/biome/issues/2637)).
+  Contributed by @Conaclos
+
+- [noUnusedVariables](https://biomejs.dev/linter/rules/no-unused-variables/) no longer crash Biome when encountering a malformed conditional type ([#1695](https://github.com/biomejs/biome/issues/1695)).
+  Contributed by @Conaclos
 
 - [useConst](https://biomejs.dev/linter/rules/use-const/) now ignores a variable that is read before its assignment.
 
@@ -79,7 +254,54 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
   Contributed by @Conaclos
 
+- [useShorthandFunctionType](https://biomejs.dev/linter/rules/use-shorthand-function-type/) now suggests correct code fixes when parentheses are required ([#2595](https://github.com/biomejs/biome/issues/2595)).
+
+  Previously, the rule didn't add parentheses when they were needed.
+  It now adds parentheses when the function signature is inside an array, a union, or an intersection.
+
+  ```diff
+  - type Union = { (): number } | string;
+  + type Union = (() => number) | string;
+  ```
+
+  Contributed by @Conaclos
+
+- [useTemplate](https://biomejs.dev/linter/rules/use-template/) now correctly escapes strings ([#2580](https://github.com/biomejs/biome/issues/2580)).
+
+  Previously, the rule didn't correctly escape characters preceded by an escaped character.
+
+  Contributed by @Conaclos
+
+- [noMisplacedAssertion](https://biomejs.dev/linter/rules/no-misplaced-assertion/) now allow these matchers
+
+  - `expect.any()`
+  - `expect.anything()`
+  - `expect.closeTo`
+  - `expect.arrayContaining`
+  - `expect.objectContaining`
+  - `expect.stringContaining`
+  - `expect.stringMatching`
+  - `expect.extend`
+  - `expect.addEqualityTesters`
+  - `expect.addSnapshotSerializer`
+
+  Contributed by @fujiyamaorange
+
 ### Parser
+
+#### Bug fixes
+
+- The language parsers no longer panic on unterminated strings followed by a newline and a space ([#2606](https://github.com/biomejs/biome/issues/2606), [#2410](https://github.com/biomejs/biome/issues/2410)).
+
+  The following example is now parsed without making Biome panics:
+
+  ```
+  "
+   "
+  ```
+
+  Contributed by @Conaclos
+
 
 ## 1.7.1 (2024-04-22)
 
@@ -102,6 +324,8 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
   console.log((a,b/* comment */));
   ```
   Contributed by @ah-yu
+
+- Correctly format nested union type to avoid reformatting issue. [#2628](https://github.com/biomejs/biome/pull/2628). Contributed by @ah-yu
 
 ### Linter
 

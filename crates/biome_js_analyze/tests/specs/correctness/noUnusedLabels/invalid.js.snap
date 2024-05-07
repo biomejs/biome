@@ -72,6 +72,8 @@ A: {
  * "A: { A: { break A; } }"
  */
 
+// We are not in a Svelte component
+$: {}
 ```
 
 # Diagnostics
@@ -262,4 +264,20 @@ invalid.js:45:1 lint/correctness/noUnusedLabels  FIXABLE  ━━━━━━━�
 
 ```
 
+```
+invalid.js:70:1 lint/correctness/noUnusedLabels  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
+  ! Unused label.
+  
+    69 │ // We are not in a Svelte component
+  > 70 │ $: {}
+       │ ^
+  
+  i The label is not used by any break statement and continue statement.
+  
+  i Safe fix: Remove the unused label.
+  
+    70 │ $:·{}
+       │ ---  
+
+```

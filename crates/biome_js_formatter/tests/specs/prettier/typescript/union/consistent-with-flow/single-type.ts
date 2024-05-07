@@ -44,17 +44,15 @@ type A5 =
     | { key: string }
     | { key: string }
   );
-// FIXME
-// TODO: reformat issue
-// type A6 = | (
-//   /*1*/ | (
-//     | (
-//           | A
-//           // A comment to force break
-//           | B
-//         )
-//   )
-//   );
+type A6 = | (
+  /*1*/ | (
+    | (
+          | A
+          // A comment to force break
+          | B
+        )
+  )
+  );
 
 type B1 =
   | (

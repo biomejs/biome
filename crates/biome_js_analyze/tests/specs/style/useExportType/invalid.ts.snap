@@ -36,6 +36,13 @@ export /*0*/ { /*1*/ type /*2*/ func /*3*/, /*4*/ type Class as C /*5*/ } /*6*/;
 
 export {}
 
+import { type T7, type T8 } from "./mod.ts";
+export {
+  /*1*/
+  type T7,
+  /*2*/
+  type T8,
+};
 ```
 
 # Diagnostics
@@ -206,6 +213,7 @@ invalid.ts:31:8 lint/style/useExportType  FIXABLE  ━━━━━━━━━�
   > 31 │ export {}
        │        ^^
     32 │ 
+    33 │ import { type T7, type T8 } from "./mod.ts";
   
   i Using export type allows transpilers to safely drop exports of types without looking for their definition.
   
@@ -216,4 +224,36 @@ invalid.ts:31:8 lint/style/useExportType  FIXABLE  ━━━━━━━━━�
 
 ```
 
+```
+invalid.ts:34:8 lint/style/useExportType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
+  ! All exports are only types and should thus use export type.
+  
+    33 │ import { type T7, type T8 } from "./mod.ts";
+  > 34 │ export {
+       │        ^
+  > 35 │   /*1*/
+  > 36 │   type T7,
+  > 37 │   /*2*/
+  > 38 │   type T8,
+  > 39 │ };
+       │ ^^
+  
+  i Using export type allows transpilers to safely drop exports of types without looking for their definition.
+  
+  i Safe fix: Use a grouped export type.
+  
+    32 32 │   
+    33 33 │   import { type T7, type T8 } from "./mod.ts";
+    34    │ - export·{
+       34 │ + export·type·{
+    35 35 │     /*1*/
+    36    │ - ··type·T7,
+       36 │ + ··T7,
+    37 37 │     /*2*/
+    38    │ - ··type·T8,
+       38 │ + ··T8,
+    39 39 │   };
+  
+
+```

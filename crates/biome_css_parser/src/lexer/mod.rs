@@ -8,6 +8,7 @@ use biome_parser::diagnostic::ParseDiagnostic;
 use biome_parser::lexer::{
     LexContext, Lexer, LexerCheckpoint, LexerWithCheckpoint, ReLexer, TokenFlags,
 };
+use biome_rowan::SyntaxKind;
 use biome_unicode_table::{
     is_css_id_continue, is_css_id_start, lookup_byte, Dispatch, Dispatch::*,
 };
@@ -485,7 +486,7 @@ impl<'src> CssLexer<'src> {
                 WHS if matches!(chr, b'\n' | b'\r') => {
                     let unterminated =
                         ParseDiagnostic::new("Missing closing quote", start..self.text_position())
-                            .with_detail(self.position..self.position + 1, "line breaks here");
+                            .with_hint("The closing quote must be on the same line.");
 
                     self.diagnostics.push(unterminated);
 

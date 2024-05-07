@@ -38,10 +38,25 @@ pub(crate) fn expected_object_field(p: &GraphqlParser, range: TextRange) -> Pars
     expected_node("object field", range, p)
 }
 
+pub(crate) fn expected_field_definition(p: &GraphqlParser, range: TextRange) -> ParseDiagnostic {
+    expected_node("field definition", range, p)
+}
+
 pub(crate) fn expected_argument(p: &GraphqlParser, range: TextRange) -> ParseDiagnostic {
     expected_node("argument", range, p)
 }
 
 pub(crate) fn expected_variable_definition(p: &GraphqlParser, range: TextRange) -> ParseDiagnostic {
     expected_node("variable definition", range, p)
+}
+
+pub(crate) fn expected_root_operation_type_definition(
+    p: &GraphqlParser,
+    range: TextRange,
+) -> ParseDiagnostic {
+    expected_node("root operation type definition", range, p)
+}
+
+pub(crate) fn expected_operation_type(p: &GraphqlParser, range: TextRange) -> ParseDiagnostic {
+    expected_any(&["query", "mutation", "subscription"], range, p)
 }

@@ -25,6 +25,7 @@ use biome_parser::diagnostic::ParseDiagnostic;
 use biome_parser::lexer::{
     LexContext, Lexer, LexerCheckpoint, LexerWithCheckpoint, ReLexer, TokenFlags,
 };
+use biome_rowan::SyntaxKind;
 use biome_unicode_table::{
     is_js_id_continue, is_js_id_start, lookup_byte,
     Dispatch::{self, *},
@@ -800,7 +801,7 @@ impl<'src> JsLexer<'src> {
                     let unterminated =
                         ParseDiagnostic::new("unterminated string literal", start..self.position)
                             .with_detail(start..self.position, "")
-                            .with_detail(self.position..self.position + 2, "line breaks here");
+                            .with_hint("The closing quote must be on the same line.");
                     self.push_diagnostic(unterminated);
                     return false;
                 }

@@ -1,5 +1,5 @@
 use super::*;
-use biome_js_syntax::{AnyJsRoot, JsSyntaxNode, TextRange};
+use biome_js_syntax::{AnyJsRoot, JsSyntaxNode, TextRange, TsConditionalType};
 use rustc_hash::{FxHashMap, FxHashSet};
 use std::collections::hash_map::Entry;
 
@@ -76,19 +76,37 @@ impl SemanticModelBuilder {
             | JS_CLASS_EXPORT_DEFAULT_DECLARATION
             | JS_CLASS_EXPRESSION
             | JS_FUNCTION_BODY
+            | JS_STATIC_INITIALIZATION_BLOCK_CLASS_MEMBER
+            | TS_MODULE_DECLARATION
+            | TS_EXTERNAL_MODULE_DECLARATION
             | TS_INTERFACE_DECLARATION
             | TS_ENUM_DECLARATION
             | TS_TYPE_ALIAS_DECLARATION
-            | TS_FUNCTION_TYPE
+            | TS_DECLARE_FUNCTION_DECLARATION
+            | TS_DECLARE_FUNCTION_EXPORT_DEFAULT_DECLARATION
+            | TS_CALL_SIGNATURE_TYPE_MEMBER
+            | TS_METHOD_SIGNATURE_CLASS_MEMBER
+            | TS_METHOD_SIGNATURE_TYPE_MEMBER
+            | TS_INDEX_SIGNATURE_CLASS_MEMBER
+            | TS_INDEX_SIGNATURE_TYPE_MEMBER
             | JS_BLOCK_STATEMENT
             | JS_FOR_STATEMENT
             | JS_FOR_OF_STATEMENT
             | JS_FOR_IN_STATEMENT
             | JS_SWITCH_STATEMENT
-            | JS_CATCH_CLAUSE => {
+            | JS_CATCH_CLAUSE
+            | TS_FUNCTION_TYPE
+            | TS_MAPPED_TYPE => {
                 self.node_by_range.insert(node.text_range(), node.clone());
             }
-            _ => {}
+            _ => {
+                if let Some(conditional_type) = TsConditionalType::cast_ref(node) {
+                    if let Ok(conditional_true_type) = conditional_type.true_type() {
+                        let syntax = conditional_true_type.into_syntax();
+                        self.node_by_range.insert(syntax.text_range(), syntax);
+                    }
+                }
+            }
         }
     }
 

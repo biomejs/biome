@@ -202,4 +202,22 @@ invalid.jsonc:1:1 lint/suspicious/noConfusingLabels ━━━━━━━━━�
 
 ```
 
+# Input
+```cjs
+$: {}
+```
 
+# Diagnostics
+```
+invalid.jsonc:1:1 lint/suspicious/noConfusingLabels ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected label.
+  
+  > 1 │ $: {}
+      │ ^
+  
+  i Only loops should be labeled.
+    The use of labels for other statements is suspicious and unfamiliar.
+  
+
+```

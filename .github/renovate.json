@@ -5,7 +5,8 @@
 		"before 9am on monday"
 	],
 	"extends": [
-		"config:best-practices"
+		"config:best-practices",
+		"helpers:pinGitHubActionDigestsToSemver"
 	],
 	"rangeStrategy": "bump",
 	"lockFileMaintenance": {
@@ -36,15 +37,6 @@
 				"quote",
 				"hashbrown",
 				"pulldown-cmark"
-			]
-		},
-		{
-			"groupName": "Website",
-			"matchFileNames": [
-				"website/package.json"
-			],
-			"matchManagers": [
-				"npm"
 			]
 		},
 		{

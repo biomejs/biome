@@ -9,7 +9,14 @@ use crate::utils::apply_document_changes;
 use crate::{documents::Document, session::Session};
 
 /// Handler for `textDocument/didOpen` LSP notification
-#[tracing::instrument(level = "debug", skip(session), err)]
+#[tracing::instrument(
+    level = "debug",
+    skip_all,
+    fields(
+        text_document_uri = display(params.text_document.uri.as_ref()),
+        text_document_language_id = display(&params.text_document.language_id),
+    )
+)]
 pub(crate) async fn did_open(
     session: &Session,
     params: lsp_types::DidOpenTextDocumentParams,
