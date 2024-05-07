@@ -1058,6 +1058,10 @@ export interface Nursery {
 	 */
 	noUselessUndefinedInitialization?: RuleFixConfiguration_for_Null;
 	/**
+	 * Disallow the use of yoda expressions.
+	 */
+	noYodaExpression?: RuleConfiguration_for_Null;
+	/**
 	 * It enables the recommended rules for this group
 	 */
 	recommended?: boolean;
@@ -2301,6 +2305,7 @@ export type Category =
 	| "lint/nursery/noUnmatchableAnbSelector"
 	| "lint/nursery/noUselessStringConcat"
 	| "lint/nursery/noUselessUndefinedInitialization"
+	| "lint/nursery/noYodaExpression"
 	| "lint/nursery/useArrayLiterals"
 	| "lint/nursery/useBiomeSuppressionComment"
 	| "lint/nursery/useConsistentBuiltinInstantiation"

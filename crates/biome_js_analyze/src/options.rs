@@ -241,6 +241,8 @@ pub type NoVoidElementsWithChildren = < lint :: correctness :: no_void_elements_
 pub type NoVoidTypeReturn =
     <lint::correctness::no_void_type_return::NoVoidTypeReturn as biome_analyze::Rule>::Options;
 pub type NoWith = <lint::complexity::no_with::NoWith as biome_analyze::Rule>::Options;
+pub type NoYodaExpression =
+    <lint::nursery::no_yoda_expression::NoYodaExpression as biome_analyze::Rule>::Options;
 pub type UseAltText = <lint::a11y::use_alt_text::UseAltText as biome_analyze::Rule>::Options;
 pub type UseAnchorContent =
     <lint::a11y::use_anchor_content::UseAnchorContent as biome_analyze::Rule>::Options;

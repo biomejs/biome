@@ -15,6 +15,7 @@ pub mod no_restricted_imports;
 pub mod no_undeclared_dependencies;
 pub mod no_useless_string_concat;
 pub mod no_useless_undefined_initialization;
+pub mod no_yoda_expression;
 pub mod use_array_literals;
 pub mod use_consistent_builtin_instantiation;
 pub mod use_default_switch_clause;
@@ -45,6 +46,7 @@ declare_group! {
             self :: no_undeclared_dependencies :: NoUndeclaredDependencies ,
             self :: no_useless_string_concat :: NoUselessStringConcat ,
             self :: no_useless_undefined_initialization :: NoUselessUndefinedInitialization ,
+            self :: no_yoda_expression :: NoYodaExpression ,
             self :: use_array_literals :: UseArrayLiterals ,
             self :: use_consistent_builtin_instantiation :: UseConsistentBuiltinInstantiation ,
             self :: use_default_switch_clause :: UseDefaultSwitchClause ,

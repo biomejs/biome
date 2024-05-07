@@ -1,0 +1,257 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```jsx
+if (x <= 'foo' || 'bar' < x) {}
+if ("red" == value) {}
+if (true === value) {}
+if (5 != value) {}
+if (5n != value) {}
+if (null !== value) {}
+if ("red" <= value) {}
+if (`red` <= value) {}
+if (`red` <= `${foo}`) {}
+if (`red` <= `${"red"}`) {}
+if (true >= value) {}
+var foo = (5 < value) ? true : false
+function foo() { return (null > value); }
+if (-1 < str.indexOf(substr)) {}
+
+```
+
+# Diagnostics
+```
+invalid.js:1:19 lint/nursery/noYodaExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid the use of yoda expressions.
+  
+  > 1 │ if (x <= 'foo' || 'bar' < x) {}
+      │                   ^^^^^^^^^
+    2 │ if ("red" == value) {}
+    3 │ if (true === value) {}
+  
+  i Yoda expressions can be confusing to some people, invert the expression for better readability.
+  
+
+```
+
+```
+invalid.js:2:5 lint/nursery/noYodaExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid the use of yoda expressions.
+  
+    1 │ if (x <= 'foo' || 'bar' < x) {}
+  > 2 │ if ("red" == value) {}
+      │     ^^^^^^^^^^^^^^
+    3 │ if (true === value) {}
+    4 │ if (5 != value) {}
+  
+  i Yoda expressions can be confusing to some people, invert the expression for better readability.
+  
+
+```
+
+```
+invalid.js:3:5 lint/nursery/noYodaExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid the use of yoda expressions.
+  
+    1 │ if (x <= 'foo' || 'bar' < x) {}
+    2 │ if ("red" == value) {}
+  > 3 │ if (true === value) {}
+      │     ^^^^^^^^^^^^^^
+    4 │ if (5 != value) {}
+    5 │ if (5n != value) {}
+  
+  i Yoda expressions can be confusing to some people, invert the expression for better readability.
+  
+
+```
+
+```
+invalid.js:4:5 lint/nursery/noYodaExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid the use of yoda expressions.
+  
+    2 │ if ("red" == value) {}
+    3 │ if (true === value) {}
+  > 4 │ if (5 != value) {}
+      │     ^^^^^^^^^^
+    5 │ if (5n != value) {}
+    6 │ if (null !== value) {}
+  
+  i Yoda expressions can be confusing to some people, invert the expression for better readability.
+  
+
+```
+
+```
+invalid.js:5:5 lint/nursery/noYodaExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid the use of yoda expressions.
+  
+    3 │ if (true === value) {}
+    4 │ if (5 != value) {}
+  > 5 │ if (5n != value) {}
+      │     ^^^^^^^^^^^
+    6 │ if (null !== value) {}
+    7 │ if ("red" <= value) {}
+  
+  i Yoda expressions can be confusing to some people, invert the expression for better readability.
+  
+
+```
+
+```
+invalid.js:6:5 lint/nursery/noYodaExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid the use of yoda expressions.
+  
+    4 │ if (5 != value) {}
+    5 │ if (5n != value) {}
+  > 6 │ if (null !== value) {}
+      │     ^^^^^^^^^^^^^^
+    7 │ if ("red" <= value) {}
+    8 │ if (`red` <= value) {}
+  
+  i Yoda expressions can be confusing to some people, invert the expression for better readability.
+  
+
+```
+
+```
+invalid.js:7:5 lint/nursery/noYodaExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid the use of yoda expressions.
+  
+    5 │ if (5n != value) {}
+    6 │ if (null !== value) {}
+  > 7 │ if ("red" <= value) {}
+      │     ^^^^^^^^^^^^^^
+    8 │ if (`red` <= value) {}
+    9 │ if (`red` <= `${foo}`) {}
+  
+  i Yoda expressions can be confusing to some people, invert the expression for better readability.
+  
+
+```
+
+```
+invalid.js:8:5 lint/nursery/noYodaExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid the use of yoda expressions.
+  
+     6 │ if (null !== value) {}
+     7 │ if ("red" <= value) {}
+   > 8 │ if (`red` <= value) {}
+       │     ^^^^^^^^^^^^^^
+     9 │ if (`red` <= `${foo}`) {}
+    10 │ if (`red` <= `${"red"}`) {}
+  
+  i Yoda expressions can be confusing to some people, invert the expression for better readability.
+  
+
+```
+
+```
+invalid.js:9:5 lint/nursery/noYodaExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid the use of yoda expressions.
+  
+     7 │ if ("red" <= value) {}
+     8 │ if (`red` <= value) {}
+   > 9 │ if (`red` <= `${foo}`) {}
+       │     ^^^^^^^^^^^^^^^^^
+    10 │ if (`red` <= `${"red"}`) {}
+    11 │ if (true >= value) {}
+  
+  i Yoda expressions can be confusing to some people, invert the expression for better readability.
+  
+
+```
+
+```
+invalid.js:10:5 lint/nursery/noYodaExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid the use of yoda expressions.
+  
+     8 │ if (`red` <= value) {}
+     9 │ if (`red` <= `${foo}`) {}
+  > 10 │ if (`red` <= `${"red"}`) {}
+       │     ^^^^^^^^^^^^^^^^^^^
+    11 │ if (true >= value) {}
+    12 │ var foo = (5 < value) ? true : false
+  
+  i Yoda expressions can be confusing to some people, invert the expression for better readability.
+  
+
+```
+
+```
+invalid.js:11:5 lint/nursery/noYodaExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid the use of yoda expressions.
+  
+     9 │ if (`red` <= `${foo}`) {}
+    10 │ if (`red` <= `${"red"}`) {}
+  > 11 │ if (true >= value) {}
+       │     ^^^^^^^^^^^^^
+    12 │ var foo = (5 < value) ? true : false
+    13 │ function foo() { return (null > value); }
+  
+  i Yoda expressions can be confusing to some people, invert the expression for better readability.
+  
+
+```
+
+```
+invalid.js:12:12 lint/nursery/noYodaExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid the use of yoda expressions.
+  
+    10 │ if (`red` <= `${"red"}`) {}
+    11 │ if (true >= value) {}
+  > 12 │ var foo = (5 < value) ? true : false
+       │            ^^^^^^^^^
+    13 │ function foo() { return (null > value); }
+    14 │ if (-1 < str.indexOf(substr)) {}
+  
+  i Yoda expressions can be confusing to some people, invert the expression for better readability.
+  
+
+```
+
+```
+invalid.js:13:26 lint/nursery/noYodaExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid the use of yoda expressions.
+  
+    11 │ if (true >= value) {}
+    12 │ var foo = (5 < value) ? true : false
+  > 13 │ function foo() { return (null > value); }
+       │                          ^^^^^^^^^^^^
+    14 │ if (-1 < str.indexOf(substr)) {}
+    15 │ 
+  
+  i Yoda expressions can be confusing to some people, invert the expression for better readability.
+  
+
+```
+
+```
+invalid.js:14:5 lint/nursery/noYodaExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid the use of yoda expressions.
+  
+    12 │ var foo = (5 < value) ? true : false
+    13 │ function foo() { return (null > value); }
+  > 14 │ if (-1 < str.indexOf(substr)) {}
+       │     ^^^^^^^^^^^^^^^^^^^^^^^^
+    15 │ 
+  
+  i Yoda expressions can be confusing to some people, invert the expression for better readability.
+  
+
+```
