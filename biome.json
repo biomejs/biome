@@ -15,7 +15,7 @@
     ]
   },
   "formatter": {
-    "ignore": ["configuration-schema.json"]
+    "ignore": ["configuration_schema.json"]
   },
   "json": {
     "formatter": {
