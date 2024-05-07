@@ -1,4 +1,3 @@
-use core::hash;
 use std::borrow::Borrow;
 use std::collections::HashSet;
 use std::hash::{DefaultHasher, Hash, Hasher};
@@ -9,7 +8,7 @@ use biome_analyze::{context::RuleContext, declare_rule, Rule, RuleDiagnostic, Ru
 use biome_console::markup;
 use biome_css_syntax::{
     AnyCssAtRule, AnyCssRelativeSelector, AnyCssRule, AnyCssSelector, CssComplexSelector,
-    CssRelativeSelector, CssRelativeSelectorList, CssRoot, CssRuleList, CssSelectorList,
+    CssRelativeSelector, CssRelativeSelectorList, CssRoot, CssSelectorList,
     CssSyntaxNode,
 };
 use biome_deserialize_macros::Deserializable;
@@ -115,19 +114,25 @@ impl Rule for NoDuplicateSelectors {
         let mut output: Vec<DuplicateSelector> = vec![];
 
         if options.disallow_in_list {
-            let selectors = node.rules().syntax().descendants().filter(
-                |x| x.clone().cast::<AnyCssSelector>().is_some() || x.clone().cast::<AnyCssRelativeSelector>().is_some()
-            );
+            let selectors = node.rules().syntax().descendants().filter(|x| {
+                x.clone().cast::<AnyCssSelector>().is_some()
+                    || x.clone().cast::<AnyCssRelativeSelector>().is_some()
+            });
 
             // selector_list unwrap should never fail due to the structure of the AST
-            for (selector, selector_list) in selectors.map(|selector| (selector.clone(), selector.parent().unwrap())).filter(|(_, parent)|{
-                // i.e not actually a list
-                return !(parent.clone().cast::<CssComplexSelector>().is_some() || parent.clone().cast::<CssRelativeSelector>().is_some())
-            }){
+            for (selector, selector_list) in selectors
+                .map(|selector| (selector.clone(), selector.parent().unwrap()))
+                .filter(|(_, parent)| {
+                    // i.e not actually a list
+                    return !(parent.clone().cast::<CssComplexSelector>().is_some()
+                        || parent.clone().cast::<CssRelativeSelector>().is_some());
+                })
+            {
                 // this_rule unwrap should never fail due to the structure of the AST
                 let this_rule = selector_list.parent().unwrap();
 
-                let selector_text = if let Some(selector) = CssRelativeSelector::cast_ref(&selector) {
+                let selector_text = if let Some(selector) = CssRelativeSelector::cast_ref(&selector)
+                {
                     selector.clone().text()
                 } else {
                     // selector is either AnyCssSelector or AnyCssRelativeSelector
@@ -152,28 +157,36 @@ impl Rule for NoDuplicateSelectors {
                 }
             }
         } else {
-            let selector_lists = node.rules().syntax().descendants().filter(
-                |x| x.clone().cast::<CssSelectorList>().is_some() || x.clone().cast::<CssRelativeSelectorList>().is_some()
-            );
+            let selector_lists = node.rules().syntax().descendants().filter(|x| {
+                x.clone().cast::<CssSelectorList>().is_some()
+                    || x.clone().cast::<CssRelativeSelectorList>().is_some()
+            });
 
             // this_rule unwrap should never fail due to the structure of the AST
-            for (selector_list, rule) in selector_lists.map(|selector_list| (selector_list.clone(), selector_list.parent().unwrap())) {
+            for (selector_list, rule) in selector_lists
+                .map(|selector_list| (selector_list.clone(), selector_list.parent().unwrap()))
+            {
                 let mut this_list_resolved_list: HashSet<ResolvedSelector> = HashSet::new();
 
                 let mut selector_list_mapped: Vec<String> = selector_list
                     .children()
                     .into_iter()
                     .filter_map(|child| {
-                        let selector_text = if let Some(selector) = AnyCssSelector::cast_ref(&child) {
+                        let selector_text = if let Some(selector) = AnyCssSelector::cast_ref(&child)
+                        {
                             normalize_complex_selector(selector.clone())
                         } else {
-                            child.clone().cast::<AnyCssRelativeSelector>().unwrap().text()
+                            child
+                                .clone()
+                                .cast::<AnyCssRelativeSelector>()
+                                .unwrap()
+                                .text()
                         };
 
                         if let Some(first) = this_list_resolved_list.get(&selector_text) {
                             output.push(DuplicateSelector {
                                 first: first.selector_node.clone(),
-                                duplicate: child.clone()
+                                duplicate: child.clone(),
                             });
                             return None;
                         }
