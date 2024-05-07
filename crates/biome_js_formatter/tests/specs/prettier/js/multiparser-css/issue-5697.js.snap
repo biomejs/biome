@@ -37,7 +37,7 @@ const StyledH1 = styled.div`
        : ""}
 -  @media (max-width: ${(props) =>
 -    props.noBreakPoint ? "0" : constants.layout.breakpoint.break1}px) {
-+  @media (max-width: ${(props) => (props.noBreakPoint ? "0" : constants.layout.breakpoint.break1)}px) {
++  @media (max-width: ${(props) => props.noBreakPoint ? "0" : constants.layout.breakpoint.break1}px) {
      font-size: 2em;
    }
  `;
@@ -59,7 +59,7 @@ const StyledH1 = styled.div`
                 justify-content: center;
                 text-align: center;`
       : ""}
-  @media (max-width: ${(props) => (props.noBreakPoint ? "0" : constants.layout.breakpoint.break1)}px) {
+  @media (max-width: ${(props) => props.noBreakPoint ? "0" : constants.layout.breakpoint.break1}px) {
     font-size: 2em;
   }
 `;
@@ -67,5 +67,5 @@ const StyledH1 = styled.div`
 
 # Lines exceeding max width of 80 characters
 ```
-   14:   @media (max-width: ${(props) => (props.noBreakPoint ? "0" : constants.layout.breakpoint.break1)}px) {
+   14:   @media (max-width: ${(props) => props.noBreakPoint ? "0" : constants.layout.breakpoint.break1}px) {
 ```

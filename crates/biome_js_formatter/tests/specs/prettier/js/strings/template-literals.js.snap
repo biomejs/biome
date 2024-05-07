@@ -81,54 +81,22 @@ which already had a linebreak so can be broken up
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,5 +1,7 @@
- foo(
--  `a long string ${1 + 2 + 3 + 2 + 3 + 2 + 3 + 2 + 3 + 2 + 3 + 2 + 3 + 2 + 3 + 2 + 3} with expr`,
-+  `a long string ${
-+    1 + 2 + 3 + 2 + 3 + 2 + 3 + 2 + 3 + 2 + 3 + 2 + 3 + 2 + 3 + 2 + 3
-+  } with expr`,
- );
- 
- const x = `a long string ${
-@@ -53,7 +55,9 @@
- );
- 
- pipe.write(
--  `\n  ${chalk.dim(`\u203A and ${more} more ${more} more ${more} more ${more}`)}`,
-+  `\n  ${chalk.dim(
-+    `\u203A and ${more} more ${more} more ${more} more ${more}`,
-+  )}`,
- );
- 
- // https://github.com/prettier/prettier/issues/1662#issue-230406820
-@@ -103,11 +107,16 @@
+@@ -103,7 +103,7 @@
  
  // https://github.com/prettier/prettier/issues/1626#issue-229655106
  const Bar = styled.div`
 -  color: ${(props) => (props.highlight.length > 0 ? palette(["text", "dark", "tertiary"])(props) : palette(["text", "dark", "primary"])(props))} !important;
-+  color: ${(props) =>
-+    props.highlight.length > 0
-+      ? palette(["text", "dark", "tertiary"])(props)
-+      : palette(["text", "dark", "primary"])(props)} !important;
++  color: ${(props) => props.highlight.length > 0 ? palette(["text", "dark", "tertiary"])(props) : palette(["text", "dark", "primary"])(props)} !important;
  `;
  
  // https://github.com/prettier/prettier/issues/3368
--let message = `this is a long message which contains an interpolation: ${format(data)} <- like this`;
-+let message = `this is a long message which contains an interpolation: ${format(
-+  data,
-+)} <- like this`;
- 
- let otherMessage = `this template contains two interpolations: ${this(one)}, which should be kept on its line,
- and this other one: ${this(
 ```
 
 # Output
 
 ```js
 foo(
-  `a long string ${
-    1 + 2 + 3 + 2 + 3 + 2 + 3 + 2 + 3 + 2 + 3 + 2 + 3 + 2 + 3 + 2 + 3
-  } with expr`,
+  `a long string ${1 + 2 + 3 + 2 + 3 + 2 + 3 + 2 + 3 + 2 + 3 + 2 + 3 + 2 + 3 + 2 + 3} with expr`,
 );
 
 const x = `a long string ${
@@ -182,9 +150,7 @@ foo(
 );
 
 pipe.write(
-  `\n  ${chalk.dim(
-    `\u203A and ${more} more ${more} more ${more} more ${more}`,
-  )}`,
+  `\n  ${chalk.dim(`\u203A and ${more} more ${more} more ${more} more ${more}`)}`,
 );
 
 // https://github.com/prettier/prettier/issues/1662#issue-230406820
@@ -234,16 +200,11 @@ const makeBody = (store, assets, html) =>
 
 // https://github.com/prettier/prettier/issues/1626#issue-229655106
 const Bar = styled.div`
-  color: ${(props) =>
-    props.highlight.length > 0
-      ? palette(["text", "dark", "tertiary"])(props)
-      : palette(["text", "dark", "primary"])(props)} !important;
+  color: ${(props) => props.highlight.length > 0 ? palette(["text", "dark", "tertiary"])(props) : palette(["text", "dark", "primary"])(props)} !important;
 `;
 
 // https://github.com/prettier/prettier/issues/3368
-let message = `this is a long message which contains an interpolation: ${format(
-  data,
-)} <- like this`;
+let message = `this is a long message which contains an interpolation: ${format(data)} <- like this`;
 
 let otherMessage = `this template contains two interpolations: ${this(one)}, which should be kept on its line,
 and this other one: ${this(
@@ -255,5 +216,9 @@ which already had a linebreak so can be broken up
 
 # Lines exceeding max width of 80 characters
 ```
-  121: let otherMessage = `this template contains two interpolations: ${this(one)}, which should be kept on its line,
+    2:   `a long string ${1 + 2 + 3 + 2 + 3 + 2 + 3 + 2 + 3 + 2 + 3 + 2 + 3 + 2 + 3 + 2 + 3} with expr`,
+   56:   `\n  ${chalk.dim(`\u203A and ${more} more ${more} more ${more} more ${more}`)}`,
+  106:   color: ${(props) => props.highlight.length > 0 ? palette(["text", "dark", "tertiary"])(props) : palette(["text", "dark", "primary"])(props)} !important;
+  110: let message = `this is a long message which contains an interpolation: ${format(data)} <- like this`;
+  112: let otherMessage = `this template contains two interpolations: ${this(one)}, which should be kept on its line,
 ```

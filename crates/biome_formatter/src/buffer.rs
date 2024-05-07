@@ -1,6 +1,6 @@
 use super::{write, Arguments, FormatElement};
 use crate::format_element::Interned;
-use crate::prelude::{LineMode, PrintMode, Tag};
+use crate::prelude::{BestFittingElement, LineMode, PrintMode, Tag};
 use crate::{Format, FormatResult, FormatState};
 use rustc_hash::FxHashMap;
 use std::any::{Any, TypeId};
@@ -508,6 +508,10 @@ impl<'a, Context> RemoveSoftLinesBuffer<'a, Context> {
     fn clean_interned(&mut self, interned: &Interned) -> Interned {
         clean_interned(interned, &mut self.interned_cache)
     }
+
+    fn clean_best_fitting(&mut self, best_fitting: &BestFittingElement) -> Vec<FormatElement> {
+        clean_best_fitting(best_fitting, &mut self.interned_cache)
+    }
 }
 
 // Extracted to function to avoid monomorphization
@@ -580,6 +584,12 @@ fn clean_interned(
                             FormatElement::Interned(interned) => {
                                 FormatElement::Interned(clean_interned(interned, interned_cache))
                             }
+                            FormatElement::BestFitting(best_fitting) => {
+                                for element in clean_best_fitting(best_fitting, interned_cache) {
+                                    cleaned.push(element);
+                                }
+                                continue;
+                            }
                             element => element.clone(),
                         };
                         cleaned.push(element)
@@ -595,6 +605,41 @@ fn clean_interned(
             result
         }
     }
+}
+
+fn clean_best_fitting(
+    best_fitting: &BestFittingElement,
+    interned_cache: &mut FxHashMap<Interned, Interned>,
+) -> Vec<FormatElement> {
+    let most_flat = best_fitting.most_flat();
+    let mut cleaned = Vec::with_capacity(most_flat.len());
+    let mut is_in_expanded_conditional_content = false;
+    for element in most_flat {
+        match element {
+            FormatElement::Tag(Tag::StartConditionalContent(condition))
+                if condition.mode == PrintMode::Expanded =>
+            {
+                is_in_expanded_conditional_content = true;
+                continue;
+            }
+            FormatElement::Tag(Tag::EndConditionalContent)
+                if is_in_expanded_conditional_content =>
+            {
+                is_in_expanded_conditional_content = false;
+                continue;
+            }
+            _ if is_in_expanded_conditional_content => continue,
+            FormatElement::Line(LineMode::Soft) => continue,
+            FormatElement::Line(LineMode::SoftOrSpace) => cleaned.push(FormatElement::Space),
+
+            FormatElement::Interned(interned) => cleaned.push(FormatElement::Interned(
+                clean_interned(interned, interned_cache),
+            )),
+            element => cleaned.push(element.clone()),
+        }
+    }
+
+    cleaned
 }
 
 impl<Context> Buffer for RemoveSoftLinesBuffer<'_, Context> {
@@ -639,9 +684,9 @@ impl<Context> Buffer for RemoveSoftLinesBuffer<'_, Context> {
                 FormatElement::Interned(self.clean_interned(&interned))
             }
             FormatElement::BestFitting(best_fitting) => {
-                let most_flat = best_fitting.most_flat();
-                for element in most_flat {
-                    self.write_element(element.clone())?;
+                let cleaned = self.clean_best_fitting(&best_fitting);
+                for element in cleaned {
+                    self.write_element(element)?;
                 }
                 return Ok(());
             }
