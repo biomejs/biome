@@ -113,26 +113,36 @@ impl WorkspaceSettings {
 
     /// Checks if the current path belongs to a registered project.
     ///
-    /// If there's a match, and the match **isn't** the current project, the function will mark the match as the current project.
-    pub fn set_current_project(&mut self, path: &BiomePath) {
+    /// If there's a match, and the match **isn't** the current project, it returns the new key.
+    pub fn path_belongs_to_current_workspace(&self, path: &BiomePath) -> Option<ProjectKey> {
         debug_assert!(
             !self.data.is_empty(),
             "You must have at least one workspace."
         );
+        debug!("Current key: {:?}", self.current_project);
         let iter = self.data.iter();
         for (key, path_to_settings) in iter {
             debug!(
                 "Workspace path {:?}, file path {:?}",
                 path_to_settings.path, path
             );
-            if path.strip_prefix(path_to_settings.path.as_path()).is_ok()
-                && key != self.current_project
-            {
+            debug!("Iter key: {:?}", key);
+            if key == self.current_project {
+                continue;
+            }
+            if path.strip_prefix(path_to_settings.path.as_path()).is_ok() {
                 debug!("Update workspace to {:?}", key);
-                self.current_project = key;
-                break;
+                return Some(key);
             }
         }
+        None
+    }
+
+    /// Checks if the current path belongs to a registered project.
+    ///
+    /// If there's a match, and the match **isn't** the current project, the function will mark the match as the current project.
+    pub fn set_current_project(&mut self, new_key: ProjectKey) {
+        self.current_project = new_key;
     }
 }
 
@@ -593,25 +603,29 @@ fn to_file_settings(
 /// Handle object holding a temporary lock on the workspace settings until
 /// the deferred language-specific options resolution is called
 #[derive(Debug)]
-pub struct SettingsHandle<'a> {
+pub struct WorkspaceSettingsHandle<'a> {
     inner: RwLockReadGuard<'a, WorkspaceSettings>,
 }
 
-impl<'a> SettingsHandle<'a> {
+impl<'a> WorkspaceSettingsHandle<'a> {
     pub(crate) fn new(settings: &'a RwLock<WorkspaceSettings>) -> Self {
         Self {
             inner: settings.read().unwrap(),
         }
     }
-}
 
-impl<'a> AsRef<Settings> for SettingsHandle<'a> {
-    fn as_ref(&self) -> &Settings {
-        self.inner.get_current_settings()
+    pub(crate) fn settings(&self) -> &Settings {
+        &self.inner.get_current_settings()
     }
 }
 
-impl<'a> SettingsHandle<'a> {
+impl<'a> AsRef<WorkspaceSettings> for WorkspaceSettingsHandle<'a> {
+    fn as_ref(&self) -> &WorkspaceSettings {
+        &self.inner
+    }
+}
+
+impl<'a> WorkspaceSettingsHandle<'a> {
     /// Resolve the formatting context for the given language
     pub(crate) fn format_options<L>(
         self,
@@ -621,22 +635,22 @@ impl<'a> SettingsHandle<'a> {
     where
         L: ServiceLanguage,
     {
+        let settings = self.inner.get_current_settings();
         L::resolve_format_options(
-            &self.inner.get_current_settings().formatter,
-            &self.inner.get_current_settings().override_settings,
-            &L::lookup_settings(&self.inner.get_current_settings().languages).formatter,
+            &settings.formatter,
+            &settings.override_settings,
+            &L::lookup_settings(&settings.languages).formatter,
             path,
             file_source,
         )
     }
 }
 
-#[derive(Debug)]
-pub struct SettingsHandleMut<'a> {
+pub struct WorkspaceSettingsHandleMut<'a> {
     inner: RwLockWriteGuard<'a, WorkspaceSettings>,
 }
 
-impl<'a> SettingsHandleMut<'a> {
+impl<'a> WorkspaceSettingsHandleMut<'a> {
     pub(crate) fn new(settings: &'a RwLock<WorkspaceSettings>) -> Self {
         Self {
             inner: settings.write().unwrap(),
@@ -644,25 +658,7 @@ impl<'a> SettingsHandleMut<'a> {
     }
 }
 
-impl<'a> AsMut<Settings> for SettingsHandleMut<'a> {
-    fn as_mut(&mut self) -> &mut Settings {
-        self.inner.get_current_settings_mut()
-    }
-}
-
-pub struct WorkspacesHandleMut<'a> {
-    inner: RwLockWriteGuard<'a, WorkspaceSettings>,
-}
-
-impl<'a> WorkspacesHandleMut<'a> {
-    pub(crate) fn new(settings: &'a RwLock<WorkspaceSettings>) -> Self {
-        Self {
-            inner: settings.write().unwrap(),
-        }
-    }
-}
-
-impl<'a> AsMut<WorkspaceSettings> for WorkspacesHandleMut<'a> {
+impl<'a> AsMut<WorkspaceSettings> for WorkspaceSettingsHandleMut<'a> {
     fn as_mut(&mut self) -> &mut WorkspaceSettings {
         &mut self.inner
     }
