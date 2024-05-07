@@ -615,7 +615,7 @@ impl<'a> WorkspaceSettingsHandle<'a> {
     }
 
     pub(crate) fn settings(&self) -> &Settings {
-        &self.inner.get_current_settings()
+        self.inner.get_current_settings()
     }
 }
 
