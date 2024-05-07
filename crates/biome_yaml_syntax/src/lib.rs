@@ -56,6 +56,13 @@ impl biome_rowan::SyntaxKind for YamlSyntaxKind {
         YamlSyntaxKind::is_list(*self)
     }
 
+    fn is_trivia(self) -> bool {
+        matches!(
+            self,
+            YamlSyntaxKind::NEWLINE | YamlSyntaxKind::WHITESPACE | YamlSyntaxKind::COMMENT
+        )
+    }
+
     fn to_string(&self) -> Option<&'static str> {
         YamlSyntaxKind::to_string(self)
     }

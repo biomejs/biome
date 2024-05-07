@@ -10,7 +10,7 @@ pub use biome_rowan::{TextLen, TextRange, TextSize, TokenAtOffset, TriviaPieceKi
 pub use file_source::JsonFileSource;
 pub use syntax_node::*;
 
-use biome_rowan::{RawSyntaxKind, TokenText};
+use biome_rowan::{RawSyntaxKind, SyntaxKind, TokenText};
 
 impl From<u16> for JsonSyntaxKind {
     fn from(d: u16) -> JsonSyntaxKind {
@@ -26,10 +26,6 @@ impl From<JsonSyntaxKind> for u16 {
 }
 
 impl JsonSyntaxKind {
-    pub fn is_trivia(self) -> bool {
-        matches!(self, JsonSyntaxKind::NEWLINE | JsonSyntaxKind::WHITESPACE)
-    }
-
     pub fn is_comments(self) -> bool {
         matches!(
             self,
@@ -83,6 +79,10 @@ impl biome_rowan::SyntaxKind for JsonSyntaxKind {
 
     fn is_list(&self) -> bool {
         JsonSyntaxKind::is_list(*self)
+    }
+
+    fn is_trivia(self) -> bool {
+        matches!(self, JsonSyntaxKind::NEWLINE | JsonSyntaxKind::WHITESPACE)
     }
 
     fn to_string(&self) -> Option<&'static str> {

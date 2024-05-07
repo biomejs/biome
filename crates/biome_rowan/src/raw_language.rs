@@ -75,6 +75,10 @@ impl SyntaxKind for RawLanguageKind {
         )
     }
 
+    fn is_trivia(self) -> bool {
+        self == RawLanguageKind::WHITESPACE
+    }
+
     fn to_string(&self) -> Option<&'static str> {
         let str = match self {
             COMMA_TOKEN => ",",
