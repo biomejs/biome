@@ -228,12 +228,12 @@ impl Rule for NoDuplicateSelectors {
         Some(
             RuleDiagnostic::new(
                 rule_category!(),
-                node.duplicate.text_range(),
+                node.duplicate.text_trimmed_range(),
                 markup! {
-                    "Duplicate selectors may result in unintentionally overriding rules:"<Emphasis>{ duplicate_text }</Emphasis>
+                    "Duplicate selectors may result in unintentionally overriding rules: "<Emphasis>{ duplicate_text }</Emphasis>
                 },
             )
-            .detail(node.first.text_range(), "Please consider moving the rule's contents to the first occurence:")
+            .detail(node.first.text_trimmed_range(), "Please consider moving the rule's contents to the first occurence:")
             .note(markup! {
                 "Remove duplicate selectors within the rule"
             }),
