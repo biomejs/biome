@@ -4,8 +4,8 @@ use super::{
     GetSyntaxTreeParams, GetSyntaxTreeResult, OpenFileParams, OpenProjectParams,
     ParsePatternParams, ParsePatternResult, PatternId, ProjectKey, PullActionsParams,
     PullActionsResult, PullDiagnosticsParams, PullDiagnosticsResult, RegisterProjectFolderParams,
-    RenameResult, SearchPatternParams, SearchResults, SupportsFeatureParams, UpdateProjectParams,
-    UpdateSettingsParams,
+    RenameResult, SearchPatternParams, SearchResults, SupportsFeatureParams,
+    UnregisterProjectFolderParams, UpdateProjectParams, UpdateSettingsParams,
 };
 use crate::file_handlers::{
     Capabilities, CodeActionsParams, DocumentFileSource, FixAllParams, LintParams, ParseResult,
@@ -395,7 +395,6 @@ impl Workspace for WorkspaceServer {
     #[tracing::instrument(level = "trace", skip(self))]
     fn update_settings(&self, params: UpdateSettingsParams) -> Result<(), WorkspaceError> {
         let mut settings = self.settings_mut();
-
         settings.as_mut().merge_with_configuration(
             params.configuration,
             params.workspace_directory,
@@ -416,7 +415,7 @@ impl Workspace for WorkspaceServer {
         );
         self.syntax.remove(&params.path);
         self.documents.insert(
-            params.path,
+            params.path.clone(),
             Document {
                 content: params.content,
                 version: params.version,
@@ -424,6 +423,10 @@ impl Workspace for WorkspaceServer {
                 file_source_index: index,
             },
         );
+        let mut workspace = self.workspaces_mut();
+
+        workspace.as_mut().set_current_project(&params.path);
+
         Ok(())
     }
     fn open_project(&self, params: OpenProjectParams) -> Result<(), WorkspaceError> {
@@ -453,6 +456,15 @@ impl Workspace for WorkspaceServer {
             workspace.as_mut().register_current_project(key);
         }
         Ok(key)
+    }
+
+    fn unregister_project_folder(
+        &self,
+        params: UnregisterProjectFolderParams,
+    ) -> Result<(), WorkspaceError> {
+        let mut workspace = self.workspaces_mut();
+        workspace.as_mut().remove_project(params.path.as_path());
+        Ok(())
     }
 
     fn update_current_project(&self, params: UpdateProjectParams) -> Result<(), WorkspaceError> {
@@ -745,7 +757,7 @@ impl Workspace for WorkspaceServer {
     ) -> Result<ParsePatternResult, WorkspaceError> {
         let pattern = biome_grit_patterns::compile_pattern(
             &params.pattern,
-            biome_grit_patterns::GritTargetLanguage,
+            biome_grit_patterns::JsTargetLanguage.into(),
         )?;
         let pattern_id = PatternId::from("1234"); // TODO: Generate a real ID.
         self.patterns.insert(pattern_id.clone(), pattern);

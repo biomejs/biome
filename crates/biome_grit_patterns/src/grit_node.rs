@@ -3,6 +3,10 @@ use biome_grit_syntax::GritSyntaxNode;
 use grit_util::{AstCursor, AstNode as GritAstNode, ByteRange, CodeRange};
 use std::{borrow::Cow, ops::Deref, str::Utf8Error};
 
+/// Wrapper around `GritSyntaxNode` as produced by our internal Grit parser.
+///
+/// This enables us to implement the [`GritAstNode`] trait on Grit nodes, which
+/// offers a bunch of utilities used by our node compilers.
 #[derive(Clone, Debug)]
 pub struct GritNode(GritSyntaxNode);
 

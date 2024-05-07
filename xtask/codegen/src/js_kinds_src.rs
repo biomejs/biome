@@ -508,6 +508,8 @@ pub const JS_KINDS_SRC: KindsSrc = KindsSrc {
         "JSX_EXPRESSION_CHILD",
         "JSX_SPREAD_CHILD",
         "JSX_STRING",
+        // Grit metavariable
+        "JS_GRIT_METAVARIABLE",
         // bogus nodes JS
         "JS_BOGUS",
         "JS_BOGUS_EXPRESSION",

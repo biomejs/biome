@@ -742,6 +742,13 @@ pub struct RegisterProjectFolderParams {
     pub set_as_current_workspace: bool,
 }
 
+#[derive(Debug, serde::Serialize, serde::Deserialize)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase")]
+pub struct UnregisterProjectFolderParams {
+    pub path: BiomePath,
+}
+
 pub trait Workspace: Send + Sync + RefUnwindSafe {
     /// Checks whether a certain feature is supported. There are different conditions:
     /// - Biome doesn't recognize a file, so it can't provide the feature;
@@ -769,11 +776,17 @@ pub trait Workspace: Send + Sync + RefUnwindSafe {
     /// Add a new project to the workspace
     fn open_project(&self, params: OpenProjectParams) -> Result<(), WorkspaceError>;
 
-    /// Register a possible workspace folders. Returns the key of said workspace. Use this key when you want to switch to different workspaces.
+    /// Register a possible workspace project folder. Returns the key of said project. Use this key when you want to switch to different projects.
     fn register_project_folder(
         &self,
         params: RegisterProjectFolderParams,
     ) -> Result<ProjectKey, WorkspaceError>;
+
+    /// Unregister a workspace project folder. The settings that belong to that project are deleted.
+    fn unregister_project_folder(
+        &self,
+        params: UnregisterProjectFolderParams,
+    ) -> Result<(), WorkspaceError>;
 
     /// Sets the current project path
     fn update_current_project(&self, params: UpdateProjectParams) -> Result<(), WorkspaceError>;
@@ -1018,16 +1031,16 @@ impl JsonSchema for ProjectKey {
 }
 
 #[derive(Debug, Default)]
-pub struct WorkspaceData<T> {
+pub struct WorkspaceData<V> {
     /// [DenseSlotMap] is the slowest type in insertion/removal, but the fastest in iteration
     ///
     /// Users wouldn't change workspace folders very often,
-    paths: DenseSlotMap<ProjectKey, T>,
+    paths: DenseSlotMap<ProjectKey, V>,
 }
 
-impl<T> WorkspaceData<T> {
+impl<V> WorkspaceData<V> {
     /// Inserts an item
-    pub fn insert(&mut self, item: T) -> ProjectKey {
+    pub fn insert(&mut self, item: V) -> ProjectKey {
         self.paths.insert(item)
     }
 
@@ -1036,11 +1049,13 @@ impl<T> WorkspaceData<T> {
         self.paths.remove(key);
     }
 
-    pub fn get_value_by_key(&self, key: ProjectKey) -> Option<&T> {
+    /// Get a reference of the value
+    pub fn get(&self, key: ProjectKey) -> Option<&V> {
         self.paths.get(key)
     }
 
-    pub fn get_mut(&mut self, key: ProjectKey) -> Option<&mut T> {
+    /// Get a mutable reference of the value
+    pub fn get_mut(&mut self, key: ProjectKey) -> Option<&mut V> {
         self.paths.get_mut(key)
     }
 
@@ -1048,7 +1063,7 @@ impl<T> WorkspaceData<T> {
         self.paths.is_empty()
     }
 
-    pub fn iter(&self) -> WorkspaceDataIterator<'_, T> {
+    pub fn iter(&self) -> WorkspaceDataIterator<'_, V> {
         WorkspaceDataIterator::new(self)
     }
 }

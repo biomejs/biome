@@ -961,7 +961,7 @@ export interface Nursery {
 	 */
 	noImportantInKeyframe?: RuleConfiguration_for_Null;
 	/**
-	 * Disallow invalid position @import rules.
+	 * Disallow the use of @import at-rules in invalid positions.
 	 */
 	noInvalidPositionAtImportRule?: RuleConfiguration_for_Null;
 	/**
@@ -1000,6 +1000,10 @@ export interface Nursery {
 	 * Disallow unmatchable An+B selectors.
 	 */
 	noUnmatchableAnbSelector?: RuleConfiguration_for_Null;
+	/**
+	 * Disallow unnecessary concatenation of string or template literals.
+	 */
+	noUselessStringConcat?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow initializing variables to undefined.
 	 */
@@ -2026,6 +2030,7 @@ export type Category =
 	| "lint/nursery/noUnknownSelectorPseudoElement"
 	| "lint/nursery/noUnknownUnit"
 	| "lint/nursery/noUnmatchableAnbSelector"
+	| "lint/nursery/noUselessStringConcat"
 	| "lint/nursery/noUselessUndefinedInitialization"
 	| "lint/nursery/useArrayLiterals"
 	| "lint/nursery/useBiomeSuppressionComment"
