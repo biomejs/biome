@@ -60,3 +60,31 @@ pub(crate) fn expected_root_operation_type_definition(
 pub(crate) fn expected_operation_type(p: &GraphqlParser, range: TextRange) -> ParseDiagnostic {
     expected_any(&["query", "mutation", "subscription"], range, p)
 }
+
+pub(crate) fn expected_directive_location(p: &GraphqlParser, range: TextRange) -> ParseDiagnostic {
+    expected_any(
+        &[
+            "QUERY",
+            "MUTATION",
+            "SUBSCRIPTION",
+            "FIELD",
+            "FRAGMENT_DEFINITION",
+            "FRAGMENT_SPREAD",
+            "INLINE_FRAGMENT",
+            "VARIABLE_DEFINITION",
+            "SCHEMA",
+            "SCALAR",
+            "OBJECT",
+            "FIELD_DEFINITION",
+            "ARGUMENT_DEFINITION",
+            "INTERFACE",
+            "UNION",
+            "ENUM",
+            "ENUM_VALUE",
+            "INPUT_OBJECT",
+            "INPUT_FIELD_DEFINITION",
+        ],
+        range,
+        p,
+    )
+}

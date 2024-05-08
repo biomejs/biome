@@ -97,7 +97,7 @@ fn parse_field_definition(p: &mut GraphqlParser) -> ParsedSyntax {
 }
 
 #[inline]
-fn parse_arguments_definition(p: &mut GraphqlParser) -> ParsedSyntax {
+pub(super) fn parse_arguments_definition(p: &mut GraphqlParser) -> ParsedSyntax {
     if !is_at_arguments_definition(p) {
         return Absent;
     }
@@ -215,7 +215,7 @@ pub(super) fn is_at_input_value_definition(p: &mut GraphqlParser<'_>) -> bool {
 /// In this case, the opening parenthesis is missing, the name token of an input value definition
 /// is also missing. It would be to complex to disambiguate input value definitions from field.
 #[inline]
-fn is_at_arguments_definition(p: &mut GraphqlParser<'_>) -> bool {
+pub(super) fn is_at_arguments_definition(p: &mut GraphqlParser<'_>) -> bool {
     p.at(T!['('])
 }
 
