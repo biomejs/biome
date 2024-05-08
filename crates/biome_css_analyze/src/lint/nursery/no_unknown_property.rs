@@ -86,7 +86,10 @@ impl Rule for NoUnknownProperty {
             )
             .note(markup! {
                 "See "<Hyperlink href="https://stylelint.io/user-guide/rules/property-no-unknown/">"CSS Specifications and browser specific properties"</Hyperlink>" for more details."
-            }),
+            })
+           .note(markup! {
+                "To resolve this issue, replace the unknown property with a valid CSS property"
+            })
         )
     }
 }
