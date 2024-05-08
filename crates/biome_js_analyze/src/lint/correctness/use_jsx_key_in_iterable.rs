@@ -205,20 +205,21 @@ fn handle_potential_react_component(
 ) -> Option<Vec<TextRange>> {
     let node = unwrap_parenthesis(node)?;
 
-    if is_inside_jsx {
-        if let AnyJsExpression::JsConditionalExpression(node) = node {
-            let consequent =
-                handle_potential_react_component(node.consequent().ok()?, model, is_inside_jsx);
-            let alternate =
-                handle_potential_react_component(node.alternate().ok()?, model, is_inside_jsx);
+    if let AnyJsExpression::JsConditionalExpression(node) = node {
+        let consequent =
+            handle_potential_react_component(node.consequent().ok()?, model, is_inside_jsx);
+        let alternate =
+            handle_potential_react_component(node.alternate().ok()?, model, is_inside_jsx);
 
-            return match (consequent, alternate) {
-                (Some(consequent), Some(alternate)) => Some([consequent, alternate].concat()),
-                (Some(consequent), None) => Some(consequent),
-                (None, Some(alternate)) => Some(alternate),
-                (None, None) => None,
-            };
-        }
+        return match (consequent, alternate) {
+            (Some(consequent), Some(alternate)) => Some([consequent, alternate].concat()),
+            (Some(consequent), None) => Some(consequent),
+            (None, Some(alternate)) => Some(alternate),
+            (None, None) => None,
+        };
+    }
+
+    if is_inside_jsx {
         if let Some(node) = ReactComponentExpression::cast_ref(node.syntax()) {
             let range = handle_react_component(node, model)?;
             Some(vec![range])
