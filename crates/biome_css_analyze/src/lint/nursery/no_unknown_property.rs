@@ -25,7 +25,9 @@ declare_rule! {
     /// a {
     ///   colr: blue;
     /// }
+    /// ```
     ///
+    /// ```css,expect_diagnostic
     /// a {
     ///   my-property: 1;
     /// }
@@ -33,15 +35,19 @@ declare_rule! {
     ///
     /// ### Valid
     ///
-    /// ```css,expect_diagnostic
+    /// ```css
     /// a {
     ///   color: green;
     /// }
+    /// ```
     ///
+    /// ```css
     /// a {
     ///   fill: black;
     /// }
+    /// ```
     ///
+    /// ```css
     /// a {
     ///   -moz-align-self: center;
     /// }
