@@ -4,7 +4,7 @@ expression: validCharsetMultipleImport.css
 ---
 # Input
 ```css
-@CHARSET 'utf-8';
+@charset "utf-8";
 @imPORT 'foo.css';
 @import 'bar.css';
 
