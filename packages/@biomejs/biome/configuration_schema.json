@@ -1538,13 +1538,6 @@
 						{ "type": "null" }
 					]
 				},
-				"noPropertyUnknown": {
-					"description": "Succinct description of the rule.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
-						{ "type": "null" }
-					]
-				},
 				"noReactSpecificProps": {
 					"description": "Prevents React-specific JSX properties from being used.",
 					"anyOf": [
@@ -1568,6 +1561,13 @@
 				},
 				"noUnknownFunction": {
 					"description": "Disallow unknown CSS value functions.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noUnknownProperty": {
+					"description": "Disallow unknown properties.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }

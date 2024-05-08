@@ -2693,9 +2693,6 @@ pub struct Nursery {
     #[doc = "Forbid the use of Node.js builtin modules."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_nodejs_modules: Option<RuleConfiguration<NoNodejsModules>>,
-    #[doc = "Succinct description of the rule."]
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_unknown_property: Option<RuleConfiguration<NoUnknownProperty>>,
     #[doc = "Prevents React-specific JSX properties from being used."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_react_specific_props: Option<RuleConfiguration<NoReactSpecificProps>>,
@@ -2708,6 +2705,9 @@ pub struct Nursery {
     #[doc = "Disallow unknown CSS value functions."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_unknown_function: Option<RuleConfiguration<NoUnknownFunction>>,
+    #[doc = "Disallow unknown properties."]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub no_unknown_property: Option<RuleConfiguration<NoUnknownProperty>>,
     #[doc = "Disallow unknown pseudo-element selectors."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_unknown_selector_pseudo_element:
@@ -2780,11 +2780,11 @@ impl Nursery {
         "noImportantInKeyframe",
         "noMisplacedAssertion",
         "noNodejsModules",
-        "noPropertyUnknown",
         "noReactSpecificProps",
         "noRestrictedImports",
         "noUndeclaredDependencies",
         "noUnknownFunction",
+        "noUnknownProperty",
         "noUnknownSelectorPseudoElement",
         "noUnknownUnit",
         "noUnmatchableAnbSelector",
@@ -2826,7 +2826,7 @@ impl Nursery {
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[10]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[11]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[12]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[19]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[18]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[20]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[21]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[22]),
@@ -2956,27 +2956,27 @@ impl Nursery {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[14]));
             }
         }
-        if let Some(rule) = self.no_unknown_property.as_ref() {
+        if let Some(rule) = self.no_react_specific_props.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[15]));
             }
         }
-        if let Some(rule) = self.no_react_specific_props.as_ref() {
+        if let Some(rule) = self.no_restricted_imports.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[16]));
             }
         }
-        if let Some(rule) = self.no_restricted_imports.as_ref() {
+        if let Some(rule) = self.no_undeclared_dependencies.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[17]));
             }
         }
-        if let Some(rule) = self.no_undeclared_dependencies.as_ref() {
+        if let Some(rule) = self.no_unknown_function.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[18]));
             }
         }
-        if let Some(rule) = self.no_unknown_function.as_ref() {
+        if let Some(rule) = self.no_unknown_property.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[19]));
             }
@@ -3120,27 +3120,27 @@ impl Nursery {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[14]));
             }
         }
-        if let Some(rule) = self.no_unknown_property.as_ref() {
+        if let Some(rule) = self.no_react_specific_props.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[15]));
             }
         }
-        if let Some(rule) = self.no_react_specific_props.as_ref() {
+        if let Some(rule) = self.no_restricted_imports.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[16]));
             }
         }
-        if let Some(rule) = self.no_restricted_imports.as_ref() {
+        if let Some(rule) = self.no_undeclared_dependencies.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[17]));
             }
         }
-        if let Some(rule) = self.no_undeclared_dependencies.as_ref() {
+        if let Some(rule) = self.no_unknown_function.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[18]));
             }
         }
-        if let Some(rule) = self.no_unknown_function.as_ref() {
+        if let Some(rule) = self.no_unknown_property.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[19]));
             }
@@ -3301,10 +3301,6 @@ impl Nursery {
                 .no_nodejs_modules
                 .as_ref()
                 .map(|conf| (conf.level(), conf.get_options())),
-            "noPropertyUnknown" => self
-                .no_unknown_property
-                .as_ref()
-                .map(|conf| (conf.level(), conf.get_options())),
             "noReactSpecificProps" => self
                 .no_react_specific_props
                 .as_ref()
@@ -3319,6 +3315,10 @@ impl Nursery {
                 .map(|conf| (conf.level(), conf.get_options())),
             "noUnknownFunction" => self
                 .no_unknown_function
+                .as_ref()
+                .map(|conf| (conf.level(), conf.get_options())),
+            "noUnknownProperty" => self
+                .no_unknown_property
                 .as_ref()
                 .map(|conf| (conf.level(), conf.get_options())),
             "noUnknownSelectorPseudoElement" => self

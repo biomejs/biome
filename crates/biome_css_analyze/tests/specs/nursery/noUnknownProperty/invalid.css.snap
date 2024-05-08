@@ -28,6 +28,8 @@ invalid.css:2:3 lint/nursery/noUnknownProperty ━━━━━━━━━━━
   
   i See CSS Specifications and browser specific properties for more details.
   
+  i To resolve this issue, replace the unknown property with a valid CSS property
+  
 
 ```
 
@@ -43,6 +45,8 @@ invalid.css:6:3 lint/nursery/noUnknownProperty ━━━━━━━━━━━
     8 │ 
   
   i See CSS Specifications and browser specific properties for more details.
+  
+  i To resolve this issue, replace the unknown property with a valid CSS property
   
 
 ```

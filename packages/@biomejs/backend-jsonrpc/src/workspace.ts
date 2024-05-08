@@ -969,10 +969,6 @@ export interface Nursery {
 	 */
 	noNodejsModules?: RuleConfiguration_for_Null;
 	/**
-	 * Succinct description of the rule.
-	 */
-	noPropertyUnknown?: RuleConfiguration_for_Null;
-	/**
 	 * Prevents React-specific JSX properties from being used.
 	 */
 	noReactSpecificProps?: RuleConfiguration_for_Null;
@@ -988,6 +984,10 @@ export interface Nursery {
 	 * Disallow unknown CSS value functions.
 	 */
 	noUnknownFunction?: RuleConfiguration_for_Null;
+	/**
+	 * Disallow unknown properties.
+	 */
+	noUnknownProperty?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow unknown pseudo-element selectors.
 	 */
@@ -2021,12 +2021,12 @@ export type Category =
 	| "lint/nursery/noMisplacedAssertion"
 	| "lint/nursery/noMissingGenericFamilyKeyword"
 	| "lint/nursery/noNodejsModules"
-	| "lint/nursery/noPropertyUnknown"
 	| "lint/nursery/noReactSpecificProps"
 	| "lint/nursery/noRestrictedImports"
 	| "lint/nursery/noTypeOnlyImportAttributes"
 	| "lint/nursery/noUndeclaredDependencies"
 	| "lint/nursery/noUnknownFunction"
+	| "lint/nursery/noUnknownProperty"
 	| "lint/nursery/noUnknownSelectorPseudoElement"
 	| "lint/nursery/noUnknownUnit"
 	| "lint/nursery/noUnmatchableAnbSelector"
