@@ -3,9 +3,10 @@ use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnosti
 use biome_console::markup;
 use biome_js_syntax::{
     AnyJsExpression, AnyJsLiteralExpression, JsBinaryExpression, JsBinaryOperator,
-    JsLogicalExpression, JsLogicalOperator, JsUnaryOperator,
+    JsCallExpression, JsIfStatement, JsLogicalExpression, JsLogicalOperator,
+    JsParenthesizedExpression, JsUnaryOperator,
 };
-use biome_rowan::AstNode;
+use biome_rowan::{AstNode, Direction, WalkEvent};
 
 declare_rule! {
     /// Disallow the use of yoda expressions.
@@ -147,7 +148,7 @@ fn is_range_assertion(parent: &Option<JsLogicalExpression>) -> bool {
                     && is_range_assertion_operator(right.operator().ok())
                     && (is_inside_range_assertion(&operator, &left, &right)
                         || is_outside_range_assertion(&operator, &left, &right))
-                    && !is_nested_logical_expression(parent_logical_expression)
+                    && is_wrapped_in_parenthesis(parent_logical_expression)
             }
             _ => false,
         };
@@ -186,7 +187,18 @@ fn is_inside_range_assertion(
         (None, None) => false,
         (Some(_), None) => true,
         (None, Some(_)) => true,
-        (Some(left_value), Some(right_value)) => left_value <= right_value,
+        (Some(left_value), Some(right_value)) => compare_literals(left_value, right_value),
+    }
+}
+
+/// Compare literals as number if possible, compare as string otherwise
+fn compare_literals(left_string_value: String, right_string_value: String) -> bool {
+    match (
+        left_string_value.parse::<f64>(),
+        right_string_value.parse::<f64>(),
+    ) {
+        (Ok(left_number_value), Ok(right_number_value)) => left_number_value <= right_number_value,
+        _ => left_string_value <= right_string_value,
     }
 }
 
@@ -212,12 +224,18 @@ fn is_outside_range_assertion(
         (None, None) => false,
         (Some(_), None) => true,
         (None, Some(_)) => true,
-        (Some(left_value), Some(right_value)) => left_value <= right_value,
+        (Some(left_value), Some(right_value)) => compare_literals(left_value, right_value),
     }
 }
 
-fn is_nested_logical_expression(logical_expression: &JsLogicalExpression) -> bool {
-    logical_expression.parent::<JsLogicalExpression>().is_some()
+fn is_wrapped_in_parenthesis(logical_expression: &JsLogicalExpression) -> bool {
+    match (
+        logical_expression.parent::<JsParenthesizedExpression>(),
+        logical_expression.parent::<JsIfStatement>(),
+    ) {
+        (None, None) => false,
+        _ => true,
+    }
 }
 
 fn is_same_identifier(
@@ -225,13 +243,26 @@ fn is_same_identifier(
     right_expression: &Option<AnyJsExpression>,
 ) -> bool {
     match (left_expression, right_expression) {
-        (Some(left), Some(right)) => is_node_equal(left.syntax(), right.syntax()),
+        (Some(left), Some(right)) => {
+            // We can't consider two call expressions equal here because the result of the expression might be different if we call it twice
+            let has_call_expression = |expression: &AnyJsExpression| {
+                expression.syntax().preorder().any(|event| match event {
+                    WalkEvent::Leave(node) => JsCallExpression::can_cast(node.kind()),
+                    _ => false,
+                })
+            };
+
+            is_node_equal(left.syntax(), right.syntax())
+                && !has_call_expression(left)
+                && !has_call_expression(right)
+        }
         _ => false,
     }
 }
 
 fn extract_string_value(expression: Option<&AnyJsExpression>) -> Option<String> {
     match expression {
+        // "a", 1, null, undefined, etc
         Some(AnyJsExpression::AnyJsLiteralExpression(literal_expression)) => Some(
             literal_expression
                 .as_static_value()
@@ -239,6 +270,7 @@ fn extract_string_value(expression: Option<&AnyJsExpression>) -> Option<String> 
                 .unwrap_or(String::new()),
         ),
 
+        // `a`
         Some(AnyJsExpression::JsTemplateExpression(template_expression)) => Some(
             template_expression
                 .elements()
@@ -251,6 +283,20 @@ fn extract_string_value(expression: Option<&AnyJsExpression>) -> Option<String> 
                         .as_str()
                 }),
         ),
+
+        // -1
+        Some(AnyJsExpression::JsUnaryExpression(unary_expression)) => {
+            match (
+                unary_expression.operator_token().ok(),
+                unary_expression.argument().ok(),
+            ) {
+                (Some(operator_token), Some(argument)) => Some(
+                    operator_token.to_string()
+                        + &extract_string_value(Some(&argument))?.to_string(),
+                ),
+                _ => None,
+            }
+        }
 
         _ => None,
     }
