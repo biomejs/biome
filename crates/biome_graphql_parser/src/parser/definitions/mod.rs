@@ -1,6 +1,7 @@
 mod r#enum;
 mod field;
 mod fragment;
+mod input_object;
 mod interface;
 mod object;
 mod operation;
@@ -17,6 +18,7 @@ use biome_parser::{
 
 use self::{
     fragment::{is_at_fragment_definition, parse_fragment_definition},
+    input_object::{is_at_input_object_type_definition, parse_input_object_type_definition},
     interface::{is_at_interface_type_definition, parse_interface_type_definition},
     object::{is_at_object_type_definition, parse_object_type_definition},
     operation::{is_at_operation, parse_operation_definition},
@@ -67,7 +69,7 @@ impl ParseNodeList for DefinitionList {
 
 #[inline]
 fn parse_definition(p: &mut GraphqlParser) -> ParsedSyntax {
-    // TODO: parse any definition
+    // TODO: add directive definition
     if is_at_operation(p) {
         parse_operation_definition(p)
     } else if is_at_fragment_definition(p) {
@@ -84,6 +86,8 @@ fn parse_definition(p: &mut GraphqlParser) -> ParsedSyntax {
         parse_union_type_definition(p)
     } else if is_at_enum_type_definition(p) {
         parse_enum_type_definition(p)
+    } else if is_at_input_object_type_definition(p) {
+        parse_input_object_type_definition(p)
     } else {
         Absent
     }
@@ -91,7 +95,7 @@ fn parse_definition(p: &mut GraphqlParser) -> ParsedSyntax {
 
 #[inline]
 fn is_at_definition(p: &mut GraphqlParser<'_>) -> bool {
-    // TODO: recover at any definition
+    // TODO: add directive definition
     is_at_operation(p)
         || is_at_fragment_definition(p)
         || is_at_schema_definition(p)
@@ -100,4 +104,5 @@ fn is_at_definition(p: &mut GraphqlParser<'_>) -> bool {
         || is_at_interface_type_definition(p)
         || is_at_union_type_definition(p)
         || is_at_enum_type_definition(p)
+        || is_at_input_object_type_definition(p)
 }
