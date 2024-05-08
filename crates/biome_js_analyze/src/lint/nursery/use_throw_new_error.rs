@@ -8,7 +8,7 @@ use biome_js_factory::make;
 use biome_js_syntax::{
     AnyJsExpression, JsCallExpression, JsNewExpression, JsParenthesizedExpression, JsSyntaxKind, T,
 };
-use biome_rowan::{AstNode, BatchMutationExt, TriviaPieceKind};
+use biome_rowan::{AstNode, BatchMutationExt, TokenText, TriviaPieceKind};
 
 use crate::JsRuleAction;
 
@@ -56,7 +56,7 @@ declare_rule! {
 
 impl Rule for UseThrowNewError {
     type Query = Ast<JsCallExpression>;
-    type State = ();
+    type State = TokenText;
     type Signals = Option<Self::State>;
     type Options = ();
 
@@ -89,21 +89,25 @@ impl Rule for UseThrowNewError {
         }?;
 
         if name.ends_with("Error") && name.chars().next()?.is_uppercase() {
-            return Some(());
+            return Some(name);
         }
 
         None
     }
 
-    fn diagnostic(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<RuleDiagnostic> {
+    fn diagnostic(ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
         let node = ctx.query();
-        Some(RuleDiagnostic::new(
-            rule_category!(),
-            node.range(),
-            markup! {
-                "Use "<Emphasis>"new"</Emphasis>" when throwing an error."
-            },
-        ))
+        let name = state.text();
+
+        Some(
+            RuleDiagnostic::new(
+                rule_category!(),
+                node.range(),
+                markup! {
+                    "Use "<Emphasis>"new "{name}"()"</Emphasis>" instead of "<Emphasis>{name}"()"</Emphasis>" when throwing an error."
+                },
+            ),
+        )
     }
 
     fn action(ctx: &RuleContext<Self>, _: &Self::State) -> Option<JsRuleAction> {
