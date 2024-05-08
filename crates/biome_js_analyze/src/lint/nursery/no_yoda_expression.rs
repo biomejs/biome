@@ -179,8 +179,8 @@ fn is_inside_range_assertion(
         return false;
     }
 
-    let left_literal = extract_string_value(&left_binary_expression.left().ok());
-    let right_literal = extract_string_value(&right_binary_expression.right().ok());
+    let left_literal = extract_string_value(left_binary_expression.left().as_ref().ok());
+    let right_literal = extract_string_value(right_binary_expression.right().as_ref().ok());
 
     match (left_literal, right_literal) {
         (None, None) => false,
@@ -205,8 +205,8 @@ fn is_outside_range_assertion(
         return false;
     }
 
-    let left_literal = extract_string_value(&left_binary_expression.right().ok());
-    let right_literal = extract_string_value(&right_binary_expression.left().ok());
+    let left_literal = extract_string_value(left_binary_expression.right().as_ref().ok());
+    let right_literal = extract_string_value(right_binary_expression.left().as_ref().ok());
 
     match (left_literal, right_literal) {
         (None, None) => false,
@@ -230,14 +230,28 @@ fn is_same_identifier(
     }
 }
 
-fn extract_string_value(expression: &Option<AnyJsExpression>) -> Option<String> {
+fn extract_string_value(expression: Option<&AnyJsExpression>) -> Option<String> {
     match expression {
-        Some(AnyJsExpression::AnyJsLiteralExpression(
-            AnyJsLiteralExpression::JsNumberLiteralExpression(number_literal_expression),
-        )) => Some(number_literal_expression.to_string()),
-        Some(AnyJsExpression::AnyJsLiteralExpression(
-            AnyJsLiteralExpression::JsStringLiteralExpression(string_literal_expression),
-        )) => Some(string_literal_expression.to_string()),
+        Some(AnyJsExpression::AnyJsLiteralExpression(literal_expression)) => Some(
+            literal_expression
+                .as_static_value()
+                .map(|static_value| static_value.text().to_string())
+                .unwrap_or(String::new()),
+        ),
+
+        Some(AnyJsExpression::JsTemplateExpression(template_expression)) => Some(
+            template_expression
+                .elements()
+                .into_iter()
+                .fold(String::new(), |acc, element| {
+                    acc + element
+                        .as_js_template_chunk_element()
+                        .unwrap()
+                        .text()
+                        .as_str()
+                }),
+        ),
+
         _ => None,
     }
 }
