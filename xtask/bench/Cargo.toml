@@ -6,6 +6,7 @@ version = "0.0.0"
 
 [dependencies]
 biome_analyze        = { workspace = true }
+biome_css_analyze    = { workspace = true }
 biome_css_formatter  = { workspace = true }
 biome_css_parser     = { workspace = true }
 biome_css_syntax     = { workspace = true }
@@ -38,7 +39,7 @@ codspeed = ["codspeed-criterion-compat"]
 
 [[bench]]
 harness = false
-name    = "analyzer"
+name    = "js_analyzer"
 
 # JavaScript benches
 [[bench]]
@@ -66,6 +67,10 @@ name    = "css_parser"
 [[bench]]
 harness = false
 name    = "css_formatter"
+
+[[bench]]
+harness = false
+name    = "css_analyzer"
 
 [lints]
 workspace = true
