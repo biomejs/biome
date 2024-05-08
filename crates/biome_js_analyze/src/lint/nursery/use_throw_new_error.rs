@@ -15,7 +15,7 @@ use crate::JsRuleAction;
 declare_rule! {
     /// Require `new` when throwing an error.
     ///
-    /// While it's possible to create a new error without using the new keyword, it's better to be explicit.
+    /// While it's possible to instantiate `Error` without using the `new` keyword, it's better to be consistent: modern builtins require `new` to be instantiated.
     ///
     /// Rule matches errors when their name ends with the word "Error" and the first character is uppercase.
     ///
