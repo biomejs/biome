@@ -999,7 +999,7 @@ version = "0.5.7"
 
 [[package]]
 name = "biome_wasm"
-version = "0.0.0"
+version = "1.7.3"
 dependencies = [
  "biome_console",
  "biome_diagnostics",

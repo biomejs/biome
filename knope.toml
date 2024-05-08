@@ -1,7 +1,27 @@
 ## npm packages
-[packages."@biomejs/biome"]
-changelog       = "CHANGELOG.md"
-versioned_files = ["packages/@biomejs/biome/package.json"]
+[packages.cli]
+changelog = "CHANGELOG.md"
+versioned_files = [
+  "packages/@biomejs/biome/package.json",
+  # Platform binaries
+  "packages/@biomejs/cli-darwin-arm64/package.json",
+  "packages/@biomejs/cli-darwin-x64/package.json",
+  "packages/@biomejs/cli-linux-arm64/package.json",
+  "packages/@biomejs/cli-linux-arm64-musl/package.json",
+  "packages/@biomejs/cli-linux-x64/package.json",
+  "packages/@biomejs/cli-linux-x64-musl/package.json",
+  "packages/@biomejs/cli-win32-arm64/package.json",
+  "packages/@biomejs/cli-win32-x64/package.json",
+  "packages/@biomejs/cli-win32-x64/package.json",
+  # WASM
+  "packages/@biomejs/wasm-web/package.json",
+  "packages/@biomejs/wasm-bundler/package.json",
+  "packages/@biomejs/wasm-nodejs/package.json",
+  "crates/biome_wasm/Cargo.toml",
+  # JSON RPC
+  "packages/@biomejs/backend-jsonrpc/package.json",
+]
+
 
 # Special crate. This is the main binary that we are going to release.
 [packages.biome_cli]
@@ -187,7 +207,7 @@ type = "CreateChangeFile"
 [[workflows]]
 name = "prepare-release"
 [[workflows.steps]]
-command = "git switch -c release"
+command = "git switch -c release/automated-ci"
 type    = "Command"
 
 [[workflows.steps]]
@@ -197,13 +217,23 @@ ignore_conventional_commits = true
 
 [[workflows.steps]]
 type = "Command"
+# Workaround to update the lock files
+# https://github.com/knope-dev/knope/issues/162
+command = "cargo build"
+
+[[workflows.steps]]
+# The script will add most up-to-date optional dependencies to the manifest of @biomejs/biome and @biomejs/backend-jsonrpc
+command = "node packages/@biomejs/biome/scripts/generate-packages.mjs"
+type    = "Command"
+
+[[workflows.steps]]
+type = "Command"
 # WARNING: if you change this message, remember to update the `prepare_release.yml` too, because it uses this message
 command = "git commit -m \"chore: prepare release\""
 
 [[workflows.steps]]
-command = "git push --force --set-upstream origin release"
+command = "git push --force-with-lease --set-upstream origin release/automated-ci"
 type    = "Command"
-
 
 [[workflows.steps]]
 base = "main"
