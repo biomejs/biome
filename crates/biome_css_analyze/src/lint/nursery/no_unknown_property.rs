@@ -14,8 +14,8 @@ declare_rule! {
     ///
     /// This rule ignores:
     ///
-    /// variables ($sass, @less, --custom-property)
-    /// vendor-prefixed properties (e.g., -moz-align-self, -webkit-align-self)
+    /// - custom variables e.g. `--custom-property`
+    /// - vendor-prefixed properties (e.g., `-moz-align-self,` `-webkit-align-self`)
     ///
     /// ## Examples
     ///
