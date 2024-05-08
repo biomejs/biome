@@ -30,7 +30,7 @@ v w, x>test {} v { w {} } x > test {}
 ```
 disallowInList.css:8:21 lint/nursery/noDuplicateSelectors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Duplicate selectors may result in unintentionally overriding rules: textarea 
+  ! Duplicate selectors may result in unintentionally overriding rules: textarea
   
      7 │ /* duplicate within a grouping selector */
    > 8 │ input, textarea {}; textarea {}
@@ -54,7 +54,7 @@ disallowInList.css:8:21 lint/nursery/noDuplicateSelectors ━━━━━━━�
 ```
 disallowInList.css:11:22 lint/nursery/noDuplicateSelectors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Duplicate selectors may result in unintentionally overriding rules: button 
+  ! Duplicate selectors may result in unintentionally overriding rules: button
   
     10 │ /* duplicate within a grouping selector, reversed */
   > 11 │ button {}; selector, button {}
@@ -78,8 +78,7 @@ disallowInList.css:11:22 lint/nursery/noDuplicateSelectors ━━━━━━━
 ```
 disallowInList.css:16:1 lint/nursery/noDuplicateSelectors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Duplicate selectors may result in unintentionally overriding rules: 
-    h1 
+  ! Duplicate selectors may result in unintentionally overriding rules: h1
   
     14 │ span, div {};
     15 │  h1, section {};
@@ -105,7 +104,7 @@ disallowInList.css:16:1 lint/nursery/noDuplicateSelectors ━━━━━━━�
 ```
 disallowInList.css:19:20 lint/nursery/noDuplicateSelectors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Duplicate selectors may result in unintentionally overriding rules: w 
+  ! Duplicate selectors may result in unintentionally overriding rules: w
   
     18 │ /* test regular case for regression */
   > 19 │ v w, x>test {} v { w {} } x > test {}
@@ -125,7 +124,7 @@ disallowInList.css:19:20 lint/nursery/noDuplicateSelectors ━━━━━━━
 ```
 disallowInList.css:19:27 lint/nursery/noDuplicateSelectors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Duplicate selectors may result in unintentionally overriding rules: x > test 
+  ! Duplicate selectors may result in unintentionally overriding rules: x > test
   
     18 │ /* test regular case for regression */
   > 19 │ v w, x>test {} v { w {} } x > test {}

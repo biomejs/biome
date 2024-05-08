@@ -62,7 +62,7 @@ x { & {} }
 ```
 invalid.css:2:4 lint/nursery/noDuplicateSelectors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Duplicate selectors may result in unintentionally overriding rules: a 
+  ! Duplicate selectors may result in unintentionally overriding rules: a
   
     1 │ /* duplicate within one rule's selector list */
   > 2 │ a, a {}
@@ -86,8 +86,7 @@ invalid.css:2:4 lint/nursery/noDuplicateSelectors ━━━━━━━━━━
 ```
 invalid.css:6:1 lint/nursery/noDuplicateSelectors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Duplicate selectors may result in unintentionally overriding rules: 
-    b 
+  ! Duplicate selectors may result in unintentionally overriding rules: b
   
     4 │ /* duplicate within one rule's selector list. multiline */
     5 │ b,
@@ -112,8 +111,7 @@ invalid.css:6:1 lint/nursery/noDuplicateSelectors ━━━━━━━━━━
 ```
 invalid.css:11:1 lint/nursery/noDuplicateSelectors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Duplicate selectors may result in unintentionally overriding rules: 
-    d 
+  ! Duplicate selectors may result in unintentionally overriding rules: d
   
      9 │ c,
     10 │ d,
@@ -139,8 +137,7 @@ invalid.css:11:1 lint/nursery/noDuplicateSelectors ━━━━━━━━━�
 ```
 invalid.css:15:1 lint/nursery/noDuplicateSelectors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Duplicate selectors may result in unintentionally overriding rules: 
-    .e
+  ! Duplicate selectors may result in unintentionally overriding rules: .e
   
     13 │ /* duplicated selectors within one rule's selector list. 2 duplicates */
     14 │ .e,
@@ -165,8 +162,7 @@ invalid.css:15:1 lint/nursery/noDuplicateSelectors ━━━━━━━━━�
 ```
 invalid.css:16:1 lint/nursery/noDuplicateSelectors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Duplicate selectors may result in unintentionally overriding rules: 
-    .e 
+  ! Duplicate selectors may result in unintentionally overriding rules: .e
   
     14 │ .e,
     15 │ .e,
@@ -191,7 +187,7 @@ invalid.css:16:1 lint/nursery/noDuplicateSelectors ━━━━━━━━━�
 ```
 invalid.css:19:11 lint/nursery/noDuplicateSelectors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Duplicate selectors may result in unintentionally overriding rules: f 
+  ! Duplicate selectors may result in unintentionally overriding rules: f
   
     18 │ /* duplicate simple selectors with another rule between */
   > 19 │ f {} g {} f {}
@@ -215,8 +211,7 @@ invalid.css:19:11 lint/nursery/noDuplicateSelectors ━━━━━━━━━�
 ```
 invalid.css:24:1 lint/nursery/noDuplicateSelectors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Duplicate selectors may result in unintentionally overriding rules: 
-    h 
+  ! Duplicate selectors may result in unintentionally overriding rules: h
   
     22 │ h {}
     23 │ i {}
@@ -241,7 +236,7 @@ invalid.css:24:1 lint/nursery/noDuplicateSelectors ━━━━━━━━━�
 ```
 invalid.css:27:9 lint/nursery/noDuplicateSelectors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Duplicate selectors may result in unintentionally overriding rules: k, j 
+  ! Duplicate selectors may result in unintentionally overriding rules: k, j
   
     26 │ /* duplicate selector lists with different order */
   > 27 │ j, k {} k, j {}
@@ -265,8 +260,7 @@ invalid.css:27:9 lint/nursery/noDuplicateSelectors ━━━━━━━━━�
 ```
 invalid.css:31:1 lint/nursery/noDuplicateSelectors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Duplicate selectors may result in unintentionally overriding rules: 
-    m n 
+  ! Duplicate selectors may result in unintentionally overriding rules: m n
   
     29 │ /* duplicate selectors with multiple components */
     30 │ m n {}
@@ -291,9 +285,8 @@ invalid.css:31:1 lint/nursery/noDuplicateSelectors ━━━━━━━━━�
 ```
 invalid.css:36:3 lint/nursery/noDuplicateSelectors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Duplicate selectors may result in unintentionally overriding rules: 
-      #baz,
-      .foo     p,q>.bar 
+  ! Duplicate selectors may result in unintentionally overriding rules: #baz,
+      .foo     p,q>.bar
   
     34 │ .foo   p, q > .bar,
     35 │ #baz {}
@@ -322,7 +315,7 @@ invalid.css:36:3 lint/nursery/noDuplicateSelectors ━━━━━━━━━�
 ```
 invalid.css:41:19 lint/nursery/noDuplicateSelectors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Duplicate selectors may result in unintentionally overriding rules: s 
+  ! Duplicate selectors may result in unintentionally overriding rules: s
   
     39 │ /* duplicate within a media query, in the same rule */
     40 │ s {}
@@ -348,7 +341,7 @@ invalid.css:41:19 lint/nursery/noDuplicateSelectors ━━━━━━━━━�
 ```
 invalid.css:45:45 lint/nursery/noDuplicateSelectors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Duplicate selectors may result in unintentionally overriding rules: t 
+  ! Duplicate selectors may result in unintentionally overriding rules: t
   
     43 │ /* duplicate within a media query, in different rules */
     44 │ t {}
@@ -374,7 +367,7 @@ invalid.css:45:45 lint/nursery/noDuplicateSelectors ━━━━━━━━━�
 ```
 invalid.css:48:12 lint/nursery/noDuplicateSelectors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Duplicate selectors may result in unintentionally overriding rules: w 
+  ! Duplicate selectors may result in unintentionally overriding rules: w
   
     47 │ /* duplicate caused by nesting */
   > 48 │ v w {} v { w {} }
@@ -398,7 +391,7 @@ invalid.css:48:12 lint/nursery/noDuplicateSelectors ━━━━━━━━━�
 ```
 invalid.css:51:5 lint/nursery/noDuplicateSelectors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Duplicate selectors may result in unintentionally overriding rules: & 
+  ! Duplicate selectors may result in unintentionally overriding rules: &
   
     50 │ /* duplicate caused by &-parent selector */
   > 51 │ x { & {} }

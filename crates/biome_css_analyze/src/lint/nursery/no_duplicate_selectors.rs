@@ -167,7 +167,7 @@ impl Rule for NoDuplicateSelectors {
                 }
             }
         } else {
-            // TODO: Can't use a node union here
+            // Union node with CssSelectorList and CssRelativeSelectorList does not have overlapping From/Into
             let selector_lists = node.rules().syntax().descendants().filter(|x| 
                 x.clone().cast::<CssSelectorList>().is_some() || x.clone().cast::<CssRelativeSelectorList>().is_some()
             );
@@ -233,8 +233,16 @@ impl Rule for NoDuplicateSelectors {
     }
 
     fn diagnostic(_: &RuleContext<Self>, node: &Self::State) -> Option<RuleDiagnostic> {
-        // TODO: type this with a union node
-        let duplicate_text = node.duplicate.to_string();
+        let duplicate_text = if let Some(duplicate) = AnySelectorLike::cast_ref(&node.duplicate) {
+            duplicate.text()
+        } else if let Some(duplicate) = CssSelectorList::cast_ref(&node.duplicate) {
+            duplicate.text()
+        } else if let Some(duplicate) = CssRelativeSelectorList::cast_ref(&node.duplicate) {
+            duplicate.text()
+        } 
+        else {
+            node.duplicate.to_string()
+        };
 
         Some(
             RuleDiagnostic::new(
