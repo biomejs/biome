@@ -12,7 +12,7 @@ pub use file_source::CssFileSource;
 pub use syntax_node::*;
 
 use crate::CssSyntaxKind::*;
-use biome_rowan::{AstNode, RawSyntaxKind};
+use biome_rowan::{AstNode, RawSyntaxKind, SyntaxKind};
 
 impl From<u16> for CssSyntaxKind {
     fn from(d: u16) -> CssSyntaxKind {
@@ -28,16 +28,6 @@ impl From<CssSyntaxKind> for u16 {
 }
 
 impl CssSyntaxKind {
-    pub fn is_trivia(self) -> bool {
-        matches!(
-            self,
-            CssSyntaxKind::NEWLINE
-                | CssSyntaxKind::WHITESPACE
-                | CssSyntaxKind::COMMENT
-                | CssSyntaxKind::MULTILINE_COMMENT
-        )
-    }
-
     /// Returns `true` for any contextual or non-contextual keyword
     #[inline]
     pub const fn is_keyword(self) -> bool {
@@ -146,6 +136,16 @@ impl biome_rowan::SyntaxKind for CssSyntaxKind {
     #[inline]
     fn is_list(&self) -> bool {
         CssSyntaxKind::is_list(*self)
+    }
+
+    fn is_trivia(self) -> bool {
+        matches!(
+            self,
+            CssSyntaxKind::NEWLINE
+                | CssSyntaxKind::WHITESPACE
+                | CssSyntaxKind::COMMENT
+                | CssSyntaxKind::MULTILINE_COMMENT
+        )
     }
 
     fn to_string(&self) -> Option<&'static str> {

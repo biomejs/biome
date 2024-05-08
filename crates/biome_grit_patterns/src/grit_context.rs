@@ -1,9 +1,9 @@
 use crate::grit_binding::GritBinding;
 use crate::grit_code_snippet::GritCodeSnippet;
 use crate::grit_file::GritFile;
-use crate::grit_node::GritNode;
 use crate::grit_node_patterns::{GritLeafNodePattern, GritNodePattern};
 use crate::grit_target_language::GritTargetLanguage;
+use crate::grit_target_node::GritTargetNode;
 use crate::grit_tree::GritTree;
 use crate::resolved_pattern::GritResolvedPattern;
 use anyhow::Result;
@@ -18,7 +18,7 @@ use grit_util::AnalysisLogs;
 pub(crate) struct GritQueryContext;
 
 impl QueryContext for GritQueryContext {
-    type Node<'a> = GritNode;
+    type Node<'a> = GritTargetNode;
     type NodePattern = GritNodePattern;
     type LeafNodePattern = GritLeafNodePattern;
     type ExecContext<'a> = GritExecContext;

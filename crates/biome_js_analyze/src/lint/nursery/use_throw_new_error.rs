@@ -99,15 +99,13 @@ impl Rule for UseThrowNewError {
         let node = ctx.query();
         let name = state.text();
 
-        Some(
-            RuleDiagnostic::new(
-                rule_category!(),
-                node.range(),
-                markup! {
-                    "Use "<Emphasis>"new "{name}"()"</Emphasis>" instead of "<Emphasis>{name}"()"</Emphasis>" when throwing an error."
-                },
-            ),
-        )
+        Some(RuleDiagnostic::new(
+            rule_category!(),
+            node.range(),
+            markup! {
+                "Use "<Emphasis>"new "{name}"()"</Emphasis>" instead of "<Emphasis>{name}"()"</Emphasis>" when throwing an error."
+            },
+        ))
     }
 
     fn action(ctx: &RuleContext<Self>, _: &Self::State) -> Option<JsRuleAction> {

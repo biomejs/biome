@@ -1,0 +1,16 @@
+enum Direction {
+  NORTH
+  EAST
+  SOUTH
+  WEST
+}
+
+enum Direction {}
+
+enum Direction
+
+enum Direction @deprecated {
+  NORTH
+}
+
+"This is an enum" enum Direction @deprecated

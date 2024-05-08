@@ -2,7 +2,6 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: css/color/functional-syntax.css
 ---
-
 # Input
 
 ```css
@@ -28,11 +27,9 @@ info: css/color/functional-syntax.css
    color: rgb(100%, 0%, 60%);
    color: rgba(51, 170, 51, 0.1);
 -  color: hsl(0.75turn, 60%, 70%);
--  color: hsl(270 60% 50% / 0.15);
--  color: hsla(240, 100%, 50%, 0.05);
 +  color: hsl(.75turn, 60%, 70%);
-+  color: hsl(270 60% 50% / .15);
-+  color: hsla(240, 100%, 50%, .05);
+   color: hsl(270 60% 50% / 0.15);
+   color: hsla(240, 100%, 50%, 0.05);
  }
 ```
 
@@ -44,9 +41,7 @@ info: css/color/functional-syntax.css
   color: rgb(100%, 0%, 60%);
   color: rgba(51, 170, 51, 0.1);
   color: hsl(.75turn, 60%, 70%);
-  color: hsl(270 60% 50% / .15);
-  color: hsla(240, 100%, 50%, .05);
+  color: hsl(270 60% 50% / 0.15);
+  color: hsla(240, 100%, 50%, 0.05);
 }
 ```
-
-

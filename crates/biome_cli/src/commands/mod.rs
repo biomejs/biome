@@ -26,6 +26,7 @@ use std::path::PathBuf;
 
 pub(crate) mod check;
 pub(crate) mod ci;
+pub(crate) mod clean;
 pub(crate) mod daemon;
 pub(crate) mod explain;
 pub(crate) mod format;
@@ -346,6 +347,10 @@ pub enum BiomeCommand {
         doc: Doc,
     },
 
+    #[bpaf(command)]
+    /// Clean the logs emitted by the daemon
+    Clean,
+
     #[bpaf(command("__run_server"), hide)]
     RunServer {
         #[bpaf(long("stop-on-disconnect"), hide_usage)]
@@ -399,6 +404,7 @@ impl BiomeCommand {
             | BiomeCommand::Init(_)
             | BiomeCommand::Explain { .. }
             | BiomeCommand::RunServer { .. }
+            | BiomeCommand::Clean { .. }
             | BiomeCommand::PrintSocket => None,
         }
     }

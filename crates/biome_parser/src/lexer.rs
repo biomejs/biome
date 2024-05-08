@@ -312,37 +312,115 @@ impl LexContext for () {
 ///   that any following token may turn out to be different as well, thus, it's necessary to clear the
 ///   lookahead cache.
 #[derive(Debug)]
-pub struct BufferedLexer<'l, Lex: Lexer<'l>> {
+pub struct BufferedLexer<Kind, Lex> {
     /// Cache storing the lookahead tokens. That are, all tokens between the `current` token and
     /// the "current" of the [Lexer]. This is because the [Lexer]'s current token points to the
     /// furthest requested lookahead token.
     ///
     /// For example for the following source `let a = 2;`. The `current` token of the inner [Lexer] and
     /// of the [BufferedLexer] after one call to `next_token` is the `let` token. However, the `current`
-    /// token diverges if the [BufferedLexer] performs lookahead. Let's say you do a lookahead of 4 (`=` token).
+    /// token diverges if the [BufferedLexer] performs lookahead. Let's say you do a non trivia lookahead of 2 (`=` token).
     /// Now, the [BufferedLexer] calls [Lexer::next_token] four times, moving the [Lexer]'s `current`
     /// token to the `=`. However, the `current` of the [BufferedLexer] still points to the `let` token.
     /// That's why the [BufferedLexer] stores the following information:
     /// * `current`: `let` (information about the `current` token from the consumer perspective)
-    /// * `lookahead`: [WHITESPACE, IDENT: 'a', WHITESPACE]. The tokens that have been lexed to
-    ///    answer the "lookahead 4" request but haven't been returned yet.
+    /// * `all_checkpoints`: [WHITESPACE, IDENT: 'a', WHITESPACE, EQ]. The checkpoints that have been lexed to
+    ///    answer the "non trivia lookahead 2" request but haven't been returned yet.
+    /// * `non_trivia_checkpoints`: [IDENT: 'a', EQ]. The checkpoints that have been lexed to
+    ///    answer the "non trivia lookahead 2" request but haven't been returned yet.
     /// * [Lexer::current]: Points to `=`
-    lookahead: VecDeque<LexerCheckpoint<Lex::Kind>>,
+    lookahead: Lookahead<Kind>,
 
     /// Stores the information of the current token in case the `lexer` is at least one token ahead.
-    current: Option<LexerCheckpoint<Lex::Kind>>,
+    current: Option<LexerCheckpoint<Kind>>,
 
     /// Underlying lexer. May be ahead if iterated with lookahead
     inner: Lex,
 }
 
-impl<'l, Lex: Lexer<'l>> BufferedLexer<'l, Lex> {
+/// A structure that maintains two collections of lexer checkpoints:
+/// one for all checkpoints and another for non-trivia checkpoints only.
+#[derive(Debug)]
+struct Lookahead<Kind> {
+    /// A buffer of all checkpoints including trivia and non-trivia types.
+    all_checkpoints: VecDeque<LexerCheckpoint<Kind>>,
+    /// A buffer of only non-trivia checkpoints.
+    non_trivia_checkpoints: VecDeque<LexerCheckpoint<Kind>>,
+}
+
+impl<K: SyntaxKind> Lookahead<K> {
+    /// Creates a new instance of `BufferedLookahead` with specified capacity for both buffers.
+    fn new() -> Self {
+        Self {
+            all_checkpoints: VecDeque::new(),
+            non_trivia_checkpoints: VecDeque::new(),
+        }
+    }
+
+    /// Adds a checkpoint to the end of both buffers, if applicable.
+    ///
+    /// Non-trivia checkpoints are cloned and added to the `non_trivia_checkpoints` buffer
+    /// only if they are not considered trivia.
+    fn push_back(&mut self, checkpoint: LexerCheckpoint<K>) {
+        if !checkpoint.current_kind.is_trivia() {
+            self.non_trivia_checkpoints.push_back(checkpoint.clone());
+        }
+
+        self.all_checkpoints.push_back(checkpoint);
+    }
+
+    /// Removes and returns the first element from the `all_checkpoints` buffer.
+    /// Also removes the corresponding element from `non_trivia_checkpoints` if it's non-trivia.
+    fn pop_front(&mut self) -> Option<LexerCheckpoint<K>> {
+        if let Some(lookahead) = self.all_checkpoints.pop_front() {
+            if !lookahead.current_kind.is_trivia() {
+                self.non_trivia_checkpoints.pop_front();
+            }
+            Some(lookahead)
+        } else {
+            None
+        }
+    }
+
+    /// Retrieves a reference to a checkpoint by index from the `all_checkpoints` buffer.
+    fn get_checkpoint(&self, index: usize) -> Option<&LexerCheckpoint<K>> {
+        self.all_checkpoints.get(index)
+    }
+
+    /// Retrieves a reference to a non-trivia checkpoint by index from the `non_trivia_checkpoints` buffer.
+    fn get_non_trivia_checkpoint(&self, index: usize) -> Option<&LexerCheckpoint<K>> {
+        self.non_trivia_checkpoints.get(index)
+    }
+
+    /// Checks if there are no checkpoints.
+    fn is_empty(&self) -> bool {
+        self.all_checkpoints.is_empty()
+    }
+
+    /// Clears all checkpoints from both buffers.
+    fn clear(&mut self) {
+        self.all_checkpoints.clear();
+        self.non_trivia_checkpoints.clear();
+    }
+
+    /// Returns the number of checkpoints in the `all_checkpoints` buffer.
+    fn all_len(&self) -> usize {
+        self.all_checkpoints.len()
+    }
+
+    /// Returns the number of non-trivia checkpoints in the `non_trivia_checkpoints` buffer.
+    fn non_trivia_len(&self) -> usize {
+        self.non_trivia_checkpoints.len()
+    }
+}
+
+impl<'l, Lex: Lexer<'l>> BufferedLexer<Lex::Kind, Lex> {
     /// Creates a new [BufferedLexer] wrapping the passed in [Lexer].
     pub fn new(lexer: Lex) -> Self {
         Self {
             inner: lexer,
             current: None,
-            lookahead: VecDeque::new(),
+            lookahead: Lookahead::new(),
         }
     }
 
@@ -441,7 +519,7 @@ impl<'l, Lex: Lexer<'l>> BufferedLexer<'l, Lex> {
     /// Returns an iterator over the tokens following the current token to perform lookahead.
     /// For example, what's the 3rd token after the current token?
     #[inline(always)]
-    pub fn lookahead<'s>(&'s mut self) -> LookaheadIterator<'s, 'l, Lex> {
+    pub fn lookahead_iter<'s>(&'s mut self) -> LookaheadIterator<'s, 'l, Lex> {
         LookaheadIterator::new(self)
     }
 
@@ -450,7 +528,7 @@ impl<'l, Lex: Lexer<'l>> BufferedLexer<'l, Lex> {
         self.inner.finish()
     }
 }
-impl<'l, Lex> BufferedLexer<'l, Lex>
+impl<'l, Lex> BufferedLexer<Lex::Kind, Lex>
 where
     Lex: ReLexer<'l>,
 {
@@ -479,10 +557,40 @@ where
     }
 }
 
-impl<'l, Lex> BufferedLexer<'l, Lex>
+impl<'l, Lex> BufferedLexer<Lex::Kind, Lex>
 where
     Lex: LexerWithCheckpoint<'l>,
 {
+    #[inline(always)]
+    pub fn nth_non_trivia(&mut self, n: usize) -> Option<LookaheadToken<Lex::Kind>> {
+        assert_ne!(n, 0);
+
+        if let Some(lookahead_token) = self
+            .lookahead
+            .get_non_trivia_checkpoint(n - 1)
+            .map(LookaheadToken::from)
+        {
+            return Some(lookahead_token);
+        }
+
+        // Jump right to where we've left of last time rather than going through all tokens again.
+        let mut remaining = n - self.lookahead.non_trivia_len();
+        let current_length = self.lookahead.all_len();
+        let iter = self.lookahead_iter().skip(current_length);
+
+        for item in iter {
+            if !item.kind().is_trivia() {
+                remaining -= 1;
+
+                if remaining == 0 {
+                    return Some(item);
+                }
+            }
+        }
+
+        None
+    }
+
     pub fn checkpoint(&self) -> LexerCheckpoint<Lex::Kind> {
         if let Some(current) = &self.current {
             current.clone()
@@ -494,12 +602,12 @@ where
 
 #[derive(Debug)]
 pub struct LookaheadIterator<'l, 't, Lex: Lexer<'t>> {
-    buffered: &'l mut BufferedLexer<'t, Lex>,
+    buffered: &'l mut BufferedLexer<Lex::Kind, Lex>,
     nth: usize,
 }
 
 impl<'l, 't, Lex: Lexer<'t>> LookaheadIterator<'l, 't, Lex> {
-    fn new(lexer: &'l mut BufferedLexer<'t, Lex>) -> Self {
+    fn new(lexer: &'l mut BufferedLexer<Lex::Kind, Lex>) -> Self {
         Self {
             buffered: lexer,
             nth: 0,
@@ -516,7 +624,7 @@ impl<'l, 't, Lex: LexerWithCheckpoint<'t>> Iterator for LookaheadIterator<'l, 't
         self.nth += 1;
 
         // Is the `nth` token already in the cache, then return it
-        if let Some(lookbehind) = lookbehind.get(self.nth - 1) {
+        if let Some(lookbehind) = lookbehind.get_checkpoint(self.nth - 1) {
             let lookahead = LookaheadToken::from(lookbehind);
             return Some(lookahead);
         }
@@ -537,8 +645,7 @@ impl<'l, 't, Lex: LexerWithCheckpoint<'t>> Iterator for LookaheadIterator<'l, 't
         let kind = lexer.next_token(Lex::LexContext::default());
         // Lex the next token and cache it in the lookahead cache. Needed to cache it right away
         // because of the diagnostic.
-        let checkpoint = lexer.checkpoint();
-        self.buffered.lookahead.push_back(checkpoint);
+        self.buffered.lookahead.push_back(lexer.checkpoint());
 
         Some(LookaheadToken {
             kind,
@@ -550,7 +657,7 @@ impl<'l, 't, Lex: LexerWithCheckpoint<'t>> Iterator for LookaheadIterator<'l, 't
 impl<'l, 't, Lex: LexerWithCheckpoint<'t>> FusedIterator for LookaheadIterator<'l, 't, Lex> {}
 
 #[derive(Debug)]
-pub struct LookaheadToken<Kind: SyntaxKind> {
+pub struct LookaheadToken<Kind> {
     kind: Kind,
     flags: TokenFlags,
 }
