@@ -3,7 +3,7 @@ use biome_console::markup;
 use biome_css_syntax::CssGenericProperty;
 use biome_rowan::{AstNode, TextRange};
 
-use crate::utils::{is_kown_properties, vendor_prefixed};
+use crate::utils::{is_known_properties, vendor_prefixed};
 
 declare_rule! {
     /// Disallow unknown properties.
@@ -69,7 +69,7 @@ impl Rule for NoUnknownProperty {
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let node = ctx.query();
         let property_name = node.name().ok()?.text().to_lowercase();
-        if !is_kown_properties(&property_name) && !vendor_prefixed(&property_name) {
+        if !is_known_properties(&property_name) && !vendor_prefixed(&property_name) {
             return Some(node.name().ok()?.range());
         }
         None

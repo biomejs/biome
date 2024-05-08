@@ -131,7 +131,7 @@ pub fn is_pseudo_elements(prop: &str) -> bool {
         || OTHER_PSEUDO_ELEMENTS.contains(&prop)
 }
 
-pub fn is_kown_properties(prop: &str) -> bool {
+pub fn is_known_properties(prop: &str) -> bool {
     KNOWN_PROPERTIES.binary_search(&prop).is_ok()
         || KNOWN_CHROME_PROPERTIES.binary_search(&prop).is_ok()
         || KNOWN_EDGE_PROPERTIES.binary_search(&prop).is_ok()
