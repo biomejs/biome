@@ -106,7 +106,7 @@ pub(crate) struct BetaLexer<'source> {
     position: usize,
 
     /// the current token
-    current_kind: BetaSyntaxKind, 
+    current_kind: BetaSyntaxKind,
 
     /// diagnostics emitted during the parsing phase
     diagnostics: Vec<ParseDiagnostic>,
@@ -127,6 +127,27 @@ The token source is the second brick needed to create a parser. The token source
 - Lookahead: check for possible next tokens/characters without advancing the parsing.
 - Re-lexing: a feature that allows the consumption of tokens with a different context.
 - Checkpoint: save the current status of the lexing phase, and restore it if a certain parsing logic is incorrect.
+
+If you want to have lookahead, you need to:
+- Wrap your lexer with a `BufferedLexer`.
+- Implement `TokenSourceWithBufferedLexer` for your token source.
+- Implement `LexerWithCheckpoint` for your lexer.
+
+```rust,ignore
+use biome_parser::lexer::BufferedLexer;
+use biome_beta_syntax::BetaSyntaxKind;
+use crate::lexer::{BetaLexer};
+
+pub(crate) struct BetaTokenSource<'src> {
+    lexer: BufferedLexer<BetaSyntaxKind, BetaLexer<'src>>,
+}
+
+impl<'source> TokenSourceWithBufferedLexer<BetaLexer<'source>> for BetaTokenSource<'source> {
+    fn lexer(&mut self) -> &mut BufferedLexer<BetaSyntaxKind, BetaLexer<'source>> {
+        &mut self.lexer
+    }
+}
+```
 
 ### Implement a parser
 
@@ -253,7 +274,7 @@ if the opening parentheses `(` isn't present in the source text. That's where mi
 ### Parsing Lists & Error Recovery
 
 > 1. Performance-Neutral Error Recovery: implement an error recovery mechanism that does not degrade the parsing performance of valid code. This ensures that the parser remains efficient while being more forgiving of errors. We can try to check if the next token is a valid item for a list (e.g. we can use `is_at_item` to check if we have a missing end list token), however versus merely checking for a end list token does introduce a performance consideration, especially in well-formed documents where syntax errors are rare.
-> 
+>
 > 2. Preservation of Valid Tree Structure: modify the parser to retain as much information from the valid parts of the AST tree as possible. Even when encountering invalid parts, the parser should mark them as 'bogus' rather than invalidating the parent node. This approach minimizes the loss of useful information due to isolated syntax errors.
 
 

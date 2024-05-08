@@ -1,0 +1,11 @@
+union SearchResult = Photo | Person
+
+union SearchResult =
+	| Photo
+	| Person
+
+union SearchResult
+
+union SearchResult @deprecated
+
+union SearchResult @deprecated = Photo | Person

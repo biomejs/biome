@@ -9,7 +9,7 @@ pub use file_source::HtmlFileSource;
 pub use syntax_node::*;
 
 use crate::HtmlSyntaxKind::{HTML_BOGUS, HTML_BOGUS_ATTRIBUTE};
-use biome_rowan::{AstNode, RawSyntaxKind, TokenText};
+use biome_rowan::{AstNode, RawSyntaxKind, SyntaxKind, TokenText};
 
 impl From<u16> for HtmlSyntaxKind {
     fn from(d: u16) -> HtmlSyntaxKind {
@@ -25,10 +25,6 @@ impl From<HtmlSyntaxKind> for u16 {
 }
 
 impl HtmlSyntaxKind {
-    pub fn is_trivia(self) -> bool {
-        matches!(self, HtmlSyntaxKind::NEWLINE | HtmlSyntaxKind::WHITESPACE)
-    }
-
     pub fn is_comments(self) -> bool {
         matches!(self, HtmlSyntaxKind::COMMENT)
     }
@@ -77,6 +73,10 @@ impl biome_rowan::SyntaxKind for HtmlSyntaxKind {
 
     fn is_list(&self) -> bool {
         HtmlSyntaxKind::is_list(*self)
+    }
+
+    fn is_trivia(self) -> bool {
+        matches!(self, HtmlSyntaxKind::NEWLINE | HtmlSyntaxKind::WHITESPACE)
     }
 
     fn to_string(&self) -> Option<&'static str> {

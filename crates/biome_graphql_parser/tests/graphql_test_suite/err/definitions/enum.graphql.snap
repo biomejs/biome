@@ -1,0 +1,398 @@
+---
+source: crates/biome_graphql_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+```graphql
+enum Direction
+  NORTH
+  EAST
+  SOUTH
+  WEST
+}
+
+enum Direction
+  NORTH
+
+enum Direction {
+
+enum Direction {
+	@deprecated
+}
+
+enu Direction
+
+enum Direction @
+  NORTH
+}
+
+```
+
+## AST
+
+```
+GraphqlRoot {
+    bom_token: missing (optional),
+    definitions: GraphqlDefinitionList [
+        GraphqlEnumTypeDefinition {
+            description: missing (optional),
+            enum_token: ENUM_KW@0..5 "enum" [] [Whitespace(" ")],
+            name: GraphqlName {
+                value_token: GRAPHQL_NAME@5..14 "Direction" [] [],
+            },
+            directives: GraphqlDirectiveList [],
+            enum_values: GraphqlEnumValuesDefinition {
+                l_curly_token: missing (required),
+                values: GraphqlEnumValueList [
+                    GraphqlEnumValueDefinition {
+                        description: missing (optional),
+                        value: GraphqlEnumValue {
+                            graphql_name: GraphqlName {
+                                value_token: GRAPHQL_NAME@14..22 "NORTH" [Newline("\n"), Whitespace("  ")] [],
+                            },
+                        },
+                        directives: GraphqlDirectiveList [],
+                    },
+                    GraphqlEnumValueDefinition {
+                        description: missing (optional),
+                        value: GraphqlEnumValue {
+                            graphql_name: GraphqlName {
+                                value_token: GRAPHQL_NAME@22..29 "EAST" [Newline("\n"), Whitespace("  ")] [],
+                            },
+                        },
+                        directives: GraphqlDirectiveList [],
+                    },
+                    GraphqlEnumValueDefinition {
+                        description: missing (optional),
+                        value: GraphqlEnumValue {
+                            graphql_name: GraphqlName {
+                                value_token: GRAPHQL_NAME@29..37 "SOUTH" [Newline("\n"), Whitespace("  ")] [],
+                            },
+                        },
+                        directives: GraphqlDirectiveList [],
+                    },
+                    GraphqlEnumValueDefinition {
+                        description: missing (optional),
+                        value: GraphqlEnumValue {
+                            graphql_name: GraphqlName {
+                                value_token: GRAPHQL_NAME@37..44 "WEST" [Newline("\n"), Whitespace("  ")] [],
+                            },
+                        },
+                        directives: GraphqlDirectiveList [],
+                    },
+                ],
+                r_curly_token: R_CURLY@44..46 "}" [Newline("\n")] [],
+            },
+        },
+        GraphqlEnumTypeDefinition {
+            description: missing (optional),
+            enum_token: ENUM_KW@46..53 "enum" [Newline("\n"), Newline("\n")] [Whitespace(" ")],
+            name: GraphqlName {
+                value_token: GRAPHQL_NAME@53..62 "Direction" [] [],
+            },
+            directives: GraphqlDirectiveList [],
+            enum_values: GraphqlEnumValuesDefinition {
+                l_curly_token: missing (required),
+                values: GraphqlEnumValueList [
+                    GraphqlEnumValueDefinition {
+                        description: missing (optional),
+                        value: GraphqlEnumValue {
+                            graphql_name: GraphqlName {
+                                value_token: GRAPHQL_NAME@62..70 "NORTH" [Newline("\n"), Whitespace("  ")] [],
+                            },
+                        },
+                        directives: GraphqlDirectiveList [],
+                    },
+                ],
+                r_curly_token: missing (required),
+            },
+        },
+        GraphqlEnumTypeDefinition {
+            description: missing (optional),
+            enum_token: ENUM_KW@70..77 "enum" [Newline("\n"), Newline("\n")] [Whitespace(" ")],
+            name: GraphqlName {
+                value_token: GRAPHQL_NAME@77..87 "Direction" [] [Whitespace(" ")],
+            },
+            directives: GraphqlDirectiveList [],
+            enum_values: GraphqlEnumValuesDefinition {
+                l_curly_token: L_CURLY@87..88 "{" [] [],
+                values: GraphqlEnumValueList [],
+                r_curly_token: missing (required),
+            },
+        },
+        GraphqlEnumTypeDefinition {
+            description: missing (optional),
+            enum_token: ENUM_KW@88..95 "enum" [Newline("\n"), Newline("\n")] [Whitespace(" ")],
+            name: GraphqlName {
+                value_token: GRAPHQL_NAME@95..105 "Direction" [] [Whitespace(" ")],
+            },
+            directives: GraphqlDirectiveList [],
+            enum_values: GraphqlEnumValuesDefinition {
+                l_curly_token: L_CURLY@105..106 "{" [] [],
+                values: GraphqlEnumValueList [
+                    GraphqlEnumValueDefinition {
+                        description: missing (optional),
+                        value: missing (required),
+                        directives: GraphqlDirectiveList [
+                            GraphqlDirective {
+                                at_token: AT@106..109 "@" [Newline("\n"), Whitespace("\t")] [],
+                                name: GraphqlName {
+                                    value_token: GRAPHQL_NAME@109..119 "deprecated" [] [],
+                                },
+                                arguments: missing (optional),
+                            },
+                        ],
+                    },
+                ],
+                r_curly_token: R_CURLY@119..121 "}" [Newline("\n")] [],
+            },
+        },
+        GraphqlBogusDefinition {
+            items: [
+                GRAPHQL_NAME@121..127 "enu" [Newline("\n"), Newline("\n")] [Whitespace(" ")],
+                GRAPHQL_NAME@127..136 "Direction" [] [],
+            ],
+        },
+        GraphqlEnumTypeDefinition {
+            description: missing (optional),
+            enum_token: ENUM_KW@136..143 "enum" [Newline("\n"), Newline("\n")] [Whitespace(" ")],
+            name: GraphqlName {
+                value_token: GRAPHQL_NAME@143..153 "Direction" [] [Whitespace(" ")],
+            },
+            directives: GraphqlDirectiveList [
+                GraphqlDirective {
+                    at_token: AT@153..154 "@" [] [],
+                    name: GraphqlName {
+                        value_token: GRAPHQL_NAME@154..162 "NORTH" [Newline("\n"), Whitespace("  ")] [],
+                    },
+                    arguments: missing (optional),
+                },
+            ],
+            enum_values: missing (optional),
+        },
+        GraphqlBogusDefinition {
+            items: [
+                R_CURLY@162..164 "}" [Newline("\n")] [],
+            ],
+        },
+    ],
+    eof_token: EOF@164..165 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: GRAPHQL_ROOT@0..165
+  0: (empty)
+  1: GRAPHQL_DEFINITION_LIST@0..164
+    0: GRAPHQL_ENUM_TYPE_DEFINITION@0..46
+      0: (empty)
+      1: ENUM_KW@0..5 "enum" [] [Whitespace(" ")]
+      2: GRAPHQL_NAME@5..14
+        0: GRAPHQL_NAME@5..14 "Direction" [] []
+      3: GRAPHQL_DIRECTIVE_LIST@14..14
+      4: GRAPHQL_ENUM_VALUES_DEFINITION@14..46
+        0: (empty)
+        1: GRAPHQL_ENUM_VALUE_LIST@14..44
+          0: GRAPHQL_ENUM_VALUE_DEFINITION@14..22
+            0: (empty)
+            1: GRAPHQL_ENUM_VALUE@14..22
+              0: GRAPHQL_NAME@14..22
+                0: GRAPHQL_NAME@14..22 "NORTH" [Newline("\n"), Whitespace("  ")] []
+            2: GRAPHQL_DIRECTIVE_LIST@22..22
+          1: GRAPHQL_ENUM_VALUE_DEFINITION@22..29
+            0: (empty)
+            1: GRAPHQL_ENUM_VALUE@22..29
+              0: GRAPHQL_NAME@22..29
+                0: GRAPHQL_NAME@22..29 "EAST" [Newline("\n"), Whitespace("  ")] []
+            2: GRAPHQL_DIRECTIVE_LIST@29..29
+          2: GRAPHQL_ENUM_VALUE_DEFINITION@29..37
+            0: (empty)
+            1: GRAPHQL_ENUM_VALUE@29..37
+              0: GRAPHQL_NAME@29..37
+                0: GRAPHQL_NAME@29..37 "SOUTH" [Newline("\n"), Whitespace("  ")] []
+            2: GRAPHQL_DIRECTIVE_LIST@37..37
+          3: GRAPHQL_ENUM_VALUE_DEFINITION@37..44
+            0: (empty)
+            1: GRAPHQL_ENUM_VALUE@37..44
+              0: GRAPHQL_NAME@37..44
+                0: GRAPHQL_NAME@37..44 "WEST" [Newline("\n"), Whitespace("  ")] []
+            2: GRAPHQL_DIRECTIVE_LIST@44..44
+        2: R_CURLY@44..46 "}" [Newline("\n")] []
+    1: GRAPHQL_ENUM_TYPE_DEFINITION@46..70
+      0: (empty)
+      1: ENUM_KW@46..53 "enum" [Newline("\n"), Newline("\n")] [Whitespace(" ")]
+      2: GRAPHQL_NAME@53..62
+        0: GRAPHQL_NAME@53..62 "Direction" [] []
+      3: GRAPHQL_DIRECTIVE_LIST@62..62
+      4: GRAPHQL_ENUM_VALUES_DEFINITION@62..70
+        0: (empty)
+        1: GRAPHQL_ENUM_VALUE_LIST@62..70
+          0: GRAPHQL_ENUM_VALUE_DEFINITION@62..70
+            0: (empty)
+            1: GRAPHQL_ENUM_VALUE@62..70
+              0: GRAPHQL_NAME@62..70
+                0: GRAPHQL_NAME@62..70 "NORTH" [Newline("\n"), Whitespace("  ")] []
+            2: GRAPHQL_DIRECTIVE_LIST@70..70
+        2: (empty)
+    2: GRAPHQL_ENUM_TYPE_DEFINITION@70..88
+      0: (empty)
+      1: ENUM_KW@70..77 "enum" [Newline("\n"), Newline("\n")] [Whitespace(" ")]
+      2: GRAPHQL_NAME@77..87
+        0: GRAPHQL_NAME@77..87 "Direction" [] [Whitespace(" ")]
+      3: GRAPHQL_DIRECTIVE_LIST@87..87
+      4: GRAPHQL_ENUM_VALUES_DEFINITION@87..88
+        0: L_CURLY@87..88 "{" [] []
+        1: GRAPHQL_ENUM_VALUE_LIST@88..88
+        2: (empty)
+    3: GRAPHQL_ENUM_TYPE_DEFINITION@88..121
+      0: (empty)
+      1: ENUM_KW@88..95 "enum" [Newline("\n"), Newline("\n")] [Whitespace(" ")]
+      2: GRAPHQL_NAME@95..105
+        0: GRAPHQL_NAME@95..105 "Direction" [] [Whitespace(" ")]
+      3: GRAPHQL_DIRECTIVE_LIST@105..105
+      4: GRAPHQL_ENUM_VALUES_DEFINITION@105..121
+        0: L_CURLY@105..106 "{" [] []
+        1: GRAPHQL_ENUM_VALUE_LIST@106..119
+          0: GRAPHQL_ENUM_VALUE_DEFINITION@106..119
+            0: (empty)
+            1: (empty)
+            2: GRAPHQL_DIRECTIVE_LIST@106..119
+              0: GRAPHQL_DIRECTIVE@106..119
+                0: AT@106..109 "@" [Newline("\n"), Whitespace("\t")] []
+                1: GRAPHQL_NAME@109..119
+                  0: GRAPHQL_NAME@109..119 "deprecated" [] []
+                2: (empty)
+        2: R_CURLY@119..121 "}" [Newline("\n")] []
+    4: GRAPHQL_BOGUS_DEFINITION@121..136
+      0: GRAPHQL_NAME@121..127 "enu" [Newline("\n"), Newline("\n")] [Whitespace(" ")]
+      1: GRAPHQL_NAME@127..136 "Direction" [] []
+    5: GRAPHQL_ENUM_TYPE_DEFINITION@136..162
+      0: (empty)
+      1: ENUM_KW@136..143 "enum" [Newline("\n"), Newline("\n")] [Whitespace(" ")]
+      2: GRAPHQL_NAME@143..153
+        0: GRAPHQL_NAME@143..153 "Direction" [] [Whitespace(" ")]
+      3: GRAPHQL_DIRECTIVE_LIST@153..162
+        0: GRAPHQL_DIRECTIVE@153..162
+          0: AT@153..154 "@" [] []
+          1: GRAPHQL_NAME@154..162
+            0: GRAPHQL_NAME@154..162 "NORTH" [Newline("\n"), Whitespace("  ")] []
+          2: (empty)
+      4: (empty)
+    6: GRAPHQL_BOGUS_DEFINITION@162..164
+      0: R_CURLY@162..164 "}" [Newline("\n")] []
+  2: EOF@164..165 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+enum.graphql:2:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `{` but instead found `NORTH`
+  
+    1 │ enum Direction
+  > 2 │   NORTH
+      │   ^^^^^
+    3 │   EAST
+    4 │   SOUTH
+  
+  i Remove NORTH
+  
+enum.graphql:9:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `{` but instead found `NORTH`
+  
+     8 │ enum Direction
+   > 9 │   NORTH
+       │   ^^^^^
+    10 │ 
+    11 │ enum Direction {
+  
+  i Remove NORTH
+  
+enum.graphql:11:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `}` but instead found `enum`
+  
+     9 │   NORTH
+    10 │ 
+  > 11 │ enum Direction {
+       │ ^^^^
+    12 │ 
+    13 │ enum Direction {
+  
+  i Remove enum
+  
+enum.graphql:13:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `}` but instead found `enum`
+  
+    11 │ enum Direction {
+    12 │ 
+  > 13 │ enum Direction {
+       │ ^^^^
+    14 │ 	@deprecated
+    15 │ }
+  
+  i Remove enum
+  
+enum.graphql:14:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a name but instead found '@'.
+  
+    13 │ enum Direction {
+  > 14 │ 	@deprecated
+       │ 	^
+    15 │ }
+    16 │ 
+  
+  i Expected a name here.
+  
+    13 │ enum Direction {
+  > 14 │ 	@deprecated
+       │ 	^
+    15 │ }
+    16 │ 
+  
+enum.graphql:17:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a definition but instead found 'enu Direction'.
+  
+    15 │ }
+    16 │ 
+  > 17 │ enu Direction
+       │ ^^^^^^^^^^^^^
+    18 │ 
+    19 │ enum Direction @
+  
+  i Expected a definition here.
+  
+    15 │ }
+    16 │ 
+  > 17 │ enu Direction
+       │ ^^^^^^^^^^^^^
+    18 │ 
+    19 │ enum Direction @
+  
+enum.graphql:21:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a definition but instead found '}'.
+  
+    19 │ enum Direction @
+    20 │   NORTH
+  > 21 │ }
+       │ ^
+    22 │ 
+  
+  i Expected a definition here.
+  
+    19 │ enum Direction @
+    20 │   NORTH
+  > 21 │ }
+       │ ^
+    22 │ 
+  
+```

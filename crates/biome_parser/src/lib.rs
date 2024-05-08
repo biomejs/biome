@@ -4,7 +4,7 @@
 use crate::diagnostic::{expected_token, ParseDiagnostic, ToDiagnostic};
 use crate::event::Event;
 use crate::event::Event::Token;
-use crate::token_source::{BumpWithContext, NthToken, TokenSource};
+use crate::token_source::{BumpWithContext, NthToken, TokenSource, TokenSourceWithBufferedLexer};
 use biome_console::fmt::Display;
 use biome_diagnostics::location::AsSpan;
 use biome_rowan::{AstNode, Language, SendNode, SyntaxKind, SyntaxNode, TextRange, TextSize};
@@ -22,6 +22,7 @@ pub mod token_set;
 pub mod token_source;
 pub mod tree_sink;
 
+use crate::lexer::LexerWithCheckpoint;
 use crate::parsed_syntax::ParsedSyntax;
 use crate::parsed_syntax::ParsedSyntax::{Absent, Present};
 use biome_diagnostics::serde::Diagnostic;
@@ -202,34 +203,38 @@ pub trait Parser: Sized {
     }
 
     /// Look ahead at a token and get its kind.
-    fn nth(&mut self, n: usize) -> Self::Kind
+    fn nth<'l, Lex>(&mut self, n: usize) -> Self::Kind
     where
-        Self::Source: NthToken,
+        Lex: LexerWithCheckpoint<'l, Kind = Self::Kind>,
+        Self::Source: NthToken<Lex> + TokenSourceWithBufferedLexer<Lex>,
     {
         self.source_mut().nth(n)
     }
 
     /// Checks if a token lookahead is something
-    fn nth_at(&mut self, n: usize, kind: Self::Kind) -> bool
+    fn nth_at<'l, Lex>(&mut self, n: usize, kind: Self::Kind) -> bool
     where
-        Self::Source: NthToken,
+        Lex: LexerWithCheckpoint<'l, Kind = Self::Kind>,
+        Self::Source: NthToken<Lex> + TokenSourceWithBufferedLexer<Lex>,
     {
         self.nth(n) == kind
     }
 
     /// Checks if a token set lookahead is something
-    fn nth_at_ts(&mut self, n: usize, kinds: TokenSet<Self::Kind>) -> bool
+    fn nth_at_ts<'l, Lex>(&mut self, n: usize, kinds: TokenSet<Self::Kind>) -> bool
     where
-        Self::Source: NthToken,
+        Lex: LexerWithCheckpoint<'l, Kind = Self::Kind>,
+        Self::Source: NthToken<Lex> + TokenSourceWithBufferedLexer<Lex>,
     {
         kinds.contains(self.nth(n))
     }
 
     /// Tests if there's a line break before the nth token.
     #[inline]
-    fn has_nth_preceding_line_break(&mut self, n: usize) -> bool
+    fn has_nth_preceding_line_break<'l, Lex>(&mut self, n: usize) -> bool
     where
-        Self::Source: NthToken,
+        Lex: LexerWithCheckpoint<'l, Kind = Self::Kind>,
+        Self::Source: NthToken<Lex> + TokenSourceWithBufferedLexer<Lex>,
     {
         self.source_mut().has_nth_preceding_line_break(n)
     }
