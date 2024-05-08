@@ -10,7 +10,7 @@ use crate::js::lists::template_element_list::TemplateElementIndention;
 use biome_js_syntax::{
     AnyJsExpression, JsSyntaxNode, JsSyntaxToken, JsTemplateElement, TsTemplateElement,
 };
-use biome_rowan::{declare_node_union, AstNode, SyntaxResult};
+use biome_rowan::{declare_node_union, AstNode, NodeOrToken, SyntaxResult};
 
 enum TemplateElementLayout {
     /// Tries to format the expression on a single line regardless of the print width.
@@ -218,7 +218,17 @@ impl AnyTemplateElement {
     }
 
     fn has_new_line_in_range(&self) -> bool {
-        self.syntax().text().contains_char('\n')
+        fn has_new_line_in_node(node: &JsSyntaxNode) -> bool {
+            node.children_with_tokens().any(|child| match child {
+                NodeOrToken::Token(token) => token
+                    // no need to check for trailing trivia as it's not possible to have a new line
+                    .leading_trivia()
+                    .pieces()
+                    .any(|trivia| trivia.is_newline()),
+                NodeOrToken::Node(node) => has_new_line_in_node(&node),
+            })
+        }
+        has_new_line_in_node(self.syntax())
     }
 }
 
