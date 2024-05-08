@@ -212,16 +212,16 @@ Bounties are the second approach towards funding Biome development. Unlike a spo
 In some cases, Biome funds bounties on its own issues in order to further the project goals as laid out in its [roadmap](#roadmap). Because Biome is the one funding these issues, it also means **100% of the pledged amount will go to the contributor completing the task**. Project-Funded Bounties have the same conditions applied to them as [Community-Funded Bounties](#community-funded-bounties). But given that these issues are funded using money that ultimately comes from our sponsors, we have additional restrictions in place:
 
 - Implementation of the task funded by Biome must advance our [roadmap](#roadmap) or help with essential infrastructure.
-  - The description of the task must include a clear rationale for why this task is eligible for funding.
-- To avoid paying commission on our own bounties, we do not assign funds through Polar.sh. Instead, we ask contributors to take the money directly from our Open Collective account upon completion of the task.
-  - Unfortunately, this means Project-Funded Bounties can only be assigned to [Core Contributors](#core-contributor) at this moment, since they have access to our Open Collective account.
+  - The task description must include a clear rationale for why this task is eligible for funding.
+- To avoid paying a commission on our own bounties, we do not assign funds through Polar.sh. Instead, we ask contributors to take the money directly from our Open Collective account upon completion of the task.
+  - Unfortunately, this means Project-Funded Bounties can only be assigned to [Core Contributors](#core-contributor) at this moment since they have access to our Open Collective account.
 
 Additionally, there is a strict process for assigning Project-Funded Bounties:
 
 - To request Biome funding for a task, a request with a clear rationale must be made in the `Community > #funding` channel on Discord.
   - To make sure our Core Contributors don't have to worry about overlooking Biome-funding-related decisions, requests made on GitHub issues are not sufficient for a funding request.
-- If no Core Contributor raises objections within 7 days, then any Core Contributor can assign the pledge to the issue and assign the requester to it.
-  - The waiting period is not necessary if a Lead approves the request.
+- If no Core Contributor raises objections within three (3) days, then any Core Contributor can assign the pledge to the issue and assign the requester to it.
+  - The waiting period is optional if a Lead approves the request.
   - If an objection is raised, the request is put on hold until a Lead makes the final decision.
 - There is a maximum amount of issues with pledges someone can have assigned to them. The limit is 2 for core contributors, and 1 for anyone else. By limiting the amount of issues with pledges that someone can have assigned, we make sure the bounties remain available for others to pick up.
 
