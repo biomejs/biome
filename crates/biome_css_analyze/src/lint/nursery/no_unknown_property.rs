@@ -8,7 +8,7 @@ use crate::utils::{is_kown_properties, vendor_prefixed};
 declare_rule! {
     /// Disallow unknown properties.
     ///
-    /// This rule considers properties defined in the `CSS Specifications and browser specific properties` to be known.
+    /// This rule considers properties defined in the CSS Specifications and browser specific properties to be known.
     /// https://github.com/known-css/known-css-properties#source
     ///
     ///
