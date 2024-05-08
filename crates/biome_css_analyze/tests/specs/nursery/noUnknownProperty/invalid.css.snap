@@ -18,7 +18,7 @@ a {
 ```
 invalid.css:2:3 lint/nursery/noUnknownProperty ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unknown property is not allowed
+  ! Unknown property is not allowed.
   
     1 │ a {
   > 2 │   colr: blue;
@@ -28,7 +28,7 @@ invalid.css:2:3 lint/nursery/noUnknownProperty ━━━━━━━━━━━
   
   i See CSS Specifications and browser specific properties for more details.
   
-  i To resolve this issue, replace the unknown property with a valid CSS property
+  i To resolve this issue, replace the unknown property with a valid CSS property.
   
 
 ```
@@ -36,7 +36,7 @@ invalid.css:2:3 lint/nursery/noUnknownProperty ━━━━━━━━━━━
 ```
 invalid.css:6:3 lint/nursery/noUnknownProperty ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unknown property is not allowed
+  ! Unknown property is not allowed.
   
     5 │ a {
   > 6 │   my-property: 1;
@@ -46,7 +46,7 @@ invalid.css:6:3 lint/nursery/noUnknownProperty ━━━━━━━━━━━
   
   i See CSS Specifications and browser specific properties for more details.
   
-  i To resolve this issue, replace the unknown property with a valid CSS property
+  i To resolve this issue, replace the unknown property with a valid CSS property.
   
 
 ```
