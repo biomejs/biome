@@ -234,6 +234,21 @@ impl Rule for NoDuplicateSelectors {
     }
 }
 
+/// Resolves nested selectors into an equivalent flat selector.
+/// If there is no parent rule, return the selector string originally passed.
+/// E.g.
+/// ```css, ignore
+/// a { b { c { /* declaration */ } } }
+/// ```
+/// 
+/// is resolved to:
+/// ```css, ignore
+/// a b c {
+///     /* declaration */
+/// }
+/// ```
+/// 
+/// Returns the resolved selector as a string.
 fn resolve_nested_selectors(selector: String, this_rule: CssSyntaxNode) -> Vec<String> {
     let mut parent_selectors: Vec<String> = vec![];
     let parent_rule = this_rule.parent().and_then(|parent| parent.grand_parent());
@@ -247,8 +262,7 @@ fn resolve_nested_selectors(selector: String, this_rule: CssSyntaxNode) -> Vec<S
                 // Each @rule is unique scope
                 // Use a hash to create the comparable scope
                 parent_selectors.push(hasher.finish().to_string());
-            }
-            if let Some(parent_rule) = AnyCssRule::cast_ref(parent_rule) {
+            } else if let Some(parent_rule) = AnyCssRule::cast_ref(parent_rule) {
                 match parent_rule {
                     AnyCssRule::CssNestedQualifiedRule(parent_rule) => {
                         parent_selectors.extend(parent_rule.prelude().into_iter().filter_map(|selector| selector.ok()).map(|selector|selector.text()));
@@ -292,6 +306,19 @@ fn resolve_nested_selectors(selector: String, this_rule: CssSyntaxNode) -> Vec<S
     }
 }
 
+/// Checks if AnyCssSelector can be cast to CssComplexSelector.
+/// If it is able to cast, trim the combinator, e.g.
+/// 
+/// ``` css, ignore
+/// a > b, c  > d { /* declaration */ }
+/// ```
+/// 
+/// is normalized to:
+/// ``` css, ignore
+/// a>b, c>d { /* declaration */ }
+/// ```
+/// 
+/// Returns the selector as a string.
 fn normalize_complex_selector(selector: AnyCssSelector) -> String {
     let mut selector_text = String::new();
 
