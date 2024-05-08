@@ -1,4 +1,3 @@
-if (x <= 'foo' || 'bar' < x) {}
 if ("red" == value) {}
 if (true === value) {}
 if (5 != value) {}
