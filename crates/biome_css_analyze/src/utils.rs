@@ -1,9 +1,12 @@
 use crate::keywords::{
     BASIC_KEYWORDS, FONT_FAMILY_KEYWORDS, FONT_SIZE_KEYWORDS, FONT_STRETCH_KEYWORDS,
     FONT_STYLE_KEYWORDS, FONT_VARIANTS_KEYWORDS, FONT_WEIGHT_ABSOLUTE_KEYWORDS,
-    FONT_WEIGHT_NUMERIC_KEYWORDS, FUNCTION_KEYWORDS, LEVEL_ONE_AND_TWO_PSEUDO_ELEMENTS,
-    LINE_HEIGHT_KEYWORDS, OTHER_PSEUDO_ELEMENTS, SHADOW_TREE_PSEUDO_ELEMENTS,
-    SYSTEM_FAMILY_NAME_KEYWORDS, VENDER_PREFIXES, VENDOR_SPECIFIC_PSEUDO_ELEMENTS,
+    FONT_WEIGHT_NUMERIC_KEYWORDS, FUNCTION_KEYWORDS, KNOWN_CHROME_PROPERTIES,
+    KNOWN_EDGE_PROPERTIES, KNOWN_EXPLORER_PROPERTIES, KNOWN_FIREFOX_PROPERTIES, KNOWN_PROPERTIES,
+    KNOWN_SAFARI_PROPERTIES, KNOWN_SUMSUNG_INTERNET_PROPERTIES, KNOWN_US_BROWSER_PROPERTIES,
+    LEVEL_ONE_AND_TWO_PSEUDO_ELEMENTS, LINE_HEIGHT_KEYWORDS, OTHER_PSEUDO_ELEMENTS,
+    SHADOW_TREE_PSEUDO_ELEMENTS, SYSTEM_FAMILY_NAME_KEYWORDS, VENDER_PREFIXES,
+    VENDOR_SPECIFIC_PSEUDO_ELEMENTS,
 };
 use biome_css_syntax::{AnyCssGenericComponentValue, AnyCssValue, CssGenericComponentValueList};
 use biome_rowan::{AstNode, SyntaxNodeCast};
@@ -126,4 +129,24 @@ pub fn is_pseudo_elements(prop: &str) -> bool {
         || VENDOR_SPECIFIC_PSEUDO_ELEMENTS.contains(&prop)
         || SHADOW_TREE_PSEUDO_ELEMENTS.contains(&prop)
         || OTHER_PSEUDO_ELEMENTS.contains(&prop)
+}
+
+pub fn is_known_properties(prop: &str) -> bool {
+    KNOWN_PROPERTIES.binary_search(&prop).is_ok()
+        || KNOWN_CHROME_PROPERTIES.binary_search(&prop).is_ok()
+        || KNOWN_EDGE_PROPERTIES.binary_search(&prop).is_ok()
+        || KNOWN_EXPLORER_PROPERTIES.binary_search(&prop).is_ok()
+        || KNOWN_FIREFOX_PROPERTIES.binary_search(&prop).is_ok()
+        || KNOWN_SAFARI_PROPERTIES.binary_search(&prop).is_ok()
+        || KNOWN_SUMSUNG_INTERNET_PROPERTIES
+            .binary_search(&prop)
+            .is_ok()
+        || KNOWN_US_BROWSER_PROPERTIES.binary_search(&prop).is_ok()
+}
+
+pub fn vendor_prefixed(props: &str) -> bool {
+    props.starts_with("-webkit-")
+        || props.starts_with("-moz-")
+        || props.starts_with("-ms-")
+        || props.starts_with("-o-")
 }
