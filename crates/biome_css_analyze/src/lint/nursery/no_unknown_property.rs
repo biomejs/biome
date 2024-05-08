@@ -81,7 +81,7 @@ impl Rule for NoUnknownProperty {
                 rule_category!(),
                 range,
                 markup! {
-                    "Unknown property is not allowed"
+                    "Unknown property is not allowed."
                 },
             )
             .note(markup! {
