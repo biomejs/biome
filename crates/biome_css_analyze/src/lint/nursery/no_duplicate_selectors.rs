@@ -16,8 +16,16 @@ use biome_rowan::{declare_node_union, AstNode, SyntaxNodeCast};
 use serde::{Deserialize, Serialize};
 
 declare_rule! {
-    /// Disallow duplicate selectors.
-    ///
+    /// Disallow duplicate selectors. This rule checks for two types of duplication:
+    /// - Duplication of a selector list within a stylesheet, e.g. `a, b {} a, b {}`. Duplicates are found even if the selectors come in different orders or have different spacing, e.g. `a d, b > c {} b>c, a d {}`.
+    /// - Duplication of a single selector with a rule's selector list, e.g. `a, b, a {}`.  (See options below, this is disabled by default)
+    /// 
+    /// The same selector is allowed to repeat in the following circumstances:
+    /// - It is used in different selector lists, e.g. `a {} a, b {}`.
+    /// - The duplicates are in rules with different parent nodes, e.g. inside and outside of a media query.
+    /// 
+    /// This rule resolves nested selectors. So `a b {} a { & b {} }` counts as a problem, because the resolved selectors end up with a duplicate.
+    /// 
     /// ## Examples
     ///
     /// ### Invalid
@@ -25,19 +33,19 @@ declare_rule! {
     /// ```css,expect_diagnostic
     /// .abc,
     /// .def,
-    /// .abc {}
+    /// .abc { /* declaration */ }
     /// ```
     ///
     /// ### Valid
     ///
     /// ```
-    /// .foo {}
-    /// .bar {}
+    /// .foo { /* declaration */ }
+    /// .bar { /* declaration */ }
     /// ```
     ///
     /// ## Options
     ///
-    /// If true, disallow duplicate selectors within selector lists.
+    /// If true, disallow duplicate selectors within selector lists. The following settings:
     ///
     /// ```json5, ignore
     /// {
@@ -47,6 +55,12 @@ declare_rule! {
     ///         }
     ///     }
     /// }
+    /// ```
+    /// 
+    /// Will result in the following failing:
+    /// 
+    /// ```css, ignore
+    /// input, textarea {}; textarea {}
     /// ```
     ///
     pub NoDuplicateSelectors {
@@ -61,6 +75,7 @@ declare_rule! {
 #[cfg_attr(feature = "schemars", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct NoDuplicateSelectorsOptions {
+    /// If set to `true` this rule will check for duplicate selectors within selector lists.
     pub disallow_in_list: bool,
 }
 
@@ -68,6 +83,9 @@ declare_node_union! {
     pub AnySelectorLike = AnyCssSelector | AnyCssRelativeSelector
 }
 
+/// Object containing the resolved selector and the relative node for that resolved selector.
+/// 
+/// This struct has a hash function which returns the hash of `selector_node`.
 #[derive(Debug, Eq)]
 struct ResolvedSelector {
     selector_text: String,
@@ -248,6 +266,21 @@ impl Rule for NoDuplicateSelectors {
 /// }
 /// ```
 /// 
+/// When trying to resolve this_rule of type [AnyCssAtRule], this function will generate a hash to replace the selector name:
+/// ```css, ignore
+/// @media print {
+///     selector { /* declaration */}
+/// }
+/// ```
+/// 
+/// is resolved to:
+/// ```css, ignore
+/// <hash> selector { /* declaration */}
+/// ```
+/// 
+/// [AnyCssAtRule] is resolved based on the text range.
+/// The same rule will not be resolved to the same hash because these are considered to belong to a separate context.
+/// 
 /// Returns the resolved selector as a string.
 fn resolve_nested_selectors(selector: String, this_rule: CssSyntaxNode) -> Vec<String> {
     let mut parent_selectors: Vec<String> = vec![];
@@ -306,7 +339,7 @@ fn resolve_nested_selectors(selector: String, this_rule: CssSyntaxNode) -> Vec<S
     }
 }
 
-/// Checks if AnyCssSelector can be cast to CssComplexSelector.
+/// Checks if [AnyCssSelector] can be cast to [CssComplexSelector].
 /// If it is able to cast, trim the combinator, e.g.
 /// 
 /// ``` css, ignore
@@ -318,6 +351,7 @@ fn resolve_nested_selectors(selector: String, this_rule: CssSyntaxNode) -> Vec<S
 /// a>b, c>d { /* declaration */ }
 /// ```
 /// 
+/// It will return `selector.text()` if it is unable to cast.
 /// Returns the selector as a string.
 fn normalize_complex_selector(selector: AnyCssSelector) -> String {
     let mut selector_text = String::new();
