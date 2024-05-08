@@ -9,7 +9,8 @@ use crate::settings::OverrideSettings;
 use crate::workspace::{DocumentFileSource, OrganizeImportsResult};
 use crate::{
     settings::{
-        FormatSettings, LanguageListSettings, LanguageSettings, ServiceLanguage, SettingsHandle,
+        FormatSettings, LanguageListSettings, LanguageSettings, ServiceLanguage,
+        WorkspaceSettingsHandle,
     },
     workspace::{
         CodeAction, FixAction, FixFileMode, FixFileResult, GetSyntaxTreeResult, PullActionsResult,
@@ -198,11 +199,11 @@ fn parse(
     biome_path: &BiomePath,
     file_source: DocumentFileSource,
     text: &str,
-    settings: SettingsHandle,
+    settings: WorkspaceSettingsHandle,
     cache: &mut NodeCache,
 ) -> ParseResult {
-    let parser_settings = &settings.as_ref().languages.javascript.parser;
-    let overrides = &settings.as_ref().override_settings;
+    let parser_settings = &settings.settings().languages.javascript.parser;
+    let overrides = &settings.settings().override_settings;
     let options = overrides.override_js_parser_options(
         biome_path,
         JsParserOptions {
@@ -280,7 +281,7 @@ fn debug_formatter_ir(
     path: &BiomePath,
     document_file_source: &DocumentFileSource,
     parse: AnyParse,
-    settings: SettingsHandle,
+    settings: WorkspaceSettingsHandle,
 ) -> Result<String, WorkspaceError> {
     let options = settings.format_options::<JsLanguage>(path, document_file_source);
 
@@ -294,7 +295,7 @@ fn debug_formatter_ir(
 pub(crate) fn lint(params: LintParams) -> LintResults {
     debug_span!("Linting JavaScript file", path =? params.path, language =? params.language)
         .in_scope(move || {
-            let settings = params.settings.as_ref();
+            let settings = params.settings.settings();
             let Some(file_source) = params
                 .language
                 .to_js_file_source()
@@ -445,8 +446,7 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
     let CodeActionsParams {
         parse,
         range,
-        rules,
-        settings,
+        workspace,
         path,
         manifest,
         language,
@@ -454,9 +454,11 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
     debug_span!("Code actions JavaScript", range =? range, path =? path).in_scope(move || {
         let tree = parse.tree();
         trace_span!("Parsed file", tree =? tree).in_scope(move || {
+            let settings = workspace.settings();
+            let rules = settings.linter().rules.as_ref();
             let mut actions = Vec::new();
             let mut enabled_rules = vec![];
-            if settings.as_ref().organize_imports.enabled {
+            if settings.organize_imports.enabled {
                 enabled_rules.push(RuleFilter::Rule("correctness", "organizeImports"));
             }
             if let Some(rules) = rules {
@@ -479,13 +481,13 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
             };
 
             filter.categories = RuleCategories::SYNTAX | RuleCategories::LINT;
-            if settings.as_ref().organize_imports.enabled {
+            if settings.organize_imports.enabled {
                 filter.categories |= RuleCategories::ACTION;
             }
             filter.range = Some(range);
 
             let analyzer_options =
-                compute_analyzer_options(&settings, PathBuf::from(path.as_path()));
+                compute_analyzer_options(&workspace, PathBuf::from(path.as_path()));
 
             let Some(source_type) = language.to_js_file_source() else {
                 error!("Could not determine the file source of the file");
@@ -649,7 +651,7 @@ pub(crate) fn format(
     biome_path: &BiomePath,
     document_file_source: &DocumentFileSource,
     parse: AnyParse,
-    settings: SettingsHandle,
+    settings: WorkspaceSettingsHandle,
 ) -> Result<Printed, WorkspaceError> {
     let options = settings.format_options::<JsLanguage>(biome_path, document_file_source);
 
@@ -672,7 +674,7 @@ pub(crate) fn format_range(
     biome_path: &BiomePath,
     document_file_source: &DocumentFileSource,
     parse: AnyParse,
-    settings: SettingsHandle,
+    settings: WorkspaceSettingsHandle,
     range: TextRange,
 ) -> Result<Printed, WorkspaceError> {
     let options = settings.format_options::<JsLanguage>(biome_path, document_file_source);
@@ -687,7 +689,7 @@ pub(crate) fn format_on_type(
     path: &BiomePath,
     document_file_source: &DocumentFileSource,
     parse: AnyParse,
-    settings: SettingsHandle,
+    settings: WorkspaceSettingsHandle,
     offset: TextSize,
 ) -> Result<Printed, WorkspaceError> {
     let options = settings.format_options::<JsLanguage>(path, document_file_source);
@@ -812,8 +814,11 @@ pub(crate) fn organize_imports(parse: AnyParse) -> Result<OrganizeImportsResult,
     }
 }
 
-fn compute_analyzer_options(settings: &SettingsHandle, file_path: PathBuf) -> AnalyzerOptions {
-    let settings = settings.as_ref();
+fn compute_analyzer_options(
+    settings: &WorkspaceSettingsHandle,
+    file_path: PathBuf,
+) -> AnalyzerOptions {
+    let settings = settings.settings();
     let preferred_quote = settings
         .languages
         .javascript

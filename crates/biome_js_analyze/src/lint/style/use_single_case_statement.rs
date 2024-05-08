@@ -52,7 +52,12 @@ impl Rule for UseSingleCaseStatement {
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let switch_clause = ctx.query();
-        if switch_clause.consequent().len() > 1 {
+        let count = switch_clause
+            .consequent()
+            .iter()
+            .filter(|stmt| !matches!(stmt, AnyJsStatement::JsBreakStatement(_)))
+            .count();
+        if count > 1 {
             Some(())
         } else {
             None

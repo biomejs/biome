@@ -1,3 +1,4 @@
+mod r#enum;
 mod field;
 mod fragment;
 mod interface;
@@ -5,6 +6,7 @@ mod object;
 mod operation;
 mod scalar;
 mod schema;
+mod union;
 
 use crate::parser::{parse_error::expected_any_definition, GraphqlParser};
 use biome_graphql_syntax::GraphqlSyntaxKind::{self, *};
@@ -18,8 +20,10 @@ use self::{
     interface::{is_at_interface_type_definition, parse_interface_type_definition},
     object::{is_at_object_type_definition, parse_object_type_definition},
     operation::{is_at_operation, parse_operation_definition},
+    r#enum::{is_at_enum_type_definition, parse_enum_type_definition},
     scalar::{is_at_scalar_type_definition, parse_scalar_type_definition},
     schema::{is_at_schema_definition, parse_schema_definition},
+    union::{is_at_union_type_definition, parse_union_type_definition},
 };
 pub(crate) use operation::is_at_selection_set_end;
 
@@ -76,6 +80,10 @@ fn parse_definition(p: &mut GraphqlParser) -> ParsedSyntax {
         parse_object_type_definition(p)
     } else if is_at_interface_type_definition(p) {
         parse_interface_type_definition(p)
+    } else if is_at_union_type_definition(p) {
+        parse_union_type_definition(p)
+    } else if is_at_enum_type_definition(p) {
+        parse_enum_type_definition(p)
     } else {
         Absent
     }
@@ -90,4 +98,6 @@ fn is_at_definition(p: &mut GraphqlParser<'_>) -> bool {
         || is_at_scalar_type_definition(p)
         || is_at_object_type_definition(p)
         || is_at_interface_type_definition(p)
+        || is_at_union_type_definition(p)
+        || is_at_enum_type_definition(p)
 }

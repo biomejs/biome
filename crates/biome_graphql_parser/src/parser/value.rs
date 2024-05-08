@@ -126,7 +126,7 @@ pub(crate) fn parse_value(p: &mut GraphqlParser) -> ParsedSyntax {
     } else if is_at_null(p) {
         parse_null(p)
     } else if is_at_enum(p) {
-        parse_enum(p)
+        parse_enum_value(p)
     } else if is_at_list(p) {
         parse_list(p)
     } else if is_at_object(p) {
@@ -187,7 +187,7 @@ fn parse_null(p: &mut GraphqlParser) -> ParsedSyntax {
 }
 
 #[inline]
-fn parse_enum(p: &mut GraphqlParser) -> ParsedSyntax {
+pub(crate) fn parse_enum_value(p: &mut GraphqlParser) -> ParsedSyntax {
     if !is_at_enum(p) {
         return Absent;
     }
