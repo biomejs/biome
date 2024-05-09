@@ -56,6 +56,17 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 	return <>{item.condition ? <div /> : <div>foo</div>}</>;
 });
 ```
+- `noExcessiveNestedTestSuites` no longer erroneously alerts on `describe` calls that are not invoking the global `describe` function. [#2599](https://github.com/biomejs/biome/issues/2599) Contributed by @dyc3
+```js
+// now valid
+z.object({})
+  .describe('')
+  .describe('')
+  .describe('')
+  .describe('')
+  .describe('')
+  .describe('');
+```
 
 ### Parser
 
