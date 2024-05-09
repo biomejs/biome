@@ -166,6 +166,18 @@ impl PartialConfiguration {
             .unwrap_or_default()
     }
 
+    pub fn get_css_formatter_configuration(&self) -> CssFormatter {
+        self.css
+            .as_ref()
+            .map(|f| {
+                f.formatter
+                    .as_ref()
+                    .map(|f| f.get_formatter_configuration())
+                    .unwrap_or_default()
+            })
+            .unwrap_or_default()
+    }
+
     pub fn is_linter_disabled(&self) -> bool {
         self.linter.as_ref().map_or(false, |f| f.is_disabled())
     }

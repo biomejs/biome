@@ -2,11 +2,13 @@ mod formatter;
 
 use std::str::FromStr;
 
+use crate::javascript::formatter::JavascriptLinter;
 use biome_deserialize::StringSet;
 use biome_deserialize_macros::{Deserializable, Merge, Partial};
 use bpaf::Bpaf;
 pub use formatter::{
-    partial_javascript_formatter, JavascriptFormatter, PartialJavascriptFormatter,
+    partial_javascript_formatter, partial_javascript_linter, JavascriptFormatter,
+    PartialJavascriptFormatter, PartialJavascriptLinter,
 };
 use serde::{Deserialize, Serialize};
 
@@ -19,6 +21,10 @@ pub struct JavascriptConfiguration {
     /// Formatting options
     #[partial(type, bpaf(external(partial_javascript_formatter), optional))]
     pub formatter: JavascriptFormatter,
+
+    /// Linter options
+    #[partial(type, bpaf(external(partial_javascript_linter), optional))]
+    pub linter: JavascriptLinter,
 
     /// Parsing options
     #[partial(type, bpaf(external(partial_javascript_parser), optional))]
