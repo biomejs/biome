@@ -12,7 +12,6 @@ Profile-*.json
 **/node_modules
 **/dist
 **/build
-packages/@biomejs/cli-*
 .pnpm-debug.log
 
 # https://github.com/nnethercote/dhat-rs output file

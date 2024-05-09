@@ -155,16 +155,9 @@ impl Display for RunningRomeServer {
 ")
         .fmt(f)?;
 
-                // Version 10.0.0 and below did not include a service version in the pipe name
-                let version = if version.is_empty() {
-                    "<=10.0.0"
-                } else {
-                    version.as_str()
-                };
-
                 markup!(
                     {Section("Server")}
-                    {KeyValuePair("Version", markup!({version}))}
+                    {KeyValuePair("Version", markup!({version.as_str()}))}
                 )
                 .fmt(f)?;
             }

@@ -39,7 +39,7 @@ pub use stmt_ext::*;
 pub use syntax_node::*;
 
 use crate::JsSyntaxKind::*;
-use biome_rowan::{AstNode, RawSyntaxKind, SyntaxResult};
+use biome_rowan::{AstNode, RawSyntaxKind, SyntaxKind, SyntaxResult};
 
 impl From<u16> for JsSyntaxKind {
     fn from(d: u16) -> JsSyntaxKind {
@@ -55,16 +55,6 @@ impl From<JsSyntaxKind> for u16 {
 }
 
 impl JsSyntaxKind {
-    pub fn is_trivia(self) -> bool {
-        matches!(
-            self,
-            JsSyntaxKind::NEWLINE
-                | JsSyntaxKind::WHITESPACE
-                | JsSyntaxKind::COMMENT
-                | JsSyntaxKind::MULTILINE_COMMENT
-        )
-    }
-
     /// Returns `true` for any contextual (await) or non-contextual keyword
     #[inline]
     pub const fn is_keyword(self) -> bool {
@@ -146,6 +136,16 @@ impl biome_rowan::SyntaxKind for JsSyntaxKind {
 
     fn is_list(&self) -> bool {
         JsSyntaxKind::is_list(*self)
+    }
+
+    fn is_trivia(self) -> bool {
+        matches!(
+            self,
+            JsSyntaxKind::NEWLINE
+                | JsSyntaxKind::WHITESPACE
+                | JsSyntaxKind::COMMENT
+                | JsSyntaxKind::MULTILINE_COMMENT
+        )
     }
 
     fn to_string(&self) -> Option<&'static str> {

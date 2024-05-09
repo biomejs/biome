@@ -1,0 +1,32 @@
+{
+  "name": "@biomejs/wasm-bundler",
+  "collaborators": [
+    "Biome Developers and Contributors"
+  ],
+  "description": "WebAssembly bindings to the Biome workspace API",
+  "version": "1.7.3",
+  "license": "MIT OR Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/biomejs/biome"
+  },
+  "files": [
+    "biome_wasm_bg.wasm",
+    "biome_wasm.js",
+    "biome_wasm_bg.js",
+    "biome_wasm.d.ts"
+  ],
+  "module": "biome_wasm.js",
+  "homepage": "https://biomejs.dev/",
+  "types": "biome_wasm.d.ts",
+  "sideEffects": [
+    "./biome_wasm.js",
+    "./snippets/*"
+  ],
+  "keywords": [
+    "parser",
+    "linter",
+    "formatter",
+    "wasm"
+  ]
+}

@@ -15,6 +15,36 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 ### CLI
 
+#### Enhancements
+
+- Biome now executes commands (lint, format, check and ci) on the working directory by default. [#2266](https://github.com/biomejs/biome/issues/2266) Contributed by @unvalley
+
+  ```diff
+  - biome check .
+  + biome check    # You can run the command without the path
+  ```
+  
+### Configuration
+
+### Editors
+
+#### New features
+
+- Add support for LSP Workspaces
+
+### Formatter
+
+### JavaScript APIs
+
+### Linter
+
+### Parser
+
+
+## 1.7.3 (2024-05-06)
+
+### CLI
+
 #### Bug fixes
 
 - The [stdin-file-path](https://biomejs.dev/guides/integrate-in-editor/#use-stdin) option now works correctly for Astro/Svelte/Vue files ([#2686](https://github.com/biomejs/biome/pull/2686))
@@ -23,18 +53,13 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
   Contributed by @tasshi-me
 
-### Configuration
-
-### Editors
-
-### Formatter
-
-### JavaScript APIs
+- `biome migrate eslint` now correctly resolve `@scope/eslint-config` ([#2705](https://github.com/biomejs/biome/issues/2705)). Contributed by @Conaclos
 
 ### Linter
 
 #### New features
 
+- Add [nursery/noUselessStringConcat](https://biomejs.dev/linter/rules/no-useless-string-concat/).
 - Add [nursery/useExplicitLengthCheck](https://biomejs.dev/linter/rules/use-explicit-length-check/).
 
 #### Bug fixes
@@ -56,6 +81,18 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
   Contributed by @Conaclos
 
+- [noUnusedLabels](https://biomejs.dev/linter/rules/no-unused-labels/) and [noConfusingLabels](https://biomejs.dev/linter/rules/no-confusing-labels/) now ignore svelte reactive statements ([#2571](https://github.com/biomejs/biome/issues/2571)).
+
+  The rules now ignore reactive Svelte blocks in Svelte components.
+
+  ```svelte
+  <script>
+  $: { /* reactive block */ }
+  </script>
+  ```
+
+  Contributed by @Conaclos
+
 - [useExportType](https://biomejs.dev/linter/rules/use-export-type/) no longer removes leading comments ([#2685](https://github.com/biomejs/biome/issues/2685)).
 
   Previously, `useExportType` removed leading comments when it factorized the `type` qualifier.
@@ -72,10 +109,19 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
   Contributed by @Conaclos
 
+- [useJsxKeyInIterable](https://biomejs.dev/linter/rules/use-jsx-key-in-iterable/) no longer reports false positive when iterating on non-jsx items ([#2590](https://github.com/biomejs/biome/issues/2590)).
+
+  The following snipet of code no longer triggers the rule:
+
+  ```jsx
+  <>{data.reduce((total, next) => total + next, 0)}</>
+  ```
+
+  Contributed by @dyc3
+
 - Fix typo by renaming `useConsistentBuiltinInstatiation` to `useConsistentBuiltinInstantiation`
   Contributed by @minht11
-
-### Parser
+- Fix the rule `useSingleCaseStatement` including `break` statements when counting the number of statements in a `switch` statement (#2696)
 
 
 ## 1.7.2 (2024-04-30)

@@ -1,5 +1,6 @@
 use crate::{
-    grit_context::GritQueryContext, grit_node::GritNode, grit_target_language::GritTargetLanguage,
+    grit_context::GritQueryContext, grit_target_language::GritTargetLanguage,
+    grit_target_node::GritTargetNode,
 };
 use grit_pattern_matcher::{binding::Binding, constant::Constant};
 use grit_util::{ByteRange, CodeRange, Range};
@@ -13,7 +14,7 @@ impl<'a> Binding<'a, GritQueryContext> for GritBinding {
         todo!()
     }
 
-    fn from_node(_node: GritNode) -> Self {
+    fn from_node(_node: GritTargetNode) -> Self {
         todo!()
     }
 
@@ -25,7 +26,7 @@ impl<'a> Binding<'a, GritQueryContext> for GritBinding {
         todo!()
     }
 
-    fn singleton(&self) -> Option<GritNode> {
+    fn singleton(&self) -> Option<GritTargetNode> {
         todo!()
     }
 
@@ -90,7 +91,7 @@ impl<'a> Binding<'a, GritQueryContext> for GritBinding {
         todo!()
     }
 
-    fn as_node(&self) -> Option<GritNode> {
+    fn as_node(&self) -> Option<GritTargetNode> {
         todo!()
     }
 
@@ -98,11 +99,11 @@ impl<'a> Binding<'a, GritQueryContext> for GritBinding {
         todo!()
     }
 
-    fn list_items(&self) -> Option<impl Iterator<Item = GritNode> + Clone> {
+    fn list_items(&self) -> Option<impl Iterator<Item = GritTargetNode> + Clone> {
         None::<TodoIterator>
     }
 
-    fn parent_node(&self) -> Option<GritNode> {
+    fn parent_node(&self) -> Option<GritTargetNode> {
         todo!()
     }
 
@@ -123,7 +124,7 @@ impl<'a> Binding<'a, GritQueryContext> for GritBinding {
 struct TodoIterator;
 
 impl Iterator for TodoIterator {
-    type Item = GritNode;
+    type Item = GritTargetNode;
 
     fn next(&mut self) -> Option<Self::Item> {
         todo!()

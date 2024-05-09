@@ -1,0 +1,20 @@
+hr {
+	opacity: .25;
+}
+
+h3 {
+	font-size: calc(1.3rem + .6vw);
+}
+h4 {
+	font-size: calc(1.275rem + .3vw);
+}
+sup {
+	top: -.5em;
+}
+.row {
+	--bs-gutter-x: 1.5rem;
+	--bs-gutter-y: 0;
+	margin-top: calc(var(--bs-gutter-y) * -1);
+	margin-right: calc(var(--bs-gutter-x) * -.5);
+	margin-left: calc(var(--bs-gutter-x) * -.5);
+}

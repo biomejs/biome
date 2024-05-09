@@ -7,7 +7,7 @@ use crate::file_handlers::{
 };
 use crate::settings::{
     FormatSettings, LanguageListSettings, LanguageSettings, OverrideSettings, ServiceLanguage,
-    SettingsHandle,
+    WorkspaceSettingsHandle,
 };
 use crate::workspace::{
     FixFileResult, GetSyntaxTreeResult, OrganizeImportsResult, PullActionsResult,
@@ -135,11 +135,11 @@ fn parse(
     biome_path: &BiomePath,
     file_source: DocumentFileSource,
     text: &str,
-    settings: SettingsHandle,
+    settings: WorkspaceSettingsHandle,
     cache: &mut NodeCache,
 ) -> ParseResult {
-    let parser = &settings.as_ref().languages.json.parser;
-    let overrides = &settings.as_ref().override_settings;
+    let parser = &settings.settings().languages.json.parser;
+    let overrides = &settings.settings().override_settings;
     let optional_json_file_source = file_source.to_json_file_source();
     let options: JsonParserOptions = overrides.override_json_parser_options(
         biome_path,
@@ -177,7 +177,7 @@ fn debug_formatter_ir(
     path: &BiomePath,
     document_file_source: &DocumentFileSource,
     parse: AnyParse,
-    settings: SettingsHandle,
+    settings: WorkspaceSettingsHandle,
 ) -> Result<String, WorkspaceError> {
     let options = settings.format_options::<JsonLanguage>(path, document_file_source);
 
@@ -193,7 +193,7 @@ fn format(
     path: &BiomePath,
     document_file_source: &DocumentFileSource,
     parse: AnyParse,
-    settings: SettingsHandle,
+    settings: WorkspaceSettingsHandle,
 ) -> Result<Printed, WorkspaceError> {
     let options = settings.format_options::<JsonLanguage>(path, document_file_source);
 
@@ -212,7 +212,7 @@ fn format_range(
     path: &BiomePath,
     document_file_source: &DocumentFileSource,
     parse: AnyParse,
-    settings: SettingsHandle,
+    settings: WorkspaceSettingsHandle,
     range: TextRange,
 ) -> Result<Printed, WorkspaceError> {
     let options = settings.format_options::<JsonLanguage>(path, document_file_source);
@@ -226,7 +226,7 @@ fn format_on_type(
     path: &BiomePath,
     document_file_source: &DocumentFileSource,
     parse: AnyParse,
-    settings: SettingsHandle,
+    settings: WorkspaceSettingsHandle,
     offset: TextSize,
 ) -> Result<Printed, WorkspaceError> {
     let options = settings.format_options::<JsonLanguage>(path, document_file_source);
@@ -264,7 +264,7 @@ fn lint(params: LintParams) -> LintResults {
         .in_scope(move || {
             let root: JsonRoot = params.parse.tree();
             let mut diagnostics = params.parse.into_diagnostics();
-            let settings = params.settings.as_ref();
+            let settings = params.settings.settings();
 
             // if we're parsing the `biome.json` file, we deserialize it, so we can emit diagnostics for
             // malformed configuration
@@ -386,9 +386,12 @@ fn organize_imports(parse: AnyParse) -> Result<OrganizeImportsResult, WorkspaceE
     })
 }
 
-fn compute_analyzer_options(settings: &SettingsHandle, file_path: PathBuf) -> AnalyzerOptions {
+fn compute_analyzer_options(
+    settings: &WorkspaceSettingsHandle,
+    file_path: PathBuf,
+) -> AnalyzerOptions {
     let configuration = AnalyzerConfiguration {
-        rules: to_analyzer_rules(settings.as_ref(), file_path.as_path()),
+        rules: to_analyzer_rules(settings.settings(), file_path.as_path()),
         globals: vec![],
         preferred_quote: PreferredQuote::Double,
         jsx_runtime: Default::default(),

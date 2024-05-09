@@ -1566,6 +1566,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noUnknownProperty": {
+					"description": "Disallow unknown properties.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noUnknownSelectorPseudoElement": {
 					"description": "Disallow unknown pseudo-element selectors.",
 					"anyOf": [
@@ -1575,6 +1582,20 @@
 				},
 				"noUnknownUnit": {
 					"description": "Disallow unknown CSS units.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noUnmatchableAnbSelector": {
+					"description": "Disallow unmatchable An+B selectors.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noUselessStringConcat": {
+					"description": "Disallow unnecessary concatenation of string or template literals.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }

@@ -7,6 +7,7 @@ use crate::constants::SUPPORTED_LANGUAGE_SET_STR;
 use biome_grit_syntax::{GritSyntaxKind, GritSyntaxKind::*, TextLen, TextRange, TextSize, T};
 use biome_parser::diagnostic::ParseDiagnostic;
 use biome_parser::lexer::{Lexer, LexerCheckpoint};
+use biome_rowan::SyntaxKind;
 use std::ops::Add;
 
 /// An extremely fast, lookup table based, lossless Grit lexer

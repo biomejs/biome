@@ -1,7 +1,7 @@
 use crate::workspace::{
     FileFeaturesResult, GetFileContentParams, IsPathIgnoredParams, OpenProjectParams,
     OrganizeImportsParams, OrganizeImportsResult, ProjectKey, RageParams, RageResult,
-    RegisterProjectFolderParams, ServerInfo, UpdateProjectParams,
+    RegisterProjectFolderParams, ServerInfo, UnregisterProjectFolderParams, UpdateProjectParams,
 };
 use crate::{TransportError, Workspace, WorkspaceError};
 use biome_formatter::Printed;
@@ -127,6 +127,13 @@ where
         params: RegisterProjectFolderParams,
     ) -> Result<ProjectKey, WorkspaceError> {
         self.request("biome/register_project_folder", params)
+    }
+
+    fn unregister_project_folder(
+        &self,
+        params: UnregisterProjectFolderParams,
+    ) -> Result<(), WorkspaceError> {
+        self.request("biome/unregister_project_folder", params)
     }
 
     fn update_current_project(&self, params: UpdateProjectParams) -> Result<(), WorkspaceError> {

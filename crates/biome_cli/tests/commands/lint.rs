@@ -1966,7 +1966,7 @@ fn group_level_recommended_false_enable_specific() {
     let code = r#"
     function SubmitButton() {
         return <button>Submit</button>;
-    }    
+    }
     "#;
 
     let file_path = Path::new("fix.jsx");
@@ -3241,6 +3241,31 @@ import "lodash";
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "no_unused_dependencies",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn should_lint_error_without_file_paths() {
+    let mut fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let file_path = Path::new("check.js");
+    fs.insert(file_path.into(), LINT_ERROR.as_bytes());
+
+    let result = run_cli(
+        DynRef::Borrowed(&mut fs),
+        &mut console,
+        Args::from([("lint"), ""].as_slice()),
+    );
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "lint_error_without_file_paths",
         fs,
         console,
         result,

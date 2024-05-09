@@ -1,5 +1,5 @@
 use crate::grit_context::{GritExecContext, GritQueryContext};
-use crate::grit_node::GritNode;
+use crate::grit_target_node::GritTargetNode;
 use crate::resolved_pattern::GritResolvedPattern;
 use anyhow::Result;
 use grit_pattern_matcher::pattern::{
@@ -15,7 +15,7 @@ impl AstNodePattern<GritQueryContext> for GritNodePattern {
         todo!()
     }
 
-    fn matches_kind_of(&self, _node: &GritNode) -> bool {
+    fn matches_kind_of(&self, _node: &GritTargetNode) -> bool {
         todo!()
     }
 }

@@ -8,6 +8,7 @@ use biome_html_syntax::HtmlSyntaxKind::{
 use biome_html_syntax::{HtmlSyntaxKind, TextLen, TextSize, T};
 use biome_parser::diagnostic::ParseDiagnostic;
 use biome_parser::lexer::{Lexer, LexerCheckpoint, LexerWithCheckpoint, TokenFlags};
+use biome_rowan::SyntaxKind;
 use biome_unicode_table::lookup_byte;
 use biome_unicode_table::Dispatch::{BSL, QOT, UNI, WHS};
 use std::ops::Add;

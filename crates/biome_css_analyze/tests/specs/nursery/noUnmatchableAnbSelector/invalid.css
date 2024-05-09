@@ -1,0 +1,14 @@
+a:nth-child(0) {}
+a:nth-child(0n) {}
+a:nth-child(+0n) {}
+a:nth-child(-0n) {}
+a:nth-child(0n+0) {}
+a:nth-child(0n-0) {}
+a:nth-child(-0n-0) {}
+a:nth-child(0 of a) {}
+a:nth-child(0), a:nth-child(1) {}
+a:nth-last-child(0) {}
+a:nth-of-type(0) {}
+a:nth-last-of-type(0) {}
+a:nth-child(0n):nth-child(-n+5) {}
+a:nth-last-child(0),a:nth-last-child(n+5) ~ li {}
