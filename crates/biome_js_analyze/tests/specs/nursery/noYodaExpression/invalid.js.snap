@@ -17,6 +17,23 @@ if (true >= value) {}
 var foo = (5 < value) ? true : false
 function foo() { return (null > value); }
 if (-1 < str.indexOf(substr)) {}
+if ( /* a */ 0 /* b */ < /* c */ foo /* d */ ) {}
+if (((((((5)))))) === ((((((((((foo))))))))))) {}
+while (0 === (a));
+while (0 === (a = b));
+function *foo() { yield(1) < a }
+function *foo() { yield((1)) < a }
+function *foo() { yield 1 < a }
+function *foo() { yield/**/1 < a }
+function *foo() { yield(1) < ++a }
+function *foo() { yield(1) < (a) }
+x=1 < a
+0 < f()in obj
+1 > x++instanceof foo
+false <= ((x))in foo
+false <= ((x)) in foo
+1 > x===foo
+1 > x
 
 ```
 
@@ -215,7 +232,7 @@ invalid.js:12:26 lint/nursery/noYodaExpression ━━━━━━━━━━━
   > 12 │ function foo() { return (null > value); }
        │                          ^^^^^^^^^^^^
     13 │ if (-1 < str.indexOf(substr)) {}
-    14 │ 
+    14 │ if ( /* a */ 0 /* b */ < /* c */ foo /* d */ ) {}
   
   i Yoda expressions can be confusing to some people, invert the expression for better readability.
   
@@ -231,7 +248,296 @@ invalid.js:13:5 lint/nursery/noYodaExpression ━━━━━━━━━━━�
     12 │ function foo() { return (null > value); }
   > 13 │ if (-1 < str.indexOf(substr)) {}
        │     ^^^^^^^^^^^^^^^^^^^^^^^^
-    14 │ 
+    14 │ if ( /* a */ 0 /* b */ < /* c */ foo /* d */ ) {}
+    15 │ if (((((((5)))))) === ((((((((((foo))))))))))) {}
+  
+  i Yoda expressions can be confusing to some people, invert the expression for better readability.
+  
+
+```
+
+```
+invalid.js:14:14 lint/nursery/noYodaExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid the use of yoda expressions.
+  
+    12 │ function foo() { return (null > value); }
+    13 │ if (-1 < str.indexOf(substr)) {}
+  > 14 │ if ( /* a */ 0 /* b */ < /* c */ foo /* d */ ) {}
+       │              ^^^^^^^^^^^^^^^^^^^^^^^
+    15 │ if (((((((5)))))) === ((((((((((foo))))))))))) {}
+    16 │ while (0 === (a));
+  
+  i Yoda expressions can be confusing to some people, invert the expression for better readability.
+  
+
+```
+
+```
+invalid.js:15:5 lint/nursery/noYodaExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid the use of yoda expressions.
+  
+    13 │ if (-1 < str.indexOf(substr)) {}
+    14 │ if ( /* a */ 0 /* b */ < /* c */ foo /* d */ ) {}
+  > 15 │ if (((((((5)))))) === ((((((((((foo))))))))))) {}
+       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    16 │ while (0 === (a));
+    17 │ while (0 === (a = b));
+  
+  i Yoda expressions can be confusing to some people, invert the expression for better readability.
+  
+
+```
+
+```
+invalid.js:16:8 lint/nursery/noYodaExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid the use of yoda expressions.
+  
+    14 │ if ( /* a */ 0 /* b */ < /* c */ foo /* d */ ) {}
+    15 │ if (((((((5)))))) === ((((((((((foo))))))))))) {}
+  > 16 │ while (0 === (a));
+       │        ^^^^^^^^^
+    17 │ while (0 === (a = b));
+    18 │ function *foo() { yield(1) < a }
+  
+  i Yoda expressions can be confusing to some people, invert the expression for better readability.
+  
+
+```
+
+```
+invalid.js:17:8 lint/nursery/noYodaExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid the use of yoda expressions.
+  
+    15 │ if (((((((5)))))) === ((((((((((foo))))))))))) {}
+    16 │ while (0 === (a));
+  > 17 │ while (0 === (a = b));
+       │        ^^^^^^^^^^^^^
+    18 │ function *foo() { yield(1) < a }
+    19 │ function *foo() { yield((1)) < a }
+  
+  i Yoda expressions can be confusing to some people, invert the expression for better readability.
+  
+
+```
+
+```
+invalid.js:18:24 lint/nursery/noYodaExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid the use of yoda expressions.
+  
+    16 │ while (0 === (a));
+    17 │ while (0 === (a = b));
+  > 18 │ function *foo() { yield(1) < a }
+       │                        ^^^^^^^
+    19 │ function *foo() { yield((1)) < a }
+    20 │ function *foo() { yield 1 < a }
+  
+  i Yoda expressions can be confusing to some people, invert the expression for better readability.
+  
+
+```
+
+```
+invalid.js:19:24 lint/nursery/noYodaExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid the use of yoda expressions.
+  
+    17 │ while (0 === (a = b));
+    18 │ function *foo() { yield(1) < a }
+  > 19 │ function *foo() { yield((1)) < a }
+       │                        ^^^^^^^^^
+    20 │ function *foo() { yield 1 < a }
+    21 │ function *foo() { yield/**/1 < a }
+  
+  i Yoda expressions can be confusing to some people, invert the expression for better readability.
+  
+
+```
+
+```
+invalid.js:20:25 lint/nursery/noYodaExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid the use of yoda expressions.
+  
+    18 │ function *foo() { yield(1) < a }
+    19 │ function *foo() { yield((1)) < a }
+  > 20 │ function *foo() { yield 1 < a }
+       │                         ^^^^^
+    21 │ function *foo() { yield/**/1 < a }
+    22 │ function *foo() { yield(1) < ++a }
+  
+  i Yoda expressions can be confusing to some people, invert the expression for better readability.
+  
+
+```
+
+```
+invalid.js:21:28 lint/nursery/noYodaExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid the use of yoda expressions.
+  
+    19 │ function *foo() { yield((1)) < a }
+    20 │ function *foo() { yield 1 < a }
+  > 21 │ function *foo() { yield/**/1 < a }
+       │                            ^^^^^
+    22 │ function *foo() { yield(1) < ++a }
+    23 │ function *foo() { yield(1) < (a) }
+  
+  i Yoda expressions can be confusing to some people, invert the expression for better readability.
+  
+
+```
+
+```
+invalid.js:22:24 lint/nursery/noYodaExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid the use of yoda expressions.
+  
+    20 │ function *foo() { yield 1 < a }
+    21 │ function *foo() { yield/**/1 < a }
+  > 22 │ function *foo() { yield(1) < ++a }
+       │                        ^^^^^^^^^
+    23 │ function *foo() { yield(1) < (a) }
+    24 │ x=1 < a
+  
+  i Yoda expressions can be confusing to some people, invert the expression for better readability.
+  
+
+```
+
+```
+invalid.js:23:24 lint/nursery/noYodaExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid the use of yoda expressions.
+  
+    21 │ function *foo() { yield/**/1 < a }
+    22 │ function *foo() { yield(1) < ++a }
+  > 23 │ function *foo() { yield(1) < (a) }
+       │                        ^^^^^^^^^
+    24 │ x=1 < a
+    25 │ 0 < f()in obj
+  
+  i Yoda expressions can be confusing to some people, invert the expression for better readability.
+  
+
+```
+
+```
+invalid.js:24:3 lint/nursery/noYodaExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid the use of yoda expressions.
+  
+    22 │ function *foo() { yield(1) < ++a }
+    23 │ function *foo() { yield(1) < (a) }
+  > 24 │ x=1 < a
+       │   ^^^^^
+    25 │ 0 < f()in obj
+    26 │ 1 > x++instanceof foo
+  
+  i Yoda expressions can be confusing to some people, invert the expression for better readability.
+  
+
+```
+
+```
+invalid.js:25:1 lint/nursery/noYodaExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid the use of yoda expressions.
+  
+    23 │ function *foo() { yield(1) < (a) }
+    24 │ x=1 < a
+  > 25 │ 0 < f()in obj
+       │ ^^^^^^^
+    26 │ 1 > x++instanceof foo
+    27 │ false <= ((x))in foo
+  
+  i Yoda expressions can be confusing to some people, invert the expression for better readability.
+  
+
+```
+
+```
+invalid.js:26:1 lint/nursery/noYodaExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid the use of yoda expressions.
+  
+    24 │ x=1 < a
+    25 │ 0 < f()in obj
+  > 26 │ 1 > x++instanceof foo
+       │ ^^^^^^^
+    27 │ false <= ((x))in foo
+    28 │ false <= ((x)) in foo
+  
+  i Yoda expressions can be confusing to some people, invert the expression for better readability.
+  
+
+```
+
+```
+invalid.js:27:1 lint/nursery/noYodaExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid the use of yoda expressions.
+  
+    25 │ 0 < f()in obj
+    26 │ 1 > x++instanceof foo
+  > 27 │ false <= ((x))in foo
+       │ ^^^^^^^^^^^^^^
+    28 │ false <= ((x)) in foo
+    29 │ 1 > x===foo
+  
+  i Yoda expressions can be confusing to some people, invert the expression for better readability.
+  
+
+```
+
+```
+invalid.js:28:1 lint/nursery/noYodaExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid the use of yoda expressions.
+  
+    26 │ 1 > x++instanceof foo
+    27 │ false <= ((x))in foo
+  > 28 │ false <= ((x)) in foo
+       │ ^^^^^^^^^^^^^^
+    29 │ 1 > x===foo
+    30 │ 1 > x
+  
+  i Yoda expressions can be confusing to some people, invert the expression for better readability.
+  
+
+```
+
+```
+invalid.js:29:1 lint/nursery/noYodaExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid the use of yoda expressions.
+  
+    27 │ false <= ((x))in foo
+    28 │ false <= ((x)) in foo
+  > 29 │ 1 > x===foo
+       │ ^^^^^
+    30 │ 1 > x
+    31 │ 
+  
+  i Yoda expressions can be confusing to some people, invert the expression for better readability.
+  
+
+```
+
+```
+invalid.js:30:1 lint/nursery/noYodaExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid the use of yoda expressions.
+  
+    28 │ false <= ((x)) in foo
+    29 │ 1 > x===foo
+  > 30 │ 1 > x
+       │ ^^^^^
+    31 │ 
   
   i Yoda expressions can be confusing to some people, invert the expression for better readability.
   

@@ -11,34 +11,7 @@ if (1 < a && a < 0) {}
 var a = b < 0 || 1 <= b;
 if (0 <= x && x < -1) {}
 if (`green` < x.y && x.y < `blue`) {}
-if (0 <= a[''] && a.b < 1) {}
-if (0 <= a[''] && a[' '] < 1) {}
-if (0 <= a[''] && a[null] < 1) {}
-if (0 <= a[``] && a[null] < 1) {}
-if (0 <= a[''] && a[b] < 1) {}
-if (0 <= a[''] && a[b()] < 1) {}
-if (0 <= a[``] && a[b()] < 1) {}
 if (0 <= a[b()] && a[b()] < 1) {}
-if (0 <= a.null && a[/(?<zero>0)/] <= 1) {}
-if (3 == a) {}
-foo(3 === a);
-// if (0 <= x && x < 1) {}
-if ( /* a */ 0 /* b */ < /* c */ foo /* d */ ) {}
-while (0 === (a));
-while (0 === (a = b));
-// function *foo() { yield(1) < a }
-// function *foo() { yield((1)) < a }
-function *foo() { yield 1 < a }
-function *foo() { yield/**/1 < a }
-// function *foo() { yield(1) < ++a }
-// function *foo() { yield(1) < (a) }
-x=1 < a
-0 < f()in obj
-1 > x++instanceof foo
-false <= ((x))in foo
-false <= ((x)) in foo
-1 > x===foo
-1 > x
 if ('b' <= x && x < 'a') {}
 if('a' <= x && x < 1) {}
 if (0 < a && b < max) {}
@@ -138,7 +111,7 @@ invalidRange.js:6:5 lint/nursery/noYodaExpression ━━━━━━━━━━
   > 6 │ if (0 <= x && x < -1) {}
       │     ^^^^^^
     7 │ if (`green` < x.y && x.y < `blue`) {}
-    8 │ if (0 <= a[''] && a.b < 1) {}
+    8 │ if (0 <= a[b()] && a[b()] < 1) {}
   
   i Yoda expressions can be confusing to some people, invert the expression for better readability.
   
@@ -154,8 +127,8 @@ invalidRange.js:7:5 lint/nursery/noYodaExpression ━━━━━━━━━━
     6 │ if (0 <= x && x < -1) {}
   > 7 │ if (`green` < x.y && x.y < `blue`) {}
       │     ^^^^^^^^^^^^^
-    8 │ if (0 <= a[''] && a.b < 1) {}
-    9 │ if (0 <= a[''] && a[' '] < 1) {}
+    8 │ if (0 <= a[b()] && a[b()] < 1) {}
+    9 │ if ('b' <= x && x < 'a') {}
   
   i Yoda expressions can be confusing to some people, invert the expression for better readability.
   
@@ -169,10 +142,10 @@ invalidRange.js:8:5 lint/nursery/noYodaExpression ━━━━━━━━━━
   
      6 │ if (0 <= x && x < -1) {}
      7 │ if (`green` < x.y && x.y < `blue`) {}
-   > 8 │ if (0 <= a[''] && a.b < 1) {}
-       │     ^^^^^^^^^^
-     9 │ if (0 <= a[''] && a[' '] < 1) {}
-    10 │ if (0 <= a[''] && a[null] < 1) {}
+   > 8 │ if (0 <= a[b()] && a[b()] < 1) {}
+       │     ^^^^^^^^^^^
+     9 │ if ('b' <= x && x < 'a') {}
+    10 │ if('a' <= x && x < 1) {}
   
   i Yoda expressions can be confusing to some people, invert the expression for better readability.
   
@@ -185,11 +158,11 @@ invalidRange.js:9:5 lint/nursery/noYodaExpression ━━━━━━━━━━
   ! Avoid the use of yoda expressions.
   
      7 │ if (`green` < x.y && x.y < `blue`) {}
-     8 │ if (0 <= a[''] && a.b < 1) {}
-   > 9 │ if (0 <= a[''] && a[' '] < 1) {}
-       │     ^^^^^^^^^^
-    10 │ if (0 <= a[''] && a[null] < 1) {}
-    11 │ if (0 <= a[``] && a[null] < 1) {}
+     8 │ if (0 <= a[b()] && a[b()] < 1) {}
+   > 9 │ if ('b' <= x && x < 'a') {}
+       │     ^^^^^^^^
+    10 │ if('a' <= x && x < 1) {}
+    11 │ if (0 < a && b < max) {}
   
   i Yoda expressions can be confusing to some people, invert the expression for better readability.
   
@@ -197,16 +170,16 @@ invalidRange.js:9:5 lint/nursery/noYodaExpression ━━━━━━━━━━
 ```
 
 ```
-invalidRange.js:10:5 lint/nursery/noYodaExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalidRange.js:10:4 lint/nursery/noYodaExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Avoid the use of yoda expressions.
   
-     8 │ if (0 <= a[''] && a.b < 1) {}
-     9 │ if (0 <= a[''] && a[' '] < 1) {}
-  > 10 │ if (0 <= a[''] && a[null] < 1) {}
-       │     ^^^^^^^^^^
-    11 │ if (0 <= a[``] && a[null] < 1) {}
-    12 │ if (0 <= a[''] && a[b] < 1) {}
+     8 │ if (0 <= a[b()] && a[b()] < 1) {}
+     9 │ if ('b' <= x && x < 'a') {}
+  > 10 │ if('a' <= x && x < 1) {}
+       │    ^^^^^^^^
+    11 │ if (0 < a && b < max) {}
+    12 │ 
   
   i Yoda expressions can be confusing to some people, invert the expression for better readability.
   
@@ -218,385 +191,11 @@ invalidRange.js:11:5 lint/nursery/noYodaExpression ━━━━━━━━━�
 
   ! Avoid the use of yoda expressions.
   
-     9 │ if (0 <= a[''] && a[' '] < 1) {}
-    10 │ if (0 <= a[''] && a[null] < 1) {}
-  > 11 │ if (0 <= a[``] && a[null] < 1) {}
-       │     ^^^^^^^^^^
-    12 │ if (0 <= a[''] && a[b] < 1) {}
-    13 │ if (0 <= a[''] && a[b()] < 1) {}
-  
-  i Yoda expressions can be confusing to some people, invert the expression for better readability.
-  
-
-```
-
-```
-invalidRange.js:12:5 lint/nursery/noYodaExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! Avoid the use of yoda expressions.
-  
-    10 │ if (0 <= a[''] && a[null] < 1) {}
-    11 │ if (0 <= a[``] && a[null] < 1) {}
-  > 12 │ if (0 <= a[''] && a[b] < 1) {}
-       │     ^^^^^^^^^^
-    13 │ if (0 <= a[''] && a[b()] < 1) {}
-    14 │ if (0 <= a[``] && a[b()] < 1) {}
-  
-  i Yoda expressions can be confusing to some people, invert the expression for better readability.
-  
-
-```
-
-```
-invalidRange.js:13:5 lint/nursery/noYodaExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! Avoid the use of yoda expressions.
-  
-    11 │ if (0 <= a[``] && a[null] < 1) {}
-    12 │ if (0 <= a[''] && a[b] < 1) {}
-  > 13 │ if (0 <= a[''] && a[b()] < 1) {}
-       │     ^^^^^^^^^^
-    14 │ if (0 <= a[``] && a[b()] < 1) {}
-    15 │ if (0 <= a[b()] && a[b()] < 1) {}
-  
-  i Yoda expressions can be confusing to some people, invert the expression for better readability.
-  
-
-```
-
-```
-invalidRange.js:14:5 lint/nursery/noYodaExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! Avoid the use of yoda expressions.
-  
-    12 │ if (0 <= a[''] && a[b] < 1) {}
-    13 │ if (0 <= a[''] && a[b()] < 1) {}
-  > 14 │ if (0 <= a[``] && a[b()] < 1) {}
-       │     ^^^^^^^^^^
-    15 │ if (0 <= a[b()] && a[b()] < 1) {}
-    16 │ if (0 <= a.null && a[/(?<zero>0)/] <= 1) {}
-  
-  i Yoda expressions can be confusing to some people, invert the expression for better readability.
-  
-
-```
-
-```
-invalidRange.js:15:5 lint/nursery/noYodaExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! Avoid the use of yoda expressions.
-  
-    13 │ if (0 <= a[''] && a[b()] < 1) {}
-    14 │ if (0 <= a[``] && a[b()] < 1) {}
-  > 15 │ if (0 <= a[b()] && a[b()] < 1) {}
-       │     ^^^^^^^^^^^
-    16 │ if (0 <= a.null && a[/(?<zero>0)/] <= 1) {}
-    17 │ if (3 == a) {}
-  
-  i Yoda expressions can be confusing to some people, invert the expression for better readability.
-  
-
-```
-
-```
-invalidRange.js:16:5 lint/nursery/noYodaExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! Avoid the use of yoda expressions.
-  
-    14 │ if (0 <= a[``] && a[b()] < 1) {}
-    15 │ if (0 <= a[b()] && a[b()] < 1) {}
-  > 16 │ if (0 <= a.null && a[/(?<zero>0)/] <= 1) {}
-       │     ^^^^^^^^^^^
-    17 │ if (3 == a) {}
-    18 │ foo(3 === a);
-  
-  i Yoda expressions can be confusing to some people, invert the expression for better readability.
-  
-
-```
-
-```
-invalidRange.js:17:5 lint/nursery/noYodaExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! Avoid the use of yoda expressions.
-  
-    15 │ if (0 <= a[b()] && a[b()] < 1) {}
-    16 │ if (0 <= a.null && a[/(?<zero>0)/] <= 1) {}
-  > 17 │ if (3 == a) {}
-       │     ^^^^^^
-    18 │ foo(3 === a);
-    19 │ // if (0 <= x && x < 1) {}
-  
-  i Yoda expressions can be confusing to some people, invert the expression for better readability.
-  
-
-```
-
-```
-invalidRange.js:18:5 lint/nursery/noYodaExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! Avoid the use of yoda expressions.
-  
-    16 │ if (0 <= a.null && a[/(?<zero>0)/] <= 1) {}
-    17 │ if (3 == a) {}
-  > 18 │ foo(3 === a);
-       │     ^^^^^^^
-    19 │ // if (0 <= x && x < 1) {}
-    20 │ if ( /* a */ 0 /* b */ < /* c */ foo /* d */ ) {}
-  
-  i Yoda expressions can be confusing to some people, invert the expression for better readability.
-  
-
-```
-
-```
-invalidRange.js:20:14 lint/nursery/noYodaExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! Avoid the use of yoda expressions.
-  
-    18 │ foo(3 === a);
-    19 │ // if (0 <= x && x < 1) {}
-  > 20 │ if ( /* a */ 0 /* b */ < /* c */ foo /* d */ ) {}
-       │              ^^^^^^^^^^^^^^^^^^^^^^^
-    21 │ while (0 === (a));
-    22 │ while (0 === (a = b));
-  
-  i Yoda expressions can be confusing to some people, invert the expression for better readability.
-  
-
-```
-
-```
-invalidRange.js:21:8 lint/nursery/noYodaExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! Avoid the use of yoda expressions.
-  
-    19 │ // if (0 <= x && x < 1) {}
-    20 │ if ( /* a */ 0 /* b */ < /* c */ foo /* d */ ) {}
-  > 21 │ while (0 === (a));
-       │        ^^^^^^^^^
-    22 │ while (0 === (a = b));
-    23 │ // function *foo() { yield(1) < a }
-  
-  i Yoda expressions can be confusing to some people, invert the expression for better readability.
-  
-
-```
-
-```
-invalidRange.js:22:8 lint/nursery/noYodaExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! Avoid the use of yoda expressions.
-  
-    20 │ if ( /* a */ 0 /* b */ < /* c */ foo /* d */ ) {}
-    21 │ while (0 === (a));
-  > 22 │ while (0 === (a = b));
-       │        ^^^^^^^^^^^^^
-    23 │ // function *foo() { yield(1) < a }
-    24 │ // function *foo() { yield((1)) < a }
-  
-  i Yoda expressions can be confusing to some people, invert the expression for better readability.
-  
-
-```
-
-```
-invalidRange.js:25:25 lint/nursery/noYodaExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! Avoid the use of yoda expressions.
-  
-    23 │ // function *foo() { yield(1) < a }
-    24 │ // function *foo() { yield((1)) < a }
-  > 25 │ function *foo() { yield 1 < a }
-       │                         ^^^^^
-    26 │ function *foo() { yield/**/1 < a }
-    27 │ // function *foo() { yield(1) < ++a }
-  
-  i Yoda expressions can be confusing to some people, invert the expression for better readability.
-  
-
-```
-
-```
-invalidRange.js:26:28 lint/nursery/noYodaExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! Avoid the use of yoda expressions.
-  
-    24 │ // function *foo() { yield((1)) < a }
-    25 │ function *foo() { yield 1 < a }
-  > 26 │ function *foo() { yield/**/1 < a }
-       │                            ^^^^^
-    27 │ // function *foo() { yield(1) < ++a }
-    28 │ // function *foo() { yield(1) < (a) }
-  
-  i Yoda expressions can be confusing to some people, invert the expression for better readability.
-  
-
-```
-
-```
-invalidRange.js:29:3 lint/nursery/noYodaExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! Avoid the use of yoda expressions.
-  
-    27 │ // function *foo() { yield(1) < ++a }
-    28 │ // function *foo() { yield(1) < (a) }
-  > 29 │ x=1 < a
-       │   ^^^^^
-    30 │ 0 < f()in obj
-    31 │ 1 > x++instanceof foo
-  
-  i Yoda expressions can be confusing to some people, invert the expression for better readability.
-  
-
-```
-
-```
-invalidRange.js:30:1 lint/nursery/noYodaExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! Avoid the use of yoda expressions.
-  
-    28 │ // function *foo() { yield(1) < (a) }
-    29 │ x=1 < a
-  > 30 │ 0 < f()in obj
-       │ ^^^^^^^
-    31 │ 1 > x++instanceof foo
-    32 │ false <= ((x))in foo
-  
-  i Yoda expressions can be confusing to some people, invert the expression for better readability.
-  
-
-```
-
-```
-invalidRange.js:31:1 lint/nursery/noYodaExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! Avoid the use of yoda expressions.
-  
-    29 │ x=1 < a
-    30 │ 0 < f()in obj
-  > 31 │ 1 > x++instanceof foo
-       │ ^^^^^^^
-    32 │ false <= ((x))in foo
-    33 │ false <= ((x)) in foo
-  
-  i Yoda expressions can be confusing to some people, invert the expression for better readability.
-  
-
-```
-
-```
-invalidRange.js:32:1 lint/nursery/noYodaExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! Avoid the use of yoda expressions.
-  
-    30 │ 0 < f()in obj
-    31 │ 1 > x++instanceof foo
-  > 32 │ false <= ((x))in foo
-       │ ^^^^^^^^^^^^^^
-    33 │ false <= ((x)) in foo
-    34 │ 1 > x===foo
-  
-  i Yoda expressions can be confusing to some people, invert the expression for better readability.
-  
-
-```
-
-```
-invalidRange.js:33:1 lint/nursery/noYodaExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! Avoid the use of yoda expressions.
-  
-    31 │ 1 > x++instanceof foo
-    32 │ false <= ((x))in foo
-  > 33 │ false <= ((x)) in foo
-       │ ^^^^^^^^^^^^^^
-    34 │ 1 > x===foo
-    35 │ 1 > x
-  
-  i Yoda expressions can be confusing to some people, invert the expression for better readability.
-  
-
-```
-
-```
-invalidRange.js:34:1 lint/nursery/noYodaExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! Avoid the use of yoda expressions.
-  
-    32 │ false <= ((x))in foo
-    33 │ false <= ((x)) in foo
-  > 34 │ 1 > x===foo
-       │ ^^^^^
-    35 │ 1 > x
-    36 │ if ('b' <= x && x < 'a') {}
-  
-  i Yoda expressions can be confusing to some people, invert the expression for better readability.
-  
-
-```
-
-```
-invalidRange.js:35:1 lint/nursery/noYodaExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! Avoid the use of yoda expressions.
-  
-    33 │ false <= ((x)) in foo
-    34 │ 1 > x===foo
-  > 35 │ 1 > x
-       │ ^^^^^
-    36 │ if ('b' <= x && x < 'a') {}
-    37 │ if('a' <= x && x < 1) {}
-  
-  i Yoda expressions can be confusing to some people, invert the expression for better readability.
-  
-
-```
-
-```
-invalidRange.js:36:5 lint/nursery/noYodaExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! Avoid the use of yoda expressions.
-  
-    34 │ 1 > x===foo
-    35 │ 1 > x
-  > 36 │ if ('b' <= x && x < 'a') {}
-       │     ^^^^^^^^
-    37 │ if('a' <= x && x < 1) {}
-    38 │ if (0 < a && b < max) {}
-  
-  i Yoda expressions can be confusing to some people, invert the expression for better readability.
-  
-
-```
-
-```
-invalidRange.js:37:4 lint/nursery/noYodaExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! Avoid the use of yoda expressions.
-  
-    35 │ 1 > x
-    36 │ if ('b' <= x && x < 'a') {}
-  > 37 │ if('a' <= x && x < 1) {}
-       │    ^^^^^^^^
-    38 │ if (0 < a && b < max) {}
-    39 │ 
-  
-  i Yoda expressions can be confusing to some people, invert the expression for better readability.
-  
-
-```
-
-```
-invalidRange.js:38:5 lint/nursery/noYodaExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! Avoid the use of yoda expressions.
-  
-    36 │ if ('b' <= x && x < 'a') {}
-    37 │ if('a' <= x && x < 1) {}
-  > 38 │ if (0 < a && b < max) {}
+     9 │ if ('b' <= x && x < 'a') {}
+    10 │ if('a' <= x && x < 1) {}
+  > 11 │ if (0 < a && b < max) {}
        │     ^^^^^
-    39 │ 
+    12 │ 
   
   i Yoda expressions can be confusing to some people, invert the expression for better readability.
   

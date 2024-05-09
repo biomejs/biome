@@ -6,7 +6,7 @@ use biome_js_syntax::{
     JsCallExpression, JsIfStatement, JsLogicalExpression, JsLogicalOperator,
     JsParenthesizedExpression, JsUnaryOperator,
 };
-use biome_rowan::{AstNode, Direction, WalkEvent};
+use biome_rowan::{AstNode, WalkEvent};
 
 declare_rule! {
     /// Disallow the use of yoda expressions.
@@ -90,16 +90,16 @@ impl Rule for NoYodaExpression {
 
 fn is_literal_expression(expression: &Option<AnyJsExpression>) -> bool {
     match expression {
-        // Any literal (1, true, null, etc)
+        // Any literal: 1, true, null, etc
         Some(AnyJsExpression::AnyJsLiteralExpression(_)) => true,
 
-        // Static template literals (`foo`)
+        // Static template literals: `foo`
         Some(AnyJsExpression::JsTemplateExpression(template_expression)) => template_expression
             .elements()
             .into_iter()
             .all(|element| element.as_js_template_chunk_element().is_some()),
 
-        // Negative numeric literal (-1)
+        // Negative numeric literal: -1
         Some(AnyJsExpression::JsUnaryExpression(unary_expression)) => {
             let is_minus_operator =
                 matches!(unary_expression.operator(), Ok(JsUnaryOperator::Minus));
@@ -112,6 +112,12 @@ fn is_literal_expression(expression: &Option<AnyJsExpression>) -> bool {
 
             is_minus_operator && is_number_expression
         }
+
+        // Parenthesized expression: (1)
+        Some(AnyJsExpression::JsParenthesizedExpression(parenthesized_expression)) => {
+            is_literal_expression(&parenthesized_expression.expression().ok())
+        }
+
         _ => false,
     }
 }
