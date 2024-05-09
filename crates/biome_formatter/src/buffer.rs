@@ -538,8 +538,9 @@ fn clean_interned(
                 .enumerate()
                 .find_map(|(index, element)| match element {
                     FormatElement::Line(LineMode::Soft | LineMode::SoftOrSpace)
-                    | FormatElement::Tag(Tag::StartConditionalContent(_))
-                    | FormatElement::Tag(Tag::EndConditionalContent)
+                    | FormatElement::Tag(
+                        Tag::StartConditionalContent(_) | Tag::EndConditionalContent,
+                    )
                     | FormatElement::BestFitting(_) => {
                         let mut cleaned = Vec::new();
                         cleaned.extend_from_slice(&interned[..index]);
