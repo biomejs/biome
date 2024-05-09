@@ -319,7 +319,7 @@ GraphqlRoot {
 ```
 directive_definition.graphql:3:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Expected a QUERY, a MUTATION, a SUBSCRIPTION, a FIELD, a FRAGMENT_DEFINITION, a FRAGMENT_SPREAD, a INLINE_FRAGMENT, a VARIABLE_DEFINITION, a SCHEMA, a SCALAR, a OBJECT, a FIELD_DEFINITION, a ARGUMENT_DEFINITION, a INTERFACE, a UNION, a ENUM, a ENUM_VALUE, a INPUT_OBJECT, or a INPUT_FIELD_DEFINITION but instead found 'directive'.
+  × Expected a valid directive location
   
     1 │ directive @example on |
     2 │ 
@@ -328,14 +328,27 @@ directive_definition.graphql:3:1 parse ━━━━━━━━━━━━━�
     4 │ 
     5 │ directive example on | ARGUMENT_DEFINITION
   
-  i Expected a QUERY, a MUTATION, a SUBSCRIPTION, a FIELD, a FRAGMENT_DEFINITION, a FRAGMENT_SPREAD, a INLINE_FRAGMENT, a VARIABLE_DEFINITION, a SCHEMA, a SCALAR, a OBJECT, a FIELD_DEFINITION, a ARGUMENT_DEFINITION, a INTERFACE, a UNION, a ENUM, a ENUM_VALUE, a INPUT_OBJECT, or a INPUT_FIELD_DEFINITION here.
+  i Must be one of:
   
-    1 │ directive @example on |
-    2 │ 
-  > 3 │ directive @ on | ARGUMENT_DEFINITION
-      │ ^^^^^^^^^
-    4 │ 
-    5 │ directive example on | ARGUMENT_DEFINITION
+  - QUERY
+  - MUTATION
+  - SUBSCRIPTION
+  - FIELD
+  - FRAGMENT_DEFINITION
+  - FRAGMENT_SPREAD
+  - INLINE_FRAGMENT
+  - VARIABLE_DEFINITION
+  - SCHEMA
+  - SCALAR
+  - OBJECT
+  - FIELD_DEFINITION
+  - ARGUMENT_DEFINITION
+  - INTERFACE
+  - UNION
+  - ENUM
+  - ENUM_VALUE
+  - INPUT_OBJECT
+  - INPUT_FIELD_DEFINITION
   
 directive_definition.graphql:3:13 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -396,7 +409,7 @@ directive_definition.graphql:6:19 parse ━━━━━━━━━━━━━�
   
 directive_definition.graphql:13:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Expected a QUERY, a MUTATION, a SUBSCRIPTION, a FIELD, a FRAGMENT_DEFINITION, a FRAGMENT_SPREAD, a INLINE_FRAGMENT, a VARIABLE_DEFINITION, a SCHEMA, a SCALAR, a OBJECT, a FIELD_DEFINITION, a ARGUMENT_DEFINITION, a INTERFACE, a UNION, a ENUM, a ENUM_VALUE, a INPUT_OBJECT, or a INPUT_FIELD_DEFINITION but instead found 'directive'.
+  × Expected a valid directive location
   
     11 │   |
     12 │ 
@@ -405,14 +418,27 @@ directive_definition.graphql:13:1 parse ━━━━━━━━━━━━━�
     14 │ 
     15 │ directve @example on
   
-  i Expected a QUERY, a MUTATION, a SUBSCRIPTION, a FIELD, a FRAGMENT_DEFINITION, a FRAGMENT_SPREAD, a INLINE_FRAGMENT, a VARIABLE_DEFINITION, a SCHEMA, a SCALAR, a OBJECT, a FIELD_DEFINITION, a ARGUMENT_DEFINITION, a INTERFACE, a UNION, a ENUM, a ENUM_VALUE, a INPUT_OBJECT, or a INPUT_FIELD_DEFINITION here.
+  i Must be one of:
   
-    11 │   |
-    12 │ 
-  > 13 │ directive @delegateField(: !) repeatable on OBJECT | INTERFACE
-       │ ^^^^^^^^^
-    14 │ 
-    15 │ directve @example on
+  - QUERY
+  - MUTATION
+  - SUBSCRIPTION
+  - FIELD
+  - FRAGMENT_DEFINITION
+  - FRAGMENT_SPREAD
+  - INLINE_FRAGMENT
+  - VARIABLE_DEFINITION
+  - SCHEMA
+  - SCALAR
+  - OBJECT
+  - FIELD_DEFINITION
+  - ARGUMENT_DEFINITION
+  - INTERFACE
+  - UNION
+  - ENUM
+  - ENUM_VALUE
+  - INPUT_OBJECT
+  - INPUT_FIELD_DEFINITION
   
 directive_definition.graphql:13:26 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -469,8 +495,7 @@ directive_definition.graphql:15:1 parse ━━━━━━━━━━━━━�
   
 directive_definition.graphql:19:5 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Expected a QUERY, a MUTATION, a SUBSCRIPTION, a FIELD, a FRAGMENT_DEFINITION, a FRAGMENT_SPREAD, a INLINE_FRAGMENT, a VARIABLE_DEFINITION, a SCHEMA, a SCALAR, a OBJECT, a FIELD_DEFINITION, a ARGUMENT_DEFINITION, a INTERFACE, a UNION, a ENUM, a ENUM_VALUE, a INPUT_OBJECT, or a INPUT_FIELD_DEFINITION but instead found '123
-      | name'.
+  × Expected a valid directive location
   
     17 │ directive @example on
     18 │   | #
@@ -480,14 +505,26 @@ directive_definition.graphql:19:5 parse ━━━━━━━━━━━━━�
        │   ^^^^^^
     21 │ 
   
-  i Expected a QUERY, a MUTATION, a SUBSCRIPTION, a FIELD, a FRAGMENT_DEFINITION, a FRAGMENT_SPREAD, a INLINE_FRAGMENT, a VARIABLE_DEFINITION, a SCHEMA, a SCALAR, a OBJECT, a FIELD_DEFINITION, a ARGUMENT_DEFINITION, a INTERFACE, a UNION, a ENUM, a ENUM_VALUE, a INPUT_OBJECT, or a INPUT_FIELD_DEFINITION here.
+  i Must be one of:
   
-    17 │ directive @example on
-    18 │   | #
-  > 19 │   | 123
-       │     ^^^
-  > 20 │   | name
-       │   ^^^^^^
-    21 │ 
+  - QUERY
+  - MUTATION
+  - SUBSCRIPTION
+  - FIELD
+  - FRAGMENT_DEFINITION
+  - FRAGMENT_SPREAD
+  - INLINE_FRAGMENT
+  - VARIABLE_DEFINITION
+  - SCHEMA
+  - SCALAR
+  - OBJECT
+  - FIELD_DEFINITION
+  - ARGUMENT_DEFINITION
+  - INTERFACE
+  - UNION
+  - ENUM
+  - ENUM_VALUE
+  - INPUT_OBJECT
+  - INPUT_FIELD_DEFINITION
   
 ```

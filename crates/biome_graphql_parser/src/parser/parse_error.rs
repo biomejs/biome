@@ -1,5 +1,8 @@
 use crate::parser::GraphqlParser;
-use biome_parser::diagnostic::{expected_any, expected_node, ParseDiagnostic};
+use biome_parser::{
+    diagnostic::{expected_any, expected_node, ParseDiagnostic},
+    Parser,
+};
 use biome_rowan::TextRange;
 
 pub(crate) fn expected_any_definition(p: &GraphqlParser, range: TextRange) -> ParseDiagnostic {
@@ -62,29 +65,29 @@ pub(crate) fn expected_operation_type(p: &GraphqlParser, range: TextRange) -> Pa
 }
 
 pub(crate) fn expected_directive_location(p: &GraphqlParser, range: TextRange) -> ParseDiagnostic {
-    expected_any(
-        &[
-            "QUERY",
-            "MUTATION",
-            "SUBSCRIPTION",
-            "FIELD",
-            "FRAGMENT_DEFINITION",
-            "FRAGMENT_SPREAD",
-            "INLINE_FRAGMENT",
-            "VARIABLE_DEFINITION",
-            "SCHEMA",
-            "SCALAR",
-            "OBJECT",
-            "FIELD_DEFINITION",
-            "ARGUMENT_DEFINITION",
-            "INTERFACE",
-            "UNION",
-            "ENUM",
-            "ENUM_VALUE",
-            "INPUT_OBJECT",
-            "INPUT_FIELD_DEFINITION",
-        ],
-        range,
-        p,
-    )
+    p.err_builder("Expected a valid directive location", range)
+        .with_alternatives(
+            "Must be one of:",
+            &[
+                "QUERY",
+                "MUTATION",
+                "SUBSCRIPTION",
+                "FIELD",
+                "FRAGMENT_DEFINITION",
+                "FRAGMENT_SPREAD",
+                "INLINE_FRAGMENT",
+                "VARIABLE_DEFINITION",
+                "SCHEMA",
+                "SCALAR",
+                "OBJECT",
+                "FIELD_DEFINITION",
+                "ARGUMENT_DEFINITION",
+                "INTERFACE",
+                "UNION",
+                "ENUM",
+                "ENUM_VALUE",
+                "INPUT_OBJECT",
+                "INPUT_FIELD_DEFINITION",
+            ],
+        )
 }
