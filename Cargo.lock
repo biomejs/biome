@@ -329,6 +329,7 @@ dependencies = [
  "indexmap 2.2.6",
  "schemars",
  "serde",
+ "serde_json",
  "smallvec",
 ]
 
