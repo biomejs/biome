@@ -663,7 +663,6 @@ impl<Context> Buffer for RemoveSoftLinesBuffer<'_, Context> {
             }
         }
         Ok(())
-        // self.inner.write_element(element)
     }
 
     fn elements(&self) -> &[FormatElement] {
