@@ -71,7 +71,7 @@ impl DeriveInput {
                 }
                 Data::Struct(data) => {
                     if data.fields.iter().all(|field| field.ident.is_some()) {
-                        let mut flatten_field = None;
+                        let mut rest_field = None;
                         let fields = data
                             .fields
                             .into_iter()
@@ -85,14 +85,14 @@ impl DeriveInput {
                                     .rename
                                     .unwrap_or_else(|| Case::Camel.convert(&ident.to_string()));
 
-                                if flatten_field.is_some() && attrs.flatten {
+                                if rest_field.is_some() && attrs.rest {
                                     abort!(
                                         ident,
-                                        "Cannot have multiple fields with #[deserializable(flatten)]"
+                                        "Cannot have multiple fields with #[deserializable(rest)]"
                                     )
                                 }
-                                if attrs.flatten {
-                                    flatten_field = Some(ident.clone());
+                                if attrs.rest {
+                                    rest_field = Some(ident.clone());
                                 }
 
                                 DeserializableFieldData {
@@ -108,9 +108,18 @@ impl DeriveInput {
                             })
                             .collect();
 
+                        if rest_field.is_some()
+                            && matches!(attrs.unknown_fields, Some(UnknownFields::Deny))
+                        {
+                            abort!(
+                                rest_field.unwrap(),
+                                "Cannot have a field with #[deserializable(rest)] and #[deserializable(unknown_fields = \"deny\")]"
+                            )
+                        }
+
                         DeserializableData::Struct(DeserializableStructData {
                             fields,
-                            flatten_field,
+                            rest_field,
                             with_validator: attrs.with_validator,
                             unknown_fields: attrs.unknown_fields.unwrap_or_default(),
                         })
@@ -163,7 +172,7 @@ pub struct DeserializableNewtypeData {
 #[derive(Debug)]
 pub struct DeserializableStructData {
     fields: Vec<DeserializableFieldData>,
-    flatten_field: Option<Ident>,
+    rest_field: Option<Ident>,
     with_validator: bool,
     unknown_fields: UnknownFields,
 }
@@ -428,7 +437,7 @@ fn generate_deserializable_struct(
     } else {
         validator
     };
-    let unknown_key_handler = if data.flatten_field.is_some() {
+    let unknown_key_handler = if data.rest_field.is_some() {
         quote! {
             unknown_key => {
                 let key_text = Text::deserialize(&key, "", diagnostics)?;
@@ -459,19 +468,19 @@ fn generate_deserializable_struct(
         }
     };
 
-    let (unknown_fields_initializer, collect_unknown_fields) =
-        if let Some(field) = data.flatten_field {
-            (
-                quote! {
-                    let mut unknown_fields = vec![];
-                },
-                quote! {
-                    result.#field = unknown_fields.into_iter().collect();
-                },
-            )
-        } else {
-            (quote! {}, quote! {})
-        };
+    let (unknown_fields_initializer, collect_unknown_fields) = if let Some(field) = data.rest_field
+    {
+        (
+            quote! {
+                let mut unknown_fields = vec![];
+            },
+            quote! {
+                result.#field = unknown_fields.into_iter().collect();
+            },
+        )
+    } else {
+        (quote! {}, quote! {})
+    };
 
     let tuple_type = generate_generics_tuple(&generics);
     let trait_bounds = generate_trait_bounds(&generics);
