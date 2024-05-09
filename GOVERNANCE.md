@@ -134,7 +134,7 @@ One or more people can own certain parts of the codebase. This process is inform
 
 There aren't strict requirements and expectations around activity for core contributors and maintainers; although long periods of inactivity must be communicated to the team.
 
-Inactive core contributors or maintainers may have voting and access rights removed and status removed, and given them the _Past contributor_ status. A core contributor or maintainer may request their voting rights and status back upon sufficient activity.
+Inactive core contributors or maintainers may have voting and access rights removed and status removed, and given them the _Past maintainer_ status. A core contributor or maintainer may request their voting rights and status back upon sufficient activity.
 
 > [!NOTE]
 > The definition of "long periods", and how long an individual needs to stay inactive in order to have their voting rights removed have yet to be decided.
@@ -195,7 +195,7 @@ Bounties are the second approach towards funding Biome development. Unlike a spo
   - The commission charged by Polar.sh is split accordingly.
   - We reserve the right to decide on a different split in the future.
 - Bounties cannot be opened for bug fixes. Users who wish to see bugs fixed are advised to consider [sponsorship](#sponsorship) instead, in order to give the project a better long-term ability to fix bugs as well.
-- If an issue in our issue tracker is not yet open for pledges, the person who wishes to pledge should indicate their desire in the comments of the issue, or do so through the `Community > #funding` channel on Discord. A [Core Contributor](#core-contributor) can then **accept** or **reject** the request for the bounty. Reasons for rejection include, but are not limited to: 
+- If an issue in our issue tracker is not yet open for pledges, the person who wishes to pledge should indicate their desire in the comments of the issue, or do so through the `Community > #funding` channel on Discord. A [Core Contributor](#core-contributor) can then **accept** or **reject** the request for the bounty. Reasons for rejection include, but are not limited to:
   - Implementation of the task would conflict with the project direction or [its values](https://biomejs.dev/internals/philosophy/).
   - Implementation of the task is (currently) technically infeasible.
   - The suggested pledge is deemed inappropriate for the amount of work involved.
