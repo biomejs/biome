@@ -4,6 +4,7 @@ mod test_case;
 use crate::language::FormatNode;
 pub use crate::language::Parse;
 pub use crate::test_case::TestCase;
+use biome_diagnostics::{print_diagnostic_to_string, Error};
 use biome_formatter::Printed;
 use biome_rowan::NodeCache;
 use criterion::measurement::WallTime;
@@ -37,7 +38,10 @@ pub fn bench_parser_group(group: &mut BenchmarkGroup<WallTime>, test_case: TestC
         &code,
         |b, _| {
             b.iter(|| {
-                black_box(parse.parse());
+                let result = black_box(parse.parse());
+                for diagnostic in result.into_diagnostics() {
+                    println!("{}", print_diagnostic_to_string(&Error::from(diagnostic)));
+                }
             })
         },
     );
