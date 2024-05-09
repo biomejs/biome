@@ -1820,6 +1820,13 @@
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
 					]
+				},
+				"useTopLevelRegex": {
+					"description": "Require all regex literals to be declared at the top level.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false

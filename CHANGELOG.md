@@ -85,6 +85,7 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 - Add [nursery/useThrowNewError](https://biomejs.dev/linter/rules/use-throw-new-error/).
   Contributed by @minht11
+- Add [nursery/useTopLevelRegex](https://biomejs.dev/linter/rules/use-top-level-regex), which enforces defining regular expressions at the top level of a module. [#2148](https://github.com/biomejs/biome/issues/2148) Contributed by @dyc3.
 
 #### Bug fixes
 
