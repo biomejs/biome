@@ -198,9 +198,7 @@ jobs:
   publish-npm:
     name: Publish npm packages
     runs-on: ubuntu-latest
-    needs:
-      - build
-      - build-wasm
+    needs: release
     environment: npm-publish
     permissions:
       contents: write
