@@ -50,6 +50,10 @@ pub(crate) fn expected_variable_definition(p: &GraphqlParser, range: TextRange) 
     expected_node("variable definition", range, p)
 }
 
+pub(crate) fn expected_variable(p: &GraphqlParser, range: TextRange) -> ParseDiagnostic {
+    expected_node("variable", range, p)
+}
+
 pub(crate) fn expected_root_operation_type_definition(
     p: &GraphqlParser,
     range: TextRange,
