@@ -577,7 +577,10 @@ impl<'src> CssLexer<'src> {
             self.advance(1);
 
             // U+002E FULL STOP (.) followed by a digit...
-            if self.current_byte().map_or(false, |byte| byte.is_ascii_digit()) {
+            if self
+                .current_byte()
+                .map_or(false, |byte| byte.is_ascii_digit())
+            {
                 // While the next input code point is a digit, consume it.
                 self.consume_number_sequence();
             }
