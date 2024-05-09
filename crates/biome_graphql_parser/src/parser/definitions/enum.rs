@@ -87,9 +87,9 @@ impl ParseRecovery for EnumValueListParseRecovery {
     const RECOVERED_KIND: Self::Kind = GRAPHQL_BOGUS;
 
     fn is_at_recovered(&self, p: &mut Self::Parser<'_>) -> bool {
-        // After a union definition is a new type definition so it's safe to
-        // assume any name we see before a new type definition is a union
-        // member type
+        // After a enum definition is a new type definition so it's safe to
+        // assume any name we see before a new type definition is a enum
+        // value
         is_at_name(p) || is_at_enum_values_end(p)
     }
 }

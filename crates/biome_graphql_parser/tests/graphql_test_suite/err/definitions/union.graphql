@@ -4,6 +4,15 @@ union SearchResult
 	| Photo
 	| Person
 
+union SearchResult =
+	|
+	| Person
+
+union SearchResult =
+	| Photo
+	|
+
+union SearchResult @
 
 union SearchResult |
 

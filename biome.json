@@ -1,20 +1,25 @@
 {
-	"$schema": "./packages/@biomejs/biome/configuration_schema.json",
-	"extends": ["@biomejs/shared/biome"],
-	"files": {
-		"ignore": [
-			"crates/**",
-			"dist/**",
-			".astro/**",
-			"assets/**",
-			"packages/@biomejs/backend-jsonrpc/src/workspace.ts",
-			"public/**",
-			"**/__snapshots__",
-			"**/undefined/**",
-			"_fonts/**"
-		]
-	},
-	"formatter": {
-		"ignore": ["configuration-schema.json"]
-	}
+  "$schema": "./packages/@biomejs/biome/configuration_schema.json",
+  "extends": ["@biomejs/shared/biome"],
+  "files": {
+    "ignore": [
+      "crates/**",
+      "dist/**",
+      ".astro/**",
+      "assets/**",
+      "packages/@biomejs/backend-jsonrpc/src/workspace.ts",
+      "public/**",
+      "**/__snapshots__",
+      "**/undefined/**",
+      "_fonts/**"
+    ]
+  },
+  "formatter": {
+    "ignore": ["configuration_schema.json"]
+  },
+  "json": {
+    "formatter": {
+      "indentStyle": "space"
+    }
+  }
 }

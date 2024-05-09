@@ -87,7 +87,7 @@ impl Parsed {
                 Some(FormatNode::JavaScript(parse.syntax(), *source_type))
             }
             Parsed::Json(parse) => Some(FormatNode::Json(parse.syntax())),
-            Parsed::Css(_) => None,
+            Parsed::Css(parse) => Some(FormatNode::Css(parse.syntax())),
         }
     }
 
@@ -95,7 +95,7 @@ impl Parsed {
         match self {
             Parsed::JavaScript(parse, _) => Some(Analyze::JavaScript(parse.tree())),
             Parsed::Json(_) => None,
-            Parsed::Css(_) => None,
+            Parsed::Css(parse) => Some(Analyze::Css(parse.tree())),
         }
     }
 

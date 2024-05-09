@@ -35,7 +35,7 @@ use std::{
     num::NonZeroU64,
     sync::{RwLock, RwLockReadGuard},
 };
-use tracing::debug;
+use tracing::trace;
 
 #[derive(Debug, Default)]
 /// The information tracked for each project
@@ -58,7 +58,7 @@ pub struct WorkspaceSettings {
 impl WorkspaceSettings {
     /// Retrieves the settings of the current workspace folder
     pub fn get_current_settings(&self) -> &Settings {
-        debug!("Current key {:?}", self.current_project);
+        trace!("Current key {:?}", self.current_project);
         let data = self
             .data
             .get(self.current_project)
@@ -84,7 +84,7 @@ impl WorkspaceSettings {
     /// a mutable reference to its [Settings] and manipulate them.
     pub fn insert_project(&mut self, workspace_path: impl Into<PathBuf>) -> ProjectKey {
         let path = BiomePath::new(workspace_path.into());
-        debug!("Insert workspace folder: {:?}", path);
+        trace!("Insert workspace folder: {:?}", path);
         self.data.insert(ProjectData {
             path,
             settings: Settings::default(),
@@ -119,19 +119,20 @@ impl WorkspaceSettings {
             !self.data.is_empty(),
             "You must have at least one workspace."
         );
-        debug!("Current key: {:?}", self.current_project);
+        trace!("Current key: {:?}", self.current_project);
         let iter = self.data.iter();
         for (key, path_to_settings) in iter {
-            debug!(
+            trace!(
                 "Workspace path {:?}, file path {:?}",
-                path_to_settings.path, path
+                path_to_settings.path,
+                path
             );
-            debug!("Iter key: {:?}", key);
+            trace!("Iter key: {:?}", key);
             if key == self.current_project {
                 continue;
             }
             if path.strip_prefix(path_to_settings.path.as_path()).is_ok() {
-                debug!("Update workspace to {:?}", key);
+                trace!("Update workspace to {:?}", key);
                 return Some(key);
             }
         }
