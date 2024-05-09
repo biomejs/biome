@@ -548,14 +548,16 @@ impl Workspace for WorkspaceServer {
 
     /// Change the content of an open file
     fn change_file(&self, params: ChangeFileParams) -> Result<(), WorkspaceError> {
-        let mut document = self
-            .documents
-            .get_mut(&params.path)
-            .ok_or_else(WorkspaceError::not_found)?;
+        {
+            let mut document = self
+                .documents
+                .get_mut(&params.path)
+                .ok_or_else(WorkspaceError::not_found)?;
 
-        debug_assert!(params.version > document.version);
-        document.version = params.version;
-        document.content = params.content;
+            debug_assert!(params.version > document.version);
+            document.version = params.version;
+            document.content = params.content;
+        }
 
         self.syntax.remove(&params.path);
         Ok(())

@@ -34,6 +34,10 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 ### Formatter
 
+#### Bug fixes
+
+- Resolve deadlocks by narrowing the scope of locks. Contributed by @mechairoi
+
 ### JavaScript APIs
 
 ### Linter
