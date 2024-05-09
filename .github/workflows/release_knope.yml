@@ -234,6 +234,7 @@ jobs:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
   publish-crate:
+    name: Publish crates
     needs: release
     runs-on: ubuntu-latest
     steps:
