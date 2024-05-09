@@ -1,0 +1,75 @@
+---
+source: crates/biome_migrate/tests/spec_tests.rs
+expression: renamedRuleAndNewRule.json
+---
+# Input
+```json
+{
+  "linter": {
+    "rules": {
+      "nursery": {
+        "foo": "error",
+        "test": "error"
+      }
+    }
+  }
+}
+
+```
+
+# Diagnostics
+```
+renamedRuleAndNewRule.json:5:9 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This rule is has been promoted to security/bar.
+  
+    3 │     "rules": {
+    4 │       "nursery": {
+  > 5 │         "foo": "error",
+      │         ^^^^^^^^^^^^^^
+    6 │         "test": "error"
+    7 │       }
+  
+  i Unsafe fix: Move the rule to the new stable group.
+  
+     2  2 │     "linter": {
+     3  3 │       "rules": {
+     4    │ - ······"nursery":·{
+     5    │ - ········"foo":·"error",
+     6    │ - ········"test":·"error"
+        4 │ + ······"nursery":{
+        5 │ + ········"test":·"error"},
+        6 │ + ······"security":{
+        7 │ + ········"bar":·"error"
+     7  8 │         }
+     8  9 │       }
+  
+
+```
+
+```
+renamedRuleAndNewRule.json:6:9 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This rule is has been promoted to security/test.
+  
+    4 │       "nursery": {
+    5 │         "foo": "error",
+  > 6 │         "test": "error"
+      │         ^^^^^^^^^^^^^^^
+    7 │       }
+    8 │     }
+  
+  i Unsafe fix: Move the rule to the new stable group.
+  
+     2  2 │     "linter": {
+     3  3 │       "rules": {
+     4    │ - ······"nursery":·{
+     5    │ - ········"foo":·"error",
+        4 │ + ······"nursery":{
+        5 │ + ········"foo":·"error"},
+        6 │ + ······"security":{
+     6  7 │           "test": "error"
+     7  8 │         }
+  
+
+```

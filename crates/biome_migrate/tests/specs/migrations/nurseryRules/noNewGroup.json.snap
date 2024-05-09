@@ -1,0 +1,43 @@
+---
+source: crates/biome_migrate/tests/spec_tests.rs
+expression: noNewGroup.json
+---
+# Input
+```json
+{
+  "linter": {
+    "rules": {
+      "nursery": {
+        "test": "error"
+      }
+    }
+  }
+}
+
+```
+
+# Diagnostics
+```
+noNewGroup.json:5:9 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This rule is has been promoted to security/test.
+  
+    3 │     "rules": {
+    4 │       "nursery": {
+  > 5 │         "test": "error"
+      │         ^^^^^^^^^^^^^^^
+    6 │       }
+    7 │     }
+  
+  i Unsafe fix: Move the rule to the new stable group.
+  
+     2  2 │     "linter": {
+     3  3 │       "rules": {
+     4    │ - ······"nursery":·{
+        4 │ + ······"nursery":{},
+        5 │ + ······"security":{
+     5  6 │           "test": "error"
+     6  7 │         }
+  
+
+```

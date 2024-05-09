@@ -1,0 +1,10 @@
+{
+  "linter": {
+    "rules": {
+      "nursery": {
+        "foo": "error",
+        "test": "error"
+      }
+    }
+  }
+}

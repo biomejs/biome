@@ -6,6 +6,7 @@ use biome_json_syntax::JsonLanguage;
 
 mod indent_size;
 mod nursery_rules;
+mod rules_to_migrate;
 mod schema;
 
 pub(crate) struct MigrationGroup;
@@ -22,7 +23,7 @@ impl RuleGroup for MigrationGroup {
         registry.record_rule::<IndentSize>();
         // v1.5.0
         registry.record_rule::<Schema>();
-        // v1.7.0
+        // v1.8.0
         registry.record_rule::<NurseryRules>();
     }
 }

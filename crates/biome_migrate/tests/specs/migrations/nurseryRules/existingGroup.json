@@ -1,0 +1,12 @@
+{
+  "linter": {
+    "rules": {
+      "nursery": {
+        "test": "error"
+      },
+      "security": {
+        "existing": "error"
+      }
+    }
+  }
+}
