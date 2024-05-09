@@ -12,6 +12,7 @@ use biome_graphql_syntax::{
     T,
 };
 use biome_parser::parse_lists::ParseNodeList;
+use biome_parser::prelude::TokenSource;
 use biome_parser::{
     parse_lists::ParseSeparatedList, parse_recovery::ParseRecovery, parsed_syntax::ParsedSyntax,
     prelude::ParsedSyntax::*, Parser,
@@ -53,11 +54,15 @@ pub(super) fn parse_implements_interface(p: &mut GraphqlParser) -> ParsedSyntax 
 
     p.bump(T![implements]);
 
-    if p.at(T![&]) {
-        p.bump(T![&]);
-    }
+    // & is optional
+    p.eat(T![&]);
 
+    let position = p.source().position();
     ImplementsInterfaceList.parse_list(p);
+
+    if position == p.source().position() {
+        p.error(expected_named_type(p, p.cur_range()));
+    }
 
     Present(m.complete(p, GRAPHQL_IMPLEMENTS_INTERFACES))
 }
