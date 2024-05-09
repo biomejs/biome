@@ -76,6 +76,7 @@ impl<'app> CliSession<'app> {
             BiomeCommand::Rage(_, daemon_logs, formatter, linter) => {
                 commands::rage::rage(self, daemon_logs, formatter, linter)
             }
+            BiomeCommand::Clean => commands::clean::clean(self),
             BiomeCommand::Start(config_path) => commands::daemon::start(self, config_path),
             BiomeCommand::Stop => commands::daemon::stop(self),
             BiomeCommand::Check {

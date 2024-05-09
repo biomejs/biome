@@ -23,7 +23,7 @@ fn bench_analyzer(criterion: &mut Criterion) {
     let mut libs = vec![];
     libs.extend(all_suites.values().flat_map(|suite| suite.lines()));
 
-    let mut group = criterion.benchmark_group("analyzer");
+    let mut group = criterion.benchmark_group("js_analyzer");
 
     for lib in libs {
         let test_case = TestCase::try_from(lib);
@@ -57,5 +57,5 @@ fn bench_analyzer(criterion: &mut Criterion) {
     group.finish();
 }
 
-criterion_group!(analyzer, bench_analyzer);
-criterion_main!(analyzer);
+criterion_group!(js_analyzer, bench_analyzer);
+criterion_main!(js_analyzer);

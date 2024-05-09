@@ -1434,7 +1434,12 @@
 		"NoDuplicateSelectorsOptions": {
 			"type": "object",
 			"required": ["disallowInList"],
-			"properties": { "disallowInList": { "type": "boolean" } },
+			"properties": {
+				"disallowInList": {
+					"description": "If set to `true` this rule will check for duplicate selectors within selector lists.",
+					"type": "boolean"
+				}
+			},
 			"additionalProperties": false
 		},
 		"Nursery": {
@@ -1509,7 +1514,7 @@
 					]
 				},
 				"noDuplicateSelectors": {
-					"description": "Disallow duplicate selectors.",
+					"description": "Disallow duplicate selectors. This rule checks for two types of duplication:",
 					"anyOf": [
 						{ "$ref": "#/definitions/NoDuplicateSelectorsConfiguration" },
 						{ "type": "null" }
@@ -1585,6 +1590,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noUnknownProperty": {
+					"description": "Disallow unknown properties.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noUnknownSelectorPseudoElement": {
 					"description": "Disallow unknown pseudo-element selectors.",
 					"anyOf": [
@@ -1647,6 +1659,13 @@
 				},
 				"useExplicitLengthCheck": {
 					"description": "Enforce explicitly comparing the length, size, byteLength or byteOffset property of a value.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useFocusableInteractive": {
+					"description": "Elements with an interactive role and interaction handlers must be focusable.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }

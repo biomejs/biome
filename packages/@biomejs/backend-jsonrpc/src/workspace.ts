@@ -945,7 +945,7 @@ export interface Nursery {
 	 */
 	noDuplicateJsonKeys?: RuleConfiguration_for_Null;
 	/**
-	 * Disallow duplicate selectors.
+	 * Disallow duplicate selectors. This rule checks for two types of duplication:
 	 */
 	noDuplicateSelectors?: RuleConfiguration_for_NoDuplicateSelectorsOptions;
 	/**
@@ -989,6 +989,10 @@ export interface Nursery {
 	 */
 	noUnknownFunction?: RuleConfiguration_for_Null;
 	/**
+	 * Disallow unknown properties.
+	 */
+	noUnknownProperty?: RuleConfiguration_for_Null;
+	/**
 	 * Disallow unknown pseudo-element selectors.
 	 */
 	noUnknownSelectorPseudoElement?: RuleConfiguration_for_Null;
@@ -1028,6 +1032,10 @@ export interface Nursery {
 	 * Enforce explicitly comparing the length, size, byteLength or byteOffset property of a value.
 	 */
 	useExplicitLengthCheck?: RuleConfiguration_for_Null;
+	/**
+	 * Elements with an interactive role and interaction handlers must be focusable.
+	 */
+	useFocusableInteractive?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow a missing generic family keyword within font families.
 	 */
@@ -1682,6 +1690,9 @@ export interface NoCssEmptyBlockOptions {
 	allowComments: boolean;
 }
 export interface NoDuplicateSelectorsOptions {
+	/**
+	 * If set to `true` this rule will check for duplicate selectors within selector lists.
+	 */
 	disallowInList: boolean;
 }
 /**
@@ -2037,6 +2048,7 @@ export type Category =
 	| "lint/nursery/noTypeOnlyImportAttributes"
 	| "lint/nursery/noUndeclaredDependencies"
 	| "lint/nursery/noUnknownFunction"
+	| "lint/nursery/noUnknownProperty"
 	| "lint/nursery/noUnknownSelectorPseudoElement"
 	| "lint/nursery/noUnknownUnit"
 	| "lint/nursery/noUnmatchableAnbSelector"
@@ -2044,9 +2056,10 @@ export type Category =
 	| "lint/nursery/noUselessUndefinedInitialization"
 	| "lint/nursery/useArrayLiterals"
 	| "lint/nursery/useBiomeSuppressionComment"
-	| "lint/nursery/useExplicitLengthCheck"
 	| "lint/nursery/useConsistentBuiltinInstantiation"
 	| "lint/nursery/useDefaultSwitchClause"
+	| "lint/nursery/useExplicitLengthCheck"
+	| "lint/nursery/useFocusableInteractive"
 	| "lint/nursery/useGenericFontNames"
 	| "lint/nursery/useImportRestrictions"
 	| "lint/nursery/useSortedClasses"

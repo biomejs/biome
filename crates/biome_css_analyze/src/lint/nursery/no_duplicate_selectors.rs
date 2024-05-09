@@ -19,13 +19,13 @@ declare_rule! {
     /// Disallow duplicate selectors. This rule checks for two types of duplication:
     /// - Duplication of a selector list within a stylesheet, e.g. `a, b {} a, b {}`. Duplicates are found even if the selectors come in different orders or have different spacing, e.g. `a d, b > c {} b>c, a d {}`.
     /// - Duplication of a single selector with a rule's selector list, e.g. `a, b, a {}`.  (See options below, this is disabled by default)
-    /// 
+    ///
     /// The same selector is allowed to repeat in the following circumstances:
     /// - It is used in different selector lists, e.g. `a {} a, b {}`.
     /// - The duplicates are in rules with different parent nodes, e.g. inside and outside of a media query.
-    /// 
+    ///
     /// This rule resolves nested selectors. So `a b {} a { & b {} }` counts as a problem, because the resolved selectors end up with a duplicate.
-    /// 
+    ///
     /// ## Examples
     ///
     /// ### Invalid
@@ -56,9 +56,9 @@ declare_rule! {
     ///     }
     /// }
     /// ```
-    /// 
+    ///
     /// Will result in the following failing:
-    /// 
+    ///
     /// ```css, ignore
     /// input, textarea {}; textarea {}
     /// ```
@@ -84,7 +84,7 @@ declare_node_union! {
 }
 
 /// Object containing the resolved selector and the relative node for that resolved selector.
-/// 
+///
 /// This struct has a hash function which returns the hash of `selector_node`.
 #[derive(Debug, Eq)]
 struct ResolvedSelector {
@@ -127,26 +127,30 @@ impl Rule for NoDuplicateSelectors {
         let mut output: Vec<DuplicateSelector> = vec![];
 
         if options.disallow_in_list {
-            let selectors = node.rules().syntax().descendants().filter_map(|x| {
-                AnySelectorLike::cast_ref(&x)
-            });
+            let selectors = node
+                .rules()
+                .syntax()
+                .descendants()
+                .filter_map(|x| AnySelectorLike::cast_ref(&x));
 
-            for (selector, selector_list) in selectors
-                .filter_map(|selector| {
-                    let parent = selector.clone().into_syntax().parent()?;
-                    if parent.clone().cast::<CssComplexSelector>().is_some() || parent.clone().cast::<CssRelativeSelector>().is_some() {
-                        return None;
-                    }
-                    Some((selector, parent))
-                }) {
-
+            for (selector, selector_list) in selectors.filter_map(|selector| {
+                let parent = selector.clone().into_syntax().parent()?;
+                if parent.clone().cast::<CssComplexSelector>().is_some()
+                    || parent.clone().cast::<CssRelativeSelector>().is_some()
+                {
+                    return None;
+                }
+                Some((selector, parent))
+            }) {
                 let Some(this_rule) = selector_list.parent() else {
                     continue;
                 };
 
                 let selector_text = match selector.clone() {
-                    AnySelectorLike::AnyCssSelector(selector) => normalize_complex_selector(selector),
-                    AnySelectorLike::AnyCssRelativeSelector(selector) => selector.text()
+                    AnySelectorLike::AnyCssSelector(selector) => {
+                        normalize_complex_selector(selector)
+                    }
+                    AnySelectorLike::AnyCssRelativeSelector(selector) => selector.text(),
                 };
 
                 for r in resolve_nested_selectors(selector_text, this_rule) {
@@ -168,16 +172,15 @@ impl Rule for NoDuplicateSelectors {
             }
         } else {
             // Union node with CssSelectorList and CssRelativeSelectorList does not have overlapping From/Into
-            let selector_lists = node.rules().syntax().descendants().filter(|x| 
-                x.clone().cast::<CssSelectorList>().is_some() || x.clone().cast::<CssRelativeSelectorList>().is_some()
-            );
+            let selector_lists = node.rules().syntax().descendants().filter(|x| {
+                x.clone().cast::<CssSelectorList>().is_some()
+                    || x.clone().cast::<CssRelativeSelectorList>().is_some()
+            });
 
-            for (selector_list, rule) in selector_lists
-                .filter_map(|selector_list|{
-                    let parent = selector_list.clone().parent()?;
-                    Some((selector_list, parent))
-                })
-            {
+            for (selector_list, rule) in selector_lists.filter_map(|selector_list| {
+                let parent = selector_list.clone().parent()?;
+                Some((selector_list, parent))
+            }) {
                 let mut this_list_resolved_list: HashSet<ResolvedSelector> = HashSet::new();
 
                 let mut selector_list_mapped: Vec<String> = selector_list
@@ -239,8 +242,7 @@ impl Rule for NoDuplicateSelectors {
             duplicate.text()
         } else if let Some(duplicate) = CssRelativeSelectorList::cast_ref(&node.duplicate) {
             duplicate.text()
-        } 
-        else {
+        } else {
             node.duplicate.to_string()
         };
 
@@ -266,29 +268,29 @@ impl Rule for NoDuplicateSelectors {
 /// ```css, ignore
 /// a { b { c { /* declaration */ } } }
 /// ```
-/// 
+///
 /// is resolved to:
 /// ```css, ignore
 /// a b c {
 ///     /* declaration */
 /// }
 /// ```
-/// 
+///
 /// When trying to resolve this_rule of type [AnyCssAtRule], this function will generate a hash to replace the selector name:
 /// ```css, ignore
 /// @media print {
 ///     selector { /* declaration */}
 /// }
 /// ```
-/// 
+///
 /// is resolved to:
 /// ```css, ignore
 /// <hash> selector { /* declaration */}
 /// ```
-/// 
+///
 /// [AnyCssAtRule] is resolved based on the text range.
 /// The same rule will not be resolved to the same hash because these are considered to belong to a separate context.
-/// 
+///
 /// Returns the resolved selector as a string.
 fn resolve_nested_selectors(selector: String, this_rule: CssSyntaxNode) -> Vec<String> {
     let mut parent_selectors: Vec<String> = vec![];
@@ -306,10 +308,22 @@ fn resolve_nested_selectors(selector: String, this_rule: CssSyntaxNode) -> Vec<S
             } else if let Some(parent_rule) = AnyCssRule::cast_ref(parent_rule) {
                 match parent_rule {
                     AnyCssRule::CssNestedQualifiedRule(parent_rule) => {
-                        parent_selectors.extend(parent_rule.prelude().into_iter().filter_map(|selector| selector.ok()).map(|selector|selector.text()));
+                        parent_selectors.extend(
+                            parent_rule
+                                .prelude()
+                                .into_iter()
+                                .filter_map(|selector| selector.ok())
+                                .map(|selector| selector.text()),
+                        );
                     }
                     AnyCssRule::CssQualifiedRule(parent_rule) => {
-                        parent_selectors.extend(parent_rule.prelude().into_iter().filter_map(|selector| selector.ok()).map(|selector|selector.text()));
+                        parent_selectors.extend(
+                            parent_rule
+                                .prelude()
+                                .into_iter()
+                                .filter_map(|selector| selector.ok())
+                                .map(|selector| selector.text()),
+                        );
                     }
                     _ => {
                         // Bogus rules are not handled
@@ -349,16 +363,16 @@ fn resolve_nested_selectors(selector: String, this_rule: CssSyntaxNode) -> Vec<S
 
 /// Checks if [AnyCssSelector] can be cast to [CssComplexSelector].
 /// If it is able to cast, trim the combinator, e.g.
-/// 
+///
 /// ``` css, ignore
 /// a > b, c  > d { /* declaration */ }
 /// ```
-/// 
+///
 /// is normalized to:
 /// ``` css, ignore
 /// a>b, c>d { /* declaration */ }
 /// ```
-/// 
+///
 /// It will return `selector.text()` if it is unable to cast.
 /// Returns the selector as a string.
 fn normalize_complex_selector(selector: AnyCssSelector) -> String {

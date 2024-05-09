@@ -2,9 +2,8 @@ use crate::test_case::TestCase;
 use biome_analyze::{AnalysisFilter, AnalyzerOptions, ControlFlow, Never, RuleCategories};
 use biome_css_formatter::context::{CssFormatContext, CssFormatOptions};
 use biome_css_parser::CssParserOptions;
-use biome_css_syntax::CssSyntaxNode;
+use biome_css_syntax::{CssRoot, CssSyntaxNode};
 use biome_formatter::{FormatResult, Formatted, PrintResult, Printed};
-use biome_js_analyze::analyze;
 use biome_js_formatter::context::{JsFormatContext, JsFormatOptions};
 use biome_js_parser::JsParserOptions;
 use biome_js_syntax::{AnyJsRoot, JsFileSource, JsSyntaxNode};
@@ -88,7 +87,7 @@ impl Parsed {
                 Some(FormatNode::JavaScript(parse.syntax(), *source_type))
             }
             Parsed::Json(parse) => Some(FormatNode::Json(parse.syntax())),
-            Parsed::Css(_) => None,
+            Parsed::Css(parse) => Some(FormatNode::Css(parse.syntax())),
         }
     }
 
@@ -96,7 +95,7 @@ impl Parsed {
         match self {
             Parsed::JavaScript(parse, _) => Some(Analyze::JavaScript(parse.tree())),
             Parsed::Json(_) => None,
-            Parsed::Css(_) => None,
+            Parsed::Css(parse) => Some(Analyze::Css(parse.tree())),
         }
     }
 
@@ -150,6 +149,7 @@ impl FormattedNode {
 
 pub enum Analyze {
     JavaScript(AnyJsRoot),
+    Css(CssRoot),
 }
 
 impl Analyze {
@@ -161,7 +161,7 @@ impl Analyze {
                     ..AnalysisFilter::default()
                 };
                 let options = AnalyzerOptions::default();
-                analyze(
+                biome_js_analyze::analyze(
                     root,
                     filter,
                     &options,
@@ -173,6 +173,18 @@ impl Analyze {
                         ControlFlow::<Never>::Continue(())
                     },
                 );
+            }
+            Analyze::Css(root) => {
+                let filter = AnalysisFilter {
+                    categories: RuleCategories::SYNTAX | RuleCategories::LINT,
+                    ..AnalysisFilter::default()
+                };
+                let options = AnalyzerOptions::default();
+                biome_css_analyze::analyze(root, filter, &options, |event| {
+                    black_box(event.diagnostic());
+                    black_box(event.actions());
+                    ControlFlow::<Never>::Continue(())
+                });
             }
         }
     }

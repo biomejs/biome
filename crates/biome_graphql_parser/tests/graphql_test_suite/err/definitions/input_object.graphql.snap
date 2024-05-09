@@ -1,0 +1,965 @@
+---
+source: crates/biome_graphql_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+```graphql
+input Point2D
+  x: Float
+  y: Float
+}
+
+input Point2D
+  x: Float
+  y: Float
+
+input Point2D {
+
+input Point2D @deprecated {
+	x: Float
+}
+
+input Point2D {
+  x: = 0
+  y: @deprecated
+}
+
+input Point2D {
+  x = 0
+  y: @deprecated
+}
+
+input Point2D {
+  = 0
+  : @
+}
+
+input Point2D {
+  x
+  y
+}
+
+input Point2D {
+	=
+  : Float
+}
+
+iput Point2D {
+	x: Float
+	y: Float
+}
+
+```
+
+## AST
+
+```
+GraphqlRoot {
+    bom_token: missing (optional),
+    definitions: GraphqlDefinitionList [
+        GraphqlInputObjectTypeDefinition {
+            description: missing (optional),
+            input_token: INPUT_KW@0..6 "input" [] [Whitespace(" ")],
+            name: GraphqlName {
+                value_token: GRAPHQL_NAME@6..13 "Point2D" [] [],
+            },
+            directives: GraphqlDirectiveList [],
+            input_fields: GraphqlInputFieldsDefinition {
+                l_curly_token: missing (required),
+                fields: GraphqlInputFieldList [
+                    GraphqlInputValueDefinition {
+                        description: missing (optional),
+                        name: GraphqlName {
+                            value_token: GRAPHQL_NAME@13..17 "x" [Newline("\n"), Whitespace("  ")] [],
+                        },
+                        colon_token: COLON@17..19 ":" [] [Whitespace(" ")],
+                        ty: GraphqlNamedType {
+                            name: GraphqlName {
+                                value_token: GRAPHQL_NAME@19..24 "Float" [] [],
+                            },
+                        },
+                        default: missing (optional),
+                        directives: GraphqlDirectiveList [],
+                    },
+                    GraphqlInputValueDefinition {
+                        description: missing (optional),
+                        name: GraphqlName {
+                            value_token: GRAPHQL_NAME@24..28 "y" [Newline("\n"), Whitespace("  ")] [],
+                        },
+                        colon_token: COLON@28..30 ":" [] [Whitespace(" ")],
+                        ty: GraphqlNamedType {
+                            name: GraphqlName {
+                                value_token: GRAPHQL_NAME@30..35 "Float" [] [],
+                            },
+                        },
+                        default: missing (optional),
+                        directives: GraphqlDirectiveList [],
+                    },
+                ],
+                r_curly_token: R_CURLY@35..37 "}" [Newline("\n")] [],
+            },
+        },
+        GraphqlInputObjectTypeDefinition {
+            description: missing (optional),
+            input_token: INPUT_KW@37..45 "input" [Newline("\n"), Newline("\n")] [Whitespace(" ")],
+            name: GraphqlName {
+                value_token: GRAPHQL_NAME@45..52 "Point2D" [] [],
+            },
+            directives: GraphqlDirectiveList [],
+            input_fields: GraphqlInputFieldsDefinition {
+                l_curly_token: missing (required),
+                fields: GraphqlInputFieldList [
+                    GraphqlInputValueDefinition {
+                        description: missing (optional),
+                        name: GraphqlName {
+                            value_token: GRAPHQL_NAME@52..56 "x" [Newline("\n"), Whitespace("  ")] [],
+                        },
+                        colon_token: COLON@56..58 ":" [] [Whitespace(" ")],
+                        ty: GraphqlNamedType {
+                            name: GraphqlName {
+                                value_token: GRAPHQL_NAME@58..63 "Float" [] [],
+                            },
+                        },
+                        default: missing (optional),
+                        directives: GraphqlDirectiveList [],
+                    },
+                    GraphqlInputValueDefinition {
+                        description: missing (optional),
+                        name: GraphqlName {
+                            value_token: GRAPHQL_NAME@63..67 "y" [Newline("\n"), Whitespace("  ")] [],
+                        },
+                        colon_token: COLON@67..69 ":" [] [Whitespace(" ")],
+                        ty: GraphqlNamedType {
+                            name: GraphqlName {
+                                value_token: GRAPHQL_NAME@69..74 "Float" [] [],
+                            },
+                        },
+                        default: missing (optional),
+                        directives: GraphqlDirectiveList [],
+                    },
+                ],
+                r_curly_token: missing (required),
+            },
+        },
+        GraphqlInputObjectTypeDefinition {
+            description: missing (optional),
+            input_token: INPUT_KW@74..82 "input" [Newline("\n"), Newline("\n")] [Whitespace(" ")],
+            name: GraphqlName {
+                value_token: GRAPHQL_NAME@82..90 "Point2D" [] [Whitespace(" ")],
+            },
+            directives: GraphqlDirectiveList [],
+            input_fields: GraphqlInputFieldsDefinition {
+                l_curly_token: L_CURLY@90..91 "{" [] [],
+                fields: GraphqlInputFieldList [],
+                r_curly_token: missing (required),
+            },
+        },
+        GraphqlInputObjectTypeDefinition {
+            description: missing (optional),
+            input_token: INPUT_KW@91..99 "input" [Newline("\n"), Newline("\n")] [Whitespace(" ")],
+            name: GraphqlName {
+                value_token: GRAPHQL_NAME@99..107 "Point2D" [] [Whitespace(" ")],
+            },
+            directives: GraphqlDirectiveList [
+                GraphqlDirective {
+                    at_token: AT@107..108 "@" [] [],
+                    name: GraphqlName {
+                        value_token: GRAPHQL_NAME@108..119 "deprecated" [] [Whitespace(" ")],
+                    },
+                    arguments: missing (optional),
+                },
+            ],
+            input_fields: GraphqlInputFieldsDefinition {
+                l_curly_token: L_CURLY@119..120 "{" [] [],
+                fields: GraphqlInputFieldList [
+                    GraphqlInputValueDefinition {
+                        description: missing (optional),
+                        name: GraphqlName {
+                            value_token: GRAPHQL_NAME@120..123 "x" [Newline("\n"), Whitespace("\t")] [],
+                        },
+                        colon_token: COLON@123..125 ":" [] [Whitespace(" ")],
+                        ty: GraphqlNamedType {
+                            name: GraphqlName {
+                                value_token: GRAPHQL_NAME@125..130 "Float" [] [],
+                            },
+                        },
+                        default: missing (optional),
+                        directives: GraphqlDirectiveList [],
+                    },
+                ],
+                r_curly_token: R_CURLY@130..132 "}" [Newline("\n")] [],
+            },
+        },
+        GraphqlInputObjectTypeDefinition {
+            description: missing (optional),
+            input_token: INPUT_KW@132..140 "input" [Newline("\n"), Newline("\n")] [Whitespace(" ")],
+            name: GraphqlName {
+                value_token: GRAPHQL_NAME@140..148 "Point2D" [] [Whitespace(" ")],
+            },
+            directives: GraphqlDirectiveList [],
+            input_fields: GraphqlInputFieldsDefinition {
+                l_curly_token: L_CURLY@148..149 "{" [] [],
+                fields: GraphqlInputFieldList [
+                    GraphqlInputValueDefinition {
+                        description: missing (optional),
+                        name: GraphqlName {
+                            value_token: GRAPHQL_NAME@149..153 "x" [Newline("\n"), Whitespace("  ")] [],
+                        },
+                        colon_token: COLON@153..155 ":" [] [Whitespace(" ")],
+                        ty: missing (required),
+                        default: GraphqlDefaultValue {
+                            eq_token: EQ@155..157 "=" [] [Whitespace(" ")],
+                            value: GraphqlIntValue {
+                                graphql_int_literal_token: GRAPHQL_INT_LITERAL@157..158 "0" [] [],
+                            },
+                        },
+                        directives: GraphqlDirectiveList [],
+                    },
+                    GraphqlInputValueDefinition {
+                        description: missing (optional),
+                        name: GraphqlName {
+                            value_token: GRAPHQL_NAME@158..162 "y" [Newline("\n"), Whitespace("  ")] [],
+                        },
+                        colon_token: COLON@162..164 ":" [] [Whitespace(" ")],
+                        ty: missing (required),
+                        default: missing (optional),
+                        directives: GraphqlDirectiveList [
+                            GraphqlDirective {
+                                at_token: AT@164..165 "@" [] [],
+                                name: GraphqlName {
+                                    value_token: GRAPHQL_NAME@165..175 "deprecated" [] [],
+                                },
+                                arguments: missing (optional),
+                            },
+                        ],
+                    },
+                ],
+                r_curly_token: R_CURLY@175..177 "}" [Newline("\n")] [],
+            },
+        },
+        GraphqlBogusDefinition {
+            items: [
+                INPUT_KW@177..185 "input" [Newline("\n"), Newline("\n")] [Whitespace(" ")],
+                GraphqlName {
+                    value_token: GRAPHQL_NAME@185..193 "Point2D" [] [Whitespace(" ")],
+                },
+                GraphqlDirectiveList [],
+                GraphqlBogus {
+                    items: [
+                        L_CURLY@193..194 "{" [] [],
+                        GraphqlBogus {
+                            items: [
+                                GraphqlBogus {
+                                    items: [
+                                        GRAPHQL_NAME@194..199 "x" [Newline("\n"), Whitespace("  ")] [Whitespace(" ")],
+                                        EQ@199..201 "=" [] [Whitespace(" ")],
+                                        GRAPHQL_INT_LITERAL@201..202 "0" [] [],
+                                    ],
+                                },
+                                GraphqlInputValueDefinition {
+                                    description: missing (optional),
+                                    name: GraphqlName {
+                                        value_token: GRAPHQL_NAME@202..206 "y" [Newline("\n"), Whitespace("  ")] [],
+                                    },
+                                    colon_token: COLON@206..208 ":" [] [Whitespace(" ")],
+                                    ty: missing (required),
+                                    default: missing (optional),
+                                    directives: GraphqlDirectiveList [
+                                        GraphqlDirective {
+                                            at_token: AT@208..209 "@" [] [],
+                                            name: GraphqlName {
+                                                value_token: GRAPHQL_NAME@209..219 "deprecated" [] [],
+                                            },
+                                            arguments: missing (optional),
+                                        },
+                                    ],
+                                },
+                            ],
+                        },
+                        R_CURLY@219..221 "}" [Newline("\n")] [],
+                    ],
+                },
+            ],
+        },
+        GraphqlBogusDefinition {
+            items: [
+                INPUT_KW@221..229 "input" [Newline("\n"), Newline("\n")] [Whitespace(" ")],
+                GraphqlName {
+                    value_token: GRAPHQL_NAME@229..237 "Point2D" [] [Whitespace(" ")],
+                },
+                GraphqlDirectiveList [],
+                GraphqlBogus {
+                    items: [
+                        L_CURLY@237..238 "{" [] [],
+                        GraphqlBogus {
+                            items: [
+                                GraphqlBogus {
+                                    items: [
+                                        EQ@238..243 "=" [Newline("\n"), Whitespace("  ")] [Whitespace(" ")],
+                                        GRAPHQL_INT_LITERAL@243..244 "0" [] [],
+                                    ],
+                                },
+                                GraphqlInputValueDefinition {
+                                    description: missing (optional),
+                                    name: missing (required),
+                                    colon_token: COLON@244..249 ":" [Newline("\n"), Whitespace("  ")] [Whitespace(" ")],
+                                    ty: missing (required),
+                                    default: missing (optional),
+                                    directives: GraphqlDirectiveList [
+                                        GraphqlDirective {
+                                            at_token: AT@249..250 "@" [] [],
+                                            name: missing (required),
+                                            arguments: missing (optional),
+                                        },
+                                    ],
+                                },
+                            ],
+                        },
+                        R_CURLY@250..252 "}" [Newline("\n")] [],
+                    ],
+                },
+            ],
+        },
+        GraphqlInputObjectTypeDefinition {
+            description: missing (optional),
+            input_token: INPUT_KW@252..260 "input" [Newline("\n"), Newline("\n")] [Whitespace(" ")],
+            name: GraphqlName {
+                value_token: GRAPHQL_NAME@260..268 "Point2D" [] [Whitespace(" ")],
+            },
+            directives: GraphqlDirectiveList [],
+            input_fields: GraphqlInputFieldsDefinition {
+                l_curly_token: L_CURLY@268..269 "{" [] [],
+                fields: GraphqlInputFieldList [
+                    GraphqlInputValueDefinition {
+                        description: missing (optional),
+                        name: GraphqlName {
+                            value_token: GRAPHQL_NAME@269..273 "x" [Newline("\n"), Whitespace("  ")] [],
+                        },
+                        colon_token: missing (required),
+                        ty: GraphqlNamedType {
+                            name: GraphqlName {
+                                value_token: GRAPHQL_NAME@273..277 "y" [Newline("\n"), Whitespace("  ")] [],
+                            },
+                        },
+                        default: missing (optional),
+                        directives: GraphqlDirectiveList [],
+                    },
+                ],
+                r_curly_token: R_CURLY@277..279 "}" [Newline("\n")] [],
+            },
+        },
+        GraphqlBogusDefinition {
+            items: [
+                INPUT_KW@279..287 "input" [Newline("\n"), Newline("\n")] [Whitespace(" ")],
+                GraphqlName {
+                    value_token: GRAPHQL_NAME@287..295 "Point2D" [] [Whitespace(" ")],
+                },
+                GraphqlDirectiveList [],
+                GraphqlBogus {
+                    items: [
+                        L_CURLY@295..296 "{" [] [],
+                        GraphqlBogus {
+                            items: [
+                                GraphqlBogus {
+                                    items: [
+                                        EQ@296..299 "=" [Newline("\n"), Whitespace("\t")] [],
+                                    ],
+                                },
+                                GraphqlInputValueDefinition {
+                                    description: missing (optional),
+                                    name: missing (required),
+                                    colon_token: COLON@299..304 ":" [Newline("\n"), Whitespace("  ")] [Whitespace(" ")],
+                                    ty: GraphqlNamedType {
+                                        name: GraphqlName {
+                                            value_token: GRAPHQL_NAME@304..309 "Float" [] [],
+                                        },
+                                    },
+                                    default: missing (optional),
+                                    directives: GraphqlDirectiveList [],
+                                },
+                            ],
+                        },
+                        R_CURLY@309..311 "}" [Newline("\n")] [],
+                    ],
+                },
+            ],
+        },
+        GraphqlBogusDefinition {
+            items: [
+                GRAPHQL_NAME@311..318 "iput" [Newline("\n"), Newline("\n")] [Whitespace(" ")],
+                GRAPHQL_NAME@318..326 "Point2D" [] [Whitespace(" ")],
+            ],
+        },
+        GraphqlSelectionSet {
+            l_curly_token: L_CURLY@326..327 "{" [] [],
+            selections: GraphqlSelectionList [
+                GraphqlField {
+                    alias: GraphqlAlias {
+                        value: GraphqlName {
+                            value_token: GRAPHQL_NAME@327..330 "x" [Newline("\n"), Whitespace("\t")] [],
+                        },
+                        colon_token: COLON@330..332 ":" [] [Whitespace(" ")],
+                    },
+                    name: GraphqlName {
+                        value_token: GRAPHQL_NAME@332..337 "Float" [] [],
+                    },
+                    arguments: missing (optional),
+                    directives: GraphqlDirectiveList [],
+                    selection_set: missing (optional),
+                },
+                GraphqlField {
+                    alias: GraphqlAlias {
+                        value: GraphqlName {
+                            value_token: GRAPHQL_NAME@337..340 "y" [Newline("\n"), Whitespace("\t")] [],
+                        },
+                        colon_token: COLON@340..342 ":" [] [Whitespace(" ")],
+                    },
+                    name: GraphqlName {
+                        value_token: GRAPHQL_NAME@342..347 "Float" [] [],
+                    },
+                    arguments: missing (optional),
+                    directives: GraphqlDirectiveList [],
+                    selection_set: missing (optional),
+                },
+            ],
+            r_curly_token: R_CURLY@347..349 "}" [Newline("\n")] [],
+        },
+    ],
+    eof_token: EOF@349..350 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: GRAPHQL_ROOT@0..350
+  0: (empty)
+  1: GRAPHQL_DEFINITION_LIST@0..349
+    0: GRAPHQL_INPUT_OBJECT_TYPE_DEFINITION@0..37
+      0: (empty)
+      1: INPUT_KW@0..6 "input" [] [Whitespace(" ")]
+      2: GRAPHQL_NAME@6..13
+        0: GRAPHQL_NAME@6..13 "Point2D" [] []
+      3: GRAPHQL_DIRECTIVE_LIST@13..13
+      4: GRAPHQL_INPUT_FIELDS_DEFINITION@13..37
+        0: (empty)
+        1: GRAPHQL_INPUT_FIELD_LIST@13..35
+          0: GRAPHQL_INPUT_VALUE_DEFINITION@13..24
+            0: (empty)
+            1: GRAPHQL_NAME@13..17
+              0: GRAPHQL_NAME@13..17 "x" [Newline("\n"), Whitespace("  ")] []
+            2: COLON@17..19 ":" [] [Whitespace(" ")]
+            3: GRAPHQL_NAMED_TYPE@19..24
+              0: GRAPHQL_NAME@19..24
+                0: GRAPHQL_NAME@19..24 "Float" [] []
+            4: (empty)
+            5: GRAPHQL_DIRECTIVE_LIST@24..24
+          1: GRAPHQL_INPUT_VALUE_DEFINITION@24..35
+            0: (empty)
+            1: GRAPHQL_NAME@24..28
+              0: GRAPHQL_NAME@24..28 "y" [Newline("\n"), Whitespace("  ")] []
+            2: COLON@28..30 ":" [] [Whitespace(" ")]
+            3: GRAPHQL_NAMED_TYPE@30..35
+              0: GRAPHQL_NAME@30..35
+                0: GRAPHQL_NAME@30..35 "Float" [] []
+            4: (empty)
+            5: GRAPHQL_DIRECTIVE_LIST@35..35
+        2: R_CURLY@35..37 "}" [Newline("\n")] []
+    1: GRAPHQL_INPUT_OBJECT_TYPE_DEFINITION@37..74
+      0: (empty)
+      1: INPUT_KW@37..45 "input" [Newline("\n"), Newline("\n")] [Whitespace(" ")]
+      2: GRAPHQL_NAME@45..52
+        0: GRAPHQL_NAME@45..52 "Point2D" [] []
+      3: GRAPHQL_DIRECTIVE_LIST@52..52
+      4: GRAPHQL_INPUT_FIELDS_DEFINITION@52..74
+        0: (empty)
+        1: GRAPHQL_INPUT_FIELD_LIST@52..74
+          0: GRAPHQL_INPUT_VALUE_DEFINITION@52..63
+            0: (empty)
+            1: GRAPHQL_NAME@52..56
+              0: GRAPHQL_NAME@52..56 "x" [Newline("\n"), Whitespace("  ")] []
+            2: COLON@56..58 ":" [] [Whitespace(" ")]
+            3: GRAPHQL_NAMED_TYPE@58..63
+              0: GRAPHQL_NAME@58..63
+                0: GRAPHQL_NAME@58..63 "Float" [] []
+            4: (empty)
+            5: GRAPHQL_DIRECTIVE_LIST@63..63
+          1: GRAPHQL_INPUT_VALUE_DEFINITION@63..74
+            0: (empty)
+            1: GRAPHQL_NAME@63..67
+              0: GRAPHQL_NAME@63..67 "y" [Newline("\n"), Whitespace("  ")] []
+            2: COLON@67..69 ":" [] [Whitespace(" ")]
+            3: GRAPHQL_NAMED_TYPE@69..74
+              0: GRAPHQL_NAME@69..74
+                0: GRAPHQL_NAME@69..74 "Float" [] []
+            4: (empty)
+            5: GRAPHQL_DIRECTIVE_LIST@74..74
+        2: (empty)
+    2: GRAPHQL_INPUT_OBJECT_TYPE_DEFINITION@74..91
+      0: (empty)
+      1: INPUT_KW@74..82 "input" [Newline("\n"), Newline("\n")] [Whitespace(" ")]
+      2: GRAPHQL_NAME@82..90
+        0: GRAPHQL_NAME@82..90 "Point2D" [] [Whitespace(" ")]
+      3: GRAPHQL_DIRECTIVE_LIST@90..90
+      4: GRAPHQL_INPUT_FIELDS_DEFINITION@90..91
+        0: L_CURLY@90..91 "{" [] []
+        1: GRAPHQL_INPUT_FIELD_LIST@91..91
+        2: (empty)
+    3: GRAPHQL_INPUT_OBJECT_TYPE_DEFINITION@91..132
+      0: (empty)
+      1: INPUT_KW@91..99 "input" [Newline("\n"), Newline("\n")] [Whitespace(" ")]
+      2: GRAPHQL_NAME@99..107
+        0: GRAPHQL_NAME@99..107 "Point2D" [] [Whitespace(" ")]
+      3: GRAPHQL_DIRECTIVE_LIST@107..119
+        0: GRAPHQL_DIRECTIVE@107..119
+          0: AT@107..108 "@" [] []
+          1: GRAPHQL_NAME@108..119
+            0: GRAPHQL_NAME@108..119 "deprecated" [] [Whitespace(" ")]
+          2: (empty)
+      4: GRAPHQL_INPUT_FIELDS_DEFINITION@119..132
+        0: L_CURLY@119..120 "{" [] []
+        1: GRAPHQL_INPUT_FIELD_LIST@120..130
+          0: GRAPHQL_INPUT_VALUE_DEFINITION@120..130
+            0: (empty)
+            1: GRAPHQL_NAME@120..123
+              0: GRAPHQL_NAME@120..123 "x" [Newline("\n"), Whitespace("\t")] []
+            2: COLON@123..125 ":" [] [Whitespace(" ")]
+            3: GRAPHQL_NAMED_TYPE@125..130
+              0: GRAPHQL_NAME@125..130
+                0: GRAPHQL_NAME@125..130 "Float" [] []
+            4: (empty)
+            5: GRAPHQL_DIRECTIVE_LIST@130..130
+        2: R_CURLY@130..132 "}" [Newline("\n")] []
+    4: GRAPHQL_INPUT_OBJECT_TYPE_DEFINITION@132..177
+      0: (empty)
+      1: INPUT_KW@132..140 "input" [Newline("\n"), Newline("\n")] [Whitespace(" ")]
+      2: GRAPHQL_NAME@140..148
+        0: GRAPHQL_NAME@140..148 "Point2D" [] [Whitespace(" ")]
+      3: GRAPHQL_DIRECTIVE_LIST@148..148
+      4: GRAPHQL_INPUT_FIELDS_DEFINITION@148..177
+        0: L_CURLY@148..149 "{" [] []
+        1: GRAPHQL_INPUT_FIELD_LIST@149..175
+          0: GRAPHQL_INPUT_VALUE_DEFINITION@149..158
+            0: (empty)
+            1: GRAPHQL_NAME@149..153
+              0: GRAPHQL_NAME@149..153 "x" [Newline("\n"), Whitespace("  ")] []
+            2: COLON@153..155 ":" [] [Whitespace(" ")]
+            3: (empty)
+            4: GRAPHQL_DEFAULT_VALUE@155..158
+              0: EQ@155..157 "=" [] [Whitespace(" ")]
+              1: GRAPHQL_INT_VALUE@157..158
+                0: GRAPHQL_INT_LITERAL@157..158 "0" [] []
+            5: GRAPHQL_DIRECTIVE_LIST@158..158
+          1: GRAPHQL_INPUT_VALUE_DEFINITION@158..175
+            0: (empty)
+            1: GRAPHQL_NAME@158..162
+              0: GRAPHQL_NAME@158..162 "y" [Newline("\n"), Whitespace("  ")] []
+            2: COLON@162..164 ":" [] [Whitespace(" ")]
+            3: (empty)
+            4: (empty)
+            5: GRAPHQL_DIRECTIVE_LIST@164..175
+              0: GRAPHQL_DIRECTIVE@164..175
+                0: AT@164..165 "@" [] []
+                1: GRAPHQL_NAME@165..175
+                  0: GRAPHQL_NAME@165..175 "deprecated" [] []
+                2: (empty)
+        2: R_CURLY@175..177 "}" [Newline("\n")] []
+    5: GRAPHQL_BOGUS_DEFINITION@177..221
+      0: INPUT_KW@177..185 "input" [Newline("\n"), Newline("\n")] [Whitespace(" ")]
+      1: GRAPHQL_NAME@185..193
+        0: GRAPHQL_NAME@185..193 "Point2D" [] [Whitespace(" ")]
+      2: GRAPHQL_DIRECTIVE_LIST@193..193
+      3: GRAPHQL_BOGUS@193..221
+        0: L_CURLY@193..194 "{" [] []
+        1: GRAPHQL_BOGUS@194..219
+          0: GRAPHQL_BOGUS@194..202
+            0: GRAPHQL_NAME@194..199 "x" [Newline("\n"), Whitespace("  ")] [Whitespace(" ")]
+            1: EQ@199..201 "=" [] [Whitespace(" ")]
+            2: GRAPHQL_INT_LITERAL@201..202 "0" [] []
+          1: GRAPHQL_INPUT_VALUE_DEFINITION@202..219
+            0: (empty)
+            1: GRAPHQL_NAME@202..206
+              0: GRAPHQL_NAME@202..206 "y" [Newline("\n"), Whitespace("  ")] []
+            2: COLON@206..208 ":" [] [Whitespace(" ")]
+            3: (empty)
+            4: (empty)
+            5: GRAPHQL_DIRECTIVE_LIST@208..219
+              0: GRAPHQL_DIRECTIVE@208..219
+                0: AT@208..209 "@" [] []
+                1: GRAPHQL_NAME@209..219
+                  0: GRAPHQL_NAME@209..219 "deprecated" [] []
+                2: (empty)
+        2: R_CURLY@219..221 "}" [Newline("\n")] []
+    6: GRAPHQL_BOGUS_DEFINITION@221..252
+      0: INPUT_KW@221..229 "input" [Newline("\n"), Newline("\n")] [Whitespace(" ")]
+      1: GRAPHQL_NAME@229..237
+        0: GRAPHQL_NAME@229..237 "Point2D" [] [Whitespace(" ")]
+      2: GRAPHQL_DIRECTIVE_LIST@237..237
+      3: GRAPHQL_BOGUS@237..252
+        0: L_CURLY@237..238 "{" [] []
+        1: GRAPHQL_BOGUS@238..250
+          0: GRAPHQL_BOGUS@238..244
+            0: EQ@238..243 "=" [Newline("\n"), Whitespace("  ")] [Whitespace(" ")]
+            1: GRAPHQL_INT_LITERAL@243..244 "0" [] []
+          1: GRAPHQL_INPUT_VALUE_DEFINITION@244..250
+            0: (empty)
+            1: (empty)
+            2: COLON@244..249 ":" [Newline("\n"), Whitespace("  ")] [Whitespace(" ")]
+            3: (empty)
+            4: (empty)
+            5: GRAPHQL_DIRECTIVE_LIST@249..250
+              0: GRAPHQL_DIRECTIVE@249..250
+                0: AT@249..250 "@" [] []
+                1: (empty)
+                2: (empty)
+        2: R_CURLY@250..252 "}" [Newline("\n")] []
+    7: GRAPHQL_INPUT_OBJECT_TYPE_DEFINITION@252..279
+      0: (empty)
+      1: INPUT_KW@252..260 "input" [Newline("\n"), Newline("\n")] [Whitespace(" ")]
+      2: GRAPHQL_NAME@260..268
+        0: GRAPHQL_NAME@260..268 "Point2D" [] [Whitespace(" ")]
+      3: GRAPHQL_DIRECTIVE_LIST@268..268
+      4: GRAPHQL_INPUT_FIELDS_DEFINITION@268..279
+        0: L_CURLY@268..269 "{" [] []
+        1: GRAPHQL_INPUT_FIELD_LIST@269..277
+          0: GRAPHQL_INPUT_VALUE_DEFINITION@269..277
+            0: (empty)
+            1: GRAPHQL_NAME@269..273
+              0: GRAPHQL_NAME@269..273 "x" [Newline("\n"), Whitespace("  ")] []
+            2: (empty)
+            3: GRAPHQL_NAMED_TYPE@273..277
+              0: GRAPHQL_NAME@273..277
+                0: GRAPHQL_NAME@273..277 "y" [Newline("\n"), Whitespace("  ")] []
+            4: (empty)
+            5: GRAPHQL_DIRECTIVE_LIST@277..277
+        2: R_CURLY@277..279 "}" [Newline("\n")] []
+    8: GRAPHQL_BOGUS_DEFINITION@279..311
+      0: INPUT_KW@279..287 "input" [Newline("\n"), Newline("\n")] [Whitespace(" ")]
+      1: GRAPHQL_NAME@287..295
+        0: GRAPHQL_NAME@287..295 "Point2D" [] [Whitespace(" ")]
+      2: GRAPHQL_DIRECTIVE_LIST@295..295
+      3: GRAPHQL_BOGUS@295..311
+        0: L_CURLY@295..296 "{" [] []
+        1: GRAPHQL_BOGUS@296..309
+          0: GRAPHQL_BOGUS@296..299
+            0: EQ@296..299 "=" [Newline("\n"), Whitespace("\t")] []
+          1: GRAPHQL_INPUT_VALUE_DEFINITION@299..309
+            0: (empty)
+            1: (empty)
+            2: COLON@299..304 ":" [Newline("\n"), Whitespace("  ")] [Whitespace(" ")]
+            3: GRAPHQL_NAMED_TYPE@304..309
+              0: GRAPHQL_NAME@304..309
+                0: GRAPHQL_NAME@304..309 "Float" [] []
+            4: (empty)
+            5: GRAPHQL_DIRECTIVE_LIST@309..309
+        2: R_CURLY@309..311 "}" [Newline("\n")] []
+    9: GRAPHQL_BOGUS_DEFINITION@311..326
+      0: GRAPHQL_NAME@311..318 "iput" [Newline("\n"), Newline("\n")] [Whitespace(" ")]
+      1: GRAPHQL_NAME@318..326 "Point2D" [] [Whitespace(" ")]
+    10: GRAPHQL_SELECTION_SET@326..349
+      0: L_CURLY@326..327 "{" [] []
+      1: GRAPHQL_SELECTION_LIST@327..347
+        0: GRAPHQL_FIELD@327..337
+          0: GRAPHQL_ALIAS@327..332
+            0: GRAPHQL_NAME@327..330
+              0: GRAPHQL_NAME@327..330 "x" [Newline("\n"), Whitespace("\t")] []
+            1: COLON@330..332 ":" [] [Whitespace(" ")]
+          1: GRAPHQL_NAME@332..337
+            0: GRAPHQL_NAME@332..337 "Float" [] []
+          2: (empty)
+          3: GRAPHQL_DIRECTIVE_LIST@337..337
+          4: (empty)
+        1: GRAPHQL_FIELD@337..347
+          0: GRAPHQL_ALIAS@337..342
+            0: GRAPHQL_NAME@337..340
+              0: GRAPHQL_NAME@337..340 "y" [Newline("\n"), Whitespace("\t")] []
+            1: COLON@340..342 ":" [] [Whitespace(" ")]
+          1: GRAPHQL_NAME@342..347
+            0: GRAPHQL_NAME@342..347 "Float" [] []
+          2: (empty)
+          3: GRAPHQL_DIRECTIVE_LIST@347..347
+          4: (empty)
+      2: R_CURLY@347..349 "}" [Newline("\n")] []
+  2: EOF@349..350 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+input_object.graphql:2:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `{` but instead found `x`
+  
+    1 │ input Point2D
+  > 2 │   x: Float
+      │   ^
+    3 │   y: Float
+    4 │ }
+  
+  i Remove x
+  
+input_object.graphql:7:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `{` but instead found `x`
+  
+    6 │ input Point2D
+  > 7 │   x: Float
+      │   ^
+    8 │   y: Float
+    9 │ 
+  
+  i Remove x
+  
+input_object.graphql:10:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `}` but instead found `input`
+  
+     8 │   y: Float
+     9 │ 
+  > 10 │ input Point2D {
+       │ ^^^^^
+    11 │ 
+    12 │ input Point2D @deprecated {
+  
+  i Remove input
+  
+input_object.graphql:12:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `}` but instead found `input`
+  
+    10 │ input Point2D {
+    11 │ 
+  > 12 │ input Point2D @deprecated {
+       │ ^^^^^
+    13 │ 	x: Float
+    14 │ }
+  
+  i Remove input
+  
+input_object.graphql:17:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a type but instead found '='.
+  
+    16 │ input Point2D {
+  > 17 │   x: = 0
+       │      ^
+    18 │   y: @deprecated
+    19 │ }
+  
+  i Expected a type here.
+  
+    16 │ input Point2D {
+  > 17 │   x: = 0
+       │      ^
+    18 │   y: @deprecated
+    19 │ }
+  
+input_object.graphql:18:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a type but instead found '@'.
+  
+    16 │ input Point2D {
+    17 │   x: = 0
+  > 18 │   y: @deprecated
+       │      ^
+    19 │ }
+    20 │ 
+  
+  i Expected a type here.
+  
+    16 │ input Point2D {
+    17 │   x: = 0
+  > 18 │   y: @deprecated
+       │      ^
+    19 │ }
+    20 │ 
+  
+input_object.graphql:22:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a name but instead found 'x = 0'.
+  
+    21 │ input Point2D {
+  > 22 │   x = 0
+       │   ^^^^^
+    23 │   y: @deprecated
+    24 │ }
+  
+  i Expected a name here.
+  
+    21 │ input Point2D {
+  > 22 │   x = 0
+       │   ^^^^^
+    23 │   y: @deprecated
+    24 │ }
+  
+input_object.graphql:23:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a type but instead found '@'.
+  
+    21 │ input Point2D {
+    22 │   x = 0
+  > 23 │   y: @deprecated
+       │      ^
+    24 │ }
+    25 │ 
+  
+  i Expected a type here.
+  
+    21 │ input Point2D {
+    22 │   x = 0
+  > 23 │   y: @deprecated
+       │      ^
+    24 │ }
+    25 │ 
+  
+input_object.graphql:27:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a name but instead found '= 0'.
+  
+    26 │ input Point2D {
+  > 27 │   = 0
+       │   ^^^
+    28 │   : @
+    29 │ }
+  
+  i Expected a name here.
+  
+    26 │ input Point2D {
+  > 27 │   = 0
+       │   ^^^
+    28 │   : @
+    29 │ }
+  
+input_object.graphql:28:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a name but instead found ':'.
+  
+    26 │ input Point2D {
+    27 │   = 0
+  > 28 │   : @
+       │   ^
+    29 │ }
+    30 │ 
+  
+  i Expected a name here.
+  
+    26 │ input Point2D {
+    27 │   = 0
+  > 28 │   : @
+       │   ^
+    29 │ }
+    30 │ 
+  
+input_object.graphql:28:5 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a type but instead found '@'.
+  
+    26 │ input Point2D {
+    27 │   = 0
+  > 28 │   : @
+       │     ^
+    29 │ }
+    30 │ 
+  
+  i Expected a type here.
+  
+    26 │ input Point2D {
+    27 │   = 0
+  > 28 │   : @
+       │     ^
+    29 │ }
+    30 │ 
+  
+input_object.graphql:29:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a name but instead found '}'.
+  
+    27 │   = 0
+    28 │   : @
+  > 29 │ }
+       │ ^
+    30 │ 
+    31 │ input Point2D {
+  
+  i Expected a name here.
+  
+    27 │   = 0
+    28 │   : @
+  > 29 │ }
+       │ ^
+    30 │ 
+    31 │ input Point2D {
+  
+input_object.graphql:33:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `:` but instead found `y`
+  
+    31 │ input Point2D {
+    32 │   x
+  > 33 │   y
+       │   ^
+    34 │ }
+    35 │ 
+  
+  i Remove y
+  
+input_object.graphql:37:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a name but instead found '='.
+  
+    36 │ input Point2D {
+  > 37 │ 	=
+       │ 	^
+    38 │   : Float
+    39 │ }
+  
+  i Expected a name here.
+  
+    36 │ input Point2D {
+  > 37 │ 	=
+       │ 	^
+    38 │   : Float
+    39 │ }
+  
+input_object.graphql:38:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a name but instead found ':'.
+  
+    36 │ input Point2D {
+    37 │ 	=
+  > 38 │   : Float
+       │   ^
+    39 │ }
+    40 │ 
+  
+  i Expected a name here.
+  
+    36 │ input Point2D {
+    37 │ 	=
+  > 38 │   : Float
+       │   ^
+    39 │ }
+    40 │ 
+  
+input_object.graphql:41:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a definition but instead found 'iput Point2D'.
+  
+    39 │ }
+    40 │ 
+  > 41 │ iput Point2D {
+       │ ^^^^^^^^^^^^
+    42 │ 	x: Float
+    43 │ 	y: Float
+  
+  i Expected a definition here.
+  
+    39 │ }
+    40 │ 
+  > 41 │ iput Point2D {
+       │ ^^^^^^^^^^^^
+    42 │ 	x: Float
+    43 │ 	y: Float
+  
+```

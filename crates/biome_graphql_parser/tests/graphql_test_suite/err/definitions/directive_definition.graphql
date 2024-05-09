@@ -1,0 +1,20 @@
+directive @example on |
+
+directive @ on | ARGUMENT_DEFINITION
+
+directive example on | ARGUMENT_DEFINITION
+directive example ARGUMENT_DEFINITION
+
+directive @example on
+  | FIELD
+  | FRAGMENT_SPREAD
+  |
+
+directive @delegateField(: !) repeatable on OBJECT | INTERFACE
+
+directve @example on
+
+directive @example on
+  | #
+  | 123
+  | name
