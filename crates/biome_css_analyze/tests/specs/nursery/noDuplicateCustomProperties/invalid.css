@@ -1,0 +1,3 @@
+a { --custom-property: pink; --custom-property: orange; }
+
+a { --custom-property: pink; background: orange; --custom-property: orange }

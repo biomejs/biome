@@ -1,0 +1,4 @@
+/* should not generate diagnostics */
+a { --custom-property: pink; }
+
+a { --custom-property: pink; --cUstOm-prOpErtY: orange; }
