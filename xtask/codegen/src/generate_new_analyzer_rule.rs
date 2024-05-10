@@ -213,7 +213,78 @@ impl Rule for {rule_name_upper_camel} {{
             )
         }
         RuleKind::Json => {
-            unimplemented!("JSON variant not implemented yet.")
+            format!(
+                r#"use biome_analyze::{{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic}};
+use biome_console::markup;
+use biome_json_syntax::JsonMember;
+use biome_rowan::AstNode;
+
+declare_rule! {{
+    /// Succinct description of the rule.
+    ///
+    /// Put context and details about the rule.
+    /// As a starting point, you can take the description of the corresponding _ESLint_ rule (if any).
+    ///
+    /// Try to stay consistent with the descriptions of implemented rules.
+    ///
+    /// Add a link to the corresponding stylelint rule (if any):
+    ///
+    /// ## Examples
+    ///
+    /// ### Invalid
+    ///
+    /// ```css,expect_diagnostic
+    /// p {{}}
+    /// ```
+    ///
+    /// ### Valid
+    ///
+    /// ```css
+    /// p {{
+    ///   color: red;
+    /// }}
+    /// ```
+    ///
+    pub {rule_name_upper_camel} {{
+        version: "next",
+        name: "{rule_name_lower_camel}",
+        recommended: false,
+    }}
+}}
+
+impl Rule for {rule_name_upper_camel} {{
+    type Query = Ast<JsonMember>;
+    type State = ();
+    type Signals = Option<Self::State>;
+    type Options = ();
+
+    fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {{
+        let _node = ctx.query();
+        None
+    }}
+
+    fn diagnostic(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<RuleDiagnostic> {{
+        //
+        // Read our guidelines to write great diagnostics:
+        // https://docs.rs/biome_analyze/latest/biome_analyze/#what-a-rule-should-say-to-the-user
+        //
+        let span = ctx.query().range();
+        Some(
+            RuleDiagnostic::new(
+                rule_category!(),
+                span,
+                markup! {{
+                    "Unexpected empty block is not allowed"
+                }},
+            )
+            .note(markup! {{
+                    "This note will give you more information."
+            }}),
+        )
+    }}
+}}
+"#
+            )
         }
     }
 }
@@ -250,9 +321,12 @@ pub fn generate_new_analyzer_rule(kind: RuleKind, category: Category, rule_name:
             Category::Lint => format!(
                 r#"    "lint/nursery/{rule_name_camel}": "https://biomejs.dev/linter/rules/{kebab_case_rule}","#
             ),
-            Category::Assist => format!(r#"    "assist/nursery/{rule_name_camel}","#),
+            Category::Assist => format!(r#"    "assists/nursery/{rule_name_camel}","#),
         };
-        let lint_start = "define_categories! {\n";
+        let lint_start = match category {
+            Category::Lint => "define_categories! {\n",
+            Category::Assist => "    ; // end lint rules\n\n",
+        };
         let lint_end = match category {
             Category::Lint => "\n    ; // end lint rules\n",
             Category::Assist => "\n    // end assist rules\n",
