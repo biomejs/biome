@@ -36,6 +36,7 @@ declare_rule! {
     ///
     /// ```css,expect_diagnostic
     /// @media (not(unknown < 320px)) and (max-width > 640px) {}
+    /// ```
     ///
     /// ```css,expect_diagnostic
     /// @media (400px <= unknown <= 700px) {}
