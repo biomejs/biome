@@ -10,6 +10,7 @@ pub mod no_duplicate_selectors_keyframe_block;
 pub mod no_important_in_keyframe;
 pub mod no_invalid_position_at_import_rule;
 pub mod no_unknown_function;
+pub mod no_unknown_media_feature_name;
 pub mod no_unknown_property;
 pub mod no_unknown_selector_pseudo_element;
 pub mod no_unknown_unit;
@@ -28,6 +29,7 @@ declare_group! {
             self :: no_important_in_keyframe :: NoImportantInKeyframe ,
             self :: no_invalid_position_at_import_rule :: NoInvalidPositionAtImportRule ,
             self :: no_unknown_function :: NoUnknownFunction ,
+            self :: no_unknown_media_feature_name :: NoUnknownMediaFeatureName ,
             self :: no_unknown_property :: NoUnknownProperty ,
             self :: no_unknown_selector_pseudo_element :: NoUnknownSelectorPseudoElement ,
             self :: no_unknown_unit :: NoUnknownUnit ,

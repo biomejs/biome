@@ -132,6 +132,7 @@ define_categories! {
     "lint/nursery/noTypeOnlyImportAttributes": "https://biomejs.dev/linter/rules/no-type-only-import-attributes",
     "lint/nursery/noUndeclaredDependencies": "https://biomejs.dev/linter/rules/no-undeclared-dependencies",
     "lint/nursery/noUnknownFunction": "https://biomejs.dev/linter/rules/no-unknown-function",
+    "lint/nursery/noUnknownMediaFeatureName": "https://biomejs.dev/linter/rules/no-unknown-media-feature-name",
     "lint/nursery/noUnknownProperty": "https://biomejs.dev/linter/rules/no-unknown-property",
     "lint/nursery/noUnknownSelectorPseudoElement": "https://biomejs.dev/linter/rules/no-unknown-selector-pseudo-element",
     "lint/nursery/noUnknownUnit": "https://biomejs.dev/linter/rules/no-unknown-unit",
