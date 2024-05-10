@@ -4,9 +4,9 @@ use crate::keywords::{
     FONT_WEIGHT_NUMERIC_KEYWORDS, FUNCTION_KEYWORDS, KNOWN_CHROME_PROPERTIES,
     KNOWN_EDGE_PROPERTIES, KNOWN_EXPLORER_PROPERTIES, KNOWN_FIREFOX_PROPERTIES, KNOWN_PROPERTIES,
     KNOWN_SAFARI_PROPERTIES, KNOWN_SUMSUNG_INTERNET_PROPERTIES, KNOWN_US_BROWSER_PROPERTIES,
-    LEVEL_ONE_AND_TWO_PSEUDO_ELEMENTS, LINE_HEIGHT_KEYWORDS, OTHER_PSEUDO_ELEMENTS,
-    SHADOW_TREE_PSEUDO_ELEMENTS, SYSTEM_FAMILY_NAME_KEYWORDS, VENDER_PREFIXES,
-    VENDOR_SPECIFIC_PSEUDO_ELEMENTS,
+    LEVEL_ONE_AND_TWO_PSEUDO_ELEMENTS, LINE_HEIGHT_KEYWORDS, MEDIA_FEATURE_NAMES,
+    OTHER_PSEUDO_ELEMENTS, SHADOW_TREE_PSEUDO_ELEMENTS, SYSTEM_FAMILY_NAME_KEYWORDS,
+    VENDOR_PREFIXES, VENDOR_SPECIFIC_PSEUDO_ELEMENTS,
 };
 use biome_css_syntax::{AnyCssGenericComponentValue, AnyCssValue, CssGenericComponentValueList};
 use biome_rowan::{AstNode, SyntaxNodeCast};
@@ -116,7 +116,7 @@ pub fn is_custom_function(value: &str) -> bool {
 
 // Returns the vendor prefix extracted from an input string.
 pub fn vender_prefix(prop: &str) -> String {
-    for prefix in VENDER_PREFIXES.iter() {
+    for prefix in VENDOR_PREFIXES.iter() {
         if prop.starts_with(prefix) {
             return (*prefix).to_string();
         }
@@ -149,4 +149,28 @@ pub fn vendor_prefixed(props: &str) -> bool {
         || props.starts_with("-moz-")
         || props.starts_with("-ms-")
         || props.starts_with("-o-")
+}
+
+/// Check if the input string is a media feature name.
+pub fn is_media_feature_name(prop: &str) -> bool {
+    let input = prop.to_lowercase();
+    let count = MEDIA_FEATURE_NAMES.binary_search(&input.as_str());
+    if count.is_ok() {
+        return true;
+    }
+    let mut has_vendor_prefix = false;
+    for prefix in VENDOR_PREFIXES.iter() {
+        if input.starts_with(prefix) {
+            has_vendor_prefix = true;
+            break;
+        }
+    }
+    if has_vendor_prefix {
+        for feature_name in MEDIA_FEATURE_NAMES.iter() {
+            if input.ends_with(feature_name) {
+                return true;
+            }
+        }
+    }
+    false
 }

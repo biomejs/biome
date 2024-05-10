@@ -855,7 +855,7 @@ pub const OTHER_PSEUDO_ELEMENTS: [&str; 18] = [
     "view-transition-old",
 ];
 
-pub const VENDER_PREFIXES: [&str; 4] = ["-webkit-", "-moz-", "-ms-", "-o-"];
+pub const VENDOR_PREFIXES: [&str; 4] = ["-webkit-", "-moz-", "-ms-", "-o-"];
 
 // https://github.com/known-css/known-css-properties/blob/master/source/w3c.json
 pub const KNOWN_PROPERTIES: [&str; 588] = [
@@ -4958,6 +4958,69 @@ pub const KNOWN_US_BROWSER_PROPERTIES: [&str; 517] = [
     "zoom",
 ];
 
+pub const MEDIA_FEATURE_NAMES: [&str; 60] = [
+    "any-hover",
+    "any-pointer",
+    "aspect-ratio",
+    "color",
+    "color-gamut",
+    "color-index",
+    "device-aspect-ratio",
+    "device-height",
+    "device-posture",
+    "device-width",
+    "display-mode",
+    "dynamic-range",
+    "environment-blending",
+    "forced-colors",
+    "grid",
+    "height",
+    "horizontal-viewport-segments",
+    "hover",
+    "inverted-colors",
+    "light-level",
+    "max-aspect-ratio",
+    "max-color",
+    "max-color-index",
+    "max-device-aspect-ratio",
+    "max-device-height",
+    "max-device-width",
+    "max-height",
+    "max-monochrome",
+    "max-resolution",
+    "max-width",
+    "min-aspect-ratio",
+    "min-color",
+    "min-color-index",
+    "min-device-aspect-ratio",
+    "min-device-height",
+    "min-device-width",
+    "min-height",
+    "min-monochrome",
+    "min-resolution",
+    "min-width",
+    "monochrome",
+    "nav-controls",
+    "orientation",
+    "overflow-block",
+    "overflow-inline",
+    "pointer",
+    "prefers-color-scheme",
+    "prefers-contrast",
+    "prefers-reduced-data",
+    "prefers-reduced-motion",
+    "prefers-reduded-transparency",
+    "resolution",
+    "scan",
+    "screen-spanning",
+    "scripting",
+    "update",
+    "vertical-viewport-segments",
+    "video-color-gamut",
+    "video-dynamic-range",
+    "width",
+];
+
 #[cfg(test)]
 mod tests {
     use std::collections::HashSet;
@@ -4965,7 +5028,7 @@ mod tests {
     use super::{
         FUNCTION_KEYWORDS, KNOWN_EDGE_PROPERTIES, KNOWN_EXPLORER_PROPERTIES,
         KNOWN_FIREFOX_PROPERTIES, KNOWN_PROPERTIES, KNOWN_SAFARI_PROPERTIES,
-        KNOWN_SUMSUNG_INTERNET_PROPERTIES, KNOWN_US_BROWSER_PROPERTIES,
+        KNOWN_SUMSUNG_INTERNET_PROPERTIES, KNOWN_US_BROWSER_PROPERTIES, MEDIA_FEATURE_NAMES,
     };
 
     #[test]
@@ -5027,6 +5090,13 @@ mod tests {
     #[test]
     fn test_kown_us_browser_properties_order() {
         for items in KNOWN_US_BROWSER_PROPERTIES.windows(2) {
+            assert!(items[0] < items[1], "{} < {}", items[0], items[1]);
+        }
+    }
+
+    #[test]
+    fn test_media_feature_names_order() {
+        for items in MEDIA_FEATURE_NAMES.windows(2) {
             assert!(items[0] < items[1], "{} < {}", items[0], items[1]);
         }
     }
