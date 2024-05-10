@@ -1573,6 +1573,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noUnknownMediaFeatureName": {
+					"description": "Disallow unknown media feature names.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noUnknownProperty": {
 					"description": "Disallow unknown properties.",
 					"anyOf": [

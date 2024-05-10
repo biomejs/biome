@@ -989,6 +989,10 @@ export interface Nursery {
 	 */
 	noUnknownFunction?: RuleConfiguration_for_Null;
 	/**
+	 * Disallow unknown media feature names.
+	 */
+	noUnknownMediaFeatureName?: RuleConfiguration_for_Null;
+	/**
 	 * Disallow unknown properties.
 	 */
 	noUnknownProperty?: RuleConfiguration_for_Null;
@@ -2035,6 +2039,7 @@ export type Category =
 	| "lint/nursery/noTypeOnlyImportAttributes"
 	| "lint/nursery/noUndeclaredDependencies"
 	| "lint/nursery/noUnknownFunction"
+	| "lint/nursery/noUnknownMediaFeatureName"
 	| "lint/nursery/noUnknownProperty"
 	| "lint/nursery/noUnknownSelectorPseudoElement"
 	| "lint/nursery/noUnknownUnit"
