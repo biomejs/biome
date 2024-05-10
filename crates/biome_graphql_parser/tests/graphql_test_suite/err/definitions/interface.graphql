@@ -44,6 +44,8 @@ inter Person
 
 interface Person implemets Character
 
+interface Person implements &
+
 interface Person @
 
 interface Person implents Character @
