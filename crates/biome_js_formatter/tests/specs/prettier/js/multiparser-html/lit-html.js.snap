@@ -2,7 +2,6 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: js/multiparser-html/lit-html.js
 ---
-
 # Input
 
 ```js
@@ -117,7 +116,7 @@ ${ foo}:${bar};
 ```diff
 --- Prettier
 +++ Biome
-@@ -14,48 +14,63 @@
+@@ -14,48 +14,59 @@
  
    render() {
      return html`
@@ -192,15 +191,11 @@ ${ foo}:${bar};
 -    const tpl = html\`<div>\${innerExpr(1)} ${outerExpr(2)}</div>\`;
 -  </script>`;
 +const trickyParens = html`<script> f((${expr}) / 2); </script>`;
-+const nestedFun = /* HTML */ `${outerExpr(
-+  1,
-+)} <script>const tpl = html\`<div>\${innerExpr( 1 )} ${outerExpr(
-+  2,
-+)}</div>\`</script>`;
++const nestedFun = /* HTML */ `${outerExpr(1)} <script>const tpl = html\`<div>\${innerExpr( 1 )} ${outerExpr(2)}</div>\`</script>`;
  
  const closingScriptTagShouldBeEscapedProperly = /* HTML */ `
    <script>
-@@ -63,31 +78,26 @@
+@@ -63,31 +74,26 @@
    </script>
  `;
  
@@ -320,11 +315,7 @@ function HelloWorld() {
 }
 
 const trickyParens = html`<script> f((${expr}) / 2); </script>`;
-const nestedFun = /* HTML */ `${outerExpr(
-  1,
-)} <script>const tpl = html\`<div>\${innerExpr( 1 )} ${outerExpr(
-  2,
-)}</div>\`</script>`;
+const nestedFun = /* HTML */ `${outerExpr(1)} <script>const tpl = html\`<div>\${innerExpr( 1 )} ${outerExpr(2)}</div>\`</script>`;
 
 const closingScriptTagShouldBeEscapedProperly = /* HTML */ `
   <script>
@@ -359,7 +350,6 @@ ${foo}:${bar};
 
 # Lines exceeding max width of 80 characters
 ```
-   81: const closingScriptTag2 = /* HTML */ `<script>const  scriptTag='<\\/script>'; <\/script>`;
+   69: const nestedFun = /* HTML */ `${outerExpr(1)} <script>const tpl = html\`<div>\${innerExpr( 1 )} ${outerExpr(2)}</div>\`</script>`;
+   77: const closingScriptTag2 = /* HTML */ `<script>const  scriptTag='<\\/script>'; <\/script>`;
 ```
-
-
