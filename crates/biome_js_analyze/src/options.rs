@@ -334,6 +334,8 @@ pub type UseSingleVarDeclarator = < lint :: style :: use_single_var_declarator :
 pub type UseSortedClasses =
     <lint::nursery::use_sorted_classes::UseSortedClasses as biome_analyze::Rule>::Options;
 pub type UseTemplate = <lint::style::use_template::UseTemplate as biome_analyze::Rule>::Options;
+pub type UseThrowNewError =
+    <lint::nursery::use_throw_new_error::UseThrowNewError as biome_analyze::Rule>::Options;
 pub type UseValidAnchor =
     <lint::a11y::use_valid_anchor::UseValidAnchor as biome_analyze::Rule>::Options;
 pub type UseValidAriaProps =

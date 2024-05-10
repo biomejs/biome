@@ -1052,6 +1052,10 @@ export interface Nursery {
 	 * Enforce the sorting of CSS utility classes.
 	 */
 	useSortedClasses?: RuleConfiguration_for_UtilityClassSortingOptions;
+	/**
+	 * Require new when throwing an error.
+	 */
+	useThrowNewError?: RuleConfiguration_for_Null;
 }
 /**
  * A list of rules that belong to this group
@@ -2055,6 +2059,7 @@ export type Category =
 	| "lint/nursery/useGenericFontNames"
 	| "lint/nursery/useImportRestrictions"
 	| "lint/nursery/useSortedClasses"
+	| "lint/nursery/useThrowNewError"
 	| "lint/performance/noAccumulatingSpread"
 	| "lint/performance/noBarrelFile"
 	| "lint/performance/noDelete"
