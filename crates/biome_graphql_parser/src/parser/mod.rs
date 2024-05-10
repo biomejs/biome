@@ -104,6 +104,6 @@ fn parse_description(p: &mut GraphqlParser) -> ParsedSyntax {
 }
 
 #[inline]
-fn is_at_name(p: &GraphqlParser) -> bool {
-    p.at(GRAPHQL_NAME)
+fn is_nth_at_name(p: &mut GraphqlParser, n: usize) -> bool {
+    p.nth_at(n, GRAPHQL_NAME)
 }

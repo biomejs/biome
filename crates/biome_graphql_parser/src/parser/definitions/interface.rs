@@ -1,6 +1,6 @@
 use crate::parser::{
     directive::{is_at_directive, DirectiveList},
-    is_at_name, parse_description,
+    is_nth_at_name, parse_description,
     parse_error::{expected_name, expected_named_type},
     parse_name,
     r#type::parse_named_type,
@@ -108,7 +108,7 @@ impl ParseRecovery for ImplementsInterfaceListParseRecovery {
     const RECOVERED_KIND: Self::Kind = GRAPHQL_BOGUS;
 
     fn is_at_recovered(&self, p: &mut Self::Parser<'_>) -> bool {
-        is_at_name(p) || p.at(T![&]) || is_at_implements_interface_end(p)
+        is_nth_at_name(p, 0) || p.at(T![&]) || is_at_implements_interface_end(p)
     }
 }
 
