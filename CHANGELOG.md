@@ -42,6 +42,21 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 ### Linter
 
+#### Bug fixes
+
+- `useJsxKeyInIterable` now handles more cases involving fragments. See the snippets below. Contributed by @dyc3
+```jsx
+// valid
+[].map((item) => {
+	return <>{item.condition ? <div key={item.id} /> : <div key={item.id}>foo</div>}</>;
+});
+
+// invalid
+[].map((item) => {
+	return <>{item.condition ? <div /> : <div>foo</div>}</>;
+});
+```
+
 ### Parser
 
 #### Enhancements
