@@ -37,6 +37,7 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 #### Bug fixes
 
 - Fix [#2470](https://github.com/biomejs/biome/issues/2470) by avoid introducing linebreaks in single line string interpolations. Contributed by @ah-yu
+- Resolve deadlocks by narrowing the scope of locks. Contributed by @mechairoi
 
 ### JavaScript APIs
 
