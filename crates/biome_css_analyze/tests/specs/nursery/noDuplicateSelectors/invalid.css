@@ -1,0 +1,51 @@
+/* duplicate within one rule's selector list */
+a, a {}
+
+/* duplicate within one rule's selector list. multiline */
+b,
+b {}
+
+/* duplicate within one rule's selector list. multiline */
+c,
+d,
+d {}
+
+/* duplicated selectors within one rule's selector list. 2 duplicates */
+.e,
+.e,
+.e {}
+
+/* duplicate simple selectors with another rule between */
+f {} g {} f {}
+
+/* duplicate simple selectors with another rule between */
+h {}
+i {}
+h {}
+
+/* duplicate selector lists with different order */
+j, k {} k, j {}
+
+/* duplicate selectors with multiple components */
+m n {}
+m n {}
+
+/* essentially duplicate selector lists with varied spacing */
+.foo   p, q > .bar,
+#baz {}
+  #baz,
+  .foo     p,q>.bar {}
+
+/* duplicate within a media query, in the same rule */
+s {}
+@media print { s, s {} }
+
+/* duplicate within a media query, in different rules */
+t {}
+@media screen and (min-width: 900px) { t {} t {} }
+
+/* duplicate caused by nesting */
+v w {} v { w {} }
+
+/* duplicate caused by &-parent selector */
+x { & {} }

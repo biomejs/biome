@@ -1,0 +1,19 @@
+/* valid cases: should not error */
+th, td {}; tr {}
+*::a {}; a {}
+*::c, b {}; c {}
+d e, f {}; d {}
+
+/* duplicate within a grouping selector */
+input, textarea {}; textarea {}
+
+/* duplicate within a grouping selector, reversed */
+button {}; selector, button {}
+
+/* duplicate within a grouping selector. multiline */
+span, div {};
+ h1, section {};
+h1 {}
+
+/* test regular case for regression */
+v w, x>test {} v { w {} } x > test {}

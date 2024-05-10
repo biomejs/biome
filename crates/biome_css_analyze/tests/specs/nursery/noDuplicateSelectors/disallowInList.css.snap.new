@@ -1,0 +1,142 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+assertion_line: 83
+expression: disallowInList.css
+---
+# Input
+```css
+/* valid cases: should not error */
+th, td {}; tr {}
+*::a {}; a {}
+*::c, b {}; c {}
+d e, f {}; d {}
+
+/* duplicate within a grouping selector */
+input, textarea {}; textarea {}
+
+/* duplicate within a grouping selector, reversed */
+button {}; selector, button {}
+
+/* duplicate within a grouping selector. multiline */
+span, div {};
+ h1, section {};
+h1 {}
+
+/* test regular case for regression */
+v w, x>test {} v { w {} } x > test {}
+```
+
+# Diagnostics
+```
+disallowInList.css:8:21 lint/nursery/noDuplicateSelectors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate selectors may result in unintentionally overriding rules: textarea
+  
+     7 │ /* duplicate within a grouping selector */
+   > 8 │ input, textarea {}; textarea {}
+       │                     ^^^^^^^^
+     9 │ 
+    10 │ /* duplicate within a grouping selector, reversed */
+  
+  i Please consider moving the rule's contents to the first occurence:
+  
+     7 │ /* duplicate within a grouping selector */
+   > 8 │ input, textarea {}; textarea {}
+       │        ^^^^^^^^
+     9 │ 
+    10 │ /* duplicate within a grouping selector, reversed */
+  
+  i Remove duplicate selectors within the rule
+  
+
+```
+
+```
+disallowInList.css:11:22 lint/nursery/noDuplicateSelectors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate selectors may result in unintentionally overriding rules: button
+  
+    10 │ /* duplicate within a grouping selector, reversed */
+  > 11 │ button {}; selector, button {}
+       │                      ^^^^^^
+    12 │ 
+    13 │ /* duplicate within a grouping selector. multiline */
+  
+  i Please consider moving the rule's contents to the first occurence:
+  
+    10 │ /* duplicate within a grouping selector, reversed */
+  > 11 │ button {}; selector, button {}
+       │ ^^^^^^
+    12 │ 
+    13 │ /* duplicate within a grouping selector. multiline */
+  
+  i Remove duplicate selectors within the rule
+  
+
+```
+
+```
+disallowInList.css:16:1 lint/nursery/noDuplicateSelectors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate selectors may result in unintentionally overriding rules: h1
+  
+    14 │ span, div {};
+    15 │  h1, section {};
+  > 16 │ h1 {}
+       │ ^^
+    17 │ 
+    18 │ /* test regular case for regression */
+  
+  i Please consider moving the rule's contents to the first occurence:
+  
+    13 │ /* duplicate within a grouping selector. multiline */
+    14 │ span, div {};
+  > 15 │  h1, section {};
+       │  ^^
+    16 │ h1 {}
+    17 │ 
+  
+  i Remove duplicate selectors within the rule
+  
+
+```
+
+```
+disallowInList.css:19:20 lint/nursery/noDuplicateSelectors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate selectors may result in unintentionally overriding rules: w
+  
+    18 │ /* test regular case for regression */
+  > 19 │ v w, x>test {} v { w {} } x > test {}
+       │                    ^
+  
+  i Please consider moving the rule's contents to the first occurence:
+  
+    18 │ /* test regular case for regression */
+  > 19 │ v w, x>test {} v { w {} } x > test {}
+       │ ^^^
+  
+  i Remove duplicate selectors within the rule
+  
+
+```
+
+```
+disallowInList.css:19:27 lint/nursery/noDuplicateSelectors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate selectors may result in unintentionally overriding rules: x > test
+  
+    18 │ /* test regular case for regression */
+  > 19 │ v w, x>test {} v { w {} } x > test {}
+       │                           ^^^^^^^^
+  
+  i Please consider moving the rule's contents to the first occurence:
+  
+    18 │ /* test regular case for regression */
+  > 19 │ v w, x>test {} v { w {} } x > test {}
+       │      ^^^^^^
+  
+  i Remove duplicate selectors within the rule
+  
+
+```

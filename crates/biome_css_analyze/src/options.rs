@@ -9,6 +9,8 @@ pub type NoCssEmptyBlock =
 pub type NoDuplicateAtImportRules = < lint :: nursery :: no_duplicate_at_import_rules :: NoDuplicateAtImportRules as biome_analyze :: Rule > :: Options ;
 pub type NoDuplicateFontNames =
     <lint::nursery::no_duplicate_font_names::NoDuplicateFontNames as biome_analyze::Rule>::Options;
+pub type NoDuplicateSelectors =
+    <lint::nursery::no_duplicate_selectors::NoDuplicateSelectors as biome_analyze::Rule>::Options;
 pub type NoDuplicateSelectorsKeyframeBlock = < lint :: nursery :: no_duplicate_selectors_keyframe_block :: NoDuplicateSelectorsKeyframeBlock as biome_analyze :: Rule > :: Options ;
 pub type NoImportantInKeyframe = < lint :: nursery :: no_important_in_keyframe :: NoImportantInKeyframe as biome_analyze :: Rule > :: Options ;
 pub type NoUnknownFunction =

@@ -945,6 +945,10 @@ export interface Nursery {
 	 */
 	noDuplicateJsonKeys?: RuleConfiguration_for_Null;
 	/**
+	 * Disallow duplicate selectors. This rule checks for two types of duplication:
+	 */
+	noDuplicateSelectors?: RuleConfiguration_for_NoDuplicateSelectorsOptions;
+	/**
 	 * Disallow duplicate selectors within keyframe blocks.
 	 */
 	noDuplicateSelectorsKeyframeBlock?: RuleConfiguration_for_Null;
@@ -1582,6 +1586,9 @@ export type RuleConfiguration_for_DeprecatedHooksOptions =
 export type RuleConfiguration_for_NoCssEmptyBlockOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_NoCssEmptyBlockOptions;
+export type RuleConfiguration_for_NoDuplicateSelectorsOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_NoDuplicateSelectorsOptions;
 export type RuleConfiguration_for_RestrictedImportsOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_RestrictedImportsOptions;
@@ -1624,6 +1631,10 @@ export interface RuleWithOptions_for_DeprecatedHooksOptions {
 export interface RuleWithOptions_for_NoCssEmptyBlockOptions {
 	level: RulePlainConfiguration;
 	options: NoCssEmptyBlockOptions;
+}
+export interface RuleWithOptions_for_NoDuplicateSelectorsOptions {
+	level: RulePlainConfiguration;
+	options: NoDuplicateSelectorsOptions;
 }
 export interface RuleWithOptions_for_RestrictedImportsOptions {
 	level: RulePlainConfiguration;
@@ -1677,6 +1688,12 @@ export interface HooksOptions {
 export interface DeprecatedHooksOptions {}
 export interface NoCssEmptyBlockOptions {
 	allowComments: boolean;
+}
+export interface NoDuplicateSelectorsOptions {
+	/**
+	 * If set to `true` this rule will check for duplicate selectors within selector lists.
+	 */
+	disallowInList: boolean;
 }
 /**
  * Options for the rule `noRestrictedImports`.
@@ -2018,6 +2035,7 @@ export type Category =
 	| "lint/nursery/noDuplicateElseIf"
 	| "lint/nursery/noDuplicateFontNames"
 	| "lint/nursery/noDuplicateJsonKeys"
+	| "lint/nursery/noDuplicateSelectors"
 	| "lint/nursery/noDuplicateSelectorsKeyframeBlock"
 	| "lint/nursery/noEvolvingAny"
 	| "lint/nursery/noFlatMapIdentity"

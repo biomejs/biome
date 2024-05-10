@@ -1,0 +1,42 @@
+/* no duplicates */
+a {} b {} c {} d, e, f {}
+
+/* duplicate inside media query */
+g {}
+@media print { g {} }	
+
+/* duplicates inside separate media query */
+@media print {
+    gg.dev {}
+}
+@media print {
+    gg.dev {}
+}
+
+/* duplicate inside keyframes */
+@keyframes h { 0% {} }
+@keyframes h { 0% {} }
+
+/* duplicates inside nested rules */
+i { i { i {} } }
+
+/* selectors using parts of other selectors */
+.foo .bar {}
+.foo {}
+.bar {}
+.bar .foo {}
+
+/* selectors reused in other non-equivalent selector lists */
+j {} j, k {}
+u {} v, u {}
+
+/* nested resolution */
+m n { top: 0; } m { n, p { color: pink; } }	
+
+@mixin abc { &:hover {} } @mixin xyz { &:hover {} }
+
+/* pass if default setting i.e. disallowInList: false */
+ul, ol {} ul {}
+
+/* attribute selector */
+[disabled].goo, [disabled] .goo {}
