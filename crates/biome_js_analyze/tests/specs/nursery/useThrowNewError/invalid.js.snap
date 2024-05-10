@@ -42,6 +42,8 @@ invalid.js:1:7 lint/nursery/useThrowNewError  FIXABLE  ━━━━━━━━�
     2 │ throw (Error)()
     3 │ throw lib.Error()
   
+  i Instantiate Error with new keyword for consistency with modern builtins.
+  
   i Unsafe fix: Add new keyword.
   
     1 │ throw·new·Error()
@@ -59,6 +61,8 @@ invalid.js:2:7 lint/nursery/useThrowNewError  FIXABLE  ━━━━━━━━�
       │       ^^^^^^^^^
     3 │ throw lib.Error()
     4 │ throw lib.mod.Error()
+  
+  i Instantiate Error with new keyword for consistency with modern builtins.
   
   i Unsafe fix: Add new keyword.
   
@@ -79,6 +83,8 @@ invalid.js:3:7 lint/nursery/useThrowNewError  FIXABLE  ━━━━━━━━�
     4 │ throw lib.mod.Error()
     5 │ throw lib[mod].Error()
   
+  i Instantiate Error with new keyword for consistency with modern builtins.
+  
   i Unsafe fix: Add new keyword.
   
     3 │ throw·new·lib.Error()
@@ -97,6 +103,8 @@ invalid.js:4:7 lint/nursery/useThrowNewError  FIXABLE  ━━━━━━━━�
       │       ^^^^^^^^^^^^^^^
     5 │ throw lib[mod].Error()
     6 │ throw (/**1**/lib.mod).Error()
+  
+  i Instantiate Error with new keyword for consistency with modern builtins.
   
   i Unsafe fix: Add new keyword.
   
@@ -117,6 +125,8 @@ invalid.js:5:7 lint/nursery/useThrowNewError  FIXABLE  ━━━━━━━━�
     6 │ throw (/**1**/lib.mod).Error()
     7 │ throw Error('foo')
   
+  i Instantiate Error with new keyword for consistency with modern builtins.
+  
   i Unsafe fix: Add new keyword.
   
     5 │ throw·new·lib[mod].Error()
@@ -135,6 +145,8 @@ invalid.js:6:7 lint/nursery/useThrowNewError  FIXABLE  ━━━━━━━━�
       │       ^^^^^^^^^^^^^^^^^^^^^^^^
     7 │ throw Error('foo')
     8 │ throw CustomError('foo')
+  
+  i Instantiate Error with new keyword for consistency with modern builtins.
   
   i Unsafe fix: Add new keyword.
   
@@ -155,6 +167,8 @@ invalid.js:7:7 lint/nursery/useThrowNewError  FIXABLE  ━━━━━━━━�
     8 │ throw CustomError('foo')
     9 │ throw FooBarBazError('foo')
   
+  i Instantiate Error with new keyword for consistency with modern builtins.
+  
   i Unsafe fix: Add new keyword.
   
     7 │ throw·new·Error('foo')
@@ -173,6 +187,8 @@ invalid.js:8:7 lint/nursery/useThrowNewError  FIXABLE  ━━━━━━━━�
        │       ^^^^^^^^^^^^^^^^^^
      9 │ throw FooBarBazError('foo')
     10 │ throw ABCError('foo')
+  
+  i Instantiate Error with new keyword for consistency with modern builtins.
   
   i Unsafe fix: Add new keyword.
   
@@ -193,6 +209,8 @@ invalid.js:9:7 lint/nursery/useThrowNewError  FIXABLE  ━━━━━━━━�
     10 │ throw ABCError('foo')
     11 │ throw Abc3Error('foo')
   
+  i Instantiate Error with new keyword for consistency with modern builtins.
+  
   i Unsafe fix: Add new keyword.
   
     9 │ throw·new·FooBarBazError('foo')
@@ -211,6 +229,8 @@ invalid.js:10:7 lint/nursery/useThrowNewError  FIXABLE  ━━━━━━━━
        │       ^^^^^^^^^^^^^^^
     11 │ throw Abc3Error('foo')
     12 │ throw TypeError()
+  
+  i Instantiate Error with new keyword for consistency with modern builtins.
   
   i Unsafe fix: Add new keyword.
   
@@ -231,6 +251,8 @@ invalid.js:11:7 lint/nursery/useThrowNewError  FIXABLE  ━━━━━━━━
     12 │ throw TypeError()
     13 │ throw EvalError()
   
+  i Instantiate Error with new keyword for consistency with modern builtins.
+  
   i Unsafe fix: Add new keyword.
   
     11 │ throw·new·Abc3Error('foo')
@@ -249,6 +271,8 @@ invalid.js:12:7 lint/nursery/useThrowNewError  FIXABLE  ━━━━━━━━
        │       ^^^^^^^^^^^
     13 │ throw EvalError()
     14 │ throw RangeError()
+  
+  i Instantiate Error with new keyword for consistency with modern builtins.
   
   i Unsafe fix: Add new keyword.
   
@@ -269,6 +293,8 @@ invalid.js:13:7 lint/nursery/useThrowNewError  FIXABLE  ━━━━━━━━
     14 │ throw RangeError()
     15 │ throw ReferenceError()
   
+  i Instantiate Error with new keyword for consistency with modern builtins.
+  
   i Unsafe fix: Add new keyword.
   
     13 │ throw·new·EvalError()
@@ -287,6 +313,8 @@ invalid.js:14:7 lint/nursery/useThrowNewError  FIXABLE  ━━━━━━━━
        │       ^^^^^^^^^^^^
     15 │ throw ReferenceError()
     16 │ throw /**1**/ SyntaxError() /**2**/
+  
+  i Instantiate Error with new keyword for consistency with modern builtins.
   
   i Unsafe fix: Add new keyword.
   
@@ -307,6 +335,8 @@ invalid.js:15:7 lint/nursery/useThrowNewError  FIXABLE  ━━━━━━━━
     16 │ throw /**1**/ SyntaxError() /**2**/
     17 │ throw URIError()
   
+  i Instantiate Error with new keyword for consistency with modern builtins.
+  
   i Unsafe fix: Add new keyword.
   
     15 │ throw·new·ReferenceError()
@@ -325,6 +355,8 @@ invalid.js:16:15 lint/nursery/useThrowNewError  FIXABLE  ━━━━━━━�
        │               ^^^^^^^^^^^^^
     17 │ throw URIError()
     18 │ throw /**1**/(( /**2**/URIError() ))
+  
+  i Instantiate Error with new keyword for consistency with modern builtins.
   
   i Unsafe fix: Add new keyword.
   
@@ -345,6 +377,8 @@ invalid.js:17:7 lint/nursery/useThrowNewError  FIXABLE  ━━━━━━━━
     18 │ throw /**1**/(( /**2**/URIError() ))
     19 │ throw (( URIError ))()
   
+  i Instantiate Error with new keyword for consistency with modern builtins.
+  
   i Unsafe fix: Add new keyword.
   
     17 │ throw·new·URIError()
@@ -363,6 +397,8 @@ invalid.js:18:24 lint/nursery/useThrowNewError  FIXABLE  ━━━━━━━�
        │                        ^^^^^^^^^^
     19 │ throw (( URIError ))()
     20 │ throw getGlobalThis().Error()
+  
+  i Instantiate Error with new keyword for consistency with modern builtins.
   
   i Unsafe fix: Add new keyword.
   
@@ -383,6 +419,8 @@ invalid.js:19:7 lint/nursery/useThrowNewError  FIXABLE  ━━━━━━━━
     20 │ throw getGlobalThis().Error()
     21 │ throw utils.getGlobalThis().Error()
   
+  i Instantiate Error with new keyword for consistency with modern builtins.
+  
   i Unsafe fix: Add new keyword.
   
     19 │ throw·new·((·URIError·))()
@@ -401,6 +439,8 @@ invalid.js:20:7 lint/nursery/useThrowNewError  FIXABLE  ━━━━━━━━
        │       ^^^^^^^^^^^^^^^^^^^^^^^
     21 │ throw utils.getGlobalThis().Error()
     22 │ throw (( ((getGlobalThis())).Error ))()
+  
+  i Instantiate Error with new keyword for consistency with modern builtins.
   
   i Unsafe fix: Add new keyword.
   
@@ -421,6 +461,8 @@ invalid.js:21:7 lint/nursery/useThrowNewError  FIXABLE  ━━━━━━━━
     22 │ throw (( ((getGlobalThis())).Error ))()
     23 │ throw ( getGlobalThis().Error )()
   
+  i Instantiate Error with new keyword for consistency with modern builtins.
+  
   i Unsafe fix: Add new keyword.
   
     21 │ throw·new·(utils.getGlobalThis().Error)()
@@ -439,6 +481,8 @@ invalid.js:22:7 lint/nursery/useThrowNewError  FIXABLE  ━━━━━━━━
        │       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     23 │ throw ( getGlobalThis().Error )()
     24 │ throw /**1**/ ( /**2**/ getGlobalThis().Error /**3 **/ )()
+  
+  i Instantiate Error with new keyword for consistency with modern builtins.
   
   i Unsafe fix: Add new keyword.
   
@@ -459,6 +503,8 @@ invalid.js:23:7 lint/nursery/useThrowNewError  FIXABLE  ━━━━━━━━
     24 │ throw /**1**/ ( /**2**/ getGlobalThis().Error /**3 **/ )()
     25 │ 
   
+  i Instantiate Error with new keyword for consistency with modern builtins.
+  
   i Unsafe fix: Add new keyword.
   
     23 │ throw·new·(·getGlobalThis().Error·)()
@@ -476,6 +522,8 @@ invalid.js:24:15 lint/nursery/useThrowNewError  FIXABLE  ━━━━━━━�
   > 24 │ throw /**1**/ ( /**2**/ getGlobalThis().Error /**3 **/ )()
        │               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     25 │ 
+  
+  i Instantiate Error with new keyword for consistency with modern builtins.
   
   i Unsafe fix: Add new keyword.
   

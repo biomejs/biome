@@ -105,7 +105,9 @@ impl Rule for UseThrowNewError {
             markup! {
                 "Use "<Emphasis>"new "{name}"()"</Emphasis>" instead of "<Emphasis>{name}"()"</Emphasis>" when throwing an error."
             },
-        ))
+        ).note(markup! {
+            "Instantiate "<Emphasis>"Error"</Emphasis>" with "<Emphasis>"new"</Emphasis>" keyword for consistency with modern builtins."
+        }))
     }
 
     fn action(ctx: &RuleContext<Self>, _: &Self::State) -> Option<JsRuleAction> {
