@@ -48,6 +48,7 @@ declare_rule! {
     pub NoPrecisionLoss {
         version: "1.0.0",
         name: "noPrecisionLoss",
+        language: "js",
         sources: &[
             RuleSource::Eslint("no-loss-of-precision"),
             RuleSource::EslintTypeScript("no-loss-of-precision"),

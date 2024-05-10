@@ -56,6 +56,7 @@ declare_rule! {
     pub UseExponentiationOperator {
         version: "1.0.0",
         name: "useExponentiationOperator",
+        language: "js",
         sources: &[RuleSource::Eslint("prefer-exponentiation-operator")],
         recommended: true,
         fix_kind: FixKind::Unsafe,

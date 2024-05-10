@@ -65,6 +65,7 @@ declare_rule! {
     pub NoUselessStringConcat {
         version: "next",
         name: "noUselessStringConcat",
+        language: "js",
         sources: &[RuleSource::Eslint("no-useless-concat")],
         recommended: false,
         fix_kind: FixKind::Unsafe,

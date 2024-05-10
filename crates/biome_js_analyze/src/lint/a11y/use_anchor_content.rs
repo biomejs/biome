@@ -67,6 +67,7 @@ declare_rule! {
     pub UseAnchorContent {
         version: "1.0.0",
         name: "useAnchorContent",
+        language: "jsx",
         sources: &[RuleSource::EslintJsxA11y("anchor-has-content")],
         recommended: true,
         fix_kind: FixKind::Unsafe,

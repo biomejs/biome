@@ -20,6 +20,7 @@ declare_rule! {
     pub NoSuperWithoutExtends {
         version: "1.0.0",
         name: "noSuperWithoutExtends",
+        language: "js",
     }
 }
 

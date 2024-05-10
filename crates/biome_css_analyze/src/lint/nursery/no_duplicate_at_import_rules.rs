@@ -46,6 +46,7 @@ declare_rule! {
     pub NoDuplicateAtImportRules {
         version: "next",
         name: "noDuplicateAtImportRules",
+        language: "css",
         recommended: true,
         sources: &[RuleSource::Stylelint("no-duplicate-at-import-rules")],
     }

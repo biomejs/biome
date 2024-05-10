@@ -68,6 +68,7 @@ declare_rule! {
     pub NoClassAssign {
         version: "1.0.0",
         name: "noClassAssign",
+        language: "js",
         sources: &[RuleSource::Eslint("no-class-assign")],
         recommended: true,
     }

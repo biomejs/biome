@@ -102,6 +102,7 @@ declare_rule! {
     pub UseConsistentBuiltinInstantiation {
         version: "1.7.2",
         name: "useConsistentBuiltinInstantiation",
+        language: "js",
         sources: &[
             RuleSource::EslintUnicorn("new-for-builtins"),
             RuleSource::Eslint("no-new-wrappers"),

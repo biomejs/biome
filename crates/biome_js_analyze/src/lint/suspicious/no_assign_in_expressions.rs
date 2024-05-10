@@ -44,6 +44,7 @@ declare_rule! {
     pub NoAssignInExpressions {
         version: "1.0.0",
         name: "noAssignInExpressions",
+        language: "js",
         sources: &[RuleSource::Eslint("no-cond-assign")],
         source_kind: RuleSourceKind::Inspired,
         recommended: true,

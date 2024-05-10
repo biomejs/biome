@@ -54,6 +54,7 @@ declare_rule! {
     pub NoUselessThisAlias {
         version: "1.0.0",
         name: "noUselessThisAlias",
+        language: "ts",
         sources: &[RuleSource::EslintTypeScript("no-this-alias")],
         source_kind: RuleSourceKind::Inspired,
         recommended: true,

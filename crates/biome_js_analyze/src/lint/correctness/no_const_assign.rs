@@ -50,6 +50,7 @@ declare_rule! {
     pub NoConstAssign {
         version: "1.0.0",
         name: "noConstAssign",
+        language: "js",
         sources: &[RuleSource::Eslint("no-const-assign")],
         recommended: true,
         fix_kind: FixKind::Unsafe,

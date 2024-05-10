@@ -49,6 +49,7 @@ declare_rule! {
     pub NoUselessUndefinedInitialization {
         version: "1.7.2",
         name: "noUselessUndefinedInitialization",
+        language: "js",
         sources: &[RuleSource::Eslint("no-undef-init")],
         source_kind: RuleSourceKind::Inspired,
         fix_kind: FixKind::Unsafe,

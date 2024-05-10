@@ -88,6 +88,7 @@ declare_rule! {
     pub NoUselessElse {
         version: "1.3.0",
         name: "noUselessElse",
+        language: "js",
         sources: &[
             RuleSource::Eslint("no-else-return"),
             RuleSource::Clippy("redundant_else 	"),

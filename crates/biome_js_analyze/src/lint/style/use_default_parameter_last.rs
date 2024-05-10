@@ -51,6 +51,7 @@ declare_rule! {
     pub UseDefaultParameterLast {
         version: "1.0.0",
         name: "useDefaultParameterLast",
+        language: "js",
         sources: &[
             RuleSource::Eslint("default-param-last"),
             RuleSource::EslintTypeScript("default-param-last")

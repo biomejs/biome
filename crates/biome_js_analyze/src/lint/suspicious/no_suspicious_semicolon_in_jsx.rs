@@ -45,6 +45,7 @@ declare_rule! {
     pub NoSuspiciousSemicolonInJsx {
         version: "1.6.0",
         name: "noSuspiciousSemicolonInJsx",
+        language: "js",
         recommended: true,
     }
 }

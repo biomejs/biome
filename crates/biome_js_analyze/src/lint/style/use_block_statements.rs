@@ -68,6 +68,7 @@ declare_rule! {
     pub UseBlockStatements {
         version: "1.0.0",
         name: "useBlockStatements",
+        language: "js",
         sources: &[RuleSource::Eslint("curly")],
         recommended: false,
         fix_kind: FixKind::Unsafe,

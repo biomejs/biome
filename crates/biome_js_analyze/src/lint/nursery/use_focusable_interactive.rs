@@ -40,6 +40,7 @@ declare_rule! {
     pub UseFocusableInteractive {
         version: "next",
         name: "useFocusableInteractive",
+        language: "jsx",
         sources: &[RuleSource::EslintJsxA11y("interactive-support-focus")],
         recommended: true,
     }

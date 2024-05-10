@@ -44,6 +44,7 @@ declare_rule! {
     pub UseArrayLiterals {
         version: "1.7.2",
         name: "useArrayLiterals",
+        language: "js",
         sources: &[RuleSource::Eslint("no-array-constructor")],
         recommended: false,
         fix_kind: FixKind::Unsafe,

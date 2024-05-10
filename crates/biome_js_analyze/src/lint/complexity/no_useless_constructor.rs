@@ -118,6 +118,7 @@ declare_rule! {
     pub NoUselessConstructor {
         version: "1.0.0",
         name: "noUselessConstructor",
+        language: "js",
         sources: &[
             RuleSource::Eslint("no-useless-constructor"),
             RuleSource::EslintTypeScript("no-useless-constructor"),

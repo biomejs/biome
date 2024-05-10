@@ -54,6 +54,7 @@ declare_rule! {
     pub NoExcessiveNestedTestSuites {
         version: "1.6.0",
         name: "noExcessiveNestedTestSuites",
+        language: "js",
         recommended: true,
         sources: &[RuleSource::EslintJest("max-nested-describe")],
         source_kind: RuleSourceKind::SameLogic,

@@ -23,6 +23,7 @@ declare_rule! {
     pub NoConsole {
         version: "1.6.0",
         name: "noConsole",
+        language: "js",
         sources: &[RuleSource::Eslint("no-console")],
         recommended: false,
         fix_kind: FixKind::Unsafe,

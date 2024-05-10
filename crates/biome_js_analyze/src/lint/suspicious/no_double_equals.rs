@@ -50,6 +50,7 @@ declare_rule! {
     pub NoDoubleEquals {
         version: "1.0.0",
         name: "noDoubleEquals",
+        language: "js",
         sources: &[RuleSource::Eslint("eqeqeq")],
         recommended: true,
         fix_kind: FixKind::Unsafe,

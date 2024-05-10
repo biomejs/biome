@@ -60,6 +60,7 @@ declare_rule! {
     pub NoAutofocus {
         version: "1.0.0",
         name: "noAutofocus",
+        language: "jsx",
         sources: &[RuleSource::EslintJsxA11y("no-autofocus")],
         recommended: true,
         fix_kind: FixKind::Unsafe,

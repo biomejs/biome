@@ -60,6 +60,7 @@ declare_rule! {
     pub NoInvalidUseBeforeDeclaration {
         version: "1.5.0",
         name: "noInvalidUseBeforeDeclaration",
+        language: "js",
         sources: &[
             RuleSource::Eslint("no-use-before-define"),
             RuleSource::EslintTypeScript("no-use-before-define"),

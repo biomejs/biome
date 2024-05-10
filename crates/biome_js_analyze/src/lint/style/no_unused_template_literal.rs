@@ -41,6 +41,7 @@ declare_rule! {
     pub NoUnusedTemplateLiteral {
         version: "1.0.0",
         name: "noUnusedTemplateLiteral",
+        language: "ts",
         sources: &[RuleSource::EslintTypeScript("no-useless-template-literals")],
         recommended: true,
         fix_kind: FixKind::Unsafe,

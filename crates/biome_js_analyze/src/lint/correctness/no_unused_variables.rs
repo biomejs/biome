@@ -90,6 +90,7 @@ declare_rule! {
     pub NoUnusedVariables {
         version: "1.0.0",
         name: "noUnusedVariables",
+        language: "js",
         sources: &[
             RuleSource::Eslint("no-unused-vars"),
             RuleSource::EslintTypeScript("no-unused-vars"),

@@ -37,6 +37,7 @@ declare_rule! {
     pub NoCatchAssign {
         version: "1.0.0",
         name: "noCatchAssign",
+        language: "js",
         sources: &[RuleSource::Eslint("no-ex-assign")],
         recommended: true,
     }

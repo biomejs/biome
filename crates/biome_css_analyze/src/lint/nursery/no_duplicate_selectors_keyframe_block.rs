@@ -37,6 +37,7 @@ declare_rule! {
     pub NoDuplicateSelectorsKeyframeBlock {
         version: "next",
         name: "noDuplicateSelectorsKeyframeBlock",
+        language: "css",
         recommended: true,
         sources:&[RuleSource::Stylelint("keyframe-block-no-duplicate-selectors")],
     }

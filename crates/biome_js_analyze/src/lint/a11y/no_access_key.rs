@@ -40,6 +40,7 @@ declare_rule! {
     pub NoAccessKey {
         version: "1.0.0",
         name: "noAccessKey",
+        language: "jsx",
         sources: &[RuleSource::EslintJsxA11y("no-access-key")],
         recommended: true,
         fix_kind: FixKind::Unsafe,

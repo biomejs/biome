@@ -48,6 +48,7 @@ declare_rule! {
     pub NoNonNullAssertion {
         version: "1.0.0",
         name: "noNonNullAssertion",
+        language: "ts",
         sources: &[RuleSource::EslintTypeScript("no-non-null-assertion")],
         recommended: true,
         fix_kind: FixKind::Unsafe,

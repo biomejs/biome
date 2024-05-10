@@ -47,6 +47,7 @@ declare_rule! {
     pub NoNegationElse {
         version: "1.0.0",
         name: "noNegationElse",
+        language: "js",
         sources: &[
             RuleSource::Eslint("no-negated-condition"),
             RuleSource::Clippy("if_not_else"),

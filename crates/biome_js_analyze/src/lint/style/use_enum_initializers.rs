@@ -67,6 +67,7 @@ declare_rule! {
     pub UseEnumInitializers {
         version: "1.0.0",
         name: "useEnumInitializers",
+        language: "ts",
         sources: &[RuleSource::EslintTypeScript("prefer-enum-initializers")],
         recommended: true,
         fix_kind: FixKind::Safe,

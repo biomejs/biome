@@ -64,6 +64,7 @@ declare_rule! {
     pub NoUnusedPrivateClassMembers {
         version: "1.3.3",
         name: "noUnusedPrivateClassMembers",
+        language: "js",
         sources: &[RuleSource::Eslint("no-unused-private-class-members")],
         recommended: false,
         fix_kind: FixKind::Unsafe,

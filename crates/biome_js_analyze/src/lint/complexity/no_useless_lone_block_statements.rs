@@ -46,6 +46,7 @@ declare_rule! {
     pub NoUselessLoneBlockStatements {
         version: "1.3.3",
         name: "noUselessLoneBlockStatements",
+        language: "js",
         sources: &[RuleSource::Eslint("no-lone-blocks")],
         recommended: true,
         fix_kind: FixKind::Unsafe,

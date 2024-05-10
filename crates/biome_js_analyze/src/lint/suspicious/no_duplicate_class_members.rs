@@ -87,6 +87,7 @@ declare_rule! {
     pub NoDuplicateClassMembers {
         version: "1.0.0",
         name: "noDuplicateClassMembers",
+        language: "js",
         sources: &[
             RuleSource::Eslint("no-dupe-class-members"),
             RuleSource::EslintTypeScript("no-dupe-class-members")

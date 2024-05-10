@@ -41,6 +41,7 @@ declare_rule! {
     pub NoImportantInKeyframe {
         version: "next",
         name: "noImportantInKeyframe",
+        language: "css",
         recommended: true,
         sources:&[RuleSource::Stylelint("keyframe-declaration-no-important")],
     }

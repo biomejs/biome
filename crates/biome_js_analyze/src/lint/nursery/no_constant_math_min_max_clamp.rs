@@ -37,6 +37,7 @@ declare_rule! {
     pub NoConstantMathMinMaxClamp {
         version: "1.7.0",
         name: "noConstantMathMinMaxClamp",
+        language: "js",
         sources: &[RuleSource::Clippy("min_max")],
         recommended: false,
         fix_kind: FixKind::Unsafe,

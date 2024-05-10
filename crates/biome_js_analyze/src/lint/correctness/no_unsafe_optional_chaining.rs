@@ -64,6 +64,7 @@ declare_rule! {
     pub NoUnsafeOptionalChaining {
         version: "1.0.0",
         name: "noUnsafeOptionalChaining",
+        language: "js",
         sources: &[RuleSource::Eslint("no-unsafe-optional-chaining")],
         recommended: true,
     }

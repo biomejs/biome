@@ -16,6 +16,7 @@ declare_rule! {
     pub NoTypeOnlyImportAttributes {
         version: "1.5.0",
         name: "noTypeOnlyImportAttributes",
+        language: "js",
     }
 }
 

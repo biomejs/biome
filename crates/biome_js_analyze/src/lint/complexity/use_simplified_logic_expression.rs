@@ -51,6 +51,7 @@ declare_rule! {
     pub UseSimplifiedLogicExpression {
         version: "1.0.0",
         name: "useSimplifiedLogicExpression",
+        language: "js",
         recommended: false,
         fix_kind: FixKind::Unsafe,
     }

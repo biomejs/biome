@@ -85,6 +85,7 @@ declare_rule! {
     pub UseFilenamingConvention {
         version: "1.5.0",
         name: "useFilenamingConvention",
+        language: "js",
         sources: &[RuleSource::EslintUnicorn("filename-case")],
         source_kind: RuleSourceKind::Inspired,
         recommended: false,

@@ -51,6 +51,7 @@ declare_rule! {
     pub NoNoninteractiveTabindex {
         version: "1.0.0",
         name: "noNoninteractiveTabindex",
+        language: "jsx",
         sources: &[RuleSource::EslintJsxA11y("no-noninteractive-tabindex")],
         recommended: true,
         fix_kind: FixKind::Unsafe,

@@ -44,6 +44,7 @@ declare_rule! {
     pub UseNodejsImportProtocol {
         version: "1.5.0",
         name: "useNodejsImportProtocol",
+        language: "js",
         sources: &[RuleSource::EslintUnicorn("prefer-node-protocol")],
         recommended: true,
         fix_kind: FixKind::Unsafe,

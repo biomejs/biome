@@ -33,6 +33,7 @@ declare_rule! {
     pub NoNewSymbol {
         version: "1.0.0",
         name: "noNewSymbol",
+        language: "js",
         recommended: false,
         sources: &[RuleSource::Eslint("no-new-symbol")],
         deprecated: "Use `noInvalidNewBuiltin` instead.",

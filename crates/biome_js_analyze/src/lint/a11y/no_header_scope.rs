@@ -40,6 +40,7 @@ declare_rule! {
     pub NoHeaderScope {
         version: "1.0.0",
         name: "noHeaderScope",
+        language: "jsx",
         sources: &[RuleSource::EslintJsxA11y("scope")],
         recommended: true,
         fix_kind: FixKind::Unsafe,

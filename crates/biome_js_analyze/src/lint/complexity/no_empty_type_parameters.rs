@@ -37,6 +37,7 @@ declare_rule! {
     pub NoEmptyTypeParameters {
         version: "1.5.0",
         name: "noEmptyTypeParameters",
+        language: "ts",
         recommended: true,
     }
 }
