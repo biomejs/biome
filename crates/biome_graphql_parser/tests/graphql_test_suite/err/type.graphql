@@ -1,4 +1,4 @@
-query ($storyId: !, $comments: [!], $tags: [!]!, $posts: PostInput]!, $input: [InputType!) {
+query ($input: [InputType!) {
 	likeStory
 }
 

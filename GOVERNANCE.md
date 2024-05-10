@@ -1,8 +1,16 @@
 # Governance
 
-This document outlines the governance model for Biome. This document includes the contributor model, code review, merging, and the consequences and process for Code of Conduct violations.
+This document outlines the governance model for Biome.
 
-## Member Roles
+It describes various parts of how the project is managed as well as accepted practices for day-to-day operation:
+
+- [Contributor Model](#contributor-model)
+- [Project Direction](#project-direction)
+- [Code Review](#code-review)
+- [Financial Contributions](#financial-contributions)
+- [Moderation](#moderation)
+
+## Contributor Model
 
 All members must follow the [Code of Conduct](CODE_OF_CONDUCT.md). Consequences for member violations are detailed in [Moderation](#moderation).
 
@@ -49,6 +57,7 @@ Core Contributors are outstanding [maintainers](#maintainer), are ambassadors of
 - Takes part in [project decisions](#project-direction-and-planning)
 - Ability to [vote](#maintainer-nomination) on new maintainers and [vote](#core-contributor-nomination) on new core contributors
 - Onboard new [maintainers](#maintainer)
+- Assign [pledges to issues](#bounties).
 
 #### Core contributor nomination
 
@@ -125,7 +134,7 @@ One or more people can own certain parts of the codebase. This process is inform
 
 There aren't strict requirements and expectations around activity for core contributors and maintainers; although long periods of inactivity must be communicated to the team.
 
-Inactive core contributors or maintainers may have voting and access rights removed and status removed, and given them the _Past contributor_ status. A core contributor or maintainer may request their voting rights and status back upon sufficient activity.
+Inactive core contributors or maintainers may have voting and access rights removed and status removed, and given them the _Past maintainer_ status. A core contributor or maintainer may request their voting rights and status back upon sufficient activity.
 
 > [!NOTE]
 > The definition of "long periods", and how long an individual needs to stay inactive in order to have their voting rights removed have yet to be decided.
@@ -139,7 +148,7 @@ Contributions to the project aren't only limited to code. Contributions come in 
 - Support in secondary channels, e.g. StackOverflow, etc.
 - Website;
 
-## Project direction and planning
+## Project Direction
 
 Project direction and planning is a shared responsibility amongst members. Core contributors are responsible for dictating high-level goals and the project scope that should be adhered to.
 
@@ -164,6 +173,80 @@ We have a reasonably liberal approach to code review and merging. We value quick
 - If necessary, identify potential owners for PR review and approval.
 - All code must go through Pull Requests (PR) and pass status checks before being merged. If a PR is merged that breaks `main` due to the branch not being up-to-date, then it should either be reverted or a quick fix merged as a separate PR.
 - If a PR is against code you have previously committed and is either small changes, bug fixes, or refactors, then you're free to merge it without any review. However, if you need more confidence in your changes, you can wait for approval from another maintainer or core contributor.
+
+## Financial Contributions
+
+There are two ways to fund Biome and its development: sponsorship and funded bounties, although we strongly prefer and recommend sponsorship.
+
+### Sponsorship
+
+Sponsorship is the first and foremost way of making financial contributions to Biome. Sponsorship can be
+done through a one-time donation, or through recurring donations. We offer incentives for certain levels of recurring donations.
+
+To learn more about sponsorship incentives, or to make a donation, please visit our [Open Collective page](https://opencollective.com/biome).
+You can also sponsor the project through [GitHub](https://github.com/sponsors/biomejs).
+
+### Community-Funded Bounties
+
+Bounties are the second approach towards funding Biome development. Unlike a sponsorship, bounties are directed towards the implementation of a specific feature. Compared to sponsorship, bounties come with a few risks, both for Biome as a project and for the people or entities offering and collecting the bounty. To minimize these risks, we only sanction bounties under the following conditions:
+
+- Bounties must be pledged through Polar.sh on an issue that is opened in our issue tracker.
+  - Unless otherwise specified, Biome reserves 30% of the payment amount, meaning contributors receive 70% of the pledged amount.
+  - The commission charged by Polar.sh is split accordingly.
+  - We reserve the right to decide on a different split in the future.
+- Bounties cannot be opened for bug fixes. Users who wish to see bugs fixed are advised to consider [sponsorship](#sponsorship) instead, in order to give the project a better long-term ability to fix bugs as well.
+- If an issue in our issue tracker is not yet open for pledges, the person who wishes to pledge should indicate their desire in the comments of the issue, or do so through the `Community > #funding` channel on Discord. A [Core Contributor](#core-contributor) can then **accept** or **reject** the request for the bounty. Reasons for rejection include, but are not limited to:
+  - Implementation of the task would conflict with the project direction or [its values](https://biomejs.dev/internals/philosophy/).
+  - Implementation of the task is (currently) technically infeasible.
+  - The suggested pledge is deemed inappropriate for the amount of work involved.
+- The person making the pledge acknowledges their pledge does not come with a guarantee of work done.
+- A task is only completed when a Biome maintainer merges the pull request that closes the task. The person trying to complete the task is responsible for addressing review comments to make sure the work meets the quality standards of the Biome project.
+- There is a 6 month expiration on pledges, as managed by Polar.sh.
+- Terms and conditions of Polar.sh apply to all pledges.
+  - For the FAQ, please see: https://docs.polar.sh/maintainers/faq/
+  - For the legal terms, please see: https://polar.sh/legal/terms
+- If you are receiving money as part of a bounty, please consider whether you need to pay taxes in your country. Core contributors and Maintainers aren't obligated to give tax advice over the money received.
+
+### Project-Funded Bounties
+
+In some cases, Biome funds bounties on its own issues in order to further the project goals as laid out in its [roadmap](#roadmap). Because Biome is the one funding these issues, it also means **100% of the pledged amount will go to the contributor completing the task**. Project-Funded Bounties have the same conditions applied to them as [Community-Funded Bounties](#community-funded-bounties). But given that these issues are funded using money that ultimately comes from our sponsors, we have additional restrictions in place:
+
+- Implementation of the task funded by Biome must advance our [roadmap](#roadmap) or help with essential infrastructure.
+  - The task description must include a clear rationale for why this task is eligible for funding.
+- To avoid paying a commission on our own bounties, we do not assign funds through Polar.sh. Instead, we ask contributors to take the money directly from our Open Collective account upon completion of the task.
+  - Unfortunately, this means Project-Funded Bounties can only be assigned to [Core Contributors](#core-contributor) at this moment since they have access to our Open Collective account.
+
+Additionally, there is a strict process for assigning Project-Funded Bounties:
+
+- To request Biome funding for a task, a request with a clear rationale must be made in the `Community > #funding` channel on Discord.
+  - To make sure our Core Contributors don't have to worry about overlooking Biome-funding-related decisions, requests made on GitHub issues are not sufficient for a funding request.
+- If no Core Contributor raises objections within three (3) days, then any Core Contributor can assign the pledge to the issue and assign the requester to it.
+  - The waiting period is optional if a Lead approves the request.
+  - If an objection is raised, the request is put on hold until a Lead makes the final decision.
+- There is a maximum amount of issues with pledges someone can have assigned to them. The limit is 2 for core contributors, and 1 for anyone else. By limiting the amount of issues with pledges that someone can have assigned, we make sure the bounties remain available for others to pick up.
+
+### Fund Allocation
+
+**Funds will be allocated for project-specific services**:
+  - Domain registrations
+  - Website hosting
+  - Password manager to manage secrets and passwords among Lead members
+
+Additionally, we may use funds for assigning [Project-Funded Bounties](#project-funded-bounties).
+
+#### Expenses
+
+Core contributors are allowed to claim expenses related to conferences where they talk about Biome, or Biome workshops that they run. Expenses that can be claimed include, but are not limited to: trip (plane, train, etc.), meals, transport, parking.
+  - The person will have to provide proof of attendance (badge, video, etc.);
+  - Expenses will have to be uploaded via the open collective website.
+  - Only the expenses that are afforded in the days of the workspace/conference are accepted:
+    - If a conference lasts multiple days and the member decides to attend *both* days, and the member speaks only the first day, only the expenses of the first day should be taken in consideration. In this example, if the member booked three nights in a hotel to attend these two days, the expense should be divided by 3  - three nights - and only expense 2 days: night before the conference, plus the night of the day the member speaks.
+    - If a conference lasts one day and the member decides to make their performance longer, all the expenses afforded in the other days won't be accepted. Only 2 nights of accommodation are accepted.
+
+Expenses must be approved by at least one [Lead](#lead). In the presence of one single Lead, the Lead will ask one Core Contributor to fact-check the honesty of expenses, and leave a comment in the Open Collective expense page. In case of multiple leads, the Lead submitting the expense must seek the approval of at least one other Lead.
+
+> [!NOTE]
+> Other usage of funds has yet to be decided.
 
 ## Moderation
 
@@ -209,26 +292,6 @@ The reviewers will determine responses based on the information gathered and the
 - Asking for an apology (private or public)
 - Permanent ban from the GitHub org and Discord server
 - Revoked contributor or moderator status
-
-## OpenCollective fund allocation
-
-**Funds will be allocated for project-specific services**:
-  - Domain registrations
-  - Website hosting
-  - Password manager to manage secrets and passwords among Lead members
-
-Core contributors are allowed to claim expenses related to conferences where they talk about Biome, or Biome workshops that they run. Expenses that can be claimed are but not limited to: trip (plane, train, etc.), meals, transport, parking.
-  - The person will have to provide proof of attendance (badge, video, etc.);
-  - Expenses will have to be uploaded via the open collective website.
-  - Only the expenses that are afforded in the days of the workspace/conference are accepted:
-    - If a conference lasts multiple days and the member decides to attend *both* days, and the member speaks only the first day, only the expenses of the first day should be taken in consideration. In this example, if the member booked three nights in a hotel to attend these two days, the expense should be divided by 3  - three nights - and only expense 2 days: night before the conference, plus the night of the day the member speaks.
-    - If a conference lasts one day and the member decides to make their performance longer, all the expenses afforded in the other days won't be accepted. Only 2 nights of accommodation are accepted.
-
-Expenses must be approved by at least one [lead](#lead). In the presence of one single lead, the lead will ask one core contributor to fact-check the honesty of expenses, and leave a comment in the Open Collective expense page. In case of multiple leads, the lead submitting the expense must seek the approval of at least one other lead.
-
-> [!NOTE]
-> Other usage of funds has yet to be decided.
-
 
 [gh-org]: https://github.com/biomejs
 [discord]: https://discord.gg/BypW39g6Yc±

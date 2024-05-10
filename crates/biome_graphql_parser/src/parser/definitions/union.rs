@@ -1,6 +1,6 @@
 use crate::parser::{
     directive::DirectiveList,
-    is_at_name, parse_description,
+    is_nth_at_name, parse_description,
     parse_error::{expected_name, expected_named_type},
     parse_name,
     r#type::parse_named_type,
@@ -112,7 +112,7 @@ impl ParseRecovery for UnionMemberListParseRecovery {
         // After a union definition is a new type definition so it's safe to
         // assume any name we see before a new type definition is a union
         // member type
-        || is_at_name(p)
+        || is_nth_at_name(p, 0)
         || is_at_union_member_types_end(p)
     }
 }
@@ -130,7 +130,7 @@ fn is_at_union_member_types(p: &mut GraphqlParser<'_>) -> bool {
     // missing both = and |. After a union definition is a new type definition
     // so it's safe to assume any name we see before a new type definition is
     // a union member type
-    || is_at_name(p)
+    || is_nth_at_name(p, 0)
 }
 
 #[inline]

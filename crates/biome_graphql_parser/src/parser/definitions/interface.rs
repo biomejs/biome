@@ -1,6 +1,6 @@
 use crate::parser::{
     directive::{is_at_directive, DirectiveList},
-    is_at_name, parse_description,
+    is_nth_at_name, parse_description,
     parse_error::{expected_name, expected_named_type},
     parse_name,
     r#type::parse_named_type,
@@ -12,6 +12,7 @@ use biome_graphql_syntax::{
     T,
 };
 use biome_parser::parse_lists::ParseNodeList;
+use biome_parser::prelude::TokenSource;
 use biome_parser::{
     parse_lists::ParseSeparatedList, parse_recovery::ParseRecovery, parsed_syntax::ParsedSyntax,
     prelude::ParsedSyntax::*, Parser,
@@ -53,11 +54,15 @@ pub(super) fn parse_implements_interface(p: &mut GraphqlParser) -> ParsedSyntax 
 
     p.bump(T![implements]);
 
-    if p.at(T![&]) {
-        p.bump(T![&]);
-    }
+    // & is optional
+    p.eat(T![&]);
 
+    let position = p.source().position();
     ImplementsInterfaceList.parse_list(p);
+
+    if position == p.source().position() {
+        p.error(expected_named_type(p, p.cur_range()));
+    }
 
     Present(m.complete(p, GRAPHQL_IMPLEMENTS_INTERFACES))
 }
@@ -108,7 +113,7 @@ impl ParseRecovery for ImplementsInterfaceListParseRecovery {
     const RECOVERED_KIND: Self::Kind = GRAPHQL_BOGUS;
 
     fn is_at_recovered(&self, p: &mut Self::Parser<'_>) -> bool {
-        is_at_name(p) || p.at(T![&]) || is_at_implements_interface_end(p)
+        is_nth_at_name(p, 0) || p.at(T![&]) || is_at_implements_interface_end(p)
     }
 }
 

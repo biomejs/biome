@@ -1029,6 +1029,10 @@ export interface Nursery {
 	 */
 	useExplicitLengthCheck?: RuleConfiguration_for_Null;
 	/**
+	 * Elements with an interactive role and interaction handlers must be focusable.
+	 */
+	useFocusableInteractive?: RuleConfiguration_for_Null;
+	/**
 	 * Disallow a missing generic family keyword within font families.
 	 */
 	useGenericFontNames?: RuleConfiguration_for_Null;
@@ -2037,6 +2041,7 @@ export type Category =
 	| "lint/nursery/useConsistentBuiltinInstantiation"
 	| "lint/nursery/useDefaultSwitchClause"
 	| "lint/nursery/useExplicitLengthCheck"
+	| "lint/nursery/useFocusableInteractive"
 	| "lint/nursery/useGenericFontNames"
 	| "lint/nursery/useImportRestrictions"
 	| "lint/nursery/useSortedClasses"

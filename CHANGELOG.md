@@ -23,7 +23,7 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
   - biome check .
   + biome check    # You can run the command without the path
   ```
-  
+
 ### Configuration
 
 ### Editors
@@ -36,6 +36,7 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 #### Bug fixes
 
+- Fix [#2470](https://github.com/biomejs/biome/issues/2470) by avoid introducing linebreaks in single line string interpolations. Contributed by @ah-yu
 - Resolve deadlocks by narrowing the scope of locks. Contributed by @mechairoi
 
 ### JavaScript APIs
@@ -44,6 +45,9 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 ### Parser
 
+#### Enhancements
+
+- `lang="tsx"` is now supported in Vue Single File Components. [#2765](https://github.com/biomejs/biome/issues/2765) Contributed by @dyc3
 
 ## 1.7.3 (2024-05-06)
 

@@ -1640,6 +1640,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useFocusableInteractive": {
+					"description": "Elements with an interactive role and interaction handlers must be focusable.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useGenericFontNames": {
 					"description": "Disallow a missing generic family keyword within font families.",
 					"anyOf": [
