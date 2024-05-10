@@ -45,6 +45,31 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 #### Bug fixes
 
+- [noUndeclaredVariables](https://biomejs.dev/linter/rules/no-undeclared-variables/) and [noUnusedImports](https://biomejs.dev/linter/rules/no-unused-imports) now correctly handle import namespaces ([#2796](https://github.com/biomejs/biome/issues/2796)).
+
+  Previously, Biome bound unqualified type to import namespaces.
+  Import namespaces can only be used as qualified names in a type (ambient) context.
+
+  ```ts
+  // Unused import
+  import * as Ns1 from "";
+  // This doesn't reference the import namespace `Ns1`
+  type T1 = Ns1; // Undeclared variable `Ns1`
+
+  // Unused import
+  import type * as Ns2 from "";
+  // This doesn't reference the import namespace `Ns2`
+  type T2 = Ns2; // Undeclared variable `Ns2`
+
+  import type * as Ns3 from "";
+  // This references the import namespace because it is a qualified name.
+  type T3 = Ns3.Inner;
+  // This also references the import namespace.
+  export type { Ns3 }
+  ```
+
+  Contributed by @Conaclos
+
 - `useJsxKeyInIterable` now handles more cases involving fragments. See the snippets below. Contributed by @dyc3
 ```jsx
 // valid

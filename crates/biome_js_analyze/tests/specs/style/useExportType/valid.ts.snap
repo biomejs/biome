@@ -45,6 +45,26 @@ declare class AmbientClass {}
 declare enum AmbientEnum {}
 declare class AmbientFunction {}
 export { AmbientClass, AmbientEnum, AmbientFunction }
+
+import type * as Ns from ""
+export { Ns }
 ```
 
+# Diagnostics
+```
+valid.ts:44:8 lint/style/useExportType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
+  ! All exports are only types and should thus use export type.
+  
+    43 │ import type * as Ns from ""
+  > 44 │ export { Ns }
+       │        ^^^^^^
+  
+  i Using export type allows transpilers to safely drop exports of types without looking for their definition.
+  
+  i Safe fix: Use a grouped export type.
+  
+    44 │ export·type·{·Ns·}
+       │        +++++      
+
+```
