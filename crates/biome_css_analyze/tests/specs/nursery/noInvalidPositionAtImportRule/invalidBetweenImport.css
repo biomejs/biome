@@ -1,0 +1,7 @@
+@import 'foo.css';
+a {}
+@import 'bar1.css';
+@import 'bar2.css';
+a {}
+@import 'bar3.css';
+@import 'bar4.css';
