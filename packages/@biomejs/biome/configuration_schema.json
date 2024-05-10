@@ -1524,6 +1524,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noInvalidPositionAtImportRule": {
+					"description": "Disallow the use of @import at-rules in invalid positions.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noMisplacedAssertion": {
 					"description": "Checks that the assertion function, for example expect, is placed inside an it() function call.",
 					"anyOf": [
@@ -1561,6 +1568,13 @@
 				},
 				"noUnknownFunction": {
 					"description": "Disallow unknown CSS value functions.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noUnknownMediaFeatureName": {
+					"description": "Disallow unknown media feature names.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
@@ -1635,6 +1649,13 @@
 				},
 				"useExplicitLengthCheck": {
 					"description": "Enforce explicitly comparing the length, size, byteLength or byteOffset property of a value.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useFocusableInteractive": {
+					"description": "Elements with an interactive role and interaction handlers must be focusable.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }

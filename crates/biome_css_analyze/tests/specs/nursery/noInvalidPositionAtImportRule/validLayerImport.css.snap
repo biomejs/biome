@@ -1,0 +1,10 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: validLayerImport.css
+---
+# Input
+```css
+@layer default;
+@import url(theme.css) layer(theme);
+
+```

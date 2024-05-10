@@ -961,6 +961,10 @@ export interface Nursery {
 	 */
 	noImportantInKeyframe?: RuleConfiguration_for_Null;
 	/**
+	 * Disallow the use of @import at-rules in invalid positions.
+	 */
+	noInvalidPositionAtImportRule?: RuleConfiguration_for_Null;
+	/**
 	 * Checks that the assertion function, for example expect, is placed inside an it() function call.
 	 */
 	noMisplacedAssertion?: RuleConfiguration_for_Null;
@@ -984,6 +988,10 @@ export interface Nursery {
 	 * Disallow unknown CSS value functions.
 	 */
 	noUnknownFunction?: RuleConfiguration_for_Null;
+	/**
+	 * Disallow unknown media feature names.
+	 */
+	noUnknownMediaFeatureName?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow unknown properties.
 	 */
@@ -1028,6 +1036,10 @@ export interface Nursery {
 	 * Enforce explicitly comparing the length, size, byteLength or byteOffset property of a value.
 	 */
 	useExplicitLengthCheck?: RuleConfiguration_for_Null;
+	/**
+	 * Elements with an interactive role and interaction handlers must be focusable.
+	 */
+	useFocusableInteractive?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow a missing generic family keyword within font families.
 	 */
@@ -2022,6 +2034,7 @@ export type Category =
 	| "lint/nursery/noEvolvingAny"
 	| "lint/nursery/noFlatMapIdentity"
 	| "lint/nursery/noImportantInKeyframe"
+	| "lint/nursery/noInvalidPositionAtImportRule"
 	| "lint/nursery/noMisplacedAssertion"
 	| "lint/nursery/noMissingGenericFamilyKeyword"
 	| "lint/nursery/noNodejsModules"
@@ -2030,6 +2043,7 @@ export type Category =
 	| "lint/nursery/noTypeOnlyImportAttributes"
 	| "lint/nursery/noUndeclaredDependencies"
 	| "lint/nursery/noUnknownFunction"
+	| "lint/nursery/noUnknownMediaFeatureName"
 	| "lint/nursery/noUnknownProperty"
 	| "lint/nursery/noUnknownSelectorPseudoElement"
 	| "lint/nursery/noUnknownUnit"
@@ -2041,6 +2055,7 @@ export type Category =
 	| "lint/nursery/useConsistentBuiltinInstantiation"
 	| "lint/nursery/useDefaultSwitchClause"
 	| "lint/nursery/useExplicitLengthCheck"
+	| "lint/nursery/useFocusableInteractive"
 	| "lint/nursery/useGenericFontNames"
 	| "lint/nursery/useImportRestrictions"
 	| "lint/nursery/useSortedClasses"

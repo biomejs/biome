@@ -11,8 +11,10 @@ pub type NoDuplicateFontNames =
     <lint::nursery::no_duplicate_font_names::NoDuplicateFontNames as biome_analyze::Rule>::Options;
 pub type NoDuplicateSelectorsKeyframeBlock = < lint :: nursery :: no_duplicate_selectors_keyframe_block :: NoDuplicateSelectorsKeyframeBlock as biome_analyze :: Rule > :: Options ;
 pub type NoImportantInKeyframe = < lint :: nursery :: no_important_in_keyframe :: NoImportantInKeyframe as biome_analyze :: Rule > :: Options ;
+pub type NoInvalidPositionAtImportRule = < lint :: nursery :: no_invalid_position_at_import_rule :: NoInvalidPositionAtImportRule as biome_analyze :: Rule > :: Options ;
 pub type NoUnknownFunction =
     <lint::nursery::no_unknown_function::NoUnknownFunction as biome_analyze::Rule>::Options;
+pub type NoUnknownMediaFeatureName = < lint :: nursery :: no_unknown_media_feature_name :: NoUnknownMediaFeatureName as biome_analyze :: Rule > :: Options ;
 pub type NoUnknownProperty =
     <lint::nursery::no_unknown_property::NoUnknownProperty as biome_analyze::Rule>::Options;
 pub type NoUnknownSelectorPseudoElement = < lint :: nursery :: no_unknown_selector_pseudo_element :: NoUnknownSelectorPseudoElement as biome_analyze :: Rule > :: Options ;
