@@ -192,7 +192,6 @@ fn generate_group(category: &'static str, group: &str, base_path: &Path) -> Resu
     let nl = Punct::new('\n', Spacing::Alone);
     let sp = Punct::new(' ', Spacing::Joint);
     let sp4 = quote! { #sp #sp #sp #sp };
-    dbg!(&category);
     let (import_macro, use_macro) = match category {
         "lint" | "syntax" => (
             quote!(

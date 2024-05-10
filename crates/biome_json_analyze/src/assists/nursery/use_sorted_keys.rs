@@ -93,16 +93,12 @@ impl Members {
         let mut separators = Vec::new();
 
         for (index, _) in self.0.iter().enumerate() {
-            if index == separator_count {
-                continue;
-            } else {
+            if index != separator_count {
                 separators.push(token(T![,]))
             }
         }
 
-        let member_list = json_member_list(items, separators);
-
-        member_list
+        json_member_list(items, separators)
     }
 }
 
