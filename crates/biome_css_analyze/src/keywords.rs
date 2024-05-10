@@ -3826,7 +3826,7 @@ pub const KNOWN_SAFARI_PROPERTIES: [&str; 644] = [
 ];
 
 // https://github.com/known-css/known-css-properties/blob/master/source/browsers/samsung_internet-23.0.json
-pub const KNOWN_SUMSUNG_INTERNET_PROPERTIES: [&str; 608] = [
+pub const KNOWN_SAMSUNG_INTERNET_PROPERTIES: [&str; 608] = [
     "-webkit-align-content",
     "-webkit-align-items",
     "-webkit-align-self",
@@ -5028,7 +5028,7 @@ mod tests {
     use super::{
         FUNCTION_KEYWORDS, KNOWN_EDGE_PROPERTIES, KNOWN_EXPLORER_PROPERTIES,
         KNOWN_FIREFOX_PROPERTIES, KNOWN_PROPERTIES, KNOWN_SAFARI_PROPERTIES,
-        KNOWN_SUMSUNG_INTERNET_PROPERTIES, KNOWN_US_BROWSER_PROPERTIES, MEDIA_FEATURE_NAMES,
+        KNOWN_SAMSUNG_INTERNET_PROPERTIES, KNOWN_US_BROWSER_PROPERTIES, MEDIA_FEATURE_NAMES,
     };
 
     #[test]
@@ -5082,7 +5082,7 @@ mod tests {
 
     #[test]
     fn test_kown_sumsung_internet_properties_order() {
-        for items in KNOWN_SUMSUNG_INTERNET_PROPERTIES.windows(2) {
+        for items in KNOWN_SAMSUNG_INTERNET_PROPERTIES.windows(2) {
             assert!(items[0] < items[1], "{} < {}", items[0], items[1]);
         }
     }
