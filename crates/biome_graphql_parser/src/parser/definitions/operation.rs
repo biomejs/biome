@@ -1,7 +1,7 @@
 use crate::parser::{
     argument::parse_arguments,
     directive::{is_at_directive, DirectiveList},
-    is_at_name,
+    is_nth_at_name,
     parse_error::{
         expected_any_selection, expected_name, expected_type, expected_variable,
         expected_variable_definition,
@@ -196,7 +196,7 @@ fn parse_fragment(p: &mut GraphqlParser) -> ParsedSyntax {
     }
     let m = p.start();
     p.expect(DOT3);
-    if is_at_name(p) {
+    if is_nth_at_name(p, 0) {
         // name is checked for in `is_at_name`
         parse_name(p).ok();
         DirectiveList.parse_list(p);
@@ -272,7 +272,7 @@ fn is_at_variable_definitions_end(p: &GraphqlParser) -> bool {
 fn is_at_variable_definition(p: &mut GraphqlParser) -> bool {
     is_at_variable(p)
     // malformed variable
-    || is_at_name(p)
+    || is_nth_at_name(p, 0)
     // malformed variable,but not inside selection set
     || (p.nth_at(1, T![:]) && !p.at(T!['{']))
     // missing entire variable
@@ -300,7 +300,7 @@ fn is_at_selection(p: &mut GraphqlParser) -> bool {
 
 #[inline]
 fn is_at_field(p: &mut GraphqlParser) -> bool {
-    is_at_name(p) || is_at_alias(p)
+    is_nth_at_name(p, 0) || is_at_alias(p)
 }
 
 #[inline]

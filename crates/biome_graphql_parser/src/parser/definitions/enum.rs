@@ -1,6 +1,6 @@
 use crate::parser::{
     directive::{is_at_directive, DirectiveList},
-    is_at_name, parse_description,
+    is_nth_at_name, parse_description,
     parse_error::expected_name,
     parse_name,
     value::{is_at_string, parse_enum_value},
@@ -90,7 +90,7 @@ impl ParseRecovery for EnumValueListParseRecovery {
         // After a enum definition is a new type definition so it's safe to
         // assume any name we see before a new type definition is a enum
         // value
-        is_at_name(p) || is_at_enum_values_end(p)
+        is_nth_at_name(p, 0) || is_at_enum_values_end(p)
     }
 }
 
@@ -122,13 +122,13 @@ fn is_at_enum_values(p: &mut GraphqlParser) -> bool {
     // After an enum definition is a new type definition
     // so it's safe to assume any name we see before a new type definition is
     // an enum value
-    || is_at_name(p)
-    || (is_at_string(p) && p.nth_at(1, GRAPHQL_NAME))
+    || is_nth_at_name(p, 0)
+    || (is_at_string(p) && is_nth_at_name(p, 1))
 }
 
 #[inline]
 fn is_at_enum_value(p: &mut GraphqlParser) -> bool {
-    is_at_name(p) || (is_at_string(p) && p.nth_at(1, GRAPHQL_NAME)) || is_at_directive(p)
+    is_nth_at_name(p, 0) || (is_at_string(p) && is_nth_at_name(p, 1)) || is_at_directive(p)
 }
 
 #[inline]

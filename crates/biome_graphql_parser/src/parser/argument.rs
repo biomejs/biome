@@ -11,7 +11,7 @@ use biome_parser::{
 use super::{
     definitions::is_at_selection_set_end,
     directive::is_at_directive,
-    is_at_name,
+    is_nth_at_name,
     parse_error::{expected_argument, expected_value},
     value::parse_value,
 };
@@ -24,7 +24,7 @@ impl ParseRecovery for ArgumentListParseRecovery {
     const RECOVERED_KIND: Self::Kind = GRAPHQL_ARGUMENT;
 
     fn is_at_recovered(&self, p: &mut Self::Parser<'_>) -> bool {
-        is_at_name(p) || is_at_argument_list_end(p)
+        is_nth_at_name(p, 0) || is_at_argument_list_end(p)
     }
 }
 
@@ -70,7 +70,7 @@ pub(crate) fn parse_arguments(p: &mut GraphqlParser) -> ParsedSyntax {
 
 #[inline]
 fn parse_argument(p: &mut GraphqlParser) -> ParsedSyntax {
-    if !is_at_name(p) {
+    if !is_nth_at_name(p, 0) {
         return Absent;
     }
 
