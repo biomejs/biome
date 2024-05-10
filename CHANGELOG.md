@@ -69,6 +69,10 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 - Add [nursery/noUselessStringConcat](https://biomejs.dev/linter/rules/no-useless-string-concat/).
 - Add [nursery/useExplicitLengthCheck](https://biomejs.dev/linter/rules/use-explicit-length-check/).
 
+- `useExhaustiveDependencies` now recognizes (some) dependencies that change on
+  every render ([#2374](https://github.com/biomejs/biome/issues/2374)).
+  Contributed by @arendjr
+
 #### Bug fixes
 
 - [noBlankTarget](https://biomejs.dev/linter/rules/no-blank-target/) no longer hangs when applying a code fix ([#2675](https://github.com/biomejs/biome/issues/2675)).
