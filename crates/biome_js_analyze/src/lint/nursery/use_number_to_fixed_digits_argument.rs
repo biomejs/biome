@@ -14,10 +14,10 @@ use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt};
 use crate::JsRuleAction;
 
 declare_rule! {
-    /// Enforce using the digits argument with Number#toFixed().
+    /// Enforce using the digits argument with `Number#toFixed()`.
     ///
-    /// It's better to make it clear what the value of the digits argument is when calling `Number#toFixed()`,
-    /// instead of relying on the default value of 0.
+    /// When using `Number#toFixed()` explicitly specify the number of digits you want to appear after the decimal point,
+    /// to avoid unexpected results, rather than relying on its default value of 0.
     ///
     /// ## Examples
     ///
