@@ -134,19 +134,19 @@ fn get_extensionless_import(
     let module_name_token = node.module_name_token()?;
     let module_path = inner_string_text(&module_name_token);
     let path = Path::new(module_path.text());
+    let mut path_components = path.components();
+    let first_component = path_components.next()?;
 
-    if !matches!(
-        path.components().next(),
-        Some(Component::CurDir | Component::ParentDir)
-    ) || path.extension().is_some()
+    if !matches!(first_component, Component::CurDir | Component::ParentDir)
+        || path.extension().is_some()
     {
         return None;
     }
 
-    let has_query_or_hash = path
-        .components()
-        .last()
-        .and_then(|c| c.as_os_str().to_str())
+    let last_component = path_components.last().unwrap_or(first_component);
+    let has_query_or_hash = last_component
+        .as_os_str()
+        .to_str()
         .map_or(false, |last| last.contains('?') || last.contains('#'));
 
     if has_query_or_hash {
@@ -159,14 +159,12 @@ fn get_extensionless_import(
     let import_ext = resolve_import_extension(file_ext, path);
     let mut path_buf = path.to_path_buf();
 
-    let is_index_file = match path.components().last() {
-        Some(Component::ParentDir) => true,
+    let is_index_file = match last_component {
+        Component::ParentDir => true,
         // `import ".././"` is the same as `import "../"`
         // Rust Path does not expose `./` path segment at very end, likely because it does not do anything.
         // To provide proper fix, we need to remove it as well.
-        Some(Component::Normal(os_str))
-            if module_path.ends_with("./") || module_path.ends_with('.') =>
-        {
+        Component::Normal(os_str) if module_path.ends_with("./") || module_path.ends_with('.') => {
             if let Some(base_name) = os_str.to_str() {
                 path_buf.set_file_name(base_name);
 
