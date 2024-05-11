@@ -7,7 +7,7 @@ use biome_js_syntax::{
 use biome_rowan::{AstNode, TextRange};
 
 declare_rule! {
-    /// Disallow non adjacent overload signatures.
+    /// Disallow the use of overload signatures that are not next to each other.
     ///
     /// Overload signatures must be adjacent.
     /// If a key is defined multiple times, only the last definition takes effect. Previous definitions are ignored.
