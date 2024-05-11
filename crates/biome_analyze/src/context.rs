@@ -19,7 +19,7 @@ where
     file_path: &'a Path,
     options: &'a R::Options,
     preferred_quote: &'a PreferredQuote,
-    jsx_runtime: JsxRuntime,
+    jsx_runtime: Option<JsxRuntime>,
 }
 
 impl<'a, R> RuleContext<'a, R>
@@ -35,7 +35,7 @@ where
         file_path: &'a Path,
         options: &'a R::Options,
         preferred_quote: &'a PreferredQuote,
-        jsx_runtime: JsxRuntime,
+        jsx_runtime: Option<JsxRuntime>,
     ) -> Result<Self, Error> {
         let rule_key = RuleKey::rule::<R>();
         Ok(Self {
@@ -103,7 +103,7 @@ where
 
     /// Returns the JSX runtime in use.
     pub fn jsx_runtime(&self) -> JsxRuntime {
-        self.jsx_runtime
+        self.jsx_runtime.expect("jsx_runtime should be provided")
     }
 
     /// Checks whether the provided text belongs to globals

@@ -852,7 +852,7 @@ fn compute_analyzer_options(
             .into_iter()
             .collect(),
         preferred_quote,
-        jsx_runtime,
+        jsx_runtime: Some(jsx_runtime),
     };
 
     AnalyzerOptions {
