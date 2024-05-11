@@ -36,6 +36,7 @@ declare_rule! {
     pub NoAriaUnsupportedElements {
         version: "1.0.0",
         name: "noAriaUnsupportedElements",
+        language: "jsx",
         sources: &[RuleSource::EslintJsxA11y("aria-unsupported-elements")],
         recommended: true,
         fix_kind: FixKind::Unsafe,

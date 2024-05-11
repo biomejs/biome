@@ -52,6 +52,7 @@ declare_rule! {
     pub NoInvalidNewBuiltin {
         version: "1.3.0",
         name: "noInvalidNewBuiltin",
+        language: "js",
         // TODO: Remove this source once `useConsistentBuiltinInstantiation` is stable
         sources: &[RuleSource::Eslint("no-new-native-nonconstructor")],
         recommended: true,

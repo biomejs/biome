@@ -91,6 +91,7 @@ declare_rule! {
     pub NoBannedTypes {
         version: "1.0.0",
         name: "noBannedTypes",
+        language: "ts",
         sources: &[RuleSource::EslintTypeScript("ban-types")],
         recommended: true,
         fix_kind: FixKind::Safe,

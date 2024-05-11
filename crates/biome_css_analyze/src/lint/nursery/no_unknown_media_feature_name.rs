@@ -67,6 +67,7 @@ declare_rule! {
     pub NoUnknownMediaFeatureName {
         version: "next",
         name: "noUnknownMediaFeatureName",
+        language: "css",
         recommended: false,
         sources: &[RuleSource::Stylelint("media-feature-name-no-unknown")],
     }

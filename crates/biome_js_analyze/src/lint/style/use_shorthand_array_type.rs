@@ -51,6 +51,7 @@ declare_rule! {
     pub UseShorthandArrayType  {
         version: "1.0.0",
         name: "useShorthandArrayType",
+        language: "ts",
         recommended: false,
         deprecated: "Use `useConsistentArrayType` instead.",
         fix_kind: FixKind::Unsafe,

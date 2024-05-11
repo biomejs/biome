@@ -19,6 +19,7 @@ declare_rule! {
     pub NoDuplicatePrivateClassMembers {
         version: "1.0.0",
         name: "noDuplicatePrivateClassMembers",
+        language: "js",
     }
 }
 

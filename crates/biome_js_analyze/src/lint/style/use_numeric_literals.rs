@@ -57,6 +57,7 @@ declare_rule! {
     pub UseNumericLiterals {
         version: "1.0.0",
         name: "useNumericLiterals",
+        language: "js",
         sources: &[RuleSource::Eslint("prefer-numeric-literals")],
         recommended: true,
         fix_kind: FixKind::Unsafe,

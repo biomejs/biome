@@ -38,6 +38,7 @@ declare_rule! {
     pub NoConstEnum {
         version: "1.0.0",
         name: "noConstEnum",
+        language: "ts",
         recommended: true,
         fix_kind: FixKind::Safe,
     }

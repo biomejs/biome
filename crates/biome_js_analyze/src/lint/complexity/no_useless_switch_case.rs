@@ -60,6 +60,7 @@ declare_rule! {
     pub NoUselessSwitchCase {
         version: "1.0.0",
         name: "noUselessSwitchCase",
+        language: "js",
         sources: &[RuleSource::EslintUnicorn("no-useless-switch-case")],
         recommended: true,
         fix_kind: FixKind::Unsafe,

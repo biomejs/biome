@@ -36,6 +36,7 @@ declare_rule! {
     pub NoImplicitAnyLet {
         version: "1.4.0",
         name: "noImplicitAnyLet",
+        language: "ts",
         recommended: true,
     }
 }

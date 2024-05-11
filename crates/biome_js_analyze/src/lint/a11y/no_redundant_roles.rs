@@ -46,6 +46,7 @@ declare_rule! {
     pub NoRedundantRoles {
         version: "1.0.0",
         name: "noRedundantRoles",
+        language: "jsx",
         sources: &[RuleSource::EslintJsxA11y("no-redundant-roles")],
         recommended: true,
         fix_kind: FixKind::Unsafe,

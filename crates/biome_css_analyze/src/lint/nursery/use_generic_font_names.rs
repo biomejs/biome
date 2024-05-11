@@ -60,6 +60,7 @@ declare_rule! {
     pub UseGenericFontNames {
         version: "next",
         name: "useGenericFontNames",
+        language: "css",
         recommended: true,
         sources: &[RuleSource::Stylelint("font-family-no-missing-generic-family-keyword")],
     }

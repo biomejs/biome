@@ -67,6 +67,7 @@ declare_rule! {
     pub UseValidAriaRole {
         version: "1.4.0",
         name: "useValidAriaRole",
+        language: "jsx",
         sources: &[RuleSource::EslintJsxA11y("aria-role")],
         recommended: true,
         fix_kind: FixKind::Unsafe,

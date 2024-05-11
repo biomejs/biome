@@ -74,6 +74,7 @@ declare_rule! {
     pub NoUnnecessaryContinue {
         version: "1.0.0",
         name: "noUnnecessaryContinue",
+        language: "js",
         recommended: true,
         fix_kind: FixKind::Unsafe,
     }

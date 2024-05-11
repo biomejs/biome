@@ -32,6 +32,7 @@ declare_rule! {
     pub NoUnknownFunction {
         version: "next",
         name: "noUnknownFunction",
+        language: "css",
         recommended: true,
         sources: &[RuleSource::Stylelint("function-no-unknown")],
     }

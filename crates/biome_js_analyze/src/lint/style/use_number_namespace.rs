@@ -68,6 +68,7 @@ declare_rule! {
     pub UseNumberNamespace {
         version: "1.5.0",
         name: "useNumberNamespace",
+        language: "js",
         sources: &[RuleSource::EslintUnicorn("prefer-number-properties")],
         recommended: true,
         fix_kind: FixKind::Unsafe,

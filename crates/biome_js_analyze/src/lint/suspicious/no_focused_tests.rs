@@ -35,6 +35,7 @@ declare_rule! {
     pub NoFocusedTests {
         version: "1.6.0",
         name: "noFocusedTests",
+        language: "js",
         recommended: true,
         sources: &[RuleSource::EslintJest("no-focused-tests")],
         source_kind: RuleSourceKind::Inspired,

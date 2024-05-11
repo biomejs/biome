@@ -49,6 +49,7 @@ declare_rule! {
     pub NoMultipleSpacesInRegularExpressionLiterals {
         version: "1.0.0",
         name: "noMultipleSpacesInRegularExpressionLiterals",
+        language: "js",
         sources: &[RuleSource::Eslint("no-regex-spaces")],
         recommended: true,
         fix_kind: FixKind::Safe,

@@ -28,6 +28,7 @@ declare_rule! {
     pub UseValidAriaProps {
         version: "1.0.0",
         name: "useValidAriaProps",
+        language: "jsx",
         sources: &[RuleSource::EslintJsxA11y("aria-props")],
         recommended: true,
         fix_kind: FixKind::Unsafe,

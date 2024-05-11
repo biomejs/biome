@@ -39,6 +39,7 @@ declare_rule! {
     pub UseSingleCaseStatement {
         version: "1.0.0",
         name: "useSingleCaseStatement",
+        language: "js",
         recommended: false,
         fix_kind: FixKind::Unsafe,
     }

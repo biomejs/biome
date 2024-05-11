@@ -47,6 +47,7 @@ declare_rule! {
     pub NoImplicitBoolean {
         version: "1.0.0",
         name: "noImplicitBoolean",
+        language: "jsx",
         sources: &[RuleSource::EslintReact("jsx-boolean-value")],
         recommended: false,
         fix_kind: FixKind::Safe,

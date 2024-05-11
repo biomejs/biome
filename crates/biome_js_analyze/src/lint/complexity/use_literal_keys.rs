@@ -51,6 +51,7 @@ declare_rule! {
     pub UseLiteralKeys {
         version: "1.0.0",
         name: "useLiteralKeys",
+        language: "js",
         sources: &[
             RuleSource::Eslint("dot-notation"),
             RuleSource::EslintTypeScript("dot-notation")

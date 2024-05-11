@@ -49,6 +49,7 @@ declare_rule! {
     pub NoConfusingVoidType {
         version: "1.2.0",
         name: "noConfusingVoidType",
+        language: "ts",
         sources: &[RuleSource::EslintTypeScript("no-invalid-void-type")],
         recommended: true,
     }

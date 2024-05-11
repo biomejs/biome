@@ -56,6 +56,7 @@ declare_rule! {
     pub NoUselessTernary {
         version: "1.5.0",
         name: "noUselessTernary",
+        language: "js",
         sources: &[RuleSource::Eslint("no-unneeded-ternary")],
         recommended: true,
         fix_kind: FixKind::Unsafe,

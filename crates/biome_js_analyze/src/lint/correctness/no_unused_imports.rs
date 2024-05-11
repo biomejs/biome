@@ -79,6 +79,7 @@ declare_rule! {
     pub NoUnusedImports {
         version: "1.3.0",
         name: "noUnusedImports",
+        language: "js",
         recommended: false,
         fix_kind: FixKind::Safe,
     }

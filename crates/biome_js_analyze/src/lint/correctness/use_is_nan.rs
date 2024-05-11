@@ -62,6 +62,7 @@ declare_rule! {
     pub UseIsNan {
         version: "1.0.0",
         name: "useIsNan",
+        language: "js",
         sources: &[RuleSource::Eslint("use-isnan")],
         recommended: true,
         fix_kind: FixKind::Unsafe,

@@ -27,6 +27,7 @@ declare_rule! {
     pub NoInvalidPositionAtImportRule {
         version: "next",
         name: "noInvalidPositionAtImportRule",
+        language: "css",
         recommended: true,
         sources: &[RuleSource::Stylelint("no-invalid-position-at-import-rule")],
     }

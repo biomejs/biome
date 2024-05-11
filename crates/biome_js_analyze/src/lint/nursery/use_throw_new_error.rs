@@ -48,6 +48,7 @@ declare_rule! {
     pub UseThrowNewError {
         version: "next",
         name: "useThrowNewError",
+        language: "js",
         sources: &[RuleSource::EslintUnicorn("throw-new-error")],
         recommended: false,
         fix_kind: FixKind::Unsafe,

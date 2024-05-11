@@ -29,6 +29,7 @@ declare_rule! {
     pub UseNodeAssertStrict {
         version: "1.6.0",
         name: "useNodeAssertStrict",
+        language: "js",
         recommended: false,
         fix_kind: FixKind::Safe,
     }

@@ -44,6 +44,7 @@ declare_rule! {
     pub UseSingleVarDeclarator {
         version: "1.0.0",
         name: "useSingleVarDeclarator",
+        language: "js",
         sources: &[RuleSource::Eslint("one-var")],
         recommended: true,
         fix_kind: FixKind::Unsafe,

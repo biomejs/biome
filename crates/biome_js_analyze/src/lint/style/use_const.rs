@@ -76,6 +76,7 @@ declare_rule! {
     pub UseConst {
         version: "1.0.0",
         name: "useConst",
+        language: "js",
         sources: &[RuleSource::Eslint("prefer-const")],
         recommended: true,
         fix_kind: FixKind::Safe,

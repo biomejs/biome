@@ -61,6 +61,7 @@ declare_rule! {
     pub NoCssEmptyBlock {
         version: "next",
         name: "noCssEmptyBlock",
+        language: "css",
         recommended: true,
         sources: &[RuleSource::Stylelint("no-empty-block")],
     }

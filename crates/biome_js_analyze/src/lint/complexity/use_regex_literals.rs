@@ -46,6 +46,7 @@ declare_rule! {
     pub UseRegexLiterals {
         version: "1.3.0",
         name: "useRegexLiterals",
+        language: "js",
         sources: &[RuleSource::Eslint("prefer-regex-literals")],
         recommended: true,
         fix_kind: FixKind::Unsafe,
