@@ -61,6 +61,7 @@ declare_rule! {
     pub UseImportExtensions {
         version: "next",
         name: "useImportExtensions",
+        language: "js",
         recommended: false,
         fix_kind: FixKind::Unsafe,
     }
