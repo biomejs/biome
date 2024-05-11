@@ -58,7 +58,7 @@ pub struct AnalyzerConfiguration {
     pub preferred_quote: PreferredQuote,
 
     /// Indicates the type of runtime or transformation used for interpreting JSX.
-    pub jsx_runtime: JsxRuntime,
+    pub jsx_runtime: Option<JsxRuntime>,
 }
 
 /// A set of information useful to the analyzer infrastructure
@@ -80,7 +80,7 @@ impl AnalyzerOptions {
             .collect()
     }
 
-    pub fn jsx_runtime(&self) -> JsxRuntime {
+    pub fn jsx_runtime(&self) -> Option<JsxRuntime> {
         self.configuration.jsx_runtime
     }
 
