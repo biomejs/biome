@@ -1,4 +1,4 @@
-use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic};
+use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
 use biome_css_syntax::{CssDeclarationOrRuleList, CssLanguage};
 use biome_rowan::{SyntaxToken, TextRange};
@@ -34,6 +34,7 @@ declare_rule! {
         version: "next",
         name: "noDuplicateCustomProperties",
         recommended: false,
+        sources: &[RuleSource::Stylelint("declaration-block-no-duplicate-properties")],
     }
 }
 
@@ -45,20 +46,25 @@ impl Rule for NoDuplicateCustomProperties {
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let node = ctx.query();
-        let mut custom_properties: Vec<SyntaxToken<CssLanguage>> = vec![];
-        for item in node {
-            if let Some(css_declaration) = item.as_css_declaration_with_semicolon() {
-                if let Ok(property) = css_declaration.declaration().ok()?.property() {
-                    if let Some(property) = property.as_css_generic_property() {
-                        if let Some(ident) = property.name().ok()?.as_css_identifier() {
-                            let value_token = ident.value_token().ok()?;
-                            custom_properties.push(value_token);
-                        }
-                    }
-                }
-            }
-        }
-        if let Some(duplicate) = check_duplicate_custom_properties(custom_properties) {
+        let custom_properties = node.into_iter().filter_map(|item| {
+            item.as_css_declaration_with_semicolon()
+                .and_then(|css_declaration| {
+                    css_declaration
+                        .declaration()
+                        .ok()?
+                        .property()
+                        .ok()?
+                        .as_css_generic_property()
+                        .and_then(|css_generic_property| {
+                            css_generic_property
+                                .name()
+                                .ok()?
+                                .as_css_identifier()
+                                .and_then(|css_identifier| css_identifier.value_token().ok())
+                        })
+                })
+        });
+        if let Some(duplicate) = check_duplicate_custom_properties(custom_properties.collect()) {
             return Some(duplicate.text_trimmed_range());
         }
         None
