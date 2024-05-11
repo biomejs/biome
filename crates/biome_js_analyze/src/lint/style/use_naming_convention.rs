@@ -1357,6 +1357,7 @@ pub enum Kind {
     /// All methods defined in type alaises and interfaces
     TypeMethod,
 }
+
 impl Kind {
     pub fn contains(self, other: Self) -> bool {
         self == other
@@ -1487,9 +1488,6 @@ impl From<Modifier> for RestrictedModifier {
     }
 }
 
-#[derive(Debug, Deserializable, Default, serde::Deserialize, serde::Serialize)]
-struct RestrictedModifierList(SmallVec<[RestrictedModifier; 4]>);
-
 #[derive(
     Debug,
     Copy,
@@ -1502,19 +1500,12 @@ struct RestrictedModifierList(SmallVec<[RestrictedModifier; 4]>);
     serde::Deserialize,
     serde::Serialize,
 )]
-#[serde(from = "RestrictedModifierList", into = "RestrictedModifierList")]
+#[serde(
+    from = "SmallVec<[RestrictedModifier; 4]>",
+    into = "SmallVec<[RestrictedModifier; 4]>"
+)]
 struct Modifiers(BitFlags<Modifier>);
 
-#[cfg(feature = "schemars")]
-impl JsonSchema for Modifiers {
-    fn schema_name() -> String {
-        "Modifiers".to_string()
-    }
-
-    fn json_schema(gen: &mut schemars::gen::SchemaGenerator) -> schemars::schema::Schema {
-        <std::collections::HashSet<RestrictedModifier>>::json_schema(gen)
-    }
-}
 impl Deref for Modifiers {
     type Target = BitFlags<Modifier>;
     fn deref(&self) -> &Self::Target {
@@ -1526,20 +1517,29 @@ impl From<Modifier> for Modifiers {
         Modifiers(value.into())
     }
 }
-impl From<Modifiers> for RestrictedModifierList {
+impl From<Modifiers> for SmallVec<[RestrictedModifier; 4]> {
     fn from(value: Modifiers) -> Self {
-        Self(value.into_iter().map(|modifier| modifier.into()).collect())
+        value.into_iter().map(|modifier| modifier.into()).collect()
     }
 }
-impl From<RestrictedModifierList> for Modifiers {
-    fn from(value: RestrictedModifierList) -> Self {
+impl From<SmallVec<[RestrictedModifier; 4]>> for Modifiers {
+    fn from(values: SmallVec<[RestrictedModifier; 4]>) -> Self {
         Self(
-            value
-                .0
+            values
                 .into_iter()
                 .map(Modifier::from)
                 .fold(BitFlags::empty(), |acc, m| acc | m),
         )
+    }
+}
+#[cfg(feature = "schemars")]
+impl JsonSchema for Modifiers {
+    fn schema_name() -> String {
+        "Modifiers".to_string()
+    }
+
+    fn json_schema(gen: &mut schemars::gen::SchemaGenerator) -> schemars::schema::Schema {
+        <std::collections::HashSet<RestrictedModifier>>::json_schema(gen)
     }
 }
 impl From<JsMethodModifierList> for Modifiers {
@@ -1652,6 +1652,7 @@ pub enum Format {
     #[serde(rename = "snake_case")]
     Snake,
 }
+
 impl From<Format> for Case {
     fn from(value: Format) -> Self {
         match value {
@@ -1684,27 +1685,27 @@ impl TryFrom<Case> for Format {
 #[derive(
     Clone, Debug, Default, Deserializable, Eq, Hash, PartialEq, serde::Deserialize, serde::Serialize,
 )]
-struct FormatList(SmallVec<[Format; 4]>);
-impl From<Formats> for FormatList {
-    fn from(value: Formats) -> Self {
-        FormatList(
-            value
-                .0
-                .into_iter()
-                .filter_map(|case| case.try_into().ok())
-                .collect(),
-        )
+#[serde(from = "SmallVec<[Format; 4]>", into = "SmallVec<[Format; 4]>")]
+pub struct Formats(Cases);
+
+impl Deref for Formats {
+    type Target = Cases;
+    fn deref(&self) -> &Self::Target {
+        &self.0
     }
 }
-
-#[derive(
-    Clone, Debug, Default, Deserializable, Eq, Hash, PartialEq, serde::Deserialize, serde::Serialize,
-)]
-#[serde(from = "FormatList", into = "FormatList")]
-pub struct Formats(Cases);
-impl From<FormatList> for Formats {
-    fn from(value: FormatList) -> Self {
-        Self(value.0.into_iter().map(|format| format.into()).collect())
+impl From<SmallVec<[Format; 4]>> for Formats {
+    fn from(values: SmallVec<[Format; 4]>) -> Self {
+        Self(values.into_iter().map(|format| format.into()).collect())
+    }
+}
+impl From<Formats> for SmallVec<[Format; 4]> {
+    fn from(value: Formats) -> Self {
+        value
+            .0
+            .into_iter()
+            .filter_map(|case| case.try_into().ok())
+            .collect()
     }
 }
 #[cfg(feature = "schemars")]
@@ -1714,12 +1715,6 @@ impl JsonSchema for Formats {
     }
     fn json_schema(gen: &mut schemars::gen::SchemaGenerator) -> schemars::schema::Schema {
         <std::collections::HashSet<Format>>::json_schema(gen)
-    }
-}
-impl Deref for Formats {
-    type Target = Cases;
-    fn deref(&self) -> &Self::Target {
-        &self.0
     }
 }
 
