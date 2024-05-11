@@ -98,10 +98,11 @@ impl Rule for UseImportExtensions {
     fn action(ctx: &RuleContext<Self>, state: &Self::State) -> Option<JsRuleAction> {
         let mut mutation = ctx.root().begin();
 
+        let (suggested_path, extension) = state.suggestion.clone()?;
         let new_module_name = if ctx.as_preferred_quote().is_double() {
-            make::js_string_literal(&state.suggestion)
+            make::js_string_literal(&suggested_path)
         } else {
-            make::js_string_literal_single_quotes(&state.suggestion)
+            make::js_string_literal_single_quotes(&suggested_path)
         };
 
         mutation.replace_element(
@@ -113,16 +114,16 @@ impl Rule for UseImportExtensions {
             category: ActionCategory::QuickFix,
             applicability: Applicability::MaybeIncorrect,
             message: markup! {
-                "Add potential import extension "<Emphasis>"."{state.potential_import_ext}</Emphasis>"."
-            }.to_owned(),
+                "Add potential import extension "<Emphasis>"."{extension}</Emphasis>"."
+            }
+            .to_owned(),
             mutation,
         })
     }
 }
 
 pub struct UseImportExtensionsState {
-    potential_import_ext: String,
-    suggestion: String,
+    suggestion: Option<(String, String)>,
     module_name_token: SyntaxToken<JsLanguage>,
 }
 
@@ -140,6 +141,19 @@ fn get_extensionless_import(
     ) || path.extension().is_some()
     {
         return None;
+    }
+
+    let has_query_or_hash = path
+        .components()
+        .last()
+        .and_then(|c| c.as_os_str().to_str())
+        .map_or(false, |last| last.contains('?') || last.contains('#'));
+
+    if has_query_or_hash {
+        return Some(UseImportExtensionsState {
+            module_name_token,
+            suggestion: None,
+        });
     }
 
     let import_ext = resolve_import_extension(file_ext, path);
@@ -174,8 +188,10 @@ fn get_extensionless_import(
 
     Some(UseImportExtensionsState {
         module_name_token: module_name_token.clone(),
-        potential_import_ext: import_ext.to_string(),
-        suggestion: path_buf.to_string_lossy().to_string(),
+        suggestion: Some((
+            path_buf.to_string_lossy().to_string(),
+            import_ext.to_string(),
+        )),
     })
 }
 

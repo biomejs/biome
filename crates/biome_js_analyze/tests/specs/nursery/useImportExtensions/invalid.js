@@ -10,6 +10,9 @@ import './foo/./'
 import './foo/'
 import './..'
 import  /** A **/'./' /** B **/
+import './foo?worker'
+import './foo#hash'
+import './foo?query=string&query2#hash'
 
 import('./foo')
 import( /** A **/'./foo'/** B **/ )

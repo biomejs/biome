@@ -16,6 +16,9 @@ import './foo/./'
 import './foo/'
 import './..'
 import  /** A **/'./' /** B **/
+import './foo?worker'
+import './foo#hash'
+import './foo?query=string&query2#hash'
 
 import('./foo')
 import( /** A **/'./foo'/** B **/ )
@@ -229,7 +232,7 @@ invalid.js:11:8 lint/nursery/useImportExtensions  FIXABLE  ━━━━━━━
   > 11 │ import './..'
        │        ^^^^^^
     12 │ import  /** A **/'./' /** B **/
-    13 │ 
+    13 │ import './foo?worker'
   
   i Explicit import improves compatibility with browsers and makes file resolution in tooling faster.
   
@@ -240,7 +243,7 @@ invalid.js:11:8 lint/nursery/useImportExtensions  FIXABLE  ━━━━━━━
     11    │ - import·'./..'
        11 │ + import·"./../index.js"
     12 12 │   import  /** A **/'./' /** B **/
-    13 13 │   
+    13 13 │   import './foo?worker'
   
 
 ```
@@ -254,8 +257,8 @@ invalid.js:12:18 lint/nursery/useImportExtensions  FIXABLE  ━━━━━━�
     11 │ import './..'
   > 12 │ import  /** A **/'./' /** B **/
        │                  ^^^^^^^^^^^^^^
-    13 │ 
-    14 │ import('./foo')
+    13 │ import './foo?worker'
+    14 │ import './foo#hash'
   
   i Explicit import improves compatibility with browsers and makes file resolution in tooling faster.
   
@@ -265,79 +268,130 @@ invalid.js:12:18 lint/nursery/useImportExtensions  FIXABLE  ━━━━━━�
     11 11 │   import './..'
     12    │ - import··/**·A·**/'./'·/**·B·**/
        12 │ + import··/**·A·**/"./index.js"·/**·B·**/
-    13 13 │   
-    14 14 │   import('./foo')
+    13 13 │   import './foo?worker'
+    14 14 │   import './foo#hash'
   
 
 ```
 
 ```
-invalid.js:14:8 lint/nursery/useImportExtensions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:13:8 lint/nursery/useImportExtensions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Add a file extension for relative imports.
+  
+    11 │ import './..'
+    12 │ import  /** A **/'./' /** B **/
+  > 13 │ import './foo?worker'
+       │        ^^^^^^^^^^^^^^
+    14 │ import './foo#hash'
+    15 │ import './foo?query=string&query2#hash'
+  
+  i Explicit import improves compatibility with browsers and makes file resolution in tooling faster.
+  
+
+```
+
+```
+invalid.js:14:8 lint/nursery/useImportExtensions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Add a file extension for relative imports.
   
     12 │ import  /** A **/'./' /** B **/
-    13 │ 
-  > 14 │ import('./foo')
+    13 │ import './foo?worker'
+  > 14 │ import './foo#hash'
+       │        ^^^^^^^^^^^^
+    15 │ import './foo?query=string&query2#hash'
+    16 │ 
+  
+  i Explicit import improves compatibility with browsers and makes file resolution in tooling faster.
+  
+
+```
+
+```
+invalid.js:15:8 lint/nursery/useImportExtensions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Add a file extension for relative imports.
+  
+    13 │ import './foo?worker'
+    14 │ import './foo#hash'
+  > 15 │ import './foo?query=string&query2#hash'
+       │        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    16 │ 
+    17 │ import('./foo')
+  
+  i Explicit import improves compatibility with browsers and makes file resolution in tooling faster.
+  
+
+```
+
+```
+invalid.js:17:8 lint/nursery/useImportExtensions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Add a file extension for relative imports.
+  
+    15 │ import './foo?query=string&query2#hash'
+    16 │ 
+  > 17 │ import('./foo')
        │        ^^^^^^^
-    15 │ import( /** A **/'./foo'/** B **/ )
-    16 │ require('./foo')
+    18 │ import( /** A **/'./foo'/** B **/ )
+    19 │ require('./foo')
   
   i Explicit import improves compatibility with browsers and makes file resolution in tooling faster.
   
   i Unsafe fix: Add potential import extension .js.
   
-    12 12 │   import  /** A **/'./' /** B **/
-    13 13 │   
-    14    │ - import('./foo')
-       14 │ + import("./foo.js")
-    15 15 │   import( /** A **/'./foo'/** B **/ )
-    16 16 │   require('./foo')
+    15 15 │   import './foo?query=string&query2#hash'
+    16 16 │   
+    17    │ - import('./foo')
+       17 │ + import("./foo.js")
+    18 18 │   import( /** A **/'./foo'/** B **/ )
+    19 19 │   require('./foo')
   
 
 ```
 
 ```
-invalid.js:15:18 lint/nursery/useImportExtensions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:18:18 lint/nursery/useImportExtensions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Add a file extension for relative imports.
   
-    14 │ import('./foo')
-  > 15 │ import( /** A **/'./foo'/** B **/ )
+    17 │ import('./foo')
+  > 18 │ import( /** A **/'./foo'/** B **/ )
        │                  ^^^^^^^^^^^^^^^^^
-    16 │ require('./foo')
+    19 │ require('./foo')
   
   i Explicit import improves compatibility with browsers and makes file resolution in tooling faster.
   
   i Unsafe fix: Add potential import extension .js.
   
-    13 13 │   
-    14 14 │   import('./foo')
-    15    │ - import(·/**·A·**/'./foo'/**·B·**/·)
-       15 │ + import(·/**·A·**/"./foo.js"/**·B·**/·)
-    16 16 │   require('./foo')
+    16 16 │   
+    17 17 │   import('./foo')
+    18    │ - import(·/**·A·**/'./foo'/**·B·**/·)
+       18 │ + import(·/**·A·**/"./foo.js"/**·B·**/·)
+    19 19 │   require('./foo')
   
 
 ```
 
 ```
-invalid.js:16:9 lint/nursery/useImportExtensions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:19:9 lint/nursery/useImportExtensions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Add a file extension for relative imports.
   
-    14 │ import('./foo')
-    15 │ import( /** A **/'./foo'/** B **/ )
-  > 16 │ require('./foo')
+    17 │ import('./foo')
+    18 │ import( /** A **/'./foo'/** B **/ )
+  > 19 │ require('./foo')
        │         ^^^^^^^
   
   i Explicit import improves compatibility with browsers and makes file resolution in tooling faster.
   
   i Unsafe fix: Add potential import extension .js.
   
-    14 14 │   import('./foo')
-    15 15 │   import( /** A **/'./foo'/** B **/ )
-    16    │ - require('./foo')
-       16 │ + require("./foo.js")
+    17 17 │   import('./foo')
+    18 18 │   import( /** A **/'./foo'/** B **/ )
+    19    │ - require('./foo')
+       19 │ + require("./foo.js")
   
 
 ```
