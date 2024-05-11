@@ -75,12 +75,27 @@ React.Children.map(c => React.cloneElement(c, {key: c}));
 });
 
 [].map((item) => {
+	return item.condition ? <div key={item.id} /> : <div key={item.id}>foo</div>;
+});
+
+[].map((item) => {
 	return <>{item.condition ? <div key={item.id} /> : <div key={item.id}>foo</div>}</>;
 });
 
 [].map((item) => {
 	const div = <div key={item.id} />;
 	return <>{item.condition ? div : <div key={item.id}>{div}</div>}</>;
+});
+
+[].map(function(item) {
+	const x = 5;
+	return <div key={item.id}>{x}</div>;
+});
+
+[].map(function(item) {
+	const x = 5;
+	const div = <div key={item.id}>{x}</div>;
+	return div;
 });
 
 ```
