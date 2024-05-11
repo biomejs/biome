@@ -1,6 +1,6 @@
 use crate::parser::{
     directive::DirectiveList,
-    is_nth_at_name, parse_description,
+    is_nth_at_name, is_nth_at_non_kw_name, parse_description,
     parse_error::{expected_field_definition, expected_name, expected_type},
     parse_name,
     r#type::parse_type,
@@ -15,8 +15,6 @@ use biome_parser::{
     parse_lists::ParseNodeList, parse_recovery::ParseRecovery, parsed_syntax::ParsedSyntax,
     prelude::ParsedSyntax::*, Parser,
 };
-
-use super::is_at_definition;
 
 #[inline]
 pub(super) fn parse_fields_definition(p: &mut GraphqlParser) -> ParsedSyntax {
@@ -182,7 +180,9 @@ pub(super) fn is_at_fields(p: &mut GraphqlParser<'_>) -> bool {
 
 #[inline]
 pub(super) fn is_at_fields_end(p: &mut GraphqlParser<'_>) -> bool {
-    p.at(T!['}']) || is_at_definition(p)
+    p.at(T!['}'])
+    // start at a new definition body, as this rule doesn't allow nested fields
+    || p.at(T!['{'])
 }
 
 /// Currently at a field definition, allowing some small errors.
@@ -208,8 +208,9 @@ pub(super) fn is_at_input_value_definition(p: &mut GraphqlParser<'_>) -> bool {
     // missing name
     || p.at(T![:])
     || (is_at_string(p) && p.nth_at(1, T![:]))
-    // missing colon: `name String`
-    || (is_nth_at_name(p, 0) && is_nth_at_name(p, 1))
+    // missing colon: `name String`. Must be non-keyword name, else it could
+    // be a new type definition.
+    || (is_nth_at_non_kw_name(p, 0) && is_nth_at_non_kw_name(p, 1))
     || (is_at_string(p) && is_nth_at_name(p, 1) && is_nth_at_name(p, 2))
 }
 

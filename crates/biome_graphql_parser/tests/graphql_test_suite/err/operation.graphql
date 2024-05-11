@@ -2,7 +2,7 @@ query likeStory }
 
 query likeStory
 
-query like$Story
+query }
 
 # malformed variables
 query ($storyId: ID! {

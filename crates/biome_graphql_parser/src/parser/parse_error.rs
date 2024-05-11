@@ -95,3 +95,7 @@ pub(crate) fn expected_directive_location(p: &GraphqlParser, range: TextRange) -
             ],
         )
 }
+
+pub(crate) fn fragment_name_must_not_be_on(p: &GraphqlParser, range: TextRange) -> ParseDiagnostic {
+    p.err_builder("Fragment name must not be 'on'", range)
+}

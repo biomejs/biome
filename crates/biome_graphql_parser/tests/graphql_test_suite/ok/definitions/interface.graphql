@@ -34,3 +34,6 @@ interface Person {
   weight("filter by weight" greater_than: Int = 0 @deprecated): Int
 }
 
+interface interface implements interface {
+  interface: interface
+}
