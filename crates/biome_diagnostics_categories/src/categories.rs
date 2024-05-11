@@ -147,6 +147,7 @@ define_categories! {
     "lint/nursery/useFocusableInteractive": "https://biomejs.dev/linter/rules/use-focusable-interactive",
     "lint/nursery/useGenericFontNames": "https://biomejs.dev/linter/rules/use-generic-font-names",
     "lint/nursery/useImportRestrictions": "https://biomejs.dev/linter/rules/use-import-restrictions",
+    "lint/nursery/useNumberToFixedDigitsArgument": "https://biomejs.dev/linter/rules/use-number-to-fixed-digits-argument",
     "lint/nursery/useSortedClasses": "https://biomejs.dev/linter/rules/use-sorted-classes",
     "lint/nursery/useThrowNewError": "https://biomejs.dev/linter/rules/use-throw-new-error",
     "lint/performance/noAccumulatingSpread": "https://biomejs.dev/linter/rules/no-accumulating-spread",

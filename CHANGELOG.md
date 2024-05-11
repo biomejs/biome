@@ -45,6 +45,9 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 #### New features
 
+- Add [nursery/useNumberToFixedDigitsArgument](https://biomejs.dev/linter/rules/use-number-to-fixed-digits-argument/).
+  Contributed by @minht11
+
 - Add [nursery/useThrowNewError](https://biomejs.dev/linter/rules/use-throw-new-error/).
   Contributed by @minht11
 
