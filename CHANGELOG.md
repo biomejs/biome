@@ -101,6 +101,7 @@ z.object({})
 
 #### New features
 
+- Add [nursery/noUselessStringConcat](https://biomejs.dev/linter/rules/no-useless-string-concat/).
 - Add [nursery/useExplicitLengthCheck](https://biomejs.dev/linter/rules/use-explicit-length-check/).
   Contributed by @minht11
 
