@@ -13,6 +13,10 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 ### Analyzer
 
+#### Enhancements
+
+- Assume Vue compiler macros are globals when processing `.vue` files. ([#2771](https://github.com/biomejs/biome/pull/2771)) Contributed by @dyc3
+
 ### CLI
 
 #### New features
