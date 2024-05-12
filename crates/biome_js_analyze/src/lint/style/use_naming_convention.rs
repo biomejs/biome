@@ -43,19 +43,20 @@ declare_rule! {
     /// and reduces overhead when thinking about the name [case] of a variable.
     ///
     /// The following section describes the default conventions enforced by the rule.
+    /// You can also enforce custom conventions with the [rule options](#options).
     ///
     /// ## Naming conventions
     ///
     /// All names can be prefixed and suffixed by underscores `_` and dollar signs `$`.
     ///
-    /// ### Variable-like names
+    /// ### Variable and parameter names
     ///
-    /// All variables, including function parameters, are in [`camelCase`] or [`PascalCase`].
-    /// Catch parameters are always in [`camelCase`].
+    /// All variables and function parameters are in [`camelCase`] or [`PascalCase`].
+    /// Catch parameters are in [`camelCase`].
     ///
     /// Additionally, global variables declared as `const` or `var` may be in [`CONSTANT_CASE`].
     /// Global variables are declared at module or script level.
-    /// Variables declared in a TypeScript `namespace` are also considered top-level.
+    /// Variables declared in a TypeScript `namespace` are also considered global.
     ///
     /// ```js
     /// function f(param, _unusedParam) {

@@ -57,7 +57,7 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
   				"useNamingConvention": {
   					"level": "error",
   					"options": {
-  						"custom": [
+  						"conventions": [
   							{
   								"selector": {
   									"kind": "classMember",
