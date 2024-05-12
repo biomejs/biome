@@ -168,7 +168,7 @@ proc-macro2        = "1.0.81"
 quickcheck         = "1.0.3"
 quickcheck_macros  = "1.0.0"
 quote              = "1.0.36"
-rayon              = "1.8.1"
+rayon              = "1.10.0"
 regex              = "1.10.4"
 rustc-hash         = "1.1.0"
 schemars           = { version = "0.8.17", features = ["indexmap2", "smallvec"] }
