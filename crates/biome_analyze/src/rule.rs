@@ -43,6 +43,7 @@ pub struct RuleMetadata {
 }
 
 #[derive(Debug, Clone, Eq, PartialEq, Serialize)]
+#[serde(rename_all = "camelCase")]
 /// Used to identify the kind of code action emitted by a rule
 pub enum FixKind {
     /// The rule emits a code action that is safe to apply. Usually these fixes don't change the semantic of the program.
@@ -62,6 +63,7 @@ impl Display for FixKind {
 }
 
 #[derive(Debug, Clone, Eq, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub enum RuleSource {
     /// Rules from [Rust Clippy](https://rust-lang.github.io/rust-clippy/master/index.html)
     Clippy(&'static str),
@@ -231,6 +233,7 @@ impl RuleSource {
 }
 
 #[derive(Debug, Default, Clone, Copy, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub enum RuleSourceKind {
     /// The rule implements the same logic of the source
     #[default]
