@@ -36,8 +36,6 @@ invalidInterface.ts:1:18 lint/style/useNamingConvention ━━━━━━━━
     2 │ 
     3 │ export interface CONSTANT_CASE {}
   
-  i The name could be renamed to `Xxx`.
-  
 
 ```
 
@@ -52,8 +50,6 @@ invalidInterface.ts:3:18 lint/style/useNamingConvention ━━━━━━━━
       │                  ^^^^^^^^^^^^^
     4 │ 
     5 │ export interface camelCase {}
-  
-  i The name could be renamed to `ConstantCase`.
   
 
 ```
@@ -70,8 +66,6 @@ invalidInterface.ts:5:18 lint/style/useNamingConvention ━━━━━━━━
     6 │ 
     7 │ export interface snake_case {}
   
-  i The name could be renamed to `CamelCase`.
-  
 
 ```
 
@@ -86,8 +80,6 @@ invalidInterface.ts:7:18 lint/style/useNamingConvention ━━━━━━━━
       │                  ^^^^^^^^^^
     8 │ 
     9 │ export interface Unknown_Style {}
-  
-  i The name could be renamed to `SnakeCase`.
   
 
 ```
@@ -104,24 +96,20 @@ invalidInterface.ts:9:18 lint/style/useNamingConvention ━━━━━━━━
     10 │ 
     11 │ interface _XXX {}
   
-  i The name could be renamed to `UnknownStyle`.
-  
 
 ```
 
 ```
-invalidInterface.ts:11:11 lint/style/useNamingConvention  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalidInterface.ts:11:12 lint/style/useNamingConvention  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This interface name trimmed as `XXX` should be in PascalCase.
+  ! This interface name part should be in PascalCase.
   
      9 │ export interface Unknown_Style {}
     10 │ 
   > 11 │ interface _XXX {}
-       │           ^^^^
+       │            ^^^
     12 │ 
     13 │ interface _CONSTANT_CASE {}
-  
-  i The name could be renamed to `_Xxx`.
   
   i Safe fix: Rename this symbol in PascalCase.
   
@@ -136,18 +124,16 @@ invalidInterface.ts:11:11 lint/style/useNamingConvention  FIXABLE  ━━━━�
 ```
 
 ```
-invalidInterface.ts:13:11 lint/style/useNamingConvention  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalidInterface.ts:13:12 lint/style/useNamingConvention  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This interface name trimmed as `CONSTANT_CASE` should be in PascalCase.
+  ! This interface name part should be in PascalCase.
   
     11 │ interface _XXX {}
     12 │ 
   > 13 │ interface _CONSTANT_CASE {}
-       │           ^^^^^^^^^^^^^^
+       │            ^^^^^^^^^^^^^
     14 │ 
     15 │ interface _camelCase {}
-  
-  i The name could be renamed to `_ConstantCase`.
   
   i Safe fix: Rename this symbol in PascalCase.
   
@@ -162,18 +148,16 @@ invalidInterface.ts:13:11 lint/style/useNamingConvention  FIXABLE  ━━━━�
 ```
 
 ```
-invalidInterface.ts:15:11 lint/style/useNamingConvention  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalidInterface.ts:15:12 lint/style/useNamingConvention  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This interface name trimmed as `camelCase` should be in PascalCase.
+  ! This interface name part should be in PascalCase.
   
     13 │ interface _CONSTANT_CASE {}
     14 │ 
   > 15 │ interface _camelCase {}
-       │           ^^^^^^^^^^
+       │            ^^^^^^^^^
     16 │ 
     17 │ interface _snake_case {}
-  
-  i The name could be renamed to `_CamelCase`.
   
   i Safe fix: Rename this symbol in PascalCase.
   
@@ -188,18 +172,16 @@ invalidInterface.ts:15:11 lint/style/useNamingConvention  FIXABLE  ━━━━�
 ```
 
 ```
-invalidInterface.ts:17:11 lint/style/useNamingConvention  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalidInterface.ts:17:12 lint/style/useNamingConvention  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This interface name trimmed as `snake_case` should be in PascalCase.
+  ! This interface name part should be in PascalCase.
   
     15 │ interface _camelCase {}
     16 │ 
   > 17 │ interface _snake_case {}
-       │           ^^^^^^^^^^^
+       │            ^^^^^^^^^^
     18 │ 
     19 │ interface _Unknown_Style {}
-  
-  i The name could be renamed to `_SnakeCase`.
   
   i Safe fix: Rename this symbol in PascalCase.
   
@@ -214,16 +196,14 @@ invalidInterface.ts:17:11 lint/style/useNamingConvention  FIXABLE  ━━━━�
 ```
 
 ```
-invalidInterface.ts:19:11 lint/style/useNamingConvention  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalidInterface.ts:19:12 lint/style/useNamingConvention  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This interface name trimmed as `Unknown_Style` should be in PascalCase.
+  ! This interface name part should be in PascalCase.
   
     17 │ interface _snake_case {}
     18 │ 
   > 19 │ interface _Unknown_Style {}
-       │           ^^^^^^^^^^^^^^
-  
-  i The name could be renamed to `_UnknownStyle`.
+       │            ^^^^^^^^^^^^^
   
   i Safe fix: Rename this symbol in PascalCase.
   
@@ -234,5 +214,3 @@ invalidInterface.ts:19:11 lint/style/useNamingConvention  FIXABLE  ━━━━�
   
 
 ```
-
-

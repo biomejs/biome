@@ -167,7 +167,7 @@ pub trait RenameSymbolExtensions {
     fn rename_node_declaration(
         &mut self,
         model: &SemanticModel,
-        node: impl RenamableNode,
+        node: &impl RenamableNode,
         new_name: &str,
     ) -> bool;
 
@@ -185,7 +185,7 @@ pub trait RenameSymbolExtensions {
     fn rename_node_declaration_with_retry<S, I>(
         &mut self,
         model: &SemanticModel,
-        node: impl RenamableNode + Clone,
+        node: &impl RenamableNode,
         candidates: I,
     ) -> bool
     where
@@ -193,7 +193,7 @@ pub trait RenameSymbolExtensions {
         I: Iterator<Item = S>,
     {
         for candidate in candidates {
-            if self.rename_node_declaration(model, node.clone(), candidate.as_ref()) {
+            if self.rename_node_declaration(model, node, candidate.as_ref()) {
                 return true;
             }
         }
@@ -205,7 +205,7 @@ pub trait RenameSymbolExtensions {
     fn rename_any_renamable_node(
         &mut self,
         model: &SemanticModel,
-        node: AnyJsRenamableDeclaration,
+        node: &AnyJsRenamableDeclaration,
         new_name: &str,
     ) -> bool {
         self.rename_node_declaration(model, node, new_name)
@@ -241,7 +241,7 @@ impl RenameSymbolExtensions for BatchMutation<JsLanguage> {
     fn rename_node_declaration(
         &mut self,
         model: &SemanticModel,
-        node: impl RenamableNode,
+        node: &impl RenamableNode,
         new_name: &str,
     ) -> bool {
         let prev_binding = match node.binding(model).and_then(AnyJsIdentifierBinding::cast) {

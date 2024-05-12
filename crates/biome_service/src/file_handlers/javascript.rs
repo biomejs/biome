@@ -742,7 +742,7 @@ fn rename(
         match node.try_into() {
             Ok(node) => {
                 let mut batch = root.begin();
-                let result = batch.rename_any_renamable_node(&model, node, &new_name);
+                let result = batch.rename_any_renamable_node(&model, &node, &new_name);
                 if !result {
                     Err(WorkspaceError::RenameError(RenameError::CannotBeRenamed {
                         original_name: original_name.to_string(),

@@ -5,7 +5,7 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_deserialize_macros::Deserializable;
 use biome_rowan::TextRange;
-use biome_string_case::Case;
+use biome_string_case::{Case, Cases};
 use rustc_hash::FxHashSet;
 use serde::{Deserialize, Serialize};
 use std::{hash::Hash, str::FromStr};
@@ -129,10 +129,8 @@ impl Rule for UseFilenamingConvention {
         if !allowed_cases.is_empty() {
             let trimmed_name = name.trim_matches('_');
             let case = Case::identify(trimmed_name, options.strict_case);
-            for allowed_case in allowed_cases {
-                if case.is_compatible_with(allowed_case) {
-                    return None;
-                }
+            if allowed_cases.contains(case) {
+                return None;
             }
         }
         if options.filename_cases.0.contains(&FilenameCase::Export) {
@@ -167,7 +165,7 @@ impl Rule for UseFilenamingConvention {
             },
             FileNamingConventionState::Filename => {
                 let allowed_cases = options.filename_cases.cases();
-                let allowed_case_names = allowed_cases.iter().map(|style| style.to_string());
+                let allowed_case_names = allowed_cases.into_iter().map(|case| case.to_string());
                 let allowed_case_names = if options.filename_cases.0.contains(&FilenameCase::Export) {
                     allowed_case_names
                         .chain(["equal to the name of an export".to_string()])
@@ -210,7 +208,7 @@ impl Rule for UseFilenamingConvention {
                     }
                 }
                 let suggested_filenames = allowed_cases
-                    .iter()
+                    .into_iter()
                     .map(|case| file_name.replacen(trimmed_name, &case.convert(trimmed_name), 1))
                     // Deduplicate suggestions
                     .collect::<FxHashSet<_>>()
@@ -300,11 +298,11 @@ impl Default for FilenamingConventionOptions {
 pub struct FilenameCases(FxHashSet<FilenameCase>);
 
 impl FilenameCases {
-    fn cases(&self) -> SmallVec<[Case; 3]> {
+    fn cases(&self) -> Cases {
         self.0
             .iter()
             .filter_map(|case| Case::try_from(*case).ok())
-            .collect()
+            .fold(Cases::empty(), |acc, case| acc | case)
     }
 }
 

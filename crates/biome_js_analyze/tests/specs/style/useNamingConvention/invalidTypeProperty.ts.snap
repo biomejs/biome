@@ -31,8 +31,6 @@ invalidTypeProperty.ts:2:5 lint/style/useNamingConvention ━━━━━━━�
     3 │ 
     4 │     SpecialProperty: unknown
   
-  i The name could be renamed to `initialized`.
-  
 
 ```
 
@@ -47,8 +45,6 @@ invalidTypeProperty.ts:4:5 lint/style/useNamingConvention ━━━━━━━�
       │     ^^^^^^^^^^^^^^^
     5 │ 
     6 │     special_property: unknown
-  
-  i The name could be renamed to `specialProperty`.
   
 
 ```
@@ -65,8 +61,6 @@ invalidTypeProperty.ts:6:5 lint/style/useNamingConvention ━━━━━━━�
     7 │ 
     8 │     Unknown_Style: unknown
   
-  i The name could be renamed to `specialProperty`.
-  
 
 ```
 
@@ -81,8 +75,6 @@ invalidTypeProperty.ts:8:5 lint/style/useNamingConvention ━━━━━━━�
        │     ^^^^^^^^^^^^^
      9 │ 
     10 │     Unknown_Init_Style: unknown
-  
-  i The name could be renamed to `unknownStyle`.
   
 
 ```
@@ -99,8 +91,6 @@ invalidTypeProperty.ts:10:5 lint/style/useNamingConvention ━━━━━━━
     11 │ 
     12 │     A_CONSTANT: unknown
   
-  i The name could be renamed to `unknownInitStyle`.
-  
 
 ```
 
@@ -115,9 +105,5 @@ invalidTypeProperty.ts:12:5 lint/style/useNamingConvention ━━━━━━━
        │     ^^^^^^^^^^
     13 │ }
   
-  i The name could be renamed to `aConstant`.
-  
 
 ```
-
-

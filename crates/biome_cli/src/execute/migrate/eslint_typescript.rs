@@ -104,17 +104,18 @@ impl From<NamingConventionOptions> for use_naming_convention::NamingConventionOp
                 Some(NamingConventionCase::StrictCamel | NamingConventionCase::StrictPascal)
             ),
             require_ascii: false,
+            conventions: Vec::new(),
             enum_member_case: enum_member_format
                 .and_then(|format| {
                     match format {
                         NamingConventionCase::Camel | NamingConventionCase::StrictCamel => {
-                            Some(use_naming_convention::EnumMemberCase::Camel)
+                            Some(use_naming_convention::Format::Camel)
                         }
                         NamingConventionCase::Pascal | NamingConventionCase::StrictPascal => {
-                            Some(use_naming_convention::EnumMemberCase::Pascal)
+                            Some(use_naming_convention::Format::Pascal)
                         }
                         NamingConventionCase::Upper => {
-                            Some(use_naming_convention::EnumMemberCase::Constant)
+                            Some(use_naming_convention::Format::Constant)
                         }
                         // Biome doesn't support `snake_case` for enum member
                         NamingConventionCase::Snake => None,

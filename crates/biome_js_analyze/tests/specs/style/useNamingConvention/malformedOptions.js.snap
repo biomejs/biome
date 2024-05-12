@@ -11,22 +11,21 @@ expression: malformedOptions.js
 ```
 malformedOptions.options:9:25 deserialize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Found an unknown value `snake_case`.
+  × Found an unknown value `kebab-case`.
   
      7 │ 					"level": "error",
      8 │ 					"options": {
-   > 9 │ 						"enumMemberCase": "snake_case"
+   > 9 │ 						"enumMemberCase": "kebab-case"
        │ 						                  ^^^^^^^^^^^^
     10 │ 					}
     11 │ 				}
   
   i Accepted values:
   
-  - PascalCase
-  - CONSTANT_CASE
   - camelCase
+  - CONSTANT_CASE
+  - PascalCase
+  - snake_case
   
 
 ```
-
-

@@ -21,9 +21,11 @@ bitflags                 = { workspace = true }
 indexmap                 = { workspace = true, features = ["serde"] }
 schemars                 = { workspace = true, optional = true }
 serde                    = { workspace = true }
+smallvec                 = { workspace = true, optional = true }
 
 [features]
-schema = ["schemars", "schemars/indexmap"]
+schema   = ["schemars", "schemars/indexmap"]
+smallvec = ["dep:smallvec"]
 
 [lints]
 workspace = true
