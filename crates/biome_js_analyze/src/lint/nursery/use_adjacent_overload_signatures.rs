@@ -104,7 +104,6 @@ impl Rule for UseAdjacentOverloadSignatures {
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
         let mut methods: Vec<Vec<(SyntaxNodeText, usize, TextRange)>> = Vec::new();
-        let mut index = 0;
         let mut export_vec = vec![];
 
         for item in node {
@@ -170,7 +169,7 @@ impl Rule for UseAdjacentOverloadSignatures {
         }
         // AnyJsModuleItem::JsExport() matches with `export function` even in declare namespace
         // So if I catch with AnyJsStatement::TsDeclareFunction() it also catches the export function in declare namespace
-        for item in node {
+        for (index, item) in node.into_iter().enumerate() {
             let AnyJsModuleItem::JsExport(node) = item else {
                 continue;
             };
@@ -182,7 +181,6 @@ impl Rule for UseAdjacentOverloadSignatures {
             let text = parent.text_trimmed();
             let range = parent.text_range();
             export_vec.push((text, index, range));
-            index += 1;
         }
         methods.push(export_vec.clone());
         let adjacent_overload_violations = check_adjacent_overload_violations(&methods);
