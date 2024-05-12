@@ -810,6 +810,22 @@ pub struct RuleAction<L: Language> {
     pub mutation: BatchMutation<L>,
 }
 
+impl<L: Language> RuleAction<L> {
+    pub fn new(
+        category: ActionCategory,
+        applicability: impl Into<Applicability>,
+        message: impl biome_console::fmt::Display,
+        mutation: BatchMutation<L>,
+    ) -> Self {
+        Self {
+            category,
+            applicability: applicability.into(),
+            message: markup! {{message}}.to_owned(),
+            mutation,
+        }
+    }
+}
+
 /// An action meant to suppress a lint rule
 #[derive(Clone)]
 pub struct SuppressAction<L: Language> {
