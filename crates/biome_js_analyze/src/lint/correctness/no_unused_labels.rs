@@ -62,6 +62,7 @@ declare_rule! {
     pub NoUnusedLabels {
         version: "1.0.0",
         name: "noUnusedLabels",
+        language: "js",
         sources: &[RuleSource::Eslint("no-unused-labels")],
         recommended: true,
         fix_kind: FixKind::Unsafe,

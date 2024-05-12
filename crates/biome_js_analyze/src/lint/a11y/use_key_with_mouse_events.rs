@@ -42,6 +42,7 @@ declare_rule! {
     pub UseKeyWithMouseEvents {
         version: "1.0.0",
         name: "useKeyWithMouseEvents",
+        language: "jsx",
         sources: &[RuleSource::EslintJsxA11y("mouse-events-have-key-events")],
         recommended: true,
     }

@@ -144,6 +144,6 @@ new-changeset:
     knope document-change
 
 # Dry-run of the release
-new-dry-run-release *args='':
+dry-run-release *args='':
     knope release --dry-run {{args}}
 

@@ -64,6 +64,7 @@ declare_rule! {
     pub UseLiteralEnumMembers {
         version: "1.0.0",
         name: "useLiteralEnumMembers",
+        language: "ts",
         sources: &[RuleSource::EslintTypeScript("prefer-literal-enum-member")],
         recommended: true,
     }

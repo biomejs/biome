@@ -87,6 +87,7 @@ declare_rule! {
     pub NoVoidTypeReturn {
         version: "1.0.0",
         name: "noVoidTypeReturn",
+        language: "ts",
         recommended: true,
     }
 }

@@ -1,0 +1,11 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: validCharsetMultipleImport.css
+---
+# Input
+```css
+@charset "utf-8";
+@imPORT 'foo.css';
+@import 'bar.css';
+
+```

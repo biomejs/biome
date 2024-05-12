@@ -25,6 +25,7 @@ declare_rule! {
     pub NoWith {
         version: "1.0.0",
         name: "noWith",
+        language: "js",
         sources: &[RuleSource::Eslint("no-with")],
         recommended: true,
     }

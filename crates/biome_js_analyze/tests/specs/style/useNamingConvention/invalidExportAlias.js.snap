@@ -17,14 +17,15 @@ export { Y as snake_case  } from ""
 ```
 invalidExportAlias.js:1:15 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This export alias name should be in camelCase or PascalCase or CONSTANT_CASE.
+  ! Two consecutive uppercase characters are not allowed in PascalCase because strictCase is set to `true`.
   
   > 1 │ export { X as XxXX }
       │               ^^^^
     2 │ 
     3 │ export { Y as snake_case  }
   
-  i The name could be renamed to `xxXx`.
+  i If you want to use consecutive uppercase characters in PascalCase, then set the strictCase option to `false`.
+    See the rule options for more details.
   
 
 ```
@@ -41,15 +42,13 @@ invalidExportAlias.js:3:15 lint/style/useNamingConvention ━━━━━━━�
     4 │ 
     5 │ export { X as XxXX } from ""
   
-  i The name could be renamed to `snakeCase`.
-  
 
 ```
 
 ```
 invalidExportAlias.js:5:15 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This export alias name should be in camelCase or PascalCase or CONSTANT_CASE.
+  ! Two consecutive uppercase characters are not allowed in PascalCase because strictCase is set to `true`.
   
     3 │ export { Y as snake_case  }
     4 │ 
@@ -58,7 +57,8 @@ invalidExportAlias.js:5:15 lint/style/useNamingConvention ━━━━━━━�
     6 │ 
     7 │ export { Y as snake_case  } from ""
   
-  i The name could be renamed to `xxXx`.
+  i If you want to use consecutive uppercase characters in PascalCase, then set the strictCase option to `false`.
+    See the rule options for more details.
   
 
 ```
@@ -73,9 +73,5 @@ invalidExportAlias.js:7:15 lint/style/useNamingConvention ━━━━━━━�
   > 7 │ export { Y as snake_case  } from ""
       │               ^^^^^^^^^^
   
-  i The name could be renamed to `snakeCase`.
-  
 
 ```
-
-

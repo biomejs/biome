@@ -72,6 +72,7 @@ declare_rule! {
     pub NoSwitchDeclarations {
         version: "1.0.0",
         name: "noSwitchDeclarations",
+        language: "js",
         sources: &[RuleSource::Eslint("no-case-declarations")],
         recommended: true,
         fix_kind: FixKind::Unsafe,

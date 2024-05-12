@@ -41,6 +41,7 @@ declare_rule! {
     pub UseWhile {
         version: "1.0.0",
         name: "useWhile",
+        language: "js",
         recommended: true,
         fix_kind: FixKind::Safe,
     }

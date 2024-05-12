@@ -39,3 +39,27 @@ React.Children.map(c => React.cloneElement(c));
 (<h1>{data.map(c => (<h1></h1>))}</h1>)
 
 (<h1>{data.map(c => {return (<h1></h1>)})}</h1>)
+
+[].map((item) => {
+	return item.condition ? <div /> : <div>foo</div>;
+});
+
+[].map((item) => {
+	return <><div /><div>{item}</div></>;
+});
+
+[].map((item) => {
+	return <>{item.condition ? <div /> : <div>foo</div>}</>;
+});
+
+[].map((item) => {
+	const x = 5;
+	const div = <div>{x}</div>;
+	return div;
+});
+
+[].map(function(item) {
+	const x = 5;
+	const div = <div>{x}</div>;
+	return div;
+});

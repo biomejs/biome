@@ -39,6 +39,7 @@ declare_rule! {
     pub NoFlatMapIdentity {
         version: "1.7.0",
         name: "noFlatMapIdentity",
+        language: "js",
         recommended: true,
         sources: &[RuleSource::Clippy("flat_map_identity")],
         fix_kind: FixKind::Safe,

@@ -57,6 +57,7 @@ declare_rule! {
     pub NoDuplicateObjectKeys {
         version: "1.0.0",
         name: "noDuplicateObjectKeys",
+        language: "js",
         sources: &[RuleSource::Eslint("no-dupe-keys")],
         recommended: true,
         fix_kind: FixKind::Unsafe,

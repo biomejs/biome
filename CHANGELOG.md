@@ -23,7 +23,7 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
   - biome check .
   + biome check    # You can run the command without the path
   ```
-  
+
 ### Configuration
 
 ### Editors
@@ -34,12 +34,85 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 ### Formatter
 
+#### Bug fixes
+
+- Fix [#2470](https://github.com/biomejs/biome/issues/2470) by avoid introducing linebreaks in single line string interpolations. Contributed by @ah-yu
+- Resolve deadlocks by narrowing the scope of locks. Contributed by @mechairoi
+
 ### JavaScript APIs
 
 ### Linter
 
+#### New features
+
+- [useNamingConvention](https://biomejs.dev/linter/rules/use-naming-convention/) now supports an option to enforce custom conventions ([#1900](https://github.com/biomejs/biome/issues/1900)).
+
+  For example, you can enforce the use of a prefix for private class members:
+
+  ```json
+  {
+  	"linter": {
+  		"rules": {
+  			"style": {
+  				"useNamingConvention": {
+  					"level": "error",
+  					"options": {
+  						"conventions": [
+  							{
+  								"selector": {
+  									"kind": "classMember",
+  									"modifiers": ["private"]
+  								},
+  								"match": "_(.*)",
+                  "formats": ["camelCase"]
+  							}
+  						]
+  					}
+  				}
+  			}
+  		}
+  	}
+  }
+  ```
+
+  Please, find more details in the [rule documentation](https://biomejs.dev/linter/rules/use-naming-convention/#conventions).
+
+  Contributed by @Conaclos
+
+- Add [nursery/useThrowNewError](https://biomejs.dev/linter/rules/use-throw-new-error/).
+  Contributed by @minht11
+
+#### Bug fixes
+
+- `useJsxKeyInIterable` now handles more cases involving fragments. See the snippets below. Contributed by @dyc3
+```jsx
+// valid
+[].map((item) => {
+	return <>{item.condition ? <div key={item.id} /> : <div key={item.id}>foo</div>}</>;
+});
+
+// invalid
+[].map((item) => {
+	return <>{item.condition ? <div /> : <div>foo</div>}</>;
+});
+```
+- `noExcessiveNestedTestSuites` no longer erroneously alerts on `describe` calls that are not invoking the global `describe` function. [#2599](https://github.com/biomejs/biome/issues/2599) Contributed by @dyc3
+```js
+// now valid
+z.object({})
+  .describe('')
+  .describe('')
+  .describe('')
+  .describe('')
+  .describe('')
+  .describe('');
+```
+
 ### Parser
 
+#### Enhancements
+
+- `lang="tsx"` is now supported in Vue Single File Components. [#2765](https://github.com/biomejs/biome/issues/2765) Contributed by @dyc3
 
 ## 1.7.3 (2024-05-06)
 
@@ -61,6 +134,10 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 - Add [nursery/noUselessStringConcat](https://biomejs.dev/linter/rules/no-useless-string-concat/).
 - Add [nursery/useExplicitLengthCheck](https://biomejs.dev/linter/rules/use-explicit-length-check/).
+
+- `useExhaustiveDependencies` now recognizes (some) dependencies that change on
+  every render ([#2374](https://github.com/biomejs/biome/issues/2374)).
+  Contributed by @arendjr
 
 #### Bug fixes
 
@@ -121,6 +198,7 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 - Fix typo by renaming `useConsistentBuiltinInstatiation` to `useConsistentBuiltinInstantiation`
   Contributed by @minht11
+- Fix the rule `useSingleCaseStatement` including `break` statements when counting the number of statements in a `switch` statement (#2696)
 
 
 ## 1.7.2 (2024-04-30)

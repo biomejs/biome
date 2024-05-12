@@ -58,6 +58,7 @@ declare_rule! {
     pub NoExtraBooleanCast {
         version: "1.0.0",
         name: "noExtraBooleanCast",
+        language: "js",
         sources: &[RuleSource::Eslint("no-extra-boolean-cast")],
         recommended: true,
         fix_kind: FixKind::Unsafe,

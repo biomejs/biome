@@ -183,6 +183,9 @@ The documentation needs to adhere to the following rules:
 - When adding _invalid_ snippets in the `### Invalid` section, you must use the `expect_diagnostic` code block property. We use this property to generate a diagnostic and attach it to the snippet. A snippet **must emit only ONE diagnostic**.
 - When adding _valid_ snippets in the `### Valid` section, you can use one single snippet.
 - You can use the code block property `ignore` to tell the code generation script to **not generate a diagnostic for an invalid snippet**.
+- Update the `language` field in the `declare_rule!` macro to the language the rule primarily applies to.
+  - If your rule applies to any JavaScript, you can leave it as `js`.
+  - If your rule only makes sense in a specific JavaScript dialect, you should set it to `jsx`, `ts`, or `tsx`, whichever is most appropriate.
 
 Here's an example of how the documentation could look like:
 
@@ -218,6 +221,7 @@ declare_rule! {
     pub(crate) NoVar {
         version: "next",
         name: "noVar",
+        language: "js",
         recommended: false,
     }
 }
@@ -373,6 +377,7 @@ declare_rule! {
     pub(crate) NoVar {
         version: "1.0.0",
         name: "noVar",
+        language: "js",
         deprecated: "Use the rule `noAnotherVar`",
         recommended: false,
     }
@@ -495,6 +500,7 @@ declare_rule! {
     pub(crate) ExampleRule {
         version: "next",
         name: "myRuleName",
+        language: "js",
         recommended: false,
     }
 }
@@ -516,6 +522,7 @@ declare_rule! {
     pub(crate) ExampleRule {
         version: "next",
         name: "myRuleName",
+        language: "js",
         recommended: false,
     }
 }

@@ -5,7 +5,7 @@ use crate::file_handlers::{
 };
 use crate::settings::{
     FormatSettings, LanguageListSettings, LanguageSettings, OverrideSettings, ServiceLanguage,
-    SettingsHandle,
+    WorkspaceSettingsHandle,
 };
 use crate::workspace::{DocumentFileSource, GetSyntaxTreeResult, OrganizeImportsResult};
 use crate::WorkspaceError;
@@ -133,11 +133,11 @@ fn parse(
     biome_path: &BiomePath,
     _file_source: DocumentFileSource,
     text: &str,
-    settings: SettingsHandle,
+    settings: WorkspaceSettingsHandle,
     cache: &mut NodeCache,
 ) -> ParseResult {
-    let parser = &settings.as_ref().languages.css.parser;
-    let overrides = &settings.as_ref().override_settings;
+    let parser = &settings.settings().languages.css.parser;
+    let overrides = &settings.settings().override_settings;
     let options: CssParserOptions =
         overrides
             .as_css_parser_options(biome_path)
@@ -170,7 +170,7 @@ fn debug_formatter_ir(
     biome_path: &BiomePath,
     document_file_source: &DocumentFileSource,
     parse: AnyParse,
-    settings: SettingsHandle,
+    settings: WorkspaceSettingsHandle,
 ) -> Result<String, WorkspaceError> {
     let options = settings.format_options::<CssLanguage>(biome_path, document_file_source);
 
@@ -186,7 +186,7 @@ fn format(
     biome_path: &BiomePath,
     document_file_source: &DocumentFileSource,
     parse: AnyParse,
-    settings: SettingsHandle,
+    settings: WorkspaceSettingsHandle,
 ) -> Result<Printed, WorkspaceError> {
     let options = settings.format_options::<CssLanguage>(biome_path, document_file_source);
 
@@ -205,7 +205,7 @@ fn format_range(
     biome_path: &BiomePath,
     document_file_source: &DocumentFileSource,
     parse: AnyParse,
-    settings: SettingsHandle,
+    settings: WorkspaceSettingsHandle,
     range: TextRange,
 ) -> Result<Printed, WorkspaceError> {
     let options = settings.format_options::<CssLanguage>(biome_path, document_file_source);
@@ -219,7 +219,7 @@ fn format_on_type(
     biome_path: &BiomePath,
     document_file_source: &DocumentFileSource,
     parse: AnyParse,
-    settings: SettingsHandle,
+    settings: WorkspaceSettingsHandle,
     offset: TextSize,
 ) -> Result<Printed, WorkspaceError> {
     let options = settings.format_options::<CssLanguage>(biome_path, document_file_source);

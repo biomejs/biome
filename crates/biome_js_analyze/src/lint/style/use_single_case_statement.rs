@@ -39,6 +39,7 @@ declare_rule! {
     pub UseSingleCaseStatement {
         version: "1.0.0",
         name: "useSingleCaseStatement",
+        language: "js",
         recommended: false,
         fix_kind: FixKind::Unsafe,
     }
@@ -52,7 +53,12 @@ impl Rule for UseSingleCaseStatement {
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let switch_clause = ctx.query();
-        if switch_clause.consequent().len() > 1 {
+        let count = switch_clause
+            .consequent()
+            .iter()
+            .filter(|stmt| !matches!(stmt, AnyJsStatement::JsBreakStatement(_)))
+            .count();
+        if count > 1 {
             Some(())
         } else {
             None

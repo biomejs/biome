@@ -41,6 +41,7 @@ declare_rule! {
     pub UseValidForDirection {
         version: "1.0.0",
         name: "useValidForDirection",
+        language: "js",
         sources: &[RuleSource::Eslint("for-direction")],
         recommended: true,
     }

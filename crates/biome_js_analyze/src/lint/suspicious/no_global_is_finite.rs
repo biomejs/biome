@@ -32,6 +32,7 @@ declare_rule! {
     pub NoGlobalIsFinite {
         version: "1.0.0",
         name: "noGlobalIsFinite",
+        language: "js",
         recommended: true,
         fix_kind: FixKind::Unsafe,
     }

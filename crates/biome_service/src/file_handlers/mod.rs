@@ -7,7 +7,7 @@ pub use crate::file_handlers::svelte::{SvelteFileHandler, SVELTE_FENCE};
 pub use crate::file_handlers::vue::{VueFileHandler, VUE_FENCE};
 use crate::workspace::{FixFileMode, OrganizeImportsResult};
 use crate::{
-    settings::SettingsHandle,
+    settings::WorkspaceSettingsHandle,
     workspace::{FixFileResult, GetSyntaxTreeResult, PullActionsResult, RenameResult},
     WorkspaceError,
 };
@@ -304,7 +304,7 @@ pub struct FixAllParams<'a> {
     pub(crate) rules: Option<&'a Rules>,
     pub(crate) filter: AnalysisFilter<'a>,
     pub(crate) fix_file_mode: FixFileMode,
-    pub(crate) settings: SettingsHandle<'a>,
+    pub(crate) settings: WorkspaceSettingsHandle<'a>,
     /// Whether it should format the code action
     pub(crate) should_format: bool,
     pub(crate) biome_path: &'a BiomePath,
@@ -327,8 +327,13 @@ pub struct ParseResult {
     pub(crate) language: Option<DocumentFileSource>,
 }
 
-type Parse =
-    fn(&BiomePath, DocumentFileSource, &str, SettingsHandle, &mut NodeCache) -> ParseResult;
+type Parse = fn(
+    &BiomePath,
+    DocumentFileSource,
+    &str,
+    WorkspaceSettingsHandle,
+    &mut NodeCache,
+) -> ParseResult;
 
 #[derive(Default)]
 pub struct ParserCapabilities {
@@ -338,8 +343,12 @@ pub struct ParserCapabilities {
 
 type DebugSyntaxTree = fn(&BiomePath, AnyParse) -> GetSyntaxTreeResult;
 type DebugControlFlow = fn(AnyParse, TextSize) -> String;
-type DebugFormatterIR =
-    fn(&BiomePath, &DocumentFileSource, AnyParse, SettingsHandle) -> Result<String, WorkspaceError>;
+type DebugFormatterIR = fn(
+    &BiomePath,
+    &DocumentFileSource,
+    AnyParse,
+    WorkspaceSettingsHandle,
+) -> Result<String, WorkspaceError>;
 
 #[derive(Default)]
 pub struct DebugCapabilities {
@@ -353,7 +362,7 @@ pub struct DebugCapabilities {
 
 pub(crate) struct LintParams<'a> {
     pub(crate) parse: AnyParse,
-    pub(crate) settings: SettingsHandle<'a>,
+    pub(crate) settings: WorkspaceSettingsHandle<'a>,
     pub(crate) language: DocumentFileSource,
     pub(crate) max_diagnostics: u32,
     pub(crate) path: &'a BiomePath,
@@ -370,8 +379,7 @@ pub(crate) struct LintResults {
 pub(crate) struct CodeActionsParams<'a> {
     pub(crate) parse: AnyParse,
     pub(crate) range: TextRange,
-    pub(crate) rules: Option<&'a Rules>,
-    pub(crate) settings: SettingsHandle<'a>,
+    pub(crate) workspace: WorkspaceSettingsHandle<'a>,
     pub(crate) path: &'a BiomePath,
     pub(crate) manifest: Option<PackageJson>,
     pub(crate) language: DocumentFileSource,
@@ -401,20 +409,20 @@ type Format = fn(
     &BiomePath,
     &DocumentFileSource,
     AnyParse,
-    SettingsHandle,
+    WorkspaceSettingsHandle,
 ) -> Result<Printed, WorkspaceError>;
 type FormatRange = fn(
     &BiomePath,
     &DocumentFileSource,
     AnyParse,
-    SettingsHandle,
+    WorkspaceSettingsHandle,
     TextRange,
 ) -> Result<Printed, WorkspaceError>;
 type FormatOnType = fn(
     &BiomePath,
     &DocumentFileSource,
     AnyParse,
-    SettingsHandle,
+    WorkspaceSettingsHandle,
     TextSize,
 ) -> Result<Printed, WorkspaceError>;
 
@@ -536,12 +544,11 @@ pub(crate) fn parse_lang_from_script_opening_tag(script_opening_tag: &str) -> La
             let attribute_value = lang_attribute.initializer()?.value().ok()?;
             let attribute_inner_string =
                 attribute_value.as_jsx_string()?.inner_string_text().ok()?;
-            if attribute_inner_string.text() == "ts" {
-                Some(Language::TypeScript {
+            match attribute_inner_string.text() {
+                "ts" | "tsx" => Some(Language::TypeScript {
                     definition_file: false,
-                })
-            } else {
-                None
+                }),
+                _ => None,
             }
         })
     })
@@ -572,11 +579,13 @@ fn test_svelte_script_lang() {
 fn test_vue_script_lang() {
     const VUE_JS_SCRIPT_OPENING_TAG: &str = r#"<script>"#;
     const VUE_TS_SCRIPT_OPENING_TAG: &str = r#"<script lang="ts">"#;
+    const VUE_TSX_SCRIPT_OPENING_TAG: &str = r#"<script lang="tsx">"#;
     const VUE_SETUP_JS_SCRIPT_OPENING_TAG: &str = r#"<script setup>"#;
     const VUE_SETUP_TS_SCRIPT_OPENING_TAG: &str = r#"<script setup lang="ts">"#;
 
     assert!(parse_lang_from_script_opening_tag(VUE_JS_SCRIPT_OPENING_TAG).is_javascript());
     assert!(parse_lang_from_script_opening_tag(VUE_TS_SCRIPT_OPENING_TAG).is_typescript());
+    assert!(parse_lang_from_script_opening_tag(VUE_TSX_SCRIPT_OPENING_TAG).is_typescript());
     assert!(parse_lang_from_script_opening_tag(VUE_SETUP_JS_SCRIPT_OPENING_TAG).is_javascript());
     assert!(parse_lang_from_script_opening_tag(VUE_SETUP_TS_SCRIPT_OPENING_TAG).is_typescript());
 }

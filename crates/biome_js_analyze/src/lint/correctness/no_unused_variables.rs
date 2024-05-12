@@ -90,6 +90,7 @@ declare_rule! {
     pub NoUnusedVariables {
         version: "1.0.0",
         name: "noUnusedVariables",
+        language: "js",
         sources: &[
             RuleSource::Eslint("no-unused-vars"),
             RuleSource::EslintTypeScript("no-unused-vars"),
@@ -422,7 +423,7 @@ impl Rule for NoUnusedVariables {
                 let new_name = format!("_{}", name_trimmed);
 
                 let model = ctx.model();
-                mutation.rename_node_declaration(model, binding.clone(), &new_name);
+                mutation.rename_node_declaration(model, binding, &new_name);
 
                 Some(JsRuleAction {
                     mutation,

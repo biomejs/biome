@@ -61,6 +61,7 @@ declare_rule! {
     pub NoMisleadingCharacterClass {
         version: "1.5.0",
         name: "noMisleadingCharacterClass",
+        language: "js",
         sources: &[RuleSource::Eslint("no-misleading-character-class")],
         recommended: true,
         fix_kind: FixKind::Safe,

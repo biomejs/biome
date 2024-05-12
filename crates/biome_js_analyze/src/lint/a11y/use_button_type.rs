@@ -39,6 +39,7 @@ declare_rule! {
     pub UseButtonType {
         version: "1.0.0",
         name: "useButtonType",
+        language: "jsx",
         sources: &[RuleSource::EslintReact("button-has-type")],
         recommended: true,
     }

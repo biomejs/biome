@@ -43,6 +43,7 @@ declare_rule! {
     pub NoUnsafeDeclarationMerging {
         version: "1.0.0",
         name: "noUnsafeDeclarationMerging",
+        language: "ts",
         sources: &[RuleSource::EslintTypeScript("no-unsafe-declaration-merging")],
         recommended: true,
     }

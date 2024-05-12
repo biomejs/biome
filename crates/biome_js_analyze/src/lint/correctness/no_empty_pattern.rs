@@ -35,6 +35,7 @@ declare_rule! {
     pub NoEmptyPattern {
         version: "1.0.0",
         name: "noEmptyPattern",
+        language: "js",
         sources: &[RuleSource::Eslint("no-empty-pattern")],
         recommended: true,
     }

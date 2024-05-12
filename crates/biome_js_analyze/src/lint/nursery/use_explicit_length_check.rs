@@ -123,6 +123,7 @@ declare_rule! {
     pub UseExplicitLengthCheck {
         version: "1.7.3",
         name: "useExplicitLengthCheck",
+        language: "js",
         recommended: false,
         sources: &[RuleSource::EslintUnicorn("explicit-length-check")],
         source_kind: RuleSourceKind::Inspired,

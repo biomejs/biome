@@ -1,0 +1,4 @@
+.chat-image {
+	grid-row: span 2 / span 2;
+	align-self: flex-end
+}

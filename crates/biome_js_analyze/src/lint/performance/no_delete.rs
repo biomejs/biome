@@ -61,6 +61,7 @@ declare_rule! {
     pub NoDelete {
         version: "1.0.0",
         name: "noDelete",
+        language: "js",
         recommended: true,
         fix_kind: FixKind::Unsafe,
     }

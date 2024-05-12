@@ -34,6 +34,7 @@ declare_rule! {
     pub UseFlatMap {
         version: "1.0.0",
         name: "useFlatMap",
+        language: "js",
         sources: &[
             RuleSource::EslintUnicorn("prefer-array-flat-map"),
             RuleSource::Clippy("map_flatten"),

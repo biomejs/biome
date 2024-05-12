@@ -39,6 +39,7 @@ declare_rule! {
     pub NoExportsInTest {
         version: "1.6.0",
         name: "noExportsInTest",
+        language: "js",
         recommended: true,
         sources: &[RuleSource::EslintJest("no-export")],
         source_kind: RuleSourceKind::Inspired,

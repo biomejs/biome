@@ -37,6 +37,7 @@ declare_rule! {
     pub NoCompareNegZero {
         version: "1.0.0",
         name: "noCompareNegZero",
+        language: "js",
         sources: &[RuleSource::Eslint("no-compare-neg-zero")],
         recommended: true,
         fix_kind: FixKind::Safe,

@@ -9,14 +9,12 @@ function f(_snake_case, CONSTANT_CASE) {}
 
 # Diagnostics
 ```
-invalidFunctionParameter.js:1:12 lint/style/useNamingConvention  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalidFunctionParameter.js:1:13 lint/style/useNamingConvention  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This function parameter name trimmed as `snake_case` should be in camelCase or PascalCase.
+  ! This function parameter name part should be in camelCase or PascalCase.
   
   > 1 │ function f(_snake_case, CONSTANT_CASE) {}
-      │            ^^^^^^^^^^^
-  
-  i The name could be renamed to `_snakeCase`.
+      │             ^^^^^^^^^^
   
   i Safe fix: Rename this symbol in camelCase.
   
@@ -33,8 +31,6 @@ invalidFunctionParameter.js:1:25 lint/style/useNamingConvention  FIXABLE  ━━
   
   > 1 │ function f(_snake_case, CONSTANT_CASE) {}
       │                         ^^^^^^^^^^^^^
-  
-  i The name could be renamed to `constantCase`.
   
   i Safe fix: Rename this symbol in camelCase.
   

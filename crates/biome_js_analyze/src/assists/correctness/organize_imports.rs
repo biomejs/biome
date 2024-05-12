@@ -44,6 +44,7 @@ declare_rule! {
     pub OrganizeImports {
         version: "1.0.0",
         name: "organizeImports",
+        language: "js",
         recommended: false,
         fix_kind: FixKind::Unsafe,
     }

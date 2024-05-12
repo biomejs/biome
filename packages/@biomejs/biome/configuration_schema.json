@@ -565,6 +565,24 @@
 			},
 			"additionalProperties": false
 		},
+		"Convention": {
+			"type": "object",
+			"properties": {
+				"formats": {
+					"description": "String cases to enforce",
+					"allOf": [{ "$ref": "#/definitions/Formats" }]
+				},
+				"match": {
+					"description": "Regular expression to enforce",
+					"anyOf": [{ "$ref": "#/definitions/Regex" }, { "type": "null" }]
+				},
+				"selector": {
+					"description": "Declarations concerned by this convention",
+					"allOf": [{ "$ref": "#/definitions/Selector" }]
+				}
+			},
+			"additionalProperties": false
+		},
 		"Correctness": {
 			"description": "A list of rules that belong to this group",
 			"type": "object",
@@ -919,22 +937,6 @@
 			"type": "object",
 			"additionalProperties": false
 		},
-		"EnumMemberCase": {
-			"description": "Supported cases for TypeScript `enum` member names.",
-			"oneOf": [
-				{
-					"description": "PascalCase",
-					"type": "string",
-					"enum": ["PascalCase"]
-				},
-				{
-					"description": "CONSTANT_CASE",
-					"type": "string",
-					"enum": ["CONSTANT_CASE"]
-				},
-				{ "description": "camelCase", "type": "string", "enum": ["camelCase"] }
-			]
-		},
 		"FilenameCase": {
 			"description": "Supported cases for file names.",
 			"oneOf": [
@@ -1015,6 +1017,16 @@
 				}
 			},
 			"additionalProperties": false
+		},
+		"Format": {
+			"description": "Supported cases.",
+			"type": "string",
+			"enum": ["camelCase", "CONSTANT_CASE", "PascalCase", "snake_case"]
+		},
+		"Formats": {
+			"type": "array",
+			"items": { "$ref": "#/definitions/Format" },
+			"uniqueItems": true
 		},
 		"FormatterConfiguration": {
 			"description": "Generic options applied to all files",
@@ -1341,6 +1353,109 @@
 				}
 			]
 		},
+		"Kind": {
+			"oneOf": [
+				{
+					"type": "string",
+					"enum": [
+						"class",
+						"enum",
+						"interface",
+						"enumMember",
+						"importNamespace",
+						"exportNamespace",
+						"variable",
+						"const",
+						"let",
+						"using",
+						"var",
+						"catchParameter",
+						"indexParameter",
+						"exportAlias",
+						"importAlias",
+						"classGetter",
+						"classSetter",
+						"classMethod",
+						"objectLiteralProperty",
+						"objectLiteralGetter",
+						"objectLiteralSetter",
+						"objectLiteralMethod",
+						"typeAlias"
+					]
+				},
+				{ "description": "All kinds", "type": "string", "enum": ["any"] },
+				{
+					"description": "All type definitions: classes, enums, interfaces, and type aliases",
+					"type": "string",
+					"enum": ["typeLike"]
+				},
+				{
+					"description": "Named function declarations and expressions",
+					"type": "string",
+					"enum": ["function"]
+				},
+				{
+					"description": "TypeScript mamespaces, import and export namesapces",
+					"type": "string",
+					"enum": ["namespaceLike"]
+				},
+				{
+					"description": "TypeScript mamespaces",
+					"type": "string",
+					"enum": ["namespace"]
+				},
+				{
+					"description": "All function parameters, but parameter properties",
+					"type": "string",
+					"enum": ["functionParameter"]
+				},
+				{
+					"description": "All generic type parameters",
+					"type": "string",
+					"enum": ["typeParameter"]
+				},
+				{
+					"description": "All class members: properties, methods, getters, and setters",
+					"type": "string",
+					"enum": ["classMember"]
+				},
+				{
+					"description": "All class properties, including parameter properties",
+					"type": "string",
+					"enum": ["classProperty"]
+				},
+				{
+					"description": "All object literal members: properties, methods, getters, and setters",
+					"type": "string",
+					"enum": ["objectLiteralMember"]
+				},
+				{
+					"description": "All members defined in type alaises and interfaces",
+					"type": "string",
+					"enum": ["typeMember"]
+				},
+				{
+					"description": "All getters defined in type alaises and interfaces",
+					"type": "string",
+					"enum": ["typeGetter"]
+				},
+				{
+					"description": "All properties defined in type alaises and interfaces",
+					"type": "string",
+					"enum": ["typeProperty"]
+				},
+				{
+					"description": "All setters defined in type alaises and interfaces",
+					"type": "string",
+					"enum": ["typeSetter"]
+				},
+				{
+					"description": "All methods defined in type alaises and interfaces",
+					"type": "string",
+					"enum": ["typeMethod"]
+				}
+			]
+		},
 		"LineEnding": {
 			"oneOf": [
 				{
@@ -1388,6 +1503,11 @@
 			},
 			"additionalProperties": false
 		},
+		"Modifiers": {
+			"type": "array",
+			"items": { "$ref": "#/definitions/RestrictedModifier" },
+			"uniqueItems": true
+		},
 		"NamingConventionConfiguration": {
 			"anyOf": [
 				{ "$ref": "#/definitions/RulePlainConfiguration" },
@@ -1398,9 +1518,14 @@
 			"description": "Rule's options.",
 			"type": "object",
 			"properties": {
+				"conventions": {
+					"description": "Custom conventions.",
+					"type": "array",
+					"items": { "$ref": "#/definitions/Convention" }
+				},
 				"enumMemberCase": {
 					"description": "Allowed cases for _TypeScript_ `enum` member names.",
-					"allOf": [{ "$ref": "#/definitions/EnumMemberCase" }]
+					"allOf": [{ "$ref": "#/definitions/Format" }]
 				},
 				"requireAscii": {
 					"description": "If `false`, then non-ASCII characters are allowed.",
@@ -1531,6 +1656,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noInvalidPositionAtImportRule": {
+					"description": "Disallow the use of @import at-rules in invalid positions.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noMisplacedAssertion": {
 					"description": "Checks that the assertion function, for example expect, is placed inside an it() function call.",
 					"anyOf": [
@@ -1568,6 +1700,20 @@
 				},
 				"noUnknownFunction": {
 					"description": "Disallow unknown CSS value functions.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noUnknownMediaFeatureName": {
+					"description": "Disallow unknown media feature names.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noUnknownProperty": {
+					"description": "Disallow unknown properties.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
@@ -1640,6 +1786,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useFocusableInteractive": {
+					"description": "Elements with an interactive role and interaction handlers must be focusable.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useGenericFontNames": {
 					"description": "Disallow a missing generic family keyword within font families.",
 					"anyOf": [
@@ -1658,6 +1811,13 @@
 					"description": "Enforce the sorting of CSS utility classes.",
 					"anyOf": [
 						{ "$ref": "#/definitions/UtilityClassSortingConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useThrowNewError": {
+					"description": "Require new when throwing an error.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
 					]
 				}
@@ -1862,6 +2022,7 @@
 		},
 		"QuoteProperties": { "type": "string", "enum": ["asNeeded", "preserve"] },
 		"QuoteStyle": { "type": "string", "enum": ["double", "single"] },
+		"Regex": { "type": "string" },
 		"RestrictedGlobalsConfiguration": {
 			"anyOf": [
 				{ "$ref": "#/definitions/RulePlainConfiguration" },
@@ -1899,6 +2060,10 @@
 				}
 			},
 			"additionalProperties": false
+		},
+		"RestrictedModifier": {
+			"type": "string",
+			"enum": ["abstract", "private", "protected", "readonly", "static"]
 		},
 		"RuleConfiguration": {
 			"anyOf": [
@@ -2055,6 +2220,7 @@
 			},
 			"additionalProperties": false
 		},
+		"Scope": { "type": "string", "enum": ["any", "global"] },
 		"Security": {
 			"description": "A list of rules that belong to this group",
 			"type": "object",
@@ -2087,6 +2253,24 @@
 				"recommended": {
 					"description": "It enables the recommended rules for this group",
 					"type": ["boolean", "null"]
+				}
+			},
+			"additionalProperties": false
+		},
+		"Selector": {
+			"type": "object",
+			"properties": {
+				"kind": {
+					"description": "Declaration kind",
+					"allOf": [{ "$ref": "#/definitions/Kind" }]
+				},
+				"modifiers": {
+					"description": "Modifiers used on the declaration",
+					"allOf": [{ "$ref": "#/definitions/Modifiers" }]
+				},
+				"scope": {
+					"description": "Scope of the declaration",
+					"allOf": [{ "$ref": "#/definitions/Scope" }]
 				}
 			},
 			"additionalProperties": false

@@ -47,6 +47,7 @@ declare_rule! {
     pub NoShoutyConstants {
         version: "1.0.0",
         name: "noShoutyConstants",
+        language: "js",
         recommended: false,
         fix_kind: FixKind::Unsafe,
     }

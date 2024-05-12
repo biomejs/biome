@@ -1,3 +1,4 @@
+use crate::lexer::{BufferedLexer, LexerWithCheckpoint};
 use crate::{diagnostic::ParseDiagnostic, lexer::LexerCheckpoint};
 use biome_rowan::{SyntaxKind, TextRange, TextSize, TriviaPieceKind};
 
@@ -85,13 +86,45 @@ pub trait BumpWithContext: TokenSource {
     fn skip_as_trivia_with_context(&mut self, context: Self::Context);
 }
 
+pub trait TokenSourceWithBufferedLexer<Lex>: TokenSource {
+    fn lexer(&mut self) -> &mut BufferedLexer<Self::Kind, Lex>;
+}
+
 /// Token source that supports inspecting the 'nth' token (lookahead)
-pub trait NthToken: TokenSource {
+pub trait NthToken<Lex>: TokenSource {
     /// Gets the kind of the nth non-trivia token
     fn nth(&mut self, n: usize) -> Self::Kind;
 
     /// Returns true if the nth non-trivia token is preceded by a line break
     fn has_nth_preceding_line_break(&mut self, n: usize) -> bool;
+}
+
+impl<'l, Lex, T> NthToken<Lex> for T
+where
+    T: TokenSourceWithBufferedLexer<Lex>,
+    Lex: LexerWithCheckpoint<'l, Kind = T::Kind>,
+{
+    /// Gets the kind of the nth non-trivia token
+    fn nth(&mut self, n: usize) -> T::Kind {
+        if n == 0 {
+            self.current()
+        } else {
+            self.lexer()
+                .nth_non_trivia(n)
+                .map_or(T::Kind::EOF, |lookahead| lookahead.kind())
+        }
+    }
+
+    /// Returns true if the nth non-trivia token is preceded by a line break
+    fn has_nth_preceding_line_break(&mut self, n: usize) -> bool {
+        if n == 0 {
+            self.has_preceding_line_break()
+        } else {
+            self.lexer()
+                .nth_non_trivia(n)
+                .map_or(false, |lookahead| lookahead.has_preceding_line_break())
+        }
+    }
 }
 
 #[derive(Debug)]

@@ -22,8 +22,6 @@ invalidTypeParameter.ts:1:23 lint/style/useNamingConvention ━━━━━━�
     2 │ 
     3 │ type Mapped<T> = {
   
-  i The name could be renamed to `L`.
-  
 
 ```
 
@@ -36,8 +34,6 @@ invalidTypeParameter.ts:1:26 lint/style/useNamingConvention ━━━━━━�
       │                          ^^
     2 │ 
     3 │ type Mapped<T> = {
-  
-  i The name could be renamed to `L1`.
   
 
 ```
@@ -52,8 +48,6 @@ invalidTypeParameter.ts:1:30 lint/style/useNamingConvention ━━━━━━�
     2 │ 
     3 │ type Mapped<T> = {
   
-  i The name could be renamed to `CamelCase`.
-  
 
 ```
 
@@ -66,8 +60,6 @@ invalidTypeParameter.ts:1:41 lint/style/useNamingConvention ━━━━━━�
       │                                         ^^^^^^^^^^^^^
     2 │ 
     3 │ type Mapped<T> = {
-  
-  i The name could be renamed to `ConstantCase`.
   
 
 ```
@@ -82,8 +74,6 @@ invalidTypeParameter.ts:1:56 lint/style/useNamingConvention ━━━━━━�
     2 │ 
     3 │ type Mapped<T> = {
   
-  i The name could be renamed to `SnakeCase`.
-  
 
 ```
 
@@ -96,8 +86,6 @@ invalidTypeParameter.ts:1:68 lint/style/useNamingConvention ━━━━━━�
       │                                                                    ^^^^^^^^^^^^^
     2 │ 
     3 │ type Mapped<T> = {
-  
-  i The name could be renamed to `UnknownStyle`.
   
 
 ```
@@ -112,9 +100,5 @@ invalidTypeParameter.ts:4:6 lint/style/useNamingConvention ━━━━━━━
       │      ^
     5 │ }
   
-  i The name could be renamed to `K`.
-  
 
 ```
-
-

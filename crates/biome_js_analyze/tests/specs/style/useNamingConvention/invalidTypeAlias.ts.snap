@@ -32,8 +32,6 @@ invalidTypeAlias.ts:1:13 lint/style/useNamingConvention ━━━━━━━━
     2 │ 
     3 │ export type CONSTANT_CASE = {}
   
-  i The name could be renamed to `CamelCase`.
-  
 
 ```
 
@@ -48,8 +46,6 @@ invalidTypeAlias.ts:3:13 lint/style/useNamingConvention ━━━━━━━━
       │             ^^^^^^^^^^^^^
     4 │ 
     5 │ export type snake_case = {}
-  
-  i The name could be renamed to `ConstantCase`.
   
 
 ```
@@ -66,8 +62,6 @@ invalidTypeAlias.ts:5:13 lint/style/useNamingConvention ━━━━━━━━
     6 │ 
     7 │ export type Unknown_Style = {}
   
-  i The name could be renamed to `SnakeCase`.
-  
 
 ```
 
@@ -83,24 +77,20 @@ invalidTypeAlias.ts:7:13 lint/style/useNamingConvention ━━━━━━━━
     8 │ 
     9 │ type _CONSTANT_CASE = {}
   
-  i The name could be renamed to `UnknownStyle`.
-  
 
 ```
 
 ```
-invalidTypeAlias.ts:9:6 lint/style/useNamingConvention  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalidTypeAlias.ts:9:7 lint/style/useNamingConvention  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This type alias name trimmed as `CONSTANT_CASE` should be in PascalCase.
+  ! This type alias name part should be in PascalCase.
   
      7 │ export type Unknown_Style = {}
      8 │ 
    > 9 │ type _CONSTANT_CASE = {}
-       │      ^^^^^^^^^^^^^^
+       │       ^^^^^^^^^^^^^
     10 │ 
     11 │ type _snake_case = {}
-  
-  i The name could be renamed to `_ConstantCase`.
   
   i Safe fix: Rename this symbol in PascalCase.
   
@@ -115,18 +105,16 @@ invalidTypeAlias.ts:9:6 lint/style/useNamingConvention  FIXABLE  ━━━━━
 ```
 
 ```
-invalidTypeAlias.ts:11:6 lint/style/useNamingConvention  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalidTypeAlias.ts:11:7 lint/style/useNamingConvention  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This type alias name trimmed as `snake_case` should be in PascalCase.
+  ! This type alias name part should be in PascalCase.
   
      9 │ type _CONSTANT_CASE = {}
     10 │ 
   > 11 │ type _snake_case = {}
-       │      ^^^^^^^^^^^
+       │       ^^^^^^^^^^
     12 │ 
     13 │ type _Unknown_Style = {}
-  
-  i The name could be renamed to `_SnakeCase`.
   
   i Safe fix: Rename this symbol in PascalCase.
   
@@ -141,18 +129,16 @@ invalidTypeAlias.ts:11:6 lint/style/useNamingConvention  FIXABLE  ━━━━�
 ```
 
 ```
-invalidTypeAlias.ts:13:6 lint/style/useNamingConvention  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalidTypeAlias.ts:13:7 lint/style/useNamingConvention  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This type alias name trimmed as `Unknown_Style` should be in PascalCase.
+  ! This type alias name part should be in PascalCase.
   
     11 │ type _snake_case = {}
     12 │ 
   > 13 │ type _Unknown_Style = {}
-       │      ^^^^^^^^^^^^^^
+       │       ^^^^^^^^^^^^^
     14 │ 
     15 │ type str = string
-  
-  i The name could be renamed to `_UnknownStyle`.
   
   i Safe fix: Rename this symbol in PascalCase.
   
@@ -176,8 +162,6 @@ invalidTypeAlias.ts:15:6 lint/style/useNamingConvention  FIXABLE  ━━━━�
   > 15 │ type str = string
        │      ^^^
   
-  i The name could be renamed to `Str`.
-  
   i Safe fix: Rename this symbol in PascalCase.
   
     13 13 │   type _Unknown_Style = {}
@@ -187,5 +171,3 @@ invalidTypeAlias.ts:15:6 lint/style/useNamingConvention  FIXABLE  ━━━━�
   
 
 ```
-
-

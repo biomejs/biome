@@ -29,6 +29,7 @@ declare_rule! {
  pub NoReactSpecificProps {
         version: "1.7.2",
         name: "noReactSpecificProps",
+        language: "js",
         sources: &[RuleSource::EslintSolid("no-react-specific-props")],
         recommended: false,
         fix_kind: FixKind::Safe,

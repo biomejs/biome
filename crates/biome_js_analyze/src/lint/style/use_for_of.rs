@@ -49,6 +49,7 @@ declare_rule! {
     pub UseForOf {
         version: "1.5.0",
         name: "useForOf",
+        language: "js",
         sources: &[
             RuleSource::EslintTypeScript("prefer-for-of"),
             RuleSource::EslintUnicorn("no-for-loop"),

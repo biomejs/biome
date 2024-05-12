@@ -48,6 +48,7 @@ declare_rule! {
     pub NoExtraNonNullAssertion {
         version: "1.0.0",
         name: "noExtraNonNullAssertion",
+        language: "ts",
         sources: &[RuleSource::EslintTypeScript("no-extra-non-null-assertion")],
         recommended: true,
         fix_kind: FixKind::Safe,

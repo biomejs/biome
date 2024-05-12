@@ -1,0 +1,10 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: validMultipleImport.css
+---
+# Input
+```css
+@import 'foo.css';
+@import 'bar.css';
+
+```

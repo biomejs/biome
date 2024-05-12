@@ -5,6 +5,7 @@ mod tests;
 use biome_graphql_syntax::{GraphqlSyntaxKind, GraphqlSyntaxKind::*, TextLen, TextSize, T};
 use biome_parser::diagnostic::ParseDiagnostic;
 use biome_parser::lexer::{Lexer, LexerCheckpoint, LexerWithCheckpoint, TokenFlags};
+use biome_rowan::SyntaxKind;
 use std::ops::Add;
 
 #[derive(Debug)]

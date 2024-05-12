@@ -48,6 +48,7 @@ declare_rule! {
     pub NoRestrictedGlobals {
         version: "1.0.0",
         name: "noRestrictedGlobals",
+        language: "js",
         sources: &[RuleSource::Eslint("no-restricted-globals")],
         recommended: false,
     }

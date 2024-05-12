@@ -70,6 +70,7 @@ declare_rule! {
     pub UseConsistentArrayType {
         version: "1.5.0",
         name: "useConsistentArrayType",
+        language: "ts",
         sources: &[RuleSource::EslintTypeScript("array-type")],
         recommended: false,
         fix_kind: FixKind::Unsafe,

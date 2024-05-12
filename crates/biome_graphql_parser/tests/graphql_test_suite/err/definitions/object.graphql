@@ -44,6 +44,8 @@ typ Person
 
 type Person implemets Character
 
+type Person implements &
+
 type Person @
 
 type Person implents Character @

@@ -1,9 +1,10 @@
 use crate::parser::{
     argument::parse_arguments,
     directive::{is_at_directive, DirectiveList},
-    is_at_name,
+    is_nth_at_name,
     parse_error::{
-        expected_any_selection, expected_name, expected_type, expected_variable_definition,
+        expected_any_selection, expected_name, expected_type, expected_variable,
+        expected_variable_definition,
     },
     parse_name,
     r#type::parse_type,
@@ -104,7 +105,7 @@ impl ParseRecovery for VariableDefinitionListParseRecovery {
     const RECOVERED_KIND: Self::Kind = GRAPHQL_BOGUS;
 
     fn is_at_recovered(&self, p: &mut Self::Parser<'_>) -> bool {
-        is_at_variable(p) || is_at_variable_definitions_end(p)
+        is_at_variable_definition(p) || is_at_variable_definitions_end(p)
     }
 }
 
@@ -166,18 +167,16 @@ fn parse_field(p: &mut GraphqlParser) -> ParsedSyntax {
 
     // alias is optional, so if there is a colon, we parse it as an alias
     // otherwise we parse it as a normal field name
-    if p.nth_at(1, T![:]) {
+    if is_at_alias(p) {
         let m = p.start();
 
-        // name is checked for in `is_at_field`
-        parse_name(p).ok();
+        parse_name(p).or_add_diagnostic(p, expected_name);
         p.bump(T![:]);
         m.complete(p, GRAPHQL_ALIAS);
 
         parse_name(p).or_add_diagnostic(p, expected_name);
     } else {
-        // name is checked for in `is_at_field`
-        parse_name(p).ok();
+        parse_name(p).or_add_diagnostic(p, expected_name);
     }
 
     // arguments are optional
@@ -196,8 +195,8 @@ fn parse_fragment(p: &mut GraphqlParser) -> ParsedSyntax {
         return Absent;
     }
     let m = p.start();
-    p.bump(DOT3);
-    if is_at_name(p) {
+    p.expect(DOT3);
+    if is_nth_at_name(p, 0) {
         // name is checked for in `is_at_name`
         parse_name(p).ok();
         DirectiveList.parse_list(p);
@@ -214,13 +213,13 @@ fn parse_fragment(p: &mut GraphqlParser) -> ParsedSyntax {
 
 #[inline]
 fn parse_variable_definitions(p: &mut GraphqlParser) -> ParsedSyntax {
-    if !p.at(T!['(']) {
+    if !is_at_variable_definitions(p) {
         return Absent;
     }
 
     let m = p.start();
 
-    p.bump(T!['(']);
+    p.expect(T!['(']);
     VariableDefinitionList.parse_list(p);
     p.expect(T![')']);
 
@@ -229,14 +228,19 @@ fn parse_variable_definitions(p: &mut GraphqlParser) -> ParsedSyntax {
 
 #[inline]
 fn parse_variable_definition(p: &mut GraphqlParser) -> ParsedSyntax {
-    if !is_at_variable(p) {
+    if !is_at_variable_definition(p) {
         return Absent;
     }
 
     let m = p.start();
 
-    // variable is checked for in `is_at_variable`
-    parse_variable(p).ok();
+    // Malformed variable
+    if !is_at_variable(p) && p.nth_at(1, T![:]) {
+        p.error(expected_variable(p, p.cur_range()));
+        p.bump_any()
+    } else {
+        parse_variable(p).or_add_diagnostic(p, expected_variable);
+    }
     p.expect(T![:]);
     parse_type(p).or_add_diagnostic(p, expected_type);
 
@@ -253,10 +257,31 @@ pub(crate) fn is_at_operation(p: &GraphqlParser<'_>) -> bool {
 }
 
 #[inline]
+fn is_at_variable_definitions(p: &mut GraphqlParser) -> bool {
+    p.at(T!['('])
+    // missing opening parenthesis
+    || is_at_variable_definition(p)
+}
+
+#[inline]
 fn is_at_variable_definitions_end(p: &GraphqlParser) -> bool {
     p.at(T![')']) || is_at_directive(p) || is_at_selection_set(p)
 }
 
+#[inline]
+fn is_at_variable_definition(p: &mut GraphqlParser) -> bool {
+    is_at_variable(p)
+    // malformed variable
+    || is_nth_at_name(p, 0)
+    // malformed variable,but not inside selection set
+    || (p.nth_at(1, T![:]) && !p.at(T!['{']))
+    // missing entire variable
+    || p.at(T![:])
+}
+
+// we must enforce that a selection set starts with a curly brace
+// otherwise it would be too complex to determine if we are at a selection set,
+// especially when we have nested selections
 #[inline]
 fn is_at_selection_set(p: &GraphqlParser) -> bool {
     p.at(T!['{'])
@@ -269,16 +294,23 @@ pub(crate) fn is_at_selection_set_end(p: &mut GraphqlParser) -> bool {
 }
 
 #[inline]
-fn is_at_selection(p: &GraphqlParser) -> bool {
+fn is_at_selection(p: &mut GraphqlParser) -> bool {
     is_at_field(p) || is_at_fragment(p)
 }
 
 #[inline]
-fn is_at_field(p: &GraphqlParser) -> bool {
-    is_at_name(p)
+fn is_at_field(p: &mut GraphqlParser) -> bool {
+    is_nth_at_name(p, 0) || is_at_alias(p)
 }
 
 #[inline]
 fn is_at_fragment(p: &GraphqlParser) -> bool {
-    p.at(DOT3)
+    p.at(DOT3) || p.at(T![on])
+}
+
+#[inline]
+fn is_at_alias(p: &mut GraphqlParser) -> bool {
+    p.nth_at(1, T![:])
+    // an alias, but missing alias name
+    || p.at(T![:])
 }

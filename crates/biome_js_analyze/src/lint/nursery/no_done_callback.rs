@@ -46,6 +46,7 @@ declare_rule! {
     pub NoDoneCallback {
         version: "1.6.1",
         name: "noDoneCallback",
+        language: "js",
         recommended: true,
         sources: &[RuleSource::EslintJest("no-done-callback")],
         source_kind: RuleSourceKind::SameLogic,

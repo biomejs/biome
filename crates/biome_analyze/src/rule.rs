@@ -28,6 +28,8 @@ pub struct RuleMetadata {
     pub name: &'static str,
     /// The content of the documentation comments for this rule
     pub docs: &'static str,
+    /// The language that the rule applies to.
+    pub language: &'static str,
     /// Whether a rule is recommended or not
     pub recommended: bool,
     /// The kind of fix
@@ -242,12 +244,18 @@ impl RuleSourceKind {
 }
 
 impl RuleMetadata {
-    pub const fn new(version: &'static str, name: &'static str, docs: &'static str) -> Self {
+    pub const fn new(
+        version: &'static str,
+        name: &'static str,
+        docs: &'static str,
+        language: &'static str,
+    ) -> Self {
         Self {
             deprecated: None,
             version,
             name,
             docs,
+            language,
             recommended: false,
             fix_kind: None,
             sources: &[],
@@ -280,6 +288,11 @@ impl RuleMetadata {
 
     pub const fn source_kind(mut self, source_kind: RuleSourceKind) -> Self {
         self.source_kind = Some(source_kind);
+        self
+    }
+
+    pub const fn language(mut self, language: &'static str) -> Self {
+        self.language = language;
         self
     }
 }
@@ -315,6 +328,7 @@ macro_rules! declare_rule {
     ( $( #[doc = $doc:literal] )+ $vis:vis $id:ident {
         version: $version:literal,
         name: $name:tt,
+        language: $language:literal,
         $( $key:ident: $value:expr, )*
     } ) => {
         $( #[doc = $doc] )*
@@ -323,7 +337,7 @@ macro_rules! declare_rule {
         impl $crate::RuleMeta for $id {
             type Group = super::Group;
             const METADATA: $crate::RuleMetadata =
-                $crate::RuleMetadata::new($version, $name, concat!( $( $doc, "\n", )* )) $( .$key($value) )*;
+                $crate::RuleMetadata::new($version, $name, concat!( $( $doc, "\n", )* ), $language) $( .$key($value) )*;
         }
 
         // Declare a new `rule_category!` macro in the module context that

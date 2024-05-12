@@ -85,6 +85,7 @@ declare_rule! {
  pub NoRedundantUseStrict {
         version: "1.0.0",
         name: "noRedundantUseStrict",
+        language: "js",
         recommended: true,
         fix_kind: FixKind::Safe,
     }

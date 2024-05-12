@@ -45,6 +45,7 @@ declare_rule! {
     pub NoAriaHiddenOnFocusable {
         version: "1.4.0",
         name: "noAriaHiddenOnFocusable",
+        language: "jsx",
         sources: &[RuleSource::EslintJsxA11y("no-aria-hidden-on-focusable")],
         recommended: true,
         fix_kind: FixKind::Unsafe,

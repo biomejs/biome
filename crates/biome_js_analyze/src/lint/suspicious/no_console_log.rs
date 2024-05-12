@@ -36,6 +36,7 @@ declare_rule! {
     pub NoConsoleLog {
         version: "1.0.0",
         name: "noConsoleLog",
+        language: "js",
         sources: &[RuleSource::Eslint("no-console")],
         source_kind: RuleSourceKind::Inspired,
         recommended: false,

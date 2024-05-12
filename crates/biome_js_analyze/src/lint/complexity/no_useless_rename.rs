@@ -60,6 +60,7 @@ declare_rule! {
     pub NoUselessRename {
         version: "1.0.0",
         name: "noUselessRename",
+        language: "js",
         sources: &[RuleSource::Eslint("no-useless-rename")],
         recommended: true,
         fix_kind: FixKind::Safe,
