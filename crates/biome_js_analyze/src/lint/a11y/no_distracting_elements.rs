@@ -81,11 +81,11 @@ impl Rule for NoDistractingElements {
         let mut mutation = ctx.root().begin();
         mutation.remove_node(element.clone());
 
-        Some(JsRuleAction {
-            category: ActionCategory::QuickFix,
-            applicability: Applicability::MaybeIncorrect,
-            message: markup! { "Remove the '"{name.text_trimmed()}"' element." }.to_owned(),
+        Some(JsRuleAction::new(
+            ActionCategory::QuickFix,
+            Applicability::MaybeIncorrect,
+            markup! { "Remove the '"{name.text_trimmed()}"' element." }.to_owned(),
             mutation,
-        })
+        ))
     }
 }

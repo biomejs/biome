@@ -238,12 +238,12 @@ impl Rule for UseValidTypeof {
             )),
         );
 
-        Some(JsRuleAction {
-            category: ActionCategory::QuickFix,
-            applicability: Applicability::MaybeIncorrect,
-            message: markup! { "Compare the result of `typeof` with a valid type name" }.to_owned(),
+        Some(JsRuleAction::new(
+            ActionCategory::QuickFix,
+            Applicability::MaybeIncorrect,
+            markup! { "Compare the result of `typeof` with a valid type name" }.to_owned(),
             mutation,
-        })
+        ))
     }
 }
 

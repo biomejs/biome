@@ -124,12 +124,12 @@ impl Rule for NoCompareNegZero {
             );
         }
 
-        Some(JsRuleAction {
-            category: ActionCategory::QuickFix,
-            applicability: Applicability::Always,
-            message: markup! { "Replace -0 with 0" }.to_owned(),
+        Some(JsRuleAction::new(
+            ActionCategory::QuickFix,
+            Applicability::Always,
+            markup! { "Replace -0 with 0" }.to_owned(),
             mutation,
-        })
+        ))
     }
 }
 

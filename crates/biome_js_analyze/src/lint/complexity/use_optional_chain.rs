@@ -201,12 +201,12 @@ impl Rule for UseOptionalChain {
 
                 let mut mutation = ctx.root().begin();
                 mutation.replace_node(AnyJsExpression::from(logical.clone()), replacement);
-                Some(JsRuleAction {
-                    category: ActionCategory::QuickFix,
-                    applicability: Applicability::MaybeIncorrect,
-                    message: markup! { "Change to an optional chain." }.to_owned(),
+                Some(JsRuleAction::new(
+                    ActionCategory::QuickFix,
+                    Applicability::MaybeIncorrect,
+                    markup! { "Change to an optional chain." }.to_owned(),
                     mutation,
-                })
+                ))
             }
             UseOptionalChainState::LogicalOrLike(chain) => {
                 let chain = chain.optional_chain_expression_nodes();
@@ -249,12 +249,12 @@ impl Rule for UseOptionalChain {
                 let (prev_member, new_member) = prev_chain?;
                 let mut mutation = ctx.root().begin();
                 mutation.replace_node(prev_member, new_member);
-                Some(JsRuleAction {
-                    category: ActionCategory::QuickFix,
-                    applicability: Applicability::MaybeIncorrect,
-                    message: markup! { "Change to an optional chain." }.to_owned(),
+                Some(JsRuleAction::new(
+                    ActionCategory::QuickFix,
+                    Applicability::MaybeIncorrect,
+                    markup! { "Change to an optional chain." }.to_owned(),
                     mutation,
-                })
+                ))
             }
         }
     }

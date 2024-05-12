@@ -108,15 +108,14 @@ impl Rule for NoDoubleEquals {
         let suggestion = if op.kind() == EQ2 { T![===] } else { T![!==] };
         mutation.replace_token(op.clone(), make::token(suggestion));
 
-        Some(JsRuleAction {
-            category: ActionCategory::QuickFix,
-            applicability: Applicability::MaybeIncorrect,
+        Some(JsRuleAction::new(
+            ActionCategory::QuickFix,
+            Applicability::MaybeIncorrect,
             // SAFETY: `suggestion` can only be JsSyntaxKind::EQ3 or JsSyntaxKind::NEQ2,
             // the implementation of `to_string` for these two variants always returns Some
-            message: markup! { "Use "<Emphasis>{suggestion.to_string().unwrap()}</Emphasis> }
-                .to_owned(),
+            markup! { "Use "<Emphasis>{suggestion.to_string().unwrap()}</Emphasis> }.to_owned(),
             mutation,
-        })
+        ))
     }
 }
 

@@ -53,14 +53,14 @@ impl Rule for TrailingComma {
         let new_node = json_member_name(ident("\"trailingCommas\""));
         mutation.replace_node(node.clone(), new_node);
 
-        Some(RuleAction {
-            category: ActionCategory::QuickFix,
-            applicability: Applicability::Always,
-            message: markup! {
+        Some(RuleAction::new(
+            ActionCategory::QuickFix,
+            Applicability::Always,
+            markup! {
                 "Use the property "<Emphasis>"javascript.formatter.trailingCommas"</Emphasis>" instead."
             }
             .to_owned(),
             mutation,
-        })
+        ))
     }
 }

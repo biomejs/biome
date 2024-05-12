@@ -135,12 +135,11 @@ impl Rule for NoSwitchDeclarations {
         let mut mutation = ctx.root().begin();
         mutation.replace_token_discard_trivia(colon_token, new_colon_token);
         mutation.replace_node_discard_trivia(consequent, new_consequent);
-        Some(JsRuleAction {
-            category: ActionCategory::QuickFix,
-            applicability: Applicability::MaybeIncorrect,
-            message: markup! { "Wrap the "<Emphasis>"declaration"</Emphasis>" in a block." }
-                .to_owned(),
+        Some(JsRuleAction::new(
+            ActionCategory::QuickFix,
+            Applicability::MaybeIncorrect,
+            markup! { "Wrap the "<Emphasis>"declaration"</Emphasis>" in a block." }.to_owned(),
             mutation,
-        })
+        ))
     }
 }

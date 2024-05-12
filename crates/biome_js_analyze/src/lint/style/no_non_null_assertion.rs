@@ -154,13 +154,13 @@ impl Rule for NoNonNullAssertion {
                     }
                 };
 
-                Some(JsRuleAction {
-                    category: ActionCategory::QuickFix,
-                    applicability: Applicability::MaybeIncorrect,
-                    message: markup! { "Replace with optional chain operator "<Emphasis>"?."</Emphasis>" This operator includes runtime checks, so it is safer than the compile-only non-null assertion operator" }
+                Some(JsRuleAction::new(
+                    ActionCategory::QuickFix,
+                    Applicability::MaybeIncorrect,
+                     markup! { "Replace with optional chain operator "<Emphasis>"?."</Emphasis>" This operator includes runtime checks, so it is safer than the compile-only non-null assertion operator" }
                         .to_owned(),
                     mutation,
-                })
+                ))
             }
         }
     }

@@ -126,11 +126,11 @@ impl Rule for NoImplicitBoolean {
 
         mutation.replace_node(n.clone(), next_attr);
 
-        Some(JsRuleAction {
-            category: ActionCategory::QuickFix,
-            applicability: Applicability::Always,
-            message: markup! { "Add explicit `true` literal for this attribute" }.to_owned(),
+        Some(JsRuleAction::new(
+            ActionCategory::QuickFix,
+            Applicability::Always,
+            markup! { "Add explicit `true` literal for this attribute" }.to_owned(),
             mutation,
-        })
+        ))
     }
 }

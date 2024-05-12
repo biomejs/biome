@@ -77,12 +77,11 @@ impl Rule for UseNodeAssertStrict {
         );
         let mut mutation = ctx.root().begin();
         mutation.replace_token(module_name.clone(), new_module_name);
-        Some(JsRuleAction {
-            category: ActionCategory::QuickFix,
-            applicability: Applicability::Always,
-            message: markup! { "Replace with "<Emphasis>"node:assert/strict"</Emphasis>"." }
-                .to_owned(),
+        Some(JsRuleAction::new(
+            ActionCategory::QuickFix,
+            Applicability::Always,
+            markup! { "Replace with "<Emphasis>"node:assert/strict"</Emphasis>"." }.to_owned(),
             mutation,
-        })
+        ))
     }
 }

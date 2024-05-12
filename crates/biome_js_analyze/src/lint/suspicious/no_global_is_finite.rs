@@ -112,14 +112,14 @@ impl Rule for NoGlobalIsFinite {
             _ => return None,
         };
         mutation.replace_node(old, new.into());
-        Some(JsRuleAction {
-            category: ActionCategory::QuickFix,
-            applicability: Applicability::MaybeIncorrect,
-            message: markup! {
+        Some(JsRuleAction::new(
+            ActionCategory::QuickFix,
+            Applicability::MaybeIncorrect,
+            markup! {
                 "Use "<Emphasis>"Number.isFinite"</Emphasis>" instead."
             }
             .to_owned(),
             mutation,
-        })
+        ))
     }
 }

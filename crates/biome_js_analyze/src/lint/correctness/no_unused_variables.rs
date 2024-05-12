@@ -425,13 +425,13 @@ impl Rule for NoUnusedVariables {
                 let model = ctx.model();
                 mutation.rename_node_declaration(model, binding, &new_name);
 
-                Some(JsRuleAction {
+                Some(JsRuleAction::new(
+                    ActionCategory::QuickFix,
+                    Applicability::MaybeIncorrect,
+                    markup! { "If this is intentional, prepend "<Emphasis>{name_trimmed}</Emphasis>" with an underscore." }
+                    .to_owned(),
                     mutation,
-                    category: ActionCategory::QuickFix,
-                    applicability: Applicability::MaybeIncorrect,
-                    message: markup! { "If this is intentional, prepend "<Emphasis>{name_trimmed}</Emphasis>" with an underscore." }
-                        .to_owned(),
-                })
+                ))
             }
         }
     }

@@ -191,11 +191,11 @@ impl Rule for NoShoutyConstants {
             return None;
         }
 
-        Some(JsRuleAction {
-            category: ActionCategory::QuickFix,
-            applicability: Applicability::MaybeIncorrect,
-            message: markup! { "Use the constant value directly" }.to_owned(),
-            mutation: batch,
-        })
+        Some(JsRuleAction::new(
+            ActionCategory::QuickFix,
+            Applicability::MaybeIncorrect,
+            markup! { "Use the constant value directly" }.to_owned(),
+            batch,
+        ))
     }
 }

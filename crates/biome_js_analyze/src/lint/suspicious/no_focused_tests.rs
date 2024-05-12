@@ -1,7 +1,7 @@
 use crate::JsRuleAction;
 use biome_analyze::{
-    context::RuleContext, declare_rule, Ast, FixKind, Rule, RuleDiagnostic, RuleSource,
-    RuleSourceKind,
+    context::RuleContext, declare_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic,
+    RuleSource, RuleSourceKind,
 };
 use biome_console::markup;
 use biome_diagnostics::Applicability;
@@ -144,11 +144,11 @@ impl Rule for NoFocusedTests {
             mutation.remove_element(NodeOrToken::Token(r_brack));
         };
 
-        Some(JsRuleAction {
-            category: biome_analyze::ActionCategory::QuickFix,
-            applicability: Applicability::MaybeIncorrect,
-            message: markup! { "Remove focus from test." }.to_owned(),
+        Some(JsRuleAction::new(
+            ActionCategory::QuickFix,
+            Applicability::MaybeIncorrect,
+            markup! { "Remove focus from test." }.to_owned(),
             mutation,
-        })
+        ))
     }
 }

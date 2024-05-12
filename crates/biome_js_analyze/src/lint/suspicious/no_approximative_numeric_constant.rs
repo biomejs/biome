@@ -108,13 +108,12 @@ impl Rule for NoApproximativeNumericConstant {
             AnyJsExpression::AnyJsLiteralExpression(AnyJsLiteralExpression::from(node.clone())),
             AnyJsExpression::from(new_node),
         );
-        Some(JsRuleAction {
-            category: ActionCategory::QuickFix,
-            applicability: Applicability::MaybeIncorrect,
-            message: markup! { "Use "<Emphasis>"Math."{ constant_name }</Emphasis>" instead." }
-                .to_owned(),
+        Some(JsRuleAction::new(
+            ActionCategory::QuickFix,
+            Applicability::MaybeIncorrect,
+            markup! { "Use "<Emphasis>"Math."{ constant_name }</Emphasis>" instead." }.to_owned(),
             mutation,
-        })
+        ))
     }
 }
 

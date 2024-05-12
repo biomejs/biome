@@ -679,12 +679,12 @@ impl Rule for UseNamingConvention {
             let mut mutation = ctx.root().begin();
             let renamed = mutation.rename_any_renamable_node(model, &renamable, &new_name[..]);
             if renamed {
-                return Some(JsRuleAction {
-                    category: ActionCategory::QuickFix,
-                    applicability: Applicability::Always,
-                    message: markup! { "Rename this symbol in "<Emphasis>{preferred_case.to_string()}</Emphasis>"." }.to_owned(),
+                return Some(JsRuleAction::new(
+                    ActionCategory::QuickFix,
+                    Applicability::Always,
+                     markup! { "Rename this symbol in "<Emphasis>{preferred_case.to_string()}</Emphasis>"." }.to_owned(),
                     mutation,
-                });
+                ));
             }
         }
         None
