@@ -146,6 +146,8 @@ impl Rule for UseAdjacentOverloadSignatures {
                 AnyJsStatement::JsClassDeclaration(node) => {
                     let members = node.members();
                     let mut class_vec = vec![];
+                    // class_index is used to keep track of the index of the method in the class
+                    // need to do this because class has `JsMethodClassMember` and `TsMethodSignatureClassMember`
                     let mut class_index = 0;
                     for member in members {
                         if let Some(method_class) = member.as_js_method_class_member() {
