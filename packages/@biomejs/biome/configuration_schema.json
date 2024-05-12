@@ -1433,7 +1433,7 @@
 					"description": "It enables ALL rules for this group.",
 					"type": ["boolean", "null"]
 				},
-				"noAdjacentOverloadSignatures": {
+				"useAdjacentOverloadSignatures": {
 					"description": "Disallow non adjacent overload signatures.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },

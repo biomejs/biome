@@ -27,7 +27,7 @@ pub(crate) fn migrate_eslint_any_rule(
             }
             let group = rules.nursery.get_or_insert_with(Default::default);
             let rule = group
-                .no_adjacent_overload_signatures
+                .use_adjacent_overload_signatures
                 .get_or_insert(Default::default());
             rule.set_level(rule_severity.into());
         }

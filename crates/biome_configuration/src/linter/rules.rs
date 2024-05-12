@@ -2649,7 +2649,7 @@ pub struct Nursery {
     pub all: Option<bool>,
     #[doc = "Succinct description of the rule."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_adjacent_overload_signatures: Option<RuleConfiguration<NoAdjacentOverloadSignatures>>,
+    pub use_adjacent_overload_signatures: Option<RuleConfiguration<UseAdjacentOverloadSignatures>>,
     #[doc = "WIP: This rule hasn't been implemented yet."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_color_invalid_hex: Option<RuleConfiguration<NoColorInvalidHex>>,
@@ -2765,7 +2765,6 @@ impl DeserializableValidator for Nursery {
 impl Nursery {
     const GROUP_NAME: &'static str = "nursery";
     pub(crate) const GROUP_RULES: &'static [&'static str] = &[
-        "noAdjacentOverloadSignatures",
         "noColorInvalidHex",
         "noConsole",
         "noConstantMathMinMaxClamp",
@@ -2790,6 +2789,7 @@ impl Nursery {
         "noUnmatchableAnbSelector",
         "noUselessStringConcat",
         "noUselessUndefinedInitialization",
+        "useAdjacentOverloadSignatures",
         "useArrayLiterals",
         "useConsistentBuiltinInstantiation",
         "useDefaultSwitchClause",
@@ -2879,7 +2879,7 @@ impl Nursery {
     }
     pub(crate) fn get_enabled_rules(&self) -> IndexSet<RuleFilter> {
         let mut index_set = IndexSet::new();
-        if let Some(rule) = self.no_adjacent_overload_signatures.as_ref() {
+        if let Some(rule) = self.use_adjacent_overload_signatures.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[0]));
             }
@@ -3038,7 +3038,7 @@ impl Nursery {
     }
     pub(crate) fn get_disabled_rules(&self) -> IndexSet<RuleFilter> {
         let mut index_set = IndexSet::new();
-        if let Some(rule) = self.no_adjacent_overload_signatures.as_ref() {
+        if let Some(rule) = self.use_adjacent_overload_signatures.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[0]));
             }
@@ -3229,10 +3229,6 @@ impl Nursery {
         rule_name: &str,
     ) -> Option<(RulePlainConfiguration, Option<RuleOptions>)> {
         match rule_name {
-            "noAdjacentOverloadSignatures" => self
-                .no_adjacent_overload_signatures
-                .as_ref()
-                .map(|conf| (conf.level(), conf.get_options())),
             "noColorInvalidHex" => self
                 .no_color_invalid_hex
                 .as_ref()
@@ -3327,6 +3323,10 @@ impl Nursery {
                 .map(|conf| (conf.level(), conf.get_options())),
             "noUselessUndefinedInitialization" => self
                 .no_useless_undefined_initialization
+                .as_ref()
+                .map(|conf| (conf.level(), conf.get_options())),
+            "useAdjacentOverloadSignatures" => self
+                .use_adjacent_overload_signatures
                 .as_ref()
                 .map(|conf| (conf.level(), conf.get_options())),
             "useArrayLiterals" => self

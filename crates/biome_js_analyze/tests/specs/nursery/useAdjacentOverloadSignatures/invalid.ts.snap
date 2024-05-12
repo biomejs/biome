@@ -1,9 +1,9 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
-expression: invalid.js
+expression: invalid.ts
 ---
 # Input
-```jsx
+```ts
 declare namespace Foo {
   export function foo_declare(s: string): void;
   export function bar_declare(): void;
@@ -58,7 +58,7 @@ export function foo(sn: string | number): void;
 
 # Diagnostics
 ```
-invalid.js:5:19 lint/nursery/noAdjacentOverloadSignatures ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:5:19 lint/nursery/useAdjacentOverloadSignatures ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! All foo_declare signatures must be adjacent.
   
@@ -69,7 +69,13 @@ invalid.js:5:19 lint/nursery/noAdjacentOverloadSignatures ━━━━━━━�
     6 │ }
     7 │ 
   
-  i All foo_type signatures must be adjacent.
+
+```
+
+```
+invalid.ts:11:20 lint/nursery/useAdjacentOverloadSignatures ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! All foo_type signatures must be adjacent.
   
      9 │   foo_type(s: string): void;
     10 │   foo_type(n: number): void;
