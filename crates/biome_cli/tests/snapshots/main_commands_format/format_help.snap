@@ -23,6 +23,8 @@ Formatting options specific to the JavaScript files
         --quote-properties=<preserve|as-needed>  When properties in objects are quoted. Defaults to asNeeded.
         --trailing-comma=<all|es5|none>  Print trailing commas wherever possible in multi-line comma-separated
                               syntactic structures. Defaults to "all".
+        --trailing-commas=<all|es5|none>  Print trailing commas wherever possible in multi-line comma-separated
+                              syntactic structures. Defaults to "all".
         --semicolons=<always|as-needed>  Whether the formatter prints semicolons for all statements or
                               only in for statements where it is necessary because of ASI.
         --arrow-parentheses=<always|as-needed>  Whether to add non-necessary parentheses to arrow functions.

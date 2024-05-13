@@ -1,4 +1,4 @@
-use crate::context::trailing_comma::FormatTrailingComma;
+use crate::context::trailing_commas::FormatTrailingCommas;
 use crate::prelude::*;
 use biome_js_syntax::{AnyJsObjectAssignmentPatternMember, JsObjectAssignmentPatternPropertyList};
 
@@ -27,7 +27,7 @@ impl FormatRule<JsObjectAssignmentPatternPropertyList>
         let trailing_separator = if has_trailing_rest {
             TrailingSeparator::Disallowed
         } else {
-            FormatTrailingComma::ES5.trailing_separator(f.options())
+            FormatTrailingCommas::ES5.trailing_separator(f.options())
         };
 
         let entries = node

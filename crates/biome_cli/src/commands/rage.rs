@@ -216,7 +216,6 @@ impl Display for RageConfiguration<'_, '_> {
                             {Section("Formatter")}
                             {KeyValuePair("Format with errors", markup!({DebugDisplay(configuration.get_formatter_configuration().format_with_errors)}))}
                             {KeyValuePair("Indent style", markup!({DebugDisplay(formatter_configuration.indent_style)}))}
-                            {KeyValuePair("Indent size", markup!({DebugDisplay(formatter_configuration.indent_size)}))}
                             {KeyValuePair("Indent width", markup!({DebugDisplay(formatter_configuration.indent_width)}))}
                             {KeyValuePair("Line ending", markup!({DebugDisplay(formatter_configuration.line_ending)}))}
                             {KeyValuePair("Line width", markup!({DebugDisplay(formatter_configuration.line_width.get())}))}
@@ -232,14 +231,13 @@ impl Display for RageConfiguration<'_, '_> {
                             {KeyValuePair("Enabled", markup!({DebugDisplay(javascript_formatter_configuration.enabled)}))}
                             {KeyValuePair("JSX quote style", markup!({DebugDisplay(javascript_formatter_configuration.jsx_quote_style)}))}
                             {KeyValuePair("Quote properties", markup!({DebugDisplay(javascript_formatter_configuration.quote_properties)}))}
-                            {KeyValuePair("Trailing comma", markup!({DebugDisplay(javascript_formatter_configuration.trailing_comma)}))}
+                            {KeyValuePair("Trailing commas", markup!({DebugDisplay(javascript_formatter_configuration.trailing_commas)}))}
                             {KeyValuePair("Semicolons", markup!({DebugDisplay(javascript_formatter_configuration.semicolons)}))}
                             {KeyValuePair("Arrow parentheses", markup!({DebugDisplay(javascript_formatter_configuration.arrow_parentheses)}))}
                             {KeyValuePair("Bracket spacing", markup!({DebugDisplay(javascript_formatter_configuration.bracket_spacing)}))}
                             {KeyValuePair("Bracket same line", markup!({DebugDisplay(javascript_formatter_configuration.bracket_same_line)}))}
                             {KeyValuePair("Quote style", markup!({DebugDisplay(javascript_formatter_configuration.quote_style)}))}
                             {KeyValuePair("Indent style", markup!({DebugDisplayOption(javascript_formatter_configuration.indent_style)}))}
-                            {KeyValuePair("Indent size", markup!({DebugDisplayOption(javascript_formatter_configuration.indent_size)}))}
                             {KeyValuePair("Indent width", markup!({DebugDisplayOption(javascript_formatter_configuration.indent_width)}))}
                             {KeyValuePair("Line ending", markup!({DebugDisplayOption(javascript_formatter_configuration.line_ending)}))}
                             {KeyValuePair("Line width", markup!({DebugDisplayOption(javascript_formatter_configuration.line_width.map(|lw| lw.get()))}))}
@@ -254,7 +252,6 @@ impl Display for RageConfiguration<'_, '_> {
                             {KeyValuePair("Enabled", markup!({DebugDisplay(json_formatter_configuration.enabled)}))}
                             {KeyValuePair("Indent style", markup!({DebugDisplayOption(json_formatter_configuration.indent_style)}))}
                             {KeyValuePair("Indent width", markup!({DebugDisplayOption(json_formatter_configuration.indent_width)}))}
-                            {KeyValuePair("Indent size", markup!({DebugDisplayOption(json_formatter_configuration.indent_size)}))}
                             {KeyValuePair("Line ending", markup!({DebugDisplayOption(json_formatter_configuration.line_ending)}))}
                             {KeyValuePair("Line width", markup!({DebugDisplayOption(json_formatter_configuration.line_width.map(|lw| lw.get()))}))}
                             {KeyValuePair("Trailing Commas", markup!({DebugDisplayOption(json_formatter_configuration.trailing_commas)}))}

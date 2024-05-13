@@ -1,0 +1,20 @@
+---
+source: crates/biome_service/tests/spec_tests.rs
+expression: javascript_formatter_trailing_commas.json
+---
+javascript_formatter_trailing_commas.json:4:22 deserialize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Found an unknown value `wrong`.
+  
+    2 │ 	"javascript": {
+    3 │ 		"formatter": {
+  > 4 │ 			"trailingCommas": "wrong"
+      │ 			                  ^^^^^^^
+    5 │ 		}
+    6 │ 	}
+  
+  i Accepted values:
+  
+  - all
+  - es5
+  - none

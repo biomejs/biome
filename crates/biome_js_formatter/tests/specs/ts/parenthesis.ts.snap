@@ -2,7 +2,6 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: ts/parenthesis.ts
 ---
-
 # Input
 
 ```ts
@@ -33,7 +32,7 @@ Line width: 80
 Quote style: Double Quotes
 JSX quote style: Double Quotes
 Quote properties: As needed
-Trailing comma: All
+Trailing commas: All
 Semicolons: Always
 Arrow parentheses: Always
 Bracket spacing: true
@@ -53,5 +52,3 @@ type T3 = keyof (typeof obj)[number];
 type T4 = keyof (typeof obj)[number];
 type T5 = (keyof typeof obj)["toString"];
 ```
-
-

@@ -78,7 +78,6 @@ Biome Configuration:
 Formatter:
   Format with errors:           true
   Indent style:                 Space
-  Indent size:                  0
   Indent width:                 2
   Line ending:                  Lf
   Line width:                   120
@@ -90,14 +89,13 @@ JavaScript Formatter:
   Enabled:                      true
   JSX quote style:              Single
   Quote properties:             AsNeeded
-  Trailing comma:               All
+  Trailing commas:              All
   Semicolons:                   Always
   Arrow parentheses:            Always
   Bracket spacing:              false
   Bracket same line:            false
   Quote style:                  Double
   Indent style:                 Tab
-  Indent size:                  unset
   Indent width:                 2
   Line ending:                  Lf
   Line width:                   100
@@ -107,7 +105,6 @@ JSON Formatter:
   Enabled:                      true
   Indent style:                 Space
   Indent width:                 2
-  Indent size:                  unset
   Line ending:                  Lf
   Line width:                   100
   Trailing Commas:              unset
