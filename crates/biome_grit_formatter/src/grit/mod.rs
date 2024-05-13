@@ -3,4 +3,8 @@
 pub(crate) mod any;
 pub(crate) mod auxiliary;
 pub(crate) mod bogus;
+pub(crate) mod declarations;
 pub(crate) mod lists;
+pub(crate) mod patterns;
+pub(crate) mod predicates;
+pub(crate) mod value;
