@@ -1,9 +1,6 @@
 use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
-use biome_js_syntax::{
-    AnyJsModuleItem, AnyJsStatement,
-    JsModuleItemList, SyntaxNodeText,
-};
+use biome_js_syntax::{AnyJsModuleItem, AnyJsStatement, JsModuleItemList, SyntaxNodeText};
 use biome_rowan::{AstNode, TextRange};
 
 declare_rule! {
@@ -118,7 +115,8 @@ impl Rule for UseAdjacentOverloadSignatures {
                     let members = ts_object.members();
                     let mut type_vec = vec![];
                     for (type_index, member) in members.into_iter().enumerate() {
-                        let method_name = member.as_ts_method_signature_type_member()?.name().ok()?;
+                        let method_name =
+                            member.as_ts_method_signature_type_member()?.name().ok()?;
                         let text = method_name.syntax().text_trimmed();
                         let range = method_name.syntax().text_range();
                         type_vec.push((text, type_index, range));
@@ -134,11 +132,7 @@ impl Rule for UseAdjacentOverloadSignatures {
                         let method_name = ts_method_signature.name().ok()?;
                         let text = method_name.syntax().text_trimmed();
                         let range = method_name.syntax().text_range();
-                        interface_vec.push((
-                            text,
-                            interface_index,
-                            range,
-                        ));
+                        interface_vec.push((text, interface_index, range));
                     }
                     methods.push(interface_vec.clone());
                 }
@@ -156,7 +150,9 @@ impl Rule for UseAdjacentOverloadSignatures {
                             let range = method_name.syntax().text_range();
                             class_vec.push((text, class_index, range));
                             class_index += 1;
-                        } else if let Some(method_class) = member.as_ts_method_signature_class_member() {
+                        } else if let Some(method_class) =
+                            member.as_ts_method_signature_class_member()
+                        {
                             let method_name = method_class.name().ok()?;
                             let text = method_name.syntax().text_trimmed();
                             let range = method_name.syntax().text_range();
@@ -178,7 +174,12 @@ impl Rule for UseAdjacentOverloadSignatures {
             let export = node.export_clause().ok()?;
             let declaration_clause = export.as_any_js_declaration_clause()?;
             let ts_declare = declaration_clause.as_ts_declare_function_declaration()?;
-            let name_token = ts_declare.id().ok()?.as_js_identifier_binding()?.name_token().ok()?;
+            let name_token = ts_declare
+                .id()
+                .ok()?
+                .as_js_identifier_binding()?
+                .name_token()
+                .ok()?;
             let parent = name_token.parent()?;
             let text = parent.text_trimmed();
             let range = parent.text_range();
