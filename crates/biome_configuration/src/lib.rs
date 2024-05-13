@@ -4,6 +4,7 @@
 //! by language. The language might further options divided by tool.
 pub mod css;
 pub mod diagnostics;
+pub mod editorconfig;
 pub mod formatter;
 pub mod generated;
 pub mod javascript;
