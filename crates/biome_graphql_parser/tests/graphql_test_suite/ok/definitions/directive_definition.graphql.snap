@@ -15,6 +15,8 @@ directive @example on
 
 "deprecated" directive @delegateField(name: String!) repeatable on OBJECT | INTERFACE
 
+directive @directive(directive: directive) on FIELD
+
 ```
 
 ## AST
@@ -133,17 +135,53 @@ GraphqlRoot {
                 },
             ],
         },
+        GraphqlDirectiveDefinition {
+            description: missing (optional),
+            directive_token: DIRECTIVE_KW@249..261 "directive" [Newline("\n"), Newline("\n")] [Whitespace(" ")],
+            at_token: AT@261..262 "@" [] [],
+            name: GraphqlName {
+                value_token: GRAPHQL_NAME@262..271 "directive" [] [],
+            },
+            arguments: GraphqlArgumentsDefinition {
+                l_paren_token: L_PAREN@271..272 "(" [] [],
+                arguments: GraphqlArgumentDefinitionList [
+                    GraphqlInputValueDefinition {
+                        description: missing (optional),
+                        name: GraphqlName {
+                            value_token: GRAPHQL_NAME@272..281 "directive" [] [],
+                        },
+                        colon_token: COLON@281..283 ":" [] [Whitespace(" ")],
+                        ty: GraphqlNamedType {
+                            name: GraphqlName {
+                                value_token: GRAPHQL_NAME@283..292 "directive" [] [],
+                            },
+                        },
+                        default: missing (optional),
+                        directives: GraphqlDirectiveList [],
+                    },
+                ],
+                r_paren_token: R_PAREN@292..294 ")" [] [Whitespace(" ")],
+            },
+            repeatable_token: missing (optional),
+            on_token: ON_KW@294..297 "on" [] [Whitespace(" ")],
+            bitwise_or_token: missing (optional),
+            locations: GraphqlDirectiveLocationList [
+                GraphqlDirectiveLocation {
+                    value_token: UPPER_FIELD_KW@297..302 "FIELD" [] [],
+                },
+            ],
+        },
     ],
-    eof_token: EOF@249..250 "" [Newline("\n")] [],
+    eof_token: EOF@302..303 "" [Newline("\n")] [],
 }
 ```
 
 ## CST
 
 ```
-0: GRAPHQL_ROOT@0..250
+0: GRAPHQL_ROOT@0..303
   0: (empty)
-  1: GRAPHQL_DEFINITION_LIST@0..249
+  1: GRAPHQL_DEFINITION_LIST@0..302
     0: GRAPHQL_DIRECTIVE_DEFINITION@0..27
       0: (empty)
       1: DIRECTIVE_KW@0..10 "directive" [] [Whitespace(" ")]
@@ -225,6 +263,32 @@ GraphqlRoot {
         1: PIPE@238..240 "|" [] [Whitespace(" ")]
         2: GRAPHQL_DIRECTIVE_LOCATION@240..249
           0: UPPER_INTERFACE_KW@240..249 "INTERFACE" [] []
-  2: EOF@249..250 "" [Newline("\n")] []
+    4: GRAPHQL_DIRECTIVE_DEFINITION@249..302
+      0: (empty)
+      1: DIRECTIVE_KW@249..261 "directive" [Newline("\n"), Newline("\n")] [Whitespace(" ")]
+      2: AT@261..262 "@" [] []
+      3: GRAPHQL_NAME@262..271
+        0: GRAPHQL_NAME@262..271 "directive" [] []
+      4: GRAPHQL_ARGUMENTS_DEFINITION@271..294
+        0: L_PAREN@271..272 "(" [] []
+        1: GRAPHQL_ARGUMENT_DEFINITION_LIST@272..292
+          0: GRAPHQL_INPUT_VALUE_DEFINITION@272..292
+            0: (empty)
+            1: GRAPHQL_NAME@272..281
+              0: GRAPHQL_NAME@272..281 "directive" [] []
+            2: COLON@281..283 ":" [] [Whitespace(" ")]
+            3: GRAPHQL_NAMED_TYPE@283..292
+              0: GRAPHQL_NAME@283..292
+                0: GRAPHQL_NAME@283..292 "directive" [] []
+            4: (empty)
+            5: GRAPHQL_DIRECTIVE_LIST@292..292
+        2: R_PAREN@292..294 ")" [] [Whitespace(" ")]
+      5: (empty)
+      6: ON_KW@294..297 "on" [] [Whitespace(" ")]
+      7: (empty)
+      8: GRAPHQL_DIRECTIVE_LOCATION_LIST@297..302
+        0: GRAPHQL_DIRECTIVE_LOCATION@297..302
+          0: UPPER_FIELD_KW@297..302 "FIELD" [] []
+  2: EOF@302..303 "" [Newline("\n")] []
 
 ```

@@ -14,3 +14,8 @@ schema {
   query: MyQueryRootType
 }
 
+schema {
+  query: query
+  mutation: mutation
+	subscription: subscription
+}

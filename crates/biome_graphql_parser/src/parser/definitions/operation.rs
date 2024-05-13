@@ -21,10 +21,7 @@ use biome_parser::{
     prelude::ParsedSyntax::*, token_set, Parser, TokenSet,
 };
 
-use super::{
-    fragment::{is_at_type_condition, parse_type_condition},
-    is_at_definition,
-};
+use super::fragment::{is_at_type_condition, parse_type_condition};
 
 pub(crate) const OPERATION_TYPE: TokenSet<GraphqlSyntaxKind> =
     token_set![T![query], T![mutation], T![subscription]];
@@ -169,8 +166,15 @@ fn parse_field(p: &mut GraphqlParser) -> ParsedSyntax {
     // otherwise we parse it as a normal field name
     if is_at_alias(p) {
         let m = p.start();
+        if p.at(T![:]) {
+            p.error(expected_name(p, p.cur_range()));
+        } else if is_nth_at_name(p, 0) {
+            parse_name(p).ok();
+        } else {
+            p.error(expected_name(p, p.cur_range()));
+            p.bump_any();
+        }
 
-        parse_name(p).or_add_diagnostic(p, expected_name);
         p.bump(T![:]);
         m.complete(p, GRAPHQL_ALIAS);
 
@@ -196,7 +200,7 @@ fn parse_fragment(p: &mut GraphqlParser) -> ParsedSyntax {
     }
     let m = p.start();
     p.expect(DOT3);
-    if is_nth_at_name(p, 0) {
+    if is_nth_at_name(p, 0) && !p.nth_at(0, T![on]) {
         // name is checked for in `is_at_name`
         parse_name(p).ok();
         DirectiveList.parse_list(p);
@@ -272,7 +276,7 @@ fn is_at_variable_definitions_end(p: &GraphqlParser) -> bool {
 fn is_at_variable_definition(p: &mut GraphqlParser) -> bool {
     is_at_variable(p)
     // malformed variable
-    || is_nth_at_name(p, 0)
+    || (is_nth_at_name(p, 0) && p.nth_at(1, T![:]))
     // malformed variable,but not inside selection set
     || (p.nth_at(1, T![:]) && !p.at(T!['{']))
     // missing entire variable
@@ -287,10 +291,11 @@ fn is_at_selection_set(p: &GraphqlParser) -> bool {
     p.at(T!['{'])
 }
 
+// Since keywords are valid names, we could only be sure that we are at the end
+// of a selection set if we are at a closing curly brace
 #[inline]
-pub(crate) fn is_at_selection_set_end(p: &mut GraphqlParser) -> bool {
-    // stop at closing brace or at the start of a new definition
-    p.at(T!['}']) || is_at_definition(p)
+fn is_at_selection_set_end(p: &mut GraphqlParser) -> bool {
+    p.at(T!['}'])
 }
 
 #[inline]

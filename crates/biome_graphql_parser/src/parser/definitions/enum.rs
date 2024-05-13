@@ -1,6 +1,6 @@
 use crate::parser::{
     directive::{is_at_directive, DirectiveList},
-    is_nth_at_name, parse_description,
+    is_nth_at_name, is_nth_at_non_kw_name, parse_description,
     parse_error::expected_name,
     parse_name,
     value::{is_at_string, parse_enum_value},
@@ -14,8 +14,6 @@ use biome_parser::{
     parse_lists::ParseNodeList, parse_recovery::ParseRecovery, parsed_syntax::ParsedSyntax,
     prelude::ParsedSyntax::*, Parser,
 };
-
-use super::is_at_definition;
 
 #[inline]
 pub(crate) fn parse_enum_type_definition(p: &mut GraphqlParser) -> ParsedSyntax {
@@ -87,9 +85,6 @@ impl ParseRecovery for EnumValueListParseRecovery {
     const RECOVERED_KIND: Self::Kind = GRAPHQL_BOGUS;
 
     fn is_at_recovered(&self, p: &mut Self::Parser<'_>) -> bool {
-        // After a enum definition is a new type definition so it's safe to
-        // assume any name we see before a new type definition is a enum
-        // value
         is_nth_at_name(p, 0) || is_at_enum_values_end(p)
     }
 }
@@ -116,14 +111,14 @@ pub(crate) fn is_at_enum_type_definition(p: &mut GraphqlParser) -> bool {
     p.at(T![enum]) || (is_at_string(p) && p.nth_at(1, T![enum]))
 }
 
+/// Either a `{`, `|`, or a non kw name token must be present, else this is
+/// likely the start of a new type definition
 #[inline]
 fn is_at_enum_values(p: &mut GraphqlParser) -> bool {
     p.at(T!['{'])
-    // After an enum definition is a new type definition
-    // so it's safe to assume any name we see before a new type definition is
-    // an enum value
-    || is_nth_at_name(p, 0)
-    || (is_at_string(p) && is_nth_at_name(p, 1))
+        || is_nth_at_non_kw_name(p, 0)
+        || (is_at_string(p) && is_nth_at_non_kw_name(p, 1))
+        || is_at_directive(p)
 }
 
 #[inline]
@@ -131,7 +126,18 @@ fn is_at_enum_value(p: &mut GraphqlParser) -> bool {
     is_nth_at_name(p, 0) || (is_at_string(p) && is_nth_at_name(p, 1)) || is_at_directive(p)
 }
 
+/// Any name except `true`, `false`, `null`, is a valid enum value
+/// so if the current token is still a name, it's still a valid enum value
 #[inline]
 fn is_at_enum_values_end(p: &mut GraphqlParser) -> bool {
-    p.at(T!['}']) || is_at_definition(p)
+    if p.at(T!['}']) {
+        return true;
+    }
+    // whether the current token is a description
+    // the directive check is for missing enum value case
+    if is_at_string(p) {
+        !is_nth_at_name(p, 1) && !p.nth_at(1, T![@])
+    } else {
+        !is_nth_at_name(p, 0) && !is_at_directive(p)
+    }
 }

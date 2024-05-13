@@ -11,14 +11,15 @@ use biome_graphql_syntax::{
     GraphqlSyntaxKind::{self, *},
     T,
 };
-use biome_parser::parse_lists::ParseNodeList;
-use biome_parser::prelude::TokenSource;
+use biome_parser::parse_lists::{ParseNodeList, ParseSeparatedList};
 use biome_parser::{
-    parse_lists::ParseSeparatedList, parse_recovery::ParseRecovery, parsed_syntax::ParsedSyntax,
-    prelude::ParsedSyntax::*, Parser,
+    parse_recovery::ParseRecovery, parsed_syntax::ParsedSyntax, prelude::ParsedSyntax::*, Parser,
 };
 
-use super::field::{is_at_fields, is_at_fields_end, parse_fields_definition};
+use super::{
+    field::{is_at_fields, is_at_fields_end, parse_fields_definition},
+    is_at_definition,
+};
 
 #[inline]
 pub(super) fn parse_interface_type_definition(p: &mut GraphqlParser) -> ParsedSyntax {
@@ -54,15 +55,7 @@ pub(super) fn parse_implements_interface(p: &mut GraphqlParser) -> ParsedSyntax 
 
     p.bump(T![implements]);
 
-    // & is optional
-    p.eat(T![&]);
-
-    let position = p.source().position();
     ImplementsInterfaceList.parse_list(p);
-
-    if position == p.source().position() {
-        p.error(expected_named_type(p, p.cur_range()));
-    }
 
     Present(m.complete(p, GRAPHQL_IMPLEMENTS_INTERFACES))
 }
@@ -103,6 +96,14 @@ impl ParseSeparatedList for ImplementsInterfaceList {
     fn allow_trailing_separating_element(&self) -> bool {
         false
     }
+
+    fn allow_empty(&self) -> bool {
+        false
+    }
+
+    fn allow_leading_seperating_element(&self) -> bool {
+        true
+    }
 }
 
 struct ImplementsInterfaceListParseRecovery;
@@ -129,5 +130,5 @@ fn is_at_implements_interface(p: &mut GraphqlParser<'_>) -> bool {
 
 #[inline]
 fn is_at_implements_interface_end(p: &mut GraphqlParser<'_>) -> bool {
-    is_at_directive(p) || is_at_fields(p) || is_at_fields_end(p)
+    is_at_directive(p) || is_at_fields(p) || is_at_fields_end(p) || is_at_definition(p)
 }
