@@ -19,6 +19,7 @@ pub enum Parse<'a> {
     JavaScript(JsFileSource, &'a str),
     Json(&'a str),
     Css(&'a str),
+    Graphql(&'a str),
 }
 
 impl<'a> Parse<'a> {
@@ -47,6 +48,7 @@ impl<'a> Parse<'a> {
                 code,
                 CssParserOptions::default().allow_wrong_line_comments(),
             )),
+            Parse::Graphql(code) => Parsed::Graphql(biome_graphql_parser::parse_graphql(code)),
         }
     }
 
@@ -71,6 +73,9 @@ impl<'a> Parse<'a> {
                 cache,
                 CssParserOptions::default().allow_wrong_line_comments(),
             )),
+            Parse::Graphql(code) => {
+                Parsed::Graphql(biome_graphql_parser::parse_graphql_with_cache(code, cache))
+            }
         }
     }
 }
@@ -79,6 +84,7 @@ pub enum Parsed {
     JavaScript(biome_js_parser::Parse<AnyJsRoot>, JsFileSource),
     Json(biome_json_parser::JsonParse),
     Css(biome_css_parser::CssParse),
+    Graphql(biome_graphql_parser::GraphqlParse),
 }
 
 impl Parsed {
@@ -89,6 +95,7 @@ impl Parsed {
             }
             Parsed::Json(parse) => Some(FormatNode::Json(parse.syntax())),
             Parsed::Css(parse) => Some(FormatNode::Css(parse.syntax())),
+            Parsed::Graphql(_parse) => None,
         }
     }
 
@@ -96,6 +103,7 @@ impl Parsed {
         match self {
             Parsed::JavaScript(parse, _) => Some(Analyze::JavaScript(parse.tree())),
             Parsed::Json(_) => None,
+            Parsed::Graphql(_) => None,
             Parsed::Css(parse) => Some(Analyze::Css(parse.tree())),
         }
     }
@@ -105,6 +113,7 @@ impl Parsed {
             Parsed::JavaScript(parse, _) => parse.into_diagnostics(),
             Parsed::Json(parse) => parse.into_diagnostics(),
             Parsed::Css(parse) => parse.into_diagnostics(),
+            Parsed::Graphql(parse) => parse.into_diagnostics(),
         }
     }
 }
