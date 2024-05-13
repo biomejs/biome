@@ -78,7 +78,7 @@ impl DeriveInput {
                             .filter_map(|field| {
                                 field.ident.map(|ident| (ident, field.attrs, field.ty))
                             })
-                            .map(|(ident, attrs, ty)| {
+                            .filter_map(|(ident, attrs, ty)| {
                                 let attrs = StructFieldAttrs::try_from(&attrs)
                                     .expect("Could not parse field attributes");
                                 let key = attrs
@@ -93,9 +93,12 @@ impl DeriveInput {
                                 }
                                 if attrs.rest {
                                     rest_field = Some(ident.clone());
+                                    // If rest field, we don't return a field data, because we don't
+                                    // want to deserialize into the field directly.
+                                    return None;
                                 }
 
-                                DeserializableFieldData {
+                                Some(DeserializableFieldData {
                                     bail_on_error: attrs.bail_on_error,
                                     deprecated: attrs.deprecated,
                                     ident,
@@ -104,7 +107,7 @@ impl DeriveInput {
                                     required: attrs.required,
                                     ty,
                                     validate: attrs.validate,
-                                }
+                                })
                             })
                             .collect();
 
@@ -442,7 +445,7 @@ fn generate_deserializable_struct(
             unknown_key => {
                 let key_text = Text::deserialize(&key, "", diagnostics)?;
                 let value = Deserializable::deserialize(&value, key_text.text(), diagnostics)?;
-                result.#rest_field.extend([(key_text, value)]);
+                std::iter::Extend::extend(&mut result.#rest_field, [(key_text, value)]);
             }
         }
     } else {
