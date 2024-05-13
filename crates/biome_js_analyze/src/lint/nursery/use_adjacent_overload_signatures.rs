@@ -260,7 +260,7 @@ fn check_adjacent_overload_violations(
 fn detect_violation_pos(sorted_positions: &[usize], expected: &[usize]) -> Option<usize> {
     let expected_len = expected.len();
     for (i, &pos) in sorted_positions.iter().enumerate() {
-        let expected_pos = expected.get(i).cloned().unwrap_or(usize::MAX);
+        let expected_pos = expected.get(i).copied().unwrap_or(usize::MAX);
         let half_len = expected_len / 2;
 
         if pos != expected_pos {
