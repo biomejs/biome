@@ -43,6 +43,15 @@ class C {
   barC(): void {};
 }
 
+class D {
+  fooB(s: string): void;
+  fooB(s: string): void;
+  barB(): void {};
+  fooB(n: number): void;
+  fooB(sn: string | number): void {};
+  fooB(sn: string | number): void {};
+}
+
 export function foo(s: string): void;
 export function foo(n: number): void;
 export function bar(): void;

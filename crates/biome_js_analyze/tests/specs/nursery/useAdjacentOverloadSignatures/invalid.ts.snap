@@ -49,6 +49,15 @@ class C {
   barC(): void {};
 }
 
+class D {
+  fooB(s: string): void;
+  fooB(s: string): void;
+  barB(): void {};
+  fooB(n: number): void;
+  fooB(sn: string | number): void {};
+  fooB(sn: string | number): void {};
+}
+
 export function foo(s: string): void;
 export function foo(n: number): void;
 export function bar(): void;
@@ -58,16 +67,15 @@ export function foo(sn: string | number): void;
 
 # Diagnostics
 ```
-invalid.ts:5:19 lint/nursery/useAdjacentOverloadSignatures ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:2:19 lint/nursery/useAdjacentOverloadSignatures ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! All foo_declare signatures must be adjacent.
   
+    1 │ declare namespace Foo {
+  > 2 │   export function foo_declare(s: string): void;
+      │                   ^^^^^^^^^^^
     3 │   export function bar_declare(): void;
     4 │   export function foo_declare(n: number): void;
-  > 5 │   export function foo_declare(sn: string | number): void;
-      │                   ^^^^^^^^^^^
-    6 │ }
-    7 │ 
   
 
 ```
@@ -110,44 +118,54 @@ invalid.ts:11:20 lint/nursery/useAdjacentOverloadSignatures ━━━━━━�
   
   i All fooB signatures must be adjacent.
   
-    30 │   fooB(s: string): void;
-    31 │   barB(): void {};
-  > 32 │   fooB(n: number): void;
-       │                         
-  > 33 │   fooB(sn: string | number): void {};
+    27 │ }
+    28 │ 
+  > 29 │ class B {
+       │          
+  > 30 │   fooB(s: string): void;
        │   ^^^^
-    34 │ }
-    35 │ 
+    31 │   barB(): void {};
+    32 │   fooB(n: number): void;
   
   i All barC signatures must be adjacent.
   
-    40 │   barC(): void {};
-    41 │   fooC(s: string): void;
-  > 42 │   fooC(sn: string | number): void {};
-       │                                      
-  > 43 │   barC(): void {};
+    34 │ }
+    35 │ 
+  > 36 │ class C {
+       │          
+  > 37 │   barC(): void {};
        │   ^^^^
-    44 │ }
-    45 │ 
+    38 │   fooC(s: string): void;
+    39 │   fooC(s: string): void;
   
   i All fooC signatures must be adjacent.
   
+    38 │   fooC(s: string): void;
     39 │   fooC(s: string): void;
-    40 │   barC(): void {};
+  > 40 │   barC(): void {};
+       │                   
   > 41 │   fooC(s: string): void;
-       │                         
-  > 42 │   fooC(sn: string | number): void {};
        │   ^^^^
+    42 │   fooC(sn: string | number): void {};
     43 │   barC(): void {};
-    44 │ }
+  
+  i All fooB signatures must be adjacent.
+  
+    46 │ class D {
+  > 47 │   fooB(s: string): void;
+       │                         
+  > 48 │   fooB(s: string): void;
+       │   ^^^^
+    49 │   barB(): void {};
+    50 │   fooB(n: number): void;
   
   i All foo signatures must be adjacent.
   
-    47 │ export function foo(n: number): void;
-    48 │ export function bar(): void;
-  > 49 │ export function foo(sn: string | number): void;
+    56 │ export function foo(n: number): void;
+    57 │ export function bar(): void;
+  > 58 │ export function foo(sn: string | number): void;
        │                 ^^^
-    50 │ 
+    59 │ 
   
 
 ```

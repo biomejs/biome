@@ -104,87 +104,83 @@ impl Rule for UseAdjacentOverloadSignatures {
         let mut methods: Vec<Vec<(SyntaxNodeText, usize, TextRange)>> = Vec::new();
         let mut export_vec = vec![];
 
-        for item in node {
-            let AnyJsModuleItem::AnyJsStatement(node) = item else {
-                continue;
-            };
-            match node {
-                // type
-                AnyJsStatement::TsTypeAliasDeclaration(node) => {
-                    let ty = node.ty().ok()?;
-                    let ts_object = ty.as_ts_object_type()?;
-                    let members = ts_object.members();
-                    let mut type_vec = vec![];
-                    for (type_index, member) in members.into_iter().enumerate() {
-                        let method_name =
-                            member.as_ts_method_signature_type_member()?.name().ok()?;
-                        let text = method_name.syntax().text_trimmed();
-                        let range = method_name.syntax().text_range();
-                        type_vec.push((text, type_index, range));
-                    }
-                    methods.push(type_vec.clone());
-                }
-                // interface
-                AnyJsStatement::TsInterfaceDeclaration(node) => {
-                    let members = node.members();
-                    let mut interface_vec = vec![];
-                    for (interface_index, member) in members.into_iter().enumerate() {
-                        let ts_method_signature = member.as_ts_method_signature_type_member()?;
-                        let method_name = ts_method_signature.name().ok()?;
-                        let text = method_name.syntax().text_trimmed();
-                        let range = method_name.syntax().text_range();
-                        interface_vec.push((text, interface_index, range));
-                    }
-                    methods.push(interface_vec.clone());
-                }
-                // class
-                AnyJsStatement::JsClassDeclaration(node) => {
-                    let members = node.members();
-                    let mut class_vec = vec![];
-                    // class_index is used to keep track of the index of the method in the class
-                    // need to do this because class has `JsMethodClassMember` and `TsMethodSignatureClassMember`
-                    let mut class_index = 0;
-                    for member in members {
-                        if let Some(method_class) = member.as_js_method_class_member() {
-                            let method_name = method_class.name().ok()?;
-                            let text = method_name.syntax().text_trimmed();
-                            let range = method_name.syntax().text_range();
-                            class_vec.push((text, class_index, range));
-                            class_index += 1;
-                        } else if let Some(method_class) =
-                            member.as_ts_method_signature_class_member()
-                        {
-                            let method_name = method_class.name().ok()?;
-                            let text = method_name.syntax().text_trimmed();
-                            let range = method_name.syntax().text_range();
-                            class_vec.push((text, class_index, range));
-                            class_index += 1;
+        for (index, item) in node.into_iter().enumerate() {
+            match item {
+                AnyJsModuleItem::AnyJsStatement(node) => {
+                    match node {
+                        // type
+                        AnyJsStatement::TsTypeAliasDeclaration(node) => {
+                            let ty = node.ty().ok()?;
+                            let ts_object = ty.as_ts_object_type()?;
+                            let members = ts_object.members();
+                            let mut type_vec = vec![];
+                            for (type_index, member) in members.into_iter().enumerate() {
+                                let method_name =
+                                    member.as_ts_method_signature_type_member()?.name().ok()?;
+                                let text = method_name.syntax().text_trimmed();
+                                let range = method_name.syntax().text_range();
+                                type_vec.push((text, type_index, range));
+                            }
+                            methods.push(type_vec.clone());
                         }
+                        // interface
+                        AnyJsStatement::TsInterfaceDeclaration(node) => {
+                            let members = node.members();
+                            let mut interface_vec = vec![];
+                            for (interface_index, member) in members.into_iter().enumerate() {
+                                let ts_method_signature =
+                                    member.as_ts_method_signature_type_member()?;
+                                let method_name = ts_method_signature.name().ok()?;
+                                let text = method_name.syntax().text_trimmed();
+                                let range = method_name.syntax().text_range();
+                                interface_vec.push((text, interface_index, range));
+                            }
+                            methods.push(interface_vec.clone());
+                        }
+                        // class
+                        AnyJsStatement::JsClassDeclaration(node) => {
+                            let members = node.members();
+                            let mut class_vec = vec![];
+                            let mut class_index = 0;
+                            for member in members {
+                                if let Some(method_class) = member.as_js_method_class_member() {
+                                    let method_name = method_class.name().ok()?;
+                                    let text = method_name.syntax().text_trimmed();
+                                    let range = method_name.syntax().text_range();
+                                    class_vec.push((text, class_index, range));
+                                    class_index += 1;
+                                } else if let Some(method_class) =
+                                    member.as_ts_method_signature_class_member()
+                                {
+                                    let method_name = method_class.name().ok()?;
+                                    let text = method_name.syntax().text_trimmed();
+                                    let range = method_name.syntax().text_range();
+                                    class_vec.push((text, class_index, range));
+                                    class_index += 1;
+                                }
+                            }
+                            methods.push(class_vec.clone());
+                        }
+                        _ => {}
                     }
-                    methods.push(class_vec.clone());
+                }
+                AnyJsModuleItem::JsExport(node) => {
+                    let export = node.export_clause().ok()?;
+                    let declaration_clause = export.as_any_js_declaration_clause()?;
+                    let ts_declare = declaration_clause.as_ts_declare_function_declaration()?;
+                    let name_token = ts_declare
+                        .id()
+                        .ok()?
+                        .as_js_identifier_binding()?
+                        .name_token()
+                        .ok()?;
+                    let parent = name_token.parent()?;
+                    let text = parent.text_trimmed();
+                    let range = parent.text_range();
+                    export_vec.push((text, index, range));
                 }
                 _ => {}
             }
-        }
-        // AnyJsModuleItem::JsExport() matches with `export function` even in declare namespace
-        // So if I catch with AnyJsStatement::TsDeclareFunction() it also catches the export function in declare namespace
-        for (index, item) in node.into_iter().enumerate() {
-            let AnyJsModuleItem::JsExport(node) = item else {
-                continue;
-            };
-            let export = node.export_clause().ok()?;
-            let declaration_clause = export.as_any_js_declaration_clause()?;
-            let ts_declare = declaration_clause.as_ts_declare_function_declaration()?;
-            let name_token = ts_declare
-                .id()
-                .ok()?
-                .as_js_identifier_binding()?
-                .name_token()
-                .ok()?;
-            let parent = name_token.parent()?;
-            let text = parent.text_trimmed();
-            let range = parent.text_range();
-            export_vec.push((text, index, range));
         }
         methods.push(export_vec.clone());
         let adjacent_overload_violations = check_adjacent_overload_violations(&methods);
@@ -229,31 +225,51 @@ fn check_adjacent_overload_violations(
     let mut violations: Vec<(SyntaxNodeText, TextRange)> = Vec::new();
 
     for group in groups.iter() {
-        let mut method_positions: Vec<(SyntaxNodeText, Vec<usize>, TextRange)> = Vec::new();
+        let mut method_positions: Vec<(SyntaxNodeText, Vec<usize>, Vec<TextRange>)> = Vec::new();
 
         for (name, position, range) in group {
-            if let Some((_, positions, last_range)) =
+            if let Some((_, positions, ranges)) =
                 method_positions.iter_mut().find(|(n, _, _)| *n == *name)
             {
                 positions.push(*position);
-                *last_range = *range;
+                ranges.push(*range);
             } else {
-                method_positions.push((name.clone(), vec![*position], *range));
+                method_positions.push((name.clone(), vec![*position], vec![*range]));
             }
         }
-
-        for (method, ref positions, last_range) in &method_positions {
+        for (method, positions, last_ranges) in &method_positions {
             if positions.len() > 1 {
                 let mut sorted_positions = positions.clone();
                 sorted_positions.sort_unstable();
                 let expected: Vec<usize> =
                     (sorted_positions[0]..=sorted_positions[sorted_positions.len() - 1]).collect();
                 if sorted_positions != expected {
-                    violations.push((method.clone(), *last_range));
+                    let violation_pos = detect_violation_pos(&sorted_positions, &expected);
+                    if let Some(pos) = violation_pos {
+                        violations.push((method.clone(), last_ranges[pos]));
+                    }
                 }
             }
         }
     }
 
     violations
+}
+
+// Detect the position of the adjacent violation
+fn detect_violation_pos(sorted_positions: &[usize], expected: &[usize]) -> Option<usize> {
+    let expected_len = expected.len();
+    for (i, &pos) in sorted_positions.iter().enumerate() {
+        let expected_pos = expected.get(i).cloned().unwrap_or(usize::MAX);
+        let half_len = expected_len / 2;
+
+        if pos != expected_pos {
+            if expected_pos >= expected[half_len] {
+                return Some(i);
+            } else {
+                return Some(i - 1);
+            }
+        }
+    }
+    None
 }
