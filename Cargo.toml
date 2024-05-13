@@ -158,7 +158,7 @@ countme            = "3.0.1"
 crossbeam          = "0.8.4"
 dashmap            = "5.4.0"
 enumflags2         = "0.7.9"
-getrandom          = "0.2.14"
+getrandom          = "0.2.15"
 ignore             = "0.4.21"
 indexmap           = { version = "2.2.6", features = ["serde"] }
 insta              = "1.38.0"
