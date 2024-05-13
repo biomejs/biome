@@ -85,6 +85,7 @@ declare_rule! {
     pub UseAdjacentOverloadSignatures {
         version: "next",
         name: "useAdjacentOverloadSignatures",
+        language: "js",
         sources: &[
             RuleSource::EslintTypeScript("adjacent-overload-signatures")
         ],
