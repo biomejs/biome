@@ -25,6 +25,26 @@ impl Text {
         self.0.text()
     }
 }
+
+impl PartialOrd for Text {
+    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+        Some(self.cmp(other))
+    }
+}
+
+impl Ord for Text {
+    fn cmp(&self, other: &Self) -> std::cmp::Ordering {
+        self.text().cmp(other.text())
+    }
+}
+
+#[cfg(feature = "serde")]
+impl serde::Serialize for Text {
+    fn serialize<S: serde::Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
+        self.0.text().serialize(serializer)
+    }
+}
+
 impl Deref for Text {
     type Target = str;
     fn deref(&self) -> &Self::Target {
