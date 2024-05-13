@@ -1,12 +1,17 @@
-use crate::utils::is_node_equal;
-use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic};
-use biome_console::markup;
-use biome_js_syntax::{
-    AnyJsExpression, AnyJsLiteralExpression, JsBinaryExpression, JsBinaryOperator,
-    JsCallExpression, JsIfStatement, JsLogicalExpression, JsLogicalOperator,
-    JsParenthesizedExpression, JsUnaryOperator,
+use crate::{utils::is_node_equal, JsRuleAction};
+use biome_analyze::{
+    context::RuleContext, declare_rule, ActionCategory, Ast, Rule, RuleDiagnostic,
 };
-use biome_rowan::{AstNode, WalkEvent};
+use biome_console::markup;
+use biome_diagnostics::Applicability;
+use biome_js_factory::make::{self, js_binary_expression, token};
+use biome_js_syntax::{
+    AnyJsExpression, AnyJsLiteralExpression, AnyJsStatement, JsBinaryExpression, JsBinaryOperator,
+    JsCallExpression, JsIfStatement, JsLanguage, JsLogicalExpression, JsLogicalOperator,
+    JsParenthesizedExpression, JsSyntaxKind, JsUnaryOperator, JsYieldArgument, JsYieldExpression,
+    T,
+};
+use biome_rowan::{AstNode, BatchMutationExt, SyntaxTriviaPiece, TriviaPieceKind, WalkEvent};
 
 declare_rule! {
     /// Disallow the use of yoda expressions.
@@ -86,6 +91,124 @@ impl Rule for NoYodaExpression {
             }),
         )
     }
+
+    fn action(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<JsRuleAction> {
+        let node = ctx.query();
+        let parent_statement = node.parent::<AnyJsStatement>();
+        let parent_expression = node.parent::<AnyJsExpression>();
+        let parent_yield_argument = node.parent::<JsYieldArgument>();
+        let mut mutation = node.clone().begin();
+
+        match (
+            node.left(),
+            node.right(),
+            node.operator_token(),
+            flip_operator(node.operator().ok()),
+        ) {
+            (Ok(left), Ok(right), Ok(operator_token), Some(flipped_operator)) => {
+                let left_leading_trivia = extract_leading_trivia(&left);
+                let left_trailing_trivia = extract_trailing_trivia(&left);
+                let right_leading_trivia = extract_leading_trivia(&right);
+                let right_trailing_trivia = extract_trailing_trivia(&right);
+                let operator_leading_trivia = operator_token.leading_trivia().pieces();
+                let operator_trailing_trivia = operator_token.trailing_trivia().pieces();
+                let whitespace = make::token(T!(==))
+                    .with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")])
+                    .trailing_trivia()
+                    .last();
+
+                let has_missing_left_trivia = match (&left_leading_trivia, &parent_yield_argument) {
+                    (trivia, Some(parent_yield_argument)) => {
+                        let parent_yield_expression =
+                            parent_yield_argument.parent::<JsYieldExpression>();
+                        let has_trivia_on_parent_expression =
+                            parent_yield_expression.clone().is_some_and(|expression| {
+                                expression.yield_token().is_ok_and(|yield_token| {
+                                    !yield_token.trailing_trivia().is_empty()
+                                })
+                            });
+
+                        trivia.is_empty() && !has_trivia_on_parent_expression
+                    }
+                    _ => false,
+                };
+                let has_missing_right_trivia = match (
+                    right.clone().syntax().last_trailing_trivia(),
+                    parent_statement.clone(),
+                    parent_expression.clone(),
+                ) {
+                    (_, Some(AnyJsStatement::JsIfStatement(_)), _) => false,
+                    (_, Some(AnyJsStatement::JsWhileStatement(_)), _) => false,
+                    (_, _, Some(AnyJsExpression::JsParenthesizedExpression(_))) => false,
+                    (Some(trivia), _, _) => trivia.is_empty(),
+                    (None, _, _) => true,
+                };
+
+                let new_left = if has_missing_left_trivia {
+                    clone_with_trivia(&right, &left_leading_trivia, &left_trailing_trivia)
+                        .with_leading_trivia_pieces(whitespace.clone())
+                        .unwrap()
+                } else {
+                    clone_with_trivia(&right, &left_leading_trivia, &left_trailing_trivia)
+                };
+                let new_operator = token(flipped_operator)
+                    .prepend_trivia_pieces(operator_leading_trivia)
+                    .append_trivia_pieces(operator_trailing_trivia);
+                let new_right = if has_missing_right_trivia {
+                    clone_with_trivia(&left, &right_leading_trivia, &right_trailing_trivia)
+                        .append_trivia_pieces(whitespace.clone())
+                        .unwrap()
+                } else {
+                    clone_with_trivia(&left, &right_leading_trivia, &right_trailing_trivia)
+                };
+
+                let binary_expression = js_binary_expression(new_left, new_operator, new_right);
+
+                if has_missing_right_trivia {
+                    mutation.replace_element_discard_trivia(
+                        node.to_owned().into_syntax().into(),
+                        binary_expression.into_syntax().into(),
+                    );
+                } else {
+                    mutation.replace_node_discard_trivia(node.clone(), binary_expression);
+                }
+
+                Some(JsRuleAction {
+                    category: ActionCategory::QuickFix,
+                    applicability: Applicability::Always,
+                    message: markup! { "Flip the operators of the expression." }.to_owned(),
+                    mutation,
+                })
+            }
+            _ => None,
+        }
+    }
+}
+
+fn extract_leading_trivia(node: &AnyJsExpression) -> Vec<SyntaxTriviaPiece<JsLanguage>> {
+    node.syntax()
+        .first_leading_trivia()
+        .map(|first_leading_trivia| first_leading_trivia.pieces().collect::<Vec<_>>())
+        .unwrap_or_default()
+}
+
+fn extract_trailing_trivia(node: &AnyJsExpression) -> Vec<SyntaxTriviaPiece<JsLanguage>> {
+    node.syntax()
+        .last_trailing_trivia()
+        .map(|last_trailing_trivia| last_trailing_trivia.pieces().collect::<Vec<_>>())
+        .unwrap_or_default()
+}
+
+fn clone_with_trivia(
+    node: &AnyJsExpression,
+    leading_trivia: &[SyntaxTriviaPiece<JsLanguage>],
+    trailing_trivia: &[SyntaxTriviaPiece<JsLanguage>],
+) -> AnyJsExpression {
+    node.clone()
+        .with_leading_trivia_pieces(leading_trivia.to_owned())
+        .unwrap()
+        .with_trailing_trivia_pieces(trailing_trivia.to_owned())
+        .unwrap()
 }
 
 fn is_literal_expression(expression: &Option<AnyJsExpression>) -> bool {
@@ -193,12 +316,14 @@ fn is_inside_range_assertion(
         (None, None) => false,
         (Some(_), None) => true,
         (None, Some(_)) => true,
-        (Some(left_value), Some(right_value)) => compare_literals(left_value, right_value),
+        (Some(left_value), Some(right_value)) => {
+            compare_literals(left_value.as_str(), right_value.as_str())
+        }
     }
 }
 
 /// Compare literals as number if possible, compare as string otherwise
-fn compare_literals(left_string_value: String, right_string_value: String) -> bool {
+fn compare_literals(left_string_value: &str, right_string_value: &str) -> bool {
     match (
         left_string_value.parse::<f64>(),
         right_string_value.parse::<f64>(),
@@ -230,18 +355,20 @@ fn is_outside_range_assertion(
         (None, None) => false,
         (Some(_), None) => true,
         (None, Some(_)) => true,
-        (Some(left_value), Some(right_value)) => compare_literals(left_value, right_value),
+        (Some(left_value), Some(right_value)) => {
+            compare_literals(left_value.as_str(), right_value.as_str())
+        }
     }
 }
 
 fn is_wrapped_in_parenthesis(logical_expression: &JsLogicalExpression) -> bool {
-    match (
-        logical_expression.parent::<JsParenthesizedExpression>(),
-        logical_expression.parent::<JsIfStatement>(),
-    ) {
-        (None, None) => false,
-        _ => true,
-    }
+    !matches!(
+        (
+            logical_expression.parent::<JsParenthesizedExpression>(),
+            logical_expression.parent::<JsIfStatement>(),
+        ),
+        (None, None)
+    )
 }
 
 fn is_same_identifier(
@@ -272,8 +399,9 @@ fn extract_string_value(expression: Option<&AnyJsExpression>) -> Option<String> 
         Some(AnyJsExpression::AnyJsLiteralExpression(literal_expression)) => Some(
             literal_expression
                 .as_static_value()
-                .map(|static_value| static_value.text().to_string())
-                .unwrap_or(String::new()),
+                .map_or(String::new(), |static_value| {
+                    static_value.text().to_string()
+                }),
         ),
 
         // `a`
@@ -303,6 +431,36 @@ fn extract_string_value(expression: Option<&AnyJsExpression>) -> Option<String> 
                 _ => None,
             }
         }
+
+        _ => None,
+    }
+}
+
+fn flip_operator(operator: Option<JsBinaryOperator>) -> Option<JsSyntaxKind> {
+    match operator {
+        // === to ===
+        Some(JsBinaryOperator::StrictEquality) => Some(T!(===)),
+
+        // !== to !==
+        Some(JsBinaryOperator::StrictInequality) => Some(T!(!==)),
+
+        // == to ==
+        Some(JsBinaryOperator::Equality) => Some(T!(==)),
+
+        // != to !=
+        Some(JsBinaryOperator::Inequality) => Some(T!(!=)),
+
+        // < to >
+        Some(JsBinaryOperator::LessThan) => Some(T!(>)),
+
+        // > to <
+        Some(JsBinaryOperator::GreaterThan) => Some(T!(<)),
+
+        // <= to >=
+        Some(JsBinaryOperator::LessThanOrEqual) => Some(T!(>=)),
+
+        // >= to <=
+        Some(JsBinaryOperator::GreaterThanOrEqual) => Some(T!(<=)),
 
         _ => None,
     }

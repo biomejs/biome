@@ -15,6 +15,7 @@ if ( /* a */ 0 /* b */ < /* c */ foo /* d */ ) {}
 if (((((((5)))))) === ((((((((((foo))))))))))) {}
 while (0 === (a));
 while (0 === (a = b));
+async function foo() { return 1 < await bar() }
 function *foo() { yield(1) < a }
 function *foo() { yield((1)) < a }
 function *foo() { yield 1 < a }
