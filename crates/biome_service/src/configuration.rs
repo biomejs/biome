@@ -1,7 +1,7 @@
 use crate::settings::Settings;
 use crate::{DynRef, WorkspaceError, VERSION};
 use biome_analyze::AnalyzerRules;
-use biome_configuration::diagnostics::CantLoadExtendFile;
+use biome_configuration::diagnostics::{CantLoadExtendFile, EditorConfigDiagnostic};
 use biome_configuration::{
     push_to_analyzer_rules, ConfigurationDiagnostic, ConfigurationPathHint, ConfigurationPayload,
     PartialConfiguration,
@@ -255,6 +255,32 @@ fn load_config(
         }))
     } else {
         Ok(None)
+    }
+}
+
+pub fn load_editorconfig(
+    file_system: &DynRef<'_, dyn FileSystem>,
+    workspace_root: PathBuf,
+) -> Result<(Option<PartialConfiguration>, Vec<EditorConfigDiagnostic>), WorkspaceError> {
+    // How .editorconfig is supposed to be resolved: https://editorconfig.org/#file-location
+    // We currently don't support the `root` property, so we just search for the file like we do for biome.json
+    if let Some(auto_search_result) =
+        match file_system.auto_search(&workspace_root, [".editorconfig"].as_slice(), false) {
+            Ok(result) => result,
+            Err(error) => return Err(WorkspaceError::from(error)),
+        }
+    {
+        let AutoSearchResult {
+            content,
+            file_path: _path,
+        } = auto_search_result;
+
+        let editorconfig = biome_configuration::editorconfig::parse_str(&content)
+            .map_err(WorkspaceError::EditorConfigDiagnostic)?;
+
+        Ok(editorconfig.to_biome())
+    } else {
+        Ok((None, vec![]))
     }
 }
 
