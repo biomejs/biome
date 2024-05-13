@@ -495,6 +495,21 @@ dependencies = [
 [[package]]
 name = "biome_grit_formatter"
 version = "0.0.0"
+dependencies = [
+ "biome_diagnostics",
+ "biome_formatter",
+ "biome_formatter_test",
+ "biome_grit_parser",
+ "biome_grit_syntax",
+ "biome_parser",
+ "biome_rowan",
+ "biome_service",
+ "biome_suppression",
+ "countme",
+ "serde",
+ "serde_json",
+ "tests_macros",
+]
 
 [[package]]
 name = "biome_grit_parser"
