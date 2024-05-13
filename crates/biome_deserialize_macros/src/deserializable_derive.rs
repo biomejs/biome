@@ -437,12 +437,12 @@ fn generate_deserializable_struct(
     } else {
         validator
     };
-    let unknown_key_handler = if data.rest_field.is_some() {
+    let unknown_key_handler = if let Some(rest_field) = data.rest_field {
         quote! {
             unknown_key => {
                 let key_text = Text::deserialize(&key, "", diagnostics)?;
                 let value = Deserializable::deserialize(&value, key_text.text(), diagnostics)?;
-                unknown_fields.push((key_text, value));
+                result.#rest_field.extend([(key_text, value)]);
             }
         }
     } else {
@@ -466,20 +466,6 @@ fn generate_deserializable_struct(
             }
             UnknownFields::Allow => quote! { _ => {} },
         }
-    };
-
-    let (unknown_fields_initializer, collect_unknown_fields) = if let Some(field) = data.rest_field
-    {
-        (
-            quote! {
-                let mut unknown_fields = vec![];
-            },
-            quote! {
-                result.#field = unknown_fields.into_iter().collect();
-            },
-        )
-    } else {
-        (quote! {}, quote! {})
     };
 
     let tuple_type = generate_generics_tuple(&generics);
@@ -509,7 +495,6 @@ fn generate_deserializable_struct(
                     ) -> Option<Self::Output> {
                         use biome_deserialize::{Deserializable, DeserializationDiagnostic, Text};
                         let mut result: Self::Output = Self::Output::default();
-                        #unknown_fields_initializer
                         for (key, value) in members.flatten() {
                             let Some(key_text) = Text::deserialize(&key, "", diagnostics) else {
                                 continue;
@@ -520,7 +505,6 @@ fn generate_deserializable_struct(
                             }
                         }
                         #validator
-                        #collect_unknown_fields
                         Some(result)
                     }
                 }
