@@ -95,7 +95,7 @@ impl Parsed {
             }
             Parsed::Json(parse) => Some(FormatNode::Json(parse.syntax())),
             Parsed::Css(parse) => Some(FormatNode::Css(parse.syntax())),
-            Parsed::Graphql(parse) => None,
+            Parsed::Graphql(_parse) => None,
         }
     }
 
