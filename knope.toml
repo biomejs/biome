@@ -192,6 +192,10 @@ versioned_files = ["crates/biome_html_parser/Cargo.toml"]
 changelog       = "crates/biome_configuration/CHANGELOG.md"
 versioned_files = ["crates/biome_configuration/Cargo.toml"]
 
+[packages.biome_grit_formatter]
+versioned_files = ["crates/biome_grit_formatter/Cargo.toml"]
+changelog = "crates/biome_grit_formatter/CHANGELOG.md"
+
 ## End of crates. DO NOT CHANGE!
 
 # Workflow to create a changeset
