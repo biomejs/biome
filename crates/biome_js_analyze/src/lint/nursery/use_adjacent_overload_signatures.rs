@@ -135,7 +135,7 @@ impl Rule for UseAdjacentOverloadSignatures {
                                 let range = method_name.syntax().text_range();
                                 interface_vec.push((text, interface_index, range));
                             }
-                            methods.push(interface_vec.clone());
+                            methods.push(interface_vec);
                         }
                         // class
                         AnyJsStatement::JsClassDeclaration(node) => {
