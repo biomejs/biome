@@ -839,6 +839,7 @@ dependencies = [
  "biome_test_utils",
  "insta",
  "lazy_static",
+ "rustc-hash",
  "tests_macros",
 ]
 

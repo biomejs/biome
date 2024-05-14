@@ -252,10 +252,11 @@ pub fn assert_errors_are_absent<L: ServiceLanguage>(
             .unwrap();
     }
 
-    panic!("There should be no errors in the file {:?} but the following errors where present:\n{}\n\nParsed tree:\n{:#?}",
+    panic!("There should be no errors in the file {:?} but the following errors where present:\n{}\n\nParsed tree:\n{:#?}\nPrinted tree:\n{}",
            path.display(),
            std::str::from_utf8(buffer.as_slice()).unwrap(),
-           &program
+           &program,
+           &program.to_string()
     );
 }
 
