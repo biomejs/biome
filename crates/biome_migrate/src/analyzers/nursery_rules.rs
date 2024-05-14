@@ -89,7 +89,7 @@ impl Rule for NurseryRules {
         let nursery_group = find_group_by_name(node, "nursery");
 
         if let Some(nursery_member) = nursery_group {
-            let rules = HashMap::from(RULES_TO_MIGRATE);
+            let rules = rustc_hash::FxHashMap::from(RULES_TO_MIGRATE);
             let object_value = nursery_member
                 .value()
                 .ok()
@@ -127,7 +127,7 @@ impl Rule for NurseryRules {
                 category!("migrate"),
                 state.as_rule_name_range(),
                 markup! {
-                    "This rule is has been promoted to "<Emphasis>{state.new_group_name}"/"{state.new_rule_name}</Emphasis>"."
+                    "This rule has been promoted to "<Emphasis>{state.new_group_name}"/"{state.new_rule_name}</Emphasis>"."
                 }
                 .to_owned(),
             )
