@@ -444,8 +444,9 @@ fn generate_deserializable_struct(
         quote! {
             unknown_key => {
                 let key_text = Text::deserialize(&key, "", diagnostics)?;
-                let value = Deserializable::deserialize(&value, key_text.text(), diagnostics)?;
-                std::iter::Extend::extend(&mut result.#rest_field, [(key_text, value)]);
+                if let Some(value) = Deserializable::deserialize(&value, key_text.text(), diagnostics) {
+                    std::iter::Extend::extend(&mut result.#rest_field, [(key_text, value)]);
+                }
             }
         }
     } else {
