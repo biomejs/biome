@@ -32,6 +32,28 @@ declare_rule! {
     /// By default, the rule ensures that the filename is either in [`camelCase`], [`kebab-case`], [`snake_case`],
     /// or equal to the name of one export in the file.
     ///
+    /// ## Ignoring some files
+    ///
+    /// Sometimes you want to completly ignore some files.
+    /// Biome ignore comments cannot be used because the rule applies on filenames not file contents.
+    /// To ignore files, you can use [`overrides`](https://biomejs.dev/reference/configuration/#overrides).
+    /// If you want to ignore all files in the `test` directory, then you can disable the rule for those files only:
+    ///
+    /// ```json
+    /// {
+    ///   "overrides": [
+    ///     {
+    ///        "include": ["test/**/*"]
+    ///        "linter": {
+    ///          "style": {
+    ///            "useFilenamingConvention": "off"
+    ///          }
+    ///        }
+    ///     }
+    ///   ]
+    /// }
+    /// ```
+    ///
     /// ## Options
     ///
     /// The rule provides several options that are detailed in the following subsections.
