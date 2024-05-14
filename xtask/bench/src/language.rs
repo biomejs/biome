@@ -29,6 +29,7 @@ impl<'a> Parse<'a> {
             Err(_) => match case.extension() {
                 "json" => Some(Parse::Json(case.code())),
                 "css" => Some(Parse::Css(case.code())),
+                "graphql" => Some(Parse::Graphql(case.code())),
                 _ => None,
             },
         }
