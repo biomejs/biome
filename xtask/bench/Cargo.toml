@@ -75,5 +75,10 @@ name    = "css_formatter"
 harness = false
 name    = "css_analyzer"
 
+# GraphQL benchs
+[[bench]]
+harness = false
+name    = "graphql_parser"
+
 [lints]
 workspace = true
