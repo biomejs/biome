@@ -6,7 +6,6 @@ use biome_json_syntax::JsonLanguage;
 
 mod indent_size;
 mod nursery_rules;
-mod rules_to_migrate;
 mod schema;
 
 pub(crate) struct MigrationGroup;

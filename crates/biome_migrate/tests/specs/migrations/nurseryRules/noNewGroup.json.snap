@@ -8,7 +8,7 @@ expression: noNewGroup.json
   "linter": {
     "rules": {
       "nursery": {
-        "test": "error"
+        "noUselessTernary": "error"
       }
     }
   }
@@ -20,12 +20,12 @@ expression: noNewGroup.json
 ```
 noNewGroup.json:5:9 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This rule is has been promoted to security/test.
+  ! This rule has been promoted to complexity/noUselessTernary.
   
     3 │     "rules": {
     4 │       "nursery": {
-  > 5 │         "test": "error"
-      │         ^^^^^^^^^^^^^^^
+  > 5 │         "noUselessTernary": "error"
+      │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^
     6 │       }
     7 │     }
   
@@ -35,8 +35,8 @@ noNewGroup.json:5:9 migrate  FIXABLE  ━━━━━━━━━━━━━━
      3  3 │       "rules": {
      4    │ - ······"nursery":·{
         4 │ + ······"nursery":{},
-        5 │ + ······"security":{
-     5  6 │           "test": "error"
+        5 │ + ······"complexity":{
+     5  6 │           "noUselessTernary": "error"
      6  7 │         }
   
 

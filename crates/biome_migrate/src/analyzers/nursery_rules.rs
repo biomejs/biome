@@ -10,10 +10,7 @@ use biome_json_syntax::{AnyJsonValue, JsonMember, JsonMemberList, JsonRoot, T};
 use biome_rowan::{
     AstNode, AstNodeExt, AstSeparatedList, BatchMutationExt, TextRange, TriviaPieceKind, WalkEvent,
 };
-use std::collections::HashMap;
-
-#[cfg(not(debug_assertions))]
-use crate::analyzers::rules_to_migrate::RULES_TO_MIGRATE;
+use rustc_hash::FxHashMap;
 
 declare_migration! {
     pub(crate) NurseryRules {
@@ -73,8 +70,47 @@ fn find_group_by_name(root: &JsonRoot, group_name: &str) -> Option<JsonMember> {
 /// - Left: name of the rule in the nursery group
 /// - Right: name of the new group and name of the new rule (sometimes we change name)
 #[cfg(debug_assertions)]
-const RULES_TO_MIGRATE: [(&str, (&str, &str)); 2] =
-    [("test", ("security", "test")), ("foo", ("security", "bar"))];
+const RULES_TO_MIGRATE: &[(&str, (&str, &str))] = &[
+    (
+        "noExcessiveNestedTestSuites",
+        ("complexity", "noExcessiveNestedTestSuites"),
+    ),
+    ("noUselessTernary", ("complexity", "noUselessTernary")),
+    (
+        "useJsxKeyInIterable",
+        ("correctness", "useJsxKeyInIterable"),
+    ),
+    ("oldName", ("suspicious", "noSuspiciousSemicolonInJsx")),
+];
+
+#[cfg(not(debug_assertions))]
+// Used in production
+const RULES_TO_MIGRATE: &[(&str, (&str, &str))] = &[
+    (
+        "noExcessiveNestedTestSuites",
+        ("complexity", "noExcessiveNestedTestSuites"),
+    ),
+    ("noUselessTernary", ("complexity", "noUselessTernary")),
+    (
+        "useJsxKeyInIterable",
+        ("correctness", "useJsxKeyInIterable"),
+    ),
+    ("noBarrelFile", ("performance", "noBarrelFile")),
+    ("noReExportAll", ("performance", "noReExportAll")),
+    ("noNamespaceImport", ("style", "noNamespaceImport")),
+    ("useNodeAssertStrict", ("style", "useNodeAssertStrict")),
+    (
+        "noDuplicateTestHooks",
+        ("suspicious", "noDuplicateTestHooks"),
+    ),
+    ("noExportsInTest", ("suspicious", "noExportsInTest")),
+    ("noFocusedTests", ("suspicious", "noFocusedTests")),
+    ("noSkippedTests", ("suspicious", "noSkippedTests")),
+    (
+        "noSuspiciousSemicolonInJsx",
+        ("suspicious", "noSuspiciousSemicolonInJsx"),
+    ),
+];
 
 impl Rule for NurseryRules {
     type Query = Ast<JsonRoot>;
@@ -89,7 +125,10 @@ impl Rule for NurseryRules {
         let nursery_group = find_group_by_name(node, "nursery");
 
         if let Some(nursery_member) = nursery_group {
-            let rules = rustc_hash::FxHashMap::from(RULES_TO_MIGRATE);
+            let mut rules = FxHashMap::default();
+            for (group, (new_group, new_name)) in RULES_TO_MIGRATE {
+                rules.insert(*group, (*new_group, *new_name));
+            }
             let object_value = nursery_member
                 .value()
                 .ok()

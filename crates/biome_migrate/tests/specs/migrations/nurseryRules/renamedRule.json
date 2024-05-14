@@ -2,7 +2,7 @@
   "linter": {
     "rules": {
       "nursery": {
-        "foo": "error"
+        "oldName": "error"
       }
     }
   }

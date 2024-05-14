@@ -8,7 +8,7 @@ expression: renamedRule.json
   "linter": {
     "rules": {
       "nursery": {
-        "foo": "error"
+        "oldName": "error"
       }
     }
   }
@@ -20,12 +20,12 @@ expression: renamedRule.json
 ```
 renamedRule.json:5:9 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This rule is has been promoted to security/bar.
+  ! This rule has been promoted to suspicious/noSuspiciousSemicolonInJsx.
   
     3 │     "rules": {
     4 │       "nursery": {
-  > 5 │         "foo": "error"
-      │         ^^^^^^^^^^^^^^
+  > 5 │         "oldName": "error"
+      │         ^^^^^^^^^^^^^^^^^^
     6 │       }
     7 │     }
   
@@ -34,10 +34,10 @@ renamedRule.json:5:9 migrate  FIXABLE  ━━━━━━━━━━━━━�
      2  2 │     "linter": {
      3  3 │       "rules": {
      4    │ - ······"nursery":·{
-     5    │ - ········"foo":·"error"
+     5    │ - ········"oldName":·"error"
         4 │ + ······"nursery":{},
-        5 │ + ······"security":{
-        6 │ + ········"bar":·"error"
+        5 │ + ······"suspicious":{
+        6 │ + ········"noSuspiciousSemicolonInJsx":·"error"
      6  7 │         }
      7  8 │       }
   

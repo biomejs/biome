@@ -2,8 +2,8 @@
   "linter": {
     "rules": {
       "nursery": {
-        "foo": "error",
-        "test": "error"
+        "noExcessiveNestedTestSuites": "error",
+        "oldName": "error"
       }
     }
   }

@@ -8,8 +8,8 @@ expression: renamedRuleAndNewRule.json
   "linter": {
     "rules": {
       "nursery": {
-        "foo": "error",
-        "test": "error"
+        "noExcessiveNestedTestSuites": "error",
+        "oldName": "error"
       }
     }
   }
@@ -21,13 +21,13 @@ expression: renamedRuleAndNewRule.json
 ```
 renamedRuleAndNewRule.json:5:9 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This rule is has been promoted to security/bar.
+  ! This rule has been promoted to complexity/noExcessiveNestedTestSuites.
   
     3 │     "rules": {
     4 │       "nursery": {
-  > 5 │         "foo": "error",
-      │         ^^^^^^^^^^^^^^
-    6 │         "test": "error"
+  > 5 │         "noExcessiveNestedTestSuites": "error",
+      │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    6 │         "oldName": "error"
     7 │       }
   
   i Unsafe fix: Move the rule to the new stable group.
@@ -35,12 +35,12 @@ renamedRuleAndNewRule.json:5:9 migrate  FIXABLE  ━━━━━━━━━━�
      2  2 │     "linter": {
      3  3 │       "rules": {
      4    │ - ······"nursery":·{
-     5    │ - ········"foo":·"error",
-     6    │ - ········"test":·"error"
+     5    │ - ········"noExcessiveNestedTestSuites":·"error",
+     6    │ - ········"oldName":·"error"
         4 │ + ······"nursery":{
-        5 │ + ········"test":·"error"},
-        6 │ + ······"security":{
-        7 │ + ········"bar":·"error"
+        5 │ + ········"oldName":·"error"},
+        6 │ + ······"complexity":{
+        7 │ + ········"noExcessiveNestedTestSuites":·"error"
      7  8 │         }
      8  9 │       }
   
@@ -50,12 +50,12 @@ renamedRuleAndNewRule.json:5:9 migrate  FIXABLE  ━━━━━━━━━━�
 ```
 renamedRuleAndNewRule.json:6:9 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This rule is has been promoted to security/test.
+  ! This rule has been promoted to suspicious/noSuspiciousSemicolonInJsx.
   
     4 │       "nursery": {
-    5 │         "foo": "error",
-  > 6 │         "test": "error"
-      │         ^^^^^^^^^^^^^^^
+    5 │         "noExcessiveNestedTestSuites": "error",
+  > 6 │         "oldName": "error"
+      │         ^^^^^^^^^^^^^^^^^^
     7 │       }
     8 │     }
   
@@ -64,12 +64,14 @@ renamedRuleAndNewRule.json:6:9 migrate  FIXABLE  ━━━━━━━━━━�
      2  2 │     "linter": {
      3  3 │       "rules": {
      4    │ - ······"nursery":·{
-     5    │ - ········"foo":·"error",
+     5    │ - ········"noExcessiveNestedTestSuites":·"error",
+     6    │ - ········"oldName":·"error"
         4 │ + ······"nursery":{
-        5 │ + ········"foo":·"error"},
-        6 │ + ······"security":{
-     6  7 │           "test": "error"
+        5 │ + ········"noExcessiveNestedTestSuites":·"error"},
+        6 │ + ······"suspicious":{
+        7 │ + ········"noSuspiciousSemicolonInJsx":·"error"
      7  8 │         }
+     8  9 │       }
   
 
 ```

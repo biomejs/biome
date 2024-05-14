@@ -8,10 +8,10 @@ expression: existingGroup.json
   "linter": {
     "rules": {
       "nursery": {
-        "test": "error"
+        "noExcessiveNestedTestSuites": "error"
       },
-      "security": {
-        "existing": "error"
+      "complexity": {
+        "noExcessiveNestedTestSuites": "error"
       }
     }
   }
@@ -23,25 +23,25 @@ expression: existingGroup.json
 ```
 existingGroup.json:5:9 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This rule is has been promoted to security/test.
+  ! This rule has been promoted to complexity/noExcessiveNestedTestSuites.
   
     3 │     "rules": {
     4 │       "nursery": {
-  > 5 │         "test": "error"
-      │         ^^^^^^^^^^^^^^^
+  > 5 │         "noExcessiveNestedTestSuites": "error"
+      │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     6 │       },
-    7 │       "security": {
+    7 │       "complexity": {
   
   i Unsafe fix: Move the rule to the new stable group.
   
      3  3 │       "rules": {
      4  4 │         "nursery": {
-     5    │ - ········"test":·"error"
+     5    │ - ········"noExcessiveNestedTestSuites":·"error"
      6  5 │         },
-     7  6 │         "security": {
-     8    │ - ········"existing":·"error"
-        7 │ + ········"existing":·"error",
-        8 │ + ········"test":·"error"
+     7  6 │         "complexity": {
+     8    │ - ········"noExcessiveNestedTestSuites":·"error"
+        7 │ + ········"noExcessiveNestedTestSuites":·"error",
+        8 │ + ········"noExcessiveNestedTestSuites":·"error"
      9  9 │         }
     10 10 │       }
   

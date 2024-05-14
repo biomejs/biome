@@ -2,7 +2,7 @@
   "linter": {
     "rules": {
       "nursery": {
-        "test": "error"
+        "noUselessTernary": "error"
       }
     }
   }
