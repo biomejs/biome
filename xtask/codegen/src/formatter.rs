@@ -796,9 +796,7 @@ fn get_node_concept(
                 _ if name.contains("Operation") || name.contains("Pattern") => NodeConcept::Pattern,
                 _ if name.contains("Predicate") => NodeConcept::Predicate,
                 _ if name.ends_with("Definition") => NodeConcept::Declaration,
-                _ if matches!(name, "CodeSnippet") || name.ends_with("Literal") => {
-                    NodeConcept::Value
-                }
+                _ if name == "CodeSnippet" || name.ends_with("Literal") => NodeConcept::Value,
                 _ => NodeConcept::Auxiliary,
             },
 
