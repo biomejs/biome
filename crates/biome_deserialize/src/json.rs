@@ -148,7 +148,7 @@ impl Deserializable for serde_json::Value {
         struct Visitor;
         impl DeserializationVisitor for Visitor {
             type Output = serde_json::Value;
-            const EXPECTED_TYPE: VisitableType = VisitableType::ARRAY;
+            const EXPECTED_TYPE: VisitableType = VisitableType::all();
             fn visit_null(
                 self,
                 _range: biome_rowan::TextRange,
@@ -182,6 +182,16 @@ impl Deserializable for serde_json::Value {
                         None
                     }
                 }
+            }
+
+            fn visit_str(
+                self,
+                value: Text,
+                _range: biome_rowan::TextRange,
+                _name: &str,
+                _diagnostics: &mut Vec<DeserializationDiagnostic>,
+            ) -> Option<Self::Output> {
+                Some(serde_json::Value::String(value.text().to_string()))
             }
 
             fn visit_array(

@@ -38,13 +38,6 @@ impl Ord for Text {
     }
 }
 
-#[cfg(feature = "serde")]
-impl serde::Serialize for Text {
-    fn serialize<S: serde::Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
-        self.0.text().serialize(serializer)
-    }
-}
-
 impl Deref for Text {
     type Target = str;
     fn deref(&self) -> &Self::Target {
