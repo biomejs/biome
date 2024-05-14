@@ -49,7 +49,7 @@ invalid.js:1:5 lint/nursery/noYodaExpression  FIXABLE  ━━━━━━━━�
     2 │ if (true === value) {}
     3 │ if (5 != value) {}
   
-  i Yoda expressions can be confusing to some people, invert the expression for better readability.
+  i Yoda expressions can be confusing to some people, invert the expression operands for better readability.
   
   i Safe fix: Flip the operators of the expression.
   
@@ -72,7 +72,7 @@ invalid.js:2:5 lint/nursery/noYodaExpression  FIXABLE  ━━━━━━━━�
     3 │ if (5 != value) {}
     4 │ if (5n != value) {}
   
-  i Yoda expressions can be confusing to some people, invert the expression for better readability.
+  i Yoda expressions can be confusing to some people, invert the expression operands for better readability.
   
   i Safe fix: Flip the operators of the expression.
   
@@ -97,7 +97,7 @@ invalid.js:3:5 lint/nursery/noYodaExpression  FIXABLE  ━━━━━━━━�
     4 │ if (5n != value) {}
     5 │ if (null !== value) {}
   
-  i Yoda expressions can be confusing to some people, invert the expression for better readability.
+  i Yoda expressions can be confusing to some people, invert the expression operands for better readability.
   
   i Safe fix: Flip the operators of the expression.
   
@@ -123,7 +123,7 @@ invalid.js:4:5 lint/nursery/noYodaExpression  FIXABLE  ━━━━━━━━�
     5 │ if (null !== value) {}
     6 │ if ("red" <= value) {}
   
-  i Yoda expressions can be confusing to some people, invert the expression for better readability.
+  i Yoda expressions can be confusing to some people, invert the expression operands for better readability.
   
   i Safe fix: Flip the operators of the expression.
   
@@ -149,7 +149,7 @@ invalid.js:5:5 lint/nursery/noYodaExpression  FIXABLE  ━━━━━━━━�
     6 │ if ("red" <= value) {}
     7 │ if (`red` <= value) {}
   
-  i Yoda expressions can be confusing to some people, invert the expression for better readability.
+  i Yoda expressions can be confusing to some people, invert the expression operands for better readability.
   
   i Safe fix: Flip the operators of the expression.
   
@@ -175,7 +175,7 @@ invalid.js:6:5 lint/nursery/noYodaExpression  FIXABLE  ━━━━━━━━�
     7 │ if (`red` <= value) {}
     8 │ if (`red` <= `${foo}`) {}
   
-  i Yoda expressions can be confusing to some people, invert the expression for better readability.
+  i Yoda expressions can be confusing to some people, invert the expression operands for better readability.
   
   i Safe fix: Flip the operators of the expression.
   
@@ -201,7 +201,7 @@ invalid.js:7:5 lint/nursery/noYodaExpression  FIXABLE  ━━━━━━━━�
     8 │ if (`red` <= `${foo}`) {}
     9 │ if (`red` <= `${"red"}`) {}
   
-  i Yoda expressions can be confusing to some people, invert the expression for better readability.
+  i Yoda expressions can be confusing to some people, invert the expression operands for better readability.
   
   i Safe fix: Flip the operators of the expression.
   
@@ -227,7 +227,7 @@ invalid.js:8:5 lint/nursery/noYodaExpression  FIXABLE  ━━━━━━━━�
      9 │ if (`red` <= `${"red"}`) {}
     10 │ if (true >= value) {}
   
-  i Yoda expressions can be confusing to some people, invert the expression for better readability.
+  i Yoda expressions can be confusing to some people, invert the expression operands for better readability.
   
   i Safe fix: Flip the operators of the expression.
   
@@ -253,7 +253,7 @@ invalid.js:9:5 lint/nursery/noYodaExpression  FIXABLE  ━━━━━━━━�
     10 │ if (true >= value) {}
     11 │ var foo = (5 < value) ? true : false
   
-  i Yoda expressions can be confusing to some people, invert the expression for better readability.
+  i Yoda expressions can be confusing to some people, invert the expression operands for better readability.
   
   i Safe fix: Flip the operators of the expression.
   
@@ -279,7 +279,7 @@ invalid.js:10:5 lint/nursery/noYodaExpression  FIXABLE  ━━━━━━━━
     11 │ var foo = (5 < value) ? true : false
     12 │ function foo() { return (null > value); }
   
-  i Yoda expressions can be confusing to some people, invert the expression for better readability.
+  i Yoda expressions can be confusing to some people, invert the expression operands for better readability.
   
   i Safe fix: Flip the operators of the expression.
   
@@ -305,7 +305,7 @@ invalid.js:11:12 lint/nursery/noYodaExpression  FIXABLE  ━━━━━━━�
     12 │ function foo() { return (null > value); }
     13 │ if (-1 < str.indexOf(substr)) {}
   
-  i Yoda expressions can be confusing to some people, invert the expression for better readability.
+  i Yoda expressions can be confusing to some people, invert the expression operands for better readability.
   
   i Safe fix: Flip the operators of the expression.
   
@@ -331,7 +331,7 @@ invalid.js:12:26 lint/nursery/noYodaExpression  FIXABLE  ━━━━━━━�
     13 │ if (-1 < str.indexOf(substr)) {}
     14 │ if ( /* a */ 0 /* b */ < /* c */ foo /* d */ ) {}
   
-  i Yoda expressions can be confusing to some people, invert the expression for better readability.
+  i Yoda expressions can be confusing to some people, invert the expression operands for better readability.
   
   i Safe fix: Flip the operators of the expression.
   
@@ -357,7 +357,7 @@ invalid.js:13:5 lint/nursery/noYodaExpression  FIXABLE  ━━━━━━━━
     14 │ if ( /* a */ 0 /* b */ < /* c */ foo /* d */ ) {}
     15 │ if (((((((5)))))) === ((((((((((foo))))))))))) {}
   
-  i Yoda expressions can be confusing to some people, invert the expression for better readability.
+  i Yoda expressions can be confusing to some people, invert the expression operands for better readability.
   
   i Safe fix: Flip the operators of the expression.
   
@@ -383,7 +383,7 @@ invalid.js:14:14 lint/nursery/noYodaExpression  FIXABLE  ━━━━━━━�
     15 │ if (((((((5)))))) === ((((((((((foo))))))))))) {}
     16 │ while (0 === (a));
   
-  i Yoda expressions can be confusing to some people, invert the expression for better readability.
+  i Yoda expressions can be confusing to some people, invert the expression operands for better readability.
   
   i Safe fix: Flip the operators of the expression.
   
@@ -409,7 +409,7 @@ invalid.js:15:5 lint/nursery/noYodaExpression  FIXABLE  ━━━━━━━━
     16 │ while (0 === (a));
     17 │ while (0 === (a = b));
   
-  i Yoda expressions can be confusing to some people, invert the expression for better readability.
+  i Yoda expressions can be confusing to some people, invert the expression operands for better readability.
   
   i Safe fix: Flip the operators of the expression.
   
@@ -435,7 +435,7 @@ invalid.js:16:8 lint/nursery/noYodaExpression  FIXABLE  ━━━━━━━━
     17 │ while (0 === (a = b));
     18 │ async function foo() { return 1 < await bar() }
   
-  i Yoda expressions can be confusing to some people, invert the expression for better readability.
+  i Yoda expressions can be confusing to some people, invert the expression operands for better readability.
   
   i Safe fix: Flip the operators of the expression.
   
@@ -461,7 +461,7 @@ invalid.js:17:8 lint/nursery/noYodaExpression  FIXABLE  ━━━━━━━━
     18 │ async function foo() { return 1 < await bar() }
     19 │ function *foo() { yield(1) < a }
   
-  i Yoda expressions can be confusing to some people, invert the expression for better readability.
+  i Yoda expressions can be confusing to some people, invert the expression operands for better readability.
   
   i Safe fix: Flip the operators of the expression.
   
@@ -487,7 +487,7 @@ invalid.js:18:31 lint/nursery/noYodaExpression  FIXABLE  ━━━━━━━�
     19 │ function *foo() { yield(1) < a }
     20 │ function *foo() { yield((1)) < a }
   
-  i Yoda expressions can be confusing to some people, invert the expression for better readability.
+  i Yoda expressions can be confusing to some people, invert the expression operands for better readability.
   
   i Safe fix: Flip the operators of the expression.
   
@@ -513,7 +513,7 @@ invalid.js:19:24 lint/nursery/noYodaExpression  FIXABLE  ━━━━━━━�
     20 │ function *foo() { yield((1)) < a }
     21 │ function *foo() { yield 1 < a }
   
-  i Yoda expressions can be confusing to some people, invert the expression for better readability.
+  i Yoda expressions can be confusing to some people, invert the expression operands for better readability.
   
   i Safe fix: Flip the operators of the expression.
   
@@ -539,7 +539,7 @@ invalid.js:20:24 lint/nursery/noYodaExpression  FIXABLE  ━━━━━━━�
     21 │ function *foo() { yield 1 < a }
     22 │ function *foo() { yield/**/1 < a }
   
-  i Yoda expressions can be confusing to some people, invert the expression for better readability.
+  i Yoda expressions can be confusing to some people, invert the expression operands for better readability.
   
   i Safe fix: Flip the operators of the expression.
   
@@ -565,7 +565,7 @@ invalid.js:21:25 lint/nursery/noYodaExpression  FIXABLE  ━━━━━━━�
     22 │ function *foo() { yield/**/1 < a }
     23 │ function *foo() { yield(1) < ++a }
   
-  i Yoda expressions can be confusing to some people, invert the expression for better readability.
+  i Yoda expressions can be confusing to some people, invert the expression operands for better readability.
   
   i Safe fix: Flip the operators of the expression.
   
@@ -591,7 +591,7 @@ invalid.js:22:28 lint/nursery/noYodaExpression  FIXABLE  ━━━━━━━�
     23 │ function *foo() { yield(1) < ++a }
     24 │ function *foo() { yield(1) < (a) }
   
-  i Yoda expressions can be confusing to some people, invert the expression for better readability.
+  i Yoda expressions can be confusing to some people, invert the expression operands for better readability.
   
   i Safe fix: Flip the operators of the expression.
   
@@ -617,7 +617,7 @@ invalid.js:23:24 lint/nursery/noYodaExpression  FIXABLE  ━━━━━━━�
     24 │ function *foo() { yield(1) < (a) }
     25 │ x=1 < a
   
-  i Yoda expressions can be confusing to some people, invert the expression for better readability.
+  i Yoda expressions can be confusing to some people, invert the expression operands for better readability.
   
   i Safe fix: Flip the operators of the expression.
   
@@ -643,7 +643,7 @@ invalid.js:24:24 lint/nursery/noYodaExpression  FIXABLE  ━━━━━━━�
     25 │ x=1 < a
     26 │ 0 < f()in obj
   
-  i Yoda expressions can be confusing to some people, invert the expression for better readability.
+  i Yoda expressions can be confusing to some people, invert the expression operands for better readability.
   
   i Safe fix: Flip the operators of the expression.
   
@@ -669,7 +669,7 @@ invalid.js:25:3 lint/nursery/noYodaExpression  FIXABLE  ━━━━━━━━
     26 │ 0 < f()in obj
     27 │ 1 > x++instanceof foo
   
-  i Yoda expressions can be confusing to some people, invert the expression for better readability.
+  i Yoda expressions can be confusing to some people, invert the expression operands for better readability.
   
   i Safe fix: Flip the operators of the expression.
   
@@ -695,7 +695,7 @@ invalid.js:26:1 lint/nursery/noYodaExpression  FIXABLE  ━━━━━━━━
     27 │ 1 > x++instanceof foo
     28 │ false <= ((x))in foo
   
-  i Yoda expressions can be confusing to some people, invert the expression for better readability.
+  i Yoda expressions can be confusing to some people, invert the expression operands for better readability.
   
   i Safe fix: Flip the operators of the expression.
   
@@ -721,7 +721,7 @@ invalid.js:27:1 lint/nursery/noYodaExpression  FIXABLE  ━━━━━━━━
     28 │ false <= ((x))in foo
     29 │ false <= ((x)) in foo
   
-  i Yoda expressions can be confusing to some people, invert the expression for better readability.
+  i Yoda expressions can be confusing to some people, invert the expression operands for better readability.
   
   i Safe fix: Flip the operators of the expression.
   
@@ -747,7 +747,7 @@ invalid.js:28:1 lint/nursery/noYodaExpression  FIXABLE  ━━━━━━━━
     29 │ false <= ((x)) in foo
     30 │ 1 > x===foo
   
-  i Yoda expressions can be confusing to some people, invert the expression for better readability.
+  i Yoda expressions can be confusing to some people, invert the expression operands for better readability.
   
   i Safe fix: Flip the operators of the expression.
   
@@ -773,7 +773,7 @@ invalid.js:29:1 lint/nursery/noYodaExpression  FIXABLE  ━━━━━━━━
     30 │ 1 > x===foo
     31 │ 1 > x
   
-  i Yoda expressions can be confusing to some people, invert the expression for better readability.
+  i Yoda expressions can be confusing to some people, invert the expression operands for better readability.
   
   i Safe fix: Flip the operators of the expression.
   
@@ -799,7 +799,7 @@ invalid.js:30:1 lint/nursery/noYodaExpression  FIXABLE  ━━━━━━━━
     31 │ 1 > x
     32 │ 
   
-  i Yoda expressions can be confusing to some people, invert the expression for better readability.
+  i Yoda expressions can be confusing to some people, invert the expression operands for better readability.
   
   i Safe fix: Flip the operators of the expression.
   
@@ -824,7 +824,7 @@ invalid.js:31:1 lint/nursery/noYodaExpression  FIXABLE  ━━━━━━━━
        │ ^^^^^
     32 │ 
   
-  i Yoda expressions can be confusing to some people, invert the expression for better readability.
+  i Yoda expressions can be confusing to some people, invert the expression operands for better readability.
   
   i Safe fix: Flip the operators of the expression.
   

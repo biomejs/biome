@@ -90,7 +90,7 @@ impl Rule for NoYodaExpression {
                 },
             )
             .note(markup! {
-                "Yoda expressions can be confusing to some people, invert the expression for better readability."
+                "Yoda expressions can be confusing to some people, invert the expression operands for better readability."
             }),
         )
     }
