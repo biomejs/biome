@@ -1,5 +1,5 @@
 ---
-@biomejs/biome: minor
+cli: minor
 ---
 
 # New `clean` command
