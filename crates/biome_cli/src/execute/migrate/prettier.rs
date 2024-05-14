@@ -8,7 +8,7 @@ use biome_formatter::{
     AttributePosition, LineEnding, LineWidth, LineWidthFromIntError, QuoteStyle,
 };
 use biome_fs::{FileSystem, OpenOptions};
-use biome_js_formatter::context::{ArrowParentheses, QuoteProperties, Semicolons, TrailingComma};
+use biome_js_formatter::context::{ArrowParentheses, QuoteProperties, Semicolons, TrailingCommas};
 use biome_json_parser::JsonParserOptions;
 use biome_service::DynRef;
 use std::path::Path;
@@ -36,7 +36,7 @@ pub(crate) struct PrettierConfiguration {
     print_width: u16,
     /// https://prettier.io/docs/en/options#use-tabs
     use_tabs: bool,
-    /// https://prettier.io/docs/en/options#trailing-comma
+    /// https://prettier.io/docs/en/options#trailing-commas
     trailing_comma: PrettierTrailingComma,
     /// https://prettier.io/docs/en/options#tab-width
     tab_width: u8,
@@ -93,7 +93,7 @@ pub(crate) struct OverrideOptions {
     print_width: Option<u16>,
     /// https://prettier.io/docs/en/options#use-tabs
     use_tabs: Option<bool>,
-    /// https://prettier.io/docs/en/options#trailing-comma
+    /// https://prettier.io/docs/en/options#trailing-commas
     trailing_comma: Option<PrettierTrailingComma>,
     /// https://prettier.io/docs/en/options#tab-width
     tab_width: Option<u8>,
@@ -147,7 +147,7 @@ enum QuoteProps {
     Preserve,
 }
 
-impl From<PrettierTrailingComma> for TrailingComma {
+impl From<PrettierTrailingComma> for TrailingCommas {
     fn from(value: PrettierTrailingComma) -> Self {
         match value {
             PrettierTrailingComma::All => Self::All,
@@ -240,7 +240,9 @@ impl TryFrom<PrettierConfiguration> for biome_configuration::PartialConfiguratio
             bracket_same_line: Some(value.bracket_line),
             arrow_parentheses: Some(value.arrow_parens.into()),
             semicolons: Some(semicolons),
-            trailing_comma: Some(value.trailing_comma.into()),
+            trailing_commas: Some(value.trailing_comma.into()),
+            // deprecated
+            trailing_comma: None,
             quote_style: Some(quote_style),
             quote_properties: Some(value.quote_props.into()),
             bracket_spacing: Some(value.bracket_spacing),
@@ -335,7 +337,7 @@ impl TryFrom<Override> for biome_configuration::OverridePattern {
             bracket_same_line: options.bracket_line,
             arrow_parentheses: options.arrow_parens.map(|arrow_parens| arrow_parens.into()),
             semicolons,
-            trailing_comma: options
+            trailing_commas: options
                 .trailing_comma
                 .map(|trailing_comma| trailing_comma.into()),
             quote_style,

@@ -1,7 +1,7 @@
 use crate::js::bindings::parameters::ParameterLayout;
 use crate::prelude::*;
 
-use crate::context::trailing_comma::FormatTrailingComma;
+use crate::context::trailing_commas::FormatTrailingCommas;
 use biome_js_syntax::parameter_ext::{AnyJsParameterList, AnyParameter};
 use biome_js_syntax::{AnyJsConstructorParameter, AnyJsParameter, JsParameterList};
 
@@ -56,7 +56,7 @@ impl Format<JsFormatContext> for FormatJsAnyParameterList<'_> {
                 let trailing_separator = if has_trailing_rest {
                     TrailingSeparator::Disallowed
                 } else {
-                    FormatTrailingComma::All.trailing_separator(f.options())
+                    FormatTrailingCommas::All.trailing_separator(f.options())
                 };
 
                 let has_modifiers = self.list.iter().any(|node| {

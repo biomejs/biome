@@ -1239,7 +1239,14 @@
 				"trailingComma": {
 					"description": "Print trailing commas wherever possible in multi-line comma-separated syntactic structures. Defaults to \"all\".",
 					"anyOf": [
-						{ "$ref": "#/definitions/TrailingComma" },
+						{ "$ref": "#/definitions/TrailingCommas" },
+						{ "type": "null" }
+					]
+				},
+				"trailingCommas": {
+					"description": "Print trailing commas wherever possible in multi-line comma-separated syntactic structures. Defaults to \"all\".",
+					"anyOf": [
+						{ "$ref": "#/definitions/TrailingCommas" },
 						{ "type": "null" }
 					]
 				}
@@ -1316,7 +1323,7 @@
 				"trailingCommas": {
 					"description": "Print trailing commas wherever possible in multi-line comma-separated syntactic structures. Defaults to \"none\".",
 					"anyOf": [
-						{ "$ref": "#/definitions/TrailingCommas" },
+						{ "$ref": "#/definitions/TrailingCommas2" },
 						{ "type": "null" }
 					]
 				}
@@ -3009,7 +3016,7 @@
 			},
 			"additionalProperties": false
 		},
-		"TrailingComma": {
+		"TrailingCommas": {
 			"description": "Print trailing commas wherever possible in multi-line comma-separated syntactic structures.",
 			"oneOf": [
 				{
@@ -3029,7 +3036,7 @@
 				}
 			]
 		},
-		"TrailingCommas": {
+		"TrailingCommas2": {
 			"oneOf": [
 				{
 					"description": "The formatter will remove the trailing commas",

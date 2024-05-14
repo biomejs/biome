@@ -26,6 +26,10 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 ### Configuration
 
+#### Enhancements
+
+- The `javascript.formatter.trailingComma` option is deprecated and renamed to `javascript.formatter.trailingCommas`. The corresponding CLI option `--trailing-comma` is also deprecated and renamed to `--trailing-commas`. Details can be checked in [#2492](https://github.com/biomejs/biome/pull/2492). Contributed by @Sec-ant
+
 ### Editors
 
 #### New features
