@@ -3,6 +3,7 @@ mod rules;
 
 pub use crate::linter::rules::Rules;
 use biome_analyze::options::RuleOptions;
+use biome_analyze::RuleFilter;
 use biome_deserialize::{Deserializable, StringSet};
 use biome_deserialize::{DeserializableValue, DeserializationDiagnostic, Merge, VisitableType};
 use biome_deserialize_macros::{Deserializable, Merge, Partial};
@@ -218,4 +219,66 @@ impl FromStr for RulePlainConfiguration {
 pub struct RuleWithOptions<T: Default> {
     pub level: RulePlainConfiguration,
     pub options: T,
+}
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq, Hash)]
+pub struct RuleCode {
+    pub group: &'static str,
+    pub name: &'static str,
+}
+
+impl<'a> From<RuleCode> for RuleFilter<'a> {
+    fn from(RuleCode { group, name }: RuleCode) -> Self {
+        RuleFilter::Rule(group, name)
+    }
+}
+
+impl FromStr for RuleCode {
+    type Err = &'static str;
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        if let Some((group, rule_name)) = s.split_once('/') {
+            if let Some((group, name)) = Rules::matches_diagnostic_code(group, rule_name) {
+                Ok(RuleCode { group, name })
+            } else {
+                Err("the rule doesn't exist.")
+            }
+        } else {
+            Err("a group and a rule name separated by a slash is required.")
+        }
+    }
+}
+
+impl serde::Serialize for RuleCode {
+    fn serialize<S: serde::Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
+        let RuleCode { group, name } = self;
+        serializer.serialize_str(&format!("{group}/{name}"))
+    }
+}
+
+impl<'de> serde::Deserialize<'de> for RuleCode {
+    fn deserialize<D: serde::Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
+        struct Visitor;
+        impl<'de> serde::de::Visitor<'de> for Visitor {
+            type Value = RuleCode;
+            fn expecting(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
+                formatter.write_str("<group>/<ruyle_name>")
+            }
+            fn visit_str<E: serde::de::Error>(self, v: &str) -> Result<Self::Value, E> {
+                match RuleCode::from_str(v) {
+                    Ok(result) => Ok(result),
+                    Err(error) => Err(serde::de::Error::custom(error)),
+                }
+            }
+        }
+        deserializer.deserialize_str(Visitor)
+    }
+}
+
+impl schemars::JsonSchema for RuleCode {
+    fn schema_name() -> String {
+        "RuleCode".to_string()
+    }
+    fn json_schema(gen: &mut schemars::gen::SchemaGenerator) -> schemars::schema::Schema {
+        String::json_schema(gen)
+    }
 }

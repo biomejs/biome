@@ -15,6 +15,34 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 ### CLI
 
+#### New features
+
+- Introduce a new valued oprion `--rule` for `biome lint` ([#58](https://github.com/biomejs/biome/issues/58)).
+
+  This new option allows you to execute a single rule.
+  This is convenient to test a rule or apply the code fixes of a single rule.
+
+  For example, you can execute the `style/useNamingConvention` rule on a set of files:
+
+  ```shell
+  biome lint --rule=style/useNamingConvention index,js
+  ```
+
+  And the napply its code fixes:
+
+  ```shell
+  biome lint --rule=style/useNamingConvention --apply index,js
+  ```
+
+  The option takes the rule configuration into account.
+
+  The severity level of the executed rule is always set to its default,
+  i.e. `error` for a recommended rule or `warn` otherwise.
+
+  The option is compatible with other options such as `--apply` and `--reporter`.
+
+  Contributed by @Conaclos
+
 #### Enhancements
 
 - Biome now executes commands (lint, format, check and ci) on the working directory by default. [#2266](https://github.com/biomejs/biome/issues/2266) Contributed by @unvalley

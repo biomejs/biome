@@ -290,13 +290,23 @@ fn lint(params: LintParams) -> LintResults {
 
             let skipped_diagnostics = diagnostic_count - diagnostics.len() as u32;
 
-            let rules = settings.as_rules(params.path.as_path());
-            let rule_filter_list = rules
-                .as_ref()
-                .map(|rules| rules.as_enabled_rules())
-                .unwrap_or_default()
-                .into_iter()
-                .collect::<Vec<_>>();
+            let mut rules = settings.as_rules(params.path.as_path());
+            let rule_filter_list = if let Some(rule) = params.rule {
+                // We execute a single rule because the `--rule` filter is specified.
+                // Set the severity level to its default.
+                if let Some(rules) = rules.as_mut() {
+                    rules.to_mut().set_default_severity(rule.group, rule.name);
+                }
+                vec![rule.into()]
+            } else {
+                let rule_filter_list = rules
+                    .as_ref()
+                    .map(|rules| rules.as_enabled_rules())
+                    .unwrap_or_default()
+                    .into_iter()
+                    .collect::<Vec<_>>();
+                rule_filter_list
+            };
 
             let analyzer_options =
                 compute_analyzer_options(&params.settings, PathBuf::from(params.path.as_path()));

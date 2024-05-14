@@ -132,7 +132,7 @@ fn parse_error() {
 }
 
 #[test]
-fn lint_error() {
+fn lint_rule_rule_doesnt_exist() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
@@ -142,14 +142,21 @@ fn lint_error() {
     let result = run_cli(
         DynRef::Borrowed(&mut fs),
         &mut console,
-        Args::from([("lint"), file_path.as_os_str().to_str().unwrap()].as_slice()),
+        Args::from(
+            [
+                ("lint"),
+                "--rule=suspicious/inexistant",
+                file_path.as_os_str().to_str().unwrap(),
+            ]
+            .as_slice(),
+        ),
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
-        "lint_error",
+        "lint_rule_rule_doesnt_exist",
         fs,
         console,
         result,
@@ -3266,6 +3273,226 @@ fn should_lint_error_without_file_paths() {
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "lint_error_without_file_paths",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn lint_error() {
+    let mut fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let file_path = Path::new("check.js");
+    fs.insert(file_path.into(), LINT_ERROR.as_bytes());
+
+    let result = run_cli(
+        DynRef::Borrowed(&mut fs),
+        &mut console,
+        Args::from([("lint"), file_path.as_os_str().to_str().unwrap()].as_slice()),
+    );
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "lint_error",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn lint_rule_missing_group() {
+    let mut fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let file_path = Path::new("check.js");
+    fs.insert(file_path.into(), LINT_ERROR.as_bytes());
+
+    let result = run_cli(
+        DynRef::Borrowed(&mut fs),
+        &mut console,
+        Args::from(
+            [
+                ("lint"),
+                "--rule=noDebugger",
+                file_path.as_os_str().to_str().unwrap(),
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "lint_rule_missing_group",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn lint_rule_filter() {
+    let mut fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+    let content = "debugger; delete obj.prop;";
+
+    let file_path = Path::new("check.js");
+    fs.insert(file_path.into(), content.as_bytes());
+
+    let result = run_cli(
+        DynRef::Borrowed(&mut fs),
+        &mut console,
+        Args::from(
+            [
+                ("lint"),
+                "--rule=suspicious/noDebugger",
+                file_path.as_os_str().to_str().unwrap(),
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "lint_rule_filter",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn lint_rule_filter_with_config() {
+    let mut fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+    let config = r#"{
+        "linter": {
+            "rules": {
+                "style": {
+                    "useNamingConvention": {
+                        "level": "off",
+                        "options": {
+                            "strictCase": false
+                        }
+                    }
+                }
+            }
+        }
+    }"#;
+    let content = r#"
+    export function NotSTrictPAscal(){}
+    export function CONSTANT_CASE(){}
+    "#;
+
+    let file_path = Path::new("check.js");
+    fs.insert(file_path.into(), content.as_bytes());
+    let config_path = Path::new("biome.json");
+    fs.insert(config_path.into(), config.as_bytes());
+
+    let result = run_cli(
+        DynRef::Borrowed(&mut fs),
+        &mut console,
+        Args::from(
+            [
+                ("lint"),
+                "--rule=style/useNamingConvention",
+                file_path.as_os_str().to_str().unwrap(),
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "lint_rule_filter_with_config",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn lint_rule_filter_with_recommened_disabled() {
+    let mut fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+    let config = r#"{
+        "linter": {
+            "rules": {
+                "recommended": false
+            }
+        }
+    }"#;
+    let content = r#"
+    export function CONSTANT_CASE(){}
+    "#;
+
+    let file_path = Path::new("check.js");
+    fs.insert(file_path.into(), content.as_bytes());
+    let config_path = Path::new("biome.json");
+    fs.insert(config_path.into(), config.as_bytes());
+
+    let result = run_cli(
+        DynRef::Borrowed(&mut fs),
+        &mut console,
+        Args::from(
+            [
+                ("lint"),
+                "--rule=style/useNamingConvention",
+                file_path.as_os_str().to_str().unwrap(),
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "lint_rule_filter_with_recommened_disabled",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn lint_rule_filter_with_linter_disabled() {
+    let mut fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+    let config = r#"{
+        "linter": {
+            "enabled": false
+        }
+    }"#;
+    let content = r#"
+    export function CONSTANT_CASE(){}
+    "#;
+
+    let file_path = Path::new("check.js");
+    fs.insert(file_path.into(), content.as_bytes());
+    let config_path = Path::new("biome.json");
+    fs.insert(config_path.into(), config.as_bytes());
+
+    let result = run_cli(
+        DynRef::Borrowed(&mut fs),
+        &mut console,
+        Args::from(
+            [
+                ("lint"),
+                "--rule=style/useNamingConvention",
+                file_path.as_os_str().to_str().unwrap(),
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "lint_rule_filter_with_linter_disabled",
         fs,
         console,
         result,

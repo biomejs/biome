@@ -313,24 +313,39 @@ pub(crate) fn lint(params: LintParams) -> LintResults {
                 compute_analyzer_options(&params.settings, PathBuf::from(params.path.as_path()));
 
             // Compute final rules (taking `overrides` into account)
-            let rules = settings.as_rules(params.path.as_path());
-            let mut rule_filter_list = rules
-                .as_ref()
-                .map(|rules| rules.as_enabled_rules())
-                .unwrap_or_default()
-                .into_iter()
-                .collect::<Vec<_>>();
-            if settings.organize_imports.enabled && !params.categories.is_syntax() {
-                rule_filter_list.push(RuleFilter::Rule("correctness", "organizeImports"));
-            }
+            let mut rules = settings.as_rules(params.path.as_path());
 
-            rule_filter_list.push(RuleFilter::Rule(
-                "correctness",
-                "noDuplicatePrivateClassMembers",
-            ));
-            rule_filter_list.push(RuleFilter::Rule("correctness", "noInitializerWithDefinite"));
-            rule_filter_list.push(RuleFilter::Rule("correctness", "noSuperWithoutExtends"));
-            rule_filter_list.push(RuleFilter::Rule("nursery", "noSuperWithoutExtends"));
+            let rule_filter_list = if let Some(rule) = params.rule {
+                // We execute a single rule because the `--rule` filter is specified.
+                // Set the severity level to its default.
+                if let Some(rules) = rules.as_mut() {
+                    rules.to_mut().set_default_severity(rule.group, rule.name);
+                }
+                vec![rule.into()]
+            } else {
+                let mut rule_filter_list = rules
+                    .as_ref()
+                    .map(|rules| rules.as_enabled_rules())
+                    .unwrap_or_default()
+                    .into_iter()
+                    .collect::<Vec<_>>();
+                if settings.organize_imports.enabled && !params.categories.is_syntax() {
+                    rule_filter_list.push(RuleFilter::Rule("correctness", "organizeImports"));
+                }
+
+                rule_filter_list.push(RuleFilter::Rule(
+                    "correctness",
+                    "noDuplicatePrivateClassMembers",
+                ));
+                rule_filter_list.push(RuleFilter::Rule("correctness", "noInitializerWithDefinite"));
+                rule_filter_list.push(RuleFilter::Rule("correctness", "noSuperWithoutExtends"));
+                rule_filter_list.push(RuleFilter::Rule("nursery", "noSuperWithoutExtends"));
+                if let Some(rule) = params.rule {
+                    rule_filter_list.clear();
+                    rule_filter_list.push(rule.into())
+                }
+                rule_filter_list
+            };
 
             let mut filter = AnalysisFilter::from_enabled_rules(Some(rule_filter_list.as_slice()));
             filter.categories = params.categories;

@@ -12,6 +12,7 @@ use crate::execute::traverse::traverse;
 use crate::reporter::json::{JsonReporter, JsonReporterVisitor};
 use crate::reporter::terminal::{ConsoleReporter, ConsoleReporterVisitor};
 use crate::{CliDiagnostic, CliSession, DiagnosticsPayload, Reporter};
+use biome_configuration::linter::RuleCode;
 use biome_console::{markup, ConsoleExt};
 use biome_diagnostics::adapters::SerdeJsonError;
 use biome_diagnostics::{category, Category};
@@ -125,6 +126,8 @@ pub enum TraversalMode {
         /// 1. The virtual path to the file
         /// 2. The content of the file
         stdin: Option<Stdin>,
+
+        rule: Option<RuleCode>,
     },
     /// This mode is enabled when running the command `biome ci`
     CI {

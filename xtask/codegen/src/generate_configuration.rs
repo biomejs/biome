@@ -94,6 +94,7 @@ pub(crate) fn generate_rules_configuration(mode: Mode) -> Result<()> {
     let mut group_as_default_rules = Vec::new();
     let mut group_match_code = Vec::new();
     let mut group_get_severity = Vec::new();
+    let mut group_set_default_severity = Vec::new();
     let mut group_name_list = vec!["recommended", "all"];
     let mut push_rule_list = Vec::new();
     for (group, rules) in groups {
@@ -154,8 +155,20 @@ pub(crate) fn generate_rules_configuration(mode: Mode) -> Result<()> {
                     }
                 }, |(level, _)| level.into())
         });
+        group_set_default_severity.push(quote! {
+            #group => {
+                if let Some(group) = &mut self.#property_group_name {
+                    let default_severity = if #group_struct_name::is_recommended_rule(rule_name) {
+                        RulePlainConfiguration::Error
+                    } else {
+                        RulePlainConfiguration::Warn
+                    };
+                    group.set_severity(rule_name, default_severity);
+                }
+            }
+        });
         group_match_code.push(quote! {
-           #group => #group_struct_name::has_rule(rule_name).then_some((category, rule_name))
+           #group => #group_struct_name::has_rule(rule_name).map(|rule_name| (#group, rule_name))
         });
     }
 
@@ -216,18 +229,14 @@ pub(crate) fn generate_rules_configuration(mode: Mode) -> Result<()> {
 
         impl Rules {
             /// Checks if the code coming from [biome_diagnostics::Diagnostic] corresponds to a rule.
-            /// Usually the code is built like {category}/{rule_name}
-            pub fn matches_diagnostic_code<'a>(
-                &self,
-                category: Option<&'a str>,
-                rule_name: Option<&'a str>,
-            ) -> Option<(&'a str, &'a str)> {
-                match (category, rule_name) {
-                    (Some(category), Some(rule_name)) => match category {
-                        #( #group_match_code ),*,
+            /// Usually the code is built like {group}/{rule_name}
+            pub fn matches_diagnostic_code(
+                group: &str,
+                rule_name: &str,
+            ) -> Option<(&'static str, &'static str)> {
+                match group {
+                    #( #group_match_code ),*,
 
-                        _ => None
-                    },
                     _ => None
                 }
             }
@@ -242,18 +251,24 @@ pub(crate) fn generate_rules_configuration(mode: Mode) -> Result<()> {
                 let _lint = split_code.next();
                 debug_assert_eq!(_lint, Some("lint"));
 
-                let group = split_code.next();
-                let rule_name = split_code.next();
+                let group = split_code.next()?;
+                let rule_name = split_code.next()?;
+                let (group, rule_name) = Self::matches_diagnostic_code(group, rule_name)?;
+                let severity = match group {
+                    #( #group_get_severity ),*,
 
-                if let Some((group, rule_name)) = self.matches_diagnostic_code(group, rule_name) {
-                    let severity = match group {
-                        #( #group_get_severity ),*,
+                    _ => unreachable!("this group should not exist, found {}", group),
+                };
+                Some(severity)
+            }
 
-                        _ => unreachable!("this group should not exist, found {}", group),
-                    };
-                    Some(severity)
-                } else {
-                    None
+            /// Set the severity of the rule to its default.
+            pub fn set_default_severity(&mut self, group: &str, rule_name: &str) {
+                match group {
+                    #( #group_set_default_severity ),*,
+                    _ => {
+                        unreachable!("this group should not exist, found {}", group);
+                    }
                 }
             }
 
@@ -323,6 +338,7 @@ fn generate_struct(group: &str, rules: &BTreeMap<&'static str, RuleMetadata>) ->
     let mut rule_enabled_check_line = Vec::new();
     let mut rule_disabled_check_line = Vec::new();
     let mut get_rule_configuration_line = Vec::new();
+    let mut set_severity = Vec::new();
 
     for (index, (rule, metadata)) in rules.iter().enumerate() {
         let summary = {
@@ -417,6 +433,13 @@ fn generate_struct(group: &str, rules: &BTreeMap<&'static str, RuleMetadata>) ->
         get_rule_configuration_line.push(quote! {
             #rule => self.#rule_identifier.as_ref().map(|conf| (conf.level(), conf.get_options()))
         });
+        set_severity.push(quote! {
+            #rule => {
+                if let Some(rule_conf) = &mut self.#rule_identifier {
+                    rule_conf.set_level(severity);
+                }
+            }
+        });
     }
 
     let group_struct_name = Ident::new(&to_capitalized(group), Span::call_site());
@@ -510,8 +533,8 @@ fn generate_struct(group: &str, rules: &BTreeMap<&'static str, RuleMetadata>) ->
             }
 
             /// Checks if, given a rule name, matches one of the rules contained in this category
-            pub(crate) fn has_rule(rule_name: &str) -> bool {
-                Self::GROUP_RULES.contains(&rule_name)
+            pub(crate) fn has_rule(rule_name: &str) -> Option<&'static str> {
+                Some(Self::GROUP_RULES[Self::GROUP_RULES.binary_search(&rule_name).ok()?])
             }
 
             /// Checks if, given a rule name, it is marked as recommended
@@ -548,6 +571,13 @@ fn generate_struct(group: &str, rules: &BTreeMap<&'static str, RuleMetadata>) ->
                 match rule_name {
                     #( #get_rule_configuration_line ),*,
                     _ => None
+                }
+            }
+
+            pub(crate) fn set_severity(&mut self, rule_name: &str, severity: RulePlainConfiguration) {
+                match rule_name {
+                    #( #set_severity ),*
+                    _ => {}
                 }
             }
         }

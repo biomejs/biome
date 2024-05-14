@@ -589,6 +589,7 @@ impl Workspace for WorkspaceServer {
                         settings: self.workspace(),
                         max_diagnostics: params.max_diagnostics as u32,
                         path: &params.path,
+                        rule: params.rule,
                         language: self.get_file_source(&params.path),
                         categories: params.categories,
                         manifest,
