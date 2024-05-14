@@ -4,7 +4,6 @@ use crate::parser::{
     parse_error::{expected_name, expected_named_type},
     parse_name,
     r#type::parse_named_type,
-    value::is_at_string,
     GraphqlParser,
 };
 use biome_graphql_syntax::{
@@ -23,9 +22,6 @@ use super::{
 
 #[inline]
 pub(super) fn parse_interface_type_definition(p: &mut GraphqlParser) -> ParsedSyntax {
-    if !is_at_interface_type_definition(p) {
-        return Absent;
-    }
     let m = p.start();
 
     // description is optional
@@ -116,11 +112,6 @@ impl ParseRecovery for ImplementsInterfaceListParseRecovery {
     fn is_at_recovered(&self, p: &mut Self::Parser<'_>) -> bool {
         is_nth_at_name(p, 0) || p.at(T![&]) || is_at_implements_interface_end(p)
     }
-}
-
-#[inline]
-pub(super) fn is_at_interface_type_definition(p: &mut GraphqlParser<'_>) -> bool {
-    p.at(T![interface]) || (is_at_string(p) && p.nth_at(1, T![interface]))
 }
 
 #[inline]

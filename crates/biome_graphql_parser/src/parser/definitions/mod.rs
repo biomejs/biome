@@ -11,24 +11,29 @@ mod schema;
 mod union;
 
 use crate::parser::{parse_error::expected_any_definition, GraphqlParser};
-use biome_graphql_syntax::GraphqlSyntaxKind::{self, *};
+use biome_graphql_syntax::{
+    GraphqlSyntaxKind::{self, *},
+    T,
+};
 use biome_parser::{
     parse_lists::ParseNodeList, parse_recovery::ParseRecovery, parsed_syntax::ParsedSyntax,
     prelude::ParsedSyntax::*, Parser,
 };
 
 use self::{
-    directive::{is_at_directive_definition, parse_directive_definition},
-    fragment::{is_at_fragment_definition, parse_fragment_definition},
-    input_object::{is_at_input_object_type_definition, parse_input_object_type_definition},
-    interface::{is_at_interface_type_definition, parse_interface_type_definition},
-    object::{is_at_object_type_definition, parse_object_type_definition},
-    operation::{is_at_operation, parse_operation_definition},
-    r#enum::{is_at_enum_type_definition, parse_enum_type_definition},
-    scalar::{is_at_scalar_type_definition, parse_scalar_type_definition},
-    schema::{is_at_schema_definition, parse_schema_definition},
-    union::{is_at_union_type_definition, parse_union_type_definition},
+    directive::parse_directive_definition,
+    fragment::parse_fragment_definition,
+    input_object::parse_input_object_type_definition,
+    interface::parse_interface_type_definition,
+    object::parse_object_type_definition,
+    operation::{parse_operation_definition, parse_selection_set},
+    r#enum::parse_enum_type_definition,
+    scalar::parse_scalar_type_definition,
+    schema::parse_schema_definition,
+    union::parse_union_type_definition,
 };
+
+use super::value::is_at_string;
 
 struct DefinitionListParseRecovery;
 
@@ -70,41 +75,40 @@ impl ParseNodeList for DefinitionList {
 
 #[inline]
 fn parse_definition(p: &mut GraphqlParser) -> ParsedSyntax {
-    if is_at_operation(p) {
-        parse_operation_definition(p)
-    } else if is_at_fragment_definition(p) {
-        parse_fragment_definition(p)
-    } else if is_at_schema_definition(p) {
-        parse_schema_definition(p)
-    } else if is_at_scalar_type_definition(p) {
-        parse_scalar_type_definition(p)
-    } else if is_at_object_type_definition(p) {
-        parse_object_type_definition(p)
-    } else if is_at_interface_type_definition(p) {
-        parse_interface_type_definition(p)
-    } else if is_at_union_type_definition(p) {
-        parse_union_type_definition(p)
-    } else if is_at_enum_type_definition(p) {
-        parse_enum_type_definition(p)
-    } else if is_at_input_object_type_definition(p) {
-        parse_input_object_type_definition(p)
-    } else if is_at_directive_definition(p) {
-        parse_directive_definition(p)
-    } else {
-        Absent
+    let keyword = if is_at_string(p) { p.nth(1) } else { p.cur() };
+    match keyword {
+        T![query] | T![mutation] | T![subscription] => parse_operation_definition(p),
+        T!['{'] => parse_selection_set(p),
+        T![fragment] => parse_fragment_definition(p),
+        T![schema] => parse_schema_definition(p),
+        T![scalar] => parse_scalar_type_definition(p),
+        T![type] => parse_object_type_definition(p),
+        T![interface] => parse_interface_type_definition(p),
+        T![union] => parse_union_type_definition(p),
+        T![enum] => parse_enum_type_definition(p),
+        T![input] => parse_input_object_type_definition(p),
+        T![directive] => parse_directive_definition(p),
+        _ => Absent,
     }
 }
 
 #[inline]
 fn is_at_definition(p: &mut GraphqlParser<'_>) -> bool {
-    is_at_operation(p)
-        || is_at_fragment_definition(p)
-        || is_at_schema_definition(p)
-        || is_at_scalar_type_definition(p)
-        || is_at_object_type_definition(p)
-        || is_at_interface_type_definition(p)
-        || is_at_union_type_definition(p)
-        || is_at_enum_type_definition(p)
-        || is_at_input_object_type_definition(p)
-        || is_at_directive_definition(p)
+    let keyword = if is_at_string(p) { p.nth(1) } else { p.cur() };
+    matches!(
+        keyword,
+        T![query]
+            | T![mutation]
+            | T![subscription]
+            | T!['{']
+            | T![fragment]
+            | T![schema]
+            | T![scalar]
+            | T![type]
+            | T![interface]
+            | T![union]
+            | T![enum]
+            | T![input]
+            | T![directive]
+    )
 }
