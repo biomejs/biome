@@ -1400,6 +1400,14 @@ pub(crate) fn migrate_eslint_any_rule(
             let rule = group.use_valid_typeof.get_or_insert(Default::default());
             rule.set_level(rule_severity.into());
         }
+        "yoda" => {
+            if !options.include_nursery {
+                return false;
+            }
+            let group = rules.nursery.get_or_insert_with(Default::default);
+            let rule = group.no_yoda_expression.get_or_insert(Default::default());
+            rule.set_level(rule_severity.into());
+        }
         _ => {
             return false;
         }
