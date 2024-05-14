@@ -1,4 +1,5 @@
 if (value === "red") {}
+while (value === "red") {}
 if (value === value) {}
 if (value != 5) {}
 if (5 & foo) {}

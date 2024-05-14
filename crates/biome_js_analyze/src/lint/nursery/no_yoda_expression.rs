@@ -9,8 +9,8 @@ use biome_js_factory::make::{self, js_binary_expression, token};
 use biome_js_syntax::{
     AnyJsExpression, AnyJsLiteralExpression, AnyJsStatement, JsBinaryExpression, JsBinaryOperator,
     JsCallExpression, JsIfStatement, JsLanguage, JsLogicalExpression, JsLogicalOperator,
-    JsParenthesizedExpression, JsSyntaxKind, JsUnaryOperator, JsYieldArgument, JsYieldExpression,
-    T,
+    JsParenthesizedExpression, JsSyntaxKind, JsUnaryOperator, JsWhileStatement, JsYieldArgument,
+    JsYieldExpression, T,
 };
 use biome_rowan::{AstNode, BatchMutationExt, SyntaxTriviaPiece, TriviaPieceKind, WalkEvent};
 
@@ -369,8 +369,9 @@ fn is_wrapped_in_parenthesis(logical_expression: &JsLogicalExpression) -> bool {
         (
             logical_expression.parent::<JsParenthesizedExpression>(),
             logical_expression.parent::<JsIfStatement>(),
+            logical_expression.parent::<JsWhileStatement>(),
         ),
-        (None, None)
+        (None, None, None)
     )
 }
 
