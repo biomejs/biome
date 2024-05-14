@@ -222,11 +222,6 @@ type = "Command"
 command = "cargo build"
 
 [[workflows.steps]]
-# The script will add most up-to-date optional dependencies to the manifest of @biomejs/biome and @biomejs/backend-jsonrpc
-command = "node packages/@biomejs/biome/scripts/generate-packages.mjs"
-type    = "Command"
-
-[[workflows.steps]]
 type = "Command"
 # WARNING: if you change this message, remember to update the `prepare_release.yml` too, because it uses this message
 command = "git commit -m \"chore: prepare release\""
@@ -248,6 +243,11 @@ template = "This PR was created by Knope. Merging it will create a new release"
 # The release workflow that will run in CI. It is triggered when the prepare-release PR is merged
 [[workflows]]
 name = "release"
+
+[[workflows.steps]]
+# The script will add most up-to-date optional dependencies to the manifest of @biomejs/biome and @biomejs/backend-jsonrpc
+command = "node packages/@biomejs/biome/scripts/generate-packages.mjs"
+type    = "Command"
 
 [[workflows.steps]]
 type = "Release"
