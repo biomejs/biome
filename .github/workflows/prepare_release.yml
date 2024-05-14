@@ -1,7 +1,7 @@
 on:
   push:
     branches: [ main ]
-name: Create Release PR
+name: Prepare Release PR
 
 permissions:
   actions: write
