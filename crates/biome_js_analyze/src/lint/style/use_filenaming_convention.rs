@@ -43,7 +43,7 @@ declare_rule! {
     /// {
     ///   "overrides": [
     ///     {
-    ///        "include": ["test/**/*"]
+    ///        "include": ["test/**/*"],
     ///        "linter": {
     ///          "style": {
     ///            "useFilenamingConvention": "off"
