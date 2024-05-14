@@ -11,8 +11,6 @@ declare_rule! {
     /// This rule is useful for preventing accidental overloads that are not adjacent.
     /// It is recommended to keep the overload signatures adjacent to make the code easier to read and maintain.
     ///
-    /// Source: https://typescript-eslint.io/rules/adjacent-overload-signatures/
-    ///
     /// ## Examples
     ///
     /// ### Invalid
