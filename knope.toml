@@ -219,7 +219,7 @@ ignore_conventional_commits = true
 type = "Command"
 # Workaround to update the lock files
 # https://github.com/knope-dev/knope/issues/162
-command = "cargo build"
+command = "cargo update -w"
 
 [[workflows.steps]]
 type = "Command"
