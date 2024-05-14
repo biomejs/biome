@@ -81,14 +81,12 @@ invalid.ts:2:19 lint/nursery/useAdjacentOverloadSignatures ━━━━━━━
 ```
 
 ```
-invalid.ts:11:20 lint/nursery/useAdjacentOverloadSignatures ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:12:3 lint/nursery/useAdjacentOverloadSignatures ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! All foo_type signatures must be adjacent.
   
-     9 │   foo_type(s: string): void;
     10 │   foo_type(n: number): void;
-  > 11 │   bar_type(): void;
-       │                    
+    11 │   bar_type(): void;
   > 12 │   foo_type(sn: string | number): void;
        │   ^^^^^^^^
     13 │ };
@@ -96,10 +94,8 @@ invalid.ts:11:20 lint/nursery/useAdjacentOverloadSignatures ━━━━━━�
   
   i All foo_interface signatures must be adjacent.
   
-    16 │   foo_interface(s: string): void;
     17 │   foo_interface(n: number): void;
-  > 18 │   bar_interface(): void;
-       │                         
+    18 │   bar_interface(): void;
   > 19 │   foo_interface(sn: string | number): void;
        │   ^^^^^^^^^^^^^
     20 │ }
@@ -107,10 +103,8 @@ invalid.ts:11:20 lint/nursery/useAdjacentOverloadSignatures ━━━━━━�
   
   i All fooA signatures must be adjacent.
   
-    23 │   fooA(s: string): void;
     24 │   fooA(n: number): void;
-  > 25 │   barA(): void {};
-       │                   
+    25 │   barA(): void {};
   > 26 │   fooA(sn: string | number): void {};
        │   ^^^^
     27 │ }
@@ -118,10 +112,7 @@ invalid.ts:11:20 lint/nursery/useAdjacentOverloadSignatures ━━━━━━�
   
   i All fooB signatures must be adjacent.
   
-    27 │ }
-    28 │ 
-  > 29 │ class B {
-       │          
+    29 │ class B {
   > 30 │   fooB(s: string): void;
        │   ^^^^
     31 │   barB(): void {};
@@ -129,10 +120,7 @@ invalid.ts:11:20 lint/nursery/useAdjacentOverloadSignatures ━━━━━━�
   
   i All barC signatures must be adjacent.
   
-    34 │ }
-    35 │ 
-  > 36 │ class C {
-       │          
+    36 │ class C {
   > 37 │   barC(): void {};
        │   ^^^^
     38 │   fooC(s: string): void;
@@ -140,10 +128,8 @@ invalid.ts:11:20 lint/nursery/useAdjacentOverloadSignatures ━━━━━━�
   
   i All fooC signatures must be adjacent.
   
-    38 │   fooC(s: string): void;
     39 │   fooC(s: string): void;
-  > 40 │   barC(): void {};
-       │                   
+    40 │   barC(): void {};
   > 41 │   fooC(s: string): void;
        │   ^^^^
     42 │   fooC(sn: string | number): void {};
@@ -152,8 +138,7 @@ invalid.ts:11:20 lint/nursery/useAdjacentOverloadSignatures ━━━━━━�
   i All fooB signatures must be adjacent.
   
     46 │ class D {
-  > 47 │   fooB(s: string): void;
-       │                         
+    47 │   fooB(s: string): void;
   > 48 │   fooB(s: string): void;
        │   ^^^^
     49 │   barB(): void {};

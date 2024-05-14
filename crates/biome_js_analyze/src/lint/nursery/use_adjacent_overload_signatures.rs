@@ -1,7 +1,7 @@
 use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
-use biome_js_syntax::{AnyJsModuleItem, AnyJsStatement, JsModuleItemList, SyntaxNodeText};
-use biome_rowan::{AstNode, TextRange};
+use biome_js_syntax::{AnyJsModuleItem, AnyJsStatement, JsModuleItemList};
+use biome_rowan::{AstNode, TextRange, TokenText};
 
 declare_rule! {
     /// Disallow the use of overload signatures that are not next to each other.
@@ -93,13 +93,13 @@ declare_rule! {
 
 impl Rule for UseAdjacentOverloadSignatures {
     type Query = Ast<JsModuleItemList>;
-    type State = Vec<(String, TextRange)>;
+    type State = Vec<(TokenText, TextRange)>;
     type Signals = Option<Self::State>;
     type Options = ();
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
-        let mut methods: Vec<Vec<(SyntaxNodeText, usize, TextRange)>> = Vec::new();
+        let mut methods: Vec<Vec<(TokenText, usize, TextRange)>> = Vec::new();
         let mut export_vec = vec![];
 
         for (index, item) in node.into_iter().enumerate() {
@@ -113,10 +113,10 @@ impl Rule for UseAdjacentOverloadSignatures {
                             let members = ts_object.members();
                             let mut type_vec = vec![];
                             for (type_index, member) in members.into_iter().enumerate() {
-                                let method_name =
+                                let method_member =
                                     member.as_ts_method_signature_type_member()?.name().ok()?;
-                                let text = method_name.syntax().text_trimmed();
-                                let range = method_name.syntax().text_range();
+                                let text = method_member.name()?;
+                                let range = method_member.range();
                                 type_vec.push((text, type_index, range));
                             }
                             methods.push(type_vec.clone());
@@ -128,9 +128,9 @@ impl Rule for UseAdjacentOverloadSignatures {
                             for (interface_index, member) in members.into_iter().enumerate() {
                                 let ts_method_signature =
                                     member.as_ts_method_signature_type_member()?;
-                                let method_name = ts_method_signature.name().ok()?;
-                                let text = method_name.syntax().text_trimmed();
-                                let range = method_name.syntax().text_range();
+                                let method_member = ts_method_signature.name().ok()?;
+                                let text = method_member.name()?;
+                                let range = method_member.range();
                                 interface_vec.push((text, interface_index, range));
                             }
                             methods.push(interface_vec);
@@ -142,17 +142,17 @@ impl Rule for UseAdjacentOverloadSignatures {
                             let mut class_index = 0;
                             for member in members {
                                 if let Some(method_class) = member.as_js_method_class_member() {
-                                    let method_name = method_class.name().ok()?;
-                                    let text = method_name.syntax().text_trimmed();
-                                    let range = method_name.syntax().text_range();
+                                    let method_member = method_class.name().ok()?;
+                                    let text = method_member.name()?;
+                                    let range = method_member.range();
                                     class_vec.push((text, class_index, range));
                                     class_index += 1;
                                 } else if let Some(method_class) =
                                     member.as_ts_method_signature_class_member()
                                 {
-                                    let method_name = method_class.name().ok()?;
-                                    let text = method_name.syntax().text_trimmed();
-                                    let range = method_name.syntax().text_range();
+                                    let method_member = method_class.name().ok()?;
+                                    let text = method_member.name()?;
+                                    let range = method_member.range();
                                     class_vec.push((text, class_index, range));
                                     class_index += 1;
                                 }
@@ -172,9 +172,8 @@ impl Rule for UseAdjacentOverloadSignatures {
                         .as_js_identifier_binding()?
                         .name_token()
                         .ok()?;
-                    let parent = name_token.parent()?;
-                    let text = parent.text_trimmed();
-                    let range = parent.text_range();
+                    let text = name_token.token_text_trimmed();
+                    let range = name_token.text_range();
                     export_vec.push((text, index, range));
                 }
                 _ => {}
@@ -182,9 +181,9 @@ impl Rule for UseAdjacentOverloadSignatures {
         }
         methods.push(export_vec.clone());
         let adjacent_overload_violations = check_adjacent_overload_violations(&methods);
-        let violation_ranges: Vec<(String, TextRange)> = adjacent_overload_violations
+        let violation_ranges: Vec<(TokenText, TextRange)> = adjacent_overload_violations
             .iter()
-            .map(|(text, range)| (text.to_string(), *range))
+            .map(|(text, range)| (text.clone(), *range))
             .collect();
 
         if !violation_ranges.is_empty() {
@@ -201,14 +200,14 @@ impl Rule for UseAdjacentOverloadSignatures {
             rule_category!(),
             text_ranges[0].1,
             markup! {
-                "All "{text_ranges[0].0}" signatures must be adjacent."
+                "All "{text_ranges[0].0.text()}" signatures must be adjacent."
             },
         );
         for text_range in text_ranges.iter().skip(1) {
             diagnostic = diagnostic.detail(
                 text_range.1,
                 markup! {
-                    "All "{text_range.0}" signatures must be adjacent."
+                    "All "{text_range.0.text()}" signatures must be adjacent."
                 },
             );
         }
@@ -218,12 +217,12 @@ impl Rule for UseAdjacentOverloadSignatures {
 }
 
 fn check_adjacent_overload_violations(
-    groups: &[Vec<(SyntaxNodeText, usize, TextRange)>],
-) -> Vec<(SyntaxNodeText, TextRange)> {
-    let mut violations: Vec<(SyntaxNodeText, TextRange)> = Vec::new();
+    groups: &[Vec<(TokenText, usize, TextRange)>],
+) -> Vec<(TokenText, TextRange)> {
+    let mut violations: Vec<(TokenText, TextRange)> = Vec::new();
 
     for group in groups.iter() {
-        let mut method_positions: Vec<(SyntaxNodeText, Vec<usize>, Vec<TextRange>)> = Vec::new();
+        let mut method_positions: Vec<(TokenText, Vec<usize>, Vec<TextRange>)> = Vec::new();
 
         for (name, position, range) in group {
             if let Some((_, positions, ranges)) =
