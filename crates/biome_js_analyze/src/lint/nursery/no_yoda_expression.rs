@@ -17,7 +17,9 @@ use biome_rowan::{AstNode, BatchMutationExt, SyntaxTriviaPiece, TriviaPieceKind,
 declare_rule! {
     /// Disallow the use of yoda expressions.
     ///
-    /// Yoda expressions can be confusing to some people, the rule forbids the use of it to improve code readability.
+    /// A Yoda expression is a programming style where the two parts of the expression are reversed from the typical order in a conditional statement.
+    /// A Yoda expression places the constant portion of the expression on the left side of the conditional statement. They can be confusing to some people,
+    /// the rule forbids the use of it to improve code readability.
     ///
     /// ## Examples
     ///
