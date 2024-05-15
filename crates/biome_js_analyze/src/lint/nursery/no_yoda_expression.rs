@@ -21,6 +21,8 @@ declare_rule! {
     /// A Yoda expression places the constant portion of the expression on the left side of the conditional statement. They can be confusing to some people,
     /// the rule forbids the use of it to improve code readability.
     ///
+    /// The rule have an exception for range expressions, expressions like `0 < value && value < 1` or `value <= 0 || 1 < value` are allowed.
+    ///
     /// ## Examples
     ///
     /// ### Invalid
@@ -49,6 +51,10 @@ declare_rule! {
     ///
     /// ```js
     /// if (value != 5) {}
+    /// ```
+    ///
+    /// ```js
+    /// if (0 < value && value < 1) {}
     /// ```
     pub NoYodaExpression {
         version: "next",
