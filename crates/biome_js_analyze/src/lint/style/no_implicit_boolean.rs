@@ -1,6 +1,6 @@
 use biome_analyze::{
     context::RuleContext, declare_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic,
-    RuleSource, RuleSourceKind
+    RuleSource, RuleSourceKind,
 };
 use biome_console::markup;
 use biome_diagnostics::Applicability;
