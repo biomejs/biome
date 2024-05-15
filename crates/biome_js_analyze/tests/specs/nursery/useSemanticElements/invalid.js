@@ -1,3 +1,7 @@
-var a = 1;
-a = 2;
-a = 3;
+const checkbox = () => (
+    <div role="checkbox" />
+);
+
+const Image = () => (
+    <div role="img" />
+);
