@@ -354,7 +354,7 @@ declare_rule! {
     ///   - `functionParameter`
     ///   - `catchParameter`
     ///   - `indexParameter`: parameters of index signatures
-    ///   = `typeParameter`: generic type parameter
+    ///   - `typeParameter`: generic type parameter
     ///   - `classMember`: class properties, parameter properties, methods, getters, and setters
     ///   - `classProperty`: class properties, including parameter properties
     ///   - `classMethod`
@@ -376,7 +376,7 @@ declare_rule! {
     ///   - `protected`: applies to class members
     ///   - `readonly`: applies to class members and type members
     ///   - `static`: applies to class members
-    /// - `scope`: where the declaration appears. Allowd values:
+    /// - `scope`: where the declaration appears. Allowed values:
     ///   - `any`: anywhere (default value if the scope is unset)
     ///   - `global`: the global scope (also includes the namespace scopes)
     ///
@@ -386,10 +386,10 @@ declare_rule! {
     ///
     /// A convention must set at least one requirement among:
     ///
-    /// - `match`: a regular expression that the name of the declaration must match.
-    ///   If the regular expression captures a part of the name, then this part is checked against `formats`.
+    /// - `match`: a regular expression that the name of the declaration must match.  
+    ///   If the regular expression captures a part of the name, then this part is checked against `formats`.  
     ///   Only the first capture is tested. Other captures are ignored.
-    /// - `formats`: the string [case] that the name must follow.
+    /// - `formats`: the string [case] that the name must follow.  
     ///   The supported cases are: [`PascalCase`], [`CONSTANT_CASE`], [`camelCase`], and [`snake_case`].
     ///
     /// If `match` is set and `formats` is unset,
@@ -401,9 +401,9 @@ declare_rule! {
     ///
     /// In the following example:
     ///
-    /// = We require `static readonly` class members to be in ["CONSTANT_CASE"].
+    /// - We require `static readonly` class members to be in [`CONSTANT_CASE`].
     /// - We require `private` class members to start with an underscore `_` and to be in [`camelCase`].
-    /// - We require global constants to be in ["CONSTANT_CASE"] and
+    /// - We require global constants to be in [`CONSTANT_CASE`] and
     ///   we allow these constants to be enclosed by double underscores or to be named `_SPECIAL_`.
     /// - We require interfaces to start with `I`, except for interfaces ending with `Error`,
     ///   and to be in [`PascalCase`].
