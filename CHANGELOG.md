@@ -113,6 +113,22 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
   Contributed by @Conaclos
 
+- [noUndeclaredVariables](https://biomejs.dev/linter/rules/no-undeclared-variables/) now ignores `this` in JSX components ([#2636](https://github.com/biomejs/biome/issues/2636)).
+
+  The ruel no longer reports `this` as undeclared in following code.
+
+  ```jsx
+  import { Component } from 'react';
+
+  export class MyComponent extends Component {
+    render() {
+      return <this.foo />
+    }
+  }
+  ```
+
+  Contributed by @printfn and @Conaclos
+
 - `useJsxKeyInIterable` now handles more cases involving fragments. See the snippets below. Contributed by @dyc3
 ```jsx
 // valid

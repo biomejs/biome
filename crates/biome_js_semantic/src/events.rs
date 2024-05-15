@@ -628,6 +628,10 @@ impl SemanticEventExtractor {
                 }
             }
             AnyJsIdentifierUsage::JsxReferenceIdentifier(_) => {
+                if name.text() == "this" {
+                    // Ignore `this` in JSX. e.g. `<this.foo />`.
+                    return;
+                }
                 self.push_reference(BindingName::Value(name), Reference::Read(range));
             }
             AnyJsIdentifierUsage::JsIdentifierAssignment(_) => {
