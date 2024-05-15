@@ -1029,6 +1029,10 @@ export interface Nursery {
 	 */
 	useImportRestrictions?: RuleConfiguration_for_Null;
 	/**
+	 * Succinct description of the rule.
+	 */
+	useSemanticElements?: RuleConfiguration_for_Null;
+	/**
 	 * Enforce the sorting of CSS utility classes.
 	 */
 	useSortedClasses?: RuleConfiguration_for_UtilityClassSortingOptions;
@@ -2029,6 +2033,7 @@ export type Category =
 	| "lint/nursery/useDefaultSwitchClause"
 	| "lint/nursery/useGenericFontNames"
 	| "lint/nursery/useImportRestrictions"
+	| "lint/nursery/useSemanticElements"
 	| "lint/nursery/useSortedClasses"
 	| "lint/performance/noAccumulatingSpread"
 	| "lint/performance/noBarrelFile"
