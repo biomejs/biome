@@ -143,6 +143,21 @@ z.object({})
 
 - `lang="tsx"` is now supported in Vue Single File Components. [#2765](https://github.com/biomejs/biome/issues/2765) Contributed by @dyc3
 
+#### Bug fixes
+
+- The `const` modifier for type parameters is now accepted for TypeScript `new` signatures ([#2825](https://github.com/biomejs/biome/issues/2825)).
+
+  The following code is now correctly parsed:
+
+  ```ts
+  interface I {
+    new<const T>(x: T): T
+  }
+  ```
+
+  Contributed by @Conaclos
+
+
 ## 1.7.3 (2024-05-06)
 
 ### CLI
