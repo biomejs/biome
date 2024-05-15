@@ -17,29 +17,27 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 #### New features
 
-- Introduce a new valued oprion `--rule` for `biome lint` ([#58](https://github.com/biomejs/biome/issues/58)).
+- Add a new option `--rule` to the command `biome lint` ([#58](https://github.com/biomejs/biome/issues/58)).
 
-  This new option allows you to execute a single rule.
-  This is convenient to test a rule or apply the code fixes of a single rule.
+  This new option allows you to execute a single rule. This option is convenient to test a rule or apply the code fixes of a single rule.
 
   For example, you can execute the `style/useNamingConvention` rule on a set of files:
 
   ```shell
-  biome lint --rule=style/useNamingConvention index,js
+  biome lint --rule=style/useNamingConvention src/index.js src/main.js
   ```
 
-  And the napply its code fixes:
+  If the rule has code action (autofix), you can use `--apply` to apply the fix:
 
   ```shell
-  biome lint --rule=style/useNamingConvention --apply index,js
+  biome lint --rule=style/useNamingConvention --apply index.js src/main.js
   ```
 
-  The option takes the rule configuration into account.
-
-  The severity level of the executed rule is always set to its default,
+  The option takes the rule options set in the Biome configuration file into account.
+  Only, the severity level of the rule is overridden by its default value,
   i.e. `error` for a recommended rule or `warn` otherwise.
 
-  The option is compatible with other options such as `--apply` and `--reporter`.
+  The option is compatible with other options such as `--apply`, `--apply-unsafe` and `--reporter`.
 
   Contributed by @Conaclos
 

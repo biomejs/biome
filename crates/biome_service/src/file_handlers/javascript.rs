@@ -340,10 +340,6 @@ pub(crate) fn lint(params: LintParams) -> LintResults {
                 rule_filter_list.push(RuleFilter::Rule("correctness", "noInitializerWithDefinite"));
                 rule_filter_list.push(RuleFilter::Rule("correctness", "noSuperWithoutExtends"));
                 rule_filter_list.push(RuleFilter::Rule("nursery", "noSuperWithoutExtends"));
-                if let Some(rule) = params.rule {
-                    rule_filter_list.clear();
-                    rule_filter_list.push(rule.into())
-                }
                 rule_filter_list
             };
 

@@ -60,7 +60,8 @@ Available positional items:
 Available options:
         --apply               Apply safe fixes, formatting and import sorting
         --apply-unsafe        Apply safe fixes and unsafe fixes, formatting and import sorting
-        --rule=NAME           Execute only this rule taking into account its configurations.
+        --rule=NAME           Run only the given rule taking into account the options set in the configurations
+                              files. The severity level of the rule is set to its default.
         --stdin-file-path=PATH  Use this option when you want to format code piped from `stdin`, and
                               print the output to `stdout`.
                               The file doesn't need to exist on disk, what matters is the extension of

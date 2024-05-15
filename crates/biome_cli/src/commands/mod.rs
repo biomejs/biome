@@ -153,7 +153,8 @@ pub enum BiomeCommand {
         #[bpaf(external, hide_usage)]
         cli_options: CliOptions,
 
-        /// Execute only this rule taking into account its configurations.
+        /// Run only the given rule taking into account the options set in the configurations files.
+        /// The severity level of the rule is set to its default.
         #[bpaf(long("rule"), argument("NAME"))]
         rule: Option<RuleCode>,
 
