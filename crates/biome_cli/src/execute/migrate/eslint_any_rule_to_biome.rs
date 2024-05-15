@@ -1178,6 +1178,10 @@ pub(crate) fn migrate_eslint_any_rule(
             rule.set_level(rule_severity.into());
         }
         "react/jsx-boolean-value" => {
+            if !options.include_inspired {
+                results.has_inspired_rules = true;
+                return false;
+            }
             let group = rules.style.get_or_insert_with(Default::default);
             let rule = group.no_implicit_boolean.get_or_insert(Default::default());
             rule.set_level(rule_severity.into());

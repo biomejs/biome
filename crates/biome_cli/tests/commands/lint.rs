@@ -3498,3 +3498,95 @@ fn lint_rule_filter_with_linter_disabled() {
         result,
     ));
 }
+
+#[test]
+fn lint_rule_filter_group() {
+    let mut fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+    let config = r#"{
+        "linter": {
+            "rules": {
+                "suspicious": {
+                    "recommended": false
+                }
+            }
+        }
+    }"#;
+    let content = r#"
+    export function CONSTANT_CASE(){
+        debugger;
+    }
+    "#;
+
+    let file_path = Path::new("check.js");
+    fs.insert(file_path.into(), content.as_bytes());
+    let config_path = Path::new("biome.json");
+    fs.insert(config_path.into(), config.as_bytes());
+
+    let result = run_cli(
+        DynRef::Borrowed(&mut fs),
+        &mut console,
+        Args::from(
+            [
+                ("lint"),
+                "--rule=suspicious",
+                file_path.as_os_str().to_str().unwrap(),
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "lint_rule_filter_group",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn lint_rule_filter_group_with_disabled_rule() {
+    let mut fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+    let config = r#"{
+        "linter": {
+            "rules": {
+                "suspicious": {
+                    "noDebugger": "off"
+                }
+            }
+        }
+    }"#;
+    let content = r#"
+    export function CONSTANT_CASE(){
+        debugger;
+    }
+    "#;
+
+    let file_path = Path::new("check.js");
+    fs.insert(file_path.into(), content.as_bytes());
+    let config_path = Path::new("biome.json");
+    fs.insert(config_path.into(), config.as_bytes());
+
+    let result = run_cli(
+        DynRef::Borrowed(&mut fs),
+        &mut console,
+        Args::from(
+            [
+                ("lint"),
+                "--rule=suspicious",
+                file_path.as_os_str().to_str().unwrap(),
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "lint_rule_filter_group_with_disabled_rule",
+        fs,
+        console,
+        result,
+    ));
+}

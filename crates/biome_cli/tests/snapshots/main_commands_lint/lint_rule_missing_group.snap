@@ -17,7 +17,7 @@ flags/invalid ━━━━━━━━━━━━━━━━━━━━━━
   × Failed to parse CLI arguments.
     
     Caused by:
-      couldn't parse `noDebugger`: a group and a rule name separated by a slash is required.
+      couldn't parse `noDebugger`: This group doesn't exist. Use the syntax `<group>/<rule>` to specify a rule.
   
 
 

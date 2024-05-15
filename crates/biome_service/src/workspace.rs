@@ -55,7 +55,7 @@ use crate::file_handlers::Capabilities;
 use crate::{Deserialize, Serialize, WorkspaceError};
 use biome_analyze::ActionCategory;
 pub use biome_analyze::RuleCategories;
-use biome_configuration::linter::RuleCode;
+use biome_configuration::linter::RuleSelector;
 use biome_configuration::PartialConfiguration;
 use biome_console::{markup, Markup, MarkupBuf};
 use biome_css_formatter::can_format_css_yet;
@@ -496,7 +496,7 @@ pub struct PullDiagnosticsParams {
     pub path: BiomePath,
     pub categories: RuleCategories,
     pub max_diagnostics: u64,
-    pub rule: Option<RuleCode>,
+    pub rule: Option<RuleSelector>,
 }
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
@@ -936,7 +936,7 @@ impl<'app, W: Workspace + ?Sized> FileGuard<'app, W> {
         &self,
         categories: RuleCategories,
         max_diagnostics: u32,
-        rule: Option<RuleCode>,
+        rule: Option<RuleSelector>,
     ) -> Result<PullDiagnosticsResult, WorkspaceError> {
         self.workspace.pull_diagnostics(PullDiagnosticsParams {
             path: self.path.clone(),

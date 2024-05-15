@@ -222,49 +222,63 @@ pub struct RuleWithOptions<T: Default> {
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq, Hash)]
-pub struct RuleCode {
-    pub group: &'static str,
-    pub name: &'static str,
+pub enum RuleSelector {
+    Group(RuleGroup),
+    Rule(RuleGroup, &'static str),
 }
 
-impl<'a> From<RuleCode> for RuleFilter<'a> {
-    fn from(RuleCode { group, name }: RuleCode) -> Self {
-        RuleFilter::Rule(group, name)
-    }
-}
-
-impl FromStr for RuleCode {
-    type Err = &'static str;
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        if let Some((group, rule_name)) = s.split_once('/') {
-            if let Some((group, name)) = Rules::matches_diagnostic_code(group, rule_name) {
-                Ok(RuleCode { group, name })
-            } else {
-                Err("the rule doesn't exist.")
-            }
-        } else {
-            Err("a group and a rule name separated by a slash is required.")
+impl From<RuleSelector> for RuleFilter<'static> {
+    fn from(value: RuleSelector) -> Self {
+        match value {
+            RuleSelector::Group(group) => RuleFilter::Group(group.as_str()),
+            RuleSelector::Rule(group, name) => RuleFilter::Rule(group.as_str(), name),
         }
     }
 }
 
-impl serde::Serialize for RuleCode {
-    fn serialize<S: serde::Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
-        let RuleCode { group, name } = self;
-        serializer.serialize_str(&format!("{group}/{name}"))
+impl FromStr for RuleSelector {
+    type Err = &'static str;
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        if let Some((group_name, rule_name)) = s.split_once('/') {
+            let group = RuleGroup::from_str(group_name)?;
+            if let Some(rule_name) = Rules::has_rule(group, rule_name) {
+                Ok(RuleSelector::Rule(group, rule_name))
+            } else {
+                Err("This rule doesn't exist.")
+            }
+        } else {
+            match RuleGroup::from_str(s) {
+                Ok(group) => Ok(RuleSelector::Group(group)),
+                Err(_) => Err(
+                    "This group doesn't exist. Use the syntax `<group>/<rule>` to specify a rule.",
+                ),
+            }
+        }
     }
 }
 
-impl<'de> serde::Deserialize<'de> for RuleCode {
+impl serde::Serialize for RuleSelector {
+    fn serialize<S: serde::Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
+        match self {
+            RuleSelector::Group(group) => serializer.serialize_str(group.as_str()),
+            RuleSelector::Rule(group, rule_name) => {
+                let group_name = group.as_str();
+                serializer.serialize_str(&format!("{group_name}/{rule_name}"))
+            }
+        }
+    }
+}
+
+impl<'de> serde::Deserialize<'de> for RuleSelector {
     fn deserialize<D: serde::Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
         struct Visitor;
         impl<'de> serde::de::Visitor<'de> for Visitor {
-            type Value = RuleCode;
+            type Value = RuleSelector;
             fn expecting(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
                 formatter.write_str("<group>/<ruyle_name>")
             }
             fn visit_str<E: serde::de::Error>(self, v: &str) -> Result<Self::Value, E> {
-                match RuleCode::from_str(v) {
+                match RuleSelector::from_str(v) {
                     Ok(result) => Ok(result),
                     Err(error) => Err(serde::de::Error::custom(error)),
                 }
@@ -274,7 +288,7 @@ impl<'de> serde::Deserialize<'de> for RuleCode {
     }
 }
 
-impl schemars::JsonSchema for RuleCode {
+impl schemars::JsonSchema for RuleSelector {
     fn schema_name() -> String {
         "RuleCode".to_string()
     }

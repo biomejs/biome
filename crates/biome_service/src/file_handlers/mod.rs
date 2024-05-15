@@ -12,7 +12,7 @@ use crate::{
     WorkspaceError,
 };
 use biome_analyze::{AnalysisFilter, AnalyzerDiagnostic, RuleCategories};
-use biome_configuration::linter::RuleCode;
+use biome_configuration::linter::RuleSelector;
 use biome_configuration::Rules;
 use biome_console::fmt::Formatter;
 use biome_console::markup;
@@ -367,7 +367,7 @@ pub(crate) struct LintParams<'a> {
     pub(crate) language: DocumentFileSource,
     pub(crate) max_diagnostics: u32,
     pub(crate) path: &'a BiomePath,
-    pub(crate) rule: Option<RuleCode>,
+    pub(crate) rule: Option<RuleSelector>,
     pub(crate) categories: RuleCategories,
     pub(crate) manifest: Option<PackageJson>,
 }

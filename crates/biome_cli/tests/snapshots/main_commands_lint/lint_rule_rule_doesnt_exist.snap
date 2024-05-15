@@ -17,7 +17,7 @@ flags/invalid ━━━━━━━━━━━━━━━━━━━━━━
   × Failed to parse CLI arguments.
     
     Caused by:
-      couldn't parse `suspicious/inexistant`: the rule doesn't exist.
+      couldn't parse `suspicious/inexistant`: This rule doesn't exist.
   
 
 

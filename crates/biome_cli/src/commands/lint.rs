@@ -5,7 +5,7 @@ use crate::commands::{
 use crate::{
     execute_mode, setup_cli_subscriber, CliDiagnostic, CliSession, Execution, TraversalMode,
 };
-use biome_configuration::linter::RuleCode;
+use biome_configuration::linter::RuleSelector;
 use biome_configuration::vcs::PartialVcsConfiguration;
 use biome_configuration::{
     PartialConfiguration, PartialFilesConfiguration, PartialLinterConfiguration,
@@ -25,7 +25,7 @@ pub(crate) struct LintCommandPayload {
     pub(crate) vcs_configuration: Option<PartialVcsConfiguration>,
     pub(crate) files_configuration: Option<PartialFilesConfiguration>,
     pub(crate) paths: Vec<OsString>,
-    pub(crate) rule: Option<RuleCode>,
+    pub(crate) rule: Option<RuleSelector>,
     pub(crate) stdin_file_path: Option<String>,
     pub(crate) staged: bool,
     pub(crate) changed: bool,

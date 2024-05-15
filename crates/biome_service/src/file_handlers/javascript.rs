@@ -24,6 +24,7 @@ use biome_analyze::{
     QueryMatch, RegistryVisitor, RuleCategories, RuleCategory, RuleFilter, RuleGroup,
 };
 use biome_configuration::javascript::JsxRuntime;
+use biome_configuration::linter::RuleSelector;
 use biome_diagnostics::{category, Applicability, Diagnostic, DiagnosticExt, Severity};
 use biome_formatter::{
     AttributePosition, FormatError, IndentStyle, IndentWidth, LineEnding, LineWidth, Printed,
@@ -315,13 +316,30 @@ pub(crate) fn lint(params: LintParams) -> LintResults {
             // Compute final rules (taking `overrides` into account)
             let mut rules = settings.as_rules(params.path.as_path());
 
-            let rule_filter_list = if let Some(rule) = params.rule {
-                // We execute a single rule because the `--rule` filter is specified.
-                // Set the severity level to its default.
-                if let Some(rules) = rules.as_mut() {
-                    rules.to_mut().set_default_severity(rule.group, rule.name);
+            let enabled_rules = if let Some(rule) = params.rule {
+                // We execute a single rule or group because the `--rule` filter is specified.
+                match rule {
+                    RuleSelector::Group(group) => {
+                        if let Some(rules) = rules.as_mut() {
+                            // Ensure that the recommended field is not set to `false`.
+                            rules.to_mut().set_recommended();
+                        }
+                        rules
+                            .as_ref()
+                            .map(|rules| rules.as_enabled_rules())
+                            .unwrap_or_default()
+                            .into_iter()
+                            .filter(|rule_filter| rule_filter.group() == group.as_str())
+                            .collect()
+                    }
+                    RuleSelector::Rule(group, rule_name) => {
+                        if let Some(rules) = rules.as_mut() {
+                            // Set the severity level of the rule to its default.
+                            rules.to_mut().set_default_severity(group, rule_name);
+                        }
+                        vec![rule.into()]
+                    }
                 }
-                vec![rule.into()]
             } else {
                 let mut rule_filter_list = rules
                     .as_ref()
@@ -343,7 +361,7 @@ pub(crate) fn lint(params: LintParams) -> LintResults {
                 rule_filter_list
             };
 
-            let mut filter = AnalysisFilter::from_enabled_rules(Some(rule_filter_list.as_slice()));
+            let mut filter = AnalysisFilter::from_enabled_rules(Some(enabled_rules.as_slice()));
             filter.categories = params.categories;
 
             let mut diagnostic_count = diagnostics.len() as u32;

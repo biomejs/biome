@@ -4,7 +4,7 @@ use crate::diagnostics::DeprecatedConfigurationFile;
 use crate::execute::Stdin;
 use crate::logging::LoggingKind;
 use crate::{CliDiagnostic, CliSession, LoggingLevel, VERSION};
-use biome_configuration::linter::RuleCode;
+use biome_configuration::linter::RuleSelector;
 use biome_configuration::{
     css::partial_css_formatter, javascript::partial_javascript_formatter,
     json::partial_json_formatter, partial_configuration, partial_files_configuration,
@@ -153,10 +153,13 @@ pub enum BiomeCommand {
         #[bpaf(external, hide_usage)]
         cli_options: CliOptions,
 
-        /// Run only the given rule taking into account the options set in the configurations files.
-        /// The severity level of the rule is set to its default.
-        #[bpaf(long("rule"), argument("NAME"))]
-        rule: Option<RuleCode>,
+        /// Run only the given rule or rule group taking the configurations file into account.
+        ///
+        /// Example: `biome lint --rule=correctness/noUnusedVariables`
+        ///
+        /// Example: `biome lint --rule=suspicious`
+        #[bpaf(long("rule"), argument("GROUP|RULE"))]
+        rule: Option<RuleSelector>,
 
         /// Use this option when you want to format code piped from `stdin`, and print the output to `stdout`.
         ///

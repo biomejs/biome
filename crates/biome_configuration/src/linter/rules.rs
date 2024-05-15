@@ -15,6 +15,62 @@ use indexmap::IndexSet;
 #[cfg(feature = "schema")]
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
+#[derive(
+    Clone,
+    Copy,
+    Debug,
+    Deserializable,
+    Eq,
+    Hash,
+    Merge,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    serde :: Deserialize,
+    serde :: Serialize,
+)]
+#[cfg_attr(feature = "schema", derive(JsonSchema))]
+#[serde(rename_all = "camelCase")]
+pub enum RuleGroup {
+    A11y,
+    Complexity,
+    Correctness,
+    Nursery,
+    Performance,
+    Security,
+    Style,
+    Suspicious,
+}
+impl RuleGroup {
+    pub const fn as_str(self) -> &'static str {
+        match self {
+            Self::A11y => A11y::GROUP_NAME,
+            Self::Complexity => Complexity::GROUP_NAME,
+            Self::Correctness => Correctness::GROUP_NAME,
+            Self::Nursery => Nursery::GROUP_NAME,
+            Self::Performance => Performance::GROUP_NAME,
+            Self::Security => Security::GROUP_NAME,
+            Self::Style => Style::GROUP_NAME,
+            Self::Suspicious => Suspicious::GROUP_NAME,
+        }
+    }
+}
+impl std::str::FromStr for RuleGroup {
+    type Err = &'static str;
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s {
+            A11y::GROUP_NAME => Ok(Self::A11y),
+            Complexity::GROUP_NAME => Ok(Self::Complexity),
+            Correctness::GROUP_NAME => Ok(Self::Correctness),
+            Nursery::GROUP_NAME => Ok(Self::Nursery),
+            Performance::GROUP_NAME => Ok(Self::Performance),
+            Security::GROUP_NAME => Ok(Self::Security),
+            Style::GROUP_NAME => Ok(Self::Style),
+            Suspicious::GROUP_NAME => Ok(Self::Suspicious),
+            _ => Err("This rule group doesn't exist."),
+        }
+    }
+}
 #[derive(Clone, Debug, Default, Deserialize, Deserializable, Eq, Merge, PartialEq, Serialize)]
 #[deserializable(with_validator)]
 #[cfg_attr(feature = "schema", derive(JsonSchema))]
@@ -68,28 +124,16 @@ impl DeserializableValidator for Rules {
 impl Rules {
     #[doc = r" Checks if the code coming from [biome_diagnostics::Diagnostic] corresponds to a rule."]
     #[doc = r" Usually the code is built like {group}/{rule_name}"]
-    pub fn matches_diagnostic_code(
-        group: &str,
-        rule_name: &str,
-    ) -> Option<(&'static str, &'static str)> {
+    pub fn has_rule(group: RuleGroup, rule_name: &str) -> Option<&'static str> {
         match group {
-            "a11y" => A11y::has_rule(rule_name).map(|rule_name| ("a11y", rule_name)),
-            "complexity" => {
-                Complexity::has_rule(rule_name).map(|rule_name| ("complexity", rule_name))
-            }
-            "correctness" => {
-                Correctness::has_rule(rule_name).map(|rule_name| ("correctness", rule_name))
-            }
-            "nursery" => Nursery::has_rule(rule_name).map(|rule_name| ("nursery", rule_name)),
-            "performance" => {
-                Performance::has_rule(rule_name).map(|rule_name| ("performance", rule_name))
-            }
-            "security" => Security::has_rule(rule_name).map(|rule_name| ("security", rule_name)),
-            "style" => Style::has_rule(rule_name).map(|rule_name| ("style", rule_name)),
-            "suspicious" => {
-                Suspicious::has_rule(rule_name).map(|rule_name| ("suspicious", rule_name))
-            }
-            _ => None,
+            RuleGroup::A11y => A11y::has_rule(rule_name),
+            RuleGroup::Complexity => Complexity::has_rule(rule_name),
+            RuleGroup::Correctness => Correctness::has_rule(rule_name),
+            RuleGroup::Nursery => Nursery::has_rule(rule_name),
+            RuleGroup::Performance => Performance::has_rule(rule_name),
+            RuleGroup::Security => Security::has_rule(rule_name),
+            RuleGroup::Style => Style::has_rule(rule_name),
+            RuleGroup::Suspicious => Suspicious::has_rule(rule_name),
         }
     }
     #[doc = r" Given a category coming from [Diagnostic](biome_diagnostics::Diagnostic), this function returns"]
@@ -100,14 +144,14 @@ impl Rules {
         let mut split_code = category.name().split('/');
         let _lint = split_code.next();
         debug_assert_eq!(_lint, Some("lint"));
-        let group = split_code.next()?;
+        let group = <RuleGroup as std::str::FromStr>::from_str(split_code.next()?).ok()?;
         let rule_name = split_code.next()?;
-        let (group, rule_name) = Self::matches_diagnostic_code(group, rule_name)?;
+        let rule_name = Self::has_rule(group, rule_name)?;
         let severity = match group {
-            "a11y" => self
+            RuleGroup::A11y => self
                 .a11y
                 .as_ref()
-                .and_then(|a11y| a11y.get_rule_configuration(rule_name))
+                .and_then(|group| group.get_rule_configuration(rule_name))
                 .map_or_else(
                     || {
                         if A11y::is_recommended_rule(rule_name) {
@@ -118,10 +162,10 @@ impl Rules {
                     },
                     |(level, _)| level.into(),
                 ),
-            "complexity" => self
+            RuleGroup::Complexity => self
                 .complexity
                 .as_ref()
-                .and_then(|complexity| complexity.get_rule_configuration(rule_name))
+                .and_then(|group| group.get_rule_configuration(rule_name))
                 .map_or_else(
                     || {
                         if Complexity::is_recommended_rule(rule_name) {
@@ -132,10 +176,10 @@ impl Rules {
                     },
                     |(level, _)| level.into(),
                 ),
-            "correctness" => self
+            RuleGroup::Correctness => self
                 .correctness
                 .as_ref()
-                .and_then(|correctness| correctness.get_rule_configuration(rule_name))
+                .and_then(|group| group.get_rule_configuration(rule_name))
                 .map_or_else(
                     || {
                         if Correctness::is_recommended_rule(rule_name) {
@@ -146,10 +190,10 @@ impl Rules {
                     },
                     |(level, _)| level.into(),
                 ),
-            "nursery" => self
+            RuleGroup::Nursery => self
                 .nursery
                 .as_ref()
-                .and_then(|nursery| nursery.get_rule_configuration(rule_name))
+                .and_then(|group| group.get_rule_configuration(rule_name))
                 .map_or_else(
                     || {
                         if Nursery::is_recommended_rule(rule_name) {
@@ -160,10 +204,10 @@ impl Rules {
                     },
                     |(level, _)| level.into(),
                 ),
-            "performance" => self
+            RuleGroup::Performance => self
                 .performance
                 .as_ref()
-                .and_then(|performance| performance.get_rule_configuration(rule_name))
+                .and_then(|group| group.get_rule_configuration(rule_name))
                 .map_or_else(
                     || {
                         if Performance::is_recommended_rule(rule_name) {
@@ -174,10 +218,10 @@ impl Rules {
                     },
                     |(level, _)| level.into(),
                 ),
-            "security" => self
+            RuleGroup::Security => self
                 .security
                 .as_ref()
-                .and_then(|security| security.get_rule_configuration(rule_name))
+                .and_then(|group| group.get_rule_configuration(rule_name))
                 .map_or_else(
                     || {
                         if Security::is_recommended_rule(rule_name) {
@@ -188,10 +232,10 @@ impl Rules {
                     },
                     |(level, _)| level.into(),
                 ),
-            "style" => self
+            RuleGroup::Style => self
                 .style
                 .as_ref()
-                .and_then(|style| style.get_rule_configuration(rule_name))
+                .and_then(|group| group.get_rule_configuration(rule_name))
                 .map_or_else(
                     || {
                         if Style::is_recommended_rule(rule_name) {
@@ -202,10 +246,10 @@ impl Rules {
                     },
                     |(level, _)| level.into(),
                 ),
-            "suspicious" => self
+            RuleGroup::Suspicious => self
                 .suspicious
                 .as_ref()
-                .and_then(|suspicious| suspicious.get_rule_configuration(rule_name))
+                .and_then(|group| group.get_rule_configuration(rule_name))
                 .map_or_else(
                     || {
                         if Suspicious::is_recommended_rule(rule_name) {
@@ -216,14 +260,13 @@ impl Rules {
                     },
                     |(level, _)| level.into(),
                 ),
-            _ => unreachable!("this group should not exist, found {}", group),
         };
         Some(severity)
     }
     #[doc = r" Set the severity of the rule to its default."]
-    pub fn set_default_severity(&mut self, group: &str, rule_name: &str) {
+    pub fn set_default_severity(&mut self, group: RuleGroup, rule_name: &str) {
         match group {
-            "a11y" => {
+            RuleGroup::A11y => {
                 if let Some(group) = &mut self.a11y {
                     let default_severity = if A11y::is_recommended_rule(rule_name) {
                         RulePlainConfiguration::Error
@@ -233,7 +276,7 @@ impl Rules {
                     group.set_severity(rule_name, default_severity);
                 }
             }
-            "complexity" => {
+            RuleGroup::Complexity => {
                 if let Some(group) = &mut self.complexity {
                     let default_severity = if Complexity::is_recommended_rule(rule_name) {
                         RulePlainConfiguration::Error
@@ -243,7 +286,7 @@ impl Rules {
                     group.set_severity(rule_name, default_severity);
                 }
             }
-            "correctness" => {
+            RuleGroup::Correctness => {
                 if let Some(group) = &mut self.correctness {
                     let default_severity = if Correctness::is_recommended_rule(rule_name) {
                         RulePlainConfiguration::Error
@@ -253,7 +296,7 @@ impl Rules {
                     group.set_severity(rule_name, default_severity);
                 }
             }
-            "nursery" => {
+            RuleGroup::Nursery => {
                 if let Some(group) = &mut self.nursery {
                     let default_severity = if Nursery::is_recommended_rule(rule_name) {
                         RulePlainConfiguration::Error
@@ -263,7 +306,7 @@ impl Rules {
                     group.set_severity(rule_name, default_severity);
                 }
             }
-            "performance" => {
+            RuleGroup::Performance => {
                 if let Some(group) = &mut self.performance {
                     let default_severity = if Performance::is_recommended_rule(rule_name) {
                         RulePlainConfiguration::Error
@@ -273,7 +316,7 @@ impl Rules {
                     group.set_severity(rule_name, default_severity);
                 }
             }
-            "security" => {
+            RuleGroup::Security => {
                 if let Some(group) = &mut self.security {
                     let default_severity = if Security::is_recommended_rule(rule_name) {
                         RulePlainConfiguration::Error
@@ -283,7 +326,7 @@ impl Rules {
                     group.set_severity(rule_name, default_severity);
                 }
             }
-            "style" => {
+            RuleGroup::Style => {
                 if let Some(group) = &mut self.style {
                     let default_severity = if Style::is_recommended_rule(rule_name) {
                         RulePlainConfiguration::Error
@@ -293,7 +336,7 @@ impl Rules {
                     group.set_severity(rule_name, default_severity);
                 }
             }
-            "suspicious" => {
+            RuleGroup::Suspicious => {
                 if let Some(group) = &mut self.suspicious {
                     let default_severity = if Suspicious::is_recommended_rule(rule_name) {
                         RulePlainConfiguration::Error
@@ -303,9 +346,36 @@ impl Rules {
                     group.set_severity(rule_name, default_severity);
                 }
             }
-            _ => {
-                unreachable!("this group should not exist, found {}", group);
-            }
+        }
+    }
+    #[doc = r" Ensure that `recommended` is set to `true` or implied."]
+    pub fn set_recommended(&mut self) {
+        if self.all != Some(true) && self.recommended == Some(false) {
+            self.recommended = Some(true)
+        }
+        if let Some(group) = &mut self.a11y {
+            group.recommended = None;
+        }
+        if let Some(group) = &mut self.complexity {
+            group.recommended = None;
+        }
+        if let Some(group) = &mut self.correctness {
+            group.recommended = None;
+        }
+        if let Some(group) = &mut self.nursery {
+            group.recommended = None;
+        }
+        if let Some(group) = &mut self.performance {
+            group.recommended = None;
+        }
+        if let Some(group) = &mut self.security {
+            group.recommended = None;
+        }
+        if let Some(group) = &mut self.style {
+            group.recommended = None;
+        }
+        if let Some(group) = &mut self.suspicious {
+            group.recommended = None;
         }
     }
     pub(crate) const fn is_recommended_false(&self) -> bool {
@@ -4239,6 +4309,11 @@ impl Nursery {
                     rule_conf.set_level(severity);
                 }
             }
+            "useTopLevelRegex" => {
+                if let Some(rule_conf) = &mut self.use_top_level_regex {
+                    rule_conf.set_level(severity);
+                }
+            }
             _ => {}
         }
     }
@@ -7325,5 +7400,32 @@ impl Suspicious {
             }
             _ => {}
         }
+    }
+}
+#[test]
+fn test_order() {
+    for items in A11y::GROUP_RULES.windows(2) {
+        assert!(items[0] < items[1], "{} < {}", items[0], items[1]);
+    }
+    for items in Complexity::GROUP_RULES.windows(2) {
+        assert!(items[0] < items[1], "{} < {}", items[0], items[1]);
+    }
+    for items in Correctness::GROUP_RULES.windows(2) {
+        assert!(items[0] < items[1], "{} < {}", items[0], items[1]);
+    }
+    for items in Nursery::GROUP_RULES.windows(2) {
+        assert!(items[0] < items[1], "{} < {}", items[0], items[1]);
+    }
+    for items in Performance::GROUP_RULES.windows(2) {
+        assert!(items[0] < items[1], "{} < {}", items[0], items[1]);
+    }
+    for items in Security::GROUP_RULES.windows(2) {
+        assert!(items[0] < items[1], "{} < {}", items[0], items[1]);
+    }
+    for items in Style::GROUP_RULES.windows(2) {
+        assert!(items[0] < items[1], "{} < {}", items[0], items[1]);
+    }
+    for items in Suspicious::GROUP_RULES.windows(2) {
+        assert!(items[0] < items[1], "{} < {}", items[0], items[1]);
     }
 }
