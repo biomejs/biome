@@ -1,6 +1,6 @@
 use biome_analyze::{
     context::RuleContext, declare_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic,
-    RuleSource,
+    RuleSource, RuleSourceKind
 };
 use biome_console::markup;
 use biome_diagnostics::Applicability;
@@ -51,6 +51,7 @@ declare_rule! {
         sources: &[RuleSource::EslintReact("jsx-boolean-value")],
         recommended: false,
         fix_kind: FixKind::Safe,
+        source_kind: RuleSourceKind::Inspired,
     }
 }
 
