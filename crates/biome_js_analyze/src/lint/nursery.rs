@@ -19,6 +19,7 @@ pub mod use_consistent_builtin_instantiation;
 pub mod use_default_switch_clause;
 pub mod use_explicit_length_check;
 pub mod use_import_restrictions;
+pub mod use_semantic_elements;
 pub mod use_sorted_classes;
 
 declare_group! {
@@ -42,6 +43,7 @@ declare_group! {
             self :: use_default_switch_clause :: UseDefaultSwitchClause ,
             self :: use_explicit_length_check :: UseExplicitLengthCheck ,
             self :: use_import_restrictions :: UseImportRestrictions ,
+            self :: use_semantic_elements :: UseSemanticElements ,
             self :: use_sorted_classes :: UseSortedClasses ,
         ]
      }
