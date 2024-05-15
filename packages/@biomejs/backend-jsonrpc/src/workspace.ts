@@ -1060,6 +1060,10 @@ export interface Nursery {
 	 * Require new when throwing an error.
 	 */
 	useThrowNewError?: RuleConfiguration_for_Null;
+	/**
+	 * Require all regex literals to be declared at the top level.
+	 */
+	useTopLevelRegex?: RuleConfiguration_for_Null;
 }
 /**
  * A list of rules that belong to this group
@@ -2149,6 +2153,7 @@ export type Category =
 	| "lint/nursery/useImportRestrictions"
 	| "lint/nursery/useSortedClasses"
 	| "lint/nursery/useThrowNewError"
+	| "lint/nursery/useTopLevelRegex"
 	| "lint/performance/noAccumulatingSpread"
 	| "lint/performance/noBarrelFile"
 	| "lint/performance/noDelete"

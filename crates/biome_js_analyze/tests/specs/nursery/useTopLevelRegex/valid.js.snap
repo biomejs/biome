@@ -1,0 +1,25 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.js
+---
+# Input
+```jsx
+/* should not generate diagnostics */
+
+/[a-Z]*/.test("foo");
+
+const REGEX = /[a-Z]*/;
+
+function foo(someString) {
+	return REGEX.test(someString)
+}
+
+const foo = {
+	regex: /[a-Z]*/
+}
+
+class Foo {
+	static regex = /[a-Z]*/;
+}
+
+```
