@@ -115,7 +115,7 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 - [noUndeclaredVariables](https://biomejs.dev/linter/rules/no-undeclared-variables/) now ignores `this` in JSX components ([#2636](https://github.com/biomejs/biome/issues/2636)).
 
-  The ruel no longer reports `this` as undeclared in following code.
+  The rule no longer reports `this` as undeclared in following code.
 
   ```jsx
   import { Component } from 'react';
