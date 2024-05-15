@@ -137,6 +137,8 @@ z.object({})
   .describe('');
 ```
 
+- [noExportsInTest](https://biomejs.dev/linter/rules/no-exports-in-test/) rule no longer treats files with in-source testing as test files https://github.com/biomejs/biome/issues/2859. Contributed by @ah-yu
+
 ### Parser
 
 #### Enhancements
