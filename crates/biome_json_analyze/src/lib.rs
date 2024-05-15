@@ -1,6 +1,7 @@
 mod lint;
 pub mod options;
 mod registry;
+pub mod utils;
 
 pub use crate::registry::visit_registry;
 use biome_analyze::{

@@ -1,0 +1,166 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: js/module/import/trailing-commas/none/import_trailing_commas.js
+---
+# Input
+
+```js
+import {
+	adsadasdasdasdasdasdasdasdasdasdas,
+	dsadsadasdasdasdasdasdasdasd,
+	dsadsadasdasdasdasdasdasdasd,
+} from "D";
+
+import {
+	adsadasdasdasdasdasdasdasdasdasdas,
+	dsadsadasdasdasdasdasdasdasd,
+	dsadsadasdasdasdasdasdasdasd, } from "W";
+
+const StandaloneBackendWASMModule = await import(/* webpackChunkName: "standalone" */'./StandaloneBackendWASM');
+
+const StandaloneBackendWASMModule = await import(/* webpackChunkName: "standalone" */'./StandaloneBackendWASM',
+	/* webpackChunkName: "standalone" */'./StandaloneBackendWASM');
+
+import(
+	'myreallylongdynamicallyloadedmodulenamemyreallylongdynamicallyloadedmodulename'
+	);
+
+import(/* Hello */ "something");
+import("something" /* Hello */);
+import(/* Hello */ "something" /* Hello */);
+import("something" /* Hello */ + "else");
+import(
+	/* Hello */
+	"something",
+	/* Hello */
+	);
+wrap(import(/* Hello */ "something"));
+
+```
+
+
+=============================
+
+# Outputs
+
+## Output 1
+
+-----
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 80
+Quote style: Double Quotes
+JSX quote style: Double Quotes
+Quote properties: As needed
+Trailing commas: All
+Semicolons: Always
+Arrow parentheses: Always
+Bracket spacing: true
+Bracket same line: false
+Attribute Position: Auto
+-----
+
+```js
+import {
+	adsadasdasdasdasdasdasdasdasdasdas,
+	dsadsadasdasdasdasdasdasdasd,
+	dsadsadasdasdasdasdasdasdasd,
+} from "D";
+
+import {
+	adsadasdasdasdasdasdasdasdasdasdas,
+	dsadsadasdasdasdasdasdasdasd,
+	dsadsadasdasdasdasdasdasdasd,
+} from "W";
+
+const StandaloneBackendWASMModule = await import(
+	/* webpackChunkName: "standalone" */ "./StandaloneBackendWASM"
+);
+
+const StandaloneBackendWASMModule = await import(
+	/* webpackChunkName: "standalone" */ "./StandaloneBackendWASM",
+	/* webpackChunkName: "standalone" */ "./StandaloneBackendWASM"
+);
+
+import(
+	"myreallylongdynamicallyloadedmodulenamemyreallylongdynamicallyloadedmodulename"
+);
+
+import(/* Hello */ "something");
+import("something" /* Hello */);
+import(/* Hello */ "something" /* Hello */);
+import("something" /* Hello */ + "else");
+import(
+	/* Hello */
+	"something"
+	/* Hello */
+);
+wrap(import(/* Hello */ "something"));
+```
+
+# Lines exceeding max width of 80 characters
+```
+   23: 	"myreallylongdynamicallyloadedmodulenamemyreallylongdynamicallyloadedmodulename"
+```
+
+## Output 1
+
+-----
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 80
+Quote style: Double Quotes
+JSX quote style: Double Quotes
+Quote properties: As needed
+Trailing commas: None
+Semicolons: Always
+Arrow parentheses: Always
+Bracket spacing: true
+Bracket same line: false
+Attribute Position: Auto
+-----
+
+```js
+import {
+	adsadasdasdasdasdasdasdasdasdasdas,
+	dsadsadasdasdasdasdasdasdasd,
+	dsadsadasdasdasdasdasdasdasd
+} from "D";
+
+import {
+	adsadasdasdasdasdasdasdasdasdasdas,
+	dsadsadasdasdasdasdasdasdasd,
+	dsadsadasdasdasdasdasdasdasd
+} from "W";
+
+const StandaloneBackendWASMModule = await import(
+	/* webpackChunkName: "standalone" */ "./StandaloneBackendWASM"
+);
+
+const StandaloneBackendWASMModule = await import(
+	/* webpackChunkName: "standalone" */ "./StandaloneBackendWASM",
+	/* webpackChunkName: "standalone" */ "./StandaloneBackendWASM"
+);
+
+import(
+	"myreallylongdynamicallyloadedmodulenamemyreallylongdynamicallyloadedmodulename"
+);
+
+import(/* Hello */ "something");
+import("something" /* Hello */);
+import(/* Hello */ "something" /* Hello */);
+import("something" /* Hello */ + "else");
+import(
+	/* Hello */
+	"something"
+	/* Hello */
+);
+wrap(import(/* Hello */ "something"));
+```
+
+# Lines exceeding max width of 80 characters
+```
+   23: 	"myreallylongdynamicallyloadedmodulenamemyreallylongdynamicallyloadedmodulename"
+```

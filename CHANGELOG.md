@@ -26,6 +26,10 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 ### Configuration
 
+#### Enhancements
+
+- The `javascript.formatter.trailingComma` option is deprecated and renamed to `javascript.formatter.trailingCommas`. The corresponding CLI option `--trailing-comma` is also deprecated and renamed to `--trailing-commas`. Details can be checked in [#2492](https://github.com/biomejs/biome/pull/2492). Contributed by @Sec-ant
+
 ### Editors
 
 #### New features
@@ -81,8 +85,50 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 - Add [nursery/useThrowNewError](https://biomejs.dev/linter/rules/use-throw-new-error/).
   Contributed by @minht11
+- Add [nursery/useTopLevelRegex](https://biomejs.dev/linter/rules/use-top-level-regex), which enforces defining regular expressions at the top level of a module. [#2148](https://github.com/biomejs/biome/issues/2148) Contributed by @dyc3.
 
 #### Bug fixes
+
+- [noUndeclaredVariables](https://biomejs.dev/linter/rules/no-undeclared-variables/) and [noUnusedImports](https://biomejs.dev/linter/rules/no-unused-imports) now correctly handle import namespaces ([#2796](https://github.com/biomejs/biome/issues/2796)).
+
+  Previously, Biome bound unqualified type to import namespaces.
+  Import namespaces can only be used as qualified names in a type (ambient) context.
+
+  ```ts
+  // Unused import
+  import * as Ns1 from "";
+  // This doesn't reference the import namespace `Ns1`
+  type T1 = Ns1; // Undeclared variable `Ns1`
+
+  // Unused import
+  import type * as Ns2 from "";
+  // This doesn't reference the import namespace `Ns2`
+  type T2 = Ns2; // Undeclared variable `Ns2`
+
+  import type * as Ns3 from "";
+  // This references the import namespace because it is a qualified name.
+  type T3 = Ns3.Inner;
+  // This also references the import namespace.
+  export type { Ns3 }
+  ```
+
+  Contributed by @Conaclos
+
+- [noUndeclaredVariables](https://biomejs.dev/linter/rules/no-undeclared-variables/) now ignores `this` in JSX components ([#2636](https://github.com/biomejs/biome/issues/2636)).
+
+  The rule no longer reports `this` as undeclared in following code.
+
+  ```jsx
+  import { Component } from 'react';
+
+  export class MyComponent extends Component {
+    render() {
+      return <this.foo />
+    }
+  }
+  ```
+
+  Contributed by @printfn and @Conaclos
 
 - `useJsxKeyInIterable` now handles more cases involving fragments. See the snippets below. Contributed by @dyc3
 ```jsx
@@ -113,6 +159,21 @@ z.object({})
 #### Enhancements
 
 - `lang="tsx"` is now supported in Vue Single File Components. [#2765](https://github.com/biomejs/biome/issues/2765) Contributed by @dyc3
+
+#### Bug fixes
+
+- The `const` modifier for type parameters is now accepted for TypeScript `new` signatures ([#2825](https://github.com/biomejs/biome/issues/2825)).
+
+  The following code is now correctly parsed:
+
+  ```ts
+  interface I {
+    new<const T>(x: T): T
+  }
+  ```
+
+  Contributed by @Conaclos
+
 
 ## 1.7.3 (2024-05-06)
 

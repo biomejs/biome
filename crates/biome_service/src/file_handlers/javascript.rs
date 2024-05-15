@@ -34,7 +34,7 @@ use biome_js_analyze::utils::rename::{RenameError, RenameSymbolExtensions};
 use biome_js_analyze::{
     analyze, analyze_with_inspect_matcher, visit_registry, ControlFlowGraph, RuleError,
 };
-use biome_js_formatter::context::trailing_comma::TrailingComma;
+use biome_js_formatter::context::trailing_commas::TrailingCommas;
 use biome_js_formatter::context::{
     ArrowParentheses, BracketSameLine, BracketSpacing, JsFormatOptions, QuoteProperties, Semicolons,
 };
@@ -58,7 +58,7 @@ pub struct JsFormatterSettings {
     pub quote_style: Option<QuoteStyle>,
     pub jsx_quote_style: Option<QuoteStyle>,
     pub quote_properties: Option<QuoteProperties>,
-    pub trailing_comma: Option<TrailingComma>,
+    pub trailing_commas: Option<TrailingCommas>,
     pub semicolons: Option<Semicolons>,
     pub arrow_parentheses: Option<ArrowParentheses>,
     pub bracket_spacing: Option<BracketSpacing>,
@@ -151,7 +151,7 @@ impl ServiceLanguage for JsLanguage {
         .with_quote_style(language.quote_style.unwrap_or_default())
         .with_jsx_quote_style(language.jsx_quote_style.unwrap_or_default())
         .with_quote_properties(language.quote_properties.unwrap_or_default())
-        .with_trailing_comma(language.trailing_comma.unwrap_or_default())
+        .with_trailing_commas(language.trailing_commas.unwrap_or_default())
         .with_semicolons(language.semicolons.unwrap_or_default())
         .with_arrow_parentheses(language.arrow_parentheses.unwrap_or_default())
         .with_bracket_spacing(language.bracket_spacing.unwrap_or_default())

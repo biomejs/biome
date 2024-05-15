@@ -14,10 +14,12 @@ use biome_diagnostics::{
     Visit,
 };
 use biome_rowan::{AstNode, BatchMutation, BatchMutationExt, Language, TextRange};
+use serde::Serialize;
 use std::cmp::Ordering;
 use std::fmt::Debug;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize)]
+#[serde(rename_all = "camelCase")]
 /// Static metadata containing information about a rule
 pub struct RuleMetadata {
     /// It marks if a rule is deprecated, and if so a reason has to be provided.
@@ -40,7 +42,8 @@ pub struct RuleMetadata {
     pub source_kind: Option<RuleSourceKind>,
 }
 
-#[derive(Debug, Clone, Eq, PartialEq)]
+#[derive(Debug, Clone, Eq, PartialEq, Serialize)]
+#[serde(rename_all = "camelCase")]
 /// Used to identify the kind of code action emitted by a rule
 pub enum FixKind {
     /// The rule emits a code action that is safe to apply. Usually these fixes don't change the semantic of the program.
@@ -59,7 +62,8 @@ impl Display for FixKind {
     }
 }
 
-#[derive(Debug, Clone, Eq)]
+#[derive(Debug, Clone, Eq, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub enum RuleSource {
     /// Rules from [Rust Clippy](https://rust-lang.github.io/rust-clippy/master/index.html)
     Clippy(&'static str),
@@ -228,7 +232,8 @@ impl RuleSource {
     }
 }
 
-#[derive(Debug, Default, Clone, Copy)]
+#[derive(Debug, Default, Clone, Copy, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub enum RuleSourceKind {
     /// The rule implements the same logic of the source
     #[default]
@@ -803,6 +808,22 @@ pub struct RuleAction<L: Language> {
     pub applicability: Applicability,
     pub message: MarkupBuf,
     pub mutation: BatchMutation<L>,
+}
+
+impl<L: Language> RuleAction<L> {
+    pub fn new(
+        category: ActionCategory,
+        applicability: impl Into<Applicability>,
+        message: impl biome_console::fmt::Display,
+        mutation: BatchMutation<L>,
+    ) -> Self {
+        Self {
+            category,
+            applicability: applicability.into(),
+            message: markup! {{message}}.to_owned(),
+            mutation,
+        }
+    }
 }
 
 /// An action meant to suppress a lint rule

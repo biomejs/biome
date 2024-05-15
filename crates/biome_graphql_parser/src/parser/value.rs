@@ -270,9 +270,10 @@ fn is_at_null(p: &GraphqlParser) -> bool {
     p.at(T![null])
 }
 
+/// https://spec.graphql.org/October2021/#EnumValue
 #[inline]
 fn is_at_enum(p: &mut GraphqlParser) -> bool {
-    is_nth_at_name(p, 0)
+    is_nth_at_name(p, 0) && !p.at(TRUE_KW) && !p.at(FALSE_KW) && !p.at(T![null])
 }
 
 #[inline]

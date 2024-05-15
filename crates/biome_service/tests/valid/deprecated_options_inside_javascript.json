@@ -1,0 +1,13 @@
+{
+	"$schema": "../../../../packages/@biomejs/biome/configuration_schema.json",
+	"formatter": {
+		"indentSize": 2
+	},
+	"javascript": {
+		"formatter": {
+			"enabled": true,
+			"indentSize": 2,
+			"trailingComma": "all"
+		}
+	}
+}

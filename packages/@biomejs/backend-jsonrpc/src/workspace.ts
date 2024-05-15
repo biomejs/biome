@@ -354,7 +354,11 @@ export interface PartialJavascriptFormatter {
 	/**
 	 * Print trailing commas wherever possible in multi-line comma-separated syntactic structures. Defaults to "all".
 	 */
-	trailingComma?: TrailingComma;
+	trailingComma?: TrailingCommas;
+	/**
+	 * Print trailing commas wherever possible in multi-line comma-separated syntactic structures. Defaults to "all".
+	 */
+	trailingCommas?: TrailingCommas;
 }
 /**
  * Indicates the type of runtime or transformation used for interpreting JSX.
@@ -400,7 +404,7 @@ export interface PartialJsonFormatter {
 	/**
 	 * Print trailing commas wherever possible in multi-line comma-separated syntactic structures. Defaults to "none".
 	 */
-	trailingCommas?: TrailingCommas;
+	trailingCommas?: TrailingCommas2;
 }
 /**
  * Options that changes how the JSON parser behaves
@@ -475,8 +479,8 @@ export type Semicolons = "always" | "asNeeded";
 /**
  * Print trailing commas wherever possible in multi-line comma-separated syntactic structures.
  */
-export type TrailingComma = "all" | "es5" | "none";
-export type TrailingCommas = "none" | "all";
+export type TrailingCommas = "all" | "es5" | "none";
+export type TrailingCommas2 = "none" | "all";
 /**
  * A list of rules that belong to this group
  */
@@ -1060,6 +1064,10 @@ export interface Nursery {
 	 * Require new when throwing an error.
 	 */
 	useThrowNewError?: RuleConfiguration_for_Null;
+	/**
+	 * Require all regex literals to be declared at the top level.
+	 */
+	useTopLevelRegex?: RuleConfiguration_for_Null;
 }
 /**
  * A list of rules that belong to this group
@@ -2150,6 +2158,7 @@ export type Category =
 	| "lint/nursery/useImportRestrictions"
 	| "lint/nursery/useSortedClasses"
 	| "lint/nursery/useThrowNewError"
+	| "lint/nursery/useTopLevelRegex"
 	| "lint/performance/noAccumulatingSpread"
 	| "lint/performance/noBarrelFile"
 	| "lint/performance/noDelete"

@@ -25,6 +25,19 @@ impl Text {
         self.0.text()
     }
 }
+
+impl PartialOrd for Text {
+    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+        Some(self.cmp(other))
+    }
+}
+
+impl Ord for Text {
+    fn cmp(&self, other: &Self) -> std::cmp::Ordering {
+        self.text().cmp(other.text())
+    }
+}
+
 impl Deref for Text {
     type Target = str;
     fn deref(&self) -> &Self::Target {

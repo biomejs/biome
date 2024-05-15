@@ -1,6 +1,6 @@
 use crate::parser::{
     directive::DirectiveList,
-    parse_error::{expected_name, expected_named_type},
+    parse_error::{expected_name, expected_named_type, fragment_name_must_not_be_on},
     parse_name,
     r#type::parse_named_type,
     GraphqlParser,
@@ -22,6 +22,9 @@ pub(crate) fn parse_fragment_definition(p: &mut GraphqlParser) -> ParsedSyntax {
     let m = p.start();
     p.bump(T![fragment]);
 
+    if p.at(T![on]) {
+        p.error(fragment_name_must_not_be_on(p, p.cur_range()));
+    }
     parse_name(p).or_add_diagnostic(p, expected_name);
     parse_type_condition(p);
 

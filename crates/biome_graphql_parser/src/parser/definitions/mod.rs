@@ -29,7 +29,6 @@ use self::{
     schema::{is_at_schema_definition, parse_schema_definition},
     union::{is_at_union_type_definition, parse_union_type_definition},
 };
-pub(crate) use operation::is_at_selection_set_end;
 
 struct DefinitionListParseRecovery;
 

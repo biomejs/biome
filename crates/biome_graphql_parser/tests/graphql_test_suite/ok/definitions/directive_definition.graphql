@@ -8,3 +8,5 @@ directive @example on
   | INLINE_FRAGMENT
 
 "deprecated" directive @delegateField(name: String!) repeatable on OBJECT | INTERFACE
+
+directive @directive(directive: directive) on FIELD

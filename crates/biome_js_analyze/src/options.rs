@@ -337,6 +337,8 @@ pub type UseSortedClasses =
 pub type UseTemplate = <lint::style::use_template::UseTemplate as biome_analyze::Rule>::Options;
 pub type UseThrowNewError =
     <lint::nursery::use_throw_new_error::UseThrowNewError as biome_analyze::Rule>::Options;
+pub type UseTopLevelRegex =
+    <lint::nursery::use_top_level_regex::UseTopLevelRegex as biome_analyze::Rule>::Options;
 pub type UseValidAnchor =
     <lint::a11y::use_valid_anchor::UseValidAnchor as biome_analyze::Rule>::Options;
 pub type UseValidAriaProps =

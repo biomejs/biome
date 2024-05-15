@@ -3,12 +3,6 @@ input Point2D
   y: Float
 }
 
-input Point2D
-  x: Float
-  y: Float
-
-input Point2D {
-
 input Point2D @deprecated {
 	x: Float
 }
@@ -42,3 +36,10 @@ iput Point2D {
 	x: Float
 	y: Float
 }
+
+input Point2D
+  x: Float
+  y: Float
+
+input Point2D {
+

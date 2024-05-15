@@ -50,10 +50,12 @@ GraphqlRoot {
             description: missing (optional),
             directive_token: DIRECTIVE_KW@23..35 "directive" [Newline("\n"), Newline("\n")] [Whitespace(" ")],
             at_token: AT@35..37 "@" [] [Whitespace(" ")],
-            name: missing (required),
+            name: GraphqlName {
+                value_token: GRAPHQL_NAME@37..40 "on" [] [Whitespace(" ")],
+            },
             arguments: missing (optional),
             repeatable_token: missing (optional),
-            on_token: ON_KW@37..40 "on" [] [Whitespace(" ")],
+            on_token: missing (required),
             bitwise_or_token: PIPE@40..42 "|" [] [Whitespace(" ")],
             locations: GraphqlDirectiveLocationList [
                 GraphqlDirectiveLocation {
@@ -214,10 +216,11 @@ GraphqlRoot {
       0: (empty)
       1: DIRECTIVE_KW@23..35 "directive" [Newline("\n"), Newline("\n")] [Whitespace(" ")]
       2: AT@35..37 "@" [] [Whitespace(" ")]
-      3: (empty)
+      3: GRAPHQL_NAME@37..40
+        0: GRAPHQL_NAME@37..40 "on" [] [Whitespace(" ")]
       4: (empty)
       5: (empty)
-      6: ON_KW@37..40 "on" [] [Whitespace(" ")]
+      6: (empty)
       7: PIPE@40..42 "|" [] [Whitespace(" ")]
       8: GRAPHQL_DIRECTIVE_LOCATION_LIST@42..61
         0: GRAPHQL_DIRECTIVE_LOCATION@42..61
@@ -350,25 +353,18 @@ directive_definition.graphql:3:1 parse ━━━━━━━━━━━━━�
   - INPUT_OBJECT
   - INPUT_FIELD_DEFINITION
   
-directive_definition.graphql:3:13 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+directive_definition.graphql:3:16 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Expected a name but instead found 'on'.
+  × expected `on` but instead found `|`
   
     1 │ directive @example on |
     2 │ 
   > 3 │ directive @ on | ARGUMENT_DEFINITION
-      │             ^^
+      │                ^
     4 │ 
     5 │ directive example on | ARGUMENT_DEFINITION
   
-  i Expected a name here.
-  
-    1 │ directive @example on |
-    2 │ 
-  > 3 │ directive @ on | ARGUMENT_DEFINITION
-      │             ^^
-    4 │ 
-    5 │ directive example on | ARGUMENT_DEFINITION
+  i Remove |
   
 directive_definition.graphql:5:11 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 

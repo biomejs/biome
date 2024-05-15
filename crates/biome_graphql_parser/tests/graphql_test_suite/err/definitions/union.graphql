@@ -10,7 +10,8 @@ union SearchResult =
 
 union SearchResult =
 	| Photo
-	|
+	  Person
+	| union
 
 union SearchResult @
 

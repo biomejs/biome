@@ -40,6 +40,9 @@ interface Person {
   weight("filter by weight" greater_than: Int = 0 @deprecated): Int
 }
 
+interface interface implements interface {
+  interface: interface
+}
 
 ```
 
@@ -546,17 +549,56 @@ GraphqlRoot {
                 r_curly_token: R_CURLY@696..698 "}" [Newline("\n")] [],
             },
         },
+        GraphqlInterfaceTypeDefinition {
+            description: missing (optional),
+            interface_token: INTERFACE_KW@698..710 "interface" [Newline("\n"), Newline("\n")] [Whitespace(" ")],
+            name: GraphqlName {
+                value_token: GRAPHQL_NAME@710..720 "interface" [] [Whitespace(" ")],
+            },
+            implements: GraphqlImplementsInterfaces {
+                implements_token: IMPLEMENTS_KW@720..731 "implements" [] [Whitespace(" ")],
+                amp_token: missing (optional),
+                interfaces: GraphqlImplementsInterfaceList [
+                    GraphqlNamedType {
+                        name: GraphqlName {
+                            value_token: GRAPHQL_NAME@731..741 "interface" [] [Whitespace(" ")],
+                        },
+                    },
+                ],
+            },
+            directives: GraphqlDirectiveList [],
+            fields: GraphqlFieldsDefinition {
+                l_curly_token: L_CURLY@741..742 "{" [] [],
+                fields: GraphqlFieldDefinitionList [
+                    GraphqlFieldDefinition {
+                        description: missing (optional),
+                        name: GraphqlName {
+                            value_token: GRAPHQL_NAME@742..754 "interface" [Newline("\n"), Whitespace("  ")] [],
+                        },
+                        arguments: missing (optional),
+                        colon_token: COLON@754..756 ":" [] [Whitespace(" ")],
+                        ty: GraphqlNamedType {
+                            name: GraphqlName {
+                                value_token: GRAPHQL_NAME@756..765 "interface" [] [],
+                            },
+                        },
+                        directives: GraphqlDirectiveList [],
+                    },
+                ],
+                r_curly_token: R_CURLY@765..767 "}" [Newline("\n")] [],
+            },
+        },
     ],
-    eof_token: EOF@698..700 "" [Newline("\n"), Newline("\n")] [],
+    eof_token: EOF@767..768 "" [Newline("\n")] [],
 }
 ```
 
 ## CST
 
 ```
-0: GRAPHQL_ROOT@0..700
+0: GRAPHQL_ROOT@0..768
   0: (empty)
-  1: GRAPHQL_DEFINITION_LIST@0..698
+  1: GRAPHQL_DEFINITION_LIST@0..767
     0: GRAPHQL_INTERFACE_TYPE_DEFINITION@0..61
       0: (empty)
       1: INTERFACE_KW@0..10 "interface" [] [Whitespace(" ")]
@@ -900,6 +942,33 @@ GraphqlRoot {
                 0: GRAPHQL_NAME@693..696 "Int" [] []
             5: GRAPHQL_DIRECTIVE_LIST@696..696
         2: R_CURLY@696..698 "}" [Newline("\n")] []
-  2: EOF@698..700 "" [Newline("\n"), Newline("\n")] []
+    10: GRAPHQL_INTERFACE_TYPE_DEFINITION@698..767
+      0: (empty)
+      1: INTERFACE_KW@698..710 "interface" [Newline("\n"), Newline("\n")] [Whitespace(" ")]
+      2: GRAPHQL_NAME@710..720
+        0: GRAPHQL_NAME@710..720 "interface" [] [Whitespace(" ")]
+      3: GRAPHQL_IMPLEMENTS_INTERFACES@720..741
+        0: IMPLEMENTS_KW@720..731 "implements" [] [Whitespace(" ")]
+        1: (empty)
+        2: GRAPHQL_IMPLEMENTS_INTERFACE_LIST@731..741
+          0: GRAPHQL_NAMED_TYPE@731..741
+            0: GRAPHQL_NAME@731..741
+              0: GRAPHQL_NAME@731..741 "interface" [] [Whitespace(" ")]
+      4: GRAPHQL_DIRECTIVE_LIST@741..741
+      5: GRAPHQL_FIELDS_DEFINITION@741..767
+        0: L_CURLY@741..742 "{" [] []
+        1: GRAPHQL_FIELD_DEFINITION_LIST@742..765
+          0: GRAPHQL_FIELD_DEFINITION@742..765
+            0: (empty)
+            1: GRAPHQL_NAME@742..754
+              0: GRAPHQL_NAME@742..754 "interface" [Newline("\n"), Whitespace("  ")] []
+            2: (empty)
+            3: COLON@754..756 ":" [] [Whitespace(" ")]
+            4: GRAPHQL_NAMED_TYPE@756..765
+              0: GRAPHQL_NAME@756..765
+                0: GRAPHQL_NAME@756..765 "interface" [] []
+            5: GRAPHQL_DIRECTIVE_LIST@765..765
+        2: R_CURLY@765..767 "}" [Newline("\n")] []
+  2: EOF@767..768 "" [Newline("\n")] []
 
 ```
