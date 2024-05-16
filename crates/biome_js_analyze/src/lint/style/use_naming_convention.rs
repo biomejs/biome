@@ -386,10 +386,10 @@ declare_rule! {
     ///
     /// A convention must set at least one requirement among:
     ///
-    /// - `match`: a regular expression that the name of the declaration must match.  
-    ///   If the regular expression captures a part of the name, then this part is checked against `formats`.  
+    /// - `match`: a regular expression that the name of the declaration must match.
+    ///   If the regular expression captures a part of the name, then this part is checked against `formats`.
     ///   Only the first capture is tested. Other captures are ignored.
-    /// - `formats`: the string [case] that the name must follow.  
+    /// - `formats`: the string [case] that the name must follow.
     ///   The supported cases are: [`PascalCase`], [`CONSTANT_CASE`], [`camelCase`], and [`snake_case`].
     ///
     /// If `match` is set and `formats` is unset,
