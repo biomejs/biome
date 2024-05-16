@@ -43,7 +43,7 @@ declare_rule! {
     ///
     /// ```ts
     /// class SomeClass<T extends any> {
-    ///    Array<Array<unknown>>;
+    ///    message: Array<Array<unknown>>;
     /// }
     /// ```
     ///
