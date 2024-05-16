@@ -1622,53 +1622,177 @@ export type RuleConfiguration_for_NamingConventionOptions =
 	| RuleWithOptions_for_NamingConventionOptions;
 export type RulePlainConfiguration = "warn" | "error" | "off";
 export interface RuleWithOptions_for_Null {
+	/**
+	 * The kind of the code actions emitted by the rule
+	 */
+	fix?: FixKind;
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
 	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
 	options: null;
 }
 export interface RuleWithOptions_for_ValidAriaRoleOptions {
+	/**
+	 * The kind of the code actions emitted by the rule
+	 */
+	fix?: FixKind;
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
 	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
 	options: ValidAriaRoleOptions;
 }
 export interface RuleWithOptions_for_ComplexityOptions {
+	/**
+	 * The kind of the code actions emitted by the rule
+	 */
+	fix?: FixKind;
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
 	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
 	options: ComplexityOptions;
 }
 export interface RuleWithOptions_for_HooksOptions {
+	/**
+	 * The kind of the code actions emitted by the rule
+	 */
+	fix?: FixKind;
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
 	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
 	options: HooksOptions;
 }
 export interface RuleWithOptions_for_DeprecatedHooksOptions {
+	/**
+	 * The kind of the code actions emitted by the rule
+	 */
+	fix?: FixKind;
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
 	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
 	options: DeprecatedHooksOptions;
 }
 export interface RuleWithOptions_for_NoCssEmptyBlockOptions {
+	/**
+	 * The kind of the code actions emitted by the rule
+	 */
+	fix?: FixKind;
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
 	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
 	options: NoCssEmptyBlockOptions;
 }
 export interface RuleWithOptions_for_RestrictedImportsOptions {
+	/**
+	 * The kind of the code actions emitted by the rule
+	 */
+	fix?: FixKind;
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
 	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
 	options: RestrictedImportsOptions;
 }
 export interface RuleWithOptions_for_UtilityClassSortingOptions {
+	/**
+	 * The kind of the code actions emitted by the rule
+	 */
+	fix?: FixKind;
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
 	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
 	options: UtilityClassSortingOptions;
 }
 export interface RuleWithOptions_for_RestrictedGlobalsOptions {
+	/**
+	 * The kind of the code actions emitted by the rule
+	 */
+	fix?: FixKind;
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
 	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
 	options: RestrictedGlobalsOptions;
 }
 export interface RuleWithOptions_for_ConsistentArrayTypeOptions {
+	/**
+	 * The kind of the code actions emitted by the rule
+	 */
+	fix?: FixKind;
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
 	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
 	options: ConsistentArrayTypeOptions;
 }
 export interface RuleWithOptions_for_FilenamingConventionOptions {
+	/**
+	 * The kind of the code actions emitted by the rule
+	 */
+	fix?: FixKind;
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
 	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
 	options: FilenamingConventionOptions;
 }
 export interface RuleWithOptions_for_NamingConventionOptions {
+	/**
+	 * The kind of the code actions emitted by the rule
+	 */
+	fix?: FixKind;
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
 	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
 	options: NamingConventionOptions;
 }
+/**
+ * Used to identify the kind of code action emitted by a rule
+ */
+export type FixKind = "none" | "safe" | "unsafe";
 export interface ValidAriaRoleOptions {
 	allowInvalidRoles: string[];
 	ignoreNonDom: boolean;

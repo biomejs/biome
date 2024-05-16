@@ -14,12 +14,12 @@ use biome_diagnostics::{
     Visit,
 };
 use biome_rowan::{AstNode, BatchMutation, BatchMutationExt, Language, TextRange};
-use serde::Serialize;
 use std::cmp::Ordering;
 use std::fmt::Debug;
 
-#[derive(Debug, Clone, Serialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Clone, Debug)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
+#[cfg_attr(feature = "serde", serde(rename_all = "camelCase"))]
 /// Static metadata containing information about a rule
 pub struct RuleMetadata {
     /// It marks if a rule is deprecated, and if so a reason has to be provided.
@@ -35,17 +35,29 @@ pub struct RuleMetadata {
     /// Whether a rule is recommended or not
     pub recommended: bool,
     /// The kind of fix
-    pub fix_kind: Option<FixKind>,
+    pub fix_kind: FixKind,
     /// The source URL of the rule
     pub sources: &'static [RuleSource],
     /// The source kind of the rule
     pub source_kind: Option<RuleSourceKind>,
 }
 
-#[derive(Debug, Clone, Eq, PartialEq, Serialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
+#[cfg_attr(
+    feature = "serde",
+    derive(
+        biome_deserialize_macros::Deserializable,
+        schemars::JsonSchema,
+        serde::Deserialize,
+        serde::Serialize
+    )
+)]
+#[cfg_attr(feature = "serde", serde(rename_all = "camelCase"))]
 /// Used to identify the kind of code action emitted by a rule
 pub enum FixKind {
+    /// The rule doesn't emit code actions.
+    #[default]
+    None,
     /// The rule emits a code action that is safe to apply. Usually these fixes don't change the semantic of the program.
     Safe,
     /// The rule emits a code action that is _unsafe_ to apply. Usually these fixes remove comments, or change
@@ -56,14 +68,16 @@ pub enum FixKind {
 impl Display for FixKind {
     fn fmt(&self, fmt: &mut biome_console::fmt::Formatter) -> std::io::Result<()> {
         match self {
+            FixKind::None => fmt.write_str("None"),
             FixKind::Safe => fmt.write_str("Safe"),
             FixKind::Unsafe => fmt.write_str("Unsafe"),
         }
     }
 }
 
-#[derive(Debug, Clone, Eq, Serialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, Clone, Eq)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
+#[cfg_attr(feature = "serde", serde(rename_all = "camelCase"))]
 pub enum RuleSource {
     /// Rules from [Rust Clippy](https://rust-lang.github.io/rust-clippy/master/index.html)
     Clippy(&'static str),
@@ -232,8 +246,9 @@ impl RuleSource {
     }
 }
 
-#[derive(Debug, Default, Clone, Copy, Serialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, Default, Clone, Copy)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
+#[cfg_attr(feature = "serde", serde(rename_all = "camelCase"))]
 pub enum RuleSourceKind {
     /// The rule implements the same logic of the source
     #[default]
@@ -262,7 +277,7 @@ impl RuleMetadata {
             docs,
             language,
             recommended: false,
-            fix_kind: None,
+            fix_kind: FixKind::None,
             sources: &[],
             source_kind: None,
         }
@@ -279,7 +294,7 @@ impl RuleMetadata {
     }
 
     pub const fn fix_kind(mut self, kind: FixKind) -> Self {
-        self.fix_kind = Some(kind);
+        self.fix_kind = kind;
         self
     }
 

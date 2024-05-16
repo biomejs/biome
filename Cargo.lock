@@ -114,6 +114,8 @@ name = "biome_analyze"
 version = "0.5.7"
 dependencies = [
  "biome_console",
+ "biome_deserialize",
+ "biome_deserialize_macros",
  "biome_diagnostics",
  "biome_rowan",
  "bitflags 2.5.0",

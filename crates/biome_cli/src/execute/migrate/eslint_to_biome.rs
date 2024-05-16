@@ -211,6 +211,7 @@ fn migrate_eslint_rule(
                 group.no_restricted_globals = Some(biome_config::RuleConfiguration::WithOptions(
                     biome_config::RuleWithOptions {
                         level: severity.into(),
+                        fix: None,
                         options: Box::new(no_restricted_globals::RestrictedGlobalsOptions {
                             denied_globals: globals.collect(),
                         }),
@@ -225,6 +226,7 @@ fn migrate_eslint_rule(
                     group.use_valid_aria_role = Some(biome_config::RuleConfiguration::WithOptions(
                         biome_config::RuleWithOptions {
                             level: severity.into(),
+                            fix: None,
                             options: Box::new((*rule_options).into()),
                         },
                     ));
@@ -239,6 +241,7 @@ fn migrate_eslint_rule(
                         Some(biome_config::RuleConfiguration::WithOptions(
                             biome_config::RuleWithOptions {
                                 level: severity.into(),
+                                fix: None,
                                 options: rule_options.into(),
                             },
                         ));
@@ -255,6 +258,7 @@ fn migrate_eslint_rule(
                 group.use_naming_convention = Some(biome_config::RuleConfiguration::WithOptions(
                     biome_config::RuleWithOptions {
                         level: severity.into(),
+                        fix: None,
                         options: options.into(),
                     },
                 ));
@@ -266,6 +270,7 @@ fn migrate_eslint_rule(
                 group.use_filenaming_convention = Some(
                     biome_config::RuleConfiguration::WithOptions(biome_config::RuleWithOptions {
                         level: conf.severity().into(),
+                        fix: None,
                         options: Box::new(conf.option_or_default().into()),
                     }),
                 );

@@ -1,0 +1,12 @@
+{
+    "linter": {
+        "rules": {
+            "style": {
+                "useConst": {
+                    "level": "warn",
+                    "fix": "unsafe"
+                }
+            }
+        }
+    }
+}
