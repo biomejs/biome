@@ -24,6 +24,7 @@ use biome_analyze::{
     QueryMatch, RegistryVisitor, RuleCategories, RuleCategory, RuleFilter, RuleGroup,
 };
 use biome_configuration::javascript::JsxRuntime;
+use biome_configuration::linter::RuleSelector;
 use biome_diagnostics::{category, Applicability, Diagnostic, DiagnosticExt, Severity};
 use biome_formatter::{
     AttributePosition, FormatError, IndentStyle, IndentWidth, LineEnding, LineWidth, Printed,
@@ -313,26 +314,54 @@ pub(crate) fn lint(params: LintParams) -> LintResults {
                 compute_analyzer_options(&params.settings, PathBuf::from(params.path.as_path()));
 
             // Compute final rules (taking `overrides` into account)
-            let rules = settings.as_rules(params.path.as_path());
-            let mut rule_filter_list = rules
-                .as_ref()
-                .map(|rules| rules.as_enabled_rules())
-                .unwrap_or_default()
-                .into_iter()
-                .collect::<Vec<_>>();
-            if settings.organize_imports.enabled && !params.categories.is_syntax() {
-                rule_filter_list.push(RuleFilter::Rule("correctness", "organizeImports"));
-            }
+            let mut rules = settings.as_rules(params.path.as_path());
 
-            rule_filter_list.push(RuleFilter::Rule(
-                "correctness",
-                "noDuplicatePrivateClassMembers",
-            ));
-            rule_filter_list.push(RuleFilter::Rule("correctness", "noInitializerWithDefinite"));
-            rule_filter_list.push(RuleFilter::Rule("correctness", "noSuperWithoutExtends"));
-            rule_filter_list.push(RuleFilter::Rule("nursery", "noSuperWithoutExtends"));
+            let enabled_rules = if let Some(rule) = params.rule {
+                // We execute a single rule or group because the `--rule` filter is specified.
+                match rule {
+                    RuleSelector::Group(group) => {
+                        if let Some(rules) = rules.as_mut() {
+                            // Ensure that the recommended field is not set to `false`.
+                            rules.to_mut().set_recommended();
+                        }
+                        rules
+                            .as_ref()
+                            .map(|rules| rules.as_enabled_rules())
+                            .unwrap_or_default()
+                            .into_iter()
+                            .filter(|rule_filter| rule_filter.group() == group.as_str())
+                            .collect()
+                    }
+                    RuleSelector::Rule(group, rule_name) => {
+                        if let Some(rules) = rules.as_mut() {
+                            // Set the severity level of the rule to its default.
+                            rules.to_mut().set_default_severity(group, rule_name);
+                        }
+                        vec![rule.into()]
+                    }
+                }
+            } else {
+                let mut rule_filter_list = rules
+                    .as_ref()
+                    .map(|rules| rules.as_enabled_rules())
+                    .unwrap_or_default()
+                    .into_iter()
+                    .collect::<Vec<_>>();
+                if settings.organize_imports.enabled && !params.categories.is_syntax() {
+                    rule_filter_list.push(RuleFilter::Rule("correctness", "organizeImports"));
+                }
 
-            let mut filter = AnalysisFilter::from_enabled_rules(Some(rule_filter_list.as_slice()));
+                rule_filter_list.push(RuleFilter::Rule(
+                    "correctness",
+                    "noDuplicatePrivateClassMembers",
+                ));
+                rule_filter_list.push(RuleFilter::Rule("correctness", "noInitializerWithDefinite"));
+                rule_filter_list.push(RuleFilter::Rule("correctness", "noSuperWithoutExtends"));
+                rule_filter_list.push(RuleFilter::Rule("nursery", "noSuperWithoutExtends"));
+                rule_filter_list
+            };
+
+            let mut filter = AnalysisFilter::from_enabled_rules(Some(enabled_rules.as_slice()));
             filter.categories = params.categories;
 
             let mut diagnostic_count = diagnostics.len() as u32;

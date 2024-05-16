@@ -7,7 +7,8 @@ expression: content
 ```block
 Run various checks on a set of files.
 
-Usage: lint [--apply] [--apply-unsafe] [--staged] [--changed] [--since=REF] [PATH]...
+Usage: lint [--apply] [--apply-unsafe] [--rule=<GROUP|RULE>] [--staged] [--changed] [--since=REF] [PATH
+]...
 
 Set of properties to integrate Biome with a VCS software.
         --vcs-client-kind=<git>  The kind of client.
@@ -60,6 +61,10 @@ Available positional items:
 Available options:
         --apply               Apply safe fixes, formatting and import sorting
         --apply-unsafe        Apply safe fixes and unsafe fixes, formatting and import sorting
+        --rule=<GROUP|RULE>   Run only the given rule or rule group taking the configurations file into
+                              account.
+                              Example: `biome lint --rule=correctness/noUnusedVariables`
+                              Example: `biome lint --rule=suspicious`
         --stdin-file-path=PATH  Use this option when you want to format code piped from `stdin`, and
                               print the output to `stdout`.
                               The file doesn't need to exist on disk, what matters is the extension of

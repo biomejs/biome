@@ -17,6 +17,7 @@ use biome_analyze::options::PreferredQuote;
 use biome_analyze::{
     AnalysisFilter, AnalyzerConfiguration, AnalyzerOptions, ControlFlow, Never, RuleCategories,
 };
+use biome_configuration::linter::RuleSelector;
 use biome_configuration::PartialConfiguration;
 use biome_deserialize::json::deserialize_from_json_ast;
 use biome_diagnostics::{category, Diagnostic, DiagnosticExt, Severity};
@@ -290,13 +291,40 @@ fn lint(params: LintParams) -> LintResults {
 
             let skipped_diagnostics = diagnostic_count - diagnostics.len() as u32;
 
-            let rules = settings.as_rules(params.path.as_path());
-            let rule_filter_list = rules
-                .as_ref()
-                .map(|rules| rules.as_enabled_rules())
-                .unwrap_or_default()
-                .into_iter()
-                .collect::<Vec<_>>();
+            let mut rules = settings.as_rules(params.path.as_path());
+            let rule_filter_list = if let Some(rule) = params.rule {
+                // We execute a single rule or group because the `--rule` filter is specified.
+                match rule {
+                    RuleSelector::Group(group) => {
+                        if let Some(rules) = rules.as_mut() {
+                            // Ensure that the recommended field is not set to `false`.
+                            rules.to_mut().set_recommended();
+                        }
+                        rules
+                            .as_ref()
+                            .map(|rules| rules.as_enabled_rules())
+                            .unwrap_or_default()
+                            .into_iter()
+                            .filter(|rule_filter| rule_filter.group() == group.as_str())
+                            .collect()
+                    }
+                    RuleSelector::Rule(group, rule_name) => {
+                        if let Some(rules) = rules.as_mut() {
+                            // Set the severity level of the rule to its default.
+                            rules.to_mut().set_default_severity(group, rule_name);
+                        }
+                        vec![rule.into()]
+                    }
+                }
+            } else {
+                let rule_filter_list = rules
+                    .as_ref()
+                    .map(|rules| rules.as_enabled_rules())
+                    .unwrap_or_default()
+                    .into_iter()
+                    .collect::<Vec<_>>();
+                rule_filter_list
+            };
 
             let analyzer_options =
                 compute_analyzer_options(&params.settings, PathBuf::from(params.path.as_path()));

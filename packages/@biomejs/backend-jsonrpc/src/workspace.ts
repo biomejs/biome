@@ -1988,8 +1988,10 @@ export interface PullDiagnosticsParams {
 	categories: RuleCategories;
 	max_diagnostics: number;
 	path: BiomePath;
+	rule?: RuleCode;
 }
 export type RuleCategories = RuleCategory[];
+export type RuleCode = string;
 export type RuleCategory = "Syntax" | "Lint" | "Action" | "Transformation";
 export interface PullDiagnosticsResult {
 	diagnostics: Diagnostic[];
