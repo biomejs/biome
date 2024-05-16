@@ -384,8 +384,8 @@ where
             if let Some(action) = R::action(&ctx, &self.state) {
                 actions.push(AnalyzerAction {
                     rule_name: Some((<R::Group as RuleGroup>::NAME, R::METADATA.name)),
+                    applicability: action.applicability(),
                     category: action.category,
-                    applicability: action.applicability,
                     mutation: action.mutation,
                     message: action.message,
                 });
