@@ -1,6 +1,6 @@
 use crate::{declare_migration, MigrationAction};
 use biome_analyze::context::RuleContext;
-use biome_analyze::{ActionCategory, Ast, Rule, RuleDiagnostic};
+use biome_analyze::{ActionCategory, Ast, FixKind, Rule, RuleDiagnostic};
 use biome_console::markup;
 use biome_diagnostics::category;
 use biome_json_factory::make::{
@@ -16,6 +16,7 @@ declare_migration! {
     pub(crate) NurseryRules {
         version: "1.7.0",
         name: "nurseryRules",
+        fix_kind: FixKind::Unsafe,
     }
 }
 
