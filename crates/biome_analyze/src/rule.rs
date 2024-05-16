@@ -75,6 +75,17 @@ impl Display for FixKind {
     }
 }
 
+impl TryFrom<FixKind> for Applicability {
+    type Error = &'static str;
+    fn try_from(value: FixKind) -> Result<Self, Self::Error> {
+        match value {
+            FixKind::None => Err("The fix kind is None"),
+            FixKind::Safe => Ok(Applicability::Always),
+            FixKind::Unsafe => Ok(Applicability::MaybeIncorrect),
+        }
+    }
+}
+
 #[derive(Debug, Clone, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize))]
 #[cfg_attr(feature = "serde", serde(rename_all = "camelCase"))]
@@ -314,6 +325,12 @@ impl RuleMetadata {
     pub const fn language(mut self, language: &'static str) -> Self {
         self.language = language;
         self
+    }
+
+    pub fn to_applicability(&self) -> Applicability {
+        self.fix_kind
+            .try_into()
+            .expect("Fix kind is not set in the rule metadata")
     }
 }
 
@@ -820,7 +837,7 @@ impl RuleDiagnostic {
 /// Code Action object returned by a single analysis rule
 pub struct RuleAction<L: Language> {
     pub category: ActionCategory,
-    pub applicability: Applicability,
+    applicability: Applicability,
     pub message: MarkupBuf,
     pub mutation: BatchMutation<L>,
 }
@@ -838,6 +855,10 @@ impl<L: Language> RuleAction<L> {
             message: markup! {{message}}.to_owned(),
             mutation,
         }
+    }
+
+    pub fn applicability(&self) -> Applicability {
+        self.applicability
     }
 }
 

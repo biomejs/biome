@@ -396,7 +396,7 @@ where
             if let Some(action) = R::action(&ctx, &self.state) {
                 actions.push(AnalyzerAction {
                     rule_name: Some((<R::Group as RuleGroup>::NAME, R::METADATA.name)),
-                    applicability: configured_applicability.unwrap_or(action.applicability),
+                    applicability: configured_applicability.unwrap_or(action.applicability()),
                     category: action.category,
                     mutation: action.mutation,
                     message: action.message,
