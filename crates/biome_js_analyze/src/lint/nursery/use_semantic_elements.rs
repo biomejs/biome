@@ -1,6 +1,6 @@
 use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
-use biome_js_syntax::JsxOpeningElement;
+use biome_js_syntax::{AnyJsxAttribute, JsxOpeningElement};
 use biome_rowan::AstNode;
 
 declare_rule! {
@@ -39,33 +39,40 @@ declare_rule! {
 
 impl Rule for UseSemanticElements {
     type Query = Ast<JsxOpeningElement>;
-    type State = ();
+    type State = AnyJsxAttribute;
     type Signals = Option<Self::State>;
     type Options = ();
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
-        panic!("[LOG] node: {:?}", node);
+        let attributes = node.attributes();
+        for attr in attributes {
+            let attr_value = attr.as_jsx_attribute().unwrap().name_value_token().unwrap();
+            let attr_name = attr_value.text_trimmed();
+            if attr_name == "role" {
+                return Some(attr);
+            }
+        }
 
         None
     }
 
-    fn diagnostic(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<RuleDiagnostic> {
+    fn diagnostic(_ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
         //
         // Read our guidelines to write great diagnostics:
         // https://docs.rs/biome_analyze/latest/biome_analyze/#what-a-rule-should-say-to-the-user
         //
-        let node = ctx.query();
+
         Some(
             RuleDiagnostic::new(
                 rule_category!(),
-                node.range(),
+                state.range(),
                 markup! {
-                    "Variable is read here."
+                    "This JSX element uses a `role` attribute. Use a semantic element instead."
                 },
             )
             .note(markup! {
-                "This note will give you more information."
+                "Semantic elements like `<button>`, `<input>`, `<textarea>`, `<a>`, `<img>`, `<table>`, `<article>`, `<section>`, `<nav>`, `<aside>`, `<header>`, `<footer>`, `<main>`, `<figure>`, `<figcaption>`, `<details>`, `<summary>`, `<dialog>`, `<menu>`, `<menuitem>`, `<fieldset>`, `<legend>`, `<caption>`, `<colgroup>`, `<col>`, `<optgroup>`, `<option>`, `<select>`, `<datalist>`, `<output>`, `<progress>`, `<meter>`, `<time>`, `<audio>`, `<video>`, `<track>`, `<source>`, `<embed>`, `<object>`, `<param>`, `<iframe>`, `<canvas>`, `<map>`, `<area>`, `<svg>`, `<math>` are more accessible and provide better semantics."
             }),
         )
     }
