@@ -41,6 +41,7 @@ declare_rule! {
     pub NoUnusedTemplateLiteral {
         version: "1.0.0",
         name: "noUnusedTemplateLiteral",
+        language: "ts",
         sources: &[RuleSource::EslintTypeScript("no-useless-template-literals")],
         recommended: true,
         fix_kind: FixKind::Unsafe,
@@ -105,12 +106,12 @@ impl Rule for NoUnusedTemplateLiteral {
             ),
         );
 
-        Some(JsRuleAction {
-            category: ActionCategory::QuickFix,
-            applicability: Applicability::MaybeIncorrect,
-            message: markup! { "Replace with string literal" }.to_owned(),
+        Some(JsRuleAction::new(
+            ActionCategory::QuickFix,
+            Applicability::MaybeIncorrect,
+            markup! { "Replace with string literal" }.to_owned(),
             mutation,
-        })
+        ))
     }
 }
 

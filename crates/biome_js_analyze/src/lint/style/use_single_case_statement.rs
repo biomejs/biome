@@ -39,6 +39,7 @@ declare_rule! {
     pub UseSingleCaseStatement {
         version: "1.0.0",
         name: "useSingleCaseStatement",
+        language: "js",
         recommended: false,
         fix_kind: FixKind::Unsafe,
     }
@@ -94,11 +95,11 @@ impl Rule for UseSingleCaseStatement {
         let mut mutation = ctx.root().begin();
         mutation.replace_token_discard_trivia(colon_token, new_colon_token);
         mutation.replace_node_discard_trivia(consequent, new_consequent);
-        Some(JsRuleAction {
-            category: ActionCategory::QuickFix,
-            applicability: Applicability::MaybeIncorrect,
-            message: markup! { "Wrap the statements in a block." }.to_owned(),
+        Some(JsRuleAction::new(
+            ActionCategory::QuickFix,
+            Applicability::MaybeIncorrect,
+            markup! { "Wrap the statements in a block." }.to_owned(),
             mutation,
-        })
+        ))
     }
 }

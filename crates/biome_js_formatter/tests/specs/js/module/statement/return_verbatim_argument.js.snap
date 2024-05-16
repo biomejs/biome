@@ -2,7 +2,6 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: js/module/statement/return_verbatim_argument.js
 ---
-
 # Input
 
 ```js
@@ -49,7 +48,7 @@ Line width: 80
 Quote style: Double Quotes
 JSX quote style: Double Quotes
 Quote properties: As needed
-Trailing comma: All
+Trailing commas: All
 Semicolons: Always
 Arrow parentheses: Always
 Bracket spacing: true
@@ -90,5 +89,3 @@ function supported3() {
     6: 		// rome-ignore lint/style/useOptionalChain: Optional chaining creates more complicated ES2019 code
    14: 		// rome-ignore lint/style/useOptionalChain: Optional chaining creates more complicated ES2019 code
 ```
-
-

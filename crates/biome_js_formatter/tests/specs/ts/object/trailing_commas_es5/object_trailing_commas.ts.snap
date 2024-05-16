@@ -1,0 +1,120 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: ts/object/trailing_commas_es5/object_trailing_commas.ts
+---
+# Input
+
+```ts
+
+// object method
+const obj = {
+	one<
+		longlonglonglonglonglonglongT1,
+		longlonglonglonglonglonglongT2,
+		longlonglonglonglonglonglongT3
+		>(
+		adsadasdasdasdasdasdasdasdasdasdas1,
+		dsadsadasdasdasdasdasdasdasd2,
+		dsadsadasdasdasdasdasdasdasd
+	) {},
+	two<
+		longlonglonglonglonglonglongT1,
+		longlonglonglonglonglonglongT2,
+		longlonglonglonglonglonglongT3
+		>(
+		adsadasdasdasdasdasdasdasdasdasdas1,
+		dsadsadasdasdasdasdasdasdasd2,
+		dsadsadasdasdasdasdasdasdasd
+	) {},
+};
+
+```
+
+
+=============================
+
+# Outputs
+
+## Output 1
+
+-----
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 80
+Quote style: Double Quotes
+JSX quote style: Double Quotes
+Quote properties: As needed
+Trailing commas: All
+Semicolons: Always
+Arrow parentheses: Always
+Bracket spacing: true
+Bracket same line: false
+Attribute Position: Auto
+-----
+
+```ts
+// object method
+const obj = {
+	one<
+		longlonglonglonglonglonglongT1,
+		longlonglonglonglonglonglongT2,
+		longlonglonglonglonglonglongT3,
+	>(
+		adsadasdasdasdasdasdasdasdasdasdas1,
+		dsadsadasdasdasdasdasdasdasd2,
+		dsadsadasdasdasdasdasdasdasd,
+	) {},
+	two<
+		longlonglonglonglonglonglongT1,
+		longlonglonglonglonglonglongT2,
+		longlonglonglonglonglonglongT3,
+	>(
+		adsadasdasdasdasdasdasdasdasdasdas1,
+		dsadsadasdasdasdasdasdasdasd2,
+		dsadsadasdasdasdasdasdasdasd,
+	) {},
+};
+```
+
+## Output 1
+
+-----
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 80
+Quote style: Double Quotes
+JSX quote style: Double Quotes
+Quote properties: As needed
+Trailing commas: ES5
+Semicolons: Always
+Arrow parentheses: Always
+Bracket spacing: true
+Bracket same line: false
+Attribute Position: Auto
+-----
+
+```ts
+// object method
+const obj = {
+	one<
+		longlonglonglonglonglonglongT1,
+		longlonglonglonglonglonglongT2,
+		longlonglonglonglonglonglongT3,
+	>(
+		adsadasdasdasdasdasdasdasdasdasdas1,
+		dsadsadasdasdasdasdasdasdasd2,
+		dsadsadasdasdasdasdasdasdasd
+	) {},
+	two<
+		longlonglonglonglonglonglongT1,
+		longlonglonglonglonglonglongT2,
+		longlonglonglonglonglonglongT3,
+	>(
+		adsadasdasdasdasdasdasdasdasdasdas1,
+		dsadsadasdasdasdasdasdasdasd2,
+		dsadsadasdasdasdasdasdasdasd
+	) {},
+};
+```

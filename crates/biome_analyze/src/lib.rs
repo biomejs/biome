@@ -768,7 +768,14 @@ pub enum RuleFilter<'a> {
     Rule(&'a str, &'a str),
 }
 
-impl RuleFilter<'_> {
+impl<'a> RuleFilter<'a> {
+    // Returns the group name of thie filter.
+    pub fn group(self) -> &'a str {
+        match self {
+            RuleFilter::Group(group) => group,
+            RuleFilter::Rule(group, _) => group,
+        }
+    }
     /// Return `true` if the group `G` matches this filter
     fn match_group<G: RuleGroup>(self) -> bool {
         match self {

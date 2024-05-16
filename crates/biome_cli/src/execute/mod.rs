@@ -12,6 +12,7 @@ use crate::execute::traverse::traverse;
 use crate::reporter::json::{JsonReporter, JsonReporterVisitor};
 use crate::reporter::terminal::{ConsoleReporter, ConsoleReporterVisitor};
 use crate::{CliDiagnostic, CliSession, DiagnosticsPayload, Reporter};
+use biome_configuration::linter::RuleSelector;
 use biome_console::{markup, ConsoleExt};
 use biome_diagnostics::adapters::SerdeJsonError;
 use biome_diagnostics::{category, Category};
@@ -125,6 +126,11 @@ pub enum TraversalMode {
         /// 1. The virtual path to the file
         /// 2. The content of the file
         stdin: Option<Stdin>,
+        /// Run only the given rule or rule group.
+        /// The option overrides the Biome configuration file as follows:
+        /// - When a rule is passed, its severity level is set to `error' if it is a recommended rule, or `warn' otherwise.
+        /// - When a rule group is passed, the `recommended` flag is enabled, but if the `all` flag is enabled.
+        rule: Option<RuleSelector>,
     },
     /// This mode is enabled when running the command `biome ci`
     CI {

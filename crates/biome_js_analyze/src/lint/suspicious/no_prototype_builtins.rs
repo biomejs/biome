@@ -42,6 +42,7 @@ declare_rule! {
     pub NoPrototypeBuiltins {
         version: "1.0.0",
         name: "noPrototypeBuiltins",
+        language: "js",
         sources: &[RuleSource::Eslint("no-prototype-builtins")],
         recommended: true,
     }

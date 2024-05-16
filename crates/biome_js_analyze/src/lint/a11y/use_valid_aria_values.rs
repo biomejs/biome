@@ -50,6 +50,7 @@ declare_rule! {
     pub UseValidAriaValues {
         version: "1.0.0",
         name: "useValidAriaValues",
+        language: "jsx",
         sources: &[RuleSource::EslintJsxA11y("aria-proptypes")],
         recommended: true,
     }

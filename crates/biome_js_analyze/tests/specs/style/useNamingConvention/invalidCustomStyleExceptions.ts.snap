@@ -1,0 +1,28 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidCustomStyleExceptions.ts
+---
+# Input
+```ts
+const aSepcial_CASE = 0; // valid
+const aSepcial_CASE_2 = 0; // invalid
+```
+
+# Diagnostics
+```
+invalidCustomStyleExceptions.ts:2:7 lint/style/useNamingConvention  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This global const name should be in camelCase or PascalCase or CONSTANT_CASE.
+  
+    1 │ const aSepcial_CASE = 0; // valid
+  > 2 │ const aSepcial_CASE_2 = 0; // invalid
+      │       ^^^^^^^^^^^^^^^
+  
+  i Safe fix: Rename this symbol in camelCase.
+  
+    1 1 │   const aSepcial_CASE = 0; // valid
+    2   │ - const·aSepcial_CASE_2·=·0;·//·invalid
+      2 │ + const·aSepcialCase2·=·0;·//·invalid
+  
+
+```

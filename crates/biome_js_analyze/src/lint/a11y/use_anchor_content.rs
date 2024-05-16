@@ -67,6 +67,7 @@ declare_rule! {
     pub UseAnchorContent {
         version: "1.0.0",
         name: "useAnchorContent",
+        language: "jsx",
         sources: &[RuleSource::EslintJsxA11y("anchor-has-content")],
         recommended: true,
         fix_kind: FixKind::Unsafe,
@@ -141,12 +142,12 @@ impl Rule for UseAnchorContent {
             let aria_hidden = node.find_attribute_by_name("aria-hidden")?;
             mutation.remove_node(aria_hidden);
 
-            return Some(JsRuleAction {
-                category: ActionCategory::QuickFix,
-                applicability: Applicability::MaybeIncorrect,
-                message: markup! { "Remove the "<Emphasis>"aria-hidden"</Emphasis>" attribute to allow the anchor element and its content visible to assistive technologies." }.to_owned(),
+            return Some(JsRuleAction::new(
+                ActionCategory::QuickFix,
+                Applicability::MaybeIncorrect,
+                 markup! { "Remove the "<Emphasis>"aria-hidden"</Emphasis>" attribute to allow the anchor element and its content visible to assistive technologies." }.to_owned(),
                 mutation,
-            });
+            ));
         }
         None
     }

@@ -2,7 +2,6 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: ts/class/readonly_ambient_property.ts
 ---
-
 # Input
 
 ```ts
@@ -34,7 +33,7 @@ Line width: 80
 Quote style: Double Quotes
 JSX quote style: Double Quotes
 Quote properties: As needed
-Trailing comma: All
+Trailing commas: All
 Semicolons: Always
 Arrow parentheses: Always
 Bracket spacing: true
@@ -50,5 +49,3 @@ export class B {
 	declare readonly prop = "value__value__value__value__value__value__value";
 }
 ```
-
-

@@ -32,6 +32,7 @@ declare_rule! {
     pub NoRenderReturnValue {
         version: "1.0.0",
         name: "noRenderReturnValue",
+        language: "jsx",
         recommended: true,
     }
 }

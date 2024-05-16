@@ -528,6 +528,16 @@ pub(crate) fn migrate_eslint_any_rule(
             let rule = group.no_redundant_alt.get_or_insert(Default::default());
             rule.set_level(rule_severity.into());
         }
+        "jsx-a11y/interactive-support-focus" => {
+            if !options.include_nursery {
+                return false;
+            }
+            let group = rules.nursery.get_or_insert_with(Default::default);
+            let rule = group
+                .use_focusable_interactive
+                .get_or_insert(Default::default());
+            rule.set_level(rule_severity.into());
+        }
         "jsx-a11y/lang" => {
             let group = rules.a11y.get_or_insert_with(Default::default);
             let rule = group.use_valid_lang.get_or_insert(Default::default());
@@ -1168,6 +1178,10 @@ pub(crate) fn migrate_eslint_any_rule(
             rule.set_level(rule_severity.into());
         }
         "react/jsx-boolean-value" => {
+            if !options.include_inspired {
+                results.has_inspired_rules = true;
+                return false;
+            }
             let group = rules.style.get_or_insert_with(Default::default);
             let rule = group.no_implicit_boolean.get_or_insert(Default::default());
             rule.set_level(rule_severity.into());
@@ -1346,6 +1360,14 @@ pub(crate) fn migrate_eslint_any_rule(
         "unicorn/prefer-number-properties" => {
             let group = rules.style.get_or_insert_with(Default::default);
             let rule = group.use_number_namespace.get_or_insert(Default::default());
+            rule.set_level(rule_severity.into());
+        }
+        "unicorn/throw-new-error" => {
+            if !options.include_nursery {
+                return false;
+            }
+            let group = rules.nursery.get_or_insert_with(Default::default);
+            let rule = group.use_throw_new_error.get_or_insert(Default::default());
             rule.set_level(rule_severity.into());
         }
         "use-isnan" => {

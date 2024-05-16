@@ -48,6 +48,7 @@ declare_rule! {
     pub NoNoninteractiveElementToInteractiveRole {
         version: "1.0.0",
         name: "noNoninteractiveElementToInteractiveRole",
+        language: "jsx",
         sources: &[RuleSource::EslintJsxA11y("no-noninteractive-element-to-interactive-role")],
         recommended: true,
         fix_kind: FixKind::Unsafe,
@@ -114,11 +115,11 @@ impl Rule for NoNoninteractiveElementToInteractiveRole {
 
         let mut mutation = ctx.root().begin();
         mutation.remove_node(role_attribute);
-        Some(JsRuleAction {
-            category: ActionCategory::QuickFix,
-            applicability: Applicability::MaybeIncorrect,
-            message: markup! { "Remove the "<Emphasis>"role"</Emphasis>" attribute." }.to_owned(),
+        Some(JsRuleAction::new(
+            ActionCategory::QuickFix,
+            Applicability::MaybeIncorrect,
+            markup! { "Remove the "<Emphasis>"role"</Emphasis>" attribute." }.to_owned(),
             mutation,
-        })
+        ))
     }
 }

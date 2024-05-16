@@ -1,0 +1,14 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: validThis.tsx
+---
+# Input
+```tsx
+export class MyComponent {
+  render() {
+    type T = typeof this.foo;
+    return <this.foo />
+  }
+}
+
+```

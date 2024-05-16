@@ -37,6 +37,7 @@ declare_rule! {
     pub NoCompareNegZero {
         version: "1.0.0",
         name: "noCompareNegZero",
+        language: "js",
         sources: &[RuleSource::Eslint("no-compare-neg-zero")],
         recommended: true,
         fix_kind: FixKind::Safe,
@@ -123,12 +124,12 @@ impl Rule for NoCompareNegZero {
             );
         }
 
-        Some(JsRuleAction {
-            category: ActionCategory::QuickFix,
-            applicability: Applicability::Always,
-            message: markup! { "Replace -0 with 0" }.to_owned(),
+        Some(JsRuleAction::new(
+            ActionCategory::QuickFix,
+            Applicability::Always,
+            markup! { "Replace -0 with 0" }.to_owned(),
             mutation,
-        })
+        ))
     }
 }
 

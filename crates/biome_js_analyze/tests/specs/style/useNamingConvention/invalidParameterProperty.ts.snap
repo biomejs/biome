@@ -19,7 +19,7 @@ export default class {
 ```
 invalidParameterProperty.ts:3:18 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This parameter property name should be in camelCase.
+  ! This class property name should be in camelCase.
   
     1 │ export default class {
     2 │     constructor(
@@ -28,15 +28,13 @@ invalidParameterProperty.ts:3:18 lint/style/useNamingConvention ━━━━━�
     4 │ 
     5 │         protected CONSTANT_CASE: unknown,
   
-  i The name could be renamed to `pascalCase`.
-  
 
 ```
 
 ```
 invalidParameterProperty.ts:5:19 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This parameter property name should be in camelCase.
+  ! This class property name should be in camelCase.
   
     3 │         readonly PascalCase: unknown,
     4 │ 
@@ -45,15 +43,13 @@ invalidParameterProperty.ts:5:19 lint/style/useNamingConvention ━━━━━�
     6 │ 
     7 │         public Unknown_Style: unknown,
   
-  i The name could be renamed to `constantCase`.
-  
 
 ```
 
 ```
 invalidParameterProperty.ts:7:16 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This parameter property name should be in camelCase.
+  ! This class property name should be in camelCase.
   
     5 │         protected CONSTANT_CASE: unknown,
     6 │ 
@@ -62,9 +58,5 @@ invalidParameterProperty.ts:7:16 lint/style/useNamingConvention ━━━━━�
     8 │     ) {}
     9 │ }
   
-  i The name could be renamed to `unknownStyle`.
-  
 
 ```
-
-

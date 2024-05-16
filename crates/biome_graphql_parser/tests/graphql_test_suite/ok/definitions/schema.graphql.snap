@@ -20,6 +20,11 @@ schema {
   query: MyQueryRootType
 }
 
+schema {
+  query: query
+  mutation: mutation
+	subscription: subscription
+}
 
 ```
 
@@ -130,17 +135,59 @@ GraphqlRoot {
             ],
             r_curly_token: R_CURLY@224..226 "}" [Newline("\n")] [],
         },
+        GraphqlSchemaDefinition {
+            description: missing (optional),
+            schema_token: SCHEMA_KW@226..235 "schema" [Newline("\n"), Newline("\n")] [Whitespace(" ")],
+            directives: GraphqlDirectiveList [],
+            l_curly_token: L_CURLY@235..236 "{" [] [],
+            root_operation_type: GraphqlRootOperationTypeDefinitionList [
+                GraphqlRootOperationTypeDefinition {
+                    operation_type: GraphqlOperationType {
+                        value_token: QUERY_KW@236..244 "query" [Newline("\n"), Whitespace("  ")] [],
+                    },
+                    colon_token: COLON@244..246 ":" [] [Whitespace(" ")],
+                    named_type: GraphqlNamedType {
+                        name: GraphqlName {
+                            value_token: GRAPHQL_NAME@246..251 "query" [] [],
+                        },
+                    },
+                },
+                GraphqlRootOperationTypeDefinition {
+                    operation_type: GraphqlOperationType {
+                        value_token: MUTATION_KW@251..262 "mutation" [Newline("\n"), Whitespace("  ")] [],
+                    },
+                    colon_token: COLON@262..264 ":" [] [Whitespace(" ")],
+                    named_type: GraphqlNamedType {
+                        name: GraphqlName {
+                            value_token: GRAPHQL_NAME@264..272 "mutation" [] [],
+                        },
+                    },
+                },
+                GraphqlRootOperationTypeDefinition {
+                    operation_type: GraphqlOperationType {
+                        value_token: SUBSCRIPTION_KW@272..286 "subscription" [Newline("\n"), Whitespace("\t")] [],
+                    },
+                    colon_token: COLON@286..288 ":" [] [Whitespace(" ")],
+                    named_type: GraphqlNamedType {
+                        name: GraphqlName {
+                            value_token: GRAPHQL_NAME@288..300 "subscription" [] [],
+                        },
+                    },
+                },
+            ],
+            r_curly_token: R_CURLY@300..302 "}" [Newline("\n")] [],
+        },
     ],
-    eof_token: EOF@226..228 "" [Newline("\n"), Newline("\n")] [],
+    eof_token: EOF@302..303 "" [Newline("\n")] [],
 }
 ```
 
 ## CST
 
 ```
-0: GRAPHQL_ROOT@0..228
+0: GRAPHQL_ROOT@0..303
   0: (empty)
-  1: GRAPHQL_DEFINITION_LIST@0..226
+  1: GRAPHQL_DEFINITION_LIST@0..302
     0: GRAPHQL_SCHEMA_DEFINITION@0..104
       0: (empty)
       1: SCHEMA_KW@0..7 "schema" [] [Whitespace(" ")]
@@ -208,6 +255,34 @@ GraphqlRoot {
             0: GRAPHQL_NAME@209..224
               0: GRAPHQL_NAME@209..224 "MyQueryRootType" [] []
       5: R_CURLY@224..226 "}" [Newline("\n")] []
-  2: EOF@226..228 "" [Newline("\n"), Newline("\n")] []
+    3: GRAPHQL_SCHEMA_DEFINITION@226..302
+      0: (empty)
+      1: SCHEMA_KW@226..235 "schema" [Newline("\n"), Newline("\n")] [Whitespace(" ")]
+      2: GRAPHQL_DIRECTIVE_LIST@235..235
+      3: L_CURLY@235..236 "{" [] []
+      4: GRAPHQL_ROOT_OPERATION_TYPE_DEFINITION_LIST@236..300
+        0: GRAPHQL_ROOT_OPERATION_TYPE_DEFINITION@236..251
+          0: GRAPHQL_OPERATION_TYPE@236..244
+            0: QUERY_KW@236..244 "query" [Newline("\n"), Whitespace("  ")] []
+          1: COLON@244..246 ":" [] [Whitespace(" ")]
+          2: GRAPHQL_NAMED_TYPE@246..251
+            0: GRAPHQL_NAME@246..251
+              0: GRAPHQL_NAME@246..251 "query" [] []
+        1: GRAPHQL_ROOT_OPERATION_TYPE_DEFINITION@251..272
+          0: GRAPHQL_OPERATION_TYPE@251..262
+            0: MUTATION_KW@251..262 "mutation" [Newline("\n"), Whitespace("  ")] []
+          1: COLON@262..264 ":" [] [Whitespace(" ")]
+          2: GRAPHQL_NAMED_TYPE@264..272
+            0: GRAPHQL_NAME@264..272
+              0: GRAPHQL_NAME@264..272 "mutation" [] []
+        2: GRAPHQL_ROOT_OPERATION_TYPE_DEFINITION@272..300
+          0: GRAPHQL_OPERATION_TYPE@272..286
+            0: SUBSCRIPTION_KW@272..286 "subscription" [Newline("\n"), Whitespace("\t")] []
+          1: COLON@286..288 ":" [] [Whitespace(" ")]
+          2: GRAPHQL_NAMED_TYPE@288..300
+            0: GRAPHQL_NAME@288..300
+              0: GRAPHQL_NAME@288..300 "subscription" [] []
+      5: R_CURLY@300..302 "}" [Newline("\n")] []
+  2: EOF@302..303 "" [Newline("\n")] []
 
 ```

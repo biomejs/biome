@@ -1,0 +1,50 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```jsx
+<div>
+	<div role="button" />
+	<div role="tab" />
+</div>;
+
+```
+
+# Diagnostics
+```
+invalid.js:2:2 lint/nursery/useFocusableInteractive ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The HTML element with the interactive role "button" is not focusable.
+  
+    1 │ <div>
+  > 2 │ 	<div role="button" />
+      │ 	^^^^^^^^^^^^^^^^^^^^^
+    3 │ 	<div role="tab" />
+    4 │ </div>;
+  
+  i A non-interactive HTML element that is not focusable may not be reachable for users that rely on keyboard navigation, even with an added role like "button".
+  
+  i Add a tabIndex attribute to make this element focusable.
+  
+
+```
+
+```
+invalid.js:3:2 lint/nursery/useFocusableInteractive ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The HTML element with the interactive role "tab" is not focusable.
+  
+    1 │ <div>
+    2 │ 	<div role="button" />
+  > 3 │ 	<div role="tab" />
+      │ 	^^^^^^^^^^^^^^^^^^
+    4 │ </div>;
+    5 │ 
+  
+  i A non-interactive HTML element that is not focusable may not be reachable for users that rely on keyboard navigation, even with an added role like "tab".
+  
+  i Add a tabIndex attribute to make this element focusable.
+  
+
+```

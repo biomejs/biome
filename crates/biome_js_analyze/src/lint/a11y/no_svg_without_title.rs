@@ -99,6 +99,7 @@ declare_rule! {
     pub NoSvgWithoutTitle {
         version: "1.0.0",
         name: "noSvgWithoutTitle",
+        language: "jsx",
         recommended: true,
     }
 }

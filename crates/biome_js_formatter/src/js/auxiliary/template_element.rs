@@ -6,11 +6,19 @@ use biome_formatter::{
 
 use crate::context::TabWidth;
 use crate::js::expressions::array_expression::FormatJsArrayExpressionOptions;
-use crate::js::lists::template_element_list::{TemplateElementIndention, TemplateElementLayout};
+use crate::js::lists::template_element_list::TemplateElementIndention;
 use biome_js_syntax::{
     AnyJsExpression, JsSyntaxNode, JsSyntaxToken, JsTemplateElement, TsTemplateElement,
 };
-use biome_rowan::{declare_node_union, AstNode, SyntaxResult};
+use biome_rowan::{declare_node_union, AstNode, NodeOrToken, SyntaxResult};
+
+enum TemplateElementLayout {
+    /// Tries to format the expression on a single line regardless of the print width.
+    SingleLine,
+
+    /// Tries to format the expression on a single line but may break the expression if the line otherwise exceeds the print width.
+    Fit,
+}
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatJsTemplateElement {
@@ -44,8 +52,6 @@ declare_node_union! {
 
 #[derive(Debug, Copy, Clone, Default)]
 pub struct TemplateElementOptions {
-    pub(crate) layout: TemplateElementLayout,
-
     /// The indention to use for this element
     pub(crate) indention: TemplateElementIndention,
 
@@ -82,10 +88,33 @@ impl Format<JsFormatContext> for FormatTemplateElement {
             }
         });
 
-        let format_inner = format_with(|f: &mut JsFormatter| match self.options.layout {
+        let interned_expression = f.intern(&format_expression)?;
+
+        let layout = if !self.element.has_new_line_in_range() {
+            let will_break = if let Some(element) = &interned_expression {
+                element.will_break()
+            } else {
+                false
+            };
+
+            // make sure the expression won't break to prevent reformat issue
+            if will_break {
+                TemplateElementLayout::Fit
+            } else {
+                TemplateElementLayout::SingleLine
+            }
+        } else {
+            TemplateElementLayout::Fit
+        };
+
+        let format_inner = format_with(|f: &mut JsFormatter| match layout {
             TemplateElementLayout::SingleLine => {
                 let mut buffer = RemoveSoftLinesBuffer::new(f);
-                write!(buffer, [format_expression])
+
+                match &interned_expression {
+                    Some(element) => buffer.write_element(element.clone()),
+                    None => Ok(()),
+                }
             }
             TemplateElementLayout::Fit => {
                 use AnyJsExpression::*;
@@ -111,13 +140,21 @@ impl Format<JsFormatContext> for FormatTemplateElement {
                                 | JsLogicalExpression(_)
                                 | JsInstanceofExpression(_)
                                 | JsInExpression(_)
+                                | JsIdentifierExpression(_)
                         )
                     );
 
-                if indent {
-                    write!(f, [soft_block_indent(&format_expression)])
-                } else {
-                    write!(f, [format_expression])
+                match &interned_expression {
+                    Some(element) if indent => {
+                        write!(
+                            f,
+                            [soft_block_indent(&format_with(
+                                |f| f.write_element(element.clone())
+                            ))]
+                        )
+                    }
+                    Some(element) => f.write_element(element.clone()),
+                    None => Ok(()),
                 }
             }
         });
@@ -178,6 +215,20 @@ impl AnyTemplateElement {
             AnyTemplateElement::JsTemplateElement(template) => template.r_curly_token(),
             AnyTemplateElement::TsTemplateElement(template) => template.r_curly_token(),
         }
+    }
+
+    fn has_new_line_in_range(&self) -> bool {
+        fn has_new_line_in_node(node: &JsSyntaxNode) -> bool {
+            node.children_with_tokens().any(|child| match child {
+                NodeOrToken::Token(token) => token
+                    // no need to check for trailing trivia as it's not possible to have a new line
+                    .leading_trivia()
+                    .pieces()
+                    .any(|trivia| trivia.is_newline()),
+                NodeOrToken::Node(node) => has_new_line_in_node(&node),
+            })
+        }
+        has_new_line_in_node(self.syntax())
     }
 }
 

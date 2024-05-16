@@ -5,10 +5,10 @@ use crate::prelude::*;
 use crate::utils::test_each_template::EachTemplateTable;
 use biome_formatter::FormatRuleWithOptions;
 use biome_js_syntax::{
-    AnyJsExpression, AnyJsLiteralExpression, AnyJsTemplateElement, AnyTsTemplateElement,
-    JsLanguage, JsTemplateElementList, TsTemplateElementList,
+    AnyJsTemplateElement, AnyTsTemplateElement, JsLanguage, JsTemplateElementList,
+    TsTemplateElementList,
 };
-use biome_rowan::{declare_node_union, AstNodeListIterator, SyntaxResult};
+use biome_rowan::{declare_node_union, AstNodeListIterator};
 use std::iter::FusedIterator;
 
 #[derive(Debug, Clone, Default)]
@@ -49,12 +49,6 @@ pub(crate) enum AnyTemplateElementList {
 
 impl Format<JsFormatContext> for AnyTemplateElementList {
     fn fmt(&self, f: &mut Formatter<JsFormatContext>) -> FormatResult<()> {
-        let layout = if self.is_simple(f.comments()) {
-            TemplateElementLayout::SingleLine
-        } else {
-            TemplateElementLayout::Fit
-        };
-
         let mut indention = TemplateElementIndention::default();
         let mut after_new_line = false;
 
@@ -64,7 +58,6 @@ impl Format<JsFormatContext> for AnyTemplateElementList {
                     let options = TemplateElementOptions {
                         after_new_line,
                         indention,
-                        layout,
                     };
 
                     match &element {
@@ -104,36 +97,6 @@ impl Format<JsFormatContext> for AnyTemplateElementList {
 }
 
 impl AnyTemplateElementList {
-    /// Returns `true` for `JsTemplate` if all elements are simple expressions that should be printed on a single line.
-    ///
-    /// Simple expressions are:
-    /// * Identifiers: `this`, `a`
-    /// * Members: `a.b`, `a[b]`, `a.b[c].d`, `a.b[5]`, `a.b["test"]`
-    fn is_simple(&self, comments: &JsComments) -> bool {
-        match self {
-            AnyTemplateElementList::JsTemplateElementList(list) => {
-                if list.is_empty() {
-                    return false;
-                }
-
-                let mut expression_elements = list.iter().filter_map(|element| match element {
-                    AnyJsTemplateElement::JsTemplateElement(element) => Some(element),
-                    _ => None,
-                });
-
-                expression_elements.all(|expression_element| {
-                    match expression_element.expression() {
-                        Ok(expression) => {
-                            is_simple_member_expression(expression, comments).unwrap_or(false)
-                        }
-                        Err(_) => false,
-                    }
-                })
-            }
-            AnyTemplateElementList::TsTemplateElementList(_) => false,
-        }
-    }
-
     fn elements(&self) -> TemplateElementIterator {
         match self {
             AnyTemplateElementList::JsTemplateElementList(list) => {
@@ -146,57 +109,8 @@ impl AnyTemplateElementList {
     }
 }
 
-#[derive(Debug, Copy, Clone, Default)]
-pub enum TemplateElementLayout {
-    /// Applied when all expressions are identifiers, `this`, static member expressions, or computed member expressions with number or string literals.
-    /// Formats the expressions on a single line, even if their width otherwise would exceed the print width.
-    SingleLine,
-
-    /// Tries to format the expression on a single line but may break the expression if the line otherwise exceeds the print width.
-    #[default]
-    Fit,
-}
-
 declare_node_union! {
     AnyTemplateElementOrChunk = AnyTemplateElement | AnyTemplateChunkElement
-}
-
-fn is_simple_member_expression(
-    expression: AnyJsExpression,
-    comments: &JsComments,
-) -> SyntaxResult<bool> {
-    let mut current = expression;
-
-    loop {
-        if comments.has_comments(current.syntax()) {
-            return Ok(false);
-        }
-
-        current = match current {
-            AnyJsExpression::JsStaticMemberExpression(expression) => expression.object()?,
-            AnyJsExpression::JsComputedMemberExpression(expression) => {
-                if matches!(
-                    expression.member()?,
-                    AnyJsExpression::AnyJsLiteralExpression(
-                        AnyJsLiteralExpression::JsStringLiteralExpression(_)
-                            | AnyJsLiteralExpression::JsNumberLiteralExpression(_)
-                    ) | AnyJsExpression::JsIdentifierExpression(_)
-                ) {
-                    expression.object()?
-                } else {
-                    break;
-                }
-            }
-            AnyJsExpression::JsIdentifierExpression(_) | AnyJsExpression::JsThisExpression(_) => {
-                return Ok(true);
-            }
-            _ => {
-                break;
-            }
-        }
-    }
-
-    Ok(false)
 }
 
 enum TemplateElementIterator {

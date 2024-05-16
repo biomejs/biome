@@ -1,0 +1,28 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: valid.css
+---
+# Input
+```css
+@media print {
+}
+
+@media screen, print {
+}
+
+@media screen and (min-width: 320px) {
+}
+
+@media screen and (-webkit-min-width: 320px) {
+}
+
+@media only screen and (min-width: 320px) and (max-width: 480px) and (resolution: 150dpi) {
+}
+
+@media (not(min-width < 320px)) and (max-width > 640px) {
+}
+
+@media (400px <= width <= 700px) {
+}
+
+```

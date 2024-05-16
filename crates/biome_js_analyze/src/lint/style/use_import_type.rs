@@ -103,6 +103,7 @@ declare_rule! {
     pub UseImportType {
         version: "1.5.0",
         name: "useImportType",
+        language: "ts",
         sources: &[RuleSource::EslintTypeScript("consistent-type-imports")],
         source_kind: RuleSourceKind::Inspired,
         recommended: true,
@@ -518,12 +519,12 @@ impl Rule for UseImportType {
                 }
             }
         }
-        Some(JsRuleAction {
-            category: ActionCategory::QuickFix,
-            applicability: Applicability::Always,
-            message: markup! { "Use "<Emphasis>"import type"</Emphasis>"." }.to_owned(),
+        Some(JsRuleAction::new(
+            ActionCategory::QuickFix,
+            Applicability::Always,
+            markup! { "Use "<Emphasis>"import type"</Emphasis>"." }.to_owned(),
             mutation,
-        })
+        ))
     }
 }
 

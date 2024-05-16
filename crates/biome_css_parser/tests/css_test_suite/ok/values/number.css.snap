@@ -1,0 +1,1801 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```css
+a {
+	a: 0;
+	a: 1;
+
+	a: 0.1;
+	a: 1.1;
+
+	a: .1;
+	a: 1.;
+	a: +.1;
+	a: -.1;
+
+	a: 1e1;
+	a: 1e+1;
+	a: 1e-1;
+	a: 1.e1;
+	a: .1e1;
+	a: 1.1e1;
+	a: 1.1e0010;
+	a: +1.1e0010;
+	a: -1.1e0010;
+	a: .1e+0010;
+	a: .1e-0010;
+
+	a: 1E1;
+	a: 1E+1;
+	a: 1E-1;
+	a: 1.E1;
+	a: .1E1;
+	a: 1.1E1;
+	a: 1.1E0010;
+	a: .1E+0010;
+	a: .1E-0010;
+
+	a: 0.5e0;
+	a: 0.5e00;
+	a: 0.5e+0;
+	a: 0.5e+00;
+	a: 0.5e-0;
+	a: 0.5e-00;
+	a: +0.5e0;
+	a: -0.5e0;
+
+	a: 1;
+	a: 1.00500;
+	a: 1.0;
+	a: 1.5;
+	a: 1.50;
+
+	a: 0.00500;
+	a: 0.0;
+	a: 0.0000;
+
+	a: 500600.001230045000;
+	a: 1.00500e60;
+	a: 1.0e60;
+	a: 0.00500e60;
+	a: 0.0e60;
+	a: 0.0000e60;
+	a: .0e60;
+	a: 0.e60;
+	a: 0e60;
+	a: 500600.001230045000e60;
+	a: 10;
+	a: 9700;
+	a: 10e100;
+	height: attr(data-size em, .01);
+}
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    rules: CssRuleList [
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selector_token: missing (optional),
+                    simple_selector: CssTypeSelector {
+                        namespace: missing (optional),
+                        ident: CssIdentifier {
+                            value_token: IDENT@0..2 "a" [] [Whitespace(" ")],
+                        },
+                    },
+                    sub_selectors: CssSubSelectorList [],
+                },
+            ],
+            block: CssDeclarationOrRuleBlock {
+                l_curly_token: L_CURLY@2..3 "{" [] [],
+                items: CssDeclarationOrRuleList [
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@3..6 "a" [Newline("\n"), Whitespace("\t")] [],
+                                },
+                                colon_token: COLON@6..8 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssNumber {
+                                        value_token: CSS_NUMBER_LITERAL@8..9 "0" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@9..10 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@10..13 "a" [Newline("\n"), Whitespace("\t")] [],
+                                },
+                                colon_token: COLON@13..15 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssNumber {
+                                        value_token: CSS_NUMBER_LITERAL@15..16 "1" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@16..17 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@17..21 "a" [Newline("\n"), Newline("\n"), Whitespace("\t")] [],
+                                },
+                                colon_token: COLON@21..23 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssNumber {
+                                        value_token: CSS_NUMBER_LITERAL@23..26 "0.1" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@26..27 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@27..30 "a" [Newline("\n"), Whitespace("\t")] [],
+                                },
+                                colon_token: COLON@30..32 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssNumber {
+                                        value_token: CSS_NUMBER_LITERAL@32..35 "1.1" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@35..36 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@36..40 "a" [Newline("\n"), Newline("\n"), Whitespace("\t")] [],
+                                },
+                                colon_token: COLON@40..42 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssNumber {
+                                        value_token: CSS_NUMBER_LITERAL@42..44 ".1" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@44..45 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@45..48 "a" [Newline("\n"), Whitespace("\t")] [],
+                                },
+                                colon_token: COLON@48..50 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssNumber {
+                                        value_token: CSS_NUMBER_LITERAL@50..52 "1." [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@52..53 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@53..56 "a" [Newline("\n"), Whitespace("\t")] [],
+                                },
+                                colon_token: COLON@56..58 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssNumber {
+                                        value_token: CSS_NUMBER_LITERAL@58..61 "+.1" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@61..62 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@62..65 "a" [Newline("\n"), Whitespace("\t")] [],
+                                },
+                                colon_token: COLON@65..67 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssNumber {
+                                        value_token: CSS_NUMBER_LITERAL@67..70 "-.1" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@70..71 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@71..75 "a" [Newline("\n"), Newline("\n"), Whitespace("\t")] [],
+                                },
+                                colon_token: COLON@75..77 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssNumber {
+                                        value_token: CSS_NUMBER_LITERAL@77..80 "1e1" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@80..81 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@81..84 "a" [Newline("\n"), Whitespace("\t")] [],
+                                },
+                                colon_token: COLON@84..86 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssNumber {
+                                        value_token: CSS_NUMBER_LITERAL@86..90 "1e+1" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@90..91 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@91..94 "a" [Newline("\n"), Whitespace("\t")] [],
+                                },
+                                colon_token: COLON@94..96 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssNumber {
+                                        value_token: CSS_NUMBER_LITERAL@96..100 "1e-1" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@100..101 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@101..104 "a" [Newline("\n"), Whitespace("\t")] [],
+                                },
+                                colon_token: COLON@104..106 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssNumber {
+                                        value_token: CSS_NUMBER_LITERAL@106..110 "1.e1" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@110..111 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@111..114 "a" [Newline("\n"), Whitespace("\t")] [],
+                                },
+                                colon_token: COLON@114..116 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssNumber {
+                                        value_token: CSS_NUMBER_LITERAL@116..120 ".1e1" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@120..121 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@121..124 "a" [Newline("\n"), Whitespace("\t")] [],
+                                },
+                                colon_token: COLON@124..126 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssNumber {
+                                        value_token: CSS_NUMBER_LITERAL@126..131 "1.1e1" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@131..132 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@132..135 "a" [Newline("\n"), Whitespace("\t")] [],
+                                },
+                                colon_token: COLON@135..137 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssNumber {
+                                        value_token: CSS_NUMBER_LITERAL@137..145 "1.1e0010" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@145..146 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@146..149 "a" [Newline("\n"), Whitespace("\t")] [],
+                                },
+                                colon_token: COLON@149..151 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssNumber {
+                                        value_token: CSS_NUMBER_LITERAL@151..160 "+1.1e0010" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@160..161 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@161..164 "a" [Newline("\n"), Whitespace("\t")] [],
+                                },
+                                colon_token: COLON@164..166 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssNumber {
+                                        value_token: CSS_NUMBER_LITERAL@166..175 "-1.1e0010" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@175..176 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@176..179 "a" [Newline("\n"), Whitespace("\t")] [],
+                                },
+                                colon_token: COLON@179..181 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssNumber {
+                                        value_token: CSS_NUMBER_LITERAL@181..189 ".1e+0010" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@189..190 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@190..193 "a" [Newline("\n"), Whitespace("\t")] [],
+                                },
+                                colon_token: COLON@193..195 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssNumber {
+                                        value_token: CSS_NUMBER_LITERAL@195..203 ".1e-0010" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@203..204 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@204..208 "a" [Newline("\n"), Newline("\n"), Whitespace("\t")] [],
+                                },
+                                colon_token: COLON@208..210 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssNumber {
+                                        value_token: CSS_NUMBER_LITERAL@210..213 "1E1" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@213..214 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@214..217 "a" [Newline("\n"), Whitespace("\t")] [],
+                                },
+                                colon_token: COLON@217..219 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssNumber {
+                                        value_token: CSS_NUMBER_LITERAL@219..223 "1E+1" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@223..224 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@224..227 "a" [Newline("\n"), Whitespace("\t")] [],
+                                },
+                                colon_token: COLON@227..229 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssNumber {
+                                        value_token: CSS_NUMBER_LITERAL@229..233 "1E-1" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@233..234 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@234..237 "a" [Newline("\n"), Whitespace("\t")] [],
+                                },
+                                colon_token: COLON@237..239 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssNumber {
+                                        value_token: CSS_NUMBER_LITERAL@239..243 "1.E1" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@243..244 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@244..247 "a" [Newline("\n"), Whitespace("\t")] [],
+                                },
+                                colon_token: COLON@247..249 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssNumber {
+                                        value_token: CSS_NUMBER_LITERAL@249..253 ".1E1" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@253..254 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@254..257 "a" [Newline("\n"), Whitespace("\t")] [],
+                                },
+                                colon_token: COLON@257..259 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssNumber {
+                                        value_token: CSS_NUMBER_LITERAL@259..264 "1.1E1" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@264..265 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@265..268 "a" [Newline("\n"), Whitespace("\t")] [],
+                                },
+                                colon_token: COLON@268..270 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssNumber {
+                                        value_token: CSS_NUMBER_LITERAL@270..278 "1.1E0010" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@278..279 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@279..282 "a" [Newline("\n"), Whitespace("\t")] [],
+                                },
+                                colon_token: COLON@282..284 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssNumber {
+                                        value_token: CSS_NUMBER_LITERAL@284..292 ".1E+0010" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@292..293 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@293..296 "a" [Newline("\n"), Whitespace("\t")] [],
+                                },
+                                colon_token: COLON@296..298 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssNumber {
+                                        value_token: CSS_NUMBER_LITERAL@298..306 ".1E-0010" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@306..307 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@307..311 "a" [Newline("\n"), Newline("\n"), Whitespace("\t")] [],
+                                },
+                                colon_token: COLON@311..313 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssNumber {
+                                        value_token: CSS_NUMBER_LITERAL@313..318 "0.5e0" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@318..319 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@319..322 "a" [Newline("\n"), Whitespace("\t")] [],
+                                },
+                                colon_token: COLON@322..324 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssNumber {
+                                        value_token: CSS_NUMBER_LITERAL@324..330 "0.5e00" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@330..331 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@331..334 "a" [Newline("\n"), Whitespace("\t")] [],
+                                },
+                                colon_token: COLON@334..336 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssNumber {
+                                        value_token: CSS_NUMBER_LITERAL@336..342 "0.5e+0" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@342..343 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@343..346 "a" [Newline("\n"), Whitespace("\t")] [],
+                                },
+                                colon_token: COLON@346..348 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssNumber {
+                                        value_token: CSS_NUMBER_LITERAL@348..355 "0.5e+00" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@355..356 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@356..359 "a" [Newline("\n"), Whitespace("\t")] [],
+                                },
+                                colon_token: COLON@359..361 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssNumber {
+                                        value_token: CSS_NUMBER_LITERAL@361..367 "0.5e-0" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@367..368 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@368..371 "a" [Newline("\n"), Whitespace("\t")] [],
+                                },
+                                colon_token: COLON@371..373 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssNumber {
+                                        value_token: CSS_NUMBER_LITERAL@373..380 "0.5e-00" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@380..381 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@381..384 "a" [Newline("\n"), Whitespace("\t")] [],
+                                },
+                                colon_token: COLON@384..386 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssNumber {
+                                        value_token: CSS_NUMBER_LITERAL@386..392 "+0.5e0" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@392..393 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@393..396 "a" [Newline("\n"), Whitespace("\t")] [],
+                                },
+                                colon_token: COLON@396..398 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssNumber {
+                                        value_token: CSS_NUMBER_LITERAL@398..404 "-0.5e0" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@404..405 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@405..409 "a" [Newline("\n"), Newline("\n"), Whitespace("\t")] [],
+                                },
+                                colon_token: COLON@409..411 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssNumber {
+                                        value_token: CSS_NUMBER_LITERAL@411..412 "1" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@412..413 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@413..416 "a" [Newline("\n"), Whitespace("\t")] [],
+                                },
+                                colon_token: COLON@416..418 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssNumber {
+                                        value_token: CSS_NUMBER_LITERAL@418..425 "1.00500" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@425..426 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@426..429 "a" [Newline("\n"), Whitespace("\t")] [],
+                                },
+                                colon_token: COLON@429..431 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssNumber {
+                                        value_token: CSS_NUMBER_LITERAL@431..434 "1.0" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@434..435 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@435..438 "a" [Newline("\n"), Whitespace("\t")] [],
+                                },
+                                colon_token: COLON@438..440 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssNumber {
+                                        value_token: CSS_NUMBER_LITERAL@440..443 "1.5" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@443..444 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@444..447 "a" [Newline("\n"), Whitespace("\t")] [],
+                                },
+                                colon_token: COLON@447..449 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssNumber {
+                                        value_token: CSS_NUMBER_LITERAL@449..453 "1.50" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@453..454 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@454..458 "a" [Newline("\n"), Newline("\n"), Whitespace("\t")] [],
+                                },
+                                colon_token: COLON@458..460 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssNumber {
+                                        value_token: CSS_NUMBER_LITERAL@460..467 "0.00500" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@467..468 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@468..471 "a" [Newline("\n"), Whitespace("\t")] [],
+                                },
+                                colon_token: COLON@471..473 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssNumber {
+                                        value_token: CSS_NUMBER_LITERAL@473..476 "0.0" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@476..477 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@477..480 "a" [Newline("\n"), Whitespace("\t")] [],
+                                },
+                                colon_token: COLON@480..482 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssNumber {
+                                        value_token: CSS_NUMBER_LITERAL@482..488 "0.0000" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@488..489 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@489..493 "a" [Newline("\n"), Newline("\n"), Whitespace("\t")] [],
+                                },
+                                colon_token: COLON@493..495 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssNumber {
+                                        value_token: CSS_NUMBER_LITERAL@495..514 "500600.001230045000" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@514..515 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@515..518 "a" [Newline("\n"), Whitespace("\t")] [],
+                                },
+                                colon_token: COLON@518..520 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssNumber {
+                                        value_token: CSS_NUMBER_LITERAL@520..530 "1.00500e60" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@530..531 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@531..534 "a" [Newline("\n"), Whitespace("\t")] [],
+                                },
+                                colon_token: COLON@534..536 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssNumber {
+                                        value_token: CSS_NUMBER_LITERAL@536..542 "1.0e60" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@542..543 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@543..546 "a" [Newline("\n"), Whitespace("\t")] [],
+                                },
+                                colon_token: COLON@546..548 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssNumber {
+                                        value_token: CSS_NUMBER_LITERAL@548..558 "0.00500e60" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@558..559 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@559..562 "a" [Newline("\n"), Whitespace("\t")] [],
+                                },
+                                colon_token: COLON@562..564 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssNumber {
+                                        value_token: CSS_NUMBER_LITERAL@564..570 "0.0e60" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@570..571 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@571..574 "a" [Newline("\n"), Whitespace("\t")] [],
+                                },
+                                colon_token: COLON@574..576 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssNumber {
+                                        value_token: CSS_NUMBER_LITERAL@576..585 "0.0000e60" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@585..586 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@586..589 "a" [Newline("\n"), Whitespace("\t")] [],
+                                },
+                                colon_token: COLON@589..591 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssNumber {
+                                        value_token: CSS_NUMBER_LITERAL@591..596 ".0e60" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@596..597 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@597..600 "a" [Newline("\n"), Whitespace("\t")] [],
+                                },
+                                colon_token: COLON@600..602 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssNumber {
+                                        value_token: CSS_NUMBER_LITERAL@602..607 "0.e60" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@607..608 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@608..611 "a" [Newline("\n"), Whitespace("\t")] [],
+                                },
+                                colon_token: COLON@611..613 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssNumber {
+                                        value_token: CSS_NUMBER_LITERAL@613..617 "0e60" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@617..618 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@618..621 "a" [Newline("\n"), Whitespace("\t")] [],
+                                },
+                                colon_token: COLON@621..623 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssNumber {
+                                        value_token: CSS_NUMBER_LITERAL@623..645 "500600.001230045000e60" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@645..646 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@646..649 "a" [Newline("\n"), Whitespace("\t")] [],
+                                },
+                                colon_token: COLON@649..651 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssNumber {
+                                        value_token: CSS_NUMBER_LITERAL@651..653 "10" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@653..654 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@654..657 "a" [Newline("\n"), Whitespace("\t")] [],
+                                },
+                                colon_token: COLON@657..659 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssNumber {
+                                        value_token: CSS_NUMBER_LITERAL@659..663 "9700" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@663..664 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@664..667 "a" [Newline("\n"), Whitespace("\t")] [],
+                                },
+                                colon_token: COLON@667..669 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssNumber {
+                                        value_token: CSS_NUMBER_LITERAL@669..675 "10e100" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@675..676 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@676..684 "height" [Newline("\n"), Whitespace("\t")] [],
+                                },
+                                colon_token: COLON@684..686 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssFunction {
+                                        name: CssIdentifier {
+                                            value_token: IDENT@686..690 "attr" [] [],
+                                        },
+                                        l_paren_token: L_PAREN@690..691 "(" [] [],
+                                        items: CssParameterList [
+                                            CssParameter {
+                                                any_css_expression: CssListOfComponentValuesExpression {
+                                                    css_component_value_list: CssComponentValueList [
+                                                        CssIdentifier {
+                                                            value_token: IDENT@691..701 "data-size" [] [Whitespace(" ")],
+                                                        },
+                                                        CssIdentifier {
+                                                            value_token: IDENT@701..703 "em" [] [],
+                                                        },
+                                                    ],
+                                                },
+                                            },
+                                            COMMA@703..705 "," [] [Whitespace(" ")],
+                                            CssParameter {
+                                                any_css_expression: CssListOfComponentValuesExpression {
+                                                    css_component_value_list: CssComponentValueList [
+                                                        CssNumber {
+                                                            value_token: CSS_NUMBER_LITERAL@705..708 ".01" [] [],
+                                                        },
+                                                    ],
+                                                },
+                                            },
+                                        ],
+                                        r_paren_token: R_PAREN@708..709 ")" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@709..710 ";" [] [],
+                    },
+                ],
+                r_curly_token: R_CURLY@710..712 "}" [Newline("\n")] [],
+            },
+        },
+    ],
+    eof_token: EOF@712..713 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..713
+  0: (empty)
+  1: CSS_RULE_LIST@0..712
+    0: CSS_QUALIFIED_RULE@0..712
+      0: CSS_SELECTOR_LIST@0..2
+        0: CSS_COMPOUND_SELECTOR@0..2
+          0: (empty)
+          1: CSS_TYPE_SELECTOR@0..2
+            0: (empty)
+            1: CSS_IDENTIFIER@0..2
+              0: IDENT@0..2 "a" [] [Whitespace(" ")]
+          2: CSS_SUB_SELECTOR_LIST@2..2
+      1: CSS_DECLARATION_OR_RULE_BLOCK@2..712
+        0: L_CURLY@2..3 "{" [] []
+        1: CSS_DECLARATION_OR_RULE_LIST@3..710
+          0: CSS_DECLARATION_WITH_SEMICOLON@3..10
+            0: CSS_DECLARATION@3..9
+              0: CSS_GENERIC_PROPERTY@3..9
+                0: CSS_IDENTIFIER@3..6
+                  0: IDENT@3..6 "a" [Newline("\n"), Whitespace("\t")] []
+                1: COLON@6..8 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@8..9
+                  0: CSS_NUMBER@8..9
+                    0: CSS_NUMBER_LITERAL@8..9 "0" [] []
+              1: (empty)
+            1: SEMICOLON@9..10 ";" [] []
+          1: CSS_DECLARATION_WITH_SEMICOLON@10..17
+            0: CSS_DECLARATION@10..16
+              0: CSS_GENERIC_PROPERTY@10..16
+                0: CSS_IDENTIFIER@10..13
+                  0: IDENT@10..13 "a" [Newline("\n"), Whitespace("\t")] []
+                1: COLON@13..15 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@15..16
+                  0: CSS_NUMBER@15..16
+                    0: CSS_NUMBER_LITERAL@15..16 "1" [] []
+              1: (empty)
+            1: SEMICOLON@16..17 ";" [] []
+          2: CSS_DECLARATION_WITH_SEMICOLON@17..27
+            0: CSS_DECLARATION@17..26
+              0: CSS_GENERIC_PROPERTY@17..26
+                0: CSS_IDENTIFIER@17..21
+                  0: IDENT@17..21 "a" [Newline("\n"), Newline("\n"), Whitespace("\t")] []
+                1: COLON@21..23 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@23..26
+                  0: CSS_NUMBER@23..26
+                    0: CSS_NUMBER_LITERAL@23..26 "0.1" [] []
+              1: (empty)
+            1: SEMICOLON@26..27 ";" [] []
+          3: CSS_DECLARATION_WITH_SEMICOLON@27..36
+            0: CSS_DECLARATION@27..35
+              0: CSS_GENERIC_PROPERTY@27..35
+                0: CSS_IDENTIFIER@27..30
+                  0: IDENT@27..30 "a" [Newline("\n"), Whitespace("\t")] []
+                1: COLON@30..32 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@32..35
+                  0: CSS_NUMBER@32..35
+                    0: CSS_NUMBER_LITERAL@32..35 "1.1" [] []
+              1: (empty)
+            1: SEMICOLON@35..36 ";" [] []
+          4: CSS_DECLARATION_WITH_SEMICOLON@36..45
+            0: CSS_DECLARATION@36..44
+              0: CSS_GENERIC_PROPERTY@36..44
+                0: CSS_IDENTIFIER@36..40
+                  0: IDENT@36..40 "a" [Newline("\n"), Newline("\n"), Whitespace("\t")] []
+                1: COLON@40..42 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@42..44
+                  0: CSS_NUMBER@42..44
+                    0: CSS_NUMBER_LITERAL@42..44 ".1" [] []
+              1: (empty)
+            1: SEMICOLON@44..45 ";" [] []
+          5: CSS_DECLARATION_WITH_SEMICOLON@45..53
+            0: CSS_DECLARATION@45..52
+              0: CSS_GENERIC_PROPERTY@45..52
+                0: CSS_IDENTIFIER@45..48
+                  0: IDENT@45..48 "a" [Newline("\n"), Whitespace("\t")] []
+                1: COLON@48..50 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@50..52
+                  0: CSS_NUMBER@50..52
+                    0: CSS_NUMBER_LITERAL@50..52 "1." [] []
+              1: (empty)
+            1: SEMICOLON@52..53 ";" [] []
+          6: CSS_DECLARATION_WITH_SEMICOLON@53..62
+            0: CSS_DECLARATION@53..61
+              0: CSS_GENERIC_PROPERTY@53..61
+                0: CSS_IDENTIFIER@53..56
+                  0: IDENT@53..56 "a" [Newline("\n"), Whitespace("\t")] []
+                1: COLON@56..58 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@58..61
+                  0: CSS_NUMBER@58..61
+                    0: CSS_NUMBER_LITERAL@58..61 "+.1" [] []
+              1: (empty)
+            1: SEMICOLON@61..62 ";" [] []
+          7: CSS_DECLARATION_WITH_SEMICOLON@62..71
+            0: CSS_DECLARATION@62..70
+              0: CSS_GENERIC_PROPERTY@62..70
+                0: CSS_IDENTIFIER@62..65
+                  0: IDENT@62..65 "a" [Newline("\n"), Whitespace("\t")] []
+                1: COLON@65..67 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@67..70
+                  0: CSS_NUMBER@67..70
+                    0: CSS_NUMBER_LITERAL@67..70 "-.1" [] []
+              1: (empty)
+            1: SEMICOLON@70..71 ";" [] []
+          8: CSS_DECLARATION_WITH_SEMICOLON@71..81
+            0: CSS_DECLARATION@71..80
+              0: CSS_GENERIC_PROPERTY@71..80
+                0: CSS_IDENTIFIER@71..75
+                  0: IDENT@71..75 "a" [Newline("\n"), Newline("\n"), Whitespace("\t")] []
+                1: COLON@75..77 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@77..80
+                  0: CSS_NUMBER@77..80
+                    0: CSS_NUMBER_LITERAL@77..80 "1e1" [] []
+              1: (empty)
+            1: SEMICOLON@80..81 ";" [] []
+          9: CSS_DECLARATION_WITH_SEMICOLON@81..91
+            0: CSS_DECLARATION@81..90
+              0: CSS_GENERIC_PROPERTY@81..90
+                0: CSS_IDENTIFIER@81..84
+                  0: IDENT@81..84 "a" [Newline("\n"), Whitespace("\t")] []
+                1: COLON@84..86 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@86..90
+                  0: CSS_NUMBER@86..90
+                    0: CSS_NUMBER_LITERAL@86..90 "1e+1" [] []
+              1: (empty)
+            1: SEMICOLON@90..91 ";" [] []
+          10: CSS_DECLARATION_WITH_SEMICOLON@91..101
+            0: CSS_DECLARATION@91..100
+              0: CSS_GENERIC_PROPERTY@91..100
+                0: CSS_IDENTIFIER@91..94
+                  0: IDENT@91..94 "a" [Newline("\n"), Whitespace("\t")] []
+                1: COLON@94..96 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@96..100
+                  0: CSS_NUMBER@96..100
+                    0: CSS_NUMBER_LITERAL@96..100 "1e-1" [] []
+              1: (empty)
+            1: SEMICOLON@100..101 ";" [] []
+          11: CSS_DECLARATION_WITH_SEMICOLON@101..111
+            0: CSS_DECLARATION@101..110
+              0: CSS_GENERIC_PROPERTY@101..110
+                0: CSS_IDENTIFIER@101..104
+                  0: IDENT@101..104 "a" [Newline("\n"), Whitespace("\t")] []
+                1: COLON@104..106 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@106..110
+                  0: CSS_NUMBER@106..110
+                    0: CSS_NUMBER_LITERAL@106..110 "1.e1" [] []
+              1: (empty)
+            1: SEMICOLON@110..111 ";" [] []
+          12: CSS_DECLARATION_WITH_SEMICOLON@111..121
+            0: CSS_DECLARATION@111..120
+              0: CSS_GENERIC_PROPERTY@111..120
+                0: CSS_IDENTIFIER@111..114
+                  0: IDENT@111..114 "a" [Newline("\n"), Whitespace("\t")] []
+                1: COLON@114..116 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@116..120
+                  0: CSS_NUMBER@116..120
+                    0: CSS_NUMBER_LITERAL@116..120 ".1e1" [] []
+              1: (empty)
+            1: SEMICOLON@120..121 ";" [] []
+          13: CSS_DECLARATION_WITH_SEMICOLON@121..132
+            0: CSS_DECLARATION@121..131
+              0: CSS_GENERIC_PROPERTY@121..131
+                0: CSS_IDENTIFIER@121..124
+                  0: IDENT@121..124 "a" [Newline("\n"), Whitespace("\t")] []
+                1: COLON@124..126 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@126..131
+                  0: CSS_NUMBER@126..131
+                    0: CSS_NUMBER_LITERAL@126..131 "1.1e1" [] []
+              1: (empty)
+            1: SEMICOLON@131..132 ";" [] []
+          14: CSS_DECLARATION_WITH_SEMICOLON@132..146
+            0: CSS_DECLARATION@132..145
+              0: CSS_GENERIC_PROPERTY@132..145
+                0: CSS_IDENTIFIER@132..135
+                  0: IDENT@132..135 "a" [Newline("\n"), Whitespace("\t")] []
+                1: COLON@135..137 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@137..145
+                  0: CSS_NUMBER@137..145
+                    0: CSS_NUMBER_LITERAL@137..145 "1.1e0010" [] []
+              1: (empty)
+            1: SEMICOLON@145..146 ";" [] []
+          15: CSS_DECLARATION_WITH_SEMICOLON@146..161
+            0: CSS_DECLARATION@146..160
+              0: CSS_GENERIC_PROPERTY@146..160
+                0: CSS_IDENTIFIER@146..149
+                  0: IDENT@146..149 "a" [Newline("\n"), Whitespace("\t")] []
+                1: COLON@149..151 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@151..160
+                  0: CSS_NUMBER@151..160
+                    0: CSS_NUMBER_LITERAL@151..160 "+1.1e0010" [] []
+              1: (empty)
+            1: SEMICOLON@160..161 ";" [] []
+          16: CSS_DECLARATION_WITH_SEMICOLON@161..176
+            0: CSS_DECLARATION@161..175
+              0: CSS_GENERIC_PROPERTY@161..175
+                0: CSS_IDENTIFIER@161..164
+                  0: IDENT@161..164 "a" [Newline("\n"), Whitespace("\t")] []
+                1: COLON@164..166 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@166..175
+                  0: CSS_NUMBER@166..175
+                    0: CSS_NUMBER_LITERAL@166..175 "-1.1e0010" [] []
+              1: (empty)
+            1: SEMICOLON@175..176 ";" [] []
+          17: CSS_DECLARATION_WITH_SEMICOLON@176..190
+            0: CSS_DECLARATION@176..189
+              0: CSS_GENERIC_PROPERTY@176..189
+                0: CSS_IDENTIFIER@176..179
+                  0: IDENT@176..179 "a" [Newline("\n"), Whitespace("\t")] []
+                1: COLON@179..181 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@181..189
+                  0: CSS_NUMBER@181..189
+                    0: CSS_NUMBER_LITERAL@181..189 ".1e+0010" [] []
+              1: (empty)
+            1: SEMICOLON@189..190 ";" [] []
+          18: CSS_DECLARATION_WITH_SEMICOLON@190..204
+            0: CSS_DECLARATION@190..203
+              0: CSS_GENERIC_PROPERTY@190..203
+                0: CSS_IDENTIFIER@190..193
+                  0: IDENT@190..193 "a" [Newline("\n"), Whitespace("\t")] []
+                1: COLON@193..195 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@195..203
+                  0: CSS_NUMBER@195..203
+                    0: CSS_NUMBER_LITERAL@195..203 ".1e-0010" [] []
+              1: (empty)
+            1: SEMICOLON@203..204 ";" [] []
+          19: CSS_DECLARATION_WITH_SEMICOLON@204..214
+            0: CSS_DECLARATION@204..213
+              0: CSS_GENERIC_PROPERTY@204..213
+                0: CSS_IDENTIFIER@204..208
+                  0: IDENT@204..208 "a" [Newline("\n"), Newline("\n"), Whitespace("\t")] []
+                1: COLON@208..210 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@210..213
+                  0: CSS_NUMBER@210..213
+                    0: CSS_NUMBER_LITERAL@210..213 "1E1" [] []
+              1: (empty)
+            1: SEMICOLON@213..214 ";" [] []
+          20: CSS_DECLARATION_WITH_SEMICOLON@214..224
+            0: CSS_DECLARATION@214..223
+              0: CSS_GENERIC_PROPERTY@214..223
+                0: CSS_IDENTIFIER@214..217
+                  0: IDENT@214..217 "a" [Newline("\n"), Whitespace("\t")] []
+                1: COLON@217..219 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@219..223
+                  0: CSS_NUMBER@219..223
+                    0: CSS_NUMBER_LITERAL@219..223 "1E+1" [] []
+              1: (empty)
+            1: SEMICOLON@223..224 ";" [] []
+          21: CSS_DECLARATION_WITH_SEMICOLON@224..234
+            0: CSS_DECLARATION@224..233
+              0: CSS_GENERIC_PROPERTY@224..233
+                0: CSS_IDENTIFIER@224..227
+                  0: IDENT@224..227 "a" [Newline("\n"), Whitespace("\t")] []
+                1: COLON@227..229 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@229..233
+                  0: CSS_NUMBER@229..233
+                    0: CSS_NUMBER_LITERAL@229..233 "1E-1" [] []
+              1: (empty)
+            1: SEMICOLON@233..234 ";" [] []
+          22: CSS_DECLARATION_WITH_SEMICOLON@234..244
+            0: CSS_DECLARATION@234..243
+              0: CSS_GENERIC_PROPERTY@234..243
+                0: CSS_IDENTIFIER@234..237
+                  0: IDENT@234..237 "a" [Newline("\n"), Whitespace("\t")] []
+                1: COLON@237..239 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@239..243
+                  0: CSS_NUMBER@239..243
+                    0: CSS_NUMBER_LITERAL@239..243 "1.E1" [] []
+              1: (empty)
+            1: SEMICOLON@243..244 ";" [] []
+          23: CSS_DECLARATION_WITH_SEMICOLON@244..254
+            0: CSS_DECLARATION@244..253
+              0: CSS_GENERIC_PROPERTY@244..253
+                0: CSS_IDENTIFIER@244..247
+                  0: IDENT@244..247 "a" [Newline("\n"), Whitespace("\t")] []
+                1: COLON@247..249 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@249..253
+                  0: CSS_NUMBER@249..253
+                    0: CSS_NUMBER_LITERAL@249..253 ".1E1" [] []
+              1: (empty)
+            1: SEMICOLON@253..254 ";" [] []
+          24: CSS_DECLARATION_WITH_SEMICOLON@254..265
+            0: CSS_DECLARATION@254..264
+              0: CSS_GENERIC_PROPERTY@254..264
+                0: CSS_IDENTIFIER@254..257
+                  0: IDENT@254..257 "a" [Newline("\n"), Whitespace("\t")] []
+                1: COLON@257..259 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@259..264
+                  0: CSS_NUMBER@259..264
+                    0: CSS_NUMBER_LITERAL@259..264 "1.1E1" [] []
+              1: (empty)
+            1: SEMICOLON@264..265 ";" [] []
+          25: CSS_DECLARATION_WITH_SEMICOLON@265..279
+            0: CSS_DECLARATION@265..278
+              0: CSS_GENERIC_PROPERTY@265..278
+                0: CSS_IDENTIFIER@265..268
+                  0: IDENT@265..268 "a" [Newline("\n"), Whitespace("\t")] []
+                1: COLON@268..270 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@270..278
+                  0: CSS_NUMBER@270..278
+                    0: CSS_NUMBER_LITERAL@270..278 "1.1E0010" [] []
+              1: (empty)
+            1: SEMICOLON@278..279 ";" [] []
+          26: CSS_DECLARATION_WITH_SEMICOLON@279..293
+            0: CSS_DECLARATION@279..292
+              0: CSS_GENERIC_PROPERTY@279..292
+                0: CSS_IDENTIFIER@279..282
+                  0: IDENT@279..282 "a" [Newline("\n"), Whitespace("\t")] []
+                1: COLON@282..284 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@284..292
+                  0: CSS_NUMBER@284..292
+                    0: CSS_NUMBER_LITERAL@284..292 ".1E+0010" [] []
+              1: (empty)
+            1: SEMICOLON@292..293 ";" [] []
+          27: CSS_DECLARATION_WITH_SEMICOLON@293..307
+            0: CSS_DECLARATION@293..306
+              0: CSS_GENERIC_PROPERTY@293..306
+                0: CSS_IDENTIFIER@293..296
+                  0: IDENT@293..296 "a" [Newline("\n"), Whitespace("\t")] []
+                1: COLON@296..298 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@298..306
+                  0: CSS_NUMBER@298..306
+                    0: CSS_NUMBER_LITERAL@298..306 ".1E-0010" [] []
+              1: (empty)
+            1: SEMICOLON@306..307 ";" [] []
+          28: CSS_DECLARATION_WITH_SEMICOLON@307..319
+            0: CSS_DECLARATION@307..318
+              0: CSS_GENERIC_PROPERTY@307..318
+                0: CSS_IDENTIFIER@307..311
+                  0: IDENT@307..311 "a" [Newline("\n"), Newline("\n"), Whitespace("\t")] []
+                1: COLON@311..313 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@313..318
+                  0: CSS_NUMBER@313..318
+                    0: CSS_NUMBER_LITERAL@313..318 "0.5e0" [] []
+              1: (empty)
+            1: SEMICOLON@318..319 ";" [] []
+          29: CSS_DECLARATION_WITH_SEMICOLON@319..331
+            0: CSS_DECLARATION@319..330
+              0: CSS_GENERIC_PROPERTY@319..330
+                0: CSS_IDENTIFIER@319..322
+                  0: IDENT@319..322 "a" [Newline("\n"), Whitespace("\t")] []
+                1: COLON@322..324 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@324..330
+                  0: CSS_NUMBER@324..330
+                    0: CSS_NUMBER_LITERAL@324..330 "0.5e00" [] []
+              1: (empty)
+            1: SEMICOLON@330..331 ";" [] []
+          30: CSS_DECLARATION_WITH_SEMICOLON@331..343
+            0: CSS_DECLARATION@331..342
+              0: CSS_GENERIC_PROPERTY@331..342
+                0: CSS_IDENTIFIER@331..334
+                  0: IDENT@331..334 "a" [Newline("\n"), Whitespace("\t")] []
+                1: COLON@334..336 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@336..342
+                  0: CSS_NUMBER@336..342
+                    0: CSS_NUMBER_LITERAL@336..342 "0.5e+0" [] []
+              1: (empty)
+            1: SEMICOLON@342..343 ";" [] []
+          31: CSS_DECLARATION_WITH_SEMICOLON@343..356
+            0: CSS_DECLARATION@343..355
+              0: CSS_GENERIC_PROPERTY@343..355
+                0: CSS_IDENTIFIER@343..346
+                  0: IDENT@343..346 "a" [Newline("\n"), Whitespace("\t")] []
+                1: COLON@346..348 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@348..355
+                  0: CSS_NUMBER@348..355
+                    0: CSS_NUMBER_LITERAL@348..355 "0.5e+00" [] []
+              1: (empty)
+            1: SEMICOLON@355..356 ";" [] []
+          32: CSS_DECLARATION_WITH_SEMICOLON@356..368
+            0: CSS_DECLARATION@356..367
+              0: CSS_GENERIC_PROPERTY@356..367
+                0: CSS_IDENTIFIER@356..359
+                  0: IDENT@356..359 "a" [Newline("\n"), Whitespace("\t")] []
+                1: COLON@359..361 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@361..367
+                  0: CSS_NUMBER@361..367
+                    0: CSS_NUMBER_LITERAL@361..367 "0.5e-0" [] []
+              1: (empty)
+            1: SEMICOLON@367..368 ";" [] []
+          33: CSS_DECLARATION_WITH_SEMICOLON@368..381
+            0: CSS_DECLARATION@368..380
+              0: CSS_GENERIC_PROPERTY@368..380
+                0: CSS_IDENTIFIER@368..371
+                  0: IDENT@368..371 "a" [Newline("\n"), Whitespace("\t")] []
+                1: COLON@371..373 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@373..380
+                  0: CSS_NUMBER@373..380
+                    0: CSS_NUMBER_LITERAL@373..380 "0.5e-00" [] []
+              1: (empty)
+            1: SEMICOLON@380..381 ";" [] []
+          34: CSS_DECLARATION_WITH_SEMICOLON@381..393
+            0: CSS_DECLARATION@381..392
+              0: CSS_GENERIC_PROPERTY@381..392
+                0: CSS_IDENTIFIER@381..384
+                  0: IDENT@381..384 "a" [Newline("\n"), Whitespace("\t")] []
+                1: COLON@384..386 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@386..392
+                  0: CSS_NUMBER@386..392
+                    0: CSS_NUMBER_LITERAL@386..392 "+0.5e0" [] []
+              1: (empty)
+            1: SEMICOLON@392..393 ";" [] []
+          35: CSS_DECLARATION_WITH_SEMICOLON@393..405
+            0: CSS_DECLARATION@393..404
+              0: CSS_GENERIC_PROPERTY@393..404
+                0: CSS_IDENTIFIER@393..396
+                  0: IDENT@393..396 "a" [Newline("\n"), Whitespace("\t")] []
+                1: COLON@396..398 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@398..404
+                  0: CSS_NUMBER@398..404
+                    0: CSS_NUMBER_LITERAL@398..404 "-0.5e0" [] []
+              1: (empty)
+            1: SEMICOLON@404..405 ";" [] []
+          36: CSS_DECLARATION_WITH_SEMICOLON@405..413
+            0: CSS_DECLARATION@405..412
+              0: CSS_GENERIC_PROPERTY@405..412
+                0: CSS_IDENTIFIER@405..409
+                  0: IDENT@405..409 "a" [Newline("\n"), Newline("\n"), Whitespace("\t")] []
+                1: COLON@409..411 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@411..412
+                  0: CSS_NUMBER@411..412
+                    0: CSS_NUMBER_LITERAL@411..412 "1" [] []
+              1: (empty)
+            1: SEMICOLON@412..413 ";" [] []
+          37: CSS_DECLARATION_WITH_SEMICOLON@413..426
+            0: CSS_DECLARATION@413..425
+              0: CSS_GENERIC_PROPERTY@413..425
+                0: CSS_IDENTIFIER@413..416
+                  0: IDENT@413..416 "a" [Newline("\n"), Whitespace("\t")] []
+                1: COLON@416..418 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@418..425
+                  0: CSS_NUMBER@418..425
+                    0: CSS_NUMBER_LITERAL@418..425 "1.00500" [] []
+              1: (empty)
+            1: SEMICOLON@425..426 ";" [] []
+          38: CSS_DECLARATION_WITH_SEMICOLON@426..435
+            0: CSS_DECLARATION@426..434
+              0: CSS_GENERIC_PROPERTY@426..434
+                0: CSS_IDENTIFIER@426..429
+                  0: IDENT@426..429 "a" [Newline("\n"), Whitespace("\t")] []
+                1: COLON@429..431 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@431..434
+                  0: CSS_NUMBER@431..434
+                    0: CSS_NUMBER_LITERAL@431..434 "1.0" [] []
+              1: (empty)
+            1: SEMICOLON@434..435 ";" [] []
+          39: CSS_DECLARATION_WITH_SEMICOLON@435..444
+            0: CSS_DECLARATION@435..443
+              0: CSS_GENERIC_PROPERTY@435..443
+                0: CSS_IDENTIFIER@435..438
+                  0: IDENT@435..438 "a" [Newline("\n"), Whitespace("\t")] []
+                1: COLON@438..440 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@440..443
+                  0: CSS_NUMBER@440..443
+                    0: CSS_NUMBER_LITERAL@440..443 "1.5" [] []
+              1: (empty)
+            1: SEMICOLON@443..444 ";" [] []
+          40: CSS_DECLARATION_WITH_SEMICOLON@444..454
+            0: CSS_DECLARATION@444..453
+              0: CSS_GENERIC_PROPERTY@444..453
+                0: CSS_IDENTIFIER@444..447
+                  0: IDENT@444..447 "a" [Newline("\n"), Whitespace("\t")] []
+                1: COLON@447..449 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@449..453
+                  0: CSS_NUMBER@449..453
+                    0: CSS_NUMBER_LITERAL@449..453 "1.50" [] []
+              1: (empty)
+            1: SEMICOLON@453..454 ";" [] []
+          41: CSS_DECLARATION_WITH_SEMICOLON@454..468
+            0: CSS_DECLARATION@454..467
+              0: CSS_GENERIC_PROPERTY@454..467
+                0: CSS_IDENTIFIER@454..458
+                  0: IDENT@454..458 "a" [Newline("\n"), Newline("\n"), Whitespace("\t")] []
+                1: COLON@458..460 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@460..467
+                  0: CSS_NUMBER@460..467
+                    0: CSS_NUMBER_LITERAL@460..467 "0.00500" [] []
+              1: (empty)
+            1: SEMICOLON@467..468 ";" [] []
+          42: CSS_DECLARATION_WITH_SEMICOLON@468..477
+            0: CSS_DECLARATION@468..476
+              0: CSS_GENERIC_PROPERTY@468..476
+                0: CSS_IDENTIFIER@468..471
+                  0: IDENT@468..471 "a" [Newline("\n"), Whitespace("\t")] []
+                1: COLON@471..473 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@473..476
+                  0: CSS_NUMBER@473..476
+                    0: CSS_NUMBER_LITERAL@473..476 "0.0" [] []
+              1: (empty)
+            1: SEMICOLON@476..477 ";" [] []
+          43: CSS_DECLARATION_WITH_SEMICOLON@477..489
+            0: CSS_DECLARATION@477..488
+              0: CSS_GENERIC_PROPERTY@477..488
+                0: CSS_IDENTIFIER@477..480
+                  0: IDENT@477..480 "a" [Newline("\n"), Whitespace("\t")] []
+                1: COLON@480..482 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@482..488
+                  0: CSS_NUMBER@482..488
+                    0: CSS_NUMBER_LITERAL@482..488 "0.0000" [] []
+              1: (empty)
+            1: SEMICOLON@488..489 ";" [] []
+          44: CSS_DECLARATION_WITH_SEMICOLON@489..515
+            0: CSS_DECLARATION@489..514
+              0: CSS_GENERIC_PROPERTY@489..514
+                0: CSS_IDENTIFIER@489..493
+                  0: IDENT@489..493 "a" [Newline("\n"), Newline("\n"), Whitespace("\t")] []
+                1: COLON@493..495 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@495..514
+                  0: CSS_NUMBER@495..514
+                    0: CSS_NUMBER_LITERAL@495..514 "500600.001230045000" [] []
+              1: (empty)
+            1: SEMICOLON@514..515 ";" [] []
+          45: CSS_DECLARATION_WITH_SEMICOLON@515..531
+            0: CSS_DECLARATION@515..530
+              0: CSS_GENERIC_PROPERTY@515..530
+                0: CSS_IDENTIFIER@515..518
+                  0: IDENT@515..518 "a" [Newline("\n"), Whitespace("\t")] []
+                1: COLON@518..520 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@520..530
+                  0: CSS_NUMBER@520..530
+                    0: CSS_NUMBER_LITERAL@520..530 "1.00500e60" [] []
+              1: (empty)
+            1: SEMICOLON@530..531 ";" [] []
+          46: CSS_DECLARATION_WITH_SEMICOLON@531..543
+            0: CSS_DECLARATION@531..542
+              0: CSS_GENERIC_PROPERTY@531..542
+                0: CSS_IDENTIFIER@531..534
+                  0: IDENT@531..534 "a" [Newline("\n"), Whitespace("\t")] []
+                1: COLON@534..536 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@536..542
+                  0: CSS_NUMBER@536..542
+                    0: CSS_NUMBER_LITERAL@536..542 "1.0e60" [] []
+              1: (empty)
+            1: SEMICOLON@542..543 ";" [] []
+          47: CSS_DECLARATION_WITH_SEMICOLON@543..559
+            0: CSS_DECLARATION@543..558
+              0: CSS_GENERIC_PROPERTY@543..558
+                0: CSS_IDENTIFIER@543..546
+                  0: IDENT@543..546 "a" [Newline("\n"), Whitespace("\t")] []
+                1: COLON@546..548 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@548..558
+                  0: CSS_NUMBER@548..558
+                    0: CSS_NUMBER_LITERAL@548..558 "0.00500e60" [] []
+              1: (empty)
+            1: SEMICOLON@558..559 ";" [] []
+          48: CSS_DECLARATION_WITH_SEMICOLON@559..571
+            0: CSS_DECLARATION@559..570
+              0: CSS_GENERIC_PROPERTY@559..570
+                0: CSS_IDENTIFIER@559..562
+                  0: IDENT@559..562 "a" [Newline("\n"), Whitespace("\t")] []
+                1: COLON@562..564 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@564..570
+                  0: CSS_NUMBER@564..570
+                    0: CSS_NUMBER_LITERAL@564..570 "0.0e60" [] []
+              1: (empty)
+            1: SEMICOLON@570..571 ";" [] []
+          49: CSS_DECLARATION_WITH_SEMICOLON@571..586
+            0: CSS_DECLARATION@571..585
+              0: CSS_GENERIC_PROPERTY@571..585
+                0: CSS_IDENTIFIER@571..574
+                  0: IDENT@571..574 "a" [Newline("\n"), Whitespace("\t")] []
+                1: COLON@574..576 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@576..585
+                  0: CSS_NUMBER@576..585
+                    0: CSS_NUMBER_LITERAL@576..585 "0.0000e60" [] []
+              1: (empty)
+            1: SEMICOLON@585..586 ";" [] []
+          50: CSS_DECLARATION_WITH_SEMICOLON@586..597
+            0: CSS_DECLARATION@586..596
+              0: CSS_GENERIC_PROPERTY@586..596
+                0: CSS_IDENTIFIER@586..589
+                  0: IDENT@586..589 "a" [Newline("\n"), Whitespace("\t")] []
+                1: COLON@589..591 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@591..596
+                  0: CSS_NUMBER@591..596
+                    0: CSS_NUMBER_LITERAL@591..596 ".0e60" [] []
+              1: (empty)
+            1: SEMICOLON@596..597 ";" [] []
+          51: CSS_DECLARATION_WITH_SEMICOLON@597..608
+            0: CSS_DECLARATION@597..607
+              0: CSS_GENERIC_PROPERTY@597..607
+                0: CSS_IDENTIFIER@597..600
+                  0: IDENT@597..600 "a" [Newline("\n"), Whitespace("\t")] []
+                1: COLON@600..602 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@602..607
+                  0: CSS_NUMBER@602..607
+                    0: CSS_NUMBER_LITERAL@602..607 "0.e60" [] []
+              1: (empty)
+            1: SEMICOLON@607..608 ";" [] []
+          52: CSS_DECLARATION_WITH_SEMICOLON@608..618
+            0: CSS_DECLARATION@608..617
+              0: CSS_GENERIC_PROPERTY@608..617
+                0: CSS_IDENTIFIER@608..611
+                  0: IDENT@608..611 "a" [Newline("\n"), Whitespace("\t")] []
+                1: COLON@611..613 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@613..617
+                  0: CSS_NUMBER@613..617
+                    0: CSS_NUMBER_LITERAL@613..617 "0e60" [] []
+              1: (empty)
+            1: SEMICOLON@617..618 ";" [] []
+          53: CSS_DECLARATION_WITH_SEMICOLON@618..646
+            0: CSS_DECLARATION@618..645
+              0: CSS_GENERIC_PROPERTY@618..645
+                0: CSS_IDENTIFIER@618..621
+                  0: IDENT@618..621 "a" [Newline("\n"), Whitespace("\t")] []
+                1: COLON@621..623 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@623..645
+                  0: CSS_NUMBER@623..645
+                    0: CSS_NUMBER_LITERAL@623..645 "500600.001230045000e60" [] []
+              1: (empty)
+            1: SEMICOLON@645..646 ";" [] []
+          54: CSS_DECLARATION_WITH_SEMICOLON@646..654
+            0: CSS_DECLARATION@646..653
+              0: CSS_GENERIC_PROPERTY@646..653
+                0: CSS_IDENTIFIER@646..649
+                  0: IDENT@646..649 "a" [Newline("\n"), Whitespace("\t")] []
+                1: COLON@649..651 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@651..653
+                  0: CSS_NUMBER@651..653
+                    0: CSS_NUMBER_LITERAL@651..653 "10" [] []
+              1: (empty)
+            1: SEMICOLON@653..654 ";" [] []
+          55: CSS_DECLARATION_WITH_SEMICOLON@654..664
+            0: CSS_DECLARATION@654..663
+              0: CSS_GENERIC_PROPERTY@654..663
+                0: CSS_IDENTIFIER@654..657
+                  0: IDENT@654..657 "a" [Newline("\n"), Whitespace("\t")] []
+                1: COLON@657..659 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@659..663
+                  0: CSS_NUMBER@659..663
+                    0: CSS_NUMBER_LITERAL@659..663 "9700" [] []
+              1: (empty)
+            1: SEMICOLON@663..664 ";" [] []
+          56: CSS_DECLARATION_WITH_SEMICOLON@664..676
+            0: CSS_DECLARATION@664..675
+              0: CSS_GENERIC_PROPERTY@664..675
+                0: CSS_IDENTIFIER@664..667
+                  0: IDENT@664..667 "a" [Newline("\n"), Whitespace("\t")] []
+                1: COLON@667..669 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@669..675
+                  0: CSS_NUMBER@669..675
+                    0: CSS_NUMBER_LITERAL@669..675 "10e100" [] []
+              1: (empty)
+            1: SEMICOLON@675..676 ";" [] []
+          57: CSS_DECLARATION_WITH_SEMICOLON@676..710
+            0: CSS_DECLARATION@676..709
+              0: CSS_GENERIC_PROPERTY@676..709
+                0: CSS_IDENTIFIER@676..684
+                  0: IDENT@676..684 "height" [Newline("\n"), Whitespace("\t")] []
+                1: COLON@684..686 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@686..709
+                  0: CSS_FUNCTION@686..709
+                    0: CSS_IDENTIFIER@686..690
+                      0: IDENT@686..690 "attr" [] []
+                    1: L_PAREN@690..691 "(" [] []
+                    2: CSS_PARAMETER_LIST@691..708
+                      0: CSS_PARAMETER@691..703
+                        0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@691..703
+                          0: CSS_COMPONENT_VALUE_LIST@691..703
+                            0: CSS_IDENTIFIER@691..701
+                              0: IDENT@691..701 "data-size" [] [Whitespace(" ")]
+                            1: CSS_IDENTIFIER@701..703
+                              0: IDENT@701..703 "em" [] []
+                      1: COMMA@703..705 "," [] [Whitespace(" ")]
+                      2: CSS_PARAMETER@705..708
+                        0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@705..708
+                          0: CSS_COMPONENT_VALUE_LIST@705..708
+                            0: CSS_NUMBER@705..708
+                              0: CSS_NUMBER_LITERAL@705..708 ".01" [] []
+                    3: R_PAREN@708..709 ")" [] []
+              1: (empty)
+            1: SEMICOLON@709..710 ";" [] []
+        2: R_CURLY@710..712 "}" [Newline("\n")] []
+  2: EOF@712..713 "" [Newline("\n")] []
+
+```

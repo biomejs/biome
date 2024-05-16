@@ -39,6 +39,7 @@ declare_rule! {
     pub NoCommaOperator {
         version: "1.0.0",
         name: "noCommaOperator",
+        language: "js",
         sources: &[RuleSource::Eslint("no-sequences")],
         recommended: true,
     }

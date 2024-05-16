@@ -83,6 +83,7 @@ declare_rule! {
     pub NoDuplicateCase {
         version: "1.0.0",
         name: "noDuplicateCase",
+        language: "js",
         sources: &[RuleSource::Eslint("no-duplicate-case")],
         recommended: true,
     }

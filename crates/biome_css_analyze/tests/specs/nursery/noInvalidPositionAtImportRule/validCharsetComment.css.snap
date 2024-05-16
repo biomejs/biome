@@ -1,0 +1,11 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: validCharsetComment.css
+---
+# Input
+```css
+@charset "utf-8";
+/* some comment */
+@import 'foo.css';
+
+```

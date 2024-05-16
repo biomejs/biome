@@ -86,6 +86,7 @@ declare_rule! {
     pub NoThenProperty {
         version: "1.5.0",
         name: "noThenProperty",
+        language: "js",
         sources: &[RuleSource::EslintUnicorn("no-thenable")],
         recommended: true,
     }

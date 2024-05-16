@@ -17,3 +17,8 @@ input Point2D {
   x: Float = 0
   "this is y" y: Float @deprecated
 }
+
+input input @input {
+	input: input
+}
+

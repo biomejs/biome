@@ -2,7 +2,7 @@ query likeStory }
 
 query likeStory
 
-query like$Story
+query }
 
 # malformed variables
 query ($storyId: ID! {
@@ -37,6 +37,10 @@ query (:  {
 	likeStory
 }
 
+query :  {
+	likeStory
+}
+
 query (  {
 	likeStory
 }
@@ -45,8 +49,13 @@ query ($storyId: = @ {
 	likeStory
 }
 
+# malformed alias
+query  {
+	: likeStory
+}
+
 # malformed arguments
-query ($storyId: ID!) {
+query {
 	likeStory storyId: $storyId)
 }
 
@@ -60,6 +69,10 @@ query ($storyId: ID!)  {
 
 query ($storyId: ID!) {
 	likeStory storyId: $
+}
+
+query ($156: = @) {
+	likeStory
 }
 
 # malformed directives

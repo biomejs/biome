@@ -1294,6 +1294,7 @@ fn parse_ts_call_signature_type_member(p: &mut JsParser, context: TypeContext) -
 // type A = { new (): string; }
 // type B = { new (a: string, b: number) }
 // type C = { new <A, B>(a: A, b: B): string }
+// type D = { new <const T>(a: T, b: B): string }
 
 // test_err ts ts_construct_signature_member_err
 // type C = { new <>(a: A, b: B): string }
@@ -1307,7 +1308,13 @@ fn parse_ts_construct_signature_type_member(
 
     let m = p.start();
     p.expect(T![new]);
-    parse_ts_type_parameters(p, context.and_allow_in_out_modifier(true)).ok();
+    parse_ts_type_parameters(
+        p,
+        context
+            .and_allow_const_modifier(true)
+            .and_allow_in_out_modifier(true),
+    )
+    .ok();
     parse_parameter_list(
         p,
         ParameterContext::Declaration,

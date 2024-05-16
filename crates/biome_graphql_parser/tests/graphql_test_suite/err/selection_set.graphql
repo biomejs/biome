@@ -5,6 +5,8 @@
 
 }
 
+query }
+
 {
 	hero(name: "Tony Stark"
 }
@@ -31,10 +33,15 @@
 }
 
 {
+  0: (name: "Tony Stark")
+}
+
+{
   ironMan: hero(name: "Tony Stark" {
 		country,
 		firstWife: wife(name: "Pepper"){
 		}
+	}
 }
 
 {
@@ -47,22 +54,16 @@
 
 # Fragment spread
 {
-  ...
-}
-
-{
-  ... @deprecated
-}
-
-{
   ironMan: (: "Tony Stark") @ {
 		...
 	}
+}
 }
 
 {
   ... {
 		hero
+	}
 }
 
 {
@@ -77,3 +78,8 @@
 		age
 	}
 }
+
+{
+  ...
+}
+

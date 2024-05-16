@@ -183,21 +183,31 @@ impl BindingName {
 
 #[derive(Debug, Clone)]
 struct BindingInfo {
+    /// range of the name
     range: TextRange,
-    is_imported: bool,
+    /// Kind of the declaration,
+    /// or in the acse of a bogus declaration, the kind of the name
+    declaration_kind: JsSyntaxKind,
 }
 
 impl BindingInfo {
-    fn new(range: TextRange) -> Self {
+    fn new(range: TextRange, declaration_kind: JsSyntaxKind) -> Self {
         Self {
             range,
-            is_imported: false,
+            declaration_kind,
         }
     }
 
-    fn into_imported(mut self) -> Self {
-        self.is_imported = true;
-        self
+    fn is_imported(&self) -> bool {
+        matches!(
+            self.declaration_kind,
+            JsSyntaxKind::TS_IMPORT_EQUALS_DECLARATION
+                | JsSyntaxKind::JS_DEFAULT_IMPORT_SPECIFIER
+                | JsSyntaxKind::JS_NAMESPACE_IMPORT_SPECIFIER
+                | JsSyntaxKind::JS_BOGUS_NAMED_IMPORT_SPECIFIER
+                | JsSyntaxKind::JS_SHORTHAND_NAMED_IMPORT_SPECIFIER
+                | JsSyntaxKind::JS_NAMED_IMPORT_SPECIFIER
+        )
     }
 }
 
@@ -399,9 +409,9 @@ impl SemanticEventExtractor {
     fn enter_identifier_binding(&mut self, node: &AnyJsIdentifierBinding) {
         let mut hoisted_scope_id = None;
         let is_exported = if let Ok(name_token) = node.name_token() {
-            let info = BindingInfo::new(name_token.text_range());
             let name = name_token.token_text_trimmed();
             if let Some(declaration) = node.declaration() {
+                let info = BindingInfo::new(name_token.text_range(), declaration.syntax().kind());
                 let is_exported = declaration.export().is_some();
                 match declaration {
                     AnyJsBindingDeclaration::JsArrayBindingPatternElement(_)
@@ -476,29 +486,35 @@ impl SemanticEventExtractor {
                         self.push_binding(None, BindingName::Type(name), info);
                     }
                     AnyJsBindingDeclaration::TsImportEqualsDeclaration(declaration) => {
-                        let info = info.into_imported();
                         if declaration.type_token().is_none() {
                             self.push_binding(None, BindingName::Value(name.clone()), info.clone());
                         }
                         self.push_binding(None, BindingName::Type(name), info);
                     }
-                    AnyJsBindingDeclaration::JsDefaultImportSpecifier(_)
-                    | AnyJsBindingDeclaration::JsNamespaceImportSpecifier(_) => {
+                    AnyJsBindingDeclaration::JsDefaultImportSpecifier(_) => {
                         let type_token = declaration
                             .parent::<AnyJsImportClause>()
                             .and_then(|clause| clause.type_token());
-                        let info = info.into_imported();
                         if type_token.is_none() {
                             self.push_binding(None, BindingName::Value(name.clone()), info.clone());
                         }
                         self.push_binding(None, BindingName::Type(name), info);
+                    }
+                    AnyJsBindingDeclaration::JsNamespaceImportSpecifier(_) => {
+                        let type_token = declaration
+                            .parent::<AnyJsImportClause>()
+                            .and_then(|clause| clause.type_token());
+                        if type_token.is_none() {
+                            self.push_binding(None, BindingName::Value(name.clone()), info.clone());
+                        } else {
+                            self.push_binding(None, BindingName::Type(name), info);
+                        }
                     }
                     AnyJsBindingDeclaration::JsBogusNamedImportSpecifier(_)
                     | AnyJsBindingDeclaration::JsShorthandNamedImportSpecifier(_)
                     | AnyJsBindingDeclaration::JsNamedImportSpecifier(_) => {
                         let specifier =
                             AnyJsNamedImportSpecifier::unwrap_cast(declaration.into_syntax());
-                        let info = info.into_imported();
                         if !specifier.imports_only_types() {
                             self.push_binding(None, BindingName::Value(name.clone()), info.clone());
                         }
@@ -523,7 +539,8 @@ impl SemanticEventExtractor {
                 }
                 is_exported
             } else {
-                // Handle identifiers in bogus nodes,
+                // Handle identifiers in bogus nodes
+                let info = BindingInfo::new(name_token.text_range(), node.syntax().kind());
                 self.push_binding(None, BindingName::Value(name), info);
                 false
             }
@@ -611,6 +628,10 @@ impl SemanticEventExtractor {
                 }
             }
             AnyJsIdentifierUsage::JsxReferenceIdentifier(_) => {
+                if name.text() == "this" {
+                    // Ignore `this` in JSX. e.g. `<this.foo />`.
+                    return;
+                }
                 self.push_reference(BindingName::Value(name), Reference::Read(range));
             }
             AnyJsIdentifierUsage::JsIdentifierAssignment(_) => {
@@ -704,7 +725,7 @@ impl SemanticEventExtractor {
             if let Ok(name_token) = infer.ident_token() {
                 let name = name_token.token_text_trimmed();
                 let name_range = name_token.text_range();
-                let binding_info = BindingInfo::new(name_range);
+                let binding_info = BindingInfo::new(name_range, JsSyntaxKind::TS_INFER_TYPE);
                 self.push_binding(None, BindingName::Type(name), binding_info);
                 let scope_id = self.current_scope_mut().scope_id;
                 self.stash.push_back(SemanticEvent::DeclarationFound {
@@ -739,15 +760,16 @@ impl SemanticEventExtractor {
     /// 2 - Unmatched references are promoted to its parent scope or become [UnresolvedReference] events;
     /// 3 - All declarations of this scope are removed;
     /// 4 - All shadowed declarations are restored.
-    fn pop_scope(&mut self, range: TextRange) {
+    fn pop_scope(&mut self, scope_range: TextRange) {
         debug_assert!(!self.scopes.is_empty());
         let scope = self.scopes.pop().unwrap();
         let scope_id = scope.scope_id;
 
-        // Match references and declarations
+        // Bind references to declarations
         for (name, mut references) in scope.references {
             if let Some(&BindingInfo {
-                range: declared_at, ..
+                range: declared_at,
+                declaration_kind,
             }) = self.bindings.get(&name)
             {
                 // If we know the declaration of these reference push the correct events...
@@ -772,9 +794,36 @@ impl SemanticEventExtractor {
                                 }
                             }
                         }
-                        Reference::Read(range)
-                        | Reference::Typeof(range)
-                        | Reference::Qualified(range) => {
+                        Reference::Read(range) | Reference::Typeof(range) => {
+                            if declaration_kind == JsSyntaxKind::JS_NAMESPACE_IMPORT_SPECIFIER
+                                && matches!(name, BindingName::Type(_))
+                            {
+                                // An import namespace imported as a type can only be
+                                // used in a qualified name, e.g `Namesapce.Type`.
+                                // Thus, the reference is unresolved.
+                                // Note that we don't need to forward the reference in a parent scope,
+                                // becasue an import namespace is laready in the root scope.
+                                self.stash.push_back(SemanticEvent::UnresolvedReference {
+                                    is_read: !reference.is_write(),
+                                    range: *reference.range(),
+                                });
+                                continue;
+                            }
+                            if declaration_before_reference {
+                                SemanticEvent::Read {
+                                    range,
+                                    declared_at,
+                                    scope_id,
+                                }
+                            } else {
+                                SemanticEvent::HoistedRead {
+                                    range,
+                                    declared_at,
+                                    scope_id,
+                                }
+                            }
+                        }
+                        Reference::Qualified(range) => {
                             if declaration_before_reference {
                                 SemanticEvent::Read {
                                     range,
@@ -825,16 +874,59 @@ impl SemanticEventExtractor {
                             // If a dual binding exists, then it exports to the dual binding.
                             continue;
                         }
+                        Reference::ExportType(range) => {
+                            if let Some(info) = &dual_binding {
+                                // TypeScript namespaces and import namespaces can also be exported as a type.
+                                if matches!(
+                                    info.declaration_kind,
+                                    JsSyntaxKind::JS_NAMESPACE_IMPORT_SPECIFIER
+                                        | TS_MODULE_DECLARATION
+                                ) {
+                                    let declared_at = info.range;
+                                    let declaration_before_reference =
+                                        declared_at.start() < reference.range().start();
+                                    self.stash
+                                        .push_back(SemanticEvent::Exported { range: declared_at });
+                                    let event = if declaration_before_reference {
+                                        SemanticEvent::Read {
+                                            range,
+                                            declared_at,
+                                            scope_id: 0,
+                                        }
+                                    } else {
+                                        SemanticEvent::HoistedRead {
+                                            range,
+                                            declared_at,
+                                            scope_id: 0,
+                                        }
+                                    };
+                                    self.stash.push_back(event);
+                                    continue;
+                                }
+                            }
+                        }
                         Reference::Typeof(range) | Reference::Qualified(range) => {
                             // A typeof can only use a value,
                             // but also an imported type (with `type` modifier)
                             if let Some(info) = &dual_binding {
-                                if info.is_imported {
-                                    self.stash.push_back(SemanticEvent::Read {
-                                        range,
-                                        declared_at: info.range,
-                                        scope_id: 0,
-                                    });
+                                if info.is_imported() {
+                                    let declared_at = info.range;
+                                    let declaration_before_reference =
+                                        declared_at.start() < reference.range().start();
+                                    let event = if declaration_before_reference {
+                                        SemanticEvent::Read {
+                                            range,
+                                            declared_at,
+                                            scope_id: 0,
+                                        }
+                                    } else {
+                                        SemanticEvent::HoistedRead {
+                                            range,
+                                            declared_at,
+                                            scope_id: 0,
+                                        }
+                                    };
+                                    self.stash.push_back(event);
                                     continue;
                                 }
                             }
@@ -858,7 +950,7 @@ impl SemanticEventExtractor {
         self.bindings.extend(scope.shadowed);
 
         self.stash.push_back(SemanticEvent::ScopeEnded {
-            range,
+            range: scope_range,
             scope_id: scope.scope_id,
         });
     }

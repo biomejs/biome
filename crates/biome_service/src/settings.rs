@@ -432,7 +432,7 @@ impl From<JavascriptConfiguration> for LanguageSettings<JsLanguage> {
         language_setting.formatter.quote_style = Some(formatter.quote_style);
         language_setting.formatter.jsx_quote_style = Some(formatter.jsx_quote_style);
         language_setting.formatter.quote_properties = Some(formatter.quote_properties);
-        language_setting.formatter.trailing_comma = Some(formatter.trailing_comma);
+        language_setting.formatter.trailing_commas = Some(formatter.trailing_commas);
         language_setting.formatter.semicolons = Some(formatter.semicolons);
         language_setting.formatter.arrow_parentheses = Some(formatter.arrow_parentheses);
         language_setting.formatter.bracket_spacing = Some(formatter.bracket_spacing.into());
@@ -965,8 +965,8 @@ impl OverrideSettingPattern {
         if let Some(quote_properties) = js_formatter.quote_properties {
             options.set_quote_properties(quote_properties);
         }
-        if let Some(trailing_comma) = js_formatter.trailing_comma {
-            options.set_trailing_comma(trailing_comma);
+        if let Some(trailing_commas) = js_formatter.trailing_commas {
+            options.set_trailing_commas(trailing_commas);
         }
         if let Some(semicolons) = js_formatter.semicolons {
             options.set_semicolons(semicolons);
@@ -1273,8 +1273,10 @@ fn to_javascript_language_settings(
     language_setting.formatter.quote_properties = formatter
         .quote_properties
         .or(parent_formatter.quote_properties);
-    language_setting.formatter.trailing_comma =
-        formatter.trailing_comma.or(parent_formatter.trailing_comma);
+    language_setting.formatter.trailing_commas = formatter
+        .trailing_commas
+        .or(formatter.trailing_comma)
+        .or(parent_formatter.trailing_commas);
     language_setting.formatter.semicolons = formatter.semicolons.or(parent_formatter.semicolons);
     language_setting.formatter.arrow_parentheses = formatter
         .arrow_parentheses

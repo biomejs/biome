@@ -44,6 +44,7 @@ declare_rule! {
     pub UseSingleVarDeclarator {
         version: "1.0.0",
         name: "useSingleVarDeclarator",
+        language: "js",
         sources: &[RuleSource::Eslint("one-var")],
         recommended: true,
         fix_kind: FixKind::Unsafe,
@@ -202,11 +203,11 @@ impl Rule for UseSingleVarDeclarator {
         let mut mutation = ctx.root().begin();
         mutation.replace_element(prev_parent.into(), next_parent.into());
 
-        Some(JsRuleAction {
-            category: ActionCategory::QuickFix,
-            applicability: Applicability::MaybeIncorrect,
-            message: markup! { "Break out into multiple declarations" }.to_owned(),
+        Some(JsRuleAction::new(
+            ActionCategory::QuickFix,
+            Applicability::MaybeIncorrect,
+            markup! { "Break out into multiple declarations" }.to_owned(),
             mutation,
-        })
+        ))
     }
 }

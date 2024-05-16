@@ -40,6 +40,7 @@ declare_rule! {
     pub UseDefaultSwitchClause {
         version: "1.7.2",
         name: "useDefaultSwitchClause",
+        language: "js",
         sources: &[RuleSource::Eslint("default-case")],
         recommended: false,
     }

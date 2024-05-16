@@ -72,6 +72,7 @@ declare_rule! {
     pub NoExcessiveCognitiveComplexity {
         version: "1.0.0",
         name: "noExcessiveCognitiveComplexity",
+        language: "js",
         sources: &[RuleSource::EslintSonarJs("cognitive-complexity")],
         recommended: false,
     }

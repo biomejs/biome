@@ -60,6 +60,7 @@ declare_rule! {
     pub UseGetterReturn {
         version: "1.0.0",
         name: "useGetterReturn",
+        language: "js",
         sources: &[RuleSource::Eslint("getter-return")],
         recommended: true,
     }

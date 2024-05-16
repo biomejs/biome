@@ -52,6 +52,7 @@ declare_rule! {
     pub NoInvalidNewBuiltin {
         version: "1.3.0",
         name: "noInvalidNewBuiltin",
+        language: "js",
         // TODO: Remove this source once `useConsistentBuiltinInstantiation` is stable
         sources: &[RuleSource::Eslint("no-new-native-nonconstructor")],
         recommended: true,
@@ -97,12 +98,12 @@ impl Rule for NoInvalidNewBuiltin {
             node.clone().into(),
             call_expression.into(),
         );
-        Some(JsRuleAction {
-            category: ActionCategory::QuickFix,
-            applicability: Applicability::MaybeIncorrect,
-            message: markup! { "Remove "<Emphasis>"new"</Emphasis>"." }.to_owned(),
+        Some(JsRuleAction::new(
+            ActionCategory::QuickFix,
+            Applicability::MaybeIncorrect,
+            markup! { "Remove "<Emphasis>"new"</Emphasis>"." }.to_owned(),
             mutation,
-        })
+        ))
     }
 }
 

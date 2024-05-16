@@ -2,7 +2,6 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: js/module/bom_character.js
 ---
-
 # Input
 
 ```js
@@ -24,7 +23,7 @@ Line width: 80
 Quote style: Double Quotes
 JSX quote style: Double Quotes
 Quote properties: As needed
-Trailing comma: All
+Trailing commas: All
 Semicolons: Always
 Arrow parentheses: Always
 Bracket spacing: true
@@ -35,5 +34,3 @@ Attribute Position: Auto
 ```js
 ﻿function foo() {}
 ```
-
-

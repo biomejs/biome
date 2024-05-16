@@ -54,6 +54,7 @@ declare_rule! {
     pub NoEmptyBlockStatements {
         version: "1.3.0",
         name: "noEmptyBlockStatements",
+        language: "js",
         sources: &[
             RuleSource::Eslint("no-empty"),
             RuleSource::Eslint("no-empty-static-block"),

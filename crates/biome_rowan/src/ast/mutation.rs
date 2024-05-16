@@ -138,6 +138,7 @@ where
         )
     }
 
+    /// Return a new version of this node detached from its parent node
     fn detach(self) -> Self {
         Self::unwrap_cast(self.into_syntax().detach())
     }

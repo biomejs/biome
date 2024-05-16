@@ -51,6 +51,7 @@ declare_rule! {
     pub UseDefaultParameterLast {
         version: "1.0.0",
         name: "useDefaultParameterLast",
+        language: "js",
         sources: &[
             RuleSource::Eslint("default-param-last"),
             RuleSource::EslintTypeScript("default-param-last")
@@ -159,13 +160,12 @@ impl Rule for UseDefaultParameterLast {
             mutation.replace_token_discard_trivia(prev_token, new_token);
             mutation.remove_node(initializer);
         }
-        Some(JsRuleAction {
+        Some(JsRuleAction::new(
+            ActionCategory::QuickFix,
+            Applicability::MaybeIncorrect,
+            markup! {"Turn the parameter into a "<Emphasis>"required parameter"</Emphasis>"."}
+                .to_owned(),
             mutation,
-            message:
-                markup! {"Turn the parameter into a "<Emphasis>"required parameter"</Emphasis>"."}
-                    .to_owned(),
-            category: ActionCategory::QuickFix,
-            applicability: Applicability::MaybeIncorrect,
-        })
+        ))
     }
 }

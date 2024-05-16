@@ -32,12 +32,15 @@ expression: content
 ```block
 fix.js:2:19 lint/correctness/noUndeclaredVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The arguments variable is undeclared
+  ! The arguments variable is undeclared.
   
   > 2 │     function f() {arguments;}
       │                   ^^^^^^^^^
     3 │     const FOO = "FOO";
     4 │     var x, y;
+  
+  i By default, Biome recognizes browser and Mode.js globals.
+    You can ignore more globals using the javascript.globals configuration.
   
 
 ```

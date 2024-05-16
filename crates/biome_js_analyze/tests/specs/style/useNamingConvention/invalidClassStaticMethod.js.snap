@@ -29,7 +29,7 @@ export default class {
 ```
 invalidClassStaticMethod.js:2:12 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This static method name should be in camelCase.
+  ! This class method name should be in camelCase.
   
     1 │ export default class {
   > 2 │     static METHOD() {}
@@ -37,15 +37,13 @@ invalidClassStaticMethod.js:2:12 lint/style/useNamingConvention ━━━━━�
     3 │ 
     4 │     static AMethod() {}
   
-  i The name could be renamed to `method`.
-  
 
 ```
 
 ```
 invalidClassStaticMethod.js:4:12 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This static method name should be in camelCase.
+  ! Two consecutive uppercase characters are not allowed in PascalCase because strictCase is set to `true`.
   
     2 │     static METHOD() {}
     3 │ 
@@ -54,7 +52,8 @@ invalidClassStaticMethod.js:4:12 lint/style/useNamingConvention ━━━━━�
     5 │ 
     6 │     static method_1() {}
   
-  i The name could be renamed to `aMethod`.
+  i If you want to use consecutive uppercase characters in PascalCase, then set the strictCase option to `false`.
+    See the rule options for more details.
   
 
 ```
@@ -62,7 +61,7 @@ invalidClassStaticMethod.js:4:12 lint/style/useNamingConvention ━━━━━�
 ```
 invalidClassStaticMethod.js:6:12 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This static method name should be in camelCase.
+  ! This class method name should be in camelCase.
   
     4 │     static AMethod() {}
     5 │ 
@@ -71,15 +70,13 @@ invalidClassStaticMethod.js:6:12 lint/style/useNamingConvention ━━━━━�
     7 │ 
     8 │     static Unknown_Style() {}
   
-  i The name could be renamed to `method1`.
-  
 
 ```
 
 ```
 invalidClassStaticMethod.js:8:12 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This static method name should be in camelCase.
+  ! This class method name should be in camelCase.
   
      6 │     static method_1() {}
      7 │ 
@@ -88,93 +85,82 @@ invalidClassStaticMethod.js:8:12 lint/style/useNamingConvention ━━━━━�
      9 │ 
     10 │     static #M() {}
   
-  i The name could be renamed to `unknownStyle`.
-  
 
 ```
 
 ```
-invalidClassStaticMethod.js:10:12 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalidClassStaticMethod.js:10:13 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This static method name should be in camelCase.
+  ! This class method name should be in camelCase.
   
      8 │     static Unknown_Style() {}
      9 │ 
   > 10 │     static #M() {}
-       │            ^^
+       │             ^
     11 │ 
     12 │     static #METHOD() {}
   
-  i The name could be renamed to `m`.
-  
 
 ```
 
 ```
-invalidClassStaticMethod.js:12:12 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalidClassStaticMethod.js:12:13 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This static method name should be in camelCase.
+  ! This class method name should be in camelCase.
   
     10 │     static #M() {}
     11 │ 
   > 12 │     static #METHOD() {}
-       │            ^^^^^^^
+       │             ^^^^^^
     13 │ 
     14 │     static #AMethod() {}
   
-  i The name could be renamed to `method`.
-  
 
 ```
 
 ```
-invalidClassStaticMethod.js:14:12 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalidClassStaticMethod.js:14:13 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This static method name should be in camelCase.
+  ! Two consecutive uppercase characters are not allowed in PascalCase because strictCase is set to `true`.
   
     12 │     static #METHOD() {}
     13 │ 
   > 14 │     static #AMethod() {}
-       │            ^^^^^^^^
+       │             ^^^^^^^
     15 │ 
     16 │     static #method_1() {}
   
-  i The name could be renamed to `aMethod`.
+  i If you want to use consecutive uppercase characters in PascalCase, then set the strictCase option to `false`.
+    See the rule options for more details.
   
 
 ```
 
 ```
-invalidClassStaticMethod.js:16:12 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalidClassStaticMethod.js:16:13 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This static method name should be in camelCase.
+  ! This class method name should be in camelCase.
   
     14 │     static #AMethod() {}
     15 │ 
   > 16 │     static #method_1() {}
-       │            ^^^^^^^^^
+       │             ^^^^^^^^
     17 │ 
     18 │     static #Unknown_Style() {}
   
-  i The name could be renamed to `method1`.
-  
 
 ```
 
 ```
-invalidClassStaticMethod.js:18:12 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalidClassStaticMethod.js:18:13 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This static method name should be in camelCase.
+  ! This class method name should be in camelCase.
   
     16 │     static #method_1() {}
     17 │ 
   > 18 │     static #Unknown_Style() {}
-       │            ^^^^^^^^^^^^^^
+       │             ^^^^^^^^^^^^^
     19 │ }
-  
-  i The name could be renamed to `unknownStyle`.
   
 
 ```
-
-

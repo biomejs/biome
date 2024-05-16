@@ -60,6 +60,7 @@ declare_rule! {
     pub NoUselessSwitchCase {
         version: "1.0.0",
         name: "noUselessSwitchCase",
+        language: "js",
         sources: &[RuleSource::EslintUnicorn("no-useless-switch-case")],
         recommended: true,
         fix_kind: FixKind::Unsafe,
@@ -151,11 +152,11 @@ impl Rule for NoUselessSwitchCase {
         } else {
             mutation.remove_node(useless_case);
         }
-        Some(JsRuleAction {
+        Some(JsRuleAction::new(
+            ActionCategory::QuickFix,
+            Applicability::MaybeIncorrect,
+            markup! {"Remove the useless "<Emphasis>"case"</Emphasis>"."}.to_owned(),
             mutation,
-            message: markup! {"Remove the useless "<Emphasis>"case"</Emphasis>"."}.to_owned(),
-            category: ActionCategory::QuickFix,
-            applicability: Applicability::MaybeIncorrect,
-        })
+        ))
     }
 }

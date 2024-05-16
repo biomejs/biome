@@ -48,6 +48,7 @@ declare_rule! {
     pub NoAccumulatingSpread {
         version: "1.0.0",
         name: "noAccumulatingSpread",
+        language: "js",
         recommended: true,
     }
 }

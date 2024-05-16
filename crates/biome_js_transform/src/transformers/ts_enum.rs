@@ -25,6 +25,7 @@ declare_transformation! {
     pub(crate) TsEnum {
         version: "1.3.0",
         name: "transformEnum",
+        language: "ts",
     }
 }
 

@@ -55,6 +55,7 @@ declare_rule! {
     pub UseHtmlLang {
         version: "1.0.0",
         name: "useHtmlLang",
+        language: "jsx",
         sources: &[RuleSource::EslintJsxA11y("html-has-lang")],
         recommended: true,
     }

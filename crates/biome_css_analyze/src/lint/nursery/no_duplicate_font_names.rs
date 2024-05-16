@@ -43,6 +43,7 @@ declare_rule! {
     pub NoDuplicateFontNames {
         version: "next",
         name: "noDuplicateFontNames",
+        language: "css",
         recommended: true,
         sources: &[RuleSource::Stylelint("font-family-no-duplicate-names")],
     }

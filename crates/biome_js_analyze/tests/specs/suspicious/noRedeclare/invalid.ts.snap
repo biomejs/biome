@@ -16,6 +16,13 @@ function f<T, T>() {}
 function g<T>() {
     type T = number;
 }
+
+import * as Ns1 from ""
+namespace Ns1 {}
+
+import type * as Ns2 from ""
+namespace Ns2 {}
+
 ```
 
 # Diagnostics
@@ -76,6 +83,7 @@ invalid.ts:11:10 lint/suspicious/noRedeclare ━━━━━━━━━━━�
   > 11 │     type T = number;
        │          ^
     12 │ }
+    13 │ 
   
   i 'T' is defined here:
   
@@ -85,6 +93,51 @@ invalid.ts:11:10 lint/suspicious/noRedeclare ━━━━━━━━━━━�
        │            ^
     11 │     type T = number;
     12 │ }
+  
+
+```
+
+```
+invalid.ts:15:11 lint/suspicious/noRedeclare ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Shouldn't redeclare 'Ns1'. Consider to delete it or rename it.
+  
+    14 │ import * as Ns1 from ""
+  > 15 │ namespace Ns1 {}
+       │           ^^^
+    16 │ 
+    17 │ import type * as Ns2 from ""
+  
+  i 'Ns1' is defined here:
+  
+    12 │ }
+    13 │ 
+  > 14 │ import * as Ns1 from ""
+       │             ^^^
+    15 │ namespace Ns1 {}
+    16 │ 
+  
+
+```
+
+```
+invalid.ts:18:11 lint/suspicious/noRedeclare ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Shouldn't redeclare 'Ns2'. Consider to delete it or rename it.
+  
+    17 │ import type * as Ns2 from ""
+  > 18 │ namespace Ns2 {}
+       │           ^^^
+    19 │ 
+  
+  i 'Ns2' is defined here:
+  
+    15 │ namespace Ns1 {}
+    16 │ 
+  > 17 │ import type * as Ns2 from ""
+       │                  ^^^
+    18 │ namespace Ns2 {}
+    19 │ 
   
 
 ```

@@ -66,6 +66,7 @@ declare_rule! {
     pub NoSelfAssign {
         version: "1.0.0",
         name: "noSelfAssign",
+        language: "js",
         sources: &[
             RuleSource::Eslint("no-self-assign"),
             RuleSource::Clippy("self_assignment"),

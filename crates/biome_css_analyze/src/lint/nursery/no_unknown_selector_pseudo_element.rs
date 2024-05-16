@@ -49,6 +49,7 @@ declare_rule! {
     pub NoUnknownSelectorPseudoElement {
         version: "next",
         name: "noUnknownSelectorPseudoElement",
+        language: "css",
         recommended: true,
         sources: &[RuleSource::Stylelint("selector-pseudo-element-no-unknown")],
     }

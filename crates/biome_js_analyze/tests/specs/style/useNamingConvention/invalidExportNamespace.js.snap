@@ -29,8 +29,6 @@ invalidExportNamespace.js:5:13 lint/style/useNamingConvention ━━━━━━
     6 │ 
     7 │ export * as snake_case from ""
   
-  i The name could be renamed to `constantCase`.
-  
 
 ```
 
@@ -46,8 +44,6 @@ invalidExportNamespace.js:7:13 lint/style/useNamingConvention ━━━━━━
     8 │ 
     9 │ export * as Unknown_Style from ""
   
-  i The name could be renamed to `snakeCase`.
-  
 
 ```
 
@@ -62,9 +58,5 @@ invalidExportNamespace.js:9:13 lint/style/useNamingConvention ━━━━━━
        │             ^^^^^^^^^^^^^
     10 │ 
   
-  i The name could be renamed to `unknownStyle`.
-  
 
 ```
-
-

@@ -88,6 +88,7 @@ declare_rule! {
     pub NoInnerDeclarations {
         version: "1.0.0",
         name: "noInnerDeclarations",
+        language: "js",
         sources: &[RuleSource::Eslint("no-inner-declarations")],
         recommended: true,
     }

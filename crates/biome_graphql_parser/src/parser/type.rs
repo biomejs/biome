@@ -5,7 +5,7 @@ use biome_parser::{
 };
 
 use super::{
-    is_at_name,
+    is_nth_at_name,
     parse_error::{expected_named_or_list_type, expected_type},
 };
 
@@ -42,7 +42,7 @@ fn parse_list_type(p: &mut GraphqlParser) -> CompletedMarker {
 
 #[inline]
 pub(crate) fn parse_named_type(p: &mut GraphqlParser) -> ParsedSyntax {
-    if !is_at_name(p) {
+    if !is_nth_at_name(p, 0) {
         return Absent;
     }
     let m = p.start();

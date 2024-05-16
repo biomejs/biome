@@ -64,6 +64,7 @@ declare_rule! {
     pub NoUnusedPrivateClassMembers {
         version: "1.3.3",
         name: "noUnusedPrivateClassMembers",
+        language: "js",
         sources: &[RuleSource::Eslint("no-unused-private-class-members")],
         recommended: false,
         fix_kind: FixKind::Unsafe,
@@ -106,12 +107,12 @@ impl Rule for NoUnusedPrivateClassMembers {
 
         mutation.remove_node(state.clone());
 
-        Some(JsRuleAction {
-            category: ActionCategory::QuickFix,
-            applicability: Applicability::MaybeIncorrect,
-            message: markup! { "Remove unused declaration." }.to_owned(),
+        Some(JsRuleAction::new(
+            ActionCategory::QuickFix,
+            Applicability::MaybeIncorrect,
+            markup! { "Remove unused declaration." }.to_owned(),
             mutation,
-        })
+        ))
     }
 }
 

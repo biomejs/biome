@@ -14,10 +14,12 @@ use biome_diagnostics::{
     Visit,
 };
 use biome_rowan::{AstNode, BatchMutation, BatchMutationExt, Language, TextRange};
+use serde::Serialize;
 use std::cmp::Ordering;
 use std::fmt::Debug;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize)]
+#[serde(rename_all = "camelCase")]
 /// Static metadata containing information about a rule
 pub struct RuleMetadata {
     /// It marks if a rule is deprecated, and if so a reason has to be provided.
@@ -28,6 +30,8 @@ pub struct RuleMetadata {
     pub name: &'static str,
     /// The content of the documentation comments for this rule
     pub docs: &'static str,
+    /// The language that the rule applies to.
+    pub language: &'static str,
     /// Whether a rule is recommended or not
     pub recommended: bool,
     /// The kind of fix
@@ -38,7 +42,8 @@ pub struct RuleMetadata {
     pub source_kind: Option<RuleSourceKind>,
 }
 
-#[derive(Debug, Clone, Eq, PartialEq)]
+#[derive(Debug, Clone, Eq, PartialEq, Serialize)]
+#[serde(rename_all = "camelCase")]
 /// Used to identify the kind of code action emitted by a rule
 pub enum FixKind {
     /// The rule emits a code action that is safe to apply. Usually these fixes don't change the semantic of the program.
@@ -57,7 +62,8 @@ impl Display for FixKind {
     }
 }
 
-#[derive(Debug, Clone, Eq)]
+#[derive(Debug, Clone, Eq, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub enum RuleSource {
     /// Rules from [Rust Clippy](https://rust-lang.github.io/rust-clippy/master/index.html)
     Clippy(&'static str),
@@ -226,7 +232,8 @@ impl RuleSource {
     }
 }
 
-#[derive(Debug, Default, Clone, Copy)]
+#[derive(Debug, Default, Clone, Copy, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub enum RuleSourceKind {
     /// The rule implements the same logic of the source
     #[default]
@@ -242,12 +249,18 @@ impl RuleSourceKind {
 }
 
 impl RuleMetadata {
-    pub const fn new(version: &'static str, name: &'static str, docs: &'static str) -> Self {
+    pub const fn new(
+        version: &'static str,
+        name: &'static str,
+        docs: &'static str,
+        language: &'static str,
+    ) -> Self {
         Self {
             deprecated: None,
             version,
             name,
             docs,
+            language,
             recommended: false,
             fix_kind: None,
             sources: &[],
@@ -280,6 +293,11 @@ impl RuleMetadata {
 
     pub const fn source_kind(mut self, source_kind: RuleSourceKind) -> Self {
         self.source_kind = Some(source_kind);
+        self
+    }
+
+    pub const fn language(mut self, language: &'static str) -> Self {
+        self.language = language;
         self
     }
 }
@@ -315,6 +333,7 @@ macro_rules! declare_rule {
     ( $( #[doc = $doc:literal] )+ $vis:vis $id:ident {
         version: $version:literal,
         name: $name:tt,
+        language: $language:literal,
         $( $key:ident: $value:expr, )*
     } ) => {
         $( #[doc = $doc] )*
@@ -323,7 +342,7 @@ macro_rules! declare_rule {
         impl $crate::RuleMeta for $id {
             type Group = super::Group;
             const METADATA: $crate::RuleMetadata =
-                $crate::RuleMetadata::new($version, $name, concat!( $( $doc, "\n", )* )) $( .$key($value) )*;
+                $crate::RuleMetadata::new($version, $name, concat!( $( $doc, "\n", )* ), $language) $( .$key($value) )*;
         }
 
         // Declare a new `rule_category!` macro in the module context that
@@ -789,6 +808,22 @@ pub struct RuleAction<L: Language> {
     pub applicability: Applicability,
     pub message: MarkupBuf,
     pub mutation: BatchMutation<L>,
+}
+
+impl<L: Language> RuleAction<L> {
+    pub fn new(
+        category: ActionCategory,
+        applicability: impl Into<Applicability>,
+        message: impl biome_console::fmt::Display,
+        mutation: BatchMutation<L>,
+    ) -> Self {
+        Self {
+            category,
+            applicability: applicability.into(),
+            message: markup! {{message}}.to_owned(),
+            mutation,
+        }
+    }
 }
 
 /// An action meant to suppress a lint rule

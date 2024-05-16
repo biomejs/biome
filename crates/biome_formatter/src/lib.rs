@@ -277,6 +277,11 @@ impl<'de> serde::Deserialize<'de> for LineWidth {
     where
         D: serde::Deserializer<'de>,
     {
+        // if let Ok(string_value) = <String as serde::Deserialize>::deserialize(&deserializer) {
+        //     if let Ok(value) = u16::from_str(&string_value) {
+        //         return LineWidth::try_from(value).map_err(serde::de::Error::custom);
+        //     }
+        // }
         let value: u16 = serde::Deserialize::deserialize(deserializer)?;
         let line_width = LineWidth::try_from(value).map_err(serde::de::Error::custom)?;
         Ok(line_width)

@@ -556,6 +556,7 @@ enum NodeDialect {
     Jsx,
     Json,
     Css,
+    Grit,
 }
 
 impl NodeDialect {
@@ -566,6 +567,7 @@ impl NodeDialect {
             NodeDialect::Jsx,
             NodeDialect::Json,
             NodeDialect::Css,
+            NodeDialect::Grit,
         ]
     }
 
@@ -580,6 +582,7 @@ impl NodeDialect {
             NodeDialect::Jsx => "jsx",
             NodeDialect::Json => "json",
             NodeDialect::Css => "css",
+            NodeDialect::Grit => "grit",
         }
     }
 
@@ -590,6 +593,7 @@ impl NodeDialect {
             "Ts" => NodeDialect::Ts,
             "Json" => NodeDialect::Json,
             "Css" => NodeDialect::Css,
+            "Grit" => NodeDialect::Grit,
             _ => {
                 eprintln!("missing prefix {}", name);
                 NodeDialect::Js
@@ -625,6 +629,10 @@ enum NodeConcept {
     Pseudo,
     Selector,
     Property,
+
+    // GritQL
+    Pattern,
+    Predicate,
 }
 
 impl NodeConcept {
@@ -649,6 +657,8 @@ impl NodeConcept {
             NodeConcept::Pseudo => "pseudo",
             NodeConcept::Selector => "selectors",
             NodeConcept::Property => "properties",
+            NodeConcept::Pattern => "patterns",
+            NodeConcept::Predicate => "predicates",
         }
     }
 }
@@ -782,8 +792,13 @@ fn get_node_concept(
             // TODO: implement formatter
             LanguageKind::Graphql => NodeConcept::Auxiliary,
 
-            // TODO: I will handle formatting in a follow-up PR.
-            LanguageKind::Grit => NodeConcept::Auxiliary,
+            LanguageKind::Grit => match name {
+                _ if name.contains("Operation") || name.contains("Pattern") => NodeConcept::Pattern,
+                _ if name.contains("Predicate") => NodeConcept::Predicate,
+                _ if name.ends_with("Definition") => NodeConcept::Declaration,
+                _ if name == "CodeSnippet" || name.ends_with("Literal") => NodeConcept::Value,
+                _ => NodeConcept::Auxiliary,
+            },
 
             LanguageKind::Html => match name {
                 _ if name.ends_with("Value") => NodeConcept::Value,

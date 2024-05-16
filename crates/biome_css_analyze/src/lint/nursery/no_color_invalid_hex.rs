@@ -27,6 +27,7 @@ declare_rule! {
     pub NoColorInvalidHex {
         version: "next",
         name: "noColorInvalidHex",
+        language: "css",
         recommended: false,
     }
 }

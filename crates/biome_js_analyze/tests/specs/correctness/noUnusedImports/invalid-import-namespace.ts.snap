@@ -1,0 +1,56 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-import-namespace.ts
+---
+# Input
+```ts
+import * as Ns1 from ""
+export type T1 = Ns1;
+
+import type * as Ns2 from ""
+export type T2 = Ns2;
+```
+
+# Diagnostics
+```
+invalid-import-namespace.ts:1:13 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This import is unused.
+  
+  > 1 │ import * as Ns1 from ""
+      │             ^^^
+    2 │ export type T1 = Ns1;
+    3 │ 
+  
+  i Unused imports might be the result of an incomplete refactoring.
+  
+  i Safe fix: Remove the unused import.
+  
+    1 │ import·*·as·Ns1·from·""
+      │ -----------------------
+
+```
+
+```
+invalid-import-namespace.ts:4:18 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This import is unused.
+  
+    2 │ export type T1 = Ns1;
+    3 │ 
+  > 4 │ import type * as Ns2 from ""
+      │                  ^^^
+    5 │ export type T2 = Ns2;
+  
+  i Unused imports might be the result of an incomplete refactoring.
+  
+  i Safe fix: Remove the unused import.
+  
+    1 1 │   import * as Ns1 from ""
+    2 2 │   export type T1 = Ns1;
+    3   │ - 
+    4   │ - import·type·*·as·Ns2·from·""
+    5 3 │   export type T2 = Ns2;
+  
+
+```

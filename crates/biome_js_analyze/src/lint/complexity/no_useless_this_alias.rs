@@ -54,6 +54,7 @@ declare_rule! {
     pub NoUselessThisAlias {
         version: "1.0.0",
         name: "noUselessThisAlias",
+        language: "ts",
         sources: &[RuleSource::EslintTypeScript("no-this-alias")],
         source_kind: RuleSourceKind::Inspired,
         recommended: true,
@@ -175,14 +176,14 @@ impl Rule for NoUselessThisAlias {
             mutation.remove_node(declarator.clone());
             mutation.remove_token(deleted_comma?);
         }
-        Some(JsRuleAction {
-            category: ActionCategory::QuickFix,
-            applicability: Applicability::Always,
-            message: markup! {
+        Some(JsRuleAction::new(
+            ActionCategory::QuickFix,
+            Applicability::Always,
+            markup! {
                 "Use "<Emphasis>"this"</Emphasis>" instead of an alias."
             }
             .to_owned(),
             mutation,
-        })
+        ))
     }
 }

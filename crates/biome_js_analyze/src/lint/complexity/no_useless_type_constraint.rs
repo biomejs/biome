@@ -79,6 +79,7 @@ declare_rule! {
     pub NoUselessTypeConstraint {
         version: "1.0.0",
         name: "noUselessTypeConstraint",
+        language: "ts",
         sources: &[RuleSource::EslintTypeScript("no-unnecessary-type-constraint")],
         recommended: true,
         fix_kind: FixKind::Safe,
@@ -149,11 +150,11 @@ impl Rule for NoUselessTypeConstraint {
         } else {
             mutation.remove_node(node.clone());
         }
-        Some(JsRuleAction {
-            category: ActionCategory::QuickFix,
-            applicability: Applicability::Always,
-            message: markup! { "Remove the constraint." }.to_owned(),
+        Some(JsRuleAction::new(
+            ActionCategory::QuickFix,
+            Applicability::Always,
+            markup! { "Remove the constraint." }.to_owned(),
             mutation,
-        })
+        ))
     }
 }

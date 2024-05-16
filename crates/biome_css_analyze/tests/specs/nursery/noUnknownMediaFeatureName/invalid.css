@@ -1,0 +1,17 @@
+@media screen and (unknown) {
+}
+
+@media screen, (unknown: 10px) {
+}
+
+@media screen and (unknown > 10px) {
+}
+
+@media only screen and (min-width: 320px) and (max-width: 480px) and (unknown: 150dpi) {
+}
+
+@media (not(unknown < 320px)) and (max-width > 640px) {
+}
+
+@media (400px <= unknown <= 700px) {
+}

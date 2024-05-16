@@ -68,6 +68,7 @@ declare_rule! {
     pub UseNumberNamespace {
         version: "1.5.0",
         name: "useNumberNamespace",
+        language: "js",
         sources: &[RuleSource::EslintUnicorn("prefer-number-properties")],
         recommended: true,
         fix_kind: FixKind::Unsafe,
@@ -178,14 +179,14 @@ impl Rule for UseNumberNamespace {
         };
         let mut mutation = ctx.root().begin();
         mutation.replace_node(old_node, new_node.into());
-        Some(JsRuleAction {
-            category: ActionCategory::QuickFix,
-            applicability: Applicability::Always,
-            message: markup! {
+        Some(JsRuleAction::new(
+            ActionCategory::QuickFix,
+            Applicability::Always,
+            markup! {
                 "Use "<Emphasis>"Number."{global_ident.text()}</Emphasis>" instead."
             }
             .to_owned(),
             mutation,
-        })
+        ))
     }
 }

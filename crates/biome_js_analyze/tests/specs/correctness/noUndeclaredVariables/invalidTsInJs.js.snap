@@ -13,12 +13,15 @@ PromiseLike;
 ```
 invalidTsInJs.js:1:1 lint/correctness/noUndeclaredVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The ArrayLike variable is undeclared
+  ! The ArrayLike variable is undeclared.
   
   > 1 │ ArrayLike;
       │ ^^^^^^^^^
     2 │ PromiseLike;
     3 │ 
+  
+  i By default, Biome recognizes browser and Mode.js globals.
+    You can ignore more globals using the javascript.globals configuration.
   
 
 ```
@@ -26,14 +29,15 @@ invalidTsInJs.js:1:1 lint/correctness/noUndeclaredVariables ━━━━━━�
 ```
 invalidTsInJs.js:2:1 lint/correctness/noUndeclaredVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The PromiseLike variable is undeclared
+  ! The PromiseLike variable is undeclared.
   
     1 │ ArrayLike;
   > 2 │ PromiseLike;
       │ ^^^^^^^^^^^
     3 │ 
   
+  i By default, Biome recognizes browser and Mode.js globals.
+    You can ignore more globals using the javascript.globals configuration.
+  
 
 ```
-
-

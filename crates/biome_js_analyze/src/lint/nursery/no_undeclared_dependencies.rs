@@ -32,6 +32,7 @@ declare_rule! {
     pub NoUndeclaredDependencies {
         version: "1.6.0",
         name: "noUndeclaredDependencies",
+        language: "js",
         recommended: false,
     }
 }

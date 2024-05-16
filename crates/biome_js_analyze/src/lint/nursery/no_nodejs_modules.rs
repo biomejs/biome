@@ -29,6 +29,7 @@ declare_rule! {
     pub NoNodejsModules {
         version: "1.5.0",
         name: "noNodejsModules",
+        language: "js",
         sources: &[RuleSource::EslintImport("no-nodejs-modules")],
         recommended: false,
     }

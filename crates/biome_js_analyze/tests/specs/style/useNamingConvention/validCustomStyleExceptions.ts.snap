@@ -1,0 +1,8 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: validCustomStyleExceptions.ts
+---
+# Input
+```ts
+const aSepcial_CASE = 0;
+```

@@ -6,9 +6,11 @@ use biome_console::markup;
 use biome_diagnostics::Applicability;
 use biome_js_factory::make;
 use biome_js_syntax::{
-    global_identifier, AnyJsExpression, JsCallExpression, JsNewExpression, JsNewOrCallExpression, T,
+    global_identifier, AnyJsExpression, JsCallExpression, JsNewExpression, JsNewOrCallExpression,
 };
-use biome_rowan::{chain_trivia_pieces, AstNode, BatchMutationExt, TriviaPieceKind};
+use biome_rowan::{chain_trivia_pieces, AstNode, BatchMutationExt};
+
+use super::use_throw_new_error::convert_call_expression_to_new_expression;
 
 declare_rule! {
     /// Enforce the use of `new` for all builtins, except `String`, `Number`, `Boolean`, `Symbol` and `BigInt`.
@@ -100,6 +102,7 @@ declare_rule! {
     pub UseConsistentBuiltinInstantiation {
         version: "1.7.2",
         name: "useConsistentBuiltinInstantiation",
+        language: "js",
         sources: &[
             RuleSource::EslintUnicorn("new-for-builtins"),
             RuleSource::Eslint("no-new-wrappers"),
@@ -170,24 +173,24 @@ impl Rule for UseConsistentBuiltinInstantiation {
 
                 mutation
                     .replace_node::<AnyJsExpression>(node.clone().into(), call_expression.into());
-                Some(JsRuleAction {
-                    category: ActionCategory::QuickFix,
-                    applicability: Applicability::MaybeIncorrect,
-                    message: markup! { "Remove "<Emphasis>"new"</Emphasis>" keyword." }.to_owned(),
+                Some(JsRuleAction::new(
+                    ActionCategory::QuickFix,
+                    Applicability::MaybeIncorrect,
+                    markup! { "Remove "<Emphasis>"new"</Emphasis>" keyword." }.to_owned(),
                     mutation,
-                })
+                ))
             }
             JsNewOrCallExpression::JsCallExpression(node) => {
                 let new_expression = convert_call_expression_to_new_expression(node)?;
 
                 mutation
                     .replace_node::<AnyJsExpression>(node.clone().into(), new_expression.into());
-                Some(JsRuleAction {
-                    category: ActionCategory::QuickFix,
-                    applicability: Applicability::MaybeIncorrect,
-                    message: markup! { "Add "<Emphasis>"new"</Emphasis>" keyword." }.to_owned(),
+                Some(JsRuleAction::new(
+                    ActionCategory::QuickFix,
+                    Applicability::MaybeIncorrect,
+                    markup! { "Add "<Emphasis>"new"</Emphasis>" keyword." }.to_owned(),
                     mutation,
-                })
+                ))
             }
         }
     }
@@ -281,23 +284,6 @@ fn convert_new_expression_to_call_expression(expr: &JsNewExpression) -> Option<J
         ))?;
     }
     Some(make::js_call_expression(callee, expr.arguments()?).build())
-}
-
-fn convert_call_expression_to_new_expression(expr: &JsCallExpression) -> Option<JsNewExpression> {
-    let mut callee = expr.callee().ok()?;
-    let leading_trivia_pieces = callee.syntax().first_leading_trivia()?.pieces();
-
-    let new_token = make::token(T![new])
-        .with_leading_trivia_pieces(leading_trivia_pieces)
-        .with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]);
-
-    callee = callee.with_leading_trivia_pieces([])?;
-
-    Some(
-        make::js_new_expression(new_token, callee)
-            .with_arguments(expr.arguments().ok()?)
-            .build(),
-    )
 }
 
 #[test]

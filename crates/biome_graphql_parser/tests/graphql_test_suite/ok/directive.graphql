@@ -7,6 +7,10 @@
 }
 
 {
+  hero @input(type: String)
+}
+
+{
   hero
 		@deprecated(reason: "Deprecated")
 		@addExternalFields(source: "profiles")

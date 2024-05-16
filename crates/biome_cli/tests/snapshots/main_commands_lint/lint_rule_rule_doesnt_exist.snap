@@ -1,0 +1,24 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: content
+---
+## `check.js`
+
+```js
+for(;true;);
+
+```
+
+# Termination Message
+
+```block
+flags/invalid ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Failed to parse CLI arguments.
+    
+    Caused by:
+      couldn't parse `suspicious/inexistant`: This rule doesn't exist.
+  
+
+
+```

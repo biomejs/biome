@@ -47,6 +47,7 @@ declare_rule! {
     pub UseHeadingContent {
         version: "1.0.0",
         name: "useHeadingContent",
+        language: "jsx",
         sources: &[RuleSource::EslintJsxA11y("heading-has-content")],
         recommended: true,
     }

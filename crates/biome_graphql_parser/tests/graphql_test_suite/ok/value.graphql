@@ -5,7 +5,9 @@
 		string_value: "string",
 		boolean_value: true,
 		null_value: null,
-		enum_value: AN_ENUM_VALUE,
+		enum_value: ENUM_VALUE,
+		enum_value: enum,
+		enum_value: on,
 		list_value: [1, 2, 3],
 		object_value: {key: "value"}
 	)

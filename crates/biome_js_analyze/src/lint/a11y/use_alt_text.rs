@@ -46,6 +46,7 @@ declare_rule! {
     pub UseAltText {
         version: "1.0.0",
         name: "useAltText",
+        language: "jsx",
         sources: &[RuleSource::EslintJsxA11y("alt-text")],
         recommended: true,
     }

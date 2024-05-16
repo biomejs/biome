@@ -126,7 +126,24 @@ mod test {
     #[ignore]
     fn quick_test() {
         let source = r#"{
-	"$schema": "https://biomejs.dev/schemas/1.0.0/schema.json"
+	"$schema": "https://biomejs.dev/schemas/1.0.0/schema.json",
+	"javascript": {
+		"formatter": {
+			"trailingComma": "all",
+			"indentSize": 2
+		}
+	},
+	"overrides": [
+		{
+			"include": ["scripts/**"],
+			"javascript": {
+				"formatter": {
+					"trailingComma": "es5",
+					"indentSize": 4
+				}
+			}
+		}
+	]
 }
 "#;
 

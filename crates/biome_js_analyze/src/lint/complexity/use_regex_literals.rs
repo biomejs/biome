@@ -46,6 +46,7 @@ declare_rule! {
     pub UseRegexLiterals {
         version: "1.3.0",
         name: "useRegexLiterals",
+        language: "js",
         sources: &[RuleSource::Eslint("prefer-regex-literals")],
         recommended: true,
         fix_kind: FixKind::Unsafe,
@@ -125,15 +126,15 @@ impl Rule for UseRegexLiterals {
         let mut mutation = ctx.root().begin();
         mutation.replace_node(prev, next);
 
-        Some(JsRuleAction {
-            category: ActionCategory::QuickFix,
-            applicability: Applicability::Always,
-            message: markup! {
+        Some(JsRuleAction::new(
+            ActionCategory::QuickFix,
+            Applicability::Always,
+            markup! {
                "Use a "<Emphasis>"literal notation"</Emphasis>" instead."
             }
             .to_owned(),
             mutation,
-        })
+        ))
     }
 }
 

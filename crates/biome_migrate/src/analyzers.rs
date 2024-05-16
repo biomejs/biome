@@ -1,10 +1,15 @@
 use crate::analyzers::indent_size::IndentSize;
+use crate::analyzers::nursery_rules::NurseryRules;
 use crate::analyzers::schema::Schema;
+use crate::analyzers::trailing_comma::TrailingComma;
+
 use biome_analyze::{GroupCategory, RegistryVisitor, RuleCategory, RuleGroup};
 use biome_json_syntax::JsonLanguage;
 
 mod indent_size;
+mod nursery_rules;
 mod schema;
+mod trailing_comma;
 
 pub(crate) struct MigrationGroup;
 pub(crate) struct MigrationCategory;
@@ -19,7 +24,11 @@ impl RuleGroup for MigrationGroup {
         // v1.3.0
         registry.record_rule::<IndentSize>();
         // v1.5.0
-        registry.record_rule::<Schema>()
+        registry.record_rule::<Schema>();
+        // v1.8.0
+        registry.record_rule::<TrailingComma>();
+        // v1.8.0
+        registry.record_rule::<NurseryRules>();
     }
 }
 

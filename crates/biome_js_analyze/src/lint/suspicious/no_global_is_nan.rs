@@ -33,6 +33,7 @@ declare_rule! {
     pub NoGlobalIsNan {
         version: "1.0.0",
         name: "noGlobalIsNan",
+        language: "js",
         recommended: true,
         fix_kind: FixKind::Unsafe,
     }
@@ -112,14 +113,14 @@ impl Rule for NoGlobalIsNan {
             _ => return None,
         };
         mutation.replace_node(old, new.into());
-        Some(JsRuleAction {
-            category: ActionCategory::QuickFix,
-            applicability: Applicability::MaybeIncorrect,
-            message: markup! {
+        Some(JsRuleAction::new(
+            ActionCategory::QuickFix,
+            Applicability::MaybeIncorrect,
+            markup! {
                 "Use "<Emphasis>"Number.isNaN"</Emphasis>" instead."
             }
             .to_owned(),
             mutation,
-        })
+        ))
     }
 }

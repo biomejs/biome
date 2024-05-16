@@ -36,6 +36,7 @@ declare_rule! {
     pub NoUnsafeNegation {
         version: "1.0.0",
         name: "noUnsafeNegation",
+        language: "js",
         sources: &[RuleSource::Eslint("no-unsafe-negation")],
         recommended: true,
         fix_kind: FixKind::Unsafe,
@@ -125,12 +126,12 @@ impl Rule for NoUnsafeNegation {
             }
         }
 
-        Some(JsRuleAction {
-            category: ActionCategory::QuickFix,
-            applicability: Applicability::MaybeIncorrect,
-            message: markup! { "Wrap the expression with a parenthesis" }.to_owned(),
+        Some(JsRuleAction::new(
+            ActionCategory::QuickFix,
+            Applicability::MaybeIncorrect,
+            markup! { "Wrap the expression with a parenthesis" }.to_owned(),
             mutation,
-        })
+        ))
     }
 }
 

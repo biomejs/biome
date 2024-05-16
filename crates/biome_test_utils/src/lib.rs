@@ -42,7 +42,7 @@ pub fn create_analyzer_options(
         rules: AnalyzerRules::default(),
         globals: vec![],
         preferred_quote: PreferredQuote::Double,
-        jsx_runtime: JsxRuntime::Transparent,
+        jsx_runtime: Some(JsxRuntime::Transparent),
     };
     let options_file = input_file.with_extension("options.json");
     if let Ok(json) = std::fs::read_to_string(options_file.clone()) {
@@ -90,8 +90,8 @@ pub fn create_analyzer_options(
                 .and_then(|js| js.jsx_runtime)
                 .unwrap_or_default()
             {
-                ReactClassic => JsxRuntime::ReactClassic,
-                Transparent => JsxRuntime::Transparent,
+                ReactClassic => Some(JsxRuntime::ReactClassic),
+                Transparent => Some(JsxRuntime::Transparent),
             };
 
             settings
@@ -252,10 +252,11 @@ pub fn assert_errors_are_absent<L: ServiceLanguage>(
             .unwrap();
     }
 
-    panic!("There should be no errors in the file {:?} but the following errors where present:\n{}\n\nParsed tree:\n{:#?}",
+    panic!("There should be no errors in the file {:?} but the following errors where present:\n{}\n\nParsed tree:\n{:#?}\nPrinted tree:\n{}",
            path.display(),
            std::str::from_utf8(buffer.as_slice()).unwrap(),
-           &program
+           &program,
+           &program.to_string()
     );
 }
 

@@ -15,6 +15,7 @@ declare_rule! {
     pub NoInitializerWithDefinite {
         version: "1.4.0",
         name: "noInitializerWithDefinite",
+        language: "js",
     }
 }
 

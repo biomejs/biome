@@ -1,0 +1,42 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: content
+---
+## `biome.json`
+
+```json
+{
+  "linter": {
+    "rules": {
+      "recommended": false
+    }
+  }
+}
+```
+
+## `check.js`
+
+```js
+
+    export function CONSTANT_CASE(){}
+    
+```
+
+# Emitted Messages
+
+```block
+check.js:2:21 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This global function name should be in camelCase or PascalCase or UPPERCASE.
+  
+  > 2 │     export function CONSTANT_CASE(){}
+      │                     ^^^^^^^^^^^^^
+    3 │     
+  
+
+```
+
+```block
+Checked 1 file in <TIME>. No fixes needed.
+Found 1 warning.
+```

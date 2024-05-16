@@ -25,14 +25,15 @@ import snake_case from ""
 ```
 invalidImportAlias.js:1:15 lint/style/useNamingConvention  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This import alias name should be in camelCase or PascalCase or CONSTANT_CASE.
+  ! Two consecutive uppercase characters are not allowed in PascalCase because strictCase is set to `true`.
   
   > 1 │ import { X as XxXX } from ""
       │               ^^^^
     2 │ 
     3 │ import { Y as snake_case  } from ""
   
-  i The name could be renamed to `xxXx`.
+  i If you want to use consecutive uppercase characters in PascalCase, then set the strictCase option to `false`.
+    See the rule options for more details.
   
   i Safe fix: Rename this symbol in camelCase.
   
@@ -56,8 +57,6 @@ invalidImportAlias.js:3:15 lint/style/useNamingConvention  FIXABLE  ━━━━
     4 │ 
     5 │ import { X as XxXX } from ""
   
-  i The name could be renamed to `snakeCase`.
-  
   i Safe fix: Rename this symbol in camelCase.
   
      1  1 │   import { X as XxXX } from ""
@@ -73,7 +72,7 @@ invalidImportAlias.js:3:15 lint/style/useNamingConvention  FIXABLE  ━━━━
 ```
 invalidImportAlias.js:5:15 lint/style/useNamingConvention  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This import alias name should be in camelCase or PascalCase or CONSTANT_CASE.
+  ! Two consecutive uppercase characters are not allowed in PascalCase because strictCase is set to `true`.
   
     3 │ import { Y as snake_case  } from ""
     4 │ 
@@ -82,7 +81,8 @@ invalidImportAlias.js:5:15 lint/style/useNamingConvention  FIXABLE  ━━━━
     6 │ 
     7 │ import { Y as snake_case  } from ""
   
-  i The name could be renamed to `xxXx`.
+  i If you want to use consecutive uppercase characters in PascalCase, then set the strictCase option to `false`.
+    See the rule options for more details.
   
   i Safe fix: Rename this symbol in camelCase.
   
@@ -108,8 +108,6 @@ invalidImportAlias.js:7:15 lint/style/useNamingConvention  FIXABLE  ━━━━
     8 │ 
     9 │ import XxXX from ""
   
-  i The name could be renamed to `snakeCase`.
-  
   i Safe fix: Rename this symbol in camelCase.
   
      5  5 │   import { X as XxXX } from ""
@@ -125,7 +123,7 @@ invalidImportAlias.js:7:15 lint/style/useNamingConvention  FIXABLE  ━━━━
 ```
 invalidImportAlias.js:9:8 lint/style/useNamingConvention  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This import alias name should be in camelCase or PascalCase or CONSTANT_CASE.
+  ! Two consecutive uppercase characters are not allowed in PascalCase because strictCase is set to `true`.
   
      7 │ import { Y as snake_case  } from ""
      8 │ 
@@ -134,7 +132,8 @@ invalidImportAlias.js:9:8 lint/style/useNamingConvention  FIXABLE  ━━━━�
     10 │ 
     11 │ import snake_case from ""
   
-  i The name could be renamed to `xxXx`.
+  i If you want to use consecutive uppercase characters in PascalCase, then set the strictCase option to `false`.
+    See the rule options for more details.
   
   i Safe fix: Rename this symbol in camelCase.
   
@@ -160,8 +159,6 @@ invalidImportAlias.js:11:8 lint/style/useNamingConvention  FIXABLE  ━━━━
     12 │ 
     13 │ import XxXX from ""
   
-  i The name could be renamed to `snakeCase`.
-  
   i Safe fix: Rename this symbol in camelCase.
   
      9  9 │   import XxXX from ""
@@ -177,7 +174,7 @@ invalidImportAlias.js:11:8 lint/style/useNamingConvention  FIXABLE  ━━━━
 ```
 invalidImportAlias.js:13:8 lint/style/useNamingConvention  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This import alias name should be in camelCase or PascalCase or CONSTANT_CASE.
+  ! Two consecutive uppercase characters are not allowed in PascalCase because strictCase is set to `true`.
   
     11 │ import snake_case from ""
     12 │ 
@@ -186,7 +183,8 @@ invalidImportAlias.js:13:8 lint/style/useNamingConvention  FIXABLE  ━━━━
     14 │ 
     15 │ import snake_case from ""
   
-  i The name could be renamed to `xxXx`.
+  i If you want to use consecutive uppercase characters in PascalCase, then set the strictCase option to `false`.
+    See the rule options for more details.
   
   i Safe fix: Rename this symbol in camelCase.
   
@@ -210,8 +208,6 @@ invalidImportAlias.js:15:8 lint/style/useNamingConvention  FIXABLE  ━━━━
   > 15 │ import snake_case from ""
        │        ^^^^^^^^^^
   
-  i The name could be renamed to `snakeCase`.
-  
   i Safe fix: Rename this symbol in camelCase.
   
     13 13 │   import XxXX from ""
@@ -221,5 +217,3 @@ invalidImportAlias.js:15:8 lint/style/useNamingConvention  FIXABLE  ━━━━
   
 
 ```
-
-

@@ -1,0 +1,90 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: js/module/array/trailing-comma/es5/array_trailing_comma.js
+---
+# Input
+
+```js
+const a = [
+	longlonglonglongItem1longlonglonglongItem1,
+	longlonglonglongItem1longlonglonglongItem2,
+	longlonglonglongItem1longlonglonglongItem3,
+];
+
+// destructuring
+[  	adsadasdasdasdasdasdasdasdasdasdas,
+	dsadsadasdasdasdasdasdasdasd,
+	dsadsadasdasdasdasdasdasdasd,] = [1, 2, 10];
+
+```
+
+
+=============================
+
+# Outputs
+
+## Output 1
+
+-----
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 80
+Quote style: Double Quotes
+JSX quote style: Double Quotes
+Quote properties: As needed
+Trailing commas: All
+Semicolons: Always
+Arrow parentheses: Always
+Bracket spacing: true
+Bracket same line: false
+Attribute Position: Auto
+-----
+
+```js
+const a = [
+	longlonglonglongItem1longlonglonglongItem1,
+	longlonglonglongItem1longlonglonglongItem2,
+	longlonglonglongItem1longlonglonglongItem3,
+];
+
+// destructuring
+[
+	adsadasdasdasdasdasdasdasdasdasdas,
+	dsadsadasdasdasdasdasdasdasd,
+	dsadsadasdasdasdasdasdasdasd,
+] = [1, 2, 10];
+```
+
+## Output 1
+
+-----
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 80
+Quote style: Double Quotes
+JSX quote style: Double Quotes
+Quote properties: As needed
+Trailing commas: ES5
+Semicolons: Always
+Arrow parentheses: Always
+Bracket spacing: true
+Bracket same line: false
+Attribute Position: Auto
+-----
+
+```js
+const a = [
+	longlonglonglongItem1longlonglonglongItem1,
+	longlonglonglongItem1longlonglonglongItem2,
+	longlonglonglongItem1longlonglonglongItem3,
+];
+
+// destructuring
+[
+	adsadasdasdasdasdasdasdasdasdasdas,
+	dsadsadasdasdasdasdasdasdasd,
+	dsadsadasdasdasdasdasdasdasd,
+] = [1, 2, 10];
+```

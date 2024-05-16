@@ -39,6 +39,7 @@ declare_rule! {
     pub UseIsArray {
         version: "1.0.0",
         name: "useIsArray",
+        language: "js",
         sources: &[RuleSource::EslintUnicorn("no-instanceof-array")],
         recommended: true,
         fix_kind: FixKind::Unsafe,
@@ -101,14 +102,14 @@ impl Rule for UseIsArray {
             AnyJsExpression::JsInstanceofExpression(node.clone()),
             call.into(),
         );
-        Some(JsRuleAction {
-            category: ActionCategory::QuickFix,
-            applicability: Applicability::MaybeIncorrect,
-            message: markup! {
+        Some(JsRuleAction::new(
+            ActionCategory::QuickFix,
+            Applicability::MaybeIncorrect,
+            markup! {
                 "Use "<Emphasis>"Array.isArray()"</Emphasis>" instead."
             }
             .to_owned(),
             mutation,
-        })
+        ))
     }
 }

@@ -38,6 +38,7 @@ declare_rule! {
     pub NoReExportAll {
         version: "1.6.0",
         name: "noReExportAll",
+        language: "js",
         recommended: false,
         sources: &[RuleSource::EslintBarrelFiles("avoid-re-export-all")],
         source_kind: RuleSourceKind::SameLogic,

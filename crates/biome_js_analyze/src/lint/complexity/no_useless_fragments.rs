@@ -62,6 +62,7 @@ declare_rule! {
     pub NoUselessFragments {
         version: "1.0.0",
         name: "noUselessFragments",
+        language: "jsx",
         sources: &[RuleSource::EslintReact("jsx-no-useless-fragment")],
         recommended: true,
         fix_kind: FixKind::Unsafe,
@@ -322,12 +323,12 @@ impl Rule for NoUselessFragments {
             }
         }
 
-        Some(JsRuleAction {
-            category: ActionCategory::QuickFix,
-            applicability: Applicability::MaybeIncorrect,
-            message: markup! { "Remove the Fragment" }.to_owned(),
+        Some(JsRuleAction::new(
+            ActionCategory::QuickFix,
+            Applicability::MaybeIncorrect,
+            markup! { "Remove the Fragment" }.to_owned(),
             mutation,
-        })
+        ))
     }
 
     fn diagnostic(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<RuleDiagnostic> {

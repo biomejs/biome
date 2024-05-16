@@ -51,6 +51,7 @@ declare_rule! {
     pub UseShorthandArrayType  {
         version: "1.0.0",
         name: "useShorthandArrayType",
+        language: "ts",
         recommended: false,
         deprecated: "Use `useConsistentArrayType` instead.",
         fix_kind: FixKind::Unsafe,
@@ -117,12 +118,12 @@ impl Rule for UseShorthandArrayType {
                         .to_owned()
                 }
             };
-            return Some(JsRuleAction {
-                category: ActionCategory::QuickFix,
-                applicability: Applicability::MaybeIncorrect,
+            return Some(JsRuleAction::new(
+                ActionCategory::QuickFix,
+                Applicability::MaybeIncorrect,
                 message,
                 mutation,
-            });
+            ));
         };
         None
     }

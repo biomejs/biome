@@ -40,6 +40,7 @@ declare_rule! {
     pub NoAccessKey {
         version: "1.0.0",
         name: "noAccessKey",
+        language: "jsx",
         sources: &[RuleSource::EslintJsxA11y("no-access-key")],
         recommended: true,
         fix_kind: FixKind::Unsafe,
@@ -99,12 +100,11 @@ impl Rule for NoAccessKey {
         let node = ctx.query();
         let mut mutation = ctx.root().begin();
         mutation.remove_node(node.clone());
-        Some(JsRuleAction {
-            category: ActionCategory::QuickFix,
-            applicability: Applicability::MaybeIncorrect,
-            message: markup! { "Remove the "<Emphasis>"accessKey"</Emphasis>" attribute." }
-                .to_owned(),
+        Some(JsRuleAction::new(
+            ActionCategory::QuickFix,
+            Applicability::MaybeIncorrect,
+            markup! { "Remove the "<Emphasis>"accessKey"</Emphasis>" attribute." }.to_owned(),
             mutation,
-        })
+        ))
     }
 }

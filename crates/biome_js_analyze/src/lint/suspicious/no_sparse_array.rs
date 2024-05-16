@@ -23,6 +23,7 @@ declare_rule! {
     pub NoSparseArray {
         version: "1.0.0",
         name: "noSparseArray",
+        language: "js",
         sources: &[RuleSource::Eslint("no-sparse-array")],
         recommended: true,
         fix_kind: FixKind::Unsafe,
@@ -97,11 +98,11 @@ markup! {
             ),
         );
 
-        Some(JsRuleAction {
-            category: ActionCategory::QuickFix,
-            applicability: Applicability::MaybeIncorrect,
-            message: markup! { "Replace hole with undefined" }.to_owned(),
+        Some(JsRuleAction::new(
+            ActionCategory::QuickFix,
+            Applicability::MaybeIncorrect,
+            markup! { "Replace hole with undefined" }.to_owned(),
             mutation,
-        })
+        ))
     }
 }

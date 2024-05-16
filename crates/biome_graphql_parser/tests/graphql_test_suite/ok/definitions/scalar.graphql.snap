@@ -7,6 +7,8 @@ expression: snapshot
 scalar UUID @specifiedBy(url: "https://tools.ietf.org/html/rfc4122")
 "abc" scalar URL @specifiedBy(url: "https://tools.ietf.org/html/rfc3986")
 
+scalar scalar @scalar(scalar: scalar)
+
 ```
 
 ## AST
@@ -79,17 +81,49 @@ GraphqlRoot {
                 },
             ],
         },
+        GraphqlScalarTypeDefinition {
+            description: missing (optional),
+            scalar_token: SCALAR_KW@142..151 "scalar" [Newline("\n"), Newline("\n")] [Whitespace(" ")],
+            name: GraphqlName {
+                value_token: GRAPHQL_NAME@151..158 "scalar" [] [Whitespace(" ")],
+            },
+            directives: GraphqlDirectiveList [
+                GraphqlDirective {
+                    at_token: AT@158..159 "@" [] [],
+                    name: GraphqlName {
+                        value_token: GRAPHQL_NAME@159..165 "scalar" [] [],
+                    },
+                    arguments: GraphqlArguments {
+                        l_paren_token: L_PAREN@165..166 "(" [] [],
+                        arguments: GraphqlArgumentList [
+                            GraphqlArgument {
+                                name: GraphqlName {
+                                    value_token: GRAPHQL_NAME@166..172 "scalar" [] [],
+                                },
+                                colon_token: COLON@172..174 ":" [] [Whitespace(" ")],
+                                value: GraphqlEnumValue {
+                                    graphql_name: GraphqlName {
+                                        value_token: GRAPHQL_NAME@174..180 "scalar" [] [],
+                                    },
+                                },
+                            },
+                        ],
+                        r_paren_token: R_PAREN@180..181 ")" [] [],
+                    },
+                },
+            ],
+        },
     ],
-    eof_token: EOF@142..143 "" [Newline("\n")] [],
+    eof_token: EOF@181..182 "" [Newline("\n")] [],
 }
 ```
 
 ## CST
 
 ```
-0: GRAPHQL_ROOT@0..143
+0: GRAPHQL_ROOT@0..182
   0: (empty)
-  1: GRAPHQL_DEFINITION_LIST@0..142
+  1: GRAPHQL_DEFINITION_LIST@0..181
     0: GRAPHQL_SCALAR_TYPE_DEFINITION@0..68
       0: (empty)
       1: SCALAR_KW@0..7 "scalar" [] [Whitespace(" ")]
@@ -132,6 +166,27 @@ GraphqlRoot {
                 2: GRAPHQL_STRING_VALUE@104..141
                   0: GRAPHQL_STRING_LITERAL@104..141 "\"https://tools.ietf.org/html/rfc3986\"" [] []
             2: R_PAREN@141..142 ")" [] []
-  2: EOF@142..143 "" [Newline("\n")] []
+    2: GRAPHQL_SCALAR_TYPE_DEFINITION@142..181
+      0: (empty)
+      1: SCALAR_KW@142..151 "scalar" [Newline("\n"), Newline("\n")] [Whitespace(" ")]
+      2: GRAPHQL_NAME@151..158
+        0: GRAPHQL_NAME@151..158 "scalar" [] [Whitespace(" ")]
+      3: GRAPHQL_DIRECTIVE_LIST@158..181
+        0: GRAPHQL_DIRECTIVE@158..181
+          0: AT@158..159 "@" [] []
+          1: GRAPHQL_NAME@159..165
+            0: GRAPHQL_NAME@159..165 "scalar" [] []
+          2: GRAPHQL_ARGUMENTS@165..181
+            0: L_PAREN@165..166 "(" [] []
+            1: GRAPHQL_ARGUMENT_LIST@166..180
+              0: GRAPHQL_ARGUMENT@166..180
+                0: GRAPHQL_NAME@166..172
+                  0: GRAPHQL_NAME@166..172 "scalar" [] []
+                1: COLON@172..174 ":" [] [Whitespace(" ")]
+                2: GRAPHQL_ENUM_VALUE@174..180
+                  0: GRAPHQL_NAME@174..180
+                    0: GRAPHQL_NAME@174..180 "scalar" [] []
+            2: R_PAREN@180..181 ")" [] []
+  2: EOF@181..182 "" [Newline("\n")] []
 
 ```

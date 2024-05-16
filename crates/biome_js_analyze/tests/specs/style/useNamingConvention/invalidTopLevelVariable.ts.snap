@@ -26,14 +26,12 @@ export const fooYPosition = 0;
 ```
 invalidTopLevelVariable.ts:1:14 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This top-level const name should be in camelCase or PascalCase or CONSTANT_CASE.
+  ! This global const name should be in camelCase or PascalCase or CONSTANT_CASE.
   
   > 1 │ export const Unknown_Style = 0
       │              ^^^^^^^^^^^^^
     2 │ export const MY__CONSTANT = 0
     3 │ 
-  
-  i The name could be renamed to `unknownStyle`.
   
 
 ```
@@ -41,7 +39,7 @@ invalidTopLevelVariable.ts:1:14 lint/style/useNamingConvention ━━━━━�
 ```
 invalidTopLevelVariable.ts:2:14 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This top-level const name should be in camelCase or PascalCase or CONSTANT_CASE.
+  ! This global const name should be in camelCase or PascalCase or CONSTANT_CASE.
   
     1 │ export const Unknown_Style = 0
   > 2 │ export const MY__CONSTANT = 0
@@ -49,15 +47,13 @@ invalidTopLevelVariable.ts:2:14 lint/style/useNamingConvention ━━━━━�
     3 │ 
     4 │ export var Unknown_Style_1 = 0
   
-  i The name could be renamed to `myConstant`.
-  
 
 ```
 
 ```
 invalidTopLevelVariable.ts:4:12 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This top-level var name should be in camelCase or PascalCase or CONSTANT_CASE.
+  ! This global var name should be in camelCase or PascalCase or CONSTANT_CASE.
   
     2 │ export const MY__CONSTANT = 0
     3 │ 
@@ -66,15 +62,13 @@ invalidTopLevelVariable.ts:4:12 lint/style/useNamingConvention ━━━━━�
     5 │ 
     6 │ export let Unknown_Style_2 = 0
   
-  i The name could be renamed to `unknownStyle1`.
-  
 
 ```
 
 ```
 invalidTopLevelVariable.ts:6:12 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This top-level let name should be in camelCase or PascalCase.
+  ! This let name should be in camelCase or PascalCase.
   
     4 │ export var Unknown_Style_1 = 0
     5 │ 
@@ -83,15 +77,13 @@ invalidTopLevelVariable.ts:6:12 lint/style/useNamingConvention ━━━━━�
     7 │ 
     8 │ export namespace X {
   
-  i The name could be renamed to `unknownStyle2`.
-  
 
 ```
 
 ```
 invalidTopLevelVariable.ts:9:18 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This top-level const name should be in camelCase or PascalCase or CONSTANT_CASE.
+  ! This global const name should be in camelCase or PascalCase or CONSTANT_CASE.
   
      8 │ export namespace X {
    > 9 │     export const Unknown_Style = 0
@@ -99,15 +91,13 @@ invalidTopLevelVariable.ts:9:18 lint/style/useNamingConvention ━━━━━�
     10 │ 
     11 │     export var Unknown_Style_1 = 0
   
-  i The name could be renamed to `unknownStyle`.
-  
 
 ```
 
 ```
 invalidTopLevelVariable.ts:11:16 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This top-level var name should be in camelCase or PascalCase or CONSTANT_CASE.
+  ! This global var name should be in camelCase or PascalCase or CONSTANT_CASE.
   
      9 │     export const Unknown_Style = 0
     10 │ 
@@ -116,15 +106,13 @@ invalidTopLevelVariable.ts:11:16 lint/style/useNamingConvention ━━━━━�
     12 │ 
     13 │     export let Unknown_Style_2 = 0
   
-  i The name could be renamed to `unknownStyle1`.
-  
 
 ```
 
 ```
 invalidTopLevelVariable.ts:13:16 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This top-level let name should be in camelCase or PascalCase.
+  ! This let name should be in camelCase or PascalCase.
   
     11 │     export var Unknown_Style_1 = 0
     12 │ 
@@ -133,22 +121,20 @@ invalidTopLevelVariable.ts:13:16 lint/style/useNamingConvention ━━━━━�
     14 │ }
     15 │ 
   
-  i The name could be renamed to `unknownStyle2`.
-  
 
 ```
 
 ```
 invalidTopLevelVariable.ts:16:14 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Two consecutive uppercase characters are not allowed in camelCase and PascalCase because strictCase is set to `true`.
+  ! Two consecutive uppercase characters are not allowed in camelCase because strictCase is set to `true`.
   
     14 │ }
     15 │ 
   > 16 │ export const fooYPosition = 0;
        │              ^^^^^^^^^^^^
   
-  i If you want to use consecutive uppercase characters in camelCase and PascalCase, then set the strictCase option to `false`.
+  i If you want to use consecutive uppercase characters in camelCase, then set the strictCase option to `false`.
     See the rule options for more details.
   
 

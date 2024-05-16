@@ -49,6 +49,7 @@ declare_rule! {
     pub NoUselessUndefinedInitialization {
         version: "1.7.2",
         name: "noUselessUndefinedInitialization",
+        language: "js",
         sources: &[RuleSource::Eslint("no-undef-init")],
         source_kind: RuleSourceKind::Inspired,
         fix_kind: FixKind::Unsafe,
@@ -128,11 +129,11 @@ impl Rule for NoUselessUndefinedInitialization {
         // This will remove any comments attached to the initialization clause
         mutation.remove_node(initializer);
 
-        Some(JsRuleAction {
-            category: ActionCategory::QuickFix,
-            applicability: Applicability::MaybeIncorrect,
-            message: markup! { "Remove undefined initialization." }.to_owned(),
+        Some(JsRuleAction::new(
+            ActionCategory::QuickFix,
+            Applicability::MaybeIncorrect,
+            markup! { "Remove undefined initialization." }.to_owned(),
             mutation,
-        })
+        ))
     }
 }

@@ -3,8 +3,9 @@ union SearchResult = Photo | Person
 union SearchResult =
 	| Photo
 	| Person
+	| union
 
-union SearchResult
+union union = union | union
 
 union SearchResult @deprecated
 

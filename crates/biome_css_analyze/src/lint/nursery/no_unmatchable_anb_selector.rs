@@ -53,6 +53,7 @@ declare_rule! {
     pub NoUnmatchableAnbSelector {
         version: "next",
         name: "noUnmatchableAnbSelector",
+        language: "css",
         recommended: true,
         sources: &[RuleSource::Stylelint("selector-anb-no-unmatchable")],
     }

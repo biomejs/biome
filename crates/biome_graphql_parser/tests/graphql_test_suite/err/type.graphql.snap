@@ -112,21 +112,25 @@ GraphqlRoot {
                                 GraphqlVariableDefinition {
                                     variable: GraphqlVariable {
                                         dollar_token: DOLLAR@70..71 "$" [] [],
-                                        name: missing (required),
+                                        name: GraphqlName {
+                                            value_token: GRAPHQL_NAME@71..76 "input" [] [],
+                                        },
                                     },
-                                    colon_token: missing (required),
-                                    ty: missing (required),
+                                    colon_token: COLON@76..78 ":" [] [Whitespace(" ")],
+                                    ty: GraphqlListType {
+                                        l_brack_token: L_BRACK@78..79 "[" [] [],
+                                        element: GraphqlNonNullType {
+                                            base: GraphqlNamedType {
+                                                name: GraphqlName {
+                                                    value_token: GRAPHQL_NAME@79..88 "InputType" [] [],
+                                                },
+                                            },
+                                            excl_token: BANG@88..89 "!" [] [],
+                                        },
+                                        r_brack_token: missing (required),
+                                    },
                                     default: missing (optional),
                                     directives: GraphqlDirectiveList [],
-                                },
-                                GraphqlBogus {
-                                    items: [
-                                        INPUT_KW@71..76 "input" [] [],
-                                        COLON@76..78 ":" [] [Whitespace(" ")],
-                                        L_BRACK@78..79 "[" [] [],
-                                        GRAPHQL_NAME@79..88 "InputType" [] [],
-                                        BANG@88..89 "!" [] [],
-                                    ],
                                 },
                             ],
                         },
@@ -320,20 +324,22 @@ GraphqlRoot {
           4: GRAPHQL_BOGUS@66..70
             0: R_BRACK@66..67 "]" [] []
             1: BANG@67..70 "!" [] [Skipped(","), Whitespace(" ")]
-          5: GRAPHQL_VARIABLE_DEFINITION@70..71
-            0: GRAPHQL_VARIABLE@70..71
+          5: GRAPHQL_VARIABLE_DEFINITION@70..89
+            0: GRAPHQL_VARIABLE@70..76
               0: DOLLAR@70..71 "$" [] []
-              1: (empty)
-            1: (empty)
-            2: (empty)
-            3: (empty)
-            4: GRAPHQL_DIRECTIVE_LIST@71..71
-          6: GRAPHQL_BOGUS@71..89
-            0: INPUT_KW@71..76 "input" [] []
+              1: GRAPHQL_NAME@71..76
+                0: GRAPHQL_NAME@71..76 "input" [] []
             1: COLON@76..78 ":" [] [Whitespace(" ")]
-            2: L_BRACK@78..79 "[" [] []
-            3: GRAPHQL_NAME@79..88 "InputType" [] []
-            4: BANG@88..89 "!" [] []
+            2: GRAPHQL_LIST_TYPE@78..89
+              0: L_BRACK@78..79 "[" [] []
+              1: GRAPHQL_NON_NULL_TYPE@79..89
+                0: GRAPHQL_NAMED_TYPE@79..88
+                  0: GRAPHQL_NAME@79..88
+                    0: GRAPHQL_NAME@79..88 "InputType" [] []
+                1: BANG@88..89 "!" [] []
+              2: (empty)
+            3: (empty)
+            4: GRAPHQL_DIRECTIVE_LIST@89..89
         2: R_PAREN@89..91 ")" [] [Whitespace(" ")]
       2: GRAPHQL_DIRECTIVE_LIST@91..91
       3: GRAPHQL_SELECTION_SET@91..105
@@ -481,21 +487,16 @@ type.graphql:1:67 parse ━━━━━━━━━━━━━━━━━━�
     2 │ 	likeStory
     3 │ }
   
-type.graphql:1:72 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+type.graphql:1:90 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Expected a name but instead found 'input'.
+  × expected `]` but instead found `)`
   
   > 1 │ query ($storyId: !, $comments: [!], $tags: [!]!, $posts: PostInput]!, $input: [InputType!) {
-      │                                                                        ^^^^^
+      │                                                                                          ^
     2 │ 	likeStory
     3 │ }
   
-  i Expected a name here.
-  
-  > 1 │ query ($storyId: !, $comments: [!], $tags: [!]!, $posts: PostInput]!, $input: [InputType!) {
-      │                                                                        ^^^^^
-    2 │ 	likeStory
-    3 │ }
+  i Remove )
   
 type.graphql:5:19 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 

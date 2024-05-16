@@ -61,6 +61,7 @@ declare_rule! {
     pub NoForEach {
         version: "1.0.0",
         name: "noForEach",
+        language: "js",
         sources: &[
             RuleSource::EslintUnicorn("no-array-for-each"),
             RuleSource::Clippy("needless_for_each"),

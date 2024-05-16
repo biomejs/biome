@@ -26,7 +26,7 @@ declare_rule! {
     ///
     /// ```ts,expect_diagnostic
     /// class SomeClass {
-    ///   message: Array<Array<any>>;
+    ///    message: Array<Array<any>>;
     /// }
     /// ```
     ///
@@ -43,7 +43,7 @@ declare_rule! {
     ///
     /// ```ts
     /// class SomeClass<T extends any> {
-    ///   message: Array<Array<unknown>>;
+    ///    message: Array<Array<unknown>>;
     /// }
     /// ```
     ///
@@ -54,6 +54,7 @@ declare_rule! {
     pub NoExplicitAny {
         version: "1.0.0",
         name: "noExplicitAny",
+        language: "ts",
         sources: &[RuleSource::EslintTypeScript("no-explicit-any")],
         recommended: true,
     }

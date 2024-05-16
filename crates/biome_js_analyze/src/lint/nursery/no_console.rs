@@ -23,6 +23,7 @@ declare_rule! {
     pub NoConsole {
         version: "1.6.0",
         name: "noConsole",
+        language: "js",
         sources: &[RuleSource::Eslint("no-console")],
         recommended: false,
         fix_kind: FixKind::Unsafe,
@@ -78,11 +79,11 @@ impl Rule for NoConsole {
             }
         }
 
-        Some(JsRuleAction {
-            category: ActionCategory::QuickFix,
-            applicability: Applicability::MaybeIncorrect,
-            message: markup! { "Remove console" }.to_owned(),
+        Some(JsRuleAction::new(
+            ActionCategory::QuickFix,
+            Applicability::MaybeIncorrect,
+            markup! { "Remove console" }.to_owned(),
             mutation,
-        })
+        ))
     }
 }

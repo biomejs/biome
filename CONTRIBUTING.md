@@ -418,7 +418,6 @@ Members are listed in alphabetical order. Members are free to use the full name,
 ### Core Contributors team
 
 - [Arend van Beelen @arendjr](https://github.com/arendjr)
-- [Daiki Nishikawa @nissy-dev](https://github.com/nissy-dev)
 - [Denis Bezrukov @denbezrukov](https://github.com/denbezrukov)
 - [Hiroki Ihoriya @unvalley](https://github.com/unvalley)
 - [Jon Egeland @faultyserver](https://github.com/faultyserver)
@@ -435,3 +434,9 @@ Members are listed in alphabetical order. Members are free to use the full name,
 - [Yoshiaki Togami @togami2864](https://github.com/togami2864)
 - [Ze-Zheng Wu @Sec-ant](https://github.com/Sec-ant)
 - [Zheyu Zhang @ah-yu](https://github.com/ah-yu)
+
+### Past Maintainers
+
+- [Daiki Nishikawa @nissy-dev](https://github.com/nissy-dev) (Core contributor)
+
+

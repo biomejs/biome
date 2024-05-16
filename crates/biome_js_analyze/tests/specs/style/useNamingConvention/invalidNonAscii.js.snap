@@ -11,7 +11,7 @@ const café = 0;
 ```
 invalidNonAscii.js:1:7 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This top-level const name should be in ASCII because requireAscii` is set to `true`.
+  ! This declaration name should be in ASCII because requireAscii is set to `true`.
   
   > 1 │ const café = 0;
       │       ^^^^
@@ -21,5 +21,3 @@ invalidNonAscii.js:1:7 lint/style/useNamingConvention ━━━━━━━━�
   
 
 ```
-
-

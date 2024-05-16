@@ -52,6 +52,7 @@ declare_rule! {
     pub NoImportAssign {
         version: "1.0.0",
         name: "noImportAssign",
+        language: "js",
         sources: &[RuleSource::Eslint("no-import-assign")],
         recommended: true,
     }

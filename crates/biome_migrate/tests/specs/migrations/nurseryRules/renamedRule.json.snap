@@ -1,0 +1,45 @@
+---
+source: crates/biome_migrate/tests/spec_tests.rs
+expression: renamedRule.json
+---
+# Input
+```json
+{
+  "linter": {
+    "rules": {
+      "nursery": {
+        "oldName": "error"
+      }
+    }
+  }
+}
+
+```
+
+# Diagnostics
+```
+renamedRule.json:5:9 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This rule has been promoted to suspicious/noSuspiciousSemicolonInJsx.
+  
+    3 │     "rules": {
+    4 │       "nursery": {
+  > 5 │         "oldName": "error"
+      │         ^^^^^^^^^^^^^^^^^^
+    6 │       }
+    7 │     }
+  
+  i Unsafe fix: Move the rule to the new stable group.
+  
+     2  2 │     "linter": {
+     3  3 │       "rules": {
+     4    │ - ······"nursery":·{
+     5    │ - ········"oldName":·"error"
+        4 │ + ······"nursery":{},
+        5 │ + ······"suspicious":{
+        6 │ + ········"noSuspiciousSemicolonInJsx":·"error"
+     6  7 │         }
+     7  8 │       }
+  
+
+```

@@ -3,6 +3,7 @@
 //! give additional information around the file that holds:
 //! - the [FileHandlers] for the specific file
 //! - shortcuts to open/write to the file
+use std::ffi::OsStr;
 use std::fs::{self, read_to_string};
 use std::{fs::File, io, io::Write, ops::Deref, path::PathBuf};
 
@@ -49,10 +50,7 @@ impl BiomePath {
         read_to_string(path)
     }
 
-    pub fn extension_as_str(&self) -> &str {
-        self.extension()
-            .expect("Can't read the file")
-            .to_str()
-            .expect("Can't read the file")
+    pub fn extension_as_str(&self) -> Option<&str> {
+        self.extension().and_then(OsStr::to_str)
     }
 }

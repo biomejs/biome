@@ -88,6 +88,7 @@ declare_rule! {
     pub NoUselessElse {
         version: "1.3.0",
         name: "noUselessElse",
+        language: "js",
         sources: &[
             RuleSource::Eslint("no-else-return"),
             RuleSource::Clippy("redundant_else 	"),
@@ -176,12 +177,12 @@ impl Rule for NoUselessElse {
             let new_stmts_list = make::js_statement_list(new_stmts);
             let mut mutation = ctx.root().begin();
             mutation.replace_node_discard_trivia(stmts_list, new_stmts_list);
-            return Some(JsRuleAction {
-                category: ActionCategory::QuickFix,
-                applicability: Applicability::MaybeIncorrect,
-                message: markup! { "Omit the "<Emphasis>"else"</Emphasis>" clause." }.to_owned(),
+            return Some(JsRuleAction::new(
+                ActionCategory::QuickFix,
+                Applicability::MaybeIncorrect,
+                markup! { "Omit the "<Emphasis>"else"</Emphasis>" clause." }.to_owned(),
                 mutation,
-            });
+            ));
         }
         None
     }

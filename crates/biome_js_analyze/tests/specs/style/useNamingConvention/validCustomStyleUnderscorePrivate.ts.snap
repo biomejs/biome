@@ -1,0 +1,10 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: validCustomStyleUnderscorePrivate.ts
+---
+# Input
+```ts
+class X {
+    private _private: number
+}
+```

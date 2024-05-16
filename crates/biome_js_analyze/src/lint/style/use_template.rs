@@ -50,6 +50,7 @@ declare_rule! {
     pub UseTemplate {
         version: "1.0.0",
         name: "useTemplate",
+        language: "js",
         sources: &[RuleSource::Eslint("prefer-template")],
         recommended: true,
         fix_kind: FixKind::Unsafe,
@@ -97,12 +98,12 @@ impl Rule for UseTemplate {
             AnyJsExpression::JsBinaryExpression(node.clone()),
             AnyJsExpression::JsTemplateExpression(template),
         );
-        Some(JsRuleAction {
-            category: ActionCategory::QuickFix,
-            applicability: Applicability::MaybeIncorrect,
-            message: markup! { "Use a "<Emphasis>"template literal"</Emphasis>"." }.to_owned(),
+        Some(JsRuleAction::new(
+            ActionCategory::QuickFix,
+            Applicability::MaybeIncorrect,
+            markup! { "Use a "<Emphasis>"template literal"</Emphasis>"." }.to_owned(),
             mutation,
-        })
+        ))
     }
 }
 

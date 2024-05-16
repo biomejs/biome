@@ -52,6 +52,7 @@ declare_rule! {
     pub NoMisrefactoredShorthandAssign {
         version: "1.3.0",
         name: "noMisrefactoredShorthandAssign",
+        language: "js",
         sources: &[RuleSource::Clippy("misrefactored_assign_op")],
         recommended: true,
         fix_kind: FixKind::Unsafe,
@@ -139,12 +140,11 @@ impl Rule for NoMisrefactoredShorthandAssign {
 
         mutation.replace_node(node.clone(), replacement_node);
 
-        Some(JsRuleAction {
-            category: ActionCategory::QuickFix,
-            applicability: Applicability::MaybeIncorrect,
+        Some(JsRuleAction::new(
+            ActionCategory::QuickFix,
+            Applicability::MaybeIncorrect,
+            markup! { "Use "<Emphasis>""{replacement_text}""</Emphasis>" instead." }.to_owned(),
             mutation,
-            message: markup! { "Use "<Emphasis>""{replacement_text}""</Emphasis>" instead." }
-                .to_owned(),
-        })
+        ))
     }
 }

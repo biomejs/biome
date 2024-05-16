@@ -1,0 +1,24 @@
+{
+	"$schema": "../../../../../../packages/@biomejs/biome/configuration_schema.json",
+	"linter": {
+		"rules": {
+			"style": {
+				"useNamingConvention": {
+					"level": "error",
+					"options": {
+                        "conventions": [
+                            {
+                                "selector": {
+									"kind": "classMember",
+                                	"modifiers": ["private"]
+								},
+								"match": "_(.*)",
+                                "formats": ["snake_case"]
+                            }
+                        ]
+					}
+				}
+			}
+		}
+	}
+}

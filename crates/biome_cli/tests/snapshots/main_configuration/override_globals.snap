@@ -54,7 +54,7 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
 ```block
 tests/test.js:3:9 lint/correctness/noUndeclaredVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × The React variable is undeclared
+  × The React variable is undeclared.
   
     1 │ test("globals", () => {
     2 │     it("uses React", () => {
@@ -62,6 +62,9 @@ tests/test.js:3:9 lint/correctness/noUndeclaredVariables ━━━━━━━�
       │         ^^^^^
     4 │     });
     5 │ });
+  
+  i By default, Biome recognizes browser and Mode.js globals.
+    You can ignore more globals using the javascript.globals configuration.
   
 
 ```

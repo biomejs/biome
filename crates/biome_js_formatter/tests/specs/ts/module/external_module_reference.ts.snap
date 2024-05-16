@@ -2,7 +2,6 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: ts/module/external_module_reference.ts
 ---
-
 # Input
 
 ```ts
@@ -27,7 +26,7 @@ Line width: 80
 Quote style: Double Quotes
 JSX quote style: Double Quotes
 Quote properties: As needed
-Trailing comma: All
+Trailing commas: All
 Semicolons: Always
 Arrow parentheses: Always
 Bracket spacing: true
@@ -40,5 +39,3 @@ import name = require("module_source");
 
 import name2 = require("other_source");
 ```
-
-

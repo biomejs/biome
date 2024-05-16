@@ -354,7 +354,11 @@ export interface PartialJavascriptFormatter {
 	/**
 	 * Print trailing commas wherever possible in multi-line comma-separated syntactic structures. Defaults to "all".
 	 */
-	trailingComma?: TrailingComma;
+	trailingComma?: TrailingCommas;
+	/**
+	 * Print trailing commas wherever possible in multi-line comma-separated syntactic structures. Defaults to "all".
+	 */
+	trailingCommas?: TrailingCommas;
 }
 /**
  * Indicates the type of runtime or transformation used for interpreting JSX.
@@ -400,7 +404,7 @@ export interface PartialJsonFormatter {
 	/**
 	 * Print trailing commas wherever possible in multi-line comma-separated syntactic structures. Defaults to "none".
 	 */
-	trailingCommas?: TrailingCommas;
+	trailingCommas?: TrailingCommas2;
 }
 /**
  * Options that changes how the JSON parser behaves
@@ -475,8 +479,8 @@ export type Semicolons = "always" | "asNeeded";
 /**
  * Print trailing commas wherever possible in multi-line comma-separated syntactic structures.
  */
-export type TrailingComma = "all" | "es5" | "none";
-export type TrailingCommas = "none" | "all";
+export type TrailingCommas = "all" | "es5" | "none";
+export type TrailingCommas2 = "none" | "all";
 /**
  * A list of rules that belong to this group
  */
@@ -965,6 +969,10 @@ export interface Nursery {
 	 */
 	noImportantInKeyframe?: RuleConfiguration_for_Null;
 	/**
+	 * Disallow the use of @import at-rules in invalid positions.
+	 */
+	noInvalidPositionAtImportRule?: RuleConfiguration_for_Null;
+	/**
 	 * Checks that the assertion function, for example expect, is placed inside an it() function call.
 	 */
 	noMisplacedAssertion?: RuleConfiguration_for_Null;
@@ -988,6 +996,10 @@ export interface Nursery {
 	 * Disallow unknown CSS value functions.
 	 */
 	noUnknownFunction?: RuleConfiguration_for_Null;
+	/**
+	 * Disallow unknown media feature names.
+	 */
+	noUnknownMediaFeatureName?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow unknown properties.
 	 */
@@ -1033,6 +1045,10 @@ export interface Nursery {
 	 */
 	useExplicitLengthCheck?: RuleConfiguration_for_Null;
 	/**
+	 * Elements with an interactive role and interaction handlers must be focusable.
+	 */
+	useFocusableInteractive?: RuleConfiguration_for_Null;
+	/**
 	 * Disallow a missing generic family keyword within font families.
 	 */
 	useGenericFontNames?: RuleConfiguration_for_Null;
@@ -1044,6 +1060,14 @@ export interface Nursery {
 	 * Enforce the sorting of CSS utility classes.
 	 */
 	useSortedClasses?: RuleConfiguration_for_UtilityClassSortingOptions;
+	/**
+	 * Require new when throwing an error.
+	 */
+	useThrowNewError?: RuleConfiguration_for_Null;
+	/**
+	 * Require all regex literals to be declared at the top level.
+	 */
+	useTopLevelRegex?: RuleConfiguration_for_Null;
 }
 /**
  * A list of rules that belong to this group
@@ -1731,9 +1755,13 @@ export interface FilenamingConventionOptions {
  */
 export interface NamingConventionOptions {
 	/**
+	 * Custom conventions.
+	 */
+	conventions: Convention[];
+	/**
 	 * Allowed cases for _TypeScript_ `enum` member names.
 	 */
-	enumMemberCase: EnumMemberCase;
+	enumMemberCase: Format;
 	/**
 	 * If `false`, then non-ASCII characters are allowed.
 	 */
@@ -1771,10 +1799,28 @@ For example, for React's `useRef()` hook the value would be `true`, while for `u
 }
 export type ConsistentArrayType = "shorthand" | "generic";
 export type FilenameCases = FilenameCase[];
+export interface Convention {
+	/**
+	 * String cases to enforce
+	 */
+	formats: Formats;
+	/**
+	 * Regular expression to enforce
+	 */
+	match?: Regex;
+	/**
+	 * Declarations concerned by this convention
+	 */
+	selector: Selector;
+}
 /**
- * Supported cases for TypeScript `enum` member names.
+ * Supported cases.
  */
-export type EnumMemberCase = "PascalCase" | "CONSTANT_CASE" | "camelCase";
+export type Format =
+	| "camelCase"
+	| "CONSTANT_CASE"
+	| "PascalCase"
+	| "snake_case";
 export type StableHookResult = boolean | number[];
 /**
  * Supported cases for file names.
@@ -1785,6 +1831,69 @@ export type FilenameCase =
 	| "kebab-case"
 	| "PascalCase"
 	| "snake_case";
+export type Formats = Format[];
+export type Regex = string;
+export interface Selector {
+	/**
+	 * Declaration kind
+	 */
+	kind: Kind;
+	/**
+	 * Modifiers used on the declaration
+	 */
+	modifiers: Modifiers;
+	/**
+	 * Scope of the declaration
+	 */
+	scope: Scope;
+}
+export type Kind =
+	| "class"
+	| "enum"
+	| "interface"
+	| "enumMember"
+	| "importNamespace"
+	| "exportNamespace"
+	| "variable"
+	| "const"
+	| "let"
+	| "using"
+	| "var"
+	| "catchParameter"
+	| "indexParameter"
+	| "exportAlias"
+	| "importAlias"
+	| "classGetter"
+	| "classSetter"
+	| "classMethod"
+	| "objectLiteralProperty"
+	| "objectLiteralGetter"
+	| "objectLiteralSetter"
+	| "objectLiteralMethod"
+	| "typeAlias"
+	| "any"
+	| "typeLike"
+	| "function"
+	| "namespaceLike"
+	| "namespace"
+	| "functionParameter"
+	| "typeParameter"
+	| "classMember"
+	| "classProperty"
+	| "objectLiteralMember"
+	| "typeMember"
+	| "typeGetter"
+	| "typeProperty"
+	| "typeSetter"
+	| "typeMethod";
+export type Modifiers = RestrictedModifier[];
+export type Scope = "any" | "global";
+export type RestrictedModifier =
+	| "abstract"
+	| "private"
+	| "protected"
+	| "readonly"
+	| "static";
 export interface RegisterProjectFolderParams {
 	path?: string;
 	setAsCurrentWorkspace: boolean;
@@ -1883,8 +1992,10 @@ export interface PullDiagnosticsParams {
 	categories: RuleCategories;
 	max_diagnostics: number;
 	path: BiomePath;
+	rule?: RuleCode;
 }
 export type RuleCategories = RuleCategory[];
+export type RuleCode = string;
 export type RuleCategory = "Syntax" | "Lint" | "Action" | "Transformation";
 export interface PullDiagnosticsResult {
 	diagnostics: Diagnostic[];
@@ -2023,6 +2134,7 @@ export type Category =
 	| "lint/nursery/noEvolvingAny"
 	| "lint/nursery/noFlatMapIdentity"
 	| "lint/nursery/noImportantInKeyframe"
+	| "lint/nursery/noInvalidPositionAtImportRule"
 	| "lint/nursery/noMisplacedAssertion"
 	| "lint/nursery/noMissingGenericFamilyKeyword"
 	| "lint/nursery/noNodejsModules"
@@ -2031,6 +2143,7 @@ export type Category =
 	| "lint/nursery/noTypeOnlyImportAttributes"
 	| "lint/nursery/noUndeclaredDependencies"
 	| "lint/nursery/noUnknownFunction"
+	| "lint/nursery/noUnknownMediaFeatureName"
 	| "lint/nursery/noUnknownProperty"
 	| "lint/nursery/noUnknownSelectorPseudoElement"
 	| "lint/nursery/noUnknownUnit"
@@ -2042,9 +2155,12 @@ export type Category =
 	| "lint/nursery/useConsistentBuiltinInstantiation"
 	| "lint/nursery/useDefaultSwitchClause"
 	| "lint/nursery/useExplicitLengthCheck"
+	| "lint/nursery/useFocusableInteractive"
 	| "lint/nursery/useGenericFontNames"
 	| "lint/nursery/useImportRestrictions"
 	| "lint/nursery/useSortedClasses"
+	| "lint/nursery/useThrowNewError"
+	| "lint/nursery/useTopLevelRegex"
 	| "lint/performance/noAccumulatingSpread"
 	| "lint/performance/noBarrelFile"
 	| "lint/performance/noDelete"

@@ -69,14 +69,14 @@ impl Rule for Schema {
         let member_value = member_value.as_json_string_value()?;
         mutation.replace_node(member_value.clone(), new_node);
 
-        Some(RuleAction {
-            category: ActionCategory::QuickFix,
-            applicability: Applicability::Always,
-            message: markup! {
+        Some(RuleAction::new(
+            ActionCategory::QuickFix,
+            Applicability::Always,
+            markup! {
                 "Update the URL."
             }
             .to_owned(),
             mutation,
-        })
+        ))
     }
 }

@@ -31,7 +31,7 @@ export default class {
 ```
 invalidClassStaticSetter.js:2:16 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This static setter name should be in camelCase.
+  ! This class setter name should be in camelCase.
   
     1 │ export default class {
   > 2 │     static set X(x) {}
@@ -39,15 +39,13 @@ invalidClassStaticSetter.js:2:16 lint/style/useNamingConvention ━━━━━�
     3 │ 
     4 │     static set PROPERTY(x) {}
   
-  i The name could be renamed to `x`.
-  
 
 ```
 
 ```
 invalidClassStaticSetter.js:4:16 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This static setter name should be in camelCase.
+  ! This class setter name should be in camelCase.
   
     2 │     static set X(x) {}
     3 │ 
@@ -56,15 +54,13 @@ invalidClassStaticSetter.js:4:16 lint/style/useNamingConvention ━━━━━�
     5 │ 
     6 │     static set SpecialProperty(x) {}
   
-  i The name could be renamed to `property`.
-  
 
 ```
 
 ```
 invalidClassStaticSetter.js:6:16 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This static setter name should be in camelCase.
+  ! This class setter name should be in camelCase.
   
     4 │     static set PROPERTY(x) {}
     5 │ 
@@ -73,15 +69,13 @@ invalidClassStaticSetter.js:6:16 lint/style/useNamingConvention ━━━━━�
     7 │ 
     8 │     static set special_property(x) {}
   
-  i The name could be renamed to `specialProperty`.
-  
 
 ```
 
 ```
 invalidClassStaticSetter.js:8:16 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This static setter name should be in camelCase.
+  ! This class setter name should be in camelCase.
   
      6 │     static set SpecialProperty(x) {}
      7 │ 
@@ -90,15 +84,13 @@ invalidClassStaticSetter.js:8:16 lint/style/useNamingConvention ━━━━━�
      9 │ 
     10 │     static set Unknown_Style(x) {}
   
-  i The name could be renamed to `specialProperty`.
-  
 
 ```
 
 ```
 invalidClassStaticSetter.js:10:16 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This static setter name should be in camelCase.
+  ! This class setter name should be in camelCase.
   
      8 │     static set special_property(x) {}
      9 │ 
@@ -107,93 +99,79 @@ invalidClassStaticSetter.js:10:16 lint/style/useNamingConvention ━━━━━
     11 │ 
     12 │     static set #X(x) {}
   
-  i The name could be renamed to `unknownStyle`.
-  
 
 ```
 
 ```
-invalidClassStaticSetter.js:12:16 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalidClassStaticSetter.js:12:17 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This static setter name should be in camelCase.
+  ! This class setter name should be in camelCase.
   
     10 │     static set Unknown_Style(x) {}
     11 │ 
   > 12 │     static set #X(x) {}
-       │                ^^
+       │                 ^
     13 │ 
     14 │     static set #PROPERTY(x) {}
   
-  i The name could be renamed to `x`.
-  
 
 ```
 
 ```
-invalidClassStaticSetter.js:14:16 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalidClassStaticSetter.js:14:17 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This static setter name should be in camelCase.
+  ! This class setter name should be in camelCase.
   
     12 │     static set #X(x) {}
     13 │ 
   > 14 │     static set #PROPERTY(x) {}
-       │                ^^^^^^^^^
+       │                 ^^^^^^^^
     15 │ 
     16 │     static set #SpecialProperty(x) {}
   
-  i The name could be renamed to `property`.
-  
 
 ```
 
 ```
-invalidClassStaticSetter.js:16:16 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalidClassStaticSetter.js:16:17 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This static setter name should be in camelCase.
+  ! This class setter name should be in camelCase.
   
     14 │     static set #PROPERTY(x) {}
     15 │ 
   > 16 │     static set #SpecialProperty(x) {}
-       │                ^^^^^^^^^^^^^^^^
+       │                 ^^^^^^^^^^^^^^^
     17 │ 
     18 │     static set #special_property(x) {}
   
-  i The name could be renamed to `specialProperty`.
-  
 
 ```
 
 ```
-invalidClassStaticSetter.js:18:16 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalidClassStaticSetter.js:18:17 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This static setter name should be in camelCase.
+  ! This class setter name should be in camelCase.
   
     16 │     static set #SpecialProperty(x) {}
     17 │ 
   > 18 │     static set #special_property(x) {}
-       │                ^^^^^^^^^^^^^^^^^
+       │                 ^^^^^^^^^^^^^^^^
     19 │ 
     20 │     static set #Unknown_Style(x) {}
   
-  i The name could be renamed to `specialProperty`.
-  
 
 ```
 
 ```
-invalidClassStaticSetter.js:20:16 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalidClassStaticSetter.js:20:17 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This static setter name should be in camelCase.
+  ! This class setter name should be in camelCase.
   
     18 │     static set #special_property(x) {}
     19 │ 
   > 20 │     static set #Unknown_Style(x) {}
-       │                ^^^^^^^^^^^^^^
+       │                 ^^^^^^^^^^^^^
     21 │ }
-  
-  i The name could be renamed to `unknownStyle`.
   
 
 ```
-
-

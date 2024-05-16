@@ -59,6 +59,7 @@ declare_rule! {
     pub NoDuplicateTestHooks {
         version: "1.6.0",
         name: "noDuplicateTestHooks",
+        language: "js",
         recommended: true,
         sources: &[RuleSource::EslintJest("no-duplicate-hooks")],
         source_kind: RuleSourceKind::Inspired,

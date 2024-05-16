@@ -15,6 +15,43 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 ### CLI
 
+#### New features
+
+- Add a new option `--rule` to the command `biome lint` ([#58](https://github.com/biomejs/biome/issues/58)).
+
+  This new option allows you to execute a single rule or a rule group.
+  This option is convenient to test a rule or apply the code fixes of a single rule.
+
+  For example, you can execute the `style/useNamingConvention` rule on the working directory:
+
+  ```shell
+  biome lint --rule=style/useNamingConvention ./
+  ```
+
+  If the rule has a code action (autofix), you can use `--apply` to apply the fix:
+
+  ```shell
+  biome lint --rule=style/useNamingConvention --apply ./
+  ```
+
+  The option takes the rule options in the Biome configuration file into account.
+  Only, the severity level of the rule is overridden by its default value,
+  i.e. `error` for a recommended rule or `warn` otherwise.
+
+  You can also run a group of rules:
+
+  ```shell
+  biome lint --rule=suspicous src/main.js
+  ```
+
+  In this case, the severity level of a rule is not overridden.
+  Thus, disabled rules stay disabled.
+  To ensure that the group is run, the `recommended` field of the group is turned on.
+
+  The option is compatible with other options such as `--apply`, `--apply-unsafe` and `--reporter`.
+
+  Contributed by @Conaclos
+
 #### Enhancements
 
 - Biome now executes commands (lint, format, check and ci) on the working directory by default. [#2266](https://github.com/biomejs/biome/issues/2266) Contributed by @unvalley
@@ -23,8 +60,12 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
   - biome check .
   + biome check    # You can run the command without the path
   ```
-  
+
 ### Configuration
+
+#### Enhancements
+
+- The `javascript.formatter.trailingComma` option is deprecated and renamed to `javascript.formatter.trailingCommas`. The corresponding CLI option `--trailing-comma` is also deprecated and renamed to `--trailing-commas`. Details can be checked in [#2492](https://github.com/biomejs/biome/pull/2492). Contributed by @Sec-ant
 
 ### Editors
 
@@ -34,11 +75,143 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 ### Formatter
 
+#### Bug fixes
+
+- Fix [#2470](https://github.com/biomejs/biome/issues/2470) by avoid introducing linebreaks in single line string interpolations. Contributed by @ah-yu
+- Resolve deadlocks by narrowing the scope of locks. Contributed by @mechairoi
+
 ### JavaScript APIs
 
 ### Linter
 
+#### New features
+
+- [useNamingConvention](https://biomejs.dev/linter/rules/use-naming-convention/) now supports an option to enforce custom conventions ([#1900](https://github.com/biomejs/biome/issues/1900)).
+
+  For example, you can enforce the use of a prefix for private class members:
+
+  ```json
+  {
+  	"linter": {
+  		"rules": {
+  			"style": {
+  				"useNamingConvention": {
+  					"level": "error",
+  					"options": {
+  						"conventions": [
+  							{
+  								"selector": {
+  									"kind": "classMember",
+  									"modifiers": ["private"]
+  								},
+  								"match": "_(.*)",
+                  "formats": ["camelCase"]
+  							}
+  						]
+  					}
+  				}
+  			}
+  		}
+  	}
+  }
+  ```
+
+  Please, find more details in the [rule documentation](https://biomejs.dev/linter/rules/use-naming-convention/#conventions).
+
+  Contributed by @Conaclos
+
+- Add [nursery/useThrowNewError](https://biomejs.dev/linter/rules/use-throw-new-error/).
+  Contributed by @minht11
+- Add [nursery/useTopLevelRegex](https://biomejs.dev/linter/rules/use-top-level-regex), which enforces defining regular expressions at the top level of a module. [#2148](https://github.com/biomejs/biome/issues/2148) Contributed by @dyc3.
+
+#### Bug fixes
+
+- [noUndeclaredVariables](https://biomejs.dev/linter/rules/no-undeclared-variables/) and [noUnusedImports](https://biomejs.dev/linter/rules/no-unused-imports) now correctly handle import namespaces ([#2796](https://github.com/biomejs/biome/issues/2796)).
+
+  Previously, Biome bound unqualified type to import namespaces.
+  Import namespaces can only be used as qualified names in a type (ambient) context.
+
+  ```ts
+  // Unused import
+  import * as Ns1 from "";
+  // This doesn't reference the import namespace `Ns1`
+  type T1 = Ns1; // Undeclared variable `Ns1`
+
+  // Unused import
+  import type * as Ns2 from "";
+  // This doesn't reference the import namespace `Ns2`
+  type T2 = Ns2; // Undeclared variable `Ns2`
+
+  import type * as Ns3 from "";
+  // This references the import namespace because it is a qualified name.
+  type T3 = Ns3.Inner;
+  // This also references the import namespace.
+  export type { Ns3 }
+  ```
+
+  Contributed by @Conaclos
+
+- [noUndeclaredVariables](https://biomejs.dev/linter/rules/no-undeclared-variables/) now ignores `this` in JSX components ([#2636](https://github.com/biomejs/biome/issues/2636)).
+
+  The rule no longer reports `this` as undeclared in following code.
+
+  ```jsx
+  import { Component } from 'react';
+
+  export class MyComponent extends Component {
+    render() {
+      return <this.foo />
+    }
+  }
+  ```
+
+  Contributed by @printfn and @Conaclos
+
+- `useJsxKeyInIterable` now handles more cases involving fragments. See the snippets below. Contributed by @dyc3
+```jsx
+// valid
+[].map((item) => {
+	return <>{item.condition ? <div key={item.id} /> : <div key={item.id}>foo</div>}</>;
+});
+
+// invalid
+[].map((item) => {
+	return <>{item.condition ? <div /> : <div>foo</div>}</>;
+});
+```
+- `noExcessiveNestedTestSuites` no longer erroneously alerts on `describe` calls that are not invoking the global `describe` function. [#2599](https://github.com/biomejs/biome/issues/2599) Contributed by @dyc3
+```js
+// now valid
+z.object({})
+  .describe('')
+  .describe('')
+  .describe('')
+  .describe('')
+  .describe('')
+  .describe('');
+```
+
+- [noExportsInTest](https://biomejs.dev/linter/rules/no-exports-in-test/) rule no longer treats files with in-source testing as test files https://github.com/biomejs/biome/issues/2859. Contributed by @ah-yu
+
 ### Parser
+
+#### Enhancements
+
+- `lang="tsx"` is now supported in Vue Single File Components. [#2765](https://github.com/biomejs/biome/issues/2765) Contributed by @dyc3
+
+#### Bug fixes
+
+- The `const` modifier for type parameters is now accepted for TypeScript `new` signatures ([#2825](https://github.com/biomejs/biome/issues/2825)).
+
+  The following code is now correctly parsed:
+
+  ```ts
+  interface I {
+    new<const T>(x: T): T
+  }
+  ```
+
+  Contributed by @Conaclos
 
 
 ## 1.7.3 (2024-05-06)
@@ -61,6 +234,10 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 - Add [nursery/noUselessStringConcat](https://biomejs.dev/linter/rules/no-useless-string-concat/).
 - Add [nursery/useExplicitLengthCheck](https://biomejs.dev/linter/rules/use-explicit-length-check/).
+
+- `useExhaustiveDependencies` now recognizes (some) dependencies that change on
+  every render ([#2374](https://github.com/biomejs/biome/issues/2374)).
+  Contributed by @arendjr
 
 #### Bug fixes
 

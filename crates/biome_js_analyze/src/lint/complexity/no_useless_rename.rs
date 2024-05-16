@@ -60,6 +60,7 @@ declare_rule! {
     pub NoUselessRename {
         version: "1.0.0",
         name: "noUselessRename",
+        language: "js",
         sources: &[RuleSource::Eslint("no-useless-rename")],
         recommended: true,
         fix_kind: FixKind::Safe,
@@ -156,11 +157,11 @@ impl Rule for NoUselessRename {
                 );
             }
         }
-        Some(JsRuleAction {
-            category: ActionCategory::QuickFix,
-            applicability: Applicability::Always,
-            message: markup! { "Remove the renaming." }.to_owned(),
+        Some(JsRuleAction::new(
+            ActionCategory::QuickFix,
+            Applicability::Always,
+            markup! { "Remove the renaming." }.to_owned(),
             mutation,
-        })
+        ))
     }
 }

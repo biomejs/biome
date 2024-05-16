@@ -26,7 +26,7 @@ pub(crate) fn format_with_guard<'ctx>(
             debug!("Pulling diagnostics from parsed file");
             let diagnostics_result = workspace_file
                 .guard()
-                .pull_diagnostics(RuleCategories::SYNTAX, max_diagnostics.into())
+                .pull_diagnostics(RuleCategories::SYNTAX, max_diagnostics.into(), None)
                 .with_file_path_and_code(
                     workspace_file.path.display().to_string(),
                     category!("format"),

@@ -41,6 +41,7 @@ declare_rule! {
     pub UseAriaPropsForRole {
         version: "1.0.0",
         name: "useAriaPropsForRole",
+        language: "jsx",
         sources: &[RuleSource::EslintJsxA11y("role-has-required-aria-props")],
         recommended: true,
     }

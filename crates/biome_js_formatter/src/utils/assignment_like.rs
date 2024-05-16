@@ -888,7 +888,23 @@ impl AnyJsAssignmentLike {
 
         let is_complex_type_alias = self.is_complex_type_alias()?;
 
-        Ok(is_complex_destructuring || has_complex_type_annotation || is_complex_type_alias)
+        let is_right_arrow_func = self.right().map_or(false, |right| match right {
+            RightAssignmentLike::JsInitializerClause(init) => {
+                init.expression().map_or(false, |expression| {
+                    matches!(expression, AnyJsExpression::JsArrowFunctionExpression(_))
+                })
+            }
+            _ => false,
+        });
+        let is_breakable = self
+            .annotation()
+            .and_then(|annotation| is_annotation_breakable(annotation).ok())
+            .unwrap_or(false);
+
+        Ok(is_complex_destructuring
+            || has_complex_type_annotation
+            || is_complex_type_alias
+            || (is_right_arrow_func && is_breakable))
     }
 
     /// Checks if the current assignment is eligible for [AssignmentLikeLayout::BreakAfterOperator]
@@ -1339,6 +1355,22 @@ fn is_nested_union_type(union_type: &TsUnionType) -> SyntaxResult<bool> {
         }
     }
     Ok(false)
+}
+
+fn is_annotation_breakable(annotation: AnyTsVariableAnnotation) -> SyntaxResult<bool> {
+    let is_breakable = annotation
+        .type_annotation()?
+        .and_then(|type_annotation| type_annotation.ty().ok())
+        .map_or(false, |ty| match ty {
+            AnyTsType::TsReferenceType(reference_type) => {
+                reference_type.type_arguments().map_or(false, |type_args| {
+                    type_args.ts_type_argument_list().len() > 0
+                })
+            }
+            _ => false,
+        });
+
+    Ok(is_breakable)
 }
 
 /// Formats an expression and passes the assignment layout to its formatting function if the expressions

@@ -38,6 +38,7 @@ declare_rule! {
     pub NoConstEnum {
         version: "1.0.0",
         name: "noConstEnum",
+        language: "ts",
         recommended: true,
         fix_kind: FixKind::Safe,
     }
@@ -80,13 +81,13 @@ impl Rule for NoConstEnum {
         ));
         mutation.remove_token(const_token);
         mutation.replace_token_discard_trivia(enum_token, new_enum_token);
-        Some(JsRuleAction {
-            category: ActionCategory::QuickFix,
-            applicability: Applicability::Always,
-            message: markup! {
+        Some(JsRuleAction::new(
+            ActionCategory::QuickFix,
+            Applicability::Always,
+             markup! {
                 "Turn the "<Emphasis>"const enum"</Emphasis>" into a regular "<Emphasis>"enum"</Emphasis>"."
             }.to_owned(),
             mutation,
-        })
+        ))
     }
 }

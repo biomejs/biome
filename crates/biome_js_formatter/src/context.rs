@@ -1,4 +1,4 @@
-pub mod trailing_comma;
+pub mod trailing_commas;
 
 use crate::comments::{FormatJsLeadingComment, JsCommentStyle, JsComments};
 use biome_deserialize_macros::{Deserializable, Merge};
@@ -12,7 +12,7 @@ use std::fmt;
 use std::fmt::Debug;
 use std::rc::Rc;
 use std::str::FromStr;
-pub use trailing_comma::TrailingComma;
+pub use trailing_commas::TrailingCommas;
 
 #[derive(Debug, Clone)]
 pub struct JsFormatContext {
@@ -153,7 +153,7 @@ pub struct JsFormatOptions {
     quote_properties: QuoteProperties,
 
     /// Print trailing commas wherever possible in multi-line comma-separated syntactic structures. Defaults to "all".
-    trailing_comma: TrailingComma,
+    trailing_commas: TrailingCommas,
 
     /// Whether the formatter prints semicolons for all statements, class members, and type members or only when necessary because of [ASI](https://tc39.es/ecma262/multipage/ecmascript-language-lexical-grammar.html#sec-automatic-semicolon-insertion).
     semicolons: Semicolons,
@@ -185,7 +185,7 @@ impl JsFormatOptions {
             quote_style: QuoteStyle::default(),
             jsx_quote_style: QuoteStyle::default(),
             quote_properties: QuoteProperties::default(),
-            trailing_comma: TrailingComma::default(),
+            trailing_commas: TrailingCommas::default(),
             semicolons: Semicolons::default(),
             arrow_parentheses: ArrowParentheses::default(),
             bracket_spacing: BracketSpacing::default(),
@@ -244,8 +244,8 @@ impl JsFormatOptions {
         self
     }
 
-    pub fn with_trailing_comma(mut self, trailing_comma: TrailingComma) -> Self {
-        self.trailing_comma = trailing_comma;
+    pub fn with_trailing_commas(mut self, trailing_commas: TrailingCommas) -> Self {
+        self.trailing_commas = trailing_commas;
         self
     }
 
@@ -299,8 +299,8 @@ impl JsFormatOptions {
         self.quote_properties = quote_properties;
     }
 
-    pub fn set_trailing_comma(&mut self, trailing_comma: TrailingComma) {
-        self.trailing_comma = trailing_comma;
+    pub fn set_trailing_commas(&mut self, trailing_commas: TrailingCommas) {
+        self.trailing_commas = trailing_commas;
     }
     pub fn set_attribute_position(&mut self, attribute_position: AttributePosition) {
         self.attribute_position = attribute_position;
@@ -338,8 +338,8 @@ impl JsFormatOptions {
         self.source_type
     }
 
-    pub fn trailing_comma(&self) -> TrailingComma {
-        self.trailing_comma
+    pub fn trailing_commas(&self) -> TrailingCommas {
+        self.trailing_commas
     }
 
     pub fn semicolons(&self) -> Semicolons {
@@ -390,7 +390,7 @@ impl fmt::Display for JsFormatOptions {
         writeln!(f, "Quote style: {}", self.quote_style)?;
         writeln!(f, "JSX quote style: {}", self.jsx_quote_style)?;
         writeln!(f, "Quote properties: {}", self.quote_properties)?;
-        writeln!(f, "Trailing comma: {}", self.trailing_comma)?;
+        writeln!(f, "Trailing commas: {}", self.trailing_commas)?;
         writeln!(f, "Semicolons: {}", self.semicolons)?;
         writeln!(f, "Arrow parentheses: {}", self.arrow_parentheses)?;
         writeln!(f, "Bracket spacing: {}", self.bracket_spacing.value())?;

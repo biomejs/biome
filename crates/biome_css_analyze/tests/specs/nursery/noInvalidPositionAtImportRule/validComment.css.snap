@@ -1,0 +1,10 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: validComment.css
+---
+# Input
+```css
+/* some comment */
+@import 'foo.css';
+
+```

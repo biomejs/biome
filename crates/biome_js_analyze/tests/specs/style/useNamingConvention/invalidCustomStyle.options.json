@@ -1,0 +1,21 @@
+{
+	"linter": {
+		"rules": {
+			"style": {
+				"useNamingConvention": {
+					"level": "error",
+					"options": {
+						"conventions": [
+							{
+								"selector": {
+									"kind": "interface"
+								},
+								"match": "I(.+)|(.*)Error"
+							}
+						]
+					}
+				}
+			}
+		}
+	}
+}

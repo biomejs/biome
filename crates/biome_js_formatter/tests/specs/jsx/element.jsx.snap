@@ -2,7 +2,6 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: jsx/element.jsx
 ---
-
 # Input
 
 ```jsx
@@ -354,7 +353,7 @@ Line width: 80
 Quote style: Double Quotes
 JSX quote style: Double Quotes
 Quote properties: As needed
-Trailing comma: All
+Trailing commas: All
 Semicolons: Always
 Arrow parentheses: Always
 Bracket spacing: true
@@ -398,9 +397,7 @@ a = <div> </div>;
 
 // Template
 a = (
-	<div>{`A Long Tempalte String That uses ${
-		5 + 4
-	} that will eventually break across multiple lines ${(40 / 3) * 45}`}</div>
+	<div>{`A Long Tempalte String That uses ${5 + 4} that will eventually break across multiple lines ${(40 / 3) * 45}`}</div>
 );
 
 // Meaningful text after self closing element adds a hard line break
@@ -767,11 +764,10 @@ function Component() {
     2: <div tooltip="A very long tooltip text that would otherwise make the attribute break onto the same line but it is not because of the single string layout"></div>;
     7: 		tooltip="A very long tooltip text that would otherwise make the attribute break
    14: 	<ASuperLongComponentNameThatWouldBreakButDoesntSinceTheComponent></ASuperLongComponentNameThatWouldBreakButDoesntSinceTheComponent>
-  179: 							"ui-monospace,SFMono-Regular,SF Mono,Consolas,Liberation Mono,Menlo,monospace",
-  200: 							"ui-monospace,SFMono-Regular,SF Mono,Consolas,Liberation Mono,Menlo,monospace",
-  213: 							"ui-monospace,SFMono-Regular,SF Mono,Consolas,Liberation Mono,Menlo,monospace",
-  238: 				<pre className="h-screen overflow-y-scroll whitespace-pre-wrap text-red-500 text-xs">
-  287: 		Uncle Boonmee Who Can Recall His Past Lives dir. Apichatpong Weerasethakul{" "}
+   36: 	<div>{`A Long Tempalte String That uses ${5 + 4} that will eventually break across multiple lines ${(40 / 3) * 45}`}</div>
+  177: 							"ui-monospace,SFMono-Regular,SF Mono,Consolas,Liberation Mono,Menlo,monospace",
+  198: 							"ui-monospace,SFMono-Regular,SF Mono,Consolas,Liberation Mono,Menlo,monospace",
+  211: 							"ui-monospace,SFMono-Regular,SF Mono,Consolas,Liberation Mono,Menlo,monospace",
+  236: 				<pre className="h-screen overflow-y-scroll whitespace-pre-wrap text-red-500 text-xs">
+  285: 		Uncle Boonmee Who Can Recall His Past Lives dir. Apichatpong Weerasethakul{" "}
 ```
-
-

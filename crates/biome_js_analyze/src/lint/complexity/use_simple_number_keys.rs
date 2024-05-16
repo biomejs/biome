@@ -48,6 +48,7 @@ declare_rule! {
     pub UseSimpleNumberKeys {
         version: "1.0.0",
         name: "useSimpleNumberKeys",
+        language: "js",
         recommended: true,
         fix_kind: FixKind::Safe,
     }
@@ -357,11 +358,11 @@ impl Rule for UseSimpleNumberKeys {
             }
         };
 
-        Some(JsRuleAction {
-            category: ActionCategory::QuickFix,
-            applicability: Applicability::Always,
+        Some(JsRuleAction::new(
+            ActionCategory::QuickFix,
+            Applicability::Always,
             message,
             mutation,
-        })
+        ))
     }
 }

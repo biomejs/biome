@@ -33,6 +33,7 @@ declare_rule! {
     pub NoVoidElementsWithChildren {
         version: "1.0.0",
         name: "noVoidElementsWithChildren",
+        language: "jsx",
         sources: &[RuleSource::EslintReact("void-dom-elements-no-children")],
         recommended: true,
         fix_kind: FixKind::Unsafe,
@@ -392,11 +393,11 @@ impl Rule for NoVoidElementsWithChildren {
             }
         }
 
-        Some(JsRuleAction {
+        Some(JsRuleAction::new(
+            ActionCategory::QuickFix,
+            Applicability::MaybeIncorrect,
+            state.action_message(),
             mutation,
-            message: state.action_message(),
-            category: ActionCategory::QuickFix,
-            applicability: Applicability::MaybeIncorrect,
-        })
+        ))
     }
 }

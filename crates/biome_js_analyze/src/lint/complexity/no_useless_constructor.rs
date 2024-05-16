@@ -118,6 +118,7 @@ declare_rule! {
     pub NoUselessConstructor {
         version: "1.0.0",
         name: "noUselessConstructor",
+        language: "js",
         sources: &[
             RuleSource::Eslint("no-useless-constructor"),
             RuleSource::EslintTypeScript("no-useless-constructor"),
@@ -212,12 +213,12 @@ impl Rule for NoUselessConstructor {
         let constructor = ctx.query();
         let mut mutation = ctx.root().begin();
         mutation.remove_node(constructor.clone());
-        Some(JsRuleAction {
-            category: ActionCategory::QuickFix,
-            applicability: Applicability::MaybeIncorrect,
-            message: markup! { "Remove the unnecessary constructor." }.to_owned(),
+        Some(JsRuleAction::new(
+            ActionCategory::QuickFix,
+            Applicability::MaybeIncorrect,
+            markup! { "Remove the unnecessary constructor." }.to_owned(),
             mutation,
-        })
+        ))
     }
 }
 

@@ -1,4 +1,4 @@
-use crate::context::trailing_comma::FormatTrailingComma;
+use crate::context::trailing_commas::FormatTrailingCommas;
 use crate::prelude::*;
 use biome_js_syntax::{JsSyntaxKind, TsTypeParameterList};
 use biome_rowan::{AstSeparatedList, SyntaxNodeOptionExt};
@@ -26,7 +26,7 @@ impl FormatRule<TsTypeParameterList> for FormatTsTypeParameterList {
         {
             TrailingSeparator::Mandatory
         } else {
-            FormatTrailingComma::ES5.trailing_separator(f.options())
+            FormatTrailingCommas::ES5.trailing_separator(f.options())
         };
 
         f.join_with(&soft_line_break_or_space())

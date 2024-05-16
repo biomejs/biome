@@ -105,6 +105,7 @@ declare_rule! {
     pub NoMisplacedAssertion {
         version: "next",
         name: "noMisplacedAssertion",
+        language: "js",
         recommended: false,
         sources: &[RuleSource::EslintJest("no-standalone-expect")],
         source_kind: RuleSourceKind::Inspired,

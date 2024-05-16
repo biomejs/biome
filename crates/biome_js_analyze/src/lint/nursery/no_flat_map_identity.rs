@@ -39,6 +39,7 @@ declare_rule! {
     pub NoFlatMapIdentity {
         version: "1.7.0",
         name: "noFlatMapIdentity",
+        language: "js",
         recommended: true,
         sources: &[RuleSource::Clippy("flat_map_identity")],
         fix_kind: FixKind::Safe,
@@ -172,11 +173,11 @@ impl Rule for NoFlatMapIdentity {
                 .with_callee(AnyJsExpression::JsStaticMemberExpression(flat_call)),
         );
 
-        Some(JsRuleAction {
+        Some(JsRuleAction::new(
+            ActionCategory::QuickFix,
+            Applicability::Always,
+            markup! {"Replace unnecessary "<Emphasis>"flatMap"</Emphasis>" call to "<Emphasis>"flat"</Emphasis>" instead."}.to_owned(),
             mutation,
-            message: markup! {"Replace unnecessary "<Emphasis>"flatMap"</Emphasis>" call to "<Emphasis>"flat"</Emphasis>" instead."}.to_owned(),
-            category: ActionCategory::QuickFix,
-            applicability: Applicability::Always,
-        })
+        ))
     }
 }

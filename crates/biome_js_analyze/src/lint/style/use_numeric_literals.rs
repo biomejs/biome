@@ -57,6 +57,7 @@ declare_rule! {
     pub UseNumericLiterals {
         version: "1.0.0",
         name: "useNumericLiterals",
+        language: "js",
         sources: &[RuleSource::Eslint("prefer-numeric-literals")],
         recommended: true,
         fix_kind: FixKind::Unsafe,
@@ -101,13 +102,12 @@ impl Rule for UseNumericLiterals {
             ),
         );
 
-        Some(JsRuleAction {
-            category: ActionCategory::QuickFix,
-            applicability: Applicability::MaybeIncorrect,
-            message: markup! { "Use the computed "{call.radix.description()}" literal instead." }
-                .to_owned(),
+        Some(JsRuleAction::new(
+            ActionCategory::QuickFix,
+            Applicability::MaybeIncorrect,
+            markup! { "Use the computed "{call.radix.description()}" literal instead." }.to_owned(),
             mutation,
-        })
+        ))
     }
 }
 

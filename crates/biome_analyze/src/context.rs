@@ -1,4 +1,5 @@
 use crate::options::{JsxRuntime, PreferredQuote};
+use crate::RuleMetadata;
 use crate::{registry::RuleRoot, FromServices, Queryable, Rule, RuleKey, ServiceBag};
 use biome_diagnostics::{Error, Result};
 use std::ops::Deref;
@@ -19,7 +20,7 @@ where
     file_path: &'a Path,
     options: &'a R::Options,
     preferred_quote: &'a PreferredQuote,
-    jsx_runtime: JsxRuntime,
+    jsx_runtime: Option<JsxRuntime>,
 }
 
 impl<'a, R> RuleContext<'a, R>
@@ -35,7 +36,7 @@ where
         file_path: &'a Path,
         options: &'a R::Options,
         preferred_quote: &'a PreferredQuote,
-        jsx_runtime: JsxRuntime,
+        jsx_runtime: Option<JsxRuntime>,
     ) -> Result<Self, Error> {
         let rule_key = RuleKey::rule::<R>();
         Ok(Self {
@@ -58,6 +59,38 @@ where
     /// Returns a clone of the AST root
     pub fn root(&self) -> RuleRoot<R> {
         self.root.clone()
+    }
+
+    /// Returns the metadata of the rule
+    ///
+    /// The metadata contains information about the rule, such as the name, version, language, and whether it is recommended.
+    ///
+    /// ## Examples
+    /// ```rust,ignore
+    /// declare_rule! {
+    ///     /// Some doc
+    ///     pub(crate) Foo {
+    ///         version: "0.0.0",
+    ///         name: "foo",
+    ///         language: "js",
+    ///         recommended: true,
+    ///     }
+    /// }
+    ///
+    /// impl Rule for Foo {
+    ///     const CATEGORY: RuleCategory = RuleCategory::Lint;
+    ///     type Query = ();
+    ///     type State = ();
+    ///     type Signals = ();
+    ///     type Options = ();
+    ///
+    ///     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
+    ///         assert_eq!(ctx.metadata().name, "foo");
+    ///     }
+    /// }
+    /// ```
+    pub fn metadata(&self) -> &RuleMetadata {
+        &R::METADATA
     }
 
     /// It retrieves the options that belong to a rule, if they exist.
@@ -103,7 +136,7 @@ where
 
     /// Returns the JSX runtime in use.
     pub fn jsx_runtime(&self) -> JsxRuntime {
-        self.jsx_runtime
+        self.jsx_runtime.expect("jsx_runtime should be provided")
     }
 
     /// Checks whether the provided text belongs to globals

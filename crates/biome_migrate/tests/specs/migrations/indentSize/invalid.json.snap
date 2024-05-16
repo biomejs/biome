@@ -26,7 +26,7 @@ expression: invalid.json
 ```
 invalid.json:3:3 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The option indentSize is deprecated.
+  ! The option formatter.indentSize is deprecated.
   
     1 │ {
     2 │ 	"formatter": {
@@ -35,7 +35,7 @@ invalid.json:3:3 migrate  FIXABLE  ━━━━━━━━━━━━━━━
     4 │ 	},
     5 │ 	"javascript": {
   
-  i Safe fix: Use the property indentWidth instead.
+  i Safe fix: Use the property formatter.indentWidth instead.
   
      1  1 │   {
      2  2 │   	"formatter": {
@@ -50,7 +50,7 @@ invalid.json:3:3 migrate  FIXABLE  ━━━━━━━━━━━━━━━
 ```
 invalid.json:7:4 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The option indentSize is deprecated.
+  ! The option formatter.indentSize is deprecated.
   
     5 │ 	"javascript": {
     6 │ 		"formatter": {
@@ -59,7 +59,7 @@ invalid.json:7:4 migrate  FIXABLE  ━━━━━━━━━━━━━━━
     8 │ 		}
     9 │ 	},
   
-  i Safe fix: Use the property indentWidth instead.
+  i Safe fix: Use the property formatter.indentWidth instead.
   
      5  5 │   	"javascript": {
      6  6 │   		"formatter": {
@@ -74,7 +74,7 @@ invalid.json:7:4 migrate  FIXABLE  ━━━━━━━━━━━━━━━
 ```
 invalid.json:12:4 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The option indentSize is deprecated.
+  ! The option formatter.indentSize is deprecated.
   
     10 │ 	"json": {
     11 │ 		"formatter": {
@@ -83,7 +83,7 @@ invalid.json:12:4 migrate  FIXABLE  ━━━━━━━━━━━━━━�
     13 │ 		}
     14 │ 	}
   
-  i Safe fix: Use the property indentWidth instead.
+  i Safe fix: Use the property formatter.indentWidth instead.
   
     10 10 │   	"json": {
     11 11 │   		"formatter": {
@@ -94,5 +94,3 @@ invalid.json:12:4 migrate  FIXABLE  ━━━━━━━━━━━━━━�
   
 
 ```
-
-

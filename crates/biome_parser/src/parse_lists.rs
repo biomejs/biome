@@ -114,11 +114,21 @@ pub trait ParseSeparatedList {
         m.complete(p, Self::LIST_KIND)
     }
 
+    /// `false` if the list must have at least one element
+    fn allow_empty(&self) -> bool {
+        true
+    }
+
     /// The [SyntaxKind] of the element that separates the elements of the list
     fn separating_element_kind(&mut self) -> Self::Kind;
 
     /// `true` if the list allows for an optional trailing element
     fn allow_trailing_separating_element(&self) -> bool {
+        false
+    }
+
+    /// `true` if the list allows for an optional leading separator
+    fn allow_leading_seperating_element(&self) -> bool {
         false
     }
 
@@ -140,8 +150,13 @@ pub trait ParseSeparatedList {
         let elements = self.start_list(p);
         let mut progress = ParserProgress::default();
         let mut first = true;
-        while !p.at(<Self::Parser<'_> as Parser>::Kind::EOF) && !self.is_at_list_end(p) {
+        while (!self.allow_empty() && first)
+            || (!p.at(<Self::Parser<'_> as Parser>::Kind::EOF) && !self.is_at_list_end(p))
+        {
             if first {
+                if self.allow_leading_seperating_element() {
+                    p.eat(self.separating_element_kind());
+                }
                 first = false;
             } else {
                 self.expect_separator(p);

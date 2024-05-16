@@ -38,6 +38,7 @@ declare_rule! {
     pub NoCommentText {
         version: "1.0.0",
         name: "noCommentText",
+        language: "jsx",
         sources: &[RuleSource::EslintReact("jsx-no-comment-textnodes")],
         recommended: true,
         fix_kind: FixKind::Unsafe,
@@ -101,11 +102,11 @@ impl Rule for NoCommentText {
             ),
         );
 
-        Some(JsRuleAction {
-            category: ActionCategory::QuickFix,
-            applicability: Applicability::MaybeIncorrect,
-            message: markup! { "Wrap the comments with braces" }.to_owned(),
+        Some(JsRuleAction::new(
+            ActionCategory::QuickFix,
+            Applicability::MaybeIncorrect,
+            markup! { "Wrap the comments with braces" }.to_owned(),
             mutation,
-        })
+        ))
     }
 }

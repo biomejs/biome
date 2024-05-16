@@ -141,6 +141,7 @@ declare_rule! {
     pub UseSortedClasses {
         version: "1.6.0",
         name: "useSortedClasses",
+        language: "jsx",
         recommended: false,
         fix_kind: FixKind::Unsafe,
     }
@@ -216,14 +217,14 @@ impl Rule for UseSortedClasses {
             }
         };
 
-        Some(JsRuleAction {
-            category: ActionCategory::QuickFix,
-            applicability: Applicability::MaybeIncorrect,
-            message: markup! {
+        Some(JsRuleAction::new(
+            ActionCategory::QuickFix,
+            Applicability::MaybeIncorrect,
+            markup! {
                 "Sort the classes."
             }
             .to_owned(),
             mutation,
-        })
+        ))
     }
 }

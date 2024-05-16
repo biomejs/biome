@@ -569,15 +569,21 @@ impl<'src> CssLexer<'src> {
         // While the next input code point is a digit, consume it.
         self.consume_number_sequence();
 
-        // If the next 2 input code points are U+002E FULL STOP (.) followed by a digit...
-        if matches!(self.current_byte(), Some(b'.'))
-            && self.peek_byte().map_or(false, |byte| byte.is_ascii_digit())
-        {
-            // Consume them.
-            self.advance(2);
+        // According to the spec if the next 2 input code points are U+002E FULL STOP (.) followed by a digit we need to consume them.
+        // However we want to parse numbers like `1.` and `1.e10` where we don't have a number after (.)
+        // If the next input code points are U+002E FULL STOP (.)...
+        if matches!(self.current_byte(), Some(b'.')) {
+            // Consume it.
+            self.advance(1);
 
-            // While the next input code point is a digit, consume it.
-            self.consume_number_sequence()
+            // U+002E FULL STOP (.) followed by a digit...
+            if self
+                .current_byte()
+                .map_or(false, |byte| byte.is_ascii_digit())
+            {
+                // While the next input code point is a digit, consume it.
+                self.consume_number_sequence();
+            }
         }
 
         // If the next 2 or 3 input code points are U+0045 LATIN CAPITAL LETTER E (E) or

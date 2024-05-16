@@ -1,6 +1,6 @@
 use crate::parser::{
     directive::DirectiveList,
-    is_at_name, parse_description,
+    is_nth_at_name, is_nth_at_non_kw_name, parse_description,
     parse_error::{expected_field_definition, expected_name, expected_type},
     parse_name,
     r#type::parse_type,
@@ -15,8 +15,6 @@ use biome_parser::{
     parse_lists::ParseNodeList, parse_recovery::ParseRecovery, parsed_syntax::ParsedSyntax,
     prelude::ParsedSyntax::*, Parser,
 };
-
-use super::is_at_definition;
 
 #[inline]
 pub(super) fn parse_fields_definition(p: &mut GraphqlParser) -> ParsedSyntax {
@@ -97,7 +95,7 @@ fn parse_field_definition(p: &mut GraphqlParser) -> ParsedSyntax {
 }
 
 #[inline]
-fn parse_arguments_definition(p: &mut GraphqlParser) -> ParsedSyntax {
+pub(super) fn parse_arguments_definition(p: &mut GraphqlParser) -> ParsedSyntax {
     if !is_at_arguments_definition(p) {
         return Absent;
     }
@@ -182,28 +180,44 @@ pub(super) fn is_at_fields(p: &mut GraphqlParser<'_>) -> bool {
 
 #[inline]
 pub(super) fn is_at_fields_end(p: &mut GraphqlParser<'_>) -> bool {
-    p.at(T!['}']) || is_at_definition(p)
+    p.at(T!['}'])
+    // start at a new definition body, as this rule doesn't allow nested fields
+    || p.at(T!['{'])
 }
 
+/// Currently at a field definition, allowing some small errors.
 #[inline]
 fn is_at_field(p: &mut GraphqlParser<'_>) -> bool {
-    (is_at_name(p) && p.nth_at(1, T![:]))
-    // with arguments
-    || (is_at_name(p) && p.nth_at(1, T!['(']))
-    || (is_at_string(p) && p.nth_at(1, GRAPHQL_NAME)) && p.nth_at(2, T![:])
+    (is_nth_at_field(p, 0))
+    || (is_at_string(p) && is_nth_at_field(p, 1))
     // missing name
     || p.at(T![:])
 }
 
+/// At correctly formatted field definition at nth token.
+#[inline]
+fn is_nth_at_field(p: &mut GraphqlParser<'_>, n: usize) -> bool {
+    is_nth_at_name(p, n) && (p.nth_at(n + 1, T![:]) || p.nth_at(n + 1, T!['(']))
+}
+
+/// Currently at an input value definition, allowing some small errors.
 #[inline]
 pub(super) fn is_at_input_value_definition(p: &mut GraphqlParser<'_>) -> bool {
-    (is_at_name(p) && p.nth_at(1, T![:]))
-    || (is_at_string(p) && p.nth_at(1, GRAPHQL_NAME) && p.nth_at(2, T![:]))
+    is_nth_at_input_value_definition(p, 0)
+    || (is_at_string(p) && is_nth_at_input_value_definition(p, 1))
     // missing name
     || p.at(T![:])
     || (is_at_string(p) && p.nth_at(1, T![:]))
-    // missing colon: `name String`
-    || (is_at_name(p) && p.nth_at(1, GRAPHQL_NAME))
+    // missing colon: `name String`. Must be non-keyword name, else it could
+    // be a new type definition.
+    || (is_nth_at_non_kw_name(p, 0) && is_nth_at_non_kw_name(p, 1))
+    || (is_at_string(p) && is_nth_at_name(p, 1) && is_nth_at_name(p, 2))
+}
+
+/// At correctly formatted input value definition at nth token.
+#[inline]
+fn is_nth_at_input_value_definition(p: &mut GraphqlParser<'_>, n: usize) -> bool {
+    is_nth_at_name(p, n) && p.nth_at(n + 1, T![:])
 }
 
 /// We must enforce that the arguments definition is always opened with a `(` token.
@@ -215,7 +229,7 @@ pub(super) fn is_at_input_value_definition(p: &mut GraphqlParser<'_>) -> bool {
 /// In this case, the opening parenthesis is missing, the name token of an input value definition
 /// is also missing. It would be to complex to disambiguate input value definitions from field.
 #[inline]
-fn is_at_arguments_definition(p: &mut GraphqlParser<'_>) -> bool {
+pub(super) fn is_at_arguments_definition(p: &mut GraphqlParser<'_>) -> bool {
     p.at(T!['('])
 }
 

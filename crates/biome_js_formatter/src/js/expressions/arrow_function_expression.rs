@@ -5,7 +5,7 @@ use biome_formatter::{
 };
 use std::iter::once;
 
-use crate::context::trailing_comma::FormatTrailingComma;
+use crate::context::trailing_commas::FormatTrailingCommas;
 use crate::js::expressions::call_arguments::GroupedCallArgumentLayout;
 use crate::parentheses::{
     is_binary_like_left_or_right, is_callee, is_conditional_test,
@@ -169,7 +169,7 @@ impl FormatNodeRule<JsArrowFunctionExpression> for FormatJsArrowFunctionExpressi
                                         Ok(())
                                     })),
                                     is_last_call_arg
-                                        .then_some(format_args![FormatTrailingComma::All,]),
+                                        .then_some(format_args![FormatTrailingCommas::All,]),
                                     should_add_soft_line.then_some(format_args![soft_line_break()])
                                 ])
                             ]
@@ -194,7 +194,7 @@ impl FormatNodeRule<JsArrowFunctionExpression> for FormatJsArrowFunctionExpressi
                                         Ok(())
                                     })),
                                     is_last_call_arg
-                                        .then_some(format_args![FormatTrailingComma::All,]),
+                                        .then_some(format_args![FormatTrailingCommas::All,]),
                                     should_add_soft_line.then_some(format_args![soft_line_break()])
                                 ])
                             ]
@@ -265,7 +265,7 @@ fn format_signature(
                             f,
                             [&soft_block_indent(&format_args![
                                 binding.format(),
-                                FormatTrailingComma::All
+                                FormatTrailingCommas::All
                             ])]
                         )?
                     }

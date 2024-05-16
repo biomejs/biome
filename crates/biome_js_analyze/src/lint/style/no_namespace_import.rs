@@ -31,6 +31,7 @@ declare_rule! {
     pub NoNamespaceImport {
         version: "1.6.0",
         name: "noNamespaceImport",
+        language: "js",
         recommended: false,
         sources: &[RuleSource::EslintBarrelFiles("avoid-namespace-import")],
         source_kind: RuleSourceKind::SameLogic,

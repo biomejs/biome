@@ -24,6 +24,7 @@ use biome_analyze::{
     QueryMatch, RegistryVisitor, RuleCategories, RuleCategory, RuleFilter, RuleGroup,
 };
 use biome_configuration::javascript::JsxRuntime;
+use biome_configuration::linter::RuleSelector;
 use biome_diagnostics::{category, Applicability, Diagnostic, DiagnosticExt, Severity};
 use biome_formatter::{
     AttributePosition, FormatError, IndentStyle, IndentWidth, LineEnding, LineWidth, Printed,
@@ -34,7 +35,7 @@ use biome_js_analyze::utils::rename::{RenameError, RenameSymbolExtensions};
 use biome_js_analyze::{
     analyze, analyze_with_inspect_matcher, visit_registry, ControlFlowGraph, RuleError,
 };
-use biome_js_formatter::context::trailing_comma::TrailingComma;
+use biome_js_formatter::context::trailing_commas::TrailingCommas;
 use biome_js_formatter::context::{
     ArrowParentheses, BracketSameLine, BracketSpacing, JsFormatOptions, QuoteProperties, Semicolons,
 };
@@ -58,7 +59,7 @@ pub struct JsFormatterSettings {
     pub quote_style: Option<QuoteStyle>,
     pub jsx_quote_style: Option<QuoteStyle>,
     pub quote_properties: Option<QuoteProperties>,
-    pub trailing_comma: Option<TrailingComma>,
+    pub trailing_commas: Option<TrailingCommas>,
     pub semicolons: Option<Semicolons>,
     pub arrow_parentheses: Option<ArrowParentheses>,
     pub bracket_spacing: Option<BracketSpacing>,
@@ -151,7 +152,7 @@ impl ServiceLanguage for JsLanguage {
         .with_quote_style(language.quote_style.unwrap_or_default())
         .with_jsx_quote_style(language.jsx_quote_style.unwrap_or_default())
         .with_quote_properties(language.quote_properties.unwrap_or_default())
-        .with_trailing_comma(language.trailing_comma.unwrap_or_default())
+        .with_trailing_commas(language.trailing_commas.unwrap_or_default())
         .with_semicolons(language.semicolons.unwrap_or_default())
         .with_arrow_parentheses(language.arrow_parentheses.unwrap_or_default())
         .with_bracket_spacing(language.bracket_spacing.unwrap_or_default())
@@ -313,26 +314,54 @@ pub(crate) fn lint(params: LintParams) -> LintResults {
                 compute_analyzer_options(&params.settings, PathBuf::from(params.path.as_path()));
 
             // Compute final rules (taking `overrides` into account)
-            let rules = settings.as_rules(params.path.as_path());
-            let mut rule_filter_list = rules
-                .as_ref()
-                .map(|rules| rules.as_enabled_rules())
-                .unwrap_or_default()
-                .into_iter()
-                .collect::<Vec<_>>();
-            if settings.organize_imports.enabled && !params.categories.is_syntax() {
-                rule_filter_list.push(RuleFilter::Rule("correctness", "organizeImports"));
-            }
+            let mut rules = settings.as_rules(params.path.as_path());
 
-            rule_filter_list.push(RuleFilter::Rule(
-                "correctness",
-                "noDuplicatePrivateClassMembers",
-            ));
-            rule_filter_list.push(RuleFilter::Rule("correctness", "noInitializerWithDefinite"));
-            rule_filter_list.push(RuleFilter::Rule("correctness", "noSuperWithoutExtends"));
-            rule_filter_list.push(RuleFilter::Rule("nursery", "noSuperWithoutExtends"));
+            let enabled_rules = if let Some(rule) = params.rule {
+                // We execute a single rule or group because the `--rule` filter is specified.
+                match rule {
+                    RuleSelector::Group(group) => {
+                        if let Some(rules) = rules.as_mut() {
+                            // Ensure that the recommended field is not set to `false`.
+                            rules.to_mut().set_recommended();
+                        }
+                        rules
+                            .as_ref()
+                            .map(|rules| rules.as_enabled_rules())
+                            .unwrap_or_default()
+                            .into_iter()
+                            .filter(|rule_filter| rule_filter.group() == group.as_str())
+                            .collect()
+                    }
+                    RuleSelector::Rule(group, rule_name) => {
+                        if let Some(rules) = rules.as_mut() {
+                            // Set the severity level of the rule to its default.
+                            rules.to_mut().set_default_severity(group, rule_name);
+                        }
+                        vec![rule.into()]
+                    }
+                }
+            } else {
+                let mut rule_filter_list = rules
+                    .as_ref()
+                    .map(|rules| rules.as_enabled_rules())
+                    .unwrap_or_default()
+                    .into_iter()
+                    .collect::<Vec<_>>();
+                if settings.organize_imports.enabled && !params.categories.is_syntax() {
+                    rule_filter_list.push(RuleFilter::Rule("correctness", "organizeImports"));
+                }
 
-            let mut filter = AnalysisFilter::from_enabled_rules(Some(rule_filter_list.as_slice()));
+                rule_filter_list.push(RuleFilter::Rule(
+                    "correctness",
+                    "noDuplicatePrivateClassMembers",
+                ));
+                rule_filter_list.push(RuleFilter::Rule("correctness", "noInitializerWithDefinite"));
+                rule_filter_list.push(RuleFilter::Rule("correctness", "noSuperWithoutExtends"));
+                rule_filter_list.push(RuleFilter::Rule("nursery", "noSuperWithoutExtends"));
+                rule_filter_list
+            };
+
+            let mut filter = AnalysisFilter::from_enabled_rules(Some(enabled_rules.as_slice()));
             filter.categories = params.categories;
 
             let mut diagnostic_count = diagnostics.len() as u32;
@@ -742,7 +771,7 @@ fn rename(
         match node.try_into() {
             Ok(node) => {
                 let mut batch = root.begin();
-                let result = batch.rename_any_renamable_node(&model, node, &new_name);
+                let result = batch.rename_any_renamable_node(&model, &node, &new_name);
                 if !result {
                     Err(WorkspaceError::RenameError(RenameError::CannotBeRenamed {
                         original_name: original_name.to_string(),
@@ -852,7 +881,7 @@ fn compute_analyzer_options(
             .into_iter()
             .collect(),
         preferred_quote,
-        jsx_runtime,
+        jsx_runtime: Some(jsx_runtime),
     };
 
     AnalyzerOptions {

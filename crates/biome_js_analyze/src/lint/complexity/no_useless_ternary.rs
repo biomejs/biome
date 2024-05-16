@@ -56,6 +56,7 @@ declare_rule! {
     pub NoUselessTernary {
         version: "1.5.0",
         name: "noUselessTernary",
+        language: "js",
         sources: &[RuleSource::Eslint("no-unneeded-ternary")],
         recommended: true,
         fix_kind: FixKind::Unsafe,
@@ -205,12 +206,12 @@ impl Rule for NoUselessTernary {
         }
 
         mutation.replace_element(node.clone().into(), new_node.into());
-        return Some(JsRuleAction {
-            category: ActionCategory::QuickFix,
-            applicability: Applicability::MaybeIncorrect,
-            message: markup! { "Remove the conditional expression with" }.to_owned(),
+        return Some(JsRuleAction::new(
+            ActionCategory::QuickFix,
+            Applicability::MaybeIncorrect,
+            markup! { "Remove the conditional expression with" }.to_owned(),
             mutation,
-        });
+        ));
     }
 }
 

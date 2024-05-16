@@ -1,0 +1,16 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: in-source-testing.js
+---
+# Input
+```jsx
+export const test = "abcdef"
+
+if (import.meta.vitest) {
+    const { describe, expect } = import.meta.vitest
+    describe("a test", () => {
+        expect(test).toEqual("abcdef")
+    })
+}
+
+```

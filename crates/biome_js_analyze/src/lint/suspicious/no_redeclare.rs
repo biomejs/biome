@@ -61,6 +61,7 @@ declare_rule! {
     pub NoRedeclare {
         version: "1.0.0",
         name: "noRedeclare",
+        language: "js",
         sources: &[
             RuleSource::Eslint("no-redeclare"),
             RuleSource::EslintTypeScript("no-redeclare"),

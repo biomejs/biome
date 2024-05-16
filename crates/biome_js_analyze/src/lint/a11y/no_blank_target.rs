@@ -51,6 +51,7 @@ declare_rule! {
     pub NoBlankTarget {
         version: "1.0.0",
         name: "noBlankTarget",
+        language: "jsx",
         sources: &[RuleSource::EslintReact("jsx-no-target-blank")],
         recommended: true,
         fix_kind: FixKind::Safe,
@@ -149,12 +150,12 @@ impl Rule for NoBlankTarget {
             .to_owned()
         };
 
-        Some(JsRuleAction {
-            mutation,
+        Some(JsRuleAction::new(
+            ActionCategory::QuickFix,
+            Applicability::Always,
             message,
-            category: ActionCategory::QuickFix,
-            applicability: Applicability::Always,
-        })
+            mutation,
+        ))
     }
 
     fn diagnostic(

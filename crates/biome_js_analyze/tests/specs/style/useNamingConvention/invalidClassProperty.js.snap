@@ -49,41 +49,35 @@ invalidClassProperty.js:2:5 lint/style/useNamingConvention ━━━━━━━
     3 │ 
     4 │     "Y" = 0
   
-  i The name could be renamed to `x`.
-  
 
 ```
 
 ```
-invalidClassProperty.js:4:5 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalidClassProperty.js:4:6 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This class property name should be in camelCase.
+  ! This class property name part should be in camelCase.
   
     2 │     X
     3 │ 
   > 4 │     "Y" = 0
-      │     ^^^
+      │      ^
     5 │ 
     6 │     #X
   
-  i The name could be renamed to `y`.
-  
 
 ```
 
 ```
-invalidClassProperty.js:6:5 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalidClassProperty.js:6:6 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This class property name should be in camelCase.
   
     4 │     "Y" = 0
     5 │ 
   > 6 │     #X
-      │     ^^
+      │      ^
     7 │ 
     8 │     Initialized = 0
-  
-  i The name could be renamed to `x`.
   
 
 ```
@@ -100,24 +94,20 @@ invalidClassProperty.js:8:5 lint/style/useNamingConvention ━━━━━━━
      9 │ 
     10 │     #Initialized = 0
   
-  i The name could be renamed to `initialized`.
-  
 
 ```
 
 ```
-invalidClassProperty.js:10:5 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalidClassProperty.js:10:6 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This class property name should be in camelCase.
   
      8 │     Initialized = 0
      9 │ 
   > 10 │     #Initialized = 0
-       │     ^^^^^^^^^^^^
+       │      ^^^^^^^^^^^
     11 │ 
     12 │     PROPERTY
-  
-  i The name could be renamed to `initialized`.
   
 
 ```
@@ -134,24 +124,20 @@ invalidClassProperty.js:12:5 lint/style/useNamingConvention ━━━━━━�
     13 │ 
     14 │     #PROPERTY
   
-  i The name could be renamed to `property`.
-  
 
 ```
 
 ```
-invalidClassProperty.js:14:5 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalidClassProperty.js:14:6 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This class property name should be in camelCase.
   
     12 │     PROPERTY
     13 │ 
   > 14 │     #PROPERTY
-       │     ^^^^^^^^^
+       │      ^^^^^^^^
     15 │ 
     16 │     SpecialProperty
-  
-  i The name could be renamed to `property`.
   
 
 ```
@@ -168,24 +154,20 @@ invalidClassProperty.js:16:5 lint/style/useNamingConvention ━━━━━━�
     17 │ 
     18 │     #SpecialProperty
   
-  i The name could be renamed to `specialProperty`.
-  
 
 ```
 
 ```
-invalidClassProperty.js:18:5 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalidClassProperty.js:18:6 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This class property name should be in camelCase.
   
     16 │     SpecialProperty
     17 │ 
   > 18 │     #SpecialProperty
-       │     ^^^^^^^^^^^^^^^^
+       │      ^^^^^^^^^^^^^^^
     19 │ 
     20 │     special_property
-  
-  i The name could be renamed to `specialProperty`.
   
 
 ```
@@ -202,24 +184,20 @@ invalidClassProperty.js:20:5 lint/style/useNamingConvention ━━━━━━�
     21 │ 
     22 │     #special_property
   
-  i The name could be renamed to `specialProperty`.
-  
 
 ```
 
 ```
-invalidClassProperty.js:22:5 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalidClassProperty.js:22:6 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This class property name should be in camelCase.
   
     20 │     special_property
     21 │ 
   > 22 │     #special_property
-       │     ^^^^^^^^^^^^^^^^^
+       │      ^^^^^^^^^^^^^^^^
     23 │ 
     24 │     Unknown_Style
-  
-  i The name could be renamed to `specialProperty`.
   
 
 ```
@@ -236,24 +214,20 @@ invalidClassProperty.js:24:5 lint/style/useNamingConvention ━━━━━━�
     25 │ 
     26 │     #Unknown_Style
   
-  i The name could be renamed to `unknownStyle`.
-  
 
 ```
 
 ```
-invalidClassProperty.js:26:5 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalidClassProperty.js:26:6 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This class property name should be in camelCase.
   
     24 │     Unknown_Style
     25 │ 
   > 26 │     #Unknown_Style
-       │     ^^^^^^^^^^^^^^
+       │      ^^^^^^^^^^^^^
     27 │ 
     28 │     Unknown_Init_Style = 0
-  
-  i The name could be renamed to `unknownStyle`.
   
 
 ```
@@ -270,25 +244,19 @@ invalidClassProperty.js:28:5 lint/style/useNamingConvention ━━━━━━�
     29 │ 
     30 │     #Unknown_Init_Style = 0
   
-  i The name could be renamed to `unknownInitStyle`.
-  
 
 ```
 
 ```
-invalidClassProperty.js:30:5 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalidClassProperty.js:30:6 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This class property name should be in camelCase.
   
     28 │     Unknown_Init_Style = 0
     29 │ 
   > 30 │     #Unknown_Init_Style = 0
-       │     ^^^^^^^^^^^^^^^^^^^
+       │      ^^^^^^^^^^^^^^^^^^
     31 │ }
-  
-  i The name could be renamed to `unknownInitStyle`.
   
 
 ```
-
-

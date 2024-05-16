@@ -39,6 +39,7 @@ declare_rule! {
     pub UseYield {
         version: "1.0.0",
         name: "useYield",
+        language: "js",
         sources: &[RuleSource::Eslint("require-yield")],
         recommended: true,
     }

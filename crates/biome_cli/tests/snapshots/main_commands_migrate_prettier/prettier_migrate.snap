@@ -37,7 +37,7 @@ biome.json migrate ━━━━━━━━━━━━━━━━━━━━�
       13 │ + → → "formatter":·{
       14 │ + → → → "jsxQuoteStyle":·"double",
       15 │ + → → → "quoteProperties":·"asNeeded",
-      16 │ + → → → "trailingComma":·"all",
+      16 │ + → → → "trailingCommas":·"all",
       17 │ + → → → "semicolons":·"always",
       18 │ + → → → "arrowParentheses":·"always",
       19 │ + → → → "bracketSpacing":·true,

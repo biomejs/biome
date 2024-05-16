@@ -2,7 +2,6 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: js/module/template/template.js
 ---
-
 # Input
 
 ```js
@@ -54,6 +53,19 @@ const foo = `but where will ${
 ExampleStory.getFragment('story')}
 `;
 
+// https://github.com/biomejs/biome/issues/2470
+let message = `this is a long message which contains an interpolation: ${format(data)} <- like this`;
+
+let otherMessage = `this template contains two interpolations: ${this(one)}, which should be kept on its line,
+and this other one: ${this(long.placeholder.text.goes.here.so.we.get.a.linebreak)
+  }
+which already had a linebreak so can be broken up
+`;
+
+message = `this is a long messsage a simple interpolation without a linebreak \${foo} <- like this\`;
+message = \`whereas this messsage has a linebreak in the interpolation \${
+  foo
+} <- like this`;
 ```
 
 
@@ -71,7 +83,7 @@ Line width: 80
 Quote style: Double Quotes
 JSX quote style: Double Quotes
 Quote properties: As needed
-Trailing comma: All
+Trailing commas: All
 Semicolons: Always
 Arrow parentheses: Always
 Bracket spacing: true
@@ -109,33 +121,16 @@ output
 `;
 
 // Single Line
-const bar = `but where will ${
-	this.fanta
-} wrap ${baz} ${"hello"} template literal? ${bar.ff.sss} long long long long ${
-	foo[3]
-} long long long long long long`;
+const bar = `but where will ${this.fanta} wrap ${baz} ${"hello"} template literal? ${bar.ff.sss} long long long long ${foo[3]} long long long long long long`;
 
 // Fit
-const foo = `but where will ${
-	(a && b && bar) || (c && d && g)
-} wrap long long long long long long`;
+const foo = `but where will ${(a && b && bar) || (c && d && g)} wrap long long long long long long`;
 
-const foo = `but where will ${
-	(lorem && loremlorem && loremlorem) || (loremc && lorem && loremlorem)
-} wrap long long long long long long`;
+const foo = `but where will ${(lorem && loremlorem && loremlorem) || (loremc && lorem && loremlorem)} wrap long long long long long long`;
 
 const a = `
 let expression_is_simple = is_plain_expression(&expression)?;
-${
-	loooooong ||
-	loooooong ||
-	loooooong ||
-	loooooong ||
-	loooooong ||
-	loooooong ||
-	loooooong ||
-	loooooong
-}
+${loooooong || loooooong || loooooong || loooooong || loooooong || loooooong || loooooong || loooooong}
 let expression_is_simple = is_plain_expression(&expression)?;
 `;
 
@@ -159,6 +154,30 @@ const foo = `but where will ${
 	ExampleStory.getFragment("story")
 }
 `;
+
+// https://github.com/biomejs/biome/issues/2470
+let message = `this is a long message which contains an interpolation: ${format(data)} <- like this`;
+
+let otherMessage = `this template contains two interpolations: ${this(one)}, which should be kept on its line,
+and this other one: ${this(
+	long.placeholder.text.goes.here.so.we.get.a.linebreak,
+)}
+which already had a linebreak so can be broken up
+`;
+
+message = `this is a long messsage a simple interpolation without a linebreak \${foo} <- like this\`;
+message = \`whereas this messsage has a linebreak in the interpolation \${
+  foo
+} <- like this`;
 ```
 
-
+# Lines exceeding max width of 80 characters
+```
+   30: const bar = `but where will ${this.fanta} wrap ${baz} ${"hello"} template literal? ${bar.ff.sss} long long long long ${foo[3]} long long long long long long`;
+   33: const foo = `but where will ${(a && b && bar) || (c && d && g)} wrap long long long long long long`;
+   35: const foo = `but where will ${(lorem && loremlorem && loremlorem) || (loremc && lorem && loremlorem)} wrap long long long long long long`;
+   39: ${loooooong || loooooong || loooooong || loooooong || loooooong || loooooong || loooooong || loooooong}
+   65: let message = `this is a long message which contains an interpolation: ${format(data)} <- like this`;
+   67: let otherMessage = `this template contains two interpolations: ${this(one)}, which should be kept on its line,
+   74: message = `this is a long messsage a simple interpolation without a linebreak \${foo} <- like this\`;
+```

@@ -48,6 +48,7 @@ declare_rule! {
     pub UseAwait {
         version: "1.4.0",
         name: "useAwait",
+        language: "js",
         sources: &[
             RuleSource::Eslint("require-await"),
             RuleSource::EslintTypeScript("require-await"),

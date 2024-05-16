@@ -3,7 +3,7 @@ use biome_formatter::{write, CstFormatContext, FormatRuleWithOptions, GroupId};
 
 use crate::utils::array::write_array_node;
 
-use crate::context::trailing_comma::FormatTrailingComma;
+use crate::context::trailing_commas::FormatTrailingCommas;
 use biome_js_syntax::JsArrayElementList;
 use biome_rowan::{AstNode, AstSeparatedList};
 
@@ -33,7 +33,7 @@ impl FormatRule<JsArrayElementList> for FormatJsArrayElementList {
 
         match layout {
             ArrayLayout::Fill => {
-                let trailing_separator = FormatTrailingComma::ES5.trailing_separator(f.options());
+                let trailing_separator = FormatTrailingCommas::ES5.trailing_separator(f.options());
 
                 let mut filler = f.fill();
 

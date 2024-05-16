@@ -51,6 +51,7 @@ declare_rule! {
     pub NoNoninteractiveTabindex {
         version: "1.0.0",
         name: "noNoninteractiveTabindex",
+        language: "jsx",
         sources: &[RuleSource::EslintJsxA11y("no-noninteractive-tabindex")],
         recommended: true,
         fix_kind: FixKind::Unsafe,
@@ -162,13 +163,12 @@ impl Rule for NoNoninteractiveTabindex {
         let mut mutation = ctx.root().begin();
 
         mutation.remove_node(tabindex_attribute);
-        Some(JsRuleAction {
-            category: ActionCategory::QuickFix,
-            applicability: Applicability::MaybeIncorrect,
-            message: markup! { "Remove the "<Emphasis>"tabIndex"</Emphasis>" attribute." }
-                .to_owned(),
+        Some(JsRuleAction::new(
+            ActionCategory::QuickFix,
+            Applicability::MaybeIncorrect,
+            markup! { "Remove the "<Emphasis>"tabIndex"</Emphasis>" attribute." }.to_owned(),
             mutation,
-        })
+        ))
     }
 }
 

@@ -106,8 +106,10 @@ biome_diagnostics_macros     = { version = "0.5.7", path = "./crates/biome_diagn
 biome_formatter              = { version = "0.5.7", path = "./crates/biome_formatter" }
 biome_fs                     = { version = "0.5.7", path = "./crates/biome_fs" }
 biome_graphql_factory        = { version = "0.1.0", path = "./crates/biome_graphql_factory" }
+biome_graphql_parser         = { version = "0.1.0", path = "./crates/biome_graphql_parser" }
 biome_graphql_syntax         = { version = "0.1.0", path = "./crates/biome_graphql_syntax" }
 biome_grit_factory           = { version = "0.5.7", path = "./crates/biome_grit_factory" }
+biome_grit_formatter         = { version = "0.0.0", path = "./crates/biome_grit_formatter" }
 biome_grit_parser            = { version = "0.1.0", path = "./crates/biome_grit_parser" }
 biome_grit_patterns          = { version = "0.0.1", path = "./crates/biome_grit_patterns" }
 biome_grit_syntax            = { version = "0.5.7", path = "./crates/biome_grit_syntax" }
@@ -151,31 +153,33 @@ biome_ungrammar      = { path = "./crates/biome_ungrammar" }
 tests_macros         = { path = "./crates/tests_macros" }
 
 # Crates needed in the workspace
-anyhow             = "1.0.82"
+anyhow             = "1.0.83"
 bitflags           = "2.5.0"
 bpaf               = { version = "0.9.9", features = ["derive"] }
 countme            = "3.0.1"
 crossbeam          = "0.8.4"
 dashmap            = "5.4.0"
-getrandom          = "0.2.14"
+enumflags2         = "0.7.9"
+getrandom          = "0.2.15"
 ignore             = "0.4.21"
 indexmap           = { version = "2.2.6", features = ["serde"] }
 insta              = "1.38.0"
 lazy_static        = "1.4.0"
 oxc_resolver       = "1.7.0"
-proc-macro2        = "1.0.81"
+proc-macro2        = "1.0.82"
 quickcheck         = "1.0.3"
 quickcheck_macros  = "1.0.0"
 quote              = "1.0.36"
-rayon              = "1.8.1"
+rayon              = "1.10.0"
 regex              = "1.10.4"
 rustc-hash         = "1.1.0"
-schemars           = "0.8.17"
-serde              = { version = "1.0.200", features = ["derive"] }
-serde_json         = "1.0.116"
+schemars           = { version = "0.8.19", features = ["indexmap2", "smallvec"] }
+serde              = { version = "1.0.201", features = ["derive"] }
+serde_ini          = "0.2.0"
+serde_json         = "1.0.117"
 similar            = "2.5.0"
 slotmap            = "1.0.7"
-smallvec           = { version = "1.10.0", features = ["union", "const_new"] }
+smallvec           = { version = "1.10.0", features = ["union", "const_new", "serde"] }
 syn                = "1.0.109"
 termcolor          = "1.4.1"
 tokio              = "1.36.0"

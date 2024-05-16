@@ -57,6 +57,7 @@ declare_rule! {
     pub UseSelfClosingElements {
         version: "1.0.0",
         name: "useSelfClosingElements",
+        language: "js",
         sources: &[RuleSource::EslintStylistic("jsx-self-closing-comp")],
         recommended: true,
         fix_kind: FixKind::Unsafe,
@@ -140,11 +141,11 @@ impl Rule for UseSelfClosingElements {
             AnyJsxTag::JsxElement(ctx.query().clone()),
             AnyJsxTag::JsxSelfClosingElement(self_closing_element),
         );
-        Some(JsRuleAction {
-            category: ActionCategory::QuickFix,
-            applicability: Applicability::MaybeIncorrect,
-            message: markup! { "Use a SelfClosingElement instead" }.to_owned(),
+        Some(JsRuleAction::new(
+            ActionCategory::QuickFix,
+            Applicability::MaybeIncorrect,
+            markup! { "Use a SelfClosingElement instead" }.to_owned(),
             mutation,
-        })
+        ))
     }
 }

@@ -51,6 +51,7 @@ declare_rule! {
     pub UseSimplifiedLogicExpression {
         version: "1.0.0",
         name: "useSimplifiedLogicExpression",
+        language: "js",
         recommended: false,
         fix_kind: FixKind::Unsafe,
     }
@@ -153,12 +154,12 @@ impl Rule for UseSimplifiedLogicExpression {
             "Discard redundant terms from the logical expression."
         };
 
-        Some(JsRuleAction {
-            category: ActionCategory::QuickFix,
-            applicability: Applicability::MaybeIncorrect,
-            message: markup! { ""{message}"" }.to_owned(),
+        Some(JsRuleAction::new(
+            ActionCategory::QuickFix,
+            Applicability::MaybeIncorrect,
+            markup! { ""{message}"" }.to_owned(),
             mutation,
-        })
+        ))
     }
 }
 

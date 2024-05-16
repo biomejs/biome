@@ -311,6 +311,7 @@ impl Session {
                 path: biome_path.clone(),
                 categories,
                 max_diagnostics: u64::MAX,
+                rule: None,
             })?;
 
             tracing::trace!("biome diagnostics: {:#?}", result.diagnostics);

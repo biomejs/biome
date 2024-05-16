@@ -1,6 +1,6 @@
 use crate::parser::{
     directive::{is_at_directive, DirectiveList},
-    is_at_name, parse_description,
+    is_nth_at_name, parse_description,
     parse_error::{expected_name, expected_named_type},
     parse_name,
     r#type::parse_named_type,
@@ -11,13 +11,15 @@ use biome_graphql_syntax::{
     GraphqlSyntaxKind::{self, *},
     T,
 };
-use biome_parser::parse_lists::ParseNodeList;
+use biome_parser::parse_lists::{ParseNodeList, ParseSeparatedList};
 use biome_parser::{
-    parse_lists::ParseSeparatedList, parse_recovery::ParseRecovery, parsed_syntax::ParsedSyntax,
-    prelude::ParsedSyntax::*, Parser,
+    parse_recovery::ParseRecovery, parsed_syntax::ParsedSyntax, prelude::ParsedSyntax::*, Parser,
 };
 
-use super::field::{is_at_fields, is_at_fields_end, parse_fields_definition};
+use super::{
+    field::{is_at_fields, is_at_fields_end, parse_fields_definition},
+    is_at_definition,
+};
 
 #[inline]
 pub(super) fn parse_interface_type_definition(p: &mut GraphqlParser) -> ParsedSyntax {
@@ -52,10 +54,6 @@ pub(super) fn parse_implements_interface(p: &mut GraphqlParser) -> ParsedSyntax 
     let m = p.start();
 
     p.bump(T![implements]);
-
-    if p.at(T![&]) {
-        p.bump(T![&]);
-    }
 
     ImplementsInterfaceList.parse_list(p);
 
@@ -98,6 +96,14 @@ impl ParseSeparatedList for ImplementsInterfaceList {
     fn allow_trailing_separating_element(&self) -> bool {
         false
     }
+
+    fn allow_empty(&self) -> bool {
+        false
+    }
+
+    fn allow_leading_seperating_element(&self) -> bool {
+        true
+    }
 }
 
 struct ImplementsInterfaceListParseRecovery;
@@ -108,7 +114,7 @@ impl ParseRecovery for ImplementsInterfaceListParseRecovery {
     const RECOVERED_KIND: Self::Kind = GRAPHQL_BOGUS;
 
     fn is_at_recovered(&self, p: &mut Self::Parser<'_>) -> bool {
-        is_at_name(p) || p.at(T![&]) || is_at_implements_interface_end(p)
+        is_nth_at_name(p, 0) || p.at(T![&]) || is_at_implements_interface_end(p)
     }
 }
 
@@ -124,5 +130,5 @@ fn is_at_implements_interface(p: &mut GraphqlParser<'_>) -> bool {
 
 #[inline]
 fn is_at_implements_interface_end(p: &mut GraphqlParser<'_>) -> bool {
-    is_at_directive(p) || is_at_fields(p) || is_at_fields_end(p)
+    is_at_directive(p) || is_at_fields(p) || is_at_fields_end(p) || is_at_definition(p)
 }

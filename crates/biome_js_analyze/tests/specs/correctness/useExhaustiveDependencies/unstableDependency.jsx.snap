@@ -1,0 +1,99 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: unstableDependency.jsx
+---
+# Input
+```jsx
+import { useEffect, useState } from "react";
+
+const Component = () => {
+    const [things, setThings] = useState(undefined);
+
+    const fetchThings = async () => {
+        const t = await fetchSomething();
+        if (t) {
+            setThings('done');
+        }
+    }
+
+    function fetchMoreThings() {
+        return fetchThings();
+    }
+
+    const mapping = {
+        something: things
+    };
+
+    useEffect(() => {
+        fetchThings();
+        const fetchData = async () => {
+            await fetchMoreThings();
+        }
+
+        fetchData().then((res) => {
+            return mapping[res.body] || res;
+        });
+    }, [fetchThings, fetchMoreThings, mapping]);
+
+    if (!things) {
+        return <div>Loading...</div>;
+    }
+
+    return (
+        <div>Loaded some things</div>
+    );
+}
+
+```
+
+# Diagnostics
+```
+unstableDependency.jsx:30:9 lint/correctness/useExhaustiveDependencies ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! fetchThings changes on every re-render and should not be used as a hook dependency.
+  
+    28 │             return mapping[res.body] || res;
+    29 │         });
+  > 30 │     }, [fetchThings, fetchMoreThings, mapping]);
+       │         ^^^^^^^^^^^
+    31 │ 
+    32 │     if (!things) {
+  
+  i To fix this, wrap the definition of fetchThings in its own useCallback() hook.
+  
+
+```
+
+```
+unstableDependency.jsx:30:22 lint/correctness/useExhaustiveDependencies ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! fetchMoreThings changes on every re-render and should not be used as a hook dependency.
+  
+    28 │             return mapping[res.body] || res;
+    29 │         });
+  > 30 │     }, [fetchThings, fetchMoreThings, mapping]);
+       │                      ^^^^^^^^^^^^^^^
+    31 │ 
+    32 │     if (!things) {
+  
+  i To fix this, wrap the definition of fetchMoreThings in its own useCallback() hook.
+  
+
+```
+
+```
+unstableDependency.jsx:30:39 lint/correctness/useExhaustiveDependencies ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! mapping changes on every re-render and should not be used as a hook dependency.
+  
+    28 │             return mapping[res.body] || res;
+    29 │         });
+  > 30 │     }, [fetchThings, fetchMoreThings, mapping]);
+       │                                       ^^^^^^^
+    31 │ 
+    32 │     if (!things) {
+  
+  i To fix this, wrap the definition of mapping in its own useMemo() hook.
+  
+
+```

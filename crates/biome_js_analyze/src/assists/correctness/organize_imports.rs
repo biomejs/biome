@@ -44,6 +44,7 @@ declare_rule! {
     pub OrganizeImports {
         version: "1.0.0",
         name: "organizeImports",
+        language: "js",
         recommended: false,
         fix_kind: FixKind::Unsafe,
     }
@@ -259,12 +260,12 @@ impl Rule for OrganizeImports {
         let mut mutation = ctx.root().begin();
         mutation.replace_node_discard_trivia(old_list, new_list);
 
-        Some(JsRuleAction {
-            category: ActionCategory::Source(SourceActionKind::OrganizeImports),
-            applicability: Applicability::MaybeIncorrect,
-            message: markup! { "Organize Imports (Biome)" }.to_owned(),
+        Some(JsRuleAction::new(
+            ActionCategory::Source(SourceActionKind::OrganizeImports),
+            Applicability::MaybeIncorrect,
+            markup! { "Organize Imports (Biome)" },
             mutation,
-        })
+        ))
     }
 }
 

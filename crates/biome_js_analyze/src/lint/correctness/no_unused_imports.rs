@@ -79,6 +79,7 @@ declare_rule! {
     pub NoUnusedImports {
         version: "1.3.0",
         name: "noUnusedImports",
+        language: "js",
         recommended: false,
         fix_kind: FixKind::Safe,
     }
@@ -158,12 +159,12 @@ impl Rule for NoUnusedImports {
                 return None;
             }
         }
-        Some(JsRuleAction {
+        Some(JsRuleAction::new(
+            ActionCategory::QuickFix,
+            Applicability::Always,
+            markup! { "Remove the unused import." }.to_owned(),
             mutation,
-            category: ActionCategory::QuickFix,
-            applicability: Applicability::Always,
-            message: markup! { "Remove the unused import." }.to_owned(),
-        })
+        ))
     }
 }
 

@@ -47,6 +47,7 @@ declare_rule! {
     pub NoDuplicateElseIf {
         version: "1.6.2",
         name: "noDuplicateElseIf",
+        language: "js",
         recommended: true,
         sources: &[RuleSource::Eslint("no-dupe-else-if")],
     }

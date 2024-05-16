@@ -127,6 +127,7 @@ declare_rule! {
     pub NoUnsafeFinally {
         version: "1.0.0",
         name: "noUnsafeFinally",
+        language: "js",
         sources: &[RuleSource::Eslint("no-unsafe-finally")],
         recommended: true,
     }

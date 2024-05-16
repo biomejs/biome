@@ -1,0 +1,147 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```css
+.chat-image {
+	grid-row: span 2 / span 2;
+	align-self: flex-end
+}
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    rules: CssRuleList [
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selector_token: missing (optional),
+                    simple_selector: missing (optional),
+                    sub_selectors: CssSubSelectorList [
+                        CssClassSelector {
+                            dot_token: DOT@0..1 "." [] [],
+                            name: CssCustomIdentifier {
+                                value_token: IDENT@1..12 "chat-image" [] [Whitespace(" ")],
+                            },
+                        },
+                    ],
+                },
+            ],
+            block: CssDeclarationOrRuleBlock {
+                l_curly_token: L_CURLY@12..13 "{" [] [],
+                items: CssDeclarationOrRuleList [
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@13..23 "grid-row" [Newline("\n"), Whitespace("\t")] [],
+                                },
+                                colon_token: COLON@23..25 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssIdentifier {
+                                        value_token: IDENT@25..30 "span" [] [Whitespace(" ")],
+                                    },
+                                    CssNumber {
+                                        value_token: CSS_NUMBER_LITERAL@30..32 "2" [] [Whitespace(" ")],
+                                    },
+                                    CssGenericDelimiter {
+                                        value: SLASH@32..34 "/" [] [Whitespace(" ")],
+                                    },
+                                    CssIdentifier {
+                                        value_token: IDENT@34..39 "span" [] [Whitespace(" ")],
+                                    },
+                                    CssNumber {
+                                        value_token: CSS_NUMBER_LITERAL@39..40 "2" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@40..41 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@41..53 "align-self" [Newline("\n"), Whitespace("\t")] [],
+                                },
+                                colon_token: COLON@53..55 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssIdentifier {
+                                        value_token: IDENT@55..63 "flex-end" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: missing (optional),
+                    },
+                ],
+                r_curly_token: R_CURLY@63..65 "}" [Newline("\n")] [],
+            },
+        },
+    ],
+    eof_token: EOF@65..66 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..66
+  0: (empty)
+  1: CSS_RULE_LIST@0..65
+    0: CSS_QUALIFIED_RULE@0..65
+      0: CSS_SELECTOR_LIST@0..12
+        0: CSS_COMPOUND_SELECTOR@0..12
+          0: (empty)
+          1: (empty)
+          2: CSS_SUB_SELECTOR_LIST@0..12
+            0: CSS_CLASS_SELECTOR@0..12
+              0: DOT@0..1 "." [] []
+              1: CSS_CUSTOM_IDENTIFIER@1..12
+                0: IDENT@1..12 "chat-image" [] [Whitespace(" ")]
+      1: CSS_DECLARATION_OR_RULE_BLOCK@12..65
+        0: L_CURLY@12..13 "{" [] []
+        1: CSS_DECLARATION_OR_RULE_LIST@13..63
+          0: CSS_DECLARATION_WITH_SEMICOLON@13..41
+            0: CSS_DECLARATION@13..40
+              0: CSS_GENERIC_PROPERTY@13..40
+                0: CSS_IDENTIFIER@13..23
+                  0: IDENT@13..23 "grid-row" [Newline("\n"), Whitespace("\t")] []
+                1: COLON@23..25 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@25..40
+                  0: CSS_IDENTIFIER@25..30
+                    0: IDENT@25..30 "span" [] [Whitespace(" ")]
+                  1: CSS_NUMBER@30..32
+                    0: CSS_NUMBER_LITERAL@30..32 "2" [] [Whitespace(" ")]
+                  2: CSS_GENERIC_DELIMITER@32..34
+                    0: SLASH@32..34 "/" [] [Whitespace(" ")]
+                  3: CSS_IDENTIFIER@34..39
+                    0: IDENT@34..39 "span" [] [Whitespace(" ")]
+                  4: CSS_NUMBER@39..40
+                    0: CSS_NUMBER_LITERAL@39..40 "2" [] []
+              1: (empty)
+            1: SEMICOLON@40..41 ";" [] []
+          1: CSS_DECLARATION_WITH_SEMICOLON@41..63
+            0: CSS_DECLARATION@41..63
+              0: CSS_GENERIC_PROPERTY@41..63
+                0: CSS_IDENTIFIER@41..53
+                  0: IDENT@41..53 "align-self" [Newline("\n"), Whitespace("\t")] []
+                1: COLON@53..55 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@55..63
+                  0: CSS_IDENTIFIER@55..63
+                    0: IDENT@55..63 "flex-end" [] []
+              1: (empty)
+            1: (empty)
+        2: R_CURLY@63..65 "}" [Newline("\n")] []
+  2: EOF@65..66 "" [Newline("\n")] []
+
+```

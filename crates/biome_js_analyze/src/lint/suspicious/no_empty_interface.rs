@@ -43,6 +43,7 @@ declare_rule! {
     pub NoEmptyInterface {
         version: "1.0.0",
         name: "noEmptyInterface",
+        language: "ts",
         sources: &[RuleSource::EslintTypeScript("no-empty-interface")],
         source_kind: RuleSourceKind::Inspired,
         recommended: true,
@@ -85,12 +86,12 @@ impl Rule for NoEmptyInterface {
             AnyJsDeclarationClause::from(node.clone()),
             AnyJsDeclarationClause::from(new_node),
         );
-        Some(JsRuleAction {
-            category: ActionCategory::QuickFix,
-            applicability: Applicability::Always,
-            message: markup! { "Use a type alias instead." }.to_owned(),
+        Some(JsRuleAction::new(
+            ActionCategory::QuickFix,
+            Applicability::Always,
+            markup! { "Use a type alias instead." }.to_owned(),
             mutation,
-        })
+        ))
     }
 }
 

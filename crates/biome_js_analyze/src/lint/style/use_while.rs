@@ -41,6 +41,7 @@ declare_rule! {
     pub UseWhile {
         version: "1.0.0",
         name: "useWhile",
+        language: "js",
         recommended: true,
         fix_kind: FixKind::Safe,
     }
@@ -95,11 +96,11 @@ impl Rule for UseWhile {
             )),
         );
 
-        Some(JsRuleAction {
-            category: ActionCategory::QuickFix,
-            applicability: Applicability::Always,
-            message: markup! { "Use a "<Emphasis>"while"</Emphasis>" loop." }.to_owned(),
+        Some(JsRuleAction::new(
+            ActionCategory::QuickFix,
+            Applicability::Always,
+            markup! { "Use a "<Emphasis>"while"</Emphasis>" loop." }.to_owned(),
             mutation,
-        })
+        ))
     }
 }

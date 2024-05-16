@@ -45,6 +45,7 @@ declare_rule! {
     pub NoAriaHiddenOnFocusable {
         version: "1.4.0",
         name: "noAriaHiddenOnFocusable",
+        language: "jsx",
         sources: &[RuleSource::EslintJsxA11y("no-aria-hidden-on-focusable")],
         recommended: true,
         fix_kind: FixKind::Unsafe,
@@ -113,11 +114,11 @@ impl Rule for NoAriaHiddenOnFocusable {
         let mut mutation = ctx.root().begin();
         let aria_hidden_attr = node.find_attribute_by_name("aria-hidden")?;
         mutation.remove_node(aria_hidden_attr);
-        Some(JsRuleAction {
-            category: ActionCategory::QuickFix,
-            applicability: Applicability::MaybeIncorrect,
-            message: markup! { "Remove the aria-hidden attribute from the element." }.to_owned(),
+        Some(JsRuleAction::new(
+            ActionCategory::QuickFix,
+            Applicability::MaybeIncorrect,
+            markup! { "Remove the aria-hidden attribute from the element." }.to_owned(),
             mutation,
-        })
+        ))
     }
 }

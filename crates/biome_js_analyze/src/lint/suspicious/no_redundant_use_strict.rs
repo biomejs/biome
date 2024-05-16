@@ -85,6 +85,7 @@ declare_rule! {
  pub NoRedundantUseStrict {
         version: "1.0.0",
         name: "noRedundantUseStrict",
+        language: "js",
         recommended: true,
         fix_kind: FixKind::Safe,
     }
@@ -175,13 +176,12 @@ impl Rule for NoRedundantUseStrict {
         // This will also remove the trivia of the node
         // which is intended
         mutation.remove_node(node.clone());
-        Some(JsRuleAction {
-            category: ActionCategory::QuickFix,
-            applicability: Applicability::Always,
-            message:
-                markup! { "Remove the redundant "<Emphasis>"use strict"</Emphasis>" directive." }
-                    .to_owned(),
+        Some(JsRuleAction::new(
+            ActionCategory::QuickFix,
+            Applicability::Always,
+            markup! { "Remove the redundant "<Emphasis>"use strict"</Emphasis>" directive." }
+                .to_owned(),
             mutation,
-        })
+        ))
     }
 }

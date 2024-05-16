@@ -50,6 +50,7 @@ declare_rule! {
     pub NoUnreachable {
         version: "1.0.0",
         name: "noUnreachable",
+        language: "js",
         sources: &[RuleSource::Eslint("no-unreachable")],
         recommended: true,
     }

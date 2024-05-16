@@ -62,6 +62,7 @@ declare_rule! {
     pub NoUnusedLabels {
         version: "1.0.0",
         name: "noUnusedLabels",
+        language: "js",
         sources: &[RuleSource::Eslint("no-unused-labels")],
         recommended: true,
         fix_kind: FixKind::Unsafe,
@@ -195,12 +196,12 @@ impl Rule for NoUnusedLabels {
         let body = unused_label.body().ok()?;
         let mut mutation = ctx.root().begin();
         mutation.replace_node(unused_label.clone().into(), body);
-        Some(JsRuleAction {
-            category: ActionCategory::QuickFix,
-            applicability: Applicability::Always,
-            message: markup! {"Remove the unused "<Emphasis>"label"</Emphasis>"."}.to_owned(),
+        Some(JsRuleAction::new(
+            ActionCategory::QuickFix,
+            Applicability::Always,
+            markup! {"Remove the unused "<Emphasis>"label"</Emphasis>"."}.to_owned(),
             mutation,
-        })
+        ))
     }
 }
 

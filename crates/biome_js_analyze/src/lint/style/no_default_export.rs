@@ -59,6 +59,7 @@ declare_rule! {
     pub NoDefaultExport {
         version: "1.4.0",
         name: "noDefaultExport",
+        language: "js",
         sources: &[RuleSource::EslintImport("no-default-export")],
         recommended: false,
     }

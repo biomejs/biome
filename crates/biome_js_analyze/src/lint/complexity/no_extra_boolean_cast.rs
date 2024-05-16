@@ -58,6 +58,7 @@ declare_rule! {
     pub NoExtraBooleanCast {
         version: "1.0.0",
         name: "noExtraBooleanCast",
+        language: "js",
         sources: &[RuleSource::Eslint("no-extra-boolean-cast")],
         recommended: true,
         fix_kind: FixKind::Unsafe,
@@ -182,12 +183,12 @@ impl Rule for NoExtraBooleanCast {
         };
         mutation.replace_node(node.clone(), node_to_replace.clone());
 
-        Some(JsRuleAction {
-            category: ActionCategory::QuickFix,
-            applicability: Applicability::MaybeIncorrect,
-            message: markup! { {message} }.to_owned(),
+        Some(JsRuleAction::new(
+            ActionCategory::QuickFix,
+            Applicability::MaybeIncorrect,
+            markup! { {message} }.to_owned(),
             mutation,
-        })
+        ))
     }
 }
 

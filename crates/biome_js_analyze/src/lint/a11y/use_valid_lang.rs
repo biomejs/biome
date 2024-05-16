@@ -31,6 +31,7 @@ declare_rule! {
     pub UseValidLang {
         version: "1.0.0",
         name: "useValidLang",
+        language: "jsx",
         sources: &[RuleSource::EslintJsxA11y("lang")],
         recommended: true,
     }

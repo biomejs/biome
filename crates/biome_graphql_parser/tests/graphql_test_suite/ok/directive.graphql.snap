@@ -13,6 +13,10 @@ expression: snapshot
 }
 
 {
+  hero @input(type: String)
+}
+
+{
   hero
 		@deprecated(reason: "Deprecated")
 		@addExternalFields(source: "profiles")
@@ -92,69 +96,108 @@ GraphqlRoot {
                 GraphqlField {
                     alias: missing (optional),
                     name: GraphqlName {
-                        value_token: GRAPHQL_NAME@71..78 "hero" [Newline("\n"), Whitespace("  ")] [],
+                        value_token: GRAPHQL_NAME@71..79 "hero" [Newline("\n"), Whitespace("  ")] [Whitespace(" ")],
                     },
                     arguments: missing (optional),
                     directives: GraphqlDirectiveList [
                         GraphqlDirective {
-                            at_token: AT@78..82 "@" [Newline("\n"), Whitespace("\t\t")] [],
+                            at_token: AT@79..80 "@" [] [],
                             name: GraphqlName {
-                                value_token: GRAPHQL_NAME@82..92 "deprecated" [] [],
+                                value_token: GRAPHQL_NAME@80..85 "input" [] [],
                             },
                             arguments: GraphqlArguments {
-                                l_paren_token: L_PAREN@92..93 "(" [] [],
+                                l_paren_token: L_PAREN@85..86 "(" [] [],
                                 arguments: GraphqlArgumentList [
                                     GraphqlArgument {
                                         name: GraphqlName {
-                                            value_token: GRAPHQL_NAME@93..99 "reason" [] [],
+                                            value_token: GRAPHQL_NAME@86..90 "type" [] [],
                                         },
-                                        colon_token: COLON@99..101 ":" [] [Whitespace(" ")],
-                                        value: GraphqlStringValue {
-                                            graphql_string_literal_token: GRAPHQL_STRING_LITERAL@101..113 "\"Deprecated\"" [] [],
-                                        },
-                                    },
-                                ],
-                                r_paren_token: R_PAREN@113..114 ")" [] [],
-                            },
-                        },
-                        GraphqlDirective {
-                            at_token: AT@114..118 "@" [Newline("\n"), Whitespace("\t\t")] [],
-                            name: GraphqlName {
-                                value_token: GRAPHQL_NAME@118..135 "addExternalFields" [] [],
-                            },
-                            arguments: GraphqlArguments {
-                                l_paren_token: L_PAREN@135..136 "(" [] [],
-                                arguments: GraphqlArgumentList [
-                                    GraphqlArgument {
-                                        name: GraphqlName {
-                                            value_token: GRAPHQL_NAME@136..142 "source" [] [],
-                                        },
-                                        colon_token: COLON@142..144 ":" [] [Whitespace(" ")],
-                                        value: GraphqlStringValue {
-                                            graphql_string_literal_token: GRAPHQL_STRING_LITERAL@144..154 "\"profiles\"" [] [],
+                                        colon_token: COLON@90..92 ":" [] [Whitespace(" ")],
+                                        value: GraphqlEnumValue {
+                                            graphql_name: GraphqlName {
+                                                value_token: GRAPHQL_NAME@92..98 "String" [] [],
+                                            },
                                         },
                                     },
                                 ],
-                                r_paren_token: R_PAREN@154..155 ")" [] [],
+                                r_paren_token: R_PAREN@98..99 ")" [] [],
                             },
                         },
                     ],
                     selection_set: missing (optional),
                 },
             ],
-            r_curly_token: R_CURLY@155..157 "}" [Newline("\n")] [],
+            r_curly_token: R_CURLY@99..101 "}" [Newline("\n")] [],
+        },
+        GraphqlSelectionSet {
+            l_curly_token: L_CURLY@101..104 "{" [Newline("\n"), Newline("\n")] [],
+            selections: GraphqlSelectionList [
+                GraphqlField {
+                    alias: missing (optional),
+                    name: GraphqlName {
+                        value_token: GRAPHQL_NAME@104..111 "hero" [Newline("\n"), Whitespace("  ")] [],
+                    },
+                    arguments: missing (optional),
+                    directives: GraphqlDirectiveList [
+                        GraphqlDirective {
+                            at_token: AT@111..115 "@" [Newline("\n"), Whitespace("\t\t")] [],
+                            name: GraphqlName {
+                                value_token: GRAPHQL_NAME@115..125 "deprecated" [] [],
+                            },
+                            arguments: GraphqlArguments {
+                                l_paren_token: L_PAREN@125..126 "(" [] [],
+                                arguments: GraphqlArgumentList [
+                                    GraphqlArgument {
+                                        name: GraphqlName {
+                                            value_token: GRAPHQL_NAME@126..132 "reason" [] [],
+                                        },
+                                        colon_token: COLON@132..134 ":" [] [Whitespace(" ")],
+                                        value: GraphqlStringValue {
+                                            graphql_string_literal_token: GRAPHQL_STRING_LITERAL@134..146 "\"Deprecated\"" [] [],
+                                        },
+                                    },
+                                ],
+                                r_paren_token: R_PAREN@146..147 ")" [] [],
+                            },
+                        },
+                        GraphqlDirective {
+                            at_token: AT@147..151 "@" [Newline("\n"), Whitespace("\t\t")] [],
+                            name: GraphqlName {
+                                value_token: GRAPHQL_NAME@151..168 "addExternalFields" [] [],
+                            },
+                            arguments: GraphqlArguments {
+                                l_paren_token: L_PAREN@168..169 "(" [] [],
+                                arguments: GraphqlArgumentList [
+                                    GraphqlArgument {
+                                        name: GraphqlName {
+                                            value_token: GRAPHQL_NAME@169..175 "source" [] [],
+                                        },
+                                        colon_token: COLON@175..177 ":" [] [Whitespace(" ")],
+                                        value: GraphqlStringValue {
+                                            graphql_string_literal_token: GRAPHQL_STRING_LITERAL@177..187 "\"profiles\"" [] [],
+                                        },
+                                    },
+                                ],
+                                r_paren_token: R_PAREN@187..188 ")" [] [],
+                            },
+                        },
+                    ],
+                    selection_set: missing (optional),
+                },
+            ],
+            r_curly_token: R_CURLY@188..190 "}" [Newline("\n")] [],
         },
     ],
-    eof_token: EOF@157..158 "" [Newline("\n")] [],
+    eof_token: EOF@190..191 "" [Newline("\n")] [],
 }
 ```
 
 ## CST
 
 ```
-0: GRAPHQL_ROOT@0..158
+0: GRAPHQL_ROOT@0..191
   0: (empty)
-  1: GRAPHQL_DEFINITION_LIST@0..157
+  1: GRAPHQL_DEFINITION_LIST@0..190
     0: GRAPHQL_SELECTION_SET@0..22
       0: L_CURLY@0..1 "{" [] []
       1: GRAPHQL_SELECTION_LIST@1..20
@@ -196,45 +239,71 @@ GraphqlRoot {
                 2: R_PAREN@65..66 ")" [] []
           4: (empty)
       2: R_CURLY@66..68 "}" [Newline("\n")] []
-    2: GRAPHQL_SELECTION_SET@68..157
+    2: GRAPHQL_SELECTION_SET@68..101
       0: L_CURLY@68..71 "{" [Newline("\n"), Newline("\n")] []
-      1: GRAPHQL_SELECTION_LIST@71..155
-        0: GRAPHQL_FIELD@71..155
+      1: GRAPHQL_SELECTION_LIST@71..99
+        0: GRAPHQL_FIELD@71..99
           0: (empty)
-          1: GRAPHQL_NAME@71..78
-            0: GRAPHQL_NAME@71..78 "hero" [Newline("\n"), Whitespace("  ")] []
+          1: GRAPHQL_NAME@71..79
+            0: GRAPHQL_NAME@71..79 "hero" [Newline("\n"), Whitespace("  ")] [Whitespace(" ")]
           2: (empty)
-          3: GRAPHQL_DIRECTIVE_LIST@78..155
-            0: GRAPHQL_DIRECTIVE@78..114
-              0: AT@78..82 "@" [Newline("\n"), Whitespace("\t\t")] []
-              1: GRAPHQL_NAME@82..92
-                0: GRAPHQL_NAME@82..92 "deprecated" [] []
-              2: GRAPHQL_ARGUMENTS@92..114
-                0: L_PAREN@92..93 "(" [] []
-                1: GRAPHQL_ARGUMENT_LIST@93..113
-                  0: GRAPHQL_ARGUMENT@93..113
-                    0: GRAPHQL_NAME@93..99
-                      0: GRAPHQL_NAME@93..99 "reason" [] []
-                    1: COLON@99..101 ":" [] [Whitespace(" ")]
-                    2: GRAPHQL_STRING_VALUE@101..113
-                      0: GRAPHQL_STRING_LITERAL@101..113 "\"Deprecated\"" [] []
-                2: R_PAREN@113..114 ")" [] []
-            1: GRAPHQL_DIRECTIVE@114..155
-              0: AT@114..118 "@" [Newline("\n"), Whitespace("\t\t")] []
-              1: GRAPHQL_NAME@118..135
-                0: GRAPHQL_NAME@118..135 "addExternalFields" [] []
-              2: GRAPHQL_ARGUMENTS@135..155
-                0: L_PAREN@135..136 "(" [] []
-                1: GRAPHQL_ARGUMENT_LIST@136..154
-                  0: GRAPHQL_ARGUMENT@136..154
-                    0: GRAPHQL_NAME@136..142
-                      0: GRAPHQL_NAME@136..142 "source" [] []
-                    1: COLON@142..144 ":" [] [Whitespace(" ")]
-                    2: GRAPHQL_STRING_VALUE@144..154
-                      0: GRAPHQL_STRING_LITERAL@144..154 "\"profiles\"" [] []
-                2: R_PAREN@154..155 ")" [] []
+          3: GRAPHQL_DIRECTIVE_LIST@79..99
+            0: GRAPHQL_DIRECTIVE@79..99
+              0: AT@79..80 "@" [] []
+              1: GRAPHQL_NAME@80..85
+                0: GRAPHQL_NAME@80..85 "input" [] []
+              2: GRAPHQL_ARGUMENTS@85..99
+                0: L_PAREN@85..86 "(" [] []
+                1: GRAPHQL_ARGUMENT_LIST@86..98
+                  0: GRAPHQL_ARGUMENT@86..98
+                    0: GRAPHQL_NAME@86..90
+                      0: GRAPHQL_NAME@86..90 "type" [] []
+                    1: COLON@90..92 ":" [] [Whitespace(" ")]
+                    2: GRAPHQL_ENUM_VALUE@92..98
+                      0: GRAPHQL_NAME@92..98
+                        0: GRAPHQL_NAME@92..98 "String" [] []
+                2: R_PAREN@98..99 ")" [] []
           4: (empty)
-      2: R_CURLY@155..157 "}" [Newline("\n")] []
-  2: EOF@157..158 "" [Newline("\n")] []
+      2: R_CURLY@99..101 "}" [Newline("\n")] []
+    3: GRAPHQL_SELECTION_SET@101..190
+      0: L_CURLY@101..104 "{" [Newline("\n"), Newline("\n")] []
+      1: GRAPHQL_SELECTION_LIST@104..188
+        0: GRAPHQL_FIELD@104..188
+          0: (empty)
+          1: GRAPHQL_NAME@104..111
+            0: GRAPHQL_NAME@104..111 "hero" [Newline("\n"), Whitespace("  ")] []
+          2: (empty)
+          3: GRAPHQL_DIRECTIVE_LIST@111..188
+            0: GRAPHQL_DIRECTIVE@111..147
+              0: AT@111..115 "@" [Newline("\n"), Whitespace("\t\t")] []
+              1: GRAPHQL_NAME@115..125
+                0: GRAPHQL_NAME@115..125 "deprecated" [] []
+              2: GRAPHQL_ARGUMENTS@125..147
+                0: L_PAREN@125..126 "(" [] []
+                1: GRAPHQL_ARGUMENT_LIST@126..146
+                  0: GRAPHQL_ARGUMENT@126..146
+                    0: GRAPHQL_NAME@126..132
+                      0: GRAPHQL_NAME@126..132 "reason" [] []
+                    1: COLON@132..134 ":" [] [Whitespace(" ")]
+                    2: GRAPHQL_STRING_VALUE@134..146
+                      0: GRAPHQL_STRING_LITERAL@134..146 "\"Deprecated\"" [] []
+                2: R_PAREN@146..147 ")" [] []
+            1: GRAPHQL_DIRECTIVE@147..188
+              0: AT@147..151 "@" [Newline("\n"), Whitespace("\t\t")] []
+              1: GRAPHQL_NAME@151..168
+                0: GRAPHQL_NAME@151..168 "addExternalFields" [] []
+              2: GRAPHQL_ARGUMENTS@168..188
+                0: L_PAREN@168..169 "(" [] []
+                1: GRAPHQL_ARGUMENT_LIST@169..187
+                  0: GRAPHQL_ARGUMENT@169..187
+                    0: GRAPHQL_NAME@169..175
+                      0: GRAPHQL_NAME@169..175 "source" [] []
+                    1: COLON@175..177 ":" [] [Whitespace(" ")]
+                    2: GRAPHQL_STRING_VALUE@177..187
+                      0: GRAPHQL_STRING_LITERAL@177..187 "\"profiles\"" [] []
+                2: R_PAREN@187..188 ")" [] []
+          4: (empty)
+      2: R_CURLY@188..190 "}" [Newline("\n")] []
+  2: EOF@190..191 "" [Newline("\n")] []
 
 ```

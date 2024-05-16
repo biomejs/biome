@@ -36,6 +36,7 @@ declare_rule! {
     pub NoConsoleLog {
         version: "1.0.0",
         name: "noConsoleLog",
+        language: "js",
         sources: &[RuleSource::Eslint("no-console")],
         source_kind: RuleSourceKind::Inspired,
         recommended: false,
@@ -98,11 +99,11 @@ impl Rule for NoConsoleLog {
             }
         }
 
-        Some(JsRuleAction {
-            category: ActionCategory::QuickFix,
-            applicability: Applicability::MaybeIncorrect,
-            message: markup! { "Remove console.log" }.to_owned(),
+        Some(JsRuleAction::new(
+            ActionCategory::QuickFix,
+            Applicability::MaybeIncorrect,
+            markup! { "Remove console.log" }.to_owned(),
             mutation,
-        })
+        ))
     }
 }

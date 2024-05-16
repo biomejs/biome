@@ -82,7 +82,9 @@ pub(crate) fn format(
                 {PrintDiagnostic::simple(&diagnostic)}
             });
 
-            config.indent_width = Some(indent_size);
+            if config.indent_width.is_none() {
+                config.indent_width = Some(indent_size);
+            }
         }
     }
     // TODO: remove in biome 2.0
@@ -95,7 +97,22 @@ pub(crate) fn format(
                 {PrintDiagnostic::simple(&diagnostic)}
             });
 
-            js_formatter.indent_width = Some(indent_size);
+            if js_formatter.indent_width.is_none() {
+                js_formatter.indent_width = Some(indent_size);
+            }
+        }
+
+        if let Some(trailing_comma) = js_formatter.trailing_comma {
+            let diagnostic = DeprecatedArgument::new(markup! {
+                "The argument "<Emphasis>"--trailing-comma"</Emphasis>" is deprecated, it will be removed in the next major release. Use "<Emphasis>"--trailing-commas"</Emphasis>" instead."
+            });
+            console.error(markup! {
+                {PrintDiagnostic::simple(&diagnostic)}
+            });
+
+            if js_formatter.trailing_commas.is_none() {
+                js_formatter.trailing_commas = Some(trailing_comma);
+            }
         }
     }
     // TODO: remove in biome 2.0
@@ -108,7 +125,9 @@ pub(crate) fn format(
                 {PrintDiagnostic::simple(&diagnostic)}
             });
 
-            json_formatter.indent_width = Some(indent_size);
+            if json_formatter.indent_width.is_none() {
+                json_formatter.indent_width = Some(indent_size);
+            }
         }
     }
     // TODO: remove in biome 2.0
@@ -121,7 +140,9 @@ pub(crate) fn format(
                 {PrintDiagnostic::simple(&diagnostic)}
             });
 
-            css_formatter.indent_width = Some(indent_size);
+            if css_formatter.indent_width.is_none() {
+                css_formatter.indent_width = Some(indent_size);
+            }
         }
     }
 

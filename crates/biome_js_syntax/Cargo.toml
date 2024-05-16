@@ -12,6 +12,7 @@ version              = "0.5.7"
 
 [dependencies]
 biome_rowan = { workspace = true }
+enumflags2  = { workspace = true }
 schemars    = { workspace = true, optional = true }
 serde       = { workspace = true, features = ["derive"] }
 

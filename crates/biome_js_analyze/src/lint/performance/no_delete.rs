@@ -61,6 +61,7 @@ declare_rule! {
     pub NoDelete {
         version: "1.0.0",
         name: "noDelete",
+        language: "js",
         recommended: true,
         fix_kind: FixKind::Unsafe,
     }
@@ -135,13 +136,12 @@ impl Rule for NoDelete {
                 )),
             )),
         );
-        Some(JsRuleAction {
-            category: ActionCategory::QuickFix,
-            applicability: Applicability::MaybeIncorrect,
-            message: markup! { "Use an "<Emphasis>"undefined"</Emphasis>" assignment instead." }
-                .to_owned(),
+        Some(JsRuleAction::new(
+            ActionCategory::QuickFix,
+            Applicability::MaybeIncorrect,
+            markup! { "Use an "<Emphasis>"undefined"</Emphasis>" assignment instead." }.to_owned(),
             mutation,
-        })
+        ))
     }
 }
 

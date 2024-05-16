@@ -1,7 +1,7 @@
 use crate::prelude::*;
 use crate::AsFormat;
 
-use crate::context::trailing_comma::FormatTrailingComma;
+use crate::context::trailing_commas::FormatTrailingCommas;
 use biome_formatter::write;
 use biome_js_syntax::{
     AnyJsArrayAssignmentPatternElement, AnyJsArrayBindingPatternElement, AnyJsArrayElement,
@@ -15,7 +15,7 @@ where
     N: AstSeparatedList<Language = JsLanguage, Node = I>,
     I: ArrayNodeElement + AsFormat<JsFormatContext>,
 {
-    let trailing_separator = FormatTrailingComma::ES5.trailing_separator(f.options());
+    let trailing_separator = FormatTrailingCommas::ES5.trailing_separator(f.options());
 
     // Specifically do not use format_separated as arrays need separators
     // inserted after holes regardless of the formatting since this makes a
@@ -57,7 +57,7 @@ where
                         }
                     }
                 } else {
-                    write!(f, [FormatTrailingComma::ES5])?;
+                    write!(f, [FormatTrailingCommas::ES5])?;
                 };
 
                 Ok(())

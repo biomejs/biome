@@ -12,6 +12,7 @@ use crate::{
     WorkspaceError,
 };
 use biome_analyze::{AnalysisFilter, AnalyzerDiagnostic, RuleCategories};
+use biome_configuration::linter::RuleSelector;
 use biome_configuration::Rules;
 use biome_console::fmt::Formatter;
 use biome_console::markup;
@@ -366,6 +367,7 @@ pub(crate) struct LintParams<'a> {
     pub(crate) language: DocumentFileSource,
     pub(crate) max_diagnostics: u32,
     pub(crate) path: &'a BiomePath,
+    pub(crate) rule: Option<RuleSelector>,
     pub(crate) categories: RuleCategories,
     pub(crate) manifest: Option<PackageJson>,
 }
@@ -544,12 +546,11 @@ pub(crate) fn parse_lang_from_script_opening_tag(script_opening_tag: &str) -> La
             let attribute_value = lang_attribute.initializer()?.value().ok()?;
             let attribute_inner_string =
                 attribute_value.as_jsx_string()?.inner_string_text().ok()?;
-            if attribute_inner_string.text() == "ts" {
-                Some(Language::TypeScript {
+            match attribute_inner_string.text() {
+                "ts" | "tsx" => Some(Language::TypeScript {
                     definition_file: false,
-                })
-            } else {
-                None
+                }),
+                _ => None,
             }
         })
     })
@@ -580,11 +581,13 @@ fn test_svelte_script_lang() {
 fn test_vue_script_lang() {
     const VUE_JS_SCRIPT_OPENING_TAG: &str = r#"<script>"#;
     const VUE_TS_SCRIPT_OPENING_TAG: &str = r#"<script lang="ts">"#;
+    const VUE_TSX_SCRIPT_OPENING_TAG: &str = r#"<script lang="tsx">"#;
     const VUE_SETUP_JS_SCRIPT_OPENING_TAG: &str = r#"<script setup>"#;
     const VUE_SETUP_TS_SCRIPT_OPENING_TAG: &str = r#"<script setup lang="ts">"#;
 
     assert!(parse_lang_from_script_opening_tag(VUE_JS_SCRIPT_OPENING_TAG).is_javascript());
     assert!(parse_lang_from_script_opening_tag(VUE_TS_SCRIPT_OPENING_TAG).is_typescript());
+    assert!(parse_lang_from_script_opening_tag(VUE_TSX_SCRIPT_OPENING_TAG).is_typescript());
     assert!(parse_lang_from_script_opening_tag(VUE_SETUP_JS_SCRIPT_OPENING_TAG).is_javascript());
     assert!(parse_lang_from_script_opening_tag(VUE_SETUP_TS_SCRIPT_OPENING_TAG).is_typescript());
 }

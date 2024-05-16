@@ -40,6 +40,7 @@ declare_rule! {
     pub NoDistractingElements {
         version: "1.0.0",
         name: "noDistractingElements",
+        language: "jsx",
         sources: &[RuleSource::EslintJsxA11y("no-distracting-elements")],
         recommended: true,
         fix_kind: FixKind::Unsafe,
@@ -80,11 +81,11 @@ impl Rule for NoDistractingElements {
         let mut mutation = ctx.root().begin();
         mutation.remove_node(element.clone());
 
-        Some(JsRuleAction {
-            category: ActionCategory::QuickFix,
-            applicability: Applicability::MaybeIncorrect,
-            message: markup! { "Remove the '"{name.text_trimmed()}"' element." }.to_owned(),
+        Some(JsRuleAction::new(
+            ActionCategory::QuickFix,
+            Applicability::MaybeIncorrect,
+            markup! { "Remove the '"{name.text_trimmed()}"' element." }.to_owned(),
             mutation,
-        })
+        ))
     }
 }

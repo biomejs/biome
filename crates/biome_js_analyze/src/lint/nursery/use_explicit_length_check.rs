@@ -123,6 +123,7 @@ declare_rule! {
     pub UseExplicitLengthCheck {
         version: "1.7.3",
         name: "useExplicitLengthCheck",
+        language: "js",
         recommended: false,
         sources: &[RuleSource::EslintUnicorn("explicit-length-check")],
         source_kind: RuleSourceKind::Inspired,
@@ -300,12 +301,12 @@ impl Rule for UseExplicitLengthCheck {
             LengthCheck::NonZero => "> 0",
         };
         let member_name = state.member_name.text();
-        Some(JsRuleAction {
-            category: ActionCategory::QuickFix,
-            applicability: Applicability::MaybeIncorrect,
-            message: markup! { "Replace "<Emphasis>"."{member_name}</Emphasis>" with "<Emphasis>"."{member_name}" "{code}</Emphasis> }.to_owned(),
+        Some(JsRuleAction::new(
+            ActionCategory::QuickFix,
+            Applicability::MaybeIncorrect,
+             markup! { "Replace "<Emphasis>"."{member_name}</Emphasis>" with "<Emphasis>"."{member_name}" "{code}</Emphasis> }.to_owned(),
             mutation,
-        })
+        ))
     }
 }
 

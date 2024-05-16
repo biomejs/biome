@@ -29,6 +29,7 @@ declare_rule! {
     pub NoDuplicateJsonKeys {
         version: "1.0.0",
         name: "noDuplicateJsonKeys",
+        language: "json",
         recommended: true,
     }
 }

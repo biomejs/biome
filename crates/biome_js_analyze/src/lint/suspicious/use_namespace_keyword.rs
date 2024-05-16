@@ -44,6 +44,7 @@ declare_rule! {
     pub UseNamespaceKeyword {
         version: "1.0.0",
         name: "useNamespaceKeyword",
+        language: "ts",
         sources: &[RuleSource::EslintTypeScript("prefer-namespace-keyword")],
         recommended: true,
         fix_kind: FixKind::Safe,
@@ -77,11 +78,11 @@ impl Rule for UseNamespaceKeyword {
     fn action(ctx: &RuleContext<Self>, module_token: &Self::State) -> Option<JsRuleAction> {
         let mut mutation = ctx.root().begin();
         mutation.replace_token_transfer_trivia(module_token.clone(), make::token(T![namespace]));
-        Some(JsRuleAction {
-            category: ActionCategory::QuickFix,
-            applicability: Applicability::Always,
-            message: markup! {"Use "<Emphasis>"namespace"</Emphasis>" instead."}.to_owned(),
+        Some(JsRuleAction::new(
+            ActionCategory::QuickFix,
+            Applicability::Always,
+            markup! {"Use "<Emphasis>"namespace"</Emphasis>" instead."}.to_owned(),
             mutation,
-        })
+        ))
     }
 }

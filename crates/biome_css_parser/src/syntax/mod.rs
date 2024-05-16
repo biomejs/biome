@@ -25,7 +25,7 @@ use biome_parser::{token_set, Parser};
 use value::dimension::{is_at_any_dimension, parse_any_dimension};
 use value::function::{is_at_any_function, parse_any_function};
 
-use self::parse_error::{expected_component_value, expected_declaration_item, expected_number};
+use self::parse_error::{expected_component_value, expected_declaration_item};
 pub(crate) fn parse_root(p: &mut CssParser) {
     let m = p.start();
     p.eat(UNICODE_BOM);
@@ -311,7 +311,7 @@ impl ParseNodeList for CssComponentValueList {
 
 #[inline]
 pub(crate) fn is_at_ratio(p: &mut CssParser) -> bool {
-    p.at(CSS_NUMBER_LITERAL) && p.nth_at(1, T![/])
+    p.at(CSS_NUMBER_LITERAL) && p.nth_at(1, T![/]) && p.nth_at(2, CSS_NUMBER_LITERAL)
 }
 
 #[inline]
@@ -321,8 +321,8 @@ pub(crate) fn parse_ratio(p: &mut CssParser) -> ParsedSyntax {
     }
     let m = p.start();
     parse_regular_number(p).ok();
-    p.eat(T![/]);
-    parse_regular_number(p).or_add_diagnostic(p, expected_number);
+    p.bump(T![/]);
+    parse_regular_number(p).ok();
     Present(m.complete(p, CSS_RATIO))
 }
 

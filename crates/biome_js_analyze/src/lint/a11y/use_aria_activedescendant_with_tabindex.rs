@@ -51,6 +51,7 @@ declare_rule! {
     pub UseAriaActivedescendantWithTabindex {
         version: "1.3.0",
         name: "useAriaActivedescendantWithTabindex",
+        language: "jsx",
         sources: &[RuleSource::EslintJsxA11y("aria-activedescendant-has-tabindex")],
         recommended: true,
         fix_kind: FixKind::Unsafe,
@@ -122,11 +123,11 @@ impl Rule for UseAriaActivedescendantWithTabindex {
 
         mutation.replace_node(old_attribute_list, jsx_attribute_list(new_attribute_list));
 
-        Some(JsRuleAction {
-            category: ActionCategory::QuickFix,
-            applicability: Applicability::MaybeIncorrect,
-            message: markup! { "Add the tabIndex attribute." }.to_owned(),
+        Some(JsRuleAction::new(
+            ActionCategory::QuickFix,
+            Applicability::MaybeIncorrect,
+            markup! { "Add the tabIndex attribute." }.to_owned(),
             mutation,
-        })
+        ))
     }
 }

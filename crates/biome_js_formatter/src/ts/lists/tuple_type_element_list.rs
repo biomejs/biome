@@ -1,4 +1,4 @@
-use crate::context::trailing_comma::FormatTrailingComma;
+use crate::context::trailing_commas::FormatTrailingCommas;
 use crate::prelude::*;
 use biome_js_syntax::TsTupleTypeElementList;
 
@@ -9,7 +9,7 @@ impl FormatRule<TsTupleTypeElementList> for FormatTsTupleTypeElementList {
     type Context = JsFormatContext;
 
     fn fmt(&self, node: &TsTupleTypeElementList, f: &mut JsFormatter) -> FormatResult<()> {
-        let trailing_separator = FormatTrailingComma::ES5.trailing_separator(f.options());
+        let trailing_separator = FormatTrailingCommas::ES5.trailing_separator(f.options());
 
         f.join_with(&soft_line_break_or_space())
             .entries(
