@@ -327,7 +327,7 @@ impl RuleMetadata {
         self
     }
 
-    pub fn to_applicability(&self) -> Applicability {
+    pub fn applicability(&self) -> Applicability {
         self.fix_kind
             .try_into()
             .expect("Fix kind is not set in the rule metadata")

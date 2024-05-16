@@ -4,7 +4,6 @@ use biome_analyze::{
     RuleDiagnostic, RuleSource, ServiceBag, Visitor, VisitorContext,
 };
 use biome_console::markup;
-use biome_diagnostics::Applicability;
 use biome_js_syntax::{
     AnyJsStatement, JsBreakStatement, JsContinueStatement, JsFileSource, JsLabeledStatement,
     JsLanguage, TextRange, WalkEvent,
@@ -65,7 +64,7 @@ declare_rule! {
         language: "js",
         sources: &[RuleSource::Eslint("no-unused-labels")],
         recommended: true,
-        fix_kind: FixKind::Unsafe,
+        fix_kind: FixKind::Safe,
     }
 }
 
@@ -198,7 +197,7 @@ impl Rule for NoUnusedLabels {
         mutation.replace_node(unused_label.clone().into(), body);
         Some(JsRuleAction::new(
             ActionCategory::QuickFix,
-            Applicability::Always,
+            ctx.metadata().applicability(),
             markup! {"Remove the unused "<Emphasis>"label"</Emphasis>"."}.to_owned(),
             mutation,
         ))

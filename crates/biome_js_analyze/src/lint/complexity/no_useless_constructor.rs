@@ -3,7 +3,6 @@ use biome_analyze::{
     RuleSource,
 };
 use biome_console::markup;
-use biome_diagnostics::Applicability;
 use biome_js_syntax::{
     AnyJsCallArgument, AnyJsClass, AnyJsConstructorParameter, AnyJsFormalParameter,
     JsCallExpression, JsConstructorClassMember,
@@ -215,7 +214,7 @@ impl Rule for NoUselessConstructor {
         mutation.remove_node(constructor.clone());
         Some(JsRuleAction::new(
             ActionCategory::QuickFix,
-            Applicability::MaybeIncorrect,
+            ctx.metadata().applicability(),
             markup! { "Remove the unnecessary constructor." }.to_owned(),
             mutation,
         ))

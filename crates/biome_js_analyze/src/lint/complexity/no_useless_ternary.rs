@@ -3,7 +3,6 @@ use biome_analyze::{
     RuleSource,
 };
 use biome_console::markup;
-use biome_diagnostics::Applicability;
 use biome_js_factory::make;
 use biome_js_syntax::{
     AnyJsExpression, AnyJsLiteralExpression, JsConditionalExpression, JsSyntaxKind,
@@ -208,7 +207,7 @@ impl Rule for NoUselessTernary {
         mutation.replace_element(node.clone().into(), new_node.into());
         return Some(JsRuleAction::new(
             ActionCategory::QuickFix,
-            Applicability::MaybeIncorrect,
+            ctx.metadata().applicability(),
             markup! { "Remove the conditional expression with" }.to_owned(),
             mutation,
         ));

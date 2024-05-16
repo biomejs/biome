@@ -3,7 +3,6 @@ use biome_analyze::{
     RuleSource,
 };
 use biome_console::markup;
-use biome_diagnostics::Applicability;
 use biome_js_syntax::{
     AnyJsExpression, JsAssignmentExpression, JsAssignmentOperator, JsBinaryExpression,
 };
@@ -142,7 +141,7 @@ impl Rule for NoMisrefactoredShorthandAssign {
 
         Some(JsRuleAction::new(
             ActionCategory::QuickFix,
-            Applicability::MaybeIncorrect,
+            ctx.metadata().applicability(),
             markup! { "Use "<Emphasis>""{replacement_text}""</Emphasis>" instead." }.to_owned(),
             mutation,
         ))

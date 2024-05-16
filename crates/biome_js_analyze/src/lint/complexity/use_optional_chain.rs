@@ -3,7 +3,6 @@ use biome_analyze::{
     context::RuleContext, declare_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic,
 };
 use biome_console::markup;
-use biome_diagnostics::Applicability;
 use biome_js_factory::make;
 use biome_js_syntax::{
     AnyJsExpression, AnyJsMemberExpression, AnyJsName, JsLogicalExpression, JsLogicalOperator,
@@ -203,7 +202,7 @@ impl Rule for UseOptionalChain {
                 mutation.replace_node(AnyJsExpression::from(logical.clone()), replacement);
                 Some(JsRuleAction::new(
                     ActionCategory::QuickFix,
-                    Applicability::MaybeIncorrect,
+                    ctx.metadata().applicability(),
                     markup! { "Change to an optional chain." }.to_owned(),
                     mutation,
                 ))
@@ -251,7 +250,7 @@ impl Rule for UseOptionalChain {
                 mutation.replace_node(prev_member, new_member);
                 Some(JsRuleAction::new(
                     ActionCategory::QuickFix,
-                    Applicability::MaybeIncorrect,
+                    ctx.metadata().applicability(),
                     markup! { "Change to an optional chain." }.to_owned(),
                     mutation,
                 ))

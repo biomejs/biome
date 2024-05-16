@@ -1,7 +1,6 @@
 use biome_analyze::context::RuleContext;
 use biome_analyze::{declare_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
-use biome_diagnostics::Applicability;
 use biome_js_factory::make;
 use biome_js_syntax::{
     AnyJsDeclaration, AnyJsStatement, AnyJsSwitchClause, JsVariableStatement, TriviaPieceKind, T,
@@ -137,7 +136,7 @@ impl Rule for NoSwitchDeclarations {
         mutation.replace_node_discard_trivia(consequent, new_consequent);
         Some(JsRuleAction::new(
             ActionCategory::QuickFix,
-            Applicability::MaybeIncorrect,
+            ctx.metadata().applicability(),
             markup! { "Wrap the "<Emphasis>"declaration"</Emphasis>" in a block." }.to_owned(),
             mutation,
         ))

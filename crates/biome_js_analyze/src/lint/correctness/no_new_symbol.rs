@@ -3,7 +3,6 @@ use biome_analyze::{
     context::RuleContext, declare_rule, ActionCategory, FixKind, Rule, RuleDiagnostic, RuleSource,
 };
 use biome_console::markup;
-use biome_diagnostics::Applicability;
 use biome_js_factory::make;
 use biome_js_syntax::{global_identifier, AnyJsExpression, JsCallExpression, JsNewExpression};
 use biome_rowan::{chain_trivia_pieces, AstNode, BatchMutationExt};
@@ -76,7 +75,7 @@ impl Rule for NoNewSymbol {
         );
         Some(JsRuleAction::new(
             ActionCategory::QuickFix,
-            Applicability::MaybeIncorrect,
+            ctx.metadata().applicability(),
             markup! { "Remove "<Emphasis>"new"</Emphasis>"." }.to_owned(),
             mutation,
         ))
