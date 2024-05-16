@@ -153,7 +153,13 @@ pub enum BiomeCommand {
         #[bpaf(external, hide_usage)]
         cli_options: CliOptions,
 
-        /// Run only the given rule or rule group taking the configurations file into account.
+        /// Run only the given rule or rule group.
+        ///
+        /// The option overrides the Biome configuration file as follows:
+        ///
+        /// - When a rule is passed, its severity level is set to `error' if it is a recommended rule, or `warn' otherwise.
+        ///
+        /// - When a rule group is passed, the `recommended` flag is enabled, but if the `all` flag is enabled.
         ///
         /// Example: `biome lint --rule=correctness/noUnusedVariables`
         ///
