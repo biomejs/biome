@@ -49,6 +49,7 @@ use biome_parser::AnyParse;
 use biome_rowan::{AstNode, BatchMutationExt, Direction, NodeCache};
 use serde::{Deserialize, Serialize};
 use std::borrow::Cow;
+use std::ffi::OsStr;
 use std::fmt::Debug;
 use std::path::PathBuf;
 use tracing::{debug, debug_span, error, info, trace, trace_span};
@@ -873,13 +874,28 @@ fn compute_analyzer_options(
         JsxRuntime::ReactClassic => biome_analyze::options::JsxRuntime::ReactClassic,
     };
 
+    let mut globals: Vec<_> = settings
+        .override_settings
+        .override_js_globals(&path, &settings.languages.javascript.globals)
+        .into_iter()
+        .collect();
+    if file_path.extension().and_then(OsStr::to_str) == Some("vue") {
+        globals.extend(
+            [
+                "defineEmits",
+                "defineProps",
+                "defineExpose",
+                "defineModel",
+                "defineOptions",
+                "defineSlots",
+            ]
+            .map(ToOwned::to_owned),
+        );
+    }
+
     let configuration = AnalyzerConfiguration {
         rules: to_analyzer_rules(settings, file_path.as_path()),
-        globals: settings
-            .override_settings
-            .override_js_globals(&path, &settings.languages.javascript.globals)
-            .into_iter()
-            .collect(),
+        globals,
         preferred_quote,
         jsx_runtime: Some(jsx_runtime),
     };
