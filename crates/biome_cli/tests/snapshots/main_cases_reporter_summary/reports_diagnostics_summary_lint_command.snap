@@ -1,0 +1,82 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: content
+---
+## `index.ts`
+
+```ts
+import { z} from "z"
+import { z, b , a} from "lodash"
+
+a ==b
+a ==b
+a ==b
+a ==b
+
+debugger 
+debugger 
+debugger 
+debugger 
+
+let f;
+let f;
+let f;
+		let f;
+		let f;
+		let f;
+```
+
+## `main.ts`
+
+```ts
+import { z} from "z"
+import { z, b , a} from "lodash"
+
+a ==b
+a ==b
+a ==b
+a ==b
+
+debugger 
+debugger 
+debugger 
+debugger 
+
+let f;
+let f;
+let f;
+		let f;
+		let f;
+		let f;
+```
+
+# Termination Message
+
+```block
+lint ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Some errors were emitted while running checks.
+  
+
+
+```
+
+# Emitted Messages
+
+```block
+Analyzer ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Some analyzer rules were triggered
+
+Rule Name                                               Diagnostics
+lint/suspicious/noImplicitAnyLet                        12 (12 error(s), 0 warning(s), 0 info(s))
+lint/suspicious/noDoubleEquals                          8 (8 error(s), 0 warning(s), 0 info(s))
+lint/suspicious/noRedeclare                             12 (12 error(s), 0 warning(s), 0 info(s))
+lint/suspicious/noDebugger                              20 (20 error(s), 0 warning(s), 0 info(s))
+
+
+```
+
+```block
+Checked 2 files in <TIME>. No fixes needed.
+Found 52 errors.
+```
