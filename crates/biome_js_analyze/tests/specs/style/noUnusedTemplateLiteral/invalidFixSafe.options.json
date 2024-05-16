@@ -1,0 +1,12 @@
+{
+    "linter": {
+        "rules": {
+            "style": {
+                "noUnusedTemplateLiteral": {
+                    "level": "warn",
+                    "fix": "safe"
+                }
+            }
+        }
+    }
+}

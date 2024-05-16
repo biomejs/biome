@@ -3,7 +3,7 @@ mod rules;
 
 pub use crate::linter::rules::Rules;
 use biome_analyze::options::RuleOptions;
-use biome_analyze::RuleFilter;
+use biome_analyze::{FixKind, RuleFilter};
 use biome_deserialize::{Deserializable, StringSet};
 use biome_deserialize::{DeserializableValue, DeserializationDiagnostic, Merge, VisitableType};
 use biome_deserialize_macros::{Deserializable, Merge, Partial};
@@ -89,15 +89,6 @@ impl<T: Default + Deserializable> Deserializable for RuleConfiguration<T> {
     }
 }
 
-impl<T: Default> FromStr for RuleConfiguration<T> {
-    type Err = String;
-
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let result = RulePlainConfiguration::from_str(s)?;
-        Ok(Self::Plain(result))
-    }
-}
-
 impl<T: Default> RuleConfiguration<T> {
     pub fn is_err(&self) -> bool {
         if let Self::WithOptions(rule) = self {
@@ -138,16 +129,26 @@ impl<T: Default> RuleConfiguration<T> {
 // severity doesn't override the options.
 impl<T: Clone + Default> Merge for RuleConfiguration<T> {
     fn merge_with(&mut self, other: Self) {
-        *self = match (&self, other) {
-            (Self::WithOptions(this), Self::Plain(other)) => Self::WithOptions(RuleWithOptions {
-                level: other,
-                options: this.options.clone(),
-            }),
-            // FIXME: Rule options don't have a `NoneState`, so we can't deep
-            //        merge them yet. For now, if an override specifies options,
-            //        it will still override *all* options.
-            (_, other) => other,
-        };
+        match self {
+            RuleConfiguration::Plain(_) => *self = other,
+            RuleConfiguration::WithOptions(this) => {
+                match other {
+                    RuleConfiguration::Plain(level) => {
+                        this.level = level;
+                    }
+                    RuleConfiguration::WithOptions(other) => {
+                        *this = RuleWithOptions {
+                            level: other.level,
+                            fix: other.fix.or(this.fix),
+                            // FIXME: Rule options don't have a `NoneState`, so we can't deep
+                            //        merge them yet. For now, if an override specifies options,
+                            //        it will still override *all* options.
+                            options: other.options,
+                        }
+                    }
+                }
+            }
+        }
     }
 }
 
@@ -156,7 +157,7 @@ impl<T: Clone + Default + 'static> RuleConfiguration<T> {
         match self {
             RuleConfiguration::Plain(_) => None,
             RuleConfiguration::WithOptions(options) => {
-                Some(RuleOptions::new(options.options.clone()))
+                Some(RuleOptions::new(options.options.clone(), options.fix))
             }
         }
     }
@@ -200,24 +201,16 @@ pub enum RulePlainConfiguration {
     Off,
 }
 
-impl FromStr for RulePlainConfiguration {
-    type Err = String;
-
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        match s {
-            "warn" => Ok(Self::Warn),
-            "error" => Ok(Self::Error),
-            "off" => Ok(Self::Off),
-            _ => Err("Invalid configuration for rule".to_string()),
-        }
-    }
-}
-
 #[derive(Clone, Debug, Default, Deserialize, Deserializable, Eq, PartialEq, Serialize)]
 #[cfg_attr(feature = "schema", derive(JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct RuleWithOptions<T: Default> {
+    /// The severity of the emitted diagnostics by the rule
     pub level: RulePlainConfiguration,
+    /// The kind of the code actions emitted by the rule
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub fix: Option<FixKind>,
+    /// Rule's options
     pub options: T,
 }
 

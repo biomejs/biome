@@ -67,6 +67,47 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 ### Configuration
 
+#### New features
+
+- Add an rule option `fix` to override the code fix kind of a rule ([#2882](https://github.com/biomejs/biome/issues/2882)).
+
+  A rule can provide a safe or an **unsafe** code **action**.
+  You can now tune the kind of code actions thanks to the `fix` option.
+  This rule option takes a value among:
+
+  - `none`: the rule no longer emits code actions.
+  - `safe`: the rule emits safe code action.
+  - `unsafe`: the rule emits unsafe code action.
+
+  The following configuration disables the code actions of `noUnusedVariables`, makes the emitted code actions of `style/useConst` and `style/useTemplate` unsafe and safe respectively.
+
+  ```json
+  {
+    "linter": {
+      "rules": {
+        "correctness": {
+          "noUnusedVariables": {
+            "level": "error",
+            "fix": "none"
+          },
+          "style": {
+            "useConst": {
+              "level": "warn",
+              "fix": "unsafe"
+            },
+            "useTemplate": {
+              "level": "warn",
+              "fix": "safe"
+            }
+          }
+        }
+      }
+    }
+  }
+  ```
+
+  Contributed by @Conaclos
+
 #### Enhancements
 
 - The `javascript.formatter.trailingComma` option is deprecated and renamed to `javascript.formatter.trailingCommas`. The corresponding CLI option `--trailing-comma` is also deprecated and renamed to `--trailing-commas`. Details can be checked in [#2492](https://github.com/biomejs/biome/pull/2492). Contributed by @Sec-ant

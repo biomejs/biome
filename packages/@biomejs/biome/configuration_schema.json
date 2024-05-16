@@ -1018,6 +1018,26 @@
 			},
 			"additionalProperties": false
 		},
+		"FixKind": {
+			"description": "Used to identify the kind of code action emitted by a rule",
+			"oneOf": [
+				{
+					"description": "The rule doesn't emit code actions.",
+					"type": "string",
+					"enum": ["none"]
+				},
+				{
+					"description": "The rule emits a code action that is safe to apply. Usually these fixes don't change the semantic of the program.",
+					"type": "string",
+					"enum": ["safe"]
+				},
+				{
+					"description": "The rule emits a code action that is _unsafe_ to apply. Usually these fixes remove comments, or change the semantic of the program.",
+					"type": "string",
+					"enum": ["unsafe"]
+				}
+			]
+		},
 		"Format": {
 			"description": "Supported cases.",
 			"type": "string",
@@ -2086,8 +2106,18 @@
 			"type": "object",
 			"required": ["level", "options"],
 			"properties": {
-				"level": { "$ref": "#/definitions/RulePlainConfiguration" },
-				"options": { "$ref": "#/definitions/ComplexityOptions" }
+				"fix": {
+					"description": "The kind of the code actions emitted by the rule",
+					"anyOf": [{ "$ref": "#/definitions/FixKind" }, { "type": "null" }]
+				},
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/ComplexityOptions" }]
+				}
 			},
 			"additionalProperties": false
 		},
@@ -2095,8 +2125,18 @@
 			"type": "object",
 			"required": ["level", "options"],
 			"properties": {
-				"level": { "$ref": "#/definitions/RulePlainConfiguration" },
-				"options": { "$ref": "#/definitions/ConsistentArrayTypeOptions" }
+				"fix": {
+					"description": "The kind of the code actions emitted by the rule",
+					"anyOf": [{ "$ref": "#/definitions/FixKind" }, { "type": "null" }]
+				},
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/ConsistentArrayTypeOptions" }]
+				}
 			},
 			"additionalProperties": false
 		},
@@ -2104,8 +2144,18 @@
 			"type": "object",
 			"required": ["level", "options"],
 			"properties": {
-				"level": { "$ref": "#/definitions/RulePlainConfiguration" },
-				"options": { "$ref": "#/definitions/DeprecatedHooksOptions" }
+				"fix": {
+					"description": "The kind of the code actions emitted by the rule",
+					"anyOf": [{ "$ref": "#/definitions/FixKind" }, { "type": "null" }]
+				},
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/DeprecatedHooksOptions" }]
+				}
 			},
 			"additionalProperties": false
 		},
@@ -2113,8 +2163,18 @@
 			"type": "object",
 			"required": ["level", "options"],
 			"properties": {
-				"level": { "$ref": "#/definitions/RulePlainConfiguration" },
-				"options": { "$ref": "#/definitions/FilenamingConventionOptions" }
+				"fix": {
+					"description": "The kind of the code actions emitted by the rule",
+					"anyOf": [{ "$ref": "#/definitions/FixKind" }, { "type": "null" }]
+				},
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/FilenamingConventionOptions" }]
+				}
 			},
 			"additionalProperties": false
 		},
@@ -2122,8 +2182,18 @@
 			"type": "object",
 			"required": ["level", "options"],
 			"properties": {
-				"level": { "$ref": "#/definitions/RulePlainConfiguration" },
-				"options": { "$ref": "#/definitions/HooksOptions" }
+				"fix": {
+					"description": "The kind of the code actions emitted by the rule",
+					"anyOf": [{ "$ref": "#/definitions/FixKind" }, { "type": "null" }]
+				},
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/HooksOptions" }]
+				}
 			},
 			"additionalProperties": false
 		},
@@ -2131,8 +2201,18 @@
 			"type": "object",
 			"required": ["level", "options"],
 			"properties": {
-				"level": { "$ref": "#/definitions/RulePlainConfiguration" },
-				"options": { "$ref": "#/definitions/NamingConventionOptions" }
+				"fix": {
+					"description": "The kind of the code actions emitted by the rule",
+					"anyOf": [{ "$ref": "#/definitions/FixKind" }, { "type": "null" }]
+				},
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/NamingConventionOptions" }]
+				}
 			},
 			"additionalProperties": false
 		},
@@ -2140,8 +2220,18 @@
 			"type": "object",
 			"required": ["level", "options"],
 			"properties": {
-				"level": { "$ref": "#/definitions/RulePlainConfiguration" },
-				"options": { "$ref": "#/definitions/NoCssEmptyBlockOptions" }
+				"fix": {
+					"description": "The kind of the code actions emitted by the rule",
+					"anyOf": [{ "$ref": "#/definitions/FixKind" }, { "type": "null" }]
+				},
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/NoCssEmptyBlockOptions" }]
+				}
 			},
 			"additionalProperties": false
 		},
@@ -2149,7 +2239,14 @@
 			"type": "object",
 			"required": ["level"],
 			"properties": {
-				"level": { "$ref": "#/definitions/RulePlainConfiguration" }
+				"fix": {
+					"description": "The kind of the code actions emitted by the rule",
+					"anyOf": [{ "$ref": "#/definitions/FixKind" }, { "type": "null" }]
+				},
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				}
 			},
 			"additionalProperties": false
 		},
@@ -2157,8 +2254,18 @@
 			"type": "object",
 			"required": ["level", "options"],
 			"properties": {
-				"level": { "$ref": "#/definitions/RulePlainConfiguration" },
-				"options": { "$ref": "#/definitions/RestrictedGlobalsOptions" }
+				"fix": {
+					"description": "The kind of the code actions emitted by the rule",
+					"anyOf": [{ "$ref": "#/definitions/FixKind" }, { "type": "null" }]
+				},
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/RestrictedGlobalsOptions" }]
+				}
 			},
 			"additionalProperties": false
 		},
@@ -2166,8 +2273,18 @@
 			"type": "object",
 			"required": ["level", "options"],
 			"properties": {
-				"level": { "$ref": "#/definitions/RulePlainConfiguration" },
-				"options": { "$ref": "#/definitions/RestrictedImportsOptions" }
+				"fix": {
+					"description": "The kind of the code actions emitted by the rule",
+					"anyOf": [{ "$ref": "#/definitions/FixKind" }, { "type": "null" }]
+				},
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/RestrictedImportsOptions" }]
+				}
 			},
 			"additionalProperties": false
 		},
@@ -2175,8 +2292,18 @@
 			"type": "object",
 			"required": ["level", "options"],
 			"properties": {
-				"level": { "$ref": "#/definitions/RulePlainConfiguration" },
-				"options": { "$ref": "#/definitions/UtilityClassSortingOptions" }
+				"fix": {
+					"description": "The kind of the code actions emitted by the rule",
+					"anyOf": [{ "$ref": "#/definitions/FixKind" }, { "type": "null" }]
+				},
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/UtilityClassSortingOptions" }]
+				}
 			},
 			"additionalProperties": false
 		},
@@ -2184,8 +2311,18 @@
 			"type": "object",
 			"required": ["level", "options"],
 			"properties": {
-				"level": { "$ref": "#/definitions/RulePlainConfiguration" },
-				"options": { "$ref": "#/definitions/ValidAriaRoleOptions" }
+				"fix": {
+					"description": "The kind of the code actions emitted by the rule",
+					"anyOf": [{ "$ref": "#/definitions/FixKind" }, { "type": "null" }]
+				},
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/ValidAriaRoleOptions" }]
+				}
 			},
 			"additionalProperties": false
 		},
