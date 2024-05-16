@@ -26,7 +26,7 @@ declare_rule! {
     ///
     /// ```ts,expect_diagnostic
     /// class SomeClass {
-    ///    Array<Array<any>>;
+    ///    message: Array<Array<any>>;
     /// }
     /// ```
     ///
