@@ -2,7 +2,7 @@ use crate::{declare_migration, MigrationAction};
 use biome_analyze::context::RuleContext;
 use biome_analyze::{ActionCategory, Ast, Rule, RuleDiagnostic};
 use biome_console::markup;
-use biome_diagnostics::{category, Applicability};
+use biome_diagnostics::category;
 use biome_json_factory::make::{
     json_member, json_member_list, json_member_name, json_object_value, json_string_literal, token,
 };
@@ -299,15 +299,15 @@ impl Rule for NurseryRules {
             mutation.replace_node(rules, json_member_list(new_members, separators));
         };
 
-        Some(MigrationAction {
-            mutation,
-            message: markup! {
+        Some(MigrationAction::new(
+            ActionCategory::QuickFix,
+            ctx.metadata().to_applicability(),
+            markup! {
                 "Move the rule to the new stable group."
             }
             .to_owned(),
-            category: ActionCategory::QuickFix,
-            applicability: Applicability::MaybeIncorrect,
-        })
+            mutation,
+        ))
     }
 }
 

@@ -62,6 +62,15 @@ impl Display for FixKind {
     }
 }
 
+impl From<&FixKind> for Applicability {
+    fn from(kind: &FixKind) -> Self {
+        match kind {
+            FixKind::Safe => Applicability::Always,
+            FixKind::Unsafe => Applicability::MaybeIncorrect,
+        }
+    }
+}
+
 #[derive(Debug, Clone, Eq, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub enum RuleSource {
@@ -299,6 +308,13 @@ impl RuleMetadata {
     pub const fn language(mut self, language: &'static str) -> Self {
         self.language = language;
         self
+    }
+
+    pub fn to_applicability(&self) -> Applicability {
+        self.fix_kind
+            .as_ref()
+            .expect("Fix kind is not set in the rule metadata")
+            .into()
     }
 }
 
@@ -805,7 +821,7 @@ impl RuleDiagnostic {
 /// Code Action object returned by a single analysis rule
 pub struct RuleAction<L: Language> {
     pub category: ActionCategory,
-    pub applicability: Applicability,
+    applicability: Applicability,
     pub message: MarkupBuf,
     pub mutation: BatchMutation<L>,
 }
@@ -823,6 +839,10 @@ impl<L: Language> RuleAction<L> {
             message: markup! {{message}}.to_owned(),
             mutation,
         }
+    }
+
+    pub fn applicability(&self) -> Applicability {
+        self.applicability
     }
 }
 
