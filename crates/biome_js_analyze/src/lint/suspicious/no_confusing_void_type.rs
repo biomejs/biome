@@ -1,15 +1,27 @@
-use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic, RuleSource};
+use biome_analyze::{
+    context::RuleContext, declare_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic,
+    RuleSource,
+};
 use biome_console::markup;
-use biome_js_syntax::{JsLanguage, JsSyntaxKind, TsConditionalType, TsVoidType};
-use biome_rowan::{AstNode, SyntaxNode};
+use biome_diagnostics::Applicability;
+use biome_js_factory::make;
+use biome_js_syntax::{AnyTsType, JsLanguage, JsSyntaxKind, TsConditionalType, TsVoidType, T};
+use biome_rowan::{AstNode, BatchMutationExt, SyntaxNode};
+
+use crate::JsRuleAction;
 
 declare_rule! {
     /// Disallow `void` type outside of generic or return types.
     ///
-    /// `void` in TypeScript refers to a function return that is meant to be ignored. Attempting to use a void type outside of a return type or generic type argument is often a sign of programmer error. `void` can also be misleading for other developers even if used correctly.
+    /// `void` in TypeScript refers to a function return that is meant to be ignored.
+    /// Attempting to use a void type outside of a return type or a type parameter is often a sign of programmer error.
+    /// `void` can also be misleading for other developers even if used correctly.
     ///
     /// > The `void` type means cannot be mixed with any other types, other than `never`, which accepts all types.
     /// > If you think you need this then you probably want the `undefined` type instead.
+    ///
+    /// The code action suggests using `undefined` instead of `void`.
+    /// It is unsafe because a variable with the `void` type cannot be asigned to a variable with the `undefined` type.
     ///
     /// ## Examples
     ///
@@ -52,6 +64,7 @@ declare_rule! {
         language: "ts",
         sources: &[RuleSource::EslintTypeScript("no-invalid-void-type")],
         recommended: true,
+        fix_kind: FixKind::Unsafe,
     }
 }
 
@@ -75,19 +88,30 @@ impl Rule for NoConfusingVoidType {
     fn diagnostic(ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
         let node = ctx.query();
         let message = match state {
-            VoidTypeContext::Union => "void is not valid as a constituent in a union type",
-            VoidTypeContext::Unknown => {
-                "void is only valid as a return type or a type argument in generic type"
-            }
+            VoidTypeContext::Union => "inside a union type.",
+            VoidTypeContext::Unknown => "outside a return type or a type parameter.",
         };
+        Some(RuleDiagnostic::new(
+            rule_category!(),
+            node.range(),
+            markup! {
+            <Emphasis>"void"</Emphasis>" is confusing "{message}},
+        ))
+    }
 
-        Some(
-            RuleDiagnostic::new(rule_category!(), node.range(), markup! {{message}}).note(
-                markup! {
-                    "Remove "<Emphasis>"void"</Emphasis>
-                },
-            ),
-        )
+    fn action(ctx: &RuleContext<Self>, _: &Self::State) -> Option<JsRuleAction> {
+        let node = ctx.query();
+        let mut mutation = ctx.root().begin();
+        mutation.replace_node(
+            AnyTsType::from(node.clone()),
+            AnyTsType::from(make::ts_undefined_type(make::token(T![undefined]))),
+        );
+        Some(JsRuleAction::new(
+            ActionCategory::QuickFix,
+            Applicability::MaybeIncorrect,
+            markup! { "Use "<Emphasis>"undefined"</Emphasis>" instead." }.to_owned(),
+            mutation,
+        ))
     }
 }
 

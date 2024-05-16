@@ -169,6 +169,15 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
   Contributed by @minht11
 - Add [nursery/useTopLevelRegex](https://biomejs.dev/linter/rules/use-top-level-regex), which enforces defining regular expressions at the top level of a module. [#2148](https://github.com/biomejs/biome/issues/2148) Contributed by @dyc3.
 
+#### Enhancements
+
+- Add a code action for [noConfusingVoidType](https://biomejs.dev/linter/rules/no-confusing-void-type/) and improve the diagnostics.
+
+  The rule now suggests using `undefined` instead of `void` in confusing places.
+  The diagnosis is also clearer.
+
+  Contributed by @Conaclos
+
 #### Bug fixes
 
 - [noUndeclaredVariables](https://biomejs.dev/linter/rules/no-undeclared-variables/) and [noUnusedImports](https://biomejs.dev/linter/rules/no-unused-imports) now correctly handle import namespaces ([#2796](https://github.com/biomejs/biome/issues/2796)).
