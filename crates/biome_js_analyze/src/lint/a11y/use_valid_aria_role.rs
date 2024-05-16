@@ -138,13 +138,13 @@ impl Rule for UseValidAriaRole {
         let mut mutation = ctx.root().begin();
         let role_attribute = node.find_attribute_by_name("role")?;
         mutation.remove_node(role_attribute);
-        Some(JsRuleAction {
-            category: ActionCategory::QuickFix,
-            applicability: Applicability::MaybeIncorrect,
-            message:
+        Some(JsRuleAction::new(
+            ActionCategory::QuickFix,
+            Applicability::MaybeIncorrect,
+
                 markup! { "Remove the invalid "<Emphasis>"role"</Emphasis>" attribute.\n Check the list of all "<Hyperlink href="https://www.w3.org/TR/wai-aria/#role_definitions">"valid"</Hyperlink>" role attributes." }
                     .to_owned(),
             mutation,
-        })
+        ))
     }
 }

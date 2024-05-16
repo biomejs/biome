@@ -102,12 +102,12 @@ impl Rule for NoStringCaseMismatch {
                 ),
             ),
         );
-        Some(JsRuleAction {
+        Some(JsRuleAction::new(
+            ActionCategory::QuickFix,
+            Applicability::MaybeIncorrect,
+            markup! {"Use "<Emphasis>{state.expected_case.description()}</Emphasis>" string value."}.to_owned(),
             mutation,
-            message: markup! {"Use "<Emphasis>{state.expected_case.description()}</Emphasis>" string value."}.to_owned(),
-            category: ActionCategory::QuickFix,
-            applicability: Applicability::MaybeIncorrect,
-        })
+        ))
     }
 }
 

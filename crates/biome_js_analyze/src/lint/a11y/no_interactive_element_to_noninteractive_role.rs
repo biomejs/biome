@@ -107,11 +107,11 @@ impl Rule for NoInteractiveElementToNoninteractiveRole {
 
         let mut mutation = ctx.root().begin();
         mutation.remove_node(role_attribute);
-        Some(JsRuleAction {
-            category: ActionCategory::QuickFix,
-            applicability: Applicability::MaybeIncorrect,
-            message: markup! { "Remove the "<Emphasis>"role"</Emphasis>" attribute." }.to_owned(),
+        Some(JsRuleAction::new(
+            ActionCategory::QuickFix,
+            Applicability::MaybeIncorrect,
+            markup! { "Remove the "<Emphasis>"role"</Emphasis>" attribute." }.to_owned(),
             mutation,
-        })
+        ))
     }
 }

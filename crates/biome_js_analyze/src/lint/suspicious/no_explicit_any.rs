@@ -26,7 +26,7 @@ declare_rule! {
     ///
     /// ```ts,expect_diagnostic
     /// class SomeClass {
-    ///   message: Array<Array<any>>;
+    ///    Array<Array<any>>;
     /// }
     /// ```
     ///
@@ -43,7 +43,7 @@ declare_rule! {
     ///
     /// ```ts
     /// class SomeClass<T extends any> {
-    ///   message: Array<Array<unknown>>;
+    ///    Array<Array<unknown>>;
     /// }
     /// ```
     ///

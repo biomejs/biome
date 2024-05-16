@@ -102,13 +102,12 @@ impl Rule for UseNumericLiterals {
             ),
         );
 
-        Some(JsRuleAction {
-            category: ActionCategory::QuickFix,
-            applicability: Applicability::MaybeIncorrect,
-            message: markup! { "Use the computed "{call.radix.description()}" literal instead." }
-                .to_owned(),
+        Some(JsRuleAction::new(
+            ActionCategory::QuickFix,
+            Applicability::MaybeIncorrect,
+            markup! { "Use the computed "{call.radix.description()}" literal instead." }.to_owned(),
             mutation,
-        })
+        ))
     }
 }
 

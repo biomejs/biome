@@ -159,12 +159,12 @@ impl Rule for NoUnusedImports {
                 return None;
             }
         }
-        Some(JsRuleAction {
+        Some(JsRuleAction::new(
+            ActionCategory::QuickFix,
+            Applicability::Always,
+            markup! { "Remove the unused import." }.to_owned(),
             mutation,
-            category: ActionCategory::QuickFix,
-            applicability: Applicability::Always,
-            message: markup! { "Remove the unused import." }.to_owned(),
-        })
+        ))
     }
 }
 

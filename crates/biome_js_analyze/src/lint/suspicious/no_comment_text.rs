@@ -102,11 +102,11 @@ impl Rule for NoCommentText {
             ),
         );
 
-        Some(JsRuleAction {
-            category: ActionCategory::QuickFix,
-            applicability: Applicability::MaybeIncorrect,
-            message: markup! { "Wrap the comments with braces" }.to_owned(),
+        Some(JsRuleAction::new(
+            ActionCategory::QuickFix,
+            Applicability::MaybeIncorrect,
+            markup! { "Wrap the comments with braces" }.to_owned(),
             mutation,
-        })
+        ))
     }
 }

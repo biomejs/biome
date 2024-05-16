@@ -90,14 +90,13 @@ impl Rule for UseFragmentSyntax {
             fragment.into_syntax().into(),
         );
 
-        Some(JsRuleAction {
+        Some(JsRuleAction::new(
+            ActionCategory::QuickFix,
+            Applicability::MaybeIncorrect,
+            (markup! { "Replace "<Emphasis>"<Fragment>"</Emphasis>" with the fragment syntax" })
+                .to_owned(),
             mutation,
-            message:
-                (markup! { "Replace "<Emphasis>"<Fragment>"</Emphasis>" with the fragment syntax" })
-                    .to_owned(),
-            applicability: Applicability::MaybeIncorrect,
-            category: ActionCategory::QuickFix,
-        })
+        ))
     }
 
     fn diagnostic(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<RuleDiagnostic> {

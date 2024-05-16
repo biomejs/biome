@@ -147,12 +147,12 @@ impl Rule for UseConst {
                 declaration.kind_token().ok()?,
                 make::token(JsSyntaxKind::CONST_KW),
             );
-            Some(JsRuleAction {
-                category: ActionCategory::QuickFix,
-                applicability: Applicability::Always,
-                message: markup! { "Use "<Emphasis>"const"</Emphasis>" instead." }.to_owned(),
-                mutation: batch,
-            })
+            Some(JsRuleAction::new(
+                ActionCategory::QuickFix,
+                Applicability::Always,
+                markup! { "Use "<Emphasis>"const"</Emphasis>" instead." }.to_owned(),
+                batch,
+            ))
         } else {
             None
         }

@@ -157,12 +157,11 @@ impl Rule for UseCollapsedElseIf {
             if_statement.clone().into(),
         );
 
-        Some(JsRuleAction {
-            category: ActionCategory::QuickFix,
-            applicability: Applicability::Always,
-            message: markup! { "Use collapsed "<Emphasis>"else if"</Emphasis>" instead." }
-                .to_owned(),
+        Some(JsRuleAction::new(
+            ActionCategory::QuickFix,
+            Applicability::Always,
+            markup! { "Use collapsed "<Emphasis>"else if"</Emphasis>" instead." }.to_owned(),
             mutation,
-        })
+        ))
     }
 }

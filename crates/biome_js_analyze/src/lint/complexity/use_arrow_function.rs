@@ -172,13 +172,12 @@ impl Rule for UseArrowFunction {
             AnyJsExpression::from(function_expression.clone()),
             arrow_function,
         );
-        Some(JsRuleAction {
-            category: ActionCategory::QuickFix,
-            applicability: Applicability::Always,
-            message: markup! { "Use an "<Emphasis>"arrow function"</Emphasis>" instead." }
-                .to_owned(),
+        Some(JsRuleAction::new(
+            ActionCategory::QuickFix,
+            Applicability::Always,
+            markup! { "Use an "<Emphasis>"arrow function"</Emphasis>" instead." }.to_owned(),
             mutation,
-        })
+        ))
     }
 }
 

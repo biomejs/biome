@@ -106,12 +106,12 @@ impl Rule for NoUnusedTemplateLiteral {
             ),
         );
 
-        Some(JsRuleAction {
-            category: ActionCategory::QuickFix,
-            applicability: Applicability::MaybeIncorrect,
-            message: markup! { "Replace with string literal" }.to_owned(),
+        Some(JsRuleAction::new(
+            ActionCategory::QuickFix,
+            Applicability::MaybeIncorrect,
+            markup! { "Replace with string literal" }.to_owned(),
             mutation,
-        })
+        ))
     }
 }
 

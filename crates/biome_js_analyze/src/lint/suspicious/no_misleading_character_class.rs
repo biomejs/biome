@@ -209,13 +209,13 @@ impl Rule for NoMisleadingCharacterClass {
                     let mut mutation = ctx.root().begin();
                     mutation.replace_token(prev_token, next_token);
 
-                    Some(JsRuleAction {
-                        category: ActionCategory::QuickFix,
-                        applicability: Applicability::Always,
-                        message: markup! { "Add unicode "<Emphasis>"u"</Emphasis>" flag to regex" }
+                    Some(JsRuleAction::new(
+                        ActionCategory::QuickFix,
+                        Applicability::Always,
+                        markup! { "Add unicode "<Emphasis>"u"</Emphasis>" flag to regex" }
                             .to_owned(),
                         mutation,
-                    })
+                    ))
                 }
 
                 AnyRegexExpression::JsNewExpression(expr) => {
@@ -229,13 +229,13 @@ impl Rule for NoMisleadingCharacterClass {
                         Some(suggest) => {
                             let mut mutation = ctx.root().begin();
                             mutation.replace_node(prev_node, suggest);
-                            Some(JsRuleAction {
-                                category: ActionCategory::QuickFix,
-                                applicability: Applicability::Always,
-                                message: markup! { "Add unicode "<Emphasis>"u"</Emphasis>" flag to regex" }
+                            Some(JsRuleAction::new(
+                                ActionCategory::QuickFix,
+                                Applicability::Always,
+                                markup! { "Add unicode "<Emphasis>"u"</Emphasis>" flag to regex" }
                                     .to_owned(),
                                 mutation,
-                            })
+                            ))
                         }
                         None => None,
                     }
@@ -252,13 +252,13 @@ impl Rule for NoMisleadingCharacterClass {
                         Some(suggest) => {
                             let mut mutation = ctx.root().begin();
                             mutation.replace_node(prev_node, suggest);
-                            Some(JsRuleAction {
-                                category: ActionCategory::QuickFix,
-                                applicability: Applicability::Always,
-                                message: markup! { "Add unicode "<Emphasis>"u"</Emphasis>" flag to regex" }
+                            Some(JsRuleAction::new(
+                                ActionCategory::QuickFix,
+                                Applicability::Always,
+                                markup! { "Add unicode "<Emphasis>"u"</Emphasis>" flag to regex" }
                                     .to_owned(),
                                 mutation,
-                            })
+                            ))
                         }
                         None => None,
                     }

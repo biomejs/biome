@@ -176,12 +176,12 @@ impl Rule for NoBannedTypes {
         let mut mutation = ctx.root().begin();
         let suggested_type = banned_type.as_js_syntax_kind()?.to_string()?;
         mutation.replace_node(reference_identifier.clone()?, banned_type.fix_with()?);
-        Some(JsRuleAction {
-            category: ActionCategory::QuickFix,
-            applicability: Applicability::Always,
-            message: markup! { "Use '"{suggested_type}"' instead" }.to_owned(),
+        Some(JsRuleAction::new(
+            ActionCategory::QuickFix,
+            Applicability::Always,
+            markup! { "Use '"{suggested_type}"' instead" }.to_owned(),
             mutation,
-        })
+        ))
     }
 }
 

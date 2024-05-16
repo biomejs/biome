@@ -98,11 +98,11 @@ markup! {
             ),
         );
 
-        Some(JsRuleAction {
-            category: ActionCategory::QuickFix,
-            applicability: Applicability::MaybeIncorrect,
-            message: markup! { "Replace hole with undefined" }.to_owned(),
+        Some(JsRuleAction::new(
+            ActionCategory::QuickFix,
+            Applicability::MaybeIncorrect,
+            markup! { "Replace hole with undefined" }.to_owned(),
             mutation,
-        })
+        ))
     }
 }

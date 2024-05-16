@@ -217,14 +217,14 @@ impl Rule for UseSortedClasses {
             }
         };
 
-        Some(JsRuleAction {
-            category: ActionCategory::QuickFix,
-            applicability: Applicability::MaybeIncorrect,
-            message: markup! {
+        Some(JsRuleAction::new(
+            ActionCategory::QuickFix,
+            Applicability::MaybeIncorrect,
+            markup! {
                 "Sort the classes."
             }
             .to_owned(),
             mutation,
-        })
+        ))
     }
 }

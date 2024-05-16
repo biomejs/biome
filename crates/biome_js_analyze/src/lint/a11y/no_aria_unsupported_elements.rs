@@ -145,13 +145,12 @@ impl Rule for NoAriaUnsupportedElements {
         let removed_attribute = attribute.to_string();
         mutation.remove_node(attribute);
 
-        Some(JsRuleAction {
-            category: ActionCategory::QuickFix,
-            applicability: Applicability::MaybeIncorrect,
-            message:
-                markup! { "Remove the "<Emphasis>""{removed_attribute}""</Emphasis>" attribute." }
-                    .to_owned(),
+        Some(JsRuleAction::new(
+            ActionCategory::QuickFix,
+            Applicability::MaybeIncorrect,
+            markup! { "Remove the "<Emphasis>""{removed_attribute}""</Emphasis>" attribute." }
+                .to_owned(),
             mutation,
-        })
+        ))
     }
 }

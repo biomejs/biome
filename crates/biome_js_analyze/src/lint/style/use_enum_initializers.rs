@@ -192,12 +192,12 @@ impl Rule for UseEnumInitializers {
         }
 
         if has_mutations {
-            return Some(JsRuleAction {
-                category: ActionCategory::QuickFix,
-                applicability: Applicability::Always,
-                message: markup! { "Initialize all enum members." }.to_owned(),
+            return Some(JsRuleAction::new(
+                ActionCategory::QuickFix,
+                Applicability::Always,
+                markup! { "Initialize all enum members." }.to_owned(),
                 mutation,
-            });
+            ));
         }
         None
     }

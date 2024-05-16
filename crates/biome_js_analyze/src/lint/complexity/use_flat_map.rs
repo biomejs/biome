@@ -120,12 +120,11 @@ impl Rule for UseFlatMap {
 
         mutation.replace_node(node.clone(), flat_map_call);
 
-        Some(JsRuleAction {
+        Some(JsRuleAction::new(
+            ActionCategory::QuickFix,
+            Applicability::Always,
+            markup! {"Replace the chain with "<Emphasis>".flatMap()"</Emphasis>"."}.to_owned(),
             mutation,
-            message: markup! {"Replace the chain with "<Emphasis>".flatMap()"</Emphasis>"."}
-                .to_owned(),
-            category: ActionCategory::QuickFix,
-            applicability: Applicability::Always,
-        })
+        ))
     }
 }

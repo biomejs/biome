@@ -65,11 +65,11 @@ impl Rule for NoDebugger {
         let mut mutation = ctx.root().begin();
         mutation.remove_statement(node.clone().into());
 
-        Some(JsRuleAction {
-            category: ActionCategory::QuickFix,
-            applicability: Applicability::MaybeIncorrect,
-            message: markup! { "Remove debugger statement" }.to_owned(),
+        Some(JsRuleAction::new(
+            ActionCategory::QuickFix,
+            Applicability::MaybeIncorrect,
+            markup! { "Remove debugger statement" }.to_owned(),
             mutation,
-        })
+        ))
     }
 }
