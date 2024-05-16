@@ -125,7 +125,7 @@ pub enum CliReporter {
     Json,
     /// Reports information using the JSON format, formatted.
     JsonPretty,
-    /// TODO
+    /// Reports linter diagnostics grouped by category and number of hits. Reports formatter diagnostics grouped by file.
     Summary,
 }
 

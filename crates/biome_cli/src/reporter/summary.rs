@@ -1,7 +1,7 @@
 use crate::reporter::terminal::ConsoleTraversalSummary;
 use crate::{DiagnosticsPayload, Execution, Reporter, ReporterVisitor, TraversalSummary};
 use biome_console::fmt::{Display, Formatter};
-use biome_console::{markup, Console, ConsoleExt, HorizontalLine, Padding, HARD_LINE, SOFT_LINE};
+use biome_console::{markup, Console, ConsoleExt, HorizontalLine, Padding, SOFT_LINE};
 use biome_diagnostics::{Resource, Severity};
 use std::cmp::Ordering;
 use std::collections::BTreeMap;
@@ -68,14 +68,14 @@ impl<'a> ReporterVisitor for SummaryReporterVisitor<'a> {
             };
 
             let category = diagnostic.category();
+            let severity = &diagnostic.severity();
             if diagnostic.severity() >= diagnostics_payload.diagnostic_level {
                 if diagnostic.tags().is_verbose() {
                     if diagnostics_payload.verbose {
                         if execution.is_check() || execution.is_lint() {
                             if let Some(category) = category {
                                 if category.name().starts_with("lint/") {
-                                    files_to_diagnostics
-                                        .insert_lint(category.name(), &diagnostic.severity());
+                                    files_to_diagnostics.insert_lint(category.name(), severity);
                                 }
                             }
                         }
@@ -89,8 +89,7 @@ impl<'a> ReporterVisitor for SummaryReporterVisitor<'a> {
                         if category.name().starts_with("lint/")
                             || category.name().starts_with("suppressions/")
                         {
-                            files_to_diagnostics
-                                .insert_lint(category.name(), &diagnostic.severity());
+                            files_to_diagnostics.insert_lint(category.name(), severity);
                         }
                     }
                 }
@@ -129,13 +128,7 @@ struct FileToDiagnostics {
 impl FileToDiagnostics {
     fn insert_lint(&mut self, rule_name: impl Into<RuleName>, severity: &Severity) {
         let rule_name = rule_name.into();
-        if let Some(value) = self.lints.0.get_mut(&rule_name) {
-            value.track_severity(severity)
-        } else {
-            let mut diagnostics_by_severity = DiagnosticsBySeverity::default();
-            diagnostics_by_severity.track_severity(severity);
-            self.lints.0.insert(rule_name, diagnostics_by_severity);
-        }
+        self.lints.insert(rule_name, severity);
     }
 
     fn insert_format(&mut self, location: &str) {
@@ -200,6 +193,18 @@ impl Display for FileToDiagnostics {
 
 #[derive(Debug, Default)]
 struct LintsByCategory(BTreeMap<RuleName, DiagnosticsBySeverity>);
+
+impl LintsByCategory {
+    fn insert(&mut self, rule: RuleName, severity: &Severity) {
+        if let Some(value) = self.0.get_mut(&rule) {
+            value.track_severity(severity);
+        } else {
+            let mut diagnostics_by_severity = DiagnosticsBySeverity::default();
+            diagnostics_by_severity.track_severity(severity);
+            self.0.insert(rule, diagnostics_by_severity);
+        }
+    }
+}
 
 impl Display for LintsByCategory {
     fn fmt(&self, fmt: &mut Formatter) -> io::Result<()> {
@@ -291,13 +296,13 @@ impl PartialEq<Self> for RuleName {
 
 impl PartialOrd<Self> for RuleName {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-        self.0.len().partial_cmp(&other.0.len())
+        Some(self.cmp(other))
     }
 }
 
 impl Ord for RuleName {
     fn cmp(&self, other: &Self) -> Ordering {
-        self.partial_cmp(other).unwrap_or_else(|| Ordering::Equal)
+        self.0.len().cmp(&other.0.len())
     }
 }
 impl Display for RuleName {

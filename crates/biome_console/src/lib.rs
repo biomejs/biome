@@ -254,7 +254,7 @@ pub const SOFT_LINE: Softline = Softline;
 
 impl Display for Softline {
     fn fmt(&self, fmt: &mut Formatter) -> io::Result<()> {
-        fmt.write_str(&"\n")
+        fmt.write_str("\n")
     }
 }
 
@@ -265,7 +265,7 @@ pub const HARD_LINE: Hardline = Hardline;
 
 impl Display for Hardline {
     fn fmt(&self, fmt: &mut Formatter) -> io::Result<()> {
-        fmt.write_str(&"\n\n")
+        fmt.write_str("\n\n")
     }
 }
 

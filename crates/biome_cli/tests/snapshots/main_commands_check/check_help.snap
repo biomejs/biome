@@ -91,7 +91,7 @@ Global options applied to all commands
         --no-errors-on-unmatched  Silence errors that would be emitted in case no files were processed
                               during the execution of the command.
         --error-on-warnings   Tell Biome to exit with an error code if some diagnostics emit warnings.
-        --reporter=<json|json-pretty>  Allows to change how diagnostics and summary are reported.
+        --reporter=<json|json-pretty|summary>  Allows to change how diagnostics and summary are reported.
         --log-level=<none|debug|info|warn|error>  The level of logging. In order, from the most verbose
                               to the least verbose: debug, info, warn, error.
                               The value `none` won't show any logging.
