@@ -27,7 +27,7 @@ declare_rule! {
     /// interface Example {
     ///   property?: string;
     /// }
-    /// declare const example: Example;
+    /// declare const foo: Example;
     /// const includesBaz = foo.property!.includes('baz');
     /// ```
     /// ```ts,expect_diagnostic
@@ -41,7 +41,7 @@ declare_rule! {
     ///   property?: string;
     /// }
     ///
-    /// declare const example: Example;
+    /// declare const foo: Example;
     /// const includesBaz = foo.property?.includes('baz') ?? false;
     /// ```
     ///
