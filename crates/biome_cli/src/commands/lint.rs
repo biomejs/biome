@@ -1,8 +1,7 @@
 use crate::cli_options::CliOptions;
 use crate::commands::{
-    get_files_to_process, get_stdin, markup, resolve_manifest, validate_configuration_diagnostics,
+    get_files_to_process, get_stdin, resolve_manifest, validate_configuration_diagnostics,
 };
-use crate::diagnostics::DeprecatedArgument;
 use crate::{
     execute_mode, setup_cli_subscriber, CliDiagnostic, CliSession, Execution, TraversalMode,
 };
@@ -11,9 +10,7 @@ use biome_configuration::vcs::PartialVcsConfiguration;
 use biome_configuration::{
     PartialConfiguration, PartialFilesConfiguration, PartialLinterConfiguration,
 };
-use biome_console::ConsoleExt;
 use biome_deserialize::Merge;
-use biome_diagnostics::PrintDiagnostic;
 use biome_service::configuration::{
     load_configuration, LoadedConfiguration, PartialConfigurationExt,
 };
