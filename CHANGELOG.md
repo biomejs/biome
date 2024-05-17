@@ -65,6 +65,24 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
   + biome check    # You can run the command without the path
   ```
 
+- `biome migrate eslint` now tries to convert ESLint ignore patterns into Biome ignore patterns.
+
+  ESLint uses [gitignore patterns](https://git-scm.com/docs/gitignore#_pattern_format).
+  Biome now tries to convert these patterns into Biome ignore patterns.
+
+  For example, the gitignore pattern `/src` is a relative path to the file in which it appears.
+  Biome now recognizes this and translates this pattern to `./src`.
+
+  Contributed by @Conaclos
+
+- `biome migrate eslint` now supports the `eslintIgnore` field in `package.json`.
+
+  ESLint allows the use of `package.json` as an ESLint configuration file.
+  ESLint supports two fields: `eslintConfig` and `eslintIgnore`.
+  Biome only supported the former. It now supports both.
+
+  Contributed by @Conaclos
+
 ### Configuration
 
 #### New features

@@ -138,7 +138,11 @@ impl eslint_eslint::LegacyConfigData {
         rules.recommended = Some(false);
         linter.rules = Some(rules);
         if !self.ignore_patterns.is_empty() {
-            let ignore = self.ignore_patterns.into_iter().collect::<StringSet>();
+            let ignore = self
+                .ignore_patterns
+                .into_iter()
+                .map(|p| p.0)
+                .collect::<StringSet>();
             linter.ignore = Some(ignore);
         }
         if !self.overrides.is_empty() {
