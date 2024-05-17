@@ -45,12 +45,13 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
   You can also run a group of rules:
 
   ```shell
-  biome lint --rule=suspicous src/main.js
+  biome lint --rule=suspicious src/main.js
   ```
 
   In this case, the severity level of a rule is not overridden.
-  Thus, disabled rules stay disabled.
+  Thus, the disabled rules stay disabled.
   To ensure that the group is run, the `recommended` field of the group is turned on.
+  The `nursery` group cannot be passed because no rules are enabled in the nursery group by default.
 
   The option is compatible with other options such as `--apply`, `--apply-unsafe` and `--reporter`.
 

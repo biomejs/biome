@@ -3368,6 +3368,41 @@ fn lint_rule_filter() {
 }
 
 #[test]
+fn lint_rule_filter_ignore_suppression_comments() {
+    let mut fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+    let content = r#"
+        debugger;
+        // biome-ignore lint/performance/noDelete: <explanation>
+        delete obj.prop;
+    "#;
+
+    let file_path = Path::new("check.js");
+    fs.insert(file_path.into(), content.as_bytes());
+
+    let result = run_cli(
+        DynRef::Borrowed(&mut fs),
+        &mut console,
+        Args::from(
+            [
+                ("lint"),
+                "--rule=suspicious/noDebugger",
+                file_path.as_os_str().to_str().unwrap(),
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "lint_rule_filter_ignore_suppression_comments",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
 fn lint_rule_filter_with_config() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
@@ -3418,7 +3453,7 @@ fn lint_rule_filter_with_config() {
 }
 
 #[test]
-fn lint_rule_filter_with_recommened_disabled() {
+fn lint_rule_filter_with_recommended_disabled() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
     let config = r#"{
@@ -3443,7 +3478,7 @@ fn lint_rule_filter_with_recommened_disabled() {
         Args::from(
             [
                 ("lint"),
-                "--rule=style/useNamingConvention",
+                "--rule=lint/style/useNamingConvention",
                 file_path.as_os_str().to_str().unwrap(),
             ]
             .as_slice(),
@@ -3452,7 +3487,7 @@ fn lint_rule_filter_with_recommened_disabled() {
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
-        "lint_rule_filter_with_recommened_disabled",
+        "lint_rule_filter_with_recommended_disabled",
         fs,
         console,
         result,
@@ -3546,6 +3581,37 @@ fn lint_rule_filter_group() {
 }
 
 #[test]
+fn lint_rule_filter_nursery_group() {
+    let mut fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+    let content = "";
+
+    let file_path = Path::new("check.js");
+    fs.insert(file_path.into(), content.as_bytes());
+
+    let result = run_cli(
+        DynRef::Borrowed(&mut fs),
+        &mut console,
+        Args::from(
+            [
+                ("lint"),
+                "--rule=nursery",
+                file_path.as_os_str().to_str().unwrap(),
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "lint_rule_filter_nursery_group",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
 fn lint_rule_filter_group_with_disabled_rule() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
@@ -3575,7 +3641,7 @@ fn lint_rule_filter_group_with_disabled_rule() {
         Args::from(
             [
                 ("lint"),
-                "--rule=suspicious",
+                "--rule=lint/suspicious",
                 file_path.as_os_str().to_str().unwrap(),
             ]
             .as_slice(),

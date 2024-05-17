@@ -231,8 +231,9 @@ impl From<RuleSelector> for RuleFilter<'static> {
 
 impl FromStr for RuleSelector {
     type Err = &'static str;
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        if let Some((group_name, rule_name)) = s.split_once('/') {
+    fn from_str(selector: &str) -> Result<Self, Self::Err> {
+        let selector = selector.strip_prefix("lint/").unwrap_or(selector);
+        if let Some((group_name, rule_name)) = selector.split_once('/') {
             let group = RuleGroup::from_str(group_name)?;
             if let Some(rule_name) = Rules::has_rule(group, rule_name) {
                 Ok(RuleSelector::Rule(group, rule_name))
@@ -240,8 +241,14 @@ impl FromStr for RuleSelector {
                 Err("This rule doesn't exist.")
             }
         } else {
-            match RuleGroup::from_str(s) {
-                Ok(group) => Ok(RuleSelector::Group(group)),
+            match RuleGroup::from_str(selector) {
+                Ok(group) => {
+                    if matches!(group, RuleGroup::Nursery) {
+                        Err("The `nursery` group cannot be selected. Select a specific nursery rule instead.")
+                    } else {
+                        Ok(RuleSelector::Group(group))
+                    }
+                }
                 Err(_) => Err(
                     "This group doesn't exist. Use the syntax `<group>/<rule>` to specify a rule.",
                 ),

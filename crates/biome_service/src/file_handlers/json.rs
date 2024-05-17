@@ -330,12 +330,17 @@ fn lint(params: LintParams) -> LintResults {
                 compute_analyzer_options(&params.settings, PathBuf::from(params.path.as_path()));
             let mut filter = AnalysisFilter::from_enabled_rules(Some(rule_filter_list.as_slice()));
             filter.categories = params.categories;
-            let has_lint = filter.categories.contains(RuleCategories::LINT);
+
+            // Do not report unused suppression comment diagnostics if:
+            // - it is a syntax-only analyzer pass, or
+            // - if a single rule is run.
+            let ignores_suppression_comment =
+                !filter.categories.contains(RuleCategories::LINT) || params.rule.is_some();
 
             let (_, analyze_diagnostics) = analyze(&root, filter, &analyzer_options, |signal| {
                 if let Some(mut diagnostic) = signal.diagnostic() {
-                    // Do not report unused suppression comment diagnostics if this is a syntax-only analyzer pass
-                    if !has_lint && diagnostic.category() == Some(category!("suppressions/unused"))
+                    if ignores_suppression_comment
+                        && diagnostic.category() == Some(category!("suppressions/unused"))
                     {
                         return ControlFlow::<Never>::Continue(());
                     }
