@@ -19,7 +19,7 @@ use biome_diagnostics::{Diagnostic, PrintDiagnostic};
 use biome_fs::{BiomePath, FileSystem};
 use biome_service::configuration::LoadedConfiguration;
 use biome_service::documentation::Doc;
-use biome_service::workspace::{OpenProjectParams, UpdateProjectParams};
+use biome_service::workspace::{FixFileMode, OpenProjectParams, UpdateProjectParams};
 use biome_service::{DynRef, WorkspaceError};
 use bpaf::Bpaf;
 use std::ffi::OsString;
@@ -141,6 +141,16 @@ pub enum BiomeCommand {
         /// Apply safe fixes and unsafe fixes, formatting and import sorting
         #[bpaf(long("apply-unsafe"), switch)]
         apply_unsafe: bool,
+        ///
+        #[bpaf(long("write"), switch)]
+        write: bool,
+        ///
+        #[bpaf(long("fix"), switch)]
+        fix: bool,
+        ///
+        #[bpaf(long("unsafe"), switch)]
+        r#unsafe: bool,
+
         #[bpaf(external(partial_linter_configuration), hide_usage, optional)]
         linter_configuration: Option<PartialLinterConfiguration>,
 
@@ -578,8 +588,162 @@ fn get_files_to_process(
     }
 }
 
-/// Tests that all CLI options adhere to the invariants expected by `bpaf`.
-#[test]
-fn check_options() {
-    biome_command().check_invariants(false);
+pub(crate) struct FixFileModeParams {
+    apply: bool,
+    apply_unsafe: bool,
+    write: bool,
+    fix: bool,
+    unsafe_: bool,
+}
+
+pub(crate) fn determine_fix_file_mode(
+    params: FixFileModeParams,
+) -> Result<Option<FixFileMode>, CliDiagnostic> {
+    let FixFileModeParams {
+        apply,
+        apply_unsafe,
+        write,
+        fix,
+        unsafe_,
+    } = params;
+
+    check_fix_incompatible_arguments(params)?;
+
+    let safe_fixes = apply || write || fix;
+    let unsafe_fixes = apply_unsafe || ((write || safe_fixes) && unsafe_);
+
+    if unsafe_fixes {
+        Ok(Some(FixFileMode::SafeAndUnsafeFixes))
+    } else if safe_fixes {
+        Ok(Some(FixFileMode::SafeFixes))
+    } else {
+        Ok(None)
+    }
+}
+
+fn check_fix_incompatible_arguments(params: FixFileModeParams) -> Result<(), CliDiagnostic> {
+    let FixFileModeParams {
+        apply,
+        apply_unsafe,
+        write,
+        fix,
+        unsafe_,
+    } = params;
+    if apply && apply_unsafe {
+        return Err(CliDiagnostic::incompatible_arguments(
+            "apply",
+            "apply_unsafe",
+        ));
+    } else if apply_unsafe && unsafe_ {
+        return Err(CliDiagnostic::incompatible_arguments(
+            "apply_unsafe",
+            "unsafe",
+        ));
+    } else if apply_unsafe && (fix || write) {
+        return Err(CliDiagnostic::incompatible_arguments(
+            "apply_unsafe",
+            if fix { "fix" } else { "write" },
+        ));
+    } else if write && fix {
+        return Err(CliDiagnostic::incompatible_arguments("write", "fix"));
+    }
+    Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn incompatible_arguments() {
+        let cases = vec![
+            (true, true, false, false, false),
+            (false, true, false, false, true),
+            (false, true, true, false, false),
+            (false, true, false, true, false),
+            (false, false, true, true, false),
+        ];
+
+        for (apply, apply_unsafe, write, fix, unsafe_) in cases {
+            assert!(check_fix_incompatible_arguments(create_params(
+                apply,
+                apply_unsafe,
+                write,
+                fix,
+                unsafe_
+            ))
+            .is_err());
+        }
+    }
+
+    #[test]
+    fn safe_fixes() {
+        let cases = vec![
+            (true, false, false, false, false),
+            (false, false, true, false, false),
+            (false, false, false, true, false),
+        ];
+
+        for (apply, apply_unsafe, write, fix, unsafe_) in cases {
+            assert_eq!(
+                determine_fix_file_mode(FixModeParams {
+                    apply,
+                    apply_unsafe,
+                    write,
+                    fix,
+                    unsafe_
+                })
+                .unwrap(),
+                Some(FixFileMode::SafeFixes)
+            );
+        }
+    }
+
+    #[test]
+    fn unsafe_fixes() {
+        let cases = vec![
+            (false, true, false, false, false),
+            (false, false, true, false, true),
+            (false, false, false, true, true),
+        ];
+
+        for (apply, apply_unsafe, write, fix, unsafe_) in cases {
+            assert_eq!(
+                determine_fix_file_mode(FixFileModeParams {
+                    apply,
+                    apply_unsafe,
+                    write,
+                    fix,
+                    unsafe_
+                })
+                .unwrap(),
+                Some(FixFileMode::SafeAndUnsafeFixes)
+            );
+        }
+    }
+
+    #[test]
+    fn no_fix() {
+        let cases = vec![(false, false, false, false, false)];
+
+        for (apply, apply_unsafe, write, fix, unsafe_) in cases {
+            assert_eq!(
+                determine_fix_file_mode(FixFileModeParams {
+                    apply,
+                    apply_unsafe,
+                    write,
+                    fix,
+                    unsafe_
+                })
+                .unwrap(),
+                None
+            );
+        }
+    }
+
+    /// Tests that all CLI options adhere to the invariants expected by `bpaf`.
+    #[test]
+    fn check_options() {
+        biome_command().check_invariants(false);
+    }
 }

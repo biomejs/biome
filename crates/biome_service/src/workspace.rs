@@ -548,7 +548,7 @@ pub struct FormatOnTypeParams {
     pub offset: TextSize,
 }
 
-#[derive(Debug, Clone, Copy, serde::Serialize, serde::Deserialize)]
+#[derive(Debug, Clone, Copy, serde::Serialize, serde::Deserialize, PartialEq)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 /// Which fixes should be applied during the analyzing phase
 pub enum FixFileMode {

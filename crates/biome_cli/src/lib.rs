@@ -112,6 +112,9 @@ impl<'app> CliSession<'app> {
             BiomeCommand::Lint {
                 apply,
                 apply_unsafe,
+                write,
+                fix,
+                r#unsafe,
                 cli_options,
                 linter_configuration,
                 paths,
@@ -127,6 +130,9 @@ impl<'app> CliSession<'app> {
                 LintCommandPayload {
                     apply_unsafe,
                     apply,
+                    write,
+                    fix,
+                    unsafe_: r#unsafe,
                     cli_options,
                     linter_configuration,
                     paths,
