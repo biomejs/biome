@@ -1060,7 +1060,7 @@ export interface Nursery {
 	/**
 	 * Disallow the use of yoda expressions.
 	 */
-	noYodaExpression?: RuleConfiguration_for_Null;
+	noYodaExpression?: RuleFixConfiguration_for_Null;
 	/**
 	 * It enables the recommended rules for this group
 	 */

@@ -1804,7 +1804,7 @@
 				"noYodaExpression": {
 					"description": "Disallow the use of yoda expressions.",
 					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "$ref": "#/definitions/RuleFixConfiguration_for_Null" },
 						{ "type": "null" }
 					]
 				},

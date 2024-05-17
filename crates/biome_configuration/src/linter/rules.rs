@@ -3387,7 +3387,7 @@ pub struct Nursery {
         Option<RuleFixConfiguration<NoUselessUndefinedInitialization>>,
     #[doc = "Disallow the use of yoda expressions."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_yoda_expression: Option<RuleConfiguration<NoYodaExpression>>,
+    pub no_yoda_expression: Option<RuleFixConfiguration<NoYodaExpression>>,
     #[doc = "Disallow Array constructors."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_array_literals: Option<RuleFixConfiguration<UseArrayLiterals>>,
