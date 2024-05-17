@@ -17,7 +17,7 @@ use biome_service::configuration::{
 use biome_service::workspace::{RegisterProjectFolderParams, UpdateSettingsParams};
 use std::ffi::OsString;
 
-use super::{determine_fix_file_mode, FixFileModeParams};
+use super::{determine_fix_file_mode, FixFileModeOptions};
 
 pub(crate) struct LintCommandPayload {
     pub(crate) apply: bool,
@@ -58,7 +58,7 @@ pub(crate) fn lint(session: CliSession, payload: LintCommandPayload) -> Result<(
     } = payload;
     setup_cli_subscriber(cli_options.log_level, cli_options.log_kind);
 
-    let fix_file_mode = determine_fix_file_mode(FixFileModeParams {
+    let fix_file_mode = determine_fix_file_mode(FixFileModeOptions {
         apply,
         apply_unsafe,
         write,

@@ -20,6 +20,8 @@ use biome_service::configuration::{
 use biome_service::workspace::{RegisterProjectFolderParams, UpdateSettingsParams};
 use std::ffi::OsString;
 
+use super::check_fix_incompatible_arguments;
+
 pub(crate) struct FormatCommandPayload {
     pub(crate) javascript_formatter: Option<PartialJavascriptFormatter>,
     pub(crate) json_formatter: Option<PartialJsonFormatter>,
@@ -29,6 +31,7 @@ pub(crate) struct FormatCommandPayload {
     pub(crate) files_configuration: Option<PartialFilesConfiguration>,
     pub(crate) stdin_file_path: Option<String>,
     pub(crate) write: bool,
+    pub(crate) fix: bool,
     pub(crate) cli_options: CliOptions,
     pub(crate) paths: Vec<OsString>,
     pub(crate) staged: bool,
@@ -50,6 +53,7 @@ pub(crate) fn format(
         stdin_file_path,
         files_configuration,
         write,
+        fix,
         mut json_formatter,
         mut css_formatter,
         since,
@@ -57,6 +61,14 @@ pub(crate) fn format(
         changed,
     } = payload;
     setup_cli_subscriber(cli_options.log_level, cli_options.log_kind);
+
+    check_fix_incompatible_arguments(super::FixFileModeOptions {
+        apply: false,
+        apply_unsafe: false,
+        write,
+        fix,
+        unsafe_: false,
+    })?;
 
     let loaded_configuration =
         load_configuration(&session.app.fs, cli_options.as_configuration_path_hint())?;
@@ -208,7 +220,7 @@ pub(crate) fn format(
 
     let execution = Execution::new(TraversalMode::Format {
         ignore_errors: cli_options.skip_errors,
-        write,
+        write: write || fix,
         stdin,
     })
     .set_report(&cli_options);

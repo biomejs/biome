@@ -235,6 +235,10 @@ pub enum BiomeCommand {
         #[bpaf(switch)]
         write: bool,
 
+        /// Alias of `--write`, writes formatted files to file system.
+        #[bpaf(switch)]
+        fix: bool,
+
         /// When set to true, only the files that have been staged (the ones prepared to be committed)
         /// will be linted.
         #[bpaf(long("staged"), switch)]
