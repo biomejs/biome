@@ -6,8 +6,8 @@ use crate::file_handlers::{
     LintResults, ParserCapabilities,
 };
 use crate::settings::{
-    FormatSettings, LanguageListSettings, LanguageSettings, OverrideSettings, ServiceLanguage,
-    WorkspaceSettingsHandle,
+    FormatSettings, LanguageListSettings, LanguageSettings, LinterSettings, OverrideSettings,
+    ServiceLanguage, Settings, WorkspaceSettingsHandle,
 };
 use crate::workspace::{
     FixFileResult, GetSyntaxTreeResult, OrganizeImportsResult, PullActionsResult,
@@ -31,7 +31,6 @@ use biome_json_syntax::{JsonLanguage, JsonRoot, JsonSyntaxNode};
 use biome_parser::AnyParse;
 use biome_rowan::{AstNode, NodeCache};
 use biome_rowan::{TextRange, TextSize, TokenAtOffset};
-use std::path::PathBuf;
 
 #[derive(Debug, Clone, Default, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
@@ -51,9 +50,15 @@ pub struct JsonParserSettings {
     pub allow_trailing_commas: bool,
 }
 
+#[derive(Debug, Clone, Default, serde::Serialize, serde::Deserialize)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+pub struct JsonLinterSettings {
+    pub enabled: Option<bool>,
+}
+
 impl ServiceLanguage for JsonLanguage {
     type FormatterSettings = JsonFormatterSettings;
-    type LinterSettings = ();
+    type LinterSettings = JsonLinterSettings;
     type OrganizeImportsSettings = ();
     type FormatOptions = JsonFormatOptions;
     type ParserSettings = JsonParserSettings;
@@ -92,7 +97,7 @@ impl ServiceLanguage for JsonLanguage {
             global.line_ending.unwrap_or_default()
         };
 
-        overrides.override_json_format_options(
+        overrides.to_override_json_format_options(
             path,
             JsonFormatOptions::new()
                 .with_line_ending(line_ending)
@@ -101,6 +106,26 @@ impl ServiceLanguage for JsonLanguage {
                 .with_line_width(line_width)
                 .with_trailing_commas(language.trailing_commas.unwrap_or_default()),
         )
+    }
+
+    fn resolve_analyzer_options(
+        global: &Settings,
+        _linter: &LinterSettings,
+        _overrides: &OverrideSettings,
+        _language: &Self::LinterSettings,
+        path: &BiomePath,
+        _file_source: &DocumentFileSource,
+    ) -> AnalyzerOptions {
+        let configuration = AnalyzerConfiguration {
+            rules: to_analyzer_rules(global, path.as_path()),
+            globals: vec![],
+            preferred_quote: PreferredQuote::Double,
+            jsx_runtime: Default::default(),
+        };
+        AnalyzerOptions {
+            configuration,
+            file_path: path.to_path_buf(),
+        }
     }
 }
 
@@ -142,7 +167,7 @@ fn parse(
     let parser = &settings.settings().languages.json.parser;
     let overrides = &settings.settings().override_settings;
     let optional_json_file_source = file_source.to_json_file_source();
-    let options: JsonParserOptions = overrides.override_json_parser_options(
+    let options: JsonParserOptions = overrides.to_override_json_parser_options(
         biome_path,
         JsonParserOptions {
             allow_comments: parser.allow_comments
@@ -326,8 +351,9 @@ fn lint(params: LintParams) -> LintResults {
                 rule_filter_list
             };
 
-            let analyzer_options =
-                compute_analyzer_options(&params.settings, PathBuf::from(params.path.as_path()));
+            let analyzer_options = &params
+                .settings
+                .analyzer_options::<JsonLanguage>(params.path, &params.language);
             let mut filter = AnalysisFilter::from_enabled_rules(Some(rule_filter_list.as_slice()));
             filter.categories = params.categories;
 
@@ -337,7 +363,7 @@ fn lint(params: LintParams) -> LintResults {
             let ignores_suppression_comment =
                 !filter.categories.contains(RuleCategories::LINT) || params.rule.is_some();
 
-            let (_, analyze_diagnostics) = analyze(&root, filter, &analyzer_options, |signal| {
+            let (_, analyze_diagnostics) = analyze(&root, filter, analyzer_options, |signal| {
                 if let Some(mut diagnostic) = signal.diagnostic() {
                     if ignores_suppression_comment
                         && diagnostic.category() == Some(category!("suppressions/unused"))
@@ -417,20 +443,4 @@ fn organize_imports(parse: AnyParse) -> Result<OrganizeImportsResult, WorkspaceE
     Ok(OrganizeImportsResult {
         code: parse.syntax::<JsonLanguage>().to_string(),
     })
-}
-
-fn compute_analyzer_options(
-    settings: &WorkspaceSettingsHandle,
-    file_path: PathBuf,
-) -> AnalyzerOptions {
-    let configuration = AnalyzerConfiguration {
-        rules: to_analyzer_rules(settings.settings(), file_path.as_path()),
-        globals: vec![],
-        preferred_quote: PreferredQuote::Double,
-        jsx_runtime: Default::default(),
-    };
-    AnalyzerOptions {
-        configuration,
-        file_path,
-    }
 }

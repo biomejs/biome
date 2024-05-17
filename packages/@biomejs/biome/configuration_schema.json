@@ -858,31 +858,30 @@
 			"type": "object",
 			"properties": {
 				"formatter": {
-					"description": "Formatting options",
+					"description": "CSS formatter options",
 					"anyOf": [
 						{ "$ref": "#/definitions/CssFormatter" },
 						{ "type": "null" }
 					]
 				},
+				"linter": {
+					"description": "CSS linter options",
+					"anyOf": [{ "$ref": "#/definitions/CssLinter" }, { "type": "null" }]
+				},
 				"parser": {
-					"description": "Parsing options",
+					"description": "CSS parsing options",
 					"anyOf": [{ "$ref": "#/definitions/CssParser" }, { "type": "null" }]
 				}
 			},
 			"additionalProperties": false
 		},
 		"CssFormatter": {
+			"description": "Options that changes how the CSS formatter behaves",
 			"type": "object",
 			"properties": {
 				"enabled": {
 					"description": "Control the formatter for CSS (and its super languages) files.",
 					"type": ["boolean", "null"]
-				},
-				"indentSize": {
-					"description": "The size of the indentation applied to CSS (and its super languages) files. Default to 2.",
-					"type": ["integer", "null"],
-					"format": "uint8",
-					"minimum": 0.0
 				},
 				"indentStyle": {
 					"description": "The indent style applied to CSS (and its super languages) files.",
@@ -906,7 +905,19 @@
 					"anyOf": [{ "$ref": "#/definitions/LineWidth" }, { "type": "null" }]
 				},
 				"quoteStyle": {
+					"description": "The type of quotes used in CSS code. Defaults to double.",
 					"anyOf": [{ "$ref": "#/definitions/QuoteStyle" }, { "type": "null" }]
+				}
+			},
+			"additionalProperties": false
+		},
+		"CssLinter": {
+			"description": "Options that changes how the CSS linter behaves",
+			"type": "object",
+			"properties": {
+				"enabled": {
+					"description": "Control the linter for CSS (and its super languages) files.",
+					"type": ["boolean", "null"]
 				}
 			},
 			"additionalProperties": false
@@ -1160,6 +1171,13 @@
 					"description": "Indicates the type of runtime or transformation used for interpreting JSX.",
 					"anyOf": [{ "$ref": "#/definitions/JsxRuntime" }, { "type": "null" }]
 				},
+				"linter": {
+					"description": "Linter options",
+					"anyOf": [
+						{ "$ref": "#/definitions/JavascriptLinter" },
+						{ "type": "null" }
+					]
+				},
 				"organizeImports": {
 					"anyOf": [
 						{ "$ref": "#/definitions/JavascriptOrganizeImports" },
@@ -1269,6 +1287,17 @@
 			},
 			"additionalProperties": false
 		},
+		"JavascriptLinter": {
+			"description": "Linter options specific to the JavaScript linter",
+			"type": "object",
+			"properties": {
+				"enabled": {
+					"description": "Control the linter for JavaScript (and its super languages) files.",
+					"type": ["boolean", "null"]
+				}
+			},
+			"additionalProperties": false
+		},
 		"JavascriptOrganizeImports": {
 			"type": "object",
 			"additionalProperties": false
@@ -1294,6 +1323,10 @@
 						{ "$ref": "#/definitions/JsonFormatter" },
 						{ "type": "null" }
 					]
+				},
+				"linter": {
+					"description": "Linting options",
+					"anyOf": [{ "$ref": "#/definitions/JsonLinter" }, { "type": "null" }]
 				},
 				"parser": {
 					"description": "Parsing options",
@@ -1342,6 +1375,17 @@
 						{ "$ref": "#/definitions/TrailingCommas2" },
 						{ "type": "null" }
 					]
+				}
+			},
+			"additionalProperties": false
+		},
+		"JsonLinter": {
+			"description": "Linter options specific to the JSON linter",
+			"type": "object",
+			"properties": {
+				"enabled": {
+					"description": "Control the linter for JSON (and its super languages) files.",
+					"type": ["boolean", "null"]
 				}
 			},
 			"additionalProperties": false

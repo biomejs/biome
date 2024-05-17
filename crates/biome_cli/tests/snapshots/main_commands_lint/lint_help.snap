@@ -28,6 +28,13 @@ The configuration of the filesystem
         --files-ignore-unknown=<true|false>  Tells Biome to not emit diagnostics when handling files
                               that doesn't know
 
+Linter options specific to the JavaScript linter
+        --javascript-linter-enabled=<true|false>  Control the linter for JavaScript (and its super languages)
+                              files.
+
+Linter options specific to the JSON linter
+        --json-linter-enabled=<true|false>  Control the linter for JSON (and its super languages) files.
+
 Global options applied to all commands
         --colors=<off|force>  Set the formatting mode for markup: "off" prints everything as plain text,
                               "force" forces the formatting of markup using ANSI even if the console

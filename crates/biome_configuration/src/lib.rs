@@ -100,7 +100,7 @@ pub struct Configuration {
     pub json: JsonConfiguration,
 
     /// Specific configuration for the Css language
-    #[partial(type, bpaf(external(partial_css_configuration), optional, hide))]
+    #[partial(type, bpaf(external(partial_css_configuration), optional))]
     pub css: CssConfiguration,
 
     /// A list of paths to other JSON files, used to extends the current configuration.
@@ -157,6 +157,18 @@ impl PartialConfiguration {
 
     pub fn get_json_formatter_configuration(&self) -> JsonFormatter {
         self.json
+            .as_ref()
+            .map(|f| {
+                f.formatter
+                    .as_ref()
+                    .map(|f| f.get_formatter_configuration())
+                    .unwrap_or_default()
+            })
+            .unwrap_or_default()
+    }
+
+    pub fn get_css_formatter_configuration(&self) -> CssFormatter {
+        self.css
             .as_ref()
             .map(|f| {
                 f.formatter

@@ -391,7 +391,6 @@ impl Workspace for WorkspaceServer {
                 {
                     file_features.set_protected_for_all_features();
                 }
-
                 Ok(entry.insert(file_features).clone())
             }
         }

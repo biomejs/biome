@@ -57,6 +57,20 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
   Contributed by @Conaclos
 
+- Add new command `biome clean`. Use this command to purge all the logs emitted by the Biome daemon. This command is really useful, because the Biome daemon tends
+  log many files and contents during its lifecycle. This means that if your editor is open for hours (or even days), the `biome-logs` folder could become quite heavy. Contributed by @ematipico
+
+- Add support for formatting and linting CSS files from the CLI. These operations are **opt-in** for the time being.
+
+  If you don't have a configuration file, you can enable these features with `--css-formatter-enabled` and `--css-linter-enabled`:
+
+  ```shell
+  biome check --css-formatter-enabled=true --css-linter-enabled=true ./
+  ```
+  Contributed by @ematipico
+
+- Add new CLI options to control the CSS formatting. Check the [CLI reference page](https://biomejs.dev/reference/cli/) for more details. Contributed by @ematipico
+
 #### Enhancements
 
 - Biome now executes commands (lint, format, check and ci) on the working directory by default. [#2266](https://github.com/biomejs/biome/issues/2266) Contributed by @unvalley
@@ -126,6 +140,11 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
   ```
 
   Contributed by @Conaclos
+
+- Add option `javascript.linter.enabled` to control the linter for JavaScript (and its super languages) files. Contributed by @ematipico
+- Add option `json.linter.enabled` to control the linter for JSON (and its super languages) files. Contributed by @ematipico
+- Add option `css.linter.enabled` to control the linter for CSS (and its super languages) files. Contributed by @ematipico
+- Add option `css.formatter`, to control the formatter options for CSS (and its super languages) files. Contributed by @ematipico
 
 #### Enhancements
 
