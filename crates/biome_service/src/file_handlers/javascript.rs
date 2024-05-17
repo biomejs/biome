@@ -371,7 +371,11 @@ pub(crate) fn lint(params: LintParams) -> LintResults {
                 .filter(|diag| diag.severity() <= Severity::Error)
                 .count();
 
-            let has_lint = filter.categories.contains(RuleCategories::LINT);
+            // Do not report unused suppression comment diagnostics if:
+            // - it is a syntax-only analyzer pass, or
+            // - if a single rule is run.
+            let ignores_suppression_comment =
+                !filter.categories.contains(RuleCategories::LINT) || params.rule.is_some();
 
             info!("Analyze file {}", params.path.display());
             let (_, analyze_diagnostics) = analyze(
@@ -382,8 +386,7 @@ pub(crate) fn lint(params: LintParams) -> LintResults {
                 params.manifest,
                 |signal| {
                     if let Some(mut diagnostic) = signal.diagnostic() {
-                        // Do not report unused suppression comment diagnostics if this is a syntax-only analyzer pass
-                        if !has_lint
+                        if ignores_suppression_comment
                             && diagnostic.category() == Some(category!("suppressions/unused"))
                         {
                             return ControlFlow::<Never>::Continue(());
