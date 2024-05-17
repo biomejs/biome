@@ -1861,6 +1861,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useNumberToFixedDigitsArgument": {
+					"description": "Enforce using the digits argument with Number#toFixed().",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleFixConfiguration_for_Null" },
+						{ "type": "null" }
+					]
+				},
 				"useSortedClasses": {
 					"description": "Enforce the sorting of CSS utility classes.",
 					"anyOf": [

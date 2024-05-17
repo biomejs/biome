@@ -1094,6 +1094,10 @@ export interface Nursery {
 	 */
 	useImportRestrictions?: RuleConfiguration_for_Null;
 	/**
+	 * Enforce using the digits argument with Number#toFixed().
+	 */
+	useNumberToFixedDigitsArgument?: RuleFixConfiguration_for_Null;
+	/**
 	 * Enforce the sorting of CSS utility classes.
 	 */
 	useSortedClasses?: RuleFixConfiguration_for_UtilityClassSortingOptions;
@@ -2303,6 +2307,7 @@ export type Category =
 	| "lint/nursery/useFocusableInteractive"
 	| "lint/nursery/useGenericFontNames"
 	| "lint/nursery/useImportRestrictions"
+	| "lint/nursery/useNumberToFixedDigitsArgument"
 	| "lint/nursery/useSortedClasses"
 	| "lint/nursery/useThrowNewError"
 	| "lint/nursery/useTopLevelRegex"
