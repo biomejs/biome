@@ -4,4 +4,6 @@ expression: content
 ---
 example.js internalError/fs ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Size of example.js is 500 B which exceeds configured maximum of 100 B for this project. The file size limit exists to prevent us inadvertently slowing down and loading large files that we shouldn't.
+  × Size of example.js is 500 B which exceeds configured maximum of 100 B for this project.
+                    The file size limit exists to prevent us inadvertently slowing down and loading large files that we shouldn't.
+                    Use the `files.maxSize` configuration to change the maximum size of files processed.
