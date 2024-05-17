@@ -77,11 +77,15 @@ export interface PartialConfiguration {
  */
 export interface PartialCssConfiguration {
 	/**
-	 * Formatting options
+	 * CSS formatter options
 	 */
 	formatter?: PartialCssFormatter;
 	/**
-	 * Parsing options
+	 * CSS linter options
+	 */
+	linter?: PartialCssLinter;
+	/**
+	 * CSS parsing options
 	 */
 	parser?: PartialCssParser;
 }
@@ -167,6 +171,10 @@ If defined here, they should not emit diagnostics.
 	 * Indicates the type of runtime or transformation used for interpreting JSX.
 	 */
 	jsxRuntime?: JsxRuntime;
+	/**
+	 * Linter options
+	 */
+	linter?: PartialJavascriptLinter;
 	organizeImports?: PartialJavascriptOrganizeImports;
 	/**
 	 * Parsing options
@@ -181,6 +189,10 @@ export interface PartialJsonConfiguration {
 	 * Formatting options
 	 */
 	formatter?: PartialJsonFormatter;
+	/**
+	 * Linting options
+	 */
+	linter?: PartialJsonLinter;
 	/**
 	 * Parsing options
 	 */
@@ -252,10 +264,6 @@ export interface PartialCssFormatter {
 	 */
 	enabled?: boolean;
 	/**
-	 * The size of the indentation applied to CSS (and its super languages) files. Default to 2.
-	 */
-	indentSize?: number;
-	/**
 	 * The indent style applied to CSS (and its super languages) files.
 	 */
 	indentStyle?: PlainIndentStyle;
@@ -271,7 +279,16 @@ export interface PartialCssFormatter {
 	 * What's the max width of a line applied to CSS (and its super languages) files. Defaults to 80.
 	 */
 	lineWidth?: LineWidth;
+	/**
+	 * The type of quotes used in CSS code. Defaults to double.
+	 */
 	quoteStyle?: QuoteStyle;
+}
+export interface PartialCssLinter {
+	/**
+	 * Control the linter for CSS (and its super languages) files.
+	 */
+	enabled?: boolean;
 }
 /**
  * Options that changes how the CSS parser behaves
@@ -364,6 +381,15 @@ export interface PartialJavascriptFormatter {
  * Indicates the type of runtime or transformation used for interpreting JSX.
  */
 export type JsxRuntime = "transparent" | "reactClassic";
+/**
+ * Linter options specific to the JavaScript linter
+ */
+export interface PartialJavascriptLinter {
+	/**
+	 * Control the linter for JavaScript (and its super languages) files.
+	 */
+	enabled?: boolean;
+}
 export interface PartialJavascriptOrganizeImports {}
 /**
  * Options that changes how the JavaScript parser behaves
@@ -405,6 +431,15 @@ export interface PartialJsonFormatter {
 	 * Print trailing commas wherever possible in multi-line comma-separated syntactic structures. Defaults to "none".
 	 */
 	trailingCommas?: TrailingCommas2;
+}
+/**
+ * Linter options specific to the JSON linter
+ */
+export interface PartialJsonLinter {
+	/**
+	 * Control the linter for JSON (and its super languages) files.
+	 */
+	enabled?: boolean;
 }
 /**
  * Options that changes how the JSON parser behaves
