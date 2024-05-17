@@ -1864,7 +1864,7 @@
 				"useNumberToFixedDigitsArgument": {
 					"description": "Enforce using the digits argument with Number#toFixed().",
 					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "$ref": "#/definitions/RuleFixConfiguration_for_Null" },
 						{ "type": "null" }
 					]
 				},

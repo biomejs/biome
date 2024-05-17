@@ -1096,7 +1096,7 @@ export interface Nursery {
 	/**
 	 * Enforce using the digits argument with Number#toFixed().
 	 */
-	useNumberToFixedDigitsArgument?: RuleConfiguration_for_Null;
+	useNumberToFixedDigitsArgument?: RuleFixConfiguration_for_Null;
 	/**
 	 * Enforce the sorting of CSS utility classes.
 	 */
