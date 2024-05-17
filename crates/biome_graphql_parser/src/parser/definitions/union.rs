@@ -4,7 +4,6 @@ use crate::parser::{
     parse_error::{expected_name, expected_named_type},
     parse_name,
     r#type::parse_named_type,
-    value::is_at_string,
     GraphqlParser,
 };
 use biome_graphql_syntax::{
@@ -23,9 +22,6 @@ use super::is_at_definition;
 
 #[inline]
 pub(crate) fn parse_union_type_definition(p: &mut GraphqlParser) -> ParsedSyntax {
-    if !is_at_union_type_definition(p) {
-        return Absent;
-    }
     let m = p.start();
 
     // description is optional
@@ -121,11 +117,6 @@ fn parse_union_member(p: &mut GraphqlParser) -> ParsedSyntax {
     }
 
     parse_named_type(p)
-}
-
-#[inline]
-pub(crate) fn is_at_union_type_definition(p: &mut GraphqlParser<'_>) -> bool {
-    p.at(T![union]) || (is_at_string(p) && p.nth_at(1, T![union]))
 }
 
 /// We must enforce either a `=`, `|`, or a non kw name token to be present, as

@@ -17,9 +17,6 @@ use biome_parser::{
 
 #[inline]
 pub(crate) fn parse_enum_type_definition(p: &mut GraphqlParser) -> ParsedSyntax {
-    if !is_at_enum_type_definition(p) {
-        return Absent;
-    }
     let m = p.start();
 
     // description is optional
@@ -104,11 +101,6 @@ pub(crate) fn parse_enum_value_definition(p: &mut GraphqlParser) -> ParsedSyntax
     DirectiveList.parse_list(p);
 
     Present(m.complete(p, GRAPHQL_ENUM_VALUE_DEFINITION))
-}
-
-#[inline]
-pub(crate) fn is_at_enum_type_definition(p: &mut GraphqlParser) -> bool {
-    p.at(T![enum]) || (is_at_string(p) && p.nth_at(1, T![enum]))
 }
 
 /// Either a `{`, `|`, or a non kw name token must be present, else this is
