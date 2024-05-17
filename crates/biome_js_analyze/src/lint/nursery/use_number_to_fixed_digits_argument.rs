@@ -113,14 +113,14 @@ impl Rule for UseNumberToFixedDigitsArgument {
 
         mutation.replace_node::<JsCallArgumentList>(previous_args, new_args);
 
-        Some(JsRuleAction {
-            category: ActionCategory::QuickFix,
-            applicability: Applicability::MaybeIncorrect,
-            message: markup! {
+        Some(JsRuleAction::new(
+            ActionCategory::QuickFix,
+            Applicability::MaybeIncorrect,
+            markup! {
                 "Add explicit digits argument to "<Emphasis>"toFixed"</Emphasis>" method."
             }
             .to_owned(),
             mutation,
-        })
+        ))
     }
 }
