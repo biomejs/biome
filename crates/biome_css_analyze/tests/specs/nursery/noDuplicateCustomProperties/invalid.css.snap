@@ -1,0 +1,43 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: invalid.css
+---
+# Input
+```css
+a { --custom-property: pink; --custom-property: orange; }
+
+a { --custom-property: pink; background: orange; --custom-property: orange }
+
+```
+
+# Diagnostics
+```
+invalid.css:1:30 lint/nursery/noDuplicateCustomProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate custom properties are not allowed.
+  
+  > 1 │ a { --custom-property: pink; --custom-property: orange; }
+      │                              ^^^^^^^^^^^^^^^^^
+    2 │ 
+    3 │ a { --custom-property: pink; background: orange; --custom-property: orange }
+  
+  i Consider removing the duplicate custom property.
+  
+
+```
+
+```
+invalid.css:3:50 lint/nursery/noDuplicateCustomProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate custom properties are not allowed.
+  
+    1 │ a { --custom-property: pink; --custom-property: orange; }
+    2 │ 
+  > 3 │ a { --custom-property: pink; background: orange; --custom-property: orange }
+      │                                                  ^^^^^^^^^^^^^^^^^
+    4 │ 
+  
+  i Consider removing the duplicate custom property.
+  
+
+```

@@ -978,6 +978,10 @@ export interface Nursery {
 	 */
 	noDuplicateAtImportRules?: RuleConfiguration_for_Null;
 	/**
+	 * Disallow duplicate custom properties within declaration blocks.
+	 */
+	noDuplicateCustomProperties?: RuleConfiguration_for_Null;
+	/**
 	 * Disallow duplicate conditions in if-else-if chains
 	 */
 	noDuplicateElseIf?: RuleConfiguration_for_Null;
@@ -2276,6 +2280,7 @@ export type Category =
 	| "lint/nursery/noCssEmptyBlock"
 	| "lint/nursery/noDoneCallback"
 	| "lint/nursery/noDuplicateAtImportRules"
+	| "lint/nursery/noDuplicateCustomProperties"
 	| "lint/nursery/noDuplicateElseIf"
 	| "lint/nursery/noDuplicateFontNames"
 	| "lint/nursery/noDuplicateJsonKeys"

@@ -3321,6 +3321,9 @@ pub struct Nursery {
     #[doc = "Disallow duplicate @import rules."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_duplicate_at_import_rules: Option<RuleConfiguration<NoDuplicateAtImportRules>>,
+    #[doc = "Disallow duplicate custom properties within declaration blocks."]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub no_duplicate_custom_properties: Option<RuleConfiguration<NoDuplicateCustomProperties>>,
     #[doc = "Disallow duplicate conditions in if-else-if chains"]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_duplicate_else_if: Option<RuleConfiguration<NoDuplicateElseIf>>,
@@ -3447,6 +3450,7 @@ impl Nursery {
         "noCssEmptyBlock",
         "noDoneCallback",
         "noDuplicateAtImportRules",
+        "noDuplicateCustomProperties",
         "noDuplicateElseIf",
         "noDuplicateFontNames",
         "noDuplicateJsonKeys",
@@ -3503,7 +3507,6 @@ impl Nursery {
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[3]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[4]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[5]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[6]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[7]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[8]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[9]),
@@ -3603,37 +3606,37 @@ impl Nursery {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[5]));
             }
         }
-        if let Some(rule) = self.no_duplicate_else_if.as_ref() {
+        if let Some(rule) = self.no_duplicate_custom_properties.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[6]));
             }
         }
-        if let Some(rule) = self.no_duplicate_font_names.as_ref() {
+        if let Some(rule) = self.no_duplicate_else_if.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[7]));
             }
         }
-        if let Some(rule) = self.no_duplicate_json_keys.as_ref() {
+        if let Some(rule) = self.no_duplicate_font_names.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[8]));
             }
         }
-        if let Some(rule) = self.no_duplicate_selectors_keyframe_block.as_ref() {
+        if let Some(rule) = self.no_duplicate_json_keys.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[9]));
             }
         }
-        if let Some(rule) = self.no_evolving_any.as_ref() {
+        if let Some(rule) = self.no_duplicate_selectors_keyframe_block.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[10]));
             }
         }
-        if let Some(rule) = self.no_flat_map_identity.as_ref() {
+        if let Some(rule) = self.no_evolving_any.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[11]));
             }
         }
-        if let Some(rule) = self.no_important_in_keyframe.as_ref() {
+        if let Some(rule) = self.no_flat_map_identity.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[12]));
             }
@@ -3797,37 +3800,37 @@ impl Nursery {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[5]));
             }
         }
-        if let Some(rule) = self.no_duplicate_else_if.as_ref() {
+        if let Some(rule) = self.no_duplicate_custom_properties.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[6]));
             }
         }
-        if let Some(rule) = self.no_duplicate_font_names.as_ref() {
+        if let Some(rule) = self.no_duplicate_else_if.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[7]));
             }
         }
-        if let Some(rule) = self.no_duplicate_json_keys.as_ref() {
+        if let Some(rule) = self.no_duplicate_font_names.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[8]));
             }
         }
-        if let Some(rule) = self.no_duplicate_selectors_keyframe_block.as_ref() {
+        if let Some(rule) = self.no_duplicate_json_keys.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[9]));
             }
         }
-        if let Some(rule) = self.no_evolving_any.as_ref() {
+        if let Some(rule) = self.no_duplicate_selectors_keyframe_block.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[10]));
             }
         }
-        if let Some(rule) = self.no_flat_map_identity.as_ref() {
+        if let Some(rule) = self.no_evolving_any.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[11]));
             }
         }
-        if let Some(rule) = self.no_important_in_keyframe.as_ref() {
+        if let Some(rule) = self.no_flat_map_identity.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[12]));
             }
@@ -3922,7 +3925,7 @@ impl Nursery {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[30]));
             }
         }
-        if let Some(rule) = self.use_focusable_interactive.as_ref() {
+        if let Some(rule) = self.use_focusable_interactive.as_ref() {gg
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[31]));
             }
@@ -4015,6 +4018,10 @@ impl Nursery {
                 .map(|conf| (conf.level(), conf.get_options())),
             "noDuplicateAtImportRules" => self
                 .no_duplicate_at_import_rules
+                .as_ref()
+                .map(|conf| (conf.level(), conf.get_options())),
+            "noDuplicateCustomProperties" => self
+                .no_duplicate_custom_properties
                 .as_ref()
                 .map(|conf| (conf.level(), conf.get_options())),
             "noDuplicateElseIf" => self
