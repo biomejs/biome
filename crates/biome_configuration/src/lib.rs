@@ -40,7 +40,8 @@ pub use json::{
 };
 pub use linter::{
     partial_linter_configuration, LinterConfiguration, PartialLinterConfiguration,
-    RuleConfiguration, RulePlainConfiguration, RuleWithOptions, Rules,
+    RuleConfiguration, RuleFixConfiguration, RulePlainConfiguration, RuleWithFixOptions,
+    RuleWithOptions, Rules,
 };
 pub use overrides::{
     OverrideFormatterConfiguration, OverrideLinterConfiguration,
