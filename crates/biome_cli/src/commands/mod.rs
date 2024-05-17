@@ -141,12 +141,15 @@ pub enum BiomeCommand {
         /// Apply safe fixes and unsafe fixes, formatting and import sorting
         #[bpaf(long("apply-unsafe"), switch)]
         apply_unsafe: bool,
+
         /// Fixes lint errors safely
         #[bpaf(long("fix"))]
         fix: bool,
+
         /// Alias for `--fix`, fixes lint errors safely
         #[bpaf(long("write"), switch)]
         write: bool,
+
         /// Fixes lint errors unsafely when used with `--fix` or `--write`
         #[bpaf(long("unsafe"), switch)]
         unsafe_: bool,
@@ -592,7 +595,8 @@ fn get_files_to_process(
     }
 }
 
-pub(crate) struct FixFileModeParams {
+/// Holds the options to determine the fix file mode.
+pub(crate) struct FixFileModeOptions {
     apply: bool,
     apply_unsafe: bool,
     write: bool,
@@ -600,18 +604,21 @@ pub(crate) struct FixFileModeParams {
     unsafe_: bool,
 }
 
+/// - [Result]: if the given options are incompatible
+/// - [Option]: if no fixes are requested
+/// - [FixFileMode]: if safe or unsafe fixes are requested
 pub(crate) fn determine_fix_file_mode(
-    params: FixFileModeParams,
+    options: FixFileModeOptions,
 ) -> Result<Option<FixFileMode>, CliDiagnostic> {
-    let FixFileModeParams {
+    let FixFileModeOptions {
         apply,
         apply_unsafe,
         write,
         fix,
         unsafe_,
-    } = params;
+    } = options;
 
-    check_fix_incompatible_arguments(params)?;
+    check_fix_incompatible_arguments(options)?;
 
     let safe_fixes = apply || write || fix;
     let unsafe_fixes = apply_unsafe || ((write || safe_fixes) && unsafe_);
@@ -625,14 +632,15 @@ pub(crate) fn determine_fix_file_mode(
     }
 }
 
-fn check_fix_incompatible_arguments(params: FixFileModeParams) -> Result<(), CliDiagnostic> {
-    let FixFileModeParams {
+/// Checks if the fix file options are incompatible.
+fn check_fix_incompatible_arguments(options: FixFileModeOptions) -> Result<(), CliDiagnostic> {
+    let FixFileModeOptions {
         apply,
         apply_unsafe,
         write,
         fix,
         unsafe_,
-    } = params;
+    } = options;
     if apply && apply_unsafe {
         return Err(CliDiagnostic::incompatible_arguments(
             "apply",
@@ -669,13 +677,13 @@ mod tests {
         ];
 
         for (apply, apply_unsafe, write, fix, unsafe_) in cases {
-            assert!(check_fix_incompatible_arguments(create_params(
+            assert!(check_fix_incompatible_arguments(FixFileModeOptions {
                 apply,
                 apply_unsafe,
                 write,
                 fix,
                 unsafe_
-            ))
+            })
             .is_err());
         }
     }
@@ -713,7 +721,7 @@ mod tests {
 
         for (apply, apply_unsafe, write, fix, unsafe_) in cases {
             assert_eq!(
-                determine_fix_file_mode(FixFileModeParams {
+                determine_fix_file_mode(FixFileModeOptions {
                     apply,
                     apply_unsafe,
                     write,
@@ -732,7 +740,7 @@ mod tests {
 
         for (apply, apply_unsafe, write, fix, unsafe_) in cases {
             assert_eq!(
-                determine_fix_file_mode(FixFileModeParams {
+                determine_fix_file_mode(FixFileModeOptions {
                     apply,
                     apply_unsafe,
                     write,
