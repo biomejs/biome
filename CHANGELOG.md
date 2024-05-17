@@ -57,6 +57,20 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
   Contributed by @Conaclos
 
+- Add new options `--fix`, `--write` and `--unsafe` to the command `biome lint` and `biome check`.
+  Add a new option `--fix` to the command `biome format`.
+
+  ```shell
+  biome <lint|check> --<fix|write> [--unsafe]
+  biome format --<fix|write>
+  ```
+
+  The `biome <lint|check> --<fix|write>` has the same behavior as `biome <lint|check> --apply`.
+  The `biome <lint|check> --<fix|write> --unsafe` has the same behavior as `biome <lint|check> --apply-unsafe`.
+  The `biome format --fix` has the same behavior as `biome format --write`.
+
+  Contributed by @unvalley
+
 #### Enhancements
 
 - Biome now executes commands (lint, format, check and ci) on the working directory by default. [#2266](https://github.com/biomejs/biome/issues/2266) Contributed by @unvalley
