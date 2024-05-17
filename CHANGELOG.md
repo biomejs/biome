@@ -318,6 +318,16 @@ z.object({})
 
   Contributed by @Conaclos
 
+- Some invalid TypeScript syntax caused the Biome parser to crash.
+
+  The following invalid syntax no longer causes the Biome parser to crash:
+
+  ```ts
+  declare using x: null;
+  declare qwait using x: null;
+  ```
+
+  Contributed by @Conaclos
 
 ## 1.7.3 (2024-05-06)
 
