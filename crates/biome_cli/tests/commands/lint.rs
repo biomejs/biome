@@ -3744,7 +3744,15 @@ fn fix_suggested() {
     let result = run_cli(
         DynRef::Borrowed(&mut fs),
         &mut console,
-        Args::from([("lint"), ("--fix"), file_path.as_os_str().to_str().unwrap()].as_slice()),
+        Args::from(
+            [
+                ("lint"),
+                ("--fix"),
+                ("--unsafe"),
+                file_path.as_os_str().to_str().unwrap(),
+            ]
+            .as_slice(),
+        ),
     );
     assert!(result.is_ok(), "run_cli returned {result:?}");
 
