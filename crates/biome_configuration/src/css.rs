@@ -34,6 +34,7 @@ pub struct CssParser {
     pub allow_wrong_line_comments: bool,
 }
 
+/// Options that changes how the CSS formatter behaves
 #[derive(Clone, Debug, Default, Deserialize, Eq, Partial, PartialEq, Serialize)]
 #[partial(derive(Bpaf, Clone, Deserializable, Eq, Merge, PartialEq))]
 #[partial(cfg_attr(feature = "schema", derive(schemars::JsonSchema)))]
@@ -77,6 +78,7 @@ impl PartialCssFormatter {
     }
 }
 
+/// Options that changes how the CSS linter behaves
 #[derive(Clone, Debug, Deserialize, Eq, Partial, PartialEq, Default, Serialize)]
 #[partial(derive(Bpaf, Clone, Deserializable, Eq, Merge, PartialEq))]
 #[partial(cfg_attr(feature = "schema", derive(schemars::JsonSchema)))]

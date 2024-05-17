@@ -99,7 +99,7 @@ pub struct Configuration {
     pub json: JsonConfiguration,
 
     /// Specific configuration for the Css language
-    #[partial(type, bpaf(external(partial_css_configuration), optional, hide))]
+    #[partial(type, bpaf(external(partial_css_configuration), optional))]
     pub css: CssConfiguration,
 
     /// A list of paths to other JSON files, used to extends the current configuration.
