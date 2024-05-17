@@ -23,8 +23,9 @@ expression: content
   },
   "css": {
     "formatter": {
+      "enabled": true,
       "lineWidth": 40,
-      "indentSize": 6
+      "indentWidth": 6
     }
   }
 }
@@ -92,21 +93,6 @@ biome.json:14:17 deserialize  DEPRECATED  ━━━━━━━━━━━━�
        │                 ^^^^^^^^^^^^
     15 │             }
     16 │         },
-  
-
-```
-
-```block
-biome.json:20:17 deserialize  DEPRECATED  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! The property indentSize is deprecated. Use css.formatter.indentWidth instead.
-  
-    18 │             "formatter": {
-    19 │                 "lineWidth": 40,
-  > 20 │                 "indentSize": 6
-       │                 ^^^^^^^^^^^^
-    21 │             }
-    22 │         }
   
 
 ```

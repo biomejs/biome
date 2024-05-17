@@ -2631,8 +2631,9 @@ fn should_apply_different_formatting() {
         },
         "css": {
             "formatter": {
+                "enabled": true,
                 "lineWidth": 40,
-                "indentSize": 6
+                "indentWidth": 6
             }
         }
     }"#,
@@ -2730,7 +2731,8 @@ const a = {
                 "--json-formatter-line-width=20",
                 "--json-formatter-indent-size=2",
                 "--css-formatter-line-width=40",
-                "--css-formatter-indent-size=6",
+                "--css-formatter-indent-width=6",
+                "--css-formatter-enabled=true",
                 json_file.as_os_str().to_str().unwrap(),
                 js_file.as_os_str().to_str().unwrap(),
                 css_file.as_os_str().to_str().unwrap(),

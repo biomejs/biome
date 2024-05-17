@@ -7,6 +7,7 @@ mod config_path;
 mod cts_files;
 mod diagnostics;
 mod handle_astro_files;
+mod handle_css_files;
 mod handle_svelte_files;
 mod handle_vue_files;
 mod included_files;

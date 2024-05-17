@@ -109,6 +109,14 @@ JSON Formatter:
   Line width:                   100
   Trailing Commas:              unset
 
+CSS Formatter:
+  Enabled:                      false
+  Indent style:                 Tab
+  Indent width:                 0
+  Line ending:                  Lf
+  Line width:                   LineWidth(80)
+  Quote style:                  Double
+
 Server:
   Version:                      0.0.0
   Name:                         biome_lsp

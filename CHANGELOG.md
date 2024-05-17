@@ -57,6 +57,20 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
   Contributed by @Conaclos
 
+- Add new command `biome clean`. Use this command to purge all the logs emitted by the Biome daemon. This command is really useful, because the Biome daemon tends
+  log many files and contents during its lifecycle. This means that if your editor is open for hours (or even days), the `biome-logs` folder could become quite heavy. Contributed by @ematipico
+
+- Add support for formatting and linting CSS files from the CLI. These operations are **opt-in** for the time being.
+
+  If you don't have a configuration file, you can enable these features with `--css-formatter-enabled` and `--css-linter-enabled`:
+
+  ```shell
+  biome check --css-formatter-enabled=true --css-linter-enabled=true ./
+  ```
+  Contributed by @ematipico
+
+- Add new CLI options to control the CSS formatting. Check the [CLI reference page](https://biomejs.dev/reference/cli/) for more details. Contributed by @ematipico
+
 - Add new options `--fix`, `--write` and `--unsafe` to the command `biome lint` and `biome check`.
   Add a new option `--fix` to the command `biome format`.
 
@@ -141,6 +155,11 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
   Contributed by @Conaclos
 
+- Add option `javascript.linter.enabled` to control the linter for JavaScript (and its super languages) files. Contributed by @ematipico
+- Add option `json.linter.enabled` to control the linter for JSON (and its super languages) files. Contributed by @ematipico
+- Add option `css.linter.enabled` to control the linter for CSS (and its super languages) files. Contributed by @ematipico
+- Add option `css.formatter`, to control the formatter options for CSS (and its super languages) files. Contributed by @ematipico
+
 #### Enhancements
 
 - The `javascript.formatter.trailingComma` option is deprecated and renamed to `javascript.formatter.trailingCommas`. The corresponding CLI option `--trailing-comma` is also deprecated and renamed to `--trailing-commas`. Details can be checked in [#2492](https://github.com/biomejs/biome/pull/2492). Contributed by @Sec-ant
@@ -201,6 +220,19 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 - Add [nursery/useThrowNewError](https://biomejs.dev/linter/rules/use-throw-new-error/).
   Contributed by @minht11
 - Add [nursery/useTopLevelRegex](https://biomejs.dev/linter/rules/use-top-level-regex), which enforces defining regular expressions at the top level of a module. [#2148](https://github.com/biomejs/biome/issues/2148) Contributed by @dyc3.
+- Add [nursery/noCssEmptyBlock](https://biomejs.dev/linter/rules/no-css-empty-block). [#2513](https://github.com/biomejs/biome/pull/2513) Contributed by @togami2864
+- Add [nursery/noDuplicateAtImportRules](https://biomejs.dev/linter/rules/no-duplicate-at-import-rules). [#2658](https://github.com/biomejs/biome/pull/2658) Contributed by @DerTimonius
+- Add [nursery/noDuplicateFontNames](https://biomejs.dev/linter/rules/no-duplicate-font-names). [#2308](https://github.com/biomejs/biome/pull/2308) Contributed by @togami2864
+- Add [nursery/noDuplicateSelectorsKeyframeBlock](https://biomejs.dev/linter/rules/no-duplicate-selectors-keyframe-block). [#2534](https://github.com/biomejs/biome/pull/2534) Contributed by @isnakode
+- Add [nursery/noImportantInKeyframe](https://biomejs.dev/linter/rules/no-important-in-keyframe). [#2542](https://github.com/biomejs/biome/pull/2542) Contributed by @isnakode
+- Add [nursery/noInvalidPositionAtImportRule](https://biomejs.dev/linter/rules/no-invalid-position-at-import-rule). [#2717](https://github.com/biomejs/biome/issues/2717) Contributed by @t-shiratori
+- Add [nursery/noUnknownFunction](https://biomejs.dev/linter/rules/no-unknown-function). [#2570](https://github.com/biomejs/biome/pull/2570) Contributed by @neokidev
+- Add [nursery/noUnknownMediaFeatureName](https://biomejs.dev/linter/rules/no-unknown-media-feature-name). [#2751](https://github.com/biomejs/biome/issues/2751) Contributed by @Kazuhiro-Mimaki
+- Add [nursery/noUnknownProperty](https://biomejs.dev/linter/rules/no-unknown-property). [#2755](https://github.com/biomejs/biome/pull/2755) Contributed by @chansuke
+- Add [nursery/noUnknownSelectorPseudoElement](https://biomejs.dev/linter/rules/no-unknown-selector-pseudo-element). [#2655](https://github.com/biomejs/biome/issues/2655) Contributed by @keita-hino
+- Add [nursery/noUnknownUnit](https://biomejs.dev/linter/rules/no-unknwon-unit). [#2535](https://github.com/biomejs/biome/issues/2535) Contributed by @neokidev
+- Add [nursery/noUnmatchableAnbSelector](https://biomejs.dev/linter/rules/no-unmatchable-anb-selector). [#2706](https://github.com/biomejs/biome/issues/2706) Contributed by @togami2864
+- Add [nursery/useGenericFontNames](https://biomejs.dev/linter/rules/use-generic-font-names). [#2573](https://github.com/biomejs/biome/pull/2573) Contributed by @togami2864
 
 #### Enhancements
 
@@ -300,6 +332,16 @@ z.object({})
 
   Contributed by @Conaclos
 
+- Some invalid TypeScript syntax caused the Biome parser to crash.
+
+  The following invalid syntax no longer causes the Biome parser to crash:
+
+  ```ts
+  declare using x: null;
+  declare qwait using x: null;
+  ```
+
+  Contributed by @Conaclos
 
 ## 1.7.3 (2024-05-06)
 

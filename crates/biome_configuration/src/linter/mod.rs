@@ -90,37 +90,22 @@ impl<T: Default + Deserializable> Deserializable for RuleConfiguration<T> {
 }
 
 impl<T: Default> RuleConfiguration<T> {
-    pub fn is_err(&self) -> bool {
-        if let Self::WithOptions(rule) = self {
-            rule.level == RulePlainConfiguration::Error
-        } else {
-            matches!(self, Self::Plain(RulePlainConfiguration::Error))
-        }
-    }
-
     pub fn is_disabled(&self) -> bool {
-        if let Self::WithOptions(rule) = self {
-            rule.level == RulePlainConfiguration::Off
-        } else {
-            matches!(self, Self::Plain(RulePlainConfiguration::Off))
-        }
+        matches!(self.level(), RulePlainConfiguration::Off)
     }
-
     pub fn is_enabled(&self) -> bool {
         !self.is_disabled()
     }
-
     pub fn level(&self) -> RulePlainConfiguration {
         match self {
-            RuleConfiguration::Plain(plain) => *plain,
-            RuleConfiguration::WithOptions(options) => options.level,
+            Self::Plain(plain) => *plain,
+            Self::WithOptions(options) => options.level,
         }
     }
-
     pub fn set_level(&mut self, level: RulePlainConfiguration) {
         match self {
-            RuleConfiguration::Plain(plain) => *plain = level,
-            RuleConfiguration::WithOptions(options) => options.level = level,
+            Self::Plain(plain) => *plain = level,
+            Self::WithOptions(options) => options.level = level,
         }
     }
 }
@@ -130,24 +115,15 @@ impl<T: Default> RuleConfiguration<T> {
 impl<T: Clone + Default> Merge for RuleConfiguration<T> {
     fn merge_with(&mut self, other: Self) {
         match self {
-            RuleConfiguration::Plain(_) => *self = other,
-            RuleConfiguration::WithOptions(this) => {
-                match other {
-                    RuleConfiguration::Plain(level) => {
-                        this.level = level;
-                    }
-                    RuleConfiguration::WithOptions(other) => {
-                        *this = RuleWithOptions {
-                            level: other.level,
-                            fix: other.fix.or(this.fix),
-                            // FIXME: Rule options don't have a `NoneState`, so we can't deep
-                            //        merge them yet. For now, if an override specifies options,
-                            //        it will still override *all* options.
-                            options: other.options,
-                        }
-                    }
+            Self::Plain(_) => *self = other,
+            Self::WithOptions(this) => match other {
+                Self::Plain(level) => {
+                    this.level = level;
                 }
-            }
+                Self::WithOptions(other) => {
+                    this.merge_with(other);
+                }
+            },
         }
     }
 }
@@ -155,10 +131,8 @@ impl<T: Clone + Default> Merge for RuleConfiguration<T> {
 impl<T: Clone + Default + 'static> RuleConfiguration<T> {
     pub fn get_options(&self) -> Option<RuleOptions> {
         match self {
-            RuleConfiguration::Plain(_) => None,
-            RuleConfiguration::WithOptions(options) => {
-                Some(RuleOptions::new(options.options.clone(), options.fix))
-            }
+            Self::Plain(_) => None,
+            Self::WithOptions(options) => Some(RuleOptions::new(options.options.clone(), None)),
         }
     }
 }
@@ -166,6 +140,85 @@ impl<T: Clone + Default + 'static> RuleConfiguration<T> {
 impl<T: Default> Default for RuleConfiguration<T> {
     fn default() -> Self {
         Self::Plain(RulePlainConfiguration::Error)
+    }
+}
+
+#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
+#[cfg_attr(feature = "schema", derive(JsonSchema))]
+#[serde(rename_all = "camelCase", deny_unknown_fields, untagged)]
+pub enum RuleFixConfiguration<T: Default> {
+    Plain(RulePlainConfiguration),
+    WithOptions(RuleWithFixOptions<T>),
+}
+
+impl<T: Default> Default for RuleFixConfiguration<T> {
+    fn default() -> Self {
+        Self::Plain(RulePlainConfiguration::Error)
+    }
+}
+
+impl<T: Default + Deserializable> Deserializable for RuleFixConfiguration<T> {
+    fn deserialize(
+        value: &impl DeserializableValue,
+        rule_name: &str,
+        diagnostics: &mut Vec<DeserializationDiagnostic>,
+    ) -> Option<Self> {
+        if value.visitable_type()? == VisitableType::STR {
+            Deserializable::deserialize(value, rule_name, diagnostics).map(Self::Plain)
+        } else {
+            Deserializable::deserialize(value, rule_name, diagnostics)
+                .map(|rule| Self::WithOptions(rule))
+        }
+    }
+}
+
+impl<T: Default> RuleFixConfiguration<T> {
+    pub fn is_disabled(&self) -> bool {
+        matches!(self.level(), RulePlainConfiguration::Off)
+    }
+    pub fn is_enabled(&self) -> bool {
+        !self.is_disabled()
+    }
+    pub fn level(&self) -> RulePlainConfiguration {
+        match self {
+            Self::Plain(plain) => *plain,
+            Self::WithOptions(options) => options.level,
+        }
+    }
+    pub fn set_level(&mut self, level: RulePlainConfiguration) {
+        match self {
+            Self::Plain(plain) => *plain = level,
+            Self::WithOptions(options) => options.level = level,
+        }
+    }
+}
+
+// Rule configuration has a custom [Merge] implementation so that overriding the
+// severity doesn't override the options.
+impl<T: Clone + Default> Merge for RuleFixConfiguration<T> {
+    fn merge_with(&mut self, other: Self) {
+        match self {
+            Self::Plain(_) => *self = other,
+            Self::WithOptions(this) => match other {
+                Self::Plain(level) => {
+                    this.level = level;
+                }
+                Self::WithOptions(other) => {
+                    this.merge_with(other);
+                }
+            },
+        }
+    }
+}
+
+impl<T: Clone + Default + 'static> RuleFixConfiguration<T> {
+    pub fn get_options(&self) -> Option<RuleOptions> {
+        match self {
+            Self::Plain(_) => None,
+            Self::WithOptions(options) => {
+                Some(RuleOptions::new(options.options.clone(), options.fix))
+            }
+        }
     }
 }
 
@@ -207,11 +260,36 @@ pub enum RulePlainConfiguration {
 pub struct RuleWithOptions<T: Default> {
     /// The severity of the emitted diagnostics by the rule
     pub level: RulePlainConfiguration,
+    /// Rule's options
+    pub options: T,
+}
+
+impl<T: Default> Merge for RuleWithOptions<T> {
+    fn merge_with(&mut self, other: Self) {
+        self.level = other.level;
+        self.options = other.options;
+    }
+}
+
+#[derive(Clone, Debug, Default, Deserialize, Deserializable, Eq, PartialEq, Serialize)]
+#[cfg_attr(feature = "schema", derive(JsonSchema))]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct RuleWithFixOptions<T: Default> {
+    /// The severity of the emitted diagnostics by the rule
+    pub level: RulePlainConfiguration,
     /// The kind of the code actions emitted by the rule
     #[serde(skip_serializing_if = "Option::is_none")]
     pub fix: Option<FixKind>,
     /// Rule's options
     pub options: T,
+}
+
+impl<T: Default> Merge for RuleWithFixOptions<T> {
+    fn merge_with(&mut self, other: Self) {
+        self.level = other.level;
+        self.fix = other.fix.or(self.fix);
+        self.options = other.options;
+    }
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq, Hash)]
