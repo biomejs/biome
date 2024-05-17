@@ -711,7 +711,7 @@ mod tests {
 
         for (apply, apply_unsafe, write, fix, unsafe_) in cases {
             assert_eq!(
-                determine_fix_file_mode(FixModeParams {
+                determine_fix_file_mode(FixFileModeOptions {
                     apply,
                     apply_unsafe,
                     write,
