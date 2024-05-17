@@ -141,15 +141,15 @@ pub enum BiomeCommand {
         /// Apply safe fixes and unsafe fixes, formatting and import sorting
         #[bpaf(long("apply-unsafe"), switch)]
         apply_unsafe: bool,
-        ///
+        /// Fixes lint errors safely
+        #[bpaf(long("fix"))]
+        fix: bool,
+        /// Alias for `--fix`, fixes lint errors safely
         #[bpaf(long("write"), switch)]
         write: bool,
-        ///
-        #[bpaf(long("fix"), switch)]
-        fix: bool,
-        ///
+        /// Fixes lint errors unsafely when used with `--fix` or `--write`
         #[bpaf(long("unsafe"), switch)]
-        r#unsafe: bool,
+        unsafe_: bool,
 
         #[bpaf(external(partial_linter_configuration), hide_usage, optional)]
         linter_configuration: Option<PartialLinterConfiguration>,

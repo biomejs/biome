@@ -44,7 +44,7 @@ pub(crate) fn lint(session: CliSession, payload: LintCommandPayload) -> Result<(
         apply_unsafe,
         write,
         fix,
-        unsafe_: r#unsafe,
+        unsafe_,
         cli_options,
         mut linter_configuration,
         mut paths,
@@ -63,7 +63,7 @@ pub(crate) fn lint(session: CliSession, payload: LintCommandPayload) -> Result<(
         apply_unsafe,
         write,
         fix,
-        unsafe_: r#unsafe,
+        unsafe_,
     })?;
 
     let loaded_configuration =
