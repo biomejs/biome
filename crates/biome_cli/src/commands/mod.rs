@@ -656,21 +656,21 @@ fn check_fix_incompatible_arguments(options: FixFileModeOptions) -> Result<(), C
     } = options;
     if apply && apply_unsafe {
         return Err(CliDiagnostic::incompatible_arguments(
-            "apply",
-            "apply_unsafe",
+            "--apply",
+            "--apply-unsafe",
         ));
     } else if apply_unsafe && unsafe_ {
         return Err(CliDiagnostic::incompatible_arguments(
-            "apply_unsafe",
-            "unsafe",
+            "--apply-unsafe",
+            "--unsafe",
         ));
     } else if apply_unsafe && (fix || write) {
         return Err(CliDiagnostic::incompatible_arguments(
-            "apply_unsafe",
-            if fix { "fix" } else { "write" },
+            "--apply-unsafe",
+            if fix { "--fix" } else { "--write" },
         ));
     } else if write && fix {
-        return Err(CliDiagnostic::incompatible_arguments("write", "fix"));
+        return Err(CliDiagnostic::incompatible_arguments("--write", "--fix"));
     }
     Ok(())
 }
