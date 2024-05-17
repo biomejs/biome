@@ -258,6 +258,9 @@ If Biome can't find the configuration, it will attempt to use the current workin
 	 */
 	useIgnoreFile?: boolean;
 }
+/**
+ * Options that changes how the CSS formatter behaves
+ */
 export interface PartialCssFormatter {
 	/**
 	 * Control the formatter for CSS (and its super languages) files.
@@ -284,6 +287,9 @@ export interface PartialCssFormatter {
 	 */
 	quoteStyle?: QuoteStyle;
 }
+/**
+ * Options that changes how the CSS linter behaves
+ */
 export interface PartialCssLinter {
 	/**
 	 * Control the linter for CSS (and its super languages) files.

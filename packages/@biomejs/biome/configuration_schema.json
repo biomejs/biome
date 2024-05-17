@@ -880,6 +880,7 @@
 			"additionalProperties": false
 		},
 		"CssFormatter": {
+			"description": "Options that changes how the CSS formatter behaves",
 			"type": "object",
 			"properties": {
 				"enabled": {
@@ -915,6 +916,7 @@
 			"additionalProperties": false
 		},
 		"CssLinter": {
+			"description": "Options that changes how the CSS linter behaves",
 			"type": "object",
 			"properties": {
 				"enabled": {
