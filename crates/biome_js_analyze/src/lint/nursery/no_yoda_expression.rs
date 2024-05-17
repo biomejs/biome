@@ -184,12 +184,12 @@ impl Rule for NoYodaExpression {
                     mutation.replace_node_discard_trivia(node.clone(), binary_expression);
                 }
 
-                Some(JsRuleAction {
-                    category: ActionCategory::QuickFix,
-                    applicability: Applicability::Always,
-                    message: markup! { "Flip the operators of the expression." }.to_owned(),
+                Some(JsRuleAction::new(
+                    ActionCategory::QuickFix,
+                    Applicability::Always,
+                    markup! { "Flip the operators of the expression." }.to_owned(),
                     mutation,
-                })
+                ))
             }
             _ => None,
         }
