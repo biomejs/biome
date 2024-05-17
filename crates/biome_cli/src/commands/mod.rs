@@ -91,7 +91,7 @@ pub enum BiomeCommand {
         #[bpaf(long("write"), switch)]
         write: bool,
 
-        /// Fixes lint errors, formatting and import sorting unsafely when used with `--fix` or `--write`
+        /// Allow to do unsafe fixes, should be used with `--fix` or `--write`
         #[bpaf(long("unsafe"), switch)]
         unsafe_: bool,
 
@@ -163,7 +163,7 @@ pub enum BiomeCommand {
         #[bpaf(long("write"), switch)]
         write: bool,
 
-        /// Fixes lint errors unsafely when used with `--fix` or `--write`
+        /// Allow to do unsafe fixes, should be used with `--fix` or `--write`
         #[bpaf(long("unsafe"), switch)]
         unsafe_: bool,
 
