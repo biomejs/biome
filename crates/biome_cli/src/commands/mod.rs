@@ -76,10 +76,10 @@ pub enum BiomeCommand {
     /// Runs formatter, linter and import sorting to the requested files.
     #[bpaf(command)]
     Check {
-        /// Apply safe fixes, formatting and import sorting (deprecated, use `--fix`)
+        /// Apply safe fixes, formatting and import sorting
         #[bpaf(long("apply"), switch, hide_usage)]
         apply: bool,
-        /// Apply safe fixes and unsafe fixes, formatting and import sorting (deprecated, use `--fix --unsafe`)
+        /// Apply safe fixes and unsafe fixes, formatting and import sorting
         #[bpaf(long("apply-unsafe"), switch, hide_usage)]
         apply_unsafe: bool,
 
@@ -148,10 +148,10 @@ pub enum BiomeCommand {
     /// Run various checks on a set of files.
     #[bpaf(command)]
     Lint {
-        /// Apply safe fixes, formatting and import sorting (deprecated, use `--fix`)
+        /// Apply safe fixes, formatting and import sorting
         #[bpaf(long("apply"), switch, hide_usage)]
         apply: bool,
-        /// Apply safe fixes and unsafe fixes, formatting and import sorting (deprecated, use `--fix --unsafe`)
+        /// Apply safe fixes and unsafe fixes, formatting and import sorting
         #[bpaf(long("apply-unsafe"), switch, hide_usage)]
         apply_unsafe: bool,
 

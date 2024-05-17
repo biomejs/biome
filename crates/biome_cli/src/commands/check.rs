@@ -65,21 +65,6 @@ pub(crate) fn check(
     } = payload;
     setup_cli_subscriber(cli_options.log_level, cli_options.log_kind);
 
-    if apply || apply_unsafe {
-        let console = &mut *session.app.console;
-        let (deprecated, alternative) = if apply {
-            ("--apply", "--fix")
-        } else {
-            ("--apply-unsafe", "--fix --unsafe")
-        };
-        let diagnostic = DeprecatedArgument::new(markup! {
-            "The argument "<Emphasis>{deprecated}</Emphasis>" is deprecated, it will be removed in the next major release. Use "<Emphasis>{alternative}</Emphasis>" instead."
-        });
-        console.error(markup! {
-            {PrintDiagnostic::simple(&diagnostic)}
-        });
-    }
-
     let fix_file_mode = determine_fix_file_mode(FixFileModeOptions {
         apply,
         apply_unsafe,
