@@ -82,6 +82,9 @@ impl<'app> CliSession<'app> {
             BiomeCommand::Check {
                 apply,
                 apply_unsafe,
+                write,
+                fix,
+                unsafe_,
                 cli_options,
                 configuration,
                 paths,
@@ -97,6 +100,9 @@ impl<'app> CliSession<'app> {
                 CheckCommandPayload {
                     apply_unsafe,
                     apply,
+                    write,
+                    fix,
+                    unsafe_,
                     cli_options,
                     configuration,
                     paths,

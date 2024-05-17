@@ -82,6 +82,19 @@ pub enum BiomeCommand {
         /// Apply safe fixes and unsafe fixes, formatting and import sorting
         #[bpaf(long("apply-unsafe"), switch)]
         apply_unsafe: bool,
+
+        /// Fixes lint errors safely, formatting and import sorting
+        #[bpaf(long("fix"))]
+        fix: bool,
+
+        /// Alias for `--fix`, fixes lint errors safely, formatting and import sorting
+        #[bpaf(long("write"), switch)]
+        write: bool,
+
+        /// Fixes lint errors, formatting and import sorting unsafely when used with `--fix` or `--write`
+        #[bpaf(long("unsafe"), switch)]
+        unsafe_: bool,
+
         /// Allow to enable or disable the formatter check.
         #[bpaf(
             long("formatter-enabled"),
