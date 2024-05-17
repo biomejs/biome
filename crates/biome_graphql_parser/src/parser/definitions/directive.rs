@@ -1,9 +1,7 @@
 use crate::parser::{
     parse_description,
     parse_error::{expected_directive_location, expected_name},
-    parse_name,
-    value::is_at_string,
-    GraphqlParser,
+    parse_name, GraphqlParser,
 };
 use biome_graphql_syntax::{
     GraphqlSyntaxKind::{self, *},
@@ -41,9 +39,6 @@ const DIRECTIVE_LOCATION_SET: TokenSet<GraphqlSyntaxKind> = token_set!(
 
 #[inline]
 pub(crate) fn parse_directive_definition(p: &mut GraphqlParser) -> ParsedSyntax {
-    if !is_at_directive_definition(p) {
-        return Absent;
-    }
     let m = p.start();
 
     // description is optional
@@ -132,9 +127,4 @@ fn parse_directive_location(p: &mut GraphqlParser) -> ParsedSyntax {
     let m = p.start();
     p.bump_ts(DIRECTIVE_LOCATION_SET);
     Present(m.complete(p, GRAPHQL_DIRECTIVE_LOCATION))
-}
-
-#[inline]
-pub(crate) fn is_at_directive_definition(p: &mut GraphqlParser) -> bool {
-    p.at(T![directive]) || (is_at_string(p) && p.nth_at(1, T![directive]))
 }

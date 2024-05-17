@@ -369,16 +369,6 @@ pub fn format_sub_tree(options: CssFormatOptions, root: &CssSyntaxNode) -> Forma
     biome_formatter::format_sub_tree(root, CssFormatLanguage::new(options))
 }
 
-/// Whether the CSS formatter is allowed to be used at all.
-///
-/// Until the formatter is sufficiently ready, we're disabling its use in any
-/// external projects, but we still want to be able to run test suites in the
-/// meantime. This flag controls that visibility, and only returns true for
-/// non-release builds.
-pub const fn can_format_css_yet() -> bool {
-    cfg!(debug_assertions) || cfg!(feature = "format_css")
-}
-
 #[cfg(test)]
 mod tests {
     use crate::context::CssFormatOptions;

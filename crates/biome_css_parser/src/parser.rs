@@ -14,7 +14,7 @@ pub(crate) struct CssParser<'source> {
     state: CssParserState,
 }
 
-#[derive(Default, Debug, Clone)]
+#[derive(Default, Debug, Clone, Copy)]
 pub struct CssParserOptions {
     pub allow_wrong_line_comments: bool,
 }

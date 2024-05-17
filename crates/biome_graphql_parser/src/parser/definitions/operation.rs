@@ -109,14 +109,6 @@ impl ParseRecovery for VariableDefinitionListParseRecovery {
 /// https://spec.graphql.org/October2021/#sec-Language.Operations.Query-shorthand
 #[inline]
 pub(crate) fn parse_operation_definition(p: &mut GraphqlParser) -> ParsedSyntax {
-    if !is_at_operation(p) {
-        return Absent;
-    }
-
-    if is_at_selection_set(p) {
-        return parse_selection_set(p);
-    }
-
     let m = p.start();
     {
         let m = p.start();
@@ -187,7 +179,7 @@ fn parse_field(p: &mut GraphqlParser) -> ParsedSyntax {
     parse_arguments(p).ok();
     DirectiveList.parse_list(p);
 
-    if is_at_selection_set(p) {
+    if p.at(T!['{']) {
         parse_selection_set(p).ok();
     }
     Present(m.complete(p, GRAPHQL_FIELD))
@@ -256,11 +248,6 @@ fn parse_variable_definition(p: &mut GraphqlParser) -> ParsedSyntax {
 }
 
 #[inline]
-pub(crate) fn is_at_operation(p: &GraphqlParser<'_>) -> bool {
-    p.at_ts(OPERATION_TYPE) || is_at_selection_set(p)
-}
-
-#[inline]
 fn is_at_variable_definitions(p: &mut GraphqlParser) -> bool {
     p.at(T!['('])
     // missing opening parenthesis
@@ -269,7 +256,10 @@ fn is_at_variable_definitions(p: &mut GraphqlParser) -> bool {
 
 #[inline]
 fn is_at_variable_definitions_end(p: &GraphqlParser) -> bool {
-    p.at(T![')']) || is_at_directive(p) || is_at_selection_set(p)
+    p.at(T![')'])
+    || is_at_directive(p)
+    // At the start of a selection set
+    || p.at(T!('{'))
 }
 
 #[inline]
@@ -281,14 +271,6 @@ fn is_at_variable_definition(p: &mut GraphqlParser) -> bool {
     || (p.nth_at(1, T![:]) && !p.at(T!['{']))
     // missing entire variable
     || p.at(T![:])
-}
-
-// we must enforce that a selection set starts with a curly brace
-// otherwise it would be too complex to determine if we are at a selection set,
-// especially when we have nested selections
-#[inline]
-fn is_at_selection_set(p: &GraphqlParser) -> bool {
-    p.at(T!['{'])
 }
 
 // Since keywords are valid names, we could only be sure that we are at the end

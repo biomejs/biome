@@ -1,18 +1,23 @@
 use rustc_hash::FxHashMap;
 
-use crate::{Rule, RuleKey};
+use crate::{FixKind, Rule, RuleKey};
 use std::any::{Any, TypeId};
 use std::fmt::Debug;
 use std::path::PathBuf;
 
 /// A convenient new type data structure to store the options that belong to a rule
 #[derive(Debug)]
-pub struct RuleOptions((TypeId, Box<dyn Any>));
+pub struct RuleOptions(TypeId, Box<dyn Any>, Option<FixKind>);
 
 impl RuleOptions {
+    /// Creates a new [RuleOptions]
+    pub fn new<O: 'static>(options: O, fix_kind: Option<FixKind>) -> Self {
+        Self(TypeId::of::<O>(), Box::new(options), fix_kind)
+    }
+
     /// It returns the deserialized rule option
     pub fn value<O: 'static>(&self) -> &O {
-        let (type_id, value) = &self.0;
+        let RuleOptions(type_id, value, _) = &self;
         let current_id = TypeId::of::<O>();
         debug_assert_eq!(type_id, &current_id);
         // SAFETY: the code should fail when asserting the types.
@@ -21,9 +26,8 @@ impl RuleOptions {
         value.downcast_ref::<O>().unwrap()
     }
 
-    /// Creates a new [RuleOptions]
-    pub fn new<O: 'static>(options: O) -> Self {
-        Self((TypeId::of::<O>(), Box::new(options)))
+    pub fn fix_kind(&self) -> Option<FixKind> {
+        self.2
     }
 }
 
@@ -40,6 +44,10 @@ impl AnalyzerRules {
     /// It retrieves the options of a stored rule, given its name
     pub fn get_rule_options<O: 'static>(&self, rule_key: &RuleKey) -> Option<&O> {
         self.0.get(rule_key).map(|o| o.value::<O>())
+    }
+
+    pub fn get_rule_fix_kind(&self, rule_key: &RuleKey) -> Option<FixKind> {
+        self.0.get(rule_key).and_then(|options| options.fix_kind())
     }
 }
 
@@ -93,6 +101,16 @@ impl AnalyzerOptions {
             .rules
             .get_rule_options::<R::Options>(&RuleKey::rule::<R>())
             .cloned()
+    }
+
+    pub fn rule_fix_kind<R>(&self) -> Option<FixKind>
+    where
+        R: Rule + 'static,
+        R::Options: Clone,
+    {
+        self.configuration
+            .rules
+            .get_rule_fix_kind(&RuleKey::rule::<R>())
     }
 
     pub fn preferred_quote(&self) -> &PreferredQuote {

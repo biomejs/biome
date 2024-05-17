@@ -74,8 +74,7 @@ regex                = { workspace = true }
 tokio                = { workspace = true, features = ["io-util"] }
 
 [features]
-docgen     = ["bpaf/docgen"]
-format_css = ["biome_css_formatter/format_css"]
+docgen = ["bpaf/docgen"]
 
 [lints]
 workspace = true

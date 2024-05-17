@@ -1,18 +1,25 @@
-use super::{ExtensionHandler, ParseResult};
+use super::{ExtensionHandler, LintParams, LintResults, ParseResult};
+use crate::configuration::to_analyzer_rules;
 use crate::file_handlers::DebugCapabilities;
 use crate::file_handlers::{
     AnalyzerCapabilities, Capabilities, FormatterCapabilities, ParserCapabilities,
 };
 use crate::settings::{
-    FormatSettings, LanguageListSettings, LanguageSettings, OverrideSettings, ServiceLanguage,
-    WorkspaceSettingsHandle,
+    FormatSettings, LanguageListSettings, LanguageSettings, LinterSettings, OverrideSettings,
+    ServiceLanguage, Settings, WorkspaceSettingsHandle,
 };
 use crate::workspace::{DocumentFileSource, GetSyntaxTreeResult, OrganizeImportsResult};
 use crate::WorkspaceError;
+use biome_analyze::options::PreferredQuote;
+use biome_analyze::{
+    AnalysisFilter, AnalyzerConfiguration, AnalyzerOptions, ControlFlow, Never, RuleCategories,
+};
+use biome_css_analyze::analyze;
 use biome_css_formatter::context::CssFormatOptions;
-use biome_css_formatter::{can_format_css_yet, format_node};
+use biome_css_formatter::format_node;
 use biome_css_parser::CssParserOptions;
 use biome_css_syntax::{CssLanguage, CssRoot, CssSyntaxNode};
+use biome_diagnostics::{category, Diagnostic, DiagnosticExt, Severity};
 use biome_formatter::{
     FormatError, IndentStyle, IndentWidth, LineEnding, LineWidth, Printed, QuoteStyle,
 };
@@ -20,8 +27,9 @@ use biome_fs::BiomePath;
 use biome_parser::AnyParse;
 use biome_rowan::NodeCache;
 use biome_rowan::{TextRange, TextSize, TokenAtOffset};
+use tracing::{debug_span, info};
 
-#[derive(Debug, Clone, Default, serde::Serialize, serde::Deserialize)]
+#[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub struct CssFormatterSettings {
     pub line_ending: Option<LineEnding>,
@@ -32,6 +40,34 @@ pub struct CssFormatterSettings {
     pub enabled: Option<bool>,
 }
 
+impl Default for CssFormatterSettings {
+    fn default() -> Self {
+        Self {
+            enabled: Some(false),
+            indent_style: Default::default(),
+            indent_width: Default::default(),
+            line_ending: Default::default(),
+            line_width: Default::default(),
+            quote_style: Default::default(),
+        }
+    }
+}
+
+#[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+pub struct CssLinterSettings {
+    pub enabled: Option<bool>,
+}
+
+// NOTE: we want to make the linter opt-in for now
+impl Default for CssLinterSettings {
+    fn default() -> Self {
+        Self {
+            enabled: Some(false),
+        }
+    }
+}
+
 #[derive(Debug, Clone, Default, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub struct CssParserSettings {
@@ -40,7 +76,7 @@ pub struct CssParserSettings {
 
 impl ServiceLanguage for CssLanguage {
     type FormatterSettings = CssFormatterSettings;
-    type LinterSettings = ();
+    type LinterSettings = CssLinterSettings;
     type OrganizeImportsSettings = ();
     type FormatOptions = CssFormatOptions;
     type ParserSettings = CssParserSettings;
@@ -73,7 +109,7 @@ impl ServiceLanguage for CssLanguage {
             global.indent_width.unwrap_or_default()
         };
 
-        overrides.override_css_format_options(
+        overrides.to_override_css_format_options(
             path,
             CssFormatOptions::new(
                 document_file_source
@@ -85,6 +121,41 @@ impl ServiceLanguage for CssLanguage {
             .with_line_width(line_width)
             .with_quote_style(language.quote_style.unwrap_or_default()),
         )
+    }
+
+    fn resolve_analyzer_options(
+        global: &Settings,
+        _linter: &LinterSettings,
+        _overrides: &OverrideSettings,
+        _language: &Self::LinterSettings,
+        file_path: &BiomePath,
+        _file_source: &DocumentFileSource,
+    ) -> AnalyzerOptions {
+        let preferred_quote = global
+            .languages
+            .css
+            .formatter
+            .quote_style
+            .map(|quote_style: QuoteStyle| {
+                if quote_style == QuoteStyle::Single {
+                    PreferredQuote::Single
+                } else {
+                    PreferredQuote::Double
+                }
+            })
+            .unwrap_or_default();
+
+        let configuration = AnalyzerConfiguration {
+            rules: to_analyzer_rules(global, file_path.as_path()),
+            globals: vec![],
+            preferred_quote,
+            jsx_runtime: None,
+        };
+
+        AnalyzerOptions {
+            configuration,
+            file_path: file_path.to_path_buf(),
+        }
     }
 }
 
@@ -101,29 +172,16 @@ impl ExtensionHandler for CssFileHandler {
                 debug_formatter_ir: Some(debug_formatter_ir),
             },
             analyzer: AnalyzerCapabilities {
-                lint: None,
+                lint: Some(lint),
                 code_actions: None,
                 rename: None,
                 fix_all: None,
                 organize_imports: Some(organize_imports),
             },
-            // TODO(faulty): Once the CSS formatter is sufficiently stable, we
-            // will unhide its capabilities from services. But in the meantime,
-            // we don't want to give the illusion that CSS is supported. Adding
-            // the capabilities at all is necessary to support snapshot tests,
-            // though, so it needs to exist here when in development.
-            formatter: if can_format_css_yet() {
-                FormatterCapabilities {
-                    format: Some(format),
-                    format_range: Some(format_range),
-                    format_on_type: Some(format_on_type),
-                }
-            } else {
-                FormatterCapabilities {
-                    format: None,
-                    format_range: None,
-                    format_on_type: None,
-                }
+            formatter: FormatterCapabilities {
+                format: Some(format),
+                format_range: Some(format_range),
+                format_on_type: Some(format_on_type),
             },
         }
     }
@@ -138,12 +196,12 @@ fn parse(
 ) -> ParseResult {
     let parser = &settings.settings().languages.css.parser;
     let overrides = &settings.settings().override_settings;
-    let options: CssParserOptions =
-        overrides
-            .as_css_parser_options(biome_path)
-            .unwrap_or(CssParserOptions {
-                allow_wrong_line_comments: parser.allow_wrong_line_comments,
-            });
+    let options: CssParserOptions = overrides.to_override_css_parser_options(
+        biome_path,
+        CssParserOptions {
+            allow_wrong_line_comments: parser.allow_wrong_line_comments,
+        },
+    );
     let parse = biome_css_parser::parse_css_with_cache(text, cache, options);
     let root = parse.syntax();
     let diagnostics = parse.into_diagnostics();
@@ -250,6 +308,98 @@ fn format_on_type(
 
     let printed = biome_css_formatter::format_sub_tree(options, &root_node)?;
     Ok(printed)
+}
+
+fn lint(params: LintParams) -> LintResults {
+    debug_span!("Linting JavaScript file", path =? params.path, language =? params.language)
+        .in_scope(move || {
+            let workspace_settings = &params.settings;
+            let analyzer_options =
+                workspace_settings.analyzer_options::<CssLanguage>(params.path, &params.language);
+            let settings = workspace_settings.settings();
+            let tree = params.parse.tree();
+            let mut diagnostics = params.parse.into_diagnostics();
+
+            // Compute final rules (taking `overrides` into account)
+            let rules = settings.as_rules(params.path.as_path());
+            let rule_filter_list = rules
+                .as_ref()
+                .map(|rules| rules.as_enabled_rules())
+                .unwrap_or_default()
+                .into_iter()
+                .collect::<Vec<_>>();
+
+            let mut filter = AnalysisFilter::from_enabled_rules(Some(rule_filter_list.as_slice()));
+            filter.categories = params.categories;
+
+            let mut diagnostic_count = diagnostics.len() as u32;
+            let mut errors = diagnostics
+                .iter()
+                .filter(|diag| diag.severity() <= Severity::Error)
+                .count();
+
+            let has_lint = filter.categories.contains(RuleCategories::LINT);
+
+            info!("Analyze file {}", params.path.display());
+            let (_, analyze_diagnostics) = analyze(&tree, filter, &analyzer_options, |signal| {
+                if let Some(mut diagnostic) = signal.diagnostic() {
+                    // Do not report unused suppression comment diagnostics if this is a syntax-only analyzer pass
+                    if !has_lint && diagnostic.category() == Some(category!("suppressions/unused"))
+                    {
+                        return ControlFlow::<Never>::Continue(());
+                    }
+
+                    diagnostic_count += 1;
+
+                    // We do now check if the severity of the diagnostics should be changed.
+                    // The configuration allows to change the severity of the diagnostics emitted by rules.
+                    let severity = diagnostic
+                        .category()
+                        .filter(|category| category.name().starts_with("lint/"))
+                        .map_or_else(
+                            || diagnostic.severity(),
+                            |category| {
+                                rules
+                                    .as_ref()
+                                    .and_then(|rules| rules.get_severity_from_code(category))
+                                    .unwrap_or(Severity::Warning)
+                            },
+                        );
+
+                    if severity >= Severity::Error {
+                        errors += 1;
+                    }
+
+                    if diagnostic_count <= params.max_diagnostics {
+                        for action in signal.actions() {
+                            if !action.is_suppression() {
+                                diagnostic = diagnostic.add_code_suggestion(action.into());
+                            }
+                        }
+
+                        let error = diagnostic.with_severity(severity);
+
+                        diagnostics.push(biome_diagnostics::serde::Diagnostic::new(error));
+                    }
+                }
+
+                ControlFlow::<Never>::Continue(())
+            });
+
+            diagnostics.extend(
+                analyze_diagnostics
+                    .into_iter()
+                    .map(biome_diagnostics::serde::Diagnostic::new)
+                    .collect::<Vec<_>>(),
+            );
+            let skipped_diagnostics = diagnostic_count.saturating_sub(diagnostics.len() as u32);
+
+            LintResults {
+                diagnostics,
+                errors,
+                skipped_diagnostics,
+            }
+        })
 }
 
 fn organize_imports(parse: AnyParse) -> Result<OrganizeImportsResult, WorkspaceError> {

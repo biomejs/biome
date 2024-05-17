@@ -146,6 +146,9 @@ We use [Polar.sh](https://polar.sh/biomejs) to up-vote and promote specific feat
       <td align="center" valign="middle">
         <a href="https://vital.io/" target="_blank"><img src="https://avatars.githubusercontent.com/u/25357309?s=200" width="80"></a>
       </td>
+      <td align="center" valign="middle">
+        <a href="https://coderabbit.ai/" target="_blank"><img src="https://avatars.githubusercontent.com/u/132028505?s=200&v=4" width="80"></a>
+      </td>
     </tr>
   </tbody>
 </table>

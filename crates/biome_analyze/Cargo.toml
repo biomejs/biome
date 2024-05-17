@@ -13,18 +13,20 @@ version              = "0.5.7"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-biome_console     = { workspace = true }
-biome_diagnostics = { workspace = true }
-biome_rowan       = { workspace = true }
-bitflags          = { workspace = true }
-rustc-hash        = { workspace = true }
-schemars          = { workspace = true, optional = true }
-serde             = { workspace = true, features = ["derive"] }
-tracing           = { workspace = true }
+biome_console            = { workspace = true }
+biome_deserialize        = { workspace = true, optional = true }
+biome_deserialize_macros = { workspace = true, optional = true }
+biome_diagnostics        = { workspace = true }
+biome_rowan              = { workspace = true }
+bitflags                 = { workspace = true }
+rustc-hash               = { workspace = true }
+schemars                 = { workspace = true, optional = true }
+serde                    = { workspace = true, features = ["derive"], optional = true }
+tracing                  = { workspace = true }
 
 
 [features]
-serde = ["schemars"]
+serde = ["dep:serde", "dep:schemars", "dep:biome_deserialize", "dep:biome_deserialize_macros"]
 
 [lints]
 workspace = true

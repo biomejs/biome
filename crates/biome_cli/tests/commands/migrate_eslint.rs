@@ -359,7 +359,8 @@ fn migrate_eslint_config_packagejson() {
             "rules": {
                 "eqeqeq": "warn"
             }
-        }
+        },
+        "eslintIgnore": ["/dist", "test", "!test/x/**"]
     }"#;
 
     let mut fs = MemoryFileSystem::default();
@@ -450,7 +451,7 @@ test/main.js
 fn migrate_eslintignore_and_ignore_patterns() {
     let biomejson = r#"{ "linter": { "enabled": true } }"#;
     let eslintrc = r#"{
-        "ignorePatterns": ["**/*.spec.js"],
+        "ignorePatterns": ["**/*.spec.js", "!x.spec.js", "/dist"],
         "rules": { "eqeqeq": "off" }
     }"#;
     let eslintignore = r#"*.test.js"#;

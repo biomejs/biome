@@ -268,7 +268,7 @@ mod tests {
 
         options.configuration.rules.push_rule(
             RuleKey::new("nursery", "useHookAtTopLevel"),
-            RuleOptions::new(HooksOptions { hooks: vec![hook] }),
+            RuleOptions::new(HooksOptions { hooks: vec![hook] }, None),
         );
 
         analyze(

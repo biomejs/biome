@@ -1,5 +1,5 @@
 use biome_analyze::{
-    GroupCategory, Queryable, RegistryVisitor, Rule, RuleCategory, RuleGroup, RuleMetadata,
+    FixKind, GroupCategory, Queryable, RegistryVisitor, Rule, RuleCategory, RuleGroup, RuleMetadata,
 };
 use biome_css_syntax::CssLanguage;
 use biome_js_syntax::JsLanguage;
@@ -131,7 +131,7 @@ pub(crate) fn generate_rules_configuration(mode: Mode) -> Result<()> {
     }
 
     let groups = quote! {
-        use crate::RuleConfiguration;
+        use crate::{RuleConfiguration, RuleFixConfiguration};
         use biome_analyze::{options::RuleOptions, RuleFilter};
         use biome_console::markup;
         use biome_deserialize::{DeserializableValidator, DeserializationDiagnostic};
@@ -420,7 +420,15 @@ fn generate_struct(group: &str, rules: &BTreeMap<&'static str, RuleMetadata>) ->
         };
 
         let rule_position = Literal::u8_unsuffixed(index as u8);
-        let rule_identifier = Ident::new(&Case::Snake.convert(rule), Span::call_site());
+        let rule_identifier = quote::format_ident!("{}", Case::Snake.convert(rule));
+        let rule_config_type = quote::format_ident!(
+            "{}",
+            if metadata.fix_kind != FixKind::None {
+                "RuleFixConfiguration"
+            } else {
+                "RuleConfiguration"
+            }
+        );
         let rule_name = Ident::new(&to_capitalized(rule), Span::call_site());
         if metadata.recommended {
             lines_recommended_rule_as_filter.push(quote! {
@@ -440,7 +448,7 @@ fn generate_struct(group: &str, rules: &BTreeMap<&'static str, RuleMetadata>) ->
         schema_lines_rules.push(quote! {
             #[doc = #summary]
             #[serde(skip_serializing_if = "Option::is_none")]
-            pub #rule_identifier: Option<RuleConfiguration<#rule_name>>
+            pub #rule_identifier: Option<#rule_config_type<#rule_name>>
         });
 
         rule_enabled_check_line.push(quote! {

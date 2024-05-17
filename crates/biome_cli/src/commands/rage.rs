@@ -256,6 +256,18 @@ impl Display for RageConfiguration<'_, '_> {
                             {KeyValuePair("Line width", markup!({DebugDisplayOption(json_formatter_configuration.line_width.map(|lw| lw.get()))}))}
                             {KeyValuePair("Trailing Commas", markup!({DebugDisplayOption(json_formatter_configuration.trailing_commas)}))}
                         ).fmt(fmt)?;
+
+                        let css_formatter_configuration =
+                            configuration.get_css_formatter_configuration();
+                        markup! (
+                            {Section("CSS Formatter")}
+                            {KeyValuePair("Enabled", markup!({DebugDisplay(css_formatter_configuration.enabled)}))}
+                            {KeyValuePair("Indent style", markup!({DebugDisplay(css_formatter_configuration.indent_style)}))}
+                            {KeyValuePair("Indent width", markup!({DebugDisplay(css_formatter_configuration.indent_width)}))}
+                            {KeyValuePair("Line ending", markup!({DebugDisplay(css_formatter_configuration.line_ending)}))}
+                            {KeyValuePair("Line width", markup!({DebugDisplay(css_formatter_configuration.line_width)}))}
+                            {KeyValuePair("Quote style", markup!({DebugDisplay(css_formatter_configuration.quote_style)}))}
+                        ).fmt(fmt)?;
                     }
 
                     // Print linter configuration if --linter option is true
@@ -263,8 +275,8 @@ impl Display for RageConfiguration<'_, '_> {
                         let linter_configuration = configuration.get_linter_rules();
                         markup! (
                             {Section("Linter")}
-                            {KeyValuePair("Recommended", markup!({DebugDisplay(linter_configuration.recommended.unwrap_or(false))}))}
-                            {KeyValuePair("All", markup!({DebugDisplay(linter_configuration.all.unwrap_or(false))}))}
+                            {KeyValuePair("Recommended", markup!({DebugDisplay(linter_configuration.recommended.unwrap_or_default())}))}
+                            {KeyValuePair("All", markup!({DebugDisplay(linter_configuration.all.unwrap_or_default())}))}
                             {RageConfigurationLintRules("Rules",linter_configuration)}
                         ).fmt(fmt)?;
                     }

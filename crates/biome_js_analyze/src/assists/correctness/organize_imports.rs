@@ -4,7 +4,6 @@ use biome_analyze::{
     context::RuleContext, declare_rule, ActionCategory, Ast, FixKind, Rule, SourceActionKind,
 };
 use biome_console::markup;
-use biome_diagnostics::Applicability;
 use biome_js_factory::make;
 use biome_js_syntax::{
     AnyJsImportClause, AnyJsModuleItem, AnyJsNamedImportSpecifier, JsImport, JsLanguage, JsModule,
@@ -262,7 +261,7 @@ impl Rule for OrganizeImports {
 
         Some(JsRuleAction::new(
             ActionCategory::Source(SourceActionKind::OrganizeImports),
-            Applicability::MaybeIncorrect,
+            ctx.metadata().to_applicability(),
             markup! { "Organize Imports (Biome)" },
             mutation,
         ))

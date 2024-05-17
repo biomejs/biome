@@ -367,6 +367,18 @@ where
     fn actions(&self) -> AnalyzerActionIter<RuleLanguage<R>> {
         let globals = self.options.globals();
 
+        let configured_applicability = if let Some(fix_kind) = self.options.rule_fix_kind::<R>() {
+            match fix_kind {
+                crate::FixKind::None => {
+                    // The action is disabled
+                    return AnalyzerActionIter::new(vec![]);
+                }
+                crate::FixKind::Safe => Some(Applicability::Always),
+                crate::FixKind::Unsafe => Some(Applicability::MaybeIncorrect),
+            }
+        } else {
+            None
+        };
         let options = self.options.rule_options::<R>().unwrap_or_default();
         let ctx = RuleContext::new(
             &self.query_result,
@@ -384,8 +396,8 @@ where
             if let Some(action) = R::action(&ctx, &self.state) {
                 actions.push(AnalyzerAction {
                     rule_name: Some((<R::Group as RuleGroup>::NAME, R::METADATA.name)),
+                    applicability: configured_applicability.unwrap_or(action.applicability()),
                     category: action.category,
-                    applicability: action.applicability,
                     mutation: action.mutation,
                     message: action.message,
                 });

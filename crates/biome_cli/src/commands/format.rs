@@ -51,7 +51,7 @@ pub(crate) fn format(
         files_configuration,
         write,
         mut json_formatter,
-        mut css_formatter,
+        css_formatter,
         since,
         staged,
         changed,
@@ -130,27 +130,8 @@ pub(crate) fn format(
             }
         }
     }
-    // TODO: remove in biome 2.0
-    if let Some(css_formatter) = css_formatter.as_mut() {
-        if let Some(indent_size) = css_formatter.indent_size {
-            let diagnostic = DeprecatedArgument::new(markup! {
-                "The argument "<Emphasis>"--css-formatter-indent-size"</Emphasis>" is deprecated, it will be removed in the next major release. Use "<Emphasis>"--css-formatter-indent-width"</Emphasis>" instead."
-            });
-            console.error(markup! {
-                {PrintDiagnostic::simple(&diagnostic)}
-            });
 
-            if css_formatter.indent_width.is_none() {
-                css_formatter.indent_width = Some(indent_size);
-            }
-        }
-    }
-
-    if css_formatter.is_some() {
-        let css = configuration.css.get_or_insert_with(Default::default);
-        css.formatter.merge_with(css_formatter);
-    }
-    configuration.files.merge_with(files_configuration);
+    // merge formatter options
     if !configuration
         .formatter
         .as_ref()
@@ -163,6 +144,10 @@ pub(crate) fn format(
 
         formatter.enabled = Some(true);
     }
+    if css_formatter.is_some() {
+        let css = configuration.css.get_or_insert_with(Default::default);
+        css.formatter.merge_with(css_formatter);
+    }
     if javascript_formatter.is_some() {
         let javascript = configuration
             .javascript
@@ -173,6 +158,8 @@ pub(crate) fn format(
         let json = configuration.json.get_or_insert_with(Default::default);
         json.formatter.merge_with(json_formatter);
     }
+
+    configuration.files.merge_with(files_configuration);
     configuration.vcs.merge_with(vcs_configuration);
 
     // check if support of git ignore files is enabled

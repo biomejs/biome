@@ -65,13 +65,5 @@ internalError/fs  DEPRECATED  ━━━━━━━━━━━━━━━━�
 ```
 
 ```block
-internalError/fs  DEPRECATED  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! The argument --css-formatter-indent-size is deprecated, it will be removed in the next major release. Use --css-formatter-indent-width instead.
-  
-
-```
-
-```block
 Formatted 3 files in <TIME>. Fixed 3 files.
 ```

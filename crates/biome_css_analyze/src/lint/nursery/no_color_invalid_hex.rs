@@ -38,11 +38,7 @@ impl Rule for NoColorInvalidHex {
     type Signals = Option<Self::State>;
     type Options = ();
 
-    fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
-        let node = ctx.query();
-        if node.items().into_iter().next().is_none() {
-            return Some(node.clone());
-        }
+    fn run(_ctx: &RuleContext<Self>) -> Option<Self::State> {
         None
     }
 

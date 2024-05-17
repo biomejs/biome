@@ -1,4 +1,4 @@
-use biome_analyze::RuleMetadata;
+use biome_analyze::{FixKind, RuleMetadata};
 use biome_console::{markup, ConsoleExt};
 use biome_service::documentation::Doc;
 
@@ -10,14 +10,17 @@ fn print_rule(session: CliSession, metadata: &RuleMetadata) {
         "# "{metadata.name}"\n"
     });
 
-    if let Some(kind) = &metadata.fix_kind {
-        session.app.console.log(markup! {
-            "Fix is "{kind}".\n"
-        });
-    } else {
-        session.app.console.log(markup! {
-            "No fix available.\n"
-        });
+    match metadata.fix_kind {
+        FixKind::None => {
+            session.app.console.log(markup! {
+                "No fix available.\n"
+            });
+        }
+        kind => {
+            session.app.console.log(markup! {
+                "Fix is "{kind}".\n"
+            });
+        }
     }
 
     let docs = metadata

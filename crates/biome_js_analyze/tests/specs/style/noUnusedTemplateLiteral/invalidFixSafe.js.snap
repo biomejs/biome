@@ -1,0 +1,25 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidFixSafe.js
+---
+# Input
+```jsx
+var foo = `bar`;
+```
+
+# Diagnostics
+```
+invalidFixSafe.js:1:11 lint/style/noUnusedTemplateLiteral  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not use template literals if interpolation and special-character handling are not needed.
+  
+  > 1 │ var foo = `bar`;
+      │           ^^^^^
+  
+  i Safe fix: Replace with string literal
+  
+  - var·foo·=·`bar`;
+  + var·foo·=·"bar";
+  
+
+```

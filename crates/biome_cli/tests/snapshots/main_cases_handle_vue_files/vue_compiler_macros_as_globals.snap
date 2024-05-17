@@ -1,0 +1,63 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: content
+---
+## `file.vue`
+
+```vue
+<script setup lang="ts">
+// These are magic vue macros, and should be treated as globals.
+defineProps(['foo'])
+defineEmits(['change', 'delete'])
+defineModel()
+
+const a = 1
+defineExpose({
+		a,
+})
+
+defineOptions({
+		inheritAttrs: false,
+})
+
+const slots = defineSlots<{
+		default(props: { msg: string }): any
+}>()
+
+</script>
+<template></template>
+```
+
+# Termination Message
+
+```block
+lint ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Some errors were emitted while running checks.
+  
+
+
+```
+
+# Emitted Messages
+
+```block
+file.vue:16:36 lint/suspicious/noExplicitAny ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected any. Specify a different type.
+  
+    15 │ const slots = defineSlots<{
+  > 16 │ 		default(props: { msg: string }): any
+       │ 		                                 ^^^
+    17 │ }>()
+    18 │ 
+  
+  i any disables many type checking rules. Its use should be avoided.
+  
+
+```
+
+```block
+Checked 1 file in <TIME>. No fixes needed.
+Found 1 error.
+```

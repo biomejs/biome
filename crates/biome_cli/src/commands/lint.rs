@@ -5,6 +5,9 @@ use crate::commands::{
 use crate::{
     execute_mode, setup_cli_subscriber, CliDiagnostic, CliSession, Execution, TraversalMode,
 };
+use biome_configuration::css::PartialCssLinter;
+use biome_configuration::javascript::PartialJavascriptLinter;
+use biome_configuration::json::PartialJsonLinter;
 use biome_configuration::linter::RuleSelector;
 use biome_configuration::vcs::PartialVcsConfiguration;
 use biome_configuration::{
@@ -30,6 +33,9 @@ pub(crate) struct LintCommandPayload {
     pub(crate) staged: bool,
     pub(crate) changed: bool,
     pub(crate) since: Option<String>,
+    pub(crate) javascript_linter: Option<PartialJavascriptLinter>,
+    pub(crate) json_linter: Option<PartialJsonLinter>,
+    pub(crate) css_linter: Option<PartialCssLinter>,
 }
 
 /// Handler for the "lint" command of the Biome CLI
@@ -47,6 +53,9 @@ pub(crate) fn lint(session: CliSession, payload: LintCommandPayload) -> Result<(
         staged,
         changed,
         since,
+        javascript_linter,
+        css_linter,
+        json_linter,
     } = payload;
     setup_cli_subscriber(cli_options.log_level, cli_options.log_kind);
 
@@ -95,6 +104,21 @@ pub(crate) fn lint(session: CliSession, payload: LintCommandPayload) -> Result<(
         vcs: vcs_configuration,
         ..Default::default()
     });
+
+    if css_linter.is_some() {
+        let css = fs_configuration.css.get_or_insert_with(Default::default);
+        css.linter.merge_with(css_linter);
+    }
+    if javascript_linter.is_some() {
+        let javascript = fs_configuration
+            .javascript
+            .get_or_insert_with(Default::default);
+        javascript.linter.merge_with(javascript_linter);
+    }
+    if json_linter.is_some() {
+        let json = fs_configuration.json.get_or_insert_with(Default::default);
+        json.linter.merge_with(json_linter);
+    }
 
     // check if support of git ignore files is enabled
     let vcs_base_path = configuration_path.or(session.app.fs.working_directory());
