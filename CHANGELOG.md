@@ -57,7 +57,7 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
   Contributed by @Conaclos
 
 - Add new command `biome clean`. Use this command to purge all the logs emitted by the Biome daemon. This command is really useful, because the Biome daemon tends
-  log many files and contents during its lifecycle. This means that if your editor is open for hours (or even days), the `biome-logs` folder could become quite heavy. @Contributed by emaitpico
+  log many files and contents during its lifecycle. This means that if your editor is open for hours (or even days), the `biome-logs` folder could become quite heavy. Contributed by @ematipico
 
 - Add support for formatting and linting CSS files from the CLI. These operations are **opt-in** for the time being.
 
