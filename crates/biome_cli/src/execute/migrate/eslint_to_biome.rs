@@ -215,7 +215,6 @@ fn migrate_eslint_rule(
                 group.no_restricted_globals = Some(biome_config::RuleConfiguration::WithOptions(
                     biome_config::RuleWithOptions {
                         level: severity.into(),
-                        fix: None,
                         options: Box::new(no_restricted_globals::RestrictedGlobalsOptions {
                             denied_globals: globals.collect(),
                         }),
@@ -227,13 +226,14 @@ fn migrate_eslint_rule(
             if migrate_eslint_any_rule(rules, &name, conf.severity(), opts, results) {
                 if let eslint_eslint::RuleConf::Option(severity, rule_options) = conf {
                     let group = rules.a11y.get_or_insert_with(Default::default);
-                    group.use_valid_aria_role = Some(biome_config::RuleConfiguration::WithOptions(
-                        biome_config::RuleWithOptions {
-                            level: severity.into(),
-                            fix: None,
-                            options: Box::new((*rule_options).into()),
-                        },
-                    ));
+                    group.use_valid_aria_role =
+                        Some(biome_config::RuleFixConfiguration::WithOptions(
+                            biome_config::RuleWithFixOptions {
+                                level: severity.into(),
+                                fix: None,
+                                options: Box::new((*rule_options).into()),
+                            },
+                        ));
                 }
             }
         }
@@ -242,8 +242,8 @@ fn migrate_eslint_rule(
                 if let eslint_eslint::RuleConf::Option(severity, rule_options) = conf {
                     let group = rules.style.get_or_insert_with(Default::default);
                     group.use_consistent_array_type =
-                        Some(biome_config::RuleConfiguration::WithOptions(
-                            biome_config::RuleWithOptions {
+                        Some(biome_config::RuleFixConfiguration::WithOptions(
+                            biome_config::RuleWithFixOptions {
                                 level: severity.into(),
                                 fix: None,
                                 options: rule_options.into(),
@@ -259,13 +259,14 @@ fn migrate_eslint_rule(
                     conf.into_vec().into_iter().map(|v| *v),
                 );
                 let group = rules.style.get_or_insert_with(Default::default);
-                group.use_naming_convention = Some(biome_config::RuleConfiguration::WithOptions(
-                    biome_config::RuleWithOptions {
-                        level: severity.into(),
-                        fix: None,
-                        options: options.into(),
-                    },
-                ));
+                group.use_naming_convention =
+                    Some(biome_config::RuleFixConfiguration::WithOptions(
+                        biome_config::RuleWithFixOptions {
+                            level: severity.into(),
+                            fix: None,
+                            options: options.into(),
+                        },
+                    ));
             }
         }
         eslint_eslint::Rule::UnicornFilenameCase(conf) => {
@@ -274,7 +275,6 @@ fn migrate_eslint_rule(
                 group.use_filenaming_convention = Some(
                     biome_config::RuleConfiguration::WithOptions(biome_config::RuleWithOptions {
                         level: conf.severity().into(),
-                        fix: None,
                         options: Box::new(conf.option_or_default().into()),
                     }),
                 );
@@ -372,7 +372,7 @@ mod tests {
         );
         assert_eq!(
             linter.rules.unwrap().suspicious.unwrap().no_double_equals,
-            Some(biome_config::RuleConfiguration::Plain(
+            Some(biome_config::RuleFixConfiguration::Plain(
                 biome_config::RulePlainConfiguration::Error
             ))
         );
@@ -393,7 +393,7 @@ mod tests {
                 .suspicious
                 .unwrap()
                 .no_double_equals,
-            Some(biome_config::RuleConfiguration::Plain(
+            Some(biome_config::RuleFixConfiguration::Plain(
                 biome_config::RulePlainConfiguration::Off
             ))
         );

@@ -1,7 +1,7 @@
 //! Generated file, do not edit by hand, see `xtask/codegen`
 
 use super::RulePlainConfiguration;
-use crate::RuleConfiguration;
+use crate::{RuleConfiguration, RuleFixConfiguration};
 use biome_analyze::{options::RuleOptions, RuleFilter};
 use biome_console::markup;
 use biome_css_analyze::options::*;
@@ -511,45 +511,45 @@ pub struct A11y {
     pub all: Option<bool>,
     #[doc = "Enforce that the accessKey attribute is not used on any HTML element."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_access_key: Option<RuleConfiguration<NoAccessKey>>,
+    pub no_access_key: Option<RuleFixConfiguration<NoAccessKey>>,
     #[doc = "Enforce that aria-hidden=\"true\" is not set on focusable elements."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_aria_hidden_on_focusable: Option<RuleConfiguration<NoAriaHiddenOnFocusable>>,
+    pub no_aria_hidden_on_focusable: Option<RuleFixConfiguration<NoAriaHiddenOnFocusable>>,
     #[doc = "Enforce that elements that do not support ARIA roles, states, and properties do not have those attributes."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_aria_unsupported_elements: Option<RuleConfiguration<NoAriaUnsupportedElements>>,
+    pub no_aria_unsupported_elements: Option<RuleFixConfiguration<NoAriaUnsupportedElements>>,
     #[doc = "Enforce that autoFocus prop is not used on elements."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_autofocus: Option<RuleConfiguration<NoAutofocus>>,
+    pub no_autofocus: Option<RuleFixConfiguration<NoAutofocus>>,
     #[doc = "Disallow target=\"_blank\" attribute without rel=\"noreferrer\""]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_blank_target: Option<RuleConfiguration<NoBlankTarget>>,
+    pub no_blank_target: Option<RuleFixConfiguration<NoBlankTarget>>,
     #[doc = "Enforces that no distracting elements are used."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_distracting_elements: Option<RuleConfiguration<NoDistractingElements>>,
+    pub no_distracting_elements: Option<RuleFixConfiguration<NoDistractingElements>>,
     #[doc = "The scope prop should be used only on \\<th> elements."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_header_scope: Option<RuleConfiguration<NoHeaderScope>>,
+    pub no_header_scope: Option<RuleFixConfiguration<NoHeaderScope>>,
     #[doc = "Enforce that non-interactive ARIA roles are not assigned to interactive HTML elements."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_interactive_element_to_noninteractive_role:
-        Option<RuleConfiguration<NoInteractiveElementToNoninteractiveRole>>,
+        Option<RuleFixConfiguration<NoInteractiveElementToNoninteractiveRole>>,
     #[doc = "Enforce that interactive ARIA roles are not assigned to non-interactive HTML elements."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_noninteractive_element_to_interactive_role:
-        Option<RuleConfiguration<NoNoninteractiveElementToInteractiveRole>>,
+        Option<RuleFixConfiguration<NoNoninteractiveElementToInteractiveRole>>,
     #[doc = "Enforce that tabIndex is not assigned to non-interactive HTML elements."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_noninteractive_tabindex: Option<RuleConfiguration<NoNoninteractiveTabindex>>,
+    pub no_noninteractive_tabindex: Option<RuleFixConfiguration<NoNoninteractiveTabindex>>,
     #[doc = "Prevent the usage of positive integers on tabIndex property"]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_positive_tabindex: Option<RuleConfiguration<NoPositiveTabindex>>,
+    pub no_positive_tabindex: Option<RuleFixConfiguration<NoPositiveTabindex>>,
     #[doc = "Enforce img alt prop does not contain the word \"image\", \"picture\", or \"photo\"."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_redundant_alt: Option<RuleConfiguration<NoRedundantAlt>>,
     #[doc = "Enforce explicit role property is not the same as implicit/default role property on an element."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_redundant_roles: Option<RuleConfiguration<NoRedundantRoles>>,
+    pub no_redundant_roles: Option<RuleFixConfiguration<NoRedundantRoles>>,
     #[doc = "Enforces the usage of the title element for the svg element."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_svg_without_title: Option<RuleConfiguration<NoSvgWithoutTitle>>,
@@ -558,11 +558,11 @@ pub struct A11y {
     pub use_alt_text: Option<RuleConfiguration<UseAltText>>,
     #[doc = "Enforce that anchors have content and that the content is accessible to screen readers."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_anchor_content: Option<RuleConfiguration<UseAnchorContent>>,
+    pub use_anchor_content: Option<RuleFixConfiguration<UseAnchorContent>>,
     #[doc = "Enforce that tabIndex is assigned to non-interactive HTML elements with aria-activedescendant."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_aria_activedescendant_with_tabindex:
-        Option<RuleConfiguration<UseAriaActivedescendantWithTabindex>>,
+        Option<RuleFixConfiguration<UseAriaActivedescendantWithTabindex>>,
     #[doc = "Enforce that elements with ARIA roles must have all required ARIA attributes for that role."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_aria_props_for_role: Option<RuleConfiguration<UseAriaPropsForRole>>,
@@ -592,10 +592,10 @@ pub struct A11y {
     pub use_valid_anchor: Option<RuleConfiguration<UseValidAnchor>>,
     #[doc = "Ensures that ARIA properties aria-* are all valid."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_valid_aria_props: Option<RuleConfiguration<UseValidAriaProps>>,
+    pub use_valid_aria_props: Option<RuleFixConfiguration<UseValidAriaProps>>,
     #[doc = "Elements with ARIA roles must use a valid, non-abstract ARIA role."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_valid_aria_role: Option<RuleConfiguration<UseValidAriaRole>>,
+    pub use_valid_aria_role: Option<RuleFixConfiguration<UseValidAriaRole>>,
     #[doc = "Enforce that ARIA state and property values are valid."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_valid_aria_values: Option<RuleConfiguration<UseValidAriaValues>>,
@@ -1395,7 +1395,7 @@ pub struct Complexity {
     pub all: Option<bool>,
     #[doc = "Disallow primitive type aliases and misleading types."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_banned_types: Option<RuleConfiguration<NoBannedTypes>>,
+    pub no_banned_types: Option<RuleFixConfiguration<NoBannedTypes>>,
     #[doc = "Disallow empty type parameters in type aliases and interfaces."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_empty_type_parameters: Option<RuleConfiguration<NoEmptyTypeParameters>>,
@@ -1408,53 +1408,54 @@ pub struct Complexity {
     pub no_excessive_nested_test_suites: Option<RuleConfiguration<NoExcessiveNestedTestSuites>>,
     #[doc = "Disallow unnecessary boolean casts"]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_extra_boolean_cast: Option<RuleConfiguration<NoExtraBooleanCast>>,
+    pub no_extra_boolean_cast: Option<RuleFixConfiguration<NoExtraBooleanCast>>,
     #[doc = "Prefer for...of statement instead of Array.forEach."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_for_each: Option<RuleConfiguration<NoForEach>>,
     #[doc = "Disallow unclear usage of consecutive space characters in regular expression literals"]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_multiple_spaces_in_regular_expression_literals:
-        Option<RuleConfiguration<NoMultipleSpacesInRegularExpressionLiterals>>,
+        Option<RuleFixConfiguration<NoMultipleSpacesInRegularExpressionLiterals>>,
     #[doc = "This rule reports when a class has no non-static members, such as for a class used exclusively as a static namespace."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_static_only_class: Option<RuleConfiguration<NoStaticOnlyClass>>,
     #[doc = "Disallow this and super in static contexts."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_this_in_static: Option<RuleConfiguration<NoThisInStatic>>,
+    pub no_this_in_static: Option<RuleFixConfiguration<NoThisInStatic>>,
     #[doc = "Disallow unnecessary catch clauses."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_useless_catch: Option<RuleConfiguration<NoUselessCatch>>,
     #[doc = "Disallow unnecessary constructors."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_useless_constructor: Option<RuleConfiguration<NoUselessConstructor>>,
+    pub no_useless_constructor: Option<RuleFixConfiguration<NoUselessConstructor>>,
     #[doc = "Disallow empty exports that don't change anything in a module file."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_useless_empty_export: Option<RuleConfiguration<NoUselessEmptyExport>>,
+    pub no_useless_empty_export: Option<RuleFixConfiguration<NoUselessEmptyExport>>,
     #[doc = "Disallow unnecessary fragments"]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_useless_fragments: Option<RuleConfiguration<NoUselessFragments>>,
+    pub no_useless_fragments: Option<RuleFixConfiguration<NoUselessFragments>>,
     #[doc = "Disallow unnecessary labels."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_useless_label: Option<RuleConfiguration<NoUselessLabel>>,
+    pub no_useless_label: Option<RuleFixConfiguration<NoUselessLabel>>,
     #[doc = "Disallow unnecessary nested block statements."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_useless_lone_block_statements: Option<RuleConfiguration<NoUselessLoneBlockStatements>>,
+    pub no_useless_lone_block_statements:
+        Option<RuleFixConfiguration<NoUselessLoneBlockStatements>>,
     #[doc = "Disallow renaming import, export, and destructured assignments to the same name."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_useless_rename: Option<RuleConfiguration<NoUselessRename>>,
+    pub no_useless_rename: Option<RuleFixConfiguration<NoUselessRename>>,
     #[doc = "Disallow useless case in switch statements."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_useless_switch_case: Option<RuleConfiguration<NoUselessSwitchCase>>,
+    pub no_useless_switch_case: Option<RuleFixConfiguration<NoUselessSwitchCase>>,
     #[doc = "Disallow ternary operators when simpler alternatives exist."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_useless_ternary: Option<RuleConfiguration<NoUselessTernary>>,
+    pub no_useless_ternary: Option<RuleFixConfiguration<NoUselessTernary>>,
     #[doc = "Disallow useless this aliasing."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_useless_this_alias: Option<RuleConfiguration<NoUselessThisAlias>>,
+    pub no_useless_this_alias: Option<RuleFixConfiguration<NoUselessThisAlias>>,
     #[doc = "Disallow using any or unknown as type constraint."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_useless_type_constraint: Option<RuleConfiguration<NoUselessTypeConstraint>>,
+    pub no_useless_type_constraint: Option<RuleFixConfiguration<NoUselessTypeConstraint>>,
     #[doc = "Disallow the use of void operators, which is not a familiar operator."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_void: Option<RuleConfiguration<NoVoid>>,
@@ -1463,25 +1464,25 @@ pub struct Complexity {
     pub no_with: Option<RuleConfiguration<NoWith>>,
     #[doc = "Use arrow functions over function expressions."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_arrow_function: Option<RuleConfiguration<UseArrowFunction>>,
+    pub use_arrow_function: Option<RuleFixConfiguration<UseArrowFunction>>,
     #[doc = "Promotes the use of .flatMap() when map().flat() are used together."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_flat_map: Option<RuleConfiguration<UseFlatMap>>,
+    pub use_flat_map: Option<RuleFixConfiguration<UseFlatMap>>,
     #[doc = "Enforce the usage of a literal access to properties over computed property access."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_literal_keys: Option<RuleConfiguration<UseLiteralKeys>>,
+    pub use_literal_keys: Option<RuleFixConfiguration<UseLiteralKeys>>,
     #[doc = "Enforce using concise optional chain instead of chained logical expressions."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_optional_chain: Option<RuleConfiguration<UseOptionalChain>>,
+    pub use_optional_chain: Option<RuleFixConfiguration<UseOptionalChain>>,
     #[doc = "Enforce the use of the regular expression literals instead of the RegExp constructor if possible."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_regex_literals: Option<RuleConfiguration<UseRegexLiterals>>,
+    pub use_regex_literals: Option<RuleFixConfiguration<UseRegexLiterals>>,
     #[doc = "Disallow number literal object member names which are not base10 or uses underscore as separator"]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_simple_number_keys: Option<RuleConfiguration<UseSimpleNumberKeys>>,
+    pub use_simple_number_keys: Option<RuleFixConfiguration<UseSimpleNumberKeys>>,
     #[doc = "Discard redundant terms from logical expressions."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_simplified_logic_expression: Option<RuleConfiguration<UseSimplifiedLogicExpression>>,
+    pub use_simplified_logic_expression: Option<RuleFixConfiguration<UseSimplifiedLogicExpression>>,
 }
 impl DeserializableValidator for Complexity {
     fn validate(
@@ -2256,7 +2257,7 @@ pub struct Correctness {
     pub no_children_prop: Option<RuleConfiguration<NoChildrenProp>>,
     #[doc = "Prevents from having const variables being re-assigned."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_const_assign: Option<RuleConfiguration<NoConstAssign>>,
+    pub no_const_assign: Option<RuleFixConfiguration<NoConstAssign>>,
     #[doc = "Disallow constant expressions in conditions"]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_constant_condition: Option<RuleConfiguration<NoConstantCondition>>,
@@ -2280,16 +2281,16 @@ pub struct Correctness {
     pub no_invalid_constructor_super: Option<RuleConfiguration<NoInvalidConstructorSuper>>,
     #[doc = "Disallow new operators with global non-constructor functions."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_invalid_new_builtin: Option<RuleConfiguration<NoInvalidNewBuiltin>>,
+    pub no_invalid_new_builtin: Option<RuleFixConfiguration<NoInvalidNewBuiltin>>,
     #[doc = "Disallow the use of variables and function parameters before their declaration"]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_invalid_use_before_declaration: Option<RuleConfiguration<NoInvalidUseBeforeDeclaration>>,
     #[doc = "Disallow new operators with the Symbol object."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_new_symbol: Option<RuleConfiguration<NoNewSymbol>>,
+    pub no_new_symbol: Option<RuleFixConfiguration<NoNewSymbol>>,
     #[doc = "Disallow \\8 and \\9 escape sequences in string literals."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_nonoctal_decimal_escape: Option<RuleConfiguration<NoNonoctalDecimalEscape>>,
+    pub no_nonoctal_decimal_escape: Option<RuleFixConfiguration<NoNonoctalDecimalEscape>>,
     #[doc = "Disallow literal numbers that lose precision"]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_precision_loss: Option<RuleConfiguration<NoPrecisionLoss>>,
@@ -2304,16 +2305,16 @@ pub struct Correctness {
     pub no_setter_return: Option<RuleConfiguration<NoSetterReturn>>,
     #[doc = "Disallow comparison of expressions modifying the string case with non-compliant value."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_string_case_mismatch: Option<RuleConfiguration<NoStringCaseMismatch>>,
+    pub no_string_case_mismatch: Option<RuleFixConfiguration<NoStringCaseMismatch>>,
     #[doc = "Disallow lexical declarations in switch clauses."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_switch_declarations: Option<RuleConfiguration<NoSwitchDeclarations>>,
+    pub no_switch_declarations: Option<RuleFixConfiguration<NoSwitchDeclarations>>,
     #[doc = "Prevents the usage of variables that haven't been declared inside the document."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_undeclared_variables: Option<RuleConfiguration<NoUndeclaredVariables>>,
     #[doc = "Avoid using unnecessary continue."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_unnecessary_continue: Option<RuleConfiguration<NoUnnecessaryContinue>>,
+    pub no_unnecessary_continue: Option<RuleFixConfiguration<NoUnnecessaryContinue>>,
     #[doc = "Disallow unreachable code"]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_unreachable: Option<RuleConfiguration<NoUnreachable>>,
@@ -2328,19 +2329,19 @@ pub struct Correctness {
     pub no_unsafe_optional_chaining: Option<RuleConfiguration<NoUnsafeOptionalChaining>>,
     #[doc = "Disallow unused imports."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_unused_imports: Option<RuleConfiguration<NoUnusedImports>>,
+    pub no_unused_imports: Option<RuleFixConfiguration<NoUnusedImports>>,
     #[doc = "Disallow unused labels."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_unused_labels: Option<RuleConfiguration<NoUnusedLabels>>,
+    pub no_unused_labels: Option<RuleFixConfiguration<NoUnusedLabels>>,
     #[doc = "Disallow unused private class members"]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_unused_private_class_members: Option<RuleConfiguration<NoUnusedPrivateClassMembers>>,
+    pub no_unused_private_class_members: Option<RuleFixConfiguration<NoUnusedPrivateClassMembers>>,
     #[doc = "Disallow unused variables."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_unused_variables: Option<RuleConfiguration<NoUnusedVariables>>,
+    pub no_unused_variables: Option<RuleFixConfiguration<NoUnusedVariables>>,
     #[doc = "This rules prevents void elements (AKA self-closing elements) from having children."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_void_elements_with_children: Option<RuleConfiguration<NoVoidElementsWithChildren>>,
+    pub no_void_elements_with_children: Option<RuleFixConfiguration<NoVoidElementsWithChildren>>,
     #[doc = "Disallow returning a value from a function with the return type 'void'"]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_void_type_return: Option<RuleConfiguration<NoVoidTypeReturn>>,
@@ -2352,7 +2353,7 @@ pub struct Correctness {
     pub use_hook_at_top_level: Option<RuleConfiguration<UseHookAtTopLevel>>,
     #[doc = "Require calls to isNaN() when checking for NaN."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_is_nan: Option<RuleConfiguration<UseIsNan>>,
+    pub use_is_nan: Option<RuleFixConfiguration<UseIsNan>>,
     #[doc = "Disallow missing key props in iterators/collection literals."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_jsx_key_in_iterable: Option<RuleConfiguration<UseJsxKeyInIterable>>,
@@ -3307,10 +3308,10 @@ pub struct Nursery {
     pub no_color_invalid_hex: Option<RuleConfiguration<NoColorInvalidHex>>,
     #[doc = "Disallow the use of console."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_console: Option<RuleConfiguration<NoConsole>>,
+    pub no_console: Option<RuleFixConfiguration<NoConsole>>,
     #[doc = "Disallow the use of Math.min and Math.max to clamp a value where the result itself is constant."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_constant_math_min_max_clamp: Option<RuleConfiguration<NoConstantMathMinMaxClamp>>,
+    pub no_constant_math_min_max_clamp: Option<RuleFixConfiguration<NoConstantMathMinMaxClamp>>,
     #[doc = "Disallow CSS empty blocks."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_css_empty_block: Option<RuleConfiguration<NoCssEmptyBlock>>,
@@ -3338,7 +3339,7 @@ pub struct Nursery {
     pub no_evolving_any: Option<RuleConfiguration<NoEvolvingAny>>,
     #[doc = "Disallow to use unnecessary callback on flatMap."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_flat_map_identity: Option<RuleConfiguration<NoFlatMapIdentity>>,
+    pub no_flat_map_identity: Option<RuleFixConfiguration<NoFlatMapIdentity>>,
     #[doc = "Disallow invalid !important within keyframe declarations"]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_important_in_keyframe: Option<RuleConfiguration<NoImportantInKeyframe>>,
@@ -3354,7 +3355,7 @@ pub struct Nursery {
     pub no_nodejs_modules: Option<RuleConfiguration<NoNodejsModules>>,
     #[doc = "Prevents React-specific JSX properties from being used."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_react_specific_props: Option<RuleConfiguration<NoReactSpecificProps>>,
+    pub no_react_specific_props: Option<RuleFixConfiguration<NoReactSpecificProps>>,
     #[doc = "Disallow specified modules when loaded by import or require."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_restricted_imports: Option<RuleConfiguration<NoRestrictedImports>>,
@@ -3382,24 +3383,24 @@ pub struct Nursery {
     pub no_unmatchable_anb_selector: Option<RuleConfiguration<NoUnmatchableAnbSelector>>,
     #[doc = "Disallow unnecessary concatenation of string or template literals."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_useless_string_concat: Option<RuleConfiguration<NoUselessStringConcat>>,
+    pub no_useless_string_concat: Option<RuleFixConfiguration<NoUselessStringConcat>>,
     #[doc = "Disallow initializing variables to undefined."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_useless_undefined_initialization:
-        Option<RuleConfiguration<NoUselessUndefinedInitialization>>,
+        Option<RuleFixConfiguration<NoUselessUndefinedInitialization>>,
     #[doc = "Disallow Array constructors."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_array_literals: Option<RuleConfiguration<UseArrayLiterals>>,
+    pub use_array_literals: Option<RuleFixConfiguration<UseArrayLiterals>>,
     #[doc = "Enforce the use of new for all builtins, except String, Number, Boolean, Symbol and BigInt."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_consistent_builtin_instantiation:
-        Option<RuleConfiguration<UseConsistentBuiltinInstantiation>>,
+        Option<RuleFixConfiguration<UseConsistentBuiltinInstantiation>>,
     #[doc = "Require the default clause in switch statements."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_default_switch_clause: Option<RuleConfiguration<UseDefaultSwitchClause>>,
     #[doc = "Enforce explicitly comparing the length, size, byteLength or byteOffset property of a value."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_explicit_length_check: Option<RuleConfiguration<UseExplicitLengthCheck>>,
+    pub use_explicit_length_check: Option<RuleFixConfiguration<UseExplicitLengthCheck>>,
     #[doc = "Elements with an interactive role and interaction handlers must be focusable."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_focusable_interactive: Option<RuleConfiguration<UseFocusableInteractive>>,
@@ -3411,10 +3412,10 @@ pub struct Nursery {
     pub use_import_restrictions: Option<RuleConfiguration<UseImportRestrictions>>,
     #[doc = "Enforce the sorting of CSS utility classes."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_sorted_classes: Option<RuleConfiguration<UseSortedClasses>>,
+    pub use_sorted_classes: Option<RuleFixConfiguration<UseSortedClasses>>,
     #[doc = "Require new when throwing an error."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_throw_new_error: Option<RuleConfiguration<UseThrowNewError>>,
+    pub use_throw_new_error: Option<RuleFixConfiguration<UseThrowNewError>>,
     #[doc = "Require all regex literals to be declared at the top level."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_top_level_regex: Option<RuleConfiguration<UseTopLevelRegex>>,
@@ -4338,7 +4339,7 @@ pub struct Performance {
     pub no_barrel_file: Option<RuleConfiguration<NoBarrelFile>>,
     #[doc = "Disallow the use of the delete operator."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_delete: Option<RuleConfiguration<NoDelete>>,
+    pub no_delete: Option<RuleFixConfiguration<NoDelete>>,
     #[doc = "Avoid re-export all."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_re_export_all: Option<RuleConfiguration<NoReExportAll>>,
@@ -4719,10 +4720,10 @@ pub struct Style {
     pub no_default_export: Option<RuleConfiguration<NoDefaultExport>>,
     #[doc = "Disallow implicit true values on JSX boolean attributes"]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_implicit_boolean: Option<RuleConfiguration<NoImplicitBoolean>>,
+    pub no_implicit_boolean: Option<RuleFixConfiguration<NoImplicitBoolean>>,
     #[doc = "Disallow type annotations for variables, parameters, and class properties initialized with a literal expression."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_inferrable_types: Option<RuleConfiguration<NoInferrableTypes>>,
+    pub no_inferrable_types: Option<RuleFixConfiguration<NoInferrableTypes>>,
     #[doc = "Disallow the use of TypeScript's namespaces."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_namespace: Option<RuleConfiguration<NoNamespace>>,
@@ -4731,10 +4732,10 @@ pub struct Style {
     pub no_namespace_import: Option<RuleConfiguration<NoNamespaceImport>>,
     #[doc = "Disallow negation in the condition of an if statement if it has an else clause."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_negation_else: Option<RuleConfiguration<NoNegationElse>>,
+    pub no_negation_else: Option<RuleFixConfiguration<NoNegationElse>>,
     #[doc = "Disallow non-null assertions using the ! postfix operator."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_non_null_assertion: Option<RuleConfiguration<NoNonNullAssertion>>,
+    pub no_non_null_assertion: Option<RuleFixConfiguration<NoNonNullAssertion>>,
     #[doc = "Disallow reassigning function parameters."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_parameter_assign: Option<RuleConfiguration<NoParameterAssign>>,
@@ -4746,43 +4747,43 @@ pub struct Style {
     pub no_restricted_globals: Option<RuleConfiguration<NoRestrictedGlobals>>,
     #[doc = "Disallow the use of constants which its value is the upper-case version of its name."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_shouty_constants: Option<RuleConfiguration<NoShoutyConstants>>,
+    pub no_shouty_constants: Option<RuleFixConfiguration<NoShoutyConstants>>,
     #[doc = "Disallow template literals if interpolation and special-character handling are not needed"]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_unused_template_literal: Option<RuleConfiguration<NoUnusedTemplateLiteral>>,
+    pub no_unused_template_literal: Option<RuleFixConfiguration<NoUnusedTemplateLiteral>>,
     #[doc = "Disallow else block when the if block breaks early."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_useless_else: Option<RuleConfiguration<NoUselessElse>>,
+    pub no_useless_else: Option<RuleFixConfiguration<NoUselessElse>>,
     #[doc = "Disallow the use of var"]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_var: Option<RuleConfiguration<NoVar>>,
+    pub no_var: Option<RuleFixConfiguration<NoVar>>,
     #[doc = "Enforce the use of as const over literal type and type annotation."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_as_const_assertion: Option<RuleConfiguration<UseAsConstAssertion>>,
+    pub use_as_const_assertion: Option<RuleFixConfiguration<UseAsConstAssertion>>,
     #[doc = "Requires following curly brace conventions."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_block_statements: Option<RuleConfiguration<UseBlockStatements>>,
+    pub use_block_statements: Option<RuleFixConfiguration<UseBlockStatements>>,
     #[doc = "Enforce using else if instead of nested if in else clauses."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_collapsed_else_if: Option<RuleConfiguration<UseCollapsedElseIf>>,
+    pub use_collapsed_else_if: Option<RuleFixConfiguration<UseCollapsedElseIf>>,
     #[doc = "Require consistently using either T\\[] or Array\\<T>"]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_consistent_array_type: Option<RuleConfiguration<UseConsistentArrayType>>,
+    pub use_consistent_array_type: Option<RuleFixConfiguration<UseConsistentArrayType>>,
     #[doc = "Require const declarations for variables that are only assigned once."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_const: Option<RuleConfiguration<UseConst>>,
+    pub use_const: Option<RuleFixConfiguration<UseConst>>,
     #[doc = "Enforce default function parameters and optional function parameters to be last."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_default_parameter_last: Option<RuleConfiguration<UseDefaultParameterLast>>,
+    pub use_default_parameter_last: Option<RuleFixConfiguration<UseDefaultParameterLast>>,
     #[doc = "Require that each enum member value be explicitly initialized."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_enum_initializers: Option<RuleConfiguration<UseEnumInitializers>>,
+    pub use_enum_initializers: Option<RuleFixConfiguration<UseEnumInitializers>>,
     #[doc = "Disallow the use of Math.pow in favor of the ** operator."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_exponentiation_operator: Option<RuleConfiguration<UseExponentiationOperator>>,
+    pub use_exponentiation_operator: Option<RuleFixConfiguration<UseExponentiationOperator>>,
     #[doc = "Promotes the use of export type for types."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_export_type: Option<RuleConfiguration<UseExportType>>,
+    pub use_export_type: Option<RuleFixConfiguration<UseExportType>>,
     #[doc = "Enforce naming conventions for JavaScript and TypeScript filenames."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_filenaming_convention: Option<RuleConfiguration<UseFilenamingConvention>>,
@@ -4791,52 +4792,52 @@ pub struct Style {
     pub use_for_of: Option<RuleConfiguration<UseForOf>>,
     #[doc = "This rule enforces the use of \\<>...\\</> over \\<Fragment>...\\</Fragment>."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_fragment_syntax: Option<RuleConfiguration<UseFragmentSyntax>>,
+    pub use_fragment_syntax: Option<RuleFixConfiguration<UseFragmentSyntax>>,
     #[doc = "Promotes the use of import type for types."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_import_type: Option<RuleConfiguration<UseImportType>>,
+    pub use_import_type: Option<RuleFixConfiguration<UseImportType>>,
     #[doc = "Require all enum members to be literal values."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_literal_enum_members: Option<RuleConfiguration<UseLiteralEnumMembers>>,
     #[doc = "Enforce naming conventions for everything across a codebase."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_naming_convention: Option<RuleConfiguration<UseNamingConvention>>,
+    pub use_naming_convention: Option<RuleFixConfiguration<UseNamingConvention>>,
     #[doc = "Promotes the usage of node:assert/strict over node:assert."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_node_assert_strict: Option<RuleConfiguration<UseNodeAssertStrict>>,
+    pub use_node_assert_strict: Option<RuleFixConfiguration<UseNodeAssertStrict>>,
     #[doc = "Enforces using the node: protocol for Node.js builtin modules."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_nodejs_import_protocol: Option<RuleConfiguration<UseNodejsImportProtocol>>,
+    pub use_nodejs_import_protocol: Option<RuleFixConfiguration<UseNodejsImportProtocol>>,
     #[doc = "Use the Number properties instead of global ones."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_number_namespace: Option<RuleConfiguration<UseNumberNamespace>>,
+    pub use_number_namespace: Option<RuleFixConfiguration<UseNumberNamespace>>,
     #[doc = "Disallow parseInt() and Number.parseInt() in favor of binary, octal, and hexadecimal literals"]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_numeric_literals: Option<RuleConfiguration<UseNumericLiterals>>,
+    pub use_numeric_literals: Option<RuleFixConfiguration<UseNumericLiterals>>,
     #[doc = "Prevent extra closing tags for components without children"]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_self_closing_elements: Option<RuleConfiguration<UseSelfClosingElements>>,
+    pub use_self_closing_elements: Option<RuleFixConfiguration<UseSelfClosingElements>>,
     #[doc = "When expressing array types, this rule promotes the usage of T\\[] shorthand instead of Array\\<T>."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_shorthand_array_type: Option<RuleConfiguration<UseShorthandArrayType>>,
+    pub use_shorthand_array_type: Option<RuleFixConfiguration<UseShorthandArrayType>>,
     #[doc = "Require assignment operator shorthand where possible."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_shorthand_assign: Option<RuleConfiguration<UseShorthandAssign>>,
+    pub use_shorthand_assign: Option<RuleFixConfiguration<UseShorthandAssign>>,
     #[doc = "Enforce using function types instead of object type with call signatures."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_shorthand_function_type: Option<RuleConfiguration<UseShorthandFunctionType>>,
+    pub use_shorthand_function_type: Option<RuleFixConfiguration<UseShorthandFunctionType>>,
     #[doc = "Enforces switch clauses have a single statement, emits a quick fix wrapping the statements in a block."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_single_case_statement: Option<RuleConfiguration<UseSingleCaseStatement>>,
+    pub use_single_case_statement: Option<RuleFixConfiguration<UseSingleCaseStatement>>,
     #[doc = "Disallow multiple variable declarations in the same variable statement"]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_single_var_declarator: Option<RuleConfiguration<UseSingleVarDeclarator>>,
+    pub use_single_var_declarator: Option<RuleFixConfiguration<UseSingleVarDeclarator>>,
     #[doc = "Prefer template literals over string concatenation."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_template: Option<RuleConfiguration<UseTemplate>>,
+    pub use_template: Option<RuleFixConfiguration<UseTemplate>>,
     #[doc = "Enforce the use of while loops instead of for loops when the initializer and update expressions are not needed."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_while: Option<RuleConfiguration<UseWhile>>,
+    pub use_while: Option<RuleFixConfiguration<UseWhile>>,
 }
 impl DeserializableValidator for Style {
     fn validate(
@@ -5892,7 +5893,7 @@ pub struct Suspicious {
     #[doc = "Use standard constants instead of approximated literals."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_approximative_numeric_constant:
-        Option<RuleConfiguration<NoApproximativeNumericConstant>>,
+        Option<RuleFixConfiguration<NoApproximativeNumericConstant>>,
     #[doc = "Discourage the usage of Array index in keys."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_array_index_key: Option<RuleConfiguration<NoArrayIndexKey>>,
@@ -5910,31 +5911,31 @@ pub struct Suspicious {
     pub no_class_assign: Option<RuleConfiguration<NoClassAssign>>,
     #[doc = "Prevent comments from being inserted as text nodes"]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_comment_text: Option<RuleConfiguration<NoCommentText>>,
+    pub no_comment_text: Option<RuleFixConfiguration<NoCommentText>>,
     #[doc = "Disallow comparing against -0"]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_compare_neg_zero: Option<RuleConfiguration<NoCompareNegZero>>,
+    pub no_compare_neg_zero: Option<RuleFixConfiguration<NoCompareNegZero>>,
     #[doc = "Disallow labeled statements that are not loops."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_confusing_labels: Option<RuleConfiguration<NoConfusingLabels>>,
     #[doc = "Disallow void type outside of generic or return types."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_confusing_void_type: Option<RuleConfiguration<NoConfusingVoidType>>,
+    pub no_confusing_void_type: Option<RuleFixConfiguration<NoConfusingVoidType>>,
     #[doc = "Disallow the use of console.log"]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_console_log: Option<RuleConfiguration<NoConsoleLog>>,
+    pub no_console_log: Option<RuleFixConfiguration<NoConsoleLog>>,
     #[doc = "Disallow TypeScript const enum"]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_const_enum: Option<RuleConfiguration<NoConstEnum>>,
+    pub no_const_enum: Option<RuleFixConfiguration<NoConstEnum>>,
     #[doc = "Prevents from having control characters and some escape sequences that match control characters in regular expressions."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_control_characters_in_regex: Option<RuleConfiguration<NoControlCharactersInRegex>>,
     #[doc = "Disallow the use of debugger"]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_debugger: Option<RuleConfiguration<NoDebugger>>,
+    pub no_debugger: Option<RuleFixConfiguration<NoDebugger>>,
     #[doc = "Require the use of === and !=="]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_double_equals: Option<RuleConfiguration<NoDoubleEquals>>,
+    pub no_double_equals: Option<RuleFixConfiguration<NoDoubleEquals>>,
     #[doc = "Disallow duplicate case labels."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_duplicate_case: Option<RuleConfiguration<NoDuplicateCase>>,
@@ -5946,7 +5947,7 @@ pub struct Suspicious {
     pub no_duplicate_jsx_props: Option<RuleConfiguration<NoDuplicateJsxProps>>,
     #[doc = "Prevents object literals having more than one property declaration for the same name."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_duplicate_object_keys: Option<RuleConfiguration<NoDuplicateObjectKeys>>,
+    pub no_duplicate_object_keys: Option<RuleFixConfiguration<NoDuplicateObjectKeys>>,
     #[doc = "Disallow duplicate function parameter name."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_duplicate_parameters: Option<RuleConfiguration<NoDuplicateParameters>>,
@@ -5958,7 +5959,7 @@ pub struct Suspicious {
     pub no_empty_block_statements: Option<RuleConfiguration<NoEmptyBlockStatements>>,
     #[doc = "Disallow the declaration of empty interfaces."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_empty_interface: Option<RuleConfiguration<NoEmptyInterface>>,
+    pub no_empty_interface: Option<RuleFixConfiguration<NoEmptyInterface>>,
     #[doc = "Disallow the any type usage."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_explicit_any: Option<RuleConfiguration<NoExplicitAny>>,
@@ -5967,13 +5968,13 @@ pub struct Suspicious {
     pub no_exports_in_test: Option<RuleConfiguration<NoExportsInTest>>,
     #[doc = "Prevents the wrong usage of the non-null assertion operator (!) in TypeScript files."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_extra_non_null_assertion: Option<RuleConfiguration<NoExtraNonNullAssertion>>,
+    pub no_extra_non_null_assertion: Option<RuleFixConfiguration<NoExtraNonNullAssertion>>,
     #[doc = "Disallow fallthrough of switch clauses."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_fallthrough_switch_clause: Option<RuleConfiguration<NoFallthroughSwitchClause>>,
     #[doc = "Disallow focused tests."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_focused_tests: Option<RuleConfiguration<NoFocusedTests>>,
+    pub no_focused_tests: Option<RuleFixConfiguration<NoFocusedTests>>,
     #[doc = "Disallow reassigning function declarations."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_function_assign: Option<RuleConfiguration<NoFunctionAssign>>,
@@ -5982,10 +5983,10 @@ pub struct Suspicious {
     pub no_global_assign: Option<RuleConfiguration<NoGlobalAssign>>,
     #[doc = "Use Number.isFinite instead of global isFinite."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_global_is_finite: Option<RuleConfiguration<NoGlobalIsFinite>>,
+    pub no_global_is_finite: Option<RuleFixConfiguration<NoGlobalIsFinite>>,
     #[doc = "Use Number.isNaN instead of global isNaN."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_global_is_nan: Option<RuleConfiguration<NoGlobalIsNan>>,
+    pub no_global_is_nan: Option<RuleFixConfiguration<NoGlobalIsNan>>,
     #[doc = "Disallow use of implicit any type on variable declarations."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_implicit_any_let: Option<RuleConfiguration<NoImplicitAnyLet>>,
@@ -5997,14 +5998,14 @@ pub struct Suspicious {
     pub no_label_var: Option<RuleConfiguration<NoLabelVar>>,
     #[doc = "Disallow characters made with multiple code points in character class syntax."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_misleading_character_class: Option<RuleConfiguration<NoMisleadingCharacterClass>>,
+    pub no_misleading_character_class: Option<RuleFixConfiguration<NoMisleadingCharacterClass>>,
     #[doc = "Enforce proper usage of new and constructor."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_misleading_instantiator: Option<RuleConfiguration<NoMisleadingInstantiator>>,
     #[doc = "Disallow shorthand assign when variable appears on both sides."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_misrefactored_shorthand_assign:
-        Option<RuleConfiguration<NoMisrefactoredShorthandAssign>>,
+        Option<RuleFixConfiguration<NoMisrefactoredShorthandAssign>>,
     #[doc = "Disallow direct use of Object.prototype builtins."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_prototype_builtins: Option<RuleConfiguration<NoPrototypeBuiltins>>,
@@ -6013,7 +6014,7 @@ pub struct Suspicious {
     pub no_redeclare: Option<RuleConfiguration<NoRedeclare>>,
     #[doc = "Prevents from having redundant \"use strict\"."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_redundant_use_strict: Option<RuleConfiguration<NoRedundantUseStrict>>,
+    pub no_redundant_use_strict: Option<RuleFixConfiguration<NoRedundantUseStrict>>,
     #[doc = "Disallow comparisons where both sides are exactly the same."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_self_compare: Option<RuleConfiguration<NoSelfCompare>>,
@@ -6022,10 +6023,10 @@ pub struct Suspicious {
     pub no_shadow_restricted_names: Option<RuleConfiguration<NoShadowRestrictedNames>>,
     #[doc = "Disallow disabled tests."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_skipped_tests: Option<RuleConfiguration<NoSkippedTests>>,
+    pub no_skipped_tests: Option<RuleFixConfiguration<NoSkippedTests>>,
     #[doc = "Disallow sparse arrays"]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_sparse_array: Option<RuleConfiguration<NoSparseArray>>,
+    pub no_sparse_array: Option<RuleFixConfiguration<NoSparseArray>>,
     #[doc = "It detects possible \"wrong\" semicolons inside JSX elements."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_suspicious_semicolon_in_jsx: Option<RuleConfiguration<NoSuspiciousSemicolonInJsx>>,
@@ -6037,7 +6038,7 @@ pub struct Suspicious {
     pub no_unsafe_declaration_merging: Option<RuleConfiguration<NoUnsafeDeclarationMerging>>,
     #[doc = "Disallow using unsafe negation."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_unsafe_negation: Option<RuleConfiguration<NoUnsafeNegation>>,
+    pub no_unsafe_negation: Option<RuleFixConfiguration<NoUnsafeNegation>>,
     #[doc = "Ensure async functions utilize await."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_await: Option<RuleConfiguration<UseAwait>>,
@@ -6049,13 +6050,13 @@ pub struct Suspicious {
     pub use_getter_return: Option<RuleConfiguration<UseGetterReturn>>,
     #[doc = "Use Array.isArray() instead of instanceof Array."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_is_array: Option<RuleConfiguration<UseIsArray>>,
+    pub use_is_array: Option<RuleFixConfiguration<UseIsArray>>,
     #[doc = "Require using the namespace keyword over the module keyword to declare TypeScript namespaces."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_namespace_keyword: Option<RuleConfiguration<UseNamespaceKeyword>>,
+    pub use_namespace_keyword: Option<RuleFixConfiguration<UseNamespaceKeyword>>,
     #[doc = "This rule verifies the result of typeof $expr unary expressions is being compared to valid values, either string literals containing valid type names or other typeof expressions"]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_valid_typeof: Option<RuleConfiguration<UseValidTypeof>>,
+    pub use_valid_typeof: Option<RuleFixConfiguration<UseValidTypeof>>,
 }
 impl DeserializableValidator for Suspicious {
     fn validate(
