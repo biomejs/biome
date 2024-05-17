@@ -84,7 +84,7 @@ pub enum BiomeCommand {
         apply_unsafe: bool,
 
         /// Fixes lint errors safely, formatting and import sorting
-        #[bpaf(long("fix"))]
+        #[bpaf(long("fix"), switch)]
         fix: bool,
 
         /// Alias for `--fix`, fixes lint errors safely, formatting and import sorting
@@ -156,7 +156,7 @@ pub enum BiomeCommand {
         apply_unsafe: bool,
 
         /// Fixes lint errors safely
-        #[bpaf(long("fix"))]
+        #[bpaf(long("fix"), switch)]
         fix: bool,
 
         /// Alias for `--fix`, fixes lint errors safely
@@ -248,11 +248,11 @@ pub enum BiomeCommand {
         cli_options: CliOptions,
 
         /// Writes formatted files to file system.
-        #[bpaf(switch)]
+        #[bpaf(long("write"), switch)]
         write: bool,
 
         /// Alias of `--write`, writes formatted files to file system.
-        #[bpaf(switch)]
+        #[bpaf(long("fix"), switch)]
         fix: bool,
 
         /// When set to true, only the files that have been staged (the ones prepared to be committed)
