@@ -664,6 +664,11 @@ fn check_fix_incompatible_arguments(options: FixFileModeOptions) -> Result<(), C
             "--apply-unsafe",
             "--unsafe",
         ));
+    } else if apply && (fix || write) {
+        return Err(CliDiagnostic::incompatible_arguments(
+            "--apply",
+            if fix { "--fix" } else { "--write" },
+        ));
     } else if apply_unsafe && (fix || write) {
         return Err(CliDiagnostic::incompatible_arguments(
             "--apply-unsafe",
@@ -682,11 +687,13 @@ mod tests {
     #[test]
     fn incompatible_arguments() {
         let cases = vec![
-            (true, true, false, false, false),
-            (false, true, false, false, true),
-            (false, true, true, false, false),
-            (false, true, false, true, false),
-            (false, false, true, true, false),
+            (true, true, false, false, false), // --apply --apply-unsafe
+            (true, false, true, false, false), // --apply --write
+            (true, false, false, true, false), // --apply --fix
+            (false, true, false, false, true), // --apply-unsafe --unsafe
+            (false, true, true, false, false), // --apply-unsafe --write
+            (false, true, false, true, false), // --apply-unsafe --fix
+            (false, false, true, true, false), // --write --fix
         ];
 
         for (apply, apply_unsafe, write, fix, unsafe_) in cases {
@@ -704,9 +711,9 @@ mod tests {
     #[test]
     fn safe_fixes() {
         let cases = vec![
-            (true, false, false, false, false),
-            (false, false, true, false, false),
-            (false, false, false, true, false),
+            (true, false, false, false, false), // --apply
+            (false, false, true, false, false), // --write
+            (false, false, false, true, false), // --fix
         ];
 
         for (apply, apply_unsafe, write, fix, unsafe_) in cases {
@@ -725,11 +732,11 @@ mod tests {
     }
 
     #[test]
-    fn unsafe_fixes() {
+    fn safe_and_unsafe_fixes() {
         let cases = vec![
-            (false, true, false, false, false),
-            (false, false, true, false, true),
-            (false, false, false, true, true),
+            (false, true, false, false, false), // --apply-unsafe
+            (false, false, true, false, true),  // --write --unsafe
+            (false, false, false, true, true),  // --fix --unsafe
         ];
 
         for (apply, apply_unsafe, write, fix, unsafe_) in cases {
@@ -749,7 +756,7 @@ mod tests {
 
     #[test]
     fn no_fix() {
-        let cases = vec![(false, false, false, false, false)];
+        let cases = vec![(false, false, false, false, false)]; // no options
 
         for (apply, apply_unsafe, write, fix, unsafe_) in cases {
             assert_eq!(
