@@ -76,11 +76,11 @@ pub enum BiomeCommand {
     /// Runs formatter, linter and import sorting to the requested files.
     #[bpaf(command)]
     Check {
-        /// Apply safe fixes, formatting and import sorting
-        #[bpaf(long("apply"), switch)]
+        /// Apply safe fixes, formatting and import sorting (deprecated, use `--fix`)
+        #[bpaf(long("apply"), switch, hide_usage)]
         apply: bool,
-        /// Apply safe fixes and unsafe fixes, formatting and import sorting
-        #[bpaf(long("apply-unsafe"), switch)]
+        /// Apply safe fixes and unsafe fixes, formatting and import sorting (deprecated, use `--fix --unsafe`)
+        #[bpaf(long("apply-unsafe"), switch, hide_usage)]
         apply_unsafe: bool,
 
         /// Fixes lint errors safely, formatting and import sorting
@@ -88,7 +88,7 @@ pub enum BiomeCommand {
         fix: bool,
 
         /// Alias for `--fix`, fixes lint errors safely, formatting and import sorting
-        #[bpaf(long("write"), switch)]
+        #[bpaf(long("write"), switch, hide_usage)]
         write: bool,
 
         /// Allow to do unsafe fixes, should be used with `--fix` or `--write`
@@ -148,11 +148,11 @@ pub enum BiomeCommand {
     /// Run various checks on a set of files.
     #[bpaf(command)]
     Lint {
-        /// Apply safe fixes, formatting and import sorting
-        #[bpaf(long("apply"), switch)]
+        /// Apply safe fixes, formatting and import sorting (deprecated, use `--fix`)
+        #[bpaf(long("apply"), switch, hide_usage)]
         apply: bool,
-        /// Apply safe fixes and unsafe fixes, formatting and import sorting
-        #[bpaf(long("apply-unsafe"), switch)]
+        /// Apply safe fixes and unsafe fixes, formatting and import sorting (deprecated, use `--fix --unsafe`)
+        #[bpaf(long("apply-unsafe"), switch, hide_usage)]
         apply_unsafe: bool,
 
         /// Fixes lint errors safely
@@ -160,7 +160,7 @@ pub enum BiomeCommand {
         fix: bool,
 
         /// Alias for `--fix`, fixes lint errors safely
-        #[bpaf(long("write"), switch)]
+        #[bpaf(long("write"), switch, hide_usage)]
         write: bool,
 
         /// Allow to do unsafe fixes, should be used with `--fix` or `--write`
@@ -252,7 +252,7 @@ pub enum BiomeCommand {
         write: bool,
 
         /// Alias of `--write`, writes formatted files to file system.
-        #[bpaf(long("fix"), switch)]
+        #[bpaf(long("fix"), switch, hide_usage)]
         fix: bool,
 
         /// When set to true, only the files that have been staged (the ones prepared to be committed)

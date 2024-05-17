@@ -1,7 +1,8 @@
 use crate::cli_options::CliOptions;
 use crate::commands::{
-    get_files_to_process, get_stdin, resolve_manifest, validate_configuration_diagnostics,
+    get_files_to_process, get_stdin, markup, resolve_manifest, validate_configuration_diagnostics,
 };
+use crate::diagnostics::DeprecatedArgument;
 use crate::{
     execute_mode, setup_cli_subscriber, CliDiagnostic, CliSession, Execution, TraversalMode,
 };
@@ -10,7 +11,9 @@ use biome_configuration::vcs::PartialVcsConfiguration;
 use biome_configuration::{
     PartialConfiguration, PartialFilesConfiguration, PartialLinterConfiguration,
 };
+use biome_console::ConsoleExt;
 use biome_deserialize::Merge;
+use biome_diagnostics::PrintDiagnostic;
 use biome_service::configuration::{
     load_configuration, LoadedConfiguration, PartialConfigurationExt,
 };
@@ -57,6 +60,21 @@ pub(crate) fn lint(session: CliSession, payload: LintCommandPayload) -> Result<(
         since,
     } = payload;
     setup_cli_subscriber(cli_options.log_level, cli_options.log_kind);
+
+    if apply || apply_unsafe {
+        let console = &mut *session.app.console;
+        let (deprecated, alternative) = if apply {
+            ("--apply", "--fix")
+        } else {
+            ("--apply-unsafe", "--fix --unsafe")
+        };
+        let diagnostic = DeprecatedArgument::new(markup! {
+            "The argument "<Emphasis>{deprecated}</Emphasis>" is deprecated, it will be removed in the next major release. Use "<Emphasis>{alternative}</Emphasis>" instead."
+        });
+        console.error(markup! {
+            {PrintDiagnostic::simple(&diagnostic)}
+        });
+    }
 
     let fix_file_mode = determine_fix_file_mode(FixFileModeOptions {
         apply,
