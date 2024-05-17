@@ -3686,3 +3686,34 @@ fn format_without_file_paths() {
         result,
     ));
 }
+
+#[test]
+fn fix() {
+    let mut fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+    let file_path = Path::new("format.js");
+    fs.insert(file_path.into(), UNFORMATTED.as_bytes());
+    let result = run_cli(
+        DynRef::Borrowed(&mut fs),
+        &mut console,
+        Args::from(
+            [
+                ("format"),
+                ("--fix"),
+                file_path.as_os_str().to_str().unwrap(),
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+    assert_file_contents(&fs, file_path, FORMATTED);
+    assert_eq!(console.out_buffer.len(), 1);
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "formatter_fix",
+        fs,
+        console,
+        result,
+    ));
+}
