@@ -27,7 +27,7 @@ declare_rule! {
     /// interface Example {
     ///   property?: string;
     /// }
-    /// declare const example: Example;
+    /// declare const foo: Example;
     /// const includesBaz = foo.property!.includes('baz');
     /// ```
     /// ```ts,expect_diagnostic
@@ -41,7 +41,7 @@ declare_rule! {
     ///   property?: string;
     /// }
     ///
-    /// declare const example: Example;
+    /// declare const foo: Example;
     /// const includesBaz = foo.property?.includes('baz') ?? false;
     /// ```
     ///
@@ -154,13 +154,13 @@ impl Rule for NoNonNullAssertion {
                     }
                 };
 
-                Some(JsRuleAction {
-                    category: ActionCategory::QuickFix,
-                    applicability: Applicability::MaybeIncorrect,
-                    message: markup! { "Replace with optional chain operator "<Emphasis>"?."</Emphasis>" This operator includes runtime checks, so it is safer than the compile-only non-null assertion operator" }
+                Some(JsRuleAction::new(
+                    ActionCategory::QuickFix,
+                    Applicability::MaybeIncorrect,
+                     markup! { "Replace with optional chain operator "<Emphasis>"?."</Emphasis>" This operator includes runtime checks, so it is safer than the compile-only non-null assertion operator" }
                         .to_owned(),
                     mutation,
-                })
+                ))
             }
         }
     }

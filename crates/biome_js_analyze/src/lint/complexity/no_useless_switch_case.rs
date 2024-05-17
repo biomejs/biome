@@ -152,11 +152,11 @@ impl Rule for NoUselessSwitchCase {
         } else {
             mutation.remove_node(useless_case);
         }
-        Some(JsRuleAction {
+        Some(JsRuleAction::new(
+            ActionCategory::QuickFix,
+            Applicability::MaybeIncorrect,
+            markup! {"Remove the useless "<Emphasis>"case"</Emphasis>"."}.to_owned(),
             mutation,
-            message: markup! {"Remove the useless "<Emphasis>"case"</Emphasis>"."}.to_owned(),
-            category: ActionCategory::QuickFix,
-            applicability: Applicability::MaybeIncorrect,
-        })
+        ))
     }
 }

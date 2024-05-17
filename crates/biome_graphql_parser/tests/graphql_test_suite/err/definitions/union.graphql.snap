@@ -16,7 +16,8 @@ union SearchResult =
 
 union SearchResult =
 	| Photo
-	|
+	  Person
+	| union
 
 union SearchResult @
 
@@ -66,8 +67,10 @@ GraphqlRoot {
             directives: GraphqlDirectiveList [],
             union_members: GraphqlUnionMemberTypes {
                 eq_token: missing (required),
-                bitwise_or_token: PIPE@48..52 "|" [Newline("\n"), Whitespace("\t")] [Whitespace(" ")],
+                bitwise_or_token: missing (optional),
                 members: GraphqlUnionMemberTypeList [
+                    missing element,
+                    PIPE@48..52 "|" [Newline("\n"), Whitespace("\t")] [Whitespace(" ")],
                     GraphqlNamedType {
                         name: GraphqlName {
                             value_token: GRAPHQL_NAME@52..57 "Photo" [] [],
@@ -91,8 +94,10 @@ GraphqlRoot {
             directives: GraphqlDirectiveList [],
             union_members: GraphqlUnionMemberTypes {
                 eq_token: EQ@88..89 "=" [] [],
-                bitwise_or_token: PIPE@89..92 "|" [Newline("\n"), Whitespace("\t")] [],
+                bitwise_or_token: missing (optional),
                 members: GraphqlUnionMemberTypeList [
+                    missing element,
+                    PIPE@89..92 "|" [Newline("\n"), Whitespace("\t")] [],
                     missing element,
                     PIPE@92..96 "|" [Newline("\n"), Whitespace("\t")] [Whitespace(" ")],
                     GraphqlNamedType {
@@ -112,102 +117,119 @@ GraphqlRoot {
             directives: GraphqlDirectiveList [],
             union_members: GraphqlUnionMemberTypes {
                 eq_token: EQ@123..124 "=" [] [],
-                bitwise_or_token: PIPE@124..128 "|" [Newline("\n"), Whitespace("\t")] [Whitespace(" ")],
+                bitwise_or_token: missing (optional),
                 members: GraphqlUnionMemberTypeList [
+                    missing element,
+                    PIPE@124..128 "|" [Newline("\n"), Whitespace("\t")] [Whitespace(" ")],
                     GraphqlNamedType {
                         name: GraphqlName {
                             value_token: GRAPHQL_NAME@128..133 "Photo" [] [],
                         },
                     },
-                    PIPE@133..136 "|" [Newline("\n"), Whitespace("\t")] [],
+                    missing separator,
+                    GraphqlNamedType {
+                        name: GraphqlName {
+                            value_token: GRAPHQL_NAME@133..143 "Person" [Newline("\n"), Whitespace("\t  ")] [],
+                        },
+                    },
+                    PIPE@143..147 "|" [Newline("\n"), Whitespace("\t")] [Whitespace(" ")],
+                    GraphqlNamedType {
+                        name: GraphqlName {
+                            value_token: GRAPHQL_NAME@147..152 "union" [] [],
+                        },
+                    },
+                ],
+            },
+        },
+        GraphqlUnionTypeDefinition {
+            description: missing (optional),
+            union_token: UNION_KW@152..160 "union" [Newline("\n"), Newline("\n")] [Whitespace(" ")],
+            name: GraphqlName {
+                value_token: GRAPHQL_NAME@160..173 "SearchResult" [] [Whitespace(" ")],
+            },
+            directives: GraphqlDirectiveList [
+                GraphqlDirective {
+                    at_token: AT@173..174 "@" [] [],
+                    name: GraphqlName {
+                        value_token: GRAPHQL_NAME@174..182 "union" [Newline("\n"), Newline("\n")] [Whitespace(" ")],
+                    },
+                    arguments: missing (optional),
+                },
+            ],
+            union_members: GraphqlUnionMemberTypes {
+                eq_token: missing (required),
+                bitwise_or_token: missing (optional),
+                members: GraphqlUnionMemberTypeList [
+                    GraphqlNamedType {
+                        name: GraphqlName {
+                            value_token: GRAPHQL_NAME@182..195 "SearchResult" [] [Whitespace(" ")],
+                        },
+                    },
+                    PIPE@195..196 "|" [] [],
                     missing element,
                 ],
             },
         },
         GraphqlUnionTypeDefinition {
             description: missing (optional),
-            union_token: UNION_KW@136..144 "union" [Newline("\n"), Newline("\n")] [Whitespace(" ")],
+            union_token: UNION_KW@196..204 "union" [Newline("\n"), Newline("\n")] [Whitespace(" ")],
             name: GraphqlName {
-                value_token: GRAPHQL_NAME@144..157 "SearchResult" [] [Whitespace(" ")],
-            },
-            directives: GraphqlDirectiveList [
-                GraphqlDirective {
-                    at_token: AT@157..158 "@" [] [],
-                    name: missing (required),
-                    arguments: missing (optional),
-                },
-            ],
-            union_members: missing (optional),
-        },
-        GraphqlUnionTypeDefinition {
-            description: missing (optional),
-            union_token: UNION_KW@158..166 "union" [Newline("\n"), Newline("\n")] [Whitespace(" ")],
-            name: GraphqlName {
-                value_token: GRAPHQL_NAME@166..179 "SearchResult" [] [Whitespace(" ")],
+                value_token: GRAPHQL_NAME@204..217 "SearchResult" [] [Whitespace(" ")],
             },
             directives: GraphqlDirectiveList [],
             union_members: GraphqlUnionMemberTypes {
-                eq_token: missing (required),
-                bitwise_or_token: PIPE@179..180 "|" [] [],
-                members: GraphqlUnionMemberTypeList [],
-            },
-        },
-        GraphqlUnionTypeDefinition {
-            description: missing (optional),
-            union_token: UNION_KW@180..188 "union" [Newline("\n"), Newline("\n")] [Whitespace(" ")],
-            name: GraphqlName {
-                value_token: GRAPHQL_NAME@188..201 "SearchResult" [] [Whitespace(" ")],
-            },
-            directives: GraphqlDirectiveList [],
-            union_members: GraphqlUnionMemberTypes {
-                eq_token: EQ@201..202 "=" [] [],
+                eq_token: EQ@217..218 "=" [] [],
                 bitwise_or_token: missing (optional),
                 members: GraphqlUnionMemberTypeList [],
             },
         },
         GraphqlUnionTypeDefinition {
             description: missing (optional),
-            union_token: UNION_KW@202..210 "union" [Newline("\n"), Newline("\n")] [Whitespace(" ")],
+            union_token: UNION_KW@218..226 "union" [Newline("\n"), Newline("\n")] [Whitespace(" ")],
             name: GraphqlName {
-                value_token: GRAPHQL_NAME@210..223 "SearchResult" [] [Whitespace(" ")],
+                value_token: GRAPHQL_NAME@226..239 "SearchResult" [] [Whitespace(" ")],
             },
             directives: GraphqlDirectiveList [],
             union_members: GraphqlUnionMemberTypes {
-                eq_token: EQ@223..225 "=" [] [Whitespace(" ")],
-                bitwise_or_token: PIPE@225..226 "|" [] [],
-                members: GraphqlUnionMemberTypeList [],
+                eq_token: EQ@239..241 "=" [] [Whitespace(" ")],
+                bitwise_or_token: missing (optional),
+                members: GraphqlUnionMemberTypeList [
+                    missing element,
+                    PIPE@241..242 "|" [] [],
+                    missing element,
+                ],
             },
         },
         GraphqlUnionTypeDefinition {
             description: missing (optional),
-            union_token: UNION_KW@226..234 "union" [Newline("\n"), Newline("\n")] [Whitespace(" ")],
+            union_token: UNION_KW@242..250 "union" [Newline("\n"), Newline("\n")] [Whitespace(" ")],
             name: GraphqlName {
-                value_token: GRAPHQL_NAME@234..247 "SearchResult" [] [Whitespace(" ")],
+                value_token: GRAPHQL_NAME@250..263 "SearchResult" [] [Whitespace(" ")],
             },
             directives: GraphqlDirectiveList [
                 GraphqlDirective {
-                    at_token: AT@247..249 "@" [] [Whitespace(" ")],
+                    at_token: AT@263..265 "@" [] [Whitespace(" ")],
                     name: missing (required),
                     arguments: missing (optional),
                 },
             ],
             union_members: GraphqlUnionMemberTypes {
-                eq_token: EQ@249..250 "=" [] [],
+                eq_token: EQ@265..266 "=" [] [],
                 bitwise_or_token: missing (optional),
                 members: GraphqlUnionMemberTypeList [],
             },
         },
     ],
-    eof_token: EOF@250..251 "" [Newline("\n")] [],
+    eof_token: EOF@266..267 "" [Newline("\n")] [],
 }
 ```
 
 ## CST
 
 ```
-0: GRAPHQL_ROOT@0..251
+0: GRAPHQL_ROOT@0..267
   0: (empty)
-  1: GRAPHQL_DEFINITION_LIST@0..250
+  1: GRAPHQL_DEFINITION_LIST@0..266
     0: GRAPHQL_UNION_TYPE_DEFINITION@0..28
       0: (empty)
       1: UNION_KW@0..6 "union" [] [Whitespace(" ")]
@@ -231,13 +253,15 @@ GraphqlRoot {
       3: GRAPHQL_DIRECTIVE_LIST@48..48
       4: GRAPHQL_UNION_MEMBER_TYPES@48..67
         0: (empty)
-        1: PIPE@48..52 "|" [Newline("\n"), Whitespace("\t")] [Whitespace(" ")]
-        2: GRAPHQL_UNION_MEMBER_TYPE_LIST@52..67
-          0: GRAPHQL_NAMED_TYPE@52..57
+        1: (empty)
+        2: GRAPHQL_UNION_MEMBER_TYPE_LIST@48..67
+          0: (empty)
+          1: PIPE@48..52 "|" [Newline("\n"), Whitespace("\t")] [Whitespace(" ")]
+          2: GRAPHQL_NAMED_TYPE@52..57
             0: GRAPHQL_NAME@52..57
               0: GRAPHQL_NAME@52..57 "Photo" [] []
-          1: PIPE@57..61 "|" [Newline("\n"), Whitespace("\t")] [Whitespace(" ")]
-          2: GRAPHQL_NAMED_TYPE@61..67
+          3: PIPE@57..61 "|" [Newline("\n"), Whitespace("\t")] [Whitespace(" ")]
+          4: GRAPHQL_NAMED_TYPE@61..67
             0: GRAPHQL_NAME@61..67
               0: GRAPHQL_NAME@61..67 "Person" [] []
     2: GRAPHQL_UNION_TYPE_DEFINITION@67..102
@@ -248,84 +272,96 @@ GraphqlRoot {
       3: GRAPHQL_DIRECTIVE_LIST@88..88
       4: GRAPHQL_UNION_MEMBER_TYPES@88..102
         0: EQ@88..89 "=" [] []
-        1: PIPE@89..92 "|" [Newline("\n"), Whitespace("\t")] []
-        2: GRAPHQL_UNION_MEMBER_TYPE_LIST@92..102
+        1: (empty)
+        2: GRAPHQL_UNION_MEMBER_TYPE_LIST@89..102
           0: (empty)
-          1: PIPE@92..96 "|" [Newline("\n"), Whitespace("\t")] [Whitespace(" ")]
-          2: GRAPHQL_NAMED_TYPE@96..102
+          1: PIPE@89..92 "|" [Newline("\n"), Whitespace("\t")] []
+          2: (empty)
+          3: PIPE@92..96 "|" [Newline("\n"), Whitespace("\t")] [Whitespace(" ")]
+          4: GRAPHQL_NAMED_TYPE@96..102
             0: GRAPHQL_NAME@96..102
               0: GRAPHQL_NAME@96..102 "Person" [] []
-    3: GRAPHQL_UNION_TYPE_DEFINITION@102..136
+    3: GRAPHQL_UNION_TYPE_DEFINITION@102..152
       0: (empty)
       1: UNION_KW@102..110 "union" [Newline("\n"), Newline("\n")] [Whitespace(" ")]
       2: GRAPHQL_NAME@110..123
         0: GRAPHQL_NAME@110..123 "SearchResult" [] [Whitespace(" ")]
       3: GRAPHQL_DIRECTIVE_LIST@123..123
-      4: GRAPHQL_UNION_MEMBER_TYPES@123..136
+      4: GRAPHQL_UNION_MEMBER_TYPES@123..152
         0: EQ@123..124 "=" [] []
-        1: PIPE@124..128 "|" [Newline("\n"), Whitespace("\t")] [Whitespace(" ")]
-        2: GRAPHQL_UNION_MEMBER_TYPE_LIST@128..136
-          0: GRAPHQL_NAMED_TYPE@128..133
+        1: (empty)
+        2: GRAPHQL_UNION_MEMBER_TYPE_LIST@124..152
+          0: (empty)
+          1: PIPE@124..128 "|" [Newline("\n"), Whitespace("\t")] [Whitespace(" ")]
+          2: GRAPHQL_NAMED_TYPE@128..133
             0: GRAPHQL_NAME@128..133
               0: GRAPHQL_NAME@128..133 "Photo" [] []
-          1: PIPE@133..136 "|" [Newline("\n"), Whitespace("\t")] []
-          2: (empty)
-    4: GRAPHQL_UNION_TYPE_DEFINITION@136..158
+          3: (empty)
+          4: GRAPHQL_NAMED_TYPE@133..143
+            0: GRAPHQL_NAME@133..143
+              0: GRAPHQL_NAME@133..143 "Person" [Newline("\n"), Whitespace("\t  ")] []
+          5: PIPE@143..147 "|" [Newline("\n"), Whitespace("\t")] [Whitespace(" ")]
+          6: GRAPHQL_NAMED_TYPE@147..152
+            0: GRAPHQL_NAME@147..152
+              0: GRAPHQL_NAME@147..152 "union" [] []
+    4: GRAPHQL_UNION_TYPE_DEFINITION@152..196
       0: (empty)
-      1: UNION_KW@136..144 "union" [Newline("\n"), Newline("\n")] [Whitespace(" ")]
-      2: GRAPHQL_NAME@144..157
-        0: GRAPHQL_NAME@144..157 "SearchResult" [] [Whitespace(" ")]
-      3: GRAPHQL_DIRECTIVE_LIST@157..158
-        0: GRAPHQL_DIRECTIVE@157..158
-          0: AT@157..158 "@" [] []
-          1: (empty)
+      1: UNION_KW@152..160 "union" [Newline("\n"), Newline("\n")] [Whitespace(" ")]
+      2: GRAPHQL_NAME@160..173
+        0: GRAPHQL_NAME@160..173 "SearchResult" [] [Whitespace(" ")]
+      3: GRAPHQL_DIRECTIVE_LIST@173..182
+        0: GRAPHQL_DIRECTIVE@173..182
+          0: AT@173..174 "@" [] []
+          1: GRAPHQL_NAME@174..182
+            0: GRAPHQL_NAME@174..182 "union" [Newline("\n"), Newline("\n")] [Whitespace(" ")]
           2: (empty)
-      4: (empty)
-    5: GRAPHQL_UNION_TYPE_DEFINITION@158..180
-      0: (empty)
-      1: UNION_KW@158..166 "union" [Newline("\n"), Newline("\n")] [Whitespace(" ")]
-      2: GRAPHQL_NAME@166..179
-        0: GRAPHQL_NAME@166..179 "SearchResult" [] [Whitespace(" ")]
-      3: GRAPHQL_DIRECTIVE_LIST@179..179
-      4: GRAPHQL_UNION_MEMBER_TYPES@179..180
+      4: GRAPHQL_UNION_MEMBER_TYPES@182..196
         0: (empty)
-        1: PIPE@179..180 "|" [] []
-        2: GRAPHQL_UNION_MEMBER_TYPE_LIST@180..180
-    6: GRAPHQL_UNION_TYPE_DEFINITION@180..202
-      0: (empty)
-      1: UNION_KW@180..188 "union" [Newline("\n"), Newline("\n")] [Whitespace(" ")]
-      2: GRAPHQL_NAME@188..201
-        0: GRAPHQL_NAME@188..201 "SearchResult" [] [Whitespace(" ")]
-      3: GRAPHQL_DIRECTIVE_LIST@201..201
-      4: GRAPHQL_UNION_MEMBER_TYPES@201..202
-        0: EQ@201..202 "=" [] []
         1: (empty)
-        2: GRAPHQL_UNION_MEMBER_TYPE_LIST@202..202
-    7: GRAPHQL_UNION_TYPE_DEFINITION@202..226
+        2: GRAPHQL_UNION_MEMBER_TYPE_LIST@182..196
+          0: GRAPHQL_NAMED_TYPE@182..195
+            0: GRAPHQL_NAME@182..195
+              0: GRAPHQL_NAME@182..195 "SearchResult" [] [Whitespace(" ")]
+          1: PIPE@195..196 "|" [] []
+          2: (empty)
+    5: GRAPHQL_UNION_TYPE_DEFINITION@196..218
       0: (empty)
-      1: UNION_KW@202..210 "union" [Newline("\n"), Newline("\n")] [Whitespace(" ")]
-      2: GRAPHQL_NAME@210..223
-        0: GRAPHQL_NAME@210..223 "SearchResult" [] [Whitespace(" ")]
-      3: GRAPHQL_DIRECTIVE_LIST@223..223
-      4: GRAPHQL_UNION_MEMBER_TYPES@223..226
-        0: EQ@223..225 "=" [] [Whitespace(" ")]
-        1: PIPE@225..226 "|" [] []
-        2: GRAPHQL_UNION_MEMBER_TYPE_LIST@226..226
-    8: GRAPHQL_UNION_TYPE_DEFINITION@226..250
+      1: UNION_KW@196..204 "union" [Newline("\n"), Newline("\n")] [Whitespace(" ")]
+      2: GRAPHQL_NAME@204..217
+        0: GRAPHQL_NAME@204..217 "SearchResult" [] [Whitespace(" ")]
+      3: GRAPHQL_DIRECTIVE_LIST@217..217
+      4: GRAPHQL_UNION_MEMBER_TYPES@217..218
+        0: EQ@217..218 "=" [] []
+        1: (empty)
+        2: GRAPHQL_UNION_MEMBER_TYPE_LIST@218..218
+    6: GRAPHQL_UNION_TYPE_DEFINITION@218..242
       0: (empty)
-      1: UNION_KW@226..234 "union" [Newline("\n"), Newline("\n")] [Whitespace(" ")]
-      2: GRAPHQL_NAME@234..247
-        0: GRAPHQL_NAME@234..247 "SearchResult" [] [Whitespace(" ")]
-      3: GRAPHQL_DIRECTIVE_LIST@247..249
-        0: GRAPHQL_DIRECTIVE@247..249
-          0: AT@247..249 "@" [] [Whitespace(" ")]
+      1: UNION_KW@218..226 "union" [Newline("\n"), Newline("\n")] [Whitespace(" ")]
+      2: GRAPHQL_NAME@226..239
+        0: GRAPHQL_NAME@226..239 "SearchResult" [] [Whitespace(" ")]
+      3: GRAPHQL_DIRECTIVE_LIST@239..239
+      4: GRAPHQL_UNION_MEMBER_TYPES@239..242
+        0: EQ@239..241 "=" [] [Whitespace(" ")]
+        1: (empty)
+        2: GRAPHQL_UNION_MEMBER_TYPE_LIST@241..242
+          0: (empty)
+          1: PIPE@241..242 "|" [] []
+          2: (empty)
+    7: GRAPHQL_UNION_TYPE_DEFINITION@242..266
+      0: (empty)
+      1: UNION_KW@242..250 "union" [Newline("\n"), Newline("\n")] [Whitespace(" ")]
+      2: GRAPHQL_NAME@250..263
+        0: GRAPHQL_NAME@250..263 "SearchResult" [] [Whitespace(" ")]
+      3: GRAPHQL_DIRECTIVE_LIST@263..265
+        0: GRAPHQL_DIRECTIVE@263..265
+          0: AT@263..265 "@" [] [Whitespace(" ")]
           1: (empty)
           2: (empty)
-      4: GRAPHQL_UNION_MEMBER_TYPES@249..250
-        0: EQ@249..250 "=" [] []
+      4: GRAPHQL_UNION_MEMBER_TYPES@265..266
+        0: EQ@265..266 "=" [] []
         1: (empty)
-        2: GRAPHQL_UNION_MEMBER_TYPE_LIST@250..250
-  2: EOF@250..251 "" [Newline("\n")] []
+        2: GRAPHQL_UNION_MEMBER_TYPE_LIST@266..266
+  2: EOF@266..267 "" [Newline("\n")] []
 
 ```
 
@@ -364,147 +400,120 @@ union.graphql:4:2 parse ━━━━━━━━━━━━━━━━━━�
   
   i Remove |
   
-union.graphql:15:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+union.graphql:13:4 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `|` but instead found `Person`
+  
+    11 │ union SearchResult =
+    12 │ 	| Photo
+  > 13 │ 	  Person
+       │ 	  ^^^^^^
+    14 │ 	| union
+    15 │ 
+  
+  i Remove Person
+  
+union.graphql:18:7 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `=` but instead found `SearchResult`
+  
+    16 │ union SearchResult @
+    17 │ 
+  > 18 │ union SearchResult |
+       │       ^^^^^^^^^^^^
+    19 │ 
+    20 │ union SearchResult =
+  
+  i Remove SearchResult
+  
+union.graphql:20:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a named type but instead found 'union'.
   
-    13 │ 	|
-    14 │ 
-  > 15 │ union SearchResult @
+    18 │ union SearchResult |
+    19 │ 
+  > 20 │ union SearchResult =
        │ ^^^^^
-    16 │ 
-    17 │ union SearchResult |
+    21 │ 
+    22 │ union SearchResult = |
   
   i Expected a named type here.
   
-    13 │ 	|
-    14 │ 
-  > 15 │ union SearchResult @
+    18 │ union SearchResult |
+    19 │ 
+  > 20 │ union SearchResult =
        │ ^^^^^
-    16 │ 
-    17 │ union SearchResult |
+    21 │ 
+    22 │ union SearchResult = |
   
-union.graphql:17:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Expected a name but instead found 'union'.
-  
-    15 │ union SearchResult @
-    16 │ 
-  > 17 │ union SearchResult |
-       │ ^^^^^
-    18 │ 
-    19 │ union SearchResult =
-  
-  i Expected a name here.
-  
-    15 │ union SearchResult @
-    16 │ 
-  > 17 │ union SearchResult |
-       │ ^^^^^
-    18 │ 
-    19 │ union SearchResult =
-  
-union.graphql:17:20 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `=` but instead found `|`
-  
-    15 │ union SearchResult @
-    16 │ 
-  > 17 │ union SearchResult |
-       │                    ^
-    18 │ 
-    19 │ union SearchResult =
-  
-  i Remove |
-  
-union.graphql:19:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+union.graphql:22:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a named type but instead found 'union'.
   
-    17 │ union SearchResult |
-    18 │ 
-  > 19 │ union SearchResult =
+    20 │ union SearchResult =
+    21 │ 
+  > 22 │ union SearchResult = |
        │ ^^^^^
-    20 │ 
-    21 │ union SearchResult = |
+    23 │ 
+    24 │ union SearchResult @ =
   
   i Expected a named type here.
   
-    17 │ union SearchResult |
-    18 │ 
-  > 19 │ union SearchResult =
+    20 │ union SearchResult =
+    21 │ 
+  > 22 │ union SearchResult = |
        │ ^^^^^
-    20 │ 
-    21 │ union SearchResult = |
-  
-union.graphql:21:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Expected a named type but instead found 'union'.
-  
-    19 │ union SearchResult =
-    20 │ 
-  > 21 │ union SearchResult = |
-       │ ^^^^^
-    22 │ 
-    23 │ union SearchResult @ =
-  
-  i Expected a named type here.
-  
-    19 │ union SearchResult =
-    20 │ 
-  > 21 │ union SearchResult = |
-       │ ^^^^^
-    22 │ 
-    23 │ union SearchResult @ =
-  
-union.graphql:23:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Expected a named type but instead found 'union'.
-  
-    21 │ union SearchResult = |
-    22 │ 
-  > 23 │ union SearchResult @ =
-       │ ^^^^^
-    24 │ 
-  
-  i Expected a named type here.
-  
-    21 │ union SearchResult = |
-    22 │ 
-  > 23 │ union SearchResult @ =
-       │ ^^^^^
-    24 │ 
-  
-union.graphql:23:22 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Expected a name but instead found '='.
-  
-    21 │ union SearchResult = |
-    22 │ 
-  > 23 │ union SearchResult @ =
-       │                      ^
-    24 │ 
-  
-  i Expected a name here.
-  
-    21 │ union SearchResult = |
-    22 │ 
-  > 23 │ union SearchResult @ =
-       │                      ^
-    24 │ 
+    23 │ 
+    24 │ union SearchResult @ =
   
 union.graphql:24:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
+  × Expected a named type but instead found 'union'.
+  
+    22 │ union SearchResult = |
+    23 │ 
+  > 24 │ union SearchResult @ =
+       │ ^^^^^
+    25 │ 
+  
+  i Expected a named type here.
+  
+    22 │ union SearchResult = |
+    23 │ 
+  > 24 │ union SearchResult @ =
+       │ ^^^^^
+    25 │ 
+  
+union.graphql:24:22 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a name but instead found '='.
+  
+    22 │ union SearchResult = |
+    23 │ 
+  > 24 │ union SearchResult @ =
+       │                      ^
+    25 │ 
+  
+  i Expected a name here.
+  
+    22 │ union SearchResult = |
+    23 │ 
+  > 24 │ union SearchResult @ =
+       │                      ^
+    25 │ 
+  
+union.graphql:25:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
   × Expected a named type but instead found the end of the file.
   
-    23 │ union SearchResult @ =
-  > 24 │ 
+    24 │ union SearchResult @ =
+  > 25 │ 
        │ 
   
   i Expected a named type here.
   
-    23 │ union SearchResult @ =
-  > 24 │ 
+    24 │ union SearchResult @ =
+  > 25 │ 
        │ 
   
 ```

@@ -3,6 +3,7 @@ use biome_analyze::context::RuleContext;
 use biome_analyze::{ActionCategory, Ast, Rule, RuleAction, RuleDiagnostic};
 use biome_console::markup;
 use biome_diagnostics::{category, Applicability};
+use biome_json_analyze::utils::matches_path;
 use biome_json_factory::make::{ident, json_member_name};
 use biome_json_syntax::JsonMemberName;
 use biome_rowan::{AstNode, BatchMutationExt};
@@ -23,11 +24,11 @@ impl Rule for IndentSize {
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
 
-        let node_text = node.inner_string_text().ok()?;
-        if node_text.text() == "indentSize" {
-            return Some(());
+        if matches_path(Some(node), &["formatter", "indentSize"]) {
+            Some(())
+        } else {
+            None
         }
-        None
     }
 
     fn diagnostic(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<RuleDiagnostic> {
@@ -37,7 +38,7 @@ impl Rule for IndentSize {
                 category!("migrate"),
                 node.range(),
                 markup! {
-                    "The option "<Emphasis>"indentSize"</Emphasis>" is deprecated."
+                    "The option "<Emphasis>"formatter.indentSize"</Emphasis>" is deprecated."
                 }
                 .to_owned(),
             )
@@ -52,14 +53,14 @@ impl Rule for IndentSize {
         let new_node = json_member_name(ident("\"indentWidth\""));
         mutation.replace_node(node.clone(), new_node);
 
-        Some(RuleAction {
-            category: ActionCategory::QuickFix,
-            applicability: Applicability::Always,
-            message: markup! {
-                "Use the property "<Emphasis>"indentWidth"</Emphasis>" instead."
+        Some(RuleAction::new(
+            ActionCategory::QuickFix,
+            Applicability::Always,
+            markup! {
+                "Use the property "<Emphasis>"formatter.indentWidth"</Emphasis>" instead."
             }
             .to_owned(),
             mutation,
-        })
+        ))
     }
 }

@@ -138,6 +138,102 @@ impl DeserializableValue for AnyJsonValue {
     }
 }
 
+#[cfg(feature = "serde")]
+impl Deserializable for serde_json::Value {
+    fn deserialize(
+        value: &impl DeserializableValue,
+        name: &str,
+        diagnostics: &mut Vec<DeserializationDiagnostic>,
+    ) -> Option<Self> {
+        struct Visitor;
+        impl DeserializationVisitor for Visitor {
+            type Output = serde_json::Value;
+            const EXPECTED_TYPE: VisitableType = VisitableType::all();
+            fn visit_null(
+                self,
+                _range: biome_rowan::TextRange,
+                _name: &str,
+                _diagnostics: &mut Vec<DeserializationDiagnostic>,
+            ) -> Option<Self::Output> {
+                Some(serde_json::Value::Null)
+            }
+
+            fn visit_bool(
+                self,
+                value: bool,
+                _range: biome_rowan::TextRange,
+                _name: &str,
+                _diagnostics: &mut Vec<DeserializationDiagnostic>,
+            ) -> Option<Self::Output> {
+                Some(serde_json::Value::Bool(value))
+            }
+
+            fn visit_number(
+                self,
+                value: TextNumber,
+                _range: biome_rowan::TextRange,
+                _name: &str,
+                diagnostics: &mut Vec<DeserializationDiagnostic>,
+            ) -> Option<Self::Output> {
+                match serde_json::from_str(value.text()) {
+                    Ok(num) => Some(serde_json::Value::Number(num)),
+                    Err(err) => {
+                        diagnostics.push(DeserializationDiagnostic::new(err.to_string()));
+                        None
+                    }
+                }
+            }
+
+            fn visit_str(
+                self,
+                value: Text,
+                _range: biome_rowan::TextRange,
+                _name: &str,
+                _diagnostics: &mut Vec<DeserializationDiagnostic>,
+            ) -> Option<Self::Output> {
+                Some(serde_json::Value::String(value.text().to_string()))
+            }
+
+            fn visit_array(
+                self,
+                values: impl Iterator<Item = Option<impl DeserializableValue>>,
+                _range: biome_rowan::TextRange,
+                _name: &str,
+                diagnostics: &mut Vec<DeserializationDiagnostic>,
+            ) -> Option<Self::Output> {
+                Some(serde_json::Value::Array(
+                    values
+                        .filter_map(|value| Deserializable::deserialize(&value?, "", diagnostics))
+                        .collect(),
+                ))
+            }
+
+            fn visit_map(
+                self,
+                members: impl Iterator<
+                    Item = Option<(impl DeserializableValue, impl DeserializableValue)>,
+                >,
+                _range: biome_rowan::TextRange,
+                _name: &str,
+                diagnostics: &mut Vec<DeserializationDiagnostic>,
+            ) -> Option<Self::Output> {
+                Some(serde_json::Value::Object(
+                    members
+                        .filter_map(|entry| {
+                            let (key, value) = entry?;
+                            let key = Deserializable::deserialize(&key, "", diagnostics)?;
+                            let value = value.deserialize(Visitor, "", diagnostics)?;
+                            Some((key, value))
+                        })
+                        .collect(),
+                ))
+            }
+        }
+
+        value.deserialize(Visitor, name, diagnostics)
+    }
+}
+
 impl DeserializableValue for JsonMemberName {
     fn range(&self) -> biome_rowan::TextRange {
         AstNode::range(self)

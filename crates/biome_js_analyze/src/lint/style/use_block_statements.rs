@@ -1,7 +1,5 @@
 use biome_analyze::context::RuleContext;
-use biome_analyze::{
-    declare_rule, ActionCategory, Ast, FixKind, Rule, RuleAction, RuleDiagnostic, RuleSource,
-};
+use biome_analyze::{declare_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
 use biome_diagnostics::Applicability;
 use biome_js_factory::make;
@@ -284,12 +282,12 @@ impl Rule for UseBlockStatements {
                 }
             },
         };
-        Some(RuleAction {
-            category: ActionCategory::QuickFix,
-            applicability: Applicability::MaybeIncorrect,
-            message: markup! { "Wrap the statement with a `JsBlockStatement`" }.to_owned(),
+        Some(JsRuleAction::new(
+            ActionCategory::QuickFix,
+            Applicability::MaybeIncorrect,
+            markup! { "Wrap the statement with a `JsBlockStatement`" }.to_owned(),
             mutation,
-        })
+        ))
     }
 }
 

@@ -25,8 +25,6 @@ invalidTypeGetter.ts:2:9 lint/style/useNamingConvention ━━━━━━━━
     3 │ 
     4 │     get special_property(): unknown
   
-  i The name could be renamed to `specialProperty`.
-  
 
 ```
 
@@ -42,8 +40,6 @@ invalidTypeGetter.ts:4:9 lint/style/useNamingConvention ━━━━━━━━
     5 │ 
     6 │     get Unknown_Style(): unknown
   
-  i The name could be renamed to `specialProperty`.
-  
 
 ```
 
@@ -58,9 +54,5 @@ invalidTypeGetter.ts:6:9 lint/style/useNamingConvention ━━━━━━━━
       │         ^^^^^^^^^^^^^
     7 │ }
   
-  i The name could be renamed to `unknownStyle`.
-  
 
 ```
-
-

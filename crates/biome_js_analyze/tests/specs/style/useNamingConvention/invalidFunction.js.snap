@@ -4,34 +4,35 @@ expression: invalidFunction.js
 ---
 # Input
 ```jsx
-function PERSON() {}
-
 function special_function() {}
 
 function Unknown_Style() {}
 
-const g = function SPECIAL_FUNCTION() {}
+(function() {
+    function PERSON() {}
+
+    const g = function SPECIAL_FUNCTION() {}
+})()
+
 ```
 
 # Diagnostics
 ```
 invalidFunction.js:1:10 lint/style/useNamingConvention  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This function name should be in camelCase or PascalCase.
+  ! This global function name should be in camelCase or PascalCase or UPPERCASE.
   
-  > 1 │ function PERSON() {}
-      │          ^^^^^^
+  > 1 │ function special_function() {}
+      │          ^^^^^^^^^^^^^^^^
     2 │ 
-    3 │ function special_function() {}
-  
-  i The name could be renamed to `person`.
+    3 │ function Unknown_Style() {}
   
   i Safe fix: Rename this symbol in camelCase.
   
-    1   │ - function·PERSON()·{}
-      1 │ + function·person()·{}
-    2 2 │   
-    3 3 │   function special_function() {}
+     1    │ - function·special_function()·{}
+        1 │ + function·specialFunction()·{}
+     2  2 │   
+     3  3 │   function Unknown_Style() {}
   
 
 ```
@@ -39,75 +40,70 @@ invalidFunction.js:1:10 lint/style/useNamingConvention  FIXABLE  ━━━━━
 ```
 invalidFunction.js:3:10 lint/style/useNamingConvention  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This function name should be in camelCase or PascalCase.
+  ! This global function name should be in camelCase or PascalCase or UPPERCASE.
   
-    1 │ function PERSON() {}
+    1 │ function special_function() {}
     2 │ 
-  > 3 │ function special_function() {}
-      │          ^^^^^^^^^^^^^^^^
-    4 │ 
-    5 │ function Unknown_Style() {}
-  
-  i The name could be renamed to `specialFunction`.
-  
-  i Safe fix: Rename this symbol in camelCase.
-  
-    1 1 │   function PERSON() {}
-    2 2 │   
-    3   │ - function·special_function()·{}
-      3 │ + function·specialFunction()·{}
-    4 4 │   
-    5 5 │   function Unknown_Style() {}
-  
-
-```
-
-```
-invalidFunction.js:5:10 lint/style/useNamingConvention  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! This function name should be in camelCase or PascalCase.
-  
-    3 │ function special_function() {}
-    4 │ 
-  > 5 │ function Unknown_Style() {}
+  > 3 │ function Unknown_Style() {}
       │          ^^^^^^^^^^^^^
-    6 │ 
-    7 │ const g = function SPECIAL_FUNCTION() {}
-  
-  i The name could be renamed to `unknownStyle`.
+    4 │ 
+    5 │ (function() {
   
   i Safe fix: Rename this symbol in camelCase.
   
-    3 3 │   function special_function() {}
-    4 4 │   
-    5   │ - function·Unknown_Style()·{}
-      5 │ + function·unknownStyle()·{}
-    6 6 │   
-    7 7 │   const g = function SPECIAL_FUNCTION() {}
+     1  1 │   function special_function() {}
+     2  2 │   
+     3    │ - function·Unknown_Style()·{}
+        3 │ + function·unknownStyle()·{}
+     4  4 │   
+     5  5 │   (function() {
   
 
 ```
 
 ```
-invalidFunction.js:7:20 lint/style/useNamingConvention  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalidFunction.js:6:14 lint/style/useNamingConvention  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This function name should be in camelCase or PascalCase.
   
-    5 │ function Unknown_Style() {}
-    6 │ 
-  > 7 │ const g = function SPECIAL_FUNCTION() {}
-      │                    ^^^^^^^^^^^^^^^^
-  
-  i The name could be renamed to `specialFunction`.
+    5 │ (function() {
+  > 6 │     function PERSON() {}
+      │              ^^^^^^
+    7 │ 
+    8 │     const g = function SPECIAL_FUNCTION() {}
   
   i Safe fix: Rename this symbol in camelCase.
   
-    5 5 │   function Unknown_Style() {}
-    6 6 │   
-    7   │ - const·g·=·function·SPECIAL_FUNCTION()·{}
-      7 │ + const·g·=·function·specialFunction()·{}
+     4  4 │   
+     5  5 │   (function() {
+     6    │ - ····function·PERSON()·{}
+        6 │ + ····function·person()·{}
+     7  7 │   
+     8  8 │       const g = function SPECIAL_FUNCTION() {}
   
 
 ```
 
+```
+invalidFunction.js:8:24 lint/style/useNamingConvention  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
+  ! This function name should be in camelCase or PascalCase.
+  
+     6 │     function PERSON() {}
+     7 │ 
+   > 8 │     const g = function SPECIAL_FUNCTION() {}
+       │                        ^^^^^^^^^^^^^^^^
+     9 │ })()
+    10 │ 
+  
+  i Safe fix: Rename this symbol in camelCase.
+  
+     6  6 │       function PERSON() {}
+     7  7 │   
+     8    │ - ····const·g·=·function·SPECIAL_FUNCTION()·{}
+        8 │ + ····const·g·=·function·specialFunction()·{}
+     9  9 │   })()
+    10 10 │   
+  
+
+```

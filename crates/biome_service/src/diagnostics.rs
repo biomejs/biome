@@ -251,15 +251,18 @@ impl Diagnostic for FileTooLarge {
     fn message(&self, fmt: &mut biome_console::fmt::Formatter<'_>) -> std::io::Result<()> {
         fmt.write_markup(
             markup!{
-                "Size of "{self.path}" is "{Bytes(self.size)}" which exceeds configured maximum of "{Bytes(self.limit)}" for this project. The file size limit exists to prevent us inadvertently slowing down and loading large files that we shouldn't."
+                "Size of "{self.path}" is "{Bytes(self.size)}" which exceeds configured maximum of "{Bytes(self.limit)}" for this project.
+                The file size limit exists to prevent us inadvertently slowing down and loading large files that we shouldn't.
+                Use the `files.maxSize` configuration to change the maximum size of files processed."
             }
         )
     }
 
     fn description(&self, fmt: &mut Formatter<'_>) -> fmt::Result {
         write!(fmt,
-               "Size of {} is {} which exceeds configured maximum of {} for this project. \
-               The file size limit exists to prevent us inadvertently slowing down and loading large files that we shouldn't.",
+               "Size of {} is {} which exceeds configured maximum of {} for this project.\n\
+               The file size limit exists to prevent us inadvertently slowing down and loading large files that we shouldn't.\n\
+               Use the `files.maxSize` configuration to change the maximum size of files processed.",
                self.path, Bytes(self.size), Bytes(self.limit)
         )
     }

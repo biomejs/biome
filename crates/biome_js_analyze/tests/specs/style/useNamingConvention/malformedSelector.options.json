@@ -1,0 +1,53 @@
+{
+	"$schema": "../../../../../../packages/@biomejs/biome/configuration_schema.json",
+	"linter": {
+		"rules": {
+			"style": {
+				"useNamingConvention": {
+					"level": "error",
+					"options": {
+						"conventions": [
+							{
+								"selector": {
+									"kind": "classMember",
+									"modifiers": ["private", "protected"]
+								},
+								"match": ".*"
+							}, {
+								"selector": {
+									"kind": "classMember",
+									"modifiers": ["abstract", "static"]
+								},
+								"match": ".*"
+							}, {
+								"selector": {
+									"kind": "const",
+									"modifiers": ["private"]
+								},
+								"match": ".*"
+							}, {
+								"selector": {
+									"kind": "const",
+									"modifiers": ["readonly"]
+								},
+								"match": ".*"
+							}, {
+								"selector": {
+									"kind": "interface",
+									"modifiers": ["abstract"]
+								},
+								"match": ".*"
+							}, {
+								"selector": {
+									"kind": "classMember",
+									"scope": "global"
+								},
+								"match": ".*"
+							}
+						]
+					}
+				}
+			}
+		}
+	}
+}

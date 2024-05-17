@@ -151,13 +151,13 @@ impl Rule for UseShorthandAssign {
 
         mutation.replace_node(node.clone(), shorthand_node);
 
-        Some(JsRuleAction {
-            category: ActionCategory::QuickFix,
-            applicability: Applicability::MaybeIncorrect,
-            message: markup! { "Use "<Emphasis>""{shorthand_operator.to_string()?}""</Emphasis>" instead." }
+        Some(JsRuleAction::new(
+            ActionCategory::QuickFix,
+            Applicability::MaybeIncorrect,
+            markup! { "Use "<Emphasis>""{shorthand_operator.to_string()?}""</Emphasis>" instead." }
                 .to_owned(),
             mutation,
-        })
+        ))
     }
 }
 

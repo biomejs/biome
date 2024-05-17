@@ -294,6 +294,22 @@ use syn::{parse_macro_input, DeriveInput};
 ///     pub name: String,
 /// }
 /// ```
+/// ### `rest`
+///
+/// If present, puts the remaining fields found in the serialized representation
+/// into this field. The field must implement `Extend<K, V>` where `K` is the
+/// `Text` type and `V` implements `Deserializable`.
+///
+/// Cannot be used with the container attribute `#[deserializable(unknown_fields = deny)]`
+///
+/// ```no_test
+/// #[derive(Default, Deserializable)]
+/// pub struct StructWithRest {
+///     pub foo: String,
+///     #[deserializable(rest)]
+///     pub extra: HashMap<Text, serde_json::Value>,
+/// }
+/// ```
 ///
 /// ### `validate`
 ///

@@ -1,0 +1,9 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: validNamesapceExportType.ts
+---
+# Input
+```ts
+namespace Ns {}
+export type { Ns }
+```

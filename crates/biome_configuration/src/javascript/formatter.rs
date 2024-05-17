@@ -1,8 +1,9 @@
 use crate::PlainIndentStyle;
 use biome_deserialize_macros::{Deserializable, Merge, Partial};
 use biome_formatter::{AttributePosition, LineEnding, LineWidth, QuoteStyle};
-use biome_js_formatter::context::trailing_comma::TrailingComma;
-use biome_js_formatter::context::{ArrowParentheses, QuoteProperties, Semicolons};
+use biome_js_formatter::context::{
+    trailing_commas::TrailingCommas, ArrowParentheses, QuoteProperties, Semicolons,
+};
 use bpaf::Bpaf;
 use serde::{Deserialize, Serialize};
 
@@ -20,9 +21,15 @@ pub struct JavascriptFormatter {
     #[partial(bpaf(long("quote-properties"), argument("preserve|as-needed"), optional))]
     pub quote_properties: QuoteProperties,
 
+    // TODO: Remove in 2.0.0
     /// Print trailing commas wherever possible in multi-line comma-separated syntactic structures. Defaults to "all".
     #[partial(bpaf(long("trailing-comma"), argument("all|es5|none"), optional))]
-    pub trailing_comma: TrailingComma,
+    #[partial(deserializable(deprecated(use_instead = "javascript.formatter.trailingCommas")))]
+    pub trailing_comma: TrailingCommas,
+
+    /// Print trailing commas wherever possible in multi-line comma-separated syntactic structures. Defaults to "all".
+    #[partial(bpaf(long("trailing-commas"), argument("all|es5|none"), optional))]
+    pub trailing_commas: TrailingCommas,
 
     /// Whether the formatter prints semicolons for all statements or only in for statements where it is necessary because of ASI.
     #[partial(bpaf(long("semicolons"), argument("always|as-needed"), optional))]
@@ -52,6 +59,7 @@ pub struct JavascriptFormatter {
     ))]
     pub indent_style: Option<PlainIndentStyle>,
 
+    // TODO: Remove in 2.0.0
     /// The size of the indentation applied to JavaScript (and its super languages) files. Default to 2.
     #[partial(deserializable(deprecated(use_instead = "javascript.formatter.indentWidth")))]
     #[partial(bpaf(long("javascript-formatter-indent-size"), argument("NUMBER"), optional))]
@@ -100,6 +108,7 @@ impl PartialJavascriptFormatter {
             jsx_quote_style: self.jsx_quote_style.unwrap_or_default(),
             quote_properties: self.quote_properties.unwrap_or_default(),
             trailing_comma: self.trailing_comma.unwrap_or_default(),
+            trailing_commas: self.trailing_commas.unwrap_or_default(),
             semicolons: self.semicolons.unwrap_or_default(),
             arrow_parentheses: self.arrow_parentheses.unwrap_or_default(),
             bracket_spacing: self.bracket_spacing.unwrap_or_default(),
@@ -122,6 +131,7 @@ impl Default for JavascriptFormatter {
             jsx_quote_style: Default::default(),
             quote_properties: Default::default(),
             trailing_comma: Default::default(),
+            trailing_commas: Default::default(),
             semicolons: Default::default(),
             arrow_parentheses: Default::default(),
             bracket_spacing: true,
@@ -133,6 +143,31 @@ impl Default for JavascriptFormatter {
             line_width: Default::default(),
             quote_style: Default::default(),
             attribute_position: Default::default(),
+        }
+    }
+}
+
+/// Linter options specific to the JavaScript linter
+#[derive(Clone, Debug, Deserialize, Eq, Partial, PartialEq, Serialize)]
+#[partial(derive(Bpaf, Clone, Deserializable, Eq, Merge, PartialEq))]
+#[partial(cfg_attr(feature = "schema", derive(schemars::JsonSchema)))]
+#[partial(serde(rename_all = "camelCase", default, deny_unknown_fields))]
+pub struct JavascriptLinter {
+    /// Control the linter for JavaScript (and its super languages) files.
+    #[partial(bpaf(long("javascript-linter-enabled"), argument("true|false"), optional))]
+    pub enabled: bool,
+}
+
+impl Default for JavascriptLinter {
+    fn default() -> Self {
+        Self { enabled: true }
+    }
+}
+
+impl PartialJavascriptLinter {
+    pub fn get_formatter_configuration(&self) -> JavascriptLinter {
+        JavascriptLinter {
+            enabled: self.enabled.unwrap_or_default(),
         }
     }
 }

@@ -117,11 +117,12 @@ impl Rule for NoVar {
             declaration.kind_token().ok()?,
             make::token(replacing_token_kind),
         );
-        Some(JsRuleAction {
-            category: ActionCategory::QuickFix,
-            applicability: Applicability::MaybeIncorrect,
-            message: markup! { "Use '"<Emphasis>{replacing_token_kind.to_string()?}</Emphasis>"' instead." }.to_owned(),
+        Some(JsRuleAction::new(
+            ActionCategory::QuickFix,
+            Applicability::MaybeIncorrect,
+            markup! { "Use '"<Emphasis>{replacing_token_kind.to_string()?}</Emphasis>"' instead." }
+                .to_owned(),
             mutation,
-        })
+        ))
     }
 }

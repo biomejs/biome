@@ -224,6 +224,10 @@ pub(crate) fn parse_ts_type_alias_declaration(p: &mut JsParser) -> ParsedSyntax 
 
 // test ts ts_declare_const_initializer
 // declare module test { const X; }
+//
+// test_err ts ts_declare_using
+// declare using x: null
+// declare await using x: null
 pub(crate) fn parse_ts_declare_statement(p: &mut JsParser) -> ParsedSyntax {
     if !is_at_ts_declare_statement(p) {
         return Absent;
@@ -247,6 +251,12 @@ pub(crate) fn parse_ts_declare_statement(p: &mut JsParser) -> ParsedSyntax {
 #[inline]
 pub(crate) fn is_at_ts_declare_statement(p: &mut JsParser) -> bool {
     if !p.at(T![declare]) || p.has_nth_preceding_line_break(1) {
+        return false;
+    }
+
+    if matches!(p.nth(1), T![using])
+        || (matches!(p.nth(1), T![await]) && matches!(p.nth(2), T![using]))
+    {
         return false;
     }
 

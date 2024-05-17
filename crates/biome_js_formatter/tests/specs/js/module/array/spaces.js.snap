@@ -2,7 +2,6 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: js/module/array/spaces.js
 ---
-
 # Input
 
 ```js
@@ -29,7 +28,7 @@ Line width: 80
 Quote style: Double Quotes
 JSX quote style: Double Quotes
 Quote properties: As needed
-Trailing comma: All
+Trailing commas: All
 Semicolons: Always
 Arrow parentheses: Always
 Bracket spacing: true
@@ -44,5 +43,3 @@ let c = [, , 1];
 let d = [, , 1, 1];
 let e = [2, 2, 1, 3];
 ```
-
-

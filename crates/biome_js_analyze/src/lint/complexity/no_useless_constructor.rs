@@ -213,12 +213,12 @@ impl Rule for NoUselessConstructor {
         let constructor = ctx.query();
         let mut mutation = ctx.root().begin();
         mutation.remove_node(constructor.clone());
-        Some(JsRuleAction {
-            category: ActionCategory::QuickFix,
-            applicability: Applicability::MaybeIncorrect,
-            message: markup! { "Remove the unnecessary constructor." }.to_owned(),
+        Some(JsRuleAction::new(
+            ActionCategory::QuickFix,
+            Applicability::MaybeIncorrect,
+            markup! { "Remove the unnecessary constructor." }.to_owned(),
             mutation,
-        })
+        ))
     }
 }
 

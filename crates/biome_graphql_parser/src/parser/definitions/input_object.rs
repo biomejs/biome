@@ -1,6 +1,6 @@
 use crate::parser::{
     directive::DirectiveList, parse_description, parse_error::expected_name, parse_name,
-    value::is_at_string, GraphqlParser,
+    GraphqlParser,
 };
 use biome_graphql_syntax::{
     GraphqlSyntaxKind::{self, *},
@@ -11,16 +11,10 @@ use biome_parser::{
     prelude::ParsedSyntax::*, Parser,
 };
 
-use super::{
-    field::{is_at_input_value_definition, parse_input_value_definition},
-    is_at_definition,
-};
+use super::field::{is_at_input_value_definition, parse_input_value_definition};
 
 #[inline]
 pub(crate) fn parse_input_object_type_definition(p: &mut GraphqlParser) -> ParsedSyntax {
-    if !is_at_input_object_type_definition(p) {
-        return Absent;
-    }
     let m = p.start();
 
     // description is optional
@@ -91,11 +85,6 @@ impl ParseRecovery for InputFieldListParseRecovery {
 }
 
 #[inline]
-pub(crate) fn is_at_input_object_type_definition(p: &mut GraphqlParser) -> bool {
-    p.at(T![input]) || (is_at_string(p) && p.nth_at(1, T![input]))
-}
-
-#[inline]
 fn is_at_input_fields_definition(p: &mut GraphqlParser) -> bool {
     p.at(T!['{'])
     // missing opening brace
@@ -104,5 +93,7 @@ fn is_at_input_fields_definition(p: &mut GraphqlParser) -> bool {
 
 #[inline]
 fn is_input_fields_end(p: &mut GraphqlParser) -> bool {
-    p.at(T!['}']) || is_at_definition(p)
+    p.at(T!['}'])
+    // start of next definition body, since input fields can't be nested
+    || p.at(T!['{'])
 }

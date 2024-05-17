@@ -1,6 +1,6 @@
 use biome_analyze::{
     context::RuleContext, declare_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic,
-    RuleSource,
+    RuleSource, RuleSourceKind,
 };
 use biome_console::markup;
 use biome_diagnostics::Applicability;
@@ -51,6 +51,7 @@ declare_rule! {
         sources: &[RuleSource::EslintReact("jsx-boolean-value")],
         recommended: false,
         fix_kind: FixKind::Safe,
+        source_kind: RuleSourceKind::Inspired,
     }
 }
 
@@ -126,11 +127,11 @@ impl Rule for NoImplicitBoolean {
 
         mutation.replace_node(n.clone(), next_attr);
 
-        Some(JsRuleAction {
-            category: ActionCategory::QuickFix,
-            applicability: Applicability::Always,
-            message: markup! { "Add explicit `true` literal for this attribute" }.to_owned(),
+        Some(JsRuleAction::new(
+            ActionCategory::QuickFix,
+            Applicability::Always,
+            markup! { "Add explicit `true` literal for this attribute" }.to_owned(),
             mutation,
-        })
+        ))
     }
 }

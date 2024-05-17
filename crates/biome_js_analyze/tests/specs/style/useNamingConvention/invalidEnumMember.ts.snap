@@ -27,8 +27,6 @@ invalidEnumMember.ts:2:5 lint/style/useNamingConvention ━━━━━━━━
     3 │     CLOSE,
     4 │ }
   
-  i The name could be renamed to `Open`.
-  
 
 ```
 
@@ -44,8 +42,6 @@ invalidEnumMember.ts:3:5 lint/style/useNamingConvention ━━━━━━━━
     4 │ }
     5 │ 
   
-  i The name could be renamed to `Close`.
-  
 
 ```
 
@@ -59,8 +55,6 @@ invalidEnumMember.ts:7:5 lint/style/useNamingConvention ━━━━━━━━
       │     ^^^^^
     8 │     left,
     9 │ }
-  
-  i The name could be renamed to `Right`.
   
 
 ```
@@ -76,9 +70,5 @@ invalidEnumMember.ts:8:5 lint/style/useNamingConvention ━━━━━━━━
       │     ^^^^
     9 │ }
   
-  i The name could be renamed to `Left`.
-  
 
 ```
-
-

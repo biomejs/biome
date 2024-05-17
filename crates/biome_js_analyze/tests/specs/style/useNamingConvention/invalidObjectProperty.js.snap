@@ -29,8 +29,6 @@ invalidObjectProperty.js:2:5 lint/style/useNamingConvention ━━━━━━�
     3 │ 
     4 │     SpecialProperty: 0,
   
-  i The name could be renamed to `initialized`.
-  
 
 ```
 
@@ -45,8 +43,6 @@ invalidObjectProperty.js:4:5 lint/style/useNamingConvention ━━━━━━�
       │     ^^^^^^^^^^^^^^^
     5 │ 
     6 │     special_property: 0,
-  
-  i The name could be renamed to `specialProperty`.
   
 
 ```
@@ -63,8 +59,6 @@ invalidObjectProperty.js:6:5 lint/style/useNamingConvention ━━━━━━�
     7 │ 
     8 │     Unknown_Style: 0,
   
-  i The name could be renamed to `specialProperty`.
-  
 
 ```
 
@@ -80,8 +74,6 @@ invalidObjectProperty.js:8:5 lint/style/useNamingConvention ━━━━━━�
      9 │ 
     10 │     Unknown_Init_Style: 0,
   
-  i The name could be renamed to `unknownStyle`.
-  
 
 ```
 
@@ -96,9 +88,5 @@ invalidObjectProperty.js:10:5 lint/style/useNamingConvention ━━━━━━�
        │     ^^^^^^^^^^^^^^^^^^
     11 │ }
   
-  i The name could be renamed to `unknownInitStyle`.
-  
 
 ```
-
-

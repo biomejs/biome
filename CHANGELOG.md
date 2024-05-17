@@ -13,7 +13,63 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 ### Analyzer
 
+#### Enhancements
+
+- Assume Vue compiler macros are globals when processing `.vue` files. ([#2771](https://github.com/biomejs/biome/pull/2771)) Contributed by @dyc3
+
 ### CLI
+
+#### New features
+
+- Add a new option `--rule` to the command `biome lint` ([#58](https://github.com/biomejs/biome/issues/58)).
+
+  This new option allows you to execute a single rule or a rule group.
+  This option is convenient to test a rule or apply the code fixes of a single rule.
+
+  For example, you can execute the `style/useNamingConvention` rule on the working directory:
+
+  ```shell
+  biome lint --rule=style/useNamingConvention ./
+  ```
+
+  If the rule has a code action (autofix), you can use `--apply` to apply the fix:
+
+  ```shell
+  biome lint --rule=style/useNamingConvention --apply ./
+  ```
+
+  The option takes the rule options in the Biome configuration file into account.
+  Only, the severity level of the rule is overridden by its default value,
+  i.e. `error` for a recommended rule or `warn` otherwise.
+
+  You can also run a group of rules:
+
+  ```shell
+  biome lint --rule=suspicious src/main.js
+  ```
+
+  In this case, the severity level of a rule is not overridden.
+  Thus, the disabled rules stay disabled.
+  To ensure that the group is run, the `recommended` field of the group is turned on.
+  The `nursery` group cannot be passed because no rules are enabled in the nursery group by default.
+
+  The option is compatible with other options such as `--apply`, `--apply-unsafe` and `--reporter`.
+
+  Contributed by @Conaclos
+
+- Add new command `biome clean`. Use this command to purge all the logs emitted by the Biome daemon. This command is really useful, because the Biome daemon tends
+  log many files and contents during its lifecycle. This means that if your editor is open for hours (or even days), the `biome-logs` folder could become quite heavy. Contributed by @ematipico
+
+- Add support for formatting and linting CSS files from the CLI. These operations are **opt-in** for the time being.
+
+  If you don't have a configuration file, you can enable these features with `--css-formatter-enabled` and `--css-linter-enabled`:
+
+  ```shell
+  biome check --css-formatter-enabled=true --css-linter-enabled=true ./
+  ```
+  Contributed by @ematipico
+
+- Add new CLI options to control the CSS formatting. Check the [CLI reference page](https://biomejs.dev/reference/cli/) for more details. Contributed by @ematipico
 
 #### Enhancements
 
@@ -24,7 +80,75 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
   + biome check    # You can run the command without the path
   ```
 
+- `biome migrate eslint` now tries to convert ESLint ignore patterns into Biome ignore patterns.
+
+  ESLint uses [gitignore patterns](https://git-scm.com/docs/gitignore#_pattern_format).
+  Biome now tries to convert these patterns into Biome ignore patterns.
+
+  For example, the gitignore pattern `/src` is a relative path to the file in which it appears.
+  Biome now recognizes this and translates this pattern to `./src`.
+
+  Contributed by @Conaclos
+
+- `biome migrate eslint` now supports the `eslintIgnore` field in `package.json`.
+
+  ESLint allows the use of `package.json` as an ESLint configuration file.
+  ESLint supports two fields: `eslintConfig` and `eslintIgnore`.
+  Biome only supported the former. It now supports both.
+
+  Contributed by @Conaclos
+
 ### Configuration
+
+#### New features
+
+- Add an rule option `fix` to override the code fix kind of a rule ([#2882](https://github.com/biomejs/biome/issues/2882)).
+
+  A rule can provide a safe or an **unsafe** code **action**.
+  You can now tune the kind of code actions thanks to the `fix` option.
+  This rule option takes a value among:
+
+  - `none`: the rule no longer emits code actions.
+  - `safe`: the rule emits safe code action.
+  - `unsafe`: the rule emits unsafe code action.
+
+  The following configuration disables the code actions of `noUnusedVariables`, makes the emitted code actions of `style/useConst` and `style/useTemplate` unsafe and safe respectively.
+
+  ```json
+  {
+    "linter": {
+      "rules": {
+        "correctness": {
+          "noUnusedVariables": {
+            "level": "error",
+            "fix": "none"
+          },
+          "style": {
+            "useConst": {
+              "level": "warn",
+              "fix": "unsafe"
+            },
+            "useTemplate": {
+              "level": "warn",
+              "fix": "safe"
+            }
+          }
+        }
+      }
+    }
+  }
+  ```
+
+  Contributed by @Conaclos
+
+- Add option `javascript.linter.enabled` to control the linter for JavaScript (and its super languages) files. Contributed by @ematipico
+- Add option `json.linter.enabled` to control the linter for JSON (and its super languages) files. Contributed by @ematipico
+- Add option `css.linter.enabled` to control the linter for CSS (and its super languages) files. Contributed by @ematipico
+- Add option `css.formatter`, to control the formatter options for CSS (and its super languages) files. Contributed by @ematipico
+
+#### Enhancements
+
+- The `javascript.formatter.trailingComma` option is deprecated and renamed to `javascript.formatter.trailingCommas`. The corresponding CLI option `--trailing-comma` is also deprecated and renamed to `--trailing-commas`. Details can be checked in [#2492](https://github.com/biomejs/biome/pull/2492). Contributed by @Sec-ant
 
 ### Editors
 
@@ -45,13 +169,111 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 #### New features
 
+- [useNamingConvention](https://biomejs.dev/linter/rules/use-naming-convention/) now supports an option to enforce custom conventions ([#1900](https://github.com/biomejs/biome/issues/1900)).
+
+  For example, you can enforce the use of a prefix for private class members:
+
+  ```json
+  {
+  	"linter": {
+  		"rules": {
+  			"style": {
+  				"useNamingConvention": {
+  					"level": "error",
+  					"options": {
+  						"conventions": [
+  							{
+  								"selector": {
+  									"kind": "classMember",
+  									"modifiers": ["private"]
+  								},
+  								"match": "_(.*)",
+                  "formats": ["camelCase"]
+  							}
+  						]
+  					}
+  				}
+  			}
+  		}
+  	}
+  }
+  ```
+
+  Please, find more details in the [rule documentation](https://biomejs.dev/linter/rules/use-naming-convention/#conventions).
+
+  Contributed by @Conaclos
+
 - Add [nursery/useNumberToFixedDigitsArgument](https://biomejs.dev/linter/rules/use-number-to-fixed-digits-argument/).
   Contributed by @minht11
 
 - Add [nursery/useThrowNewError](https://biomejs.dev/linter/rules/use-throw-new-error/).
   Contributed by @minht11
+- Add [nursery/useTopLevelRegex](https://biomejs.dev/linter/rules/use-top-level-regex), which enforces defining regular expressions at the top level of a module. [#2148](https://github.com/biomejs/biome/issues/2148) Contributed by @dyc3.
+- Add [nursery/noCssEmptyBlock](https://biomejs.dev/linter/rules/no-css-empty-block). [#2513](https://github.com/biomejs/biome/pull/2513) Contributed by @togami2864
+- Add [nursery/noDuplicateAtImportRules](https://biomejs.dev/linter/rules/no-duplicate-at-import-rules). [#2658](https://github.com/biomejs/biome/pull/2658) Contributed by @DerTimonius
+- Add [nursery/noDuplicateFontNames](https://biomejs.dev/linter/rules/no-duplicate-font-names). [#2308](https://github.com/biomejs/biome/pull/2308) Contributed by @togami2864
+- Add [nursery/noDuplicateSelectorsKeyframeBlock](https://biomejs.dev/linter/rules/no-duplicate-selectors-keyframe-block). [#2534](https://github.com/biomejs/biome/pull/2534) Contributed by @isnakode
+- Add [nursery/noImportantInKeyframe](https://biomejs.dev/linter/rules/no-important-in-keyframe). [#2542](https://github.com/biomejs/biome/pull/2542) Contributed by @isnakode
+- Add [nursery/noInvalidPositionAtImportRule](https://biomejs.dev/linter/rules/no-invalid-position-at-import-rule). [#2717](https://github.com/biomejs/biome/issues/2717) Contributed by @t-shiratori
+- Add [nursery/noUnknownFunction](https://biomejs.dev/linter/rules/no-unknown-function). [#2570](https://github.com/biomejs/biome/pull/2570) Contributed by @neokidev
+- Add [nursery/noUnknownMediaFeatureName](https://biomejs.dev/linter/rules/no-unknown-media-feature-name). [#2751](https://github.com/biomejs/biome/issues/2751) Contributed by @Kazuhiro-Mimaki
+- Add [nursery/noUnknownProperty](https://biomejs.dev/linter/rules/no-unknown-property). [#2755](https://github.com/biomejs/biome/pull/2755) Contributed by @chansuke
+- Add [nursery/noUnknownSelectorPseudoElement](https://biomejs.dev/linter/rules/no-unknown-selector-pseudo-element). [#2655](https://github.com/biomejs/biome/issues/2655) Contributed by @keita-hino
+- Add [nursery/noUnknownUnit](https://biomejs.dev/linter/rules/no-unknwon-unit). [#2535](https://github.com/biomejs/biome/issues/2535) Contributed by @neokidev
+- Add [nursery/noUnmatchableAnbSelector](https://biomejs.dev/linter/rules/no-unmatchable-anb-selector). [#2706](https://github.com/biomejs/biome/issues/2706) Contributed by @togami2864
+- Add [nursery/useGenericFontNames](https://biomejs.dev/linter/rules/use-generic-font-names). [#2573](https://github.com/biomejs/biome/pull/2573) Contributed by @togami2864
+
+#### Enhancements
+
+- Add a code action for [noConfusingVoidType](https://biomejs.dev/linter/rules/no-confusing-void-type/) and improve the diagnostics.
+
+  The rule now suggests using `undefined` instead of `void` in confusing places.
+  The diagnosis is also clearer.
+
+  Contributed by @Conaclos
 
 #### Bug fixes
+
+- [noUndeclaredVariables](https://biomejs.dev/linter/rules/no-undeclared-variables/) and [noUnusedImports](https://biomejs.dev/linter/rules/no-unused-imports) now correctly handle import namespaces ([#2796](https://github.com/biomejs/biome/issues/2796)).
+
+  Previously, Biome bound unqualified type to import namespaces.
+  Import namespaces can only be used as qualified names in a type (ambient) context.
+
+  ```ts
+  // Unused import
+  import * as Ns1 from "";
+  // This doesn't reference the import namespace `Ns1`
+  type T1 = Ns1; // Undeclared variable `Ns1`
+
+  // Unused import
+  import type * as Ns2 from "";
+  // This doesn't reference the import namespace `Ns2`
+  type T2 = Ns2; // Undeclared variable `Ns2`
+
+  import type * as Ns3 from "";
+  // This references the import namespace because it is a qualified name.
+  type T3 = Ns3.Inner;
+  // This also references the import namespace.
+  export type { Ns3 }
+  ```
+
+  Contributed by @Conaclos
+
+- [noUndeclaredVariables](https://biomejs.dev/linter/rules/no-undeclared-variables/) now ignores `this` in JSX components ([#2636](https://github.com/biomejs/biome/issues/2636)).
+
+  The rule no longer reports `this` as undeclared in following code.
+
+  ```jsx
+  import { Component } from 'react';
+
+  export class MyComponent extends Component {
+    render() {
+      return <this.foo />
+    }
+  }
+  ```
+
+  Contributed by @printfn and @Conaclos
 
 - `useJsxKeyInIterable` now handles more cases involving fragments. See the snippets below. Contributed by @dyc3
 ```jsx
@@ -77,11 +299,38 @@ z.object({})
   .describe('');
 ```
 
+- [noExportsInTest](https://biomejs.dev/linter/rules/no-exports-in-test/) rule no longer treats files with in-source testing as test files https://github.com/biomejs/biome/issues/2859. Contributed by @ah-yu
+
 ### Parser
 
 #### Enhancements
 
 - `lang="tsx"` is now supported in Vue Single File Components. [#2765](https://github.com/biomejs/biome/issues/2765) Contributed by @dyc3
+
+#### Bug fixes
+
+- The `const` modifier for type parameters is now accepted for TypeScript `new` signatures ([#2825](https://github.com/biomejs/biome/issues/2825)).
+
+  The following code is now correctly parsed:
+
+  ```ts
+  interface I {
+    new<const T>(x: T): T
+  }
+  ```
+
+  Contributed by @Conaclos
+
+- Some invalid TypeScript syntax caused the Biome parser to crash.
+
+  The following invalid syntax no longer causes the Biome parser to crash:
+
+  ```ts
+  declare using x: null;
+  declare qwait using x: null;
+  ```
+
+  Contributed by @Conaclos
 
 ## 1.7.3 (2024-05-06)
 

@@ -154,12 +154,12 @@ impl Rule for UseSimplifiedLogicExpression {
             "Discard redundant terms from the logical expression."
         };
 
-        Some(JsRuleAction {
-            category: ActionCategory::QuickFix,
-            applicability: Applicability::MaybeIncorrect,
-            message: markup! { ""{message}"" }.to_owned(),
+        Some(JsRuleAction::new(
+            ActionCategory::QuickFix,
+            Applicability::MaybeIncorrect,
+            markup! { ""{message}"" }.to_owned(),
             mutation,
-        })
+        ))
     }
 }
 

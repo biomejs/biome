@@ -216,16 +216,16 @@ impl Rule for NoNonoctalDecimalEscape {
 
         mutation.replace_token(prev_token, next_token);
 
-        Some(JsRuleAction {
-            category: ActionCategory::QuickFix,
-            applicability: Applicability::MaybeIncorrect,
-            message: match kind {
+        Some(JsRuleAction::new(
+            ActionCategory::QuickFix,
+            Applicability::MaybeIncorrect,
+             match kind {
 				FixSuggestionKind::Refactor => {
 					markup! ("Replace "<Emphasis>{replace_from}</Emphasis>" with "<Emphasis>{replace_to}</Emphasis>". This maintains the current functionality.").to_owned()
 				}
 			},
             mutation,
-        })
+        ))
     }
 }
 

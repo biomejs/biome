@@ -133,11 +133,11 @@ impl Rule for NoExtraNonNullAssertion {
 
         mutation.remove_token(excl_token);
 
-        Some(JsRuleAction {
-            category: ActionCategory::QuickFix,
-            applicability: Applicability::Always,
-            message: markup! { "Remove extra non-null assertion." }.to_owned(),
+        Some(JsRuleAction::new(
+            ActionCategory::QuickFix,
+            Applicability::Always,
+            markup! { "Remove extra non-null assertion." }.to_owned(),
             mutation,
-        })
+        ))
     }
 }

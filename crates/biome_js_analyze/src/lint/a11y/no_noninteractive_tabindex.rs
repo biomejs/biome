@@ -163,13 +163,12 @@ impl Rule for NoNoninteractiveTabindex {
         let mut mutation = ctx.root().begin();
 
         mutation.remove_node(tabindex_attribute);
-        Some(JsRuleAction {
-            category: ActionCategory::QuickFix,
-            applicability: Applicability::MaybeIncorrect,
-            message: markup! { "Remove the "<Emphasis>"tabIndex"</Emphasis>" attribute." }
-                .to_owned(),
+        Some(JsRuleAction::new(
+            ActionCategory::QuickFix,
+            Applicability::MaybeIncorrect,
+            markup! { "Remove the "<Emphasis>"tabIndex"</Emphasis>" attribute." }.to_owned(),
             mutation,
-        })
+        ))
     }
 }
 

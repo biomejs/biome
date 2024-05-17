@@ -94,14 +94,14 @@ impl Rule for UseValidAriaProps {
 
         mutation.remove_node(attribute.clone());
 
-        Some(JsRuleAction {
-            category: ActionCategory::QuickFix,
-            applicability: Applicability::MaybeIncorrect,
-            message:
+        Some(JsRuleAction::new(
+            ActionCategory::QuickFix,
+            Applicability::MaybeIncorrect,
+
                 markup! { "Remove the invalid "<Emphasis>"aria-*"</Emphasis>" attribute.
                 Check the list of all "<Hyperlink href="https://developer.mozilla.org/en-US/docs/web/Accessibility/ARIA/Attributes#aria_attribute_types">"valid"</Hyperlink>" aria-* attributes." }
                     .to_owned(),
             mutation,
-        })
+        ))
     }
 }

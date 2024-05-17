@@ -21,7 +21,7 @@ expression: invalidSyllabary.js
 ```
 invalidSyllabary.js:2:11 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This top-level const name should be in camelCase or PascalCase or CONSTANT_CASE.
+  ! This global const name should be in camelCase or PascalCase or CONSTANT_CASE.
   
     1 │ {
   > 2 │     const 안녕a하세요 = 0;
@@ -60,5 +60,3 @@ invalidSyllabary.js:10:11 lint/style/useNamingConvention ━━━━━━━�
   
 
 ```
-
-

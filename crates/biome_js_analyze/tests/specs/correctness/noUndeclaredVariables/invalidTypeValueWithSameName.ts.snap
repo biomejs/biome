@@ -12,13 +12,14 @@ export type { a }
 ```
 invalidTypeValueWithSameName.ts:2:15 lint/correctness/noUndeclaredVariables ━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The a variable is undeclared
+  ! The a variable is undeclared.
   
     1 │ const a = 0;
   > 2 │ export type { a }
       │               ^
   
+  i By default, Biome recognizes browser and Mode.js globals.
+    You can ignore more globals using the javascript.globals configuration.
+  
 
 ```
-
-

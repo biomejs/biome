@@ -188,13 +188,12 @@ impl Rule for UseExportType {
                         ))
                         .with_specifiers(new_specifier_list),
                 );
-                JsRuleAction {
-                    category: ActionCategory::QuickFix,
-                    applicability: Applicability::Always,
-                    message: markup! { "Use a grouped "<Emphasis>"export type"</Emphasis>"." }
-                        .to_owned(),
+                JsRuleAction::new(
+                    ActionCategory::QuickFix,
+                    Applicability::Always,
+                    markup! { "Use a grouped "<Emphasis>"export type"</Emphasis>"." }.to_owned(),
                     mutation,
-                }
+                )
             }
             ExportTypeFix::AddInlineTypeQualifiers(specifiers) => {
                 for specifier in specifiers {
@@ -212,13 +211,12 @@ impl Rule for UseExportType {
                             )),
                     );
                 }
-                JsRuleAction {
-                    category: ActionCategory::QuickFix,
-                    applicability: Applicability::Always,
-                    message: markup! { "Use inline "<Emphasis>"type"</Emphasis>" exports." }
-                        .to_owned(),
+                JsRuleAction::new(
+                    ActionCategory::QuickFix,
+                    Applicability::Always,
+                    markup! { "Use inline "<Emphasis>"type"</Emphasis>" exports." }.to_owned(),
                     mutation,
-                }
+                )
             }
         };
         Some(diagnostic)

@@ -100,12 +100,11 @@ impl Rule for NoAccessKey {
         let node = ctx.query();
         let mut mutation = ctx.root().begin();
         mutation.remove_node(node.clone());
-        Some(JsRuleAction {
-            category: ActionCategory::QuickFix,
-            applicability: Applicability::MaybeIncorrect,
-            message: markup! { "Remove the "<Emphasis>"accessKey"</Emphasis>" attribute." }
-                .to_owned(),
+        Some(JsRuleAction::new(
+            ActionCategory::QuickFix,
+            Applicability::MaybeIncorrect,
+            markup! { "Remove the "<Emphasis>"accessKey"</Emphasis>" attribute." }.to_owned(),
             mutation,
-        })
+        ))
     }
 }

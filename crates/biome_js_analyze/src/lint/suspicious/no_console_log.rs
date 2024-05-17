@@ -99,11 +99,11 @@ impl Rule for NoConsoleLog {
             }
         }
 
-        Some(JsRuleAction {
-            category: ActionCategory::QuickFix,
-            applicability: Applicability::MaybeIncorrect,
-            message: markup! { "Remove console.log" }.to_owned(),
+        Some(JsRuleAction::new(
+            ActionCategory::QuickFix,
+            Applicability::MaybeIncorrect,
+            markup! { "Remove console.log" }.to_owned(),
             mutation,
-        })
+        ))
     }
 }

@@ -26,15 +26,13 @@ export function f() {
 ```
 invalidLocalVariable.js:2:11 lint/style/useNamingConvention  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This local const name should be in camelCase or PascalCase.
+  ! This const name should be in camelCase or PascalCase.
   
     1 │ export default function () {
   > 2 │     const CONSTANT_CASE_CONST = 0
       │           ^^^^^^^^^^^^^^^^^^^
     3 │ 
     4 │     let CONSTANT_CASE_LET
-  
-  i The name could be renamed to `constantCaseConst`.
   
   i Safe fix: Rename this symbol in camelCase.
   
@@ -50,7 +48,7 @@ invalidLocalVariable.js:2:11 lint/style/useNamingConvention  FIXABLE  ━━━�
 ```
 invalidLocalVariable.js:4:9 lint/style/useNamingConvention  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This local let name should be in camelCase or PascalCase.
+  ! This let name should be in camelCase or PascalCase.
   
     2 │     const CONSTANT_CASE_CONST = 0
     3 │ 
@@ -58,8 +56,6 @@ invalidLocalVariable.js:4:9 lint/style/useNamingConvention  FIXABLE  ━━━�
       │         ^^^^^^^^^^^^^^^^^
     5 │ 
     6 │     var CONSTANT_CASE_VAR
-  
-  i The name could be renamed to `constantCaseLet`.
   
   i Safe fix: Rename this symbol in camelCase.
   
@@ -76,7 +72,7 @@ invalidLocalVariable.js:4:9 lint/style/useNamingConvention  FIXABLE  ━━━�
 ```
 invalidLocalVariable.js:6:9 lint/style/useNamingConvention  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This local var name should be in camelCase or PascalCase.
+  ! This var name should be in camelCase or PascalCase.
   
     4 │     let CONSTANT_CASE_LET
     5 │ 
@@ -84,8 +80,6 @@ invalidLocalVariable.js:6:9 lint/style/useNamingConvention  FIXABLE  ━━━�
       │         ^^^^^^^^^^^^^^^^^
     7 │ 
     8 │     const { prop: Unknown_Style } = obj
-  
-  i The name could be renamed to `constantCaseVar`.
   
   i Safe fix: Rename this symbol in camelCase.
   
@@ -102,7 +96,7 @@ invalidLocalVariable.js:6:9 lint/style/useNamingConvention  FIXABLE  ━━━�
 ```
 invalidLocalVariable.js:8:19 lint/style/useNamingConvention  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This local const name should be in camelCase or PascalCase.
+  ! This const name should be in camelCase or PascalCase.
   
      6 │     var CONSTANT_CASE_VAR
      7 │ 
@@ -110,8 +104,6 @@ invalidLocalVariable.js:8:19 lint/style/useNamingConvention  FIXABLE  ━━━�
        │                   ^^^^^^^^^^^^^
      9 │ }
     10 │ 
-  
-  i The name could be renamed to `unknownStyle`.
   
   i Safe fix: Rename this symbol in camelCase.
   
@@ -128,15 +120,13 @@ invalidLocalVariable.js:8:19 lint/style/useNamingConvention  FIXABLE  ━━━�
 ```
 invalidLocalVariable.js:12:11 lint/style/useNamingConvention  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This local const name should be in camelCase or PascalCase.
+  ! This const name should be in camelCase or PascalCase.
   
     11 │ export function f() {
   > 12 │     const a_var = 0;
        │           ^^^^^
     13 │     console.log(a_var);
     14 │     return a_var;
-  
-  i The name could be renamed to `aVar`.
   
   i Safe fix: Rename this symbol in camelCase.
   

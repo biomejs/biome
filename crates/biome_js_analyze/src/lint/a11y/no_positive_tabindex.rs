@@ -195,14 +195,13 @@ impl Rule for NoPositiveTabindex {
             }
         };
 
-        Some(JsRuleAction {
-            category: biome_analyze::ActionCategory::QuickFix,
-            applicability: Applicability::MaybeIncorrect,
-            message:
-                markup! { "Replace the "<Emphasis>"tableIndex"</Emphasis>" prop value with 0." }
-                    .to_owned(),
+        Some(JsRuleAction::new(
+            biome_analyze::ActionCategory::QuickFix,
+            Applicability::MaybeIncorrect,
+            markup! { "Replace the "<Emphasis>"tableIndex"</Emphasis>" prop value with 0." }
+                .to_owned(),
             mutation,
-        })
+        ))
     }
 }
 

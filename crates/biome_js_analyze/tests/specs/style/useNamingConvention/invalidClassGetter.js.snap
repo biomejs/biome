@@ -39,8 +39,6 @@ invalidClassGetter.js:2:9 lint/style/useNamingConvention ━━━━━━━�
     3 │ 
     4 │     get PROPERTY() {}
   
-  i The name could be renamed to `x`.
-  
 
 ```
 
@@ -55,8 +53,6 @@ invalidClassGetter.js:4:9 lint/style/useNamingConvention ━━━━━━━�
       │         ^^^^^^^^
     5 │ 
     6 │     get SpecialProperty() {}
-  
-  i The name could be renamed to `property`.
   
 
 ```
@@ -73,8 +69,6 @@ invalidClassGetter.js:6:9 lint/style/useNamingConvention ━━━━━━━�
     7 │ 
     8 │     get special_property() {}
   
-  i The name could be renamed to `specialProperty`.
-  
 
 ```
 
@@ -89,8 +83,6 @@ invalidClassGetter.js:8:9 lint/style/useNamingConvention ━━━━━━━�
        │         ^^^^^^^^^^^^^^^^
      9 │ 
     10 │     get Unknown_Style() {}
-  
-  i The name could be renamed to `specialProperty`.
   
 
 ```
@@ -107,93 +99,79 @@ invalidClassGetter.js:10:9 lint/style/useNamingConvention ━━━━━━━�
     11 │ 
     12 │     get #X() {}
   
-  i The name could be renamed to `unknownStyle`.
-  
 
 ```
 
 ```
-invalidClassGetter.js:12:9 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalidClassGetter.js:12:10 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This class getter name should be in camelCase.
   
     10 │     get Unknown_Style() {}
     11 │ 
   > 12 │     get #X() {}
-       │         ^^
+       │          ^
     13 │ 
     14 │     get #PROPERTY() {}
   
-  i The name could be renamed to `x`.
-  
 
 ```
 
 ```
-invalidClassGetter.js:14:9 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalidClassGetter.js:14:10 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This class getter name should be in camelCase.
   
     12 │     get #X() {}
     13 │ 
   > 14 │     get #PROPERTY() {}
-       │         ^^^^^^^^^
+       │          ^^^^^^^^
     15 │ 
     16 │     get #SpecialProperty() {}
   
-  i The name could be renamed to `property`.
-  
 
 ```
 
 ```
-invalidClassGetter.js:16:9 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalidClassGetter.js:16:10 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This class getter name should be in camelCase.
   
     14 │     get #PROPERTY() {}
     15 │ 
   > 16 │     get #SpecialProperty() {}
-       │         ^^^^^^^^^^^^^^^^
+       │          ^^^^^^^^^^^^^^^
     17 │ 
     18 │     get #special_property() {}
   
-  i The name could be renamed to `specialProperty`.
-  
 
 ```
 
 ```
-invalidClassGetter.js:18:9 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalidClassGetter.js:18:10 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This class getter name should be in camelCase.
   
     16 │     get #SpecialProperty() {}
     17 │ 
   > 18 │     get #special_property() {}
-       │         ^^^^^^^^^^^^^^^^^
+       │          ^^^^^^^^^^^^^^^^
     19 │ 
     20 │     get #Unknown_Style() {}
   
-  i The name could be renamed to `specialProperty`.
-  
 
 ```
 
 ```
-invalidClassGetter.js:20:9 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalidClassGetter.js:20:10 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This class getter name should be in camelCase.
   
     18 │     get #special_property() {}
     19 │ 
   > 20 │     get #Unknown_Style() {}
-       │         ^^^^^^^^^^^^^^
+       │          ^^^^^^^^^^^^^
     21 │ }
-  
-  i The name could be renamed to `unknownStyle`.
   
 
 ```
-
-

@@ -118,12 +118,12 @@ impl Rule for UseShorthandArrayType {
                         .to_owned()
                 }
             };
-            return Some(JsRuleAction {
-                category: ActionCategory::QuickFix,
-                applicability: Applicability::MaybeIncorrect,
+            return Some(JsRuleAction::new(
+                ActionCategory::QuickFix,
+                Applicability::MaybeIncorrect,
                 message,
                 mutation,
-            });
+            ));
         };
         None
     }

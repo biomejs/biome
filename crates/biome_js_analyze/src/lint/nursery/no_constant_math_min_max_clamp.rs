@@ -107,13 +107,13 @@ impl Rule for NoConstantMathMinMaxClamp {
         mutation.replace_node(state.0.clone(), state.1.clone());
         mutation.replace_node(state.1.clone(), state.0.clone());
 
-        Some(JsRuleAction {
+        Some(JsRuleAction::new(
+            ActionCategory::QuickFix,
+            Applicability::MaybeIncorrect,
+            markup! {"Swap "<Emphasis>{state.0.text()}</Emphasis>" with "<Emphasis>{state.1.text()}</Emphasis>"."}
+            .to_owned(),
             mutation,
-            message: markup! {"Swap "<Emphasis>{state.0.text()}</Emphasis>" with "<Emphasis>{state.1.text()}</Emphasis>"."}
-                .to_owned(),
-            category: ActionCategory::QuickFix,
-            applicability: Applicability::MaybeIncorrect,
-        })
+        ))
     }
 }
 

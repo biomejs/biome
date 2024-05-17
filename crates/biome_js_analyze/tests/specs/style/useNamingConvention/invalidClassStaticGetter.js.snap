@@ -25,7 +25,7 @@ export default class {
 ```
 invalidClassStaticGetter.js:2:16 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This static getter name should be in camelCase or CONSTANT_CASE.
+  ! This static class getter name should be in camelCase or CONSTANT_CASE.
   
     1 │ export default class {
   > 2 │     static get SpecialProperty() {}
@@ -33,15 +33,13 @@ invalidClassStaticGetter.js:2:16 lint/style/useNamingConvention ━━━━━�
     3 │ 
     4 │     static get special_property() {}
   
-  i The name could be renamed to `specialProperty`.
-  
 
 ```
 
 ```
 invalidClassStaticGetter.js:4:16 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This static getter name should be in camelCase or CONSTANT_CASE.
+  ! This static class getter name should be in camelCase or CONSTANT_CASE.
   
     2 │     static get SpecialProperty() {}
     3 │ 
@@ -50,15 +48,13 @@ invalidClassStaticGetter.js:4:16 lint/style/useNamingConvention ━━━━━�
     5 │ 
     6 │     static get Unknown_Style() {}
   
-  i The name could be renamed to `specialProperty`.
-  
 
 ```
 
 ```
 invalidClassStaticGetter.js:6:16 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This static getter name should be in camelCase or CONSTANT_CASE.
+  ! This static class getter name should be in camelCase or CONSTANT_CASE.
   
     4 │     static get special_property() {}
     5 │ 
@@ -67,59 +63,49 @@ invalidClassStaticGetter.js:6:16 lint/style/useNamingConvention ━━━━━�
     7 │ 
     8 │     static get #X() {}
   
-  i The name could be renamed to `unknownStyle`.
-  
 
 ```
 
 ```
-invalidClassStaticGetter.js:10:16 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalidClassStaticGetter.js:10:17 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This static getter name should be in camelCase or CONSTANT_CASE.
+  ! This static class getter name should be in camelCase or CONSTANT_CASE.
   
      8 │     static get #X() {}
      9 │ 
   > 10 │     static get #SpecialProperty() {}
-       │                ^^^^^^^^^^^^^^^^
+       │                 ^^^^^^^^^^^^^^^
     11 │ 
     12 │     static get #special_property() {}
   
-  i The name could be renamed to `specialProperty`.
-  
 
 ```
 
 ```
-invalidClassStaticGetter.js:12:16 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalidClassStaticGetter.js:12:17 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This static getter name should be in camelCase or CONSTANT_CASE.
+  ! This static class getter name should be in camelCase or CONSTANT_CASE.
   
     10 │     static get #SpecialProperty() {}
     11 │ 
   > 12 │     static get #special_property() {}
-       │                ^^^^^^^^^^^^^^^^^
+       │                 ^^^^^^^^^^^^^^^^
     13 │ 
     14 │     static get #Unknown_Style() {}
   
-  i The name could be renamed to `specialProperty`.
-  
 
 ```
 
 ```
-invalidClassStaticGetter.js:14:16 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalidClassStaticGetter.js:14:17 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This static getter name should be in camelCase or CONSTANT_CASE.
+  ! This static class getter name should be in camelCase or CONSTANT_CASE.
   
     12 │     static get #special_property() {}
     13 │ 
   > 14 │     static get #Unknown_Style() {}
-       │                ^^^^^^^^^^^^^^
+       │                 ^^^^^^^^^^^^^
     15 │ }
-  
-  i The name could be renamed to `unknownStyle`.
   
 
 ```
-
-

@@ -206,12 +206,12 @@ impl Rule for NoUselessTernary {
         }
 
         mutation.replace_element(node.clone().into(), new_node.into());
-        return Some(JsRuleAction {
-            category: ActionCategory::QuickFix,
-            applicability: Applicability::MaybeIncorrect,
-            message: markup! { "Remove the conditional expression with" }.to_owned(),
+        return Some(JsRuleAction::new(
+            ActionCategory::QuickFix,
+            Applicability::MaybeIncorrect,
+            markup! { "Remove the conditional expression with" }.to_owned(),
             mutation,
-        });
+        ));
     }
 }
 

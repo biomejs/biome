@@ -157,11 +157,11 @@ impl Rule for NoUselessRename {
                 );
             }
         }
-        Some(JsRuleAction {
-            category: ActionCategory::QuickFix,
-            applicability: Applicability::Always,
-            message: markup! { "Remove the renaming." }.to_owned(),
+        Some(JsRuleAction::new(
+            ActionCategory::QuickFix,
+            Applicability::Always,
+            markup! { "Remove the renaming." }.to_owned(),
             mutation,
-        })
+        ))
     }
 }

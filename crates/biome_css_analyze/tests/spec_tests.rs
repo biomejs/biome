@@ -99,7 +99,7 @@ pub(crate) fn analyze_and_snap(
     check_action_type: CheckActionType,
     parser_options: CssParserOptions,
 ) -> usize {
-    let parsed = parse_css(input_code, parser_options.clone());
+    let parsed = parse_css(input_code, parser_options);
     let root = parsed.tree();
 
     let mut diagnostics = Vec::new();
@@ -116,18 +116,12 @@ pub(crate) fn analyze_and_snap(
                             input_code,
                             source_type,
                             &action,
-                            parser_options.clone(),
+                            parser_options,
                         );
                         diag = diag.add_code_suggestion(CodeSuggestionAdvice::from(action));
                     }
                 } else if !action.is_suppression() {
-                    check_code_action(
-                        input_file,
-                        input_code,
-                        source_type,
-                        &action,
-                        parser_options.clone(),
-                    );
+                    check_code_action(input_file, input_code, source_type, &action, parser_options);
                     diag = diag.add_code_suggestion(CodeSuggestionAdvice::from(action));
                 }
             }
@@ -140,23 +134,11 @@ pub(crate) fn analyze_and_snap(
         for action in event.actions() {
             if check_action_type.is_suppression() {
                 if action.category.matches("quickfix.suppressRule") {
-                    check_code_action(
-                        input_file,
-                        input_code,
-                        source_type,
-                        &action,
-                        parser_options.clone(),
-                    );
+                    check_code_action(input_file, input_code, source_type, &action, parser_options);
                     code_fixes.push(code_fix_to_string(input_code, action));
                 }
             } else if !action.category.matches("quickfix.suppressRule") {
-                check_code_action(
-                    input_file,
-                    input_code,
-                    source_type,
-                    &action,
-                    parser_options.clone(),
-                );
+                check_code_action(input_file, input_code, source_type, &action, parser_options);
                 code_fixes.push(code_fix_to_string(input_code, action));
             }
         }

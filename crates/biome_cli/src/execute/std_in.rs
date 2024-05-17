@@ -58,9 +58,9 @@ pub(crate) fn run<'a>(
 
             let code = printed.into_code();
             let output = match biome_path.extension_as_str() {
-                "astro" => AstroFileHandler::output(content, code.as_str()),
-                "vue" => VueFileHandler::output(content, code.as_str()),
-                "svelte" => SvelteFileHandler::output(content, code.as_str()),
+                Some("astro") => AstroFileHandler::output(content, code.as_str()),
+                Some("vue") => VueFileHandler::output(content, code.as_str()),
+                Some("svelte") => SvelteFileHandler::output(content, code.as_str()),
                 _ => code,
             };
             console.append(markup! {
@@ -117,9 +117,9 @@ pub(crate) fn run<'a>(
                 })?;
                 let code = fix_file_result.code;
                 let output = match biome_path.extension_as_str() {
-                    "astro" => AstroFileHandler::output(&new_content, code.as_str()),
-                    "vue" => VueFileHandler::output(&new_content, code.as_str()),
-                    "svelte" => SvelteFileHandler::output(&new_content, code.as_str()),
+                    Some("astro") => AstroFileHandler::output(&new_content, code.as_str()),
+                    Some("vue") => VueFileHandler::output(&new_content, code.as_str()),
+                    Some("svelte") => SvelteFileHandler::output(&new_content, code.as_str()),
                     _ => code,
                 };
                 if output != new_content {
@@ -139,9 +139,9 @@ pub(crate) fn run<'a>(
                 })?;
                 let code = result.code;
                 let output = match biome_path.extension_as_str() {
-                    "astro" => AstroFileHandler::output(&new_content, code.as_str()),
-                    "vue" => VueFileHandler::output(&new_content, code.as_str()),
-                    "svelte" => SvelteFileHandler::output(&new_content, code.as_str()),
+                    Some("astro") => AstroFileHandler::output(&new_content, code.as_str()),
+                    Some("vue") => VueFileHandler::output(&new_content, code.as_str()),
+                    Some("svelte") => SvelteFileHandler::output(&new_content, code.as_str()),
                     _ => code,
                 };
                 if output != new_content {
@@ -156,11 +156,17 @@ pub(crate) fn run<'a>(
             }
         }
 
+        let rule = if let TraversalMode::Lint { rule, .. } = mode.traversal_mode() {
+            *rule
+        } else {
+            None
+        };
         if !mode.is_check_apply_unsafe() {
             let result = workspace.pull_diagnostics(PullDiagnosticsParams {
                 categories: RuleCategories::LINT | RuleCategories::SYNTAX,
                 path: biome_path.clone(),
                 max_diagnostics: mode.max_diagnostics.into(),
+                rule,
             })?;
             diagnostics.extend(result.diagnostics);
         }
@@ -171,9 +177,9 @@ pub(crate) fn run<'a>(
             })?;
             let code = printed.into_code();
             let output = match biome_path.extension_as_str() {
-                "astro" => AstroFileHandler::output(&new_content, code.as_str()),
-                "vue" => VueFileHandler::output(&new_content, code.as_str()),
-                "svelte" => SvelteFileHandler::output(&new_content, code.as_str()),
+                Some("astro") => AstroFileHandler::output(&new_content, code.as_str()),
+                Some("vue") => VueFileHandler::output(&new_content, code.as_str()),
+                Some("svelte") => SvelteFileHandler::output(&new_content, code.as_str()),
                 _ => code,
             };
             if mode.is_check_apply() || mode.is_check_apply_unsafe() {

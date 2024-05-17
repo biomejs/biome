@@ -4,7 +4,6 @@ use biome_analyze::{
     context::RuleContext, declare_rule, ActionCategory, Ast, FixKind, Rule, SourceActionKind,
 };
 use biome_console::markup;
-use biome_diagnostics::Applicability;
 use biome_js_factory::make;
 use biome_js_syntax::{
     AnyJsImportClause, AnyJsModuleItem, AnyJsNamedImportSpecifier, JsImport, JsLanguage, JsModule,
@@ -260,12 +259,12 @@ impl Rule for OrganizeImports {
         let mut mutation = ctx.root().begin();
         mutation.replace_node_discard_trivia(old_list, new_list);
 
-        Some(JsRuleAction {
-            category: ActionCategory::Source(SourceActionKind::OrganizeImports),
-            applicability: Applicability::MaybeIncorrect,
-            message: markup! { "Organize Imports (Biome)" }.to_owned(),
+        Some(JsRuleAction::new(
+            ActionCategory::Source(SourceActionKind::OrganizeImports),
+            ctx.metadata().to_applicability(),
+            markup! { "Organize Imports (Biome)" },
             mutation,
-        })
+        ))
     }
 }
 

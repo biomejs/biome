@@ -171,12 +171,12 @@ impl Rule for NoThisInStatic {
         let expr = AnyJsExpression::cast_ref(this_super_expression.syntax())?;
         let mut mutation = ctx.root().begin();
         mutation.replace_node(expr, suggested_class_name.into());
-        Some(JsRuleAction {
-            category: ActionCategory::QuickFix,
-            applicability: Applicability::MaybeIncorrect,
-            message: markup! { "Use the class name instead." }.to_owned(),
+        Some(JsRuleAction::new(
+            ActionCategory::QuickFix,
+            Applicability::MaybeIncorrect,
+            markup! { "Use the class name instead." }.to_owned(),
             mutation,
-        })
+        ))
     }
 }
 

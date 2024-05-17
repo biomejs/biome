@@ -161,12 +161,12 @@ impl Rule for UseExponentiationOperator {
             .prepend_trivia_pieces(node.syntax().first_leading_trivia()?.pieces())?
             .append_trivia_pieces(node.syntax().last_trailing_trivia()?.pieces())?;
         mutation.replace_node_discard_trivia(AnyJsExpression::from(node.clone()), new_node);
-        Some(JsRuleAction {
-            category: ActionCategory::QuickFix,
-            applicability: Applicability::MaybeIncorrect,
-            message: markup! { "Use the '**' operator instead of 'Math.pow'." }.to_owned(),
+        Some(JsRuleAction::new(
+            ActionCategory::QuickFix,
+            Applicability::MaybeIncorrect,
+            markup! { "Use the '**' operator instead of 'Math.pow'." }.to_owned(),
             mutation,
-        })
+        ))
     }
 }
 

@@ -24,6 +24,11 @@ input Point2D {
   "this is y" y: Float @deprecated
 }
 
+input input @input {
+	input: input
+}
+
+
 ```
 
 ## AST
@@ -212,17 +217,53 @@ GraphqlRoot {
                 r_curly_token: R_CURLY@233..235 "}" [Newline("\n")] [],
             },
         },
+        GraphqlInputObjectTypeDefinition {
+            description: missing (optional),
+            input_token: INPUT_KW@235..243 "input" [Newline("\n"), Newline("\n")] [Whitespace(" ")],
+            name: GraphqlName {
+                value_token: GRAPHQL_NAME@243..249 "input" [] [Whitespace(" ")],
+            },
+            directives: GraphqlDirectiveList [
+                GraphqlDirective {
+                    at_token: AT@249..250 "@" [] [],
+                    name: GraphqlName {
+                        value_token: GRAPHQL_NAME@250..256 "input" [] [Whitespace(" ")],
+                    },
+                    arguments: missing (optional),
+                },
+            ],
+            input_fields: GraphqlInputFieldsDefinition {
+                l_curly_token: L_CURLY@256..257 "{" [] [],
+                fields: GraphqlInputFieldList [
+                    GraphqlInputValueDefinition {
+                        description: missing (optional),
+                        name: GraphqlName {
+                            value_token: GRAPHQL_NAME@257..264 "input" [Newline("\n"), Whitespace("\t")] [],
+                        },
+                        colon_token: COLON@264..266 ":" [] [Whitespace(" ")],
+                        ty: GraphqlNamedType {
+                            name: GraphqlName {
+                                value_token: GRAPHQL_NAME@266..271 "input" [] [],
+                            },
+                        },
+                        default: missing (optional),
+                        directives: GraphqlDirectiveList [],
+                    },
+                ],
+                r_curly_token: R_CURLY@271..273 "}" [Newline("\n")] [],
+            },
+        },
     ],
-    eof_token: EOF@235..236 "" [Newline("\n")] [],
+    eof_token: EOF@273..275 "" [Newline("\n"), Newline("\n")] [],
 }
 ```
 
 ## CST
 
 ```
-0: GRAPHQL_ROOT@0..236
+0: GRAPHQL_ROOT@0..275
   0: (empty)
-  1: GRAPHQL_DEFINITION_LIST@0..235
+  1: GRAPHQL_DEFINITION_LIST@0..273
     0: GRAPHQL_INPUT_OBJECT_TYPE_DEFINITION@0..39
       0: (empty)
       1: INPUT_KW@0..6 "input" [] [Whitespace(" ")]
@@ -349,6 +390,31 @@ GraphqlRoot {
                   0: GRAPHQL_NAME@223..233 "deprecated" [] []
                 2: (empty)
         2: R_CURLY@233..235 "}" [Newline("\n")] []
-  2: EOF@235..236 "" [Newline("\n")] []
+    6: GRAPHQL_INPUT_OBJECT_TYPE_DEFINITION@235..273
+      0: (empty)
+      1: INPUT_KW@235..243 "input" [Newline("\n"), Newline("\n")] [Whitespace(" ")]
+      2: GRAPHQL_NAME@243..249
+        0: GRAPHQL_NAME@243..249 "input" [] [Whitespace(" ")]
+      3: GRAPHQL_DIRECTIVE_LIST@249..256
+        0: GRAPHQL_DIRECTIVE@249..256
+          0: AT@249..250 "@" [] []
+          1: GRAPHQL_NAME@250..256
+            0: GRAPHQL_NAME@250..256 "input" [] [Whitespace(" ")]
+          2: (empty)
+      4: GRAPHQL_INPUT_FIELDS_DEFINITION@256..273
+        0: L_CURLY@256..257 "{" [] []
+        1: GRAPHQL_INPUT_FIELD_LIST@257..271
+          0: GRAPHQL_INPUT_VALUE_DEFINITION@257..271
+            0: (empty)
+            1: GRAPHQL_NAME@257..264
+              0: GRAPHQL_NAME@257..264 "input" [Newline("\n"), Whitespace("\t")] []
+            2: COLON@264..266 ":" [] [Whitespace(" ")]
+            3: GRAPHQL_NAMED_TYPE@266..271
+              0: GRAPHQL_NAME@266..271
+                0: GRAPHQL_NAME@266..271 "input" [] []
+            4: (empty)
+            5: GRAPHQL_DIRECTIVE_LIST@271..271
+        2: R_CURLY@271..273 "}" [Newline("\n")] []
+  2: EOF@273..275 "" [Newline("\n"), Newline("\n")] []
 
 ```

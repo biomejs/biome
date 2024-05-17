@@ -5,10 +5,10 @@ enum Direction
   WEST
 }
 
-enum Direction
-  NORTH
-
+# the following 2 invalid enum definitions form a valid enum definition
 enum Direction {
+
+enum Direction }
 
 enum Direction {
 	@deprecated
@@ -19,3 +19,7 @@ enu Direction
 enum Direction @
   NORTH
 }
+
+enum Direction
+  NORTH
+

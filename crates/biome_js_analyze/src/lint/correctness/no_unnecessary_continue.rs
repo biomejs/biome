@@ -107,12 +107,12 @@ impl Rule for NoUnnecessaryContinue {
         let node = ctx.query();
         let mut mutation = ctx.root().begin();
         mutation.remove_statement(node.clone().into());
-        Some(JsRuleAction {
-            category: ActionCategory::QuickFix,
-            applicability: Applicability::MaybeIncorrect,
-            message: markup! { "Delete the unnecessary continue statement" }.to_owned(),
+        Some(JsRuleAction::new(
+            ActionCategory::QuickFix,
+            Applicability::MaybeIncorrect,
+            markup! { "Delete the unnecessary continue statement" }.to_owned(),
             mutation,
-        })
+        ))
     }
 }
 

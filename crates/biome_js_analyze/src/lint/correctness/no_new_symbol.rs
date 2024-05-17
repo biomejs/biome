@@ -74,12 +74,12 @@ impl Rule for NoNewSymbol {
             node.clone().into(),
             call_expression.into(),
         );
-        Some(JsRuleAction {
-            category: ActionCategory::QuickFix,
-            applicability: Applicability::MaybeIncorrect,
-            message: markup! { "Remove "<Emphasis>"new"</Emphasis>"." }.to_owned(),
+        Some(JsRuleAction::new(
+            ActionCategory::QuickFix,
+            Applicability::MaybeIncorrect,
+            markup! { "Remove "<Emphasis>"new"</Emphasis>"." }.to_owned(),
             mutation,
-        })
+        ))
     }
 }
 

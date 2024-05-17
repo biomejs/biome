@@ -150,12 +150,12 @@ impl Rule for NoBlankTarget {
             .to_owned()
         };
 
-        Some(JsRuleAction {
-            mutation,
+        Some(JsRuleAction::new(
+            ActionCategory::QuickFix,
+            Applicability::Always,
             message,
-            category: ActionCategory::QuickFix,
-            applicability: Applicability::Always,
-        })
+            mutation,
+        ))
     }
 
     fn diagnostic(

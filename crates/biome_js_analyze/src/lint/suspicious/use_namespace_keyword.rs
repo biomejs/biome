@@ -78,11 +78,11 @@ impl Rule for UseNamespaceKeyword {
     fn action(ctx: &RuleContext<Self>, module_token: &Self::State) -> Option<JsRuleAction> {
         let mut mutation = ctx.root().begin();
         mutation.replace_token_transfer_trivia(module_token.clone(), make::token(T![namespace]));
-        Some(JsRuleAction {
-            category: ActionCategory::QuickFix,
-            applicability: Applicability::Always,
-            message: markup! {"Use "<Emphasis>"namespace"</Emphasis>" instead."}.to_owned(),
+        Some(JsRuleAction::new(
+            ActionCategory::QuickFix,
+            Applicability::Always,
+            markup! {"Use "<Emphasis>"namespace"</Emphasis>" instead."}.to_owned(),
             mutation,
-        })
+        ))
     }
 }

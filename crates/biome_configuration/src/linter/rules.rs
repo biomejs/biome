@@ -1,7 +1,7 @@
 //! Generated file, do not edit by hand, see `xtask/codegen`
 
 use super::RulePlainConfiguration;
-use crate::RuleConfiguration;
+use crate::{RuleConfiguration, RuleFixConfiguration};
 use biome_analyze::{options::RuleOptions, RuleFilter};
 use biome_console::markup;
 use biome_css_analyze::options::*;
@@ -15,6 +15,62 @@ use indexmap::IndexSet;
 #[cfg(feature = "schema")]
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
+#[derive(
+    Clone,
+    Copy,
+    Debug,
+    Deserializable,
+    Eq,
+    Hash,
+    Merge,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    serde :: Deserialize,
+    serde :: Serialize,
+)]
+#[cfg_attr(feature = "schema", derive(JsonSchema))]
+#[serde(rename_all = "camelCase")]
+pub enum RuleGroup {
+    A11y,
+    Complexity,
+    Correctness,
+    Nursery,
+    Performance,
+    Security,
+    Style,
+    Suspicious,
+}
+impl RuleGroup {
+    pub const fn as_str(self) -> &'static str {
+        match self {
+            Self::A11y => A11y::GROUP_NAME,
+            Self::Complexity => Complexity::GROUP_NAME,
+            Self::Correctness => Correctness::GROUP_NAME,
+            Self::Nursery => Nursery::GROUP_NAME,
+            Self::Performance => Performance::GROUP_NAME,
+            Self::Security => Security::GROUP_NAME,
+            Self::Style => Style::GROUP_NAME,
+            Self::Suspicious => Suspicious::GROUP_NAME,
+        }
+    }
+}
+impl std::str::FromStr for RuleGroup {
+    type Err = &'static str;
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s {
+            A11y::GROUP_NAME => Ok(Self::A11y),
+            Complexity::GROUP_NAME => Ok(Self::Complexity),
+            Correctness::GROUP_NAME => Ok(Self::Correctness),
+            Nursery::GROUP_NAME => Ok(Self::Nursery),
+            Performance::GROUP_NAME => Ok(Self::Performance),
+            Security::GROUP_NAME => Ok(Self::Security),
+            Style::GROUP_NAME => Ok(Self::Style),
+            Suspicious::GROUP_NAME => Ok(Self::Suspicious),
+            _ => Err("This rule group doesn't exist."),
+        }
+    }
+}
 #[derive(Clone, Debug, Default, Deserialize, Deserializable, Eq, Merge, PartialEq, Serialize)]
 #[deserializable(with_validator)]
 #[cfg_attr(feature = "schema", derive(JsonSchema))]
@@ -67,25 +123,17 @@ impl DeserializableValidator for Rules {
 }
 impl Rules {
     #[doc = r" Checks if the code coming from [biome_diagnostics::Diagnostic] corresponds to a rule."]
-    #[doc = r" Usually the code is built like {category}/{rule_name}"]
-    pub fn matches_diagnostic_code<'a>(
-        &self,
-        category: Option<&'a str>,
-        rule_name: Option<&'a str>,
-    ) -> Option<(&'a str, &'a str)> {
-        match (category, rule_name) {
-            (Some(category), Some(rule_name)) => match category {
-                "a11y" => A11y::has_rule(rule_name).then_some((category, rule_name)),
-                "complexity" => Complexity::has_rule(rule_name).then_some((category, rule_name)),
-                "correctness" => Correctness::has_rule(rule_name).then_some((category, rule_name)),
-                "nursery" => Nursery::has_rule(rule_name).then_some((category, rule_name)),
-                "performance" => Performance::has_rule(rule_name).then_some((category, rule_name)),
-                "security" => Security::has_rule(rule_name).then_some((category, rule_name)),
-                "style" => Style::has_rule(rule_name).then_some((category, rule_name)),
-                "suspicious" => Suspicious::has_rule(rule_name).then_some((category, rule_name)),
-                _ => None,
-            },
-            _ => None,
+    #[doc = r" Usually the code is built like {group}/{rule_name}"]
+    pub fn has_rule(group: RuleGroup, rule_name: &str) -> Option<&'static str> {
+        match group {
+            RuleGroup::A11y => A11y::has_rule(rule_name),
+            RuleGroup::Complexity => Complexity::has_rule(rule_name),
+            RuleGroup::Correctness => Correctness::has_rule(rule_name),
+            RuleGroup::Nursery => Nursery::has_rule(rule_name),
+            RuleGroup::Performance => Performance::has_rule(rule_name),
+            RuleGroup::Security => Security::has_rule(rule_name),
+            RuleGroup::Style => Style::has_rule(rule_name),
+            RuleGroup::Suspicious => Suspicious::has_rule(rule_name),
         }
     }
     #[doc = r" Given a category coming from [Diagnostic](biome_diagnostics::Diagnostic), this function returns"]
@@ -96,127 +144,238 @@ impl Rules {
         let mut split_code = category.name().split('/');
         let _lint = split_code.next();
         debug_assert_eq!(_lint, Some("lint"));
-        let group = split_code.next();
-        let rule_name = split_code.next();
-        if let Some((group, rule_name)) = self.matches_diagnostic_code(group, rule_name) {
-            let severity = match group {
-                "a11y" => self
-                    .a11y
-                    .as_ref()
-                    .and_then(|a11y| a11y.get_rule_configuration(rule_name))
-                    .map_or_else(
-                        || {
-                            if A11y::is_recommended_rule(rule_name) {
-                                Severity::Error
-                            } else {
-                                Severity::Warning
-                            }
-                        },
-                        |(level, _)| level.into(),
-                    ),
-                "complexity" => self
-                    .complexity
-                    .as_ref()
-                    .and_then(|complexity| complexity.get_rule_configuration(rule_name))
-                    .map_or_else(
-                        || {
-                            if Complexity::is_recommended_rule(rule_name) {
-                                Severity::Error
-                            } else {
-                                Severity::Warning
-                            }
-                        },
-                        |(level, _)| level.into(),
-                    ),
-                "correctness" => self
-                    .correctness
-                    .as_ref()
-                    .and_then(|correctness| correctness.get_rule_configuration(rule_name))
-                    .map_or_else(
-                        || {
-                            if Correctness::is_recommended_rule(rule_name) {
-                                Severity::Error
-                            } else {
-                                Severity::Warning
-                            }
-                        },
-                        |(level, _)| level.into(),
-                    ),
-                "nursery" => self
-                    .nursery
-                    .as_ref()
-                    .and_then(|nursery| nursery.get_rule_configuration(rule_name))
-                    .map_or_else(
-                        || {
-                            if Nursery::is_recommended_rule(rule_name) {
-                                Severity::Error
-                            } else {
-                                Severity::Warning
-                            }
-                        },
-                        |(level, _)| level.into(),
-                    ),
-                "performance" => self
-                    .performance
-                    .as_ref()
-                    .and_then(|performance| performance.get_rule_configuration(rule_name))
-                    .map_or_else(
-                        || {
-                            if Performance::is_recommended_rule(rule_name) {
-                                Severity::Error
-                            } else {
-                                Severity::Warning
-                            }
-                        },
-                        |(level, _)| level.into(),
-                    ),
-                "security" => self
-                    .security
-                    .as_ref()
-                    .and_then(|security| security.get_rule_configuration(rule_name))
-                    .map_or_else(
-                        || {
-                            if Security::is_recommended_rule(rule_name) {
-                                Severity::Error
-                            } else {
-                                Severity::Warning
-                            }
-                        },
-                        |(level, _)| level.into(),
-                    ),
-                "style" => self
-                    .style
-                    .as_ref()
-                    .and_then(|style| style.get_rule_configuration(rule_name))
-                    .map_or_else(
-                        || {
-                            if Style::is_recommended_rule(rule_name) {
-                                Severity::Error
-                            } else {
-                                Severity::Warning
-                            }
-                        },
-                        |(level, _)| level.into(),
-                    ),
-                "suspicious" => self
-                    .suspicious
-                    .as_ref()
-                    .and_then(|suspicious| suspicious.get_rule_configuration(rule_name))
-                    .map_or_else(
-                        || {
-                            if Suspicious::is_recommended_rule(rule_name) {
-                                Severity::Error
-                            } else {
-                                Severity::Warning
-                            }
-                        },
-                        |(level, _)| level.into(),
-                    ),
-                _ => unreachable!("this group should not exist, found {}", group),
-            };
-            Some(severity)
-        } else {
-            None
+        let group = <RuleGroup as std::str::FromStr>::from_str(split_code.next()?).ok()?;
+        let rule_name = split_code.next()?;
+        let rule_name = Self::has_rule(group, rule_name)?;
+        let severity = match group {
+            RuleGroup::A11y => self
+                .a11y
+                .as_ref()
+                .and_then(|group| group.get_rule_configuration(rule_name))
+                .map_or_else(
+                    || {
+                        if A11y::is_recommended_rule(rule_name) {
+                            Severity::Error
+                        } else {
+                            Severity::Warning
+                        }
+                    },
+                    |(level, _)| level.into(),
+                ),
+            RuleGroup::Complexity => self
+                .complexity
+                .as_ref()
+                .and_then(|group| group.get_rule_configuration(rule_name))
+                .map_or_else(
+                    || {
+                        if Complexity::is_recommended_rule(rule_name) {
+                            Severity::Error
+                        } else {
+                            Severity::Warning
+                        }
+                    },
+                    |(level, _)| level.into(),
+                ),
+            RuleGroup::Correctness => self
+                .correctness
+                .as_ref()
+                .and_then(|group| group.get_rule_configuration(rule_name))
+                .map_or_else(
+                    || {
+                        if Correctness::is_recommended_rule(rule_name) {
+                            Severity::Error
+                        } else {
+                            Severity::Warning
+                        }
+                    },
+                    |(level, _)| level.into(),
+                ),
+            RuleGroup::Nursery => self
+                .nursery
+                .as_ref()
+                .and_then(|group| group.get_rule_configuration(rule_name))
+                .map_or_else(
+                    || {
+                        if Nursery::is_recommended_rule(rule_name) {
+                            Severity::Error
+                        } else {
+                            Severity::Warning
+                        }
+                    },
+                    |(level, _)| level.into(),
+                ),
+            RuleGroup::Performance => self
+                .performance
+                .as_ref()
+                .and_then(|group| group.get_rule_configuration(rule_name))
+                .map_or_else(
+                    || {
+                        if Performance::is_recommended_rule(rule_name) {
+                            Severity::Error
+                        } else {
+                            Severity::Warning
+                        }
+                    },
+                    |(level, _)| level.into(),
+                ),
+            RuleGroup::Security => self
+                .security
+                .as_ref()
+                .and_then(|group| group.get_rule_configuration(rule_name))
+                .map_or_else(
+                    || {
+                        if Security::is_recommended_rule(rule_name) {
+                            Severity::Error
+                        } else {
+                            Severity::Warning
+                        }
+                    },
+                    |(level, _)| level.into(),
+                ),
+            RuleGroup::Style => self
+                .style
+                .as_ref()
+                .and_then(|group| group.get_rule_configuration(rule_name))
+                .map_or_else(
+                    || {
+                        if Style::is_recommended_rule(rule_name) {
+                            Severity::Error
+                        } else {
+                            Severity::Warning
+                        }
+                    },
+                    |(level, _)| level.into(),
+                ),
+            RuleGroup::Suspicious => self
+                .suspicious
+                .as_ref()
+                .and_then(|group| group.get_rule_configuration(rule_name))
+                .map_or_else(
+                    || {
+                        if Suspicious::is_recommended_rule(rule_name) {
+                            Severity::Error
+                        } else {
+                            Severity::Warning
+                        }
+                    },
+                    |(level, _)| level.into(),
+                ),
+        };
+        Some(severity)
+    }
+    #[doc = r" Set the severity of the rule to its default."]
+    pub fn set_default_severity(&mut self, group: RuleGroup, rule_name: &str) {
+        match group {
+            RuleGroup::A11y => {
+                if let Some(group) = &mut self.a11y {
+                    let default_severity = if A11y::is_recommended_rule(rule_name) {
+                        RulePlainConfiguration::Error
+                    } else {
+                        RulePlainConfiguration::Warn
+                    };
+                    group.set_severity(rule_name, default_severity);
+                }
+            }
+            RuleGroup::Complexity => {
+                if let Some(group) = &mut self.complexity {
+                    let default_severity = if Complexity::is_recommended_rule(rule_name) {
+                        RulePlainConfiguration::Error
+                    } else {
+                        RulePlainConfiguration::Warn
+                    };
+                    group.set_severity(rule_name, default_severity);
+                }
+            }
+            RuleGroup::Correctness => {
+                if let Some(group) = &mut self.correctness {
+                    let default_severity = if Correctness::is_recommended_rule(rule_name) {
+                        RulePlainConfiguration::Error
+                    } else {
+                        RulePlainConfiguration::Warn
+                    };
+                    group.set_severity(rule_name, default_severity);
+                }
+            }
+            RuleGroup::Nursery => {
+                if let Some(group) = &mut self.nursery {
+                    let default_severity = if Nursery::is_recommended_rule(rule_name) {
+                        RulePlainConfiguration::Error
+                    } else {
+                        RulePlainConfiguration::Warn
+                    };
+                    group.set_severity(rule_name, default_severity);
+                }
+            }
+            RuleGroup::Performance => {
+                if let Some(group) = &mut self.performance {
+                    let default_severity = if Performance::is_recommended_rule(rule_name) {
+                        RulePlainConfiguration::Error
+                    } else {
+                        RulePlainConfiguration::Warn
+                    };
+                    group.set_severity(rule_name, default_severity);
+                }
+            }
+            RuleGroup::Security => {
+                if let Some(group) = &mut self.security {
+                    let default_severity = if Security::is_recommended_rule(rule_name) {
+                        RulePlainConfiguration::Error
+                    } else {
+                        RulePlainConfiguration::Warn
+                    };
+                    group.set_severity(rule_name, default_severity);
+                }
+            }
+            RuleGroup::Style => {
+                if let Some(group) = &mut self.style {
+                    let default_severity = if Style::is_recommended_rule(rule_name) {
+                        RulePlainConfiguration::Error
+                    } else {
+                        RulePlainConfiguration::Warn
+                    };
+                    group.set_severity(rule_name, default_severity);
+                }
+            }
+            RuleGroup::Suspicious => {
+                if let Some(group) = &mut self.suspicious {
+                    let default_severity = if Suspicious::is_recommended_rule(rule_name) {
+                        RulePlainConfiguration::Error
+                    } else {
+                        RulePlainConfiguration::Warn
+                    };
+                    group.set_severity(rule_name, default_severity);
+                }
+            }
+        }
+    }
+    #[doc = r" Ensure that `recommended` is set to `true` or implied."]
+    pub fn set_recommended(&mut self) {
+        if self.all != Some(true) && self.recommended == Some(false) {
+            self.recommended = Some(true)
+        }
+        if let Some(group) = &mut self.a11y {
+            group.recommended = None;
+        }
+        if let Some(group) = &mut self.complexity {
+            group.recommended = None;
+        }
+        if let Some(group) = &mut self.correctness {
+            group.recommended = None;
+        }
+        if let Some(group) = &mut self.nursery {
+            group.recommended = None;
+        }
+        if let Some(group) = &mut self.performance {
+            group.recommended = None;
+        }
+        if let Some(group) = &mut self.security {
+            group.recommended = None;
+        }
+        if let Some(group) = &mut self.style {
+            group.recommended = None;
+        }
+        if let Some(group) = &mut self.suspicious {
+            group.recommended = None;
         }
     }
     pub(crate) const fn is_recommended_false(&self) -> bool {
@@ -352,45 +511,45 @@ pub struct A11y {
     pub all: Option<bool>,
     #[doc = "Enforce that the accessKey attribute is not used on any HTML element."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_access_key: Option<RuleConfiguration<NoAccessKey>>,
+    pub no_access_key: Option<RuleFixConfiguration<NoAccessKey>>,
     #[doc = "Enforce that aria-hidden=\"true\" is not set on focusable elements."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_aria_hidden_on_focusable: Option<RuleConfiguration<NoAriaHiddenOnFocusable>>,
+    pub no_aria_hidden_on_focusable: Option<RuleFixConfiguration<NoAriaHiddenOnFocusable>>,
     #[doc = "Enforce that elements that do not support ARIA roles, states, and properties do not have those attributes."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_aria_unsupported_elements: Option<RuleConfiguration<NoAriaUnsupportedElements>>,
+    pub no_aria_unsupported_elements: Option<RuleFixConfiguration<NoAriaUnsupportedElements>>,
     #[doc = "Enforce that autoFocus prop is not used on elements."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_autofocus: Option<RuleConfiguration<NoAutofocus>>,
+    pub no_autofocus: Option<RuleFixConfiguration<NoAutofocus>>,
     #[doc = "Disallow target=\"_blank\" attribute without rel=\"noreferrer\""]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_blank_target: Option<RuleConfiguration<NoBlankTarget>>,
+    pub no_blank_target: Option<RuleFixConfiguration<NoBlankTarget>>,
     #[doc = "Enforces that no distracting elements are used."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_distracting_elements: Option<RuleConfiguration<NoDistractingElements>>,
+    pub no_distracting_elements: Option<RuleFixConfiguration<NoDistractingElements>>,
     #[doc = "The scope prop should be used only on \\<th> elements."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_header_scope: Option<RuleConfiguration<NoHeaderScope>>,
+    pub no_header_scope: Option<RuleFixConfiguration<NoHeaderScope>>,
     #[doc = "Enforce that non-interactive ARIA roles are not assigned to interactive HTML elements."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_interactive_element_to_noninteractive_role:
-        Option<RuleConfiguration<NoInteractiveElementToNoninteractiveRole>>,
+        Option<RuleFixConfiguration<NoInteractiveElementToNoninteractiveRole>>,
     #[doc = "Enforce that interactive ARIA roles are not assigned to non-interactive HTML elements."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_noninteractive_element_to_interactive_role:
-        Option<RuleConfiguration<NoNoninteractiveElementToInteractiveRole>>,
+        Option<RuleFixConfiguration<NoNoninteractiveElementToInteractiveRole>>,
     #[doc = "Enforce that tabIndex is not assigned to non-interactive HTML elements."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_noninteractive_tabindex: Option<RuleConfiguration<NoNoninteractiveTabindex>>,
+    pub no_noninteractive_tabindex: Option<RuleFixConfiguration<NoNoninteractiveTabindex>>,
     #[doc = "Prevent the usage of positive integers on tabIndex property"]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_positive_tabindex: Option<RuleConfiguration<NoPositiveTabindex>>,
+    pub no_positive_tabindex: Option<RuleFixConfiguration<NoPositiveTabindex>>,
     #[doc = "Enforce img alt prop does not contain the word \"image\", \"picture\", or \"photo\"."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_redundant_alt: Option<RuleConfiguration<NoRedundantAlt>>,
     #[doc = "Enforce explicit role property is not the same as implicit/default role property on an element."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_redundant_roles: Option<RuleConfiguration<NoRedundantRoles>>,
+    pub no_redundant_roles: Option<RuleFixConfiguration<NoRedundantRoles>>,
     #[doc = "Enforces the usage of the title element for the svg element."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_svg_without_title: Option<RuleConfiguration<NoSvgWithoutTitle>>,
@@ -399,11 +558,11 @@ pub struct A11y {
     pub use_alt_text: Option<RuleConfiguration<UseAltText>>,
     #[doc = "Enforce that anchors have content and that the content is accessible to screen readers."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_anchor_content: Option<RuleConfiguration<UseAnchorContent>>,
+    pub use_anchor_content: Option<RuleFixConfiguration<UseAnchorContent>>,
     #[doc = "Enforce that tabIndex is assigned to non-interactive HTML elements with aria-activedescendant."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_aria_activedescendant_with_tabindex:
-        Option<RuleConfiguration<UseAriaActivedescendantWithTabindex>>,
+        Option<RuleFixConfiguration<UseAriaActivedescendantWithTabindex>>,
     #[doc = "Enforce that elements with ARIA roles must have all required ARIA attributes for that role."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_aria_props_for_role: Option<RuleConfiguration<UseAriaPropsForRole>>,
@@ -433,10 +592,10 @@ pub struct A11y {
     pub use_valid_anchor: Option<RuleConfiguration<UseValidAnchor>>,
     #[doc = "Ensures that ARIA properties aria-* are all valid."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_valid_aria_props: Option<RuleConfiguration<UseValidAriaProps>>,
+    pub use_valid_aria_props: Option<RuleFixConfiguration<UseValidAriaProps>>,
     #[doc = "Elements with ARIA roles must use a valid, non-abstract ARIA role."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_valid_aria_role: Option<RuleConfiguration<UseValidAriaRole>>,
+    pub use_valid_aria_role: Option<RuleFixConfiguration<UseValidAriaRole>>,
     #[doc = "Enforce that ARIA state and property values are valid."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_valid_aria_values: Option<RuleConfiguration<UseValidAriaValues>>,
@@ -910,8 +1069,8 @@ impl A11y {
         index_set
     }
     #[doc = r" Checks if, given a rule name, matches one of the rules contained in this category"]
-    pub(crate) fn has_rule(rule_name: &str) -> bool {
-        Self::GROUP_RULES.contains(&rule_name)
+    pub(crate) fn has_rule(rule_name: &str) -> Option<&'static str> {
+        Some(Self::GROUP_RULES[Self::GROUP_RULES.binary_search(&rule_name).ok()?])
     }
     #[doc = r" Checks if, given a rule name, it is marked as recommended"]
     pub(crate) fn is_recommended_rule(rule_name: &str) -> bool {
@@ -1066,6 +1225,161 @@ impl A11y {
             _ => None,
         }
     }
+    pub(crate) fn set_severity(&mut self, rule_name: &str, severity: RulePlainConfiguration) {
+        match rule_name {
+            "noAccessKey" => {
+                if let Some(rule_conf) = &mut self.no_access_key {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "noAriaHiddenOnFocusable" => {
+                if let Some(rule_conf) = &mut self.no_aria_hidden_on_focusable {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "noAriaUnsupportedElements" => {
+                if let Some(rule_conf) = &mut self.no_aria_unsupported_elements {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "noAutofocus" => {
+                if let Some(rule_conf) = &mut self.no_autofocus {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "noBlankTarget" => {
+                if let Some(rule_conf) = &mut self.no_blank_target {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "noDistractingElements" => {
+                if let Some(rule_conf) = &mut self.no_distracting_elements {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "noHeaderScope" => {
+                if let Some(rule_conf) = &mut self.no_header_scope {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "noInteractiveElementToNoninteractiveRole" => {
+                if let Some(rule_conf) = &mut self.no_interactive_element_to_noninteractive_role {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "noNoninteractiveElementToInteractiveRole" => {
+                if let Some(rule_conf) = &mut self.no_noninteractive_element_to_interactive_role {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "noNoninteractiveTabindex" => {
+                if let Some(rule_conf) = &mut self.no_noninteractive_tabindex {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "noPositiveTabindex" => {
+                if let Some(rule_conf) = &mut self.no_positive_tabindex {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "noRedundantAlt" => {
+                if let Some(rule_conf) = &mut self.no_redundant_alt {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "noRedundantRoles" => {
+                if let Some(rule_conf) = &mut self.no_redundant_roles {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "noSvgWithoutTitle" => {
+                if let Some(rule_conf) = &mut self.no_svg_without_title {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "useAltText" => {
+                if let Some(rule_conf) = &mut self.use_alt_text {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "useAnchorContent" => {
+                if let Some(rule_conf) = &mut self.use_anchor_content {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "useAriaActivedescendantWithTabindex" => {
+                if let Some(rule_conf) = &mut self.use_aria_activedescendant_with_tabindex {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "useAriaPropsForRole" => {
+                if let Some(rule_conf) = &mut self.use_aria_props_for_role {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "useButtonType" => {
+                if let Some(rule_conf) = &mut self.use_button_type {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "useHeadingContent" => {
+                if let Some(rule_conf) = &mut self.use_heading_content {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "useHtmlLang" => {
+                if let Some(rule_conf) = &mut self.use_html_lang {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "useIframeTitle" => {
+                if let Some(rule_conf) = &mut self.use_iframe_title {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "useKeyWithClickEvents" => {
+                if let Some(rule_conf) = &mut self.use_key_with_click_events {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "useKeyWithMouseEvents" => {
+                if let Some(rule_conf) = &mut self.use_key_with_mouse_events {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "useMediaCaption" => {
+                if let Some(rule_conf) = &mut self.use_media_caption {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "useValidAnchor" => {
+                if let Some(rule_conf) = &mut self.use_valid_anchor {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "useValidAriaProps" => {
+                if let Some(rule_conf) = &mut self.use_valid_aria_props {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "useValidAriaRole" => {
+                if let Some(rule_conf) = &mut self.use_valid_aria_role {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "useValidAriaValues" => {
+                if let Some(rule_conf) = &mut self.use_valid_aria_values {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "useValidLang" => {
+                if let Some(rule_conf) = &mut self.use_valid_lang {
+                    rule_conf.set_level(severity);
+                }
+            }
+            _ => {}
+        }
+    }
 }
 #[derive(Clone, Debug, Default, Deserialize, Deserializable, Eq, Merge, PartialEq, Serialize)]
 #[deserializable(with_validator)]
@@ -1081,7 +1395,7 @@ pub struct Complexity {
     pub all: Option<bool>,
     #[doc = "Disallow primitive type aliases and misleading types."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_banned_types: Option<RuleConfiguration<NoBannedTypes>>,
+    pub no_banned_types: Option<RuleFixConfiguration<NoBannedTypes>>,
     #[doc = "Disallow empty type parameters in type aliases and interfaces."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_empty_type_parameters: Option<RuleConfiguration<NoEmptyTypeParameters>>,
@@ -1094,53 +1408,54 @@ pub struct Complexity {
     pub no_excessive_nested_test_suites: Option<RuleConfiguration<NoExcessiveNestedTestSuites>>,
     #[doc = "Disallow unnecessary boolean casts"]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_extra_boolean_cast: Option<RuleConfiguration<NoExtraBooleanCast>>,
+    pub no_extra_boolean_cast: Option<RuleFixConfiguration<NoExtraBooleanCast>>,
     #[doc = "Prefer for...of statement instead of Array.forEach."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_for_each: Option<RuleConfiguration<NoForEach>>,
     #[doc = "Disallow unclear usage of consecutive space characters in regular expression literals"]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_multiple_spaces_in_regular_expression_literals:
-        Option<RuleConfiguration<NoMultipleSpacesInRegularExpressionLiterals>>,
+        Option<RuleFixConfiguration<NoMultipleSpacesInRegularExpressionLiterals>>,
     #[doc = "This rule reports when a class has no non-static members, such as for a class used exclusively as a static namespace."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_static_only_class: Option<RuleConfiguration<NoStaticOnlyClass>>,
     #[doc = "Disallow this and super in static contexts."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_this_in_static: Option<RuleConfiguration<NoThisInStatic>>,
+    pub no_this_in_static: Option<RuleFixConfiguration<NoThisInStatic>>,
     #[doc = "Disallow unnecessary catch clauses."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_useless_catch: Option<RuleConfiguration<NoUselessCatch>>,
     #[doc = "Disallow unnecessary constructors."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_useless_constructor: Option<RuleConfiguration<NoUselessConstructor>>,
+    pub no_useless_constructor: Option<RuleFixConfiguration<NoUselessConstructor>>,
     #[doc = "Disallow empty exports that don't change anything in a module file."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_useless_empty_export: Option<RuleConfiguration<NoUselessEmptyExport>>,
+    pub no_useless_empty_export: Option<RuleFixConfiguration<NoUselessEmptyExport>>,
     #[doc = "Disallow unnecessary fragments"]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_useless_fragments: Option<RuleConfiguration<NoUselessFragments>>,
+    pub no_useless_fragments: Option<RuleFixConfiguration<NoUselessFragments>>,
     #[doc = "Disallow unnecessary labels."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_useless_label: Option<RuleConfiguration<NoUselessLabel>>,
+    pub no_useless_label: Option<RuleFixConfiguration<NoUselessLabel>>,
     #[doc = "Disallow unnecessary nested block statements."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_useless_lone_block_statements: Option<RuleConfiguration<NoUselessLoneBlockStatements>>,
+    pub no_useless_lone_block_statements:
+        Option<RuleFixConfiguration<NoUselessLoneBlockStatements>>,
     #[doc = "Disallow renaming import, export, and destructured assignments to the same name."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_useless_rename: Option<RuleConfiguration<NoUselessRename>>,
+    pub no_useless_rename: Option<RuleFixConfiguration<NoUselessRename>>,
     #[doc = "Disallow useless case in switch statements."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_useless_switch_case: Option<RuleConfiguration<NoUselessSwitchCase>>,
+    pub no_useless_switch_case: Option<RuleFixConfiguration<NoUselessSwitchCase>>,
     #[doc = "Disallow ternary operators when simpler alternatives exist."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_useless_ternary: Option<RuleConfiguration<NoUselessTernary>>,
+    pub no_useless_ternary: Option<RuleFixConfiguration<NoUselessTernary>>,
     #[doc = "Disallow useless this aliasing."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_useless_this_alias: Option<RuleConfiguration<NoUselessThisAlias>>,
+    pub no_useless_this_alias: Option<RuleFixConfiguration<NoUselessThisAlias>>,
     #[doc = "Disallow using any or unknown as type constraint."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_useless_type_constraint: Option<RuleConfiguration<NoUselessTypeConstraint>>,
+    pub no_useless_type_constraint: Option<RuleFixConfiguration<NoUselessTypeConstraint>>,
     #[doc = "Disallow the use of void operators, which is not a familiar operator."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_void: Option<RuleConfiguration<NoVoid>>,
@@ -1149,25 +1464,25 @@ pub struct Complexity {
     pub no_with: Option<RuleConfiguration<NoWith>>,
     #[doc = "Use arrow functions over function expressions."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_arrow_function: Option<RuleConfiguration<UseArrowFunction>>,
+    pub use_arrow_function: Option<RuleFixConfiguration<UseArrowFunction>>,
     #[doc = "Promotes the use of .flatMap() when map().flat() are used together."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_flat_map: Option<RuleConfiguration<UseFlatMap>>,
+    pub use_flat_map: Option<RuleFixConfiguration<UseFlatMap>>,
     #[doc = "Enforce the usage of a literal access to properties over computed property access."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_literal_keys: Option<RuleConfiguration<UseLiteralKeys>>,
+    pub use_literal_keys: Option<RuleFixConfiguration<UseLiteralKeys>>,
     #[doc = "Enforce using concise optional chain instead of chained logical expressions."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_optional_chain: Option<RuleConfiguration<UseOptionalChain>>,
+    pub use_optional_chain: Option<RuleFixConfiguration<UseOptionalChain>>,
     #[doc = "Enforce the use of the regular expression literals instead of the RegExp constructor if possible."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_regex_literals: Option<RuleConfiguration<UseRegexLiterals>>,
+    pub use_regex_literals: Option<RuleFixConfiguration<UseRegexLiterals>>,
     #[doc = "Disallow number literal object member names which are not base10 or uses underscore as separator"]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_simple_number_keys: Option<RuleConfiguration<UseSimpleNumberKeys>>,
+    pub use_simple_number_keys: Option<RuleFixConfiguration<UseSimpleNumberKeys>>,
     #[doc = "Discard redundant terms from logical expressions."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_simplified_logic_expression: Option<RuleConfiguration<UseSimplifiedLogicExpression>>,
+    pub use_simplified_logic_expression: Option<RuleFixConfiguration<UseSimplifiedLogicExpression>>,
 }
 impl DeserializableValidator for Complexity {
     fn validate(
@@ -1621,8 +1936,8 @@ impl Complexity {
         index_set
     }
     #[doc = r" Checks if, given a rule name, matches one of the rules contained in this category"]
-    pub(crate) fn has_rule(rule_name: &str) -> bool {
-        Self::GROUP_RULES.contains(&rule_name)
+    pub(crate) fn has_rule(rule_name: &str) -> Option<&'static str> {
+        Some(Self::GROUP_RULES[Self::GROUP_RULES.binary_search(&rule_name).ok()?])
     }
     #[doc = r" Checks if, given a rule name, it is marked as recommended"]
     pub(crate) fn is_recommended_rule(rule_name: &str) -> bool {
@@ -1773,6 +2088,157 @@ impl Complexity {
             _ => None,
         }
     }
+    pub(crate) fn set_severity(&mut self, rule_name: &str, severity: RulePlainConfiguration) {
+        match rule_name {
+            "noBannedTypes" => {
+                if let Some(rule_conf) = &mut self.no_banned_types {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "noEmptyTypeParameters" => {
+                if let Some(rule_conf) = &mut self.no_empty_type_parameters {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "noExcessiveCognitiveComplexity" => {
+                if let Some(rule_conf) = &mut self.no_excessive_cognitive_complexity {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "noExcessiveNestedTestSuites" => {
+                if let Some(rule_conf) = &mut self.no_excessive_nested_test_suites {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "noExtraBooleanCast" => {
+                if let Some(rule_conf) = &mut self.no_extra_boolean_cast {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "noForEach" => {
+                if let Some(rule_conf) = &mut self.no_for_each {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "noMultipleSpacesInRegularExpressionLiterals" => {
+                if let Some(rule_conf) = &mut self.no_multiple_spaces_in_regular_expression_literals
+                {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "noStaticOnlyClass" => {
+                if let Some(rule_conf) = &mut self.no_static_only_class {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "noThisInStatic" => {
+                if let Some(rule_conf) = &mut self.no_this_in_static {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "noUselessCatch" => {
+                if let Some(rule_conf) = &mut self.no_useless_catch {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "noUselessConstructor" => {
+                if let Some(rule_conf) = &mut self.no_useless_constructor {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "noUselessEmptyExport" => {
+                if let Some(rule_conf) = &mut self.no_useless_empty_export {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "noUselessFragments" => {
+                if let Some(rule_conf) = &mut self.no_useless_fragments {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "noUselessLabel" => {
+                if let Some(rule_conf) = &mut self.no_useless_label {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "noUselessLoneBlockStatements" => {
+                if let Some(rule_conf) = &mut self.no_useless_lone_block_statements {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "noUselessRename" => {
+                if let Some(rule_conf) = &mut self.no_useless_rename {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "noUselessSwitchCase" => {
+                if let Some(rule_conf) = &mut self.no_useless_switch_case {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "noUselessTernary" => {
+                if let Some(rule_conf) = &mut self.no_useless_ternary {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "noUselessThisAlias" => {
+                if let Some(rule_conf) = &mut self.no_useless_this_alias {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "noUselessTypeConstraint" => {
+                if let Some(rule_conf) = &mut self.no_useless_type_constraint {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "noVoid" => {
+                if let Some(rule_conf) = &mut self.no_void {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "noWith" => {
+                if let Some(rule_conf) = &mut self.no_with {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "useArrowFunction" => {
+                if let Some(rule_conf) = &mut self.use_arrow_function {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "useFlatMap" => {
+                if let Some(rule_conf) = &mut self.use_flat_map {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "useLiteralKeys" => {
+                if let Some(rule_conf) = &mut self.use_literal_keys {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "useOptionalChain" => {
+                if let Some(rule_conf) = &mut self.use_optional_chain {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "useRegexLiterals" => {
+                if let Some(rule_conf) = &mut self.use_regex_literals {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "useSimpleNumberKeys" => {
+                if let Some(rule_conf) = &mut self.use_simple_number_keys {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "useSimplifiedLogicExpression" => {
+                if let Some(rule_conf) = &mut self.use_simplified_logic_expression {
+                    rule_conf.set_level(severity);
+                }
+            }
+            _ => {}
+        }
+    }
 }
 #[derive(Clone, Debug, Default, Deserialize, Deserializable, Eq, Merge, PartialEq, Serialize)]
 #[deserializable(with_validator)]
@@ -1791,7 +2257,7 @@ pub struct Correctness {
     pub no_children_prop: Option<RuleConfiguration<NoChildrenProp>>,
     #[doc = "Prevents from having const variables being re-assigned."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_const_assign: Option<RuleConfiguration<NoConstAssign>>,
+    pub no_const_assign: Option<RuleFixConfiguration<NoConstAssign>>,
     #[doc = "Disallow constant expressions in conditions"]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_constant_condition: Option<RuleConfiguration<NoConstantCondition>>,
@@ -1815,16 +2281,16 @@ pub struct Correctness {
     pub no_invalid_constructor_super: Option<RuleConfiguration<NoInvalidConstructorSuper>>,
     #[doc = "Disallow new operators with global non-constructor functions."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_invalid_new_builtin: Option<RuleConfiguration<NoInvalidNewBuiltin>>,
+    pub no_invalid_new_builtin: Option<RuleFixConfiguration<NoInvalidNewBuiltin>>,
     #[doc = "Disallow the use of variables and function parameters before their declaration"]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_invalid_use_before_declaration: Option<RuleConfiguration<NoInvalidUseBeforeDeclaration>>,
     #[doc = "Disallow new operators with the Symbol object."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_new_symbol: Option<RuleConfiguration<NoNewSymbol>>,
+    pub no_new_symbol: Option<RuleFixConfiguration<NoNewSymbol>>,
     #[doc = "Disallow \\8 and \\9 escape sequences in string literals."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_nonoctal_decimal_escape: Option<RuleConfiguration<NoNonoctalDecimalEscape>>,
+    pub no_nonoctal_decimal_escape: Option<RuleFixConfiguration<NoNonoctalDecimalEscape>>,
     #[doc = "Disallow literal numbers that lose precision"]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_precision_loss: Option<RuleConfiguration<NoPrecisionLoss>>,
@@ -1839,16 +2305,16 @@ pub struct Correctness {
     pub no_setter_return: Option<RuleConfiguration<NoSetterReturn>>,
     #[doc = "Disallow comparison of expressions modifying the string case with non-compliant value."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_string_case_mismatch: Option<RuleConfiguration<NoStringCaseMismatch>>,
+    pub no_string_case_mismatch: Option<RuleFixConfiguration<NoStringCaseMismatch>>,
     #[doc = "Disallow lexical declarations in switch clauses."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_switch_declarations: Option<RuleConfiguration<NoSwitchDeclarations>>,
+    pub no_switch_declarations: Option<RuleFixConfiguration<NoSwitchDeclarations>>,
     #[doc = "Prevents the usage of variables that haven't been declared inside the document."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_undeclared_variables: Option<RuleConfiguration<NoUndeclaredVariables>>,
     #[doc = "Avoid using unnecessary continue."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_unnecessary_continue: Option<RuleConfiguration<NoUnnecessaryContinue>>,
+    pub no_unnecessary_continue: Option<RuleFixConfiguration<NoUnnecessaryContinue>>,
     #[doc = "Disallow unreachable code"]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_unreachable: Option<RuleConfiguration<NoUnreachable>>,
@@ -1863,19 +2329,19 @@ pub struct Correctness {
     pub no_unsafe_optional_chaining: Option<RuleConfiguration<NoUnsafeOptionalChaining>>,
     #[doc = "Disallow unused imports."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_unused_imports: Option<RuleConfiguration<NoUnusedImports>>,
+    pub no_unused_imports: Option<RuleFixConfiguration<NoUnusedImports>>,
     #[doc = "Disallow unused labels."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_unused_labels: Option<RuleConfiguration<NoUnusedLabels>>,
+    pub no_unused_labels: Option<RuleFixConfiguration<NoUnusedLabels>>,
     #[doc = "Disallow unused private class members"]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_unused_private_class_members: Option<RuleConfiguration<NoUnusedPrivateClassMembers>>,
+    pub no_unused_private_class_members: Option<RuleFixConfiguration<NoUnusedPrivateClassMembers>>,
     #[doc = "Disallow unused variables."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_unused_variables: Option<RuleConfiguration<NoUnusedVariables>>,
+    pub no_unused_variables: Option<RuleFixConfiguration<NoUnusedVariables>>,
     #[doc = "This rules prevents void elements (AKA self-closing elements) from having children."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_void_elements_with_children: Option<RuleConfiguration<NoVoidElementsWithChildren>>,
+    pub no_void_elements_with_children: Option<RuleFixConfiguration<NoVoidElementsWithChildren>>,
     #[doc = "Disallow returning a value from a function with the return type 'void'"]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_void_type_return: Option<RuleConfiguration<NoVoidTypeReturn>>,
@@ -1887,7 +2353,7 @@ pub struct Correctness {
     pub use_hook_at_top_level: Option<RuleConfiguration<UseHookAtTopLevel>>,
     #[doc = "Require calls to isNaN() when checking for NaN."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_is_nan: Option<RuleConfiguration<UseIsNan>>,
+    pub use_is_nan: Option<RuleFixConfiguration<UseIsNan>>,
     #[doc = "Disallow missing key props in iterators/collection literals."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_jsx_key_in_iterable: Option<RuleConfiguration<UseJsxKeyInIterable>>,
@@ -2450,8 +2916,8 @@ impl Correctness {
         index_set
     }
     #[doc = r" Checks if, given a rule name, matches one of the rules contained in this category"]
-    pub(crate) fn has_rule(rule_name: &str) -> bool {
-        Self::GROUP_RULES.contains(&rule_name)
+    pub(crate) fn has_rule(rule_name: &str) -> Option<&'static str> {
+        Some(Self::GROUP_RULES[Self::GROUP_RULES.binary_search(&rule_name).ok()?])
     }
     #[doc = r" Checks if, given a rule name, it is marked as recommended"]
     pub(crate) fn is_recommended_rule(rule_name: &str) -> bool {
@@ -2634,6 +3100,196 @@ impl Correctness {
             _ => None,
         }
     }
+    pub(crate) fn set_severity(&mut self, rule_name: &str, severity: RulePlainConfiguration) {
+        match rule_name {
+            "noChildrenProp" => {
+                if let Some(rule_conf) = &mut self.no_children_prop {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "noConstAssign" => {
+                if let Some(rule_conf) = &mut self.no_const_assign {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "noConstantCondition" => {
+                if let Some(rule_conf) = &mut self.no_constant_condition {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "noConstructorReturn" => {
+                if let Some(rule_conf) = &mut self.no_constructor_return {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "noEmptyCharacterClassInRegex" => {
+                if let Some(rule_conf) = &mut self.no_empty_character_class_in_regex {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "noEmptyPattern" => {
+                if let Some(rule_conf) = &mut self.no_empty_pattern {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "noGlobalObjectCalls" => {
+                if let Some(rule_conf) = &mut self.no_global_object_calls {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "noInnerDeclarations" => {
+                if let Some(rule_conf) = &mut self.no_inner_declarations {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "noInvalidConstructorSuper" => {
+                if let Some(rule_conf) = &mut self.no_invalid_constructor_super {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "noInvalidNewBuiltin" => {
+                if let Some(rule_conf) = &mut self.no_invalid_new_builtin {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "noInvalidUseBeforeDeclaration" => {
+                if let Some(rule_conf) = &mut self.no_invalid_use_before_declaration {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "noNewSymbol" => {
+                if let Some(rule_conf) = &mut self.no_new_symbol {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "noNonoctalDecimalEscape" => {
+                if let Some(rule_conf) = &mut self.no_nonoctal_decimal_escape {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "noPrecisionLoss" => {
+                if let Some(rule_conf) = &mut self.no_precision_loss {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "noRenderReturnValue" => {
+                if let Some(rule_conf) = &mut self.no_render_return_value {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "noSelfAssign" => {
+                if let Some(rule_conf) = &mut self.no_self_assign {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "noSetterReturn" => {
+                if let Some(rule_conf) = &mut self.no_setter_return {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "noStringCaseMismatch" => {
+                if let Some(rule_conf) = &mut self.no_string_case_mismatch {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "noSwitchDeclarations" => {
+                if let Some(rule_conf) = &mut self.no_switch_declarations {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "noUndeclaredVariables" => {
+                if let Some(rule_conf) = &mut self.no_undeclared_variables {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "noUnnecessaryContinue" => {
+                if let Some(rule_conf) = &mut self.no_unnecessary_continue {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "noUnreachable" => {
+                if let Some(rule_conf) = &mut self.no_unreachable {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "noUnreachableSuper" => {
+                if let Some(rule_conf) = &mut self.no_unreachable_super {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "noUnsafeFinally" => {
+                if let Some(rule_conf) = &mut self.no_unsafe_finally {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "noUnsafeOptionalChaining" => {
+                if let Some(rule_conf) = &mut self.no_unsafe_optional_chaining {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "noUnusedImports" => {
+                if let Some(rule_conf) = &mut self.no_unused_imports {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "noUnusedLabels" => {
+                if let Some(rule_conf) = &mut self.no_unused_labels {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "noUnusedPrivateClassMembers" => {
+                if let Some(rule_conf) = &mut self.no_unused_private_class_members {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "noUnusedVariables" => {
+                if let Some(rule_conf) = &mut self.no_unused_variables {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "noVoidElementsWithChildren" => {
+                if let Some(rule_conf) = &mut self.no_void_elements_with_children {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "noVoidTypeReturn" => {
+                if let Some(rule_conf) = &mut self.no_void_type_return {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "useExhaustiveDependencies" => {
+                if let Some(rule_conf) = &mut self.use_exhaustive_dependencies {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "useHookAtTopLevel" => {
+                if let Some(rule_conf) = &mut self.use_hook_at_top_level {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "useIsNan" => {
+                if let Some(rule_conf) = &mut self.use_is_nan {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "useJsxKeyInIterable" => {
+                if let Some(rule_conf) = &mut self.use_jsx_key_in_iterable {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "useValidForDirection" => {
+                if let Some(rule_conf) = &mut self.use_valid_for_direction {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "useYield" => {
+                if let Some(rule_conf) = &mut self.use_yield {
+                    rule_conf.set_level(severity);
+                }
+            }
+            _ => {}
+        }
+    }
 }
 #[derive(Clone, Debug, Default, Deserialize, Deserializable, Eq, Merge, PartialEq, Serialize)]
 #[deserializable(with_validator)]
@@ -2652,10 +3308,10 @@ pub struct Nursery {
     pub no_color_invalid_hex: Option<RuleConfiguration<NoColorInvalidHex>>,
     #[doc = "Disallow the use of console."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_console: Option<RuleConfiguration<NoConsole>>,
+    pub no_console: Option<RuleFixConfiguration<NoConsole>>,
     #[doc = "Disallow the use of Math.min and Math.max to clamp a value where the result itself is constant."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_constant_math_min_max_clamp: Option<RuleConfiguration<NoConstantMathMinMaxClamp>>,
+    pub no_constant_math_min_max_clamp: Option<RuleFixConfiguration<NoConstantMathMinMaxClamp>>,
     #[doc = "Disallow CSS empty blocks."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_css_empty_block: Option<RuleConfiguration<NoCssEmptyBlock>>,
@@ -2683,7 +3339,7 @@ pub struct Nursery {
     pub no_evolving_any: Option<RuleConfiguration<NoEvolvingAny>>,
     #[doc = "Disallow to use unnecessary callback on flatMap."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_flat_map_identity: Option<RuleConfiguration<NoFlatMapIdentity>>,
+    pub no_flat_map_identity: Option<RuleFixConfiguration<NoFlatMapIdentity>>,
     #[doc = "Disallow invalid !important within keyframe declarations"]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_important_in_keyframe: Option<RuleConfiguration<NoImportantInKeyframe>>,
@@ -2699,7 +3355,7 @@ pub struct Nursery {
     pub no_nodejs_modules: Option<RuleConfiguration<NoNodejsModules>>,
     #[doc = "Prevents React-specific JSX properties from being used."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_react_specific_props: Option<RuleConfiguration<NoReactSpecificProps>>,
+    pub no_react_specific_props: Option<RuleFixConfiguration<NoReactSpecificProps>>,
     #[doc = "Disallow specified modules when loaded by import or require."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_restricted_imports: Option<RuleConfiguration<NoRestrictedImports>>,
@@ -2727,24 +3383,24 @@ pub struct Nursery {
     pub no_unmatchable_anb_selector: Option<RuleConfiguration<NoUnmatchableAnbSelector>>,
     #[doc = "Disallow unnecessary concatenation of string or template literals."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_useless_string_concat: Option<RuleConfiguration<NoUselessStringConcat>>,
+    pub no_useless_string_concat: Option<RuleFixConfiguration<NoUselessStringConcat>>,
     #[doc = "Disallow initializing variables to undefined."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_useless_undefined_initialization:
-        Option<RuleConfiguration<NoUselessUndefinedInitialization>>,
+        Option<RuleFixConfiguration<NoUselessUndefinedInitialization>>,
     #[doc = "Disallow Array constructors."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_array_literals: Option<RuleConfiguration<UseArrayLiterals>>,
+    pub use_array_literals: Option<RuleFixConfiguration<UseArrayLiterals>>,
     #[doc = "Enforce the use of new for all builtins, except String, Number, Boolean, Symbol and BigInt."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_consistent_builtin_instantiation:
-        Option<RuleConfiguration<UseConsistentBuiltinInstantiation>>,
+        Option<RuleFixConfiguration<UseConsistentBuiltinInstantiation>>,
     #[doc = "Require the default clause in switch statements."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_default_switch_clause: Option<RuleConfiguration<UseDefaultSwitchClause>>,
     #[doc = "Enforce explicitly comparing the length, size, byteLength or byteOffset property of a value."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_explicit_length_check: Option<RuleConfiguration<UseExplicitLengthCheck>>,
+    pub use_explicit_length_check: Option<RuleFixConfiguration<UseExplicitLengthCheck>>,
     #[doc = "Elements with an interactive role and interaction handlers must be focusable."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_focusable_interactive: Option<RuleConfiguration<UseFocusableInteractive>>,
@@ -2760,10 +3416,13 @@ pub struct Nursery {
         Option<RuleConfiguration<UseNumberToFixedDigitsArgument>>,
     #[doc = "Enforce the sorting of CSS utility classes."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_sorted_classes: Option<RuleConfiguration<UseSortedClasses>>,
+    pub use_sorted_classes: Option<RuleFixConfiguration<UseSortedClasses>>,
     #[doc = "Require new when throwing an error."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_throw_new_error: Option<RuleConfiguration<UseThrowNewError>>,
+    pub use_throw_new_error: Option<RuleFixConfiguration<UseThrowNewError>>,
+    #[doc = "Require all regex literals to be declared at the top level."]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub use_top_level_regex: Option<RuleConfiguration<UseTopLevelRegex>>,
 }
 impl DeserializableValidator for Nursery {
     fn validate(
@@ -2819,6 +3478,7 @@ impl Nursery {
         "useNumberToFixedDigitsArgument",
         "useSortedClasses",
         "useThrowNewError",
+        "useTopLevelRegex",
     ];
     const RECOMMENDED_RULES: &'static [&'static str] = &[
         "noCssEmptyBlock",
@@ -3097,6 +3757,11 @@ impl Nursery {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[36]));
             }
         }
+        if let Some(rule) = self.use_top_level_regex.as_ref() {
+            if rule.is_enabled() {
+                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[36]));
+            }
+        }
         index_set
     }
     pub(crate) fn get_disabled_rules(&self) -> IndexSet<RuleFilter> {
@@ -3286,11 +3951,16 @@ impl Nursery {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[36]));
             }
         }
+        if let Some(rule) = self.use_top_level_regex.as_ref() {
+            if rule.is_disabled() {
+                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[36]));
+            }
+        }
         index_set
     }
     #[doc = r" Checks if, given a rule name, matches one of the rules contained in this category"]
-    pub(crate) fn has_rule(rule_name: &str) -> bool {
-        Self::GROUP_RULES.contains(&rule_name)
+    pub(crate) fn has_rule(rule_name: &str) -> Option<&'static str> {
+        Some(Self::GROUP_RULES[Self::GROUP_RULES.binary_search(&rule_name).ok()?])
     }
     #[doc = r" Checks if, given a rule name, it is marked as recommended"]
     pub(crate) fn is_recommended_rule(rule_name: &str) -> bool {
@@ -3470,7 +4140,201 @@ impl Nursery {
                 .use_throw_new_error
                 .as_ref()
                 .map(|conf| (conf.level(), conf.get_options())),
+            "useTopLevelRegex" => self
+                .use_top_level_regex
+                .as_ref()
+                .map(|conf| (conf.level(), conf.get_options())),
             _ => None,
+        }
+    }
+    pub(crate) fn set_severity(&mut self, rule_name: &str, severity: RulePlainConfiguration) {
+        match rule_name {
+            "noColorInvalidHex" => {
+                if let Some(rule_conf) = &mut self.no_color_invalid_hex {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "noConsole" => {
+                if let Some(rule_conf) = &mut self.no_console {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "noConstantMathMinMaxClamp" => {
+                if let Some(rule_conf) = &mut self.no_constant_math_min_max_clamp {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "noCssEmptyBlock" => {
+                if let Some(rule_conf) = &mut self.no_css_empty_block {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "noDoneCallback" => {
+                if let Some(rule_conf) = &mut self.no_done_callback {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "noDuplicateAtImportRules" => {
+                if let Some(rule_conf) = &mut self.no_duplicate_at_import_rules {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "noDuplicateElseIf" => {
+                if let Some(rule_conf) = &mut self.no_duplicate_else_if {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "noDuplicateFontNames" => {
+                if let Some(rule_conf) = &mut self.no_duplicate_font_names {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "noDuplicateJsonKeys" => {
+                if let Some(rule_conf) = &mut self.no_duplicate_json_keys {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "noDuplicateSelectorsKeyframeBlock" => {
+                if let Some(rule_conf) = &mut self.no_duplicate_selectors_keyframe_block {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "noEvolvingAny" => {
+                if let Some(rule_conf) = &mut self.no_evolving_any {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "noFlatMapIdentity" => {
+                if let Some(rule_conf) = &mut self.no_flat_map_identity {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "noImportantInKeyframe" => {
+                if let Some(rule_conf) = &mut self.no_important_in_keyframe {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "noInvalidPositionAtImportRule" => {
+                if let Some(rule_conf) = &mut self.no_invalid_position_at_import_rule {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "noMisplacedAssertion" => {
+                if let Some(rule_conf) = &mut self.no_misplaced_assertion {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "noNodejsModules" => {
+                if let Some(rule_conf) = &mut self.no_nodejs_modules {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "noReactSpecificProps" => {
+                if let Some(rule_conf) = &mut self.no_react_specific_props {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "noRestrictedImports" => {
+                if let Some(rule_conf) = &mut self.no_restricted_imports {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "noUndeclaredDependencies" => {
+                if let Some(rule_conf) = &mut self.no_undeclared_dependencies {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "noUnknownFunction" => {
+                if let Some(rule_conf) = &mut self.no_unknown_function {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "noUnknownMediaFeatureName" => {
+                if let Some(rule_conf) = &mut self.no_unknown_media_feature_name {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "noUnknownProperty" => {
+                if let Some(rule_conf) = &mut self.no_unknown_property {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "noUnknownSelectorPseudoElement" => {
+                if let Some(rule_conf) = &mut self.no_unknown_selector_pseudo_element {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "noUnknownUnit" => {
+                if let Some(rule_conf) = &mut self.no_unknown_unit {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "noUnmatchableAnbSelector" => {
+                if let Some(rule_conf) = &mut self.no_unmatchable_anb_selector {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "noUselessStringConcat" => {
+                if let Some(rule_conf) = &mut self.no_useless_string_concat {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "noUselessUndefinedInitialization" => {
+                if let Some(rule_conf) = &mut self.no_useless_undefined_initialization {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "useArrayLiterals" => {
+                if let Some(rule_conf) = &mut self.use_array_literals {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "useConsistentBuiltinInstantiation" => {
+                if let Some(rule_conf) = &mut self.use_consistent_builtin_instantiation {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "useDefaultSwitchClause" => {
+                if let Some(rule_conf) = &mut self.use_default_switch_clause {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "useExplicitLengthCheck" => {
+                if let Some(rule_conf) = &mut self.use_explicit_length_check {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "useFocusableInteractive" => {
+                if let Some(rule_conf) = &mut self.use_focusable_interactive {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "useGenericFontNames" => {
+                if let Some(rule_conf) = &mut self.use_generic_font_names {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "useImportRestrictions" => {
+                if let Some(rule_conf) = &mut self.use_import_restrictions {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "useSortedClasses" => {
+                if let Some(rule_conf) = &mut self.use_sorted_classes {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "useThrowNewError" => {
+                if let Some(rule_conf) = &mut self.use_throw_new_error {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "useTopLevelRegex" => {
+                if let Some(rule_conf) = &mut self.use_top_level_regex {
+                    rule_conf.set_level(severity);
+                }
+            }
+            _ => {}
         }
     }
 }
@@ -3494,7 +4358,7 @@ pub struct Performance {
     pub no_barrel_file: Option<RuleConfiguration<NoBarrelFile>>,
     #[doc = "Disallow the use of the delete operator."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_delete: Option<RuleConfiguration<NoDelete>>,
+    pub no_delete: Option<RuleFixConfiguration<NoDelete>>,
     #[doc = "Avoid re-export all."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_re_export_all: Option<RuleConfiguration<NoReExportAll>>,
@@ -3594,8 +4458,8 @@ impl Performance {
         index_set
     }
     #[doc = r" Checks if, given a rule name, matches one of the rules contained in this category"]
-    pub(crate) fn has_rule(rule_name: &str) -> bool {
-        Self::GROUP_RULES.contains(&rule_name)
+    pub(crate) fn has_rule(rule_name: &str) -> Option<&'static str> {
+        Some(Self::GROUP_RULES[Self::GROUP_RULES.binary_search(&rule_name).ok()?])
     }
     #[doc = r" Checks if, given a rule name, it is marked as recommended"]
     pub(crate) fn is_recommended_rule(rule_name: &str) -> bool {
@@ -3644,6 +4508,31 @@ impl Performance {
                 .as_ref()
                 .map(|conf| (conf.level(), conf.get_options())),
             _ => None,
+        }
+    }
+    pub(crate) fn set_severity(&mut self, rule_name: &str, severity: RulePlainConfiguration) {
+        match rule_name {
+            "noAccumulatingSpread" => {
+                if let Some(rule_conf) = &mut self.no_accumulating_spread {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "noBarrelFile" => {
+                if let Some(rule_conf) = &mut self.no_barrel_file {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "noDelete" => {
+                if let Some(rule_conf) = &mut self.no_delete {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "noReExportAll" => {
+                if let Some(rule_conf) = &mut self.no_re_export_all {
+                    rule_conf.set_level(severity);
+                }
+            }
+            _ => {}
         }
     }
 }
@@ -3758,8 +4647,8 @@ impl Security {
         index_set
     }
     #[doc = r" Checks if, given a rule name, matches one of the rules contained in this category"]
-    pub(crate) fn has_rule(rule_name: &str) -> bool {
-        Self::GROUP_RULES.contains(&rule_name)
+    pub(crate) fn has_rule(rule_name: &str) -> Option<&'static str> {
+        Some(Self::GROUP_RULES[Self::GROUP_RULES.binary_search(&rule_name).ok()?])
     }
     #[doc = r" Checks if, given a rule name, it is marked as recommended"]
     pub(crate) fn is_recommended_rule(rule_name: &str) -> bool {
@@ -3806,6 +4695,26 @@ impl Security {
             _ => None,
         }
     }
+    pub(crate) fn set_severity(&mut self, rule_name: &str, severity: RulePlainConfiguration) {
+        match rule_name {
+            "noDangerouslySetInnerHtml" => {
+                if let Some(rule_conf) = &mut self.no_dangerously_set_inner_html {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "noDangerouslySetInnerHtmlWithChildren" => {
+                if let Some(rule_conf) = &mut self.no_dangerously_set_inner_html_with_children {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "noGlobalEval" => {
+                if let Some(rule_conf) = &mut self.no_global_eval {
+                    rule_conf.set_level(severity);
+                }
+            }
+            _ => {}
+        }
+    }
 }
 #[derive(Clone, Debug, Default, Deserialize, Deserializable, Eq, Merge, PartialEq, Serialize)]
 #[deserializable(with_validator)]
@@ -3830,10 +4739,10 @@ pub struct Style {
     pub no_default_export: Option<RuleConfiguration<NoDefaultExport>>,
     #[doc = "Disallow implicit true values on JSX boolean attributes"]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_implicit_boolean: Option<RuleConfiguration<NoImplicitBoolean>>,
+    pub no_implicit_boolean: Option<RuleFixConfiguration<NoImplicitBoolean>>,
     #[doc = "Disallow type annotations for variables, parameters, and class properties initialized with a literal expression."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_inferrable_types: Option<RuleConfiguration<NoInferrableTypes>>,
+    pub no_inferrable_types: Option<RuleFixConfiguration<NoInferrableTypes>>,
     #[doc = "Disallow the use of TypeScript's namespaces."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_namespace: Option<RuleConfiguration<NoNamespace>>,
@@ -3842,10 +4751,10 @@ pub struct Style {
     pub no_namespace_import: Option<RuleConfiguration<NoNamespaceImport>>,
     #[doc = "Disallow negation in the condition of an if statement if it has an else clause."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_negation_else: Option<RuleConfiguration<NoNegationElse>>,
+    pub no_negation_else: Option<RuleFixConfiguration<NoNegationElse>>,
     #[doc = "Disallow non-null assertions using the ! postfix operator."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_non_null_assertion: Option<RuleConfiguration<NoNonNullAssertion>>,
+    pub no_non_null_assertion: Option<RuleFixConfiguration<NoNonNullAssertion>>,
     #[doc = "Disallow reassigning function parameters."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_parameter_assign: Option<RuleConfiguration<NoParameterAssign>>,
@@ -3857,43 +4766,43 @@ pub struct Style {
     pub no_restricted_globals: Option<RuleConfiguration<NoRestrictedGlobals>>,
     #[doc = "Disallow the use of constants which its value is the upper-case version of its name."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_shouty_constants: Option<RuleConfiguration<NoShoutyConstants>>,
+    pub no_shouty_constants: Option<RuleFixConfiguration<NoShoutyConstants>>,
     #[doc = "Disallow template literals if interpolation and special-character handling are not needed"]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_unused_template_literal: Option<RuleConfiguration<NoUnusedTemplateLiteral>>,
+    pub no_unused_template_literal: Option<RuleFixConfiguration<NoUnusedTemplateLiteral>>,
     #[doc = "Disallow else block when the if block breaks early."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_useless_else: Option<RuleConfiguration<NoUselessElse>>,
+    pub no_useless_else: Option<RuleFixConfiguration<NoUselessElse>>,
     #[doc = "Disallow the use of var"]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_var: Option<RuleConfiguration<NoVar>>,
+    pub no_var: Option<RuleFixConfiguration<NoVar>>,
     #[doc = "Enforce the use of as const over literal type and type annotation."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_as_const_assertion: Option<RuleConfiguration<UseAsConstAssertion>>,
+    pub use_as_const_assertion: Option<RuleFixConfiguration<UseAsConstAssertion>>,
     #[doc = "Requires following curly brace conventions."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_block_statements: Option<RuleConfiguration<UseBlockStatements>>,
+    pub use_block_statements: Option<RuleFixConfiguration<UseBlockStatements>>,
     #[doc = "Enforce using else if instead of nested if in else clauses."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_collapsed_else_if: Option<RuleConfiguration<UseCollapsedElseIf>>,
+    pub use_collapsed_else_if: Option<RuleFixConfiguration<UseCollapsedElseIf>>,
     #[doc = "Require consistently using either T\\[] or Array\\<T>"]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_consistent_array_type: Option<RuleConfiguration<UseConsistentArrayType>>,
+    pub use_consistent_array_type: Option<RuleFixConfiguration<UseConsistentArrayType>>,
     #[doc = "Require const declarations for variables that are only assigned once."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_const: Option<RuleConfiguration<UseConst>>,
+    pub use_const: Option<RuleFixConfiguration<UseConst>>,
     #[doc = "Enforce default function parameters and optional function parameters to be last."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_default_parameter_last: Option<RuleConfiguration<UseDefaultParameterLast>>,
+    pub use_default_parameter_last: Option<RuleFixConfiguration<UseDefaultParameterLast>>,
     #[doc = "Require that each enum member value be explicitly initialized."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_enum_initializers: Option<RuleConfiguration<UseEnumInitializers>>,
+    pub use_enum_initializers: Option<RuleFixConfiguration<UseEnumInitializers>>,
     #[doc = "Disallow the use of Math.pow in favor of the ** operator."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_exponentiation_operator: Option<RuleConfiguration<UseExponentiationOperator>>,
+    pub use_exponentiation_operator: Option<RuleFixConfiguration<UseExponentiationOperator>>,
     #[doc = "Promotes the use of export type for types."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_export_type: Option<RuleConfiguration<UseExportType>>,
+    pub use_export_type: Option<RuleFixConfiguration<UseExportType>>,
     #[doc = "Enforce naming conventions for JavaScript and TypeScript filenames."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_filenaming_convention: Option<RuleConfiguration<UseFilenamingConvention>>,
@@ -3902,52 +4811,52 @@ pub struct Style {
     pub use_for_of: Option<RuleConfiguration<UseForOf>>,
     #[doc = "This rule enforces the use of \\<>...\\</> over \\<Fragment>...\\</Fragment>."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_fragment_syntax: Option<RuleConfiguration<UseFragmentSyntax>>,
+    pub use_fragment_syntax: Option<RuleFixConfiguration<UseFragmentSyntax>>,
     #[doc = "Promotes the use of import type for types."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_import_type: Option<RuleConfiguration<UseImportType>>,
+    pub use_import_type: Option<RuleFixConfiguration<UseImportType>>,
     #[doc = "Require all enum members to be literal values."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_literal_enum_members: Option<RuleConfiguration<UseLiteralEnumMembers>>,
     #[doc = "Enforce naming conventions for everything across a codebase."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_naming_convention: Option<RuleConfiguration<UseNamingConvention>>,
+    pub use_naming_convention: Option<RuleFixConfiguration<UseNamingConvention>>,
     #[doc = "Promotes the usage of node:assert/strict over node:assert."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_node_assert_strict: Option<RuleConfiguration<UseNodeAssertStrict>>,
+    pub use_node_assert_strict: Option<RuleFixConfiguration<UseNodeAssertStrict>>,
     #[doc = "Enforces using the node: protocol for Node.js builtin modules."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_nodejs_import_protocol: Option<RuleConfiguration<UseNodejsImportProtocol>>,
+    pub use_nodejs_import_protocol: Option<RuleFixConfiguration<UseNodejsImportProtocol>>,
     #[doc = "Use the Number properties instead of global ones."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_number_namespace: Option<RuleConfiguration<UseNumberNamespace>>,
+    pub use_number_namespace: Option<RuleFixConfiguration<UseNumberNamespace>>,
     #[doc = "Disallow parseInt() and Number.parseInt() in favor of binary, octal, and hexadecimal literals"]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_numeric_literals: Option<RuleConfiguration<UseNumericLiterals>>,
+    pub use_numeric_literals: Option<RuleFixConfiguration<UseNumericLiterals>>,
     #[doc = "Prevent extra closing tags for components without children"]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_self_closing_elements: Option<RuleConfiguration<UseSelfClosingElements>>,
+    pub use_self_closing_elements: Option<RuleFixConfiguration<UseSelfClosingElements>>,
     #[doc = "When expressing array types, this rule promotes the usage of T\\[] shorthand instead of Array\\<T>."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_shorthand_array_type: Option<RuleConfiguration<UseShorthandArrayType>>,
+    pub use_shorthand_array_type: Option<RuleFixConfiguration<UseShorthandArrayType>>,
     #[doc = "Require assignment operator shorthand where possible."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_shorthand_assign: Option<RuleConfiguration<UseShorthandAssign>>,
+    pub use_shorthand_assign: Option<RuleFixConfiguration<UseShorthandAssign>>,
     #[doc = "Enforce using function types instead of object type with call signatures."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_shorthand_function_type: Option<RuleConfiguration<UseShorthandFunctionType>>,
+    pub use_shorthand_function_type: Option<RuleFixConfiguration<UseShorthandFunctionType>>,
     #[doc = "Enforces switch clauses have a single statement, emits a quick fix wrapping the statements in a block."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_single_case_statement: Option<RuleConfiguration<UseSingleCaseStatement>>,
+    pub use_single_case_statement: Option<RuleFixConfiguration<UseSingleCaseStatement>>,
     #[doc = "Disallow multiple variable declarations in the same variable statement"]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_single_var_declarator: Option<RuleConfiguration<UseSingleVarDeclarator>>,
+    pub use_single_var_declarator: Option<RuleFixConfiguration<UseSingleVarDeclarator>>,
     #[doc = "Prefer template literals over string concatenation."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_template: Option<RuleConfiguration<UseTemplate>>,
+    pub use_template: Option<RuleFixConfiguration<UseTemplate>>,
     #[doc = "Enforce the use of while loops instead of for loops when the initializer and update expressions are not needed."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_while: Option<RuleConfiguration<UseWhile>>,
+    pub use_while: Option<RuleFixConfiguration<UseWhile>>,
 }
 impl DeserializableValidator for Style {
     fn validate(
@@ -4559,8 +5468,8 @@ impl Style {
         index_set
     }
     #[doc = r" Checks if, given a rule name, matches one of the rules contained in this category"]
-    pub(crate) fn has_rule(rule_name: &str) -> bool {
-        Self::GROUP_RULES.contains(&rule_name)
+    pub(crate) fn has_rule(rule_name: &str) -> Option<&'static str> {
+        Some(Self::GROUP_RULES[Self::GROUP_RULES.binary_search(&rule_name).ok()?])
     }
     #[doc = r" Checks if, given a rule name, it is marked as recommended"]
     pub(crate) fn is_recommended_rule(rule_name: &str) -> bool {
@@ -4767,6 +5676,226 @@ impl Style {
             _ => None,
         }
     }
+    pub(crate) fn set_severity(&mut self, rule_name: &str, severity: RulePlainConfiguration) {
+        match rule_name {
+            "noArguments" => {
+                if let Some(rule_conf) = &mut self.no_arguments {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "noCommaOperator" => {
+                if let Some(rule_conf) = &mut self.no_comma_operator {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "noDefaultExport" => {
+                if let Some(rule_conf) = &mut self.no_default_export {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "noImplicitBoolean" => {
+                if let Some(rule_conf) = &mut self.no_implicit_boolean {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "noInferrableTypes" => {
+                if let Some(rule_conf) = &mut self.no_inferrable_types {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "noNamespace" => {
+                if let Some(rule_conf) = &mut self.no_namespace {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "noNamespaceImport" => {
+                if let Some(rule_conf) = &mut self.no_namespace_import {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "noNegationElse" => {
+                if let Some(rule_conf) = &mut self.no_negation_else {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "noNonNullAssertion" => {
+                if let Some(rule_conf) = &mut self.no_non_null_assertion {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "noParameterAssign" => {
+                if let Some(rule_conf) = &mut self.no_parameter_assign {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "noParameterProperties" => {
+                if let Some(rule_conf) = &mut self.no_parameter_properties {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "noRestrictedGlobals" => {
+                if let Some(rule_conf) = &mut self.no_restricted_globals {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "noShoutyConstants" => {
+                if let Some(rule_conf) = &mut self.no_shouty_constants {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "noUnusedTemplateLiteral" => {
+                if let Some(rule_conf) = &mut self.no_unused_template_literal {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "noUselessElse" => {
+                if let Some(rule_conf) = &mut self.no_useless_else {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "noVar" => {
+                if let Some(rule_conf) = &mut self.no_var {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "useAsConstAssertion" => {
+                if let Some(rule_conf) = &mut self.use_as_const_assertion {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "useBlockStatements" => {
+                if let Some(rule_conf) = &mut self.use_block_statements {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "useCollapsedElseIf" => {
+                if let Some(rule_conf) = &mut self.use_collapsed_else_if {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "useConsistentArrayType" => {
+                if let Some(rule_conf) = &mut self.use_consistent_array_type {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "useConst" => {
+                if let Some(rule_conf) = &mut self.use_const {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "useDefaultParameterLast" => {
+                if let Some(rule_conf) = &mut self.use_default_parameter_last {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "useEnumInitializers" => {
+                if let Some(rule_conf) = &mut self.use_enum_initializers {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "useExponentiationOperator" => {
+                if let Some(rule_conf) = &mut self.use_exponentiation_operator {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "useExportType" => {
+                if let Some(rule_conf) = &mut self.use_export_type {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "useFilenamingConvention" => {
+                if let Some(rule_conf) = &mut self.use_filenaming_convention {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "useForOf" => {
+                if let Some(rule_conf) = &mut self.use_for_of {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "useFragmentSyntax" => {
+                if let Some(rule_conf) = &mut self.use_fragment_syntax {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "useImportType" => {
+                if let Some(rule_conf) = &mut self.use_import_type {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "useLiteralEnumMembers" => {
+                if let Some(rule_conf) = &mut self.use_literal_enum_members {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "useNamingConvention" => {
+                if let Some(rule_conf) = &mut self.use_naming_convention {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "useNodeAssertStrict" => {
+                if let Some(rule_conf) = &mut self.use_node_assert_strict {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "useNodejsImportProtocol" => {
+                if let Some(rule_conf) = &mut self.use_nodejs_import_protocol {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "useNumberNamespace" => {
+                if let Some(rule_conf) = &mut self.use_number_namespace {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "useNumericLiterals" => {
+                if let Some(rule_conf) = &mut self.use_numeric_literals {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "useSelfClosingElements" => {
+                if let Some(rule_conf) = &mut self.use_self_closing_elements {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "useShorthandArrayType" => {
+                if let Some(rule_conf) = &mut self.use_shorthand_array_type {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "useShorthandAssign" => {
+                if let Some(rule_conf) = &mut self.use_shorthand_assign {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "useShorthandFunctionType" => {
+                if let Some(rule_conf) = &mut self.use_shorthand_function_type {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "useSingleCaseStatement" => {
+                if let Some(rule_conf) = &mut self.use_single_case_statement {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "useSingleVarDeclarator" => {
+                if let Some(rule_conf) = &mut self.use_single_var_declarator {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "useTemplate" => {
+                if let Some(rule_conf) = &mut self.use_template {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "useWhile" => {
+                if let Some(rule_conf) = &mut self.use_while {
+                    rule_conf.set_level(severity);
+                }
+            }
+            _ => {}
+        }
+    }
 }
 #[derive(Clone, Debug, Default, Deserialize, Deserializable, Eq, Merge, PartialEq, Serialize)]
 #[deserializable(with_validator)]
@@ -4783,7 +5912,7 @@ pub struct Suspicious {
     #[doc = "Use standard constants instead of approximated literals."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_approximative_numeric_constant:
-        Option<RuleConfiguration<NoApproximativeNumericConstant>>,
+        Option<RuleFixConfiguration<NoApproximativeNumericConstant>>,
     #[doc = "Discourage the usage of Array index in keys."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_array_index_key: Option<RuleConfiguration<NoArrayIndexKey>>,
@@ -4801,31 +5930,31 @@ pub struct Suspicious {
     pub no_class_assign: Option<RuleConfiguration<NoClassAssign>>,
     #[doc = "Prevent comments from being inserted as text nodes"]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_comment_text: Option<RuleConfiguration<NoCommentText>>,
+    pub no_comment_text: Option<RuleFixConfiguration<NoCommentText>>,
     #[doc = "Disallow comparing against -0"]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_compare_neg_zero: Option<RuleConfiguration<NoCompareNegZero>>,
+    pub no_compare_neg_zero: Option<RuleFixConfiguration<NoCompareNegZero>>,
     #[doc = "Disallow labeled statements that are not loops."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_confusing_labels: Option<RuleConfiguration<NoConfusingLabels>>,
     #[doc = "Disallow void type outside of generic or return types."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_confusing_void_type: Option<RuleConfiguration<NoConfusingVoidType>>,
+    pub no_confusing_void_type: Option<RuleFixConfiguration<NoConfusingVoidType>>,
     #[doc = "Disallow the use of console.log"]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_console_log: Option<RuleConfiguration<NoConsoleLog>>,
+    pub no_console_log: Option<RuleFixConfiguration<NoConsoleLog>>,
     #[doc = "Disallow TypeScript const enum"]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_const_enum: Option<RuleConfiguration<NoConstEnum>>,
+    pub no_const_enum: Option<RuleFixConfiguration<NoConstEnum>>,
     #[doc = "Prevents from having control characters and some escape sequences that match control characters in regular expressions."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_control_characters_in_regex: Option<RuleConfiguration<NoControlCharactersInRegex>>,
     #[doc = "Disallow the use of debugger"]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_debugger: Option<RuleConfiguration<NoDebugger>>,
+    pub no_debugger: Option<RuleFixConfiguration<NoDebugger>>,
     #[doc = "Require the use of === and !=="]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_double_equals: Option<RuleConfiguration<NoDoubleEquals>>,
+    pub no_double_equals: Option<RuleFixConfiguration<NoDoubleEquals>>,
     #[doc = "Disallow duplicate case labels."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_duplicate_case: Option<RuleConfiguration<NoDuplicateCase>>,
@@ -4837,7 +5966,7 @@ pub struct Suspicious {
     pub no_duplicate_jsx_props: Option<RuleConfiguration<NoDuplicateJsxProps>>,
     #[doc = "Prevents object literals having more than one property declaration for the same name."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_duplicate_object_keys: Option<RuleConfiguration<NoDuplicateObjectKeys>>,
+    pub no_duplicate_object_keys: Option<RuleFixConfiguration<NoDuplicateObjectKeys>>,
     #[doc = "Disallow duplicate function parameter name."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_duplicate_parameters: Option<RuleConfiguration<NoDuplicateParameters>>,
@@ -4849,7 +5978,7 @@ pub struct Suspicious {
     pub no_empty_block_statements: Option<RuleConfiguration<NoEmptyBlockStatements>>,
     #[doc = "Disallow the declaration of empty interfaces."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_empty_interface: Option<RuleConfiguration<NoEmptyInterface>>,
+    pub no_empty_interface: Option<RuleFixConfiguration<NoEmptyInterface>>,
     #[doc = "Disallow the any type usage."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_explicit_any: Option<RuleConfiguration<NoExplicitAny>>,
@@ -4858,13 +5987,13 @@ pub struct Suspicious {
     pub no_exports_in_test: Option<RuleConfiguration<NoExportsInTest>>,
     #[doc = "Prevents the wrong usage of the non-null assertion operator (!) in TypeScript files."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_extra_non_null_assertion: Option<RuleConfiguration<NoExtraNonNullAssertion>>,
+    pub no_extra_non_null_assertion: Option<RuleFixConfiguration<NoExtraNonNullAssertion>>,
     #[doc = "Disallow fallthrough of switch clauses."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_fallthrough_switch_clause: Option<RuleConfiguration<NoFallthroughSwitchClause>>,
     #[doc = "Disallow focused tests."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_focused_tests: Option<RuleConfiguration<NoFocusedTests>>,
+    pub no_focused_tests: Option<RuleFixConfiguration<NoFocusedTests>>,
     #[doc = "Disallow reassigning function declarations."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_function_assign: Option<RuleConfiguration<NoFunctionAssign>>,
@@ -4873,10 +6002,10 @@ pub struct Suspicious {
     pub no_global_assign: Option<RuleConfiguration<NoGlobalAssign>>,
     #[doc = "Use Number.isFinite instead of global isFinite."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_global_is_finite: Option<RuleConfiguration<NoGlobalIsFinite>>,
+    pub no_global_is_finite: Option<RuleFixConfiguration<NoGlobalIsFinite>>,
     #[doc = "Use Number.isNaN instead of global isNaN."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_global_is_nan: Option<RuleConfiguration<NoGlobalIsNan>>,
+    pub no_global_is_nan: Option<RuleFixConfiguration<NoGlobalIsNan>>,
     #[doc = "Disallow use of implicit any type on variable declarations."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_implicit_any_let: Option<RuleConfiguration<NoImplicitAnyLet>>,
@@ -4888,14 +6017,14 @@ pub struct Suspicious {
     pub no_label_var: Option<RuleConfiguration<NoLabelVar>>,
     #[doc = "Disallow characters made with multiple code points in character class syntax."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_misleading_character_class: Option<RuleConfiguration<NoMisleadingCharacterClass>>,
+    pub no_misleading_character_class: Option<RuleFixConfiguration<NoMisleadingCharacterClass>>,
     #[doc = "Enforce proper usage of new and constructor."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_misleading_instantiator: Option<RuleConfiguration<NoMisleadingInstantiator>>,
     #[doc = "Disallow shorthand assign when variable appears on both sides."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_misrefactored_shorthand_assign:
-        Option<RuleConfiguration<NoMisrefactoredShorthandAssign>>,
+        Option<RuleFixConfiguration<NoMisrefactoredShorthandAssign>>,
     #[doc = "Disallow direct use of Object.prototype builtins."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_prototype_builtins: Option<RuleConfiguration<NoPrototypeBuiltins>>,
@@ -4904,7 +6033,7 @@ pub struct Suspicious {
     pub no_redeclare: Option<RuleConfiguration<NoRedeclare>>,
     #[doc = "Prevents from having redundant \"use strict\"."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_redundant_use_strict: Option<RuleConfiguration<NoRedundantUseStrict>>,
+    pub no_redundant_use_strict: Option<RuleFixConfiguration<NoRedundantUseStrict>>,
     #[doc = "Disallow comparisons where both sides are exactly the same."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_self_compare: Option<RuleConfiguration<NoSelfCompare>>,
@@ -4913,10 +6042,10 @@ pub struct Suspicious {
     pub no_shadow_restricted_names: Option<RuleConfiguration<NoShadowRestrictedNames>>,
     #[doc = "Disallow disabled tests."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_skipped_tests: Option<RuleConfiguration<NoSkippedTests>>,
+    pub no_skipped_tests: Option<RuleFixConfiguration<NoSkippedTests>>,
     #[doc = "Disallow sparse arrays"]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_sparse_array: Option<RuleConfiguration<NoSparseArray>>,
+    pub no_sparse_array: Option<RuleFixConfiguration<NoSparseArray>>,
     #[doc = "It detects possible \"wrong\" semicolons inside JSX elements."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_suspicious_semicolon_in_jsx: Option<RuleConfiguration<NoSuspiciousSemicolonInJsx>>,
@@ -4928,7 +6057,7 @@ pub struct Suspicious {
     pub no_unsafe_declaration_merging: Option<RuleConfiguration<NoUnsafeDeclarationMerging>>,
     #[doc = "Disallow using unsafe negation."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_unsafe_negation: Option<RuleConfiguration<NoUnsafeNegation>>,
+    pub no_unsafe_negation: Option<RuleFixConfiguration<NoUnsafeNegation>>,
     #[doc = "Ensure async functions utilize await."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_await: Option<RuleConfiguration<UseAwait>>,
@@ -4940,13 +6069,13 @@ pub struct Suspicious {
     pub use_getter_return: Option<RuleConfiguration<UseGetterReturn>>,
     #[doc = "Use Array.isArray() instead of instanceof Array."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_is_array: Option<RuleConfiguration<UseIsArray>>,
+    pub use_is_array: Option<RuleFixConfiguration<UseIsArray>>,
     #[doc = "Require using the namespace keyword over the module keyword to declare TypeScript namespaces."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_namespace_keyword: Option<RuleConfiguration<UseNamespaceKeyword>>,
+    pub use_namespace_keyword: Option<RuleFixConfiguration<UseNamespaceKeyword>>,
     #[doc = "This rule verifies the result of typeof $expr unary expressions is being compared to valid values, either string literals containing valid type names or other typeof expressions"]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_valid_typeof: Option<RuleConfiguration<UseValidTypeof>>,
+    pub use_valid_typeof: Option<RuleFixConfiguration<UseValidTypeof>>,
 }
 impl DeserializableValidator for Suspicious {
     fn validate(
@@ -5756,8 +6885,8 @@ impl Suspicious {
         index_set
     }
     #[doc = r" Checks if, given a rule name, matches one of the rules contained in this category"]
-    pub(crate) fn has_rule(rule_name: &str) -> bool {
-        Self::GROUP_RULES.contains(&rule_name)
+    pub(crate) fn has_rule(rule_name: &str) -> Option<&'static str> {
+        Some(Self::GROUP_RULES[Self::GROUP_RULES.binary_search(&rule_name).ok()?])
     }
     #[doc = r" Checks if, given a rule name, it is marked as recommended"]
     pub(crate) fn is_recommended_rule(rule_name: &str) -> bool {
@@ -6011,5 +7140,312 @@ impl Suspicious {
                 .map(|conf| (conf.level(), conf.get_options())),
             _ => None,
         }
+    }
+    pub(crate) fn set_severity(&mut self, rule_name: &str, severity: RulePlainConfiguration) {
+        match rule_name {
+            "noApproximativeNumericConstant" => {
+                if let Some(rule_conf) = &mut self.no_approximative_numeric_constant {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "noArrayIndexKey" => {
+                if let Some(rule_conf) = &mut self.no_array_index_key {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "noAssignInExpressions" => {
+                if let Some(rule_conf) = &mut self.no_assign_in_expressions {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "noAsyncPromiseExecutor" => {
+                if let Some(rule_conf) = &mut self.no_async_promise_executor {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "noCatchAssign" => {
+                if let Some(rule_conf) = &mut self.no_catch_assign {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "noClassAssign" => {
+                if let Some(rule_conf) = &mut self.no_class_assign {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "noCommentText" => {
+                if let Some(rule_conf) = &mut self.no_comment_text {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "noCompareNegZero" => {
+                if let Some(rule_conf) = &mut self.no_compare_neg_zero {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "noConfusingLabels" => {
+                if let Some(rule_conf) = &mut self.no_confusing_labels {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "noConfusingVoidType" => {
+                if let Some(rule_conf) = &mut self.no_confusing_void_type {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "noConsoleLog" => {
+                if let Some(rule_conf) = &mut self.no_console_log {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "noConstEnum" => {
+                if let Some(rule_conf) = &mut self.no_const_enum {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "noControlCharactersInRegex" => {
+                if let Some(rule_conf) = &mut self.no_control_characters_in_regex {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "noDebugger" => {
+                if let Some(rule_conf) = &mut self.no_debugger {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "noDoubleEquals" => {
+                if let Some(rule_conf) = &mut self.no_double_equals {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "noDuplicateCase" => {
+                if let Some(rule_conf) = &mut self.no_duplicate_case {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "noDuplicateClassMembers" => {
+                if let Some(rule_conf) = &mut self.no_duplicate_class_members {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "noDuplicateJsxProps" => {
+                if let Some(rule_conf) = &mut self.no_duplicate_jsx_props {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "noDuplicateObjectKeys" => {
+                if let Some(rule_conf) = &mut self.no_duplicate_object_keys {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "noDuplicateParameters" => {
+                if let Some(rule_conf) = &mut self.no_duplicate_parameters {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "noDuplicateTestHooks" => {
+                if let Some(rule_conf) = &mut self.no_duplicate_test_hooks {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "noEmptyBlockStatements" => {
+                if let Some(rule_conf) = &mut self.no_empty_block_statements {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "noEmptyInterface" => {
+                if let Some(rule_conf) = &mut self.no_empty_interface {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "noExplicitAny" => {
+                if let Some(rule_conf) = &mut self.no_explicit_any {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "noExportsInTest" => {
+                if let Some(rule_conf) = &mut self.no_exports_in_test {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "noExtraNonNullAssertion" => {
+                if let Some(rule_conf) = &mut self.no_extra_non_null_assertion {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "noFallthroughSwitchClause" => {
+                if let Some(rule_conf) = &mut self.no_fallthrough_switch_clause {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "noFocusedTests" => {
+                if let Some(rule_conf) = &mut self.no_focused_tests {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "noFunctionAssign" => {
+                if let Some(rule_conf) = &mut self.no_function_assign {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "noGlobalAssign" => {
+                if let Some(rule_conf) = &mut self.no_global_assign {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "noGlobalIsFinite" => {
+                if let Some(rule_conf) = &mut self.no_global_is_finite {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "noGlobalIsNan" => {
+                if let Some(rule_conf) = &mut self.no_global_is_nan {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "noImplicitAnyLet" => {
+                if let Some(rule_conf) = &mut self.no_implicit_any_let {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "noImportAssign" => {
+                if let Some(rule_conf) = &mut self.no_import_assign {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "noLabelVar" => {
+                if let Some(rule_conf) = &mut self.no_label_var {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "noMisleadingCharacterClass" => {
+                if let Some(rule_conf) = &mut self.no_misleading_character_class {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "noMisleadingInstantiator" => {
+                if let Some(rule_conf) = &mut self.no_misleading_instantiator {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "noMisrefactoredShorthandAssign" => {
+                if let Some(rule_conf) = &mut self.no_misrefactored_shorthand_assign {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "noPrototypeBuiltins" => {
+                if let Some(rule_conf) = &mut self.no_prototype_builtins {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "noRedeclare" => {
+                if let Some(rule_conf) = &mut self.no_redeclare {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "noRedundantUseStrict" => {
+                if let Some(rule_conf) = &mut self.no_redundant_use_strict {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "noSelfCompare" => {
+                if let Some(rule_conf) = &mut self.no_self_compare {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "noShadowRestrictedNames" => {
+                if let Some(rule_conf) = &mut self.no_shadow_restricted_names {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "noSkippedTests" => {
+                if let Some(rule_conf) = &mut self.no_skipped_tests {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "noSparseArray" => {
+                if let Some(rule_conf) = &mut self.no_sparse_array {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "noSuspiciousSemicolonInJsx" => {
+                if let Some(rule_conf) = &mut self.no_suspicious_semicolon_in_jsx {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "noThenProperty" => {
+                if let Some(rule_conf) = &mut self.no_then_property {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "noUnsafeDeclarationMerging" => {
+                if let Some(rule_conf) = &mut self.no_unsafe_declaration_merging {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "noUnsafeNegation" => {
+                if let Some(rule_conf) = &mut self.no_unsafe_negation {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "useAwait" => {
+                if let Some(rule_conf) = &mut self.use_await {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "useDefaultSwitchClauseLast" => {
+                if let Some(rule_conf) = &mut self.use_default_switch_clause_last {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "useGetterReturn" => {
+                if let Some(rule_conf) = &mut self.use_getter_return {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "useIsArray" => {
+                if let Some(rule_conf) = &mut self.use_is_array {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "useNamespaceKeyword" => {
+                if let Some(rule_conf) = &mut self.use_namespace_keyword {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "useValidTypeof" => {
+                if let Some(rule_conf) = &mut self.use_valid_typeof {
+                    rule_conf.set_level(severity);
+                }
+            }
+            _ => {}
+        }
+    }
+}
+#[test]
+fn test_order() {
+    for items in A11y::GROUP_RULES.windows(2) {
+        assert!(items[0] < items[1], "{} < {}", items[0], items[1]);
+    }
+    for items in Complexity::GROUP_RULES.windows(2) {
+        assert!(items[0] < items[1], "{} < {}", items[0], items[1]);
+    }
+    for items in Correctness::GROUP_RULES.windows(2) {
+        assert!(items[0] < items[1], "{} < {}", items[0], items[1]);
+    }
+    for items in Nursery::GROUP_RULES.windows(2) {
+        assert!(items[0] < items[1], "{} < {}", items[0], items[1]);
+    }
+    for items in Performance::GROUP_RULES.windows(2) {
+        assert!(items[0] < items[1], "{} < {}", items[0], items[1]);
+    }
+    for items in Security::GROUP_RULES.windows(2) {
+        assert!(items[0] < items[1], "{} < {}", items[0], items[1]);
+    }
+    for items in Style::GROUP_RULES.windows(2) {
+        assert!(items[0] < items[1], "{} < {}", items[0], items[1]);
+    }
+    for items in Suspicious::GROUP_RULES.windows(2) {
+        assert!(items[0] < items[1], "{} < {}", items[0], items[1]);
     }
 }
