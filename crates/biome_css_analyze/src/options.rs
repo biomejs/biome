@@ -2,8 +2,6 @@
 
 use crate::lint;
 
-pub type NoColorInvalidHex =
-    <lint::nursery::no_color_invalid_hex::NoColorInvalidHex as biome_analyze::Rule>::Options;
 pub type NoCssEmptyBlock =
     <lint::nursery::no_css_empty_block::NoCssEmptyBlock as biome_analyze::Rule>::Options;
 pub type NoDuplicateAtImportRules = < lint :: nursery :: no_duplicate_at_import_rules :: NoDuplicateAtImportRules as biome_analyze :: Rule > :: Options ;
