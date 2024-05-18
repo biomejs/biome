@@ -319,14 +319,15 @@ fn is_inside_range_assertion(
     match (left_literal, right_literal) {
         (None, None) => Some(false),
         (Some(_), None) | (None, Some(_)) => Some(true),
-        (Some(left_value), Some(right_value)) => {
-            Some(compare_literals(left_value.as_str(), right_value.as_str()))
-        }
+        (Some(left_value), Some(right_value)) => Some(compare_string_literals(
+            left_value.as_str(),
+            right_value.as_str(),
+        )),
     }
 }
 
 /// Compare literals as number if possible, compare as string otherwise
-fn compare_literals(left_string_value: &str, right_string_value: &str) -> bool {
+fn compare_string_literals(left_string_value: &str, right_string_value: &str) -> bool {
     match (
         left_string_value.parse::<f64>(),
         right_string_value.parse::<f64>(),
@@ -357,9 +358,10 @@ fn is_outside_range_assertion(
     match (left_literal, right_literal) {
         (None, None) => Some(false),
         (Some(_), None) | (None, Some(_)) => Some(true),
-        (Some(left_value), Some(right_value)) => {
-            Some(compare_literals(left_value.as_str(), right_value.as_str()))
-        }
+        (Some(left_value), Some(right_value)) => Some(compare_string_literals(
+            left_value.as_str(),
+            right_value.as_str(),
+        )),
     }
 }
 
