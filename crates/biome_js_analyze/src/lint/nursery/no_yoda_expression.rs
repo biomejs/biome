@@ -368,6 +368,9 @@ fn is_wrapped_in_parenthesis(logical_expression: JsLogicalExpression) -> bool {
 
 fn is_same_identifier(left_expression: AnyJsExpression, right_expression: AnyJsExpression) -> bool {
     // We can't consider two call expressions equal here because the result of the expression might be different if we call it twice
+    // Example: consider the following expression `if (0 <= a[b()] && a[b()] < 1) {}`. The two references of `a[b()]` would be
+    // considered the same by `is_node_equal`, but if `b()` returns a different value when called multiple times, then the value
+    // of `a[b()]` can be different.
     let has_call_expression = |expression: AnyJsExpression| {
         expression.syntax().preorder().any(|event| match event {
             WalkEvent::Leave(node) => JsCallExpression::can_cast(node.kind()),
