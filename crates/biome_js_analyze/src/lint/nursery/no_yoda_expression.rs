@@ -77,9 +77,8 @@ impl Rule for NoYodaExpression {
         let node = ctx.query();
         let left = node.left().ok()?;
         let right = node.right().ok()?;
-        let operator = node.operator().ok()?;
 
-        let has_yoda_expression = is_comparison_operator(operator)
+        let has_yoda_expression = node.is_comparison_operator()
             && is_literal_expression(left).unwrap_or_default()
             && !is_literal_expression(right).unwrap_or_default()
             && !is_range_assertion(node).unwrap_or_default();
@@ -250,20 +249,6 @@ fn is_literal_expression(expression: AnyJsExpression) -> Option<bool> {
 
         _ => Some(false),
     }
-}
-
-fn is_comparison_operator(operator: JsBinaryOperator) -> bool {
-    matches!(
-        operator,
-        JsBinaryOperator::LessThan
-            | JsBinaryOperator::GreaterThan
-            | JsBinaryOperator::LessThanOrEqual
-            | JsBinaryOperator::GreaterThanOrEqual
-            | JsBinaryOperator::Equality
-            | JsBinaryOperator::StrictEquality
-            | JsBinaryOperator::Inequality
-            | JsBinaryOperator::StrictInequality
-    )
 }
 
 fn is_range_assertion(node: &JsBinaryExpression) -> Option<bool> {
