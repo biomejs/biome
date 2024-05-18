@@ -53,12 +53,12 @@ When writing a rule, you must adhere to the following **pillars**:
 
 ### Create and implement the rule
 
-New rules **must** be placed inside the `nursery` group. This group is meant as an incubation space, exempt from semantic versioning. Once a rule is stable, it's promoted to a group that fits it. This is done a minor/major release.
+New rules **must** be placed inside the `nursery` group. This group is meant as an incubation space, exempt from semantic versioning. Once a rule is stable, it's promoted to a group that fits it. This is done in a minor/major release.
 
 > [!TIP]
-> As developer, you aren't forced to make a rule perfect in one PR. Instead, you are encouraged to lay off a plan and to split the work in multiple PRs.
+> As a developer, you aren't forced to make a rule perfect in one PR. Instead, you are encouraged to lay out a plan and to split the work into multiple PRs.
 >
-> If aren't familiar with Biome's APIs, this is an option that you have. If you decided to use this option, you should make sure to describe your plan in an issue.
+> If you aren't familiar with Biome's APIs, this is an option that you have. If you decide to use this option, you should make sure to describe your plan in an issue.
 
 Let's say we want to create a new rule called `myRuleName`, which uses the semantic model.
 
@@ -229,7 +229,7 @@ Below, there are many tips and guidelines on how to create a lint rule using Bio
 
 #### Navigating the CST
 
-Then navigating the nodes and tokens of certain nodes, will you notice straight away that the majority of those methods will return a `Result` (`SyntaxResult`).
+Then navigating the nodes and tokens of certain nodes, you will notice straight away that the majority of those methods will return a `Result` (`SyntaxResult`).
 
 Generally, you will end up navigating the CST inside the `run` function, and this function will usually return an `Option` or a `Vec`.
 
@@ -251,7 +251,7 @@ Generally, you will end up navigating the CST inside the `run` function, and thi
 
 #### Query multiple nodes
 
-There are times when you might need to query multiple nodes at the time. Instead of querying the root of the CST, you can use the macro `declare_node_union!` to "join" multiple nodes into an `enum`:
+There are times when you might need to query multiple nodes at once. Instead of querying the root of the CST, you can use the macro `declare_node_union!` to "join" multiple nodes into an `enum`:
 
 ```rust
 use biome_rowan::{declare_node_union, AstNode};
@@ -321,7 +321,7 @@ impl Rule for ExampleRule {
 
 #### Semantic Model
 
-The semantic model provides information about the references of a binding (variable) within a program, indicating if it is written (e.g., `const a = 4`), read (e.g., `const b = a`, where `a` is read), or exported.
+The semantic model provides information about the references of a binding (declaration) within a program, indicating if it is written (e.g., `const a = 4`), read (e.g., `const b = a`, where `a` is read), or exported.
 
 
 ##### How to use the query `Semantic<>` in a lint rule
