@@ -5,7 +5,6 @@ use biome_analyze::{
 };
 use biome_console::{markup, Markup, MarkupBuf};
 use biome_deserialize_macros::Deserializable;
-use biome_diagnostics::Applicability;
 use biome_js_factory::make;
 use biome_js_syntax::{
     AnyTsName, AnyTsType, JsSyntaxKind, JsSyntaxToken, TriviaPieceKind, TsReferenceType,
@@ -178,7 +177,7 @@ impl Rule for UseConsistentArrayType {
                 if let Some(kind) = get_array_kind_by_reference(ty) {
                     return Some(JsRuleAction::new(
                         ActionCategory::QuickFix,
-                        Applicability::MaybeIncorrect,
+                        ctx.metadata().applicability(),
                         get_action_message(kind),
                         mutation,
                     ));
@@ -193,7 +192,7 @@ impl Rule for UseConsistentArrayType {
                 if let Some(kind) = get_array_kind_by_any_type(&ty) {
                     return Some(JsRuleAction::new(
                         ActionCategory::QuickFix,
-                        Applicability::MaybeIncorrect,
+                        ctx.metadata().applicability(),
                         get_action_message(kind),
                         mutation,
                     ));
@@ -207,7 +206,7 @@ impl Rule for UseConsistentArrayType {
                 mutation.replace_node(AnyTsType::TsArrayType(ty.clone()), state.clone());
                 Some(JsRuleAction::new(
                     ActionCategory::QuickFix,
-                    Applicability::MaybeIncorrect,
+                    ctx.metadata().applicability(),
                     get_action_message(TsArrayKind::Shorthand),
                     mutation,
                 ))

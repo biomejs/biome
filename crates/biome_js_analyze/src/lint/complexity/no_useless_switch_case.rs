@@ -1,7 +1,6 @@
 use biome_analyze::context::RuleContext;
 use biome_analyze::{declare_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
-use biome_diagnostics::Applicability;
 use biome_js_syntax::{AnyJsSwitchClause, JsCaseClause, JsDefaultClause};
 use biome_rowan::{AstNode, AstNodeList, BatchMutationExt, Direction};
 
@@ -154,7 +153,7 @@ impl Rule for NoUselessSwitchCase {
         }
         Some(JsRuleAction::new(
             ActionCategory::QuickFix,
-            Applicability::MaybeIncorrect,
+            ctx.metadata().applicability(),
             markup! {"Remove the useless "<Emphasis>"case"</Emphasis>"."}.to_owned(),
             mutation,
         ))

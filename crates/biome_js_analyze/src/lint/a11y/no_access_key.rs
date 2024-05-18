@@ -4,7 +4,6 @@ use biome_analyze::{
     RuleSource,
 };
 use biome_console::markup;
-use biome_diagnostics::Applicability;
 use biome_js_syntax::{jsx_ext::AnyJsxElement, JsxAttribute, JsxAttributeList};
 use biome_rowan::{AstNode, BatchMutationExt};
 
@@ -102,7 +101,7 @@ impl Rule for NoAccessKey {
         mutation.remove_node(node.clone());
         Some(JsRuleAction::new(
             ActionCategory::QuickFix,
-            Applicability::MaybeIncorrect,
+            ctx.metadata().applicability(),
             markup! { "Remove the "<Emphasis>"accessKey"</Emphasis>" attribute." }.to_owned(),
             mutation,
         ))

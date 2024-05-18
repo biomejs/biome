@@ -4,7 +4,6 @@ use biome_analyze::{
 };
 use biome_aria::AriaRoles;
 use biome_console::markup;
-use biome_diagnostics::Applicability;
 use biome_js_syntax::{
     jsx_ext::AnyJsxElement, AnyJsxAttributeValue, JsNumberLiteralExpression,
     JsStringLiteralExpression, JsUnaryExpression, TextRange,
@@ -165,7 +164,7 @@ impl Rule for NoNoninteractiveTabindex {
         mutation.remove_node(tabindex_attribute);
         Some(JsRuleAction::new(
             ActionCategory::QuickFix,
-            Applicability::MaybeIncorrect,
+            ctx.metadata().applicability(),
             markup! { "Remove the "<Emphasis>"tabIndex"</Emphasis>" attribute." }.to_owned(),
             mutation,
         ))

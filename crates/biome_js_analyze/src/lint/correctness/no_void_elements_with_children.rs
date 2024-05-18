@@ -4,7 +4,6 @@ use crate::JsRuleAction;
 use biome_analyze::context::RuleContext;
 use biome_analyze::{declare_rule, ActionCategory, FixKind, Rule, RuleDiagnostic, RuleSource};
 use biome_console::{markup, MarkupBuf};
-use biome_diagnostics::Applicability;
 use biome_js_factory::make::{jsx_attribute_list, jsx_self_closing_element};
 use biome_js_syntax::{
     AnyJsxAttribute, JsCallExpression, JsPropertyObjectMember, JsxAttribute, JsxElement,
@@ -395,7 +394,7 @@ impl Rule for NoVoidElementsWithChildren {
 
         Some(JsRuleAction::new(
             ActionCategory::QuickFix,
-            Applicability::MaybeIncorrect,
+            ctx.metadata().applicability(),
             state.action_message(),
             mutation,
         ))

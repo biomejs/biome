@@ -2,7 +2,6 @@ use crate::utils::batch::JsBatchMutation;
 use biome_analyze::context::RuleContext;
 use biome_analyze::{declare_rule, Ast, FixKind, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
-use biome_diagnostics::Applicability;
 use biome_js_syntax::{
     AnyJsObjectMember, JsGetterObjectMember, JsObjectExpression, JsSetterObjectMember,
 };
@@ -313,7 +312,7 @@ impl Rule for NoDuplicateObjectKeys {
         Some(JsRuleAction::new(
             biome_analyze::ActionCategory::QuickFix,
             // The property initialization could contain side effects
-            Applicability::MaybeIncorrect,
+            ctx.metadata().applicability(),
             markup!("Remove this " {member_definition.to_string()}).to_owned(),
             batch,
         ))

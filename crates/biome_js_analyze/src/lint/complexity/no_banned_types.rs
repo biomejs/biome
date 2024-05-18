@@ -3,7 +3,6 @@ use std::fmt::Display;
 use biome_analyze::context::RuleContext;
 use biome_analyze::{declare_rule, ActionCategory, FixKind, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
-use biome_diagnostics::Applicability;
 use biome_js_factory::make;
 use biome_js_syntax::{
     JsReferenceIdentifier, JsSyntaxKind, TextRange, TsIntersectionTypeElementList, TsObjectType,
@@ -178,7 +177,7 @@ impl Rule for NoBannedTypes {
         mutation.replace_node(reference_identifier.clone()?, banned_type.fix_with()?);
         Some(JsRuleAction::new(
             ActionCategory::QuickFix,
-            Applicability::Always,
+            ctx.metadata().applicability(),
             markup! { "Use '"{suggested_type}"' instead" }.to_owned(),
             mutation,
         ))
