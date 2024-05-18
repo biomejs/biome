@@ -1603,6 +1603,22 @@
 			},
 			"additionalProperties": false
 		},
+		"NoLabelWithoutControlConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithNoLabelWithoutControlOptions" }
+			]
+		},
+		"NoLabelWithoutControlOptions": {
+			"type": "object",
+			"required": ["controlComponents", "labelAttributes", "labelComponents"],
+			"properties": {
+				"controlComponents": { "type": "array", "items": { "type": "string" } },
+				"labelAttributes": { "type": "array", "items": { "type": "string" } },
+				"labelComponents": { "type": "array", "items": { "type": "string" } }
+			},
+			"additionalProperties": false
+		},
 		"Nursery": {
 			"description": "A list of rules that belong to this group",
 			"type": "object",
@@ -1699,6 +1715,13 @@
 					"description": "Disallow the use of @import at-rules in invalid positions.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noLabelWithoutControl": {
+					"description": "Succinct description of the rule.",
+					"anyOf": [
+						{ "$ref": "#/definitions/NoLabelWithoutControlConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -2363,6 +2386,21 @@
 				"options": {
 					"description": "Rule's options",
 					"allOf": [{ "$ref": "#/definitions/HooksOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
+		"RuleWithNoLabelWithoutControlOptions": {
+			"type": "object",
+			"required": ["level", "options"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/NoLabelWithoutControlOptions" }]
 				}
 			},
 			"additionalProperties": false
