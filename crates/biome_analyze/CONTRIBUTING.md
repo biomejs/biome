@@ -10,7 +10,7 @@ The analyzer allows implementors to create **four different** types of rules:
 - **Assist**: This rule detects refactoring opportunities and emits code action signals.
 - **Transformation**: This rule detects transformations that should be applied to the code.
 
-## Creating a rules
+## Creating a rule
 
 When creating or updating a lint rule, you need to be aware that there's a lot of generated code inside our toolchain.
 Our CI ensures that this code is not out of sync and fails otherwise.
@@ -22,7 +22,7 @@ _Just_ is not part of the rust toolchain, you have to install it with [a package
 
 ### Choose a name
 
-_Biome_ follows a naming convention according to what the rule do:
+_Biome_ follows a naming convention according to what the rule does:
 
 1. Forbid a concept
 
@@ -52,6 +52,13 @@ When writing a rule, you must adhere to the following **pillars**:
 1. Tell the user what they should do. Generally, this is implemented using a code action. If a code action is not applicable a note should tell the user what they should do to fix the error.
 
 ### Create and implement the rule
+
+New rules **must** be placed inside the `nursery` group. This group is meant as an incubation space, exempt from semantic versioning. Once a rule is stable, it's promoted to a group that fits it. This is done in a minor/major release.
+
+> [!TIP]
+> As a developer, you aren't forced to make a rule perfect in one PR. Instead, you are encouraged to lay out a plan and to split the work into multiple PRs.
+>
+> If you aren't familiar with Biome's APIs, this is an option that you have. If you decide to use this option, you should make sure to describe your plan in an issue.
 
 Let's say we want to create a new rule called `myRuleName`, which uses the semantic model.
 
@@ -111,6 +118,363 @@ Let's say we want to create a new rule called `myRuleName`, which uses the seman
 Don't forget to format your code with `just f` and lint with `just l`.
 
 That's it! Now, let's test the rule.
+
+### Rule configuration
+
+Some rules may allow customization using options.
+We try to keep rule options to a minimum and only when needed.
+Before adding an option, it's worth a discussion.
+Options should follow our [technical philosophy](https://biomejs.dev/internals/philosophy/#technical).
+
+Let's assume that the rule we implement support the following options:
+
+- `behavior`: a string among `"A"`, `"B"`, and `"C"`;
+- `threshold`: an integer between 0 and 255;
+- `behaviorExceptions`: an array of strings.
+
+We would like to set the options in the `biome.json` configuration file:
+
+```json
+{
+  "linter": {
+    "rules": {
+      "recommended": true,
+      "nursery": {
+        "my-rule": {
+          "behavior": "A",
+          "threshold": 30,
+          "behaviorExceptions": ["f"],
+        }
+      }
+    }
+  }
+}
+```
+
+The first step is to create the Rust data representation of the rule's options.
+
+```rust,ignore
+use biome_deserialize_macros::Deserializable;
+
+#[derive(Clone, Debug, Default, Deserializable)]
+pub struct MyRuleOptions {
+    behavior: Behavior,
+    threshold: u8,
+    behavior_exceptions: Vec<String>
+}
+
+#[derive(Clone, Debug, Default, Deserializable)]
+pub enum Behavior {
+    #[default]
+    A,
+    B,
+    C,
+}
+```
+
+To allow deserializing instances of the types `MyRuleOptions` and `Behavior`,
+they have to implement the `Deserializable` trait from the `biome_deserialize` crate.
+This is what the `Deserializable` keyword in the `#[derive]` statements above did.
+It's a so-called derive macros, which generates the implementation for the `Deserializable` trait
+for you.
+
+With these types in place, you can set the associated type `Options` of the rule:
+
+```rust,ignore
+impl Rule for MyRule {
+    type Query = Semantic<JsCallExpression>;
+    type State = Fix;
+    type Signals = Vec<Self::State>;
+    type Options = MyRuleOptions;
+
+    ...
+}
+```
+
+A rule can retrieve its options with:
+
+```rust,ignore
+let options = ctx.options();
+```
+
+The compiler should warn you that `MyRuleOptions` does not implement some required types.
+We currently require implementing _serde_'s traits `Deserialize`/`Serialize`.
+You can simply use a derive macros:
+
+```rust,ignore
+#[derive(Debug, Default, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "schemars", derive(JsonSchema))]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct MyRuleOptions {
+    #[serde(default, skip_serializing_if = "is_default")]
+    main_behavior: Behavior,
+
+    #[serde(default, skip_serializing_if = "is_default")]
+    extra_behaviors: Vec<Behavior>,
+}
+
+#[derive(Debug, Default, Clone)]
+#[cfg_attr(feature = "schemars", derive(JsonSchema))]
+pub enum Behavior {
+    #[default]
+    A,
+    B,
+    C,
+}
+```
+
+### Coding the rule
+
+Below, there are many tips and guidelines on how to create a lint rule using Biome infrastructure.
+
+#### Navigating the CST
+
+Then navigating the nodes and tokens of certain nodes, you will notice straight away that the majority of those methods will return a `Result` (`SyntaxResult`).
+
+Generally, you will end up navigating the CST inside the `run` function, and this function will usually return an `Option` or a `Vec`.
+
+- If the `run` function returns an `Option`, you're encouraged to transform `Result` into `Option` and use the try operator `?`. This will make your coding way easier:
+  ```rust
+  fn run() -> Self::Signals {
+    let prev_val = js_object_member.value().ok()?;
+  }
+  ```
+- If the `run` function returns a `Vec`, you're encouraged to use the `let else` trick to reduce code branching:
+
+  ```rust
+    fn run() -> Self::Signals {
+      let Ok(prev_val) = js_object_member.value() else {
+        return vec![]
+      };
+    }
+  ```
+
+#### Query multiple nodes
+
+There are times when you might need to query multiple nodes at once. Instead of querying the root of the CST, you can use the macro `declare_node_union!` to "join" multiple nodes into an `enum`:
+
+```rust
+use biome_rowan::{declare_node_union, AstNode};
+use biome_js_syntax::{AnyJsFunction, JsMethodObjectMember, JsMethodClassMember};
+
+declare_node_union! {
+  pub AnyFunctionLike = AnyJsFunction | JsMethodObjectMember | JsMethodClassMember
+}
+```
+
+When creating a new node like this, we internally prefix them with `Any*` and postfix them with `*Like`. This is our internal naming convention.
+
+The type `AnyFunctionLike` implements the trait `AstNode`, which means that it implements all methods such as `syntax`, `children`, etc.
+
+#### `declare_rule`
+
+This macro is used to declare an analyzer rule type, and implement the [RuleMeta] trait for it.
+
+The macro itself expect the following syntax:
+
+```rust,ignore
+use biome_analyze::declare_rule;
+
+declare_rule! {
+    /// Documentation
+    pub(crate) ExampleRule {
+        version: "next",
+        name: "myRuleName",
+        language: "js",
+        recommended: false,
+    }
+}
+```
+
+#### Category Macro
+
+Declaring a rule using `declare_rule!` will cause a new `rule_category!`
+macro to be declared in the surrounding module. This macro can be used to
+refer to the corresponding diagnostic category for this lint rule, if it
+has one. Using this macro instead of getting the category for a diagnostic
+by dynamically parsing its string name has the advantage of statically
+injecting the category at compile time and checking that it is correctly
+registered to the `biome_diagnostics` library.
+
+```rust,ignore
+declare_rule! {
+    /// Documentation
+    pub(crate) ExampleRule {
+        version: "next",
+        name: "myRuleName",
+        language: "js",
+        recommended: false,
+    }
+}
+
+impl Rule for ExampleRule {
+    fn diagnostic(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<RuleDiagnostic> {
+        Some(RuleDiagnostic::new(
+            rule_category!(),
+            ctx.query().text_trimmed_range(),
+            "message",
+        ))
+    }
+}
+```
+
+
+#### Semantic Model
+
+The semantic model provides information about the references of a binding (declaration) within a program, indicating if it is written (e.g., `const a = 4`), read (e.g., `const b = a`, where `a` is read), or exported.
+
+
+##### How to use the query `Semantic<>` in a lint rule
+
+We have a for loop that creates an index i, and we need to identify where this index is used inside the body of the loop
+
+```js
+for (let i = 0; i < array.length; i++) {
+  array[i] = i
+}
+```
+
+To get started we need to create a new rule using the semantic type `type Query = Semantic<JsForStatement>;`
+We can now use the `ctx.model()` to get information about bindings in the for loop.
+
+```rust,ignore
+impl Rule for ForLoopCountReferences {
+    type Query = Semantic<JsForStatement>;
+    type State = ();
+    type Signals = Option<Self::State>;
+    type Options = ();
+
+    fn run(ctx: &RuleContext<Self>) -> Self::Signals {
+        let node = ctx.query();
+
+        // The model holds all informations about the semantic, like scopes and declarations
+        let model = ctx.model();
+
+        // Here we are extracting the `let i = 0;` declaration in for loop
+        let initializer = node.initializer()?;
+        let declarators = initializer.as_js_variable_declaration()?.declarators();
+        let initializer = declarators.first()?.ok()?;
+        let initializer_id = initializer.id().ok()?;
+
+        // Now we have the binding of this declaration
+        let binding = initializer_id
+            .as_any_js_binding()?
+            .as_js_identifier_binding()?;
+
+        // How many times this variable appers in the code
+        let count = binding.all_references(model).count();
+
+        // Get all read references
+        let readonly_references = binding.all_reads(model);
+
+        // Get all write references
+        let write_references = binding.all_writes(model);
+    }
+}
+```
+
+#### Custom Visitors
+
+Some lint rules may need to deeply inspect the child nodes of a query match
+before deciding on whether they should emit a signal or not. These rules can be
+inefficient to implement using the query system, as they will lead to redundant
+traversal passes being executed over the same syntax tree. To make this more
+efficient, you can implement a custom `Queryable` type and associated
+`Visitor` to emit it as part of the analyzer's main traversal pass. As an
+example, here's how this could be done to implement the `useYield` rule:
+
+```rust,ignore
+// First, create a visitor struct that holds a stack of function syntax nodes and booleans
+#[derive(Default)]
+struct MissingYieldVisitor {
+    stack: Vec<(AnyFunctionLike, bool)>,
+}
+
+// Implement the `Visitor` trait for this struct
+impl Visitor for MissingYieldVisitor {
+    type Language = JsLanguage;
+
+    fn visit(
+        &mut self,
+        event: &WalkEvent<SyntaxNode<Self::Language>>,
+        mut ctx: VisitorContext<Self::Language>,
+    ) {
+        match event {
+            WalkEvent::Enter(node) => {
+                // When the visitor enters a function node, push a new entry on the stack
+                if let Some(node) = AnyFunctionLike::cast_ref(node) {
+                    self.stack.push((node, false));
+                }
+
+                if let Some((_, has_yield)) = self.stack.last_mut() {
+                    // When the visitor enters a `yield` expression, set the
+                    // `has_yield` flag for the top entry on the stack to `true`
+                    if JsYieldExpression::can_cast(node.kind()) {
+                        *has_yield = true;
+                    }
+                }
+            }
+            WalkEvent::Leave(node) => {
+                // When the visitor exits a function, if it matches the node of the top-most
+                // entry of the stack and the `has_yield` flag is `false`, emit a query match
+                if let Some(exit_node) = AnyFunctionLike::cast_ref(node) {
+                    if let Some((enter_node, has_yield)) = self.stack.pop() {
+                        debug_assert_eq!(enter_node, exit_node);
+                        if !has_yield {
+                            ctx.match_query(MissingYield(enter_node));
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+// Declare a query match struct type containing a JavaScript function node
+pub(crate) struct MissingYield(AnyFunctionLike);
+
+impl QueryMatch for MissingYield {
+    fn text_range(&self) -> TextRange {
+        self.0.range()
+    }
+}
+
+// Implement the `Queryable` trait for this type
+impl Queryable for MissingYield {
+    // `Input` is the type that `ctx.match_query()` is called with in the visitor
+    type Input = Self;
+    type Language = JsLanguage;
+    // `Output` if the type that `ctx.query()` will return in the rule
+    type Output = AnyFunctionLike;
+    type Services = ();
+
+    fn build_visitor(
+        analyzer: &mut impl AddVisitor<Self::Language>,
+        _: &<Self::Language as Language>::Root,
+    ) {
+        // Register our custom visitor to run in the `Syntax` phase
+        analyzer.add_visitor(Phases::Syntax, MissingYieldVisitor::default);
+    }
+
+    // Extract the output object from the input type
+    fn unwrap_match(services: &ServiceBag, query: &Self::Input) -> Self::Output {
+        query.0.clone()
+    }
+}
+
+impl Rule for UseYield {
+    // Declare the custom `MissingYield` queryable as the rule's query
+    type Query = MissingYield;
+
+    fn run(ctx: &RuleContext<Self>) -> Self::Signals {
+        // Read the function's root node from the queryable output
+        let query: &AnyFunctionLike = ctx.query();
+
+        // ...
+    }
+}
+```
+
 
 ### Test the rule
 
@@ -250,109 +614,6 @@ Stage and commit your changes:
 > git commit -m 'feat(biome_js_analyze): myRuleName'
 ```
 
-### Rule configuration
-
-Some rules may allow customization using options.
-We try to keep rule options to a minimum and only when needed.
-Before adding an option, it's worth a discussion.
-Options should follow our [technical philosophy](https://biomejs.dev/internals/philosophy/#technical).
-
-Let's assume that the rule we implement support the following options:
-
-- `behavior`: a string among `"A"`, `"B"`, and `"C"`;
-- `threshold`: an integer between 0 and 255;
-- `behaviorExceptions`: an array of strings.
-
-We would like to set the options in the `biome.json` configuration file:
-
-```json
-{
-  "linter": {
-    "rules": {
-      "recommended": true,
-      "nursery": {
-        "my-rule": {
-          "behavior": "A",
-          "threshold": 30,
-          "behaviorExceptions": ["f"],
-        }
-      }
-    }
-  }
-}
-```
-
-The first step is to create the Rust data representation of the rule's options.
-
-```rust,ignore
-use biome_deserialize_macros::Deserializable;
-
-#[derive(Clone, Debug, Default, Deserializable)]
-pub struct MyRuleOptions {
-    behavior: Behavior,
-    threshold: u8,
-    behavior_exceptions: Vec<String>
-}
-
-#[derive(Clone, Debug, Default, Deserializable)]
-pub enum Behavior {
-    #[default]
-    A,
-    B,
-    C,
-}
-```
-
-To allow deserializing instances of the types `MyRuleOptions` and `Behavior`,
-they have to implement the `Deserializable` trait from the `biome_deserialize` crate.
-This is what the `Deserializable` keyword in the `#[derive]` statements above did.
-It's a so-called derive macros, which generates the implementation for the `Deserializable` trait
-for you.
-
-With these types in place, you can set the associated type `Options` of the rule:
-
-```rust,ignore
-impl Rule for MyRule {
-    type Query = Semantic<JsCallExpression>;
-    type State = Fix;
-    type Signals = Vec<Self::State>;
-    type Options = MyRuleOptions;
-
-    ...
-}
-```
-
-A rule can retrieve its options with:
-
-```rust,ignore
-let options = ctx.options();
-```
-
-The compiler should warn you that `MyRuleOptions` does not implement some required types.
-We currently require implementing _serde_'s traits `Deserialize`/`Serialize`.
-You can simply use a derive macros:
-
-```rust,ignore
-#[derive(Debug, Default, Clone, Serialize, Deserialize)]
-#[cfg_attr(feature = "schemars", derive(JsonSchema))]
-#[serde(rename_all = "camelCase", deny_unknown_fields)]
-pub struct MyRuleOptions {
-    #[serde(default, skip_serializing_if = "is_default")]
-    main_behavior: Behavior,
-
-    #[serde(default, skip_serializing_if = "is_default")]
-    extra_behaviors: Vec<Behavior>,
-}
-
-#[derive(Debug, Default, Clone)]
-#[cfg_attr(feature = "schemars", derive(JsonSchema))]
-pub enum Behavior {
-    #[default]
-    A,
-    B,
-    C,
-}
-```
 
 ### Deprecate a rule
 
@@ -380,214 +641,6 @@ declare_rule! {
         language: "js",
         deprecated: "Use the rule `noAnotherVar`",
         recommended: false,
-    }
-}
-```
-
-### Custom Visitors
-
-Some lint rules may need to deeply inspect the child nodes of a query match
-before deciding on whether they should emit a signal or not. These rules can be
-inefficient to implement using the query system, as they will lead to redundant
-traversal passes being executed over the same syntax tree. To make this more
-efficient, you can implement a custom `Queryable` type and associated
-`Visitor` to emit it as part of the analyzer's main traversal pass. As an
-example, here's how this could be done to implement the `useYield` rule:
-
-```rust,ignore
-// First, create a visitor struct that holds a stack of function syntax nodes and booleans
-#[derive(Default)]
-struct MissingYieldVisitor {
-    stack: Vec<(AnyFunctionLike, bool)>,
-}
-
-// Implement the `Visitor` trait for this struct
-impl Visitor for MissingYieldVisitor {
-    type Language = JsLanguage;
-
-    fn visit(
-        &mut self,
-        event: &WalkEvent<SyntaxNode<Self::Language>>,
-        mut ctx: VisitorContext<Self::Language>,
-    ) {
-        match event {
-            WalkEvent::Enter(node) => {
-                // When the visitor enters a function node, push a new entry on the stack
-                if let Some(node) = AnyFunctionLike::cast_ref(node) {
-                    self.stack.push((node, false));
-                }
-
-                if let Some((_, has_yield)) = self.stack.last_mut() {
-                    // When the visitor enters a `yield` expression, set the
-                    // `has_yield` flag for the top entry on the stack to `true`
-                    if JsYieldExpression::can_cast(node.kind()) {
-                        *has_yield = true;
-                    }
-                }
-            }
-            WalkEvent::Leave(node) => {
-                // When the visitor exits a function, if it matches the node of the top-most
-                // entry of the stack and the `has_yield` flag is `false`, emit a query match
-                if let Some(exit_node) = AnyFunctionLike::cast_ref(node) {
-                    if let Some((enter_node, has_yield)) = self.stack.pop() {
-                        debug_assert_eq!(enter_node, exit_node);
-                        if !has_yield {
-                            ctx.match_query(MissingYield(enter_node));
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
-
-// Declare a query match struct type containing a JavaScript function node
-pub(crate) struct MissingYield(AnyFunctionLike);
-
-impl QueryMatch for MissingYield {
-    fn text_range(&self) -> TextRange {
-        self.0.range()
-    }
-}
-
-// Implement the `Queryable` trait for this type
-impl Queryable for MissingYield {
-    // `Input` is the type that `ctx.match_query()` is called with in the visitor
-    type Input = Self;
-    type Language = JsLanguage;
-    // `Output` if the type that `ctx.query()` will return in the rule
-    type Output = AnyFunctionLike;
-    type Services = ();
-
-    fn build_visitor(
-        analyzer: &mut impl AddVisitor<Self::Language>,
-        _: &<Self::Language as Language>::Root,
-    ) {
-        // Register our custom visitor to run in the `Syntax` phase
-        analyzer.add_visitor(Phases::Syntax, MissingYieldVisitor::default);
-    }
-
-    // Extract the output object from the input type
-    fn unwrap_match(services: &ServiceBag, query: &Self::Input) -> Self::Output {
-        query.0.clone()
-    }
-}
-
-impl Rule for UseYield {
-    // Declare the custom `MissingYield` queryable as the rule's query
-    type Query = MissingYield;
-
-    fn run(ctx: &RuleContext<Self>) -> Self::Signals {
-        // Read the function's root node from the queryable output
-        let query: &AnyFunctionLike = ctx.query();
-
-        // ...
-    }
-}
-```
-
-### `declare_rule`
-
-This macro is used to declare an analyzer rule type, and implement the [RuleMeta] trait for it.
-
-The macro itself expect the following syntax:
-
-```rust,ignore
-use biome_analyze::declare_rule;
-
-declare_rule! {
-    /// Documentation
-    pub(crate) ExampleRule {
-        version: "next",
-        name: "myRuleName",
-        language: "js",
-        recommended: false,
-    }
-}
-```
-
-### Category Macro
-
-Declaring a rule using `declare_rule!` will cause a new `rule_category!`
-macro to be declared in the surrounding module. This macro can be used to
-refer to the corresponding diagnostic category for this lint rule, if it
-has one. Using this macro instead of getting the category for a diagnostic
-by dynamically parsing its string name has the advantage of statically
-injecting the category at compile time and checking that it is correctly
-registered to the `biome_diagnostics` library.
-
-```rust,ignore
-declare_rule! {
-    /// Documentation
-    pub(crate) ExampleRule {
-        version: "next",
-        name: "myRuleName",
-        language: "js",
-        recommended: false,
-    }
-}
-
-impl Rule for ExampleRule {
-    fn diagnostic(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<RuleDiagnostic> {
-        Some(RuleDiagnostic::new(
-            rule_category!(),
-            ctx.query().text_trimmed_range(),
-            "message",
-        ))
-    }
-}
-```
-
-### Semantic Model
-
-The semantic model provides information about the references of a binding (variable) within a program, indicating if it is written (e.g., `const a = 4`), read (e.g., `const b = a`, where `a` is read), or exported.
-
-
-#### How to use the query `Semantic<>` in a lint rule
-
-We have a for loop that creates an index i, and we need to identify where this index is used inside the body of the loop
-
-```js
-for (let i = 0; i < array.length; i++) {
-  array[i] = i
-}
-```
-
-To get started we need to create a new rule using the semantic type `type Query = Semantic<JsForStatement>;`
-We can now use the `ctx.model()` to get information about bindings in the for loop.
-
-```rust,ignore
-impl Rule for ForLoopCountReferences {
-    type Query = Semantic<JsForStatement>;
-    type State = ();
-    type Signals = Option<Self::State>;
-    type Options = ();
-
-    fn run(ctx: &RuleContext<Self>) -> Self::Signals {
-        let node = ctx.query();
-
-        // The model holds all informations about the semantic, like scopes and declarations
-        let model = ctx.model();
-
-        // Here we are extracting the `let i = 0;` declaration in for loop
-        let initializer = node.initializer()?;
-        let declarators = initializer.as_js_variable_declaration()?.declarators();
-        let initializer = declarators.first()?.ok()?;
-        let initializer_id = initializer.id().ok()?;
-
-        // Now we have the binding of this declaration
-        let binding = initializer_id
-            .as_any_js_binding()?
-            .as_js_identifier_binding()?;
-
-        // How many times this variable appers in the code
-        let count = binding.all_references(model).count();
-
-        // Get all read references
-        let readonly_references = binding.all_reads(model);
-
-        // Get all write references
-        let write_references = binding.all_writes(model);
     }
 }
 ```
