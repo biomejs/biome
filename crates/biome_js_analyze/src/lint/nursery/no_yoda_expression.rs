@@ -397,43 +397,19 @@ fn is_same_identifier(left_expression: AnyJsExpression, right_expression: AnyJsE
 
 fn extract_string_value(expression: AnyJsExpression) -> Option<String> {
     match expression {
-        // "a", 1, null, undefined, etc
-        AnyJsExpression::AnyJsLiteralExpression(literal_expression) => Some(
-            literal_expression
-                .as_static_value()
-                .map_or(String::new(), |static_value| {
-                    static_value.text().to_string()
-                }),
-        ),
-
-        // `a`
-        AnyJsExpression::JsTemplateExpression(template_expression) => Some(
-            template_expression
-                .elements()
-                .into_iter()
-                .fold(String::new(), |acc, element| {
-                    acc + element
-                        .as_js_template_chunk_element()
-                        .unwrap()
-                        .text()
-                        .as_str()
-                }),
-        ),
-
-        // -1
-        AnyJsExpression::JsUnaryExpression(unary_expression) => {
-            match (
-                unary_expression.operator_token().ok(),
-                unary_expression.argument().ok(),
-            ) {
-                (Some(operator_token), Some(argument)) => {
-                    Some(operator_token.to_string() + &extract_string_value(argument)?.to_string())
-                }
-                _ => None,
+        AnyJsExpression::JsUnaryExpression(unary) => match unary.operator() {
+            Ok(JsUnaryOperator::Minus) => {
+                let argument = unary.argument().ok()?.text();
+                let is_numeric_literal = unary.is_signed_numeric_literal().unwrap_or_default();
+                is_numeric_literal.then_some(String::from("-") + argument.as_str())
             }
+            _ => None,
+        },
+        _ => {
+            let static_value = expression.as_static_value()?;
+            let text = static_value.text();
+            Some(text.to_string())
         }
-
-        _ => None,
     }
 }
 
