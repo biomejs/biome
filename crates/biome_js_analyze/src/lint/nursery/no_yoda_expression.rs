@@ -8,11 +8,12 @@ use biome_diagnostics::Applicability;
 use biome_js_factory::make::{self, js_binary_expression, token};
 use biome_js_syntax::{
     AnyJsExpression, AnyJsLiteralExpression, AnyJsStatement, JsBinaryExpression, JsBinaryOperator,
-    JsCallExpression, JsIfStatement, JsLanguage, JsLogicalExpression, JsLogicalOperator,
-    JsParenthesizedExpression, JsSyntaxKind, JsUnaryOperator, JsWhileStatement, JsYieldArgument,
-    JsYieldExpression, T,
+    JsCallExpression, JsLanguage, JsLogicalExpression, JsLogicalOperator, JsSyntaxKind,
+    JsUnaryOperator, JsYieldArgument, JsYieldExpression, T,
 };
-use biome_rowan::{AstNode, BatchMutationExt, SyntaxTriviaPiece, TriviaPieceKind, WalkEvent};
+use biome_rowan::{
+    AstNode, BatchMutationExt, NodeOrToken, SyntaxTriviaPiece, TriviaPieceKind, WalkEvent,
+};
 
 declare_rule! {
     /// Disallow the use of yoda expressions.
@@ -365,15 +366,19 @@ fn is_outside_range_assertion(
     }
 }
 
+// Determines whether the prev and next token are parenthesis
 fn is_wrapped_in_parenthesis(logical_expression: JsLogicalExpression) -> bool {
-    !matches!(
-        (
-            logical_expression.parent::<JsParenthesizedExpression>(),
-            logical_expression.parent::<JsIfStatement>(),
-            logical_expression.parent::<JsWhileStatement>(),
-        ),
-        (None, None, None)
-    )
+    let syntax = logical_expression.syntax();
+
+    match (
+        syntax.prev_sibling_or_token(),
+        syntax.next_sibling_or_token(),
+    ) {
+        (Some(NodeOrToken::Token(prev_token)), Some(NodeOrToken::Token(next_token))) => {
+            matches!(prev_token.kind(), T!['(']) && matches!(next_token.kind(), T![')'])
+        }
+        _ => false,
+    }
 }
 
 fn is_same_identifier(left_expression: AnyJsExpression, right_expression: AnyJsExpression) -> bool {
