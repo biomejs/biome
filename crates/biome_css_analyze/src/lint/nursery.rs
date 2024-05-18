@@ -7,6 +7,7 @@ pub mod no_duplicate_at_import_rules;
 pub mod no_duplicate_font_names;
 pub mod no_duplicate_selectors_keyframe_block;
 pub mod no_important_in_keyframe;
+pub mod no_invalid_direction_in_linear_gradient;
 pub mod no_invalid_position_at_import_rule;
 pub mod no_unknown_function;
 pub mod no_unknown_media_feature_name;
@@ -25,6 +26,7 @@ declare_group! {
             self :: no_duplicate_font_names :: NoDuplicateFontNames ,
             self :: no_duplicate_selectors_keyframe_block :: NoDuplicateSelectorsKeyframeBlock ,
             self :: no_important_in_keyframe :: NoImportantInKeyframe ,
+            self :: no_invalid_direction_in_linear_gradient :: NoInvalidDirectionInLinearGradient ,
             self :: no_invalid_position_at_import_rule :: NoInvalidPositionAtImportRule ,
             self :: no_unknown_function :: NoUnknownFunction ,
             self :: no_unknown_media_feature_name :: NoUnknownMediaFeatureName ,

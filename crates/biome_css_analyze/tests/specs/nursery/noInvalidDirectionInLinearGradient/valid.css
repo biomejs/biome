@@ -1,0 +1,99 @@
+.foo {
+	background: linear-gradient(to top, #fff, #000);
+}
+.foo {
+	background: lInEaR-gRaDiEnT(to top, #fff, #000);
+}
+.foo {
+	background: LINEAR-GRADIENT(to top, #fff, #000);
+}
+.foo {
+	background: linear-gradient(to bottom, #fff, #000);
+}
+.foo {
+	background: linear-gradient(to right, #fff, #000);
+}
+.foo {
+	background: linear-gradient(to left, #fff, #000);
+}
+.foo {
+	background: linear-gradient(to top left, #fff, #000);
+}
+.foo {
+	background: linear-gradient(to left top, #fff, #000);
+}
+.foo {
+	background: linear-gradient(to bottom right, #fff, #000);
+}
+.foo {
+	background: linear-gradient(to right bottom, #fff, #000);
+}
+.foo {
+	background: linear-gradient(45deg, #fff, #000);
+}
+.foo {
+	background: linear-gradient(100grad, #fff, #000);
+}
+.foo {
+	background: linear-gradient(0.25turn, #fff, #000);
+}
+.foo {
+	background: linear-gradient(1.57rad, #fff, #000);
+}
+.foo {
+	background: linear-gradient(#fff, #000);
+}
+.foo {
+	background: linear-gradient(black, white);
+}
+.foo {
+	background: linear-gradient(in srgb to top, #fff, #000);
+}
+.foo {
+	background: linear-gradient(to top in srgb, #fff, #000);
+}
+.foo {
+	background: linear-gradient(rgba(255, 255, 255, 0.5) 0%, #000);
+}
+.foo {
+	background: -webkit-linear-gradient(top, #fff, #000);
+}
+.foo {
+	background: -moz-linear-gradient(top, #fff, #000);
+}
+.foo {
+	background: -o-linear-gradient(top, #fff, #000);
+}
+.foo {
+	background: url(foo.png), -webkit-linear-gradient(bottom, #fff, #000);
+}
+.foo {
+	background: -webkit-linear-gradient(bottom, #fff, #000), url(foo.png);
+}
+.foo {
+	background: url(foo.png), -moz-linear-gradient(bottom, #fff, #000);
+}
+.foo {
+	background: -moz-linear-gradient(bottom, #fff, #000), url(foo.png);
+}
+.foo {
+	background: url(foo.png), -o-linear-gradient(bottom, #fff, #000);
+}
+.foo {
+	background: -o-linear-gradient(bottom, #fff, #000), url(foo.png);
+}
+.foo {
+	background: url(foo.png), -webkit-linear-gradient(bottom, #fff, #000),
+		url(bar.png);
+}
+.foo {
+	background: url(foo.png), -moz-linear-gradient(bottom, #fff, #000),
+		url(bar.png);
+}
+.foo {
+	background: url(foo.png), -o-linear-gradient(bottom, #fff, #000), url(bar.png);
+}
+.foo {
+	background: url(foo.png), -ms-linear-gradient(bottom, #fff, #000),
+		url(bar.png);
+}
