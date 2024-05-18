@@ -79,8 +79,8 @@ impl Rule for NoYodaExpression {
         let right = node.right().ok()?;
 
         let has_yoda_expression = node.is_comparison_operator()
-            && is_literal_expression(left).unwrap_or_default()
-            && !is_literal_expression(right).unwrap_or_default()
+            && is_literal_expression(&left).unwrap_or_default()
+            && !is_literal_expression(&right).unwrap_or_default()
             && !is_range_assertion(node).unwrap_or_default();
 
         has_yoda_expression.then_some(())
@@ -115,10 +115,10 @@ impl Rule for NoYodaExpression {
         let operator_token = node.operator_token().ok()?;
         let flipped_operator = flip_operator(node.operator().ok()?)?;
 
-        let left_leading_trivia = extract_leading_trivia(left.clone());
-        let left_trailing_trivia = extract_trailing_trivia(left.clone());
-        let right_leading_trivia = extract_leading_trivia(right.clone());
-        let right_trailing_trivia = extract_trailing_trivia(right.clone());
+        let left_leading_trivia = extract_leading_trivia(&left);
+        let left_trailing_trivia = extract_trailing_trivia(&left);
+        let right_leading_trivia = extract_leading_trivia(&right);
+        let right_trailing_trivia = extract_trailing_trivia(&right);
         let operator_leading_trivia = operator_token.leading_trivia().pieces();
         let operator_trailing_trivia = operator_token.trailing_trivia().pieces();
         let whitespace = make::token(T!(==))
@@ -190,14 +190,14 @@ impl Rule for NoYodaExpression {
     }
 }
 
-fn extract_leading_trivia(node: AnyJsExpression) -> Vec<SyntaxTriviaPiece<JsLanguage>> {
+fn extract_leading_trivia(node: &AnyJsExpression) -> Vec<SyntaxTriviaPiece<JsLanguage>> {
     node.syntax()
         .first_leading_trivia()
         .map(|first_leading_trivia| first_leading_trivia.pieces().collect::<Vec<_>>())
         .unwrap_or_default()
 }
 
-fn extract_trailing_trivia(node: AnyJsExpression) -> Vec<SyntaxTriviaPiece<JsLanguage>> {
+fn extract_trailing_trivia(node: &AnyJsExpression) -> Vec<SyntaxTriviaPiece<JsLanguage>> {
     node.syntax()
         .last_trailing_trivia()
         .map(|last_trailing_trivia| last_trailing_trivia.pieces().collect::<Vec<_>>())
@@ -215,7 +215,7 @@ fn clone_with_trivia(
         .unwrap()
 }
 
-fn is_literal_expression(expression: AnyJsExpression) -> Option<bool> {
+fn is_literal_expression(expression: &AnyJsExpression) -> Option<bool> {
     match expression {
         // Any literal: 1, true, null, etc
         AnyJsExpression::AnyJsLiteralExpression(_) => Some(true),
@@ -244,7 +244,7 @@ fn is_literal_expression(expression: AnyJsExpression) -> Option<bool> {
 
         // Parenthesized expression: (1)
         AnyJsExpression::JsParenthesizedExpression(parenthesized_expression) => {
-            is_literal_expression(parenthesized_expression.expression().ok()?)
+            is_literal_expression(&parenthesized_expression.expression().ok()?)
         }
 
         _ => Some(false),
@@ -266,11 +266,9 @@ fn is_range_assertion(node: &JsBinaryExpression) -> Option<bool> {
         ) => Some(
             is_range_assertion_operator(left.operator().ok())
                 && is_range_assertion_operator(right.operator().ok())
-                && (is_inside_range_assertion(operator.clone(), left.clone(), right.clone())
-                    .unwrap_or_default()
-                    || is_outside_range_assertion(operator.clone(), left.clone(), right.clone())
-                        .unwrap_or_default())
-                && is_wrapped_in_parenthesis(parent_logical_expression),
+                && (is_inside_range_assertion(operator, &left, &right).unwrap_or_default()
+                    || is_outside_range_assertion(operator, &left, &right).unwrap_or_default())
+                && is_wrapped_in_parenthesis(&parent_logical_expression),
         ),
         _ => None,
     }
@@ -287,8 +285,8 @@ fn is_range_assertion_operator(operator: Option<JsBinaryOperator>) -> bool {
 /// Determines whether the nodes compose an inside range assertion, like `0 <= x && x < 1`
 fn is_inside_range_assertion(
     operator: JsLogicalOperator,
-    left_binary_expression: JsBinaryExpression,
-    right_binary_expression: JsBinaryExpression,
+    left_binary_expression: &JsBinaryExpression,
+    right_binary_expression: &JsBinaryExpression,
 ) -> Option<bool> {
     let left_identifier = left_binary_expression.right().ok()?;
     let right_identifier = right_binary_expression.left().ok()?;
@@ -326,8 +324,8 @@ fn compare_string_literals(left_string_value: &str, right_string_value: &str) ->
 /// Determines whether the nodes compose an outside range assertion, like `x < 0 || 1 <= x`
 fn is_outside_range_assertion(
     operator: JsLogicalOperator,
-    left_binary_expression: JsBinaryExpression,
-    right_binary_expression: JsBinaryExpression,
+    left_binary_expression: &JsBinaryExpression,
+    right_binary_expression: &JsBinaryExpression,
 ) -> Option<bool> {
     let left_identifier = left_binary_expression.left().ok()?;
     let right_identifier = right_binary_expression.right().ok()?;
@@ -352,7 +350,7 @@ fn is_outside_range_assertion(
 }
 
 // Determines whether the prev and next token are parenthesis
-fn is_wrapped_in_parenthesis(logical_expression: JsLogicalExpression) -> bool {
+fn is_wrapped_in_parenthesis(logical_expression: &JsLogicalExpression) -> bool {
     let syntax = logical_expression.syntax();
 
     match (
