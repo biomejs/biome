@@ -58,7 +58,7 @@ New rules **must** be placed inside the `nursery` group. This group is meant as 
 > [!TIP]
 > As developer, you aren't forced to make a rule perfect in one PR. Instead, you are encouraged to lay off a plan and to split the work in multiple PRs.
 >
-> If aren't familiar with Biome's APIs, this is an option that you have. If you decided to use this option, make sure to describe your plan in an issue.
+> If aren't familiar with Biome's APIs, this is an option that you have. If you decided to use this option, you should make sure to describe your plan in an issue.
 
 Let's say we want to create a new rule called `myRuleName`, which uses the semantic model.
 
