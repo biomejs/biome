@@ -22,7 +22,7 @@ _Just_ is not part of the rust toolchain, you have to install it with [a package
 
 ### Choose a name
 
-_Biome_ follows a naming convention according to what the rule do:
+_Biome_ follows a naming convention according to what the rule does:
 
 1. Forbid a concept
 
