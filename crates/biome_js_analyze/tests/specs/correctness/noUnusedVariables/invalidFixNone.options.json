@@ -1,0 +1,12 @@
+{
+    "linter": {
+        "rules": {
+            "correctness": {
+                "noUnusedVariables": {
+                    "level": "warn",
+                    "fix": "none"
+                }
+            }
+        }
+    }
+}

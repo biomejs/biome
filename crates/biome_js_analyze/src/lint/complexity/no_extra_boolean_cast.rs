@@ -183,12 +183,12 @@ impl Rule for NoExtraBooleanCast {
         };
         mutation.replace_node(node.clone(), node_to_replace.clone());
 
-        Some(JsRuleAction {
-            category: ActionCategory::QuickFix,
-            applicability: Applicability::MaybeIncorrect,
-            message: markup! { {message} }.to_owned(),
+        Some(JsRuleAction::new(
+            ActionCategory::QuickFix,
+            Applicability::MaybeIncorrect,
+            markup! { {message} }.to_owned(),
             mutation,
-        })
+        ))
     }
 }
 

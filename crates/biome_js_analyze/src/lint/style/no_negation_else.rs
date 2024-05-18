@@ -121,12 +121,12 @@ impl Rule for NoNegationElse {
             }
         }
 
-        Some(JsRuleAction {
-            category: ActionCategory::QuickFix,
-            applicability: Applicability::Always,
-            message: markup! { "Invert the condition and the blocks." }.to_owned(),
+        Some(JsRuleAction::new(
+            ActionCategory::QuickFix,
+            Applicability::Always,
+            markup! { "Invert the condition and the blocks." }.to_owned(),
             mutation,
-        })
+        ))
     }
 }
 

@@ -190,12 +190,12 @@ impl Rule for UseAsConstAssertion {
                 mutation.replace_node(previous_initializer.expression().ok()?, new_expr);
             }
         };
-        Some(JsRuleAction {
-            category: ActionCategory::QuickFix,
-            applicability: Applicability::Always,
-            message: markup! { "Replace with "<Emphasis>"as const"</Emphasis>"." }.to_owned(),
+        Some(JsRuleAction::new(
+            ActionCategory::QuickFix,
+            Applicability::Always,
+            markup! { "Replace with "<Emphasis>"as const"</Emphasis>"." }.to_owned(),
             mutation,
-        })
+        ))
     }
 }
 

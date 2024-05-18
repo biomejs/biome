@@ -198,12 +198,12 @@ impl Rule for NoInferrableTypes {
         mutation.replace_token_discard_trivia(prev_token, new_prev_token);
         mutation.replace_token_discard_trivia(next_token, new_next_token);
         mutation.remove_node(annotation.clone());
-        Some(JsRuleAction {
-            category: ActionCategory::QuickFix,
-            applicability: Applicability::Always,
-            message: markup! { "Remove the type annotation." }.to_owned(),
+        Some(JsRuleAction::new(
+            ActionCategory::QuickFix,
+            Applicability::Always,
+            markup! { "Remove the type annotation." }.to_owned(),
             mutation,
-        })
+        ))
     }
 }
 

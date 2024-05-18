@@ -18,12 +18,26 @@ expression: content
 
 ```json
 {
-        "ignorePatterns": ["**/*.spec.js"],
+        "ignorePatterns": ["**/*.spec.js", "!x.spec.js", "/dist"],
         "rules": { "eqeqeq": "off" }
     }
 ```
 
 # Emitted Messages
+
+```block
+.eslintrc.json:2:44 deserialize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Negated patterns are not supported.
+  
+    1 │ {
+  > 2 │         "ignorePatterns": ["**/*.spec.js", "!x.spec.js", "/dist"],
+      │                                            ^^^^^^^^^^^^
+    3 │         "rules": { "eqeqeq": "off" }
+    4 │     }
+  
+
+```
 
 ```block
 biome.json migrate ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -38,7 +52,7 @@ biome.json migrate ━━━━━━━━━━━━━━━━━━━━�
        5 │ + → → → "recommended":·false,
        6 │ + → → → "suspicious":·{·"noDoubleEquals":·"off"·}
        7 │ + → → },
-       8 │ + → → "ignore":·["**/*.spec.js",·"**/*.test.js"]
+       8 │ + → → "ignore":·["**/*.spec.js",·"./dist",·"**/*.test.js"]
        9 │ + → }
       10 │ + }
       11 │ + 

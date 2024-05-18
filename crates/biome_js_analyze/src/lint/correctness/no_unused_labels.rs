@@ -196,12 +196,12 @@ impl Rule for NoUnusedLabels {
         let body = unused_label.body().ok()?;
         let mut mutation = ctx.root().begin();
         mutation.replace_node(unused_label.clone().into(), body);
-        Some(JsRuleAction {
-            category: ActionCategory::QuickFix,
-            applicability: Applicability::Always,
-            message: markup! {"Remove the unused "<Emphasis>"label"</Emphasis>"."}.to_owned(),
+        Some(JsRuleAction::new(
+            ActionCategory::QuickFix,
+            Applicability::Always,
+            markup! {"Remove the unused "<Emphasis>"label"</Emphasis>"."}.to_owned(),
             mutation,
-        })
+        ))
     }
 }
 

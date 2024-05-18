@@ -391,7 +391,6 @@ impl Workspace for WorkspaceServer {
                 {
                     file_features.set_protected_for_all_features();
                 }
-
                 Ok(entry.insert(file_features).clone())
             }
         }
@@ -589,6 +588,7 @@ impl Workspace for WorkspaceServer {
                         settings: self.workspace(),
                         max_diagnostics: params.max_diagnostics as u32,
                         path: &params.path,
+                        rule: params.rule,
                         language: self.get_file_source(&params.path),
                         categories: params.categories,
                         manifest,

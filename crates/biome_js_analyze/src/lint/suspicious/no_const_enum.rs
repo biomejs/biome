@@ -81,13 +81,13 @@ impl Rule for NoConstEnum {
         ));
         mutation.remove_token(const_token);
         mutation.replace_token_discard_trivia(enum_token, new_enum_token);
-        Some(JsRuleAction {
-            category: ActionCategory::QuickFix,
-            applicability: Applicability::Always,
-            message: markup! {
+        Some(JsRuleAction::new(
+            ActionCategory::QuickFix,
+            Applicability::Always,
+             markup! {
                 "Turn the "<Emphasis>"const enum"</Emphasis>" into a regular "<Emphasis>"enum"</Emphasis>"."
             }.to_owned(),
             mutation,
-        })
+        ))
     }
 }

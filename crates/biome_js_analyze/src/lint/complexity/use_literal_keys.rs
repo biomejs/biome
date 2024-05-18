@@ -161,15 +161,15 @@ impl Rule for UseLiteralKeys {
                 );
             }
         }
-        Some(JsRuleAction {
-            mutation,
-            applicability: Applicability::MaybeIncorrect,
-            category: ActionCategory::QuickFix,
-            message: markup! {
+        Some(JsRuleAction::new(
+            ActionCategory::QuickFix,
+            Applicability::MaybeIncorrect,
+            markup! {
                 "Use a literal key instead."
             }
             .to_owned(),
-        })
+            mutation,
+        ))
     }
 }
 

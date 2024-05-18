@@ -5,7 +5,6 @@ use crate::parser::{
         expected_named_type, expected_operation_type, expected_root_operation_type_definition,
     },
     r#type::parse_named_type,
-    value::is_at_string,
     GraphqlParser,
 };
 use biome_graphql_syntax::{
@@ -21,9 +20,6 @@ use super::{is_at_definition, operation::OPERATION_TYPE};
 
 #[inline]
 pub(crate) fn parse_schema_definition(p: &mut GraphqlParser) -> ParsedSyntax {
-    if !is_at_schema_definition(p) {
-        return Absent;
-    }
     let m = p.start();
     // description is optional
     parse_description(p).ok();
@@ -104,11 +100,6 @@ fn parse_root_operation_type_definition(p: &mut GraphqlParser) -> ParsedSyntax {
     parse_named_type(p).or_add_diagnostic(p, expected_named_type);
 
     Present(m.complete(p, GRAPHQL_ROOT_OPERATION_TYPE_DEFINITION))
-}
-
-#[inline]
-pub(crate) fn is_at_schema_definition(p: &mut GraphqlParser<'_>) -> bool {
-    p.at(T![schema]) || (is_at_string(p) && p.nth_at(1, T![schema]))
 }
 
 #[inline]

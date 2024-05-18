@@ -256,7 +256,7 @@ declare_rule! {
     ///         "strictCase": false,
     ///         "requireAscii": true,
     ///         "enumMemberCase": "CONSTANT_CASE",
-    ///         "custon": [
+    ///         "conventions": [
     ///             {
     ///                 "selector": {
     ///                     "kind": "memberLike",
@@ -286,7 +286,7 @@ declare_rule! {
     /// When this option is set to `true`, it forbids names that include non-ASCII characters.
     /// For instance,  when the option is set to `true`, `café` or `안녕하세요` will throw an error.
     ///
-    /// When the option is set to `false`, anames may include non-ASCII characters.
+    /// When the option is set to `false`, names may include non-ASCII characters.
     /// `café` and `안녕하세요` are so valid.
     ///
     /// Default: `false`
@@ -329,8 +329,8 @@ declare_rule! {
     /// }
     /// ```
     ///
-    /// A selector descibes which decalrations the convention applies to.
-    /// You can select a decalration based on several criteria:
+    /// A selector describes which declarations the convention applies to.
+    /// You can select a declaration based on several criteria:
     ///
     /// - `kind`: the kind of the declaration among:
     ///   - `any` (default kind if the kind is unset)
@@ -340,7 +340,7 @@ declare_rule! {
     ///   - `interface`
     ///   - `typeAlias`
     ///   - `function`: named function declarations and expressions
-    ///   - `namespaceLike`: TypeScript namespaces, import and export namespaces (`import * as namspace from`)
+    ///   - `namespaceLike`: TypeScript namespaces, import and export namespaces (`import * as namespace from`)
     ///   - `namespace`: TypeScript namespaces
     ///   - `importNamespace`
     ///   - `exportNamespace`
@@ -354,7 +354,7 @@ declare_rule! {
     ///   - `functionParameter`
     ///   - `catchParameter`
     ///   - `indexParameter`: parameters of index signatures
-    ///   = `typeParameter`: generic type parameter
+    ///   - `typeParameter`: generic type parameter
     ///   - `classMember`: class properties, parameter properties, methods, getters, and setters
     ///   - `classProperty`: class properties, including parameter properties
     ///   - `classMethod`
@@ -365,7 +365,7 @@ declare_rule! {
     ///   - `objectLiteralMethod`
     ///   - `objectLiteralGetter`
     ///   - `objectLiteralSetter`
-    ///   - `typeMember`: properties, methods, getters, and setters declared in type alaises and interfaces
+    ///   - `typeMember`: properties, methods, getters, and setters declared in type aliases and interfaces
     ///   - `typeProperty`
     ///   - `typeMethod`
     ///   - `typeGetter`
@@ -376,7 +376,7 @@ declare_rule! {
     ///   - `protected`: applies to class members
     ///   - `readonly`: applies to class members and type members
     ///   - `static`: applies to class members
-    /// - `scope`: where the declaration appears. Allowd values:
+    /// - `scope`: where the declaration appears. Allowed values:
     ///   - `any`: anywhere (default value if the scope is unset)
     ///   - `global`: the global scope (also includes the namespace scopes)
     ///
@@ -401,9 +401,9 @@ declare_rule! {
     ///
     /// In the following example:
     ///
-    /// = We require `static readonly` class members to be in ["CONSTANT_CASE"].
+    /// - We require `static readonly` class members to be in [`CONSTANT_CASE`].
     /// - We require `private` class members to start with an underscore `_` and to be in [`camelCase`].
-    /// - We require global constants to be in ["CONSTANT_CASE"] and
+    /// - We require global constants to be in [`CONSTANT_CASE`] and
     ///   we allow these constants to be enclosed by double underscores or to be named `_SPECIAL_`.
     /// - We require interfaces to start with `I`, except for interfaces ending with `Error`,
     ///   and to be in [`PascalCase`].
@@ -413,7 +413,7 @@ declare_rule! {
     /// {
     ///     "//": "...",
     ///     "options": {
-    ///         "custon": [
+    ///         "conventions": [
     ///             {
     ///                 "selector": {
     ///                     "kind": "classMember",
@@ -679,12 +679,12 @@ impl Rule for UseNamingConvention {
             let mut mutation = ctx.root().begin();
             let renamed = mutation.rename_any_renamable_node(model, &renamable, &new_name[..]);
             if renamed {
-                return Some(JsRuleAction {
-                    category: ActionCategory::QuickFix,
-                    applicability: Applicability::Always,
-                    message: markup! { "Rename this symbol in "<Emphasis>{preferred_case.to_string()}</Emphasis>"." }.to_owned(),
+                return Some(JsRuleAction::new(
+                    ActionCategory::QuickFix,
+                    Applicability::Always,
+                     markup! { "Rename this symbol in "<Emphasis>{preferred_case.to_string()}</Emphasis>"." }.to_owned(),
                     mutation,
-                });
+                ));
             }
         }
         None

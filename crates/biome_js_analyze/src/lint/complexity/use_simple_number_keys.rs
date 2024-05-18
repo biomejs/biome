@@ -358,11 +358,11 @@ impl Rule for UseSimpleNumberKeys {
             }
         };
 
-        Some(JsRuleAction {
-            category: ActionCategory::QuickFix,
-            applicability: Applicability::Always,
+        Some(JsRuleAction::new(
+            ActionCategory::QuickFix,
+            Applicability::Always,
             message,
             mutation,
-        })
+        ))
     }
 }

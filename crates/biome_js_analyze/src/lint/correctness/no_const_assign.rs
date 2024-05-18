@@ -106,13 +106,13 @@ impl Rule for NoConstAssign {
             let const_token = declarator.declaration()?.kind_token().ok()?;
             let let_token = make::token(JsSyntaxKind::LET_KW);
             mutation.replace_token(const_token, let_token);
-            return Some(JsRuleAction {
-                            category: ActionCategory::QuickFix,
-                            applicability: Applicability::MaybeIncorrect,
-                            message: markup! { "Replace "<Emphasis>"const"</Emphasis>" with "<Emphasis>"let"</Emphasis>" if you assign it to a new value." }
+            return Some(JsRuleAction::new(
+                            ActionCategory::QuickFix,
+                            Applicability::MaybeIncorrect,
+                             markup! { "Replace "<Emphasis>"const"</Emphasis>" with "<Emphasis>"let"</Emphasis>" if you assign it to a new value." }
                                 .to_owned(),
                             mutation,
-                        });
+            ));
         }
         None
     }

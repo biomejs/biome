@@ -126,12 +126,12 @@ impl Rule for NoUnsafeNegation {
             }
         }
 
-        Some(JsRuleAction {
-            category: ActionCategory::QuickFix,
-            applicability: Applicability::MaybeIncorrect,
-            message: markup! { "Wrap the expression with a parenthesis" }.to_owned(),
+        Some(JsRuleAction::new(
+            ActionCategory::QuickFix,
+            Applicability::MaybeIncorrect,
+            markup! { "Wrap the expression with a parenthesis" }.to_owned(),
             mutation,
-        })
+        ))
     }
 }
 

@@ -163,12 +163,12 @@ impl Rule for NoUselessStringConcat {
             _ => None,
         };
 
-        fix_result.and(Some(JsRuleAction {
-            category: ActionCategory::QuickFix,
-            applicability: Applicability::MaybeIncorrect,
-            message: markup! { "Remove the useless concatenation" }.to_owned(),
+        fix_result.and(Some(JsRuleAction::new(
+            ActionCategory::QuickFix,
+            Applicability::MaybeIncorrect,
+            markup! { "Remove the useless concatenation" }.to_owned(),
             mutation,
-        }))
+        )))
     }
 }
 

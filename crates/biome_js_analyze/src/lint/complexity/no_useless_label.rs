@@ -108,12 +108,12 @@ impl Rule for NoUselessLabel {
         let mut mutation = ctx.root().begin();
         mutation.remove_token(label_token);
         mutation.replace_token_discard_trivia(stmt_token, new_stmt_token);
-        Some(JsRuleAction {
-            category: ActionCategory::QuickFix,
-            applicability: Applicability::Always,
-            message: markup! {"Remove the unnecessary "<Emphasis>"label"</Emphasis>".\nYou can achieve the same result without the label."}.to_owned(),
+        Some(JsRuleAction::new(
+            ActionCategory::QuickFix,
+            Applicability::Always,
+             markup! {"Remove the unnecessary "<Emphasis>"label"</Emphasis>".\nYou can achieve the same result without the label."}.to_owned(),
             mutation,
-        })
+        ))
     }
 }
 

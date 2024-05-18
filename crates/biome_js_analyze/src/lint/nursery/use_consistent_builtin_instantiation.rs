@@ -173,24 +173,24 @@ impl Rule for UseConsistentBuiltinInstantiation {
 
                 mutation
                     .replace_node::<AnyJsExpression>(node.clone().into(), call_expression.into());
-                Some(JsRuleAction {
-                    category: ActionCategory::QuickFix,
-                    applicability: Applicability::MaybeIncorrect,
-                    message: markup! { "Remove "<Emphasis>"new"</Emphasis>" keyword." }.to_owned(),
+                Some(JsRuleAction::new(
+                    ActionCategory::QuickFix,
+                    Applicability::MaybeIncorrect,
+                    markup! { "Remove "<Emphasis>"new"</Emphasis>" keyword." }.to_owned(),
                     mutation,
-                })
+                ))
             }
             JsNewOrCallExpression::JsCallExpression(node) => {
                 let new_expression = convert_call_expression_to_new_expression(node)?;
 
                 mutation
                     .replace_node::<AnyJsExpression>(node.clone().into(), new_expression.into());
-                Some(JsRuleAction {
-                    category: ActionCategory::QuickFix,
-                    applicability: Applicability::MaybeIncorrect,
-                    message: markup! { "Add "<Emphasis>"new"</Emphasis>" keyword." }.to_owned(),
+                Some(JsRuleAction::new(
+                    ActionCategory::QuickFix,
+                    Applicability::MaybeIncorrect,
+                    markup! { "Add "<Emphasis>"new"</Emphasis>" keyword." }.to_owned(),
                     mutation,
-                })
+                ))
             }
         }
     }

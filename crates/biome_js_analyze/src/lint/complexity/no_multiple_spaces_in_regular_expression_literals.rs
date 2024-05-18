@@ -177,12 +177,12 @@ impl Rule for NoMultipleSpacesInRegularExpressionLiterals {
             JsSyntaxToken::new_detached(JsSyntaxKind::JS_REGEX_LITERAL, &normalized_text, [], []);
         let mut mutation = ctx.root().begin();
         mutation.replace_token(token, next_trimmed_token);
-        Some(JsRuleAction {
-            category: ActionCategory::QuickFix,
-            applicability: Applicability::Always,
-            message: markup! { "Use a quantifier instead." }.to_owned(),
+        Some(JsRuleAction::new(
+            ActionCategory::QuickFix,
+            Applicability::Always,
+            markup! { "Use a quantifier instead." }.to_owned(),
             mutation,
-        })
+        ))
     }
 }
 

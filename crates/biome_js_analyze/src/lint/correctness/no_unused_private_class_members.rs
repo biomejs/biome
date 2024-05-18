@@ -107,12 +107,12 @@ impl Rule for NoUnusedPrivateClassMembers {
 
         mutation.remove_node(state.clone());
 
-        Some(JsRuleAction {
-            category: ActionCategory::QuickFix,
-            applicability: Applicability::MaybeIncorrect,
-            message: markup! { "Remove unused declaration." }.to_owned(),
+        Some(JsRuleAction::new(
+            ActionCategory::QuickFix,
+            Applicability::MaybeIncorrect,
+            markup! { "Remove unused declaration." }.to_owned(),
             mutation,
-        })
+        ))
     }
 }
 

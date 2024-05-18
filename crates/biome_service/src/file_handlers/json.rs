@@ -6,8 +6,8 @@ use crate::file_handlers::{
     LintResults, ParserCapabilities,
 };
 use crate::settings::{
-    FormatSettings, LanguageListSettings, LanguageSettings, OverrideSettings, ServiceLanguage,
-    WorkspaceSettingsHandle,
+    FormatSettings, LanguageListSettings, LanguageSettings, LinterSettings, OverrideSettings,
+    ServiceLanguage, Settings, WorkspaceSettingsHandle,
 };
 use crate::workspace::{
     FixFileResult, GetSyntaxTreeResult, OrganizeImportsResult, PullActionsResult,
@@ -17,6 +17,7 @@ use biome_analyze::options::PreferredQuote;
 use biome_analyze::{
     AnalysisFilter, AnalyzerConfiguration, AnalyzerOptions, ControlFlow, Never, RuleCategories,
 };
+use biome_configuration::linter::RuleSelector;
 use biome_configuration::PartialConfiguration;
 use biome_deserialize::json::deserialize_from_json_ast;
 use biome_diagnostics::{category, Diagnostic, DiagnosticExt, Severity};
@@ -30,7 +31,6 @@ use biome_json_syntax::{JsonLanguage, JsonRoot, JsonSyntaxNode};
 use biome_parser::AnyParse;
 use biome_rowan::{AstNode, NodeCache};
 use biome_rowan::{TextRange, TextSize, TokenAtOffset};
-use std::path::PathBuf;
 
 #[derive(Debug, Clone, Default, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
@@ -50,9 +50,15 @@ pub struct JsonParserSettings {
     pub allow_trailing_commas: bool,
 }
 
+#[derive(Debug, Clone, Default, serde::Serialize, serde::Deserialize)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+pub struct JsonLinterSettings {
+    pub enabled: Option<bool>,
+}
+
 impl ServiceLanguage for JsonLanguage {
     type FormatterSettings = JsonFormatterSettings;
-    type LinterSettings = ();
+    type LinterSettings = JsonLinterSettings;
     type OrganizeImportsSettings = ();
     type FormatOptions = JsonFormatOptions;
     type ParserSettings = JsonParserSettings;
@@ -91,7 +97,7 @@ impl ServiceLanguage for JsonLanguage {
             global.line_ending.unwrap_or_default()
         };
 
-        overrides.override_json_format_options(
+        overrides.to_override_json_format_options(
             path,
             JsonFormatOptions::new()
                 .with_line_ending(line_ending)
@@ -100,6 +106,26 @@ impl ServiceLanguage for JsonLanguage {
                 .with_line_width(line_width)
                 .with_trailing_commas(language.trailing_commas.unwrap_or_default()),
         )
+    }
+
+    fn resolve_analyzer_options(
+        global: &Settings,
+        _linter: &LinterSettings,
+        _overrides: &OverrideSettings,
+        _language: &Self::LinterSettings,
+        path: &BiomePath,
+        _file_source: &DocumentFileSource,
+    ) -> AnalyzerOptions {
+        let configuration = AnalyzerConfiguration {
+            rules: to_analyzer_rules(global, path.as_path()),
+            globals: vec![],
+            preferred_quote: PreferredQuote::Double,
+            jsx_runtime: Default::default(),
+        };
+        AnalyzerOptions {
+            configuration,
+            file_path: path.to_path_buf(),
+        }
     }
 }
 
@@ -141,7 +167,7 @@ fn parse(
     let parser = &settings.settings().languages.json.parser;
     let overrides = &settings.settings().override_settings;
     let optional_json_file_source = file_source.to_json_file_source();
-    let options: JsonParserOptions = overrides.override_json_parser_options(
+    let options: JsonParserOptions = overrides.to_override_json_parser_options(
         biome_path,
         JsonParserOptions {
             allow_comments: parser.allow_comments
@@ -290,24 +316,57 @@ fn lint(params: LintParams) -> LintResults {
 
             let skipped_diagnostics = diagnostic_count - diagnostics.len() as u32;
 
-            let rules = settings.as_rules(params.path.as_path());
-            let rule_filter_list = rules
-                .as_ref()
-                .map(|rules| rules.as_enabled_rules())
-                .unwrap_or_default()
-                .into_iter()
-                .collect::<Vec<_>>();
+            let mut rules = settings.as_rules(params.path.as_path());
+            let rule_filter_list = if let Some(rule) = params.rule {
+                // We execute a single rule or group because the `--rule` filter is specified.
+                match rule {
+                    RuleSelector::Group(group) => {
+                        if let Some(rules) = rules.as_mut() {
+                            // Ensure that the recommended field is not set to `false`.
+                            rules.to_mut().set_recommended();
+                        }
+                        rules
+                            .as_ref()
+                            .map(|rules| rules.as_enabled_rules())
+                            .unwrap_or_default()
+                            .into_iter()
+                            .filter(|rule_filter| rule_filter.group() == group.as_str())
+                            .collect()
+                    }
+                    RuleSelector::Rule(group, rule_name) => {
+                        if let Some(rules) = rules.as_mut() {
+                            // Set the severity level of the rule to its default.
+                            rules.to_mut().set_default_severity(group, rule_name);
+                        }
+                        vec![rule.into()]
+                    }
+                }
+            } else {
+                let rule_filter_list = rules
+                    .as_ref()
+                    .map(|rules| rules.as_enabled_rules())
+                    .unwrap_or_default()
+                    .into_iter()
+                    .collect::<Vec<_>>();
+                rule_filter_list
+            };
 
-            let analyzer_options =
-                compute_analyzer_options(&params.settings, PathBuf::from(params.path.as_path()));
+            let analyzer_options = &params
+                .settings
+                .analyzer_options::<JsonLanguage>(params.path, &params.language);
             let mut filter = AnalysisFilter::from_enabled_rules(Some(rule_filter_list.as_slice()));
             filter.categories = params.categories;
-            let has_lint = filter.categories.contains(RuleCategories::LINT);
 
-            let (_, analyze_diagnostics) = analyze(&root, filter, &analyzer_options, |signal| {
+            // Do not report unused suppression comment diagnostics if:
+            // - it is a syntax-only analyzer pass, or
+            // - if a single rule is run.
+            let ignores_suppression_comment =
+                !filter.categories.contains(RuleCategories::LINT) || params.rule.is_some();
+
+            let (_, analyze_diagnostics) = analyze(&root, filter, analyzer_options, |signal| {
                 if let Some(mut diagnostic) = signal.diagnostic() {
-                    // Do not report unused suppression comment diagnostics if this is a syntax-only analyzer pass
-                    if !has_lint && diagnostic.category() == Some(category!("suppressions/unused"))
+                    if ignores_suppression_comment
+                        && diagnostic.category() == Some(category!("suppressions/unused"))
                     {
                         return ControlFlow::<Never>::Continue(());
                     }
@@ -384,20 +443,4 @@ fn organize_imports(parse: AnyParse) -> Result<OrganizeImportsResult, WorkspaceE
     Ok(OrganizeImportsResult {
         code: parse.syntax::<JsonLanguage>().to_string(),
     })
-}
-
-fn compute_analyzer_options(
-    settings: &WorkspaceSettingsHandle,
-    file_path: PathBuf,
-) -> AnalyzerOptions {
-    let configuration = AnalyzerConfiguration {
-        rules: to_analyzer_rules(settings.settings(), file_path.as_path()),
-        globals: vec![],
-        preferred_quote: PreferredQuote::Double,
-        jsx_runtime: Default::default(),
-    };
-    AnalyzerOptions {
-        configuration,
-        file_path,
-    }
 }

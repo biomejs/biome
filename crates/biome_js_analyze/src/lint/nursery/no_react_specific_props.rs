@@ -87,14 +87,14 @@ impl Rule for NoReactSpecificProps {
         let new_name_node = AnyJsxAttributeName::JsxName(jsx_name(jsx_ident(replacement)));
         mutation.replace_node(original_name_node, new_name_node);
 
-        Some(JsRuleAction {
-            category: ActionCategory::QuickFix,
-            applicability: Applicability::Always,
-            message: markup! {
+        Some(JsRuleAction::new(
+            ActionCategory::QuickFix,
+            Applicability::Always,
+            markup! {
                 {format!("Replace this attribute name with {replacement:?}")}
             }
             .to_owned(),
             mutation,
-        })
+        ))
     }
 }

@@ -182,15 +182,15 @@ impl Rule for UseIsNan {
                     call.into(),
                 );
 
-                return Some(JsRuleAction {
-                    category: ActionCategory::QuickFix,
-                    applicability: Applicability::MaybeIncorrect,
-                    message: markup! {
+                return Some(JsRuleAction::new(
+                    ActionCategory::QuickFix,
+                    Applicability::MaybeIncorrect,
+                    markup! {
                         "Use "<Emphasis>"Number.isNaN()"</Emphasis>" instead."
                     }
                     .to_owned(),
                     mutation,
-                });
+                ));
             }
             UseIsNanQuery::JsCaseClause(_) => None,
             UseIsNanQuery::JsSwitchStatement(_) => None,

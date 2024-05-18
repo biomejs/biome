@@ -150,11 +150,11 @@ impl Rule for NoUselessTypeConstraint {
         } else {
             mutation.remove_node(node.clone());
         }
-        Some(JsRuleAction {
-            category: ActionCategory::QuickFix,
-            applicability: Applicability::Always,
-            message: markup! { "Remove the constraint." }.to_owned(),
+        Some(JsRuleAction::new(
+            ActionCategory::QuickFix,
+            Applicability::Always,
+            markup! { "Remove the constraint." }.to_owned(),
             mutation,
-        })
+        ))
     }
 }

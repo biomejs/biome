@@ -393,11 +393,11 @@ impl Rule for NoVoidElementsWithChildren {
             }
         }
 
-        Some(JsRuleAction {
+        Some(JsRuleAction::new(
+            ActionCategory::QuickFix,
+            Applicability::MaybeIncorrect,
+            state.action_message(),
             mutation,
-            message: state.action_message(),
-            category: ActionCategory::QuickFix,
-            applicability: Applicability::MaybeIncorrect,
-        })
+        ))
     }
 }
