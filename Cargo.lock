@@ -538,7 +538,7 @@ dependencies = [
  "grit-pattern-matcher",
  "grit-util",
  "im",
- "itertools",
+ "rustc-hash",
  "serde",
 ]
 
