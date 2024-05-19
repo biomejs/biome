@@ -701,6 +701,8 @@ fn check_fix_incompatible_arguments(options: FixFileModeOptions) -> Result<(), C
 
 #[cfg(test)]
 mod tests {
+    use biome_console::BufferConsole;
+
     use super::*;
 
     #[test]
