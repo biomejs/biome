@@ -86,6 +86,7 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
   The `biome migrate --fix` has the same behavior as `biome migrate --write`.
 
   This change allows these commands to write modifications in the same options.
+  With this change, the `--apply` and `--apply-unsafe` option is deprecated.
 
   Contributed by @unvalley
 
