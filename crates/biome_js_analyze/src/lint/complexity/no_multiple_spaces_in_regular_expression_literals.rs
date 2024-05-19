@@ -3,7 +3,6 @@ use biome_analyze::{
     RuleSource,
 };
 use biome_console::markup;
-use biome_diagnostics::Applicability;
 use biome_js_syntax::{JsRegexLiteralExpression, JsSyntaxKind, JsSyntaxToken, TextRange, TextSize};
 use biome_rowan::BatchMutationExt;
 use std::{fmt::Write, ops::Range};
@@ -179,7 +178,7 @@ impl Rule for NoMultipleSpacesInRegularExpressionLiterals {
         mutation.replace_token(token, next_trimmed_token);
         Some(JsRuleAction::new(
             ActionCategory::QuickFix,
-            Applicability::Always,
+            ctx.metadata().applicability(),
             markup! { "Use a quantifier instead." }.to_owned(),
             mutation,
         ))

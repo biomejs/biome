@@ -4,7 +4,6 @@ use biome_analyze::{
     RuleSource,
 };
 use biome_console::markup;
-use biome_diagnostics::Applicability;
 use biome_js_syntax::{AnyJsStatement, JsBlockStatement, JsElseClause, JsIfStatement};
 use biome_rowan::{AstNode, AstNodeList, BatchMutationExt};
 
@@ -159,7 +158,7 @@ impl Rule for UseCollapsedElseIf {
 
         Some(JsRuleAction::new(
             ActionCategory::QuickFix,
-            Applicability::Always,
+            ctx.metadata().applicability(),
             markup! { "Use collapsed "<Emphasis>"else if"</Emphasis>" instead." }.to_owned(),
             mutation,
         ))

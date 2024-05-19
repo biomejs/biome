@@ -2,7 +2,6 @@ use crate::JsRuleAction;
 use biome_analyze::context::RuleContext;
 use biome_analyze::{declare_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
-use biome_diagnostics::Applicability;
 use biome_js_factory::make::{ident, js_name};
 use biome_js_syntax::{AnyJsExpression, AnyJsMemberExpression, AnyJsName, JsCallExpression};
 use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt};
@@ -122,7 +121,7 @@ impl Rule for UseFlatMap {
 
         Some(JsRuleAction::new(
             ActionCategory::QuickFix,
-            Applicability::Always,
+            ctx.metadata().applicability(),
             markup! {"Replace the chain with "<Emphasis>".flatMap()"</Emphasis>"."}.to_owned(),
             mutation,
         ))

@@ -3,7 +3,6 @@ use biome_analyze::{
     RuleSource, RuleSourceKind,
 };
 use biome_console::markup;
-use biome_diagnostics::Applicability;
 use biome_js_factory::make;
 use biome_js_syntax::{
     AnyJsLiteralExpression, AnyJsxAttributeValue, JsSyntaxKind, JsxAttribute, JsxAttributeFields, T,
@@ -129,7 +128,7 @@ impl Rule for NoImplicitBoolean {
 
         Some(JsRuleAction::new(
             ActionCategory::QuickFix,
-            Applicability::Always,
+            ctx.metadata().applicability(),
             markup! { "Add explicit `true` literal for this attribute" }.to_owned(),
             mutation,
         ))

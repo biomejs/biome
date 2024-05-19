@@ -261,7 +261,7 @@ impl Rule for OrganizeImports {
 
         Some(JsRuleAction::new(
             ActionCategory::Source(SourceActionKind::OrganizeImports),
-            ctx.metadata().to_applicability(),
+            ctx.metadata().applicability(),
             markup! { "Organize Imports (Biome)" },
             mutation,
         ))

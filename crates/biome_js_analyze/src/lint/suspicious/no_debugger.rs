@@ -3,7 +3,6 @@ use biome_analyze::{
     RuleSource,
 };
 use biome_console::markup;
-use biome_diagnostics::Applicability;
 use biome_js_syntax::JsDebuggerStatement;
 use biome_rowan::{AstNode, BatchMutationExt};
 
@@ -67,7 +66,7 @@ impl Rule for NoDebugger {
 
         Some(JsRuleAction::new(
             ActionCategory::QuickFix,
-            Applicability::MaybeIncorrect,
+            ctx.metadata().applicability(),
             markup! { "Remove debugger statement" }.to_owned(),
             mutation,
         ))

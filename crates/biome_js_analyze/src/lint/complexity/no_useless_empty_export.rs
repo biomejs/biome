@@ -3,7 +3,6 @@ use biome_analyze::{
     RuleSource,
 };
 use biome_console::markup;
-use biome_diagnostics::Applicability;
 use biome_js_syntax::{AnyJsModuleItem, JsExport, JsModuleItemList, JsSyntaxToken};
 use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt};
 
@@ -105,7 +104,7 @@ impl Rule for NoUselessEmptyExport {
         mutation.remove_node(ctx.query().clone());
         Some(JsRuleAction::new(
             ActionCategory::QuickFix,
-            Applicability::Always,
+            ctx.metadata().applicability(),
             markup! { "Remove this useless empty export." }.to_owned(),
             mutation,
         ))

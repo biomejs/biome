@@ -954,10 +954,6 @@ export interface Nursery {
 	 */
 	all?: boolean;
 	/**
-	 * WIP: This rule hasn't been implemented yet.
-	 */
-	noColorInvalidHex?: RuleConfiguration_for_Null;
-	/**
 	 * Disallow the use of console.
 	 */
 	noConsole?: RuleFixConfiguration_for_Null;
@@ -2269,8 +2265,6 @@ export type Category =
 	| "lint/correctness/useJsxKeyInIterable"
 	| "lint/correctness/useValidForDirection"
 	| "lint/correctness/useYield"
-	| "lint/nursery/colorNoInvalidHex"
-	| "lint/nursery/noColorInvalidHex"
 	| "lint/nursery/noConsole"
 	| "lint/nursery/noConstantMathMinMaxClamp"
 	| "lint/nursery/noCssEmptyBlock"

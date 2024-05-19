@@ -3,7 +3,6 @@ use biome_analyze::{
     context::RuleContext, declare_rule, ActionCategory, FixKind, Rule, RuleDiagnostic, RuleSource,
 };
 use biome_console::markup;
-use biome_diagnostics::Applicability;
 use biome_js_syntax::jsx_ext::AnyJsxElement;
 use biome_rowan::{AstNode, AstNodeList, BatchMutationExt};
 
@@ -126,9 +125,9 @@ impl Rule for NoAriaUnsupportedElements {
         )
     }
 
-    fn action(_ctx: &RuleContext<Self>, _state: &Self::State) -> Option<JsRuleAction> {
-        let element = _ctx.query();
-        let mut mutation = _ctx.root().begin();
+    fn action(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<JsRuleAction> {
+        let element = ctx.query();
+        let mut mutation = ctx.root().begin();
 
         let attribute = element.attributes().into_iter().find_map(|attribute| {
             let jsx_attribute = attribute.as_jsx_attribute()?;
@@ -147,7 +146,7 @@ impl Rule for NoAriaUnsupportedElements {
 
         Some(JsRuleAction::new(
             ActionCategory::QuickFix,
-            Applicability::MaybeIncorrect,
+            ctx.metadata().applicability(),
             markup! { "Remove the "<Emphasis>""{removed_attribute}""</Emphasis>" attribute." }
                 .to_owned(),
             mutation,

@@ -3,7 +3,6 @@ use biome_analyze::{
     RuleSource,
 };
 use biome_console::markup;
-use biome_diagnostics::Applicability;
 use biome_js_syntax::{inner_string_text, AnyJsImportSpecifierLike, JsSyntaxKind, JsSyntaxToken};
 use biome_rowan::BatchMutationExt;
 
@@ -96,7 +95,7 @@ impl Rule for UseNodejsImportProtocol {
         mutation.replace_token(module_name.clone(), new_module_name);
         Some(JsRuleAction::new(
             ActionCategory::QuickFix,
-            Applicability::MaybeIncorrect,
+            ctx.metadata().applicability(),
             markup! { "Add the "<Emphasis>"node:"</Emphasis>" protocol." }.to_owned(),
             mutation,
         ))

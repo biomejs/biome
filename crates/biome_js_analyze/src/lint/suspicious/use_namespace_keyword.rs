@@ -3,7 +3,6 @@ use biome_analyze::{
     RuleSource,
 };
 use biome_console::markup;
-use biome_diagnostics::Applicability;
 use biome_js_factory::make;
 use biome_js_syntax::{JsSyntaxToken, TsModuleDeclaration, T};
 use biome_rowan::BatchMutationExt;
@@ -80,7 +79,7 @@ impl Rule for UseNamespaceKeyword {
         mutation.replace_token_transfer_trivia(module_token.clone(), make::token(T![namespace]));
         Some(JsRuleAction::new(
             ActionCategory::QuickFix,
-            Applicability::Always,
+            ctx.metadata().applicability(),
             markup! {"Use "<Emphasis>"namespace"</Emphasis>" instead."}.to_owned(),
             mutation,
         ))

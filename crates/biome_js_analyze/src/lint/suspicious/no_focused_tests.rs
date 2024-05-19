@@ -4,7 +4,6 @@ use biome_analyze::{
     RuleSource, RuleSourceKind,
 };
 use biome_console::markup;
-use biome_diagnostics::Applicability;
 use biome_js_factory::make;
 use biome_js_syntax::{JsCallExpression, TextRange};
 use biome_rowan::{AstNode, BatchMutationExt, NodeOrToken};
@@ -146,7 +145,7 @@ impl Rule for NoFocusedTests {
 
         Some(JsRuleAction::new(
             ActionCategory::QuickFix,
-            Applicability::MaybeIncorrect,
+            ctx.metadata().applicability(),
             markup! { "Remove focus from test." }.to_owned(),
             mutation,
         ))

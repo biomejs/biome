@@ -4,7 +4,6 @@ use biome_analyze::{
     RuleSource,
 };
 use biome_console::markup;
-use biome_diagnostics::Applicability;
 use biome_js_factory::make;
 use biome_js_syntax::{
     AnyJsExpression, TsNonNullAssertionAssignment, TsNonNullAssertionExpression, T,
@@ -156,7 +155,7 @@ impl Rule for NoNonNullAssertion {
 
                 Some(JsRuleAction::new(
                     ActionCategory::QuickFix,
-                    Applicability::MaybeIncorrect,
+                    ctx.metadata().applicability(),
                      markup! { "Replace with optional chain operator "<Emphasis>"?."</Emphasis>" This operator includes runtime checks, so it is safer than the compile-only non-null assertion operator" }
                         .to_owned(),
                     mutation,

@@ -7,7 +7,6 @@ use biome_analyze::{
 };
 use biome_console::markup;
 
-use biome_diagnostics::Applicability;
 use biome_js_factory::make;
 use biome_js_semantic::{ReferencesExtensions, Scope, SemanticModel, SemanticScopeExtensions};
 use biome_js_syntax::*;
@@ -149,7 +148,7 @@ impl Rule for UseConst {
             );
             Some(JsRuleAction::new(
                 ActionCategory::QuickFix,
-                Applicability::Always,
+                ctx.metadata().applicability(),
                 markup! { "Use "<Emphasis>"const"</Emphasis>" instead." }.to_owned(),
                 batch,
             ))

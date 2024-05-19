@@ -3,7 +3,6 @@ use biome_analyze::{
     context::RuleContext, declare_rule, ActionCategory, FixKind, Rule, RuleDiagnostic, RuleSource,
 };
 use biome_console::markup;
-use biome_diagnostics::Applicability;
 use biome_js_syntax::{
     global_identifier, AnyJsMemberExpression, JsCallExpression, JsExpressionStatement,
 };
@@ -81,7 +80,7 @@ impl Rule for NoConsole {
 
         Some(JsRuleAction::new(
             ActionCategory::QuickFix,
-            Applicability::MaybeIncorrect,
+            ctx.metadata().applicability(),
             markup! { "Remove console" }.to_owned(),
             mutation,
         ))
