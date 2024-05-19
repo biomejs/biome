@@ -640,6 +640,7 @@ pub(crate) struct FixFileModeOptions {
 /// - [FixFileMode]: if safe or unsafe fixes are requested
 pub(crate) fn determine_fix_file_mode(
     options: FixFileModeOptions,
+    console: &mut dyn Console,
 ) -> Result<Option<FixFileMode>, CliDiagnostic> {
     let FixFileModeOptions {
         apply,
@@ -704,7 +705,9 @@ mod tests {
 
     #[test]
     fn incompatible_arguments() {
-        let cases = vec![
+        let mut console = BufferConsole::default();
+
+        for (apply, apply_unsafe, write, fix, unsafe_) in vec![
             (true, true, false, false, false), // --apply --apply-unsafe
             (true, false, true, false, false), // --apply --write
             (true, false, false, true, false), // --apply --fix
@@ -712,37 +715,38 @@ mod tests {
             (false, true, true, false, false), // --apply-unsafe --write
             (false, true, false, true, false), // --apply-unsafe --fix
             (false, false, true, true, false), // --write --fix
-        ];
-
-        for (apply, apply_unsafe, write, fix, unsafe_) in cases {
+        ] {
             assert!(check_fix_incompatible_arguments(FixFileModeOptions {
                 apply,
                 apply_unsafe,
                 write,
                 fix,
                 unsafe_
-            })
+            },)
             .is_err());
         }
     }
 
     #[test]
     fn safe_fixes() {
-        let cases = vec![
+        let mut console = BufferConsole::default();
+
+        for (apply, apply_unsafe, write, fix, unsafe_) in vec![
             (true, false, false, false, false), // --apply
             (false, false, true, false, false), // --write
             (false, false, false, true, false), // --fix
-        ];
-
-        for (apply, apply_unsafe, write, fix, unsafe_) in cases {
+        ] {
             assert_eq!(
-                determine_fix_file_mode(FixFileModeOptions {
-                    apply,
-                    apply_unsafe,
-                    write,
-                    fix,
-                    unsafe_
-                })
+                determine_fix_file_mode(
+                    FixFileModeOptions {
+                        apply,
+                        apply_unsafe,
+                        write,
+                        fix,
+                        unsafe_
+                    },
+                    &mut console
+                )
                 .unwrap(),
                 Some(FixFileMode::SafeFixes)
             );
@@ -751,21 +755,24 @@ mod tests {
 
     #[test]
     fn safe_and_unsafe_fixes() {
-        let cases = vec![
+        let mut console = BufferConsole::default();
+
+        for (apply, apply_unsafe, write, fix, unsafe_) in vec![
             (false, true, false, false, false), // --apply-unsafe
             (false, false, true, false, true),  // --write --unsafe
             (false, false, false, true, true),  // --fix --unsafe
-        ];
-
-        for (apply, apply_unsafe, write, fix, unsafe_) in cases {
+        ] {
             assert_eq!(
-                determine_fix_file_mode(FixFileModeOptions {
-                    apply,
-                    apply_unsafe,
-                    write,
-                    fix,
-                    unsafe_
-                })
+                determine_fix_file_mode(
+                    FixFileModeOptions {
+                        apply,
+                        apply_unsafe,
+                        write,
+                        fix,
+                        unsafe_
+                    },
+                    &mut console
+                )
                 .unwrap(),
                 Some(FixFileMode::SafeAndUnsafeFixes)
             );
@@ -774,17 +781,21 @@ mod tests {
 
     #[test]
     fn no_fix() {
-        let cases = vec![(false, false, false, false, false)]; // no options
+        let mut console = BufferConsole::default();
 
-        for (apply, apply_unsafe, write, fix, unsafe_) in cases {
+        for (apply, apply_unsafe, write, fix, unsafe_) in vec![(false, false, false, false, false)]
+        {
             assert_eq!(
-                determine_fix_file_mode(FixFileModeOptions {
-                    apply,
-                    apply_unsafe,
-                    write,
-                    fix,
-                    unsafe_
-                })
+                determine_fix_file_mode(
+                    FixFileModeOptions {
+                        apply,
+                        apply_unsafe,
+                        write,
+                        fix,
+                        unsafe_
+                    },
+                    &mut console
+                )
                 .unwrap(),
                 None
             );
