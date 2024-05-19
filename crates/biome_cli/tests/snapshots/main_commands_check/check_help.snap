@@ -126,9 +126,10 @@ Available options:
         --write               Writes safe fixes, formatting and import sorting
         --unsafe              Allow to do unsafe fixes, should be used with `--write` or `--fix`
         --fix                 Alias for `--write`, writes safe fixes, formatting and import sorting
-        --apply               Alias for `--write`, writes safe fixes, formatting and import sorting
+        --apply               Alias for `--write`, writes safe fixes, formatting and import sorting (deprecated,
+                              use `--write`)
         --apply-unsafe        Alias for `--write --unsafe`, writes safe and unsafe fixes, formatting
-                              and import sorting
+                              and import sorting (deprecated, use `--write --unsafe`)
         --formatter-enabled=<true|false>  Allow to enable or disable the formatter check.
         --linter-enabled=<true|false>  Allow to enable or disable the linter check.
         --organize-imports-enabled=<true|false>  Allow to enable or disable the organize imports.

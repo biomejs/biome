@@ -13,6 +13,14 @@ console.log(a);
 # Emitted Messages
 
 ```block
+internalError/fs  DEPRECATED  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The argument --apply-unsafe is deprecated, it will be removed in the next major release. Use --write --unsafe instead.
+  
+
+```
+
+```block
 The --json option is unstable/experimental and its output might change between patches/minor releases.
 ```
 

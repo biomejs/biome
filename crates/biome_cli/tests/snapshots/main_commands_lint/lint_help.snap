@@ -68,8 +68,9 @@ Available options:
         --write               Writes safe fixes
         --unsafe              Allow to do unsafe fixes, should be used with `--write` or `--fix`
         --fix                 Alias for `--write`, writes safe fixes
-        --apply               Alias for `--write`, writes safe fixes
-        --apply-unsafe        Alias for `--write --unsafe`, writes safe and unsafe fixes
+        --apply               Alias for `--write`, writes safe fixes (deprecated, use `--write`)
+        --apply-unsafe        Alias for `--write --unsafe`, writes safe and unsafe fixes (deprecated,
+                              use `--write --unsafe`)
         --rule=<GROUP|RULE>   Run only the given rule or rule group.
                               The option overrides the Biome configuration file as follows:
                               - When a rule is passed, its severity level is set to `error' if it is
