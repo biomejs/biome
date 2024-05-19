@@ -206,7 +206,6 @@ fn get_extensionless_import(
 
     Some(UseImportExtensionsState {
         module_name_token: module_name_token.clone(),
-        // suggestion: None,
         suggestion: Some((new_path, import_ext.to_string())),
     })
 }
