@@ -102,7 +102,7 @@ impl Rule for UseAdjacentOverloadSignatures {
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
-        let mut methods: Vec<Vec<(TokenText, usize, TextRange)>> = Vec::new();
+        let mut methods: Vec<Vec<(TokenText, u32, TextRange)>> = Vec::new();
         let mut export_vec = vec![];
 
         for (index, item) in node.into_iter().enumerate() {
@@ -156,7 +156,7 @@ impl Rule for UseAdjacentOverloadSignatures {
                                             .ok()?;
                                         let text = method_member.name()?;
                                         let range = method_member.range();
-                                        type_vec.push((text, type_index, range));
+                                        type_vec.push((text, type_index as u32, range));
                                     }
                                     methods.push(type_vec.clone());
                                 }
@@ -170,12 +170,12 @@ impl Rule for UseAdjacentOverloadSignatures {
                     let tuple = export_text_range[0].clone();
                     let text = tuple.0.clone();
                     let range = tuple.1;
-                    export_vec.push((text, index, range));
+                    export_vec.push((text, index as u32, range));
                 }
                 _ => {}
             }
         }
-        methods.push(export_vec.clone());
+        methods.push(export_vec);
         let adjacent_overload_violations = check_adjacent_overload_violations(&methods);
         let violation_ranges: Vec<(TokenText, TextRange)> = adjacent_overload_violations
             .iter()
@@ -212,12 +212,12 @@ impl Rule for UseAdjacentOverloadSignatures {
 }
 
 fn check_adjacent_overload_violations(
-    groups: &[Vec<(TokenText, usize, TextRange)>],
+    groups: &[Vec<(TokenText, u32, TextRange)>],
 ) -> Vec<(TokenText, TextRange)> {
     let mut violations: Vec<(TokenText, TextRange)> = Vec::new();
 
     for group in groups.iter() {
-        let mut method_positions: Vec<(TokenText, Vec<usize>, Vec<TextRange>)> = Vec::new();
+        let mut method_positions: Vec<(TokenText, Vec<u32>, Vec<TextRange>)> = Vec::new();
 
         for (name, position, range) in group {
             if let Some((_, positions, ranges)) =
@@ -233,7 +233,7 @@ fn check_adjacent_overload_violations(
             if positions.len() > 1 {
                 let mut sorted_positions = positions.clone();
                 sorted_positions.sort_unstable();
-                let expected: Vec<usize> =
+                let expected: Vec<u32> =
                     (sorted_positions[0]..=sorted_positions[sorted_positions.len() - 1]).collect();
                 if sorted_positions != expected {
                     let violation_pos = detect_violation_pos(&sorted_positions, &expected);
@@ -249,10 +249,10 @@ fn check_adjacent_overload_violations(
 }
 
 // Detect the position of the adjacent violation
-fn detect_violation_pos(sorted_positions: &[usize], expected: &[usize]) -> Option<usize> {
+fn detect_violation_pos(sorted_positions: &[u32], expected: &[u32]) -> Option<usize> {
     let expected_len = expected.len();
     for (i, &pos) in sorted_positions.iter().enumerate() {
-        let expected_pos = expected.get(i).copied().unwrap_or(usize::MAX);
+        let expected_pos = expected.get(i).copied().unwrap_or(u32::MAX);
         let half_len = expected_len / 2;
 
         if pos != expected_pos {
@@ -266,7 +266,7 @@ fn detect_violation_pos(sorted_positions: &[usize], expected: &[usize]) -> Optio
     None
 }
 
-fn handle_interface(node: TsInterfaceDeclaration) -> Option<Vec<(TokenText, usize, TextRange)>> {
+fn handle_interface(node: TsInterfaceDeclaration) -> Option<Vec<(TokenText, u32, TextRange)>> {
     let members = node.members();
     let mut interface_vec = vec![];
     for (interface_index, member) in members.into_iter().enumerate() {
@@ -274,12 +274,12 @@ fn handle_interface(node: TsInterfaceDeclaration) -> Option<Vec<(TokenText, usiz
         let method_member = ts_method_signature.name().ok()?;
         let text = method_member.name()?;
         let range = method_member.range();
-        interface_vec.push((text, interface_index, range));
+        interface_vec.push((text, interface_index as u32, range));
     }
     Some(interface_vec)
 }
 
-fn handle_type(node: TsTypeAliasDeclaration) -> Option<Vec<(TokenText, usize, TextRange)>> {
+fn handle_type(node: TsTypeAliasDeclaration) -> Option<Vec<(TokenText, u32, TextRange)>> {
     let ty = node.ty().ok()?;
     let ts_object = ty.as_ts_object_type()?;
     let members = ts_object.members();
@@ -288,12 +288,12 @@ fn handle_type(node: TsTypeAliasDeclaration) -> Option<Vec<(TokenText, usize, Te
         let method_member = member.as_ts_method_signature_type_member()?.name().ok()?;
         let text = method_member.name()?;
         let range = method_member.range();
-        type_vec.push((text, type_index, range));
+        type_vec.push((text, type_index as u32, range));
     }
     Some(type_vec)
 }
 
-fn handle_class(node: JsClassDeclaration) -> Option<Vec<(TokenText, usize, TextRange)>> {
+fn handle_class(node: JsClassDeclaration) -> Option<Vec<(TokenText, u32, TextRange)>> {
     let members = node.members();
     let mut class_vec = vec![];
     let mut class_index = 0;
