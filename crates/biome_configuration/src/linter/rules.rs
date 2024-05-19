@@ -4318,13 +4318,13 @@ impl Nursery {
                     rule_conf.set_level(severity);
                 }
             }
-<<<<<<< HEAD
             "useNumberToFixedDigitsArgument" => {
                 if let Some(rule_conf) = &mut self.use_number_to_fixed_digits_argument {
-=======
+                    rule_conf.set_level(severity);
+                }
+            }
             "useSemanticElements" => {
                 if let Some(rule_conf) = &mut self.use_semantic_elements {
->>>>>>> e8c3f99d7f (feat: add feature)
                     rule_conf.set_level(severity);
                 }
             }
