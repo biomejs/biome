@@ -1088,7 +1088,7 @@ export interface Nursery {
 	/**
 	 * Require import extensions for relative imports.
 	 */
-	useImportExtensions?: RuleConfiguration_for_Null;
+	useImportExtensions?: RuleFixConfiguration_for_Null;
 	/**
 	 * Disallows package private imports.
 	 */

@@ -4,7 +4,6 @@ use biome_analyze::{
     context::RuleContext, declare_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic,
 };
 use biome_console::markup;
-use biome_diagnostics::Applicability;
 use biome_js_factory::make;
 use biome_js_syntax::{inner_string_text, AnyJsImportSpecifierLike, JsLanguage};
 use biome_rowan::{BatchMutationExt, SyntaxToken};
@@ -111,15 +110,15 @@ impl Rule for UseImportExtensions {
             new_module_name.into(),
         );
 
-        Some(JsRuleAction {
-            category: ActionCategory::QuickFix,
-            applicability: Applicability::MaybeIncorrect,
-            message: markup! {
+        Some(JsRuleAction::new(
+            ActionCategory::QuickFix,
+            ctx.metadata().applicability(),
+            markup! {
                 "Add potential import extension "<Emphasis>"."{extension}</Emphasis>"."
             }
             .to_owned(),
             mutation,
-        })
+        ))
     }
 }
 
@@ -185,14 +184,19 @@ fn get_extensionless_import(
         _ => {}
     };
 
-    let mut new_path = path_parts.map(|p| format!("{}/", p)).collect::<String>();
+    // TODO. Once `intersperse` is stabilized, use it instead.
+    // https://github.com/rust-lang/rust/issues/79524
+    let mut new_path = path_parts.fold(String::new(), |mut output, b| {
+        output.push_str(b);
+        output.push('/');
+
+        output
+    });
 
     let part = if is_index_file {
         format!("index.{}", import_ext)
     } else {
-        // TODO. Once `intersperse` is stabilized, use it instead.
-        // https://github.com/rust-lang/rust/issues/79524
-        // Remove trailing slash after mapping.
+        // fold always adds trailing slash, so we need to remove it.
         new_path.pop();
 
         format!(".{}", import_ext)

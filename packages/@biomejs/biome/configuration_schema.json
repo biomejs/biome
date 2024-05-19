@@ -1850,7 +1850,7 @@
 				"useImportExtensions": {
 					"description": "Require import extensions for relative imports.",
 					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "$ref": "#/definitions/RuleFixConfiguration_for_Null" },
 						{ "type": "null" }
 					]
 				},
