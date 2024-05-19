@@ -1,6 +1,6 @@
 use crate::changed::{get_changed_files, get_staged_files};
 use crate::cli_options::{cli_options, CliOptions, ColorsArg};
-use crate::diagnostics::DeprecatedConfigurationFile;
+use crate::diagnostics::{DeprecatedArgument, DeprecatedConfigurationFile};
 use crate::execute::Stdin;
 use crate::logging::LoggingKind;
 use crate::{CliDiagnostic, CliSession, LoggingLevel, VERSION};
@@ -91,11 +91,11 @@ pub enum BiomeCommand {
         #[bpaf(long("fix"), switch, hide_usage)]
         fix: bool,
 
-        /// Alias for `--write`, writes safe fixes, formatting and import sorting
+        /// Alias for `--write`, writes safe fixes, formatting and import sorting (deprecated, use `--write`)
         #[bpaf(long("apply"), switch, hide_usage)]
         apply: bool,
 
-        /// Alias for `--write --unsafe`, writes safe and unsafe fixes, formatting and import sorting
+        /// Alias for `--write --unsafe`, writes safe and unsafe fixes, formatting and import sorting (deprecated, use `--write --unsafe`)
         #[bpaf(long("apply-unsafe"), switch, hide_usage)]
         apply_unsafe: bool,
 
@@ -164,11 +164,11 @@ pub enum BiomeCommand {
         #[bpaf(long("fix"), switch, hide_usage)]
         fix: bool,
 
-        /// Alias for `--write`, writes safe fixes
+        /// Alias for `--write`, writes safe fixes (deprecated, use `--write`)
         #[bpaf(long("apply"), switch, hide_usage)]
         apply: bool,
 
-        /// Alias for `--write --unsafe`, writes safe and unsafe fixes
+        /// Alias for `--write --unsafe`, writes safe and unsafe fixes (deprecated, use `--write --unsafe`)
         #[bpaf(long("apply-unsafe"), switch, hide_usage)]
         apply_unsafe: bool,
 
@@ -640,7 +640,7 @@ pub(crate) struct FixFileModeOptions {
 /// - [FixFileMode]: if safe or unsafe fixes are requested
 pub(crate) fn determine_fix_file_mode(
     options: FixFileModeOptions,
-    _console: &mut dyn Console,
+    console: &mut dyn Console,
 ) -> Result<Option<FixFileMode>, CliDiagnostic> {
     let FixFileModeOptions {
         apply,
@@ -649,6 +649,18 @@ pub(crate) fn determine_fix_file_mode(
         fix,
         unsafe_,
     } = options;
+
+    if apply || apply_unsafe {
+        let (deprecated, alternative) = if apply {
+            ("--apply", "--write")
+        } else {
+            ("--apply-unsafe", "--write --unsafe")
+        };
+        let diagnostic = DeprecatedArgument::new(markup! {
+            "The argument "<Emphasis>{deprecated}</Emphasis>" is deprecated, it will be removed in the next major release. Use "<Emphasis>{alternative}</Emphasis>" instead."
+        });
+        console.error(markup! {{PrintDiagnostic::simple(&diagnostic)}});
+    }
 
     check_fix_incompatible_arguments(options)?;
 
