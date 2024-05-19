@@ -5,7 +5,6 @@ use biome_analyze::{
 };
 use biome_console::{markup, Markup, MarkupBuf};
 use biome_deserialize_macros::Deserializable;
-use biome_diagnostics::Applicability;
 use biome_js_factory::make;
 use biome_js_syntax::{
     AnyTsName, AnyTsType, JsSyntaxKind, JsSyntaxToken, TriviaPieceKind, TsReferenceType,
@@ -176,12 +175,12 @@ impl Rule for UseConsistentArrayType {
             AnyTsType::TsReferenceType(ty) => {
                 mutation.replace_node(AnyTsType::TsReferenceType(ty.clone()), state.clone());
                 if let Some(kind) = get_array_kind_by_reference(ty) {
-                    return Some(JsRuleAction {
-                        category: ActionCategory::QuickFix,
-                        applicability: Applicability::MaybeIncorrect,
-                        message: get_action_message(kind),
+                    return Some(JsRuleAction::new(
+                        ActionCategory::QuickFix,
+                        ctx.metadata().applicability(),
+                        get_action_message(kind),
                         mutation,
-                    });
+                    ));
                 }
 
                 None
@@ -191,12 +190,12 @@ impl Rule for UseConsistentArrayType {
                 let ty = ty.ty().ok()?;
 
                 if let Some(kind) = get_array_kind_by_any_type(&ty) {
-                    return Some(JsRuleAction {
-                        category: ActionCategory::QuickFix,
-                        applicability: Applicability::MaybeIncorrect,
-                        message: get_action_message(kind),
+                    return Some(JsRuleAction::new(
+                        ActionCategory::QuickFix,
+                        ctx.metadata().applicability(),
+                        get_action_message(kind),
                         mutation,
-                    });
+                    ));
                 }
 
                 None
@@ -205,12 +204,12 @@ impl Rule for UseConsistentArrayType {
                 if query.syntax().parent().kind() != Some(JsSyntaxKind::TS_TYPE_OPERATOR_TYPE) =>
             {
                 mutation.replace_node(AnyTsType::TsArrayType(ty.clone()), state.clone());
-                Some(JsRuleAction {
-                    category: ActionCategory::QuickFix,
-                    applicability: Applicability::MaybeIncorrect,
-                    message: get_action_message(TsArrayKind::Shorthand),
+                Some(JsRuleAction::new(
+                    ActionCategory::QuickFix,
+                    ctx.metadata().applicability(),
+                    get_action_message(TsArrayKind::Shorthand),
                     mutation,
-                })
+                ))
             }
             _ => None,
         }

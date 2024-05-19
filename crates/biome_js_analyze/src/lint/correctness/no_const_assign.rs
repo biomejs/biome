@@ -3,7 +3,6 @@ use crate::JsRuleAction;
 use biome_analyze::context::RuleContext;
 use biome_analyze::{declare_rule, ActionCategory, FixKind, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
-use biome_diagnostics::Applicability;
 use biome_js_factory::make::{self};
 use biome_js_syntax::binding_ext::AnyJsBindingDeclaration;
 use biome_js_syntax::{JsIdentifierAssignment, JsSyntaxKind};
@@ -106,13 +105,13 @@ impl Rule for NoConstAssign {
             let const_token = declarator.declaration()?.kind_token().ok()?;
             let let_token = make::token(JsSyntaxKind::LET_KW);
             mutation.replace_token(const_token, let_token);
-            return Some(JsRuleAction {
-                            category: ActionCategory::QuickFix,
-                            applicability: Applicability::MaybeIncorrect,
-                            message: markup! { "Replace "<Emphasis>"const"</Emphasis>" with "<Emphasis>"let"</Emphasis>" if you assign it to a new value." }
+            return Some(JsRuleAction::new(
+                            ActionCategory::QuickFix,
+                            ctx.metadata().applicability(),
+                             markup! { "Replace "<Emphasis>"const"</Emphasis>" with "<Emphasis>"let"</Emphasis>" if you assign it to a new value." }
                                 .to_owned(),
                             mutation,
-                        });
+            ));
         }
         None
     }

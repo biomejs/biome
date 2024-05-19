@@ -3,7 +3,6 @@ use biome_analyze::{
     RuleSource,
 };
 use biome_console::markup;
-use biome_diagnostics::Applicability;
 use biome_js_syntax::{
     is_in_boolean_context, is_negation, AnyJsExpression, JsCallArgumentList, JsCallArguments,
     JsCallExpression, JsNewExpression, JsSyntaxNode, JsUnaryOperator,
@@ -183,12 +182,12 @@ impl Rule for NoExtraBooleanCast {
         };
         mutation.replace_node(node.clone(), node_to_replace.clone());
 
-        Some(JsRuleAction {
-            category: ActionCategory::QuickFix,
-            applicability: Applicability::MaybeIncorrect,
-            message: markup! { {message} }.to_owned(),
+        Some(JsRuleAction::new(
+            ActionCategory::QuickFix,
+            ctx.metadata().applicability(),
+            markup! { {message} }.to_owned(),
             mutation,
-        })
+        ))
     }
 }
 

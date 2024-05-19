@@ -4,7 +4,6 @@ use biome_analyze::{
     RuleSourceKind,
 };
 use biome_console::markup;
-use biome_diagnostics::Applicability;
 use biome_js_factory::make;
 use biome_js_syntax::{AnyJsExportNamedSpecifier, JsExportNamedClause, JsFileSource, T};
 use biome_rowan::{
@@ -188,13 +187,12 @@ impl Rule for UseExportType {
                         ))
                         .with_specifiers(new_specifier_list),
                 );
-                JsRuleAction {
-                    category: ActionCategory::QuickFix,
-                    applicability: Applicability::Always,
-                    message: markup! { "Use a grouped "<Emphasis>"export type"</Emphasis>"." }
-                        .to_owned(),
+                JsRuleAction::new(
+                    ActionCategory::QuickFix,
+                    ctx.metadata().applicability(),
+                    markup! { "Use a grouped "<Emphasis>"export type"</Emphasis>"." }.to_owned(),
                     mutation,
-                }
+                )
             }
             ExportTypeFix::AddInlineTypeQualifiers(specifiers) => {
                 for specifier in specifiers {
@@ -212,13 +210,12 @@ impl Rule for UseExportType {
                             )),
                     );
                 }
-                JsRuleAction {
-                    category: ActionCategory::QuickFix,
-                    applicability: Applicability::Always,
-                    message: markup! { "Use inline "<Emphasis>"type"</Emphasis>" exports." }
-                        .to_owned(),
+                JsRuleAction::new(
+                    ActionCategory::QuickFix,
+                    ctx.metadata().applicability(),
+                    markup! { "Use inline "<Emphasis>"type"</Emphasis>" exports." }.to_owned(),
                     mutation,
-                }
+                )
             }
         };
         Some(diagnostic)

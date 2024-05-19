@@ -3,7 +3,6 @@ use crate::JsRuleAction;
 use biome_analyze::context::RuleContext;
 use biome_analyze::{declare_rule, ActionCategory, FixKind, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
-use biome_diagnostics::Applicability;
 use biome_js_factory::{make, syntax::T};
 use biome_js_syntax::{
     global_identifier, AnyJsCallArgument, AnyJsExpression, AnyJsMemberExpression, JsBinaryOperator,
@@ -161,12 +160,12 @@ impl Rule for UseExponentiationOperator {
             .prepend_trivia_pieces(node.syntax().first_leading_trivia()?.pieces())?
             .append_trivia_pieces(node.syntax().last_trailing_trivia()?.pieces())?;
         mutation.replace_node_discard_trivia(AnyJsExpression::from(node.clone()), new_node);
-        Some(JsRuleAction {
-            category: ActionCategory::QuickFix,
-            applicability: Applicability::MaybeIncorrect,
-            message: markup! { "Use the '**' operator instead of 'Math.pow'." }.to_owned(),
+        Some(JsRuleAction::new(
+            ActionCategory::QuickFix,
+            ctx.metadata().applicability(),
+            markup! { "Use the '**' operator instead of 'Math.pow'." }.to_owned(),
             mutation,
-        })
+        ))
     }
 }
 

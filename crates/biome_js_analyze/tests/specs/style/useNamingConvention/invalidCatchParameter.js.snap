@@ -25,8 +25,6 @@ invalidCatchParameter.js:1:14 lint/style/useNamingConvention  FIXABLE  ━━━
     2 │ 
     3 │ try {} catch(SpecificError) {}
   
-  i The name could be renamed to `e`.
-  
   i Safe fix: Rename this symbol in camelCase.
   
     1   │ - try·{}·catch(E)·{}
@@ -48,8 +46,6 @@ invalidCatchParameter.js:3:14 lint/style/useNamingConvention  FIXABLE  ━━━
       │              ^^^^^^^^^^^^^
     4 │ 
     5 │ try {} catch(specific_error) {}
-  
-  i The name could be renamed to `specificError`.
   
   i Safe fix: Rename this symbol in camelCase.
   
@@ -75,8 +71,6 @@ invalidCatchParameter.js:5:14 lint/style/useNamingConvention  FIXABLE  ━━━
     6 │ 
     7 │ try {} catch(SPECIFIC_ERROR) {}
   
-  i The name could be renamed to `specificError`.
-  
   i Safe fix: Rename this symbol in camelCase.
   
     3 3 │   try {} catch(SpecificError) {}
@@ -100,8 +94,6 @@ invalidCatchParameter.js:7:14 lint/style/useNamingConvention  FIXABLE  ━━━
       │              ^^^^^^^^^^^^^^
     8 │ 
   
-  i The name could be renamed to `specificError`.
-  
   i Safe fix: Rename this symbol in camelCase.
   
     5 5 │   try {} catch(specific_error) {}
@@ -112,5 +104,3 @@ invalidCatchParameter.js:7:14 lint/style/useNamingConvention  FIXABLE  ━━━
   
 
 ```
-
-

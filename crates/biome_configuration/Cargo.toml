@@ -36,6 +36,7 @@ oxc_resolver             = { workspace = true }
 rustc-hash               = { workspace = true }
 schemars                 = { workspace = true, features = ["indexmap1"], optional = true }
 serde                    = { workspace = true, features = ["derive"] }
+serde_ini                = { workspace = true }
 serde_json               = { workspace = true, features = ["raw_value"] }
 
 [features]

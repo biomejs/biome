@@ -1,90 +1,172 @@
 use crate::{
     AnyJsMethodModifier, AnyJsPropertyModifier, AnyTsIndexSignatureModifier,
     AnyTsMethodSignatureModifier, AnyTsPropertyParameterModifier, AnyTsPropertySignatureModifier,
-    AnyTsTypeParameterModifier, JsSyntaxKind, TsAccessibilityModifier,
+    AnyTsTypeParameterModifier, JsMethodModifierList, JsPropertyModifierList, JsSyntaxKind,
+    TsAccessibilityModifier, TsMethodSignatureModifierList, TsPropertySignatureModifierList,
 };
 
 /// Helpful data structure to make the order of modifiers predictable inside the formatter
-#[derive(Debug, Ord, PartialOrd, Eq, PartialEq)]
-pub enum Modifiers {
+#[derive(Clone, Copy, Debug, Eq, PartialEq, PartialOrd, Ord)]
+#[enumflags2::bitflags]
+#[repr(u16)]
+pub enum Modifier {
     // modifiers must be sorted by precedence.
-    Decorator,
-    Accessibility,
-    Declare,
-    Static,
-    Abstract,
-    Override,
-    Readonly,
-    Accessor,
+    Decorator = 1 << 0,
+    BogusAccessibility = 1 << 1,
+    Private = 1 << 2,
+    Protected = 1 << 3,
+    Public = 1 << 4,
+    Declare = 1 << 5,
+    Static = 1 << 6,
+    Abstract = 1 << 7,
+    Override = 1 << 8,
+    Readonly = 1 << 9,
+    Accessor = 1 << 10,
 }
 
-impl From<&AnyTsIndexSignatureModifier> for Modifiers {
+impl std::fmt::Display for Modifier {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "{}",
+            match self {
+                Modifier::Decorator => "decorator",
+                Modifier::BogusAccessibility => "accessibility",
+                Modifier::Private => "private",
+                Modifier::Protected => "protected",
+                Modifier::Public => "public",
+                Modifier::Declare => "declare",
+                Modifier::Static => "static",
+                Modifier::Abstract => "abstract",
+                Modifier::Override => "override",
+                Modifier::Readonly => "readonly",
+                Modifier::Accessor => "accessor",
+            }
+        )
+    }
+}
+
+impl From<&AnyTsIndexSignatureModifier> for Modifier {
     fn from(modifier: &AnyTsIndexSignatureModifier) -> Self {
         match modifier {
-            AnyTsIndexSignatureModifier::JsStaticModifier(_) => Modifiers::Static,
-            AnyTsIndexSignatureModifier::TsReadonlyModifier(_) => Modifiers::Readonly,
+            AnyTsIndexSignatureModifier::JsStaticModifier(_) => Modifier::Static,
+            AnyTsIndexSignatureModifier::TsReadonlyModifier(_) => Modifier::Readonly,
         }
     }
 }
 
-impl From<&AnyJsMethodModifier> for Modifiers {
+impl From<&AnyJsMethodModifier> for Modifier {
     fn from(modifier: &AnyJsMethodModifier) -> Self {
         match modifier {
-            AnyJsMethodModifier::JsDecorator(_) => Modifiers::Decorator,
-            AnyJsMethodModifier::JsStaticModifier(_) => Modifiers::Static,
-            AnyJsMethodModifier::TsAccessibilityModifier(_) => Modifiers::Accessibility,
-            AnyJsMethodModifier::TsOverrideModifier(_) => Modifiers::Override,
+            AnyJsMethodModifier::JsDecorator(_) => Modifier::Decorator,
+            AnyJsMethodModifier::JsStaticModifier(_) => Modifier::Static,
+            AnyJsMethodModifier::TsAccessibilityModifier(accessibility) => accessibility.into(),
+            AnyJsMethodModifier::TsOverrideModifier(_) => Modifier::Override,
         }
     }
 }
 
-impl From<&AnyTsMethodSignatureModifier> for Modifiers {
+impl From<&AnyTsMethodSignatureModifier> for Modifier {
     fn from(modifier: &AnyTsMethodSignatureModifier) -> Self {
         match modifier {
-            AnyTsMethodSignatureModifier::JsDecorator(_) => Modifiers::Decorator,
-            AnyTsMethodSignatureModifier::JsStaticModifier(_) => Modifiers::Static,
-            AnyTsMethodSignatureModifier::TsAbstractModifier(_) => Modifiers::Abstract,
-            AnyTsMethodSignatureModifier::TsAccessibilityModifier(_) => Modifiers::Accessibility,
-            AnyTsMethodSignatureModifier::TsOverrideModifier(_) => Modifiers::Override,
+            AnyTsMethodSignatureModifier::JsDecorator(_) => Modifier::Decorator,
+            AnyTsMethodSignatureModifier::JsStaticModifier(_) => Modifier::Static,
+            AnyTsMethodSignatureModifier::TsAbstractModifier(_) => Modifier::Abstract,
+            AnyTsMethodSignatureModifier::TsAccessibilityModifier(accessibility) => {
+                accessibility.into()
+            }
+            AnyTsMethodSignatureModifier::TsOverrideModifier(_) => Modifier::Override,
         }
     }
 }
 
-impl From<&AnyJsPropertyModifier> for Modifiers {
+impl From<&AnyJsPropertyModifier> for Modifier {
     fn from(modifier: &AnyJsPropertyModifier) -> Self {
         match modifier {
-            AnyJsPropertyModifier::JsDecorator(_) => Modifiers::Decorator,
-            AnyJsPropertyModifier::JsStaticModifier(_) => Modifiers::Static,
-            AnyJsPropertyModifier::JsAccessorModifier(_) => Modifiers::Accessor,
-            AnyJsPropertyModifier::TsAccessibilityModifier(_) => Modifiers::Accessibility,
-            AnyJsPropertyModifier::TsOverrideModifier(_) => Modifiers::Override,
-            AnyJsPropertyModifier::TsReadonlyModifier(_) => Modifiers::Readonly,
+            AnyJsPropertyModifier::JsDecorator(_) => Modifier::Decorator,
+            AnyJsPropertyModifier::JsStaticModifier(_) => Modifier::Static,
+            AnyJsPropertyModifier::JsAccessorModifier(_) => Modifier::Accessor,
+            AnyJsPropertyModifier::TsAccessibilityModifier(accessibility) => accessibility.into(),
+            AnyJsPropertyModifier::TsOverrideModifier(_) => Modifier::Override,
+            AnyJsPropertyModifier::TsReadonlyModifier(_) => Modifier::Readonly,
         }
     }
 }
 
-impl From<&AnyTsPropertyParameterModifier> for Modifiers {
+impl From<&AnyTsPropertyParameterModifier> for Modifier {
     fn from(modifier: &AnyTsPropertyParameterModifier) -> Self {
         match modifier {
-            AnyTsPropertyParameterModifier::TsAccessibilityModifier(_) => Modifiers::Accessibility,
-            AnyTsPropertyParameterModifier::TsOverrideModifier(_) => Modifiers::Override,
-            AnyTsPropertyParameterModifier::TsReadonlyModifier(_) => Modifiers::Readonly,
+            AnyTsPropertyParameterModifier::TsAccessibilityModifier(accessibility) => {
+                accessibility.into()
+            }
+            AnyTsPropertyParameterModifier::TsOverrideModifier(_) => Modifier::Override,
+            AnyTsPropertyParameterModifier::TsReadonlyModifier(_) => Modifier::Readonly,
         }
     }
 }
 
-impl From<&AnyTsPropertySignatureModifier> for Modifiers {
+impl From<&AnyTsPropertySignatureModifier> for Modifier {
     fn from(modifier: &AnyTsPropertySignatureModifier) -> Self {
         match modifier {
-            AnyTsPropertySignatureModifier::JsDecorator(_) => Modifiers::Decorator,
-            AnyTsPropertySignatureModifier::TsAccessibilityModifier(_) => Modifiers::Accessibility,
-            AnyTsPropertySignatureModifier::TsDeclareModifier(_) => Modifiers::Declare,
-            AnyTsPropertySignatureModifier::JsStaticModifier(_) => Modifiers::Static,
-            AnyTsPropertySignatureModifier::JsAccessorModifier(_) => Modifiers::Accessor,
-            AnyTsPropertySignatureModifier::TsAbstractModifier(_) => Modifiers::Abstract,
-            AnyTsPropertySignatureModifier::TsOverrideModifier(_) => Modifiers::Override,
-            AnyTsPropertySignatureModifier::TsReadonlyModifier(_) => Modifiers::Readonly,
+            AnyTsPropertySignatureModifier::JsDecorator(_) => Modifier::Decorator,
+            AnyTsPropertySignatureModifier::TsAccessibilityModifier(accessibility) => {
+                accessibility.into()
+            }
+            AnyTsPropertySignatureModifier::TsDeclareModifier(_) => Modifier::Declare,
+            AnyTsPropertySignatureModifier::JsStaticModifier(_) => Modifier::Static,
+            AnyTsPropertySignatureModifier::JsAccessorModifier(_) => Modifier::Accessor,
+            AnyTsPropertySignatureModifier::TsAbstractModifier(_) => Modifier::Abstract,
+            AnyTsPropertySignatureModifier::TsOverrideModifier(_) => Modifier::Override,
+            AnyTsPropertySignatureModifier::TsReadonlyModifier(_) => Modifier::Readonly,
         }
+    }
+}
+
+impl From<&TsAccessibilityModifier> for Modifier {
+    fn from(value: &TsAccessibilityModifier) -> Self {
+        if let Ok(modifier_token) = value.modifier_token() {
+            match modifier_token.kind() {
+                JsSyntaxKind::PRIVATE_KW => Self::Private,
+                JsSyntaxKind::PROTECTED_KW => Self::Protected,
+                JsSyntaxKind::PUBLIC_KW => Self::Public,
+                _ => Self::BogusAccessibility,
+            }
+        } else {
+            Self::BogusAccessibility
+        }
+    }
+}
+
+impl From<&JsMethodModifierList> for enumflags2::BitFlags<Modifier> {
+    fn from(value: &JsMethodModifierList) -> Self {
+        value
+            .into_iter()
+            .map(|m| Modifier::from(&m))
+            .fold(Self::empty(), |acc, m| acc | m)
+    }
+}
+impl From<&JsPropertyModifierList> for enumflags2::BitFlags<Modifier> {
+    fn from(value: &JsPropertyModifierList) -> Self {
+        value
+            .into_iter()
+            .map(|m| Modifier::from(&m))
+            .fold(Self::empty(), |acc, m| acc | m)
+    }
+}
+impl From<&TsPropertySignatureModifierList> for enumflags2::BitFlags<Modifier> {
+    fn from(value: &TsPropertySignatureModifierList) -> Self {
+        value
+            .into_iter()
+            .map(|m| Modifier::from(&m))
+            .fold(Self::empty(), |acc, m| acc | m)
+    }
+}
+impl From<&TsMethodSignatureModifierList> for enumflags2::BitFlags<Modifier> {
+    fn from(value: &TsMethodSignatureModifierList) -> Self {
+        value
+            .into_iter()
+            .map(|m| Modifier::from(&m))
+            .fold(Self::empty(), |acc, m| acc | m)
     }
 }
 

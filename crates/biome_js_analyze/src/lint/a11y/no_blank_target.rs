@@ -2,7 +2,6 @@ use crate::JsRuleAction;
 use biome_analyze::context::RuleContext;
 use biome_analyze::{declare_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
-use biome_diagnostics::Applicability;
 use biome_js_factory::make::{
     jsx_attribute, jsx_attribute_initializer_clause, jsx_attribute_list, jsx_ident, jsx_name,
     jsx_string, jsx_string_literal, token,
@@ -150,12 +149,12 @@ impl Rule for NoBlankTarget {
             .to_owned()
         };
 
-        Some(JsRuleAction {
-            mutation,
+        Some(JsRuleAction::new(
+            ActionCategory::QuickFix,
+            ctx.metadata().applicability(),
             message,
-            category: ActionCategory::QuickFix,
-            applicability: Applicability::Always,
-        })
+            mutation,
+        ))
     }
 
     fn diagnostic(

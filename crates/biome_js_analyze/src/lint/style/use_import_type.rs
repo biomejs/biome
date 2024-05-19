@@ -8,7 +8,6 @@ use biome_analyze::{
     RuleDiagnostic, RuleSource, RuleSourceKind,
 };
 use biome_console::markup;
-use biome_diagnostics::Applicability;
 use biome_js_factory::make;
 use biome_js_semantic::{ReferencesExtensions, SemanticModel};
 use biome_js_syntax::{
@@ -519,12 +518,12 @@ impl Rule for UseImportType {
                 }
             }
         }
-        Some(JsRuleAction {
-            category: ActionCategory::QuickFix,
-            applicability: Applicability::Always,
-            message: markup! { "Use "<Emphasis>"import type"</Emphasis>"." }.to_owned(),
+        Some(JsRuleAction::new(
+            ActionCategory::QuickFix,
+            ctx.metadata().applicability(),
+            markup! { "Use "<Emphasis>"import type"</Emphasis>"." }.to_owned(),
             mutation,
-        })
+        ))
     }
 }
 

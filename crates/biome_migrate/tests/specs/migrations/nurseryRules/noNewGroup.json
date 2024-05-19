@@ -1,0 +1,9 @@
+{
+  "linter": {
+    "rules": {
+      "nursery": {
+        "noUselessTernary": "error"
+      }
+    }
+  }
+}

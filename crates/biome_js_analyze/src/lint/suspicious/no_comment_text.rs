@@ -3,7 +3,6 @@ use biome_analyze::{
     RuleSource,
 };
 use biome_console::markup;
-use biome_diagnostics::Applicability;
 use biome_js_factory::make;
 use biome_js_syntax::{AnyJsxChild, JsxText, TriviaPieceKind, T};
 use biome_rowan::{AstNode, BatchMutationExt};
@@ -102,11 +101,11 @@ impl Rule for NoCommentText {
             ),
         );
 
-        Some(JsRuleAction {
-            category: ActionCategory::QuickFix,
-            applicability: Applicability::MaybeIncorrect,
-            message: markup! { "Wrap the comments with braces" }.to_owned(),
+        Some(JsRuleAction::new(
+            ActionCategory::QuickFix,
+            ctx.metadata().applicability(),
+            markup! { "Wrap the comments with braces" }.to_owned(),
             mutation,
-        })
+        ))
     }
 }

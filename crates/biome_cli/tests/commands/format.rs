@@ -79,7 +79,7 @@ const hello: string = "world";
 </script>
 <div></div>"#;
 
-const APPLY_TRAILING_COMMA_BEFORE: &str = r#"
+const APPLY_TRAILING_COMMAS_BEFORE: &str = r#"
 const a = [
 	longlonglonglongItem1longlonglonglongItem1,
 	longlonglonglongItem1longlonglonglongItem2,
@@ -87,7 +87,7 @@ const a = [
 ];
 "#;
 
-const APPLY_TRAILING_COMMA_AFTER: &str = r#"const a = [
+const APPLY_TRAILING_COMMAS_AFTER: &str = r#"const a = [
 	longlonglonglongItem1longlonglonglongItem1,
 	longlonglonglongItem1longlonglonglongItem2,
 	longlonglonglongItem1longlonglonglongItem3
@@ -743,12 +743,48 @@ fn applies_custom_css_quote_style() {
 }
 
 #[test]
-fn applies_custom_trailing_comma() {
+fn applies_custom_trailing_commas() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let file_path = Path::new("file.js");
-    fs.insert(file_path.into(), APPLY_TRAILING_COMMA_BEFORE.as_bytes());
+    fs.insert(file_path.into(), APPLY_TRAILING_COMMAS_BEFORE.as_bytes());
+
+    let result = run_cli(
+        DynRef::Borrowed(&mut fs),
+        &mut console,
+        Args::from(
+            [
+                ("format"),
+                ("--trailing-commas"),
+                ("none"),
+                ("--write"),
+                file_path.as_os_str().to_str().unwrap(),
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_file_contents(&fs, file_path, APPLY_TRAILING_COMMAS_AFTER);
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "applies_custom_trailing_commas",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn applies_custom_trailing_commas_using_the_deprecated_option() {
+    let mut fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let file_path = Path::new("file.js");
+    fs.insert(file_path.into(), APPLY_TRAILING_COMMAS_BEFORE.as_bytes());
 
     let result = run_cli(
         DynRef::Borrowed(&mut fs),
@@ -767,11 +803,49 @@ fn applies_custom_trailing_comma() {
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
 
-    assert_file_contents(&fs, file_path, APPLY_TRAILING_COMMA_AFTER);
+    assert_file_contents(&fs, file_path, APPLY_TRAILING_COMMAS_AFTER);
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
-        "applies_custom_trailing_comma",
+        "applies_custom_trailing_commas_using_the_deprecated_option",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn applies_custom_trailing_commas_overriding_the_deprecated_option() {
+    let mut fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let file_path = Path::new("file.js");
+    fs.insert(file_path.into(), APPLY_TRAILING_COMMAS_BEFORE.as_bytes());
+
+    let result = run_cli(
+        DynRef::Borrowed(&mut fs),
+        &mut console,
+        Args::from(
+            [
+                ("format"),
+                ("--trailing-commas"),
+                ("none"),
+                ("--trailing-comma"),
+                ("all"),
+                ("--write"),
+                file_path.as_os_str().to_str().unwrap(),
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_file_contents(&fs, file_path, APPLY_TRAILING_COMMAS_AFTER);
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "applies_custom_trailing_commas_overriding_the_deprecated_option",
         fs,
         console,
         result,
@@ -923,21 +997,21 @@ fn applies_custom_bracket_same_line() {
 }
 
 #[test]
-fn trailing_comma_parse_errors() {
+fn trailing_commas_parse_errors() {
     let mut console = BufferConsole::default();
     let mut fs = MemoryFileSystem::default();
 
     let result = run_cli(
         DynRef::Borrowed(&mut fs),
         &mut console,
-        Args::from([("format"), ("--trailing-comma"), ("NONE"), ("file.js")].as_slice()),
+        Args::from([("format"), ("--trailing-commas"), ("NONE"), ("file.js")].as_slice()),
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
-        "trailing_comma_parse_errors",
+        "trailing_commas_parse_errors",
         fs,
         console,
         result,
@@ -2557,8 +2631,9 @@ fn should_apply_different_formatting() {
         },
         "css": {
             "formatter": {
+                "enabled": true,
                 "lineWidth": 40,
-                "indentSize": 6
+                "indentWidth": 6
             }
         }
     }"#,
@@ -2656,7 +2731,8 @@ const a = {
                 "--json-formatter-line-width=20",
                 "--json-formatter-indent-size=2",
                 "--css-formatter-line-width=40",
-                "--css-formatter-indent-size=6",
+                "--css-formatter-indent-width=6",
+                "--css-formatter-enabled=true",
                 json_file.as_os_str().to_str().unwrap(),
                 js_file.as_os_str().to_str().unwrap(),
                 css_file.as_os_str().to_str().unwrap(),

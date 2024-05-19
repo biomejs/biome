@@ -2,7 +2,6 @@ use biome_analyze::{
     context::RuleContext, declare_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic,
 };
 use biome_console::markup;
-use biome_diagnostics::Applicability;
 use biome_js_factory::make;
 use biome_js_syntax::{AnyJsStatement, AnyJsSwitchClause, TriviaPieceKind, T};
 use biome_rowan::{AstNode, AstNodeList, BatchMutationExt};
@@ -95,11 +94,11 @@ impl Rule for UseSingleCaseStatement {
         let mut mutation = ctx.root().begin();
         mutation.replace_token_discard_trivia(colon_token, new_colon_token);
         mutation.replace_node_discard_trivia(consequent, new_consequent);
-        Some(JsRuleAction {
-            category: ActionCategory::QuickFix,
-            applicability: Applicability::MaybeIncorrect,
-            message: markup! { "Wrap the statements in a block." }.to_owned(),
+        Some(JsRuleAction::new(
+            ActionCategory::QuickFix,
+            ctx.metadata().applicability(),
+            markup! { "Wrap the statements in a block." }.to_owned(),
             mutation,
-        })
+        ))
     }
 }

@@ -120,6 +120,18 @@ We use [Polar.sh](https://polar.sh/biomejs) to up-vote and promote specific feat
   </tbody>
 </table>
 
+### Silver Sponsors
+
+<table>
+  <tbody>
+    <tr>
+      <td align="center" valign="middle">
+        <a href="https://l2beat.com/" target="_blank"><img src="https://images.opencollective.com/l2beat/c2b2a27/logo/256.png" height="100"></a>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
 ### Bronze Sponsors
 
 <table>
@@ -133,6 +145,9 @@ We use [Polar.sh](https://polar.sh/biomejs) to up-vote and promote specific feat
       </td>
       <td align="center" valign="middle">
         <a href="https://vital.io/" target="_blank"><img src="https://avatars.githubusercontent.com/u/25357309?s=200" width="80"></a>
+      </td>
+      <td align="center" valign="middle">
+        <a href="https://coderabbit.ai/" target="_blank"><img src="https://avatars.githubusercontent.com/u/132028505?s=200&v=4" width="80"></a>
       </td>
     </tr>
   </tbody>

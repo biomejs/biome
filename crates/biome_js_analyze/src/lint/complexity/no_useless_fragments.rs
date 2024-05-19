@@ -4,7 +4,6 @@ use crate::JsRuleAction;
 use biome_analyze::context::RuleContext;
 use biome_analyze::{declare_rule, ActionCategory, FixKind, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
-use biome_diagnostics::Applicability;
 use biome_js_factory::make::{
     js_expression_statement, js_string_literal_expression, jsx_expression_child, jsx_string,
     jsx_string_literal, jsx_tag_expression, token, JsxExpressionChildBuilder,
@@ -323,12 +322,12 @@ impl Rule for NoUselessFragments {
             }
         }
 
-        Some(JsRuleAction {
-            category: ActionCategory::QuickFix,
-            applicability: Applicability::MaybeIncorrect,
-            message: markup! { "Remove the Fragment" }.to_owned(),
+        Some(JsRuleAction::new(
+            ActionCategory::QuickFix,
+            ctx.metadata().applicability(),
+            markup! { "Remove the Fragment" }.to_owned(),
             mutation,
-        })
+        ))
     }
 
     fn diagnostic(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<RuleDiagnostic> {

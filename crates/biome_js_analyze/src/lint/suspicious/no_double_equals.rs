@@ -3,7 +3,6 @@ use biome_analyze::{
     context::RuleContext, declare_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic,
 };
 use biome_console::markup;
-use biome_diagnostics::Applicability;
 use biome_js_factory::make;
 use biome_js_syntax::{AnyJsExpression, AnyJsLiteralExpression, JsBinaryExpression, T};
 use biome_js_syntax::{JsSyntaxKind::*, JsSyntaxToken};
@@ -108,15 +107,14 @@ impl Rule for NoDoubleEquals {
         let suggestion = if op.kind() == EQ2 { T![===] } else { T![!==] };
         mutation.replace_token(op.clone(), make::token(suggestion));
 
-        Some(JsRuleAction {
-            category: ActionCategory::QuickFix,
-            applicability: Applicability::MaybeIncorrect,
+        Some(JsRuleAction::new(
+            ActionCategory::QuickFix,
+            ctx.metadata().applicability(),
             // SAFETY: `suggestion` can only be JsSyntaxKind::EQ3 or JsSyntaxKind::NEQ2,
             // the implementation of `to_string` for these two variants always returns Some
-            message: markup! { "Use "<Emphasis>{suggestion.to_string().unwrap()}</Emphasis> }
-                .to_owned(),
+            markup! { "Use "<Emphasis>{suggestion.to_string().unwrap()}</Emphasis> }.to_owned(),
             mutation,
-        })
+        ))
     }
 }
 

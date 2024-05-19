@@ -14,6 +14,7 @@ use std::{
     num::{NonZeroU16, NonZeroU32, NonZeroU64, NonZeroU8, NonZeroUsize},
     ops::Deref,
     path::PathBuf,
+    u8,
 };
 
 /// Type that allows deserializing a string without heap-allocation.
@@ -24,6 +25,19 @@ impl Text {
         self.0.text()
     }
 }
+
+impl PartialOrd for Text {
+    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+        Some(self.cmp(other))
+    }
+}
+
+impl Ord for Text {
+    fn cmp(&self, other: &Self) -> std::cmp::Ordering {
+        self.text().cmp(other.text())
+    }
+}
+
 impl Deref for Text {
     type Target = str;
     fn deref(&self) -> &Self::Target {
@@ -512,6 +526,35 @@ impl<T: Deserializable> Deserializable for Vec<T> {
         struct Visitor<T>(PhantomData<T>);
         impl<T: Deserializable> DeserializationVisitor for Visitor<T> {
             type Output = Vec<T>;
+            const EXPECTED_TYPE: VisitableType = VisitableType::ARRAY;
+            fn visit_array(
+                self,
+                values: impl Iterator<Item = Option<impl DeserializableValue>>,
+                _range: TextRange,
+                _name: &str,
+                diagnostics: &mut Vec<DeserializationDiagnostic>,
+            ) -> Option<Self::Output> {
+                Some(
+                    values
+                        .filter_map(|value| Deserializable::deserialize(&value?, "", diagnostics))
+                        .collect(),
+                )
+            }
+        }
+        value.deserialize(Visitor(PhantomData), name, diagnostics)
+    }
+}
+
+#[cfg(feature = "smallvec")]
+impl<T: Deserializable, const L: usize> Deserializable for smallvec::SmallVec<[T; L]> {
+    fn deserialize(
+        value: &impl DeserializableValue,
+        name: &str,
+        diagnostics: &mut Vec<DeserializationDiagnostic>,
+    ) -> Option<Self> {
+        struct Visitor<T, const L: usize>(PhantomData<T>);
+        impl<T: Deserializable, const L: usize> DeserializationVisitor for Visitor<T, L> {
+            type Output = smallvec::SmallVec<[T; L]>;
             const EXPECTED_TYPE: VisitableType = VisitableType::ARRAY;
             fn visit_array(
                 self,

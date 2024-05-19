@@ -2,7 +2,6 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: js/module/assignment/assignment.js
 ---
-
 # Input
 
 ```js
@@ -193,7 +192,7 @@ Line width: 80
 Quote style: Double Quotes
 JSX quote style: Double Quotes
 Quote properties: As needed
-Trailing comma: All
+Trailing commas: All
 Semicolons: Always
 Arrow parentheses: Always
 Bracket spacing: true
@@ -457,5 +456,3 @@ export const MSG_WITHOUT_ESCAPE_CHARACTER_TEST =
    64: 	"12345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890";
    66: 	"12345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890";
 ```
-
-

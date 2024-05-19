@@ -4,7 +4,6 @@ use biome_analyze::{
     RuleSource,
 };
 use biome_console::markup;
-use biome_diagnostics::Applicability;
 use biome_js_factory::make;
 use biome_js_syntax::{
     AnyJsExpression, TsNonNullAssertionAssignment, TsNonNullAssertionExpression, T,
@@ -27,7 +26,7 @@ declare_rule! {
     /// interface Example {
     ///   property?: string;
     /// }
-    /// declare const example: Example;
+    /// declare const foo: Example;
     /// const includesBaz = foo.property!.includes('baz');
     /// ```
     /// ```ts,expect_diagnostic
@@ -41,7 +40,7 @@ declare_rule! {
     ///   property?: string;
     /// }
     ///
-    /// declare const example: Example;
+    /// declare const foo: Example;
     /// const includesBaz = foo.property?.includes('baz') ?? false;
     /// ```
     ///
@@ -154,13 +153,13 @@ impl Rule for NoNonNullAssertion {
                     }
                 };
 
-                Some(JsRuleAction {
-                    category: ActionCategory::QuickFix,
-                    applicability: Applicability::MaybeIncorrect,
-                    message: markup! { "Replace with optional chain operator "<Emphasis>"?."</Emphasis>" This operator includes runtime checks, so it is safer than the compile-only non-null assertion operator" }
+                Some(JsRuleAction::new(
+                    ActionCategory::QuickFix,
+                    ctx.metadata().applicability(),
+                     markup! { "Replace with optional chain operator "<Emphasis>"?."</Emphasis>" This operator includes runtime checks, so it is safer than the compile-only non-null assertion operator" }
                         .to_owned(),
                     mutation,
-                })
+                ))
             }
         }
     }

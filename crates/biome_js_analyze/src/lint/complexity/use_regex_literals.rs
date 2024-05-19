@@ -2,7 +2,6 @@ use biome_analyze::{
     context::RuleContext, declare_rule, ActionCategory, FixKind, Rule, RuleDiagnostic, RuleSource,
 };
 use biome_console::markup;
-use biome_diagnostics::Applicability;
 use biome_js_factory::make::js_regex_literal_expression;
 use biome_js_semantic::SemanticModel;
 use biome_js_syntax::{
@@ -49,7 +48,7 @@ declare_rule! {
         language: "js",
         sources: &[RuleSource::Eslint("prefer-regex-literals")],
         recommended: true,
-        fix_kind: FixKind::Unsafe,
+        fix_kind: FixKind::Safe,
     }
 }
 
@@ -126,15 +125,15 @@ impl Rule for UseRegexLiterals {
         let mut mutation = ctx.root().begin();
         mutation.replace_node(prev, next);
 
-        Some(JsRuleAction {
-            category: ActionCategory::QuickFix,
-            applicability: Applicability::Always,
-            message: markup! {
+        Some(JsRuleAction::new(
+            ActionCategory::QuickFix,
+            ctx.metadata().applicability(),
+            markup! {
                "Use a "<Emphasis>"literal notation"</Emphasis>" instead."
             }
             .to_owned(),
             mutation,
-        })
+        ))
     }
 }
 

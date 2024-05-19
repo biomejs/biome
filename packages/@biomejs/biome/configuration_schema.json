@@ -83,77 +83,77 @@
 				"noAccessKey": {
 					"description": "Enforce that the accessKey attribute is not used on any HTML element.",
 					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "$ref": "#/definitions/RuleFixConfiguration_for_Null" },
 						{ "type": "null" }
 					]
 				},
 				"noAriaHiddenOnFocusable": {
 					"description": "Enforce that aria-hidden=\"true\" is not set on focusable elements.",
 					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "$ref": "#/definitions/RuleFixConfiguration_for_Null" },
 						{ "type": "null" }
 					]
 				},
 				"noAriaUnsupportedElements": {
 					"description": "Enforce that elements that do not support ARIA roles, states, and properties do not have those attributes.",
 					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "$ref": "#/definitions/RuleFixConfiguration_for_Null" },
 						{ "type": "null" }
 					]
 				},
 				"noAutofocus": {
 					"description": "Enforce that autoFocus prop is not used on elements.",
 					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "$ref": "#/definitions/RuleFixConfiguration_for_Null" },
 						{ "type": "null" }
 					]
 				},
 				"noBlankTarget": {
 					"description": "Disallow target=\"_blank\" attribute without rel=\"noreferrer\"",
 					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "$ref": "#/definitions/RuleFixConfiguration_for_Null" },
 						{ "type": "null" }
 					]
 				},
 				"noDistractingElements": {
 					"description": "Enforces that no distracting elements are used.",
 					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "$ref": "#/definitions/RuleFixConfiguration_for_Null" },
 						{ "type": "null" }
 					]
 				},
 				"noHeaderScope": {
 					"description": "The scope prop should be used only on \\<th> elements.",
 					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "$ref": "#/definitions/RuleFixConfiguration_for_Null" },
 						{ "type": "null" }
 					]
 				},
 				"noInteractiveElementToNoninteractiveRole": {
 					"description": "Enforce that non-interactive ARIA roles are not assigned to interactive HTML elements.",
 					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "$ref": "#/definitions/RuleFixConfiguration_for_Null" },
 						{ "type": "null" }
 					]
 				},
 				"noNoninteractiveElementToInteractiveRole": {
 					"description": "Enforce that interactive ARIA roles are not assigned to non-interactive HTML elements.",
 					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "$ref": "#/definitions/RuleFixConfiguration_for_Null" },
 						{ "type": "null" }
 					]
 				},
 				"noNoninteractiveTabindex": {
 					"description": "Enforce that tabIndex is not assigned to non-interactive HTML elements.",
 					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "$ref": "#/definitions/RuleFixConfiguration_for_Null" },
 						{ "type": "null" }
 					]
 				},
 				"noPositiveTabindex": {
 					"description": "Prevent the usage of positive integers on tabIndex property",
 					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "$ref": "#/definitions/RuleFixConfiguration_for_Null" },
 						{ "type": "null" }
 					]
 				},
@@ -167,7 +167,7 @@
 				"noRedundantRoles": {
 					"description": "Enforce explicit role property is not the same as implicit/default role property on an element.",
 					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "$ref": "#/definitions/RuleFixConfiguration_for_Null" },
 						{ "type": "null" }
 					]
 				},
@@ -192,14 +192,14 @@
 				"useAnchorContent": {
 					"description": "Enforce that anchors have content and that the content is accessible to screen readers.",
 					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "$ref": "#/definitions/RuleFixConfiguration_for_Null" },
 						{ "type": "null" }
 					]
 				},
 				"useAriaActivedescendantWithTabindex": {
 					"description": "Enforce that tabIndex is assigned to non-interactive HTML elements with aria-activedescendant.",
 					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "$ref": "#/definitions/RuleFixConfiguration_for_Null" },
 						{ "type": "null" }
 					]
 				},
@@ -269,14 +269,16 @@
 				"useValidAriaProps": {
 					"description": "Ensures that ARIA properties aria-* are all valid.",
 					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "$ref": "#/definitions/RuleFixConfiguration_for_Null" },
 						{ "type": "null" }
 					]
 				},
 				"useValidAriaRole": {
 					"description": "Elements with ARIA roles must use a valid, non-abstract ARIA role.",
 					"anyOf": [
-						{ "$ref": "#/definitions/ValidAriaRoleConfiguration" },
+						{
+							"$ref": "#/definitions/RuleFixConfiguration_for_ValidAriaRoleOptions"
+						},
 						{ "type": "null" }
 					]
 				},
@@ -310,7 +312,7 @@
 				"noBannedTypes": {
 					"description": "Disallow primitive type aliases and misleading types.",
 					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "$ref": "#/definitions/RuleFixConfiguration_for_Null" },
 						{ "type": "null" }
 					]
 				},
@@ -338,7 +340,7 @@
 				"noExtraBooleanCast": {
 					"description": "Disallow unnecessary boolean casts",
 					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "$ref": "#/definitions/RuleFixConfiguration_for_Null" },
 						{ "type": "null" }
 					]
 				},
@@ -352,7 +354,7 @@
 				"noMultipleSpacesInRegularExpressionLiterals": {
 					"description": "Disallow unclear usage of consecutive space characters in regular expression literals",
 					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "$ref": "#/definitions/RuleFixConfiguration_for_Null" },
 						{ "type": "null" }
 					]
 				},
@@ -366,7 +368,7 @@
 				"noThisInStatic": {
 					"description": "Disallow this and super in static contexts.",
 					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "$ref": "#/definitions/RuleFixConfiguration_for_Null" },
 						{ "type": "null" }
 					]
 				},
@@ -380,70 +382,70 @@
 				"noUselessConstructor": {
 					"description": "Disallow unnecessary constructors.",
 					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "$ref": "#/definitions/RuleFixConfiguration_for_Null" },
 						{ "type": "null" }
 					]
 				},
 				"noUselessEmptyExport": {
 					"description": "Disallow empty exports that don't change anything in a module file.",
 					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "$ref": "#/definitions/RuleFixConfiguration_for_Null" },
 						{ "type": "null" }
 					]
 				},
 				"noUselessFragments": {
 					"description": "Disallow unnecessary fragments",
 					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "$ref": "#/definitions/RuleFixConfiguration_for_Null" },
 						{ "type": "null" }
 					]
 				},
 				"noUselessLabel": {
 					"description": "Disallow unnecessary labels.",
 					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "$ref": "#/definitions/RuleFixConfiguration_for_Null" },
 						{ "type": "null" }
 					]
 				},
 				"noUselessLoneBlockStatements": {
 					"description": "Disallow unnecessary nested block statements.",
 					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "$ref": "#/definitions/RuleFixConfiguration_for_Null" },
 						{ "type": "null" }
 					]
 				},
 				"noUselessRename": {
 					"description": "Disallow renaming import, export, and destructured assignments to the same name.",
 					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "$ref": "#/definitions/RuleFixConfiguration_for_Null" },
 						{ "type": "null" }
 					]
 				},
 				"noUselessSwitchCase": {
 					"description": "Disallow useless case in switch statements.",
 					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "$ref": "#/definitions/RuleFixConfiguration_for_Null" },
 						{ "type": "null" }
 					]
 				},
 				"noUselessTernary": {
 					"description": "Disallow ternary operators when simpler alternatives exist.",
 					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "$ref": "#/definitions/RuleFixConfiguration_for_Null" },
 						{ "type": "null" }
 					]
 				},
 				"noUselessThisAlias": {
 					"description": "Disallow useless this aliasing.",
 					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "$ref": "#/definitions/RuleFixConfiguration_for_Null" },
 						{ "type": "null" }
 					]
 				},
 				"noUselessTypeConstraint": {
 					"description": "Disallow using any or unknown as type constraint.",
 					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "$ref": "#/definitions/RuleFixConfiguration_for_Null" },
 						{ "type": "null" }
 					]
 				},
@@ -468,49 +470,49 @@
 				"useArrowFunction": {
 					"description": "Use arrow functions over function expressions.",
 					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "$ref": "#/definitions/RuleFixConfiguration_for_Null" },
 						{ "type": "null" }
 					]
 				},
 				"useFlatMap": {
 					"description": "Promotes the use of .flatMap() when map().flat() are used together.",
 					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "$ref": "#/definitions/RuleFixConfiguration_for_Null" },
 						{ "type": "null" }
 					]
 				},
 				"useLiteralKeys": {
 					"description": "Enforce the usage of a literal access to properties over computed property access.",
 					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "$ref": "#/definitions/RuleFixConfiguration_for_Null" },
 						{ "type": "null" }
 					]
 				},
 				"useOptionalChain": {
 					"description": "Enforce using concise optional chain instead of chained logical expressions.",
 					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "$ref": "#/definitions/RuleFixConfiguration_for_Null" },
 						{ "type": "null" }
 					]
 				},
 				"useRegexLiterals": {
 					"description": "Enforce the use of the regular expression literals instead of the RegExp constructor if possible.",
 					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "$ref": "#/definitions/RuleFixConfiguration_for_Null" },
 						{ "type": "null" }
 					]
 				},
 				"useSimpleNumberKeys": {
 					"description": "Disallow number literal object member names which are not base10 or uses underscore as separator",
 					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "$ref": "#/definitions/RuleFixConfiguration_for_Null" },
 						{ "type": "null" }
 					]
 				},
 				"useSimplifiedLogicExpression": {
 					"description": "Discard redundant terms from logical expressions.",
 					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "$ref": "#/definitions/RuleFixConfiguration_for_Null" },
 						{ "type": "null" }
 					]
 				}
@@ -551,17 +553,29 @@
 				}
 			]
 		},
-		"ConsistentArrayTypeConfiguration": {
-			"anyOf": [
-				{ "$ref": "#/definitions/RulePlainConfiguration" },
-				{ "$ref": "#/definitions/RuleWithConsistentArrayTypeOptions" }
-			]
-		},
 		"ConsistentArrayTypeOptions": {
 			"type": "object",
 			"required": ["syntax"],
 			"properties": {
 				"syntax": { "$ref": "#/definitions/ConsistentArrayType" }
+			},
+			"additionalProperties": false
+		},
+		"Convention": {
+			"type": "object",
+			"properties": {
+				"formats": {
+					"description": "String cases to enforce",
+					"allOf": [{ "$ref": "#/definitions/Formats" }]
+				},
+				"match": {
+					"description": "Regular expression to enforce",
+					"anyOf": [{ "$ref": "#/definitions/Regex" }, { "type": "null" }]
+				},
+				"selector": {
+					"description": "Declarations concerned by this convention",
+					"allOf": [{ "$ref": "#/definitions/Selector" }]
+				}
 			},
 			"additionalProperties": false
 		},
@@ -583,7 +597,7 @@
 				"noConstAssign": {
 					"description": "Prevents from having const variables being re-assigned.",
 					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "$ref": "#/definitions/RuleFixConfiguration_for_Null" },
 						{ "type": "null" }
 					]
 				},
@@ -639,7 +653,7 @@
 				"noInvalidNewBuiltin": {
 					"description": "Disallow new operators with global non-constructor functions.",
 					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "$ref": "#/definitions/RuleFixConfiguration_for_Null" },
 						{ "type": "null" }
 					]
 				},
@@ -653,14 +667,14 @@
 				"noNewSymbol": {
 					"description": "Disallow new operators with the Symbol object.",
 					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "$ref": "#/definitions/RuleFixConfiguration_for_Null" },
 						{ "type": "null" }
 					]
 				},
 				"noNonoctalDecimalEscape": {
 					"description": "Disallow \\8 and \\9 escape sequences in string literals.",
 					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "$ref": "#/definitions/RuleFixConfiguration_for_Null" },
 						{ "type": "null" }
 					]
 				},
@@ -695,14 +709,14 @@
 				"noStringCaseMismatch": {
 					"description": "Disallow comparison of expressions modifying the string case with non-compliant value.",
 					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "$ref": "#/definitions/RuleFixConfiguration_for_Null" },
 						{ "type": "null" }
 					]
 				},
 				"noSwitchDeclarations": {
 					"description": "Disallow lexical declarations in switch clauses.",
 					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "$ref": "#/definitions/RuleFixConfiguration_for_Null" },
 						{ "type": "null" }
 					]
 				},
@@ -716,7 +730,7 @@
 				"noUnnecessaryContinue": {
 					"description": "Avoid using unnecessary continue.",
 					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "$ref": "#/definitions/RuleFixConfiguration_for_Null" },
 						{ "type": "null" }
 					]
 				},
@@ -751,35 +765,35 @@
 				"noUnusedImports": {
 					"description": "Disallow unused imports.",
 					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "$ref": "#/definitions/RuleFixConfiguration_for_Null" },
 						{ "type": "null" }
 					]
 				},
 				"noUnusedLabels": {
 					"description": "Disallow unused labels.",
 					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "$ref": "#/definitions/RuleFixConfiguration_for_Null" },
 						{ "type": "null" }
 					]
 				},
 				"noUnusedPrivateClassMembers": {
 					"description": "Disallow unused private class members",
 					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "$ref": "#/definitions/RuleFixConfiguration_for_Null" },
 						{ "type": "null" }
 					]
 				},
 				"noUnusedVariables": {
 					"description": "Disallow unused variables.",
 					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "$ref": "#/definitions/RuleFixConfiguration_for_Null" },
 						{ "type": "null" }
 					]
 				},
 				"noVoidElementsWithChildren": {
 					"description": "This rules prevents void elements (AKA self-closing elements) from having children.",
 					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "$ref": "#/definitions/RuleFixConfiguration_for_Null" },
 						{ "type": "null" }
 					]
 				},
@@ -811,7 +825,7 @@
 				"useIsNan": {
 					"description": "Require calls to isNaN() when checking for NaN.",
 					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "$ref": "#/definitions/RuleFixConfiguration_for_Null" },
 						{ "type": "null" }
 					]
 				},
@@ -844,31 +858,30 @@
 			"type": "object",
 			"properties": {
 				"formatter": {
-					"description": "Formatting options",
+					"description": "CSS formatter options",
 					"anyOf": [
 						{ "$ref": "#/definitions/CssFormatter" },
 						{ "type": "null" }
 					]
 				},
+				"linter": {
+					"description": "CSS linter options",
+					"anyOf": [{ "$ref": "#/definitions/CssLinter" }, { "type": "null" }]
+				},
 				"parser": {
-					"description": "Parsing options",
+					"description": "CSS parsing options",
 					"anyOf": [{ "$ref": "#/definitions/CssParser" }, { "type": "null" }]
 				}
 			},
 			"additionalProperties": false
 		},
 		"CssFormatter": {
+			"description": "Options that changes how the CSS formatter behaves",
 			"type": "object",
 			"properties": {
 				"enabled": {
 					"description": "Control the formatter for CSS (and its super languages) files.",
 					"type": ["boolean", "null"]
-				},
-				"indentSize": {
-					"description": "The size of the indentation applied to CSS (and its super languages) files. Default to 2.",
-					"type": ["integer", "null"],
-					"format": "uint8",
-					"minimum": 0.0
 				},
 				"indentStyle": {
 					"description": "The indent style applied to CSS (and its super languages) files.",
@@ -892,7 +905,19 @@
 					"anyOf": [{ "$ref": "#/definitions/LineWidth" }, { "type": "null" }]
 				},
 				"quoteStyle": {
+					"description": "The type of quotes used in CSS code. Defaults to double.",
 					"anyOf": [{ "$ref": "#/definitions/QuoteStyle" }, { "type": "null" }]
+				}
+			},
+			"additionalProperties": false
+		},
+		"CssLinter": {
+			"description": "Options that changes how the CSS linter behaves",
+			"type": "object",
+			"properties": {
+				"enabled": {
+					"description": "Control the linter for CSS (and its super languages) files.",
+					"type": ["boolean", "null"]
 				}
 			},
 			"additionalProperties": false
@@ -918,22 +943,6 @@
 			"description": "Options for the `useHookAtTopLevel` rule have been deprecated, since we now use the React hook naming convention to determine whether a function is a hook.",
 			"type": "object",
 			"additionalProperties": false
-		},
-		"EnumMemberCase": {
-			"description": "Supported cases for TypeScript `enum` member names.",
-			"oneOf": [
-				{
-					"description": "PascalCase",
-					"type": "string",
-					"enum": ["PascalCase"]
-				},
-				{
-					"description": "CONSTANT_CASE",
-					"type": "string",
-					"enum": ["CONSTANT_CASE"]
-				},
-				{ "description": "camelCase", "type": "string", "enum": ["camelCase"] }
-			]
 		},
 		"FilenameCase": {
 			"description": "Supported cases for file names.",
@@ -1015,6 +1024,36 @@
 				}
 			},
 			"additionalProperties": false
+		},
+		"FixKind": {
+			"description": "Used to identify the kind of code action emitted by a rule",
+			"oneOf": [
+				{
+					"description": "The rule doesn't emit code actions.",
+					"type": "string",
+					"enum": ["none"]
+				},
+				{
+					"description": "The rule emits a code action that is safe to apply. Usually these fixes don't change the semantic of the program.",
+					"type": "string",
+					"enum": ["safe"]
+				},
+				{
+					"description": "The rule emits a code action that is _unsafe_ to apply. Usually these fixes remove comments, or change the semantic of the program.",
+					"type": "string",
+					"enum": ["unsafe"]
+				}
+			]
+		},
+		"Format": {
+			"description": "Supported cases.",
+			"type": "string",
+			"enum": ["camelCase", "CONSTANT_CASE", "PascalCase", "snake_case"]
+		},
+		"Formats": {
+			"type": "array",
+			"items": { "$ref": "#/definitions/Format" },
+			"uniqueItems": true
 		},
 		"FormatterConfiguration": {
 			"description": "Generic options applied to all files",
@@ -1132,6 +1171,13 @@
 					"description": "Indicates the type of runtime or transformation used for interpreting JSX.",
 					"anyOf": [{ "$ref": "#/definitions/JsxRuntime" }, { "type": "null" }]
 				},
+				"linter": {
+					"description": "Linter options",
+					"anyOf": [
+						{ "$ref": "#/definitions/JavascriptLinter" },
+						{ "type": "null" }
+					]
+				},
 				"organizeImports": {
 					"anyOf": [
 						{ "$ref": "#/definitions/JavascriptOrganizeImports" },
@@ -1227,9 +1273,27 @@
 				"trailingComma": {
 					"description": "Print trailing commas wherever possible in multi-line comma-separated syntactic structures. Defaults to \"all\".",
 					"anyOf": [
-						{ "$ref": "#/definitions/TrailingComma" },
+						{ "$ref": "#/definitions/TrailingCommas" },
 						{ "type": "null" }
 					]
+				},
+				"trailingCommas": {
+					"description": "Print trailing commas wherever possible in multi-line comma-separated syntactic structures. Defaults to \"all\".",
+					"anyOf": [
+						{ "$ref": "#/definitions/TrailingCommas" },
+						{ "type": "null" }
+					]
+				}
+			},
+			"additionalProperties": false
+		},
+		"JavascriptLinter": {
+			"description": "Linter options specific to the JavaScript linter",
+			"type": "object",
+			"properties": {
+				"enabled": {
+					"description": "Control the linter for JavaScript (and its super languages) files.",
+					"type": ["boolean", "null"]
 				}
 			},
 			"additionalProperties": false
@@ -1259,6 +1323,10 @@
 						{ "$ref": "#/definitions/JsonFormatter" },
 						{ "type": "null" }
 					]
+				},
+				"linter": {
+					"description": "Linting options",
+					"anyOf": [{ "$ref": "#/definitions/JsonLinter" }, { "type": "null" }]
 				},
 				"parser": {
 					"description": "Parsing options",
@@ -1304,9 +1372,20 @@
 				"trailingCommas": {
 					"description": "Print trailing commas wherever possible in multi-line comma-separated syntactic structures. Defaults to \"none\".",
 					"anyOf": [
-						{ "$ref": "#/definitions/TrailingCommas" },
+						{ "$ref": "#/definitions/TrailingCommas2" },
 						{ "type": "null" }
 					]
+				}
+			},
+			"additionalProperties": false
+		},
+		"JsonLinter": {
+			"description": "Linter options specific to the JSON linter",
+			"type": "object",
+			"properties": {
+				"enabled": {
+					"description": "Control the linter for JSON (and its super languages) files.",
+					"type": ["boolean", "null"]
 				}
 			},
 			"additionalProperties": false
@@ -1338,6 +1417,109 @@
 					"description": "Indicates a classic React environment that requires the `React` import.\n\nCorresponds to the `react` value for the `jsx` option in TypeScript's `tsconfig.json`.\n\nThis option should only be necessary if you cannot upgrade to a React version that supports the new JSX runtime. For more information about the old vs. new JSX runtime, please see: <https://legacy.reactjs.org/blog/2020/09/22/introducing-the-new-jsx-transform.html>",
 					"type": "string",
 					"enum": ["reactClassic"]
+				}
+			]
+		},
+		"Kind": {
+			"oneOf": [
+				{
+					"type": "string",
+					"enum": [
+						"class",
+						"enum",
+						"interface",
+						"enumMember",
+						"importNamespace",
+						"exportNamespace",
+						"variable",
+						"const",
+						"let",
+						"using",
+						"var",
+						"catchParameter",
+						"indexParameter",
+						"exportAlias",
+						"importAlias",
+						"classGetter",
+						"classSetter",
+						"classMethod",
+						"objectLiteralProperty",
+						"objectLiteralGetter",
+						"objectLiteralSetter",
+						"objectLiteralMethod",
+						"typeAlias"
+					]
+				},
+				{ "description": "All kinds", "type": "string", "enum": ["any"] },
+				{
+					"description": "All type definitions: classes, enums, interfaces, and type aliases",
+					"type": "string",
+					"enum": ["typeLike"]
+				},
+				{
+					"description": "Named function declarations and expressions",
+					"type": "string",
+					"enum": ["function"]
+				},
+				{
+					"description": "TypeScript mamespaces, import and export namesapces",
+					"type": "string",
+					"enum": ["namespaceLike"]
+				},
+				{
+					"description": "TypeScript mamespaces",
+					"type": "string",
+					"enum": ["namespace"]
+				},
+				{
+					"description": "All function parameters, but parameter properties",
+					"type": "string",
+					"enum": ["functionParameter"]
+				},
+				{
+					"description": "All generic type parameters",
+					"type": "string",
+					"enum": ["typeParameter"]
+				},
+				{
+					"description": "All class members: properties, methods, getters, and setters",
+					"type": "string",
+					"enum": ["classMember"]
+				},
+				{
+					"description": "All class properties, including parameter properties",
+					"type": "string",
+					"enum": ["classProperty"]
+				},
+				{
+					"description": "All object literal members: properties, methods, getters, and setters",
+					"type": "string",
+					"enum": ["objectLiteralMember"]
+				},
+				{
+					"description": "All members defined in type alaises and interfaces",
+					"type": "string",
+					"enum": ["typeMember"]
+				},
+				{
+					"description": "All getters defined in type alaises and interfaces",
+					"type": "string",
+					"enum": ["typeGetter"]
+				},
+				{
+					"description": "All properties defined in type alaises and interfaces",
+					"type": "string",
+					"enum": ["typeProperty"]
+				},
+				{
+					"description": "All setters defined in type alaises and interfaces",
+					"type": "string",
+					"enum": ["typeSetter"]
+				},
+				{
+					"description": "All methods defined in type alaises and interfaces",
+					"type": "string",
+					"enum": ["typeMethod"]
 				}
 			]
 		},
@@ -1388,19 +1570,23 @@
 			},
 			"additionalProperties": false
 		},
-		"NamingConventionConfiguration": {
-			"anyOf": [
-				{ "$ref": "#/definitions/RulePlainConfiguration" },
-				{ "$ref": "#/definitions/RuleWithNamingConventionOptions" }
-			]
+		"Modifiers": {
+			"type": "array",
+			"items": { "$ref": "#/definitions/RestrictedModifier" },
+			"uniqueItems": true
 		},
 		"NamingConventionOptions": {
 			"description": "Rule's options.",
 			"type": "object",
 			"properties": {
+				"conventions": {
+					"description": "Custom conventions.",
+					"type": "array",
+					"items": { "$ref": "#/definitions/Convention" }
+				},
 				"enumMemberCase": {
 					"description": "Allowed cases for _TypeScript_ `enum` member names.",
-					"allOf": [{ "$ref": "#/definitions/EnumMemberCase" }]
+					"allOf": [{ "$ref": "#/definitions/Format" }]
 				},
 				"requireAscii": {
 					"description": "If `false`, then non-ASCII characters are allowed.",
@@ -1433,24 +1619,17 @@
 					"description": "It enables ALL rules for this group.",
 					"type": ["boolean", "null"]
 				},
-				"noColorInvalidHex": {
-					"description": "WIP: This rule hasn't been implemented yet.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
-						{ "type": "null" }
-					]
-				},
 				"noConsole": {
 					"description": "Disallow the use of console.",
 					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "$ref": "#/definitions/RuleFixConfiguration_for_Null" },
 						{ "type": "null" }
 					]
 				},
 				"noConstantMathMinMaxClamp": {
 					"description": "Disallow the use of Math.min and Math.max to clamp a value where the result itself is constant.",
 					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "$ref": "#/definitions/RuleFixConfiguration_for_Null" },
 						{ "type": "null" }
 					]
 				},
@@ -1513,7 +1692,7 @@
 				"noFlatMapIdentity": {
 					"description": "Disallow to use unnecessary callback on flatMap.",
 					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "$ref": "#/definitions/RuleFixConfiguration_for_Null" },
 						{ "type": "null" }
 					]
 				},
@@ -1548,7 +1727,7 @@
 				"noReactSpecificProps": {
 					"description": "Prevents React-specific JSX properties from being used.",
 					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "$ref": "#/definitions/RuleFixConfiguration_for_Null" },
 						{ "type": "null" }
 					]
 				},
@@ -1611,14 +1790,14 @@
 				"noUselessStringConcat": {
 					"description": "Disallow unnecessary concatenation of string or template literals.",
 					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "$ref": "#/definitions/RuleFixConfiguration_for_Null" },
 						{ "type": "null" }
 					]
 				},
 				"noUselessUndefinedInitialization": {
 					"description": "Disallow initializing variables to undefined.",
 					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "$ref": "#/definitions/RuleFixConfiguration_for_Null" },
 						{ "type": "null" }
 					]
 				},
@@ -1629,14 +1808,14 @@
 				"useArrayLiterals": {
 					"description": "Disallow Array constructors.",
 					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "$ref": "#/definitions/RuleFixConfiguration_for_Null" },
 						{ "type": "null" }
 					]
 				},
 				"useConsistentBuiltinInstantiation": {
 					"description": "Enforce the use of new for all builtins, except String, Number, Boolean, Symbol and BigInt.",
 					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "$ref": "#/definitions/RuleFixConfiguration_for_Null" },
 						{ "type": "null" }
 					]
 				},
@@ -1650,7 +1829,7 @@
 				"useExplicitLengthCheck": {
 					"description": "Enforce explicitly comparing the length, size, byteLength or byteOffset property of a value.",
 					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "$ref": "#/definitions/RuleFixConfiguration_for_Null" },
 						{ "type": "null" }
 					]
 				},
@@ -1682,15 +1861,31 @@
 						{ "type": "null" }
 					]
 				},
+				"useNumberToFixedDigitsArgument": {
+					"description": "Enforce using the digits argument with Number#toFixed().",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleFixConfiguration_for_Null" },
+						{ "type": "null" }
+					]
+				},
 				"useSortedClasses": {
 					"description": "Enforce the sorting of CSS utility classes.",
 					"anyOf": [
-						{ "$ref": "#/definitions/UtilityClassSortingConfiguration" },
+						{
+							"$ref": "#/definitions/RuleFixConfiguration_for_UtilityClassSortingOptions"
+						},
 						{ "type": "null" }
 					]
 				},
 				"useThrowNewError": {
 					"description": "Require new when throwing an error.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleFixConfiguration_for_Null" },
+						{ "type": "null" }
+					]
+				},
+				"useTopLevelRegex": {
+					"description": "Require all regex literals to be declared at the top level.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
@@ -1871,7 +2066,7 @@
 				"noDelete": {
 					"description": "Disallow the use of the delete operator.",
 					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "$ref": "#/definitions/RuleFixConfiguration_for_Null" },
 						{ "type": "null" }
 					]
 				},
@@ -1897,6 +2092,7 @@
 		},
 		"QuoteProperties": { "type": "string", "enum": ["asNeeded", "preserve"] },
 		"QuoteStyle": { "type": "string", "enum": ["double", "single"] },
+		"Regex": { "type": "string" },
 		"RestrictedGlobalsConfiguration": {
 			"anyOf": [
 				{ "$ref": "#/definitions/RulePlainConfiguration" },
@@ -1935,10 +2131,50 @@
 			},
 			"additionalProperties": false
 		},
+		"RestrictedModifier": {
+			"type": "string",
+			"enum": ["abstract", "private", "protected", "readonly", "static"]
+		},
 		"RuleConfiguration": {
 			"anyOf": [
 				{ "$ref": "#/definitions/RulePlainConfiguration" },
 				{ "$ref": "#/definitions/RuleWithNoOptions" }
+			]
+		},
+		"RuleFixConfiguration_for_ConsistentArrayTypeOptions": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{
+					"$ref": "#/definitions/RuleWithFixOptions_for_ConsistentArrayTypeOptions"
+				}
+			]
+		},
+		"RuleFixConfiguration_for_NamingConventionOptions": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{
+					"$ref": "#/definitions/RuleWithFixOptions_for_NamingConventionOptions"
+				}
+			]
+		},
+		"RuleFixConfiguration_for_Null": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithFixOptions_for_Null" }
+			]
+		},
+		"RuleFixConfiguration_for_UtilityClassSortingOptions": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{
+					"$ref": "#/definitions/RuleWithFixOptions_for_UtilityClassSortingOptions"
+				}
+			]
+		},
+		"RuleFixConfiguration_for_ValidAriaRoleOptions": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithFixOptions_for_ValidAriaRoleOptions" }
 			]
 		},
 		"RulePlainConfiguration": {
@@ -1949,17 +2185,14 @@
 			"type": "object",
 			"required": ["level", "options"],
 			"properties": {
-				"level": { "$ref": "#/definitions/RulePlainConfiguration" },
-				"options": { "$ref": "#/definitions/ComplexityOptions" }
-			},
-			"additionalProperties": false
-		},
-		"RuleWithConsistentArrayTypeOptions": {
-			"type": "object",
-			"required": ["level", "options"],
-			"properties": {
-				"level": { "$ref": "#/definitions/RulePlainConfiguration" },
-				"options": { "$ref": "#/definitions/ConsistentArrayTypeOptions" }
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/ComplexityOptions" }]
+				}
 			},
 			"additionalProperties": false
 		},
@@ -1967,8 +2200,14 @@
 			"type": "object",
 			"required": ["level", "options"],
 			"properties": {
-				"level": { "$ref": "#/definitions/RulePlainConfiguration" },
-				"options": { "$ref": "#/definitions/DeprecatedHooksOptions" }
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/DeprecatedHooksOptions" }]
+				}
 			},
 			"additionalProperties": false
 		},
@@ -1976,8 +2215,106 @@
 			"type": "object",
 			"required": ["level", "options"],
 			"properties": {
-				"level": { "$ref": "#/definitions/RulePlainConfiguration" },
-				"options": { "$ref": "#/definitions/FilenamingConventionOptions" }
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/FilenamingConventionOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
+		"RuleWithFixOptions_for_ConsistentArrayTypeOptions": {
+			"type": "object",
+			"required": ["level", "options"],
+			"properties": {
+				"fix": {
+					"description": "The kind of the code actions emitted by the rule",
+					"anyOf": [{ "$ref": "#/definitions/FixKind" }, { "type": "null" }]
+				},
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/ConsistentArrayTypeOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
+		"RuleWithFixOptions_for_NamingConventionOptions": {
+			"type": "object",
+			"required": ["level", "options"],
+			"properties": {
+				"fix": {
+					"description": "The kind of the code actions emitted by the rule",
+					"anyOf": [{ "$ref": "#/definitions/FixKind" }, { "type": "null" }]
+				},
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/NamingConventionOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
+		"RuleWithFixOptions_for_Null": {
+			"type": "object",
+			"required": ["level", "options"],
+			"properties": {
+				"fix": {
+					"description": "The kind of the code actions emitted by the rule",
+					"anyOf": [{ "$ref": "#/definitions/FixKind" }, { "type": "null" }]
+				},
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": { "description": "Rule's options", "type": "null" }
+			},
+			"additionalProperties": false
+		},
+		"RuleWithFixOptions_for_UtilityClassSortingOptions": {
+			"type": "object",
+			"required": ["level", "options"],
+			"properties": {
+				"fix": {
+					"description": "The kind of the code actions emitted by the rule",
+					"anyOf": [{ "$ref": "#/definitions/FixKind" }, { "type": "null" }]
+				},
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/UtilityClassSortingOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
+		"RuleWithFixOptions_for_ValidAriaRoleOptions": {
+			"type": "object",
+			"required": ["level", "options"],
+			"properties": {
+				"fix": {
+					"description": "The kind of the code actions emitted by the rule",
+					"anyOf": [{ "$ref": "#/definitions/FixKind" }, { "type": "null" }]
+				},
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/ValidAriaRoleOptions" }]
+				}
 			},
 			"additionalProperties": false
 		},
@@ -1985,17 +2322,14 @@
 			"type": "object",
 			"required": ["level", "options"],
 			"properties": {
-				"level": { "$ref": "#/definitions/RulePlainConfiguration" },
-				"options": { "$ref": "#/definitions/HooksOptions" }
-			},
-			"additionalProperties": false
-		},
-		"RuleWithNamingConventionOptions": {
-			"type": "object",
-			"required": ["level", "options"],
-			"properties": {
-				"level": { "$ref": "#/definitions/RulePlainConfiguration" },
-				"options": { "$ref": "#/definitions/NamingConventionOptions" }
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/HooksOptions" }]
+				}
 			},
 			"additionalProperties": false
 		},
@@ -2003,8 +2337,14 @@
 			"type": "object",
 			"required": ["level", "options"],
 			"properties": {
-				"level": { "$ref": "#/definitions/RulePlainConfiguration" },
-				"options": { "$ref": "#/definitions/NoCssEmptyBlockOptions" }
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/NoCssEmptyBlockOptions" }]
+				}
 			},
 			"additionalProperties": false
 		},
@@ -2012,7 +2352,10 @@
 			"type": "object",
 			"required": ["level"],
 			"properties": {
-				"level": { "$ref": "#/definitions/RulePlainConfiguration" }
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				}
 			},
 			"additionalProperties": false
 		},
@@ -2020,8 +2363,14 @@
 			"type": "object",
 			"required": ["level", "options"],
 			"properties": {
-				"level": { "$ref": "#/definitions/RulePlainConfiguration" },
-				"options": { "$ref": "#/definitions/RestrictedGlobalsOptions" }
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/RestrictedGlobalsOptions" }]
+				}
 			},
 			"additionalProperties": false
 		},
@@ -2029,26 +2378,14 @@
 			"type": "object",
 			"required": ["level", "options"],
 			"properties": {
-				"level": { "$ref": "#/definitions/RulePlainConfiguration" },
-				"options": { "$ref": "#/definitions/RestrictedImportsOptions" }
-			},
-			"additionalProperties": false
-		},
-		"RuleWithUtilityClassSortingOptions": {
-			"type": "object",
-			"required": ["level", "options"],
-			"properties": {
-				"level": { "$ref": "#/definitions/RulePlainConfiguration" },
-				"options": { "$ref": "#/definitions/UtilityClassSortingOptions" }
-			},
-			"additionalProperties": false
-		},
-		"RuleWithValidAriaRoleOptions": {
-			"type": "object",
-			"required": ["level", "options"],
-			"properties": {
-				"level": { "$ref": "#/definitions/RulePlainConfiguration" },
-				"options": { "$ref": "#/definitions/ValidAriaRoleOptions" }
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/RestrictedImportsOptions" }]
+				}
 			},
 			"additionalProperties": false
 		},
@@ -2090,6 +2427,7 @@
 			},
 			"additionalProperties": false
 		},
+		"Scope": { "type": "string", "enum": ["any", "global"] },
 		"Security": {
 			"description": "A list of rules that belong to this group",
 			"type": "object",
@@ -2122,6 +2460,24 @@
 				"recommended": {
 					"description": "It enables the recommended rules for this group",
 					"type": ["boolean", "null"]
+				}
+			},
+			"additionalProperties": false
+		},
+		"Selector": {
+			"type": "object",
+			"properties": {
+				"kind": {
+					"description": "Declaration kind",
+					"allOf": [{ "$ref": "#/definitions/Kind" }]
+				},
+				"modifiers": {
+					"description": "Modifiers used on the declaration",
+					"allOf": [{ "$ref": "#/definitions/Modifiers" }]
+				},
+				"scope": {
+					"description": "Scope of the declaration",
+					"allOf": [{ "$ref": "#/definitions/Scope" }]
 				}
 			},
 			"additionalProperties": false
@@ -2183,14 +2539,14 @@
 				"noImplicitBoolean": {
 					"description": "Disallow implicit true values on JSX boolean attributes",
 					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "$ref": "#/definitions/RuleFixConfiguration_for_Null" },
 						{ "type": "null" }
 					]
 				},
 				"noInferrableTypes": {
 					"description": "Disallow type annotations for variables, parameters, and class properties initialized with a literal expression.",
 					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "$ref": "#/definitions/RuleFixConfiguration_for_Null" },
 						{ "type": "null" }
 					]
 				},
@@ -2211,14 +2567,14 @@
 				"noNegationElse": {
 					"description": "Disallow negation in the condition of an if statement if it has an else clause.",
 					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "$ref": "#/definitions/RuleFixConfiguration_for_Null" },
 						{ "type": "null" }
 					]
 				},
 				"noNonNullAssertion": {
 					"description": "Disallow non-null assertions using the ! postfix operator.",
 					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "$ref": "#/definitions/RuleFixConfiguration_for_Null" },
 						{ "type": "null" }
 					]
 				},
@@ -2246,28 +2602,28 @@
 				"noShoutyConstants": {
 					"description": "Disallow the use of constants which its value is the upper-case version of its name.",
 					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "$ref": "#/definitions/RuleFixConfiguration_for_Null" },
 						{ "type": "null" }
 					]
 				},
 				"noUnusedTemplateLiteral": {
 					"description": "Disallow template literals if interpolation and special-character handling are not needed",
 					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "$ref": "#/definitions/RuleFixConfiguration_for_Null" },
 						{ "type": "null" }
 					]
 				},
 				"noUselessElse": {
 					"description": "Disallow else block when the if block breaks early.",
 					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "$ref": "#/definitions/RuleFixConfiguration_for_Null" },
 						{ "type": "null" }
 					]
 				},
 				"noVar": {
 					"description": "Disallow the use of var",
 					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "$ref": "#/definitions/RuleFixConfiguration_for_Null" },
 						{ "type": "null" }
 					]
 				},
@@ -2278,63 +2634,65 @@
 				"useAsConstAssertion": {
 					"description": "Enforce the use of as const over literal type and type annotation.",
 					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "$ref": "#/definitions/RuleFixConfiguration_for_Null" },
 						{ "type": "null" }
 					]
 				},
 				"useBlockStatements": {
 					"description": "Requires following curly brace conventions.",
 					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "$ref": "#/definitions/RuleFixConfiguration_for_Null" },
 						{ "type": "null" }
 					]
 				},
 				"useCollapsedElseIf": {
 					"description": "Enforce using else if instead of nested if in else clauses.",
 					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "$ref": "#/definitions/RuleFixConfiguration_for_Null" },
 						{ "type": "null" }
 					]
 				},
 				"useConsistentArrayType": {
 					"description": "Require consistently using either T\\[] or Array\\<T>",
 					"anyOf": [
-						{ "$ref": "#/definitions/ConsistentArrayTypeConfiguration" },
+						{
+							"$ref": "#/definitions/RuleFixConfiguration_for_ConsistentArrayTypeOptions"
+						},
 						{ "type": "null" }
 					]
 				},
 				"useConst": {
 					"description": "Require const declarations for variables that are only assigned once.",
 					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "$ref": "#/definitions/RuleFixConfiguration_for_Null" },
 						{ "type": "null" }
 					]
 				},
 				"useDefaultParameterLast": {
 					"description": "Enforce default function parameters and optional function parameters to be last.",
 					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "$ref": "#/definitions/RuleFixConfiguration_for_Null" },
 						{ "type": "null" }
 					]
 				},
 				"useEnumInitializers": {
 					"description": "Require that each enum member value be explicitly initialized.",
 					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "$ref": "#/definitions/RuleFixConfiguration_for_Null" },
 						{ "type": "null" }
 					]
 				},
 				"useExponentiationOperator": {
 					"description": "Disallow the use of Math.pow in favor of the ** operator.",
 					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "$ref": "#/definitions/RuleFixConfiguration_for_Null" },
 						{ "type": "null" }
 					]
 				},
 				"useExportType": {
 					"description": "Promotes the use of export type for types.",
 					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "$ref": "#/definitions/RuleFixConfiguration_for_Null" },
 						{ "type": "null" }
 					]
 				},
@@ -2355,14 +2713,14 @@
 				"useFragmentSyntax": {
 					"description": "This rule enforces the use of \\<>...\\</> over \\<Fragment>...\\</Fragment>.",
 					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "$ref": "#/definitions/RuleFixConfiguration_for_Null" },
 						{ "type": "null" }
 					]
 				},
 				"useImportType": {
 					"description": "Promotes the use of import type for types.",
 					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "$ref": "#/definitions/RuleFixConfiguration_for_Null" },
 						{ "type": "null" }
 					]
 				},
@@ -2376,91 +2734,93 @@
 				"useNamingConvention": {
 					"description": "Enforce naming conventions for everything across a codebase.",
 					"anyOf": [
-						{ "$ref": "#/definitions/NamingConventionConfiguration" },
+						{
+							"$ref": "#/definitions/RuleFixConfiguration_for_NamingConventionOptions"
+						},
 						{ "type": "null" }
 					]
 				},
 				"useNodeAssertStrict": {
 					"description": "Promotes the usage of node:assert/strict over node:assert.",
 					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "$ref": "#/definitions/RuleFixConfiguration_for_Null" },
 						{ "type": "null" }
 					]
 				},
 				"useNodejsImportProtocol": {
 					"description": "Enforces using the node: protocol for Node.js builtin modules.",
 					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "$ref": "#/definitions/RuleFixConfiguration_for_Null" },
 						{ "type": "null" }
 					]
 				},
 				"useNumberNamespace": {
 					"description": "Use the Number properties instead of global ones.",
 					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "$ref": "#/definitions/RuleFixConfiguration_for_Null" },
 						{ "type": "null" }
 					]
 				},
 				"useNumericLiterals": {
 					"description": "Disallow parseInt() and Number.parseInt() in favor of binary, octal, and hexadecimal literals",
 					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "$ref": "#/definitions/RuleFixConfiguration_for_Null" },
 						{ "type": "null" }
 					]
 				},
 				"useSelfClosingElements": {
 					"description": "Prevent extra closing tags for components without children",
 					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "$ref": "#/definitions/RuleFixConfiguration_for_Null" },
 						{ "type": "null" }
 					]
 				},
 				"useShorthandArrayType": {
 					"description": "When expressing array types, this rule promotes the usage of T\\[] shorthand instead of Array\\<T>.",
 					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "$ref": "#/definitions/RuleFixConfiguration_for_Null" },
 						{ "type": "null" }
 					]
 				},
 				"useShorthandAssign": {
 					"description": "Require assignment operator shorthand where possible.",
 					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "$ref": "#/definitions/RuleFixConfiguration_for_Null" },
 						{ "type": "null" }
 					]
 				},
 				"useShorthandFunctionType": {
 					"description": "Enforce using function types instead of object type with call signatures.",
 					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "$ref": "#/definitions/RuleFixConfiguration_for_Null" },
 						{ "type": "null" }
 					]
 				},
 				"useSingleCaseStatement": {
 					"description": "Enforces switch clauses have a single statement, emits a quick fix wrapping the statements in a block.",
 					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "$ref": "#/definitions/RuleFixConfiguration_for_Null" },
 						{ "type": "null" }
 					]
 				},
 				"useSingleVarDeclarator": {
 					"description": "Disallow multiple variable declarations in the same variable statement",
 					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "$ref": "#/definitions/RuleFixConfiguration_for_Null" },
 						{ "type": "null" }
 					]
 				},
 				"useTemplate": {
 					"description": "Prefer template literals over string concatenation.",
 					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "$ref": "#/definitions/RuleFixConfiguration_for_Null" },
 						{ "type": "null" }
 					]
 				},
 				"useWhile": {
 					"description": "Enforce the use of while loops instead of for loops when the initializer and update expressions are not needed.",
 					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "$ref": "#/definitions/RuleFixConfiguration_for_Null" },
 						{ "type": "null" }
 					]
 				}
@@ -2478,7 +2838,7 @@
 				"noApproximativeNumericConstant": {
 					"description": "Use standard constants instead of approximated literals.",
 					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "$ref": "#/definitions/RuleFixConfiguration_for_Null" },
 						{ "type": "null" }
 					]
 				},
@@ -2520,14 +2880,14 @@
 				"noCommentText": {
 					"description": "Prevent comments from being inserted as text nodes",
 					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "$ref": "#/definitions/RuleFixConfiguration_for_Null" },
 						{ "type": "null" }
 					]
 				},
 				"noCompareNegZero": {
 					"description": "Disallow comparing against -0",
 					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "$ref": "#/definitions/RuleFixConfiguration_for_Null" },
 						{ "type": "null" }
 					]
 				},
@@ -2541,21 +2901,21 @@
 				"noConfusingVoidType": {
 					"description": "Disallow void type outside of generic or return types.",
 					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "$ref": "#/definitions/RuleFixConfiguration_for_Null" },
 						{ "type": "null" }
 					]
 				},
 				"noConsoleLog": {
 					"description": "Disallow the use of console.log",
 					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "$ref": "#/definitions/RuleFixConfiguration_for_Null" },
 						{ "type": "null" }
 					]
 				},
 				"noConstEnum": {
 					"description": "Disallow TypeScript const enum",
 					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "$ref": "#/definitions/RuleFixConfiguration_for_Null" },
 						{ "type": "null" }
 					]
 				},
@@ -2569,14 +2929,14 @@
 				"noDebugger": {
 					"description": "Disallow the use of debugger",
 					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "$ref": "#/definitions/RuleFixConfiguration_for_Null" },
 						{ "type": "null" }
 					]
 				},
 				"noDoubleEquals": {
 					"description": "Require the use of === and !==",
 					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "$ref": "#/definitions/RuleFixConfiguration_for_Null" },
 						{ "type": "null" }
 					]
 				},
@@ -2604,7 +2964,7 @@
 				"noDuplicateObjectKeys": {
 					"description": "Prevents object literals having more than one property declaration for the same name.",
 					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "$ref": "#/definitions/RuleFixConfiguration_for_Null" },
 						{ "type": "null" }
 					]
 				},
@@ -2632,7 +2992,7 @@
 				"noEmptyInterface": {
 					"description": "Disallow the declaration of empty interfaces.",
 					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "$ref": "#/definitions/RuleFixConfiguration_for_Null" },
 						{ "type": "null" }
 					]
 				},
@@ -2653,7 +3013,7 @@
 				"noExtraNonNullAssertion": {
 					"description": "Prevents the wrong usage of the non-null assertion operator (!) in TypeScript files.",
 					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "$ref": "#/definitions/RuleFixConfiguration_for_Null" },
 						{ "type": "null" }
 					]
 				},
@@ -2667,7 +3027,7 @@
 				"noFocusedTests": {
 					"description": "Disallow focused tests.",
 					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "$ref": "#/definitions/RuleFixConfiguration_for_Null" },
 						{ "type": "null" }
 					]
 				},
@@ -2688,14 +3048,14 @@
 				"noGlobalIsFinite": {
 					"description": "Use Number.isFinite instead of global isFinite.",
 					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "$ref": "#/definitions/RuleFixConfiguration_for_Null" },
 						{ "type": "null" }
 					]
 				},
 				"noGlobalIsNan": {
 					"description": "Use Number.isNaN instead of global isNaN.",
 					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "$ref": "#/definitions/RuleFixConfiguration_for_Null" },
 						{ "type": "null" }
 					]
 				},
@@ -2723,7 +3083,7 @@
 				"noMisleadingCharacterClass": {
 					"description": "Disallow characters made with multiple code points in character class syntax.",
 					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "$ref": "#/definitions/RuleFixConfiguration_for_Null" },
 						{ "type": "null" }
 					]
 				},
@@ -2737,7 +3097,7 @@
 				"noMisrefactoredShorthandAssign": {
 					"description": "Disallow shorthand assign when variable appears on both sides.",
 					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "$ref": "#/definitions/RuleFixConfiguration_for_Null" },
 						{ "type": "null" }
 					]
 				},
@@ -2758,7 +3118,7 @@
 				"noRedundantUseStrict": {
 					"description": "Prevents from having redundant \"use strict\".",
 					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "$ref": "#/definitions/RuleFixConfiguration_for_Null" },
 						{ "type": "null" }
 					]
 				},
@@ -2779,14 +3139,14 @@
 				"noSkippedTests": {
 					"description": "Disallow disabled tests.",
 					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "$ref": "#/definitions/RuleFixConfiguration_for_Null" },
 						{ "type": "null" }
 					]
 				},
 				"noSparseArray": {
 					"description": "Disallow sparse arrays",
 					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "$ref": "#/definitions/RuleFixConfiguration_for_Null" },
 						{ "type": "null" }
 					]
 				},
@@ -2814,7 +3174,7 @@
 				"noUnsafeNegation": {
 					"description": "Disallow using unsafe negation.",
 					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "$ref": "#/definitions/RuleFixConfiguration_for_Null" },
 						{ "type": "null" }
 					]
 				},
@@ -2846,28 +3206,28 @@
 				"useIsArray": {
 					"description": "Use Array.isArray() instead of instanceof Array.",
 					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "$ref": "#/definitions/RuleFixConfiguration_for_Null" },
 						{ "type": "null" }
 					]
 				},
 				"useNamespaceKeyword": {
 					"description": "Require using the namespace keyword over the module keyword to declare TypeScript namespaces.",
 					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "$ref": "#/definitions/RuleFixConfiguration_for_Null" },
 						{ "type": "null" }
 					]
 				},
 				"useValidTypeof": {
 					"description": "This rule verifies the result of typeof $expr unary expressions is being compared to valid values, either string literals containing valid type names or other typeof expressions",
 					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "$ref": "#/definitions/RuleFixConfiguration_for_Null" },
 						{ "type": "null" }
 					]
 				}
 			},
 			"additionalProperties": false
 		},
-		"TrailingComma": {
+		"TrailingCommas": {
 			"description": "Print trailing commas wherever possible in multi-line comma-separated syntactic structures.",
 			"oneOf": [
 				{
@@ -2887,7 +3247,7 @@
 				}
 			]
 		},
-		"TrailingCommas": {
+		"TrailingCommas2": {
 			"oneOf": [
 				{
 					"description": "The formatter will remove the trailing commas",
@@ -2899,12 +3259,6 @@
 					"type": "string",
 					"enum": ["all"]
 				}
-			]
-		},
-		"UtilityClassSortingConfiguration": {
-			"anyOf": [
-				{ "$ref": "#/definitions/RulePlainConfiguration" },
-				{ "$ref": "#/definitions/RuleWithUtilityClassSortingOptions" }
 			]
 		},
 		"UtilityClassSortingOptions": {
@@ -2922,12 +3276,6 @@
 				}
 			},
 			"additionalProperties": false
-		},
-		"ValidAriaRoleConfiguration": {
-			"anyOf": [
-				{ "$ref": "#/definitions/RulePlainConfiguration" },
-				{ "$ref": "#/definitions/RuleWithValidAriaRoleOptions" }
-			]
 		},
 		"ValidAriaRoleOptions": {
 			"type": "object",

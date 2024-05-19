@@ -4,7 +4,6 @@ use biome_analyze::{
     context::RuleContext, declare_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic,
 };
 use biome_console::markup;
-use biome_diagnostics::Applicability;
 use biome_js_factory::make;
 use biome_js_factory::make::ts_type_alias_declaration;
 use biome_js_syntax::AnyTsType::TsThisType;
@@ -153,12 +152,12 @@ impl Rule for UseShorthandFunctionType {
                 AnyJsDeclarationClause::from(interface_decl),
                 AnyJsDeclarationClause::from(type_alias_declaration),
             );
-            return Some(JsRuleAction {
-                category: ActionCategory::QuickFix,
-                applicability: Applicability::Always,
-                message: markup! { "Alias a function type instead of using an interface with a call signature." }.to_owned(),
+            return Some(JsRuleAction::new(
+                ActionCategory::QuickFix,
+                ctx.metadata().applicability(),
+                 markup! { "Alias a function type instead of using an interface with a call signature." }.to_owned(),
                 mutation,
-            });
+            ));
         }
 
         if let Some(ts_object_type) = ts_type_member_list.parent::<TsObjectType>() {
@@ -195,12 +194,13 @@ impl Rule for UseShorthandFunctionType {
             };
 
             mutation.replace_node(AnyTsType::from(ts_object_type), new_function_type);
-            return Some(JsRuleAction {
-                category: ActionCategory::QuickFix,
-                applicability: Applicability::Always,
-                message: markup! { "Use a function type instead of an object type with a call signature." }.to_owned(),
+            return Some(JsRuleAction::new(
+                ActionCategory::QuickFix,
+                ctx.metadata().applicability(),
+                markup! { "Use a function type instead of an object type with a call signature." }
+                    .to_owned(),
                 mutation,
-            });
+            ));
         }
 
         None

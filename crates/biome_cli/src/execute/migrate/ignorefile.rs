@@ -35,30 +35,42 @@ impl IgnorePatterns {
             if line.is_empty() || line.starts_with('#') {
                 continue;
             }
-            if line.starts_with('!') {
-                has_negated_patterns = true;
-                // Skip negated patterns because we don't support them.
-                continue;
+            match convert_pattern(line) {
+                Ok(pattern) => {
+                    patterns.insert(pattern);
+                }
+                Err(_) => {
+                    has_negated_patterns = true;
+                    // Skip negated patterns because we don't support them.
+                    continue;
+                }
             }
-            let pattern = if let Some(stripped_line) = line.strip_prefix('/') {
-                // Patterns tha tstarts with `/` are relative to the ignore file
-                format!("./{}", stripped_line)
-            } else if line.find('/').is_some_and(|index| index < (line.len() - 1))
-                || line == "**"
-                || line == "**/"
-            {
-                // Patterns that includes at least one `/` in the middle are relatives paths
-                line.to_string()
-            } else {
-                format!("**/{line}")
-            };
-            patterns.insert(pattern);
         }
         IgnorePatterns {
             patterns,
             has_negated_patterns,
         }
     }
+}
+
+pub(crate) fn convert_pattern(line: &str) -> Result<String, &'static str> {
+    if line.starts_with('!') {
+        // Skip negated patterns because we don't support them.
+        return Err("Negated patterns are not supported.");
+    }
+    let result = if let Some(stripped_line) = line.strip_prefix('/') {
+        // Patterns tha tstarts with `/` are relative to the ignore file
+        format!("./{}", stripped_line)
+    } else if line.find('/').is_some_and(|index| index < (line.len() - 1))
+        || line == "**"
+        || line == "**/"
+    {
+        // Patterns that includes at least one `/` in the middle are relatives paths
+        line.to_string()
+    } else {
+        format!("**/{line}")
+    };
+    Ok(result)
 }
 
 #[cfg(test)]

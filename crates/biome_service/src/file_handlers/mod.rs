@@ -12,10 +12,10 @@ use crate::{
     WorkspaceError,
 };
 use biome_analyze::{AnalysisFilter, AnalyzerDiagnostic, RuleCategories};
+use biome_configuration::linter::RuleSelector;
 use biome_configuration::Rules;
 use biome_console::fmt::Formatter;
 use biome_console::markup;
-use biome_css_formatter::can_format_css_yet;
 use biome_css_syntax::CssFileSource;
 use biome_diagnostics::{Diagnostic, Severity};
 use biome_formatter::Printed;
@@ -366,6 +366,7 @@ pub(crate) struct LintParams<'a> {
     pub(crate) language: DocumentFileSource,
     pub(crate) max_diagnostics: u32,
     pub(crate) path: &'a BiomePath,
+    pub(crate) rule: Option<RuleSelector>,
     pub(crate) categories: RuleCategories,
     pub(crate) manifest: Option<PackageJson>,
 }
@@ -483,14 +484,7 @@ impl Features {
                 EmbeddingKind::None => self.js.capabilities(),
             },
             DocumentFileSource::Json(_) => self.json.capabilities(),
-            DocumentFileSource::Css(_) => {
-                // TODO: change this when we are ready to handle CSS files
-                if can_format_css_yet() {
-                    self.css.capabilities()
-                } else {
-                    self.unknown.capabilities()
-                }
-            }
+            DocumentFileSource::Css(_) => self.css.capabilities(),
             DocumentFileSource::Unknown => self.unknown.capabilities(),
         }
     }

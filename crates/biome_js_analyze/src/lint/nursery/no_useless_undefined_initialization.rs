@@ -3,7 +3,6 @@ use biome_analyze::{
     RuleSource, RuleSourceKind,
 };
 use biome_console::markup;
-use biome_diagnostics::Applicability;
 use biome_js_syntax::JsVariableDeclaration;
 use biome_rowan::{AstNode, BatchMutationExt, TextRange};
 
@@ -129,11 +128,11 @@ impl Rule for NoUselessUndefinedInitialization {
         // This will remove any comments attached to the initialization clause
         mutation.remove_node(initializer);
 
-        Some(JsRuleAction {
-            category: ActionCategory::QuickFix,
-            applicability: Applicability::MaybeIncorrect,
-            message: markup! { "Remove undefined initialization." }.to_owned(),
+        Some(JsRuleAction::new(
+            ActionCategory::QuickFix,
+            ctx.metadata().applicability(),
+            markup! { "Remove undefined initialization." }.to_owned(),
             mutation,
-        })
+        ))
     }
 }

@@ -27,15 +27,13 @@ invalidObjectMethod.js:2:5 lint/style/useNamingConvention ━━━━━━━�
     3 │ 
     4 │     AMethod() {},
   
-  i The name could be renamed to `method`.
-  
 
 ```
 
 ```
 invalidObjectMethod.js:4:5 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This object method name should be in camelCase.
+  ! Two consecutive uppercase characters are not allowed in PascalCase because strictCase is set to `true`.
   
     2 │     METHOD() {},
     3 │ 
@@ -44,7 +42,8 @@ invalidObjectMethod.js:4:5 lint/style/useNamingConvention ━━━━━━━�
     5 │ 
     6 │     method_1() {},
   
-  i The name could be renamed to `aMethod`.
+  i If you want to use consecutive uppercase characters in PascalCase, then set the strictCase option to `false`.
+    See the rule options for more details.
   
 
 ```
@@ -61,8 +60,6 @@ invalidObjectMethod.js:6:5 lint/style/useNamingConvention ━━━━━━━�
     7 │ 
     8 │     Unknown_Style() {},
   
-  i The name could be renamed to `method1`.
-  
 
 ```
 
@@ -77,9 +74,5 @@ invalidObjectMethod.js:8:5 lint/style/useNamingConvention ━━━━━━━�
       │     ^^^^^^^^^^^^^
     9 │ }
   
-  i The name could be renamed to `unknownStyle`.
-  
 
 ```
-
-

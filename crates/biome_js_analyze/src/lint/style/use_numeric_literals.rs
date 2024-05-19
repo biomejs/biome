@@ -3,7 +3,6 @@ use crate::{ast_utils, JsRuleAction};
 use biome_analyze::context::RuleContext;
 use biome_analyze::{declare_rule, ActionCategory, FixKind, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
-use biome_diagnostics::Applicability;
 use biome_js_factory::make;
 use biome_js_semantic::SemanticModel;
 use biome_js_syntax::{
@@ -102,13 +101,12 @@ impl Rule for UseNumericLiterals {
             ),
         );
 
-        Some(JsRuleAction {
-            category: ActionCategory::QuickFix,
-            applicability: Applicability::MaybeIncorrect,
-            message: markup! { "Use the computed "{call.radix.description()}" literal instead." }
-                .to_owned(),
+        Some(JsRuleAction::new(
+            ActionCategory::QuickFix,
+            ctx.metadata().applicability(),
+            markup! { "Use the computed "{call.radix.description()}" literal instead." }.to_owned(),
             mutation,
-        })
+        ))
     }
 }
 

@@ -5,7 +5,6 @@ use biome_analyze::{
     context::RuleContext, declare_rule, ActionCategory, FixKind, Rule, RuleDiagnostic,
 };
 use biome_console::markup;
-use biome_diagnostics::Applicability;
 use biome_js_semantic::ReferencesExtensions;
 use biome_js_syntax::binding_ext::{
     AnyJsBindingDeclaration, AnyJsIdentifierBinding, JsAnyParameterParentFunction,
@@ -423,15 +422,15 @@ impl Rule for NoUnusedVariables {
                 let new_name = format!("_{}", name_trimmed);
 
                 let model = ctx.model();
-                mutation.rename_node_declaration(model, binding.clone(), &new_name);
+                mutation.rename_node_declaration(model, binding, &new_name);
 
-                Some(JsRuleAction {
+                Some(JsRuleAction::new(
+                    ActionCategory::QuickFix,
+                    ctx.metadata().applicability(),
+                    markup! { "If this is intentional, prepend "<Emphasis>{name_trimmed}</Emphasis>" with an underscore." }
+                    .to_owned(),
                     mutation,
-                    category: ActionCategory::QuickFix,
-                    applicability: Applicability::MaybeIncorrect,
-                    message: markup! { "If this is intentional, prepend "<Emphasis>{name_trimmed}</Emphasis>" with an underscore." }
-                        .to_owned(),
-                })
+                ))
             }
         }
     }

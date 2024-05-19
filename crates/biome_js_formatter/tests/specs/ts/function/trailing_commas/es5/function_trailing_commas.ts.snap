@@ -1,0 +1,171 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: ts/function/trailing_commas/es5/function_trailing_commas.ts
+---
+# Input
+
+```ts
+function test<
+	longlonglonglonglonglonglongT1,
+	longlonglonglonglonglonglongT2,
+	longlonglonglonglonglonglongT3
+	>(
+	longlonglonglonglonglonglongItem1,
+	longlonglonglonglonglonglongItem2,
+	longlonglonglonglonglonglongItem3
+) {}
+const test1 = <
+	longlonglonglonglonglonglongT1,
+	longlonglonglonglonglonglongT2,
+	longlonglonglonglonglonglongT3
+	>(
+	longlonglonglonglonglonglongItem1,
+	longlonglonglonglonglonglongItem2,
+	longlonglonglonglonglonglongItem3
+) => {};
+test<
+	longlonglonglonglonglonglongT1,
+	longlonglonglonglonglonglongT2,
+	longlonglonglonglonglonglongT3
+	>(
+	longlonglonglonglonglonglongItem1,
+	longlonglonglonglonglonglongItem2,
+	longlonglonglonglonglonglongItem3,
+);
+
+this.test(	longlonglonglonglonglonglongT1,
+	longlonglonglonglonglonglongT2,
+	longlonglonglonglonglonglongT3);
+
+connect(
+	mapStateToPropsmapStateToProps,
+	mapDispatchToPropsmapDispatchToProps,
+	mergePropsmergeProps,
+)(Component)
+
+```
+
+
+=============================
+
+# Outputs
+
+## Output 1
+
+-----
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 80
+Quote style: Double Quotes
+JSX quote style: Double Quotes
+Quote properties: As needed
+Trailing commas: All
+Semicolons: Always
+Arrow parentheses: Always
+Bracket spacing: true
+Bracket same line: false
+Attribute Position: Auto
+-----
+
+```ts
+function test<
+	longlonglonglonglonglonglongT1,
+	longlonglonglonglonglonglongT2,
+	longlonglonglonglonglonglongT3,
+>(
+	longlonglonglonglonglonglongItem1,
+	longlonglonglonglonglonglongItem2,
+	longlonglonglonglonglonglongItem3,
+) {}
+const test1 = <
+	longlonglonglonglonglonglongT1,
+	longlonglonglonglonglonglongT2,
+	longlonglonglonglonglonglongT3,
+>(
+	longlonglonglonglonglonglongItem1,
+	longlonglonglonglonglonglongItem2,
+	longlonglonglonglonglonglongItem3,
+) => {};
+test<
+	longlonglonglonglonglonglongT1,
+	longlonglonglonglonglonglongT2,
+	longlonglonglonglonglonglongT3
+>(
+	longlonglonglonglonglonglongItem1,
+	longlonglonglonglonglonglongItem2,
+	longlonglonglonglonglonglongItem3,
+);
+
+this.test(
+	longlonglonglonglonglonglongT1,
+	longlonglonglonglonglonglongT2,
+	longlonglonglonglonglonglongT3,
+);
+
+connect(
+	mapStateToPropsmapStateToProps,
+	mapDispatchToPropsmapDispatchToProps,
+	mergePropsmergeProps,
+)(Component);
+```
+
+## Output 1
+
+-----
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 80
+Quote style: Double Quotes
+JSX quote style: Double Quotes
+Quote properties: As needed
+Trailing commas: ES5
+Semicolons: Always
+Arrow parentheses: Always
+Bracket spacing: true
+Bracket same line: false
+Attribute Position: Auto
+-----
+
+```ts
+function test<
+	longlonglonglonglonglonglongT1,
+	longlonglonglonglonglonglongT2,
+	longlonglonglonglonglonglongT3,
+>(
+	longlonglonglonglonglonglongItem1,
+	longlonglonglonglonglonglongItem2,
+	longlonglonglonglonglonglongItem3
+) {}
+const test1 = <
+	longlonglonglonglonglonglongT1,
+	longlonglonglonglonglonglongT2,
+	longlonglonglonglonglonglongT3,
+>(
+	longlonglonglonglonglonglongItem1,
+	longlonglonglonglonglonglongItem2,
+	longlonglonglonglonglonglongItem3
+) => {};
+test<
+	longlonglonglonglonglonglongT1,
+	longlonglonglonglonglonglongT2,
+	longlonglonglonglonglonglongT3
+>(
+	longlonglonglonglonglonglongItem1,
+	longlonglonglonglonglonglongItem2,
+	longlonglonglonglonglonglongItem3
+);
+
+this.test(
+	longlonglonglonglonglonglongT1,
+	longlonglonglonglonglonglongT2,
+	longlonglonglonglonglonglongT3
+);
+
+connect(
+	mapStateToPropsmapStateToProps,
+	mapDispatchToPropsmapDispatchToProps,
+	mergePropsmergeProps
+)(Component);
+```

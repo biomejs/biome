@@ -35,7 +35,7 @@ pub fn assert_rename_binding_a_to_b_ok(before: &str, expected: &str) {
             .text_trimmed()
             .replace('a', "b");
 
-        assert!(batch.rename_node_declaration(&model, binding, &new_name));
+        assert!(batch.rename_node_declaration(&model, &binding, &new_name));
     }
 
     let root = batch.commit();
@@ -64,7 +64,7 @@ pub fn assert_rename_ts_binding_a_to_b_ok(before: &str, expected: &str) {
             .text_trimmed()
             .replace('a', "b");
 
-        assert!(batch.rename_node_declaration(&model, binding, &new_name));
+        assert!(batch.rename_node_declaration(&model, &binding, &new_name));
     }
 
     let root = batch.commit();
@@ -92,7 +92,7 @@ pub fn assert_rename_binding_a_to_b_nok(before: &str) {
         .unwrap();
 
     let mut batch = r.tree().begin();
-    assert!(!batch.rename_node_declaration(&model, binding_a, "b"));
+    assert!(!batch.rename_node_declaration(&model, &binding_a, "b"));
 }
 
 /// Search an identifier named "a" and remove the entire node of type Anc around it.

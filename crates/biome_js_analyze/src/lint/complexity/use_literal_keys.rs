@@ -4,7 +4,6 @@ use biome_analyze::{
     RuleSource,
 };
 use biome_console::markup;
-use biome_diagnostics::Applicability;
 use biome_js_factory::make::{
     self, ident, js_literal_member_name, js_name, js_static_member_assignment,
     js_static_member_expression, token,
@@ -161,15 +160,15 @@ impl Rule for UseLiteralKeys {
                 );
             }
         }
-        Some(JsRuleAction {
-            mutation,
-            applicability: Applicability::MaybeIncorrect,
-            category: ActionCategory::QuickFix,
-            message: markup! {
+        Some(JsRuleAction::new(
+            ActionCategory::QuickFix,
+            ctx.metadata().applicability(),
+            markup! {
                 "Use a literal key instead."
             }
             .to_owned(),
-        })
+            mutation,
+        ))
     }
 }
 

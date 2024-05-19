@@ -8,7 +8,6 @@ use biome_analyze::{
     RuleDiagnostic,
 };
 use biome_console::markup;
-use biome_diagnostics::Applicability;
 use biome_js_factory::make;
 use biome_js_semantic::ReferencesExtensions;
 use biome_js_syntax::{
@@ -159,12 +158,12 @@ impl Rule for NoUnusedImports {
                 return None;
             }
         }
-        Some(JsRuleAction {
+        Some(JsRuleAction::new(
+            ActionCategory::QuickFix,
+            ctx.metadata().applicability(),
+            markup! { "Remove the unused import." }.to_owned(),
             mutation,
-            category: ActionCategory::QuickFix,
-            applicability: Applicability::Always,
-            message: markup! { "Remove the unused import." }.to_owned(),
-        })
+        ))
     }
 }
 

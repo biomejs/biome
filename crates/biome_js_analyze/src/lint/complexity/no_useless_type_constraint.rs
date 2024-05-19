@@ -2,7 +2,6 @@ use biome_analyze::context::RuleContext;
 use biome_analyze::{declare_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
 
-use biome_diagnostics::Applicability;
 use biome_js_factory::make;
 use biome_js_syntax::{
     AnyTsType, JsFileSource, JsSyntaxKind, TsTypeConstraintClause, TsTypeParameter,
@@ -150,11 +149,11 @@ impl Rule for NoUselessTypeConstraint {
         } else {
             mutation.remove_node(node.clone());
         }
-        Some(JsRuleAction {
-            category: ActionCategory::QuickFix,
-            applicability: Applicability::Always,
-            message: markup! { "Remove the constraint." }.to_owned(),
+        Some(JsRuleAction::new(
+            ActionCategory::QuickFix,
+            ctx.metadata().applicability(),
+            markup! { "Remove the constraint." }.to_owned(),
             mutation,
-        })
+        ))
     }
 }

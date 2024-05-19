@@ -1,6 +1,6 @@
 use crate::workspace::{DocumentFileSource, ProjectKey, WorkspaceData};
 use crate::{Matcher, WorkspaceError};
-use biome_analyze::AnalyzerRules;
+use biome_analyze::{AnalyzerOptions, AnalyzerRules};
 use biome_configuration::diagnostics::InvalidIgnorePattern;
 use biome_configuration::javascript::JsxRuntime;
 use biome_configuration::organize_imports::OrganizeImports;
@@ -250,6 +250,24 @@ impl Settings {
         enabled == Some(&false)
     }
 
+    /// Whether the linter is disabled for CSS files
+    pub fn javascript_linter_disabled(&self) -> bool {
+        let enabled = self.languages.javascript.linter.enabled.as_ref();
+        enabled == Some(&false)
+    }
+
+    /// Whether the linter is disabled for CSS files
+    pub fn json_linter_disabled(&self) -> bool {
+        let enabled = self.languages.json.linter.enabled.as_ref();
+        enabled == Some(&false)
+    }
+
+    /// Whether the linter is disabled for CSS files
+    pub fn css_linter_disabled(&self) -> bool {
+        let enabled = self.languages.css.linter.enabled.as_ref();
+        enabled == Some(&false)
+    }
+
     /// Retrieves the settings of the linter
     pub fn linter(&self) -> &LinterSettings {
         &self.linter
@@ -432,7 +450,7 @@ impl From<JavascriptConfiguration> for LanguageSettings<JsLanguage> {
         language_setting.formatter.quote_style = Some(formatter.quote_style);
         language_setting.formatter.jsx_quote_style = Some(formatter.jsx_quote_style);
         language_setting.formatter.quote_properties = Some(formatter.quote_properties);
-        language_setting.formatter.trailing_comma = Some(formatter.trailing_comma);
+        language_setting.formatter.trailing_commas = Some(formatter.trailing_commas);
         language_setting.formatter.semicolons = Some(formatter.semicolons);
         language_setting.formatter.arrow_parentheses = Some(formatter.arrow_parentheses);
         language_setting.formatter.bracket_spacing = Some(formatter.bracket_spacing.into());
@@ -446,6 +464,7 @@ impl From<JavascriptConfiguration> for LanguageSettings<JsLanguage> {
 
         language_setting.globals = Some(javascript.globals.into_index_set());
         language_setting.environment = javascript.jsx_runtime.into();
+        language_setting.linter.enabled = Some(javascript.linter.enabled);
 
         language_setting
     }
@@ -462,6 +481,7 @@ impl From<JsonConfiguration> for LanguageSettings<JsonLanguage> {
         language_setting.formatter.line_width = json.formatter.line_width;
         language_setting.formatter.indent_width = json.formatter.indent_width.map(Into::into);
         language_setting.formatter.indent_style = json.formatter.indent_style.map(Into::into);
+        language_setting.linter.enabled = Some(json.linter.enabled);
 
         language_setting
     }
@@ -472,10 +492,11 @@ impl From<CssConfiguration> for LanguageSettings<CssLanguage> {
         let mut language_setting: LanguageSettings<CssLanguage> = LanguageSettings::default();
 
         language_setting.formatter.enabled = Some(css.formatter.enabled);
-        language_setting.formatter.line_width = css.formatter.line_width;
-        language_setting.formatter.indent_width = css.formatter.indent_width.map(Into::into);
-        language_setting.formatter.indent_style = css.formatter.indent_style.map(Into::into);
+        language_setting.formatter.line_width = Some(css.formatter.line_width);
+        language_setting.formatter.indent_width = Some(css.formatter.indent_width.into());
+        language_setting.formatter.indent_style = Some(css.formatter.indent_style.into());
         language_setting.formatter.quote_style = Some(css.formatter.quote_style);
+        language_setting.linter.enabled = Some(css.linter.enabled);
 
         language_setting
     }
@@ -511,6 +532,17 @@ pub trait ServiceLanguage: biome_rowan::Language {
         path: &BiomePath,
         file_source: &DocumentFileSource,
     ) -> Self::FormatOptions;
+
+    /// Resolve the linter options from the global (workspace level),
+    /// per-language and editor provided formatter settings
+    fn resolve_analyzer_options(
+        global: &Settings,
+        linter: &LinterSettings,
+        overrides: &OverrideSettings,
+        language: &Self::LinterSettings,
+        path: &BiomePath,
+        file_source: &DocumentFileSource,
+    ) -> AnalyzerOptions;
 }
 
 #[derive(Debug, Default)]
@@ -645,6 +677,25 @@ impl<'a> WorkspaceSettingsHandle<'a> {
             file_source,
         )
     }
+
+    pub(crate) fn analyzer_options<L>(
+        &self,
+        path: &BiomePath,
+        file_source: &DocumentFileSource,
+    ) -> AnalyzerOptions
+    where
+        L: ServiceLanguage,
+    {
+        let settings = self.inner.get_current_settings();
+        L::resolve_analyzer_options(
+            settings,
+            &settings.linter,
+            &settings.override_settings,
+            &L::lookup_settings(&settings.languages).linter,
+            path,
+            file_source,
+        )
+    }
 }
 
 pub struct WorkspaceSettingsHandleMut<'a> {
@@ -748,8 +799,8 @@ impl OverrideSettings {
             })
     }
 
-    /// It scans the current override rules and return the formatting options that of the first override is matched
-    pub fn override_json_format_options(
+    /// It scans the current override rules and return the json format that of the first override is matched
+    pub fn to_override_json_format_options(
         &self,
         path: &Path,
         options: JsonFormatOptions,
@@ -769,7 +820,7 @@ impl OverrideSettings {
     }
 
     /// It scans the current override rules and return the formatting options that of the first override is matched
-    pub fn override_css_format_options(
+    pub fn to_override_css_format_options(
         &self,
         path: &Path,
         options: CssFormatOptions,
@@ -788,7 +839,7 @@ impl OverrideSettings {
         })
     }
 
-    pub fn override_js_parser_options(
+    pub fn to_override_js_parser_options(
         &self,
         path: &Path,
         options: JsParserOptions,
@@ -806,7 +857,7 @@ impl OverrideSettings {
         })
     }
 
-    pub fn override_json_parser_options(
+    pub fn to_override_json_parser_options(
         &self,
         path: &Path,
         options: JsonParserOptions,
@@ -824,21 +875,22 @@ impl OverrideSettings {
         })
     }
 
-    pub fn as_css_parser_options(&self, path: &Path) -> Option<CssParserOptions> {
-        for pattern in &self.patterns {
+    /// It scans the current override rules and return the parser options that of the first override is matched
+    pub fn to_override_css_parser_options(
+        &self,
+        path: &Path,
+        options: CssParserOptions,
+    ) -> CssParserOptions {
+        self.patterns.iter().fold(options, |mut options, pattern| {
             let included = !pattern.include.is_empty() && pattern.include.matches_path(path);
             let excluded = !pattern.exclude.is_empty() && pattern.exclude.matches_path(path);
 
             if included || !excluded {
-                let css_parser = &pattern.languages.css.parser;
-
-                return Some(CssParserOptions {
-                    allow_wrong_line_comments: css_parser.allow_wrong_line_comments,
-                });
+                pattern.apply_overrides_to_css_parser_options(&mut options)
             }
-        }
 
-        None
+            options
+        })
     }
 
     /// Retrieves the options of lint rules that have been overridden
@@ -932,6 +984,7 @@ pub struct OverrideSettingPattern {
     pub(crate) cached_css_format_options: RwLock<Option<CssFormatOptions>>,
     pub(crate) cached_js_parser_options: RwLock<Option<JsParserOptions>>,
     pub(crate) cached_json_parser_options: RwLock<Option<JsonParserOptions>>,
+    pub(crate) cached_css_parser_options: RwLock<Option<CssParserOptions>>,
 }
 impl OverrideSettingPattern {
     fn apply_overrides_to_js_format_options(&self, options: &mut JsFormatOptions) {
@@ -965,8 +1018,8 @@ impl OverrideSettingPattern {
         if let Some(quote_properties) = js_formatter.quote_properties {
             options.set_quote_properties(quote_properties);
         }
-        if let Some(trailing_comma) = js_formatter.trailing_comma {
-            options.set_trailing_comma(trailing_comma);
+        if let Some(trailing_commas) = js_formatter.trailing_commas {
+            options.set_trailing_commas(trailing_commas);
         }
         if let Some(semicolons) = js_formatter.semicolons {
             options.set_semicolons(semicolons);
@@ -1088,6 +1141,24 @@ impl OverrideSettingPattern {
         options.allow_comments = json_parser.allow_comments;
 
         if let Ok(mut writeonly_cache) = self.cached_json_parser_options.write() {
+            let options = *options;
+            let _ = writeonly_cache.insert(options);
+        }
+    }
+
+    fn apply_overrides_to_css_parser_options(&self, options: &mut CssParserOptions) {
+        if let Ok(readonly_cache) = self.cached_css_parser_options.read() {
+            if let Some(cached_options) = readonly_cache.as_ref() {
+                *options = *cached_options;
+                return;
+            }
+        }
+
+        let css_parser = &self.languages.css.parser;
+
+        options.allow_wrong_line_comments = css_parser.allow_wrong_line_comments;
+
+        if let Ok(mut writeonly_cache) = self.cached_css_parser_options.write() {
             let options = *options;
             let _ = writeonly_cache.insert(options);
         }
@@ -1273,8 +1344,10 @@ fn to_javascript_language_settings(
     language_setting.formatter.quote_properties = formatter
         .quote_properties
         .or(parent_formatter.quote_properties);
-    language_setting.formatter.trailing_comma =
-        formatter.trailing_comma.or(parent_formatter.trailing_comma);
+    language_setting.formatter.trailing_commas = formatter
+        .trailing_commas
+        .or(formatter.trailing_comma)
+        .or(parent_formatter.trailing_commas);
     language_setting.formatter.semicolons = formatter.semicolons.or(parent_formatter.semicolons);
     language_setting.formatter.arrow_parentheses = formatter
         .arrow_parentheses
@@ -1372,7 +1445,6 @@ fn to_css_language_settings(
     language_setting.formatter.indent_width = formatter
         .indent_width
         .map(Into::into)
-        .or(formatter.indent_size.map(Into::into))
         .or(parent_formatter.indent_width);
     language_setting.formatter.indent_style = formatter
         .indent_style

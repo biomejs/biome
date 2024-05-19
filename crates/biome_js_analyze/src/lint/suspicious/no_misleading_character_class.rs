@@ -3,7 +3,6 @@ use biome_analyze::{
     context::RuleContext, declare_rule, ActionCategory, FixKind, Rule, RuleDiagnostic, RuleSource,
 };
 use biome_console::markup;
-use biome_diagnostics::Applicability;
 use biome_js_factory::make;
 use biome_js_syntax::{
     global_identifier, AnyJsCallArgument, AnyJsExpression, AnyJsLiteralExpression,
@@ -209,13 +208,13 @@ impl Rule for NoMisleadingCharacterClass {
                     let mut mutation = ctx.root().begin();
                     mutation.replace_token(prev_token, next_token);
 
-                    Some(JsRuleAction {
-                        category: ActionCategory::QuickFix,
-                        applicability: Applicability::Always,
-                        message: markup! { "Add unicode "<Emphasis>"u"</Emphasis>" flag to regex" }
+                    Some(JsRuleAction::new(
+                        ActionCategory::QuickFix,
+                        ctx.metadata().applicability(),
+                        markup! { "Add unicode "<Emphasis>"u"</Emphasis>" flag to regex" }
                             .to_owned(),
                         mutation,
-                    })
+                    ))
                 }
 
                 AnyRegexExpression::JsNewExpression(expr) => {
@@ -229,13 +228,13 @@ impl Rule for NoMisleadingCharacterClass {
                         Some(suggest) => {
                             let mut mutation = ctx.root().begin();
                             mutation.replace_node(prev_node, suggest);
-                            Some(JsRuleAction {
-                                category: ActionCategory::QuickFix,
-                                applicability: Applicability::Always,
-                                message: markup! { "Add unicode "<Emphasis>"u"</Emphasis>" flag to regex" }
+                            Some(JsRuleAction::new(
+                                ActionCategory::QuickFix,
+                                ctx.metadata().applicability(),
+                                markup! { "Add unicode "<Emphasis>"u"</Emphasis>" flag to regex" }
                                     .to_owned(),
                                 mutation,
-                            })
+                            ))
                         }
                         None => None,
                     }
@@ -252,13 +251,13 @@ impl Rule for NoMisleadingCharacterClass {
                         Some(suggest) => {
                             let mut mutation = ctx.root().begin();
                             mutation.replace_node(prev_node, suggest);
-                            Some(JsRuleAction {
-                                category: ActionCategory::QuickFix,
-                                applicability: Applicability::Always,
-                                message: markup! { "Add unicode "<Emphasis>"u"</Emphasis>" flag to regex" }
+                            Some(JsRuleAction::new(
+                                ActionCategory::QuickFix,
+                                ctx.metadata().applicability(),
+                                markup! { "Add unicode "<Emphasis>"u"</Emphasis>" flag to regex" }
                                     .to_owned(),
                                 mutation,
-                            })
+                            ))
                         }
                         None => None,
                     }

@@ -2,7 +2,6 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: jsx/conditional.jsx
 ---
-
 # Input
 
 ```jsx
@@ -73,7 +72,7 @@ Line width: 80
 Quote style: Double Quotes
 JSX quote style: Double Quotes
 Quote properties: As needed
-Trailing comma: All
+Trailing commas: All
 Semicolons: Always
 Arrow parentheses: Always
 Bracket spacing: true
@@ -136,5 +135,3 @@ Attribute Position: Auto
 	)
 ) : null;
 ```
-
-

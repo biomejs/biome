@@ -1,7 +1,6 @@
 use biome_analyze::context::RuleContext;
 use biome_analyze::{declare_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
-use biome_diagnostics::Applicability;
 use biome_js_syntax::{JsFormalParameter, JsInitializerClause, JsSyntaxToken, TsPropertyParameter};
 use biome_rowan::{declare_node_union, AstNode, BatchMutationExt, Direction};
 
@@ -160,13 +159,12 @@ impl Rule for UseDefaultParameterLast {
             mutation.replace_token_discard_trivia(prev_token, new_token);
             mutation.remove_node(initializer);
         }
-        Some(JsRuleAction {
+        Some(JsRuleAction::new(
+            ActionCategory::QuickFix,
+            ctx.metadata().applicability(),
+            markup! {"Turn the parameter into a "<Emphasis>"required parameter"</Emphasis>"."}
+                .to_owned(),
             mutation,
-            message:
-                markup! {"Turn the parameter into a "<Emphasis>"required parameter"</Emphasis>"."}
-                    .to_owned(),
-            category: ActionCategory::QuickFix,
-            applicability: Applicability::MaybeIncorrect,
-        })
+        ))
     }
 }

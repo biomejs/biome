@@ -4,7 +4,6 @@ use biome_analyze::{
     RuleSource,
 };
 use biome_console::markup;
-use biome_diagnostics::Applicability;
 use biome_js_factory::make;
 use biome_js_syntax::{is_negation, AnyJsExpression, JsInExpression, JsInstanceofExpression};
 use biome_rowan::{declare_node_union, AstNode, AstNodeExt, BatchMutationExt};
@@ -126,12 +125,12 @@ impl Rule for NoUnsafeNegation {
             }
         }
 
-        Some(JsRuleAction {
-            category: ActionCategory::QuickFix,
-            applicability: Applicability::MaybeIncorrect,
-            message: markup! { "Wrap the expression with a parenthesis" }.to_owned(),
+        Some(JsRuleAction::new(
+            ActionCategory::QuickFix,
+            ctx.metadata().applicability(),
+            markup! { "Wrap the expression with a parenthesis" }.to_owned(),
             mutation,
-        })
+        ))
     }
 }
 

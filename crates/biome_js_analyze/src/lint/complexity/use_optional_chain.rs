@@ -3,7 +3,6 @@ use biome_analyze::{
     context::RuleContext, declare_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic,
 };
 use biome_console::markup;
-use biome_diagnostics::Applicability;
 use biome_js_factory::make;
 use biome_js_syntax::{
     AnyJsExpression, AnyJsMemberExpression, AnyJsName, JsLogicalExpression, JsLogicalOperator,
@@ -201,12 +200,12 @@ impl Rule for UseOptionalChain {
 
                 let mut mutation = ctx.root().begin();
                 mutation.replace_node(AnyJsExpression::from(logical.clone()), replacement);
-                Some(JsRuleAction {
-                    category: ActionCategory::QuickFix,
-                    applicability: Applicability::MaybeIncorrect,
-                    message: markup! { "Change to an optional chain." }.to_owned(),
+                Some(JsRuleAction::new(
+                    ActionCategory::QuickFix,
+                    ctx.metadata().applicability(),
+                    markup! { "Change to an optional chain." }.to_owned(),
                     mutation,
-                })
+                ))
             }
             UseOptionalChainState::LogicalOrLike(chain) => {
                 let chain = chain.optional_chain_expression_nodes();
@@ -249,12 +248,12 @@ impl Rule for UseOptionalChain {
                 let (prev_member, new_member) = prev_chain?;
                 let mut mutation = ctx.root().begin();
                 mutation.replace_node(prev_member, new_member);
-                Some(JsRuleAction {
-                    category: ActionCategory::QuickFix,
-                    applicability: Applicability::MaybeIncorrect,
-                    message: markup! { "Change to an optional chain." }.to_owned(),
+                Some(JsRuleAction::new(
+                    ActionCategory::QuickFix,
+                    ctx.metadata().applicability(),
+                    markup! { "Change to an optional chain." }.to_owned(),
                     mutation,
-                })
+                ))
             }
         }
     }

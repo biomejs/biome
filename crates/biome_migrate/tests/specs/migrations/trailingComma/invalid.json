@@ -1,0 +1,17 @@
+{
+	"javascript": {
+		"formatter": {
+			"trailingComma": "all"
+		}
+	},
+	"overrides": [
+		{
+			"include": ["scripts/**"],
+			"javascript": {
+				"formatter": {
+					"trailingComma": "es5"
+				}
+			}
+		}
+	]
+}

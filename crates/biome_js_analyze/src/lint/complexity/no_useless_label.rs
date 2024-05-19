@@ -1,7 +1,6 @@
 use biome_analyze::context::RuleContext;
 use biome_analyze::{declare_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
-use biome_diagnostics::Applicability;
 use biome_js_syntax::{AnyJsStatement, JsLabeledStatement, JsSyntaxKind};
 
 use crate::JsRuleAction;
@@ -108,12 +107,12 @@ impl Rule for NoUselessLabel {
         let mut mutation = ctx.root().begin();
         mutation.remove_token(label_token);
         mutation.replace_token_discard_trivia(stmt_token, new_stmt_token);
-        Some(JsRuleAction {
-            category: ActionCategory::QuickFix,
-            applicability: Applicability::Always,
-            message: markup! {"Remove the unnecessary "<Emphasis>"label"</Emphasis>".\nYou can achieve the same result without the label."}.to_owned(),
+        Some(JsRuleAction::new(
+            ActionCategory::QuickFix,
+            ctx.metadata().applicability(),
+             markup! {"Remove the unnecessary "<Emphasis>"label"</Emphasis>".\nYou can achieve the same result without the label."}.to_owned(),
             mutation,
-        })
+        ))
     }
 }
 

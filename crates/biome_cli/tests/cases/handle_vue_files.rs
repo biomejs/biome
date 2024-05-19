@@ -119,6 +119,28 @@ a.c = undefined;
 </script>
 <template></template>"#;
 
+const VUE_TS_FILE_SETUP_GLOBALS: &str = r#"<script setup lang="ts">
+// These are magic vue macros, and should be treated as globals.
+defineProps(['foo'])
+defineEmits(['change', 'delete'])
+defineModel()
+
+const a = 1
+defineExpose({
+		a,
+})
+
+defineOptions({
+		inheritAttrs: false,
+})
+
+const slots = defineSlots<{
+		default(props: { msg: string }): any
+}>()
+
+</script>
+<template></template>"#;
+
 #[test]
 fn format_vue_implicit_js_files() {
     let mut fs = MemoryFileSystem::default();
@@ -841,6 +863,33 @@ fn check_stdin_apply_unsafe_successfully() {
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "check_stdin_apply_unsafe_successfully",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn vue_compiler_macros_as_globals() {
+    let mut fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let vue_file_path = Path::new("file.vue");
+    fs.insert(vue_file_path.into(), VUE_TS_FILE_SETUP_GLOBALS.as_bytes());
+
+    let result = run_cli(
+        DynRef::Borrowed(&mut fs),
+        &mut console,
+        Args::from([("lint"), vue_file_path.as_os_str().to_str().unwrap()].as_slice()),
+    );
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+
+    assert_file_contents(&fs, vue_file_path, VUE_TS_FILE_SETUP_GLOBALS);
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "vue_compiler_macros_as_globals",
         fs,
         console,
         result,

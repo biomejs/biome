@@ -1,13 +1,14 @@
 {
 	"$schema": "../../../../packages/@biomejs/biome/configuration_schema.json",
 	"formatter": {
-		"indentSize": 2
+		"indentWidth": 2
 	},
 	"javascript": {
 		"formatter": {
 			"enabled": true,
 			"indentStyle": "space",
-			"indentSize": 2,
+			"indentWidth": 2,
+			"trailingCommas": "all",
 			"lineEnding": "lf",
 			"lineWidth": 200,
 			"quoteStyle": "single"

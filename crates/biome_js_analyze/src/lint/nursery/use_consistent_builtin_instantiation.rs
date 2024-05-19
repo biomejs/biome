@@ -3,7 +3,6 @@ use biome_analyze::{
     context::RuleContext, declare_rule, ActionCategory, FixKind, Rule, RuleDiagnostic, RuleSource,
 };
 use biome_console::markup;
-use biome_diagnostics::Applicability;
 use biome_js_factory::make;
 use biome_js_syntax::{
     global_identifier, AnyJsExpression, JsCallExpression, JsNewExpression, JsNewOrCallExpression,
@@ -173,24 +172,24 @@ impl Rule for UseConsistentBuiltinInstantiation {
 
                 mutation
                     .replace_node::<AnyJsExpression>(node.clone().into(), call_expression.into());
-                Some(JsRuleAction {
-                    category: ActionCategory::QuickFix,
-                    applicability: Applicability::MaybeIncorrect,
-                    message: markup! { "Remove "<Emphasis>"new"</Emphasis>" keyword." }.to_owned(),
+                Some(JsRuleAction::new(
+                    ActionCategory::QuickFix,
+                    ctx.metadata().applicability(),
+                    markup! { "Remove "<Emphasis>"new"</Emphasis>" keyword." }.to_owned(),
                     mutation,
-                })
+                ))
             }
             JsNewOrCallExpression::JsCallExpression(node) => {
                 let new_expression = convert_call_expression_to_new_expression(node)?;
 
                 mutation
                     .replace_node::<AnyJsExpression>(node.clone().into(), new_expression.into());
-                Some(JsRuleAction {
-                    category: ActionCategory::QuickFix,
-                    applicability: Applicability::MaybeIncorrect,
-                    message: markup! { "Add "<Emphasis>"new"</Emphasis>" keyword." }.to_owned(),
+                Some(JsRuleAction::new(
+                    ActionCategory::QuickFix,
+                    ctx.metadata().applicability(),
+                    markup! { "Add "<Emphasis>"new"</Emphasis>" keyword." }.to_owned(),
                     mutation,
-                })
+                ))
             }
         }
     }

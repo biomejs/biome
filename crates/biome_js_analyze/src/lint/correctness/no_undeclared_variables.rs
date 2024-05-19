@@ -83,9 +83,11 @@ impl Rule for NoUndeclaredVariables {
             rule_category!(),
             *span,
             markup! {
-                "The "<Emphasis>{name}</Emphasis>" variable is undeclared"
+                "The "<Emphasis>{name}</Emphasis>" variable is undeclared."
             },
-        ))
+        ).note(markup! {
+            "By default, Biome recognizes browser and Mode.js globals.\nYou can ignore more globals using the "<Hyperlink href="https://biomejs.dev/reference/configuration/#javascriptglobals">"javascript.globals"</Hyperlink>" configuration."
+        }))
     }
 }
 

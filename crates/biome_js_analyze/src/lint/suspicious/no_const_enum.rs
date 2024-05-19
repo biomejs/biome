@@ -1,7 +1,6 @@
 use biome_analyze::context::RuleContext;
 use biome_analyze::{declare_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic};
 use biome_console::markup;
-use biome_diagnostics::Applicability;
 use biome_js_syntax::TsEnumDeclaration;
 use biome_rowan::{chain_trivia_pieces, trim_leading_trivia_pieces, AstNode, BatchMutationExt};
 
@@ -81,13 +80,13 @@ impl Rule for NoConstEnum {
         ));
         mutation.remove_token(const_token);
         mutation.replace_token_discard_trivia(enum_token, new_enum_token);
-        Some(JsRuleAction {
-            category: ActionCategory::QuickFix,
-            applicability: Applicability::Always,
-            message: markup! {
+        Some(JsRuleAction::new(
+            ActionCategory::QuickFix,
+            ctx.metadata().applicability(),
+             markup! {
                 "Turn the "<Emphasis>"const enum"</Emphasis>" into a regular "<Emphasis>"enum"</Emphasis>"."
             }.to_owned(),
             mutation,
-        })
+        ))
     }
 }

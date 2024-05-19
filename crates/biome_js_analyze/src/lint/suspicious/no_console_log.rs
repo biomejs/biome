@@ -4,7 +4,6 @@ use biome_analyze::{
     RuleSourceKind,
 };
 use biome_console::markup;
-use biome_diagnostics::Applicability;
 use biome_js_syntax::{
     global_identifier, AnyJsMemberExpression, JsCallExpression, JsExpressionStatement,
 };
@@ -99,11 +98,11 @@ impl Rule for NoConsoleLog {
             }
         }
 
-        Some(JsRuleAction {
-            category: ActionCategory::QuickFix,
-            applicability: Applicability::MaybeIncorrect,
-            message: markup! { "Remove console.log" }.to_owned(),
+        Some(JsRuleAction::new(
+            ActionCategory::QuickFix,
+            ctx.metadata().applicability(),
+            markup! { "Remove console.log" }.to_owned(),
             mutation,
-        })
+        ))
     }
 }

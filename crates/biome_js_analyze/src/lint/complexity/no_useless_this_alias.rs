@@ -6,7 +6,6 @@ use biome_analyze::{
     RuleSourceKind,
 };
 use biome_console::markup;
-use biome_diagnostics::Applicability;
 use biome_js_factory::make;
 use biome_js_semantic::ReferencesExtensions;
 use biome_js_syntax::{
@@ -176,14 +175,14 @@ impl Rule for NoUselessThisAlias {
             mutation.remove_node(declarator.clone());
             mutation.remove_token(deleted_comma?);
         }
-        Some(JsRuleAction {
-            category: ActionCategory::QuickFix,
-            applicability: Applicability::Always,
-            message: markup! {
+        Some(JsRuleAction::new(
+            ActionCategory::QuickFix,
+            ctx.metadata().applicability(),
+            markup! {
                 "Use "<Emphasis>"this"</Emphasis>" instead of an alias."
             }
             .to_owned(),
             mutation,
-        })
+        ))
     }
 }

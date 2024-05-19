@@ -5,7 +5,6 @@ use biome_analyze::{
     RuleSource,
 };
 use biome_console::markup;
-use biome_diagnostics::Applicability;
 use biome_js_factory::make;
 use biome_js_syntax::{
     numbers::split_into_radix_and_number, AnyJsExpression, AnyJsLiteralExpression,
@@ -108,13 +107,12 @@ impl Rule for NoApproximativeNumericConstant {
             AnyJsExpression::AnyJsLiteralExpression(AnyJsLiteralExpression::from(node.clone())),
             AnyJsExpression::from(new_node),
         );
-        Some(JsRuleAction {
-            category: ActionCategory::QuickFix,
-            applicability: Applicability::MaybeIncorrect,
-            message: markup! { "Use "<Emphasis>"Math."{ constant_name }</Emphasis>" instead." }
-                .to_owned(),
+        Some(JsRuleAction::new(
+            ActionCategory::QuickFix,
+            ctx.metadata().applicability(),
+            markup! { "Use "<Emphasis>"Math."{ constant_name }</Emphasis>" instead." }.to_owned(),
             mutation,
-        })
+        ))
     }
 }
 

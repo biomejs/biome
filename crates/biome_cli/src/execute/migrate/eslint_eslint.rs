@@ -13,7 +13,7 @@ use std::ops::DerefMut;
 use std::vec;
 use std::{any::TypeId, marker::PhantomData, ops::Deref};
 
-use super::{eslint_jsxa11y, eslint_typescript, eslint_unicorn};
+use super::{eslint_jsxa11y, eslint_typescript, eslint_unicorn, ignorefile};
 
 /// This modules includes implementations for deserializing an eslint configuration.
 ///
@@ -92,6 +92,7 @@ impl Merge for FlatLanguageOptions {
 #[deserializable(unknown_fields = "allow")]
 pub(crate) struct EslintPackageJson {
     pub(crate) eslint_config: Option<LegacyConfigData>,
+    pub(crate) eslint_ignore: Vec<IgnorePattern>,
 }
 
 #[derive(Debug, Default, Deserializable)]
@@ -100,7 +101,7 @@ pub(crate) struct LegacyConfigData {
     pub(crate) extends: ShorthandVec<String>,
     pub(crate) globals: Globals,
     /// The glob patterns that ignore to lint.
-    pub(crate) ignore_patterns: ShorthandVec<String>,
+    pub(crate) ignore_patterns: ShorthandVec<IgnorePattern>,
     /// The parser options.
     pub(crate) rules: Rules,
     pub(crate) overrides: Vec<OverrideConfigData>,
@@ -112,6 +113,31 @@ impl Merge for LegacyConfigData {
         self.ignore_patterns.merge_with(other.ignore_patterns);
         self.rules.merge_with(other.rules);
         self.overrides.append(&mut other.overrides);
+    }
+}
+
+#[derive(Debug, Default)]
+pub(crate) struct IgnorePattern(pub(crate) String);
+impl Deref for IgnorePattern {
+    type Target = String;
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+impl biome_deserialize::Deserializable for IgnorePattern {
+    fn deserialize(
+        value: &impl DeserializableValue,
+        name: &str,
+        diagnostics: &mut Vec<DeserializationDiagnostic>,
+    ) -> Option<Self> {
+        let s = biome_deserialize::Text::deserialize(value, name, diagnostics)?;
+        match ignorefile::convert_pattern(s.text()) {
+            Ok(pattern) => Some(Self(pattern)),
+            Err(msg) => {
+                diagnostics.push(DeserializationDiagnostic::new(msg).with_range(value.range()));
+                None
+            }
+        }
     }
 }
 
@@ -544,7 +570,7 @@ pub(crate) enum Rule {
     TypeScriptArrayType(RuleConf<eslint_typescript::ArrayTypeOptions>),
     TypeScriptNamingConvention(RuleConf<Box<eslint_typescript::NamingConventionSelection>>),
     UnicornFilenameCase(RuleConf<eslint_unicorn::FilenameCaseOptions>),
-    // If ypu add new variants, dont forget to update [Rules::deserialize].
+    // If you add new variants, don't forget to update [Rules::deserialize].
 }
 impl Rule {
     pub(crate) fn name(&self) -> Cow<'static, str> {

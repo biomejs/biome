@@ -5,7 +5,6 @@ use biome_analyze::{
     RuleSource, RuleSourceKind,
 };
 use biome_console::markup;
-use biome_diagnostics::Applicability;
 use biome_js_factory::make;
 use biome_js_syntax::{AnyJsStatement, JsIfStatement, JsStatementList, JsSyntaxKind};
 use biome_rowan::{
@@ -177,12 +176,12 @@ impl Rule for NoUselessElse {
             let new_stmts_list = make::js_statement_list(new_stmts);
             let mut mutation = ctx.root().begin();
             mutation.replace_node_discard_trivia(stmts_list, new_stmts_list);
-            return Some(JsRuleAction {
-                category: ActionCategory::QuickFix,
-                applicability: Applicability::MaybeIncorrect,
-                message: markup! { "Omit the "<Emphasis>"else"</Emphasis>" clause." }.to_owned(),
+            return Some(JsRuleAction::new(
+                ActionCategory::QuickFix,
+                ctx.metadata().applicability(),
+                markup! { "Omit the "<Emphasis>"else"</Emphasis>" clause." }.to_owned(),
                 mutation,
-            });
+            ));
         }
         None
     }

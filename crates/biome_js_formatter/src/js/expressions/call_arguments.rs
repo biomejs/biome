@@ -1,4 +1,4 @@
-use crate::context::trailing_comma::FormatTrailingComma;
+use crate::context::trailing_commas::FormatTrailingCommas;
 use crate::js::bindings::parameters::has_only_simple_parameters;
 use crate::js::declarations::function_declaration::FormatFunctionOptions;
 use crate::js::expressions::arrow_function_expression::{
@@ -732,7 +732,7 @@ impl<'a> Format<JsFormatContext> for FormatAllArgsBrokenOut<'a> {
                     }
 
                     if !is_inside_import {
-                        write!(f, [FormatTrailingComma::All])?;
+                        write!(f, [FormatTrailingCommas::All])?;
                     }
                     Ok(())
                 })),
