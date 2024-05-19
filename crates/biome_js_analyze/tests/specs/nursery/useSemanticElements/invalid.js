@@ -5,3 +5,7 @@ const checkbox = () => (
 const Image = () => (
     <div role="img" ></div>
 );
+
+const Button = () => (
+    <div aria-label="foo" role="button" >button</div>
+);
