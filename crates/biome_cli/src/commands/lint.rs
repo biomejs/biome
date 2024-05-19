@@ -67,13 +67,16 @@ pub(crate) fn lint(session: CliSession, payload: LintCommandPayload) -> Result<(
     } = payload;
     setup_cli_subscriber(cli_options.log_level, cli_options.log_kind);
 
-    let fix_file_mode = determine_fix_file_mode(FixFileModeOptions {
-        apply,
-        apply_unsafe,
-        write,
-        fix,
-        unsafe_,
-    })?;
+    let fix_file_mode = determine_fix_file_mode(
+        FixFileModeOptions {
+            apply,
+            apply_unsafe,
+            write,
+            fix,
+            unsafe_,
+        },
+        session.app.console,
+    )?;
 
     let loaded_configuration =
         load_configuration(&session.app.fs, cli_options.as_configuration_path_hint())?;
