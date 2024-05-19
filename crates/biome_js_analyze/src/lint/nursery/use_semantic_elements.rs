@@ -53,14 +53,13 @@ impl Rule for UseSemanticElements {
             let attr_value = attr.as_jsx_attribute().unwrap().name_value_token().unwrap();
             let attr_name = attr_value.text_trimmed();
             if attr_name == "role" {
-                let aria_roles = AriaRoles::default();
                 let extract_attributes = ctx.extract_attributes(&node.attributes());
 
                 let element: biome_rowan::SyntaxToken<biome_js_syntax::JsLanguage> =
                     node.name().ok()?.as_jsx_name()?.value_token().ok()?;
                 let element_name = element.text_trimmed();
                 let is_not_interative =
-                    aria_roles.is_not_interactive_element(element_name, extract_attributes);
+                    AriaRoles.is_not_interactive_element(element_name, extract_attributes);
                 if is_not_interative {
                     return Some(attr);
                 }
