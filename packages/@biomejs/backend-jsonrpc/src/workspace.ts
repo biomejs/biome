@@ -2271,7 +2271,7 @@ export type Category =
 	| "lint/correctness/useYield"
 	| "lint/nursery/colorNoInvalidHex"
 	| "lint/nursery/useAdjacentOverloadSignatures"
-	| "lint/nursery/noColorInvalidHex"gggg
+	| "lint/nursery/noColorInvalidHex"
 	| "lint/nursery/noConsole"
 	| "lint/nursery/noConstantMathMinMaxClamp"
 	| "lint/nursery/noCssEmptyBlock"

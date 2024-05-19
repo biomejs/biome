@@ -111,17 +111,17 @@ impl Rule for UseAdjacentOverloadSignatures {
                     match node {
                         // type
                         AnyJsStatement::TsTypeAliasDeclaration(node) => {
-                            let type_vec = handle_type(node)?;
+                            let type_vec = handle_type(&node)?;
                             methods.push(type_vec.clone());
                         }
                         // interface
                         AnyJsStatement::TsInterfaceDeclaration(node) => {
-                            let interface_vec = handle_interface(node)?;
+                            let interface_vec = handle_interface(&node)?;
                             methods.push(interface_vec);
                         }
                         // class
                         AnyJsStatement::JsClassDeclaration(node) => {
-                            let class_vec = handle_class(node)?;
+                            let class_vec = handle_class(&node)?;
                             methods.push(class_vec);
                         }
                         // function
@@ -131,11 +131,11 @@ impl Rule for UseAdjacentOverloadSignatures {
                             for statement in statements {
                                 match statement {
                                     AnyJsStatement::TsInterfaceDeclaration(node) => {
-                                        let interface_vec = handle_interface(node)?;
+                                        let interface_vec = handle_interface(&node)?;
                                         methods.push(interface_vec);
                                     }
                                     AnyJsStatement::TsTypeAliasDeclaration(node) => {
-                                        let type_vec = handle_type(node)?;
+                                        let type_vec = handle_type(&node)?;
                                         methods.push(type_vec);
                                     }
                                     _ => {}
@@ -166,7 +166,7 @@ impl Rule for UseAdjacentOverloadSignatures {
                     }
                 }
                 AnyJsModuleItem::JsExport(node) => {
-                    let export_text_range = handle_export(node)?;
+                    let export_text_range = handle_export(&node)?;
                     let tuple = export_text_range[0].clone();
                     let text = tuple.0.clone();
                     let range = tuple.1;
@@ -175,7 +175,7 @@ impl Rule for UseAdjacentOverloadSignatures {
                 _ => {}
             }
         }
-        methods.push(export_vec);
+        methods.push(export_vec.clone());
         let adjacent_overload_violations = check_adjacent_overload_violations(&methods);
         let violation_ranges: Vec<(TokenText, TextRange)> = adjacent_overload_violations
             .iter()
@@ -266,7 +266,7 @@ fn detect_violation_pos(sorted_positions: &[u32], expected: &[u32]) -> Option<us
     None
 }
 
-fn handle_interface(node: TsInterfaceDeclaration) -> Option<Vec<(TokenText, u32, TextRange)>> {
+fn handle_interface(node: &TsInterfaceDeclaration) -> Option<Vec<(TokenText, u32, TextRange)>> {
     let members = node.members();
     let mut interface_vec = vec![];
     for (interface_index, member) in members.into_iter().enumerate() {
@@ -279,7 +279,7 @@ fn handle_interface(node: TsInterfaceDeclaration) -> Option<Vec<(TokenText, u32,
     Some(interface_vec)
 }
 
-fn handle_type(node: TsTypeAliasDeclaration) -> Option<Vec<(TokenText, u32, TextRange)>> {
+fn handle_type(node: &TsTypeAliasDeclaration) -> Option<Vec<(TokenText, u32, TextRange)>> {
     let ty = node.ty().ok()?;
     let ts_object = ty.as_ts_object_type()?;
     let members = ts_object.members();
@@ -293,7 +293,7 @@ fn handle_type(node: TsTypeAliasDeclaration) -> Option<Vec<(TokenText, u32, Text
     Some(type_vec)
 }
 
-fn handle_class(node: JsClassDeclaration) -> Option<Vec<(TokenText, u32, TextRange)>> {
+fn handle_class(node: &JsClassDeclaration) -> Option<Vec<(TokenText, u32, TextRange)>> {
     let members = node.members();
     let mut class_vec = vec![];
     let mut class_index = 0;
@@ -315,7 +315,7 @@ fn handle_class(node: JsClassDeclaration) -> Option<Vec<(TokenText, u32, TextRan
     Some(class_vec)
 }
 
-fn handle_export(node: JsExport) -> Option<Vec<(TokenText, TextRange)>> {
+fn handle_export(node: &JsExport) -> Option<Vec<(TokenText, TextRange)>> {
     let export = node.export_clause().ok()?;
     let declaration_clause = export.as_any_js_declaration_clause()?;
     let ts_declare = declaration_clause.as_ts_declare_function_declaration()?;
