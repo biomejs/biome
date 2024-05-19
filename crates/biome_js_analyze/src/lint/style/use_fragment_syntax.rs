@@ -4,7 +4,6 @@ use crate::JsRuleAction;
 use biome_analyze::context::RuleContext;
 use biome_analyze::{declare_rule, ActionCategory, FixKind, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
-use biome_diagnostics::Applicability;
 use biome_js_factory::make::{
     jsx_child_list, jsx_closing_fragment, jsx_fragment, jsx_opening_fragment,
 };
@@ -92,7 +91,7 @@ impl Rule for UseFragmentSyntax {
 
         Some(JsRuleAction::new(
             ActionCategory::QuickFix,
-            Applicability::MaybeIncorrect,
+            ctx.metadata().applicability(),
             (markup! { "Replace "<Emphasis>"<Fragment>"</Emphasis>" with the fragment syntax" })
                 .to_owned(),
             mutation,

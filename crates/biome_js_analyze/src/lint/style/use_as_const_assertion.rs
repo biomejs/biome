@@ -4,7 +4,6 @@ use biome_analyze::{
     RuleSource,
 };
 use biome_console::markup;
-use biome_diagnostics::Applicability;
 use biome_js_factory::make;
 use biome_js_syntax::{
     AnyJsExpression, AnyJsLiteralExpression, AnyTsName, AnyTsType, JsInitializerClause,
@@ -192,7 +191,7 @@ impl Rule for UseAsConstAssertion {
         };
         Some(JsRuleAction::new(
             ActionCategory::QuickFix,
-            Applicability::Always,
+            ctx.metadata().applicability(),
             markup! { "Replace with "<Emphasis>"as const"</Emphasis>"." }.to_owned(),
             mutation,
         ))

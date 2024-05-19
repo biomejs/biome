@@ -4,7 +4,6 @@ use biome_analyze::{
 };
 use biome_aria::{roles::AriaRoleDefinition, AriaRoles};
 use biome_console::markup;
-use biome_diagnostics::Applicability;
 use biome_js_syntax::{
     jsx_ext::AnyJsxElement, AnyJsxAttributeValue, JsxAttribute, JsxAttributeList,
 };
@@ -107,7 +106,7 @@ impl Rule for NoRedundantRoles {
         mutation.remove_node(state.redundant_attribute.clone());
         Some(JsRuleAction::new(
             ActionCategory::QuickFix,
-            Applicability::MaybeIncorrect,
+            ctx.metadata().applicability(),
             markup! { "Remove the "<Emphasis>"role"</Emphasis>" attribute." }.to_owned(),
             mutation,
         ))

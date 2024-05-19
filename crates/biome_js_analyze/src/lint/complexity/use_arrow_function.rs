@@ -5,7 +5,6 @@ use biome_analyze::{
     VisitorContext,
 };
 use biome_console::markup;
-use biome_diagnostics::Applicability;
 use biome_js_factory::make;
 use biome_js_syntax::{
     AnyJsExpression, AnyJsFunctionBody, AnyJsStatement, JsConstructorClassMember, JsFunctionBody,
@@ -174,7 +173,7 @@ impl Rule for UseArrowFunction {
         );
         Some(JsRuleAction::new(
             ActionCategory::QuickFix,
-            Applicability::Always,
+            ctx.metadata().applicability(),
             markup! { "Use an "<Emphasis>"arrow function"</Emphasis>" instead." }.to_owned(),
             mutation,
         ))

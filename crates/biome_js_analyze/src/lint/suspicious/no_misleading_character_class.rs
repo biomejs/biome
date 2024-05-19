@@ -3,7 +3,6 @@ use biome_analyze::{
     context::RuleContext, declare_rule, ActionCategory, FixKind, Rule, RuleDiagnostic, RuleSource,
 };
 use biome_console::markup;
-use biome_diagnostics::Applicability;
 use biome_js_factory::make;
 use biome_js_syntax::{
     global_identifier, AnyJsCallArgument, AnyJsExpression, AnyJsLiteralExpression,
@@ -211,7 +210,7 @@ impl Rule for NoMisleadingCharacterClass {
 
                     Some(JsRuleAction::new(
                         ActionCategory::QuickFix,
-                        Applicability::Always,
+                        ctx.metadata().applicability(),
                         markup! { "Add unicode "<Emphasis>"u"</Emphasis>" flag to regex" }
                             .to_owned(),
                         mutation,
@@ -231,7 +230,7 @@ impl Rule for NoMisleadingCharacterClass {
                             mutation.replace_node(prev_node, suggest);
                             Some(JsRuleAction::new(
                                 ActionCategory::QuickFix,
-                                Applicability::Always,
+                                ctx.metadata().applicability(),
                                 markup! { "Add unicode "<Emphasis>"u"</Emphasis>" flag to regex" }
                                     .to_owned(),
                                 mutation,
@@ -254,7 +253,7 @@ impl Rule for NoMisleadingCharacterClass {
                             mutation.replace_node(prev_node, suggest);
                             Some(JsRuleAction::new(
                                 ActionCategory::QuickFix,
-                                Applicability::Always,
+                                ctx.metadata().applicability(),
                                 markup! { "Add unicode "<Emphasis>"u"</Emphasis>" flag to regex" }
                                     .to_owned(),
                                 mutation,

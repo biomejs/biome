@@ -3,7 +3,6 @@ use biome_analyze::{
     RuleSource,
 };
 use biome_console::markup;
-use biome_diagnostics::Applicability;
 use biome_js_factory::make;
 use biome_js_syntax::{AnyJsxTag, JsSyntaxToken, JsxElement, JsxOpeningElementFields, T};
 use biome_rowan::{AstNode, AstNodeList, BatchMutationExt, TriviaPiece};
@@ -143,7 +142,7 @@ impl Rule for UseSelfClosingElements {
         );
         Some(JsRuleAction::new(
             ActionCategory::QuickFix,
-            Applicability::MaybeIncorrect,
+            ctx.metadata().applicability(),
             markup! { "Use a SelfClosingElement instead" }.to_owned(),
             mutation,
         ))

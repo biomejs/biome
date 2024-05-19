@@ -3,7 +3,6 @@ use biome_analyze::{
     RuleSource,
 };
 use biome_console::markup;
-use biome_diagnostics::Applicability;
 use biome_js_factory::make;
 use biome_js_syntax::{
     JsSyntaxKind, JsSyntaxToken, JsVariableDeclarationFields, JsVariableStatement,
@@ -205,7 +204,7 @@ impl Rule for UseSingleVarDeclarator {
 
         Some(JsRuleAction::new(
             ActionCategory::QuickFix,
-            Applicability::MaybeIncorrect,
+            ctx.metadata().applicability(),
             markup! { "Break out into multiple declarations" }.to_owned(),
             mutation,
         ))

@@ -18,7 +18,7 @@ static GLOBAL: tikv_jemallocator::Jemalloc = tikv_jemallocator::Jemalloc;
 static GLOBAL: std::alloc::System = std::alloc::System;
 fn bench_json_formatter(criterion: &mut Criterion) {
     let mut all_suites = HashMap::new();
-    all_suites.insert("json", include_str!("libs-js.txt"));
+    all_suites.insert("json", include_str!("libs-json.txt"));
     let mut libs = vec![];
     libs.extend(all_suites.values().flat_map(|suite| suite.lines()));
 

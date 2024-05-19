@@ -3,7 +3,6 @@ use biome_analyze::{
     context::RuleContext, declare_rule, ActionCategory, FixKind, Rule, RuleDiagnostic, RuleSource,
 };
 use biome_console::markup;
-use biome_diagnostics::Applicability;
 use biome_js_syntax::jsx_ext::AnyJsxElement;
 use biome_rowan::{AstNode, BatchMutationExt};
 
@@ -116,7 +115,7 @@ impl Rule for NoAriaHiddenOnFocusable {
         mutation.remove_node(aria_hidden_attr);
         Some(JsRuleAction::new(
             ActionCategory::QuickFix,
-            Applicability::MaybeIncorrect,
+            ctx.metadata().applicability(),
             markup! { "Remove the aria-hidden attribute from the element." }.to_owned(),
             mutation,
         ))

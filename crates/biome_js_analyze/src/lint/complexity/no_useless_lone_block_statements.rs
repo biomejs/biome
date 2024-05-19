@@ -4,7 +4,6 @@ use biome_analyze::{
     context::RuleContext, declare_rule, ActionCategory, FixKind, Rule, RuleDiagnostic, RuleSource,
 };
 use biome_console::markup;
-use biome_diagnostics::Applicability;
 use biome_js_factory::make;
 use biome_js_syntax::{
     AnyJsStatement, AnyJsSwitchClause, JsBlockStatement, JsFileSource, JsLabeledStatement,
@@ -49,7 +48,7 @@ declare_rule! {
         language: "js",
         sources: &[RuleSource::Eslint("no-lone-blocks")],
         recommended: true,
-        fix_kind: FixKind::Unsafe,
+        fix_kind: FixKind::Safe,
     }
 }
 
@@ -132,7 +131,7 @@ impl Rule for NoUselessLoneBlockStatements {
 
         return Some(JsRuleAction::new(
             ActionCategory::QuickFix,
-            Applicability::Always,
+            ctx.metadata().applicability(),
             markup! { "Remove redundant block." }.to_owned(),
             mutation,
         ));

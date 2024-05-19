@@ -4,7 +4,6 @@ use biome_analyze::{
     declare_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic, RuleSource, RuleSourceKind,
 };
 use biome_console::markup;
-use biome_diagnostics::Applicability;
 use biome_js_factory::{
     make,
     syntax::{AnyTsType, T},
@@ -88,7 +87,7 @@ impl Rule for NoEmptyInterface {
         );
         Some(JsRuleAction::new(
             ActionCategory::QuickFix,
-            Applicability::Always,
+            ctx.metadata().applicability(),
             markup! { "Use a type alias instead." }.to_owned(),
             mutation,
         ))

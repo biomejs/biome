@@ -2,7 +2,6 @@ use biome_analyze::{
     context::RuleContext, declare_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic,
 };
 use biome_console::markup;
-use biome_diagnostics::Applicability;
 use biome_js_factory::make;
 use biome_js_syntax::{AnyJsStatement, JsForStatement, T};
 use biome_rowan::{trim_leading_trivia_pieces, AstNode, BatchMutationExt};
@@ -98,7 +97,7 @@ impl Rule for UseWhile {
 
         Some(JsRuleAction::new(
             ActionCategory::QuickFix,
-            Applicability::Always,
+            ctx.metadata().applicability(),
             markup! { "Use a "<Emphasis>"while"</Emphasis>" loop." }.to_owned(),
             mutation,
         ))

@@ -15,7 +15,6 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_deserialize::{DeserializableValidator, DeserializationDiagnostic};
 use biome_deserialize_macros::Deserializable;
-use biome_diagnostics::Applicability;
 use biome_js_semantic::{CanBeImportedExported, SemanticModel};
 use biome_js_syntax::{
     binding_ext::AnyJsBindingDeclaration, AnyJsClassMember, AnyJsObjectMember,
@@ -681,7 +680,7 @@ impl Rule for UseNamingConvention {
             if renamed {
                 return Some(JsRuleAction::new(
                     ActionCategory::QuickFix,
-                    Applicability::Always,
+                    ctx.metadata().applicability(),
                      markup! { "Rename this symbol in "<Emphasis>{preferred_case.to_string()}</Emphasis>"." }.to_owned(),
                     mutation,
                 ));

@@ -302,7 +302,7 @@ impl Rule for NurseryRules {
 
         Some(MigrationAction::new(
             ActionCategory::QuickFix,
-            ctx.metadata().to_applicability(),
+            ctx.metadata().applicability(),
             markup! {
                 "Move the rule to the new stable group."
             }
