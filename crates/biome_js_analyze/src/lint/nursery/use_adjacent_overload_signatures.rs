@@ -1,6 +1,9 @@
 use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
-use biome_js_syntax::{AnyJsModuleItem, AnyJsStatement, JsModuleItemList};
+use biome_js_syntax::{
+    AnyJsModuleItem, AnyJsStatement, JsClassDeclaration, JsExport, JsModuleItemList,
+    TsInterfaceDeclaration, TsTypeAliasDeclaration,
+};
 use biome_rowan::{AstNode, TextRange, TokenText};
 
 declare_rule! {
@@ -108,72 +111,65 @@ impl Rule for UseAdjacentOverloadSignatures {
                     match node {
                         // type
                         AnyJsStatement::TsTypeAliasDeclaration(node) => {
-                            let ty = node.ty().ok()?;
-                            let ts_object = ty.as_ts_object_type()?;
-                            let members = ts_object.members();
-                            let mut type_vec = vec![];
-                            for (type_index, member) in members.into_iter().enumerate() {
-                                let method_member =
-                                    member.as_ts_method_signature_type_member()?.name().ok()?;
-                                let text = method_member.name()?;
-                                let range = method_member.range();
-                                type_vec.push((text, type_index, range));
-                            }
+                            let type_vec = handle_type(node)?;
                             methods.push(type_vec.clone());
                         }
                         // interface
                         AnyJsStatement::TsInterfaceDeclaration(node) => {
-                            let members = node.members();
-                            let mut interface_vec = vec![];
-                            for (interface_index, member) in members.into_iter().enumerate() {
-                                let ts_method_signature =
-                                    member.as_ts_method_signature_type_member()?;
-                                let method_member = ts_method_signature.name().ok()?;
-                                let text = method_member.name()?;
-                                let range = method_member.range();
-                                interface_vec.push((text, interface_index, range));
-                            }
+                            let interface_vec = handle_interface(node)?;
                             methods.push(interface_vec);
                         }
                         // class
                         AnyJsStatement::JsClassDeclaration(node) => {
-                            let members = node.members();
-                            let mut class_vec = vec![];
-                            let mut class_index = 0;
-                            for member in members {
-                                if let Some(method_class) = member.as_js_method_class_member() {
-                                    let method_member = method_class.name().ok()?;
-                                    let text = method_member.name()?;
-                                    let range = method_member.range();
-                                    class_vec.push((text, class_index, range));
-                                    class_index += 1;
-                                } else if let Some(method_class) =
-                                    member.as_ts_method_signature_class_member()
-                                {
-                                    let method_member = method_class.name().ok()?;
-                                    let text = method_member.name()?;
-                                    let range = method_member.range();
-                                    class_vec.push((text, class_index, range));
-                                    class_index += 1;
+                            let class_vec = handle_class(node)?;
+                            methods.push(class_vec);
+                        }
+                        // function
+                        AnyJsStatement::JsFunctionDeclaration(node) => {
+                            let body = node.body().ok()?;
+                            let statements = body.statements();
+                            for statement in statements {
+                                match statement {
+                                    AnyJsStatement::TsInterfaceDeclaration(node) => {
+                                        let interface_vec = handle_interface(node)?;
+                                        methods.push(interface_vec);
+                                    }
+                                    AnyJsStatement::TsTypeAliasDeclaration(node) => {
+                                        let type_vec = handle_type(node)?;
+                                        methods.push(type_vec);
+                                    }
+                                    _ => {}
                                 }
                             }
-                            methods.push(class_vec.clone());
+
+                            let return_type_annotation = node.return_type_annotation();
+                            if let Some(return_type_annotation) = return_type_annotation {
+                                let ty = return_type_annotation.ty().ok()?;
+                                if let Some(ty) = ty.as_any_ts_type() {
+                                    let ts_object = ty.as_ts_object_type()?;
+                                    let members = ts_object.members();
+                                    let mut type_vec = vec![];
+                                    for (type_index, member) in members.into_iter().enumerate() {
+                                        let method_member = member
+                                            .as_ts_method_signature_type_member()?
+                                            .name()
+                                            .ok()?;
+                                        let text = method_member.name()?;
+                                        let range = method_member.range();
+                                        type_vec.push((text, type_index, range));
+                                    }
+                                    methods.push(type_vec.clone());
+                                }
+                            }
                         }
                         _ => {}
                     }
                 }
                 AnyJsModuleItem::JsExport(node) => {
-                    let export = node.export_clause().ok()?;
-                    let declaration_clause = export.as_any_js_declaration_clause()?;
-                    let ts_declare = declaration_clause.as_ts_declare_function_declaration()?;
-                    let name_token = ts_declare
-                        .id()
-                        .ok()?
-                        .as_js_identifier_binding()?
-                        .name_token()
-                        .ok()?;
-                    let text = name_token.token_text_trimmed();
-                    let range = name_token.text_range();
+                    let export_text_range = handle_export(node)?;
+                    let tuple = export_text_range[0].clone();
+                    let text = tuple.0.clone();
+                    let range = tuple.1;
                     export_vec.push((text, index, range));
                 }
                 _ => {}
@@ -185,7 +181,6 @@ impl Rule for UseAdjacentOverloadSignatures {
             .iter()
             .map(|(text, range)| (text.clone(), *range))
             .collect();
-
         if !violation_ranges.is_empty() {
             Some(violation_ranges)
         } else {
@@ -269,4 +264,69 @@ fn detect_violation_pos(sorted_positions: &[usize], expected: &[usize]) -> Optio
         }
     }
     None
+}
+
+fn handle_interface(node: TsInterfaceDeclaration) -> Option<Vec<(TokenText, usize, TextRange)>> {
+    let members = node.members();
+    let mut interface_vec = vec![];
+    for (interface_index, member) in members.into_iter().enumerate() {
+        let ts_method_signature = member.as_ts_method_signature_type_member()?;
+        let method_member = ts_method_signature.name().ok()?;
+        let text = method_member.name()?;
+        let range = method_member.range();
+        interface_vec.push((text, interface_index, range));
+    }
+    Some(interface_vec)
+}
+
+fn handle_type(node: TsTypeAliasDeclaration) -> Option<Vec<(TokenText, usize, TextRange)>> {
+    let ty = node.ty().ok()?;
+    let ts_object = ty.as_ts_object_type()?;
+    let members = ts_object.members();
+    let mut type_vec = vec![];
+    for (type_index, member) in members.into_iter().enumerate() {
+        let method_member = member.as_ts_method_signature_type_member()?.name().ok()?;
+        let text = method_member.name()?;
+        let range = method_member.range();
+        type_vec.push((text, type_index, range));
+    }
+    Some(type_vec)
+}
+
+fn handle_class(node: JsClassDeclaration) -> Option<Vec<(TokenText, usize, TextRange)>> {
+    let members = node.members();
+    let mut class_vec = vec![];
+    let mut class_index = 0;
+    for member in members {
+        if let Some(method_class) = member.as_js_method_class_member() {
+            let method_member = method_class.name().ok()?;
+            let text = method_member.name()?;
+            let range = method_member.range();
+            class_vec.push((text, class_index, range));
+            class_index += 1;
+        } else if let Some(method_class) = member.as_ts_method_signature_class_member() {
+            let method_member = method_class.name().ok()?;
+            let text = method_member.name()?;
+            let range = method_member.range();
+            class_vec.push((text, class_index, range));
+            class_index += 1;
+        }
+    }
+    Some(class_vec)
+}
+
+fn handle_export(node: JsExport) -> Option<Vec<(TokenText, TextRange)>> {
+    let export = node.export_clause().ok()?;
+    let declaration_clause = export.as_any_js_declaration_clause()?;
+    let ts_declare = declaration_clause.as_ts_declare_function_declaration()?;
+    let name_token = ts_declare
+        .id()
+        .ok()?
+        .as_js_identifier_binding()?
+        .name_token()
+        .ok()?;
+    let text = name_token.token_text_trimmed();
+    let range = name_token.text_range();
+    let export_text_range = vec![(text, range)];
+    Some(export_text_range)
 }

@@ -63,6 +63,29 @@ export function foo(n: number): void;
 export function bar(): void;
 export function foo(sn: string | number): void;
 
+function f() {
+  interface Inner {
+    interfaceA(x: boolean): boolean
+    interfaceB()
+    interfaceA(x: number): number
+  }
+}
+
+function g() {
+  type InnerType = {
+    typeMethodA(x: boolean): boolean;
+    typeMethodB(): void;
+    typeMethodA(x: number): number;
+  };
+}
+
+function h (): {
+  functionA(x: boolean): boolean,
+  functionB(),
+  functionA(x: number): number,
+} {
+}
+
 ```
 
 # Diagnostics
@@ -144,6 +167,33 @@ invalid.ts:12:3 lint/nursery/useAdjacentOverloadSignatures ━━━━━━━
     49 │   barB(): void {};
     50 │   fooB(n: number): void;
   
+  i All interfaceA signatures must be adjacent.
+  
+    62 │     interfaceA(x: boolean): boolean
+    63 │     interfaceB()
+  > 64 │     interfaceA(x: number): number
+       │     ^^^^^^^^^^
+    65 │   }
+    66 │ }
+  
+  i All typeMethodA signatures must be adjacent.
+  
+    70 │     typeMethodA(x: boolean): boolean;
+    71 │     typeMethodB(): void;
+  > 72 │     typeMethodA(x: number): number;
+       │     ^^^^^^^^^^^
+    73 │   };
+    74 │ }
+  
+  i All functionA signatures must be adjacent.
+  
+    77 │   functionA(x: boolean): boolean,
+    78 │   functionB(),
+  > 79 │   functionA(x: number): number,
+       │   ^^^^^^^^^
+    80 │ } {
+    81 │ }
+  
   i All foo signatures must be adjacent.
   
     56 │ export function foo(n: number): void;
@@ -151,6 +201,7 @@ invalid.ts:12:3 lint/nursery/useAdjacentOverloadSignatures ━━━━━━━
   > 58 │ export function foo(sn: string | number): void;
        │                 ^^^
     59 │ 
+    60 │ function f() {
   
 
 ```

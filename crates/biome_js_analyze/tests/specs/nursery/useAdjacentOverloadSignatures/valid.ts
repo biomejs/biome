@@ -48,3 +48,17 @@ export function foo(s: string): void;
 export function foo(n: number): void;
 export function foo(sn: string | number): void;
 
+function f() {
+  interface Inner {
+    innterInterfaceA(x: boolean): boolean
+    intterInterfaceA(x: number): number
+    innterInterfaceB()
+  }
+}
+
+function f (): {
+  functionB(),
+  functionA(x: boolean): boolean,
+  functionA(x: number): number,
+} {
+}

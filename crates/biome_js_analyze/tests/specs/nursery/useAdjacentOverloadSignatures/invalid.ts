@@ -56,3 +56,26 @@ export function foo(s: string): void;
 export function foo(n: number): void;
 export function bar(): void;
 export function foo(sn: string | number): void;
+
+function f() {
+  interface Inner {
+    interfaceA(x: boolean): boolean
+    interfaceB()
+    interfaceA(x: number): number
+  }
+}
+
+function g() {
+  type InnerType = {
+    typeMethodA(x: boolean): boolean;
+    typeMethodB(): void;
+    typeMethodA(x: number): number;
+  };
+}
+
+function h (): {
+  functionA(x: boolean): boolean,
+  functionB(),
+  functionA(x: number): number,
+} {
+}
