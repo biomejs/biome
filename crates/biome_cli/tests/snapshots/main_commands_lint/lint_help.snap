@@ -7,7 +7,7 @@ expression: content
 ```block
 Run various checks on a set of files.
 
-Usage: lint [--fix] [--unsafe] [--rule=<GROUP|RULE>] [--staged] [--changed] [--since=REF] [PATH]...
+Usage: lint [--write] [--unsafe] [--rule=<GROUP|RULE>] [--staged] [--changed] [--since=REF] [PATH]...
 
 Set of properties to integrate Biome with a VCS software.
         --vcs-client-kind=<git>  The kind of client.
@@ -65,11 +65,11 @@ Available positional items:
     PATH                      Single file, single path or list of paths
 
 Available options:
-        --apply               Apply safe fixes, formatting and import sorting
-        --apply-unsafe        Apply safe fixes and unsafe fixes, formatting and import sorting
-        --fix                 Fixes lint errors safely
-        --write               Alias for `--fix`, fixes lint errors safely
-        --unsafe              Allow to do unsafe fixes, should be used with `--fix` or `--write`
+        --write               Writes safe fixes
+        --unsafe              Allow to do unsafe fixes, should be used with `--write` or `--fix`
+        --fix                 Alias for `--write`, writes safe fixes
+        --apply               Alias for `--write`, writes safe fixes
+        --apply-unsafe        Alias for `--write --unsafe`, writes safe and unsafe fixes
         --rule=<GROUP|RULE>   Run only the given rule or rule group.
                               The option overrides the Biome configuration file as follows:
                               - When a rule is passed, its severity level is set to `error' if it is

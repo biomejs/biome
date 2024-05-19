@@ -79,24 +79,25 @@ pub enum BiomeCommand {
     /// Runs formatter, linter and import sorting to the requested files.
     #[bpaf(command)]
     Check {
-        /// Apply safe fixes, formatting and import sorting
-        #[bpaf(long("apply"), switch, hide_usage)]
-        apply: bool,
-        /// Apply safe fixes and unsafe fixes, formatting and import sorting
-        #[bpaf(long("apply-unsafe"), switch, hide_usage)]
-        apply_unsafe: bool,
-
-        /// Fixes lint errors safely, formatting and import sorting
-        #[bpaf(long("fix"), switch)]
-        fix: bool,
-
-        /// Alias for `--fix`, fixes lint errors safely, formatting and import sorting
-        #[bpaf(long("write"), switch, hide_usage)]
+        /// Writes safe fixes, formatting and import sorting
+        #[bpaf(long("write"), switch)]
         write: bool,
 
-        /// Allow to do unsafe fixes, should be used with `--fix` or `--write`
+        /// Allow to do unsafe fixes, should be used with `--write` or `--fix`
         #[bpaf(long("unsafe"), switch)]
         unsafe_: bool,
+
+        /// Alias for `--write`, writes safe fixes, formatting and import sorting
+        #[bpaf(long("fix"), switch, hide_usage)]
+        fix: bool,
+
+        /// Alias for `--write`, writes safe fixes, formatting and import sorting
+        #[bpaf(long("apply"), switch, hide_usage)]
+        apply: bool,
+
+        /// Alias for `--write --unsafe`, writes safe and unsafe fixes, formatting and import sorting
+        #[bpaf(long("apply-unsafe"), switch, hide_usage)]
+        apply_unsafe: bool,
 
         /// Allow to enable or disable the formatter check.
         #[bpaf(
@@ -151,24 +152,25 @@ pub enum BiomeCommand {
     /// Run various checks on a set of files.
     #[bpaf(command)]
     Lint {
-        /// Apply safe fixes, formatting and import sorting
-        #[bpaf(long("apply"), switch, hide_usage)]
-        apply: bool,
-        /// Apply safe fixes and unsafe fixes, formatting and import sorting
-        #[bpaf(long("apply-unsafe"), switch, hide_usage)]
-        apply_unsafe: bool,
-
-        /// Fixes lint errors safely
-        #[bpaf(long("fix"), switch)]
-        fix: bool,
-
-        /// Alias for `--fix`, fixes lint errors safely
-        #[bpaf(long("write"), switch, hide_usage)]
+        /// Writes safe fixes
+        #[bpaf(long("write"), switch)]
         write: bool,
 
-        /// Allow to do unsafe fixes, should be used with `--fix` or `--write`
+        /// Allow to do unsafe fixes, should be used with `--write` or `--fix`
         #[bpaf(long("unsafe"), switch)]
         unsafe_: bool,
+
+        /// Alias for `--write`, writes safe fixes
+        #[bpaf(long("fix"), switch, hide_usage)]
+        fix: bool,
+
+        /// Alias for `--write`, writes safe fixes
+        #[bpaf(long("apply"), switch, hide_usage)]
+        apply: bool,
+
+        /// Alias for `--write --unsafe`, writes safe and unsafe fixes
+        #[bpaf(long("apply-unsafe"), switch, hide_usage)]
+        apply_unsafe: bool,
 
         #[bpaf(external(partial_linter_configuration), hide_usage, optional)]
         linter_configuration: Option<PartialLinterConfiguration>,
@@ -346,7 +348,7 @@ pub enum BiomeCommand {
         cli_options: CliOptions,
 
         /// Writes the new configuration file to disk
-        #[bpaf(long("write"), long("fix"), switch)]
+        #[bpaf(long("write"), switch)]
         write: bool,
 
         /// Alias of `--write`, writes the new configuration file to disk

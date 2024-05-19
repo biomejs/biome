@@ -7,7 +7,7 @@ expression: content
 ```block
 Runs formatter, linter and import sorting to the requested files.
 
-Usage: check [--fix] [--unsafe] [--staged] [--changed] [--since=REF] [PATH]...
+Usage: check [--write] [--unsafe] [--staged] [--changed] [--since=REF] [PATH]...
 
 The configuration that is contained inside the file `biome.json`
         --vcs-client-kind=<git>  The kind of client.
@@ -123,11 +123,12 @@ Available positional items:
     PATH                      Single file, single path or list of paths
 
 Available options:
-        --apply               Apply safe fixes, formatting and import sorting
-        --apply-unsafe        Apply safe fixes and unsafe fixes, formatting and import sorting
-        --fix                 Fixes lint errors safely, formatting and import sorting
-        --write               Alias for `--fix`, fixes lint errors safely, formatting and import sorting
-        --unsafe              Allow to do unsafe fixes, should be used with `--fix` or `--write`
+        --write               Writes safe fixes, formatting and import sorting
+        --unsafe              Allow to do unsafe fixes, should be used with `--write` or `--fix`
+        --fix                 Alias for `--write`, writes safe fixes, formatting and import sorting
+        --apply               Alias for `--write`, writes safe fixes, formatting and import sorting
+        --apply-unsafe        Alias for `--write --unsafe`, writes safe and unsafe fixes, formatting
+                              and import sorting
         --formatter-enabled=<true|false>  Allow to enable or disable the formatter check.
         --linter-enabled=<true|false>  Allow to enable or disable the linter check.
         --organize-imports-enabled=<true|false>  Allow to enable or disable the organize imports.
