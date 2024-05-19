@@ -38,6 +38,7 @@ Global options applied to all commands
 
 Available options:
         --write               Writes the new configuration file to disk
+        --fix                 Alias of `--write`, writes the new configuration file to disk
     -h, --help                Prints help information
 
 Available commands:

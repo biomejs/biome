@@ -346,8 +346,12 @@ pub enum BiomeCommand {
         cli_options: CliOptions,
 
         /// Writes the new configuration file to disk
-        #[bpaf(long("write"), switch)]
+        #[bpaf(long("write"), long("fix"), switch)]
         write: bool,
+
+        /// Alias of `--write`, writes the new configuration file to disk
+        #[bpaf(long("fix"), switch, hide_usage)]
+        fix: bool,
 
         #[bpaf(external(migrate_sub_command), optional)]
         sub_command: Option<MigrateSubCommand>,

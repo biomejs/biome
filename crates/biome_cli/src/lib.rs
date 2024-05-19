@@ -219,8 +219,9 @@ impl<'app> CliSession<'app> {
             BiomeCommand::Migrate {
                 cli_options,
                 write,
+                fix,
                 sub_command,
-            } => commands::migrate::migrate(self, cli_options, write, sub_command),
+            } => commands::migrate::migrate(self, cli_options, write, fix, sub_command),
             BiomeCommand::Search {
                 cli_options,
                 files_configuration,
