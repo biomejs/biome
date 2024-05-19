@@ -5,6 +5,8 @@ use biome_rowan::AstNode;
 use lazy_static::lazy_static;
 use regex::Regex;
 
+use crate::utils::vendor_prefixed;
+
 declare_rule! {
     /// Disallow non-standard direction values for linear gradient functions.
     ///
@@ -46,7 +48,6 @@ declare_rule! {
 }
 
 lazy_static! {
-    pub static ref GET_PREFIX_REGEX: Regex = Regex::new(r"^(-\w+-)").unwrap();
     pub static ref LINEAR_GRADIENT_FUNCTION_NAME: Regex =
         Regex::new(r"^(?i)(-webkit-|-moz-|-o-|-ms-)?linear-gradient").unwrap();
     pub static ref IN_KEYWORD: Regex = Regex::new(r"(?i)\bin\b").unwrap();
@@ -73,7 +74,7 @@ impl Rule for NoInvalidDirectionInLinearGradient {
     type Signals = Option<Self::State>;
     type Options = ();
 
-    fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
+    fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
         let node_name = node.name().ok()?.text();
         let is_linear_gradient = LINEAR_GRADIENT_FUNCTION_NAME.is_match(&node_name);
@@ -98,10 +99,7 @@ impl Rule for NoInvalidDirectionInLinearGradient {
             if !DIRECTION.is_match(&first_css_parameter_text) {
                 return None;
             }
-            let has_prefix = LINEAR_GRADIENT_FUNCTION_NAME
-                .captures(&node_name)
-                .and_then(|caps| caps.get(1))
-                .is_some();
+            let has_prefix = vendor_prefixed(&node_name);
             if !is_standdard_direction(&first_css_parameter_text, !has_prefix) {
                 return Some(first_css_parameter);
             }
