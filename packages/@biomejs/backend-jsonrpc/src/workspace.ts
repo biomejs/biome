@@ -1094,7 +1094,7 @@ export interface Nursery {
 	 */
 	useNumberToFixedDigitsArgument?: RuleFixConfiguration_for_Null;
 	/**
-	 * Succinct description of the rule.
+	 * It detects the use of role attributes in JSX elements and suggests using semantic elements instead.
 	 */
 	useSemanticElements?: RuleConfiguration_for_Null;
 	/**

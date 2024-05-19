@@ -3411,7 +3411,7 @@ pub struct Nursery {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_number_to_fixed_digits_argument:
         Option<RuleFixConfiguration<UseNumberToFixedDigitsArgument>>,
-    #[doc = "Succinct description of the rule."]
+    #[doc = "It detects the use of role attributes in JSX elements and suggests using semantic elements instead."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_semantic_elements: Option<RuleConfiguration<UseSemanticElements>>,
     #[doc = "Enforce the sorting of CSS utility classes."]
@@ -3518,7 +3518,6 @@ impl Nursery {
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[23]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[30]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[31]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[32]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[34]),
     ];
     const ALL_RULES_AS_FILTERS: &'static [RuleFilter<'static>] = &[

@@ -15,6 +15,7 @@ const Image = () => (
 const Button = () => (
     <div aria-label="foo" role="button" >button</div>
 );
+
 ```
 
 # Diagnostics
@@ -59,6 +60,7 @@ invalid.js:10:27 lint/nursery/useSemanticElements ━━━━━━━━━━
   > 10 │     <div aria-label="foo" role="button" >button</div>
        │                           ^^^^^^^^^^^^^
     11 │ );
+    12 │ 
   
   i Semantic elements like `<button>`, `<input>`, `<textarea>`, `<a>`, `<img>`, `<table>`, `<article>`, `<section>`, `<nav>`, `<aside>`, `<header>`, `<footer>`, `<main>`, `<figure>`, `<figcaption>`, `<details>`, `<summary>`, `<dialog>`, `<menu>`, `<menuitem>`, `<fieldset>`, `<legend>`, `<caption>`, `<colgroup>`, `<col>`, `<optgroup>`, `<option>`, `<select>`, `<datalist>`, `<output>`, `<progress>`, `<meter>`, `<time>`, `<audio>`, `<video>`, `<track>`, `<source>`, `<embed>`, `<object>`, `<param>`, `<iframe>`, `<canvas>`, `<map>`, `<area>`, `<svg>`, `<math>` are more accessible and provide better semantics.
   

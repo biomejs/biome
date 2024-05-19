@@ -1862,7 +1862,7 @@
 					]
 				},
 				"useSemanticElements": {
-					"description": "Succinct description of the rule.",
+					"description": "It detects the use of role attributes in JSX elements and suggests using semantic elements instead.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
