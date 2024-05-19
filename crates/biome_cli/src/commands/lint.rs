@@ -17,12 +17,17 @@ use biome_deserialize::Merge;
 use biome_service::configuration::{
     load_configuration, LoadedConfiguration, PartialConfigurationExt,
 };
-use biome_service::workspace::{FixFileMode, RegisterProjectFolderParams, UpdateSettingsParams};
+use biome_service::workspace::{RegisterProjectFolderParams, UpdateSettingsParams};
 use std::ffi::OsString;
+
+use super::{determine_fix_file_mode, FixFileModeOptions};
 
 pub(crate) struct LintCommandPayload {
     pub(crate) apply: bool,
     pub(crate) apply_unsafe: bool,
+    pub(crate) write: bool,
+    pub(crate) fix: bool,
+    pub(crate) unsafe_: bool,
     pub(crate) cli_options: CliOptions,
     pub(crate) linter_configuration: Option<PartialLinterConfiguration>,
     pub(crate) vcs_configuration: Option<PartialVcsConfiguration>,
@@ -43,6 +48,9 @@ pub(crate) fn lint(session: CliSession, payload: LintCommandPayload) -> Result<(
     let LintCommandPayload {
         apply,
         apply_unsafe,
+        write,
+        fix,
+        unsafe_,
         cli_options,
         mut linter_configuration,
         mut paths,
@@ -59,18 +67,16 @@ pub(crate) fn lint(session: CliSession, payload: LintCommandPayload) -> Result<(
     } = payload;
     setup_cli_subscriber(cli_options.log_level, cli_options.log_kind);
 
-    let fix_file_mode = if apply && apply_unsafe {
-        return Err(CliDiagnostic::incompatible_arguments(
-            "--apply",
-            "--apply-unsafe",
-        ));
-    } else if !apply && !apply_unsafe {
-        None
-    } else if apply && !apply_unsafe {
-        Some(FixFileMode::SafeFixes)
-    } else {
-        Some(FixFileMode::SafeAndUnsafeFixes)
-    };
+    let fix_file_mode = determine_fix_file_mode(
+        FixFileModeOptions {
+            apply,
+            apply_unsafe,
+            write,
+            fix,
+            unsafe_,
+        },
+        session.app.console,
+    )?;
 
     let loaded_configuration =
         load_configuration(&session.app.fs, cli_options.as_configuration_path_hint())?;

@@ -82,6 +82,9 @@ impl<'app> CliSession<'app> {
             BiomeCommand::Check {
                 apply,
                 apply_unsafe,
+                write,
+                fix,
+                unsafe_,
                 cli_options,
                 configuration,
                 paths,
@@ -97,6 +100,9 @@ impl<'app> CliSession<'app> {
                 CheckCommandPayload {
                     apply_unsafe,
                     apply,
+                    write,
+                    fix,
+                    unsafe_,
                     cli_options,
                     configuration,
                     paths,
@@ -112,6 +118,9 @@ impl<'app> CliSession<'app> {
             BiomeCommand::Lint {
                 apply,
                 apply_unsafe,
+                write,
+                fix,
+                unsafe_,
                 cli_options,
                 linter_configuration,
                 paths,
@@ -130,6 +139,9 @@ impl<'app> CliSession<'app> {
                 LintCommandPayload {
                     apply_unsafe,
                     apply,
+                    write,
+                    fix,
+                    unsafe_,
                     cli_options,
                     linter_configuration,
                     paths,
@@ -172,6 +184,7 @@ impl<'app> CliSession<'app> {
                 formatter_configuration,
                 stdin_file_path,
                 write,
+                fix,
                 cli_options,
                 paths,
                 vcs_configuration,
@@ -188,6 +201,7 @@ impl<'app> CliSession<'app> {
                     formatter_configuration,
                     stdin_file_path,
                     write,
+                    fix,
                     cli_options,
                     paths,
                     vcs_configuration,
@@ -205,8 +219,9 @@ impl<'app> CliSession<'app> {
             BiomeCommand::Migrate {
                 cli_options,
                 write,
+                fix,
                 sub_command,
-            } => commands::migrate::migrate(self, cli_options, write, sub_command),
+            } => commands::migrate::migrate(self, cli_options, write, fix, sub_command),
             BiomeCommand::Search {
                 cli_options,
                 files_configuration,
