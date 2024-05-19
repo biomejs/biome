@@ -640,7 +640,7 @@ pub(crate) struct FixFileModeOptions {
 /// - [FixFileMode]: if safe or unsafe fixes are requested
 pub(crate) fn determine_fix_file_mode(
     options: FixFileModeOptions,
-    console: &mut dyn Console,
+    _console: &mut dyn Console,
 ) -> Result<Option<FixFileMode>, CliDiagnostic> {
     let FixFileModeOptions {
         apply,
@@ -707,9 +707,7 @@ mod tests {
 
     #[test]
     fn incompatible_arguments() {
-        let mut console = BufferConsole::default();
-
-        for (apply, apply_unsafe, write, fix, unsafe_) in vec![
+        for (apply, apply_unsafe, write, fix, unsafe_) in [
             (true, true, false, false, false), // --apply --apply-unsafe
             (true, false, true, false, false), // --apply --write
             (true, false, false, true, false), // --apply --fix
@@ -724,7 +722,7 @@ mod tests {
                 write,
                 fix,
                 unsafe_
-            },)
+            })
             .is_err());
         }
     }
@@ -733,7 +731,7 @@ mod tests {
     fn safe_fixes() {
         let mut console = BufferConsole::default();
 
-        for (apply, apply_unsafe, write, fix, unsafe_) in vec![
+        for (apply, apply_unsafe, write, fix, unsafe_) in [
             (true, false, false, false, false), // --apply
             (false, false, true, false, false), // --write
             (false, false, false, true, false), // --fix
@@ -759,7 +757,7 @@ mod tests {
     fn safe_and_unsafe_fixes() {
         let mut console = BufferConsole::default();
 
-        for (apply, apply_unsafe, write, fix, unsafe_) in vec![
+        for (apply, apply_unsafe, write, fix, unsafe_) in [
             (false, true, false, false, false), // --apply-unsafe
             (false, false, true, false, true),  // --write --unsafe
             (false, false, false, true, true),  // --fix --unsafe
@@ -785,23 +783,21 @@ mod tests {
     fn no_fix() {
         let mut console = BufferConsole::default();
 
-        for (apply, apply_unsafe, write, fix, unsafe_) in vec![(false, false, false, false, false)]
-        {
-            assert_eq!(
-                determine_fix_file_mode(
-                    FixFileModeOptions {
-                        apply,
-                        apply_unsafe,
-                        write,
-                        fix,
-                        unsafe_
-                    },
-                    &mut console
-                )
-                .unwrap(),
-                None
-            );
-        }
+        let (apply, apply_unsafe, write, fix, unsafe_) = (false, false, false, false, false);
+        assert_eq!(
+            determine_fix_file_mode(
+                FixFileModeOptions {
+                    apply,
+                    apply_unsafe,
+                    write,
+                    fix,
+                    unsafe_
+                },
+                &mut console
+            )
+            .unwrap(),
+            None
+        );
     }
 
     /// Tests that all CLI options adhere to the invariants expected by `bpaf`.
