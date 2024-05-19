@@ -232,7 +232,7 @@ Below, there are many tips and guidelines on how to create a lint rule using Bio
 
 This macro is used to declare an analyzer rule type, and implement the [RuleMeta] trait for it.
 
-The macro itself expect the following syntax:
+The macro itself expects the following syntax:
 
 ```rust
 use biome_analyze::declare_rule;
@@ -250,7 +250,7 @@ declare_rule! {
 
 ##### Biome lint rules inspired by other lint rules
 
-If a **lint** rule is inspired by an existing rule from other ecosystems (ESLint, ESLint plugins, clippy, etc.), you can a new metadata to the macro called `source`. Its value is `Source`, which is an `enum` that contains various variants.
+If a **lint** rule is inspired by an existing rule from other ecosystems (ESLint, ESLint plugins, clippy, etc.), you can add a new metadata to the macro called `source`. Its value is `Source`, which is an `enum` that contains various variants.
 
 If you're implementing a lint rule that matches the behaviour of the ESLint rule `no-debugger`, you'll use the variant `::ESLint` and pass the name of the rule:
 
@@ -269,7 +269,7 @@ declare_rule! {
 }
 ```
 
-If the rule you're implementing has a different behaviour and/or option, you can add the `source_kind` metadata and use the `SourceKind::Inspired` type.
+If the rule you're implementing has a different behaviour or option, you can add the `source_kind` metadata and use the `SourceKind::Inspired` type.
 
 ```rust
 use biome_analyze::{declare_rule, Source, SourceKind};
@@ -322,11 +322,11 @@ impl Rule for ExampleRule {
 
 #### Navigating the CST
 
-Then navigating the nodes and tokens of certain nodes, you will notice straight away that the majority of those methods will return a `Result` (`SyntaxResult`).
+When navigating the nodes and tokens of certain nodes, you will notice straight away that the majority of those methods will return a `Result` (`SyntaxResult`).
 
 Generally, you will end up navigating the CST inside the `run` function, and this function will usually return an `Option` or a `Vec`.
 
-- If the `run` function returns an `Option`, you're encouraged to transform `Result` into `Option` and use the try operator `?`. This will make your coding way easier:
+- If the `run` function returns an `Option`, you're encouraged to transform the `Result` into an `Option` and use the try operator `?`. This will make your coding way easier:
   ```rust
   fn run() -> Self::Signals {
     let prev_val = js_object_member.value().ok()?;
@@ -417,7 +417,7 @@ impl Rule for ForLoopCountReferences {
 
 A rule can implement a code action. A code action provides to the final user the option to fix or change their code.
 
-For a lint rule, for example, it signals an opportunity for the user to fix the diagnostic emitted by the rule.
+In a lint rule, for example, it signals an opportunity for the user to fix the diagnostic emitted by the rule.
 
 First, you have to add a new metadata called `fix_kind`, its value is the `FixKind`.
 
