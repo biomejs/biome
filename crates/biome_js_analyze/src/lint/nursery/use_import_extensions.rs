@@ -158,39 +158,52 @@ fn get_extensionless_import(
     }
 
     let import_ext = resolve_import_extension(file_ext, path);
-    let mut path_buf = path.to_path_buf();
 
-    let is_index_file = match last_component {
-        Component::ParentDir => true,
+    let mut path_parts = module_path.text().split('/');
+    let mut is_index_file = false;
+
+    // Remove trailing slash.
+    if module_path.ends_with('/') {
+        path_parts.next_back();
+
+        is_index_file = true;
+    }
+
+    match last_component {
+        Component::ParentDir => {
+            is_index_file = true;
+        }
         // `import ".././"` is the same as `import "../"`
         // Rust Path does not expose `./` path segment at very end, likely because it does not do anything.
         // To provide proper fix, we need to remove it as well.
-        Component::Normal(os_str) if module_path.ends_with("./") || module_path.ends_with('.') => {
-            if let Some(base_name) = os_str.to_str() {
-                path_buf.set_file_name(base_name);
+        Component::Normal(_) if module_path.ends_with("./") || module_path.ends_with('.') => {
+            // Remove useless path segment.
+            path_parts.next_back();
 
-                true
-            } else {
-                false
-            }
+            is_index_file = true;
         }
-        _ if module_path.ends_with('/') => true,
-        _ => false,
+        _ => {}
     };
 
-    if is_index_file {
-        let part = format!("index.{}", import_ext);
-        path_buf.push(part);
+    let mut new_path = path_parts.map(|p| format!("{}/", p)).collect::<String>();
+
+    let part = if is_index_file {
+        format!("index.{}", import_ext)
     } else {
-        path_buf.set_extension(import_ext);
-    }
+        // TODO. Once `intersperse` is stabilized, use it instead.
+        // https://github.com/rust-lang/rust/issues/79524
+        // Remove trailing slash after mapping.
+        new_path.pop();
+
+        format!(".{}", import_ext)
+    };
+
+    new_path.push_str(&part);
 
     Some(UseImportExtensionsState {
         module_name_token: module_name_token.clone(),
-        suggestion: Some((
-            path_buf.to_string_lossy().to_string(),
-            import_ext.to_string(),
-        )),
+        // suggestion: None,
+        suggestion: Some((new_path, import_ext.to_string())),
     })
 }
 
