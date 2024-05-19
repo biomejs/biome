@@ -169,6 +169,8 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 #### New features
 
+- Add [nursery/useThrowOnlyError](https://biomejs.dev/linter/rules/use_throw_only_error/).
+  Contributed by @minht11
 - [useNamingConvention](https://biomejs.dev/linter/rules/use-naming-convention/) now supports an option to enforce custom conventions ([#1900](https://github.com/biomejs/biome/issues/1900)).
 
   For example, you can enforce the use of a prefix for private class members:

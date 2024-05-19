@@ -1102,6 +1102,10 @@ export interface Nursery {
 	 */
 	useThrowNewError?: RuleFixConfiguration_for_Null;
 	/**
+	 * Disallow throwing non-Error values.
+	 */
+	useThrowOnlyError?: RuleConfiguration_for_Null;
+	/**
 	 * Require all regex literals to be declared at the top level.
 	 */
 	useTopLevelRegex?: RuleConfiguration_for_Null;
@@ -2304,6 +2308,7 @@ export type Category =
 	| "lint/nursery/useNumberToFixedDigitsArgument"
 	| "lint/nursery/useSortedClasses"
 	| "lint/nursery/useThrowNewError"
+	| "lint/nursery/useThrowOnlyError"
 	| "lint/nursery/useTopLevelRegex"
 	| "lint/performance/noAccumulatingSpread"
 	| "lint/performance/noBarrelFile"
