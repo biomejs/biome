@@ -212,6 +212,8 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 #### New features
 
+- Add [nursery/useDateNow](https://biomejs.dev/linter/rules/use-date-now/).
+  Contributed by @minht11
 - Add [nursery/useImportExtensions](https://biomejs.dev/linter/rules/use-import-extensions/).
   Contributed by @minht11
 

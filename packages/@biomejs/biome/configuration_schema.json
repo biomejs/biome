@@ -1819,6 +1819,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useDateNow": {
+					"description": "Use Date.now() to get the number of milliseconds since the Unix Epoch.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleFixConfiguration_for_Null" },
+						{ "type": "null" }
+					]
+				},
 				"useDefaultSwitchClause": {
 					"description": "Require the default clause in switch statements.",
 					"anyOf": [
