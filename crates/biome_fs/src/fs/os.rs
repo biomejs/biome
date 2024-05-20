@@ -53,7 +53,6 @@ impl Default for OsFileSystem {
     }
 }
 
-
 impl FileSystem for OsFileSystem {
     fn open_with_options(&self, path: &Path, options: OpenOptions) -> io::Result<Box<dyn File>> {
         tracing::debug_span!("OsFileSystem::open_with_options", path = ?path, options = ?options)
@@ -72,15 +71,21 @@ impl FileSystem for OsFileSystem {
         })
     }
 
-    fn for_each_path(&self,  func: ForEachPath) {
-        let paths = self.paths.0.read();
-        let iter = paths.iter();
-        for path in iter {
-            OsTraversalScope::with(|_| {
-                func(path.as_path())
-            })
-        }
+    fn check(&self, func: BoxedTraversal) {
+        OsTraversalScope::with(move |scope| {
+            func(scope);
+        })
     }
+
+    // fn for_each_path(&self,  func: ForEachPath) {
+    //     let paths = self.paths.0.read();
+    //     let iter = paths.iter();
+    //     for path in iter {
+    //         OsTraversalScope::with(|_| {
+    //             func(path.as_path())
+    //         })
+    //     }
+    // }
 
     fn working_directory(&self) -> Option<PathBuf> {
         self.working_directory.clone()
@@ -220,6 +225,12 @@ impl<'scope> TraversalScope<'scope> for OsTraversalScope<'scope> {
         };
         handle_any_file(&self.scope, ctx, path, file_type, None);
     }
+
+    fn handle(&self, context: &'scope dyn TraversalContext, path: PathBuf) {
+        self.scope.spawn(move |_| {
+            context.handle_path(&path);
+        });
+    }
 }
 
 // TODO: remove in Biome 2.0, and directly use `.gitignore`
@@ -356,10 +367,10 @@ fn handle_any_file<'scope>(
     }
 
     if file_type.is_file() {
-            scope.spawn(move |_| {
-                ctx.handle_file(&path);
-                // ctx.store_file(&path);
-            });
+        scope.spawn(move |_| {
+            ctx.handle_path(&path);
+            // ctx.store_file(&path);
+        });
         return;
     }
 

@@ -1,4 +1,4 @@
-use super::process_file::{store_file, DiffKind, FileStatus, Message, FileResult, process_file};
+use super::process_file::{process_file, process_file, DiffKind, FileResult, FileStatus, Message};
 use super::{Execution, TraversalMode};
 use crate::cli_options::CliOptions;
 use crate::execute::diagnostics::{
@@ -15,7 +15,9 @@ use biome_service::workspace::{DropPatternParams, IsPathIgnoredParams};
 use biome_service::{extension_error, workspace::SupportsFeatureParams, Workspace, WorkspaceError};
 use crossbeam::channel::{unbounded, Receiver, Sender};
 use rustc_hash::FxHashSet;
+use std::panic::UnwindSafe;
 use std::sync::atomic::AtomicU32;
+use std::sync::RwLock;
 use std::{
     env::current_dir,
     ffi::OsString,
@@ -28,7 +30,6 @@ use std::{
     thread,
     time::{Duration, Instant},
 };
-use std::panic::UnwindSafe;
 
 pub(crate) fn traverse(
     execution: &Execution,
@@ -103,6 +104,7 @@ pub(crate) fn traverse(
                 skipped: &skipped,
                 messages: sender,
                 remaining_diagnostics: &remaining_diagnostics,
+                paths: RwLock::default(),
             },
         );
         // wait for the main thread to finish
@@ -163,8 +165,11 @@ fn traverse_inputs(fs: &dyn FileSystem, inputs: Vec<OsString>, ctx: &TraversalOp
         }
     }));
 
-    fs.for_each_path(Box::new(move | path| {
-        ctx.handle_file(path)
+    let paths = ctx.paths();
+    fs.check(Box::new(move |scope: &dyn TraversalScope| {
+        for path in paths {
+            scope.handle(ctx, path.to_path_buf());
+        }
     }));
 
     start.elapsed()
@@ -488,6 +493,9 @@ pub(crate) struct TraversalOptions<'ctx, 'app> {
     /// The approximate number of diagnostics the console will print before
     /// folding the rest into the "skipped diagnostics" counter
     pub(crate) remaining_diagnostics: &'ctx AtomicU32,
+
+    /// List of paths that should be processed
+    pub(crate) paths: RwLock<Vec<PathBuf>>,
 }
 
 impl<'ctx, 'app> TraversalOptions<'ctx, 'app> {
@@ -521,6 +529,10 @@ impl<'ctx, 'app> TraversalOptions<'ctx, 'app> {
 impl<'ctx, 'app> TraversalContext for TraversalOptions<'ctx, 'app> {
     fn interner(&self) -> &PathInterner {
         &self.interner
+    }
+
+    fn paths(&self) -> &[PathBuf] {
+        self.paths.read().unwrap().as_slice()
     }
 
     fn push_diagnostic(&self, error: Error) {
@@ -593,19 +605,22 @@ impl<'ctx, 'app> TraversalContext for TraversalOptions<'ctx, 'app> {
         }
     }
 
-    fn handle_file(&self, path: &Path) {
+    fn handle_path(&self, path: &Path) {
         handle_file(self, path, process_file)
     }
 
-    fn store_file(&self, path: &Path) {
-        handle_file(self, path, store_file)
+    fn store_path(&self, path: &Path) {
+        self.paths.write().unwrap().push(path.to_path_buf())
     }
 }
 
-/// This function wraps the [store_file] function implementing the traversal
+/// This function wraps the [process_file] function implementing the traversal
 /// in a [catch_unwind] block and emit diagnostics in case of error (either the
 /// traversal function returns Err or panics)
-fn handle_file<F>(ctx: &TraversalOptions, path: &Path, func: F) where F: Fn(&TraversalOptions, &Path) -> FileResult + UnwindSafe {
+fn handle_file<F>(ctx: &TraversalOptions, path: &Path, func: F)
+where
+    F: Fn(&TraversalOptions, &Path) -> FileResult + UnwindSafe,
+{
     match catch_unwind(move || func(ctx, path)) {
         Ok(Ok(FileStatus::Changed)) => {
             ctx.increment_changed();

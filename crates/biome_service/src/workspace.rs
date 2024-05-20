@@ -283,18 +283,6 @@ impl FileFeaturesResult {
         self.support_kind_for(&FeatureName::OrganizeImports)
     }
 
-    pub fn supports_lint(&self) -> bool {
-        self.supports_for(&FeatureName::Lint)
-    }
-
-    pub fn supports_format(&self) -> bool {
-        self.supports_for(&FeatureName::Format)
-    }
-
-    pub fn supports_organize_imports(&self) -> bool {
-        self.supports_for(&FeatureName::OrganizeImports)
-    }
-
     pub fn support_kind_for(&self, feature: &FeatureKind) -> Option<&SupportKind> {
         self.features_supported.get(feature)
     }
@@ -320,14 +308,14 @@ impl FileFeaturesResult {
             .all(|support_kind| support_kind.is_protected())
     }
 
-    /// The file is not supported if all the featured marked it as not supported
+    /// The file is not supported if all the features are unsupported
     pub fn is_not_supported(&self) -> bool {
         self.features_supported
             .values()
             .all(|support_kind| support_kind.is_not_supported())
     }
 
-    /// The file is not enabled if all the features marked it as not enabled
+    /// The file is not enabled if all the features aren't enabled
     pub fn is_not_enabled(&self) -> bool {
         self.features_supported
             .values()

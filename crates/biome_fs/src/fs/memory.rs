@@ -237,13 +237,8 @@ impl FileSystem for MemoryFileSystem {
         todo!()
     }
 
-    fn for_each_path(&self,  func: ForEachPath) {
-        let files = self.files.0.read();
-
-        for file in files.keys() {
-
-            func(file.as_path())
-        }
+    fn check<'scope>(&'scope self, func: BoxedTraversal<'_, 'scope>) {
+        func(&MemoryTraversalScope { fs: self })
     }
 }
 
@@ -319,7 +314,7 @@ impl<'scope> TraversalScope<'scope> for MemoryTraversalScope<'scope> {
                     if !ctx.can_handle(&biome_path) {
                         continue;
                     }
-                    ctx.handle_file(path);
+                    ctx.store_path(path);
                 }
             }
         }
@@ -343,6 +338,10 @@ impl<'scope> TraversalScope<'scope> for MemoryTraversalScope<'scope> {
                 }));
             }
         }
+    }
+
+    fn handle(&self, context: &'scope dyn TraversalContext, path: PathBuf) {
+        context.handle_path(&path);
     }
 }
 
@@ -538,12 +537,17 @@ mod tests {
                 true
             }
 
-            fn handle_file(&self, path: &Path) {
+            fn handle_path(&self, path: &Path) {
                 self.visited.lock().push(path.into())
             }
 
-            fn store_file(&self, path: &Path) {
+            fn store_path(&self, path: &Path) {
                 self.visited.lock().push(path.into())
+            }
+
+            fn paths(&self) -> Vec<PathBuf> {
+                let lock = self.visited.lock();
+                lock.to_vec()
             }
         }
 

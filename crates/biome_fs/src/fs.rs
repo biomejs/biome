@@ -37,9 +37,6 @@ impl ConfigName {
 
 type AutoSearchResultAlias = Result<Option<AutoSearchResult>, FileSystemDiagnostic>;
 
-type ForEachPath<'fs, 'scope> = Box<dyn Fn(&Path) + Sync + Send + 'fs>;
-
-
 pub trait FileSystem: Send + Sync + RefUnwindSafe {
     /// It opens a file with the given set of options
     fn open_with_options(&self, path: &Path, options: OpenOptions) -> io::Result<Box<dyn File>>;
@@ -51,7 +48,7 @@ pub trait FileSystem: Send + Sync + RefUnwindSafe {
     fn traversal<'scope>(&'scope self, func: BoxedTraversal<'_, 'scope>);
 
     /// TODO: add documentation
-    fn for_each_path(&self, func: ForEachPath);
+    fn check<'scope>(&'scope self, func: BoxedTraversal<'_, 'scope>);
 
     // TODO: remove once we remove `rome.json` support [2.0]
     /// Returns the temporary configuration files that are supported
@@ -305,12 +302,14 @@ type BoxedTraversal<'fs, 'scope> = Box<dyn FnOnce(&dyn TraversalScope<'scope>) +
 pub trait TraversalScope<'scope> {
     /// Spawn a new filesystem read task
     ///
-    /// If the provided path exists and is a file, then the [`handle_file`](TraversalContext::handle_file)
+    /// If the provided path exists and is a file, then the [`handle_file`](TraversalContext::handle_path)
     /// method of the provided [TraversalContext] will be called. If it's a
     /// directory, it will be recursively traversed and all the files the
     /// [`can_handle`](TraversalContext::can_handle) method of the context
     /// returns true for will be handled as well
     fn spawn(&self, context: &'scope dyn TraversalContext, path: PathBuf);
+
+    fn handle(&self, context: &'scope dyn TraversalContext, path: PathBuf);
 }
 
 pub trait TraversalContext: Sync {
@@ -329,19 +328,24 @@ pub trait TraversalContext: Sync {
 
     /// This method will be called by the traversal for each file it finds
     /// where [TraversalContext::can_handle] returned true
-    fn handle_file(&self, path: &Path);
+    fn handle_path(&self, path: &Path);
 
+    /// This method will be called by the traversal for each file it finds
+    /// where [TraversalContext::store_path] returned true
+    fn store_path(&self, path: &Path);
 
-    fn store_file(&self, path: &Path);
+    /// Returns the paths that should be handled
+    fn paths(&self) -> Vec<PathBuf>;
 }
 
 impl<T> FileSystem for Arc<T>
 where
     T: FileSystem + Send,
 {
-    fn for_each_path(&self,  func: ForEachPath) {
-        T::for_each_path(self,  func)
+    fn check<'scope>(&'scope self, func: BoxedTraversal<'_, 'scope>) {
+        T::check(self, func)
     }
+
     fn open_with_options(&self, path: &Path, options: OpenOptions) -> io::Result<Box<dyn File>> {
         T::open_with_options(self, path, options)
     }
