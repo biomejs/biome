@@ -372,8 +372,7 @@ z.object({})
 #### New features
 
 - Add [nursery/noUselessStringConcat](https://biomejs.dev/linter/rules/no-useless-string-concat/).
-- Add [nursery/useExplicitLengthCheck](https://biomejs.dev/linter/rules/use-explicit-length-check/).
-  Contributed by @minht11
+- Add [nursery/useExplicitLengthCheck](https://biomejs.dev/linter/rules/use-explicit-length-check/). Contributed by @minht11
 
 - `useExhaustiveDependencies` now recognizes (some) dependencies that change on
   every render ([#2374](https://github.com/biomejs/biome/issues/2374)).
