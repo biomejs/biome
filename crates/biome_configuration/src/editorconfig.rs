@@ -12,19 +12,24 @@
 use std::{collections::HashMap, str::FromStr};
 
 use biome_deserialize::StringSet;
-use biome_diagnostics::Diagnostic;
+use biome_diagnostics::{adapters::IniError, Error};
 use biome_formatter::{LineEnding, LineWidth};
 use indexmap::IndexSet;
 use serde::{Deserialize, Deserializer};
 
 use crate::{
+    diagnostics::{EditorConfigDiagnostic, ParseFailedDiagnostic},
     OverrideFormatterConfiguration, OverridePattern, Overrides, PartialConfiguration,
     PartialFormatterConfiguration, PlainIndentStyle,
 };
 
-pub fn parse_str(s: &str) -> serde_ini::de::Result<EditorConfig> {
+pub fn parse_str(s: &str) -> Result<EditorConfig, EditorConfigDiagnostic> {
     // TODO: use serde_path_to_error to emit better parse diagnostics
-    serde_ini::from_str(s)
+    serde_ini::from_str(s).map_err(|err| {
+        EditorConfigDiagnostic::ParseFailed(ParseFailedDiagnostic {
+            source: Some(Error::from(IniError::from(err))),
+        })
+    })
 }
 
 /// Represents a parsed .editorconfig file, containing only the options that are relevant to biome.
@@ -38,12 +43,7 @@ pub struct EditorConfig {
 }
 
 impl EditorConfig {
-    pub fn to_biome(
-        mut self,
-    ) -> (
-        Option<PartialConfiguration>,
-        Vec<EditorConfigValidationError>,
-    ) {
+    pub fn to_biome(mut self) -> (Option<PartialConfiguration>, Vec<EditorConfigDiagnostic>) {
         let diagnostics = self.validate();
 
         let mut config = PartialConfiguration {
@@ -64,7 +64,7 @@ impl EditorConfig {
         (Some(config), diagnostics)
     }
 
-    fn validate(&self) -> Vec<EditorConfigValidationError> {
+    fn validate(&self) -> Vec<EditorConfigDiagnostic> {
         let mut errors: Vec<_> = self.options.values().flat_map(|o| o.validate()).collect();
 
         // biome doesn't currently support all the glob patterns that .editorconfig does
@@ -72,9 +72,7 @@ impl EditorConfig {
             self.options
                 .keys()
                 .filter(|k| k.contains('{') || k.contains('}'))
-                .map(|pattern| EditorConfigValidationError::UnknownGlobPattern {
-                    pattern: pattern.clone(),
-                }),
+                .map(|pattern| EditorConfigDiagnostic::unknown_glob_pattern(pattern.clone())),
         );
 
         errors
@@ -116,14 +114,14 @@ impl EditorConfigOptions {
         }
     }
 
-    fn validate(&self) -> Vec<EditorConfigValidationError> {
+    fn validate(&self) -> Vec<EditorConfigDiagnostic> {
         let mut errors = vec![];
         // `insert_final_newline = false` results in formatting behavior that is incompatible with biome
         if let Some(false) = self.insert_final_newline {
-            errors.push(EditorConfigValidationError::Incompatible {
-                key: "insert_final_newline",
-                message: "Biome always inserts a final newline.",
-            });
+            errors.push(EditorConfigDiagnostic::incompatible(
+                "insert_final_newline",
+                "Biome always inserts a final newline.",
+            ));
         }
         errors
     }
@@ -171,45 +169,6 @@ where
     LineWidth::from_str(s.as_str())
         .map_err(serde::de::Error::custom)
         .map(Some)
-}
-
-#[derive(Debug, Clone)]
-pub enum EditorConfigValidationError {
-    /// An option is completely incompatible with biome.
-    Incompatible {
-        key: &'static str,
-        message: &'static str,
-    },
-    /// A glob pattern that biome doesn't support.
-    UnknownGlobPattern { pattern: String },
-}
-
-impl Diagnostic for EditorConfigValidationError {
-    fn severity(&self) -> biome_diagnostics::Severity {
-        match self {
-            EditorConfigValidationError::Incompatible { .. } => biome_diagnostics::Severity::Error,
-            EditorConfigValidationError::UnknownGlobPattern { .. } => {
-                biome_diagnostics::Severity::Warning
-            }
-        }
-    }
-
-    fn description(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(fmt, "editorconfig validation error: ")?;
-        match self {
-            EditorConfigValidationError::Incompatible { key, message } => {
-                write!(fmt, "key '{}' is incompatible with biome: {}", key, message)?;
-            }
-            EditorConfigValidationError::UnknownGlobPattern { pattern } => {
-                write!(
-                    fmt,
-                    "We don't know how to handle this glob pattern: '{}'",
-                    pattern
-                )?;
-            }
-        }
-        Ok(())
-    }
 }
 
 #[cfg(test)]
@@ -294,10 +253,7 @@ insert_final_newline = false
         let conf = parse_str(input).expect("Failed to parse editorconfig");
         let (_, errors) = conf.to_biome();
         assert_eq!(errors.len(), 1);
-        assert!(matches!(
-            errors[0],
-            EditorConfigValidationError::Incompatible { .. }
-        ));
+        assert!(matches!(errors[0], EditorConfigDiagnostic::Incompatible(_)));
     }
 
     #[test]
@@ -314,7 +270,7 @@ indent_style = space
         assert_eq!(errors.len(), 1);
         assert!(matches!(
             errors[0],
-            EditorConfigValidationError::UnknownGlobPattern { .. }
+            EditorConfigDiagnostic::UnknownGlobPattern(_)
         ));
     }
 }

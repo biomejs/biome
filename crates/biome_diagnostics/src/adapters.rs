@@ -4,7 +4,10 @@
 
 use std::io;
 
-use biome_console::{fmt, markup};
+use biome_console::{
+    fmt::{self, Display},
+    markup,
+};
 
 use crate::{category, Category, Diagnostic, DiagnosticTags};
 
@@ -154,5 +157,40 @@ impl Diagnostic for SerdeJsonError {
 
     fn message(&self, fmt: &mut fmt::Formatter<'_>) -> io::Result<()> {
         fmt.write_markup(markup!({ AsConsoleDisplay(&self.error) }))
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct IniError {
+    error: serde_ini::de::Error,
+}
+
+impl Diagnostic for IniError {
+    fn category(&self) -> Option<&'static Category> {
+        Some(category!("configuration"))
+    }
+
+    fn severity(&self) -> crate::Severity {
+        crate::Severity::Error
+    }
+
+    fn description(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(fmt, "{}", self.error)
+    }
+
+    fn message(&self, fmt: &mut fmt::Formatter<'_>) -> std::io::Result<()> {
+        fmt.write_markup(markup!({ AsConsoleDisplay(&self.error) }))
+    }
+}
+
+impl Display for IniError {
+    fn fmt(&self, fmt: &mut fmt::Formatter<'_>) -> std::io::Result<()> {
+        write!(fmt, "{:?}", self.error)
+    }
+}
+
+impl From<serde_ini::de::Error> for IniError {
+    fn from(error: serde_ini::de::Error) -> Self {
+        Self { error }
     }
 }

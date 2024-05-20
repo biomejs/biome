@@ -1,4 +1,5 @@
 use crate::workspace::DocumentFileSource;
+use biome_configuration::diagnostics::EditorConfigDiagnostic;
 use biome_configuration::{CantLoadExtendFile, ConfigurationDiagnostic};
 use biome_console::fmt::Bytes;
 use biome_console::markup;
@@ -59,6 +60,8 @@ pub enum WorkspaceError {
     ProtectedFile(ProtectedFile),
     /// Error when searching for a pattern
     SearchError(SearchError),
+    /// Thrown when a `.editorconfig` file is found, but it can't be parsed.
+    EditorConfigDiagnostic(EditorConfigDiagnostic),
 }
 
 impl WorkspaceError {

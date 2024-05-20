@@ -15,7 +15,7 @@ use biome_console::{markup, ConsoleExt};
 use biome_deserialize::Merge;
 use biome_diagnostics::PrintDiagnostic;
 use biome_service::configuration::{
-    load_configuration, LoadedConfiguration, PartialConfigurationExt,
+    load_configuration, load_editorconfig, LoadedConfiguration, PartialConfigurationExt,
 };
 use biome_service::workspace::{RegisterProjectFolderParams, UpdateSettingsParams};
 use std::ffi::OsString;
@@ -77,12 +77,34 @@ pub(crate) fn format(
         session.app.console,
         cli_options.verbose,
     )?;
+    let fs = &session.app.fs;
+    let (editorconfig, editorconfig_diagnostics) = {
+        let search_path = loaded_configuration
+            .directory_path
+            .clone()
+            .unwrap_or_else(|| fs.working_directory().unwrap_or_default());
+        load_editorconfig(fs, search_path)?
+    };
+    for diagnostic in editorconfig_diagnostics {
+        session.app.console.error(markup! {
+            {PrintDiagnostic::simple(&diagnostic)}
+        })
+    }
+
     resolve_manifest(&session)?;
     let LoadedConfiguration {
-        mut configuration,
+        configuration: biome_configuration,
         directory_path: configuration_path,
         ..
     } = loaded_configuration;
+    let mut configuration = if let Some(mut configuration) = editorconfig {
+        // this makes biome configuration take precedence over editorconfig configuration
+        configuration.merge_with(biome_configuration);
+        configuration
+    } else {
+        biome_configuration
+    };
+
     // TODO: remove in biome 2.0
     let console = &mut *session.app.console;
     if let Some(config) = formatter_configuration.as_mut() {

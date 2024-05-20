@@ -203,6 +203,70 @@ pub struct CantResolve {
     source: Option<Error>,
 }
 
+#[derive(Debug, Serialize, Deserialize, Diagnostic)]
+pub enum EditorConfigDiagnostic {
+    /// Failed to parse the .editorconfig file.
+    ParseFailed(ParseFailedDiagnostic),
+    /// An option is completely incompatible with biome.
+    Incompatible(InconpatibleDiagnostic),
+    /// A glob pattern that biome doesn't support.
+    UnknownGlobPattern(UnknownGlobPatternDiagnostic),
+}
+
+impl EditorConfigDiagnostic {
+    pub fn incompatible(key: impl Into<String>, message: impl Into<String>) -> Self {
+        Self::Incompatible(InconpatibleDiagnostic {
+            message: MessageAndDescription::from(
+                markup! { "Key '"{key.into()}"' is incompatible with biome: "{message.into()}}
+                    .to_owned(),
+            ),
+        })
+    }
+
+    pub fn unknown_glob_pattern(pattern: impl Into<String>) -> Self {
+        Self::UnknownGlobPattern(UnknownGlobPatternDiagnostic {
+            message: MessageAndDescription::from(
+                markup! { "This glob pattern is incompatible with biome: "{pattern.into()}}
+                    .to_owned(),
+            ),
+        })
+    }
+}
+
+#[derive(Debug, Serialize, Deserialize, Diagnostic)]
+#[diagnostic(
+    category = "configuration",
+    severity = Error,
+    message = "Failed the parse the .editorconfig file.",
+)]
+pub struct ParseFailedDiagnostic {
+    #[serde(skip)]
+    #[source]
+    pub source: Option<Error>,
+}
+
+#[derive(Debug, Serialize, Deserialize, Diagnostic)]
+#[diagnostic(
+    category = "configuration",
+    severity = Error,
+)]
+pub struct InconpatibleDiagnostic {
+    #[message]
+    #[description]
+    pub message: MessageAndDescription,
+}
+
+#[derive(Debug, Serialize, Deserialize, Diagnostic)]
+#[diagnostic(
+    category = "configuration",
+    severity = Warning,
+)]
+pub struct UnknownGlobPatternDiagnostic {
+    #[message]
+    #[description]
+    pub message: MessageAndDescription,
+}
+
 #[cfg(test)]
 mod test {
     use crate::{ConfigurationDiagnostic, PartialConfiguration};
