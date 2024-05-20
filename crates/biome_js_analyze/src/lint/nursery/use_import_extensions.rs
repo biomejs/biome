@@ -11,13 +11,15 @@ use biome_rowan::{BatchMutationExt, SyntaxToken};
 use crate::JsRuleAction;
 
 declare_rule! {
-    /// Require import extensions for relative imports.
+    /// Enforce file extensions for relative imports.
     ///
     /// Browsers and Node.js do not natively support importing files without extensions. This rule
-    /// enforces the use of import extensions for relative imports to make the code more consistent.
+    /// enforces the use of file extensions for relative imports to make the code more consistent.
     ///
-    /// Tooling also benefits from explicit import extensions, because they do not need to guess which
+    /// Tooling also benefits from explicit file extensions, because they do not need to guess which
     /// file to resolve.
+    /// 
+    /// Rule checks static imports and dynamic imports calls such as `import()` and `require()`.
     ///
     /// ## Examples
     ///
@@ -35,7 +37,13 @@ declare_rule! {
     /// ```js,expect_diagnostic
     /// import "../.";
     /// ```
-    ///
+    /// ```js,expect_diagnostic
+    /// import("./foo");
+    /// ```
+    /// ```js,expect_diagnostic
+    /// require("./foo");
+    /// ```
+    /// 
     /// ### Valid
     ///
     /// ```js
@@ -47,7 +55,12 @@ declare_rule! {
     /// ```js
     /// import "./bar/index.js";
     /// ```
-    ///
+    /// ```js
+    /// import("./foo.js");
+    /// ```
+    /// ```js
+    /// require("./foo.js");
+    /// ```
     /// ## Caveats
     ///
     /// If you are using TypeScript, TypeScript version 5.0 and later is required, also make sure to enable
