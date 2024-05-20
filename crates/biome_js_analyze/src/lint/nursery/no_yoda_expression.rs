@@ -19,8 +19,7 @@ declare_rule! {
     /// Disallow the use of yoda expressions.
     ///
     /// A Yoda expression is a programming style where, given a binary operation, the "static" part of the binary operation is placed on the left-hand side.
-    /// A Yoda expression places the constant portion of the expression on the left side of the conditional statement. They can be confusing to some people,
-    /// the rule forbids the use of it to improve code readability.
+    /// This rule **forbids** the use of Yoda expressions and enforces the placing of the "static" part of the binary operations on the right-hand side.
     ///
     /// The rule have an exception for range expressions, expressions like `0 < value && value < 1` or `value <= 0 || 1 < value` are allowed.
     ///
