@@ -917,7 +917,7 @@ impl<L: Language> RuleAction<L> {
     pub fn new(
         category: ActionCategory,
         applicability: impl Into<Applicability>,
-        message: impl biome_console::fmt::Display,
+        message: impl Display,
         mutation: BatchMutation<L>,
     ) -> Self {
         Self {

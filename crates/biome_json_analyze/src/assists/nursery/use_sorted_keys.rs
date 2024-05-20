@@ -1,9 +1,9 @@
 use crate::JsonRuleAction;
 use biome_analyze::{
-    context::RuleContext, declare_rule, ActionCategory, Ast, RefactorKind, Rule, RuleAction,
+    context::RuleContext, declare_rule, ActionCategory, Ast, FixKind, RefactorKind, Rule,
+    RuleAction,
 };
 use biome_console::markup;
-use biome_diagnostics::Applicability;
 use biome_json_factory::make::{json_member_list, token};
 use biome_json_syntax::{JsonMember, JsonMemberList, T};
 use biome_rowan::{AstNode, AstNodeExt, AstSeparatedList, BatchMutationExt};
@@ -21,26 +21,12 @@ declare_rule! {
     ///
     /// Add a link to the corresponding stylelint rule (if any):
     ///
-    /// ## Examples
-    ///
-    /// ### Invalid
-    ///
-    /// ```css,expect_diagnostic
-    /// p {}
-    /// ```
-    ///
-    /// ### Valid
-    ///
-    /// ```css
-    /// p {
-    ///   color: red;
-    /// }
-    /// ```
-    ///
     pub UseSortedKeys {
         version: "next",
         name: "useSortedKeys",
+        language: "json",
         recommended: false,
+        fix_kind: FixKind::Safe,
     }
 }
 
@@ -138,14 +124,13 @@ impl Rule for UseSortedKeys {
         let node = ctx.query().clone();
         mutation.replace_node(node, list);
 
-        Some(RuleAction {
-            mutation,
-            category: ActionCategory::Refactor(RefactorKind::Other(Cow::Borrowed("useSortedKeys"))),
-            applicability: Applicability::MaybeIncorrect,
-            message: markup! {
+        Some(RuleAction::new(
+            ActionCategory::Refactor(RefactorKind::Other(Cow::Borrowed("useSortedKeys"))),
+            ctx.metadata().applicability(),
+            markup! {
                 "They keys of the current object can be sorted."
-            }
-            .to_owned(),
-        })
+            },
+            mutation,
+        ))
     }
 }
