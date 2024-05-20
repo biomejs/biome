@@ -322,6 +322,8 @@ pub type UseOptionalChain =
 pub type UseRegexLiterals =
     <lint::complexity::use_regex_literals::UseRegexLiterals as biome_analyze::Rule>::Options;
 pub type UseSelfClosingElements = < lint :: style :: use_self_closing_elements :: UseSelfClosingElements as biome_analyze :: Rule > :: Options ;
+pub type UseSemanticElements =
+    <lint::nursery::use_semantic_elements::UseSemanticElements as biome_analyze::Rule>::Options;
 pub type UseShorthandArrayType =
     <lint::style::use_shorthand_array_type::UseShorthandArrayType as biome_analyze::Rule>::Options;
 pub type UseShorthandAssign =
