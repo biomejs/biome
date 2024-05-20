@@ -22,7 +22,7 @@ unicode-segmentation = "1.11.0"
 unicode-width        = { workspace = true }
 
 [dev-dependencies]
-trybuild = "1.0.91"
+trybuild = "1.0.96"
 
 [features]
 serde_markup = ["serde", "schemars"]
