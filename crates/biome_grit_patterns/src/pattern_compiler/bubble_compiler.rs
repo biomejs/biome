@@ -3,7 +3,6 @@ use crate::{grit_context::GritQueryContext, util::TextRangeGritExt, CompileError
 use biome_grit_syntax::GritBubble;
 use biome_rowan::AstNode;
 use grit_pattern_matcher::pattern::{Bubble, Pattern, PatternDefinition};
-use itertools::Itertools;
 use std::collections::BTreeMap;
 
 pub(crate) struct BubbleCompiler;
@@ -30,7 +29,13 @@ impl BubbleCompiler {
                 )
             })
             .collect();
-        if parameters.iter().unique_by(|n| &n.0).count() != parameters.len() {
+        if parameters
+            .iter()
+            .map(|n| &n.0)
+            .collect::<rustc_hash::FxHashSet<_>>()
+            .len()
+            != parameters.len()
+        {
             return Err(CompileError::DuplicateParameters);
         }
 

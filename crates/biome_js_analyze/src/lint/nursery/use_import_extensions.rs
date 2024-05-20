@@ -18,7 +18,7 @@ declare_rule! {
     ///
     /// Tooling also benefits from explicit file extensions, because they do not need to guess which
     /// file to resolve.
-    /// 
+    ///
     /// Rule checks static imports and dynamic imports calls such as `import()` and `require()`.
     ///
     /// ## Examples
@@ -43,7 +43,7 @@ declare_rule! {
     /// ```js,expect_diagnostic
     /// require("./foo");
     /// ```
-    /// 
+    ///
     /// ### Valid
     ///
     /// ```js

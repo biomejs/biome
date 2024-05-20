@@ -1848,7 +1848,7 @@
 					]
 				},
 				"useImportExtensions": {
-					"description": "Require import extensions for relative imports.",
+					"description": "Enforce file extensions for relative imports.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleFixConfiguration_for_Null" },
 						{ "type": "null" }
@@ -1865,6 +1865,13 @@
 					"description": "Enforce using the digits argument with Number#toFixed().",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleFixConfiguration_for_Null" },
+						{ "type": "null" }
+					]
+				},
+				"useSemanticElements": {
+					"description": "It detects the use of role attributes in JSX elements and suggests using semantic elements instead.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
 					]
 				},

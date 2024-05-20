@@ -31,7 +31,7 @@ impl<'a> ReporterVisitor for ConsoleReporterVisitor<'a> {
         if execution.is_check() && summary.suggested_fixes_skipped > 0 {
             self.0.log(markup! {
                 <Warn>"Skipped "{summary.suggested_fixes_skipped}" suggested fixes.\n"</Warn>
-                <Info>"If you wish to apply the suggested (unsafe) fixes, use the command "<Emphasis>"biome check --apply-unsafe\n"</Emphasis></Info>
+                <Info>"If you wish to apply the suggested (unsafe) fixes, use the command "<Emphasis>"biome check --fix --unsafe\n"</Emphasis></Info>
             })
         }
 

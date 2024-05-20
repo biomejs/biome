@@ -147,6 +147,7 @@ define_categories! {
     "lint/nursery/useImportExtensions": "https://biomejs.dev/linter/rules/use-import-extensions",
     "lint/nursery/useImportRestrictions": "https://biomejs.dev/linter/rules/use-import-restrictions",
     "lint/nursery/useNumberToFixedDigitsArgument": "https://biomejs.dev/linter/rules/use-number-to-fixed-digits-argument",
+    "lint/nursery/useSemanticElements": "https://biomejs.dev/linter/rules/use-semantic-elements",
     "lint/nursery/useSortedClasses": "https://biomejs.dev/linter/rules/use-sorted-classes",
     "lint/nursery/useThrowNewError": "https://biomejs.dev/linter/rules/use-throw-new-error",
     "lint/nursery/useTopLevelRegex": "https://biomejs.dev/linter/rules/use-top-level-regex",

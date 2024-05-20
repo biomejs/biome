@@ -71,6 +71,24 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 - Add new CLI options to control the CSS formatting. Check the [CLI reference page](https://biomejs.dev/reference/cli/) for more details. Contributed by @ematipico
 
+- Add new options `--write`, `--fix` (alias of `--write`) and `--unsafe` to the command `biome lint` and `biome check`.
+  Add a new option `--fix` (alias of `--write`) to the command `biome format` and `biome migrate`.
+
+  ```shell
+  biome <lint|check> --<write|fix> [--unsafe]
+  biome format --<write|fix>
+  biome migrate --<write|fix>
+  ```
+
+  The `biome <lint|check> --<write|fix>` has the same behavior as `biome <lint|check> --apply`.
+  The `biome <lint|check> --<write|fix> --unsafe` has the same behavior as `biome <lint|check> --apply-unsafe`.
+  The `biome format --fix` has the same behavior as `biome format --write`.
+  The `biome migrate --fix` has the same behavior as `biome migrate --write`.
+
+  This change allows these commands to write modifications in the same options.
+
+  Contributed by @unvalley
+
 #### Enhancements
 
 - Biome now executes commands (lint, format, check and ci) on the working directory by default. [#2266](https://github.com/biomejs/biome/issues/2266) Contributed by @unvalley
