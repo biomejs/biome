@@ -1086,6 +1086,10 @@ export interface Nursery {
 	 */
 	useGenericFontNames?: RuleConfiguration_for_Null;
 	/**
+	 * Enforce file extensions for relative imports.
+	 */
+	useImportExtensions?: RuleFixConfiguration_for_Null;
+	/**
 	 * Disallows package private imports.
 	 */
 	useImportRestrictions?: RuleConfiguration_for_Null;
@@ -1093,6 +1097,10 @@ export interface Nursery {
 	 * Enforce using the digits argument with Number#toFixed().
 	 */
 	useNumberToFixedDigitsArgument?: RuleFixConfiguration_for_Null;
+	/**
+	 * It detects the use of role attributes in JSX elements and suggests using semantic elements instead.
+	 */
+	useSemanticElements?: RuleConfiguration_for_Null;
 	/**
 	 * Enforce the sorting of CSS utility classes.
 	 */
@@ -2300,8 +2308,10 @@ export type Category =
 	| "lint/nursery/useExplicitLengthCheck"
 	| "lint/nursery/useFocusableInteractive"
 	| "lint/nursery/useGenericFontNames"
+	| "lint/nursery/useImportExtensions"
 	| "lint/nursery/useImportRestrictions"
 	| "lint/nursery/useNumberToFixedDigitsArgument"
+	| "lint/nursery/useSemanticElements"
 	| "lint/nursery/useSortedClasses"
 	| "lint/nursery/useThrowNewError"
 	| "lint/nursery/useTopLevelRegex"

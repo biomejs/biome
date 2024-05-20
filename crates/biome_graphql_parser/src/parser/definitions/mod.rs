@@ -29,7 +29,7 @@ use self::{
     operation::{parse_operation_definition, parse_selection_set},
     r#enum::parse_enum_type_definition,
     scalar::parse_scalar_type_definition,
-    schema::parse_schema_definition,
+    schema::{parse_schema_definition, parse_schema_extension},
     union::parse_union_type_definition,
 };
 
@@ -88,6 +88,15 @@ fn parse_definition(p: &mut GraphqlParser) -> ParsedSyntax {
         T![enum] => parse_enum_type_definition(p),
         T![input] => parse_input_object_type_definition(p),
         T![directive] => parse_directive_definition(p),
+        T![extend] => parse_extension(p),
+        _ => Absent,
+    }
+}
+
+#[inline]
+fn parse_extension(p: &mut GraphqlParser) -> ParsedSyntax {
+    match p.nth(1) {
+        T![schema] => parse_schema_extension(p),
         _ => Absent,
     }
 }

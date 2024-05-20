@@ -1,5 +1,6 @@
 use crate::workspace::DocumentFileSource;
-use biome_configuration::{CantLoadExtendFile, ConfigurationDiagnostic};
+use biome_configuration::diagnostics::{ConfigurationDiagnostic, EditorConfigDiagnostic};
+use biome_configuration::{BiomeDiagnostic, CantLoadExtendFile};
 use biome_console::fmt::Bytes;
 use biome_console::markup;
 use biome_diagnostics::{
@@ -150,15 +151,21 @@ impl From<FileSystemDiagnostic> for WorkspaceError {
     }
 }
 
-impl From<ConfigurationDiagnostic> for WorkspaceError {
-    fn from(value: ConfigurationDiagnostic) -> Self {
-        Self::Configuration(value)
+impl From<BiomeDiagnostic> for WorkspaceError {
+    fn from(value: BiomeDiagnostic) -> Self {
+        Self::Configuration(value.into())
+    }
+}
+
+impl From<EditorConfigDiagnostic> for WorkspaceError {
+    fn from(value: EditorConfigDiagnostic) -> Self {
+        Self::Configuration(value.into())
     }
 }
 
 impl From<CantLoadExtendFile> for WorkspaceError {
     fn from(value: CantLoadExtendFile) -> Self {
-        WorkspaceError::Configuration(ConfigurationDiagnostic::CantLoadExtendFile(value))
+        WorkspaceError::Configuration(BiomeDiagnostic::CantLoadExtendFile(value).into())
     }
 }
 

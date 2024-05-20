@@ -117,6 +117,31 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
   Contributed by @Conaclos
 
+- Add a new `--reporter` called `summary`. This reporter will print diagnostics in a different way, based on the tools (formatter, linter, etc.) that are executed.
+  Import sorting and formatter shows the name of the files that require formatting. Instead, the linter will group the number of rules triggered and the number of errors/warnings:
+
+  ```
+  Formatter ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  The following files needs to be formatted:
+  main.ts
+  index.ts
+
+  Organize Imports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  The following files needs to have their imports sorted:
+  main.ts
+  index.ts
+
+  Analyzer ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  Some analyzer rules were triggered
+
+  Rule Name                                               Diagnostics
+  lint/suspicious/noImplicitAnyLet                        12 (12 error(s), 0 warning(s), 0 info(s))
+  lint/suspicious/noDoubleEquals                          8 (8 error(s), 0 warning(s), 0 info(s))
+  lint/suspicious/noRedeclare                             12 (12 error(s), 0 warning(s), 0 info(s))
+  lint/suspicious/noDebugger                              20 (20 error(s), 0 warning(s), 0 info(s))
+  ```
+  Contributed by @ematipico
+
 ### Configuration
 
 #### New features
@@ -187,6 +212,9 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 ### Linter
 
 #### New features
+
+- Add [nursery/useImportExtensions](https://biomejs.dev/linter/rules/use-import-extensions/).
+  Contributed by @minht11
 
 - [useNamingConvention](https://biomejs.dev/linter/rules/use-naming-convention/) now supports an option to enforce custom conventions ([#1900](https://github.com/biomejs/biome/issues/1900)).
 
@@ -319,7 +347,17 @@ z.object({})
 ```
 
 - [noExportsInTest](https://biomejs.dev/linter/rules/no-exports-in-test/) rule no longer treats files with in-source testing as test files https://github.com/biomejs/biome/issues/2859. Contributed by @ah-yu
+- [useSortedClasses](https://biomejs.dev/linter/rules/use-sorted-classes/) now keeps leading and trailing spaces when applying the code action inside template literals:
 
+  ```
+  i Unsafe fix: Sort the classes.
+
+    1 1 │   <>
+    2   │ - → <div·class={`${variable}·px-2·foo·p-4·bar`}/>
+      2 │ + → <div·class={`${variable}·foo·bar·p-4·px-2`}/>
+    3 3 │   	<div class={`px-2 foo p-4 bar ${variable}`}/>
+    4 4 │   </>
+  ```
 ### Parser
 
 #### Enhancements
@@ -370,7 +408,7 @@ z.object({})
 #### New features
 
 - Add [nursery/noUselessStringConcat](https://biomejs.dev/linter/rules/no-useless-string-concat/).
-- Add [nursery/useExplicitLengthCheck](https://biomejs.dev/linter/rules/use-explicit-length-check/).
+- Add [nursery/useExplicitLengthCheck](https://biomejs.dev/linter/rules/use-explicit-length-check/). Contributed by @minht11
 
 - `useExhaustiveDependencies` now recognizes (some) dependencies that change on
   every render ([#2374](https://github.com/biomejs/biome/issues/2374)).

@@ -83,6 +83,7 @@ declare_rule! {
 }
 
 impl Rule for UseImportRestrictions {
+    // TODO. This does not handle dynamic imports and require calls.
     type Query = Ast<JsModuleSource>;
     type State = ImportRestrictionsState;
     type Signals = Option<Self::State>;
@@ -132,6 +133,8 @@ fn get_restricted_import(module_path: &TokenText) -> Option<ImportRestrictionsSt
     let mut path_parts: Vec<_> = module_path.text().split('/').collect();
     let mut index_filename = None;
 
+    // TODO. The implementation could be optimized further by using
+    // `Path::new(module_path.text())` for further inspiration see `use_import_extensions` rule.
     if let Some(extension) = get_extension(&path_parts) {
         if !SOURCE_EXTENSIONS.contains(&extension) {
             return None; // Resource files are exempt.

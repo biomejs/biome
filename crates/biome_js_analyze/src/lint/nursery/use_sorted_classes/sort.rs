@@ -85,11 +85,12 @@ fn compare_classes(a: &ClassInfo, b: &ClassInfo) -> Ordering {
 pub fn sort_class_name(class_name: &TokenText, sort_config: &SortConfig) -> String {
     // Obtain classes by splitting the class string by whitespace.
     let classes = class_name.split_whitespace().collect::<Vec<&str>>();
+    let classes_len = classes.len();
 
     // Separate custom classes from recognized classes, and compute the recognized classes' info.
     // Custom classes always go first, in the order that they appear in.
-    let mut sorted_classes: Vec<&str> = Vec::new();
-    let mut classes_info: Vec<ClassInfo> = Vec::new();
+    let mut sorted_classes = Vec::new();
+    let mut classes_info = Vec::new();
     for class in classes {
         match get_class_info(class, sort_config) {
             Some(class_info) => {
@@ -117,6 +118,18 @@ pub fn sort_class_name(class_name: &TokenText, sort_config: &SortConfig) -> Stri
             .map(|class_info| class_info.text.as_str()),
     );
 
-    // Join the classes back into a string.
-    sorted_classes.join(" ")
+    let mut result = sorted_classes.join(" ");
+    if classes_len > 0 {
+        // restore front space
+        if class_name.starts_with(' ') {
+            result.insert(0, ' ');
+        }
+
+        // restore final space
+        if class_name.ends_with(' ') {
+            result.push(' ');
+        }
+    }
+
+    result
 }

@@ -16,7 +16,7 @@ use biome_configuration::{
     PartialCssFormatter, PartialFilesConfiguration, PartialFormatterConfiguration,
     PartialJavascriptFormatter, PartialJsonFormatter, PartialLinterConfiguration,
 };
-use biome_configuration::{ConfigurationDiagnostic, PartialConfiguration};
+use biome_configuration::{BiomeDiagnostic, PartialConfiguration};
 use biome_console::{markup, Console, ConsoleExt};
 use biome_diagnostics::{Diagnostic, PrintDiagnostic};
 use biome_fs::{BiomePath, FileSystem};
@@ -541,9 +541,10 @@ pub(crate) fn validate_configuration_diagnostics(
 
     if loaded_configuration.has_errors() {
         return Err(CliDiagnostic::workspace_error(
-            WorkspaceError::Configuration(ConfigurationDiagnostic::invalid_configuration(
+            BiomeDiagnostic::invalid_configuration(
                 "Biome exited because the configuration resulted in errors. Please fix them.",
-            )),
+            )
+            .into(),
         ));
     }
 
