@@ -58,6 +58,10 @@ declare_rule! {
     /// ```js
     /// if (0 < value && value < 1) {}
     /// ```
+    ///
+    /// ## Resources
+    /// - [Wikipedia definition](https://en.wikipedia.org/wiki/Yoda_conditions)
+    ///
     pub NoYodaExpression {
         version: "next",
         name: "noYodaExpression",
