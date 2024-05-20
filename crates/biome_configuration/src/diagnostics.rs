@@ -7,9 +7,30 @@ use biome_rowan::SyntaxError;
 use serde::{Deserialize, Serialize};
 use std::fmt::{Debug, Formatter};
 
-/// Series of errors that can be thrown while computing the configuration
-#[derive(Deserialize, Diagnostic, Serialize)]
+/// Series of errors that can be thrown while computing the configuration.
+#[derive(Debug, Deserialize, Diagnostic, Serialize)]
 pub enum ConfigurationDiagnostic {
+    /// Diagnostics related to `biome.json` files
+    Biome(BiomeDiagnostic),
+    /// Diagnostics related to `.editorconfig` files
+    EditorConfig(EditorConfigDiagnostic),
+}
+
+impl From<BiomeDiagnostic> for ConfigurationDiagnostic {
+    fn from(value: BiomeDiagnostic) -> Self {
+        Self::Biome(value)
+    }
+}
+
+impl From<EditorConfigDiagnostic> for ConfigurationDiagnostic {
+    fn from(value: EditorConfigDiagnostic) -> Self {
+        Self::EditorConfig(value)
+    }
+}
+
+/// Series of errors that can be thrown while computing the configuration, specifically for `biome.json`.
+#[derive(Deserialize, Diagnostic, Serialize)]
+pub enum BiomeDiagnostic {
     /// Thrown when the program can't serialize the configuration, while saving it
     SerializationError(SerializationError),
 
@@ -35,21 +56,19 @@ pub enum ConfigurationDiagnostic {
     CantResolve(CantResolve),
 }
 
-impl From<SyntaxError> for ConfigurationDiagnostic {
+impl From<SyntaxError> for BiomeDiagnostic {
     fn from(_: SyntaxError) -> Self {
-        ConfigurationDiagnostic::Deserialization(DeserializationDiagnostic::new(
-            markup! {"Syntax Error"},
-        ))
+        BiomeDiagnostic::Deserialization(DeserializationDiagnostic::new(markup! {"Syntax Error"}))
     }
 }
 
-impl From<DeserializationDiagnostic> for ConfigurationDiagnostic {
+impl From<DeserializationDiagnostic> for BiomeDiagnostic {
     fn from(value: DeserializationDiagnostic) -> Self {
-        ConfigurationDiagnostic::Deserialization(value)
+        BiomeDiagnostic::Deserialization(value)
     }
 }
 
-impl ConfigurationDiagnostic {
+impl BiomeDiagnostic {
     pub fn new_serialization_error() -> Self {
         Self::SerializationError(SerializationError)
     }
@@ -90,13 +109,13 @@ impl ConfigurationDiagnostic {
     }
 }
 
-impl Debug for ConfigurationDiagnostic {
+impl Debug for BiomeDiagnostic {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self, f)
     }
 }
 
-impl std::fmt::Display for ConfigurationDiagnostic {
+impl std::fmt::Display for BiomeDiagnostic {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         self.description(f)
     }
@@ -237,7 +256,7 @@ impl EditorConfigDiagnostic {
 #[diagnostic(
     category = "configuration",
     severity = Error,
-    message = "Failed the parse the .editorconfig file.",
+    message = "Failed to parse the .editorconfig file.",
 )]
 pub struct ParseFailedDiagnostic {
     #[serde(skip)]
@@ -269,7 +288,7 @@ pub struct UnknownGlobPatternDiagnostic {
 
 #[cfg(test)]
 mod test {
-    use crate::{ConfigurationDiagnostic, PartialConfiguration};
+    use crate::{BiomeDiagnostic, PartialConfiguration};
     use biome_deserialize::json::deserialize_from_json_str;
     use biome_diagnostics::{print_diagnostic_to_string, DiagnosticExt, Error};
     use biome_json_parser::JsonParserOptions;
@@ -286,14 +305,14 @@ mod test {
 
     #[test]
     fn diagnostic_size() {
-        assert_eq!(std::mem::size_of::<ConfigurationDiagnostic>(), 96);
+        assert_eq!(std::mem::size_of::<BiomeDiagnostic>(), 96);
     }
 
     #[test]
     fn config_already_exists() {
         snap_diagnostic(
             "config_already_exists",
-            ConfigurationDiagnostic::new_already_exists().with_file_path("biome.json"),
+            BiomeDiagnostic::new_already_exists().with_file_path("biome.json"),
         )
     }
 

@@ -3,7 +3,7 @@ use crate::{DynRef, WorkspaceError, VERSION};
 use biome_analyze::AnalyzerRules;
 use biome_configuration::diagnostics::{CantLoadExtendFile, EditorConfigDiagnostic};
 use biome_configuration::{
-    push_to_analyzer_rules, ConfigurationDiagnostic, ConfigurationPathHint, ConfigurationPayload,
+    push_to_analyzer_rules, BiomeDiagnostic, ConfigurationPathHint, ConfigurationPayload,
     PartialConfiguration,
 };
 use biome_console::markup;
@@ -274,10 +274,7 @@ pub fn load_editorconfig(
             content,
             file_path: _path,
         } = auto_search_result;
-
-        let editorconfig = biome_configuration::editorconfig::parse_str(&content)
-            .map_err(WorkspaceError::EditorConfigDiagnostic)?;
-
+        let editorconfig = biome_configuration::editorconfig::parse_str(&content)?;
         Ok(editorconfig.to_biome())
     } else {
         Ok((None, vec![]))
@@ -306,7 +303,7 @@ pub fn create_config(
 
     let mut config_file = fs.open_with_options(&path, options).map_err(|err| {
         if err.kind() == ErrorKind::AlreadyExists {
-            WorkspaceError::Configuration(ConfigurationDiagnostic::new_already_exists())
+            BiomeDiagnostic::new_already_exists().into()
         } else {
             WorkspaceError::cant_read_file(format!("{}", path.display()))
         }
@@ -323,9 +320,8 @@ pub fn create_config(
         configuration.schema = Some(format!("https://biomejs.dev/schemas/{VERSION}/schema.json"));
     }
 
-    let contents = serde_json::to_string_pretty(&configuration).map_err(|_| {
-        WorkspaceError::Configuration(ConfigurationDiagnostic::new_serialization_error())
-    })?;
+    let contents = serde_json::to_string_pretty(&configuration)
+        .map_err(|_| BiomeDiagnostic::new_serialization_error())?;
 
     let parsed = parse_json(&contents, JsonParserOptions::default());
     let formatted =
@@ -451,7 +447,7 @@ impl PartialConfigurationExt for PartialConfiguration {
             } else {
                 fs.resolve_configuration(extend_entry.as_str(), external_resolution_base_path)
                     .map_err(|error| {
-                        ConfigurationDiagnostic::cant_resolve(
+                        BiomeDiagnostic::cant_resolve(
                             external_resolution_base_path.display().to_string(),
                             error,
                         )
