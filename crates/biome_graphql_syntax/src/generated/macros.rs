@@ -244,6 +244,11 @@ macro_rules! map_syntax_node {
                         unsafe { $crate::GraphqlRootOperationTypeDefinition::new_unchecked(node) };
                     $body
                 }
+                $crate::GraphqlSyntaxKind::GRAPHQL_ROOT_OPERATION_TYPES => {
+                    let $pattern =
+                        unsafe { $crate::GraphqlRootOperationTypes::new_unchecked(node) };
+                    $body
+                }
                 $crate::GraphqlSyntaxKind::GRAPHQL_SCALAR_TYPE_DEFINITION => {
                     let $pattern =
                         unsafe { $crate::GraphqlScalarTypeDefinition::new_unchecked(node) };
@@ -260,12 +265,6 @@ macro_rules! map_syntax_node {
                 }
                 $crate::GraphqlSyntaxKind::GRAPHQL_SCHEMA_EXTENSION => {
                     let $pattern = unsafe { $crate::GraphqlSchemaExtension::new_unchecked(node) };
-                    $body
-                }
-                $crate::GraphqlSyntaxKind::GRAPHQL_SCHEMA_EXTENSION_WITH_ROOT_OPERATION_TYPE => {
-                    let $pattern = unsafe {
-                        $crate::GraphqlSchemaExtensionWithRootOperationType::new_unchecked(node)
-                    };
                     $body
                 }
                 $crate::GraphqlSyntaxKind::GRAPHQL_SELECTION_SET => {
