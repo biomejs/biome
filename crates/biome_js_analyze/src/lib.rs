@@ -240,7 +240,7 @@ mod tests {
     use crate::react::hooks::StableHookResult;
     use crate::{analyze, AnalysisFilter, ControlFlow};
 
-       #[ignore]
+    #[ignore]
     #[test]
     fn quick_test() {
         fn markup_to_string(markup: Markup) -> String {
