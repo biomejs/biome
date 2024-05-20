@@ -117,7 +117,7 @@ impl Rule for UseAdjacentOverloadSignatures {
                                 declaration.as_ts_module_declaration()?.body().ok()?.items();
                             for (index, item) in items.into_iter().enumerate() {
                                 if let AnyJsModuleItem::JsExport(node) = item {
-                                    let export_text_range = handle_signle_export(&node)?;
+                                    let export_text_range = handle_export(&node)?;
                                     let tuple = export_text_range[0].clone();
                                     let text = tuple.0.clone();
                                     let range = tuple.1;
@@ -182,7 +182,7 @@ impl Rule for UseAdjacentOverloadSignatures {
                     }
                 }
                 AnyJsModuleItem::JsExport(node) => {
-                    let export_text_range = handle_signle_export(&node)?;
+                    let export_text_range = handle_export(&node)?;
                     let tuple = export_text_range[0].clone();
                     let text = tuple.0.clone();
                     let range = tuple.1;
@@ -331,7 +331,7 @@ fn handle_class(node: &JsClassDeclaration) -> Option<Vec<(TokenText, u32, TextRa
     Some(class_vec)
 }
 
-fn handle_signle_export(node: &JsExport) -> Option<Vec<(TokenText, TextRange)>> {
+fn handle_export(node: &JsExport) -> Option<Vec<(TokenText, TextRange)>> {
     let export = node.export_clause().ok()?;
     let declaration_clause = export.as_any_js_declaration_clause()?;
     let ts_declare = declaration_clause.as_ts_declare_function_declaration()?;
