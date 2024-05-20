@@ -1,8 +1,8 @@
 use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
 use biome_js_syntax::{
-    AnyJsModuleItem, AnyJsStatement, JsClassDeclaration, JsExport, JsModule, JsScript,
-    TsInterfaceDeclaration, TsTypeAliasDeclaration,
+    AnyJsModuleItem, JsClassDeclaration, JsExport, JsFunctionDeclaration, JsModule,
+    JsModuleItemList, TsDeclareStatement, TsInterfaceDeclaration, TsTypeAliasDeclaration,
 };
 use biome_rowan::{declare_node_union, AstNode, TextRange, TokenText};
 
@@ -95,103 +95,51 @@ declare_rule! {
 }
 
 impl Rule for UseAdjacentOverloadSignatures {
-    type Query = Ast<JsModule>;
+    type Query = Ast<DeclarationOsModuleNode>;
     type State = Vec<(TokenText, TextRange)>;
     type Signals = Option<Self::State>;
     type Options = ();
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
-        let items = node.items();
         let mut methods: Vec<Vec<(TokenText, u32, TextRange)>> = Vec::new();
-        let mut export_vec = vec![];
 
-        for (index, item) in items.into_iter().enumerate() {
-            match item {
-                AnyJsModuleItem::AnyJsStatement(node) => {
-                    match node {
-                        // dcclare
-                        AnyJsStatement::TsDeclareStatement(node) => {
-                            let declaration = node.declaration().ok()?;
-                            let items =
-                                declaration.as_ts_module_declaration()?.body().ok()?.items();
-                            for (index, item) in items.into_iter().enumerate() {
-                                if let AnyJsModuleItem::JsExport(node) = item {
-                                    let export_text_range = handle_export(&node)?;
-                                    let tuple = export_text_range[0].clone();
-                                    let text = tuple.0.clone();
-                                    let range = tuple.1;
-                                    export_vec.push((text, index as u32, range));
-                                }
-                            }
-                        }
-                        // type
-                        AnyJsStatement::TsTypeAliasDeclaration(node) => {
-                            let type_vec = handle_type(&node)?;
-                            methods.push(type_vec.clone());
-                        }
-                        // interface
-                        AnyJsStatement::TsInterfaceDeclaration(node) => {
-                            let interface_vec = handle_interface(&node)?;
-                            methods.push(interface_vec);
-                        }
-                        // class
-                        AnyJsStatement::JsClassDeclaration(node) => {
-                            let class_vec = handle_class(&node)?;
-                            methods.push(class_vec);
-                        }
-                        // function
-                        AnyJsStatement::JsFunctionDeclaration(node) => {
-                            let body = node.body().ok()?;
-                            let statements = body.statements();
-                            for statement in statements {
-                                match statement {
-                                    AnyJsStatement::TsInterfaceDeclaration(node) => {
-                                        let interface_vec = handle_interface(&node)?;
-                                        methods.push(interface_vec);
-                                    }
-                                    AnyJsStatement::TsTypeAliasDeclaration(node) => {
-                                        let type_vec = handle_type(&node)?;
-                                        methods.push(type_vec);
-                                    }
-                                    _ => {}
-                                }
-                            }
-
-                            let return_type_annotation = node.return_type_annotation();
-                            if let Some(return_type_annotation) = return_type_annotation {
-                                let ty = return_type_annotation.ty().ok()?;
-                                if let Some(ty) = ty.as_any_ts_type() {
-                                    let ts_object = ty.as_ts_object_type()?;
-                                    let members = ts_object.members();
-                                    let mut type_vec = vec![];
-                                    for (type_index, member) in members.into_iter().enumerate() {
-                                        let method_member = member
-                                            .as_ts_method_signature_type_member()?
-                                            .name()
-                                            .ok()?;
-                                        let text = method_member.name()?;
-                                        let range = method_member.range();
-                                        type_vec.push((text, type_index as u32, range));
-                                    }
-                                    methods.push(type_vec.clone());
-                                }
-                            }
-                        }
-                        _ => {}
-                    }
-                }
-                AnyJsModuleItem::JsExport(node) => {
-                    let export_text_range = handle_export(&node)?;
-                    let tuple = export_text_range[0].clone();
-                    let text = tuple.0.clone();
-                    let range = tuple.1;
-                    export_vec.push((text, index as u32, range));
-                }
-                _ => {}
+        match node {
+            // Handle export function foo() {} in declare namespace Foo {}
+            DeclarationOsModuleNode::TsDeclareStatement(node) => {
+                let declaration = node.declaration().ok()?;
+                let items = declaration.as_ts_module_declaration()?.body().ok()?.items();
+                let export_vec = handle_exports(&items)?;
+                methods.push(export_vec);
+            }
+            // Handle interface Foo {}
+            DeclarationOsModuleNode::TsInterfaceDeclaration(node) => {
+                let interface_vec = handle_interface(node)?;
+                methods.push(interface_vec);
+            }
+            // Handle type Foo = {}
+            DeclarationOsModuleNode::TsTypeAliasDeclaration(node) => {
+                let type_vec = handle_type(node)?;
+                methods.push(type_vec);
+            }
+            // Handle class Foo {}
+            DeclarationOsModuleNode::JsClassDeclaration(node) => {
+                let class_vec = handle_class(node)?;
+                methods.push(class_vec);
+            }
+            // Handle export function foo() {}
+            DeclarationOsModuleNode::JsFunctionDeclaration(node) => {
+                let function_declare_vec = handle_function(node)?;
+                methods.push(function_declare_vec);
+            }
+            // Handle export function foo() {}
+            DeclarationOsModuleNode::JsModule(node) => {
+                let items = node.items();
+                let export_vec = handle_exports(&items)?;
+                methods.push(export_vec);
             }
         }
-        methods.push(export_vec.clone());
+        // Collect all adjacent overload violations
         let adjacent_overload_violations = check_adjacent_overload_violations(&methods);
         let violation_ranges: Vec<(TokenText, TextRange)> = adjacent_overload_violations
             .iter()
@@ -331,6 +279,25 @@ fn handle_class(node: &JsClassDeclaration) -> Option<Vec<(TokenText, u32, TextRa
     Some(class_vec)
 }
 
+fn handle_function(node: &JsFunctionDeclaration) -> Option<Vec<(TokenText, u32, TextRange)>> {
+    let return_type_annotation = node.return_type_annotation();
+    let mut function_declare_vec = vec![];
+    if let Some(return_type_annotation) = return_type_annotation {
+        let ty = return_type_annotation.ty().ok()?;
+        if let Some(ty) = ty.as_any_ts_type() {
+            let ts_object = ty.as_ts_object_type()?;
+            let members = ts_object.members();
+            for (type_index, member) in members.into_iter().enumerate() {
+                let method_member = member.as_ts_method_signature_type_member()?.name().ok()?;
+                let text = method_member.name()?;
+                let range = method_member.range();
+                function_declare_vec.push((text, type_index as u32, range));
+            }
+        }
+    }
+    Some(function_declare_vec)
+}
+
 fn handle_export(node: &JsExport) -> Option<Vec<(TokenText, TextRange)>> {
     let export = node.export_clause().ok()?;
     let declaration_clause = export.as_any_js_declaration_clause()?;
@@ -347,6 +314,24 @@ fn handle_export(node: &JsExport) -> Option<Vec<(TokenText, TextRange)>> {
     Some(export_text_range)
 }
 
+fn handle_exports(
+    items: &JsModuleItemList,
+    //mut export_vec: Vec<(TokenText, u32, TextRange)>,
+) -> Option<Vec<(TokenText, u32, TextRange)>> {
+    //let mut export_vec = vec![];
+    let mut export_vec = vec![];
+    for (index, item) in items.into_iter().enumerate() {
+        if let AnyJsModuleItem::JsExport(node) = item {
+            let export_text_range = handle_export(&node)?;
+            let tuple = export_text_range[0].clone();
+            let text = tuple.0.clone();
+            let range = tuple.1;
+            export_vec.push((text, index as u32, range));
+        }
+    }
+    Some(export_vec)
+}
+
 declare_node_union! {
-    pub DeclarationOsModuleNode = JsModule | JsScript
+    pub DeclarationOsModuleNode = TsInterfaceDeclaration | TsTypeAliasDeclaration | TsDeclareStatement | JsClassDeclaration | JsModule | JsFunctionDeclaration
 }

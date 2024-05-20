@@ -90,6 +90,20 @@ function h (): {
 
 # Diagnostics
 ```
+invalid.ts:2:19 lint/nursery/useAdjacentOverloadSignatures ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! All foo_declare signatures must be adjacent.
+  
+    1 │ declare namespace Foo {
+  > 2 │   export function foo_declare(s: string): void;
+      │                   ^^^^^^^^^^^
+    3 │   export function bar_declare(): void;
+    4 │   export function foo_declare(n: number): void;
+  
+
+```
+
+```
 invalid.ts:12:3 lint/nursery/useAdjacentOverloadSignatures ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! All foo_type signatures must be adjacent.
@@ -101,7 +115,13 @@ invalid.ts:12:3 lint/nursery/useAdjacentOverloadSignatures ━━━━━━━
     13 │ };
     14 │ 
   
-  i All foo_interface signatures must be adjacent.
+
+```
+
+```
+invalid.ts:19:3 lint/nursery/useAdjacentOverloadSignatures ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! All foo_interface signatures must be adjacent.
   
     17 │   foo_interface(n: number): void;
     18 │   bar_interface(): void;
@@ -110,7 +130,13 @@ invalid.ts:12:3 lint/nursery/useAdjacentOverloadSignatures ━━━━━━━
     20 │ }
     21 │ 
   
-  i All fooA signatures must be adjacent.
+
+```
+
+```
+invalid.ts:26:3 lint/nursery/useAdjacentOverloadSignatures ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! All fooA signatures must be adjacent.
   
     24 │   fooA(n: number): void;
     25 │   barA(): void {};
@@ -119,7 +145,13 @@ invalid.ts:12:3 lint/nursery/useAdjacentOverloadSignatures ━━━━━━━
     27 │ }
     28 │ 
   
-  i All fooB signatures must be adjacent.
+
+```
+
+```
+invalid.ts:30:3 lint/nursery/useAdjacentOverloadSignatures ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! All fooB signatures must be adjacent.
   
     29 │ class B {
   > 30 │   fooB(s: string): void;
@@ -127,7 +159,13 @@ invalid.ts:12:3 lint/nursery/useAdjacentOverloadSignatures ━━━━━━━
     31 │   barB(): void {};
     32 │   fooB(n: number): void;
   
-  i All barC signatures must be adjacent.
+
+```
+
+```
+invalid.ts:37:3 lint/nursery/useAdjacentOverloadSignatures ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! All barC signatures must be adjacent.
   
     36 │ class C {
   > 37 │   barC(): void {};
@@ -144,7 +182,13 @@ invalid.ts:12:3 lint/nursery/useAdjacentOverloadSignatures ━━━━━━━
     42 │   fooC(sn: string | number): void {};
     43 │   barC(): void {};
   
-  i All fooB signatures must be adjacent.
+
+```
+
+```
+invalid.ts:48:3 lint/nursery/useAdjacentOverloadSignatures ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! All fooB signatures must be adjacent.
   
     46 │ class D {
     47 │   fooB(s: string): void;
@@ -153,7 +197,28 @@ invalid.ts:12:3 lint/nursery/useAdjacentOverloadSignatures ━━━━━━━
     49 │   barB(): void {};
     50 │   fooB(n: number): void;
   
-  i All interfaceA signatures must be adjacent.
+
+```
+
+```
+invalid.ts:58:17 lint/nursery/useAdjacentOverloadSignatures ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! All foo signatures must be adjacent.
+  
+    56 │ export function foo(n: number): void;
+    57 │ export function bar(): void;
+  > 58 │ export function foo(sn: string | number): void;
+       │                 ^^^
+    59 │ 
+    60 │ function f() {
+  
+
+```
+
+```
+invalid.ts:64:5 lint/nursery/useAdjacentOverloadSignatures ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! All interfaceA signatures must be adjacent.
   
     62 │     interfaceA(x: boolean): boolean
     63 │     interfaceB()
@@ -162,7 +227,13 @@ invalid.ts:12:3 lint/nursery/useAdjacentOverloadSignatures ━━━━━━━
     65 │   }
     66 │ }
   
-  i All typeMethodA signatures must be adjacent.
+
+```
+
+```
+invalid.ts:72:5 lint/nursery/useAdjacentOverloadSignatures ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! All typeMethodA signatures must be adjacent.
   
     70 │     typeMethodA(x: boolean): boolean;
     71 │     typeMethodB(): void;
@@ -171,7 +242,13 @@ invalid.ts:12:3 lint/nursery/useAdjacentOverloadSignatures ━━━━━━━
     73 │   };
     74 │ }
   
-  i All functionA signatures must be adjacent.
+
+```
+
+```
+invalid.ts:79:3 lint/nursery/useAdjacentOverloadSignatures ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! All functionA signatures must be adjacent.
   
     77 │   functionA(x: boolean): boolean,
     78 │   functionB(),
@@ -179,23 +256,6 @@ invalid.ts:12:3 lint/nursery/useAdjacentOverloadSignatures ━━━━━━━
        │   ^^^^^^^^^
     80 │ } {
     81 │ }
-  
-  i All foo_declare signatures must be adjacent.
-  
-    1 │ declare namespace Foo {
-  > 2 │   export function foo_declare(s: string): void;
-      │                   ^^^^^^^^^^^
-    3 │   export function bar_declare(): void;
-    4 │   export function foo_declare(n: number): void;
-  
-  i All foo signatures must be adjacent.
-  
-    56 │ export function foo(n: number): void;
-    57 │ export function bar(): void;
-  > 58 │ export function foo(sn: string | number): void;
-       │                 ^^^
-    59 │ 
-    60 │ function f() {
   
 
 ```
