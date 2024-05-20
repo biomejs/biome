@@ -116,6 +116,31 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
   Contributed by @Conaclos
 
+- Add a new `--reporter` called `summary`. This reporter will print diagnostics in a different way, based on the tools (formatter, linter, etc.) that are executed.
+  Import sorting and formatter shows the name of the files that require formatting. Instead, the linter will group the number of rules triggered and the number of errors/warnings:
+
+  ```
+  Formatter ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  The following files needs to be formatted:
+  main.ts
+  index.ts
+
+  Organize Imports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  The following files needs to have their imports sorted:
+  main.ts
+  index.ts
+
+  Analyzer ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  Some analyzer rules were triggered
+
+  Rule Name                                               Diagnostics
+  lint/suspicious/noImplicitAnyLet                        12 (12 error(s), 0 warning(s), 0 info(s))
+  lint/suspicious/noDoubleEquals                          8 (8 error(s), 0 warning(s), 0 info(s))
+  lint/suspicious/noRedeclare                             12 (12 error(s), 0 warning(s), 0 info(s))
+  lint/suspicious/noDebugger                              20 (20 error(s), 0 warning(s), 0 info(s))
+  ```
+  Contributed by @ematipico
+
 ### Configuration
 
 #### New features

@@ -144,7 +144,10 @@ impl<'a> fmt::Display for SummaryTotal<'a> {
     }
 }
 
-struct ConsoleTraversalSummary<'a>(pub(crate) &'a TraversalMode, &'a TraversalSummary);
+pub(crate) struct ConsoleTraversalSummary<'a>(
+    pub(crate) &'a TraversalMode,
+    pub(crate) &'a TraversalSummary,
+);
 impl<'a> fmt::Display for ConsoleTraversalSummary<'a> {
     fn fmt(&self, fmt: &mut Formatter) -> io::Result<()> {
         let summary = SummaryTotal(self.0, self.1.changed + self.1.unchanged, &self.1.duration);
