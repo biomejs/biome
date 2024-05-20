@@ -79,7 +79,7 @@ impl Rule for UseSemanticElements {
                 markup! {
                     "For examples and more information, see" <Hyperlink href="https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Roles">"WAI-ARIA Roles"</Hyperlink>
                 },
-                &["serif", "sans-serif", "monospace", "etc."],
+                &["<button>", "<input>", "<textarea>", "<a>", "<img>", "<table>", "<article>", "<section>", "<nav>", "<aside>", "<header>", "<footer>", "<main>", "<figure>", "<figcaption>", "<details>", "<summary>", "<dialog>", "<menu>", "<menuitem>", "<fieldset>", "<legend>", "<caption>", "<colgroup>", "<col>", "<optgroup>", "<option>", "<select>", "<datalist>", "<output>", "<progress>", "<meter>", "<time>", "<audio>", "<video>", "<track>", "<source>", "<embed>", "<object>", "<param>", "<iframe>", "<canvas>", "<map>", "<area>", "<svg>", "<math>"]
             ),
         )
     }

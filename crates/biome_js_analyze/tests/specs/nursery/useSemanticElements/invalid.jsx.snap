@@ -69,10 +69,52 @@ invalid.jsx:2:10 lint/nursery/useSemanticElements ━━━━━━━━━━
   
   i For examples and more information, seeWAI-ARIA Roles
   
-  - serif
-  - sans-serif
-  - monospace
-  - etc.
+  - <button>
+  - <input>
+  - <textarea>
+  - <a>
+  - <img>
+  - <table>
+  - <article>
+  - <section>
+  - <nav>
+  - <aside>
+  - <header>
+  - <footer>
+  - <main>
+  - <figure>
+  - <figcaption>
+  - <details>
+  - <summary>
+  - <dialog>
+  - <menu>
+  - <menuitem>
+  - <fieldset>
+  - <legend>
+  - <caption>
+  - <colgroup>
+  - <col>
+  - <optgroup>
+  - <option>
+  - <select>
+  - <datalist>
+  - <output>
+  - <progress>
+  - <meter>
+  - <time>
+  - <audio>
+  - <video>
+  - <track>
+  - <source>
+  - <embed>
+  - <object>
+  - <param>
+  - <iframe>
+  - <canvas>
+  - <map>
+  - <area>
+  - <svg>
+  - <math>
   
 
 ```
@@ -91,10 +133,52 @@ invalid.jsx:3:10 lint/nursery/useSemanticElements ━━━━━━━━━━
   
   i For examples and more information, seeWAI-ARIA Roles
   
-  - serif
-  - sans-serif
-  - monospace
-  - etc.
+  - <button>
+  - <input>
+  - <textarea>
+  - <a>
+  - <img>
+  - <table>
+  - <article>
+  - <section>
+  - <nav>
+  - <aside>
+  - <header>
+  - <footer>
+  - <main>
+  - <figure>
+  - <figcaption>
+  - <details>
+  - <summary>
+  - <dialog>
+  - <menu>
+  - <menuitem>
+  - <fieldset>
+  - <legend>
+  - <caption>
+  - <colgroup>
+  - <col>
+  - <optgroup>
+  - <option>
+  - <select>
+  - <datalist>
+  - <output>
+  - <progress>
+  - <meter>
+  - <time>
+  - <audio>
+  - <video>
+  - <track>
+  - <source>
+  - <embed>
+  - <object>
+  - <param>
+  - <iframe>
+  - <canvas>
+  - <map>
+  - <area>
+  - <svg>
+  - <math>
   
 
 ```
@@ -113,10 +197,52 @@ invalid.jsx:4:10 lint/nursery/useSemanticElements ━━━━━━━━━━
   
   i For examples and more information, seeWAI-ARIA Roles
   
-  - serif
-  - sans-serif
-  - monospace
-  - etc.
+  - <button>
+  - <input>
+  - <textarea>
+  - <a>
+  - <img>
+  - <table>
+  - <article>
+  - <section>
+  - <nav>
+  - <aside>
+  - <header>
+  - <footer>
+  - <main>
+  - <figure>
+  - <figcaption>
+  - <details>
+  - <summary>
+  - <dialog>
+  - <menu>
+  - <menuitem>
+  - <fieldset>
+  - <legend>
+  - <caption>
+  - <colgroup>
+  - <col>
+  - <optgroup>
+  - <option>
+  - <select>
+  - <datalist>
+  - <output>
+  - <progress>
+  - <meter>
+  - <time>
+  - <audio>
+  - <video>
+  - <track>
+  - <source>
+  - <embed>
+  - <object>
+  - <param>
+  - <iframe>
+  - <canvas>
+  - <map>
+  - <area>
+  - <svg>
+  - <math>
   
 
 ```
@@ -135,10 +261,52 @@ invalid.jsx:5:10 lint/nursery/useSemanticElements ━━━━━━━━━━
   
   i For examples and more information, seeWAI-ARIA Roles
   
-  - serif
-  - sans-serif
-  - monospace
-  - etc.
+  - <button>
+  - <input>
+  - <textarea>
+  - <a>
+  - <img>
+  - <table>
+  - <article>
+  - <section>
+  - <nav>
+  - <aside>
+  - <header>
+  - <footer>
+  - <main>
+  - <figure>
+  - <figcaption>
+  - <details>
+  - <summary>
+  - <dialog>
+  - <menu>
+  - <menuitem>
+  - <fieldset>
+  - <legend>
+  - <caption>
+  - <colgroup>
+  - <col>
+  - <optgroup>
+  - <option>
+  - <select>
+  - <datalist>
+  - <output>
+  - <progress>
+  - <meter>
+  - <time>
+  - <audio>
+  - <video>
+  - <track>
+  - <source>
+  - <embed>
+  - <object>
+  - <param>
+  - <iframe>
+  - <canvas>
+  - <map>
+  - <area>
+  - <svg>
+  - <math>
   
 
 ```
@@ -157,10 +325,52 @@ invalid.jsx:6:10 lint/nursery/useSemanticElements ━━━━━━━━━━
   
   i For examples and more information, seeWAI-ARIA Roles
   
-  - serif
-  - sans-serif
-  - monospace
-  - etc.
+  - <button>
+  - <input>
+  - <textarea>
+  - <a>
+  - <img>
+  - <table>
+  - <article>
+  - <section>
+  - <nav>
+  - <aside>
+  - <header>
+  - <footer>
+  - <main>
+  - <figure>
+  - <figcaption>
+  - <details>
+  - <summary>
+  - <dialog>
+  - <menu>
+  - <menuitem>
+  - <fieldset>
+  - <legend>
+  - <caption>
+  - <colgroup>
+  - <col>
+  - <optgroup>
+  - <option>
+  - <select>
+  - <datalist>
+  - <output>
+  - <progress>
+  - <meter>
+  - <time>
+  - <audio>
+  - <video>
+  - <track>
+  - <source>
+  - <embed>
+  - <object>
+  - <param>
+  - <iframe>
+  - <canvas>
+  - <map>
+  - <area>
+  - <svg>
+  - <math>
   
 
 ```
@@ -179,10 +389,52 @@ invalid.jsx:7:10 lint/nursery/useSemanticElements ━━━━━━━━━━
   
   i For examples and more information, seeWAI-ARIA Roles
   
-  - serif
-  - sans-serif
-  - monospace
-  - etc.
+  - <button>
+  - <input>
+  - <textarea>
+  - <a>
+  - <img>
+  - <table>
+  - <article>
+  - <section>
+  - <nav>
+  - <aside>
+  - <header>
+  - <footer>
+  - <main>
+  - <figure>
+  - <figcaption>
+  - <details>
+  - <summary>
+  - <dialog>
+  - <menu>
+  - <menuitem>
+  - <fieldset>
+  - <legend>
+  - <caption>
+  - <colgroup>
+  - <col>
+  - <optgroup>
+  - <option>
+  - <select>
+  - <datalist>
+  - <output>
+  - <progress>
+  - <meter>
+  - <time>
+  - <audio>
+  - <video>
+  - <track>
+  - <source>
+  - <embed>
+  - <object>
+  - <param>
+  - <iframe>
+  - <canvas>
+  - <map>
+  - <area>
+  - <svg>
+  - <math>
   
 
 ```
@@ -201,10 +453,52 @@ invalid.jsx:8:10 lint/nursery/useSemanticElements ━━━━━━━━━━
   
   i For examples and more information, seeWAI-ARIA Roles
   
-  - serif
-  - sans-serif
-  - monospace
-  - etc.
+  - <button>
+  - <input>
+  - <textarea>
+  - <a>
+  - <img>
+  - <table>
+  - <article>
+  - <section>
+  - <nav>
+  - <aside>
+  - <header>
+  - <footer>
+  - <main>
+  - <figure>
+  - <figcaption>
+  - <details>
+  - <summary>
+  - <dialog>
+  - <menu>
+  - <menuitem>
+  - <fieldset>
+  - <legend>
+  - <caption>
+  - <colgroup>
+  - <col>
+  - <optgroup>
+  - <option>
+  - <select>
+  - <datalist>
+  - <output>
+  - <progress>
+  - <meter>
+  - <time>
+  - <audio>
+  - <video>
+  - <track>
+  - <source>
+  - <embed>
+  - <object>
+  - <param>
+  - <iframe>
+  - <canvas>
+  - <map>
+  - <area>
+  - <svg>
+  - <math>
   
 
 ```
@@ -223,10 +517,52 @@ invalid.jsx:9:10 lint/nursery/useSemanticElements ━━━━━━━━━━
   
   i For examples and more information, seeWAI-ARIA Roles
   
-  - serif
-  - sans-serif
-  - monospace
-  - etc.
+  - <button>
+  - <input>
+  - <textarea>
+  - <a>
+  - <img>
+  - <table>
+  - <article>
+  - <section>
+  - <nav>
+  - <aside>
+  - <header>
+  - <footer>
+  - <main>
+  - <figure>
+  - <figcaption>
+  - <details>
+  - <summary>
+  - <dialog>
+  - <menu>
+  - <menuitem>
+  - <fieldset>
+  - <legend>
+  - <caption>
+  - <colgroup>
+  - <col>
+  - <optgroup>
+  - <option>
+  - <select>
+  - <datalist>
+  - <output>
+  - <progress>
+  - <meter>
+  - <time>
+  - <audio>
+  - <video>
+  - <track>
+  - <source>
+  - <embed>
+  - <object>
+  - <param>
+  - <iframe>
+  - <canvas>
+  - <map>
+  - <area>
+  - <svg>
+  - <math>
   
 
 ```
@@ -245,10 +581,52 @@ invalid.jsx:10:10 lint/nursery/useSemanticElements ━━━━━━━━━�
   
   i For examples and more information, seeWAI-ARIA Roles
   
-  - serif
-  - sans-serif
-  - monospace
-  - etc.
+  - <button>
+  - <input>
+  - <textarea>
+  - <a>
+  - <img>
+  - <table>
+  - <article>
+  - <section>
+  - <nav>
+  - <aside>
+  - <header>
+  - <footer>
+  - <main>
+  - <figure>
+  - <figcaption>
+  - <details>
+  - <summary>
+  - <dialog>
+  - <menu>
+  - <menuitem>
+  - <fieldset>
+  - <legend>
+  - <caption>
+  - <colgroup>
+  - <col>
+  - <optgroup>
+  - <option>
+  - <select>
+  - <datalist>
+  - <output>
+  - <progress>
+  - <meter>
+  - <time>
+  - <audio>
+  - <video>
+  - <track>
+  - <source>
+  - <embed>
+  - <object>
+  - <param>
+  - <iframe>
+  - <canvas>
+  - <map>
+  - <area>
+  - <svg>
+  - <math>
   
 
 ```
@@ -267,10 +645,52 @@ invalid.jsx:11:10 lint/nursery/useSemanticElements ━━━━━━━━━�
   
   i For examples and more information, seeWAI-ARIA Roles
   
-  - serif
-  - sans-serif
-  - monospace
-  - etc.
+  - <button>
+  - <input>
+  - <textarea>
+  - <a>
+  - <img>
+  - <table>
+  - <article>
+  - <section>
+  - <nav>
+  - <aside>
+  - <header>
+  - <footer>
+  - <main>
+  - <figure>
+  - <figcaption>
+  - <details>
+  - <summary>
+  - <dialog>
+  - <menu>
+  - <menuitem>
+  - <fieldset>
+  - <legend>
+  - <caption>
+  - <colgroup>
+  - <col>
+  - <optgroup>
+  - <option>
+  - <select>
+  - <datalist>
+  - <output>
+  - <progress>
+  - <meter>
+  - <time>
+  - <audio>
+  - <video>
+  - <track>
+  - <source>
+  - <embed>
+  - <object>
+  - <param>
+  - <iframe>
+  - <canvas>
+  - <map>
+  - <area>
+  - <svg>
+  - <math>
   
 
 ```
@@ -289,10 +709,52 @@ invalid.jsx:12:10 lint/nursery/useSemanticElements ━━━━━━━━━�
   
   i For examples and more information, seeWAI-ARIA Roles
   
-  - serif
-  - sans-serif
-  - monospace
-  - etc.
+  - <button>
+  - <input>
+  - <textarea>
+  - <a>
+  - <img>
+  - <table>
+  - <article>
+  - <section>
+  - <nav>
+  - <aside>
+  - <header>
+  - <footer>
+  - <main>
+  - <figure>
+  - <figcaption>
+  - <details>
+  - <summary>
+  - <dialog>
+  - <menu>
+  - <menuitem>
+  - <fieldset>
+  - <legend>
+  - <caption>
+  - <colgroup>
+  - <col>
+  - <optgroup>
+  - <option>
+  - <select>
+  - <datalist>
+  - <output>
+  - <progress>
+  - <meter>
+  - <time>
+  - <audio>
+  - <video>
+  - <track>
+  - <source>
+  - <embed>
+  - <object>
+  - <param>
+  - <iframe>
+  - <canvas>
+  - <map>
+  - <area>
+  - <svg>
+  - <math>
   
 
 ```
@@ -311,10 +773,52 @@ invalid.jsx:13:10 lint/nursery/useSemanticElements ━━━━━━━━━�
   
   i For examples and more information, seeWAI-ARIA Roles
   
-  - serif
-  - sans-serif
-  - monospace
-  - etc.
+  - <button>
+  - <input>
+  - <textarea>
+  - <a>
+  - <img>
+  - <table>
+  - <article>
+  - <section>
+  - <nav>
+  - <aside>
+  - <header>
+  - <footer>
+  - <main>
+  - <figure>
+  - <figcaption>
+  - <details>
+  - <summary>
+  - <dialog>
+  - <menu>
+  - <menuitem>
+  - <fieldset>
+  - <legend>
+  - <caption>
+  - <colgroup>
+  - <col>
+  - <optgroup>
+  - <option>
+  - <select>
+  - <datalist>
+  - <output>
+  - <progress>
+  - <meter>
+  - <time>
+  - <audio>
+  - <video>
+  - <track>
+  - <source>
+  - <embed>
+  - <object>
+  - <param>
+  - <iframe>
+  - <canvas>
+  - <map>
+  - <area>
+  - <svg>
+  - <math>
   
 
 ```
@@ -333,10 +837,52 @@ invalid.jsx:14:10 lint/nursery/useSemanticElements ━━━━━━━━━�
   
   i For examples and more information, seeWAI-ARIA Roles
   
-  - serif
-  - sans-serif
-  - monospace
-  - etc.
+  - <button>
+  - <input>
+  - <textarea>
+  - <a>
+  - <img>
+  - <table>
+  - <article>
+  - <section>
+  - <nav>
+  - <aside>
+  - <header>
+  - <footer>
+  - <main>
+  - <figure>
+  - <figcaption>
+  - <details>
+  - <summary>
+  - <dialog>
+  - <menu>
+  - <menuitem>
+  - <fieldset>
+  - <legend>
+  - <caption>
+  - <colgroup>
+  - <col>
+  - <optgroup>
+  - <option>
+  - <select>
+  - <datalist>
+  - <output>
+  - <progress>
+  - <meter>
+  - <time>
+  - <audio>
+  - <video>
+  - <track>
+  - <source>
+  - <embed>
+  - <object>
+  - <param>
+  - <iframe>
+  - <canvas>
+  - <map>
+  - <area>
+  - <svg>
+  - <math>
   
 
 ```
@@ -355,10 +901,52 @@ invalid.jsx:15:10 lint/nursery/useSemanticElements ━━━━━━━━━�
   
   i For examples and more information, seeWAI-ARIA Roles
   
-  - serif
-  - sans-serif
-  - monospace
-  - etc.
+  - <button>
+  - <input>
+  - <textarea>
+  - <a>
+  - <img>
+  - <table>
+  - <article>
+  - <section>
+  - <nav>
+  - <aside>
+  - <header>
+  - <footer>
+  - <main>
+  - <figure>
+  - <figcaption>
+  - <details>
+  - <summary>
+  - <dialog>
+  - <menu>
+  - <menuitem>
+  - <fieldset>
+  - <legend>
+  - <caption>
+  - <colgroup>
+  - <col>
+  - <optgroup>
+  - <option>
+  - <select>
+  - <datalist>
+  - <output>
+  - <progress>
+  - <meter>
+  - <time>
+  - <audio>
+  - <video>
+  - <track>
+  - <source>
+  - <embed>
+  - <object>
+  - <param>
+  - <iframe>
+  - <canvas>
+  - <map>
+  - <area>
+  - <svg>
+  - <math>
   
 
 ```
@@ -377,10 +965,52 @@ invalid.jsx:16:10 lint/nursery/useSemanticElements ━━━━━━━━━�
   
   i For examples and more information, seeWAI-ARIA Roles
   
-  - serif
-  - sans-serif
-  - monospace
-  - etc.
+  - <button>
+  - <input>
+  - <textarea>
+  - <a>
+  - <img>
+  - <table>
+  - <article>
+  - <section>
+  - <nav>
+  - <aside>
+  - <header>
+  - <footer>
+  - <main>
+  - <figure>
+  - <figcaption>
+  - <details>
+  - <summary>
+  - <dialog>
+  - <menu>
+  - <menuitem>
+  - <fieldset>
+  - <legend>
+  - <caption>
+  - <colgroup>
+  - <col>
+  - <optgroup>
+  - <option>
+  - <select>
+  - <datalist>
+  - <output>
+  - <progress>
+  - <meter>
+  - <time>
+  - <audio>
+  - <video>
+  - <track>
+  - <source>
+  - <embed>
+  - <object>
+  - <param>
+  - <iframe>
+  - <canvas>
+  - <map>
+  - <area>
+  - <svg>
+  - <math>
   
 
 ```
@@ -399,10 +1029,52 @@ invalid.jsx:17:10 lint/nursery/useSemanticElements ━━━━━━━━━�
   
   i For examples and more information, seeWAI-ARIA Roles
   
-  - serif
-  - sans-serif
-  - monospace
-  - etc.
+  - <button>
+  - <input>
+  - <textarea>
+  - <a>
+  - <img>
+  - <table>
+  - <article>
+  - <section>
+  - <nav>
+  - <aside>
+  - <header>
+  - <footer>
+  - <main>
+  - <figure>
+  - <figcaption>
+  - <details>
+  - <summary>
+  - <dialog>
+  - <menu>
+  - <menuitem>
+  - <fieldset>
+  - <legend>
+  - <caption>
+  - <colgroup>
+  - <col>
+  - <optgroup>
+  - <option>
+  - <select>
+  - <datalist>
+  - <output>
+  - <progress>
+  - <meter>
+  - <time>
+  - <audio>
+  - <video>
+  - <track>
+  - <source>
+  - <embed>
+  - <object>
+  - <param>
+  - <iframe>
+  - <canvas>
+  - <map>
+  - <area>
+  - <svg>
+  - <math>
   
 
 ```
@@ -421,10 +1093,52 @@ invalid.jsx:18:10 lint/nursery/useSemanticElements ━━━━━━━━━�
   
   i For examples and more information, seeWAI-ARIA Roles
   
-  - serif
-  - sans-serif
-  - monospace
-  - etc.
+  - <button>
+  - <input>
+  - <textarea>
+  - <a>
+  - <img>
+  - <table>
+  - <article>
+  - <section>
+  - <nav>
+  - <aside>
+  - <header>
+  - <footer>
+  - <main>
+  - <figure>
+  - <figcaption>
+  - <details>
+  - <summary>
+  - <dialog>
+  - <menu>
+  - <menuitem>
+  - <fieldset>
+  - <legend>
+  - <caption>
+  - <colgroup>
+  - <col>
+  - <optgroup>
+  - <option>
+  - <select>
+  - <datalist>
+  - <output>
+  - <progress>
+  - <meter>
+  - <time>
+  - <audio>
+  - <video>
+  - <track>
+  - <source>
+  - <embed>
+  - <object>
+  - <param>
+  - <iframe>
+  - <canvas>
+  - <map>
+  - <area>
+  - <svg>
+  - <math>
   
 
 ```
@@ -443,10 +1157,52 @@ invalid.jsx:19:10 lint/nursery/useSemanticElements ━━━━━━━━━�
   
   i For examples and more information, seeWAI-ARIA Roles
   
-  - serif
-  - sans-serif
-  - monospace
-  - etc.
+  - <button>
+  - <input>
+  - <textarea>
+  - <a>
+  - <img>
+  - <table>
+  - <article>
+  - <section>
+  - <nav>
+  - <aside>
+  - <header>
+  - <footer>
+  - <main>
+  - <figure>
+  - <figcaption>
+  - <details>
+  - <summary>
+  - <dialog>
+  - <menu>
+  - <menuitem>
+  - <fieldset>
+  - <legend>
+  - <caption>
+  - <colgroup>
+  - <col>
+  - <optgroup>
+  - <option>
+  - <select>
+  - <datalist>
+  - <output>
+  - <progress>
+  - <meter>
+  - <time>
+  - <audio>
+  - <video>
+  - <track>
+  - <source>
+  - <embed>
+  - <object>
+  - <param>
+  - <iframe>
+  - <canvas>
+  - <map>
+  - <area>
+  - <svg>
+  - <math>
   
 
 ```
@@ -465,10 +1221,52 @@ invalid.jsx:20:10 lint/nursery/useSemanticElements ━━━━━━━━━�
   
   i For examples and more information, seeWAI-ARIA Roles
   
-  - serif
-  - sans-serif
-  - monospace
-  - etc.
+  - <button>
+  - <input>
+  - <textarea>
+  - <a>
+  - <img>
+  - <table>
+  - <article>
+  - <section>
+  - <nav>
+  - <aside>
+  - <header>
+  - <footer>
+  - <main>
+  - <figure>
+  - <figcaption>
+  - <details>
+  - <summary>
+  - <dialog>
+  - <menu>
+  - <menuitem>
+  - <fieldset>
+  - <legend>
+  - <caption>
+  - <colgroup>
+  - <col>
+  - <optgroup>
+  - <option>
+  - <select>
+  - <datalist>
+  - <output>
+  - <progress>
+  - <meter>
+  - <time>
+  - <audio>
+  - <video>
+  - <track>
+  - <source>
+  - <embed>
+  - <object>
+  - <param>
+  - <iframe>
+  - <canvas>
+  - <map>
+  - <area>
+  - <svg>
+  - <math>
   
 
 ```
@@ -487,10 +1285,52 @@ invalid.jsx:21:10 lint/nursery/useSemanticElements ━━━━━━━━━�
   
   i For examples and more information, seeWAI-ARIA Roles
   
-  - serif
-  - sans-serif
-  - monospace
-  - etc.
+  - <button>
+  - <input>
+  - <textarea>
+  - <a>
+  - <img>
+  - <table>
+  - <article>
+  - <section>
+  - <nav>
+  - <aside>
+  - <header>
+  - <footer>
+  - <main>
+  - <figure>
+  - <figcaption>
+  - <details>
+  - <summary>
+  - <dialog>
+  - <menu>
+  - <menuitem>
+  - <fieldset>
+  - <legend>
+  - <caption>
+  - <colgroup>
+  - <col>
+  - <optgroup>
+  - <option>
+  - <select>
+  - <datalist>
+  - <output>
+  - <progress>
+  - <meter>
+  - <time>
+  - <audio>
+  - <video>
+  - <track>
+  - <source>
+  - <embed>
+  - <object>
+  - <param>
+  - <iframe>
+  - <canvas>
+  - <map>
+  - <area>
+  - <svg>
+  - <math>
   
 
 ```
@@ -509,10 +1349,52 @@ invalid.jsx:22:10 lint/nursery/useSemanticElements ━━━━━━━━━�
   
   i For examples and more information, seeWAI-ARIA Roles
   
-  - serif
-  - sans-serif
-  - monospace
-  - etc.
+  - <button>
+  - <input>
+  - <textarea>
+  - <a>
+  - <img>
+  - <table>
+  - <article>
+  - <section>
+  - <nav>
+  - <aside>
+  - <header>
+  - <footer>
+  - <main>
+  - <figure>
+  - <figcaption>
+  - <details>
+  - <summary>
+  - <dialog>
+  - <menu>
+  - <menuitem>
+  - <fieldset>
+  - <legend>
+  - <caption>
+  - <colgroup>
+  - <col>
+  - <optgroup>
+  - <option>
+  - <select>
+  - <datalist>
+  - <output>
+  - <progress>
+  - <meter>
+  - <time>
+  - <audio>
+  - <video>
+  - <track>
+  - <source>
+  - <embed>
+  - <object>
+  - <param>
+  - <iframe>
+  - <canvas>
+  - <map>
+  - <area>
+  - <svg>
+  - <math>
   
 
 ```
@@ -531,10 +1413,52 @@ invalid.jsx:23:10 lint/nursery/useSemanticElements ━━━━━━━━━�
   
   i For examples and more information, seeWAI-ARIA Roles
   
-  - serif
-  - sans-serif
-  - monospace
-  - etc.
+  - <button>
+  - <input>
+  - <textarea>
+  - <a>
+  - <img>
+  - <table>
+  - <article>
+  - <section>
+  - <nav>
+  - <aside>
+  - <header>
+  - <footer>
+  - <main>
+  - <figure>
+  - <figcaption>
+  - <details>
+  - <summary>
+  - <dialog>
+  - <menu>
+  - <menuitem>
+  - <fieldset>
+  - <legend>
+  - <caption>
+  - <colgroup>
+  - <col>
+  - <optgroup>
+  - <option>
+  - <select>
+  - <datalist>
+  - <output>
+  - <progress>
+  - <meter>
+  - <time>
+  - <audio>
+  - <video>
+  - <track>
+  - <source>
+  - <embed>
+  - <object>
+  - <param>
+  - <iframe>
+  - <canvas>
+  - <map>
+  - <area>
+  - <svg>
+  - <math>
   
 
 ```
@@ -553,10 +1477,52 @@ invalid.jsx:24:10 lint/nursery/useSemanticElements ━━━━━━━━━�
   
   i For examples and more information, seeWAI-ARIA Roles
   
-  - serif
-  - sans-serif
-  - monospace
-  - etc.
+  - <button>
+  - <input>
+  - <textarea>
+  - <a>
+  - <img>
+  - <table>
+  - <article>
+  - <section>
+  - <nav>
+  - <aside>
+  - <header>
+  - <footer>
+  - <main>
+  - <figure>
+  - <figcaption>
+  - <details>
+  - <summary>
+  - <dialog>
+  - <menu>
+  - <menuitem>
+  - <fieldset>
+  - <legend>
+  - <caption>
+  - <colgroup>
+  - <col>
+  - <optgroup>
+  - <option>
+  - <select>
+  - <datalist>
+  - <output>
+  - <progress>
+  - <meter>
+  - <time>
+  - <audio>
+  - <video>
+  - <track>
+  - <source>
+  - <embed>
+  - <object>
+  - <param>
+  - <iframe>
+  - <canvas>
+  - <map>
+  - <area>
+  - <svg>
+  - <math>
   
 
 ```
@@ -575,10 +1541,52 @@ invalid.jsx:25:10 lint/nursery/useSemanticElements ━━━━━━━━━�
   
   i For examples and more information, seeWAI-ARIA Roles
   
-  - serif
-  - sans-serif
-  - monospace
-  - etc.
+  - <button>
+  - <input>
+  - <textarea>
+  - <a>
+  - <img>
+  - <table>
+  - <article>
+  - <section>
+  - <nav>
+  - <aside>
+  - <header>
+  - <footer>
+  - <main>
+  - <figure>
+  - <figcaption>
+  - <details>
+  - <summary>
+  - <dialog>
+  - <menu>
+  - <menuitem>
+  - <fieldset>
+  - <legend>
+  - <caption>
+  - <colgroup>
+  - <col>
+  - <optgroup>
+  - <option>
+  - <select>
+  - <datalist>
+  - <output>
+  - <progress>
+  - <meter>
+  - <time>
+  - <audio>
+  - <video>
+  - <track>
+  - <source>
+  - <embed>
+  - <object>
+  - <param>
+  - <iframe>
+  - <canvas>
+  - <map>
+  - <area>
+  - <svg>
+  - <math>
   
 
 ```
@@ -597,10 +1605,52 @@ invalid.jsx:26:10 lint/nursery/useSemanticElements ━━━━━━━━━�
   
   i For examples and more information, seeWAI-ARIA Roles
   
-  - serif
-  - sans-serif
-  - monospace
-  - etc.
+  - <button>
+  - <input>
+  - <textarea>
+  - <a>
+  - <img>
+  - <table>
+  - <article>
+  - <section>
+  - <nav>
+  - <aside>
+  - <header>
+  - <footer>
+  - <main>
+  - <figure>
+  - <figcaption>
+  - <details>
+  - <summary>
+  - <dialog>
+  - <menu>
+  - <menuitem>
+  - <fieldset>
+  - <legend>
+  - <caption>
+  - <colgroup>
+  - <col>
+  - <optgroup>
+  - <option>
+  - <select>
+  - <datalist>
+  - <output>
+  - <progress>
+  - <meter>
+  - <time>
+  - <audio>
+  - <video>
+  - <track>
+  - <source>
+  - <embed>
+  - <object>
+  - <param>
+  - <iframe>
+  - <canvas>
+  - <map>
+  - <area>
+  - <svg>
+  - <math>
   
 
 ```
@@ -619,10 +1669,52 @@ invalid.jsx:27:10 lint/nursery/useSemanticElements ━━━━━━━━━�
   
   i For examples and more information, seeWAI-ARIA Roles
   
-  - serif
-  - sans-serif
-  - monospace
-  - etc.
+  - <button>
+  - <input>
+  - <textarea>
+  - <a>
+  - <img>
+  - <table>
+  - <article>
+  - <section>
+  - <nav>
+  - <aside>
+  - <header>
+  - <footer>
+  - <main>
+  - <figure>
+  - <figcaption>
+  - <details>
+  - <summary>
+  - <dialog>
+  - <menu>
+  - <menuitem>
+  - <fieldset>
+  - <legend>
+  - <caption>
+  - <colgroup>
+  - <col>
+  - <optgroup>
+  - <option>
+  - <select>
+  - <datalist>
+  - <output>
+  - <progress>
+  - <meter>
+  - <time>
+  - <audio>
+  - <video>
+  - <track>
+  - <source>
+  - <embed>
+  - <object>
+  - <param>
+  - <iframe>
+  - <canvas>
+  - <map>
+  - <area>
+  - <svg>
+  - <math>
   
 
 ```
@@ -641,10 +1733,52 @@ invalid.jsx:28:10 lint/nursery/useSemanticElements ━━━━━━━━━�
   
   i For examples and more information, seeWAI-ARIA Roles
   
-  - serif
-  - sans-serif
-  - monospace
-  - etc.
+  - <button>
+  - <input>
+  - <textarea>
+  - <a>
+  - <img>
+  - <table>
+  - <article>
+  - <section>
+  - <nav>
+  - <aside>
+  - <header>
+  - <footer>
+  - <main>
+  - <figure>
+  - <figcaption>
+  - <details>
+  - <summary>
+  - <dialog>
+  - <menu>
+  - <menuitem>
+  - <fieldset>
+  - <legend>
+  - <caption>
+  - <colgroup>
+  - <col>
+  - <optgroup>
+  - <option>
+  - <select>
+  - <datalist>
+  - <output>
+  - <progress>
+  - <meter>
+  - <time>
+  - <audio>
+  - <video>
+  - <track>
+  - <source>
+  - <embed>
+  - <object>
+  - <param>
+  - <iframe>
+  - <canvas>
+  - <map>
+  - <area>
+  - <svg>
+  - <math>
   
 
 ```
@@ -663,10 +1797,52 @@ invalid.jsx:29:10 lint/nursery/useSemanticElements ━━━━━━━━━�
   
   i For examples and more information, seeWAI-ARIA Roles
   
-  - serif
-  - sans-serif
-  - monospace
-  - etc.
+  - <button>
+  - <input>
+  - <textarea>
+  - <a>
+  - <img>
+  - <table>
+  - <article>
+  - <section>
+  - <nav>
+  - <aside>
+  - <header>
+  - <footer>
+  - <main>
+  - <figure>
+  - <figcaption>
+  - <details>
+  - <summary>
+  - <dialog>
+  - <menu>
+  - <menuitem>
+  - <fieldset>
+  - <legend>
+  - <caption>
+  - <colgroup>
+  - <col>
+  - <optgroup>
+  - <option>
+  - <select>
+  - <datalist>
+  - <output>
+  - <progress>
+  - <meter>
+  - <time>
+  - <audio>
+  - <video>
+  - <track>
+  - <source>
+  - <embed>
+  - <object>
+  - <param>
+  - <iframe>
+  - <canvas>
+  - <map>
+  - <area>
+  - <svg>
+  - <math>
   
 
 ```
@@ -685,10 +1861,52 @@ invalid.jsx:30:10 lint/nursery/useSemanticElements ━━━━━━━━━�
   
   i For examples and more information, seeWAI-ARIA Roles
   
-  - serif
-  - sans-serif
-  - monospace
-  - etc.
+  - <button>
+  - <input>
+  - <textarea>
+  - <a>
+  - <img>
+  - <table>
+  - <article>
+  - <section>
+  - <nav>
+  - <aside>
+  - <header>
+  - <footer>
+  - <main>
+  - <figure>
+  - <figcaption>
+  - <details>
+  - <summary>
+  - <dialog>
+  - <menu>
+  - <menuitem>
+  - <fieldset>
+  - <legend>
+  - <caption>
+  - <colgroup>
+  - <col>
+  - <optgroup>
+  - <option>
+  - <select>
+  - <datalist>
+  - <output>
+  - <progress>
+  - <meter>
+  - <time>
+  - <audio>
+  - <video>
+  - <track>
+  - <source>
+  - <embed>
+  - <object>
+  - <param>
+  - <iframe>
+  - <canvas>
+  - <map>
+  - <area>
+  - <svg>
+  - <math>
   
 
 ```
@@ -707,10 +1925,52 @@ invalid.jsx:31:10 lint/nursery/useSemanticElements ━━━━━━━━━�
   
   i For examples and more information, seeWAI-ARIA Roles
   
-  - serif
-  - sans-serif
-  - monospace
-  - etc.
+  - <button>
+  - <input>
+  - <textarea>
+  - <a>
+  - <img>
+  - <table>
+  - <article>
+  - <section>
+  - <nav>
+  - <aside>
+  - <header>
+  - <footer>
+  - <main>
+  - <figure>
+  - <figcaption>
+  - <details>
+  - <summary>
+  - <dialog>
+  - <menu>
+  - <menuitem>
+  - <fieldset>
+  - <legend>
+  - <caption>
+  - <colgroup>
+  - <col>
+  - <optgroup>
+  - <option>
+  - <select>
+  - <datalist>
+  - <output>
+  - <progress>
+  - <meter>
+  - <time>
+  - <audio>
+  - <video>
+  - <track>
+  - <source>
+  - <embed>
+  - <object>
+  - <param>
+  - <iframe>
+  - <canvas>
+  - <map>
+  - <area>
+  - <svg>
+  - <math>
   
 
 ```
@@ -729,10 +1989,52 @@ invalid.jsx:32:10 lint/nursery/useSemanticElements ━━━━━━━━━�
   
   i For examples and more information, seeWAI-ARIA Roles
   
-  - serif
-  - sans-serif
-  - monospace
-  - etc.
+  - <button>
+  - <input>
+  - <textarea>
+  - <a>
+  - <img>
+  - <table>
+  - <article>
+  - <section>
+  - <nav>
+  - <aside>
+  - <header>
+  - <footer>
+  - <main>
+  - <figure>
+  - <figcaption>
+  - <details>
+  - <summary>
+  - <dialog>
+  - <menu>
+  - <menuitem>
+  - <fieldset>
+  - <legend>
+  - <caption>
+  - <colgroup>
+  - <col>
+  - <optgroup>
+  - <option>
+  - <select>
+  - <datalist>
+  - <output>
+  - <progress>
+  - <meter>
+  - <time>
+  - <audio>
+  - <video>
+  - <track>
+  - <source>
+  - <embed>
+  - <object>
+  - <param>
+  - <iframe>
+  - <canvas>
+  - <map>
+  - <area>
+  - <svg>
+  - <math>
   
 
 ```
@@ -751,10 +2053,52 @@ invalid.jsx:33:10 lint/nursery/useSemanticElements ━━━━━━━━━�
   
   i For examples and more information, seeWAI-ARIA Roles
   
-  - serif
-  - sans-serif
-  - monospace
-  - etc.
+  - <button>
+  - <input>
+  - <textarea>
+  - <a>
+  - <img>
+  - <table>
+  - <article>
+  - <section>
+  - <nav>
+  - <aside>
+  - <header>
+  - <footer>
+  - <main>
+  - <figure>
+  - <figcaption>
+  - <details>
+  - <summary>
+  - <dialog>
+  - <menu>
+  - <menuitem>
+  - <fieldset>
+  - <legend>
+  - <caption>
+  - <colgroup>
+  - <col>
+  - <optgroup>
+  - <option>
+  - <select>
+  - <datalist>
+  - <output>
+  - <progress>
+  - <meter>
+  - <time>
+  - <audio>
+  - <video>
+  - <track>
+  - <source>
+  - <embed>
+  - <object>
+  - <param>
+  - <iframe>
+  - <canvas>
+  - <map>
+  - <area>
+  - <svg>
+  - <math>
   
 
 ```
@@ -773,10 +2117,52 @@ invalid.jsx:34:10 lint/nursery/useSemanticElements ━━━━━━━━━�
   
   i For examples and more information, seeWAI-ARIA Roles
   
-  - serif
-  - sans-serif
-  - monospace
-  - etc.
+  - <button>
+  - <input>
+  - <textarea>
+  - <a>
+  - <img>
+  - <table>
+  - <article>
+  - <section>
+  - <nav>
+  - <aside>
+  - <header>
+  - <footer>
+  - <main>
+  - <figure>
+  - <figcaption>
+  - <details>
+  - <summary>
+  - <dialog>
+  - <menu>
+  - <menuitem>
+  - <fieldset>
+  - <legend>
+  - <caption>
+  - <colgroup>
+  - <col>
+  - <optgroup>
+  - <option>
+  - <select>
+  - <datalist>
+  - <output>
+  - <progress>
+  - <meter>
+  - <time>
+  - <audio>
+  - <video>
+  - <track>
+  - <source>
+  - <embed>
+  - <object>
+  - <param>
+  - <iframe>
+  - <canvas>
+  - <map>
+  - <area>
+  - <svg>
+  - <math>
   
 
 ```
@@ -795,10 +2181,52 @@ invalid.jsx:35:10 lint/nursery/useSemanticElements ━━━━━━━━━�
   
   i For examples and more information, seeWAI-ARIA Roles
   
-  - serif
-  - sans-serif
-  - monospace
-  - etc.
+  - <button>
+  - <input>
+  - <textarea>
+  - <a>
+  - <img>
+  - <table>
+  - <article>
+  - <section>
+  - <nav>
+  - <aside>
+  - <header>
+  - <footer>
+  - <main>
+  - <figure>
+  - <figcaption>
+  - <details>
+  - <summary>
+  - <dialog>
+  - <menu>
+  - <menuitem>
+  - <fieldset>
+  - <legend>
+  - <caption>
+  - <colgroup>
+  - <col>
+  - <optgroup>
+  - <option>
+  - <select>
+  - <datalist>
+  - <output>
+  - <progress>
+  - <meter>
+  - <time>
+  - <audio>
+  - <video>
+  - <track>
+  - <source>
+  - <embed>
+  - <object>
+  - <param>
+  - <iframe>
+  - <canvas>
+  - <map>
+  - <area>
+  - <svg>
+  - <math>
   
 
 ```
@@ -817,10 +2245,52 @@ invalid.jsx:36:10 lint/nursery/useSemanticElements ━━━━━━━━━�
   
   i For examples and more information, seeWAI-ARIA Roles
   
-  - serif
-  - sans-serif
-  - monospace
-  - etc.
+  - <button>
+  - <input>
+  - <textarea>
+  - <a>
+  - <img>
+  - <table>
+  - <article>
+  - <section>
+  - <nav>
+  - <aside>
+  - <header>
+  - <footer>
+  - <main>
+  - <figure>
+  - <figcaption>
+  - <details>
+  - <summary>
+  - <dialog>
+  - <menu>
+  - <menuitem>
+  - <fieldset>
+  - <legend>
+  - <caption>
+  - <colgroup>
+  - <col>
+  - <optgroup>
+  - <option>
+  - <select>
+  - <datalist>
+  - <output>
+  - <progress>
+  - <meter>
+  - <time>
+  - <audio>
+  - <video>
+  - <track>
+  - <source>
+  - <embed>
+  - <object>
+  - <param>
+  - <iframe>
+  - <canvas>
+  - <map>
+  - <area>
+  - <svg>
+  - <math>
   
 
 ```
@@ -839,10 +2309,52 @@ invalid.jsx:37:10 lint/nursery/useSemanticElements ━━━━━━━━━�
   
   i For examples and more information, seeWAI-ARIA Roles
   
-  - serif
-  - sans-serif
-  - monospace
-  - etc.
+  - <button>
+  - <input>
+  - <textarea>
+  - <a>
+  - <img>
+  - <table>
+  - <article>
+  - <section>
+  - <nav>
+  - <aside>
+  - <header>
+  - <footer>
+  - <main>
+  - <figure>
+  - <figcaption>
+  - <details>
+  - <summary>
+  - <dialog>
+  - <menu>
+  - <menuitem>
+  - <fieldset>
+  - <legend>
+  - <caption>
+  - <colgroup>
+  - <col>
+  - <optgroup>
+  - <option>
+  - <select>
+  - <datalist>
+  - <output>
+  - <progress>
+  - <meter>
+  - <time>
+  - <audio>
+  - <video>
+  - <track>
+  - <source>
+  - <embed>
+  - <object>
+  - <param>
+  - <iframe>
+  - <canvas>
+  - <map>
+  - <area>
+  - <svg>
+  - <math>
   
 
 ```
@@ -861,10 +2373,52 @@ invalid.jsx:38:10 lint/nursery/useSemanticElements ━━━━━━━━━�
   
   i For examples and more information, seeWAI-ARIA Roles
   
-  - serif
-  - sans-serif
-  - monospace
-  - etc.
+  - <button>
+  - <input>
+  - <textarea>
+  - <a>
+  - <img>
+  - <table>
+  - <article>
+  - <section>
+  - <nav>
+  - <aside>
+  - <header>
+  - <footer>
+  - <main>
+  - <figure>
+  - <figcaption>
+  - <details>
+  - <summary>
+  - <dialog>
+  - <menu>
+  - <menuitem>
+  - <fieldset>
+  - <legend>
+  - <caption>
+  - <colgroup>
+  - <col>
+  - <optgroup>
+  - <option>
+  - <select>
+  - <datalist>
+  - <output>
+  - <progress>
+  - <meter>
+  - <time>
+  - <audio>
+  - <video>
+  - <track>
+  - <source>
+  - <embed>
+  - <object>
+  - <param>
+  - <iframe>
+  - <canvas>
+  - <map>
+  - <area>
+  - <svg>
+  - <math>
   
 
 ```
@@ -883,10 +2437,52 @@ invalid.jsx:39:10 lint/nursery/useSemanticElements ━━━━━━━━━�
   
   i For examples and more information, seeWAI-ARIA Roles
   
-  - serif
-  - sans-serif
-  - monospace
-  - etc.
+  - <button>
+  - <input>
+  - <textarea>
+  - <a>
+  - <img>
+  - <table>
+  - <article>
+  - <section>
+  - <nav>
+  - <aside>
+  - <header>
+  - <footer>
+  - <main>
+  - <figure>
+  - <figcaption>
+  - <details>
+  - <summary>
+  - <dialog>
+  - <menu>
+  - <menuitem>
+  - <fieldset>
+  - <legend>
+  - <caption>
+  - <colgroup>
+  - <col>
+  - <optgroup>
+  - <option>
+  - <select>
+  - <datalist>
+  - <output>
+  - <progress>
+  - <meter>
+  - <time>
+  - <audio>
+  - <video>
+  - <track>
+  - <source>
+  - <embed>
+  - <object>
+  - <param>
+  - <iframe>
+  - <canvas>
+  - <map>
+  - <area>
+  - <svg>
+  - <math>
   
 
 ```
@@ -905,10 +2501,52 @@ invalid.jsx:40:10 lint/nursery/useSemanticElements ━━━━━━━━━�
   
   i For examples and more information, seeWAI-ARIA Roles
   
-  - serif
-  - sans-serif
-  - monospace
-  - etc.
+  - <button>
+  - <input>
+  - <textarea>
+  - <a>
+  - <img>
+  - <table>
+  - <article>
+  - <section>
+  - <nav>
+  - <aside>
+  - <header>
+  - <footer>
+  - <main>
+  - <figure>
+  - <figcaption>
+  - <details>
+  - <summary>
+  - <dialog>
+  - <menu>
+  - <menuitem>
+  - <fieldset>
+  - <legend>
+  - <caption>
+  - <colgroup>
+  - <col>
+  - <optgroup>
+  - <option>
+  - <select>
+  - <datalist>
+  - <output>
+  - <progress>
+  - <meter>
+  - <time>
+  - <audio>
+  - <video>
+  - <track>
+  - <source>
+  - <embed>
+  - <object>
+  - <param>
+  - <iframe>
+  - <canvas>
+  - <map>
+  - <area>
+  - <svg>
+  - <math>
   
 
 ```
@@ -927,10 +2565,52 @@ invalid.jsx:41:10 lint/nursery/useSemanticElements ━━━━━━━━━�
   
   i For examples and more information, seeWAI-ARIA Roles
   
-  - serif
-  - sans-serif
-  - monospace
-  - etc.
+  - <button>
+  - <input>
+  - <textarea>
+  - <a>
+  - <img>
+  - <table>
+  - <article>
+  - <section>
+  - <nav>
+  - <aside>
+  - <header>
+  - <footer>
+  - <main>
+  - <figure>
+  - <figcaption>
+  - <details>
+  - <summary>
+  - <dialog>
+  - <menu>
+  - <menuitem>
+  - <fieldset>
+  - <legend>
+  - <caption>
+  - <colgroup>
+  - <col>
+  - <optgroup>
+  - <option>
+  - <select>
+  - <datalist>
+  - <output>
+  - <progress>
+  - <meter>
+  - <time>
+  - <audio>
+  - <video>
+  - <track>
+  - <source>
+  - <embed>
+  - <object>
+  - <param>
+  - <iframe>
+  - <canvas>
+  - <map>
+  - <area>
+  - <svg>
+  - <math>
   
 
 ```
@@ -949,10 +2629,52 @@ invalid.jsx:42:10 lint/nursery/useSemanticElements ━━━━━━━━━�
   
   i For examples and more information, seeWAI-ARIA Roles
   
-  - serif
-  - sans-serif
-  - monospace
-  - etc.
+  - <button>
+  - <input>
+  - <textarea>
+  - <a>
+  - <img>
+  - <table>
+  - <article>
+  - <section>
+  - <nav>
+  - <aside>
+  - <header>
+  - <footer>
+  - <main>
+  - <figure>
+  - <figcaption>
+  - <details>
+  - <summary>
+  - <dialog>
+  - <menu>
+  - <menuitem>
+  - <fieldset>
+  - <legend>
+  - <caption>
+  - <colgroup>
+  - <col>
+  - <optgroup>
+  - <option>
+  - <select>
+  - <datalist>
+  - <output>
+  - <progress>
+  - <meter>
+  - <time>
+  - <audio>
+  - <video>
+  - <track>
+  - <source>
+  - <embed>
+  - <object>
+  - <param>
+  - <iframe>
+  - <canvas>
+  - <map>
+  - <area>
+  - <svg>
+  - <math>
   
 
 ```
@@ -971,10 +2693,52 @@ invalid.jsx:43:10 lint/nursery/useSemanticElements ━━━━━━━━━�
   
   i For examples and more information, seeWAI-ARIA Roles
   
-  - serif
-  - sans-serif
-  - monospace
-  - etc.
+  - <button>
+  - <input>
+  - <textarea>
+  - <a>
+  - <img>
+  - <table>
+  - <article>
+  - <section>
+  - <nav>
+  - <aside>
+  - <header>
+  - <footer>
+  - <main>
+  - <figure>
+  - <figcaption>
+  - <details>
+  - <summary>
+  - <dialog>
+  - <menu>
+  - <menuitem>
+  - <fieldset>
+  - <legend>
+  - <caption>
+  - <colgroup>
+  - <col>
+  - <optgroup>
+  - <option>
+  - <select>
+  - <datalist>
+  - <output>
+  - <progress>
+  - <meter>
+  - <time>
+  - <audio>
+  - <video>
+  - <track>
+  - <source>
+  - <embed>
+  - <object>
+  - <param>
+  - <iframe>
+  - <canvas>
+  - <map>
+  - <area>
+  - <svg>
+  - <math>
   
 
 ```
@@ -993,10 +2757,52 @@ invalid.jsx:44:10 lint/nursery/useSemanticElements ━━━━━━━━━�
   
   i For examples and more information, seeWAI-ARIA Roles
   
-  - serif
-  - sans-serif
-  - monospace
-  - etc.
+  - <button>
+  - <input>
+  - <textarea>
+  - <a>
+  - <img>
+  - <table>
+  - <article>
+  - <section>
+  - <nav>
+  - <aside>
+  - <header>
+  - <footer>
+  - <main>
+  - <figure>
+  - <figcaption>
+  - <details>
+  - <summary>
+  - <dialog>
+  - <menu>
+  - <menuitem>
+  - <fieldset>
+  - <legend>
+  - <caption>
+  - <colgroup>
+  - <col>
+  - <optgroup>
+  - <option>
+  - <select>
+  - <datalist>
+  - <output>
+  - <progress>
+  - <meter>
+  - <time>
+  - <audio>
+  - <video>
+  - <track>
+  - <source>
+  - <embed>
+  - <object>
+  - <param>
+  - <iframe>
+  - <canvas>
+  - <map>
+  - <area>
+  - <svg>
+  - <math>
   
 
 ```
@@ -1015,10 +2821,52 @@ invalid.jsx:45:10 lint/nursery/useSemanticElements ━━━━━━━━━�
   
   i For examples and more information, seeWAI-ARIA Roles
   
-  - serif
-  - sans-serif
-  - monospace
-  - etc.
+  - <button>
+  - <input>
+  - <textarea>
+  - <a>
+  - <img>
+  - <table>
+  - <article>
+  - <section>
+  - <nav>
+  - <aside>
+  - <header>
+  - <footer>
+  - <main>
+  - <figure>
+  - <figcaption>
+  - <details>
+  - <summary>
+  - <dialog>
+  - <menu>
+  - <menuitem>
+  - <fieldset>
+  - <legend>
+  - <caption>
+  - <colgroup>
+  - <col>
+  - <optgroup>
+  - <option>
+  - <select>
+  - <datalist>
+  - <output>
+  - <progress>
+  - <meter>
+  - <time>
+  - <audio>
+  - <video>
+  - <track>
+  - <source>
+  - <embed>
+  - <object>
+  - <param>
+  - <iframe>
+  - <canvas>
+  - <map>
+  - <area>
+  - <svg>
+  - <math>
   
 
 ```
@@ -1037,10 +2885,52 @@ invalid.jsx:46:10 lint/nursery/useSemanticElements ━━━━━━━━━�
   
   i For examples and more information, seeWAI-ARIA Roles
   
-  - serif
-  - sans-serif
-  - monospace
-  - etc.
+  - <button>
+  - <input>
+  - <textarea>
+  - <a>
+  - <img>
+  - <table>
+  - <article>
+  - <section>
+  - <nav>
+  - <aside>
+  - <header>
+  - <footer>
+  - <main>
+  - <figure>
+  - <figcaption>
+  - <details>
+  - <summary>
+  - <dialog>
+  - <menu>
+  - <menuitem>
+  - <fieldset>
+  - <legend>
+  - <caption>
+  - <colgroup>
+  - <col>
+  - <optgroup>
+  - <option>
+  - <select>
+  - <datalist>
+  - <output>
+  - <progress>
+  - <meter>
+  - <time>
+  - <audio>
+  - <video>
+  - <track>
+  - <source>
+  - <embed>
+  - <object>
+  - <param>
+  - <iframe>
+  - <canvas>
+  - <map>
+  - <area>
+  - <svg>
+  - <math>
   
 
 ```
@@ -1059,10 +2949,52 @@ invalid.jsx:47:10 lint/nursery/useSemanticElements ━━━━━━━━━�
   
   i For examples and more information, seeWAI-ARIA Roles
   
-  - serif
-  - sans-serif
-  - monospace
-  - etc.
+  - <button>
+  - <input>
+  - <textarea>
+  - <a>
+  - <img>
+  - <table>
+  - <article>
+  - <section>
+  - <nav>
+  - <aside>
+  - <header>
+  - <footer>
+  - <main>
+  - <figure>
+  - <figcaption>
+  - <details>
+  - <summary>
+  - <dialog>
+  - <menu>
+  - <menuitem>
+  - <fieldset>
+  - <legend>
+  - <caption>
+  - <colgroup>
+  - <col>
+  - <optgroup>
+  - <option>
+  - <select>
+  - <datalist>
+  - <output>
+  - <progress>
+  - <meter>
+  - <time>
+  - <audio>
+  - <video>
+  - <track>
+  - <source>
+  - <embed>
+  - <object>
+  - <param>
+  - <iframe>
+  - <canvas>
+  - <map>
+  - <area>
+  - <svg>
+  - <math>
   
 
 ```
