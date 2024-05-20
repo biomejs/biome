@@ -1,10 +1,10 @@
 use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
 use biome_js_syntax::{
-    AnyJsModuleItem, AnyJsStatement, JsClassDeclaration, JsExport, JsModuleItemList,
+    AnyJsModuleItem, AnyJsStatement, JsClassDeclaration, JsExport, JsModule, JsScript,
     TsInterfaceDeclaration, TsTypeAliasDeclaration,
 };
-use biome_rowan::{AstNode, TextRange, TokenText};
+use biome_rowan::{declare_node_union, AstNode, TextRange, TokenText};
 
 declare_rule! {
     /// Disallow the use of overload signatures that are not next to each other.
@@ -95,20 +95,36 @@ declare_rule! {
 }
 
 impl Rule for UseAdjacentOverloadSignatures {
-    type Query = Ast<JsModuleItemList>;
+    type Query = Ast<JsModule>;
     type State = Vec<(TokenText, TextRange)>;
     type Signals = Option<Self::State>;
     type Options = ();
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
+        let items = node.items();
         let mut methods: Vec<Vec<(TokenText, u32, TextRange)>> = Vec::new();
         let mut export_vec = vec![];
 
-        for (index, item) in node.into_iter().enumerate() {
+        for (index, item) in items.into_iter().enumerate() {
             match item {
                 AnyJsModuleItem::AnyJsStatement(node) => {
                     match node {
+                        // dcclare
+                        AnyJsStatement::TsDeclareStatement(node) => {
+                            let declaration = node.declaration().ok()?;
+                            let items =
+                                declaration.as_ts_module_declaration()?.body().ok()?.items();
+                            for (index, item) in items.into_iter().enumerate() {
+                                if let AnyJsModuleItem::JsExport(node) = item {
+                                    let export_text_range = handle_signle_export(&node)?;
+                                    let tuple = export_text_range[0].clone();
+                                    let text = tuple.0.clone();
+                                    let range = tuple.1;
+                                    export_vec.push((text, index as u32, range));
+                                }
+                            }
+                        }
                         // type
                         AnyJsStatement::TsTypeAliasDeclaration(node) => {
                             let type_vec = handle_type(&node)?;
@@ -166,7 +182,7 @@ impl Rule for UseAdjacentOverloadSignatures {
                     }
                 }
                 AnyJsModuleItem::JsExport(node) => {
-                    let export_text_range = handle_export(&node)?;
+                    let export_text_range = handle_signle_export(&node)?;
                     let tuple = export_text_range[0].clone();
                     let text = tuple.0.clone();
                     let range = tuple.1;
@@ -315,7 +331,7 @@ fn handle_class(node: &JsClassDeclaration) -> Option<Vec<(TokenText, u32, TextRa
     Some(class_vec)
 }
 
-fn handle_export(node: &JsExport) -> Option<Vec<(TokenText, TextRange)>> {
+fn handle_signle_export(node: &JsExport) -> Option<Vec<(TokenText, TextRange)>> {
     let export = node.export_clause().ok()?;
     let declaration_clause = export.as_any_js_declaration_clause()?;
     let ts_declare = declaration_clause.as_ts_declare_function_declaration()?;
@@ -329,4 +345,8 @@ fn handle_export(node: &JsExport) -> Option<Vec<(TokenText, TextRange)>> {
     let range = name_token.text_range();
     let export_text_range = vec![(text, range)];
     Some(export_text_range)
+}
+
+declare_node_union! {
+    pub DeclarationOsModuleNode = JsModule | JsScript
 }

@@ -90,20 +90,6 @@ function h (): {
 
 # Diagnostics
 ```
-invalid.ts:2:19 lint/nursery/useAdjacentOverloadSignatures ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! All foo_declare signatures must be adjacent.
-  
-    1 │ declare namespace Foo {
-  > 2 │   export function foo_declare(s: string): void;
-      │                   ^^^^^^^^^^^
-    3 │   export function bar_declare(): void;
-    4 │   export function foo_declare(n: number): void;
-  
-
-```
-
-```
 invalid.ts:12:3 lint/nursery/useAdjacentOverloadSignatures ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! All foo_type signatures must be adjacent.
@@ -193,6 +179,14 @@ invalid.ts:12:3 lint/nursery/useAdjacentOverloadSignatures ━━━━━━━
        │   ^^^^^^^^^
     80 │ } {
     81 │ }
+  
+  i All foo_declare signatures must be adjacent.
+  
+    1 │ declare namespace Foo {
+  > 2 │   export function foo_declare(s: string): void;
+      │                   ^^^^^^^^^^^
+    3 │   export function bar_declare(): void;
+    4 │   export function foo_declare(n: number): void;
   
   i All foo signatures must be adjacent.
   
