@@ -346,7 +346,17 @@ z.object({})
 ```
 
 - [noExportsInTest](https://biomejs.dev/linter/rules/no-exports-in-test/) rule no longer treats files with in-source testing as test files https://github.com/biomejs/biome/issues/2859. Contributed by @ah-yu
+- [useSortedClasses](https://biomejs.dev/linter/rules/use-sorted-classes/) now keeps leading and trailing spaces when applying the code action inside template literals:
 
+  ```
+  i Unsafe fix: Sort the classes.
+
+    1 1 │   <>
+    2   │ - → <div·class={`${variable}·px-2·foo·p-4·bar`}/>
+      2 │ + → <div·class={`${variable}·foo·bar·p-4·px-2`}/>
+    3 3 │   	<div class={`px-2 foo p-4 bar ${variable}`}/>
+    4 4 │   </>
+  ```
 ### Parser
 
 #### Enhancements
