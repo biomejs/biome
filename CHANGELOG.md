@@ -187,6 +187,9 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 #### New features
 
+- Add [nursery/useImportExtensions](https://biomejs.dev/linter/rules/use-import-extensions/).
+  Contributed by @minht11
+
 - [useNamingConvention](https://biomejs.dev/linter/rules/use-naming-convention/) now supports an option to enforce custom conventions ([#1900](https://github.com/biomejs/biome/issues/1900)).
 
   For example, you can enforce the use of a prefix for private class members:
@@ -369,7 +372,7 @@ z.object({})
 #### New features
 
 - Add [nursery/noUselessStringConcat](https://biomejs.dev/linter/rules/no-useless-string-concat/).
-- Add [nursery/useExplicitLengthCheck](https://biomejs.dev/linter/rules/use-explicit-length-check/).
+- Add [nursery/useExplicitLengthCheck](https://biomejs.dev/linter/rules/use-explicit-length-check/). Contributed by @minht11
 
 - `useExhaustiveDependencies` now recognizes (some) dependencies that change on
   every render ([#2374](https://github.com/biomejs/biome/issues/2374)).
