@@ -1,0 +1,397 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```jsx
+import "./sub/foo";
+import "./sub/Foo";
+import "./sub/Bar/";
+
+// Guaranteed resolve to 'index.js' file
+import './foo/..'
+import './foo/../'
+import './foo/.'
+import './foo/./'
+import './foo/'
+import './..'
+import  /** A **/'./' /** B **/
+import './foo?worker'
+import './foo#hash'
+import './foo?query=string&query2#hash'
+
+import('./foo')
+import( /** A **/'./foo'/** B **/ )
+require('./foo')
+```
+
+# Diagnostics
+```
+invalid.js:1:8 lint/nursery/useImportExtensions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Add a file extension for relative imports.
+  
+  > 1 │ import "./sub/foo";
+      │        ^^^^^^^^^^^
+    2 │ import "./sub/Foo";
+    3 │ import "./sub/Bar/";
+  
+  i Explicit import improves compatibility with browsers and makes file resolution in tooling faster.
+  
+  i Unsafe fix: Add potential import extension .js.
+  
+     1    │ - import·"./sub/foo";
+        1 │ + import·"./sub/foo.js";
+     2  2 │   import "./sub/Foo";
+     3  3 │   import "./sub/Bar/";
+  
+
+```
+
+```
+invalid.js:2:8 lint/nursery/useImportExtensions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Add a file extension for relative imports.
+  
+    1 │ import "./sub/foo";
+  > 2 │ import "./sub/Foo";
+      │        ^^^^^^^^^^^
+    3 │ import "./sub/Bar/";
+    4 │ 
+  
+  i Explicit import improves compatibility with browsers and makes file resolution in tooling faster.
+  
+  i Unsafe fix: Add potential import extension .jsx.
+  
+     1  1 │   import "./sub/foo";
+     2    │ - import·"./sub/Foo";
+        2 │ + import·"./sub/Foo.jsx";
+     3  3 │   import "./sub/Bar/";
+     4  4 │   
+  
+
+```
+
+```
+invalid.js:3:8 lint/nursery/useImportExtensions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Add a file extension for relative imports.
+  
+    1 │ import "./sub/foo";
+    2 │ import "./sub/Foo";
+  > 3 │ import "./sub/Bar/";
+      │        ^^^^^^^^^^^^
+    4 │ 
+    5 │ // Guaranteed resolve to 'index.js' file
+  
+  i Explicit import improves compatibility with browsers and makes file resolution in tooling faster.
+  
+  i Unsafe fix: Add potential import extension .jsx.
+  
+    3 │ import·"./sub/Bar/index.jsx";
+      │                   +++++++++  
+
+```
+
+```
+invalid.js:6:8 lint/nursery/useImportExtensions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Add a file extension for relative imports.
+  
+    5 │ // Guaranteed resolve to 'index.js' file
+  > 6 │ import './foo/..'
+      │        ^^^^^^^^^^
+    7 │ import './foo/../'
+    8 │ import './foo/.'
+  
+  i Explicit import improves compatibility with browsers and makes file resolution in tooling faster.
+  
+  i Unsafe fix: Add potential import extension .js.
+  
+     4  4 │   
+     5  5 │   // Guaranteed resolve to 'index.js' file
+     6    │ - import·'./foo/..'
+        6 │ + import·"./foo/../index.js"
+     7  7 │   import './foo/../'
+     8  8 │   import './foo/.'
+  
+
+```
+
+```
+invalid.js:7:8 lint/nursery/useImportExtensions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Add a file extension for relative imports.
+  
+    5 │ // Guaranteed resolve to 'index.js' file
+    6 │ import './foo/..'
+  > 7 │ import './foo/../'
+      │        ^^^^^^^^^^^
+    8 │ import './foo/.'
+    9 │ import './foo/./'
+  
+  i Explicit import improves compatibility with browsers and makes file resolution in tooling faster.
+  
+  i Unsafe fix: Add potential import extension .js.
+  
+     5  5 │   // Guaranteed resolve to 'index.js' file
+     6  6 │   import './foo/..'
+     7    │ - import·'./foo/../'
+        7 │ + import·"./foo/../index.js"
+     8  8 │   import './foo/.'
+     9  9 │   import './foo/./'
+  
+
+```
+
+```
+invalid.js:8:8 lint/nursery/useImportExtensions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Add a file extension for relative imports.
+  
+     6 │ import './foo/..'
+     7 │ import './foo/../'
+   > 8 │ import './foo/.'
+       │        ^^^^^^^^^
+     9 │ import './foo/./'
+    10 │ import './foo/'
+  
+  i Explicit import improves compatibility with browsers and makes file resolution in tooling faster.
+  
+  i Unsafe fix: Add potential import extension .js.
+  
+     6  6 │   import './foo/..'
+     7  7 │   import './foo/../'
+     8    │ - import·'./foo/.'
+        8 │ + import·"./foo/index.js"
+     9  9 │   import './foo/./'
+    10 10 │   import './foo/'
+  
+
+```
+
+```
+invalid.js:9:8 lint/nursery/useImportExtensions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Add a file extension for relative imports.
+  
+     7 │ import './foo/../'
+     8 │ import './foo/.'
+   > 9 │ import './foo/./'
+       │        ^^^^^^^^^^
+    10 │ import './foo/'
+    11 │ import './..'
+  
+  i Explicit import improves compatibility with browsers and makes file resolution in tooling faster.
+  
+  i Unsafe fix: Add potential import extension .js.
+  
+     7  7 │   import './foo/../'
+     8  8 │   import './foo/.'
+     9    │ - import·'./foo/./'
+        9 │ + import·"./foo/index.js"
+    10 10 │   import './foo/'
+    11 11 │   import './..'
+  
+
+```
+
+```
+invalid.js:10:8 lint/nursery/useImportExtensions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Add a file extension for relative imports.
+  
+     8 │ import './foo/.'
+     9 │ import './foo/./'
+  > 10 │ import './foo/'
+       │        ^^^^^^^^
+    11 │ import './..'
+    12 │ import  /** A **/'./' /** B **/
+  
+  i Explicit import improves compatibility with browsers and makes file resolution in tooling faster.
+  
+  i Unsafe fix: Add potential import extension .js.
+  
+     8  8 │   import './foo/.'
+     9  9 │   import './foo/./'
+    10    │ - import·'./foo/'
+       10 │ + import·"./foo/index.js"
+    11 11 │   import './..'
+    12 12 │   import  /** A **/'./' /** B **/
+  
+
+```
+
+```
+invalid.js:11:8 lint/nursery/useImportExtensions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Add a file extension for relative imports.
+  
+     9 │ import './foo/./'
+    10 │ import './foo/'
+  > 11 │ import './..'
+       │        ^^^^^^
+    12 │ import  /** A **/'./' /** B **/
+    13 │ import './foo?worker'
+  
+  i Explicit import improves compatibility with browsers and makes file resolution in tooling faster.
+  
+  i Unsafe fix: Add potential import extension .js.
+  
+     9  9 │   import './foo/./'
+    10 10 │   import './foo/'
+    11    │ - import·'./..'
+       11 │ + import·"./../index.js"
+    12 12 │   import  /** A **/'./' /** B **/
+    13 13 │   import './foo?worker'
+  
+
+```
+
+```
+invalid.js:12:18 lint/nursery/useImportExtensions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Add a file extension for relative imports.
+  
+    10 │ import './foo/'
+    11 │ import './..'
+  > 12 │ import  /** A **/'./' /** B **/
+       │                  ^^^^^^^^^^^^^^
+    13 │ import './foo?worker'
+    14 │ import './foo#hash'
+  
+  i Explicit import improves compatibility with browsers and makes file resolution in tooling faster.
+  
+  i Unsafe fix: Add potential import extension .js.
+  
+    10 10 │   import './foo/'
+    11 11 │   import './..'
+    12    │ - import··/**·A·**/'./'·/**·B·**/
+       12 │ + import··/**·A·**/"./index.js"·/**·B·**/
+    13 13 │   import './foo?worker'
+    14 14 │   import './foo#hash'
+  
+
+```
+
+```
+invalid.js:13:8 lint/nursery/useImportExtensions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Add a file extension for relative imports.
+  
+    11 │ import './..'
+    12 │ import  /** A **/'./' /** B **/
+  > 13 │ import './foo?worker'
+       │        ^^^^^^^^^^^^^^
+    14 │ import './foo#hash'
+    15 │ import './foo?query=string&query2#hash'
+  
+  i Explicit import improves compatibility with browsers and makes file resolution in tooling faster.
+  
+
+```
+
+```
+invalid.js:14:8 lint/nursery/useImportExtensions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Add a file extension for relative imports.
+  
+    12 │ import  /** A **/'./' /** B **/
+    13 │ import './foo?worker'
+  > 14 │ import './foo#hash'
+       │        ^^^^^^^^^^^^
+    15 │ import './foo?query=string&query2#hash'
+    16 │ 
+  
+  i Explicit import improves compatibility with browsers and makes file resolution in tooling faster.
+  
+
+```
+
+```
+invalid.js:15:8 lint/nursery/useImportExtensions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Add a file extension for relative imports.
+  
+    13 │ import './foo?worker'
+    14 │ import './foo#hash'
+  > 15 │ import './foo?query=string&query2#hash'
+       │        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    16 │ 
+    17 │ import('./foo')
+  
+  i Explicit import improves compatibility with browsers and makes file resolution in tooling faster.
+  
+
+```
+
+```
+invalid.js:17:8 lint/nursery/useImportExtensions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Add a file extension for relative imports.
+  
+    15 │ import './foo?query=string&query2#hash'
+    16 │ 
+  > 17 │ import('./foo')
+       │        ^^^^^^^
+    18 │ import( /** A **/'./foo'/** B **/ )
+    19 │ require('./foo')
+  
+  i Explicit import improves compatibility with browsers and makes file resolution in tooling faster.
+  
+  i Unsafe fix: Add potential import extension .js.
+  
+    15 15 │   import './foo?query=string&query2#hash'
+    16 16 │   
+    17    │ - import('./foo')
+       17 │ + import("./foo.js")
+    18 18 │   import( /** A **/'./foo'/** B **/ )
+    19 19 │   require('./foo')
+  
+
+```
+
+```
+invalid.js:18:18 lint/nursery/useImportExtensions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Add a file extension for relative imports.
+  
+    17 │ import('./foo')
+  > 18 │ import( /** A **/'./foo'/** B **/ )
+       │                  ^^^^^^^^^^^^^^^^^
+    19 │ require('./foo')
+  
+  i Explicit import improves compatibility with browsers and makes file resolution in tooling faster.
+  
+  i Unsafe fix: Add potential import extension .js.
+  
+    16 16 │   
+    17 17 │   import('./foo')
+    18    │ - import(·/**·A·**/'./foo'/**·B·**/·)
+       18 │ + import(·/**·A·**/"./foo.js"/**·B·**/·)
+    19 19 │   require('./foo')
+  
+
+```
+
+```
+invalid.js:19:9 lint/nursery/useImportExtensions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Add a file extension for relative imports.
+  
+    17 │ import('./foo')
+    18 │ import( /** A **/'./foo'/** B **/ )
+  > 19 │ require('./foo')
+       │         ^^^^^^^
+  
+  i Explicit import improves compatibility with browsers and makes file resolution in tooling faster.
+  
+  i Unsafe fix: Add potential import extension .js.
+  
+    17 17 │   import('./foo')
+    18 18 │   import( /** A **/'./foo'/** B **/ )
+    19    │ - require('./foo')
+       19 │ + require("./foo.js")
+  
+
+```

@@ -132,3 +132,29 @@ fn should_create_biome_json_file() {
         result,
     ));
 }
+
+#[test]
+fn should_emit_incompatible_arguments_error() {
+    let mut fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let configuration = r#"{ "linter": { "enabled": true } }"#;
+    let configuration_path = Path::new("biome.json");
+    fs.insert(configuration_path.into(), configuration.as_bytes());
+
+    let result = run_cli(
+        DynRef::Borrowed(&mut fs),
+        &mut console,
+        Args::from([("migrate"), "--write", "--fix"].as_slice()),
+    );
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "should_suggest_error_incompatible_arguments",
+        fs,
+        console,
+        result,
+    ));
+}

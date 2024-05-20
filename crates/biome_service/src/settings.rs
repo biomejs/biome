@@ -5,7 +5,7 @@ use biome_configuration::diagnostics::InvalidIgnorePattern;
 use biome_configuration::javascript::JsxRuntime;
 use biome_configuration::organize_imports::OrganizeImports;
 use biome_configuration::{
-    push_to_analyzer_rules, ConfigurationDiagnostic, CssConfiguration, FilesConfiguration,
+    push_to_analyzer_rules, BiomeDiagnostic, CssConfiguration, FilesConfiguration,
     FormatterConfiguration, JavascriptConfiguration, JsonConfiguration, LinterConfiguration,
     OverrideFormatterConfiguration, OverrideLinterConfiguration,
     OverrideOrganizeImportsConfiguration, Overrides, PartialConfiguration, PartialCssConfiguration,
@@ -1186,10 +1186,10 @@ pub fn to_matcher(
     if let Some(string_set) = string_set {
         for pattern in string_set.iter() {
             matcher.add_pattern(pattern).map_err(|err| {
-                WorkspaceError::Configuration(ConfigurationDiagnostic::new_invalid_ignore_pattern(
+                BiomeDiagnostic::new_invalid_ignore_pattern(
                     pattern.to_string(),
                     err.msg.to_string(),
-                ))
+                )
             })?;
         }
     }
@@ -1203,19 +1203,15 @@ fn to_git_ignore(path: PathBuf, matches: &[String]) -> Result<Gitignore, Workspa
         gitignore_builder
             .add_line(Some(path.clone()), the_match)
             .map_err(|err| {
-                WorkspaceError::Configuration(ConfigurationDiagnostic::InvalidIgnorePattern(
-                    InvalidIgnorePattern {
-                        message: err.to_string(),
-                    },
-                ))
+                BiomeDiagnostic::InvalidIgnorePattern(InvalidIgnorePattern {
+                    message: err.to_string(),
+                })
             })?;
     }
     let gitignore = gitignore_builder.build().map_err(|err| {
-        WorkspaceError::Configuration(ConfigurationDiagnostic::InvalidIgnorePattern(
-            InvalidIgnorePattern {
-                message: err.to_string(),
-            },
-        ))
+        BiomeDiagnostic::InvalidIgnorePattern(InvalidIgnorePattern {
+            message: err.to_string(),
+        })
     })?;
     Ok(gitignore)
 }

@@ -23,7 +23,7 @@ biome_rowan          = { workspace = true }
 grit-pattern-matcher = { version = "0.2" }
 grit-util            = { version = "0.2" }
 im                   = { version = "15.1.0" }
-itertools            = "0.10.5"
+rustc-hash           = { workspace = true }
 serde                = { workspace = true, features = ["derive"] }
 
 [lints]

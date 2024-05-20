@@ -57,6 +57,12 @@ pub(crate) fn expected_variable(p: &GraphqlParser, range: TextRange) -> ParseDia
     expected_node("variable", range, p)
 }
 
+pub(crate) fn expected_schema_extension(p: &GraphqlParser, range: TextRange) -> ParseDiagnostic {
+    p.err_builder(
+        "Expected at least one directive or root operation type definition",
+        range,
+    )
+}
 pub(crate) fn expected_root_operation_type_definition(
     p: &GraphqlParser,
     range: TextRange,

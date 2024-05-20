@@ -10,7 +10,7 @@ The analyzer allows implementors to create **four different** types of rules:
 - **Assist**: This rule detects refactoring opportunities and emits code action signals.
 - **Transformation**: This rule detects transformations that should be applied to the code.
 
-## Creating a rules
+## Creating a rule
 
 When creating or updating a lint rule, you need to be aware that there's a lot of generated code inside our toolchain.
 Our CI ensures that this code is not out of sync and fails otherwise.
@@ -22,7 +22,7 @@ _Just_ is not part of the rust toolchain, you have to install it with [a package
 
 ### Choose a name
 
-_Biome_ follows a naming convention according to what the rule do:
+_Biome_ follows a naming convention according to what the rule does:
 
 1. Forbid a concept
 
@@ -53,6 +53,13 @@ When writing a rule, you must adhere to the following **pillars**:
 
 ### Create and implement the rule
 
+New rules **must** be placed inside the `nursery` group. This group is meant as an incubation space, exempt from semantic versioning. Once a rule is stable, it's promoted to a group that fits it. This is done in a minor/major release.
+
+> [!TIP]
+> As a developer, you aren't forced to make a rule perfect in one PR. Instead, you are encouraged to lay out a plan and to split the work into multiple PRs.
+>
+> If you aren't familiar with Biome's APIs, this is an option that you have. If you decide to use this option, you should make sure to describe your plan in an issue.
+
 Let's say we want to create a new rule called `myRuleName`, which uses the semantic model.
 
 1. Run the command
@@ -67,7 +74,7 @@ Let's say we want to create a new rule called `myRuleName`, which uses the seman
    just new-css-lintrule myRuleName
    ```
 
-1. The `Ast` query type allows you to query the AST of a program.
+1. The `CST` query type allows you to query the CST of a program.
 1. The `State` type doesn't have to be used, so it can be considered optional. However, it has to be defined as `type State = ()`.
 1. Implement the `run` function:
 
@@ -75,7 +82,7 @@ Let's say we want to create a new rule called `myRuleName`, which uses the seman
 
 1. Implement the `diagnostic` function. Follow the [pillars](#explain-a-rule-to-the-user):
 
-   ```rust,ignore
+   ```rust
    impl Rule for UseAwesomeTricks {
        // .. code
        fn diagnostic(_ctx: &RuleContext<Self>, _state: &Self::State) -> Option<RuleDiagnostic> {}
@@ -86,7 +93,7 @@ Let's say we want to create a new rule called `myRuleName`, which uses the seman
 
 1. Implement the optional `action` function, if we are able to provide a code action:
 
-   ```rust,ignore
+   ```rust
    impl Rule for UseAwesomeTricks {
        // .. code
        fn action(_ctx: &RuleContext<Self>, _state: &Self::State) -> Option<JsRuleAction> {}
@@ -95,7 +102,7 @@ Let's say we want to create a new rule called `myRuleName`, which uses the seman
 
    It may return zero or one code action.
    Rules can return a code action that can be **safe** or **unsafe**. If a rule returns a code action, you must add `fix_kind` to the macro `declare_rule`.
-   ```rust,ignore
+   ```rust
    use biome_analyze::FixKind;
    declare_rule!{
      fix_kind: FixKind::Safe,
@@ -111,144 +118,6 @@ Let's say we want to create a new rule called `myRuleName`, which uses the seman
 Don't forget to format your code with `just f` and lint with `just l`.
 
 That's it! Now, let's test the rule.
-
-### Test the rule
-
-#### Quick test
-
-A swift way to test your rule is to go inside the `biome_js_analyze/src/lib.rs` file (this will change based on where you're implementing the rule) and modify the `quick_test` function.
-
-Usually this test is ignored, so remove _comment_ the macro `#[ignore]` macro, change the `let SOURCE` variable to whatever source code you need to test.  Then update the rule filter, and add your rule:
-
-```rust,ignore
-let rule_filter = RuleFilter::Rule("nursery", "useAwesomeTrick");
-```
-
-Now from your terminal, go inside the `biome_js_analyze` folder and run the test using `cargo`:
-
-```shell
-cargo t quick_test
-```
-
-Remember that, in case you add `dbg!` macros inside your source code, you'll have to use `--show-output`:
-
-```shell
-cargo t quick_test -- --show-output
-```
-
-The test is designed to **show** diagnostics and code actions if the rule correctly emits the signal. If nothing is shown, your logic didn't emit any signal.
-
-#### Snapshots
-
-Inside the `tests/specs/` folder, rules are divided by group and rule name.
-The test infrastructure is rigid around the association of the pair "group/rule name", which means that
-_**your test cases are placed inside the wrong group, you won't see any diagnostics**_.
-
-Since each new rule will start from `nursery`, that's where we start.
-If you used `just new-js-lintrule`, a folder that use the name of the rule should exist.
-Otherwise, create a folder called `myRuleName/`, and then create one or more files where you want to create different cases.
-
-A common pattern is to create files prefixed by `invalid` or `valid`.
-The files prefixed by `invalid` contain code that are reported by the rule.
-The files prefixed by `valid` contain code that are not reported by the rule.
-
-Files ending with the extension `.jsonc` are differently handled.
-These files should contain an array of strings where each string is a code snippet.
-For instance, for the rule `noVar`, the file `invalidScript.jsonc` contains:
-
-```jsonc
-["var x = 1; foo(x);", "for (var x of [1,2,3]) { foo(x); }"]
-```
-
-Note that code in a file ending with the extension `.jsonc` are in a _script environment_.
-This means that you cannot use syntax that belongs to _ECMAScript modules_ such as `import` and `export`.
-
-Run the command:
-
-```shell
-just test-lintrule myRuleName
-```
-
-and if you've done everything correctly, you should see some snapshots emitted with diagnostics and code actions.
-
-Check our main [contribution document](https://github.com/biomejs/biome/blob/main/CONTRIBUTING.md#testing) to know how to deal with the snapshot tests.
-
-### Document the rule
-
-The documentation needs to adhere to the following rules:
-- The **first** paragraph of the documentation is used as brief description of the rule, and it **must** be written in one single line. Breaking the paragraph in multiple lines will break the table content of the rules page.
-- The next paragraphs can be used to further document the rule with as many details as you see fit.
-- The documentation must have a `## Examples` header, followed by two headers: `### Invalid` and `### Valid`. `### Invalid` must go first because we need to show when the rule is triggered.
-- Each code block must have a _language_ defined.
-- When adding _invalid_ snippets in the `### Invalid` section, you must use the `expect_diagnostic` code block property. We use this property to generate a diagnostic and attach it to the snippet. A snippet **must emit only ONE diagnostic**.
-- When adding _valid_ snippets in the `### Valid` section, you can use one single snippet.
-- You can use the code block property `ignore` to tell the code generation script to **not generate a diagnostic for an invalid snippet**.
-- Update the `language` field in the `declare_rule!` macro to the language the rule primarily applies to.
-  - If your rule applies to any JavaScript, you can leave it as `js`.
-  - If your rule only makes sense in a specific JavaScript dialect, you should set it to `jsx`, `ts`, or `tsx`, whichever is most appropriate.
-
-Here's an example of how the documentation could look like:
-
-```rust,ignore
-use biome_analyze::declare_rule;
-declare_rule! {
-    /// Disallow the use of `var`.
-    ///
-    /// _ES2015_ allows to create variables with block scope instead of function scope
-    /// using the `let` and `const` keywords.
-    /// Block scope is common in many other programming languages and help to avoid mistakes.
-    ///
-    /// Source: https://eslint.org/docs/latest/rules/no-var
-    ///
-    /// ## Examples
-    ///
-    /// ### Invalid
-    ///
-    /// ```js,expect_diagnostic
-    /// var foo = 1;
-    /// ```
-    ///
-    /// ```js,expect_diagnostic
-    /// var bar = 1;
-    /// ```
-    ///
-    /// ### Valid
-    ///
-    /// ```js
-    /// const foo = 1;
-    /// let bar = 1;
-    ///```
-    pub(crate) NoVar {
-        version: "next",
-        name: "noVar",
-        language: "js",
-        recommended: false,
-    }
-}
-```
-
-This will cause the documentation generator to ensure the rule does emit
-exactly one diagnostic for this code, and to include a snapshot for the
-diagnostic in the resulting documentation page.
-
-### Code generation
-
-For simplicity, use `just` to run all the commands with:
-
-```shell
-just gen-lint
-```
-
-### Commit your work
-
-Once the rule implemented, tested, and documented, you are ready to open a pull request!
-
-Stage and commit your changes:
-
-```shell
-> git add -A
-> git commit -m 'feat(biome_js_analyze): myRuleName'
-```
 
 ### Rule configuration
 
@@ -284,7 +153,7 @@ We would like to set the options in the `biome.json` configuration file:
 
 The first step is to create the Rust data representation of the rule's options.
 
-```rust,ignore
+```rust
 use biome_deserialize_macros::Deserializable;
 
 #[derive(Clone, Debug, Default, Deserializable)]
@@ -311,7 +180,7 @@ for you.
 
 With these types in place, you can set the associated type `Options` of the rule:
 
-```rust,ignore
+```rust
 impl Rule for MyRule {
     type Query = Semantic<JsCallExpression>;
     type State = Fix;
@@ -324,7 +193,7 @@ impl Rule for MyRule {
 
 A rule can retrieve its options with:
 
-```rust,ignore
+```rust
 let options = ctx.options();
 ```
 
@@ -332,7 +201,7 @@ The compiler should warn you that `MyRuleOptions` does not implement some requir
 We currently require implementing _serde_'s traits `Deserialize`/`Serialize`.
 You can simply use a derive macros:
 
-```rust,ignore
+```rust
 #[derive(Debug, Default, Clone, Serialize, Deserialize)]
 #[cfg_attr(feature = "schemars", derive(JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
@@ -354,37 +223,241 @@ pub enum Behavior {
 }
 ```
 
-### Deprecate a rule
+### Coding the rule
 
-There are occasions when a rule must be deprecated, to avoid breaking changes. The reason
-of deprecation can be multiple.
+Below, there are many tips and guidelines on how to create a lint rule using Biome infrastructure.
 
-In order to do, the macro allows adding additional field to add the reason for deprecation
 
-```rust,ignore
+#### `declare_rule`
+
+This macro is used to declare an analyzer rule type, and implement the [RuleMeta] trait for it.
+
+The macro itself expects the following syntax:
+
+```rust
 use biome_analyze::declare_rule;
 
 declare_rule! {
-    /// Disallow the use of `var`.
-    ///
-    /// ## Examples
-    ///
-    /// ### Invalid
-    ///
-    /// ```js,expect_diagnostic
-    /// var a, b;
-    /// ```
-    pub(crate) NoVar {
-        version: "1.0.0",
-        name: "noVar",
+    /// Documentation
+    pub(crate) ExampleRule {
+        version: "next",
+        name: "myRuleName",
         language: "js",
-        deprecated: "Use the rule `noAnotherVar`",
         recommended: false,
     }
 }
 ```
 
-### Custom Visitors
+##### Biome lint rules inspired by other lint rules
+
+If a **lint** rule is inspired by an existing rule from other ecosystems (ESLint, ESLint plugins, clippy, etc.), you can add a new metadata to the macro called `source`. Its value is `Source`, which is an `enum` that contains various variants.
+
+If you're implementing a lint rule that matches the behaviour of the ESLint rule `no-debugger`, you'll use the variant `::ESLint` and pass the name of the rule:
+
+```rust
+use biome_analyze::{declare_rule, Source};
+
+declare_rule! {
+    /// Documentation
+    pub(crate) ExampleRule {
+        version: "next",
+        name: "myRuleName",
+        language: "js",
+        recommended: false,
+        source: Source::Eslint("no-debugger"),
+    }
+}
+```
+
+If the rule you're implementing has a different behaviour or option, you can add the `source_kind` metadata and use the `SourceKind::Inspired` type.
+
+```rust
+use biome_analyze::{declare_rule, Source, SourceKind};
+
+declare_rule! {
+    /// Documentation
+    pub(crate) ExampleRule {
+        version: "next",
+        name: "myRuleName",
+        language: "js",
+        recommended: false,
+        source: Source::Eslint("no-debugger"),
+        source_kind: SourceKind::Inspired,
+    }
+}
+```
+By default, `source_kind` is always `SourceKind::Same`.
+
+#### Category Macro
+
+Declaring a rule using `declare_rule!` will cause a new `rule_category!`
+macro to be declared in the surrounding module. This macro can be used to
+refer to the corresponding diagnostic category for this lint rule, if it
+has one. Using this macro instead of getting the category for a diagnostic
+by dynamically parsing its string name has the advantage of statically
+injecting the category at compile time and checking that it is correctly
+registered to the `biome_diagnostics` library.
+
+```rust
+declare_rule! {
+    /// Documentation
+    pub(crate) ExampleRule {
+        version: "next",
+        name: "myRuleName",
+        language: "js",
+        recommended: false,
+    }
+}
+
+impl Rule for ExampleRule {
+    fn diagnostic(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<RuleDiagnostic> {
+        Some(RuleDiagnostic::new(
+            rule_category!(),
+            ctx.query().text_trimmed_range(),
+            "message",
+        ))
+    }
+}
+```
+
+#### Navigating the CST
+
+When navigating the nodes and tokens of certain nodes, you will notice straight away that the majority of those methods will return a `Result` (`SyntaxResult`).
+
+Generally, you will end up navigating the CST inside the `run` function, and this function will usually return an `Option` or a `Vec`.
+
+- If the `run` function returns an `Option`, you're encouraged to transform the `Result` into an `Option` and use the try operator `?`. This will make your coding way easier:
+  ```rust
+  fn run() -> Self::Signals {
+    let prev_val = js_object_member.value().ok()?;
+  }
+  ```
+- If the `run` function returns a `Vec`, you're encouraged to use the `let else` trick to reduce code branching:
+
+  ```rust
+    fn run() -> Self::Signals {
+      let Ok(prev_val) = js_object_member.value() else {
+        return vec![]
+      };
+    }
+  ```
+
+#### Query multiple nodes
+
+There are times when you might need to query multiple nodes at once. Instead of querying the root of the CST, you can use the macro `declare_node_union!` to "join" multiple nodes into an `enum`:
+
+```rust
+use biome_rowan::{declare_node_union, AstNode};
+use biome_js_syntax::{AnyJsFunction, JsMethodObjectMember, JsMethodClassMember};
+
+declare_node_union! {
+  pub AnyFunctionLike = AnyJsFunction | JsMethodObjectMember | JsMethodClassMember
+}
+```
+
+When creating a new node like this, we internally prefix them with `Any*` and postfix them with `*Like`. This is our internal naming convention.
+
+The type `AnyFunctionLike` implements the trait `AstNode`, which means that it implements all methods such as `syntax`, `children`, etc.
+
+#### Semantic Model
+
+The semantic model provides information about the references of a binding (declaration) within a program, indicating if it is written (e.g., `const a = 4`), read (e.g., `const b = a`, where `a` is read), or exported.
+
+
+##### How to use the query `Semantic<>` in a lint rule
+
+We have a for loop that creates an index i, and we need to identify where this index is used inside the body of the loop
+
+```js
+for (let i = 0; i < array.length; i++) {
+  array[i] = i
+}
+```
+
+To get started we need to create a new rule using the semantic type `type Query = Semantic<JsForStatement>;`
+We can now use the `ctx.model()` to get information about bindings in the for loop.
+
+```rust
+impl Rule for ForLoopCountReferences {
+    type Query = Semantic<JsForStatement>;
+    type State = ();
+    type Signals = Option<Self::State>;
+    type Options = ();
+
+    fn run(ctx: &RuleContext<Self>) -> Self::Signals {
+        let node = ctx.query();
+
+        // The model holds all informations about the semantic, like scopes and declarations
+        let model = ctx.model();
+
+        // Here we are extracting the `let i = 0;` declaration in for loop
+        let initializer = node.initializer()?;
+        let declarators = initializer.as_js_variable_declaration()?.declarators();
+        let initializer = declarators.first()?.ok()?;
+        let initializer_id = initializer.id().ok()?;
+
+        // Now we have the binding of this declaration
+        let binding = initializer_id
+            .as_any_js_binding()?
+            .as_js_identifier_binding()?;
+
+        // How many times this variable appers in the code
+        let count = binding.all_references(model).count();
+
+        // Get all read references
+        let readonly_references = binding.all_reads(model);
+
+        // Get all write references
+        let write_references = binding.all_writes(model);
+    }
+}
+```
+
+#### Code action
+
+A rule can implement a code action. A code action provides to the final user the option to fix or change their code.
+
+In a lint rule, for example, it signals an opportunity for the user to fix the diagnostic emitted by the rule.
+
+First, you have to add a new metadata called `fix_kind`, its value is the `FixKind`.
+
+```rust
+use biome_analyze::{declare_rule, FixKind};
+
+declare_rule! {
+    /// Documentation
+    pub(crate) ExampleRule {
+        version: "next",
+        name: "myRuleName",
+        language: "js",
+        recommended: false,
+        fix_kind: FixKind::Safe,
+    }
+}
+```
+
+Then, you'll have to implement the `action` function of the trait `Rule` and return a `JsRuleAction`.
+
+`JsRuleAction` needs, among other things, a `mutation` type, which you will use to store all additions, deletions and replacements that you will execute inside the action:
+
+```rust
+impl Rule for ExampleRule {
+    fn action(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<JsRuleAction> {
+      let mut mutation = ctx.root().begin();
+
+      Some(JsRuleAction::new(
+        ActionCategory::QuickFix,
+        ctx.metadata().applicability(),
+        markup! { "Remove the '"{name.text_trimmed()}"' element." }.to_owned(),
+        mutation,
+      ))
+    }
+}
+```
+
+The function `ctx.metadata().applicability()` will compute the `Applicability` type from the `fix_kind` value you provided at the beginning, inside the macro.
+
+#### Custom Visitors
 
 Some lint rules may need to deeply inspect the child nodes of a query match
 before deciding on whether they should emit a signal or not. These rules can be
@@ -394,7 +467,7 @@ efficient, you can implement a custom `Queryable` type and associated
 `Visitor` to emit it as part of the analyzer's main traversal pass. As an
 example, here's how this could be done to implement the `useYield` rule:
 
-```rust,ignore
+```rust
 // First, create a visitor struct that holds a stack of function syntax nodes and booleans
 #[derive(Default)]
 struct MissingYieldVisitor {
@@ -486,108 +559,172 @@ impl Rule for UseYield {
 }
 ```
 
-### `declare_rule`
 
-This macro is used to declare an analyzer rule type, and implement the [RuleMeta] trait for it.
+### Test the rule
 
-The macro itself expect the following syntax:
+#### Quick test
 
-```rust,ignore
+A swift way to test your rule is to go inside the `biome_js_analyze/src/lib.rs` file (this will change based on where you're implementing the rule) and modify the `quick_test` function.
+
+Usually this test is ignored, so remove _comment_ the macro `#[ignore]` macro, change the `let SOURCE` variable to whatever source code you need to test.  Then update the rule filter, and add your rule:
+
+```rust
+let rule_filter = RuleFilter::Rule("nursery", "useAwesomeTrick");
+```
+
+Now from your terminal, go inside the `biome_js_analyze` folder and run the test using `cargo`:
+
+```shell
+cargo t quick_test
+```
+
+Remember that, in case you add `dbg!` macros inside your source code, you'll have to use `--show-output`:
+
+```shell
+cargo t quick_test -- --show-output
+```
+
+The test is designed to **show** diagnostics and code actions if the rule correctly emits the signal. If nothing is shown, your logic didn't emit any signal.
+
+#### Snapshots
+
+Inside the `tests/specs/` folder, rules are divided by group and rule name.
+The test infrastructure is rigid around the association of the pair "group/rule name", which means that
+_**your test cases are placed inside the wrong group, you won't see any diagnostics**_.
+
+Since each new rule will start from `nursery`, that's where we start.
+If you used `just new-js-lintrule`, a folder that use the name of the rule should exist.
+Otherwise, create a folder called `myRuleName/`, and then create one or more files where you want to create different cases.
+
+A common pattern is to create files prefixed by `invalid` or `valid`.
+The files prefixed by `invalid` contain code that are reported by the rule.
+The files prefixed by `valid` contain code that are not reported by the rule.
+
+Files ending with the extension `.jsonc` are differently handled.
+These files should contain an array of strings where each string is a code snippet.
+For instance, for the rule `noVar`, the file `invalidScript.jsonc` contains:
+
+```jsonc
+["var x = 1; foo(x);", "for (var x of [1,2,3]) { foo(x); }"]
+```
+
+Note that code in a file ending with the extension `.jsonc` are in a _script environment_.
+This means that you cannot use syntax that belongs to _ECMAScript modules_ such as `import` and `export`.
+
+Run the command:
+
+```shell
+just test-lintrule myRuleName
+```
+
+and if you've done everything correctly, you should see some snapshots emitted with diagnostics and code actions.
+
+Check our main [contribution document](https://github.com/biomejs/biome/blob/main/CONTRIBUTING.md#testing) to know how to deal with the snapshot tests.
+
+### Document the rule
+
+The documentation needs to adhere to the following rules:
+- The **first** paragraph of the documentation is used as brief description of the rule, and it **must** be written in one single line. Breaking the paragraph in multiple lines will break the table content of the rules page.
+- The next paragraphs can be used to further document the rule with as many details as you see fit.
+- The documentation must have a `## Examples` header, followed by two headers: `### Invalid` and `### Valid`. `### Invalid` must go first because we need to show when the rule is triggered.
+- Each code block must have a _language_ defined.
+- When adding _invalid_ snippets in the `### Invalid` section, you must use the `expect_diagnostic` code block property. We use this property to generate a diagnostic and attach it to the snippet. A snippet **must emit only ONE diagnostic**.
+- When adding _valid_ snippets in the `### Valid` section, you can use one single snippet.
+- You can use the code block property `ignore` to tell the code generation script to **not generate a diagnostic for an invalid snippet**.
+- Update the `language` field in the `declare_rule!` macro to the language the rule primarily applies to.
+  - If your rule applies to any JavaScript, you can leave it as `js`.
+  - If your rule only makes sense in a specific JavaScript dialect, you should set it to `jsx`, `ts`, or `tsx`, whichever is most appropriate.
+
+Here's an example of how the documentation could look like:
+
+```rust
+use biome_analyze::declare_rule;
+declare_rule! {
+    /// Disallow the use of `var`.
+    ///
+    /// _ES2015_ allows to create variables with block scope instead of function scope
+    /// using the `let` and `const` keywords.
+    /// Block scope is common in many other programming languages and help to avoid mistakes.
+    ///
+    /// Source: https://eslint.org/docs/latest/rules/no-var
+    ///
+    /// ## Examples
+    ///
+    /// ### Invalid
+    ///
+    /// ```js,expect_diagnostic
+    /// var foo = 1;
+    /// ```
+    ///
+    /// ```js,expect_diagnostic
+    /// var bar = 1;
+    /// ```
+    ///
+    /// ### Valid
+    ///
+    /// ```js
+    /// const foo = 1;
+    /// let bar = 1;
+    ///```
+    pub(crate) NoVar {
+        version: "next",
+        name: "noVar",
+        language: "js",
+        recommended: false,
+    }
+}
+```
+
+This will cause the documentation generator to ensure the rule does emit
+exactly one diagnostic for this code, and to include a snapshot for the
+diagnostic in the resulting documentation page.
+
+### Code generation
+
+For simplicity, use `just` to run all the commands with:
+
+```shell
+just gen-lint
+```
+
+### Commit your work
+
+Once the rule implemented, tested, and documented, you are ready to open a pull request!
+
+Stage and commit your changes:
+
+```shell
+> git add -A
+> git commit -m 'feat(biome_js_analyze): myRuleName'
+```
+
+
+### Deprecate a rule
+
+There are occasions when a rule must be deprecated, to avoid breaking changes. The reason
+of deprecation can be multiple.
+
+In order to do, the macro allows adding additional field to add the reason for deprecation
+
+```rust
 use biome_analyze::declare_rule;
 
 declare_rule! {
-    /// Documentation
-    pub(crate) ExampleRule {
-        version: "next",
-        name: "myRuleName",
+    /// Disallow the use of `var`.
+    ///
+    /// ## Examples
+    ///
+    /// ### Invalid
+    ///
+    /// ```js,expect_diagnostic
+    /// var a, b;
+    /// ```
+    pub(crate) NoVar {
+        version: "1.0.0",
+        name: "noVar",
         language: "js",
+        deprecated: "Use the rule `noAnotherVar`",
         recommended: false,
-    }
-}
-```
-
-### Category Macro
-
-Declaring a rule using `declare_rule!` will cause a new `rule_category!`
-macro to be declared in the surrounding module. This macro can be used to
-refer to the corresponding diagnostic category for this lint rule, if it
-has one. Using this macro instead of getting the category for a diagnostic
-by dynamically parsing its string name has the advantage of statically
-injecting the category at compile time and checking that it is correctly
-registered to the `biome_diagnostics` library.
-
-```rust,ignore
-declare_rule! {
-    /// Documentation
-    pub(crate) ExampleRule {
-        version: "next",
-        name: "myRuleName",
-        language: "js",
-        recommended: false,
-    }
-}
-
-impl Rule for ExampleRule {
-    fn diagnostic(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<RuleDiagnostic> {
-        Some(RuleDiagnostic::new(
-            rule_category!(),
-            ctx.query().text_trimmed_range(),
-            "message",
-        ))
-    }
-}
-```
-
-### Semantic Model
-
-The semantic model provides information about the references of a binding (variable) within a program, indicating if it is written (e.g., `const a = 4`), read (e.g., `const b = a`, where `a` is read), or exported.
-
-
-#### How to use the query `Semantic<>` in a lint rule
-
-We have a for loop that creates an index i, and we need to identify where this index is used inside the body of the loop
-
-```js
-for (let i = 0; i < array.length; i++) {
-  array[i] = i
-}
-```
-
-To get started we need to create a new rule using the semantic type `type Query = Semantic<JsForStatement>;`
-We can now use the `ctx.model()` to get information about bindings in the for loop.
-
-```rust,ignore
-impl Rule for ForLoopCountReferences {
-    type Query = Semantic<JsForStatement>;
-    type State = ();
-    type Signals = Option<Self::State>;
-    type Options = ();
-
-    fn run(ctx: &RuleContext<Self>) -> Self::Signals {
-        let node = ctx.query();
-
-        // The model holds all informations about the semantic, like scopes and declarations
-        let model = ctx.model();
-
-        // Here we are extracting the `let i = 0;` declaration in for loop
-        let initializer = node.initializer()?;
-        let declarators = initializer.as_js_variable_declaration()?.declarators();
-        let initializer = declarators.first()?.ok()?;
-        let initializer_id = initializer.id().ok()?;
-
-        // Now we have the binding of this declaration
-        let binding = initializer_id
-            .as_any_js_binding()?
-            .as_js_identifier_binding()?;
-
-        // How many times this variable appers in the code
-        let count = binding.all_references(model).count();
-
-        // Get all read references
-        let readonly_references = binding.all_reads(model);
-
-        // Get all write references
-        let write_references = binding.all_writes(model);
     }
 }
 ```
