@@ -1,0 +1,59 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: templateLiteralSpace.jsx
+---
+# Input
+```jsx
+<>
+	<div class={`${variable} px-2 foo p-4 bar`}/>
+	<div class={`px-2 foo p-4 bar ${variable}`}/>
+</>
+
+```
+
+# Diagnostics
+```
+templateLiteralSpace.jsx:2:26 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! These CSS classes should be sorted.
+  
+    1 │ <>
+  > 2 │ 	<div class={`${variable} px-2 foo p-4 bar`}/>
+      │ 	                        ^^^^^^^^^^^^^^^^^
+    3 │ 	<div class={`px-2 foo p-4 bar ${variable}`}/>
+    4 │ </>
+  
+  i Unsafe fix: Sort the classes.
+  
+    1 1 │   <>
+    2   │ - → <div·class={`${variable}·px-2·foo·p-4·bar`}/>
+      2 │ + → <div·class={`${variable}·foo·bar·p-4·px-2`}/>
+    3 3 │   	<div class={`px-2 foo p-4 bar ${variable}`}/>
+    4 4 │   </>
+  
+
+```
+
+```
+templateLiteralSpace.jsx:3:15 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! These CSS classes should be sorted.
+  
+    1 │ <>
+    2 │ 	<div class={`${variable} px-2 foo p-4 bar`}/>
+  > 3 │ 	<div class={`px-2 foo p-4 bar ${variable}`}/>
+      │ 	             ^^^^^^^^^^^^^^^^^
+    4 │ </>
+    5 │ 
+  
+  i Unsafe fix: Sort the classes.
+  
+    1 1 │   <>
+    2 2 │   	<div class={`${variable} px-2 foo p-4 bar`}/>
+    3   │ - → <div·class={`px-2·foo·p-4·bar·${variable}`}/>
+      3 │ + → <div·class={`foo·bar·p-4·px-2·${variable}`}/>
+    4 4 │   </>
+    5 5 │   
+  
+
+```
