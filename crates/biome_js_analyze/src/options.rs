@@ -289,6 +289,8 @@ pub type UseHookAtTopLevel =
 pub type UseHtmlLang = <lint::a11y::use_html_lang::UseHtmlLang as biome_analyze::Rule>::Options;
 pub type UseIframeTitle =
     <lint::a11y::use_iframe_title::UseIframeTitle as biome_analyze::Rule>::Options;
+pub type UseImportExtensions =
+    <lint::nursery::use_import_extensions::UseImportExtensions as biome_analyze::Rule>::Options;
 pub type UseImportRestrictions =
     <lint::nursery::use_import_restrictions::UseImportRestrictions as biome_analyze::Rule>::Options;
 pub type UseImportType =
@@ -323,6 +325,8 @@ pub type UseOptionalChain =
 pub type UseRegexLiterals =
     <lint::complexity::use_regex_literals::UseRegexLiterals as biome_analyze::Rule>::Options;
 pub type UseSelfClosingElements = < lint :: style :: use_self_closing_elements :: UseSelfClosingElements as biome_analyze :: Rule > :: Options ;
+pub type UseSemanticElements =
+    <lint::nursery::use_semantic_elements::UseSemanticElements as biome_analyze::Rule>::Options;
 pub type UseShorthandArrayType =
     <lint::style::use_shorthand_array_type::UseShorthandArrayType as biome_analyze::Rule>::Options;
 pub type UseShorthandAssign =

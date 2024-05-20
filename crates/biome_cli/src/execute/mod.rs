@@ -10,6 +10,7 @@ use crate::diagnostics::ReportDiagnostic;
 use crate::execute::migrate::MigratePayload;
 use crate::execute::traverse::traverse;
 use crate::reporter::json::{JsonReporter, JsonReporterVisitor};
+use crate::reporter::summary::{SummaryReporter, SummaryReporterVisitor};
 use crate::reporter::terminal::{ConsoleReporter, ConsoleReporterVisitor};
 use crate::{CliDiagnostic, CliSession, DiagnosticsPayload, Reporter};
 use biome_configuration::linter::RuleSelector;
@@ -186,19 +187,29 @@ impl Display for TraversalMode {
 }
 
 /// Tells to the execution of the traversal how the information should be reported
-#[derive(Copy, Clone, Default, Debug)]
+#[derive(Copy, Clone, Debug)]
 pub enum ReportMode {
     /// Reports information straight to the console, it's the default mode
-    #[default]
-    Terminal,
+    Terminal { with_summary: bool },
     /// Reports information in JSON format
     Json { pretty: bool },
+}
+
+impl Default for ReportMode {
+    fn default() -> Self {
+        Self::Terminal {
+            with_summary: false,
+        }
+    }
 }
 
 impl From<CliReporter> for ReportMode {
     fn from(value: CliReporter) -> Self {
         match value {
-            CliReporter::Default => Self::Terminal,
+            CliReporter::Default => Self::Terminal {
+                with_summary: false,
+            },
+            CliReporter::Summary => Self::Terminal { with_summary: true },
             CliReporter::Json => Self::Json { pretty: false },
             CliReporter::JsonPretty => Self::Json { pretty: true },
         }
@@ -388,17 +399,30 @@ pub fn execute_mode(
         let should_exit_on_warnings = summary_result.warnings > 0 && cli_options.error_on_warnings;
 
         match execution.report_mode {
-            ReportMode::Terminal => {
-                let reporter = ConsoleReporter {
-                    summary: summary_result,
-                    diagnostics_payload: DiagnosticsPayload {
-                        verbose: cli_options.verbose,
-                        diagnostic_level: cli_options.diagnostic_level,
-                        diagnostics,
-                    },
-                    execution: execution.clone(),
-                };
-                reporter.write(&mut ConsoleReporterVisitor(console))?;
+            ReportMode::Terminal { with_summary } => {
+                if with_summary {
+                    let reporter = SummaryReporter {
+                        summary: summary_result,
+                        diagnostics_payload: DiagnosticsPayload {
+                            verbose: cli_options.verbose,
+                            diagnostic_level: cli_options.diagnostic_level,
+                            diagnostics,
+                        },
+                        execution: execution.clone(),
+                    };
+                    reporter.write(&mut SummaryReporterVisitor(console))?;
+                } else {
+                    let reporter = ConsoleReporter {
+                        summary: summary_result,
+                        diagnostics_payload: DiagnosticsPayload {
+                            verbose: cli_options.verbose,
+                            diagnostic_level: cli_options.diagnostic_level,
+                            diagnostics,
+                        },
+                        execution: execution.clone(),
+                    };
+                    reporter.write(&mut ConsoleReporterVisitor(console))?;
+                }
             }
             ReportMode::Json { pretty } => {
                 console.error(markup!{

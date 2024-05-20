@@ -6,13 +6,14 @@ use biome_console::{markup, ConsoleExt};
 use biome_service::configuration::{load_configuration, LoadedConfiguration};
 use biome_service::workspace::RegisterProjectFolderParams;
 
-use super::MigrateSubCommand;
+use super::{check_fix_incompatible_arguments, FixFileModeOptions, MigrateSubCommand};
 
 /// Handler for the "check" command of the Biome CLI
 pub(crate) fn migrate(
     session: CliSession,
     cli_options: CliOptions,
     write: bool,
+    fix: bool,
     sub_command: Option<MigrateSubCommand>,
 ) -> Result<(), CliDiagnostic> {
     let base_path = cli_options.as_configuration_path_hint();
@@ -23,6 +24,14 @@ pub(crate) fn migrate(
         file_path,
     } = load_configuration(&session.app.fs, base_path)?;
     setup_cli_subscriber(cli_options.log_level, cli_options.log_kind);
+
+    check_fix_incompatible_arguments(FixFileModeOptions {
+        apply: false,
+        apply_unsafe: false,
+        write,
+        fix,
+        unsafe_: false,
+    })?;
 
     session
         .app
@@ -35,7 +44,7 @@ pub(crate) fn migrate(
     if let (Some(path), Some(directory_path)) = (file_path, directory_path) {
         execute_mode(
             Execution::new(TraversalMode::Migrate {
-                write,
+                write: write || fix,
                 configuration_file_path: path,
                 configuration_directory_path: directory_path,
                 sub_command,

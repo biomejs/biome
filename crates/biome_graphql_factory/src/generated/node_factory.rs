@@ -1157,6 +1157,20 @@ pub fn graphql_root_operation_type_definition(
         ],
     ))
 }
+pub fn graphql_root_operation_types(
+    l_curly_token: SyntaxToken,
+    root_operation_type: GraphqlRootOperationTypeDefinitionList,
+    r_curly_token: SyntaxToken,
+) -> GraphqlRootOperationTypes {
+    GraphqlRootOperationTypes::unwrap_cast(SyntaxNode::new_detached(
+        GraphqlSyntaxKind::GRAPHQL_ROOT_OPERATION_TYPES,
+        [
+            Some(SyntaxElement::Token(l_curly_token)),
+            Some(SyntaxElement::Node(root_operation_type.into_syntax())),
+            Some(SyntaxElement::Token(r_curly_token)),
+        ],
+    ))
+}
 pub fn graphql_scalar_type_definition(
     scalar_token: SyntaxToken,
     name: GraphqlName,
@@ -1212,25 +1226,19 @@ pub fn graphql_scalar_type_extension(
 pub fn graphql_schema_definition(
     schema_token: SyntaxToken,
     directives: GraphqlDirectiveList,
-    l_curly_token: SyntaxToken,
-    root_operation_type: GraphqlRootOperationTypeDefinitionList,
-    r_curly_token: SyntaxToken,
+    root_operation_types: GraphqlRootOperationTypes,
 ) -> GraphqlSchemaDefinitionBuilder {
     GraphqlSchemaDefinitionBuilder {
         schema_token,
         directives,
-        l_curly_token,
-        root_operation_type,
-        r_curly_token,
+        root_operation_types,
         description: None,
     }
 }
 pub struct GraphqlSchemaDefinitionBuilder {
     schema_token: SyntaxToken,
     directives: GraphqlDirectiveList,
-    l_curly_token: SyntaxToken,
-    root_operation_type: GraphqlRootOperationTypeDefinitionList,
-    r_curly_token: SyntaxToken,
+    root_operation_types: GraphqlRootOperationTypes,
     description: Option<GraphqlDescription>,
 }
 impl GraphqlSchemaDefinitionBuilder {
@@ -1246,9 +1254,7 @@ impl GraphqlSchemaDefinitionBuilder {
                     .map(|token| SyntaxElement::Node(token.into_syntax())),
                 Some(SyntaxElement::Token(self.schema_token)),
                 Some(SyntaxElement::Node(self.directives.into_syntax())),
-                Some(SyntaxElement::Token(self.l_curly_token)),
-                Some(SyntaxElement::Node(self.root_operation_type.into_syntax())),
-                Some(SyntaxElement::Token(self.r_curly_token)),
+                Some(SyntaxElement::Node(self.root_operation_types.into_syntax())),
             ],
         ))
     }
@@ -1257,6 +1263,7 @@ pub fn graphql_schema_extension(
     extend_token: SyntaxToken,
     schema_token: SyntaxToken,
     directives: GraphqlDirectiveList,
+    root_operation_types: GraphqlRootOperationTypes,
 ) -> GraphqlSchemaExtension {
     GraphqlSchemaExtension::unwrap_cast(SyntaxNode::new_detached(
         GraphqlSyntaxKind::GRAPHQL_SCHEMA_EXTENSION,
@@ -1264,26 +1271,7 @@ pub fn graphql_schema_extension(
             Some(SyntaxElement::Token(extend_token)),
             Some(SyntaxElement::Token(schema_token)),
             Some(SyntaxElement::Node(directives.into_syntax())),
-        ],
-    ))
-}
-pub fn graphql_schema_extension_with_root_operation_type(
-    extend_token: SyntaxToken,
-    schema_token: SyntaxToken,
-    directives: GraphqlDirectiveList,
-    l_curly_token: SyntaxToken,
-    root_operation_type: GraphqlRootOperationTypeDefinitionList,
-    r_curly_token: SyntaxToken,
-) -> GraphqlSchemaExtensionWithRootOperationType {
-    GraphqlSchemaExtensionWithRootOperationType::unwrap_cast(SyntaxNode::new_detached(
-        GraphqlSyntaxKind::GRAPHQL_SCHEMA_EXTENSION_WITH_ROOT_OPERATION_TYPE,
-        [
-            Some(SyntaxElement::Token(extend_token)),
-            Some(SyntaxElement::Token(schema_token)),
-            Some(SyntaxElement::Node(directives.into_syntax())),
-            Some(SyntaxElement::Token(l_curly_token)),
-            Some(SyntaxElement::Node(root_operation_type.into_syntax())),
-            Some(SyntaxElement::Token(r_curly_token)),
+            Some(SyntaxElement::Node(root_operation_types.into_syntax())),
         ],
     ))
 }

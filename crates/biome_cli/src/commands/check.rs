@@ -9,18 +9,25 @@ use biome_configuration::{
     organize_imports::PartialOrganizeImports, PartialConfiguration, PartialFormatterConfiguration,
     PartialLinterConfiguration,
 };
+use biome_console::{markup, ConsoleExt};
 use biome_deserialize::Merge;
-use biome_service::configuration::PartialConfigurationExt;
+use biome_diagnostics::PrintDiagnostic;
+use biome_service::configuration::{load_editorconfig, PartialConfigurationExt};
 use biome_service::workspace::RegisterProjectFolderParams;
 use biome_service::{
     configuration::{load_configuration, LoadedConfiguration},
-    workspace::{FixFileMode, UpdateSettingsParams},
+    workspace::UpdateSettingsParams,
 };
 use std::ffi::OsString;
+
+use super::{determine_fix_file_mode, FixFileModeOptions};
 
 pub(crate) struct CheckCommandPayload {
     pub(crate) apply: bool,
     pub(crate) apply_unsafe: bool,
+    pub(crate) write: bool,
+    pub(crate) fix: bool,
+    pub(crate) unsafe_: bool,
     pub(crate) cli_options: CliOptions,
     pub(crate) configuration: Option<PartialConfiguration>,
     pub(crate) paths: Vec<OsString>,
@@ -41,6 +48,9 @@ pub(crate) fn check(
     let CheckCommandPayload {
         apply,
         apply_unsafe,
+        write,
+        fix,
+        unsafe_,
         cli_options,
         configuration,
         mut paths,
@@ -54,18 +64,16 @@ pub(crate) fn check(
     } = payload;
     setup_cli_subscriber(cli_options.log_level, cli_options.log_kind);
 
-    let fix_file_mode = if apply && apply_unsafe {
-        return Err(CliDiagnostic::incompatible_arguments(
-            "--apply",
-            "--apply-unsafe",
-        ));
-    } else if !apply && !apply_unsafe {
-        None
-    } else if apply && !apply_unsafe {
-        Some(FixFileMode::SafeFixes)
-    } else {
-        Some(FixFileMode::SafeAndUnsafeFixes)
-    };
+    let fix_file_mode = determine_fix_file_mode(
+        FixFileModeOptions {
+            apply,
+            apply_unsafe,
+            write,
+            fix,
+            unsafe_,
+        },
+        session.app.console,
+    )?;
 
     let loaded_configuration =
         load_configuration(&session.app.fs, cli_options.as_configuration_path_hint())?;
@@ -74,13 +82,34 @@ pub(crate) fn check(
         session.app.console,
         cli_options.verbose,
     )?;
+    let fs = &session.app.fs;
+    let (editorconfig, editorconfig_diagnostics) = {
+        let search_path = loaded_configuration
+            .directory_path
+            .clone()
+            .unwrap_or_else(|| fs.working_directory().unwrap_or_default());
+        load_editorconfig(fs, search_path)?
+    };
+    for diagnostic in editorconfig_diagnostics {
+        session.app.console.error(markup! {
+            {PrintDiagnostic::simple(&diagnostic)}
+        })
+    }
+
     resolve_manifest(&session)?;
 
     let LoadedConfiguration {
-        configuration: mut fs_configuration,
+        configuration: biome_configuration,
         directory_path: configuration_path,
         ..
     } = loaded_configuration;
+    let mut fs_configuration = if let Some(mut fs_configuration) = editorconfig {
+        // this makes biome configuration take precedence over editorconfig configuration
+        fs_configuration.merge_with(biome_configuration);
+        fs_configuration
+    } else {
+        biome_configuration
+    };
 
     let formatter = fs_configuration
         .formatter

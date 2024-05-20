@@ -1,0 +1,3000 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.jsx
+---
+# Input
+```jsx
+<>
+    <div role="checkbox" ></div>
+    <div role="radio" ></div>
+    <div role="option" ></div>
+    <div role="combobox" ></div>
+    <div role="heading" ></div>
+    <div role="separator" ></div>
+    <div role="button" ></div>
+    <div role="article" ></div>
+    <div role="dialog" ></div>
+    <div role="alert" ></div>
+    <div role="alertdialog" ></div>
+    <div role="cell" ></div>
+    <div role="columnheader" ></div>
+    <div role="definition" ></div>
+    <div role="figure" ></div>
+    <div role="form" ></div>
+    <div role="graphics-document" ></div>
+    <div role="graphics-object" ></div>
+    <div role="grid" ></div>
+    <div role="gridcell" ></div>
+    <div role="group" ></div>
+    <div role="img" ></div>
+    <div role="link" ></div>
+    <div role="list" ></div>
+    <div role="listbox" ></div>
+    <div role="listitem" ></div>
+    <div role="navigation" ></div>
+    <div role="row" ></div>
+    <div role="rowgroup" ></div>
+    <div role="rowheader" ></div>
+    <div role="search" ></div>
+    <div role="searchbox" ></div>
+    <div role="table" ></div>
+    <div role="term" ></div>
+    <div role="textbox" ></div>
+    <div role="generic" ></div>
+    <div role="caption" ></div>
+    <div role="main" ></div>
+    <div role="time" ></div>
+    <div role="p" ></div>
+    <div role="aside" ></div>
+    <div role="blockquote" ></div>
+    <div role="associationlist" ></div>
+    <div role="status" ></div>
+    <div role="contentinfo" ></div>
+    <div role="region" ></div>
+</>
+
+```
+
+# Diagnostics
+```
+invalid.jsx:2:10 lint/nursery/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The element with this role can be changed to a DOM element that already this role.
+  
+    1 │ <>
+  > 2 │     <div role="checkbox" ></div>
+      │          ^^^^^^^^^^^^^^^
+    3 │     <div role="radio" ></div>
+    4 │     <div role="option" ></div>
+  
+  i For examples and more information, seeWAI-ARIA Roles
+  
+  - <button>
+  - <input>
+  - <textarea>
+  - <a>
+  - <img>
+  - <table>
+  - <article>
+  - <section>
+  - <nav>
+  - <aside>
+  - <header>
+  - <footer>
+  - <main>
+  - <figure>
+  - <figcaption>
+  - <details>
+  - <summary>
+  - <dialog>
+  - <menu>
+  - <menuitem>
+  - <fieldset>
+  - <legend>
+  - <caption>
+  - <colgroup>
+  - <col>
+  - <optgroup>
+  - <option>
+  - <select>
+  - <datalist>
+  - <output>
+  - <progress>
+  - <meter>
+  - <time>
+  - <audio>
+  - <video>
+  - <track>
+  - <source>
+  - <embed>
+  - <object>
+  - <param>
+  - <iframe>
+  - <canvas>
+  - <map>
+  - <area>
+  - <svg>
+  - <math>
+  
+
+```
+
+```
+invalid.jsx:3:10 lint/nursery/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The element with this role can be changed to a DOM element that already this role.
+  
+    1 │ <>
+    2 │     <div role="checkbox" ></div>
+  > 3 │     <div role="radio" ></div>
+      │          ^^^^^^^^^^^^
+    4 │     <div role="option" ></div>
+    5 │     <div role="combobox" ></div>
+  
+  i For examples and more information, seeWAI-ARIA Roles
+  
+  - <button>
+  - <input>
+  - <textarea>
+  - <a>
+  - <img>
+  - <table>
+  - <article>
+  - <section>
+  - <nav>
+  - <aside>
+  - <header>
+  - <footer>
+  - <main>
+  - <figure>
+  - <figcaption>
+  - <details>
+  - <summary>
+  - <dialog>
+  - <menu>
+  - <menuitem>
+  - <fieldset>
+  - <legend>
+  - <caption>
+  - <colgroup>
+  - <col>
+  - <optgroup>
+  - <option>
+  - <select>
+  - <datalist>
+  - <output>
+  - <progress>
+  - <meter>
+  - <time>
+  - <audio>
+  - <video>
+  - <track>
+  - <source>
+  - <embed>
+  - <object>
+  - <param>
+  - <iframe>
+  - <canvas>
+  - <map>
+  - <area>
+  - <svg>
+  - <math>
+  
+
+```
+
+```
+invalid.jsx:4:10 lint/nursery/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The element with this role can be changed to a DOM element that already this role.
+  
+    2 │     <div role="checkbox" ></div>
+    3 │     <div role="radio" ></div>
+  > 4 │     <div role="option" ></div>
+      │          ^^^^^^^^^^^^^
+    5 │     <div role="combobox" ></div>
+    6 │     <div role="heading" ></div>
+  
+  i For examples and more information, seeWAI-ARIA Roles
+  
+  - <button>
+  - <input>
+  - <textarea>
+  - <a>
+  - <img>
+  - <table>
+  - <article>
+  - <section>
+  - <nav>
+  - <aside>
+  - <header>
+  - <footer>
+  - <main>
+  - <figure>
+  - <figcaption>
+  - <details>
+  - <summary>
+  - <dialog>
+  - <menu>
+  - <menuitem>
+  - <fieldset>
+  - <legend>
+  - <caption>
+  - <colgroup>
+  - <col>
+  - <optgroup>
+  - <option>
+  - <select>
+  - <datalist>
+  - <output>
+  - <progress>
+  - <meter>
+  - <time>
+  - <audio>
+  - <video>
+  - <track>
+  - <source>
+  - <embed>
+  - <object>
+  - <param>
+  - <iframe>
+  - <canvas>
+  - <map>
+  - <area>
+  - <svg>
+  - <math>
+  
+
+```
+
+```
+invalid.jsx:5:10 lint/nursery/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The element with this role can be changed to a DOM element that already this role.
+  
+    3 │     <div role="radio" ></div>
+    4 │     <div role="option" ></div>
+  > 5 │     <div role="combobox" ></div>
+      │          ^^^^^^^^^^^^^^^
+    6 │     <div role="heading" ></div>
+    7 │     <div role="separator" ></div>
+  
+  i For examples and more information, seeWAI-ARIA Roles
+  
+  - <button>
+  - <input>
+  - <textarea>
+  - <a>
+  - <img>
+  - <table>
+  - <article>
+  - <section>
+  - <nav>
+  - <aside>
+  - <header>
+  - <footer>
+  - <main>
+  - <figure>
+  - <figcaption>
+  - <details>
+  - <summary>
+  - <dialog>
+  - <menu>
+  - <menuitem>
+  - <fieldset>
+  - <legend>
+  - <caption>
+  - <colgroup>
+  - <col>
+  - <optgroup>
+  - <option>
+  - <select>
+  - <datalist>
+  - <output>
+  - <progress>
+  - <meter>
+  - <time>
+  - <audio>
+  - <video>
+  - <track>
+  - <source>
+  - <embed>
+  - <object>
+  - <param>
+  - <iframe>
+  - <canvas>
+  - <map>
+  - <area>
+  - <svg>
+  - <math>
+  
+
+```
+
+```
+invalid.jsx:6:10 lint/nursery/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The element with this role can be changed to a DOM element that already this role.
+  
+    4 │     <div role="option" ></div>
+    5 │     <div role="combobox" ></div>
+  > 6 │     <div role="heading" ></div>
+      │          ^^^^^^^^^^^^^^
+    7 │     <div role="separator" ></div>
+    8 │     <div role="button" ></div>
+  
+  i For examples and more information, seeWAI-ARIA Roles
+  
+  - <button>
+  - <input>
+  - <textarea>
+  - <a>
+  - <img>
+  - <table>
+  - <article>
+  - <section>
+  - <nav>
+  - <aside>
+  - <header>
+  - <footer>
+  - <main>
+  - <figure>
+  - <figcaption>
+  - <details>
+  - <summary>
+  - <dialog>
+  - <menu>
+  - <menuitem>
+  - <fieldset>
+  - <legend>
+  - <caption>
+  - <colgroup>
+  - <col>
+  - <optgroup>
+  - <option>
+  - <select>
+  - <datalist>
+  - <output>
+  - <progress>
+  - <meter>
+  - <time>
+  - <audio>
+  - <video>
+  - <track>
+  - <source>
+  - <embed>
+  - <object>
+  - <param>
+  - <iframe>
+  - <canvas>
+  - <map>
+  - <area>
+  - <svg>
+  - <math>
+  
+
+```
+
+```
+invalid.jsx:7:10 lint/nursery/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The element with this role can be changed to a DOM element that already this role.
+  
+    5 │     <div role="combobox" ></div>
+    6 │     <div role="heading" ></div>
+  > 7 │     <div role="separator" ></div>
+      │          ^^^^^^^^^^^^^^^^
+    8 │     <div role="button" ></div>
+    9 │     <div role="article" ></div>
+  
+  i For examples and more information, seeWAI-ARIA Roles
+  
+  - <button>
+  - <input>
+  - <textarea>
+  - <a>
+  - <img>
+  - <table>
+  - <article>
+  - <section>
+  - <nav>
+  - <aside>
+  - <header>
+  - <footer>
+  - <main>
+  - <figure>
+  - <figcaption>
+  - <details>
+  - <summary>
+  - <dialog>
+  - <menu>
+  - <menuitem>
+  - <fieldset>
+  - <legend>
+  - <caption>
+  - <colgroup>
+  - <col>
+  - <optgroup>
+  - <option>
+  - <select>
+  - <datalist>
+  - <output>
+  - <progress>
+  - <meter>
+  - <time>
+  - <audio>
+  - <video>
+  - <track>
+  - <source>
+  - <embed>
+  - <object>
+  - <param>
+  - <iframe>
+  - <canvas>
+  - <map>
+  - <area>
+  - <svg>
+  - <math>
+  
+
+```
+
+```
+invalid.jsx:8:10 lint/nursery/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The element with this role can be changed to a DOM element that already this role.
+  
+     6 │     <div role="heading" ></div>
+     7 │     <div role="separator" ></div>
+   > 8 │     <div role="button" ></div>
+       │          ^^^^^^^^^^^^^
+     9 │     <div role="article" ></div>
+    10 │     <div role="dialog" ></div>
+  
+  i For examples and more information, seeWAI-ARIA Roles
+  
+  - <button>
+  - <input>
+  - <textarea>
+  - <a>
+  - <img>
+  - <table>
+  - <article>
+  - <section>
+  - <nav>
+  - <aside>
+  - <header>
+  - <footer>
+  - <main>
+  - <figure>
+  - <figcaption>
+  - <details>
+  - <summary>
+  - <dialog>
+  - <menu>
+  - <menuitem>
+  - <fieldset>
+  - <legend>
+  - <caption>
+  - <colgroup>
+  - <col>
+  - <optgroup>
+  - <option>
+  - <select>
+  - <datalist>
+  - <output>
+  - <progress>
+  - <meter>
+  - <time>
+  - <audio>
+  - <video>
+  - <track>
+  - <source>
+  - <embed>
+  - <object>
+  - <param>
+  - <iframe>
+  - <canvas>
+  - <map>
+  - <area>
+  - <svg>
+  - <math>
+  
+
+```
+
+```
+invalid.jsx:9:10 lint/nursery/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The element with this role can be changed to a DOM element that already this role.
+  
+     7 │     <div role="separator" ></div>
+     8 │     <div role="button" ></div>
+   > 9 │     <div role="article" ></div>
+       │          ^^^^^^^^^^^^^^
+    10 │     <div role="dialog" ></div>
+    11 │     <div role="alert" ></div>
+  
+  i For examples and more information, seeWAI-ARIA Roles
+  
+  - <button>
+  - <input>
+  - <textarea>
+  - <a>
+  - <img>
+  - <table>
+  - <article>
+  - <section>
+  - <nav>
+  - <aside>
+  - <header>
+  - <footer>
+  - <main>
+  - <figure>
+  - <figcaption>
+  - <details>
+  - <summary>
+  - <dialog>
+  - <menu>
+  - <menuitem>
+  - <fieldset>
+  - <legend>
+  - <caption>
+  - <colgroup>
+  - <col>
+  - <optgroup>
+  - <option>
+  - <select>
+  - <datalist>
+  - <output>
+  - <progress>
+  - <meter>
+  - <time>
+  - <audio>
+  - <video>
+  - <track>
+  - <source>
+  - <embed>
+  - <object>
+  - <param>
+  - <iframe>
+  - <canvas>
+  - <map>
+  - <area>
+  - <svg>
+  - <math>
+  
+
+```
+
+```
+invalid.jsx:10:10 lint/nursery/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The element with this role can be changed to a DOM element that already this role.
+  
+     8 │     <div role="button" ></div>
+     9 │     <div role="article" ></div>
+  > 10 │     <div role="dialog" ></div>
+       │          ^^^^^^^^^^^^^
+    11 │     <div role="alert" ></div>
+    12 │     <div role="alertdialog" ></div>
+  
+  i For examples and more information, seeWAI-ARIA Roles
+  
+  - <button>
+  - <input>
+  - <textarea>
+  - <a>
+  - <img>
+  - <table>
+  - <article>
+  - <section>
+  - <nav>
+  - <aside>
+  - <header>
+  - <footer>
+  - <main>
+  - <figure>
+  - <figcaption>
+  - <details>
+  - <summary>
+  - <dialog>
+  - <menu>
+  - <menuitem>
+  - <fieldset>
+  - <legend>
+  - <caption>
+  - <colgroup>
+  - <col>
+  - <optgroup>
+  - <option>
+  - <select>
+  - <datalist>
+  - <output>
+  - <progress>
+  - <meter>
+  - <time>
+  - <audio>
+  - <video>
+  - <track>
+  - <source>
+  - <embed>
+  - <object>
+  - <param>
+  - <iframe>
+  - <canvas>
+  - <map>
+  - <area>
+  - <svg>
+  - <math>
+  
+
+```
+
+```
+invalid.jsx:11:10 lint/nursery/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The element with this role can be changed to a DOM element that already this role.
+  
+     9 │     <div role="article" ></div>
+    10 │     <div role="dialog" ></div>
+  > 11 │     <div role="alert" ></div>
+       │          ^^^^^^^^^^^^
+    12 │     <div role="alertdialog" ></div>
+    13 │     <div role="cell" ></div>
+  
+  i For examples and more information, seeWAI-ARIA Roles
+  
+  - <button>
+  - <input>
+  - <textarea>
+  - <a>
+  - <img>
+  - <table>
+  - <article>
+  - <section>
+  - <nav>
+  - <aside>
+  - <header>
+  - <footer>
+  - <main>
+  - <figure>
+  - <figcaption>
+  - <details>
+  - <summary>
+  - <dialog>
+  - <menu>
+  - <menuitem>
+  - <fieldset>
+  - <legend>
+  - <caption>
+  - <colgroup>
+  - <col>
+  - <optgroup>
+  - <option>
+  - <select>
+  - <datalist>
+  - <output>
+  - <progress>
+  - <meter>
+  - <time>
+  - <audio>
+  - <video>
+  - <track>
+  - <source>
+  - <embed>
+  - <object>
+  - <param>
+  - <iframe>
+  - <canvas>
+  - <map>
+  - <area>
+  - <svg>
+  - <math>
+  
+
+```
+
+```
+invalid.jsx:12:10 lint/nursery/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The element with this role can be changed to a DOM element that already this role.
+  
+    10 │     <div role="dialog" ></div>
+    11 │     <div role="alert" ></div>
+  > 12 │     <div role="alertdialog" ></div>
+       │          ^^^^^^^^^^^^^^^^^^
+    13 │     <div role="cell" ></div>
+    14 │     <div role="columnheader" ></div>
+  
+  i For examples and more information, seeWAI-ARIA Roles
+  
+  - <button>
+  - <input>
+  - <textarea>
+  - <a>
+  - <img>
+  - <table>
+  - <article>
+  - <section>
+  - <nav>
+  - <aside>
+  - <header>
+  - <footer>
+  - <main>
+  - <figure>
+  - <figcaption>
+  - <details>
+  - <summary>
+  - <dialog>
+  - <menu>
+  - <menuitem>
+  - <fieldset>
+  - <legend>
+  - <caption>
+  - <colgroup>
+  - <col>
+  - <optgroup>
+  - <option>
+  - <select>
+  - <datalist>
+  - <output>
+  - <progress>
+  - <meter>
+  - <time>
+  - <audio>
+  - <video>
+  - <track>
+  - <source>
+  - <embed>
+  - <object>
+  - <param>
+  - <iframe>
+  - <canvas>
+  - <map>
+  - <area>
+  - <svg>
+  - <math>
+  
+
+```
+
+```
+invalid.jsx:13:10 lint/nursery/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The element with this role can be changed to a DOM element that already this role.
+  
+    11 │     <div role="alert" ></div>
+    12 │     <div role="alertdialog" ></div>
+  > 13 │     <div role="cell" ></div>
+       │          ^^^^^^^^^^^
+    14 │     <div role="columnheader" ></div>
+    15 │     <div role="definition" ></div>
+  
+  i For examples and more information, seeWAI-ARIA Roles
+  
+  - <button>
+  - <input>
+  - <textarea>
+  - <a>
+  - <img>
+  - <table>
+  - <article>
+  - <section>
+  - <nav>
+  - <aside>
+  - <header>
+  - <footer>
+  - <main>
+  - <figure>
+  - <figcaption>
+  - <details>
+  - <summary>
+  - <dialog>
+  - <menu>
+  - <menuitem>
+  - <fieldset>
+  - <legend>
+  - <caption>
+  - <colgroup>
+  - <col>
+  - <optgroup>
+  - <option>
+  - <select>
+  - <datalist>
+  - <output>
+  - <progress>
+  - <meter>
+  - <time>
+  - <audio>
+  - <video>
+  - <track>
+  - <source>
+  - <embed>
+  - <object>
+  - <param>
+  - <iframe>
+  - <canvas>
+  - <map>
+  - <area>
+  - <svg>
+  - <math>
+  
+
+```
+
+```
+invalid.jsx:14:10 lint/nursery/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The element with this role can be changed to a DOM element that already this role.
+  
+    12 │     <div role="alertdialog" ></div>
+    13 │     <div role="cell" ></div>
+  > 14 │     <div role="columnheader" ></div>
+       │          ^^^^^^^^^^^^^^^^^^^
+    15 │     <div role="definition" ></div>
+    16 │     <div role="figure" ></div>
+  
+  i For examples and more information, seeWAI-ARIA Roles
+  
+  - <button>
+  - <input>
+  - <textarea>
+  - <a>
+  - <img>
+  - <table>
+  - <article>
+  - <section>
+  - <nav>
+  - <aside>
+  - <header>
+  - <footer>
+  - <main>
+  - <figure>
+  - <figcaption>
+  - <details>
+  - <summary>
+  - <dialog>
+  - <menu>
+  - <menuitem>
+  - <fieldset>
+  - <legend>
+  - <caption>
+  - <colgroup>
+  - <col>
+  - <optgroup>
+  - <option>
+  - <select>
+  - <datalist>
+  - <output>
+  - <progress>
+  - <meter>
+  - <time>
+  - <audio>
+  - <video>
+  - <track>
+  - <source>
+  - <embed>
+  - <object>
+  - <param>
+  - <iframe>
+  - <canvas>
+  - <map>
+  - <area>
+  - <svg>
+  - <math>
+  
+
+```
+
+```
+invalid.jsx:15:10 lint/nursery/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The element with this role can be changed to a DOM element that already this role.
+  
+    13 │     <div role="cell" ></div>
+    14 │     <div role="columnheader" ></div>
+  > 15 │     <div role="definition" ></div>
+       │          ^^^^^^^^^^^^^^^^^
+    16 │     <div role="figure" ></div>
+    17 │     <div role="form" ></div>
+  
+  i For examples and more information, seeWAI-ARIA Roles
+  
+  - <button>
+  - <input>
+  - <textarea>
+  - <a>
+  - <img>
+  - <table>
+  - <article>
+  - <section>
+  - <nav>
+  - <aside>
+  - <header>
+  - <footer>
+  - <main>
+  - <figure>
+  - <figcaption>
+  - <details>
+  - <summary>
+  - <dialog>
+  - <menu>
+  - <menuitem>
+  - <fieldset>
+  - <legend>
+  - <caption>
+  - <colgroup>
+  - <col>
+  - <optgroup>
+  - <option>
+  - <select>
+  - <datalist>
+  - <output>
+  - <progress>
+  - <meter>
+  - <time>
+  - <audio>
+  - <video>
+  - <track>
+  - <source>
+  - <embed>
+  - <object>
+  - <param>
+  - <iframe>
+  - <canvas>
+  - <map>
+  - <area>
+  - <svg>
+  - <math>
+  
+
+```
+
+```
+invalid.jsx:16:10 lint/nursery/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The element with this role can be changed to a DOM element that already this role.
+  
+    14 │     <div role="columnheader" ></div>
+    15 │     <div role="definition" ></div>
+  > 16 │     <div role="figure" ></div>
+       │          ^^^^^^^^^^^^^
+    17 │     <div role="form" ></div>
+    18 │     <div role="graphics-document" ></div>
+  
+  i For examples and more information, seeWAI-ARIA Roles
+  
+  - <button>
+  - <input>
+  - <textarea>
+  - <a>
+  - <img>
+  - <table>
+  - <article>
+  - <section>
+  - <nav>
+  - <aside>
+  - <header>
+  - <footer>
+  - <main>
+  - <figure>
+  - <figcaption>
+  - <details>
+  - <summary>
+  - <dialog>
+  - <menu>
+  - <menuitem>
+  - <fieldset>
+  - <legend>
+  - <caption>
+  - <colgroup>
+  - <col>
+  - <optgroup>
+  - <option>
+  - <select>
+  - <datalist>
+  - <output>
+  - <progress>
+  - <meter>
+  - <time>
+  - <audio>
+  - <video>
+  - <track>
+  - <source>
+  - <embed>
+  - <object>
+  - <param>
+  - <iframe>
+  - <canvas>
+  - <map>
+  - <area>
+  - <svg>
+  - <math>
+  
+
+```
+
+```
+invalid.jsx:17:10 lint/nursery/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The element with this role can be changed to a DOM element that already this role.
+  
+    15 │     <div role="definition" ></div>
+    16 │     <div role="figure" ></div>
+  > 17 │     <div role="form" ></div>
+       │          ^^^^^^^^^^^
+    18 │     <div role="graphics-document" ></div>
+    19 │     <div role="graphics-object" ></div>
+  
+  i For examples and more information, seeWAI-ARIA Roles
+  
+  - <button>
+  - <input>
+  - <textarea>
+  - <a>
+  - <img>
+  - <table>
+  - <article>
+  - <section>
+  - <nav>
+  - <aside>
+  - <header>
+  - <footer>
+  - <main>
+  - <figure>
+  - <figcaption>
+  - <details>
+  - <summary>
+  - <dialog>
+  - <menu>
+  - <menuitem>
+  - <fieldset>
+  - <legend>
+  - <caption>
+  - <colgroup>
+  - <col>
+  - <optgroup>
+  - <option>
+  - <select>
+  - <datalist>
+  - <output>
+  - <progress>
+  - <meter>
+  - <time>
+  - <audio>
+  - <video>
+  - <track>
+  - <source>
+  - <embed>
+  - <object>
+  - <param>
+  - <iframe>
+  - <canvas>
+  - <map>
+  - <area>
+  - <svg>
+  - <math>
+  
+
+```
+
+```
+invalid.jsx:18:10 lint/nursery/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The element with this role can be changed to a DOM element that already this role.
+  
+    16 │     <div role="figure" ></div>
+    17 │     <div role="form" ></div>
+  > 18 │     <div role="graphics-document" ></div>
+       │          ^^^^^^^^^^^^^^^^^^^^^^^^
+    19 │     <div role="graphics-object" ></div>
+    20 │     <div role="grid" ></div>
+  
+  i For examples and more information, seeWAI-ARIA Roles
+  
+  - <button>
+  - <input>
+  - <textarea>
+  - <a>
+  - <img>
+  - <table>
+  - <article>
+  - <section>
+  - <nav>
+  - <aside>
+  - <header>
+  - <footer>
+  - <main>
+  - <figure>
+  - <figcaption>
+  - <details>
+  - <summary>
+  - <dialog>
+  - <menu>
+  - <menuitem>
+  - <fieldset>
+  - <legend>
+  - <caption>
+  - <colgroup>
+  - <col>
+  - <optgroup>
+  - <option>
+  - <select>
+  - <datalist>
+  - <output>
+  - <progress>
+  - <meter>
+  - <time>
+  - <audio>
+  - <video>
+  - <track>
+  - <source>
+  - <embed>
+  - <object>
+  - <param>
+  - <iframe>
+  - <canvas>
+  - <map>
+  - <area>
+  - <svg>
+  - <math>
+  
+
+```
+
+```
+invalid.jsx:19:10 lint/nursery/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The element with this role can be changed to a DOM element that already this role.
+  
+    17 │     <div role="form" ></div>
+    18 │     <div role="graphics-document" ></div>
+  > 19 │     <div role="graphics-object" ></div>
+       │          ^^^^^^^^^^^^^^^^^^^^^^
+    20 │     <div role="grid" ></div>
+    21 │     <div role="gridcell" ></div>
+  
+  i For examples and more information, seeWAI-ARIA Roles
+  
+  - <button>
+  - <input>
+  - <textarea>
+  - <a>
+  - <img>
+  - <table>
+  - <article>
+  - <section>
+  - <nav>
+  - <aside>
+  - <header>
+  - <footer>
+  - <main>
+  - <figure>
+  - <figcaption>
+  - <details>
+  - <summary>
+  - <dialog>
+  - <menu>
+  - <menuitem>
+  - <fieldset>
+  - <legend>
+  - <caption>
+  - <colgroup>
+  - <col>
+  - <optgroup>
+  - <option>
+  - <select>
+  - <datalist>
+  - <output>
+  - <progress>
+  - <meter>
+  - <time>
+  - <audio>
+  - <video>
+  - <track>
+  - <source>
+  - <embed>
+  - <object>
+  - <param>
+  - <iframe>
+  - <canvas>
+  - <map>
+  - <area>
+  - <svg>
+  - <math>
+  
+
+```
+
+```
+invalid.jsx:20:10 lint/nursery/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The element with this role can be changed to a DOM element that already this role.
+  
+    18 │     <div role="graphics-document" ></div>
+    19 │     <div role="graphics-object" ></div>
+  > 20 │     <div role="grid" ></div>
+       │          ^^^^^^^^^^^
+    21 │     <div role="gridcell" ></div>
+    22 │     <div role="group" ></div>
+  
+  i For examples and more information, seeWAI-ARIA Roles
+  
+  - <button>
+  - <input>
+  - <textarea>
+  - <a>
+  - <img>
+  - <table>
+  - <article>
+  - <section>
+  - <nav>
+  - <aside>
+  - <header>
+  - <footer>
+  - <main>
+  - <figure>
+  - <figcaption>
+  - <details>
+  - <summary>
+  - <dialog>
+  - <menu>
+  - <menuitem>
+  - <fieldset>
+  - <legend>
+  - <caption>
+  - <colgroup>
+  - <col>
+  - <optgroup>
+  - <option>
+  - <select>
+  - <datalist>
+  - <output>
+  - <progress>
+  - <meter>
+  - <time>
+  - <audio>
+  - <video>
+  - <track>
+  - <source>
+  - <embed>
+  - <object>
+  - <param>
+  - <iframe>
+  - <canvas>
+  - <map>
+  - <area>
+  - <svg>
+  - <math>
+  
+
+```
+
+```
+invalid.jsx:21:10 lint/nursery/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The element with this role can be changed to a DOM element that already this role.
+  
+    19 │     <div role="graphics-object" ></div>
+    20 │     <div role="grid" ></div>
+  > 21 │     <div role="gridcell" ></div>
+       │          ^^^^^^^^^^^^^^^
+    22 │     <div role="group" ></div>
+    23 │     <div role="img" ></div>
+  
+  i For examples and more information, seeWAI-ARIA Roles
+  
+  - <button>
+  - <input>
+  - <textarea>
+  - <a>
+  - <img>
+  - <table>
+  - <article>
+  - <section>
+  - <nav>
+  - <aside>
+  - <header>
+  - <footer>
+  - <main>
+  - <figure>
+  - <figcaption>
+  - <details>
+  - <summary>
+  - <dialog>
+  - <menu>
+  - <menuitem>
+  - <fieldset>
+  - <legend>
+  - <caption>
+  - <colgroup>
+  - <col>
+  - <optgroup>
+  - <option>
+  - <select>
+  - <datalist>
+  - <output>
+  - <progress>
+  - <meter>
+  - <time>
+  - <audio>
+  - <video>
+  - <track>
+  - <source>
+  - <embed>
+  - <object>
+  - <param>
+  - <iframe>
+  - <canvas>
+  - <map>
+  - <area>
+  - <svg>
+  - <math>
+  
+
+```
+
+```
+invalid.jsx:22:10 lint/nursery/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The element with this role can be changed to a DOM element that already this role.
+  
+    20 │     <div role="grid" ></div>
+    21 │     <div role="gridcell" ></div>
+  > 22 │     <div role="group" ></div>
+       │          ^^^^^^^^^^^^
+    23 │     <div role="img" ></div>
+    24 │     <div role="link" ></div>
+  
+  i For examples and more information, seeWAI-ARIA Roles
+  
+  - <button>
+  - <input>
+  - <textarea>
+  - <a>
+  - <img>
+  - <table>
+  - <article>
+  - <section>
+  - <nav>
+  - <aside>
+  - <header>
+  - <footer>
+  - <main>
+  - <figure>
+  - <figcaption>
+  - <details>
+  - <summary>
+  - <dialog>
+  - <menu>
+  - <menuitem>
+  - <fieldset>
+  - <legend>
+  - <caption>
+  - <colgroup>
+  - <col>
+  - <optgroup>
+  - <option>
+  - <select>
+  - <datalist>
+  - <output>
+  - <progress>
+  - <meter>
+  - <time>
+  - <audio>
+  - <video>
+  - <track>
+  - <source>
+  - <embed>
+  - <object>
+  - <param>
+  - <iframe>
+  - <canvas>
+  - <map>
+  - <area>
+  - <svg>
+  - <math>
+  
+
+```
+
+```
+invalid.jsx:23:10 lint/nursery/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The element with this role can be changed to a DOM element that already this role.
+  
+    21 │     <div role="gridcell" ></div>
+    22 │     <div role="group" ></div>
+  > 23 │     <div role="img" ></div>
+       │          ^^^^^^^^^^
+    24 │     <div role="link" ></div>
+    25 │     <div role="list" ></div>
+  
+  i For examples and more information, seeWAI-ARIA Roles
+  
+  - <button>
+  - <input>
+  - <textarea>
+  - <a>
+  - <img>
+  - <table>
+  - <article>
+  - <section>
+  - <nav>
+  - <aside>
+  - <header>
+  - <footer>
+  - <main>
+  - <figure>
+  - <figcaption>
+  - <details>
+  - <summary>
+  - <dialog>
+  - <menu>
+  - <menuitem>
+  - <fieldset>
+  - <legend>
+  - <caption>
+  - <colgroup>
+  - <col>
+  - <optgroup>
+  - <option>
+  - <select>
+  - <datalist>
+  - <output>
+  - <progress>
+  - <meter>
+  - <time>
+  - <audio>
+  - <video>
+  - <track>
+  - <source>
+  - <embed>
+  - <object>
+  - <param>
+  - <iframe>
+  - <canvas>
+  - <map>
+  - <area>
+  - <svg>
+  - <math>
+  
+
+```
+
+```
+invalid.jsx:24:10 lint/nursery/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The element with this role can be changed to a DOM element that already this role.
+  
+    22 │     <div role="group" ></div>
+    23 │     <div role="img" ></div>
+  > 24 │     <div role="link" ></div>
+       │          ^^^^^^^^^^^
+    25 │     <div role="list" ></div>
+    26 │     <div role="listbox" ></div>
+  
+  i For examples and more information, seeWAI-ARIA Roles
+  
+  - <button>
+  - <input>
+  - <textarea>
+  - <a>
+  - <img>
+  - <table>
+  - <article>
+  - <section>
+  - <nav>
+  - <aside>
+  - <header>
+  - <footer>
+  - <main>
+  - <figure>
+  - <figcaption>
+  - <details>
+  - <summary>
+  - <dialog>
+  - <menu>
+  - <menuitem>
+  - <fieldset>
+  - <legend>
+  - <caption>
+  - <colgroup>
+  - <col>
+  - <optgroup>
+  - <option>
+  - <select>
+  - <datalist>
+  - <output>
+  - <progress>
+  - <meter>
+  - <time>
+  - <audio>
+  - <video>
+  - <track>
+  - <source>
+  - <embed>
+  - <object>
+  - <param>
+  - <iframe>
+  - <canvas>
+  - <map>
+  - <area>
+  - <svg>
+  - <math>
+  
+
+```
+
+```
+invalid.jsx:25:10 lint/nursery/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The element with this role can be changed to a DOM element that already this role.
+  
+    23 │     <div role="img" ></div>
+    24 │     <div role="link" ></div>
+  > 25 │     <div role="list" ></div>
+       │          ^^^^^^^^^^^
+    26 │     <div role="listbox" ></div>
+    27 │     <div role="listitem" ></div>
+  
+  i For examples and more information, seeWAI-ARIA Roles
+  
+  - <button>
+  - <input>
+  - <textarea>
+  - <a>
+  - <img>
+  - <table>
+  - <article>
+  - <section>
+  - <nav>
+  - <aside>
+  - <header>
+  - <footer>
+  - <main>
+  - <figure>
+  - <figcaption>
+  - <details>
+  - <summary>
+  - <dialog>
+  - <menu>
+  - <menuitem>
+  - <fieldset>
+  - <legend>
+  - <caption>
+  - <colgroup>
+  - <col>
+  - <optgroup>
+  - <option>
+  - <select>
+  - <datalist>
+  - <output>
+  - <progress>
+  - <meter>
+  - <time>
+  - <audio>
+  - <video>
+  - <track>
+  - <source>
+  - <embed>
+  - <object>
+  - <param>
+  - <iframe>
+  - <canvas>
+  - <map>
+  - <area>
+  - <svg>
+  - <math>
+  
+
+```
+
+```
+invalid.jsx:26:10 lint/nursery/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The element with this role can be changed to a DOM element that already this role.
+  
+    24 │     <div role="link" ></div>
+    25 │     <div role="list" ></div>
+  > 26 │     <div role="listbox" ></div>
+       │          ^^^^^^^^^^^^^^
+    27 │     <div role="listitem" ></div>
+    28 │     <div role="navigation" ></div>
+  
+  i For examples and more information, seeWAI-ARIA Roles
+  
+  - <button>
+  - <input>
+  - <textarea>
+  - <a>
+  - <img>
+  - <table>
+  - <article>
+  - <section>
+  - <nav>
+  - <aside>
+  - <header>
+  - <footer>
+  - <main>
+  - <figure>
+  - <figcaption>
+  - <details>
+  - <summary>
+  - <dialog>
+  - <menu>
+  - <menuitem>
+  - <fieldset>
+  - <legend>
+  - <caption>
+  - <colgroup>
+  - <col>
+  - <optgroup>
+  - <option>
+  - <select>
+  - <datalist>
+  - <output>
+  - <progress>
+  - <meter>
+  - <time>
+  - <audio>
+  - <video>
+  - <track>
+  - <source>
+  - <embed>
+  - <object>
+  - <param>
+  - <iframe>
+  - <canvas>
+  - <map>
+  - <area>
+  - <svg>
+  - <math>
+  
+
+```
+
+```
+invalid.jsx:27:10 lint/nursery/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The element with this role can be changed to a DOM element that already this role.
+  
+    25 │     <div role="list" ></div>
+    26 │     <div role="listbox" ></div>
+  > 27 │     <div role="listitem" ></div>
+       │          ^^^^^^^^^^^^^^^
+    28 │     <div role="navigation" ></div>
+    29 │     <div role="row" ></div>
+  
+  i For examples and more information, seeWAI-ARIA Roles
+  
+  - <button>
+  - <input>
+  - <textarea>
+  - <a>
+  - <img>
+  - <table>
+  - <article>
+  - <section>
+  - <nav>
+  - <aside>
+  - <header>
+  - <footer>
+  - <main>
+  - <figure>
+  - <figcaption>
+  - <details>
+  - <summary>
+  - <dialog>
+  - <menu>
+  - <menuitem>
+  - <fieldset>
+  - <legend>
+  - <caption>
+  - <colgroup>
+  - <col>
+  - <optgroup>
+  - <option>
+  - <select>
+  - <datalist>
+  - <output>
+  - <progress>
+  - <meter>
+  - <time>
+  - <audio>
+  - <video>
+  - <track>
+  - <source>
+  - <embed>
+  - <object>
+  - <param>
+  - <iframe>
+  - <canvas>
+  - <map>
+  - <area>
+  - <svg>
+  - <math>
+  
+
+```
+
+```
+invalid.jsx:28:10 lint/nursery/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The element with this role can be changed to a DOM element that already this role.
+  
+    26 │     <div role="listbox" ></div>
+    27 │     <div role="listitem" ></div>
+  > 28 │     <div role="navigation" ></div>
+       │          ^^^^^^^^^^^^^^^^^
+    29 │     <div role="row" ></div>
+    30 │     <div role="rowgroup" ></div>
+  
+  i For examples and more information, seeWAI-ARIA Roles
+  
+  - <button>
+  - <input>
+  - <textarea>
+  - <a>
+  - <img>
+  - <table>
+  - <article>
+  - <section>
+  - <nav>
+  - <aside>
+  - <header>
+  - <footer>
+  - <main>
+  - <figure>
+  - <figcaption>
+  - <details>
+  - <summary>
+  - <dialog>
+  - <menu>
+  - <menuitem>
+  - <fieldset>
+  - <legend>
+  - <caption>
+  - <colgroup>
+  - <col>
+  - <optgroup>
+  - <option>
+  - <select>
+  - <datalist>
+  - <output>
+  - <progress>
+  - <meter>
+  - <time>
+  - <audio>
+  - <video>
+  - <track>
+  - <source>
+  - <embed>
+  - <object>
+  - <param>
+  - <iframe>
+  - <canvas>
+  - <map>
+  - <area>
+  - <svg>
+  - <math>
+  
+
+```
+
+```
+invalid.jsx:29:10 lint/nursery/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The element with this role can be changed to a DOM element that already this role.
+  
+    27 │     <div role="listitem" ></div>
+    28 │     <div role="navigation" ></div>
+  > 29 │     <div role="row" ></div>
+       │          ^^^^^^^^^^
+    30 │     <div role="rowgroup" ></div>
+    31 │     <div role="rowheader" ></div>
+  
+  i For examples and more information, seeWAI-ARIA Roles
+  
+  - <button>
+  - <input>
+  - <textarea>
+  - <a>
+  - <img>
+  - <table>
+  - <article>
+  - <section>
+  - <nav>
+  - <aside>
+  - <header>
+  - <footer>
+  - <main>
+  - <figure>
+  - <figcaption>
+  - <details>
+  - <summary>
+  - <dialog>
+  - <menu>
+  - <menuitem>
+  - <fieldset>
+  - <legend>
+  - <caption>
+  - <colgroup>
+  - <col>
+  - <optgroup>
+  - <option>
+  - <select>
+  - <datalist>
+  - <output>
+  - <progress>
+  - <meter>
+  - <time>
+  - <audio>
+  - <video>
+  - <track>
+  - <source>
+  - <embed>
+  - <object>
+  - <param>
+  - <iframe>
+  - <canvas>
+  - <map>
+  - <area>
+  - <svg>
+  - <math>
+  
+
+```
+
+```
+invalid.jsx:30:10 lint/nursery/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The element with this role can be changed to a DOM element that already this role.
+  
+    28 │     <div role="navigation" ></div>
+    29 │     <div role="row" ></div>
+  > 30 │     <div role="rowgroup" ></div>
+       │          ^^^^^^^^^^^^^^^
+    31 │     <div role="rowheader" ></div>
+    32 │     <div role="search" ></div>
+  
+  i For examples and more information, seeWAI-ARIA Roles
+  
+  - <button>
+  - <input>
+  - <textarea>
+  - <a>
+  - <img>
+  - <table>
+  - <article>
+  - <section>
+  - <nav>
+  - <aside>
+  - <header>
+  - <footer>
+  - <main>
+  - <figure>
+  - <figcaption>
+  - <details>
+  - <summary>
+  - <dialog>
+  - <menu>
+  - <menuitem>
+  - <fieldset>
+  - <legend>
+  - <caption>
+  - <colgroup>
+  - <col>
+  - <optgroup>
+  - <option>
+  - <select>
+  - <datalist>
+  - <output>
+  - <progress>
+  - <meter>
+  - <time>
+  - <audio>
+  - <video>
+  - <track>
+  - <source>
+  - <embed>
+  - <object>
+  - <param>
+  - <iframe>
+  - <canvas>
+  - <map>
+  - <area>
+  - <svg>
+  - <math>
+  
+
+```
+
+```
+invalid.jsx:31:10 lint/nursery/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The element with this role can be changed to a DOM element that already this role.
+  
+    29 │     <div role="row" ></div>
+    30 │     <div role="rowgroup" ></div>
+  > 31 │     <div role="rowheader" ></div>
+       │          ^^^^^^^^^^^^^^^^
+    32 │     <div role="search" ></div>
+    33 │     <div role="searchbox" ></div>
+  
+  i For examples and more information, seeWAI-ARIA Roles
+  
+  - <button>
+  - <input>
+  - <textarea>
+  - <a>
+  - <img>
+  - <table>
+  - <article>
+  - <section>
+  - <nav>
+  - <aside>
+  - <header>
+  - <footer>
+  - <main>
+  - <figure>
+  - <figcaption>
+  - <details>
+  - <summary>
+  - <dialog>
+  - <menu>
+  - <menuitem>
+  - <fieldset>
+  - <legend>
+  - <caption>
+  - <colgroup>
+  - <col>
+  - <optgroup>
+  - <option>
+  - <select>
+  - <datalist>
+  - <output>
+  - <progress>
+  - <meter>
+  - <time>
+  - <audio>
+  - <video>
+  - <track>
+  - <source>
+  - <embed>
+  - <object>
+  - <param>
+  - <iframe>
+  - <canvas>
+  - <map>
+  - <area>
+  - <svg>
+  - <math>
+  
+
+```
+
+```
+invalid.jsx:32:10 lint/nursery/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The element with this role can be changed to a DOM element that already this role.
+  
+    30 │     <div role="rowgroup" ></div>
+    31 │     <div role="rowheader" ></div>
+  > 32 │     <div role="search" ></div>
+       │          ^^^^^^^^^^^^^
+    33 │     <div role="searchbox" ></div>
+    34 │     <div role="table" ></div>
+  
+  i For examples and more information, seeWAI-ARIA Roles
+  
+  - <button>
+  - <input>
+  - <textarea>
+  - <a>
+  - <img>
+  - <table>
+  - <article>
+  - <section>
+  - <nav>
+  - <aside>
+  - <header>
+  - <footer>
+  - <main>
+  - <figure>
+  - <figcaption>
+  - <details>
+  - <summary>
+  - <dialog>
+  - <menu>
+  - <menuitem>
+  - <fieldset>
+  - <legend>
+  - <caption>
+  - <colgroup>
+  - <col>
+  - <optgroup>
+  - <option>
+  - <select>
+  - <datalist>
+  - <output>
+  - <progress>
+  - <meter>
+  - <time>
+  - <audio>
+  - <video>
+  - <track>
+  - <source>
+  - <embed>
+  - <object>
+  - <param>
+  - <iframe>
+  - <canvas>
+  - <map>
+  - <area>
+  - <svg>
+  - <math>
+  
+
+```
+
+```
+invalid.jsx:33:10 lint/nursery/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The element with this role can be changed to a DOM element that already this role.
+  
+    31 │     <div role="rowheader" ></div>
+    32 │     <div role="search" ></div>
+  > 33 │     <div role="searchbox" ></div>
+       │          ^^^^^^^^^^^^^^^^
+    34 │     <div role="table" ></div>
+    35 │     <div role="term" ></div>
+  
+  i For examples and more information, seeWAI-ARIA Roles
+  
+  - <button>
+  - <input>
+  - <textarea>
+  - <a>
+  - <img>
+  - <table>
+  - <article>
+  - <section>
+  - <nav>
+  - <aside>
+  - <header>
+  - <footer>
+  - <main>
+  - <figure>
+  - <figcaption>
+  - <details>
+  - <summary>
+  - <dialog>
+  - <menu>
+  - <menuitem>
+  - <fieldset>
+  - <legend>
+  - <caption>
+  - <colgroup>
+  - <col>
+  - <optgroup>
+  - <option>
+  - <select>
+  - <datalist>
+  - <output>
+  - <progress>
+  - <meter>
+  - <time>
+  - <audio>
+  - <video>
+  - <track>
+  - <source>
+  - <embed>
+  - <object>
+  - <param>
+  - <iframe>
+  - <canvas>
+  - <map>
+  - <area>
+  - <svg>
+  - <math>
+  
+
+```
+
+```
+invalid.jsx:34:10 lint/nursery/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The element with this role can be changed to a DOM element that already this role.
+  
+    32 │     <div role="search" ></div>
+    33 │     <div role="searchbox" ></div>
+  > 34 │     <div role="table" ></div>
+       │          ^^^^^^^^^^^^
+    35 │     <div role="term" ></div>
+    36 │     <div role="textbox" ></div>
+  
+  i For examples and more information, seeWAI-ARIA Roles
+  
+  - <button>
+  - <input>
+  - <textarea>
+  - <a>
+  - <img>
+  - <table>
+  - <article>
+  - <section>
+  - <nav>
+  - <aside>
+  - <header>
+  - <footer>
+  - <main>
+  - <figure>
+  - <figcaption>
+  - <details>
+  - <summary>
+  - <dialog>
+  - <menu>
+  - <menuitem>
+  - <fieldset>
+  - <legend>
+  - <caption>
+  - <colgroup>
+  - <col>
+  - <optgroup>
+  - <option>
+  - <select>
+  - <datalist>
+  - <output>
+  - <progress>
+  - <meter>
+  - <time>
+  - <audio>
+  - <video>
+  - <track>
+  - <source>
+  - <embed>
+  - <object>
+  - <param>
+  - <iframe>
+  - <canvas>
+  - <map>
+  - <area>
+  - <svg>
+  - <math>
+  
+
+```
+
+```
+invalid.jsx:35:10 lint/nursery/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The element with this role can be changed to a DOM element that already this role.
+  
+    33 │     <div role="searchbox" ></div>
+    34 │     <div role="table" ></div>
+  > 35 │     <div role="term" ></div>
+       │          ^^^^^^^^^^^
+    36 │     <div role="textbox" ></div>
+    37 │     <div role="generic" ></div>
+  
+  i For examples and more information, seeWAI-ARIA Roles
+  
+  - <button>
+  - <input>
+  - <textarea>
+  - <a>
+  - <img>
+  - <table>
+  - <article>
+  - <section>
+  - <nav>
+  - <aside>
+  - <header>
+  - <footer>
+  - <main>
+  - <figure>
+  - <figcaption>
+  - <details>
+  - <summary>
+  - <dialog>
+  - <menu>
+  - <menuitem>
+  - <fieldset>
+  - <legend>
+  - <caption>
+  - <colgroup>
+  - <col>
+  - <optgroup>
+  - <option>
+  - <select>
+  - <datalist>
+  - <output>
+  - <progress>
+  - <meter>
+  - <time>
+  - <audio>
+  - <video>
+  - <track>
+  - <source>
+  - <embed>
+  - <object>
+  - <param>
+  - <iframe>
+  - <canvas>
+  - <map>
+  - <area>
+  - <svg>
+  - <math>
+  
+
+```
+
+```
+invalid.jsx:36:10 lint/nursery/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The element with this role can be changed to a DOM element that already this role.
+  
+    34 │     <div role="table" ></div>
+    35 │     <div role="term" ></div>
+  > 36 │     <div role="textbox" ></div>
+       │          ^^^^^^^^^^^^^^
+    37 │     <div role="generic" ></div>
+    38 │     <div role="caption" ></div>
+  
+  i For examples and more information, seeWAI-ARIA Roles
+  
+  - <button>
+  - <input>
+  - <textarea>
+  - <a>
+  - <img>
+  - <table>
+  - <article>
+  - <section>
+  - <nav>
+  - <aside>
+  - <header>
+  - <footer>
+  - <main>
+  - <figure>
+  - <figcaption>
+  - <details>
+  - <summary>
+  - <dialog>
+  - <menu>
+  - <menuitem>
+  - <fieldset>
+  - <legend>
+  - <caption>
+  - <colgroup>
+  - <col>
+  - <optgroup>
+  - <option>
+  - <select>
+  - <datalist>
+  - <output>
+  - <progress>
+  - <meter>
+  - <time>
+  - <audio>
+  - <video>
+  - <track>
+  - <source>
+  - <embed>
+  - <object>
+  - <param>
+  - <iframe>
+  - <canvas>
+  - <map>
+  - <area>
+  - <svg>
+  - <math>
+  
+
+```
+
+```
+invalid.jsx:37:10 lint/nursery/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The element with this role can be changed to a DOM element that already this role.
+  
+    35 │     <div role="term" ></div>
+    36 │     <div role="textbox" ></div>
+  > 37 │     <div role="generic" ></div>
+       │          ^^^^^^^^^^^^^^
+    38 │     <div role="caption" ></div>
+    39 │     <div role="main" ></div>
+  
+  i For examples and more information, seeWAI-ARIA Roles
+  
+  - <button>
+  - <input>
+  - <textarea>
+  - <a>
+  - <img>
+  - <table>
+  - <article>
+  - <section>
+  - <nav>
+  - <aside>
+  - <header>
+  - <footer>
+  - <main>
+  - <figure>
+  - <figcaption>
+  - <details>
+  - <summary>
+  - <dialog>
+  - <menu>
+  - <menuitem>
+  - <fieldset>
+  - <legend>
+  - <caption>
+  - <colgroup>
+  - <col>
+  - <optgroup>
+  - <option>
+  - <select>
+  - <datalist>
+  - <output>
+  - <progress>
+  - <meter>
+  - <time>
+  - <audio>
+  - <video>
+  - <track>
+  - <source>
+  - <embed>
+  - <object>
+  - <param>
+  - <iframe>
+  - <canvas>
+  - <map>
+  - <area>
+  - <svg>
+  - <math>
+  
+
+```
+
+```
+invalid.jsx:38:10 lint/nursery/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The element with this role can be changed to a DOM element that already this role.
+  
+    36 │     <div role="textbox" ></div>
+    37 │     <div role="generic" ></div>
+  > 38 │     <div role="caption" ></div>
+       │          ^^^^^^^^^^^^^^
+    39 │     <div role="main" ></div>
+    40 │     <div role="time" ></div>
+  
+  i For examples and more information, seeWAI-ARIA Roles
+  
+  - <button>
+  - <input>
+  - <textarea>
+  - <a>
+  - <img>
+  - <table>
+  - <article>
+  - <section>
+  - <nav>
+  - <aside>
+  - <header>
+  - <footer>
+  - <main>
+  - <figure>
+  - <figcaption>
+  - <details>
+  - <summary>
+  - <dialog>
+  - <menu>
+  - <menuitem>
+  - <fieldset>
+  - <legend>
+  - <caption>
+  - <colgroup>
+  - <col>
+  - <optgroup>
+  - <option>
+  - <select>
+  - <datalist>
+  - <output>
+  - <progress>
+  - <meter>
+  - <time>
+  - <audio>
+  - <video>
+  - <track>
+  - <source>
+  - <embed>
+  - <object>
+  - <param>
+  - <iframe>
+  - <canvas>
+  - <map>
+  - <area>
+  - <svg>
+  - <math>
+  
+
+```
+
+```
+invalid.jsx:39:10 lint/nursery/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The element with this role can be changed to a DOM element that already this role.
+  
+    37 │     <div role="generic" ></div>
+    38 │     <div role="caption" ></div>
+  > 39 │     <div role="main" ></div>
+       │          ^^^^^^^^^^^
+    40 │     <div role="time" ></div>
+    41 │     <div role="p" ></div>
+  
+  i For examples and more information, seeWAI-ARIA Roles
+  
+  - <button>
+  - <input>
+  - <textarea>
+  - <a>
+  - <img>
+  - <table>
+  - <article>
+  - <section>
+  - <nav>
+  - <aside>
+  - <header>
+  - <footer>
+  - <main>
+  - <figure>
+  - <figcaption>
+  - <details>
+  - <summary>
+  - <dialog>
+  - <menu>
+  - <menuitem>
+  - <fieldset>
+  - <legend>
+  - <caption>
+  - <colgroup>
+  - <col>
+  - <optgroup>
+  - <option>
+  - <select>
+  - <datalist>
+  - <output>
+  - <progress>
+  - <meter>
+  - <time>
+  - <audio>
+  - <video>
+  - <track>
+  - <source>
+  - <embed>
+  - <object>
+  - <param>
+  - <iframe>
+  - <canvas>
+  - <map>
+  - <area>
+  - <svg>
+  - <math>
+  
+
+```
+
+```
+invalid.jsx:40:10 lint/nursery/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The element with this role can be changed to a DOM element that already this role.
+  
+    38 │     <div role="caption" ></div>
+    39 │     <div role="main" ></div>
+  > 40 │     <div role="time" ></div>
+       │          ^^^^^^^^^^^
+    41 │     <div role="p" ></div>
+    42 │     <div role="aside" ></div>
+  
+  i For examples and more information, seeWAI-ARIA Roles
+  
+  - <button>
+  - <input>
+  - <textarea>
+  - <a>
+  - <img>
+  - <table>
+  - <article>
+  - <section>
+  - <nav>
+  - <aside>
+  - <header>
+  - <footer>
+  - <main>
+  - <figure>
+  - <figcaption>
+  - <details>
+  - <summary>
+  - <dialog>
+  - <menu>
+  - <menuitem>
+  - <fieldset>
+  - <legend>
+  - <caption>
+  - <colgroup>
+  - <col>
+  - <optgroup>
+  - <option>
+  - <select>
+  - <datalist>
+  - <output>
+  - <progress>
+  - <meter>
+  - <time>
+  - <audio>
+  - <video>
+  - <track>
+  - <source>
+  - <embed>
+  - <object>
+  - <param>
+  - <iframe>
+  - <canvas>
+  - <map>
+  - <area>
+  - <svg>
+  - <math>
+  
+
+```
+
+```
+invalid.jsx:41:10 lint/nursery/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The element with this role can be changed to a DOM element that already this role.
+  
+    39 │     <div role="main" ></div>
+    40 │     <div role="time" ></div>
+  > 41 │     <div role="p" ></div>
+       │          ^^^^^^^^
+    42 │     <div role="aside" ></div>
+    43 │     <div role="blockquote" ></div>
+  
+  i For examples and more information, seeWAI-ARIA Roles
+  
+  - <button>
+  - <input>
+  - <textarea>
+  - <a>
+  - <img>
+  - <table>
+  - <article>
+  - <section>
+  - <nav>
+  - <aside>
+  - <header>
+  - <footer>
+  - <main>
+  - <figure>
+  - <figcaption>
+  - <details>
+  - <summary>
+  - <dialog>
+  - <menu>
+  - <menuitem>
+  - <fieldset>
+  - <legend>
+  - <caption>
+  - <colgroup>
+  - <col>
+  - <optgroup>
+  - <option>
+  - <select>
+  - <datalist>
+  - <output>
+  - <progress>
+  - <meter>
+  - <time>
+  - <audio>
+  - <video>
+  - <track>
+  - <source>
+  - <embed>
+  - <object>
+  - <param>
+  - <iframe>
+  - <canvas>
+  - <map>
+  - <area>
+  - <svg>
+  - <math>
+  
+
+```
+
+```
+invalid.jsx:42:10 lint/nursery/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The element with this role can be changed to a DOM element that already this role.
+  
+    40 │     <div role="time" ></div>
+    41 │     <div role="p" ></div>
+  > 42 │     <div role="aside" ></div>
+       │          ^^^^^^^^^^^^
+    43 │     <div role="blockquote" ></div>
+    44 │     <div role="associationlist" ></div>
+  
+  i For examples and more information, seeWAI-ARIA Roles
+  
+  - <button>
+  - <input>
+  - <textarea>
+  - <a>
+  - <img>
+  - <table>
+  - <article>
+  - <section>
+  - <nav>
+  - <aside>
+  - <header>
+  - <footer>
+  - <main>
+  - <figure>
+  - <figcaption>
+  - <details>
+  - <summary>
+  - <dialog>
+  - <menu>
+  - <menuitem>
+  - <fieldset>
+  - <legend>
+  - <caption>
+  - <colgroup>
+  - <col>
+  - <optgroup>
+  - <option>
+  - <select>
+  - <datalist>
+  - <output>
+  - <progress>
+  - <meter>
+  - <time>
+  - <audio>
+  - <video>
+  - <track>
+  - <source>
+  - <embed>
+  - <object>
+  - <param>
+  - <iframe>
+  - <canvas>
+  - <map>
+  - <area>
+  - <svg>
+  - <math>
+  
+
+```
+
+```
+invalid.jsx:43:10 lint/nursery/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The element with this role can be changed to a DOM element that already this role.
+  
+    41 │     <div role="p" ></div>
+    42 │     <div role="aside" ></div>
+  > 43 │     <div role="blockquote" ></div>
+       │          ^^^^^^^^^^^^^^^^^
+    44 │     <div role="associationlist" ></div>
+    45 │     <div role="status" ></div>
+  
+  i For examples and more information, seeWAI-ARIA Roles
+  
+  - <button>
+  - <input>
+  - <textarea>
+  - <a>
+  - <img>
+  - <table>
+  - <article>
+  - <section>
+  - <nav>
+  - <aside>
+  - <header>
+  - <footer>
+  - <main>
+  - <figure>
+  - <figcaption>
+  - <details>
+  - <summary>
+  - <dialog>
+  - <menu>
+  - <menuitem>
+  - <fieldset>
+  - <legend>
+  - <caption>
+  - <colgroup>
+  - <col>
+  - <optgroup>
+  - <option>
+  - <select>
+  - <datalist>
+  - <output>
+  - <progress>
+  - <meter>
+  - <time>
+  - <audio>
+  - <video>
+  - <track>
+  - <source>
+  - <embed>
+  - <object>
+  - <param>
+  - <iframe>
+  - <canvas>
+  - <map>
+  - <area>
+  - <svg>
+  - <math>
+  
+
+```
+
+```
+invalid.jsx:44:10 lint/nursery/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The element with this role can be changed to a DOM element that already this role.
+  
+    42 │     <div role="aside" ></div>
+    43 │     <div role="blockquote" ></div>
+  > 44 │     <div role="associationlist" ></div>
+       │          ^^^^^^^^^^^^^^^^^^^^^^
+    45 │     <div role="status" ></div>
+    46 │     <div role="contentinfo" ></div>
+  
+  i For examples and more information, seeWAI-ARIA Roles
+  
+  - <button>
+  - <input>
+  - <textarea>
+  - <a>
+  - <img>
+  - <table>
+  - <article>
+  - <section>
+  - <nav>
+  - <aside>
+  - <header>
+  - <footer>
+  - <main>
+  - <figure>
+  - <figcaption>
+  - <details>
+  - <summary>
+  - <dialog>
+  - <menu>
+  - <menuitem>
+  - <fieldset>
+  - <legend>
+  - <caption>
+  - <colgroup>
+  - <col>
+  - <optgroup>
+  - <option>
+  - <select>
+  - <datalist>
+  - <output>
+  - <progress>
+  - <meter>
+  - <time>
+  - <audio>
+  - <video>
+  - <track>
+  - <source>
+  - <embed>
+  - <object>
+  - <param>
+  - <iframe>
+  - <canvas>
+  - <map>
+  - <area>
+  - <svg>
+  - <math>
+  
+
+```
+
+```
+invalid.jsx:45:10 lint/nursery/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The element with this role can be changed to a DOM element that already this role.
+  
+    43 │     <div role="blockquote" ></div>
+    44 │     <div role="associationlist" ></div>
+  > 45 │     <div role="status" ></div>
+       │          ^^^^^^^^^^^^^
+    46 │     <div role="contentinfo" ></div>
+    47 │     <div role="region" ></div>
+  
+  i For examples and more information, seeWAI-ARIA Roles
+  
+  - <button>
+  - <input>
+  - <textarea>
+  - <a>
+  - <img>
+  - <table>
+  - <article>
+  - <section>
+  - <nav>
+  - <aside>
+  - <header>
+  - <footer>
+  - <main>
+  - <figure>
+  - <figcaption>
+  - <details>
+  - <summary>
+  - <dialog>
+  - <menu>
+  - <menuitem>
+  - <fieldset>
+  - <legend>
+  - <caption>
+  - <colgroup>
+  - <col>
+  - <optgroup>
+  - <option>
+  - <select>
+  - <datalist>
+  - <output>
+  - <progress>
+  - <meter>
+  - <time>
+  - <audio>
+  - <video>
+  - <track>
+  - <source>
+  - <embed>
+  - <object>
+  - <param>
+  - <iframe>
+  - <canvas>
+  - <map>
+  - <area>
+  - <svg>
+  - <math>
+  
+
+```
+
+```
+invalid.jsx:46:10 lint/nursery/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The element with this role can be changed to a DOM element that already this role.
+  
+    44 │     <div role="associationlist" ></div>
+    45 │     <div role="status" ></div>
+  > 46 │     <div role="contentinfo" ></div>
+       │          ^^^^^^^^^^^^^^^^^^
+    47 │     <div role="region" ></div>
+    48 │ </>
+  
+  i For examples and more information, seeWAI-ARIA Roles
+  
+  - <button>
+  - <input>
+  - <textarea>
+  - <a>
+  - <img>
+  - <table>
+  - <article>
+  - <section>
+  - <nav>
+  - <aside>
+  - <header>
+  - <footer>
+  - <main>
+  - <figure>
+  - <figcaption>
+  - <details>
+  - <summary>
+  - <dialog>
+  - <menu>
+  - <menuitem>
+  - <fieldset>
+  - <legend>
+  - <caption>
+  - <colgroup>
+  - <col>
+  - <optgroup>
+  - <option>
+  - <select>
+  - <datalist>
+  - <output>
+  - <progress>
+  - <meter>
+  - <time>
+  - <audio>
+  - <video>
+  - <track>
+  - <source>
+  - <embed>
+  - <object>
+  - <param>
+  - <iframe>
+  - <canvas>
+  - <map>
+  - <area>
+  - <svg>
+  - <math>
+  
+
+```
+
+```
+invalid.jsx:47:10 lint/nursery/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The element with this role can be changed to a DOM element that already this role.
+  
+    45 │     <div role="status" ></div>
+    46 │     <div role="contentinfo" ></div>
+  > 47 │     <div role="region" ></div>
+       │          ^^^^^^^^^^^^^
+    48 │ </>
+    49 │ 
+  
+  i For examples and more information, seeWAI-ARIA Roles
+  
+  - <button>
+  - <input>
+  - <textarea>
+  - <a>
+  - <img>
+  - <table>
+  - <article>
+  - <section>
+  - <nav>
+  - <aside>
+  - <header>
+  - <footer>
+  - <main>
+  - <figure>
+  - <figcaption>
+  - <details>
+  - <summary>
+  - <dialog>
+  - <menu>
+  - <menuitem>
+  - <fieldset>
+  - <legend>
+  - <caption>
+  - <colgroup>
+  - <col>
+  - <optgroup>
+  - <option>
+  - <select>
+  - <datalist>
+  - <output>
+  - <progress>
+  - <meter>
+  - <time>
+  - <audio>
+  - <video>
+  - <track>
+  - <source>
+  - <embed>
+  - <object>
+  - <param>
+  - <iframe>
+  - <canvas>
+  - <map>
+  - <area>
+  - <svg>
+  - <math>
+  
+
+```

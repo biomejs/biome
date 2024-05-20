@@ -15,10 +15,12 @@ use biome_console::{markup, ConsoleExt};
 use biome_deserialize::Merge;
 use biome_diagnostics::PrintDiagnostic;
 use biome_service::configuration::{
-    load_configuration, LoadedConfiguration, PartialConfigurationExt,
+    load_configuration, load_editorconfig, LoadedConfiguration, PartialConfigurationExt,
 };
 use biome_service::workspace::{RegisterProjectFolderParams, UpdateSettingsParams};
 use std::ffi::OsString;
+
+use super::check_fix_incompatible_arguments;
 
 pub(crate) struct FormatCommandPayload {
     pub(crate) javascript_formatter: Option<PartialJavascriptFormatter>,
@@ -29,6 +31,7 @@ pub(crate) struct FormatCommandPayload {
     pub(crate) files_configuration: Option<PartialFilesConfiguration>,
     pub(crate) stdin_file_path: Option<String>,
     pub(crate) write: bool,
+    pub(crate) fix: bool,
     pub(crate) cli_options: CliOptions,
     pub(crate) paths: Vec<OsString>,
     pub(crate) staged: bool,
@@ -50,6 +53,7 @@ pub(crate) fn format(
         stdin_file_path,
         files_configuration,
         write,
+        fix,
         mut json_formatter,
         css_formatter,
         since,
@@ -58,6 +62,14 @@ pub(crate) fn format(
     } = payload;
     setup_cli_subscriber(cli_options.log_level, cli_options.log_kind);
 
+    check_fix_incompatible_arguments(super::FixFileModeOptions {
+        apply: false,
+        apply_unsafe: false,
+        write,
+        fix,
+        unsafe_: false,
+    })?;
+
     let loaded_configuration =
         load_configuration(&session.app.fs, cli_options.as_configuration_path_hint())?;
     validate_configuration_diagnostics(
@@ -65,12 +77,34 @@ pub(crate) fn format(
         session.app.console,
         cli_options.verbose,
     )?;
+    let fs = &session.app.fs;
+    let (editorconfig, editorconfig_diagnostics) = {
+        let search_path = loaded_configuration
+            .directory_path
+            .clone()
+            .unwrap_or_else(|| fs.working_directory().unwrap_or_default());
+        load_editorconfig(fs, search_path)?
+    };
+    for diagnostic in editorconfig_diagnostics {
+        session.app.console.error(markup! {
+            {PrintDiagnostic::simple(&diagnostic)}
+        })
+    }
+
     resolve_manifest(&session)?;
     let LoadedConfiguration {
-        mut configuration,
+        configuration: biome_configuration,
         directory_path: configuration_path,
         ..
     } = loaded_configuration;
+    let mut configuration = if let Some(mut configuration) = editorconfig {
+        // this makes biome configuration take precedence over editorconfig configuration
+        configuration.merge_with(biome_configuration);
+        configuration
+    } else {
+        biome_configuration
+    };
+
     // TODO: remove in biome 2.0
     let console = &mut *session.app.console;
     if let Some(config) = formatter_configuration.as_mut() {
@@ -195,7 +229,7 @@ pub(crate) fn format(
 
     let execution = Execution::new(TraversalMode::Format {
         ignore_errors: cli_options.skip_errors,
-        write,
+        write: write || fix,
         stdin,
     })
     .set_report(&cli_options);

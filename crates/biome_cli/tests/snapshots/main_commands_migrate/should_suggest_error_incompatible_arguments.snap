@@ -1,0 +1,20 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: content
+---
+## `biome.json`
+
+```json
+{ "linter": { "enabled": true } }
+```
+
+# Termination Message
+
+```block
+flags/invalid ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Incompatible arguments --write and --fix
+  
+
+
+```
