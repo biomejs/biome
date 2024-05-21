@@ -125,7 +125,7 @@ impl Rule for NoUselessUndefinedInitialization {
         let current_declaration = declarators
             .clone()
             .into_iter()
-            .flat_map(|declarator| declarator.ok())
+            .filter_map(|declarator| declarator.ok())
             .find(|decl| decl.id().is_ok_and(|id| id.text() == state.0))?;
 
         let current_initializer = current_declaration.initializer()?;
@@ -153,7 +153,7 @@ impl Rule for NoUselessUndefinedInitialization {
         let new_declarators: Vec<JsVariableDeclarator> = declarators
             .clone()
             .into_iter()
-            .flat_map(|decl| decl.ok())
+            .filter_map(|decl| decl.ok())
             .map(|decl| {
                 if decl == current_declaration {
                     new_declaration.clone()
