@@ -552,7 +552,7 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
             let analyzer_options =
                 workspace.analyzer_options::<JsLanguage>(params.path, &params.language);
             let settings = workspace.settings();
-            let rules = settings.as_rules(&params.path);
+            let rules = settings.as_rules(params.path);
             let mut actions = Vec::new();
             let mut enabled_rules = vec![];
             if settings.organize_imports.enabled {
