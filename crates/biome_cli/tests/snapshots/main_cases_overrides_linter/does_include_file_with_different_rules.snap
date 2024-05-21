@@ -34,5 +34,13 @@ debugger
 # Emitted Messages
 
 ```block
+internalError/fs  DEPRECATED  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The argument --apply-unsafe is deprecated, it will be removed in the next major release. Use --write --unsafe instead.
+  
+
+```
+
+```block
 Checked 2 files in <TIME>. Fixed 1 file.
 ```

@@ -1648,6 +1648,108 @@ if(a === -0) {}
 }
 
 #[tokio::test]
+async fn does_not_pull_action_for_disabled_rule_in_override_issue_2782() -> Result<()> {
+    let factory = ServerFactory::default();
+    let (service, client) = factory.create(None).into_inner();
+    let (stream, sink) = client.split();
+    let mut server = Server::new(service);
+
+    let (sender, _) = channel(CHANNEL_BUFFER_SIZE);
+    let reader = tokio::spawn(client_handler(stream, sink, sender));
+
+    server.initialize().await?;
+    server.initialized().await?;
+
+    let incorrect_config = r#"{
+    "$schema": "https://biomejs.dev/schemas/1.7.3/schema.json",
+    "organizeImports": { "enabled": false },
+    "linter": {
+        "enabled": true,
+        "rules": {
+            "recommended": false,
+            "style": {
+                "useEnumInitializers": "error"
+            }
+        }
+    },
+    "overrides": [
+        {
+            "include": ["*.ts", "*.tsx"],
+            "linter": {
+                "rules": {
+                    "style": {
+                        "useEnumInitializers": "off"
+                    }
+                }
+            }
+        }
+    ]
+}"#;
+    server
+        .open_named_document(incorrect_config, url!("biome.json"), "json")
+        .await?;
+
+    server
+        .open_named_document(
+            r#"enum X {
+	A,
+	B,
+	C,
+}"#,
+            url!("test.ts"),
+            "typescript",
+        )
+        .await?;
+
+    server.load_configuration().await?;
+
+    let res: lsp::CodeActionResponse = server
+        .request(
+            "textDocument/codeAction",
+            "pull_code_actions",
+            lsp::CodeActionParams {
+                text_document: TextDocumentIdentifier {
+                    uri: url!("test.ts"),
+                },
+                range: Range {
+                    start: Position {
+                        line: 0,
+                        character: 1,
+                    },
+                    end: Position {
+                        line: 3,
+                        character: 10,
+                    },
+                },
+                context: lsp::CodeActionContext {
+                    diagnostics: vec![fixable_diagnostic(0)?],
+                    only: Some(vec![lsp::CodeActionKind::new(
+                        "quickfix.biome.style.useEnumInitializers",
+                    )]),
+                    ..Default::default()
+                },
+                work_done_progress_params: WorkDoneProgressParams {
+                    work_done_token: None,
+                },
+                partial_result_params: lsp::PartialResultParams {
+                    partial_result_token: None,
+                },
+            },
+        )
+        .await?
+        .context("codeAction returned None")?;
+
+    assert!(res.is_empty(), "This should not have code actions");
+
+    server.close_document().await?;
+
+    server.shutdown().await?;
+    reader.abort();
+
+    Ok(())
+}
+
+#[tokio::test]
 async fn pull_refactors() -> Result<()> {
     let factory = ServerFactory::default();
     let (service, client) = factory.create(None).into_inner();

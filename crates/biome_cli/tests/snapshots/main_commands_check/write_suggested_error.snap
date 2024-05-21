@@ -1,0 +1,33 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: content
+---
+## `fix.js`
+
+```js
+let a = 4;
+debugger;
+console.log(a);
+
+```
+
+# Termination Message
+
+```block
+flags/invalid ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Incompatible arguments --apply and --write
+  
+
+
+```
+
+# Emitted Messages
+
+```block
+internalError/fs  DEPRECATED  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The argument --apply is deprecated, it will be removed in the next major release. Use --write instead.
+  
+
+```

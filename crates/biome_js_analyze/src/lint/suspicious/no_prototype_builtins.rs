@@ -12,7 +12,7 @@ declare_rule! {
     /// Moreover, the methods could be shadowed, this can lead to random bugs and denial of service
     /// vulnerabilities. For example, calling `hasOwnProperty` directly on parsed JSON like `{"hasOwnProperty": 1}` could lead to vulnerabilities.
     /// To avoid subtle bugs like this, you should call these methods from `Object.prototype`.
-    /// For example, `foo.isPrototypeof(bar)` should be replaced with `Object.prototype.isPrototypeof.call(foo, "bar")`
+    /// For example, `foo.isPrototypeOf(bar)` should be replaced with `Object.prototype.isPrototypeOf.call(foo, "bar")`
     /// As for the `hasOwn` method, `foo.hasOwn("bar")` should be replaced with `Object.hasOwn(foo, "bar")`.
     ///
     /// ## Examples

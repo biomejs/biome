@@ -952,47 +952,37 @@ pub fn graphql_object_type_extension(
     extend_token: SyntaxToken,
     type_token: SyntaxToken,
     name: GraphqlName,
-    implements: GraphqlImplementsInterfaces,
-) -> GraphqlObjectTypeExtension {
-    GraphqlObjectTypeExtension::unwrap_cast(SyntaxNode::new_detached(
-        GraphqlSyntaxKind::GRAPHQL_OBJECT_TYPE_EXTENSION,
-        [
-            Some(SyntaxElement::Token(extend_token)),
-            Some(SyntaxElement::Token(type_token)),
-            Some(SyntaxElement::Node(name.into_syntax())),
-            Some(SyntaxElement::Node(implements.into_syntax())),
-        ],
-    ))
-}
-pub fn graphql_object_type_extension_with_directives(
-    extend_token: SyntaxToken,
-    type_token: SyntaxToken,
-    name: GraphqlName,
     directives: GraphqlDirectiveList,
-) -> GraphqlObjectTypeExtensionWithDirectivesBuilder {
-    GraphqlObjectTypeExtensionWithDirectivesBuilder {
+) -> GraphqlObjectTypeExtensionBuilder {
+    GraphqlObjectTypeExtensionBuilder {
         extend_token,
         type_token,
         name,
         directives,
         implements: None,
+        fields: None,
     }
 }
-pub struct GraphqlObjectTypeExtensionWithDirectivesBuilder {
+pub struct GraphqlObjectTypeExtensionBuilder {
     extend_token: SyntaxToken,
     type_token: SyntaxToken,
     name: GraphqlName,
     directives: GraphqlDirectiveList,
     implements: Option<GraphqlImplementsInterfaces>,
+    fields: Option<GraphqlFieldsDefinition>,
 }
-impl GraphqlObjectTypeExtensionWithDirectivesBuilder {
+impl GraphqlObjectTypeExtensionBuilder {
     pub fn with_implements(mut self, implements: GraphqlImplementsInterfaces) -> Self {
         self.implements = Some(implements);
         self
     }
-    pub fn build(self) -> GraphqlObjectTypeExtensionWithDirectives {
-        GraphqlObjectTypeExtensionWithDirectives::unwrap_cast(SyntaxNode::new_detached(
-            GraphqlSyntaxKind::GRAPHQL_OBJECT_TYPE_EXTENSION_WITH_DIRECTIVES,
+    pub fn with_fields(mut self, fields: GraphqlFieldsDefinition) -> Self {
+        self.fields = Some(fields);
+        self
+    }
+    pub fn build(self) -> GraphqlObjectTypeExtension {
+        GraphqlObjectTypeExtension::unwrap_cast(SyntaxNode::new_detached(
+            GraphqlSyntaxKind::GRAPHQL_OBJECT_TYPE_EXTENSION,
             [
                 Some(SyntaxElement::Token(self.extend_token)),
                 Some(SyntaxElement::Token(self.type_token)),
@@ -1000,50 +990,8 @@ impl GraphqlObjectTypeExtensionWithDirectivesBuilder {
                 self.implements
                     .map(|token| SyntaxElement::Node(token.into_syntax())),
                 Some(SyntaxElement::Node(self.directives.into_syntax())),
-            ],
-        ))
-    }
-}
-pub fn graphql_object_type_extension_with_fields(
-    extend_token: SyntaxToken,
-    type_token: SyntaxToken,
-    name: GraphqlName,
-    directives: GraphqlDirectiveList,
-    fields: GraphqlFieldsDefinition,
-) -> GraphqlObjectTypeExtensionWithFieldsBuilder {
-    GraphqlObjectTypeExtensionWithFieldsBuilder {
-        extend_token,
-        type_token,
-        name,
-        directives,
-        fields,
-        implements: None,
-    }
-}
-pub struct GraphqlObjectTypeExtensionWithFieldsBuilder {
-    extend_token: SyntaxToken,
-    type_token: SyntaxToken,
-    name: GraphqlName,
-    directives: GraphqlDirectiveList,
-    fields: GraphqlFieldsDefinition,
-    implements: Option<GraphqlImplementsInterfaces>,
-}
-impl GraphqlObjectTypeExtensionWithFieldsBuilder {
-    pub fn with_implements(mut self, implements: GraphqlImplementsInterfaces) -> Self {
-        self.implements = Some(implements);
-        self
-    }
-    pub fn build(self) -> GraphqlObjectTypeExtensionWithFields {
-        GraphqlObjectTypeExtensionWithFields::unwrap_cast(SyntaxNode::new_detached(
-            GraphqlSyntaxKind::GRAPHQL_OBJECT_TYPE_EXTENSION_WITH_FIELDS,
-            [
-                Some(SyntaxElement::Token(self.extend_token)),
-                Some(SyntaxElement::Token(self.type_token)),
-                Some(SyntaxElement::Node(self.name.into_syntax())),
-                self.implements
+                self.fields
                     .map(|token| SyntaxElement::Node(token.into_syntax())),
-                Some(SyntaxElement::Node(self.directives.into_syntax())),
-                Some(SyntaxElement::Node(self.fields.into_syntax())),
             ],
         ))
     }
@@ -1157,6 +1105,20 @@ pub fn graphql_root_operation_type_definition(
         ],
     ))
 }
+pub fn graphql_root_operation_types(
+    l_curly_token: SyntaxToken,
+    root_operation_type: GraphqlRootOperationTypeDefinitionList,
+    r_curly_token: SyntaxToken,
+) -> GraphqlRootOperationTypes {
+    GraphqlRootOperationTypes::unwrap_cast(SyntaxNode::new_detached(
+        GraphqlSyntaxKind::GRAPHQL_ROOT_OPERATION_TYPES,
+        [
+            Some(SyntaxElement::Token(l_curly_token)),
+            Some(SyntaxElement::Node(root_operation_type.into_syntax())),
+            Some(SyntaxElement::Token(r_curly_token)),
+        ],
+    ))
+}
 pub fn graphql_scalar_type_definition(
     scalar_token: SyntaxToken,
     name: GraphqlName,
@@ -1212,25 +1174,19 @@ pub fn graphql_scalar_type_extension(
 pub fn graphql_schema_definition(
     schema_token: SyntaxToken,
     directives: GraphqlDirectiveList,
-    l_curly_token: SyntaxToken,
-    root_operation_type: GraphqlRootOperationTypeDefinitionList,
-    r_curly_token: SyntaxToken,
+    root_operation_types: GraphqlRootOperationTypes,
 ) -> GraphqlSchemaDefinitionBuilder {
     GraphqlSchemaDefinitionBuilder {
         schema_token,
         directives,
-        l_curly_token,
-        root_operation_type,
-        r_curly_token,
+        root_operation_types,
         description: None,
     }
 }
 pub struct GraphqlSchemaDefinitionBuilder {
     schema_token: SyntaxToken,
     directives: GraphqlDirectiveList,
-    l_curly_token: SyntaxToken,
-    root_operation_type: GraphqlRootOperationTypeDefinitionList,
-    r_curly_token: SyntaxToken,
+    root_operation_types: GraphqlRootOperationTypes,
     description: Option<GraphqlDescription>,
 }
 impl GraphqlSchemaDefinitionBuilder {
@@ -1246,9 +1202,7 @@ impl GraphqlSchemaDefinitionBuilder {
                     .map(|token| SyntaxElement::Node(token.into_syntax())),
                 Some(SyntaxElement::Token(self.schema_token)),
                 Some(SyntaxElement::Node(self.directives.into_syntax())),
-                Some(SyntaxElement::Token(self.l_curly_token)),
-                Some(SyntaxElement::Node(self.root_operation_type.into_syntax())),
-                Some(SyntaxElement::Token(self.r_curly_token)),
+                Some(SyntaxElement::Node(self.root_operation_types.into_syntax())),
             ],
         ))
     }
@@ -1257,6 +1211,7 @@ pub fn graphql_schema_extension(
     extend_token: SyntaxToken,
     schema_token: SyntaxToken,
     directives: GraphqlDirectiveList,
+    root_operation_types: GraphqlRootOperationTypes,
 ) -> GraphqlSchemaExtension {
     GraphqlSchemaExtension::unwrap_cast(SyntaxNode::new_detached(
         GraphqlSyntaxKind::GRAPHQL_SCHEMA_EXTENSION,
@@ -1264,26 +1219,7 @@ pub fn graphql_schema_extension(
             Some(SyntaxElement::Token(extend_token)),
             Some(SyntaxElement::Token(schema_token)),
             Some(SyntaxElement::Node(directives.into_syntax())),
-        ],
-    ))
-}
-pub fn graphql_schema_extension_with_root_operation_type(
-    extend_token: SyntaxToken,
-    schema_token: SyntaxToken,
-    directives: GraphqlDirectiveList,
-    l_curly_token: SyntaxToken,
-    root_operation_type: GraphqlRootOperationTypeDefinitionList,
-    r_curly_token: SyntaxToken,
-) -> GraphqlSchemaExtensionWithRootOperationType {
-    GraphqlSchemaExtensionWithRootOperationType::unwrap_cast(SyntaxNode::new_detached(
-        GraphqlSyntaxKind::GRAPHQL_SCHEMA_EXTENSION_WITH_ROOT_OPERATION_TYPE,
-        [
-            Some(SyntaxElement::Token(extend_token)),
-            Some(SyntaxElement::Token(schema_token)),
-            Some(SyntaxElement::Node(directives.into_syntax())),
-            Some(SyntaxElement::Token(l_curly_token)),
-            Some(SyntaxElement::Node(root_operation_type.into_syntax())),
-            Some(SyntaxElement::Token(r_curly_token)),
+            Some(SyntaxElement::Node(root_operation_types.into_syntax())),
         ],
     ))
 }

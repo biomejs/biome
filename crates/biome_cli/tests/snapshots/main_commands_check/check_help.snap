@@ -7,7 +7,7 @@ expression: content
 ```block
 Runs formatter, linter and import sorting to the requested files.
 
-Usage: check [--apply] [--apply-unsafe] [--staged] [--changed] [--since=REF] [PATH]...
+Usage: check [--write] [--unsafe] [--staged] [--changed] [--since=REF] [PATH]...
 
 The configuration that is contained inside the file `biome.json`
         --vcs-client-kind=<git>  The kind of client.
@@ -107,7 +107,7 @@ Global options applied to all commands
         --no-errors-on-unmatched  Silence errors that would be emitted in case no files were processed
                               during the execution of the command.
         --error-on-warnings   Tell Biome to exit with an error code if some diagnostics emit warnings.
-        --reporter=<json|json-pretty>  Allows to change how diagnostics and summary are reported.
+        --reporter=<json|json-pretty|summary>  Allows to change how diagnostics and summary are reported.
         --log-level=<none|debug|info|warn|error>  The level of logging. In order, from the most verbose
                               to the least verbose: debug, info, warn, error.
                               The value `none` won't show any logging.
@@ -123,8 +123,13 @@ Available positional items:
     PATH                      Single file, single path or list of paths
 
 Available options:
-        --apply               Apply safe fixes, formatting and import sorting
-        --apply-unsafe        Apply safe fixes and unsafe fixes, formatting and import sorting
+        --write               Writes safe fixes, formatting and import sorting
+        --unsafe              Allow to do unsafe fixes, should be used with `--write` or `--fix`
+        --fix                 Alias for `--write`, writes safe fixes, formatting and import sorting
+        --apply               Alias for `--write`, writes safe fixes, formatting and import sorting (deprecated,
+                              use `--write`)
+        --apply-unsafe        Alias for `--write --unsafe`, writes safe and unsafe fixes, formatting
+                              and import sorting (deprecated, use `--write --unsafe`)
         --formatter-enabled=<true|false>  Allow to enable or disable the formatter check.
         --linter-enabled=<true|false>  Allow to enable or disable the linter check.
         --organize-imports-enabled=<true|false>  Allow to enable or disable the organize imports.

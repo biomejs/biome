@@ -1,0 +1,38 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: content
+---
+## `biome.json`
+
+```json
+{
+  "formatter": {
+    "lineWidth": 90
+  }
+}
+```
+
+## `.editorconfig`
+
+```editorconfig
+
+[*]
+max_line_length = 100
+indent_style = tab
+
+```
+
+## `test.js`
+
+```js
+console.log(
+	"really long string that should break if the line width is <=90, but not at 100",
+);
+
+```
+
+# Emitted Messages
+
+```block
+Formatted 1 file in <TIME>. No fixes needed.
+```

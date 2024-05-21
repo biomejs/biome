@@ -617,6 +617,16 @@ pub(crate) fn migrate_eslint_any_rule(
             let rule = group.no_redundant_roles.get_or_insert(Default::default());
             rule.set_level(rule_severity.into());
         }
+        "jsx-a11y/prefer-tag-over-role" => {
+            if !options.include_nursery {
+                return false;
+            }
+            let group = rules.nursery.get_or_insert_with(Default::default);
+            let rule = group
+                .use_semantic_elements
+                .get_or_insert(Default::default());
+            rule.set_level(rule_severity.into());
+        }
         "jsx-a11y/role-has-required-aria-props" => {
             let group = rules.a11y.get_or_insert_with(Default::default);
             let rule = group
@@ -1269,14 +1279,14 @@ pub(crate) fn migrate_eslint_any_rule(
         "react/no-danger" => {
             let group = rules.security.get_or_insert_with(Default::default);
             let rule = group
-                .no_dangerously_set_inner_html_with_children
+                .no_dangerously_set_inner_html
                 .get_or_insert(Default::default());
             rule.set_level(rule_severity.into());
         }
         "react/no-danger-with-children" => {
             let group = rules.security.get_or_insert_with(Default::default);
             let rule = group
-                .no_dangerously_set_inner_html
+                .no_dangerously_set_inner_html_with_children
                 .get_or_insert(Default::default());
             rule.set_level(rule_severity.into());
         }

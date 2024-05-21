@@ -73,13 +73,10 @@ impl MarkupElement<'_> {
             MarkupElement::Warn => {
                 color.set_fg(Some(Color::Yellow));
             }
-            MarkupElement::Info => {
-                color.set_fg(Some(Color::Green));
-            }
             MarkupElement::Trace => {
                 color.set_fg(Some(Color::Magenta));
             }
-            MarkupElement::Debug => {
+            MarkupElement::Info | MarkupElement::Debug => {
                 // Blue is really difficult to see on the standard windows command line
                 #[cfg(windows)]
                 const BLUE: Color = Color::Cyan;

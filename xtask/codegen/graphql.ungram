@@ -68,10 +68,9 @@ AnyGraphqlDefinition =
 	| GraphqlInputObjectTypeDefinition
 	| GraphqlBogusDefinition
 	// Type System Extensions: we may possible want to group those in an enum outside of 'Definition'
-	| AnyGraphqlSchemaExtension
-	// Type Extensions
+	| GraphqlSchemaExtension
 	| GraphqlScalarTypeExtension
-	| AnyGraphqlObjectTypeExtension
+	| GraphqlObjectTypeExtension
 	| AnyGraphqlInterfaceTypeExtension
 	| AnyGraphqlUnionTypeExtension
 	| AnyGraphqlEnumTypeExtension
@@ -298,9 +297,7 @@ GraphqlSchemaDefinition =
 	description: GraphqlDescription?
 	'schema'
 	directives: GraphqlDirectiveList
-	'{'
-	root_operation_type: GraphqlRootOperationTypeDefinitionList
-	'}'
+  root_operation_types: GraphqlRootOperationTypes
 
 // schema {query: Query}
 //         ^^^^^^^^^^^^
@@ -308,24 +305,17 @@ GraphqlSchemaDefinition =
 GraphqlRootOperationTypeDefinitionList = GraphqlRootOperationTypeDefinition*
 
 // https://spec.graphql.org/October2021/#sec-Schema-Extension
-AnyGraphqlSchemaExtension =
-	GraphqlSchemaExtensionWithRootOperationType
-	| GraphqlSchemaExtension
-	| GraphqlBogusExtension
-
 // extend schema @x {mutation: Mutation}
-GraphqlSchemaExtensionWithRootOperationType =
-	'extend' 'schema'
-	directives: GraphqlDirectiveList
+GraphqlSchemaExtension =
+  'extend'
+  'schema'
+  directives: GraphqlDirectiveList
+  root_operation_types: GraphqlRootOperationTypes
+
+GraphqlRootOperationTypes =
 	'{'
 	root_operation_type: GraphqlRootOperationTypeDefinitionList
 	'}'
-
-// extend schema @xyz
-GraphqlSchemaExtension =
-	 'extend'
-	 'schema'
-	 directives: GraphqlDirectiveList
 
 // schema {query: Query}
 //         ^^^^^^^^^^^^
@@ -365,35 +355,14 @@ GraphqlObjectTypeDefinition =
 	fields: GraphqlFieldsDefinition?
 
 // https://spec.graphql.org/October2021/#sec-Object-Extensions
-AnyGraphqlObjectTypeExtension =
-	GraphqlObjectTypeExtensionWithFields
-	| GraphqlObjectTypeExtensionWithDirectives
-	| GraphqlObjectTypeExtension
-	| GraphqlBogusExtension
-
 // extend type C implements A @i {e: f}
-GraphqlObjectTypeExtensionWithFields =
-	'extend'
-	'type'
-	name: GraphqlName
-	implements: GraphqlImplementsInterfaces?
-	directives: GraphqlDirectiveList
-	fields: GraphqlFieldsDefinition
-
-// extend type C implements A @i
-GraphqlObjectTypeExtensionWithDirectives =
-	'extend'
-	'type'
-	name: GraphqlName
-	implements: GraphqlImplementsInterfaces?
-	directives: GraphqlDirectiveList
-
-// extend type C implements A
 GraphqlObjectTypeExtension =
 	'extend'
 	'type'
 	name: GraphqlName
-	implements: GraphqlImplementsInterfaces
+	implements: GraphqlImplementsInterfaces?
+	directives: GraphqlDirectiveList
+	fields: GraphqlFieldsDefinition?
 
 // extend type C implements
 // & A

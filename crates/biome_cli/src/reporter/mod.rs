@@ -1,4 +1,5 @@
 pub(crate) mod json;
+pub(crate) mod summary;
 pub(crate) mod terminal;
 
 use crate::execute::Execution;

@@ -13,12 +13,12 @@ pub(crate) fn expected_any_selection(p: &GraphqlParser, range: TextRange) -> Par
     expected_any(&["field", "fragment spread", "inline fragment"], range, p)
 }
 
-pub(crate) fn expected_name(p: &GraphqlParser, range: TextRange) -> ParseDiagnostic {
-    expected_node("name", range, p)
+pub(crate) fn fragment_name_must_not_be_on(p: &GraphqlParser, range: TextRange) -> ParseDiagnostic {
+    p.err_builder("Fragment name must not be 'on'", range)
 }
 
-pub(crate) fn expected_directive(p: &GraphqlParser, range: TextRange) -> ParseDiagnostic {
-    expected_node("directive", range, p)
+pub(crate) fn expected_name(p: &GraphqlParser, range: TextRange) -> ParseDiagnostic {
+    expected_node("name", range, p)
 }
 
 pub(crate) fn expected_named_type(p: &GraphqlParser, range: TextRange) -> ParseDiagnostic {
@@ -57,6 +57,13 @@ pub(crate) fn expected_variable(p: &GraphqlParser, range: TextRange) -> ParseDia
     expected_node("variable", range, p)
 }
 
+pub(crate) fn expected_schema_extension(p: &GraphqlParser, range: TextRange) -> ParseDiagnostic {
+    p.err_builder(
+        "Expected at least one directive or root operation type definition",
+        range,
+    )
+}
+
 pub(crate) fn expected_root_operation_type_definition(
     p: &GraphqlParser,
     range: TextRange,
@@ -66,6 +73,10 @@ pub(crate) fn expected_root_operation_type_definition(
 
 pub(crate) fn expected_operation_type(p: &GraphqlParser, range: TextRange) -> ParseDiagnostic {
     expected_any(&["query", "mutation", "subscription"], range, p)
+}
+
+pub(crate) fn expected_directive(p: &GraphqlParser, range: TextRange) -> ParseDiagnostic {
+    expected_node("directive", range, p)
 }
 
 pub(crate) fn expected_directive_location(p: &GraphqlParser, range: TextRange) -> ParseDiagnostic {
@@ -96,6 +107,9 @@ pub(crate) fn expected_directive_location(p: &GraphqlParser, range: TextRange) -
         )
 }
 
-pub(crate) fn fragment_name_must_not_be_on(p: &GraphqlParser, range: TextRange) -> ParseDiagnostic {
-    p.err_builder("Fragment name must not be 'on'", range)
+pub(crate) fn expected_object_extension(p: &GraphqlParser, range: TextRange) -> ParseDiagnostic {
+    p.err_builder(
+        "Expected at least one directive, implements interface or fields definition",
+        range,
+    )
 }

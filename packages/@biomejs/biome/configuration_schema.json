@@ -1847,6 +1847,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useImportExtensions": {
+					"description": "Enforce file extensions for relative imports.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleFixConfiguration_for_Null" },
+						{ "type": "null" }
+					]
+				},
 				"useImportRestrictions": {
 					"description": "Disallows package private imports.",
 					"anyOf": [
@@ -1858,6 +1865,13 @@
 					"description": "Enforce using the digits argument with Number#toFixed().",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleFixConfiguration_for_Null" },
+						{ "type": "null" }
+					]
+				},
+				"useSemanticElements": {
+					"description": "It detects the use of role attributes in JSX elements and suggests using semantic elements instead.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -1885,7 +1899,7 @@
 					]
 				},
 				"useTopLevelRegex": {
-					"description": "Require all regex literals to be declared at the top level.",
+					"description": "Require regex literals to be declared at the top level.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }

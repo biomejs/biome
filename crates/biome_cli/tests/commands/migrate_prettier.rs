@@ -231,6 +231,37 @@ fn prettier_migrate_write() {
 }
 
 #[test]
+fn prettier_migrate_fix() {
+    let mut fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let configuration = r#"{ "linter": { "enabled": true } }"#;
+    let prettier = r#"{ "useTabs": false, "semi": true, "singleQuote": true }"#;
+
+    let configuration_path = Path::new("biome.json");
+    fs.insert(configuration_path.into(), configuration.as_bytes());
+
+    let prettier_path = Path::new(".prettierrc");
+    fs.insert(prettier_path.into(), prettier.as_bytes());
+
+    let result = run_cli(
+        DynRef::Borrowed(&mut fs),
+        &mut console,
+        Args::from([("migrate"), "prettier", "--fix"].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "prettier_migrate_fix",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
 fn prettierjson_migrate_write() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();

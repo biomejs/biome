@@ -140,7 +140,7 @@ declare_rule! {
     pub UseSortedClasses {
         version: "1.6.0",
         name: "useSortedClasses",
-        language: "jsx",
+        language: "js",
         recommended: false,
         fix_kind: FixKind::Unsafe,
     }

@@ -42,5 +42,13 @@ internalError/io ━━━━━━━━━━━━━━━━━━━━━
 # Emitted Messages
 
 ```block
+internalError/fs  DEPRECATED  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The argument --apply-unsafe is deprecated, it will be removed in the next major release. Use --write --unsafe instead.
+  
+
+```
+
+```block
 Checked 0 files in <TIME>. No fixes needed.
 ```

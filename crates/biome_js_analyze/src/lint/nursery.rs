@@ -20,8 +20,10 @@ pub mod use_consistent_builtin_instantiation;
 pub mod use_default_switch_clause;
 pub mod use_explicit_length_check;
 pub mod use_focusable_interactive;
+pub mod use_import_extensions;
 pub mod use_import_restrictions;
 pub mod use_number_to_fixed_digits_argument;
+pub mod use_semantic_elements;
 pub mod use_sorted_classes;
 pub mod use_throw_new_error;
 pub mod use_throw_only_error;
@@ -49,8 +51,10 @@ declare_group! {
             self :: use_default_switch_clause :: UseDefaultSwitchClause ,
             self :: use_explicit_length_check :: UseExplicitLengthCheck ,
             self :: use_focusable_interactive :: UseFocusableInteractive ,
+            self :: use_import_extensions :: UseImportExtensions ,
             self :: use_import_restrictions :: UseImportRestrictions ,
             self :: use_number_to_fixed_digits_argument :: UseNumberToFixedDigitsArgument ,
+            self :: use_semantic_elements :: UseSemanticElements ,
             self :: use_sorted_classes :: UseSortedClasses ,
             self :: use_throw_new_error :: UseThrowNewError ,
             self :: use_throw_only_error :: UseThrowOnlyError ,
