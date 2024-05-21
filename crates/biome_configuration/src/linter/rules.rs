@@ -3423,7 +3423,7 @@ pub struct Nursery {
     #[doc = "Require new when throwing an error."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_throw_new_error: Option<RuleFixConfiguration<UseThrowNewError>>,
-    #[doc = "Require all regex literals to be declared at the top level."]
+    #[doc = "Require regex literals to be declared at the top level."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_top_level_regex: Option<RuleConfiguration<UseTopLevelRegex>>,
 }

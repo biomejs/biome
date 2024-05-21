@@ -1110,7 +1110,7 @@ export interface Nursery {
 	 */
 	useThrowNewError?: RuleFixConfiguration_for_Null;
 	/**
-	 * Require all regex literals to be declared at the top level.
+	 * Require regex literals to be declared at the top level.
 	 */
 	useTopLevelRegex?: RuleConfiguration_for_Null;
 }

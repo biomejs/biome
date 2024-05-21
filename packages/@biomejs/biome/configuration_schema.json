@@ -1892,7 +1892,7 @@
 					]
 				},
 				"useTopLevelRegex": {
-					"description": "Require all regex literals to be declared at the top level.",
+					"description": "Require regex literals to be declared at the top level.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
