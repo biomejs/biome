@@ -11,7 +11,7 @@ use biome_rowan::AstNode;
 declare_rule! {
     /// Disallow throwing non-`Error` values.
     ///
-    /// It is considered good practice to only throw the `Error` object itself or an object using the `Error` object
+    /// It is considered good practice only to throw the `Error` object itself or an object using the `Error` object
     /// as base objects for user-defined exceptions. The fundamental benefit of `Error` objects is that they automatically
     /// keep track of where they were built and originated.
     ///
@@ -45,9 +45,9 @@ declare_rule! {
     ///
     /// ## Caveats
     ///
-    /// This rule only covers cases where throw value can be known statically,
-    /// complex cases such as object and function access are not checked yet.
-    /// This will be improved in the future, once Biome supports type inference.
+    /// This rule only covers cases where throwing the value can be known statically.
+    /// Complex cases such as object and function access aren't checked.
+    /// This will be improved in the future once Biome supports type inference.
     ///
     pub UseThrowOnlyError {
         version: "next",
@@ -69,7 +69,7 @@ impl Rule for UseThrowOnlyError {
         let node = ctx.query();
         let expr = node.argument().ok()?.omit_parentheses();
 
-        is_invalid_throw_value(&expr)
+        is_invalid_throw_value(&expr).and(Some(()))
     }
 
     fn diagnostic(ctx: &RuleContext<Self>, _: &Self::State) -> Option<RuleDiagnostic> {
@@ -82,13 +82,12 @@ impl Rule for UseThrowOnlyError {
                 "Throwing non-"<Emphasis>"Error"</Emphasis>" values is not allowed."
             },
         ).note(markup! {
-            "WHile Javascript supports throwing any value, handling non-"<Emphasis>"Error"</Emphasis>" values is confusing."
+            "While Javascript supports throwing any value, handling non-"<Emphasis>"Error"</Emphasis>" values is confusing."
         }))
     }
 }
 
-// TODO. Type inference could be used to catch more cases.
-fn is_invalid_throw_value(any_expr: &AnyJsExpression) -> Option<()> {
+fn is_invalid_throw_value(any_expr: &AnyJsExpression) -> Option<bool> {
     let kind = any_expr.syntax().kind();
 
     if AnyJsLiteralExpression::can_cast(kind)
@@ -98,7 +97,7 @@ fn is_invalid_throw_value(any_expr: &AnyJsExpression) -> Option<()> {
             JsSyntaxKind::JS_BINARY_EXPRESSION | JsSyntaxKind::JS_TEMPLATE_EXPRESSION
         )
     {
-        return Some(());
+        return Some(true);
     }
 
     if let Some(logical_expr) = JsLogicalExpression::cast_ref(any_expr.syntax()) {
@@ -133,7 +132,7 @@ fn is_invalid_throw_value(any_expr: &AnyJsExpression) -> Option<()> {
 
     if let Some(identifier) = any_expr.as_js_reference_identifier() {
         if identifier.is_undefined() {
-            return Some(());
+            return Some(true);
         }
     }
 
