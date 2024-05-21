@@ -1,0 +1,53 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: content
+---
+## `biome.json`
+
+```json
+{
+  "formatter": {
+    "lineWidth": 20
+  },
+  "javascript": {
+    "formatter": {
+      "enabled": false
+    }
+  },
+  "overrides": [
+    { "include": ["formatted.js"], "formatter": { "enabled": true } },
+    {
+      "include": ["dirty.js"],
+      "linter": {
+        "rules": {
+          "performance": {
+            "noBarrelFile": "off"
+          }
+        }
+      }
+    }
+  ]
+}
+```
+
+## `dirty.js`
+
+```js
+const a = ["loreum", "ipsum"]
+```
+
+## `formatted.js`
+
+```js
+const a = [
+	"loreum",
+	"ipsum",
+];
+
+```
+
+# Emitted Messages
+
+```block
+Formatted 1 file in <TIME>. Fixed 1 file.
+```
