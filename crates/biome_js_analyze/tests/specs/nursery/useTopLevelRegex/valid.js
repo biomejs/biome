@@ -15,3 +15,11 @@ const foo = {
 class Foo {
 	static regex = /[a-Z]*/;
 }
+
+function foo(str) {
+	return /[a-Z]*/g.exec(str)
+}
+
+function foo(str) {
+	return /[a-Z]*/y.exec(str)
+}
