@@ -33,6 +33,7 @@ pub(crate) fn parse_object_type_definition(p: &mut GraphqlParser) -> ParsedSynta
     Present(m.complete(p, GRAPHQL_OBJECT_TYPE_DEFINITION))
 }
 
+/// Must only be called if the next 2 token is `extend` and `type`, otherwise it will panic.
 #[inline]
 pub(crate) fn parse_object_type_extension(p: &mut GraphqlParser) -> ParsedSyntax {
     let m = p.start();

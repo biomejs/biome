@@ -24,6 +24,7 @@ pub(crate) fn parse_scalar_type_definition(p: &mut GraphqlParser) -> ParsedSynta
     Present(m.complete(p, GRAPHQL_SCALAR_TYPE_DEFINITION))
 }
 
+/// Must only be called if the next 2 token is `extend` and `scalar`, otherwise it will panic.
 #[inline]
 pub(crate) fn parse_scalar_type_extension(p: &mut GraphqlParser) -> ParsedSyntax {
     let m = p.start();
