@@ -59,7 +59,9 @@ expression: invalid.jsx
 ```
 invalid.jsx:2:10 lint/nursery/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The element with this role can be changed to a DOM element that already this role.
+  ! The elements with the following roles can be changed to the following elements:
+    <input type="checkbox">
+  
   
     1 │ <>
   > 2 │     <div role="checkbox" ></div>
@@ -122,7 +124,9 @@ invalid.jsx:2:10 lint/nursery/useSemanticElements ━━━━━━━━━━
 ```
 invalid.jsx:3:10 lint/nursery/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The element with this role can be changed to a DOM element that already this role.
+  ! The elements with the following roles can be changed to the following elements:
+    <input type="radio">
+  
   
     1 │ <>
     2 │     <div role="checkbox" ></div>
@@ -186,7 +190,9 @@ invalid.jsx:3:10 lint/nursery/useSemanticElements ━━━━━━━━━━
 ```
 invalid.jsx:4:10 lint/nursery/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The element with this role can be changed to a DOM element that already this role.
+  ! The elements with the following roles can be changed to the following elements:
+    <option>
+  
   
     2 │     <div role="checkbox" ></div>
     3 │     <div role="radio" ></div>
@@ -250,7 +256,9 @@ invalid.jsx:4:10 lint/nursery/useSemanticElements ━━━━━━━━━━
 ```
 invalid.jsx:5:10 lint/nursery/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The element with this role can be changed to a DOM element that already this role.
+  ! The elements with the following roles can be changed to the following elements:
+    <select>
+  
   
     3 │     <div role="radio" ></div>
     4 │     <div role="option" ></div>
@@ -314,7 +322,9 @@ invalid.jsx:5:10 lint/nursery/useSemanticElements ━━━━━━━━━━
 ```
 invalid.jsx:6:10 lint/nursery/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The element with this role can be changed to a DOM element that already this role.
+  ! The elements with the following roles can be changed to the following elements:
+    <h1>
+  
   
     4 │     <div role="option" ></div>
     5 │     <div role="combobox" ></div>
@@ -378,7 +388,9 @@ invalid.jsx:6:10 lint/nursery/useSemanticElements ━━━━━━━━━━
 ```
 invalid.jsx:7:10 lint/nursery/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The element with this role can be changed to a DOM element that already this role.
+  ! The elements with the following roles can be changed to the following elements:
+    <hr>
+  
   
     5 │     <div role="combobox" ></div>
     6 │     <div role="heading" ></div>
@@ -442,7 +454,9 @@ invalid.jsx:7:10 lint/nursery/useSemanticElements ━━━━━━━━━━
 ```
 invalid.jsx:8:10 lint/nursery/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The element with this role can be changed to a DOM element that already this role.
+  ! The elements with the following roles can be changed to the following elements:
+    <button>
+  
   
      6 │     <div role="heading" ></div>
      7 │     <div role="separator" ></div>
@@ -506,7 +520,9 @@ invalid.jsx:8:10 lint/nursery/useSemanticElements ━━━━━━━━━━
 ```
 invalid.jsx:9:10 lint/nursery/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The element with this role can be changed to a DOM element that already this role.
+  ! The elements with the following roles can be changed to the following elements:
+    <article>
+  
   
      7 │     <div role="separator" ></div>
      8 │     <div role="button" ></div>
@@ -570,7 +586,9 @@ invalid.jsx:9:10 lint/nursery/useSemanticElements ━━━━━━━━━━
 ```
 invalid.jsx:10:10 lint/nursery/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The element with this role can be changed to a DOM element that already this role.
+  ! The elements with the following roles can be changed to the following elements:
+    <dialog>
+  
   
      8 │     <div role="button" ></div>
      9 │     <div role="article" ></div>
@@ -634,7 +652,9 @@ invalid.jsx:10:10 lint/nursery/useSemanticElements ━━━━━━━━━�
 ```
 invalid.jsx:11:10 lint/nursery/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The element with this role can be changed to a DOM element that already this role.
+  ! The elements with the following roles can be changed to the following elements:
+    <alert>
+  
   
      9 │     <div role="article" ></div>
     10 │     <div role="dialog" ></div>
@@ -698,7 +718,9 @@ invalid.jsx:11:10 lint/nursery/useSemanticElements ━━━━━━━━━�
 ```
 invalid.jsx:12:10 lint/nursery/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The element with this role can be changed to a DOM element that already this role.
+  ! The elements with the following roles can be changed to the following elements:
+    <alert>
+  
   
     10 │     <div role="dialog" ></div>
     11 │     <div role="alert" ></div>
@@ -762,7 +784,9 @@ invalid.jsx:12:10 lint/nursery/useSemanticElements ━━━━━━━━━�
 ```
 invalid.jsx:13:10 lint/nursery/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The element with this role can be changed to a DOM element that already this role.
+  ! The elements with the following roles can be changed to the following elements:
+    <td>
+  
   
     11 │     <div role="alert" ></div>
     12 │     <div role="alertdialog" ></div>
@@ -826,7 +850,9 @@ invalid.jsx:13:10 lint/nursery/useSemanticElements ━━━━━━━━━�
 ```
 invalid.jsx:14:10 lint/nursery/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The element with this role can be changed to a DOM element that already this role.
+  ! The elements with the following roles can be changed to the following elements:
+    <th scope="col">
+  
   
     12 │     <div role="alertdialog" ></div>
     13 │     <div role="cell" ></div>
@@ -890,7 +916,9 @@ invalid.jsx:14:10 lint/nursery/useSemanticElements ━━━━━━━━━�
 ```
 invalid.jsx:15:10 lint/nursery/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The element with this role can be changed to a DOM element that already this role.
+  ! The elements with the following roles can be changed to the following elements:
+    <dd>
+  
   
     13 │     <div role="cell" ></div>
     14 │     <div role="columnheader" ></div>
@@ -954,7 +982,9 @@ invalid.jsx:15:10 lint/nursery/useSemanticElements ━━━━━━━━━�
 ```
 invalid.jsx:16:10 lint/nursery/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The element with this role can be changed to a DOM element that already this role.
+  ! The elements with the following roles can be changed to the following elements:
+    <figure>
+  
   
     14 │     <div role="columnheader" ></div>
     15 │     <div role="definition" ></div>
@@ -1018,7 +1048,9 @@ invalid.jsx:16:10 lint/nursery/useSemanticElements ━━━━━━━━━�
 ```
 invalid.jsx:17:10 lint/nursery/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The element with this role can be changed to a DOM element that already this role.
+  ! The elements with the following roles can be changed to the following elements:
+    <form>
+  
   
     15 │     <div role="definition" ></div>
     16 │     <div role="figure" ></div>
@@ -1082,7 +1114,9 @@ invalid.jsx:17:10 lint/nursery/useSemanticElements ━━━━━━━━━�
 ```
 invalid.jsx:18:10 lint/nursery/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The element with this role can be changed to a DOM element that already this role.
+  ! The elements with the following roles can be changed to the following elements:
+    <graphics-object>
+  
   
     16 │     <div role="figure" ></div>
     17 │     <div role="form" ></div>
@@ -1146,7 +1180,9 @@ invalid.jsx:18:10 lint/nursery/useSemanticElements ━━━━━━━━━�
 ```
 invalid.jsx:19:10 lint/nursery/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The element with this role can be changed to a DOM element that already this role.
+  ! The elements with the following roles can be changed to the following elements:
+    <graphics-document>
+  
   
     17 │     <div role="form" ></div>
     18 │     <div role="graphics-document" ></div>
@@ -1210,7 +1246,9 @@ invalid.jsx:19:10 lint/nursery/useSemanticElements ━━━━━━━━━�
 ```
 invalid.jsx:20:10 lint/nursery/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The element with this role can be changed to a DOM element that already this role.
+  ! The elements with the following roles can be changed to the following elements:
+    <table>
+  
   
     18 │     <div role="graphics-document" ></div>
     19 │     <div role="graphics-object" ></div>
@@ -1274,7 +1312,9 @@ invalid.jsx:20:10 lint/nursery/useSemanticElements ━━━━━━━━━�
 ```
 invalid.jsx:21:10 lint/nursery/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The element with this role can be changed to a DOM element that already this role.
+  ! The elements with the following roles can be changed to the following elements:
+    <td>
+  
   
     19 │     <div role="graphics-object" ></div>
     20 │     <div role="grid" ></div>
@@ -1338,7 +1378,9 @@ invalid.jsx:21:10 lint/nursery/useSemanticElements ━━━━━━━━━�
 ```
 invalid.jsx:22:10 lint/nursery/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The element with this role can be changed to a DOM element that already this role.
+  ! The elements with the following roles can be changed to the following elements:
+    <fieldset>
+  
   
     20 │     <div role="grid" ></div>
     21 │     <div role="gridcell" ></div>
@@ -1402,7 +1444,9 @@ invalid.jsx:22:10 lint/nursery/useSemanticElements ━━━━━━━━━�
 ```
 invalid.jsx:23:10 lint/nursery/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The element with this role can be changed to a DOM element that already this role.
+  ! The elements with the following roles can be changed to the following elements:
+    <img>
+  
   
     21 │     <div role="gridcell" ></div>
     22 │     <div role="group" ></div>
@@ -1466,7 +1510,9 @@ invalid.jsx:23:10 lint/nursery/useSemanticElements ━━━━━━━━━�
 ```
 invalid.jsx:24:10 lint/nursery/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The element with this role can be changed to a DOM element that already this role.
+  ! The elements with the following roles can be changed to the following elements:
+    <a>
+  
   
     22 │     <div role="group" ></div>
     23 │     <div role="img" ></div>
@@ -1530,7 +1576,9 @@ invalid.jsx:24:10 lint/nursery/useSemanticElements ━━━━━━━━━�
 ```
 invalid.jsx:25:10 lint/nursery/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The element with this role can be changed to a DOM element that already this role.
+  ! The elements with the following roles can be changed to the following elements:
+    <ol>
+  
   
     23 │     <div role="img" ></div>
     24 │     <div role="link" ></div>
@@ -1594,7 +1642,9 @@ invalid.jsx:25:10 lint/nursery/useSemanticElements ━━━━━━━━━�
 ```
 invalid.jsx:26:10 lint/nursery/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The element with this role can be changed to a DOM element that already this role.
+  ! The elements with the following roles can be changed to the following elements:
+    <select>
+  
   
     24 │     <div role="link" ></div>
     25 │     <div role="list" ></div>
@@ -1658,7 +1708,9 @@ invalid.jsx:26:10 lint/nursery/useSemanticElements ━━━━━━━━━�
 ```
 invalid.jsx:27:10 lint/nursery/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The element with this role can be changed to a DOM element that already this role.
+  ! The elements with the following roles can be changed to the following elements:
+    <li>
+  
   
     25 │     <div role="list" ></div>
     26 │     <div role="listbox" ></div>
@@ -1722,7 +1774,9 @@ invalid.jsx:27:10 lint/nursery/useSemanticElements ━━━━━━━━━�
 ```
 invalid.jsx:28:10 lint/nursery/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The element with this role can be changed to a DOM element that already this role.
+  ! The elements with the following roles can be changed to the following elements:
+    <nav>
+  
   
     26 │     <div role="listbox" ></div>
     27 │     <div role="listitem" ></div>
@@ -1786,7 +1840,9 @@ invalid.jsx:28:10 lint/nursery/useSemanticElements ━━━━━━━━━�
 ```
 invalid.jsx:29:10 lint/nursery/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The element with this role can be changed to a DOM element that already this role.
+  ! The elements with the following roles can be changed to the following elements:
+    <tr>
+  
   
     27 │     <div role="listitem" ></div>
     28 │     <div role="navigation" ></div>
@@ -1850,7 +1906,9 @@ invalid.jsx:29:10 lint/nursery/useSemanticElements ━━━━━━━━━�
 ```
 invalid.jsx:30:10 lint/nursery/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The element with this role can be changed to a DOM element that already this role.
+  ! The elements with the following roles can be changed to the following elements:
+    <tbody>
+  
   
     28 │     <div role="navigation" ></div>
     29 │     <div role="row" ></div>
@@ -1914,7 +1972,9 @@ invalid.jsx:30:10 lint/nursery/useSemanticElements ━━━━━━━━━�
 ```
 invalid.jsx:31:10 lint/nursery/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The element with this role can be changed to a DOM element that already this role.
+  ! The elements with the following roles can be changed to the following elements:
+    <th scope="row">
+  
   
     29 │     <div role="row" ></div>
     30 │     <div role="rowgroup" ></div>
@@ -1978,7 +2038,9 @@ invalid.jsx:31:10 lint/nursery/useSemanticElements ━━━━━━━━━�
 ```
 invalid.jsx:32:10 lint/nursery/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The element with this role can be changed to a DOM element that already this role.
+  ! The elements with the following roles can be changed to the following elements:
+    <input type="search">
+  
   
     30 │     <div role="rowgroup" ></div>
     31 │     <div role="rowheader" ></div>
@@ -2042,7 +2104,9 @@ invalid.jsx:32:10 lint/nursery/useSemanticElements ━━━━━━━━━�
 ```
 invalid.jsx:33:10 lint/nursery/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The element with this role can be changed to a DOM element that already this role.
+  ! The elements with the following roles can be changed to the following elements:
+    <input type="search">
+  
   
     31 │     <div role="rowheader" ></div>
     32 │     <div role="search" ></div>
@@ -2106,7 +2170,9 @@ invalid.jsx:33:10 lint/nursery/useSemanticElements ━━━━━━━━━�
 ```
 invalid.jsx:34:10 lint/nursery/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The element with this role can be changed to a DOM element that already this role.
+  ! The elements with the following roles can be changed to the following elements:
+    <table>
+  
   
     32 │     <div role="search" ></div>
     33 │     <div role="searchbox" ></div>
@@ -2170,7 +2236,9 @@ invalid.jsx:34:10 lint/nursery/useSemanticElements ━━━━━━━━━�
 ```
 invalid.jsx:35:10 lint/nursery/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The element with this role can be changed to a DOM element that already this role.
+  ! The elements with the following roles can be changed to the following elements:
+    <dt>
+  
   
     33 │     <div role="searchbox" ></div>
     34 │     <div role="table" ></div>
@@ -2234,7 +2302,9 @@ invalid.jsx:35:10 lint/nursery/useSemanticElements ━━━━━━━━━�
 ```
 invalid.jsx:36:10 lint/nursery/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The element with this role can be changed to a DOM element that already this role.
+  ! The elements with the following roles can be changed to the following elements:
+    <textarea>
+  
   
     34 │     <div role="table" ></div>
     35 │     <div role="term" ></div>
@@ -2298,7 +2368,9 @@ invalid.jsx:36:10 lint/nursery/useSemanticElements ━━━━━━━━━�
 ```
 invalid.jsx:37:10 lint/nursery/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The element with this role can be changed to a DOM element that already this role.
+  ! The elements with the following roles can be changed to the following elements:
+    <div>
+  
   
     35 │     <div role="term" ></div>
     36 │     <div role="textbox" ></div>
@@ -2362,7 +2434,9 @@ invalid.jsx:37:10 lint/nursery/useSemanticElements ━━━━━━━━━�
 ```
 invalid.jsx:38:10 lint/nursery/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The element with this role can be changed to a DOM element that already this role.
+  ! The elements with the following roles can be changed to the following elements:
+    <caption>
+  
   
     36 │     <div role="textbox" ></div>
     37 │     <div role="generic" ></div>
@@ -2426,7 +2500,9 @@ invalid.jsx:38:10 lint/nursery/useSemanticElements ━━━━━━━━━�
 ```
 invalid.jsx:39:10 lint/nursery/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The element with this role can be changed to a DOM element that already this role.
+  ! The elements with the following roles can be changed to the following elements:
+    <main>
+  
   
     37 │     <div role="generic" ></div>
     38 │     <div role="caption" ></div>
@@ -2490,7 +2566,9 @@ invalid.jsx:39:10 lint/nursery/useSemanticElements ━━━━━━━━━�
 ```
 invalid.jsx:40:10 lint/nursery/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The element with this role can be changed to a DOM element that already this role.
+  ! The elements with the following roles can be changed to the following elements:
+    <time>
+  
   
     38 │     <div role="caption" ></div>
     39 │     <div role="main" ></div>
@@ -2554,7 +2632,9 @@ invalid.jsx:40:10 lint/nursery/useSemanticElements ━━━━━━━━━�
 ```
 invalid.jsx:41:10 lint/nursery/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The element with this role can be changed to a DOM element that already this role.
+  ! The elements with the following roles can be changed to the following elements:
+    <p>
+  
   
     39 │     <div role="main" ></div>
     40 │     <div role="time" ></div>
@@ -2618,7 +2698,9 @@ invalid.jsx:41:10 lint/nursery/useSemanticElements ━━━━━━━━━�
 ```
 invalid.jsx:42:10 lint/nursery/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The element with this role can be changed to a DOM element that already this role.
+  ! The elements with the following roles can be changed to the following elements:
+    <aside>
+  
   
     40 │     <div role="time" ></div>
     41 │     <div role="p" ></div>
@@ -2682,7 +2764,9 @@ invalid.jsx:42:10 lint/nursery/useSemanticElements ━━━━━━━━━�
 ```
 invalid.jsx:43:10 lint/nursery/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The element with this role can be changed to a DOM element that already this role.
+  ! The elements with the following roles can be changed to the following elements:
+    <blockquote>
+  
   
     41 │     <div role="p" ></div>
     42 │     <div role="aside" ></div>
@@ -2746,7 +2830,9 @@ invalid.jsx:43:10 lint/nursery/useSemanticElements ━━━━━━━━━�
 ```
 invalid.jsx:44:10 lint/nursery/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The element with this role can be changed to a DOM element that already this role.
+  ! The elements with the following roles can be changed to the following elements:
+    <dl>
+  
   
     42 │     <div role="aside" ></div>
     43 │     <div role="blockquote" ></div>
@@ -2810,7 +2896,9 @@ invalid.jsx:44:10 lint/nursery/useSemanticElements ━━━━━━━━━�
 ```
 invalid.jsx:45:10 lint/nursery/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The element with this role can be changed to a DOM element that already this role.
+  ! The elements with the following roles can be changed to the following elements:
+    <output>
+  
   
     43 │     <div role="blockquote" ></div>
     44 │     <div role="associationlist" ></div>
@@ -2874,7 +2962,9 @@ invalid.jsx:45:10 lint/nursery/useSemanticElements ━━━━━━━━━�
 ```
 invalid.jsx:46:10 lint/nursery/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The element with this role can be changed to a DOM element that already this role.
+  ! The elements with the following roles can be changed to the following elements:
+    <footer>
+  
   
     44 │     <div role="associationlist" ></div>
     45 │     <div role="status" ></div>
@@ -2938,7 +3028,9 @@ invalid.jsx:46:10 lint/nursery/useSemanticElements ━━━━━━━━━�
 ```
 invalid.jsx:47:10 lint/nursery/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The element with this role can be changed to a DOM element that already this role.
+  ! The elements with the following roles can be changed to the following elements:
+    <section>
+  
   
     45 │     <div role="status" ></div>
     46 │     <div role="contentinfo" ></div>

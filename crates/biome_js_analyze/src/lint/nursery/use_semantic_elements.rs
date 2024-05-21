@@ -43,7 +43,12 @@ declare_rule! {
 
 impl Rule for UseSemanticElements {
     type Query = Aria<JsxOpeningElement>;
-    type State = AnyJsxAttribute;
+    // TODO: get element and attributes and AnyJsxAttribute
+    type State = (
+        AnyJsxAttribute,
+        Option<Vec<String>>,
+        Option<Vec<(String, String)>>,
+    );
     type Signals = Option<Self::State>;
     type Options = ();
 
@@ -59,7 +64,36 @@ impl Rule for UseSemanticElements {
             let is_not_interative =
                 AriaRoles.is_not_interactive_element(element_name, extract_attributes);
             if is_not_interative {
-                return Some(AnyJsxAttribute::from(attr));
+                let static_value = attr.as_static_value().unwrap();
+                let role_value = static_value.as_string_constant().unwrap();
+                let candidates = AriaRoles.get_corresponding_element(role_value);
+
+                if let Some(elements) = candidates {
+                    let mut result_elements: Vec<String> = vec![];
+                    let mut result_attributes: Vec<(String, String)> = vec![];
+
+                    for element in elements {
+                        // Get only first attribute
+                        let attributes = element.1.first();
+
+                        result_elements.push(element.0.to_string());
+
+                        if let Some(attribute) = attributes {
+                            result_attributes
+                                .push((attribute.0.to_string(), attribute.1.to_string()));
+                        } else {
+                            result_attributes.push((String::new(), String::new()));
+                        }
+                    }
+
+                    return Some((
+                        AnyJsxAttribute::from(attr),
+                        Some(result_elements),
+                        Some(result_attributes),
+                    ));
+                } else {
+                    return Some((AnyJsxAttribute::from(attr), None, None));
+                }
             }
         }
 
@@ -67,13 +101,42 @@ impl Rule for UseSemanticElements {
     }
 
     fn diagnostic(_ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
+        let alternative_elements = state.clone().1;
+        let alternative_attributes = state.clone().2;
+
+        let mut error_message = if alternative_elements.is_some() {
+            String::from(
+                "The elements with the following roles can be changed to the following elements:\n",
+            )
+        } else {
+            String::from("The element with this role can be changed to a DOM element that already this role.")
+        };
+
+        for (element, attribute) in alternative_elements
+            .iter()
+            .zip(alternative_attributes.iter())
+        {
+            if !attribute.first().unwrap().0.is_empty() && !attribute.first().unwrap().1.is_empty()
+            {
+                error_message.push_str(&format!(
+                    "<{element} {key}=\"{value}\">\n",
+                    element = element.first().unwrap(),
+                    key = attribute.first().unwrap().0,
+                    value = attribute.first().unwrap().1
+                ));
+            } else {
+                error_message.push_str(&format!(
+                    "<{element}>\n",
+                    element = element.first().unwrap()
+                ));
+            }
+        }
+
         Some(
             RuleDiagnostic::new(
                 rule_category!(),
-                state.range(),
-                markup! {
-                    "The element with this role can be changed to a DOM element that already this role."
-                },
+                state.0.range(),
+                error_message,
             )
             .footer_list(
                 markup! {
