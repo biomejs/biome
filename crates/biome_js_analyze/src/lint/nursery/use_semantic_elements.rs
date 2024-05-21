@@ -43,7 +43,6 @@ declare_rule! {
 
 impl Rule for UseSemanticElements {
     type Query = Aria<JsxOpeningElement>;
-    // TODO: get element and attributes and AnyJsxAttribute
     type State = (
         AnyJsxAttribute,
         Option<Vec<String>>,

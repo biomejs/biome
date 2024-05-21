@@ -66,8 +66,6 @@ macro_rules! define_role {
                 Some(Self::CONCEPTS.iter())
             }
         }
-
-
     };
 }
 
