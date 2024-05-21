@@ -82,8 +82,8 @@ impl Rule for NoYodaExpression {
         let right = node.right().ok()?;
 
         let has_yoda_expression = node.is_comparison_operator()
-            && is_literal_expression(&left).unwrap_or_default()
-            && !is_literal_expression(&right).unwrap_or_default()
+            && is_literal_expression(&left)?
+            && !is_literal_expression(&right)?
             && !is_range_assertion(node).unwrap_or_default();
 
         has_yoda_expression.then_some(())
@@ -130,7 +130,7 @@ impl Rule for NoYodaExpression {
             .last();
 
         let has_missing_left_trivia = match (&left_leading_trivia, &parent_yield_argument) {
-            (trivia, Some(parent_yield_argument)) => {
+            (Some(trivia), Some(parent_yield_argument)) => {
                 let parent_yield_expression = parent_yield_argument.parent::<JsYieldExpression>();
                 let has_trivia_on_parent_expression =
                     parent_yield_expression.clone().is_some_and(|expression| {
@@ -156,19 +156,19 @@ impl Rule for NoYodaExpression {
         };
 
         let new_left = if has_missing_left_trivia {
-            clone_with_trivia(right, &left_leading_trivia, &left_trailing_trivia)?
+            clone_with_trivia(right, left_leading_trivia, left_trailing_trivia)?
                 .with_leading_trivia_pieces(whitespace.clone())?
         } else {
-            clone_with_trivia(right, &left_leading_trivia, &left_trailing_trivia)?
+            clone_with_trivia(right, left_leading_trivia, left_trailing_trivia)?
         };
         let new_operator = token(flipped_operator)
             .prepend_trivia_pieces(operator_leading_trivia)
             .append_trivia_pieces(operator_trailing_trivia);
         let new_right = if has_missing_right_trivia {
-            clone_with_trivia(left, &right_leading_trivia, &right_trailing_trivia)?
+            clone_with_trivia(left, right_leading_trivia, right_trailing_trivia)?
                 .append_trivia_pieces(whitespace.clone())?
         } else {
-            clone_with_trivia(left, &right_leading_trivia, &right_trailing_trivia)?
+            clone_with_trivia(left, right_leading_trivia, right_trailing_trivia)?
         };
 
         let binary_expression = js_binary_expression(new_left, new_operator, new_right);
@@ -191,27 +191,29 @@ impl Rule for NoYodaExpression {
     }
 }
 
-fn extract_leading_trivia(node: &AnyJsExpression) -> Vec<SyntaxTriviaPiece<JsLanguage>> {
-    node.syntax()
-        .first_leading_trivia()
-        .map(|first_leading_trivia| first_leading_trivia.pieces().collect::<Vec<_>>())
-        .unwrap_or_default()
+fn extract_leading_trivia(node: &AnyJsExpression) -> Option<Vec<SyntaxTriviaPiece<JsLanguage>>> {
+    Some(
+        node.syntax()
+            .first_leading_trivia()
+            .map(|first_leading_trivia| first_leading_trivia.pieces().collect::<Vec<_>>())?,
+    )
 }
 
-fn extract_trailing_trivia(node: &AnyJsExpression) -> Vec<SyntaxTriviaPiece<JsLanguage>> {
-    node.syntax()
-        .last_trailing_trivia()
-        .map(|last_trailing_trivia| last_trailing_trivia.pieces().collect::<Vec<_>>())
-        .unwrap_or_default()
+fn extract_trailing_trivia(node: &AnyJsExpression) -> Option<Vec<SyntaxTriviaPiece<JsLanguage>>> {
+    Some(
+        node.syntax()
+            .last_trailing_trivia()
+            .map(|last_trailing_trivia| last_trailing_trivia.pieces().collect::<Vec<_>>())?,
+    )
 }
 
 fn clone_with_trivia(
     node: AnyJsExpression,
-    leading_trivia: &[SyntaxTriviaPiece<JsLanguage>],
-    trailing_trivia: &[SyntaxTriviaPiece<JsLanguage>],
+    leading_trivia: Option<Vec<SyntaxTriviaPiece<JsLanguage>>>,
+    trailing_trivia: Option<Vec<SyntaxTriviaPiece<JsLanguage>>>,
 ) -> Option<AnyJsExpression> {
-    node.with_leading_trivia_pieces(leading_trivia.to_owned())?
-        .with_trailing_trivia_pieces(trailing_trivia.to_owned())
+    node.with_leading_trivia_pieces(leading_trivia?.to_owned())?
+        .with_trailing_trivia_pieces(trailing_trivia?.to_owned())
 }
 
 fn is_literal_expression(expression: &AnyJsExpression) -> Option<bool> {
@@ -265,8 +267,8 @@ fn is_range_assertion(node: &JsBinaryExpression) -> Option<bool> {
         ) => Some(
             is_range_assertion_operator(left.operator().ok())
                 && is_range_assertion_operator(right.operator().ok())
-                && (is_inside_range_assertion(operator, &left, &right).unwrap_or_default()
-                    || is_outside_range_assertion(operator, &left, &right).unwrap_or_default())
+                && (is_inside_range_assertion(operator, &left, &right)?
+                    || is_outside_range_assertion(operator, &left, &right)?)
                 && is_wrapped_in_parenthesis(&parent_logical_expression),
         ),
         _ => None,
@@ -368,7 +370,7 @@ fn extract_string_value(expression: AnyJsExpression) -> Option<String> {
         AnyJsExpression::JsUnaryExpression(unary) => match unary.operator() {
             Ok(JsUnaryOperator::Minus) => {
                 let argument = unary.argument().ok()?.text();
-                let is_numeric_literal = unary.is_signed_numeric_literal().unwrap_or_default();
+                let is_numeric_literal = unary.is_signed_numeric_literal().ok()?;
                 is_numeric_literal.then_some(String::from("-") + argument.as_str())
             }
             _ => None,
