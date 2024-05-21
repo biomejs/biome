@@ -48,6 +48,13 @@ impl Rule for UseTopLevelRegex {
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let regex = ctx.query();
+        // Ignore regular expressions with the g and/or y flags, as calling test/exec has side effects.
+        // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/RegExp/lastIndex#avoiding_side_effects
+        let (_, flags) = regex.decompose().ok()?;
+        let flags = flags.text();
+        if flags.contains('g') || flags.contains('y') {
+            return None;
+        }
         let found_all_allowed = regex.syntax().ancestors().all(|node| {
             if let Some(node) = AnyJsControlFlowRoot::cast_ref(&node) {
                 matches!(
