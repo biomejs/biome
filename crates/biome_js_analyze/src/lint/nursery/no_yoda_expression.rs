@@ -156,21 +156,19 @@ impl Rule for NoYodaExpression {
         };
 
         let new_left = if has_missing_left_trivia {
-            clone_with_trivia(right, &left_leading_trivia, &left_trailing_trivia)
-                .with_leading_trivia_pieces(whitespace.clone())
-                .unwrap()
+            clone_with_trivia(right, &left_leading_trivia, &left_trailing_trivia)?
+                .with_leading_trivia_pieces(whitespace.clone())?
         } else {
-            clone_with_trivia(right, &left_leading_trivia, &left_trailing_trivia)
+            clone_with_trivia(right, &left_leading_trivia, &left_trailing_trivia)?
         };
         let new_operator = token(flipped_operator)
             .prepend_trivia_pieces(operator_leading_trivia)
             .append_trivia_pieces(operator_trailing_trivia);
         let new_right = if has_missing_right_trivia {
-            clone_with_trivia(left, &right_leading_trivia, &right_trailing_trivia)
-                .append_trivia_pieces(whitespace.clone())
-                .unwrap()
+            clone_with_trivia(left, &right_leading_trivia, &right_trailing_trivia)?
+                .append_trivia_pieces(whitespace.clone())?
         } else {
-            clone_with_trivia(left, &right_leading_trivia, &right_trailing_trivia)
+            clone_with_trivia(left, &right_leading_trivia, &right_trailing_trivia)?
         };
 
         let binary_expression = js_binary_expression(new_left, new_operator, new_right);
@@ -211,11 +209,9 @@ fn clone_with_trivia(
     node: AnyJsExpression,
     leading_trivia: &[SyntaxTriviaPiece<JsLanguage>],
     trailing_trivia: &[SyntaxTriviaPiece<JsLanguage>],
-) -> AnyJsExpression {
-    node.with_leading_trivia_pieces(leading_trivia.to_owned())
-        .unwrap()
+) -> Option<AnyJsExpression> {
+    node.with_leading_trivia_pieces(leading_trivia.to_owned())?
         .with_trailing_trivia_pieces(trailing_trivia.to_owned())
-        .unwrap()
 }
 
 fn is_literal_expression(expression: &AnyJsExpression) -> Option<bool> {
