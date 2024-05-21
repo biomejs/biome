@@ -70,7 +70,7 @@ AnyGraphqlDefinition =
 	// Type System Extensions: we may possible want to group those in an enum outside of 'Definition'
 	| GraphqlSchemaExtension
 	| GraphqlScalarTypeExtension
-	| AnyGraphqlObjectTypeExtension
+	| GraphqlObjectTypeExtension
 	| AnyGraphqlInterfaceTypeExtension
 	| AnyGraphqlUnionTypeExtension
 	| AnyGraphqlEnumTypeExtension
@@ -355,35 +355,14 @@ GraphqlObjectTypeDefinition =
 	fields: GraphqlFieldsDefinition?
 
 // https://spec.graphql.org/October2021/#sec-Object-Extensions
-AnyGraphqlObjectTypeExtension =
-	GraphqlObjectTypeExtensionWithFields
-	| GraphqlObjectTypeExtensionWithDirectives
-	| GraphqlObjectTypeExtension
-	| GraphqlBogusExtension
-
 // extend type C implements A @i {e: f}
-GraphqlObjectTypeExtensionWithFields =
-	'extend'
-	'type'
-	name: GraphqlName
-	implements: GraphqlImplementsInterfaces?
-	directives: GraphqlDirectiveList
-	fields: GraphqlFieldsDefinition
-
-// extend type C implements A @i
-GraphqlObjectTypeExtensionWithDirectives =
-	'extend'
-	'type'
-	name: GraphqlName
-	implements: GraphqlImplementsInterfaces?
-	directives: GraphqlDirectiveList
-
-// extend type C implements A
 GraphqlObjectTypeExtension =
 	'extend'
 	'type'
 	name: GraphqlName
-	implements: GraphqlImplementsInterfaces
+	implements: GraphqlImplementsInterfaces?
+	directives: GraphqlDirectiveList
+	fields: GraphqlFieldsDefinition?
 
 // extend type C implements
 // & A

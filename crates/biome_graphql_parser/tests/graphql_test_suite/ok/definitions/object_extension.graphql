@@ -1,0 +1,17 @@
+extend type Story {
+  isHiddenLocally: Boolean
+}
+
+extend type User @addedDirective
+
+extend type User implements Character
+
+extend type User implements Character @deprecated
+
+extend type User @deprecated {
+  name: String
+}
+
+extend type User implements Character @deprecated {
+  name: String
+}

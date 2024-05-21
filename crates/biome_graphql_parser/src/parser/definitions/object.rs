@@ -1,10 +1,13 @@
 use crate::parser::{
-    directive::DirectiveList, parse_description, parse_error::expected_name, parse_name,
-    GraphqlParser,
+    directive::DirectiveList,
+    parse_description,
+    parse_error::{expected_name, expected_object_extension},
+    parse_name, GraphqlParser,
 };
 use biome_graphql_syntax::{GraphqlSyntaxKind::*, T};
 use biome_parser::{
-    parse_lists::ParseNodeList, parsed_syntax::ParsedSyntax, prelude::ParsedSyntax::*, Parser,
+    parse_lists::ParseNodeList, parsed_syntax::ParsedSyntax, prelude::ParsedSyntax::*,
+    token_source::TokenSource, Parser,
 };
 
 use super::{field::parse_fields_definition, interface::parse_implements_interface};
@@ -28,4 +31,28 @@ pub(crate) fn parse_object_type_definition(p: &mut GraphqlParser) -> ParsedSynta
     parse_fields_definition(p).ok();
 
     Present(m.complete(p, GRAPHQL_OBJECT_TYPE_DEFINITION))
+}
+
+#[inline]
+pub(crate) fn parse_object_type_extension(p: &mut GraphqlParser) -> ParsedSyntax {
+    let m = p.start();
+
+    p.bump(T![extend]);
+    p.bump(T![type]);
+
+    parse_name(p).or_add_diagnostic(p, expected_name);
+
+    let implements_interface_empty = parse_implements_interface(p).is_absent();
+
+    let pos = p.source().position();
+    DirectiveList.parse_list(p);
+    let directive_empty = p.source().position() == pos;
+
+    let fields_definition_empty = parse_fields_definition(p).is_absent();
+
+    if directive_empty && implements_interface_empty && fields_definition_empty {
+        p.error(expected_object_extension(p, p.cur_range()));
+    }
+
+    Present(m.complete(p, GRAPHQL_OBJECT_TYPE_EXTENSION))
 }

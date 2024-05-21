@@ -210,18 +210,6 @@ macro_rules! map_syntax_node {
                         unsafe { $crate::GraphqlObjectTypeExtension::new_unchecked(node) };
                     $body
                 }
-                $crate::GraphqlSyntaxKind::GRAPHQL_OBJECT_TYPE_EXTENSION_WITH_DIRECTIVES => {
-                    let $pattern = unsafe {
-                        $crate::GraphqlObjectTypeExtensionWithDirectives::new_unchecked(node)
-                    };
-                    $body
-                }
-                $crate::GraphqlSyntaxKind::GRAPHQL_OBJECT_TYPE_EXTENSION_WITH_FIELDS => {
-                    let $pattern = unsafe {
-                        $crate::GraphqlObjectTypeExtensionWithFields::new_unchecked(node)
-                    };
-                    $body
-                }
                 $crate::GraphqlSyntaxKind::GRAPHQL_OBJECT_VALUE => {
                     let $pattern = unsafe { $crate::GraphqlObjectValue::new_unchecked(node) };
                     $body
