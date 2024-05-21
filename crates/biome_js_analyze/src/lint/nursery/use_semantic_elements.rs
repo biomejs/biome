@@ -140,7 +140,7 @@ impl Rule for UseSemanticElements {
             )
             .footer_list(
                 markup! {
-                    "For examples and more information, see" <Hyperlink href="https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Roles">"WAI-ARIA Roles"</Hyperlink>
+                    "For examples and more information, see " <Hyperlink href="https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Roles">"WAI-ARIA Roles"</Hyperlink>
                 },
                 &["<button>", "<input>", "<textarea>", "<a>", "<img>", "<table>", "<article>", "<section>", "<nav>", "<aside>", "<header>", "<footer>", "<main>", "<figure>", "<figcaption>", "<details>", "<summary>", "<dialog>", "<menu>", "<menuitem>", "<fieldset>", "<legend>", "<caption>", "<colgroup>", "<col>", "<optgroup>", "<option>", "<select>", "<datalist>", "<output>", "<progress>", "<meter>", "<time>", "<audio>", "<video>", "<track>", "<source>", "<embed>", "<object>", "<param>", "<iframe>", "<canvas>", "<map>", "<area>", "<svg>", "<math>"]
             ),
