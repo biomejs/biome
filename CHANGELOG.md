@@ -357,6 +357,7 @@ z.object({})
     3 3 │   	<div class={`px-2 foo p-4 bar ${variable}`}/>
     4 4 │   </>
   ```
+- [noUndeclaredDependencies](https://biomejs.dev/linter/rules/no-undeclared-dependencies/) is correctly triggered when running `biome ci`. Contributed by @ematipico
 ### Parser
 
 #### Enhancements
