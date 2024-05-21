@@ -279,6 +279,13 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
   The diagnosis is also clearer.
 
   Contributed by @Conaclos
+- Improve code action for [nursery/noUselessUndefinedInitialization](https://biomejs.dev/linter/rules/no-useless-undefined-initialization/) to handle comments.
+
+  The rule now places inline comments after the declaration statement, instead of removing them.
+  The code action is now safe to apply.
+  
+  Contributed by @lutaok
+
 
 #### Bug fixes
 
