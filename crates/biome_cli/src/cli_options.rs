@@ -51,7 +51,7 @@ pub struct CliOptions {
     /// Allows to change how diagnostics and summary are reported.
     #[bpaf(
         long("reporter"),
-        argument("json|json-pretty|github|junit|summary"),
+        argument("json|json-pretty|github|junit|summary|gitlab"),
         fallback(CliReporter::default())
     )]
     pub reporter: CliReporter,
@@ -131,6 +131,8 @@ pub enum CliReporter {
     Junit,
     /// Reports linter diagnostics grouped by category and number of hits. Reports formatter diagnostics grouped by file.
     Summary,
+    /// Reports linter diagnostics using the [GitLab Code Quality report](https://docs.gitlab.com/ee/ci/testing/code_quality.html#implement-a-custom-tool).
+    GitLab,
 }
 
 impl CliReporter {
@@ -149,6 +151,7 @@ impl FromStr for CliReporter {
             "summary" => Ok(Self::Summary),
             "github" => Ok(Self::GitHub),
             "junit" => Ok(Self::Junit),
+            "gitlab" => Ok(Self::GitLab),
             _ => Err(format!(
                 "value {s:?} is not valid for the --reporter argument"
             )),
@@ -165,6 +168,7 @@ impl Display for CliReporter {
             CliReporter::Summary => f.write_str("summary"),
             CliReporter::GitHub => f.write_str("github"),
             CliReporter::Junit => f.write_str("junit"),
+            CliReporter::GitLab => f.write_str("gitlab"),
         }
     }
 }
