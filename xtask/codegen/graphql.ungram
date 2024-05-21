@@ -69,7 +69,6 @@ AnyGraphqlDefinition =
 	| GraphqlBogusDefinition
 	// Type System Extensions: we may possible want to group those in an enum outside of 'Definition'
 	| GraphqlSchemaExtension
-	// Type Extensions
 	| GraphqlScalarTypeExtension
 	| AnyGraphqlObjectTypeExtension
 	| AnyGraphqlInterfaceTypeExtension
