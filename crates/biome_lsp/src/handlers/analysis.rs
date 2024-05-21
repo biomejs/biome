@@ -33,16 +33,7 @@ fn fix_all_kind() -> CodeActionKind {
 /// Queries the [`AnalysisServer`] for code actions of the file matching its path
 ///
 /// If the AnalysisServer has no matching file, results in error.
-#[tracing::instrument(level = "debug", 
-    skip_all, 
-    fields(
-        uri = display(& params.text_document.uri), 
-        range = debug(params.range), 
-        only = debug(& params.context.only), 
-        diagnostics = debug(& params.context.diagnostics)
-    ), 
-    err
-)]
+#[tracing::instrument(level = "debug", skip_all, fields(uri = display(& params.text_document.uri), range = debug(params.range), only = debug(& params.context.only), diagnostics = debug(& params.context.diagnostics)), err)]
 pub(crate) fn code_actions(
     session: &Session,
     params: CodeActionParams,
@@ -57,7 +48,7 @@ pub(crate) fn code_actions(
             .with_organize_imports()
             .build(),
     })?;
-    
+
     if !file_features.supports_lint() && !file_features.supports_organize_imports() {
         debug!("Linter and organize imports are both disabled");
         return Ok(Some(Vec::new()));
