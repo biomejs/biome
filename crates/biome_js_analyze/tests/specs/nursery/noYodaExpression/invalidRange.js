@@ -5,7 +5,6 @@ if (1 < a && a < 0) {}
 var a = b < 0 || 1 <= b;
 if (0 <= x && x < -1) {}
 if (`green` < x.y && x.y < `blue`) {}
-if (0 <= a[b()] && a[b()] < 1) {}
 if ('b' <= x && x < 'a') {}
 if('a' <= x && x < 1) {}
 if (0 < a && b < max) {}

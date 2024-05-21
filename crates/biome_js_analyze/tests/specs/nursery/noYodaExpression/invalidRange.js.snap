@@ -11,7 +11,6 @@ if (1 < a && a < 0) {}
 var a = b < 0 || 1 <= b;
 if (0 <= x && x < -1) {}
 if (`green` < x.y && x.y < `blue`) {}
-if (0 <= a[b()] && a[b()] < 1) {}
 if ('b' <= x && x < 'a') {}
 if('a' <= x && x < 1) {}
 if (0 < a && b < max) {}
@@ -153,7 +152,7 @@ invalidRange.js:6:5 lint/nursery/noYodaExpression  FIXABLE  ━━━━━━�
   > 6 │ if (0 <= x && x < -1) {}
       │     ^^^^^^
     7 │ if (`green` < x.y && x.y < `blue`) {}
-    8 │ if (0 <= a[b()] && a[b()] < 1) {}
+    8 │ if ('b' <= x && x < 'a') {}
   
   i Yoda expressions can be confusing to some people, invert the expression operands for better readability.
   
@@ -164,7 +163,7 @@ invalidRange.js:6:5 lint/nursery/noYodaExpression  FIXABLE  ━━━━━━�
      6    │ - if·(0·<=·x·&&·x·<·-1)·{}
         6 │ + if·(x·>=·0·&&·x·<·-1)·{}
      7  7 │   if (`green` < x.y && x.y < `blue`) {}
-     8  8 │   if (0 <= a[b()] && a[b()] < 1) {}
+     8  8 │   if ('b' <= x && x < 'a') {}
   
 
 ```
@@ -178,8 +177,8 @@ invalidRange.js:7:5 lint/nursery/noYodaExpression  FIXABLE  ━━━━━━�
     6 │ if (0 <= x && x < -1) {}
   > 7 │ if (`green` < x.y && x.y < `blue`) {}
       │     ^^^^^^^^^^^^^
-    8 │ if (0 <= a[b()] && a[b()] < 1) {}
-    9 │ if ('b' <= x && x < 'a') {}
+    8 │ if ('b' <= x && x < 'a') {}
+    9 │ if('a' <= x && x < 1) {}
   
   i Yoda expressions can be confusing to some people, invert the expression operands for better readability.
   
@@ -189,8 +188,8 @@ invalidRange.js:7:5 lint/nursery/noYodaExpression  FIXABLE  ━━━━━━�
      6  6 │   if (0 <= x && x < -1) {}
      7    │ - if·(`green`·<·x.y·&&·x.y·<·`blue`)·{}
         7 │ + if·(x.y·>·`green`·&&·x.y·<·`blue`)·{}
-     8  8 │   if (0 <= a[b()] && a[b()] < 1) {}
-     9  9 │   if ('b' <= x && x < 'a') {}
+     8  8 │   if ('b' <= x && x < 'a') {}
+     9  9 │   if('a' <= x && x < 1) {}
   
 
 ```
@@ -202,10 +201,10 @@ invalidRange.js:8:5 lint/nursery/noYodaExpression  FIXABLE  ━━━━━━�
   
      6 │ if (0 <= x && x < -1) {}
      7 │ if (`green` < x.y && x.y < `blue`) {}
-   > 8 │ if (0 <= a[b()] && a[b()] < 1) {}
-       │     ^^^^^^^^^^^
-     9 │ if ('b' <= x && x < 'a') {}
-    10 │ if('a' <= x && x < 1) {}
+   > 8 │ if ('b' <= x && x < 'a') {}
+       │     ^^^^^^^^
+     9 │ if('a' <= x && x < 1) {}
+    10 │ if (0 < a && b < max) {}
   
   i Yoda expressions can be confusing to some people, invert the expression operands for better readability.
   
@@ -213,86 +212,60 @@ invalidRange.js:8:5 lint/nursery/noYodaExpression  FIXABLE  ━━━━━━�
   
      6  6 │   if (0 <= x && x < -1) {}
      7  7 │   if (`green` < x.y && x.y < `blue`) {}
-     8    │ - if·(0·<=·a[b()]·&&·a[b()]·<·1)·{}
-        8 │ + if·(a[b()]·>=·0·&&·a[b()]·<·1)·{}
-     9  9 │   if ('b' <= x && x < 'a') {}
-    10 10 │   if('a' <= x && x < 1) {}
+     8    │ - if·('b'·<=·x·&&·x·<·'a')·{}
+        8 │ + if·(x·>=·'b'·&&·x·<·'a')·{}
+     9  9 │   if('a' <= x && x < 1) {}
+    10 10 │   if (0 < a && b < max) {}
   
 
 ```
 
 ```
-invalidRange.js:9:5 lint/nursery/noYodaExpression  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalidRange.js:9:4 lint/nursery/noYodaExpression  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Avoid the use of yoda expressions.
   
      7 │ if (`green` < x.y && x.y < `blue`) {}
-     8 │ if (0 <= a[b()] && a[b()] < 1) {}
-   > 9 │ if ('b' <= x && x < 'a') {}
-       │     ^^^^^^^^
-    10 │ if('a' <= x && x < 1) {}
-    11 │ if (0 < a && b < max) {}
+     8 │ if ('b' <= x && x < 'a') {}
+   > 9 │ if('a' <= x && x < 1) {}
+       │    ^^^^^^^^
+    10 │ if (0 < a && b < max) {}
+    11 │ 
   
   i Yoda expressions can be confusing to some people, invert the expression operands for better readability.
   
   i Safe fix: Flip the operators of the expression.
   
      7  7 │   if (`green` < x.y && x.y < `blue`) {}
-     8  8 │   if (0 <= a[b()] && a[b()] < 1) {}
-     9    │ - if·('b'·<=·x·&&·x·<·'a')·{}
-        9 │ + if·(x·>=·'b'·&&·x·<·'a')·{}
-    10 10 │   if('a' <= x && x < 1) {}
-    11 11 │   if (0 < a && b < max) {}
+     8  8 │   if ('b' <= x && x < 'a') {}
+     9    │ - if('a'·<=·x·&&·x·<·1)·{}
+        9 │ + if(x·>=·'a'·&&·x·<·1)·{}
+    10 10 │   if (0 < a && b < max) {}
+    11 11 │   
   
 
 ```
 
 ```
-invalidRange.js:10:4 lint/nursery/noYodaExpression  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalidRange.js:10:5 lint/nursery/noYodaExpression  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Avoid the use of yoda expressions.
   
-     8 │ if (0 <= a[b()] && a[b()] < 1) {}
-     9 │ if ('b' <= x && x < 'a') {}
-  > 10 │ if('a' <= x && x < 1) {}
-       │    ^^^^^^^^
-    11 │ if (0 < a && b < max) {}
-    12 │ 
-  
-  i Yoda expressions can be confusing to some people, invert the expression operands for better readability.
-  
-  i Safe fix: Flip the operators of the expression.
-  
-     8  8 │   if (0 <= a[b()] && a[b()] < 1) {}
-     9  9 │   if ('b' <= x && x < 'a') {}
-    10    │ - if('a'·<=·x·&&·x·<·1)·{}
-       10 │ + if(x·>=·'a'·&&·x·<·1)·{}
-    11 11 │   if (0 < a && b < max) {}
-    12 12 │   
-  
-
-```
-
-```
-invalidRange.js:11:5 lint/nursery/noYodaExpression  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! Avoid the use of yoda expressions.
-  
-     9 │ if ('b' <= x && x < 'a') {}
-    10 │ if('a' <= x && x < 1) {}
-  > 11 │ if (0 < a && b < max) {}
+     8 │ if ('b' <= x && x < 'a') {}
+     9 │ if('a' <= x && x < 1) {}
+  > 10 │ if (0 < a && b < max) {}
        │     ^^^^^
-    12 │ 
+    11 │ 
   
   i Yoda expressions can be confusing to some people, invert the expression operands for better readability.
   
   i Safe fix: Flip the operators of the expression.
   
-     9  9 │   if ('b' <= x && x < 'a') {}
-    10 10 │   if('a' <= x && x < 1) {}
-    11    │ - if·(0·<·a·&&·b·<·max)·{}
-       11 │ + if·(a·>·0·&&·b·<·max)·{}
-    12 12 │   
+     8  8 │   if ('b' <= x && x < 'a') {}
+     9  9 │   if('a' <= x && x < 1) {}
+    10    │ - if·(0·<·a·&&·b·<·max)·{}
+       10 │ + if·(a·>·0·&&·b·<·max)·{}
+    11 11 │   
   
 
 ```

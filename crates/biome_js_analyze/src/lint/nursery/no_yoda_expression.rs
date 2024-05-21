@@ -8,12 +8,10 @@ use biome_diagnostics::Applicability;
 use biome_js_factory::make::{self, js_binary_expression, token};
 use biome_js_syntax::{
     AnyJsExpression, AnyJsLiteralExpression, AnyJsStatement, JsBinaryExpression, JsBinaryOperator,
-    JsCallExpression, JsLanguage, JsLogicalExpression, JsLogicalOperator, JsSyntaxKind,
-    JsUnaryOperator, JsYieldArgument, JsYieldExpression, T,
+    JsLanguage, JsLogicalExpression, JsLogicalOperator, JsSyntaxKind, JsUnaryOperator,
+    JsYieldArgument, JsYieldExpression, T,
 };
-use biome_rowan::{
-    AstNode, BatchMutationExt, NodeOrToken, SyntaxTriviaPiece, TriviaPieceKind, WalkEvent,
-};
+use biome_rowan::{AstNode, BatchMutationExt, NodeOrToken, SyntaxTriviaPiece, TriviaPieceKind};
 
 declare_rule! {
     /// Disallow the use of yoda expressions.
@@ -297,7 +295,7 @@ fn is_inside_range_assertion(
     let right_identifier = right_binary_expression.left().ok()?;
 
     if !matches!(operator, JsLogicalOperator::LogicalAnd)
-        || !is_same_identifier(left_identifier, right_identifier)
+        || !is_node_equal(left_identifier.syntax(), right_identifier.syntax())
     {
         return Some(false);
     }
@@ -336,7 +334,7 @@ fn is_outside_range_assertion(
     let right_identifier = right_binary_expression.right().ok()?;
 
     if !matches!(operator, JsLogicalOperator::LogicalOr)
-        || !is_same_identifier(left_identifier, right_identifier)
+        || !is_node_equal(left_identifier.syntax(), right_identifier.syntax())
     {
         return Some(false);
     }
@@ -367,23 +365,6 @@ fn is_wrapped_in_parenthesis(logical_expression: &JsLogicalExpression) -> bool {
         }
         _ => false,
     }
-}
-
-fn is_same_identifier(left_expression: AnyJsExpression, right_expression: AnyJsExpression) -> bool {
-    // We can't consider two call expressions equal here because the result of the expression might be different if we call it twice
-    // Example: consider the following expression `if (0 <= a[b()] && a[b()] < 1) {}`. The two references of `a[b()]` would be
-    // considered the same by `is_node_equal`, but if `b()` returns a different value when called multiple times, then the value
-    // of `a[b()]` can be different.
-    let has_call_expression = |expression: AnyJsExpression| {
-        expression.syntax().preorder().any(|event| match event {
-            WalkEvent::Leave(node) => JsCallExpression::can_cast(node.kind()),
-            _ => false,
-        })
-    };
-
-    is_node_equal(left_expression.syntax(), right_expression.syntax())
-        && !has_call_expression(left_expression)
-        && !has_call_expression(right_expression)
 }
 
 fn extract_string_value(expression: AnyJsExpression) -> Option<String> {
