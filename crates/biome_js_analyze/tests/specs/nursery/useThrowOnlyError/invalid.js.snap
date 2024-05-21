@@ -41,7 +41,7 @@ invalid.js:1:1 lint/nursery/useThrowOnlyError ━━━━━━━━━━━�
     2 │ throw "error";
     3 │ throw 0;
   
-  i WHile Javascript supports throwing any value, handling non-Error values is confusing.
+  i While Javascript supports throwing any value, handling non-Error values is confusing.
   
 
 ```
@@ -57,7 +57,7 @@ invalid.js:2:1 lint/nursery/useThrowOnlyError ━━━━━━━━━━━�
     3 │ throw 0;
     4 │ throw false;
   
-  i WHile Javascript supports throwing any value, handling non-Error values is confusing.
+  i While Javascript supports throwing any value, handling non-Error values is confusing.
   
 
 ```
@@ -74,7 +74,7 @@ invalid.js:3:1 lint/nursery/useThrowOnlyError ━━━━━━━━━━━�
     4 │ throw false;
     5 │ throw null;
   
-  i WHile Javascript supports throwing any value, handling non-Error values is confusing.
+  i While Javascript supports throwing any value, handling non-Error values is confusing.
   
 
 ```
@@ -91,7 +91,7 @@ invalid.js:4:1 lint/nursery/useThrowOnlyError ━━━━━━━━━━━�
     5 │ throw null;
     6 │ throw {};
   
-  i WHile Javascript supports throwing any value, handling non-Error values is confusing.
+  i While Javascript supports throwing any value, handling non-Error values is confusing.
   
 
 ```
@@ -108,7 +108,7 @@ invalid.js:5:1 lint/nursery/useThrowOnlyError ━━━━━━━━━━━�
     6 │ throw {};
     7 │ throw "a" + "b";
   
-  i WHile Javascript supports throwing any value, handling non-Error values is confusing.
+  i While Javascript supports throwing any value, handling non-Error values is confusing.
   
 
 ```
@@ -125,7 +125,7 @@ invalid.js:6:1 lint/nursery/useThrowOnlyError ━━━━━━━━━━━�
     7 │ throw "a" + "b";
     8 │ const a = "";
   
-  i WHile Javascript supports throwing any value, handling non-Error values is confusing.
+  i While Javascript supports throwing any value, handling non-Error values is confusing.
   
 
 ```
@@ -142,7 +142,7 @@ invalid.js:7:1 lint/nursery/useThrowOnlyError ━━━━━━━━━━━�
     8 │ const a = "";
     9 │ throw a + "b";
   
-  i WHile Javascript supports throwing any value, handling non-Error values is confusing.
+  i While Javascript supports throwing any value, handling non-Error values is confusing.
   
 
 ```
@@ -159,7 +159,7 @@ invalid.js:9:1 lint/nursery/useThrowOnlyError ━━━━━━━━━━━�
     10 │ let foo;
     11 │ throw (foo = "error");
   
-  i WHile Javascript supports throwing any value, handling non-Error values is confusing.
+  i While Javascript supports throwing any value, handling non-Error values is confusing.
   
 
 ```
@@ -176,7 +176,7 @@ invalid.js:11:1 lint/nursery/useThrowOnlyError ━━━━━━━━━━━
     12 │ throw (new Error(), 1, 2, 3);
     13 │ throw "literal" && "not an Error";
   
-  i WHile Javascript supports throwing any value, handling non-Error values is confusing.
+  i While Javascript supports throwing any value, handling non-Error values is confusing.
   
 
 ```
@@ -193,7 +193,7 @@ invalid.js:12:1 lint/nursery/useThrowOnlyError ━━━━━━━━━━━
     13 │ throw "literal" && "not an Error";
     14 │ throw "literal" || new Error();
   
-  i WHile Javascript supports throwing any value, handling non-Error values is confusing.
+  i While Javascript supports throwing any value, handling non-Error values is confusing.
   
 
 ```
@@ -210,7 +210,7 @@ invalid.js:13:1 lint/nursery/useThrowOnlyError ━━━━━━━━━━━
     14 │ throw "literal" || new Error();
     15 │ throw new Error() && "literal";
   
-  i WHile Javascript supports throwing any value, handling non-Error values is confusing.
+  i While Javascript supports throwing any value, handling non-Error values is confusing.
   
 
 ```
@@ -227,7 +227,7 @@ invalid.js:14:1 lint/nursery/useThrowOnlyError ━━━━━━━━━━━
     15 │ throw new Error() && "literal";
     16 │ throw "literal" ?? new Error();
   
-  i WHile Javascript supports throwing any value, handling non-Error values is confusing.
+  i While Javascript supports throwing any value, handling non-Error values is confusing.
   
 
 ```
@@ -244,7 +244,7 @@ invalid.js:15:1 lint/nursery/useThrowOnlyError ━━━━━━━━━━━
     16 │ throw "literal" ?? new Error();
     17 │ throw foo ? "not an Error" : "literal";
   
-  i WHile Javascript supports throwing any value, handling non-Error values is confusing.
+  i While Javascript supports throwing any value, handling non-Error values is confusing.
   
 
 ```
@@ -261,7 +261,7 @@ invalid.js:16:1 lint/nursery/useThrowOnlyError ━━━━━━━━━━━
     17 │ throw foo ? "not an Error" : "literal";
     18 │ throw foo ? new Error() : "literal";
   
-  i WHile Javascript supports throwing any value, handling non-Error values is confusing.
+  i While Javascript supports throwing any value, handling non-Error values is confusing.
   
 
 ```
@@ -278,7 +278,7 @@ invalid.js:17:1 lint/nursery/useThrowOnlyError ━━━━━━━━━━━
     18 │ throw foo ? new Error() : "literal";
     19 │ throw foo ? "literal" : new Error();
   
-  i WHile Javascript supports throwing any value, handling non-Error values is confusing.
+  i While Javascript supports throwing any value, handling non-Error values is confusing.
   
 
 ```
@@ -295,7 +295,7 @@ invalid.js:18:1 lint/nursery/useThrowOnlyError ━━━━━━━━━━━
     19 │ throw foo ? "literal" : new Error();
     20 │ throw `${foo}`;
   
-  i WHile Javascript supports throwing any value, handling non-Error values is confusing.
+  i While Javascript supports throwing any value, handling non-Error values is confusing.
   
 
 ```
@@ -312,7 +312,7 @@ invalid.js:19:1 lint/nursery/useThrowOnlyError ━━━━━━━━━━━
     20 │ throw `${foo}`;
     21 │ 
   
-  i WHile Javascript supports throwing any value, handling non-Error values is confusing.
+  i While Javascript supports throwing any value, handling non-Error values is confusing.
   
 
 ```
@@ -329,7 +329,7 @@ invalid.js:20:1 lint/nursery/useThrowOnlyError ━━━━━━━━━━━
     21 │ 
     22 │ // False positives while valid, not a good practice.
   
-  i WHile Javascript supports throwing any value, handling non-Error values is confusing.
+  i While Javascript supports throwing any value, handling non-Error values is confusing.
   
 
 ```
@@ -344,7 +344,7 @@ invalid.js:23:1 lint/nursery/useThrowOnlyError ━━━━━━━━━━━
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     24 │ throw new Error() || "literal";
   
-  i WHile Javascript supports throwing any value, handling non-Error values is confusing.
+  i While Javascript supports throwing any value, handling non-Error values is confusing.
   
 
 ```
@@ -359,7 +359,7 @@ invalid.js:24:1 lint/nursery/useThrowOnlyError ━━━━━━━━━━━
   > 24 │ throw new Error() || "literal";
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   
-  i WHile Javascript supports throwing any value, handling non-Error values is confusing.
+  i While Javascript supports throwing any value, handling non-Error values is confusing.
   
 
 ```
