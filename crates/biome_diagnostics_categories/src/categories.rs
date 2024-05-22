@@ -150,6 +150,7 @@ define_categories! {
     "lint/nursery/useSemanticElements": "https://biomejs.dev/linter/rules/use-semantic-elements",
     "lint/nursery/useSortedClasses": "https://biomejs.dev/linter/rules/use-sorted-classes",
     "lint/nursery/useThrowNewError": "https://biomejs.dev/linter/rules/use-throw-new-error",
+    "lint/nursery/useThrowOnlyError": "https://biomejs.dev/linter/rules/use-throw-only-error",
     "lint/nursery/useTopLevelRegex": "https://biomejs.dev/linter/rules/use-top-level-regex",
     "lint/performance/noAccumulatingSpread": "https://biomejs.dev/linter/rules/no-accumulating-spread",
     "lint/performance/noBarrelFile": "https://biomejs.dev/linter/rules/no-barrel-file",
