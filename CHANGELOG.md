@@ -141,6 +141,8 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
   ```
   Contributed by @ematipico
 
+- `biome ci` now enforces printing the output using colours. If you were previously using `--colors=force`, you can remove it because it's automatically set. Contributed by @ematipico
+
 ### Configuration
 
 #### New features
