@@ -71,7 +71,7 @@ AnyGraphqlDefinition =
 	| GraphqlSchemaExtension
 	| GraphqlScalarTypeExtension
 	| GraphqlObjectTypeExtension
-	| AnyGraphqlInterfaceTypeExtension
+	| GraphqlInterfaceTypeExtension
 	| AnyGraphqlUnionTypeExtension
 	| AnyGraphqlEnumTypeExtension
 	| AnyGraphqlInputObjectTypeExtension
@@ -426,35 +426,14 @@ GraphqlInterfaceTypeDefinition =
 	fields: GraphqlFieldsDefinition?
 
 // https://spec.graphql.org/October2021/#sec-Interface-Extensions
-AnyGraphqlInterfaceTypeExtension =
-	GraphqlInterfaceTypeExtensionWithFields
-	| GraphqlInterfaceTypeExtensionWithDirectives
-	| GraphqlInterfaceTypeExtension
-	| GraphqlBogusExtension
-
 // extend interface A implements B @i {e: f}
-GraphqlInterfaceTypeExtensionWithFields =
-	'extend'
-	'interface'
-	name: GraphqlName
-	implements: GraphqlImplementsInterfaces?
-	directives: GraphqlDirectiveList
-	fields: GraphqlFieldsDefinition
-
-// extend interface A implements B @i
-GraphqlInterfaceTypeExtensionWithDirectives =
-	'extend'
-	'interface'
-	name: GraphqlName
-	implements: GraphqlImplementsInterfaces?
-	directives: GraphqlDirectiveList
-
-// extend interface A implements B
 GraphqlInterfaceTypeExtension =
 	'extend'
 	'interface'
 	name: GraphqlName
-	implements: GraphqlImplementsInterfaces
+	implements: GraphqlImplementsInterfaces?
+	directives: GraphqlDirectiveList
+	fields: GraphqlFieldsDefinition?
 
 // union A =
 //   | B
