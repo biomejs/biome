@@ -1066,6 +1066,10 @@ export interface Nursery {
 	 */
 	recommended?: boolean;
 	/**
+	 * Disallow the use of overload signatures that are not next to each other.
+	 */
+	useAdjacentOverloadSignatures?: RuleConfiguration_for_Null;
+	/**
 	 * Disallow Array constructors.
 	 */
 	useArrayLiterals?: RuleFixConfiguration_for_Null;
@@ -2265,6 +2269,9 @@ export type Category =
 	| "lint/correctness/useJsxKeyInIterable"
 	| "lint/correctness/useValidForDirection"
 	| "lint/correctness/useYield"
+	| "lint/nursery/colorNoInvalidHex"
+	| "lint/nursery/useAdjacentOverloadSignatures"
+	| "lint/nursery/noColorInvalidHex"
 	| "lint/nursery/noConsole"
 	| "lint/nursery/noConstantMathMinMaxClamp"
 	| "lint/nursery/noEmptyBlock"
