@@ -988,7 +988,7 @@ export interface Nursery {
 	/**
 	 * Disallow CSS empty blocks.
 	 */
-	noEmptyBlock?: RuleConfiguration_for_NoEmptyBlockOptions;
+	noEmptyBlock?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow variables from evolving into any type through reassignments.
 	 */
@@ -1659,9 +1659,6 @@ export type RuleConfiguration_for_HooksOptions =
 export type RuleConfiguration_for_DeprecatedHooksOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_DeprecatedHooksOptions;
-export type RuleConfiguration_for_NoEmptyBlockOptions =
-	| RulePlainConfiguration
-	| RuleWithOptions_for_NoEmptyBlockOptions;
 export type RuleConfiguration_for_RestrictedImportsOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_RestrictedImportsOptions;
@@ -1748,16 +1745,6 @@ export interface RuleWithOptions_for_DeprecatedHooksOptions {
 	 * Rule's options
 	 */
 	options: DeprecatedHooksOptions;
-}
-export interface RuleWithOptions_for_NoEmptyBlockOptions {
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoEmptyBlockOptions;
 }
 export interface RuleWithOptions_for_RestrictedImportsOptions {
 	/**
@@ -1861,9 +1848,6 @@ export interface HooksOptions {
  * Options for the `useHookAtTopLevel` rule have been deprecated, since we now use the React hook naming convention to determine whether a function is a hook.
  */
 export interface DeprecatedHooksOptions {}
-export interface NoEmptyBlockOptions {
-	allowComments: boolean;
-}
 /**
  * Options for the rule `noRestrictedImports`.
  */

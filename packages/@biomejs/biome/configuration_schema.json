@@ -1599,18 +1599,6 @@
 			},
 			"additionalProperties": false
 		},
-		"NoEmptyBlockConfiguration": {
-			"anyOf": [
-				{ "$ref": "#/definitions/RulePlainConfiguration" },
-				{ "$ref": "#/definitions/RuleWithNoEmptyBlockOptions" }
-			]
-		},
-		"NoEmptyBlockOptions": {
-			"type": "object",
-			"required": ["allowComments"],
-			"properties": { "allowComments": { "type": "boolean" } },
-			"additionalProperties": false
-		},
 		"Nursery": {
 			"description": "A list of rules that belong to this group",
 			"type": "object",
@@ -1678,7 +1666,7 @@
 				"noEmptyBlock": {
 					"description": "Disallow CSS empty blocks.",
 					"anyOf": [
-						{ "$ref": "#/definitions/NoEmptyBlockConfiguration" },
+						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -2350,21 +2338,6 @@
 				"options": {
 					"description": "Rule's options",
 					"allOf": [{ "$ref": "#/definitions/HooksOptions" }]
-				}
-			},
-			"additionalProperties": false
-		},
-		"RuleWithNoEmptyBlockOptions": {
-			"type": "object",
-			"required": ["level", "options"],
-			"properties": {
-				"level": {
-					"description": "The severity of the emitted diagnostics by the rule",
-					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
-				},
-				"options": {
-					"description": "Rule's options",
-					"allOf": [{ "$ref": "#/definitions/NoEmptyBlockOptions" }]
 				}
 			},
 			"additionalProperties": false

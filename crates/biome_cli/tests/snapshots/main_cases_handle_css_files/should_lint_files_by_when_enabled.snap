@@ -30,9 +30,9 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
 # Emitted Messages
 
 ```block
-input.css:1:6 lint/nursery/noCssEmptyBlock ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+input.css:1:6 lint/nursery/noEmptyBlock ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Empty blocks aren't allowed.
+  × Empty block isn't allowed.
   
   > 1 │ html {}
       │      ^^
