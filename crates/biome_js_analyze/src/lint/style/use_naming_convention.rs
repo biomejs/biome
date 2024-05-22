@@ -303,7 +303,7 @@ declare_rule! {
     /// This option will be deprecated in the future.
     /// Use the `conventions` option instead.
     ///
-    /// ### conventions
+    /// ### conventions (Since v1.8.0)
     ///
     /// The `conventions` option allows applying custom conventions.
     /// The option takes an array of conventions.

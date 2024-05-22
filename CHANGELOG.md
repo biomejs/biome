@@ -259,7 +259,7 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
   }
   ```
 
-  Please, find more details in the [rule documentation](https://biomejs.dev/linter/rules/use-naming-convention/#conventions).
+  Please, find more details in the [rule documentation](https://biomejs.dev/linter/rules/use-naming-convention/#options).
 
   Contributed by @Conaclos
 
