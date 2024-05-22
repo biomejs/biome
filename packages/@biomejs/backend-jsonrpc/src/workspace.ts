@@ -962,10 +962,6 @@ export interface Nursery {
 	 */
 	noConstantMathMinMaxClamp?: RuleFixConfiguration_for_Null;
 	/**
-	 * Disallow CSS empty blocks.
-	 */
-	noCssEmptyBlock?: RuleConfiguration_for_NoCssEmptyBlockOptions;
-	/**
 	 * Disallow using a callback in asynchronous tests and hooks.
 	 */
 	noDoneCallback?: RuleConfiguration_for_Null;
@@ -989,6 +985,10 @@ export interface Nursery {
 	 * Disallow duplicate selectors within keyframe blocks.
 	 */
 	noDuplicateSelectorsKeyframeBlock?: RuleConfiguration_for_Null;
+	/**
+	 * Disallow CSS empty blocks.
+	 */
+	noEmptyBlock?: RuleConfiguration_for_NoEmptyBlockOptions;
 	/**
 	 * Disallow variables from evolving into any type through reassignments.
 	 */
@@ -1659,9 +1659,9 @@ export type RuleConfiguration_for_HooksOptions =
 export type RuleConfiguration_for_DeprecatedHooksOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_DeprecatedHooksOptions;
-export type RuleConfiguration_for_NoCssEmptyBlockOptions =
+export type RuleConfiguration_for_NoEmptyBlockOptions =
 	| RulePlainConfiguration
-	| RuleWithOptions_for_NoCssEmptyBlockOptions;
+	| RuleWithOptions_for_NoEmptyBlockOptions;
 export type RuleConfiguration_for_RestrictedImportsOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_RestrictedImportsOptions;
@@ -1749,7 +1749,7 @@ export interface RuleWithOptions_for_DeprecatedHooksOptions {
 	 */
 	options: DeprecatedHooksOptions;
 }
-export interface RuleWithOptions_for_NoCssEmptyBlockOptions {
+export interface RuleWithOptions_for_NoEmptyBlockOptions {
 	/**
 	 * The severity of the emitted diagnostics by the rule
 	 */
@@ -1757,7 +1757,7 @@ export interface RuleWithOptions_for_NoCssEmptyBlockOptions {
 	/**
 	 * Rule's options
 	 */
-	options: NoCssEmptyBlockOptions;
+	options: NoEmptyBlockOptions;
 }
 export interface RuleWithOptions_for_RestrictedImportsOptions {
 	/**
@@ -1861,7 +1861,7 @@ export interface HooksOptions {
  * Options for the `useHookAtTopLevel` rule have been deprecated, since we now use the React hook naming convention to determine whether a function is a hook.
  */
 export interface DeprecatedHooksOptions {}
-export interface NoCssEmptyBlockOptions {
+export interface NoEmptyBlockOptions {
 	allowComments: boolean;
 }
 /**
@@ -2283,7 +2283,7 @@ export type Category =
 	| "lint/correctness/useYield"
 	| "lint/nursery/noConsole"
 	| "lint/nursery/noConstantMathMinMaxClamp"
-	| "lint/nursery/noCssEmptyBlock"
+	| "lint/nursery/noEmptyBlock"
 	| "lint/nursery/noDoneCallback"
 	| "lint/nursery/noDuplicateAtImportRules"
 	| "lint/nursery/noDuplicateElseIf"

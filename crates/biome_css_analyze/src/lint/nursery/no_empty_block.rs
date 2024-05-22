@@ -50,7 +50,7 @@ declare_rule! {
     ///
     /// ```json
     /// {
-    ///     "noCssEmptyBlock": {
+    ///     "noEmptyBlock": {
     ///         "options": {
     ///           "allowComments": false
     ///         }
@@ -58,9 +58,9 @@ declare_rule! {
     /// }
     /// ```
     ///
-    pub NoCssEmptyBlock {
+    pub NoEmptyBlock {
         version: "next",
-        name: "noCssEmptyBlock",
+        name: "noEmptyBlock",
         language: "css",
         recommended: true,
         sources: &[RuleSource::Stylelint("no-empty-block")],
@@ -70,11 +70,11 @@ declare_rule! {
 #[derive(Debug, Clone, Deserialize, Deserializable, Eq, PartialEq, Serialize)]
 #[cfg_attr(feature = "schemars", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
-pub struct NoCssEmptyBlockOptions {
+pub struct NoEmptyBlockOptions {
     pub allow_comments: bool,
 }
 
-impl Default for NoCssEmptyBlockOptions {
+impl Default for NoEmptyBlockOptions {
     fn default() -> Self {
         Self {
             allow_comments: true,
@@ -82,11 +82,11 @@ impl Default for NoCssEmptyBlockOptions {
     }
 }
 
-impl Rule for NoCssEmptyBlock {
+impl Rule for NoEmptyBlock {
     type Query = Ast<CssBlockLike>;
     type State = CssBlockLike;
     type Signals = Option<Self::State>;
-    type Options = NoCssEmptyBlockOptions;
+    type Options = NoEmptyBlockOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let node = ctx.query();

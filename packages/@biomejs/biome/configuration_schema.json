@@ -1599,13 +1599,13 @@
 			},
 			"additionalProperties": false
 		},
-		"NoCssEmptyBlockConfiguration": {
+		"NoEmptyBlockConfiguration": {
 			"anyOf": [
 				{ "$ref": "#/definitions/RulePlainConfiguration" },
-				{ "$ref": "#/definitions/RuleWithNoCssEmptyBlockOptions" }
+				{ "$ref": "#/definitions/RuleWithNoEmptyBlockOptions" }
 			]
 		},
-		"NoCssEmptyBlockOptions": {
+		"NoEmptyBlockOptions": {
 			"type": "object",
 			"required": ["allowComments"],
 			"properties": { "allowComments": { "type": "boolean" } },
@@ -1630,13 +1630,6 @@
 					"description": "Disallow the use of Math.min and Math.max to clamp a value where the result itself is constant.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleFixConfiguration_for_Null" },
-						{ "type": "null" }
-					]
-				},
-				"noCssEmptyBlock": {
-					"description": "Disallow CSS empty blocks.",
-					"anyOf": [
-						{ "$ref": "#/definitions/NoCssEmptyBlockConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -1679,6 +1672,13 @@
 					"description": "Disallow duplicate selectors within keyframe blocks.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noEmptyBlock": {
+					"description": "Disallow CSS empty blocks.",
+					"anyOf": [
+						{ "$ref": "#/definitions/NoEmptyBlockConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -2354,7 +2354,7 @@
 			},
 			"additionalProperties": false
 		},
-		"RuleWithNoCssEmptyBlockOptions": {
+		"RuleWithNoEmptyBlockOptions": {
 			"type": "object",
 			"required": ["level", "options"],
 			"properties": {
@@ -2364,7 +2364,7 @@
 				},
 				"options": {
 					"description": "Rule's options",
-					"allOf": [{ "$ref": "#/definitions/NoCssEmptyBlockOptions" }]
+					"allOf": [{ "$ref": "#/definitions/NoEmptyBlockOptions" }]
 				}
 			},
 			"additionalProperties": false

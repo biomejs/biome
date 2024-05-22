@@ -3309,9 +3309,6 @@ pub struct Nursery {
     #[doc = "Disallow the use of Math.min and Math.max to clamp a value where the result itself is constant."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_constant_math_min_max_clamp: Option<RuleFixConfiguration<NoConstantMathMinMaxClamp>>,
-    #[doc = "Disallow CSS empty blocks."]
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_css_empty_block: Option<RuleConfiguration<NoCssEmptyBlock>>,
     #[doc = "Disallow using a callback in asynchronous tests and hooks."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_done_callback: Option<RuleConfiguration<NoDoneCallback>>,
@@ -3331,6 +3328,9 @@ pub struct Nursery {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_duplicate_selectors_keyframe_block:
         Option<RuleConfiguration<NoDuplicateSelectorsKeyframeBlock>>,
+    #[doc = "Disallow CSS empty blocks."]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub no_empty_block: Option<RuleConfiguration<NoEmptyBlock>>,
     #[doc = "Disallow variables from evolving into any type through reassignments."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_evolving_any: Option<RuleConfiguration<NoEvolvingAny>>,
@@ -3452,13 +3452,13 @@ impl Nursery {
     pub(crate) const GROUP_RULES: &'static [&'static str] = &[
         "noConsole",
         "noConstantMathMinMaxClamp",
-        "noCssEmptyBlock",
         "noDoneCallback",
         "noDuplicateAtImportRules",
         "noDuplicateElseIf",
         "noDuplicateFontNames",
         "noDuplicateJsonKeys",
         "noDuplicateSelectorsKeyframeBlock",
+        "noEmptyBlock",
         "noEvolvingAny",
         "noFlatMapIdentity",
         "noImportantInKeyframe",
@@ -3493,13 +3493,13 @@ impl Nursery {
         "useTopLevelRegex",
     ];
     const RECOMMENDED_RULES: &'static [&'static str] = &[
-        "noCssEmptyBlock",
         "noDoneCallback",
         "noDuplicateAtImportRules",
         "noDuplicateElseIf",
         "noDuplicateFontNames",
         "noDuplicateJsonKeys",
         "noDuplicateSelectorsKeyframeBlock",
+        "noEmptyBlock",
         "noEvolvingAny",
         "noFlatMapIdentity",
         "noImportantInKeyframe",
@@ -3600,37 +3600,37 @@ impl Nursery {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[1]));
             }
         }
-        if let Some(rule) = self.no_css_empty_block.as_ref() {
+        if let Some(rule) = self.no_done_callback.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[2]));
             }
         }
-        if let Some(rule) = self.no_done_callback.as_ref() {
+        if let Some(rule) = self.no_duplicate_at_import_rules.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[3]));
             }
         }
-        if let Some(rule) = self.no_duplicate_at_import_rules.as_ref() {
+        if let Some(rule) = self.no_duplicate_else_if.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[4]));
             }
         }
-        if let Some(rule) = self.no_duplicate_else_if.as_ref() {
+        if let Some(rule) = self.no_duplicate_font_names.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[5]));
             }
         }
-        if let Some(rule) = self.no_duplicate_font_names.as_ref() {
+        if let Some(rule) = self.no_duplicate_json_keys.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[6]));
             }
         }
-        if let Some(rule) = self.no_duplicate_json_keys.as_ref() {
+        if let Some(rule) = self.no_duplicate_selectors_keyframe_block.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[7]));
             }
         }
-        if let Some(rule) = self.no_duplicate_selectors_keyframe_block.as_ref() {
+        if let Some(rule) = self.no_empty_block.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[8]));
             }
@@ -3809,37 +3809,37 @@ impl Nursery {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[1]));
             }
         }
-        if let Some(rule) = self.no_css_empty_block.as_ref() {
+        if let Some(rule) = self.no_done_callback.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[2]));
             }
         }
-        if let Some(rule) = self.no_done_callback.as_ref() {
+        if let Some(rule) = self.no_duplicate_at_import_rules.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[3]));
             }
         }
-        if let Some(rule) = self.no_duplicate_at_import_rules.as_ref() {
+        if let Some(rule) = self.no_duplicate_else_if.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[4]));
             }
         }
-        if let Some(rule) = self.no_duplicate_else_if.as_ref() {
+        if let Some(rule) = self.no_duplicate_font_names.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[5]));
             }
         }
-        if let Some(rule) = self.no_duplicate_font_names.as_ref() {
+        if let Some(rule) = self.no_duplicate_json_keys.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[6]));
             }
         }
-        if let Some(rule) = self.no_duplicate_json_keys.as_ref() {
+        if let Some(rule) = self.no_duplicate_selectors_keyframe_block.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[7]));
             }
         }
-        if let Some(rule) = self.no_duplicate_selectors_keyframe_block.as_ref() {
+        if let Some(rule) = self.no_empty_block.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[8]));
             }
@@ -4048,10 +4048,6 @@ impl Nursery {
                 .no_constant_math_min_max_clamp
                 .as_ref()
                 .map(|conf| (conf.level(), conf.get_options())),
-            "noCssEmptyBlock" => self
-                .no_css_empty_block
-                .as_ref()
-                .map(|conf| (conf.level(), conf.get_options())),
             "noDoneCallback" => self
                 .no_done_callback
                 .as_ref()
@@ -4074,6 +4070,10 @@ impl Nursery {
                 .map(|conf| (conf.level(), conf.get_options())),
             "noDuplicateSelectorsKeyframeBlock" => self
                 .no_duplicate_selectors_keyframe_block
+                .as_ref()
+                .map(|conf| (conf.level(), conf.get_options())),
+            "noEmptyBlock" => self
+                .no_empty_block
                 .as_ref()
                 .map(|conf| (conf.level(), conf.get_options())),
             "noEvolvingAny" => self
@@ -4219,11 +4219,6 @@ impl Nursery {
                     rule_conf.set_level(severity);
                 }
             }
-            "noCssEmptyBlock" => {
-                if let Some(rule_conf) = &mut self.no_css_empty_block {
-                    rule_conf.set_level(severity);
-                }
-            }
             "noDoneCallback" => {
                 if let Some(rule_conf) = &mut self.no_done_callback {
                     rule_conf.set_level(severity);
@@ -4251,6 +4246,11 @@ impl Nursery {
             }
             "noDuplicateSelectorsKeyframeBlock" => {
                 if let Some(rule_conf) = &mut self.no_duplicate_selectors_keyframe_block {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "noEmptyBlock" => {
+                if let Some(rule_conf) = &mut self.no_empty_block {
                     rule_conf.set_level(severity);
                 }
             }
