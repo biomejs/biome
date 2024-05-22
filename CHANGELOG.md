@@ -200,6 +200,10 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 - Add support for LSP Workspaces
 
+#### Bug fixes
+
+- Fixes [#2781](https://github.com/biomejs/biome/issues/2781), by correctly computing the configuration to apply to a specific file. Contributed by @ematipico
+
 ### Formatter
 
 #### Bug fixes
@@ -214,8 +218,8 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 #### New features
 
-- Add [nursery/useImportExtensions](https://biomejs.dev/linter/rules/use-import-extensions/).
-  Contributed by @minht11
+- Add [nursery/useThrowOnlyError](https://biomejs.dev/linter/rules/use_throw_only_error/). Contributed by @minht11
+- Add [nursery/useImportExtensions](https://biomejs.dev/linter/rules/use-import-extensions/). Contributed by @minht11
 
 - [useNamingConvention](https://biomejs.dev/linter/rules/use-naming-convention/) now supports an option to enforce custom conventions ([#1900](https://github.com/biomejs/biome/issues/1900)).
 

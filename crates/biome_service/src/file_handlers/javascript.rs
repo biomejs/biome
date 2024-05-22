@@ -616,8 +616,6 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
 }
 
 /// If applies all the safe fixes to the given syntax tree.
-///
-/// If `indent_style` is [Some], it means that the formatting should be applied at the end
 pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceError> {
     let FixAllParams {
         parse,
