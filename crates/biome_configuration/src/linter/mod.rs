@@ -335,6 +335,15 @@ impl FromStr for RuleSelector {
     }
 }
 
+impl std::fmt::Display for RuleSelector {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            RuleSelector::Group(group) => write!(f, "{}", group.as_str()),
+            RuleSelector::Rule(group, rule) => write!(f, "{}/{rule}", group.as_str()),
+        }
+    }
+}
+
 impl serde::Serialize for RuleSelector {
     fn serialize<S: serde::Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         match self {

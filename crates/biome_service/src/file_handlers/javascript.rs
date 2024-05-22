@@ -379,31 +379,7 @@ pub(crate) fn lint(params: LintParams) -> LintResults {
             // Compute final rules (taking `overrides` into account)
             let mut rules = settings.as_rules(params.path.as_path());
 
-            let enabled_rules = if let Some(rule) = params.rule {
-                // We execute a single rule or group because the `--rule` filter is specified.
-                match rule {
-                    RuleSelector::Group(group) => {
-                        if let Some(rules) = rules.as_mut() {
-                            // Ensure that the recommended field is not set to `false`.
-                            rules.to_mut().set_recommended();
-                        }
-                        rules
-                            .as_ref()
-                            .map(|rules| rules.as_enabled_rules())
-                            .unwrap_or_default()
-                            .into_iter()
-                            .filter(|rule_filter| rule_filter.group() == group.as_str())
-                            .collect()
-                    }
-                    RuleSelector::Rule(group, rule_name) => {
-                        if let Some(rules) = rules.as_mut() {
-                            // Set the severity level of the rule to its default.
-                            rules.to_mut().set_default_severity(group, rule_name);
-                        }
-                        vec![rule.into()]
-                    }
-                }
-            } else {
+            let enabled_rules = if params.only.is_empty() && params.skip.is_empty() {
                 let mut rule_filter_list = rules
                     .as_ref()
                     .map(|rules| rules.as_enabled_rules())
@@ -413,7 +389,6 @@ pub(crate) fn lint(params: LintParams) -> LintResults {
                 if settings.organize_imports.enabled && !params.categories.is_syntax() {
                     rule_filter_list.push(RuleFilter::Rule("correctness", "organizeImports"));
                 }
-
                 rule_filter_list.push(RuleFilter::Rule(
                     "correctness",
                     "noDuplicatePrivateClassMembers",
@@ -422,6 +397,50 @@ pub(crate) fn lint(params: LintParams) -> LintResults {
                 rule_filter_list.push(RuleFilter::Rule("correctness", "noSuperWithoutExtends"));
                 rule_filter_list.push(RuleFilter::Rule("nursery", "noSuperWithoutExtends"));
                 rule_filter_list
+            } else {
+                // We execute a single rule or group because the `--only` filter is specified.
+                let mut enabled_rules = rustc_hash::FxHashSet::default();
+                let mut only_groups = rustc_hash::FxHashSet::default();
+                let skipped = params
+                    .skip
+                    .into_iter()
+                    .map(|selector| selector.into())
+                    .collect::<rustc_hash::FxHashSet<RuleFilter>>();
+                for selector in &params.only {
+                    match selector {
+                        RuleSelector::Group(group) => {
+                            only_groups.insert(group.as_str());
+                        }
+                        RuleSelector::Rule(group, rule_name) => {
+                            if let Some(rules) = rules.as_mut() {
+                                // Set the severity level of the rule to its default.
+                                rules
+                                    .to_mut()
+                                    .set_default_severity_if_off(*group, rule_name);
+                            }
+                            enabled_rules.insert((*selector).into());
+                        }
+                    }
+                }
+                if !skipped.is_empty() || !only_groups.is_empty() {
+                    if let Some(rules) = rules.as_mut() {
+                        // Ensure that the recommended field is not set to `false`.
+                        rules.to_mut().set_recommended();
+                    }
+                    enabled_rules.extend(
+                        rules
+                            .as_ref()
+                            .map(|rules| rules.as_enabled_rules())
+                            .unwrap_or_default()
+                            .into_iter()
+                            .filter(|rule_filter| {
+                                (params.only.is_empty()
+                                    || only_groups.contains(&rule_filter.group()))
+                                    && !skipped.iter().any(|filter| filter.contains(*rule_filter))
+                            }),
+                    );
+                }
+                enabled_rules.into_iter().collect()
             };
 
             let mut filter = AnalysisFilter::from_enabled_rules(Some(enabled_rules.as_slice()));
@@ -437,7 +456,7 @@ pub(crate) fn lint(params: LintParams) -> LintResults {
             // - it is a syntax-only analyzer pass, or
             // - if a single rule is run.
             let ignores_suppression_comment =
-                !filter.categories.contains(RuleCategories::LINT) || params.rule.is_some();
+                !filter.categories.contains(RuleCategories::LINT) || !params.only.is_empty();
 
             info!("Analyze file {}", params.path.display());
             let (_, analyze_diagnostics) = analyze(

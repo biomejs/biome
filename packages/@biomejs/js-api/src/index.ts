@@ -199,6 +199,8 @@ export class Biome {
 				path,
 				categories: ["Syntax"],
 				max_diagnostics: Number.MAX_SAFE_INTEGER,
+				only: [],
+				skip: [],
 			});
 
 			const hasErrors = diagnostics.some(
@@ -269,6 +271,8 @@ export class Biome {
 				path,
 				categories: ["Syntax", "Lint"],
 				max_diagnostics: Number.MAX_SAFE_INTEGER,
+				only: [],
+				skip: [],
 			});
 
 			return {

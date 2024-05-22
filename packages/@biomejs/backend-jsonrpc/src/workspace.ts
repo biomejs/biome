@@ -2141,8 +2141,9 @@ export interface GetFormatterIRParams {
 export interface PullDiagnosticsParams {
 	categories: RuleCategories;
 	max_diagnostics: number;
+	only: RuleCode[];
 	path: BiomePath;
-	rule?: RuleCode;
+	skip: RuleCode[];
 }
 export type RuleCategories = RuleCategory[];
 export type RuleCode = string;

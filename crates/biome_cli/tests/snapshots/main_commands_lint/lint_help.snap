@@ -7,7 +7,8 @@ expression: content
 ```block
 Run various checks on a set of files.
 
-Usage: lint [--write] [--unsafe] [--rule=<GROUP|RULE>] [--staged] [--changed] [--since=REF] [PATH]...
+Usage: lint [--write] [--unsafe] [--only=<GROUP|RULE>]... [--skip=<GROUP|RULE>]... [--staged] [--changed
+] [--since=REF] [PATH]...
 
 Set of properties to integrate Biome with a VCS software.
         --vcs-client-kind=<git>  The kind of client.
@@ -71,14 +72,18 @@ Available options:
         --apply               Alias for `--write`, writes safe fixes (deprecated, use `--write`)
         --apply-unsafe        Alias for `--write --unsafe`, writes safe and unsafe fixes (deprecated,
                               use `--write --unsafe`)
-        --rule=<GROUP|RULE>   Run only the given rule or rule group.
+        --only=<GROUP|RULE>   Run only the given rule or rule group.
                               The option overrides the Biome configuration file as follows:
                               - When a rule is passed, its severity level is set to `error' if it is
                               a recommended rule, or `warn' otherwise.
                               - When a rule group is passed, the `recommended` flag is enabled, but if
                               the `all` flag is enabled.
-                              Example: `biome lint --rule=correctness/noUnusedVariables`
-                              Example: `biome lint --rule=suspicious`
+                              Example: `biome lint --only=correctness/noUnusedVariables --only=suspicious`
+        --skip=<GROUP|RULE>   Skip the given rule or rule group.
+                              The option overrides the Biome configuration file as follows:
+                              - When a rule is passed, its severity level is set to `off'.
+                              - When a rule group is passed, all rules of the group are skipped.
+                              Example: `biome lint --skip=correctness/noUnusedVariables --skip=suspicious`
         --stdin-file-path=PATH  Use this option when you want to format code piped from `stdin`, and
                               print the output to `stdout`.
                               The file doesn't need to exist on disk, what matters is the extension of

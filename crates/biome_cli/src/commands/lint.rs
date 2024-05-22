@@ -33,7 +33,8 @@ pub(crate) struct LintCommandPayload {
     pub(crate) vcs_configuration: Option<PartialVcsConfiguration>,
     pub(crate) files_configuration: Option<PartialFilesConfiguration>,
     pub(crate) paths: Vec<OsString>,
-    pub(crate) rule: Option<RuleSelector>,
+    pub(crate) only: Vec<RuleSelector>,
+    pub(crate) skip: Vec<RuleSelector>,
     pub(crate) stdin_file_path: Option<String>,
     pub(crate) staged: bool,
     pub(crate) changed: bool,
@@ -54,7 +55,8 @@ pub(crate) fn lint(session: CliSession, payload: LintCommandPayload) -> Result<(
         cli_options,
         mut linter_configuration,
         mut paths,
-        rule,
+        only,
+        skip,
         stdin_file_path,
         vcs_configuration,
         files_configuration,
@@ -66,6 +68,15 @@ pub(crate) fn lint(session: CliSession, payload: LintCommandPayload) -> Result<(
         json_linter,
     } = payload;
     setup_cli_subscriber(cli_options.log_level, cli_options.log_kind);
+
+    if !skip.is_empty() {
+        if let Some(selector) = only.iter().find(|selector| skip.contains(selector)) {
+            return Err(CliDiagnostic::incompatible_arguments(
+                format!("--only={selector}"),
+                format!("--skip={selector}"),
+            ));
+        }
+    }
 
     let fix_file_mode = determine_fix_file_mode(
         FixFileModeOptions {
@@ -161,7 +172,8 @@ pub(crate) fn lint(session: CliSession, payload: LintCommandPayload) -> Result<(
         Execution::new(TraversalMode::Lint {
             fix_file_mode,
             stdin,
-            rule,
+            only,
+            skip,
         })
         .set_report(&cli_options),
         session,

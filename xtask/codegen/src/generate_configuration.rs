@@ -258,7 +258,7 @@ pub(crate) fn generate_rules_configuration(mode: Mode) -> Result<()> {
             }
 
             /// Set the severity of the rule to its default.
-            pub fn set_default_severity(&mut self, group: RuleGroup, rule_name: &str) {
+            pub fn set_default_severity_if_off(&mut self, group: RuleGroup, rule_name: &str) {
                 match group {
                     #(
                         RuleGroup::#group_pascal_idents => {
@@ -268,7 +268,7 @@ pub(crate) fn generate_rules_configuration(mode: Mode) -> Result<()> {
                                 } else {
                                     RulePlainConfiguration::Warn
                                 };
-                                group.set_severity(rule_name, default_severity);
+                                group.set_severity_if_off(rule_name, default_severity);
                             }
                         }
                     )*
@@ -372,7 +372,7 @@ fn generate_struct(group: &str, rules: &BTreeMap<&'static str, RuleMetadata>) ->
     let mut rule_enabled_check_line = Vec::new();
     let mut rule_disabled_check_line = Vec::new();
     let mut get_rule_configuration_line = Vec::new();
-    let mut set_severity = Vec::new();
+    let mut set_severity_if_off = Vec::new();
 
     for (index, (rule, metadata)) in rules.iter().enumerate() {
         let summary = {
@@ -475,10 +475,12 @@ fn generate_struct(group: &str, rules: &BTreeMap<&'static str, RuleMetadata>) ->
         get_rule_configuration_line.push(quote! {
             #rule => self.#rule_identifier.as_ref().map(|conf| (conf.level(), conf.get_options()))
         });
-        set_severity.push(quote! {
+        set_severity_if_off.push(quote! {
             #rule => {
                 if let Some(rule_conf) = &mut self.#rule_identifier {
-                    rule_conf.set_level(severity);
+                    if matches!(rule_conf.level(), RulePlainConfiguration::Off) {
+                        rule_conf.set_level(severity);
+                    }
                 }
             }
         });
@@ -616,9 +618,9 @@ fn generate_struct(group: &str, rules: &BTreeMap<&'static str, RuleMetadata>) ->
                 }
             }
 
-            pub(crate) fn set_severity(&mut self, rule_name: &str, severity: RulePlainConfiguration) {
+            pub(crate) fn set_severity_if_off(&mut self, rule_name: &str, severity: RulePlainConfiguration) {
                 match rule_name {
-                    #( #set_severity ),*
+                    #( #set_severity_if_off ),*
                     _ => {}
                 }
             }

@@ -201,11 +201,21 @@ pub enum BiomeCommand {
         ///
         /// - When a rule group is passed, the `recommended` flag is enabled, but if the `all` flag is enabled.
         ///
-        /// Example: `biome lint --rule=correctness/noUnusedVariables`
+        /// Example: `biome lint --only=correctness/noUnusedVariables --only=suspicious`
+        #[bpaf(long("only"), argument("GROUP|RULE"))]
+        only: Vec<RuleSelector>,
+
+        /// Skip the given rule or rule group.
         ///
-        /// Example: `biome lint --rule=suspicious`
-        #[bpaf(long("rule"), argument("GROUP|RULE"))]
-        rule: Option<RuleSelector>,
+        /// The option overrides the Biome configuration file as follows:
+        ///
+        /// - When a rule is passed, its severity level is set to `off'.
+        ///
+        /// - When a rule group is passed, all rules of the group are skipped.
+        ///
+        /// Example: `biome lint --skip=correctness/noUnusedVariables --skip=suspicious`
+        #[bpaf(long("skip"), argument("GROUP|RULE"))]
+        skip: Vec<RuleSelector>,
 
         /// Use this option when you want to format code piped from `stdin`, and print the output to `stdout`.
         ///

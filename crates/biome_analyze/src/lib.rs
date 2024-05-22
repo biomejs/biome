@@ -795,6 +795,19 @@ impl<'a> RuleFilter<'a> {
             }
         }
     }
+
+    /// Returns `true` if the current rule filter is more general than `other`.
+    pub fn contains(self, other: Self) -> bool {
+        match self {
+            RuleFilter::Group(group) => group == other.group(),
+            RuleFilter::Rule(group, rule) => match other {
+                RuleFilter::Group(_) => false,
+                RuleFilter::Rule(other_group, other_rule) => {
+                    group == other_group && rule == other_rule
+                }
+            },
+        }
+    }
 }
 
 impl<'a> Debug for RuleFilter<'a> {

@@ -1,0 +1,20 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: content
+---
+## `check.js`
+
+```js
+
+```
+
+# Termination Message
+
+```block
+flags/invalid ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Incompatible arguments --only=suspicious/noDebugger and --skip=suspicious/noDebugger
+  
+
+
+```

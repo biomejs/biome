@@ -57,17 +57,19 @@ pub(crate) fn lint_with_guard<'ctx>(
             }
 
             let max_diagnostics = ctx.remaining_diagnostics.load(Ordering::Relaxed);
-            let rule = if let TraversalMode::Lint { rule, .. } = ctx.execution.traversal_mode() {
-                *rule
-            } else {
-                None
-            };
+            let (only, skip) =
+                if let TraversalMode::Lint { only, skip, .. } = ctx.execution.traversal_mode() {
+                    (only.clone(), skip.clone())
+                } else {
+                    (Vec::new(), Vec::new())
+                };
             let pull_diagnostics_result = workspace_file
                 .guard()
                 .pull_diagnostics(
                     RuleCategories::LINT | RuleCategories::SYNTAX,
                     max_diagnostics.into(),
-                    rule,
+                    only,
+                    skip,
                 )
                 .with_file_path_and_code(
                     workspace_file.path.display().to_string(),
