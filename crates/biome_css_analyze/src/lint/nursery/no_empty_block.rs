@@ -1,9 +1,7 @@
 use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
 use biome_css_syntax::stmt_ext::CssBlockLike;
-use biome_deserialize_macros::Deserializable;
 use biome_rowan::AstNode;
-use serde::{Deserialize, Serialize};
 
 declare_rule! {
     /// Disallow CSS empty blocks.
@@ -44,20 +42,6 @@ declare_rule! {
     /// @media print { a { color: pink; } }
     /// ```
     ///
-    /// ## Options
-    ///
-    /// If false, exclude comments from being treated as content inside of a block.
-    ///
-    /// ```json
-    /// {
-    ///     "noEmptyBlock": {
-    ///         "options": {
-    ///           "allowComments": false
-    ///         }
-    ///     }
-    /// }
-    /// ```
-    ///
     pub NoEmptyBlock {
         version: "next",
         name: "noEmptyBlock",
@@ -67,41 +51,15 @@ declare_rule! {
     }
 }
 
-#[derive(Debug, Clone, Deserialize, Deserializable, Eq, PartialEq, Serialize)]
-#[cfg_attr(feature = "schemars", derive(schemars::JsonSchema))]
-#[serde(rename_all = "camelCase", deny_unknown_fields)]
-pub struct NoEmptyBlockOptions {
-    pub allow_comments: bool,
-}
-
-impl Default for NoEmptyBlockOptions {
-    fn default() -> Self {
-        Self {
-            allow_comments: true,
-        }
-    }
-}
-
 impl Rule for NoEmptyBlock {
     type Query = Ast<CssBlockLike>;
     type State = CssBlockLike;
     type Signals = Option<Self::State>;
-    type Options = NoEmptyBlockOptions;
+    type Options = ();
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let node = ctx.query();
-        let options = ctx.options();
-        let allow_comments_inside_empty_block = options.allow_comments;
-        if allow_comments_inside_empty_block {
-            let has_comments_inside_block = node.r_curly_token().ok()?.has_leading_comments()
-                || node.l_curly_token().ok()?.has_trailing_comments();
-
-            if !node.is_empty() || has_comments_inside_block {
-                return None;
-            } else {
-                return Some(node.clone());
-            }
-        } else if node.is_empty() {
+        if node.is_empty() {
             return Some(node.clone());
         }
 
@@ -115,7 +73,7 @@ impl Rule for NoEmptyBlock {
                 rule_category!(),
                 span,
                 markup! {
-                    "Empty blocks aren't allowed."
+                    "Empty block isn't allowed."
                 },
             )
             .note(markup! {

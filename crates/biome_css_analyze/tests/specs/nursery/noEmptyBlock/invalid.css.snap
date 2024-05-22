@@ -63,9 +63,9 @@ a {
 
 # Diagnostics
 ```
-invalid.css:2:3 lint/nursery/noCssEmptyBlock ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:2:3 lint/nursery/noEmptyBlock ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Empty blocks aren't allowed.
+  ! Empty block isn't allowed.
   
     1 │ /* CssDeclarationOrRuleBlock */
   > 2 │ a {}
@@ -79,9 +79,9 @@ invalid.css:2:3 lint/nursery/noCssEmptyBlock ━━━━━━━━━━━�
 ```
 
 ```
-invalid.css:3:3 lint/nursery/noCssEmptyBlock ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:3:3 lint/nursery/noEmptyBlock ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Empty blocks aren't allowed.
+  ! Empty block isn't allowed.
   
     1 │ /* CssDeclarationOrRuleBlock */
     2 │ a {}
@@ -96,9 +96,9 @@ invalid.css:3:3 lint/nursery/noCssEmptyBlock ━━━━━━━━━━━�
 ```
 
 ```
-invalid.css:4:3 lint/nursery/noCssEmptyBlock ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:4:3 lint/nursery/noEmptyBlock ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Empty blocks aren't allowed.
+  ! Empty block isn't allowed.
   
     2 │ a {}
     3 │ a { }
@@ -116,9 +116,9 @@ invalid.css:4:3 lint/nursery/noCssEmptyBlock ━━━━━━━━━━━�
 ```
 
 ```
-invalid.css:8:4 lint/nursery/noCssEmptyBlock ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:8:4 lint/nursery/noEmptyBlock ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Empty blocks aren't allowed.
+  ! Empty block isn't allowed.
   
      6 │ }
      7 │ 
@@ -133,9 +133,9 @@ invalid.css:8:4 lint/nursery/noCssEmptyBlock ━━━━━━━━━━━�
 ```
 
 ```
-invalid.css:9:4 lint/nursery/noCssEmptyBlock ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:9:4 lint/nursery/noEmptyBlock ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Empty blocks aren't allowed.
+  ! Empty block isn't allowed.
   
      8 │ .b {}
    > 9 │ .b { }
@@ -149,9 +149,9 @@ invalid.css:9:4 lint/nursery/noCssEmptyBlock ━━━━━━━━━━━�
 ```
 
 ```
-invalid.css:10:4 lint/nursery/noCssEmptyBlock ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:10:4 lint/nursery/noEmptyBlock ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Empty blocks aren't allowed.
+  ! Empty block isn't allowed.
   
      8 │ .b {}
      9 │ .b { }
@@ -169,9 +169,9 @@ invalid.css:10:4 lint/nursery/noCssEmptyBlock ━━━━━━━━━━━�
 ```
 
 ```
-invalid.css:15:14 lint/nursery/noCssEmptyBlock ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:15:14 lint/nursery/noEmptyBlock ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Empty blocks aren't allowed.
+  ! Empty block isn't allowed.
   
     14 │ /* CssRuleBlock */
   > 15 │ @media print {}
@@ -185,9 +185,9 @@ invalid.css:15:14 lint/nursery/noCssEmptyBlock ━━━━━━━━━━━
 ```
 
 ```
-invalid.css:16:14 lint/nursery/noCssEmptyBlock ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:16:14 lint/nursery/noEmptyBlock ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Empty blocks aren't allowed.
+  ! Empty block isn't allowed.
   
     14 │ /* CssRuleBlock */
     15 │ @media print {}
@@ -205,9 +205,9 @@ invalid.css:16:14 lint/nursery/noCssEmptyBlock ━━━━━━━━━━━
 ```
 
 ```
-invalid.css:19:18 lint/nursery/noCssEmptyBlock ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:19:18 lint/nursery/noEmptyBlock ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Empty blocks aren't allowed.
+  ! Empty block isn't allowed.
   
     18 │ }
   > 19 │ @media print { a {} }
@@ -221,9 +221,9 @@ invalid.css:19:18 lint/nursery/noCssEmptyBlock ━━━━━━━━━━━
 ```
 
 ```
-invalid.css:22:30 lint/nursery/noCssEmptyBlock ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:22:30 lint/nursery/noEmptyBlock ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Empty blocks aren't allowed.
+  ! Empty block isn't allowed.
   
     21 │ /* CssDeclarationBlock */
   > 22 │ @font-palette-values --ident {}
@@ -237,9 +237,9 @@ invalid.css:22:30 lint/nursery/noCssEmptyBlock ━━━━━━━━━━━
 ```
 
 ```
-invalid.css:23:12 lint/nursery/noCssEmptyBlock ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:23:12 lint/nursery/noEmptyBlock ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Empty blocks aren't allowed.
+  ! Empty block isn't allowed.
   
     21 │ /* CssDeclarationBlock */
     22 │ @font-palette-values --ident {}
@@ -254,9 +254,9 @@ invalid.css:23:12 lint/nursery/noCssEmptyBlock ━━━━━━━━━━━
 ```
 
 ```
-invalid.css:26:20 lint/nursery/noCssEmptyBlock ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:26:20 lint/nursery/noEmptyBlock ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Empty blocks aren't allowed.
+  ! Empty block isn't allowed.
   
     25 │ /* CssKeyframesBlock */
   > 26 │ @keyframes slidein {}
@@ -270,9 +270,9 @@ invalid.css:26:20 lint/nursery/noCssEmptyBlock ━━━━━━━━━━━
 ```
 
 ```
-invalid.css:28:10 lint/nursery/noCssEmptyBlock ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:28:10 lint/nursery/noEmptyBlock ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Empty blocks aren't allowed.
+  ! Empty block isn't allowed.
   
     26 │ @keyframes slidein {}
     27 │ @keyframes slidein {
@@ -289,9 +289,9 @@ invalid.css:28:10 lint/nursery/noCssEmptyBlock ━━━━━━━━━━━
 ```
 
 ```
-invalid.css:38:13 lint/nursery/noCssEmptyBlock ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:38:13 lint/nursery/noEmptyBlock ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Empty blocks aren't allowed.
+  ! Empty block isn't allowed.
   
     36 │ /* CssFontFeatureValuesBlock */
     37 │ @font-feature-values Font One {
@@ -309,9 +309,9 @@ invalid.css:38:13 lint/nursery/noCssEmptyBlock ━━━━━━━━━━━
 ```
 
 ```
-invalid.css:44:7 lint/nursery/noCssEmptyBlock ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:44:7 lint/nursery/noEmptyBlock ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Empty blocks aren't allowed.
+  ! Empty block isn't allowed.
   
     43 │ /* CssPageAtRuleBlock */
   > 44 │ @page {}
@@ -325,9 +325,9 @@ invalid.css:44:7 lint/nursery/noCssEmptyBlock ━━━━━━━━━━━�
 ```
 
 ```
-invalid.css:45:14 lint/nursery/noCssEmptyBlock ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:45:14 lint/nursery/noEmptyBlock ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Empty blocks aren't allowed.
+  ! Empty block isn't allowed.
   
     43 │ /* CssPageAtRuleBlock */
     44 │ @page {}
@@ -343,9 +343,9 @@ invalid.css:45:14 lint/nursery/noCssEmptyBlock ━━━━━━━━━━━
 ```
 
 ```
-invalid.css:50:28 lint/nursery/noCssEmptyBlock ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:50:28 lint/nursery/noEmptyBlock ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Empty blocks aren't allowed.
+  ! Empty block isn't allowed.
   
     49 │ /* CssDeclarationOrAtRuleBlock */
   > 50 │ @page :left { @left-middle {} background: red; }
@@ -359,9 +359,9 @@ invalid.css:50:28 lint/nursery/noCssEmptyBlock ━━━━━━━━━━━
 ```
 
 ```
-invalid.css:52:16 lint/nursery/noCssEmptyBlock ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:52:16 lint/nursery/noEmptyBlock ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Empty blocks aren't allowed.
+  ! Empty block isn't allowed.
   
     50 │ @page :left { @left-middle {} background: red; }
     51 │ @page {
