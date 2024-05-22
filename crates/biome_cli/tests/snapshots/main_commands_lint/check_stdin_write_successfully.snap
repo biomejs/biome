@@ -13,5 +13,3 @@ import {a as a} from 'mod'; function f() {return{a}} class Foo {}
 ```block
 import {a} from 'mod'; function f() {return{a}} class Foo {}
 ```
-
-

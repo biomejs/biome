@@ -3,7 +3,6 @@ import type {
 	Diagnostic,
 	FixFileMode,
 	PartialConfiguration,
-	PullDiagnosticsResult,
 	Workspace,
 } from "@biomejs/wasm-nodejs";
 import { Distribution, type WasmModule, loadModule, wrapError } from "./wasm";

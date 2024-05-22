@@ -2217,7 +2217,7 @@ file2.js
 }
 
 #[test]
-fn check_stdin_apply_successfully() {
+fn check_stdin_write_successfully() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
@@ -2228,7 +2228,7 @@ fn check_stdin_apply_successfully() {
     let result = run_cli(
         DynRef::Borrowed(&mut fs),
         &mut console,
-        Args::from([("lint"), "--apply", ("--stdin-file-path"), ("mock.js")].as_slice()),
+        Args::from([("lint"), "--write", ("--stdin-file-path"), ("mock.js")].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -2249,7 +2249,7 @@ fn check_stdin_apply_successfully() {
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
-        "check_stdin_apply_successfully",
+        "check_stdin_write_successfully",
         fs,
         console,
         result,
@@ -2257,7 +2257,7 @@ fn check_stdin_apply_successfully() {
 }
 
 #[test]
-fn check_stdin_apply_unsafe_successfully() {
+fn check_stdin_write_unsafe_successfully() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
@@ -2271,7 +2271,8 @@ fn check_stdin_apply_unsafe_successfully() {
         Args::from(
             [
                 ("lint"),
-                "--apply-unsafe",
+                "--write",
+                "--unsafe",
                 ("--stdin-file-path"),
                 ("mock.js"),
             ]
@@ -2294,7 +2295,7 @@ fn check_stdin_apply_unsafe_successfully() {
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
-        "check_stdin_apply_unsafe_successfully",
+        "check_stdin_write_unsafe_successfully",
         fs,
         console,
         result,

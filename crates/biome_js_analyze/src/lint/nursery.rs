@@ -27,6 +27,7 @@ pub mod use_number_to_fixed_digits_argument;
 pub mod use_semantic_elements;
 pub mod use_sorted_classes;
 pub mod use_throw_new_error;
+pub mod use_throw_only_error;
 pub mod use_top_level_regex;
 
 declare_group! {
@@ -58,6 +59,7 @@ declare_group! {
             self :: use_semantic_elements :: UseSemanticElements ,
             self :: use_sorted_classes :: UseSortedClasses ,
             self :: use_throw_new_error :: UseThrowNewError ,
+            self :: use_throw_only_error :: UseThrowOnlyError ,
             self :: use_top_level_regex :: UseTopLevelRegex ,
         ]
      }

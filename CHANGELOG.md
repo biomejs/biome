@@ -86,6 +86,7 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
   The `biome migrate --fix` has the same behavior as `biome migrate --write`.
 
   This change allows these commands to write modifications in the same options.
+  With this change, the `--apply` and `--apply-unsafe` options are deprecated.
 
   Contributed by @unvalley
 
@@ -116,6 +117,12 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
   Contributed by @Conaclos
 
+- `biome migrate eslint` now propagates NodeJS errors to the user.
+
+  This will help users to identify why Biome is unable to load some ESLint configurations.
+
+  Contributed by @Conaclos
+
 - Add a new `--reporter` called `summary`. This reporter will print diagnostics in a different way, based on the tools (formatter, linter, etc.) that are executed.
   Import sorting and formatter shows the name of the files that require formatting. Instead, the linter will group the number of rules triggered and the number of errors/warnings:
 
@@ -140,6 +147,8 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
   lint/suspicious/noDebugger                              20 (20 error(s), 0 warning(s), 0 info(s))
   ```
   Contributed by @ematipico
+
+- `biome ci` now enforces printing the output using colours. If you were previously using `--colors=force`, you can remove it because it's automatically set. Contributed by @ematipico
 
 ### Configuration
 
@@ -199,12 +208,17 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 - Add support for LSP Workspaces
 
+#### Bug fixes
+
+- Fixes [#2781](https://github.com/biomejs/biome/issues/2781), by correctly computing the configuration to apply to a specific file. Contributed by @ematipico
+
 ### Formatter
 
 #### Bug fixes
 
 - Fix [#2470](https://github.com/biomejs/biome/issues/2470) by avoid introducing linebreaks in single line string interpolations. Contributed by @ah-yu
 - Resolve deadlocks by narrowing the scope of locks. Contributed by @mechairoi
+- Fix [#2782](https://github.com/biomejs/biome/issues/2782) by computing the enabled rules by taking the override settings into consideration. Contributed by @ematipico
 
 ### JavaScript APIs
 
@@ -212,8 +226,8 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 #### New features
 
-- Add [nursery/useImportExtensions](https://biomejs.dev/linter/rules/use-import-extensions/).
-  Contributed by @minht11
+- Add [nursery/useThrowOnlyError](https://biomejs.dev/linter/rules/use_throw_only_error/). Contributed by @minht11
+- Add [nursery/useImportExtensions](https://biomejs.dev/linter/rules/use-import-extensions/). Contributed by @minht11
 
 - [useNamingConvention](https://biomejs.dev/linter/rules/use-naming-convention/) now supports an option to enforce custom conventions ([#1900](https://github.com/biomejs/biome/issues/1900)).
 
@@ -245,7 +259,7 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
   }
   ```
 
-  Please, find more details in the [rule documentation](https://biomejs.dev/linter/rules/use-naming-convention/#conventions).
+  Please, find more details in the [rule documentation](https://biomejs.dev/linter/rules/use-naming-convention/#options).
 
   Contributed by @Conaclos
 
@@ -268,6 +282,7 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 - Add [nursery/noUnknownUnit](https://biomejs.dev/linter/rules/no-unknwon-unit). [#2535](https://github.com/biomejs/biome/issues/2535) Contributed by @neokidev
 - Add [nursery/noUnmatchableAnbSelector](https://biomejs.dev/linter/rules/no-unmatchable-anb-selector). [#2706](https://github.com/biomejs/biome/issues/2706) Contributed by @togami2864
 - Add [nursery/useGenericFontNames](https://biomejs.dev/linter/rules/use-generic-font-names). [#2573](https://github.com/biomejs/biome/pull/2573) Contributed by @togami2864
+- Add [nursery/noYodaExpression](https://biomejs.dev/linter/rules/no-yoda-expression/). Contributed by @michellocana
 
 #### Enhancements
 
@@ -357,6 +372,8 @@ z.object({})
     3 3 │   	<div class={`px-2 foo p-4 bar ${variable}`}/>
     4 4 │   </>
   ```
+- [noUndeclaredDependencies](https://biomejs.dev/linter/rules/no-undeclared-dependencies/) is correctly triggered when running `biome ci`. Contributed by @ematipico
+- [noUnusedVariables](https://biomejs.dev/linter/rules/no-unused-variables/) no longer panics when a certain combination of characters is typed. Contributed by @ematipico
 ### Parser
 
 #### Enhancements

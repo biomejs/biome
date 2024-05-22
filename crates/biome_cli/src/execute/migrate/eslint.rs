@@ -263,17 +263,10 @@ fn load_eslint_extends_config(
             }
         };
         // load ESLint preset
-        let Ok(node::Resolution {
+        let node::Resolution {
             content,
             resolved_path,
-        }) = node::load_config(&module_name)
-        else {
-            return Err(CliDiagnostic::MigrateError(MigrationDiagnostic {
-                reason: format!(
-                    "The module '{rest}' cannot be loaded. Make sure that the module exists."
-                ),
-            }));
-        };
+        } = node::load_config(&module_name)?;
         let deserialized = deserialize_from_json_str::<eslint_eslint::PluginExport>(
             &content,
             JsonParserOptions::default(),
@@ -299,17 +292,10 @@ fn load_eslint_extends_config(
         } else {
             EslintPackage::Config.resolve_name(name)
         };
-        let Ok(node::Resolution {
+        let node::Resolution {
             content,
             resolved_path,
-        }) = node::load_config(&module_name)
-        else {
-            return Err(CliDiagnostic::MigrateError(MigrationDiagnostic {
-                reason: format!(
-                    "The module '{module_name}' cannot be loaded. Make sure that the module exists."
-                ),
-            }));
-        };
+        } = node::load_config(&module_name)?;
         let deserialized = deserialize_from_json_str::<eslint_eslint::LegacyConfigData>(
             &content,
             JsonParserOptions::default(),
