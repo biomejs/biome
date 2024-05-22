@@ -3426,6 +3426,9 @@ pub struct Nursery {
     #[doc = "Require new when throwing an error."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_throw_new_error: Option<RuleFixConfiguration<UseThrowNewError>>,
+    #[doc = "Disallow throwing non-Error values."]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub use_throw_only_error: Option<RuleConfiguration<UseThrowOnlyError>>,
     #[doc = "Require regex literals to be declared at the top level."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_top_level_regex: Option<RuleConfiguration<UseTopLevelRegex>>,
@@ -3486,6 +3489,7 @@ impl Nursery {
         "useSemanticElements",
         "useSortedClasses",
         "useThrowNewError",
+        "useThrowOnlyError",
         "useTopLevelRegex",
     ];
     const RECOMMENDED_RULES: &'static [&'static str] = &[
@@ -3569,6 +3573,7 @@ impl Nursery {
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[37]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[38]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[39]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[40]),
     ];
     #[doc = r" Retrieves the recommended rules"]
     pub(crate) fn is_recommended_true(&self) -> bool {
@@ -3780,9 +3785,14 @@ impl Nursery {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[38]));
             }
         }
-        if let Some(rule) = self.use_top_level_regex.as_ref() {
+        if let Some(rule) = self.use_throw_only_error.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[39]));
+            }
+        }
+        if let Some(rule) = self.use_top_level_regex.as_ref() {
+            if rule.is_enabled() {
+                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[40]));
             }
         }
         index_set
@@ -3984,9 +3994,14 @@ impl Nursery {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[38]));
             }
         }
-        if let Some(rule) = self.use_top_level_regex.as_ref() {
+        if let Some(rule) = self.use_throw_only_error.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[39]));
+            }
+        }
+        if let Some(rule) = self.use_top_level_regex.as_ref() {
+            if rule.is_disabled() {
+                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[40]));
             }
         }
         index_set
@@ -4179,6 +4194,10 @@ impl Nursery {
                 .map(|conf| (conf.level(), conf.get_options())),
             "useThrowNewError" => self
                 .use_throw_new_error
+                .as_ref()
+                .map(|conf| (conf.level(), conf.get_options())),
+            "useThrowOnlyError" => self
+                .use_throw_only_error
                 .as_ref()
                 .map(|conf| (conf.level(), conf.get_options())),
             "useTopLevelRegex" => self
@@ -4382,6 +4401,11 @@ impl Nursery {
             }
             "useThrowNewError" => {
                 if let Some(rule_conf) = &mut self.use_throw_new_error {
+                    rule_conf.set_level(severity);
+                }
+            }
+            "useThrowOnlyError" => {
+                if let Some(rule_conf) = &mut self.use_throw_only_error {
                     rule_conf.set_level(severity);
                 }
             }
