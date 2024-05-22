@@ -83,18 +83,18 @@ pub(crate) fn check(
         cli_options.verbose,
     )?;
     let fs = &session.app.fs;
-    let (editorconfig, editorconfig_diagnostics) = {
-        let search_path = loaded_configuration
-            .directory_path
-            .clone()
-            .unwrap_or_else(|| fs.working_directory().unwrap_or_default());
-        load_editorconfig(fs, search_path)?
-    };
-    for diagnostic in editorconfig_diagnostics {
-        session.app.console.error(markup! {
-            {PrintDiagnostic::simple(&diagnostic)}
-        })
-    }
+    // let (editorconfig, editorconfig_diagnostics) = {
+    //     let search_path = loaded_configuration
+    //         .directory_path
+    //         .clone()
+    //         .unwrap_or_else(|| fs.working_directory().unwrap_or_default());
+    //     load_editorconfig(fs, search_path)?
+    // };
+    // for diagnostic in editorconfig_diagnostics {
+    //     session.app.console.error(markup! {
+    //         {PrintDiagnostic::simple(&diagnostic)}
+    //     })
+    // }
 
     resolve_manifest(&session)?;
 
