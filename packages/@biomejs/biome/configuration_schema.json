@@ -1801,6 +1801,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noYodaExpression": {
+					"description": "Disallow the use of yoda expressions.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleFixConfiguration_for_Null" },
+						{ "type": "null" }
+					]
+				},
 				"recommended": {
 					"description": "It enables the recommended rules for this group",
 					"type": ["boolean", "null"]
