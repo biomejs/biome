@@ -32,7 +32,7 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
 ```block
 input.css:1:6 lint/nursery/noEmptyBlock ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Empty block isn't allowed.
+  × An empty block isn't allowed.
   
   > 1 │ html {}
       │      ^^

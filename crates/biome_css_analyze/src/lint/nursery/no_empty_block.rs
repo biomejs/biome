@@ -73,7 +73,7 @@ impl Rule for NoEmptyBlock {
                 rule_category!(),
                 span,
                 markup! {
-                    "Empty block isn't allowed."
+                    "An empty block isn't allowed."
                 },
             )
             .note(markup! {

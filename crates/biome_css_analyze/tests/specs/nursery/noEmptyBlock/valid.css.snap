@@ -80,7 +80,7 @@ a {
 ```
 valid.css:3:3 lint/nursery/noEmptyBlock ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Empty block isn't allowed.
+  ! An empty block isn't allowed.
   
     1 │ /* CssDeclarationOrRuleBlock */
     2 │ a { color: pink; }
@@ -97,7 +97,7 @@ valid.css:3:3 lint/nursery/noEmptyBlock ━━━━━━━━━━━━━�
 ```
 valid.css:4:3 lint/nursery/noEmptyBlock ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Empty block isn't allowed.
+  ! An empty block isn't allowed.
   
     2 │ a { color: pink; }
     3 │ a { /* foo */ }
@@ -117,7 +117,7 @@ valid.css:4:3 lint/nursery/noEmptyBlock ━━━━━━━━━━━━━�
 ```
 valid.css:7:3 lint/nursery/noEmptyBlock ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Empty block isn't allowed.
+  ! An empty block isn't allowed.
   
      5 │     /* foo */
      6 │ }
@@ -138,7 +138,7 @@ valid.css:7:3 lint/nursery/noEmptyBlock ━━━━━━━━━━━━━�
 ```
 valid.css:11:3 lint/nursery/noEmptyBlock ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Empty block isn't allowed.
+  ! An empty block isn't allowed.
   
      9 │     /* bar */
     10 │ }
@@ -158,7 +158,7 @@ valid.css:11:3 lint/nursery/noEmptyBlock ━━━━━━━━━━━━━
 ```
 valid.css:17:18 lint/nursery/noEmptyBlock ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Empty block isn't allowed.
+  ! An empty block isn't allowed.
   
     15 │ /* CssRuleBlock */
     16 │ @media print { a { color: pink; } }
