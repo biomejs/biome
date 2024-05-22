@@ -1599,18 +1599,6 @@
 			},
 			"additionalProperties": false
 		},
-		"NoCssEmptyBlockConfiguration": {
-			"anyOf": [
-				{ "$ref": "#/definitions/RulePlainConfiguration" },
-				{ "$ref": "#/definitions/RuleWithNoCssEmptyBlockOptions" }
-			]
-		},
-		"NoCssEmptyBlockOptions": {
-			"type": "object",
-			"required": ["allowComments"],
-			"properties": { "allowComments": { "type": "boolean" } },
-			"additionalProperties": false
-		},
 		"Nursery": {
 			"description": "A list of rules that belong to this group",
 			"type": "object",
@@ -1630,13 +1618,6 @@
 					"description": "Disallow the use of Math.min and Math.max to clamp a value where the result itself is constant.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleFixConfiguration_for_Null" },
-						{ "type": "null" }
-					]
-				},
-				"noCssEmptyBlock": {
-					"description": "Disallow CSS empty blocks.",
-					"anyOf": [
-						{ "$ref": "#/definitions/NoCssEmptyBlockConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -1677,6 +1658,13 @@
 				},
 				"noDuplicateSelectorsKeyframeBlock": {
 					"description": "Disallow duplicate selectors within keyframe blocks.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noEmptyBlock": {
+					"description": "Disallow CSS empty blocks.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
@@ -2350,21 +2338,6 @@
 				"options": {
 					"description": "Rule's options",
 					"allOf": [{ "$ref": "#/definitions/HooksOptions" }]
-				}
-			},
-			"additionalProperties": false
-		},
-		"RuleWithNoCssEmptyBlockOptions": {
-			"type": "object",
-			"required": ["level", "options"],
-			"properties": {
-				"level": {
-					"description": "The severity of the emitted diagnostics by the rule",
-					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
-				},
-				"options": {
-					"description": "Rule's options",
-					"allOf": [{ "$ref": "#/definitions/NoCssEmptyBlockOptions" }]
 				}
 			},
 			"additionalProperties": false
