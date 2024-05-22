@@ -92,3 +92,11 @@ pub struct CssLinter {
     #[partial(bpaf(long("css-linter-enabled"), argument("true|false"), optional))]
     pub enabled: bool,
 }
+
+impl PartialCssLinter {
+    pub fn get_linter_configuration(&self) -> CssLinter {
+        CssLinter {
+            enabled: self.enabled.unwrap_or_default(),
+        }
+    }
+}

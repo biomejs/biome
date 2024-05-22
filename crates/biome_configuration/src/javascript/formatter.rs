@@ -146,28 +146,3 @@ impl Default for JavascriptFormatter {
         }
     }
 }
-
-/// Linter options specific to the JavaScript linter
-#[derive(Clone, Debug, Deserialize, Eq, Partial, PartialEq, Serialize)]
-#[partial(derive(Bpaf, Clone, Deserializable, Eq, Merge, PartialEq))]
-#[partial(cfg_attr(feature = "schema", derive(schemars::JsonSchema)))]
-#[partial(serde(rename_all = "camelCase", default, deny_unknown_fields))]
-pub struct JavascriptLinter {
-    /// Control the linter for JavaScript (and its super languages) files.
-    #[partial(bpaf(long("javascript-linter-enabled"), argument("true|false"), optional))]
-    pub enabled: bool,
-}
-
-impl Default for JavascriptLinter {
-    fn default() -> Self {
-        Self { enabled: true }
-    }
-}
-
-impl PartialJavascriptLinter {
-    pub fn get_formatter_configuration(&self) -> JavascriptLinter {
-        JavascriptLinter {
-            enabled: self.enabled.unwrap_or_default(),
-        }
-    }
-}

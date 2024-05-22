@@ -126,3 +126,11 @@ impl Default for JsonLinter {
         Self { enabled: true }
     }
 }
+
+impl PartialJsonLinter {
+    pub fn get_linter_configuration(&self) -> JsonLinter {
+        JsonLinter {
+            enabled: self.enabled.unwrap_or_default(),
+        }
+    }
+}

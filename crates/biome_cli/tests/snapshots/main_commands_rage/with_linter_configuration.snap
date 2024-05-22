@@ -20,14 +20,6 @@ expression: content
       "correctness": {
         "all": true
       },
-      "nursery": {
-        "useConsistentArrayType": {
-          "level": "warn",
-          "options": {
-            "syntax": "shorthand"
-          }
-        }
-      },
       "suspicious": {
         "noCommentText": {
           "level": "warn"
@@ -61,22 +53,207 @@ Environment:
   NODE_PACKAGE_MANAGER:         unset
 
 Biome Configuration:
-  Error:                        Found an unknown key `useConsistentArrayType`.
-  Status:                       Loaded with errors
+  Status:                       Loaded successfully
   Formatter disabled:           false
   Linter disabled:              false
   Organize imports disabled:    false
   VCS disabled:                 true
 
 Linter:
+  JavaScript enabled:           true
+  JSON enabled:                 true
+  CSS enabled:                  false
   Recommended:                  true
   All:                          false
-  Rules:                        a11y/noAccessKey = "off"
-                                a11y/noAutofocus = "off"
-                                complexity/recommended = true
-                                correctness/all = true
-                                style/noNonNullAssertion = "off"
-                                suspicious/noCommentText = {"level":"warn","options":null}
+  Enabled rules:
+  a11y/noAriaHiddenOnFocusable
+  a11y/noAriaUnsupportedElements
+  a11y/noBlankTarget
+  a11y/noDistractingElements
+  a11y/noHeaderScope
+  a11y/noInteractiveElementToNoninteractiveRole
+  a11y/noNoninteractiveElementToInteractiveRole
+  a11y/noNoninteractiveTabindex
+  a11y/noPositiveTabindex
+  a11y/noRedundantAlt
+  a11y/noRedundantRoles
+  a11y/noSvgWithoutTitle
+  a11y/useAltText
+  a11y/useAnchorContent
+  a11y/useAriaActivedescendantWithTabindex
+  a11y/useAriaPropsForRole
+  a11y/useButtonType
+  a11y/useHeadingContent
+  a11y/useHtmlLang
+  a11y/useIframeTitle
+  a11y/useKeyWithClickEvents
+  a11y/useKeyWithMouseEvents
+  a11y/useMediaCaption
+  a11y/useValidAnchor
+  a11y/useValidAriaProps
+  a11y/useValidAriaRole
+  a11y/useValidAriaValues
+  a11y/useValidLang
+  complexity/noBannedTypes
+  complexity/noEmptyTypeParameters
+  complexity/noExcessiveNestedTestSuites
+  complexity/noExtraBooleanCast
+  complexity/noForEach
+  complexity/noMultipleSpacesInRegularExpressionLiterals
+  complexity/noStaticOnlyClass
+  complexity/noThisInStatic
+  complexity/noUselessCatch
+  complexity/noUselessConstructor
+  complexity/noUselessEmptyExport
+  complexity/noUselessFragments
+  complexity/noUselessLabel
+  complexity/noUselessLoneBlockStatements
+  complexity/noUselessRename
+  complexity/noUselessSwitchCase
+  complexity/noUselessTernary
+  complexity/noUselessThisAlias
+  complexity/noUselessTypeConstraint
+  complexity/noWith
+  complexity/useArrowFunction
+  complexity/useFlatMap
+  complexity/useLiteralKeys
+  complexity/useOptionalChain
+  complexity/useRegexLiterals
+  complexity/useSimpleNumberKeys
+  correctness/noChildrenProp
+  correctness/noConstAssign
+  correctness/noConstantCondition
+  correctness/noConstructorReturn
+  correctness/noEmptyCharacterClassInRegex
+  correctness/noEmptyPattern
+  correctness/noGlobalObjectCalls
+  correctness/noInnerDeclarations
+  correctness/noInvalidConstructorSuper
+  correctness/noInvalidNewBuiltin
+  correctness/noInvalidUseBeforeDeclaration
+  correctness/noNewSymbol
+  correctness/noNonoctalDecimalEscape
+  correctness/noPrecisionLoss
+  correctness/noRenderReturnValue
+  correctness/noSelfAssign
+  correctness/noSetterReturn
+  correctness/noStringCaseMismatch
+  correctness/noSwitchDeclarations
+  correctness/noUndeclaredVariables
+  correctness/noUnnecessaryContinue
+  correctness/noUnreachable
+  correctness/noUnreachableSuper
+  correctness/noUnsafeFinally
+  correctness/noUnsafeOptionalChaining
+  correctness/noUnusedImports
+  correctness/noUnusedLabels
+  correctness/noUnusedPrivateClassMembers
+  correctness/noUnusedVariables
+  correctness/noVoidElementsWithChildren
+  correctness/noVoidTypeReturn
+  correctness/useExhaustiveDependencies
+  correctness/useHookAtTopLevel
+  correctness/useIsNan
+  correctness/useJsxKeyInIterable
+  correctness/useValidForDirection
+  correctness/useYield
+  nursery/noCssEmptyBlock
+  nursery/noDoneCallback
+  nursery/noDuplicateAtImportRules
+  nursery/noDuplicateElseIf
+  nursery/noDuplicateFontNames
+  nursery/noDuplicateJsonKeys
+  nursery/noDuplicateSelectorsKeyframeBlock
+  nursery/noEvolvingAny
+  nursery/noFlatMapIdentity
+  nursery/noImportantInKeyframe
+  nursery/noInvalidPositionAtImportRule
+  nursery/noUnknownFunction
+  nursery/noUnknownSelectorPseudoElement
+  nursery/noUnknownUnit
+  nursery/noUnmatchableAnbSelector
+  nursery/useFocusableInteractive
+  nursery/useGenericFontNames
+  nursery/useSemanticElements
+  performance/noAccumulatingSpread
+  performance/noDelete
+  security/noDangerouslySetInnerHtml
+  security/noDangerouslySetInnerHtmlWithChildren
+  security/noGlobalEval
+  style/noArguments
+  style/noCommaOperator
+  style/noInferrableTypes
+  style/noParameterAssign
+  style/noUnusedTemplateLiteral
+  style/noUselessElse
+  style/noVar
+  style/useAsConstAssertion
+  style/useConst
+  style/useDefaultParameterLast
+  style/useEnumInitializers
+  style/useExponentiationOperator
+  style/useExportType
+  style/useImportType
+  style/useLiteralEnumMembers
+  style/useNodejsImportProtocol
+  style/useNumberNamespace
+  style/useNumericLiterals
+  style/useSelfClosingElements
+  style/useShorthandFunctionType
+  style/useSingleVarDeclarator
+  style/useTemplate
+  style/useWhile
+  suspicious/noApproximativeNumericConstant
+  suspicious/noArrayIndexKey
+  suspicious/noAssignInExpressions
+  suspicious/noAsyncPromiseExecutor
+  suspicious/noCatchAssign
+  suspicious/noClassAssign
+  suspicious/noCommentText
+  suspicious/noCompareNegZero
+  suspicious/noConfusingLabels
+  suspicious/noConfusingVoidType
+  suspicious/noConstEnum
+  suspicious/noControlCharactersInRegex
+  suspicious/noDebugger
+  suspicious/noDoubleEquals
+  suspicious/noDuplicateCase
+  suspicious/noDuplicateClassMembers
+  suspicious/noDuplicateJsxProps
+  suspicious/noDuplicateObjectKeys
+  suspicious/noDuplicateParameters
+  suspicious/noDuplicateTestHooks
+  suspicious/noEmptyInterface
+  suspicious/noExplicitAny
+  suspicious/noExportsInTest
+  suspicious/noExtraNonNullAssertion
+  suspicious/noFallthroughSwitchClause
+  suspicious/noFocusedTests
+  suspicious/noFunctionAssign
+  suspicious/noGlobalAssign
+  suspicious/noGlobalIsFinite
+  suspicious/noGlobalIsNan
+  suspicious/noImplicitAnyLet
+  suspicious/noImportAssign
+  suspicious/noLabelVar
+  suspicious/noMisleadingCharacterClass
+  suspicious/noMisleadingInstantiator
+  suspicious/noMisrefactoredShorthandAssign
+  suspicious/noPrototypeBuiltins
+  suspicious/noRedeclare
+  suspicious/noRedundantUseStrict
+  suspicious/noSelfCompare
+  suspicious/noShadowRestrictedNames
+  suspicious/noSparseArray
+  suspicious/noSuspiciousSemicolonInJsx
+  suspicious/noThenProperty
+  suspicious/noUnsafeDeclarationMerging
+  suspicious/noUnsafeNegation
+  suspicious/useDefaultSwitchClauseLast
+  suspicious/useGetterReturn
+  suspicious/useIsArray
+  suspicious/useNamespaceKeyword
+  suspicious/useValidTypeof
 
 Server:
   Version:                      0.0.0
@@ -87,5 +264,3 @@ Server:
 Workspace:
   Open Documents:               0
 ```
-
-

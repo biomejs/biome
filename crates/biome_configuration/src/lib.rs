@@ -14,9 +14,12 @@ pub mod organize_imports;
 mod overrides;
 pub mod vcs;
 
+use crate::css::CssLinter;
 pub use crate::diagnostics::BiomeDiagnostic;
 pub use crate::diagnostics::CantLoadExtendFile;
 pub use crate::generated::push_to_analyzer_rules;
+use crate::javascript::{JavascriptLinter, PartialJavascriptLinter};
+use crate::json::JsonLinter;
 use crate::organize_imports::{partial_organize_imports, OrganizeImports, PartialOrganizeImports};
 use crate::vcs::{partial_vcs_configuration, PartialVcsConfiguration, VcsConfiguration};
 use biome_deserialize::{Deserialized, StringSet};
@@ -155,6 +158,18 @@ impl PartialConfiguration {
             .unwrap_or_default()
     }
 
+    pub fn get_javascript_linter_configuration(&self) -> JavascriptLinter {
+        self.javascript
+            .as_ref()
+            .map(|f| {
+                f.linter
+                    .as_ref()
+                    .map(|f| f.get_linter_configuration())
+                    .unwrap_or_default()
+            })
+            .unwrap_or_default()
+    }
+
     pub fn get_json_formatter_configuration(&self) -> JsonFormatter {
         self.json
             .as_ref()
@@ -167,6 +182,18 @@ impl PartialConfiguration {
             .unwrap_or_default()
     }
 
+    pub fn get_json_linter_configuration(&self) -> JsonLinter {
+        self.json
+            .as_ref()
+            .map(|f| {
+                f.linter
+                    .as_ref()
+                    .map(|f| f.get_linter_configuration())
+                    .unwrap_or_default()
+            })
+            .unwrap_or_default()
+    }
+
     pub fn get_css_formatter_configuration(&self) -> CssFormatter {
         self.css
             .as_ref()
@@ -174,6 +201,18 @@ impl PartialConfiguration {
                 f.formatter
                     .as_ref()
                     .map(|f| f.get_formatter_configuration())
+                    .unwrap_or_default()
+            })
+            .unwrap_or_default()
+    }
+
+    pub fn get_css_linter_configuration(&self) -> CssLinter {
+        self.css
+            .as_ref()
+            .map(|f| {
+                f.linter
+                    .as_ref()
+                    .map(|f| f.get_linter_configuration())
                     .unwrap_or_default()
             })
             .unwrap_or_default()

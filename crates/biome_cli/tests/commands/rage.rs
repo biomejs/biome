@@ -300,14 +300,6 @@ fn with_linter_configuration() {
       "correctness": {
         "all": true
       },
-      "nursery": {
-        "useConsistentArrayType": {
-          "level": "warn",
-          "options": {
-            "syntax": "shorthand"
-          }
-        }
-      },
       "suspicious": {
         "noCommentText": {
           "level": "warn"
