@@ -336,15 +336,12 @@ fn lint(params: LintParams) -> LintResults {
                     .as_ref()
                     .map(|rules| rules.as_enabled_rules())
                     .unwrap_or_default()
-                    .into_iter()
-                    .collect::<Vec<_>>()
             } else {
                 // Filter rule/groups according to the `--only` and `--skip` options.
                 // `--only` and `--skip` behave like `--include`/`--ignore`
                 rule_filters(&mut rules, &params.only, &params.skip)
-                    .into_iter()
-                    .collect()
             };
+            let enabled_rules = enabled_rules.into_iter().collect::<Vec<_>>();
 
             let mut filter = AnalysisFilter::from_enabled_rules(Some(enabled_rules.as_slice()));
             filter.categories = params.categories;

@@ -11,7 +11,7 @@ use biome_diagnostics::{Category, Severity};
 use biome_js_analyze::options::*;
 use biome_json_analyze::options::*;
 use biome_rowan::TextRange;
-use indexmap::IndexSet;
+use rustc_hash::FxHashSet;
 #[cfg(feature = "schema")]
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
@@ -387,9 +387,9 @@ impl Rules {
     #[doc = r" It returns the enabled rules by default."]
     #[doc = r""]
     #[doc = r" The enabled rules are calculated from the difference with the disabled rules."]
-    pub fn as_enabled_rules(&self) -> IndexSet<RuleFilter<'static>> {
-        let mut enabled_rules = IndexSet::new();
-        let mut disabled_rules = IndexSet::new();
+    pub fn as_enabled_rules(&self) -> FxHashSet<RuleFilter<'static>> {
+        let mut enabled_rules = FxHashSet::default();
+        let mut disabled_rules = FxHashSet::default();
         if let Some(group) = self.a11y.as_ref() {
             group.collect_preset_rules(
                 self.is_all_true(),
@@ -760,8 +760,8 @@ impl A11y {
     pub(crate) fn is_all_unset(&self) -> bool {
         self.all.is_none()
     }
-    pub(crate) fn get_enabled_rules(&self) -> IndexSet<RuleFilter<'static>> {
-        let mut index_set = IndexSet::new();
+    pub(crate) fn get_enabled_rules(&self) -> FxHashSet<RuleFilter<'static>> {
+        let mut index_set = FxHashSet::default();
         if let Some(rule) = self.no_access_key.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[0]));
@@ -914,8 +914,8 @@ impl A11y {
         }
         index_set
     }
-    pub(crate) fn get_disabled_rules(&self) -> IndexSet<RuleFilter<'static>> {
-        let mut index_set = IndexSet::new();
+    pub(crate) fn get_disabled_rules(&self) -> FxHashSet<RuleFilter<'static>> {
+        let mut index_set = FxHashSet::default();
         if let Some(rule) = self.no_access_key.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[0]));
@@ -1087,7 +1087,7 @@ impl A11y {
         &self,
         parent_is_all: bool,
         parent_is_recommended: bool,
-        enabled_rules: &mut IndexSet<RuleFilter<'static>>,
+        enabled_rules: &mut FxHashSet<RuleFilter<'static>>,
     ) {
         if self.is_all_true() || self.is_all_unset() && parent_is_all {
             enabled_rules.extend(Self::all_rules_as_filters());
@@ -1695,8 +1695,8 @@ impl Complexity {
     pub(crate) fn is_all_unset(&self) -> bool {
         self.all.is_none()
     }
-    pub(crate) fn get_enabled_rules(&self) -> IndexSet<RuleFilter<'static>> {
-        let mut index_set = IndexSet::new();
+    pub(crate) fn get_enabled_rules(&self) -> FxHashSet<RuleFilter<'static>> {
+        let mut index_set = FxHashSet::default();
         if let Some(rule) = self.no_banned_types.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[0]));
@@ -1847,8 +1847,8 @@ impl Complexity {
         }
         index_set
     }
-    pub(crate) fn get_disabled_rules(&self) -> IndexSet<RuleFilter<'static>> {
-        let mut index_set = IndexSet::new();
+    pub(crate) fn get_disabled_rules(&self) -> FxHashSet<RuleFilter<'static>> {
+        let mut index_set = FxHashSet::default();
         if let Some(rule) = self.no_banned_types.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[0]));
@@ -2018,7 +2018,7 @@ impl Complexity {
         &self,
         parent_is_all: bool,
         parent_is_recommended: bool,
-        enabled_rules: &mut IndexSet<RuleFilter<'static>>,
+        enabled_rules: &mut FxHashSet<RuleFilter<'static>>,
     ) {
         if self.is_all_true() || self.is_all_unset() && parent_is_all {
             enabled_rules.extend(Self::all_rules_as_filters());
@@ -2663,8 +2663,8 @@ impl Correctness {
     pub(crate) fn is_all_unset(&self) -> bool {
         self.all.is_none()
     }
-    pub(crate) fn get_enabled_rules(&self) -> IndexSet<RuleFilter<'static>> {
-        let mut index_set = IndexSet::new();
+    pub(crate) fn get_enabled_rules(&self) -> FxHashSet<RuleFilter<'static>> {
+        let mut index_set = FxHashSet::default();
         if let Some(rule) = self.no_children_prop.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[0]));
@@ -2852,8 +2852,8 @@ impl Correctness {
         }
         index_set
     }
-    pub(crate) fn get_disabled_rules(&self) -> IndexSet<RuleFilter<'static>> {
-        let mut index_set = IndexSet::new();
+    pub(crate) fn get_disabled_rules(&self) -> FxHashSet<RuleFilter<'static>> {
+        let mut index_set = FxHashSet::default();
         if let Some(rule) = self.no_children_prop.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[0]));
@@ -3060,7 +3060,7 @@ impl Correctness {
         &self,
         parent_is_all: bool,
         parent_is_recommended: bool,
-        enabled_rules: &mut IndexSet<RuleFilter<'static>>,
+        enabled_rules: &mut FxHashSet<RuleFilter<'static>>,
     ) {
         if self.is_all_true() || self.is_all_unset() && parent_is_all {
             enabled_rules.extend(Self::all_rules_as_filters());
@@ -3797,8 +3797,8 @@ impl Nursery {
     pub(crate) fn is_all_unset(&self) -> bool {
         self.all.is_none()
     }
-    pub(crate) fn get_enabled_rules(&self) -> IndexSet<RuleFilter<'static>> {
-        let mut index_set = IndexSet::new();
+    pub(crate) fn get_enabled_rules(&self) -> FxHashSet<RuleFilter<'static>> {
+        let mut index_set = FxHashSet::default();
         if let Some(rule) = self.no_console.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[0]));
@@ -4011,8 +4011,8 @@ impl Nursery {
         }
         index_set
     }
-    pub(crate) fn get_disabled_rules(&self) -> IndexSet<RuleFilter<'static>> {
-        let mut index_set = IndexSet::new();
+    pub(crate) fn get_disabled_rules(&self) -> FxHashSet<RuleFilter<'static>> {
+        let mut index_set = FxHashSet::default();
         if let Some(rule) = self.no_console.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[0]));
@@ -4244,7 +4244,7 @@ impl Nursery {
         &self,
         parent_is_all: bool,
         parent_is_recommended: bool,
-        enabled_rules: &mut IndexSet<RuleFilter<'static>>,
+        enabled_rules: &mut FxHashSet<RuleFilter<'static>>,
     ) {
         if self.is_all_true() || self.is_all_unset() && parent_is_all {
             enabled_rules.extend(Self::all_rules_as_filters());
@@ -4803,8 +4803,8 @@ impl Performance {
     pub(crate) fn is_all_unset(&self) -> bool {
         self.all.is_none()
     }
-    pub(crate) fn get_enabled_rules(&self) -> IndexSet<RuleFilter<'static>> {
-        let mut index_set = IndexSet::new();
+    pub(crate) fn get_enabled_rules(&self) -> FxHashSet<RuleFilter<'static>> {
+        let mut index_set = FxHashSet::default();
         if let Some(rule) = self.no_accumulating_spread.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[0]));
@@ -4827,8 +4827,8 @@ impl Performance {
         }
         index_set
     }
-    pub(crate) fn get_disabled_rules(&self) -> IndexSet<RuleFilter<'static>> {
-        let mut index_set = IndexSet::new();
+    pub(crate) fn get_disabled_rules(&self) -> FxHashSet<RuleFilter<'static>> {
+        let mut index_set = FxHashSet::default();
         if let Some(rule) = self.no_accumulating_spread.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[0]));
@@ -4870,7 +4870,7 @@ impl Performance {
         &self,
         parent_is_all: bool,
         parent_is_recommended: bool,
-        enabled_rules: &mut IndexSet<RuleFilter<'static>>,
+        enabled_rules: &mut FxHashSet<RuleFilter<'static>>,
     ) {
         if self.is_all_true() || self.is_all_unset() && parent_is_all {
             enabled_rules.extend(Self::all_rules_as_filters());
@@ -5014,8 +5014,8 @@ impl Security {
     pub(crate) fn is_all_unset(&self) -> bool {
         self.all.is_none()
     }
-    pub(crate) fn get_enabled_rules(&self) -> IndexSet<RuleFilter<'static>> {
-        let mut index_set = IndexSet::new();
+    pub(crate) fn get_enabled_rules(&self) -> FxHashSet<RuleFilter<'static>> {
+        let mut index_set = FxHashSet::default();
         if let Some(rule) = self.no_dangerously_set_inner_html.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[0]));
@@ -5033,8 +5033,8 @@ impl Security {
         }
         index_set
     }
-    pub(crate) fn get_disabled_rules(&self) -> IndexSet<RuleFilter<'static>> {
-        let mut index_set = IndexSet::new();
+    pub(crate) fn get_disabled_rules(&self) -> FxHashSet<RuleFilter<'static>> {
+        let mut index_set = FxHashSet::default();
         if let Some(rule) = self.no_dangerously_set_inner_html.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[0]));
@@ -5071,7 +5071,7 @@ impl Security {
         &self,
         parent_is_all: bool,
         parent_is_recommended: bool,
-        enabled_rules: &mut IndexSet<RuleFilter<'static>>,
+        enabled_rules: &mut FxHashSet<RuleFilter<'static>>,
     ) {
         if self.is_all_true() || self.is_all_unset() && parent_is_all {
             enabled_rules.extend(Self::all_rules_as_filters());
@@ -5445,8 +5445,8 @@ impl Style {
     pub(crate) fn is_all_unset(&self) -> bool {
         self.all.is_none()
     }
-    pub(crate) fn get_enabled_rules(&self) -> IndexSet<RuleFilter<'static>> {
-        let mut index_set = IndexSet::new();
+    pub(crate) fn get_enabled_rules(&self) -> FxHashSet<RuleFilter<'static>> {
+        let mut index_set = FxHashSet::default();
         if let Some(rule) = self.no_arguments.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[0]));
@@ -5664,8 +5664,8 @@ impl Style {
         }
         index_set
     }
-    pub(crate) fn get_disabled_rules(&self) -> IndexSet<RuleFilter<'static>> {
-        let mut index_set = IndexSet::new();
+    pub(crate) fn get_disabled_rules(&self) -> FxHashSet<RuleFilter<'static>> {
+        let mut index_set = FxHashSet::default();
         if let Some(rule) = self.no_arguments.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[0]));
@@ -5902,7 +5902,7 @@ impl Style {
         &self,
         parent_is_all: bool,
         parent_is_recommended: bool,
-        enabled_rules: &mut IndexSet<RuleFilter<'static>>,
+        enabled_rules: &mut FxHashSet<RuleFilter<'static>>,
     ) {
         if self.is_all_true() || self.is_all_unset() && parent_is_all {
             enabled_rules.extend(Self::all_rules_as_filters());
@@ -6832,8 +6832,8 @@ impl Suspicious {
     pub(crate) fn is_all_unset(&self) -> bool {
         self.all.is_none()
     }
-    pub(crate) fn get_enabled_rules(&self) -> IndexSet<RuleFilter<'static>> {
-        let mut index_set = IndexSet::new();
+    pub(crate) fn get_enabled_rules(&self) -> FxHashSet<RuleFilter<'static>> {
+        let mut index_set = FxHashSet::default();
         if let Some(rule) = self.no_approximative_numeric_constant.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[0]));
@@ -7111,8 +7111,8 @@ impl Suspicious {
         }
         index_set
     }
-    pub(crate) fn get_disabled_rules(&self) -> IndexSet<RuleFilter<'static>> {
-        let mut index_set = IndexSet::new();
+    pub(crate) fn get_disabled_rules(&self) -> FxHashSet<RuleFilter<'static>> {
+        let mut index_set = FxHashSet::default();
         if let Some(rule) = self.no_approximative_numeric_constant.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[0]));
@@ -7409,7 +7409,7 @@ impl Suspicious {
         &self,
         parent_is_all: bool,
         parent_is_recommended: bool,
-        enabled_rules: &mut IndexSet<RuleFilter<'static>>,
+        enabled_rules: &mut FxHashSet<RuleFilter<'static>>,
     ) {
         if self.is_all_true() || self.is_all_unset() && parent_is_all {
             enabled_rules.extend(Self::all_rules_as_filters());

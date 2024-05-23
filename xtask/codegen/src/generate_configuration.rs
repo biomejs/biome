@@ -141,7 +141,7 @@ pub(crate) fn generate_rules_configuration(mode: Mode) -> Result<()> {
         use biome_json_analyze::options::*;
         use biome_css_analyze::options::*;
         use biome_rowan::TextRange;
-        use indexmap::IndexSet;
+        use rustc_hash::FxHashSet;
         use serde::{Deserialize, Serialize};
         #[cfg(feature = "schema")]
         use schemars::JsonSchema;
@@ -300,9 +300,9 @@ pub(crate) fn generate_rules_configuration(mode: Mode) -> Result<()> {
             /// It returns the enabled rules by default.
             ///
             /// The enabled rules are calculated from the difference with the disabled rules.
-            pub fn as_enabled_rules(&self) -> IndexSet<RuleFilter<'static>> {
-                let mut enabled_rules = IndexSet::new();
-                let mut disabled_rules = IndexSet::new();
+            pub fn as_enabled_rules(&self) -> FxHashSet<RuleFilter<'static>> {
+                let mut enabled_rules = FxHashSet::default();
+                let mut disabled_rules = FxHashSet::default();
                 #( #group_as_default_rules )*
 
                 enabled_rules.difference(&disabled_rules).copied().collect()
@@ -564,14 +564,14 @@ fn generate_struct(group: &str, rules: &BTreeMap<&'static str, RuleMetadata>) ->
                 self.all.is_none()
             }
 
-            pub(crate) fn get_enabled_rules(&self) -> IndexSet<RuleFilter<'static>> {
-               let mut index_set = IndexSet::new();
+            pub(crate) fn get_enabled_rules(&self) -> FxHashSet<RuleFilter<'static>> {
+               let mut index_set = FxHashSet::default();
                #( #rule_enabled_check_line )*
                index_set
             }
 
-            pub(crate) fn get_disabled_rules(&self) -> IndexSet<RuleFilter<'static>> {
-               let mut index_set = IndexSet::new();
+            pub(crate) fn get_disabled_rules(&self) -> FxHashSet<RuleFilter<'static>> {
+               let mut index_set = FxHashSet::default();
                #( #rule_disabled_check_line )*
                index_set
             }
@@ -601,7 +601,7 @@ fn generate_struct(group: &str, rules: &BTreeMap<&'static str, RuleMetadata>) ->
                 &self,
                 parent_is_all: bool,
                 parent_is_recommended: bool,
-                enabled_rules: &mut IndexSet<RuleFilter<'static>>,
+                enabled_rules: &mut FxHashSet<RuleFilter<'static>>,
             ) {
                 // The order of the if-else branches MATTERS!
                 if self.is_all_true() || self.is_all_unset() && parent_is_all {

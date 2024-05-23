@@ -558,8 +558,6 @@ pub(crate) fn rule_filters(
     only: &[RuleSelector],
     skip: &[RuleSelector],
 ) -> FxHashSet<RuleFilter<'static>> {
-    // Filter rule/groups according to the `--only` and `--skip` options.
-    // `--only` and `--skip` behave like `--include`/`--ignore`
     let mut enabled_rules = rustc_hash::FxHashSet::<RuleFilter>::default();
     let mut only_groups = rustc_hash::FxHashSet::default();
     let mut skipped_groups = rustc_hash::FxHashSet::default();
