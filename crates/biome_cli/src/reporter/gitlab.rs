@@ -1,29 +1,110 @@
-/// See
 use crate::{DiagnosticsPayload, Execution, Reporter, ReporterVisitor, TraversalSummary};
 use biome_console::fmt::Formatter;
+use biome_diagnostics::{LineIndexBuf, PrintDescription};
 use serde::Serialize;
+use std::{cmp::max, fmt::Display};
 
-#[derive(Debug, Default, Serialize)]
-#[serde(rename_all = "camelCase")]
-pub(crate) struct GitLabReporterVisitor {
-    summary: TraversalSummary,
-    diagnostics: Vec<biome_diagnostics::serde::Diagnostic>,
-    command: String,
+#[derive(Serialize)]
+struct Lines {
+    begin: u8,
 }
 
-impl GitLabReporterVisitor {
-    pub(crate) fn new(summary: TraversalSummary) -> Self {
-        Self {
-            summary,
-            diagnostics: vec![],
-            command: String::new(),
+#[derive(Serialize)]
+struct Location {
+    path: String,
+    lines: Lines,
+}
+
+enum GitLabSeverity {
+    Info,
+    Minor,
+    Major,
+    Critical,
+    Blocker,
+}
+
+impl Display for GitLabSeverity {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "{}",
+            match self {
+                GitLabSeverity::Info => "info".to_string(),
+                GitLabSeverity::Minor => "minor".to_string(),
+                GitLabSeverity::Major => "major".to_string(),
+                GitLabSeverity::Critical => "critical".to_string(),
+                GitLabSeverity::Blocker => "blocker".to_string(),
+            }
+        )
+    }
+}
+
+impl From<biome_diagnostics::diagnostic::Severity> for GitLabSeverity {
+    fn from(value: biome_diagnostics::diagnostic::Severity) -> Self {
+        match value {
+            biome_diagnostics::Severity::Hint => Self::Info,
+            biome_diagnostics::Severity::Information => Self::Minor,
+            biome_diagnostics::Severity::Warning => Self::Major,
+            biome_diagnostics::Severity::Error => Self::Critical,
+            biome_diagnostics::Severity::Fatal => Self::Blocker,
         }
     }
 }
 
+#[derive(Serialize)]
+struct GitLabDiagnostic {
+    description: String,
+    severity: String,
+    fingerprint: String,
+    location: Location,
+}
+
+fn get_location_path(value: &biome_diagnostics::error::Error) -> Option<String> {
+    match value.location().resource? {
+        biome_diagnostics::Resource::Argv => None,
+        biome_diagnostics::Resource::Memory => None,
+        biome_diagnostics::Resource::File(path) => Some(path.to_string()),
+    }
+}
+
+fn get_line_begin(value: &biome_diagnostics::error::Error) -> Option<u8> {
+    let location = value.location();
+    let buf = LineIndexBuf::from_source_text(location.source_code?.text);
+    let diagnostic_offset = location.span?.start();
+
+    buf.iter()
+        .enumerate()
+        .find(|(_, line_offset)| **line_offset >= diagnostic_offset)
+        .map(|(line_number, _)| u8::try_from(line_number).unwrap())
+}
+
+impl From<biome_diagnostics::error::Error> for GitLabDiagnostic {
+    fn from(value: biome_diagnostics::error::Error) -> Self {
+        Self {
+            severity: GitLabSeverity::from(value.severity()).to_string(),
+            // TODO: Somehow include advices in here.
+            description: PrintDescription(&value).to_string(),
+            // TODO:
+            fingerprint: "TODO".to_string(),
+            location: Location {
+                // TODO: Relativize this path
+                path: get_location_path(&value).unwrap_or("unknown".to_string()),
+                lines: Lines {
+                    begin: get_line_begin(&value).map(|line| max(line, 1)).unwrap_or(1),
+                },
+            },
+        }
+    }
+}
+
+#[derive(Default)]
+pub(crate) struct GitLabReporterVisitor {
+    diagnostics: Vec<GitLabDiagnostic>,
+}
+
 impl biome_console::fmt::Display for GitLabReporterVisitor {
     fn fmt(&self, fmt: &mut Formatter) -> std::io::Result<()> {
-        let content = serde_json::to_string(&self)?;
+        let content = serde_json::to_string(&self.diagnostics)?;
         fmt.write_str(content.as_str())
     }
 }
@@ -44,14 +125,7 @@ impl Reporter for GitLabReporter {
 }
 
 impl ReporterVisitor for GitLabReporterVisitor {
-    fn report_summary(
-        &mut self,
-        execution: &Execution,
-        summary: TraversalSummary,
-    ) -> std::io::Result<()> {
-        self.summary = summary;
-        self.command = format!("{}", execution.traversal_mode());
-
+    fn report_summary(&mut self, _: &Execution, _: TraversalSummary) -> std::io::Result<()> {
         Ok(())
     }
 
@@ -64,12 +138,10 @@ impl ReporterVisitor for GitLabReporterVisitor {
             if diagnostic.severity() >= payload.diagnostic_level {
                 if diagnostic.tags().is_verbose() {
                     if payload.verbose {
-                        self.diagnostics
-                            .push(biome_diagnostics::serde::Diagnostic::new(diagnostic))
+                        self.diagnostics.push(GitLabDiagnostic::from(diagnostic))
                     }
                 } else {
-                    self.diagnostics
-                        .push(biome_diagnostics::serde::Diagnostic::new(diagnostic))
+                    self.diagnostics.push(GitLabDiagnostic::from(diagnostic))
                 }
             }
         }

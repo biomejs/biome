@@ -526,9 +526,6 @@ pub fn execute_mode(
                 reporter.write(&mut GithubReporterVisitor(console))?;
             }
             ReportMode::GitLab => {
-                console.error(markup!{
-                    <Warn>"The "<Emphasis>"--json"</Emphasis>" option is "<Underline>"unstable/experimental"</Underline>" and its output might change between patches/minor releases."</Warn>
-                });
                 let reporter = GitLabReporter {
                     summary: summary_result,
                     diagnostics: DiagnosticsPayload {
