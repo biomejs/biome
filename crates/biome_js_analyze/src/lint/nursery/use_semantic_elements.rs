@@ -55,7 +55,6 @@ impl Rule for UseSemanticElements {
             // check is not interactive element
             let element = node.name().ok()?.as_jsx_name()?.value_token().ok()?;
             let element_name = element.text_trimmed();
-            println!("element_name: {:?}", element_name);
 
             let aria_roles = ctx.aria_roles();
             let extract_attributes = ctx.extract_attributes(&node.attributes());
