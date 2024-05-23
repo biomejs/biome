@@ -20,6 +20,35 @@ function copyBinaryToNativePackage(platform, arch) {
 	const os = platform.split("-")[0];
 	const buildName = getName(platform, arch);
 	const packageRoot = resolve(PACKAGES_ROOT, buildName);
+	const packageName = `@biomejs/${buildName}`;
+
+	// Update the package.json manifest
+	const { version, license, repository, engines, homepage } = rootManifest;
+
+	const manifest = JSON.stringify(
+		{
+			name: packageName,
+			version,
+			license,
+			repository,
+			engines,
+			homepage,
+			os: [os],
+			cpu: [arch],
+			libc:
+				os === "linux"
+					? packageName.endsWith("musl")
+						? ["musl"]
+						: ["glibc"]
+					: undefined,
+		},
+		null,
+		2,
+	);
+
+	const manifestPath = resolve(packageRoot, "package.json");
+	console.log(`Update manifest ${manifestPath}`);
+	fs.writeFileSync(manifestPath, manifest);
 
 	// Copy the CLI binary
 	const ext = os === "win32" ? ".exe" : "";
