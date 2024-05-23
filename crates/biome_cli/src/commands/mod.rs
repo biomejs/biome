@@ -195,23 +195,16 @@ pub enum BiomeCommand {
 
         /// Run only the given rule or rule group.
         ///
-        /// The option overrides the Biome configuration file as follows:
+        /// When a rule is passed, its severity level is set to `error' if it is a recommended rule, or `warn' otherwise.
         ///
-        /// - When a rule is passed, its severity level is set to `error' if it is a recommended rule, or `warn' otherwise.
-        ///
-        /// - When a rule group is passed, the `recommended` flag is enabled, but if the `all` flag is enabled.
+        /// When a rule group is passed, the `recommended` flag is enabled, but if the `all` flag is enabled.
         ///
         /// Example: `biome lint --only=correctness/noUnusedVariables --only=suspicious`
         #[bpaf(long("only"), argument("GROUP|RULE"))]
         only: Vec<RuleSelector>,
 
-        /// Skip the given rule or rule group.
-        ///
-        /// The option overrides the Biome configuration file as follows:
-        ///
-        /// - When a rule is passed, its severity level is set to `off'.
-        ///
-        /// - When a rule group is passed, all rules of the group are skipped.
+        /// Skip the given rule or group of rules by setting the severity level of the rules to `off`.
+        /// This option takes precedence over `--only`.
         ///
         /// Example: `biome lint --skip=correctness/noUnusedVariables --skip=suspicious`
         #[bpaf(long("skip"), argument("GROUP|RULE"))]

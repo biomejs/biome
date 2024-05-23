@@ -553,48 +553,29 @@ pub(crate) fn parse_lang_from_script_opening_tag(script_opening_tag: &str) -> La
 }
 
 /// Returns the rules enabled in `rules` and filtered by `only` and `skip`.
-pub(crate) fn rule_filters(
+pub(crate) fn only_rules(
     rules: &mut Option<Cow<Rules>>,
     only: &[RuleSelector],
-    skip: &[RuleSelector],
 ) -> FxHashSet<RuleFilter<'static>> {
     let mut enabled_rules = rustc_hash::FxHashSet::<RuleFilter>::default();
     let mut only_groups = rustc_hash::FxHashSet::default();
-    let mut skipped_groups = rustc_hash::FxHashSet::default();
-    let mut skipped_rules = rustc_hash::FxHashSet::<RuleFilter>::default();
-    for selector in skip {
-        match selector {
-            RuleSelector::Group(group) => {
-                skipped_groups.insert(group.as_str());
-            }
-            RuleSelector::Rule(_, _) => {
-                skipped_rules.insert((*selector).into());
-            }
-        }
-    }
     for selector in only {
         match selector {
             RuleSelector::Group(group) => {
-                if !skipped_groups.contains(group.as_str()) {
-                    only_groups.insert(group.as_str());
-                }
+                only_groups.insert(group.as_str());
             }
             RuleSelector::Rule(group, rule_name) => {
-                if !skipped_groups.contains(group.as_str())
-                    && !skipped_rules.contains(&(*selector).into())
-                {
-                    if let Some(rules) = rules.as_mut() {
-                        // Set the severity level of the rule to its default.
-                        rules
-                            .to_mut()
-                            .set_default_severity_if_off(*group, rule_name);
-                    }
-                    enabled_rules.insert((*selector).into());
+                if let Some(rules) = rules.as_mut() {
+                    // Set the severity level of the rule to its default.
+                    rules
+                        .to_mut()
+                        .set_default_severity_if_off(*group, rule_name);
                 }
+                enabled_rules.insert((*selector).into());
             }
         }
     }
-    if !skip.is_empty() || !only_groups.is_empty() {
+    if !only_groups.is_empty() {
         if let Some(rules) = rules.as_mut() {
             // Ensure that the recommended field is not set to `false`.
             rules.to_mut().set_recommended();
@@ -605,11 +586,7 @@ pub(crate) fn rule_filters(
                 .map(|rules| rules.as_enabled_rules())
                 .unwrap_or_default()
                 .into_iter()
-                .filter(|rule_filter| {
-                    (only.is_empty() || only_groups.contains(&rule_filter.group()))
-                        && !skipped_groups.contains(&rule_filter.group())
-                        && !skipped_rules.contains(rule_filter)
-                }),
+                .filter(|rule_filter| only_groups.contains(&rule_filter.group())),
         );
     }
     enabled_rules

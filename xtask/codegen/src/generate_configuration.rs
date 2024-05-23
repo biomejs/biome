@@ -257,7 +257,7 @@ pub(crate) fn generate_rules_configuration(mode: Mode) -> Result<()> {
                 Some(severity)
             }
 
-            /// Set the severity of the rule to its default.
+            /// Set the severity of the rule to its default if its severity if set to `off`.
             pub fn set_default_severity_if_off(&mut self, group: RuleGroup, rule_name: &str) {
                 match group {
                     #(

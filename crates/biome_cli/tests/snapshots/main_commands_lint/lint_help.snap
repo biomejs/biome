@@ -73,16 +73,13 @@ Available options:
         --apply-unsafe        Alias for `--write --unsafe`, writes safe and unsafe fixes (deprecated,
                               use `--write --unsafe`)
         --only=<GROUP|RULE>   Run only the given rule or rule group.
-                              The option overrides the Biome configuration file as follows:
-                              - When a rule is passed, its severity level is set to `error' if it is
-                              a recommended rule, or `warn' otherwise.
-                              - When a rule group is passed, the `recommended` flag is enabled, but if
+                              When a rule is passed, its severity level is set to `error' if it is a
+                              recommended rule, or `warn' otherwise.
+                              When a rule group is passed, the `recommended` flag is enabled, but if
                               the `all` flag is enabled.
                               Example: `biome lint --only=correctness/noUnusedVariables --only=suspicious`
-        --skip=<GROUP|RULE>   Skip the given rule or rule group.
-                              The option overrides the Biome configuration file as follows:
-                              - When a rule is passed, its severity level is set to `off'.
-                              - When a rule group is passed, all rules of the group are skipped.
+        --skip=<GROUP|RULE>   Skip the given rule or group of rules by setting the severity level of
+                              the rules to `off`. This option takes precedence over `--only`.
                               Example: `biome lint --skip=correctness/noUnusedVariables --skip=suspicious`
         --stdin-file-path=PATH  Use this option when you want to format code piped from `stdin`, and
                               print the output to `stdout`.

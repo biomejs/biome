@@ -1,4 +1,4 @@
-use super::{rule_filters, CodeActionsParams, DocumentFileSource, ExtensionHandler, ParseResult};
+use super::{only_rules, CodeActionsParams, DocumentFileSource, ExtensionHandler, ParseResult};
 use crate::configuration::to_analyzer_rules;
 use crate::file_handlers::DebugCapabilities;
 use crate::file_handlers::{
@@ -315,6 +315,10 @@ fn lint(params: LintParams) -> LintResults {
 
             let skipped_diagnostics = diagnostic_count - diagnostics.len() as u32;
 
+            let analyzer_options = &params
+                .settings
+                .analyzer_options::<JsonLanguage>(params.path, &params.language);
+
             let mut rules = settings.as_rules(params.path.as_path());
             let enabled_rules = if params.only.is_empty() {
                 rules
@@ -324,15 +328,20 @@ fn lint(params: LintParams) -> LintResults {
             } else {
                 // Filter rule/groups according to the `--only` and `--skip` options.
                 // `--only` and `--skip` behave like `--include`/`--ignore`
-                rule_filters(&mut rules, &params.only, &params.skip)
+                only_rules(&mut rules, &params.only)
             };
             let enabled_rules = enabled_rules.into_iter().collect::<Vec<_>>();
-
-            let analyzer_options = &params
-                .settings
-                .analyzer_options::<JsonLanguage>(params.path, &params.language);
-            let mut filter = AnalysisFilter::from_enabled_rules(Some(enabled_rules.as_slice()));
-            filter.categories = params.categories;
+            let disabled_rules = params
+                .skip
+                .into_iter()
+                .map(|selector| selector.into())
+                .collect::<Vec<_>>();
+            let filter = AnalysisFilter {
+                categories: params.categories,
+                enabled_rules: Some(enabled_rules.as_slice()),
+                disabled_rules: (!disabled_rules.is_empty()).then_some(&disabled_rules),
+                range: None,
+            };
 
             // Do not report unused suppression comment diagnostics if:
             // - it is a syntax-only analyzer pass, or

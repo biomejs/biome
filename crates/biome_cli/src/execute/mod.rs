@@ -132,10 +132,8 @@ pub enum TraversalMode {
         /// - When a rule is passed, its severity level is set to `error' if it is a recommended rule, or `warn' otherwise.
         /// - When a rule group is passed, the `recommended` flag is enabled, but if the `all` flag is enabled.
         only: Vec<RuleSelector>,
-        /// Skip the given rule or rule group.
-        /// The option overrides the Biome configuration file as follows:
-        /// - When a rule is passed, its severity level is set to `off'.
-        /// - When a rule group is passed, all rules of the group are skipped.
+        /// Skip the given rule or group of rules by setting the severity level of the rules to `off`.
+        /// This option takes precedence over `--only`.
         skip: Vec<RuleSelector>,
     },
     /// This mode is enabled when running the command `biome ci`

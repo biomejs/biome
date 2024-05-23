@@ -4,7 +4,7 @@ use super::{
 };
 use crate::configuration::to_analyzer_rules;
 use crate::diagnostics::extension_error;
-use crate::file_handlers::{is_diagnostic_error, rule_filters, FixAllParams};
+use crate::file_handlers::{is_diagnostic_error, only_rules, FixAllParams};
 use crate::settings::{LinterSettings, OverrideSettings, Settings};
 use crate::workspace::{DocumentFileSource, OrganizeImportsResult};
 use crate::{
@@ -378,7 +378,7 @@ pub(crate) fn lint(params: LintParams) -> LintResults {
             // Compute final rules (taking `overrides` into account)
             let mut rules = settings.as_rules(params.path.as_path());
 
-            let enabled_rules = if params.only.is_empty() && params.skip.is_empty() {
+            let enabled_rules = if params.only.is_empty() {
                 let mut rule_filter_list = rules
                     .as_ref()
                     .map(|rules| rules.as_enabled_rules())
@@ -399,13 +399,19 @@ pub(crate) fn lint(params: LintParams) -> LintResults {
             } else {
                 // Filter rule/groups according to the `--only` and `--skip` options.
                 // `--only` and `--skip` behave like `--include`/`--ignore`
-                rule_filters(&mut rules, &params.only, &params.skip)
-                    .into_iter()
-                    .collect()
+                only_rules(&mut rules, &params.only).into_iter().collect()
             };
-
-            let mut filter = AnalysisFilter::from_enabled_rules(Some(enabled_rules.as_slice()));
-            filter.categories = params.categories;
+            let disabled_rules = params
+                .skip
+                .into_iter()
+                .map(|selector| selector.into())
+                .collect::<Vec<_>>();
+            let filter = AnalysisFilter {
+                categories: params.categories,
+                enabled_rules: Some(enabled_rules.as_slice()),
+                disabled_rules: (!disabled_rules.is_empty()).then_some(&disabled_rules),
+                range: None,
+            };
 
             let mut diagnostic_count = diagnostics.len() as u32;
             let mut errors = diagnostics
@@ -552,7 +558,7 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
             }
 
             let mut filter = if !enabled_rules.is_empty() {
-                AnalysisFilter::from_enabled_rules(Some(enabled_rules.as_slice()))
+                AnalysisFilter::from_enabled_rules(enabled_rules.as_slice())
             } else {
                 AnalysisFilter::default()
             };
