@@ -25,6 +25,10 @@ jobs:
           node-version: 20
           cache: "pnpm"
 
+      - name: Update package.json name
+        working-directory: packages/scripts
+        run: node update-package-name.mjs
+
       - name: Publish
         working-directory: packages/@biomejs/wasm-web
         run: pnpx pkg-pr-new publish
