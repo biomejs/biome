@@ -193,11 +193,9 @@ pub enum BiomeCommand {
         #[bpaf(external, hide_usage)]
         cli_options: CliOptions,
 
-        /// Run only the given rule or rule group.
-        ///
-        /// When a rule is passed, its severity level is set to `error' if it is a recommended rule, or `warn' otherwise.
-        ///
-        /// When a rule group is passed, the `recommended` flag is enabled, but if the `all` flag is enabled.
+        /// Run only the given rule or group of rules.
+        /// If the severity level of a rule is `off`,
+        /// then the severity level of the rule is set to `error` if it is a recommended rule or `warn` otherwise.
         ///
         /// Example: `biome lint --only=correctness/noUnusedVariables --only=suspicious`
         #[bpaf(long("only"), argument("GROUP|RULE"))]

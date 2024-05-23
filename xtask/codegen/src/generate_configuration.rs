@@ -228,6 +228,8 @@ pub(crate) fn generate_rules_configuration(mode: Mode) -> Result<()> {
 
             /// Given a category coming from [Diagnostic](biome_diagnostics::Diagnostic), this function returns
             /// the [Severity](biome_diagnostics::Severity) associated to the rule, if the configuration changed it.
+            /// If the severity is off or not set, then the function returns the default severity of the rule:
+            /// [Severity::Error] for recommended rules and [Severity::Warning] for other rules.
             ///
             /// If not, the function returns [None].
             pub fn get_severity_from_code(&self, category: &Category) -> Option<Severity> {
@@ -245,6 +247,7 @@ pub(crate) fn generate_rules_configuration(mode: Mode) -> Result<()> {
                             .#group_idents
                             .as_ref()
                             .and_then(|group| group.get_rule_configuration(rule_name))
+                            .filter(|(level, _)| !matches!(level, RulePlainConfiguration::Off))
                             .map_or_else(|| {
                                 if #group_pascal_idents::is_recommended_rule(rule_name) {
                                     Severity::Error
@@ -255,24 +258,6 @@ pub(crate) fn generate_rules_configuration(mode: Mode) -> Result<()> {
                     )*
                 };
                 Some(severity)
-            }
-
-            /// Set the severity of the rule to its default if its severity if set to `off`.
-            pub fn set_default_severity_if_off(&mut self, group: RuleGroup, rule_name: &str) {
-                match group {
-                    #(
-                        RuleGroup::#group_pascal_idents => {
-                            if let Some(group) = &mut self.#group_idents {
-                                let default_severity = if #group_pascal_idents::is_recommended_rule(rule_name) {
-                                    RulePlainConfiguration::Error
-                                } else {
-                                    RulePlainConfiguration::Warn
-                                };
-                                group.set_severity_if_off(rule_name, default_severity);
-                            }
-                        }
-                    )*
-                }
             }
 
             /// Ensure that `recommended` is set to `true` or implied.
@@ -372,7 +357,6 @@ fn generate_struct(group: &str, rules: &BTreeMap<&'static str, RuleMetadata>) ->
     let mut rule_enabled_check_line = Vec::new();
     let mut rule_disabled_check_line = Vec::new();
     let mut get_rule_configuration_line = Vec::new();
-    let mut set_severity_if_off = Vec::new();
 
     for (index, (rule, metadata)) in rules.iter().enumerate() {
         let summary = {
@@ -474,15 +458,6 @@ fn generate_struct(group: &str, rules: &BTreeMap<&'static str, RuleMetadata>) ->
 
         get_rule_configuration_line.push(quote! {
             #rule => self.#rule_identifier.as_ref().map(|conf| (conf.level(), conf.get_options()))
-        });
-        set_severity_if_off.push(quote! {
-            #rule => {
-                if let Some(rule_conf) = &mut self.#rule_identifier {
-                    if matches!(rule_conf.level(), RulePlainConfiguration::Off) {
-                        rule_conf.set_level(severity);
-                    }
-                }
-            }
         });
     }
 
@@ -615,13 +590,6 @@ fn generate_struct(group: &str, rules: &BTreeMap<&'static str, RuleMetadata>) ->
                 match rule_name {
                     #( #get_rule_configuration_line ),*,
                     _ => None
-                }
-            }
-
-            pub(crate) fn set_severity_if_off(&mut self, rule_name: &str, severity: RulePlainConfiguration) {
-                match rule_name {
-                    #( #set_severity_if_off ),*
-                    _ => {}
                 }
             }
         }

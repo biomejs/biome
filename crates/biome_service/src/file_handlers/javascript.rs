@@ -4,7 +4,7 @@ use super::{
 };
 use crate::configuration::to_analyzer_rules;
 use crate::diagnostics::extension_error;
-use crate::file_handlers::{is_diagnostic_error, only_rules, FixAllParams};
+use crate::file_handlers::{is_diagnostic_error, FixAllParams};
 use crate::settings::{LinterSettings, OverrideSettings, Settings};
 use crate::workspace::{DocumentFileSource, OrganizeImportsResult};
 use crate::{
@@ -376,9 +376,16 @@ pub(crate) fn lint(params: LintParams) -> LintResults {
                 .analyzer_options::<JsLanguage>(params.path, &params.language);
 
             // Compute final rules (taking `overrides` into account)
-            let mut rules = settings.as_rules(params.path.as_path());
+            let rules = settings.as_rules(params.path.as_path());
 
-            let enabled_rules = if params.only.is_empty() {
+            let has_only_filter = !params.only.is_empty();
+            let enabled_rules = if has_only_filter {
+                params
+                    .only
+                    .into_iter()
+                    .map(|selector| selector.into())
+                    .collect::<Vec<_>>()
+            } else {
                 let mut rule_filter_list = rules
                     .as_ref()
                     .map(|rules| rules.as_enabled_rules())
@@ -396,10 +403,6 @@ pub(crate) fn lint(params: LintParams) -> LintResults {
                 rule_filter_list.push(RuleFilter::Rule("correctness", "noSuperWithoutExtends"));
                 rule_filter_list.push(RuleFilter::Rule("nursery", "noSuperWithoutExtends"));
                 rule_filter_list
-            } else {
-                // Filter rule/groups according to the `--only` and `--skip` options.
-                // `--only` and `--skip` behave like `--include`/`--ignore`
-                only_rules(&mut rules, &params.only).into_iter().collect()
             };
             let disabled_rules = params
                 .skip
@@ -413,17 +416,17 @@ pub(crate) fn lint(params: LintParams) -> LintResults {
                 range: None,
             };
 
+            // Do not report unused suppression comment diagnostics if:
+            // - it is a syntax-only analyzer pass, or
+            // - if a single rule is run.
+            let ignores_suppression_comment =
+                !filter.categories.contains(RuleCategories::LINT) || has_only_filter;
+
             let mut diagnostic_count = diagnostics.len() as u32;
             let mut errors = diagnostics
                 .iter()
                 .filter(|diag| diag.severity() <= Severity::Error)
                 .count();
-
-            // Do not report unused suppression comment diagnostics if:
-            // - it is a syntax-only analyzer pass, or
-            // - if a single rule is run.
-            let ignores_suppression_comment =
-                !filter.categories.contains(RuleCategories::LINT) || !params.only.is_empty();
 
             info!("Analyze file {}", params.path.display());
             let (_, analyze_diagnostics) = analyze(

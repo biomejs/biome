@@ -1,4 +1,4 @@
-use super::{only_rules, CodeActionsParams, DocumentFileSource, ExtensionHandler, ParseResult};
+use super::{CodeActionsParams, DocumentFileSource, ExtensionHandler, ParseResult};
 use crate::configuration::to_analyzer_rules;
 use crate::file_handlers::DebugCapabilities;
 use crate::file_handlers::{
@@ -307,30 +307,27 @@ fn lint(params: LintParams) -> LintResults {
                 );
             }
 
-            let mut diagnostic_count = diagnostics.len() as u32;
-            let mut errors = diagnostics
-                .iter()
-                .filter(|diag| diag.severity() <= Severity::Error)
-                .count();
-
-            let skipped_diagnostics = diagnostic_count - diagnostics.len() as u32;
-
             let analyzer_options = &params
                 .settings
                 .analyzer_options::<JsonLanguage>(params.path, &params.language);
 
-            let mut rules = settings.as_rules(params.path.as_path());
-            let enabled_rules = if params.only.is_empty() {
+            let rules = settings.as_rules(params.path.as_path());
+
+            let has_only_filter = !params.only.is_empty();
+            let enabled_rules = if has_only_filter {
+                params
+                    .only
+                    .into_iter()
+                    .map(|selector| selector.into())
+                    .collect::<Vec<_>>()
+            } else {
                 rules
                     .as_ref()
                     .map(|rules| rules.as_enabled_rules())
                     .unwrap_or_default()
-            } else {
-                // Filter rule/groups according to the `--only` and `--skip` options.
-                // `--only` and `--skip` behave like `--include`/`--ignore`
-                only_rules(&mut rules, &params.only)
+                    .into_iter()
+                    .collect::<Vec<_>>()
             };
-            let enabled_rules = enabled_rules.into_iter().collect::<Vec<_>>();
             let disabled_rules = params
                 .skip
                 .into_iter()
@@ -347,7 +344,14 @@ fn lint(params: LintParams) -> LintResults {
             // - it is a syntax-only analyzer pass, or
             // - if a single rule is run.
             let ignores_suppression_comment =
-                !filter.categories.contains(RuleCategories::LINT) || !params.only.is_empty();
+                !filter.categories.contains(RuleCategories::LINT) || has_only_filter;
+
+            let mut diagnostic_count = diagnostics.len() as u32;
+            let mut errors = diagnostics
+                .iter()
+                .filter(|diag| diag.severity() <= Severity::Error)
+                .count();
+            let skipped_diagnostics = diagnostic_count - diagnostics.len() as u32;
 
             let (_, analyze_diagnostics) = analyze(&root, filter, analyzer_options, |signal| {
                 if let Some(mut diagnostic) = signal.diagnostic() {

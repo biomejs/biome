@@ -72,11 +72,9 @@ Available options:
         --apply               Alias for `--write`, writes safe fixes (deprecated, use `--write`)
         --apply-unsafe        Alias for `--write --unsafe`, writes safe and unsafe fixes (deprecated,
                               use `--write --unsafe`)
-        --only=<GROUP|RULE>   Run only the given rule or rule group.
-                              When a rule is passed, its severity level is set to `error' if it is a
-                              recommended rule, or `warn' otherwise.
-                              When a rule group is passed, the `recommended` flag is enabled, but if
-                              the `all` flag is enabled.
+        --only=<GROUP|RULE>   Run only the given rule or group of rules. If the severity level of a rule
+                              is `off`, then the severity level of the rule is set to `error` if it is
+                              a recommended rule or `warn` otherwise.
                               Example: `biome lint --only=correctness/noUnusedVariables --only=suspicious`
         --skip=<GROUP|RULE>   Skip the given rule or group of rules by setting the severity level of
                               the rules to `off`. This option takes precedence over `--only`.
