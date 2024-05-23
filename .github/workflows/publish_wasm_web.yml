@@ -19,10 +19,9 @@ jobs:
       - name: Build WASM module for the web
         run: wasm-pack build --out-dir ../../packages/@biomejs/wasm-web --target web --release --scope biomejs crates/biome_wasm
 
-      - name: Install corepack and Node.js
-        uses: actions/setup-node@v4
+      - run: corepack enable
+      - uses: actions/setup-node@v4
         with:
-          corepack-enable: true
           node-version: 20
           cache: "pnpm"
 
