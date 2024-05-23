@@ -439,7 +439,7 @@ impl<L: Language + Default> RegistryRule<L> {
                     query_result.clone(),
                     result,
                     params.services,
-                    params.apply_suppression_comment,
+                    params.suppression_action,
                     params.options,
                 ));
 

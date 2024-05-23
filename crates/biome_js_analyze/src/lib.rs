@@ -1,6 +1,6 @@
 #![warn(clippy::needless_pass_by_value)]
 
-use crate::suppression_action::apply_suppression_comment;
+use crate::suppression_action::JsSuppressionAction;
 use biome_analyze::{
     AnalysisFilter, Analyzer, AnalyzerContext, AnalyzerOptions, AnalyzerSignal, ControlFlow,
     InspectMatcher, LanguageRoot, MatchQueryParams, MetadataRegistry, RuleAction, RuleRegistry,
@@ -117,7 +117,7 @@ where
         metadata(),
         InspectMatcher::new(registry, inspect_matcher),
         parse_linter_suppression_comment,
-        apply_suppression_comment,
+        Box::new(JsSuppressionAction),
         &mut emit_signal,
     );
 

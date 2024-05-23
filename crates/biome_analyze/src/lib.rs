@@ -16,6 +16,7 @@ mod registry;
 mod rule;
 mod services;
 mod signals;
+mod suppression_action;
 mod syntax;
 mod visitor;
 
@@ -44,6 +45,7 @@ pub use crate::signals::{
 };
 pub use crate::syntax::{Ast, SyntaxVisitor};
 pub use crate::visitor::{NodeVisitor, Visitor, VisitorContext, VisitorFinishContext};
+pub use suppression_action::{ApplySuppression, SuppressionAction};
 
 use biome_console::markup;
 use biome_diagnostics::{
@@ -70,7 +72,7 @@ pub struct Analyzer<'analyzer, L: Language, Matcher, Break, Diag> {
     /// Language-specific suppression comment parsing function
     parse_suppression_comment: SuppressionParser<Diag>,
     /// Language-specific suppression comment emitter
-    apply_suppression_comment: SuppressionCommentEmitter<L>,
+    suppression_action: Box<dyn SuppressionAction<Language = L>>,
     /// Handles analyzer signals emitted by individual rules
     emit_signal: SignalHandler<'analyzer, L, Break>,
 }
@@ -94,7 +96,7 @@ where
         metadata: &'analyzer MetadataRegistry,
         query_matcher: Matcher,
         parse_suppression_comment: SuppressionParser<Diag>,
-        apply_suppression_comment: SuppressionCommentEmitter<L>,
+        suppression_action: Box<dyn SuppressionAction<Language = L>>,
         emit_signal: SignalHandler<'analyzer, L, Break>,
     ) -> Self {
         Self {
@@ -102,7 +104,7 @@ where
             metadata,
             query_matcher,
             parse_suppression_comment,
-            apply_suppression_comment,
+            suppression_action,
             emit_signal,
         }
     }
@@ -123,7 +125,7 @@ where
             mut query_matcher,
             parse_suppression_comment,
             mut emit_signal,
-            apply_suppression_comment,
+            suppression_action,
         } = self;
 
         let mut line_index = 0;
@@ -143,7 +145,7 @@ where
                 root: &ctx.root,
                 services: &ctx.services,
                 range: ctx.range,
-                apply_suppression_comment,
+                suppression_action: suppression_action.as_ref(),
                 options: ctx.options,
             };
 
@@ -208,7 +210,7 @@ struct PhaseRunner<'analyzer, 'phase, L: Language, Matcher, Break, Diag> {
     /// Language-specific suppression comment parsing function
     parse_suppression_comment: SuppressionParser<Diag>,
     /// Language-specific suppression comment emitter
-    apply_suppression_comment: SuppressionCommentEmitter<L>,
+    suppression_action: &'phase dyn SuppressionAction<Language = L>,
     /// Line index at the current position of the traversal
     line_index: &'phase mut usize,
     /// Track active suppression comments per-line, ordered by line index
@@ -280,7 +282,7 @@ where
                     range: self.range,
                     query_matcher: self.query_matcher,
                     signal_queue: &mut self.signal_queue,
-                    apply_suppression_comment: self.apply_suppression_comment,
+                    suppression_action: self.suppression_action,
                     options: self.options,
                 };
 
@@ -305,7 +307,7 @@ where
                     range: self.range,
                     query_matcher: self.query_matcher,
                     signal_queue: &mut self.signal_queue,
-                    apply_suppression_comment: self.apply_suppression_comment,
+                    suppression_action: self.suppression_action,
                     options: self.options,
                 };
 
@@ -754,9 +756,6 @@ pub struct SuppressionCommentEmitterPayload<'a, L: Language> {
     /// The original range of the diagnostic where the rule was triggered
     pub diagnostic_text_range: &'a TextRange,
 }
-
-/// Convenient type that to mark a function that is responsible to create a mutation to add a suppression comment.
-type SuppressionCommentEmitter<L> = fn(SuppressionCommentEmitterPayload<L>);
 
 type SignalHandler<'a, L, Break> = &'a mut dyn FnMut(&dyn AnalyzerSignal<L>) -> ControlFlow<Break>;
 

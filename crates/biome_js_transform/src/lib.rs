@@ -4,12 +4,13 @@ mod transformers;
 
 use crate::registry::visit_transformation_registry;
 use biome_analyze::{
-    AnalysisFilter, Analyzer, AnalyzerContext, AnalyzerOptions, AnalyzerSignal, ControlFlow,
-    InspectMatcher, LanguageRoot, MatchQueryParams, MetadataRegistry, RuleRegistry,
+    AnalysisFilter, Analyzer, AnalyzerContext, AnalyzerOptions, AnalyzerSignal, ApplySuppression,
+    ControlFlow, InspectMatcher, LanguageRoot, MatchQueryParams, MetadataRegistry, RuleRegistry,
+    SuppressionAction,
 };
 use biome_diagnostics::Error;
 use biome_js_syntax::{JsFileSource, JsLanguage};
-use biome_rowan::BatchMutation;
+use biome_rowan::{BatchMutation, SyntaxToken};
 use std::convert::Infallible;
 
 /// Return the static [MetadataRegistry] for the JS analyzer rules
@@ -54,11 +55,31 @@ where
         return (None, diagnostics);
     }
 
+    struct TestAction;
+    impl SuppressionAction for TestAction {
+        type Language = JsLanguage;
+
+        fn find_token_to_apply_suppression(
+            &self,
+            _: SyntaxToken<Self::Language>,
+        ) -> Option<ApplySuppression<Self::Language>> {
+            None
+        }
+
+        fn apply_suppression(
+            &self,
+            _: &mut BatchMutation<Self::Language>,
+            _: ApplySuppression<Self::Language>,
+            _: &str,
+        ) {
+            unreachable!("")
+        }
+    }
     let mut analyzer = Analyzer::new(
         metadata(),
         InspectMatcher::new(registry, inspect_matcher),
         |_| -> Vec<Result<_, Infallible>> { unreachable!() },
-        |_| {},
+        Box::new(TestAction),
         &mut emit_signal,
     );
 

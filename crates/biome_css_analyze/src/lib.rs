@@ -2,15 +2,18 @@ mod keywords;
 mod lint;
 pub mod options;
 mod registry;
+mod suppression_action;
 mod utils;
 
 pub use crate::registry::visit_registry;
+use crate::suppression_action::CssSuppressionAction;
 use biome_analyze::{
     AnalysisFilter, AnalyzerOptions, AnalyzerSignal, ControlFlow, LanguageRoot, MatchQueryParams,
-    MetadataRegistry, RuleRegistry, SuppressionDiagnostic, SuppressionKind,
+    MetadataRegistry, RuleRegistry, SuppressionKind,
 };
 use biome_css_syntax::CssLanguage;
-use biome_diagnostics::Error;
+use biome_diagnostics::{category, Error};
+use biome_suppression::{parse_suppression_comment, SuppressionDiagnostic};
 
 /// Return the static [MetadataRegistry] for the JSON analyzer rules
 pub fn metadata() -> &'static MetadataRegistry {
@@ -60,10 +63,43 @@ where
     B: 'a,
 {
     fn parse_linter_suppression_comment(
-        _text: &str,
+        text: &str,
     ) -> Vec<Result<SuppressionKind, SuppressionDiagnostic>> {
-        vec![]
+        let mut result = Vec::new();
+
+        for comment in parse_suppression_comment(text) {
+            let categories = match comment {
+                Ok(comment) => {
+                    if comment.is_legacy {
+                        result.push(Ok(SuppressionKind::Deprecated));
+                    }
+                    comment.categories
+                }
+                Err(err) => {
+                    result.push(Err(err));
+                    continue;
+                }
+            };
+
+            for (key, value) in categories {
+                if key == category!("lint") {
+                    if let Some(value) = value {
+                        result.push(Ok(SuppressionKind::MaybeLegacy(value)));
+                    } else {
+                        result.push(Ok(SuppressionKind::Everything));
+                    }
+                } else {
+                    let category = key.name();
+                    if let Some(rule) = category.strip_prefix("lint/") {
+                        result.push(Ok(SuppressionKind::Rule(rule)));
+                    }
+                }
+            }
+        }
+
+        result
     }
+
     let mut registry = RuleRegistry::builder(&filter, root);
     visit_registry(&mut registry);
 
@@ -78,7 +114,7 @@ where
         metadata(),
         biome_analyze::InspectMatcher::new(registry, inspect_matcher),
         parse_linter_suppression_comment,
-        |_| {},
+        Box::new(CssSuppressionAction),
         &mut emit_signal,
     );
 
