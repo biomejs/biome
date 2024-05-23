@@ -16,6 +16,7 @@ use crate::WorkspaceError;
 use biome_analyze::options::PreferredQuote;
 use biome_analyze::{
     AnalysisFilter, AnalyzerConfiguration, AnalyzerOptions, ControlFlow, Never, RuleCategories,
+    RuleFilter,
 };
 use biome_configuration::linter::RuleSelector;
 use biome_configuration::PartialConfiguration;
@@ -329,11 +330,8 @@ fn lint(params: LintParams) -> LintResults {
                 // We execute a single rule or group because the `--only` filter is specified.
                 let mut enabled_rules = rustc_hash::FxHashSet::default();
                 let mut only_groups = rustc_hash::FxHashSet::default();
-                let skipped = params
-                    .skip
-                    .into_iter()
-                    .map(|selector| selector.into())
-                    .collect::<rustc_hash::FxHashSet<biome_analyze::RuleFilter>>();
+                let mut skipped_groups = rustc_hash::FxHashSet::default();
+                let mut skipped_rules = rustc_hash::FxHashSet::<RuleFilter>::default();
                 for selector in &params.only {
                     match selector {
                         RuleSelector::Group(group) => {
@@ -350,7 +348,17 @@ fn lint(params: LintParams) -> LintResults {
                         }
                     }
                 }
-                if !skipped.is_empty() || !only_groups.is_empty() {
+                for selector in &params.skip {
+                    match selector {
+                        RuleSelector::Group(group) => {
+                            skipped_groups.insert(group.as_str());
+                        }
+                        RuleSelector::Rule(_, _) => {
+                            skipped_rules.insert((*selector).into());
+                        }
+                    }
+                }
+                if !params.skip.is_empty() || !only_groups.is_empty() {
                     if let Some(rules) = rules.as_mut() {
                         // Ensure that the recommended field is not set to `false`.
                         rules.to_mut().set_recommended();
@@ -364,7 +372,8 @@ fn lint(params: LintParams) -> LintResults {
                             .filter(|rule_filter| {
                                 (params.only.is_empty()
                                     || only_groups.contains(&rule_filter.group()))
-                                    && !skipped.iter().any(|filter| filter.contains(*rule_filter))
+                                    && !skipped_groups.contains(&rule_filter.group())
+                                    && !skipped_rules.contains(rule_filter)
                             }),
                     );
                 }
