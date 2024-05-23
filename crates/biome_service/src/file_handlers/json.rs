@@ -1,4 +1,4 @@
-use super::{CodeActionsParams, DocumentFileSource, ExtensionHandler, ParseResult};
+use super::{rule_filters, CodeActionsParams, DocumentFileSource, ExtensionHandler, ParseResult};
 use crate::configuration::to_analyzer_rules;
 use crate::file_handlers::DebugCapabilities;
 use crate::file_handlers::{
@@ -16,9 +16,7 @@ use crate::WorkspaceError;
 use biome_analyze::options::PreferredQuote;
 use biome_analyze::{
     AnalysisFilter, AnalyzerConfiguration, AnalyzerOptions, ControlFlow, Never, RuleCategories,
-    RuleFilter,
 };
-use biome_configuration::linter::RuleSelector;
 use biome_configuration::PartialConfiguration;
 use biome_deserialize::json::deserialize_from_json_ast;
 use biome_diagnostics::{category, Diagnostic, DiagnosticExt, Severity};
@@ -327,57 +325,11 @@ fn lint(params: LintParams) -> LintResults {
                     .collect::<Vec<_>>();
                 rule_filter_list
             } else {
-                // We execute a single rule or group because the `--only` filter is specified.
-                let mut enabled_rules = rustc_hash::FxHashSet::default();
-                let mut only_groups = rustc_hash::FxHashSet::default();
-                let mut skipped_groups = rustc_hash::FxHashSet::default();
-                let mut skipped_rules = rustc_hash::FxHashSet::<RuleFilter>::default();
-                for selector in &params.only {
-                    match selector {
-                        RuleSelector::Group(group) => {
-                            only_groups.insert(group.as_str());
-                        }
-                        RuleSelector::Rule(group, rule_name) => {
-                            if let Some(rules) = rules.as_mut() {
-                                // Set the severity level of the rule to its default.
-                                rules
-                                    .to_mut()
-                                    .set_default_severity_if_off(*group, rule_name);
-                            }
-                            enabled_rules.insert((*selector).into());
-                        }
-                    }
-                }
-                for selector in &params.skip {
-                    match selector {
-                        RuleSelector::Group(group) => {
-                            skipped_groups.insert(group.as_str());
-                        }
-                        RuleSelector::Rule(_, _) => {
-                            skipped_rules.insert((*selector).into());
-                        }
-                    }
-                }
-                if !params.skip.is_empty() || !only_groups.is_empty() {
-                    if let Some(rules) = rules.as_mut() {
-                        // Ensure that the recommended field is not set to `false`.
-                        rules.to_mut().set_recommended();
-                    }
-                    enabled_rules.extend(
-                        rules
-                            .as_ref()
-                            .map(|rules| rules.as_enabled_rules())
-                            .unwrap_or_default()
-                            .into_iter()
-                            .filter(|rule_filter| {
-                                (params.only.is_empty()
-                                    || only_groups.contains(&rule_filter.group()))
-                                    && !skipped_groups.contains(&rule_filter.group())
-                                    && !skipped_rules.contains(rule_filter)
-                            }),
-                    );
-                }
-                enabled_rules.into_iter().collect()
+                // Filter rule/groups according to the `--only` and `--skip` options.
+                // `--only` and `--skip` behave like `--include`/`--ignore`
+                rule_filters(&mut rules, &params.only, &params.skip)
+                    .into_iter()
+                    .collect()
             };
 
             let analyzer_options = &params

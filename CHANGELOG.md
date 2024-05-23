@@ -43,7 +43,7 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
   biome lint --skip=style --skip=suspicious/noExplicitAny
   ```
 
-  You can also use `--only` and `--skip` together.
+  You can also use `--only` and `--skip` together. `--skip` oevrrides `--only`.
   The following command executes only the rules from the `style` group, but the `style/useNamingConvention` rule.
 
   ```shell

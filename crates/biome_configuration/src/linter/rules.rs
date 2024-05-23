@@ -387,7 +387,7 @@ impl Rules {
     #[doc = r" It returns the enabled rules by default."]
     #[doc = r""]
     #[doc = r" The enabled rules are calculated from the difference with the disabled rules."]
-    pub fn as_enabled_rules(&self) -> IndexSet<RuleFilter> {
+    pub fn as_enabled_rules(&self) -> IndexSet<RuleFilter<'static>> {
         let mut enabled_rules = IndexSet::new();
         let mut disabled_rules = IndexSet::new();
         if let Some(group) = self.a11y.as_ref() {
@@ -760,7 +760,7 @@ impl A11y {
     pub(crate) fn is_all_unset(&self) -> bool {
         self.all.is_none()
     }
-    pub(crate) fn get_enabled_rules(&self) -> IndexSet<RuleFilter> {
+    pub(crate) fn get_enabled_rules(&self) -> IndexSet<RuleFilter<'static>> {
         let mut index_set = IndexSet::new();
         if let Some(rule) = self.no_access_key.as_ref() {
             if rule.is_enabled() {
@@ -914,7 +914,7 @@ impl A11y {
         }
         index_set
     }
-    pub(crate) fn get_disabled_rules(&self) -> IndexSet<RuleFilter> {
+    pub(crate) fn get_disabled_rules(&self) -> IndexSet<RuleFilter<'static>> {
         let mut index_set = IndexSet::new();
         if let Some(rule) = self.no_access_key.as_ref() {
             if rule.is_disabled() {
@@ -1087,7 +1087,7 @@ impl A11y {
         &self,
         parent_is_all: bool,
         parent_is_recommended: bool,
-        enabled_rules: &mut IndexSet<RuleFilter>,
+        enabled_rules: &mut IndexSet<RuleFilter<'static>>,
     ) {
         if self.is_all_true() || self.is_all_unset() && parent_is_all {
             enabled_rules.extend(Self::all_rules_as_filters());
@@ -1695,7 +1695,7 @@ impl Complexity {
     pub(crate) fn is_all_unset(&self) -> bool {
         self.all.is_none()
     }
-    pub(crate) fn get_enabled_rules(&self) -> IndexSet<RuleFilter> {
+    pub(crate) fn get_enabled_rules(&self) -> IndexSet<RuleFilter<'static>> {
         let mut index_set = IndexSet::new();
         if let Some(rule) = self.no_banned_types.as_ref() {
             if rule.is_enabled() {
@@ -1847,7 +1847,7 @@ impl Complexity {
         }
         index_set
     }
-    pub(crate) fn get_disabled_rules(&self) -> IndexSet<RuleFilter> {
+    pub(crate) fn get_disabled_rules(&self) -> IndexSet<RuleFilter<'static>> {
         let mut index_set = IndexSet::new();
         if let Some(rule) = self.no_banned_types.as_ref() {
             if rule.is_disabled() {
@@ -2018,7 +2018,7 @@ impl Complexity {
         &self,
         parent_is_all: bool,
         parent_is_recommended: bool,
-        enabled_rules: &mut IndexSet<RuleFilter>,
+        enabled_rules: &mut IndexSet<RuleFilter<'static>>,
     ) {
         if self.is_all_true() || self.is_all_unset() && parent_is_all {
             enabled_rules.extend(Self::all_rules_as_filters());
@@ -2663,7 +2663,7 @@ impl Correctness {
     pub(crate) fn is_all_unset(&self) -> bool {
         self.all.is_none()
     }
-    pub(crate) fn get_enabled_rules(&self) -> IndexSet<RuleFilter> {
+    pub(crate) fn get_enabled_rules(&self) -> IndexSet<RuleFilter<'static>> {
         let mut index_set = IndexSet::new();
         if let Some(rule) = self.no_children_prop.as_ref() {
             if rule.is_enabled() {
@@ -2852,7 +2852,7 @@ impl Correctness {
         }
         index_set
     }
-    pub(crate) fn get_disabled_rules(&self) -> IndexSet<RuleFilter> {
+    pub(crate) fn get_disabled_rules(&self) -> IndexSet<RuleFilter<'static>> {
         let mut index_set = IndexSet::new();
         if let Some(rule) = self.no_children_prop.as_ref() {
             if rule.is_disabled() {
@@ -3060,7 +3060,7 @@ impl Correctness {
         &self,
         parent_is_all: bool,
         parent_is_recommended: bool,
-        enabled_rules: &mut IndexSet<RuleFilter>,
+        enabled_rules: &mut IndexSet<RuleFilter<'static>>,
     ) {
         if self.is_all_true() || self.is_all_unset() && parent_is_all {
             enabled_rules.extend(Self::all_rules_as_filters());
@@ -3797,7 +3797,7 @@ impl Nursery {
     pub(crate) fn is_all_unset(&self) -> bool {
         self.all.is_none()
     }
-    pub(crate) fn get_enabled_rules(&self) -> IndexSet<RuleFilter> {
+    pub(crate) fn get_enabled_rules(&self) -> IndexSet<RuleFilter<'static>> {
         let mut index_set = IndexSet::new();
         if let Some(rule) = self.no_console.as_ref() {
             if rule.is_enabled() {
@@ -4011,7 +4011,7 @@ impl Nursery {
         }
         index_set
     }
-    pub(crate) fn get_disabled_rules(&self) -> IndexSet<RuleFilter> {
+    pub(crate) fn get_disabled_rules(&self) -> IndexSet<RuleFilter<'static>> {
         let mut index_set = IndexSet::new();
         if let Some(rule) = self.no_console.as_ref() {
             if rule.is_disabled() {
@@ -4244,7 +4244,7 @@ impl Nursery {
         &self,
         parent_is_all: bool,
         parent_is_recommended: bool,
-        enabled_rules: &mut IndexSet<RuleFilter>,
+        enabled_rules: &mut IndexSet<RuleFilter<'static>>,
     ) {
         if self.is_all_true() || self.is_all_unset() && parent_is_all {
             enabled_rules.extend(Self::all_rules_as_filters());
@@ -4803,7 +4803,7 @@ impl Performance {
     pub(crate) fn is_all_unset(&self) -> bool {
         self.all.is_none()
     }
-    pub(crate) fn get_enabled_rules(&self) -> IndexSet<RuleFilter> {
+    pub(crate) fn get_enabled_rules(&self) -> IndexSet<RuleFilter<'static>> {
         let mut index_set = IndexSet::new();
         if let Some(rule) = self.no_accumulating_spread.as_ref() {
             if rule.is_enabled() {
@@ -4827,7 +4827,7 @@ impl Performance {
         }
         index_set
     }
-    pub(crate) fn get_disabled_rules(&self) -> IndexSet<RuleFilter> {
+    pub(crate) fn get_disabled_rules(&self) -> IndexSet<RuleFilter<'static>> {
         let mut index_set = IndexSet::new();
         if let Some(rule) = self.no_accumulating_spread.as_ref() {
             if rule.is_disabled() {
@@ -4870,7 +4870,7 @@ impl Performance {
         &self,
         parent_is_all: bool,
         parent_is_recommended: bool,
-        enabled_rules: &mut IndexSet<RuleFilter>,
+        enabled_rules: &mut IndexSet<RuleFilter<'static>>,
     ) {
         if self.is_all_true() || self.is_all_unset() && parent_is_all {
             enabled_rules.extend(Self::all_rules_as_filters());
@@ -5014,7 +5014,7 @@ impl Security {
     pub(crate) fn is_all_unset(&self) -> bool {
         self.all.is_none()
     }
-    pub(crate) fn get_enabled_rules(&self) -> IndexSet<RuleFilter> {
+    pub(crate) fn get_enabled_rules(&self) -> IndexSet<RuleFilter<'static>> {
         let mut index_set = IndexSet::new();
         if let Some(rule) = self.no_dangerously_set_inner_html.as_ref() {
             if rule.is_enabled() {
@@ -5033,7 +5033,7 @@ impl Security {
         }
         index_set
     }
-    pub(crate) fn get_disabled_rules(&self) -> IndexSet<RuleFilter> {
+    pub(crate) fn get_disabled_rules(&self) -> IndexSet<RuleFilter<'static>> {
         let mut index_set = IndexSet::new();
         if let Some(rule) = self.no_dangerously_set_inner_html.as_ref() {
             if rule.is_disabled() {
@@ -5071,7 +5071,7 @@ impl Security {
         &self,
         parent_is_all: bool,
         parent_is_recommended: bool,
-        enabled_rules: &mut IndexSet<RuleFilter>,
+        enabled_rules: &mut IndexSet<RuleFilter<'static>>,
     ) {
         if self.is_all_true() || self.is_all_unset() && parent_is_all {
             enabled_rules.extend(Self::all_rules_as_filters());
@@ -5445,7 +5445,7 @@ impl Style {
     pub(crate) fn is_all_unset(&self) -> bool {
         self.all.is_none()
     }
-    pub(crate) fn get_enabled_rules(&self) -> IndexSet<RuleFilter> {
+    pub(crate) fn get_enabled_rules(&self) -> IndexSet<RuleFilter<'static>> {
         let mut index_set = IndexSet::new();
         if let Some(rule) = self.no_arguments.as_ref() {
             if rule.is_enabled() {
@@ -5664,7 +5664,7 @@ impl Style {
         }
         index_set
     }
-    pub(crate) fn get_disabled_rules(&self) -> IndexSet<RuleFilter> {
+    pub(crate) fn get_disabled_rules(&self) -> IndexSet<RuleFilter<'static>> {
         let mut index_set = IndexSet::new();
         if let Some(rule) = self.no_arguments.as_ref() {
             if rule.is_disabled() {
@@ -5902,7 +5902,7 @@ impl Style {
         &self,
         parent_is_all: bool,
         parent_is_recommended: bool,
-        enabled_rules: &mut IndexSet<RuleFilter>,
+        enabled_rules: &mut IndexSet<RuleFilter<'static>>,
     ) {
         if self.is_all_true() || self.is_all_unset() && parent_is_all {
             enabled_rules.extend(Self::all_rules_as_filters());
@@ -6832,7 +6832,7 @@ impl Suspicious {
     pub(crate) fn is_all_unset(&self) -> bool {
         self.all.is_none()
     }
-    pub(crate) fn get_enabled_rules(&self) -> IndexSet<RuleFilter> {
+    pub(crate) fn get_enabled_rules(&self) -> IndexSet<RuleFilter<'static>> {
         let mut index_set = IndexSet::new();
         if let Some(rule) = self.no_approximative_numeric_constant.as_ref() {
             if rule.is_enabled() {
@@ -7111,7 +7111,7 @@ impl Suspicious {
         }
         index_set
     }
-    pub(crate) fn get_disabled_rules(&self) -> IndexSet<RuleFilter> {
+    pub(crate) fn get_disabled_rules(&self) -> IndexSet<RuleFilter<'static>> {
         let mut index_set = IndexSet::new();
         if let Some(rule) = self.no_approximative_numeric_constant.as_ref() {
             if rule.is_disabled() {
@@ -7409,7 +7409,7 @@ impl Suspicious {
         &self,
         parent_is_all: bool,
         parent_is_recommended: bool,
-        enabled_rules: &mut IndexSet<RuleFilter>,
+        enabled_rules: &mut IndexSet<RuleFilter<'static>>,
     ) {
         if self.is_all_true() || self.is_all_unset() && parent_is_all {
             enabled_rules.extend(Self::all_rules_as_filters());

@@ -11,7 +11,7 @@ use crate::{
     workspace::{FixFileResult, GetSyntaxTreeResult, PullActionsResult, RenameResult},
     WorkspaceError,
 };
-use biome_analyze::{AnalysisFilter, AnalyzerDiagnostic, RuleCategories};
+use biome_analyze::{AnalysisFilter, AnalyzerDiagnostic, RuleCategories, RuleFilter};
 use biome_configuration::linter::RuleSelector;
 use biome_configuration::Rules;
 use biome_console::fmt::Formatter;
@@ -27,6 +27,8 @@ use biome_parser::AnyParse;
 use biome_project::PackageJson;
 use biome_rowan::{FileSourceError, NodeCache};
 pub use javascript::JsFormatterSettings;
+use rustc_hash::FxHashSet;
+use std::borrow::Cow;
 use std::ffi::OsStr;
 use std::path::Path;
 
@@ -548,6 +550,71 @@ pub(crate) fn parse_lang_from_script_opening_tag(script_opening_tag: &str) -> La
         })
     })
     .map_or(Language::JavaScript, |lang| lang)
+}
+
+/// Returns the rules enabled in `rules` and filtered by `only` and `skip`.
+pub(crate) fn rule_filters(
+    rules: &mut Option<Cow<Rules>>,
+    only: &[RuleSelector],
+    skip: &[RuleSelector],
+) -> FxHashSet<RuleFilter<'static>> {
+    // Filter rule/groups according to the `--only` and `--skip` options.
+    // `--only` and `--skip` behave like `--include`/`--ignore`
+    let mut enabled_rules = rustc_hash::FxHashSet::<RuleFilter>::default();
+    let mut only_groups = rustc_hash::FxHashSet::default();
+    let mut skipped_groups = rustc_hash::FxHashSet::default();
+    let mut skipped_rules = rustc_hash::FxHashSet::<RuleFilter>::default();
+    for selector in skip {
+        match selector {
+            RuleSelector::Group(group) => {
+                skipped_groups.insert(group.as_str());
+            }
+            RuleSelector::Rule(_, _) => {
+                skipped_rules.insert((*selector).into());
+            }
+        }
+    }
+    for selector in only {
+        match selector {
+            RuleSelector::Group(group) => {
+                if !skipped_groups.contains(group.as_str()) {
+                    only_groups.insert(group.as_str());
+                }
+            }
+            RuleSelector::Rule(group, rule_name) => {
+                if !skipped_groups.contains(group.as_str())
+                    && !skipped_rules.contains(&(*selector).into())
+                {
+                    if let Some(rules) = rules.as_mut() {
+                        // Set the severity level of the rule to its default.
+                        rules
+                            .to_mut()
+                            .set_default_severity_if_off(*group, rule_name);
+                    }
+                    enabled_rules.insert((*selector).into());
+                }
+            }
+        }
+    }
+    if !skip.is_empty() || !only_groups.is_empty() {
+        if let Some(rules) = rules.as_mut() {
+            // Ensure that the recommended field is not set to `false`.
+            rules.to_mut().set_recommended();
+        }
+        enabled_rules.extend(
+            rules
+                .as_ref()
+                .map(|rules| rules.as_enabled_rules())
+                .unwrap_or_default()
+                .into_iter()
+                .filter(|rule_filter| {
+                    (only.is_empty() || only_groups.contains(&rule_filter.group()))
+                        && !skipped_groups.contains(&rule_filter.group())
+                        && !skipped_rules.contains(rule_filter)
+                }),
+        );
+    }
+    enabled_rules
 }
 
 #[test]

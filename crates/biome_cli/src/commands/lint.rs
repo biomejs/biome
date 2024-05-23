@@ -69,15 +69,6 @@ pub(crate) fn lint(session: CliSession, payload: LintCommandPayload) -> Result<(
     } = payload;
     setup_cli_subscriber(cli_options.log_level, cli_options.log_kind);
 
-    if !skip.is_empty() {
-        if let Some(selector) = only.iter().find(|selector| skip.contains(selector)) {
-            return Err(CliDiagnostic::incompatible_arguments(
-                format!("--only={selector}"),
-                format!("--skip={selector}"),
-            ));
-        }
-    }
-
     let fix_file_mode = determine_fix_file_mode(
         FixFileModeOptions {
             apply,

@@ -8,13 +8,8 @@ expression: content
 
 ```
 
-# Termination Message
+# Emitted Messages
 
 ```block
-flags/invalid ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Incompatible arguments --only=suspicious and --skip=suspicious
-  
-
-
+Checked 1 file in <TIME>. No fixes needed.
 ```

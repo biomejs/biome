@@ -300,7 +300,7 @@ pub(crate) fn generate_rules_configuration(mode: Mode) -> Result<()> {
             /// It returns the enabled rules by default.
             ///
             /// The enabled rules are calculated from the difference with the disabled rules.
-            pub fn as_enabled_rules(&self) -> IndexSet<RuleFilter> {
+            pub fn as_enabled_rules(&self) -> IndexSet<RuleFilter<'static>> {
                 let mut enabled_rules = IndexSet::new();
                 let mut disabled_rules = IndexSet::new();
                 #( #group_as_default_rules )*
@@ -564,13 +564,13 @@ fn generate_struct(group: &str, rules: &BTreeMap<&'static str, RuleMetadata>) ->
                 self.all.is_none()
             }
 
-            pub(crate) fn get_enabled_rules(&self) -> IndexSet<RuleFilter> {
+            pub(crate) fn get_enabled_rules(&self) -> IndexSet<RuleFilter<'static>> {
                let mut index_set = IndexSet::new();
                #( #rule_enabled_check_line )*
                index_set
             }
 
-            pub(crate) fn get_disabled_rules(&self) -> IndexSet<RuleFilter> {
+            pub(crate) fn get_disabled_rules(&self) -> IndexSet<RuleFilter<'static>> {
                let mut index_set = IndexSet::new();
                #( #rule_disabled_check_line )*
                index_set
@@ -601,7 +601,7 @@ fn generate_struct(group: &str, rules: &BTreeMap<&'static str, RuleMetadata>) ->
                 &self,
                 parent_is_all: bool,
                 parent_is_recommended: bool,
-                enabled_rules: &mut IndexSet<RuleFilter>,
+                enabled_rules: &mut IndexSet<RuleFilter<'static>>,
             ) {
                 // The order of the if-else branches MATTERS!
                 if self.is_all_true() || self.is_all_unset() && parent_is_all {
