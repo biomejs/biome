@@ -3,7 +3,7 @@ use super::{
     LintResults, ParseResult,
 };
 use crate::configuration::to_analyzer_rules;
-use crate::file_handlers::DebugCapabilities;
+use crate::file_handlers::{rule_filters, DebugCapabilities};
 use crate::file_handlers::{
     AnalyzerCapabilities, Capabilities, FormatterCapabilities, ParserCapabilities,
 };
@@ -329,15 +329,24 @@ fn lint(params: LintParams) -> LintResults {
             let mut diagnostics = params.parse.into_diagnostics();
 
             // Compute final rules (taking `overrides` into account)
-            let rules = settings.as_rules(params.path.as_path());
-            let rule_filter_list = rules
-                .as_ref()
-                .map(|rules| rules.as_enabled_rules())
-                .unwrap_or_default()
-                .into_iter()
-                .collect::<Vec<_>>();
+            let mut rules = settings.as_rules(params.path.as_path());
 
-            let mut filter = AnalysisFilter::from_enabled_rules(Some(rule_filter_list.as_slice()));
+            let enabled_rules = if params.only.is_empty() && params.skip.is_empty() {
+                rules
+                    .as_ref()
+                    .map(|rules| rules.as_enabled_rules())
+                    .unwrap_or_default()
+                    .into_iter()
+                    .collect::<Vec<_>>()
+            } else {
+                // Filter rule/groups according to the `--only` and `--skip` options.
+                // `--only` and `--skip` behave like `--include`/`--ignore`
+                rule_filters(&mut rules, &params.only, &params.skip)
+                    .into_iter()
+                    .collect()
+            };
+
+            let mut filter = AnalysisFilter::from_enabled_rules(Some(enabled_rules.as_slice()));
             filter.categories = params.categories;
 
             let mut diagnostic_count = diagnostics.len() as u32;
@@ -346,13 +355,18 @@ fn lint(params: LintParams) -> LintResults {
                 .filter(|diag| diag.severity() <= Severity::Error)
                 .count();
 
-            let has_lint = filter.categories.contains(RuleCategories::LINT);
+            // Do not report unused suppression comment diagnostics if:
+            // - it is a syntax-only analyzer pass, or
+            // - if a single rule is run.
+            let ignores_suppression_comment =
+                !filter.categories.contains(RuleCategories::LINT) || !params.only.is_empty();
 
             info!("Analyze file {}", params.path.display());
             let (_, analyze_diagnostics) = analyze(&tree, filter, &analyzer_options, |signal| {
                 if let Some(mut diagnostic) = signal.diagnostic() {
                     // Do not report unused suppression comment diagnostics if this is a syntax-only analyzer pass
-                    if !has_lint && diagnostic.category() == Some(category!("suppressions/unused"))
+                    if ignores_suppression_comment
+                        && diagnostic.category() == Some(category!("suppressions/unused"))
                     {
                         return ControlFlow::<Never>::Continue(());
                     }
