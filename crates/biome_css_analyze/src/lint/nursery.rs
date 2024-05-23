@@ -8,6 +8,7 @@ pub mod no_duplicate_selectors_keyframe_block;
 pub mod no_empty_block;
 pub mod no_important_in_keyframe;
 pub mod no_invalid_position_at_import_rule;
+pub mod no_shorthand_property_overrides;
 pub mod no_unknown_function;
 pub mod no_unknown_media_feature_name;
 pub mod no_unknown_property;
@@ -26,6 +27,7 @@ declare_group! {
             self :: no_empty_block :: NoEmptyBlock ,
             self :: no_important_in_keyframe :: NoImportantInKeyframe ,
             self :: no_invalid_position_at_import_rule :: NoInvalidPositionAtImportRule ,
+            self :: no_shorthand_property_overrides :: NoShorthandPropertyOverrides ,
             self :: no_unknown_function :: NoUnknownFunction ,
             self :: no_unknown_media_feature_name :: NoUnknownMediaFeatureName ,
             self :: no_unknown_property :: NoUnknownProperty ,

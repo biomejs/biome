@@ -1,0 +1,300 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: invalid.css
+---
+# Input
+```css
+a { padding-left: 10px; padding: 20px; }
+
+a { border-width: 20px; border: 1px solid black; }
+
+a { border-color: red; border: 1px solid black; }
+
+a { border-style: dotted; border: 1px solid black; }
+
+a { border-image: url("foo.png"); border: 1px solid black; }
+
+a { border-image-source: url("foo.png"); border: 1px solid black; }
+
+a { pAdDiNg-lEfT: 10Px; pAdDiNg: 20Px; }
+
+a { PADDING-LEFT: 10PX; PADDING: 20PX; }
+
+/* Overriding within nested rule */
+a { padding-left: 10px; { b { padding-top: 10px; padding: 20px; }}}
+
+a { border-top-width: 1px; top: 0; bottom: 3px; border: 2px solid blue; }
+
+a { transition-property: opacity; transition: opacity 1s linear; }
+
+a { background-repeat: no-repeat; background: url(lion.png); }
+
+/* @media (color) { background-repeat: no-repeat; background: url(lion.png); } */
+
+/* a { @media (color) { background-repeat: no-repeat; background: url(lion.png); }} */
+
+/* a { -webkit-transition-property: opacity; -webkit-transition: opacity 1s linear; } */
+
+/* a { -WEBKIT-transition-property: opacity; -webKIT-transition: opacity 1s linear; } */
+
+a { font-variant: small-caps; font: sans-serif; }
+
+a { font-variant: all-small-caps; font: sans-serif; }
+
+a { font-size-adjust: 0.545; font: Verdana; }
+
+/* a { font-variant-caps: small-caps; font-variant: normal; } */
+
+/* Multiple shorthand property overrides */
+a { padding-left: 10px; padding: 20px; border-width: 20px; border: 1px solid black; }
+
+```
+
+# Diagnostics
+```
+invalid.css:1:25 lint/nursery/noShorthandPropertyOverrides ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected shorthand property padding after padding-left
+  
+  > 1 │ a { padding-left: 10px; padding: 20px; }
+      │                         ^^^^^^^
+    2 │ 
+    3 │ a { border-width: 20px; border: 1px solid black; }
+  
+
+```
+
+```
+invalid.css:3:25 lint/nursery/noShorthandPropertyOverrides ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected shorthand property border after border-width
+  
+    1 │ a { padding-left: 10px; padding: 20px; }
+    2 │ 
+  > 3 │ a { border-width: 20px; border: 1px solid black; }
+      │                         ^^^^^^
+    4 │ 
+    5 │ a { border-color: red; border: 1px solid black; }
+  
+
+```
+
+```
+invalid.css:5:24 lint/nursery/noShorthandPropertyOverrides ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected shorthand property border after border-color
+  
+    3 │ a { border-width: 20px; border: 1px solid black; }
+    4 │ 
+  > 5 │ a { border-color: red; border: 1px solid black; }
+      │                        ^^^^^^
+    6 │ 
+    7 │ a { border-style: dotted; border: 1px solid black; }
+  
+
+```
+
+```
+invalid.css:7:27 lint/nursery/noShorthandPropertyOverrides ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected shorthand property border after border-style
+  
+    5 │ a { border-color: red; border: 1px solid black; }
+    6 │ 
+  > 7 │ a { border-style: dotted; border: 1px solid black; }
+      │                           ^^^^^^
+    8 │ 
+    9 │ a { border-image: url("foo.png"); border: 1px solid black; }
+  
+
+```
+
+```
+invalid.css:9:35 lint/nursery/noShorthandPropertyOverrides ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected shorthand property border after border-image
+  
+     7 │ a { border-style: dotted; border: 1px solid black; }
+     8 │ 
+   > 9 │ a { border-image: url("foo.png"); border: 1px solid black; }
+       │                                   ^^^^^^
+    10 │ 
+    11 │ a { border-image-source: url("foo.png"); border: 1px solid black; }
+  
+
+```
+
+```
+invalid.css:11:42 lint/nursery/noShorthandPropertyOverrides ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected shorthand property border after border-image-source
+  
+     9 │ a { border-image: url("foo.png"); border: 1px solid black; }
+    10 │ 
+  > 11 │ a { border-image-source: url("foo.png"); border: 1px solid black; }
+       │                                          ^^^^^^
+    12 │ 
+    13 │ a { pAdDiNg-lEfT: 10Px; pAdDiNg: 20Px; }
+  
+
+```
+
+```
+invalid.css:13:25 lint/nursery/noShorthandPropertyOverrides ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected shorthand property padding after padding-left
+  
+    11 │ a { border-image-source: url("foo.png"); border: 1px solid black; }
+    12 │ 
+  > 13 │ a { pAdDiNg-lEfT: 10Px; pAdDiNg: 20Px; }
+       │                         ^^^^^^^
+    14 │ 
+    15 │ a { PADDING-LEFT: 10PX; PADDING: 20PX; }
+  
+
+```
+
+```
+invalid.css:15:25 lint/nursery/noShorthandPropertyOverrides ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected shorthand property padding after padding-left
+  
+    13 │ a { pAdDiNg-lEfT: 10Px; pAdDiNg: 20Px; }
+    14 │ 
+  > 15 │ a { PADDING-LEFT: 10PX; PADDING: 20PX; }
+       │                         ^^^^^^^
+    16 │ 
+    17 │ /* Overriding within nested rule */
+  
+
+```
+
+```
+invalid.css:18:50 lint/nursery/noShorthandPropertyOverrides ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected shorthand property padding after padding-top
+  
+    17 │ /* Overriding within nested rule */
+  > 18 │ a { padding-left: 10px; { b { padding-top: 10px; padding: 20px; }}}
+       │                                                  ^^^^^^^
+    19 │ 
+    20 │ a { border-top-width: 1px; top: 0; bottom: 3px; border: 2px solid blue; }
+  
+
+```
+
+```
+invalid.css:20:49 lint/nursery/noShorthandPropertyOverrides ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected shorthand property border after border-top-width
+  
+    18 │ a { padding-left: 10px; { b { padding-top: 10px; padding: 20px; }}}
+    19 │ 
+  > 20 │ a { border-top-width: 1px; top: 0; bottom: 3px; border: 2px solid blue; }
+       │                                                 ^^^^^^
+    21 │ 
+    22 │ a { transition-property: opacity; transition: opacity 1s linear; }
+  
+
+```
+
+```
+invalid.css:22:35 lint/nursery/noShorthandPropertyOverrides ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected shorthand property transition after transition-property
+  
+    20 │ a { border-top-width: 1px; top: 0; bottom: 3px; border: 2px solid blue; }
+    21 │ 
+  > 22 │ a { transition-property: opacity; transition: opacity 1s linear; }
+       │                                   ^^^^^^^^^^
+    23 │ 
+    24 │ a { background-repeat: no-repeat; background: url(lion.png); }
+  
+
+```
+
+```
+invalid.css:24:35 lint/nursery/noShorthandPropertyOverrides ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected shorthand property background after background-repeat
+  
+    22 │ a { transition-property: opacity; transition: opacity 1s linear; }
+    23 │ 
+  > 24 │ a { background-repeat: no-repeat; background: url(lion.png); }
+       │                                   ^^^^^^^^^^
+    25 │ 
+    26 │ /* @media (color) { background-repeat: no-repeat; background: url(lion.png); } */
+  
+
+```
+
+```
+invalid.css:34:31 lint/nursery/noShorthandPropertyOverrides ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected shorthand property font after font-variant
+  
+    32 │ /* a { -WEBKIT-transition-property: opacity; -webKIT-transition: opacity 1s linear; } */
+    33 │ 
+  > 34 │ a { font-variant: small-caps; font: sans-serif; }
+       │                               ^^^^
+    35 │ 
+    36 │ a { font-variant: all-small-caps; font: sans-serif; }
+  
+
+```
+
+```
+invalid.css:36:35 lint/nursery/noShorthandPropertyOverrides ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected shorthand property font after font-variant
+  
+    34 │ a { font-variant: small-caps; font: sans-serif; }
+    35 │ 
+  > 36 │ a { font-variant: all-small-caps; font: sans-serif; }
+       │                                   ^^^^
+    37 │ 
+    38 │ a { font-size-adjust: 0.545; font: Verdana; }
+  
+
+```
+
+```
+invalid.css:38:30 lint/nursery/noShorthandPropertyOverrides ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected shorthand property font after font-size-adjust
+  
+    36 │ a { font-variant: all-small-caps; font: sans-serif; }
+    37 │ 
+  > 38 │ a { font-size-adjust: 0.545; font: Verdana; }
+       │                              ^^^^
+    39 │ 
+    40 │ /* a { font-variant-caps: small-caps; font-variant: normal; } */
+  
+
+```
+
+```
+invalid.css:43:25 lint/nursery/noShorthandPropertyOverrides ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected shorthand property padding after padding-left
+  
+    42 │ /* Multiple shorthand property overrides */
+  > 43 │ a { padding-left: 10px; padding: 20px; border-width: 20px; border: 1px solid black; }
+       │                         ^^^^^^^
+    44 │ 
+  
+
+```
+
+```
+invalid.css:43:60 lint/nursery/noShorthandPropertyOverrides ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected shorthand property border after border-width
+  
+    42 │ /* Multiple shorthand property overrides */
+  > 43 │ a { padding-left: 10px; padding: 20px; border-width: 20px; border: 1px solid black; }
+       │                                                            ^^^^^^
+    44 │ 
+  
+
+```
