@@ -28,24 +28,24 @@ function ex() {
 
 # Diagnostics
 ```
-invalid.ts:1:5 lint/nursery/noEvolvingTypes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:1:5 lint/nursery/noEvolvingTypes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This variable's type is not allowed to evolve implicitly, leading to potential any types.
+  ! The type of this variable may evolve implicitly to any type, including the any type.
   
   > 1 │ let a;
       │     ^
     2 │ const b = [];
     3 │ let c = null;
   
-  i The variable's type may evolve, leading to any. Use explicit type or initialization. Specifying an explicit type or initial value to avoid implicit type evolution.
+  i Add an explicit type or initialization to avoid implicit type evolution.
   
 
 ```
 
 ```
-invalid.ts:2:7 lint/nursery/noEvolvingTypes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:2:7 lint/nursery/noEvolvingTypes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This variable's type is not allowed to evolve implicitly, leading to potential any types.
+  ! The type of this variable may evolve implicitly to any type, including the any type.
   
     1 │ let a;
   > 2 │ const b = [];
@@ -53,15 +53,15 @@ invalid.ts:2:7 lint/nursery/noEvolvingTypes ━━━━━━━━━━━━
     3 │ let c = null;
     4 │ 
   
-  i The variable's type may evolve, leading to any. Use explicit type or initialization. Specifying an explicit type or initial value to avoid implicit type evolution.
+  i Add an explicit type or initialization to avoid implicit type evolution.
   
 
 ```
 
 ```
-invalid.ts:3:5 lint/nursery/noEvolvingTypes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:3:5 lint/nursery/noEvolvingTypes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This variable's type is not allowed to evolve implicitly, leading to potential any types.
+  ! The type of this variable may evolve implicitly to any type, including the any type.
   
     1 │ let a;
     2 │ const b = [];
@@ -70,15 +70,15 @@ invalid.ts:3:5 lint/nursery/noEvolvingTypes ━━━━━━━━━━━━
     4 │ 
     5 │ let someVar1;
   
-  i The variable's type may evolve, leading to any. Use explicit type or initialization. Specifying an explicit type or initial value to avoid implicit type evolution.
+  i Add an explicit type or initialization to avoid implicit type evolution.
   
 
 ```
 
 ```
-invalid.ts:5:5 lint/nursery/noEvolvingTypes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:5:5 lint/nursery/noEvolvingTypes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This variable's type is not allowed to evolve implicitly, leading to potential any types.
+  ! The type of this variable may evolve implicitly to any type, including the any type.
   
     3 │ let c = null;
     4 │ 
@@ -87,15 +87,15 @@ invalid.ts:5:5 lint/nursery/noEvolvingTypes ━━━━━━━━━━━━
     6 │ someVar1 = '123';
     7 │ someVar1 = 123;
   
-  i The variable's type may evolve, leading to any. Use explicit type or initialization. Specifying an explicit type or initial value to avoid implicit type evolution.
+  i Add an explicit type or initialization to avoid implicit type evolution.
   
 
 ```
 
 ```
-invalid.ts:9:5 lint/nursery/noEvolvingTypes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:9:5 lint/nursery/noEvolvingTypes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This variable's type is not allowed to evolve implicitly, leading to potential any types.
+  ! The type of this variable may evolve implicitly to any type, including the any type.
   
      7 │ someVar1 = 123;
      8 │ 
@@ -104,15 +104,15 @@ invalid.ts:9:5 lint/nursery/noEvolvingTypes ━━━━━━━━━━━━
     10 │ someVar1 = '123';
     11 │ someVar1 = 123;
   
-  i The variable's type may evolve, leading to any. Use explicit type or initialization. Specifying an explicit type or initial value to avoid implicit type evolution.
+  i Add an explicit type or initialization to avoid implicit type evolution.
   
 
 ```
 
 ```
-invalid.ts:13:12 lint/nursery/noEvolvingTypes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:13:12 lint/nursery/noEvolvingTypes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This variable's type is not allowed to evolve implicitly, leading to potential any types.
+  ! The type of this variable may evolve implicitly to any type, including the any type.
   
     11 │ someVar1 = 123;
     12 │ 
@@ -121,15 +121,15 @@ invalid.ts:13:12 lint/nursery/noEvolvingTypes ━━━━━━━━━━━�
     14 │ var x = 0, y, z = 0;
     15 │ for(let a = 0, b; a < 5; a++) {}
   
-  i The variable's type may evolve, leading to any. Use explicit type or initialization. Specifying an explicit type or initial value to avoid implicit type evolution.
+  i Add an explicit type or initialization to avoid implicit type evolution.
   
 
 ```
 
 ```
-invalid.ts:14:12 lint/nursery/noEvolvingTypes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:14:12 lint/nursery/noEvolvingTypes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This variable's type is not allowed to evolve implicitly, leading to potential any types.
+  ! The type of this variable may evolve implicitly to any type, including the any type.
   
     13 │ let x = 0, y, z = 0;
   > 14 │ var x = 0, y, z = 0;
@@ -137,15 +137,15 @@ invalid.ts:14:12 lint/nursery/noEvolvingTypes ━━━━━━━━━━━�
     15 │ for(let a = 0, b; a < 5; a++) {}
     16 │ 
   
-  i The variable's type may evolve, leading to any. Use explicit type or initialization. Specifying an explicit type or initial value to avoid implicit type evolution.
+  i Add an explicit type or initialization to avoid implicit type evolution.
   
 
 ```
 
 ```
-invalid.ts:15:16 lint/nursery/noEvolvingTypes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:15:16 lint/nursery/noEvolvingTypes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This variable's type is not allowed to evolve implicitly, leading to potential any types.
+  ! The type of this variable may evolve implicitly to any type, including the any type.
   
     13 │ let x = 0, y, z = 0;
     14 │ var x = 0, y, z = 0;
@@ -154,15 +154,15 @@ invalid.ts:15:16 lint/nursery/noEvolvingTypes ━━━━━━━━━━━�
     16 │ 
     17 │ function ex() {
   
-  i The variable's type may evolve, leading to any. Use explicit type or initialization. Specifying an explicit type or initial value to avoid implicit type evolution.
+  i Add an explicit type or initialization to avoid implicit type evolution.
   
 
 ```
 
 ```
-invalid.ts:18:9 lint/nursery/noEvolvingTypes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:18:9 lint/nursery/noEvolvingTypes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This variable's type is not allowed to evolve implicitly, leading to potential any types.
+  ! The type of this variable may evolve implicitly to any type, including the any type.
   
     17 │ function ex() {
   > 18 │     let b;
@@ -170,7 +170,7 @@ invalid.ts:18:9 lint/nursery/noEvolvingTypes ━━━━━━━━━━━�
     19 │ }
     20 │ 
   
-  i The variable's type may evolve, leading to any. Use explicit type or initialization. Specifying an explicit type or initial value to avoid implicit type evolution.
+  i Add an explicit type or initialization to avoid implicit type evolution.
   
 
 ```

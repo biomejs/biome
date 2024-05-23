@@ -81,12 +81,12 @@ Rule Name                                               Diagnostics
 lint/suspicious/noImplicitAnyLet                        12 (12 error(s), 0 warning(s), 0 info(s))
 lint/suspicious/noDoubleEquals                          8 (8 error(s), 0 warning(s), 0 info(s))
 lint/suspicious/noRedeclare                             12 (12 error(s), 0 warning(s), 0 info(s))
-lint/suspicious/noDebugger                              20 (20 error(s), 0 warning(s), 0 info(s))
+lint/suspicious/noDebugger                              8 (8 error(s), 0 warning(s), 0 info(s))
 
 
 ```
 
 ```block
 Checked 2 files in <TIME>. No fixes needed.
-Found 56 errors.
+Found 44 errors.
 ```
