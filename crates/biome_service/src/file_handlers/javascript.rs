@@ -412,7 +412,7 @@ pub(crate) fn lint(params: LintParams) -> LintResults {
             let filter = AnalysisFilter {
                 categories: params.categories,
                 enabled_rules: Some(enabled_rules.as_slice()),
-                disabled_rules: (!disabled_rules.is_empty()).then_some(&disabled_rules),
+                disabled_rules: &disabled_rules,
                 range: None,
             };
 

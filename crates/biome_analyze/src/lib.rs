@@ -823,9 +823,10 @@ pub struct AnalysisFilter<'a> {
     /// Only allow rules with these categories to emit signals
     pub categories: RuleCategories,
     /// Only allow rules matching these names to emit signals
+    /// If `enabled_rules` is set to `None`, then all rules are enabled.
     pub enabled_rules: Option<&'a [RuleFilter<'a>]>,
     /// Do not allow rules matching these names to emit signals
-    pub disabled_rules: Option<&'a [RuleFilter<'a>]>,
+    pub disabled_rules: &'a [RuleFilter<'a>],
     /// Only emit signals matching this text range
     pub range: Option<TextRange>,
 }
@@ -850,20 +851,22 @@ impl<'analysis> AnalysisFilter<'analysis> {
             && self.enabled_rules.map_or(true, |enabled_rules| {
                 enabled_rules.iter().any(|filter| filter.match_group::<G>())
             })
-            && self.disabled_rules.map_or(true, |disabled_rules| {
-                !disabled_rules.iter().any(|filter| {
-                    matches!(filter, RuleFilter::Group(_)) && filter.match_group::<G>()
-                })
-            })
+            && !self
+                .disabled_rules
+                .iter()
+                .any(|filter| matches!(filter, RuleFilter::Group(_)) && filter.match_group::<G>())
     }
 
     /// Return `true` if the rule `R` matches this filter
     pub fn match_rule<R: Rule>(&self) -> bool {
-        self.enabled_rules.map_or(true, |enabled_rules| {
-            enabled_rules.iter().any(|filter| filter.match_rule::<R>())
-        }) && self.disabled_rules.map_or(true, |disabled_rules| {
-            !disabled_rules.iter().any(|filter| filter.match_rule::<R>())
-        })
+        self.match_category::<<R::Group as RuleGroup>::Category>()
+            && self.enabled_rules.map_or(true, |enabled_rules| {
+                enabled_rules.iter().any(|filter| filter.match_rule::<R>())
+            })
+            && !self
+                .disabled_rules
+                .iter()
+                .any(|filter| filter.match_rule::<R>())
     }
 }
 
