@@ -65,7 +65,7 @@ invalid.jsx:2:10 lint/nursery/useSemanticElements ━━━━━━━━━━
   
     1 │ <>
   > 2 │     <div role="checkbox" ></div>
-      │          ^^^^^^^^^^^^^^^
+      │          ^^^^
     3 │     <div role="radio" ></div>
     4 │     <div role="option" ></div>
   
@@ -131,7 +131,7 @@ invalid.jsx:3:10 lint/nursery/useSemanticElements ━━━━━━━━━━
     1 │ <>
     2 │     <div role="checkbox" ></div>
   > 3 │     <div role="radio" ></div>
-      │          ^^^^^^^^^^^^
+      │          ^^^^
     4 │     <div role="option" ></div>
     5 │     <div role="combobox" ></div>
   
@@ -197,7 +197,7 @@ invalid.jsx:4:10 lint/nursery/useSemanticElements ━━━━━━━━━━
     2 │     <div role="checkbox" ></div>
     3 │     <div role="radio" ></div>
   > 4 │     <div role="option" ></div>
-      │          ^^^^^^^^^^^^^
+      │          ^^^^
     5 │     <div role="combobox" ></div>
     6 │     <div role="heading" ></div>
   
@@ -263,7 +263,7 @@ invalid.jsx:5:10 lint/nursery/useSemanticElements ━━━━━━━━━━
     3 │     <div role="radio" ></div>
     4 │     <div role="option" ></div>
   > 5 │     <div role="combobox" ></div>
-      │          ^^^^^^^^^^^^^^^
+      │          ^^^^
     6 │     <div role="heading" ></div>
     7 │     <div role="separator" ></div>
   
@@ -324,12 +324,17 @@ invalid.jsx:6:10 lint/nursery/useSemanticElements ━━━━━━━━━━
 
   ! The elements with the following roles can be changed to the following elements:
     <h1>
+    <h2>
+    <h3>
+    <h4>
+    <h5>
+    <h6>
   
   
     4 │     <div role="option" ></div>
     5 │     <div role="combobox" ></div>
   > 6 │     <div role="heading" ></div>
-      │          ^^^^^^^^^^^^^^
+      │          ^^^^
     7 │     <div role="separator" ></div>
     8 │     <div role="button" ></div>
   
@@ -395,7 +400,7 @@ invalid.jsx:7:10 lint/nursery/useSemanticElements ━━━━━━━━━━
     5 │     <div role="combobox" ></div>
     6 │     <div role="heading" ></div>
   > 7 │     <div role="separator" ></div>
-      │          ^^^^^^^^^^^^^^^^
+      │          ^^^^
     8 │     <div role="button" ></div>
     9 │     <div role="article" ></div>
   
@@ -456,12 +461,13 @@ invalid.jsx:8:10 lint/nursery/useSemanticElements ━━━━━━━━━━
 
   ! The elements with the following roles can be changed to the following elements:
     <button>
+    <input type="button">
   
   
      6 │     <div role="heading" ></div>
      7 │     <div role="separator" ></div>
    > 8 │     <div role="button" ></div>
-       │          ^^^^^^^^^^^^^
+       │          ^^^^
      9 │     <div role="article" ></div>
     10 │     <div role="dialog" ></div>
   
@@ -527,7 +533,7 @@ invalid.jsx:9:10 lint/nursery/useSemanticElements ━━━━━━━━━━
      7 │     <div role="separator" ></div>
      8 │     <div role="button" ></div>
    > 9 │     <div role="article" ></div>
-       │          ^^^^^^^^^^^^^^
+       │          ^^^^
     10 │     <div role="dialog" ></div>
     11 │     <div role="alert" ></div>
   
@@ -593,7 +599,7 @@ invalid.jsx:10:10 lint/nursery/useSemanticElements ━━━━━━━━━�
      8 │     <div role="button" ></div>
      9 │     <div role="article" ></div>
   > 10 │     <div role="dialog" ></div>
-       │          ^^^^^^^^^^^^^
+       │          ^^^^
     11 │     <div role="alert" ></div>
     12 │     <div role="alertdialog" ></div>
   
@@ -659,7 +665,7 @@ invalid.jsx:11:10 lint/nursery/useSemanticElements ━━━━━━━━━�
      9 │     <div role="article" ></div>
     10 │     <div role="dialog" ></div>
   > 11 │     <div role="alert" ></div>
-       │          ^^^^^^^^^^^^
+       │          ^^^^
     12 │     <div role="alertdialog" ></div>
     13 │     <div role="cell" ></div>
   
@@ -725,7 +731,7 @@ invalid.jsx:12:10 lint/nursery/useSemanticElements ━━━━━━━━━�
     10 │     <div role="dialog" ></div>
     11 │     <div role="alert" ></div>
   > 12 │     <div role="alertdialog" ></div>
-       │          ^^^^^^^^^^^^^^^^^^
+       │          ^^^^
     13 │     <div role="cell" ></div>
     14 │     <div role="columnheader" ></div>
   
@@ -791,7 +797,7 @@ invalid.jsx:13:10 lint/nursery/useSemanticElements ━━━━━━━━━�
     11 │     <div role="alert" ></div>
     12 │     <div role="alertdialog" ></div>
   > 13 │     <div role="cell" ></div>
-       │          ^^^^^^^^^^^
+       │          ^^^^
     14 │     <div role="columnheader" ></div>
     15 │     <div role="definition" ></div>
   
@@ -857,7 +863,7 @@ invalid.jsx:14:10 lint/nursery/useSemanticElements ━━━━━━━━━�
     12 │     <div role="alertdialog" ></div>
     13 │     <div role="cell" ></div>
   > 14 │     <div role="columnheader" ></div>
-       │          ^^^^^^^^^^^^^^^^^^^
+       │          ^^^^
     15 │     <div role="definition" ></div>
     16 │     <div role="figure" ></div>
   
@@ -918,12 +924,13 @@ invalid.jsx:15:10 lint/nursery/useSemanticElements ━━━━━━━━━�
 
   ! The elements with the following roles can be changed to the following elements:
     <dd>
+    <dfn>
   
   
     13 │     <div role="cell" ></div>
     14 │     <div role="columnheader" ></div>
   > 15 │     <div role="definition" ></div>
-       │          ^^^^^^^^^^^^^^^^^
+       │          ^^^^
     16 │     <div role="figure" ></div>
     17 │     <div role="form" ></div>
   
@@ -989,7 +996,7 @@ invalid.jsx:16:10 lint/nursery/useSemanticElements ━━━━━━━━━�
     14 │     <div role="columnheader" ></div>
     15 │     <div role="definition" ></div>
   > 16 │     <div role="figure" ></div>
-       │          ^^^^^^^^^^^^^
+       │          ^^^^
     17 │     <div role="form" ></div>
     18 │     <div role="graphics-document" ></div>
   
@@ -1055,7 +1062,7 @@ invalid.jsx:17:10 lint/nursery/useSemanticElements ━━━━━━━━━�
     15 │     <div role="definition" ></div>
     16 │     <div role="figure" ></div>
   > 17 │     <div role="form" ></div>
-       │          ^^^^^^^^^^^
+       │          ^^^^
     18 │     <div role="graphics-document" ></div>
     19 │     <div role="graphics-object" ></div>
   
@@ -1116,12 +1123,14 @@ invalid.jsx:18:10 lint/nursery/useSemanticElements ━━━━━━━━━�
 
   ! The elements with the following roles can be changed to the following elements:
     <graphics-object>
+    <img>
+    <article>
   
   
     16 │     <div role="figure" ></div>
     17 │     <div role="form" ></div>
   > 18 │     <div role="graphics-document" ></div>
-       │          ^^^^^^^^^^^^^^^^^^^^^^^^
+       │          ^^^^
     19 │     <div role="graphics-object" ></div>
     20 │     <div role="grid" ></div>
   
@@ -1182,12 +1191,15 @@ invalid.jsx:19:10 lint/nursery/useSemanticElements ━━━━━━━━━�
 
   ! The elements with the following roles can be changed to the following elements:
     <graphics-document>
+    <group>
+    <img>
+    <graphics-symbol>
   
   
     17 │     <div role="form" ></div>
     18 │     <div role="graphics-document" ></div>
   > 19 │     <div role="graphics-object" ></div>
-       │          ^^^^^^^^^^^^^^^^^^^^^^
+       │          ^^^^
     20 │     <div role="grid" ></div>
     21 │     <div role="gridcell" ></div>
   
@@ -1253,7 +1265,7 @@ invalid.jsx:20:10 lint/nursery/useSemanticElements ━━━━━━━━━�
     18 │     <div role="graphics-document" ></div>
     19 │     <div role="graphics-object" ></div>
   > 20 │     <div role="grid" ></div>
-       │          ^^^^^^^^^^^
+       │          ^^^^
     21 │     <div role="gridcell" ></div>
     22 │     <div role="group" ></div>
   
@@ -1319,7 +1331,7 @@ invalid.jsx:21:10 lint/nursery/useSemanticElements ━━━━━━━━━�
     19 │     <div role="graphics-object" ></div>
     20 │     <div role="grid" ></div>
   > 21 │     <div role="gridcell" ></div>
-       │          ^^^^^^^^^^^^^^^
+       │          ^^^^
     22 │     <div role="group" ></div>
     23 │     <div role="img" ></div>
   
@@ -1385,7 +1397,7 @@ invalid.jsx:22:10 lint/nursery/useSemanticElements ━━━━━━━━━�
     20 │     <div role="grid" ></div>
     21 │     <div role="gridcell" ></div>
   > 22 │     <div role="group" ></div>
-       │          ^^^^^^^^^^^^
+       │          ^^^^
     23 │     <div role="img" ></div>
     24 │     <div role="link" ></div>
   
@@ -1451,7 +1463,7 @@ invalid.jsx:23:10 lint/nursery/useSemanticElements ━━━━━━━━━�
     21 │     <div role="gridcell" ></div>
     22 │     <div role="group" ></div>
   > 23 │     <div role="img" ></div>
-       │          ^^^^^^^^^^
+       │          ^^^^
     24 │     <div role="link" ></div>
     25 │     <div role="list" ></div>
   
@@ -1512,12 +1524,13 @@ invalid.jsx:24:10 lint/nursery/useSemanticElements ━━━━━━━━━�
 
   ! The elements with the following roles can be changed to the following elements:
     <a>
+    <link>
   
   
     22 │     <div role="group" ></div>
     23 │     <div role="img" ></div>
   > 24 │     <div role="link" ></div>
-       │          ^^^^^^^^^^^
+       │          ^^^^
     25 │     <div role="list" ></div>
     26 │     <div role="listbox" ></div>
   
@@ -1578,12 +1591,13 @@ invalid.jsx:25:10 lint/nursery/useSemanticElements ━━━━━━━━━�
 
   ! The elements with the following roles can be changed to the following elements:
     <ol>
+    <ul>
   
   
     23 │     <div role="img" ></div>
     24 │     <div role="link" ></div>
   > 25 │     <div role="list" ></div>
-       │          ^^^^^^^^^^^
+       │          ^^^^
     26 │     <div role="listbox" ></div>
     27 │     <div role="listitem" ></div>
   
@@ -1649,7 +1663,7 @@ invalid.jsx:26:10 lint/nursery/useSemanticElements ━━━━━━━━━�
     24 │     <div role="link" ></div>
     25 │     <div role="list" ></div>
   > 26 │     <div role="listbox" ></div>
-       │          ^^^^^^^^^^^^^^
+       │          ^^^^
     27 │     <div role="listitem" ></div>
     28 │     <div role="navigation" ></div>
   
@@ -1715,7 +1729,7 @@ invalid.jsx:27:10 lint/nursery/useSemanticElements ━━━━━━━━━�
     25 │     <div role="list" ></div>
     26 │     <div role="listbox" ></div>
   > 27 │     <div role="listitem" ></div>
-       │          ^^^^^^^^^^^^^^^
+       │          ^^^^
     28 │     <div role="navigation" ></div>
     29 │     <div role="row" ></div>
   
@@ -1781,7 +1795,7 @@ invalid.jsx:28:10 lint/nursery/useSemanticElements ━━━━━━━━━�
     26 │     <div role="listbox" ></div>
     27 │     <div role="listitem" ></div>
   > 28 │     <div role="navigation" ></div>
-       │          ^^^^^^^^^^^^^^^^^
+       │          ^^^^
     29 │     <div role="row" ></div>
     30 │     <div role="rowgroup" ></div>
   
@@ -1847,7 +1861,7 @@ invalid.jsx:29:10 lint/nursery/useSemanticElements ━━━━━━━━━�
     27 │     <div role="listitem" ></div>
     28 │     <div role="navigation" ></div>
   > 29 │     <div role="row" ></div>
-       │          ^^^^^^^^^^
+       │          ^^^^
     30 │     <div role="rowgroup" ></div>
     31 │     <div role="rowheader" ></div>
   
@@ -1908,12 +1922,14 @@ invalid.jsx:30:10 lint/nursery/useSemanticElements ━━━━━━━━━�
 
   ! The elements with the following roles can be changed to the following elements:
     <tbody>
+    <tfoot>
+    <thead>
   
   
     28 │     <div role="navigation" ></div>
     29 │     <div role="row" ></div>
   > 30 │     <div role="rowgroup" ></div>
-       │          ^^^^^^^^^^^^^^^
+       │          ^^^^
     31 │     <div role="rowheader" ></div>
     32 │     <div role="search" ></div>
   
@@ -1979,7 +1995,7 @@ invalid.jsx:31:10 lint/nursery/useSemanticElements ━━━━━━━━━�
     29 │     <div role="row" ></div>
     30 │     <div role="rowgroup" ></div>
   > 31 │     <div role="rowheader" ></div>
-       │          ^^^^^^^^^^^^^^^^
+       │          ^^^^
     32 │     <div role="search" ></div>
     33 │     <div role="searchbox" ></div>
   
@@ -2045,7 +2061,7 @@ invalid.jsx:32:10 lint/nursery/useSemanticElements ━━━━━━━━━�
     30 │     <div role="rowgroup" ></div>
     31 │     <div role="rowheader" ></div>
   > 32 │     <div role="search" ></div>
-       │          ^^^^^^^^^^^^^
+       │          ^^^^
     33 │     <div role="searchbox" ></div>
     34 │     <div role="table" ></div>
   
@@ -2111,7 +2127,7 @@ invalid.jsx:33:10 lint/nursery/useSemanticElements ━━━━━━━━━�
     31 │     <div role="rowheader" ></div>
     32 │     <div role="search" ></div>
   > 33 │     <div role="searchbox" ></div>
-       │          ^^^^^^^^^^^^^^^^
+       │          ^^^^
     34 │     <div role="table" ></div>
     35 │     <div role="term" ></div>
   
@@ -2177,7 +2193,7 @@ invalid.jsx:34:10 lint/nursery/useSemanticElements ━━━━━━━━━�
     32 │     <div role="search" ></div>
     33 │     <div role="searchbox" ></div>
   > 34 │     <div role="table" ></div>
-       │          ^^^^^^^^^^^^
+       │          ^^^^
     35 │     <div role="term" ></div>
     36 │     <div role="textbox" ></div>
   
@@ -2243,7 +2259,7 @@ invalid.jsx:35:10 lint/nursery/useSemanticElements ━━━━━━━━━�
     33 │     <div role="searchbox" ></div>
     34 │     <div role="table" ></div>
   > 35 │     <div role="term" ></div>
-       │          ^^^^^^^^^^^
+       │          ^^^^
     36 │     <div role="textbox" ></div>
     37 │     <div role="generic" ></div>
   
@@ -2304,12 +2320,13 @@ invalid.jsx:36:10 lint/nursery/useSemanticElements ━━━━━━━━━�
 
   ! The elements with the following roles can be changed to the following elements:
     <textarea>
+    <input type="search">
   
   
     34 │     <div role="table" ></div>
     35 │     <div role="term" ></div>
   > 36 │     <div role="textbox" ></div>
-       │          ^^^^^^^^^^^^^^
+       │          ^^^^
     37 │     <div role="generic" ></div>
     38 │     <div role="caption" ></div>
   
@@ -2370,12 +2387,13 @@ invalid.jsx:37:10 lint/nursery/useSemanticElements ━━━━━━━━━�
 
   ! The elements with the following roles can be changed to the following elements:
     <div>
+    <span>
   
   
     35 │     <div role="term" ></div>
     36 │     <div role="textbox" ></div>
   > 37 │     <div role="generic" ></div>
-       │          ^^^^^^^^^^^^^^
+       │          ^^^^
     38 │     <div role="caption" ></div>
     39 │     <div role="main" ></div>
   
@@ -2436,12 +2454,14 @@ invalid.jsx:38:10 lint/nursery/useSemanticElements ━━━━━━━━━�
 
   ! The elements with the following roles can be changed to the following elements:
     <caption>
+    <figcaption>
+    <legend>
   
   
     36 │     <div role="textbox" ></div>
     37 │     <div role="generic" ></div>
   > 38 │     <div role="caption" ></div>
-       │          ^^^^^^^^^^^^^^
+       │          ^^^^
     39 │     <div role="main" ></div>
     40 │     <div role="time" ></div>
   
@@ -2507,7 +2527,7 @@ invalid.jsx:39:10 lint/nursery/useSemanticElements ━━━━━━━━━�
     37 │     <div role="generic" ></div>
     38 │     <div role="caption" ></div>
   > 39 │     <div role="main" ></div>
-       │          ^^^^^^^^^^^
+       │          ^^^^
     40 │     <div role="time" ></div>
     41 │     <div role="p" ></div>
   
@@ -2573,7 +2593,7 @@ invalid.jsx:40:10 lint/nursery/useSemanticElements ━━━━━━━━━�
     38 │     <div role="caption" ></div>
     39 │     <div role="main" ></div>
   > 40 │     <div role="time" ></div>
-       │          ^^^^^^^^^^^
+       │          ^^^^
     41 │     <div role="p" ></div>
     42 │     <div role="aside" ></div>
   
@@ -2639,7 +2659,7 @@ invalid.jsx:41:10 lint/nursery/useSemanticElements ━━━━━━━━━�
     39 │     <div role="main" ></div>
     40 │     <div role="time" ></div>
   > 41 │     <div role="p" ></div>
-       │          ^^^^^^^^
+       │          ^^^^
     42 │     <div role="aside" ></div>
     43 │     <div role="blockquote" ></div>
   
@@ -2705,7 +2725,7 @@ invalid.jsx:42:10 lint/nursery/useSemanticElements ━━━━━━━━━�
     40 │     <div role="time" ></div>
     41 │     <div role="p" ></div>
   > 42 │     <div role="aside" ></div>
-       │          ^^^^^^^^^^^^
+       │          ^^^^
     43 │     <div role="blockquote" ></div>
     44 │     <div role="associationlist" ></div>
   
@@ -2771,7 +2791,7 @@ invalid.jsx:43:10 lint/nursery/useSemanticElements ━━━━━━━━━�
     41 │     <div role="p" ></div>
     42 │     <div role="aside" ></div>
   > 43 │     <div role="blockquote" ></div>
-       │          ^^^^^^^^^^^^^^^^^
+       │          ^^^^
     44 │     <div role="associationlist" ></div>
     45 │     <div role="status" ></div>
   
@@ -2837,7 +2857,7 @@ invalid.jsx:44:10 lint/nursery/useSemanticElements ━━━━━━━━━�
     42 │     <div role="aside" ></div>
     43 │     <div role="blockquote" ></div>
   > 44 │     <div role="associationlist" ></div>
-       │          ^^^^^^^^^^^^^^^^^^^^^^
+       │          ^^^^
     45 │     <div role="status" ></div>
     46 │     <div role="contentinfo" ></div>
   
@@ -2903,7 +2923,7 @@ invalid.jsx:45:10 lint/nursery/useSemanticElements ━━━━━━━━━�
     43 │     <div role="blockquote" ></div>
     44 │     <div role="associationlist" ></div>
   > 45 │     <div role="status" ></div>
-       │          ^^^^^^^^^^^^^
+       │          ^^^^
     46 │     <div role="contentinfo" ></div>
     47 │     <div role="region" ></div>
   
@@ -2969,7 +2989,7 @@ invalid.jsx:46:10 lint/nursery/useSemanticElements ━━━━━━━━━�
     44 │     <div role="associationlist" ></div>
     45 │     <div role="status" ></div>
   > 46 │     <div role="contentinfo" ></div>
-       │          ^^^^^^^^^^^^^^^^^^
+       │          ^^^^
     47 │     <div role="region" ></div>
     48 │ </>
   
@@ -3035,7 +3055,7 @@ invalid.jsx:47:10 lint/nursery/useSemanticElements ━━━━━━━━━�
     45 │     <div role="status" ></div>
     46 │     <div role="contentinfo" ></div>
   > 47 │     <div role="region" ></div>
-       │          ^^^^^^^^^^^^^
+       │          ^^^^
     48 │ </>
     49 │ 
   
