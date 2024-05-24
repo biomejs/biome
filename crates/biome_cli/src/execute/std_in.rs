@@ -156,17 +156,18 @@ pub(crate) fn run<'a>(
             }
         }
 
-        let rule = if let TraversalMode::Lint { rule, .. } = mode.traversal_mode() {
-            *rule
+        let (only, skip) = if let TraversalMode::Lint { only, skip, .. } = mode.traversal_mode() {
+            (only.clone(), skip.clone())
         } else {
-            None
+            (Vec::new(), Vec::new())
         };
         if !mode.is_check_apply_unsafe() {
             let result = workspace.pull_diagnostics(PullDiagnosticsParams {
                 categories: RuleCategories::LINT | RuleCategories::SYNTAX,
                 path: biome_path.clone(),
                 max_diagnostics: mode.max_diagnostics.into(),
-                rule,
+                only,
+                skip,
             })?;
             diagnostics.extend(result.diagnostics);
         }

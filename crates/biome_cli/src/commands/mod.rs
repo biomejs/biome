@@ -193,19 +193,20 @@ pub enum BiomeCommand {
         #[bpaf(external, hide_usage)]
         cli_options: CliOptions,
 
-        /// Run only the given rule or rule group.
+        /// Run only the given rule or group of rules.
+        /// If the severity level of a rule is `off`,
+        /// then the severity level of the rule is set to `error` if it is a recommended rule or `warn` otherwise.
         ///
-        /// The option overrides the Biome configuration file as follows:
+        /// Example: `biome lint --only=correctness/noUnusedVariables --only=suspicious`
+        #[bpaf(long("only"), argument("GROUP|RULE"))]
+        only: Vec<RuleSelector>,
+
+        /// Skip the given rule or group of rules by setting the severity level of the rules to `off`.
+        /// This option takes precedence over `--only`.
         ///
-        /// - When a rule is passed, its severity level is set to `error' if it is a recommended rule, or `warn' otherwise.
-        ///
-        /// - When a rule group is passed, the `recommended` flag is enabled, but if the `all` flag is enabled.
-        ///
-        /// Example: `biome lint --rule=correctness/noUnusedVariables`
-        ///
-        /// Example: `biome lint --rule=suspicious`
-        #[bpaf(long("rule"), argument("GROUP|RULE"))]
-        rule: Option<RuleSelector>,
+        /// Example: `biome lint --skip=correctness/noUnusedVariables --skip=suspicious`
+        #[bpaf(long("skip"), argument("GROUP|RULE"))]
+        skip: Vec<RuleSelector>,
 
         /// Use this option when you want to format code piped from `stdin`, and print the output to `stdout`.
         ///

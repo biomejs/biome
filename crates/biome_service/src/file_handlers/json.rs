@@ -17,7 +17,6 @@ use biome_analyze::options::PreferredQuote;
 use biome_analyze::{
     AnalysisFilter, AnalyzerConfiguration, AnalyzerOptions, ControlFlow, Never, RuleCategories,
 };
-use biome_configuration::linter::RuleSelector;
 use biome_configuration::PartialConfiguration;
 use biome_deserialize::json::deserialize_from_json_ast;
 use biome_diagnostics::{category, Diagnostic, DiagnosticExt, Severity};
@@ -308,60 +307,51 @@ fn lint(params: LintParams) -> LintResults {
                 );
             }
 
-            let mut diagnostic_count = diagnostics.len() as u32;
-            let mut errors = diagnostics
-                .iter()
-                .filter(|diag| diag.severity() <= Severity::Error)
-                .count();
+            let analyzer_options = &params
+                .settings
+                .analyzer_options::<JsonLanguage>(params.path, &params.language);
 
-            let skipped_diagnostics = diagnostic_count - diagnostics.len() as u32;
+            let rules = settings.as_rules(params.path.as_path());
 
-            let mut rules = settings.as_rules(params.path.as_path());
-            let rule_filter_list = if let Some(rule) = params.rule {
-                // We execute a single rule or group because the `--rule` filter is specified.
-                match rule {
-                    RuleSelector::Group(group) => {
-                        if let Some(rules) = rules.as_mut() {
-                            // Ensure that the recommended field is not set to `false`.
-                            rules.to_mut().set_recommended();
-                        }
-                        rules
-                            .as_ref()
-                            .map(|rules| rules.as_enabled_rules())
-                            .unwrap_or_default()
-                            .into_iter()
-                            .filter(|rule_filter| rule_filter.group() == group.as_str())
-                            .collect()
-                    }
-                    RuleSelector::Rule(group, rule_name) => {
-                        if let Some(rules) = rules.as_mut() {
-                            // Set the severity level of the rule to its default.
-                            rules.to_mut().set_default_severity(group, rule_name);
-                        }
-                        vec![rule.into()]
-                    }
-                }
+            let has_only_filter = !params.only.is_empty();
+            let enabled_rules = if has_only_filter {
+                params
+                    .only
+                    .into_iter()
+                    .map(|selector| selector.into())
+                    .collect::<Vec<_>>()
             } else {
-                let rule_filter_list = rules
+                rules
                     .as_ref()
                     .map(|rules| rules.as_enabled_rules())
                     .unwrap_or_default()
                     .into_iter()
-                    .collect::<Vec<_>>();
-                rule_filter_list
+                    .collect::<Vec<_>>()
             };
-
-            let analyzer_options = &params
-                .settings
-                .analyzer_options::<JsonLanguage>(params.path, &params.language);
-            let mut filter = AnalysisFilter::from_enabled_rules(Some(rule_filter_list.as_slice()));
-            filter.categories = params.categories;
+            let disabled_rules = params
+                .skip
+                .into_iter()
+                .map(|selector| selector.into())
+                .collect::<Vec<_>>();
+            let filter = AnalysisFilter {
+                categories: params.categories,
+                enabled_rules: Some(enabled_rules.as_slice()),
+                disabled_rules: &disabled_rules,
+                range: None,
+            };
 
             // Do not report unused suppression comment diagnostics if:
             // - it is a syntax-only analyzer pass, or
             // - if a single rule is run.
             let ignores_suppression_comment =
-                !filter.categories.contains(RuleCategories::LINT) || params.rule.is_some();
+                !filter.categories.contains(RuleCategories::LINT) || has_only_filter;
+
+            let mut diagnostic_count = diagnostics.len() as u32;
+            let mut errors = diagnostics
+                .iter()
+                .filter(|diag| diag.severity() <= Severity::Error)
+                .count();
+            let skipped_diagnostics = diagnostic_count - diagnostics.len() as u32;
 
             let (_, analyze_diagnostics) = analyze(&root, filter, analyzer_options, |signal| {
                 if let Some(mut diagnostic) = signal.diagnostic() {

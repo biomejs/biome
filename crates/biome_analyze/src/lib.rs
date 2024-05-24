@@ -548,7 +548,7 @@ where
         let line_index = *self.line_index + 1;
 
         // If the last suppression was on the same or previous line, extend its
-        // range and set of supressed rules with the content for the new suppression
+        // range and set of suppressed rules with the content for the new suppression
         if let Some(last_suppression) = self.line_suppressions.last_mut() {
             if last_suppression.line_index == line_index
                 || last_suppression.line_index + 1 == line_index
@@ -767,7 +767,7 @@ pub enum RuleFilter<'a> {
 }
 
 impl<'a> RuleFilter<'a> {
-    // Returns the group name of thie filter.
+    // Returns the group name of this filter.
     pub fn group(self) -> &'a str {
         match self {
             RuleFilter::Group(group) => group,
@@ -822,14 +822,23 @@ pub struct AnalysisFilter<'a> {
     /// Only allow rules with these categories to emit signals
     pub categories: RuleCategories,
     /// Only allow rules matching these names to emit signals
+    /// If `enabled_rules` is set to `None`, then all rules are enabled.
     pub enabled_rules: Option<&'a [RuleFilter<'a>]>,
     /// Do not allow rules matching these names to emit signals
-    pub disabled_rules: Option<&'a [RuleFilter<'a>]>,
+    pub disabled_rules: &'a [RuleFilter<'a>],
     /// Only emit signals matching this text range
     pub range: Option<TextRange>,
 }
 
 impl<'analysis> AnalysisFilter<'analysis> {
+    /// It creates a new filter with the set of [enabled rules](RuleFilter) passed as argument
+    pub fn from_enabled_rules(enabled_rules: &'analysis [RuleFilter<'analysis>]) -> Self {
+        Self {
+            enabled_rules: Some(enabled_rules),
+            ..AnalysisFilter::default()
+        }
+    }
+
     /// Return `true` if the category `C` matches this filter
     pub fn match_category<C: GroupCategory>(&self) -> bool {
         self.categories.contains(C::CATEGORY.into())
@@ -841,33 +850,22 @@ impl<'analysis> AnalysisFilter<'analysis> {
             && self.enabled_rules.map_or(true, |enabled_rules| {
                 enabled_rules.iter().any(|filter| filter.match_group::<G>())
             })
-            && self.disabled_rules.map_or(true, |disabled_rules| {
-                !disabled_rules
-                    .iter()
-                    .any(|filter| filter.match_group::<G>())
-            })
+            && !self
+                .disabled_rules
+                .iter()
+                .any(|filter| matches!(filter, RuleFilter::Group(_)) && filter.match_group::<G>())
     }
 
     /// Return `true` if the rule `R` matches this filter
-    pub fn match_rule<R>(&self) -> bool
-    where
-        R: Rule,
-    {
-        self.match_group::<R::Group>()
+    pub fn match_rule<R: Rule>(&self) -> bool {
+        self.match_category::<<R::Group as RuleGroup>::Category>()
             && self.enabled_rules.map_or(true, |enabled_rules| {
                 enabled_rules.iter().any(|filter| filter.match_rule::<R>())
             })
-            && self.disabled_rules.map_or(true, |disabled_rules| {
-                !disabled_rules.iter().any(|filter| filter.match_rule::<R>())
-            })
-    }
-
-    /// It creates a new filter with the set of [enabled rules](RuleFilter) passed as argument
-    pub fn from_enabled_rules(enabled_rules: Option<&'analysis [RuleFilter<'analysis>]>) -> Self {
-        Self {
-            enabled_rules,
-            ..AnalysisFilter::default()
-        }
+            && !self
+                .disabled_rules
+                .iter()
+                .any(|filter| filter.match_rule::<R>())
     }
 }
 
