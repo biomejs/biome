@@ -1,9 +1,11 @@
 mod lint;
 pub mod options;
 mod registry;
+mod suppression_action;
 pub mod utils;
 
 pub use crate::registry::visit_registry;
+use crate::suppression_action::JsonSuppressionAction;
 use biome_analyze::{
     AnalysisFilter, AnalyzerOptions, AnalyzerSignal, ControlFlow, LanguageRoot, MatchQueryParams,
     MetadataRegistry, RuleRegistry, SuppressionDiagnostic, SuppressionKind,
@@ -77,7 +79,7 @@ where
         metadata(),
         biome_analyze::InspectMatcher::new(registry, inspect_matcher),
         parse_linter_suppression_comment,
-        |_| {},
+        Box::new(JsonSuppressionAction),
         &mut emit_signal,
     );
 

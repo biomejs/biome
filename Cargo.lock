@@ -255,6 +255,7 @@ dependencies = [
  "biome_deserialize_macros",
  "biome_diagnostics",
  "biome_rowan",
+ "biome_suppression",
  "biome_test_utils",
  "insta",
  "lazy_static",
