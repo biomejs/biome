@@ -3340,7 +3340,7 @@ pub struct Nursery {
     #[doc = "Disallow invalid !important within keyframe declarations"]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_important_in_keyframe: Option<RuleConfiguration<NoImportantInKeyframe>>,
-    #[doc = "Succinct description of the rule."]
+    #[doc = "Disallow non-standard direction values for linear gradient functions."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_invalid_direction_in_linear_gradient:
         Option<RuleConfiguration<NoInvalidDirectionInLinearGradient>>,
