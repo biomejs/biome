@@ -2142,7 +2142,9 @@
 				"paths": {
 					"description": "A list of names that should trigger the rule",
 					"type": "object",
-					"additionalProperties": { "type": "string" }
+					"additionalProperties": {
+						"$ref": "#/definitions/RestrictedModuleConfig"
+					}
 				}
 			},
 			"additionalProperties": false
@@ -2150,6 +2152,16 @@
 		"RestrictedModifier": {
 			"type": "string",
 			"enum": ["abstract", "private", "protected", "readonly", "static"]
+		},
+		"RestrictedModuleConfig": {
+			"description": "Options for each path of rule `noRestrictedImports`.",
+			"type": "object",
+			"required": ["allowedFrom", "message"],
+			"properties": {
+				"allowedFrom": { "type": "array", "items": { "type": "string" } },
+				"message": { "type": "string" }
+			},
+			"additionalProperties": false
 		},
 		"RuleConfiguration": {
 			"anyOf": [

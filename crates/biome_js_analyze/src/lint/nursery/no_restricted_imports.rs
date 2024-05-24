@@ -17,8 +17,13 @@ declare_rule! {
     ///     "noRestrictedImports": {
     ///         "options": {
     ///             "paths": {
-    ///                 "lodash": "Using lodash is not encouraged",
-    ///                 "underscore": "Using underscore is not encouraged"
+    ///                 "lodash": {
+    ///                    "message": "Using lodash is not encouraged",
+    ///                    "allowedFrom": ["src/utils"]
+    ///                 },
+    ///                 "underscore": {
+    ///                    "message": "Using underscore is not encouraged",
+    ///                 }
     ///             }
     ///         }
     ///     }
@@ -36,6 +41,15 @@ declare_rule! {
     }
 }
 
+/// Options for each path of rule `noRestrictedImports`.
+#[derive(Clone, Debug, Default, Deserialize, Deserializable, Eq, PartialEq, Serialize)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct RestrictedModuleConfig {
+    pub message: String,
+    pub allowed_from: Vec<String>,
+}
+
 /// Options for the rule `noRestrictedImports`.
 #[derive(Clone, Debug, Default, Deserialize, Deserializable, Eq, PartialEq, Serialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
@@ -43,7 +57,7 @@ declare_rule! {
 pub struct RestrictedImportsOptions {
     /// A list of names that should trigger the rule
     #[serde(skip_serializing_if = "FxHashMap::is_empty")]
-    paths: FxHashMap<String, String>,
+    paths: FxHashMap<String, RestrictedModuleConfig>,
 }
 
 impl Rule for NoRestrictedImports {
@@ -54,16 +68,29 @@ impl Rule for NoRestrictedImports {
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
+        let file_path = ctx.file_path();
+
         if node.is_in_ts_module_declaration() {
             return None;
         }
+
+        // "import { merge } from 'lodash';" => get the "lodash"
         let module_name = node.module_name_token()?;
         let inner_text = inner_string_text(&module_name);
 
         ctx.options()
             .paths
             .get(inner_text.text())
-            .map(|message| (module_name.text_trimmed_range(), message.to_string()))
+            .and_then(|config| {
+                if config
+                    .allowed_from
+                    .contains(&file_path.to_string_lossy().to_string())
+                {
+                    return None;
+                }
+
+                Some((module_name.text_trimmed_range(), config.message.to_string()))
+            })
     }
 
     fn diagnostic(_ctx: &RuleContext<Self>, (span, text): &Self::State) -> Option<RuleDiagnostic> {
