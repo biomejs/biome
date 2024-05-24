@@ -3,7 +3,7 @@ use crate::matcher::pattern::MatchResult::{
     EntirePatternDoesntMatch, Match, SubPatternDoesntMatch,
 };
 use crate::matcher::pattern::PatternToken::{
-    AnyChar, AnyExcept, AnyRecursiveSequence, AnySequence, AnyWithin, Char,
+    AnyChar, AnyExcept, AnyPattern, AnyRecursiveSequence, AnySequence, AnyWithin, Char,
 };
 use std::error::Error;
 use std::path::Path;
@@ -62,11 +62,19 @@ impl fmt::Display for PatternError {
 ///   `]` and NOT `]` can be matched by `[]]` and `[!]]` respectively.  The `-`
 ///   character can be specified inside a character sequence pattern by placing
 ///   it at the start or the end, e.g. `[abc-]`.
+///
+/// - `{...}` can be used to specify multiple patterns separated by commas. For
+///   example, `a/{b,c}/d` will match `a/b/d` and `a/c/d`.
 #[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Default, Debug)]
 pub struct Pattern {
+    /// The original glob pattern that was parsed to create this `Pattern`.
     original: String,
     tokens: Vec<PatternToken>,
     is_recursive: bool,
+    /// Did this pattern come from an `.editorconfig` file?
+    ///
+    /// TODO: Remove this flag and support `{a,b}` globs in Biome 2.0
+    is_editorconfig: bool,
 }
 
 /// Show the original glob pattern.
@@ -92,6 +100,8 @@ enum PatternToken {
     AnyRecursiveSequence,
     AnyWithin(Vec<CharSpecifier>),
     AnyExcept(Vec<CharSpecifier>),
+    /// A set of patterns that at least one of them must match
+    AnyPattern(Vec<Pattern>),
 }
 
 #[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Debug)]
@@ -117,6 +127,13 @@ impl Pattern {
     ///
     /// An invalid glob pattern will yield a `PatternError`.
     pub fn new(pattern: &str) -> Result<Self, PatternError> {
+        Self::parse(pattern, false)
+    }
+
+    /// This function compiles Unix shell style patterns.
+    ///
+    /// An invalid glob pattern will yield a `PatternError`.
+    pub fn parse(pattern: &str, is_editorconfig: bool) -> Result<Self, PatternError> {
         let chars = pattern.chars().collect::<Vec<_>>();
         let mut tokens = Vec::new();
         let mut is_recursive = false;
@@ -245,6 +262,46 @@ impl Pattern {
                         msg: ERROR_INVALID_RANGE,
                     });
                 }
+                '{' if is_editorconfig => {
+                    let mut depth = 1;
+                    let mut j = i + 1;
+                    while j < chars.len() {
+                        match chars[j] {
+                            '{' => depth += 1,
+                            '}' => depth -= 1,
+                            _ => (),
+                        }
+                        if depth > 1 {
+                            return Err(PatternError {
+                                pos: j,
+                                msg: "nested '{' in '{...}' is not allowed",
+                            });
+                        }
+                        if depth == 0 {
+                            break;
+                        }
+                        j += 1;
+                    }
+
+                    if depth != 0 {
+                        return Err(PatternError {
+                            pos: i,
+                            msg: "unmatched '{'",
+                        });
+                    }
+
+                    let mut subpatterns = Vec::new();
+                    for subpattern in pattern[i + 1..j].split(',') {
+                        let mut pattern = Pattern::new(subpattern)?;
+                        // HACK: remove the leading '**' if it exists
+                        if pattern.tokens.first() == Some(&PatternToken::AnyRecursiveSequence) {
+                            pattern.tokens.remove(0);
+                        }
+                        subpatterns.push(pattern);
+                    }
+                    tokens.push(AnyPattern(subpatterns));
+                    i = j + 1;
+                }
                 c => {
                     tokens.push(Char(c));
                     i += 1;
@@ -256,7 +313,17 @@ impl Pattern {
             tokens,
             original: pattern.to_string(),
             is_recursive,
+            is_editorconfig,
         })
+    }
+
+    fn from_tokens(tokens: Vec<PatternToken>, original: String, is_recursive: bool) -> Self {
+        Self {
+            tokens,
+            original,
+            is_recursive,
+            is_editorconfig: false,
+        }
     }
 
     /// Escape metacharacters within the given string by surrounding them in
@@ -331,7 +398,7 @@ impl Pattern {
         options: MatchOptions,
     ) -> MatchResult {
         for (ti, token) in self.tokens[i..].iter().enumerate() {
-            match *token {
+            match token {
                 AnySequence | AnyRecursiveSequence => {
                     // ** must be at the start.
                     debug_assert!(match *token {
@@ -370,6 +437,23 @@ impl Pattern {
                         }
                     }
                 }
+                AnyPattern(patterns) => {
+                    for pattern in patterns.iter() {
+                        let mut tokens = pattern.tokens.clone();
+                        tokens.extend_from_slice(&self.tokens[(i + ti + 1)..]);
+                        let new_pattern = Pattern::from_tokens(
+                            tokens,
+                            pattern.original.clone(),
+                            pattern.is_recursive,
+                        );
+                        if new_pattern.matches_from(follows_separator, file.clone(), 0, options)
+                            == Match
+                        {
+                            return Match;
+                        }
+                    }
+                    return SubPatternDoesntMatch;
+                }
                 _ => {
                     let c = match file.next() {
                         Some(c) => c,
@@ -391,7 +475,7 @@ impl Pattern {
                         AnyWithin(ref specifiers) => in_char_specifiers(specifiers, c, options),
                         AnyExcept(ref specifiers) => !in_char_specifiers(specifiers, c, options),
                         Char(c2) => chars_eq(c, c2, options.case_sensitive),
-                        AnySequence | AnyRecursiveSequence => unreachable!(),
+                        AnySequence | AnyRecursiveSequence | AnyPattern(_) => unreachable!(),
                     } {
                         return SubPatternDoesntMatch;
                     }
@@ -923,5 +1007,47 @@ mod test {
                 .unwrap()
                 .matches_path(Path::new("\\\\?\\C:\\a\\b\\c.js")));
         }
+    }
+
+    #[test]
+    fn test_pattern_glob_brackets() {
+        let pattern = Pattern::parse("{foo.js,bar.js}", true).unwrap();
+        assert!(pattern.matches_path(Path::new("foo.js")));
+        assert!(pattern.matches_path(Path::new("bar.js")));
+        assert!(!pattern.matches_path(Path::new("baz.js")));
+
+        let pattern = Pattern::parse("{foo,bar}.js", true).unwrap();
+        assert!(pattern.matches_path(Path::new("foo.js")));
+        assert!(pattern.matches_path(Path::new("bar.js")));
+        assert!(!pattern.matches_path(Path::new("baz.js")));
+
+        assert!(Pattern::parse("**/{foo,bar}.js", true)
+            .unwrap()
+            .matches_path(Path::new("a/b/foo.js")));
+
+        let pattern = Pattern::parse("src/{a/foo,bar}.js", true).unwrap();
+        assert!(pattern.matches_path(Path::new("src/a/foo.js")));
+        assert!(pattern.matches_path(Path::new("src/bar.js")));
+        assert!(!pattern.matches_path(Path::new("src/a/b/foo.js")));
+        assert!(!pattern.matches_path(Path::new("src/a/bar.js")));
+
+        let pattern = Pattern::parse("src/{a,b}/{c,d}/foo.js", true).unwrap();
+        assert!(pattern.matches_path(Path::new("src/a/c/foo.js")));
+        assert!(pattern.matches_path(Path::new("src/a/d/foo.js")));
+        assert!(pattern.matches_path(Path::new("src/b/c/foo.js")));
+        assert!(pattern.matches_path(Path::new("src/b/d/foo.js")));
+        assert!(!pattern.matches_path(Path::new("src/bar/foo.js")));
+
+        let _ = Pattern::parse("{{foo,bar},baz}", true)
+            .expect_err("should not allow curly brackets more than 1 level deep");
+    }
+
+    #[test]
+    fn test_pattern_glob_brackets_not_available_by_default() {
+        // RODO: Remove this test when we make brackets available by default in Biome 2.0
+        let pattern = Pattern::parse("{foo.js,bar.js}", false).unwrap();
+        assert!(!pattern.matches_path(Path::new("foo.js")));
+        assert!(!pattern.matches_path(Path::new("bar.js")));
+        assert!(!pattern.matches_path(Path::new("baz.js")));
     }
 }
