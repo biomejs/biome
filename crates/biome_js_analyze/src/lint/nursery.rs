@@ -15,6 +15,8 @@ pub mod no_restricted_imports;
 pub mod no_undeclared_dependencies;
 pub mod no_useless_string_concat;
 pub mod no_useless_undefined_initialization;
+pub mod no_yoda_expression;
+pub mod use_adjacent_overload_signatures;
 pub mod use_array_literals;
 pub mod use_consistent_builtin_instantiation;
 pub mod use_default_switch_clause;
@@ -26,6 +28,7 @@ pub mod use_number_to_fixed_digits_argument;
 pub mod use_semantic_elements;
 pub mod use_sorted_classes;
 pub mod use_throw_new_error;
+pub mod use_throw_only_error;
 pub mod use_top_level_regex;
 
 declare_group! {
@@ -45,6 +48,8 @@ declare_group! {
             self :: no_undeclared_dependencies :: NoUndeclaredDependencies ,
             self :: no_useless_string_concat :: NoUselessStringConcat ,
             self :: no_useless_undefined_initialization :: NoUselessUndefinedInitialization ,
+            self :: no_yoda_expression :: NoYodaExpression ,
+            self :: use_adjacent_overload_signatures :: UseAdjacentOverloadSignatures ,
             self :: use_array_literals :: UseArrayLiterals ,
             self :: use_consistent_builtin_instantiation :: UseConsistentBuiltinInstantiation ,
             self :: use_default_switch_clause :: UseDefaultSwitchClause ,
@@ -56,6 +61,7 @@ declare_group! {
             self :: use_semantic_elements :: UseSemanticElements ,
             self :: use_sorted_classes :: UseSortedClasses ,
             self :: use_throw_new_error :: UseThrowNewError ,
+            self :: use_throw_only_error :: UseThrowOnlyError ,
             self :: use_top_level_regex :: UseTopLevelRegex ,
         ]
      }

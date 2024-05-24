@@ -18,7 +18,7 @@ invalidTypeValueWithSameName.ts:2:15 lint/correctness/noUndeclaredVariables ━�
   > 2 │ export type { a }
       │               ^
   
-  i By default, Biome recognizes browser and Mode.js globals.
+  i By default, Biome recognizes browser and Node.js globals.
     You can ignore more globals using the javascript.globals configuration.
   
 

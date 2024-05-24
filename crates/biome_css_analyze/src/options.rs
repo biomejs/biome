@@ -2,12 +2,12 @@
 
 use crate::lint;
 
-pub type NoCssEmptyBlock =
-    <lint::nursery::no_css_empty_block::NoCssEmptyBlock as biome_analyze::Rule>::Options;
 pub type NoDuplicateAtImportRules = < lint :: nursery :: no_duplicate_at_import_rules :: NoDuplicateAtImportRules as biome_analyze :: Rule > :: Options ;
 pub type NoDuplicateFontNames =
     <lint::nursery::no_duplicate_font_names::NoDuplicateFontNames as biome_analyze::Rule>::Options;
 pub type NoDuplicateSelectorsKeyframeBlock = < lint :: nursery :: no_duplicate_selectors_keyframe_block :: NoDuplicateSelectorsKeyframeBlock as biome_analyze :: Rule > :: Options ;
+pub type NoEmptyBlock =
+    <lint::nursery::no_empty_block::NoEmptyBlock as biome_analyze::Rule>::Options;
 pub type NoImportantInKeyframe = < lint :: nursery :: no_important_in_keyframe :: NoImportantInKeyframe as biome_analyze :: Rule > :: Options ;
 pub type NoInvalidDirectionInLinearGradient = < lint :: nursery :: no_invalid_direction_in_linear_gradient :: NoInvalidDirectionInLinearGradient as biome_analyze :: Rule > :: Options ;
 pub type NoInvalidPositionAtImportRule = < lint :: nursery :: no_invalid_position_at_import_rule :: NoInvalidPositionAtImportRule as biome_analyze :: Rule > :: Options ;

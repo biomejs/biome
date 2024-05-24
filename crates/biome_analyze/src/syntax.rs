@@ -94,14 +94,14 @@ impl<L: Language + 'static> Visitor for SyntaxVisitor<L> {
 mod tests {
     use biome_rowan::{
         raw_language::{RawLanguage, RawLanguageKind, RawLanguageRoot, RawSyntaxTreeBuilder},
-        AstNode, SyntaxNode,
+        AstNode, BatchMutation, SyntaxNode, SyntaxToken,
     };
     use std::convert::Infallible;
 
     use crate::{
         matcher::MatchQueryParams, registry::Phases, Analyzer, AnalyzerContext, AnalyzerOptions,
-        AnalyzerSignal, ControlFlow, MetadataRegistry, Never, QueryMatcher, ServiceBag,
-        SyntaxVisitor,
+        AnalyzerSignal, ApplySuppression, ControlFlow, MetadataRegistry, Never, QueryMatcher,
+        ServiceBag, SuppressionAction, SyntaxVisitor,
     };
 
     #[derive(Default)]
@@ -150,11 +150,32 @@ mod tests {
 
         let metadata = MetadataRegistry::default();
 
+        struct TestAction;
+        impl SuppressionAction for TestAction {
+            type Language = RawLanguage;
+
+            fn find_token_to_apply_suppression(
+                &self,
+                _: SyntaxToken<Self::Language>,
+            ) -> Option<ApplySuppression<Self::Language>> {
+                None
+            }
+
+            fn apply_suppression(
+                &self,
+                _: &mut BatchMutation<Self::Language>,
+                _: ApplySuppression<Self::Language>,
+                _: &str,
+            ) {
+                unreachable!("")
+            }
+        }
+
         let mut analyzer = Analyzer::new(
             &metadata,
             &mut matcher,
             |_| -> Vec<Result<_, Infallible>> { unreachable!() },
-            |_| unreachable!(),
+            Box::new(TestAction),
             &mut emit_signal,
         );
 

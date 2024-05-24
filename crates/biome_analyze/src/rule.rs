@@ -1,9 +1,7 @@
 use crate::categories::{ActionCategory, RuleCategory};
 use crate::context::RuleContext;
 use crate::registry::{RegistryVisitor, RuleLanguage, RuleSuppressions};
-use crate::{
-    Phase, Phases, Queryable, SuppressionCommentEmitter, SuppressionCommentEmitterPayload,
-};
+use crate::{Phase, Phases, Queryable, SuppressionAction, SuppressionCommentEmitterPayload};
 use biome_console::fmt::Display;
 use biome_console::{markup, MarkupBuf};
 use biome_diagnostics::advice::CodeSuggestionAdvice;
@@ -621,7 +619,7 @@ pub trait Rule: RuleMeta + Sized {
     fn suppress(
         ctx: &RuleContext<Self>,
         text_range: &TextRange,
-        apply_suppression_comment: SuppressionCommentEmitter<RuleLanguage<Self>>,
+        suppression_action: &dyn SuppressionAction<Language = RuleLanguage<Self>>,
     ) -> Option<SuppressAction<RuleLanguage<Self>>>
     where
         Self: 'static,
@@ -637,7 +635,7 @@ pub trait Rule: RuleMeta + Sized {
             let root = ctx.root();
             let token = root.syntax().token_at_offset(text_range.start());
             let mut mutation = root.begin();
-            apply_suppression_comment(SuppressionCommentEmitterPayload {
+            suppression_action.apply_suppression_comment(SuppressionCommentEmitterPayload {
                 suppression_text: suppression_text.as_str(),
                 mutation: &mut mutation,
                 token_offset: token,

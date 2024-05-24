@@ -24,6 +24,7 @@
   "keywords": [
     "parser",
     "linter",
-    "formatter"
+    "formatter",
+    "wasm"
   ]
 }

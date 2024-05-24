@@ -51,7 +51,6 @@ use serde::{Deserialize, Serialize};
 use std::borrow::Cow;
 use std::ffi::OsStr;
 use std::fmt::Debug;
-use std::path::PathBuf;
 use tracing::{debug, debug_span, error, info, trace, trace_span};
 
 #[derive(Debug, Clone, Default, serde::Serialize, serde::Deserialize)]
@@ -376,7 +375,6 @@ pub(crate) fn lint(params: LintParams) -> LintResults {
             let analyzer_options = &params
                 .settings
                 .analyzer_options::<JsLanguage>(params.path, &params.language);
-            compute_analyzer_options(&params.settings, PathBuf::from(params.path.as_path()));
 
             // Compute final rules (taking `overrides` into account)
             let mut rules = settings.as_rules(params.path.as_path());
@@ -551,14 +549,16 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
     debug_span!("Code actions JavaScript", range =? range, path =? path).in_scope(move || {
         let tree = parse.tree();
         trace_span!("Parsed file", tree =? tree).in_scope(move || {
+            let analyzer_options =
+                workspace.analyzer_options::<JsLanguage>(params.path, &params.language);
             let settings = workspace.settings();
-            let rules = settings.linter().rules.as_ref();
+            let rules = settings.as_rules(params.path);
             let mut actions = Vec::new();
             let mut enabled_rules = vec![];
             if settings.organize_imports.enabled {
                 enabled_rules.push(RuleFilter::Rule("correctness", "organizeImports"));
             }
-            if let Some(rules) = rules {
+            if let Some(rules) = rules.as_ref() {
                 let rules = rules.as_enabled_rules().into_iter().collect();
 
                 // The rules in the assist category do not have configuration entries,
@@ -582,9 +582,6 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
                 filter.categories |= RuleCategories::ACTION;
             }
             filter.range = Some(range);
-
-            let analyzer_options =
-                compute_analyzer_options(&workspace, PathBuf::from(path.as_path()));
 
             let Some(source_type) = language.to_js_file_source() else {
                 error!("Could not determine the file source of the file");
@@ -619,8 +616,6 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
 }
 
 /// If applies all the safe fixes to the given syntax tree.
-///
-/// If `indent_style` is [Some], it means that the formatting should be applied at the end
 pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceError> {
     let FixAllParams {
         parse,
@@ -647,7 +642,8 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
 
     let mut skipped_suggested_fixes = 0;
     let mut errors: u16 = 0;
-    let analyzer_options = compute_analyzer_options(&settings, PathBuf::from(biome_path.as_path()));
+    let analyzer_options =
+        settings.analyzer_options::<JsLanguage>(biome_path, &document_file_source);
     loop {
         let (action, _) = analyze(
             &tree,
@@ -908,67 +904,5 @@ pub(crate) fn organize_imports(parse: AnyParse) -> Result<OrganizeImportsResult,
         Ok(OrganizeImportsResult {
             code: tree.syntax().to_string(),
         })
-    }
-}
-
-fn compute_analyzer_options(
-    settings: &WorkspaceSettingsHandle,
-    file_path: PathBuf,
-) -> AnalyzerOptions {
-    let settings = settings.settings();
-    let preferred_quote = settings
-        .languages
-        .javascript
-        .formatter
-        .quote_style
-        .map(|quote_style: QuoteStyle| {
-            if quote_style == QuoteStyle::Single {
-                PreferredQuote::Single
-            } else {
-                PreferredQuote::Double
-            }
-        })
-        .unwrap_or_default();
-
-    let path = BiomePath::new(file_path.as_path());
-    let jsx_runtime = match settings
-        .override_settings
-        .override_jsx_runtime(&path, settings.languages.javascript.environment.jsx_runtime)
-    {
-        // In the future, we may wish to map an `Auto` variant to a concrete
-        // analyzer value for easy access by the analyzer.
-        JsxRuntime::Transparent => biome_analyze::options::JsxRuntime::Transparent,
-        JsxRuntime::ReactClassic => biome_analyze::options::JsxRuntime::ReactClassic,
-    };
-
-    let mut globals: Vec<_> = settings
-        .override_settings
-        .override_js_globals(&path, &settings.languages.javascript.globals)
-        .into_iter()
-        .collect();
-    if file_path.extension().and_then(OsStr::to_str) == Some("vue") {
-        globals.extend(
-            [
-                "defineEmits",
-                "defineProps",
-                "defineExpose",
-                "defineModel",
-                "defineOptions",
-                "defineSlots",
-            ]
-            .map(ToOwned::to_owned),
-        );
-    }
-
-    let configuration = AnalyzerConfiguration {
-        rules: to_analyzer_rules(settings, file_path.as_path()),
-        globals,
-        preferred_quote,
-        jsx_runtime: Some(jsx_runtime),
-    };
-
-    AnalyzerOptions {
-        configuration,
-        file_path,
     }
 }

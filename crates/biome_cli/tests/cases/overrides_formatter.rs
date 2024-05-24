@@ -234,6 +234,74 @@ fn does_include_file_with_different_overrides() {
     ));
 }
 
+/// Issue: https://github.com/biomejs/biome/issues/2924
+#[test]
+fn complex_enable_disable_overrides() {
+    let mut console = BufferConsole::default();
+    let mut fs = MemoryFileSystem::default();
+    let file_path = Path::new("biome.json");
+    fs.insert(
+        file_path.into(),
+        r#"{
+  "formatter": {
+    "lineWidth": 20
+  },
+  "javascript": {
+    "formatter": {
+      "enabled": false
+    }
+  },
+  "overrides": [
+    { "include": ["formatted.js"], "formatter": { "enabled": true } },
+    {
+      "include": ["dirty.js"],
+      "linter": {
+        "rules": {
+          "performance": {
+            "noBarrelFile": "off"
+          }
+        }
+      }
+    }
+  ]
+}
+
+"#
+        .as_bytes(),
+    );
+
+    let formatted = Path::new("formatted.js");
+    fs.insert(formatted.into(), UNFORMATTED_LINE_WIDTH.as_bytes());
+
+    let unformatted = Path::new("dirty.js");
+    fs.insert(unformatted.into(), UNFORMATTED_LINE_WIDTH.as_bytes());
+
+    let result = run_cli(
+        DynRef::Borrowed(&mut fs),
+        &mut console,
+        Args::from(
+            [
+                ("format"),
+                ("--write"),
+                formatted.as_os_str().to_str().unwrap(),
+                unformatted.as_os_str().to_str().unwrap(),
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert_file_contents(&fs, formatted, FORMATTED_LINE_WIDTH_OVERRIDDEN);
+    assert_file_contents(&fs, unformatted, UNFORMATTED_LINE_WIDTH);
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "complex_enable_disable_overrides",
+        fs,
+        console,
+        result,
+    ));
+}
+
 #[test]
 #[ignore = "Enable when we are ready to handle CSS files"]
 fn does_include_file_with_different_languages() {

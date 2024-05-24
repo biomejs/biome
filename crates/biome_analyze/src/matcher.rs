@@ -1,6 +1,6 @@
 use crate::{
     AnalyzerOptions, AnalyzerSignal, Phases, QueryMatch, Rule, RuleFilter, RuleGroup, ServiceBag,
-    SuppressionCommentEmitter,
+    SuppressionAction,
 };
 use biome_rowan::{Language, TextRange};
 use std::{
@@ -25,7 +25,7 @@ pub struct MatchQueryParams<'phase, 'query, L: Language> {
     pub query: Query,
     pub services: &'phase ServiceBag,
     pub signal_queue: &'query mut BinaryHeap<SignalEntry<'phase, L>>,
-    pub apply_suppression_comment: SuppressionCommentEmitter<L>,
+    pub suppression_action: &'phase dyn SuppressionAction<Language = L>,
     pub options: &'phase AnalyzerOptions,
 }
 
@@ -198,16 +198,16 @@ where
 mod tests {
     use super::MatchQueryParams;
     use crate::{
-        signals::DiagnosticSignal, Analyzer, AnalyzerContext, AnalyzerSignal, ControlFlow,
-        MetadataRegistry, Never, Phases, QueryMatcher, RuleKey, ServiceBag, SignalEntry,
-        SyntaxVisitor,
+        signals::DiagnosticSignal, Analyzer, AnalyzerContext, AnalyzerSignal, ApplySuppression,
+        ControlFlow, MetadataRegistry, Never, Phases, QueryMatcher, RuleKey, ServiceBag,
+        SignalEntry, SuppressionAction, SyntaxVisitor,
     };
     use crate::{AnalyzerOptions, SuppressionKind};
     use biome_diagnostics::{category, DiagnosticExt};
     use biome_diagnostics::{Diagnostic, Severity};
     use biome_rowan::{
         raw_language::{RawLanguage, RawLanguageKind, RawLanguageRoot, RawSyntaxTreeBuilder},
-        AstNode, SyntaxNode, TextRange, TextSize, TriviaPiece,
+        AstNode, BatchMutation, SyntaxNode, SyntaxToken, TextRange, TextSize, TriviaPiece,
     };
     use std::convert::Infallible;
 
@@ -360,11 +360,33 @@ mod tests {
         let mut metadata = MetadataRegistry::default();
         metadata.insert_rule("group", "rule");
 
+        struct TestAction;
+
+        impl SuppressionAction for TestAction {
+            type Language = RawLanguage;
+
+            fn find_token_to_apply_suppression(
+                &self,
+                _: SyntaxToken<Self::Language>,
+            ) -> Option<ApplySuppression<Self::Language>> {
+                None
+            }
+
+            fn apply_suppression(
+                &self,
+                _: &mut BatchMutation<Self::Language>,
+                _: ApplySuppression<Self::Language>,
+                _: &str,
+            ) {
+                unreachable!("")
+            }
+        }
+
         let mut analyzer = Analyzer::new(
             &metadata,
             SuppressionMatcher,
             parse_suppression_comment,
-            |_| unreachable!(),
+            Box::new(TestAction),
             &mut emit_signal,
         );
 

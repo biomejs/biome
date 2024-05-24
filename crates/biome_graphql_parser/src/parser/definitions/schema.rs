@@ -33,6 +33,7 @@ pub(crate) fn parse_schema_definition(p: &mut GraphqlParser) -> ParsedSyntax {
     Present(m.complete(p, GRAPHQL_SCHEMA_DEFINITION))
 }
 
+/// Must only be called if the next 2 token is `extend` and `schema`, otherwise it will panic.
 #[inline]
 pub(crate) fn parse_schema_extension(p: &mut GraphqlParser) -> ParsedSyntax {
     let m = p.start();

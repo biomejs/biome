@@ -23,7 +23,7 @@ invalidNamesapceReference.ts:2:18 lint/correctness/noUndeclaredVariables ━━�
     3 │ 
     4 │ import type * as Ns2 from "";
   
-  i By default, Biome recognizes browser and Mode.js globals.
+  i By default, Biome recognizes browser and Node.js globals.
     You can ignore more globals using the javascript.globals configuration.
   
 
@@ -38,7 +38,7 @@ invalidNamesapceReference.ts:5:18 lint/correctness/noUndeclaredVariables ━━�
   > 5 │ export type T2 = Ns2;  // This doesn't reference the import namespace `Ns1`
       │                  ^^^
   
-  i By default, Biome recognizes browser and Mode.js globals.
+  i By default, Biome recognizes browser and Node.js globals.
     You can ignore more globals using the javascript.globals configuration.
   
 

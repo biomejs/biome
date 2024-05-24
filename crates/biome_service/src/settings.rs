@@ -1307,7 +1307,13 @@ pub(crate) fn to_override_format_settings(
         .unwrap_or(format_settings.format_with_errors);
 
     OverrideFormatSettings {
-        enabled: conf.enabled.or(Some(format_settings.enabled)),
+        enabled: conf.enabled.or(
+            if format_settings.enabled != FormatSettings::default().enabled {
+                Some(format_settings.enabled)
+            } else {
+                None
+            },
+        ),
         indent_style,
         indent_width,
         line_ending,

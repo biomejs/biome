@@ -962,10 +962,6 @@ export interface Nursery {
 	 */
 	noConstantMathMinMaxClamp?: RuleFixConfiguration_for_Null;
 	/**
-	 * Disallow CSS empty blocks.
-	 */
-	noCssEmptyBlock?: RuleConfiguration_for_NoCssEmptyBlockOptions;
-	/**
 	 * Disallow using a callback in asynchronous tests and hooks.
 	 */
 	noDoneCallback?: RuleConfiguration_for_Null;
@@ -989,6 +985,10 @@ export interface Nursery {
 	 * Disallow duplicate selectors within keyframe blocks.
 	 */
 	noDuplicateSelectorsKeyframeBlock?: RuleConfiguration_for_Null;
+	/**
+	 * Disallow CSS empty blocks.
+	 */
+	noEmptyBlock?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow variables from evolving into any type through reassignments.
 	 */
@@ -1062,9 +1062,17 @@ export interface Nursery {
 	 */
 	noUselessUndefinedInitialization?: RuleFixConfiguration_for_Null;
 	/**
+	 * Disallow the use of yoda expressions.
+	 */
+	noYodaExpression?: RuleFixConfiguration_for_Null;
+	/**
 	 * It enables the recommended rules for this group
 	 */
 	recommended?: boolean;
+	/**
+	 * Disallow the use of overload signatures that are not next to each other.
+	 */
+	useAdjacentOverloadSignatures?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow Array constructors.
 	 */
@@ -1114,7 +1122,11 @@ export interface Nursery {
 	 */
 	useThrowNewError?: RuleFixConfiguration_for_Null;
 	/**
-	 * Require all regex literals to be declared at the top level.
+	 * Disallow throwing non-Error values.
+	 */
+	useThrowOnlyError?: RuleConfiguration_for_Null;
+	/**
+	 * Require regex literals to be declared at the top level.
 	 */
 	useTopLevelRegex?: RuleConfiguration_for_Null;
 }
@@ -1655,9 +1667,6 @@ export type RuleConfiguration_for_HooksOptions =
 export type RuleConfiguration_for_DeprecatedHooksOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_DeprecatedHooksOptions;
-export type RuleConfiguration_for_NoCssEmptyBlockOptions =
-	| RulePlainConfiguration
-	| RuleWithOptions_for_NoCssEmptyBlockOptions;
 export type RuleConfiguration_for_RestrictedImportsOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_RestrictedImportsOptions;
@@ -1744,16 +1753,6 @@ export interface RuleWithOptions_for_DeprecatedHooksOptions {
 	 * Rule's options
 	 */
 	options: DeprecatedHooksOptions;
-}
-export interface RuleWithOptions_for_NoCssEmptyBlockOptions {
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoCssEmptyBlockOptions;
 }
 export interface RuleWithOptions_for_RestrictedImportsOptions {
 	/**
@@ -1857,9 +1856,6 @@ export interface HooksOptions {
  * Options for the `useHookAtTopLevel` rule have been deprecated, since we now use the React hook naming convention to determine whether a function is a hook.
  */
 export interface DeprecatedHooksOptions {}
-export interface NoCssEmptyBlockOptions {
-	allowComments: boolean;
-}
 /**
  * Options for the rule `noRestrictedImports`.
  */
@@ -2277,9 +2273,12 @@ export type Category =
 	| "lint/correctness/useJsxKeyInIterable"
 	| "lint/correctness/useValidForDirection"
 	| "lint/correctness/useYield"
+	| "lint/nursery/colorNoInvalidHex"
+	| "lint/nursery/useAdjacentOverloadSignatures"
+	| "lint/nursery/noColorInvalidHex"
 	| "lint/nursery/noConsole"
 	| "lint/nursery/noConstantMathMinMaxClamp"
-	| "lint/nursery/noCssEmptyBlock"
+	| "lint/nursery/noEmptyBlock"
 	| "lint/nursery/noDoneCallback"
 	| "lint/nursery/noDuplicateAtImportRules"
 	| "lint/nursery/noDuplicateElseIf"
@@ -2306,6 +2305,7 @@ export type Category =
 	| "lint/nursery/noUnmatchableAnbSelector"
 	| "lint/nursery/noUselessStringConcat"
 	| "lint/nursery/noUselessUndefinedInitialization"
+	| "lint/nursery/noYodaExpression"
 	| "lint/nursery/useArrayLiterals"
 	| "lint/nursery/useBiomeSuppressionComment"
 	| "lint/nursery/useConsistentBuiltinInstantiation"
@@ -2319,6 +2319,7 @@ export type Category =
 	| "lint/nursery/useSemanticElements"
 	| "lint/nursery/useSortedClasses"
 	| "lint/nursery/useThrowNewError"
+	| "lint/nursery/useThrowOnlyError"
 	| "lint/nursery/useTopLevelRegex"
 	| "lint/performance/noAccumulatingSpread"
 	| "lint/performance/noBarrelFile"

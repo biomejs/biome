@@ -1,6 +1,6 @@
 use crate::changed::get_changed_files;
 use crate::cli_options::CliOptions;
-use crate::commands::validate_configuration_diagnostics;
+use crate::commands::{resolve_manifest, validate_configuration_diagnostics};
 use crate::{execute_mode, setup_cli_subscriber, CliDiagnostic, CliSession, Execution};
 use biome_configuration::{organize_imports::PartialOrganizeImports, PartialConfiguration};
 use biome_configuration::{PartialFormatterConfiguration, PartialLinterConfiguration};
@@ -44,6 +44,7 @@ pub(crate) fn ci(session: CliSession, payload: CiCommandPayload) -> Result<(), C
         session.app.console,
         cli_options.verbose,
     )?;
+    resolve_manifest(&session)?;
 
     let LoadedConfiguration {
         configuration: mut fs_configuration,
