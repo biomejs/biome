@@ -29,7 +29,7 @@ arguments-object.js:7:13 lint/correctness/noUndeclaredVariables ━━━━━�
     8 │ 
     9 │ const bar = () => {
   
-  i By default, Biome recognizes browser and Mode.js globals.
+  i By default, Biome recognizes browser and Node.js globals.
     You can ignore more globals using the javascript.globals configuration.
   
 
@@ -45,7 +45,7 @@ arguments-object.js:10:17 lint/correctness/noUndeclaredVariables ━━━━━
        │                 ^^^^^^^^^
     11 │ }
   
-  i By default, Biome recognizes browser and Mode.js globals.
+  i By default, Biome recognizes browser and Node.js globals.
     You can ignore more globals using the javascript.globals configuration.
   
 

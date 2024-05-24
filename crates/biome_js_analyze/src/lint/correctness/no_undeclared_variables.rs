@@ -102,7 +102,7 @@ impl Rule for NoUndeclaredVariables {
                 "The "<Emphasis>{name}</Emphasis>" variable is undeclared."
             },
         ).note(markup! {
-            "By default, Biome recognizes browser and Mode.js globals.\nYou can ignore more globals using the "<Hyperlink href="https://biomejs.dev/reference/configuration/#javascriptglobals">"javascript.globals"</Hyperlink>" configuration."
+            "By default, Biome recognizes browser and Node.js globals.\nYou can ignore more globals using the "<Hyperlink href="https://biomejs.dev/reference/configuration/#javascriptglobals">"javascript.globals"</Hyperlink>" configuration."
         }))
     }
 }

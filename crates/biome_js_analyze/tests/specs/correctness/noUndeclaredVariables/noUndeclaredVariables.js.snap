@@ -32,7 +32,7 @@ noUndeclaredVariables.js:2:1 lint/correctness/noUndeclaredVariables ━━━━
     3 │ function f() {
     4 │     lorem;
   
-  i By default, Biome recognizes browser and Mode.js globals.
+  i By default, Biome recognizes browser and Node.js globals.
     You can ignore more globals using the javascript.globals configuration.
   
 
@@ -50,7 +50,7 @@ noUndeclaredVariables.js:4:5 lint/correctness/noUndeclaredVariables ━━━━
     5 │ }
     6 │ assignment = "value";
   
-  i By default, Biome recognizes browser and Mode.js globals.
+  i By default, Biome recognizes browser and Node.js globals.
     You can ignore more globals using the javascript.globals configuration.
   
 
@@ -68,7 +68,7 @@ noUndeclaredVariables.js:6:1 lint/correctness/noUndeclaredVariables ━━━━
     7 │ <Missing />;
     8 │ 
   
-  i By default, Biome recognizes browser and Mode.js globals.
+  i By default, Biome recognizes browser and Node.js globals.
     You can ignore more globals using the javascript.globals configuration.
   
 
@@ -86,7 +86,7 @@ noUndeclaredVariables.js:7:2 lint/correctness/noUndeclaredVariables ━━━━
     8 │ 
     9 │ // valid
   
-  i By default, Biome recognizes browser and Mode.js globals.
+  i By default, Biome recognizes browser and Node.js globals.
     You can ignore more globals using the javascript.globals configuration.
   
 
