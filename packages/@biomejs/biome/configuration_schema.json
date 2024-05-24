@@ -1462,7 +1462,7 @@
 					"enum": ["function"]
 				},
 				{
-					"description": "TypeScript mamespaces, import and export namesapces",
+					"description": "TypeScript namespaces, import and export namespaces",
 					"type": "string",
 					"enum": ["namespaceLike"]
 				},
