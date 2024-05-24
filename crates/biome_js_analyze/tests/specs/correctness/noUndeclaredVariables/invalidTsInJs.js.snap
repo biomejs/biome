@@ -20,7 +20,7 @@ invalidTsInJs.js:1:1 lint/correctness/noUndeclaredVariables ━━━━━━�
     2 │ PromiseLike;
     3 │ 
   
-  i By default, Biome recognizes browser and Mode.js globals.
+  i By default, Biome recognizes browser and Node.js globals.
     You can ignore more globals using the javascript.globals configuration.
   
 
@@ -36,7 +36,7 @@ invalidTsInJs.js:2:1 lint/correctness/noUndeclaredVariables ━━━━━━�
       │ ^^^^^^^^^^^
     3 │ 
   
-  i By default, Biome recognizes browser and Mode.js globals.
+  i By default, Biome recognizes browser and Node.js globals.
     You can ignore more globals using the javascript.globals configuration.
   
 
