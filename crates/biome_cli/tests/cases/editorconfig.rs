@@ -7,7 +7,6 @@ use bpaf::Args;
 use std::path::Path;
 
 #[test]
-#[ignore = "enable once we have the configuration to turn it on"]
 fn should_use_editorconfig() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
