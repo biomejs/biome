@@ -1,0 +1,10 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: validArguments.js
+---
+# Input
+```jsx
+function foo() {
+    console.log(arguments);
+}
+```

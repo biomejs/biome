@@ -3,7 +3,9 @@ use crate::services::semantic::SemanticServices;
 use biome_analyze::context::RuleContext;
 use biome_analyze::{declare_rule, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
-use biome_js_syntax::{JsFileSource, Language, TextRange, TsAsExpression, TsReferenceType};
+use biome_js_syntax::{
+    AnyJsFunction, JsFileSource, Language, TextRange, TsAsExpression, TsReferenceType,
+};
 use biome_rowan::AstNode;
 
 declare_rule! {
@@ -65,6 +67,20 @@ impl Rule for NoUndeclaredVariables {
                 // Typescript Const Assertion
                 if text == "const" && under_as_expression {
                     return None;
+                }
+
+                // arguments object within non-arrow functions
+                if text == "arguments" {
+                    let is_in_non_arrow_function =
+                        identifier.syntax().ancestors().any(|ancestor| {
+                            !matches!(
+                                AnyJsFunction::cast(ancestor),
+                                None | Some(AnyJsFunction::JsArrowFunctionExpression(_))
+                            )
+                        });
+                    if is_in_non_arrow_function {
+                        return None;
+                    }
                 }
 
                 if is_global(text, source_type) {
