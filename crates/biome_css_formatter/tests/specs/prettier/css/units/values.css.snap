@@ -2,7 +2,6 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: css/units/values.css
 ---
-
 # Input
 
 ```css
@@ -62,19 +61,19 @@ info: css/units/values.css
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,7 +1,9 @@
+@@ -1,7 +1,7 @@
 -@value 4XLarge 28/36px;
-+@
-+value 4XLarge 28/36px
-+;
- 
- .postCssLowerCasingValueName {
+-
+-.postCssLowerCasingValueName {
 -  font: 4XLarge Helvetica;
++@
++value 4XLarge 28/36px;
++  .postCssLowerCasingValueName {
 +  font: 4xlarge helvetica;
  }
  
  .cssUnits {
-@@ -25,7 +27,7 @@
+@@ -25,7 +25,7 @@
    a: 5vmax;
    a: 5cm;
    a: 5mm;
@@ -83,7 +82,7 @@ info: css/units/values.css
    a: 5in;
    a: 5pt;
    a: 5pc;
-@@ -35,13 +37,13 @@
+@@ -35,13 +35,13 @@
    a: 5rad;
    a: 5s;
    a: 5ms;
@@ -107,10 +106,8 @@ info: css/units/values.css
 
 ```css
 @
-value 4XLarge 28/36px
-;
-
-.postCssLowerCasingValueName {
+value 4XLarge 28/36px;
+  .postCssLowerCasingValueName {
   font: 4xlarge helvetica;
 }
 
@@ -161,12 +158,25 @@ value 4XLarge 28/36px
 ```
 values.css:1:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected value or character.
+  × @value at-rule is not a standard CSS feature.
   
   > 1 │ @value 4XLarge 28/36px;
       │  ^^^^^
     2 │ 
     3 │ .postCssLowerCasingValueName {
+  
+  i You can enable @value at-rule parsing by setting the `css_modules` option to `true` in your configuration file.
+  
+values.css:3:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+    1 │ @value 4XLarge 28/36px;
+    2 │ 
+  > 3 │ .postCssLowerCasingValueName {
+      │ ^
+    4 │   font: 4XLarge Helvetica;
+    5 │ }
   
   i Expected one of:
   
@@ -189,72 +199,5 @@ values.css:1:2 parse ━━━━━━━━━━━━━━━━━━━�
   - viewport
   - scope
   
-values.css:1:8 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Expected a compound selector but instead found '4'.
-  
-  > 1 │ @value 4XLarge 28/36px;
-      │        ^
-    2 │ 
-    3 │ .postCssLowerCasingValueName {
-  
-  i Expected a compound selector here.
-  
-  > 1 │ @value 4XLarge 28/36px;
-      │        ^
-    2 │ 
-    3 │ .postCssLowerCasingValueName {
-  
-values.css:1:9 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `XLarge`
-  
-  > 1 │ @value 4XLarge 28/36px;
-      │         ^^^^^^
-    2 │ 
-    3 │ .postCssLowerCasingValueName {
-  
-  i Remove XLarge
-  
-values.css:1:16 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Expected a compound selector but instead found '28'.
-  
-  > 1 │ @value 4XLarge 28/36px;
-      │                ^^
-    2 │ 
-    3 │ .postCssLowerCasingValueName {
-  
-  i Expected a compound selector here.
-  
-  > 1 │ @value 4XLarge 28/36px;
-      │                ^^
-    2 │ 
-    3 │ .postCssLowerCasingValueName {
-  
-values.css:1:21 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `px`
-  
-  > 1 │ @value 4XLarge 28/36px;
-      │                     ^^
-    2 │ 
-    3 │ .postCssLowerCasingValueName {
-  
-  i Remove px
-  
-values.css:1:23 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `;`
-  
-  > 1 │ @value 4XLarge 28/36px;
-      │                       ^
-    2 │ 
-    3 │ .postCssLowerCasingValueName {
-  
-  i Remove ;
-  
 
 ```
-
-

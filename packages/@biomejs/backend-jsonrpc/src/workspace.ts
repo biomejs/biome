@@ -304,6 +304,10 @@ export interface PartialCssParser {
 	 * Allow comments to appear on incorrect lines in `.css` files
 	 */
 	allowWrongLineComments?: boolean;
+	/**
+	 * Enables parsing of CSS Modules specific features.
+	 */
+	cssModules?: boolean;
 }
 export type AttributePosition = "auto" | "multiline";
 export type PlainIndentStyle = "tab" | "space";

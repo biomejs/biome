@@ -1,0 +1,134 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```css
+@value colors: "./colors.css";
+@value common-gradient: transparent 75%, var(--ring-line-color) 75%, currentColor 79%;
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    rules: CssRuleList [
+        CssBogusRule {
+            items: [
+                AT@0..1 "@" [] [],
+            ],
+        },
+        CssBogusRule {
+            items: [
+                AT@1..32 "@" [Skipped("value"), Whitespace(" "), Skipped("colors"), Skipped(":"), Whitespace(" "), Skipped("\"./colors.css\""), Skipped(";"), Newline("\n")] [],
+            ],
+        },
+    ],
+    eof_token: EOF@32..118 "" [Skipped("value"), Whitespace(" "), Skipped("common-gradient"), Skipped(":"), Whitespace(" "), Skipped("transparent"), Whitespace(" "), Skipped("75"), Skipped("%"), Skipped(","), Whitespace(" "), Skipped("var"), Skipped("("), Skipped("--ring-line-color"), Skipped(")"), Whitespace(" "), Skipped("75"), Skipped("%"), Skipped(","), Whitespace(" "), Skipped("currentColor"), Whitespace(" "), Skipped("79"), Skipped("%"), Skipped(";"), Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..118
+  0: (empty)
+  1: CSS_RULE_LIST@0..32
+    0: CSS_BOGUS_RULE@0..1
+      0: AT@0..1 "@" [] []
+    1: CSS_BOGUS_RULE@1..32
+      0: AT@1..32 "@" [Skipped("value"), Whitespace(" "), Skipped("colors"), Skipped(":"), Whitespace(" "), Skipped("\"./colors.css\""), Skipped(";"), Newline("\n")] []
+  2: EOF@32..118 "" [Skipped("value"), Whitespace(" "), Skipped("common-gradient"), Skipped(":"), Whitespace(" "), Skipped("transparent"), Whitespace(" "), Skipped("75"), Skipped("%"), Skipped(","), Whitespace(" "), Skipped("var"), Skipped("("), Skipped("--ring-line-color"), Skipped(")"), Whitespace(" "), Skipped("75"), Skipped("%"), Skipped(","), Whitespace(" "), Skipped("currentColor"), Whitespace(" "), Skipped("79"), Skipped("%"), Skipped(";"), Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+at_rule_value_disabled.css:1:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × @value at-rule is not a standard CSS feature.
+  
+  > 1 │ @value colors: "./colors.css";
+      │  ^^^^^
+    2 │ @value common-gradient: transparent 75%, var(--ring-line-color) 75%, currentColor 79%;
+    3 │ 
+  
+  i You can enable @value at-rule parsing by setting the `css_modules` option to `true` in your configuration file.
+  
+at_rule_value_disabled.css:2:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+    1 │ @value colors: "./colors.css";
+  > 2 │ @value common-gradient: transparent 75%, var(--ring-line-color) 75%, currentColor 79%;
+      │ ^
+    3 │ 
+  
+  i Expected one of:
+  
+  - charset
+  - color-profile
+  - container
+  - counter-style
+  - document
+  - font-face
+  - font-feature-values
+  - font-palette-values
+  - import
+  - keyframes
+  - layer
+  - media
+  - namespace
+  - page
+  - property
+  - supports
+  - viewport
+  - scope
+  
+at_rule_value_disabled.css:2:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × @value at-rule is not a standard CSS feature.
+  
+    1 │ @value colors: "./colors.css";
+  > 2 │ @value common-gradient: transparent 75%, var(--ring-line-color) 75%, currentColor 79%;
+      │  ^^^^^
+    3 │ 
+  
+  i You can enable @value at-rule parsing by setting the `css_modules` option to `true` in your configuration file.
+  
+at_rule_value_disabled.css:3:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+    1 │ @value colors: "./colors.css";
+    2 │ @value common-gradient: transparent 75%, var(--ring-line-color) 75%, currentColor 79%;
+  > 3 │ 
+      │ 
+  
+  i Expected one of:
+  
+  - charset
+  - color-profile
+  - container
+  - counter-style
+  - document
+  - font-face
+  - font-feature-values
+  - font-palette-values
+  - import
+  - keyframes
+  - layer
+  - media
+  - namespace
+  - page
+  - property
+  - supports
+  - viewport
+  - scope
+  
+```

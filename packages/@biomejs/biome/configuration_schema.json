@@ -929,6 +929,10 @@
 				"allowWrongLineComments": {
 					"description": "Allow comments to appear on incorrect lines in `.css` files",
 					"type": ["boolean", "null"]
+				},
+				"cssModules": {
+					"description": "Enables parsing of CSS Modules specific features.",
+					"type": ["boolean", "null"]
 				}
 			},
 			"additionalProperties": false

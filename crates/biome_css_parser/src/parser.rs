@@ -12,27 +12,51 @@ pub(crate) struct CssParser<'source> {
     context: ParserContext<CssSyntaxKind>,
     source: CssTokenSource<'source>,
     state: CssParserState,
+    options: CssParserOptions,
 }
 
 #[derive(Default, Debug, Clone, Copy)]
 pub struct CssParserOptions {
+    /// If this is `true`, **wrong** comments starting with `//` will be treated
+    /// as a comment.
+    ///
+    /// This option exists because there are so many css-in-js tools and people
+    /// use `//` as a comment because it's javascript file.
+    ///
+    /// Defaults to `false`.
     pub allow_wrong_line_comments: bool,
+
+    /// Enables parsing of CSS Modules specific features.
+    /// Defaults to `false`.
+    pub css_modules: bool,
 }
 
 impl CssParserOptions {
+    /// Allows the parser to parse wrong line comments.
     pub fn allow_wrong_line_comments(mut self) -> Self {
         self.allow_wrong_line_comments = true;
+        self
+    }
+
+    /// Enables parsing of css modules selectors.
+    pub fn allow_css_modules(mut self) -> Self {
+        self.css_modules = true;
         self
     }
 }
 
 impl<'source> CssParser<'source> {
-    pub fn new(source: &'source str, config: CssParserOptions) -> Self {
+    pub fn new(source: &'source str, options: CssParserOptions) -> Self {
         Self {
             context: ParserContext::default(),
-            source: CssTokenSource::from_str(source, config),
+            source: CssTokenSource::from_str(source, options),
             state: CssParserState::new(),
+            options,
         }
+    }
+
+    pub fn options(&self) -> &CssParserOptions {
+        &self.options
     }
 
     /// Re-lexes the current token in the specified context. Returns the kind

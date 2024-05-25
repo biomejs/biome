@@ -69,20 +69,16 @@ info: css/modules/modules.css
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,11 +1,18 @@
+@@ -1,11 +1,12 @@
 -@value colors: './colors.css';
 -@value first, second, third from colors;
-+@
-+value colors: './colors.css'
-+;
-+@
-+value first,
-+second,
-+third from colors 
-+;
- 
- .title {
+-
+-.title {
 -  @nest :global(h1)& {
++@
++@
++value first, second, third from colors;
++  .title {
 +  @
 +  nest :global(h1)& {
      background: red;
@@ -92,7 +88,7 @@ info: css/modules/modules.css
  
  .className {
    color: green;
-@@ -13,16 +20,16 @@
+@@ -13,16 +14,16 @@
  }
  
  .otherClassName {
@@ -112,7 +108,7 @@ info: css/modules/modules.css
  }
  
  :global {
-@@ -42,7 +49,7 @@
+@@ -42,7 +43,7 @@
    localAlias: keyFromDep;
  }
  :export {
@@ -127,15 +123,9 @@ info: css/modules/modules.css
 
 ```css
 @
-value colors: './colors.css'
-;
 @
-value first,
-second,
-third from colors 
-;
-
-.title {
+value first, second, third from colors;
+  .title {
   @
   nest :global(h1)& {
     background: red;
@@ -194,12 +184,24 @@ third from colors
 ```
 modules.css:1:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected value or character.
+  × @value at-rule is not a standard CSS feature.
   
   > 1 │ @value colors: './colors.css';
       │  ^^^^^
     2 │ @value first, second, third from colors;
     3 │ 
+  
+  i You can enable @value at-rule parsing by setting the `css_modules` option to `true` in your configuration file.
+  
+modules.css:2:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+    1 │ @value colors: './colors.css';
+  > 2 │ @value first, second, third from colors;
+      │ ^
+    3 │ 
+    4 │ .title {
   
   i Expected one of:
   
@@ -221,84 +223,29 @@ modules.css:1:2 parse ━━━━━━━━━━━━━━━━━━━�
   - supports
   - viewport
   - scope
-  
-modules.css:1:16 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Unexpected value or character.
-  
-  > 1 │ @value colors: './colors.css';
-      │                ^^^^^^^^^^^^^^
-    2 │ @value first, second, third from colors;
-    3 │ 
-  
-  i Expected one of:
-  
-  - hover
-  - focus
-  - active
-  - first-child
-  - last-child
-  - nth-child
-  - nth-last-child
-  - first-of-type
-  - last-of-type
-  - nth-of-type
-  - nth-last-of-type
-  - only-child
-  - only-of-type
-  - checked
-  - disabled
-  - enabled
-  - required
-  - optional
-  - valid
-  - invalid
-  - in-range
-  - out-of-range
-  - read-only
-  - read-write
-  - placeholder-shown
-  - default
-  - checked
-  - indeterminate
-  - blank
-  - empty
-  - root
-  - target
-  - lang
-  - not
-  - is
-  - where
-  - fullscreen
-  - link
-  - visited
-  - any-link
-  - local-link
-  - scope
-  - current
-  - past
-  - future
-  
-modules.css:1:30 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `;`
-  
-  > 1 │ @value colors: './colors.css';
-      │                              ^
-    2 │ @value first, second, third from colors;
-    3 │ 
-  
-  i Remove ;
   
 modules.css:2:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected value or character.
+  × @value at-rule is not a standard CSS feature.
   
     1 │ @value colors: './colors.css';
   > 2 │ @value first, second, third from colors;
       │  ^^^^^
     3 │ 
     4 │ .title {
+  
+  i You can enable @value at-rule parsing by setting the `css_modules` option to `true` in your configuration file.
+  
+modules.css:4:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+    2 │ @value first, second, third from colors;
+    3 │ 
+  > 4 │ .title {
+      │ ^
+    5 │   @nest :global(h1)& {
+    6 │     background: red;
   
   i Expected one of:
   
@@ -320,18 +267,6 @@ modules.css:2:2 parse ━━━━━━━━━━━━━━━━━━━�
   - supports
   - viewport
   - scope
-  
-modules.css:2:40 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `;`
-  
-    1 │ @value colors: './colors.css';
-  > 2 │ @value first, second, third from colors;
-      │                                        ^
-    3 │ 
-    4 │ .title {
-  
-  i Remove ;
   
 modules.css:5:4 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 

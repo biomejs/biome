@@ -70,3 +70,7 @@ pub(crate) mod supports_not_condition;
 pub(crate) mod supports_or_condition;
 pub(crate) mod universal_namespace_prefix;
 pub(crate) mod url_function;
+pub(crate) mod value_at_rule_declaration_clause;
+pub(crate) mod value_at_rule_import_clause;
+pub(crate) mod value_at_rule_import_specifier;
+pub(crate) mod value_at_rule_named_import_specifier;

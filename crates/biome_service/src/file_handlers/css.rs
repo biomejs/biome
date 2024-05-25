@@ -80,6 +80,7 @@ impl Default for CssLinterSettings {
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub struct CssParserSettings {
     pub allow_wrong_line_comments: bool,
+    pub css_modules: bool,
 }
 
 impl ServiceLanguage for CssLanguage {
@@ -208,6 +209,7 @@ fn parse(
         biome_path,
         CssParserOptions {
             allow_wrong_line_comments: parser.allow_wrong_line_comments,
+            css_modules: parser.css_modules,
         },
     );
     let parse = biome_css_parser::parse_css_with_cache(text, cache, options);

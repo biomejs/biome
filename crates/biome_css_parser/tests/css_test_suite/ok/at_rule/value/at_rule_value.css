@@ -1,0 +1,15 @@
+/* my-component.css */
+/* alias paths for other values or composition */
+@value colors: "./colors.css";
+/* import multiple from a single file */
+@value primary, secondary from colors;
+/* make local aliases to imported values */
+@value small as bp-small, medium, large as bp-large from "./breakpoints.css";
+/* value as selector name */
+@value selectorValue: secondary-color;
+@value small: (max-width: 599px);
+@value medium: (min-width: 600px) and (max-width: 959px);
+@value large: (min-width: 960px);
+@value primary: #BF4040;
+@value secondary: #1F4F7F;
+@value common-gradient: transparent 75%, var(--ring-line-color) 75%, currentColor 79%;

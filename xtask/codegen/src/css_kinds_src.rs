@@ -237,6 +237,8 @@ pub const CSS_KINDS_SRC: KindsSrc = KindsSrc {
         "domain",
         "media-document",
         "regexp",
+        "value",
+        "as",
         //
         "font-face",
         // Don't add to the end of this list, add new keywords above the "HERE"
@@ -446,6 +448,15 @@ pub const CSS_KINDS_SRC: KindsSrc = KindsSrc {
         "CSS_DOCUMENT_AT_RULE",
         "CSS_DOCUMENT_MATCHER_LIST",
         "CSS_DOCUMENT_CUSTOM_MATCHER",
+        "CSS_VALUE_AT_RULE",
+        "CSS_VALUE_AT_RULE_PROPERTY_LIST",
+        "CSS_VALUE_AT_RULE_IMPORT_SPECIFIER_LIST",
+        "CSS_VALUE_AT_RULE_IMPORT_CLAUSE",
+        "CSS_VALUE_AT_RULE_IMPORT_SPECIFIER",
+        "CSS_VALUE_AT_RULE_NAMED_IMPORT_SPECIFIER",
+        "CSS_VALUE_AT_RULE_DECLARATION_CLAUSE",
+        "CSS_VALUE_AT_RULE_GENERIC_PROPERTY",
+        "CSS_VALUE_AT_RULE_GENERIC_VALUE",
         // Bogus nodes
         "CSS_BOGUS",
         "CSS_BOGUS_BLOCK",
