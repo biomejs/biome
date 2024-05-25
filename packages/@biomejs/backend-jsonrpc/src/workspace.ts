@@ -1022,7 +1022,7 @@ export interface Nursery {
 	 */
 	noRestrictedImports?: RuleConfiguration_for_RestrictedImportsOptions;
 	/**
-	 * Succinct description of the rule.
+	 * Enforce that non-interactive, visible elements (such as \<div>) that have click handlers use the role attribute.
 	 */
 	noStaticElementInteractions?: RuleConfiguration_for_Null;
 	/**

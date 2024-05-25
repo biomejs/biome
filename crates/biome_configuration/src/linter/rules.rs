@@ -2785,7 +2785,7 @@ pub struct Nursery {
     #[doc = "Disallow specified modules when loaded by import or require."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_restricted_imports: Option<RuleConfiguration<NoRestrictedImports>>,
-    #[doc = "Succinct description of the rule."]
+    #[doc = "Enforce that non-interactive, visible elements (such as \\<div>) that have click handlers use the role attribute."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_static_element_interactions: Option<RuleConfiguration<NoStaticElementInteractions>>,
     #[doc = "Disallow the use of dependencies that aren't specified in the package.json."]

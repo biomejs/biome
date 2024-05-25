@@ -297,14 +297,57 @@ fn is_invalid_element(element_name: &str) -> bool {
 /// This function ables non-interactive elements.
 /// This is because this is an element that is abled by eslint-plugin-jsx-a11y.
 fn is_valid_element(element_name: &str) -> bool {
-    match element_name {
-        "input" | "form" | "iframe" | "h1" | "h2" | "h3" | "h4" | "h5" | "h6" | "ruby" | "pre"
-        | "mark" | "aside" | "blockquote" => true,
-        "address" | "article" | "caption" | "output" | "p" | "li" | "ol" | "ul" | "nav"
-        | "table" | "thead" | "tbody" | "tfoot" | "time" | "dfn" | "main" | "br" | "details"
-        | "dd" | "dir" | "dl" | "dt" | "fieldset" | "figcaption" | "figure" | "footer" | "img"
-        | "label" | "legend" | "marquee" | "menu" | "meter" | "optgroup" | "progress" | "th"
-        | "td" => true,
-        _ => false,
-    }
+    matches!(
+        element_name,
+        "input"
+            | "form"
+            | "iframe"
+            | "h1"
+            | "h2"
+            | "h3"
+            | "h4"
+            | "h5"
+            | "h6"
+            | "ruby"
+            | "pre"
+            | "mark"
+            | "aside"
+            | "blockquote"
+            | "address"
+            | "article"
+            | "caption"
+            | "output"
+            | "p"
+            | "li"
+            | "ol"
+            | "ul"
+            | "nav"
+            | "table"
+            | "thead"
+            | "tbody"
+            | "tfoot"
+            | "time"
+            | "dfn"
+            | "main"
+            | "br"
+            | "details"
+            | "dd"
+            | "dir"
+            | "dl"
+            | "dt"
+            | "fieldset"
+            | "figcaption"
+            | "figure"
+            | "footer"
+            | "img"
+            | "label"
+            | "legend"
+            | "marquee"
+            | "menu"
+            | "meter"
+            | "optgroup"
+            | "progress"
+            | "th"
+            | "td"
+    )
 }

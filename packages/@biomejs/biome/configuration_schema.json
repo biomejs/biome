@@ -1727,7 +1727,7 @@
 					]
 				},
 				"noStaticElementInteractions": {
-					"description": "Succinct description of the rule.",
+					"description": "Enforce that non-interactive, visible elements (such as \\<div>) that have click handlers use the role attribute.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
