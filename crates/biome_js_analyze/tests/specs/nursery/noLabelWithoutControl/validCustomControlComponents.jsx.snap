@@ -5,6 +5,5 @@ expression: validCustomControlComponents.jsx
 # Input
 ```jsx
 <label><span>A label<CustomInput /></span></label>;
-<label><span>A label<CustomInput /></span></label>;
 
 ```

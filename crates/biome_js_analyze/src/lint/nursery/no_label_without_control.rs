@@ -2,8 +2,8 @@ use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnosti
 use biome_console::markup;
 use biome_deserialize_macros::Deserializable;
 use biome_js_syntax::{
-    AnyJsxAttribute, AnyJsxAttributeName, AnyJsxAttributeValue, AnyJsxElementName, AnyJsxTag,
-    JsxAttribute, JsxName, JsxOpeningElement, JsxReferenceIdentifier, JsxTagExpression, JsxText,
+    AnyJsxAttribute, AnyJsxAttributeName, AnyJsxAttributeValue, AnyJsxTag, JsxAttribute,
+    JsxAttributeList, JsxName, JsxReferenceIdentifier, JsxText,
 };
 use biome_rowan::AstNode;
 use serde::{Deserialize, Serialize};
@@ -51,7 +51,7 @@ pub struct NoLabelWithoutControlOptions {
 }
 
 impl Rule for NoLabelWithoutControl {
-    type Query = Ast<JsxTagExpression>;
+    type Query = Ast<AnyJsxTag>;
     type State = ();
     type Signals = Option<Self::State>;
     type Options = NoLabelWithoutControlOptions;
@@ -111,33 +111,30 @@ fn get_option(value: &[String], default_value: &[&str]) -> Vec<String> {
         .collect()
 }
 
-/// Returns the `JsxOpeningElement` inside of the passed `JsxTagExpression`
-fn get_opening_element(jsx_tag_expression: &JsxTagExpression) -> Option<JsxOpeningElement> {
-    match jsx_tag_expression.tag().ok()? {
-        AnyJsxTag::JsxElement(element) => element.opening_element().ok(),
+/// Returns the `JsxAttributeList` of the passed `AnyJsxTag`
+fn get_element_attributes(jsx_tag: &AnyJsxTag) -> Option<JsxAttributeList> {
+    match jsx_tag {
+        AnyJsxTag::JsxElement(element) => Some(element.opening_element().ok()?.attributes()),
+        AnyJsxTag::JsxSelfClosingElement(element) => Some(element.attributes()),
         _ => None,
     }
 }
 
-/// Returns the element name of a `JsxTagExpression`
-fn get_element_name(jsx_tag_expression: &JsxTagExpression) -> Option<String> {
-    let opening_element = get_opening_element(jsx_tag_expression)?;
-
-    match opening_element.name().ok()? {
-        AnyJsxElementName::JsxName(jsx_name) => Some(jsx_name.text()),
-        AnyJsxElementName::JsxReferenceIdentifier(jsx_reference_identifier) => {
-            Some(jsx_reference_identifier.text())
-        }
+/// Returns the element name of a `AnyJsxTag`
+fn get_element_name(jsx_tag: &AnyJsxTag) -> Option<String> {
+    match jsx_tag {
+        AnyJsxTag::JsxElement(element) => Some(element.opening_element().ok()?.name().ok()?.text()),
+        AnyJsxTag::JsxSelfClosingElement(element) => Some(element.name().ok()?.text()),
         _ => None,
     }
 }
 
-/// Returns whether the passed `JsxTagExpression` have a `for` or `htmlFor` attribute
-fn has_for_attribute(jsx_tag_expression: &JsxTagExpression) -> Option<bool> {
+/// Returns whether the passed `AnyJsxTag` have a `for` or `htmlFor` attribute
+fn has_for_attribute(jsx_tag: &AnyJsxTag) -> Option<bool> {
     let for_attributes = &["for", "htmlFor"];
-    let opening_element = get_opening_element(jsx_tag_expression)?;
+    let attributes = get_element_attributes(jsx_tag)?;
 
-    Some(opening_element.attributes().into_iter().any(|attribute| {
+    Some(attributes.into_iter().any(|attribute| {
         match attribute {
             AnyJsxAttribute::JsxAttribute(jsx_attribute) => jsx_attribute
                 .name()
@@ -147,13 +144,10 @@ fn has_for_attribute(jsx_tag_expression: &JsxTagExpression) -> Option<bool> {
     }))
 }
 
-/// Returns whether the passed `JsxTagExpression` have a child that is considered a control component
+/// Returns whether the passed `AnyJsxTag` have a child that is considered a control component
 /// according to the passed `control_components` parameter
-fn has_nested_control(
-    jsx_tag_expression: &JsxTagExpression,
-    control_components: &[String],
-) -> bool {
-    jsx_tag_expression.syntax().descendants().any(|descendant| {
+fn has_nested_control(jsx_tag: &AnyJsxTag, control_components: &[String]) -> bool {
+    jsx_tag.syntax().descendants().any(|descendant| {
         match (
             JsxName::cast(descendant.clone()),
             JsxReferenceIdentifier::cast(descendant.clone()),
@@ -167,15 +161,12 @@ fn has_nested_control(
     })
 }
 
-/// Returns whether the passed `JsxTagExpression` meets one of the following conditions:
+/// Returns whether the passed `AnyJsxTag` meets one of the following conditions:
 /// - Has a label attribute that corresponds to the `label_attributes` parameter
 /// - Has an `aria-labelledby` attribute
 /// - Has a child `JsxText` node
-fn has_accessible_label(
-    jsx_tag_expression: &JsxTagExpression,
-    label_attributes: &[String],
-) -> bool {
-    let jsx_attributes = jsx_tag_expression
+fn has_accessible_label(jsx_tag: &AnyJsxTag, label_attributes: &[String]) -> bool {
+    let jsx_attributes = jsx_tag
         .syntax()
         .descendants()
         .filter_map(JsxAttribute::cast)
@@ -199,7 +190,7 @@ fn has_accessible_label(
         }
     });
 
-    let has_text = jsx_tag_expression
+    let has_text = jsx_tag
         .syntax()
         .descendants()
         .any(|descendant| JsxText::cast(descendant).is_some());

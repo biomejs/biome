@@ -1,0 +1,59 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidCustomLabelComponents.jsx
+---
+# Input
+```jsx
+<CustomLabel aria-label="A label" />;
+<CustomLabel label="A label" />;
+<CustomLabel aria-label="A label" />;
+
+```
+
+# Diagnostics
+```
+invalidCustomLabelComponents.jsx:1:1 lint/nursery/noLabelWithoutControl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Variable is read here.
+  
+  > 1 │ <CustomLabel aria-label="A label" />;
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    2 │ <CustomLabel label="A label" />;
+    3 │ <CustomLabel aria-label="A label" />;
+  
+  i This note will give you more information.
+  
+
+```
+
+```
+invalidCustomLabelComponents.jsx:2:1 lint/nursery/noLabelWithoutControl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Variable is read here.
+  
+    1 │ <CustomLabel aria-label="A label" />;
+  > 2 │ <CustomLabel label="A label" />;
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    3 │ <CustomLabel aria-label="A label" />;
+    4 │ 
+  
+  i This note will give you more information.
+  
+
+```
+
+```
+invalidCustomLabelComponents.jsx:3:1 lint/nursery/noLabelWithoutControl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Variable is read here.
+  
+    1 │ <CustomLabel aria-label="A label" />;
+    2 │ <CustomLabel label="A label" />;
+  > 3 │ <CustomLabel aria-label="A label" />;
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ 
+  
+  i This note will give you more information.
+  
+
+```

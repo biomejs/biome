@@ -1,0 +1,24 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidCustomControlComponents.jsx
+---
+# Input
+```jsx
+<label><span><CustomInput /></span></label>;
+
+```
+
+# Diagnostics
+```
+invalidCustomControlComponents.jsx:1:1 lint/nursery/noLabelWithoutControl ━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Variable is read here.
+  
+  > 1 │ <label><span><CustomInput /></span></label>;
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    2 │ 
+  
+  i This note will give you more information.
+  
+
+```

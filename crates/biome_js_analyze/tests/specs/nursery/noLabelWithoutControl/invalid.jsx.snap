@@ -4,5 +4,128 @@ expression: invalid.jsx
 ---
 # Input
 ```jsx
+<label htmlFor="js_id" />;
+<label htmlFor="js_id"><input /></label>;
+<label htmlFor="js_id"><textarea /></label>;
+<label></label>;
+<label>A label</label>;
+<div><label /><input /></div>;
+<div><label>A label</label><input /></div>;
+
+```
+
+# Diagnostics
+```
+invalid.jsx:1:1 lint/nursery/noLabelWithoutControl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Variable is read here.
+  
+  > 1 │ <label htmlFor="js_id" />;
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^
+    2 │ <label htmlFor="js_id"><input /></label>;
+    3 │ <label htmlFor="js_id"><textarea /></label>;
+  
+  i This note will give you more information.
+  
+
+```
+
+```
+invalid.jsx:2:1 lint/nursery/noLabelWithoutControl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Variable is read here.
+  
+    1 │ <label htmlFor="js_id" />;
+  > 2 │ <label htmlFor="js_id"><input /></label>;
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    3 │ <label htmlFor="js_id"><textarea /></label>;
+    4 │ <label></label>;
+  
+  i This note will give you more information.
+  
+
+```
+
+```
+invalid.jsx:3:1 lint/nursery/noLabelWithoutControl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Variable is read here.
+  
+    1 │ <label htmlFor="js_id" />;
+    2 │ <label htmlFor="js_id"><input /></label>;
+  > 3 │ <label htmlFor="js_id"><textarea /></label>;
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ <label></label>;
+    5 │ <label>A label</label>;
+  
+  i This note will give you more information.
+  
+
+```
+
+```
+invalid.jsx:4:1 lint/nursery/noLabelWithoutControl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Variable is read here.
+  
+    2 │ <label htmlFor="js_id"><input /></label>;
+    3 │ <label htmlFor="js_id"><textarea /></label>;
+  > 4 │ <label></label>;
+      │ ^^^^^^^^^^^^^^^
+    5 │ <label>A label</label>;
+    6 │ <div><label /><input /></div>;
+  
+  i This note will give you more information.
+  
+
+```
+
+```
+invalid.jsx:5:1 lint/nursery/noLabelWithoutControl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Variable is read here.
+  
+    3 │ <label htmlFor="js_id"><textarea /></label>;
+    4 │ <label></label>;
+  > 5 │ <label>A label</label>;
+      │ ^^^^^^^^^^^^^^^^^^^^^^
+    6 │ <div><label /><input /></div>;
+    7 │ <div><label>A label</label><input /></div>;
+  
+  i This note will give you more information.
+  
+
+```
+
+```
+invalid.jsx:6:6 lint/nursery/noLabelWithoutControl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Variable is read here.
+  
+    4 │ <label></label>;
+    5 │ <label>A label</label>;
+  > 6 │ <div><label /><input /></div>;
+      │      ^^^^^^^^^
+    7 │ <div><label>A label</label><input /></div>;
+    8 │ 
+  
+  i This note will give you more information.
+  
+
+```
+
+```
+invalid.jsx:7:6 lint/nursery/noLabelWithoutControl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Variable is read here.
+  
+    5 │ <label>A label</label>;
+    6 │ <div><label /><input /></div>;
+  > 7 │ <div><label>A label</label><input /></div>;
+      │      ^^^^^^^^^^^^^^^^^^^^^^
+    8 │ 
+  
+  i This note will give you more information.
+  
 
 ```

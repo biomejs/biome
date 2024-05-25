@@ -1,0 +1,24 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidCustomLabelAttributes.jsx
+---
+# Input
+```jsx
+<label label="A label" />;
+
+```
+
+# Diagnostics
+```
+invalidCustomLabelAttributes.jsx:1:1 lint/nursery/noLabelWithoutControl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Variable is read here.
+  
+  > 1 │ <label label="A label" />;
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^
+    2 │ 
+  
+  i This note will give you more information.
+  
+
+```
