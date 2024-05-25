@@ -8,7 +8,7 @@ use crate::services::semantic::Semantic;
 declare_rule! {
     /// Enforce passing a message value when creating a built-in error.
     ///
-    //  This rule enforces a message value to be passed in when creating an instance of a built-in `Error` object,
+    /// This rule enforces a message value to be passed in when creating an instance of a built-in `Error` object,
     /// which leads to more readable and debuggable code.
     ///
     /// ## Examples
