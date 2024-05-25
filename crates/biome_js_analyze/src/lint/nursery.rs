@@ -20,6 +20,7 @@ pub mod use_adjacent_overload_signatures;
 pub mod use_array_literals;
 pub mod use_consistent_builtin_instantiation;
 pub mod use_default_switch_clause;
+pub mod use_error_message;
 pub mod use_explicit_length_check;
 pub mod use_focusable_interactive;
 pub mod use_import_extensions;
@@ -53,6 +54,7 @@ declare_group! {
             self :: use_array_literals :: UseArrayLiterals ,
             self :: use_consistent_builtin_instantiation :: UseConsistentBuiltinInstantiation ,
             self :: use_default_switch_clause :: UseDefaultSwitchClause ,
+            self :: use_error_message :: UseErrorMessage ,
             self :: use_explicit_length_check :: UseExplicitLengthCheck ,
             self :: use_focusable_interactive :: UseFocusableInteractive ,
             self :: use_import_extensions :: UseImportExtensions ,

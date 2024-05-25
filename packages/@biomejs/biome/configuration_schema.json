@@ -1828,6 +1828,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useErrorMessage": {
+					"description": "Enforce passing a message value when creating a built-in error.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useExplicitLengthCheck": {
 					"description": "Enforce explicitly comparing the length, size, byteLength or byteOffset property of a value.",
 					"anyOf": [
