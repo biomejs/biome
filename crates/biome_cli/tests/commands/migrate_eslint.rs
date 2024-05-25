@@ -256,7 +256,26 @@ fn migrate_eslintrcjson_rule_options() {
             "@typescript-eslint/array-type": ["error", { "default": "generic" }],
             "@typescript-eslint/naming-convention": ["error",
                 {
+                    "selector": "property",
+                    "leadingUnderscore": "forbid"
+                },
+                {
+                    "selector": "property",
+                    "modifiers": ["private"],
+                    "format": ["strictCamelCase"],
+                    "leadingUnderscore": "require"
+                },
+                {
+                    "selector": "interface",
+                    "prefix": ["I", "IO"]
+                },
+                {
                     "selector": "enumMember",
+                    "format": ["UPPER_CASE"]
+                },
+                {
+                    "selector": "variable",
+                    "types": ["boolean"],
                     "format": ["UPPER_CASE"]
                 }
             ],
@@ -301,7 +320,7 @@ fn migrate_eslintrcjson_rule_options() {
                     "multipleFileExtensions": true
                 }]
             }
-        }],
+        }]
     }"#;
 
     let mut fs = MemoryFileSystem::default();
@@ -315,7 +334,6 @@ fn migrate_eslintrcjson_rule_options() {
         Args::from(["migrate", "eslint", "--include-inspired"].as_slice()),
     );
 
-    assert!(result.is_ok(), "run_cli returned {result:?}");
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "migrate_eslintrcjson_rule_options",
