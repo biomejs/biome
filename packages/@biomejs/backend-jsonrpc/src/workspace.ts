@@ -1022,6 +1022,10 @@ export interface Nursery {
 	 */
 	noRestrictedImports?: RuleConfiguration_for_RestrictedImportsOptions;
 	/**
+	 * Succinct description of the rule.
+	 */
+	noStaticElementInteractions?: RuleConfiguration_for_Null;
+	/**
 	 * Disallow the use of dependencies that aren't specified in the package.json.
 	 */
 	noUndeclaredDependencies?: RuleConfiguration_for_Null;
@@ -2271,17 +2275,16 @@ export type Category =
 	| "lint/correctness/useValidForDirection"
 	| "lint/correctness/useYield"
 	| "lint/nursery/colorNoInvalidHex"
-	| "lint/nursery/useAdjacentOverloadSignatures"
 	| "lint/nursery/noColorInvalidHex"
 	| "lint/nursery/noConsole"
 	| "lint/nursery/noConstantMathMinMaxClamp"
-	| "lint/nursery/noEmptyBlock"
 	| "lint/nursery/noDoneCallback"
 	| "lint/nursery/noDuplicateAtImportRules"
 	| "lint/nursery/noDuplicateElseIf"
 	| "lint/nursery/noDuplicateFontNames"
 	| "lint/nursery/noDuplicateJsonKeys"
 	| "lint/nursery/noDuplicateSelectorsKeyframeBlock"
+	| "lint/nursery/noEmptyBlock"
 	| "lint/nursery/noEvolvingAny"
 	| "lint/nursery/noFlatMapIdentity"
 	| "lint/nursery/noImportantInKeyframe"
@@ -2291,6 +2294,7 @@ export type Category =
 	| "lint/nursery/noNodejsModules"
 	| "lint/nursery/noReactSpecificProps"
 	| "lint/nursery/noRestrictedImports"
+	| "lint/nursery/noStaticElementInteractions"
 	| "lint/nursery/noTypeOnlyImportAttributes"
 	| "lint/nursery/noUndeclaredDependencies"
 	| "lint/nursery/noUnknownFunction"
@@ -2302,6 +2306,7 @@ export type Category =
 	| "lint/nursery/noUselessStringConcat"
 	| "lint/nursery/noUselessUndefinedInitialization"
 	| "lint/nursery/noYodaExpression"
+	| "lint/nursery/useAdjacentOverloadSignatures"
 	| "lint/nursery/useArrayLiterals"
 	| "lint/nursery/useBiomeSuppressionComment"
 	| "lint/nursery/useConsistentBuiltinInstantiation"
