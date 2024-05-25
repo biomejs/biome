@@ -1,0 +1,1326 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.jsx
+---
+# Input
+```jsx
+<>
+	<div onClick={() => void 0} />
+	<div onClick={() => void 0} role={undefined} />
+	<div onClick={() => void 0} {...props} />
+	<div onKeyUp={() => void 0} aria-hidden={false} />
+	{/*Static elements; no inherent role */}
+	<a onClick={() => void 0} />
+	<a onClick={() => {}} />
+	<a tabIndex="0" onClick={() => void 0} />
+	<area onClick={() => {}} />
+	<acronym onClick={() => {}} />
+	<applet onClick={() => {}} />
+	<b onClick={() => {}} />
+	<base onClick={() => {}} />
+	<bdi onClick={() => {}} />
+	<bdo onClick={() => {}} />
+	<big onClick={() => {}} />
+	<blink onClick={() => {}} />
+	<body onClick={() => {}} />
+	<center onClick={() => {}} />
+	<cite onClick={() => {}} />
+	<col onClick={() => {}} />
+	<colgroup onClick={() => {}} />
+	<content onClick={() => {}} />
+	<data onClick={() => {}} />
+	<div onClick={() => {}} />
+	<font onClick={() => {}} />
+	<frame onClick={() => {}} />
+	<frameset onClick={() => {}} />
+	<head onClick={() => {}} />
+	<header onClick={() => {}} />
+	<hgroup onClick={() => {}} />
+	<i onClick={() => {}} />
+	<kbd onClick={() => {}} />
+	<keygen onClick={() => {}} />
+	<link onClick={() => {}} href="#" />
+	<map onClick={() => {}} />
+	<meta onClick={() => {}} />
+	<noembed onClick={() => {}} />
+	<noscript onClick={() => {}} />
+	<object onClick={() => {}} />
+	<param onClick={() => {}} />
+	<picture onClick={() => {}} />
+	<q onClick={() => {}} />
+	<rp onClick={() => {}} />
+	<rt onClick={() => {}} />
+	<rtc onClick={() => {}} />
+	<s onClick={() => {}} />
+	<samp onClick={() => {}} />
+	<script onClick={() => {}} />
+	<section onClick={() => {}} />
+	<small onClick={() => {}} />
+	<source onClick={() => {}} />
+	<spacer onClick={() => {}} />
+	<span onClick={() => {}} />
+	<strike onClick={() => {}} />
+	<style onClick={() => {}} />
+	<summary onClick={() => {}} />
+	<title onClick={() => {}} />
+	<track onClick={() => {}} />
+	<tt onClick={() => {}} />
+	<u onClick={() => {}} />
+	<var onClick={() => {}} />
+	<wbr onClick={() => {}} />
+	<xmp onClick={() => {}} />
+	{/* // Handlers */}
+	<div onKeyDown={() => {}} />
+	<div onKeyPress={() => {}} />
+	<div onKeyUp={() => {}} />
+	<div onClick={() => {}} />
+	<div onMouseDown={() => {}} />
+	<div onMouseUp={() => {}} />
+
+	{/* Presentation is a special case role that indicates intentional static semantics */}
+	<div role="presentation" onClick={() => {}} />
+	<div role="presentation" onKeyDown={() => {}} />
+	{/* HTML elements attributed with an abstract role */}
+	<div role="command" onClick={() => {}} />
+	<div role="composite" onClick={() => {}} />
+	<div role="input" onClick={() => {}} />
+	<div role="landmark" onClick={() => {}} />
+	<div role="range" onClick={() => {}} />
+	<div role="roletype" onClick={() => {}} />
+	<div role="sectionhead" onClick={() => {}} />
+	<div role="select" onClick={() => {}} />
+	<div role="structure" onClick={() => {}} />
+	<div role="widget" onClick={() => {}} />
+	<div role="window" onClick={() => {}} />
+</>;
+
+```
+
+# Diagnostics
+```
+invalid.jsx:2:2 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid non-native interactive elements. If using native HTML is not possible, add an appropriate role and support for tabbing, mouse, keyboard, and touch inputs to an interactive content element
+  
+    1 │ <>
+  > 2 │ 	<div onClick={() => void 0} />
+      │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    3 │ 	<div onClick={() => void 0} role={undefined} />
+    4 │ 	<div onClick={() => void 0} {...props} />
+  
+
+```
+
+```
+invalid.jsx:3:2 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid non-native interactive elements. If using native HTML is not possible, add an appropriate role and support for tabbing, mouse, keyboard, and touch inputs to an interactive content element
+  
+    1 │ <>
+    2 │ 	<div onClick={() => void 0} />
+  > 3 │ 	<div onClick={() => void 0} role={undefined} />
+      │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ 	<div onClick={() => void 0} {...props} />
+    5 │ 	<div onKeyUp={() => void 0} aria-hidden={false} />
+  
+
+```
+
+```
+invalid.jsx:4:2 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid non-native interactive elements. If using native HTML is not possible, add an appropriate role and support for tabbing, mouse, keyboard, and touch inputs to an interactive content element
+  
+    2 │ 	<div onClick={() => void 0} />
+    3 │ 	<div onClick={() => void 0} role={undefined} />
+  > 4 │ 	<div onClick={() => void 0} {...props} />
+      │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │ 	<div onKeyUp={() => void 0} aria-hidden={false} />
+    6 │ 	{/*Static elements; no inherent role */}
+  
+
+```
+
+```
+invalid.jsx:5:2 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid non-native interactive elements. If using native HTML is not possible, add an appropriate role and support for tabbing, mouse, keyboard, and touch inputs to an interactive content element
+  
+    3 │ 	<div onClick={() => void 0} role={undefined} />
+    4 │ 	<div onClick={() => void 0} {...props} />
+  > 5 │ 	<div onKeyUp={() => void 0} aria-hidden={false} />
+      │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    6 │ 	{/*Static elements; no inherent role */}
+    7 │ 	<a onClick={() => void 0} />
+  
+
+```
+
+```
+invalid.jsx:7:2 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid non-native interactive elements. If using native HTML is not possible, add an appropriate role and support for tabbing, mouse, keyboard, and touch inputs to an interactive content element
+  
+    5 │ 	<div onKeyUp={() => void 0} aria-hidden={false} />
+    6 │ 	{/*Static elements; no inherent role */}
+  > 7 │ 	<a onClick={() => void 0} />
+      │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    8 │ 	<a onClick={() => {}} />
+    9 │ 	<a tabIndex="0" onClick={() => void 0} />
+  
+
+```
+
+```
+invalid.jsx:8:2 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid non-native interactive elements. If using native HTML is not possible, add an appropriate role and support for tabbing, mouse, keyboard, and touch inputs to an interactive content element
+  
+     6 │ 	{/*Static elements; no inherent role */}
+     7 │ 	<a onClick={() => void 0} />
+   > 8 │ 	<a onClick={() => {}} />
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^
+     9 │ 	<a tabIndex="0" onClick={() => void 0} />
+    10 │ 	<area onClick={() => {}} />
+  
+
+```
+
+```
+invalid.jsx:9:2 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid non-native interactive elements. If using native HTML is not possible, add an appropriate role and support for tabbing, mouse, keyboard, and touch inputs to an interactive content element
+  
+     7 │ 	<a onClick={() => void 0} />
+     8 │ 	<a onClick={() => {}} />
+   > 9 │ 	<a tabIndex="0" onClick={() => void 0} />
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    10 │ 	<area onClick={() => {}} />
+    11 │ 	<acronym onClick={() => {}} />
+  
+
+```
+
+```
+invalid.jsx:10:2 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid non-native interactive elements. If using native HTML is not possible, add an appropriate role and support for tabbing, mouse, keyboard, and touch inputs to an interactive content element
+  
+     8 │ 	<a onClick={() => {}} />
+     9 │ 	<a tabIndex="0" onClick={() => void 0} />
+  > 10 │ 	<area onClick={() => {}} />
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    11 │ 	<acronym onClick={() => {}} />
+    12 │ 	<applet onClick={() => {}} />
+  
+
+```
+
+```
+invalid.jsx:11:2 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid non-native interactive elements. If using native HTML is not possible, add an appropriate role and support for tabbing, mouse, keyboard, and touch inputs to an interactive content element
+  
+     9 │ 	<a tabIndex="0" onClick={() => void 0} />
+    10 │ 	<area onClick={() => {}} />
+  > 11 │ 	<acronym onClick={() => {}} />
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    12 │ 	<applet onClick={() => {}} />
+    13 │ 	<b onClick={() => {}} />
+  
+
+```
+
+```
+invalid.jsx:12:2 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid non-native interactive elements. If using native HTML is not possible, add an appropriate role and support for tabbing, mouse, keyboard, and touch inputs to an interactive content element
+  
+    10 │ 	<area onClick={() => {}} />
+    11 │ 	<acronym onClick={() => {}} />
+  > 12 │ 	<applet onClick={() => {}} />
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    13 │ 	<b onClick={() => {}} />
+    14 │ 	<base onClick={() => {}} />
+  
+
+```
+
+```
+invalid.jsx:13:2 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid non-native interactive elements. If using native HTML is not possible, add an appropriate role and support for tabbing, mouse, keyboard, and touch inputs to an interactive content element
+  
+    11 │ 	<acronym onClick={() => {}} />
+    12 │ 	<applet onClick={() => {}} />
+  > 13 │ 	<b onClick={() => {}} />
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^
+    14 │ 	<base onClick={() => {}} />
+    15 │ 	<bdi onClick={() => {}} />
+  
+
+```
+
+```
+invalid.jsx:14:2 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid non-native interactive elements. If using native HTML is not possible, add an appropriate role and support for tabbing, mouse, keyboard, and touch inputs to an interactive content element
+  
+    12 │ 	<applet onClick={() => {}} />
+    13 │ 	<b onClick={() => {}} />
+  > 14 │ 	<base onClick={() => {}} />
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    15 │ 	<bdi onClick={() => {}} />
+    16 │ 	<bdo onClick={() => {}} />
+  
+
+```
+
+```
+invalid.jsx:15:2 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid non-native interactive elements. If using native HTML is not possible, add an appropriate role and support for tabbing, mouse, keyboard, and touch inputs to an interactive content element
+  
+    13 │ 	<b onClick={() => {}} />
+    14 │ 	<base onClick={() => {}} />
+  > 15 │ 	<bdi onClick={() => {}} />
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^
+    16 │ 	<bdo onClick={() => {}} />
+    17 │ 	<big onClick={() => {}} />
+  
+
+```
+
+```
+invalid.jsx:16:2 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid non-native interactive elements. If using native HTML is not possible, add an appropriate role and support for tabbing, mouse, keyboard, and touch inputs to an interactive content element
+  
+    14 │ 	<base onClick={() => {}} />
+    15 │ 	<bdi onClick={() => {}} />
+  > 16 │ 	<bdo onClick={() => {}} />
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^
+    17 │ 	<big onClick={() => {}} />
+    18 │ 	<blink onClick={() => {}} />
+  
+
+```
+
+```
+invalid.jsx:17:2 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid non-native interactive elements. If using native HTML is not possible, add an appropriate role and support for tabbing, mouse, keyboard, and touch inputs to an interactive content element
+  
+    15 │ 	<bdi onClick={() => {}} />
+    16 │ 	<bdo onClick={() => {}} />
+  > 17 │ 	<big onClick={() => {}} />
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^
+    18 │ 	<blink onClick={() => {}} />
+    19 │ 	<body onClick={() => {}} />
+  
+
+```
+
+```
+invalid.jsx:18:2 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid non-native interactive elements. If using native HTML is not possible, add an appropriate role and support for tabbing, mouse, keyboard, and touch inputs to an interactive content element
+  
+    16 │ 	<bdo onClick={() => {}} />
+    17 │ 	<big onClick={() => {}} />
+  > 18 │ 	<blink onClick={() => {}} />
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    19 │ 	<body onClick={() => {}} />
+    20 │ 	<center onClick={() => {}} />
+  
+
+```
+
+```
+invalid.jsx:19:2 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid non-native interactive elements. If using native HTML is not possible, add an appropriate role and support for tabbing, mouse, keyboard, and touch inputs to an interactive content element
+  
+    17 │ 	<big onClick={() => {}} />
+    18 │ 	<blink onClick={() => {}} />
+  > 19 │ 	<body onClick={() => {}} />
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    20 │ 	<center onClick={() => {}} />
+    21 │ 	<cite onClick={() => {}} />
+  
+
+```
+
+```
+invalid.jsx:20:2 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid non-native interactive elements. If using native HTML is not possible, add an appropriate role and support for tabbing, mouse, keyboard, and touch inputs to an interactive content element
+  
+    18 │ 	<blink onClick={() => {}} />
+    19 │ 	<body onClick={() => {}} />
+  > 20 │ 	<center onClick={() => {}} />
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    21 │ 	<cite onClick={() => {}} />
+    22 │ 	<col onClick={() => {}} />
+  
+
+```
+
+```
+invalid.jsx:21:2 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid non-native interactive elements. If using native HTML is not possible, add an appropriate role and support for tabbing, mouse, keyboard, and touch inputs to an interactive content element
+  
+    19 │ 	<body onClick={() => {}} />
+    20 │ 	<center onClick={() => {}} />
+  > 21 │ 	<cite onClick={() => {}} />
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    22 │ 	<col onClick={() => {}} />
+    23 │ 	<colgroup onClick={() => {}} />
+  
+
+```
+
+```
+invalid.jsx:22:2 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid non-native interactive elements. If using native HTML is not possible, add an appropriate role and support for tabbing, mouse, keyboard, and touch inputs to an interactive content element
+  
+    20 │ 	<center onClick={() => {}} />
+    21 │ 	<cite onClick={() => {}} />
+  > 22 │ 	<col onClick={() => {}} />
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^
+    23 │ 	<colgroup onClick={() => {}} />
+    24 │ 	<content onClick={() => {}} />
+  
+
+```
+
+```
+invalid.jsx:23:2 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid non-native interactive elements. If using native HTML is not possible, add an appropriate role and support for tabbing, mouse, keyboard, and touch inputs to an interactive content element
+  
+    21 │ 	<cite onClick={() => {}} />
+    22 │ 	<col onClick={() => {}} />
+  > 23 │ 	<colgroup onClick={() => {}} />
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    24 │ 	<content onClick={() => {}} />
+    25 │ 	<data onClick={() => {}} />
+  
+
+```
+
+```
+invalid.jsx:24:2 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid non-native interactive elements. If using native HTML is not possible, add an appropriate role and support for tabbing, mouse, keyboard, and touch inputs to an interactive content element
+  
+    22 │ 	<col onClick={() => {}} />
+    23 │ 	<colgroup onClick={() => {}} />
+  > 24 │ 	<content onClick={() => {}} />
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    25 │ 	<data onClick={() => {}} />
+    26 │ 	<div onClick={() => {}} />
+  
+
+```
+
+```
+invalid.jsx:25:2 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid non-native interactive elements. If using native HTML is not possible, add an appropriate role and support for tabbing, mouse, keyboard, and touch inputs to an interactive content element
+  
+    23 │ 	<colgroup onClick={() => {}} />
+    24 │ 	<content onClick={() => {}} />
+  > 25 │ 	<data onClick={() => {}} />
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    26 │ 	<div onClick={() => {}} />
+    27 │ 	<font onClick={() => {}} />
+  
+
+```
+
+```
+invalid.jsx:26:2 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid non-native interactive elements. If using native HTML is not possible, add an appropriate role and support for tabbing, mouse, keyboard, and touch inputs to an interactive content element
+  
+    24 │ 	<content onClick={() => {}} />
+    25 │ 	<data onClick={() => {}} />
+  > 26 │ 	<div onClick={() => {}} />
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^
+    27 │ 	<font onClick={() => {}} />
+    28 │ 	<frame onClick={() => {}} />
+  
+
+```
+
+```
+invalid.jsx:27:2 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid non-native interactive elements. If using native HTML is not possible, add an appropriate role and support for tabbing, mouse, keyboard, and touch inputs to an interactive content element
+  
+    25 │ 	<data onClick={() => {}} />
+    26 │ 	<div onClick={() => {}} />
+  > 27 │ 	<font onClick={() => {}} />
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    28 │ 	<frame onClick={() => {}} />
+    29 │ 	<frameset onClick={() => {}} />
+  
+
+```
+
+```
+invalid.jsx:28:2 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid non-native interactive elements. If using native HTML is not possible, add an appropriate role and support for tabbing, mouse, keyboard, and touch inputs to an interactive content element
+  
+    26 │ 	<div onClick={() => {}} />
+    27 │ 	<font onClick={() => {}} />
+  > 28 │ 	<frame onClick={() => {}} />
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    29 │ 	<frameset onClick={() => {}} />
+    30 │ 	<head onClick={() => {}} />
+  
+
+```
+
+```
+invalid.jsx:29:2 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid non-native interactive elements. If using native HTML is not possible, add an appropriate role and support for tabbing, mouse, keyboard, and touch inputs to an interactive content element
+  
+    27 │ 	<font onClick={() => {}} />
+    28 │ 	<frame onClick={() => {}} />
+  > 29 │ 	<frameset onClick={() => {}} />
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    30 │ 	<head onClick={() => {}} />
+    31 │ 	<header onClick={() => {}} />
+  
+
+```
+
+```
+invalid.jsx:30:2 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid non-native interactive elements. If using native HTML is not possible, add an appropriate role and support for tabbing, mouse, keyboard, and touch inputs to an interactive content element
+  
+    28 │ 	<frame onClick={() => {}} />
+    29 │ 	<frameset onClick={() => {}} />
+  > 30 │ 	<head onClick={() => {}} />
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    31 │ 	<header onClick={() => {}} />
+    32 │ 	<hgroup onClick={() => {}} />
+  
+
+```
+
+```
+invalid.jsx:31:2 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid non-native interactive elements. If using native HTML is not possible, add an appropriate role and support for tabbing, mouse, keyboard, and touch inputs to an interactive content element
+  
+    29 │ 	<frameset onClick={() => {}} />
+    30 │ 	<head onClick={() => {}} />
+  > 31 │ 	<header onClick={() => {}} />
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    32 │ 	<hgroup onClick={() => {}} />
+    33 │ 	<i onClick={() => {}} />
+  
+
+```
+
+```
+invalid.jsx:32:2 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid non-native interactive elements. If using native HTML is not possible, add an appropriate role and support for tabbing, mouse, keyboard, and touch inputs to an interactive content element
+  
+    30 │ 	<head onClick={() => {}} />
+    31 │ 	<header onClick={() => {}} />
+  > 32 │ 	<hgroup onClick={() => {}} />
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    33 │ 	<i onClick={() => {}} />
+    34 │ 	<kbd onClick={() => {}} />
+  
+
+```
+
+```
+invalid.jsx:33:2 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid non-native interactive elements. If using native HTML is not possible, add an appropriate role and support for tabbing, mouse, keyboard, and touch inputs to an interactive content element
+  
+    31 │ 	<header onClick={() => {}} />
+    32 │ 	<hgroup onClick={() => {}} />
+  > 33 │ 	<i onClick={() => {}} />
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^
+    34 │ 	<kbd onClick={() => {}} />
+    35 │ 	<keygen onClick={() => {}} />
+  
+
+```
+
+```
+invalid.jsx:34:2 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid non-native interactive elements. If using native HTML is not possible, add an appropriate role and support for tabbing, mouse, keyboard, and touch inputs to an interactive content element
+  
+    32 │ 	<hgroup onClick={() => {}} />
+    33 │ 	<i onClick={() => {}} />
+  > 34 │ 	<kbd onClick={() => {}} />
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^
+    35 │ 	<keygen onClick={() => {}} />
+    36 │ 	<link onClick={() => {}} href="#" />
+  
+
+```
+
+```
+invalid.jsx:35:2 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid non-native interactive elements. If using native HTML is not possible, add an appropriate role and support for tabbing, mouse, keyboard, and touch inputs to an interactive content element
+  
+    33 │ 	<i onClick={() => {}} />
+    34 │ 	<kbd onClick={() => {}} />
+  > 35 │ 	<keygen onClick={() => {}} />
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    36 │ 	<link onClick={() => {}} href="#" />
+    37 │ 	<map onClick={() => {}} />
+  
+
+```
+
+```
+invalid.jsx:36:2 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid non-native interactive elements. If using native HTML is not possible, add an appropriate role and support for tabbing, mouse, keyboard, and touch inputs to an interactive content element
+  
+    34 │ 	<kbd onClick={() => {}} />
+    35 │ 	<keygen onClick={() => {}} />
+  > 36 │ 	<link onClick={() => {}} href="#" />
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    37 │ 	<map onClick={() => {}} />
+    38 │ 	<meta onClick={() => {}} />
+  
+
+```
+
+```
+invalid.jsx:37:2 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid non-native interactive elements. If using native HTML is not possible, add an appropriate role and support for tabbing, mouse, keyboard, and touch inputs to an interactive content element
+  
+    35 │ 	<keygen onClick={() => {}} />
+    36 │ 	<link onClick={() => {}} href="#" />
+  > 37 │ 	<map onClick={() => {}} />
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^
+    38 │ 	<meta onClick={() => {}} />
+    39 │ 	<noembed onClick={() => {}} />
+  
+
+```
+
+```
+invalid.jsx:38:2 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid non-native interactive elements. If using native HTML is not possible, add an appropriate role and support for tabbing, mouse, keyboard, and touch inputs to an interactive content element
+  
+    36 │ 	<link onClick={() => {}} href="#" />
+    37 │ 	<map onClick={() => {}} />
+  > 38 │ 	<meta onClick={() => {}} />
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    39 │ 	<noembed onClick={() => {}} />
+    40 │ 	<noscript onClick={() => {}} />
+  
+
+```
+
+```
+invalid.jsx:39:2 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid non-native interactive elements. If using native HTML is not possible, add an appropriate role and support for tabbing, mouse, keyboard, and touch inputs to an interactive content element
+  
+    37 │ 	<map onClick={() => {}} />
+    38 │ 	<meta onClick={() => {}} />
+  > 39 │ 	<noembed onClick={() => {}} />
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    40 │ 	<noscript onClick={() => {}} />
+    41 │ 	<object onClick={() => {}} />
+  
+
+```
+
+```
+invalid.jsx:40:2 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid non-native interactive elements. If using native HTML is not possible, add an appropriate role and support for tabbing, mouse, keyboard, and touch inputs to an interactive content element
+  
+    38 │ 	<meta onClick={() => {}} />
+    39 │ 	<noembed onClick={() => {}} />
+  > 40 │ 	<noscript onClick={() => {}} />
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    41 │ 	<object onClick={() => {}} />
+    42 │ 	<param onClick={() => {}} />
+  
+
+```
+
+```
+invalid.jsx:41:2 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid non-native interactive elements. If using native HTML is not possible, add an appropriate role and support for tabbing, mouse, keyboard, and touch inputs to an interactive content element
+  
+    39 │ 	<noembed onClick={() => {}} />
+    40 │ 	<noscript onClick={() => {}} />
+  > 41 │ 	<object onClick={() => {}} />
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    42 │ 	<param onClick={() => {}} />
+    43 │ 	<picture onClick={() => {}} />
+  
+
+```
+
+```
+invalid.jsx:42:2 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid non-native interactive elements. If using native HTML is not possible, add an appropriate role and support for tabbing, mouse, keyboard, and touch inputs to an interactive content element
+  
+    40 │ 	<noscript onClick={() => {}} />
+    41 │ 	<object onClick={() => {}} />
+  > 42 │ 	<param onClick={() => {}} />
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    43 │ 	<picture onClick={() => {}} />
+    44 │ 	<q onClick={() => {}} />
+  
+
+```
+
+```
+invalid.jsx:43:2 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid non-native interactive elements. If using native HTML is not possible, add an appropriate role and support for tabbing, mouse, keyboard, and touch inputs to an interactive content element
+  
+    41 │ 	<object onClick={() => {}} />
+    42 │ 	<param onClick={() => {}} />
+  > 43 │ 	<picture onClick={() => {}} />
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    44 │ 	<q onClick={() => {}} />
+    45 │ 	<rp onClick={() => {}} />
+  
+
+```
+
+```
+invalid.jsx:44:2 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid non-native interactive elements. If using native HTML is not possible, add an appropriate role and support for tabbing, mouse, keyboard, and touch inputs to an interactive content element
+  
+    42 │ 	<param onClick={() => {}} />
+    43 │ 	<picture onClick={() => {}} />
+  > 44 │ 	<q onClick={() => {}} />
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^
+    45 │ 	<rp onClick={() => {}} />
+    46 │ 	<rt onClick={() => {}} />
+  
+
+```
+
+```
+invalid.jsx:45:2 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid non-native interactive elements. If using native HTML is not possible, add an appropriate role and support for tabbing, mouse, keyboard, and touch inputs to an interactive content element
+  
+    43 │ 	<picture onClick={() => {}} />
+    44 │ 	<q onClick={() => {}} />
+  > 45 │ 	<rp onClick={() => {}} />
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^
+    46 │ 	<rt onClick={() => {}} />
+    47 │ 	<rtc onClick={() => {}} />
+  
+
+```
+
+```
+invalid.jsx:46:2 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid non-native interactive elements. If using native HTML is not possible, add an appropriate role and support for tabbing, mouse, keyboard, and touch inputs to an interactive content element
+  
+    44 │ 	<q onClick={() => {}} />
+    45 │ 	<rp onClick={() => {}} />
+  > 46 │ 	<rt onClick={() => {}} />
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^
+    47 │ 	<rtc onClick={() => {}} />
+    48 │ 	<s onClick={() => {}} />
+  
+
+```
+
+```
+invalid.jsx:47:2 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid non-native interactive elements. If using native HTML is not possible, add an appropriate role and support for tabbing, mouse, keyboard, and touch inputs to an interactive content element
+  
+    45 │ 	<rp onClick={() => {}} />
+    46 │ 	<rt onClick={() => {}} />
+  > 47 │ 	<rtc onClick={() => {}} />
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^
+    48 │ 	<s onClick={() => {}} />
+    49 │ 	<samp onClick={() => {}} />
+  
+
+```
+
+```
+invalid.jsx:48:2 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid non-native interactive elements. If using native HTML is not possible, add an appropriate role and support for tabbing, mouse, keyboard, and touch inputs to an interactive content element
+  
+    46 │ 	<rt onClick={() => {}} />
+    47 │ 	<rtc onClick={() => {}} />
+  > 48 │ 	<s onClick={() => {}} />
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^
+    49 │ 	<samp onClick={() => {}} />
+    50 │ 	<script onClick={() => {}} />
+  
+
+```
+
+```
+invalid.jsx:49:2 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid non-native interactive elements. If using native HTML is not possible, add an appropriate role and support for tabbing, mouse, keyboard, and touch inputs to an interactive content element
+  
+    47 │ 	<rtc onClick={() => {}} />
+    48 │ 	<s onClick={() => {}} />
+  > 49 │ 	<samp onClick={() => {}} />
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    50 │ 	<script onClick={() => {}} />
+    51 │ 	<section onClick={() => {}} />
+  
+
+```
+
+```
+invalid.jsx:50:2 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid non-native interactive elements. If using native HTML is not possible, add an appropriate role and support for tabbing, mouse, keyboard, and touch inputs to an interactive content element
+  
+    48 │ 	<s onClick={() => {}} />
+    49 │ 	<samp onClick={() => {}} />
+  > 50 │ 	<script onClick={() => {}} />
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    51 │ 	<section onClick={() => {}} />
+    52 │ 	<small onClick={() => {}} />
+  
+
+```
+
+```
+invalid.jsx:51:2 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid non-native interactive elements. If using native HTML is not possible, add an appropriate role and support for tabbing, mouse, keyboard, and touch inputs to an interactive content element
+  
+    49 │ 	<samp onClick={() => {}} />
+    50 │ 	<script onClick={() => {}} />
+  > 51 │ 	<section onClick={() => {}} />
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    52 │ 	<small onClick={() => {}} />
+    53 │ 	<source onClick={() => {}} />
+  
+
+```
+
+```
+invalid.jsx:52:2 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid non-native interactive elements. If using native HTML is not possible, add an appropriate role and support for tabbing, mouse, keyboard, and touch inputs to an interactive content element
+  
+    50 │ 	<script onClick={() => {}} />
+    51 │ 	<section onClick={() => {}} />
+  > 52 │ 	<small onClick={() => {}} />
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    53 │ 	<source onClick={() => {}} />
+    54 │ 	<spacer onClick={() => {}} />
+  
+
+```
+
+```
+invalid.jsx:53:2 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid non-native interactive elements. If using native HTML is not possible, add an appropriate role and support for tabbing, mouse, keyboard, and touch inputs to an interactive content element
+  
+    51 │ 	<section onClick={() => {}} />
+    52 │ 	<small onClick={() => {}} />
+  > 53 │ 	<source onClick={() => {}} />
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    54 │ 	<spacer onClick={() => {}} />
+    55 │ 	<span onClick={() => {}} />
+  
+
+```
+
+```
+invalid.jsx:54:2 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid non-native interactive elements. If using native HTML is not possible, add an appropriate role and support for tabbing, mouse, keyboard, and touch inputs to an interactive content element
+  
+    52 │ 	<small onClick={() => {}} />
+    53 │ 	<source onClick={() => {}} />
+  > 54 │ 	<spacer onClick={() => {}} />
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    55 │ 	<span onClick={() => {}} />
+    56 │ 	<strike onClick={() => {}} />
+  
+
+```
+
+```
+invalid.jsx:55:2 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid non-native interactive elements. If using native HTML is not possible, add an appropriate role and support for tabbing, mouse, keyboard, and touch inputs to an interactive content element
+  
+    53 │ 	<source onClick={() => {}} />
+    54 │ 	<spacer onClick={() => {}} />
+  > 55 │ 	<span onClick={() => {}} />
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    56 │ 	<strike onClick={() => {}} />
+    57 │ 	<style onClick={() => {}} />
+  
+
+```
+
+```
+invalid.jsx:56:2 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid non-native interactive elements. If using native HTML is not possible, add an appropriate role and support for tabbing, mouse, keyboard, and touch inputs to an interactive content element
+  
+    54 │ 	<spacer onClick={() => {}} />
+    55 │ 	<span onClick={() => {}} />
+  > 56 │ 	<strike onClick={() => {}} />
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    57 │ 	<style onClick={() => {}} />
+    58 │ 	<summary onClick={() => {}} />
+  
+
+```
+
+```
+invalid.jsx:57:2 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid non-native interactive elements. If using native HTML is not possible, add an appropriate role and support for tabbing, mouse, keyboard, and touch inputs to an interactive content element
+  
+    55 │ 	<span onClick={() => {}} />
+    56 │ 	<strike onClick={() => {}} />
+  > 57 │ 	<style onClick={() => {}} />
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    58 │ 	<summary onClick={() => {}} />
+    59 │ 	<title onClick={() => {}} />
+  
+
+```
+
+```
+invalid.jsx:58:2 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid non-native interactive elements. If using native HTML is not possible, add an appropriate role and support for tabbing, mouse, keyboard, and touch inputs to an interactive content element
+  
+    56 │ 	<strike onClick={() => {}} />
+    57 │ 	<style onClick={() => {}} />
+  > 58 │ 	<summary onClick={() => {}} />
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    59 │ 	<title onClick={() => {}} />
+    60 │ 	<track onClick={() => {}} />
+  
+
+```
+
+```
+invalid.jsx:59:2 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid non-native interactive elements. If using native HTML is not possible, add an appropriate role and support for tabbing, mouse, keyboard, and touch inputs to an interactive content element
+  
+    57 │ 	<style onClick={() => {}} />
+    58 │ 	<summary onClick={() => {}} />
+  > 59 │ 	<title onClick={() => {}} />
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    60 │ 	<track onClick={() => {}} />
+    61 │ 	<tt onClick={() => {}} />
+  
+
+```
+
+```
+invalid.jsx:60:2 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid non-native interactive elements. If using native HTML is not possible, add an appropriate role and support for tabbing, mouse, keyboard, and touch inputs to an interactive content element
+  
+    58 │ 	<summary onClick={() => {}} />
+    59 │ 	<title onClick={() => {}} />
+  > 60 │ 	<track onClick={() => {}} />
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    61 │ 	<tt onClick={() => {}} />
+    62 │ 	<u onClick={() => {}} />
+  
+
+```
+
+```
+invalid.jsx:61:2 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid non-native interactive elements. If using native HTML is not possible, add an appropriate role and support for tabbing, mouse, keyboard, and touch inputs to an interactive content element
+  
+    59 │ 	<title onClick={() => {}} />
+    60 │ 	<track onClick={() => {}} />
+  > 61 │ 	<tt onClick={() => {}} />
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^
+    62 │ 	<u onClick={() => {}} />
+    63 │ 	<var onClick={() => {}} />
+  
+
+```
+
+```
+invalid.jsx:62:2 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid non-native interactive elements. If using native HTML is not possible, add an appropriate role and support for tabbing, mouse, keyboard, and touch inputs to an interactive content element
+  
+    60 │ 	<track onClick={() => {}} />
+    61 │ 	<tt onClick={() => {}} />
+  > 62 │ 	<u onClick={() => {}} />
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^
+    63 │ 	<var onClick={() => {}} />
+    64 │ 	<wbr onClick={() => {}} />
+  
+
+```
+
+```
+invalid.jsx:63:2 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid non-native interactive elements. If using native HTML is not possible, add an appropriate role and support for tabbing, mouse, keyboard, and touch inputs to an interactive content element
+  
+    61 │ 	<tt onClick={() => {}} />
+    62 │ 	<u onClick={() => {}} />
+  > 63 │ 	<var onClick={() => {}} />
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^
+    64 │ 	<wbr onClick={() => {}} />
+    65 │ 	<xmp onClick={() => {}} />
+  
+
+```
+
+```
+invalid.jsx:64:2 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid non-native interactive elements. If using native HTML is not possible, add an appropriate role and support for tabbing, mouse, keyboard, and touch inputs to an interactive content element
+  
+    62 │ 	<u onClick={() => {}} />
+    63 │ 	<var onClick={() => {}} />
+  > 64 │ 	<wbr onClick={() => {}} />
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^
+    65 │ 	<xmp onClick={() => {}} />
+    66 │ 	{/* // Handlers */}
+  
+
+```
+
+```
+invalid.jsx:65:2 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid non-native interactive elements. If using native HTML is not possible, add an appropriate role and support for tabbing, mouse, keyboard, and touch inputs to an interactive content element
+  
+    63 │ 	<var onClick={() => {}} />
+    64 │ 	<wbr onClick={() => {}} />
+  > 65 │ 	<xmp onClick={() => {}} />
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^
+    66 │ 	{/* // Handlers */}
+    67 │ 	<div onKeyDown={() => {}} />
+  
+
+```
+
+```
+invalid.jsx:67:2 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid non-native interactive elements. If using native HTML is not possible, add an appropriate role and support for tabbing, mouse, keyboard, and touch inputs to an interactive content element
+  
+    65 │ 	<xmp onClick={() => {}} />
+    66 │ 	{/* // Handlers */}
+  > 67 │ 	<div onKeyDown={() => {}} />
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    68 │ 	<div onKeyPress={() => {}} />
+    69 │ 	<div onKeyUp={() => {}} />
+  
+
+```
+
+```
+invalid.jsx:68:2 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid non-native interactive elements. If using native HTML is not possible, add an appropriate role and support for tabbing, mouse, keyboard, and touch inputs to an interactive content element
+  
+    66 │ 	{/* // Handlers */}
+    67 │ 	<div onKeyDown={() => {}} />
+  > 68 │ 	<div onKeyPress={() => {}} />
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    69 │ 	<div onKeyUp={() => {}} />
+    70 │ 	<div onClick={() => {}} />
+  
+
+```
+
+```
+invalid.jsx:69:2 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid non-native interactive elements. If using native HTML is not possible, add an appropriate role and support for tabbing, mouse, keyboard, and touch inputs to an interactive content element
+  
+    67 │ 	<div onKeyDown={() => {}} />
+    68 │ 	<div onKeyPress={() => {}} />
+  > 69 │ 	<div onKeyUp={() => {}} />
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^
+    70 │ 	<div onClick={() => {}} />
+    71 │ 	<div onMouseDown={() => {}} />
+  
+
+```
+
+```
+invalid.jsx:70:2 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid non-native interactive elements. If using native HTML is not possible, add an appropriate role and support for tabbing, mouse, keyboard, and touch inputs to an interactive content element
+  
+    68 │ 	<div onKeyPress={() => {}} />
+    69 │ 	<div onKeyUp={() => {}} />
+  > 70 │ 	<div onClick={() => {}} />
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^
+    71 │ 	<div onMouseDown={() => {}} />
+    72 │ 	<div onMouseUp={() => {}} />
+  
+
+```
+
+```
+invalid.jsx:71:2 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid non-native interactive elements. If using native HTML is not possible, add an appropriate role and support for tabbing, mouse, keyboard, and touch inputs to an interactive content element
+  
+    69 │ 	<div onKeyUp={() => {}} />
+    70 │ 	<div onClick={() => {}} />
+  > 71 │ 	<div onMouseDown={() => {}} />
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    72 │ 	<div onMouseUp={() => {}} />
+    73 │ 
+  
+
+```
+
+```
+invalid.jsx:72:2 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid non-native interactive elements. If using native HTML is not possible, add an appropriate role and support for tabbing, mouse, keyboard, and touch inputs to an interactive content element
+  
+    70 │ 	<div onClick={() => {}} />
+    71 │ 	<div onMouseDown={() => {}} />
+  > 72 │ 	<div onMouseUp={() => {}} />
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    73 │ 
+    74 │ 	{/* Presentation is a special case role that indicates intentional static semantics */}
+  
+
+```
+
+```
+invalid.jsx:75:2 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid non-native interactive elements. If using native HTML is not possible, add an appropriate role and support for tabbing, mouse, keyboard, and touch inputs to an interactive content element
+  
+    74 │ 	{/* Presentation is a special case role that indicates intentional static semantics */}
+  > 75 │ 	<div role="presentation" onClick={() => {}} />
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    76 │ 	<div role="presentation" onKeyDown={() => {}} />
+    77 │ 	{/* HTML elements attributed with an abstract role */}
+  
+
+```
+
+```
+invalid.jsx:76:2 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid non-native interactive elements. If using native HTML is not possible, add an appropriate role and support for tabbing, mouse, keyboard, and touch inputs to an interactive content element
+  
+    74 │ 	{/* Presentation is a special case role that indicates intentional static semantics */}
+    75 │ 	<div role="presentation" onClick={() => {}} />
+  > 76 │ 	<div role="presentation" onKeyDown={() => {}} />
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    77 │ 	{/* HTML elements attributed with an abstract role */}
+    78 │ 	<div role="command" onClick={() => {}} />
+  
+
+```
+
+```
+invalid.jsx:78:2 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid non-native interactive elements. If using native HTML is not possible, add an appropriate role and support for tabbing, mouse, keyboard, and touch inputs to an interactive content element
+  
+    76 │ 	<div role="presentation" onKeyDown={() => {}} />
+    77 │ 	{/* HTML elements attributed with an abstract role */}
+  > 78 │ 	<div role="command" onClick={() => {}} />
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    79 │ 	<div role="composite" onClick={() => {}} />
+    80 │ 	<div role="input" onClick={() => {}} />
+  
+
+```
+
+```
+invalid.jsx:79:2 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid non-native interactive elements. If using native HTML is not possible, add an appropriate role and support for tabbing, mouse, keyboard, and touch inputs to an interactive content element
+  
+    77 │ 	{/* HTML elements attributed with an abstract role */}
+    78 │ 	<div role="command" onClick={() => {}} />
+  > 79 │ 	<div role="composite" onClick={() => {}} />
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    80 │ 	<div role="input" onClick={() => {}} />
+    81 │ 	<div role="landmark" onClick={() => {}} />
+  
+
+```
+
+```
+invalid.jsx:80:2 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid non-native interactive elements. If using native HTML is not possible, add an appropriate role and support for tabbing, mouse, keyboard, and touch inputs to an interactive content element
+  
+    78 │ 	<div role="command" onClick={() => {}} />
+    79 │ 	<div role="composite" onClick={() => {}} />
+  > 80 │ 	<div role="input" onClick={() => {}} />
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    81 │ 	<div role="landmark" onClick={() => {}} />
+    82 │ 	<div role="range" onClick={() => {}} />
+  
+
+```
+
+```
+invalid.jsx:81:2 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid non-native interactive elements. If using native HTML is not possible, add an appropriate role and support for tabbing, mouse, keyboard, and touch inputs to an interactive content element
+  
+    79 │ 	<div role="composite" onClick={() => {}} />
+    80 │ 	<div role="input" onClick={() => {}} />
+  > 81 │ 	<div role="landmark" onClick={() => {}} />
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    82 │ 	<div role="range" onClick={() => {}} />
+    83 │ 	<div role="roletype" onClick={() => {}} />
+  
+
+```
+
+```
+invalid.jsx:82:2 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid non-native interactive elements. If using native HTML is not possible, add an appropriate role and support for tabbing, mouse, keyboard, and touch inputs to an interactive content element
+  
+    80 │ 	<div role="input" onClick={() => {}} />
+    81 │ 	<div role="landmark" onClick={() => {}} />
+  > 82 │ 	<div role="range" onClick={() => {}} />
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    83 │ 	<div role="roletype" onClick={() => {}} />
+    84 │ 	<div role="sectionhead" onClick={() => {}} />
+  
+
+```
+
+```
+invalid.jsx:83:2 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid non-native interactive elements. If using native HTML is not possible, add an appropriate role and support for tabbing, mouse, keyboard, and touch inputs to an interactive content element
+  
+    81 │ 	<div role="landmark" onClick={() => {}} />
+    82 │ 	<div role="range" onClick={() => {}} />
+  > 83 │ 	<div role="roletype" onClick={() => {}} />
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    84 │ 	<div role="sectionhead" onClick={() => {}} />
+    85 │ 	<div role="select" onClick={() => {}} />
+  
+
+```
+
+```
+invalid.jsx:84:2 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid non-native interactive elements. If using native HTML is not possible, add an appropriate role and support for tabbing, mouse, keyboard, and touch inputs to an interactive content element
+  
+    82 │ 	<div role="range" onClick={() => {}} />
+    83 │ 	<div role="roletype" onClick={() => {}} />
+  > 84 │ 	<div role="sectionhead" onClick={() => {}} />
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    85 │ 	<div role="select" onClick={() => {}} />
+    86 │ 	<div role="structure" onClick={() => {}} />
+  
+
+```
+
+```
+invalid.jsx:85:2 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid non-native interactive elements. If using native HTML is not possible, add an appropriate role and support for tabbing, mouse, keyboard, and touch inputs to an interactive content element
+  
+    83 │ 	<div role="roletype" onClick={() => {}} />
+    84 │ 	<div role="sectionhead" onClick={() => {}} />
+  > 85 │ 	<div role="select" onClick={() => {}} />
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    86 │ 	<div role="structure" onClick={() => {}} />
+    87 │ 	<div role="widget" onClick={() => {}} />
+  
+
+```
+
+```
+invalid.jsx:86:2 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid non-native interactive elements. If using native HTML is not possible, add an appropriate role and support for tabbing, mouse, keyboard, and touch inputs to an interactive content element
+  
+    84 │ 	<div role="sectionhead" onClick={() => {}} />
+    85 │ 	<div role="select" onClick={() => {}} />
+  > 86 │ 	<div role="structure" onClick={() => {}} />
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    87 │ 	<div role="widget" onClick={() => {}} />
+    88 │ 	<div role="window" onClick={() => {}} />
+  
+
+```
+
+```
+invalid.jsx:87:2 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid non-native interactive elements. If using native HTML is not possible, add an appropriate role and support for tabbing, mouse, keyboard, and touch inputs to an interactive content element
+  
+    85 │ 	<div role="select" onClick={() => {}} />
+    86 │ 	<div role="structure" onClick={() => {}} />
+  > 87 │ 	<div role="widget" onClick={() => {}} />
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    88 │ 	<div role="window" onClick={() => {}} />
+    89 │ </>;
+  
+
+```
+
+```
+invalid.jsx:88:2 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid non-native interactive elements. If using native HTML is not possible, add an appropriate role and support for tabbing, mouse, keyboard, and touch inputs to an interactive content element
+  
+    86 │ 	<div role="structure" onClick={() => {}} />
+    87 │ 	<div role="widget" onClick={() => {}} />
+  > 88 │ 	<div role="window" onClick={() => {}} />
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    89 │ </>;
+    90 │ 
+  
+
+```

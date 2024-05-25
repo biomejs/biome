@@ -185,6 +185,7 @@ pub type NoSkippedTests =
     <lint::suspicious::no_skipped_tests::NoSkippedTests as biome_analyze::Rule>::Options;
 pub type NoSparseArray =
     <lint::suspicious::no_sparse_array::NoSparseArray as biome_analyze::Rule>::Options;
+pub type NoStaticElementInteractions = < lint :: nursery :: no_static_element_interactions :: NoStaticElementInteractions as biome_analyze :: Rule > :: Options ;
 pub type NoStaticOnlyClass =
     <lint::complexity::no_static_only_class::NoStaticOnlyClass as biome_analyze::Rule>::Options;
 pub type NoStringCaseMismatch = < lint :: correctness :: no_string_case_mismatch :: NoStringCaseMismatch as biome_analyze :: Rule > :: Options ;
