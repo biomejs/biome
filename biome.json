@@ -1,6 +1,5 @@
 {
   "$schema": "./packages/@biomejs/biome/configuration_schema.json",
-  "extends": ["@biomejs/shared/biome"],
   "files": {
     "ignore": [
       "crates/**",
@@ -11,15 +10,39 @@
       "public/**",
       "**/__snapshots__",
       "**/undefined/**",
-      "_fonts/**"
+      "_fonts/**",
+      "packages/@biomejs/wasm-*"
+    ],
+    "include": [
+      "packages/@biomejs/**",
+      "packages/tailwindcss-config-analyzer"
     ]
   },
   "formatter": {
-    "ignore": ["configuration_schema.json"]
+    "ignore": [
+      "configuration_schema.json"
+    ]
   },
   "json": {
     "formatter": {
       "indentStyle": "space"
     }
+  },
+  "vcs": {
+    "clientKind": "git",
+    "enabled": true,
+    "useIgnoreFile": true
+  },
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "recommended": true,
+      "style": {
+        "noNonNullAssertion": "off"
+      }
+    }
+  },
+  "organizeImports": {
+    "enabled": true
   }
 }

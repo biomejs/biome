@@ -57,13 +57,14 @@ pub struct WorkspaceSettings {
 
 impl WorkspaceSettings {
     /// Retrieves the settings of the current workspace folder
-    pub fn get_current_settings(&self) -> &Settings {
+    pub fn get_current_settings(&self) -> Option<&Settings> {
         trace!("Current key {:?}", self.current_project);
-        let data = self
-            .data
-            .get(self.current_project)
-            .expect("You must have at least one workspace.");
-        &data.settings
+        let data = self.data.get(self.current_project);
+        if let Some(data) = data {
+            Some(&data.settings)
+        } else {
+            None
+        }
     }
 
     /// Retrieves a mutable reference of the settings of the current project
@@ -115,10 +116,9 @@ impl WorkspaceSettings {
     ///
     /// If there's a match, and the match **isn't** the current project, it returns the new key.
     pub fn path_belongs_to_current_workspace(&self, path: &BiomePath) -> Option<ProjectKey> {
-        debug_assert!(
-            !self.data.is_empty(),
-            "You must have at least one workspace."
-        );
+        if self.data.is_empty() {
+            return None;
+        }
         trace!("Current key: {:?}", self.current_project);
         let iter = self.data.iter();
         for (key, path_to_settings) in iter {
@@ -529,9 +529,9 @@ pub trait ServiceLanguage: biome_rowan::Language {
     /// Resolve the formatter options from the global (workspace level),
     /// per-language and editor provided formatter settings
     fn resolve_format_options(
-        global: &FormatSettings,
-        overrides: &OverrideSettings,
-        language: &Self::FormatterSettings,
+        global: Option<&FormatSettings>,
+        overrides: Option<&OverrideSettings>,
+        language: Option<&Self::FormatterSettings>,
         path: &BiomePath,
         file_source: &DocumentFileSource,
     ) -> Self::FormatOptions;
@@ -539,10 +539,10 @@ pub trait ServiceLanguage: biome_rowan::Language {
     /// Resolve the linter options from the global (workspace level),
     /// per-language and editor provided formatter settings
     fn resolve_analyzer_options(
-        global: &Settings,
-        linter: &LinterSettings,
-        overrides: &OverrideSettings,
-        language: &Self::LinterSettings,
+        global: Option<&Settings>,
+        linter: Option<&LinterSettings>,
+        overrides: Option<&OverrideSettings>,
+        language: Option<&Self::LinterSettings>,
         path: &BiomePath,
         file_source: &DocumentFileSource,
     ) -> AnalyzerOptions;
@@ -650,7 +650,7 @@ impl<'a> WorkspaceSettingsHandle<'a> {
         }
     }
 
-    pub(crate) fn settings(&self) -> &Settings {
+    pub(crate) fn settings(&self) -> Option<&Settings> {
         self.inner.get_current_settings()
     }
 }
@@ -664,7 +664,7 @@ impl<'a> AsRef<WorkspaceSettings> for WorkspaceSettingsHandle<'a> {
 impl<'a> WorkspaceSettingsHandle<'a> {
     /// Resolve the formatting context for the given language
     pub(crate) fn format_options<L>(
-        self,
+        &self,
         path: &BiomePath,
         file_source: &DocumentFileSource,
     ) -> L::FormatOptions
@@ -672,13 +672,12 @@ impl<'a> WorkspaceSettingsHandle<'a> {
         L: ServiceLanguage,
     {
         let settings = self.inner.get_current_settings();
-        L::resolve_format_options(
-            &settings.formatter,
-            &settings.override_settings,
-            &L::lookup_settings(&settings.languages).formatter,
-            path,
-            file_source,
-        )
+        let formatter = settings.map(|s| &s.formatter);
+        let overrides = settings.map(|s| &s.override_settings);
+        let editor_settings = settings
+            .map(|s| L::lookup_settings(&s.languages))
+            .map(|result| &result.formatter);
+        L::resolve_format_options(formatter, overrides, editor_settings, path, file_source)
     }
 
     pub(crate) fn analyzer_options<L>(
@@ -690,11 +689,16 @@ impl<'a> WorkspaceSettingsHandle<'a> {
         L: ServiceLanguage,
     {
         let settings = self.inner.get_current_settings();
+        let linter = settings.map(|s| &s.linter);
+        let overrides = settings.map(|s| &s.override_settings);
+        let editor_settings = settings
+            .map(|s| L::lookup_settings(&s.languages))
+            .map(|result| &result.linter);
         L::resolve_analyzer_options(
             settings,
-            &settings.linter,
-            &settings.override_settings,
-            &L::lookup_settings(&settings.languages).linter,
+            linter,
+            overrides,
+            editor_settings,
             path,
             file_source,
         )
