@@ -1462,7 +1462,7 @@
 					"enum": ["function"]
 				},
 				{
-					"description": "TypeScript mamespaces, import and export namesapces",
+					"description": "TypeScript namespaces, import and export namespaces",
 					"type": "string",
 					"enum": ["namespaceLike"]
 				},
@@ -1823,6 +1823,13 @@
 				},
 				"useDefaultSwitchClause": {
 					"description": "Require the default clause in switch statements.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useErrorMessage": {
+					"description": "Enforce passing a message value when creating a built-in error.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }

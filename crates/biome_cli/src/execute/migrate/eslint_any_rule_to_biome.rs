@@ -1334,6 +1334,14 @@ pub(crate) fn migrate_eslint_any_rule(
                 .get_or_insert(Default::default());
             rule.set_level(rule_severity.into());
         }
+        "unicorn/error-message" => {
+            if !options.include_nursery {
+                return false;
+            }
+            let group = rules.nursery.get_or_insert_with(Default::default);
+            let rule = group.use_error_message.get_or_insert(Default::default());
+            rule.set_level(rule_severity.into());
+        }
         "unicorn/explicit-length-check" => {
             if !options.include_inspired {
                 results.has_inspired_rules = true;
