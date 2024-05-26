@@ -36,21 +36,3 @@ expression: valid.jsx
 <label>foo<textarea /></label>;
 
 ```
-
-# Diagnostics
-```
-valid.jsx:17:1 lint/nursery/noLabelWithoutControl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! Variable is read here.
-  
-    15 │ <label>A label<input /></label>;
-    16 │ <label>A label<textarea /></label>;
-  > 17 │ <label><img alt="A label" /><input /></label>;
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    18 │ <label><img aria-label="A label" /><input /></label>;
-    19 │ <label><span>A label<input /></span></label>;
-  
-  i This note will give you more information.
-  
-
-```

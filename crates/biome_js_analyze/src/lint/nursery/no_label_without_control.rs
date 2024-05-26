@@ -121,7 +121,7 @@ impl Rule for NoLabelWithoutControl {
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
         let options = ctx.options();
-        let label_attributes = get_option(&options.label_attributes, &["aria-label"]);
+        let label_attributes = get_option(&options.label_attributes, &["aria-label", "alt"]);
         let label_components = get_option(&options.label_components, &["label"]);
         let control_components = get_option(
             &options.control_components,
