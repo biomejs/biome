@@ -61,13 +61,14 @@ pub(crate) fn parse_at_rule(p: &mut CssParser) -> ParsedSyntax {
 
     p.bump(T![@]);
 
-    let kind = if parse_any_at_rule(p)
-        .or_add_diagnostic(p, expected_any_at_rule)
-        .is_some()
-    {
-        CSS_AT_RULE
-    } else {
-        CSS_BOGUS_RULE
+    let range = p.cur_range();
+
+    let kind = match parse_any_at_rule(p) {
+        Present(_) => CSS_AT_RULE,
+        Absent => {
+            p.error(expected_any_at_rule(p, range));
+            CSS_BOGUS_RULE
+        }
     };
 
     Present(m.complete(p, kind))
