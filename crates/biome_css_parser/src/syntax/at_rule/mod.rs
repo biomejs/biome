@@ -61,6 +61,7 @@ pub(crate) fn parse_at_rule(p: &mut CssParser) -> ParsedSyntax {
 
     p.bump(T![@]);
 
+    // Show the error under the token next to the '@'
     let range = p.cur_range();
 
     let kind = match parse_any_at_rule(p) {
