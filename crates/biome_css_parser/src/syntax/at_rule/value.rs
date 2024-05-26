@@ -59,6 +59,8 @@ pub(crate) fn parse_value_at_rule(p: &mut CssParser) -> ParsedSyntax {
         parse_value_at_rule_declaration_clause(p).ok();
     } else if is_at_value_at_rule_import_clause(p) {
         parse_value_at_rule_import_clause(p).ok();
+    } else {
+        p.error(expected_at_rule_declaration_clause(p, p.cur_range()));
     }
 
     p.expect(T![;]);
@@ -280,13 +282,24 @@ impl ParseRecovery for ValueAtRulePropertyListParseRecovery {
 }
 
 /// Creates a diagnostic for an expected import source.
-pub(crate) fn expected_import_source(p: &CssParser, range: TextRange) -> ParseDiagnostic {
+fn expected_import_source(p: &CssParser, range: TextRange) -> ParseDiagnostic {
     expect_one_of(&["identifier", "string"], range).into_diagnostic(p)
 }
 
 /// Creates a diagnostic for an expected import specifier.
-pub(crate) fn expected_import_specifier(p: &CssParser, range: TextRange) -> ParseDiagnostic {
+fn expected_import_specifier(p: &CssParser, range: TextRange) -> ParseDiagnostic {
     expect_one_of(&["identifier", "<identifier> as <identifier>"], range).into_diagnostic(p)
+}
+
+/// Generates a parse diagnostic for an expected at-rule declaration clause.
+/// This function returns a diagnostic error indicating that an at-rule declaration clause
+/// or import clause was expected at the given range in the CSS parser.
+fn expected_at_rule_declaration_clause(p: &CssParser, range: TextRange) -> ParseDiagnostic {
+    expect_one_of(
+        &["declaration at rule clause", "import at rule clause"],
+        range,
+    )
+    .into_diagnostic(p)
 }
 
 /// Generates a parse diagnostic for when the @value at-rule is not allowed.

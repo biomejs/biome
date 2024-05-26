@@ -2,7 +2,6 @@
   "$schema": "../../../../../../../packages/@biomejs/biome/configuration_schema.json",
   "css": {
     "parser": {
-      "allowWrongLineComments": true,
       "cssModules": true
     }
   }
