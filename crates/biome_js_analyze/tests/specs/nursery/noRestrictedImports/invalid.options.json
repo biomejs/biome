@@ -1,19 +1,27 @@
 {
-	"$schema": "../../../../../../packages/@biomejs/biome/configuration_schema.json",
-	"linter": {
-		"enabled": true,
-		"rules": {
-			"nursery": {
-				"noRestrictedImports": {
-					"level": "error",
-					"options": {
-						"paths": {
-							"eslint": "Importing Eslint is forbidden",
-							"lodash": "It's not recommended to use lodash"
-						}
-					}
-				}
-			}
-		}
-	}
+  "$schema": "../../../../../../packages/@biomejs/biome/configuration_schema.json",
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "nursery": {
+        "noRestrictedImports": {
+          "level": "error",
+          "options": {
+            "paths": {
+              "eslint": {
+                "message": "Importing Eslint is forbidden"
+              },
+              "lodash": {
+                "message": "It's not recommended to use lodash"
+              },
+              "antd": {
+                "message": "It's not recommended to use any submodule of antd",
+                "includeAllSubmodules": true
+              }
+            }
+          }
+        }
+      }
+    }
+  }
 }

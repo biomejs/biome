@@ -47,7 +47,8 @@ declare_rule! {
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct RestrictedModuleConfig {
     pub message: String,
-    pub allowed_from: Vec<String>,
+    pub allowed_from: Option<Vec<String>>,
+    pub include_all_submodules: Option<bool>,
 }
 
 /// Options for the rule `noRestrictedImports`.
@@ -80,17 +81,28 @@ impl Rule for NoRestrictedImports {
 
         ctx.options()
             .paths
-            .get(inner_text.text())
-            .and_then(|config| {
-                if config
-                    .allowed_from
-                    .contains(&file_path.to_string_lossy().to_string())
+            .iter()
+            .filter_map(|(path, config)| {
+                if !inner_text.text().starts_with(path) {
+                    return None;
+                }
+
+                if let Some(allowed_from) = &config.allowed_from {
+                    if allowed_from.contains(&file_path.to_string_lossy().to_string()) {
+                        return None;
+                    }
+                }
+
+                if (config.include_all_submodules.is_none()
+                    || config.include_all_submodules == Some(false))
+                    && inner_text.text().len() != path.len()
                 {
                     return None;
                 }
 
                 Some((module_name.text_trimmed_range(), config.message.to_string()))
             })
+            .next()
     }
 
     fn diagnostic(_ctx: &RuleContext<Self>, (span, text): &Self::State) -> Option<RuleDiagnostic> {

@@ -7,7 +7,9 @@
 					"level": "error",
 					"options": {
 						"paths": {
-							"node:fs": "Importing from node:fs is forbidden"
+							"node:fs": {
+								"message": "Importing from node:fs is forbidden"
+							}
 						}
 					}
 				}

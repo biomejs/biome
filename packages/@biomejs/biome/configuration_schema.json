@@ -2156,9 +2156,13 @@
 		"RestrictedModuleConfig": {
 			"description": "Options for each path of rule `noRestrictedImports`.",
 			"type": "object",
-			"required": ["allowedFrom", "message"],
+			"required": ["message"],
 			"properties": {
-				"allowedFrom": { "type": "array", "items": { "type": "string" } },
+				"allowedFrom": {
+					"type": ["array", "null"],
+					"items": { "type": "string" }
+				},
+				"includeAllSubmodules": { "type": ["boolean", "null"] },
 				"message": { "type": "string" }
 			},
 			"additionalProperties": false
