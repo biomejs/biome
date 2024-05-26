@@ -17,5 +17,8 @@ biome_rowan     = { workspace = true }
 rust-lapper     = "1.1.0"
 rustc-hash      = { workspace = true }
 
+[dev-dependencies]
+biome_css_parser = { workspace = true }
+
 [lints]
 workspace = true
