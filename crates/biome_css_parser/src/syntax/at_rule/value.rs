@@ -43,12 +43,10 @@ pub(crate) fn parse_value_at_rule(p: &mut CssParser) -> ParsedSyntax {
         p.error(value_at_rule_not_allowed(p, p.cur_range()));
 
         // Skip the entire rule to avoid parsing errors.
-        p.parse_as_skipped_trivia_tokens(|p| {
-            // Skip until the next semicolon.
-            while !p.eat(T![;]) {
-                p.bump_any();
-            }
-        });
+        // Skip until the next semicolon.
+        while !p.eat(T![;]) {
+            p.bump_any();
+        }
 
         return Absent;
     }

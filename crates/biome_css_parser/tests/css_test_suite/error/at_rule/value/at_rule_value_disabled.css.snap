@@ -20,15 +20,38 @@ CssRoot {
         CssBogusRule {
             items: [
                 AT@0..1 "@" [] [],
+                VALUE_KW@1..7 "value" [] [Whitespace(" ")],
+                IDENT@7..13 "colors" [] [],
+                COLON@13..15 ":" [] [Whitespace(" ")],
+                CSS_STRING_LITERAL@15..29 "\"./colors.css\"" [] [],
+                SEMICOLON@29..30 ";" [] [],
             ],
         },
         CssBogusRule {
             items: [
-                AT@1..32 "@" [Skipped("value"), Whitespace(" "), Skipped("colors"), Skipped(":"), Whitespace(" "), Skipped("\"./colors.css\""), Skipped(";"), Newline("\n")] [],
+                AT@30..32 "@" [Newline("\n")] [],
+                VALUE_KW@32..38 "value" [] [Whitespace(" ")],
+                IDENT@38..53 "common-gradient" [] [],
+                COLON@53..55 ":" [] [Whitespace(" ")],
+                IDENT@55..67 "transparent" [] [Whitespace(" ")],
+                CSS_PERCENTAGE_VALUE@67..69 "75" [] [],
+                PERCENT@69..70 "%" [] [],
+                COMMA@70..72 "," [] [Whitespace(" ")],
+                VAR_KW@72..75 "var" [] [],
+                L_PAREN@75..76 "(" [] [],
+                IDENT@76..93 "--ring-line-color" [] [],
+                R_PAREN@93..95 ")" [] [Whitespace(" ")],
+                CSS_PERCENTAGE_VALUE@95..97 "75" [] [],
+                PERCENT@97..98 "%" [] [],
+                COMMA@98..100 "," [] [Whitespace(" ")],
+                IDENT@100..113 "currentColor" [] [Whitespace(" ")],
+                CSS_PERCENTAGE_VALUE@113..115 "79" [] [],
+                PERCENT@115..116 "%" [] [],
+                SEMICOLON@116..117 ";" [] [],
             ],
         },
     ],
-    eof_token: EOF@32..118 "" [Skipped("value"), Whitespace(" "), Skipped("common-gradient"), Skipped(":"), Whitespace(" "), Skipped("transparent"), Whitespace(" "), Skipped("75"), Skipped("%"), Skipped(","), Whitespace(" "), Skipped("var"), Skipped("("), Skipped("--ring-line-color"), Skipped(")"), Whitespace(" "), Skipped("75"), Skipped("%"), Skipped(","), Whitespace(" "), Skipped("currentColor"), Whitespace(" "), Skipped("79"), Skipped("%"), Skipped(";"), Newline("\n")] [],
+    eof_token: EOF@117..118 "" [Newline("\n")] [],
 }
 ```
 
@@ -37,12 +60,35 @@ CssRoot {
 ```
 0: CSS_ROOT@0..118
   0: (empty)
-  1: CSS_RULE_LIST@0..32
-    0: CSS_BOGUS_RULE@0..1
+  1: CSS_RULE_LIST@0..117
+    0: CSS_BOGUS_RULE@0..30
       0: AT@0..1 "@" [] []
-    1: CSS_BOGUS_RULE@1..32
-      0: AT@1..32 "@" [Skipped("value"), Whitespace(" "), Skipped("colors"), Skipped(":"), Whitespace(" "), Skipped("\"./colors.css\""), Skipped(";"), Newline("\n")] []
-  2: EOF@32..118 "" [Skipped("value"), Whitespace(" "), Skipped("common-gradient"), Skipped(":"), Whitespace(" "), Skipped("transparent"), Whitespace(" "), Skipped("75"), Skipped("%"), Skipped(","), Whitespace(" "), Skipped("var"), Skipped("("), Skipped("--ring-line-color"), Skipped(")"), Whitespace(" "), Skipped("75"), Skipped("%"), Skipped(","), Whitespace(" "), Skipped("currentColor"), Whitespace(" "), Skipped("79"), Skipped("%"), Skipped(";"), Newline("\n")] []
+      1: VALUE_KW@1..7 "value" [] [Whitespace(" ")]
+      2: IDENT@7..13 "colors" [] []
+      3: COLON@13..15 ":" [] [Whitespace(" ")]
+      4: CSS_STRING_LITERAL@15..29 "\"./colors.css\"" [] []
+      5: SEMICOLON@29..30 ";" [] []
+    1: CSS_BOGUS_RULE@30..117
+      0: AT@30..32 "@" [Newline("\n")] []
+      1: VALUE_KW@32..38 "value" [] [Whitespace(" ")]
+      2: IDENT@38..53 "common-gradient" [] []
+      3: COLON@53..55 ":" [] [Whitespace(" ")]
+      4: IDENT@55..67 "transparent" [] [Whitespace(" ")]
+      5: CSS_PERCENTAGE_VALUE@67..69 "75" [] []
+      6: PERCENT@69..70 "%" [] []
+      7: COMMA@70..72 "," [] [Whitespace(" ")]
+      8: VAR_KW@72..75 "var" [] []
+      9: L_PAREN@75..76 "(" [] []
+      10: IDENT@76..93 "--ring-line-color" [] []
+      11: R_PAREN@93..95 ")" [] [Whitespace(" ")]
+      12: CSS_PERCENTAGE_VALUE@95..97 "75" [] []
+      13: PERCENT@97..98 "%" [] []
+      14: COMMA@98..100 "," [] [Whitespace(" ")]
+      15: IDENT@100..113 "currentColor" [] [Whitespace(" ")]
+      16: CSS_PERCENTAGE_VALUE@113..115 "79" [] []
+      17: PERCENT@115..116 "%" [] []
+      18: SEMICOLON@116..117 ";" [] []
+  2: EOF@117..118 "" [Newline("\n")] []
 
 ```
 
