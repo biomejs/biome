@@ -162,14 +162,17 @@ XLarge 28/36px
 ```
 values.css:1:8 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected `;` but instead found `4`
+  × Unexpected value or character.
   
   > 1 │ @value 4XLarge 28/36px;
       │        ^
     2 │ 
     3 │ .postCssLowerCasingValueName {
   
-  i Remove 4
+  i Expected one of:
+  
+  - declaration at rule clause
+  - import at rule clause
   
 values.css:1:16 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
