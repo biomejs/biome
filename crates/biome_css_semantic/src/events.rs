@@ -1,5 +1,6 @@
 use std::collections::VecDeque;
 
+use biome_css_syntax::CssSyntaxKind::*;
 use biome_rowan::{TextRange, TokenText};
 use rustc_hash::FxHashMap;
 
@@ -83,19 +84,58 @@ pub struct CssSemanticEventExtractor {
 
 impl CssSemanticEventExtractor {
     pub fn new() -> Self {
-        todo!()
+        Self {
+            stash: VecDeque::new(),
+            scopes: vec![],
+            scope_count: 0,
+            bindings: FxHashMap::default(),
+        }
+    }
+    pub fn pop(&mut self) -> Option<CssSemanticEvent> {
+        self.stash.pop_front()
     }
 
     pub fn enter(&mut self, node: &biome_css_syntax::CssSyntaxNode) {
-        todo!()
+        match node.kind() {
+            CSS_SELECTOR_LIST
+            | CSS_RELATIVE_SELECTOR_LIST
+            | CSS_SUPPORTS_AT_RULE
+            | CSS_MEDIA_AT_RULE => self.push_scope(node.text_range()),
+            _ => {}
+        }
     }
 
     pub fn leave(&mut self, node: &biome_css_syntax::CssSyntaxNode) {
-        todo!()
+        match node.kind() {
+            CSS_SELECTOR_LIST
+            | CSS_RELATIVE_SELECTOR_LIST
+            | CSS_SUPPORTS_AT_RULE
+            | CSS_MEDIA_AT_RULE => self.pop_scope(node.text_range()),
+            _ => {}
+        }
     }
 
-    pub fn pop(&mut self) -> Option<CssSemanticEvent> {
-        self.stash.pop_front()
+    fn push_scope(&mut self, range: TextRange) {
+        let scope_id = self.scope_count;
+        self.scope_count += 1;
+        self.stash.push_back(CssSemanticEvent::ScopeStarted {
+            range,
+            scope_id,
+            parent_scope_id: self.scopes.iter().last().map(|x| x.scope_id),
+        });
+        self.scopes.push(Scope {
+            scope_id,
+            bindings: vec![],
+        });
+    }
+
+    fn pop_scope(&mut self, range: TextRange) {
+        debug_assert!(!self.scopes.is_empty());
+        let scope = self.scopes.pop().unwrap();
+        let scope_id = scope.scope_id;
+
+        self.stash
+            .push_back(CssSemanticEvent::ScopeEnded { range, scope_id });
     }
 }
 
@@ -106,7 +146,14 @@ mod test {
 
     #[test]
     fn test_css_semantic_event_extractor() {
-        let tree = parse_css(r#""#, CssParserOptions::default());
+        let tree = parse_css(
+            r#".parent {
+    .child {
+        color: red;
+    }
+}"#,
+            CssParserOptions::default(),
+        );
         let mut extractor = CssSemanticEventExtractor::new();
         for e in tree.syntax().preorder() {
             match e {

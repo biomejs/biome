@@ -10,22 +10,22 @@ pub struct CssSemanticModel {
 }
 
 pub struct CssSemanticModelData {
-    pub(crate) root: CssRoot,
-    // All scopes of this model
-    pub(crate) scopes: Vec<CssSemanticModelScopeData>,
-    pub(crate) scope_by_range: Lapper<usize, usize>,
-    // Maps the start of a node range to a scope id
-    pub(crate) scope_hoisted_to_by_range: FxHashMap<TextSize, usize>,
-    // Map to each by its range
-    pub(crate) node_by_range: FxHashMap<TextRange, CssSyntaxNode>,
-    // Maps any range start in the code to its bindings (usize points to bindings vec)
-    pub(crate) declared_at_by_start: FxHashMap<TextSize, usize>,
-    // List of all the declarations
-    pub(crate) bindings: Vec<SemanticModelBindingData>,
-    // Index bindings by range start
-    pub(crate) bindings_by_start: FxHashMap<TextSize, usize>,
-    /// All references that could not be resolved
-    pub(crate) unresolved_references: Vec<SemanticModelUnresolvedReference>,
+    // pub(crate) root: CssRoot,
+    // // All scopes of this model
+    // pub(crate) scopes: Vec<CssSemanticModelScopeData>,
+    // pub(crate) scope_by_range: Lapper<usize, usize>,
+    // // Maps the start of a node range to a scope id
+    // pub(crate) scope_hoisted_to_by_range: FxHashMap<TextSize, usize>,
+    // // Map to each by its range
+    // pub(crate) node_by_range: FxHashMap<TextRange, CssSyntaxNode>,
+    // // Maps any range start in the code to its bindings (usize points to bindings vec)
+    // pub(crate) declared_at_by_start: FxHashMap<TextSize, usize>,
+    // // List of all the declarations
+    // pub(crate) bindings: Vec<SemanticModelBindingData>,
+    // // Index bindings by range start
+    // pub(crate) bindings_by_start: FxHashMap<TextSize, usize>,
+    // /// All references that could not be resolved
+    // pub(crate) unresolved_references: Vec<SemanticModelUnresolvedReference>,
 }
 
 #[derive(Debug)]
