@@ -4,6 +4,9 @@ expression: invalid.jsx
 ---
 # Input
 ```jsx
+<label for="js_id" />;
+<label for="js_id"><input /></label>;
+<label for="js_id"><textarea /></label>;
 <label htmlFor="js_id" />;
 <label htmlFor="js_id"><input /></label>;
 <label htmlFor="js_id"><textarea /></label>;
@@ -20,10 +23,10 @@ invalid.jsx:1:1 lint/nursery/noLabelWithoutControl ━━━━━━━━━�
 
   ! Variable is read here.
   
-  > 1 │ <label htmlFor="js_id" />;
-      │ ^^^^^^^^^^^^^^^^^^^^^^^^^
-    2 │ <label htmlFor="js_id"><input /></label>;
-    3 │ <label htmlFor="js_id"><textarea /></label>;
+  > 1 │ <label for="js_id" />;
+      │ ^^^^^^^^^^^^^^^^^^^^^
+    2 │ <label for="js_id"><input /></label>;
+    3 │ <label for="js_id"><textarea /></label>;
   
   i This note will give you more information.
   
@@ -35,11 +38,11 @@ invalid.jsx:2:1 lint/nursery/noLabelWithoutControl ━━━━━━━━━�
 
   ! Variable is read here.
   
-    1 │ <label htmlFor="js_id" />;
-  > 2 │ <label htmlFor="js_id"><input /></label>;
-      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    3 │ <label htmlFor="js_id"><textarea /></label>;
-    4 │ <label></label>;
+    1 │ <label for="js_id" />;
+  > 2 │ <label for="js_id"><input /></label>;
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    3 │ <label for="js_id"><textarea /></label>;
+    4 │ <label htmlFor="js_id" />;
   
   i This note will give you more information.
   
@@ -51,12 +54,12 @@ invalid.jsx:3:1 lint/nursery/noLabelWithoutControl ━━━━━━━━━�
 
   ! Variable is read here.
   
-    1 │ <label htmlFor="js_id" />;
-    2 │ <label htmlFor="js_id"><input /></label>;
-  > 3 │ <label htmlFor="js_id"><textarea /></label>;
-      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    4 │ <label></label>;
-    5 │ <label>A label</label>;
+    1 │ <label for="js_id" />;
+    2 │ <label for="js_id"><input /></label>;
+  > 3 │ <label for="js_id"><textarea /></label>;
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ <label htmlFor="js_id" />;
+    5 │ <label htmlFor="js_id"><input /></label>;
   
   i This note will give you more information.
   
@@ -68,12 +71,12 @@ invalid.jsx:4:1 lint/nursery/noLabelWithoutControl ━━━━━━━━━�
 
   ! Variable is read here.
   
-    2 │ <label htmlFor="js_id"><input /></label>;
-    3 │ <label htmlFor="js_id"><textarea /></label>;
-  > 4 │ <label></label>;
-      │ ^^^^^^^^^^^^^^^
-    5 │ <label>A label</label>;
-    6 │ <div><label /><input /></div>;
+    2 │ <label for="js_id"><input /></label>;
+    3 │ <label for="js_id"><textarea /></label>;
+  > 4 │ <label htmlFor="js_id" />;
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │ <label htmlFor="js_id"><input /></label>;
+    6 │ <label htmlFor="js_id"><textarea /></label>;
   
   i This note will give you more information.
   
@@ -85,12 +88,12 @@ invalid.jsx:5:1 lint/nursery/noLabelWithoutControl ━━━━━━━━━�
 
   ! Variable is read here.
   
-    3 │ <label htmlFor="js_id"><textarea /></label>;
-    4 │ <label></label>;
-  > 5 │ <label>A label</label>;
-      │ ^^^^^^^^^^^^^^^^^^^^^^
-    6 │ <div><label /><input /></div>;
-    7 │ <div><label>A label</label><input /></div>;
+    3 │ <label for="js_id"><textarea /></label>;
+    4 │ <label htmlFor="js_id" />;
+  > 5 │ <label htmlFor="js_id"><input /></label>;
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    6 │ <label htmlFor="js_id"><textarea /></label>;
+    7 │ <label></label>;
   
   i This note will give you more information.
   
@@ -98,16 +101,16 @@ invalid.jsx:5:1 lint/nursery/noLabelWithoutControl ━━━━━━━━━�
 ```
 
 ```
-invalid.jsx:6:6 lint/nursery/noLabelWithoutControl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:6:1 lint/nursery/noLabelWithoutControl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Variable is read here.
   
-    4 │ <label></label>;
-    5 │ <label>A label</label>;
-  > 6 │ <div><label /><input /></div>;
-      │      ^^^^^^^^^
-    7 │ <div><label>A label</label><input /></div>;
-    8 │ 
+    4 │ <label htmlFor="js_id" />;
+    5 │ <label htmlFor="js_id"><input /></label>;
+  > 6 │ <label htmlFor="js_id"><textarea /></label>;
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    7 │ <label></label>;
+    8 │ <label>A label</label>;
   
   i This note will give you more information.
   
@@ -115,15 +118,66 @@ invalid.jsx:6:6 lint/nursery/noLabelWithoutControl ━━━━━━━━━�
 ```
 
 ```
-invalid.jsx:7:6 lint/nursery/noLabelWithoutControl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:7:1 lint/nursery/noLabelWithoutControl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Variable is read here.
   
-    5 │ <label>A label</label>;
-    6 │ <div><label /><input /></div>;
-  > 7 │ <div><label>A label</label><input /></div>;
-      │      ^^^^^^^^^^^^^^^^^^^^^^
-    8 │ 
+    5 │ <label htmlFor="js_id"><input /></label>;
+    6 │ <label htmlFor="js_id"><textarea /></label>;
+  > 7 │ <label></label>;
+      │ ^^^^^^^^^^^^^^^
+    8 │ <label>A label</label>;
+    9 │ <div><label /><input /></div>;
+  
+  i This note will give you more information.
+  
+
+```
+
+```
+invalid.jsx:8:1 lint/nursery/noLabelWithoutControl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Variable is read here.
+  
+     6 │ <label htmlFor="js_id"><textarea /></label>;
+     7 │ <label></label>;
+   > 8 │ <label>A label</label>;
+       │ ^^^^^^^^^^^^^^^^^^^^^^
+     9 │ <div><label /><input /></div>;
+    10 │ <div><label>A label</label><input /></div>;
+  
+  i This note will give you more information.
+  
+
+```
+
+```
+invalid.jsx:9:6 lint/nursery/noLabelWithoutControl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Variable is read here.
+  
+     7 │ <label></label>;
+     8 │ <label>A label</label>;
+   > 9 │ <div><label /><input /></div>;
+       │      ^^^^^^^^^
+    10 │ <div><label>A label</label><input /></div>;
+    11 │ 
+  
+  i This note will give you more information.
+  
+
+```
+
+```
+invalid.jsx:10:6 lint/nursery/noLabelWithoutControl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Variable is read here.
+  
+     8 │ <label>A label</label>;
+     9 │ <div><label /><input /></div>;
+  > 10 │ <div><label>A label</label><input /></div>;
+       │      ^^^^^^^^^^^^^^^^^^^^^^
+    11 │ 
   
   i This note will give you more information.
   

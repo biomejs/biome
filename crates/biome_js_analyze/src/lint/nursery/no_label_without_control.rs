@@ -9,28 +9,90 @@ use biome_rowan::AstNode;
 use serde::{Deserialize, Serialize};
 
 declare_rule! {
-    /// Succinct description of the rule.
+    /// Enforce that a label element or component has a text label and an associated control.
     ///
-    /// Put context and details about the rule.
-    /// As a starting point, you can take the description of the corresponding _ESLint_ rule (if any).
+    /// There are two supported ways to associate a label with a control:
+    /// - Wrapping a control in a label element.
+    /// - Adding a `for` attribute (or `htmlFor` in React) to a label and assigning it a DOM ID string that indicates an input on the page.
     ///
-    /// Try to stay consistent with the descriptions of implemented rules.
-    ///
-    /// Add a link to the corresponding ESLint rule (if any):
+    /// This rule checks that any `label` element (or an indicated custom component that will output a `label` element) meets one of this conditions:
+    /// - Wraps an `input` element (or an indicated custom component that will output an `input` element)
+    /// - Has a `for` or `htmlFor` attribute and that the `label` element/component has accessible text content.
     ///
     /// ## Examples
     ///
     /// ### Invalid
     ///
-    /// ```js,expect_diagnostic
-    /// var a = 1;
-    /// a = 2;
+    /// ```jsx,expect_diagnostic
+    /// <label for="js_id" />;
+    /// ```
+    ///
+    /// ```jsx,expect_diagnostic
+    /// <label for="js_id"><input /></label>;
+    /// ```
+    ///
+    /// ```jsx,expect_diagnostic
+    /// <label htmlFor="js_id" />;
+    /// ```
+    ///
+    /// ```jsx,expect_diagnostic
+    /// <label htmlFor="js_id"><input /></label>;
+    /// ```
+    ///
+    /// ```jsx,expect_diagnostic
+    /// <label>A label</label>;
+    /// ```
+    ///
+    /// ```jsx,expect_diagnostic
+    /// <div><label /><input /></div>;
     /// ```
     ///
     /// ### Valid
     ///
-    /// ```js
-    /// // var a = 1;
+    /// ```jsx
+    /// <label for="js_id" aria-label="A label" />;
+    /// ```
+    ///
+    /// ```jsx
+    /// <label for="js_id" aria-labelledby="A label" />;
+    /// ```
+    ///
+    /// ```jsx
+    /// <label htmlFor="js_id" aria-label="A label" />;
+    /// ```
+    ///
+    /// ```jsx
+    /// <label htmlFor="js_id" aria-labelledby="A label" />;
+    /// ```
+    ///
+    /// ```jsx
+    /// <label>A label<input /></label>;
+    /// ```
+    ///
+    /// ```jsx
+    /// <label>A label<textarea /></label>;
+    /// ```
+    ///
+    /// ```jsx
+    /// <label><img alt="A label" /><input /></label>;
+    /// ```
+    ///
+    /// ## Options
+    ///
+    /// The rule supports the following options:
+    /// - `controlComponents` - An array of component names that should be considered the same as an `input` element.
+    /// - `labelAttributes` - An array of attributes that should be treated as the `label` accessible text content.
+    /// - `labelComponents` - An array of component names that should be considered the same as a `label` element.
+    ///
+    /// ```json
+    /// {
+    ///     "//": "...",
+    ///     "options": {
+    ///         "controlComponents": ["CustomInput"],
+    ///         "labelAttributes": ["label"],
+    ///         "labelComponents": ["CustomLabel"]
+    ///     }
+    /// }
     /// ```
     ///
     pub NoLabelWithoutControl {
