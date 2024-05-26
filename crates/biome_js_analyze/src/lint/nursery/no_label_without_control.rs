@@ -112,9 +112,14 @@ pub struct NoLabelWithoutControlOptions {
     pub control_components: Vec<String>,
 }
 
+pub struct NoLabelWithoutControlState {
+    pub has_text_content: bool,
+    pub has_control_association: bool,
+}
+
 impl Rule for NoLabelWithoutControl {
     type Query = Ast<AnyJsxTag>;
-    type State = ();
+    type State = NoLabelWithoutControlState;
     type Signals = Option<Self::State>;
     type Options = NoLabelWithoutControlOptions;
 
@@ -134,33 +139,43 @@ impl Rule for NoLabelWithoutControl {
             return None;
         }
 
-        if has_accessible_label(node, &label_attributes)
-            && (has_for_attribute(node)? || has_nested_control(node, &control_components))
-        {
+        let has_text_content = has_accessible_label(node, &label_attributes);
+        let has_control_association =
+            has_for_attribute(node)? || has_nested_control(node, &control_components);
+
+        if has_text_content && has_control_association {
             return None;
         }
 
-        Some(())
+        Some(NoLabelWithoutControlState {
+            has_text_content,
+            has_control_association,
+        })
     }
 
-    fn diagnostic(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<RuleDiagnostic> {
-        //
-        // Read our guidelines to write great diagnostics:
-        // https://docs.rs/biome_analyze/latest/biome_analyze/#what-a-rule-should-say-to-the-user
-        //
+    fn diagnostic(ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
         let node = ctx.query();
-        Some(
-            RuleDiagnostic::new(
-                rule_category!(),
-                node.range(),
-                markup! {
-                    "Variable is read here."
-                },
-            )
-            .note(markup! {
-                "This note will give you more information."
-            }),
-        )
+        let mut diagnostic = RuleDiagnostic::new(
+            rule_category!(),
+            node.range(),
+            markup! {
+                "A form label must be associated with a control."
+            },
+        );
+
+        if !state.has_text_content {
+            diagnostic = diagnostic.note(
+                markup! { "Consider adding an accessible text content to the label element." },
+            );
+        }
+
+        if !state.has_control_association {
+            diagnostic = diagnostic.note(
+                markup! { "Consider adding a `for` or `htmlFor` attribute to the label element or moving the control element to inside the label element." },
+            );
+        }
+
+        Some(diagnostic)
     }
 }
 

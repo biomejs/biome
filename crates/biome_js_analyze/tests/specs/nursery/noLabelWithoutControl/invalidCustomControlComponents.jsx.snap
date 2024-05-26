@@ -12,13 +12,13 @@ expression: invalidCustomControlComponents.jsx
 ```
 invalidCustomControlComponents.jsx:1:1 lint/nursery/noLabelWithoutControl ━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Variable is read here.
+  ! A form label must be associated with a control.
   
   > 1 │ <label><span><CustomInput /></span></label>;
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     2 │ 
   
-  i This note will give you more information.
+  i Consider adding an accessible text content to the label element.
   
 
 ```

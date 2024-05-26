@@ -21,14 +21,14 @@ expression: invalid.jsx
 ```
 invalid.jsx:1:1 lint/nursery/noLabelWithoutControl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Variable is read here.
+  ! A form label must be associated with a control.
   
   > 1 │ <label for="js_id" />;
       │ ^^^^^^^^^^^^^^^^^^^^^
     2 │ <label for="js_id"><input /></label>;
     3 │ <label for="js_id"><textarea /></label>;
   
-  i This note will give you more information.
+  i Consider adding an accessible text content to the label element.
   
 
 ```
@@ -36,7 +36,7 @@ invalid.jsx:1:1 lint/nursery/noLabelWithoutControl ━━━━━━━━━�
 ```
 invalid.jsx:2:1 lint/nursery/noLabelWithoutControl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Variable is read here.
+  ! A form label must be associated with a control.
   
     1 │ <label for="js_id" />;
   > 2 │ <label for="js_id"><input /></label>;
@@ -44,7 +44,7 @@ invalid.jsx:2:1 lint/nursery/noLabelWithoutControl ━━━━━━━━━�
     3 │ <label for="js_id"><textarea /></label>;
     4 │ <label htmlFor="js_id" />;
   
-  i This note will give you more information.
+  i Consider adding an accessible text content to the label element.
   
 
 ```
@@ -52,7 +52,7 @@ invalid.jsx:2:1 lint/nursery/noLabelWithoutControl ━━━━━━━━━�
 ```
 invalid.jsx:3:1 lint/nursery/noLabelWithoutControl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Variable is read here.
+  ! A form label must be associated with a control.
   
     1 │ <label for="js_id" />;
     2 │ <label for="js_id"><input /></label>;
@@ -61,7 +61,7 @@ invalid.jsx:3:1 lint/nursery/noLabelWithoutControl ━━━━━━━━━�
     4 │ <label htmlFor="js_id" />;
     5 │ <label htmlFor="js_id"><input /></label>;
   
-  i This note will give you more information.
+  i Consider adding an accessible text content to the label element.
   
 
 ```
@@ -69,7 +69,7 @@ invalid.jsx:3:1 lint/nursery/noLabelWithoutControl ━━━━━━━━━�
 ```
 invalid.jsx:4:1 lint/nursery/noLabelWithoutControl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Variable is read here.
+  ! A form label must be associated with a control.
   
     2 │ <label for="js_id"><input /></label>;
     3 │ <label for="js_id"><textarea /></label>;
@@ -78,7 +78,7 @@ invalid.jsx:4:1 lint/nursery/noLabelWithoutControl ━━━━━━━━━�
     5 │ <label htmlFor="js_id"><input /></label>;
     6 │ <label htmlFor="js_id"><textarea /></label>;
   
-  i This note will give you more information.
+  i Consider adding an accessible text content to the label element.
   
 
 ```
@@ -86,7 +86,7 @@ invalid.jsx:4:1 lint/nursery/noLabelWithoutControl ━━━━━━━━━�
 ```
 invalid.jsx:5:1 lint/nursery/noLabelWithoutControl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Variable is read here.
+  ! A form label must be associated with a control.
   
     3 │ <label for="js_id"><textarea /></label>;
     4 │ <label htmlFor="js_id" />;
@@ -95,7 +95,7 @@ invalid.jsx:5:1 lint/nursery/noLabelWithoutControl ━━━━━━━━━�
     6 │ <label htmlFor="js_id"><textarea /></label>;
     7 │ <label></label>;
   
-  i This note will give you more information.
+  i Consider adding an accessible text content to the label element.
   
 
 ```
@@ -103,7 +103,7 @@ invalid.jsx:5:1 lint/nursery/noLabelWithoutControl ━━━━━━━━━�
 ```
 invalid.jsx:6:1 lint/nursery/noLabelWithoutControl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Variable is read here.
+  ! A form label must be associated with a control.
   
     4 │ <label htmlFor="js_id" />;
     5 │ <label htmlFor="js_id"><input /></label>;
@@ -112,7 +112,7 @@ invalid.jsx:6:1 lint/nursery/noLabelWithoutControl ━━━━━━━━━�
     7 │ <label></label>;
     8 │ <label>A label</label>;
   
-  i This note will give you more information.
+  i Consider adding an accessible text content to the label element.
   
 
 ```
@@ -120,7 +120,7 @@ invalid.jsx:6:1 lint/nursery/noLabelWithoutControl ━━━━━━━━━�
 ```
 invalid.jsx:7:1 lint/nursery/noLabelWithoutControl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Variable is read here.
+  ! A form label must be associated with a control.
   
     5 │ <label htmlFor="js_id"><input /></label>;
     6 │ <label htmlFor="js_id"><textarea /></label>;
@@ -129,7 +129,9 @@ invalid.jsx:7:1 lint/nursery/noLabelWithoutControl ━━━━━━━━━�
     8 │ <label>A label</label>;
     9 │ <div><label /><input /></div>;
   
-  i This note will give you more information.
+  i Consider adding an accessible text content to the label element.
+  
+  i Consider adding a `for` or `htmlFor` attribute to the label element or moving the control element to inside the label element.
   
 
 ```
@@ -137,7 +139,7 @@ invalid.jsx:7:1 lint/nursery/noLabelWithoutControl ━━━━━━━━━�
 ```
 invalid.jsx:8:1 lint/nursery/noLabelWithoutControl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Variable is read here.
+  ! A form label must be associated with a control.
   
      6 │ <label htmlFor="js_id"><textarea /></label>;
      7 │ <label></label>;
@@ -146,7 +148,7 @@ invalid.jsx:8:1 lint/nursery/noLabelWithoutControl ━━━━━━━━━�
      9 │ <div><label /><input /></div>;
     10 │ <div><label>A label</label><input /></div>;
   
-  i This note will give you more information.
+  i Consider adding a `for` or `htmlFor` attribute to the label element or moving the control element to inside the label element.
   
 
 ```
@@ -154,7 +156,7 @@ invalid.jsx:8:1 lint/nursery/noLabelWithoutControl ━━━━━━━━━�
 ```
 invalid.jsx:9:6 lint/nursery/noLabelWithoutControl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Variable is read here.
+  ! A form label must be associated with a control.
   
      7 │ <label></label>;
      8 │ <label>A label</label>;
@@ -163,7 +165,9 @@ invalid.jsx:9:6 lint/nursery/noLabelWithoutControl ━━━━━━━━━�
     10 │ <div><label>A label</label><input /></div>;
     11 │ 
   
-  i This note will give you more information.
+  i Consider adding an accessible text content to the label element.
+  
+  i Consider adding a `for` or `htmlFor` attribute to the label element or moving the control element to inside the label element.
   
 
 ```
@@ -171,7 +175,7 @@ invalid.jsx:9:6 lint/nursery/noLabelWithoutControl ━━━━━━━━━�
 ```
 invalid.jsx:10:6 lint/nursery/noLabelWithoutControl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Variable is read here.
+  ! A form label must be associated with a control.
   
      8 │ <label>A label</label>;
      9 │ <div><label /><input /></div>;
@@ -179,7 +183,7 @@ invalid.jsx:10:6 lint/nursery/noLabelWithoutControl ━━━━━━━━━�
        │      ^^^^^^^^^^^^^^^^^^^^^^
     11 │ 
   
-  i This note will give you more information.
+  i Consider adding a `for` or `htmlFor` attribute to the label element or moving the control element to inside the label element.
   
 
 ```

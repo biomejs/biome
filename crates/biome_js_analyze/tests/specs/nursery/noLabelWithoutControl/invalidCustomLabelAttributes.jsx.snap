@@ -12,13 +12,13 @@ expression: invalidCustomLabelAttributes.jsx
 ```
 invalidCustomLabelAttributes.jsx:1:1 lint/nursery/noLabelWithoutControl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Variable is read here.
+  ! A form label must be associated with a control.
   
   > 1 │ <label label="A label" />;
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^
     2 │ 
   
-  i This note will give you more information.
+  i Consider adding a `for` or `htmlFor` attribute to the label element or moving the control element to inside the label element.
   
 
 ```
