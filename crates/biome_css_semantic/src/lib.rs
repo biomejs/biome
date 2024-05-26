@@ -1,14 +1,7 @@
-pub fn add(left: usize, right: usize) -> usize {
-    left + right
-}
+mod model;
 
-#[cfg(test)]
-mod tests {
-    use super::*;
+use biome_css_syntax::CssRoot;
 
-    #[test]
-    fn it_works() {
-        let result = add(2, 2);
-        assert_eq!(result, 4);
-    }
+pub fn create_css_semantic_model(root: CssRoot) {
+    todo!()
 }

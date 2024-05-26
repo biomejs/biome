@@ -11,5 +11,11 @@ name                 = "biome_css_semantic"
 repository.workspace = true
 version              = "0.0.0"
 
+[dependencies]
+biome_css_syntax = { workspace = true }
+biome_rowan     = { workspace = true }
+rust-lapper     = "1.1.0"
+rustc-hash      = { workspace = true }
+
 [lints]
 workspace = true
