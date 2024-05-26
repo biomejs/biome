@@ -1010,7 +1010,7 @@ export interface Nursery {
 	 */
 	noInvalidPositionAtImportRule?: RuleConfiguration_for_Null;
 	/**
-	 * Succinct description of the rule.
+	 * Enforce that a label element or component has a text label and an associated control.
 	 */
 	noLabelWithoutControl?: RuleConfiguration_for_NoLabelWithoutControlOptions;
 	/**

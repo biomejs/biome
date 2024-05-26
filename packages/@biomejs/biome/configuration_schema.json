@@ -1719,7 +1719,7 @@
 					]
 				},
 				"noLabelWithoutControl": {
-					"description": "Succinct description of the rule.",
+					"description": "Enforce that a label element or component has a text label and an associated control.",
 					"anyOf": [
 						{ "$ref": "#/definitions/NoLabelWithoutControlConfiguration" },
 						{ "type": "null" }

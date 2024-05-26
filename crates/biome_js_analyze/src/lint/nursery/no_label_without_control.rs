@@ -1,4 +1,4 @@
-use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic};
+use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
 use biome_deserialize_macros::Deserializable;
 use biome_js_syntax::{
@@ -98,7 +98,8 @@ declare_rule! {
     pub NoLabelWithoutControl {
         version: "next",
         name: "noLabelWithoutControl",
-        language: "js",
+        language: "jsx",
+        sources: &[RuleSource::EslintJsxA11y("label-has-associated-control")],
         recommended: false,
     }
 }

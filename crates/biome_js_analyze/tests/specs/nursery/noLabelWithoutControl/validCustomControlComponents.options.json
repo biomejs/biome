@@ -7,7 +7,9 @@
 				"noLabelWithoutControl": {
 					"level": "error",
 					"options": {
-            "controlComponents": ["CustomInput"]
+            "controlComponents": ["CustomInput"],
+            "labelAttributes": [],
+            "labelComponents": []
 					}
 				}
 			}
