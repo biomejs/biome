@@ -61,19 +61,20 @@ info: css/units/values.css
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,7 +1,7 @@
+@@ -1,7 +1,10 @@
 -@value 4XLarge 28/36px;
--
--.postCssLowerCasingValueName {
++@value
++4
++XLarge 28/36px
++;
+ 
+ .postCssLowerCasingValueName {
 -  font: 4XLarge Helvetica;
-+@
-+value 4XLarge 28/36px;
-+  .postCssLowerCasingValueName {
 +  font: 4xlarge helvetica;
  }
  
  .cssUnits {
-@@ -25,7 +25,7 @@
+@@ -25,7 +28,7 @@
    a: 5vmax;
    a: 5cm;
    a: 5mm;
@@ -82,7 +83,7 @@ info: css/units/values.css
    a: 5in;
    a: 5pt;
    a: 5pc;
-@@ -35,13 +35,13 @@
+@@ -35,13 +38,13 @@
    a: 5rad;
    a: 5s;
    a: 5ms;
@@ -105,9 +106,12 @@ info: css/units/values.css
 # Output
 
 ```css
-@
-value 4XLarge 28/36px;
-  .postCssLowerCasingValueName {
+@value
+4
+XLarge 28/36px
+;
+
+.postCssLowerCasingValueName {
   font: 4xlarge helvetica;
 }
 
@@ -156,48 +160,54 @@ value 4XLarge 28/36px;
 
 # Errors
 ```
-values.css:1:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+values.css:1:8 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × @value at-rule is not a standard CSS feature.
+  × expected `;` but instead found `4`
   
   > 1 │ @value 4XLarge 28/36px;
-      │  ^^^^^
+      │        ^
     2 │ 
     3 │ .postCssLowerCasingValueName {
   
-  i You can enable @value at-rule parsing by setting the `css_modules` option to `true` in your configuration file.
+  i Remove 4
   
-values.css:3:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+values.css:1:16 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected value or character.
+  × Expected a compound selector but instead found '28'.
   
-    1 │ @value 4XLarge 28/36px;
+  > 1 │ @value 4XLarge 28/36px;
+      │                ^^
     2 │ 
-  > 3 │ .postCssLowerCasingValueName {
-      │ ^
-    4 │   font: 4XLarge Helvetica;
-    5 │ }
+    3 │ .postCssLowerCasingValueName {
   
-  i Expected one of:
+  i Expected a compound selector here.
   
-  - charset
-  - color-profile
-  - container
-  - counter-style
-  - document
-  - font-face
-  - font-feature-values
-  - font-palette-values
-  - import
-  - keyframes
-  - layer
-  - media
-  - namespace
-  - page
-  - property
-  - supports
-  - viewport
-  - scope
+  > 1 │ @value 4XLarge 28/36px;
+      │                ^^
+    2 │ 
+    3 │ .postCssLowerCasingValueName {
+  
+values.css:1:21 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `px`
+  
+  > 1 │ @value 4XLarge 28/36px;
+      │                     ^^
+    2 │ 
+    3 │ .postCssLowerCasingValueName {
+  
+  i Remove px
+  
+values.css:1:23 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `;`
+  
+  > 1 │ @value 4XLarge 28/36px;
+      │                       ^
+    2 │ 
+    3 │ .postCssLowerCasingValueName {
+  
+  i Remove ;
   
 
 ```

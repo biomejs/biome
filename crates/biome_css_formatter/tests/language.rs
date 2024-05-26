@@ -19,7 +19,12 @@ impl TestFormatLanguage for CssTestFormatLanguage {
     type FormatLanguage = CssFormatLanguage;
 
     fn parse(&self, text: &str) -> AnyParse {
-        let parse = parse_css(text, CssParserOptions::default());
+        let parse = parse_css(
+            text,
+            CssParserOptions::default()
+                .allow_wrong_line_comments()
+                .allow_css_modules(),
+        );
 
         AnyParse::new(parse.syntax().as_send().unwrap(), parse.into_diagnostics())
     }
