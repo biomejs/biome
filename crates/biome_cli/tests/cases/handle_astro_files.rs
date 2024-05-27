@@ -697,7 +697,10 @@ fn astro_global_object() {
     let mut console = BufferConsole::default();
 
     let astro_file_path = Path::new("file.astro");
-    fs.insert(astro_file_path.into(), ASTRO_FILE_ASTRO_GLOBAL_OBJECT.as_bytes());
+    fs.insert(
+        astro_file_path.into(),
+        ASTRO_FILE_ASTRO_GLOBAL_OBJECT.as_bytes(),
+    );
 
     let result = run_cli(
         DynRef::Borrowed(&mut fs),
