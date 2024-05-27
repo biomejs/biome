@@ -47,7 +47,9 @@ impl<'a> Parse<'a> {
             )),
             Parse::Css(code) => Parsed::Css(biome_css_parser::parse_css(
                 code,
-                CssParserOptions::default().allow_wrong_line_comments(),
+                CssParserOptions::default()
+                    .allow_wrong_line_comments()
+                    .allow_css_modules(),
             )),
             Parse::Graphql(code) => Parsed::Graphql(biome_graphql_parser::parse_graphql(code)),
         }
@@ -72,7 +74,9 @@ impl<'a> Parse<'a> {
             Parse::Css(code) => Parsed::Css(biome_css_parser::parse_css_with_cache(
                 code,
                 cache,
-                CssParserOptions::default().allow_wrong_line_comments(),
+                CssParserOptions::default()
+                    .allow_wrong_line_comments()
+                    .allow_css_modules(),
             )),
             Parse::Graphql(code) => {
                 Parsed::Graphql(biome_graphql_parser::parse_graphql_with_cache(code, cache))

@@ -21,11 +21,15 @@ biome_unicode_table = { workspace = true }
 tracing             = { workspace = true }
 
 [dev-dependencies]
-biome_test_utils  = { path = "../biome_test_utils" }
-insta             = { workspace = true }
-quickcheck        = { workspace = true }
-quickcheck_macros = { workspace = true }
-tests_macros      = { path = "../tests_macros" }
+biome_configuration = { workspace = true }
+biome_deserialize   = { workspace = true }
+biome_fs            = { workspace = true }
+biome_service       = { workspace = true }
+biome_test_utils    = { path = "../biome_test_utils" }
+insta               = { workspace = true }
+quickcheck          = { workspace = true }
+quickcheck_macros   = { workspace = true }
+tests_macros        = { path = "../tests_macros" }
 
 [lints]
 workspace = true

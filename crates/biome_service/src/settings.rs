@@ -491,6 +491,9 @@ impl From<CssConfiguration> for LanguageSettings<CssLanguage> {
     fn from(css: CssConfiguration) -> Self {
         let mut language_setting: LanguageSettings<CssLanguage> = LanguageSettings::default();
 
+        language_setting.parser.allow_wrong_line_comments = css.parser.allow_wrong_line_comments;
+        language_setting.parser.css_modules = css.parser.css_modules;
+
         language_setting.formatter.enabled = Some(css.formatter.enabled);
         language_setting.formatter.line_width = Some(css.formatter.line_width);
         language_setting.formatter.indent_width = Some(css.formatter.indent_width.into());
@@ -1157,6 +1160,7 @@ impl OverrideSettingPattern {
         let css_parser = &self.languages.css.parser;
 
         options.allow_wrong_line_comments = css_parser.allow_wrong_line_comments;
+        options.css_modules = css_parser.css_modules;
 
         if let Ok(mut writeonly_cache) = self.cached_css_parser_options.write() {
             let options = *options;
@@ -1459,6 +1463,7 @@ fn to_css_language_settings(
     language_setting.parser.allow_wrong_line_comments = parser
         .allow_wrong_line_comments
         .unwrap_or(parent_parser.allow_wrong_line_comments);
+    language_setting.parser.css_modules = parser.css_modules.unwrap_or(parent_parser.css_modules);
 
     language_setting
 }
