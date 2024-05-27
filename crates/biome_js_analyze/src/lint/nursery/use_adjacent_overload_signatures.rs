@@ -104,28 +104,33 @@ impl Rule for UseAdjacentOverloadSignatures {
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
         let mut methods: Vec<(TokenText, TextRange)> = Vec::new();
-        //let mut methods: Vec<(u32, SyntaxNodeText, u32, TextRange)> = Vec::new();
         let mut seen_methods = FxHashSet::default();
         let mut last_method = None;
 
         match node {
+            // Handle export function foo() {} in declare namespace Foo {}
             DeclarationOrModuleNode::TsDeclareStatement(node) => {
                 let declaration = node.declaration().ok()?;
                 let items = declaration.as_ts_module_declaration()?.body().ok()?.items();
                 collect_exports(&items, &mut methods, &mut seen_methods, &mut last_method);
             }
+            // Handle interface Foo {}
             DeclarationOrModuleNode::TsInterfaceDeclaration(node) => {
                 collect_interface(node, &mut methods, &mut seen_methods, &mut last_method);
             }
+            // Handle type Foo = {}
             DeclarationOrModuleNode::TsTypeAliasDeclaration(node) => {
                 collect_type(node, &mut methods, &mut seen_methods, &mut last_method);
             }
+            // Handle class Foo {}
             DeclarationOrModuleNode::JsClassDeclaration(node) => {
                 collect_class(node, &mut methods, &mut seen_methods, &mut last_method);
             }
+            // Handle export function foo() {}
             DeclarationOrModuleNode::JsFunctionDeclaration(node) => {
                 collect_function(node, &mut methods, &mut seen_methods, &mut last_method);
             }
+            // Handle export function foo() {}
             DeclarationOrModuleNode::JsModule(node) => {
                 let items = node.items();
                 collect_exports(&items, &mut methods, &mut seen_methods, &mut last_method);
@@ -294,6 +299,7 @@ fn collect_exports(
     }
 }
 
+// Check if the method is already seen and add it to the list of methods
 fn check_method(
     text: TokenText,
     range: TextRange,
