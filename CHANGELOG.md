@@ -15,7 +15,7 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 #### Enhancements
 
-- Assume `Astro` object is always a global when processing `.astro` files. ([#2771](https://github.com/biomejs/biome/pull/2771)) Contributed by @minht11
+- Assume `Astro` object is always a global when processing `.astro` files. Contributed by @minht11
 - Assume Vue compiler macros are globals when processing `.vue` files. ([#2771](https://github.com/biomejs/biome/pull/2771)) Contributed by @dyc3
 
 ### CLI
