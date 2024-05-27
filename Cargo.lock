@@ -322,7 +322,7 @@ dependencies = [
 
 [[package]]
 name = "biome_deserialize"
-version = "0.5.7"
+version = "0.6.0"
 dependencies = [
  "biome_console",
  "biome_deserialize_macros",
@@ -340,7 +340,7 @@ dependencies = [
 
 [[package]]
 name = "biome_deserialize_macros"
-version = "0.5.7"
+version = "0.6.0"
 dependencies = [
  "biome_string_case",
  "proc-macro-error",

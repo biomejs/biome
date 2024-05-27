@@ -9,7 +9,7 @@ expression: content
   "linter": {
     "rules": {
       "suspicious": {
-        "recommended": false
+        "noDebugger": "off"
       }
     }
   }

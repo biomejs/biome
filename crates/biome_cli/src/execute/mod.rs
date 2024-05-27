@@ -127,11 +127,13 @@ pub enum TraversalMode {
         /// 1. The virtual path to the file
         /// 2. The content of the file
         stdin: Option<Stdin>,
-        /// Run only the given rule or rule group.
-        /// The option overrides the Biome configuration file as follows:
-        /// - When a rule is passed, its severity level is set to `error' if it is a recommended rule, or `warn' otherwise.
-        /// - When a rule group is passed, the `recommended` flag is enabled, but if the `all` flag is enabled.
-        rule: Option<RuleSelector>,
+        /// Run only the given rule or group of rules.
+        /// If the severity level of a rule is `off`,
+        /// then the severity level of the rule is set to `error` if it is a recommended rule or `warn` otherwise.
+        only: Vec<RuleSelector>,
+        /// Skip the given rule or group of rules by setting the severity level of the rules to `off`.
+        /// This option takes precedence over `--only`.
+        skip: Vec<RuleSelector>,
     },
     /// This mode is enabled when running the command `biome ci`
     CI {

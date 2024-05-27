@@ -573,7 +573,8 @@ impl Workspace for WorkspaceServer {
                         settings: self.workspace(),
                         max_diagnostics: params.max_diagnostics as u32,
                         path: &params.path,
-                        rule: params.rule,
+                        only: params.only,
+                        skip: params.skip,
                         language: self.get_file_source(&params.path),
                         categories: params.categories,
                         manifest,
@@ -717,7 +718,7 @@ impl Workspace for WorkspaceServer {
             .unwrap_or_default()
             .into_iter()
             .collect::<Vec<_>>();
-        let filter = AnalysisFilter::from_enabled_rules(Some(rule_filter_list.as_slice()));
+        let filter = AnalysisFilter::from_enabled_rules(rule_filter_list.as_slice());
         let manifest = self.get_current_project()?.map(|pr| pr.manifest);
         let language = self.get_file_source(&params.path);
         fix_all(FixAllParams {

@@ -21,39 +21,36 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 #### New features
 
-- Add a new option `--rule` to the command `biome lint` ([#58](https://github.com/biomejs/biome/issues/58)).
+- Add two new options `--only` and `--skip` to the command `biome lint` ([#58](https://github.com/biomejs/biome/issues/58)).
 
-  This new option allows you to execute a single rule or a rule group.
-  This option is convenient to test a rule or apply the code fixes of a single rule.
-
-  For example, you can execute the `style/useNamingConvention` rule on the working directory:
-
-  ```shell
-  biome lint --rule=style/useNamingConvention ./
-  ```
-
-  If the rule has a code action (autofix), you can use `--apply` to apply the fix:
+  The `--only` option allows you to run a given rule or rule group,
+  For example, the following command runs only the `style/useNamingConvention` and `style/noInferrableTypes` rules.
+  If the rule is disabled in the configuration, then its severity level is set to `error` for a recommended rule or `warn` otherwise.
 
   ```shell
-  biome lint --rule=style/useNamingConvention --apply ./
+  biome lint --only=style/useNamingConvention --only=style/noInferrableTypes
   ```
 
-  The option takes the rule options in the Biome configuration file into account.
-  Only, the severity level of the rule is overridden by its default value,
-  i.e. `error` for a recommended rule or `warn` otherwise.
+  Passing a group does not change the severity level of the rules in the group.
+  All the disabled rules in the group will remain disabled.
+  To ensure that the group is run, the `recommended` field of the group is enabled.
+  The `nursery` group cannot be passed, as no rules are enabled by default in the nursery group.
 
-  You can also run a group of rules:
+  The `--skip` option allows you to skip the execution of a given group or a given rule.
+  For example, the following command skips the `style` group and the `suspicious/noExplicitAny` rule.
 
   ```shell
-  biome lint --rule=suspicious src/main.js
+  biome lint --skip=style --skip=suspicious/noExplicitAny
   ```
 
-  In this case, the severity level of a rule is not overridden.
-  Thus, the disabled rules stay disabled.
-  To ensure that the group is run, the `recommended` field of the group is turned on.
-  The `nursery` group cannot be passed because no rules are enabled in the nursery group by default.
+  You can also use `--only` and `--skip` together. `--skip` oevrrides `--only`.
+  The following command executes only the rules from the `style` group, but the `style/useNamingConvention` rule.
 
-  The option is compatible with other options such as `--apply`, `--apply-unsafe` and `--reporter`.
+  ```shell
+  biome lint --only=style --skip=style/useNamingConvention
+  ```
+
+  These options are compatible with other options such as `--write` (previously `--apply`), and `--reporter`.
 
   Contributed by @Conaclos
 
@@ -202,6 +199,11 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 - The `javascript.formatter.trailingComma` option is deprecated and renamed to `javascript.formatter.trailingCommas`. The corresponding CLI option `--trailing-comma` is also deprecated and renamed to `--trailing-commas`. Details can be checked in [#2492](https://github.com/biomejs/biome/pull/2492). Contributed by @Sec-ant
 
+#### Bug fixes
+
+- Fix a bug where if the formatter was disabled at the language level, it could be erroneously enabled by an
+  override that did not specify the formatter section [#2924](https://github.com/biomejs/biome/issues/2924). Contributed by @dyc3
+
 ### Editors
 
 #### New features
@@ -226,6 +228,7 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 #### New features
 
+- Add [nursery/useErrorMessage](https://biomejs.dev/linter/rules/use_error_message/). Contributed by @minht11
 - Add [nursery/useThrowOnlyError](https://biomejs.dev/linter/rules/use_throw_only_error/). Contributed by @minht11
 - Add [nursery/useImportExtensions](https://biomejs.dev/linter/rules/use-import-extensions/). Contributed by @minht11
 

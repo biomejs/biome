@@ -24,7 +24,6 @@ use biome_analyze::{
     QueryMatch, RegistryVisitor, RuleCategories, RuleCategory, RuleFilter, RuleGroup,
 };
 use biome_configuration::javascript::JsxRuntime;
-use biome_configuration::linter::RuleSelector;
 use biome_diagnostics::{category, Applicability, Diagnostic, DiagnosticExt, Severity};
 use biome_formatter::{
     AttributePosition, FormatError, IndentStyle, IndentWidth, LineEnding, LineWidth, Printed,
@@ -377,32 +376,15 @@ pub(crate) fn lint(params: LintParams) -> LintResults {
                 .analyzer_options::<JsLanguage>(params.path, &params.language);
 
             // Compute final rules (taking `overrides` into account)
-            let mut rules = settings.as_rules(params.path.as_path());
+            let rules = settings.as_rules(params.path.as_path());
 
-            let enabled_rules = if let Some(rule) = params.rule {
-                // We execute a single rule or group because the `--rule` filter is specified.
-                match rule {
-                    RuleSelector::Group(group) => {
-                        if let Some(rules) = rules.as_mut() {
-                            // Ensure that the recommended field is not set to `false`.
-                            rules.to_mut().set_recommended();
-                        }
-                        rules
-                            .as_ref()
-                            .map(|rules| rules.as_enabled_rules())
-                            .unwrap_or_default()
-                            .into_iter()
-                            .filter(|rule_filter| rule_filter.group() == group.as_str())
-                            .collect()
-                    }
-                    RuleSelector::Rule(group, rule_name) => {
-                        if let Some(rules) = rules.as_mut() {
-                            // Set the severity level of the rule to its default.
-                            rules.to_mut().set_default_severity(group, rule_name);
-                        }
-                        vec![rule.into()]
-                    }
-                }
+            let has_only_filter = !params.only.is_empty();
+            let enabled_rules = if has_only_filter {
+                params
+                    .only
+                    .into_iter()
+                    .map(|selector| selector.into())
+                    .collect::<Vec<_>>()
             } else {
                 let mut rule_filter_list = rules
                     .as_ref()
@@ -413,7 +395,6 @@ pub(crate) fn lint(params: LintParams) -> LintResults {
                 if settings.organize_imports.enabled && !params.categories.is_syntax() {
                     rule_filter_list.push(RuleFilter::Rule("correctness", "organizeImports"));
                 }
-
                 rule_filter_list.push(RuleFilter::Rule(
                     "correctness",
                     "noDuplicatePrivateClassMembers",
@@ -423,21 +404,29 @@ pub(crate) fn lint(params: LintParams) -> LintResults {
                 rule_filter_list.push(RuleFilter::Rule("nursery", "noSuperWithoutExtends"));
                 rule_filter_list
             };
+            let disabled_rules = params
+                .skip
+                .into_iter()
+                .map(|selector| selector.into())
+                .collect::<Vec<_>>();
+            let filter = AnalysisFilter {
+                categories: params.categories,
+                enabled_rules: Some(enabled_rules.as_slice()),
+                disabled_rules: &disabled_rules,
+                range: None,
+            };
 
-            let mut filter = AnalysisFilter::from_enabled_rules(Some(enabled_rules.as_slice()));
-            filter.categories = params.categories;
+            // Do not report unused suppression comment diagnostics if:
+            // - it is a syntax-only analyzer pass, or
+            // - if a single rule is run.
+            let ignores_suppression_comment =
+                !filter.categories.contains(RuleCategories::LINT) || has_only_filter;
 
             let mut diagnostic_count = diagnostics.len() as u32;
             let mut errors = diagnostics
                 .iter()
                 .filter(|diag| diag.severity() <= Severity::Error)
                 .count();
-
-            // Do not report unused suppression comment diagnostics if:
-            // - it is a syntax-only analyzer pass, or
-            // - if a single rule is run.
-            let ignores_suppression_comment =
-                !filter.categories.contains(RuleCategories::LINT) || params.rule.is_some();
 
             info!("Analyze file {}", params.path.display());
             let (_, analyze_diagnostics) = analyze(
@@ -572,7 +561,7 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
             }
 
             let mut filter = if !enabled_rules.is_empty() {
-                AnalysisFilter::from_enabled_rules(Some(enabled_rules.as_slice()))
+                AnalysisFilter::from_enabled_rules(enabled_rules.as_slice())
             } else {
                 AnalysisFilter::default()
             };

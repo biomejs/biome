@@ -502,7 +502,8 @@ pub struct PullDiagnosticsParams {
     pub path: BiomePath,
     pub categories: RuleCategories,
     pub max_diagnostics: u64,
-    pub rule: Option<RuleSelector>,
+    pub only: Vec<RuleSelector>,
+    pub skip: Vec<RuleSelector>,
 }
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
@@ -942,13 +943,15 @@ impl<'app, W: Workspace + ?Sized> FileGuard<'app, W> {
         &self,
         categories: RuleCategories,
         max_diagnostics: u32,
-        rule: Option<RuleSelector>,
+        only: Vec<RuleSelector>,
+        skip: Vec<RuleSelector>,
     ) -> Result<PullDiagnosticsResult, WorkspaceError> {
         self.workspace.pull_diagnostics(PullDiagnosticsParams {
             path: self.path.clone(),
             categories,
             max_diagnostics: max_diagnostics.into(),
-            rule,
+            only,
+            skip,
         })
     }
 

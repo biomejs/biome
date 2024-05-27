@@ -330,15 +330,39 @@ fn lint(params: LintParams) -> LintResults {
 
             // Compute final rules (taking `overrides` into account)
             let rules = settings.as_rules(params.path.as_path());
-            let rule_filter_list = rules
-                .as_ref()
-                .map(|rules| rules.as_enabled_rules())
-                .unwrap_or_default()
-                .into_iter()
-                .collect::<Vec<_>>();
 
-            let mut filter = AnalysisFilter::from_enabled_rules(Some(rule_filter_list.as_slice()));
-            filter.categories = params.categories;
+            let has_only_filter = !params.only.is_empty();
+            let enabled_rules = if has_only_filter {
+                params
+                    .only
+                    .into_iter()
+                    .map(|selector| selector.into())
+                    .collect::<Vec<_>>()
+            } else {
+                rules
+                    .as_ref()
+                    .map(|rules| rules.as_enabled_rules())
+                    .unwrap_or_default()
+                    .into_iter()
+                    .collect::<Vec<_>>()
+            };
+            let disabled_rules = params
+                .skip
+                .into_iter()
+                .map(|selector| selector.into())
+                .collect::<Vec<_>>();
+            let filter = AnalysisFilter {
+                categories: params.categories,
+                enabled_rules: Some(enabled_rules.as_slice()),
+                disabled_rules: &disabled_rules,
+                range: None,
+            };
+
+            // Do not report unused suppression comment diagnostics if:
+            // - it is a syntax-only analyzer pass, or
+            // - if a single rule is run.
+            let ignores_suppression_comment =
+                !filter.categories.contains(RuleCategories::LINT) || has_only_filter;
 
             let mut diagnostic_count = diagnostics.len() as u32;
             let mut errors = diagnostics
@@ -346,13 +370,12 @@ fn lint(params: LintParams) -> LintResults {
                 .filter(|diag| diag.severity() <= Severity::Error)
                 .count();
 
-            let has_lint = filter.categories.contains(RuleCategories::LINT);
-
             info!("Analyze file {}", params.path.display());
             let (_, analyze_diagnostics) = analyze(&tree, filter, &analyzer_options, |signal| {
                 if let Some(mut diagnostic) = signal.diagnostic() {
                     // Do not report unused suppression comment diagnostics if this is a syntax-only analyzer pass
-                    if !has_lint && diagnostic.category() == Some(category!("suppressions/unused"))
+                    if ignores_suppression_comment
+                        && diagnostic.category() == Some(category!("suppressions/unused"))
                     {
                         return ControlFlow::<Never>::Continue(());
                     }
@@ -439,7 +462,7 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
                 .into_iter()
                 .collect::<Vec<_>>();
 
-            let mut filter = AnalysisFilter::from_enabled_rules(Some(filter.as_slice()));
+            let mut filter = AnalysisFilter::from_enabled_rules(filter.as_slice());
 
             filter.categories = RuleCategories::SYNTAX | RuleCategories::LINT;
             if settings.organize_imports.enabled {
