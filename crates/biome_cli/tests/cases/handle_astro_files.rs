@@ -708,8 +708,6 @@ fn astro_global_object() {
         Args::from([("lint"), astro_file_path.as_os_str().to_str().unwrap()].as_slice()),
     );
 
-    dbg!("YEAH", &result);
-
     assert!(result.is_ok(), "run_cli returned {result:?}");
 
     assert_file_contents(&fs, astro_file_path, ASTRO_FILE_ASTRO_GLOBAL_OBJECT);
