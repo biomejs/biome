@@ -807,7 +807,7 @@ impl SemanticEventExtractor {
                 declaration_kind,
             }) = self.bindings.get(&name)
             {
-                // If we know the declaration of these reference push the correct events...
+                // We know the declaration of these reference.
                 for reference in references {
                     let declaration_before_reference =
                         declared_at.start() < reference.range().start();
@@ -881,47 +881,51 @@ impl SemanticEventExtractor {
             {
                 // Don't report an export that exports at least a binding.
             } else if let Some(parent) = self.scopes.last_mut() {
-                // ... if not, promote these references to the parent scope ...
+                // Promote these references to the parent scope
                 let parent_references = parent.references.entry(name).or_default();
                 parent_references.append(&mut references);
-            } else {
-                // ... or raise UnresolvedReference if this is the global scope.
-                let dual_binding = self.bindings.get(&name.dual()).cloned();
+            } else if let Some(info) = self.bindings.get(&name.dual()).cloned() {
+                // We are in the global scope.
+                // Try to bind some of these references to the dual binding of `name`,
+                // otherwise raide `UnresolvedReference`.
                 for reference in references {
                     match reference {
-                        Reference::Export(_) if dual_binding.is_some() => {
+                        Reference::Export(_) => {
                             // An export can export both a value and a type.
                             // If a dual binding exists, then it exports to the dual binding.
-                            continue;
                         }
-                        Reference::AmbientRead(range) => {
+                        Reference::AmbientRead(range) if info.is_imported() => {
                             // An ambient read can only read a value,
                             // but also an imported value as a type (with the `type` modifier)
-                            if let Some(info) = &dual_binding {
-                                if info.is_imported() {
-                                    let declared_at = info.range;
-                                    let declaration_before_reference =
-                                        declared_at.start() < reference.range().start();
-                                    let event = if declaration_before_reference {
-                                        SemanticEvent::Read {
-                                            range,
-                                            declared_at,
-                                            scope_id: 0,
-                                        }
-                                    } else {
-                                        SemanticEvent::HoistedRead {
-                                            range,
-                                            declared_at,
-                                            scope_id: 0,
-                                        }
-                                    };
-                                    self.stash.push_back(event);
-                                    continue;
+                            let declared_at = info.range;
+                            let declaration_before_reference =
+                                declared_at.start() < reference.range().start();
+                            let event = if declaration_before_reference {
+                                SemanticEvent::Read {
+                                    range,
+                                    declared_at,
+                                    scope_id: 0,
                                 }
-                            }
+                            } else {
+                                SemanticEvent::HoistedRead {
+                                    range,
+                                    declared_at,
+                                    scope_id: 0,
+                                }
+                            };
+                            self.stash.push_back(event);
                         }
-                        _ => {}
+                        _ => {
+                            self.stash.push_back(SemanticEvent::UnresolvedReference {
+                                is_read: !reference.is_write(),
+                                range: *reference.range(),
+                            });
+                        }
                     }
+                }
+            } else {
+                // We are in the global scope. Raise `UnresolvedReference`.
+                for reference in references {
                     self.stash.push_back(SemanticEvent::UnresolvedReference {
                         is_read: !reference.is_write(),
                         range: *reference.range(),
