@@ -218,7 +218,7 @@ enum Reference {
     /// export { A }
     /// ```
     Export(TextRange),
-    /// All reads that are not an export or part of a `typeof` expression
+    /// Read a value or a type.
     /// ```js
     /// f();
     /// a;
@@ -230,23 +230,19 @@ enum Reference {
     /// typeof Y;
     /// const X = 0;
     /// typeof X;
+    ///
     /// type T = {[X]: number, [Y]: number };
+    ///
+    /// namespace A { type B = number; }
+    /// let a: A.B = 1;
     /// ```
-    Typeof(TextRange),
+    AmbientRead(TextRange),
     /// Assignment
     /// ```js
     /// a = 0;
     /// a += 1;
     /// ```
     Write(TextRange),
-    /// TS_QUALIFIED_NAME
-    /// ```ts
-    /// namespace A {
-    ///   type B = number;
-    /// }
-    /// let a: A.B = 1;
-    /// ```
-    Qualified(TextRange),
 }
 
 impl Reference {
@@ -259,9 +255,8 @@ impl Reference {
         match self {
             Self::Export(range)
             | Self::Read(range)
-            | Self::Typeof(range)
-            | Self::Write(range)
-            | Self::Qualified(range) => range,
+            | Self::AmbientRead(range)
+            | Self::Write(range) => range,
         }
     }
 }
@@ -606,7 +601,7 @@ impl SemanticEventExtractor {
                                 ) {
                                     self.push_reference(
                                         BindingName::Value(name.clone()),
-                                        Reference::Typeof(range),
+                                        Reference::AmbientRead(range),
                                     );
                                 } else {
                                     self.push_reference(
@@ -637,7 +632,7 @@ impl SemanticEventExtractor {
                                 if matches!(parent.kind(), TS_QUALIFIED_NAME) {
                                     self.push_reference(
                                         BindingName::Value(name),
-                                        Reference::Qualified(range),
+                                        Reference::AmbientRead(range),
                                     )
                                 } else {
                                     self.push_reference(
@@ -654,7 +649,7 @@ impl SemanticEventExtractor {
                                 // We handle this particular case in `pop_scope` (unresolved reference)
                                 self.push_reference(
                                     BindingName::Value(name.clone()),
-                                    Reference::Typeof(range),
+                                    Reference::AmbientRead(range),
                                 );
                             }
                             _ => {
@@ -834,7 +829,7 @@ impl SemanticEventExtractor {
                                 }
                             }
                         }
-                        Reference::Read(range) | Reference::Typeof(range) => {
+                        Reference::Read(range) | Reference::AmbientRead(range) => {
                             if declaration_kind == JsSyntaxKind::JS_NAMESPACE_IMPORT_SPECIFIER
                                 && matches!(name, BindingName::Type(_))
                             {
@@ -849,21 +844,6 @@ impl SemanticEventExtractor {
                                 });
                                 continue;
                             }
-                            if declaration_before_reference {
-                                SemanticEvent::Read {
-                                    range,
-                                    declared_at,
-                                    scope_id,
-                                }
-                            } else {
-                                SemanticEvent::HoistedRead {
-                                    range,
-                                    declared_at,
-                                    scope_id,
-                                }
-                            }
-                        }
-                        Reference::Qualified(range) => {
                             if declaration_before_reference {
                                 SemanticEvent::Read {
                                     range,
@@ -914,9 +894,9 @@ impl SemanticEventExtractor {
                             // If a dual binding exists, then it exports to the dual binding.
                             continue;
                         }
-                        Reference::Typeof(range) | Reference::Qualified(range) => {
-                            // A typeof can only use a value,
-                            // but also an imported variable as a type (with the `type` modifier)
+                        Reference::AmbientRead(range) => {
+                            // An ambient read can only read a value,
+                            // but also an imported value as a type (with the `type` modifier)
                             if let Some(info) = &dual_binding {
                                 if info.is_imported() {
                                     let declared_at = info.range;
