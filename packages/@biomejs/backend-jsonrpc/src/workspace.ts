@@ -1082,6 +1082,10 @@ export interface Nursery {
 	 */
 	useConsistentBuiltinInstantiation?: RuleFixConfiguration_for_Null;
 	/**
+	 * Use Date.now() to get the number of milliseconds since the Unix Epoch.
+	 */
+	useDateNow?: RuleFixConfiguration_for_Null;
+	/**
 	 * Require the default clause in switch statements.
 	 */
 	useDefaultSwitchClause?: RuleConfiguration_for_Null;
@@ -2313,6 +2317,7 @@ export type Category =
 	| "lint/nursery/useArrayLiterals"
 	| "lint/nursery/useBiomeSuppressionComment"
 	| "lint/nursery/useConsistentBuiltinInstantiation"
+	| "lint/nursery/useDateNow"
 	| "lint/nursery/useDefaultSwitchClause"
 	| "lint/nursery/useErrorMessage"
 	| "lint/nursery/useExplicitLengthCheck"
