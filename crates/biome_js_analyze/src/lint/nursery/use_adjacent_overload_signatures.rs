@@ -96,7 +96,7 @@ declare_rule! {
 }
 
 impl Rule for UseAdjacentOverloadSignatures {
-    type Query = Ast<DeclarationOsModuleNode>;
+    type Query = Ast<DeclarationOrModuleNode>;
     type State = Vec<(TokenText, TextRange)>;
     type Signals = Option<Self::State>;
     type Options = ();
@@ -109,24 +109,24 @@ impl Rule for UseAdjacentOverloadSignatures {
         let mut last_method = None;
 
         match node {
-            DeclarationOsModuleNode::TsDeclareStatement(node) => {
+            DeclarationOrModuleNode::TsDeclareStatement(node) => {
                 let declaration = node.declaration().ok()?;
                 let items = declaration.as_ts_module_declaration()?.body().ok()?.items();
                 collect_exports(&items, &mut methods, &mut seen_methods, &mut last_method);
             }
-            DeclarationOsModuleNode::TsInterfaceDeclaration(node) => {
+            DeclarationOrModuleNode::TsInterfaceDeclaration(node) => {
                 collect_interface(node, &mut methods, &mut seen_methods, &mut last_method);
             }
-            DeclarationOsModuleNode::TsTypeAliasDeclaration(node) => {
+            DeclarationOrModuleNode::TsTypeAliasDeclaration(node) => {
                 collect_type(node, &mut methods, &mut seen_methods, &mut last_method);
             }
-            DeclarationOsModuleNode::JsClassDeclaration(node) => {
+            DeclarationOrModuleNode::JsClassDeclaration(node) => {
                 collect_class(node, &mut methods, &mut seen_methods, &mut last_method);
             }
-            DeclarationOsModuleNode::JsFunctionDeclaration(node) => {
+            DeclarationOrModuleNode::JsFunctionDeclaration(node) => {
                 collect_function(node, &mut methods, &mut seen_methods, &mut last_method);
             }
-            DeclarationOsModuleNode::JsModule(node) => {
+            DeclarationOrModuleNode::JsModule(node) => {
                 let items = node.items();
                 collect_exports(&items, &mut methods, &mut seen_methods, &mut last_method);
             }
@@ -314,5 +314,5 @@ fn check_method(
 }
 
 declare_node_union! {
-    pub DeclarationOsModuleNode = TsInterfaceDeclaration | TsTypeAliasDeclaration | TsDeclareStatement | JsClassDeclaration | JsModule | JsFunctionDeclaration
+    pub DeclarationOrModuleNode = TsInterfaceDeclaration | TsTypeAliasDeclaration | TsDeclareStatement | JsClassDeclaration | JsModule | JsFunctionDeclaration
 }
