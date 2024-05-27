@@ -62,6 +62,28 @@ macro_rules! url {
     };
 }
 
+fn fixable_diagnostic(line: u32) -> Result<lsp::Diagnostic> {
+    Ok(lsp::Diagnostic {
+        range: Range {
+            start: Position { line, character: 3 },
+            end: Position {
+                line,
+                character: 11,
+            },
+        },
+        severity: Some(lsp::DiagnosticSeverity::ERROR),
+        code: Some(lsp::NumberOrString::String(String::from(
+            "lint/suspicious/noCompareNegZero",
+        ))),
+        code_description: None,
+        source: Some(String::from("biome")),
+        message: String::from("Do not use the === operator to compare against -0."),
+        related_information: None,
+        tags: None,
+        data: None,
+    })
+}
+
 struct Server {
     service: Timeout<LspService<LSPServer>>,
 }
@@ -150,7 +172,7 @@ impl Server {
                 InitializeParams {
                     process_id: None,
                     root_path: None,
-                    root_uri: Some(url!("/")),
+                    root_uri: Some(url!("")),
                     initialization_options: None,
                     capabilities: ClientCapabilities::default(),
                     trace: None,
@@ -277,6 +299,8 @@ impl Server {
         )
         .await
     }
+
+    /// When calling this function, remember to insert the file inside the memory file system
     async fn load_configuration(&mut self) -> Result<()> {
         self.notify(
             "workspace/didChangeConfiguration",
@@ -829,28 +853,6 @@ async fn pull_diagnostics_from_new_file() -> Result<()> {
     Ok(())
 }
 
-fn fixable_diagnostic(line: u32) -> Result<lsp::Diagnostic> {
-    Ok(lsp::Diagnostic {
-        range: Range {
-            start: Position { line, character: 3 },
-            end: Position {
-                line,
-                character: 11,
-            },
-        },
-        severity: Some(lsp::DiagnosticSeverity::ERROR),
-        code: Some(lsp::NumberOrString::String(String::from(
-            "lint/suspicious/noCompareNegZero",
-        ))),
-        code_description: None,
-        source: Some(String::from("biome")),
-        message: String::from("Do not use the === operator to compare against -0."),
-        related_information: None,
-        tags: None,
-        data: None,
-    })
-}
-
 #[tokio::test]
 async fn pull_quick_fixes() -> Result<()> {
     let factory = ServerFactory::default();
@@ -1383,6 +1385,90 @@ async fn pull_diagnostics_for_rome_json() -> Result<()> {
 }
 
 #[tokio::test]
+async fn pull_diagnostics_for_css_files() -> Result<()> {
+    let factory = ServerFactory::default();
+    let mut fs = MemoryFileSystem::default();
+    let config = r#"{
+        "css": {
+            "linter": { "enabled": true }
+        },
+        "linter": {
+            "rules": { "nursery": { "noUnknownProperty": "error" } }
+        }
+    }"#;
+
+    fs.insert(url!("biome.json").to_file_path().unwrap(), config);
+    let (service, client) = factory
+        .create_with_fs(None, DynRef::Owned(Box::new(fs)))
+        .into_inner();
+
+    let (stream, sink) = client.split();
+    let mut server = Server::new(service);
+
+    let (sender, mut receiver) = channel(CHANNEL_BUFFER_SIZE);
+    let reader = tokio::spawn(client_handler(stream, sink, sender));
+
+    server.initialize().await?;
+    server.initialized().await?;
+
+    server.load_configuration().await?;
+
+    let incorrect_config = r#"a {colr: blue;}"#;
+    server
+        .open_named_document(incorrect_config, url!("document.css"), "css")
+        .await?;
+
+    let notification = tokio::select! {
+        msg = receiver.next() => msg,
+        _ = sleep(Duration::from_secs(1)) => {
+            panic!("timed out waiting for the server to send diagnostics")
+        }
+    };
+
+    assert_eq!(
+        notification,
+        Some(ServerNotification::PublishDiagnostics(
+            PublishDiagnosticsParams {
+                uri: url!("document.css"),
+                version: Some(0),
+                diagnostics: vec![lsp::Diagnostic {
+                    range: Range {
+                        start: Position {
+                            line: 0,
+                            character: 3,
+                        },
+                        end: Position {
+                            line: 0,
+                            character: 7,
+                        },
+                    },
+                    severity: Some(lsp::DiagnosticSeverity::ERROR),
+                    code: Some(lsp::NumberOrString::String(String::from(
+                        "lint/nursery/noUnknownProperty"
+                    ))),
+                    code_description: Some(CodeDescription {
+                        href: Url::parse("https://biomejs.dev/linter/rules/no-unknown-property")
+                            .unwrap()
+                    }),
+                    source: Some(String::from("biome")),
+                    message: String::from("Unknown property is not allowed.",),
+                    related_information: None,
+                    tags: None,
+                    data: None,
+                }],
+            }
+        ))
+    );
+
+    server.close_document().await?;
+
+    server.shutdown().await?;
+    reader.abort();
+
+    Ok(())
+}
+
+#[tokio::test]
 async fn no_code_actions_for_ignored_json_files() -> Result<()> {
     let factory = ServerFactory::default();
     let (service, client) = factory.create(None).into_inner();
@@ -1638,6 +1724,108 @@ if(a === -0) {}
     });
 
     assert_eq!(res, vec![expected_code_action]);
+
+    server.close_document().await?;
+
+    server.shutdown().await?;
+    reader.abort();
+
+    Ok(())
+}
+
+#[tokio::test]
+async fn does_not_pull_action_for_disabled_rule_in_override_issue_2782() -> Result<()> {
+    let factory = ServerFactory::default();
+    let (service, client) = factory.create(None).into_inner();
+    let (stream, sink) = client.split();
+    let mut server = Server::new(service);
+
+    let (sender, _) = channel(CHANNEL_BUFFER_SIZE);
+    let reader = tokio::spawn(client_handler(stream, sink, sender));
+
+    server.initialize().await?;
+    server.initialized().await?;
+
+    let incorrect_config = r#"{
+    "$schema": "https://biomejs.dev/schemas/1.7.3/schema.json",
+    "organizeImports": { "enabled": false },
+    "linter": {
+        "enabled": true,
+        "rules": {
+            "recommended": false,
+            "style": {
+                "useEnumInitializers": "error"
+            }
+        }
+    },
+    "overrides": [
+        {
+            "include": ["*.ts", "*.tsx"],
+            "linter": {
+                "rules": {
+                    "style": {
+                        "useEnumInitializers": "off"
+                    }
+                }
+            }
+        }
+    ]
+}"#;
+    server
+        .open_named_document(incorrect_config, url!("biome.json"), "json")
+        .await?;
+
+    server
+        .open_named_document(
+            r#"enum X {
+	A,
+	B,
+	C,
+}"#,
+            url!("test.ts"),
+            "typescript",
+        )
+        .await?;
+
+    server.load_configuration().await?;
+
+    let res: lsp::CodeActionResponse = server
+        .request(
+            "textDocument/codeAction",
+            "pull_code_actions",
+            lsp::CodeActionParams {
+                text_document: TextDocumentIdentifier {
+                    uri: url!("test.ts"),
+                },
+                range: Range {
+                    start: Position {
+                        line: 0,
+                        character: 1,
+                    },
+                    end: Position {
+                        line: 3,
+                        character: 10,
+                    },
+                },
+                context: lsp::CodeActionContext {
+                    diagnostics: vec![fixable_diagnostic(0)?],
+                    only: Some(vec![lsp::CodeActionKind::new(
+                        "quickfix.biome.style.useEnumInitializers",
+                    )]),
+                    ..Default::default()
+                },
+                work_done_progress_params: WorkDoneProgressParams {
+                    work_done_token: None,
+                },
+                partial_result_params: lsp::PartialResultParams {
+                    partial_result_token: None,
+                },
+            },
+        )
+        .await?
+        .context("codeAction returned None")?;
+
+    assert!(res.is_empty(), "This should not have code actions");
 
     server.close_document().await?;
 

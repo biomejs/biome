@@ -2030,6 +2030,76 @@ pub fn css_url_value_raw(value_token: SyntaxToken) -> CssUrlValueRaw {
         [Some(SyntaxElement::Token(value_token))],
     ))
 }
+pub fn css_value_at_rule(
+    value_token: SyntaxToken,
+    clause: AnyCssValueAtRuleClause,
+    semicolon_token: SyntaxToken,
+) -> CssValueAtRule {
+    CssValueAtRule::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_VALUE_AT_RULE,
+        [
+            Some(SyntaxElement::Token(value_token)),
+            Some(SyntaxElement::Node(clause.into_syntax())),
+            Some(SyntaxElement::Token(semicolon_token)),
+        ],
+    ))
+}
+pub fn css_value_at_rule_declaration_clause(
+    properties: CssValueAtRulePropertyList,
+) -> CssValueAtRuleDeclarationClause {
+    CssValueAtRuleDeclarationClause::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_VALUE_AT_RULE_DECLARATION_CLAUSE,
+        [Some(SyntaxElement::Node(properties.into_syntax()))],
+    ))
+}
+pub fn css_value_at_rule_generic_property(
+    name: AnyCssDeclarationName,
+    colon_token: SyntaxToken,
+    value: CssValueAtRuleGenericValue,
+) -> CssValueAtRuleGenericProperty {
+    CssValueAtRuleGenericProperty::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_VALUE_AT_RULE_GENERIC_PROPERTY,
+        [
+            Some(SyntaxElement::Node(name.into_syntax())),
+            Some(SyntaxElement::Token(colon_token)),
+            Some(SyntaxElement::Node(value.into_syntax())),
+        ],
+    ))
+}
+pub fn css_value_at_rule_import_clause(
+    specifiers: CssValueAtRuleImportSpecifierList,
+    from_token: SyntaxToken,
+    source: AnyCssValueAtRuleImportSource,
+) -> CssValueAtRuleImportClause {
+    CssValueAtRuleImportClause::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_VALUE_AT_RULE_IMPORT_CLAUSE,
+        [
+            Some(SyntaxElement::Node(specifiers.into_syntax())),
+            Some(SyntaxElement::Token(from_token)),
+            Some(SyntaxElement::Node(source.into_syntax())),
+        ],
+    ))
+}
+pub fn css_value_at_rule_import_specifier(name: CssIdentifier) -> CssValueAtRuleImportSpecifier {
+    CssValueAtRuleImportSpecifier::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_VALUE_AT_RULE_IMPORT_SPECIFIER,
+        [Some(SyntaxElement::Node(name.into_syntax()))],
+    ))
+}
+pub fn css_value_at_rule_named_import_specifier(
+    name: CssIdentifier,
+    as_token: SyntaxToken,
+    local_name: CssIdentifier,
+) -> CssValueAtRuleNamedImportSpecifier {
+    CssValueAtRuleNamedImportSpecifier::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_VALUE_AT_RULE_NAMED_IMPORT_SPECIFIER,
+        [
+            Some(SyntaxElement::Node(name.into_syntax())),
+            Some(SyntaxElement::Token(as_token)),
+            Some(SyntaxElement::Node(local_name.into_syntax())),
+        ],
+    ))
+}
 pub fn css_component_value_list<I>(items: I) -> CssComponentValueList
 where
     I: IntoIterator<Item = AnyCssValue>,
@@ -2438,6 +2508,51 @@ where
             .map(|item| Some(item.into_syntax().into())),
     ))
 }
+pub fn css_value_at_rule_import_specifier_list<I, S>(
+    items: I,
+    separators: S,
+) -> CssValueAtRuleImportSpecifierList
+where
+    I: IntoIterator<Item = AnyCssValueAtRuleImportSpecifier>,
+    I::IntoIter: ExactSizeIterator,
+    S: IntoIterator<Item = CssSyntaxToken>,
+    S::IntoIter: ExactSizeIterator,
+{
+    let mut items = items.into_iter();
+    let mut separators = separators.into_iter();
+    let length = items.len() + separators.len();
+    CssValueAtRuleImportSpecifierList::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_VALUE_AT_RULE_IMPORT_SPECIFIER_LIST,
+        (0..length).map(|index| {
+            if index % 2 == 0 {
+                Some(items.next()?.into_syntax().into())
+            } else {
+                Some(separators.next()?.into())
+            }
+        }),
+    ))
+}
+pub fn css_value_at_rule_property_list<I, S>(items: I, separators: S) -> CssValueAtRulePropertyList
+where
+    I: IntoIterator<Item = AnyCssValueAtRuleProperty>,
+    I::IntoIter: ExactSizeIterator,
+    S: IntoIterator<Item = CssSyntaxToken>,
+    S::IntoIter: ExactSizeIterator,
+{
+    let mut items = items.into_iter();
+    let mut separators = separators.into_iter();
+    let length = items.len() + separators.len();
+    CssValueAtRulePropertyList::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_VALUE_AT_RULE_PROPERTY_LIST,
+        (0..length).map(|index| {
+            if index % 2 == 0 {
+                Some(items.next()?.into_syntax().into())
+            } else {
+                Some(separators.next()?.into())
+            }
+        }),
+    ))
+}
 pub fn css_bogus<I>(slots: I) -> CssBogus
 where
     I: IntoIterator<Item = Option<SyntaxElement>>,
@@ -2652,6 +2767,16 @@ where
 {
     CssBogusUrlModifier::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_BOGUS_URL_MODIFIER,
+        slots,
+    ))
+}
+pub fn css_value_at_rule_generic_value<I>(slots: I) -> CssValueAtRuleGenericValue
+where
+    I: IntoIterator<Item = Option<SyntaxElement>>,
+    I::IntoIter: ExactSizeIterator,
+{
+    CssValueAtRuleGenericValue::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_VALUE_AT_RULE_GENERIC_VALUE,
         slots,
     ))
 }

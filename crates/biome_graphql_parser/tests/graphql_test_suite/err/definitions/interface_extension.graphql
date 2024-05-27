@@ -1,0 +1,5 @@
+extend interface Story
+
+extend interface User
+  name: String
+}

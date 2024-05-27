@@ -7,11 +7,13 @@ use crate::registry::visit_migration_registry;
 use crate::version_services::TheVersion;
 pub use biome_analyze::ControlFlow;
 use biome_analyze::{
-    AnalysisFilter, Analyzer, AnalyzerContext, AnalyzerOptions, AnalyzerSignal, InspectMatcher,
-    LanguageRoot, MatchQueryParams, MetadataRegistry, RuleAction, RuleRegistry,
+    AnalysisFilter, Analyzer, AnalyzerContext, AnalyzerOptions, AnalyzerSignal, ApplySuppression,
+    InspectMatcher, LanguageRoot, MatchQueryParams, MetadataRegistry, RuleAction, RuleRegistry,
+    SuppressionAction,
 };
 use biome_diagnostics::Error;
 use biome_json_syntax::JsonLanguage;
+use biome_rowan::{BatchMutation, SyntaxToken};
 use std::convert::Infallible;
 use std::path::{Path, PathBuf};
 use std::sync::Arc;
@@ -61,12 +63,31 @@ where
     if !diagnostics.is_empty() {
         return (None, diagnostics);
     }
+    struct TestAction;
+    impl SuppressionAction for TestAction {
+        type Language = JsonLanguage;
 
+        fn find_token_to_apply_suppression(
+            &self,
+            _: SyntaxToken<Self::Language>,
+        ) -> Option<ApplySuppression<Self::Language>> {
+            None
+        }
+
+        fn apply_suppression(
+            &self,
+            _: &mut BatchMutation<Self::Language>,
+            _: ApplySuppression<Self::Language>,
+            _: &str,
+        ) {
+            unreachable!("")
+        }
+    }
     let mut analyzer = Analyzer::new(
         metadata(),
         InspectMatcher::new(migration_registry, inspect_matcher),
         |_| -> Vec<Result<_, Infallible>> { unreachable!() },
-        |_| {},
+        Box::new(TestAction),
         &mut emit_signal,
     );
 

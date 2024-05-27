@@ -4,8 +4,7 @@ use crate::{
     context::RuleContext,
     registry::{RuleLanguage, RuleRoot},
     rule::Rule,
-    AnalyzerDiagnostic, AnalyzerOptions, Queryable, RuleGroup, ServiceBag,
-    SuppressionCommentEmitter,
+    AnalyzerDiagnostic, AnalyzerOptions, Queryable, RuleGroup, ServiceBag, SuppressionAction,
 };
 use biome_console::MarkupBuf;
 use biome_diagnostics::{advice::CodeSuggestionAdvice, Applicability, CodeSuggestion, Error};
@@ -310,7 +309,7 @@ pub(crate) struct RuleSignal<'phase, R: Rule> {
     state: R::State,
     services: &'phase ServiceBag,
     /// An optional action to suppress the rule.
-    apply_suppression_comment: SuppressionCommentEmitter<RuleLanguage<R>>,
+    suppression_action: &'phase dyn SuppressionAction<Language = RuleLanguage<R>>,
     /// A list of strings that are considered "globals" inside the analyzer
     options: &'phase AnalyzerOptions,
 }
@@ -324,9 +323,10 @@ where
         query_result: <<R as Rule>::Query as Queryable>::Output,
         state: R::State,
         services: &'phase ServiceBag,
-        apply_suppression_comment: SuppressionCommentEmitter<
-            <<R as Rule>::Query as Queryable>::Language,
+        suppression_action: &'phase dyn SuppressionAction<
+            Language = <<R as Rule>::Query as Queryable>::Language,
         >,
+
         options: &'phase AnalyzerOptions,
     ) -> Self {
         Self {
@@ -334,7 +334,7 @@ where
             query_result,
             state,
             services,
-            apply_suppression_comment,
+            suppression_action,
             options,
         }
     }
@@ -404,7 +404,7 @@ where
             };
             if let Some(text_range) = R::text_range(&ctx, &self.state) {
                 if let Some(suppression_action) =
-                    R::suppress(&ctx, &text_range, self.apply_suppression_comment)
+                    R::suppress(&ctx, &text_range, self.suppression_action)
                 {
                     let action = AnalyzerAction {
                         rule_name: Some((<R::Group as RuleGroup>::NAME, R::METADATA.name)),

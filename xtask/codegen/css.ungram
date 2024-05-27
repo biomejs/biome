@@ -550,6 +550,7 @@ AnyCssAtRule =
 	| CssStartingStyleAtRule
 	| CssDocumentAtRule
 	| CssPropertyAtRule
+	| CssValueAtRule
 	| CssBogusAtRule
 
 // @charset "UTF-8";
@@ -1420,6 +1421,81 @@ CssDocumentCustomMatcher =
 	'('
 	value: CssString
 	')'
+
+// https://github.com/css-modules/postcss-modules-values
+// @value selectorValue: secondary-color;
+//        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+// @value small as bp-small, large as bp-large from "./breakpoints.css";
+//        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+CssValueAtRule =
+	'value'
+	clause: AnyCssValueAtRuleClause
+	';'
+
+AnyCssValueAtRuleClause =
+	CssValueAtRuleImportClause
+	| CssValueAtRuleDeclarationClause
+
+// @value small as bp-small, large as bp-large from "./breakpoints.css";
+//        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+CssValueAtRuleImportClause =
+	specifiers: CssValueAtRuleImportSpecifierList
+	'from'
+	source: AnyCssValueAtRuleImportSource
+
+// @value primary, secondary from colors;
+//         												^^^^^^
+// @value small as bp-small, large as bp-large from "./breakpoints.css";
+//          																				^^^^^^^^^^^^^^^^^^^
+AnyCssValueAtRuleImportSource =
+	CssString
+	| CssIdentifier
+
+CssValueAtRuleImportSpecifierList = (AnyCssValueAtRuleImportSpecifier (',' AnyCssValueAtRuleImportSpecifier)*)
+
+AnyCssValueAtRuleImportSpecifier =
+	CssValueAtRuleImportSpecifier
+	| CssValueAtRuleNamedImportSpecifier
+
+// @value small, large as bp-large from "./breakpoints.css";
+//        ^^^^^
+CssValueAtRuleImportSpecifier =
+ name: CssIdentifier
+
+// @value small, large as bp-large from "./breakpoints.css";
+//        			 ^^^^^^^^^^^^^^^^^
+CssValueAtRuleNamedImportSpecifier =
+	name: CssIdentifier
+	'as'
+	local_name: CssIdentifier
+
+// @value small: (max-width: 599px), selectorValue: secondary-color;
+//        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+CssValueAtRuleDeclarationClause =
+	properties: CssValueAtRulePropertyList
+
+CssValueAtRulePropertyList = (AnyCssValueAtRuleProperty (',' AnyCssValueAtRuleProperty)*)
+
+AnyCssValueAtRuleProperty =
+	CssValueAtRuleGenericProperty
+	| CssBogusProperty
+
+CssValueAtRuleGenericProperty =
+	name: AnyCssDeclarationName
+	':'
+	value: CssValueAtRuleGenericValue
+
+// A generic property can be any sequence of tokens, which is why we parse it as an unformed tree.
+// This approach allows for flexibility, as the exact structure of generic properties may not be well-defined.
+// By parsing the property in this manner, we ensure that we can handle a wide variety of cases without
+// requiring specific grammar rules for each possible property structure.
+//
+// If we want to extend the parsing with a specific grammar in the future, we can implement speculative parsing.
+// Speculative parsing would attempt to parse the property according to the new grammar rules.
+// If an error occurs during this process, we can fall back to the current implementation, which treats
+// the property as an unformed tree. This approach ensures backward compatibility and allows for incremental
+// improvements to the parser without breaking existing functionality.
+CssValueAtRuleGenericValue = SyntaxElement*
 
 ///////////////
 // AUXILIARY

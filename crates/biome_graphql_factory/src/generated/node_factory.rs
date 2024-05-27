@@ -728,47 +728,37 @@ pub fn graphql_interface_type_extension(
     extend_token: SyntaxToken,
     interface_token: SyntaxToken,
     name: GraphqlName,
-    implements: GraphqlImplementsInterfaces,
-) -> GraphqlInterfaceTypeExtension {
-    GraphqlInterfaceTypeExtension::unwrap_cast(SyntaxNode::new_detached(
-        GraphqlSyntaxKind::GRAPHQL_INTERFACE_TYPE_EXTENSION,
-        [
-            Some(SyntaxElement::Token(extend_token)),
-            Some(SyntaxElement::Token(interface_token)),
-            Some(SyntaxElement::Node(name.into_syntax())),
-            Some(SyntaxElement::Node(implements.into_syntax())),
-        ],
-    ))
-}
-pub fn graphql_interface_type_extension_with_directives(
-    extend_token: SyntaxToken,
-    interface_token: SyntaxToken,
-    name: GraphqlName,
     directives: GraphqlDirectiveList,
-) -> GraphqlInterfaceTypeExtensionWithDirectivesBuilder {
-    GraphqlInterfaceTypeExtensionWithDirectivesBuilder {
+) -> GraphqlInterfaceTypeExtensionBuilder {
+    GraphqlInterfaceTypeExtensionBuilder {
         extend_token,
         interface_token,
         name,
         directives,
         implements: None,
+        fields: None,
     }
 }
-pub struct GraphqlInterfaceTypeExtensionWithDirectivesBuilder {
+pub struct GraphqlInterfaceTypeExtensionBuilder {
     extend_token: SyntaxToken,
     interface_token: SyntaxToken,
     name: GraphqlName,
     directives: GraphqlDirectiveList,
     implements: Option<GraphqlImplementsInterfaces>,
+    fields: Option<GraphqlFieldsDefinition>,
 }
-impl GraphqlInterfaceTypeExtensionWithDirectivesBuilder {
+impl GraphqlInterfaceTypeExtensionBuilder {
     pub fn with_implements(mut self, implements: GraphqlImplementsInterfaces) -> Self {
         self.implements = Some(implements);
         self
     }
-    pub fn build(self) -> GraphqlInterfaceTypeExtensionWithDirectives {
-        GraphqlInterfaceTypeExtensionWithDirectives::unwrap_cast(SyntaxNode::new_detached(
-            GraphqlSyntaxKind::GRAPHQL_INTERFACE_TYPE_EXTENSION_WITH_DIRECTIVES,
+    pub fn with_fields(mut self, fields: GraphqlFieldsDefinition) -> Self {
+        self.fields = Some(fields);
+        self
+    }
+    pub fn build(self) -> GraphqlInterfaceTypeExtension {
+        GraphqlInterfaceTypeExtension::unwrap_cast(SyntaxNode::new_detached(
+            GraphqlSyntaxKind::GRAPHQL_INTERFACE_TYPE_EXTENSION,
             [
                 Some(SyntaxElement::Token(self.extend_token)),
                 Some(SyntaxElement::Token(self.interface_token)),
@@ -776,50 +766,8 @@ impl GraphqlInterfaceTypeExtensionWithDirectivesBuilder {
                 self.implements
                     .map(|token| SyntaxElement::Node(token.into_syntax())),
                 Some(SyntaxElement::Node(self.directives.into_syntax())),
-            ],
-        ))
-    }
-}
-pub fn graphql_interface_type_extension_with_fields(
-    extend_token: SyntaxToken,
-    interface_token: SyntaxToken,
-    name: GraphqlName,
-    directives: GraphqlDirectiveList,
-    fields: GraphqlFieldsDefinition,
-) -> GraphqlInterfaceTypeExtensionWithFieldsBuilder {
-    GraphqlInterfaceTypeExtensionWithFieldsBuilder {
-        extend_token,
-        interface_token,
-        name,
-        directives,
-        fields,
-        implements: None,
-    }
-}
-pub struct GraphqlInterfaceTypeExtensionWithFieldsBuilder {
-    extend_token: SyntaxToken,
-    interface_token: SyntaxToken,
-    name: GraphqlName,
-    directives: GraphqlDirectiveList,
-    fields: GraphqlFieldsDefinition,
-    implements: Option<GraphqlImplementsInterfaces>,
-}
-impl GraphqlInterfaceTypeExtensionWithFieldsBuilder {
-    pub fn with_implements(mut self, implements: GraphqlImplementsInterfaces) -> Self {
-        self.implements = Some(implements);
-        self
-    }
-    pub fn build(self) -> GraphqlInterfaceTypeExtensionWithFields {
-        GraphqlInterfaceTypeExtensionWithFields::unwrap_cast(SyntaxNode::new_detached(
-            GraphqlSyntaxKind::GRAPHQL_INTERFACE_TYPE_EXTENSION_WITH_FIELDS,
-            [
-                Some(SyntaxElement::Token(self.extend_token)),
-                Some(SyntaxElement::Token(self.interface_token)),
-                Some(SyntaxElement::Node(self.name.into_syntax())),
-                self.implements
+                self.fields
                     .map(|token| SyntaxElement::Node(token.into_syntax())),
-                Some(SyntaxElement::Node(self.directives.into_syntax())),
-                Some(SyntaxElement::Node(self.fields.into_syntax())),
             ],
         ))
     }
@@ -952,47 +900,37 @@ pub fn graphql_object_type_extension(
     extend_token: SyntaxToken,
     type_token: SyntaxToken,
     name: GraphqlName,
-    implements: GraphqlImplementsInterfaces,
-) -> GraphqlObjectTypeExtension {
-    GraphqlObjectTypeExtension::unwrap_cast(SyntaxNode::new_detached(
-        GraphqlSyntaxKind::GRAPHQL_OBJECT_TYPE_EXTENSION,
-        [
-            Some(SyntaxElement::Token(extend_token)),
-            Some(SyntaxElement::Token(type_token)),
-            Some(SyntaxElement::Node(name.into_syntax())),
-            Some(SyntaxElement::Node(implements.into_syntax())),
-        ],
-    ))
-}
-pub fn graphql_object_type_extension_with_directives(
-    extend_token: SyntaxToken,
-    type_token: SyntaxToken,
-    name: GraphqlName,
     directives: GraphqlDirectiveList,
-) -> GraphqlObjectTypeExtensionWithDirectivesBuilder {
-    GraphqlObjectTypeExtensionWithDirectivesBuilder {
+) -> GraphqlObjectTypeExtensionBuilder {
+    GraphqlObjectTypeExtensionBuilder {
         extend_token,
         type_token,
         name,
         directives,
         implements: None,
+        fields: None,
     }
 }
-pub struct GraphqlObjectTypeExtensionWithDirectivesBuilder {
+pub struct GraphqlObjectTypeExtensionBuilder {
     extend_token: SyntaxToken,
     type_token: SyntaxToken,
     name: GraphqlName,
     directives: GraphqlDirectiveList,
     implements: Option<GraphqlImplementsInterfaces>,
+    fields: Option<GraphqlFieldsDefinition>,
 }
-impl GraphqlObjectTypeExtensionWithDirectivesBuilder {
+impl GraphqlObjectTypeExtensionBuilder {
     pub fn with_implements(mut self, implements: GraphqlImplementsInterfaces) -> Self {
         self.implements = Some(implements);
         self
     }
-    pub fn build(self) -> GraphqlObjectTypeExtensionWithDirectives {
-        GraphqlObjectTypeExtensionWithDirectives::unwrap_cast(SyntaxNode::new_detached(
-            GraphqlSyntaxKind::GRAPHQL_OBJECT_TYPE_EXTENSION_WITH_DIRECTIVES,
+    pub fn with_fields(mut self, fields: GraphqlFieldsDefinition) -> Self {
+        self.fields = Some(fields);
+        self
+    }
+    pub fn build(self) -> GraphqlObjectTypeExtension {
+        GraphqlObjectTypeExtension::unwrap_cast(SyntaxNode::new_detached(
+            GraphqlSyntaxKind::GRAPHQL_OBJECT_TYPE_EXTENSION,
             [
                 Some(SyntaxElement::Token(self.extend_token)),
                 Some(SyntaxElement::Token(self.type_token)),
@@ -1000,50 +938,8 @@ impl GraphqlObjectTypeExtensionWithDirectivesBuilder {
                 self.implements
                     .map(|token| SyntaxElement::Node(token.into_syntax())),
                 Some(SyntaxElement::Node(self.directives.into_syntax())),
-            ],
-        ))
-    }
-}
-pub fn graphql_object_type_extension_with_fields(
-    extend_token: SyntaxToken,
-    type_token: SyntaxToken,
-    name: GraphqlName,
-    directives: GraphqlDirectiveList,
-    fields: GraphqlFieldsDefinition,
-) -> GraphqlObjectTypeExtensionWithFieldsBuilder {
-    GraphqlObjectTypeExtensionWithFieldsBuilder {
-        extend_token,
-        type_token,
-        name,
-        directives,
-        fields,
-        implements: None,
-    }
-}
-pub struct GraphqlObjectTypeExtensionWithFieldsBuilder {
-    extend_token: SyntaxToken,
-    type_token: SyntaxToken,
-    name: GraphqlName,
-    directives: GraphqlDirectiveList,
-    fields: GraphqlFieldsDefinition,
-    implements: Option<GraphqlImplementsInterfaces>,
-}
-impl GraphqlObjectTypeExtensionWithFieldsBuilder {
-    pub fn with_implements(mut self, implements: GraphqlImplementsInterfaces) -> Self {
-        self.implements = Some(implements);
-        self
-    }
-    pub fn build(self) -> GraphqlObjectTypeExtensionWithFields {
-        GraphqlObjectTypeExtensionWithFields::unwrap_cast(SyntaxNode::new_detached(
-            GraphqlSyntaxKind::GRAPHQL_OBJECT_TYPE_EXTENSION_WITH_FIELDS,
-            [
-                Some(SyntaxElement::Token(self.extend_token)),
-                Some(SyntaxElement::Token(self.type_token)),
-                Some(SyntaxElement::Node(self.name.into_syntax())),
-                self.implements
+                self.fields
                     .map(|token| SyntaxElement::Node(token.into_syntax())),
-                Some(SyntaxElement::Node(self.directives.into_syntax())),
-                Some(SyntaxElement::Node(self.fields.into_syntax())),
             ],
         ))
     }

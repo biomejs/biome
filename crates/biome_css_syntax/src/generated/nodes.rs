@@ -5889,6 +5889,260 @@ pub struct CssUrlValueRawFields {
     pub value_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
+pub struct CssValueAtRule {
+    pub(crate) syntax: SyntaxNode,
+}
+impl CssValueAtRule {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> CssValueAtRuleFields {
+        CssValueAtRuleFields {
+            value_token: self.value_token(),
+            clause: self.clause(),
+            semicolon_token: self.semicolon_token(),
+        }
+    }
+    pub fn value_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn clause(&self) -> SyntaxResult<AnyCssValueAtRuleClause> {
+        support::required_node(&self.syntax, 1usize)
+    }
+    pub fn semicolon_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 2usize)
+    }
+}
+#[cfg(feature = "serde")]
+impl Serialize for CssValueAtRule {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[cfg_attr(feature = "serde", derive(Serialize))]
+pub struct CssValueAtRuleFields {
+    pub value_token: SyntaxResult<SyntaxToken>,
+    pub clause: SyntaxResult<AnyCssValueAtRuleClause>,
+    pub semicolon_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct CssValueAtRuleDeclarationClause {
+    pub(crate) syntax: SyntaxNode,
+}
+impl CssValueAtRuleDeclarationClause {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> CssValueAtRuleDeclarationClauseFields {
+        CssValueAtRuleDeclarationClauseFields {
+            properties: self.properties(),
+        }
+    }
+    pub fn properties(&self) -> CssValueAtRulePropertyList {
+        support::list(&self.syntax, 0usize)
+    }
+}
+#[cfg(feature = "serde")]
+impl Serialize for CssValueAtRuleDeclarationClause {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[cfg_attr(feature = "serde", derive(Serialize))]
+pub struct CssValueAtRuleDeclarationClauseFields {
+    pub properties: CssValueAtRulePropertyList,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct CssValueAtRuleGenericProperty {
+    pub(crate) syntax: SyntaxNode,
+}
+impl CssValueAtRuleGenericProperty {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> CssValueAtRuleGenericPropertyFields {
+        CssValueAtRuleGenericPropertyFields {
+            name: self.name(),
+            colon_token: self.colon_token(),
+            value: self.value(),
+        }
+    }
+    pub fn name(&self) -> SyntaxResult<AnyCssDeclarationName> {
+        support::required_node(&self.syntax, 0usize)
+    }
+    pub fn colon_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 1usize)
+    }
+    pub fn value(&self) -> SyntaxResult<CssValueAtRuleGenericValue> {
+        support::required_node(&self.syntax, 2usize)
+    }
+}
+#[cfg(feature = "serde")]
+impl Serialize for CssValueAtRuleGenericProperty {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[cfg_attr(feature = "serde", derive(Serialize))]
+pub struct CssValueAtRuleGenericPropertyFields {
+    pub name: SyntaxResult<AnyCssDeclarationName>,
+    pub colon_token: SyntaxResult<SyntaxToken>,
+    pub value: SyntaxResult<CssValueAtRuleGenericValue>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct CssValueAtRuleImportClause {
+    pub(crate) syntax: SyntaxNode,
+}
+impl CssValueAtRuleImportClause {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> CssValueAtRuleImportClauseFields {
+        CssValueAtRuleImportClauseFields {
+            specifiers: self.specifiers(),
+            from_token: self.from_token(),
+            source: self.source(),
+        }
+    }
+    pub fn specifiers(&self) -> CssValueAtRuleImportSpecifierList {
+        support::list(&self.syntax, 0usize)
+    }
+    pub fn from_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 1usize)
+    }
+    pub fn source(&self) -> SyntaxResult<AnyCssValueAtRuleImportSource> {
+        support::required_node(&self.syntax, 2usize)
+    }
+}
+#[cfg(feature = "serde")]
+impl Serialize for CssValueAtRuleImportClause {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[cfg_attr(feature = "serde", derive(Serialize))]
+pub struct CssValueAtRuleImportClauseFields {
+    pub specifiers: CssValueAtRuleImportSpecifierList,
+    pub from_token: SyntaxResult<SyntaxToken>,
+    pub source: SyntaxResult<AnyCssValueAtRuleImportSource>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct CssValueAtRuleImportSpecifier {
+    pub(crate) syntax: SyntaxNode,
+}
+impl CssValueAtRuleImportSpecifier {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> CssValueAtRuleImportSpecifierFields {
+        CssValueAtRuleImportSpecifierFields { name: self.name() }
+    }
+    pub fn name(&self) -> SyntaxResult<CssIdentifier> {
+        support::required_node(&self.syntax, 0usize)
+    }
+}
+#[cfg(feature = "serde")]
+impl Serialize for CssValueAtRuleImportSpecifier {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[cfg_attr(feature = "serde", derive(Serialize))]
+pub struct CssValueAtRuleImportSpecifierFields {
+    pub name: SyntaxResult<CssIdentifier>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct CssValueAtRuleNamedImportSpecifier {
+    pub(crate) syntax: SyntaxNode,
+}
+impl CssValueAtRuleNamedImportSpecifier {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> CssValueAtRuleNamedImportSpecifierFields {
+        CssValueAtRuleNamedImportSpecifierFields {
+            name: self.name(),
+            as_token: self.as_token(),
+            local_name: self.local_name(),
+        }
+    }
+    pub fn name(&self) -> SyntaxResult<CssIdentifier> {
+        support::required_node(&self.syntax, 0usize)
+    }
+    pub fn as_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 1usize)
+    }
+    pub fn local_name(&self) -> SyntaxResult<CssIdentifier> {
+        support::required_node(&self.syntax, 2usize)
+    }
+}
+#[cfg(feature = "serde")]
+impl Serialize for CssValueAtRuleNamedImportSpecifier {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[cfg_attr(feature = "serde", derive(Serialize))]
+pub struct CssValueAtRuleNamedImportSpecifierFields {
+    pub name: SyntaxResult<CssIdentifier>,
+    pub as_token: SyntaxResult<SyntaxToken>,
+    pub local_name: SyntaxResult<CssIdentifier>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "serde", derive(Serialize))]
 pub enum AnyCssAtRule {
     CssBogusAtRule(CssBogusAtRule),
@@ -5910,6 +6164,7 @@ pub enum AnyCssAtRule {
     CssScopeAtRule(CssScopeAtRule),
     CssStartingStyleAtRule(CssStartingStyleAtRule),
     CssSupportsAtRule(CssSupportsAtRule),
+    CssValueAtRule(CssValueAtRule),
 }
 impl AnyCssAtRule {
     pub fn as_css_bogus_at_rule(&self) -> Option<&CssBogusAtRule> {
@@ -6023,6 +6278,12 @@ impl AnyCssAtRule {
     pub fn as_css_supports_at_rule(&self) -> Option<&CssSupportsAtRule> {
         match &self {
             AnyCssAtRule::CssSupportsAtRule(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_value_at_rule(&self) -> Option<&CssValueAtRule> {
+        match &self {
+            AnyCssAtRule::CssValueAtRule(item) => Some(item),
             _ => None,
         }
     }
@@ -7831,6 +8092,92 @@ impl AnyCssValue {
     pub fn as_css_string(&self) -> Option<&CssString> {
         match &self {
             AnyCssValue::CssString(item) => Some(item),
+            _ => None,
+        }
+    }
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize))]
+pub enum AnyCssValueAtRuleClause {
+    CssValueAtRuleDeclarationClause(CssValueAtRuleDeclarationClause),
+    CssValueAtRuleImportClause(CssValueAtRuleImportClause),
+}
+impl AnyCssValueAtRuleClause {
+    pub fn as_css_value_at_rule_declaration_clause(
+        &self,
+    ) -> Option<&CssValueAtRuleDeclarationClause> {
+        match &self {
+            AnyCssValueAtRuleClause::CssValueAtRuleDeclarationClause(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_value_at_rule_import_clause(&self) -> Option<&CssValueAtRuleImportClause> {
+        match &self {
+            AnyCssValueAtRuleClause::CssValueAtRuleImportClause(item) => Some(item),
+            _ => None,
+        }
+    }
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize))]
+pub enum AnyCssValueAtRuleImportSource {
+    CssIdentifier(CssIdentifier),
+    CssString(CssString),
+}
+impl AnyCssValueAtRuleImportSource {
+    pub fn as_css_identifier(&self) -> Option<&CssIdentifier> {
+        match &self {
+            AnyCssValueAtRuleImportSource::CssIdentifier(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_string(&self) -> Option<&CssString> {
+        match &self {
+            AnyCssValueAtRuleImportSource::CssString(item) => Some(item),
+            _ => None,
+        }
+    }
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize))]
+pub enum AnyCssValueAtRuleImportSpecifier {
+    CssValueAtRuleImportSpecifier(CssValueAtRuleImportSpecifier),
+    CssValueAtRuleNamedImportSpecifier(CssValueAtRuleNamedImportSpecifier),
+}
+impl AnyCssValueAtRuleImportSpecifier {
+    pub fn as_css_value_at_rule_import_specifier(&self) -> Option<&CssValueAtRuleImportSpecifier> {
+        match &self {
+            AnyCssValueAtRuleImportSpecifier::CssValueAtRuleImportSpecifier(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_value_at_rule_named_import_specifier(
+        &self,
+    ) -> Option<&CssValueAtRuleNamedImportSpecifier> {
+        match &self {
+            AnyCssValueAtRuleImportSpecifier::CssValueAtRuleNamedImportSpecifier(item) => {
+                Some(item)
+            }
+            _ => None,
+        }
+    }
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize))]
+pub enum AnyCssValueAtRuleProperty {
+    CssBogusProperty(CssBogusProperty),
+    CssValueAtRuleGenericProperty(CssValueAtRuleGenericProperty),
+}
+impl AnyCssValueAtRuleProperty {
+    pub fn as_css_bogus_property(&self) -> Option<&CssBogusProperty> {
+        match &self {
+            AnyCssValueAtRuleProperty::CssBogusProperty(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_value_at_rule_generic_property(&self) -> Option<&CssValueAtRuleGenericProperty> {
+        match &self {
+            AnyCssValueAtRuleProperty::CssValueAtRuleGenericProperty(item) => Some(item),
             _ => None,
         }
     }
@@ -13538,6 +13885,252 @@ impl From<CssUrlValueRaw> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl AstNode for CssValueAtRule {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_VALUE_AT_RULE as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == CSS_VALUE_AT_RULE
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for CssValueAtRule {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("CssValueAtRule")
+            .field(
+                "value_token",
+                &support::DebugSyntaxResult(self.value_token()),
+            )
+            .field("clause", &support::DebugSyntaxResult(self.clause()))
+            .field(
+                "semicolon_token",
+                &support::DebugSyntaxResult(self.semicolon_token()),
+            )
+            .finish()
+    }
+}
+impl From<CssValueAtRule> for SyntaxNode {
+    fn from(n: CssValueAtRule) -> SyntaxNode {
+        n.syntax
+    }
+}
+impl From<CssValueAtRule> for SyntaxElement {
+    fn from(n: CssValueAtRule) -> SyntaxElement {
+        n.syntax.into()
+    }
+}
+impl AstNode for CssValueAtRuleDeclarationClause {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_VALUE_AT_RULE_DECLARATION_CLAUSE as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == CSS_VALUE_AT_RULE_DECLARATION_CLAUSE
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for CssValueAtRuleDeclarationClause {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("CssValueAtRuleDeclarationClause")
+            .field("properties", &self.properties())
+            .finish()
+    }
+}
+impl From<CssValueAtRuleDeclarationClause> for SyntaxNode {
+    fn from(n: CssValueAtRuleDeclarationClause) -> SyntaxNode {
+        n.syntax
+    }
+}
+impl From<CssValueAtRuleDeclarationClause> for SyntaxElement {
+    fn from(n: CssValueAtRuleDeclarationClause) -> SyntaxElement {
+        n.syntax.into()
+    }
+}
+impl AstNode for CssValueAtRuleGenericProperty {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_VALUE_AT_RULE_GENERIC_PROPERTY as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == CSS_VALUE_AT_RULE_GENERIC_PROPERTY
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for CssValueAtRuleGenericProperty {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("CssValueAtRuleGenericProperty")
+            .field("name", &support::DebugSyntaxResult(self.name()))
+            .field(
+                "colon_token",
+                &support::DebugSyntaxResult(self.colon_token()),
+            )
+            .field("value", &support::DebugSyntaxResult(self.value()))
+            .finish()
+    }
+}
+impl From<CssValueAtRuleGenericProperty> for SyntaxNode {
+    fn from(n: CssValueAtRuleGenericProperty) -> SyntaxNode {
+        n.syntax
+    }
+}
+impl From<CssValueAtRuleGenericProperty> for SyntaxElement {
+    fn from(n: CssValueAtRuleGenericProperty) -> SyntaxElement {
+        n.syntax.into()
+    }
+}
+impl AstNode for CssValueAtRuleImportClause {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_VALUE_AT_RULE_IMPORT_CLAUSE as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == CSS_VALUE_AT_RULE_IMPORT_CLAUSE
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for CssValueAtRuleImportClause {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("CssValueAtRuleImportClause")
+            .field("specifiers", &self.specifiers())
+            .field("from_token", &support::DebugSyntaxResult(self.from_token()))
+            .field("source", &support::DebugSyntaxResult(self.source()))
+            .finish()
+    }
+}
+impl From<CssValueAtRuleImportClause> for SyntaxNode {
+    fn from(n: CssValueAtRuleImportClause) -> SyntaxNode {
+        n.syntax
+    }
+}
+impl From<CssValueAtRuleImportClause> for SyntaxElement {
+    fn from(n: CssValueAtRuleImportClause) -> SyntaxElement {
+        n.syntax.into()
+    }
+}
+impl AstNode for CssValueAtRuleImportSpecifier {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_VALUE_AT_RULE_IMPORT_SPECIFIER as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == CSS_VALUE_AT_RULE_IMPORT_SPECIFIER
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for CssValueAtRuleImportSpecifier {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("CssValueAtRuleImportSpecifier")
+            .field("name", &support::DebugSyntaxResult(self.name()))
+            .finish()
+    }
+}
+impl From<CssValueAtRuleImportSpecifier> for SyntaxNode {
+    fn from(n: CssValueAtRuleImportSpecifier) -> SyntaxNode {
+        n.syntax
+    }
+}
+impl From<CssValueAtRuleImportSpecifier> for SyntaxElement {
+    fn from(n: CssValueAtRuleImportSpecifier) -> SyntaxElement {
+        n.syntax.into()
+    }
+}
+impl AstNode for CssValueAtRuleNamedImportSpecifier {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> = SyntaxKindSet::from_raw(RawSyntaxKind(
+        CSS_VALUE_AT_RULE_NAMED_IMPORT_SPECIFIER as u16,
+    ));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == CSS_VALUE_AT_RULE_NAMED_IMPORT_SPECIFIER
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for CssValueAtRuleNamedImportSpecifier {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("CssValueAtRuleNamedImportSpecifier")
+            .field("name", &support::DebugSyntaxResult(self.name()))
+            .field("as_token", &support::DebugSyntaxResult(self.as_token()))
+            .field("local_name", &support::DebugSyntaxResult(self.local_name()))
+            .finish()
+    }
+}
+impl From<CssValueAtRuleNamedImportSpecifier> for SyntaxNode {
+    fn from(n: CssValueAtRuleNamedImportSpecifier) -> SyntaxNode {
+        n.syntax
+    }
+}
+impl From<CssValueAtRuleNamedImportSpecifier> for SyntaxElement {
+    fn from(n: CssValueAtRuleNamedImportSpecifier) -> SyntaxElement {
+        n.syntax.into()
+    }
+}
 impl From<CssBogusAtRule> for AnyCssAtRule {
     fn from(node: CssBogusAtRule) -> AnyCssAtRule {
         AnyCssAtRule::CssBogusAtRule(node)
@@ -13633,6 +14226,11 @@ impl From<CssSupportsAtRule> for AnyCssAtRule {
         AnyCssAtRule::CssSupportsAtRule(node)
     }
 }
+impl From<CssValueAtRule> for AnyCssAtRule {
+    fn from(node: CssValueAtRule) -> AnyCssAtRule {
+        AnyCssAtRule::CssValueAtRule(node)
+    }
+}
 impl AstNode for AnyCssAtRule {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> = CssBogusAtRule::KIND_SET
@@ -13653,7 +14251,8 @@ impl AstNode for AnyCssAtRule {
         .union(CssPropertyAtRule::KIND_SET)
         .union(CssScopeAtRule::KIND_SET)
         .union(CssStartingStyleAtRule::KIND_SET)
-        .union(CssSupportsAtRule::KIND_SET);
+        .union(CssSupportsAtRule::KIND_SET)
+        .union(CssValueAtRule::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
         matches!(
             kind,
@@ -13676,6 +14275,7 @@ impl AstNode for AnyCssAtRule {
                 | CSS_SCOPE_AT_RULE
                 | CSS_STARTING_STYLE_AT_RULE
                 | CSS_SUPPORTS_AT_RULE
+                | CSS_VALUE_AT_RULE
         )
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
@@ -13715,6 +14315,7 @@ impl AstNode for AnyCssAtRule {
                 AnyCssAtRule::CssStartingStyleAtRule(CssStartingStyleAtRule { syntax })
             }
             CSS_SUPPORTS_AT_RULE => AnyCssAtRule::CssSupportsAtRule(CssSupportsAtRule { syntax }),
+            CSS_VALUE_AT_RULE => AnyCssAtRule::CssValueAtRule(CssValueAtRule { syntax }),
             _ => return None,
         };
         Some(res)
@@ -13740,6 +14341,7 @@ impl AstNode for AnyCssAtRule {
             AnyCssAtRule::CssScopeAtRule(it) => &it.syntax,
             AnyCssAtRule::CssStartingStyleAtRule(it) => &it.syntax,
             AnyCssAtRule::CssSupportsAtRule(it) => &it.syntax,
+            AnyCssAtRule::CssValueAtRule(it) => &it.syntax,
         }
     }
     fn into_syntax(self) -> SyntaxNode {
@@ -13763,6 +14365,7 @@ impl AstNode for AnyCssAtRule {
             AnyCssAtRule::CssScopeAtRule(it) => it.syntax,
             AnyCssAtRule::CssStartingStyleAtRule(it) => it.syntax,
             AnyCssAtRule::CssSupportsAtRule(it) => it.syntax,
+            AnyCssAtRule::CssValueAtRule(it) => it.syntax,
         }
     }
 }
@@ -13788,6 +14391,7 @@ impl std::fmt::Debug for AnyCssAtRule {
             AnyCssAtRule::CssScopeAtRule(it) => std::fmt::Debug::fmt(it, f),
             AnyCssAtRule::CssStartingStyleAtRule(it) => std::fmt::Debug::fmt(it, f),
             AnyCssAtRule::CssSupportsAtRule(it) => std::fmt::Debug::fmt(it, f),
+            AnyCssAtRule::CssValueAtRule(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
@@ -13813,6 +14417,7 @@ impl From<AnyCssAtRule> for SyntaxNode {
             AnyCssAtRule::CssScopeAtRule(it) => it.into(),
             AnyCssAtRule::CssStartingStyleAtRule(it) => it.into(),
             AnyCssAtRule::CssSupportsAtRule(it) => it.into(),
+            AnyCssAtRule::CssValueAtRule(it) => it.into(),
         }
     }
 }
@@ -19211,6 +19816,286 @@ impl From<AnyCssValue> for SyntaxElement {
         node.into()
     }
 }
+impl From<CssValueAtRuleDeclarationClause> for AnyCssValueAtRuleClause {
+    fn from(node: CssValueAtRuleDeclarationClause) -> AnyCssValueAtRuleClause {
+        AnyCssValueAtRuleClause::CssValueAtRuleDeclarationClause(node)
+    }
+}
+impl From<CssValueAtRuleImportClause> for AnyCssValueAtRuleClause {
+    fn from(node: CssValueAtRuleImportClause) -> AnyCssValueAtRuleClause {
+        AnyCssValueAtRuleClause::CssValueAtRuleImportClause(node)
+    }
+}
+impl AstNode for AnyCssValueAtRuleClause {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        CssValueAtRuleDeclarationClause::KIND_SET.union(CssValueAtRuleImportClause::KIND_SET);
+    fn can_cast(kind: SyntaxKind) -> bool {
+        matches!(
+            kind,
+            CSS_VALUE_AT_RULE_DECLARATION_CLAUSE | CSS_VALUE_AT_RULE_IMPORT_CLAUSE
+        )
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        let res = match syntax.kind() {
+            CSS_VALUE_AT_RULE_DECLARATION_CLAUSE => {
+                AnyCssValueAtRuleClause::CssValueAtRuleDeclarationClause(
+                    CssValueAtRuleDeclarationClause { syntax },
+                )
+            }
+            CSS_VALUE_AT_RULE_IMPORT_CLAUSE => {
+                AnyCssValueAtRuleClause::CssValueAtRuleImportClause(CssValueAtRuleImportClause {
+                    syntax,
+                })
+            }
+            _ => return None,
+        };
+        Some(res)
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        match self {
+            AnyCssValueAtRuleClause::CssValueAtRuleDeclarationClause(it) => &it.syntax,
+            AnyCssValueAtRuleClause::CssValueAtRuleImportClause(it) => &it.syntax,
+        }
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        match self {
+            AnyCssValueAtRuleClause::CssValueAtRuleDeclarationClause(it) => it.syntax,
+            AnyCssValueAtRuleClause::CssValueAtRuleImportClause(it) => it.syntax,
+        }
+    }
+}
+impl std::fmt::Debug for AnyCssValueAtRuleClause {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            AnyCssValueAtRuleClause::CssValueAtRuleDeclarationClause(it) => {
+                std::fmt::Debug::fmt(it, f)
+            }
+            AnyCssValueAtRuleClause::CssValueAtRuleImportClause(it) => std::fmt::Debug::fmt(it, f),
+        }
+    }
+}
+impl From<AnyCssValueAtRuleClause> for SyntaxNode {
+    fn from(n: AnyCssValueAtRuleClause) -> SyntaxNode {
+        match n {
+            AnyCssValueAtRuleClause::CssValueAtRuleDeclarationClause(it) => it.into(),
+            AnyCssValueAtRuleClause::CssValueAtRuleImportClause(it) => it.into(),
+        }
+    }
+}
+impl From<AnyCssValueAtRuleClause> for SyntaxElement {
+    fn from(n: AnyCssValueAtRuleClause) -> SyntaxElement {
+        let node: SyntaxNode = n.into();
+        node.into()
+    }
+}
+impl From<CssIdentifier> for AnyCssValueAtRuleImportSource {
+    fn from(node: CssIdentifier) -> AnyCssValueAtRuleImportSource {
+        AnyCssValueAtRuleImportSource::CssIdentifier(node)
+    }
+}
+impl From<CssString> for AnyCssValueAtRuleImportSource {
+    fn from(node: CssString) -> AnyCssValueAtRuleImportSource {
+        AnyCssValueAtRuleImportSource::CssString(node)
+    }
+}
+impl AstNode for AnyCssValueAtRuleImportSource {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> = CssIdentifier::KIND_SET.union(CssString::KIND_SET);
+    fn can_cast(kind: SyntaxKind) -> bool {
+        matches!(kind, CSS_IDENTIFIER | CSS_STRING)
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        let res = match syntax.kind() {
+            CSS_IDENTIFIER => {
+                AnyCssValueAtRuleImportSource::CssIdentifier(CssIdentifier { syntax })
+            }
+            CSS_STRING => AnyCssValueAtRuleImportSource::CssString(CssString { syntax }),
+            _ => return None,
+        };
+        Some(res)
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        match self {
+            AnyCssValueAtRuleImportSource::CssIdentifier(it) => &it.syntax,
+            AnyCssValueAtRuleImportSource::CssString(it) => &it.syntax,
+        }
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        match self {
+            AnyCssValueAtRuleImportSource::CssIdentifier(it) => it.syntax,
+            AnyCssValueAtRuleImportSource::CssString(it) => it.syntax,
+        }
+    }
+}
+impl std::fmt::Debug for AnyCssValueAtRuleImportSource {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            AnyCssValueAtRuleImportSource::CssIdentifier(it) => std::fmt::Debug::fmt(it, f),
+            AnyCssValueAtRuleImportSource::CssString(it) => std::fmt::Debug::fmt(it, f),
+        }
+    }
+}
+impl From<AnyCssValueAtRuleImportSource> for SyntaxNode {
+    fn from(n: AnyCssValueAtRuleImportSource) -> SyntaxNode {
+        match n {
+            AnyCssValueAtRuleImportSource::CssIdentifier(it) => it.into(),
+            AnyCssValueAtRuleImportSource::CssString(it) => it.into(),
+        }
+    }
+}
+impl From<AnyCssValueAtRuleImportSource> for SyntaxElement {
+    fn from(n: AnyCssValueAtRuleImportSource) -> SyntaxElement {
+        let node: SyntaxNode = n.into();
+        node.into()
+    }
+}
+impl From<CssValueAtRuleImportSpecifier> for AnyCssValueAtRuleImportSpecifier {
+    fn from(node: CssValueAtRuleImportSpecifier) -> AnyCssValueAtRuleImportSpecifier {
+        AnyCssValueAtRuleImportSpecifier::CssValueAtRuleImportSpecifier(node)
+    }
+}
+impl From<CssValueAtRuleNamedImportSpecifier> for AnyCssValueAtRuleImportSpecifier {
+    fn from(node: CssValueAtRuleNamedImportSpecifier) -> AnyCssValueAtRuleImportSpecifier {
+        AnyCssValueAtRuleImportSpecifier::CssValueAtRuleNamedImportSpecifier(node)
+    }
+}
+impl AstNode for AnyCssValueAtRuleImportSpecifier {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        CssValueAtRuleImportSpecifier::KIND_SET.union(CssValueAtRuleNamedImportSpecifier::KIND_SET);
+    fn can_cast(kind: SyntaxKind) -> bool {
+        matches!(
+            kind,
+            CSS_VALUE_AT_RULE_IMPORT_SPECIFIER | CSS_VALUE_AT_RULE_NAMED_IMPORT_SPECIFIER
+        )
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        let res = match syntax.kind() {
+            CSS_VALUE_AT_RULE_IMPORT_SPECIFIER => {
+                AnyCssValueAtRuleImportSpecifier::CssValueAtRuleImportSpecifier(
+                    CssValueAtRuleImportSpecifier { syntax },
+                )
+            }
+            CSS_VALUE_AT_RULE_NAMED_IMPORT_SPECIFIER => {
+                AnyCssValueAtRuleImportSpecifier::CssValueAtRuleNamedImportSpecifier(
+                    CssValueAtRuleNamedImportSpecifier { syntax },
+                )
+            }
+            _ => return None,
+        };
+        Some(res)
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        match self {
+            AnyCssValueAtRuleImportSpecifier::CssValueAtRuleImportSpecifier(it) => &it.syntax,
+            AnyCssValueAtRuleImportSpecifier::CssValueAtRuleNamedImportSpecifier(it) => &it.syntax,
+        }
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        match self {
+            AnyCssValueAtRuleImportSpecifier::CssValueAtRuleImportSpecifier(it) => it.syntax,
+            AnyCssValueAtRuleImportSpecifier::CssValueAtRuleNamedImportSpecifier(it) => it.syntax,
+        }
+    }
+}
+impl std::fmt::Debug for AnyCssValueAtRuleImportSpecifier {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            AnyCssValueAtRuleImportSpecifier::CssValueAtRuleImportSpecifier(it) => {
+                std::fmt::Debug::fmt(it, f)
+            }
+            AnyCssValueAtRuleImportSpecifier::CssValueAtRuleNamedImportSpecifier(it) => {
+                std::fmt::Debug::fmt(it, f)
+            }
+        }
+    }
+}
+impl From<AnyCssValueAtRuleImportSpecifier> for SyntaxNode {
+    fn from(n: AnyCssValueAtRuleImportSpecifier) -> SyntaxNode {
+        match n {
+            AnyCssValueAtRuleImportSpecifier::CssValueAtRuleImportSpecifier(it) => it.into(),
+            AnyCssValueAtRuleImportSpecifier::CssValueAtRuleNamedImportSpecifier(it) => it.into(),
+        }
+    }
+}
+impl From<AnyCssValueAtRuleImportSpecifier> for SyntaxElement {
+    fn from(n: AnyCssValueAtRuleImportSpecifier) -> SyntaxElement {
+        let node: SyntaxNode = n.into();
+        node.into()
+    }
+}
+impl From<CssBogusProperty> for AnyCssValueAtRuleProperty {
+    fn from(node: CssBogusProperty) -> AnyCssValueAtRuleProperty {
+        AnyCssValueAtRuleProperty::CssBogusProperty(node)
+    }
+}
+impl From<CssValueAtRuleGenericProperty> for AnyCssValueAtRuleProperty {
+    fn from(node: CssValueAtRuleGenericProperty) -> AnyCssValueAtRuleProperty {
+        AnyCssValueAtRuleProperty::CssValueAtRuleGenericProperty(node)
+    }
+}
+impl AstNode for AnyCssValueAtRuleProperty {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        CssBogusProperty::KIND_SET.union(CssValueAtRuleGenericProperty::KIND_SET);
+    fn can_cast(kind: SyntaxKind) -> bool {
+        matches!(
+            kind,
+            CSS_BOGUS_PROPERTY | CSS_VALUE_AT_RULE_GENERIC_PROPERTY
+        )
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        let res = match syntax.kind() {
+            CSS_BOGUS_PROPERTY => {
+                AnyCssValueAtRuleProperty::CssBogusProperty(CssBogusProperty { syntax })
+            }
+            CSS_VALUE_AT_RULE_GENERIC_PROPERTY => {
+                AnyCssValueAtRuleProperty::CssValueAtRuleGenericProperty(
+                    CssValueAtRuleGenericProperty { syntax },
+                )
+            }
+            _ => return None,
+        };
+        Some(res)
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        match self {
+            AnyCssValueAtRuleProperty::CssBogusProperty(it) => &it.syntax,
+            AnyCssValueAtRuleProperty::CssValueAtRuleGenericProperty(it) => &it.syntax,
+        }
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        match self {
+            AnyCssValueAtRuleProperty::CssBogusProperty(it) => it.syntax,
+            AnyCssValueAtRuleProperty::CssValueAtRuleGenericProperty(it) => it.syntax,
+        }
+    }
+}
+impl std::fmt::Debug for AnyCssValueAtRuleProperty {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            AnyCssValueAtRuleProperty::CssBogusProperty(it) => std::fmt::Debug::fmt(it, f),
+            AnyCssValueAtRuleProperty::CssValueAtRuleGenericProperty(it) => {
+                std::fmt::Debug::fmt(it, f)
+            }
+        }
+    }
+}
+impl From<AnyCssValueAtRuleProperty> for SyntaxNode {
+    fn from(n: AnyCssValueAtRuleProperty) -> SyntaxNode {
+        match n {
+            AnyCssValueAtRuleProperty::CssBogusProperty(it) => it.into(),
+            AnyCssValueAtRuleProperty::CssValueAtRuleGenericProperty(it) => it.into(),
+        }
+    }
+}
+impl From<AnyCssValueAtRuleProperty> for SyntaxElement {
+    fn from(n: AnyCssValueAtRuleProperty) -> SyntaxElement {
+        let node: SyntaxNode = n.into();
+        node.into()
+    }
+}
 impl std::fmt::Display for AnyCssAtRule {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
@@ -19557,6 +20442,26 @@ impl std::fmt::Display for AnyCssUrlValue {
     }
 }
 impl std::fmt::Display for AnyCssValue {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for AnyCssValueAtRuleClause {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for AnyCssValueAtRuleImportSource {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for AnyCssValueAtRuleImportSpecifier {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for AnyCssValueAtRuleProperty {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
@@ -20227,6 +21132,36 @@ impl std::fmt::Display for CssUrlFunction {
     }
 }
 impl std::fmt::Display for CssUrlValueRaw {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for CssValueAtRule {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for CssValueAtRuleDeclarationClause {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for CssValueAtRuleGenericProperty {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for CssValueAtRuleImportClause {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for CssValueAtRuleImportSpecifier {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for CssValueAtRuleNamedImportSpecifier {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
@@ -21482,6 +22417,63 @@ impl From<CssBogusUrlModifier> for SyntaxNode {
 }
 impl From<CssBogusUrlModifier> for SyntaxElement {
     fn from(n: CssBogusUrlModifier) -> SyntaxElement {
+        n.syntax.into()
+    }
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize))]
+pub struct CssValueAtRuleGenericValue {
+    syntax: SyntaxNode,
+}
+impl CssValueAtRuleGenericValue {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn items(&self) -> SyntaxElementChildren {
+        support::elements(&self.syntax)
+    }
+}
+impl AstNode for CssValueAtRuleGenericValue {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_VALUE_AT_RULE_GENERIC_VALUE as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == CSS_VALUE_AT_RULE_GENERIC_VALUE
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for CssValueAtRuleGenericValue {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("CssValueAtRuleGenericValue")
+            .field("items", &DebugSyntaxElementChildren(self.items()))
+            .finish()
+    }
+}
+impl From<CssValueAtRuleGenericValue> for SyntaxNode {
+    fn from(n: CssValueAtRuleGenericValue) -> SyntaxNode {
+        n.syntax
+    }
+}
+impl From<CssValueAtRuleGenericValue> for SyntaxElement {
+    fn from(n: CssValueAtRuleGenericValue) -> SyntaxElement {
         n.syntax.into()
     }
 }
@@ -23556,6 +24548,173 @@ impl IntoIterator for &CssUrlModifierList {
 impl IntoIterator for CssUrlModifierList {
     type Item = AnyCssUrlModifier;
     type IntoIter = AstNodeListIterator<Language, AnyCssUrlModifier>;
+    fn into_iter(self) -> Self::IntoIter {
+        self.iter()
+    }
+}
+#[derive(Clone, Eq, PartialEq, Hash)]
+pub struct CssValueAtRuleImportSpecifierList {
+    syntax_list: SyntaxList,
+}
+impl CssValueAtRuleImportSpecifierList {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self {
+            syntax_list: syntax.into_list(),
+        }
+    }
+}
+impl AstNode for CssValueAtRuleImportSpecifierList {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> = SyntaxKindSet::from_raw(RawSyntaxKind(
+        CSS_VALUE_AT_RULE_IMPORT_SPECIFIER_LIST as u16,
+    ));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == CSS_VALUE_AT_RULE_IMPORT_SPECIFIER_LIST
+    }
+    fn cast(syntax: SyntaxNode) -> Option<CssValueAtRuleImportSpecifierList> {
+        if Self::can_cast(syntax.kind()) {
+            Some(CssValueAtRuleImportSpecifierList {
+                syntax_list: syntax.into_list(),
+            })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        self.syntax_list.node()
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax_list.into_node()
+    }
+}
+#[cfg(feature = "serde")]
+impl Serialize for CssValueAtRuleImportSpecifierList {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut seq = serializer.serialize_seq(Some(self.len()))?;
+        for e in self.iter() {
+            seq.serialize_element(&e)?;
+        }
+        seq.end()
+    }
+}
+impl AstSeparatedList for CssValueAtRuleImportSpecifierList {
+    type Language = Language;
+    type Node = AnyCssValueAtRuleImportSpecifier;
+    fn syntax_list(&self) -> &SyntaxList {
+        &self.syntax_list
+    }
+    fn into_syntax_list(self) -> SyntaxList {
+        self.syntax_list
+    }
+}
+impl Debug for CssValueAtRuleImportSpecifierList {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        f.write_str("CssValueAtRuleImportSpecifierList ")?;
+        f.debug_list().entries(self.elements()).finish()
+    }
+}
+impl IntoIterator for CssValueAtRuleImportSpecifierList {
+    type Item = SyntaxResult<AnyCssValueAtRuleImportSpecifier>;
+    type IntoIter = AstSeparatedListNodesIterator<Language, AnyCssValueAtRuleImportSpecifier>;
+    fn into_iter(self) -> Self::IntoIter {
+        self.iter()
+    }
+}
+impl IntoIterator for &CssValueAtRuleImportSpecifierList {
+    type Item = SyntaxResult<AnyCssValueAtRuleImportSpecifier>;
+    type IntoIter = AstSeparatedListNodesIterator<Language, AnyCssValueAtRuleImportSpecifier>;
+    fn into_iter(self) -> Self::IntoIter {
+        self.iter()
+    }
+}
+#[derive(Clone, Eq, PartialEq, Hash)]
+pub struct CssValueAtRulePropertyList {
+    syntax_list: SyntaxList,
+}
+impl CssValueAtRulePropertyList {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self {
+            syntax_list: syntax.into_list(),
+        }
+    }
+}
+impl AstNode for CssValueAtRulePropertyList {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_VALUE_AT_RULE_PROPERTY_LIST as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == CSS_VALUE_AT_RULE_PROPERTY_LIST
+    }
+    fn cast(syntax: SyntaxNode) -> Option<CssValueAtRulePropertyList> {
+        if Self::can_cast(syntax.kind()) {
+            Some(CssValueAtRulePropertyList {
+                syntax_list: syntax.into_list(),
+            })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        self.syntax_list.node()
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax_list.into_node()
+    }
+}
+#[cfg(feature = "serde")]
+impl Serialize for CssValueAtRulePropertyList {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut seq = serializer.serialize_seq(Some(self.len()))?;
+        for e in self.iter() {
+            seq.serialize_element(&e)?;
+        }
+        seq.end()
+    }
+}
+impl AstSeparatedList for CssValueAtRulePropertyList {
+    type Language = Language;
+    type Node = AnyCssValueAtRuleProperty;
+    fn syntax_list(&self) -> &SyntaxList {
+        &self.syntax_list
+    }
+    fn into_syntax_list(self) -> SyntaxList {
+        self.syntax_list
+    }
+}
+impl Debug for CssValueAtRulePropertyList {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        f.write_str("CssValueAtRulePropertyList ")?;
+        f.debug_list().entries(self.elements()).finish()
+    }
+}
+impl IntoIterator for CssValueAtRulePropertyList {
+    type Item = SyntaxResult<AnyCssValueAtRuleProperty>;
+    type IntoIter = AstSeparatedListNodesIterator<Language, AnyCssValueAtRuleProperty>;
+    fn into_iter(self) -> Self::IntoIter {
+        self.iter()
+    }
+}
+impl IntoIterator for &CssValueAtRulePropertyList {
+    type Item = SyntaxResult<AnyCssValueAtRuleProperty>;
+    type IntoIter = AstSeparatedListNodesIterator<Language, AnyCssValueAtRuleProperty>;
     fn into_iter(self) -> Self::IntoIter {
         self.iter()
     }

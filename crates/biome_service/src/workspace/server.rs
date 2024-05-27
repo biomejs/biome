@@ -48,8 +48,6 @@ pub(super) struct WorkspaceServer {
     documents: DashMap<BiomePath, Document>,
     /// Stores the result of the parser (syntax tree + diagnostics) for a given URL
     syntax: DashMap<BiomePath, AnyParse>,
-    /// Stores the features supported for each file
-    file_features: DashMap<BiomePath, FileFeaturesResult>,
     /// Stores the parsed manifests
     manifests: DashMap<BiomePath, NodeJsProject>,
     /// The current focused project
@@ -90,7 +88,6 @@ impl WorkspaceServer {
             settings: RwLock::default(),
             documents: DashMap::default(),
             syntax: DashMap::default(),
-            file_features: DashMap::default(),
             manifests: DashMap::default(),
             current_project_path: RwLock::default(),
             file_sources: RwLock::default(),
@@ -347,53 +344,43 @@ impl Workspace for WorkspaceServer {
         &self,
         params: SupportsFeatureParams,
     ) -> Result<FileFeaturesResult, WorkspaceError> {
-        let file_features_result = self.file_features.entry(params.path.clone());
-        match file_features_result {
-            Entry::Occupied(entry) => {
-                let result = entry.get();
-                Ok(result.clone())
-            }
-            Entry::Vacant(entry) => {
-                let capabilities = self.get_file_capabilities(&params.path);
-                let language = DocumentFileSource::from_path(&params.path);
-                let path = params.path.as_path();
-                let settings = self.workspace();
-                let settings = settings.settings();
-                let mut file_features = FileFeaturesResult::new();
-                let file_name = path.file_name().and_then(|s| s.to_str());
-                file_features = file_features
-                    .with_capabilities(&capabilities)
-                    .with_settings_and_language(settings, &language, path);
+        let capabilities = self.get_file_capabilities(&params.path);
+        let language = DocumentFileSource::from_path(&params.path);
+        let path = params.path.as_path();
+        let settings = self.workspace();
+        let settings = settings.settings();
+        let mut file_features = FileFeaturesResult::new();
+        let file_name = path.file_name().and_then(|s| s.to_str());
+        file_features = file_features
+            .with_capabilities(&capabilities)
+            .with_settings_and_language(settings, &language, path);
 
-                if settings.files.ignore_unknown
-                    && language == DocumentFileSource::Unknown
-                    && self.get_file_source(&params.path) == DocumentFileSource::Unknown
-                {
-                    file_features.ignore_not_supported();
-                } else if file_name == Some(ConfigName::biome_json())
-                    || file_name == Some(ConfigName::biome_jsonc())
-                {
-                    // Never ignore Biome's config file
-                } else if self.is_ignored_by_top_level_config(path) {
-                    file_features.set_ignored_for_all_features();
-                } else {
-                    for feature in params.features {
-                        if self.is_ignored_by_feature_config(path, feature) {
-                            file_features.ignored(feature);
-                        }
-                    }
+        if settings.files.ignore_unknown
+            && language == DocumentFileSource::Unknown
+            && self.get_file_source(&params.path) == DocumentFileSource::Unknown
+        {
+            file_features.ignore_not_supported();
+        } else if file_name == Some(ConfigName::biome_json())
+            || file_name == Some(ConfigName::biome_jsonc())
+        {
+            // Never ignore Biome's config file
+        } else if self.is_ignored_by_top_level_config(path) {
+            file_features.set_ignored_for_all_features();
+        } else {
+            for feature in params.features {
+                if self.is_ignored_by_feature_config(path, feature) {
+                    file_features.ignored(feature);
                 }
-
-                // If the file is not ignored by at least one feature,
-                // then check that the file is not protected.
-                // Protected files must be ignored.
-                if !file_features.is_not_processed() && FileFeaturesResult::is_protected_file(path)
-                {
-                    file_features.set_protected_for_all_features();
-                }
-                Ok(entry.insert(file_features).clone())
             }
         }
+
+        // If the file is not ignored by at least one feature,
+        // then check that the file is not protected.
+        // Protected files must be ignored.
+        if !file_features.is_not_processed() && FileFeaturesResult::is_protected_file(path) {
+            file_features.set_protected_for_all_features();
+        }
+        Ok(file_features)
     }
     fn is_path_ignored(&self, params: IsPathIgnoredParams) -> Result<bool, WorkspaceError> {
         Ok(self.is_ignored(params.biome_path.as_path(), params.features))
@@ -416,8 +403,6 @@ impl Workspace for WorkspaceServer {
                 params.gitignore_matches.as_slice(),
             )?;
 
-        // settings changed, hence everything that is computed from the settings needs to be purged
-        self.file_features.clear();
         Ok(())
     }
     /// Add a new file to the workspace
@@ -588,7 +573,8 @@ impl Workspace for WorkspaceServer {
                         settings: self.workspace(),
                         max_diagnostics: params.max_diagnostics as u32,
                         path: &params.path,
-                        rule: params.rule,
+                        only: params.only,
+                        skip: params.skip,
                         language: self.get_file_source(&params.path),
                         categories: params.categories,
                         manifest,
@@ -732,7 +718,7 @@ impl Workspace for WorkspaceServer {
             .unwrap_or_default()
             .into_iter()
             .collect::<Vec<_>>();
-        let filter = AnalysisFilter::from_enabled_rules(Some(rule_filter_list.as_slice()));
+        let filter = AnalysisFilter::from_enabled_rules(rule_filter_list.as_slice());
         let manifest = self.get_current_project()?.map(|pr| pr.manifest);
         let language = self.get_file_source(&params.path);
         fix_all(FixAllParams {

@@ -3,7 +3,6 @@ import type {
 	Diagnostic,
 	FixFileMode,
 	PartialConfiguration,
-	PullDiagnosticsResult,
 	Workspace,
 } from "@biomejs/wasm-nodejs";
 import { Distribution, type WasmModule, loadModule, wrapError } from "./wasm";
@@ -200,6 +199,8 @@ export class Biome {
 				path,
 				categories: ["Syntax"],
 				max_diagnostics: Number.MAX_SAFE_INTEGER,
+				only: [],
+				skip: [],
 			});
 
 			const hasErrors = diagnostics.some(
@@ -270,6 +271,8 @@ export class Biome {
 				path,
 				categories: ["Syntax", "Lint"],
 				max_diagnostics: Number.MAX_SAFE_INTEGER,
+				only: [],
+				skip: [],
 			});
 
 			return {

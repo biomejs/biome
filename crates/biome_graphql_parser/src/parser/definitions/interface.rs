@@ -1,7 +1,7 @@
 use crate::parser::{
     directive::{is_at_directive, DirectiveList},
     is_nth_at_name, parse_description,
-    parse_error::{expected_name, expected_named_type},
+    parse_error::{expected_name, expected_named_type, expected_object_extension},
     parse_name,
     r#type::parse_named_type,
     GraphqlParser,
@@ -10,7 +10,10 @@ use biome_graphql_syntax::{
     GraphqlSyntaxKind::{self, *},
     T,
 };
-use biome_parser::parse_lists::{ParseNodeList, ParseSeparatedList};
+use biome_parser::{
+    parse_lists::{ParseNodeList, ParseSeparatedList},
+    token_source::TokenSource,
+};
 use biome_parser::{
     parse_recovery::ParseRecovery, parsed_syntax::ParsedSyntax, prelude::ParsedSyntax::*, Parser,
 };
@@ -40,6 +43,31 @@ pub(super) fn parse_interface_type_definition(p: &mut GraphqlParser) -> ParsedSy
     parse_fields_definition(p).ok();
 
     Present(m.complete(p, GRAPHQL_INTERFACE_TYPE_DEFINITION))
+}
+
+/// Must only be called if the next 2 token is `extend` and `interface`, otherwise it will panic.
+#[inline]
+pub(super) fn parse_interface_type_extension(p: &mut GraphqlParser) -> ParsedSyntax {
+    let m = p.start();
+
+    p.bump(T![extend]);
+    p.bump(T![interface]);
+
+    parse_name(p).or_add_diagnostic(p, expected_name);
+
+    let implements_interface_empty = parse_implements_interface(p).is_absent();
+
+    let pos = p.source().position();
+    DirectiveList.parse_list(p);
+    let directive_empty = p.source().position() == pos;
+
+    let fields_definition_empty = parse_fields_definition(p).is_absent();
+
+    if directive_empty && implements_interface_empty && fields_definition_empty {
+        p.error(expected_object_extension(p, p.cur_range()));
+    }
+
+    Present(m.complete(p, GRAPHQL_INTERFACE_TYPE_EXTENSION))
 }
 
 #[inline]

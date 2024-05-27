@@ -11,7 +11,7 @@ use biome_diagnostics::{Category, Severity};
 use biome_js_analyze::options::*;
 use biome_json_analyze::options::*;
 use biome_rowan::TextRange;
-use indexmap::IndexSet;
+use rustc_hash::FxHashSet;
 #[cfg(feature = "schema")]
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
@@ -138,6 +138,8 @@ impl Rules {
     }
     #[doc = r" Given a category coming from [Diagnostic](biome_diagnostics::Diagnostic), this function returns"]
     #[doc = r" the [Severity](biome_diagnostics::Severity) associated to the rule, if the configuration changed it."]
+    #[doc = r" If the severity is off or not set, then the function returns the default severity of the rule:"]
+    #[doc = r" [Severity::Error] for recommended rules and [Severity::Warning] for other rules."]
     #[doc = r""]
     #[doc = r" If not, the function returns [None]."]
     pub fn get_severity_from_code(&self, category: &Category) -> Option<Severity> {
@@ -152,6 +154,7 @@ impl Rules {
                 .a11y
                 .as_ref()
                 .and_then(|group| group.get_rule_configuration(rule_name))
+                .filter(|(level, _)| !matches!(level, RulePlainConfiguration::Off))
                 .map_or_else(
                     || {
                         if A11y::is_recommended_rule(rule_name) {
@@ -166,6 +169,7 @@ impl Rules {
                 .complexity
                 .as_ref()
                 .and_then(|group| group.get_rule_configuration(rule_name))
+                .filter(|(level, _)| !matches!(level, RulePlainConfiguration::Off))
                 .map_or_else(
                     || {
                         if Complexity::is_recommended_rule(rule_name) {
@@ -180,6 +184,7 @@ impl Rules {
                 .correctness
                 .as_ref()
                 .and_then(|group| group.get_rule_configuration(rule_name))
+                .filter(|(level, _)| !matches!(level, RulePlainConfiguration::Off))
                 .map_or_else(
                     || {
                         if Correctness::is_recommended_rule(rule_name) {
@@ -194,6 +199,7 @@ impl Rules {
                 .nursery
                 .as_ref()
                 .and_then(|group| group.get_rule_configuration(rule_name))
+                .filter(|(level, _)| !matches!(level, RulePlainConfiguration::Off))
                 .map_or_else(
                     || {
                         if Nursery::is_recommended_rule(rule_name) {
@@ -208,6 +214,7 @@ impl Rules {
                 .performance
                 .as_ref()
                 .and_then(|group| group.get_rule_configuration(rule_name))
+                .filter(|(level, _)| !matches!(level, RulePlainConfiguration::Off))
                 .map_or_else(
                     || {
                         if Performance::is_recommended_rule(rule_name) {
@@ -222,6 +229,7 @@ impl Rules {
                 .security
                 .as_ref()
                 .and_then(|group| group.get_rule_configuration(rule_name))
+                .filter(|(level, _)| !matches!(level, RulePlainConfiguration::Off))
                 .map_or_else(
                     || {
                         if Security::is_recommended_rule(rule_name) {
@@ -236,6 +244,7 @@ impl Rules {
                 .style
                 .as_ref()
                 .and_then(|group| group.get_rule_configuration(rule_name))
+                .filter(|(level, _)| !matches!(level, RulePlainConfiguration::Off))
                 .map_or_else(
                     || {
                         if Style::is_recommended_rule(rule_name) {
@@ -250,6 +259,7 @@ impl Rules {
                 .suspicious
                 .as_ref()
                 .and_then(|group| group.get_rule_configuration(rule_name))
+                .filter(|(level, _)| !matches!(level, RulePlainConfiguration::Off))
                 .map_or_else(
                     || {
                         if Suspicious::is_recommended_rule(rule_name) {
@@ -262,91 +272,6 @@ impl Rules {
                 ),
         };
         Some(severity)
-    }
-    #[doc = r" Set the severity of the rule to its default."]
-    pub fn set_default_severity(&mut self, group: RuleGroup, rule_name: &str) {
-        match group {
-            RuleGroup::A11y => {
-                if let Some(group) = &mut self.a11y {
-                    let default_severity = if A11y::is_recommended_rule(rule_name) {
-                        RulePlainConfiguration::Error
-                    } else {
-                        RulePlainConfiguration::Warn
-                    };
-                    group.set_severity(rule_name, default_severity);
-                }
-            }
-            RuleGroup::Complexity => {
-                if let Some(group) = &mut self.complexity {
-                    let default_severity = if Complexity::is_recommended_rule(rule_name) {
-                        RulePlainConfiguration::Error
-                    } else {
-                        RulePlainConfiguration::Warn
-                    };
-                    group.set_severity(rule_name, default_severity);
-                }
-            }
-            RuleGroup::Correctness => {
-                if let Some(group) = &mut self.correctness {
-                    let default_severity = if Correctness::is_recommended_rule(rule_name) {
-                        RulePlainConfiguration::Error
-                    } else {
-                        RulePlainConfiguration::Warn
-                    };
-                    group.set_severity(rule_name, default_severity);
-                }
-            }
-            RuleGroup::Nursery => {
-                if let Some(group) = &mut self.nursery {
-                    let default_severity = if Nursery::is_recommended_rule(rule_name) {
-                        RulePlainConfiguration::Error
-                    } else {
-                        RulePlainConfiguration::Warn
-                    };
-                    group.set_severity(rule_name, default_severity);
-                }
-            }
-            RuleGroup::Performance => {
-                if let Some(group) = &mut self.performance {
-                    let default_severity = if Performance::is_recommended_rule(rule_name) {
-                        RulePlainConfiguration::Error
-                    } else {
-                        RulePlainConfiguration::Warn
-                    };
-                    group.set_severity(rule_name, default_severity);
-                }
-            }
-            RuleGroup::Security => {
-                if let Some(group) = &mut self.security {
-                    let default_severity = if Security::is_recommended_rule(rule_name) {
-                        RulePlainConfiguration::Error
-                    } else {
-                        RulePlainConfiguration::Warn
-                    };
-                    group.set_severity(rule_name, default_severity);
-                }
-            }
-            RuleGroup::Style => {
-                if let Some(group) = &mut self.style {
-                    let default_severity = if Style::is_recommended_rule(rule_name) {
-                        RulePlainConfiguration::Error
-                    } else {
-                        RulePlainConfiguration::Warn
-                    };
-                    group.set_severity(rule_name, default_severity);
-                }
-            }
-            RuleGroup::Suspicious => {
-                if let Some(group) = &mut self.suspicious {
-                    let default_severity = if Suspicious::is_recommended_rule(rule_name) {
-                        RulePlainConfiguration::Error
-                    } else {
-                        RulePlainConfiguration::Warn
-                    };
-                    group.set_severity(rule_name, default_severity);
-                }
-            }
-        }
     }
     #[doc = r" Ensure that `recommended` is set to `true` or implied."]
     pub fn set_recommended(&mut self) {
@@ -387,9 +312,9 @@ impl Rules {
     #[doc = r" It returns the enabled rules by default."]
     #[doc = r""]
     #[doc = r" The enabled rules are calculated from the difference with the disabled rules."]
-    pub fn as_enabled_rules(&self) -> IndexSet<RuleFilter> {
-        let mut enabled_rules = IndexSet::new();
-        let mut disabled_rules = IndexSet::new();
+    pub fn as_enabled_rules(&self) -> FxHashSet<RuleFilter<'static>> {
+        let mut enabled_rules = FxHashSet::default();
+        let mut disabled_rules = FxHashSet::default();
         if let Some(group) = self.a11y.as_ref() {
             group.collect_preset_rules(
                 self.is_all_true(),
@@ -760,8 +685,8 @@ impl A11y {
     pub(crate) fn is_all_unset(&self) -> bool {
         self.all.is_none()
     }
-    pub(crate) fn get_enabled_rules(&self) -> IndexSet<RuleFilter> {
-        let mut index_set = IndexSet::new();
+    pub(crate) fn get_enabled_rules(&self) -> FxHashSet<RuleFilter<'static>> {
+        let mut index_set = FxHashSet::default();
         if let Some(rule) = self.no_access_key.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[0]));
@@ -914,8 +839,8 @@ impl A11y {
         }
         index_set
     }
-    pub(crate) fn get_disabled_rules(&self) -> IndexSet<RuleFilter> {
-        let mut index_set = IndexSet::new();
+    pub(crate) fn get_disabled_rules(&self) -> FxHashSet<RuleFilter<'static>> {
+        let mut index_set = FxHashSet::default();
         if let Some(rule) = self.no_access_key.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[0]));
@@ -1087,7 +1012,7 @@ impl A11y {
         &self,
         parent_is_all: bool,
         parent_is_recommended: bool,
-        enabled_rules: &mut IndexSet<RuleFilter>,
+        enabled_rules: &mut FxHashSet<RuleFilter<'static>>,
     ) {
         if self.is_all_true() || self.is_all_unset() && parent_is_all {
             enabled_rules.extend(Self::all_rules_as_filters());
@@ -1223,161 +1148,6 @@ impl A11y {
                 .as_ref()
                 .map(|conf| (conf.level(), conf.get_options())),
             _ => None,
-        }
-    }
-    pub(crate) fn set_severity(&mut self, rule_name: &str, severity: RulePlainConfiguration) {
-        match rule_name {
-            "noAccessKey" => {
-                if let Some(rule_conf) = &mut self.no_access_key {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "noAriaHiddenOnFocusable" => {
-                if let Some(rule_conf) = &mut self.no_aria_hidden_on_focusable {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "noAriaUnsupportedElements" => {
-                if let Some(rule_conf) = &mut self.no_aria_unsupported_elements {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "noAutofocus" => {
-                if let Some(rule_conf) = &mut self.no_autofocus {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "noBlankTarget" => {
-                if let Some(rule_conf) = &mut self.no_blank_target {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "noDistractingElements" => {
-                if let Some(rule_conf) = &mut self.no_distracting_elements {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "noHeaderScope" => {
-                if let Some(rule_conf) = &mut self.no_header_scope {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "noInteractiveElementToNoninteractiveRole" => {
-                if let Some(rule_conf) = &mut self.no_interactive_element_to_noninteractive_role {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "noNoninteractiveElementToInteractiveRole" => {
-                if let Some(rule_conf) = &mut self.no_noninteractive_element_to_interactive_role {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "noNoninteractiveTabindex" => {
-                if let Some(rule_conf) = &mut self.no_noninteractive_tabindex {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "noPositiveTabindex" => {
-                if let Some(rule_conf) = &mut self.no_positive_tabindex {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "noRedundantAlt" => {
-                if let Some(rule_conf) = &mut self.no_redundant_alt {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "noRedundantRoles" => {
-                if let Some(rule_conf) = &mut self.no_redundant_roles {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "noSvgWithoutTitle" => {
-                if let Some(rule_conf) = &mut self.no_svg_without_title {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "useAltText" => {
-                if let Some(rule_conf) = &mut self.use_alt_text {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "useAnchorContent" => {
-                if let Some(rule_conf) = &mut self.use_anchor_content {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "useAriaActivedescendantWithTabindex" => {
-                if let Some(rule_conf) = &mut self.use_aria_activedescendant_with_tabindex {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "useAriaPropsForRole" => {
-                if let Some(rule_conf) = &mut self.use_aria_props_for_role {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "useButtonType" => {
-                if let Some(rule_conf) = &mut self.use_button_type {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "useHeadingContent" => {
-                if let Some(rule_conf) = &mut self.use_heading_content {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "useHtmlLang" => {
-                if let Some(rule_conf) = &mut self.use_html_lang {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "useIframeTitle" => {
-                if let Some(rule_conf) = &mut self.use_iframe_title {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "useKeyWithClickEvents" => {
-                if let Some(rule_conf) = &mut self.use_key_with_click_events {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "useKeyWithMouseEvents" => {
-                if let Some(rule_conf) = &mut self.use_key_with_mouse_events {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "useMediaCaption" => {
-                if let Some(rule_conf) = &mut self.use_media_caption {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "useValidAnchor" => {
-                if let Some(rule_conf) = &mut self.use_valid_anchor {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "useValidAriaProps" => {
-                if let Some(rule_conf) = &mut self.use_valid_aria_props {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "useValidAriaRole" => {
-                if let Some(rule_conf) = &mut self.use_valid_aria_role {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "useValidAriaValues" => {
-                if let Some(rule_conf) = &mut self.use_valid_aria_values {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "useValidLang" => {
-                if let Some(rule_conf) = &mut self.use_valid_lang {
-                    rule_conf.set_level(severity);
-                }
-            }
-            _ => {}
         }
     }
 }
@@ -1631,8 +1401,8 @@ impl Complexity {
     pub(crate) fn is_all_unset(&self) -> bool {
         self.all.is_none()
     }
-    pub(crate) fn get_enabled_rules(&self) -> IndexSet<RuleFilter> {
-        let mut index_set = IndexSet::new();
+    pub(crate) fn get_enabled_rules(&self) -> FxHashSet<RuleFilter<'static>> {
+        let mut index_set = FxHashSet::default();
         if let Some(rule) = self.no_banned_types.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[0]));
@@ -1783,8 +1553,8 @@ impl Complexity {
         }
         index_set
     }
-    pub(crate) fn get_disabled_rules(&self) -> IndexSet<RuleFilter> {
-        let mut index_set = IndexSet::new();
+    pub(crate) fn get_disabled_rules(&self) -> FxHashSet<RuleFilter<'static>> {
+        let mut index_set = FxHashSet::default();
         if let Some(rule) = self.no_banned_types.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[0]));
@@ -1954,7 +1724,7 @@ impl Complexity {
         &self,
         parent_is_all: bool,
         parent_is_recommended: bool,
-        enabled_rules: &mut IndexSet<RuleFilter>,
+        enabled_rules: &mut FxHashSet<RuleFilter<'static>>,
     ) {
         if self.is_all_true() || self.is_all_unset() && parent_is_all {
             enabled_rules.extend(Self::all_rules_as_filters());
@@ -2086,157 +1856,6 @@ impl Complexity {
                 .as_ref()
                 .map(|conf| (conf.level(), conf.get_options())),
             _ => None,
-        }
-    }
-    pub(crate) fn set_severity(&mut self, rule_name: &str, severity: RulePlainConfiguration) {
-        match rule_name {
-            "noBannedTypes" => {
-                if let Some(rule_conf) = &mut self.no_banned_types {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "noEmptyTypeParameters" => {
-                if let Some(rule_conf) = &mut self.no_empty_type_parameters {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "noExcessiveCognitiveComplexity" => {
-                if let Some(rule_conf) = &mut self.no_excessive_cognitive_complexity {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "noExcessiveNestedTestSuites" => {
-                if let Some(rule_conf) = &mut self.no_excessive_nested_test_suites {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "noExtraBooleanCast" => {
-                if let Some(rule_conf) = &mut self.no_extra_boolean_cast {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "noForEach" => {
-                if let Some(rule_conf) = &mut self.no_for_each {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "noMultipleSpacesInRegularExpressionLiterals" => {
-                if let Some(rule_conf) = &mut self.no_multiple_spaces_in_regular_expression_literals
-                {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "noStaticOnlyClass" => {
-                if let Some(rule_conf) = &mut self.no_static_only_class {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "noThisInStatic" => {
-                if let Some(rule_conf) = &mut self.no_this_in_static {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "noUselessCatch" => {
-                if let Some(rule_conf) = &mut self.no_useless_catch {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "noUselessConstructor" => {
-                if let Some(rule_conf) = &mut self.no_useless_constructor {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "noUselessEmptyExport" => {
-                if let Some(rule_conf) = &mut self.no_useless_empty_export {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "noUselessFragments" => {
-                if let Some(rule_conf) = &mut self.no_useless_fragments {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "noUselessLabel" => {
-                if let Some(rule_conf) = &mut self.no_useless_label {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "noUselessLoneBlockStatements" => {
-                if let Some(rule_conf) = &mut self.no_useless_lone_block_statements {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "noUselessRename" => {
-                if let Some(rule_conf) = &mut self.no_useless_rename {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "noUselessSwitchCase" => {
-                if let Some(rule_conf) = &mut self.no_useless_switch_case {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "noUselessTernary" => {
-                if let Some(rule_conf) = &mut self.no_useless_ternary {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "noUselessThisAlias" => {
-                if let Some(rule_conf) = &mut self.no_useless_this_alias {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "noUselessTypeConstraint" => {
-                if let Some(rule_conf) = &mut self.no_useless_type_constraint {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "noVoid" => {
-                if let Some(rule_conf) = &mut self.no_void {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "noWith" => {
-                if let Some(rule_conf) = &mut self.no_with {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "useArrowFunction" => {
-                if let Some(rule_conf) = &mut self.use_arrow_function {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "useFlatMap" => {
-                if let Some(rule_conf) = &mut self.use_flat_map {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "useLiteralKeys" => {
-                if let Some(rule_conf) = &mut self.use_literal_keys {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "useOptionalChain" => {
-                if let Some(rule_conf) = &mut self.use_optional_chain {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "useRegexLiterals" => {
-                if let Some(rule_conf) = &mut self.use_regex_literals {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "useSimpleNumberKeys" => {
-                if let Some(rule_conf) = &mut self.use_simple_number_keys {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "useSimplifiedLogicExpression" => {
-                if let Some(rule_conf) = &mut self.use_simplified_logic_expression {
-                    rule_conf.set_level(severity);
-                }
-            }
-            _ => {}
         }
     }
 }
@@ -2537,8 +2156,8 @@ impl Correctness {
     pub(crate) fn is_all_unset(&self) -> bool {
         self.all.is_none()
     }
-    pub(crate) fn get_enabled_rules(&self) -> IndexSet<RuleFilter> {
-        let mut index_set = IndexSet::new();
+    pub(crate) fn get_enabled_rules(&self) -> FxHashSet<RuleFilter<'static>> {
+        let mut index_set = FxHashSet::default();
         if let Some(rule) = self.no_children_prop.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[0]));
@@ -2726,8 +2345,8 @@ impl Correctness {
         }
         index_set
     }
-    pub(crate) fn get_disabled_rules(&self) -> IndexSet<RuleFilter> {
-        let mut index_set = IndexSet::new();
+    pub(crate) fn get_disabled_rules(&self) -> FxHashSet<RuleFilter<'static>> {
+        let mut index_set = FxHashSet::default();
         if let Some(rule) = self.no_children_prop.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[0]));
@@ -2934,7 +2553,7 @@ impl Correctness {
         &self,
         parent_is_all: bool,
         parent_is_recommended: bool,
-        enabled_rules: &mut IndexSet<RuleFilter>,
+        enabled_rules: &mut FxHashSet<RuleFilter<'static>>,
     ) {
         if self.is_all_true() || self.is_all_unset() && parent_is_all {
             enabled_rules.extend(Self::all_rules_as_filters());
@@ -3100,196 +2719,6 @@ impl Correctness {
             _ => None,
         }
     }
-    pub(crate) fn set_severity(&mut self, rule_name: &str, severity: RulePlainConfiguration) {
-        match rule_name {
-            "noChildrenProp" => {
-                if let Some(rule_conf) = &mut self.no_children_prop {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "noConstAssign" => {
-                if let Some(rule_conf) = &mut self.no_const_assign {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "noConstantCondition" => {
-                if let Some(rule_conf) = &mut self.no_constant_condition {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "noConstructorReturn" => {
-                if let Some(rule_conf) = &mut self.no_constructor_return {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "noEmptyCharacterClassInRegex" => {
-                if let Some(rule_conf) = &mut self.no_empty_character_class_in_regex {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "noEmptyPattern" => {
-                if let Some(rule_conf) = &mut self.no_empty_pattern {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "noGlobalObjectCalls" => {
-                if let Some(rule_conf) = &mut self.no_global_object_calls {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "noInnerDeclarations" => {
-                if let Some(rule_conf) = &mut self.no_inner_declarations {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "noInvalidConstructorSuper" => {
-                if let Some(rule_conf) = &mut self.no_invalid_constructor_super {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "noInvalidNewBuiltin" => {
-                if let Some(rule_conf) = &mut self.no_invalid_new_builtin {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "noInvalidUseBeforeDeclaration" => {
-                if let Some(rule_conf) = &mut self.no_invalid_use_before_declaration {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "noNewSymbol" => {
-                if let Some(rule_conf) = &mut self.no_new_symbol {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "noNonoctalDecimalEscape" => {
-                if let Some(rule_conf) = &mut self.no_nonoctal_decimal_escape {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "noPrecisionLoss" => {
-                if let Some(rule_conf) = &mut self.no_precision_loss {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "noRenderReturnValue" => {
-                if let Some(rule_conf) = &mut self.no_render_return_value {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "noSelfAssign" => {
-                if let Some(rule_conf) = &mut self.no_self_assign {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "noSetterReturn" => {
-                if let Some(rule_conf) = &mut self.no_setter_return {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "noStringCaseMismatch" => {
-                if let Some(rule_conf) = &mut self.no_string_case_mismatch {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "noSwitchDeclarations" => {
-                if let Some(rule_conf) = &mut self.no_switch_declarations {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "noUndeclaredVariables" => {
-                if let Some(rule_conf) = &mut self.no_undeclared_variables {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "noUnnecessaryContinue" => {
-                if let Some(rule_conf) = &mut self.no_unnecessary_continue {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "noUnreachable" => {
-                if let Some(rule_conf) = &mut self.no_unreachable {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "noUnreachableSuper" => {
-                if let Some(rule_conf) = &mut self.no_unreachable_super {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "noUnsafeFinally" => {
-                if let Some(rule_conf) = &mut self.no_unsafe_finally {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "noUnsafeOptionalChaining" => {
-                if let Some(rule_conf) = &mut self.no_unsafe_optional_chaining {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "noUnusedImports" => {
-                if let Some(rule_conf) = &mut self.no_unused_imports {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "noUnusedLabels" => {
-                if let Some(rule_conf) = &mut self.no_unused_labels {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "noUnusedPrivateClassMembers" => {
-                if let Some(rule_conf) = &mut self.no_unused_private_class_members {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "noUnusedVariables" => {
-                if let Some(rule_conf) = &mut self.no_unused_variables {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "noVoidElementsWithChildren" => {
-                if let Some(rule_conf) = &mut self.no_void_elements_with_children {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "noVoidTypeReturn" => {
-                if let Some(rule_conf) = &mut self.no_void_type_return {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "useExhaustiveDependencies" => {
-                if let Some(rule_conf) = &mut self.use_exhaustive_dependencies {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "useHookAtTopLevel" => {
-                if let Some(rule_conf) = &mut self.use_hook_at_top_level {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "useIsNan" => {
-                if let Some(rule_conf) = &mut self.use_is_nan {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "useJsxKeyInIterable" => {
-                if let Some(rule_conf) = &mut self.use_jsx_key_in_iterable {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "useValidForDirection" => {
-                if let Some(rule_conf) = &mut self.use_valid_for_direction {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "useYield" => {
-                if let Some(rule_conf) = &mut self.use_yield {
-                    rule_conf.set_level(severity);
-                }
-            }
-            _ => {}
-        }
-    }
 }
 #[derive(Clone, Debug, Default, Deserialize, Deserializable, Eq, Merge, PartialEq, Serialize)]
 #[deserializable(with_validator)]
@@ -3309,9 +2738,6 @@ pub struct Nursery {
     #[doc = "Disallow the use of Math.min and Math.max to clamp a value where the result itself is constant."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_constant_math_min_max_clamp: Option<RuleFixConfiguration<NoConstantMathMinMaxClamp>>,
-    #[doc = "Disallow CSS empty blocks."]
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_css_empty_block: Option<RuleConfiguration<NoCssEmptyBlock>>,
     #[doc = "Disallow using a callback in asynchronous tests and hooks."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_done_callback: Option<RuleConfiguration<NoDoneCallback>>,
@@ -3331,6 +2757,9 @@ pub struct Nursery {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_duplicate_selectors_keyframe_block:
         Option<RuleConfiguration<NoDuplicateSelectorsKeyframeBlock>>,
+    #[doc = "Disallow CSS empty blocks."]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub no_empty_block: Option<RuleConfiguration<NoEmptyBlock>>,
     #[doc = "Disallow variables from evolving into any type through reassignments."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_evolving_any: Option<RuleConfiguration<NoEvolvingAny>>,
@@ -3385,6 +2814,12 @@ pub struct Nursery {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_useless_undefined_initialization:
         Option<RuleFixConfiguration<NoUselessUndefinedInitialization>>,
+    #[doc = "Disallow the use of yoda expressions."]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub no_yoda_expression: Option<RuleFixConfiguration<NoYodaExpression>>,
+    #[doc = "Disallow the use of overload signatures that are not next to each other."]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub use_adjacent_overload_signatures: Option<RuleConfiguration<UseAdjacentOverloadSignatures>>,
     #[doc = "Disallow Array constructors."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_array_literals: Option<RuleFixConfiguration<UseArrayLiterals>>,
@@ -3398,6 +2833,9 @@ pub struct Nursery {
     #[doc = "Require the default clause in switch statements."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_default_switch_clause: Option<RuleConfiguration<UseDefaultSwitchClause>>,
+    #[doc = "Enforce passing a message value when creating a built-in error."]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub use_error_message: Option<RuleConfiguration<UseErrorMessage>>,
     #[doc = "Enforce explicitly comparing the length, size, byteLength or byteOffset property of a value."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_explicit_length_check: Option<RuleFixConfiguration<UseExplicitLengthCheck>>,
@@ -3426,7 +2864,10 @@ pub struct Nursery {
     #[doc = "Require new when throwing an error."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_throw_new_error: Option<RuleFixConfiguration<UseThrowNewError>>,
-    #[doc = "Require all regex literals to be declared at the top level."]
+    #[doc = "Disallow throwing non-Error values."]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub use_throw_only_error: Option<RuleConfiguration<UseThrowOnlyError>>,
+    #[doc = "Require regex literals to be declared at the top level."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_top_level_regex: Option<RuleConfiguration<UseTopLevelRegex>>,
 }
@@ -3449,13 +2890,13 @@ impl Nursery {
     pub(crate) const GROUP_RULES: &'static [&'static str] = &[
         "noConsole",
         "noConstantMathMinMaxClamp",
-        "noCssEmptyBlock",
         "noDoneCallback",
         "noDuplicateAtImportRules",
         "noDuplicateElseIf",
         "noDuplicateFontNames",
         "noDuplicateJsonKeys",
         "noDuplicateSelectorsKeyframeBlock",
+        "noEmptyBlock",
         "noEvolvingAny",
         "noFlatMapIdentity",
         "noImportantInKeyframe",
@@ -3473,10 +2914,13 @@ impl Nursery {
         "noUnmatchableAnbSelector",
         "noUselessStringConcat",
         "noUselessUndefinedInitialization",
+        "noYodaExpression",
+        "useAdjacentOverloadSignatures",
         "useArrayLiterals",
         "useConsistentBuiltinInstantiation",
         "useDateNow",
         "useDefaultSwitchClause",
+        "useErrorMessage",
         "useExplicitLengthCheck",
         "useFocusableInteractive",
         "useGenericFontNames",
@@ -3486,16 +2930,17 @@ impl Nursery {
         "useSemanticElements",
         "useSortedClasses",
         "useThrowNewError",
+        "useThrowOnlyError",
         "useTopLevelRegex",
     ];
     const RECOMMENDED_RULES: &'static [&'static str] = &[
-        "noCssEmptyBlock",
         "noDoneCallback",
         "noDuplicateAtImportRules",
         "noDuplicateElseIf",
         "noDuplicateFontNames",
         "noDuplicateJsonKeys",
         "noDuplicateSelectorsKeyframeBlock",
+        "noEmptyBlock",
         "noEvolvingAny",
         "noFlatMapIdentity",
         "noImportantInKeyframe",
@@ -3524,9 +2969,9 @@ impl Nursery {
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[21]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[22]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[23]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[31]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[32]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[36]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[34]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[35]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[39]),
     ];
     const ALL_RULES_AS_FILTERS: &'static [RuleFilter<'static>] = &[
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[0]),
@@ -3569,6 +3014,10 @@ impl Nursery {
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[37]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[38]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[39]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[40]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[41]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[42]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[43]),
     ];
     #[doc = r" Retrieves the recommended rules"]
     pub(crate) fn is_recommended_true(&self) -> bool {
@@ -3583,8 +3032,8 @@ impl Nursery {
     pub(crate) fn is_all_unset(&self) -> bool {
         self.all.is_none()
     }
-    pub(crate) fn get_enabled_rules(&self) -> IndexSet<RuleFilter> {
-        let mut index_set = IndexSet::new();
+    pub(crate) fn get_enabled_rules(&self) -> FxHashSet<RuleFilter<'static>> {
+        let mut index_set = FxHashSet::default();
         if let Some(rule) = self.no_console.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[0]));
@@ -3595,37 +3044,37 @@ impl Nursery {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[1]));
             }
         }
-        if let Some(rule) = self.no_css_empty_block.as_ref() {
+        if let Some(rule) = self.no_done_callback.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[2]));
             }
         }
-        if let Some(rule) = self.no_done_callback.as_ref() {
+        if let Some(rule) = self.no_duplicate_at_import_rules.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[3]));
             }
         }
-        if let Some(rule) = self.no_duplicate_at_import_rules.as_ref() {
+        if let Some(rule) = self.no_duplicate_else_if.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[4]));
             }
         }
-        if let Some(rule) = self.no_duplicate_else_if.as_ref() {
+        if let Some(rule) = self.no_duplicate_font_names.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[5]));
             }
         }
-        if let Some(rule) = self.no_duplicate_font_names.as_ref() {
+        if let Some(rule) = self.no_duplicate_json_keys.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[6]));
             }
         }
-        if let Some(rule) = self.no_duplicate_json_keys.as_ref() {
+        if let Some(rule) = self.no_duplicate_selectors_keyframe_block.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[7]));
             }
         }
-        if let Some(rule) = self.no_duplicate_selectors_keyframe_block.as_ref() {
+        if let Some(rule) = self.no_empty_block.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[8]));
             }
@@ -3715,80 +3164,100 @@ impl Nursery {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[25]));
             }
         }
-        if let Some(rule) = self.use_array_literals.as_ref() {
+        if let Some(rule) = self.no_yoda_expression.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[26]));
             }
         }
-        if let Some(rule) = self.use_consistent_builtin_instantiation.as_ref() {
+        if let Some(rule) = self.use_adjacent_overload_signatures.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[27]));
             }
         }
-        if let Some(rule) = self.use_date_now.as_ref() {
+        if let Some(rule) = self.use_array_literals.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[28]));
             }
         }
-        if let Some(rule) = self.use_default_switch_clause.as_ref() {
+        if let Some(rule) = self.use_consistent_builtin_instantiation.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[29]));
             }
         }
-        if let Some(rule) = self.use_explicit_length_check.as_ref() {
+        if let Some(rule) = self.use_date_now.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[30]));
             }
         }
-        if let Some(rule) = self.use_focusable_interactive.as_ref() {
+        if let Some(rule) = self.use_default_switch_clause.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[31]));
             }
         }
-        if let Some(rule) = self.use_generic_font_names.as_ref() {
+        if let Some(rule) = self.use_error_message.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[32]));
             }
         }
-        if let Some(rule) = self.use_import_extensions.as_ref() {
+        if let Some(rule) = self.use_explicit_length_check.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[33]));
             }
         }
-        if let Some(rule) = self.use_import_restrictions.as_ref() {
+        if let Some(rule) = self.use_focusable_interactive.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[34]));
             }
         }
-        if let Some(rule) = self.use_number_to_fixed_digits_argument.as_ref() {
+        if let Some(rule) = self.use_generic_font_names.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[35]));
             }
         }
-        if let Some(rule) = self.use_semantic_elements.as_ref() {
+        if let Some(rule) = self.use_import_extensions.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[36]));
             }
         }
-        if let Some(rule) = self.use_sorted_classes.as_ref() {
+        if let Some(rule) = self.use_import_restrictions.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[37]));
             }
         }
-        if let Some(rule) = self.use_throw_new_error.as_ref() {
+        if let Some(rule) = self.use_number_to_fixed_digits_argument.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[38]));
             }
         }
-        if let Some(rule) = self.use_top_level_regex.as_ref() {
+        if let Some(rule) = self.use_semantic_elements.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[39]));
+            }
+        }
+        if let Some(rule) = self.use_sorted_classes.as_ref() {
+            if rule.is_enabled() {
+                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[40]));
+            }
+        }
+        if let Some(rule) = self.use_throw_new_error.as_ref() {
+            if rule.is_enabled() {
+                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[41]));
+            }
+        }
+        if let Some(rule) = self.use_throw_only_error.as_ref() {
+            if rule.is_enabled() {
+                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[42]));
+            }
+        }
+        if let Some(rule) = self.use_top_level_regex.as_ref() {
+            if rule.is_enabled() {
+                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[43]));
             }
         }
         index_set
     }
-    pub(crate) fn get_disabled_rules(&self) -> IndexSet<RuleFilter> {
-        let mut index_set = IndexSet::new();
+    pub(crate) fn get_disabled_rules(&self) -> FxHashSet<RuleFilter<'static>> {
+        let mut index_set = FxHashSet::default();
         if let Some(rule) = self.no_console.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[0]));
@@ -3799,37 +3268,37 @@ impl Nursery {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[1]));
             }
         }
-        if let Some(rule) = self.no_css_empty_block.as_ref() {
+        if let Some(rule) = self.no_done_callback.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[2]));
             }
         }
-        if let Some(rule) = self.no_done_callback.as_ref() {
+        if let Some(rule) = self.no_duplicate_at_import_rules.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[3]));
             }
         }
-        if let Some(rule) = self.no_duplicate_at_import_rules.as_ref() {
+        if let Some(rule) = self.no_duplicate_else_if.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[4]));
             }
         }
-        if let Some(rule) = self.no_duplicate_else_if.as_ref() {
+        if let Some(rule) = self.no_duplicate_font_names.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[5]));
             }
         }
-        if let Some(rule) = self.no_duplicate_font_names.as_ref() {
+        if let Some(rule) = self.no_duplicate_json_keys.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[6]));
             }
         }
-        if let Some(rule) = self.no_duplicate_json_keys.as_ref() {
+        if let Some(rule) = self.no_duplicate_selectors_keyframe_block.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[7]));
             }
         }
-        if let Some(rule) = self.no_duplicate_selectors_keyframe_block.as_ref() {
+        if let Some(rule) = self.no_empty_block.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[8]));
             }
@@ -3919,74 +3388,94 @@ impl Nursery {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[25]));
             }
         }
-        if let Some(rule) = self.use_array_literals.as_ref() {
+        if let Some(rule) = self.no_yoda_expression.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[26]));
             }
         }
-        if let Some(rule) = self.use_consistent_builtin_instantiation.as_ref() {
+        if let Some(rule) = self.use_adjacent_overload_signatures.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[27]));
             }
         }
-        if let Some(rule) = self.use_date_now.as_ref() {
+        if let Some(rule) = self.use_array_literals.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[28]));
             }
         }
-        if let Some(rule) = self.use_default_switch_clause.as_ref() {
+        if let Some(rule) = self.use_consistent_builtin_instantiation.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[29]));
             }
         }
-        if let Some(rule) = self.use_explicit_length_check.as_ref() {
+        if let Some(rule) = self.use_date_now.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[30]));
             }
         }
-        if let Some(rule) = self.use_focusable_interactive.as_ref() {
+        if let Some(rule) = self.use_default_switch_clause.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[31]));
             }
         }
-        if let Some(rule) = self.use_generic_font_names.as_ref() {
+        if let Some(rule) = self.use_error_message.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[32]));
             }
         }
-        if let Some(rule) = self.use_import_extensions.as_ref() {
+        if let Some(rule) = self.use_explicit_length_check.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[33]));
             }
         }
-        if let Some(rule) = self.use_import_restrictions.as_ref() {
+        if let Some(rule) = self.use_focusable_interactive.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[34]));
             }
         }
-        if let Some(rule) = self.use_number_to_fixed_digits_argument.as_ref() {
+        if let Some(rule) = self.use_generic_font_names.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[35]));
             }
         }
-        if let Some(rule) = self.use_semantic_elements.as_ref() {
+        if let Some(rule) = self.use_import_extensions.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[36]));
             }
         }
-        if let Some(rule) = self.use_sorted_classes.as_ref() {
+        if let Some(rule) = self.use_import_restrictions.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[37]));
             }
         }
-        if let Some(rule) = self.use_throw_new_error.as_ref() {
+        if let Some(rule) = self.use_number_to_fixed_digits_argument.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[38]));
             }
         }
-        if let Some(rule) = self.use_top_level_regex.as_ref() {
+        if let Some(rule) = self.use_semantic_elements.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[39]));
+            }
+        }
+        if let Some(rule) = self.use_sorted_classes.as_ref() {
+            if rule.is_disabled() {
+                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[40]));
+            }
+        }
+        if let Some(rule) = self.use_throw_new_error.as_ref() {
+            if rule.is_disabled() {
+                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[41]));
+            }
+        }
+        if let Some(rule) = self.use_throw_only_error.as_ref() {
+            if rule.is_disabled() {
+                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[42]));
+            }
+        }
+        if let Some(rule) = self.use_top_level_regex.as_ref() {
+            if rule.is_disabled() {
+                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[43]));
             }
         }
         index_set
@@ -4010,7 +3499,7 @@ impl Nursery {
         &self,
         parent_is_all: bool,
         parent_is_recommended: bool,
-        enabled_rules: &mut IndexSet<RuleFilter>,
+        enabled_rules: &mut FxHashSet<RuleFilter<'static>>,
     ) {
         if self.is_all_true() || self.is_all_unset() && parent_is_all {
             enabled_rules.extend(Self::all_rules_as_filters());
@@ -4031,10 +3520,6 @@ impl Nursery {
                 .map(|conf| (conf.level(), conf.get_options())),
             "noConstantMathMinMaxClamp" => self
                 .no_constant_math_min_max_clamp
-                .as_ref()
-                .map(|conf| (conf.level(), conf.get_options())),
-            "noCssEmptyBlock" => self
-                .no_css_empty_block
                 .as_ref()
                 .map(|conf| (conf.level(), conf.get_options())),
             "noDoneCallback" => self
@@ -4059,6 +3544,10 @@ impl Nursery {
                 .map(|conf| (conf.level(), conf.get_options())),
             "noDuplicateSelectorsKeyframeBlock" => self
                 .no_duplicate_selectors_keyframe_block
+                .as_ref()
+                .map(|conf| (conf.level(), conf.get_options())),
+            "noEmptyBlock" => self
+                .no_empty_block
                 .as_ref()
                 .map(|conf| (conf.level(), conf.get_options())),
             "noEvolvingAny" => self
@@ -4129,6 +3618,14 @@ impl Nursery {
                 .no_useless_undefined_initialization
                 .as_ref()
                 .map(|conf| (conf.level(), conf.get_options())),
+            "noYodaExpression" => self
+                .no_yoda_expression
+                .as_ref()
+                .map(|conf| (conf.level(), conf.get_options())),
+            "useAdjacentOverloadSignatures" => self
+                .use_adjacent_overload_signatures
+                .as_ref()
+                .map(|conf| (conf.level(), conf.get_options())),
             "useArrayLiterals" => self
                 .use_array_literals
                 .as_ref()
@@ -4143,6 +3640,10 @@ impl Nursery {
                 .map(|conf| (conf.level(), conf.get_options())),
             "useDefaultSwitchClause" => self
                 .use_default_switch_clause
+                .as_ref()
+                .map(|conf| (conf.level(), conf.get_options())),
+            "useErrorMessage" => self
+                .use_error_message
                 .as_ref()
                 .map(|conf| (conf.level(), conf.get_options())),
             "useExplicitLengthCheck" => self
@@ -4181,216 +3682,15 @@ impl Nursery {
                 .use_throw_new_error
                 .as_ref()
                 .map(|conf| (conf.level(), conf.get_options())),
+            "useThrowOnlyError" => self
+                .use_throw_only_error
+                .as_ref()
+                .map(|conf| (conf.level(), conf.get_options())),
             "useTopLevelRegex" => self
                 .use_top_level_regex
                 .as_ref()
                 .map(|conf| (conf.level(), conf.get_options())),
             _ => None,
-        }
-    }
-    pub(crate) fn set_severity(&mut self, rule_name: &str, severity: RulePlainConfiguration) {
-        match rule_name {
-            "noConsole" => {
-                if let Some(rule_conf) = &mut self.no_console {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "noConstantMathMinMaxClamp" => {
-                if let Some(rule_conf) = &mut self.no_constant_math_min_max_clamp {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "noCssEmptyBlock" => {
-                if let Some(rule_conf) = &mut self.no_css_empty_block {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "noDoneCallback" => {
-                if let Some(rule_conf) = &mut self.no_done_callback {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "noDuplicateAtImportRules" => {
-                if let Some(rule_conf) = &mut self.no_duplicate_at_import_rules {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "noDuplicateElseIf" => {
-                if let Some(rule_conf) = &mut self.no_duplicate_else_if {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "noDuplicateFontNames" => {
-                if let Some(rule_conf) = &mut self.no_duplicate_font_names {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "noDuplicateJsonKeys" => {
-                if let Some(rule_conf) = &mut self.no_duplicate_json_keys {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "noDuplicateSelectorsKeyframeBlock" => {
-                if let Some(rule_conf) = &mut self.no_duplicate_selectors_keyframe_block {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "noEvolvingAny" => {
-                if let Some(rule_conf) = &mut self.no_evolving_any {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "noFlatMapIdentity" => {
-                if let Some(rule_conf) = &mut self.no_flat_map_identity {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "noImportantInKeyframe" => {
-                if let Some(rule_conf) = &mut self.no_important_in_keyframe {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "noInvalidPositionAtImportRule" => {
-                if let Some(rule_conf) = &mut self.no_invalid_position_at_import_rule {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "noMisplacedAssertion" => {
-                if let Some(rule_conf) = &mut self.no_misplaced_assertion {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "noNodejsModules" => {
-                if let Some(rule_conf) = &mut self.no_nodejs_modules {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "noReactSpecificProps" => {
-                if let Some(rule_conf) = &mut self.no_react_specific_props {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "noRestrictedImports" => {
-                if let Some(rule_conf) = &mut self.no_restricted_imports {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "noUndeclaredDependencies" => {
-                if let Some(rule_conf) = &mut self.no_undeclared_dependencies {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "noUnknownFunction" => {
-                if let Some(rule_conf) = &mut self.no_unknown_function {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "noUnknownMediaFeatureName" => {
-                if let Some(rule_conf) = &mut self.no_unknown_media_feature_name {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "noUnknownProperty" => {
-                if let Some(rule_conf) = &mut self.no_unknown_property {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "noUnknownSelectorPseudoElement" => {
-                if let Some(rule_conf) = &mut self.no_unknown_selector_pseudo_element {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "noUnknownUnit" => {
-                if let Some(rule_conf) = &mut self.no_unknown_unit {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "noUnmatchableAnbSelector" => {
-                if let Some(rule_conf) = &mut self.no_unmatchable_anb_selector {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "noUselessStringConcat" => {
-                if let Some(rule_conf) = &mut self.no_useless_string_concat {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "noUselessUndefinedInitialization" => {
-                if let Some(rule_conf) = &mut self.no_useless_undefined_initialization {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "useArrayLiterals" => {
-                if let Some(rule_conf) = &mut self.use_array_literals {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "useConsistentBuiltinInstantiation" => {
-                if let Some(rule_conf) = &mut self.use_consistent_builtin_instantiation {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "useDateNow" => {
-                if let Some(rule_conf) = &mut self.use_date_now {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "useDefaultSwitchClause" => {
-                if let Some(rule_conf) = &mut self.use_default_switch_clause {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "useExplicitLengthCheck" => {
-                if let Some(rule_conf) = &mut self.use_explicit_length_check {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "useFocusableInteractive" => {
-                if let Some(rule_conf) = &mut self.use_focusable_interactive {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "useGenericFontNames" => {
-                if let Some(rule_conf) = &mut self.use_generic_font_names {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "useImportExtensions" => {
-                if let Some(rule_conf) = &mut self.use_import_extensions {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "useImportRestrictions" => {
-                if let Some(rule_conf) = &mut self.use_import_restrictions {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "useNumberToFixedDigitsArgument" => {
-                if let Some(rule_conf) = &mut self.use_number_to_fixed_digits_argument {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "useSemanticElements" => {
-                if let Some(rule_conf) = &mut self.use_semantic_elements {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "useSortedClasses" => {
-                if let Some(rule_conf) = &mut self.use_sorted_classes {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "useThrowNewError" => {
-                if let Some(rule_conf) = &mut self.use_throw_new_error {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "useTopLevelRegex" => {
-                if let Some(rule_conf) = &mut self.use_top_level_regex {
-                    rule_conf.set_level(severity);
-                }
-            }
-            _ => {}
         }
     }
 }
@@ -4465,8 +3765,8 @@ impl Performance {
     pub(crate) fn is_all_unset(&self) -> bool {
         self.all.is_none()
     }
-    pub(crate) fn get_enabled_rules(&self) -> IndexSet<RuleFilter> {
-        let mut index_set = IndexSet::new();
+    pub(crate) fn get_enabled_rules(&self) -> FxHashSet<RuleFilter<'static>> {
+        let mut index_set = FxHashSet::default();
         if let Some(rule) = self.no_accumulating_spread.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[0]));
@@ -4489,8 +3789,8 @@ impl Performance {
         }
         index_set
     }
-    pub(crate) fn get_disabled_rules(&self) -> IndexSet<RuleFilter> {
-        let mut index_set = IndexSet::new();
+    pub(crate) fn get_disabled_rules(&self) -> FxHashSet<RuleFilter<'static>> {
+        let mut index_set = FxHashSet::default();
         if let Some(rule) = self.no_accumulating_spread.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[0]));
@@ -4532,7 +3832,7 @@ impl Performance {
         &self,
         parent_is_all: bool,
         parent_is_recommended: bool,
-        enabled_rules: &mut IndexSet<RuleFilter>,
+        enabled_rules: &mut FxHashSet<RuleFilter<'static>>,
     ) {
         if self.is_all_true() || self.is_all_unset() && parent_is_all {
             enabled_rules.extend(Self::all_rules_as_filters());
@@ -4564,31 +3864,6 @@ impl Performance {
                 .as_ref()
                 .map(|conf| (conf.level(), conf.get_options())),
             _ => None,
-        }
-    }
-    pub(crate) fn set_severity(&mut self, rule_name: &str, severity: RulePlainConfiguration) {
-        match rule_name {
-            "noAccumulatingSpread" => {
-                if let Some(rule_conf) = &mut self.no_accumulating_spread {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "noBarrelFile" => {
-                if let Some(rule_conf) = &mut self.no_barrel_file {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "noDelete" => {
-                if let Some(rule_conf) = &mut self.no_delete {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "noReExportAll" => {
-                if let Some(rule_conf) = &mut self.no_re_export_all {
-                    rule_conf.set_level(severity);
-                }
-            }
-            _ => {}
         }
     }
 }
@@ -4664,8 +3939,8 @@ impl Security {
     pub(crate) fn is_all_unset(&self) -> bool {
         self.all.is_none()
     }
-    pub(crate) fn get_enabled_rules(&self) -> IndexSet<RuleFilter> {
-        let mut index_set = IndexSet::new();
+    pub(crate) fn get_enabled_rules(&self) -> FxHashSet<RuleFilter<'static>> {
+        let mut index_set = FxHashSet::default();
         if let Some(rule) = self.no_dangerously_set_inner_html.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[0]));
@@ -4683,8 +3958,8 @@ impl Security {
         }
         index_set
     }
-    pub(crate) fn get_disabled_rules(&self) -> IndexSet<RuleFilter> {
-        let mut index_set = IndexSet::new();
+    pub(crate) fn get_disabled_rules(&self) -> FxHashSet<RuleFilter<'static>> {
+        let mut index_set = FxHashSet::default();
         if let Some(rule) = self.no_dangerously_set_inner_html.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[0]));
@@ -4721,7 +3996,7 @@ impl Security {
         &self,
         parent_is_all: bool,
         parent_is_recommended: bool,
-        enabled_rules: &mut IndexSet<RuleFilter>,
+        enabled_rules: &mut FxHashSet<RuleFilter<'static>>,
     ) {
         if self.is_all_true() || self.is_all_unset() && parent_is_all {
             enabled_rules.extend(Self::all_rules_as_filters());
@@ -4749,26 +4024,6 @@ impl Security {
                 .as_ref()
                 .map(|conf| (conf.level(), conf.get_options())),
             _ => None,
-        }
-    }
-    pub(crate) fn set_severity(&mut self, rule_name: &str, severity: RulePlainConfiguration) {
-        match rule_name {
-            "noDangerouslySetInnerHtml" => {
-                if let Some(rule_conf) = &mut self.no_dangerously_set_inner_html {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "noDangerouslySetInnerHtmlWithChildren" => {
-                if let Some(rule_conf) = &mut self.no_dangerously_set_inner_html_with_children {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "noGlobalEval" => {
-                if let Some(rule_conf) = &mut self.no_global_eval {
-                    rule_conf.set_level(severity);
-                }
-            }
-            _ => {}
         }
     }
 }
@@ -5085,8 +4340,8 @@ impl Style {
     pub(crate) fn is_all_unset(&self) -> bool {
         self.all.is_none()
     }
-    pub(crate) fn get_enabled_rules(&self) -> IndexSet<RuleFilter> {
-        let mut index_set = IndexSet::new();
+    pub(crate) fn get_enabled_rules(&self) -> FxHashSet<RuleFilter<'static>> {
+        let mut index_set = FxHashSet::default();
         if let Some(rule) = self.no_arguments.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[0]));
@@ -5304,8 +4559,8 @@ impl Style {
         }
         index_set
     }
-    pub(crate) fn get_disabled_rules(&self) -> IndexSet<RuleFilter> {
-        let mut index_set = IndexSet::new();
+    pub(crate) fn get_disabled_rules(&self) -> FxHashSet<RuleFilter<'static>> {
+        let mut index_set = FxHashSet::default();
         if let Some(rule) = self.no_arguments.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[0]));
@@ -5542,7 +4797,7 @@ impl Style {
         &self,
         parent_is_all: bool,
         parent_is_recommended: bool,
-        enabled_rules: &mut IndexSet<RuleFilter>,
+        enabled_rules: &mut FxHashSet<RuleFilter<'static>>,
     ) {
         if self.is_all_true() || self.is_all_unset() && parent_is_all {
             enabled_rules.extend(Self::all_rules_as_filters());
@@ -5730,226 +4985,6 @@ impl Style {
                 .as_ref()
                 .map(|conf| (conf.level(), conf.get_options())),
             _ => None,
-        }
-    }
-    pub(crate) fn set_severity(&mut self, rule_name: &str, severity: RulePlainConfiguration) {
-        match rule_name {
-            "noArguments" => {
-                if let Some(rule_conf) = &mut self.no_arguments {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "noCommaOperator" => {
-                if let Some(rule_conf) = &mut self.no_comma_operator {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "noDefaultExport" => {
-                if let Some(rule_conf) = &mut self.no_default_export {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "noImplicitBoolean" => {
-                if let Some(rule_conf) = &mut self.no_implicit_boolean {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "noInferrableTypes" => {
-                if let Some(rule_conf) = &mut self.no_inferrable_types {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "noNamespace" => {
-                if let Some(rule_conf) = &mut self.no_namespace {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "noNamespaceImport" => {
-                if let Some(rule_conf) = &mut self.no_namespace_import {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "noNegationElse" => {
-                if let Some(rule_conf) = &mut self.no_negation_else {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "noNonNullAssertion" => {
-                if let Some(rule_conf) = &mut self.no_non_null_assertion {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "noParameterAssign" => {
-                if let Some(rule_conf) = &mut self.no_parameter_assign {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "noParameterProperties" => {
-                if let Some(rule_conf) = &mut self.no_parameter_properties {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "noRestrictedGlobals" => {
-                if let Some(rule_conf) = &mut self.no_restricted_globals {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "noShoutyConstants" => {
-                if let Some(rule_conf) = &mut self.no_shouty_constants {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "noUnusedTemplateLiteral" => {
-                if let Some(rule_conf) = &mut self.no_unused_template_literal {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "noUselessElse" => {
-                if let Some(rule_conf) = &mut self.no_useless_else {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "noVar" => {
-                if let Some(rule_conf) = &mut self.no_var {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "useAsConstAssertion" => {
-                if let Some(rule_conf) = &mut self.use_as_const_assertion {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "useBlockStatements" => {
-                if let Some(rule_conf) = &mut self.use_block_statements {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "useCollapsedElseIf" => {
-                if let Some(rule_conf) = &mut self.use_collapsed_else_if {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "useConsistentArrayType" => {
-                if let Some(rule_conf) = &mut self.use_consistent_array_type {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "useConst" => {
-                if let Some(rule_conf) = &mut self.use_const {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "useDefaultParameterLast" => {
-                if let Some(rule_conf) = &mut self.use_default_parameter_last {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "useEnumInitializers" => {
-                if let Some(rule_conf) = &mut self.use_enum_initializers {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "useExponentiationOperator" => {
-                if let Some(rule_conf) = &mut self.use_exponentiation_operator {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "useExportType" => {
-                if let Some(rule_conf) = &mut self.use_export_type {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "useFilenamingConvention" => {
-                if let Some(rule_conf) = &mut self.use_filenaming_convention {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "useForOf" => {
-                if let Some(rule_conf) = &mut self.use_for_of {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "useFragmentSyntax" => {
-                if let Some(rule_conf) = &mut self.use_fragment_syntax {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "useImportType" => {
-                if let Some(rule_conf) = &mut self.use_import_type {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "useLiteralEnumMembers" => {
-                if let Some(rule_conf) = &mut self.use_literal_enum_members {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "useNamingConvention" => {
-                if let Some(rule_conf) = &mut self.use_naming_convention {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "useNodeAssertStrict" => {
-                if let Some(rule_conf) = &mut self.use_node_assert_strict {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "useNodejsImportProtocol" => {
-                if let Some(rule_conf) = &mut self.use_nodejs_import_protocol {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "useNumberNamespace" => {
-                if let Some(rule_conf) = &mut self.use_number_namespace {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "useNumericLiterals" => {
-                if let Some(rule_conf) = &mut self.use_numeric_literals {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "useSelfClosingElements" => {
-                if let Some(rule_conf) = &mut self.use_self_closing_elements {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "useShorthandArrayType" => {
-                if let Some(rule_conf) = &mut self.use_shorthand_array_type {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "useShorthandAssign" => {
-                if let Some(rule_conf) = &mut self.use_shorthand_assign {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "useShorthandFunctionType" => {
-                if let Some(rule_conf) = &mut self.use_shorthand_function_type {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "useSingleCaseStatement" => {
-                if let Some(rule_conf) = &mut self.use_single_case_statement {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "useSingleVarDeclarator" => {
-                if let Some(rule_conf) = &mut self.use_single_var_declarator {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "useTemplate" => {
-                if let Some(rule_conf) = &mut self.use_template {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "useWhile" => {
-                if let Some(rule_conf) = &mut self.use_while {
-                    rule_conf.set_level(severity);
-                }
-            }
-            _ => {}
         }
     }
 }
@@ -6382,8 +5417,8 @@ impl Suspicious {
     pub(crate) fn is_all_unset(&self) -> bool {
         self.all.is_none()
     }
-    pub(crate) fn get_enabled_rules(&self) -> IndexSet<RuleFilter> {
-        let mut index_set = IndexSet::new();
+    pub(crate) fn get_enabled_rules(&self) -> FxHashSet<RuleFilter<'static>> {
+        let mut index_set = FxHashSet::default();
         if let Some(rule) = self.no_approximative_numeric_constant.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[0]));
@@ -6661,8 +5696,8 @@ impl Suspicious {
         }
         index_set
     }
-    pub(crate) fn get_disabled_rules(&self) -> IndexSet<RuleFilter> {
-        let mut index_set = IndexSet::new();
+    pub(crate) fn get_disabled_rules(&self) -> FxHashSet<RuleFilter<'static>> {
+        let mut index_set = FxHashSet::default();
         if let Some(rule) = self.no_approximative_numeric_constant.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[0]));
@@ -6959,7 +5994,7 @@ impl Suspicious {
         &self,
         parent_is_all: bool,
         parent_is_recommended: bool,
-        enabled_rules: &mut IndexSet<RuleFilter>,
+        enabled_rules: &mut FxHashSet<RuleFilter<'static>>,
     ) {
         if self.is_all_true() || self.is_all_unset() && parent_is_all {
             enabled_rules.extend(Self::all_rules_as_filters());
@@ -7195,286 +6230,6 @@ impl Suspicious {
                 .as_ref()
                 .map(|conf| (conf.level(), conf.get_options())),
             _ => None,
-        }
-    }
-    pub(crate) fn set_severity(&mut self, rule_name: &str, severity: RulePlainConfiguration) {
-        match rule_name {
-            "noApproximativeNumericConstant" => {
-                if let Some(rule_conf) = &mut self.no_approximative_numeric_constant {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "noArrayIndexKey" => {
-                if let Some(rule_conf) = &mut self.no_array_index_key {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "noAssignInExpressions" => {
-                if let Some(rule_conf) = &mut self.no_assign_in_expressions {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "noAsyncPromiseExecutor" => {
-                if let Some(rule_conf) = &mut self.no_async_promise_executor {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "noCatchAssign" => {
-                if let Some(rule_conf) = &mut self.no_catch_assign {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "noClassAssign" => {
-                if let Some(rule_conf) = &mut self.no_class_assign {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "noCommentText" => {
-                if let Some(rule_conf) = &mut self.no_comment_text {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "noCompareNegZero" => {
-                if let Some(rule_conf) = &mut self.no_compare_neg_zero {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "noConfusingLabels" => {
-                if let Some(rule_conf) = &mut self.no_confusing_labels {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "noConfusingVoidType" => {
-                if let Some(rule_conf) = &mut self.no_confusing_void_type {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "noConsoleLog" => {
-                if let Some(rule_conf) = &mut self.no_console_log {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "noConstEnum" => {
-                if let Some(rule_conf) = &mut self.no_const_enum {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "noControlCharactersInRegex" => {
-                if let Some(rule_conf) = &mut self.no_control_characters_in_regex {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "noDebugger" => {
-                if let Some(rule_conf) = &mut self.no_debugger {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "noDoubleEquals" => {
-                if let Some(rule_conf) = &mut self.no_double_equals {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "noDuplicateCase" => {
-                if let Some(rule_conf) = &mut self.no_duplicate_case {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "noDuplicateClassMembers" => {
-                if let Some(rule_conf) = &mut self.no_duplicate_class_members {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "noDuplicateJsxProps" => {
-                if let Some(rule_conf) = &mut self.no_duplicate_jsx_props {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "noDuplicateObjectKeys" => {
-                if let Some(rule_conf) = &mut self.no_duplicate_object_keys {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "noDuplicateParameters" => {
-                if let Some(rule_conf) = &mut self.no_duplicate_parameters {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "noDuplicateTestHooks" => {
-                if let Some(rule_conf) = &mut self.no_duplicate_test_hooks {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "noEmptyBlockStatements" => {
-                if let Some(rule_conf) = &mut self.no_empty_block_statements {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "noEmptyInterface" => {
-                if let Some(rule_conf) = &mut self.no_empty_interface {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "noExplicitAny" => {
-                if let Some(rule_conf) = &mut self.no_explicit_any {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "noExportsInTest" => {
-                if let Some(rule_conf) = &mut self.no_exports_in_test {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "noExtraNonNullAssertion" => {
-                if let Some(rule_conf) = &mut self.no_extra_non_null_assertion {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "noFallthroughSwitchClause" => {
-                if let Some(rule_conf) = &mut self.no_fallthrough_switch_clause {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "noFocusedTests" => {
-                if let Some(rule_conf) = &mut self.no_focused_tests {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "noFunctionAssign" => {
-                if let Some(rule_conf) = &mut self.no_function_assign {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "noGlobalAssign" => {
-                if let Some(rule_conf) = &mut self.no_global_assign {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "noGlobalIsFinite" => {
-                if let Some(rule_conf) = &mut self.no_global_is_finite {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "noGlobalIsNan" => {
-                if let Some(rule_conf) = &mut self.no_global_is_nan {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "noImplicitAnyLet" => {
-                if let Some(rule_conf) = &mut self.no_implicit_any_let {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "noImportAssign" => {
-                if let Some(rule_conf) = &mut self.no_import_assign {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "noLabelVar" => {
-                if let Some(rule_conf) = &mut self.no_label_var {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "noMisleadingCharacterClass" => {
-                if let Some(rule_conf) = &mut self.no_misleading_character_class {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "noMisleadingInstantiator" => {
-                if let Some(rule_conf) = &mut self.no_misleading_instantiator {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "noMisrefactoredShorthandAssign" => {
-                if let Some(rule_conf) = &mut self.no_misrefactored_shorthand_assign {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "noPrototypeBuiltins" => {
-                if let Some(rule_conf) = &mut self.no_prototype_builtins {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "noRedeclare" => {
-                if let Some(rule_conf) = &mut self.no_redeclare {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "noRedundantUseStrict" => {
-                if let Some(rule_conf) = &mut self.no_redundant_use_strict {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "noSelfCompare" => {
-                if let Some(rule_conf) = &mut self.no_self_compare {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "noShadowRestrictedNames" => {
-                if let Some(rule_conf) = &mut self.no_shadow_restricted_names {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "noSkippedTests" => {
-                if let Some(rule_conf) = &mut self.no_skipped_tests {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "noSparseArray" => {
-                if let Some(rule_conf) = &mut self.no_sparse_array {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "noSuspiciousSemicolonInJsx" => {
-                if let Some(rule_conf) = &mut self.no_suspicious_semicolon_in_jsx {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "noThenProperty" => {
-                if let Some(rule_conf) = &mut self.no_then_property {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "noUnsafeDeclarationMerging" => {
-                if let Some(rule_conf) = &mut self.no_unsafe_declaration_merging {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "noUnsafeNegation" => {
-                if let Some(rule_conf) = &mut self.no_unsafe_negation {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "useAwait" => {
-                if let Some(rule_conf) = &mut self.use_await {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "useDefaultSwitchClauseLast" => {
-                if let Some(rule_conf) = &mut self.use_default_switch_clause_last {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "useGetterReturn" => {
-                if let Some(rule_conf) = &mut self.use_getter_return {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "useIsArray" => {
-                if let Some(rule_conf) = &mut self.use_is_array {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "useNamespaceKeyword" => {
-                if let Some(rule_conf) = &mut self.use_namespace_keyword {
-                    rule_conf.set_level(severity);
-                }
-            }
-            "useValidTypeof" => {
-                if let Some(rule_conf) = &mut self.use_valid_typeof {
-                    rule_conf.set_level(severity);
-                }
-            }
-            _ => {}
         }
     }
 }

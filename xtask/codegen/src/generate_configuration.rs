@@ -141,7 +141,7 @@ pub(crate) fn generate_rules_configuration(mode: Mode) -> Result<()> {
         use biome_json_analyze::options::*;
         use biome_css_analyze::options::*;
         use biome_rowan::TextRange;
-        use indexmap::IndexSet;
+        use rustc_hash::FxHashSet;
         use serde::{Deserialize, Serialize};
         #[cfg(feature = "schema")]
         use schemars::JsonSchema;
@@ -228,6 +228,8 @@ pub(crate) fn generate_rules_configuration(mode: Mode) -> Result<()> {
 
             /// Given a category coming from [Diagnostic](biome_diagnostics::Diagnostic), this function returns
             /// the [Severity](biome_diagnostics::Severity) associated to the rule, if the configuration changed it.
+            /// If the severity is off or not set, then the function returns the default severity of the rule:
+            /// [Severity::Error] for recommended rules and [Severity::Warning] for other rules.
             ///
             /// If not, the function returns [None].
             pub fn get_severity_from_code(&self, category: &Category) -> Option<Severity> {
@@ -245,6 +247,7 @@ pub(crate) fn generate_rules_configuration(mode: Mode) -> Result<()> {
                             .#group_idents
                             .as_ref()
                             .and_then(|group| group.get_rule_configuration(rule_name))
+                            .filter(|(level, _)| !matches!(level, RulePlainConfiguration::Off))
                             .map_or_else(|| {
                                 if #group_pascal_idents::is_recommended_rule(rule_name) {
                                     Severity::Error
@@ -255,24 +258,6 @@ pub(crate) fn generate_rules_configuration(mode: Mode) -> Result<()> {
                     )*
                 };
                 Some(severity)
-            }
-
-            /// Set the severity of the rule to its default.
-            pub fn set_default_severity(&mut self, group: RuleGroup, rule_name: &str) {
-                match group {
-                    #(
-                        RuleGroup::#group_pascal_idents => {
-                            if let Some(group) = &mut self.#group_idents {
-                                let default_severity = if #group_pascal_idents::is_recommended_rule(rule_name) {
-                                    RulePlainConfiguration::Error
-                                } else {
-                                    RulePlainConfiguration::Warn
-                                };
-                                group.set_severity(rule_name, default_severity);
-                            }
-                        }
-                    )*
-                }
             }
 
             /// Ensure that `recommended` is set to `true` or implied.
@@ -300,9 +285,9 @@ pub(crate) fn generate_rules_configuration(mode: Mode) -> Result<()> {
             /// It returns the enabled rules by default.
             ///
             /// The enabled rules are calculated from the difference with the disabled rules.
-            pub fn as_enabled_rules(&self) -> IndexSet<RuleFilter> {
-                let mut enabled_rules = IndexSet::new();
-                let mut disabled_rules = IndexSet::new();
+            pub fn as_enabled_rules(&self) -> FxHashSet<RuleFilter<'static>> {
+                let mut enabled_rules = FxHashSet::default();
+                let mut disabled_rules = FxHashSet::default();
                 #( #group_as_default_rules )*
 
                 enabled_rules.difference(&disabled_rules).copied().collect()
@@ -372,7 +357,6 @@ fn generate_struct(group: &str, rules: &BTreeMap<&'static str, RuleMetadata>) ->
     let mut rule_enabled_check_line = Vec::new();
     let mut rule_disabled_check_line = Vec::new();
     let mut get_rule_configuration_line = Vec::new();
-    let mut set_severity = Vec::new();
 
     for (index, (rule, metadata)) in rules.iter().enumerate() {
         let summary = {
@@ -475,13 +459,6 @@ fn generate_struct(group: &str, rules: &BTreeMap<&'static str, RuleMetadata>) ->
         get_rule_configuration_line.push(quote! {
             #rule => self.#rule_identifier.as_ref().map(|conf| (conf.level(), conf.get_options()))
         });
-        set_severity.push(quote! {
-            #rule => {
-                if let Some(rule_conf) = &mut self.#rule_identifier {
-                    rule_conf.set_level(severity);
-                }
-            }
-        });
     }
 
     let group_pascal_ident = Ident::new(&to_capitalized(group), Span::call_site());
@@ -562,14 +539,14 @@ fn generate_struct(group: &str, rules: &BTreeMap<&'static str, RuleMetadata>) ->
                 self.all.is_none()
             }
 
-            pub(crate) fn get_enabled_rules(&self) -> IndexSet<RuleFilter> {
-               let mut index_set = IndexSet::new();
+            pub(crate) fn get_enabled_rules(&self) -> FxHashSet<RuleFilter<'static>> {
+               let mut index_set = FxHashSet::default();
                #( #rule_enabled_check_line )*
                index_set
             }
 
-            pub(crate) fn get_disabled_rules(&self) -> IndexSet<RuleFilter> {
-               let mut index_set = IndexSet::new();
+            pub(crate) fn get_disabled_rules(&self) -> FxHashSet<RuleFilter<'static>> {
+               let mut index_set = FxHashSet::default();
                #( #rule_disabled_check_line )*
                index_set
             }
@@ -599,7 +576,7 @@ fn generate_struct(group: &str, rules: &BTreeMap<&'static str, RuleMetadata>) ->
                 &self,
                 parent_is_all: bool,
                 parent_is_recommended: bool,
-                enabled_rules: &mut IndexSet<RuleFilter>,
+                enabled_rules: &mut FxHashSet<RuleFilter<'static>>,
             ) {
                 // The order of the if-else branches MATTERS!
                 if self.is_all_true() || self.is_all_unset() && parent_is_all {
@@ -613,13 +590,6 @@ fn generate_struct(group: &str, rules: &BTreeMap<&'static str, RuleMetadata>) ->
                 match rule_name {
                     #( #get_rule_configuration_line ),*,
                     _ => None
-                }
-            }
-
-            pub(crate) fn set_severity(&mut self, rule_name: &str, severity: RulePlainConfiguration) {
-                match rule_name {
-                    #( #set_severity ),*
-                    _ => {}
                 }
             }
         }

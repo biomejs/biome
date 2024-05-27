@@ -98,8 +98,8 @@ biome_css_factory            = { version = "0.5.7", path = "./crates/biome_css_f
 biome_css_formatter          = { version = "0.5.7", path = "./crates/biome_css_formatter" }
 biome_css_parser             = { version = "0.5.7", path = "./crates/biome_css_parser" }
 biome_css_syntax             = { version = "0.5.7", path = "./crates/biome_css_syntax" }
-biome_deserialize            = { version = "0.5.7", path = "./crates/biome_deserialize" }
-biome_deserialize_macros     = { version = "0.5.7", path = "./crates/biome_deserialize_macros" }
+biome_deserialize            = { version = "0.6.0", path = "./crates/biome_deserialize" }
+biome_deserialize_macros     = { version = "0.6.0", path = "./crates/biome_deserialize_macros" }
 biome_diagnostics            = { version = "0.5.7", path = "./crates/biome_diagnostics" }
 biome_diagnostics_categories = { version = "0.5.7", path = "./crates/biome_diagnostics_categories" }
 biome_diagnostics_macros     = { version = "0.5.7", path = "./crates/biome_diagnostics_macros" }
@@ -153,7 +153,7 @@ biome_ungrammar      = { path = "./crates/biome_ungrammar" }
 tests_macros         = { path = "./crates/tests_macros" }
 
 # Crates needed in the workspace
-anyhow             = "1.0.83"
+anyhow             = "1.0.86"
 bitflags           = "2.5.0"
 bpaf               = { version = "0.9.9", features = ["derive"] }
 countme            = "3.0.1"
@@ -166,15 +166,15 @@ indexmap           = { version = "2.2.6", features = ["serde"] }
 insta              = "1.38.0"
 lazy_static        = "1.4.0"
 oxc_resolver       = "1.7.0"
-proc-macro2        = "1.0.82"
+proc-macro2        = "1.0.84"
 quickcheck         = "1.0.3"
 quickcheck_macros  = "1.0.0"
 quote              = "1.0.36"
 rayon              = "1.10.0"
 regex              = "1.10.4"
 rustc-hash         = "1.1.0"
-schemars           = { version = "0.8.19", features = ["indexmap2", "smallvec"] }
-serde              = { version = "1.0.201", features = ["derive"] }
+schemars           = { version = "0.8.21", features = ["indexmap2", "smallvec"] }
+serde              = { version = "1.0.203", features = ["derive"] }
 serde_ini          = "0.2.0"
 serde_json         = "1.0.117"
 similar            = "2.5.0"

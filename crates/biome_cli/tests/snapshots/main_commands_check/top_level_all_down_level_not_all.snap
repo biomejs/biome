@@ -41,22 +41,6 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
 # Emitted Messages
 
 ```block
-fix.js:2:19 lint/correctness/noUndeclaredVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! The arguments variable is undeclared.
-  
-  > 2 │     function f() {arguments;}
-      │                   ^^^^^^^^^
-    3 │     const FOO = "FOO";
-    4 │     var x, y;
-  
-  i By default, Biome recognizes browser and Mode.js globals.
-    You can ignore more globals using the javascript.globals configuration.
-  
-
-```
-
-```block
 fix.js:2:14 lint/correctness/noUnusedVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This function is unused.
@@ -167,5 +151,5 @@ fix.js format ━━━━━━━━━━━━━━━━━━━━━━
 ```block
 Checked 1 file in <TIME>. No fixes needed.
 Found 1 error.
-Found 5 warnings.
+Found 4 warnings.
 ```

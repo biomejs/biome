@@ -24,7 +24,6 @@ use biome_analyze::{
     QueryMatch, RegistryVisitor, RuleCategories, RuleCategory, RuleFilter, RuleGroup,
 };
 use biome_configuration::javascript::JsxRuntime;
-use biome_configuration::linter::RuleSelector;
 use biome_diagnostics::{category, Applicability, Diagnostic, DiagnosticExt, Severity};
 use biome_formatter::{
     AttributePosition, FormatError, IndentStyle, IndentWidth, LineEnding, LineWidth, Printed,
@@ -51,7 +50,6 @@ use serde::{Deserialize, Serialize};
 use std::borrow::Cow;
 use std::ffi::OsStr;
 use std::fmt::Debug;
-use std::path::PathBuf;
 use tracing::{debug, debug_span, error, info, trace, trace_span};
 
 #[derive(Debug, Clone, Default, serde::Serialize, serde::Deserialize)]
@@ -376,35 +374,17 @@ pub(crate) fn lint(params: LintParams) -> LintResults {
             let analyzer_options = &params
                 .settings
                 .analyzer_options::<JsLanguage>(params.path, &params.language);
-            compute_analyzer_options(&params.settings, PathBuf::from(params.path.as_path()));
 
             // Compute final rules (taking `overrides` into account)
-            let mut rules = settings.as_rules(params.path.as_path());
+            let rules = settings.as_rules(params.path.as_path());
 
-            let enabled_rules = if let Some(rule) = params.rule {
-                // We execute a single rule or group because the `--rule` filter is specified.
-                match rule {
-                    RuleSelector::Group(group) => {
-                        if let Some(rules) = rules.as_mut() {
-                            // Ensure that the recommended field is not set to `false`.
-                            rules.to_mut().set_recommended();
-                        }
-                        rules
-                            .as_ref()
-                            .map(|rules| rules.as_enabled_rules())
-                            .unwrap_or_default()
-                            .into_iter()
-                            .filter(|rule_filter| rule_filter.group() == group.as_str())
-                            .collect()
-                    }
-                    RuleSelector::Rule(group, rule_name) => {
-                        if let Some(rules) = rules.as_mut() {
-                            // Set the severity level of the rule to its default.
-                            rules.to_mut().set_default_severity(group, rule_name);
-                        }
-                        vec![rule.into()]
-                    }
-                }
+            let has_only_filter = !params.only.is_empty();
+            let enabled_rules = if has_only_filter {
+                params
+                    .only
+                    .into_iter()
+                    .map(|selector| selector.into())
+                    .collect::<Vec<_>>()
             } else {
                 let mut rule_filter_list = rules
                     .as_ref()
@@ -415,7 +395,6 @@ pub(crate) fn lint(params: LintParams) -> LintResults {
                 if settings.organize_imports.enabled && !params.categories.is_syntax() {
                     rule_filter_list.push(RuleFilter::Rule("correctness", "organizeImports"));
                 }
-
                 rule_filter_list.push(RuleFilter::Rule(
                     "correctness",
                     "noDuplicatePrivateClassMembers",
@@ -425,21 +404,29 @@ pub(crate) fn lint(params: LintParams) -> LintResults {
                 rule_filter_list.push(RuleFilter::Rule("nursery", "noSuperWithoutExtends"));
                 rule_filter_list
             };
+            let disabled_rules = params
+                .skip
+                .into_iter()
+                .map(|selector| selector.into())
+                .collect::<Vec<_>>();
+            let filter = AnalysisFilter {
+                categories: params.categories,
+                enabled_rules: Some(enabled_rules.as_slice()),
+                disabled_rules: &disabled_rules,
+                range: None,
+            };
 
-            let mut filter = AnalysisFilter::from_enabled_rules(Some(enabled_rules.as_slice()));
-            filter.categories = params.categories;
+            // Do not report unused suppression comment diagnostics if:
+            // - it is a syntax-only analyzer pass, or
+            // - if a single rule is run.
+            let ignores_suppression_comment =
+                !filter.categories.contains(RuleCategories::LINT) || has_only_filter;
 
             let mut diagnostic_count = diagnostics.len() as u32;
             let mut errors = diagnostics
                 .iter()
                 .filter(|diag| diag.severity() <= Severity::Error)
                 .count();
-
-            // Do not report unused suppression comment diagnostics if:
-            // - it is a syntax-only analyzer pass, or
-            // - if a single rule is run.
-            let ignores_suppression_comment =
-                !filter.categories.contains(RuleCategories::LINT) || params.rule.is_some();
 
             info!("Analyze file {}", params.path.display());
             let (_, analyze_diagnostics) = analyze(
@@ -551,14 +538,16 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
     debug_span!("Code actions JavaScript", range =? range, path =? path).in_scope(move || {
         let tree = parse.tree();
         trace_span!("Parsed file", tree =? tree).in_scope(move || {
+            let analyzer_options =
+                workspace.analyzer_options::<JsLanguage>(params.path, &params.language);
             let settings = workspace.settings();
-            let rules = settings.linter().rules.as_ref();
+            let rules = settings.as_rules(params.path);
             let mut actions = Vec::new();
             let mut enabled_rules = vec![];
             if settings.organize_imports.enabled {
                 enabled_rules.push(RuleFilter::Rule("correctness", "organizeImports"));
             }
-            if let Some(rules) = rules {
+            if let Some(rules) = rules.as_ref() {
                 let rules = rules.as_enabled_rules().into_iter().collect();
 
                 // The rules in the assist category do not have configuration entries,
@@ -572,7 +561,7 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
             }
 
             let mut filter = if !enabled_rules.is_empty() {
-                AnalysisFilter::from_enabled_rules(Some(enabled_rules.as_slice()))
+                AnalysisFilter::from_enabled_rules(enabled_rules.as_slice())
             } else {
                 AnalysisFilter::default()
             };
@@ -582,9 +571,6 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
                 filter.categories |= RuleCategories::ACTION;
             }
             filter.range = Some(range);
-
-            let analyzer_options =
-                compute_analyzer_options(&workspace, PathBuf::from(path.as_path()));
 
             let Some(source_type) = language.to_js_file_source() else {
                 error!("Could not determine the file source of the file");
@@ -619,8 +605,6 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
 }
 
 /// If applies all the safe fixes to the given syntax tree.
-///
-/// If `indent_style` is [Some], it means that the formatting should be applied at the end
 pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceError> {
     let FixAllParams {
         parse,
@@ -647,7 +631,8 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
 
     let mut skipped_suggested_fixes = 0;
     let mut errors: u16 = 0;
-    let analyzer_options = compute_analyzer_options(&settings, PathBuf::from(biome_path.as_path()));
+    let analyzer_options =
+        settings.analyzer_options::<JsLanguage>(biome_path, &document_file_source);
     loop {
         let (action, _) = analyze(
             &tree,
@@ -908,67 +893,5 @@ pub(crate) fn organize_imports(parse: AnyParse) -> Result<OrganizeImportsResult,
         Ok(OrganizeImportsResult {
             code: tree.syntax().to_string(),
         })
-    }
-}
-
-fn compute_analyzer_options(
-    settings: &WorkspaceSettingsHandle,
-    file_path: PathBuf,
-) -> AnalyzerOptions {
-    let settings = settings.settings();
-    let preferred_quote = settings
-        .languages
-        .javascript
-        .formatter
-        .quote_style
-        .map(|quote_style: QuoteStyle| {
-            if quote_style == QuoteStyle::Single {
-                PreferredQuote::Single
-            } else {
-                PreferredQuote::Double
-            }
-        })
-        .unwrap_or_default();
-
-    let path = BiomePath::new(file_path.as_path());
-    let jsx_runtime = match settings
-        .override_settings
-        .override_jsx_runtime(&path, settings.languages.javascript.environment.jsx_runtime)
-    {
-        // In the future, we may wish to map an `Auto` variant to a concrete
-        // analyzer value for easy access by the analyzer.
-        JsxRuntime::Transparent => biome_analyze::options::JsxRuntime::Transparent,
-        JsxRuntime::ReactClassic => biome_analyze::options::JsxRuntime::ReactClassic,
-    };
-
-    let mut globals: Vec<_> = settings
-        .override_settings
-        .override_js_globals(&path, &settings.languages.javascript.globals)
-        .into_iter()
-        .collect();
-    if file_path.extension().and_then(OsStr::to_str) == Some("vue") {
-        globals.extend(
-            [
-                "defineEmits",
-                "defineProps",
-                "defineExpose",
-                "defineModel",
-                "defineOptions",
-                "defineSlots",
-            ]
-            .map(ToOwned::to_owned),
-        );
-    }
-
-    let configuration = AnalyzerConfiguration {
-        rules: to_analyzer_rules(settings, file_path.as_path()),
-        globals,
-        preferred_quote,
-        jsx_runtime: Some(jsx_runtime),
-    };
-
-    AnalyzerOptions {
-        configuration,
-        file_path,
     }
 }

@@ -2,7 +2,6 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: css/units/values.css
 ---
-
 # Input
 
 ```css
@@ -62,10 +61,11 @@ info: css/units/values.css
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,7 +1,9 @@
+@@ -1,7 +1,10 @@
 -@value 4XLarge 28/36px;
-+@
-+value 4XLarge 28/36px
++@value
++4
++XLarge 28/36px
 +;
  
  .postCssLowerCasingValueName {
@@ -74,7 +74,7 @@ info: css/units/values.css
  }
  
  .cssUnits {
-@@ -25,7 +27,7 @@
+@@ -25,7 +28,7 @@
    a: 5vmax;
    a: 5cm;
    a: 5mm;
@@ -83,7 +83,7 @@ info: css/units/values.css
    a: 5in;
    a: 5pt;
    a: 5pc;
-@@ -35,13 +37,13 @@
+@@ -35,13 +38,13 @@
    a: 5rad;
    a: 5s;
    a: 5ms;
@@ -106,8 +106,9 @@ info: css/units/values.css
 # Output
 
 ```css
-@
-value 4XLarge 28/36px
+@value
+4
+XLarge 28/36px
 ;
 
 .postCssLowerCasingValueName {
@@ -159,62 +160,19 @@ value 4XLarge 28/36px
 
 # Errors
 ```
-values.css:1:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+values.css:1:8 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Unexpected value or character.
   
   > 1 │ @value 4XLarge 28/36px;
-      │  ^^^^^
+      │        ^
     2 │ 
     3 │ .postCssLowerCasingValueName {
   
   i Expected one of:
   
-  - charset
-  - color-profile
-  - container
-  - counter-style
-  - document
-  - font-face
-  - font-feature-values
-  - font-palette-values
-  - import
-  - keyframes
-  - layer
-  - media
-  - namespace
-  - page
-  - property
-  - supports
-  - viewport
-  - scope
-  
-values.css:1:8 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Expected a compound selector but instead found '4'.
-  
-  > 1 │ @value 4XLarge 28/36px;
-      │        ^
-    2 │ 
-    3 │ .postCssLowerCasingValueName {
-  
-  i Expected a compound selector here.
-  
-  > 1 │ @value 4XLarge 28/36px;
-      │        ^
-    2 │ 
-    3 │ .postCssLowerCasingValueName {
-  
-values.css:1:9 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `XLarge`
-  
-  > 1 │ @value 4XLarge 28/36px;
-      │         ^^^^^^
-    2 │ 
-    3 │ .postCssLowerCasingValueName {
-  
-  i Remove XLarge
+  - declaration at rule clause
+  - import at rule clause
   
 values.css:1:16 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -256,5 +214,3 @@ values.css:1:23 parse ━━━━━━━━━━━━━━━━━━━�
   
 
 ```
-
-

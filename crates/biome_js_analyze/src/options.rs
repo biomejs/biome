@@ -241,6 +241,9 @@ pub type NoVoidElementsWithChildren = < lint :: correctness :: no_void_elements_
 pub type NoVoidTypeReturn =
     <lint::correctness::no_void_type_return::NoVoidTypeReturn as biome_analyze::Rule>::Options;
 pub type NoWith = <lint::complexity::no_with::NoWith as biome_analyze::Rule>::Options;
+pub type NoYodaExpression =
+    <lint::nursery::no_yoda_expression::NoYodaExpression as biome_analyze::Rule>::Options;
+pub type UseAdjacentOverloadSignatures = < lint :: nursery :: use_adjacent_overload_signatures :: UseAdjacentOverloadSignatures as biome_analyze :: Rule > :: Options ;
 pub type UseAltText = <lint::a11y::use_alt_text::UseAltText as biome_analyze::Rule>::Options;
 pub type UseAnchorContent =
     <lint::a11y::use_anchor_content::UseAnchorContent as biome_analyze::Rule>::Options;
@@ -269,6 +272,8 @@ pub type UseDefaultSwitchClause = < lint :: nursery :: use_default_switch_clause
 pub type UseDefaultSwitchClauseLast = < lint :: suspicious :: use_default_switch_clause_last :: UseDefaultSwitchClauseLast as biome_analyze :: Rule > :: Options ;
 pub type UseEnumInitializers =
     <lint::style::use_enum_initializers::UseEnumInitializers as biome_analyze::Rule>::Options;
+pub type UseErrorMessage =
+    <lint::nursery::use_error_message::UseErrorMessage as biome_analyze::Rule>::Options;
 pub type UseExhaustiveDependencies = < lint :: correctness :: use_exhaustive_dependencies :: UseExhaustiveDependencies as biome_analyze :: Rule > :: Options ;
 pub type UseExplicitLengthCheck = < lint :: nursery :: use_explicit_length_check :: UseExplicitLengthCheck as biome_analyze :: Rule > :: Options ;
 pub type UseExponentiationOperator = < lint :: style :: use_exponentiation_operator :: UseExponentiationOperator as biome_analyze :: Rule > :: Options ;
@@ -342,6 +347,8 @@ pub type UseSortedClasses =
 pub type UseTemplate = <lint::style::use_template::UseTemplate as biome_analyze::Rule>::Options;
 pub type UseThrowNewError =
     <lint::nursery::use_throw_new_error::UseThrowNewError as biome_analyze::Rule>::Options;
+pub type UseThrowOnlyError =
+    <lint::nursery::use_throw_only_error::UseThrowOnlyError as biome_analyze::Rule>::Options;
 pub type UseTopLevelRegex =
     <lint::nursery::use_top_level_regex::UseTopLevelRegex as biome_analyze::Rule>::Options;
 pub type UseValidAnchor =

@@ -69,10 +69,9 @@ AnyGraphqlDefinition =
 	| GraphqlBogusDefinition
 	// Type System Extensions: we may possible want to group those in an enum outside of 'Definition'
 	| GraphqlSchemaExtension
-	// Type Extensions
 	| GraphqlScalarTypeExtension
-	| AnyGraphqlObjectTypeExtension
-	| AnyGraphqlInterfaceTypeExtension
+	| GraphqlObjectTypeExtension
+	| GraphqlInterfaceTypeExtension
 	| AnyGraphqlUnionTypeExtension
 	| AnyGraphqlEnumTypeExtension
 	| AnyGraphqlInputObjectTypeExtension
@@ -356,35 +355,14 @@ GraphqlObjectTypeDefinition =
 	fields: GraphqlFieldsDefinition?
 
 // https://spec.graphql.org/October2021/#sec-Object-Extensions
-AnyGraphqlObjectTypeExtension =
-	GraphqlObjectTypeExtensionWithFields
-	| GraphqlObjectTypeExtensionWithDirectives
-	| GraphqlObjectTypeExtension
-	| GraphqlBogusExtension
-
 // extend type C implements A @i {e: f}
-GraphqlObjectTypeExtensionWithFields =
-	'extend'
-	'type'
-	name: GraphqlName
-	implements: GraphqlImplementsInterfaces?
-	directives: GraphqlDirectiveList
-	fields: GraphqlFieldsDefinition
-
-// extend type C implements A @i
-GraphqlObjectTypeExtensionWithDirectives =
-	'extend'
-	'type'
-	name: GraphqlName
-	implements: GraphqlImplementsInterfaces?
-	directives: GraphqlDirectiveList
-
-// extend type C implements A
 GraphqlObjectTypeExtension =
 	'extend'
 	'type'
 	name: GraphqlName
-	implements: GraphqlImplementsInterfaces
+	implements: GraphqlImplementsInterfaces?
+	directives: GraphqlDirectiveList
+	fields: GraphqlFieldsDefinition?
 
 // extend type C implements
 // & A
@@ -448,35 +426,14 @@ GraphqlInterfaceTypeDefinition =
 	fields: GraphqlFieldsDefinition?
 
 // https://spec.graphql.org/October2021/#sec-Interface-Extensions
-AnyGraphqlInterfaceTypeExtension =
-	GraphqlInterfaceTypeExtensionWithFields
-	| GraphqlInterfaceTypeExtensionWithDirectives
-	| GraphqlInterfaceTypeExtension
-	| GraphqlBogusExtension
-
 // extend interface A implements B @i {e: f}
-GraphqlInterfaceTypeExtensionWithFields =
-	'extend'
-	'interface'
-	name: GraphqlName
-	implements: GraphqlImplementsInterfaces?
-	directives: GraphqlDirectiveList
-	fields: GraphqlFieldsDefinition
-
-// extend interface A implements B @i
-GraphqlInterfaceTypeExtensionWithDirectives =
-	'extend'
-	'interface'
-	name: GraphqlName
-	implements: GraphqlImplementsInterfaces?
-	directives: GraphqlDirectiveList
-
-// extend interface A implements B
 GraphqlInterfaceTypeExtension =
 	'extend'
 	'interface'
 	name: GraphqlName
-	implements: GraphqlImplementsInterfaces
+	implements: GraphqlImplementsInterfaces?
+	directives: GraphqlDirectiveList
+	fields: GraphqlFieldsDefinition?
 
 // union A =
 //   | B

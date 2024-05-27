@@ -63,7 +63,7 @@ tests/test.js:3:9 lint/correctness/noUndeclaredVariables ━━━━━━━�
     4 │     });
     5 │ });
   
-  i By default, Biome recognizes browser and Mode.js globals.
+  i By default, Biome recognizes browser and Node.js globals.
     You can ignore more globals using the javascript.globals configuration.
   
 

@@ -303,7 +303,7 @@ declare_rule! {
     /// This option will be deprecated in the future.
     /// Use the `conventions` option instead.
     ///
-    /// ### conventions
+    /// ### conventions (Since v1.8.0)
     ///
     /// The `conventions` option allows applying custom conventions.
     /// The option takes an array of conventions.
@@ -522,7 +522,7 @@ impl Rule for UseNamingConvention {
                             start: name_range_start as u16,
                             end: (name_range_start + name.len()) as u16,
                         },
-                        suggestion: Suggestion::Match(matching.as_source().to_string()),
+                        suggestion: Suggestion::Match(matching.to_string()),
                     });
                 };
                 if let Some(first_capture) = capture.iter().skip(1).find_map(|x| x) {
@@ -551,7 +551,7 @@ impl Rule for UseNamingConvention {
                         start: name_range_start as u16,
                         end: (name_range_start + name.len()) as u16,
                     },
-                    suggestion: Suggestion::Formats(convention.formats.clone()),
+                    suggestion: Suggestion::Formats(convention.formats),
                 });
             }
         }
@@ -573,7 +573,7 @@ impl Rule for UseNamingConvention {
                 start: name_range_start as u16,
                 end: (name_range_start + name.len()) as u16,
             },
-            suggestion: Suggestion::Formats(default_convention.formats.clone()),
+            suggestion: Suggestion::Formats(default_convention.formats),
         })
     }
 
@@ -720,7 +720,7 @@ impl AnyIdentifierBindingLike {
 
 #[derive(Debug)]
 pub struct State {
-    // Selector of the convention which is not fullfilled.
+    // Selector of the convention which is not fulfilled.
     convention_selector: Selector,
     // Range of the name where the suggestion applies
     name_range: Range<u16>,
@@ -826,15 +826,15 @@ fn is_default<T: Default + Eq>(value: &T) -> bool {
 pub struct Convention {
     /// Declarations concerned by this convention
     #[serde(default, skip_serializing_if = "is_default")]
-    selector: Selector,
+    pub selector: Selector,
 
     /// Regular expression to enforce
     #[serde(default, rename = "match", skip_serializing_if = "Option::is_none")]
-    matching: Option<RestrictedRegex>,
+    pub matching: Option<RestrictedRegex>,
 
     /// String cases to enforce
     #[serde(default, skip_serializing_if = "is_default")]
-    formats: Formats,
+    pub formats: Formats,
 }
 
 impl DeserializableValidator for Convention {
@@ -858,24 +858,116 @@ impl DeserializableValidator for Convention {
     }
 }
 
+#[derive(Copy, Clone, Debug)]
+pub enum InvalidSelector {
+    IncompatibleModifiers(Modifier, Modifier),
+    UnsupportedModifiers(Kind, Modifier),
+    UnsupportedScope(Kind, Scope),
+}
+impl std::error::Error for InvalidSelector {}
+impl std::fmt::Display for InvalidSelector {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            InvalidSelector::IncompatibleModifiers(modifier1, modifier2) => {
+                write!(
+                    f,
+                    "The `{modifier1}` and `{modifier2}` modifiers cannot be used together.",
+                )
+            }
+            InvalidSelector::UnsupportedModifiers(kind, modifier) => {
+                write!(
+                    f,
+                    "The `{modifier}` modifier cannot be used with the `{kind}` kind."
+                )
+            }
+            InvalidSelector::UnsupportedScope(kind, scope) => {
+                let scope = scope.to_string();
+                let scope = scope.trim_end();
+                write!(
+                    f,
+                    "The `{scope}` scope cannot be used with the `{kind}` kind."
+                )
+            }
+        }
+    }
+}
+
 #[derive(
     Clone, Copy, Debug, Default, Deserializable, Eq, PartialEq, serde::Deserialize, serde::Serialize,
 )]
 #[cfg_attr(feature = "schemars", derive(JsonSchema))]
 #[deserializable(with_validator)]
 #[serde(deny_unknown_fields)]
-struct Selector {
+pub struct Selector {
     /// Declaration kind
     #[serde(default, skip_serializing_if = "is_default")]
-    kind: Kind,
+    pub kind: Kind,
 
     /// Modifiers used on the declaration
     #[serde(default, skip_serializing_if = "is_default")]
-    modifiers: Modifiers,
+    pub modifiers: Modifiers,
 
     /// Scope of the declaration
     #[serde(default, skip_serializing_if = "is_default")]
-    scope: Scope,
+    pub scope: Scope,
+}
+
+impl Selector {
+    /// Returns an error if the current selector is not valid.
+    pub fn check(self) -> Result<(), InvalidSelector> {
+        if self.modifiers.intersects(Modifier::CLASS_MEMBER) {
+            let accessibility = Modifier::Private | Modifier::Protected;
+            if *self.modifiers & accessibility == accessibility {
+                return Err(InvalidSelector::IncompatibleModifiers(
+                    Modifier::Private,
+                    Modifier::Protected,
+                ));
+            }
+            let abstarct_or_static = Modifier::Abstract | Modifier::Static;
+            if *self.modifiers & abstarct_or_static == abstarct_or_static {
+                return Err(InvalidSelector::IncompatibleModifiers(
+                    Modifier::Abstract,
+                    Modifier::Static,
+                ));
+            }
+            if !Kind::ClassMember.contains(self.kind) {
+                let modifiers = self.modifiers.0 & Modifier::CLASS_MEMBER;
+                if let Some(modifier) = modifiers.iter().next() {
+                    return Err(InvalidSelector::UnsupportedModifiers(self.kind, modifier));
+                }
+            }
+        }
+        if self.modifiers.contains(Modifier::Abstract) {
+            if self.kind != Kind::Class && !Kind::ClassMember.contains(self.kind) {
+                return Err(InvalidSelector::UnsupportedModifiers(
+                    self.kind,
+                    Modifier::Abstract,
+                ));
+            }
+            if self.modifiers.contains(Modifier::Static) {
+                return Err(InvalidSelector::IncompatibleModifiers(
+                    Modifier::Abstract,
+                    Modifier::Static,
+                ));
+            }
+        }
+        if self.modifiers.contains(Modifier::Readonly)
+            && !matches!(self.kind, Kind::ClassProperty | Kind::TypeProperty)
+        {
+            return Err(InvalidSelector::UnsupportedModifiers(
+                self.kind,
+                Modifier::Readonly,
+            ));
+        }
+        if self.scope == Scope::Global
+            && !Kind::Variable.contains(self.kind)
+            && !Kind::Function.contains(self.kind)
+            && !Kind::TypeLike.contains(self.kind)
+        {
+            return Err(InvalidSelector::UnsupportedScope(self.kind, Scope::Global));
+        }
+        Ok(())
+    }
 }
 
 impl DeserializableValidator for Selector {
@@ -885,71 +977,9 @@ impl DeserializableValidator for Selector {
         range: biome_rowan::TextRange,
         diagnostics: &mut Vec<biome_deserialize::DeserializationDiagnostic>,
     ) -> bool {
-        let accessibility = Modifier::Private | Modifier::Protected;
-        let class_member_modifiers = accessibility | Modifier::Static;
-        if self.modifiers.intersects(class_member_modifiers) {
-            if self.modifiers.0 & accessibility == accessibility {
-                diagnostics.push(
-                    DeserializationDiagnostic::new(
-                        "The `private` and `protected` modifiers cannot be used toghether.",
-                    )
-                    .with_range(range),
-                );
-                return false;
-            }
-            if !Kind::ClassMember.contains(self.kind) {
-                let modifier = self.modifiers.0 & class_member_modifiers;
-                diagnostics.push(
-                    DeserializationDiagnostic::new(format_args!(
-                        "The `{modifier}` modifier can only be used on class member kinds."
-                    ))
-                    .with_range(range),
-                );
-                return false;
-            }
-        }
-        if self.modifiers.contains(Modifier::Abstract) {
-            if self.kind != Kind::Class && !Kind::ClassMember.contains(self.kind) {
-                diagnostics.push(
-                    DeserializationDiagnostic::new(
-                        "The `abstract` modifier can only be used on classes and class member kinds."
-                    )
-                    .with_range(range),
-                );
-                return false;
-            }
-            if self.modifiers.contains(Modifier::Static) {
-                diagnostics.push(
-                    DeserializationDiagnostic::new(
-                        "The `abstract` and `static` modifiers cannot be used toghether.",
-                    )
-                    .with_range(range),
-                );
-                return false;
-            }
-        }
-        if self.modifiers.contains(Modifier::Readonly)
-            && !matches!(self.kind, Kind::ClassProperty | Kind::TypeProperty)
-        {
-            diagnostics.push(
-                DeserializationDiagnostic::new(
-                    "The `readonly` modifier can only be used on class and type property kinds.",
-                )
-                .with_range(range),
-            );
-            return false;
-        }
-        if self.scope == Scope::Global
-            && !Kind::Variable.contains(self.kind)
-            && !Kind::Function.contains(self.kind)
-            && !Kind::TypeLike.contains(self.kind)
-        {
-            diagnostics.push(
-                DeserializationDiagnostic::new(
-                    "The `global` scope can only be used on type and variable kinds.",
-                )
-                .with_range(range),
-            );
+        if let Err(error) = self.check() {
+            diagnostics
+                .push(DeserializationDiagnostic::new(format_args!("{}", error)).with_range(range));
             return false;
         }
         true
@@ -1071,7 +1101,7 @@ impl Selector {
                 Selector::with_modifiers(Kind::ClassSetter, setter.modifiers())
             }
         };
-        // Ignore explicitly overrided members
+        // Ignore explicitly overridden members
         (!modifiers.contains(Modifier::Override)).then_some(Selector {
             kind,
             modifiers,
@@ -1311,7 +1341,7 @@ pub enum Kind {
     Function,
     Interface,
     EnumMember,
-    /// TypeScript mamespaces, import and export namesapces
+    /// TypeScript namespaces, import and export namespaces
     NamespaceLike,
     /// TypeScript mamespaces
     Namespace,
@@ -1457,7 +1487,7 @@ impl std::fmt::Display for Kind {
 #[cfg_attr(feature = "schemars", derive(JsonSchema))]
 #[serde(rename_all = "camelCase")]
 #[repr(u16)]
-enum RestrictedModifier {
+pub enum RestrictedModifier {
     Abstract = Modifier::Abstract as u16,
     Private = Modifier::Private as u16,
     Protected = Modifier::Protected as u16,
@@ -1488,6 +1518,11 @@ impl From<Modifier> for RestrictedModifier {
         }
     }
 }
+impl From<RestrictedModifier> for BitFlags<Modifier> {
+    fn from(modifier: RestrictedModifier) -> Self {
+        Modifier::from(modifier).into()
+    }
+}
 
 #[derive(
     Debug,
@@ -1505,7 +1540,7 @@ impl From<Modifier> for RestrictedModifier {
     from = "SmallVec<[RestrictedModifier; 4]>",
     into = "SmallVec<[RestrictedModifier; 4]>"
 )]
-struct Modifiers(BitFlags<Modifier>);
+pub struct Modifiers(BitFlags<Modifier>);
 
 impl Deref for Modifiers {
     type Target = BitFlags<Modifier>;
@@ -1525,6 +1560,11 @@ impl From<Modifiers> for SmallVec<[RestrictedModifier; 4]> {
 }
 impl From<SmallVec<[RestrictedModifier; 4]>> for Modifiers {
     fn from(values: SmallVec<[RestrictedModifier; 4]>) -> Self {
+        Self::from_iter(values)
+    }
+}
+impl FromIterator<RestrictedModifier> for Modifiers {
+    fn from_iter<T: IntoIterator<Item = RestrictedModifier>>(values: T) -> Self {
         Self(
             values
                 .into_iter()
@@ -1593,7 +1633,7 @@ pub enum Scope {
 }
 
 impl Scope {
-    /// Returns thes scope of `node` or `None` if the scope cannot be determined or
+    /// Returns the scope of `node` or `None` if the scope cannot be determined or
     /// if the scope is an external module.
     fn from_declaration(node: &AnyJsBindingDeclaration) -> Option<Scope> {
         let control_flow_root = node
@@ -1684,7 +1724,16 @@ impl TryFrom<Case> for Format {
 }
 
 #[derive(
-    Clone, Debug, Default, Deserializable, Eq, Hash, PartialEq, serde::Deserialize, serde::Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Default,
+    Deserializable,
+    Eq,
+    Hash,
+    PartialEq,
+    serde::Deserialize,
+    serde::Serialize,
 )]
 #[serde(from = "SmallVec<[Format; 4]>", into = "SmallVec<[Format; 4]>")]
 pub struct Formats(Cases);
@@ -1697,6 +1746,11 @@ impl Deref for Formats {
 }
 impl From<SmallVec<[Format; 4]>> for Formats {
     fn from(values: SmallVec<[Format; 4]>) -> Self {
+        Self::from_iter(values)
+    }
+}
+impl FromIterator<Format> for Formats {
+    fn from_iter<T: IntoIterator<Item = Format>>(values: T) -> Self {
         Self(values.into_iter().map(|format| format.into()).collect())
     }
 }

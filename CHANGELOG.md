@@ -21,39 +21,36 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 #### New features
 
-- Add a new option `--rule` to the command `biome lint` ([#58](https://github.com/biomejs/biome/issues/58)).
+- Add two new options `--only` and `--skip` to the command `biome lint` ([#58](https://github.com/biomejs/biome/issues/58)).
 
-  This new option allows you to execute a single rule or a rule group.
-  This option is convenient to test a rule or apply the code fixes of a single rule.
-
-  For example, you can execute the `style/useNamingConvention` rule on the working directory:
-
-  ```shell
-  biome lint --rule=style/useNamingConvention ./
-  ```
-
-  If the rule has a code action (autofix), you can use `--apply` to apply the fix:
+  The `--only` option allows you to run a given rule or rule group,
+  For example, the following command runs only the `style/useNamingConvention` and `style/noInferrableTypes` rules.
+  If the rule is disabled in the configuration, then its severity level is set to `error` for a recommended rule or `warn` otherwise.
 
   ```shell
-  biome lint --rule=style/useNamingConvention --apply ./
+  biome lint --only=style/useNamingConvention --only=style/noInferrableTypes
   ```
 
-  The option takes the rule options in the Biome configuration file into account.
-  Only, the severity level of the rule is overridden by its default value,
-  i.e. `error` for a recommended rule or `warn` otherwise.
+  Passing a group does not change the severity level of the rules in the group.
+  All the disabled rules in the group will remain disabled.
+  To ensure that the group is run, the `recommended` field of the group is enabled.
+  The `nursery` group cannot be passed, as no rules are enabled by default in the nursery group.
 
-  You can also run a group of rules:
+  The `--skip` option allows you to skip the execution of a given group or a given rule.
+  For example, the following command skips the `style` group and the `suspicious/noExplicitAny` rule.
 
   ```shell
-  biome lint --rule=suspicious src/main.js
+  biome lint --skip=style --skip=suspicious/noExplicitAny
   ```
 
-  In this case, the severity level of a rule is not overridden.
-  Thus, the disabled rules stay disabled.
-  To ensure that the group is run, the `recommended` field of the group is turned on.
-  The `nursery` group cannot be passed because no rules are enabled in the nursery group by default.
+  You can also use `--only` and `--skip` together. `--skip` oevrrides `--only`.
+  The following command executes only the rules from the `style` group, but the `style/useNamingConvention` rule.
 
-  The option is compatible with other options such as `--apply`, `--apply-unsafe` and `--reporter`.
+  ```shell
+  biome lint --only=style --skip=style/useNamingConvention
+  ```
+
+  These options are compatible with other options such as `--write` (previously `--apply`), and `--reporter`.
 
   Contributed by @Conaclos
 
@@ -86,6 +83,7 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
   The `biome migrate --fix` has the same behavior as `biome migrate --write`.
 
   This change allows these commands to write modifications in the same options.
+  With this change, the `--apply` and `--apply-unsafe` options are deprecated.
 
   Contributed by @unvalley
 
@@ -116,6 +114,12 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
   Contributed by @Conaclos
 
+- `biome migrate eslint` now propagates NodeJS errors to the user.
+
+  This will help users to identify why Biome is unable to load some ESLint configurations.
+
+  Contributed by @Conaclos
+
 - Add a new `--reporter` called `summary`. This reporter will print diagnostics in a different way, based on the tools (formatter, linter, etc.) that are executed.
   Import sorting and formatter shows the name of the files that require formatting. Instead, the linter will group the number of rules triggered and the number of errors/warnings:
 
@@ -140,6 +144,8 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
   lint/suspicious/noDebugger                              20 (20 error(s), 0 warning(s), 0 info(s))
   ```
   Contributed by @ematipico
+
+- `biome ci` now enforces printing the output using colours. If you were previously using `--colors=force`, you can remove it because it's automatically set. Contributed by @ematipico
 
 ### Configuration
 
@@ -193,11 +199,20 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 - The `javascript.formatter.trailingComma` option is deprecated and renamed to `javascript.formatter.trailingCommas`. The corresponding CLI option `--trailing-comma` is also deprecated and renamed to `--trailing-commas`. Details can be checked in [#2492](https://github.com/biomejs/biome/pull/2492). Contributed by @Sec-ant
 
+#### Bug fixes
+
+- Fix a bug where if the formatter was disabled at the language level, it could be erroneously enabled by an
+  override that did not specify the formatter section [#2924](https://github.com/biomejs/biome/issues/2924). Contributed by @dyc3
+
 ### Editors
 
 #### New features
 
 - Add support for LSP Workspaces
+
+#### Bug fixes
+
+- Fixes [#2781](https://github.com/biomejs/biome/issues/2781), by correctly computing the configuration to apply to a specific file. Contributed by @ematipico
 
 ### Formatter
 
@@ -205,6 +220,7 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 - Fix [#2470](https://github.com/biomejs/biome/issues/2470) by avoid introducing linebreaks in single line string interpolations. Contributed by @ah-yu
 - Resolve deadlocks by narrowing the scope of locks. Contributed by @mechairoi
+- Fix [#2782](https://github.com/biomejs/biome/issues/2782) by computing the enabled rules by taking the override settings into consideration. Contributed by @ematipico
 
 ### JavaScript APIs
 
@@ -213,6 +229,8 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 #### New features
 
 - Add [nursery/useDateNow](https://biomejs.dev/linter/rules/use-date-now/). Contributed by @minht11
+- Add [nursery/useErrorMessage](https://biomejs.dev/linter/rules/use_error_message/). Contributed by @minht11
+- Add [nursery/useThrowOnlyError](https://biomejs.dev/linter/rules/use_throw_only_error/). Contributed by @minht11
 - Add [nursery/useImportExtensions](https://biomejs.dev/linter/rules/use-import-extensions/). Contributed by @minht11
 
 - [useNamingConvention](https://biomejs.dev/linter/rules/use-naming-convention/) now supports an option to enforce custom conventions ([#1900](https://github.com/biomejs/biome/issues/1900)).
@@ -245,7 +263,7 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
   }
   ```
 
-  Please, find more details in the [rule documentation](https://biomejs.dev/linter/rules/use-naming-convention/#conventions).
+  Please, find more details in the [rule documentation](https://biomejs.dev/linter/rules/use-naming-convention/#options).
 
   Contributed by @Conaclos
 
@@ -268,6 +286,7 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 - Add [nursery/noUnknownUnit](https://biomejs.dev/linter/rules/no-unknwon-unit). [#2535](https://github.com/biomejs/biome/issues/2535) Contributed by @neokidev
 - Add [nursery/noUnmatchableAnbSelector](https://biomejs.dev/linter/rules/no-unmatchable-anb-selector). [#2706](https://github.com/biomejs/biome/issues/2706) Contributed by @togami2864
 - Add [nursery/useGenericFontNames](https://biomejs.dev/linter/rules/use-generic-font-names). [#2573](https://github.com/biomejs/biome/pull/2573) Contributed by @togami2864
+- Add [nursery/noYodaExpression](https://biomejs.dev/linter/rules/no-yoda-expression/). Contributed by @michellocana
 
 #### Enhancements
 
@@ -277,6 +296,13 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
   The diagnosis is also clearer.
 
   Contributed by @Conaclos
+- Improve code action for [nursery/noUselessUndefinedInitialization](https://biomejs.dev/linter/rules/no-useless-undefined-initialization/) to handle comments.
+
+  The rule now places inline comments after the declaration statement, instead of removing them.
+  The code action is now safe to apply.
+  
+  Contributed by @lutaok
+
 
 #### Bug fixes
 
@@ -301,6 +327,18 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
   type T3 = Ns3.Inner;
   // This also references the import namespace.
   export type { Ns3 }
+  ```
+
+  Contributed by @Conaclos
+
+- [noUndeclaredVariables](https://biomejs.dev/linter/rules/no-undeclared-variables/) now correctly handle ambient computed member names ([#2975](https://github.com/biomejs/biome/issues/2975)).
+
+  A constant can be imported as a type and used in a computed member name of a member signature.
+  Previously, Biome was unable to bind the value imported as a type to the computed member name.
+
+  ```ts
+  import type { NAME } from "./constants.js";
+  type X = { [NAME]: number };
   ```
 
   Contributed by @Conaclos
@@ -357,6 +395,10 @@ z.object({})
     3 3 │   	<div class={`px-2 foo p-4 bar ${variable}`}/>
     4 4 │   </>
   ```
+- [noUndeclaredDependencies](https://biomejs.dev/linter/rules/no-undeclared-dependencies/) is correctly triggered when running `biome ci`. Contributed by @ematipico
+- [noUnusedVariables](https://biomejs.dev/linter/rules/no-unused-variables/) no longer panics when a certain combination of characters is typed. Contributed by @ematipico
+
+- [noUndeclaredVariables](https://biomejs.dev/linter/rules/no-undeclared-variables/) no logger alerts on `arguments` object in a function scope. Contributed by @ah-yu
 ### Parser
 
 #### Enhancements

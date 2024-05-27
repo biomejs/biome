@@ -23,3 +23,4 @@ pub(crate) mod bogus_scope_range;
 pub(crate) mod bogus_selector;
 pub(crate) mod bogus_sub_selector;
 pub(crate) mod bogus_url_modifier;
+pub(crate) mod value_at_rule_generic_value;

@@ -77,7 +77,7 @@ pub(crate) struct CssLexer<'src> {
 
     diagnostics: Vec<ParseDiagnostic>,
 
-    config: CssParserOptions,
+    options: CssParserOptions,
 }
 
 impl<'src> Lexer<'src> for CssLexer<'src> {
@@ -197,12 +197,12 @@ impl<'src> CssLexer<'src> {
             current_flags: TokenFlags::empty(),
             position: 0,
             diagnostics: vec![],
-            config: CssParserOptions::default(),
+            options: CssParserOptions::default(),
         }
     }
 
-    pub(crate) fn with_config(self, config: CssParserOptions) -> Self {
-        Self { config, ..self }
+    pub(crate) fn with_options(self, options: CssParserOptions) -> Self {
+        Self { options, ..self }
     }
 
     /// Bumps the current byte and creates a lexed token of the passed in kind
@@ -843,6 +843,8 @@ impl<'src> CssLexer<'src> {
             b"domain" => DOMAIN_KW,
             b"media-document" => MEDIA_DOCUMENT_KW,
             b"regexp" => REGEXP_KW,
+            b"value" => VALUE_KW,
+            b"as" => AS_KW,
             _ => IDENT,
         }
     }
@@ -1030,7 +1032,7 @@ impl<'src> CssLexer<'src> {
                     COMMENT
                 }
             }
-            Some(b'/') if self.config.allow_wrong_line_comments => {
+            Some(b'/') if self.options.allow_wrong_line_comments => {
                 self.advance(2);
 
                 while let Some(chr) = self.current_byte() {

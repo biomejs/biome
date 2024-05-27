@@ -15,5 +15,13 @@ import Button from "./components/Button.vue";
 # Emitted Messages
 
 ```block
+internalError/fs  DEPRECATED  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The argument --apply is deprecated, it will be removed in the next major release. Use --write instead.
+  
+
+```
+
+```block
 Checked 1 file in <TIME>. Fixed 1 file.
 ```
