@@ -323,6 +323,18 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
   Contributed by @Conaclos
 
+- [noUndeclaredVariables](https://biomejs.dev/linter/rules/no-undeclared-variables/) now correctly handle ambient computed member names ([#2975](https://github.com/biomejs/biome/issues/2975)).
+
+  A constant can be imported as a type and used in a computed member name of a member signature.
+  Previously, Biome was unable to bind the value imported as a type to the computed member name.
+
+  ```ts
+  import type { NAME } from "./constants.js";
+  type X = { [NAME]: number };
+  ```
+
+  Contributed by @Conaclos
+
 - [noUndeclaredVariables](https://biomejs.dev/linter/rules/no-undeclared-variables/) now ignores `this` in JSX components ([#2636](https://github.com/biomejs/biome/issues/2636)).
 
   The rule no longer reports `this` as undeclared in following code.
