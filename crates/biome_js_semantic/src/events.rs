@@ -2,11 +2,9 @@
 
 use biome_js_syntax::binding_ext::{AnyJsBindingDeclaration, AnyJsIdentifierBinding};
 use biome_js_syntax::{
-    AnyJsExportNamedSpecifier, AnyJsImportClause, AnyJsNamedImportSpecifier, AnyTsType,
-};
-use biome_js_syntax::{
     AnyJsIdentifierUsage, JsLanguage, JsSyntaxKind, JsSyntaxNode, TextRange, TsTypeParameterName,
 };
+use biome_js_syntax::{AnyJsImportClause, AnyJsNamedImportSpecifier, AnyTsType};
 use biome_rowan::{syntax::Preorder, AstNode, SyntaxNodeOptionExt, TokenText};
 use rustc_hash::FxHashMap;
 use std::collections::VecDeque;
@@ -175,8 +173,8 @@ impl BindingName {
     /// Turn a type into a value and a value into a type.
     fn dual(self) -> Self {
         match self {
-            BindingName::Type(name) => BindingName::Value(name),
-            BindingName::Value(name) => BindingName::Type(name),
+            Self::Type(name) => Self::Value(name),
+            Self::Value(name) => Self::Type(name),
         }
     }
 }
@@ -220,12 +218,6 @@ enum Reference {
     /// export { A }
     /// ```
     Export(TextRange),
-    /// Read and export only a type
-    /// ```ts
-    /// export { type T1 }
-    /// export type { T2, T3 }
-    /// ```
-    ExportType(TextRange),
     /// All reads that are not an export or part of a `typeof` expression
     /// ```js
     /// f();
@@ -266,7 +258,6 @@ impl Reference {
     const fn range(&self) -> &TextRange {
         match self {
             Self::Export(range)
-            | Self::ExportType(range)
             | Self::Read(range)
             | Self::Typeof(range)
             | Self::Write(range)
@@ -575,6 +566,13 @@ impl SemanticEventExtractor {
                     return;
                 };
                 match parent.kind() {
+                    JS_EXPORT_NAMED_SHORTHAND_SPECIFIER | JS_EXPORT_NAMED_SPECIFIER => {
+                        self.push_reference(
+                            BindingName::Value(name.clone()),
+                            Reference::Export(range),
+                        );
+                        self.push_reference(BindingName::Type(name), Reference::Export(range));
+                    }
                     JS_IDENTIFIER_EXPRESSION => {
                         let Some(grand_parent) = parent.parent() else {
                             self.push_reference(BindingName::Value(name), Reference::Read(range));
@@ -626,38 +624,17 @@ impl SemanticEventExtractor {
                         }
                     }
                     _ => {
-                        if let Some(specifier) = AnyJsExportNamedSpecifier::cast(parent) {
-                            if specifier.exports_only_types() {
-                                self.push_reference(
-                                    BindingName::Type(name),
-                                    Reference::ExportType(range),
-                                );
-                            } else {
-                                self.push_reference(
-                                    BindingName::Value(name.clone()),
-                                    Reference::Export(range),
-                                );
-                                self.push_reference(
-                                    BindingName::Type(name),
-                                    Reference::Export(range),
-                                );
-                            }
-                            return;
-                        }
                         if name.text() == "this" {
                             // Ignore `this` in typeof position. e.g. `typeof this.prop`.
                             return;
                         }
-                        match node
-                            .syntax()
+                        match parent
                             .ancestors()
-                            .skip(1)
                             .find(|x| x.kind() != TS_QUALIFIED_NAME)
                             .kind()
                         {
                             Some(TS_REFERENCE_TYPE) => {
-                                if matches!(node.syntax().parent().kind(), Some(TS_QUALIFIED_NAME))
-                                {
+                                if matches!(parent.kind(), TS_QUALIFIED_NAME) {
                                     self.push_reference(
                                         BindingName::Value(name),
                                         Reference::Qualified(range),
@@ -840,7 +817,7 @@ impl SemanticEventExtractor {
                     let declaration_before_reference =
                         declared_at.start() < reference.range().start();
                     let event = match reference {
-                        Reference::Export(range) | Reference::ExportType(range) => {
+                        Reference::Export(range) => {
                             self.stash
                                 .push_back(SemanticEvent::Exported { range: declared_at });
                             if declaration_before_reference {
@@ -936,37 +913,6 @@ impl SemanticEventExtractor {
                             // An export can export both a value and a type.
                             // If a dual binding exists, then it exports to the dual binding.
                             continue;
-                        }
-                        Reference::ExportType(range) => {
-                            if let Some(info) = &dual_binding {
-                                // TypeScript namespaces and import namespaces can also be exported as a type.
-                                if matches!(
-                                    info.declaration_kind,
-                                    JsSyntaxKind::JS_NAMESPACE_IMPORT_SPECIFIER
-                                        | TS_MODULE_DECLARATION
-                                ) {
-                                    let declared_at = info.range;
-                                    let declaration_before_reference =
-                                        declared_at.start() < reference.range().start();
-                                    self.stash
-                                        .push_back(SemanticEvent::Exported { range: declared_at });
-                                    let event = if declaration_before_reference {
-                                        SemanticEvent::Read {
-                                            range,
-                                            declared_at,
-                                            scope_id: 0,
-                                        }
-                                    } else {
-                                        SemanticEvent::HoistedRead {
-                                            range,
-                                            declared_at,
-                                            scope_id: 0,
-                                        }
-                                    };
-                                    self.stash.push_back(event);
-                                    continue;
-                                }
-                            }
                         }
                         Reference::Typeof(range) | Reference::Qualified(range) => {
                             // A typeof can only use a value,
