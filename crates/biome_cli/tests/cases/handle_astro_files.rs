@@ -92,6 +92,11 @@ const foo = "";
 ---
 <div></div>"#;
 
+const ASTRO_FILE_ASTRO_GLOBAL_OBJECT: &str = r#"---
+const { some } = Astro.props
+---
+<div>{some}</div>"#;
+
 #[test]
 fn format_astro_files() {
     let mut fs = MemoryFileSystem::default();
@@ -680,6 +685,35 @@ fn check_stdin_write_unsafe_successfully() {
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "check_stdin_write_unsafe_successfully",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn astro_global_object() {
+    let mut fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let astro_file_path = Path::new("file.astro");
+    fs.insert(astro_file_path.into(), ASTRO_FILE_ASTRO_GLOBAL_OBJECT.as_bytes());
+
+    let result = run_cli(
+        DynRef::Borrowed(&mut fs),
+        &mut console,
+        Args::from([("lint"), astro_file_path.as_os_str().to_str().unwrap()].as_slice()),
+    );
+
+    dbg!("YEAH", &result);
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_file_contents(&fs, astro_file_path, ASTRO_FILE_ASTRO_GLOBAL_OBJECT);
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "astro_global",
         fs,
         console,
         result,

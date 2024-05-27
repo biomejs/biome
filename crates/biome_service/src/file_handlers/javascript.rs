@@ -201,19 +201,26 @@ impl ServiceLanguage for JsLanguage {
             .override_js_globals(path, &global.languages.javascript.globals)
             .into_iter()
             .collect();
-        if path.extension().and_then(OsStr::to_str) == Some("vue") {
-            globals.extend(
-                [
-                    "defineEmits",
-                    "defineProps",
-                    "defineExpose",
-                    "defineModel",
-                    "defineOptions",
-                    "defineSlots",
-                ]
-                .map(ToOwned::to_owned),
-            );
-        }
+
+        match path.extension().and_then(OsStr::to_str) {
+            Some("vue") => {
+                globals.extend(
+                    [
+                        "defineEmits",
+                        "defineProps",
+                        "defineExpose",
+                        "defineModel",
+                        "defineOptions",
+                        "defineSlots",
+                    ]
+                    .map(ToOwned::to_owned),
+                );
+            }
+            Some("astro") => {
+                globals.extend(["Astro"].map(ToOwned::to_owned));
+            }
+            _ => {}
+        };
 
         let configuration = AnalyzerConfiguration {
             rules: to_analyzer_rules(global, path),
