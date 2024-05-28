@@ -273,13 +273,7 @@ fn has_accessible_label(
 
 /// Returns whether the passed `jsx_attribute_value` has a valid value inside it
 fn has_jsx_attribute_value(jsx_attribute_value: AnyJsxAttributeValue) -> bool {
-    match jsx_attribute_value {
-        AnyJsxAttributeValue::JsxString(jsx_string) => jsx_string
-            .inner_string_text()
-            .ok()
-            .map(|inner| inner.text().to_string())
-            .is_some_and(|escaped_text| !escaped_text.trim().is_empty()),
-        AnyJsxAttributeValue::JsxExpressionAttributeValue(_) => true,
-        _ => false,
-    }
+    jsx_attribute_value
+        .as_static_value()
+        .is_some_and(|static_value| !static_value.text().trim().is_empty())
 }
