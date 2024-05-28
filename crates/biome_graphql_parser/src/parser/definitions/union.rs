@@ -15,7 +15,6 @@ use biome_parser::{
     parse_recovery::ParseRecovery,
     parsed_syntax::ParsedSyntax,
     prelude::ParsedSyntax::*,
-    token_source::TokenSource,
     Parser,
 };
 
@@ -50,9 +49,8 @@ pub(super) fn parse_union_type_extension(p: &mut GraphqlParser) -> ParsedSyntax 
 
     parse_name(p).or_add_diagnostic(p, expected_name);
 
-    let pos = p.source().position();
-    DirectiveList.parse_list(p);
-    let directive_empty = p.source().position() == pos;
+    let directive_list = DirectiveList.parse_list(p);
+    let directive_empty = directive_list.range(p).is_empty();
 
     let union_members_empty = parse_union_member_types(p).is_absent();
 
