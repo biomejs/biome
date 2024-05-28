@@ -40,7 +40,7 @@ pub(crate) fn parse_union_type_definition(p: &mut GraphqlParser) -> ParsedSyntax
     Present(m.complete(p, GRAPHQL_UNION_TYPE_DEFINITION))
 }
 
-/// Must only be called if the next 2 token is `extend` and `interface`, otherwise it will panic.
+/// Must only be called if the next 2 token is `extend` and `union`, otherwise it will panic.
 #[inline]
 pub(super) fn parse_union_type_extension(p: &mut GraphqlParser) -> ParsedSyntax {
     let m = p.start();
