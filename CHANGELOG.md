@@ -301,7 +301,7 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
   The rule now places inline comments after the declaration statement, instead of removing them.
   The code action is now safe to apply.
-  
+
   Contributed by @lutaok
 
 
@@ -383,6 +383,8 @@ z.object({})
   .describe('')
   .describe('');
 ```
+- `noEmptyBlockStatements` no longer reports empty constructors using typescript parameter properties. [#3005](https://github.com/biomejs/biome/issues/3005) Contributed by @dyc3
+- `noEmptyBlockStatements` no longer reports empty private or protected constructors. Contributed by @dyc3
 
 - [noExportsInTest](https://biomejs.dev/linter/rules/no-exports-in-test/) rule no longer treats files with in-source testing as test files https://github.com/biomejs/biome/issues/2859. Contributed by @ah-yu
 - [useSortedClasses](https://biomejs.dev/linter/rules/use-sorted-classes/) now keeps leading and trailing spaces when applying the code action inside template literals:
