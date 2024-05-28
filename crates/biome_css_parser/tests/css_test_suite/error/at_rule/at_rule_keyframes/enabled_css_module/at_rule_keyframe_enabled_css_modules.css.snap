@@ -195,61 +195,61 @@ CssRoot {
 at_rule_keyframe_enabled_css_modules.css:1:13 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Unexpected value or character.
-
+  
   > 1 │ @keyframes :invalid(test) {}
       │             ^^^^^^^
     2 │ @keyframes :invalid test {}
     3 │ @keyframes :global(test {}
-
+  
   i Expected one of:
-
+  
   - global
   - local
-
+  
 at_rule_keyframe_enabled_css_modules.css:2:13 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Unexpected value or character.
-
+  
     1 │ @keyframes :invalid(test) {}
   > 2 │ @keyframes :invalid test {}
       │             ^^^^^^^
     3 │ @keyframes :global(test {}
     4 │ @keyframes :local() {}
-
+  
   i Expected one of:
-
+  
   - global
   - local
-
+  
 at_rule_keyframe_enabled_css_modules.css:3:25 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `)` but instead found `{`
-
+  
     1 │ @keyframes :invalid(test) {}
     2 │ @keyframes :invalid test {}
   > 3 │ @keyframes :global(test {}
       │                         ^
     4 │ @keyframes :local() {}
-    5 │
-
+    5 │ 
+  
   i Remove {
-
+  
 at_rule_keyframe_enabled_css_modules.css:4:19 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected an identifier but instead found ')'.
-
+  
     2 │ @keyframes :invalid test {}
     3 │ @keyframes :global(test {}
   > 4 │ @keyframes :local() {}
       │                   ^
-    5 │
-
+    5 │ 
+  
   i Expected an identifier here.
-
+  
     2 │ @keyframes :invalid test {}
     3 │ @keyframes :global(test {}
   > 4 │ @keyframes :local() {}
       │                   ^
-    5 │
-
+    5 │ 
+  
 ```
