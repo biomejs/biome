@@ -1,0 +1,377 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```css
+@keyframes test {}
+@keyframes "test" {}
+@keyframes :local(test) {}
+@keyframes :local("test") {}
+@keyframes :local test {}
+@keyframes :local "test" {}
+@keyframes :global(test) {}
+@keyframes :global("test") {}
+@keyframes :global test {}
+@keyframes :global "test" {}
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    rules: CssRuleList [
+        CssAtRule {
+            at_token: AT@0..1 "@" [] [],
+            rule: CssKeyframesAtRule {
+                keyframes_token: KEYFRAMES_KW@1..11 "keyframes" [] [Whitespace(" ")],
+                name: CssCustomIdentifier {
+                    value_token: IDENT@11..16 "test" [] [Whitespace(" ")],
+                },
+                block: CssKeyframesBlock {
+                    l_curly_token: L_CURLY@16..17 "{" [] [],
+                    items: CssKeyframesItemList [],
+                    r_curly_token: R_CURLY@17..18 "}" [] [],
+                },
+            },
+        },
+        CssAtRule {
+            at_token: AT@18..20 "@" [Newline("\n")] [],
+            rule: CssKeyframesAtRule {
+                keyframes_token: KEYFRAMES_KW@20..30 "keyframes" [] [Whitespace(" ")],
+                name: CssString {
+                    value_token: CSS_STRING_LITERAL@30..37 "\"test\"" [] [Whitespace(" ")],
+                },
+                block: CssKeyframesBlock {
+                    l_curly_token: L_CURLY@37..38 "{" [] [],
+                    items: CssKeyframesItemList [],
+                    r_curly_token: R_CURLY@38..39 "}" [] [],
+                },
+            },
+        },
+        CssAtRule {
+            at_token: AT@39..41 "@" [Newline("\n")] [],
+            rule: CssKeyframesAtRule {
+                keyframes_token: KEYFRAMES_KW@41..51 "keyframes" [] [Whitespace(" ")],
+                name: CssKeyframesScopedName {
+                    colon_token: COLON@51..52 ":" [] [],
+                    scope: CssKeyframesScopeFunction {
+                        scope: LOCAL_KW@52..57 "local" [] [],
+                        l_paren_token: L_PAREN@57..58 "(" [] [],
+                        name: CssCustomIdentifier {
+                            value_token: IDENT@58..62 "test" [] [],
+                        },
+                        r_paren_token: R_PAREN@62..64 ")" [] [Whitespace(" ")],
+                    },
+                },
+                block: CssKeyframesBlock {
+                    l_curly_token: L_CURLY@64..65 "{" [] [],
+                    items: CssKeyframesItemList [],
+                    r_curly_token: R_CURLY@65..66 "}" [] [],
+                },
+            },
+        },
+        CssAtRule {
+            at_token: AT@66..68 "@" [Newline("\n")] [],
+            rule: CssKeyframesAtRule {
+                keyframes_token: KEYFRAMES_KW@68..78 "keyframes" [] [Whitespace(" ")],
+                name: CssKeyframesScopedName {
+                    colon_token: COLON@78..79 ":" [] [],
+                    scope: CssKeyframesScopeFunction {
+                        scope: LOCAL_KW@79..84 "local" [] [],
+                        l_paren_token: L_PAREN@84..85 "(" [] [],
+                        name: CssString {
+                            value_token: CSS_STRING_LITERAL@85..91 "\"test\"" [] [],
+                        },
+                        r_paren_token: R_PAREN@91..93 ")" [] [Whitespace(" ")],
+                    },
+                },
+                block: CssKeyframesBlock {
+                    l_curly_token: L_CURLY@93..94 "{" [] [],
+                    items: CssKeyframesItemList [],
+                    r_curly_token: R_CURLY@94..95 "}" [] [],
+                },
+            },
+        },
+        CssAtRule {
+            at_token: AT@95..97 "@" [Newline("\n")] [],
+            rule: CssKeyframesAtRule {
+                keyframes_token: KEYFRAMES_KW@97..107 "keyframes" [] [Whitespace(" ")],
+                name: CssKeyframesScopedName {
+                    colon_token: COLON@107..108 ":" [] [],
+                    scope: CssKeyframesScopePrefix {
+                        scope: LOCAL_KW@108..114 "local" [] [Whitespace(" ")],
+                        name: CssCustomIdentifier {
+                            value_token: IDENT@114..119 "test" [] [Whitespace(" ")],
+                        },
+                    },
+                },
+                block: CssKeyframesBlock {
+                    l_curly_token: L_CURLY@119..120 "{" [] [],
+                    items: CssKeyframesItemList [],
+                    r_curly_token: R_CURLY@120..121 "}" [] [],
+                },
+            },
+        },
+        CssAtRule {
+            at_token: AT@121..123 "@" [Newline("\n")] [],
+            rule: CssKeyframesAtRule {
+                keyframes_token: KEYFRAMES_KW@123..133 "keyframes" [] [Whitespace(" ")],
+                name: CssKeyframesScopedName {
+                    colon_token: COLON@133..134 ":" [] [],
+                    scope: CssKeyframesScopePrefix {
+                        scope: LOCAL_KW@134..140 "local" [] [Whitespace(" ")],
+                        name: CssString {
+                            value_token: CSS_STRING_LITERAL@140..147 "\"test\"" [] [Whitespace(" ")],
+                        },
+                    },
+                },
+                block: CssKeyframesBlock {
+                    l_curly_token: L_CURLY@147..148 "{" [] [],
+                    items: CssKeyframesItemList [],
+                    r_curly_token: R_CURLY@148..149 "}" [] [],
+                },
+            },
+        },
+        CssAtRule {
+            at_token: AT@149..151 "@" [Newline("\n")] [],
+            rule: CssKeyframesAtRule {
+                keyframes_token: KEYFRAMES_KW@151..161 "keyframes" [] [Whitespace(" ")],
+                name: CssKeyframesScopedName {
+                    colon_token: COLON@161..162 ":" [] [],
+                    scope: CssKeyframesScopeFunction {
+                        scope: GLOBAL_KW@162..168 "global" [] [],
+                        l_paren_token: L_PAREN@168..169 "(" [] [],
+                        name: CssCustomIdentifier {
+                            value_token: IDENT@169..173 "test" [] [],
+                        },
+                        r_paren_token: R_PAREN@173..175 ")" [] [Whitespace(" ")],
+                    },
+                },
+                block: CssKeyframesBlock {
+                    l_curly_token: L_CURLY@175..176 "{" [] [],
+                    items: CssKeyframesItemList [],
+                    r_curly_token: R_CURLY@176..177 "}" [] [],
+                },
+            },
+        },
+        CssAtRule {
+            at_token: AT@177..179 "@" [Newline("\n")] [],
+            rule: CssKeyframesAtRule {
+                keyframes_token: KEYFRAMES_KW@179..189 "keyframes" [] [Whitespace(" ")],
+                name: CssKeyframesScopedName {
+                    colon_token: COLON@189..190 ":" [] [],
+                    scope: CssKeyframesScopeFunction {
+                        scope: GLOBAL_KW@190..196 "global" [] [],
+                        l_paren_token: L_PAREN@196..197 "(" [] [],
+                        name: CssString {
+                            value_token: CSS_STRING_LITERAL@197..203 "\"test\"" [] [],
+                        },
+                        r_paren_token: R_PAREN@203..205 ")" [] [Whitespace(" ")],
+                    },
+                },
+                block: CssKeyframesBlock {
+                    l_curly_token: L_CURLY@205..206 "{" [] [],
+                    items: CssKeyframesItemList [],
+                    r_curly_token: R_CURLY@206..207 "}" [] [],
+                },
+            },
+        },
+        CssAtRule {
+            at_token: AT@207..209 "@" [Newline("\n")] [],
+            rule: CssKeyframesAtRule {
+                keyframes_token: KEYFRAMES_KW@209..219 "keyframes" [] [Whitespace(" ")],
+                name: CssKeyframesScopedName {
+                    colon_token: COLON@219..220 ":" [] [],
+                    scope: CssKeyframesScopePrefix {
+                        scope: GLOBAL_KW@220..227 "global" [] [Whitespace(" ")],
+                        name: CssCustomIdentifier {
+                            value_token: IDENT@227..232 "test" [] [Whitespace(" ")],
+                        },
+                    },
+                },
+                block: CssKeyframesBlock {
+                    l_curly_token: L_CURLY@232..233 "{" [] [],
+                    items: CssKeyframesItemList [],
+                    r_curly_token: R_CURLY@233..234 "}" [] [],
+                },
+            },
+        },
+        CssAtRule {
+            at_token: AT@234..236 "@" [Newline("\n")] [],
+            rule: CssKeyframesAtRule {
+                keyframes_token: KEYFRAMES_KW@236..246 "keyframes" [] [Whitespace(" ")],
+                name: CssKeyframesScopedName {
+                    colon_token: COLON@246..247 ":" [] [],
+                    scope: CssKeyframesScopePrefix {
+                        scope: GLOBAL_KW@247..254 "global" [] [Whitespace(" ")],
+                        name: CssString {
+                            value_token: CSS_STRING_LITERAL@254..261 "\"test\"" [] [Whitespace(" ")],
+                        },
+                    },
+                },
+                block: CssKeyframesBlock {
+                    l_curly_token: L_CURLY@261..262 "{" [] [],
+                    items: CssKeyframesItemList [],
+                    r_curly_token: R_CURLY@262..263 "}" [] [],
+                },
+            },
+        },
+    ],
+    eof_token: EOF@263..264 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..264
+  0: (empty)
+  1: CSS_RULE_LIST@0..263
+    0: CSS_AT_RULE@0..18
+      0: AT@0..1 "@" [] []
+      1: CSS_KEYFRAMES_AT_RULE@1..18
+        0: KEYFRAMES_KW@1..11 "keyframes" [] [Whitespace(" ")]
+        1: CSS_CUSTOM_IDENTIFIER@11..16
+          0: IDENT@11..16 "test" [] [Whitespace(" ")]
+        2: CSS_KEYFRAMES_BLOCK@16..18
+          0: L_CURLY@16..17 "{" [] []
+          1: CSS_KEYFRAMES_ITEM_LIST@17..17
+          2: R_CURLY@17..18 "}" [] []
+    1: CSS_AT_RULE@18..39
+      0: AT@18..20 "@" [Newline("\n")] []
+      1: CSS_KEYFRAMES_AT_RULE@20..39
+        0: KEYFRAMES_KW@20..30 "keyframes" [] [Whitespace(" ")]
+        1: CSS_STRING@30..37
+          0: CSS_STRING_LITERAL@30..37 "\"test\"" [] [Whitespace(" ")]
+        2: CSS_KEYFRAMES_BLOCK@37..39
+          0: L_CURLY@37..38 "{" [] []
+          1: CSS_KEYFRAMES_ITEM_LIST@38..38
+          2: R_CURLY@38..39 "}" [] []
+    2: CSS_AT_RULE@39..66
+      0: AT@39..41 "@" [Newline("\n")] []
+      1: CSS_KEYFRAMES_AT_RULE@41..66
+        0: KEYFRAMES_KW@41..51 "keyframes" [] [Whitespace(" ")]
+        1: CSS_KEYFRAMES_SCOPED_NAME@51..64
+          0: COLON@51..52 ":" [] []
+          1: CSS_KEYFRAMES_SCOPE_FUNCTION@52..64
+            0: LOCAL_KW@52..57 "local" [] []
+            1: L_PAREN@57..58 "(" [] []
+            2: CSS_CUSTOM_IDENTIFIER@58..62
+              0: IDENT@58..62 "test" [] []
+            3: R_PAREN@62..64 ")" [] [Whitespace(" ")]
+        2: CSS_KEYFRAMES_BLOCK@64..66
+          0: L_CURLY@64..65 "{" [] []
+          1: CSS_KEYFRAMES_ITEM_LIST@65..65
+          2: R_CURLY@65..66 "}" [] []
+    3: CSS_AT_RULE@66..95
+      0: AT@66..68 "@" [Newline("\n")] []
+      1: CSS_KEYFRAMES_AT_RULE@68..95
+        0: KEYFRAMES_KW@68..78 "keyframes" [] [Whitespace(" ")]
+        1: CSS_KEYFRAMES_SCOPED_NAME@78..93
+          0: COLON@78..79 ":" [] []
+          1: CSS_KEYFRAMES_SCOPE_FUNCTION@79..93
+            0: LOCAL_KW@79..84 "local" [] []
+            1: L_PAREN@84..85 "(" [] []
+            2: CSS_STRING@85..91
+              0: CSS_STRING_LITERAL@85..91 "\"test\"" [] []
+            3: R_PAREN@91..93 ")" [] [Whitespace(" ")]
+        2: CSS_KEYFRAMES_BLOCK@93..95
+          0: L_CURLY@93..94 "{" [] []
+          1: CSS_KEYFRAMES_ITEM_LIST@94..94
+          2: R_CURLY@94..95 "}" [] []
+    4: CSS_AT_RULE@95..121
+      0: AT@95..97 "@" [Newline("\n")] []
+      1: CSS_KEYFRAMES_AT_RULE@97..121
+        0: KEYFRAMES_KW@97..107 "keyframes" [] [Whitespace(" ")]
+        1: CSS_KEYFRAMES_SCOPED_NAME@107..119
+          0: COLON@107..108 ":" [] []
+          1: CSS_KEYFRAMES_SCOPE_PREFIX@108..119
+            0: LOCAL_KW@108..114 "local" [] [Whitespace(" ")]
+            1: CSS_CUSTOM_IDENTIFIER@114..119
+              0: IDENT@114..119 "test" [] [Whitespace(" ")]
+        2: CSS_KEYFRAMES_BLOCK@119..121
+          0: L_CURLY@119..120 "{" [] []
+          1: CSS_KEYFRAMES_ITEM_LIST@120..120
+          2: R_CURLY@120..121 "}" [] []
+    5: CSS_AT_RULE@121..149
+      0: AT@121..123 "@" [Newline("\n")] []
+      1: CSS_KEYFRAMES_AT_RULE@123..149
+        0: KEYFRAMES_KW@123..133 "keyframes" [] [Whitespace(" ")]
+        1: CSS_KEYFRAMES_SCOPED_NAME@133..147
+          0: COLON@133..134 ":" [] []
+          1: CSS_KEYFRAMES_SCOPE_PREFIX@134..147
+            0: LOCAL_KW@134..140 "local" [] [Whitespace(" ")]
+            1: CSS_STRING@140..147
+              0: CSS_STRING_LITERAL@140..147 "\"test\"" [] [Whitespace(" ")]
+        2: CSS_KEYFRAMES_BLOCK@147..149
+          0: L_CURLY@147..148 "{" [] []
+          1: CSS_KEYFRAMES_ITEM_LIST@148..148
+          2: R_CURLY@148..149 "}" [] []
+    6: CSS_AT_RULE@149..177
+      0: AT@149..151 "@" [Newline("\n")] []
+      1: CSS_KEYFRAMES_AT_RULE@151..177
+        0: KEYFRAMES_KW@151..161 "keyframes" [] [Whitespace(" ")]
+        1: CSS_KEYFRAMES_SCOPED_NAME@161..175
+          0: COLON@161..162 ":" [] []
+          1: CSS_KEYFRAMES_SCOPE_FUNCTION@162..175
+            0: GLOBAL_KW@162..168 "global" [] []
+            1: L_PAREN@168..169 "(" [] []
+            2: CSS_CUSTOM_IDENTIFIER@169..173
+              0: IDENT@169..173 "test" [] []
+            3: R_PAREN@173..175 ")" [] [Whitespace(" ")]
+        2: CSS_KEYFRAMES_BLOCK@175..177
+          0: L_CURLY@175..176 "{" [] []
+          1: CSS_KEYFRAMES_ITEM_LIST@176..176
+          2: R_CURLY@176..177 "}" [] []
+    7: CSS_AT_RULE@177..207
+      0: AT@177..179 "@" [Newline("\n")] []
+      1: CSS_KEYFRAMES_AT_RULE@179..207
+        0: KEYFRAMES_KW@179..189 "keyframes" [] [Whitespace(" ")]
+        1: CSS_KEYFRAMES_SCOPED_NAME@189..205
+          0: COLON@189..190 ":" [] []
+          1: CSS_KEYFRAMES_SCOPE_FUNCTION@190..205
+            0: GLOBAL_KW@190..196 "global" [] []
+            1: L_PAREN@196..197 "(" [] []
+            2: CSS_STRING@197..203
+              0: CSS_STRING_LITERAL@197..203 "\"test\"" [] []
+            3: R_PAREN@203..205 ")" [] [Whitespace(" ")]
+        2: CSS_KEYFRAMES_BLOCK@205..207
+          0: L_CURLY@205..206 "{" [] []
+          1: CSS_KEYFRAMES_ITEM_LIST@206..206
+          2: R_CURLY@206..207 "}" [] []
+    8: CSS_AT_RULE@207..234
+      0: AT@207..209 "@" [Newline("\n")] []
+      1: CSS_KEYFRAMES_AT_RULE@209..234
+        0: KEYFRAMES_KW@209..219 "keyframes" [] [Whitespace(" ")]
+        1: CSS_KEYFRAMES_SCOPED_NAME@219..232
+          0: COLON@219..220 ":" [] []
+          1: CSS_KEYFRAMES_SCOPE_PREFIX@220..232
+            0: GLOBAL_KW@220..227 "global" [] [Whitespace(" ")]
+            1: CSS_CUSTOM_IDENTIFIER@227..232
+              0: IDENT@227..232 "test" [] [Whitespace(" ")]
+        2: CSS_KEYFRAMES_BLOCK@232..234
+          0: L_CURLY@232..233 "{" [] []
+          1: CSS_KEYFRAMES_ITEM_LIST@233..233
+          2: R_CURLY@233..234 "}" [] []
+    9: CSS_AT_RULE@234..263
+      0: AT@234..236 "@" [Newline("\n")] []
+      1: CSS_KEYFRAMES_AT_RULE@236..263
+        0: KEYFRAMES_KW@236..246 "keyframes" [] [Whitespace(" ")]
+        1: CSS_KEYFRAMES_SCOPED_NAME@246..261
+          0: COLON@246..247 ":" [] []
+          1: CSS_KEYFRAMES_SCOPE_PREFIX@247..261
+            0: GLOBAL_KW@247..254 "global" [] [Whitespace(" ")]
+            1: CSS_STRING@254..261
+              0: CSS_STRING_LITERAL@254..261 "\"test\"" [] [Whitespace(" ")]
+        2: CSS_KEYFRAMES_BLOCK@261..263
+          0: L_CURLY@261..262 "{" [] []
+          1: CSS_KEYFRAMES_ITEM_LIST@262..262
+          2: R_CURLY@262..263 "}" [] []
+  2: EOF@263..264 "" [Newline("\n")] []
+
+```

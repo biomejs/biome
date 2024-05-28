@@ -2019,6 +2019,120 @@ impl IntoFormat<CssFormatContext> for biome_css_syntax::CssKeyframesPercentageSe
         FormatOwnedWithRule :: new (self , crate :: css :: selectors :: keyframes_percentage_selector :: FormatCssKeyframesPercentageSelector :: default ())
     }
 }
+impl FormatRule<biome_css_syntax::CssKeyframesScopeFunction>
+    for crate::css::auxiliary::keyframes_scope_function::FormatCssKeyframesScopeFunction
+{
+    type Context = CssFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_css_syntax::CssKeyframesScopeFunction,
+        f: &mut CssFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_css_syntax::CssKeyframesScopeFunction>::fmt(self, node, f)
+    }
+}
+impl AsFormat<CssFormatContext> for biome_css_syntax::CssKeyframesScopeFunction {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_css_syntax::CssKeyframesScopeFunction,
+        crate::css::auxiliary::keyframes_scope_function::FormatCssKeyframesScopeFunction,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        #![allow(clippy::default_constructed_unit_structs)]
+        FormatRefWithRule :: new (self , crate :: css :: auxiliary :: keyframes_scope_function :: FormatCssKeyframesScopeFunction :: default ())
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::CssKeyframesScopeFunction {
+    type Format = FormatOwnedWithRule<
+        biome_css_syntax::CssKeyframesScopeFunction,
+        crate::css::auxiliary::keyframes_scope_function::FormatCssKeyframesScopeFunction,
+    >;
+    fn into_format(self) -> Self::Format {
+        #![allow(clippy::default_constructed_unit_structs)]
+        FormatOwnedWithRule :: new (self , crate :: css :: auxiliary :: keyframes_scope_function :: FormatCssKeyframesScopeFunction :: default ())
+    }
+}
+impl FormatRule<biome_css_syntax::CssKeyframesScopePrefix>
+    for crate::css::auxiliary::keyframes_scope_prefix::FormatCssKeyframesScopePrefix
+{
+    type Context = CssFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_css_syntax::CssKeyframesScopePrefix,
+        f: &mut CssFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_css_syntax::CssKeyframesScopePrefix>::fmt(self, node, f)
+    }
+}
+impl AsFormat<CssFormatContext> for biome_css_syntax::CssKeyframesScopePrefix {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_css_syntax::CssKeyframesScopePrefix,
+        crate::css::auxiliary::keyframes_scope_prefix::FormatCssKeyframesScopePrefix,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        #![allow(clippy::default_constructed_unit_structs)]
+        FormatRefWithRule::new(
+            self,
+            crate::css::auxiliary::keyframes_scope_prefix::FormatCssKeyframesScopePrefix::default(),
+        )
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::CssKeyframesScopePrefix {
+    type Format = FormatOwnedWithRule<
+        biome_css_syntax::CssKeyframesScopePrefix,
+        crate::css::auxiliary::keyframes_scope_prefix::FormatCssKeyframesScopePrefix,
+    >;
+    fn into_format(self) -> Self::Format {
+        #![allow(clippy::default_constructed_unit_structs)]
+        FormatOwnedWithRule::new(
+            self,
+            crate::css::auxiliary::keyframes_scope_prefix::FormatCssKeyframesScopePrefix::default(),
+        )
+    }
+}
+impl FormatRule<biome_css_syntax::CssKeyframesScopedName>
+    for crate::css::auxiliary::keyframes_scoped_name::FormatCssKeyframesScopedName
+{
+    type Context = CssFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_css_syntax::CssKeyframesScopedName,
+        f: &mut CssFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_css_syntax::CssKeyframesScopedName>::fmt(self, node, f)
+    }
+}
+impl AsFormat<CssFormatContext> for biome_css_syntax::CssKeyframesScopedName {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_css_syntax::CssKeyframesScopedName,
+        crate::css::auxiliary::keyframes_scoped_name::FormatCssKeyframesScopedName,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        #![allow(clippy::default_constructed_unit_structs)]
+        FormatRefWithRule::new(
+            self,
+            crate::css::auxiliary::keyframes_scoped_name::FormatCssKeyframesScopedName::default(),
+        )
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::CssKeyframesScopedName {
+    type Format = FormatOwnedWithRule<
+        biome_css_syntax::CssKeyframesScopedName,
+        crate::css::auxiliary::keyframes_scoped_name::FormatCssKeyframesScopedName,
+    >;
+    fn into_format(self) -> Self::Format {
+        #![allow(clippy::default_constructed_unit_structs)]
+        FormatOwnedWithRule::new(
+            self,
+            crate::css::auxiliary::keyframes_scoped_name::FormatCssKeyframesScopedName::default(),
+        )
+    }
+}
 impl FormatRule<biome_css_syntax::CssLayerAtRule>
     for crate::css::statements::layer_at_rule::FormatCssLayerAtRule
 {
@@ -6071,6 +6185,46 @@ impl IntoFormat<CssFormatContext> for biome_css_syntax::CssBogusKeyframesItem {
         )
     }
 }
+impl FormatRule<biome_css_syntax::CssBogusKeyframesName>
+    for crate::css::bogus::bogus_keyframes_name::FormatCssBogusKeyframesName
+{
+    type Context = CssFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_css_syntax::CssBogusKeyframesName,
+        f: &mut CssFormatter,
+    ) -> FormatResult<()> {
+        FormatBogusNodeRule::<biome_css_syntax::CssBogusKeyframesName>::fmt(self, node, f)
+    }
+}
+impl AsFormat<CssFormatContext> for biome_css_syntax::CssBogusKeyframesName {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_css_syntax::CssBogusKeyframesName,
+        crate::css::bogus::bogus_keyframes_name::FormatCssBogusKeyframesName,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        #![allow(clippy::default_constructed_unit_structs)]
+        FormatRefWithRule::new(
+            self,
+            crate::css::bogus::bogus_keyframes_name::FormatCssBogusKeyframesName::default(),
+        )
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::CssBogusKeyframesName {
+    type Format = FormatOwnedWithRule<
+        biome_css_syntax::CssBogusKeyframesName,
+        crate::css::bogus::bogus_keyframes_name::FormatCssBogusKeyframesName,
+    >;
+    fn into_format(self) -> Self::Format {
+        #![allow(clippy::default_constructed_unit_structs)]
+        FormatOwnedWithRule::new(
+            self,
+            crate::css::bogus::bogus_keyframes_name::FormatCssBogusKeyframesName::default(),
+        )
+    }
+}
 impl FormatRule<biome_css_syntax::CssBogusLayer>
     for crate::css::bogus::bogus_layer::FormatCssBogusLayer
 {
@@ -7356,33 +7510,6 @@ impl IntoFormat<CssFormatContext> for biome_css_syntax::AnyCssImportUrl {
         )
     }
 }
-impl AsFormat<CssFormatContext> for biome_css_syntax::AnyCssKeyframeName {
-    type Format<'a> = FormatRefWithRule<
-        'a,
-        biome_css_syntax::AnyCssKeyframeName,
-        crate::css::any::keyframe_name::FormatAnyCssKeyframeName,
-    >;
-    fn format(&self) -> Self::Format<'_> {
-        #![allow(clippy::default_constructed_unit_structs)]
-        FormatRefWithRule::new(
-            self,
-            crate::css::any::keyframe_name::FormatAnyCssKeyframeName::default(),
-        )
-    }
-}
-impl IntoFormat<CssFormatContext> for biome_css_syntax::AnyCssKeyframeName {
-    type Format = FormatOwnedWithRule<
-        biome_css_syntax::AnyCssKeyframeName,
-        crate::css::any::keyframe_name::FormatAnyCssKeyframeName,
-    >;
-    fn into_format(self) -> Self::Format {
-        #![allow(clippy::default_constructed_unit_structs)]
-        FormatOwnedWithRule::new(
-            self,
-            crate::css::any::keyframe_name::FormatAnyCssKeyframeName::default(),
-        )
-    }
-}
 impl AsFormat<CssFormatContext> for biome_css_syntax::AnyCssKeyframesBlock {
     type Format<'a> = FormatRefWithRule<
         'a,
@@ -7410,6 +7537,33 @@ impl IntoFormat<CssFormatContext> for biome_css_syntax::AnyCssKeyframesBlock {
         )
     }
 }
+impl AsFormat<CssFormatContext> for biome_css_syntax::AnyCssKeyframesIdentifier {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_css_syntax::AnyCssKeyframesIdentifier,
+        crate::css::any::keyframes_identifier::FormatAnyCssKeyframesIdentifier,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        #![allow(clippy::default_constructed_unit_structs)]
+        FormatRefWithRule::new(
+            self,
+            crate::css::any::keyframes_identifier::FormatAnyCssKeyframesIdentifier::default(),
+        )
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::AnyCssKeyframesIdentifier {
+    type Format = FormatOwnedWithRule<
+        biome_css_syntax::AnyCssKeyframesIdentifier,
+        crate::css::any::keyframes_identifier::FormatAnyCssKeyframesIdentifier,
+    >;
+    fn into_format(self) -> Self::Format {
+        #![allow(clippy::default_constructed_unit_structs)]
+        FormatOwnedWithRule::new(
+            self,
+            crate::css::any::keyframes_identifier::FormatAnyCssKeyframesIdentifier::default(),
+        )
+    }
+}
 impl AsFormat<CssFormatContext> for biome_css_syntax::AnyCssKeyframesItem {
     type Format<'a> = FormatRefWithRule<
         'a,
@@ -7434,6 +7588,60 @@ impl IntoFormat<CssFormatContext> for biome_css_syntax::AnyCssKeyframesItem {
         FormatOwnedWithRule::new(
             self,
             crate::css::any::keyframes_item::FormatAnyCssKeyframesItem::default(),
+        )
+    }
+}
+impl AsFormat<CssFormatContext> for biome_css_syntax::AnyCssKeyframesName {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_css_syntax::AnyCssKeyframesName,
+        crate::css::any::keyframes_name::FormatAnyCssKeyframesName,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        #![allow(clippy::default_constructed_unit_structs)]
+        FormatRefWithRule::new(
+            self,
+            crate::css::any::keyframes_name::FormatAnyCssKeyframesName::default(),
+        )
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::AnyCssKeyframesName {
+    type Format = FormatOwnedWithRule<
+        biome_css_syntax::AnyCssKeyframesName,
+        crate::css::any::keyframes_name::FormatAnyCssKeyframesName,
+    >;
+    fn into_format(self) -> Self::Format {
+        #![allow(clippy::default_constructed_unit_structs)]
+        FormatOwnedWithRule::new(
+            self,
+            crate::css::any::keyframes_name::FormatAnyCssKeyframesName::default(),
+        )
+    }
+}
+impl AsFormat<CssFormatContext> for biome_css_syntax::AnyCssKeyframesScope {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_css_syntax::AnyCssKeyframesScope,
+        crate::css::any::keyframes_scope::FormatAnyCssKeyframesScope,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        #![allow(clippy::default_constructed_unit_structs)]
+        FormatRefWithRule::new(
+            self,
+            crate::css::any::keyframes_scope::FormatAnyCssKeyframesScope::default(),
+        )
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::AnyCssKeyframesScope {
+    type Format = FormatOwnedWithRule<
+        biome_css_syntax::AnyCssKeyframesScope,
+        crate::css::any::keyframes_scope::FormatAnyCssKeyframesScope,
+    >;
+    fn into_format(self) -> Self::Format {
+        #![allow(clippy::default_constructed_unit_structs)]
+        FormatOwnedWithRule::new(
+            self,
+            crate::css::any::keyframes_scope::FormatAnyCssKeyframesScope::default(),
         )
     }
 }

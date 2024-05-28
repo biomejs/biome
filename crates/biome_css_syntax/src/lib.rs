@@ -93,6 +93,7 @@ impl biome_rowan::SyntaxKind for CssSyntaxKind {
                 | CSS_BOGUS_PROPERTY
                 | CSS_BOGUS_PROPERTY_VALUE
                 | CSS_BOGUS_DOCUMENT_MATCHER
+                | CSS_BOGUS_KEYFRAMES_NAME
         )
     }
 
@@ -114,6 +115,7 @@ impl biome_rowan::SyntaxKind for CssSyntaxKind {
             kind if AnyCssKeyframesItem::can_cast(*kind) => CSS_BOGUS_KEYFRAMES_ITEM,
             kind if AnyCssProperty::can_cast(*kind) => CSS_BOGUS_PROPERTY,
             kind if AnyCssDocumentMatcher::can_cast(*kind) => CSS_BOGUS_DOCUMENT_MATCHER,
+            kind if AnyCssKeyframesName::can_cast(*kind) => CSS_BOGUS_KEYFRAMES_NAME,
 
             _ => CSS_BOGUS,
         }

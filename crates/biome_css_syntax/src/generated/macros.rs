@@ -246,6 +246,19 @@ macro_rules! map_syntax_node {
                         unsafe { $crate::CssKeyframesPercentageSelector::new_unchecked(node) };
                     $body
                 }
+                $crate::CssSyntaxKind::CSS_KEYFRAMES_SCOPE_FUNCTION => {
+                    let $pattern =
+                        unsafe { $crate::CssKeyframesScopeFunction::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::CSS_KEYFRAMES_SCOPE_PREFIX => {
+                    let $pattern = unsafe { $crate::CssKeyframesScopePrefix::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::CSS_KEYFRAMES_SCOPED_NAME => {
+                    let $pattern = unsafe { $crate::CssKeyframesScopedName::new_unchecked(node) };
+                    $body
+                }
                 $crate::CssSyntaxKind::CSS_LAYER_AT_RULE => {
                     let $pattern = unsafe { $crate::CssLayerAtRule::new_unchecked(node) };
                     $body
@@ -657,6 +670,10 @@ macro_rules! map_syntax_node {
                 }
                 $crate::CssSyntaxKind::CSS_BOGUS_KEYFRAMES_ITEM => {
                     let $pattern = unsafe { $crate::CssBogusKeyframesItem::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::CSS_BOGUS_KEYFRAMES_NAME => {
+                    let $pattern = unsafe { $crate::CssBogusKeyframesName::new_unchecked(node) };
                     $body
                 }
                 $crate::CssSyntaxKind::CSS_BOGUS_LAYER => {

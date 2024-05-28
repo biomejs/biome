@@ -774,7 +774,7 @@ pub fn css_import_supports(
 }
 pub fn css_keyframes_at_rule(
     keyframes_token: SyntaxToken,
-    name: AnyCssKeyframeName,
+    name: AnyCssKeyframesName,
     block: AnyCssKeyframesBlock,
 ) -> CssKeyframesAtRule {
     CssKeyframesAtRule::unwrap_cast(SyntaxNode::new_detached(
@@ -824,6 +824,46 @@ pub fn css_keyframes_percentage_selector(
     CssKeyframesPercentageSelector::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_KEYFRAMES_PERCENTAGE_SELECTOR,
         [Some(SyntaxElement::Node(selector.into_syntax()))],
+    ))
+}
+pub fn css_keyframes_scope_function(
+    scope_token: SyntaxToken,
+    l_paren_token: SyntaxToken,
+    name: AnyCssKeyframesIdentifier,
+    r_paren_token: SyntaxToken,
+) -> CssKeyframesScopeFunction {
+    CssKeyframesScopeFunction::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_KEYFRAMES_SCOPE_FUNCTION,
+        [
+            Some(SyntaxElement::Token(scope_token)),
+            Some(SyntaxElement::Token(l_paren_token)),
+            Some(SyntaxElement::Node(name.into_syntax())),
+            Some(SyntaxElement::Token(r_paren_token)),
+        ],
+    ))
+}
+pub fn css_keyframes_scope_prefix(
+    scope_token: SyntaxToken,
+    name: AnyCssKeyframesIdentifier,
+) -> CssKeyframesScopePrefix {
+    CssKeyframesScopePrefix::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_KEYFRAMES_SCOPE_PREFIX,
+        [
+            Some(SyntaxElement::Token(scope_token)),
+            Some(SyntaxElement::Node(name.into_syntax())),
+        ],
+    ))
+}
+pub fn css_keyframes_scoped_name(
+    colon_token: SyntaxToken,
+    scope: AnyCssKeyframesScope,
+) -> CssKeyframesScopedName {
+    CssKeyframesScopedName::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_KEYFRAMES_SCOPED_NAME,
+        [
+            Some(SyntaxElement::Token(colon_token)),
+            Some(SyntaxElement::Node(scope.into_syntax())),
+        ],
     ))
 }
 pub fn css_layer_at_rule(layer_token: SyntaxToken, layer: AnyCssLayer) -> CssLayerAtRule {
@@ -2637,6 +2677,16 @@ where
 {
     CssBogusKeyframesItem::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_BOGUS_KEYFRAMES_ITEM,
+        slots,
+    ))
+}
+pub fn css_bogus_keyframes_name<I>(slots: I) -> CssBogusKeyframesName
+where
+    I: IntoIterator<Item = Option<SyntaxElement>>,
+    I::IntoIter: ExactSizeIterator,
+{
+    CssBogusKeyframesName::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_BOGUS_KEYFRAMES_NAME,
         slots,
     ))
 }
