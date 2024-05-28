@@ -269,12 +269,6 @@ macro_rules! map_syntax_node {
                         unsafe { $crate::GraphqlUnionTypeExtension::new_unchecked(node) };
                     $body
                 }
-                $crate::GraphqlSyntaxKind::GRAPHQL_UNION_TYPE_EXTENSION_WITH_MEMBERS => {
-                    let $pattern = unsafe {
-                        $crate::GraphqlUnionTypeExtensionWithMembers::new_unchecked(node)
-                    };
-                    $body
-                }
                 $crate::GraphqlSyntaxKind::GRAPHQL_VARIABLE => {
                     let $pattern = unsafe { $crate::GraphqlVariable::new_unchecked(node) };
                     $body

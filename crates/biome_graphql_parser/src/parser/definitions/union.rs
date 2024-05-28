@@ -1,7 +1,7 @@
 use crate::parser::{
     directive::DirectiveList,
     is_nth_at_name, is_nth_at_non_kw_name, parse_description,
-    parse_error::{expected_name, expected_named_type},
+    parse_error::{expected_name, expected_named_type, expected_union_extension},
     parse_name,
     r#type::parse_named_type,
     GraphqlParser,
@@ -15,6 +15,7 @@ use biome_parser::{
     parse_recovery::ParseRecovery,
     parsed_syntax::ParsedSyntax,
     prelude::ParsedSyntax::*,
+    token_source::TokenSource,
     Parser,
 };
 
@@ -37,6 +38,29 @@ pub(crate) fn parse_union_type_definition(p: &mut GraphqlParser) -> ParsedSyntax
     parse_union_member_types(p).ok();
 
     Present(m.complete(p, GRAPHQL_UNION_TYPE_DEFINITION))
+}
+
+/// Must only be called if the next 2 token is `extend` and `interface`, otherwise it will panic.
+#[inline]
+pub(super) fn parse_union_type_extension(p: &mut GraphqlParser) -> ParsedSyntax {
+    let m = p.start();
+
+    p.bump(T![extend]);
+    p.bump(T![union]);
+
+    parse_name(p).or_add_diagnostic(p, expected_name);
+
+    let pos = p.source().position();
+    DirectiveList.parse_list(p);
+    let directive_empty = p.source().position() == pos;
+
+    let union_members_empty = parse_union_member_types(p).is_absent();
+
+    if directive_empty && union_members_empty {
+        p.error(expected_union_extension(p, p.cur_range()));
+    }
+
+    Present(m.complete(p, GRAPHQL_UNION_TYPE_EXTENSION))
 }
 
 #[inline]

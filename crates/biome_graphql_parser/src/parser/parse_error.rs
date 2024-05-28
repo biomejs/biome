@@ -113,3 +113,10 @@ pub(crate) fn expected_object_extension(p: &GraphqlParser, range: TextRange) -> 
         range,
     )
 }
+
+pub(crate) fn expected_union_extension(p: &GraphqlParser, range: TextRange) -> ParseDiagnostic {
+    p.err_builder(
+        "Expected at least one directive or union member types",
+        range,
+    )
+}
