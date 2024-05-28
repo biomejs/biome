@@ -71,7 +71,7 @@ info: css/modules/modules.css
 +++ Biome
 @@ -2,10 +2,11 @@
  @value first, second, third from colors;
-
+ 
  .title {
 -  @nest :global(h1)& {
 +  @
@@ -80,28 +80,28 @@ info: css/modules/modules.css
 -  }
  }
 +}
-
+ 
  .className {
    color: green;
 @@ -13,16 +14,16 @@
  }
-
+ 
  .otherClassName {
 -  composes: className;
 +  composes: classname;
    color: yellow;
  }
-
+ 
  .otherClassName {
 -  composes: className from "./style.css";
 +  composes: classname from "./style.css";
  }
-
+ 
  .otherClassName {
 -  composes: globalClassName from global;
 +  composes: globalclassname from global;
  }
-
+ 
  :global {
 @@ -42,7 +43,7 @@
    localAlias: keyFromDep;
@@ -110,7 +110,7 @@ info: css/modules/modules.css
 -  exportedKey: exportedValue;
 +  exportedkey: exportedvalue;
  }
-
+ 
  @keyframes :global(spin) {
 ```
 
@@ -180,15 +180,15 @@ info: css/modules/modules.css
 modules.css:5:4 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Unexpected value or character.
-
+  
     4 │ .title {
   > 5 │   @nest :global(h1)& {
       │    ^^^^
     6 │     background: red;
     7 │   }
-
+  
   i Expected one of:
-
+  
   - charset
   - color-profile
   - container
@@ -207,11 +207,11 @@ modules.css:5:4 parse ━━━━━━━━━━━━━━━━━━━�
   - supports
   - viewport
   - scope
-
+  
 modules.css:5:20 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Unexpected value or character.
-
+  
     4 │ .title {
   > 5 │   @nest :global(h1)& {
       │                    ^^^
@@ -219,9 +219,9 @@ modules.css:5:20 parse ━━━━━━━━━━━━━━━━━━━
       │     ^^^^^^^^^^^^^^^
     7 │   }
     8 │ }
-
+  
   i Expected one of:
-
+  
   - identifier
   - string
   - number
@@ -229,39 +229,39 @@ modules.css:5:20 parse ━━━━━━━━━━━━━━━━━━━
   - ratio
   - custom property
   - function
-
+  
 modules.css:8:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a qualified rule, or an at rule but instead found '}'.
-
+  
      6 │     background: red;
      7 │   }
    > 8 │ }
        │ ^
-     9 │
+     9 │ 
     10 │ .className {
-
+  
   i Expected a qualified rule, or an at rule here.
-
+  
      6 │     background: red;
      7 │   }
    > 8 │ }
        │ ^
-     9 │
+     9 │ 
     10 │ .className {
-
+  
 modules.css:41:8 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `,` but instead found `(`
-
+  
     39 │ }
-    40 │
+    40 │ 
   > 41 │ :import("path/to/dep.css") {
        │        ^
     42 │   localAlias: keyFromDep;
     43 │ }
-
+  
   i Remove (
-
+  
 
 ```
