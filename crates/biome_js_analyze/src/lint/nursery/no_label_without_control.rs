@@ -69,6 +69,8 @@ declare_rule! {
     /// - `labelAttributes` - An array of attributes that should be treated as the `label` accessible text content.
     /// - `labelComponents` - An array of component names that should be considered the same as a `label` element.
     ///
+    /// Both options `inputComponents` and `labelComponents` don't have support for namespace components (e.g. `<Control.Input>`).
+    ///
     /// ```json
     /// {
     ///     "//": "...",
