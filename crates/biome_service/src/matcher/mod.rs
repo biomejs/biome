@@ -51,6 +51,11 @@ impl Matcher {
         Ok(())
     }
 
+    /// It adds a unix shell style pattern that has already been parsed
+    pub fn add_pattern_parsed(&mut self, pattern: Pattern) {
+        self.patterns.push(pattern);
+    }
+
     /// It matches the given string against the stored patterns.
     ///
     /// It returns [true] if there's at least a match

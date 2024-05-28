@@ -1,7 +1,9 @@
+use crate::matcher::Pattern;
 use crate::workspace::{DocumentFileSource, ProjectKey, WorkspaceData};
 use crate::{Matcher, WorkspaceError};
 use biome_analyze::{AnalyzerOptions, AnalyzerRules};
 use biome_configuration::diagnostics::InvalidIgnorePattern;
+use biome_configuration::editorconfig::EditorConfig;
 use biome_configuration::javascript::JsxRuntime;
 use biome_configuration::organize_imports::OrganizeImports;
 use biome_configuration::{
@@ -1551,5 +1553,15 @@ impl TryFrom<OverrideLinterConfiguration> for LinterSettings {
             ignored_files: Matcher::empty(),
             included_files: Matcher::empty(),
         })
+    }
+}
+
+pub fn overrides_from_editorconfig(editorconfig: EditorConfig) -> Result<Vec<OverrideSettingPattern>, PatternError> {
+    let (biome, _) = editorconfig.to_biome();
+    if let Some(overrides) = biome.and_then(|biome| biome.overrides) {
+
+        Ok(overrides)
+    } else {
+        Ok(vec![])
     }
 }
