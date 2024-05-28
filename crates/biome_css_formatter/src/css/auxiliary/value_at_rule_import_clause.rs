@@ -1,6 +1,7 @@
 use crate::prelude::*;
-use biome_css_syntax::CssValueAtRuleImportClause;
-use biome_rowan::AstNode;
+use biome_css_syntax::{CssValueAtRuleImportClause, CssValueAtRuleImportClauseFields};
+use biome_formatter::write;
+
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatCssValueAtRuleImportClause;
 impl FormatNodeRule<CssValueAtRuleImportClause> for FormatCssValueAtRuleImportClause {
@@ -9,6 +10,21 @@ impl FormatNodeRule<CssValueAtRuleImportClause> for FormatCssValueAtRuleImportCl
         node: &CssValueAtRuleImportClause,
         f: &mut CssFormatter,
     ) -> FormatResult<()> {
-        format_verbatim_node(node.syntax()).fmt(f)
+        let CssValueAtRuleImportClauseFields {
+            specifiers,
+            from_token,
+            source,
+        } = node.as_fields();
+
+        write!(
+            f,
+            [
+                specifiers.format(),
+                space(),
+                from_token.format(),
+                space(),
+                source.format()
+            ]
+        )
     }
 }
