@@ -87,7 +87,7 @@ declare_rule! {
         name: "noLabelWithoutControl",
         language: "jsx",
         sources: &[RuleSource::EslintJsxA11y("label-has-associated-control")],
-        recommended: false,
+        recommended: true,
     }
 }
 
