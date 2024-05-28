@@ -1,3 +1,5 @@
+use std::ffi::OsStr;
+
 use super::{CodeActionsParams, DocumentFileSource, ExtensionHandler, ParseResult};
 use crate::configuration::to_analyzer_rules;
 use crate::file_handlers::DebugCapabilities;
@@ -96,6 +98,14 @@ impl ServiceLanguage for JsonLanguage {
             global.line_ending.unwrap_or_default()
         };
 
+        // ensure it never formats biome.json into a form it can't parse
+        let trailing_commas =
+            if matches!(path.file_name().and_then(OsStr::to_str), Some("biome.json")) {
+                TrailingCommas::None
+            } else {
+                language.trailing_commas.unwrap_or_default()
+            };
+
         overrides.to_override_json_format_options(
             path,
             JsonFormatOptions::new()
@@ -103,7 +113,7 @@ impl ServiceLanguage for JsonLanguage {
                 .with_indent_style(indent_style)
                 .with_indent_width(indent_width)
                 .with_line_width(line_width)
-                .with_trailing_commas(language.trailing_commas.unwrap_or_default()),
+                .with_trailing_commas(trailing_commas),
         )
     }
 
