@@ -2,8 +2,8 @@ use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnosti
 use biome_console::markup;
 use biome_deserialize_macros::Deserializable;
 use biome_js_syntax::{
-    AnyJsxAttribute, AnyJsxAttributeName, AnyJsxAttributeValue, AnyJsxTag, JsxAttribute,
-    JsxAttributeList, JsxName, JsxReferenceIdentifier, JsxText,
+    AnyJsxAttribute, AnyJsxAttributeValue, AnyJsxTag, JsxAttribute, JsxAttributeList, JsxName,
+    JsxReferenceIdentifier, JsxText,
 };
 use biome_rowan::AstNode;
 use serde::{Deserialize, Serialize};
@@ -131,9 +131,9 @@ impl Rule for NoLabelWithoutControl {
         }
 
         let has_text_content =
-            has_accessible_label(node, label_attributes, default_label_attributes.to_vec());
+            has_accessible_label(node, label_attributes, default_label_attributes);
         let has_control_association = has_for_attribute(node)?
-            || has_nested_control(node, input_components, default_input_components.to_vec());
+            || has_nested_control(node, input_components, default_input_components);
 
         if has_text_content && has_control_association {
             return None;
@@ -208,8 +208,8 @@ fn has_for_attribute(jsx_tag: &AnyJsxTag) -> Option<bool> {
 /// according to the passed `input_components` parameter
 fn has_nested_control(
     jsx_tag: &AnyJsxTag,
-    input_components: &Vec<String>,
-    default_input_components: Vec<&str>,
+    input_components: &[String],
+    default_input_components: &[&str],
 ) -> bool {
     jsx_tag.syntax().descendants().any(|descendant| {
         match (
@@ -237,39 +237,36 @@ fn has_nested_control(
 /// - Has a child `JsxText` node
 fn has_accessible_label(
     jsx_tag: &AnyJsxTag,
-    label_attributes: &Vec<String>,
-    default_label_attributes: Vec<&str>,
+    label_attributes: &[String],
+    default_label_attributes: &[&str],
 ) -> bool {
-    let jsx_attributes = jsx_tag
-        .syntax()
-        .descendants()
-        .filter_map(JsxAttribute::cast)
-        .collect::<Vec<JsxAttribute>>();
+    let mut has_text = false;
+    let mut has_accessible_attribute = false;
 
-    let has_accessible_attribute = jsx_attributes.iter().any(|jsx_attribute| {
-        match (
-            jsx_attribute.name().ok(),
-            jsx_attribute
-                .initializer()
-                .and_then(|initializer| initializer.value().ok()),
-        ) {
-            (Some(AnyJsxAttributeName::JsxName(jsx_name)), Some(jsx_attribute_value)) => {
+    for descendant in jsx_tag.syntax().descendants() {
+        if let Some(jsx_attribute) = JsxAttribute::cast(descendant.clone()) {
+            if let (Some(jsx_name), Some(jsx_attribute_value)) = (
+                jsx_attribute.name().ok(),
+                jsx_attribute
+                    .initializer()
+                    .and_then(|initializer| initializer.value().ok()),
+            ) {
                 let attribute_name = jsx_name.text();
                 let has_label_attribute = label_attributes.contains(&attribute_name)
                     || default_label_attributes.contains(&attribute_name.as_str());
                 let is_aria_labelledby_attribute = jsx_name.text() == "aria-labelledby";
                 let has_value = has_jsx_attribute_value(jsx_attribute_value);
 
-                has_value && (is_aria_labelledby_attribute || has_label_attribute)
+                if has_value && (is_aria_labelledby_attribute || has_label_attribute) {
+                    has_accessible_attribute = true
+                }
             }
-            _ => false,
         }
-    });
 
-    let has_text = jsx_tag
-        .syntax()
-        .descendants()
-        .any(|descendant| JsxText::cast(descendant).is_some());
+        if JsxText::cast(descendant.clone()).is_some() {
+            has_text = true;
+        }
+    }
 
     has_accessible_attribute || has_text
 }
