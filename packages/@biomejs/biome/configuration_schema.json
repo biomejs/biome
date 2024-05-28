@@ -2213,7 +2213,7 @@
 		},
 		"RulePlainConfiguration": {
 			"type": "string",
-			"enum": ["warn", "error", "off"]
+			"enum": ["warn", "error", "info", "off"]
 		},
 		"RuleWithComplexityOptions": {
 			"type": "object",
