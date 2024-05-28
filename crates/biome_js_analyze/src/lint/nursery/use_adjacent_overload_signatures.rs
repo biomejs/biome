@@ -1,10 +1,11 @@
 use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
 use biome_js_syntax::{
-    AnyJsModuleItem, JsClassDeclaration, JsExport, JsFunctionDeclaration, JsModule,
-    JsModuleItemList, TsDeclareStatement, TsInterfaceDeclaration, TsTypeAliasDeclaration,
+    AnyJsModuleItem, JsClassDeclaration, JsFunctionDeclaration, JsModule, JsModuleItemList,
+    TsDeclareStatement, TsInterfaceDeclaration, TsTypeAliasDeclaration,
 };
 use biome_rowan::{declare_node_union, AstNode, TextRange, TokenText};
+use rustc_hash::FxHashSet;
 
 declare_rule! {
     /// Disallow the use of overload signatures that are not next to each other.
@@ -95,58 +96,49 @@ declare_rule! {
 }
 
 impl Rule for UseAdjacentOverloadSignatures {
-    type Query = Ast<DeclarationOsModuleNode>;
+    type Query = Ast<DeclarationOrModuleNode>;
     type State = Vec<(TokenText, TextRange)>;
     type Signals = Option<Self::State>;
     type Options = ();
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
-        let mut methods: Vec<Vec<(TokenText, u32, TextRange)>> = Vec::new();
+        let mut methods: Vec<(TokenText, TextRange)> = Vec::new();
+        let mut seen_methods = FxHashSet::default();
+        let mut last_method = None;
 
         match node {
             // Handle export function foo() {} in declare namespace Foo {}
-            DeclarationOsModuleNode::TsDeclareStatement(node) => {
+            DeclarationOrModuleNode::TsDeclareStatement(node) => {
                 let declaration = node.declaration().ok()?;
                 let items = declaration.as_ts_module_declaration()?.body().ok()?.items();
-                let export_vec = handle_exports(&items)?;
-                methods.push(export_vec);
+                collect_exports(&items, &mut methods, &mut seen_methods, &mut last_method);
             }
             // Handle interface Foo {}
-            DeclarationOsModuleNode::TsInterfaceDeclaration(node) => {
-                let interface_vec = handle_interface(node)?;
-                methods.push(interface_vec);
+            DeclarationOrModuleNode::TsInterfaceDeclaration(node) => {
+                collect_interface(node, &mut methods, &mut seen_methods, &mut last_method);
             }
             // Handle type Foo = {}
-            DeclarationOsModuleNode::TsTypeAliasDeclaration(node) => {
-                let type_vec = handle_type(node)?;
-                methods.push(type_vec);
+            DeclarationOrModuleNode::TsTypeAliasDeclaration(node) => {
+                collect_type(node, &mut methods, &mut seen_methods, &mut last_method);
             }
             // Handle class Foo {}
-            DeclarationOsModuleNode::JsClassDeclaration(node) => {
-                let class_vec = handle_class(node)?;
-                methods.push(class_vec);
+            DeclarationOrModuleNode::JsClassDeclaration(node) => {
+                collect_class(node, &mut methods, &mut seen_methods, &mut last_method);
             }
             // Handle export function foo() {}
-            DeclarationOsModuleNode::JsFunctionDeclaration(node) => {
-                let function_declare_vec = handle_function(node)?;
-                methods.push(function_declare_vec);
+            DeclarationOrModuleNode::JsFunctionDeclaration(node) => {
+                collect_function(node, &mut methods, &mut seen_methods, &mut last_method);
             }
             // Handle export function foo() {}
-            DeclarationOsModuleNode::JsModule(node) => {
+            DeclarationOrModuleNode::JsModule(node) => {
                 let items = node.items();
-                let export_vec = handle_exports(&items)?;
-                methods.push(export_vec);
+                collect_exports(&items, &mut methods, &mut seen_methods, &mut last_method);
             }
         }
-        // Collect all adjacent overload violations
-        let adjacent_overload_violations = check_adjacent_overload_violations(&methods);
-        let violation_ranges: Vec<(TokenText, TextRange)> = adjacent_overload_violations
-            .iter()
-            .map(|(text, range)| (text.clone(), *range))
-            .collect();
-        if !violation_ranges.is_empty() {
-            Some(violation_ranges)
+
+        if !methods.is_empty() {
+            Some(methods)
         } else {
             None
         }
@@ -175,163 +167,158 @@ impl Rule for UseAdjacentOverloadSignatures {
     }
 }
 
-fn check_adjacent_overload_violations(
-    groups: &[Vec<(TokenText, u32, TextRange)>],
-) -> Vec<(TokenText, TextRange)> {
-    let mut violations: Vec<(TokenText, TextRange)> = Vec::new();
-
-    for group in groups.iter() {
-        let mut method_positions: Vec<(TokenText, Vec<u32>, Vec<TextRange>)> = Vec::new();
-
-        for (name, position, range) in group {
-            if let Some((_, positions, ranges)) =
-                method_positions.iter_mut().find(|(n, _, _)| *n == *name)
-            {
-                positions.push(*position);
-                ranges.push(*range);
-            } else {
-                method_positions.push((name.clone(), vec![*position], vec![*range]));
+fn collect_interface(
+    node: &TsInterfaceDeclaration,
+    methods: &mut Vec<(TokenText, TextRange)>,
+    seen_methods: &mut FxHashSet<TokenText>,
+    last_method: &mut Option<TokenText>,
+) {
+    let members = node.members();
+    for member in members {
+        if let Some(ts_method_signature) = member.as_ts_method_signature_type_member() {
+            if let Ok(method_member) = ts_method_signature.name() {
+                if let Some(text) = method_member.name() {
+                    let range = method_member.range();
+                    check_method(text, range, methods, seen_methods, last_method);
+                }
             }
         }
-        for (method, positions, last_ranges) in &method_positions {
-            if positions.len() > 1 {
-                let mut sorted_positions = positions.clone();
-                sorted_positions.sort_unstable();
-                let expected: Vec<u32> =
-                    (sorted_positions[0]..=sorted_positions[sorted_positions.len() - 1]).collect();
-                if sorted_positions != expected {
-                    let violation_pos = detect_violation_pos(&sorted_positions, &expected);
-                    if let Some(pos) = violation_pos {
-                        violations.push((method.clone(), last_ranges[pos]));
+    }
+}
+
+fn collect_type(
+    node: &TsTypeAliasDeclaration,
+    methods: &mut Vec<(TokenText, TextRange)>,
+    seen_methods: &mut FxHashSet<TokenText>,
+    last_method: &mut Option<TokenText>,
+) {
+    let ty = node
+        .ty()
+        .ok()
+        .and_then(|ty| ty.as_ts_object_type().cloned());
+    if let Some(ts_object) = ty {
+        let members = ts_object.members();
+        for member in members {
+            if let Some(method_member) = member
+                .as_ts_method_signature_type_member()
+                .and_then(|m| m.name().ok())
+            {
+                if let Some(text) = method_member.name() {
+                    let range = method_member.range();
+                    check_method(text, range, methods, seen_methods, last_method);
+                }
+            }
+        }
+    }
+}
+
+fn collect_class(
+    node: &JsClassDeclaration,
+    methods: &mut Vec<(TokenText, TextRange)>,
+    seen_methods: &mut FxHashSet<TokenText>,
+    last_method: &mut Option<TokenText>,
+) {
+    let members = node.members();
+    for member in members {
+        if let Some(method_class) = member
+            .as_js_method_class_member()
+            .or_else(|| member.as_js_method_class_member())
+        {
+            if let Ok(method_member) = method_class.name() {
+                if let Some(text) = method_member.name() {
+                    let range = method_member.range();
+                    check_method(text, range, methods, seen_methods, last_method);
+                }
+            }
+        } else if let Some(method_class) = member.as_ts_method_signature_class_member() {
+            if let Ok(method_member) = method_class.name() {
+                if let Some(text) = method_member.name() {
+                    let range = method_member.range();
+                    check_method(text, range, methods, seen_methods, last_method);
+                }
+            }
+        }
+    }
+}
+
+fn collect_function(
+    node: &JsFunctionDeclaration,
+    methods: &mut Vec<(TokenText, TextRange)>,
+    seen_methods: &mut FxHashSet<TokenText>,
+    last_method: &mut Option<TokenText>,
+) {
+    if let Some(return_type_annotation) = node.return_type_annotation() {
+        if let Some(ty) = return_type_annotation
+            .ty()
+            .ok()
+            .and_then(|ty| ty.as_any_ts_type().cloned())
+        {
+            if let Some(ts_object) = ty.as_ts_object_type() {
+                let members = ts_object.members();
+                for member in members {
+                    if let Some(method_member) = member
+                        .as_ts_method_signature_type_member()
+                        .and_then(|m| m.name().ok())
+                    {
+                        if let Some(text) = method_member.name() {
+                            let range = method_member.range();
+                            check_method(text, range, methods, seen_methods, last_method);
+                        }
                     }
                 }
             }
         }
     }
-
-    violations
 }
 
-// Detect the position of the adjacent violation
-fn detect_violation_pos(sorted_positions: &[u32], expected: &[u32]) -> Option<usize> {
-    let expected_len = expected.len();
-    for (i, &pos) in sorted_positions.iter().enumerate() {
-        let expected_pos = expected.get(i).copied().unwrap_or(u32::MAX);
-        let half_len = expected_len / 2;
-
-        if pos != expected_pos {
-            if expected_pos >= expected[half_len] {
-                return Some(i);
-            } else {
-                return Some(i - 1);
-            }
-        }
-    }
-    None
-}
-
-fn handle_interface(node: &TsInterfaceDeclaration) -> Option<Vec<(TokenText, u32, TextRange)>> {
-    let members = node.members();
-    let mut interface_vec = vec![];
-    for (interface_index, member) in members.into_iter().enumerate() {
-        let ts_method_signature = member.as_ts_method_signature_type_member()?;
-        let method_member = ts_method_signature.name().ok()?;
-        let text = method_member.name()?;
-        let range = method_member.range();
-        interface_vec.push((text, interface_index as u32, range));
-    }
-    Some(interface_vec)
-}
-
-fn handle_type(node: &TsTypeAliasDeclaration) -> Option<Vec<(TokenText, u32, TextRange)>> {
-    let ty = node.ty().ok()?;
-    let ts_object = ty.as_ts_object_type()?;
-    let members = ts_object.members();
-    let mut type_vec = vec![];
-    for (type_index, member) in members.into_iter().enumerate() {
-        let method_member = member.as_ts_method_signature_type_member()?.name().ok()?;
-        let text = method_member.name()?;
-        let range = method_member.range();
-        type_vec.push((text, type_index as u32, range));
-    }
-    Some(type_vec)
-}
-
-fn handle_class(node: &JsClassDeclaration) -> Option<Vec<(TokenText, u32, TextRange)>> {
-    let members = node.members();
-    let mut class_vec = vec![];
-    let mut class_index = 0;
-    for member in members {
-        if let Some(method_class) = member.as_js_method_class_member() {
-            let method_member = method_class.name().ok()?;
-            let text = method_member.name()?;
-            let range = method_member.range();
-            class_vec.push((text, class_index, range));
-            class_index += 1;
-        } else if let Some(method_class) = member.as_ts_method_signature_class_member() {
-            let method_member = method_class.name().ok()?;
-            let text = method_member.name()?;
-            let range = method_member.range();
-            class_vec.push((text, class_index, range));
-            class_index += 1;
-        }
-    }
-    Some(class_vec)
-}
-
-fn handle_function(node: &JsFunctionDeclaration) -> Option<Vec<(TokenText, u32, TextRange)>> {
-    let return_type_annotation = node.return_type_annotation();
-    let mut function_declare_vec = vec![];
-    if let Some(return_type_annotation) = return_type_annotation {
-        let ty = return_type_annotation.ty().ok()?;
-        if let Some(ty) = ty.as_any_ts_type() {
-            let ts_object = ty.as_ts_object_type()?;
-            let members = ts_object.members();
-            for (type_index, member) in members.into_iter().enumerate() {
-                let method_member = member.as_ts_method_signature_type_member()?.name().ok()?;
-                let text = method_member.name()?;
-                let range = method_member.range();
-                function_declare_vec.push((text, type_index as u32, range));
-            }
-        }
-    }
-    Some(function_declare_vec)
-}
-
-fn handle_export(node: &JsExport) -> Option<Vec<(TokenText, TextRange)>> {
-    let export = node.export_clause().ok()?;
-    let declaration_clause = export.as_any_js_declaration_clause()?;
-    let ts_declare = declaration_clause.as_ts_declare_function_declaration()?;
-    let name_token = ts_declare
-        .id()
-        .ok()?
-        .as_js_identifier_binding()?
-        .name_token()
-        .ok()?;
-    let text = name_token.token_text_trimmed();
-    let range = name_token.text_range();
-    let export_text_range = vec![(text, range)];
-    Some(export_text_range)
-}
-
-fn handle_exports(
+fn collect_exports(
     items: &JsModuleItemList,
-    //mut export_vec: Vec<(TokenText, u32, TextRange)>,
-) -> Option<Vec<(TokenText, u32, TextRange)>> {
-    //let mut export_vec = vec![];
-    let mut export_vec = vec![];
-    for (index, item) in items.into_iter().enumerate() {
+    methods: &mut Vec<(TokenText, TextRange)>,
+    seen_methods: &mut FxHashSet<TokenText>,
+    last_method: &mut Option<TokenText>,
+) {
+    for item in items {
         if let AnyJsModuleItem::JsExport(node) = item {
-            let export_text_range = handle_export(&node)?;
-            let tuple = export_text_range[0].clone();
-            let text = tuple.0.clone();
-            let range = tuple.1;
-            export_vec.push((text, index as u32, range));
+            if let Ok(export) = node.export_clause() {
+                if let Some(declaration_clause) = export.as_any_js_declaration_clause() {
+                    if let Some(ts_declare) =
+                        declaration_clause.as_ts_declare_function_declaration()
+                    {
+                        if let Some(name_token) = ts_declare.id().ok().and_then(|id| {
+                            id.as_js_identifier_binding()
+                                .and_then(|id| id.name_token().ok())
+                        }) {
+                            let text = name_token.token_text_trimmed();
+                            let range = name_token.text_range();
+                            check_method(text, range, methods, seen_methods, last_method);
+                        }
+                    }
+                }
+            }
         }
     }
-    Some(export_vec)
+}
+
+// Check if the method is already seen and add it to the list of methods
+fn check_method(
+    text: TokenText,
+    range: TextRange,
+    methods: &mut Vec<(TokenText, TextRange)>,
+    seen_methods: &mut FxHashSet<TokenText>,
+    last_method: &mut Option<TokenText>,
+) {
+    if let Some(last) = last_method {
+        if last != &text && seen_methods.contains(&text) {
+            methods.push((text.clone(), range));
+        } else {
+            seen_methods.insert(text.clone());
+        }
+    } else {
+        seen_methods.insert(text.clone());
+    }
+    *last_method = Some(text);
 }
 
 declare_node_union! {
-    pub DeclarationOsModuleNode = TsInterfaceDeclaration | TsTypeAliasDeclaration | TsDeclareStatement | JsClassDeclaration | JsModule | JsFunctionDeclaration
+    pub DeclarationOrModuleNode = TsInterfaceDeclaration | TsTypeAliasDeclaration | TsDeclareStatement | JsClassDeclaration | JsModule | JsFunctionDeclaration
 }
