@@ -10,8 +10,9 @@ use biome_configuration::{
     push_to_analyzer_rules, BiomeDiagnostic, CssConfiguration, FilesConfiguration,
     FormatterConfiguration, JavascriptConfiguration, JsonConfiguration, LinterConfiguration,
     OverrideFormatterConfiguration, OverrideLinterConfiguration,
-    OverrideOrganizeImportsConfiguration, Overrides, PartialConfiguration, PartialCssConfiguration,
-    PartialJavascriptConfiguration, PartialJsonConfiguration, PlainIndentStyle, Rules,
+    OverrideOrganizeImportsConfiguration, OverridePattern, Overrides, PartialConfiguration,
+    PartialCssConfiguration, PartialJavascriptConfiguration, PartialJsonConfiguration,
+    PlainIndentStyle, Rules,
 };
 use biome_css_formatter::context::CssFormatOptions;
 use biome_css_parser::CssParserOptions;
@@ -629,8 +630,8 @@ fn to_file_settings(
         Some(FilesSettings {
             max_size: config.max_size,
             git_ignore,
-            ignored_files: to_matcher(working_directory.clone(), Some(&config.ignore))?,
-            included_files: to_matcher(working_directory, Some(&config.include))?,
+            ignored_files: to_matcher(working_directory.clone(), Some(&config.ignore), false)?,
+            included_files: to_matcher(working_directory, Some(&config.include), false)?,
             ignore_unknown: config.ignore_unknown,
         })
     } else {
@@ -1184,6 +1185,7 @@ impl OverrideSettingPattern {
 pub fn to_matcher(
     working_directory: Option<PathBuf>,
     string_set: Option<&StringSet>,
+    is_editorconfig: bool,
 ) -> Result<Matcher, WorkspaceError> {
     let mut matcher = Matcher::empty();
     if let Some(working_directory) = working_directory {
@@ -1191,12 +1193,13 @@ pub fn to_matcher(
     }
     if let Some(string_set) = string_set {
         for pattern in string_set.iter() {
-            matcher.add_pattern(pattern).map_err(|err| {
+            let pattern = Pattern::parse(pattern, is_editorconfig).map_err(|err| {
                 BiomeDiagnostic::new_invalid_ignore_pattern(
                     pattern.to_string(),
                     err.msg.to_string(),
                 )
             })?;
+            matcher.add_pattern_parsed(pattern);
         }
     }
     Ok(matcher)
@@ -1228,8 +1231,12 @@ pub fn to_organize_imports_settings(
 ) -> Result<OrganizeImportsSettings, WorkspaceError> {
     Ok(OrganizeImportsSettings {
         enabled: organize_imports.enabled,
-        ignored_files: to_matcher(working_directory.clone(), Some(&organize_imports.ignore))?,
-        included_files: to_matcher(working_directory, Some(&organize_imports.include))?,
+        ignored_files: to_matcher(
+            working_directory.clone(),
+            Some(&organize_imports.ignore),
+            false,
+        )?,
+        included_files: to_matcher(working_directory, Some(&organize_imports.include), false)?,
     })
 }
 
@@ -1253,43 +1260,68 @@ pub fn to_override_settings(
     current_settings: &Settings,
 ) -> Result<OverrideSettings, WorkspaceError> {
     let mut override_settings = OverrideSettings::default();
-    for mut pattern in overrides.0 {
-        let formatter = pattern.formatter.take().unwrap_or_default();
-        let formatter = to_override_format_settings(formatter, &current_settings.formatter);
-
-        let linter = pattern.linter.take().unwrap_or_default();
-        let linter = to_override_linter_settings(linter, &current_settings.linter);
-
-        let organize_imports = pattern.organize_imports.take().unwrap_or_default();
-        let organize_imports = to_override_organize_imports_settings(
-            organize_imports,
-            &current_settings.organize_imports,
-        );
-
-        let mut languages = LanguageListSettings::default();
-        let javascript = pattern.javascript.take().unwrap_or_default();
-        let json = pattern.json.take().unwrap_or_default();
-        let css = pattern.css.take().unwrap_or_default();
-        languages.javascript =
-            to_javascript_language_settings(javascript, &current_settings.languages.javascript);
-
-        languages.json = to_json_language_settings(json, &current_settings.languages.json);
-        languages.css = to_css_language_settings(css, &current_settings.languages.css);
-
-        let pattern_setting = OverrideSettingPattern {
-            include: to_matcher(working_directory.clone(), pattern.include.as_ref())?,
-            exclude: to_matcher(working_directory.clone(), pattern.ignore.as_ref())?,
-            formatter,
-            linter,
-            organize_imports,
-            languages,
-            ..OverrideSettingPattern::default()
-        };
-
+    for pattern in overrides.0 {
+        let pattern_setting =
+            to_override_setting_pattern(working_directory.clone(), pattern, current_settings)?;
         override_settings.patterns.push(pattern_setting);
     }
 
     Ok(override_settings)
+}
+
+fn to_override_setting_pattern(
+    working_directory: Option<PathBuf>,
+    pattern: OverridePattern,
+    current_settings: &Settings,
+) -> Result<OverrideSettingPattern, WorkspaceError> {
+    let include = to_matcher(working_directory.clone(), pattern.include.as_ref(), false)?;
+    let exclude = to_matcher(working_directory.clone(), pattern.ignore.as_ref(), false)?;
+    to_override_setting_pattern_with_matchers(
+        working_directory,
+        pattern,
+        current_settings,
+        include,
+        exclude,
+    )
+}
+
+fn to_override_setting_pattern_with_matchers(
+    working_directory: Option<PathBuf>,
+    mut pattern: OverridePattern,
+    current_settings: &Settings,
+    include: Matcher,
+    exclude: Matcher,
+) -> Result<OverrideSettingPattern, WorkspaceError> {
+    let formatter = pattern.formatter.take().unwrap_or_default();
+    let formatter = to_override_format_settings(formatter, &current_settings.formatter);
+
+    let linter = pattern.linter.take().unwrap_or_default();
+    let linter = to_override_linter_settings(linter, &current_settings.linter);
+
+    let organize_imports = pattern.organize_imports.take().unwrap_or_default();
+    let organize_imports =
+        to_override_organize_imports_settings(organize_imports, &current_settings.organize_imports);
+
+    let mut languages = LanguageListSettings::default();
+    let javascript = pattern.javascript.take().unwrap_or_default();
+    let json = pattern.json.take().unwrap_or_default();
+    let css = pattern.css.take().unwrap_or_default();
+    languages.javascript =
+        to_javascript_language_settings(javascript, &current_settings.languages.javascript);
+
+    languages.json = to_json_language_settings(json, &current_settings.languages.json);
+    languages.css = to_css_language_settings(css, &current_settings.languages.css);
+
+    let settings = OverrideSettingPattern {
+        include,
+        exclude,
+        formatter,
+        linter,
+        organize_imports,
+        languages,
+        ..OverrideSettingPattern::default()
+    };
+    Ok(settings)
 }
 
 pub(crate) fn to_override_format_settings(
@@ -1497,8 +1529,8 @@ pub fn to_format_settings(
         line_width: Some(conf.line_width),
         format_with_errors: conf.format_with_errors,
         attribute_position: Some(conf.attribute_position),
-        ignored_files: to_matcher(working_directory.clone(), Some(&conf.ignore))?,
-        included_files: to_matcher(working_directory, Some(&conf.include))?,
+        ignored_files: to_matcher(working_directory.clone(), Some(&conf.ignore), false)?,
+        included_files: to_matcher(working_directory, Some(&conf.include), false)?,
     })
 }
 
@@ -1538,8 +1570,8 @@ pub fn to_linter_settings(
     Ok(LinterSettings {
         enabled: conf.enabled,
         rules: Some(conf.rules),
-        ignored_files: to_matcher(working_directory.clone(), Some(&conf.ignore))?,
-        included_files: to_matcher(working_directory.clone(), Some(&conf.include))?,
+        ignored_files: to_matcher(working_directory.clone(), Some(&conf.ignore), false)?,
+        included_files: to_matcher(working_directory.clone(), Some(&conf.include), false)?,
     })
 }
 
@@ -1556,11 +1588,27 @@ impl TryFrom<OverrideLinterConfiguration> for LinterSettings {
     }
 }
 
-pub fn overrides_from_editorconfig(editorconfig: EditorConfig) -> Result<Vec<OverrideSettingPattern>, PatternError> {
+pub fn overrides_from_editorconfig(
+    path: Option<PathBuf>,
+    current_settings: &Settings,
+    editorconfig: EditorConfig,
+) -> Result<Vec<OverrideSettingPattern>, WorkspaceError> {
     let (biome, _) = editorconfig.to_biome();
     if let Some(overrides) = biome.and_then(|biome| biome.overrides) {
-
-        Ok(overrides)
+        let mut settings = vec![];
+        for o in overrides.0 {
+            let include = to_matcher(path.clone(), o.include.as_ref(), true)?;
+            let exclude = to_matcher(path.clone(), o.ignore.as_ref(), true)?;
+            let pattern = to_override_setting_pattern_with_matchers(
+                path.clone(),
+                o,
+                current_settings,
+                include,
+                exclude,
+            )?;
+            settings.push(pattern);
+        }
+        Ok(settings)
     } else {
         Ok(vec![])
     }
