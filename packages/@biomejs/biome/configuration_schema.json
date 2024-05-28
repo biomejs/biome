@@ -1613,9 +1613,21 @@
 			"type": "object",
 			"required": ["inputComponents", "labelAttributes", "labelComponents"],
 			"properties": {
-				"inputComponents": { "type": "array", "items": { "type": "string" } },
-				"labelAttributes": { "type": "array", "items": { "type": "string" } },
-				"labelComponents": { "type": "array", "items": { "type": "string" } }
+				"inputComponents": {
+					"description": "Array of component names that should be considered the same as an `input` element.",
+					"type": "array",
+					"items": { "type": "string" }
+				},
+				"labelAttributes": {
+					"description": "Array of attributes that should be treated as the `label` accessible text content.",
+					"type": "array",
+					"items": { "type": "string" }
+				},
+				"labelComponents": {
+					"description": "Array of component names that should be considered the same as a `label` element.",
+					"type": "array",
+					"items": { "type": "string" }
+				}
 			},
 			"additionalProperties": false
 		},

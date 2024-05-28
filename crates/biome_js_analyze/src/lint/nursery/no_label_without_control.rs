@@ -93,9 +93,12 @@ declare_rule! {
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct NoLabelWithoutControlOptions {
-    pub label_components: Vec<String>,
-    pub label_attributes: Vec<String>,
+    /// Array of component names that should be considered the same as an `input` element.
     pub input_components: Vec<String>,
+    /// Array of attributes that should be treated as the `label` accessible text content.
+    pub label_attributes: Vec<String>,
+    /// Array of component names that should be considered the same as a `label` element.
+    pub label_components: Vec<String>,
 }
 
 pub struct NoLabelWithoutControlState {

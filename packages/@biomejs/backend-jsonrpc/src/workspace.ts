@@ -1882,8 +1882,17 @@ export interface HooksOptions {
  */
 export interface DeprecatedHooksOptions {}
 export interface NoLabelWithoutControlOptions {
+	/**
+	 * Array of component names that should be considered the same as an `input` element.
+	 */
 	inputComponents: string[];
+	/**
+	 * Array of attributes that should be treated as the `label` accessible text content.
+	 */
 	labelAttributes: string[];
+	/**
+	 * Array of component names that should be considered the same as a `label` element.
+	 */
 	labelComponents: string[];
 }
 /**
