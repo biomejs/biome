@@ -255,7 +255,7 @@ fn has_accessible_label(
                 let has_label_attribute = label_attributes.contains(&attribute_name)
                     || default_label_attributes.contains(&attribute_name.as_str());
                 let is_aria_labelledby_attribute = jsx_name.text() == "aria-labelledby";
-                let has_value = has_jsx_attribute_value(jsx_attribute_value);
+                let has_value = has_jsx_attribute_value(&jsx_attribute_value);
 
                 if has_value && (is_aria_labelledby_attribute || has_label_attribute) {
                     has_accessible_attribute = true
@@ -272,7 +272,7 @@ fn has_accessible_label(
 }
 
 /// Returns whether the passed `jsx_attribute_value` has a valid value inside it
-fn has_jsx_attribute_value(jsx_attribute_value: AnyJsxAttributeValue) -> bool {
+fn has_jsx_attribute_value(jsx_attribute_value: &AnyJsxAttributeValue) -> bool {
     jsx_attribute_value
         .as_static_value()
         .is_some_and(|static_value| !static_value.text().trim().is_empty())
