@@ -11,7 +11,7 @@ use serde::{Deserialize, Serialize};
 declare_rule! {
     /// Enforce that a label element or component has a text label and an associated input.
     ///
-    /// An "input" is considered one of the following elements: `input`, `meter`, `output`, `progress`, `select` or `textarea`
+    /// An "input" is considered one of the following elements: `input`, `meter`, `output`, `progress`, `select` or `textarea`.
     ///
     /// There are two supported ways to associate a label with an input:
     /// - Wrapping an input in a label element.
