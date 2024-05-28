@@ -115,22 +115,25 @@ impl Rule for NoLabelWithoutControl {
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
         let options = ctx.options();
-        let label_attributes = get_option(&options.label_attributes, &["aria-label", "alt"]);
-        let label_components = get_option(&options.label_components, &["label"]);
-        let input_components = get_option(
-            &options.input_components,
-            &["input", "meter", "output", "progress", "select", "textarea"],
-        );
+        let label_attributes = &options.label_attributes;
+        let label_components = &options.label_components;
+        let input_components = &options.input_components;
+        let default_label_attributes = &["aria-label", "alt"];
+        let default_label_components = &["label"];
+        let default_input_components =
+            &["input", "meter", "output", "progress", "select", "textarea"];
         let element_name = get_element_name(node)?;
-        let is_allowed_element = label_components.contains(&element_name);
+        let is_allowed_element = label_components.contains(&element_name)
+            || default_label_components.contains(&element_name.as_str());
 
         if !is_allowed_element {
             return None;
         }
 
-        let has_text_content = has_accessible_label(node, &label_attributes);
-        let has_control_association =
-            has_for_attribute(node)? || has_nested_control(node, &input_components);
+        let has_text_content =
+            has_accessible_label(node, label_attributes, default_label_attributes.to_vec());
+        let has_control_association = has_for_attribute(node)?
+            || has_nested_control(node, input_components, default_input_components.to_vec());
 
         if has_text_content && has_control_association {
             return None;
@@ -168,15 +171,6 @@ impl Rule for NoLabelWithoutControl {
     }
 }
 
-/// Returns an array option merged with the default value
-fn get_option(value: &[String], default_value: &[&str]) -> Vec<String> {
-    value
-        .iter()
-        .cloned()
-        .chain(default_value.iter().map(|value| (*value).to_string()))
-        .collect()
-}
-
 /// Returns the `JsxAttributeList` of the passed `AnyJsxTag`
 fn get_element_attributes(jsx_tag: &AnyJsxTag) -> Option<JsxAttributeList> {
     match jsx_tag {
@@ -212,15 +206,25 @@ fn has_for_attribute(jsx_tag: &AnyJsxTag) -> Option<bool> {
 
 /// Returns whether the passed `AnyJsxTag` have a child that is considered an input component
 /// according to the passed `input_components` parameter
-fn has_nested_control(jsx_tag: &AnyJsxTag, input_components: &[String]) -> bool {
+fn has_nested_control(
+    jsx_tag: &AnyJsxTag,
+    input_components: &Vec<String>,
+    default_input_components: Vec<&str>,
+) -> bool {
     jsx_tag.syntax().descendants().any(|descendant| {
         match (
             JsxName::cast(descendant.clone()),
             JsxReferenceIdentifier::cast(descendant.clone()),
         ) {
-            (Some(jsx_name), _) => input_components.contains(&jsx_name.text()),
+            (Some(jsx_name), _) => {
+                let attribute_name = jsx_name.text();
+                input_components.contains(&attribute_name)
+                    || default_input_components.contains(&attribute_name.as_str())
+            }
             (_, Some(jsx_reference_identifier)) => {
-                input_components.contains(&jsx_reference_identifier.text())
+                let attribute_name = jsx_reference_identifier.text();
+                input_components.contains(&attribute_name)
+                    || default_input_components.contains(&attribute_name.as_str())
             }
             _ => false,
         }
@@ -231,7 +235,11 @@ fn has_nested_control(jsx_tag: &AnyJsxTag, input_components: &[String]) -> bool 
 /// - Has a label attribute that corresponds to the `label_attributes` parameter
 /// - Has an `aria-labelledby` attribute
 /// - Has a child `JsxText` node
-fn has_accessible_label(jsx_tag: &AnyJsxTag, label_attributes: &[String]) -> bool {
+fn has_accessible_label(
+    jsx_tag: &AnyJsxTag,
+    label_attributes: &Vec<String>,
+    default_label_attributes: Vec<&str>,
+) -> bool {
     let jsx_attributes = jsx_tag
         .syntax()
         .descendants()
@@ -246,7 +254,9 @@ fn has_accessible_label(jsx_tag: &AnyJsxTag, label_attributes: &[String]) -> boo
                 .and_then(|initializer| initializer.value().ok()),
         ) {
             (Some(AnyJsxAttributeName::JsxName(jsx_name)), Some(jsx_attribute_value)) => {
-                let has_label_attribute = label_attributes.contains(&jsx_name.text());
+                let attribute_name = jsx_name.text();
+                let has_label_attribute = label_attributes.contains(&attribute_name)
+                    || default_label_attributes.contains(&attribute_name.as_str());
                 let is_aria_labelledby_attribute = jsx_name.text() == "aria-labelledby";
                 let has_value = has_jsx_attribute_value(jsx_attribute_value);
 
