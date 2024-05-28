@@ -219,7 +219,7 @@ fn parse(
             .map(|s| s.languages.css.parser.allow_wrong_line_comments)
             .unwrap_or_default(),
         css_modules: settings
-            .map(|s| s.languages.css.parser.css_modules)
+            .map(|s| s.languages.css.parser.allow_wrong_line_comments)
             .unwrap_or_default(),
     };
     if let Some(settings) = settings {
@@ -227,15 +227,6 @@ fn parse(
             .override_settings
             .to_override_css_parser_options(biome_path, options);
     }
-    let parser = &settings.settings().languages.css.parser;
-    let overrides = &settings.settings().override_settings;
-    let options: CssParserOptions = overrides.to_override_css_parser_options(
-        biome_path,
-        CssParserOptions {
-            allow_wrong_line_comments: parser.allow_wrong_line_comments,
-            css_modules: parser.css_modules,
-        },
-    );
     let parse = biome_css_parser::parse_css_with_cache(text, cache, options);
     let root = parse.syntax();
     let diagnostics = parse.into_diagnostics();
