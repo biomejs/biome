@@ -2773,7 +2773,7 @@ pub struct Nursery {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_invalid_position_at_import_rule:
         Option<RuleConfiguration<NoInvalidPositionAtImportRule>>,
-    #[doc = "Enforce that a label element or component has a text label and an associated control."]
+    #[doc = "Enforce that a label element or component has a text label and an associated input."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_label_without_control: Option<RuleConfiguration<NoLabelWithoutControl>>,
     #[doc = "Checks that the assertion function, for example expect, is placed inside an it() function call."]

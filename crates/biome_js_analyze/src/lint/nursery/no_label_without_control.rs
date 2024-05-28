@@ -9,13 +9,16 @@ use biome_rowan::AstNode;
 use serde::{Deserialize, Serialize};
 
 declare_rule! {
-    /// Enforce that a label element or component has a text label and an associated control.
+    /// Enforce that a label element or component has a text label and an associated input.
     ///
-    /// There are two supported ways to associate a label with a control:
-    /// - Wrapping a control in a label element.
-    /// - Adding a `for` attribute (or `htmlFor` in React) to a label and assigning it a DOM ID string that indicates an input on the page.
+    /// An "input" is considered one of the following elements: `input`, `meter`, `output`, `progress`, `select` or `textarea`
     ///
-    /// This rule checks that any `label` element (or an indicated custom component that will output a `label` element) meets one of this conditions:
+    /// There are two supported ways to associate a label with an input:
+    /// - Wrapping an input in a label element.
+    /// - Adding a `for` attribute (or `htmlFor` in React) to a label and assigning it a DOM ID string associated with an input on the page.
+    ///
+    ///
+    /// This rule checks that any `label` element (or an indicated custom component that will output a `label` element) meets one of these conditions:
     /// - Wraps an `input` element (or an indicated custom component that will output an `input` element)
     /// - Has a `for` or `htmlFor` attribute and that the `label` element/component has accessible text content.
     ///
@@ -62,7 +65,7 @@ declare_rule! {
     /// ## Options
     ///
     /// The rule supports the following options:
-    /// - `controlComponents` - An array of component names that should be considered the same as an `input` element.
+    /// - `inputComponents` - An array of component names that should be considered the same as an `input` element.
     /// - `labelAttributes` - An array of attributes that should be treated as the `label` accessible text content.
     /// - `labelComponents` - An array of component names that should be considered the same as a `label` element.
     ///
@@ -70,7 +73,7 @@ declare_rule! {
     /// {
     ///     "//": "...",
     ///     "options": {
-    ///         "controlComponents": ["CustomInput"],
+    ///         "inputComponents": ["CustomInput"],
     ///         "labelAttributes": ["label"],
     ///         "labelComponents": ["CustomLabel"]
     ///     }
@@ -92,7 +95,7 @@ declare_rule! {
 pub struct NoLabelWithoutControlOptions {
     pub label_components: Vec<String>,
     pub label_attributes: Vec<String>,
-    pub control_components: Vec<String>,
+    pub input_components: Vec<String>,
 }
 
 pub struct NoLabelWithoutControlState {
@@ -111,8 +114,8 @@ impl Rule for NoLabelWithoutControl {
         let options = ctx.options();
         let label_attributes = get_option(&options.label_attributes, &["aria-label", "alt"]);
         let label_components = get_option(&options.label_components, &["label"]);
-        let control_components = get_option(
-            &options.control_components,
+        let input_components = get_option(
+            &options.input_components,
             &["input", "meter", "output", "progress", "select", "textarea"],
         );
         let element_name = get_element_name(node)?;
@@ -124,7 +127,7 @@ impl Rule for NoLabelWithoutControl {
 
         let has_text_content = has_accessible_label(node, &label_attributes);
         let has_control_association =
-            has_for_attribute(node)? || has_nested_control(node, &control_components);
+            has_for_attribute(node)? || has_nested_control(node, &input_components);
 
         if has_text_content && has_control_association {
             return None;
@@ -142,7 +145,7 @@ impl Rule for NoLabelWithoutControl {
             rule_category!(),
             node.range(),
             markup! {
-                "A form label must be associated with a control."
+                "A form label must be associated with an input."
             },
         );
 
@@ -154,7 +157,7 @@ impl Rule for NoLabelWithoutControl {
 
         if !state.has_control_association {
             diagnostic = diagnostic.note(
-                markup! { "Consider adding a `for` or `htmlFor` attribute to the label element or moving the control element to inside the label element." },
+                markup! { "Consider adding a `for` or `htmlFor` attribute to the label element or moving the input element to inside the label element." },
             );
         }
 
@@ -204,17 +207,17 @@ fn has_for_attribute(jsx_tag: &AnyJsxTag) -> Option<bool> {
     }))
 }
 
-/// Returns whether the passed `AnyJsxTag` have a child that is considered a control component
-/// according to the passed `control_components` parameter
-fn has_nested_control(jsx_tag: &AnyJsxTag, control_components: &[String]) -> bool {
+/// Returns whether the passed `AnyJsxTag` have a child that is considered an input component
+/// according to the passed `input_components` parameter
+fn has_nested_control(jsx_tag: &AnyJsxTag, input_components: &[String]) -> bool {
     jsx_tag.syntax().descendants().any(|descendant| {
         match (
             JsxName::cast(descendant.clone()),
             JsxReferenceIdentifier::cast(descendant.clone()),
         ) {
-            (Some(jsx_name), _) => control_components.contains(&jsx_name.text()),
+            (Some(jsx_name), _) => input_components.contains(&jsx_name.text()),
             (_, Some(jsx_reference_identifier)) => {
-                control_components.contains(&jsx_reference_identifier.text())
+                input_components.contains(&jsx_reference_identifier.text())
             }
             _ => false,
         }

@@ -13,7 +13,7 @@ expression: invalidCustomOptions.jsx
 ```
 invalidCustomOptions.jsx:1:1 lint/nursery/noLabelWithoutControl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! A form label must be associated with a control.
+  ! A form label must be associated with an input.
   
   > 1 │ <CustomLabel><span><CustomInput /></span></CustomLabel>;
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -28,14 +28,14 @@ invalidCustomOptions.jsx:1:1 lint/nursery/noLabelWithoutControl ━━━━━�
 ```
 invalidCustomOptions.jsx:2:1 lint/nursery/noLabelWithoutControl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! A form label must be associated with a control.
+  ! A form label must be associated with an input.
   
     1 │ <CustomLabel><span><CustomInput /></span></CustomLabel>;
   > 2 │ <CustomLabel aria-label="A label" />;
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     3 │ 
   
-  i Consider adding a `for` or `htmlFor` attribute to the label element or moving the control element to inside the label element.
+  i Consider adding a `for` or `htmlFor` attribute to the label element or moving the input element to inside the label element.
   
 
 ```

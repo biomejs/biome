@@ -1010,7 +1010,7 @@ export interface Nursery {
 	 */
 	noInvalidPositionAtImportRule?: RuleConfiguration_for_Null;
 	/**
-	 * Enforce that a label element or component has a text label and an associated control.
+	 * Enforce that a label element or component has a text label and an associated input.
 	 */
 	noLabelWithoutControl?: RuleConfiguration_for_NoLabelWithoutControlOptions;
 	/**
@@ -1882,7 +1882,7 @@ export interface HooksOptions {
  */
 export interface DeprecatedHooksOptions {}
 export interface NoLabelWithoutControlOptions {
-	controlComponents: string[];
+	inputComponents: string[];
 	labelAttributes: string[];
 	labelComponents: string[];
 }

@@ -1,6 +1,6 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
-expression: invalidCustomControlComponents.jsx
+expression: invalidCustomInputComponents.jsx
 ---
 # Input
 ```jsx
@@ -10,9 +10,9 @@ expression: invalidCustomControlComponents.jsx
 
 # Diagnostics
 ```
-invalidCustomControlComponents.jsx:1:1 lint/nursery/noLabelWithoutControl ━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalidCustomInputComponents.jsx:1:1 lint/nursery/noLabelWithoutControl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! A form label must be associated with a control.
+  ! A form label must be associated with an input.
   
   > 1 │ <label><span><CustomInput /></span></label>;
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

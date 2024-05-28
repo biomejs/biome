@@ -1611,9 +1611,9 @@
 		},
 		"NoLabelWithoutControlOptions": {
 			"type": "object",
-			"required": ["controlComponents", "labelAttributes", "labelComponents"],
+			"required": ["inputComponents", "labelAttributes", "labelComponents"],
 			"properties": {
-				"controlComponents": { "type": "array", "items": { "type": "string" } },
+				"inputComponents": { "type": "array", "items": { "type": "string" } },
 				"labelAttributes": { "type": "array", "items": { "type": "string" } },
 				"labelComponents": { "type": "array", "items": { "type": "string" } }
 			},
@@ -1719,7 +1719,7 @@
 					]
 				},
 				"noLabelWithoutControl": {
-					"description": "Enforce that a label element or component has a text label and an associated control.",
+					"description": "Enforce that a label element or component has a text label and an associated input.",
 					"anyOf": [
 						{ "$ref": "#/definitions/NoLabelWithoutControlConfiguration" },
 						{ "type": "null" }
