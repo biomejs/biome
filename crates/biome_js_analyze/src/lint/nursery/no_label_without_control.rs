@@ -51,29 +51,11 @@ declare_rule! {
     ///
     /// ```jsx
     /// <label for="js_id" aria-label="A label" />;
-    /// ```
-    ///
-    /// ```jsx
     /// <label for="js_id" aria-labelledby="A label" />;
-    /// ```
-    ///
-    /// ```jsx
     /// <label htmlFor="js_id" aria-label="A label" />;
-    /// ```
-    ///
-    /// ```jsx
     /// <label htmlFor="js_id" aria-labelledby="A label" />;
-    /// ```
-    ///
-    /// ```jsx
     /// <label>A label<input /></label>;
-    /// ```
-    ///
-    /// ```jsx
     /// <label>A label<textarea /></label>;
-    /// ```
-    ///
-    /// ```jsx
     /// <label><img alt="A label" /><input /></label>;
     /// ```
     ///
