@@ -74,7 +74,7 @@ use tracing::debug;
 
 pub use self::client::{TransportRequest, WorkspaceClient, WorkspaceTransport};
 pub use crate::file_handlers::DocumentFileSource;
-use crate::settings::Settings;
+use crate::settings::{ConfigurationBundle, Settings};
 
 mod client;
 mod server;
@@ -410,7 +410,7 @@ impl FeaturesBuilder {
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub struct UpdateSettingsParams {
-    pub configuration: PartialConfiguration,
+    pub configuration: Vec<ConfigurationBundle>,
     // @ematipico TODO: have a better data structure for this
     pub vcs_base_path: Option<PathBuf>,
     // @ematipico TODO: have a better data structure for this

@@ -10,7 +10,7 @@ use biome_formatter::{FormatOptions, Printed};
 use biome_fs::BiomePath;
 use biome_parser::AnyParse;
 use biome_rowan::{TextRange, TextSize};
-use biome_service::settings::{ServiceLanguage, Settings};
+use biome_service::settings::{ConfigSource, ConfigurationBundle, ServiceLanguage, Settings};
 use biome_service::workspace::{
     DocumentFileSource, FeaturesBuilder, RegisterProjectFolderParams, SupportsFeatureParams,
 };
@@ -236,8 +236,12 @@ where
                 options_path.get_buffer_from_file().as_str(),
             )
             .consume();
+            let bundle = ConfigurationBundle {
+                config: test_options.unwrap(),
+                source: ConfigSource::Biome,
+            };
             settings
-                .merge_with_configuration(test_options.unwrap_or_default(), None, None, &[])
+                .merge_with_configuration(bundle, None, None, &[])
                 .unwrap();
 
             if !diagnostics.is_empty() {

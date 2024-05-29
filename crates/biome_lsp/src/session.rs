@@ -13,6 +13,7 @@ use biome_service::configuration::{
     load_configuration, LoadedConfiguration, PartialConfigurationExt,
 };
 use biome_service::file_handlers::{AstroFileHandler, SvelteFileHandler, VueFileHandler};
+use biome_service::settings::{ConfigSource, ConfigurationBundle};
 use biome_service::workspace::{
     FeaturesBuilder, GetFileContentParams, OpenProjectParams, PullDiagnosticsParams,
     RegisterProjectFolderParams, SupportsFeatureParams, UpdateProjectParams,
@@ -498,9 +499,13 @@ impl Session {
                                     },
                                 );
                             }
+                            let bundle = ConfigurationBundle {
+                                config: configuration,
+                                source: ConfigSource::Biome,
+                            };
                             let result = self.workspace.update_settings(UpdateSettingsParams {
                                 workspace_directory: fs.working_directory(),
-                                configuration,
+                                configuration: vec![bundle],
                                 vcs_base_path,
                                 gitignore_matches,
                             });

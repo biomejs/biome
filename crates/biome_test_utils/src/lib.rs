@@ -9,7 +9,7 @@ use biome_json_parser::{JsonParserOptions, ParseDiagnostic};
 use biome_project::PackageJson;
 use biome_rowan::{SyntaxKind, SyntaxNode, SyntaxSlot};
 use biome_service::configuration::to_analyzer_rules;
-use biome_service::settings::{ServiceLanguage, Settings};
+use biome_service::settings::{ConfigSource, ConfigurationBundle, ServiceLanguage, Settings};
 use json_comments::StripComments;
 use similar::TextDiff;
 use std::ffi::{c_int, OsStr};
@@ -94,8 +94,12 @@ pub fn create_analyzer_options(
                 Transparent => Some(JsxRuntime::Transparent),
             };
 
+            let bundle = ConfigurationBundle {
+                config: configuration,
+                source: ConfigSource::Biome,
+            };
             settings
-                .merge_with_configuration(configuration, None, None, &[])
+                .merge_with_configuration(bundle, None, None, &[])
                 .unwrap();
             analyzer_configuration.rules = to_analyzer_rules(&settings, input_file);
         }

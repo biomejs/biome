@@ -172,11 +172,12 @@ impl Settings {
     #[tracing::instrument(level = "trace", skip(self))]
     pub fn merge_with_configuration(
         &mut self,
-        configuration: PartialConfiguration,
+        bundle: ConfigurationBundle,
         working_directory: Option<PathBuf>,
         vcs_path: Option<PathBuf>,
         gitignore_matches: &[String],
     ) -> Result<(), WorkspaceError> {
+        let configuration = bundle.config;
         // formatter part
         if let Some(formatter) = configuration.formatter {
             self.formatter = to_format_settings(
@@ -1612,4 +1613,19 @@ pub fn overrides_from_editorconfig(
     } else {
         Ok(vec![])
     }
+}
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq, serde::Serialize, serde::Deserialize)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+pub enum ConfigSource {
+    Biome,
+    EditorConfig,
+}
+
+/// A simple wrapper around the configuration and the source of the configuration so  that we can gate certain features based on where the configuration came from.
+#[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+pub struct ConfigurationBundle {
+    pub config: PartialConfiguration,
+    pub source: ConfigSource,
 }

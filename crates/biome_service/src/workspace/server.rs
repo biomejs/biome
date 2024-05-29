@@ -393,15 +393,16 @@ impl Workspace for WorkspaceServer {
     #[tracing::instrument(level = "trace", skip(self))]
     fn update_settings(&self, params: UpdateSettingsParams) -> Result<(), WorkspaceError> {
         let mut workspace = self.workspaces_mut();
-        workspace
-            .as_mut()
-            .get_current_settings_mut()
-            .merge_with_configuration(
-                params.configuration,
-                params.workspace_directory,
-                params.vcs_base_path,
+        let settings = workspace.as_mut().get_current_settings_mut();
+
+        for bundle in params.configuration {
+            settings.merge_with_configuration(
+                bundle,
+                params.workspace_directory.clone(),
+                params.vcs_base_path.clone(),
                 params.gitignore_matches.as_slice(),
             )?;
+        }
 
         Ok(())
     }
