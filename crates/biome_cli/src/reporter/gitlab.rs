@@ -40,28 +40,13 @@ struct Location {
 }
 
 #[derive(Serialize)]
+#[serde(rename_all = "snake_case")]
 enum GitLabSeverity {
     Info,
     Minor,
     Major,
     Critical,
     Blocker,
-}
-
-impl Display for GitLabSeverity {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(
-            f,
-            "{}",
-            match self {
-                GitLabSeverity::Info => "info".to_string(),
-                GitLabSeverity::Minor => "minor".to_string(),
-                GitLabSeverity::Major => "major".to_string(),
-                GitLabSeverity::Critical => "critical".to_string(),
-                GitLabSeverity::Blocker => "blocker".to_string(),
-            }
-        )
-    }
 }
 
 impl From<biome_diagnostics::diagnostic::Severity> for GitLabSeverity {
