@@ -195,6 +195,20 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 - Add option `json.linter.enabled` to control the linter for JSON (and its super languages) files. Contributed by @ematipico
 - Add option `css.linter.enabled` to control the linter for CSS (and its super languages) files. Contributed by @ematipico
 - Add option `css.formatter`, to control the formatter options for CSS (and its super languages) files. Contributed by @ematipico
+- You can now change the severity of lint rules down to `"info"`. The `"info"` severity doesn't emit error codes, and it isn't affected by other options like `--error-on-warnings`:
+
+  ```json
+  {
+    "linter": {
+      "rules": {
+        "suspicious": {
+          "noDebugger": "info"
+        }
+      }
+    }
+  }
+  ```
+  Contributed by @ematipico
 
 #### Enhancements
 

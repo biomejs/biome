@@ -175,6 +175,17 @@ pub const CONFIG_LINTER_DOWNGRADE_DIAGNOSTIC: &str = r#"{
   }
 }"#;
 
+pub const CONFIG_LINTER_DOWNGRADE_DIAGNOSTIC_INFO: &str = r#"{
+  "linter": {
+    "rules": {
+        "recommended": true,
+        "suspicious": {
+            "noDebugger": "info"
+        }
+    }
+  }
+}"#;
+
 pub const CONFIG_LINTER_UPGRADE_DIAGNOSTIC: &str = r#"{
   "linter": {
     "rules": {
