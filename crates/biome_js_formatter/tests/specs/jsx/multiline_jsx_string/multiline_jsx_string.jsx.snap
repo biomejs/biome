@@ -1,0 +1,66 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: jsx/multiline_jsx_string/multiline_jsx_string.jsx
+---
+# Input
+
+```jsx
+<div className="px-1 px-2
+px-3"/>;
+
+```
+
+
+=============================
+
+# Outputs
+
+## Output 1
+
+-----
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 80
+Quote style: Double Quotes
+JSX quote style: Double Quotes
+Quote properties: As needed
+Trailing commas: All
+Semicolons: Always
+Arrow parentheses: Always
+Bracket spacing: true
+Bracket same line: false
+Attribute Position: Auto
+-----
+
+```jsx
+<div
+	className="px-1 px-2
+px-3"
+/>;
+```
+
+## Output 1
+
+-----
+Indent style: Tab
+Indent width: 2
+Line ending: CRLF
+Line width: 80
+Quote style: Double Quotes
+JSX quote style: Double Quotes
+Quote properties: As needed
+Trailing commas: All
+Semicolons: Always
+Arrow parentheses: Always
+Bracket spacing: true
+Bracket same line: false
+Attribute Position: Auto
+-----
+
+```jsx
+<div<CRLF>
+	className="px-1 px-2<CRLF>
+px-3"<CRLF>
+/>;<CRLF>
+```
