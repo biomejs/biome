@@ -5,7 +5,7 @@ use serde::Serialize;
 use std::{
     cmp::max,
     collections::HashSet,
-    fmt::Display,
+    fs::canonicalize,
     hash::{DefaultHasher, Hash, Hasher},
     path::{Path, PathBuf},
 };
@@ -27,16 +27,16 @@ pub(crate) struct GitLabDiagnostic {
 }
 
 #[derive(Serialize)]
-struct Lines {
-    /// The line on which the code quality violation occurred.
-    begin: u8,
-}
-
-#[derive(Serialize)]
 struct Location {
     /// The relative path to the file containing the code quality violation.
     path: String,
     lines: Lines,
+}
+
+#[derive(Serialize)]
+struct Lines {
+    /// The line on which the code quality violation occurred.
+    begin: u8,
 }
 
 #[derive(Serialize)]
@@ -124,7 +124,10 @@ impl ReporterVisitor for GitLabReporterVisitor {
 }
 
 pub(crate) struct GitLabDiagnosticBuilder {
+    /// The root of the Git repository.
+    /// Required for relativization of the reported absolute paths.
     repository_root: Option<PathBuf>,
+    /// A set of fingerprints (unique identifiers) to prevent collisions.
     fingerprints: HashSet<u64>,
 }
 
@@ -136,6 +139,7 @@ impl GitLabDiagnosticBuilder {
         }
     }
 
+    /// Turns a biome diagnostic into one in the GitLab Code Quality report format.
     pub fn gitlab_diagnostic(
         &mut self,
         value: biome_diagnostics::error::Error,
@@ -161,6 +165,7 @@ impl GitLabDiagnosticBuilder {
         }
     }
 
+    /// Generates a fingerprint for a diagnostic.
     fn fingerprint(&self, check_name: &String, path: &String, line: u8) -> u64 {
         let mut hasher = DefaultHasher::new();
 
@@ -171,6 +176,8 @@ impl GitLabDiagnosticBuilder {
         hasher.finish()
     }
 
+    /// Enforces uniqueness of generated fingerprints in the context of a
+    /// single report.
     fn ensure_fingerprint_uniqueness(&mut self, fingerprint: u64, salt: u64) -> u64 {
         let mut current = fingerprint;
         while self.fingerprints.contains(&current) {
@@ -184,6 +191,9 @@ impl GitLabDiagnosticBuilder {
         current
     }
 
+    /// GitLab only cares about paths relative to the repository root.
+    /// This function attempts to relativize the absolute path from the
+    /// diagnostic, while falling back to the originally reported one.
     fn path(&self, value: &biome_diagnostics::error::Error) -> Option<String> {
         let path = match value.location().resource? {
             biome_diagnostics::Resource::Argv => None,
@@ -195,13 +205,18 @@ impl GitLabDiagnosticBuilder {
             return Some(path);
         };
 
-        let Ok(relativized) = Path::new(path.as_str()).strip_prefix(root) else {
+        let Ok(resolved) = canonicalize(Path::new(path.as_str())) else {
+            return Some(path);
+        };
+
+        let Ok(relativized) = resolved.strip_prefix(root) else {
             return Some(path);
         };
 
         Some(relativized.to_str().unwrap_or(path.as_str()).to_string())
     }
 
+    /// Extracts the line number from the diagnostic.
     fn line(&self, value: &biome_diagnostics::error::Error) -> Option<u8> {
         let location = value.location();
         let buf = LineIndexBuf::from_source_text(location.source_code?.text);
