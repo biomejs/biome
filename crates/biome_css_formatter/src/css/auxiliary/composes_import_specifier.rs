@@ -10,9 +10,7 @@ impl FormatNodeRule<CssComposesImportSpecifier> for FormatCssComposesImportSpeci
         node: &CssComposesImportSpecifier,
         f: &mut CssFormatter,
     ) -> FormatResult<()> {
-        let CssComposesImportSpecifierFields {
-            from_token, source
-        } = node.as_fields();
+        let CssComposesImportSpecifierFields { from_token, source } = node.as_fields();
 
         write![f, [space(), from_token.format(), space(), source.format()]]
     }
