@@ -106,7 +106,7 @@ fn parse_keyframes_scoped_name(p: &mut CssParser) -> ParsedSyntax {
 
     p.bump(T![:]);
 
-    if !p.options().css_modules {
+    if p.options().is_css_modules_disabled() {
         // :local and :global are not standard CSS features
         // provide a hint on how to enable parsing of these pseudo-classes
         p.error(local_or_global_not_allowed(p, p.cur_range()));

@@ -1,0 +1,11 @@
+.a {
+	composes: ;
+}
+
+.otherClassName {
+	composes: className from ;
+}
+
+.otherClassName {
+	composes: globalClassName from ;
+}

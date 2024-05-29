@@ -189,6 +189,58 @@ pub fn css_complex_selector(
         ],
     ))
 }
+pub fn css_composes_import_specifier(
+    from_token: SyntaxToken,
+    source: AnyCssComposesImportSource,
+) -> CssComposesImportSpecifier {
+    CssComposesImportSpecifier::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_COMPOSES_IMPORT_SPECIFIER,
+        [
+            Some(SyntaxElement::Token(from_token)),
+            Some(SyntaxElement::Node(source.into_syntax())),
+        ],
+    ))
+}
+pub fn css_composes_property(
+    name: CssIdentifier,
+    colon_token: SyntaxToken,
+    value: CssComposesPropertyValue,
+) -> CssComposesProperty {
+    CssComposesProperty::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_COMPOSES_PROPERTY,
+        [
+            Some(SyntaxElement::Node(name.into_syntax())),
+            Some(SyntaxElement::Token(colon_token)),
+            Some(SyntaxElement::Node(value.into_syntax())),
+        ],
+    ))
+}
+pub fn css_composes_property_value(class: CssCustomIdentifier) -> CssComposesPropertyValueBuilder {
+    CssComposesPropertyValueBuilder {
+        class,
+        specifier: None,
+    }
+}
+pub struct CssComposesPropertyValueBuilder {
+    class: CssCustomIdentifier,
+    specifier: Option<CssComposesImportSpecifier>,
+}
+impl CssComposesPropertyValueBuilder {
+    pub fn with_specifier(mut self, specifier: CssComposesImportSpecifier) -> Self {
+        self.specifier = Some(specifier);
+        self
+    }
+    pub fn build(self) -> CssComposesPropertyValue {
+        CssComposesPropertyValue::unwrap_cast(SyntaxNode::new_detached(
+            CssSyntaxKind::CSS_COMPOSES_PROPERTY_VALUE,
+            [
+                Some(SyntaxElement::Node(self.class.into_syntax())),
+                self.specifier
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+            ],
+        ))
+    }
+}
 pub fn css_compound_selector(sub_selectors: CssSubSelectorList) -> CssCompoundSelectorBuilder {
     CssCompoundSelectorBuilder {
         sub_selectors,

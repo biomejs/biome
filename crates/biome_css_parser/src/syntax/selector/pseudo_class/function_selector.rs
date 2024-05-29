@@ -42,7 +42,7 @@ pub(crate) fn parse_pseudo_class_function_selector(p: &mut CssParser) -> ParsedS
         return Absent;
     }
 
-    if !p.options().css_modules {
+    if p.options().is_css_modules_disabled() {
         // :local and :global are not standard CSS features
         // provide a hint on how to enable parsing of these pseudo-classes
         p.error(local_or_global_not_allowed(p, p.cur_range()));
