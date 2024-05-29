@@ -6,7 +6,7 @@ Criterion is used to generate benchmark results.
 
 ## Prerequisites
 
-Install `cargo-critcmp` to compare benchmarks between branches.
+Install `critcmp` to compare benchmarks between branches.
 
 ```bash
 cargo install critcmp
