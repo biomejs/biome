@@ -302,6 +302,7 @@ pub const CSS_KINDS_SRC: KindsSrc = KindsSrc {
         "CSS_COMPOSES_PROPERTY",
         "CSS_COMPOSES_PROPERTY_VALUE",
         "CSS_COMPOSES_IMPORT_SPECIFIER",
+        "CSS_COMPOSES_CLASS_LIST",
         "CSS_UNKNOWN_PROPERTY_VALUE",
         // Properties
         "CSS_PARAMETER_LIST",

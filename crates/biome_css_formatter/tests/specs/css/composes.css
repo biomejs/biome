@@ -16,3 +16,16 @@
 	from
 	global;
 }
+
+.b {
+	composes:
+		classNameA
+		classNameB;
+}
+
+.c {
+	composes:
+		classNameA
+		classNameB
+ from './namespace.css';
+}

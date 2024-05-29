@@ -9,7 +9,7 @@ use crate::syntax::{
 use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::{CssSyntaxKind, T};
 use biome_parser::parse_lists::ParseNodeList;
-use biome_parser::parse_recovery::{ParseRecoveryTokenSet, RecoveryResult};
+use biome_parser::parse_recovery::{ParseRecovery, ParseRecoveryTokenSet, RecoveryResult};
 use biome_parser::prelude::ParsedSyntax;
 use biome_parser::prelude::ParsedSyntax::{Absent, Present};
 use biome_parser::{token_set, Parser, TokenSet};
@@ -31,11 +31,31 @@ pub(crate) fn parse_any_property(p: &mut CssParser) -> ParsedSyntax {
     }
 }
 
+/// Checks if the current parser position is at a `composes` property.
+///
+/// This function determines if the parser is currently positioned at a `composes` property,
+/// which is indicated by the presence of the `composes` keyword followed by a colon (`:`).
 #[inline]
 fn is_at_composes_property(p: &mut CssParser) -> bool {
     p.at(T![composes]) && p.nth_at(1, T![:])
 }
 
+/// Parses a `composes` property in CSS Modules.
+///
+/// This function parses a `composes` property, which is used in CSS Modules to compose classes from other modules.
+/// If the current parser position is not at a `composes` property, it returns `Absent`. If CSS Modules are disabled,
+/// it generates a diagnostic error and falls back to parsing a generic property.
+///
+/// Basic usage in CSS:
+/// ```css
+/// .button {
+///     composes: baseButton alertButton from 'base.css';
+/// }
+///
+/// .alert {
+///     composes: alertText;
+/// }
+/// ```
 fn parse_composes_property(p: &mut CssParser) -> ParsedSyntax {
     if !is_at_composes_property(p) {
         return Absent;
@@ -51,16 +71,14 @@ fn parse_composes_property(p: &mut CssParser) -> ParsedSyntax {
     }
 
     let m = p.start();
+    // remap the `composes` keyword to a regular identifier
     parse_regular_identifier(p).ok();
     p.bump(T![:]);
 
     {
         let m = p.start();
 
-        // Parse the identifier as a custom identifier because it is a selector, which is case-sensitive.
-        // For more information, see: https://github.com/css-modules/css-modules/blob/master/docs/composition.md
-        parse_custom_identifier_with_keywords(p, CssLexContext::Regular, true)
-            .or_add_diagnostic(p, expected_identifier);
+        ComposesClassList.parse_list(p);
 
         if p.at(T![from]) {
             let m = p.start();
@@ -81,6 +99,52 @@ fn parse_composes_property(p: &mut CssParser) -> ParsedSyntax {
 
     Present(m.complete(p, CSS_COMPOSES_PROPERTY))
 }
+
+/// A struct representing a list of classes in a `composes` property.
+struct ComposesClassList;
+
+impl ParseNodeList for ComposesClassList {
+    type Kind = CssSyntaxKind;
+    type Parser<'source> = CssParser<'source>;
+    const LIST_KIND: Self::Kind = CSS_COMPOSES_CLASS_LIST;
+
+    /// Parses an individual element in the `composes` class list.
+    ///
+    /// This function parses an identifier as a custom identifier because it is a selector,
+    /// which is case-sensitive. For more information, see:
+    /// https://github.com/css-modules/css-modules/blob/master/docs/composition.md
+    fn parse_element(&mut self, p: &mut Self::Parser<'_>) -> ParsedSyntax {
+        parse_custom_identifier_with_keywords(p, CssLexContext::Regular, true)
+    }
+
+    fn is_at_list_end(&self, p: &mut Self::Parser<'_>) -> bool {
+        p.at_ts(CSS_END_OF_COMPOSES_CLASS_TOKEN_SET)
+    }
+
+    fn recover(
+        &mut self,
+        p: &mut Self::Parser<'_>,
+        parsed_element: ParsedSyntax,
+    ) -> RecoveryResult {
+        parsed_element.or_recover(p, &ComposesClassListParseRecovery, expected_identifier)
+    }
+}
+
+struct ComposesClassListParseRecovery;
+
+impl ParseRecovery for ComposesClassListParseRecovery {
+    type Kind = CssSyntaxKind;
+    type Parser<'source> = CssParser<'source>;
+    const RECOVERED_KIND: Self::Kind = CSS_BOGUS;
+
+    fn is_at_recovered(&self, p: &mut Self::Parser<'_>) -> bool {
+        // If the next token is the end of the list or the next element, we're at a recovery point.
+        p.at_ts(CSS_END_OF_COMPOSES_CLASS_TOKEN_SET) || is_at_identifier(p)
+    }
+}
+
+const CSS_END_OF_COMPOSES_CLASS_TOKEN_SET: TokenSet<CssSyntaxKind> =
+    CSS_END_OF_PROPERTY_VALUE_TOKEN_SET.union(token_set!(T![from]));
 
 #[inline]
 fn is_at_generic_property(p: &mut CssParser) -> bool {

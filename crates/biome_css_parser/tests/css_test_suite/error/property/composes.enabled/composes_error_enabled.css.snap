@@ -52,7 +52,7 @@ CssRoot {
                                 },
                                 colon_token: COLON@14..16 ":" [] [Whitespace(" ")],
                                 value: CssComposesPropertyValue {
-                                    class: missing (required),
+                                    classes: CssComposesClassList [],
                                     specifier: missing (optional),
                                 },
                             },
@@ -90,9 +90,11 @@ CssRoot {
                                 },
                                 colon_token: COLON@48..50 ":" [] [Whitespace(" ")],
                                 value: CssComposesPropertyValue {
-                                    class: CssCustomIdentifier {
-                                        value_token: IDENT@50..60 "className" [] [Whitespace(" ")],
-                                    },
+                                    classes: CssComposesClassList [
+                                        CssCustomIdentifier {
+                                            value_token: IDENT@50..60 "className" [] [Whitespace(" ")],
+                                        },
+                                    ],
                                     specifier: CssComposesImportSpecifier {
                                         from_token: FROM_KW@60..65 "from" [] [Whitespace(" ")],
                                         source: missing (required),
@@ -133,9 +135,11 @@ CssRoot {
                                 },
                                 colon_token: COLON@97..99 ":" [] [Whitespace(" ")],
                                 value: CssComposesPropertyValue {
-                                    class: CssCustomIdentifier {
-                                        value_token: IDENT@99..115 "globalClassName" [] [Whitespace(" ")],
-                                    },
+                                    classes: CssComposesClassList [
+                                        CssCustomIdentifier {
+                                            value_token: IDENT@99..115 "globalClassName" [] [Whitespace(" ")],
+                                        },
+                                    ],
                                     specifier: CssComposesImportSpecifier {
                                         from_token: FROM_KW@115..120 "from" [] [Whitespace(" ")],
                                         source: missing (required),
@@ -181,7 +185,7 @@ CssRoot {
                   0: IDENT@4..14 "composes" [Newline("\n"), Whitespace("\t")] []
                 1: COLON@14..16 ":" [] [Whitespace(" ")]
                 2: CSS_COMPOSES_PROPERTY_VALUE@16..16
-                  0: (empty)
+                  0: CSS_COMPOSES_CLASS_LIST@16..16
                   1: (empty)
               1: (empty)
             1: SEMICOLON@16..17 ";" [] []
@@ -206,8 +210,9 @@ CssRoot {
                   0: IDENT@38..48 "composes" [Newline("\n"), Whitespace("\t")] []
                 1: COLON@48..50 ":" [] [Whitespace(" ")]
                 2: CSS_COMPOSES_PROPERTY_VALUE@50..65
-                  0: CSS_CUSTOM_IDENTIFIER@50..60
-                    0: IDENT@50..60 "className" [] [Whitespace(" ")]
+                  0: CSS_COMPOSES_CLASS_LIST@50..60
+                    0: CSS_CUSTOM_IDENTIFIER@50..60
+                      0: IDENT@50..60 "className" [] [Whitespace(" ")]
                   1: CSS_COMPOSES_IMPORT_SPECIFIER@60..65
                     0: FROM_KW@60..65 "from" [] [Whitespace(" ")]
                     1: (empty)
@@ -234,8 +239,9 @@ CssRoot {
                   0: IDENT@87..97 "composes" [Newline("\n"), Whitespace("\t")] []
                 1: COLON@97..99 ":" [] [Whitespace(" ")]
                 2: CSS_COMPOSES_PROPERTY_VALUE@99..120
-                  0: CSS_CUSTOM_IDENTIFIER@99..115
-                    0: IDENT@99..115 "globalClassName" [] [Whitespace(" ")]
+                  0: CSS_COMPOSES_CLASS_LIST@99..115
+                    0: CSS_CUSTOM_IDENTIFIER@99..115
+                      0: IDENT@99..115 "globalClassName" [] [Whitespace(" ")]
                   1: CSS_COMPOSES_IMPORT_SPECIFIER@115..120
                     0: FROM_KW@115..120 "from" [] [Whitespace(" ")]
                     1: (empty)
@@ -249,24 +255,6 @@ CssRoot {
 ## Diagnostics
 
 ```
-composes_error_enabled.css:2:12 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Expected an identifier but instead found ';'.
-  
-    1 │ .a {
-  > 2 │ 	composes: ;
-      │ 	          ^
-    3 │ }
-    4 │ 
-  
-  i Expected an identifier here.
-  
-    1 │ .a {
-  > 2 │ 	composes: ;
-      │ 	          ^
-    3 │ }
-    4 │ 
-  
 composes_error_enabled.css:6:27 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Unexpected value or character.

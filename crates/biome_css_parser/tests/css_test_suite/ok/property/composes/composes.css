@@ -9,3 +9,11 @@
 .otherClassName {
 	composes: globalClassName from global;
 }
+
+.b {
+	composes: classNameA classNameB;
+}
+
+.c {
+	composes: classNameA classNameB from './module.css';
+}

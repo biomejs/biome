@@ -5297,6 +5297,33 @@ impl IntoFormat<CssFormatContext> for biome_css_syntax::CssComponentValueList {
         )
     }
 }
+impl AsFormat<CssFormatContext> for biome_css_syntax::CssComposesClassList {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_css_syntax::CssComposesClassList,
+        crate::css::lists::composes_class_list::FormatCssComposesClassList,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        #![allow(clippy::default_constructed_unit_structs)]
+        FormatRefWithRule::new(
+            self,
+            crate::css::lists::composes_class_list::FormatCssComposesClassList::default(),
+        )
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::CssComposesClassList {
+    type Format = FormatOwnedWithRule<
+        biome_css_syntax::CssComposesClassList,
+        crate::css::lists::composes_class_list::FormatCssComposesClassList,
+    >;
+    fn into_format(self) -> Self::Format {
+        #![allow(clippy::default_constructed_unit_structs)]
+        FormatOwnedWithRule::new(
+            self,
+            crate::css::lists::composes_class_list::FormatCssComposesClassList::default(),
+        )
+    }
+}
 impl AsFormat<CssFormatContext> for biome_css_syntax::CssCompoundSelectorList {
     type Format<'a> = FormatRefWithRule<
         'a,

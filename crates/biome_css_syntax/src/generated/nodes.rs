@@ -606,12 +606,12 @@ impl CssComposesPropertyValue {
     }
     pub fn as_fields(&self) -> CssComposesPropertyValueFields {
         CssComposesPropertyValueFields {
-            class: self.class(),
+            classes: self.classes(),
             specifier: self.specifier(),
         }
     }
-    pub fn class(&self) -> SyntaxResult<CssCustomIdentifier> {
-        support::required_node(&self.syntax, 0usize)
+    pub fn classes(&self) -> CssComposesClassList {
+        support::list(&self.syntax, 0usize)
     }
     pub fn specifier(&self) -> Option<CssComposesImportSpecifier> {
         support::node(&self.syntax, 1usize)
@@ -628,7 +628,7 @@ impl Serialize for CssComposesPropertyValue {
 }
 #[cfg_attr(feature = "serde", derive(Serialize))]
 pub struct CssComposesPropertyValueFields {
-    pub class: SyntaxResult<CssCustomIdentifier>,
+    pub classes: CssComposesClassList,
     pub specifier: Option<CssComposesImportSpecifier>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
@@ -9082,7 +9082,7 @@ impl AstNode for CssComposesPropertyValue {
 impl std::fmt::Debug for CssComposesPropertyValue {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("CssComposesPropertyValue")
-            .field("class", &support::DebugSyntaxResult(self.class()))
+            .field("classes", &self.classes())
             .field(
                 "specifier",
                 &support::DebugOptionalElement(self.specifier()),
@@ -23470,6 +23470,89 @@ impl IntoIterator for &CssComponentValueList {
 impl IntoIterator for CssComponentValueList {
     type Item = AnyCssValue;
     type IntoIter = AstNodeListIterator<Language, AnyCssValue>;
+    fn into_iter(self) -> Self::IntoIter {
+        self.iter()
+    }
+}
+#[derive(Clone, Eq, PartialEq, Hash)]
+pub struct CssComposesClassList {
+    syntax_list: SyntaxList,
+}
+impl CssComposesClassList {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self {
+            syntax_list: syntax.into_list(),
+        }
+    }
+}
+impl AstNode for CssComposesClassList {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_COMPOSES_CLASS_LIST as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == CSS_COMPOSES_CLASS_LIST
+    }
+    fn cast(syntax: SyntaxNode) -> Option<CssComposesClassList> {
+        if Self::can_cast(syntax.kind()) {
+            Some(CssComposesClassList {
+                syntax_list: syntax.into_list(),
+            })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        self.syntax_list.node()
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax_list.into_node()
+    }
+}
+#[cfg(feature = "serde")]
+impl Serialize for CssComposesClassList {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut seq = serializer.serialize_seq(Some(self.len()))?;
+        for e in self.iter() {
+            seq.serialize_element(&e)?;
+        }
+        seq.end()
+    }
+}
+impl AstNodeList for CssComposesClassList {
+    type Language = Language;
+    type Node = CssCustomIdentifier;
+    fn syntax_list(&self) -> &SyntaxList {
+        &self.syntax_list
+    }
+    fn into_syntax_list(self) -> SyntaxList {
+        self.syntax_list
+    }
+}
+impl Debug for CssComposesClassList {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        f.write_str("CssComposesClassList ")?;
+        f.debug_list().entries(self.iter()).finish()
+    }
+}
+impl IntoIterator for &CssComposesClassList {
+    type Item = CssCustomIdentifier;
+    type IntoIter = AstNodeListIterator<Language, CssCustomIdentifier>;
+    fn into_iter(self) -> Self::IntoIter {
+        self.iter()
+    }
+}
+impl IntoIterator for CssComposesClassList {
+    type Item = CssCustomIdentifier;
+    type IntoIter = AstNodeListIterator<Language, CssCustomIdentifier>;
     fn into_iter(self) -> Self::IntoIter {
         self.iter()
     }

@@ -438,7 +438,7 @@ impl SyntaxFactory for CssSyntaxFactory {
                 let mut slots: RawNodeSlots<2usize> = RawNodeSlots::default();
                 let mut current_element = elements.next();
                 if let Some(element) = &current_element {
-                    if CssCustomIdentifier::can_cast(element.kind()) {
+                    if CssComposesClassList::can_cast(element.kind()) {
                         slots.mark_present();
                         current_element = elements.next();
                     }
@@ -4452,6 +4452,9 @@ impl SyntaxFactory for CssSyntaxFactory {
             }
             CSS_COMPONENT_VALUE_LIST => {
                 Self::make_node_list_syntax(kind, children, AnyCssValue::can_cast)
+            }
+            CSS_COMPOSES_CLASS_LIST => {
+                Self::make_node_list_syntax(kind, children, CssCustomIdentifier::can_cast)
             }
             CSS_COMPOUND_SELECTOR_LIST => Self::make_separated_list_syntax(
                 kind,

@@ -228,7 +228,7 @@ impl CssComposesProperty {
     }
 }
 impl CssComposesPropertyValue {
-    pub fn with_class(self, element: CssCustomIdentifier) -> Self {
+    pub fn with_classes(self, element: CssComposesClassList) -> Self {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(0usize..=0usize, once(Some(element.into_syntax().into()))),

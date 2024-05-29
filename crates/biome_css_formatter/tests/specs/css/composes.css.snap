@@ -24,6 +24,19 @@ info: css/composes.css
 	global;
 }
 
+.b {
+	composes:
+		classNameA
+		classNameB;
+}
+
+.c {
+	composes:
+		classNameA
+		classNameB
+ from './namespace.css';
+}
+
 ```
 
 
@@ -52,5 +65,13 @@ Quote style: Double Quotes
 
 .otherClassName {
 	composes: globalClassName from global;
+}
+
+.b {
+	composes: classNameA classNameB;
+}
+
+.c {
+	composes: classNameA classNameB from "./namespace.css";
 }
 ```

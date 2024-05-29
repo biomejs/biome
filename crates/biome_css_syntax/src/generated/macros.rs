@@ -751,6 +751,10 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::CssComponentValueList::new_unchecked(node) };
                     $body
                 }
+                $crate::CssSyntaxKind::CSS_COMPOSES_CLASS_LIST => {
+                    let $pattern = unsafe { $crate::CssComposesClassList::new_unchecked(node) };
+                    $body
+                }
                 $crate::CssSyntaxKind::CSS_COMPOUND_SELECTOR_LIST => {
                     let $pattern = unsafe { $crate::CssCompoundSelectorList::new_unchecked(node) };
                     $body

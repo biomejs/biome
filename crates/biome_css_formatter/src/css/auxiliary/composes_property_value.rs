@@ -10,8 +10,8 @@ impl FormatNodeRule<CssComposesPropertyValue> for FormatCssComposesPropertyValue
         node: &CssComposesPropertyValue,
         f: &mut CssFormatter,
     ) -> FormatResult<()> {
-        let CssComposesPropertyValueFields { class, specifier } = node.as_fields();
+        let CssComposesPropertyValueFields { classes, specifier } = node.as_fields();
 
-        write![f, [class.format(), specifier.format()]]
+        write![f, [classes.format(), specifier.format()]]
     }
 }

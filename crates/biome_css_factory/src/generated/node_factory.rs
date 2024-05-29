@@ -215,14 +215,16 @@ pub fn css_composes_property(
         ],
     ))
 }
-pub fn css_composes_property_value(class: CssCustomIdentifier) -> CssComposesPropertyValueBuilder {
+pub fn css_composes_property_value(
+    classes: CssComposesClassList,
+) -> CssComposesPropertyValueBuilder {
     CssComposesPropertyValueBuilder {
-        class,
+        classes,
         specifier: None,
     }
 }
 pub struct CssComposesPropertyValueBuilder {
-    class: CssCustomIdentifier,
+    classes: CssComposesClassList,
     specifier: Option<CssComposesImportSpecifier>,
 }
 impl CssComposesPropertyValueBuilder {
@@ -234,7 +236,7 @@ impl CssComposesPropertyValueBuilder {
         CssComposesPropertyValue::unwrap_cast(SyntaxNode::new_detached(
             CssSyntaxKind::CSS_COMPOSES_PROPERTY_VALUE,
             [
-                Some(SyntaxElement::Node(self.class.into_syntax())),
+                Some(SyntaxElement::Node(self.classes.into_syntax())),
                 self.specifier
                     .map(|token| SyntaxElement::Node(token.into_syntax())),
             ],
@@ -2199,6 +2201,18 @@ where
 {
     CssComponentValueList::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_COMPONENT_VALUE_LIST,
+        items
+            .into_iter()
+            .map(|item| Some(item.into_syntax().into())),
+    ))
+}
+pub fn css_composes_class_list<I>(items: I) -> CssComposesClassList
+where
+    I: IntoIterator<Item = CssCustomIdentifier>,
+    I::IntoIter: ExactSizeIterator,
+{
+    CssComposesClassList::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_COMPOSES_CLASS_LIST,
         items
             .into_iter()
             .map(|item| Some(item.into_syntax().into())),
