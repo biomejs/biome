@@ -72,7 +72,7 @@ AnyGraphqlDefinition =
 	| GraphqlScalarTypeExtension
 	| GraphqlObjectTypeExtension
 	| GraphqlInterfaceTypeExtension
-	| AnyGraphqlUnionTypeExtension
+	| GraphqlUnionTypeExtension
 	| AnyGraphqlEnumTypeExtension
 	| AnyGraphqlInputObjectTypeExtension
 
@@ -456,25 +456,13 @@ GraphqlUnionMemberTypes =
 GraphqlUnionMemberTypeList = (GraphqlNamedType ('|' GraphqlNamedType)*)
 
 // https://spec.graphql.org/October2021/#sec-Union-Extensions
-AnyGraphqlUnionTypeExtension =
-	GraphqlUnionTypeExtensionWithMembers
-	| GraphqlUnionTypeExtension
-	| GraphqlBogusExtension
-
-// extend union A @d = C | D
-GraphqlUnionTypeExtensionWithMembers =
-	'extend'
-	'union'
-	name: GraphqlName
-	directives: GraphqlDirectiveList
-	union_members: GraphqlUnionMemberTypes
-
 // extend union A @d
 GraphqlUnionTypeExtension =
 	'extend'
 	'union'
 	name: GraphqlName
 	directives: GraphqlDirectiveList
+	union_members: GraphqlUnionMemberTypes?
 
 // "xyz" enum A @d {
 //    B

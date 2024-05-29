@@ -30,7 +30,7 @@ use self::{
     r#enum::parse_enum_type_definition,
     scalar::{parse_scalar_type_definition, parse_scalar_type_extension},
     schema::{parse_schema_definition, parse_schema_extension},
-    union::parse_union_type_definition,
+    union::{parse_union_type_definition, parse_union_type_extension},
 };
 
 use super::value::is_at_string;
@@ -100,6 +100,7 @@ fn parse_extension(p: &mut GraphqlParser) -> ParsedSyntax {
         T![scalar] => parse_scalar_type_extension(p),
         T![type] => parse_object_type_extension(p),
         T![interface] => parse_interface_type_extension(p),
+        T![union] => parse_union_type_extension(p),
         _ => Absent,
     }
 }

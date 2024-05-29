@@ -1281,34 +1281,40 @@ pub fn graphql_union_type_extension(
     union_token: SyntaxToken,
     name: GraphqlName,
     directives: GraphqlDirectiveList,
-) -> GraphqlUnionTypeExtension {
-    GraphqlUnionTypeExtension::unwrap_cast(SyntaxNode::new_detached(
-        GraphqlSyntaxKind::GRAPHQL_UNION_TYPE_EXTENSION,
-        [
-            Some(SyntaxElement::Token(extend_token)),
-            Some(SyntaxElement::Token(union_token)),
-            Some(SyntaxElement::Node(name.into_syntax())),
-            Some(SyntaxElement::Node(directives.into_syntax())),
-        ],
-    ))
+) -> GraphqlUnionTypeExtensionBuilder {
+    GraphqlUnionTypeExtensionBuilder {
+        extend_token,
+        union_token,
+        name,
+        directives,
+        union_members: None,
+    }
 }
-pub fn graphql_union_type_extension_with_members(
+pub struct GraphqlUnionTypeExtensionBuilder {
     extend_token: SyntaxToken,
     union_token: SyntaxToken,
     name: GraphqlName,
     directives: GraphqlDirectiveList,
-    union_members: GraphqlUnionMemberTypes,
-) -> GraphqlUnionTypeExtensionWithMembers {
-    GraphqlUnionTypeExtensionWithMembers::unwrap_cast(SyntaxNode::new_detached(
-        GraphqlSyntaxKind::GRAPHQL_UNION_TYPE_EXTENSION_WITH_MEMBERS,
-        [
-            Some(SyntaxElement::Token(extend_token)),
-            Some(SyntaxElement::Token(union_token)),
-            Some(SyntaxElement::Node(name.into_syntax())),
-            Some(SyntaxElement::Node(directives.into_syntax())),
-            Some(SyntaxElement::Node(union_members.into_syntax())),
-        ],
-    ))
+    union_members: Option<GraphqlUnionMemberTypes>,
+}
+impl GraphqlUnionTypeExtensionBuilder {
+    pub fn with_union_members(mut self, union_members: GraphqlUnionMemberTypes) -> Self {
+        self.union_members = Some(union_members);
+        self
+    }
+    pub fn build(self) -> GraphqlUnionTypeExtension {
+        GraphqlUnionTypeExtension::unwrap_cast(SyntaxNode::new_detached(
+            GraphqlSyntaxKind::GRAPHQL_UNION_TYPE_EXTENSION,
+            [
+                Some(SyntaxElement::Token(self.extend_token)),
+                Some(SyntaxElement::Token(self.union_token)),
+                Some(SyntaxElement::Node(self.name.into_syntax())),
+                Some(SyntaxElement::Node(self.directives.into_syntax())),
+                self.union_members
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+            ],
+        ))
+    }
 }
 pub fn graphql_variable(dollar_token: SyntaxToken, name: GraphqlName) -> GraphqlVariable {
     GraphqlVariable::unwrap_cast(SyntaxNode::new_detached(
