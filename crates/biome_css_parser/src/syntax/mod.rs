@@ -1,5 +1,6 @@
 mod at_rule;
 mod block;
+mod css_modules;
 mod parse_error;
 mod property;
 mod selector;
@@ -26,6 +27,7 @@ use value::dimension::{is_at_any_dimension, parse_any_dimension};
 use value::function::{is_at_any_function, parse_any_function};
 
 use self::parse_error::{expected_component_value, expected_declaration_item};
+
 pub(crate) fn parse_root(p: &mut CssParser) {
     let m = p.start();
     p.eat(UNICODE_BOM);

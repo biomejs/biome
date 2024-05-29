@@ -2,7 +2,6 @@
 source: crates/biome_css_parser/tests/spec_test.rs
 expression: snapshot
 ---
-
 ## Input
 
 ```css
@@ -425,7 +424,7 @@ CssRoot {
 ## Diagnostics
 
 ```
-pseudo_class_function_selector.css:1:10 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+pseudo_class_function_selector_enabled.css:1:10 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a selector but instead found '{'.
   
@@ -441,7 +440,7 @@ pseudo_class_function_selector.css:1:10 parse ━━━━━━━━━━━�
     2 │ :global() {}
     3 │ :global(.div, .class) {}
   
-pseudo_class_function_selector.css:2:9 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+pseudo_class_function_selector_enabled.css:2:9 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a selector but instead found ')'.
   
@@ -459,7 +458,7 @@ pseudo_class_function_selector.css:2:9 parse ━━━━━━━━━━━�
     3 │ :global(.div, .class) {}
     4 │ :global(.div, .class {}
   
-pseudo_class_function_selector.css:3:9 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+pseudo_class_function_selector_enabled.css:3:9 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a selector but instead found '.div, .class'.
   
@@ -479,7 +478,7 @@ pseudo_class_function_selector.css:3:9 parse ━━━━━━━━━━━�
     4 │ :global(.div, .class {}
     5 │ :global(.div .class {}
   
-pseudo_class_function_selector.css:4:9 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+pseudo_class_function_selector_enabled.css:4:9 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a selector but instead found '.div, .class'.
   
@@ -499,7 +498,7 @@ pseudo_class_function_selector.css:4:9 parse ━━━━━━━━━━━�
     5 │ :global(.div .class {}
     6 │ :global(.div .class
   
-pseudo_class_function_selector.css:4:22 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+pseudo_class_function_selector_enabled.css:4:22 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `)` but instead found `{`
   
@@ -512,7 +511,7 @@ pseudo_class_function_selector.css:4:22 parse ━━━━━━━━━━━�
   
   i Remove {
   
-pseudo_class_function_selector.css:5:21 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+pseudo_class_function_selector_enabled.css:5:21 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `)` but instead found `{`
   
@@ -525,7 +524,7 @@ pseudo_class_function_selector.css:5:21 parse ━━━━━━━━━━━�
   
   i Remove {
   
-pseudo_class_function_selector.css:7:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+pseudo_class_function_selector_enabled.css:7:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `)` but instead the file ends
   
@@ -542,5 +541,3 @@ pseudo_class_function_selector.css:7:1 parse ━━━━━━━━━━━�
       │ 
   
 ```
-
-

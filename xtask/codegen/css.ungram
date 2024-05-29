@@ -58,6 +58,7 @@ CssBogusPropertyValue = SyntaxElement*
 CssBogusDocumentMatcher = SyntaxElement*
 CssBogusFontFamilyName = SyntaxElement*
 CssBogusCustomIdentifier = SyntaxElement*
+CssBogusKeyframesName = SyntaxElement*
 
 CssRoot =
 	bom: 'UNICODE_BOM'?
@@ -817,6 +818,8 @@ AnyCssContainerStyleInParens =
 // https://drafts.csswg.org/css-animations/#keyframes
 // @keyframes = @keyframes <keyframes-name> { <qualified-rule-list> }
 // <keyframes-name> = <custom-ident> | <string>
+// 	| :<module-scope>(<keyframes-name>) | :<module-scope> <keyframes-name>  // for CSS Modules
+// <module-scope> = global | local
 // <keyframe-block> = <keyframe-selector># { <declaration-list> }
 // <keyframe-selector> = from | to | <percentage [0,100]>
 
@@ -824,16 +827,49 @@ AnyCssContainerStyleInParens =
 // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 CssKeyframesAtRule =
 	'keyframes'
-	name: AnyCssKeyframeName
+	name: AnyCssKeyframesName
 	block: AnyCssKeyframesBlock
+
+AnyCssKeyframesName =
+	CssKeyframesScopedName
+	| AnyCssKeyframesIdentifier
+	| CssBogusKeyframesName
 
 AnyCssKeyframesBlock =
 	CssKeyframesBlock
 	| CssBogusBlock
 
+// This grammar is specific to CSS Modules and defines how scoped keyframes are parsed.
+// In CSS Modules, keyframes can be scoped locally or globally using the `:local` and `:global` pseudo-classes.
+// @keyframes :local("test") {}
+//            ^^^^^^^^^^^^^^^
+// @keyframes :global test {}
+//            ^^^^^^^^^^^^^
+CssKeyframesScopedName =
+	':'
+	scope: AnyCssKeyframesScope
+
+AnyCssKeyframesScope = CssKeyframesScopeFunction | CssKeyframesScopePrefix
+
+// @keyframes :local("test") {}
+//            ^^^^^^^^^^^^^^^
+CssKeyframesScopeFunction =
+	scope: ('global' | 'local')
+	'('
+	name: AnyCssKeyframesIdentifier
+	')'
+
+// @keyframes :global test {}
+//            ^^^^^^^^^^^^^
+CssKeyframesScopePrefix =
+	scope: ('global' | 'local')
+	name: AnyCssKeyframesIdentifier
+
+// End of CSS Modules specific grammar
+
 // @keyframes "something" { from {} to {} }
 //            ^^^^^^^^^^^
-AnyCssKeyframeName = CssCustomIdentifier | CssString
+AnyCssKeyframesIdentifier = CssCustomIdentifier | CssString
 
 // @keyframes "something" { from {} to {} }
 //                        ^^^^^^^^^^^^^^^^^

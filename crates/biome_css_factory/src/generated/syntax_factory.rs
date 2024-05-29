@@ -23,6 +23,7 @@ impl SyntaxFactory for CssSyntaxFactory {
             | CSS_BOGUS_FONT_FAMILY_NAME
             | CSS_BOGUS_FONT_FEATURE_VALUES_ITEM
             | CSS_BOGUS_KEYFRAMES_ITEM
+            | CSS_BOGUS_KEYFRAMES_NAME
             | CSS_BOGUS_LAYER
             | CSS_BOGUS_MEDIA_QUERY
             | CSS_BOGUS_PAGE_SELECTOR_PSEUDO
@@ -1581,7 +1582,7 @@ impl SyntaxFactory for CssSyntaxFactory {
                 }
                 slots.next_slot();
                 if let Some(element) = &current_element {
-                    if AnyCssKeyframeName::can_cast(element.kind()) {
+                    if AnyCssKeyframesName::can_cast(element.kind()) {
                         slots.mark_present();
                         current_element = elements.next();
                     }
@@ -1698,6 +1699,98 @@ impl SyntaxFactory for CssSyntaxFactory {
                     );
                 }
                 slots.into_node(CSS_KEYFRAMES_PERCENTAGE_SELECTOR, children)
+            }
+            CSS_KEYFRAMES_SCOPE_FUNCTION => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<4usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element {
+                    if matches!(element.kind(), T![global] | T![local]) {
+                        slots.mark_present();
+                        current_element = elements.next();
+                    }
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element {
+                    if element.kind() == T!['('] {
+                        slots.mark_present();
+                        current_element = elements.next();
+                    }
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element {
+                    if AnyCssKeyframesIdentifier::can_cast(element.kind()) {
+                        slots.mark_present();
+                        current_element = elements.next();
+                    }
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element {
+                    if element.kind() == T![')'] {
+                        slots.mark_present();
+                        current_element = elements.next();
+                    }
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        CSS_KEYFRAMES_SCOPE_FUNCTION.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(CSS_KEYFRAMES_SCOPE_FUNCTION, children)
+            }
+            CSS_KEYFRAMES_SCOPE_PREFIX => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<2usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element {
+                    if matches!(element.kind(), T![global] | T![local]) {
+                        slots.mark_present();
+                        current_element = elements.next();
+                    }
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element {
+                    if AnyCssKeyframesIdentifier::can_cast(element.kind()) {
+                        slots.mark_present();
+                        current_element = elements.next();
+                    }
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        CSS_KEYFRAMES_SCOPE_PREFIX.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(CSS_KEYFRAMES_SCOPE_PREFIX, children)
+            }
+            CSS_KEYFRAMES_SCOPED_NAME => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<2usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element {
+                    if element.kind() == T ! [:] {
+                        slots.mark_present();
+                        current_element = elements.next();
+                    }
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element {
+                    if AnyCssKeyframesScope::can_cast(element.kind()) {
+                        slots.mark_present();
+                        current_element = elements.next();
+                    }
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        CSS_KEYFRAMES_SCOPED_NAME.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(CSS_KEYFRAMES_SCOPED_NAME, children)
             }
             CSS_LAYER_AT_RULE => {
                 let mut elements = (&children).into_iter();

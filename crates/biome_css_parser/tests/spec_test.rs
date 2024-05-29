@@ -174,7 +174,7 @@ pub fn run(test_case: &str, _snapshot_name: &str, test_directory: &str, outcome_
 #[test]
 pub fn quick_test() {
     let code = r#"
-@value large: (min-width: 960px), medium: (d) and (c);
+@keyframes :local(a) {}
     "#;
 
     let root = parse_css(

@@ -21,10 +21,10 @@ biome_unicode_table = { workspace = true }
 tracing             = { workspace = true }
 
 [dev-dependencies]
-biome_configuration = { workspace = true }
-biome_deserialize   = { workspace = true }
-biome_fs            = { workspace = true }
-biome_service       = { workspace = true }
+biome_configuration = { path = "../biome_configuration" }
+biome_deserialize   = { path = "../biome_deserialize" }
+biome_fs            = { path = "../biome_fs" }
+biome_service       = { path = "../biome_service" }
 biome_test_utils    = { path = "../biome_test_utils" }
 insta               = { workspace = true }
 quickcheck          = { workspace = true }

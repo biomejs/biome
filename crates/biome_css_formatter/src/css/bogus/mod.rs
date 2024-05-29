@@ -10,6 +10,7 @@ pub(crate) mod bogus_document_matcher;
 pub(crate) mod bogus_font_family_name;
 pub(crate) mod bogus_font_feature_values_item;
 pub(crate) mod bogus_keyframes_item;
+pub(crate) mod bogus_keyframes_name;
 pub(crate) mod bogus_layer;
 pub(crate) mod bogus_media_query;
 pub(crate) mod bogus_page_selector_pseudo;

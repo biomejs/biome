@@ -263,25 +263,5 @@ modules.css:41:8 parse ━━━━━━━━━━━━━━━━━━━
   
   i Remove (
   
-modules.css:48:12 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Expected an identifier but instead found ':global(spin)'.
-  
-    46 │ }
-    47 │ 
-  > 48 │ @keyframes :global(spin) {
-       │            ^^^^^^^^^^^^^
-    49 │   from {
-    50 │     transform: rotate(0deg);
-  
-  i Expected an identifier here.
-  
-    46 │ }
-    47 │ 
-  > 48 │ @keyframes :global(spin) {
-       │            ^^^^^^^^^^^^^
-    49 │   from {
-    50 │     transform: rotate(0deg);
-  
 
 ```

@@ -52,13 +52,15 @@ pub(crate) fn parse_pseudo_class_selector(p: &mut CssParser) -> ParsedSyntax {
 
     p.bump(T![:]);
 
-    let kind = if parse_pseudo_class(p)
-        .or_add_diagnostic(p, expected_any_pseudo_class)
-        .is_some()
-    {
-        CSS_PSEUDO_CLASS_SELECTOR
-    } else {
-        CSS_BOGUS_SUB_SELECTOR
+    // Show the error under the token next to the ':'
+    let range = p.cur_range();
+
+    let kind = match parse_pseudo_class(p) {
+        Present(_) => CSS_PSEUDO_CLASS_SELECTOR,
+        Absent => {
+            p.error(expected_any_pseudo_class(p, range));
+            CSS_BOGUS_SUB_SELECTOR
+        }
     };
 
     Present(m.complete(p, kind))
