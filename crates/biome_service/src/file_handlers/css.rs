@@ -31,6 +31,7 @@ use biome_formatter::{
 };
 use biome_fs::BiomePath;
 use biome_js_analyze::RuleError;
+use biome_js_syntax::AnyJsRoot;
 use biome_parser::AnyParse;
 use biome_rowan::{AstNode, NodeCache};
 use biome_rowan::{TextRange, TextSize, TokenAtOffset};
@@ -96,66 +97,76 @@ impl ServiceLanguage for CssLanguage {
     }
 
     fn resolve_format_options(
-        global: &FormatSettings,
-        overrides: &OverrideSettings,
-        language: &Self::FormatterSettings,
+        global: Option<&FormatSettings>,
+        overrides: Option<&OverrideSettings>,
+        language: Option<&Self::FormatterSettings>,
         path: &BiomePath,
         document_file_source: &DocumentFileSource,
     ) -> Self::FormatOptions {
-        let indent_style = if let Some(indent_style) = language.indent_style {
-            indent_style
-        } else {
-            global.indent_style.unwrap_or_default()
-        };
-        let line_width = if let Some(line_width) = language.line_width {
-            line_width
-        } else {
-            global.line_width.unwrap_or_default()
-        };
-        let indent_width = if let Some(indent_width) = language.indent_width {
-            indent_width
-        } else {
-            global.indent_width.unwrap_or_default()
-        };
+        let indent_style = language
+            .and_then(|l| l.indent_style)
+            .or(global.and_then(|g| g.indent_style))
+            .unwrap_or_default();
+        let line_width = language
+            .and_then(|l| l.line_width)
+            .or(global.and_then(|g| g.line_width))
+            .unwrap_or_default();
+        let indent_width = language
+            .and_then(|l| l.indent_width)
+            .or(global.and_then(|g| g.indent_width))
+            .unwrap_or_default();
 
-        overrides.to_override_css_format_options(
-            path,
-            CssFormatOptions::new(
-                document_file_source
-                    .to_css_file_source()
-                    .unwrap_or_default(),
-            )
-            .with_indent_style(indent_style)
-            .with_indent_width(indent_width)
-            .with_line_width(line_width)
-            .with_quote_style(language.quote_style.unwrap_or_default()),
+        let line_ending = language
+            .and_then(|l| l.line_ending)
+            .or(global.and_then(|g| g.line_ending))
+            .unwrap_or_default();
+
+        let options = CssFormatOptions::new(
+            document_file_source
+                .to_css_file_source()
+                .unwrap_or_default(),
         )
+        .with_indent_style(indent_style)
+        .with_indent_width(indent_width)
+        .with_line_width(line_width)
+        .with_line_ending(line_ending)
+        .with_quote_style(language.and_then(|l| l.quote_style).unwrap_or_default());
+        if let Some(overrides) = overrides {
+            overrides.to_override_css_format_options(path, options)
+        } else {
+            options
+        }
     }
 
     fn resolve_analyzer_options(
-        global: &Settings,
-        _linter: &LinterSettings,
-        _overrides: &OverrideSettings,
-        _language: &Self::LinterSettings,
+        global: Option<&Settings>,
+        _linter: Option<&LinterSettings>,
+        _overrides: Option<&OverrideSettings>,
+        _language: Option<&Self::LinterSettings>,
         file_path: &BiomePath,
         _file_source: &DocumentFileSource,
     ) -> AnalyzerOptions {
         let preferred_quote = global
-            .languages
-            .css
-            .formatter
-            .quote_style
-            .map(|quote_style: QuoteStyle| {
-                if quote_style == QuoteStyle::Single {
-                    PreferredQuote::Single
-                } else {
-                    PreferredQuote::Double
-                }
+            .and_then(|global| {
+                global
+                    .languages
+                    .css
+                    .formatter
+                    .quote_style
+                    .map(|quote_style: QuoteStyle| {
+                        if quote_style == QuoteStyle::Single {
+                            PreferredQuote::Single
+                        } else {
+                            PreferredQuote::Double
+                        }
+                    })
             })
             .unwrap_or_default();
 
         let configuration = AnalyzerConfiguration {
-            rules: to_analyzer_rules(global, file_path.as_path()),
+            rules: global
+                .map(|g| to_analyzer_rules(g, file_path.as_path()))
+                .unwrap_or_default(),
             globals: vec![],
             preferred_quote,
             jsx_runtime: None,
@@ -200,18 +211,22 @@ fn parse(
     biome_path: &BiomePath,
     _file_source: DocumentFileSource,
     text: &str,
-    settings: WorkspaceSettingsHandle,
+    settings: Option<&Settings>,
     cache: &mut NodeCache,
 ) -> ParseResult {
-    let parser = &settings.settings().languages.css.parser;
-    let overrides = &settings.settings().override_settings;
-    let options: CssParserOptions = overrides.to_override_css_parser_options(
-        biome_path,
-        CssParserOptions {
-            allow_wrong_line_comments: parser.allow_wrong_line_comments,
-            css_modules: parser.css_modules,
-        },
-    );
+    let mut options = CssParserOptions {
+        allow_wrong_line_comments: settings
+            .map(|s| s.languages.css.parser.allow_wrong_line_comments)
+            .unwrap_or_default(),
+        css_modules: settings
+            .map(|s| s.languages.css.parser.allow_wrong_line_comments)
+            .unwrap_or_default(),
+    };
+    if let Some(settings) = settings {
+        options = settings
+            .override_settings
+            .to_override_css_parser_options(biome_path, options);
+    }
     let parse = biome_css_parser::parse_css_with_cache(text, cache, options);
     let root = parse.syntax();
     let diagnostics = parse.into_diagnostics();
@@ -323,36 +338,43 @@ fn format_on_type(
 fn lint(params: LintParams) -> LintResults {
     debug_span!("Linting CSS file", path =? params.path, language =? params.language).in_scope(
         move || {
-            let workspace_settings = &params.settings;
+            let workspace_settings = &params.workspace;
             let analyzer_options =
                 workspace_settings.analyzer_options::<CssLanguage>(params.path, &params.language);
-            let settings = workspace_settings.settings();
             let tree = params.parse.tree();
             let mut diagnostics = params.parse.into_diagnostics();
 
-            // Compute final rules (taking `overrides` into account)
-            let rules = settings.as_rules(params.path.as_path());
-
             let has_only_filter = !params.only.is_empty();
-            let enabled_rules = if has_only_filter {
-                params
-                    .only
-                    .into_iter()
-                    .map(|selector| selector.into())
-                    .collect::<Vec<_>>()
+            let mut rules = None;
+
+            let enabled_rules = if let Some(settings) = params.workspace.settings() {
+                // Compute final rules (taking `overrides` into account)
+                rules = settings.as_rules(params.path.as_path());
+
+                if has_only_filter {
+                    params
+                        .only
+                        .into_iter()
+                        .map(|selector| selector.into())
+                        .collect::<Vec<_>>()
+                } else {
+                    rules
+                        .as_ref()
+                        .map(|rules| rules.as_enabled_rules())
+                        .unwrap_or_default()
+                        .into_iter()
+                        .collect::<Vec<_>>()
+                }
             } else {
-                rules
-                    .as_ref()
-                    .map(|rules| rules.as_enabled_rules())
-                    .unwrap_or_default()
-                    .into_iter()
-                    .collect::<Vec<_>>()
+                vec![]
             };
+
             let disabled_rules = params
                 .skip
                 .into_iter()
                 .map(|selector| selector.into())
                 .collect::<Vec<_>>();
+
             let filter = AnalysisFilter {
                 categories: params.categories,
                 enabled_rules: Some(enabled_rules.as_slice()),
@@ -451,11 +473,11 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
         path,
         manifest: _,
         language,
+        settings,
     } = params;
     debug_span!("Code actions JavaScript", range =? range, path =? path).in_scope(move || {
         let tree = parse.tree();
         trace_span!("Parsed file", tree =? tree).in_scope(move || {
-            let settings = workspace.settings();
             let rules = settings.as_rules(params.path.as_path());
             let filter = rules
                 .as_ref()
@@ -505,31 +527,49 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
 pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceError> {
     let FixAllParams {
         parse,
-        rules,
         fix_file_mode,
-        settings,
+        workspace,
         should_format,
         biome_path,
-        mut filter,
         manifest: _,
         document_file_source,
     } = params;
 
+    let settings = workspace.settings();
+    let Some(settings) = settings else {
+        let tree: AnyJsRoot = parse.tree();
+
+        return Ok(FixFileResult {
+            actions: vec![],
+            errors: 0,
+            skipped_suggested_fixes: 0,
+            code: tree.syntax().to_string(),
+        });
+    };
+
     let mut tree: CssRoot = parse.tree();
     let mut actions = Vec::new();
 
-    filter.categories = RuleCategories::SYNTAX | RuleCategories::LINT;
+    // Compute final rules (taking `overrides` into account)
+    let rules = settings.as_rules(params.biome_path.as_path());
+    let rule_filter_list = rules
+        .as_ref()
+        .map(|rules| rules.as_enabled_rules())
+        .unwrap_or_default()
+        .into_iter()
+        .collect::<Vec<_>>();
+    let filter = AnalysisFilter::from_enabled_rules(rule_filter_list.as_slice());
 
     let mut skipped_suggested_fixes = 0;
     let mut errors: u16 = 0;
     let analyzer_options =
-        settings.analyzer_options::<CssLanguage>(biome_path, &document_file_source);
+        workspace.analyzer_options::<CssLanguage>(biome_path, &document_file_source);
     loop {
         let (action, _) = analyze(&tree, filter, &analyzer_options, |signal| {
             let current_diagnostic = signal.diagnostic();
 
             if let Some(diagnostic) = current_diagnostic.as_ref() {
-                if is_diagnostic_error(diagnostic, rules) {
+                if is_diagnostic_error(diagnostic, rules.as_deref()) {
                     errors += 1;
                 }
             }
@@ -593,7 +633,7 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
             None => {
                 let code = if should_format {
                     format_node(
-                        settings.format_options::<CssLanguage>(biome_path, &document_file_source),
+                        workspace.format_options::<CssLanguage>(biome_path, &document_file_source),
                         tree.syntax(),
                     )?
                     .print()?
