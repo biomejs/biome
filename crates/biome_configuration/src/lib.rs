@@ -18,7 +18,7 @@ use crate::css::CssLinter;
 pub use crate::diagnostics::BiomeDiagnostic;
 pub use crate::diagnostics::CantLoadExtendFile;
 pub use crate::generated::push_to_analyzer_rules;
-use crate::javascript::{JavascriptLinter, PartialJavascriptLinter};
+use crate::javascript::JavascriptLinter;
 use crate::json::JsonLinter;
 use crate::organize_imports::{partial_organize_imports, OrganizeImports, PartialOrganizeImports};
 use crate::vcs::{partial_vcs_configuration, PartialVcsConfiguration, VcsConfiguration};
