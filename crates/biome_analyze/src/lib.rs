@@ -815,6 +815,19 @@ impl<'a> Display for RuleFilter<'a> {
     }
 }
 
+impl<'a> biome_console::fmt::Display for RuleFilter<'a> {
+    fn fmt(&self, fmt: &mut biome_console::fmt::Formatter) -> std::io::Result<()> {
+        match self {
+            RuleFilter::Group(group) => {
+                write!(fmt, "{group}")
+            }
+            RuleFilter::Rule(group, rule) => {
+                write!(fmt, "{group}/{rule}")
+            }
+        }
+    }
+}
+
 /// Allows filtering the list of rules that will be executed in a run of the analyzer,
 /// and at what source code range signals (diagnostics or actions) may be raised
 #[derive(Debug, Default, Clone, Copy)]

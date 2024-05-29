@@ -1,21 +1,18 @@
-use biome_configuration::ConfigurationPathHint;
+use biome_configuration::{ConfigurationPathHint, Rules};
 use biome_console::fmt::{Display, Formatter};
-use biome_console::{fmt, markup, ConsoleExt, HorizontalLine, Markup};
+use biome_console::{fmt, markup, ConsoleExt, HorizontalLine, Markup, Padding, SOFT_LINE};
 use biome_diagnostics::termcolor::{ColorChoice, WriteColor};
 use biome_diagnostics::{termcolor, PrintDescription};
 use biome_fs::FileSystem;
 use biome_service::configuration::{load_configuration, LoadedConfiguration};
 use biome_service::workspace::{client, RageEntry, RageParams};
 use biome_service::{DynRef, Workspace};
-use serde_json::Value;
-use std::collections::HashMap;
 use std::{env, io, ops::Deref};
 use tokio::runtime::Runtime;
 
 use crate::commands::daemon::read_most_recent_log_file;
 use crate::service::enumerate_pipes;
 use crate::{service, CliDiagnostic, CliSession, VERSION};
-use serde::Serialize;
 
 /// Handler for the `rage` command
 pub(crate) fn rage(
@@ -273,11 +270,18 @@ impl Display for RageConfiguration<'_, '_> {
                     // Print linter configuration if --linter option is true
                     if self.linter {
                         let linter_configuration = configuration.get_linter_rules();
+
+                        let javascript_linter = configuration.get_javascript_linter_configuration();
+                        let json_linter = configuration.get_json_linter_configuration();
+                        let css_linter = configuration.get_css_linter_configuration();
                         markup! (
                             {Section("Linter")}
+                            {KeyValuePair("JavaScript enabled", markup!({DebugDisplay(javascript_linter.enabled)}))}
+                            {KeyValuePair("JSON enabled", markup!({DebugDisplay(json_linter.enabled)}))}
+                            {KeyValuePair("CSS enabled", markup!({DebugDisplay(css_linter.enabled)}))}
                             {KeyValuePair("Recommended", markup!({DebugDisplay(linter_configuration.recommended.unwrap_or_default())}))}
                             {KeyValuePair("All", markup!({DebugDisplay(linter_configuration.all.unwrap_or_default())}))}
-                            {RageConfigurationLintRules("Rules",linter_configuration)}
+                            {RageConfigurationLintRules("Enabled rules",linter_configuration)}
                         ).fmt(fmt)?;
                     }
                 }
@@ -293,48 +297,18 @@ impl Display for RageConfiguration<'_, '_> {
     }
 }
 
-struct RageConfigurationLintRules<'a, T>(&'a str, T);
+struct RageConfigurationLintRules<'a>(&'a str, Rules);
 
-impl<T> Display for RageConfigurationLintRules<'_, T>
-where
-    T: Serialize,
-{
-    fn fmt(&self, fmt: &mut fmt::Formatter<'_>) -> io::Result<()> {
+impl Display for RageConfigurationLintRules<'_> {
+    fn fmt(&self, fmt: &mut Formatter<'_>) -> io::Result<()> {
         let rules_str = self.0;
-        write!(fmt, "  {rules_str}:")?;
-
-        let rule_json_str = serde_json::to_string(&self.1)
-            .map_err(|_| io::Error::new(io::ErrorKind::Other, "Failed to serialize"))?;
-        let group_to_rules: HashMap<String, Value> = serde_json::from_str(rule_json_str.as_str())
-            .map_err(|_| {
-            io::Error::new(io::ErrorKind::Other, "Failed to convert to HashMap")
-        })?;
-
-        let mut groups: Vec<&String> = group_to_rules.keys().collect();
-        groups.sort();
-
-        let first_padding_width = 30usize.saturating_sub(rules_str.len() + 1);
-        let mut padding_width = first_padding_width;
-
-        if groups.is_empty() {
-            for _ in 0..padding_width {
-                fmt.write_str(" ")?;
-            }
-            markup!(<Dim>"unset\n"</Dim>).fmt(fmt)?;
-        } else {
-            for group in groups {
-                if let Some(rules) = group_to_rules.get(group).and_then(Value::as_object) {
-                    for (rule_name, rule_config) in rules {
-                        for _ in 0..padding_width {
-                            fmt.write_str(" ")?;
-                        }
-                        fmt.write_str(&format!("{}/{} = {}\n", group, rule_name, rule_config))?;
-                        if padding_width == first_padding_width {
-                            padding_width = 30usize.saturating_sub(0) + 2;
-                        }
-                    }
-                }
-            }
+        let padding = Padding::new(2);
+        fmt.write_markup(markup! {{padding}{rules_str}":"})?;
+        fmt.write_markup(markup! {{SOFT_LINE}})?;
+        let rules = self.1.as_enabled_rules();
+        for rule in rules {
+            fmt.write_markup(markup! {{padding}{rule}})?;
+            fmt.write_markup(markup! {{SOFT_LINE}})?;
         }
 
         Ok(())

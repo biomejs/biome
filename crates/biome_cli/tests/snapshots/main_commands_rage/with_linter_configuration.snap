@@ -9,24 +9,13 @@ expression: content
   "linter": {
     "enabled": true,
     "rules": {
-      "recommended": true,
+      "recommended": false,
       "a11y": {
         "noAccessKey": "off",
         "noAutofocus": "off"
       },
       "complexity": {
         "recommended": true
-      },
-      "correctness": {
-        "all": true
-      },
-      "nursery": {
-        "useConsistentArrayType": {
-          "level": "warn",
-          "options": {
-            "syntax": "shorthand"
-          }
-        }
       },
       "suspicious": {
         "noCommentText": {
@@ -61,22 +50,46 @@ Environment:
   NODE_PACKAGE_MANAGER:         unset
 
 Biome Configuration:
-  Error:                        Found an unknown key `useConsistentArrayType`.
-  Status:                       Loaded with errors
+  Status:                       Loaded successfully
   Formatter disabled:           false
   Linter disabled:              false
   Organize imports disabled:    false
   VCS disabled:                 true
 
 Linter:
-  Recommended:                  true
+  JavaScript enabled:           true
+  JSON enabled:                 true
+  CSS enabled:                  false
+  Recommended:                  false
   All:                          false
-  Rules:                        a11y/noAccessKey = "off"
-                                a11y/noAutofocus = "off"
-                                complexity/recommended = true
-                                correctness/all = true
-                                style/noNonNullAssertion = "off"
-                                suspicious/noCommentText = {"level":"warn","options":null}
+  Enabled rules:
+  complexity/noBannedTypes
+  complexity/noThisInStatic
+  complexity/noUselessConstructor
+  complexity/useLiteralKeys
+  complexity/useOptionalChain
+  complexity/noMultipleSpacesInRegularExpressionLiterals
+  complexity/noUselessLoneBlockStatements
+  complexity/noUselessEmptyExport
+  complexity/noUselessSwitchCase
+  complexity/noStaticOnlyClass
+  complexity/noUselessTypeConstraint
+  complexity/noWith
+  complexity/useRegexLiterals
+  complexity/useArrowFunction
+  complexity/noExtraBooleanCast
+  complexity/noEmptyTypeParameters
+  complexity/useSimpleNumberKeys
+  suspicious/noCommentText
+  complexity/noExcessiveNestedTestSuites
+  complexity/noUselessLabel
+  complexity/noUselessCatch
+  complexity/noUselessFragments
+  complexity/noUselessTernary
+  complexity/noForEach
+  complexity/useFlatMap
+  complexity/noUselessRename
+  complexity/noUselessThisAlias
 
 Server:
   Version:                      0.0.0
@@ -87,5 +100,3 @@ Server:
 Workspace:
   Open Documents:               0
 ```
-
-
