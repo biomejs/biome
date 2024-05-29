@@ -228,7 +228,6 @@ impl ServiceLanguage for JsLanguage {
             );
         }
 
-
         match path.extension().and_then(OsStr::to_str) {
             Some("vue") => {
                 globals.extend(
