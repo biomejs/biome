@@ -10,9 +10,38 @@ env:
   BIOME_PUSH_ON_MAIN_EVENT_TYPE: biome-push-on-main-event
 
 jobs:
+  build-wasm:
+    name: Build @biomejs/wasm-web
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29 # v4.1.6
+
+      - name: Install wasm-pack
+        run: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
+
+      - name: Build WASM module for the web
+        run: wasm-pack build --out-dir ../../packages/@biomejs/wasm-web --target web --release --scope biomejs crates/biome_wasm
+
+      - run: corepack enable
+      - uses: actions/setup-node@60edb5dd545a775178f52524783378180af0d1f8 # v4.0.2
+        with:
+          node-version: 20
+          cache: "pnpm"
+
+      - name: Update package.json name
+        working-directory: packages/scripts
+        run: node update-package-name.mjs
+
+      - name: Publish
+        working-directory: packages/@biomejs/wasm-web
+        run: pnpx pkg-pr-new publish
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   repository-dispatch:
     name: Repository dispatch
     runs-on: ubuntu-latest
+    needs: build-wasm
     steps:
       - name: Dispatch event on push
         if: ${{ github.event_name == 'push' }}
