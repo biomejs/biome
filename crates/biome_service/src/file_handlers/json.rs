@@ -99,7 +99,7 @@ impl ServiceLanguage for JsonLanguage {
             if matches!(path.file_name().and_then(OsStr::to_str), Some("biome.json")) {
                 TrailingCommas::None
             } else {
-                language.trailing_commas.unwrap_or_default()
+                language.and_then(|l| l.trailing_commas).unwrap_or_default()
             };
 
         let options = JsonFormatOptions::new()
