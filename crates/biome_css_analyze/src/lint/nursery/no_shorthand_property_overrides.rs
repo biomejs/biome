@@ -47,11 +47,11 @@ declare_rule! {
 fn get_css_declaration_list(property: &CssGenericProperty) -> Option<CssDeclarationOrRuleList> {
     for ancestor in property.syntax().ancestors() {
         if matches!(ancestor.kind(), CssSyntaxKind::CSS_DECLARATION_OR_RULE_LIST) {
-            return Some(ancestor.cast::<CssDeclarationOrRuleList>()?);
+            return ancestor.cast::<CssDeclarationOrRuleList>();
         }
     }
 
-    return None;
+    None
 }
 
 fn get_prior_property_names_in_block(
@@ -97,7 +97,6 @@ impl Rule for NoShorthandPropertyOverrides {
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let node = ctx.query();
-        dbg!(node);
 
         let target_property_name_node = node.name().ok()?;
         let target_property_name = target_property_name_node.text().to_lowercase();
