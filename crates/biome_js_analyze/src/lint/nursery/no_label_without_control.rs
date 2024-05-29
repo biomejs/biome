@@ -108,6 +108,11 @@ pub struct NoLabelWithoutControlState {
     pub has_control_association: bool,
 }
 
+const DEFAULT_LABEL_ATTRIBUTES: &[&str; 2] = &["aria-label", "alt"];
+const DEFAULT_LABEL_COMPONENTS: &[&str; 1] = &["label"];
+const DEFAULT_INPUT_COMPONENTS: &[&str; 6] =
+    &["input", "meter", "output", "progress", "select", "textarea"];
+
 impl Rule for NoLabelWithoutControl {
     type Query = Ast<AnyJsxTag>;
     type State = NoLabelWithoutControlState;
@@ -120,22 +125,18 @@ impl Rule for NoLabelWithoutControl {
         let label_attributes = &options.label_attributes;
         let label_components = &options.label_components;
         let input_components = &options.input_components;
-        let default_label_attributes = &["aria-label", "alt"];
-        let default_label_components = &["label"];
-        let default_input_components =
-            &["input", "meter", "output", "progress", "select", "textarea"];
+
         let element_name = get_element_name(node)?;
         let is_allowed_element = label_components.contains(&element_name)
-            || default_label_components.contains(&element_name.as_str());
+            || DEFAULT_LABEL_COMPONENTS.contains(&element_name.as_str());
 
         if !is_allowed_element {
             return None;
         }
 
-        let has_text_content =
-            has_accessible_label(node, label_attributes, default_label_attributes);
-        let has_control_association = has_for_attribute(node)?
-            || has_nested_control(node, input_components, default_input_components);
+        let has_text_content = has_accessible_label(node, label_attributes);
+        let has_control_association =
+            has_for_attribute(node)? || has_nested_control(node, input_components);
 
         if has_text_content && has_control_association {
             return None;
@@ -208,11 +209,7 @@ fn has_for_attribute(jsx_tag: &AnyJsxTag) -> Option<bool> {
 
 /// Returns whether the passed `AnyJsxTag` have a child that is considered an input component
 /// according to the passed `input_components` parameter
-fn has_nested_control(
-    jsx_tag: &AnyJsxTag,
-    input_components: &[String],
-    default_input_components: &[&str],
-) -> bool {
+fn has_nested_control(jsx_tag: &AnyJsxTag, input_components: &[String]) -> bool {
     jsx_tag.syntax().descendants().any(|descendant| {
         match (
             JsxName::cast(descendant.clone()),
@@ -221,12 +218,12 @@ fn has_nested_control(
             (Some(jsx_name), _) => {
                 let attribute_name = jsx_name.text();
                 input_components.contains(&attribute_name)
-                    || default_input_components.contains(&attribute_name.as_str())
+                    || DEFAULT_INPUT_COMPONENTS.contains(&attribute_name.as_str())
             }
             (_, Some(jsx_reference_identifier)) => {
                 let attribute_name = jsx_reference_identifier.text();
                 input_components.contains(&attribute_name)
-                    || default_input_components.contains(&attribute_name.as_str())
+                    || DEFAULT_INPUT_COMPONENTS.contains(&attribute_name.as_str())
             }
             _ => false,
         }
@@ -237,11 +234,7 @@ fn has_nested_control(
 /// - Has a label attribute that corresponds to the `label_attributes` parameter
 /// - Has an `aria-labelledby` attribute
 /// - Has a child `JsxText` node
-fn has_accessible_label(
-    jsx_tag: &AnyJsxTag,
-    label_attributes: &[String],
-    default_label_attributes: &[&str],
-) -> bool {
+fn has_accessible_label(jsx_tag: &AnyJsxTag, label_attributes: &[String]) -> bool {
     let mut has_text = false;
     let mut has_accessible_attribute = false;
 
@@ -255,7 +248,7 @@ fn has_accessible_label(
             ) {
                 let attribute_name = jsx_name.text();
                 let has_label_attribute = label_attributes.contains(&attribute_name)
-                    || default_label_attributes.contains(&attribute_name.as_str());
+                    || DEFAULT_LABEL_ATTRIBUTES.contains(&attribute_name.as_str());
                 let is_aria_labelledby_attribute = jsx_name.text() == "aria-labelledby";
                 let has_value = has_jsx_attribute_value(&jsx_attribute_value);
 
