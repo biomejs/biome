@@ -1,6 +1,8 @@
 use crate::lexer::CssLexContext;
 use crate::parser::CssParser;
-use crate::syntax::css_modules::{composes_not_allowed, expected_composes_import_source};
+use crate::syntax::css_modules::{
+    composes_not_allowed, expected_classes_list, expected_composes_import_source,
+};
 use crate::syntax::parse_error::{expected_component_value, expected_identifier};
 use crate::syntax::{
     is_at_any_value, is_at_identifier, is_at_string, parse_any_value,
@@ -78,7 +80,12 @@ fn parse_composes_property(p: &mut CssParser) -> ParsedSyntax {
     {
         let m = p.start();
 
-        ComposesClassList.parse_list(p);
+        let classes = ComposesClassList.parse_list(p);
+
+        // If the list of classes is empty, generate a diagnostic error.
+        if classes.range(p).is_empty() {
+            p.error(expected_classes_list(p, p.cur_range()));
+        }
 
         if p.at(T![from]) {
             let m = p.start();

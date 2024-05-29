@@ -48,3 +48,14 @@ pub(crate) fn composes_not_allowed(p: &CssParser, range: TextRange) -> ParseDiag
 pub(crate) fn expected_composes_import_source(p: &CssParser, range: TextRange) -> ParseDiagnostic {
     expect_one_of(&["<identifier>", "<string>"], range).into_diagnostic(p)
 }
+
+/// Generates a parse diagnostic for an empty list of classes after `composes`.
+///
+/// This function returns a diagnostic error indicating that a non-empty list of classes was expected
+/// after the `composes` keyword in a CSS Modules declaration, but an empty list was found.
+pub(crate) fn expected_classes_list(p: &CssParser, range: TextRange) -> ParseDiagnostic {
+    p.err_builder(
+        "Expected a non-empty list of classes after `composes`.",
+        range,
+    )
+}

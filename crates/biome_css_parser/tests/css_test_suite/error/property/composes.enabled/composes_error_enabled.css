@@ -9,3 +9,11 @@
 .otherClassName {
 	composes: globalClassName from ;
 }
+
+.otherClassName {
+	composes:  from ;
+}
+
+.otherClassName {
+	composes:  from global;
+}

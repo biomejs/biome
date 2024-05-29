@@ -17,6 +17,14 @@ expression: snapshot
 	composes: globalClassName from ;
 }
 
+.otherClassName {
+	composes:  from ;
+}
+
+.otherClassName {
+	composes:  from global;
+}
+
 ```
 
 
@@ -154,17 +162,101 @@ CssRoot {
                 r_curly_token: R_CURLY@121..123 "}" [Newline("\n")] [],
             },
         },
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selector_token: missing (optional),
+                    simple_selector: missing (optional),
+                    sub_selectors: CssSubSelectorList [
+                        CssClassSelector {
+                            dot_token: DOT@123..126 "." [Newline("\n"), Newline("\n")] [],
+                            name: CssCustomIdentifier {
+                                value_token: IDENT@126..141 "otherClassName" [] [Whitespace(" ")],
+                            },
+                        },
+                    ],
+                },
+            ],
+            block: CssDeclarationOrRuleBlock {
+                l_curly_token: L_CURLY@141..142 "{" [] [],
+                items: CssDeclarationOrRuleList [
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssComposesProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@142..152 "composes" [Newline("\n"), Whitespace("\t")] [],
+                                },
+                                colon_token: COLON@152..155 ":" [] [Whitespace("  ")],
+                                value: CssComposesPropertyValue {
+                                    classes: CssComposesClassList [],
+                                    specifier: CssComposesImportSpecifier {
+                                        from_token: FROM_KW@155..160 "from" [] [Whitespace(" ")],
+                                        source: missing (required),
+                                    },
+                                },
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@160..161 ";" [] [],
+                    },
+                ],
+                r_curly_token: R_CURLY@161..163 "}" [Newline("\n")] [],
+            },
+        },
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selector_token: missing (optional),
+                    simple_selector: missing (optional),
+                    sub_selectors: CssSubSelectorList [
+                        CssClassSelector {
+                            dot_token: DOT@163..166 "." [Newline("\n"), Newline("\n")] [],
+                            name: CssCustomIdentifier {
+                                value_token: IDENT@166..181 "otherClassName" [] [Whitespace(" ")],
+                            },
+                        },
+                    ],
+                },
+            ],
+            block: CssDeclarationOrRuleBlock {
+                l_curly_token: L_CURLY@181..182 "{" [] [],
+                items: CssDeclarationOrRuleList [
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssComposesProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@182..192 "composes" [Newline("\n"), Whitespace("\t")] [],
+                                },
+                                colon_token: COLON@192..195 ":" [] [Whitespace("  ")],
+                                value: CssComposesPropertyValue {
+                                    classes: CssComposesClassList [],
+                                    specifier: CssComposesImportSpecifier {
+                                        from_token: FROM_KW@195..200 "from" [] [Whitespace(" ")],
+                                        source: CssIdentifier {
+                                            value_token: IDENT@200..206 "global" [] [],
+                                        },
+                                    },
+                                },
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@206..207 ";" [] [],
+                    },
+                ],
+                r_curly_token: R_CURLY@207..209 "}" [Newline("\n")] [],
+            },
+        },
     ],
-    eof_token: EOF@123..124 "" [Newline("\n")] [],
+    eof_token: EOF@209..210 "" [Newline("\n")] [],
 }
 ```
 
 ## CST
 
 ```
-0: CSS_ROOT@0..124
+0: CSS_ROOT@0..210
   0: (empty)
-  1: CSS_RULE_LIST@0..123
+  1: CSS_RULE_LIST@0..209
     0: CSS_QUALIFIED_RULE@0..19
       0: CSS_SELECTOR_LIST@0..3
         0: CSS_COMPOUND_SELECTOR@0..3
@@ -248,13 +340,78 @@ CssRoot {
               1: (empty)
             1: SEMICOLON@120..121 ";" [] []
         2: R_CURLY@121..123 "}" [Newline("\n")] []
-  2: EOF@123..124 "" [Newline("\n")] []
+    3: CSS_QUALIFIED_RULE@123..163
+      0: CSS_SELECTOR_LIST@123..141
+        0: CSS_COMPOUND_SELECTOR@123..141
+          0: (empty)
+          1: (empty)
+          2: CSS_SUB_SELECTOR_LIST@123..141
+            0: CSS_CLASS_SELECTOR@123..141
+              0: DOT@123..126 "." [Newline("\n"), Newline("\n")] []
+              1: CSS_CUSTOM_IDENTIFIER@126..141
+                0: IDENT@126..141 "otherClassName" [] [Whitespace(" ")]
+      1: CSS_DECLARATION_OR_RULE_BLOCK@141..163
+        0: L_CURLY@141..142 "{" [] []
+        1: CSS_DECLARATION_OR_RULE_LIST@142..161
+          0: CSS_DECLARATION_WITH_SEMICOLON@142..161
+            0: CSS_DECLARATION@142..160
+              0: CSS_COMPOSES_PROPERTY@142..160
+                0: CSS_IDENTIFIER@142..152
+                  0: IDENT@142..152 "composes" [Newline("\n"), Whitespace("\t")] []
+                1: COLON@152..155 ":" [] [Whitespace("  ")]
+                2: CSS_COMPOSES_PROPERTY_VALUE@155..160
+                  0: CSS_COMPOSES_CLASS_LIST@155..155
+                  1: CSS_COMPOSES_IMPORT_SPECIFIER@155..160
+                    0: FROM_KW@155..160 "from" [] [Whitespace(" ")]
+                    1: (empty)
+              1: (empty)
+            1: SEMICOLON@160..161 ";" [] []
+        2: R_CURLY@161..163 "}" [Newline("\n")] []
+    4: CSS_QUALIFIED_RULE@163..209
+      0: CSS_SELECTOR_LIST@163..181
+        0: CSS_COMPOUND_SELECTOR@163..181
+          0: (empty)
+          1: (empty)
+          2: CSS_SUB_SELECTOR_LIST@163..181
+            0: CSS_CLASS_SELECTOR@163..181
+              0: DOT@163..166 "." [Newline("\n"), Newline("\n")] []
+              1: CSS_CUSTOM_IDENTIFIER@166..181
+                0: IDENT@166..181 "otherClassName" [] [Whitespace(" ")]
+      1: CSS_DECLARATION_OR_RULE_BLOCK@181..209
+        0: L_CURLY@181..182 "{" [] []
+        1: CSS_DECLARATION_OR_RULE_LIST@182..207
+          0: CSS_DECLARATION_WITH_SEMICOLON@182..207
+            0: CSS_DECLARATION@182..206
+              0: CSS_COMPOSES_PROPERTY@182..206
+                0: CSS_IDENTIFIER@182..192
+                  0: IDENT@182..192 "composes" [Newline("\n"), Whitespace("\t")] []
+                1: COLON@192..195 ":" [] [Whitespace("  ")]
+                2: CSS_COMPOSES_PROPERTY_VALUE@195..206
+                  0: CSS_COMPOSES_CLASS_LIST@195..195
+                  1: CSS_COMPOSES_IMPORT_SPECIFIER@195..206
+                    0: FROM_KW@195..200 "from" [] [Whitespace(" ")]
+                    1: CSS_IDENTIFIER@200..206
+                      0: IDENT@200..206 "global" [] []
+              1: (empty)
+            1: SEMICOLON@206..207 ";" [] []
+        2: R_CURLY@207..209 "}" [Newline("\n")] []
+  2: EOF@209..210 "" [Newline("\n")] []
 
 ```
 
 ## Diagnostics
 
 ```
+composes_error_enabled.css:2:12 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a non-empty list of classes after `composes`.
+  
+    1 │ .a {
+  > 2 │ 	composes: ;
+      │ 	          ^
+    3 │ }
+    4 │ 
+  
 composes_error_enabled.css:6:27 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Unexpected value or character.
@@ -284,5 +441,40 @@ composes_error_enabled.css:10:33 parse ━━━━━━━━━━━━━�
   
   - <identifier>
   - <string>
+  
+composes_error_enabled.css:14:13 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a non-empty list of classes after `composes`.
+  
+    13 │ .otherClassName {
+  > 14 │ 	composes:  from ;
+       │ 	           ^^^^
+    15 │ }
+    16 │ 
+  
+composes_error_enabled.css:14:18 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+    13 │ .otherClassName {
+  > 14 │ 	composes:  from ;
+       │ 	                ^
+    15 │ }
+    16 │ 
+  
+  i Expected one of:
+  
+  - <identifier>
+  - <string>
+  
+composes_error_enabled.css:18:13 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a non-empty list of classes after `composes`.
+  
+    17 │ .otherClassName {
+  > 18 │ 	composes:  from global;
+       │ 	           ^^^^
+    19 │ }
+    20 │ 
   
 ```
