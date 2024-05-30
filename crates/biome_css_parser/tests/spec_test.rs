@@ -8,7 +8,7 @@ use biome_diagnostics::DiagnosticExt;
 use biome_diagnostics::{print_diagnostic_to_string, termcolor};
 use biome_fs::BiomePath;
 use biome_rowan::SyntaxKind;
-use biome_service::settings::Settings;
+use biome_service::settings::{ConfigSource, ConfigurationBundle, Settings};
 use biome_test_utils::has_bogus_nodes_or_empty_slots;
 use std::fmt::Write;
 use std::fs;
@@ -54,8 +54,12 @@ pub fn run(test_case: &str, _snapshot_name: &str, test_directory: &str, outcome_
         )
         .consume();
 
+        let bundle = ConfigurationBundle {
+            config: test_options.unwrap_or_default(),
+            source: ConfigSource::EditorConfig,
+        };
         settings
-            .merge_with_configuration(test_options.unwrap_or_default(), None, None, &[])
+            .merge_with_configuration(bundle, None, None, &[])
             .unwrap();
 
         let settings = settings.languages.css.parser;
