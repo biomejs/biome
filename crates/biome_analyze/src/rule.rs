@@ -543,11 +543,33 @@ pub trait Rule: RuleMeta + Sized {
     /// `diagnostic` or `action` on it
     fn run(ctx: &RuleContext<Self>) -> Self::Signals;
 
-    /// Returns the value associated with the given signal.
+    /// Returns the instances associated with the given signal.
     ///
-    /// This allows suppression of specific values for a given rule, without
-    /// suppressing other values for the same rule.
-    fn values_for_signal(_signal: &Self::State) -> Vec<String> {
+    /// This allows suppression of specific instances of a given rule, without
+    /// suppressing other instances of the same rule.
+    ///
+    /// ## Example
+    ///
+    /// Consider the situation where the following two variables are unused:
+    ///
+    /// ```js
+    /// let a, b;
+    /// ```
+    ///
+    /// The rule `noUnusedVariables` will report a diagnostic about it, which we
+    /// can suppress with `// biome-ignore lint/correctness/noUnusedVariables`.
+    ///
+    /// But what if we wanted to suppress the rule for `a`, but not for `b`?
+    ///
+    /// We would need to recognize there are actually two separate instances
+    /// that the rule is reporting on, identified as "a" and "b". This allows
+    /// the user to suppress a specific instance using
+    /// `// biome-ignore lint/correctness/noUnusedVariables(a)`.
+    ///
+    /// *Note: For `noUnusedVariables` the above may not seem very useful (and
+    /// indeed it's not implemented), but for rules such as
+    /// `useExhaustiveDependencies` this is actually desirable.*
+    fn instances_for_signal(_signal: &Self::State) -> Vec<String> {
         Vec::new()
     }
 

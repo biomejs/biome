@@ -434,7 +434,7 @@ impl<L: Language + Default> RegistryRule<L> {
 
                 R::suppressed_nodes(&ctx, &result, &mut state.suppressions);
 
-                let values = R::values_for_signal(&result);
+                let instances = R::instances_for_signal(&result);
                 let signal = Box::new(RuleSignal::<R>::new(
                     params.root,
                     query_result.clone(),
@@ -447,7 +447,7 @@ impl<L: Language + Default> RegistryRule<L> {
                 params.signal_queue.push(SignalEntry {
                     signal,
                     rule: RuleKey::rule::<R>(),
-                    values,
+                    instances,
                     text_range,
                 });
             }

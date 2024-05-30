@@ -242,9 +242,8 @@ struct LineSuppression {
     /// List of all the rules this comment has started suppressing (must be
     /// removed from the suppressed set on expiration)
     suppressed_rules: Vec<RuleFilter<'static>>,
-    /// List of all the rules this comment has started suppressing with specific
-    /// values
-    suppressed_rules_with_values: Vec<(RuleFilter<'static>, String)>,
+    /// List of all the rule instances this comment has started suppressing.
+    suppressed_instances: Vec<(RuleFilter<'static>, String)>,
     /// Set to `true` when a signal matching this suppression was emitted and
     /// suppressed
     did_suppress_signal: bool,
@@ -417,13 +416,13 @@ where
                     return true;
                 }
 
-                if entry.values.is_empty() {
+                if entry.instances.is_empty() {
                     return false;
                 }
 
-                entry.values.iter().all(|value| {
+                entry.instances.iter().all(|value| {
                     suppression
-                        .suppressed_rules_with_values
+                        .suppressed_instances
                         .iter()
                         .any(|(filter, v)| *filter == entry.rule && v == value)
                 })
@@ -455,8 +454,8 @@ where
         range: TextRange,
     ) -> ControlFlow<Break> {
         let mut suppress_all = false;
-        let mut suppressions = Vec::new();
-        let mut suppressions_with_values = Vec::new();
+        let mut suppressed_rules = Vec::new();
+        let mut suppressed_instances = Vec::new();
         let mut has_legacy = false;
 
         for result in (self.parse_suppression_comment)(text) {
@@ -490,10 +489,10 @@ where
                 (self.emit_signal)(&signal)?;
             }
 
-            let (rule, value) = match kind {
+            let (rule, instance) = match kind {
                 SuppressionKind::Everything => (None, None),
                 SuppressionKind::Rule(rule) => (Some(rule), None),
-                SuppressionKind::RuleWithValue(rule, value) => (Some(rule), Some(value)),
+                SuppressionKind::RuleInstance(rule, instance) => (Some(rule), Some(instance)),
                 SuppressionKind::MaybeLegacy(rule) => (Some(rule), None),
                 SuppressionKind::Deprecated => (None, None),
             };
@@ -508,12 +507,10 @@ where
                     }
                 };
 
-                match (key, value) {
-                    (Some(key), Some(value)) => {
-                        suppressions_with_values.push((key, value.to_owned()))
-                    }
+                match (key, instance) {
+                    (Some(key), Some(value)) => suppressed_instances.push((key, value.to_owned())),
                     (Some(key), None) => {
-                        suppressions.push(key);
+                        suppressed_rules.push(key);
                         has_legacy |= matches!(kind, SuppressionKind::MaybeLegacy(_));
                     }
                     _ if range_match(self.range, range) => {
@@ -541,7 +538,7 @@ where
                     _ => {}
                 }
             } else {
-                suppressions.clear();
+                suppressed_rules.clear();
                 suppress_all = true;
                 // If this if a "suppress all lints" comment, no need to
                 // parse anything else
@@ -566,7 +563,7 @@ where
             (self.emit_signal)(&signal)?;
         }
 
-        if !suppress_all && suppressions.is_empty() && suppressions_with_values.is_empty() {
+        if !suppress_all && suppressed_rules.is_empty() && suppressed_instances.is_empty() {
             return ControlFlow::Continue(());
         }
 
@@ -583,13 +580,13 @@ where
                 last_suppression.text_range = last_suppression.text_range.cover(range);
                 last_suppression.suppress_all |= suppress_all;
                 if !last_suppression.suppress_all {
-                    last_suppression.suppressed_rules.extend(suppressions);
+                    last_suppression.suppressed_rules.extend(suppressed_rules);
                     last_suppression
-                        .suppressed_rules_with_values
-                        .extend(suppressions_with_values);
+                        .suppressed_instances
+                        .extend(suppressed_instances);
                 } else {
                     last_suppression.suppressed_rules.clear();
-                    last_suppression.suppressed_rules_with_values.clear();
+                    last_suppression.suppressed_instances.clear();
                 }
                 return ControlFlow::Continue(());
             }
@@ -600,8 +597,8 @@ where
             comment_span: range,
             text_range: range,
             suppress_all,
-            suppressed_rules: suppressions,
-            suppressed_rules_with_values: suppressions_with_values,
+            suppressed_rules,
+            suppressed_instances,
             did_suppress_signal: false,
         };
 
@@ -704,7 +701,7 @@ fn range_match(filter: Option<TextRange>, range: TextRange) -> bool {
 /// - `// biome-ignore format` -> `vec![]`
 /// - `// biome-ignore lint` -> `vec![Everything]`
 /// - `// biome-ignore lint/style/useWhile` -> `vec![Rule("style/useWhile")]`
-/// - `// biome-ignore lint/style/useWhile(foo)` -> `vec![RuleWithValue("style/useWhile")]`
+/// - `// biome-ignore lint/style/useWhile(foo)` -> `vec![RuleWithValue("style/useWhile", "foo")]`
 /// - `// biome-ignore lint/style/useWhile lint/nursery/noUnreachable` -> `vec![Rule("style/useWhile"), Rule("nursery/noUnreachable")]`
 /// - `// biome-ignore lint(style/useWhile)` -> `vec![MaybeLegacy("style/useWhile")]`
 /// - `// biome-ignore lint(style/useWhile) lint(nursery/noUnreachable)` -> `vec![MaybeLegacy("style/useWhile"), MaybeLegacy("nursery/noUnreachable")]`
@@ -717,7 +714,7 @@ pub enum SuppressionKind<'a> {
     /// A suppression disabling a specific rule eg. `// biome-ignore lint/style/useWhile`
     Rule(&'a str),
     /// A suppression to be evaluated by a specific rule eg. `// biome-ignore lint/correctness/useExhaustiveDependencies(foo)`
-    RuleWithValue(&'a str, &'a str),
+    RuleInstance(&'a str, &'a str),
     /// A suppression using the legacy syntax to disable a specific rule eg. `// biome-ignore lint(style/useWhile)`
     MaybeLegacy(&'a str),
     /// `rome-ignore` is legacy

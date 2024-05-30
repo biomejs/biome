@@ -142,7 +142,7 @@ declare_rule! {
     ///
     /// Sometimes you may wish to ignore a diagnostic about a specific
     /// dependency without disabling *all* linting for that hook. To do so,
-    /// you may specify the name of a specific dependency between brackets,
+    /// you may specify the name of a specific dependency between parentheses,
     /// like this:
     ///
     /// ```js
@@ -150,7 +150,7 @@ declare_rule! {
     ///
     /// function component() {
     ///     let a = 1;
-    ///     // biome-ignore lint/correctness/useExhaustiveDependencies(a): *insert good reason*
+    ///     // biome-ignore lint/correctness/useExhaustiveDependencies(a): <explanation>
     ///     useEffect(() => {
     ///         console.log(a);
     ///     }, []);
@@ -839,7 +839,7 @@ impl Rule for UseExhaustiveDependencies {
         signals
     }
 
-    fn values_for_signal(signal: &Self::State) -> Vec<String> {
+    fn instances_for_signal(signal: &Self::State) -> Vec<String> {
         match signal {
             Fix::AddDependency { captures, .. } => vec![captures.0.clone()],
             Fix::RemoveDependency { dependencies, .. } => dependencies
