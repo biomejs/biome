@@ -523,7 +523,7 @@ CssComposesClassList = CssCustomIdentifier*
 //  composes: className from './style.css';
 //                      ^^^^^^^^^^^^^^^^^^
 //  composes: className from global;
-//											^^^^^^^^^^^
+//                      ^^^^^^^^^^^
 CssComposesImportSpecifier =
 	'from'
 	source: AnyCssComposesImportSource
@@ -531,7 +531,7 @@ CssComposesImportSpecifier =
 //  composes: className from './style.css';
 //                           ^^^^^^^^^^^^^
 //  composes: className from global;
-//													 ^^^^^^
+//                           ^^^^^^
 AnyCssComposesImportSource =
 	CssString | CssIdentifier
 
