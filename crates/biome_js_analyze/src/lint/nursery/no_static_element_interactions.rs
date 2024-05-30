@@ -6,7 +6,6 @@ use biome_js_syntax::jsx_ext::AnyJsxElement;
 use biome_js_syntax::{AnyJsxAttribute, JsxAttributeList};
 use biome_rowan::AstNode;
 use rustc_hash::FxHashMap;
-use std::collections::HashMap;
 
 declare_rule! {
     /// Enforce that non-interactive, visible elements (such as `<div>`) that have click handlers use the role attribute.
@@ -48,8 +47,8 @@ declare_rule! {
 // ref: https://github.com/jsx-eslint/eslint-plugin-jsx-a11y/blob/974275353598e9407c76bd4a50c331a953755cee/src/rules/no-static-element-interactions.js#L33-L37
 // ref: https://github.com/jsx-eslint/jsx-ast-utils/blob/main/src/eventHandlers.js
 lazy_static::lazy_static! {
-    static ref INTERACTIVE_HANDLER_LIST: HashMap<&'static str, Vec<&'static str>> = {
-        let mut m = HashMap::new();
+    static ref EVENT_TO_HANDLERS: FxHashMap<&'static str, Vec<&'static str>> = {
+        let mut m = FxHashMap::default();
         m.insert("clipboard", vec!["onCopy", "onCut", "onPaste"]);
         m.insert("composition", vec!["onCompositionEnd", "onCompositionStart", "onCompositionUpdate"]);
         m.insert("keyboard", vec!["onKeyDown", "onKeyPress", "onKeyUp"]);
@@ -176,7 +175,7 @@ impl Rule for NoStaticElementInteractions {
 fn is_interactive_handler_present(attributes: &FxHashMap<String, Vec<String>>) -> bool {
     let categories_to_check = vec!["focus", "keyboard", "mouse"];
     for category in categories_to_check {
-        if let Some(handlers) = INTERACTIVE_HANDLER_LIST.get(category) {
+        if let Some(handlers) = EVENT_TO_HANDLERS.get(category) {
             for handler in handlers {
                 if let Some(values) = attributes.get(*handler) {
                     if values.iter().any(|value| value != "null") {
