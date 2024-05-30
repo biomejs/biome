@@ -144,13 +144,12 @@ impl GitLabDiagnosticBuilder {
         &mut self,
         value: biome_diagnostics::error::Error,
     ) -> GitLabDiagnostic {
-        let check_name = value.category().map_or("unknown".to_string(), |category| {
-            category.name().to_string()
-        });
-        let path = self.path(&value).unwrap_or("unknown".to_string());
+        let check_name = self.check_name(&value).unwrap_or_default();
+        let path = self.path(&value).unwrap_or_default();
         let line = self.line(&value).map_or(1, |line| max(line, 1));
+        let source_code = self.source_code(&value).unwrap_or_default();
         let fingerprint = self
-            .ensure_fingerprint_uniqueness(self.fingerprint(&check_name, &path, line), 0)
+            .ensure_fingerprint_uniqueness(self.fingerprint(&check_name, &path, &source_code), 0)
             .to_string();
 
         GitLabDiagnostic {
@@ -165,13 +164,31 @@ impl GitLabDiagnosticBuilder {
         }
     }
 
+    /// Extracts the name of the category as the check name.
+    fn check_name(&self, value: &biome_diagnostics::error::Error) -> Option<String> {
+        let category = value.category()?;
+        Some(category.name().to_string())
+    }
+
+    /// Extracts the source code generating the diagnostic.
+    fn source_code(&self, value: &biome_diagnostics::error::Error) -> Option<String> {
+        let location = value.location();
+        let source_code = location.source_code?;
+        let span = location.span?;
+
+        Some(source_code.text[span].to_string())
+    }
+
     /// Generates a fingerprint for a diagnostic.
-    fn fingerprint(&self, check_name: &String, path: &String, line: u8) -> u64 {
+    fn fingerprint(&self, check_name: &String, path: &String, code: &String) -> u64 {
         let mut hasher = DefaultHasher::new();
 
+        // Including the source code in our hash leads to more stable
+        // fingerprints. If you instead rely on e.g. the line number and change
+        // the first line of a file, all of its fingerprint would change.
+        code.hash(&mut hasher);
         check_name.hash(&mut hasher);
         path.hash(&mut hasher);
-        line.hash(&mut hasher);
 
         hasher.finish()
     }
