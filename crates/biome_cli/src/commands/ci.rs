@@ -8,6 +8,7 @@ use biome_deserialize::Merge;
 use biome_service::configuration::{
     load_configuration, LoadedConfiguration, PartialConfigurationExt,
 };
+use biome_service::settings::{ConfigSource, ConfigurationBundle};
 use biome_service::workspace::{RegisterProjectFolderParams, UpdateSettingsParams};
 use std::ffi::OsString;
 
@@ -115,11 +116,15 @@ pub(crate) fn ci(session: CliSession, payload: CiCommandPayload) -> Result<(), C
             set_as_current_workspace: true,
         })?;
 
+    let bundle = ConfigurationBundle {
+        config: fs_configuration,
+        source: ConfigSource::Biome,
+    };
     session
         .app
         .workspace
         .update_settings(UpdateSettingsParams {
-            configuration: fs_configuration,
+            configuration: vec![bundle],
             workspace_directory: session.app.fs.working_directory(),
             vcs_base_path,
             gitignore_matches,

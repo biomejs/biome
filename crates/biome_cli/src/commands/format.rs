@@ -17,6 +17,7 @@ use biome_diagnostics::PrintDiagnostic;
 use biome_service::configuration::{
     load_configuration, LoadedConfiguration, PartialConfigurationExt,
 };
+use biome_service::settings::{ConfigSource, ConfigurationBundle};
 use biome_service::workspace::{RegisterProjectFolderParams, UpdateSettingsParams};
 use std::ffi::OsString;
 
@@ -215,12 +216,16 @@ pub(crate) fn format(
             set_as_current_workspace: true,
         })?;
 
+    let bundle = ConfigurationBundle {
+        config: configuration,
+        source: ConfigSource::Biome,
+    };
     session
         .app
         .workspace
         .update_settings(UpdateSettingsParams {
             workspace_directory: session.app.fs.working_directory(),
-            configuration,
+            configuration: vec![bundle],
             vcs_base_path,
             gitignore_matches,
         })?;

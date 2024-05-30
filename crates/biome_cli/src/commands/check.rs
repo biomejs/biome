@@ -11,6 +11,7 @@ use biome_configuration::{
 };
 use biome_deserialize::Merge;
 use biome_service::configuration::PartialConfigurationExt;
+use biome_service::settings::{ConfigSource, ConfigurationBundle};
 use biome_service::workspace::RegisterProjectFolderParams;
 use biome_service::{
     configuration::{load_configuration, LoadedConfiguration},
@@ -165,12 +166,16 @@ pub(crate) fn check(
             set_as_current_workspace: true,
         })?;
 
+    let bundle = ConfigurationBundle {
+        config: fs_configuration,
+        source: ConfigSource::Biome,
+    };
     session
         .app
         .workspace
         .update_settings(UpdateSettingsParams {
             workspace_directory: session.app.fs.working_directory(),
-            configuration: fs_configuration,
+            configuration: vec![bundle],
             vcs_base_path,
             gitignore_matches,
         })?;

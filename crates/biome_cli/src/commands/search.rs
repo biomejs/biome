@@ -8,6 +8,7 @@ use biome_deserialize::Merge;
 use biome_service::configuration::{
     load_configuration, LoadedConfiguration, PartialConfigurationExt,
 };
+use biome_service::settings::{ConfigSource, ConfigurationBundle};
 use biome_service::workspace::{
     ParsePatternParams, RegisterProjectFolderParams, UpdateSettingsParams,
 };
@@ -68,9 +69,13 @@ pub(crate) fn search(
             path: session.app.fs.working_directory(),
             set_as_current_workspace: true,
         })?;
+    let bundle = ConfigurationBundle {
+        config: configuration,
+        source: ConfigSource::Biome,
+    };
     workspace.update_settings(UpdateSettingsParams {
         workspace_directory: session.app.fs.working_directory(),
-        configuration,
+        configuration: vec![bundle],
         vcs_base_path,
         gitignore_matches,
     })?;
