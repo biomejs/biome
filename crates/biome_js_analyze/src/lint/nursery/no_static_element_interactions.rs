@@ -89,7 +89,7 @@ impl Rule for NoStaticElementInteractions {
         let aria_roles = ctx.aria_roles();
         let element_name = node.name().ok()?.as_jsx_name()?.value_token().ok()?;
         let attributes = extract_attrs(&node.attributes());
-        let elm = element_name.text_trimmed();
+        let element_name = element_name.text_trimmed();
 
         if let Some(attributes_ref) = attributes.as_ref() {
             if !is_interactive_handler_present(attributes_ref) {
@@ -112,7 +112,7 @@ impl Rule for NoStaticElementInteractions {
             return None;
         }
 
-        let is_valid_element = match elm {
+        let is_valid_element = match element_name {
             "section" => ["aria-label", "aria-labelledby"].iter().any(|&attr_name| {
                 node.find_attribute_by_name(attr_name)
                     .map_or(false, |attr| {
@@ -125,11 +125,9 @@ impl Rule for NoStaticElementInteractions {
                     .map_or(false, |val| !val.text().is_empty())
             }),
             _ => {
-                (!aria_roles.is_not_interactive_element(
-                    element_name.text_trimmed(),
-                    attributes_option.clone(),
-                ) && !is_invalid_element(elm))
-                    || is_valid_element(elm)
+                (!aria_roles.is_not_interactive_element(element_name, attributes_option.clone())
+                    && !is_invalid_element(element_name))
+                    || is_valid_element(element_name)
             }
         };
 
