@@ -498,16 +498,16 @@ CssGenericProperty =
 // This grammar is specific to CSS Modules and defines how composes classes.
 // https://github.com/css-modules/css-modules/blob/master/docs/composition.md
 // .otherClassName {
-//		composes: globalClassName from global;
+//    composes: globalClassName from global;
 //    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 // }
 // .otherClassName {
-//     composes: className;
-//	 	 ^^^^^^^^^^^^^^^^^^^
+//    composes: className;
+//    ^^^^^^^^^^^^^^^^^^^
 //  }
 // .otherClassName {
-//     composes: className from './style.css';
-//		 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+//    composes: className from './style.css';
+//    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 // }
 CssComposesProperty =
 	name: CssIdentifier
