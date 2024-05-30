@@ -56,7 +56,6 @@ use crate::{Deserialize, Serialize, WorkspaceError};
 use biome_analyze::ActionCategory;
 pub use biome_analyze::RuleCategories;
 use biome_configuration::linter::RuleSelector;
-use biome_configuration::PartialConfiguration;
 use biome_console::{markup, Markup, MarkupBuf};
 use biome_diagnostics::CodeSuggestion;
 use biome_formatter::Printed;
