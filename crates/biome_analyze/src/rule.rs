@@ -543,6 +543,14 @@ pub trait Rule: RuleMeta + Sized {
     /// `diagnostic` or `action` on it
     fn run(ctx: &RuleContext<Self>) -> Self::Signals;
 
+    /// Returns the value associated with the given signal.
+    ///
+    /// This allows suppression of specific values for a given rule, without
+    /// suppressing other values for the same rule.
+    fn values_for_signal(_signal: &Self::State) -> Vec<String> {
+        Vec::new()
+    }
+
     /// Used by the analyzer to associate a range of source text to a signal in
     /// order to support suppression comments.
     ///

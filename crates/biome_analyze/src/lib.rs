@@ -242,6 +242,9 @@ struct LineSuppression {
     /// List of all the rules this comment has started suppressing (must be
     /// removed from the suppressed set on expiration)
     suppressed_rules: Vec<RuleFilter<'static>>,
+    /// List of all the rules this comment has started suppressing with specific
+    /// values
+    suppressed_rules_with_values: Vec<(RuleFilter<'static>, String)>,
     /// Set to `true` when a signal matching this suppression was emitted and
     /// suppressed
     did_suppress_signal: bool,
@@ -406,10 +409,24 @@ where
                     return true;
                 }
 
-                suppression
+                if suppression
                     .suppressed_rules
                     .iter()
                     .any(|filter| *filter == entry.rule)
+                {
+                    return true;
+                }
+
+                if entry.values.is_empty() {
+                    return false;
+                }
+
+                entry.values.iter().all(|value| {
+                    suppression
+                        .suppressed_rules_with_values
+                        .iter()
+                        .any(|(filter, v)| *filter == entry.rule && v == value)
+                })
             });
 
             // If the signal is being suppressed mark the line suppression as
@@ -420,9 +437,8 @@ where
                 (self.emit_signal)(&*entry.signal)?;
             }
 
-            // SAFETY: This removes `query` from the queue, it is known to
-            // exist since the `while let Some` block was entered
-            self.signal_queue.pop().unwrap();
+            // Remove signal from the queue.
+            self.signal_queue.pop();
         }
 
         ControlFlow::Continue(())
@@ -440,6 +456,7 @@ where
     ) -> ControlFlow<Break> {
         let mut suppress_all = false;
         let mut suppressions = Vec::new();
+        let mut suppressions_with_values = Vec::new();
         let mut has_legacy = false;
 
         for result in (self.parse_suppression_comment)(text) {
@@ -473,18 +490,16 @@ where
                 (self.emit_signal)(&signal)?;
             }
 
-            let rule = match kind {
-                SuppressionKind::Everything => None,
-                SuppressionKind::Rule(rule) => Some(rule),
-                SuppressionKind::MaybeLegacy(rule) => Some(rule),
-                SuppressionKind::Deprecated => None,
+            let (rule, value) = match kind {
+                SuppressionKind::Everything => (None, None),
+                SuppressionKind::Rule(rule) => (Some(rule), None),
+                SuppressionKind::RuleWithValue(rule, value) => (Some(rule), Some(value)),
+                SuppressionKind::MaybeLegacy(rule) => (Some(rule), None),
+                SuppressionKind::Deprecated => (None, None),
             };
 
             if let Some(rule) = rule {
-                let group_rule = rule.find('/').map(|index| {
-                    let (start, end) = rule.split_at(index);
-                    (start, &end[1..])
-                });
+                let group_rule = rule.split_once('/');
 
                 let key = match group_rule {
                     None => self.metadata.find_group(rule).map(RuleFilter::from),
@@ -493,26 +508,37 @@ where
                     }
                 };
 
-                if let Some(key) = key {
-                    suppressions.push(key);
-                    has_legacy |= matches!(kind, SuppressionKind::MaybeLegacy(_));
-                } else if range_match(self.range, range) {
-                    // Emit a warning for the unknown rule
-                    let signal = DiagnosticSignal::new(move || match group_rule {
-                        Some((group, rule)) => SuppressionDiagnostic::new(
-                            category!("suppressions/unknownRule"),
-                            range,
-                            format_args!("Unknown lint rule {group}/{rule} in suppression comment"),
-                        ),
+                match (key, value) {
+                    (Some(key), Some(value)) => {
+                        suppressions_with_values.push((key, value.to_owned()))
+                    }
+                    (Some(key), None) => {
+                        suppressions.push(key);
+                        has_legacy |= matches!(kind, SuppressionKind::MaybeLegacy(_));
+                    }
+                    _ if range_match(self.range, range) => {
+                        // Emit a warning for the unknown rule
+                        let signal = DiagnosticSignal::new(move || match group_rule {
+                            Some((group, rule)) => SuppressionDiagnostic::new(
+                                category!("suppressions/unknownRule"),
+                                range,
+                                format_args!(
+                                    "Unknown lint rule {group}/{rule} in suppression comment"
+                                ),
+                            ),
 
-                        None => SuppressionDiagnostic::new(
-                            category!("suppressions/unknownGroup"),
-                            range,
-                            format_args!("Unknown lint rule group {rule} in suppression comment"),
-                        ),
-                    });
+                            None => SuppressionDiagnostic::new(
+                                category!("suppressions/unknownGroup"),
+                                range,
+                                format_args!(
+                                    "Unknown lint rule group {rule} in suppression comment"
+                                ),
+                            ),
+                        });
 
-                    (self.emit_signal)(&signal)?;
+                        (self.emit_signal)(&signal)?;
+                    }
+                    _ => {}
                 }
             } else {
                 suppressions.clear();
@@ -540,7 +566,7 @@ where
             (self.emit_signal)(&signal)?;
         }
 
-        if !suppress_all && suppressions.is_empty() {
+        if !suppress_all && suppressions.is_empty() && suppressions_with_values.is_empty() {
             return ControlFlow::Continue(());
         }
 
@@ -558,8 +584,12 @@ where
                 last_suppression.suppress_all |= suppress_all;
                 if !last_suppression.suppress_all {
                     last_suppression.suppressed_rules.extend(suppressions);
+                    last_suppression
+                        .suppressed_rules_with_values
+                        .extend(suppressions_with_values);
                 } else {
                     last_suppression.suppressed_rules.clear();
+                    last_suppression.suppressed_rules_with_values.clear();
                 }
                 return ControlFlow::Continue(());
             }
@@ -571,6 +601,7 @@ where
             text_range: range,
             suppress_all,
             suppressed_rules: suppressions,
+            suppressed_rules_with_values: suppressions_with_values,
             did_suppress_signal: false,
         };
 
@@ -670,21 +701,24 @@ fn range_match(filter: Option<TextRange>, range: TextRange) -> bool {
 ///
 /// # Examples
 ///
-/// - `// rome-ignore format` -> `vec![]`
-/// - `// rome-ignore lint` -> `vec![Everything]`
-/// - `// rome-ignore lint/style/useWhile` -> `vec![Rule("style/useWhile")]`
-/// - `// rome-ignore lint/style/useWhile lint/nursery/noUnreachable` -> `vec![Rule("style/useWhile"), Rule("nursery/noUnreachable")]`
-/// - `// rome-ignore lint(style/useWhile)` -> `vec![MaybeLegacy("style/useWhile")]`
-/// - `// rome-ignore lint(style/useWhile) lint(nursery/noUnreachable)` -> `vec![MaybeLegacy("style/useWhile"), MaybeLegacy("nursery/noUnreachable")]`
+/// - `// biome-ignore format` -> `vec![]`
+/// - `// biome-ignore lint` -> `vec![Everything]`
+/// - `// biome-ignore lint/style/useWhile` -> `vec![Rule("style/useWhile")]`
+/// - `// biome-ignore lint/style/useWhile(foo)` -> `vec![RuleWithValue("style/useWhile")]`
+/// - `// biome-ignore lint/style/useWhile lint/nursery/noUnreachable` -> `vec![Rule("style/useWhile"), Rule("nursery/noUnreachable")]`
+/// - `// biome-ignore lint(style/useWhile)` -> `vec![MaybeLegacy("style/useWhile")]`
+/// - `// biome-ignore lint(style/useWhile) lint(nursery/noUnreachable)` -> `vec![MaybeLegacy("style/useWhile"), MaybeLegacy("nursery/noUnreachable")]`
 type SuppressionParser<D> = fn(&str) -> Vec<Result<SuppressionKind, D>>;
 
 /// This enum is used to categorize what is disabled by a suppression comment and with what syntax
 pub enum SuppressionKind<'a> {
-    /// A suppression disabling all lints eg. `// rome-ignore lint`
+    /// A suppression disabling all lints eg. `// biome-ignore lint`
     Everything,
-    /// A suppression disabling a specific rule eg. `// rome-ignore lint/style/useWhile`
+    /// A suppression disabling a specific rule eg. `// biome-ignore lint/style/useWhile`
     Rule(&'a str),
-    /// A suppression using the legacy syntax to disable a specific rule eg. `// rome-ignore lint(style/useWhile)`
+    /// A suppression to be evaluated by a specific rule eg. `// biome-ignore lint/correctness/useExhaustiveDependencies(foo)`
+    RuleWithValue(&'a str, &'a str),
+    /// A suppression using the legacy syntax to disable a specific rule eg. `// biome-ignore lint(style/useWhile)`
     MaybeLegacy(&'a str),
     /// `rome-ignore` is legacy
     Deprecated,

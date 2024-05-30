@@ -138,6 +138,28 @@ declare_rule! {
     /// }
     /// ```
     ///
+    /// ## Ignoring a specific dependency
+    ///
+    /// Sometimes you may wish to ignore a diagnostic about a specific
+    /// dependency without disabling *all* linting for that hook. To do so,
+    /// you may specify the name of a specific dependency between brackets,
+    /// like this:
+    ///
+    /// ```js
+    /// import { useEffect } from "react";
+    ///
+    /// function component() {
+    ///     let a = 1;
+    ///     // biome-ignore lint/correctness/useExhaustiveDependencies(a): *insert good reason*
+    ///     useEffect(() => {
+    ///         console.log(a);
+    ///     }, []);
+    /// }
+    /// ```
+    ///
+    /// If you wish to ignore multiple dependencies, you can add multiple
+    /// comments and add a reason for each.
+    ///
     /// ## Options
     ///
     /// Allows to specify custom hooks - from libraries or internal projects -
@@ -815,6 +837,22 @@ impl Rule for UseExhaustiveDependencies {
         }
 
         signals
+    }
+
+    fn values_for_signal(signal: &Self::State) -> Vec<String> {
+        match signal {
+            Fix::AddDependency { captures, .. } => vec![captures.0.clone()],
+            Fix::RemoveDependency { dependencies, .. } => dependencies
+                .iter()
+                .map(|dep| dep.syntax().text_trimmed().to_string())
+                .collect(),
+            Fix::DependencyTooUnstable {
+                dependency_name, ..
+            } => vec![dependency_name.clone()],
+            Fix::DependencyTooDeep {
+                dependency_text, ..
+            } => vec![dependency_text.clone()],
+        }
     }
 
     fn diagnostic(ctx: &RuleContext<Self>, dep: &Self::State) -> Option<RuleDiagnostic> {

@@ -137,6 +137,8 @@ pub struct SignalEntry<'phase, L: Language> {
     pub signal: Box<dyn AnalyzerSignal<L> + 'phase>,
     /// Unique identifier for the rule that emitted this signal
     pub rule: RuleKey,
+    /// Optional rule-specific values being suppressed
+    pub values: Vec<String>,
     /// Text range in the document this signal covers
     pub text_range: TextRange,
 }
@@ -233,6 +235,7 @@ mod tests {
             params.signal_queue.push(SignalEntry {
                 signal: Box::new(DiagnosticSignal::new(move || TestDiagnostic { span })),
                 rule: RuleKey::new("group", "rule"),
+                values: Default::default(),
                 text_range: span,
             });
         }
