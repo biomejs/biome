@@ -782,6 +782,23 @@ impl Rule for UseExhaustiveDependencies {
                     })
                 });
 
+            // Find duplicated deps from specified ones
+            {
+                let mut dep_list: BTreeMap<String, AnyJsExpression> = BTreeMap::new();
+                for dep in correct_deps.iter() {
+                    let expression_name = dep.to_string();
+                    if dep_list.contains_key(&expression_name) {
+                        signals.push(Fix::RemoveDependency {
+                            function_name_range: result.function_name_range,
+                            component_function: component_function.clone(),
+                            dependencies: vec![dep.clone()],
+                        });
+                        continue;
+                    }
+                    dep_list.insert(expression_name, dep.clone());
+                }
+            }
+
             // Find correctly specified dependencies with an unstable identity,
             // since they would trigger re-evaluation on every render.
             let unstable_deps = correct_deps.into_iter().filter_map(|dep| {
