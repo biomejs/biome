@@ -225,7 +225,7 @@ impl Settings {
         // NOTE: keep this last. Computing the overrides require reading the settings computed by the parent settings.
         if let Some(overrides) = configuration.overrides {
             self.override_settings =
-                to_override_settings(working_directory.clone(), overrides, self)?;
+                to_override_settings(working_directory.clone(), overrides, self, bundle.source)?;
         }
 
         Ok(())
@@ -1259,11 +1259,12 @@ pub fn to_override_settings(
     working_directory: Option<PathBuf>,
     overrides: Overrides,
     current_settings: &Settings,
+    source: ConfigSource,
 ) -> Result<OverrideSettings, WorkspaceError> {
     let mut override_settings = OverrideSettings::default();
     for pattern in overrides.0 {
         let pattern_setting =
-            to_override_setting_pattern(working_directory.clone(), pattern, current_settings)?;
+            to_override_setting_pattern(working_directory.clone(), pattern, current_settings, source)?;
         override_settings.patterns.push(pattern_setting);
     }
 
@@ -1274,9 +1275,11 @@ fn to_override_setting_pattern(
     working_directory: Option<PathBuf>,
     pattern: OverridePattern,
     current_settings: &Settings,
+    source: ConfigSource,
 ) -> Result<OverrideSettingPattern, WorkspaceError> {
-    let include = to_matcher(working_directory.clone(), pattern.include.as_ref(), false)?;
-    let exclude = to_matcher(working_directory.clone(), pattern.ignore.as_ref(), false)?;
+    let is_editorconfig = source == ConfigSource::EditorConfig;
+    let include = to_matcher(working_directory.clone(), pattern.include.as_ref(), is_editorconfig)?;
+    let exclude = to_matcher(working_directory.clone(), pattern.ignore.as_ref(), is_editorconfig)?;
     to_override_setting_pattern_with_matchers(
         working_directory,
         pattern,
