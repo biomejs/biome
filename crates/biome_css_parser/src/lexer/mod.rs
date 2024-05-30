@@ -845,6 +845,7 @@ impl<'src> CssLexer<'src> {
             b"regexp" => REGEXP_KW,
             b"value" => VALUE_KW,
             b"as" => AS_KW,
+            b"composes" => COMPOSES_KW,
             _ => IDENT,
         }
     }

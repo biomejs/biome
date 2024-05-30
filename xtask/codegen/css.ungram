@@ -487,12 +487,53 @@ CssDeclaration =
 
 AnyCssProperty =
 	CssGenericProperty
+	| CssComposesProperty
 	| CssBogusProperty
 
 CssGenericProperty =
 	name: AnyCssDeclarationName
 	':'
 	value: CssGenericComponentValueList
+
+// This grammar is specific to CSS Modules and defines how composes classes.
+// https://github.com/css-modules/css-modules/blob/master/docs/composition.md
+// .otherClassName {
+//    composes: globalClassName from global;
+//    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+// }
+// .otherClassName {
+//    composes: className;
+//    ^^^^^^^^^^^^^^^^^^^
+//  }
+// .otherClassName {
+//    composes: className from './style.css';
+//    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+// }
+CssComposesProperty =
+	name: CssIdentifier
+	':'
+	value: CssComposesPropertyValue
+
+CssComposesPropertyValue =
+	classes: CssComposesClassList
+	specifier: CssComposesImportSpecifier?
+
+CssComposesClassList = CssCustomIdentifier*
+
+//  composes: className from './style.css';
+//                      ^^^^^^^^^^^^^^^^^^
+//  composes: className from global;
+//                      ^^^^^^^^^^^
+CssComposesImportSpecifier =
+	'from'
+	source: AnyCssComposesImportSource
+
+//  composes: className from './style.css';
+//                           ^^^^^^^^^^^^^
+//  composes: className from global;
+//                           ^^^^^^
+AnyCssComposesImportSource =
+	CssString | CssIdentifier
 
 // div {
 //	--bs-btn-focus-shadow-rgb: 33, 37, 41;

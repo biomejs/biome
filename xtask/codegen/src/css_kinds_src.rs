@@ -239,6 +239,7 @@ pub const CSS_KINDS_SRC: KindsSrc = KindsSrc {
         "regexp",
         "value",
         "as",
+        "composes",
         //
         "font-face",
         // Don't add to the end of this list, add new keywords above the "HERE"
@@ -298,6 +299,10 @@ pub const CSS_KINDS_SRC: KindsSrc = KindsSrc {
         "CSS_GENERIC_COMPONENT_VALUE_LIST",
         "CSS_GENERIC_DELIMITER",
         "CSS_GENERIC_PROPERTY",
+        "CSS_COMPOSES_PROPERTY",
+        "CSS_COMPOSES_PROPERTY_VALUE",
+        "CSS_COMPOSES_IMPORT_SPECIFIER",
+        "CSS_COMPOSES_CLASS_LIST",
         "CSS_UNKNOWN_PROPERTY_VALUE",
         // Properties
         "CSS_PARAMETER_LIST",

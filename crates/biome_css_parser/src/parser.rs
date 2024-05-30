@@ -43,6 +43,11 @@ impl CssParserOptions {
         self.css_modules = true;
         self
     }
+
+    /// Checks if parsing of CSS Modules features is disabled.
+    pub fn is_css_modules_disabled(&self) -> bool {
+        !self.css_modules
+    }
 }
 
 impl<'source> CssParser<'source> {

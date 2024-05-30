@@ -174,7 +174,18 @@ pub fn run(test_case: &str, _snapshot_name: &str, test_directory: &str, outcome_
 #[test]
 pub fn quick_test() {
     let code = r#"
-@keyframes :local(a) {}
+.a {
+	composes: myClass;
+}
+
+.otherClassName {
+	composes: className from "./style.css";
+}
+
+.otherClassName {
+	composes: globalClassName from global;
+}
+
     "#;
 
     let root = parse_css(

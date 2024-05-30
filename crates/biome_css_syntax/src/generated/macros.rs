@@ -60,6 +60,19 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::CssComplexSelector::new_unchecked(node) };
                     $body
                 }
+                $crate::CssSyntaxKind::CSS_COMPOSES_IMPORT_SPECIFIER => {
+                    let $pattern =
+                        unsafe { $crate::CssComposesImportSpecifier::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::CSS_COMPOSES_PROPERTY => {
+                    let $pattern = unsafe { $crate::CssComposesProperty::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::CSS_COMPOSES_PROPERTY_VALUE => {
+                    let $pattern = unsafe { $crate::CssComposesPropertyValue::new_unchecked(node) };
+                    $body
+                }
                 $crate::CssSyntaxKind::CSS_COMPOUND_SELECTOR => {
                     let $pattern = unsafe { $crate::CssCompoundSelector::new_unchecked(node) };
                     $body
@@ -736,6 +749,10 @@ macro_rules! map_syntax_node {
                 }
                 $crate::CssSyntaxKind::CSS_COMPONENT_VALUE_LIST => {
                     let $pattern = unsafe { $crate::CssComponentValueList::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::CSS_COMPOSES_CLASS_LIST => {
+                    let $pattern = unsafe { $crate::CssComposesClassList::new_unchecked(node) };
                     $body
                 }
                 $crate::CssSyntaxKind::CSS_COMPOUND_SELECTOR_LIST => {

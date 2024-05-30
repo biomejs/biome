@@ -83,26 +83,6 @@ info: css/modules/modules.css
  
  .className {
    color: green;
-@@ -13,16 +14,16 @@
- }
- 
- .otherClassName {
--  composes: className;
-+  composes: classname;
-   color: yellow;
- }
- 
- .otherClassName {
--  composes: className from "./style.css";
-+  composes: classname from "./style.css";
- }
- 
- .otherClassName {
--  composes: globalClassName from global;
-+  composes: globalclassname from global;
- }
- 
- :global {
 @@ -42,7 +43,7 @@
    localAlias: keyFromDep;
  }
@@ -133,16 +113,16 @@ info: css/modules/modules.css
 }
 
 .otherClassName {
-  composes: classname;
+  composes: className;
   color: yellow;
 }
 
 .otherClassName {
-  composes: classname from "./style.css";
+  composes: className from "./style.css";
 }
 
 .otherClassName {
-  composes: globalclassname from global;
+  composes: globalClassName from global;
 }
 
 :global {

@@ -189,6 +189,60 @@ pub fn css_complex_selector(
         ],
     ))
 }
+pub fn css_composes_import_specifier(
+    from_token: SyntaxToken,
+    source: AnyCssComposesImportSource,
+) -> CssComposesImportSpecifier {
+    CssComposesImportSpecifier::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_COMPOSES_IMPORT_SPECIFIER,
+        [
+            Some(SyntaxElement::Token(from_token)),
+            Some(SyntaxElement::Node(source.into_syntax())),
+        ],
+    ))
+}
+pub fn css_composes_property(
+    name: CssIdentifier,
+    colon_token: SyntaxToken,
+    value: CssComposesPropertyValue,
+) -> CssComposesProperty {
+    CssComposesProperty::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_COMPOSES_PROPERTY,
+        [
+            Some(SyntaxElement::Node(name.into_syntax())),
+            Some(SyntaxElement::Token(colon_token)),
+            Some(SyntaxElement::Node(value.into_syntax())),
+        ],
+    ))
+}
+pub fn css_composes_property_value(
+    classes: CssComposesClassList,
+) -> CssComposesPropertyValueBuilder {
+    CssComposesPropertyValueBuilder {
+        classes,
+        specifier: None,
+    }
+}
+pub struct CssComposesPropertyValueBuilder {
+    classes: CssComposesClassList,
+    specifier: Option<CssComposesImportSpecifier>,
+}
+impl CssComposesPropertyValueBuilder {
+    pub fn with_specifier(mut self, specifier: CssComposesImportSpecifier) -> Self {
+        self.specifier = Some(specifier);
+        self
+    }
+    pub fn build(self) -> CssComposesPropertyValue {
+        CssComposesPropertyValue::unwrap_cast(SyntaxNode::new_detached(
+            CssSyntaxKind::CSS_COMPOSES_PROPERTY_VALUE,
+            [
+                Some(SyntaxElement::Node(self.classes.into_syntax())),
+                self.specifier
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+            ],
+        ))
+    }
+}
 pub fn css_compound_selector(sub_selectors: CssSubSelectorList) -> CssCompoundSelectorBuilder {
     CssCompoundSelectorBuilder {
         sub_selectors,
@@ -2147,6 +2201,18 @@ where
 {
     CssComponentValueList::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_COMPONENT_VALUE_LIST,
+        items
+            .into_iter()
+            .map(|item| Some(item.into_syntax().into())),
+    ))
+}
+pub fn css_composes_class_list<I>(items: I) -> CssComposesClassList
+where
+    I: IntoIterator<Item = CssCustomIdentifier>,
+    I::IntoIter: ExactSizeIterator,
+{
+    CssComposesClassList::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_COMPOSES_CLASS_LIST,
         items
             .into_iter()
             .map(|item| Some(item.into_syntax().into())),

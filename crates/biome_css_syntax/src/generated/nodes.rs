@@ -504,6 +504,134 @@ pub struct CssComplexSelectorFields {
     pub right: SyntaxResult<AnyCssSelector>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
+pub struct CssComposesImportSpecifier {
+    pub(crate) syntax: SyntaxNode,
+}
+impl CssComposesImportSpecifier {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> CssComposesImportSpecifierFields {
+        CssComposesImportSpecifierFields {
+            from_token: self.from_token(),
+            source: self.source(),
+        }
+    }
+    pub fn from_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn source(&self) -> SyntaxResult<AnyCssComposesImportSource> {
+        support::required_node(&self.syntax, 1usize)
+    }
+}
+#[cfg(feature = "serde")]
+impl Serialize for CssComposesImportSpecifier {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[cfg_attr(feature = "serde", derive(Serialize))]
+pub struct CssComposesImportSpecifierFields {
+    pub from_token: SyntaxResult<SyntaxToken>,
+    pub source: SyntaxResult<AnyCssComposesImportSource>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct CssComposesProperty {
+    pub(crate) syntax: SyntaxNode,
+}
+impl CssComposesProperty {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> CssComposesPropertyFields {
+        CssComposesPropertyFields {
+            name: self.name(),
+            colon_token: self.colon_token(),
+            value: self.value(),
+        }
+    }
+    pub fn name(&self) -> SyntaxResult<CssIdentifier> {
+        support::required_node(&self.syntax, 0usize)
+    }
+    pub fn colon_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 1usize)
+    }
+    pub fn value(&self) -> SyntaxResult<CssComposesPropertyValue> {
+        support::required_node(&self.syntax, 2usize)
+    }
+}
+#[cfg(feature = "serde")]
+impl Serialize for CssComposesProperty {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[cfg_attr(feature = "serde", derive(Serialize))]
+pub struct CssComposesPropertyFields {
+    pub name: SyntaxResult<CssIdentifier>,
+    pub colon_token: SyntaxResult<SyntaxToken>,
+    pub value: SyntaxResult<CssComposesPropertyValue>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct CssComposesPropertyValue {
+    pub(crate) syntax: SyntaxNode,
+}
+impl CssComposesPropertyValue {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> CssComposesPropertyValueFields {
+        CssComposesPropertyValueFields {
+            classes: self.classes(),
+            specifier: self.specifier(),
+        }
+    }
+    pub fn classes(&self) -> CssComposesClassList {
+        support::list(&self.syntax, 0usize)
+    }
+    pub fn specifier(&self) -> Option<CssComposesImportSpecifier> {
+        support::node(&self.syntax, 1usize)
+    }
+}
+#[cfg(feature = "serde")]
+impl Serialize for CssComposesPropertyValue {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[cfg_attr(feature = "serde", derive(Serialize))]
+pub struct CssComposesPropertyValueFields {
+    pub classes: CssComposesClassList,
+    pub specifier: Option<CssComposesImportSpecifier>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
 pub struct CssCompoundSelector {
     pub(crate) syntax: SyntaxNode,
 }
@@ -6443,6 +6571,26 @@ impl AnyCssAttributeMatcherValue {
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "serde", derive(Serialize))]
+pub enum AnyCssComposesImportSource {
+    CssIdentifier(CssIdentifier),
+    CssString(CssString),
+}
+impl AnyCssComposesImportSource {
+    pub fn as_css_identifier(&self) -> Option<&CssIdentifier> {
+        match &self {
+            AnyCssComposesImportSource::CssIdentifier(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_string(&self) -> Option<&CssString> {
+        match &self {
+            AnyCssComposesImportSource::CssString(item) => Some(item),
+            _ => None,
+        }
+    }
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize))]
 pub enum AnyCssCompoundSelector {
     CssBogusSelector(CssBogusSelector),
     CssCompoundSelector(CssCompoundSelector),
@@ -7524,12 +7672,19 @@ impl AnyCssPageSelectorPseudo {
 #[cfg_attr(feature = "serde", derive(Serialize))]
 pub enum AnyCssProperty {
     CssBogusProperty(CssBogusProperty),
+    CssComposesProperty(CssComposesProperty),
     CssGenericProperty(CssGenericProperty),
 }
 impl AnyCssProperty {
     pub fn as_css_bogus_property(&self) -> Option<&CssBogusProperty> {
         match &self {
             AnyCssProperty::CssBogusProperty(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_composes_property(&self) -> Option<&CssComposesProperty> {
+        match &self {
+            AnyCssProperty::CssComposesProperty(item) => Some(item),
             _ => None,
         }
     }
@@ -8818,6 +8973,130 @@ impl From<CssComplexSelector> for SyntaxNode {
 }
 impl From<CssComplexSelector> for SyntaxElement {
     fn from(n: CssComplexSelector) -> SyntaxElement {
+        n.syntax.into()
+    }
+}
+impl AstNode for CssComposesImportSpecifier {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_COMPOSES_IMPORT_SPECIFIER as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == CSS_COMPOSES_IMPORT_SPECIFIER
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for CssComposesImportSpecifier {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("CssComposesImportSpecifier")
+            .field("from_token", &support::DebugSyntaxResult(self.from_token()))
+            .field("source", &support::DebugSyntaxResult(self.source()))
+            .finish()
+    }
+}
+impl From<CssComposesImportSpecifier> for SyntaxNode {
+    fn from(n: CssComposesImportSpecifier) -> SyntaxNode {
+        n.syntax
+    }
+}
+impl From<CssComposesImportSpecifier> for SyntaxElement {
+    fn from(n: CssComposesImportSpecifier) -> SyntaxElement {
+        n.syntax.into()
+    }
+}
+impl AstNode for CssComposesProperty {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_COMPOSES_PROPERTY as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == CSS_COMPOSES_PROPERTY
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for CssComposesProperty {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("CssComposesProperty")
+            .field("name", &support::DebugSyntaxResult(self.name()))
+            .field(
+                "colon_token",
+                &support::DebugSyntaxResult(self.colon_token()),
+            )
+            .field("value", &support::DebugSyntaxResult(self.value()))
+            .finish()
+    }
+}
+impl From<CssComposesProperty> for SyntaxNode {
+    fn from(n: CssComposesProperty) -> SyntaxNode {
+        n.syntax
+    }
+}
+impl From<CssComposesProperty> for SyntaxElement {
+    fn from(n: CssComposesProperty) -> SyntaxElement {
+        n.syntax.into()
+    }
+}
+impl AstNode for CssComposesPropertyValue {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_COMPOSES_PROPERTY_VALUE as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == CSS_COMPOSES_PROPERTY_VALUE
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for CssComposesPropertyValue {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("CssComposesPropertyValue")
+            .field("classes", &self.classes())
+            .field(
+                "specifier",
+                &support::DebugOptionalElement(self.specifier()),
+            )
+            .finish()
+    }
+}
+impl From<CssComposesPropertyValue> for SyntaxNode {
+    fn from(n: CssComposesPropertyValue) -> SyntaxNode {
+        n.syntax
+    }
+}
+impl From<CssComposesPropertyValue> for SyntaxElement {
+    fn from(n: CssComposesPropertyValue) -> SyntaxElement {
         n.syntax.into()
     }
 }
@@ -14794,6 +15073,65 @@ impl From<AnyCssAttributeMatcherValue> for SyntaxElement {
         node.into()
     }
 }
+impl From<CssIdentifier> for AnyCssComposesImportSource {
+    fn from(node: CssIdentifier) -> AnyCssComposesImportSource {
+        AnyCssComposesImportSource::CssIdentifier(node)
+    }
+}
+impl From<CssString> for AnyCssComposesImportSource {
+    fn from(node: CssString) -> AnyCssComposesImportSource {
+        AnyCssComposesImportSource::CssString(node)
+    }
+}
+impl AstNode for AnyCssComposesImportSource {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> = CssIdentifier::KIND_SET.union(CssString::KIND_SET);
+    fn can_cast(kind: SyntaxKind) -> bool {
+        matches!(kind, CSS_IDENTIFIER | CSS_STRING)
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        let res = match syntax.kind() {
+            CSS_IDENTIFIER => AnyCssComposesImportSource::CssIdentifier(CssIdentifier { syntax }),
+            CSS_STRING => AnyCssComposesImportSource::CssString(CssString { syntax }),
+            _ => return None,
+        };
+        Some(res)
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        match self {
+            AnyCssComposesImportSource::CssIdentifier(it) => &it.syntax,
+            AnyCssComposesImportSource::CssString(it) => &it.syntax,
+        }
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        match self {
+            AnyCssComposesImportSource::CssIdentifier(it) => it.syntax,
+            AnyCssComposesImportSource::CssString(it) => it.syntax,
+        }
+    }
+}
+impl std::fmt::Debug for AnyCssComposesImportSource {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            AnyCssComposesImportSource::CssIdentifier(it) => std::fmt::Debug::fmt(it, f),
+            AnyCssComposesImportSource::CssString(it) => std::fmt::Debug::fmt(it, f),
+        }
+    }
+}
+impl From<AnyCssComposesImportSource> for SyntaxNode {
+    fn from(n: AnyCssComposesImportSource) -> SyntaxNode {
+        match n {
+            AnyCssComposesImportSource::CssIdentifier(it) => it.into(),
+            AnyCssComposesImportSource::CssString(it) => it.into(),
+        }
+    }
+}
+impl From<AnyCssComposesImportSource> for SyntaxElement {
+    fn from(n: AnyCssComposesImportSource) -> SyntaxElement {
+        let node: SyntaxNode = n.into();
+        node.into()
+    }
+}
 impl From<CssBogusSelector> for AnyCssCompoundSelector {
     fn from(node: CssBogusSelector) -> AnyCssCompoundSelector {
         AnyCssCompoundSelector::CssBogusSelector(node)
@@ -18216,6 +18554,11 @@ impl From<CssBogusProperty> for AnyCssProperty {
         AnyCssProperty::CssBogusProperty(node)
     }
 }
+impl From<CssComposesProperty> for AnyCssProperty {
+    fn from(node: CssComposesProperty) -> AnyCssProperty {
+        AnyCssProperty::CssComposesProperty(node)
+    }
+}
 impl From<CssGenericProperty> for AnyCssProperty {
     fn from(node: CssGenericProperty) -> AnyCssProperty {
         AnyCssProperty::CssGenericProperty(node)
@@ -18223,14 +18566,21 @@ impl From<CssGenericProperty> for AnyCssProperty {
 }
 impl AstNode for AnyCssProperty {
     type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> =
-        CssBogusProperty::KIND_SET.union(CssGenericProperty::KIND_SET);
+    const KIND_SET: SyntaxKindSet<Language> = CssBogusProperty::KIND_SET
+        .union(CssComposesProperty::KIND_SET)
+        .union(CssGenericProperty::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
-        matches!(kind, CSS_BOGUS_PROPERTY | CSS_GENERIC_PROPERTY)
+        matches!(
+            kind,
+            CSS_BOGUS_PROPERTY | CSS_COMPOSES_PROPERTY | CSS_GENERIC_PROPERTY
+        )
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
             CSS_BOGUS_PROPERTY => AnyCssProperty::CssBogusProperty(CssBogusProperty { syntax }),
+            CSS_COMPOSES_PROPERTY => {
+                AnyCssProperty::CssComposesProperty(CssComposesProperty { syntax })
+            }
             CSS_GENERIC_PROPERTY => {
                 AnyCssProperty::CssGenericProperty(CssGenericProperty { syntax })
             }
@@ -18241,12 +18591,14 @@ impl AstNode for AnyCssProperty {
     fn syntax(&self) -> &SyntaxNode {
         match self {
             AnyCssProperty::CssBogusProperty(it) => &it.syntax,
+            AnyCssProperty::CssComposesProperty(it) => &it.syntax,
             AnyCssProperty::CssGenericProperty(it) => &it.syntax,
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
             AnyCssProperty::CssBogusProperty(it) => it.syntax,
+            AnyCssProperty::CssComposesProperty(it) => it.syntax,
             AnyCssProperty::CssGenericProperty(it) => it.syntax,
         }
     }
@@ -18255,6 +18607,7 @@ impl std::fmt::Debug for AnyCssProperty {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             AnyCssProperty::CssBogusProperty(it) => std::fmt::Debug::fmt(it, f),
+            AnyCssProperty::CssComposesProperty(it) => std::fmt::Debug::fmt(it, f),
             AnyCssProperty::CssGenericProperty(it) => std::fmt::Debug::fmt(it, f),
         }
     }
@@ -18263,6 +18616,7 @@ impl From<AnyCssProperty> for SyntaxNode {
     fn from(n: AnyCssProperty) -> SyntaxNode {
         match n {
             AnyCssProperty::CssBogusProperty(it) => it.into(),
+            AnyCssProperty::CssComposesProperty(it) => it.into(),
             AnyCssProperty::CssGenericProperty(it) => it.into(),
         }
     }
@@ -20564,6 +20918,11 @@ impl std::fmt::Display for AnyCssAttributeMatcherValue {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
+impl std::fmt::Display for AnyCssComposesImportSource {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
 impl std::fmt::Display for AnyCssCompoundSelector {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
@@ -20985,6 +21344,21 @@ impl std::fmt::Display for CssColorProfileAtRule {
     }
 }
 impl std::fmt::Display for CssComplexSelector {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for CssComposesImportSpecifier {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for CssComposesProperty {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for CssComposesPropertyValue {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
@@ -23096,6 +23470,89 @@ impl IntoIterator for &CssComponentValueList {
 impl IntoIterator for CssComponentValueList {
     type Item = AnyCssValue;
     type IntoIter = AstNodeListIterator<Language, AnyCssValue>;
+    fn into_iter(self) -> Self::IntoIter {
+        self.iter()
+    }
+}
+#[derive(Clone, Eq, PartialEq, Hash)]
+pub struct CssComposesClassList {
+    syntax_list: SyntaxList,
+}
+impl CssComposesClassList {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self {
+            syntax_list: syntax.into_list(),
+        }
+    }
+}
+impl AstNode for CssComposesClassList {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_COMPOSES_CLASS_LIST as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == CSS_COMPOSES_CLASS_LIST
+    }
+    fn cast(syntax: SyntaxNode) -> Option<CssComposesClassList> {
+        if Self::can_cast(syntax.kind()) {
+            Some(CssComposesClassList {
+                syntax_list: syntax.into_list(),
+            })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        self.syntax_list.node()
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax_list.into_node()
+    }
+}
+#[cfg(feature = "serde")]
+impl Serialize for CssComposesClassList {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut seq = serializer.serialize_seq(Some(self.len()))?;
+        for e in self.iter() {
+            seq.serialize_element(&e)?;
+        }
+        seq.end()
+    }
+}
+impl AstNodeList for CssComposesClassList {
+    type Language = Language;
+    type Node = CssCustomIdentifier;
+    fn syntax_list(&self) -> &SyntaxList {
+        &self.syntax_list
+    }
+    fn into_syntax_list(self) -> SyntaxList {
+        self.syntax_list
+    }
+}
+impl Debug for CssComposesClassList {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        f.write_str("CssComposesClassList ")?;
+        f.debug_list().entries(self.iter()).finish()
+    }
+}
+impl IntoIterator for &CssComposesClassList {
+    type Item = CssCustomIdentifier;
+    type IntoIter = AstNodeListIterator<Language, CssCustomIdentifier>;
+    fn into_iter(self) -> Self::IntoIter {
+        self.iter()
+    }
+}
+impl IntoIterator for CssComposesClassList {
+    type Item = CssCustomIdentifier;
+    type IntoIter = AstNodeListIterator<Language, CssCustomIdentifier>;
     fn into_iter(self) -> Self::IntoIter {
         self.iter()
     }

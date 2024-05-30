@@ -37,7 +37,7 @@ pub(crate) fn parse_value_at_rule(p: &mut CssParser) -> ParsedSyntax {
         return Absent;
     }
 
-    if !p.options().css_modules {
+    if p.options().is_css_modules_disabled() {
         // @value at-rule is not a standard CSS feature.
         // Provide a hint on how to enable parsing of @value at-rules.
         p.error(value_at_rule_not_allowed(p, p.cur_range()));

@@ -4,6 +4,8 @@ pub(crate) mod attribute_matcher;
 pub(crate) mod attribute_matcher_value;
 pub(crate) mod attribute_name;
 pub(crate) mod binary_expression;
+pub(crate) mod composes_import_specifier;
+pub(crate) mod composes_property_value;
 pub(crate) mod container_and_query;
 pub(crate) mod container_not_query;
 pub(crate) mod container_or_query;
