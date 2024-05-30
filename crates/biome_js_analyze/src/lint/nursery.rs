@@ -8,6 +8,7 @@ pub mod no_done_callback;
 pub mod no_duplicate_else_if;
 pub mod no_evolving_any;
 pub mod no_flat_map_identity;
+pub mod no_label_without_control;
 pub mod no_misplaced_assertion;
 pub mod no_nodejs_modules;
 pub mod no_react_specific_props;
@@ -43,6 +44,7 @@ declare_group! {
             self :: no_duplicate_else_if :: NoDuplicateElseIf ,
             self :: no_evolving_any :: NoEvolvingAny ,
             self :: no_flat_map_identity :: NoFlatMapIdentity ,
+            self :: no_label_without_control :: NoLabelWithoutControl ,
             self :: no_misplaced_assertion :: NoMisplacedAssertion ,
             self :: no_nodejs_modules :: NoNodejsModules ,
             self :: no_react_specific_props :: NoReactSpecificProps ,

@@ -36,7 +36,7 @@ impl<'a> Iterator for InterpretEscapedString<'a> {
 
 /// unescape
 ///
-pub(crate) fn escape_string(s: &str) -> Result<String, EscapeError> {
+pub(crate) fn unescape_string(s: &str) -> Result<String, EscapeError> {
     (InterpretEscapedString { s: s.chars() }).collect()
 }
 

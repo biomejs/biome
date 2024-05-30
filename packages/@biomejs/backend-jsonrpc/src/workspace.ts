@@ -1010,6 +1010,10 @@ export interface Nursery {
 	 */
 	noInvalidPositionAtImportRule?: RuleConfiguration_for_Null;
 	/**
+	 * Enforce that a label element or component has a text label and an associated input.
+	 */
+	noLabelWithoutControl?: RuleConfiguration_for_NoLabelWithoutControlOptions;
+	/**
 	 * Checks that the assertion function, for example expect, is placed inside an it() function call.
 	 */
 	noMisplacedAssertion?: RuleConfiguration_for_Null;
@@ -1675,6 +1679,9 @@ export type RuleConfiguration_for_HooksOptions =
 export type RuleConfiguration_for_DeprecatedHooksOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_DeprecatedHooksOptions;
+export type RuleConfiguration_for_NoLabelWithoutControlOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_NoLabelWithoutControlOptions;
 export type RuleConfiguration_for_RestrictedImportsOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_RestrictedImportsOptions;
@@ -1761,6 +1768,16 @@ export interface RuleWithOptions_for_DeprecatedHooksOptions {
 	 * Rule's options
 	 */
 	options: DeprecatedHooksOptions;
+}
+export interface RuleWithOptions_for_NoLabelWithoutControlOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: NoLabelWithoutControlOptions;
 }
 export interface RuleWithOptions_for_RestrictedImportsOptions {
 	/**
@@ -1864,6 +1881,20 @@ export interface HooksOptions {
  * Options for the `useHookAtTopLevel` rule have been deprecated, since we now use the React hook naming convention to determine whether a function is a hook.
  */
 export interface DeprecatedHooksOptions {}
+export interface NoLabelWithoutControlOptions {
+	/**
+	 * Array of component names that should be considered the same as an `input` element.
+	 */
+	inputComponents: string[];
+	/**
+	 * Array of attributes that should be treated as the `label` accessible text content.
+	 */
+	labelAttributes: string[];
+	/**
+	 * Array of component names that should be considered the same as a `label` element.
+	 */
+	labelComponents: string[];
+}
 /**
  * Options for the rule `noRestrictedImports`.
  */
@@ -2297,6 +2328,7 @@ export type Category =
 	| "lint/nursery/noFlatMapIdentity"
 	| "lint/nursery/noImportantInKeyframe"
 	| "lint/nursery/noInvalidPositionAtImportRule"
+	| "lint/nursery/noLabelWithoutControl"
 	| "lint/nursery/noMisplacedAssertion"
 	| "lint/nursery/noMissingGenericFamilyKeyword"
 	| "lint/nursery/noNodejsModules"
