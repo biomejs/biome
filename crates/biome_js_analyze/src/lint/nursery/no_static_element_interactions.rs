@@ -108,7 +108,13 @@ impl Rule for NoStaticElementInteractions {
             None
         };
 
-        if has_truthy_ariahidden_attr(node) {
+        if node
+            .find_attribute_by_name("aria-hidden")
+            .map_or(false, |attr| {
+                attr.as_static_value()
+                    .map_or(true, |val| val.text() == "true")
+            })
+        {
             return None;
         }
 
@@ -209,15 +215,6 @@ pub fn extract_attrs(attribute_list: &JsxAttributeList) -> Option<FxHashMap<Stri
         }
     }
     Some(defined_attributes)
-}
-
-fn has_truthy_ariahidden_attr(node: &AnyJsxElement) -> bool {
-    return node
-        .find_attribute_by_name("aria-hidden")
-        .map_or(false, |attr| {
-            attr.as_static_value()
-                .map_or(true, |val| val.text() == "true")
-        });
 }
 
 /// This function allows non-interactive Roles.
