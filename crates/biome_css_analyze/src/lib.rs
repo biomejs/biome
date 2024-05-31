@@ -146,7 +146,7 @@ mod tests {
 
     use crate::{analyze, AnalysisFilter, ControlFlow};
 
-    #[ignore]
+    // #[ignore]
     #[test]
     fn quick_test() {
         fn markup_to_string(markup: Markup) -> String {
@@ -158,12 +158,29 @@ mod tests {
             String::from_utf8(buffer).unwrap()
         }
 
-        const SOURCE: &str = r#"@font-face { font-family: Gentium; }"#;
+        const SOURCE: &str = r#"
+        a:hover {}
+        :not(p) {}
+        input:-moz-placeholder {}
+        :root { }
+        :--heading { }
+        ::-webkit-scrollbar-thumb:window-inactive { }
+        a:nth-child(0) {}
+        a:has(> img, +dt) {}
+        :host(span:focus) {}
+        :-webkit-any(i,p,:link,span:focus) {}
+        :dir(rtl) {}
+        "#;
+
+        CssParserOptions {
+            allow_wrong_line_comments: true,
+            ..Default::default()
+        };
 
         let parsed = parse_css(SOURCE, CssParserOptions::default());
 
         let mut error_ranges: Vec<TextRange> = Vec::new();
-        let rule_filter = RuleFilter::Rule("nursery", "noMissingGenericFamilyKeyword");
+        let rule_filter = RuleFilter::Rule("nursery", "noUnknownPseudoClassSelector");
         let options = AnalyzerOptions::default();
         analyze(
             &parsed.tree(),

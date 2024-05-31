@@ -1,10 +1,16 @@
-use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic};
+use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
-use biome_css_syntax::CssDeclarationOrRuleBlock;
-use biome_rowan::AstNode;
+use biome_css_syntax::{
+    AnyCssPseudoClass, CssPseudoClassFunctionCompoundSelector,
+    CssPseudoClassFunctionCompoundSelectorList, CssPseudoClassFunctionIdentifier,
+    CssPseudoClassFunctionNth, CssPseudoClassFunctionRelativeSelectorList,
+    CssPseudoClassFunctionSelector, CssPseudoClassFunctionSelectorList,
+    CssPseudoClassFunctionValueList, CssPseudoClassIdentifier, CssPseudoClassSelector,
+};
+use biome_rowan::{declare_node_union, AstNode};
 
 declare_rule! {
-    /// Succinct description of the rule.
+    /// Disallow unknown pseudo-class selectors.
     ///
     /// Put context and details about the rule.
     /// As a starting point, you can take the description of the corresponding _ESLint_ rule (if any).
@@ -34,21 +40,76 @@ declare_rule! {
         name: "noUnknownPseudoClassSelector",
         language: "css",
         recommended: false,
+        sources: &[RuleSource::Stylelint("selector-pseudo-class-no-unknown")],
     }
 }
 
+declare_node_union! {
+    pub AnyWithoutBogusPseudoSelector = CssPseudoClassFunctionCompoundSelector|CssPseudoClassFunctionCompoundSelectorList|CssPseudoClassFunctionIdentifier
+                                        |CssPseudoClassFunctionNth|CssPseudoClassFunctionRelativeSelectorList|CssPseudoClassFunctionSelector
+                                        |CssPseudoClassFunctionSelectorList|CssPseudoClassFunctionValueList|CssPseudoClassIdentifier
+}
+
 impl Rule for NoUnknownPseudoClassSelector {
-    type Query = Ast<CssDeclarationOrRuleBlock>;
-    type State = CssDeclarationOrRuleBlock;
+    type Query = Ast<CssPseudoClassSelector>;
+    type State = AnyCssPseudoClass;
     type Signals = Option<Self::State>;
     type Options = ();
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let node = ctx.query();
-        if node.items().into_iter().next().is_none() {
-            return Some(node.clone());
-        }
-        None
+        let pseudo_class = node.class().ok()?;
+        let (pseudo_selector_name, pseudo_selector_range) = match &pseudo_class {
+            biome_css_syntax::AnyCssPseudoClass::CssBogusPseudoClass(_) => None,
+            biome_css_syntax::AnyCssPseudoClass::CssPseudoClassFunctionCompoundSelector(
+                selector,
+            ) => {
+                let name = selector.name().ok()?;
+                Some((name.to_string(), name.text_range()))
+            }
+            biome_css_syntax::AnyCssPseudoClass::CssPseudoClassFunctionCompoundSelectorList(
+                selector_list,
+            ) => {
+                let name = selector_list.name().ok()?;
+                Some((name.to_string(), name.text_range()))
+            }
+            biome_css_syntax::AnyCssPseudoClass::CssPseudoClassFunctionIdentifier(ident) => {
+                let name = ident.name_token().ok()?;
+                Some((name.to_string(), name.text_range()))
+            }
+            biome_css_syntax::AnyCssPseudoClass::CssPseudoClassFunctionNth(func_nth) => {
+                let name = func_nth.name().ok()?;
+                Some((name.to_string(), name.text_range()))
+            }
+            biome_css_syntax::AnyCssPseudoClass::CssPseudoClassFunctionRelativeSelectorList(
+                selector_list,
+            ) => {
+                let name = selector_list.name_token().ok()?;
+                Some((name.to_string(), name.text_range()))
+            }
+            biome_css_syntax::AnyCssPseudoClass::CssPseudoClassFunctionSelector(selector) => {
+                let name = selector.name().ok()?;
+                Some((name.to_string(), name.text_range()))
+            }
+            biome_css_syntax::AnyCssPseudoClass::CssPseudoClassFunctionSelectorList(
+                selector_list,
+            ) => {
+                let name = selector_list.name().ok()?;
+                Some((name.to_string(), name.text_range()))
+            }
+            biome_css_syntax::AnyCssPseudoClass::CssPseudoClassFunctionValueList(
+                func_value_list,
+            ) => {
+                let name = func_value_list.name_token().ok()?;
+                Some((name.to_string(), name.text_range()))
+            }
+            biome_css_syntax::AnyCssPseudoClass::CssPseudoClassIdentifier(ident) => {
+                let name = ident.name().ok()?;
+                Some((name.to_string(), name.range()))
+            }
+        }?;
+
+        Some(pseudo_class)
     }
 
     fn diagnostic(_: &RuleContext<Self>, node: &Self::State) -> Option<RuleDiagnostic> {
