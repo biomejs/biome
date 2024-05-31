@@ -199,7 +199,8 @@ pub enum ReportMode {
     Json { pretty: bool },
     /// Reports information for GitHub
     GitHub,
-    /// JUnit output https://github.com/testmoapp/junitxml?tab=readme-ov-file#basic-junit-xml-structure
+    /// JUnit output 
+    /// Ref: https://github.com/testmoapp/junitxml?tab=readme-ov-file#basic-junit-xml-structure
     Junit,
 }
 
