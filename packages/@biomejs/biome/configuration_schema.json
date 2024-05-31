@@ -1814,6 +1814,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noUnusedFunctionParameters": {
+					"description": "Disallow unused function parameters.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleFixConfiguration_for_Null" },
+						{ "type": "null" }
+					]
+				},
 				"noUselessStringConcat": {
 					"description": "Disallow unnecessary concatenation of string or template literals.",
 					"anyOf": [
