@@ -147,6 +147,38 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
   Contributed by @ematipico
 
 - `biome ci` now enforces printing the output using colours. If you were previously using `--colors=force`, you can remove it because it's automatically set. Contributed by @ematipico
+- Add a new `--reporter` called `github`. This reporter will print diagnostics using [GitHub workflow commands](https://docs.github.com/en/actions/using-workflows/workflow-commands-for-github-actions#about-workflow-commands):
+
+  ```
+  ::error title=lint/suspicious/noDoubleEquals,file=main.ts,line=4,endLine=4,col=3,endColumn=5::Use === instead of ==
+  ::error title=lint/suspicious/noDebugger,file=main.ts,line=6,endLine=6,col=1,endColumn=9::This is an unexpected use of the debugger statement.
+  ::error title=lint/nursery/noEvolvingAny,file=main.ts,line=8,endLine=8,col=5,endColumn=6::This variable's type is not allowed to evolve implicitly, leading to potential any types.
+  ```
+  Contributed by @ematipico
+- Add a new `--reporter` called `junit`. This reporter will print diagnostics using [GitHub workflow commands](https://docs.github.com/en/actions/using-workflows/workflow-commands-for-github-actions#about-workflow-commands):
+
+  ```xml
+  <?xml version="1.0" encoding="UTF-8"?>
+  <testsuites name="Biome" tests="16" failures="16" errors="20" time="<TIME>">
+    <testsuite name="main.ts" tests="1" disabled="0" errors="0" failures="1" package="org.biome">
+        <testcase name="org.biome.lint.suspicious.noDoubleEquals" line="4" column="3">
+            <failure message="Use === instead of ==. == is only allowed when comparing against `null`">line 3, col 2, Use === instead of ==. == is only allowed when comparing against `null`</failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="main.ts" tests="1" disabled="0" errors="0" failures="1" package="org.biome">
+        <testcase name="org.biome.lint.suspicious.noDebugger" line="6" column="1">
+            <failure message="This is an unexpected use of the debugger statement.">line 5, col 0, This is an unexpected use of the debugger statement.</failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="main.ts" tests="1" disabled="0" errors="0" failures="1" package="org.biome">
+        <testcase name="org.biome.lint.nursery.noEvolvingAny" line="8" column="5">
+            <failure message="This variable&apos;s type is not allowed to evolve implicitly, leading to potential any types.">line 7, col 4, This variable&apos;s type is not allowed to evolve implicitly, leading to potential any types.</failure>
+        </testcase>
+    </testsuite>
+  </testsuites>
+  ```
+  Contributed by @ematipico
+
 
 ### Configuration
 
