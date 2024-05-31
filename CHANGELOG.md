@@ -13,6 +13,12 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 ### Analyzer
 
+#### New features
+
+- Allow suppression comments to suppress individual instances of rules. This is
+  used for the lint rule `useExhaustiveDependencies`, which is now able to
+  suppress specific dependencies. Fixes #2509. Contributed by @arendjr
+
 #### Enhancements
 
 - Assume `Astro` object is always a global when processing `.astro` files. Contributed by @minht11
