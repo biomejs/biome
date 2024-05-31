@@ -1,9 +1,10 @@
-use std::collections::HashSet;
-
-use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic};
+use biome_analyze::{
+    context::RuleContext, declare_rule, AddVisitor, Phases, QueryMatch, Queryable, Rule,
+    RuleDiagnostic, ServiceBag, Visitor, VisitorContext,
+};
 use biome_console::markup;
-use biome_css_syntax::{CssDeclarationOrRuleList, CssGenericProperty, CssSyntaxKind};
-use biome_rowan::{AstNode, SyntaxNodeCast, TextRange};
+use biome_css_syntax::{CssGenericProperty, CssLanguage, CssSyntaxKind};
+use biome_rowan::{AstNode, Language, SyntaxNode, SyntaxNodeCast, TextRange, WalkEvent};
 
 use crate::utils::{get_longhand_sub_properties, get_reset_to_initial_properties};
 
@@ -44,43 +45,95 @@ declare_rule! {
     }
 }
 
-fn get_css_declaration_list(property: &CssGenericProperty) -> Option<CssDeclarationOrRuleList> {
-    for ancestor in property.syntax().ancestors() {
-        if matches!(ancestor.kind(), CssSyntaxKind::CSS_DECLARATION_OR_RULE_LIST) {
-            return ancestor.cast::<CssDeclarationOrRuleList>();
-        }
-    }
-
-    None
+#[derive(Default)]
+struct NoDeclarationBlockShorthandPropertyOverridesVisitor {
+    prior_property_names_in_declaration_block: Vec<String>,
 }
 
-fn get_prior_property_names_in_block(
-    target_property: &CssGenericProperty,
-) -> Option<HashSet<String>> {
-    let declaration_list = get_css_declaration_list(target_property)?;
+impl Visitor for NoDeclarationBlockShorthandPropertyOverridesVisitor {
+    type Language = CssLanguage;
 
-    let mut prior_declarations = HashSet::new();
-    for declaration in declaration_list {
-        if let Some(declaration) = declaration.as_css_declaration_with_semicolon() {
-            let current_property = declaration.declaration().ok()?.property().ok()?;
+    fn visit(
+        &mut self,
+        event: &WalkEvent<SyntaxNode<Self::Language>>,
+        mut ctx: VisitorContext<Self::Language>,
+    ) {
+        match event {
+            WalkEvent::Enter(node) => match node.kind() {
+                CssSyntaxKind::CSS_DECLARATION_OR_RULE_BLOCK => {
+                    self.prior_property_names_in_declaration_block.clear();
+                }
+                CssSyntaxKind::CSS_GENERIC_PROPERTY => {
+                    if let Some(property_node) = node.clone().cast::<CssGenericProperty>() {
+                        if let Ok(target_property_name_node) = property_node.name() {
+                            let target_property_name =
+                                target_property_name_node.text().to_lowercase();
 
-            let current_property =
-                if let Some(current_property) = current_property.as_css_generic_property() {
-                    current_property
-                } else {
-                    continue;
-                };
+                            let longhand_sub_properties =
+                                get_longhand_sub_properties(&target_property_name);
+                            let reset_to_initial_properties =
+                                get_reset_to_initial_properties(&target_property_name);
 
-            if current_property == target_property {
-                break;
-            }
+                            self.prior_property_names_in_declaration_block
+                                .iter()
+                                .for_each(|prior_property_name| {
+                                    if longhand_sub_properties
+                                        .contains(&prior_property_name.as_str())
+                                        || reset_to_initial_properties
+                                            .contains(&prior_property_name.as_str())
+                                    {
+                                        ctx.match_query(
+                                            NoDeclarationBlockShorthandPropertyOverridesQuery {
+                                                target_property_node: property_node.clone(),
+                                                override_property_name: prior_property_name.clone(),
+                                            },
+                                        );
+                                    }
+                                });
 
-            let current_property_name = current_property.name().ok()?.text().to_lowercase();
-            prior_declarations.insert(current_property_name);
+                            self.prior_property_names_in_declaration_block
+                                .push(target_property_name);
+                        }
+                    }
+                }
+                _ => {}
+            },
+            _ => {}
         }
     }
+}
 
-    Some(prior_declarations)
+#[derive(Clone)]
+pub struct NoDeclarationBlockShorthandPropertyOverridesQuery {
+    target_property_node: CssGenericProperty,
+    override_property_name: String,
+}
+
+impl QueryMatch for NoDeclarationBlockShorthandPropertyOverridesQuery {
+    fn text_range(&self) -> TextRange {
+        self.target_property_node.range()
+    }
+}
+
+impl Queryable for NoDeclarationBlockShorthandPropertyOverridesQuery {
+    type Input = Self;
+    type Language = CssLanguage;
+    type Output = NoDeclarationBlockShorthandPropertyOverridesQuery;
+    type Services = ();
+
+    fn build_visitor(
+        analyzer: &mut impl AddVisitor<Self::Language>,
+        _: &<Self::Language as Language>::Root,
+    ) {
+        analyzer.add_visitor(
+            Phases::Syntax,
+            NoDeclarationBlockShorthandPropertyOverridesVisitor::default,
+        );
+    }
+
+    fn unwrap_match(_: &ServiceBag, query: &Self::Input) -> Self::Output {
+        query.clone()
+    }
 }
 
 pub struct NoDeclarationBlockShorthandPropertyOverridesState {
@@ -90,34 +143,24 @@ pub struct NoDeclarationBlockShorthandPropertyOverridesState {
 }
 
 impl Rule for NoShorthandPropertyOverrides {
-    type Query = Ast<CssGenericProperty>;
+    type Query = NoDeclarationBlockShorthandPropertyOverridesQuery;
     type State = NoDeclarationBlockShorthandPropertyOverridesState;
     type Signals = Option<Self::State>;
     type Options = ();
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
-        let node = ctx.query();
+        let query = ctx.query();
 
-        let target_property_name_node = node.name().ok()?;
-        let target_property_name = target_property_name_node.text().to_lowercase();
+        let (target_property_name, span) = {
+            let name = query.target_property_node.name().ok()?;
+            (name.text().to_lowercase(), name.range())
+        };
 
-        let prior_property_names = get_prior_property_names_in_block(node)?;
-        let longhand_sub_properties = get_longhand_sub_properties(&target_property_name);
-        let reset_to_initial_properties = get_reset_to_initial_properties(&target_property_name);
-
-        for prior_property_name in prior_property_names {
-            if longhand_sub_properties.contains(&prior_property_name.as_str())
-                || reset_to_initial_properties.contains(&prior_property_name.as_str())
-            {
-                return Some(NoDeclarationBlockShorthandPropertyOverridesState {
-                    target_property_name,
-                    override_property_name: prior_property_name,
-                    span: target_property_name_node.range(),
-                });
-            }
-        }
-
-        None
+        Some(NoDeclarationBlockShorthandPropertyOverridesState {
+            target_property_name,
+            override_property_name: query.override_property_name.to_string(),
+            span,
+        })
     }
 
     fn diagnostic(_: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
