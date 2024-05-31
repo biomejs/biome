@@ -9,7 +9,7 @@ New entries must be placed in a section entitled `Unreleased`.
 Read
 our [guidelines for writing a good changelog entry](https://github.com/biomejs/biome/blob/main/CONTRIBUTING.md#changelog).
 
-## Unreleased
+## 1.8.0 (TBD)
 
 ### Analyzer
 
@@ -259,12 +259,18 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 - Fix a bug where if the formatter was disabled at the language level, it could be erroneously enabled by an
   override that did not specify the formatter section [#2924](https://github.com/biomejs/biome/issues/2924). Contributed by @dyc3
+- Fix [#2990](https://github.com/biomejs/biome/issues/2990), now Biome doesn't add a trailing comma when formatting `biome.json`. Contributed by @dyc3
 
 ### Editors
 
 #### New features
 
 - Add support for LSP Workspaces
+
+#### Enhancements
+
+- The LSP doesn't crash anymore when the configuration file contains errors. If the configuration contains errors, Biome now shows a pop-up to the user, and it will only parse files using the default configuration.
+  Formatting and linting is disabled until the configuration file is fixed. Contributed by @ematipico
 
 #### Bug fixes
 
