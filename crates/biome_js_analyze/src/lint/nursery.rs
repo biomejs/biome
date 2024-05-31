@@ -14,6 +14,7 @@ pub mod no_nodejs_modules;
 pub mod no_react_specific_props;
 pub mod no_restricted_imports;
 pub mod no_undeclared_dependencies;
+pub mod no_unused_function_parameters;
 pub mod no_useless_string_concat;
 pub mod no_useless_undefined_initialization;
 pub mod no_yoda_expression;
@@ -50,6 +51,7 @@ declare_group! {
             self :: no_react_specific_props :: NoReactSpecificProps ,
             self :: no_restricted_imports :: NoRestrictedImports ,
             self :: no_undeclared_dependencies :: NoUndeclaredDependencies ,
+            self :: no_unused_function_parameters :: NoUnusedFunctionParameters ,
             self :: no_useless_string_concat :: NoUselessStringConcat ,
             self :: no_useless_undefined_initialization :: NoUselessUndefinedInitialization ,
             self :: no_yoda_expression :: NoYodaExpression ,

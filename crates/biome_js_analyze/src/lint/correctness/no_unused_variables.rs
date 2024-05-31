@@ -30,6 +30,10 @@ declare_rule! {
     /// If you want to report unused imports,
     /// enable [noUnusedImports](https://biomejs.dev/linter/rules/no-unused-imports/).
     ///
+    /// From `v1.9.0`, the rule won't check unused function parameters any more.
+    /// Users should switch to
+    /// [noUnusedFunctionParameters](https://biomejs.dev/linter/rules/no-unused-function-parameters/)
+    ///
     /// ## Examples
     ///
     /// ### Invalid
@@ -65,7 +69,7 @@ declare_rule! {
     /// export function f<T>() {}
     /// ```
     ///
-    /// # Valid
+    /// ### Valid
     ///
     /// ```js
     /// function foo(b) {
@@ -99,7 +103,7 @@ declare_rule! {
     }
 }
 
-/// Suggestion if the bindnig is unused
+/// Suggestion if the binding is unused
 #[derive(Debug)]
 pub enum SuggestedFix {
     /// No suggestion will be given

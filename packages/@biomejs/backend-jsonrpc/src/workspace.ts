@@ -1058,6 +1058,10 @@ export interface Nursery {
 	 */
 	noUnmatchableAnbSelector?: RuleConfiguration_for_Null;
 	/**
+	 * Disallow unused function parameters.
+	 */
+	noUnusedFunctionParameters?: RuleFixConfiguration_for_Null;
+	/**
 	 * Disallow unnecessary concatenation of string or template literals.
 	 */
 	noUselessStringConcat?: RuleFixConfiguration_for_Null;
@@ -2342,6 +2346,7 @@ export type Category =
 	| "lint/nursery/noUnknownSelectorPseudoElement"
 	| "lint/nursery/noUnknownUnit"
 	| "lint/nursery/noUnmatchableAnbSelector"
+	| "lint/nursery/noUnusedFunctionParameters"
 	| "lint/nursery/noUselessStringConcat"
 	| "lint/nursery/noUselessUndefinedInitialization"
 	| "lint/nursery/noYodaExpression"

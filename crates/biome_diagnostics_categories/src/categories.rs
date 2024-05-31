@@ -138,6 +138,7 @@ define_categories! {
     "lint/nursery/noUnknownSelectorPseudoElement": "https://biomejs.dev/linter/rules/no-unknown-selector-pseudo-element",
     "lint/nursery/noUnknownUnit": "https://biomejs.dev/linter/rules/no-unknown-unit",
     "lint/nursery/noUnmatchableAnbSelector": "https://biomejs.dev/linter/rules/no-unmatchable-anb-selector",
+    "lint/nursery/noUnusedFunctionParameters": "https://biomejs.dev/linter/rules/no-unused-function-parameters",
     "lint/nursery/noUselessStringConcat": "https://biomejs.dev/linter/rules/no-useless-string-concat",
     "lint/nursery/noUselessUndefinedInitialization": "https://biomejs.dev/linter/rules/no-useless-undefined-initialization",
     "lint/nursery/noYodaExpression": "https://biomejs.dev/linter/rules/no-yoda-expression",
