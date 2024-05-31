@@ -41,24 +41,21 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
 # Emitted Messages
 
 ```block
-fix.js:4:5 lint/style/useSingleVarDeclarator  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+fix.js format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Declare variables separately
+  × Formatter would have printed the following content:
   
-    2 │     function f() {arguments;}
-    3 │     const FOO = "FOO";
-  > 4 │     var x, y;
-      │     ^^^^^^^^^
-    5 │     
-  
-  i Unsafe fix: Break out into multiple declarations
-  
-    2 2 │       function f() {arguments;}
-    3 3 │       const FOO = "FOO";
+    1   │ - 
+    2   │ - ····function·f()·{arguments;}
+    3   │ - ····const·FOO·=·"FOO";
     4   │ - ····var·x,·y;
-      4 │ + ····var·x;
-      5 │ + ····var·y;
-    5 6 │       
+    5   │ - ····
+      1 │ + function·f()·{
+      2 │ + → arguments;
+      3 │ + }
+      4 │ + const·FOO·=·"FOO";
+      5 │ + var·x,·y;
+      6 │ + 
   
 
 ```
@@ -105,21 +102,24 @@ fix.js:4:5 lint/style/noVar  FIXABLE  ━━━━━━━━━━━━━━
 ```
 
 ```block
-fix.js format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+fix.js:4:5 lint/style/useSingleVarDeclarator  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Formatter would have printed the following content:
+  × Declare variables separately
   
-    1   │ - 
-    2   │ - ····function·f()·{arguments;}
-    3   │ - ····const·FOO·=·"FOO";
+    2 │     function f() {arguments;}
+    3 │     const FOO = "FOO";
+  > 4 │     var x, y;
+      │     ^^^^^^^^^
+    5 │     
+  
+  i Unsafe fix: Break out into multiple declarations
+  
+    2 2 │       function f() {arguments;}
+    3 3 │       const FOO = "FOO";
     4   │ - ····var·x,·y;
-    5   │ - ····
-      1 │ + function·f()·{
-      2 │ + → arguments;
-      3 │ + }
-      4 │ + const·FOO·=·"FOO";
-      5 │ + var·x,·y;
-      6 │ + 
+      4 │ + ····var·x;
+      5 │ + ····var·y;
+    5 6 │       
   
 
 ```

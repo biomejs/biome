@@ -23,22 +23,12 @@ ci ━━━━━━━━━━━━━━━━━━━━━━━━━�
 # Emitted Messages
 
 ```block
-ci.js:1:1 lint/style/useWhile  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ci.js format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use a while loop instead of a for loop.
+  × File content differs from formatting output
   
-  > 1 │ for(;true;);
-      │ ^^^^^^^^^^^
-    2 │ 
-  
-  i Prefer a while loop over a for loop without initialization and update.
-  
-  i Safe fix: Use a while loop.
-  
-    1   │ - for(;true;);
-      1 │ + while(true);
-    2 2 │   
-  
+    1 │ for·(;·true;·);
+      │    +  +     +  
 
 ```
 
@@ -55,12 +45,22 @@ ci.js:1:6 lint/correctness/noConstantCondition ━━━━━━━━━━━
 ```
 
 ```block
-ci.js format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ci.js:1:1 lint/style/useWhile  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × File content differs from formatting output
+  × Use a while loop instead of a for loop.
   
-    1 │ for·(;·true;·);
-      │    +  +     +  
+  > 1 │ for(;true;);
+      │ ^^^^^^^^^^^
+    2 │ 
+  
+  i Prefer a while loop over a for loop without initialization and update.
+  
+  i Safe fix: Use a while loop.
+  
+    1   │ - for(;true;);
+      1 │ + while(true);
+    2 2 │   
+  
 
 ```
 

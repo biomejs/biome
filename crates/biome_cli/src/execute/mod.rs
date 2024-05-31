@@ -23,6 +23,7 @@ use biome_fs::BiomePath;
 use biome_service::workspace::{
     FeatureName, FeaturesBuilder, FixFileMode, FormatFileParams, OpenFileParams, PatternId,
 };
+use std::cmp::Ordering;
 use std::ffi::OsString;
 use std::fmt::{Display, Formatter};
 use std::path::{Path, PathBuf};
@@ -199,7 +200,7 @@ pub enum ReportMode {
     Json { pretty: bool },
     /// Reports information for GitHub
     GitHub,
-    /// JUnit output 
+    /// JUnit output
     /// Ref: https://github.com/testmoapp/junitxml?tab=readme-ov-file#basic-junit-xml-structure
     Junit,
 }
@@ -401,12 +402,19 @@ pub fn execute_mode(
         };
         migrate::run(payload)
     } else {
-        let (summary_result, diagnostics) = traverse(&execution, &mut session, cli_options, paths)?;
+        let (summary_result, mut diagnostics) =
+            traverse(&execution, &mut session, cli_options, paths)?;
         let console = session.app.console;
         let errors = summary_result.errors;
         let skipped = summary_result.skipped;
         let processed = summary_result.changed + summary_result.unchanged;
 
+        diagnostics.sort_unstable_by(|a, b| match (a.category(), b.category()) {
+            (Some(a), Some(b)) => a.name().cmp(b.name()),
+            (Some(_), None) => Ordering::Greater,
+            (None, Some(_)) => Ordering::Less,
+            _ => Ordering::Equal,
+        });
         let should_exit_on_warnings = summary_result.warnings > 0 && cli_options.error_on_warnings;
 
         match execution.report_mode {
