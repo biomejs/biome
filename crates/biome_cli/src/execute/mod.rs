@@ -296,13 +296,6 @@ impl Execution {
         matches!(self.traversal_mode, TraversalMode::CI { .. })
     }
 
-    pub(crate) const fn is_ci_github(&self) -> bool {
-        if let TraversalMode::CI { environment } = &self.traversal_mode {
-            return matches!(environment, Some(ExecutionEnvironment::GitHub));
-        }
-        false
-    }
-
     pub(crate) const fn is_check(&self) -> bool {
         matches!(self.traversal_mode, TraversalMode::Check { .. })
     }

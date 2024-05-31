@@ -178,32 +178,6 @@ fn redact_snapshot(input: &str) -> Option<Cow<'_, str>> {
     output = replace_temp_dir(output);
     output = replace_biome_dir(output);
 
-    // Ref: https://docs.github.com/actions/learn-github-actions/variables#default-environment-variables
-    let is_github = std::env::var("GITHUB_ACTIONS")
-        .ok()
-        .map_or(false, |value| value == "true");
-
-    if is_github {
-        // GitHub actions sets the env var GITHUB_ACTIONS=true in CI
-        // Based on that, biome also has a feature that detects if it's running on GH Actions and
-        // emits additional information in the output (workflow commands, see PR + discussion at #681)
-        // To avoid polluting snapshots with that, we filter out those lines
-
-        let lines: Vec<_> = output
-            .split('\n')
-            .filter(|line| {
-                !line.starts_with("::notice ")
-                    && !line.starts_with("::warning ")
-                    && !line.starts_with("::error ")
-            })
-            .collect();
-
-        output = Cow::Owned(lines.join("\n"));
-        if output.is_empty() {
-            return None;
-        }
-    }
-
     // Normalize Windows-specific path separators to "/"
     if cfg!(windows) {
         let mut rest = &*output;
