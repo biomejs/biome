@@ -16,6 +16,27 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
 # Emitted Messages
 
 ```block
+<TEMP_DIR>/include_files_in_subdir/subdir/file.js:2:1 lint/suspicious/noDebugger  FIXABLE  ━━━━━━━━━━━━━━━━━━━━
+
+  × This is an unexpected use of the debugger statement.
+  
+    1 │ let a = 4;
+  > 2 │ debugger;
+      │ ^^^^^^^^^
+    3 │ console.log(a);
+    4 │ 
+  
+  i Unsafe fix: Remove debugger statement
+  
+    1 1 │   let a = 4;
+    2   │ - debugger;
+    3 2 │   console.log(a);
+    4 3 │   
+  
+
+```
+
+```block
 <TEMP_DIR>/include_files_in_subdir/subdir/file.js:1:1 lint/style/useConst  FIXABLE  ━━━━━━━━━━━━━━━━━━━━
 
   × This let declares a variable that is only assigned once.
@@ -38,27 +59,6 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
       1 │ + const·a·=·4;
     2 2 │   debugger;
     3 3 │   console.log(a);
-  
-
-```
-
-```block
-<TEMP_DIR>/include_files_in_subdir/subdir/file.js:2:1 lint/suspicious/noDebugger  FIXABLE  ━━━━━━━━━━━━━━━━━━━━
-
-  × This is an unexpected use of the debugger statement.
-  
-    1 │ let a = 4;
-  > 2 │ debugger;
-      │ ^^^^^^^^^
-    3 │ console.log(a);
-    4 │ 
-  
-  i Unsafe fix: Remove debugger statement
-  
-    1 1 │   let a = 4;
-    2   │ - debugger;
-    3 2 │   console.log(a);
-    4 3 │   
   
 
 ```

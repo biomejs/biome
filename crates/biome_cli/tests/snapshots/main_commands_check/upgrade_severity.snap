@@ -37,22 +37,6 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
 # Emitted Messages
 
 ```block
-file.js format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Formatter would have printed the following content:
-  
-    1   │ - if(!cond)·{·exprA();·}·else·{·exprB()·}
-      1 │ + if·(!cond)·{
-      2 │ + → exprA();
-      3 │ + }·else·{
-      4 │ + → exprB();
-      5 │ + }
-      6 │ + 
-  
-
-```
-
-```block
 file.js:1:1 lint/style/noNegationElse  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Invert blocks when performing a negation test.
@@ -64,6 +48,22 @@ file.js:1:1 lint/style/noNegationElse  FIXABLE  ━━━━━━━━━━�
   
   - if(!cond)·{·exprA();·}·else·{·exprB()·}
   + if(cond)·{·exprB()·}·else·{·exprA();·}
+  
+
+```
+
+```block
+file.js format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Formatter would have printed the following content:
+  
+    1   │ - if(!cond)·{·exprA();·}·else·{·exprB()·}
+      1 │ + if·(!cond)·{
+      2 │ + → exprA();
+      3 │ + }·else·{
+      4 │ + → exprB();
+      5 │ + }
+      6 │ + 
   
 
 ```

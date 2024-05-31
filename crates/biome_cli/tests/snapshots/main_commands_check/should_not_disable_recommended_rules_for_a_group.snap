@@ -44,16 +44,6 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
 # Emitted Messages
 
 ```block
-fix.js format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Formatter would have printed the following content:
-  
-    4 │ → → 
-      │ ----
-
-```
-
-```block
 fix.js:3:1 lint/complexity/useFlatMap  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × The call chain .map().flat() can be replaced with a single .flatMap() call.
@@ -72,6 +62,16 @@ fix.js:3:1 lint/complexity/useFlatMap  FIXABLE  ━━━━━━━━━━�
       3 │ + array.flatMap((sentence)·=>·sentence.split("·"));
     4 4 │   		
   
+
+```
+
+```block
+fix.js format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Formatter would have printed the following content:
+  
+    4 │ → → 
+      │ ----
 
 ```
 

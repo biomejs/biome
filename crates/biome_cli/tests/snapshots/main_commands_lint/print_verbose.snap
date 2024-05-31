@@ -23,18 +23,6 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
 # Emitted Messages
 
 ```block
-check.js:1:6 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Unexpected constant condition.
-  
-  > 1 │ for(;true;);
-      │      ^^^^
-    2 │ 
-  
-
-```
-
-```block
 check.js:1:1 lint/style/useWhile  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Use a while loop instead of a for loop.
@@ -50,6 +38,18 @@ check.js:1:1 lint/style/useWhile  FIXABLE  ━━━━━━━━━━━━�
     1   │ - for(;true;);
       1 │ + while(true);
     2 2 │   
+  
+
+```
+
+```block
+check.js:1:6 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected constant condition.
+  
+  > 1 │ for(;true;);
+      │      ^^^^
+    2 │ 
   
 
 ```

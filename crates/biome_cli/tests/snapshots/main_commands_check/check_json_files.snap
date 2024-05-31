@@ -36,18 +36,6 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
 # Emitted Messages
 
 ```block
-test.json format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Formatter would have printed the following content:
-  
-    1   │ - {·"foo":·true,·"foo":·true·}
-      1 │ + {·"foo":·true,·"foo":·true·}
-      2 │ + 
-  
-
-```
-
-```block
 test.json:1:3 lint/nursery/noDuplicateJsonKeys ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × The key foo was already declared.
@@ -61,6 +49,18 @@ test.json:1:3 lint/nursery/noDuplicateJsonKeys ━━━━━━━━━━━
       │                ^^^^^
   
   i If a key is defined multiple times, only the last definition takes effect. Previous definitions are ignored.
+  
+
+```
+
+```block
+test.json format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Formatter would have printed the following content:
+  
+    1   │ - {·"foo":·true,·"foo":·true·}
+      1 │ + {·"foo":·true,·"foo":·true·}
+      2 │ + 
   
 
 ```

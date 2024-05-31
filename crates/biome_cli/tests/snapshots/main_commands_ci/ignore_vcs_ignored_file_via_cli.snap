@@ -39,18 +39,6 @@ ci ━━━━━━━━━━━━━━━━━━━━━━━━━�
 # Emitted Messages
 
 ```block
-file1.js format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × File content differs from formatting output
-  
-    1   │ - array.map(sentence·=>·sentence.split('·')).flat();
-      1 │ + array.map((sentence)·=>·sentence.split("·")).flat();
-      2 │ + 
-  
-
-```
-
-```block
 file1.js:1:1 lint/complexity/useFlatMap  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × The call chain .map().flat() can be replaced with a single .flatMap() call.
@@ -62,6 +50,18 @@ file1.js:1:1 lint/complexity/useFlatMap  FIXABLE  ━━━━━━━━━━
   
   - array.map(sentence·=>·sentence.split('·')).flat();
   + array.flatMap(sentence·=>·sentence.split('·'));
+  
+
+```
+
+```block
+file1.js format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × File content differs from formatting output
+  
+    1   │ - array.map(sentence·=>·sentence.split('·')).flat();
+      1 │ + array.map((sentence)·=>·sentence.split("·")).flat();
+      2 │ + 
   
 
 ```

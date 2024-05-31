@@ -41,6 +41,29 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
 # Emitted Messages
 
 ```block
+fix.js:4:5 lint/style/useSingleVarDeclarator  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Declare variables separately
+  
+    2 │     function f() {arguments;}
+    3 │     const FOO = "FOO";
+  > 4 │     var x, y;
+      │     ^^^^^^^^^
+    5 │     
+  
+  i Unsafe fix: Break out into multiple declarations
+  
+    2 2 │       function f() {arguments;}
+    3 3 │       const FOO = "FOO";
+    4   │ - ····var·x,·y;
+      4 │ + ····var·x;
+      5 │ + ····var·y;
+    5 6 │       
+  
+
+```
+
+```block
 fix.js:2:19 lint/style/noArguments ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Use the rest parameters instead of arguments.
@@ -77,29 +100,6 @@ fix.js:4:5 lint/style/noVar  FIXABLE  ━━━━━━━━━━━━━━
     4   │ - ····var·x,·y;
       4 │ + ····let·x,·y;
     5 5 │       
-  
-
-```
-
-```block
-fix.js:4:5 lint/style/useSingleVarDeclarator  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Declare variables separately
-  
-    2 │     function f() {arguments;}
-    3 │     const FOO = "FOO";
-  > 4 │     var x, y;
-      │     ^^^^^^^^^
-    5 │     
-  
-  i Unsafe fix: Break out into multiple declarations
-  
-    2 2 │       function f() {arguments;}
-    3 3 │       const FOO = "FOO";
-    4   │ - ····var·x,·y;
-      4 │ + ····var·x;
-      5 │ + ····var·y;
-    5 6 │       
   
 
 ```
