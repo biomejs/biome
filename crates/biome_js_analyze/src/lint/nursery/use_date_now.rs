@@ -50,7 +50,7 @@ declare_rule! {
     /// ```
     ///
     pub UseDateNow {
-        version: "next",
+        version: "1.8.0",
         name: "useDateNow",
         language: "js",
         sources: &[RuleSource::EslintUnicorn("prefer-date-now")],

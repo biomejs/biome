@@ -289,6 +289,16 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 ### Linter
 
+#### Promoted rules
+
+New rules are incubated in the nursery group. Once stable, we promote them to a stable group. The following rules are promoted:
+
+- [useImportRestrictions](https://biomejs.dev/linter/rules/use-import-restrictions/)
+- [noNodejsModules](https://biomejs.dev/linter/rules/no-nodejs-modules/)
+- [useArrayLiterals](https://biomejs.dev/linter/rules/use-array-literals/)
+- [noConstantMathMinMaxClamp](https://biomejs.dev/linter/rules/no-constant-math-min-max-clamp/)
+- [noFlatMapIdentity](https://biomejs.dev/linter/rules/no-flat-map-identity/)
+
 #### New features
 
 - Add [nursery/useDateNow](https://biomejs.dev/linter/rules/use-date-now/). Contributed by @minht11

@@ -50,7 +50,7 @@ declare_rule! {
     /// This will be improved in the future once Biome supports type inference.
     ///
     pub UseThrowOnlyError {
-        version: "next",
+        version: "1.8.0",
         name: "useThrowOnlyError",
         language: "js",
         sources: &[RuleSource::Eslint("no-throw-literal"), RuleSource::EslintTypeScript("no-throw-literal"), RuleSource::EslintTypeScript("only-throw-error")],

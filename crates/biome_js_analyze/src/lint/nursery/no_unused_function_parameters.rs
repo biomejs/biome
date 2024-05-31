@@ -47,7 +47,7 @@ declare_rule! {
     /// ```
     ///
     pub NoUnusedFunctionParameters {
-        version: "next",
+        version: "1.8.0",
         name: "noUnusedFunctionParameters",
         language: "js",
         recommended: false,

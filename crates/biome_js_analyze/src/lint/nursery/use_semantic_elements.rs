@@ -33,7 +33,7 @@ declare_rule! {
     /// ```
     ///
     pub UseSemanticElements {
-        version: "next",
+        version: "1.8.0",
         name: "useSemanticElements",
         language: "jsx",
         sources: &[RuleSource::EslintJsxA11y("prefer-tag-over-role")],

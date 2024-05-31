@@ -608,6 +608,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noConstantMathMinMaxClamp": {
+					"description": "Disallow the use of Math.min and Math.max to clamp a value where the result itself is constant.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleFixConfiguration_for_Null" },
+						{ "type": "null" }
+					]
+				},
 				"noConstructorReturn": {
 					"description": "Disallow returning a value from a constructor.",
 					"anyOf": [
@@ -626,6 +633,13 @@
 					"description": "Disallows empty destructuring patterns.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noFlatMapIdentity": {
+					"description": "Disallow to use unnecessary callback on flatMap.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleFixConfiguration_for_Null" },
 						{ "type": "null" }
 					]
 				},
@@ -668,6 +682,13 @@
 					"description": "Disallow new operators with the Symbol object.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleFixConfiguration_for_Null" },
+						{ "type": "null" }
+					]
+				},
+				"noNodejsModules": {
+					"description": "Forbid the use of Node.js builtin modules.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -807,6 +828,13 @@
 				"recommended": {
 					"description": "It enables the recommended rules for this group",
 					"type": ["boolean", "null"]
+				},
+				"useArrayLiterals": {
+					"description": "Disallow Array constructors.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleFixConfiguration_for_Null" },
+						{ "type": "null" }
+					]
 				},
 				"useExhaustiveDependencies": {
 					"description": "Enforce all dependencies are correctly specified in a React hook.",
@@ -1646,13 +1674,6 @@
 						{ "type": "null" }
 					]
 				},
-				"noConstantMathMinMaxClamp": {
-					"description": "Disallow the use of Math.min and Math.max to clamp a value where the result itself is constant.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleFixConfiguration_for_Null" },
-						{ "type": "null" }
-					]
-				},
 				"noDoneCallback": {
 					"description": "Disallow using a callback in asynchronous tests and hooks.",
 					"anyOf": [
@@ -1709,13 +1730,6 @@
 						{ "type": "null" }
 					]
 				},
-				"noFlatMapIdentity": {
-					"description": "Disallow to use unnecessary callback on flatMap.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleFixConfiguration_for_Null" },
-						{ "type": "null" }
-					]
-				},
 				"noImportantInKeyframe": {
 					"description": "Disallow invalid !important within keyframe declarations",
 					"anyOf": [
@@ -1739,13 +1753,6 @@
 				},
 				"noMisplacedAssertion": {
 					"description": "Checks that the assertion function, for example expect, is placed inside an it() function call.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"noNodejsModules": {
-					"description": "Forbid the use of Node.js builtin modules.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
@@ -1853,13 +1860,6 @@
 						{ "type": "null" }
 					]
 				},
-				"useArrayLiterals": {
-					"description": "Disallow Array constructors.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleFixConfiguration_for_Null" },
-						{ "type": "null" }
-					]
-				},
 				"useConsistentBuiltinInstantiation": {
 					"description": "Enforce the use of new for all builtins, except String, Number, Boolean, Symbol and BigInt.",
 					"anyOf": [
@@ -1913,13 +1913,6 @@
 					"description": "Enforce file extensions for relative imports.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleFixConfiguration_for_Null" },
-						{ "type": "null" }
-					]
-				},
-				"useImportRestrictions": {
-					"description": "Disallows package private imports.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -2790,6 +2783,13 @@
 					"description": "This rule enforces the use of \\<>...\\</> over \\<Fragment>...\\</Fragment>.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleFixConfiguration_for_Null" },
+						{ "type": "null" }
+					]
+				},
+				"useImportRestrictions": {
+					"description": "Disallows package private imports.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
 					]
 				},

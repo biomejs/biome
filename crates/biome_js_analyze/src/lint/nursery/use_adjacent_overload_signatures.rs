@@ -85,7 +85,7 @@ declare_rule! {
     /// ```
     ///
     pub UseAdjacentOverloadSignatures {
-        version: "next",
+        version: "1.8.0",
         name: "useAdjacentOverloadSignatures",
         language: "js",
         sources: &[

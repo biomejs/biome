@@ -30,6 +30,7 @@ pub mod use_export_type;
 pub mod use_filenaming_convention;
 pub mod use_for_of;
 pub mod use_fragment_syntax;
+pub mod use_import_restrictions;
 pub mod use_import_type;
 pub mod use_literal_enum_members;
 pub mod use_naming_convention;
@@ -78,6 +79,7 @@ declare_group! {
             self :: use_filenaming_convention :: UseFilenamingConvention ,
             self :: use_for_of :: UseForOf ,
             self :: use_fragment_syntax :: UseFragmentSyntax ,
+            self :: use_import_restrictions :: UseImportRestrictions ,
             self :: use_import_type :: UseImportType ,
             self :: use_literal_enum_members :: UseLiteralEnumMembers ,
             self :: use_naming_convention :: UseNamingConvention ,
