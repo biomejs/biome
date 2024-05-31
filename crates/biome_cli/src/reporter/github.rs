@@ -34,10 +34,10 @@ impl<'a> ReporterVisitor for GithubReporterVisitor<'a> {
             if diagnostic.severity() >= diagnostics_payload.diagnostic_level {
                 if diagnostic.tags().is_verbose() {
                     if diagnostics_payload.verbose {
-                        self.0.error(markup! {{PrintGitHubDiagnostic(diagnostic)}});
+                        self.0.log(markup! {{PrintGitHubDiagnostic(diagnostic)}});
                     }
                 } else {
-                    self.0.error(markup! {{PrintGitHubDiagnostic(diagnostic)}});
+                    self.0.log(markup! {{PrintGitHubDiagnostic(diagnostic)}});
                 }
             }
         }
