@@ -65,8 +65,7 @@ impl<'a> ReporterVisitor for ConsoleReporterVisitor<'a> {
                 }
             }
             if execution.is_ci_github() {
-                self.0
-                    .log(markup! {{PrintGitHubDiagnostic::simple(diagnostic)}});
+                self.0.log(markup! {{PrintGitHubDiagnostic(diagnostic)}});
             }
         }
 

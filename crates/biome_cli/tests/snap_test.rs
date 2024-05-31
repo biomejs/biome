@@ -18,6 +18,7 @@ use std::path::{Path, PathBuf, MAIN_SEPARATOR};
 
 lazy_static! {
     static ref TIME_REGEX: Regex = Regex::new("\\s[0-9]+[mµn]?s\\.").unwrap();
+    static ref TIME_JUNIT_REGEX: Regex = Regex::new("time=\\\"[.0-9]+\\\"").unwrap();
 }
 
 #[derive(Default)]
@@ -156,6 +157,13 @@ fn redact_snapshot(input: &str) -> Option<Cow<'_, str>> {
     let the_match = TIME_REGEX.find(output.as_ref()).map(|f| f.start()..f.end());
     if let Some(found) = the_match {
         output.to_mut().replace_range(found, " <TIME>.");
+    }
+
+    let the_match = TIME_JUNIT_REGEX
+        .find(output.as_ref())
+        .map(|f| f.start()..f.end());
+    if let Some(found) = the_match {
+        output.to_mut().replace_range(found, "time=\"<TIME>\"");
     }
 
     // Normalize the name of the current executable to "biome"

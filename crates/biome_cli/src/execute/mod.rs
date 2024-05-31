@@ -9,7 +9,9 @@ use crate::commands::MigrateSubCommand;
 use crate::diagnostics::ReportDiagnostic;
 use crate::execute::migrate::MigratePayload;
 use crate::execute::traverse::traverse;
+use crate::reporter::github::{GithubReporter, GithubReporterVisitor};
 use crate::reporter::json::{JsonReporter, JsonReporterVisitor};
+use crate::reporter::junit::{JunitReporter, JunitReporterVisitor};
 use crate::reporter::summary::{SummaryReporter, SummaryReporterVisitor};
 use crate::reporter::terminal::{ConsoleReporter, ConsoleReporterVisitor};
 use crate::{CliDiagnostic, CliSession, DiagnosticsPayload, Reporter};
@@ -195,6 +197,10 @@ pub enum ReportMode {
     Terminal { with_summary: bool },
     /// Reports information in JSON format
     Json { pretty: bool },
+    /// Reports information for GitHub
+    GitHub,
+    /// JUnit output https://github.com/testmoapp/junitxml?tab=readme-ov-file#basic-junit-xml-structure
+    Junit,
 }
 
 impl Default for ReportMode {
@@ -214,6 +220,8 @@ impl From<CliReporter> for ReportMode {
             CliReporter::Summary => Self::Terminal { with_summary: true },
             CliReporter::Json => Self::Json { pretty: false },
             CliReporter::JsonPretty => Self::Json { pretty: true },
+            CliReporter::GitHub => Self::GitHub,
+            CliReporter::Junit => Self::Junit,
         }
     }
 }
@@ -465,6 +473,29 @@ pub fn execute_mode(
                         {buffer}
                     });
                 }
+            }
+            ReportMode::GitHub => {
+                let reporter = GithubReporter {
+                    diagnostics_payload: DiagnosticsPayload {
+                        verbose: cli_options.verbose,
+                        diagnostic_level: cli_options.diagnostic_level,
+                        diagnostics,
+                    },
+                    execution: execution.clone(),
+                };
+                reporter.write(&mut GithubReporterVisitor(console))?;
+            }
+            ReportMode::Junit => {
+                let reporter = JunitReporter {
+                    summary: summary_result,
+                    diagnostics_payload: DiagnosticsPayload {
+                        verbose: cli_options.verbose,
+                        diagnostic_level: cli_options.diagnostic_level,
+                        diagnostics,
+                    },
+                    execution: execution.clone(),
+                };
+                reporter.write(&mut JunitReporterVisitor::new(console))?;
             }
         }
 
