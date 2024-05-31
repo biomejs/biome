@@ -184,6 +184,28 @@ fn handle_function_body(
     model: &SemanticModel,
     is_inside_jsx: bool,
 ) -> Vec<TextRange> {
+    // if the return statement definitely has a key prop, don't need to check the rest of the function
+    let return_statement = node
+        .statements()
+        .iter()
+        .find_map(|statement| statement.as_js_return_statement().cloned());
+    let is_return_component = return_statement
+        .as_ref()
+        .and_then(|ret| {
+            let returned_value = ret.argument()?;
+            Some(ReactComponentExpression::can_cast(
+                returned_value.syntax().kind(),
+            ))
+        })
+        .unwrap_or(false);
+    let ranges = return_statement.and_then(|ret| {
+        let returned_value = ret.argument()?;
+        handle_potential_react_component(returned_value, model, is_inside_jsx)
+    });
+    if ranges.is_none() && is_return_component {
+        return vec![];
+    }
+
     node.statements()
         .iter()
         .filter_map(|statement| {
