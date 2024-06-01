@@ -1867,6 +1867,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useConsistentStringFunctions": {
+					"description": "Succinct description of the rule.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useDateNow": {
 					"description": "Use Date.now() to get the number of milliseconds since the Unix Epoch.",
 					"anyOf": [

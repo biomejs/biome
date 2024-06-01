@@ -21,6 +21,7 @@ pub mod no_yoda_expression;
 pub mod use_adjacent_overload_signatures;
 pub mod use_array_literals;
 pub mod use_consistent_builtin_instantiation;
+pub mod use_consistent_string_functions;
 pub mod use_date_now;
 pub mod use_default_switch_clause;
 pub mod use_error_message;
@@ -58,6 +59,7 @@ declare_group! {
             self :: use_adjacent_overload_signatures :: UseAdjacentOverloadSignatures ,
             self :: use_array_literals :: UseArrayLiterals ,
             self :: use_consistent_builtin_instantiation :: UseConsistentBuiltinInstantiation ,
+            self :: use_consistent_string_functions :: UseConsistentStringFunctions ,
             self :: use_date_now :: UseDateNow ,
             self :: use_default_switch_clause :: UseDefaultSwitchClause ,
             self :: use_error_message :: UseErrorMessage ,

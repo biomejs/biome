@@ -1,0 +1,101 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```jsx
+const foo = bar.trimLeft();
+const foo = bar.trimRight();
+
+foo.substr(start, length);
+foo.substring(indexStart, indexEnd);
+
+```
+
+# Diagnostics
+```
+invalid.js:1:17 lint/nursery/useConsistentStringFunctions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Disallow using inconsistent string functions.
+  
+  > 1 │ const foo = bar.trimLeft();
+      │                 ^^^^^^^^
+    2 │ const foo = bar.trimRight();
+    3 │ 
+  
+  i Safe fix: Replace inconsistent string function trimLeft()  with trimStart().
+  
+    1   │ - const·foo·=·bar.trimLeft();
+      1 │ + const·foo·=·bar.trimStart();
+    2 2 │   const foo = bar.trimRight();
+    3 3 │   
+  
+
+```
+
+```
+invalid.js:2:17 lint/nursery/useConsistentStringFunctions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Disallow using inconsistent string functions.
+  
+    1 │ const foo = bar.trimLeft();
+  > 2 │ const foo = bar.trimRight();
+      │                 ^^^^^^^^^
+    3 │ 
+    4 │ foo.substr(start, length);
+  
+  i Safe fix: Replace inconsistent string function trimRight()  with trimEnd().
+  
+    1 1 │   const foo = bar.trimLeft();
+    2   │ - const·foo·=·bar.trimRight();
+      2 │ + const·foo·=·bar.trimEnd();
+    3 3 │   
+    4 4 │   foo.substr(start, length);
+  
+
+```
+
+```
+invalid.js:4:5 lint/nursery/useConsistentStringFunctions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Disallow using inconsistent string functions.
+  
+    2 │ const foo = bar.trimRight();
+    3 │ 
+  > 4 │ foo.substr(start, length);
+      │     ^^^^^^
+    5 │ foo.substring(indexStart, indexEnd);
+    6 │ 
+  
+  i Safe fix: Replace inconsistent string function substr()  with slice().
+  
+    2 2 │   const foo = bar.trimRight();
+    3 3 │   
+    4   │ - foo.substr(start,·length);
+      4 │ + foo.slice(start,·length);
+    5 5 │   foo.substring(indexStart, indexEnd);
+    6 6 │   
+  
+
+```
+
+```
+invalid.js:5:5 lint/nursery/useConsistentStringFunctions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Disallow using inconsistent string functions.
+  
+    4 │ foo.substr(start, length);
+  > 5 │ foo.substring(indexStart, indexEnd);
+      │     ^^^^^^^^^
+    6 │ 
+  
+  i Safe fix: Replace inconsistent string function substring()  with slice().
+  
+    3 3 │   
+    4 4 │   foo.substr(start, length);
+    5   │ - foo.substring(indexStart,·indexEnd);
+      5 │ + foo.slice(indexStart,·indexEnd);
+    6 6 │   
+  
+
+```

@@ -146,6 +146,7 @@ define_categories! {
     "lint/nursery/useArrayLiterals": "https://biomejs.dev/linter/rules/use-array-literals",
     "lint/nursery/useBiomeSuppressionComment": "https://biomejs.dev/linter/rules/use-biome-suppression-comment",
     "lint/nursery/useConsistentBuiltinInstantiation": "https://biomejs.dev/linter/rules/use-consistent-new-builtin",
+    "lint/nursery/useConsistentStringFunctions": "https://biomejs.dev/linter/rules/use-consistent-string-functions",
     "lint/nursery/useDateNow": "https://biomejs.dev/linter/rules/use-date-now",
     "lint/nursery/useDefaultSwitchClause": "https://biomejs.dev/linter/rules/use-default-switch-clause",
     "lint/nursery/useErrorMessage": "https://biomejs.dev/linter/rules/use-error-message",
