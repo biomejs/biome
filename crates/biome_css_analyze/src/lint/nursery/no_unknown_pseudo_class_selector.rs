@@ -1,5 +1,6 @@
-use crate::utils::{
-    is_custom_selector, is_known_pseudo_class, is_page_pseudo_class, vendor_prefixed,
+use crate::{
+    keywords::{WEBKIT_SCROLLBAR_PSEUDO_CLASSES, WEBKIT_SCROLLBAR_PSEUDO_ELEMENTS},
+    utils::{is_custom_selector, is_known_pseudo_class, is_page_pseudo_class, vendor_prefixed},
 };
 use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
@@ -8,9 +9,9 @@ use biome_css_syntax::{
     CssPseudoClassFunctionCompoundSelectorList, CssPseudoClassFunctionIdentifier,
     CssPseudoClassFunctionNth, CssPseudoClassFunctionRelativeSelectorList,
     CssPseudoClassFunctionSelector, CssPseudoClassFunctionSelectorList,
-    CssPseudoClassFunctionValueList, CssPseudoClassIdentifier,
+    CssPseudoClassFunctionValueList, CssPseudoClassIdentifier, CssPseudoElementSelector,
 };
-use biome_rowan::{declare_node_union, AstNode, TextRange};
+use biome_rowan::{declare_node_union, AstNode, SyntaxNodeCast, TextRange};
 
 declare_rule! {
     /// Disallow unknown pseudo-class selectors.
@@ -57,10 +58,23 @@ pub struct NoUnknownPseudoClassSelectorState {
     span: TextRange,
 }
 
+fn is_webkit_pseudo_class(node: &AnyPseudoLike) -> bool {
+    let mut prev_element = node.syntax().parent().and_then(|p| p.prev_sibling());
+    while let Some(prev) = &prev_element {
+        let maybe_selector: Option<CssPseudoElementSelector> = prev.clone().cast();
+        if let Some(selector) = maybe_selector.as_ref() {
+            return WEBKIT_SCROLLBAR_PSEUDO_ELEMENTS.contains(&selector.text().trim_matches(':'));
+        };
+        prev_element = prev.prev_sibling();
+    }
+
+    false
+}
+
 #[derive(Debug)]
 enum PseudoClassType {
     PagePseudoClass,
-    // WebkitScrollbarPseudoClass,
+    WebkitScrollbarPseudoClass,
     OTHER,
 }
 
@@ -72,7 +86,6 @@ impl Rule for NoUnknownPseudoClassSelector {
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let pseudo_class = ctx.query();
-        dbg!(pseudo_class);
         let (name, span) = match pseudo_class {
             AnyPseudoLike::CssPseudoClassFunctionCompoundSelector(selector) => {
                 let name = selector.name().ok()?;
@@ -118,21 +131,28 @@ impl Rule for NoUnknownPseudoClassSelector {
 
         let pseudo_type = match &pseudo_class {
             AnyPseudoLike::CssPageSelectorPseudo(_) => PseudoClassType::PagePseudoClass,
-            _ => PseudoClassType::OTHER,
+            _ => {
+                if is_webkit_pseudo_class(&pseudo_class) {
+                    PseudoClassType::WebkitScrollbarPseudoClass
+                } else {
+                    PseudoClassType::OTHER
+                }
+            }
         };
 
         let lower_name = name.to_lowercase();
 
         let is_valid_class = match pseudo_type {
             PseudoClassType::PagePseudoClass => is_page_pseudo_class(&lower_name),
+            PseudoClassType::WebkitScrollbarPseudoClass => {
+                WEBKIT_SCROLLBAR_PSEUDO_CLASSES.contains(&lower_name.as_str())
+            }
             PseudoClassType::OTHER => {
                 is_custom_selector(&lower_name)
                     || vendor_prefixed(&lower_name)
                     || is_known_pseudo_class(&lower_name)
             }
         };
-
-        dbg!(&lower_name, &pseudo_type, is_valid_class);
 
         if is_valid_class {
             None

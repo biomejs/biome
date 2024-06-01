@@ -859,6 +859,30 @@ pub const VENDOR_PREFIXES: [&str; 4] = ["-webkit-", "-moz-", "-ms-", "-o-"];
 
 pub const AT_RULE_PAGE_PSEUDO_CLASSES: [&str; 4] = ["first", "right", "left", "blank"];
 
+pub const WEBKIT_SCROLLBAR_PSEUDO_ELEMENTS: [&str; 7] = [
+    "-webkit-resizer",
+    "-webkit-scrollbar",
+    "-webkit-scrollbar-button",
+    "-webkit-scrollbar-corner",
+    "-webkit-scrollbar-thumb",
+    "-webkit-scrollbar-track",
+    "-webkit-scrollbar-track-piece",
+];
+
+pub const WEBKIT_SCROLLBAR_PSEUDO_CLASSES: [&str; 11] = [
+    "horizontal",
+    "vertical",
+    "decrement",
+    "increment",
+    "start",
+    "end",
+    "double-button",
+    "single-button",
+    "no-button",
+    "corner-present",
+    "window-inactive",
+];
+
 pub const A_NPLUS_BNOTATION_PSEUDO_CLASSES: [&str; 4] = [
     "nth-column",
     "nth-last-column",

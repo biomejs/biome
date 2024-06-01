@@ -159,6 +159,10 @@ mod tests {
         }
 
         const SOURCE: &str = r#"
+        .test::-webkit-scrollbar-button:horizontal:decrement {}
+        "#;
+
+        r#"
         /* valid */
         a:hover {}
         :not(p) {}
