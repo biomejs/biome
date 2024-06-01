@@ -40,8 +40,14 @@ declare_rule! {
 }
 
 #[derive(Default)]
+struct PriorProperty {
+    original: String,
+    lowercase: String,
+}
+
+#[derive(Default)]
 struct NoDeclarationBlockShorthandPropertyOverridesVisitor {
-    prior_properties_in_block: Vec<(String, String)>,
+    prior_properties_in_block: Vec<PriorProperty>,
 }
 
 impl Visitor for NoDeclarationBlockShorthandPropertyOverridesVisitor {
@@ -53,53 +59,58 @@ impl Visitor for NoDeclarationBlockShorthandPropertyOverridesVisitor {
         mut ctx: VisitorContext<Self::Language>,
     ) {
         match event {
-            WalkEvent::Enter(node) => match node.kind() {
-                CssSyntaxKind::CSS_DECLARATION_OR_RULE_BLOCK => {
-                    self.prior_properties_in_block.clear();
-                }
-                CssSyntaxKind::CSS_GENERIC_PROPERTY => {
-                    if let Some(property_name_node) = node
-                        .clone()
-                        .cast::<CssGenericProperty>()
-                        .and_then(|property_node| property_node.name().ok())
-                    {
-                        let property = property_name_node.text();
-                        let property_lower = property.to_lowercase();
+            WalkEvent::Enter(node) => {
+                match node.kind() {
+                    CssSyntaxKind::CSS_DECLARATION_OR_RULE_BLOCK => {
+                        self.prior_properties_in_block.clear();
+                    }
+                    CssSyntaxKind::CSS_GENERIC_PROPERTY => {
+                        if let Some(property_node) = node
+                            .clone()
+                            .cast::<CssGenericProperty>()
+                            .and_then(|property_node| property_node.name().ok())
+                        {
+                            let property_original = property_node.text();
+                            let property_lowercase = property_original.to_lowercase();
 
-                        let vendor_prefix = vender_prefix(&property_lower);
-                        let unprefixed_property = property_lower[vendor_prefix.len()..].to_string();
+                            let vendor_prefix = vender_prefix(&property_lowercase);
+                            let unprefixed_property =
+                                property_lowercase[vendor_prefix.len()..].to_string();
 
-                        let longhand_sub_properties =
-                            get_longhand_sub_properties(&unprefixed_property);
-                        let reset_to_initial_properties =
-                            get_reset_to_initial_properties(&unprefixed_property);
+                            let longhand_sub_properties =
+                                get_longhand_sub_properties(&unprefixed_property);
+                            let reset_to_initial_properties =
+                                get_reset_to_initial_properties(&unprefixed_property);
 
-                        longhand_sub_properties
+                            longhand_sub_properties
                             .iter()
                             .chain(reset_to_initial_properties.iter())
                             .for_each(|override_property| {
                                 self.prior_properties_in_block
                                     .iter()
                                     .for_each(|prior_property| {
-                                        if prior_property.1
+                                        if prior_property.lowercase
                                             == (vendor_prefix.clone() + override_property)
                                         {
                                             ctx.match_query(
                                                 NoDeclarationBlockShorthandPropertyOverridesQuery {
-                                                    property_node: property_name_node.clone(),
-                                                    override_property: prior_property.0.to_string(),
+                                                    property_node: property_node.clone(),
+                                                    override_property: prior_property.original.clone(),
                                                 },
                                             );
                                         }
                                     });
                             });
 
-                        self.prior_properties_in_block
-                            .push((property, property_lower));
+                            self.prior_properties_in_block.push(PriorProperty {
+                                original: property_original,
+                                lowercase: property_lowercase,
+                            });
+                        }
                     }
+                    _ => {}
                 }
-                _ => {}
-            },
+            }
             _ => {}
         }
     }
