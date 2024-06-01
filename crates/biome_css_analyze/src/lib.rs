@@ -146,7 +146,7 @@ mod tests {
 
     use crate::{analyze, AnalysisFilter, ControlFlow};
 
-    // #[ignore]
+    #[ignore]
     #[test]
     fn quick_test() {
         fn markup_to_string(markup: Markup) -> String {
@@ -159,10 +159,6 @@ mod tests {
         }
 
         const SOURCE: &str = r#"
-        .test::-webkit-scrollbar-button:horizontal:decrement {}
-        "#;
-
-        r#"
         /* valid */
         a:hover {}
         :not(p) {}
