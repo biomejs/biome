@@ -8,6 +8,43 @@ use biome_rowan::{AstNode, Language, SyntaxNode, SyntaxNodeCast, TextRange, Walk
 
 use crate::utils::{get_longhand_sub_properties, get_reset_to_initial_properties, vender_prefix};
 
+fn remove_vendor_prefix(prop: &str, prefix: &str) -> String {
+    if let Some(prop) = prop.strip_prefix(prefix) {
+        return prop.to_string();
+    }
+
+    prop.to_string()
+}
+
+fn get_override_props(property: &str) -> Vec<&str> {
+    let longhand_sub_props = get_longhand_sub_properties(property);
+    let reset_to_initial_props = get_reset_to_initial_properties(property);
+
+    let mut merged = Vec::with_capacity(longhand_sub_props.len() + reset_to_initial_props.len());
+
+    let (mut i, mut j) = (0, 0);
+
+    while i < longhand_sub_props.len() && j < reset_to_initial_props.len() {
+        if longhand_sub_props[i] < reset_to_initial_props[j] {
+            merged.push(longhand_sub_props[i]);
+            i += 1;
+        } else {
+            merged.push(reset_to_initial_props[j]);
+            j += 1;
+        }
+    }
+
+    if i < longhand_sub_props.len() {
+        merged.extend_from_slice(&longhand_sub_props[i..]);
+    }
+
+    if j < reset_to_initial_props.len() {
+        merged.extend_from_slice(&reset_to_initial_props[j..]);
+    }
+
+    merged
+}
+
 declare_rule! {
     /// Disallow shorthand properties that override related longhand properties.
     ///
@@ -47,7 +84,7 @@ struct PriorProperty {
 
 #[derive(Default)]
 struct NoDeclarationBlockShorthandPropertyOverridesVisitor {
-    prior_properties_in_block: Vec<PriorProperty>,
+    prior_props_in_block: Vec<PriorProperty>,
 }
 
 impl Visitor for NoDeclarationBlockShorthandPropertyOverridesVisitor {
@@ -61,51 +98,43 @@ impl Visitor for NoDeclarationBlockShorthandPropertyOverridesVisitor {
         if let WalkEvent::Enter(node) = event {
             match node.kind() {
                 CssSyntaxKind::CSS_DECLARATION_OR_RULE_BLOCK => {
-                    self.prior_properties_in_block.clear();
+                    self.prior_props_in_block.clear();
                 }
                 CssSyntaxKind::CSS_GENERIC_PROPERTY => {
-                    if let Some(property_node) = node
+                    if let Some(prop_node) = node
                         .clone()
                         .cast::<CssGenericProperty>()
                         .and_then(|property_node| property_node.name().ok())
                     {
-                        let property_original = property_node.text();
-                        let property_lowercase = property_original.to_lowercase();
+                        let prop = prop_node.text();
+                        let prop_lowercase = prop.to_lowercase();
 
-                        let vendor_prefix = vender_prefix(&property_lowercase);
-                        let unprefixed_property =
-                            property_lowercase[vendor_prefix.len()..].to_string();
+                        let prop_prefix = vender_prefix(&prop_lowercase);
+                        let unprefixed_prop = remove_vendor_prefix(&prop_lowercase, &prop_prefix);
+                        let override_props = get_override_props(&unprefixed_prop);
 
-                        let longhand_sub_properties =
-                            get_longhand_sub_properties(&unprefixed_property);
-                        let reset_to_initial_properties =
-                            get_reset_to_initial_properties(&unprefixed_property);
+                        self.prior_props_in_block.iter().for_each(|prior_prop| {
+                            let prior_prop_prefix = vender_prefix(&prior_prop.lowercase);
+                            let unprefixed_prior_prop =
+                                remove_vendor_prefix(&prior_prop.lowercase, &prior_prop_prefix);
 
-                        longhand_sub_properties
-                            .iter()
-                            .chain(reset_to_initial_properties.iter())
-                            .for_each(|override_property| {
-                                self.prior_properties_in_block
-                                    .iter()
-                                    .for_each(|prior_property| {
-                                        if prior_property.lowercase
-                                            == (vendor_prefix.clone() + override_property)
-                                        {
-                                            ctx.match_query(
-                                                NoDeclarationBlockShorthandPropertyOverridesQuery {
-                                                    property_node: property_node.clone(),
-                                                    override_property: prior_property
-                                                        .original
-                                                        .clone(),
-                                                },
-                                            );
-                                        }
-                                    });
-                            });
+                            if prop_prefix == prior_prop_prefix
+                                && override_props
+                                    .binary_search(&unprefixed_prior_prop.as_str())
+                                    .is_ok()
+                            {
+                                ctx.match_query(
+                                    NoDeclarationBlockShorthandPropertyOverridesQuery {
+                                        property_node: prop_node.clone(),
+                                        override_property: prior_prop.original.clone(),
+                                    },
+                                );
+                            }
+                        });
 
-                        self.prior_properties_in_block.push(PriorProperty {
-                            original: property_original,
-                            lowercase: property_lowercase,
+                        self.prior_props_in_block.push(PriorProperty {
+                            original: prop,
+                            lowercase: prop_lowercase,
                         });
                     }
                 }
