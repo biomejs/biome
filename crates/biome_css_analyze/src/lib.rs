@@ -179,6 +179,7 @@ mod tests {
         a:pseudo-class { }
         body:not(div):noot(span) {}
         :first { }
+        @page :blank:unknown { }
         "#;
 
         CssParserOptions {

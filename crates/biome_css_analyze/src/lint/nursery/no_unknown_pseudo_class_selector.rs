@@ -5,7 +5,7 @@ use crate::{
 use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
 use biome_css_syntax::{
-    CssPageSelectorPseudo, CssPseudoClassFunctionCompoundSelector,
+    CssBogusPseudoClass, CssPageSelectorPseudo, CssPseudoClassFunctionCompoundSelector,
     CssPseudoClassFunctionCompoundSelectorList, CssPseudoClassFunctionIdentifier,
     CssPseudoClassFunctionNth, CssPseudoClassFunctionRelativeSelectorList,
     CssPseudoClassFunctionSelector, CssPseudoClassFunctionSelectorList,
@@ -66,7 +66,7 @@ declare_node_union! {
     pub AnyPseudoLike = CssPseudoClassFunctionCompoundSelector|CssPseudoClassFunctionCompoundSelectorList|CssPseudoClassFunctionIdentifier
                         |CssPseudoClassFunctionNth|CssPseudoClassFunctionRelativeSelectorList|CssPseudoClassFunctionSelector
                         |CssPseudoClassFunctionSelectorList|CssPseudoClassFunctionValueList|CssPseudoClassIdentifier
-                        |CssPageSelectorPseudo
+                        |CssBogusPseudoClass|CssPageSelectorPseudo
 }
 
 fn is_webkit_pseudo_class(node: &AnyPseudoLike) -> bool {
@@ -104,6 +104,7 @@ impl Rule for NoUnknownPseudoClassSelector {
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let pseudo_class = ctx.query();
         let (name, span) = match pseudo_class {
+            AnyPseudoLike::CssBogusPseudoClass(class) => Some((class.text(), class.range())),
             AnyPseudoLike::CssPseudoClassFunctionCompoundSelector(selector) => {
                 let name = selector.name().ok()?;
                 Some((name.text().to_string(), name.text_range()))
