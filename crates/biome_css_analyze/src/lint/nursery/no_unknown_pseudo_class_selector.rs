@@ -1,12 +1,14 @@
-use crate::utils::{is_custom_selector, is_known_pseudo_class, vendor_prefixed};
+use crate::utils::{
+    is_custom_selector, is_known_pseudo_class, is_page_pseudo_class, vendor_prefixed,
+};
 use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
 use biome_css_syntax::{
-    AnyCssPseudoClass, CssPseudoClassFunctionCompoundSelector,
+    CssPageSelectorPseudo, CssPseudoClassFunctionCompoundSelector,
     CssPseudoClassFunctionCompoundSelectorList, CssPseudoClassFunctionIdentifier,
     CssPseudoClassFunctionNth, CssPseudoClassFunctionRelativeSelectorList,
     CssPseudoClassFunctionSelector, CssPseudoClassFunctionSelectorList,
-    CssPseudoClassFunctionValueList, CssPseudoClassIdentifier, CssPseudoClassSelector,
+    CssPseudoClassFunctionValueList, CssPseudoClassIdentifier,
 };
 use biome_rowan::{declare_node_union, AstNode, TextRange};
 
@@ -44,85 +46,102 @@ declare_rule! {
         sources: &[RuleSource::Stylelint("selector-pseudo-class-no-unknown")],
     }
 }
-
+declare_node_union! {
+    pub AnyPseudoLike = CssPseudoClassFunctionCompoundSelector|CssPseudoClassFunctionCompoundSelectorList|CssPseudoClassFunctionIdentifier
+                        |CssPseudoClassFunctionNth|CssPseudoClassFunctionRelativeSelectorList|CssPseudoClassFunctionSelector
+                        |CssPseudoClassFunctionSelectorList|CssPseudoClassFunctionValueList|CssPseudoClassIdentifier
+                        |CssPageSelectorPseudo
+}
 pub struct NoUnknownPseudoClassSelectorState {
     class_name: String,
     span: TextRange,
 }
 
+#[derive(Debug)]
+enum PseudoClassType {
+    PagePseudoClass,
+    // WebkitScrollbarPseudoClass,
+    OTHER,
+}
+
 impl Rule for NoUnknownPseudoClassSelector {
-    type Query = Ast<CssPseudoClassSelector>;
+    type Query = Ast<AnyPseudoLike>;
     type State = NoUnknownPseudoClassSelectorState;
     type Signals = Option<Self::State>;
     type Options = ();
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
-        let node = ctx.query();
-        let pseudo_class = node.class().ok()?;
-        dbg!(&pseudo_class);
-        let (name, span) = match &pseudo_class {
-            biome_css_syntax::AnyCssPseudoClass::CssBogusPseudoClass(_) => None,
-            biome_css_syntax::AnyCssPseudoClass::CssPseudoClassFunctionCompoundSelector(
-                selector,
-            ) => {
+        let pseudo_class = ctx.query();
+        dbg!(pseudo_class);
+        let (name, span) = match pseudo_class {
+            AnyPseudoLike::CssPseudoClassFunctionCompoundSelector(selector) => {
                 let name = selector.name().ok()?;
                 Some((name.text().to_string(), name.text_range()))
             }
-            biome_css_syntax::AnyCssPseudoClass::CssPseudoClassFunctionCompoundSelectorList(
-                selector_list,
-            ) => {
+            AnyPseudoLike::CssPseudoClassFunctionCompoundSelectorList(selector_list) => {
                 let name = selector_list.name().ok()?;
                 Some((name.text().to_string(), name.text_range()))
             }
-            biome_css_syntax::AnyCssPseudoClass::CssPseudoClassFunctionIdentifier(ident) => {
+            AnyPseudoLike::CssPseudoClassFunctionIdentifier(ident) => {
                 let name = ident.name_token().ok()?;
                 Some((name.text().to_string(), name.text_range()))
             }
-            biome_css_syntax::AnyCssPseudoClass::CssPseudoClassFunctionNth(func_nth) => {
+            AnyPseudoLike::CssPseudoClassFunctionNth(func_nth) => {
                 let name = func_nth.name().ok()?;
                 Some((name.text().to_string(), name.text_range()))
             }
-            biome_css_syntax::AnyCssPseudoClass::CssPseudoClassFunctionRelativeSelectorList(
-                selector_list,
-            ) => {
+            AnyPseudoLike::CssPseudoClassFunctionRelativeSelectorList(selector_list) => {
                 let name = selector_list.name_token().ok()?;
-                Some((name.text().to_string(), name.text_range()))
+                Some((name.token_text_trimmed().to_string(), name.text_range()))
             }
-            biome_css_syntax::AnyCssPseudoClass::CssPseudoClassFunctionSelector(selector) => {
+            AnyPseudoLike::CssPseudoClassFunctionSelector(selector) => {
                 let name = selector.name().ok()?;
                 Some((name.text().to_string(), name.text_range()))
             }
-            biome_css_syntax::AnyCssPseudoClass::CssPseudoClassFunctionSelectorList(
-                selector_list,
-            ) => {
+            AnyPseudoLike::CssPseudoClassFunctionSelectorList(selector_list) => {
                 let name = selector_list.name().ok()?;
                 Some((name.text().to_string(), name.text_range()))
             }
-            biome_css_syntax::AnyCssPseudoClass::CssPseudoClassFunctionValueList(
-                func_value_list,
-            ) => {
+            AnyPseudoLike::CssPseudoClassFunctionValueList(func_value_list) => {
                 let name = func_value_list.name_token().ok()?;
                 Some((name.text().to_string(), name.text_range()))
             }
-            biome_css_syntax::AnyCssPseudoClass::CssPseudoClassIdentifier(ident) => {
+            AnyPseudoLike::CssPseudoClassIdentifier(ident) => {
                 let name = ident.name().ok()?;
                 Some((name.text().to_string(), name.range()))
             }
+            AnyPseudoLike::CssPageSelectorPseudo(page_pseudo) => {
+                let name = page_pseudo.selector().ok()?;
+                Some((name.token_text_trimmed().to_string(), name.text_range()))
+            }
         }?;
+
+        let pseudo_type = match &pseudo_class {
+            AnyPseudoLike::CssPageSelectorPseudo(_) => PseudoClassType::PagePseudoClass,
+            _ => PseudoClassType::OTHER,
+        };
 
         let lower_name = name.to_lowercase();
 
-        if is_custom_selector(&lower_name)
-            || vendor_prefixed(&lower_name)
-            || is_known_pseudo_class(&lower_name)
-        {
-            return None;
-        }
+        let is_valid_class = match pseudo_type {
+            PseudoClassType::PagePseudoClass => is_page_pseudo_class(&lower_name),
+            PseudoClassType::OTHER => {
+                is_custom_selector(&lower_name)
+                    || vendor_prefixed(&lower_name)
+                    || is_known_pseudo_class(&lower_name)
+            }
+        };
 
-        Some(NoUnknownPseudoClassSelectorState {
-            class_name: name,
-            span: span,
-        })
+        dbg!(&lower_name, &pseudo_type, is_valid_class);
+
+        if is_valid_class {
+            None
+        } else {
+            Some(NoUnknownPseudoClassSelectorState {
+                class_name: name,
+                span: span,
+            })
+        }
     }
 
     fn diagnostic(_: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
