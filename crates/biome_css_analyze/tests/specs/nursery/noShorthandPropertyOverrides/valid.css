@@ -2,13 +2,8 @@ a { padding: 10px; }
 
 a { padding: 10px; padding-left: 20px; }
 
-/* @media (color) { padding: 10px; padding-left: 20px; }
+@media (color) { a { padding: 10px; padding-left: 20px; }}
 
-a { @media (color) { padding: 10px; padding-left: 20px; }} */
-
-a { padding-left: 10px; { b { padding: 20px; }}}
-
-/* Nested related properties */
 a { border-top-width: 1px; top: 0; bottom: 3px; border-bottom: 2px solid blue; }
 
 a { transition-property: opacity; } a { transition: opacity 1s linear; }

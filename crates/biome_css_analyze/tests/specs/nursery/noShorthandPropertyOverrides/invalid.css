@@ -14,22 +14,17 @@ a { pAdDiNg-lEfT: 10Px; pAdDiNg: 20Px; }
 
 a { PADDING-LEFT: 10PX; PADDING: 20PX; }
 
-/* Overriding within nested rule */
-a { padding-left: 10px; { b { padding-top: 10px; padding: 20px; }}}
-
 a { border-top-width: 1px; top: 0; bottom: 3px; border: 2px solid blue; }
 
 a { transition-property: opacity; transition: opacity 1s linear; }
 
 a { background-repeat: no-repeat; background: url(lion.png); }
 
-/* @media (color) { background-repeat: no-repeat; background: url(lion.png); } */
+@media (color) { a { background-repeat: no-repeat; background: url(lion.png); }}
 
-/* a { @media (color) { background-repeat: no-repeat; background: url(lion.png); }} */
+a { -webkit-transition-property: opacity; -webkit-transition: opacity 1s linear; }
 
-/* a { -webkit-transition-property: opacity; -webkit-transition: opacity 1s linear; } */
-
-/* a { -WEBKIT-transition-property: opacity; -webKIT-transition: opacity 1s linear; } */
+a { -WEBKIT-transition-property: opacity; -webKIT-transition: opacity 1s linear; }
 
 a { font-variant: small-caps; font: sans-serif; }
 
@@ -37,7 +32,4 @@ a { font-variant: all-small-caps; font: sans-serif; }
 
 a { font-size-adjust: 0.545; font: Verdana; }
 
-/* a { font-variant-caps: small-caps; font-variant: normal; } */
-
-/* Multiple shorthand property overrides */
 a { padding-left: 10px; padding: 20px; border-width: 20px; border: 1px solid black; }
