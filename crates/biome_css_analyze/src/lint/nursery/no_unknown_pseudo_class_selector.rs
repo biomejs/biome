@@ -16,27 +16,42 @@ use biome_rowan::{declare_node_union, AstNode, SyntaxNodeCast, TextRange};
 declare_rule! {
     /// Disallow unknown pseudo-class selectors.
     ///
-    /// Put context and details about the rule.
-    /// As a starting point, you can take the description of the corresponding _ESLint_ rule (if any).
+    /// For details on known pseudo-class, see the [MDN web docs](https://developer.mozilla.org/en-US/docs/Web/CSS/Pseudo-classes)
     ///
-    /// Try to stay consistent with the descriptions of implemented rules.
-    ///
-    /// Add a link to the corresponding stylelint rule (if any):
+    /// This rule ignores vendor-prefixed pseudo-class selectors.
     ///
     /// ## Examples
     ///
     /// ### Invalid
     ///
     /// ```css,expect_diagnostic
-    /// p {}
+    /// a:unknown {}
+    /// ```
+    ///
+    /// ```css,expect_diagnostic
+    /// a:UNKNOWN {}
+    /// ```
+    ///
+    /// ```css,expect_diagnostic
+    /// a:hoverr {}
     /// ```
     ///
     /// ### Valid
     ///
     /// ```css
-    /// p {
-    ///   color: red;
-    /// }
+    /// a:hover {}
+    /// ```
+    ///
+    /// ```css
+    /// a:focus {}
+    /// ```
+    ///
+    /// ```css
+    /// :not(p) {}
+    /// ```
+    ///
+    /// ```css
+    /// input:-moz-placeholder {}
     /// ```
     ///
     pub NoUnknownPseudoClassSelector {
@@ -53,10 +68,6 @@ declare_node_union! {
                         |CssPseudoClassFunctionSelectorList|CssPseudoClassFunctionValueList|CssPseudoClassIdentifier
                         |CssPageSelectorPseudo
 }
-pub struct NoUnknownPseudoClassSelectorState {
-    class_name: String,
-    span: TextRange,
-}
 
 fn is_webkit_pseudo_class(node: &AnyPseudoLike) -> bool {
     let mut prev_element = node.syntax().parent().and_then(|p| p.prev_sibling());
@@ -71,11 +82,17 @@ fn is_webkit_pseudo_class(node: &AnyPseudoLike) -> bool {
     false
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy)]
 enum PseudoClassType {
     PagePseudoClass,
     WebkitScrollbarPseudoClass,
     OTHER,
+}
+
+pub struct NoUnknownPseudoClassSelectorState {
+    class_name: String,
+    span: TextRange,
+    class_type: PseudoClassType,
 }
 
 impl Rule for NoUnknownPseudoClassSelector {
@@ -160,27 +177,41 @@ impl Rule for NoUnknownPseudoClassSelector {
             Some(NoUnknownPseudoClassSelectorState {
                 class_name: name,
                 span: span,
+                class_type: pseudo_type,
             })
         }
     }
 
     fn diagnostic(_: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
-        //
-        // Read our guidelines to write great diagnostics:
-        // https://docs.rs/biome_analyze/latest/biome_analyze/#what-a-rule-should-say-to-the-user
-        //
-        let Self::State { class_name, span } = state;
-        Some(
-            RuleDiagnostic::new(
-                rule_category!(),
-                span,
-                markup! {
-                    "Unexpected unknown pseudo-class "<Emphasis>{ class_name }</Emphasis>" "
-                },
-            )
-            .note(markup! {
+        let Self::State {
+            class_name,
+            span,
+            class_type,
+        } = state;
+        let mut diag = RuleDiagnostic::new(
+            rule_category!(),
+            span,
+            markup! {
+                "Unexpected unknown pseudo-class "<Emphasis>{ class_name }</Emphasis>" "
+            },
+        );
+        match class_type {
+            PseudoClassType::PagePseudoClass => {
+                diag = diag.note(markup! {
+                    "See "<Hyperlink href="https://developer.mozilla.org/en-US/docs/Web/CSS/@page">"MDN web docs"</Hyperlink>" for more details."
+                });
+            }
+            PseudoClassType::WebkitScrollbarPseudoClass => {
+                diag = diag.note(markup! {
+                    "See "<Hyperlink href="https://developer.mozilla.org/en-US/docs/Web/CSS/::-webkit-scrollbar">"MDN web docs"</Hyperlink>" for more details."
+                });
+            }
+            PseudoClassType::OTHER => {
+                diag = diag.note(markup! {
                     "See "<Hyperlink href="https://developer.mozilla.org/en-US/docs/Web/CSS/Pseudo-classes">"MDN web docs"</Hyperlink>" for more details."
-            }),
-        )
+            });
+            }
+        };
+        Some(diag)
     }
 }
