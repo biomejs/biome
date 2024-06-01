@@ -187,7 +187,7 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 #### Bug fixes
 
-- Fix issue where running `biome init` would create `biome.json` even if `biome.jsonc` already exists. [#3024](https://github.com/biomejs/biome/issues/3024) Contributed by @minht11
+- Fix  [#3024](https://github.com/biomejs/biome/issues/3024), where running `biome init` would create `biome.json` even if `biome.jsonc` already exists.  Contributed by @minht11
 
 ### Configuration
 
