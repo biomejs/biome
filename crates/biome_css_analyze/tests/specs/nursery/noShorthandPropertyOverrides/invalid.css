@@ -33,3 +33,5 @@ a { font-variant: all-small-caps; font: sans-serif; }
 a { font-size-adjust: 0.545; font: Verdana; }
 
 a { padding-left: 10px; padding: 20px; border-width: 20px; border: 1px solid black; }
+
+a { padding-left: 10px; padding-right: 10px; padding: 20px; }

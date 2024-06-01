@@ -40,6 +40,8 @@ a { font-size-adjust: 0.545; font: Verdana; }
 
 a { padding-left: 10px; padding: 20px; border-width: 20px; border: 1px solid black; }
 
+a { padding-left: 10px; padding-right: 10px; padding: 20px; }
+
 ```
 
 # Diagnostics
@@ -306,6 +308,7 @@ invalid.css:35:25 lint/nursery/noShorthandPropertyOverrides ━━━━━━�
   > 35 │ a { padding-left: 10px; padding: 20px; border-width: 20px; border: 1px solid black; }
        │                         ^^^^^^^
     36 │ 
+    37 │ a { padding-left: 10px; padding-right: 10px; padding: 20px; }
   
 
 ```
@@ -320,6 +323,35 @@ invalid.css:35:60 lint/nursery/noShorthandPropertyOverrides ━━━━━━�
   > 35 │ a { padding-left: 10px; padding: 20px; border-width: 20px; border: 1px solid black; }
        │                                                            ^^^^^^
     36 │ 
+    37 │ a { padding-left: 10px; padding-right: 10px; padding: 20px; }
+  
+
+```
+
+```
+invalid.css:37:46 lint/nursery/noShorthandPropertyOverrides ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected shorthand property padding after padding-left
+  
+    35 │ a { padding-left: 10px; padding: 20px; border-width: 20px; border: 1px solid black; }
+    36 │ 
+  > 37 │ a { padding-left: 10px; padding-right: 10px; padding: 20px; }
+       │                                              ^^^^^^^
+    38 │ 
+  
+
+```
+
+```
+invalid.css:37:46 lint/nursery/noShorthandPropertyOverrides ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected shorthand property padding after padding-right
+  
+    35 │ a { padding-left: 10px; padding: 20px; border-width: 20px; border: 1px solid black; }
+    36 │ 
+  > 37 │ a { padding-left: 10px; padding-right: 10px; padding: 20px; }
+       │                                              ^^^^^^^
+    38 │ 
   
 
 ```
