@@ -197,7 +197,7 @@ fn handle_function_body(
                 returned_value.syntax().kind(),
             ))
         })
-        .unwrap_or(false);
+        .unwrap_or_default();
     let ranges = return_statement.and_then(|ret| {
         let returned_value = ret.argument()?;
         handle_potential_react_component(returned_value, model, is_inside_jsx)
