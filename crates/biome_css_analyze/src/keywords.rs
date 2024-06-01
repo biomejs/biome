@@ -857,6 +857,85 @@ pub const OTHER_PSEUDO_ELEMENTS: [&str; 18] = [
 
 pub const VENDOR_PREFIXES: [&str; 4] = ["-webkit-", "-moz-", "-ms-", "-o-"];
 
+pub const AT_RULE_PAGE_PSEUDO_CLASSES: [&str; 4] = ["first", "right", "left", "blank"];
+
+pub const A_NPLUS_BNOTATION_PSEUDO_CLASSES: [&str; 4] = [
+    "nth-column",
+    "nth-last-column",
+    "nth-last-of-type",
+    "nth-of-type",
+];
+
+pub const A_NPLUS_BOF_SNOTATION_PSEUDO_CLASSES: [&str; 2] = ["nth-child", "nth-last-child"];
+
+pub const LINGUISTIC_PSEUDO_CLASSES: [&str; 2] = ["dir", "lang"];
+
+pub const LOGICAL_COMBINATIONS_PSEUDO_CLASSES: [&str; 5] = ["has", "is", "matches", "not", "where"];
+
+/// See https://drafts.csswg.org/selectors/#resource-pseudos
+pub const RESOURCE_STATE_PSEUDO_CLASSES: [&str; 7] = [
+    "playing",
+    "paused",
+    "seeking",
+    "buffering",
+    "stalled",
+    "muted",
+    "volume-locked",
+];
+
+pub const OTHER_PSEUDO_CLASSES: [&str; 50] = [
+    "active",
+    "any-link",
+    "autofill",
+    "blank",
+    "checked",
+    "current",
+    "default",
+    "defined",
+    "disabled",
+    "empty",
+    "enabled",
+    "first-child",
+    "first-of-type",
+    "focus",
+    "focus-visible",
+    "focus-within",
+    "fullscreen",
+    "fullscreen-ancestor",
+    "future",
+    "host",
+    "host-context",
+    "hover",
+    "indeterminate",
+    "in-range",
+    "invalid",
+    "last-child",
+    "last-of-type",
+    "link",
+    "modal",
+    "only-child",
+    "only-of-type",
+    "optional",
+    "out-of-range",
+    "past",
+    "placeholder-shown",
+    "picture-in-picture",
+    "popover-open",
+    "read-only",
+    "read-write",
+    "required",
+    "root",
+    "scope",
+    "state",
+    "target",
+    "unresolved",
+    "user-invalid",
+    "user-valid",
+    "valid",
+    "visited",
+    "window-inactive",
+];
+
 // https://github.com/known-css/known-css-properties/blob/master/source/w3c.json
 pub const KNOWN_PROPERTIES: [&str; 588] = [
     "-webkit-line-clamp",

@@ -159,17 +159,22 @@ mod tests {
         }
 
         const SOURCE: &str = r#"
+        /* valid */
         a:hover {}
         :not(p) {}
-        input:-moz-placeholder {}
+        a:before { }
+        input:not([type='submit'])
         :root { }
         :--heading { }
-        ::-webkit-scrollbar-thumb:window-inactive { }
-        a:nth-child(0) {}
-        a:has(> img, +dt) {}
-        :host(span:focus) {}
-        :-webkit-any(i,p,:link,span:focus) {}
-        :dir(rtl) {}
+        :popover-open {}
+        .test::-webkit-scrollbar-button:horizontal:decrement {}
+        @page :first { }
+       
+        /* invalid */
+        a:unknown { }
+        a:pseudo-class { }
+        body:not(div):noot(span) {}
+        :first { }
         "#;
 
         CssParserOptions {
