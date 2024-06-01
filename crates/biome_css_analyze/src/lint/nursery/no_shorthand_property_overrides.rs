@@ -6,18 +6,12 @@ use biome_console::markup;
 use biome_css_syntax::{CssGenericProperty, CssLanguage, CssSyntaxKind};
 use biome_rowan::{AstNode, Language, SyntaxNode, SyntaxNodeCast, TextRange, WalkEvent};
 
-use crate::utils::{get_longhand_sub_properties, get_reset_to_initial_properties};
+use crate::utils::{get_longhand_sub_properties, get_reset_to_initial_properties, vender_prefix};
 
 declare_rule! {
     /// Disallow shorthand properties that override related longhand properties.
     ///
     /// For details on shorthand properties, see the [MDN web docs](https://developer.mozilla.org/en-US/docs/Web/CSS/Shorthand_properties).
-    ///
-    ///
-    /// This rule ignores:
-    ///
-    /// - vendor-prefixed properties (e.g., `-webkit-transition`)
-    ///
     ///
     /// ## Examples
     ///
@@ -69,23 +63,26 @@ impl Visitor for NoDeclarationBlockShorthandPropertyOverridesVisitor {
                             let target_property_name =
                                 target_property_name_node.text().to_lowercase();
 
-                            let longhand_sub_properties =
-                                get_longhand_sub_properties(&target_property_name);
-                            let reset_to_initial_properties =
-                                get_reset_to_initial_properties(&target_property_name);
+                            let vendor_prefix = vender_prefix(&target_property_name);
+                            let unprefixed =
+                                target_property_name[vendor_prefix.len()..].to_string();
 
-                            self.prior_property_names_in_declaration_block
+                            let longhand_sub_properties = get_longhand_sub_properties(&unprefixed);
+                            let reset_to_initial_properties =
+                                get_reset_to_initial_properties(&unprefixed);
+
+                            longhand_sub_properties
                                 .iter()
-                                .for_each(|prior_property_name| {
-                                    if longhand_sub_properties
-                                        .contains(&prior_property_name.as_str())
-                                        || reset_to_initial_properties
-                                            .contains(&prior_property_name.as_str())
+                                .chain(reset_to_initial_properties.iter())
+                                .for_each(|property| {
+                                    if self
+                                        .prior_property_names_in_declaration_block
+                                        .contains(&(vendor_prefix.clone() + property))
                                     {
                                         ctx.match_query(
                                             NoDeclarationBlockShorthandPropertyOverridesQuery {
                                                 target_property_node: property_node.clone(),
-                                                override_property_name: prior_property_name.clone(),
+                                                override_property_name: property.to_string(),
                                             },
                                         );
                                     }
