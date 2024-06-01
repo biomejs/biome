@@ -1242,8 +1242,8 @@ impl<'a> AriaRoles {
         false
     }
 
-    /// Given a role, it returns the corresponding element and attributes
-    pub fn get_corresponding_element(&self, role: &str) -> Option<Iter<(&str, &[(&str, &str)])>> {
+    /// Given a role, it returns the corresponding elements and attributes associated to that role
+    pub fn get_elements_by_role(&self, role: &str) -> ElementsAndAttributes {
         let role_candidate = match role {
             "checkbox" => &CheckboxRole as &dyn AriaRoleDefinitionWithConcepts,
             "radio" => &RadioRole as &dyn AriaRoleDefinitionWithConcepts,

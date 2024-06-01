@@ -74,7 +74,7 @@ impl Rule for UseSemanticElements {
 
         let static_value = role_attribute.as_static_value()?;
         let role_value = static_value.as_string_constant()?;
-        let candidate = AriaRoles.get_corresponding_element(role_value);
+        let candidate = AriaRoles.get_elements_by_role(role_value);
 
         let mut result_elements: Vec<&str> = vec![];
         let mut result_attributes: Vec<(&str, &str)> = vec![];
