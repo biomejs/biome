@@ -134,7 +134,7 @@ invalid.css:11:42 lint/nursery/noShorthandPropertyOverrides ━━━━━━�
 ```
 invalid.css:13:25 lint/nursery/noShorthandPropertyOverrides ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected shorthand property padding after padding-left
+  ! Unexpected shorthand property pAdDiNg after pAdDiNg-lEfT
   
     11 │ a { border-image-source: url("foo.png"); border: 1px solid black; }
     12 │ 
@@ -149,7 +149,7 @@ invalid.css:13:25 lint/nursery/noShorthandPropertyOverrides ━━━━━━�
 ```
 invalid.css:15:25 lint/nursery/noShorthandPropertyOverrides ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected shorthand property padding after padding-left
+  ! Unexpected shorthand property PADDING after PADDING-LEFT
   
     13 │ a { pAdDiNg-lEfT: 10Px; pAdDiNg: 20Px; }
     14 │ 
@@ -224,7 +224,7 @@ invalid.css:23:52 lint/nursery/noShorthandPropertyOverrides ━━━━━━�
 ```
 invalid.css:25:43 lint/nursery/noShorthandPropertyOverrides ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected shorthand property -webkit-transition after transition-property
+  ! Unexpected shorthand property -webkit-transition after -webkit-transition-property
   
     23 │ @media (color) { a { background-repeat: no-repeat; background: url(lion.png); }}
     24 │ 
@@ -239,7 +239,7 @@ invalid.css:25:43 lint/nursery/noShorthandPropertyOverrides ━━━━━━�
 ```
 invalid.css:27:43 lint/nursery/noShorthandPropertyOverrides ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected shorthand property -webkit-transition after transition-property
+  ! Unexpected shorthand property -webKIT-transition after -WEBKIT-transition-property
   
     25 │ a { -webkit-transition-property: opacity; -webkit-transition: opacity 1s linear; }
     26 │ 

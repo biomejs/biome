@@ -3,7 +3,7 @@ use biome_analyze::{
     RuleDiagnostic, ServiceBag, Visitor, VisitorContext,
 };
 use biome_console::markup;
-use biome_css_syntax::{CssGenericProperty, CssLanguage, CssSyntaxKind};
+use biome_css_syntax::{AnyCssDeclarationName, CssGenericProperty, CssLanguage, CssSyntaxKind};
 use biome_rowan::{AstNode, Language, SyntaxNode, SyntaxNodeCast, TextRange, WalkEvent};
 
 use crate::utils::{get_longhand_sub_properties, get_reset_to_initial_properties, vender_prefix};
@@ -41,7 +41,7 @@ declare_rule! {
 
 #[derive(Default)]
 struct NoDeclarationBlockShorthandPropertyOverridesVisitor {
-    prior_property_names_in_declaration_block: Vec<String>,
+    prior_properties_in_block: Vec<(String, String)>,
 }
 
 impl Visitor for NoDeclarationBlockShorthandPropertyOverridesVisitor {
@@ -55,42 +55,47 @@ impl Visitor for NoDeclarationBlockShorthandPropertyOverridesVisitor {
         match event {
             WalkEvent::Enter(node) => match node.kind() {
                 CssSyntaxKind::CSS_DECLARATION_OR_RULE_BLOCK => {
-                    self.prior_property_names_in_declaration_block.clear();
+                    self.prior_properties_in_block.clear();
                 }
                 CssSyntaxKind::CSS_GENERIC_PROPERTY => {
-                    if let Some(property_node) = node.clone().cast::<CssGenericProperty>() {
-                        if let Ok(target_property_name_node) = property_node.name() {
-                            let target_property_name =
-                                target_property_name_node.text().to_lowercase();
+                    if let Some(property_name_node) = node
+                        .clone()
+                        .cast::<CssGenericProperty>()
+                        .and_then(|property_node| property_node.name().ok())
+                    {
+                        let property = property_name_node.text();
+                        let property_lower = property.to_lowercase();
 
-                            let vendor_prefix = vender_prefix(&target_property_name);
-                            let unprefixed =
-                                target_property_name[vendor_prefix.len()..].to_string();
+                        let vendor_prefix = vender_prefix(&property_lower);
+                        let unprefixed_property = property_lower[vendor_prefix.len()..].to_string();
 
-                            let longhand_sub_properties = get_longhand_sub_properties(&unprefixed);
-                            let reset_to_initial_properties =
-                                get_reset_to_initial_properties(&unprefixed);
+                        let longhand_sub_properties =
+                            get_longhand_sub_properties(&unprefixed_property);
+                        let reset_to_initial_properties =
+                            get_reset_to_initial_properties(&unprefixed_property);
 
-                            longhand_sub_properties
-                                .iter()
-                                .chain(reset_to_initial_properties.iter())
-                                .for_each(|property| {
-                                    if self
-                                        .prior_property_names_in_declaration_block
-                                        .contains(&(vendor_prefix.clone() + property))
-                                    {
-                                        ctx.match_query(
-                                            NoDeclarationBlockShorthandPropertyOverridesQuery {
-                                                target_property_node: property_node.clone(),
-                                                override_property_name: property.to_string(),
-                                            },
-                                        );
-                                    }
-                                });
+                        longhand_sub_properties
+                            .iter()
+                            .chain(reset_to_initial_properties.iter())
+                            .for_each(|override_property| {
+                                self.prior_properties_in_block
+                                    .iter()
+                                    .for_each(|prior_property| {
+                                        if prior_property.1
+                                            == (vendor_prefix.clone() + override_property)
+                                        {
+                                            ctx.match_query(
+                                                NoDeclarationBlockShorthandPropertyOverridesQuery {
+                                                    property_node: property_name_node.clone(),
+                                                    override_property: prior_property.0.to_string(),
+                                                },
+                                            );
+                                        }
+                                    });
+                            });
 
-                            self.prior_property_names_in_declaration_block
-                                .push(target_property_name);
-                        }
+                        self.prior_properties_in_block
+                            .push((property, property_lower));
                     }
                 }
                 _ => {}
@@ -102,13 +107,13 @@ impl Visitor for NoDeclarationBlockShorthandPropertyOverridesVisitor {
 
 #[derive(Clone)]
 pub struct NoDeclarationBlockShorthandPropertyOverridesQuery {
-    target_property_node: CssGenericProperty,
-    override_property_name: String,
+    property_node: AnyCssDeclarationName,
+    override_property: String,
 }
 
 impl QueryMatch for NoDeclarationBlockShorthandPropertyOverridesQuery {
     fn text_range(&self) -> TextRange {
-        self.target_property_node.range()
+        self.property_node.range()
     }
 }
 
@@ -134,8 +139,8 @@ impl Queryable for NoDeclarationBlockShorthandPropertyOverridesQuery {
 }
 
 pub struct NoDeclarationBlockShorthandPropertyOverridesState {
-    target_property_name: String,
-    override_property_name: String,
+    target_property: String,
+    override_property: String,
     span: TextRange,
 }
 
@@ -148,15 +153,10 @@ impl Rule for NoShorthandPropertyOverrides {
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let query = ctx.query();
 
-        let (target_property_name, span) = {
-            let name = query.target_property_node.name().ok()?;
-            (name.text().to_lowercase(), name.range())
-        };
-
         Some(NoDeclarationBlockShorthandPropertyOverridesState {
-            target_property_name,
-            override_property_name: query.override_property_name.to_string(),
-            span,
+            target_property: query.property_node.text(),
+            override_property: query.override_property.clone(),
+            span: query.text_range(),
         })
     }
 
@@ -165,7 +165,7 @@ impl Rule for NoShorthandPropertyOverrides {
             rule_category!(),
             state.span,
             markup! {
-                "Unexpected shorthand property "<Emphasis>{state.target_property_name}</Emphasis>" after "<Emphasis>{state.override_property_name}</Emphasis>
+                "Unexpected shorthand property "<Emphasis>{state.target_property}</Emphasis>" after "<Emphasis>{state.override_property}</Emphasis>
             },
         ))
     }
