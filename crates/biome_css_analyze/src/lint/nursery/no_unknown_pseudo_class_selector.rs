@@ -86,7 +86,7 @@ fn is_webkit_pseudo_class(node: &AnyPseudoLike) -> bool {
 enum PseudoClassType {
     PagePseudoClass,
     WebkitScrollbarPseudoClass,
-    OTHER,
+    Other,
 }
 
 pub struct NoUnknownPseudoClassSelectorState {
@@ -150,10 +150,10 @@ impl Rule for NoUnknownPseudoClassSelector {
         let pseudo_type = match &pseudo_class {
             AnyPseudoLike::CssPageSelectorPseudo(_) => PseudoClassType::PagePseudoClass,
             _ => {
-                if is_webkit_pseudo_class(&pseudo_class) {
+                if is_webkit_pseudo_class(pseudo_class) {
                     PseudoClassType::WebkitScrollbarPseudoClass
                 } else {
-                    PseudoClassType::OTHER
+                    PseudoClassType::Other
                 }
             }
         };
@@ -165,7 +165,7 @@ impl Rule for NoUnknownPseudoClassSelector {
             PseudoClassType::WebkitScrollbarPseudoClass => {
                 WEBKIT_SCROLLBAR_PSEUDO_CLASSES.contains(&lower_name.as_str())
             }
-            PseudoClassType::OTHER => {
+            PseudoClassType::Other => {
                 is_custom_selector(&lower_name)
                     || vendor_prefixed(&lower_name)
                     || is_known_pseudo_class(&lower_name)
@@ -177,7 +177,7 @@ impl Rule for NoUnknownPseudoClassSelector {
         } else {
             Some(NoUnknownPseudoClassSelectorState {
                 class_name: name,
-                span: span,
+                span,
                 class_type: pseudo_type,
             })
         }
@@ -207,7 +207,7 @@ impl Rule for NoUnknownPseudoClassSelector {
                     "See "<Hyperlink href="https://developer.mozilla.org/en-US/docs/Web/CSS/::-webkit-scrollbar">"MDN web docs"</Hyperlink>" for more details."
                 });
             }
-            PseudoClassType::OTHER => {
+            PseudoClassType::Other => {
                 diag = diag.note(markup! {
                     "See "<Hyperlink href="https://developer.mozilla.org/en-US/docs/Web/CSS/Pseudo-classes">"MDN web docs"</Hyperlink>" for more details."
             });

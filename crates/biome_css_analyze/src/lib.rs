@@ -178,11 +178,6 @@ mod tests {
         @page :blank:unknown { }
         "#;
 
-        CssParserOptions {
-            allow_wrong_line_comments: true,
-            ..Default::default()
-        };
-
         let parsed = parse_css(SOURCE, CssParserOptions::default());
 
         let mut error_ranges: Vec<TextRange> = Vec::new();
