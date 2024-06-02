@@ -3,8 +3,8 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_js_factory::make;
-use biome_js_syntax::JsStaticMemberExpression;
-use biome_rowan::{BatchMutationExt, TextRange, TokenText};
+use biome_js_syntax::JsCallExpression;
+use biome_rowan::{AstSeparatedList, BatchMutationExt, TextRange, TokenText};
 
 use crate::JsRuleAction;
 
@@ -19,6 +19,12 @@ declare_rule! {
     ///
     /// While `trimLeft()` and `trimRight()` are aliases for `trimStart()` and `trimEnd()`, using the latter helps maintain consistency and uses direction-independent wording.
     /// Similarly, `slice()` is preferred over `substr()` and `substring()` because it is a more popular option with clearer behavior, and it has a consistent counterpart in arrays.
+    ///
+    /// Note that `substring` and `slice` are not identical when arguments are passed.
+    /// For detailed differences, refer to the MDN documentation:
+    /// - [The difference between substring() and substr()](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/substring#the_difference_between_substring_and_substr)
+    /// - [Differences between substring() and slice()](https:
+    /// //developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/substring#differences_between_substring_and_slice)
     ///
     /// ## Examples
     ///
@@ -63,20 +69,23 @@ declare_rule! {
     }
 }
 
+#[derive(Debug, Clone)]
 pub struct UseConsistentStringFunctionsState {
     member_name: TokenText,
     span: TextRange,
 }
 
 impl Rule for UseConsistentStringFunctions {
-    type Query = Ast<JsStaticMemberExpression>;
+    type Query = Ast<JsCallExpression>;
     type State = UseConsistentStringFunctionsState;
     type Signals = Option<Self::State>;
     type Options = ();
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
-        let value_token = node.member().ok()?.value_token().ok()?;
+        let callee = node.callee().ok()?;
+        let expression = callee.as_js_static_member_expression()?;
+        let value_token = expression.member().ok()?.value_token().ok()?;
         let string_function_name = value_token.text_trimmed();
 
         match string_function_name {
@@ -91,21 +100,48 @@ impl Rule for UseConsistentStringFunctions {
     }
 
     fn diagnostic(_: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
+        let member_name = state.member_name.text();
+        let replaced_member_name = match member_name {
+            "trimLeft" => "trimStart()",
+            "trimRight" => "trimEnd()",
+            "substr" | "substring" => "slice()",
+            _ => return None,
+        };
         let span = state.span;
-        Some(RuleDiagnostic::new(
-            rule_category!(),
-            span,
+        let diagnostic_message = markup! {
+            "Avoid using "{member_name}" and consider using "{replaced_member_name}" instead."
+        }
+        .to_owned();
+        let note_message = if member_name == "substring" {
             markup! {
-                "Disallow using inconsistent string functions."
-            },
-        ))
+                ""{member_name}"() is not identical to "{replaced_member_name}" when arguments are passed. Please refer to the MDN documentation for details."
+            }.to_owned()
+        } else {
+            markup! {
+                ""{member_name}"() is an alias for "{replaced_member_name}"."
+            }
+            .to_owned()
+        };
+        let supplement_note = markup! {
+            "See "<Hyperlink href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/substring#the_difference_between_substring_and_substr">"MDN web docs"</Hyperlink>" for more details."
+        }.to_owned();
+        Some(
+            RuleDiagnostic::new(rule_category!(), span, diagnostic_message)
+                .note(note_message)
+                .note(supplement_note),
+        )
     }
 
-    fn action(ctx: &RuleContext<Self>, state: &Self::State) -> Option<JsRuleAction> {
+    fn action(ctx: &RuleContext<Self>, _: &Self::State) -> Option<JsRuleAction> {
         let node = ctx.query();
-        let member = node.member().ok()?;
-        let member_name = state.member_name.text();
-        let mut mutation = ctx.root().begin();
+        let callee = node.callee().ok()?;
+        let expression = callee.as_js_static_member_expression()?;
+        let member = expression.member().ok()?;
+        let expression = callee.as_js_static_member_expression()?;
+        let value_token = expression.member().ok()?.value_token().ok()?;
+        let member_name = value_token.text_trimmed();
+        let arguments = node.arguments().ok()?;
+        let args = arguments.args();
 
         let replaced_member_name = match member_name {
             "trimLeft" => "trimStart()",
@@ -114,6 +150,7 @@ impl Rule for UseConsistentStringFunctions {
             _ => return None,
         };
 
+        let mut mutation = ctx.root().begin();
         match member_name {
             "trimLeft" => {
                 let replaced_function = make::js_name(make::ident("trimStart"));
@@ -123,9 +160,20 @@ impl Rule for UseConsistentStringFunctions {
                 let replaced_function = make::js_name(make::ident("trimEnd"));
                 mutation.replace_element(member.into(), replaced_function.into());
             }
-            "substr" | "substring" => {
+            "substr" => {
                 let replaced_function = make::js_name(make::ident("slice"));
                 mutation.replace_element(member.into(), replaced_function.into());
+            }
+            "substring" => {
+                if args.len() == 0 {
+                    let replaced_function = make::js_name(make::ident("slice"));
+                    let member = member.clone();
+                    mutation.replace_element(member.into(), replaced_function.into());
+                } else {
+                    // If the function has arguments, we cannot replace it with slice() as it has different behavior.
+                    // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/substring#differences_between_substring_and_slice
+                    return None;
+                }
             }
             _ => {}
         }
