@@ -3,7 +3,6 @@ use biome_analyze::context::RuleContext;
 use biome_analyze::{declare_rule, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
 use biome_js_syntax::jsx_ext::AnyJsxElement;
-use biome_js_syntax::{AnyJsxAttribute, JsxAttributeList};
 use biome_rowan::AstNode;
 use rustc_hash::FxHashMap;
 
@@ -86,8 +85,8 @@ impl Rule for NoStaticElementInteractions {
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
         let element_name = node.name().ok()?.as_jsx_name()?.value_token().ok()?;
-        let attributes = extract_attrs(&node.attributes());
         let aria_roles = ctx.aria_roles();
+        let attributes = ctx.extract_attributes(&node.attributes());
         let element_name = element_name.text_trimmed();
 
         if let Some(attributes_ref) = attributes.as_ref() {
@@ -172,36 +171,6 @@ fn is_interactive_handler_present(attributes: &FxHashMap<String, Vec<String>>) -
         }
     }
     false
-}
-
-/// This method is an override of AriaService::extract_attributes.
-///
-/// This modified version can extract attributes with dynamic values as well.
-/// The original extract_attributes in AriaService skips extracting other static attributes if a dynamic value is encountered.
-pub fn extract_attrs(attribute_list: &JsxAttributeList) -> Option<FxHashMap<String, Vec<String>>> {
-    let mut defined_attributes: FxHashMap<String, Vec<String>> = FxHashMap::default();
-    for attribute in attribute_list {
-        if let AnyJsxAttribute::JsxAttribute(attr) = attribute {
-            let name = attr.name().ok()?.syntax().text_trimmed().to_string();
-            let values = if let Some(initializer) = attr.initializer() {
-                let initializer = initializer.value().ok()?;
-                if let Some(static_value) = initializer.as_static_value() {
-                    static_value
-                        .text()
-                        .split(' ')
-                        .map(|s| s.to_string())
-                        .collect::<Vec<String>>()
-                } else {
-                    vec![initializer.syntax().text().to_string()]
-                }
-            } else {
-                vec!["true".to_string()]
-            };
-
-            defined_attributes.entry(name).or_insert(values);
-        }
-    }
-    Some(defined_attributes)
 }
 
 /// This function disables interactive elements.
