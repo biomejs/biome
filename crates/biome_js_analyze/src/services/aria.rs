@@ -53,17 +53,23 @@ impl AriaServices {
             if let AnyJsxAttribute::JsxAttribute(attr) = attribute {
                 let name = attr.name().ok()?.syntax().text_trimmed().to_string();
                 // handle an attribute without values e.g. `<img aria-hidden />`
-                let Some(initializer) = attr.initializer() else {
-                    defined_attributes
-                        .entry(name)
-                        .or_insert(vec!["true".to_string()]);
-                    continue;
+                let values = if let Some(initializer) = attr.initializer() {
+                    let initializer = initializer.value().ok()?;
+                    if let Some(static_value) = initializer.as_static_value() {
+                        // handle multiple values e.g. `<div class="wrapper document">`
+                        static_value
+                            .text()
+                            .split(' ')
+                            .map(|s| s.to_string())
+                            .collect::<Vec<String>>()
+                    } else {
+                        // handle dynamic values e.g. `<div onClick={dynamicValue}>`
+                        vec![initializer.syntax().text().to_string()]
+                    }
+                } else {
+                    vec!["true".to_string()]
                 };
-                let initializer = initializer.value().ok()?;
-                let static_value = initializer.as_static_value()?;
-                // handle multiple values e.g. `<div class="wrapper document">`
-                let values = static_value.text().split(' ');
-                let values = values.map(|s| s.to_string()).collect::<Vec<String>>();
+
                 defined_attributes.entry(name).or_insert(values);
             }
         }
