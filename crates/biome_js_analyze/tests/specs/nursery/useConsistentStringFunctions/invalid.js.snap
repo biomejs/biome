@@ -4,53 +4,104 @@ expression: invalid.js
 ---
 # Input
 ```jsx
-const foo = bar.trimLeft();
-const foo = bar.trimRight();
+foo.trimLeft();
+foo.trimRight();
+trimLeft.trimRight();
+foo.trimLeft.trimRight();
+"foo".trimLeft();
+foo
+	// comment
+	.trimRight /* comment */
+	/* comment */
+	();
+foo?.trimLeft();
 
-foo.substr(start, length);
-foo.substring(indexStart, indexEnd);
+// Substring
+foo.substr()
+foo?.substr()
+foo.bar?.substring()
+foo?.[0]?.substring()
+foo.bar.substr?.()
+foo.bar?.substring?.()
+foo.bar?.baz?.substr()
+foo.bar?.baz.substring()
+foo.bar.baz?.substr()
+"foo".substr()
+"foo".substr(bar.length, Math.min(baz, 100)) // "foo".slice(bar.length, bar.length + Math.min(baz, 100))
+"foo".substr(1, "abc".length) // "foo".slice(1, 1 + "abc".length)
+"foo".substr("1", 2)
+"foo".substring(length, 0) // "foo".slice(0, Math.max(0, length))
+foo.substring(start) // foo.slice(Math.max(0, start))
+foo.substring(start, end)
+"foo".substring(1, 3)
+// Extra arguments
+foo.substring(1, 2, 3)
 
 ```
 
 # Diagnostics
 ```
-invalid.js:1:17 lint/nursery/useConsistentStringFunctions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:1:5 lint/nursery/useConsistentStringFunctions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Disallow using inconsistent string functions.
   
-  > 1 │ const foo = bar.trimLeft();
-      │                 ^^^^^^^^
-    2 │ const foo = bar.trimRight();
-    3 │ 
+  > 1 │ foo.trimLeft();
+      │     ^^^^^^^^
+    2 │ foo.trimRight();
+    3 │ trimLeft.trimRight();
   
   i Safe fix: Replace inconsistent string function trimLeft()  with trimStart().
   
-    1   │ - const·foo·=·bar.trimLeft();
-      1 │ + const·foo·=·bar.trimStart();
-    2 2 │   const foo = bar.trimRight();
-    3 3 │   
+     1    │ - foo.trimLeft();
+        1 │ + foo.trimStart();
+     2  2 │   foo.trimRight();
+     3  3 │   trimLeft.trimRight();
   
 
 ```
 
 ```
-invalid.js:2:17 lint/nursery/useConsistentStringFunctions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:2:5 lint/nursery/useConsistentStringFunctions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Disallow using inconsistent string functions.
   
-    1 │ const foo = bar.trimLeft();
-  > 2 │ const foo = bar.trimRight();
-      │                 ^^^^^^^^^
-    3 │ 
-    4 │ foo.substr(start, length);
+    1 │ foo.trimLeft();
+  > 2 │ foo.trimRight();
+      │     ^^^^^^^^^
+    3 │ trimLeft.trimRight();
+    4 │ foo.trimLeft.trimRight();
   
   i Safe fix: Replace inconsistent string function trimRight()  with trimEnd().
   
-    1 1 │   const foo = bar.trimLeft();
-    2   │ - const·foo·=·bar.trimRight();
-      2 │ + const·foo·=·bar.trimEnd();
-    3 3 │   
-    4 4 │   foo.substr(start, length);
+     1  1 │   foo.trimLeft();
+     2    │ - foo.trimRight();
+        2 │ + foo.trimEnd();
+     3  3 │   trimLeft.trimRight();
+     4  4 │   foo.trimLeft.trimRight();
+  
+
+```
+
+```
+invalid.js:3:10 lint/nursery/useConsistentStringFunctions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Disallow using inconsistent string functions.
+  
+    1 │ foo.trimLeft();
+    2 │ foo.trimRight();
+  > 3 │ trimLeft.trimRight();
+      │          ^^^^^^^^^
+    4 │ foo.trimLeft.trimRight();
+    5 │ "foo".trimLeft();
+  
+  i Safe fix: Replace inconsistent string function trimRight()  with trimEnd().
+  
+     1  1 │   foo.trimLeft();
+     2  2 │   foo.trimRight();
+     3    │ - trimLeft.trimRight();
+        3 │ + trimLeft.trimEnd();
+     4  4 │   foo.trimLeft.trimRight();
+     5  5 │   "foo".trimLeft();
   
 
 ```
@@ -60,42 +111,546 @@ invalid.js:4:5 lint/nursery/useConsistentStringFunctions  FIXABLE  ━━━━�
 
   ! Disallow using inconsistent string functions.
   
-    2 │ const foo = bar.trimRight();
-    3 │ 
-  > 4 │ foo.substr(start, length);
-      │     ^^^^^^
-    5 │ foo.substring(indexStart, indexEnd);
-    6 │ 
+    2 │ foo.trimRight();
+    3 │ trimLeft.trimRight();
+  > 4 │ foo.trimLeft.trimRight();
+      │     ^^^^^^^^
+    5 │ "foo".trimLeft();
+    6 │ foo
   
-  i Safe fix: Replace inconsistent string function substr()  with slice().
+  i Safe fix: Replace inconsistent string function trimLeft()  with trimStart().
   
-    2 2 │   const foo = bar.trimRight();
-    3 3 │   
-    4   │ - foo.substr(start,·length);
-      4 │ + foo.slice(start,·length);
-    5 5 │   foo.substring(indexStart, indexEnd);
-    6 6 │   
+     2  2 │   foo.trimRight();
+     3  3 │   trimLeft.trimRight();
+     4    │ - foo.trimLeft.trimRight();
+        4 │ + foo.trimStart.trimRight();
+     5  5 │   "foo".trimLeft();
+     6  6 │   foo
   
 
 ```
 
 ```
-invalid.js:5:5 lint/nursery/useConsistentStringFunctions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:4:14 lint/nursery/useConsistentStringFunctions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Disallow using inconsistent string functions.
   
-    4 │ foo.substr(start, length);
-  > 5 │ foo.substring(indexStart, indexEnd);
-      │     ^^^^^^^^^
-    6 │ 
+    2 │ foo.trimRight();
+    3 │ trimLeft.trimRight();
+  > 4 │ foo.trimLeft.trimRight();
+      │              ^^^^^^^^^
+    5 │ "foo".trimLeft();
+    6 │ foo
+  
+  i Safe fix: Replace inconsistent string function trimRight()  with trimEnd().
+  
+     2  2 │   foo.trimRight();
+     3  3 │   trimLeft.trimRight();
+     4    │ - foo.trimLeft.trimRight();
+        4 │ + foo.trimLeft.trimEnd();
+     5  5 │   "foo".trimLeft();
+     6  6 │   foo
+  
+
+```
+
+```
+invalid.js:5:7 lint/nursery/useConsistentStringFunctions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Disallow using inconsistent string functions.
+  
+    3 │ trimLeft.trimRight();
+    4 │ foo.trimLeft.trimRight();
+  > 5 │ "foo".trimLeft();
+      │       ^^^^^^^^
+    6 │ foo
+    7 │ 	// comment
+  
+  i Safe fix: Replace inconsistent string function trimLeft()  with trimStart().
+  
+     3  3 │   trimLeft.trimRight();
+     4  4 │   foo.trimLeft.trimRight();
+     5    │ - "foo".trimLeft();
+        5 │ + "foo".trimStart();
+     6  6 │   foo
+     7  7 │   	// comment
+  
+
+```
+
+```
+invalid.js:8:3 lint/nursery/useConsistentStringFunctions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Disallow using inconsistent string functions.
+  
+     6 │ foo
+     7 │ 	// comment
+   > 8 │ 	.trimRight /* comment */
+       │ 	 ^^^^^^^^^^^^^^^^^^^^^^^
+     9 │ 	/* comment */
+    10 │ 	();
+  
+  i Safe fix: Replace inconsistent string function trimRight()  with trimEnd().
+  
+     6  6 │   foo
+     7  7 │   	// comment
+     8    │ - → .trimRight·/*·comment·*/
+        8 │ + → .trimEnd·/*·comment·*/
+     9  9 │   	/* comment */
+    10 10 │   	();
+  
+
+```
+
+```
+invalid.js:11:6 lint/nursery/useConsistentStringFunctions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Disallow using inconsistent string functions.
+  
+     9 │ 	/* comment */
+    10 │ 	();
+  > 11 │ foo?.trimLeft();
+       │      ^^^^^^^^
+    12 │ 
+    13 │ // Substring
+  
+  i Safe fix: Replace inconsistent string function trimLeft()  with trimStart().
+  
+     9  9 │   	/* comment */
+    10 10 │   	();
+    11    │ - foo?.trimLeft();
+       11 │ + foo?.trimStart();
+    12 12 │   
+    13 13 │   // Substring
+  
+
+```
+
+```
+invalid.js:14:5 lint/nursery/useConsistentStringFunctions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Disallow using inconsistent string functions.
+  
+    13 │ // Substring
+  > 14 │ foo.substr()
+       │     ^^^^^^
+    15 │ foo?.substr()
+    16 │ foo.bar?.substring()
+  
+  i Safe fix: Replace inconsistent string function substr()  with slice().
+  
+    12 12 │   
+    13 13 │   // Substring
+    14    │ - foo.substr()
+       14 │ + foo.slice()
+    15 15 │   foo?.substr()
+    16 16 │   foo.bar?.substring()
+  
+
+```
+
+```
+invalid.js:15:6 lint/nursery/useConsistentStringFunctions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Disallow using inconsistent string functions.
+  
+    13 │ // Substring
+    14 │ foo.substr()
+  > 15 │ foo?.substr()
+       │      ^^^^^^
+    16 │ foo.bar?.substring()
+    17 │ foo?.[0]?.substring()
+  
+  i Safe fix: Replace inconsistent string function substr()  with slice().
+  
+    13 13 │   // Substring
+    14 14 │   foo.substr()
+    15    │ - foo?.substr()
+       15 │ + foo?.slice()
+    16 16 │   foo.bar?.substring()
+    17 17 │   foo?.[0]?.substring()
+  
+
+```
+
+```
+invalid.js:16:10 lint/nursery/useConsistentStringFunctions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Disallow using inconsistent string functions.
+  
+    14 │ foo.substr()
+    15 │ foo?.substr()
+  > 16 │ foo.bar?.substring()
+       │          ^^^^^^^^^
+    17 │ foo?.[0]?.substring()
+    18 │ foo.bar.substr?.()
   
   i Safe fix: Replace inconsistent string function substring()  with slice().
   
-    3 3 │   
-    4 4 │   foo.substr(start, length);
-    5   │ - foo.substring(indexStart,·indexEnd);
-      5 │ + foo.slice(indexStart,·indexEnd);
-    6 6 │   
+    14 14 │   foo.substr()
+    15 15 │   foo?.substr()
+    16    │ - foo.bar?.substring()
+       16 │ + foo.bar?.slice()
+    17 17 │   foo?.[0]?.substring()
+    18 18 │   foo.bar.substr?.()
+  
+
+```
+
+```
+invalid.js:17:11 lint/nursery/useConsistentStringFunctions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Disallow using inconsistent string functions.
+  
+    15 │ foo?.substr()
+    16 │ foo.bar?.substring()
+  > 17 │ foo?.[0]?.substring()
+       │           ^^^^^^^^^
+    18 │ foo.bar.substr?.()
+    19 │ foo.bar?.substring?.()
+  
+  i Safe fix: Replace inconsistent string function substring()  with slice().
+  
+    15 15 │   foo?.substr()
+    16 16 │   foo.bar?.substring()
+    17    │ - foo?.[0]?.substring()
+       17 │ + foo?.[0]?.slice()
+    18 18 │   foo.bar.substr?.()
+    19 19 │   foo.bar?.substring?.()
+  
+
+```
+
+```
+invalid.js:18:9 lint/nursery/useConsistentStringFunctions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Disallow using inconsistent string functions.
+  
+    16 │ foo.bar?.substring()
+    17 │ foo?.[0]?.substring()
+  > 18 │ foo.bar.substr?.()
+       │         ^^^^^^
+    19 │ foo.bar?.substring?.()
+    20 │ foo.bar?.baz?.substr()
+  
+  i Safe fix: Replace inconsistent string function substr()  with slice().
+  
+    16 16 │   foo.bar?.substring()
+    17 17 │   foo?.[0]?.substring()
+    18    │ - foo.bar.substr?.()
+       18 │ + foo.bar.slice?.()
+    19 19 │   foo.bar?.substring?.()
+    20 20 │   foo.bar?.baz?.substr()
+  
+
+```
+
+```
+invalid.js:19:10 lint/nursery/useConsistentStringFunctions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Disallow using inconsistent string functions.
+  
+    17 │ foo?.[0]?.substring()
+    18 │ foo.bar.substr?.()
+  > 19 │ foo.bar?.substring?.()
+       │          ^^^^^^^^^
+    20 │ foo.bar?.baz?.substr()
+    21 │ foo.bar?.baz.substring()
+  
+  i Safe fix: Replace inconsistent string function substring()  with slice().
+  
+    17 17 │   foo?.[0]?.substring()
+    18 18 │   foo.bar.substr?.()
+    19    │ - foo.bar?.substring?.()
+       19 │ + foo.bar?.slice?.()
+    20 20 │   foo.bar?.baz?.substr()
+    21 21 │   foo.bar?.baz.substring()
+  
+
+```
+
+```
+invalid.js:20:15 lint/nursery/useConsistentStringFunctions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Disallow using inconsistent string functions.
+  
+    18 │ foo.bar.substr?.()
+    19 │ foo.bar?.substring?.()
+  > 20 │ foo.bar?.baz?.substr()
+       │               ^^^^^^
+    21 │ foo.bar?.baz.substring()
+    22 │ foo.bar.baz?.substr()
+  
+  i Safe fix: Replace inconsistent string function substr()  with slice().
+  
+    18 18 │   foo.bar.substr?.()
+    19 19 │   foo.bar?.substring?.()
+    20    │ - foo.bar?.baz?.substr()
+       20 │ + foo.bar?.baz?.slice()
+    21 21 │   foo.bar?.baz.substring()
+    22 22 │   foo.bar.baz?.substr()
+  
+
+```
+
+```
+invalid.js:21:14 lint/nursery/useConsistentStringFunctions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Disallow using inconsistent string functions.
+  
+    19 │ foo.bar?.substring?.()
+    20 │ foo.bar?.baz?.substr()
+  > 21 │ foo.bar?.baz.substring()
+       │              ^^^^^^^^^
+    22 │ foo.bar.baz?.substr()
+    23 │ "foo".substr()
+  
+  i Safe fix: Replace inconsistent string function substring()  with slice().
+  
+    19 19 │   foo.bar?.substring?.()
+    20 20 │   foo.bar?.baz?.substr()
+    21    │ - foo.bar?.baz.substring()
+       21 │ + foo.bar?.baz.slice()
+    22 22 │   foo.bar.baz?.substr()
+    23 23 │   "foo".substr()
+  
+
+```
+
+```
+invalid.js:22:14 lint/nursery/useConsistentStringFunctions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Disallow using inconsistent string functions.
+  
+    20 │ foo.bar?.baz?.substr()
+    21 │ foo.bar?.baz.substring()
+  > 22 │ foo.bar.baz?.substr()
+       │              ^^^^^^
+    23 │ "foo".substr()
+    24 │ "foo".substr(bar.length, Math.min(baz, 100)) // "foo".slice(bar.length, bar.length + Math.min(baz, 100))
+  
+  i Safe fix: Replace inconsistent string function substr()  with slice().
+  
+    20 20 │   foo.bar?.baz?.substr()
+    21 21 │   foo.bar?.baz.substring()
+    22    │ - foo.bar.baz?.substr()
+       22 │ + foo.bar.baz?.slice()
+    23 23 │   "foo".substr()
+    24 24 │   "foo".substr(bar.length, Math.min(baz, 100)) // "foo".slice(bar.length, bar.length + Math.min(baz, 100))
+  
+
+```
+
+```
+invalid.js:23:7 lint/nursery/useConsistentStringFunctions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Disallow using inconsistent string functions.
+  
+    21 │ foo.bar?.baz.substring()
+    22 │ foo.bar.baz?.substr()
+  > 23 │ "foo".substr()
+       │       ^^^^^^
+    24 │ "foo".substr(bar.length, Math.min(baz, 100)) // "foo".slice(bar.length, bar.length + Math.min(baz, 100))
+    25 │ "foo".substr(1, "abc".length) // "foo".slice(1, 1 + "abc".length)
+  
+  i Safe fix: Replace inconsistent string function substr()  with slice().
+  
+    21 21 │   foo.bar?.baz.substring()
+    22 22 │   foo.bar.baz?.substr()
+    23    │ - "foo".substr()
+       23 │ + "foo".slice()
+    24 24 │   "foo".substr(bar.length, Math.min(baz, 100)) // "foo".slice(bar.length, bar.length + Math.min(baz, 100))
+    25 25 │   "foo".substr(1, "abc".length) // "foo".slice(1, 1 + "abc".length)
+  
+
+```
+
+```
+invalid.js:24:7 lint/nursery/useConsistentStringFunctions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Disallow using inconsistent string functions.
+  
+    22 │ foo.bar.baz?.substr()
+    23 │ "foo".substr()
+  > 24 │ "foo".substr(bar.length, Math.min(baz, 100)) // "foo".slice(bar.length, bar.length + Math.min(baz, 100))
+       │       ^^^^^^
+    25 │ "foo".substr(1, "abc".length) // "foo".slice(1, 1 + "abc".length)
+    26 │ "foo".substr("1", 2)
+  
+  i Safe fix: Replace inconsistent string function substr()  with slice().
+  
+    22 22 │   foo.bar.baz?.substr()
+    23 23 │   "foo".substr()
+    24    │ - "foo".substr(bar.length,·Math.min(baz,·100))·//·"foo".slice(bar.length,·bar.length·+·Math.min(baz,·100))
+       24 │ + "foo".slice(bar.length,·Math.min(baz,·100))·//·"foo".slice(bar.length,·bar.length·+·Math.min(baz,·100))
+    25 25 │   "foo".substr(1, "abc".length) // "foo".slice(1, 1 + "abc".length)
+    26 26 │   "foo".substr("1", 2)
+  
+
+```
+
+```
+invalid.js:25:7 lint/nursery/useConsistentStringFunctions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Disallow using inconsistent string functions.
+  
+    23 │ "foo".substr()
+    24 │ "foo".substr(bar.length, Math.min(baz, 100)) // "foo".slice(bar.length, bar.length + Math.min(baz, 100))
+  > 25 │ "foo".substr(1, "abc".length) // "foo".slice(1, 1 + "abc".length)
+       │       ^^^^^^
+    26 │ "foo".substr("1", 2)
+    27 │ "foo".substring(length, 0) // "foo".slice(0, Math.max(0, length))
+  
+  i Safe fix: Replace inconsistent string function substr()  with slice().
+  
+    23 23 │   "foo".substr()
+    24 24 │   "foo".substr(bar.length, Math.min(baz, 100)) // "foo".slice(bar.length, bar.length + Math.min(baz, 100))
+    25    │ - "foo".substr(1,·"abc".length)·//·"foo".slice(1,·1·+·"abc".length)
+       25 │ + "foo".slice(1,·"abc".length)·//·"foo".slice(1,·1·+·"abc".length)
+    26 26 │   "foo".substr("1", 2)
+    27 27 │   "foo".substring(length, 0) // "foo".slice(0, Math.max(0, length))
+  
+
+```
+
+```
+invalid.js:26:7 lint/nursery/useConsistentStringFunctions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Disallow using inconsistent string functions.
+  
+    24 │ "foo".substr(bar.length, Math.min(baz, 100)) // "foo".slice(bar.length, bar.length + Math.min(baz, 100))
+    25 │ "foo".substr(1, "abc".length) // "foo".slice(1, 1 + "abc".length)
+  > 26 │ "foo".substr("1", 2)
+       │       ^^^^^^
+    27 │ "foo".substring(length, 0) // "foo".slice(0, Math.max(0, length))
+    28 │ foo.substring(start) // foo.slice(Math.max(0, start))
+  
+  i Safe fix: Replace inconsistent string function substr()  with slice().
+  
+    24 24 │   "foo".substr(bar.length, Math.min(baz, 100)) // "foo".slice(bar.length, bar.length + Math.min(baz, 100))
+    25 25 │   "foo".substr(1, "abc".length) // "foo".slice(1, 1 + "abc".length)
+    26    │ - "foo".substr("1",·2)
+       26 │ + "foo".slice("1",·2)
+    27 27 │   "foo".substring(length, 0) // "foo".slice(0, Math.max(0, length))
+    28 28 │   foo.substring(start) // foo.slice(Math.max(0, start))
+  
+
+```
+
+```
+invalid.js:27:7 lint/nursery/useConsistentStringFunctions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Disallow using inconsistent string functions.
+  
+    25 │ "foo".substr(1, "abc".length) // "foo".slice(1, 1 + "abc".length)
+    26 │ "foo".substr("1", 2)
+  > 27 │ "foo".substring(length, 0) // "foo".slice(0, Math.max(0, length))
+       │       ^^^^^^^^^
+    28 │ foo.substring(start) // foo.slice(Math.max(0, start))
+    29 │ foo.substring(start, end)
+  
+  i Safe fix: Replace inconsistent string function substring()  with slice().
+  
+    25 25 │   "foo".substr(1, "abc".length) // "foo".slice(1, 1 + "abc".length)
+    26 26 │   "foo".substr("1", 2)
+    27    │ - "foo".substring(length,·0)·//·"foo".slice(0,·Math.max(0,·length))
+       27 │ + "foo".slice(length,·0)·//·"foo".slice(0,·Math.max(0,·length))
+    28 28 │   foo.substring(start) // foo.slice(Math.max(0, start))
+    29 29 │   foo.substring(start, end)
+  
+
+```
+
+```
+invalid.js:28:5 lint/nursery/useConsistentStringFunctions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Disallow using inconsistent string functions.
+  
+    26 │ "foo".substr("1", 2)
+    27 │ "foo".substring(length, 0) // "foo".slice(0, Math.max(0, length))
+  > 28 │ foo.substring(start) // foo.slice(Math.max(0, start))
+       │     ^^^^^^^^^
+    29 │ foo.substring(start, end)
+    30 │ "foo".substring(1, 3)
+  
+  i Safe fix: Replace inconsistent string function substring()  with slice().
+  
+    26 26 │   "foo".substr("1", 2)
+    27 27 │   "foo".substring(length, 0) // "foo".slice(0, Math.max(0, length))
+    28    │ - foo.substring(start)·//·foo.slice(Math.max(0,·start))
+       28 │ + foo.slice(start)·//·foo.slice(Math.max(0,·start))
+    29 29 │   foo.substring(start, end)
+    30 30 │   "foo".substring(1, 3)
+  
+
+```
+
+```
+invalid.js:29:5 lint/nursery/useConsistentStringFunctions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Disallow using inconsistent string functions.
+  
+    27 │ "foo".substring(length, 0) // "foo".slice(0, Math.max(0, length))
+    28 │ foo.substring(start) // foo.slice(Math.max(0, start))
+  > 29 │ foo.substring(start, end)
+       │     ^^^^^^^^^
+    30 │ "foo".substring(1, 3)
+    31 │ // Extra arguments
+  
+  i Safe fix: Replace inconsistent string function substring()  with slice().
+  
+    27 27 │   "foo".substring(length, 0) // "foo".slice(0, Math.max(0, length))
+    28 28 │   foo.substring(start) // foo.slice(Math.max(0, start))
+    29    │ - foo.substring(start,·end)
+       29 │ + foo.slice(start,·end)
+    30 30 │   "foo".substring(1, 3)
+    31 31 │   // Extra arguments
+  
+
+```
+
+```
+invalid.js:30:7 lint/nursery/useConsistentStringFunctions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Disallow using inconsistent string functions.
+  
+    28 │ foo.substring(start) // foo.slice(Math.max(0, start))
+    29 │ foo.substring(start, end)
+  > 30 │ "foo".substring(1, 3)
+       │       ^^^^^^^^^
+    31 │ // Extra arguments
+    32 │ foo.substring(1, 2, 3)
+  
+  i Safe fix: Replace inconsistent string function substring()  with slice().
+  
+    28 28 │   foo.substring(start) // foo.slice(Math.max(0, start))
+    29 29 │   foo.substring(start, end)
+    30    │ - "foo".substring(1,·3)
+       30 │ + "foo".slice(1,·3)
+    31 31 │   // Extra arguments
+    32 32 │   foo.substring(1, 2, 3)
+  
+
+```
+
+```
+invalid.js:32:5 lint/nursery/useConsistentStringFunctions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Disallow using inconsistent string functions.
+  
+    30 │ "foo".substring(1, 3)
+    31 │ // Extra arguments
+  > 32 │ foo.substring(1, 2, 3)
+       │     ^^^^^^^^^
+    33 │ 
+  
+  i Safe fix: Replace inconsistent string function substring()  with slice().
+  
+    30 30 │   "foo".substring(1, 3)
+    31 31 │   // Extra arguments
+    32    │ - foo.substring(1,·2,·3)
+       32 │ + foo.slice(1,·2,·3)
+    33 33 │   
   
 
 ```
