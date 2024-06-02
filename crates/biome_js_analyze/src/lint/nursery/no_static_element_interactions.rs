@@ -76,6 +76,8 @@ lazy_static::lazy_static! {
     };
 }
 
+const CATEGORIES_TO_CHECK: &[&str] = &["focus", "keyboard", "mouse"];
+
 impl Rule for NoStaticElementInteractions {
     type Query = Aria<AnyJsxElement>;
     type State = ();
@@ -90,7 +92,21 @@ impl Rule for NoStaticElementInteractions {
         let element_name = element_name.text_trimmed();
 
         if let Some(attributes_ref) = attributes.as_ref() {
-            if !is_interactive_handler_present(attributes_ref) {
+            let has_interactive_handler = CATEGORIES_TO_CHECK.iter().any(|&category| {
+                if let Some(handlers) = EVENT_TO_HANDLERS.get(category) {
+                    handlers.iter().any(|&handler| {
+                        if let Some(values) = attributes_ref.get(handler) {
+                            values.iter().any(|value| value != "null")
+                        } else {
+                            false
+                        }
+                    })
+                } else {
+                    false
+                }
+            });
+
+            if !has_interactive_handler {
                 return None;
             }
         } else {
@@ -154,23 +170,6 @@ impl Rule for NoStaticElementInteractions {
             markup! {{"If using native HTML is not possible, add an appropriate role and support for tabbing, mouse, keyboard, and touch inputs to an interactive content element"}}
         ))
     }
-}
-
-/// Check if any interactive handler is present in the attributes.
-fn is_interactive_handler_present(attributes: &FxHashMap<String, Vec<String>>) -> bool {
-    let categories_to_check = vec!["focus", "keyboard", "mouse"];
-    for category in categories_to_check {
-        if let Some(handlers) = EVENT_TO_HANDLERS.get(category) {
-            for handler in handlers {
-                if let Some(values) = attributes.get(*handler) {
-                    if values.iter().any(|value| value != "null") {
-                        return true;
-                    }
-                }
-            }
-        }
-    }
-    false
 }
 
 /// This function disables interactive elements.
