@@ -1193,6 +1193,10 @@ export interface Nursery {
 	 */
 	useImportRestrictions?: RuleConfiguration_for_Null;
 	/**
+	 * This rule allows you to enforce curly braces or disallow unnecessary curly braces in JSX props and/or children.
+	 */
+	useJsxCurlyBraceConvention?: RuleFixConfiguration_for_Null;
+	/**
 	 * Enforce using the digits argument with Number#toFixed().
 	 */
 	useNumberToFixedDigitsArgument?: RuleFixConfiguration_for_Null;
@@ -2471,6 +2475,7 @@ export type Category =
 	| "lint/nursery/useGenericFontNames"
 	| "lint/nursery/useImportExtensions"
 	| "lint/nursery/useImportRestrictions"
+	| "lint/nursery/useJsxCurlyBraceConvention"
 	| "lint/nursery/useNumberToFixedDigitsArgument"
 	| "lint/nursery/useSemanticElements"
 	| "lint/nursery/useSortedClasses"
