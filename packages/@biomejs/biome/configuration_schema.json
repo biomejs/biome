@@ -1983,6 +1983,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useConsistentCurlyBraces": {
+					"description": "This rule enforces consistent use of curly braces inside JSX attributes and JSX children.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleFixConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useConsistentGridAreas": {
 					"description": "Disallows invalid named grid areas in CSS Grid Layouts.",
 					"anyOf": [
