@@ -1868,9 +1868,9 @@
 					]
 				},
 				"useConsistentStringFunctions": {
-					"description": "Succinct description of the rule.",
+					"description": "Enforce the use of consistent string functions.",
 					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "$ref": "#/definitions/RuleFixConfiguration_for_Null" },
 						{ "type": "null" }
 					]
 				},

@@ -1090,9 +1090,9 @@ export interface Nursery {
 	 */
 	useConsistentBuiltinInstantiation?: RuleFixConfiguration_for_Null;
 	/**
-	 * Succinct description of the rule.
+	 * Enforce the use of consistent string functions.
 	 */
-	useConsistentStringFunctions?: RuleConfiguration_for_Null;
+	useConsistentStringFunctions?: RuleFixConfiguration_for_Null;
 	/**
 	 * Use Date.now() to get the number of milliseconds since the Unix Epoch.
 	 */

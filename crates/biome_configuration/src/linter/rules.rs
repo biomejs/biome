@@ -2833,9 +2833,9 @@ pub struct Nursery {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_consistent_builtin_instantiation:
         Option<RuleFixConfiguration<UseConsistentBuiltinInstantiation>>,
-    #[doc = "Succinct description of the rule."]
+    #[doc = "Enforce the use of consistent string functions."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_consistent_string_functions: Option<RuleConfiguration<UseConsistentStringFunctions>>,
+    pub use_consistent_string_functions: Option<RuleFixConfiguration<UseConsistentStringFunctions>>,
     #[doc = "Use Date.now() to get the number of milliseconds since the Unix Epoch."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_date_now: Option<RuleFixConfiguration<UseDateNow>>,
