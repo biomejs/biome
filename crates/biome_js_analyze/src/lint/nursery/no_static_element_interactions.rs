@@ -98,15 +98,6 @@ impl Rule for NoStaticElementInteractions {
             return None;
         }
 
-        let default_attributes = FxHashMap::default();
-        let attributes_ref = attributes.as_ref().unwrap_or(&default_attributes);
-
-        let attributes_option = if !attributes_ref.is_empty() {
-            Some(attributes_ref.clone())
-        } else {
-            None
-        };
-
         if node
             .find_attribute_by_name("aria-hidden")
             .map_or(false, |attr| {
@@ -130,7 +121,7 @@ impl Rule for NoStaticElementInteractions {
                     .map_or(false, |val| !val.text().is_empty())
             }),
             _ => {
-                (!aria_roles.is_not_interactive_element(element_name, attributes_option.clone())
+                (!aria_roles.is_not_interactive_element(element_name, attributes.clone())
                     && !is_invalid_element(element_name))
                     || is_valid_element(element_name)
             }
@@ -140,20 +131,15 @@ impl Rule for NoStaticElementInteractions {
             return None;
         }
 
-        if attributes_option.is_some() {
-            match node.find_attribute_by_name("role") {
-                Some(attr) => {
-                    let role_value = attr.as_static_value()?;
-                    let role_text = role_value.text();
+        if let Some(attr) = node.find_attribute_by_name("role") {
+            let role_value = attr.as_static_value()?;
+            let role_text = role_value.text();
 
-                    if aria_roles.is_role_interactive(role_text) {
-                        return None;
-                    }
-                }
-                None => {
-                    return Some(());
-                }
-            };
+            if aria_roles.is_role_interactive(role_text) {
+                return None;
+            }
+        } else {
+            return Some(());
         }
 
         Some(())
