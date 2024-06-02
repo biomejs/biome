@@ -85,9 +85,9 @@ impl Rule for NoStaticElementInteractions {
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
-        let aria_roles = ctx.aria_roles();
         let element_name = node.name().ok()?.as_jsx_name()?.value_token().ok()?;
         let attributes = extract_attrs(&node.attributes());
+        let aria_roles = ctx.aria_roles();
         let element_name = element_name.text_trimmed();
 
         if let Some(attributes_ref) = attributes.as_ref() {
