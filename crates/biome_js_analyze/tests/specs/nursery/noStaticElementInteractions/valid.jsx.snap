@@ -52,9 +52,7 @@ expression: valid.jsx
 
 	<div role="button" onClick={() => {}} />
 	<div role="checkbox" onClick={() => {}} />
-	<div role="columnheader" onClick={() => {}} />
 	<div role="combobox" onClick={() => {}} />
-	<div role="form" onClick={() => {}} />
 	<div role="gridcell" onClick={() => {}} />
 	<div role="link" onClick={() => {}} />
 	<div role="menuitem" onClick={() => {}} />
@@ -62,14 +60,12 @@ expression: valid.jsx
 	<div role="menuitemradio" onClick={() => {}} />
 	<div role="option" onClick={() => {}} />
 	<div role="radio" onClick={() => {}} />
-	<div role="rowheader" onClick={() => {}} />
 	<div role="searchbox" onClick={() => {}} />
 	<div role="slider" onClick={() => {}} />
 	<div role="spinbutton" onClick={() => {}} />
 	<div role="switch" onClick={() => {}} />
 	<div role="tab" onClick={() => {}} />
 	<div role="textbox" onClick={() => {}} />
-	<div role="treeitem" onClick={() => {}} />
 
 	<div onCopy={() => {}} />
 	<div onCut={() => {}} />
@@ -183,55 +179,12 @@ expression: valid.jsx
 	<ul onClick={() => {}} />
 
 	{/* HTML elements attributed with a non-interactive role */}
-	<div role="alert" onClick={() => {}} />
-	<div role="alertdialog" onClick={() => {}} />
-	<div role="application" onClick={() => {}} />
-	<div role="article" onClick={() => {}} />
-	<div role="banner" onClick={() => {}} />
-	<div role="cell" onClick={() => {}} />
-	<div role="complementary" onClick={() => {}} />
-	<div role="contentinfo" onClick={() => {}} />
-	<div role="definition" onClick={() => {}} />
-	<div role="dialog" onClick={() => {}} />
-	<div role="directory" onClick={() => {}} />
-	<div role="document" onClick={() => {}} />
-	<div role="feed" onClick={() => {}} />
-	<div role="figure" onClick={() => {}} />
-	<div role="grid" onClick={() => {}} />
-	<div role="group" onClick={() => {}} />
-	<div role="heading" onClick={() => {}} />
-	<div role="img" onClick={() => {}} />
-	<div role="list" onClick={() => {}} />
 	<div role="listbox" onClick={() => {}} />
-	<div role="listitem" onClick={() => {}} />
-	<div role="log" onClick={() => {}} />
-	<div role="main" onClick={() => {}} />
-	<div role="marquee" onClick={() => {}} />
-	<div role="math" onClick={() => {}} />
-	<div role="menu" onClick={() => {}} />
-	<div role="menubar" onClick={() => {}} />
-	<div role="navigation" onClick={() => {}} />
-	<div role="note" onClick={() => {}} />
 	<div role="progressbar" onClick={() => {}} />
-	<div role="radiogroup" onClick={() => {}} />
-	<div role="region" onClick={() => {}} />
 	<div role="row" onClick={() => {}} />
-	<div role="rowgroup" onClick={() => {}} />
-	<div role="section" onClick={() => {}} />
-	<div role="search" onClick={() => {}} />
 	<div role="separator" onClick={() => {}} />
 	<div role="scrollbar" onClick={() => {}} />
-	<div role="status" onClick={() => {}} />
-	<div role="table" onClick={() => {}} />
-	<div role="tablist" onClick={() => {}} />
-	<div role="tabpanel" onClick={() => {}} />
 	<td onClick={() => {}} />
-	<div role="term" onClick={() => {}} />
-	<div role="timer" onClick={() => {}} />
-	<div role="toolbar" onClick={() => {}} />
-	<div role="tooltip" onClick={() => {}} />
-	<div role="tree" onClick={() => {}} />
-	<div role="treegrid" onClick={() => {}} />
 </>;
 
 ```

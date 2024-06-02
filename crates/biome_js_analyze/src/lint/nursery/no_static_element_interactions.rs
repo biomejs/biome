@@ -146,7 +146,7 @@ impl Rule for NoStaticElementInteractions {
                     let role_value = attr.as_static_value()?;
                     let role_text = role_value.text();
 
-                    if has_valid_role(role_text) || aria_roles.is_role_interactive(role_text) {
+                    if aria_roles.is_role_interactive(role_text) {
                         return None;
                     }
                 }
@@ -216,61 +216,6 @@ pub fn extract_attrs(attribute_list: &JsxAttributeList) -> Option<FxHashMap<Stri
         }
     }
     Some(defined_attributes)
-}
-
-/// This function allows non-interactive Roles.
-/// That is because these are Roles enabled in eslint-plugin-jsx-a11y.
-fn has_valid_role(role: &str) -> bool {
-    matches!(
-        role,
-        "columnheader"
-            | "form"
-            | "rowheader"
-            | "treeitem"
-            | "alert"
-            | "alertdialog"
-            | "application"
-            | "article"
-            | "banner"
-            | "cell"
-            | "complementary"
-            | "contentinfo"
-            | "definition"
-            | "dialog"
-            | "directory"
-            | "document"
-            | "feed"
-            | "figure"
-            | "grid"
-            | "group"
-            | "heading"
-            | "img"
-            | "list"
-            | "listitem"
-            | "log"
-            | "main"
-            | "marquee"
-            | "math"
-            | "menu"
-            | "menubar"
-            | "navigation"
-            | "note"
-            | "radiogroup"
-            | "region"
-            | "rowgroup"
-            | "section"
-            | "search"
-            | "status"
-            | "table"
-            | "tablist"
-            | "tabpanel"
-            | "term"
-            | "timer"
-            | "toolbar"
-            | "tooltip"
-            | "tree"
-            | "treegrid"
-    )
 }
 
 /// This function disables interactive elements.
