@@ -2,6 +2,7 @@ use biome_analyze::{context::RuleContext, declare_rule, Rule, RuleDiagnostic, Ru
 use biome_aria::AriaRoles;
 use biome_console::markup;
 use biome_js_syntax::{JsxAttribute, JsxOpeningElement};
+use biome_rowan::TextRange;
 
 use crate::services::aria::Aria;
 
@@ -112,18 +113,20 @@ impl Rule for UseSemanticElements {
             }
         }
 
+        let span = TextRange::new(
+            role_attribute.name_value_token()?.text_range().start(),
+            role_attribute.as_static_value()?.range().end(),
+        );
+
         Some(
             RuleDiagnostic::new(
                 rule_category!(),
-                role_attribute.name_value_token()?.text_range(),
+                span,
                 error_message,
             )
-            .footer_list(
-                markup! {
-                    "For examples and more information, see " <Hyperlink href="https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Roles">"WAI-ARIA Roles"</Hyperlink>
-                },
-                &["<button>", "<input>", "<textarea>", "<a>", "<img>", "<table>", "<article>", "<section>", "<nav>", "<aside>", "<header>", "<footer>", "<main>", "<figure>", "<figcaption>", "<details>", "<summary>", "<dialog>", "<menu>", "<menuitem>", "<fieldset>", "<legend>", "<caption>", "<colgroup>", "<col>", "<optgroup>", "<option>", "<select>", "<datalist>", "<output>", "<progress>", "<meter>", "<time>", "<audio>", "<video>", "<track>", "<source>", "<embed>", "<object>", "<param>", "<iframe>", "<canvas>", "<map>", "<area>", "<svg>", "<math>"]
-            ),
+            .note(markup! {
+                "For examples and more information, see " <Hyperlink href="https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Roles">"WAI-ARIA Roles"</Hyperlink>
+            }),
         )
     }
 }
