@@ -165,9 +165,9 @@ impl Rule for NoStaticElementInteractions {
         Some(RuleDiagnostic::new(
             rule_category!(),
             node.range(),
-            markup! {{"Avoid non-native interactive elements. If using native HTML is not possible, add an appropriate role and support for tabbing, mouse, keyboard, and touch inputs to an interactive content element"}},
+            markup! {{"Static Elements should not be interactive."}},
         ).note(
-            markup! {{"If using native HTML is not possible, add an appropriate role and support for tabbing, mouse, keyboard, and touch inputs to an interactive content element"}}
+            markup! {{"To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value."}}
         ))
     }
 }
