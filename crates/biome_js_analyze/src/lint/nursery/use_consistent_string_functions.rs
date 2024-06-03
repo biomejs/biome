@@ -107,7 +107,6 @@ impl Rule for UseConsistentStringFunctions {
             "substr" | "substring" => "slice()",
             _ => return None,
         };
-        let span = state.span;
         let diagnostic_message = markup! {
             "Avoid using "{member_name}" and consider using "{replaced_member_name}" instead."
         }
@@ -126,7 +125,7 @@ impl Rule for UseConsistentStringFunctions {
             "See "<Hyperlink href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/substring#the_difference_between_substring_and_substr">"MDN web docs"</Hyperlink>" for more details."
         }.to_owned();
         Some(
-            RuleDiagnostic::new(rule_category!(), span, diagnostic_message)
+            RuleDiagnostic::new(rule_category!(), state.span, diagnostic_message)
                 .note(note_message)
                 .note(supplement_note),
         )
