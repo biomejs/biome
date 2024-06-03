@@ -54,7 +54,7 @@ invalid.js:1:5 lint/nursery/useConsistentStringFunctions  FIXABLE  ━━━━�
   
   i See MDN web docs for more details.
   
-  i Safe fix: Replace inconsistent string function trimLeft()  with trimStart().
+  i Safe fix: Replace inconsistent string function trimLeft with trimStart.
   
      1    │ - foo.trimLeft();
         1 │ + foo.trimStart();
@@ -79,7 +79,7 @@ invalid.js:2:5 lint/nursery/useConsistentStringFunctions  FIXABLE  ━━━━�
   
   i See MDN web docs for more details.
   
-  i Safe fix: Replace inconsistent string function trimRight()  with trimEnd().
+  i Safe fix: Replace inconsistent string function trimRight with trimEnd.
   
      1  1 │   foo.trimLeft();
      2    │ - foo.trimRight();
@@ -106,7 +106,7 @@ invalid.js:3:10 lint/nursery/useConsistentStringFunctions  FIXABLE  ━━━━
   
   i See MDN web docs for more details.
   
-  i Safe fix: Replace inconsistent string function trimRight()  with trimEnd().
+  i Safe fix: Replace inconsistent string function trimRight with trimEnd.
   
      1  1 │   foo.trimLeft();
      2  2 │   foo.trimRight();
@@ -134,7 +134,7 @@ invalid.js:4:14 lint/nursery/useConsistentStringFunctions  FIXABLE  ━━━━
   
   i See MDN web docs for more details.
   
-  i Safe fix: Replace inconsistent string function trimRight()  with trimEnd().
+  i Safe fix: Replace inconsistent string function trimRight with trimEnd.
   
      2  2 │   foo.trimRight();
      3  3 │   trimLeft.trimRight();
@@ -162,7 +162,7 @@ invalid.js:5:7 lint/nursery/useConsistentStringFunctions  FIXABLE  ━━━━�
   
   i See MDN web docs for more details.
   
-  i Safe fix: Replace inconsistent string function trimLeft()  with trimStart().
+  i Safe fix: Replace inconsistent string function trimLeft with trimStart.
   
      3  3 │   trimLeft.trimRight();
      4  4 │   foo.trimLeft.trimRight();
@@ -190,7 +190,7 @@ invalid.js:8:3 lint/nursery/useConsistentStringFunctions  FIXABLE  ━━━━�
   
   i See MDN web docs for more details.
   
-  i Safe fix: Replace inconsistent string function trimRight()  with trimEnd().
+  i Safe fix: Replace inconsistent string function trimRight with trimEnd.
   
      6  6 │   foo
      7  7 │   	// comment
@@ -218,7 +218,7 @@ invalid.js:11:6 lint/nursery/useConsistentStringFunctions  FIXABLE  ━━━━
   
   i See MDN web docs for more details.
   
-  i Safe fix: Replace inconsistent string function trimLeft()  with trimStart().
+  i Safe fix: Replace inconsistent string function trimLeft with trimStart.
   
      9  9 │   	/* comment */
     10 10 │   	();
@@ -245,7 +245,7 @@ invalid.js:14:5 lint/nursery/useConsistentStringFunctions  FIXABLE  ━━━━
   
   i See MDN web docs for more details.
   
-  i Safe fix: Replace inconsistent string function substr()  with slice().
+  i Safe fix: Replace inconsistent string function substr with slice.
   
     12 12 │   
     13 13 │   // Substring
@@ -273,7 +273,7 @@ invalid.js:15:6 lint/nursery/useConsistentStringFunctions  FIXABLE  ━━━━
   
   i See MDN web docs for more details.
   
-  i Safe fix: Replace inconsistent string function substr()  with slice().
+  i Safe fix: Replace inconsistent string function substr with slice.
   
     13 13 │   // Substring
     14 14 │   foo.substr()
@@ -301,7 +301,7 @@ invalid.js:16:10 lint/nursery/useConsistentStringFunctions  FIXABLE  ━━━�
   
   i See MDN web docs for more details.
   
-  i Safe fix: Replace inconsistent string function substring()  with slice().
+  i Safe fix: Replace inconsistent string function substring with slice.
   
     14 14 │   foo.substr()
     15 15 │   foo?.substr()
@@ -329,7 +329,7 @@ invalid.js:17:11 lint/nursery/useConsistentStringFunctions  FIXABLE  ━━━�
   
   i See MDN web docs for more details.
   
-  i Safe fix: Replace inconsistent string function substring()  with slice().
+  i Safe fix: Replace inconsistent string function substring with slice.
   
     15 15 │   foo?.substr()
     16 16 │   foo.bar?.substring()
@@ -357,7 +357,7 @@ invalid.js:18:9 lint/nursery/useConsistentStringFunctions  FIXABLE  ━━━━
   
   i See MDN web docs for more details.
   
-  i Safe fix: Replace inconsistent string function substr()  with slice().
+  i Safe fix: Replace inconsistent string function substr with slice.
   
     16 16 │   foo.bar?.substring()
     17 17 │   foo?.[0]?.substring()
@@ -385,7 +385,7 @@ invalid.js:19:10 lint/nursery/useConsistentStringFunctions  FIXABLE  ━━━�
   
   i See MDN web docs for more details.
   
-  i Safe fix: Replace inconsistent string function substring()  with slice().
+  i Safe fix: Replace inconsistent string function substring with slice.
   
     17 17 │   foo?.[0]?.substring()
     18 18 │   foo.bar.substr?.()
@@ -413,7 +413,7 @@ invalid.js:20:15 lint/nursery/useConsistentStringFunctions  FIXABLE  ━━━�
   
   i See MDN web docs for more details.
   
-  i Safe fix: Replace inconsistent string function substr()  with slice().
+  i Safe fix: Replace inconsistent string function substr with slice.
   
     18 18 │   foo.bar.substr?.()
     19 19 │   foo.bar?.substring?.()
@@ -441,7 +441,7 @@ invalid.js:21:14 lint/nursery/useConsistentStringFunctions  FIXABLE  ━━━�
   
   i See MDN web docs for more details.
   
-  i Safe fix: Replace inconsistent string function substring()  with slice().
+  i Safe fix: Replace inconsistent string function substring with slice.
   
     19 19 │   foo.bar?.substring?.()
     20 20 │   foo.bar?.baz?.substr()
@@ -469,7 +469,7 @@ invalid.js:22:14 lint/nursery/useConsistentStringFunctions  FIXABLE  ━━━�
   
   i See MDN web docs for more details.
   
-  i Safe fix: Replace inconsistent string function substr()  with slice().
+  i Safe fix: Replace inconsistent string function substr with slice.
   
     20 20 │   foo.bar?.baz?.substr()
     21 21 │   foo.bar?.baz.substring()
@@ -497,7 +497,7 @@ invalid.js:23:7 lint/nursery/useConsistentStringFunctions  FIXABLE  ━━━━
   
   i See MDN web docs for more details.
   
-  i Safe fix: Replace inconsistent string function substr()  with slice().
+  i Safe fix: Replace inconsistent string function substr with slice.
   
     21 21 │   foo.bar?.baz.substring()
     22 22 │   foo.bar.baz?.substr()
@@ -525,7 +525,7 @@ invalid.js:24:7 lint/nursery/useConsistentStringFunctions  FIXABLE  ━━━━
   
   i See MDN web docs for more details.
   
-  i Safe fix: Replace inconsistent string function substr()  with slice().
+  i Safe fix: Replace inconsistent string function substr with slice.
   
     22 22 │   foo.bar.baz?.substr()
     23 23 │   "foo".substr()
@@ -553,7 +553,7 @@ invalid.js:25:7 lint/nursery/useConsistentStringFunctions  FIXABLE  ━━━━
   
   i See MDN web docs for more details.
   
-  i Safe fix: Replace inconsistent string function substr()  with slice().
+  i Safe fix: Replace inconsistent string function substr with slice.
   
     23 23 │   "foo".substr()
     24 24 │   "foo".substr(bar.length, Math.min(baz, 100)) // "foo".slice(bar.length, bar.length + Math.min(baz, 100))
@@ -581,7 +581,7 @@ invalid.js:26:7 lint/nursery/useConsistentStringFunctions  FIXABLE  ━━━━
   
   i See MDN web docs for more details.
   
-  i Safe fix: Replace inconsistent string function substr()  with slice().
+  i Safe fix: Replace inconsistent string function substr with slice.
   
     24 24 │   "foo".substr(bar.length, Math.min(baz, 100)) // "foo".slice(bar.length, bar.length + Math.min(baz, 100))
     25 25 │   "foo".substr(1, "abc".length) // "foo".slice(1, 1 + "abc".length)

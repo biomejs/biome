@@ -143,24 +143,24 @@ impl Rule for UseConsistentStringFunctions {
         let args = arguments.args();
 
         let replaced_member_name = match member_name {
-            "trimLeft" => "trimStart()",
-            "trimRight" => "trimEnd()",
-            "substr" | "substring" => "slice()",
+            "trimLeft" => "trimStart",
+            "trimRight" => "trimEnd",
+            "substr" | "substring" => "slice",
             _ => return None,
         };
 
         let mut mutation = ctx.root().begin();
         match member_name {
             "trimLeft" => {
-                let replaced_function = make::js_name(make::ident("trimStart"));
+                let replaced_function = make::js_name(make::ident(replaced_member_name));
                 mutation.replace_element(member.into(), replaced_function.into());
             }
             "trimRight" => {
-                let replaced_function = make::js_name(make::ident("trimEnd"));
+                let replaced_function = make::js_name(make::ident(replaced_member_name));
                 mutation.replace_element(member.into(), replaced_function.into());
             }
             "substr" => {
-                let replaced_function = make::js_name(make::ident("slice"));
+                let replaced_function = make::js_name(make::ident(replaced_member_name));
                 mutation.replace_element(member.into(), replaced_function.into());
             }
             "substring" => {
@@ -180,7 +180,7 @@ impl Rule for UseConsistentStringFunctions {
         Some(JsRuleAction::new(
             ActionCategory::QuickFix,
             ctx.metadata().applicability(),
-            markup! { "Replace inconsistent string function "<Emphasis>{member_name}</Emphasis>"()  with "<Emphasis>{replaced_member_name}</Emphasis>"." }
+            markup! { "Replace inconsistent string function "<Emphasis>{member_name}</Emphasis>" with "<Emphasis>{replaced_member_name}</Emphasis>"." }
                 .to_owned(),
             mutation,
         ))
