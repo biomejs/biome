@@ -28,6 +28,12 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 #### New features
 
+- New `clean` command. Use this new command to clean after the `biome-logs` directory, and remove all the log files.
+
+  ```shell
+  biome clean
+  ```
+
 - Add two new options `--only` and `--skip` to the command `biome lint` ([#58](https://github.com/biomejs/biome/issues/58)).
 
   The `--only` option allows you to run a given rule or rule group,
