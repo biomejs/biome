@@ -238,13 +238,6 @@ pub(crate) fn migrate_eslint_any_rule(
                 .get_or_insert(Default::default());
             rule.set_level(rule_severity.into());
         }
-        "@typescript-eslint/no-useless-template-literals" => {
-            let group = rules.style.get_or_insert_with(Default::default);
-            let rule = group
-                .no_unused_template_literal
-                .get_or_insert(Default::default());
-            rule.set_level(rule_severity.into());
-        }
         "@typescript-eslint/parameter-properties" => {
             if !options.include_inspired {
                 results.has_inspired_rules = true;
