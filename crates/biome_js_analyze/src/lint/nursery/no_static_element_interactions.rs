@@ -136,8 +136,11 @@ impl Rule for NoStaticElementInteractions {
                     .map_or(false, |val| !val.text().is_empty())
             }),
             _ => {
+                // In Biome-managed elements, whether an element is interactive is determined by the is_not_interactive_element function.
                 (!aria_roles.is_not_interactive_element(element_name, attributes.clone())
+                    // Except for elements invalid in the eslint-plugin-jsx-a11y test case.
                     && !is_invalid_element(element_name))
+                    // Also, elements marked as valid in eslint-plugin-jsx-a11y are marked as “valid” even if they are marked as invalid in Biome.
                     || is_valid_element(element_name)
             }
         };
