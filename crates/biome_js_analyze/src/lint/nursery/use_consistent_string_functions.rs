@@ -113,7 +113,9 @@ impl Rule for UseConsistentStringFunctions {
         .to_owned();
         let note_message = if member_name == "substring" {
             markup! {
-                ""{member_name}"() is not identical to "{replaced_member_name}" when arguments are passed. Please refer to the MDN documentation for details."
+                "<Emphasis>{member_name}</Emphasis> and <Emphasis>{replaced_member_name}</Emphasis>differ in their behaviour when arguments are passed.
+                ---
+                See "<Hyperlink href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/substring#the_difference_between_substring_and_substr">"MDN web docs"</Hyperlink>" for more details."
             }.to_owned()
         } else {
             markup! {
@@ -121,13 +123,9 @@ impl Rule for UseConsistentStringFunctions {
             }
             .to_owned()
         };
-        let supplement_note = markup! {
-            "See "<Hyperlink href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/substring#the_difference_between_substring_and_substr">"MDN web docs"</Hyperlink>" for more details."
-        }.to_owned();
         Some(
             RuleDiagnostic::new(rule_category!(), state.span, diagnostic_message)
-                .note(note_message)
-                .note(supplement_note),
+                .note(note_message),
         )
     }
 
