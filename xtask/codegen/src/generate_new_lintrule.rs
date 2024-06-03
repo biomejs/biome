@@ -73,7 +73,7 @@ declare_rule! {{
     /// ```
     ///
     pub {rule_name_upper_camel} {{
-        version: "next",
+        version: "1.8.0",
         name: "{rule_name_lower_camel}",
         language: "js",
         recommended: false,
@@ -148,7 +148,7 @@ declare_rule! {{
     /// ```
     ///
     pub {rule_name_upper_camel} {{
-        version: "next",
+        version: "1.8.0",
         name: "{rule_name_lower_camel}",
         language: "css",
         recommended: false,

@@ -25,7 +25,7 @@ declare_rule! {
     /// ```
     ///
     pub NoInvalidPositionAtImportRule {
-        version: "next",
+        version: "1.8.0",
         name: "noInvalidPositionAtImportRule",
         language: "css",
         recommended: true,

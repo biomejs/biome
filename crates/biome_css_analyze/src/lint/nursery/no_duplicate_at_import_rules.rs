@@ -44,7 +44,7 @@ declare_rule! {
     /// ```
     ///
     pub NoDuplicateAtImportRules {
-        version: "next",
+        version: "1.8.0",
         name: "noDuplicateAtImportRules",
         language: "css",
         recommended: true,

@@ -43,7 +43,7 @@ declare_rule! {
     /// ```
     ///
     pub NoEmptyBlock {
-        version: "next",
+        version: "1.8.0",
         name: "noEmptyBlock",
         language: "css",
         recommended: true,
