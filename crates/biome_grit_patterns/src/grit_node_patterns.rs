@@ -11,6 +11,8 @@ use grit_util::AnalysisLogs;
 pub(crate) struct GritNodePattern;
 
 impl AstNodePattern<GritQueryContext> for GritNodePattern {
+    const INCLUDES_TRIVIA: bool = true;
+
     fn children(&self) -> Vec<PatternOrPredicate<GritQueryContext>> {
         todo!()
     }

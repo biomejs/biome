@@ -1,10 +1,12 @@
 #![allow(dead_code)] // FIXME: Remove when more stuff is ready
 mod diagnostics;
 mod errors;
+mod grit_analysis_ext;
 mod grit_binding;
 mod grit_code_snippet;
 mod grit_context;
 mod grit_file;
+mod grit_js_parser;
 mod grit_node;
 mod grit_node_patterns;
 mod grit_query;

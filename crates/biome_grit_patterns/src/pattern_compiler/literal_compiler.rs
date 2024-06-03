@@ -1,9 +1,10 @@
 use super::{
     compilation_context::NodeCompilationContext, list_compiler::ListCompiler,
-    map_compiler::MapCompiler,
+    map_compiler::MapCompiler, snippet_compiler::parse_snippet_content,
 };
-use crate::{grit_context::GritQueryContext, CompileError};
-use biome_grit_syntax::{AnyGritLiteral, GritSyntaxKind};
+use crate::{grit_context::GritQueryContext, util::TextRangeGritExt, CompileError};
+use biome_grit_syntax::{AnyGritCodeSnippetSource, AnyGritLiteral, GritSyntaxKind};
+use biome_rowan::AstNode;
 use grit_pattern_matcher::pattern::{
     BooleanConstant, FloatConstant, IntConstant, Pattern, StringConstant,
 };
@@ -20,7 +21,16 @@ impl LiteralCompiler {
             AnyGritLiteral::GritBooleanLiteral(node) => Ok(Pattern::BooleanConstant(
                 BooleanConstant::new(node.value()?.text_trimmed() == "true"),
             )),
-            AnyGritLiteral::GritCodeSnippet(_) => todo!(),
+            AnyGritLiteral::GritCodeSnippet(node) => match node.source()? {
+                AnyGritCodeSnippetSource::GritBacktickSnippetLiteral(node) => {
+                    let token = node.value_token()?;
+                    let text = token.text_trimmed();
+                    let range = node.syntax().text_trimmed_range().to_byte_range();
+                    parse_snippet_content(&text[1..text.len() - 1], range, context, is_rhs)
+                }
+                AnyGritCodeSnippetSource::GritLanguageSpecificSnippet(_) => todo!(),
+                AnyGritCodeSnippetSource::GritRawBacktickSnippetLiteral(_) => todo!(),
+            },
             AnyGritLiteral::GritDoubleLiteral(node) => Ok(Pattern::FloatConstant(
                 FloatConstant::new(node.value_token()?.text_trimmed().parse().map_err(|err| {
                     CompileError::LiteralOutOfRange(format!("Error parsing double: {err}"))

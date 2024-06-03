@@ -51,6 +51,13 @@ pub enum CompileError {
 
     /// A pattern is required to compile a Grit query.
     MissingPattern,
+
+    /// Bracketed metavariables are only allowed on the right-hand side of
+    /// rewrite.
+    InvalidBracketedMetavariable,
+
+    /// Unknown variable.
+    UnknownVariable(String),
 }
 
 impl Diagnostic for CompileError {}

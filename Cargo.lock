@@ -540,6 +540,7 @@ dependencies = [
  "biome_diagnostics",
  "biome_grit_parser",
  "biome_grit_syntax",
+ "biome_js_parser",
  "biome_js_syntax",
  "biome_parser",
  "biome_rowan",
@@ -1878,9 +1879,9 @@ dependencies = [
 
 [[package]]
 name = "grit-pattern-matcher"
-version = "0.2.0"
+version = "0.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f7ca790933b1ae99fbb0caf4b90255bbcdc6507b893d5bbd8d0552bbb48018c2"
+checksum = "eb91ad25bb8557f3be40899becf5db27e8431e359d69d5b67104f1d1a12c8d9a"
 dependencies = [
  "anyhow",
  "elsa",
@@ -1893,9 +1894,9 @@ dependencies = [
 
 [[package]]
 name = "grit-util"
-version = "0.2.0"
+version = "0.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f6b466e27499052b6206a3fe31eff49c5c55586ea23f9d73b2df41c0de8057ef"
+checksum = "e4d302f12945a38d464183a6ffe49b8b778876f82ab753174324cd7aae74b24a"
 dependencies = [
  "derive_builder",
  "once_cell",
