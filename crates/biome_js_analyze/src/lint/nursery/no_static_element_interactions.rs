@@ -148,13 +148,10 @@ impl Rule for NoStaticElementInteractions {
 
         if let Some(attr) = node.find_attribute_by_name("role") {
             let role_value = attr.as_static_value()?;
-            let role_text = role_value.text();
 
-            if aria_roles.is_role_interactive(role_text) {
+            if aria_roles.is_role_interactive(role_value.text()) {
                 return None;
             }
-        } else {
-            return Some(());
         }
 
         Some(())
