@@ -73,7 +73,7 @@ AnyGraphqlDefinition =
 	| GraphqlObjectTypeExtension
 	| GraphqlInterfaceTypeExtension
 	| GraphqlUnionTypeExtension
-	| AnyGraphqlEnumTypeExtension
+	| GraphqlEnumTypeExtension
 	| AnyGraphqlInputObjectTypeExtension
 
 // https://spec.graphql.org/October2021/#sec-Language.Operations.Query-shorthand
@@ -495,25 +495,13 @@ GraphqlEnumValueDefinition =
 	directives: GraphqlDirectiveList
 
 // https://spec.graphql.org/October2021/#sec-Enum-Extensions
-AnyGraphqlEnumTypeExtension =
-	GraphqlEnumTypeExtensionWithValues
-	| GraphqlEnumTypeExtension
-	| GraphqlBogusExtension
-
 // extend enum A @d { Y }
-GraphqlEnumTypeExtensionWithValues =
-	'extend'
-	'enum'
-	name: GraphqlName
-	directives: GraphqlDirectiveList
-	enum_values: GraphqlEnumValuesDefinition
-
-// extend enum A @d
 GraphqlEnumTypeExtension =
 	'extend'
 	'enum'
 	name: GraphqlName
 	directives: GraphqlDirectiveList
+	enum_values: GraphqlEnumValuesDefinition?
 
 // "xyz" input A @d { x: y }
 // https://spec.graphql.org/October2021/#sec-Input-Object

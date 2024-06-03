@@ -1,0 +1,6 @@
+extend enum Direction
+
+extend enum Direction
+  NORTH
+}
+

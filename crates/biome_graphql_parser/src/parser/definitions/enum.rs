@@ -1,7 +1,7 @@
 use crate::parser::{
     directive::{is_at_directive, DirectiveList},
     is_nth_at_name, is_nth_at_non_kw_name, parse_description,
-    parse_error::expected_name,
+    parse_error::{expected_enum_extension, expected_name},
     parse_name,
     value::{is_at_string, parse_enum_value},
     GraphqlParser,
@@ -32,6 +32,28 @@ pub(crate) fn parse_enum_type_definition(p: &mut GraphqlParser) -> ParsedSyntax 
     parse_enum_values(p).ok();
 
     Present(m.complete(p, GRAPHQL_ENUM_TYPE_DEFINITION))
+}
+
+/// Must only be called if the next 2 token is `extend` and `enum`, otherwise it will panic.
+#[inline]
+pub(crate) fn parse_enum_type_extension(p: &mut GraphqlParser) -> ParsedSyntax {
+    let m = p.start();
+
+    p.bump(T![extend]);
+    p.bump(T![enum]);
+
+    parse_name(p).or_add_diagnostic(p, expected_name);
+
+    let directive_list = DirectiveList.parse_list(p);
+    let directive_empty = directive_list.range(p).is_empty();
+
+    let enum_values_empty = parse_enum_values(p).is_absent();
+
+    if directive_empty && enum_values_empty {
+        p.error(expected_enum_extension(p, p.cur_range()));
+    }
+
+    Present(m.complete(p, GRAPHQL_ENUM_TYPE_EXTENSION))
 }
 
 #[inline]
