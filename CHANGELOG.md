@@ -9,7 +9,7 @@ New entries must be placed in a section entitled `Unreleased`.
 Read
 our [guidelines for writing a good changelog entry](https://github.com/biomejs/biome/blob/main/CONTRIBUTING.md#changelog).
 
-## 1.8.0 (TBD)
+## 1.8.0 (2024-06-04)
 
 ### Analyzer
 

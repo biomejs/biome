@@ -390,7 +390,6 @@ When releasing a new version of a Biome, follow these steps:
 1. [ ] Linter rules have a `version` metadata directly defined in their implementation.
    This field is set to `next` for newly created rules.
    This field must be updated to the new version.
-   Then execute `just gen-lint`.
 
 1. [ ] Update the website with the new version number:
    `BIOME_VERSION=<version> just gen-web`.
