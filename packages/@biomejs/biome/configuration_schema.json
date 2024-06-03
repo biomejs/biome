@@ -1982,6 +1982,13 @@
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
 					]
+				},
+				"useValidAutocomplete": {
+					"description": "Use correct values for the autocomplete attribute on input elements.",
+					"anyOf": [
+						{ "$ref": "#/definitions/UseValidAutocompleteConfiguration" },
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false
@@ -2442,6 +2449,21 @@
 				"options": {
 					"description": "Rule's options",
 					"allOf": [{ "$ref": "#/definitions/ValidAriaRoleOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
+		"RuleWithUseValidAutocompleteOptions": {
+			"type": "object",
+			"required": ["level", "options"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/UseValidAutocompleteOptions" }]
 				}
 			},
 			"additionalProperties": false
@@ -3319,6 +3341,20 @@
 				{ "$ref": "#/definitions/RulePlainConfiguration" },
 				{ "$ref": "#/definitions/RuleWithUtilityClassSortingOptions" }
 			]
+    },
+		"UseValidAutocompleteConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithUseValidAutocompleteOptions" }
+			]
+		},
+		"UseValidAutocompleteOptions": {
+			"type": "object",
+			"required": ["inputComponents"],
+			"properties": {
+				"inputComponents": { "type": "array", "items": { "type": "string" } }
+			},
+			"additionalProperties": false
 		},
 		"UtilityClassSortingOptions": {
 			"type": "object",

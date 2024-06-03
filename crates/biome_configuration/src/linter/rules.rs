@@ -2951,6 +2951,9 @@ pub struct Nursery {
     #[doc = "Require regex literals to be declared at the top level."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_top_level_regex: Option<RuleConfiguration<UseTopLevelRegex>>,
+    #[doc = "Use correct values for the autocomplete attribute on input elements."]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub use_valid_autocomplete: Option<RuleConfiguration<UseValidAutocomplete>>,
 }
 impl DeserializableValidator for Nursery {
     fn validate(
@@ -3014,6 +3017,7 @@ impl Nursery {
         "useThrowNewError",
         "useThrowOnlyError",
         "useTopLevelRegex",
+        "useValidAutocomplete",
     ];
     const RECOMMENDED_RULES: &'static [&'static str] = &[
         "noDoneCallback",
@@ -3103,6 +3107,8 @@ impl Nursery {
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[42]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[43]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[44]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[45]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[46]),
     ];
     #[doc = r" Retrieves the recommended rules"]
     pub(crate) fn is_recommended_true(&self) -> bool {
@@ -3344,6 +3350,11 @@ impl Nursery {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[44]));
             }
         }
+        if let Some(rule) = self.use_valid_autocomplete.as_ref() {
+            if rule.is_enabled() {
+                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[46]));
+            }
+        }
         index_set
     }
     pub(crate) fn get_disabled_rules(&self) -> FxHashSet<RuleFilter<'static>> {
@@ -3573,6 +3584,11 @@ impl Nursery {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[44]));
             }
         }
+        if let Some(rule) = self.use_valid_autocomplete.as_ref() {
+            if rule.is_disabled() {
+                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[46]));
+            }
+        }
         index_set
     }
     #[doc = r" Checks if, given a rule name, matches one of the rules contained in this category"]
@@ -3787,6 +3803,10 @@ impl Nursery {
                 .map(|conf| (conf.level(), conf.get_options())),
             "useTopLevelRegex" => self
                 .use_top_level_regex
+                .as_ref()
+                .map(|conf| (conf.level(), conf.get_options())),
+            "useValidAutocomplete" => self
+                .use_valid_autocomplete
                 .as_ref()
                 .map(|conf| (conf.level(), conf.get_options())),
             _ => None,
