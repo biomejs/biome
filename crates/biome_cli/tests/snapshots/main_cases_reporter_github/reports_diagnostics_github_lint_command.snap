@@ -52,15 +52,7 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
 
 ```block
-::error title=lint/nursery/noEvolvingAny,file=main.ts,line=8,endLine=8,col=5,endColumn=6::This variable's type is not allowed to evolve implicitly, leading to potential any types.
-```
-
-```block
 ::error title=lint/suspicious/noImplicitAnyLet,file=main.ts,line=8,endLine=8,col=5,endColumn=6::This variable implicitly has the any type.
-```
-
-```block
-::error title=lint/nursery/noEvolvingAny,file=main.ts,line=9,endLine=9,col=7,endColumn=8::This variable's type is not allowed to evolve implicitly, leading to potential any types.
 ```
 
 ```block
@@ -84,15 +76,7 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
 
 ```block
-::error title=lint/nursery/noEvolvingAny,file=index.ts,line=8,endLine=8,col=5,endColumn=6::This variable's type is not allowed to evolve implicitly, leading to potential any types.
-```
-
-```block
 ::error title=lint/suspicious/noImplicitAnyLet,file=index.ts,line=8,endLine=8,col=5,endColumn=6::This variable implicitly has the any type.
-```
-
-```block
-::error title=lint/nursery/noEvolvingAny,file=index.ts,line=9,endLine=9,col=7,endColumn=8::This variable's type is not allowed to evolve implicitly, leading to potential any types.
 ```
 
 ```block

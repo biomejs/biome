@@ -363,6 +363,8 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 - Make [useExhaustiveDependencies](https://biomejs.dev/linter/rules/use-exhaustive-dependencies/) report duplicate dependencies. Contributed by @tunamaguro
 
+- Rename `noEvolvingAny` into `noEvolvingTypes` ([#48](https://github.com/biomejs/website/issues/48)). Contributed by @Conaclos
+
 #### Bug fixes
 
 - [noUndeclaredVariables](https://biomejs.dev/linter/rules/no-undeclared-variables/) and [noUnusedImports](https://biomejs.dev/linter/rules/no-unused-imports) now correctly handle import namespaces ([#2796](https://github.com/biomejs/biome/issues/2796)).
@@ -1260,7 +1262,7 @@ The following rules are promoted:
 
 #### New features
 
-- Add rule [noEvolvingAny](https://biomejs.dev/linter/rules/no-evolving-any) to disallow variables from evolving into `any` type through reassignments. Contributed by @fujiyamaorange
+- Add rule [noEvolvingTypes](https://biomejs.dev/linter/rules/no-evolving-any) to disallow variables from evolving into `any` type through reassignments. Contributed by @fujiyamaorange
 
 #### Enhancements
 
