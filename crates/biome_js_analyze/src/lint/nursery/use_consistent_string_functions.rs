@@ -117,6 +117,12 @@ impl Rule for UseConsistentStringFunctions {
                 ---
                 See "<Hyperlink href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/substring#the_difference_between_substring_and_substr">"MDN web docs"</Hyperlink>" for more details."
             }.to_owned()
+        } else if member_name == "substr" {
+            markup! {
+                "<Emphasis>{member_name}</Emphasis> and <Emphasis>{replaced_member_name}</Emphasis>differ in their behaviour particularly in the interpretation of the second argument and when start is greater than stop.
+                ---
+                See "<Hyperlink href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/substr#description">"MDN web docs"</Hyperlink>" for more details."
+            }.to_owned()
         } else {
             markup! {
                 ""{member_name}"() is an alias for "{replaced_member_name}"."
