@@ -166,7 +166,7 @@ indexmap           = { version = "2.2.6", features = ["serde"] }
 insta              = "1.38.0"
 lazy_static        = "1.4.0"
 oxc_resolver       = "1.7.0"
-proc-macro2        = "1.0.84"
+proc-macro2        = "1.0.85"
 quickcheck         = "1.0.3"
 quickcheck_macros  = "1.0.0"
 quote              = "1.0.36"
