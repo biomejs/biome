@@ -393,7 +393,10 @@ pub(crate) fn migrate_eslint_any_rule(
                 results.has_inspired_rules = true;
                 return false;
             }
-            let group = rules.style.get_or_insert_with(Default::default);
+            if !options.include_nursery {
+                return false;
+            }
+            let group = rules.nursery.get_or_insert_with(Default::default);
             let rule = group
                 .use_import_restrictions
                 .get_or_insert(Default::default());

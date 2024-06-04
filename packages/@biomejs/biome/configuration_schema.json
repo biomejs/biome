@@ -1916,6 +1916,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useImportRestrictions": {
+					"description": "Disallows package private imports.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useNumberToFixedDigitsArgument": {
 					"description": "Enforce using the digits argument with Number#toFixed().",
 					"anyOf": [
@@ -2783,13 +2790,6 @@
 					"description": "This rule enforces the use of \\<>...\\</> over \\<Fragment>...\\</Fragment>.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleFixConfiguration_for_Null" },
-						{ "type": "null" }
-					]
-				},
-				"useImportRestrictions": {
-					"description": "Disallows package private imports.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
 					]
 				},
