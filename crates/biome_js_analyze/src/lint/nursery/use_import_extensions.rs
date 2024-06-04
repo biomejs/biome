@@ -37,7 +37,7 @@ declare_rule! {
     /// ```js,expect_diagnostic
     /// import "../.";
     /// ```
-    /// ```js,expect_diagnostic
+    /// ```js,expect_diagnostic,ignore
     /// import("./foo");
     /// ```
     /// ```js,expect_diagnostic

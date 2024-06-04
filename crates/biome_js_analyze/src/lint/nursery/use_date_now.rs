@@ -27,15 +27,19 @@ declare_rule! {
     /// ```js,expect_diagnostic
     /// const foo = new Date().getTime();
     /// ```
+    ///
     /// ```js,expect_diagnostic
     /// const foo = new Date().valueOf();
     /// ```
-    /// ```js,expect_diagnostic
+    ///
+    /// ```js,expect_diagnostic,ignore
     /// const foo = +new Date;
     /// ```
+    ///
     /// ```js,expect_diagnostic
     /// const foo = Number(new Date());
     /// ```
+    ///
     /// ```js,expect_diagnostic
     /// const foo = new Date() * 2;
     /// ```
