@@ -35,7 +35,7 @@ declare_rule! {
     /// ```
     ///
     pub NoDuplicateSelectorsKeyframeBlock {
-        version: "next",
+        version: "1.8.0",
         name: "noDuplicateSelectorsKeyframeBlock",
         language: "css",
         recommended: true,

@@ -62,7 +62,7 @@ declare_rule! {
     ///           'bar'
     /// ```
     pub NoUselessStringConcat {
-        version: "next",
+        version: "1.8.0",
         name: "noUselessStringConcat",
         language: "js",
         sources: &[RuleSource::Eslint("no-useless-concat")],

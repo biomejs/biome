@@ -38,7 +38,7 @@ declare_rule! {
     /// ```
     ///
     pub UseFocusableInteractive {
-        version: "next",
+        version: "1.8.0",
         name: "useFocusableInteractive",
         language: "jsx",
         sources: &[RuleSource::EslintJsxA11y("interactive-support-focus")],

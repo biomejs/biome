@@ -44,7 +44,7 @@ pub type NoConstEnum =
     <lint::suspicious::no_const_enum::NoConstEnum as biome_analyze::Rule>::Options;
 pub type NoConstantCondition =
     <lint::correctness::no_constant_condition::NoConstantCondition as biome_analyze::Rule>::Options;
-pub type NoConstantMathMinMaxClamp = < lint :: nursery :: no_constant_math_min_max_clamp :: NoConstantMathMinMaxClamp as biome_analyze :: Rule > :: Options ;
+pub type NoConstantMathMinMaxClamp = < lint :: correctness :: no_constant_math_min_max_clamp :: NoConstantMathMinMaxClamp as biome_analyze :: Rule > :: Options ;
 pub type NoConstructorReturn =
     <lint::correctness::no_constructor_return::NoConstructorReturn as biome_analyze::Rule>::Options;
 pub type NoControlCharactersInRegex = < lint :: suspicious :: no_control_characters_in_regex :: NoControlCharactersInRegex as biome_analyze :: Rule > :: Options ;
@@ -90,7 +90,7 @@ pub type NoExtraBooleanCast =
 pub type NoExtraNonNullAssertion = < lint :: suspicious :: no_extra_non_null_assertion :: NoExtraNonNullAssertion as biome_analyze :: Rule > :: Options ;
 pub type NoFallthroughSwitchClause = < lint :: suspicious :: no_fallthrough_switch_clause :: NoFallthroughSwitchClause as biome_analyze :: Rule > :: Options ;
 pub type NoFlatMapIdentity =
-    <lint::nursery::no_flat_map_identity::NoFlatMapIdentity as biome_analyze::Rule>::Options;
+    <lint::correctness::no_flat_map_identity::NoFlatMapIdentity as biome_analyze::Rule>::Options;
 pub type NoFocusedTests =
     <lint::suspicious::no_focused_tests::NoFocusedTests as biome_analyze::Rule>::Options;
 pub type NoForEach = <lint::complexity::no_for_each::NoForEach as biome_analyze::Rule>::Options;
@@ -137,7 +137,7 @@ pub type NoNegationElse =
 pub type NoNewSymbol =
     <lint::correctness::no_new_symbol::NoNewSymbol as biome_analyze::Rule>::Options;
 pub type NoNodejsModules =
-    <lint::nursery::no_nodejs_modules::NoNodejsModules as biome_analyze::Rule>::Options;
+    <lint::correctness::no_nodejs_modules::NoNodejsModules as biome_analyze::Rule>::Options;
 pub type NoNonNullAssertion =
     <lint::style::no_non_null_assertion::NoNonNullAssertion as biome_analyze::Rule>::Options;
 pub type NoNoninteractiveElementToInteractiveRole = < lint :: a11y :: no_noninteractive_element_to_interactive_role :: NoNoninteractiveElementToInteractiveRole as biome_analyze :: Rule > :: Options ;
@@ -253,7 +253,7 @@ pub type UseAriaActivedescendantWithTabindex = < lint :: a11y :: use_aria_active
 pub type UseAriaPropsForRole =
     <lint::a11y::use_aria_props_for_role::UseAriaPropsForRole as biome_analyze::Rule>::Options;
 pub type UseArrayLiterals =
-    <lint::nursery::use_array_literals::UseArrayLiterals as biome_analyze::Rule>::Options;
+    <lint::correctness::use_array_literals::UseArrayLiterals as biome_analyze::Rule>::Options;
 pub type UseArrowFunction =
     <lint::complexity::use_arrow_function::UseArrowFunction as biome_analyze::Rule>::Options;
 pub type UseAsConstAssertion =

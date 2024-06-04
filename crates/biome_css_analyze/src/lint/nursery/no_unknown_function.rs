@@ -30,7 +30,7 @@ declare_rule! {
     /// ```
     ///
     pub NoUnknownFunction {
-        version: "next",
+        version: "1.8.0",
         name: "noUnknownFunction",
         language: "css",
         recommended: true,

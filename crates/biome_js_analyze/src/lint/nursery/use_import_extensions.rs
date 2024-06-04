@@ -71,7 +71,7 @@ declare_rule! {
     /// When applying the suggested fix, make sure to verify that the file type is correct.
     ///
     pub UseImportExtensions {
-        version: "next",
+        version: "1.8.0",
         name: "useImportExtensions",
         language: "js",
         recommended: false,

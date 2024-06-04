@@ -47,7 +47,7 @@ declare_rule! {
     /// ```
     ///
     pub NoUnknownSelectorPseudoElement {
-        version: "next",
+        version: "1.8.0",
         name: "noUnknownSelectorPseudoElement",
         language: "css",
         recommended: true,

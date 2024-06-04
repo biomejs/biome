@@ -83,7 +83,7 @@ declare_rule! {
     /// ```
     ///
     pub NoLabelWithoutControl {
-        version: "next",
+        version: "1.8.0",
         name: "noLabelWithoutControl",
         language: "jsx",
         sources: &[RuleSource::EslintJsxA11y("label-has-associated-control")],
