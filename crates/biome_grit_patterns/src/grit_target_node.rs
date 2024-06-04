@@ -1,6 +1,6 @@
 use crate::util::TextRangeGritExt;
 use biome_js_syntax::{JsSyntaxKind, JsSyntaxNode, JsSyntaxToken};
-use biome_rowan::{SyntaxNodeText, TextRange};
+use biome_rowan::{SyntaxKind, SyntaxNodeText, TextRange};
 use grit_util::{AstCursor, AstNode as GritAstNode, ByteRange, CodeRange};
 use std::{borrow::Cow, str::Utf8Error};
 
@@ -73,6 +73,14 @@ macro_rules! generate_target_node {
                     $(Self::$lang_node(node) => node.text_trimmed_range()),+
                 }
             }
+
+            pub fn start_byte(&self) -> u32 {
+                self.text_trimmed_range().start().into()
+            }
+
+            pub fn end_byte(&self) -> u32 {
+                self.text_trimmed_range().end().into()
+            }
         }
 
         impl GritAstNode for GritTargetNode {
@@ -144,12 +152,6 @@ macro_rules! generate_target_node {
                 }
             }
 
-            fn full_source(&self) -> &str {
-                // This should not be a problem anytime soon, though we may want to
-                // reconsider when we implement rewrites.
-                unimplemented!("Full source of file not available")
-            }
-
             fn walk(&self) -> impl AstCursor<Node = Self> {
                 GritTargetNodeCursor::new(self)
             }
@@ -184,6 +186,14 @@ macro_rules! generate_target_node {
                 Self::$lang_kind(value)
             }
         })+
+
+        impl GritTargetSyntaxKind {
+            pub fn is_bogus(&self) -> bool {
+                match self {
+                    $(Self::$lang_kind(kind) => kind.is_bogus()),+
+                }
+            }
+        }
     };
 }
 
