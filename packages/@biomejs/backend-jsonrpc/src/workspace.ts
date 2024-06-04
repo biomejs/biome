@@ -809,6 +809,10 @@ export interface Correctness {
 	 */
 	noConstantCondition?: RuleConfiguration_for_Null;
 	/**
+	 * Disallow the use of Math.min and Math.max to clamp a value where the result itself is constant.
+	 */
+	noConstantMathMinMaxClamp?: RuleFixConfiguration_for_Null;
+	/**
 	 * Disallow returning a value from a constructor.
 	 */
 	noConstructorReturn?: RuleConfiguration_for_Null;
@@ -820,6 +824,10 @@ export interface Correctness {
 	 * Disallows empty destructuring patterns.
 	 */
 	noEmptyPattern?: RuleConfiguration_for_Null;
+	/**
+	 * Disallow to use unnecessary callback on flatMap.
+	 */
+	noFlatMapIdentity?: RuleFixConfiguration_for_Null;
 	/**
 	 * Disallow calling global object properties as functions
 	 */
@@ -844,6 +852,10 @@ export interface Correctness {
 	 * Disallow new operators with the Symbol object.
 	 */
 	noNewSymbol?: RuleFixConfiguration_for_Null;
+	/**
+	 * Forbid the use of Node.js builtin modules.
+	 */
+	noNodejsModules?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow \8 and \9 escape sequences in string literals.
 	 */
@@ -925,6 +937,10 @@ export interface Correctness {
 	 */
 	recommended?: boolean;
 	/**
+	 * Disallow Array constructors.
+	 */
+	useArrayLiterals?: RuleFixConfiguration_for_Null;
+	/**
 	 * Enforce all dependencies are correctly specified in a React hook.
 	 */
 	useExhaustiveDependencies?: RuleConfiguration_for_HooksOptions;
@@ -962,10 +978,6 @@ export interface Nursery {
 	 */
 	noConsole?: RuleFixConfiguration_for_Null;
 	/**
-	 * Disallow the use of Math.min and Math.max to clamp a value where the result itself is constant.
-	 */
-	noConstantMathMinMaxClamp?: RuleFixConfiguration_for_Null;
-	/**
 	 * Disallow using a callback in asynchronous tests and hooks.
 	 */
 	noDoneCallback?: RuleConfiguration_for_Null;
@@ -998,10 +1010,6 @@ export interface Nursery {
 	 */
 	noEvolvingTypes?: RuleConfiguration_for_Null;
 	/**
-	 * Disallow to use unnecessary callback on flatMap.
-	 */
-	noFlatMapIdentity?: RuleFixConfiguration_for_Null;
-	/**
 	 * Disallow invalid !important within keyframe declarations
 	 */
 	noImportantInKeyframe?: RuleConfiguration_for_Null;
@@ -1017,10 +1025,6 @@ export interface Nursery {
 	 * Checks that the assertion function, for example expect, is placed inside an it() function call.
 	 */
 	noMisplacedAssertion?: RuleConfiguration_for_Null;
-	/**
-	 * Forbid the use of Node.js builtin modules.
-	 */
-	noNodejsModules?: RuleConfiguration_for_Null;
 	/**
 	 * Prevents React-specific JSX properties from being used.
 	 */
@@ -1081,10 +1085,6 @@ export interface Nursery {
 	 * Disallow the use of overload signatures that are not next to each other.
 	 */
 	useAdjacentOverloadSignatures?: RuleConfiguration_for_Null;
-	/**
-	 * Disallow Array constructors.
-	 */
-	useArrayLiterals?: RuleFixConfiguration_for_Null;
 	/**
 	 * Enforce the use of new for all builtins, except String, Number, Boolean, Symbol and BigInt.
 	 */
@@ -2283,15 +2283,18 @@ export type Category =
 	| "lint/correctness/noChildrenProp"
 	| "lint/correctness/noConstAssign"
 	| "lint/correctness/noConstantCondition"
+	| "lint/correctness/noConstantMathMinMaxClamp"
 	| "lint/correctness/noConstructorReturn"
 	| "lint/correctness/noEmptyCharacterClassInRegex"
 	| "lint/correctness/noEmptyPattern"
+	| "lint/correctness/noFlatMapIdentity"
 	| "lint/correctness/noGlobalObjectCalls"
 	| "lint/correctness/noInnerDeclarations"
 	| "lint/correctness/noInvalidConstructorSuper"
 	| "lint/correctness/noInvalidNewBuiltin"
 	| "lint/correctness/noInvalidUseBeforeDeclaration"
 	| "lint/correctness/noNewSymbol"
+	| "lint/correctness/noNodejsModules"
 	| "lint/correctness/noNonoctalDecimalEscape"
 	| "lint/correctness/noPrecisionLoss"
 	| "lint/correctness/noRenderReturnValue"
@@ -2311,6 +2314,7 @@ export type Category =
 	| "lint/correctness/noUnusedVariables"
 	| "lint/correctness/noVoidElementsWithChildren"
 	| "lint/correctness/noVoidTypeReturn"
+	| "lint/correctness/useArrayLiterals"
 	| "lint/correctness/useExhaustiveDependencies"
 	| "lint/correctness/useHookAtTopLevel"
 	| "lint/correctness/useIsNan"
@@ -2320,7 +2324,6 @@ export type Category =
 	| "lint/nursery/colorNoInvalidHex"
 	| "lint/nursery/noColorInvalidHex"
 	| "lint/nursery/noConsole"
-	| "lint/nursery/noConstantMathMinMaxClamp"
 	| "lint/nursery/noDoneCallback"
 	| "lint/nursery/noDuplicateAtImportRules"
 	| "lint/nursery/noDuplicateElseIf"
@@ -2329,13 +2332,11 @@ export type Category =
 	| "lint/nursery/noDuplicateSelectorsKeyframeBlock"
 	| "lint/nursery/noEmptyBlock"
 	| "lint/nursery/noEvolvingTypes"
-	| "lint/nursery/noFlatMapIdentity"
 	| "lint/nursery/noImportantInKeyframe"
 	| "lint/nursery/noInvalidPositionAtImportRule"
 	| "lint/nursery/noLabelWithoutControl"
 	| "lint/nursery/noMisplacedAssertion"
 	| "lint/nursery/noMissingGenericFamilyKeyword"
-	| "lint/nursery/noNodejsModules"
 	| "lint/nursery/noReactSpecificProps"
 	| "lint/nursery/noRestrictedImports"
 	| "lint/nursery/noTypeOnlyImportAttributes"
@@ -2351,7 +2352,6 @@ export type Category =
 	| "lint/nursery/noUselessUndefinedInitialization"
 	| "lint/nursery/noYodaExpression"
 	| "lint/nursery/useAdjacentOverloadSignatures"
-	| "lint/nursery/useArrayLiterals"
 	| "lint/nursery/useBiomeSuppressionComment"
 	| "lint/nursery/useConsistentBuiltinInstantiation"
 	| "lint/nursery/useDateNow"
