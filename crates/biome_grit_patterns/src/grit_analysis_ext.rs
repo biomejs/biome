@@ -1,6 +1,8 @@
-use biome_diagnostics::{Diagnostic, PrintDescription, Severity};
-use grit_util::{AnalysisLog, Position, Range};
+use biome_diagnostics::{display::SourceFile, Diagnostic, PrintDescription, Severity};
+use grit_util::AnalysisLog;
 use std::path::{Path, PathBuf};
+
+use crate::source_location_ext::SourceFileExt;
 
 pub trait GritAnalysisExt {
     fn to_log(&self, path: Option<&Path>) -> AnalysisLog;
@@ -12,38 +14,12 @@ where
 {
     fn to_log(&self, path: Option<&Path>) -> AnalysisLog {
         let location = self.location();
-        let source = location.source_code;
-        let range =
-            match (location.span, source) {
-                (Some(range), Some(source)) => source.text[..range.start().into()]
-                    .lines()
-                    .enumerate()
-                    .last()
-                    .map(|(i, line)| {
-                        let start = Position {
-                            line: (i + 1) as u32,
-                            column: line.len() as u32,
-                        };
-                        let end = source.text[range].lines().enumerate().last().map_or(
-                            start,
-                            |(j, line)| Position {
-                                line: start.line + j as u32,
-                                column: if j == 0 {
-                                    start.column + line.len() as u32
-                                } else {
-                                    line.len() as u32
-                                },
-                            },
-                        );
-                        Range {
-                            start,
-                            end,
-                            start_byte: range.start().into(),
-                            end_byte: range.end().into(),
-                        }
-                    }),
-                _ => None,
-            };
+        let source = location.source_code.map(SourceFile::new);
+
+        let range = match (location.span, source) {
+            (Some(range), Some(source)) => source.to_grit_range(range),
+            _ => None,
+        };
 
         AnalysisLog {
             engine_id: Some("biome".to_owned()),
@@ -63,7 +39,7 @@ where
             position: range.as_ref().map(|r| r.start),
             range,
             syntax_tree: None,
-            source: source.map(|s| s.text.to_owned()),
+            source: location.source_code.map(|s| s.text.to_string()),
         }
     }
 }

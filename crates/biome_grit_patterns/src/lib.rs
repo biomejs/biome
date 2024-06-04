@@ -15,6 +15,7 @@ mod grit_target_node;
 mod grit_tree;
 mod pattern_compiler;
 mod resolved_pattern;
+mod source_location_ext;
 mod util;
 mod variables;
 

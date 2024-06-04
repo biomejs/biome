@@ -26,6 +26,7 @@ impl LiteralCompiler {
                     let token = node.value_token()?;
                     let text = token.text_trimmed();
                     let range = node.syntax().text_trimmed_range().to_byte_range();
+                    debug_assert!(text.len() >= 2, "Literals must have quotes");
                     parse_snippet_content(&text[1..text.len() - 1], range, context, is_rhs)
                 }
                 AnyGritCodeSnippetSource::GritLanguageSpecificSnippet(_) => todo!(),
