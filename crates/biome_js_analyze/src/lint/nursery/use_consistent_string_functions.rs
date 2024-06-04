@@ -144,6 +144,15 @@ impl Rule for UseConsistentStringFunctions {
     }
 
     fn action(ctx: &RuleContext<Self>, state: &Self::State) -> Option<JsRuleAction> {
+        if state.member_name == "substring" && state.has_arguments
+            || state.member_name == "substr" && state.has_arguments
+        {
+            // If the function has arguments, we cannot replace it with slice() as it has different behavior.
+            // - https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/substring#differences_between_substring_and_slice
+            // - https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/substr#description
+            return None;
+        }
+
         let node = ctx.query();
         let callee = node.callee().ok()?;
         let expression = callee.as_js_static_member_expression()?;
@@ -158,32 +167,8 @@ impl Rule for UseConsistentStringFunctions {
         };
 
         let mut mutation = ctx.root().begin();
-        match member_name {
-            "trimLeft" => {
-                let replaced_function = make::js_name(make::ident(replaced_member_name));
-                mutation.replace_element(member.into(), replaced_function.into());
-            }
-            "trimRight" => {
-                let replaced_function = make::js_name(make::ident(replaced_member_name));
-                mutation.replace_element(member.into(), replaced_function.into());
-            }
-            "substr" => {
-                let replaced_function = make::js_name(make::ident(replaced_member_name));
-                mutation.replace_element(member.into(), replaced_function.into());
-            }
-            "substring" => {
-                if !state.has_arguments {
-                    let replaced_function = make::js_name(make::ident("slice"));
-                    let member = member.clone();
-                    mutation.replace_element(member.into(), replaced_function.into());
-                } else {
-                    // If the function has arguments, we cannot replace it with slice() as it has different behavior.
-                    // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/substring#differences_between_substring_and_slice
-                    return None;
-                }
-            }
-            _ => {}
-        }
+        let replaced_function = make::js_name(make::ident(replaced_member_name));
+        mutation.replace_element(member.into(), replaced_function.into());
 
         Some(JsRuleAction::new(
             ActionCategory::QuickFix,
