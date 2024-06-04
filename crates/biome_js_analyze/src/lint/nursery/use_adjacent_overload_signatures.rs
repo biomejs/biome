@@ -19,7 +19,7 @@ declare_rule! {
     ///
     /// ### Invalid
     ///
-    /// ```js,expect_diagnostic
+    /// ```ts,expect_diagnostic
     /// type Foo = {
     ///   foo_type(s: string): void;
     ///   foo_type(n: number): void;
@@ -28,7 +28,7 @@ declare_rule! {
     /// };
     /// ```
     ///
-    /// ```js,expect_diagnostic
+    /// ```ts,expect_diagnostic
     /// interface Foo {
     ///   foo_interface(s: string): void;
     ///   foo_interface(n: number): void;
@@ -37,7 +37,7 @@ declare_rule! {
     /// }
     /// ```
     ///
-    /// ```js,expect_diagnostic
+    /// ```ts,expect_diagnostic
     /// class A {
     ///   fooA(s: string): void;
     ///   fooA(n: number): void;
@@ -48,7 +48,7 @@ declare_rule! {
     ///
     /// ### Valid
     ///
-    /// ```js
+    /// ```ts
     /// declare namespace Foo {
     ///   export function foo_declare(s: string): void;
     ///   export function foo_declare(n: number): void;
@@ -57,7 +57,7 @@ declare_rule! {
     /// }
     /// ```
     ///
-    /// ```js
+    /// ```ts
     /// type Foo = {
     ///   foo_type(s: string): void;
     ///   foo_type(n: number): void;
@@ -75,7 +75,7 @@ declare_rule! {
     /// }
     /// ```
     ///
-    /// ```js
+    /// ```ts
     /// class A {
     ///   fooA(s: string): void;
     ///   fooA(n: number): void;
