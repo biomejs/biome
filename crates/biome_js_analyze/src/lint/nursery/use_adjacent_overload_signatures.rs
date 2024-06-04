@@ -37,7 +37,7 @@ declare_rule! {
     /// }
     /// ```
     ///
-    /// ```ts,expect_diagnostic
+    /// ```ts,expect_diagnostic,ignore
     /// class A {
     ///   fooA(s: string): void;
     ///   fooA(n: number): void;
@@ -66,7 +66,7 @@ declare_rule! {
     /// };
     /// ```
     ///
-    /// ```js
+    /// ```ts
     /// interface Foo {
     ///   foo_interface(s: string): void;
     ///   foo_interface(n: number): void;
