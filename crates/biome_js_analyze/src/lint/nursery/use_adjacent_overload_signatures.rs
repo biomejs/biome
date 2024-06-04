@@ -35,7 +35,7 @@ declare_rule! {
     ///   bar_interface(): void;
     ///   foo_interface(sn: string | number): void;
     /// }
-    /// ``
+    /// ```
     ///
     /// ```js,expect_diagnostic
     /// class A {
@@ -55,7 +55,7 @@ declare_rule! {
     ///   export function foo_declare(sn: string | number): void;
     ///   export function bar_declare(): void;
     /// }
-    /// ````
+    /// ```
     ///
     /// ```js
     /// type Foo = {
