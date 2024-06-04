@@ -1702,7 +1702,7 @@
 						{ "type": "null" }
 					]
 				},
-				"noEvolvingAny": {
+				"noEvolvingTypes": {
 					"description": "Disallow variables from evolving into any type through reassignments.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },

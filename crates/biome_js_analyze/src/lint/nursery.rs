@@ -6,7 +6,7 @@ pub mod no_console;
 pub mod no_constant_math_min_max_clamp;
 pub mod no_done_callback;
 pub mod no_duplicate_else_if;
-pub mod no_evolving_any;
+pub mod no_evolving_types;
 pub mod no_flat_map_identity;
 pub mod no_label_without_control;
 pub mod no_misplaced_assertion;
@@ -44,7 +44,7 @@ declare_group! {
             self :: no_constant_math_min_max_clamp :: NoConstantMathMinMaxClamp ,
             self :: no_done_callback :: NoDoneCallback ,
             self :: no_duplicate_else_if :: NoDuplicateElseIf ,
-            self :: no_evolving_any :: NoEvolvingAny ,
+            self :: no_evolving_types :: NoEvolvingTypes ,
             self :: no_flat_map_identity :: NoFlatMapIdentity ,
             self :: no_label_without_control :: NoLabelWithoutControl ,
             self :: no_misplaced_assertion :: NoMisplacedAssertion ,

@@ -238,11 +238,16 @@ pub(crate) fn migrate_eslint_any_rule(
                 .get_or_insert(Default::default());
             rule.set_level(rule_severity.into());
         }
-        "@typescript-eslint/no-useless-template-literals" => {
-            let group = rules.style.get_or_insert_with(Default::default);
-            let rule = group
-                .no_unused_template_literal
-                .get_or_insert(Default::default());
+        "@typescript-eslint/only-throw-error" => {
+            if !options.include_inspired {
+                results.has_inspired_rules = true;
+                return false;
+            }
+            if !options.include_nursery {
+                return false;
+            }
+            let group = rules.nursery.get_or_insert_with(Default::default);
+            let rule = group.use_throw_only_error.get_or_insert(Default::default());
             rule.set_level(rule_severity.into());
         }
         "@typescript-eslint/parameter-properties" => {
@@ -1164,18 +1169,6 @@ pub(crate) fn migrate_eslint_any_rule(
             let rule = group
                 .use_single_var_declarator
                 .get_or_insert(Default::default());
-            rule.set_level(rule_severity.into());
-        }
-        "only-throw-error" => {
-            if !options.include_inspired {
-                results.has_inspired_rules = true;
-                return false;
-            }
-            if !options.include_nursery {
-                return false;
-            }
-            let group = rules.nursery.get_or_insert_with(Default::default);
-            let rule = group.use_throw_only_error.get_or_insert(Default::default());
             rule.set_level(rule_severity.into());
         }
         "operator-assignment" => {
