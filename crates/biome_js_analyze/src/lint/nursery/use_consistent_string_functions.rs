@@ -148,9 +148,7 @@ impl Rule for UseConsistentStringFunctions {
         let callee = node.callee().ok()?;
         let expression = callee.as_js_static_member_expression()?;
         let member = expression.member().ok()?;
-        let expression = callee.as_js_static_member_expression()?;
-        let value_token = expression.member().ok()?.value_token().ok()?;
-        let member_name = value_token.text_trimmed();
+        let member_name = state.member_name.text();
 
         let replaced_member_name = match member_name {
             "trimLeft" => "trimStart",
