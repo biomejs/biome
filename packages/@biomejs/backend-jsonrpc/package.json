@@ -1,6 +1,6 @@
 {
   "name": "@biomejs/backend-jsonrpc",
-  "version": "1.7.3",
+  "version": "1.8.0",
   "main": "dist/index.js",
   "scripts": {
     "test": "vitest",
@@ -24,7 +24,13 @@
   "author": "Biome Developers and Contributors",
   "bugs": "https://github.com/biomejs/biome/issues",
   "description": "Bindings to the JSON-RPC Workspace API of the Biome daemon",
-  "keywords": ["JavaScript", "TypeScript", "format", "lint", "toolchain"],
+  "keywords": [
+    "JavaScript",
+    "TypeScript",
+    "format",
+    "lint",
+    "toolchain"
+  ],
   "engines": {
     "node": ">=14.21.3"
   },

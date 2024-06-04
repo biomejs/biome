@@ -9,7 +9,7 @@ license     = "MIT OR Apache-2.0"
 name        = "biome_wasm"
 publish     = false
 repository  = "https://github.com/biomejs/biome"
-version     = "1.7.3"
+version     = "1.8.0"
 
 
 [lib]
