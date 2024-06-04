@@ -111,23 +111,27 @@ impl Rule for UseConsistentStringFunctions {
             "Avoid using "{member_name}" and consider using "{replaced_member_name}" instead."
         }
         .to_owned();
-        let note_message = if member_name == "substring" {
-            markup! {
-                "<Emphasis>{member_name}</Emphasis> and <Emphasis>{replaced_member_name}</Emphasis>differ in their behaviour when arguments are passed.
-                ---
-                See "<Hyperlink href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/substring#the_difference_between_substring_and_substr">"MDN web docs"</Hyperlink>" for more details."
-            }.to_owned()
-        } else if member_name == "substr" {
-            markup! {
-                "<Emphasis>{member_name}</Emphasis> and <Emphasis>{replaced_member_name}</Emphasis>differ in their behaviour particularly in the interpretation of the second argument and when start is greater than stop.
-                ---
-                See "<Hyperlink href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/substr#description">"MDN web docs"</Hyperlink>" for more details."
-            }.to_owned()
-        } else {
-            markup! {
-                ""{member_name}"() is an alias for "{replaced_member_name}"."
+        let note_message = match member_name {
+            "substring" => {
+                markup! {
+                    "<Emphasis>{member_name}</Emphasis> and <Emphasis>{replaced_member_name}</Emphasis>differ in their behaviour when arguments are passed.
+                    ---
+                    See "<Hyperlink href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/substring#the_difference_between_substring_and_substr">"MDN web docs"</Hyperlink>" for more details."
+                }.to_owned()
+            },
+            "substr" => {
+                markup! {
+                    "<Emphasis>{member_name}</Emphasis> and <Emphasis>{replaced_member_name}</Emphasis>differ in their behaviour particularly in the interpretation of the second argument and when start is greater than stop.
+                    ---
+                    See "<Hyperlink href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/substr#description">"MDN web docs"</Hyperlink>" for more details."
+                }.to_owned()
+            },
+            _ => {
+                markup! {
+                    ""{member_name}"() is an alias for "{replaced_member_name}"."
+                }
+                .to_owned()
             }
-            .to_owned()
         };
         Some(
             RuleDiagnostic::new(rule_category!(), state.span, diagnostic_message)
