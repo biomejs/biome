@@ -138,7 +138,6 @@ biome.json:9:13 deserialize ━━━━━━━━━━━━━━━━━�
   - useFilenamingConvention
   - useForOf
   - useFragmentSyntax
-  - useImportRestrictions
   - useImportType
   - useLiteralEnumMembers
   - useNamingConvention
