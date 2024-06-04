@@ -73,6 +73,7 @@ declare_rule! {
 pub struct UseConsistentStringFunctionsState {
     member_name: TokenText,
     span: TextRange,
+    has_arguments: bool,
 }
 
 impl Rule for UseConsistentStringFunctions {
@@ -87,12 +88,15 @@ impl Rule for UseConsistentStringFunctions {
         let expression = callee.as_js_static_member_expression()?;
         let value_token = expression.member().ok()?.value_token().ok()?;
         let string_function_name = value_token.text_trimmed();
+        let arguments = node.arguments().ok()?;
+        let args = arguments.args();
 
         match string_function_name {
             "trimLeft" | "trimRight" | "substr" | "substring" => {
                 Some(UseConsistentStringFunctionsState {
                     member_name: value_token.token_text_trimmed(),
                     span: value_token.text_range(),
+                    has_arguments: args.len() > 0,
                 })
             }
             _ => None,
@@ -139,7 +143,7 @@ impl Rule for UseConsistentStringFunctions {
         )
     }
 
-    fn action(ctx: &RuleContext<Self>, _: &Self::State) -> Option<JsRuleAction> {
+    fn action(ctx: &RuleContext<Self>, state: &Self::State) -> Option<JsRuleAction> {
         let node = ctx.query();
         let callee = node.callee().ok()?;
         let expression = callee.as_js_static_member_expression()?;
@@ -147,8 +151,6 @@ impl Rule for UseConsistentStringFunctions {
         let expression = callee.as_js_static_member_expression()?;
         let value_token = expression.member().ok()?.value_token().ok()?;
         let member_name = value_token.text_trimmed();
-        let arguments = node.arguments().ok()?;
-        let args = arguments.args();
 
         let replaced_member_name = match member_name {
             "trimLeft" => "trimStart",
@@ -172,7 +174,7 @@ impl Rule for UseConsistentStringFunctions {
                 mutation.replace_element(member.into(), replaced_function.into());
             }
             "substring" => {
-                if args.len() == 0 {
+                if !state.has_arguments {
                     let replaced_function = make::js_name(make::ident("slice"));
                     let member = member.clone();
                     mutation.replace_element(member.into(), replaced_function.into());
