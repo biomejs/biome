@@ -57,7 +57,7 @@ npx @biomejs/biome format --write ./src
 npx @biomejs/biome lint ./src
 
 # 运行格式化，Lint 等，并应用安全的建议
-npx @biomejs/biome check --apply ./src
+npx @biomejs/biome check --write ./src
 
 # 在 CI 环境中检查所有文件是否符合格式，Lint 等
 npx @biomejs/biome ci ./src
