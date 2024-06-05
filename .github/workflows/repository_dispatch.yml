@@ -33,10 +33,17 @@ jobs:
       - name: Build WASM module for the web
         run: wasm-pack build --out-dir ../../packages/@biomejs/wasm-web --target web --profiling --scope biomejs crates/biome_wasm
 
+      - name: Save wasm-pack cache
+        uses: actions/cache/save@v3
+        with:
+          path: ./target
+          key: wasm-pack-cache
+
       - name: Setup node
         uses: actions/setup-node@60edb5dd545a775178f52524783378180af0d1f8 # v4.0.2
         with:
           node-version: 20
+          cache: pnpm
 
       - name: Update package.json name
         working-directory: packages/@biomejs/wasm-web
@@ -44,15 +51,9 @@ jobs:
 
       - name: Publish
         working-directory: packages/@biomejs/wasm-web
-        run: npx pkg-pr-new publish
+        run: pnpx pkg-pr-new publish
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Save wasm-pack cache
-        uses: actions/cache/save@v3
-        with:
-          path: ./target
-          key: wasm-pack-cache
 
   repository-dispatch:
     name: Repository dispatch
