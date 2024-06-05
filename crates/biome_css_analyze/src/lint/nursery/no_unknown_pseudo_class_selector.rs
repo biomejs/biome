@@ -63,10 +63,18 @@ declare_rule! {
     }
 }
 declare_node_union! {
-    pub AnyPseudoLike = CssPseudoClassFunctionCompoundSelector|CssPseudoClassFunctionCompoundSelectorList|CssPseudoClassFunctionIdentifier
-                        |CssPseudoClassFunctionNth|CssPseudoClassFunctionRelativeSelectorList|CssPseudoClassFunctionSelector
-                        |CssPseudoClassFunctionSelectorList|CssPseudoClassFunctionValueList|CssPseudoClassIdentifier
-                        |CssBogusPseudoClass|CssPageSelectorPseudo
+  pub AnyPseudoLike =
+      CssPseudoClassFunctionCompoundSelector
+      | CssPseudoClassFunctionCompoundSelectorList
+      | CssPseudoClassFunctionIdentifier
+      | CssPseudoClassFunctionNth
+      | CssPseudoClassFunctionRelativeSelectorList
+      | CssPseudoClassFunctionSelector
+      | CssPseudoClassFunctionSelectorList
+      | CssPseudoClassFunctionValueList
+      | CssPseudoClassIdentifier
+      | CssBogusPseudoClass
+      | CssPageSelectorPseudo
 }
 
 fn is_webkit_pseudo_class(node: &AnyPseudoLike) -> bool {
