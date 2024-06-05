@@ -2869,7 +2869,7 @@ pub struct Nursery {
     #[doc = "Disallow unknown properties."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_unknown_property: Option<RuleConfiguration<NoUnknownProperty>>,
-    #[doc = "Succinct description of the rule."]
+    #[doc = "Disallow unknown pseudo-class selectors."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_unknown_pseudo_class_selector: Option<RuleConfiguration<NoUnknownPseudoClassSelector>>,
     #[doc = "Disallow unknown pseudo-element selectors."]
@@ -3019,6 +3019,7 @@ impl Nursery {
         "noInvalidPositionAtImportRule",
         "noLabelWithoutControl",
         "noUnknownFunction",
+        "noUnknownPseudoClassSelector",
         "noUnknownSelectorPseudoElement",
         "noUnknownUnit",
         "noUnmatchableAnbSelector",
@@ -3038,6 +3039,7 @@ impl Nursery {
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[10]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[11]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[16]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[19]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[20]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[21]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[22]),
