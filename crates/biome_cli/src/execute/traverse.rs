@@ -38,14 +38,19 @@ pub(crate) fn traverse(
     init_thread_pool();
 
     if inputs.is_empty() {
-        match execution.traversal_mode {
+        match &execution.traversal_mode {
             TraversalMode::Check { .. }
             | TraversalMode::Lint { .. }
             | TraversalMode::Format { .. }
-            | TraversalMode::CI { .. } => match current_dir() {
-                Ok(current_dir) => inputs.push(current_dir.into_os_string()),
-                Err(err) => return Err(CliDiagnostic::io_error(err)),
-            },
+            | TraversalMode::CI { .. } => {
+                // The `--staged` or `--changed` flags are intentionally empty, so we ignore them.
+                if !execution.is_vcs_targeted() {
+                    match current_dir() {
+                        Ok(current_dir) => inputs.push(current_dir.into_os_string()),
+                        Err(err) => return Err(CliDiagnostic::io_error(err)),
+                    }
+                }
+            }
             _ => {
                 if execution.as_stdin_file().is_none() && !cli_options.no_errors_on_unmatched {
                     return Err(CliDiagnostic::missing_argument(
