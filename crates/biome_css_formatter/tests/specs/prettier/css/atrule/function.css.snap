@@ -2,7 +2,6 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: css/atrule/function.css
 ---
-
 # Input
 
 ```css
@@ -1603,22 +1602,9 @@ function.css:30:2 parse ━━━━━━━━━━━━━━━━━━�
   
   i Remove function
   
-function.css:31:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `func`
-  
-    29 │ }
-    30 │ @function
-  > 31 │ func
-       │ ^^^^
-    32 │ (
-    33 │ $arg
-  
-  i Remove func
-  
 function.css:32:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected `,` but instead found `(`
+  × Expected a compound selector but instead found '('.
   
     30 │ @function
     31 │ func
@@ -1627,7 +1613,14 @@ function.css:32:1 parse ━━━━━━━━━━━━━━━━━━�
     33 │ $arg
     34 │ ,
   
-  i Remove (
+  i Expected a compound selector here.
+  
+    30 │ @function
+    31 │ func
+  > 32 │ (
+       │ ^
+    33 │ $arg
+    34 │ ,
   
 function.css:33:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -1795,7 +1788,7 @@ function.css:45:2 parse ━━━━━━━━━━━━━━━━━━�
   
 function.css:46:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected `,` but instead found `"Func"`
+  × Expected a compound selector but instead found '"Func"'.
   
     44 │ {
     45 │ @return
@@ -1804,7 +1797,14 @@ function.css:46:1 parse ━━━━━━━━━━━━━━━━━━�
     47 │ ;
     48 │ }
   
-  i Remove "Func"
+  i Expected a compound selector here.
+  
+    44 │ {
+    45 │ @return
+  > 46 │ "Func"
+       │ ^^^^^^
+    47 │ ;
+    48 │ }
   
 function.css:49:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -1819,22 +1819,9 @@ function.css:49:2 parse ━━━━━━━━━━━━━━━━━━�
   
   i Remove function
   
-function.css:51:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `func`
-  
-    49 │ @function
-    50 │ 
-  > 51 │ func
-       │ ^^^^
-    52 │ 
-    53 │ (
-  
-  i Remove func
-  
 function.css:53:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected `,` but instead found `(`
+  × Expected a compound selector but instead found '('.
   
     51 │ func
     52 │ 
@@ -1843,7 +1830,14 @@ function.css:53:1 parse ━━━━━━━━━━━━━━━━━━�
     54 │ 
     55 │ $arg
   
-  i Remove (
+  i Expected a compound selector here.
+  
+    51 │ func
+    52 │ 
+  > 53 │ (
+       │ ^
+    54 │ 
+    55 │ $arg
   
 function.css:55:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -2011,7 +2005,7 @@ function.css:79:2 parse ━━━━━━━━━━━━━━━━━━�
   
 function.css:81:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected `,` but instead found `"Func"`
+  × Expected a compound selector but instead found '"Func"'.
   
     79 │ @return
     80 │ 
@@ -2020,7 +2014,14 @@ function.css:81:1 parse ━━━━━━━━━━━━━━━━━━�
     82 │ 
     83 │ ;
   
-  i Remove "Func"
+  i Expected a compound selector here.
+  
+    79 │ @return
+    80 │ 
+  > 81 │ "Func"
+       │ ^^^^^^
+    82 │ 
+    83 │ ;
   
 function.css:86:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -2245,5 +2246,3 @@ function.css:89:1 parse ━━━━━━━━━━━━━━━━━━�
 ```
    87: @function func($very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg, $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg1, $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg2: 10, $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-args...) {
 ```
-
-

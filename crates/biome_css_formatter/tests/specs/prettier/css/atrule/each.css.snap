@@ -2,7 +2,6 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: css/atrule/each.css
 ---
-
 # Input
 
 ```css
@@ -232,23 +231,7 @@ h3
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,69 +1,264 @@
--@each $animal in puma, sea-slug, egret, salamander {
-+@
-+each $animal in puma,
-+sea-slug,
-+egret,
-+salamander {
- }
--@each $animal in puma, sea-slug, egret, salamander {
-+@
-+each $animal in puma,
-+sea-slug,
-+egret,
-+salamander {
- }
--@each $animal in puma, sea-slug, egret, salamander {
--}
+@@ -1,69 +1,234 @@
 -@each $animal in puma, sea-slug, egret, salamander {
 +@
 +each $animal in puma,
@@ -271,7 +254,33 @@ h3
 +salamander {
  }
 -@each $animal in puma, sea-slug, egret, salamander {
--}
++@
++each $animal in puma,
++sea-slug,
++egret,
++salamander {
+ }
+-@each $animal in puma, sea-slug, egret, salamander {
++@
++each $animal in puma,
++sea-slug,
++egret,
++salamander {
+ }
+-@each $animal in puma, sea-slug, egret, salamander {
++@
++each $animal in puma,
++sea-slug,
++egret,
++salamander {
+ }
+-@each $animal in puma, sea-slug, egret, salamander {
++@
++each $animal in puma,
++sea-slug,
++egret,
++salamander {
+ }
 -@each $animal in ((puma), (sea-slug), (egret), (salamander)) {
 -}
 -@each $animal in((puma), (sea-slug), (egret), (salamander)) {
@@ -310,44 +319,9 @@ h3
 -@each $element, $size in(h1: 20px, h2: 16px, h3: 14px) {
 -}
 -@each $element, $size in (h1: 20px, h2: 16px, h3: 14px) {
-+@
-+each
-+$animal
-+in
-+puma
-+,
-+sea-slug
-+,
-+egret
-+,
-+salamander
-+{
- }
+-}
 -@each $element, $size in (h1: 20px, h2: 16px, h3: 14px) {
-+@
-+each
-+
-+$animal
-+
-+in
-+
-+puma
-+
-+,
-+
-+sea-slug
-+
-+,
-+
-+egret
-+
-+,
-+
-+salamander
-+
-+{
-+
- }
+-}
 -@each $element, $size in (h1: 20px, h2: 16px, h3: 14px) {
 +@
 +each $animal in ((puma), (sea-slug), (egret), (salamander)) {}
@@ -374,7 +348,6 @@ h3
 +each
 +    $animal
 +    in
-+ 
 +(
 +    (
 +puma 
@@ -400,8 +373,6 @@ h3
 +    $animal
 +
 +    in
-+
-+ 
 +(
 +
 +    (
@@ -474,7 +445,6 @@ h3
 +    $element,
 +    $size
 +    in
-+ 
 +(
 +h1
 +    :
@@ -521,7 +491,6 @@ h3
 +$size
 +
 +in
-+
 +(
 +
 +h1
@@ -535,14 +504,12 @@ h3
 +h2
 +
 +:
-+
-+16px
  
 -      h2: 16px,
++16px
++
 +,
- 
--      h3: 14px
--    ) {
++
 +h3
 +
 +:
@@ -552,7 +519,9 @@ h3
 +)
 +
 +{
-+
+ 
+-      h3: 14px
+-    ) {
  }
 ```
 
@@ -590,41 +559,16 @@ egret,
 salamander {
 }
 @
-each
-$animal
-in
-puma
-,
-sea-slug
-,
-egret
-,
-salamander
-{
+each $animal in puma,
+sea-slug,
+egret,
+salamander {
 }
 @
-each
-
-$animal
-
-in
-
-puma
-
-,
-
-sea-slug
-
-,
-
-egret
-
-,
-
-salamander
-
-{
-
+each $animal in puma,
+sea-slug,
+egret,
+salamander {
 }
 @
 each $animal in ((puma), (sea-slug), (egret), (salamander)) {}
@@ -651,7 +595,6 @@ puma),
 each
     $animal
     in
- 
 (
     (
 puma 
@@ -677,8 +620,6 @@ each
     $animal
 
     in
-
- 
 (
 
     (
@@ -750,7 +691,6 @@ each
     $element,
     $size
     in
- 
 (
 h1
     :
@@ -793,7 +733,6 @@ $element,
 $size
 
 in
-
 (
 
 h1
@@ -1016,45 +955,6 @@ each.css:18:2 parse ━━━━━━━━━━━━━━━━━━━━
   - viewport
   - scope
   
-each.css:19:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `$animal`
-  
-    17 │     }
-    18 │ @each
-  > 19 │ $animal
-       │ ^^^^^^^
-    20 │ in
-    21 │ puma
-  
-  i Remove $animal
-  
-each.css:20:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `in`
-  
-    18 │ @each
-    19 │ $animal
-  > 20 │ in
-       │ ^^
-    21 │ puma
-    22 │ ,
-  
-  i Remove in
-  
-each.css:21:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `puma`
-  
-    19 │ $animal
-    20 │ in
-  > 21 │ puma
-       │ ^^^^
-    22 │ ,
-    23 │ sea-slug
-  
-  i Remove puma
-  
 each.css:30:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Unexpected value or character.
@@ -1086,45 +986,6 @@ each.css:30:2 parse ━━━━━━━━━━━━━━━━━━━━
   - supports
   - viewport
   - scope
-  
-each.css:32:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `$animal`
-  
-    30 │ @each
-    31 │ 
-  > 32 │ $animal
-       │ ^^^^^^^
-    33 │ 
-    34 │ in
-  
-  i Remove $animal
-  
-each.css:34:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `in`
-  
-    32 │ $animal
-    33 │ 
-  > 34 │ in
-       │ ^^
-    35 │ 
-    36 │ puma
-  
-  i Remove in
-  
-each.css:36:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `puma`
-  
-    34 │ in
-    35 │ 
-  > 36 │ puma
-       │ ^^^^
-    37 │ 
-    38 │ ,
-  
-  i Remove puma
   
 each.css:53:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -4558,35 +4419,9 @@ each.css:163:2 parse ━━━━━━━━━━━━━━━━━━━�
   - viewport
   - scope
   
-each.css:164:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `$element`
-  
-    162 │     }
-    163 │ @each
-  > 164 │ $element,
-        │ ^^^^^^^^
-    165 │ $size
-    166 │ in
-  
-  i Remove $element
-  
-each.css:166:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `in`
-  
-    164 │ $element,
-    165 │ $size
-  > 166 │ in
-        │ ^^
-    167 │ (
-    168 │ h1
-  
-  i Remove in
-  
 each.css:167:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected `,` but instead found `(`
+  × Expected a compound selector but instead found '('.
   
     165 │ $size
     166 │ in
@@ -4595,7 +4430,14 @@ each.css:167:1 parse ━━━━━━━━━━━━━━━━━━━�
     168 │ h1
     169 │ :
   
-  i Remove (
+  i Expected a compound selector here.
+  
+    165 │ $size
+    166 │ in
+  > 167 │ (
+        │ ^
+    168 │ h1
+    169 │ :
   
 each.css:170:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -4858,35 +4700,9 @@ each.css:182:2 parse ━━━━━━━━━━━━━━━━━━━�
   - viewport
   - scope
   
-each.css:183:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `$element`
-  
-    181 │ }
-    182 │ @each
-  > 183 │ $element,
-        │ ^^^^^^^^
-    184 │ 
-    185 │ $size
-  
-  i Remove $element
-  
-each.css:187:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `in`
-  
-    185 │ $size
-    186 │ 
-  > 187 │ in
-        │ ^^
-    188 │ 
-    189 │ (
-  
-  i Remove in
-  
 each.css:189:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected `,` but instead found `(`
+  × Expected a compound selector but instead found '('.
   
     187 │ in
     188 │ 
@@ -4895,7 +4711,14 @@ each.css:189:1 parse ━━━━━━━━━━━━━━━━━━━�
     190 │ 
     191 │ h1
   
-  i Remove (
+  i Expected a compound selector here.
+  
+    187 │ in
+    188 │ 
+  > 189 │ (
+        │ ^
+    190 │ 
+    191 │ h1
   
 each.css:195:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -5131,12 +4954,10 @@ each.css:213:1 parse ━━━━━━━━━━━━━━━━━━━�
 
 # Lines exceeding max width of 80 characters
 ```
-   73: each  $animal  in  (  (  puma  )  ,  (  sea-slug  )  ,  (  egret  )  ,  (  salamander  )  )  {}
-  159: each $animal, $color, $cursor in (puma, black, default), (sea-slug, blue, pointer), (egret, white, move) {}
-  161: each $animal,$color,$cursor in (puma,black,default),(sea-slug,blue,pointer),(egret,white,move){}
-  169:   $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var
-  177: each $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var, $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var1, $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var-2 in (puma, black, default), (sea-slug, blue, pointer), (egret, white, move) {}
-  183: each  $element  ,  $size  in  (  h1  :  20px  ,  h2  :  16px  ,  h3  :  14px  )  {}
+   48: each  $animal  in  (  (  puma  )  ,  (  sea-slug  )  ,  (  egret  )  ,  (  salamander  )  )  {}
+  131: each $animal, $color, $cursor in (puma, black, default), (sea-slug, blue, pointer), (egret, white, move) {}
+  133: each $animal,$color,$cursor in (puma,black,default),(sea-slug,blue,pointer),(egret,white,move){}
+  141:   $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var
+  149: each $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var, $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var1, $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var-2 in (puma, black, default), (sea-slug, blue, pointer), (egret, white, move) {}
+  155: each  $element  ,  $size  in  (  h1  :  20px  ,  h2  :  16px  ,  h3  :  14px  )  {}
 ```
-
-

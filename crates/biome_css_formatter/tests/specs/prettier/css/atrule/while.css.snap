@@ -2,7 +2,6 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: css/atrule/while.css
 ---
-
 # Input
 
 ```css
@@ -125,7 +124,7 @@ $i
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,72 +1,144 @@
+@@ -1,72 +1,142 @@
 -@while $i > 0 {
 +@
 +while $i > 0 {}
@@ -152,6 +151,22 @@ $i
 +{
  }
 -@while $i>0 {
+-}
+-@while $i > 0 {
+-}
+-@while $i > 0 {
+-}
+-@while $i > 0 {
+-}
+-@while $i > 0 {
+-}
+-@while $i > 0 {
+-}
+-@while ($i > 0) {
+-}
+-@while ($i>0) {
+-}
+-@while ($i > 0) {
 +@
 +while
 +
@@ -164,7 +179,7 @@ $i
 +{
 +
  }
--@while $i > 0 {
+-@while ($i > 0) {
 +@
 +while ($i > 0) {}
 +@
@@ -183,7 +198,7 @@ $i
 +while
 +    ($i > 0) {}
 +@
-+while 
++while
 +(
 +$i
 +>
@@ -191,22 +206,9 @@ $i
 +)
 +{
  }
--@while $i > 0 {
--}
--@while $i > 0 {
--}
--@while $i > 0 {
--}
--@while $i > 0 {
--}
--@while ($i > 0) {
--}
--@while ($i>0) {
--}
 -@while ($i > 0) {
 +@
-+while 
-+
++while
 +(
 +
 +$i
@@ -220,10 +222,6 @@ $i
 +{
 +
  }
--@while ($i > 0) {
--}
--@while ($i > 0) {
--}
 -@while ($i > 0) {
 -}
 -@while ($i > 0) {
@@ -290,7 +288,7 @@ $i
 +    (0)
 +) {}
 +@
-+while 
++while
 +(
 +(
 +$i 
@@ -301,31 +299,30 @@ $i
 +)
 +)
 +{
-+}
-+@
-+while 
-+
-+(
-+
-+(
-+
-+$i 
-+
-+)
-+
-+>
-+
-+(
-+
-+0
-+
-+)
-+
-+)
-+
-+{
-+
  }
++@
++while
++(
++
++(
++
++$i 
++
++)
++
++>
++
++(
++
++0
++
++)
++
++)
++
++{
++
++}
 +@
 +while ($very-very-very-very-very-very-very-very-very-very-very-very-long-var > 1) {}
 +@
@@ -393,7 +390,7 @@ $i >
 while
     ($i > 0) {}
 @
-while 
+while
 (
 $i
 >
@@ -402,8 +399,7 @@ $i
 {
 }
 @
-while 
-
+while
 (
 
 $i
@@ -439,7 +435,7 @@ while (($i
     (0)
 ) {}
 @
-while 
+while
 (
 (
 $i 
@@ -452,8 +448,7 @@ $i
 {
 }
 @
-while 
-
+while
 (
 
 (
@@ -770,19 +765,6 @@ while.css:13:2 parse ━━━━━━━━━━━━━━━━━━━�
   - viewport
   - scope
   
-while.css:14:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `$i`
-  
-    12 │     {}
-    13 │ @while
-  > 14 │ $i
-       │ ^^
-    15 │ >
-    16 │ 0
-  
-  i Remove $i
-  
 while.css:16:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a compound selector but instead found '0'.
@@ -834,19 +816,6 @@ while.css:19:2 parse ━━━━━━━━━━━━━━━━━━━�
   - supports
   - viewport
   - scope
-  
-while.css:21:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `$i`
-  
-    19 │ @while
-    20 │ 
-  > 21 │ $i
-       │ ^^
-    22 │ 
-    23 │ >
-  
-  i Remove $i
   
 while.css:25:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -1393,7 +1362,7 @@ while.css:39:2 parse ━━━━━━━━━━━━━━━━━━━�
   
 while.css:40:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected `,` but instead found `(`
+  × Expected a compound selector but instead found '('.
   
     38 │     ($i > 0) {}
     39 │ @while
@@ -1402,7 +1371,14 @@ while.css:40:1 parse ━━━━━━━━━━━━━━━━━━━�
     41 │ $i
     42 │ >
   
-  i Remove (
+  i Expected a compound selector here.
+  
+    38 │     ($i > 0) {}
+    39 │ @while
+  > 40 │ (
+       │ ^
+    41 │ $i
+    42 │ >
   
 while.css:43:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -1458,7 +1434,7 @@ while.css:47:2 parse ━━━━━━━━━━━━━━━━━━━�
   
 while.css:49:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected `,` but instead found `(`
+  × Expected a compound selector but instead found '('.
   
     47 │ @while
     48 │ 
@@ -1467,7 +1443,14 @@ while.css:49:1 parse ━━━━━━━━━━━━━━━━━━━�
     50 │ 
     51 │ $i
   
-  i Remove (
+  i Expected a compound selector here.
+  
+    47 │ @while
+    48 │ 
+  > 49 │ (
+       │ ^
+    50 │ 
+    51 │ $i
   
 while.css:55:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -1981,7 +1964,7 @@ while.css:72:2 parse ━━━━━━━━━━━━━━━━━━━�
   
 while.css:73:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected `,` but instead found `(`
+  × Expected a compound selector but instead found '('.
   
     71 │ ) {}
     72 │ @while
@@ -1990,7 +1973,14 @@ while.css:73:1 parse ━━━━━━━━━━━━━━━━━━━�
     74 │ (
     75 │ $i
   
-  i Remove (
+  i Expected a compound selector here.
+  
+    71 │ ) {}
+    72 │ @while
+  > 73 │ (
+       │ ^
+    74 │ (
+    75 │ $i
   
 while.css:76:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -2039,7 +2029,7 @@ while.css:84:2 parse ━━━━━━━━━━━━━━━━━━━�
   
 while.css:86:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected `,` but instead found `(`
+  × Expected a compound selector but instead found '('.
   
     84 │ @while
     85 │ 
@@ -2048,7 +2038,14 @@ while.css:86:1 parse ━━━━━━━━━━━━━━━━━━━�
     87 │ 
     88 │ (
   
-  i Remove (
+  i Expected a compound selector here.
+  
+    84 │ @while
+    85 │ 
+  > 86 │ (
+       │ ^
+    87 │ 
+    88 │ (
   
 while.css:92:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -2383,14 +2380,12 @@ while.css:110:196 parse ━━━━━━━━━━━━━━━━━━�
 
 # Lines exceeding max width of 80 characters
 ```
-   80: while $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var > 1 {}
-   82: while 1 > $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var {}
-   85:   $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var
-   86:   > $other-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var {
-  138: while ($very-very-very-very-very-very-very-very-very-very-very-very-long-var > 1) {}
-  140: while (1 > $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var) {}
-  142: while ($very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var > 1) {}
-  144: while ($very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var > $other-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var) {}
+   79: while $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var > 1 {}
+   81: while 1 > $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var {}
+   84:   $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var
+   85:   > $other-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var {
+  136: while ($very-very-very-very-very-very-very-very-very-very-very-very-long-var > 1) {}
+  138: while (1 > $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var) {}
+  140: while ($very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var > 1) {}
+  142: while ($very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var > $other-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var) {}
 ```
-
-

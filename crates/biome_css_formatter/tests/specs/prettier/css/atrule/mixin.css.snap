@@ -2,7 +2,6 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: css/atrule/mixin.css
 ---
-
 # Input
 
 ```css
@@ -124,7 +123,7 @@ $background
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,70 +1,132 @@
+@@ -1,70 +1,122 @@
 -@mixin clearfix {
 +@
 +mixin clearfix {
@@ -138,8 +137,6 @@ $background
 +mixin clearfix {
  }
 -@mixin clearfix {
--}
--@mixin clearfix {
 +@
 +mixin clearfix {
  }
@@ -149,21 +146,14 @@ $background
  }
 -@mixin clearfix {
 +@
-+mixin
-+clearfix
-+{
++mixin clearfix {
  }
+-@mixin clearfix {
 +@
-+mixin
-+
-+clearfix
++mixin clearfix {
+ }
  
 -@mixin mix($arg, $arg1, $arg2: 10, $args...) {
-+{
-+
- }
--@mixin mix($arg, $arg1, $arg2: 10, $args...) {
-+
 +@
 +mixin mix($arg, $arg1, $arg2: 10, $args...) {}
 +@
@@ -181,8 +171,7 @@ $background
 +    $args...
 +) {}
 +@
-+mixin
-+mix
++mixin mix 
 +(
 +$arg,
 +    $arg1,
@@ -195,7 +184,7 @@ $background
 +(
 +$arg,
 +$arg1,
-+$arg2: 
++$arg2 : 
 +10
 +,
 +$args
@@ -203,6 +192,8 @@ $background
 +)
 +{
  }
+-@mixin mix($arg, $arg1, $arg2: 10, $args...) {
+-}
 -@mixin mix($arg, $arg1, $arg2: 10, $args...) {
 -}
 -@mixin mix($arg, $arg1, $arg2: 10, $args...) {
@@ -221,12 +212,11 @@ $background
 +mixin
 +
 +mix
-+
 +(
 +
 +$arg,
 +$arg1,
-+$arg2: 
++$arg2 : 
 +
 +10
 +
@@ -240,7 +230,8 @@ $background
  
 -  $args...
 -) {
--}
++{
+ }
 -@mixin mix(
 -  $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg,
 -  $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg1,
@@ -270,8 +261,7 @@ $background
 -@mixin button-variant($foo: "  ...  ") {
 -}
 -@mixin sexy-border($color, $width, $foo: (color: red)) {
-+{
- }
+-}
 +@
 +mixin mix($very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg, $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg1, $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg2: 10, $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-args...) {}
 +@
@@ -291,10 +281,9 @@ $background
 +)
 +) {}
 +@
-+mixin
-+button-variant
++mixin button-variant 
 +(
-+$hover-background:darken 
++$hover-background :darken 
 +(
 +$background,
 +7.5 
@@ -336,17 +325,10 @@ mixin clearfix {
 mixin clearfix {
 }
 @
-mixin
-clearfix
-{
+mixin clearfix {
 }
 @
-mixin
-
-clearfix
-
-{
-
+mixin clearfix {
 }
 
 @
@@ -366,8 +348,7 @@ $arg,
     $args...
 ) {}
 @
-mixin
-mix
+mixin mix 
 (
 $arg,
     $arg1,
@@ -380,7 +361,7 @@ mix
 (
 $arg,
 $arg1,
-$arg2: 
+$arg2 : 
 10
 ,
 $args
@@ -392,12 +373,11 @@ $args
 mixin
 
 mix
-
 (
 
 $arg,
 $arg1,
-$arg2: 
+$arg2 : 
 
 10
 
@@ -430,10 +410,9 @@ $hover-background: darken($background, 7.5%
 )
 ) {}
 @
-mixin
-button-variant
+mixin button-variant 
 (
-$hover-background:darken 
+$hover-background :darken 
 (
 $background,
 7.5 
@@ -645,19 +624,6 @@ mixin.css:9:2 parse ━━━━━━━━━━━━━━━━━━━━
   - viewport
   - scope
   
-mixin.css:10:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `clearfix`
-  
-     8 │   {}
-     9 │ @mixin
-  > 10 │ clearfix
-       │ ^^^^^^^^
-    11 │ {
-    12 │ }
-  
-  i Remove clearfix
-  
 mixin.css:13:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Unexpected value or character.
@@ -689,19 +655,6 @@ mixin.css:13:2 parse ━━━━━━━━━━━━━━━━━━━�
   - supports
   - viewport
   - scope
-  
-mixin.css:15:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `clearfix`
-  
-    13 │ @mixin
-    14 │ 
-  > 15 │ clearfix
-       │ ^^^^^^^^
-    16 │ 
-    17 │ {
-  
-  i Remove clearfix
   
 mixin.css:21:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -1611,19 +1564,6 @@ mixin.css:31:2 parse ━━━━━━━━━━━━━━━━━━━�
   - viewport
   - scope
   
-mixin.css:32:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `mix`
-  
-    30 │ ) {}
-    31 │ @mixin
-  > 32 │ mix(
-       │ ^^^
-    33 │     $arg,
-    34 │     $arg1,
-  
-  i Remove mix
-  
 mixin.css:32:4 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `,` but instead found `(`
@@ -1788,22 +1728,9 @@ mixin.css:38:2 parse ━━━━━━━━━━━━━━━━━━━�
   - viewport
   - scope
   
-mixin.css:39:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `mix`
-  
-    37 │     ) {}
-    38 │ @mixin
-  > 39 │ mix
-       │ ^^^
-    40 │ (
-    41 │ $arg
-  
-  i Remove mix
-  
 mixin.css:40:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected `,` but instead found `(`
+  × Expected a compound selector but instead found '('.
   
     38 │ @mixin
     39 │ mix
@@ -1812,7 +1739,14 @@ mixin.css:40:1 parse ━━━━━━━━━━━━━━━━━━━�
     41 │ $arg
     42 │ ,
   
-  i Remove (
+  i Expected a compound selector here.
+  
+    38 │ @mixin
+    39 │ mix
+  > 40 │ (
+       │ ^
+    41 │ $arg
+    42 │ ,
   
 mixin.css:47:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -1965,22 +1899,9 @@ mixin.css:54:2 parse ━━━━━━━━━━━━━━━━━━━�
   - viewport
   - scope
   
-mixin.css:56:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `mix`
-  
-    54 │ @mixin
-    55 │ 
-  > 56 │ mix
-       │ ^^^
-    57 │ 
-    58 │ (
-  
-  i Remove mix
-  
 mixin.css:58:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected `,` but instead found `(`
+  × Expected a compound selector but instead found '('.
   
     56 │ mix
     57 │ 
@@ -1989,7 +1910,14 @@ mixin.css:58:1 parse ━━━━━━━━━━━━━━━━━━━�
     59 │ 
     60 │ $arg
   
-  i Remove (
+  i Expected a compound selector here.
+  
+    56 │ mix
+    57 │ 
+  > 58 │ (
+       │ ^
+    59 │ 
+    60 │ $arg
   
 mixin.css:72:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -2969,19 +2897,6 @@ mixin.css:93:2 parse ━━━━━━━━━━━━━━━━━━━�
   - viewport
   - scope
   
-mixin.css:94:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `button-variant`
-  
-    92 │ ) {}
-    93 │ @mixin
-  > 94 │ button-variant(
-       │ ^^^^^^^^^^^^^^
-    95 │ $hover-background
-    96 │ :
-  
-  i Remove button-variant
-  
 mixin.css:94:15 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `,` but instead found `(`
@@ -3653,7 +3568,5 @@ mixin.css:109:25 parse ━━━━━━━━━━━━━━━━━━━
 
 # Lines exceeding max width of 80 characters
 ```
-   93: mixin mix($very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg, $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg1, $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg2: 10, $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-args...) {}
+   84: mixin mix($very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg, $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg1, $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg2: 10, $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-args...) {}
 ```
-
-

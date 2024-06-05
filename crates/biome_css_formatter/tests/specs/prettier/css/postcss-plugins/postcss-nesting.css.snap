@@ -2,7 +2,6 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: css/postcss-plugins/postcss-nesting.css
 ---
-
 # Input
 
 ```css
@@ -244,22 +243,22 @@ a {
    order: 1;
 -  @nest & b {
 +  @
-+  nest &b {
++  nest & b {
      order: 2;
    }
 -  @nest & c {
 +  @
-+  nest &c {
++  nest & c {
      order: 3;
    }
 -  @nest & d {
 +  @
-+  nest &d {
++  nest & d {
      order: 4;
    }
 -  @nest & e {
 +  @
-+  nest &e {
++  nest & e {
      order: 5;
    }
  }
@@ -360,19 +359,19 @@ a {
 a {
   order: 1;
   @
-  nest &b {
+  nest & b {
     order: 2;
   }
   @
-  nest &c {
+  nest & c {
     order: 3;
   }
   @
-  nest &d {
+  nest & d {
     order: 4;
   }
   @
-  nest &e {
+  nest & e {
     order: 5;
   }
 }
@@ -2345,5 +2344,3 @@ postcss-nesting.css:202:1 parse ━━━━━━━━━━━━━━━━
   203:   @nest very-very-very-very-very-very-very-very-very-long-selector &, very-very-very-very-very-very-very-very-very-long-selector & {
   206:   @nest very-very-very-very-very-very-very-very-very-long-selector + very-very-very-very-very-very-very-very-very-long-selector  &, very-very-very-very-very-very-very-very-very-long-selector very-very-very-very-very-very-very-very-very-long-selector & {
 ```
-
-
