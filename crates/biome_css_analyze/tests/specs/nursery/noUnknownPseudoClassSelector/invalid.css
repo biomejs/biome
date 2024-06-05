@@ -5,7 +5,8 @@ a:UNKNOWN { }
 a:pseudo-class { }
 body:not(div):noot(span) {}
 a:unknown::before { }
-a,\nb > .foo:error { }
+a,
+b > .foo:error { }
 ::-webkit-scrollbar-button:horizontal:unknown {}
 :first { }
 :slotted {}

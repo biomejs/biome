@@ -11,7 +11,8 @@ a:UNKNOWN { }
 a:pseudo-class { }
 body:not(div):noot(span) {}
 a:unknown::before { }
-a,\nb > .foo:error { }
+a,
+b > .foo:error { }
 ::-webkit-scrollbar-button:horizontal:unknown {}
 :first { }
 :slotted {}
@@ -114,7 +115,7 @@ invalid.css:6:15 lint/nursery/noUnknownPseudoClassSelector ━━━━━━━
   > 6 │ body:not(div):noot(span) {}
       │               ^^^^
     7 │ a:unknown::before { }
-    8 │ a,\nb > .foo:error { }
+    8 │ a,
   
   i See MDN web docs for more details.
   
@@ -130,8 +131,8 @@ invalid.css:7:3 lint/nursery/noUnknownPseudoClassSelector ━━━━━━━�
     6 │ body:not(div):noot(span) {}
   > 7 │ a:unknown::before { }
       │   ^^^^^^^
-    8 │ a,\nb > .foo:error { }
-    9 │ ::-webkit-scrollbar-button:horizontal:unknown {}
+    8 │ a,
+    9 │ b > .foo:error { }
   
   i See MDN web docs for more details.
   
@@ -139,16 +140,16 @@ invalid.css:7:3 lint/nursery/noUnknownPseudoClassSelector ━━━━━━━�
 ```
 
 ```
-invalid.css:8:14 lint/nursery/noUnknownPseudoClassSelector ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:9:10 lint/nursery/noUnknownPseudoClassSelector ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Unexpected unknown pseudo-class error 
   
-     6 │ body:not(div):noot(span) {}
      7 │ a:unknown::before { }
-   > 8 │ a,\nb > .foo:error { }
-       │              ^^^^^
-     9 │ ::-webkit-scrollbar-button:horizontal:unknown {}
-    10 │ :first { }
+     8 │ a,
+   > 9 │ b > .foo:error { }
+       │          ^^^^^
+    10 │ ::-webkit-scrollbar-button:horizontal:unknown {}
+    11 │ :first { }
   
   i See MDN web docs for more details.
   
@@ -156,33 +157,16 @@ invalid.css:8:14 lint/nursery/noUnknownPseudoClassSelector ━━━━━━━
 ```
 
 ```
-invalid.css:9:39 lint/nursery/noUnknownPseudoClassSelector ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:10:39 lint/nursery/noUnknownPseudoClassSelector ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Unexpected unknown pseudo-class unknown 
   
-     7 │ a:unknown::before { }
-     8 │ a,\nb > .foo:error { }
-   > 9 │ ::-webkit-scrollbar-button:horizontal:unknown {}
+     8 │ a,
+     9 │ b > .foo:error { }
+  > 10 │ ::-webkit-scrollbar-button:horizontal:unknown {}
        │                                       ^^^^^^^
-    10 │ :first { }
-    11 │ :slotted {}
-  
-  i See MDN web docs for more details.
-  
-
-```
-
-```
-invalid.css:10:2 lint/nursery/noUnknownPseudoClassSelector ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! Unexpected unknown pseudo-class first 
-  
-     8 │ a,\nb > .foo:error { }
-     9 │ ::-webkit-scrollbar-button:horizontal:unknown {}
-  > 10 │ :first { }
-       │  ^^^^^
-    11 │ :slotted {}
-    12 │ :placeholder {}
+    11 │ :first { }
+    12 │ :slotted {}
   
   i See MDN web docs for more details.
   
@@ -192,14 +176,14 @@ invalid.css:10:2 lint/nursery/noUnknownPseudoClassSelector ━━━━━━━
 ```
 invalid.css:11:2 lint/nursery/noUnknownPseudoClassSelector ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected unknown pseudo-class slotted 
+  ! Unexpected unknown pseudo-class first 
   
-     9 │ ::-webkit-scrollbar-button:horizontal:unknown {}
-    10 │ :first { }
-  > 11 │ :slotted {}
-       │  ^^^^^^^
-    12 │ :placeholder {}
-    13 │ @page :blank:unknown { }
+     9 │ b > .foo:error { }
+    10 │ ::-webkit-scrollbar-button:horizontal:unknown {}
+  > 11 │ :first { }
+       │  ^^^^^
+    12 │ :slotted {}
+    13 │ :placeholder {}
   
   i See MDN web docs for more details.
   
@@ -209,14 +193,31 @@ invalid.css:11:2 lint/nursery/noUnknownPseudoClassSelector ━━━━━━━
 ```
 invalid.css:12:2 lint/nursery/noUnknownPseudoClassSelector ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
+  ! Unexpected unknown pseudo-class slotted 
+  
+    10 │ ::-webkit-scrollbar-button:horizontal:unknown {}
+    11 │ :first { }
+  > 12 │ :slotted {}
+       │  ^^^^^^^
+    13 │ :placeholder {}
+    14 │ @page :blank:unknown { }
+  
+  i See MDN web docs for more details.
+  
+
+```
+
+```
+invalid.css:13:2 lint/nursery/noUnknownPseudoClassSelector ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
   ! Unexpected unknown pseudo-class placeholder 
   
-    10 │ :first { }
-    11 │ :slotted {}
-  > 12 │ :placeholder {}
+    11 │ :first { }
+    12 │ :slotted {}
+  > 13 │ :placeholder {}
        │  ^^^^^^^^^^^
-    13 │ @page :blank:unknown { }
-    14 │ @page foo:unknown { }
+    14 │ @page :blank:unknown { }
+    15 │ @page foo:unknown { }
   
   i See MDN web docs for more details.
   
@@ -224,16 +225,16 @@ invalid.css:12:2 lint/nursery/noUnknownPseudoClassSelector ━━━━━━━
 ```
 
 ```
-invalid.css:13:14 lint/nursery/noUnknownPseudoClassSelector ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:14:14 lint/nursery/noUnknownPseudoClassSelector ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Unexpected unknown pseudo-class unknown 
   
-    11 │ :slotted {}
-    12 │ :placeholder {}
-  > 13 │ @page :blank:unknown { }
+    12 │ :slotted {}
+    13 │ :placeholder {}
+  > 14 │ @page :blank:unknown { }
        │              ^^^^^^^
-    14 │ @page foo:unknown { }
-    15 │ :horizontal:decrement {}
+    15 │ @page foo:unknown { }
+    16 │ :horizontal:decrement {}
   
   i See MDN web docs for more details.
   
@@ -241,15 +242,15 @@ invalid.css:13:14 lint/nursery/noUnknownPseudoClassSelector ━━━━━━�
 ```
 
 ```
-invalid.css:14:11 lint/nursery/noUnknownPseudoClassSelector ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:15:11 lint/nursery/noUnknownPseudoClassSelector ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Unexpected unknown pseudo-class unknown 
   
-    12 │ :placeholder {}
-    13 │ @page :blank:unknown { }
-  > 14 │ @page foo:unknown { }
+    13 │ :placeholder {}
+    14 │ @page :blank:unknown { }
+  > 15 │ @page foo:unknown { }
        │           ^^^^^^^
-    15 │ :horizontal:decrement {}
+    16 │ :horizontal:decrement {}
   
   i See MDN web docs for more details.
   
@@ -257,13 +258,13 @@ invalid.css:14:11 lint/nursery/noUnknownPseudoClassSelector ━━━━━━�
 ```
 
 ```
-invalid.css:15:2 lint/nursery/noUnknownPseudoClassSelector ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:16:2 lint/nursery/noUnknownPseudoClassSelector ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Unexpected unknown pseudo-class horizontal 
   
-    13 │ @page :blank:unknown { }
-    14 │ @page foo:unknown { }
-  > 15 │ :horizontal:decrement {}
+    14 │ @page :blank:unknown { }
+    15 │ @page foo:unknown { }
+  > 16 │ :horizontal:decrement {}
        │  ^^^^^^^^^^
   
   i See MDN web docs for more details.
@@ -272,13 +273,13 @@ invalid.css:15:2 lint/nursery/noUnknownPseudoClassSelector ━━━━━━━
 ```
 
 ```
-invalid.css:15:13 lint/nursery/noUnknownPseudoClassSelector ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:16:13 lint/nursery/noUnknownPseudoClassSelector ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Unexpected unknown pseudo-class decrement 
   
-    13 │ @page :blank:unknown { }
-    14 │ @page foo:unknown { }
-  > 15 │ :horizontal:decrement {}
+    14 │ @page :blank:unknown { }
+    15 │ @page foo:unknown { }
+  > 16 │ :horizontal:decrement {}
        │             ^^^^^^^^^
   
   i See MDN web docs for more details.

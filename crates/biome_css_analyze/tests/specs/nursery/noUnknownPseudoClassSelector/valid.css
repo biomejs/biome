@@ -16,7 +16,8 @@ div.sidebar:has(*:nth-child(5)):not(:has(*:nth-child(6))) { }
 div :nth-child(2 of .widget) { }
 a:hover::before { }
 a:-moz-placeholder { }
-a,\nb > .foo:hover { }
+a,
+b > .foo:hover { }
 :--heading { }
 ::-webkit-scrollbar-thumb:window-inactive { }
 ::selection:window-inactive { }
