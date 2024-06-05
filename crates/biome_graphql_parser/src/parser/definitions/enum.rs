@@ -40,7 +40,7 @@ pub(crate) fn parse_enum_type_extension(p: &mut GraphqlParser) -> ParsedSyntax {
     let m = p.start();
 
     p.bump(T![extend]);
-    p.bump(T![enum]);
+    p.expect(T![enum]);
 
     parse_name(p).or_add_diagnostic(p, expected_name);
 
