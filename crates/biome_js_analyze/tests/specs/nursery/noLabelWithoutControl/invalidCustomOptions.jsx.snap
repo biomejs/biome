@@ -1,0 +1,41 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidCustomOptions.jsx
+---
+# Input
+```jsx
+<CustomLabel><span><CustomInput /></span></CustomLabel>;
+<CustomLabel aria-label="A label" />;
+
+```
+
+# Diagnostics
+```
+invalidCustomOptions.jsx:1:1 lint/nursery/noLabelWithoutControl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! A form label must be associated with an input.
+  
+  > 1 │ <CustomLabel><span><CustomInput /></span></CustomLabel>;
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    2 │ <CustomLabel aria-label="A label" />;
+    3 │ 
+  
+  i Consider adding an accessible text content to the label element.
+  
+
+```
+
+```
+invalidCustomOptions.jsx:2:1 lint/nursery/noLabelWithoutControl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! A form label must be associated with an input.
+  
+    1 │ <CustomLabel><span><CustomInput /></span></CustomLabel>;
+  > 2 │ <CustomLabel aria-label="A label" />;
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    3 │ 
+  
+  i Consider adding a `for` or `htmlFor` attribute to the label element or moving the input element to inside the label element.
+  
+
+```

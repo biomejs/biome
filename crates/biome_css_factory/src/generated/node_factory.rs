@@ -189,6 +189,60 @@ pub fn css_complex_selector(
         ],
     ))
 }
+pub fn css_composes_import_specifier(
+    from_token: SyntaxToken,
+    source: AnyCssComposesImportSource,
+) -> CssComposesImportSpecifier {
+    CssComposesImportSpecifier::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_COMPOSES_IMPORT_SPECIFIER,
+        [
+            Some(SyntaxElement::Token(from_token)),
+            Some(SyntaxElement::Node(source.into_syntax())),
+        ],
+    ))
+}
+pub fn css_composes_property(
+    name: CssIdentifier,
+    colon_token: SyntaxToken,
+    value: CssComposesPropertyValue,
+) -> CssComposesProperty {
+    CssComposesProperty::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_COMPOSES_PROPERTY,
+        [
+            Some(SyntaxElement::Node(name.into_syntax())),
+            Some(SyntaxElement::Token(colon_token)),
+            Some(SyntaxElement::Node(value.into_syntax())),
+        ],
+    ))
+}
+pub fn css_composes_property_value(
+    classes: CssComposesClassList,
+) -> CssComposesPropertyValueBuilder {
+    CssComposesPropertyValueBuilder {
+        classes,
+        specifier: None,
+    }
+}
+pub struct CssComposesPropertyValueBuilder {
+    classes: CssComposesClassList,
+    specifier: Option<CssComposesImportSpecifier>,
+}
+impl CssComposesPropertyValueBuilder {
+    pub fn with_specifier(mut self, specifier: CssComposesImportSpecifier) -> Self {
+        self.specifier = Some(specifier);
+        self
+    }
+    pub fn build(self) -> CssComposesPropertyValue {
+        CssComposesPropertyValue::unwrap_cast(SyntaxNode::new_detached(
+            CssSyntaxKind::CSS_COMPOSES_PROPERTY_VALUE,
+            [
+                Some(SyntaxElement::Node(self.classes.into_syntax())),
+                self.specifier
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+            ],
+        ))
+    }
+}
 pub fn css_compound_selector(sub_selectors: CssSubSelectorList) -> CssCompoundSelectorBuilder {
     CssCompoundSelectorBuilder {
         sub_selectors,
@@ -774,7 +828,7 @@ pub fn css_import_supports(
 }
 pub fn css_keyframes_at_rule(
     keyframes_token: SyntaxToken,
-    name: AnyCssKeyframeName,
+    name: AnyCssKeyframesName,
     block: AnyCssKeyframesBlock,
 ) -> CssKeyframesAtRule {
     CssKeyframesAtRule::unwrap_cast(SyntaxNode::new_detached(
@@ -824,6 +878,46 @@ pub fn css_keyframes_percentage_selector(
     CssKeyframesPercentageSelector::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_KEYFRAMES_PERCENTAGE_SELECTOR,
         [Some(SyntaxElement::Node(selector.into_syntax()))],
+    ))
+}
+pub fn css_keyframes_scope_function(
+    scope_token: SyntaxToken,
+    l_paren_token: SyntaxToken,
+    name: AnyCssKeyframesIdentifier,
+    r_paren_token: SyntaxToken,
+) -> CssKeyframesScopeFunction {
+    CssKeyframesScopeFunction::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_KEYFRAMES_SCOPE_FUNCTION,
+        [
+            Some(SyntaxElement::Token(scope_token)),
+            Some(SyntaxElement::Token(l_paren_token)),
+            Some(SyntaxElement::Node(name.into_syntax())),
+            Some(SyntaxElement::Token(r_paren_token)),
+        ],
+    ))
+}
+pub fn css_keyframes_scope_prefix(
+    scope_token: SyntaxToken,
+    name: AnyCssKeyframesIdentifier,
+) -> CssKeyframesScopePrefix {
+    CssKeyframesScopePrefix::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_KEYFRAMES_SCOPE_PREFIX,
+        [
+            Some(SyntaxElement::Token(scope_token)),
+            Some(SyntaxElement::Node(name.into_syntax())),
+        ],
+    ))
+}
+pub fn css_keyframes_scoped_name(
+    colon_token: SyntaxToken,
+    scope: AnyCssKeyframesScope,
+) -> CssKeyframesScopedName {
+    CssKeyframesScopedName::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_KEYFRAMES_SCOPED_NAME,
+        [
+            Some(SyntaxElement::Token(colon_token)),
+            Some(SyntaxElement::Node(scope.into_syntax())),
+        ],
     ))
 }
 pub fn css_layer_at_rule(layer_token: SyntaxToken, layer: AnyCssLayer) -> CssLayerAtRule {
@@ -2030,6 +2124,76 @@ pub fn css_url_value_raw(value_token: SyntaxToken) -> CssUrlValueRaw {
         [Some(SyntaxElement::Token(value_token))],
     ))
 }
+pub fn css_value_at_rule(
+    value_token: SyntaxToken,
+    clause: AnyCssValueAtRuleClause,
+    semicolon_token: SyntaxToken,
+) -> CssValueAtRule {
+    CssValueAtRule::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_VALUE_AT_RULE,
+        [
+            Some(SyntaxElement::Token(value_token)),
+            Some(SyntaxElement::Node(clause.into_syntax())),
+            Some(SyntaxElement::Token(semicolon_token)),
+        ],
+    ))
+}
+pub fn css_value_at_rule_declaration_clause(
+    properties: CssValueAtRulePropertyList,
+) -> CssValueAtRuleDeclarationClause {
+    CssValueAtRuleDeclarationClause::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_VALUE_AT_RULE_DECLARATION_CLAUSE,
+        [Some(SyntaxElement::Node(properties.into_syntax()))],
+    ))
+}
+pub fn css_value_at_rule_generic_property(
+    name: AnyCssDeclarationName,
+    colon_token: SyntaxToken,
+    value: CssValueAtRuleGenericValue,
+) -> CssValueAtRuleGenericProperty {
+    CssValueAtRuleGenericProperty::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_VALUE_AT_RULE_GENERIC_PROPERTY,
+        [
+            Some(SyntaxElement::Node(name.into_syntax())),
+            Some(SyntaxElement::Token(colon_token)),
+            Some(SyntaxElement::Node(value.into_syntax())),
+        ],
+    ))
+}
+pub fn css_value_at_rule_import_clause(
+    specifiers: CssValueAtRuleImportSpecifierList,
+    from_token: SyntaxToken,
+    source: AnyCssValueAtRuleImportSource,
+) -> CssValueAtRuleImportClause {
+    CssValueAtRuleImportClause::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_VALUE_AT_RULE_IMPORT_CLAUSE,
+        [
+            Some(SyntaxElement::Node(specifiers.into_syntax())),
+            Some(SyntaxElement::Token(from_token)),
+            Some(SyntaxElement::Node(source.into_syntax())),
+        ],
+    ))
+}
+pub fn css_value_at_rule_import_specifier(name: CssIdentifier) -> CssValueAtRuleImportSpecifier {
+    CssValueAtRuleImportSpecifier::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_VALUE_AT_RULE_IMPORT_SPECIFIER,
+        [Some(SyntaxElement::Node(name.into_syntax()))],
+    ))
+}
+pub fn css_value_at_rule_named_import_specifier(
+    name: CssIdentifier,
+    as_token: SyntaxToken,
+    local_name: CssIdentifier,
+) -> CssValueAtRuleNamedImportSpecifier {
+    CssValueAtRuleNamedImportSpecifier::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_VALUE_AT_RULE_NAMED_IMPORT_SPECIFIER,
+        [
+            Some(SyntaxElement::Node(name.into_syntax())),
+            Some(SyntaxElement::Token(as_token)),
+            Some(SyntaxElement::Node(local_name.into_syntax())),
+        ],
+    ))
+}
 pub fn css_component_value_list<I>(items: I) -> CssComponentValueList
 where
     I: IntoIterator<Item = AnyCssValue>,
@@ -2037,6 +2201,18 @@ where
 {
     CssComponentValueList::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_COMPONENT_VALUE_LIST,
+        items
+            .into_iter()
+            .map(|item| Some(item.into_syntax().into())),
+    ))
+}
+pub fn css_composes_class_list<I>(items: I) -> CssComposesClassList
+where
+    I: IntoIterator<Item = CssCustomIdentifier>,
+    I::IntoIter: ExactSizeIterator,
+{
+    CssComposesClassList::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_COMPOSES_CLASS_LIST,
         items
             .into_iter()
             .map(|item| Some(item.into_syntax().into())),
@@ -2438,6 +2614,51 @@ where
             .map(|item| Some(item.into_syntax().into())),
     ))
 }
+pub fn css_value_at_rule_import_specifier_list<I, S>(
+    items: I,
+    separators: S,
+) -> CssValueAtRuleImportSpecifierList
+where
+    I: IntoIterator<Item = AnyCssValueAtRuleImportSpecifier>,
+    I::IntoIter: ExactSizeIterator,
+    S: IntoIterator<Item = CssSyntaxToken>,
+    S::IntoIter: ExactSizeIterator,
+{
+    let mut items = items.into_iter();
+    let mut separators = separators.into_iter();
+    let length = items.len() + separators.len();
+    CssValueAtRuleImportSpecifierList::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_VALUE_AT_RULE_IMPORT_SPECIFIER_LIST,
+        (0..length).map(|index| {
+            if index % 2 == 0 {
+                Some(items.next()?.into_syntax().into())
+            } else {
+                Some(separators.next()?.into())
+            }
+        }),
+    ))
+}
+pub fn css_value_at_rule_property_list<I, S>(items: I, separators: S) -> CssValueAtRulePropertyList
+where
+    I: IntoIterator<Item = AnyCssValueAtRuleProperty>,
+    I::IntoIter: ExactSizeIterator,
+    S: IntoIterator<Item = CssSyntaxToken>,
+    S::IntoIter: ExactSizeIterator,
+{
+    let mut items = items.into_iter();
+    let mut separators = separators.into_iter();
+    let length = items.len() + separators.len();
+    CssValueAtRulePropertyList::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_VALUE_AT_RULE_PROPERTY_LIST,
+        (0..length).map(|index| {
+            if index % 2 == 0 {
+                Some(items.next()?.into_syntax().into())
+            } else {
+                Some(separators.next()?.into())
+            }
+        }),
+    ))
+}
 pub fn css_bogus<I>(slots: I) -> CssBogus
 where
     I: IntoIterator<Item = Option<SyntaxElement>>,
@@ -2522,6 +2743,16 @@ where
 {
     CssBogusKeyframesItem::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_BOGUS_KEYFRAMES_ITEM,
+        slots,
+    ))
+}
+pub fn css_bogus_keyframes_name<I>(slots: I) -> CssBogusKeyframesName
+where
+    I: IntoIterator<Item = Option<SyntaxElement>>,
+    I::IntoIter: ExactSizeIterator,
+{
+    CssBogusKeyframesName::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_BOGUS_KEYFRAMES_NAME,
         slots,
     ))
 }
@@ -2652,6 +2883,16 @@ where
 {
     CssBogusUrlModifier::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_BOGUS_URL_MODIFIER,
+        slots,
+    ))
+}
+pub fn css_value_at_rule_generic_value<I>(slots: I) -> CssValueAtRuleGenericValue
+where
+    I: IntoIterator<Item = Option<SyntaxElement>>,
+    I::IntoIter: ExactSizeIterator,
+{
+    CssValueAtRuleGenericValue::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_VALUE_AT_RULE_GENERIC_VALUE,
         slots,
     ))
 }

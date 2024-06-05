@@ -238,11 +238,16 @@ pub(crate) fn migrate_eslint_any_rule(
                 .get_or_insert(Default::default());
             rule.set_level(rule_severity.into());
         }
-        "@typescript-eslint/no-useless-template-literals" => {
-            let group = rules.style.get_or_insert_with(Default::default);
-            let rule = group
-                .no_unused_template_literal
-                .get_or_insert(Default::default());
+        "@typescript-eslint/only-throw-error" => {
+            if !options.include_inspired {
+                results.has_inspired_rules = true;
+                return false;
+            }
+            if !options.include_nursery {
+                return false;
+            }
+            let group = rules.nursery.get_or_insert_with(Default::default);
+            let rule = group.use_throw_only_error.get_or_insert(Default::default());
             rule.set_level(rule_severity.into());
         }
         "@typescript-eslint/parameter-properties" => {
@@ -403,10 +408,7 @@ pub(crate) fn migrate_eslint_any_rule(
             rule.set_level(rule_severity.into());
         }
         "import/no-nodejs-modules" => {
-            if !options.include_nursery {
-                return false;
-            }
-            let group = rules.nursery.get_or_insert_with(Default::default);
+            let group = rules.correctness.get_or_insert_with(Default::default);
             let rule = group.no_nodejs_modules.get_or_insert(Default::default());
             rule.set_level(rule_severity.into());
         }
@@ -560,6 +562,16 @@ pub(crate) fn migrate_eslint_any_rule(
                 .get_or_insert(Default::default());
             rule.set_level(rule_severity.into());
         }
+        "jsx-a11y/label-has-associated-control" => {
+            if !options.include_nursery {
+                return false;
+            }
+            let group = rules.nursery.get_or_insert_with(Default::default);
+            let rule = group
+                .no_label_without_control
+                .get_or_insert(Default::default());
+            rule.set_level(rule_severity.into());
+        }
         "jsx-a11y/lang" => {
             let group = rules.a11y.get_or_insert_with(Default::default);
             let rule = group.use_valid_lang.get_or_insert(Default::default());
@@ -655,10 +667,7 @@ pub(crate) fn migrate_eslint_any_rule(
             rule.set_level(rule_severity.into());
         }
         "no-array-constructor" => {
-            if !options.include_nursery {
-                return false;
-            }
-            let group = rules.nursery.get_or_insert_with(Default::default);
+            let group = rules.correctness.get_or_insert_with(Default::default);
             let rule = group.use_array_literals.get_or_insert(Default::default());
             rule.set_level(rule_severity.into());
         }
@@ -1156,18 +1165,6 @@ pub(crate) fn migrate_eslint_any_rule(
                 .get_or_insert(Default::default());
             rule.set_level(rule_severity.into());
         }
-        "only-throw-error" => {
-            if !options.include_inspired {
-                results.has_inspired_rules = true;
-                return false;
-            }
-            if !options.include_nursery {
-                return false;
-            }
-            let group = rules.nursery.get_or_insert_with(Default::default);
-            let rule = group.use_throw_only_error.get_or_insert(Default::default());
-            rule.set_level(rule_severity.into());
-        }
         "operator-assignment" => {
             let group = rules.style.get_or_insert_with(Default::default);
             let rule = group.use_shorthand_assign.get_or_insert(Default::default());
@@ -1412,6 +1409,14 @@ pub(crate) fn migrate_eslint_any_rule(
         "unicorn/prefer-array-flat-map" => {
             let group = rules.complexity.get_or_insert_with(Default::default);
             let rule = group.use_flat_map.get_or_insert(Default::default());
+            rule.set_level(rule_severity.into());
+        }
+        "unicorn/prefer-date-now" => {
+            if !options.include_nursery {
+                return false;
+            }
+            let group = rules.nursery.get_or_insert_with(Default::default);
+            let rule = group.use_date_now.get_or_insert(Default::default());
             rule.set_level(rule_severity.into());
         }
         "unicorn/prefer-node-protocol" => {

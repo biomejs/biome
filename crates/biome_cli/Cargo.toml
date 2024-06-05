@@ -43,6 +43,7 @@ dashmap                  = { workspace = true }
 hdrhistogram             = { version = "7.5.4", default-features = false }
 indexmap                 = { workspace = true }
 lazy_static              = { workspace = true }
+quick-junit              = "0.4.0"
 rayon                    = { workspace = true }
 regex                    = { workspace = true }
 rustc-hash               = { workspace = true }

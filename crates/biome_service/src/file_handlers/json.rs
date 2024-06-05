@@ -1,3 +1,5 @@
+use std::ffi::OsStr;
+
 use super::{CodeActionsParams, DocumentFileSource, ExtensionHandler, ParseResult};
 use crate::configuration::to_analyzer_rules;
 use crate::file_handlers::DebugCapabilities;
@@ -68,55 +70,64 @@ impl ServiceLanguage for JsonLanguage {
     }
 
     fn resolve_format_options(
-        global: &FormatSettings,
-        overrides: &OverrideSettings,
-        language: &JsonFormatterSettings,
+        global: Option<&FormatSettings>,
+        overrides: Option<&OverrideSettings>,
+        language: Option<&JsonFormatterSettings>,
         path: &BiomePath,
         _document_file_source: &DocumentFileSource,
     ) -> Self::FormatOptions {
-        let indent_style = if let Some(indent_style) = language.indent_style {
-            indent_style
-        } else {
-            global.indent_style.unwrap_or_default()
-        };
-        let line_width = if let Some(line_width) = language.line_width {
-            line_width
-        } else {
-            global.line_width.unwrap_or_default()
-        };
-        let indent_width = if let Some(indent_width) = language.indent_width {
-            indent_width
-        } else {
-            global.indent_width.unwrap_or_default()
-        };
+        let indent_style = language
+            .and_then(|l| l.indent_style)
+            .or(global.and_then(|g| g.indent_style))
+            .unwrap_or_default();
+        let line_width = language
+            .and_then(|l| l.line_width)
+            .or(global.and_then(|g| g.line_width))
+            .unwrap_or_default();
+        let indent_width = language
+            .and_then(|l| l.indent_width)
+            .or(global.and_then(|g| g.indent_width))
+            .unwrap_or_default();
 
-        let line_ending = if let Some(line_ending) = language.line_ending {
-            line_ending
-        } else {
-            global.line_ending.unwrap_or_default()
-        };
+        let line_ending = language
+            .and_then(|l| l.line_ending)
+            .or(global.and_then(|g| g.line_ending))
+            .unwrap_or_default();
 
-        overrides.to_override_json_format_options(
-            path,
-            JsonFormatOptions::new()
-                .with_line_ending(line_ending)
-                .with_indent_style(indent_style)
-                .with_indent_width(indent_width)
-                .with_line_width(line_width)
-                .with_trailing_commas(language.trailing_commas.unwrap_or_default()),
-        )
+        // ensure it never formats biome.json into a form it can't parse
+        let trailing_commas =
+            if matches!(path.file_name().and_then(OsStr::to_str), Some("biome.json")) {
+                TrailingCommas::None
+            } else {
+                language.and_then(|l| l.trailing_commas).unwrap_or_default()
+            };
+
+        let options = JsonFormatOptions::new()
+            .with_line_ending(line_ending)
+            .with_indent_style(indent_style)
+            .with_indent_width(indent_width)
+            .with_line_width(line_width)
+            .with_trailing_commas(trailing_commas);
+
+        if let Some(overrides) = overrides {
+            overrides.to_override_json_format_options(path, options)
+        } else {
+            options
+        }
     }
 
     fn resolve_analyzer_options(
-        global: &Settings,
-        _linter: &LinterSettings,
-        _overrides: &OverrideSettings,
-        _language: &Self::LinterSettings,
+        global: Option<&Settings>,
+        _linter: Option<&LinterSettings>,
+        _overrides: Option<&OverrideSettings>,
+        _language: Option<&Self::LinterSettings>,
         path: &BiomePath,
         _file_source: &DocumentFileSource,
     ) -> AnalyzerOptions {
         let configuration = AnalyzerConfiguration {
-            rules: to_analyzer_rules(global, path.as_path()),
+            rules: global
+                .map(|g| to_analyzer_rules(g, path.as_path()))
+                .unwrap_or_default(),
             globals: vec![],
             preferred_quote: PreferredQuote::Double,
             jsx_runtime: Default::default(),
@@ -160,21 +171,23 @@ fn parse(
     biome_path: &BiomePath,
     file_source: DocumentFileSource,
     text: &str,
-    settings: WorkspaceSettingsHandle,
+    settings: Option<&Settings>,
     cache: &mut NodeCache,
 ) -> ParseResult {
-    let parser = &settings.settings().languages.json.parser;
-    let overrides = &settings.settings().override_settings;
+    let parser = settings.map(|s| &s.languages.json.parser);
+    let overrides = settings.map(|s| &s.override_settings);
     let optional_json_file_source = file_source.to_json_file_source();
-    let options: JsonParserOptions = overrides.to_override_json_parser_options(
-        biome_path,
-        JsonParserOptions {
-            allow_comments: parser.allow_comments
-                || optional_json_file_source.map_or(false, |x| x.allow_comments()),
-            allow_trailing_commas: parser.allow_trailing_commas
-                || optional_json_file_source.map_or(false, |x| x.allow_trailing_commas()),
-        },
-    );
+    let options = JsonParserOptions {
+        allow_comments: parser.map(|p| p.allow_comments).unwrap_or_default()
+            || optional_json_file_source.map_or(false, |x| x.allow_comments()),
+        allow_trailing_commas: parser.map(|p| p.allow_trailing_commas).unwrap_or_default()
+            || optional_json_file_source.map_or(false, |x| x.allow_trailing_commas()),
+    };
+    let options = if let Some(overrides) = overrides {
+        overrides.to_override_json_parser_options(biome_path, options)
+    } else {
+        options
+    };
     let parse = biome_json_parser::parse_json_with_cache(text, cache, options);
     let root = parse.syntax();
     let diagnostics = parse.into_diagnostics();
@@ -289,7 +302,6 @@ fn lint(params: LintParams) -> LintResults {
         .in_scope(move || {
             let root: JsonRoot = params.parse.tree();
             let mut diagnostics = params.parse.into_diagnostics();
-            let settings = params.settings.settings();
 
             // if we're parsing the `biome.json` file, we deserialize it, so we can emit diagnostics for
             // malformed configuration
@@ -308,10 +320,13 @@ fn lint(params: LintParams) -> LintResults {
             }
 
             let analyzer_options = &params
-                .settings
+                .workspace
                 .analyzer_options::<JsonLanguage>(params.path, &params.language);
 
-            let rules = settings.as_rules(params.path.as_path());
+            let mut rules = None;
+            if let Some(settings) = params.workspace.settings() {
+                rules = settings.as_rules(params.path.as_path());
+            }
 
             let has_only_filter = !params.only.is_empty();
             let enabled_rules = if has_only_filter {

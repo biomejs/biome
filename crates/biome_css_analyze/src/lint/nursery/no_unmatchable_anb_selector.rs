@@ -51,7 +51,7 @@ declare_rule! {
     /// ```
     ///
     pub NoUnmatchableAnbSelector {
-        version: "next",
+        version: "1.8.0",
         name: "noUnmatchableAnbSelector",
         language: "css",
         recommended: true,

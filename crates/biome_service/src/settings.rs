@@ -57,13 +57,14 @@ pub struct WorkspaceSettings {
 
 impl WorkspaceSettings {
     /// Retrieves the settings of the current workspace folder
-    pub fn get_current_settings(&self) -> &Settings {
+    pub fn get_current_settings(&self) -> Option<&Settings> {
         trace!("Current key {:?}", self.current_project);
-        let data = self
-            .data
-            .get(self.current_project)
-            .expect("You must have at least one workspace.");
-        &data.settings
+        let data = self.data.get(self.current_project);
+        if let Some(data) = data {
+            Some(&data.settings)
+        } else {
+            None
+        }
     }
 
     /// Retrieves a mutable reference of the settings of the current project
@@ -115,10 +116,9 @@ impl WorkspaceSettings {
     ///
     /// If there's a match, and the match **isn't** the current project, it returns the new key.
     pub fn path_belongs_to_current_workspace(&self, path: &BiomePath) -> Option<ProjectKey> {
-        debug_assert!(
-            !self.data.is_empty(),
-            "You must have at least one workspace."
-        );
+        if self.data.is_empty() {
+            return None;
+        }
         trace!("Current key: {:?}", self.current_project);
         let iter = self.data.iter();
         for (key, path_to_settings) in iter {
@@ -491,6 +491,9 @@ impl From<CssConfiguration> for LanguageSettings<CssLanguage> {
     fn from(css: CssConfiguration) -> Self {
         let mut language_setting: LanguageSettings<CssLanguage> = LanguageSettings::default();
 
+        language_setting.parser.allow_wrong_line_comments = css.parser.allow_wrong_line_comments;
+        language_setting.parser.css_modules = css.parser.css_modules;
+
         language_setting.formatter.enabled = Some(css.formatter.enabled);
         language_setting.formatter.line_width = Some(css.formatter.line_width);
         language_setting.formatter.indent_width = Some(css.formatter.indent_width.into());
@@ -526,9 +529,9 @@ pub trait ServiceLanguage: biome_rowan::Language {
     /// Resolve the formatter options from the global (workspace level),
     /// per-language and editor provided formatter settings
     fn resolve_format_options(
-        global: &FormatSettings,
-        overrides: &OverrideSettings,
-        language: &Self::FormatterSettings,
+        global: Option<&FormatSettings>,
+        overrides: Option<&OverrideSettings>,
+        language: Option<&Self::FormatterSettings>,
         path: &BiomePath,
         file_source: &DocumentFileSource,
     ) -> Self::FormatOptions;
@@ -536,10 +539,10 @@ pub trait ServiceLanguage: biome_rowan::Language {
     /// Resolve the linter options from the global (workspace level),
     /// per-language and editor provided formatter settings
     fn resolve_analyzer_options(
-        global: &Settings,
-        linter: &LinterSettings,
-        overrides: &OverrideSettings,
-        language: &Self::LinterSettings,
+        global: Option<&Settings>,
+        linter: Option<&LinterSettings>,
+        overrides: Option<&OverrideSettings>,
+        language: Option<&Self::LinterSettings>,
         path: &BiomePath,
         file_source: &DocumentFileSource,
     ) -> AnalyzerOptions;
@@ -647,7 +650,7 @@ impl<'a> WorkspaceSettingsHandle<'a> {
         }
     }
 
-    pub(crate) fn settings(&self) -> &Settings {
+    pub(crate) fn settings(&self) -> Option<&Settings> {
         self.inner.get_current_settings()
     }
 }
@@ -661,7 +664,7 @@ impl<'a> AsRef<WorkspaceSettings> for WorkspaceSettingsHandle<'a> {
 impl<'a> WorkspaceSettingsHandle<'a> {
     /// Resolve the formatting context for the given language
     pub(crate) fn format_options<L>(
-        self,
+        &self,
         path: &BiomePath,
         file_source: &DocumentFileSource,
     ) -> L::FormatOptions
@@ -669,13 +672,12 @@ impl<'a> WorkspaceSettingsHandle<'a> {
         L: ServiceLanguage,
     {
         let settings = self.inner.get_current_settings();
-        L::resolve_format_options(
-            &settings.formatter,
-            &settings.override_settings,
-            &L::lookup_settings(&settings.languages).formatter,
-            path,
-            file_source,
-        )
+        let formatter = settings.map(|s| &s.formatter);
+        let overrides = settings.map(|s| &s.override_settings);
+        let editor_settings = settings
+            .map(|s| L::lookup_settings(&s.languages))
+            .map(|result| &result.formatter);
+        L::resolve_format_options(formatter, overrides, editor_settings, path, file_source)
     }
 
     pub(crate) fn analyzer_options<L>(
@@ -687,11 +689,16 @@ impl<'a> WorkspaceSettingsHandle<'a> {
         L: ServiceLanguage,
     {
         let settings = self.inner.get_current_settings();
+        let linter = settings.map(|s| &s.linter);
+        let overrides = settings.map(|s| &s.override_settings);
+        let editor_settings = settings
+            .map(|s| L::lookup_settings(&s.languages))
+            .map(|result| &result.linter);
         L::resolve_analyzer_options(
             settings,
-            &settings.linter,
-            &settings.override_settings,
-            &L::lookup_settings(&settings.languages).linter,
+            linter,
+            overrides,
+            editor_settings,
             path,
             file_source,
         )
@@ -1157,6 +1164,7 @@ impl OverrideSettingPattern {
         let css_parser = &self.languages.css.parser;
 
         options.allow_wrong_line_comments = css_parser.allow_wrong_line_comments;
+        options.css_modules = css_parser.css_modules;
 
         if let Ok(mut writeonly_cache) = self.cached_css_parser_options.write() {
             let options = *options;
@@ -1459,6 +1467,7 @@ fn to_css_language_settings(
     language_setting.parser.allow_wrong_line_comments = parser
         .allow_wrong_line_comments
         .unwrap_or(parent_parser.allow_wrong_line_comments);
+    language_setting.parser.css_modules = parser.css_modules.unwrap_or(parent_parser.css_modules);
 
     language_setting
 }

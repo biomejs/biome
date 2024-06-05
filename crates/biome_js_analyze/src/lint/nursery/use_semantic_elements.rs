@@ -27,13 +27,15 @@ declare_rule! {
     /// ### Valid
     ///
     /// ```jsx
-    /// <div>...</div>
-    /// <header>...</header>
-    /// <img alt="" src="image.jpg" />
+    /// <>
+    ///  <div></div>
+    ///  <header></header>
+    ///  <img alt="" src="image.jpg" />
+    /// </>
     /// ```
     ///
     pub UseSemanticElements {
-        version: "next",
+        version: "1.8.0",
         name: "useSemanticElements",
         language: "jsx",
         sources: &[RuleSource::EslintJsxA11y("prefer-tag-over-role")],

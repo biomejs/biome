@@ -1,0 +1,115 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: content
+---
+## `index.ts`
+
+```ts
+import { z} from "z"
+import { z, b , a} from "lodash"
+
+a ==b
+
+debugger 
+
+let f;
+		let f;
+```
+
+## `main.ts`
+
+```ts
+import { z} from "z"
+import { z, b , a} from "lodash"
+
+a ==b
+
+debugger 
+
+let f;
+		let f;
+```
+
+# Termination Message
+
+```block
+check ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Some errors were emitted while running checks.
+  
+
+
+```
+
+# Emitted Messages
+
+```block
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites name="Biome" tests="12" failures="12" errors="16" time="<TIME>">
+    <testsuite name="main.ts" tests="1" disabled="0" errors="0" failures="1" package="org.biome">
+        <testcase name="org.biome.lint.suspicious.noDoubleEquals" line="4" column="3">
+            <failure message="Use === instead of ==.
+== is only allowed when comparing against `null`">line 3, col 2, Use === instead of ==.
+== is only allowed when comparing against `null`</failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="main.ts" tests="1" disabled="0" errors="0" failures="1" package="org.biome">
+        <testcase name="org.biome.lint.suspicious.noDebugger" line="6" column="1">
+            <failure message="This is an unexpected use of the debugger statement.">line 5, col 0, This is an unexpected use of the debugger statement.</failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="main.ts" tests="1" disabled="0" errors="0" failures="1" package="org.biome">
+        <testcase name="org.biome.lint.suspicious.noImplicitAnyLet" line="8" column="5">
+            <failure message="This variable implicitly has the any type.">line 7, col 4, This variable implicitly has the any type.</failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="main.ts" tests="1" disabled="0" errors="0" failures="1" package="org.biome">
+        <testcase name="org.biome.lint.suspicious.noImplicitAnyLet" line="9" column="7">
+            <failure message="This variable implicitly has the any type.">line 8, col 6, This variable implicitly has the any type.</failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="main.ts" tests="1" disabled="0" errors="0" failures="1" package="org.biome">
+        <testcase name="org.biome.lint.suspicious.noRedeclare" line="2" column="10">
+            <failure message="Shouldn&apos;t redeclare &apos;z&apos;. Consider to delete it or rename it.">line 1, col 9, Shouldn&apos;t redeclare &apos;z&apos;. Consider to delete it or rename it.</failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="main.ts" tests="1" disabled="0" errors="0" failures="1" package="org.biome">
+        <testcase name="org.biome.lint.suspicious.noRedeclare" line="9" column="7">
+            <failure message="Shouldn&apos;t redeclare &apos;f&apos;. Consider to delete it or rename it.">line 8, col 6, Shouldn&apos;t redeclare &apos;f&apos;. Consider to delete it or rename it.</failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="index.ts" tests="1" disabled="0" errors="0" failures="1" package="org.biome">
+        <testcase name="org.biome.lint.suspicious.noDoubleEquals" line="4" column="3">
+            <failure message="Use === instead of ==.
+== is only allowed when comparing against `null`">line 3, col 2, Use === instead of ==.
+== is only allowed when comparing against `null`</failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="index.ts" tests="1" disabled="0" errors="0" failures="1" package="org.biome">
+        <testcase name="org.biome.lint.suspicious.noDebugger" line="6" column="1">
+            <failure message="This is an unexpected use of the debugger statement.">line 5, col 0, This is an unexpected use of the debugger statement.</failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="index.ts" tests="1" disabled="0" errors="0" failures="1" package="org.biome">
+        <testcase name="org.biome.lint.suspicious.noImplicitAnyLet" line="8" column="5">
+            <failure message="This variable implicitly has the any type.">line 7, col 4, This variable implicitly has the any type.</failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="index.ts" tests="1" disabled="0" errors="0" failures="1" package="org.biome">
+        <testcase name="org.biome.lint.suspicious.noImplicitAnyLet" line="9" column="7">
+            <failure message="This variable implicitly has the any type.">line 8, col 6, This variable implicitly has the any type.</failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="index.ts" tests="1" disabled="0" errors="0" failures="1" package="org.biome">
+        <testcase name="org.biome.lint.suspicious.noRedeclare" line="2" column="10">
+            <failure message="Shouldn&apos;t redeclare &apos;z&apos;. Consider to delete it or rename it.">line 1, col 9, Shouldn&apos;t redeclare &apos;z&apos;. Consider to delete it or rename it.</failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="index.ts" tests="1" disabled="0" errors="0" failures="1" package="org.biome">
+        <testcase name="org.biome.lint.suspicious.noRedeclare" line="9" column="7">
+            <failure message="Shouldn&apos;t redeclare &apos;f&apos;. Consider to delete it or rename it.">line 8, col 6, Shouldn&apos;t redeclare &apos;f&apos;. Consider to delete it or rename it.</failure>
+        </testcase>
+    </testsuite>
+</testsuites>
+
+```

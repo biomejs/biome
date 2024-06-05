@@ -3,7 +3,7 @@ use crate::file_handlers::{
     ExtensionHandler, FixAllParams, FormatterCapabilities, LintParams, LintResults, ParseResult,
     ParserCapabilities,
 };
-use crate::settings::WorkspaceSettingsHandle;
+use crate::settings::{Settings, WorkspaceSettingsHandle};
 use crate::workspace::{
     DocumentFileSource, FixFileResult, OrganizeImportsResult, PullActionsResult,
 };
@@ -94,7 +94,7 @@ fn parse(
     _rome_path: &BiomePath,
     file_source: DocumentFileSource,
     text: &str,
-    _settings: WorkspaceSettingsHandle,
+    _settings: Option<&Settings>,
     cache: &mut NodeCache,
 ) -> ParseResult {
     let frontmatter = AstroFileHandler::input(text);

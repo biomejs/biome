@@ -27,7 +27,7 @@ impl QueryContext for GritQueryContext {
     type ResolvedPattern<'a> = GritResolvedPattern;
     type Language<'a> = GritTargetLanguage;
     type File<'a> = GritFile;
-    type Tree = GritTree;
+    type Tree<'a> = GritTree;
 }
 
 #[derive(Debug)]
@@ -79,6 +79,15 @@ impl<'a> ExecContext<'a, GritQueryContext> for GritExecContext {
     }
 
     fn name(&self) -> Option<&str> {
+        todo!()
+    }
+
+    fn load_file(
+        &self,
+        _file: &<GritQueryContext as QueryContext>::File<'a>,
+        _state: &mut State<'a, GritQueryContext>,
+        _logs: &mut AnalysisLogs,
+    ) -> Result<bool> {
         todo!()
     }
 }

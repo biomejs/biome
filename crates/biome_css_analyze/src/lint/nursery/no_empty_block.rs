@@ -33,9 +33,7 @@ declare_rule! {
     /// ```
     ///
     /// ```css
-    /// p {
-    ///   /* foo */
-    /// }
+    /// p { /* foo */ }
     /// ```
     ///
     /// ```css
@@ -43,7 +41,7 @@ declare_rule! {
     /// ```
     ///
     pub NoEmptyBlock {
-        version: "next",
+        version: "1.8.0",
         name: "noEmptyBlock",
         language: "css",
         recommended: true,

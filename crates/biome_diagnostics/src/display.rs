@@ -10,7 +10,7 @@ mod diff;
 pub(super) mod frame;
 mod message;
 
-use crate::display::frame::SourceFile;
+pub use crate::display::frame::{SourceFile, SourceLocation};
 use crate::{
     diagnostic::internal::AsDiagnostic, Advices, Diagnostic, DiagnosticTags, Location, LogCategory,
     Resource, Severity, Visit,

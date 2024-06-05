@@ -608,6 +608,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noConstantMathMinMaxClamp": {
+					"description": "Disallow the use of Math.min and Math.max to clamp a value where the result itself is constant.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleFixConfiguration_for_Null" },
+						{ "type": "null" }
+					]
+				},
 				"noConstructorReturn": {
 					"description": "Disallow returning a value from a constructor.",
 					"anyOf": [
@@ -626,6 +633,13 @@
 					"description": "Disallows empty destructuring patterns.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noFlatMapIdentity": {
+					"description": "Disallow to use unnecessary callback on flatMap.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleFixConfiguration_for_Null" },
 						{ "type": "null" }
 					]
 				},
@@ -668,6 +682,13 @@
 					"description": "Disallow new operators with the Symbol object.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleFixConfiguration_for_Null" },
+						{ "type": "null" }
+					]
+				},
+				"noNodejsModules": {
+					"description": "Forbid the use of Node.js builtin modules.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -808,6 +829,13 @@
 					"description": "It enables the recommended rules for this group",
 					"type": ["boolean", "null"]
 				},
+				"useArrayLiterals": {
+					"description": "Disallow Array constructors.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleFixConfiguration_for_Null" },
+						{ "type": "null" }
+					]
+				},
 				"useExhaustiveDependencies": {
 					"description": "Enforce all dependencies are correctly specified in a React hook.",
 					"anyOf": [
@@ -928,6 +956,10 @@
 			"properties": {
 				"allowWrongLineComments": {
 					"description": "Allow comments to appear on incorrect lines in `.css` files",
+					"type": ["boolean", "null"]
+				},
+				"cssModules": {
+					"description": "Enables parsing of CSS Modules specific features.",
 					"type": ["boolean", "null"]
 				}
 			},
@@ -1599,6 +1631,34 @@
 			},
 			"additionalProperties": false
 		},
+		"NoLabelWithoutControlConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithNoLabelWithoutControlOptions" }
+			]
+		},
+		"NoLabelWithoutControlOptions": {
+			"type": "object",
+			"required": ["inputComponents", "labelAttributes", "labelComponents"],
+			"properties": {
+				"inputComponents": {
+					"description": "Array of component names that should be considered the same as an `input` element.",
+					"type": "array",
+					"items": { "type": "string" }
+				},
+				"labelAttributes": {
+					"description": "Array of attributes that should be treated as the `label` accessible text content.",
+					"type": "array",
+					"items": { "type": "string" }
+				},
+				"labelComponents": {
+					"description": "Array of component names that should be considered the same as a `label` element.",
+					"type": "array",
+					"items": { "type": "string" }
+				}
+			},
+			"additionalProperties": false
+		},
 		"Nursery": {
 			"description": "A list of rules that belong to this group",
 			"type": "object",
@@ -1609,13 +1669,6 @@
 				},
 				"noConsole": {
 					"description": "Disallow the use of console.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleFixConfiguration_for_Null" },
-						{ "type": "null" }
-					]
-				},
-				"noConstantMathMinMaxClamp": {
-					"description": "Disallow the use of Math.min and Math.max to clamp a value where the result itself is constant.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleFixConfiguration_for_Null" },
 						{ "type": "null" }
@@ -1670,17 +1723,10 @@
 						{ "type": "null" }
 					]
 				},
-				"noEvolvingAny": {
+				"noEvolvingTypes": {
 					"description": "Disallow variables from evolving into any type through reassignments.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"noFlatMapIdentity": {
-					"description": "Disallow to use unnecessary callback on flatMap.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleFixConfiguration_for_Null" },
 						{ "type": "null" }
 					]
 				},
@@ -1698,15 +1744,15 @@
 						{ "type": "null" }
 					]
 				},
-				"noMisplacedAssertion": {
-					"description": "Checks that the assertion function, for example expect, is placed inside an it() function call.",
+				"noLabelWithoutControl": {
+					"description": "Enforce that a label element or component has a text label and an associated input.",
 					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "$ref": "#/definitions/NoLabelWithoutControlConfiguration" },
 						{ "type": "null" }
 					]
 				},
-				"noNodejsModules": {
-					"description": "Forbid the use of Node.js builtin modules.",
+				"noMisplacedAssertion": {
+					"description": "Checks that the assertion function, for example expect, is placed inside an it() function call.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
@@ -1775,6 +1821,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noUnusedFunctionParameters": {
+					"description": "Disallow unused function parameters.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleFixConfiguration_for_Null" },
+						{ "type": "null" }
+					]
+				},
 				"noUselessStringConcat": {
 					"description": "Disallow unnecessary concatenation of string or template literals.",
 					"anyOf": [
@@ -1807,15 +1860,15 @@
 						{ "type": "null" }
 					]
 				},
-				"useArrayLiterals": {
-					"description": "Disallow Array constructors.",
+				"useConsistentBuiltinInstantiation": {
+					"description": "Enforce the use of new for all builtins, except String, Number, Boolean, Symbol and BigInt.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleFixConfiguration_for_Null" },
 						{ "type": "null" }
 					]
 				},
-				"useConsistentBuiltinInstantiation": {
-					"description": "Enforce the use of new for all builtins, except String, Number, Boolean, Symbol and BigInt.",
+				"useDateNow": {
+					"description": "Use Date.now() to get the number of milliseconds since the Unix Epoch.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleFixConfiguration_for_Null" },
 						{ "type": "null" }
@@ -2218,7 +2271,7 @@
 		},
 		"RulePlainConfiguration": {
 			"type": "string",
-			"enum": ["warn", "error", "off"]
+			"enum": ["warn", "error", "info", "off"]
 		},
 		"RuleWithComplexityOptions": {
 			"type": "object",
@@ -2368,6 +2421,21 @@
 				"options": {
 					"description": "Rule's options",
 					"allOf": [{ "$ref": "#/definitions/HooksOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
+		"RuleWithNoLabelWithoutControlOptions": {
+			"type": "object",
+			"required": ["level", "options"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/NoLabelWithoutControlOptions" }]
 				}
 			},
 			"additionalProperties": false

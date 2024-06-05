@@ -9,7 +9,9 @@ use crate::commands::MigrateSubCommand;
 use crate::diagnostics::ReportDiagnostic;
 use crate::execute::migrate::MigratePayload;
 use crate::execute::traverse::traverse;
+use crate::reporter::github::{GithubReporter, GithubReporterVisitor};
 use crate::reporter::json::{JsonReporter, JsonReporterVisitor};
+use crate::reporter::junit::{JunitReporter, JunitReporterVisitor};
 use crate::reporter::summary::{SummaryReporter, SummaryReporterVisitor};
 use crate::reporter::terminal::{ConsoleReporter, ConsoleReporterVisitor};
 use crate::{CliDiagnostic, CliSession, DiagnosticsPayload, Reporter};
@@ -195,6 +197,11 @@ pub enum ReportMode {
     Terminal { with_summary: bool },
     /// Reports information in JSON format
     Json { pretty: bool },
+    /// Reports information for GitHub
+    GitHub,
+    /// JUnit output
+    /// Ref: https://github.com/testmoapp/junitxml?tab=readme-ov-file#basic-junit-xml-structure
+    Junit,
 }
 
 impl Default for ReportMode {
@@ -214,6 +221,8 @@ impl From<CliReporter> for ReportMode {
             CliReporter::Summary => Self::Terminal { with_summary: true },
             CliReporter::Json => Self::Json { pretty: false },
             CliReporter::JsonPretty => Self::Json { pretty: true },
+            CliReporter::GitHub => Self::GitHub,
+            CliReporter::Junit => Self::Junit,
         }
     }
 }
@@ -285,13 +294,6 @@ impl Execution {
 
     pub(crate) const fn is_ci(&self) -> bool {
         matches!(self.traversal_mode, TraversalMode::CI { .. })
-    }
-
-    pub(crate) const fn is_ci_github(&self) -> bool {
-        if let TraversalMode::CI { environment } = &self.traversal_mode {
-            return matches!(environment, Some(ExecutionEnvironment::GitHub));
-        }
-        false
     }
 
     pub(crate) const fn is_check(&self) -> bool {
@@ -397,7 +399,6 @@ pub fn execute_mode(
         let errors = summary_result.errors;
         let skipped = summary_result.skipped;
         let processed = summary_result.changed + summary_result.unchanged;
-
         let should_exit_on_warnings = summary_result.warnings > 0 && cli_options.error_on_warnings;
 
         match execution.report_mode {
@@ -465,6 +466,29 @@ pub fn execute_mode(
                         {buffer}
                     });
                 }
+            }
+            ReportMode::GitHub => {
+                let reporter = GithubReporter {
+                    diagnostics_payload: DiagnosticsPayload {
+                        verbose: cli_options.verbose,
+                        diagnostic_level: cli_options.diagnostic_level,
+                        diagnostics,
+                    },
+                    execution: execution.clone(),
+                };
+                reporter.write(&mut GithubReporterVisitor(console))?;
+            }
+            ReportMode::Junit => {
+                let reporter = JunitReporter {
+                    summary: summary_result,
+                    diagnostics_payload: DiagnosticsPayload {
+                        verbose: cli_options.verbose,
+                        diagnostic_level: cli_options.diagnostic_level,
+                        diagnostics,
+                    },
+                    execution: execution.clone(),
+                };
+                reporter.write(&mut JunitReporterVisitor::new(console))?;
             }
         }
 

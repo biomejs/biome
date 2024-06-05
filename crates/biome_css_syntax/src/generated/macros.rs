@@ -60,6 +60,19 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::CssComplexSelector::new_unchecked(node) };
                     $body
                 }
+                $crate::CssSyntaxKind::CSS_COMPOSES_IMPORT_SPECIFIER => {
+                    let $pattern =
+                        unsafe { $crate::CssComposesImportSpecifier::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::CSS_COMPOSES_PROPERTY => {
+                    let $pattern = unsafe { $crate::CssComposesProperty::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::CSS_COMPOSES_PROPERTY_VALUE => {
+                    let $pattern = unsafe { $crate::CssComposesPropertyValue::new_unchecked(node) };
+                    $body
+                }
                 $crate::CssSyntaxKind::CSS_COMPOUND_SELECTOR => {
                     let $pattern = unsafe { $crate::CssCompoundSelector::new_unchecked(node) };
                     $body
@@ -244,6 +257,19 @@ macro_rules! map_syntax_node {
                 $crate::CssSyntaxKind::CSS_KEYFRAMES_PERCENTAGE_SELECTOR => {
                     let $pattern =
                         unsafe { $crate::CssKeyframesPercentageSelector::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::CSS_KEYFRAMES_SCOPE_FUNCTION => {
+                    let $pattern =
+                        unsafe { $crate::CssKeyframesScopeFunction::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::CSS_KEYFRAMES_SCOPE_PREFIX => {
+                    let $pattern = unsafe { $crate::CssKeyframesScopePrefix::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::CSS_KEYFRAMES_SCOPED_NAME => {
+                    let $pattern = unsafe { $crate::CssKeyframesScopedName::new_unchecked(node) };
                     $body
                 }
                 $crate::CssSyntaxKind::CSS_LAYER_AT_RULE => {
@@ -593,6 +619,35 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::CssUrlValueRaw::new_unchecked(node) };
                     $body
                 }
+                $crate::CssSyntaxKind::CSS_VALUE_AT_RULE => {
+                    let $pattern = unsafe { $crate::CssValueAtRule::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::CSS_VALUE_AT_RULE_DECLARATION_CLAUSE => {
+                    let $pattern =
+                        unsafe { $crate::CssValueAtRuleDeclarationClause::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::CSS_VALUE_AT_RULE_GENERIC_PROPERTY => {
+                    let $pattern =
+                        unsafe { $crate::CssValueAtRuleGenericProperty::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::CSS_VALUE_AT_RULE_IMPORT_CLAUSE => {
+                    let $pattern =
+                        unsafe { $crate::CssValueAtRuleImportClause::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::CSS_VALUE_AT_RULE_IMPORT_SPECIFIER => {
+                    let $pattern =
+                        unsafe { $crate::CssValueAtRuleImportSpecifier::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::CSS_VALUE_AT_RULE_NAMED_IMPORT_SPECIFIER => {
+                    let $pattern =
+                        unsafe { $crate::CssValueAtRuleNamedImportSpecifier::new_unchecked(node) };
+                    $body
+                }
                 $crate::CssSyntaxKind::CSS_BOGUS => {
                     let $pattern = unsafe { $crate::CssBogus::new_unchecked(node) };
                     $body
@@ -628,6 +683,10 @@ macro_rules! map_syntax_node {
                 }
                 $crate::CssSyntaxKind::CSS_BOGUS_KEYFRAMES_ITEM => {
                     let $pattern = unsafe { $crate::CssBogusKeyframesItem::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::CSS_BOGUS_KEYFRAMES_NAME => {
+                    let $pattern = unsafe { $crate::CssBogusKeyframesName::new_unchecked(node) };
                     $body
                 }
                 $crate::CssSyntaxKind::CSS_BOGUS_LAYER => {
@@ -683,8 +742,17 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::CssBogusUrlModifier::new_unchecked(node) };
                     $body
                 }
+                $crate::CssSyntaxKind::CSS_VALUE_AT_RULE_GENERIC_VALUE => {
+                    let $pattern =
+                        unsafe { $crate::CssValueAtRuleGenericValue::new_unchecked(node) };
+                    $body
+                }
                 $crate::CssSyntaxKind::CSS_COMPONENT_VALUE_LIST => {
                     let $pattern = unsafe { $crate::CssComponentValueList::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::CSS_COMPOSES_CLASS_LIST => {
+                    let $pattern = unsafe { $crate::CssComposesClassList::new_unchecked(node) };
                     $body
                 }
                 $crate::CssSyntaxKind::CSS_COMPOUND_SELECTOR_LIST => {
@@ -785,6 +853,16 @@ macro_rules! map_syntax_node {
                 }
                 $crate::CssSyntaxKind::CSS_URL_MODIFIER_LIST => {
                     let $pattern = unsafe { $crate::CssUrlModifierList::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::CSS_VALUE_AT_RULE_IMPORT_SPECIFIER_LIST => {
+                    let $pattern =
+                        unsafe { $crate::CssValueAtRuleImportSpecifierList::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::CSS_VALUE_AT_RULE_PROPERTY_LIST => {
+                    let $pattern =
+                        unsafe { $crate::CssValueAtRulePropertyList::new_unchecked(node) };
                     $body
                 }
                 _ => unreachable!(),

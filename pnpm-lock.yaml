@@ -6,11 +6,7 @@ settings:
 
 importers:
 
-  .:
-    devDependencies:
-      '@biomejs/shared':
-        specifier: workspace:^
-        version: link:shared
+  .: {}
 
   packages/@biomejs/backend-jsonrpc:
     optionalDependencies:
@@ -137,8 +133,6 @@ importers:
       typescript:
         specifier: 5.4.5
         version: 5.4.5
-
-  shared: {}
 
 packages:
 

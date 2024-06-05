@@ -1,4 +1,5 @@
 use crate::parser::CssParser;
+use crate::syntax::css_modules::{local_or_global_not_allowed, CSS_MODULES_SCOPE_SET};
 use crate::syntax::parse_error::expected_selector;
 use crate::syntax::selector::{
     eat_or_recover_selector_function_close_token, parse_selector,
@@ -6,28 +7,58 @@ use crate::syntax::selector::{
 };
 use biome_css_syntax::CssSyntaxKind::CSS_PSEUDO_CLASS_FUNCTION_SELECTOR;
 use biome_css_syntax::CssSyntaxKind::*;
-use biome_css_syntax::{CssSyntaxKind, T};
+use biome_css_syntax::T;
 use biome_parser::parsed_syntax::ParsedSyntax;
 use biome_parser::parsed_syntax::ParsedSyntax::{Absent, Present};
-use biome_parser::{token_set, Parser, TokenSet};
+use biome_parser::Parser;
 
-const PSEUDO_CLASS_FUNCTION_SELECTOR_SET: TokenSet<CssSyntaxKind> =
-    token_set![T![global], T![local]];
-
+/// Checks if the current parser position is at a pseudo-class function selector for CSS Modules.
+///
+/// This function determines if the parser is currently positioned at the start of a `:local` or `:global`
+/// pseudo-class function selector, which is part of the CSS Modules syntax.
 #[inline]
 pub(crate) fn is_at_pseudo_class_function_selector(p: &mut CssParser) -> bool {
-    p.at_ts(PSEUDO_CLASS_FUNCTION_SELECTOR_SET) && p.nth_at(1, T!['('])
+    p.at_ts(CSS_MODULES_SCOPE_SET) && p.nth_at(1, T!['('])
 }
 
+/// Parses a pseudo-class function selector for CSS Modules.
+///
+/// This function parses a pseudo-class function selector, specifically `:local` or `:global`, in CSS Modules.
+/// If the `css_modules` option is not enabled, it generates a diagnostic error and skips the selector.
+/// ```css
+/// :local(.className) {
+///     color: red;
+/// }
+/// :global(.globalClass) .nestedClass {
+///     padding: 10px;
+/// }
+/// :local(.className) > :global(.globalClass) {
+///     margin: 0;
+/// }
+/// ```
 #[inline]
 pub(crate) fn parse_pseudo_class_function_selector(p: &mut CssParser) -> ParsedSyntax {
     if !is_at_pseudo_class_function_selector(p) {
         return Absent;
     }
 
+    if p.options().is_css_modules_disabled() {
+        // :local and :global are not standard CSS features
+        // provide a hint on how to enable parsing of these pseudo-classes
+        p.error(local_or_global_not_allowed(p, p.cur_range()));
+
+        // Skip the entire pseudo-class function selector
+        // Skip until the next closing parenthesis
+        while !p.eat(T![')']) {
+            p.bump_any();
+        }
+
+        return Absent;
+    }
+
     let m = p.start();
 
-    p.bump_ts(PSEUDO_CLASS_FUNCTION_SELECTOR_SET);
+    p.bump_ts(CSS_MODULES_SCOPE_SET);
     p.bump(T!['(']);
 
     let kind = match parse_selector(p) {

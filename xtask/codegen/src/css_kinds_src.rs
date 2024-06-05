@@ -237,6 +237,9 @@ pub const CSS_KINDS_SRC: KindsSrc = KindsSrc {
         "domain",
         "media-document",
         "regexp",
+        "value",
+        "as",
+        "composes",
         //
         "font-face",
         // Don't add to the end of this list, add new keywords above the "HERE"
@@ -296,6 +299,10 @@ pub const CSS_KINDS_SRC: KindsSrc = KindsSrc {
         "CSS_GENERIC_COMPONENT_VALUE_LIST",
         "CSS_GENERIC_DELIMITER",
         "CSS_GENERIC_PROPERTY",
+        "CSS_COMPOSES_PROPERTY",
+        "CSS_COMPOSES_PROPERTY_VALUE",
+        "CSS_COMPOSES_IMPORT_SPECIFIER",
+        "CSS_COMPOSES_CLASS_LIST",
         "CSS_UNKNOWN_PROPERTY_VALUE",
         // Properties
         "CSS_PARAMETER_LIST",
@@ -407,6 +414,9 @@ pub const CSS_KINDS_SRC: KindsSrc = KindsSrc {
         "CSS_QUERY_FEATURE_RANGE_INTERVAL",
         "CSS_QUERY_FEATURE_RANGE_COMPARISON",
         "CSS_KEYFRAMES_BLOCK",
+        "CSS_KEYFRAMES_SCOPED_NAME",
+        "CSS_KEYFRAMES_SCOPE_FUNCTION",
+        "CSS_KEYFRAMES_SCOPE_PREFIX",
         "CSS_KEYFRAMES_ITEM_LIST",
         "CSS_KEYFRAMES_ITEM",
         "CSS_KEYFRAMES_IDENT_SELECTOR",
@@ -446,6 +456,15 @@ pub const CSS_KINDS_SRC: KindsSrc = KindsSrc {
         "CSS_DOCUMENT_AT_RULE",
         "CSS_DOCUMENT_MATCHER_LIST",
         "CSS_DOCUMENT_CUSTOM_MATCHER",
+        "CSS_VALUE_AT_RULE",
+        "CSS_VALUE_AT_RULE_PROPERTY_LIST",
+        "CSS_VALUE_AT_RULE_IMPORT_SPECIFIER_LIST",
+        "CSS_VALUE_AT_RULE_IMPORT_CLAUSE",
+        "CSS_VALUE_AT_RULE_IMPORT_SPECIFIER",
+        "CSS_VALUE_AT_RULE_NAMED_IMPORT_SPECIFIER",
+        "CSS_VALUE_AT_RULE_DECLARATION_CLAUSE",
+        "CSS_VALUE_AT_RULE_GENERIC_PROPERTY",
+        "CSS_VALUE_AT_RULE_GENERIC_VALUE",
         // Bogus nodes
         "CSS_BOGUS",
         "CSS_BOGUS_BLOCK",
@@ -470,5 +489,6 @@ pub const CSS_KINDS_SRC: KindsSrc = KindsSrc {
         "CSS_BOGUS_FONT_FEATURE_VALUES_ITEM",
         "CSS_BOGUS_FONT_FAMILY_NAME",
         "CSS_BOGUS_CUSTOM_IDENTIFIER",
+        "CSS_BOGUS_KEYFRAMES_NAME",
     ],
 };

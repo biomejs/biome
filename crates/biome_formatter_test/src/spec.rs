@@ -13,6 +13,7 @@ use biome_rowan::{TextRange, TextSize};
 use biome_service::settings::{ServiceLanguage, Settings};
 use biome_service::workspace::{
     DocumentFileSource, FeaturesBuilder, RegisterProjectFolderParams, SupportsFeatureParams,
+    UpdateSettingsParams,
 };
 use biome_service::App;
 use std::ops::Range;
@@ -30,7 +31,11 @@ pub struct SpecTestFile<'a> {
 }
 
 impl<'a> SpecTestFile<'a> {
-    pub fn try_from_file(input_file: &'a str, root_path: &'a Path) -> Option<SpecTestFile<'a>> {
+    pub fn try_from_file(
+        input_file: &'a str,
+        root_path: &'a Path,
+        settings: Option<UpdateSettingsParams>,
+    ) -> Option<SpecTestFile<'a>> {
         let mut console = EnvConsole::default();
         let app = App::with_console(&mut console);
         let file_path = &input_file;
@@ -48,6 +53,10 @@ impl<'a> SpecTestFile<'a> {
                 path: None,
             })
             .unwrap();
+
+        if let Some(settings) = settings {
+            app.workspace.update_settings(settings).unwrap();
+        }
         let mut input_file = BiomePath::new(file_path);
         let can_format = app
             .workspace

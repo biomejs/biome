@@ -32,6 +32,10 @@ pub struct CssParser {
     /// Allow comments to appear on incorrect lines in `.css` files
     #[partial(bpaf(hide))]
     pub allow_wrong_line_comments: bool,
+
+    /// Enables parsing of CSS Modules specific features.
+    #[partial(bpaf(hide))]
+    pub css_modules: bool,
 }
 
 /// Options that changes how the CSS formatter behaves
@@ -87,4 +91,12 @@ pub struct CssLinter {
     /// Control the linter for CSS (and its super languages) files.
     #[partial(bpaf(long("css-linter-enabled"), argument("true|false"), optional))]
     pub enabled: bool,
+}
+
+impl PartialCssLinter {
+    pub fn get_linter_configuration(&self) -> CssLinter {
+        CssLinter {
+            enabled: self.enabled.unwrap_or_default(),
+        }
+    }
 }

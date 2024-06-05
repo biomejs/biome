@@ -25,22 +25,22 @@ declare_rule! {
     ///
     /// ### Invalid
     ///
-    /// ```js,expect_diagnostic
+    /// ```js,expect_diagnostic,ignore
     /// import "./foo";
     /// ```
-    /// ```js,expect_diagnostic
+    /// ```js,expect_diagnostic,ignore
     /// import "./bar/";
     /// ```
-    /// ```js,expect_diagnostic
+    /// ```js,expect_diagnostic,ignore
     /// import "../";
     /// ```
-    /// ```js,expect_diagnostic
+    /// ```js,expect_diagnostic,ignore
     /// import "../.";
     /// ```
-    /// ```js,expect_diagnostic
+    /// ```js,expect_diagnostic,ignore
     /// import("./foo");
     /// ```
-    /// ```js,expect_diagnostic
+    /// ```js,expect_diagnostic,ignore
     /// require("./foo");
     /// ```
     ///
@@ -71,7 +71,7 @@ declare_rule! {
     /// When applying the suggested fix, make sure to verify that the file type is correct.
     ///
     pub UseImportExtensions {
-        version: "next",
+        version: "1.8.0",
         name: "useImportExtensions",
         language: "js",
         recommended: false,

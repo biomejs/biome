@@ -1,0 +1,2 @@
+@value colors: "./colors.css";
+@value common-gradient: transparent 75%, var(--ring-line-color) 75%, currentColor 79%;

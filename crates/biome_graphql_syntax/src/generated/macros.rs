@@ -67,11 +67,6 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::GraphqlEnumTypeExtension::new_unchecked(node) };
                     $body
                 }
-                $crate::GraphqlSyntaxKind::GRAPHQL_ENUM_TYPE_EXTENSION_WITH_VALUES => {
-                    let $pattern =
-                        unsafe { $crate::GraphqlEnumTypeExtensionWithValues::new_unchecked(node) };
-                    $body
-                }
                 $crate::GraphqlSyntaxKind::GRAPHQL_ENUM_VALUE => {
                     let $pattern = unsafe { $crate::GraphqlEnumValue::new_unchecked(node) };
                     $body
@@ -158,18 +153,6 @@ macro_rules! map_syntax_node {
                 $crate::GraphqlSyntaxKind::GRAPHQL_INTERFACE_TYPE_EXTENSION => {
                     let $pattern =
                         unsafe { $crate::GraphqlInterfaceTypeExtension::new_unchecked(node) };
-                    $body
-                }
-                $crate::GraphqlSyntaxKind::GRAPHQL_INTERFACE_TYPE_EXTENSION_WITH_DIRECTIVES => {
-                    let $pattern = unsafe {
-                        $crate::GraphqlInterfaceTypeExtensionWithDirectives::new_unchecked(node)
-                    };
-                    $body
-                }
-                $crate::GraphqlSyntaxKind::GRAPHQL_INTERFACE_TYPE_EXTENSION_WITH_FIELDS => {
-                    let $pattern = unsafe {
-                        $crate::GraphqlInterfaceTypeExtensionWithFields::new_unchecked(node)
-                    };
                     $body
                 }
                 $crate::GraphqlSyntaxKind::GRAPHQL_LIST_TYPE => {
@@ -279,12 +262,6 @@ macro_rules! map_syntax_node {
                 $crate::GraphqlSyntaxKind::GRAPHQL_UNION_TYPE_EXTENSION => {
                     let $pattern =
                         unsafe { $crate::GraphqlUnionTypeExtension::new_unchecked(node) };
-                    $body
-                }
-                $crate::GraphqlSyntaxKind::GRAPHQL_UNION_TYPE_EXTENSION_WITH_MEMBERS => {
-                    let $pattern = unsafe {
-                        $crate::GraphqlUnionTypeExtensionWithMembers::new_unchecked(node)
-                    };
                     $body
                 }
                 $crate::GraphqlSyntaxKind::GRAPHQL_VARIABLE => {

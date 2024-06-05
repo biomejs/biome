@@ -140,8 +140,13 @@ pub fn normalize_string(
 ) -> Cow<str> {
     let alternate_quote = preferred_quote.other();
 
-    // A string should be manipulated only if its raw content contains backslash or quotes
-    if !raw_content.contains(['\\', preferred_quote.as_char(), alternate_quote.as_char()]) {
+    // A string should be manipulated only if its raw content contains backslash, quotes or line terminators
+    if !raw_content.contains([
+        '\\',
+        '\r',
+        preferred_quote.as_char(),
+        alternate_quote.as_char(),
+    ]) {
         return Cow::Borrowed(raw_content);
     }
 
@@ -262,5 +267,22 @@ pub fn normalize_string(
         } else {
             Cow::Owned(reduced_string)
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn normalize_newline() {
+        assert_eq!(
+            normalize_string("a\nb", Quote::Double, true),
+            Cow::Borrowed("a\nb")
+        );
+        assert_eq!(
+            normalize_string("a\r\nb", Quote::Double, false),
+            Cow::Borrowed("a\nb")
+        );
     }
 }
