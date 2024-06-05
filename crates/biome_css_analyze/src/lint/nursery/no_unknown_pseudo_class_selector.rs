@@ -58,7 +58,7 @@ declare_rule! {
         version: "1.8.0",
         name: "noUnknownPseudoClassSelector",
         language: "css",
-        recommended: false,
+        recommended: true,
         sources: &[RuleSource::Stylelint("selector-pseudo-class-no-unknown")],
     }
 }
