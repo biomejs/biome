@@ -11,7 +11,7 @@ use biome_css_syntax::{
     CssPseudoClassFunctionSelector, CssPseudoClassFunctionSelectorList,
     CssPseudoClassFunctionValueList, CssPseudoClassIdentifier, CssPseudoElementSelector,
 };
-use biome_rowan::{declare_node_union, AstNode, SyntaxNodeCast, TextRange};
+use biome_rowan::{declare_node_union, AstNode, TextRange};
 
 declare_rule! {
     /// Disallow unknown pseudo-class selectors.
