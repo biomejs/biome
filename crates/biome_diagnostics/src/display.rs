@@ -1,5 +1,5 @@
 use std::path::Path;
-use std::{io, iter};
+use std::{env, io, iter};
 
 use biome_console::{fmt, markup, HorizontalLine, Markup, MarkupBuf, MarkupElement, MarkupNode};
 use biome_text_edit::TextEdit;
@@ -91,15 +91,21 @@ impl<D: Diagnostic + ?Sized> fmt::Display for PrintHeader<'_, D> {
             _ => None,
         };
 
+        let is_vscode = env::var("TERM_PROGRAM").unwrap_or_default() == "vscode";
+
         if let Some(name) = file_name {
-            let path_name = Path::new(name);
-            if path_name.is_absolute() {
-                let link = format!("file://{}", name);
-                fmt.write_markup(markup! {
-                    <Hyperlink href={link}>{name}</Hyperlink>
-                })?;
-            } else {
+            if is_vscode {
                 fmt.write_str(name)?;
+            } else {
+                let path_name = Path::new(name);
+                if path_name.is_absolute() {
+                    let link = format!("file://{}", name);
+                    fmt.write_markup(markup! {
+                        <Hyperlink href={link}>{name}</Hyperlink>
+                    })?;
+                } else {
+                    fmt.write_str(name)?;
+                }
             }
 
             // Print the line and column position if the location has a span and source code
