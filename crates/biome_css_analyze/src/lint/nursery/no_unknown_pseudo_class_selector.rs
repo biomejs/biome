@@ -80,7 +80,7 @@ declare_node_union! {
 fn is_webkit_pseudo_class(node: &AnyPseudoLike) -> bool {
     let mut prev_element = node.syntax().parent().and_then(|p| p.prev_sibling());
     while let Some(prev) = &prev_element {
-        let maybe_selector: Option<CssPseudoElementSelector> = prev.clone().cast();
+        let maybe_selector = CssPseudoElementSelector::cast_ref(prev);
         if let Some(selector) = maybe_selector.as_ref() {
             return WEBKIT_SCROLLBAR_PSEUDO_ELEMENTS.contains(&selector.text().trim_matches(':'));
         };
