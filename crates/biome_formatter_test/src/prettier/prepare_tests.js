@@ -8,7 +8,7 @@ if (process.argv.length < 3) {
 }
 
 const defaultConfig = {
-	trailingComma: 'all',
+	trailingCommas: 'all',
 	tabWidth: 2,
 	printWidth: 80,
 	singleQuote: false,

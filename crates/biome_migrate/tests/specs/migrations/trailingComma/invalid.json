@@ -1,7 +1,7 @@
 {
 	"javascript": {
 		"formatter": {
-			"trailingComma": "all"
+			"trailingCommas": "all"
 		}
 	},
 	"overrides": [
@@ -9,7 +9,7 @@
 			"include": ["scripts/**"],
 			"javascript": {
 				"formatter": {
-					"trailingComma": "es5"
+					"trailingCommas": "es5"
 				}
 			}
 		}
