@@ -521,7 +521,7 @@ mod tests {
   "semi": true,
   "singleQuote": true,
   "tabWidth": 2,
-  "trailingCommas": "es5",
+  "trailingComma": "es5",
   "useTabs": true,
   "jsxSingleQuote": true
 }

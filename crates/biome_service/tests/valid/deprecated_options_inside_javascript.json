@@ -7,7 +7,7 @@
 		"formatter": {
 			"enabled": true,
 			"indentSize": 2,
-			"trailingCommas": "all"
+			"trailingComma": "all"
 		}
 	}
 }
