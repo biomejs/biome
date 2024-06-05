@@ -20,6 +20,12 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29 # v4.1.6
+      
+      - name: Warm up wasm-pack cache
+        uses: actions/cache/restore@v3
+        with:
+          path: ./target
+          key: wasm-pack-cache
 
       - name: Install wasm-pack
         run: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
@@ -41,6 +47,12 @@ jobs:
         run: npx pkg-pr-new publish
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Save wasm-pack cache
+        uses: actions/cache/save@v3
+        with:
+          path: ./target
+          key: wasm-pack-cache
 
   repository-dispatch:
     name: Repository dispatch
