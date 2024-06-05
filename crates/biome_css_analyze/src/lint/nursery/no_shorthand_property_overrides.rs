@@ -4,7 +4,7 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_css_syntax::{AnyCssDeclarationName, CssGenericProperty, CssLanguage, CssSyntaxKind};
-use biome_rowan::{AstNode, Language, SyntaxNode, SyntaxNodeCast, TextRange, WalkEvent};
+use biome_rowan::{AstNode, Language, SyntaxNode, TextRange, WalkEvent};
 
 use crate::utils::{get_longhand_sub_properties, get_reset_to_initial_properties, vender_prefix};
 
@@ -102,9 +102,7 @@ impl Visitor for NoDeclarationBlockShorthandPropertyOverridesVisitor {
                     self.prior_props_in_block.clear();
                 }
                 CssSyntaxKind::CSS_GENERIC_PROPERTY => {
-                    if let Some(prop_node) = node
-                        .clone()
-                        .cast::<CssGenericProperty>()
+                    if let Some(prop_node) = CssGenericProperty::cast_ref(node)
                         .and_then(|property_node| property_node.name().ok())
                     {
                         let prop = prop_node.text();
