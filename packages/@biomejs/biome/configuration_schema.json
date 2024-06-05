@@ -2140,7 +2140,7 @@
 			"required": ["paths"],
 			"properties": {
 				"paths": {
-					"description": "A list of names that should trigger the rule",
+					"description": "A list of imports that should trigger the rule",
 					"type": "object",
 					"additionalProperties": {
 						"$ref": "#/definitions/RestrictedModuleConfig"

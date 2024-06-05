@@ -5,8 +5,8 @@ expression: invalid.js
 # Input
 ```jsx
 import eslint from 'eslint';
-import ComponentA from 'antd/componentA';
 const l = require('lodash');
+import ComponentA from 'antd/componentA';
 
 ```
 
@@ -18,35 +18,35 @@ invalid.js:1:20 lint/nursery/noRestrictedImports ━━━━━━━━━━�
   
   > 1 │ import eslint from 'eslint';
       │                    ^^^^^^^^
-    2 │ import ComponentA from 'antd/componentA';
-    3 │ const l = require('lodash');
+    2 │ const l = require('lodash');
+    3 │ import ComponentA from 'antd/componentA';
   
 
 ```
 
 ```
-invalid.js:2:24 lint/nursery/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:2:19 lint/nursery/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! It's not recommended to use any submodule of antd
+  ! It's not recommended to use lodash
   
     1 │ import eslint from 'eslint';
-  > 2 │ import ComponentA from 'antd/componentA';
-      │                        ^^^^^^^^^^^^^^^^^
-    3 │ const l = require('lodash');
+  > 2 │ const l = require('lodash');
+      │                   ^^^^^^^^
+    3 │ import ComponentA from 'antd/componentA';
     4 │ 
   
 
 ```
 
 ```
-invalid.js:3:19 lint/nursery/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:3:24 lint/nursery/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! It's not recommended to use lodash
+  ! It's not recommended to use any submodule of antd
   
     1 │ import eslint from 'eslint';
-    2 │ import ComponentA from 'antd/componentA';
-  > 3 │ const l = require('lodash');
-      │                   ^^^^^^^^
+    2 │ const l = require('lodash');
+  > 3 │ import ComponentA from 'antd/componentA';
+      │                        ^^^^^^^^^^^^^^^^^
     4 │ 
   
 
