@@ -233,34 +233,40 @@ pub fn graphql_enum_type_extension(
     enum_token: SyntaxToken,
     name: GraphqlName,
     directives: GraphqlDirectiveList,
-) -> GraphqlEnumTypeExtension {
-    GraphqlEnumTypeExtension::unwrap_cast(SyntaxNode::new_detached(
-        GraphqlSyntaxKind::GRAPHQL_ENUM_TYPE_EXTENSION,
-        [
-            Some(SyntaxElement::Token(extend_token)),
-            Some(SyntaxElement::Token(enum_token)),
-            Some(SyntaxElement::Node(name.into_syntax())),
-            Some(SyntaxElement::Node(directives.into_syntax())),
-        ],
-    ))
+) -> GraphqlEnumTypeExtensionBuilder {
+    GraphqlEnumTypeExtensionBuilder {
+        extend_token,
+        enum_token,
+        name,
+        directives,
+        enum_values: None,
+    }
 }
-pub fn graphql_enum_type_extension_with_values(
+pub struct GraphqlEnumTypeExtensionBuilder {
     extend_token: SyntaxToken,
     enum_token: SyntaxToken,
     name: GraphqlName,
     directives: GraphqlDirectiveList,
-    enum_values: GraphqlEnumValuesDefinition,
-) -> GraphqlEnumTypeExtensionWithValues {
-    GraphqlEnumTypeExtensionWithValues::unwrap_cast(SyntaxNode::new_detached(
-        GraphqlSyntaxKind::GRAPHQL_ENUM_TYPE_EXTENSION_WITH_VALUES,
-        [
-            Some(SyntaxElement::Token(extend_token)),
-            Some(SyntaxElement::Token(enum_token)),
-            Some(SyntaxElement::Node(name.into_syntax())),
-            Some(SyntaxElement::Node(directives.into_syntax())),
-            Some(SyntaxElement::Node(enum_values.into_syntax())),
-        ],
-    ))
+    enum_values: Option<GraphqlEnumValuesDefinition>,
+}
+impl GraphqlEnumTypeExtensionBuilder {
+    pub fn with_enum_values(mut self, enum_values: GraphqlEnumValuesDefinition) -> Self {
+        self.enum_values = Some(enum_values);
+        self
+    }
+    pub fn build(self) -> GraphqlEnumTypeExtension {
+        GraphqlEnumTypeExtension::unwrap_cast(SyntaxNode::new_detached(
+            GraphqlSyntaxKind::GRAPHQL_ENUM_TYPE_EXTENSION,
+            [
+                Some(SyntaxElement::Token(self.extend_token)),
+                Some(SyntaxElement::Token(self.enum_token)),
+                Some(SyntaxElement::Node(self.name.into_syntax())),
+                Some(SyntaxElement::Node(self.directives.into_syntax())),
+                self.enum_values
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+            ],
+        ))
+    }
 }
 pub fn graphql_enum_value(graphql_name: GraphqlName) -> GraphqlEnumValue {
     GraphqlEnumValue::unwrap_cast(SyntaxNode::new_detached(

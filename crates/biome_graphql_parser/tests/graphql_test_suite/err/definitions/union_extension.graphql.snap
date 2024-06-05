@@ -94,7 +94,7 @@ GraphqlRoot {
 ```
 union_extension.graphql:3:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Expected at least one directive or union member types
+  × Expected at least one directive or a set union member types
   
     1 │ extend union SearchResult
     2 │ 

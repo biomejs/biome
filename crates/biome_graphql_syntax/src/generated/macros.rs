@@ -67,11 +67,6 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::GraphqlEnumTypeExtension::new_unchecked(node) };
                     $body
                 }
-                $crate::GraphqlSyntaxKind::GRAPHQL_ENUM_TYPE_EXTENSION_WITH_VALUES => {
-                    let $pattern =
-                        unsafe { $crate::GraphqlEnumTypeExtensionWithValues::new_unchecked(node) };
-                    $body
-                }
                 $crate::GraphqlSyntaxKind::GRAPHQL_ENUM_VALUE => {
                     let $pattern = unsafe { $crate::GraphqlEnumValue::new_unchecked(node) };
                     $body
