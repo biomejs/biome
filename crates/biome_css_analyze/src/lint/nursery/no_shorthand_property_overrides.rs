@@ -1,6 +1,6 @@
 use biome_analyze::{
     context::RuleContext, declare_rule, AddVisitor, Phases, QueryMatch, Queryable, Rule,
-    RuleDiagnostic, ServiceBag, Visitor, VisitorContext,
+    RuleDiagnostic, RuleSource, ServiceBag, Visitor, VisitorContext,
 };
 use biome_console::markup;
 use biome_css_syntax::{AnyCssDeclarationName, CssGenericProperty, CssLanguage, CssSyntaxKind};
@@ -73,6 +73,7 @@ declare_rule! {
         name: "noShorthandPropertyOverrides",
         language: "css",
         recommended: true,
+        sources: &[RuleSource::Stylelint("declaration-block-no-shorthand-property-overrides")],
     }
 }
 
