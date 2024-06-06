@@ -43,7 +43,7 @@ pub(crate) fn traverse(
             | TraversalMode::Lint { .. }
             | TraversalMode::Format { .. }
             | TraversalMode::CI { .. } => {
-                // The `--staged` or `--changed` flags are intentionally empty, so we ignore them.
+                // If `--staged` or `--changed` is specified, it's acceptable for them to be empty, so ignore it.
                 if !execution.is_vcs_targeted() {
                     match current_dir() {
                         Ok(current_dir) => inputs.push(current_dir.into_os_string()),
