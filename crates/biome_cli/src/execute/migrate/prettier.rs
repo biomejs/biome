@@ -5,7 +5,7 @@ use biome_deserialize::{json::deserialize_from_json_str, StringSet};
 use biome_deserialize_macros::Deserializable;
 use biome_diagnostics::{DiagnosticExt, PrintDiagnostic};
 use biome_formatter::{
-    AttributePosition, IndentWidth, LineEnding, LineWidth, ParseLineWidthError, QuoteStyle,
+    AttributePosition, IndentWidth, LineEnding, LineWidth, ParseFormatNumberError, QuoteStyle,
 };
 use biome_fs::{FileSystem, OpenOptions};
 use biome_js_formatter::context::{ArrowParentheses, QuoteProperties, Semicolons, TrailingCommas};
@@ -187,7 +187,7 @@ impl From<QuoteProps> for QuoteProperties {
 }
 
 impl TryFrom<PrettierConfiguration> for biome_configuration::PartialConfiguration {
-    type Error = ParseLineWidthError;
+    type Error = ParseFormatNumberError;
     fn try_from(value: PrettierConfiguration) -> Result<Self, Self::Error> {
         let mut result = biome_configuration::PartialConfiguration::default();
 
@@ -267,7 +267,7 @@ impl TryFrom<PrettierConfiguration> for biome_configuration::PartialConfiguratio
 }
 
 impl TryFrom<Override> for biome_configuration::OverridePattern {
-    type Error = ParseLineWidthError;
+    type Error = ParseFormatNumberError;
     fn try_from(Override { files, options }: Override) -> Result<Self, Self::Error> {
         let mut result = biome_configuration::OverridePattern {
             include: Some(StringSet::new(files.into_iter().collect())),

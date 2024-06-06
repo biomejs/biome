@@ -237,7 +237,7 @@ max_line_length = 80
         assert_eq!(formatter.indent_style, Some(PlainIndentStyle::Space));
         assert_eq!(formatter.indent_width.unwrap().value(), 4);
         assert_eq!(formatter.line_ending, Some(LineEnding::Crlf));
-        assert_eq!(formatter.line_width.map(|v| v.get()), Some(80));
+        assert_eq!(formatter.line_width.map(|v| v.value()), Some(80));
     }
 
     #[test]
