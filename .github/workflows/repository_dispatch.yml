@@ -5,9 +5,14 @@ on:
     branches:
       - main
 
+permissions:
+  contents: read
+  actions: write
+
 env:
   BIOME_WEBSITE_REPO: biomejs/website
   BIOME_PUSH_ON_MAIN_EVENT_TYPE: biome-push-on-main-event
+  WASM_PACK_CACHE_KEY: wasm-pack-cache
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -22,10 +27,13 @@ jobs:
         uses: actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29 # v4.1.6
 
       - name: Warm up wasm-pack cache
+        id: cache-restore
         uses: actions/cache/restore@v3
         with:
-          path: ./target
-          key: wasm-pack-cache
+          path: |
+            ./target
+            ./packages/@biomejs/wasm-web
+          key: ${{ env.WASM_PACK_CACHE_KEY }}
 
       - name: Install wasm-pack
         run: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
@@ -33,14 +41,26 @@ jobs:
       - name: Build WASM module for the web
         run: wasm-pack build --out-dir ../../packages/@biomejs/wasm-web --target web --profiling --scope biomejs crates/biome_wasm
 
-      - name: Save wasm-pack cache
+      # https://github.com/actions/cache/issues/342
+      - name: Clear old wasm-pack cache
+        if: ${{ steps.cache-restore.outputs.cache-hit }}
+        run: |
+          gh extension install actions/gh-actions-cache
+          gh actions-cache delete ${{ env.WASM_PACK_CACHE_KEY }} --confirm
+        env:
+          GH_TOKEN: ${{ github.token }}
+        continue-on-error: true
+
+      - name: Save new wasm-pack cache
         uses: actions/cache/save@v3
         with:
-          path: ./target
-          key: wasm-pack-cache
+          path: |
+            ./target
+            ./packages/@biomejs/wasm-web
+          key: ${{ env.WASM_PACK_CACHE_KEY }}
 
       - name: Install pnpm
-        uses: pnpm/action-setup@v4
+        run: corepack enable
 
       - name: Setup node
         uses: actions/setup-node@60edb5dd545a775178f52524783378180af0d1f8 # v4.0.2
@@ -48,9 +68,11 @@ jobs:
           node-version: 20
           cache: pnpm
 
-      - name: Update package.json name
+      - name: Update package.json
         working-directory: packages/@biomejs/wasm-web
-        run: npm pkg set name='@biomejs/wasm-web'
+        run: |
+          npm pkg set name='@biomejs/wasm-web'
+          npm pkg set version='${{ github.event.head_commit.id }}'
 
       - name: Publish
         working-directory: packages/@biomejs/wasm-web
