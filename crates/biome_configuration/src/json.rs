@@ -1,6 +1,6 @@
 use crate::PlainIndentStyle;
 use biome_deserialize_macros::{Deserializable, Merge, Partial};
-use biome_formatter::{LineEnding, LineWidth};
+use biome_formatter::{IndentWidth, LineEnding, LineWidth};
 use biome_json_formatter::context::TrailingCommas;
 use bpaf::Bpaf;
 use serde::{Deserialize, Serialize};
@@ -54,12 +54,12 @@ pub struct JsonFormatter {
 
     /// The size of the indentation applied to JSON (and its super languages) files. Default to 2.
     #[partial(bpaf(long("json-formatter-indent-width"), argument("NUMBER"), optional))]
-    pub indent_width: Option<u8>,
+    pub indent_width: Option<IndentWidth>,
 
     /// The size of the indentation applied to JSON (and its super languages) files. Default to 2.
     #[partial(bpaf(long("json-formatter-indent-size"), argument("NUMBER"), optional))]
     #[partial(deserializable(deprecated(use_instead = "json.formatter.indentWidth")))]
-    pub indent_size: Option<u8>,
+    pub indent_size: Option<IndentWidth>,
 
     /// The type of line ending applied to JSON (and its super languages) files.
     #[partial(bpaf(long("json-formatter-line-ending"), argument("lf|crlf|cr"), optional))]

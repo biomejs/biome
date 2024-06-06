@@ -11,6 +11,8 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 ## Unreleased
 
+### Analyzer
+
 ### CLI
 
 #### Bug fixes
@@ -18,11 +20,27 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 - Fix [#3069](https://github.com/biomejs/biome/issues/3069), prevent overwriting paths when using `--staged` or `--changed` options. Contributed by @unvalley
 - Fix the bug where whitespace after the & character in CSS nesting was incorrectly trimmed, ensuring proper targeting of child classes [#3061](https://github.com/biomejs/biome/issues/3061). Contributed by @denbezrukov
 
+
+### Configuration
+
+#### Bug fixes
+
+- Fix [#3067](https://github.com/biomejs/biome/issues/3067), by assigning the correct default value to `indentWidth`. Contributed by @ematipico
+
+### Editors
+
+### Formatter
+
+### JavaScript APIs
+
 ### Linter
 
 #### Bug fixes
 
 - The `no-empty-block` css lint rule now treats empty blocks containing comments as valid ones. Contributed by @Sec-ant
+
+
+### Parser
 
 ## 1.8.0 (2024-06-04)
 
@@ -305,8 +323,6 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 - Resolve deadlocks by narrowing the scope of locks. Contributed by @mechairoi
 - Fix [#2782](https://github.com/biomejs/biome/issues/2782) by computing the enabled rules by taking the override settings into consideration. Contributed by @ematipico
 - Fix [https://github.com/biomejs/biome/issues/2877] by correctly handling line terminators in JSX string. Contributed by @ah-yu
-
-### JavaScript APIs
 
 ### Linter
 

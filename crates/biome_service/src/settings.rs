@@ -496,7 +496,7 @@ impl From<CssConfiguration> for LanguageSettings<CssLanguage> {
 
         language_setting.formatter.enabled = Some(css.formatter.enabled);
         language_setting.formatter.line_width = Some(css.formatter.line_width);
-        language_setting.formatter.indent_width = Some(css.formatter.indent_width.into());
+        language_setting.formatter.indent_width = Some(css.formatter.indent_width);
         language_setting.formatter.indent_style = Some(css.formatter.indent_style.into());
         language_setting.formatter.quote_style = Some(css.formatter.quote_style);
         language_setting.linter.enabled = Some(css.linter.enabled);
@@ -1489,7 +1489,7 @@ pub fn to_format_settings(
         PlainIndentStyle::Tab => IndentStyle::Tab,
         PlainIndentStyle::Space => IndentStyle::Space,
     };
-    let indent_width = conf.indent_width.into();
+    let indent_width = conf.indent_width;
 
     Ok(FormatSettings {
         enabled: conf.enabled,
