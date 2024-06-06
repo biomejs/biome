@@ -28,7 +28,7 @@ jobs:
 
       - name: Warm up wasm-pack cache
         id: cache-restore
-        uses: actions/cache/restore@v3
+        uses: actions/cache/restore@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9 # v4.0.2
         with:
           path: |
             ./target
@@ -52,7 +52,7 @@ jobs:
         continue-on-error: true
 
       - name: Save new wasm-pack cache
-        uses: actions/cache/save@v3
+        uses: actions/cache/save@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9 # v4.0.2
         with:
           path: |
             ./target
