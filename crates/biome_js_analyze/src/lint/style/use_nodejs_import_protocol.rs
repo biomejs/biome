@@ -3,7 +3,7 @@ use biome_analyze::{
     RuleSource,
 };
 use biome_console::markup;
-use biome_js_syntax::{inner_string_text, AnyJsImportSpecifierLike, JsSyntaxKind, JsSyntaxToken};
+use biome_js_syntax::{inner_string_text, AnyJsImportLike, JsSyntaxKind, JsSyntaxToken};
 use biome_rowan::BatchMutationExt;
 
 use crate::{globals::is_node_builtin_module, JsRuleAction};
@@ -51,7 +51,7 @@ declare_rule! {
 }
 
 impl Rule for UseNodejsImportProtocol {
-    type Query = Ast<AnyJsImportSpecifierLike>;
+    type Query = Ast<AnyJsImportLike>;
     type State = JsSyntaxToken;
     type Signals = Option<Self::State>;
     type Options = ();

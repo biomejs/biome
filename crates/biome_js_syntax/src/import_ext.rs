@@ -1,7 +1,8 @@
 use crate::{
     inner_string_text, AnyJsBinding, AnyJsImportClause, AnyJsNamedImportSpecifier,
-    JsCallExpression, JsImport, JsImportAssertion, JsImportCallExpression, JsModuleSource,
-    JsSyntaxToken, TsExternalModuleDeclaration,
+    JsCallExpression, JsDefaultImportSpecifier, JsImport, JsImportAssertion,
+    JsImportCallExpression, JsModuleSource, JsNamedImportSpecifier, JsNamespaceImportSpecifier,
+    JsShorthandNamedImportSpecifier, JsSyntaxToken, TsExternalModuleDeclaration,
 };
 use biome_rowan::{declare_node_union, AstNode, SyntaxNodeOptionExt, SyntaxResult, TokenText};
 
@@ -202,27 +203,26 @@ declare_node_union! {
     ///    import("lodash")
     /// // ^^^^^^^^^^^^^^^^
     /// ```
-    pub AnyJsImportSpecifierLike = JsModuleSource | JsCallExpression |  JsImportCallExpression
+    pub AnyJsImportLike = JsModuleSource | JsCallExpression |  JsImportCallExpression
 }
 
-impl AnyJsImportSpecifierLike {
+impl AnyJsImportLike {
     /// Returns the inner text of specifier:
     ///
     /// ## Examples
     ///
     /// ```
     /// use biome_js_factory::make;
-    /// use biome_js_syntax::AnyJsImportSpecifierLike;
-    /// use biome_rowan::TriviaPieceKind;
+    /// use biome_js_syntax::AnyJsImportLike;
     ///
     /// let source_name = make::js_module_source(make::js_string_literal("foo"));
-    /// let any_import_specifier = AnyJsImportSpecifierLike::JsModuleSource(source_name);
+    /// let any_import_specifier = AnyJsImportLike::JsModuleSource(source_name);
     /// assert_eq!(any_import_specifier.inner_string_text().unwrap().text(), "foo")
     /// ```
     pub fn inner_string_text(&self) -> Option<TokenText> {
         match self {
-            AnyJsImportSpecifierLike::JsModuleSource(source) => source.inner_string_text().ok(),
-            AnyJsImportSpecifierLike::JsCallExpression(expression) => {
+            AnyJsImportLike::JsModuleSource(source) => source.inner_string_text().ok(),
+            AnyJsImportLike::JsCallExpression(expression) => {
                 let callee = expression.callee().ok()?;
                 let name = callee.as_js_reference_identifier()?.value_token().ok()?;
                 if name.text_trimmed() == "require" {
@@ -240,7 +240,7 @@ impl AnyJsImportSpecifierLike {
                     None
                 }
             }
-            AnyJsImportSpecifierLike::JsImportCallExpression(import_call) => {
+            AnyJsImportLike::JsImportCallExpression(import_call) => {
                 let [Some(argument)] = import_call.arguments().ok()?.get_arguments_by_index([0])
                 else {
                     return None;
@@ -261,17 +261,16 @@ impl AnyJsImportSpecifierLike {
     ///
     /// ```
     /// use biome_js_factory::make;
-    /// use biome_js_syntax::AnyJsImportSpecifierLike;
-    /// use biome_rowan::TriviaPieceKind;
+    /// use biome_js_syntax::AnyJsImportLike;
     ///
     /// let source_name = make::js_module_source(make::js_string_literal("foo"));
-    /// let any_import_specifier = AnyJsImportSpecifierLike::JsModuleSource(source_name);
+    /// let any_import_specifier = AnyJsImportLike::JsModuleSource(source_name);
     /// assert_eq!(any_import_specifier.module_name_token().unwrap().text(), "\"foo\"")
     /// ```
     pub fn module_name_token(&self) -> Option<JsSyntaxToken> {
         match self {
-            AnyJsImportSpecifierLike::JsModuleSource(source) => source.value_token().ok(),
-            AnyJsImportSpecifierLike::JsCallExpression(expression) => {
+            AnyJsImportLike::JsModuleSource(source) => source.value_token().ok(),
+            AnyJsImportLike::JsCallExpression(expression) => {
                 let callee = expression.callee().ok()?;
                 let name = callee.as_js_reference_identifier()?.value_token().ok()?;
                 if name.text_trimmed() == "require" {
@@ -289,7 +288,7 @@ impl AnyJsImportSpecifierLike {
                     None
                 }
             }
-            AnyJsImportSpecifierLike::JsImportCallExpression(import_call) => {
+            AnyJsImportLike::JsImportCallExpression(import_call) => {
                 let [Some(argument)] = import_call.arguments().ok()?.get_arguments_by_index([0])
                 else {
                     return None;
@@ -312,22 +311,21 @@ impl AnyJsImportSpecifierLike {
     ///
     /// ```
     /// use biome_js_factory::make;
-    /// use biome_js_syntax::{AnyJsImportSpecifierLike, JsSyntaxKind, JsSyntaxToken};
-    /// use biome_rowan::TriviaPieceKind;
+    /// use biome_js_syntax::{AnyJsImportLike, JsSyntaxKind, JsSyntaxToken};
     ///
     /// let module_token = JsSyntaxToken::new_detached(JsSyntaxKind::MODULE_KW, "module", [], []);
     /// let module_source = make::js_module_source(make::js_string_literal("foo"));
     /// let module_declaration = make::ts_external_module_declaration(module_token, module_source).build();
-    /// let any_import_specifier = AnyJsImportSpecifierLike::JsModuleSource(module_declaration.source().expect("module source"));
+    /// let any_import_specifier = AnyJsImportLike::JsModuleSource(module_declaration.source().expect("module source"));
     /// assert!(any_import_specifier.is_in_ts_module_declaration());
     ///
     /// let module_source = make::js_module_source(make::js_string_literal("bar"));
-    /// let any_import_specifier = AnyJsImportSpecifierLike::JsModuleSource(module_source);
+    /// let any_import_specifier = AnyJsImportLike::JsModuleSource(module_source);
     /// assert!(!any_import_specifier.is_in_ts_module_declaration());
     /// ```
     pub fn is_in_ts_module_declaration(&self) -> bool {
         // It first has to be a JsModuleSource
-        if !matches!(self, AnyJsImportSpecifierLike::JsModuleSource(_)) {
+        if !matches!(self, AnyJsImportLike::JsModuleSource(_)) {
             return false;
         }
         // Then test whether its parent is a TsExternalModuleDeclaration
@@ -335,5 +333,24 @@ impl AnyJsImportSpecifierLike {
             return TsExternalModuleDeclaration::can_cast(parent_syntax_kind);
         }
         false
+    }
+}
+
+declare_node_union! {
+    pub AnyJsImportSpecifier = JsNamedImportSpecifier
+        | JsShorthandNamedImportSpecifier
+        | JsNamespaceImportSpecifier
+        | JsDefaultImportSpecifier
+}
+
+impl AnyJsImportSpecifier {
+    /// Imported name of this import specifier.
+    pub fn local_name(&self) -> SyntaxResult<AnyJsBinding> {
+        match self {
+            Self::JsNamedImportSpecifier(specifier) => specifier.local_name(),
+            Self::JsShorthandNamedImportSpecifier(specifier) => specifier.local_name(),
+            Self::JsNamespaceImportSpecifier(specifier) => specifier.local_name(),
+            Self::JsDefaultImportSpecifier(specifier) => specifier.local_name(),
+        }
     }
 }

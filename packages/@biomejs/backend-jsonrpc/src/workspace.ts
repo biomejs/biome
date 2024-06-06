@@ -1011,6 +1011,10 @@ export interface Nursery {
 	 */
 	noEvolvingTypes?: RuleConfiguration_for_Null;
 	/**
+	 * Disallow exporting an imported variable.
+	 */
+	noExportedImports?: RuleConfiguration_for_Null;
+	/**
 	 * Disallow invalid !important within keyframe declarations
 	 */
 	noImportantInKeyframe?: RuleConfiguration_for_Null;
@@ -2378,6 +2382,7 @@ export type Category =
 	| "lint/nursery/noDuplicateSelectorsKeyframeBlock"
 	| "lint/nursery/noEmptyBlock"
 	| "lint/nursery/noEvolvingTypes"
+	| "lint/nursery/noExportedImports"
 	| "lint/nursery/noImportantInKeyframe"
 	| "lint/nursery/noInvalidDirectionInLinearGradient"
 	| "lint/nursery/noInvalidPositionAtImportRule"
