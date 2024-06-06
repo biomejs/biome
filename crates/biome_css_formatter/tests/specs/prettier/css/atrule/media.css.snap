@@ -2,7 +2,6 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: css/atrule/media.css
 ---
-
 # Input
 
 ```css
@@ -766,7 +765,7 @@ media.css:93:21 parse ━━━━━━━━━━━━━━━━━━━�
   
 media.css:104:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected `,` but instead found `;`
+  × Expected a compound selector but instead found ';'.
   
     102 │ :
     103 │ green
@@ -775,11 +774,18 @@ media.css:104:1 parse ━━━━━━━━━━━━━━━━━━━�
     105 │ @media
     106 │ (
   
-  i Remove ;
+  i Expected a compound selector here.
+  
+    102 │ :
+    103 │ green
+  > 104 │ ;
+        │ ^
+    105 │ @media
+    106 │ (
   
 media.css:115:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected `,` but instead found `;`
+  × Expected a compound selector but instead found ';'.
   
     113 │ :
     114 │ red
@@ -788,11 +794,18 @@ media.css:115:1 parse ━━━━━━━━━━━━━━━━━━━�
     116 │ }
     117 │ }
   
-  i Remove ;
+  i Expected a compound selector here.
+  
+    113 │ :
+    114 │ red
+  > 115 │ ;
+        │ ^
+    116 │ }
+    117 │ }
   
 media.css:124:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected `,` but instead found `;`
+  × Expected a compound selector but instead found ';'.
   
     122 │ :
     123 │ black
@@ -801,11 +814,18 @@ media.css:124:1 parse ━━━━━━━━━━━━━━━━━━━�
     125 │ }
     126 │ }
   
-  i Remove ;
+  i Expected a compound selector here.
+  
+    122 │ :
+    123 │ black
+  > 124 │ ;
+        │ ^
+    125 │ }
+    126 │ }
   
 media.css:143:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected `,` but instead found `;`
+  × Expected a compound selector but instead found ';'.
   
     141 │ green
     142 │ 
@@ -814,11 +834,18 @@ media.css:143:1 parse ━━━━━━━━━━━━━━━━━━━�
     144 │ 
     145 │ @media
   
-  i Remove ;
+  i Expected a compound selector here.
+  
+    141 │ green
+    142 │ 
+  > 143 │ ;
+        │ ^
+    144 │ 
+    145 │ @media
   
 media.css:165:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected `,` but instead found `;`
+  × Expected a compound selector but instead found ';'.
   
     163 │ red
     164 │ 
@@ -827,11 +854,18 @@ media.css:165:1 parse ━━━━━━━━━━━━━━━━━━━�
     166 │ 
     167 │ }
   
-  i Remove ;
+  i Expected a compound selector here.
+  
+    163 │ red
+    164 │ 
+  > 165 │ ;
+        │ ^
+    166 │ 
+    167 │ }
   
 media.css:183:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected `,` but instead found `;`
+  × Expected a compound selector but instead found ';'.
   
     181 │ black
     182 │ 
@@ -840,7 +874,14 @@ media.css:183:1 parse ━━━━━━━━━━━━━━━━━━━�
     184 │ 
     185 │ }
   
-  i Remove ;
+  i Expected a compound selector here.
+  
+    181 │ black
+    182 │ 
+  > 183 │ ;
+        │ ^
+    184 │ 
+    185 │ }
   
 media.css:190:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -863,5 +904,3 @@ media.css:190:1 parse ━━━━━━━━━━━━━━━━━━━�
 ```
   195: @media all and (-webkit-min-device-pixel-ratio: 1.5), all and (-o-min-device-pixel-ratio: 3/2), all and (min--moz-device-pixel-ratio: 1.5), all and (min-device-pixel-ratio: 1.5) {}
 ```
-
-

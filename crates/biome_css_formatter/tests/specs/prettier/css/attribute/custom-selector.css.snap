@@ -2,7 +2,6 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: css/attribute/custom-selector.css
 ---
-
 # Input
 
 ```css
@@ -206,22 +205,9 @@ custom-selector.css:3:2 parse ━━━━━━━━━━━━━━━━�
   - viewport
   - scope
   
-custom-selector.css:5:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `i`
-  
-    3 │ @custom-selector
-    4 │ :--icon
-  > 5 │ i[
-      │ ^
-    6 │ class
-    7 │ ^=
-  
-  i Remove i
-  
 custom-selector.css:16:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected `,` but instead found `;`
+  × Expected a compound selector but instead found ';'.
   
     14 │ ' icon-'
     15 │ ]
@@ -229,9 +215,13 @@ custom-selector.css:16:1 parse ━━━━━━━━━━━━━━━━�
        │ ^
     17 │ 
   
-  i Remove ;
+  i Expected a compound selector here.
+  
+    14 │ ' icon-'
+    15 │ ]
+  > 16 │ ;
+       │ ^
+    17 │ 
   
 
 ```
-
-

@@ -2,7 +2,6 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: css/atrule/custom-media.css
 ---
-
 # Input
 
 ```css
@@ -119,7 +118,7 @@ max-width
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,20 +1,136 @@
+@@ -1,20 +1,131 @@
 -@custom-media --small-viewport (max-width: 30em);
 -@custom-media --small-viewport (max-width: 30em);
 -@custom-media --small-viewport (max-width: 30em);
@@ -156,7 +155,6 @@ max-width
 +@
 +custom-media
 +    --small-viewport
-+ 
 +(
 +max-width: 30em
 +    )
@@ -174,7 +172,6 @@ max-width
 +custom-media
 +
 +--small-viewport
-+
 +(
 +
 +max-width
@@ -212,7 +209,6 @@ max-width
 +not
 +
 +all
-+
 +;
 +@
 +custom-media --tablet (min-width: 768px) and (max-width: 1279px)
@@ -241,7 +237,7 @@ max-width
 +:
 +768px
 +)
-+and 
++and
 +(
 +max-width
 +:
@@ -252,7 +248,6 @@ max-width
 +custom-media
 +
 +--tablet
-+
 +(
 +
 +min-width
@@ -263,8 +258,7 @@ max-width
 +
 +)
 +
-+and 
-+
++and
 +(
 +
 +max-width
@@ -297,7 +291,6 @@ custom-media --small-viewport
 @
 custom-media
     --small-viewport
- 
 (
 max-width: 30em
     )
@@ -315,7 +308,6 @@ max-width
 custom-media
 
 --small-viewport
-
 (
 
 max-width
@@ -353,7 +345,6 @@ custom-media
 not
 
 all
-
 ;
 @
 custom-media --tablet (min-width: 768px) and (max-width: 1279px)
@@ -382,7 +373,7 @@ min-width
 :
 768px
 )
-and 
+and
 (
 max-width
 :
@@ -393,7 +384,6 @@ max-width
 custom-media
 
 --tablet
-
 (
 
 min-width
@@ -404,8 +394,7 @@ min-width
 
 )
 
-and 
-
+and
 (
 
 max-width
@@ -1231,22 +1220,9 @@ custom-media.css:11:2 parse ━━━━━━━━━━━━━━━━━�
   - viewport
   - scope
   
-custom-media.css:12:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `--small-viewport`
-  
-    10 │     );
-    11 │ @custom-media
-  > 12 │ --small-viewport
-       │ ^^^^^^^^^^^^^^^^
-    13 │ (
-    14 │ max-width
-  
-  i Remove --small-viewport
-  
 custom-media.css:13:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected `,` but instead found `(`
+  × Expected a compound selector but instead found '('.
   
     11 │ @custom-media
     12 │ --small-viewport
@@ -1255,7 +1231,14 @@ custom-media.css:13:1 parse ━━━━━━━━━━━━━━━━━�
     14 │ max-width
     15 │ :
   
-  i Remove (
+  i Expected a compound selector here.
+  
+    11 │ @custom-media
+    12 │ --small-viewport
+  > 13 │ (
+       │ ^
+    14 │ max-width
+    15 │ :
   
 custom-media.css:16:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -1374,22 +1357,9 @@ custom-media.css:19:2 parse ━━━━━━━━━━━━━━━━━�
   - viewport
   - scope
   
-custom-media.css:21:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `--small-viewport`
-  
-    19 │ @custom-media
-    20 │ 
-  > 21 │ --small-viewport
-       │ ^^^^^^^^^^^^^^^^
-    22 │ 
-    23 │ (
-  
-  i Remove --small-viewport
-  
 custom-media.css:23:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected `,` but instead found `(`
+  × Expected a compound selector but instead found '('.
   
     21 │ --small-viewport
     22 │ 
@@ -1398,7 +1368,14 @@ custom-media.css:23:1 parse ━━━━━━━━━━━━━━━━━�
     24 │ 
     25 │ max-width
   
-  i Remove (
+  i Expected a compound selector here.
+  
+    21 │ --small-viewport
+    22 │ 
+  > 23 │ (
+       │ ^
+    24 │ 
+    25 │ max-width
   
 custom-media.css:29:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -1702,48 +1679,9 @@ custom-media.css:41:2 parse ━━━━━━━━━━━━━━━━━�
   - viewport
   - scope
   
-custom-media.css:42:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `--none`
-  
-    40 │     all;
-    41 │ @custom-media
-  > 42 │ --none
-       │ ^^^^^^
-    43 │ not
-    44 │ all
-  
-  i Remove --none
-  
-custom-media.css:43:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `not`
-  
-    41 │ @custom-media
-    42 │ --none
-  > 43 │ not
-       │ ^^^
-    44 │ all
-    45 │ ;
-  
-  i Remove not
-  
-custom-media.css:44:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `all`
-  
-    42 │ --none
-    43 │ not
-  > 44 │ all
-       │ ^^^
-    45 │ ;
-    46 │ @custom-media
-  
-  i Remove all
-  
 custom-media.css:45:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected `,` but instead found `;`
+  × Expected a compound selector but instead found ';'.
   
     43 │ not
     44 │ all
@@ -1752,7 +1690,14 @@ custom-media.css:45:1 parse ━━━━━━━━━━━━━━━━━�
     46 │ @custom-media
     47 │ 
   
-  i Remove ;
+  i Expected a compound selector here.
+  
+    43 │ not
+    44 │ all
+  > 45 │ ;
+       │ ^
+    46 │ @custom-media
+    47 │ 
   
 custom-media.css:46:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -1786,48 +1731,9 @@ custom-media.css:46:2 parse ━━━━━━━━━━━━━━━━━�
   - viewport
   - scope
   
-custom-media.css:48:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `--none`
-  
-    46 │ @custom-media
-    47 │ 
-  > 48 │ --none
-       │ ^^^^^^
-    49 │ 
-    50 │ not
-  
-  i Remove --none
-  
-custom-media.css:50:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `not`
-  
-    48 │ --none
-    49 │ 
-  > 50 │ not
-       │ ^^^
-    51 │ 
-    52 │ all
-  
-  i Remove not
-  
-custom-media.css:52:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `all`
-  
-    50 │ not
-    51 │ 
-  > 52 │ all
-       │ ^^^
-    53 │ 
-    54 │ ;
-  
-  i Remove all
-  
 custom-media.css:54:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected `,` but instead found `;`
+  × Expected a compound selector but instead found ';'.
   
     52 │ all
     53 │ 
@@ -1836,7 +1742,14 @@ custom-media.css:54:1 parse ━━━━━━━━━━━━━━━━━�
     55 │ @custom-media --tablet (min-width: 768px) and (max-width: 1279px);
     56 │ @custom-media --tablet (min-width:768px) and (max-width:1279px);
   
-  i Remove ;
+  i Expected a compound selector here.
+  
+    52 │ all
+    53 │ 
+  > 54 │ ;
+       │ ^
+    55 │ @custom-media --tablet (min-width: 768px) and (max-width: 1279px);
+    56 │ @custom-media --tablet (min-width:768px) and (max-width:1279px);
   
 custom-media.css:55:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -3325,22 +3238,9 @@ custom-media.css:64:2 parse ━━━━━━━━━━━━━━━━━�
   - viewport
   - scope
   
-custom-media.css:65:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `--tablet`
-  
-    63 │     (max-width: 1279px);
-    64 │ @custom-media
-  > 65 │ --tablet
-       │ ^^^^^^^^
-    66 │ (
-    67 │ min-width
-  
-  i Remove --tablet
-  
 custom-media.css:66:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected `,` but instead found `(`
+  × Expected a compound selector but instead found '('.
   
     64 │ @custom-media
     65 │ --tablet
@@ -3349,7 +3249,14 @@ custom-media.css:66:1 parse ━━━━━━━━━━━━━━━━━�
     67 │ min-width
     68 │ :
   
-  i Remove (
+  i Expected a compound selector here.
+  
+    64 │ @custom-media
+    65 │ --tablet
+  > 66 │ (
+       │ ^
+    67 │ min-width
+    68 │ :
   
 custom-media.css:69:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -3438,7 +3345,7 @@ custom-media.css:70:1 parse ━━━━━━━━━━━━━━━━━�
   
 custom-media.css:72:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected `,` but instead found `(`
+  × Expected a compound selector but instead found '('.
   
     70 │ )
     71 │ and
@@ -3447,7 +3354,14 @@ custom-media.css:72:1 parse ━━━━━━━━━━━━━━━━━�
     73 │ max-width
     74 │ :
   
-  i Remove (
+  i Expected a compound selector here.
+  
+    70 │ )
+    71 │ and
+  > 72 │ (
+       │ ^
+    73 │ max-width
+    74 │ :
   
 custom-media.css:75:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -3566,22 +3480,9 @@ custom-media.css:78:2 parse ━━━━━━━━━━━━━━━━━�
   - viewport
   - scope
   
-custom-media.css:80:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `--tablet`
-  
-    78 │ @custom-media
-    79 │ 
-  > 80 │ --tablet
-       │ ^^^^^^^^
-    81 │ 
-    82 │ (
-  
-  i Remove --tablet
-  
 custom-media.css:82:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected `,` but instead found `(`
+  × Expected a compound selector but instead found '('.
   
     80 │ --tablet
     81 │ 
@@ -3590,7 +3491,14 @@ custom-media.css:82:1 parse ━━━━━━━━━━━━━━━━━�
     83 │ 
     84 │ min-width
   
-  i Remove (
+  i Expected a compound selector here.
+  
+    80 │ --tablet
+    81 │ 
+  > 82 │ (
+       │ ^
+    83 │ 
+    84 │ min-width
   
 custom-media.css:88:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -3679,7 +3587,7 @@ custom-media.css:90:1 parse ━━━━━━━━━━━━━━━━━�
   
 custom-media.css:94:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected `,` but instead found `(`
+  × Expected a compound selector but instead found '('.
   
     92 │ and
     93 │ 
@@ -3688,7 +3596,14 @@ custom-media.css:94:1 parse ━━━━━━━━━━━━━━━━━�
     95 │ 
     96 │ max-width
   
-  i Remove (
+  i Expected a compound selector here.
+  
+    92 │ and
+    93 │ 
+  > 94 │ (
+       │ ^
+    95 │ 
+    96 │ max-width
   
 custom-media.css:100:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -3780,7 +3695,5 @@ custom-media.css:102:1 parse ━━━━━━━━━━━━━━━━━
 
 # Lines exceeding max width of 80 characters
 ```
-   82: custom-media  --tablet  (  min-width  :  768px  )  and  (  max-width  :  1279px  )
+   79: custom-media  --tablet  (  min-width  :  768px  )  and  (  max-width  :  1279px  )
 ```
-
-

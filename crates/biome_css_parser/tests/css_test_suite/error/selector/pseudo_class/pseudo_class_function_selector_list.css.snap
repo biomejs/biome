@@ -2,7 +2,6 @@
 source: crates/biome_css_parser/tests/spec_test.rs
 expression: snapshot
 ---
-
 ## Input
 
 ```css
@@ -339,17 +338,21 @@ CssRoot {
                                     WHERE_KW@159..164 "where" [] [],
                                     L_PAREN@164..165 "(" [] [],
                                     CssSelectorList [
-                                        CssCompoundSelector {
-                                            nesting_selector_token: missing (optional),
-                                            simple_selector: missing (optional),
-                                            sub_selectors: CssSubSelectorList [
-                                                CssClassSelector {
-                                                    dot_token: DOT@165..166 "." [] [],
-                                                    name: CssCustomIdentifier {
-                                                        value_token: IDENT@166..169 "div" [] [],
+                                        CssComplexSelector {
+                                            left: CssCompoundSelector {
+                                                nesting_selector_token: missing (optional),
+                                                simple_selector: missing (optional),
+                                                sub_selectors: CssSubSelectorList [
+                                                    CssClassSelector {
+                                                        dot_token: DOT@165..166 "." [] [],
+                                                        name: CssCustomIdentifier {
+                                                            value_token: IDENT@166..169 "div" [] [],
+                                                        },
                                                     },
-                                                },
-                                            ],
+                                                ],
+                                            },
+                                            combinator: CSS_SPACE_LITERAL@169..170 "\n" [] [],
+                                            right: missing (required),
                                         },
                                     ],
                                 ],
@@ -363,7 +366,7 @@ CssRoot {
             },
         },
     ],
-    eof_token: EOF@169..170 "" [Newline("\n")] [],
+    eof_token: EOF@170..170 "" [] [],
 }
 ```
 
@@ -372,7 +375,7 @@ CssRoot {
 ```
 0: CSS_ROOT@0..170
   0: (empty)
-  1: CSS_RULE_LIST@0..169
+  1: CSS_RULE_LIST@0..170
     0: CSS_QUALIFIED_RULE@0..10
       0: CSS_SELECTOR_LIST@0..8
         0: CSS_COMPOUND_SELECTOR@0..8
@@ -565,28 +568,31 @@ CssRoot {
         0: L_CURLY@155..156 "{" [] []
         1: CSS_DECLARATION_OR_RULE_LIST@156..156
         2: R_CURLY@156..157 "}" [] []
-    8: CSS_QUALIFIED_RULE@157..169
-      0: CSS_SELECTOR_LIST@157..169
-        0: CSS_COMPOUND_SELECTOR@157..169
+    8: CSS_QUALIFIED_RULE@157..170
+      0: CSS_SELECTOR_LIST@157..170
+        0: CSS_COMPOUND_SELECTOR@157..170
           0: (empty)
           1: (empty)
-          2: CSS_SUB_SELECTOR_LIST@157..169
-            0: CSS_PSEUDO_CLASS_SELECTOR@157..169
+          2: CSS_SUB_SELECTOR_LIST@157..170
+            0: CSS_PSEUDO_CLASS_SELECTOR@157..170
               0: COLON@157..159 ":" [Newline("\n")] []
-              1: CSS_BOGUS_PSEUDO_CLASS@159..169
+              1: CSS_BOGUS_PSEUDO_CLASS@159..170
                 0: WHERE_KW@159..164 "where" [] []
                 1: L_PAREN@164..165 "(" [] []
-                2: CSS_SELECTOR_LIST@165..169
-                  0: CSS_COMPOUND_SELECTOR@165..169
-                    0: (empty)
-                    1: (empty)
-                    2: CSS_SUB_SELECTOR_LIST@165..169
-                      0: CSS_CLASS_SELECTOR@165..169
-                        0: DOT@165..166 "." [] []
-                        1: CSS_CUSTOM_IDENTIFIER@166..169
-                          0: IDENT@166..169 "div" [] []
-      1: CSS_BOGUS_BLOCK@169..169
-  2: EOF@169..170 "" [Newline("\n")] []
+                2: CSS_SELECTOR_LIST@165..170
+                  0: CSS_COMPLEX_SELECTOR@165..170
+                    0: CSS_COMPOUND_SELECTOR@165..169
+                      0: (empty)
+                      1: (empty)
+                      2: CSS_SUB_SELECTOR_LIST@165..169
+                        0: CSS_CLASS_SELECTOR@165..169
+                          0: DOT@165..166 "." [] []
+                          1: CSS_CUSTOM_IDENTIFIER@166..169
+                            0: IDENT@166..169 "div" [] []
+                    1: CSS_SPACE_LITERAL@169..170 "\n" [] []
+                    2: (empty)
+      1: CSS_BOGUS_BLOCK@170..170
+  2: EOF@170..170 "" [] []
 
 ```
 
@@ -768,14 +774,14 @@ pseudo_class_function_selector_list.css:8:13 parse ━━━━━━━━━�
   
 pseudo_class_function_selector_list.css:10:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected `)` but instead the file ends
+  × Expected a compound selector but instead found the end of the file.
   
      8 │ :where(.div {}
      9 │ :where(.div
   > 10 │ 
        │ 
   
-  i the file ends here
+  i Expected a compound selector here.
   
      8 │ :where(.div {}
      9 │ :where(.div
@@ -783,5 +789,3 @@ pseudo_class_function_selector_list.css:10:1 parse ━━━━━━━━━�
        │ 
   
 ```
-
-

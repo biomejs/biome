@@ -376,8 +376,10 @@ impl<'src> CssLexer<'src> {
     }
 
     fn consume_selector_token(&mut self, current: u8) -> CssSyntaxKind {
-        match current {
-            b' ' => self.consume_byte(CSS_SPACE_LITERAL),
+        let dispatched = lookup_byte(current);
+
+        match dispatched {
+            WHS => self.consume_byte(CSS_SPACE_LITERAL),
             _ => self.consume_token(current),
         }
     }

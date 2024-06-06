@@ -2,7 +2,6 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: css/atrule/for.css
 ---
-
 # Input
 
 ```css
@@ -58,7 +57,7 @@ through
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,51 +1,69 @@
+@@ -1,51 +1,67 @@
 -@for $i from 1 through 8 {
 -}
 -@for $i from 1 through 8 {
@@ -94,7 +93,7 @@ through
 +for  $i
 +from
 +1
-+through 
++through
 +8
 +{}
 +@
@@ -102,7 +101,7 @@ through
 +$i
 +from
 +1
-+through 
++through
 +8
 +{}
 +@
@@ -110,7 +109,7 @@ through
 +$i
 +from
 +1
-+through 
++through
 +8
 +{}
 +@
@@ -119,11 +118,9 @@ through
 +$i
 +
 +from
-+
 +1
 +
-+through 
-+
++through
 +8
 +
 +{}
@@ -184,7 +181,7 @@ for  $i  from  1  through  8  {}
 for  $i
 from
 1
-through 
+through
 8
 {}
 @
@@ -192,7 +189,7 @@ for
 $i
 from
 1
-through 
+through
 8
 {}
 @
@@ -200,7 +197,7 @@ for
 $i
 from
 1
-through 
+through
 8
 {}
 @
@@ -209,11 +206,9 @@ for
 $i
 
 from
-
 1
 
-through 
-
+through
 8
 
 {}
@@ -516,22 +511,9 @@ for.css:4:2 parse ━━━━━━━━━━━━━━━━━━━━�
   - viewport
   - scope
   
-for.css:5:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `from`
-  
-    3 │ @for  $i  from  1  through  8  {}
-    4 │ @for  $i
-  > 5 │ from
-      │ ^^^^
-    6 │ 1
-    7 │ through
-  
-  i Remove from
-  
 for.css:6:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected `,` but instead found `1`
+  × Expected a compound selector but instead found '1'.
   
     4 │ @for  $i
     5 │ from
@@ -540,11 +522,18 @@ for.css:6:1 parse ━━━━━━━━━━━━━━━━━━━━�
     7 │ through
     8 │ 8
   
-  i Remove 1
+  i Expected a compound selector here.
+  
+    4 │ @for  $i
+    5 │ from
+  > 6 │ 1
+      │ ^
+    7 │ through
+    8 │ 8
   
 for.css:8:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected `,` but instead found `8`
+  × Expected a compound selector but instead found '8'.
   
      6 │ 1
      7 │ through
@@ -553,7 +542,14 @@ for.css:8:1 parse ━━━━━━━━━━━━━━━━━━━━�
      9 │ {}
     10 │ @for
   
-  i Remove 8
+  i Expected a compound selector here.
+  
+     6 │ 1
+     7 │ through
+   > 8 │ 8
+       │ ^
+     9 │ {}
+    10 │ @for
   
 for.css:10:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -587,35 +583,9 @@ for.css:10:2 parse ━━━━━━━━━━━━━━━━━━━━�
   - viewport
   - scope
   
-for.css:11:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `$i`
-  
-     9 │ {}
-    10 │ @for
-  > 11 │ $i
-       │ ^^
-    12 │ from
-    13 │ 1
-  
-  i Remove $i
-  
-for.css:12:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `from`
-  
-    10 │ @for
-    11 │ $i
-  > 12 │ from
-       │ ^^^^
-    13 │ 1
-    14 │ through
-  
-  i Remove from
-  
 for.css:13:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected `,` but instead found `1`
+  × Expected a compound selector but instead found '1'.
   
     11 │ $i
     12 │ from
@@ -624,11 +594,18 @@ for.css:13:1 parse ━━━━━━━━━━━━━━━━━━━━�
     14 │ through
     15 │ 8
   
-  i Remove 1
+  i Expected a compound selector here.
+  
+    11 │ $i
+    12 │ from
+  > 13 │ 1
+       │ ^
+    14 │ through
+    15 │ 8
   
 for.css:15:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected `,` but instead found `8`
+  × Expected a compound selector but instead found '8'.
   
     13 │ 1
     14 │ through
@@ -637,7 +614,14 @@ for.css:15:1 parse ━━━━━━━━━━━━━━━━━━━━�
     16 │ {}
     17 │ @for
   
-  i Remove 8
+  i Expected a compound selector here.
+  
+    13 │ 1
+    14 │ through
+  > 15 │ 8
+       │ ^
+    16 │ {}
+    17 │ @for
   
 for.css:17:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -671,35 +655,9 @@ for.css:17:2 parse ━━━━━━━━━━━━━━━━━━━━�
   - viewport
   - scope
   
-for.css:18:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `$i`
-  
-    16 │ {}
-    17 │ @for
-  > 18 │ $i
-       │ ^^
-    19 │ from
-    20 │ 1
-  
-  i Remove $i
-  
-for.css:19:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `from`
-  
-    17 │ @for
-    18 │ $i
-  > 19 │ from
-       │ ^^^^
-    20 │ 1
-    21 │ through
-  
-  i Remove from
-  
 for.css:20:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected `,` but instead found `1`
+  × Expected a compound selector but instead found '1'.
   
     18 │ $i
     19 │ from
@@ -708,11 +666,18 @@ for.css:20:1 parse ━━━━━━━━━━━━━━━━━━━━�
     21 │ through
     22 │ 8
   
-  i Remove 1
+  i Expected a compound selector here.
+  
+    18 │ $i
+    19 │ from
+  > 20 │ 1
+       │ ^
+    21 │ through
+    22 │ 8
   
 for.css:22:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected `,` but instead found `8`
+  × Expected a compound selector but instead found '8'.
   
     20 │ 1
     21 │ through
@@ -721,7 +686,14 @@ for.css:22:1 parse ━━━━━━━━━━━━━━━━━━━━�
     23 │ {}
     24 │ @for
   
-  i Remove 8
+  i Expected a compound selector here.
+  
+    20 │ 1
+    21 │ through
+  > 22 │ 8
+       │ ^
+    23 │ {}
+    24 │ @for
   
 for.css:24:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -755,35 +727,9 @@ for.css:24:2 parse ━━━━━━━━━━━━━━━━━━━━�
   - viewport
   - scope
   
-for.css:26:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `$i`
-  
-    24 │ @for
-    25 │ 
-  > 26 │ $i
-       │ ^^
-    27 │ 
-    28 │ from
-  
-  i Remove $i
-  
-for.css:28:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `from`
-  
-    26 │ $i
-    27 │ 
-  > 28 │ from
-       │ ^^^^
-    29 │ 
-    30 │ 1
-  
-  i Remove from
-  
 for.css:30:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected `,` but instead found `1`
+  × Expected a compound selector but instead found '1'.
   
     28 │ from
     29 │ 
@@ -792,11 +738,18 @@ for.css:30:1 parse ━━━━━━━━━━━━━━━━━━━━�
     31 │ 
     32 │ through
   
-  i Remove 1
+  i Expected a compound selector here.
+  
+    28 │ from
+    29 │ 
+  > 30 │ 1
+       │ ^
+    31 │ 
+    32 │ through
   
 for.css:34:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected `,` but instead found `8`
+  × Expected a compound selector but instead found '8'.
   
     32 │ through
     33 │ 
@@ -805,7 +758,14 @@ for.css:34:1 parse ━━━━━━━━━━━━━━━━━━━━�
     35 │ 
     36 │ {}
   
-  i Remove 8
+  i Expected a compound selector here.
+  
+    32 │ through
+    33 │ 
+  > 34 │ 8
+       │ ^
+    35 │ 
+    36 │ {}
   
 for.css:37:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -1336,17 +1296,15 @@ for.css:43:456 parse ━━━━━━━━━━━━━━━━━━━�
 
 # Lines exceeding max width of 80 characters
 ```
-   45: for $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var from 1 through 5 {}
-   47: for $i from $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var1 through 5 {}
-   49: for $i from 1 through $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var-2 {}
-   52:   $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var
-   54:   $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var1
-   56:   $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var-2 {
-   60:   $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var
-   62:   $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var1
-   64:   $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var-2 {
-   67: for $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var from ($var1 + $var1) through ($var-2 + $var-2) {}
-   69: for $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var from ($very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var1 + $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var1) through ($very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var-2 + $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var-2) {}
+   43: for $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var from 1 through 5 {}
+   45: for $i from $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var1 through 5 {}
+   47: for $i from 1 through $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var-2 {}
+   50:   $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var
+   52:   $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var1
+   54:   $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var-2 {
+   58:   $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var
+   60:   $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var1
+   62:   $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var-2 {
+   65: for $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var from ($var1 + $var1) through ($var-2 + $var-2) {}
+   67: for $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var from ($very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var1 + $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var1) through ($very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var-2 + $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var-2) {}
 ```
-
-

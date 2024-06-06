@@ -2,7 +2,6 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: css/atrule/at-root.css
 ---
-
 # Input
 
 ```css
@@ -365,7 +364,7 @@ red
      .child1 {
        width: 100px;
      }
-@@ -59,117 +65,171 @@
+@@ -59,37 +65,44 @@
    }
  }
  .parent {
@@ -399,36 +398,25 @@ red
  .parent {
 -  @at-root .child {
 +  @
-+  at-root.child {
++  at-root .child {
      width: 100px;
    }
  }
  .parent {
 -  @at-root .child {
 +  @
-+  at-root.child {
++  at-root .child {
      width: 100px;
    }
  }
  .parent {
 -  @at-root input[type="radio"] {
--    color: red;
--  }
 +  @
-+  at-root
-+input[
-+type
-+=
-+'radio'
-+]
-+{
-+color
-+:
-+red
-+;
-+}
++  at-root input[type="radio"] {
+     color: red;
+   }
  }
- @media print {
+@@ -97,79 +110,117 @@
    .page {
      width: 8in;
  
@@ -670,30 +658,21 @@ red
 }
 .parent {
   @
-  at-root.child {
+  at-root .child {
     width: 100px;
   }
 }
 .parent {
   @
-  at-root.child {
+  at-root .child {
     width: 100px;
   }
 }
 .parent {
   @
-  at-root
-input[
-type
-=
-'radio'
-]
-{
-color
-:
-red
-;
-}
+  at-root input[type="radio"] {
+    color: red;
+  }
 }
 @media print {
   .page {
@@ -1232,19 +1211,6 @@ at-root.css:152:2 parse ━━━━━━━━━━━━━━━━━━�
   - viewport
   - scope
   
-at-root.css:153:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `input`
-  
-    151 │ .parent {
-    152 │ @at-root
-  > 153 │ input[
-        │ ^^^^^
-    154 │ type
-    155 │ =
-  
-  i Remove input
-  
 at-root.css:169:10 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Unexpected value or character.
@@ -1743,7 +1709,7 @@ at-root.css:228:2 parse ━━━━━━━━━━━━━━━━━━�
   
 at-root.css:229:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected `,` but instead found `(`
+  × Expected a compound selector but instead found '('.
   
     227 │ ;
     228 │ @at-root
@@ -1752,7 +1718,14 @@ at-root.css:229:1 parse ━━━━━━━━━━━━━━━━━━�
     230 │ with
     231 │ :
   
-  i Remove (
+  i Expected a compound selector here.
+  
+    227 │ ;
+    228 │ @at-root
+  > 229 │ (
+        │ ^
+    230 │ with
+    231 │ :
   
 at-root.css:230:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -1814,7 +1787,7 @@ at-root.css:258:2 parse ━━━━━━━━━━━━━━━━━━�
   
 at-root.css:260:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected `,` but instead found `(`
+  × Expected a compound selector but instead found '('.
   
     258 │ @at-root
     259 │ 
@@ -1823,7 +1796,14 @@ at-root.css:260:1 parse ━━━━━━━━━━━━━━━━━━�
     261 │ 
     262 │ with
   
-  i Remove (
+  i Expected a compound selector here.
+  
+    258 │ @at-root
+    259 │ 
+  > 260 │ (
+        │ ^
+    261 │ 
+    262 │ with
   
 at-root.css:262:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -1931,5 +1911,3 @@ at-root.css:288:33 parse ━━━━━━━━━━━━━━━━━━�
   
 
 ```
-
-

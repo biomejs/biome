@@ -2,7 +2,6 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: css/atrule/custom-selector.css
 ---
-
 # Input
 
 ```css
@@ -79,7 +78,7 @@ h6
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,48 +1,147 @@
+@@ -1,48 +1,146 @@
 -@custom-selector :--heading h1, h2, h3, h4, h5, h6;
 -@custom-selector :--heading h1, h2, h3, h4, h5, h6;
 -@custom-selector :--heading h1, h2, h3, h4, h5, h6;
@@ -164,7 +163,6 @@ h6
 +,
 +
 +h6
-+
 +;
 +@
 +custom-selector
@@ -353,7 +351,6 @@ h5
 ,
 
 h6
-
 ;
 @
 custom-selector
@@ -686,22 +683,9 @@ custom-selector.css:14:2 parse ━━━━━━━━━━━━━━━━�
   - viewport
   - scope
   
-custom-selector.css:16:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `h1`
-  
-    14 │ @custom-selector
-    15 │ :--heading
-  > 16 │ h1
-       │ ^^
-    17 │ ,
-    18 │ h2
-  
-  i Remove h1
-  
 custom-selector.css:27:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected `,` but instead found `;`
+  × Expected a compound selector but instead found ';'.
   
     25 │ ,
     26 │ h6
@@ -710,7 +694,14 @@ custom-selector.css:27:1 parse ━━━━━━━━━━━━━━━━�
     28 │ @custom-selector
     29 │ 
   
-  i Remove ;
+  i Expected a compound selector here.
+  
+    25 │ ,
+    26 │ h6
+  > 27 │ ;
+       │ ^
+    28 │ @custom-selector
+    29 │ 
   
 custom-selector.css:28:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -744,22 +735,9 @@ custom-selector.css:28:2 parse ━━━━━━━━━━━━━━━━�
   - viewport
   - scope
   
-custom-selector.css:32:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `h1`
-  
-    30 │ :--heading
-    31 │ 
-  > 32 │ h1
-       │ ^^
-    33 │ 
-    34 │ ,
-  
-  i Remove h1
-  
 custom-selector.css:54:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected `,` but instead found `;`
+  × Expected a compound selector but instead found ';'.
   
     52 │ h6
     53 │ 
@@ -768,7 +746,14 @@ custom-selector.css:54:1 parse ━━━━━━━━━━━━━━━━�
     55 │ @custom-selector :--very-very-very-very-very-very-very-very-very-long-selector-name h1, h2, h3, h4, h5, h6;
     56 │ @custom-selector :--very-very-very-very-very-very-very-very-very-long-selector-name h1 + h1, h2, h3, h4, h5, h6;
   
-  i Remove ;
+  i Expected a compound selector here.
+  
+    52 │ h6
+    53 │ 
+  > 54 │ ;
+       │ ^
+    55 │ @custom-selector :--very-very-very-very-very-very-very-very-very-long-selector-name h1, h2, h3, h4, h5, h6;
+    56 │ @custom-selector :--very-very-very-very-very-very-very-very-very-long-selector-name h1 + h1, h2, h3, h4, h5, h6;
   
 custom-selector.css:55:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -1218,5 +1203,3 @@ custom-selector.css:64:60 parse ━━━━━━━━━━━━━━━━
   
 
 ```
-
-
