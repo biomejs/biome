@@ -15,7 +15,13 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 #### Bug fixes
 
-- Fix  [#3069](https://github.com/biomejs/biome/issues/3069), prevent overwriting paths when using `--staged` or `--changed` options. Contributed by @unvalley
+- Fix [#3069](https://github.com/biomejs/biome/issues/3069), prevent overwriting paths when using `--staged` or `--changed` options. Contributed by @unvalley
+
+### Linter
+
+#### Bug fixes
+
+- The `no-empty-block` css lint rule now treats empty blocks containing comments as valid ones. Contributed by @Sec-ant
 
 ## 1.8.0 (2024-06-04)
 
