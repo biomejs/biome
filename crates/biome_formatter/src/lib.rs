@@ -75,6 +75,7 @@ pub use source_map::{TransformSourceMap, TransformSourceMapBuilder};
 use std::marker::PhantomData;
 use std::num::ParseIntError;
 use std::str::FromStr;
+use std::u8;
 use token::string::Quote;
 
 #[derive(Debug, Eq, PartialEq, Clone, Copy, Hash)]
@@ -196,15 +197,19 @@ impl std::fmt::Display for LineEnding {
     }
 }
 
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, Merge, Hash, PartialEq)]
 #[cfg_attr(
     feature = "serde",
-    derive(serde::Serialize, serde::Deserialize, schemars::JsonSchema),
+    derive(serde::Serialize, schemars::JsonSchema),
     serde(rename_all = "camelCase")
 )]
 pub struct IndentWidth(u8);
 
 impl IndentWidth {
+    pub const MIN: u8 = 2;
+
+    pub const MAX: u8 = 80;
+
     /// Return the numeric value for this [IndentWidth]
     pub fn value(&self) -> u8 {
         self.0
@@ -217,9 +222,56 @@ impl Default for IndentWidth {
     }
 }
 
-impl From<u8> for IndentWidth {
-    fn from(value: u8) -> Self {
-        Self(value)
+impl Deserializable for IndentWidth {
+    fn deserialize(
+        value: &impl DeserializableValue,
+        name: &str,
+        diagnostics: &mut Vec<DeserializationDiagnostic>,
+    ) -> Option<Self> {
+        let value_text = TextNumber::deserialize(value, name, diagnostics)?;
+        if let Ok(value) = value_text.parse::<Self>() {
+            return Some(value);
+        }
+        diagnostics.push(DeserializationDiagnostic::new_out_of_bound_integer(
+            Self::MIN,
+            Self::MAX,
+            value.range(),
+        ));
+        None
+    }
+}
+
+#[cfg(feature = "serde")]
+impl<'de> serde::Deserialize<'de> for IndentWidth {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        let value: u8 = serde::Deserialize::deserialize(deserializer)?;
+        let indent_width = IndentWidth::try_from(value).map_err(serde::de::Error::custom)?;
+        Ok(indent_width)
+    }
+}
+
+impl FromStr for IndentWidth {
+    type Err = ParseLineWidthError;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let value = u8::from_str(s).map_err(ParseLineWidthError::ParseError)?;
+        let value = Self::try_from(value).map_err(ParseLineWidthError::TryFromU8Error)?;
+        Ok(value)
+    }
+}
+
+impl TryFrom<u8> for IndentWidth {
+    type Error = IndentWidthFromIntError;
+
+    fn try_from(value: u8) -> Result<Self, Self::Error> {
+        if (Self::MIN..=Self::MAX).contains(&value) {
+            Ok(Self(value))
+        } else {
+            Err(IndentWidthFromIntError(value))
+        }
     }
 }
 
@@ -277,11 +329,6 @@ impl<'de> serde::Deserialize<'de> for LineWidth {
     where
         D: serde::Deserializer<'de>,
     {
-        // if let Ok(string_value) = <String as serde::Deserialize>::deserialize(&deserializer) {
-        //     if let Ok(value) = u16::from_str(&string_value) {
-        //         return LineWidth::try_from(value).map_err(serde::de::Error::custom);
-        //     }
-        // }
         let value: u16 = serde::Deserialize::deserialize(deserializer)?;
         let line_width = LineWidth::try_from(value).map_err(serde::de::Error::custom)?;
         Ok(line_width)
@@ -293,7 +340,27 @@ pub enum ParseLineWidthError {
     /// The string could not be parsed as a valid [u16]
     ParseError(ParseIntError),
     /// The [u16] value of the string is not a valid [LineWidth]
-    TryFromIntError(LineWidthFromIntError),
+    TryFromU16Error(LineWidthFromIntError),
+    /// The [u8] value of the string is not a valid [IndentWidth]
+    TryFromU8Error(IndentWidthFromIntError),
+}
+
+impl From<IndentWidthFromIntError> for ParseLineWidthError {
+    fn from(value: IndentWidthFromIntError) -> Self {
+        Self::TryFromU8Error(value)
+    }
+}
+
+impl From<LineWidthFromIntError> for ParseLineWidthError {
+    fn from(value: LineWidthFromIntError) -> Self {
+        Self::TryFromU16Error(value)
+    }
+}
+
+impl From<ParseIntError> for ParseLineWidthError {
+    fn from(value: ParseIntError) -> Self {
+        Self::ParseError(value)
+    }
 }
 
 impl Debug for ParseLineWidthError {
@@ -306,24 +373,11 @@ impl std::fmt::Display for ParseLineWidthError {
     fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             ParseLineWidthError::ParseError(err) => std::fmt::Display::fmt(err, fmt),
-            ParseLineWidthError::TryFromIntError(err) => std::fmt::Display::fmt(err, fmt),
+            ParseLineWidthError::TryFromU16Error(err) => std::fmt::Display::fmt(err, fmt),
+            ParseLineWidthError::TryFromU8Error(err) => std::fmt::Display::fmt(err, fmt),
         }
     }
 }
-
-impl FromStr for LineWidth {
-    type Err = ParseLineWidthError;
-
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let value = u16::from_str(s).map_err(ParseLineWidthError::ParseError)?;
-        let value = Self::try_from(value).map_err(ParseLineWidthError::TryFromIntError)?;
-        Ok(value)
-    }
-}
-
-/// Error type returned when converting a u16 to a [LineWidth] fails
-#[derive(Clone, Copy, Debug)]
-pub struct LineWidthFromIntError(pub u16);
 
 impl TryFrom<u16> for LineWidth {
     type Error = LineWidthFromIntError;
@@ -336,6 +390,35 @@ impl TryFrom<u16> for LineWidth {
         }
     }
 }
+
+impl FromStr for LineWidth {
+    type Err = ParseLineWidthError;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let value = u16::from_str(s).map_err(ParseLineWidthError::ParseError)?;
+        let value = Self::try_from(value).map_err(ParseLineWidthError::TryFromU16Error)?;
+        Ok(value)
+    }
+}
+
+/// Error type returned when converting a u16 to a [LineWidth] fails
+#[derive(Clone, Copy, Debug)]
+pub struct IndentWidthFromIntError(pub u8);
+
+impl std::fmt::Display for IndentWidthFromIntError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        writeln!(
+            f,
+            "The indent width should be between {} and {}",
+            LineWidth::MIN,
+            LineWidth::MAX,
+        )
+    }
+}
+
+/// Error type returned when converting a u16 to a [LineWidth] fails
+#[derive(Clone, Copy, Debug)]
+pub struct LineWidthFromIntError(pub u16);
 
 impl std::fmt::Display for LineWidthFromIntError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {

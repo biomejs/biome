@@ -1,6 +1,6 @@
 use crate::PlainIndentStyle;
 use biome_deserialize_macros::{Deserializable, Merge, Partial};
-use biome_formatter::{AttributePosition, LineEnding, LineWidth, QuoteStyle};
+use biome_formatter::{AttributePosition, IndentWidth, LineEnding, LineWidth, QuoteStyle};
 use biome_js_formatter::context::{
     trailing_commas::TrailingCommas, ArrowParentheses, QuoteProperties, Semicolons,
 };
@@ -63,7 +63,7 @@ pub struct JavascriptFormatter {
     /// The size of the indentation applied to JavaScript (and its super languages) files. Default to 2.
     #[partial(deserializable(deprecated(use_instead = "javascript.formatter.indentWidth")))]
     #[partial(bpaf(long("javascript-formatter-indent-size"), argument("NUMBER"), optional))]
-    pub indent_size: Option<u8>,
+    pub indent_size: Option<IndentWidth>,
 
     /// The size of the indentation applied to JavaScript (and its super languages) files. Default to 2.
     #[partial(bpaf(
@@ -71,7 +71,7 @@ pub struct JavascriptFormatter {
         argument("NUMBER"),
         optional
     ))]
-    pub indent_width: Option<u8>,
+    pub indent_width: Option<IndentWidth>,
 
     /// The type of line ending applied to JavaScript (and its super languages) files.
     #[partial(bpaf(
