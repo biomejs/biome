@@ -339,9 +339,9 @@ impl<'de> serde::Deserialize<'de> for LineWidth {
 pub enum ParseLineWidthError {
     /// The string could not be parsed as a valid [u16]
     ParseError(ParseIntError),
-    /// The [u16] value of the string is not a valid [LineWidth]
+    /// The `u16` value of the string is not a valid [LineWidth]
     TryFromU16Error(LineWidthFromIntError),
-    /// The [u8] value of the string is not a valid [IndentWidth]
+    /// The `u8 value of the string is not a valid [IndentWidth]
     TryFromU8Error(IndentWidthFromIntError),
 }
 

@@ -3,7 +3,7 @@ use biome_console::fmt::{Formatter, Termcolor};
 use biome_console::{markup, BufferConsole, Markup};
 use biome_diagnostics::termcolor::NoColor;
 use biome_diagnostics::{print_diagnostic_to_string, Error};
-use biome_formatter::IndentStyle;
+use biome_formatter::{IndentStyle, IndentWidth};
 use biome_fs::{ConfigName, FileSystemExt, MemoryFileSystem};
 use biome_json_formatter::context::JsonFormatOptions;
 use biome_json_formatter::format_node;
@@ -69,7 +69,7 @@ impl CliSnapshot {
             let formatted = format_node(
                 JsonFormatOptions::default()
                     .with_indent_style(IndentStyle::Space)
-                    .with_indent_width(2.into()),
+                    .with_indent_width(IndentWidth::default()),
                 &parsed.syntax(),
             )
             .expect("formatted JSON")

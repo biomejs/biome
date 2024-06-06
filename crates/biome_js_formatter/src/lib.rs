@@ -600,7 +600,7 @@ while(
         let result = format_range(
             JsFormatOptions::new(JsFileSource::js_script())
                 .with_indent_style(IndentStyle::Space)
-                .with_indent_width(4.into()),
+                .with_indent_width(4.try_into().unwrap()),
             &tree.syntax(),
             TextRange::new(range_start, range_end),
         );
@@ -634,7 +634,7 @@ function() {
         let result = format_range(
             JsFormatOptions::new(JsFileSource::js_script())
                 .with_indent_style(IndentStyle::Space)
-                .with_indent_width(4.into()),
+                .with_indent_width(4.try_into().unwrap()),
             &tree.syntax(),
             TextRange::new(range_start, range_end),
         );
@@ -663,7 +663,7 @@ function() {
         let result = format_range(
             JsFormatOptions::new(JsFileSource::js_script())
                 .with_indent_style(IndentStyle::Space)
-                .with_indent_width(4.into()),
+                .with_indent_width(4.try_into().unwrap()),
             &tree.syntax(),
             TextRange::new(range_start, range_end),
         );
@@ -693,7 +693,7 @@ function() {
         let result = format_range(
             JsFormatOptions::new(JsFileSource::js_script())
                 .with_indent_style(IndentStyle::Space)
-                .with_indent_width(4.into()),
+                .with_indent_width(4.try_into().unwrap()),
             &tree.syntax(),
             range,
         )
@@ -726,7 +726,7 @@ function() {
         let result = format_range(
             JsFormatOptions::new(JsFileSource::js_script())
                 .with_indent_style(IndentStyle::Space)
-                .with_indent_width(4.into()),
+                .with_indent_width(4.try_into().unwrap()),
             &tree.syntax(),
             range,
         )

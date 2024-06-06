@@ -1400,7 +1400,7 @@ mod tests {
             root,
             PrinterOptions {
                 indent_style: IndentStyle::Space,
-                indent_width: 2.into(),
+                indent_width: 2.try_into().unwrap(),
                 line_ending: LineEnding::Lf,
                 ..PrinterOptions::default()
             },
@@ -1568,7 +1568,7 @@ two lines`,
     fn it_use_the_indent_character_specified_in_the_options() {
         let options = PrinterOptions {
             indent_style: IndentStyle::Tab,
-            indent_width: 4.into(),
+            indent_width: 2.try_into().unwrap(),
             print_width: PrintWidth::new(19),
             ..PrinterOptions::default()
         };
