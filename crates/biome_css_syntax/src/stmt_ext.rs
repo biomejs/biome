@@ -45,4 +45,14 @@ impl CssBlockLike {
             CssBlockLike::CssDeclarationOrRuleBlock(block) => block.items().is_empty(),
         }
     }
+
+    pub fn is_empty_without_comments(&self) -> bool {
+        self.is_empty()
+            && !self
+                .l_curly_token()
+                .is_ok_and(|token| token.has_trailing_comments())
+            && !self
+                .r_curly_token()
+                .is_ok_and(|token| token.has_leading_comments())
+    }
 }
