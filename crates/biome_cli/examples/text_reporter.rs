@@ -1,4 +1,6 @@
-use biome_cli::{DiagnosticsPayload, Execution, Reporter, ReporterVisitor, TraversalSummary};
+use biome_cli::{
+    DiagnosticsPayload, Execution, Reporter, ReporterVisitor, TraversalSummary, VcsTargeted,
+};
 
 /// This will be the visitor, which where we **write** the data
 struct BufferVisitor(String);
@@ -10,7 +12,10 @@ struct TextReport {
 
 impl Reporter for TextReport {
     fn write(self, visitor: &mut dyn ReporterVisitor) -> std::io::Result<()> {
-        let execution = Execution::new_format();
+        let execution = Execution::new_format(VcsTargeted {
+            staged: false,
+            changed: false,
+        });
         visitor.report_summary(&execution, self.summary)?;
         Ok(())
     }
