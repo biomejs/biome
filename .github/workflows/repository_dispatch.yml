@@ -76,9 +76,7 @@ jobs:
 
       - name: Publish
         working-directory: packages/@biomejs/wasm-web
-        run: pnpx pkg-pr-new publish
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: pnpx pkg-pr-new publish --compact
 
   repository-dispatch:
     name: Repository dispatch
