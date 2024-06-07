@@ -174,7 +174,7 @@ fn get_extensionless_import(
     let mut path_parts = module_path.text().split('/');
     let mut is_index_file = false;
 
-    // Remove trailing slash.
+    // Remove trailing slash and useless path segment.
     if module_path.ends_with('/') || module_path.ends_with("/.") {
         path_parts.next_back();
 
