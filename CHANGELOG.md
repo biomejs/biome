@@ -37,8 +37,23 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 #### Bug fixes
 
-- The `no-empty-block` css lint rule now treats empty blocks containing comments as valid ones. Contributed by @Sec-ant
+- The `noEmptyBlock` css lint rule now treats empty blocks containing comments as valid ones. Contributed by @Sec-ant
 
+- [useLiteralKeys](https://biomejs.dev/linter/rules/use-literal-keys/) no longer reports quoted member names ([#3085](https://github.com/biomejs/biome/issues/3085)).
+
+  Previously [useLiteralKeys](https://biomejs.dev/linter/rules/use-literal-keys/) reported quoted member names that can be unquoted.
+  For example, the rule suggested the following fix:
+
+  ```diff
+  - const x = { "prop": 0 };
+  + const x = { prop: 0 };
+  ```
+
+  This conflicted with the option [quoteProperties](https://biomejs.dev/reference/configuration/#javascriptformatterquoteproperties) of our formatter.
+
+  The rule now ignores quoted member names.
+
+  Contributed by @Conaclos
 
 ### Parser
 
