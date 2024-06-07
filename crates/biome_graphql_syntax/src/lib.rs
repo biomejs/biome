@@ -47,7 +47,6 @@ impl biome_rowan::SyntaxKind for GraphqlSyntaxKind {
                 | GRAPHQL_BOGUS_SELECTION
                 | GRAPHQL_BOGUS_VALUE
                 | GRAPHQL_BOGUS_TYPE
-                | GRAPHQL_BOGUS_EXTENSION
         )
     }
 
@@ -57,7 +56,6 @@ impl biome_rowan::SyntaxKind for GraphqlSyntaxKind {
             kind if AnyGraphqlSelection::can_cast(*kind) => GRAPHQL_BOGUS_SELECTION,
             kind if AnyGraphqlValue::can_cast(*kind) => GRAPHQL_BOGUS_VALUE,
             kind if AnyGraphqlType::can_cast(*kind) => GRAPHQL_BOGUS_TYPE,
-            kind if AnyGraphqlInputObjectTypeExtension::can_cast(*kind) => GRAPHQL_BOGUS_EXTENSION,
             _ => GRAPHQL_BOGUS,
         }
     }

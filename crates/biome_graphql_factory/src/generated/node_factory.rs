@@ -595,34 +595,40 @@ pub fn graphql_input_object_type_extension(
     input_token: SyntaxToken,
     name: GraphqlName,
     directives: GraphqlDirectiveList,
-) -> GraphqlInputObjectTypeExtension {
-    GraphqlInputObjectTypeExtension::unwrap_cast(SyntaxNode::new_detached(
-        GraphqlSyntaxKind::GRAPHQL_INPUT_OBJECT_TYPE_EXTENSION,
-        [
-            Some(SyntaxElement::Token(extend_token)),
-            Some(SyntaxElement::Token(input_token)),
-            Some(SyntaxElement::Node(name.into_syntax())),
-            Some(SyntaxElement::Node(directives.into_syntax())),
-        ],
-    ))
+) -> GraphqlInputObjectTypeExtensionBuilder {
+    GraphqlInputObjectTypeExtensionBuilder {
+        extend_token,
+        input_token,
+        name,
+        directives,
+        input_fields: None,
+    }
 }
-pub fn graphql_input_object_type_extension_with_fields(
+pub struct GraphqlInputObjectTypeExtensionBuilder {
     extend_token: SyntaxToken,
     input_token: SyntaxToken,
     name: GraphqlName,
     directives: GraphqlDirectiveList,
-    input_fields: GraphqlInputFieldsDefinition,
-) -> GraphqlInputObjectTypeExtensionWithFields {
-    GraphqlInputObjectTypeExtensionWithFields::unwrap_cast(SyntaxNode::new_detached(
-        GraphqlSyntaxKind::GRAPHQL_INPUT_OBJECT_TYPE_EXTENSION_WITH_FIELDS,
-        [
-            Some(SyntaxElement::Token(extend_token)),
-            Some(SyntaxElement::Token(input_token)),
-            Some(SyntaxElement::Node(name.into_syntax())),
-            Some(SyntaxElement::Node(directives.into_syntax())),
-            Some(SyntaxElement::Node(input_fields.into_syntax())),
-        ],
-    ))
+    input_fields: Option<GraphqlInputFieldsDefinition>,
+}
+impl GraphqlInputObjectTypeExtensionBuilder {
+    pub fn with_input_fields(mut self, input_fields: GraphqlInputFieldsDefinition) -> Self {
+        self.input_fields = Some(input_fields);
+        self
+    }
+    pub fn build(self) -> GraphqlInputObjectTypeExtension {
+        GraphqlInputObjectTypeExtension::unwrap_cast(SyntaxNode::new_detached(
+            GraphqlSyntaxKind::GRAPHQL_INPUT_OBJECT_TYPE_EXTENSION,
+            [
+                Some(SyntaxElement::Token(self.extend_token)),
+                Some(SyntaxElement::Token(self.input_token)),
+                Some(SyntaxElement::Node(self.name.into_syntax())),
+                Some(SyntaxElement::Node(self.directives.into_syntax())),
+                self.input_fields
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+            ],
+        ))
+    }
 }
 pub fn graphql_input_value_definition(
     name: GraphqlName,
@@ -1165,17 +1171,40 @@ pub fn graphql_schema_extension(
     extend_token: SyntaxToken,
     schema_token: SyntaxToken,
     directives: GraphqlDirectiveList,
-    root_operation_types: GraphqlRootOperationTypes,
-) -> GraphqlSchemaExtension {
-    GraphqlSchemaExtension::unwrap_cast(SyntaxNode::new_detached(
-        GraphqlSyntaxKind::GRAPHQL_SCHEMA_EXTENSION,
-        [
-            Some(SyntaxElement::Token(extend_token)),
-            Some(SyntaxElement::Token(schema_token)),
-            Some(SyntaxElement::Node(directives.into_syntax())),
-            Some(SyntaxElement::Node(root_operation_types.into_syntax())),
-        ],
-    ))
+) -> GraphqlSchemaExtensionBuilder {
+    GraphqlSchemaExtensionBuilder {
+        extend_token,
+        schema_token,
+        directives,
+        root_operation_types: None,
+    }
+}
+pub struct GraphqlSchemaExtensionBuilder {
+    extend_token: SyntaxToken,
+    schema_token: SyntaxToken,
+    directives: GraphqlDirectiveList,
+    root_operation_types: Option<GraphqlRootOperationTypes>,
+}
+impl GraphqlSchemaExtensionBuilder {
+    pub fn with_root_operation_types(
+        mut self,
+        root_operation_types: GraphqlRootOperationTypes,
+    ) -> Self {
+        self.root_operation_types = Some(root_operation_types);
+        self
+    }
+    pub fn build(self) -> GraphqlSchemaExtension {
+        GraphqlSchemaExtension::unwrap_cast(SyntaxNode::new_detached(
+            GraphqlSyntaxKind::GRAPHQL_SCHEMA_EXTENSION,
+            [
+                Some(SyntaxElement::Token(self.extend_token)),
+                Some(SyntaxElement::Token(self.schema_token)),
+                Some(SyntaxElement::Node(self.directives.into_syntax())),
+                self.root_operation_types
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+            ],
+        ))
+    }
 }
 pub fn graphql_selection_set(
     l_curly_token: SyntaxToken,
@@ -1617,16 +1646,6 @@ where
 {
     GraphqlBogusDefinition::unwrap_cast(SyntaxNode::new_detached(
         GraphqlSyntaxKind::GRAPHQL_BOGUS_DEFINITION,
-        slots,
-    ))
-}
-pub fn graphql_bogus_extension<I>(slots: I) -> GraphqlBogusExtension
-where
-    I: IntoIterator<Item = Option<SyntaxElement>>,
-    I::IntoIter: ExactSizeIterator,
-{
-    GraphqlBogusExtension::unwrap_cast(SyntaxNode::new_detached(
-        GraphqlSyntaxKind::GRAPHQL_BOGUS_EXTENSION,
         slots,
     ))
 }
