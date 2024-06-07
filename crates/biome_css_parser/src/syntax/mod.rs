@@ -52,7 +52,15 @@ pub(crate) fn is_at_rule_list_element(p: &mut CssParser) -> bool {
     is_at_at_rule(p) || is_at_qualified_rule(p)
 }
 
-struct RuleListParseRecovery;
+struct RuleListParseRecovery {
+    end_kind: CssSyntaxKind,
+}
+
+impl RuleListParseRecovery {
+    fn new(end_kind: CssSyntaxKind) -> Self {
+        Self { end_kind }
+    }
+}
 
 impl ParseRecovery for RuleListParseRecovery {
     type Kind = CssSyntaxKind;
@@ -60,7 +68,7 @@ impl ParseRecovery for RuleListParseRecovery {
     const RECOVERED_KIND: Self::Kind = CSS_BOGUS_RULE;
 
     fn is_at_recovered(&self, p: &mut Self::Parser<'_>) -> bool {
-        is_at_rule_list_element(p)
+        p.at(self.end_kind) || is_at_rule_list_element(p)
     }
 }
 
@@ -88,7 +96,11 @@ impl ParseNodeList for RuleList {
         p: &mut Self::Parser<'_>,
         parsed_element: ParsedSyntax,
     ) -> RecoveryResult {
-        parsed_element.or_recover(p, &RuleListParseRecovery, expected_any_rule)
+        parsed_element.or_recover(
+            p,
+            &RuleListParseRecovery::new(self.end_kind),
+            expected_any_rule,
+        )
     }
 }
 

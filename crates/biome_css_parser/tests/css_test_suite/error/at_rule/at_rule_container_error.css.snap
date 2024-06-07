@@ -880,236 +880,236 @@ CssRoot {
 at_rule_container_error.css:1:12 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected an identifier but instead found 'inherit'
-
+  
   > 1 │ @container inherit (width <= 500px) { }
       │            ^^^^^^^
     2 │ @container initial (width <= 500px) { }
     3 │ @container unset (width <= 500px) { }
-
+  
   i 'inherit' is a CSS-wide keyword that cannot be used here
-
+  
 at_rule_container_error.css:2:12 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected an identifier but instead found 'initial'
-
+  
     1 │ @container inherit (width <= 500px) { }
   > 2 │ @container initial (width <= 500px) { }
       │            ^^^^^^^
     3 │ @container unset (width <= 500px) { }
     4 │ @container revert (width <= 500px) { }
-
+  
   i 'initial' is a CSS-wide keyword that cannot be used here
-
+  
 at_rule_container_error.css:3:12 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected an identifier but instead found 'unset'
-
+  
     1 │ @container inherit (width <= 500px) { }
     2 │ @container initial (width <= 500px) { }
   > 3 │ @container unset (width <= 500px) { }
       │            ^^^^^
     4 │ @container revert (width <= 500px) { }
     5 │ @container revert-layer (width <= 500px) { }
-
+  
   i 'unset' is a CSS-wide keyword that cannot be used here
-
+  
 at_rule_container_error.css:4:12 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected an identifier but instead found 'revert'
-
+  
     2 │ @container initial (width <= 500px) { }
     3 │ @container unset (width <= 500px) { }
   > 4 │ @container revert (width <= 500px) { }
       │            ^^^^^^
     5 │ @container revert-layer (width <= 500px) { }
     6 │ @container inherit width <= 500px) { }
-
+  
   i 'revert' is a CSS-wide keyword that cannot be used here
-
+  
 at_rule_container_error.css:5:12 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected an identifier but instead found 'revert-layer'
-
+  
     3 │ @container unset (width <= 500px) { }
     4 │ @container revert (width <= 500px) { }
   > 5 │ @container revert-layer (width <= 500px) { }
       │            ^^^^^^^^^^^^
     6 │ @container inherit width <= 500px) { }
-    7 │
-
+    7 │ 
+  
   i 'revert-layer' is a CSS-wide keyword that cannot be used here
-
+  
 at_rule_container_error.css:6:12 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected an identifier but instead found 'inherit'
-
+  
     4 │ @container revert (width <= 500px) { }
     5 │ @container revert-layer (width <= 500px) { }
   > 6 │ @container inherit width <= 500px) { }
       │            ^^^^^^^
-    7 │
+    7 │ 
     8 │ @container not width <= 500px) {  }
-
+  
   i 'inherit' is a CSS-wide keyword that cannot be used here
-
+  
 at_rule_container_error.css:6:20 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `{` but instead found `width`
-
+  
     4 │ @container revert (width <= 500px) { }
     5 │ @container revert-layer (width <= 500px) { }
   > 6 │ @container inherit width <= 500px) { }
       │                    ^^^^^
-    7 │
+    7 │ 
     8 │ @container not width <= 500px) {  }
-
+  
   i Remove width
-
+  
 at_rule_container_error.css:6:26 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a compound selector but instead found '<='.
-
+  
     4 │ @container revert (width <= 500px) { }
     5 │ @container revert-layer (width <= 500px) { }
   > 6 │ @container inherit width <= 500px) { }
       │                          ^^
-    7 │
+    7 │ 
     8 │ @container not width <= 500px) {  }
-
+  
   i Expected a compound selector here.
-
+  
     4 │ @container revert (width <= 500px) { }
     5 │ @container revert-layer (width <= 500px) { }
   > 6 │ @container inherit width <= 500px) { }
       │                          ^^
-    7 │
+    7 │ 
     8 │ @container not width <= 500px) {  }
-
+  
 at_rule_container_error.css:6:32 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `,` but instead found `px`
-
+  
     4 │ @container revert (width <= 500px) { }
     5 │ @container revert-layer (width <= 500px) { }
   > 6 │ @container inherit width <= 500px) { }
       │                                ^^
-    7 │
+    7 │ 
     8 │ @container not width <= 500px) {  }
-
+  
   i Remove px
-
+  
 at_rule_container_error.css:6:34 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `,` but instead found `)`
-
+  
     4 │ @container revert (width <= 500px) { }
     5 │ @container revert-layer (width <= 500px) { }
   > 6 │ @container inherit width <= 500px) { }
       │                                  ^
-    7 │
+    7 │ 
     8 │ @container not width <= 500px) {  }
-
+  
   i Remove )
-
+  
 at_rule_container_error.css:8:16 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `{` but instead found `width`
-
+  
      6 │ @container inherit width <= 500px) { }
-     7 │
+     7 │ 
    > 8 │ @container not width <= 500px) {  }
        │                ^^^^^
-     9 │
+     9 │ 
     10 │ @container not (width <= 500px {  }
-
+  
   i Remove width
-
+  
 at_rule_container_error.css:8:22 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a compound selector but instead found '<='.
-
+  
      6 │ @container inherit width <= 500px) { }
-     7 │
+     7 │ 
    > 8 │ @container not width <= 500px) {  }
        │                      ^^
-     9 │
+     9 │ 
     10 │ @container not (width <= 500px {  }
-
+  
   i Expected a compound selector here.
-
+  
      6 │ @container inherit width <= 500px) { }
-     7 │
+     7 │ 
    > 8 │ @container not width <= 500px) {  }
        │                      ^^
-     9 │
+     9 │ 
     10 │ @container not (width <= 500px {  }
-
+  
 at_rule_container_error.css:8:28 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `,` but instead found `px`
-
+  
      6 │ @container inherit width <= 500px) { }
-     7 │
+     7 │ 
    > 8 │ @container not width <= 500px) {  }
        │                            ^^
-     9 │
+     9 │ 
     10 │ @container not (width <= 500px {  }
-
+  
   i Remove px
-
+  
 at_rule_container_error.css:8:30 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `,` but instead found `)`
-
+  
      6 │ @container inherit width <= 500px) { }
-     7 │
+     7 │ 
    > 8 │ @container not width <= 500px) {  }
        │                              ^
-     9 │
+     9 │ 
     10 │ @container not (width <= 500px {  }
-
+  
   i Remove )
-
+  
 at_rule_container_error.css:10:32 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `)` but instead found `{`
-
+  
      8 │ @container not width <= 500px) {  }
-     9 │
+     9 │ 
   > 10 │ @container not (width <= 500px {  }
        │                                ^
     11 │ @container not (width <=) {  }
     12 │ @container not {  }
-
+  
   i Remove {
-
+  
 at_rule_container_error.css:18:34 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `{` but instead found `}`
-
+  
     16 │ @container card (inline-size > 30em) or {  }
-    17 │
+    17 │ 
   > 18 │ @container (inline-size >= 0px)  }
        │                                  ^
-    19 │
+    19 │ 
     20 │ @container { }
-
+  
   i Remove }
-
+  
 at_rule_container_error.css:22:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `}` but instead the file ends
-
+  
     20 │ @container { }
     21 │ @container () { }
-  > 22 │
-       │
-
+  > 22 │ 
+       │ 
+  
   i the file ends here
-
+  
     20 │ @container { }
     21 │ @container () { }
-  > 22 │
-       │
-
+  > 22 │ 
+       │ 
+  
 ```
