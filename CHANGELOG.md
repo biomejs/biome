@@ -55,6 +55,8 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
   Contributed by @Conaclos
 
+- [noEmptyInterface](https://biomejs.dev/linter/rules/no-empty-interface/) now ignores empty interfaces in ambient modules ([#3110](https://github.com/biomejs/biome/issues/3110)). Contributed by @Conaclos
+
 ### Parser
 
 ## 1.8.0 (2024-06-04)
