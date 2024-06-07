@@ -29,7 +29,7 @@ declare_rule! {
     /// import "./foo";
     /// ```
     /// ```js,expect_diagnostic,ignore
-    /// import "./bar/";
+    /// import "./foo/";
     /// ```
     /// ```js,expect_diagnostic,ignore
     /// import "../";
@@ -175,20 +175,20 @@ fn get_extensionless_import(
     let mut is_index_file = false;
 
     // Remove trailing slash.
-    if module_path.ends_with('/') {
+    if module_path.ends_with('/') || module_path.ends_with("/.") {
         path_parts.next_back();
 
         is_index_file = true;
     }
 
     match last_component {
-        Component::ParentDir => {
+        Component::ParentDir | Component::CurDir => {
             is_index_file = true;
         }
         // `import ".././"` is the same as `import "../"`
         // Rust Path does not expose `./` path segment at very end, likely because it does not do anything.
         // To provide proper fix, we need to remove it as well.
-        Component::Normal(_) if module_path.ends_with("./") || module_path.ends_with('.') => {
+        Component::Normal(_) if module_path.ends_with("./") => {
             // Remove useless path segment.
             path_parts.next_back();
 

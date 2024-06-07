@@ -37,6 +37,7 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 #### Bug fixes
 
+- [useImportExtensions](https://biomejs.dev/linter/rules/use-import-extensions/) now suggests a correct fix for `import '.'` and `import './.'`. Contributed by @minht11
 - The `noEmptyBlock` css lint rule now treats empty blocks containing comments as valid ones. Contributed by @Sec-ant
 
 - [useLiteralKeys](https://biomejs.dev/linter/rules/use-literal-keys/) no longer reports quoted member names ([#3085](https://github.com/biomejs/biome/issues/3085)).
