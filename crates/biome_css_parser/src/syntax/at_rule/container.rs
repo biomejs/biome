@@ -1,7 +1,7 @@
 use crate::lexer::CssLexContext;
 use crate::parser::CssParser;
 use crate::syntax::at_rule::feature::parse_any_query_feature;
-use crate::syntax::block::parse_rule_block;
+use crate::syntax::block::parse_conditional_block;
 use crate::syntax::parse_error::expected_non_css_wide_keyword_identifier;
 use crate::syntax::{is_at_declaration, parse_custom_identifier, parse_declaration};
 use biome_css_syntax::CssSyntaxKind::*;
@@ -41,7 +41,7 @@ pub(crate) fn parse_container_at_rule(p: &mut CssParser) -> ParsedSyntax {
     };
 
     parse_any_container_query(p).ok(); // TODO handle error
-    parse_rule_block(p);
+    parse_conditional_block(p);
 
     Present(m.complete(p, CSS_CONTAINER_AT_RULE))
 }

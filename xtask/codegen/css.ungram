@@ -450,6 +450,12 @@ AnyCssDeclarationOrAtRule =
     CssDeclarationWithSemicolon
     | CssAtRule
 
+// When nested in this way, the contents of a nested group rule's block are parsed as <block-contents> rather than <rule-list>:
+// https://drafts.csswg.org/css-nesting-1/#conditionals
+AnyCssConditionalBlock =
+	AnyCssDeclarationOrRuleBlock
+	| AnyCssRuleBlock
+
 // @page :left { background: red; @media (500px <= width <= 500px) {  } }
 // 						   ^^^^^^^^^^^^^^^^
 // NOTE: ';' is optional for the last declaration in a block. For declarations not at the end, the parser will raise an error if ';' is missing.
@@ -736,7 +742,7 @@ CssContainerAtRule =
 	'container'
 	name: CssCustomIdentifier?
 	query: AnyCssContainerQuery
-	block: AnyCssRuleBlock
+	block: AnyCssConditionalBlock
 
 // <container-query>
 AnyCssContainerQuery =
@@ -985,7 +991,7 @@ CssKeyframesPercentageSelector =
 CssMediaAtRule =
 	'media'
 	queries: CssMediaQueryList
-	block: AnyCssRuleBlock
+	block: AnyCssConditionalBlock
 
 // @media screen, (width > 500px), print {}
 // 				^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -1249,7 +1255,7 @@ AnyCssLayer =
 //        ^^^^^^^^^^^^^^^^
 CssLayerDeclaration =
 	references: CssLayerReferenceList
-	block: AnyCssRuleBlock
+	block: AnyCssConditionalBlock
 
 // @layer framework, bar.baz;
 //        ^^^^^^^^^^^^^^^^^^^
@@ -1285,7 +1291,7 @@ CssLayerNameList = (CssIdentifier ('.' CssIdentifier)*)
 CssSupportsAtRule =
 	'supports'
 	condition: AnyCssSupportsCondition
-	block: AnyCssRuleBlock
+	block: AnyCssConditionalBlock
 
 AnyCssSupportsCondition =
 	CssSupportsNotCondition
@@ -1362,7 +1368,7 @@ CssSupportsFeatureSelector =
 CssScopeAtRule =
 	'scope'
 	range: AnyCssScopeRange?
-	block: AnyCssRuleBlock
+	block: AnyCssConditionalBlock
 
 AnyCssScopeRange =
 	CssScopeRangeStart

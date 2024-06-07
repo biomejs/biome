@@ -300,7 +300,7 @@ impl CssContainerAtRule {
                 .splice_slots(2usize..=2usize, once(Some(element.into_syntax().into()))),
         )
     }
-    pub fn with_block(self, element: AnyCssRuleBlock) -> Self {
+    pub fn with_block(self, element: AnyCssConditionalBlock) -> Self {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(3usize..=3usize, once(Some(element.into_syntax().into()))),
@@ -1086,7 +1086,7 @@ impl CssLayerDeclaration {
                 .splice_slots(0usize..=0usize, once(Some(element.into_syntax().into()))),
         )
     }
-    pub fn with_block(self, element: AnyCssRuleBlock) -> Self {
+    pub fn with_block(self, element: AnyCssConditionalBlock) -> Self {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(1usize..=1usize, once(Some(element.into_syntax().into()))),
@@ -1188,7 +1188,7 @@ impl CssMediaAtRule {
                 .splice_slots(1usize..=1usize, once(Some(element.into_syntax().into()))),
         )
     }
-    pub fn with_block(self, element: AnyCssRuleBlock) -> Self {
+    pub fn with_block(self, element: AnyCssConditionalBlock) -> Self {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(2usize..=2usize, once(Some(element.into_syntax().into()))),
@@ -2116,7 +2116,7 @@ impl CssScopeAtRule {
             once(element.map(|element| element.into_syntax().into())),
         ))
     }
-    pub fn with_block(self, element: AnyCssRuleBlock) -> Self {
+    pub fn with_block(self, element: AnyCssConditionalBlock) -> Self {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(2usize..=2usize, once(Some(element.into_syntax().into()))),
@@ -2240,7 +2240,7 @@ impl CssSupportsAtRule {
                 .splice_slots(1usize..=1usize, once(Some(element.into_syntax().into()))),
         )
     }
-    pub fn with_block(self, element: AnyCssRuleBlock) -> Self {
+    pub fn with_block(self, element: AnyCssConditionalBlock) -> Self {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(2usize..=2usize, once(Some(element.into_syntax().into()))),

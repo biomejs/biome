@@ -327,20 +327,23 @@ CssRoot {
                                         },
                                     },
                                 ],
-                                block: CssRuleBlock {
+                                block: CssDeclarationOrRuleBlock {
                                     l_curly_token: L_CURLY@517..518 "{" [] [],
-                                    rules: CssRuleList [
-                                        CssQualifiedRule {
-                                            prelude: CssSelectorList [
-                                                CssCompoundSelector {
-                                                    nesting_selector_token: missing (optional),
-                                                    simple_selector: CssTypeSelector {
-                                                        namespace: missing (optional),
-                                                        ident: CssIdentifier {
-                                                            value_token: IDENT@518..529 "article" [Newline("\n"), Whitespace("\t\t")] [Whitespace(" ")],
+                                    items: CssDeclarationOrRuleList [
+                                        CssNestedQualifiedRule {
+                                            prelude: CssRelativeSelectorList [
+                                                CssRelativeSelector {
+                                                    combinator: missing (optional),
+                                                    selector: CssCompoundSelector {
+                                                        nesting_selector_token: missing (optional),
+                                                        simple_selector: CssTypeSelector {
+                                                            namespace: missing (optional),
+                                                            ident: CssIdentifier {
+                                                                value_token: IDENT@518..529 "article" [Newline("\n"), Whitespace("\t\t")] [Whitespace(" ")],
+                                                            },
                                                         },
+                                                        sub_selectors: CssSubSelectorList [],
                                                     },
-                                                    sub_selectors: CssSubSelectorList [],
                                                 },
                                             ],
                                             block: CssDeclarationOrRuleBlock {
@@ -597,18 +600,20 @@ CssRoot {
                           0: CSS_NUMBER_LITERAL@510..513 "900" [] []
                           1: IDENT@513..515 "px" [] []
                       2: R_PAREN@515..517 ")" [] [Whitespace(" ")]
-                2: CSS_RULE_BLOCK@517..560
+                2: CSS_DECLARATION_OR_RULE_BLOCK@517..560
                   0: L_CURLY@517..518 "{" [] []
-                  1: CSS_RULE_LIST@518..557
-                    0: CSS_QUALIFIED_RULE@518..557
-                      0: CSS_SELECTOR_LIST@518..529
-                        0: CSS_COMPOUND_SELECTOR@518..529
+                  1: CSS_DECLARATION_OR_RULE_LIST@518..557
+                    0: CSS_NESTED_QUALIFIED_RULE@518..557
+                      0: CSS_RELATIVE_SELECTOR_LIST@518..529
+                        0: CSS_RELATIVE_SELECTOR@518..529
                           0: (empty)
-                          1: CSS_TYPE_SELECTOR@518..529
+                          1: CSS_COMPOUND_SELECTOR@518..529
                             0: (empty)
-                            1: CSS_IDENTIFIER@518..529
-                              0: IDENT@518..529 "article" [Newline("\n"), Whitespace("\t\t")] [Whitespace(" ")]
-                          2: CSS_SUB_SELECTOR_LIST@529..529
+                            1: CSS_TYPE_SELECTOR@518..529
+                              0: (empty)
+                              1: CSS_IDENTIFIER@518..529
+                                0: IDENT@518..529 "article" [Newline("\n"), Whitespace("\t\t")] [Whitespace(" ")]
+                            2: CSS_SUB_SELECTOR_LIST@529..529
                       1: CSS_DECLARATION_OR_RULE_BLOCK@529..557
                         0: L_CURLY@529..530 "{" [] []
                         1: CSS_DECLARATION_OR_RULE_LIST@530..553
