@@ -42,7 +42,7 @@ declare_rule! {
         name: "noSubstr",
         language: "js",
         recommended: false,
-        fix_kind: FixKind::Safe,
+        fix_kind: FixKind::Unsafe,
     }
 }
 
