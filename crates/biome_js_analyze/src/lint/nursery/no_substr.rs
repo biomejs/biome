@@ -104,7 +104,6 @@ impl Rule for NoSubstr {
         let callee = node.callee().ok()?;
         let expression = callee.as_js_static_member_expression()?;
         let member = expression.member().ok()?;
-        let member_name = state.member_name.text();
         let replaced_member_name = state.replaced_member_name;
 
         let mut mutation = ctx.root().begin();
@@ -114,7 +113,7 @@ impl Rule for NoSubstr {
         Some(JsRuleAction::new(
             ActionCategory::QuickFix,
             ctx.metadata().applicability(),
-            markup! { "Replace inconsistent string function "<Emphasis>{member_name}</Emphasis>" with "<Emphasis>{replaced_member_name}</Emphasis>"." }
+            markup! { "Replace with "<Emphasis>"."{replaced_member_name}"()"</Emphasis>"" }
                 .to_owned(),
             mutation,
         ))
