@@ -2119,10 +2119,10 @@
 						{ "type": "null" }
 					]
 				},
-				"useValidAutocomplete": {
-					"description": "Use valid values for the autocomplete attribute on input elements.",
+				"useTrimStartEnd": {
+					"description": "Enforce the use of trimStart() over trimLeft() and trimeEnd() over trimRight().",
 					"anyOf": [
-						{ "$ref": "#/definitions/UseValidAutocompleteConfiguration" },
+						{ "$ref": "#/definitions/RuleFixConfiguration" },
 						{ "type": "null" }
 					]
 				}

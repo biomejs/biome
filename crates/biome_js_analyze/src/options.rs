@@ -357,6 +357,8 @@ pub type UseThrowOnlyError =
     <lint::nursery::use_throw_only_error::UseThrowOnlyError as biome_analyze::Rule>::Options;
 pub type UseTopLevelRegex =
     <lint::nursery::use_top_level_regex::UseTopLevelRegex as biome_analyze::Rule>::Options;
+pub type UseTrimStartEnd =
+    <lint::nursery::use_trim_start_end::UseTrimStartEnd as biome_analyze::Rule>::Options;
 pub type UseValidAnchor =
     <lint::a11y::use_valid_anchor::UseValidAnchor as biome_analyze::Rule>::Options;
 pub type UseValidAriaProps =

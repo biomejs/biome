@@ -168,7 +168,7 @@ define_categories! {
     "lint/nursery/useThrowNewError": "https://biomejs.dev/linter/rules/use-throw-new-error",
     "lint/nursery/useThrowOnlyError": "https://biomejs.dev/linter/rules/use-throw-only-error",
     "lint/nursery/useTopLevelRegex": "https://biomejs.dev/linter/rules/use-top-level-regex",
-    "lint/nursery/useValidAutocomplete": "https://biomejs.dev/linter/rules/use-valid-autocomplete",
+    "lint/nursery/useTrimStartEnd": "https://biomejs.dev/linter/rules/use-trim-start-end",
     "lint/performance/noAccumulatingSpread": "https://biomejs.dev/linter/rules/no-accumulating-spread",
     "lint/performance/noBarrelFile": "https://biomejs.dev/linter/rules/no-barrel-file",
     "lint/performance/noDelete": "https://biomejs.dev/linter/rules/no-delete",
