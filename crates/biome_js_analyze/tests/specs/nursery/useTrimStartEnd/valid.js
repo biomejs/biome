@@ -1,15 +1,7 @@
----
-source: crates/biome_js_analyze/tests/spec_tests.rs
-expression: valid.js
----
-# Input
-```jsx
 const foo = bar.trimStart();
 const foo = bar.trimEnd();
 bar.trimStart?.()
 bar['trimStart']()
-<<<<<<< HEAD
-=======
 foo.trimStart(),
 foo.trimStart?.(),
 foo.trimEnd(),
@@ -32,6 +24,3 @@ foo.bar(foo.trimLeft),
 // `trimLeft` is in `MemberExpression.object`
 trimLeft.foo(),
 foo.trimLeft.bar(),
->>>>>>> f5418c0e88 (feat(biome_js_analyzer): `useTrimStartEnd`)
-
-```

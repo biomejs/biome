@@ -1175,9 +1175,9 @@ export interface Nursery {
 	 */
 	useTopLevelRegex?: RuleConfiguration_for_Null;
 	/**
-	 * Use valid values for the autocomplete attribute on input elements.
+	 * Enforce the use of trimStart() over trimLeft() and trimeEnd() over trimRight().
 	 */
-	useValidAutocomplete?: RuleConfiguration_for_UseValidAutocompleteOptions;
+	useTrimStartEnd?: RuleFixConfiguration_for_Null;
 }
 /**
  * A list of rules that belong to this group
@@ -2429,7 +2429,7 @@ export type Category =
 	| "lint/nursery/useThrowNewError"
 	| "lint/nursery/useThrowOnlyError"
 	| "lint/nursery/useTopLevelRegex"
-	| "lint/nursery/useValidAutocomplete"
+	| "lint/nursery/useTrimStartEnd"
 	| "lint/performance/noAccumulatingSpread"
 	| "lint/performance/noBarrelFile"
 	| "lint/performance/noDelete"
