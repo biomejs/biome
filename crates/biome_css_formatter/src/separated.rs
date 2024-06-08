@@ -110,7 +110,7 @@ pub(crate) trait FormatAstSeparatedListWithOptionsExtension<O>:
     /// calling the `separator_factory` function. The last trailing separator
     /// will not be printed by default. Use `with_trailing_separator` to add it
     /// in where necessary.
-    fn format_separated_with_options1(
+    fn format_separated_with_options(
         &self,
         separator: &'static str,
         options: O,

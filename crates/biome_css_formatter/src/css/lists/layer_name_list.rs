@@ -9,7 +9,7 @@ impl FormatRule<CssLayerNameList> for FormatCssLayerNameList {
     type Context = CssFormatContext;
     fn fmt(&self, node: &CssLayerNameList, f: &mut CssFormatter) -> FormatResult<()> {
         f.join()
-            .entries(node.format_separated_with_options1(
+            .entries(node.format_separated_with_options(
                 ".",
                 FormatCssIdentifierOptions::default().prevent_lowercase(true),
             ))
