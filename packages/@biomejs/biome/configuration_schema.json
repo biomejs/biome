@@ -1769,10 +1769,10 @@
 						{ "type": "null" }
 					]
 				},
-				"noShorthandPropertyOverrides": {
-					"description": "Disallow shorthand properties that override related longhand properties.",
+				"noSubstr": {
+					"description": "Enforce the use of slice()oversubstr()andsubstring()`.",
 					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "$ref": "#/definitions/RuleFixConfiguration" },
 						{ "type": "null" }
 					]
 				},

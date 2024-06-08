@@ -2857,9 +2857,9 @@ pub struct Nursery {
     #[doc = "Disallow specified modules when loaded by import or require."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_restricted_imports: Option<RuleConfiguration<NoRestrictedImports>>,
-    #[doc = "Disallow shorthand properties that override related longhand properties."]
+    #[doc = "Enforce the use of slice()oversubstr()andsubstring()`."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_shorthand_property_overrides: Option<RuleConfiguration<NoShorthandPropertyOverrides>>,
+    pub no_substr: Option<RuleFixConfiguration<NoSubstr>>,
     #[doc = "Disallow the use of dependencies that aren't specified in the package.json."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_undeclared_dependencies: Option<RuleConfiguration<NoUndeclaredDependencies>>,
@@ -2984,7 +2984,7 @@ impl Nursery {
         "noMisplacedAssertion",
         "noReactSpecificProps",
         "noRestrictedImports",
-        "noShorthandPropertyOverrides",
+        "noSubstr",
         "noUndeclaredDependencies",
         "noUnknownFunction",
         "noUnknownMediaFeatureName",
@@ -3047,7 +3047,6 @@ impl Nursery {
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[9]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[10]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[11]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[15]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[17]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[20]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[21]),
@@ -3194,7 +3193,7 @@ impl Nursery {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[14]));
             }
         }
-        if let Some(rule) = self.no_shorthand_property_overrides.as_ref() {
+        if let Some(rule) = self.no_substr.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[15]));
             }
@@ -3423,7 +3422,7 @@ impl Nursery {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[14]));
             }
         }
-        if let Some(rule) = self.no_shorthand_property_overrides.as_ref() {
+        if let Some(rule) = self.no_substr.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[15]));
             }
@@ -3669,8 +3668,8 @@ impl Nursery {
                 .no_restricted_imports
                 .as_ref()
                 .map(|conf| (conf.level(), conf.get_options())),
-            "noShorthandPropertyOverrides" => self
-                .no_shorthand_property_overrides
+            "noSubstr" => self
+                .no_substr
                 .as_ref()
                 .map(|conf| (conf.level(), conf.get_options())),
             "noUndeclaredDependencies" => self

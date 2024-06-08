@@ -1,0 +1,1 @@
+foo.slice(beginIndex, endIndex);
