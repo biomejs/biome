@@ -65,7 +65,6 @@ impl Rule for NoSubstr {
 
             Some(NoSubstrState {
                 value_token,
-                replaced_member_name: "slice",
                 has_arguments: !args.is_empty(),
             })
         } else {
@@ -75,12 +74,12 @@ impl Rule for NoSubstr {
 
     fn diagnostic(_: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
         let diagnostic_message = markup! {
-            "Avoid using "{state.member_name().text()}" and consider using "{state.replaced_member_name}" instead."
+            "Avoid using "{state.member_name().text()}" and consider using slice instead."
         }
         .to_owned();
         let note_message = {
             markup! {
-                "Use "<Emphasis>"."{state.member_name().text()}"()"</Emphasis>" instead of "<Emphasis>"."{state.replaced_member_name}"()"</Emphasis>"."
+                "Use "<Emphasis>"."{state.member_name().text()}"()"</Emphasis>" instead of "<Emphasis>".slice()"</Emphasis>"."
             }
             .to_owned()
         };
@@ -102,17 +101,15 @@ impl Rule for NoSubstr {
         let callee = node.callee().ok()?;
         let expression = callee.as_js_static_member_expression()?;
         let member = expression.member().ok()?;
-        let replaced_member_name = state.replaced_member_name;
 
         let mut mutation = ctx.root().begin();
-        let replaced_function = make::js_name(make::ident(replaced_member_name));
+        let replaced_function = make::js_name(make::ident("slice"));
         mutation.replace_element(member.into(), replaced_function.into());
 
         Some(JsRuleAction::new(
             ActionCategory::QuickFix,
             ctx.metadata().applicability(),
-            markup! { "Replace with "<Emphasis>"."{replaced_member_name}"()"</Emphasis>"" }
-                .to_owned(),
+            markup! { "Replace with "<Emphasis>".slice()"</Emphasis>"." }.to_owned(),
             mutation,
         ))
     }
@@ -121,7 +118,6 @@ impl Rule for NoSubstr {
 #[derive(Debug, Clone)]
 pub struct NoSubstrState {
     value_token: JsSyntaxToken,
-    replaced_member_name: &'static str,
     has_arguments: bool,
 }
 
