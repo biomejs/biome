@@ -14,7 +14,7 @@ declare_rule! {
     /// `slice()` is preferred over `substr()` and `substring()` because it is a more popular option with clearer behavior,
     ///  and it has a consistent counterpart in arrays.
     ///
-    /// Note that `substring` and `slice` are not identical when arguments are passed.
+    /// Note that `substr`, `substring` and `slice` are not identical when arguments are passed.
     /// For detailed differences, refer to the MDN documentation:
     /// - [The difference between substring() and substr()](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/substring#the_difference_between_substring_and_substr)
     /// - [Differences between substring() and slice()](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/substring#differences_between_substring_and_slice)
