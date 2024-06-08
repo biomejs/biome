@@ -3,16 +3,23 @@ use biome_analyze::{
     RuleSource,
 };
 use biome_console::markup;
+<<<<<<< HEAD
 use biome_js_factory::make::{self};
 use biome_js_syntax::{
     AnyJsExpression, AnyJsLiteralExpression, AnyJsName, AnyJsTemplateElement, JsCallExpression,
     JsLanguage, JsSyntaxKind, JsSyntaxToken, T,
 };
 use biome_rowan::{AstSeparatedList, BatchMutationExt, SyntaxToken, TextRange};
+=======
+use biome_js_factory::make;
+use biome_js_syntax::JsCallExpression;
+use biome_rowan::{BatchMutationExt, TextRange, TokenText};
+>>>>>>> 0ee594f175 (feat(biome_js_analyzer): `useTrimStartEnd`)
 
 use crate::JsRuleAction;
 
 declare_rule! {
+<<<<<<< HEAD
     /// Enforce the use of `String.trimStart()` and `String.trimEnd()` over `String.trimLeft()` and `String.trimRight()`.
     ///
     /// While `String.trimLeft()` and `String.trimRight()` are aliases for `String.trimStart()` and `String.trimEnd()`,
@@ -22,6 +29,12 @@ declare_rule! {
     /// See the MDN documentation for more details:
     /// - [String.prototype.trimStart()](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/trimStart)
     /// - [String.prototype.trimEnd()](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/trimEnd)
+=======
+    /// Enforce the use of trimStart() over trimLeft() and trimeEnd() over trimRight().
+    ///
+    /// While `trimLeft()` and `trimRight()` are aliases for `trimStart()` and `trimEnd()`,
+    /// using the latter helps maintain consistency and uses direction-independent wording.
+>>>>>>> 0ee594f175 (feat(biome_js_analyzer): `useTrimStartEnd`)
     ///
     /// ## Examples
     ///
@@ -57,9 +70,15 @@ declare_rule! {
 
 #[derive(Debug, Clone)]
 pub struct UseTrimStartEndState {
+<<<<<<< HEAD
     member_name: String,
     span: TextRange,
     suggested_name: &'static str,
+=======
+    member_name: TokenText,
+    span: TextRange,
+    replaced_member_name: &'static str,
+>>>>>>> 0ee594f175 (feat(biome_js_analyzer): `useTrimStartEnd`)
 }
 
 impl Rule for UseTrimStartEnd {
@@ -70,6 +89,7 @@ impl Rule for UseTrimStartEnd {
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
+<<<<<<< HEAD
         let arguments = node.arguments().ok()?;
         let args = arguments.args();
 
@@ -112,21 +132,51 @@ impl Rule for UseTrimStartEnd {
             member_name,
             span,
             suggested_name: suggested_name?,
+=======
+        let callee = node.callee().ok()?;
+        let expression = callee.as_js_static_member_expression()?;
+        let value_token = expression.member().ok()?.value_token().ok()?;
+        let name = value_token.text_trimmed();
+        let suggested_name = match name {
+            "trimLeft" => Some("trimStart"),
+            "trimRight" => Some("trimEnd"),
+            _ => None,
+        }?;
+
+        Some(UseTrimStartEndState {
+            member_name: value_token.token_text_trimmed(),
+            span: value_token.text_range(),
+            replaced_member_name: suggested_name,
+>>>>>>> 0ee594f175 (feat(biome_js_analyzer): `useTrimStartEnd`)
         })
     }
 
     fn diagnostic(_: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
+<<<<<<< HEAD
         let diagnostic_message = markup! {
             "Use "{state.suggested_name}" instead of "{state.member_name}"."
+=======
+        let member_name = state.member_name.text();
+        let replaced_member_name = state.replaced_member_name;
+        let diagnostic_message = markup! {
+            "Use "{member_name}" instead of "{replaced_member_name}"."
+>>>>>>> 0ee594f175 (feat(biome_js_analyzer): `useTrimStartEnd`)
         }
         .to_owned();
         let note_message = {
             markup! {
+<<<<<<< HEAD
                 ""{state.member_name}"() is an alias for "{state.suggested_name}"."
             }
             .to_owned()
         };
 
+=======
+                ""{member_name}"() is an alias for "{replaced_member_name}"."
+            }
+            .to_owned()
+        };
+>>>>>>> 0ee594f175 (feat(biome_js_analyzer): `useTrimStartEnd`)
         Some(
             RuleDiagnostic::new(rule_category!(), state.span, diagnostic_message)
                 .note(note_message),
@@ -136,6 +186,7 @@ impl Rule for UseTrimStartEnd {
     fn action(ctx: &RuleContext<Self>, state: &Self::State) -> Option<JsRuleAction> {
         let node = ctx.query();
         let callee = node.callee().ok()?;
+<<<<<<< HEAD
 
         let is_computed_member = callee.as_js_computed_member_expression().is_some();
         let is_template = if is_computed_member {
@@ -221,16 +272,31 @@ impl Rule for UseTrimStartEnd {
 
         let mut mutation = ctx.root().begin();
         mutation.replace_node(callee, call_expression);
+=======
+        let expression = callee.as_js_static_member_expression()?;
+        let member = expression.member().ok()?;
+        let member_name = state.member_name.text();
+        let replaced_member_name = state.replaced_member_name;
+
+        let mut mutation = ctx.root().begin();
+        let replaced_function = make::js_name(make::ident(replaced_member_name));
+        mutation.replace_element(member.into(), replaced_function.into());
+>>>>>>> 0ee594f175 (feat(biome_js_analyzer): `useTrimStartEnd`)
 
         Some(JsRuleAction::new(
             ActionCategory::QuickFix,
             ctx.metadata().applicability(),
+<<<<<<< HEAD
             markup! { "Replace "<Emphasis>{state.member_name}</Emphasis>" with "<Emphasis>{replaced_member_name}</Emphasis>"." }
+=======
+            markup! { "Replace "<Emphasis>{member_name}</Emphasis>" with "<Emphasis>{replaced_member_name}</Emphasis>"." }
+>>>>>>> 0ee594f175 (feat(biome_js_analyzer): `useTrimStartEnd`)
                 .to_owned(),
             mutation,
         ))
     }
 }
+<<<<<<< HEAD
 
 fn generate_syntax_token(callee: AnyJsExpression) -> Option<SyntaxToken<JsLanguage>> {
     let token = if let AnyJsExpression::JsComputedMemberExpression(expression) = callee {
@@ -281,3 +347,5 @@ fn suggested_name(text: &SyntaxToken<JsLanguage>) -> String {
         cleaned.to_string()
     }
 }
+=======
+>>>>>>> 0ee594f175 (feat(biome_js_analyzer): `useTrimStartEnd`)
