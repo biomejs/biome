@@ -90,7 +90,7 @@ impl Rule for NoSubstr {
         .to_owned();
         let note_message = {
             markup! {
-                ""{member_name}" is an alias for "{replaced_member_name}"."
+                "Use "<Emphasis>"."{member_name}"()"</Emphasis>" instead of "<Emphasis>"."{replaced_member_name}"()"</Emphasis>"."
             }
             .to_owned()
         };
