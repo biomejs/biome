@@ -3,8 +3,8 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_js_factory::make;
-use biome_js_syntax::JsCallExpression;
-use biome_rowan::{AstSeparatedList, BatchMutationExt, TextRange, TokenText};
+use biome_js_syntax::{JsCallExpression, JsSyntaxToken};
+use biome_rowan::{AstSeparatedList, BatchMutationExt};
 
 use crate::JsRuleAction;
 
@@ -63,8 +63,7 @@ impl Rule for NoSubstr {
 
         if matches!(string_function_name, "substr" | "substring") {
             Some(NoSubstrState {
-                member_name: value_token.token_text_trimmed(),
-                span: value_token.text_range(),
+                value_token,
                 replaced_member_name: "slice",
                 has_arguments: !args.is_empty(),
             })
@@ -74,21 +73,23 @@ impl Rule for NoSubstr {
     }
 
     fn diagnostic(_: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
-        let member_name = state.member_name.text();
-        let replaced_member_name = state.replaced_member_name;
         let diagnostic_message = markup! {
-            "Avoid using "{member_name}" and consider using "{replaced_member_name}" instead."
+            "Avoid using "{state.value_token.token_text_trimmed().text()}" and consider using "{state.replaced_member_name}" instead."
         }
         .to_owned();
         let note_message = {
             markup! {
-                "Use "<Emphasis>"."{member_name}"()"</Emphasis>" instead of "<Emphasis>"."{replaced_member_name}"()"</Emphasis>"."
+                "Use "<Emphasis>"."{state.value_token.token_text_trimmed().text()}"()"</Emphasis>" instead of "<Emphasis>"."{state.replaced_member_name}"()"</Emphasis>"."
             }
             .to_owned()
         };
         Some(
-            RuleDiagnostic::new(rule_category!(), state.span, diagnostic_message)
-                .note(note_message),
+            RuleDiagnostic::new(
+                rule_category!(),
+                state.value_token.text_range(),
+                diagnostic_message,
+            )
+            .note(note_message),
         )
     }
 
@@ -122,8 +123,7 @@ impl Rule for NoSubstr {
 
 #[derive(Debug, Clone)]
 pub struct NoSubstrState {
-    member_name: TokenText,
-    span: TextRange,
+    value_token: JsSyntaxToken,
     replaced_member_name: &'static str,
     has_arguments: bool,
 }
