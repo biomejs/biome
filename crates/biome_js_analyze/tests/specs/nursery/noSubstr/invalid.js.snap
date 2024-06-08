@@ -39,7 +39,9 @@ invalid.js:1:5 lint/nursery/noSubstr  FIXABLE  ━━━━━━━━━━━
   
   i Use .substr() instead of .slice().
   
-  i Safe fix: Replace with .slice()
+  i See MDN web docs for more details.
+  
+  i Safe fix: Replace with .slice().
   
      1    │ - foo.substr()
         1 │ + foo.slice()
@@ -62,7 +64,9 @@ invalid.js:2:6 lint/nursery/noSubstr  FIXABLE  ━━━━━━━━━━━
   
   i Use .substr() instead of .slice().
   
-  i Safe fix: Replace with .slice()
+  i See MDN web docs for more details.
+  
+  i Safe fix: Replace with .slice().
   
      1  1 │   foo.substr()
      2    │ - foo?.substr()
@@ -87,7 +91,9 @@ invalid.js:3:10 lint/nursery/noSubstr  FIXABLE  ━━━━━━━━━━�
   
   i Use .substring() instead of .slice().
   
-  i Safe fix: Replace with .slice()
+  i See MDN web docs for more details.
+  
+  i Safe fix: Replace with .slice().
   
      1  1 │   foo.substr()
      2  2 │   foo?.substr()
@@ -113,7 +119,9 @@ invalid.js:4:11 lint/nursery/noSubstr  FIXABLE  ━━━━━━━━━━�
   
   i Use .substring() instead of .slice().
   
-  i Safe fix: Replace with .slice()
+  i See MDN web docs for more details.
+  
+  i Safe fix: Replace with .slice().
   
      2  2 │   foo?.substr()
      3  3 │   foo.bar?.substring()
@@ -139,7 +147,9 @@ invalid.js:5:9 lint/nursery/noSubstr  FIXABLE  ━━━━━━━━━━━
   
   i Use .substr() instead of .slice().
   
-  i Safe fix: Replace with .slice()
+  i See MDN web docs for more details.
+  
+  i Safe fix: Replace with .slice().
   
      3  3 │   foo.bar?.substring()
      4  4 │   foo?.[0]?.substring()
@@ -165,7 +175,9 @@ invalid.js:6:10 lint/nursery/noSubstr  FIXABLE  ━━━━━━━━━━�
   
   i Use .substring() instead of .slice().
   
-  i Safe fix: Replace with .slice()
+  i See MDN web docs for more details.
+  
+  i Safe fix: Replace with .slice().
   
      4  4 │   foo?.[0]?.substring()
      5  5 │   foo.bar.substr?.()
@@ -191,7 +203,9 @@ invalid.js:7:15 lint/nursery/noSubstr  FIXABLE  ━━━━━━━━━━�
   
   i Use .substr() instead of .slice().
   
-  i Safe fix: Replace with .slice()
+  i See MDN web docs for more details.
+  
+  i Safe fix: Replace with .slice().
   
      5  5 │   foo.bar.substr?.()
      6  6 │   foo.bar?.substring?.()
@@ -217,7 +231,9 @@ invalid.js:8:14 lint/nursery/noSubstr  FIXABLE  ━━━━━━━━━━�
   
   i Use .substring() instead of .slice().
   
-  i Safe fix: Replace with .slice()
+  i See MDN web docs for more details.
+  
+  i Safe fix: Replace with .slice().
   
      6  6 │   foo.bar?.substring?.()
      7  7 │   foo.bar?.baz?.substr()
@@ -243,7 +259,9 @@ invalid.js:9:14 lint/nursery/noSubstr  FIXABLE  ━━━━━━━━━━�
   
   i Use .substr() instead of .slice().
   
-  i Safe fix: Replace with .slice()
+  i See MDN web docs for more details.
+  
+  i Safe fix: Replace with .slice().
   
      7  7 │   foo.bar?.baz?.substr()
      8  8 │   foo.bar?.baz.substring()
@@ -269,7 +287,9 @@ invalid.js:10:7 lint/nursery/noSubstr  FIXABLE  ━━━━━━━━━━�
   
   i Use .substr() instead of .slice().
   
-  i Safe fix: Replace with .slice()
+  i See MDN web docs for more details.
+  
+  i Safe fix: Replace with .slice().
   
      8  8 │   foo.bar?.baz.substring()
      9  9 │   foo.bar.baz?.substr()
@@ -295,6 +315,8 @@ invalid.js:11:7 lint/nursery/noSubstr ━━━━━━━━━━━━━━
   
   i Use .substr() instead of .slice().
   
+  i See MDN web docs for more details.
+  
 
 ```
 
@@ -311,6 +333,8 @@ invalid.js:12:7 lint/nursery/noSubstr ━━━━━━━━━━━━━━
     14 │ "foo".substring(length, 0) // "foo".slice(0, Math.max(0, length))
   
   i Use .substr() instead of .slice().
+  
+  i See MDN web docs for more details.
   
 
 ```
@@ -329,6 +353,8 @@ invalid.js:13:7 lint/nursery/noSubstr ━━━━━━━━━━━━━━
   
   i Use .substr() instead of .slice().
   
+  i See MDN web docs for more details.
+  
 
 ```
 
@@ -345,6 +371,8 @@ invalid.js:14:7 lint/nursery/noSubstr ━━━━━━━━━━━━━━
     16 │ foo.substring(start, end)
   
   i Use .substring() instead of .slice().
+  
+  i See MDN web docs for more details.
   
 
 ```
@@ -363,6 +391,8 @@ invalid.js:15:5 lint/nursery/noSubstr ━━━━━━━━━━━━━━
   
   i Use .substring() instead of .slice().
   
+  i See MDN web docs for more details.
+  
 
 ```
 
@@ -379,6 +409,8 @@ invalid.js:16:5 lint/nursery/noSubstr ━━━━━━━━━━━━━━
     18 │ // Extra arguments
   
   i Use .substring() instead of .slice().
+  
+  i See MDN web docs for more details.
   
 
 ```
@@ -397,6 +429,8 @@ invalid.js:17:7 lint/nursery/noSubstr ━━━━━━━━━━━━━━
   
   i Use .substring() instead of .slice().
   
+  i See MDN web docs for more details.
+  
 
 ```
 
@@ -412,6 +446,8 @@ invalid.js:19:5 lint/nursery/noSubstr ━━━━━━━━━━━━━━
     20 │ 
   
   i Use .substring() instead of .slice().
+  
+  i See MDN web docs for more details.
   
 
 ```
