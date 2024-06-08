@@ -55,7 +55,7 @@ declare_rule! {
     /// ```
     ///
     pub NoUnknownPseudoClassSelector {
-        version: "1.8.0",
+        version: "next",
         name: "noUnknownPseudoClassSelector",
         language: "css",
         recommended: true,
