@@ -1331,6 +1331,11 @@ pub(crate) fn migrate_eslint_any_rule(
                 .get_or_insert(Default::default());
             rule.set_level(rule_severity.into());
         }
+        "sonarjs/prefer-while" => {
+            let group = rules.style.get_or_insert_with(Default::default);
+            let rule = group.use_while.get_or_insert(Default::default());
+            rule.set_level(rule_severity.into());
+        }
         "unicorn/error-message" => {
             if !options.include_nursery {
                 return false;
@@ -1447,6 +1452,16 @@ pub(crate) fn migrate_eslint_any_rule(
             }
             let group = rules.nursery.get_or_insert_with(Default::default);
             let rule = group.use_throw_new_error.get_or_insert(Default::default());
+            rule.set_level(rule_severity.into());
+        }
+        "unused-imports/no-unused-imports" => {
+            let group = rules.correctness.get_or_insert_with(Default::default);
+            let rule = group.no_unused_imports.get_or_insert(Default::default());
+            rule.set_level(rule_severity.into());
+        }
+        "unused-imports/no-unused-vars" => {
+            let group = rules.correctness.get_or_insert_with(Default::default);
+            let rule = group.no_unused_variables.get_or_insert(Default::default());
             rule.set_level(rule_severity.into());
         }
         "use-isnan" => {

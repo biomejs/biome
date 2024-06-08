@@ -2,7 +2,6 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: css/loose/loose.css
 ---
-
 # Input
 
 ```css
@@ -52,5 +51,3 @@ div {
   background-image: url() center center no-repeat black;
 }
 ```
-
-

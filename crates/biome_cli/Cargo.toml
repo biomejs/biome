@@ -54,7 +54,7 @@ tokio                    = { workspace = true, features = ["io-std", "io-util", 
 tracing                  = { workspace = true }
 tracing-appender         = "0.2.3"
 tracing-subscriber       = { workspace = true, features = ["env-filter", "json"] }
-tracing-tree             = "0.3.0"
+tracing-tree             = "0.3.1"
 
 [target.'cfg(unix)'.dependencies]
 libc  = "0.2.154"

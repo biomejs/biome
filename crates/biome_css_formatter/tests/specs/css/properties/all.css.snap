@@ -30,6 +30,15 @@ div {
 	);
 }
 
+.variable {
+	--myVariableName: 10px;
+	margin: var(--myVariableName);
+}
+
+.function {
+	transform: translateX(10px) translateY(10px);
+}
+
 ```
 
 
@@ -67,5 +76,14 @@ div {
 		180deg,
 		180deg
 	);
+}
+
+.variable {
+	--myVariableName: 10px;
+	margin: var(--myVariableName);
+}
+
+.function {
+	transform: translateX(10px) translateY(10px);
 }
 ```
