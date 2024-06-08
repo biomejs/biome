@@ -101,9 +101,7 @@ impl Rule for NoSubstr {
     }
 
     fn action(ctx: &RuleContext<Self>, state: &Self::State) -> Option<JsRuleAction> {
-        if (state.member_name == "substr" || state.member_name == "substring")
-            && state.has_arguments
-        {
+        if state.has_arguments {
             // If the function has arguments, we cannot replace it with slice() as it has different behavior.
             // - https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/substring#differences_between_substring_and_slice
             // - https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/substr#description
