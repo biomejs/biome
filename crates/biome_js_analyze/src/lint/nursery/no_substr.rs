@@ -83,9 +83,15 @@ impl Rule for NoSubstr {
             }
             .to_owned()
         };
+        let mdn_link = {
+            markup! {
+                "See "<Hyperlink href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/substring#the_difference_between_substring_and_substr">"MDN web docs"</Hyperlink>" for more details."
+            }.to_owned()
+        };
         Some(
             RuleDiagnostic::new(rule_category!(), state.span(), diagnostic_message)
-                .note(note_message),
+                .note(note_message)
+                .note(mdn_link),
         )
     }
 
