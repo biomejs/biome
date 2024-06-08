@@ -2301,7 +2301,7 @@ CssRoot {
                     l_paren_token: L_PAREN@2191..2192 "(" [] [],
                     declaration: CssDeclaration {
                         property: CssGenericProperty {
-                            name: CssIdentifier {
+                            name: CssDashedIdentifier {
                                 value_token: IDENT@2192..2197 "--foo" [] [],
                             },
                             colon_token: COLON@2197..2199 ":" [] [Whitespace(" ")],
@@ -3215,7 +3215,7 @@ CssRoot {
                     l_paren_token: L_PAREN@2939..2943 "(" [] [Whitespace("   ")],
                     declaration: CssDeclaration {
                         property: CssGenericProperty {
-                            name: CssIdentifier {
+                            name: CssDashedIdentifier {
                                 value_token: IDENT@2943..2948 "--var" [] [],
                             },
                             colon_token: COLON@2948..2952 ":" [] [Whitespace("   ")],
@@ -4830,7 +4830,7 @@ CssRoot {
           0: L_PAREN@2191..2192 "(" [] []
           1: CSS_DECLARATION@2192..2204
             0: CSS_GENERIC_PROPERTY@2192..2204
-              0: CSS_IDENTIFIER@2192..2197
+              0: CSS_DASHED_IDENTIFIER@2192..2197
                 0: IDENT@2192..2197 "--foo" [] []
               1: COLON@2197..2199 ":" [] [Whitespace(" ")]
               2: CSS_GENERIC_COMPONENT_VALUE_LIST@2199..2204
@@ -5439,7 +5439,7 @@ CssRoot {
           0: L_PAREN@2939..2943 "(" [] [Whitespace("   ")]
           1: CSS_DECLARATION@2943..2961
             0: CSS_GENERIC_PROPERTY@2943..2961
-              0: CSS_IDENTIFIER@2943..2948
+              0: CSS_DASHED_IDENTIFIER@2943..2948
                 0: IDENT@2943..2948 "--var" [] []
               1: COLON@2948..2952 ":" [] [Whitespace("   ")]
               2: CSS_GENERIC_COMPONENT_VALUE_LIST@2952..2961

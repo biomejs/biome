@@ -5,8 +5,9 @@ use crate::syntax::css_modules::{
 };
 use crate::syntax::parse_error::{expected_component_value, expected_identifier};
 use crate::syntax::{
-    is_at_any_value, is_at_identifier, is_at_string, parse_any_value,
-    parse_custom_identifier_with_keywords, parse_regular_identifier, parse_string,
+    is_at_any_value, is_at_dashed_identifier, is_at_identifier, is_at_string, parse_any_value,
+    parse_custom_identifier_with_keywords, parse_dashed_identifier, parse_regular_identifier,
+    parse_string,
 };
 use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::{CssSyntaxKind, T};
@@ -165,7 +166,12 @@ fn parse_generic_property(p: &mut CssParser) -> ParsedSyntax {
     }
 
     let m = p.start();
-    parse_regular_identifier(p).ok();
+
+    if is_at_dashed_identifier(p) {
+        parse_dashed_identifier(p).ok();
+    } else {
+        parse_regular_identifier(p).ok();
+    }
 
     p.expect(T![:]);
 
