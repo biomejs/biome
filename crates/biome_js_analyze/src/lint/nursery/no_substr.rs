@@ -69,14 +69,15 @@ impl Rule for NoSubstr {
         let arguments = node.arguments().ok()?;
         let args = arguments.args();
 
-        match string_function_name {
-            "substr" | "substring" => Some(NoSubstrState {
+        if matches!(string_function_name, "substr" | "substring") {
+            Some(NoSubstrState {
                 member_name: value_token.token_text_trimmed(),
                 span: value_token.text_range(),
                 replaced_member_name: "slice",
-                has_arguments: args.len() > 0,
-            }),
-            _ => None,
+                has_arguments: !args.is_empty(),
+            })
+        } else {
+            None
         }
     }
 
