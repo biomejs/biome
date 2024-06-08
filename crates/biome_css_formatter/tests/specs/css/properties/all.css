@@ -22,3 +22,12 @@ div {
 		180deg
 	);
 }
+
+.variable {
+	--myVariableName: 10px;
+	margin: var(--myVariableName);
+}
+
+.function {
+	transform: translateX(10px) translateY(10px);
+}
