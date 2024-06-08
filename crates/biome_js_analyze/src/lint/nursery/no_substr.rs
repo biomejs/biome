@@ -38,7 +38,7 @@ declare_rule! {
     /// ```
     ///
     pub NoSubstr {
-        version: "1.8.0",
+        version: "next",
         name: "noSubstr",
         language: "js",
         recommended: false,
