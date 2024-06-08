@@ -1770,7 +1770,7 @@
 					]
 				},
 				"noSubstr": {
-					"description": "Enforce the use of slice()oversubstr()andsubstring()`.",
+					"description": "Enforce the use of slice() over substr() and substring().",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleFixConfiguration" },
 						{ "type": "null" }

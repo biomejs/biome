@@ -2857,7 +2857,7 @@ pub struct Nursery {
     #[doc = "Disallow specified modules when loaded by import or require."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_restricted_imports: Option<RuleConfiguration<NoRestrictedImports>>,
-    #[doc = "Enforce the use of slice()oversubstr()andsubstring()`."]
+    #[doc = "Enforce the use of slice() over substr() and substring()."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_substr: Option<RuleFixConfiguration<NoSubstr>>,
     #[doc = "Disallow the use of dependencies that aren't specified in the package.json."]

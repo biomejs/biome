@@ -1035,7 +1035,7 @@ export interface Nursery {
 	 */
 	noRestrictedImports?: RuleConfiguration_for_RestrictedImportsOptions;
 	/**
-	 * Enforce the use of slice()oversubstr()andsubstring()`.
+	 * Enforce the use of slice() over substr() and substring().
 	 */
 	noSubstr?: RuleFixConfiguration_for_Null;
 	/**
