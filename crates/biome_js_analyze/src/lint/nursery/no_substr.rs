@@ -58,10 +58,11 @@ impl Rule for NoSubstr {
         let expression = callee.as_js_static_member_expression()?;
         let value_token = expression.member().ok()?.value_token().ok()?;
         let string_function_name = value_token.text_trimmed();
-        let arguments = node.arguments().ok()?;
-        let args = arguments.args();
 
         if matches!(string_function_name, "substr" | "substring") {
+            let arguments = node.arguments().ok()?;
+            let args = arguments.args();
+
             Some(NoSubstrState {
                 value_token,
                 replaced_member_name: "slice",
