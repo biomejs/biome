@@ -1264,7 +1264,7 @@ export interface Nursery {
 	/**
 	 * Use valid values for the autocomplete attribute on input elements.
 	 */
-	useValidAutocomplete?: RuleConfiguration_for_UseValidAutocompleteOptions;
+	useTrimStartEnd?: RuleFixConfiguration_for_Null;
 }
 /**
  * A list of rules that belong to this group
@@ -2551,7 +2551,6 @@ export type Category =
 	| "lint/nursery/useThrowOnlyError"
 	| "lint/nursery/useTopLevelRegex"
 	| "lint/nursery/useTrimStartEnd"
-	| "lint/nursery/useValidAutocomplete"
 	| "lint/performance/noAccumulatingSpread"
 	| "lint/performance/noBarrelFile"
 	| "lint/performance/noDelete"

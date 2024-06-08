@@ -31,5 +31,4 @@ bar['trimStart']()
 bar["trimStart"]()
 bar[`trimStart`]()
 
-
 ```
