@@ -4,7 +4,7 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_js_factory::make;
 use biome_js_syntax::{JsCallExpression, JsSyntaxToken};
-use biome_rowan::{AstSeparatedList, BatchMutationExt};
+use biome_rowan::{AstSeparatedList, BatchMutationExt, TextRange, TokenText};
 
 use crate::JsRuleAction;
 
@@ -74,22 +74,18 @@ impl Rule for NoSubstr {
 
     fn diagnostic(_: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
         let diagnostic_message = markup! {
-            "Avoid using "{state.value_token.token_text_trimmed().text()}" and consider using "{state.replaced_member_name}" instead."
+            "Avoid using "{state.member_name().text()}" and consider using "{state.replaced_member_name}" instead."
         }
         .to_owned();
         let note_message = {
             markup! {
-                "Use "<Emphasis>"."{state.value_token.token_text_trimmed().text()}"()"</Emphasis>" instead of "<Emphasis>"."{state.replaced_member_name}"()"</Emphasis>"."
+                "Use "<Emphasis>"."{state.member_name().text()}"()"</Emphasis>" instead of "<Emphasis>"."{state.replaced_member_name}"()"</Emphasis>"."
             }
             .to_owned()
         };
         Some(
-            RuleDiagnostic::new(
-                rule_category!(),
-                state.value_token.text_range(),
-                diagnostic_message,
-            )
-            .note(note_message),
+            RuleDiagnostic::new(rule_category!(), state.span(), diagnostic_message)
+                .note(note_message),
         )
     }
 
@@ -126,4 +122,14 @@ pub struct NoSubstrState {
     value_token: JsSyntaxToken,
     replaced_member_name: &'static str,
     has_arguments: bool,
+}
+
+impl NoSubstrState {
+    fn member_name(&self) -> TokenText {
+        self.value_token.token_text_trimmed()
+    }
+
+    fn span(&self) -> TextRange {
+        self.value_token.text_range()
+    }
 }
