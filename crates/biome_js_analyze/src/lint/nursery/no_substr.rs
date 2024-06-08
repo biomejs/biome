@@ -46,14 +46,6 @@ declare_rule! {
     }
 }
 
-#[derive(Debug, Clone)]
-pub struct NoSubstrState {
-    member_name: TokenText,
-    span: TextRange,
-    replaced_member_name: &'static str,
-    has_arguments: bool,
-}
-
 impl Rule for NoSubstr {
     type Query = Ast<JsCallExpression>;
     type State = NoSubstrState;
@@ -127,4 +119,12 @@ impl Rule for NoSubstr {
             mutation,
         ))
     }
+}
+
+#[derive(Debug, Clone)]
+pub struct NoSubstrState {
+    member_name: TokenText,
+    span: TextRange,
+    replaced_member_name: &'static str,
+    has_arguments: bool,
 }
