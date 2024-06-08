@@ -3,6 +3,7 @@
 	align-self: flex-end
 }
 
+
 #grid {
 	display: grid;
 	grid-template-columns: [first nav-start] 150px [main-start] 1fr [last];

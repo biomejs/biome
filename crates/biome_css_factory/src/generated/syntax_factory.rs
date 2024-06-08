@@ -220,6 +220,39 @@ impl SyntaxFactory for CssSyntaxFactory {
                 }
                 slots.into_node(CSS_BINARY_EXPRESSION, children)
             }
+            CSS_BRACKETED_VALUE => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<3usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element {
+                    if element.kind() == T!['['] {
+                        slots.mark_present();
+                        current_element = elements.next();
+                    }
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element {
+                    if CssBracketedValueList::can_cast(element.kind()) {
+                        slots.mark_present();
+                        current_element = elements.next();
+                    }
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element {
+                    if element.kind() == T![']'] {
+                        slots.mark_present();
+                        current_element = elements.next();
+                    }
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        CSS_BRACKETED_VALUE.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(CSS_BRACKETED_VALUE, children)
+            }
             CSS_CHARSET_AT_RULE => {
                 let mut elements = (&children).into_iter();
                 let mut slots: RawNodeSlots<3usize> = RawNodeSlots::default();
@@ -4450,6 +4483,9 @@ impl SyntaxFactory for CssSyntaxFactory {
                 }
                 slots.into_node(CSS_VALUE_AT_RULE_NAMED_IMPORT_SPECIFIER, children)
             }
+            CSS_BRACKETED_VALUE_LIST => {
+                Self::make_node_list_syntax(kind, children, AnyCssCustomIdentifier::can_cast)
+            }
             CSS_COMPONENT_VALUE_LIST => {
                 Self::make_node_list_syntax(kind, children, AnyCssValue::can_cast)
             }
@@ -4464,7 +4500,7 @@ impl SyntaxFactory for CssSyntaxFactory {
                 false,
             ),
             CSS_CUSTOM_IDENTIFIER_LIST => {
-                Self::make_node_list_syntax(kind, children, CssCustomIdentifier::can_cast)
+                Self::make_node_list_syntax(kind, children, AnyCssCustomIdentifier::can_cast)
             }
             CSS_DECLARATION_LIST => {
                 Self::make_node_list_syntax(kind, children, CssDeclarationWithSemicolon::can_cast)

@@ -20,6 +20,7 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 - Fix [#3069](https://github.com/biomejs/biome/issues/3069), prevent overwriting paths when using `--staged` or `--changed` options. Contributed by @unvalley
 - Fix the bug where whitespace after the & character in CSS nesting was incorrectly trimmed, ensuring proper targeting of child classes [#3061](https://github.com/biomejs/biome/issues/3061). Contributed by @denbezrukov
 - Fix [#3068](https://github.com/biomejs/biome/issues/3068) where the CSS formatter was inadvertently converting variable declarations and function calls to lowercase. Contributed by @denbezrukov
+- Fix [#3055](https://github.com/biomejs/biome/issues/3055) CSS: Layout using named grid lines is now correctly parsed. Contributed by @denbezrukov
 
 ### Configuration
 

@@ -360,6 +360,8 @@ pub const CSS_KINDS_SRC: KindsSrc = KindsSrc {
         "CSS_URL_MODIFIER_LIST",
         "CSS_COLOR",
         "CSS_BORDER",
+        "CSS_BRACKETED_VALUE",
+        "CSS_BRACKETED_VALUE_LIST",
         // At rule nodes
         "CSS_AT_RULE",
         "CSS_CHARSET_AT_RULE",

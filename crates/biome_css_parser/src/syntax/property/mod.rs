@@ -126,7 +126,7 @@ impl ParseNodeList for ComposesClassList {
     }
 
     fn is_at_list_end(&self, p: &mut Self::Parser<'_>) -> bool {
-        p.at_ts(CSS_END_OF_COMPOSES_CLASS_TOKEN_SET)
+        p.at_ts(END_OF_COMPOSES_CLASS_TOKEN_SET)
     }
 
     fn recover(
@@ -147,12 +147,12 @@ impl ParseRecovery for ComposesClassListParseRecovery {
 
     fn is_at_recovered(&self, p: &mut Self::Parser<'_>) -> bool {
         // If the next token is the end of the list or the next element, we're at a recovery point.
-        p.at_ts(CSS_END_OF_COMPOSES_CLASS_TOKEN_SET) || is_at_identifier(p)
+        p.at_ts(END_OF_COMPOSES_CLASS_TOKEN_SET) || is_at_identifier(p)
     }
 }
 
-const CSS_END_OF_COMPOSES_CLASS_TOKEN_SET: TokenSet<CssSyntaxKind> =
-    CSS_END_OF_PROPERTY_VALUE_TOKEN_SET.union(token_set!(T![from]));
+const END_OF_COMPOSES_CLASS_TOKEN_SET: TokenSet<CssSyntaxKind> =
+    END_OF_PROPERTY_VALUE_TOKEN_SET.union(token_set!(T![from]));
 
 #[inline]
 fn is_at_generic_property(p: &mut CssParser) -> bool {
@@ -179,7 +179,7 @@ fn parse_generic_property(p: &mut CssParser) -> ParsedSyntax {
 
     Present(m.complete(p, CSS_GENERIC_PROPERTY))
 }
-const CSS_END_OF_PROPERTY_VALUE_TOKEN_SET: TokenSet<CssSyntaxKind> = token_set!(T!['}'], T![;]);
+const END_OF_PROPERTY_VALUE_TOKEN_SET: TokenSet<CssSyntaxKind> = token_set!(T!['}'], T![;]);
 
 struct GenericComponentValueList;
 
@@ -193,7 +193,7 @@ impl ParseNodeList for GenericComponentValueList {
     }
 
     fn is_at_list_end(&self, p: &mut Self::Parser<'_>) -> bool {
-        p.at_ts(CSS_END_OF_PROPERTY_VALUE_TOKEN_SET) || p.at(T![')']) || /* !token is !important */ p.at(T![!])
+        p.at_ts(END_OF_PROPERTY_VALUE_TOKEN_SET) || p.at(T![')']) || /* !token is !important */ p.at(T![!])
     }
 
     fn recover(
@@ -203,10 +203,7 @@ impl ParseNodeList for GenericComponentValueList {
     ) -> RecoveryResult {
         parsed_element.or_recover_with_token_set(
             p,
-            &ParseRecoveryTokenSet::new(
-                CSS_BOGUS_PROPERTY_VALUE,
-                CSS_END_OF_PROPERTY_VALUE_TOKEN_SET,
-            ),
+            &ParseRecoveryTokenSet::new(CSS_BOGUS_PROPERTY_VALUE, END_OF_PROPERTY_VALUE_TOKEN_SET),
             expected_component_value,
         )
     }
