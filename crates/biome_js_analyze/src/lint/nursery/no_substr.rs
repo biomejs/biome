@@ -9,7 +9,7 @@ use biome_rowan::{AstSeparatedList, BatchMutationExt, TextRange, TokenText};
 use crate::JsRuleAction;
 
 declare_rule! {
-    /// Enforce the use of slice()` over `substr()` and `substring()`.
+    /// Enforce the use of `slice()` over `substr()` and `substring()`.
     ///
     /// `slice()` is preferred over `substr()` and `substring()` because it is a more popular option with clearer behavior,
     ///  and it has a consistent counterpart in arrays.
