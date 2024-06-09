@@ -3,8 +3,10 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_js_factory::make;
-use biome_js_syntax::{JsCallExpression, JsSyntaxToken};
-use biome_rowan::{AstSeparatedList, BatchMutationExt, TextRange, TokenText};
+use biome_js_syntax::{
+    AnyJsName, JsCallArguments, JsExpressionStatement, JsSyntaxToken, JsVariableStatement,
+};
+use biome_rowan::{declare_node_union, AstSeparatedList, BatchMutationExt, TextRange, TokenText};
 
 use crate::JsRuleAction;
 
@@ -47,19 +49,17 @@ declare_rule! {
 }
 
 impl Rule for NoSubstr {
-    type Query = Ast<JsCallExpression>;
+    type Query = Ast<AnyJsStatement>;
     type State = NoSubstrState;
     type Signals = Option<Self::State>;
     type Options = ();
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
-        let callee = node.callee().ok()?;
-        let expression = callee.as_js_static_member_expression()?;
-        let value_token = expression.member().ok()?.value_token().ok()?;
-        let string_function_name = value_token.text_trimmed();
+        let value_token = node.value_token()?;
+        println!("value_token: {:?}", value_token.text_trimmed());
 
-        if matches!(string_function_name, "substr" | "substring") {
+        if matches!(value_token.text_trimmed(), "substr" | "substring") {
             Some(NoSubstrState { value_token })
         } else {
             None
@@ -89,7 +89,7 @@ impl Rule for NoSubstr {
 
     fn action(ctx: &RuleContext<Self>, _: &Self::State) -> Option<JsRuleAction> {
         let node = ctx.query();
-        let arguments = node.arguments().ok()?;
+        let arguments = node.arguments()?;
         let args = arguments.args();
 
         if !args.is_empty() {
@@ -99,13 +99,9 @@ impl Rule for NoSubstr {
             return None;
         }
 
-        let callee = node.callee().ok()?;
-        let expression = callee.as_js_static_member_expression()?;
-        let member = expression.member().ok()?;
-
         let mut mutation = ctx.root().begin();
         let replaced_function = make::js_name(make::ident("slice"));
-        mutation.replace_element(member.into(), replaced_function.into());
+        mutation.replace_element(node.member()?.into(), replaced_function.into());
 
         Some(JsRuleAction::new(
             ActionCategory::QuickFix,
@@ -128,5 +124,80 @@ impl NoSubstrState {
 
     fn span(&self) -> TextRange {
         self.value_token.text_range()
+    }
+}
+
+declare_node_union! {
+    pub AnyJsStatement = JsExpressionStatement | JsVariableStatement
+}
+
+impl AnyJsStatement {
+    pub fn value_token(&self) -> Option<JsSyntaxToken> {
+        match self {
+            AnyJsStatement::JsExpressionStatement(node) => {
+                let callee = node
+                    .expression()
+                    .ok()?
+                    .as_js_call_expression()?
+                    .callee()
+                    .ok()?;
+                callee
+                    .as_js_static_member_expression()?
+                    .member()
+                    .ok()?
+                    .value_token()
+                    .ok()
+            }
+            AnyJsStatement::JsVariableStatement(node) => {
+                let declaration = node.declaration().ok()?;
+                let declarators = declaration.declarators();
+                declarators.into_iter().find_map(|declarator| {
+                    let init = declarator.ok()?.initializer()?;
+                    init.expression()
+                        .ok()?
+                        .as_js_static_member_expression()?
+                        .member()
+                        .ok()?
+                        .value_token()
+                        .ok()
+                })
+            }
+        }
+    }
+    pub fn member(&self) -> Option<AnyJsName> {
+        match self {
+            AnyJsStatement::JsExpressionStatement(node) => {
+                let callee = node
+                    .expression()
+                    .ok()?
+                    .as_js_call_expression()?
+                    .callee()
+                    .ok()?;
+                callee.as_js_static_member_expression()?.member().ok()
+            }
+            AnyJsStatement::JsVariableStatement(node) => {
+                let declaration = node.declaration().ok()?;
+                let declarators = declaration.declarators();
+                declarators.into_iter().find_map(|declarator| {
+                    let init = declarator.ok()?.initializer()?;
+                    init.expression()
+                        .ok()?
+                        .as_js_static_member_expression()?
+                        .member()
+                        .ok()
+                })
+            }
+        }
+    }
+    pub fn arguments(&self) -> Option<JsCallArguments> {
+        match self {
+            AnyJsStatement::JsExpressionStatement(node) => node
+                .expression()
+                .ok()?
+                .as_js_call_expression()?
+                .arguments()
+                .ok(),
+            _ => None,
+        }
     }
 }
