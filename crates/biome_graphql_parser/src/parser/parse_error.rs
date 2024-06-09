@@ -127,3 +127,13 @@ pub(crate) fn expected_enum_extension(p: &GraphqlParser, range: TextRange) -> Pa
         range,
     )
 }
+
+pub(crate) fn expected_input_object_extension(
+    p: &GraphqlParser,
+    range: TextRange,
+) -> ParseDiagnostic {
+    p.err_builder(
+        "Expected at least one directive or a set of fields definition",
+        range,
+    )
+}

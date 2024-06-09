@@ -130,12 +130,6 @@ macro_rules! map_syntax_node {
                         unsafe { $crate::GraphqlInputObjectTypeExtension::new_unchecked(node) };
                     $body
                 }
-                $crate::GraphqlSyntaxKind::GRAPHQL_INPUT_OBJECT_TYPE_EXTENSION_WITH_FIELDS => {
-                    let $pattern = unsafe {
-                        $crate::GraphqlInputObjectTypeExtensionWithFields::new_unchecked(node)
-                    };
-                    $body
-                }
                 $crate::GraphqlSyntaxKind::GRAPHQL_INPUT_VALUE_DEFINITION => {
                     let $pattern =
                         unsafe { $crate::GraphqlInputValueDefinition::new_unchecked(node) };
@@ -284,10 +278,6 @@ macro_rules! map_syntax_node {
                 }
                 $crate::GraphqlSyntaxKind::GRAPHQL_BOGUS_DEFINITION => {
                     let $pattern = unsafe { $crate::GraphqlBogusDefinition::new_unchecked(node) };
-                    $body
-                }
-                $crate::GraphqlSyntaxKind::GRAPHQL_BOGUS_EXTENSION => {
-                    let $pattern = unsafe { $crate::GraphqlBogusExtension::new_unchecked(node) };
                     $body
                 }
                 $crate::GraphqlSyntaxKind::GRAPHQL_BOGUS_SELECTION => {
