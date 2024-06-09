@@ -18,6 +18,7 @@ mod property;
 mod scope;
 mod starting_style;
 mod supports;
+mod unknown;
 mod value;
 
 use crate::parser::CssParser;
@@ -39,6 +40,7 @@ use crate::syntax::at_rule::property::parse_property_at_rule;
 use crate::syntax::at_rule::scope::parse_scope_at_rule;
 use crate::syntax::at_rule::starting_style::parse_starting_style_at_rule;
 use crate::syntax::at_rule::supports::parse_supports_at_rule;
+use crate::syntax::at_rule::unknown::{is_at_unknown_at_rule, parse_unknown_at_rule};
 use crate::syntax::at_rule::value::parse_value_at_rule;
 use crate::syntax::parse_error::expected_any_at_rule;
 use biome_css_syntax::CssSyntaxKind::*;
@@ -97,6 +99,7 @@ pub(crate) fn parse_any_at_rule(p: &mut CssParser) -> ParsedSyntax {
         T![document] => parse_document_at_rule(p),
         T![property] => parse_property_at_rule(p),
         T![value] => parse_value_at_rule(p),
+        _ if is_at_unknown_at_rule(p) => parse_unknown_at_rule(p),
         _ => Absent,
     }
 }

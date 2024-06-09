@@ -255,9 +255,11 @@ fn parse_value_at_rule_generic_property(p: &mut CssParser) -> ParsedSyntax {
         let m = p.start();
 
         // Skip all tokens until the end of the property value or the next property.
+        // EOF indicates the end of the file.
         // `;` indicates the end of the list.
         // `,` is the separator before the next property.
-        while !(ValueAtRulePropertyList.is_at_list_end(p)
+        while !(p.at(EOF)
+            || ValueAtRulePropertyList.is_at_list_end(p)
             || p.at(T![,]) && is_nth_at_value_at_rule_generic_property(p, 1))
         {
             p.bump_any();

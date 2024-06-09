@@ -453,8 +453,9 @@ AnyCssDeclarationOrAtRule =
 // When nested in this way, the contents of a nested group rule's block are parsed as <block-contents> rather than <rule-list>:
 // https://drafts.csswg.org/css-nesting-1/#conditionals
 AnyCssConditionalBlock =
-	AnyCssDeclarationOrRuleBlock
-	| AnyCssRuleBlock
+	CssDeclarationOrRuleBlock
+	| CssRuleBlock
+	| CssBogusBlock
 
 // @page :left { background: red; @media (500px <= width <= 500px) {  } }
 // 						   ^^^^^^^^^^^^^^^^
@@ -599,6 +600,8 @@ AnyCssAtRule =
 	| CssDocumentAtRule
 	| CssPropertyAtRule
 	| CssValueAtRule
+	| CssUnknownBlockAtRule
+	| CssUnknownValueAtRule
 	| CssBogusAtRule
 
 // @charset "UTF-8";
@@ -1575,6 +1578,24 @@ CssValueAtRuleGenericProperty =
 // the property as an unformed tree. This approach ensures backward compatibility and allows for incremental
 // improvements to the parser without breaking existing functionality.
 CssValueAtRuleGenericValue = SyntaxElement*
+
+/// Represents an unknown or unsupported CSS at-rule during parsing.
+///
+/// When encountered during parsing, `CssUnknownAtRule` serves as a fallback mechanism,
+/// allowing the parser to continue processing the stylesheet by treating the unsupported rule
+/// as part of an unformed tree. This enables graceful handling of CSS constructs that are not
+/// supported by the parser, ensuring that the stylesheet can still be processed without errors.
+CssUnknownBlockAtRule =
+	name: CssIdentifier
+	parameters: CssUnknownAtRuleParameterList
+	block: AnyCssDeclarationOrRuleBlock
+
+CssUnknownValueAtRule =
+	name: CssIdentifier
+	parameters: CssUnknownAtRuleParameterList
+	';'
+
+CssUnknownAtRuleParameterList = SyntaxElement*
 
 ///////////////
 // AUXILIARY

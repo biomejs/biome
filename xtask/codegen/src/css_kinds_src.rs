@@ -467,6 +467,9 @@ pub const CSS_KINDS_SRC: KindsSrc = KindsSrc {
         "CSS_VALUE_AT_RULE_DECLARATION_CLAUSE",
         "CSS_VALUE_AT_RULE_GENERIC_PROPERTY",
         "CSS_VALUE_AT_RULE_GENERIC_VALUE",
+        "CSS_UNKNOWN_BLOCK_AT_RULE",
+        "CSS_UNKNOWN_VALUE_AT_RULE",
+        "CSS_UNKNOWN_AT_RULE_PARAMETER_LIST",
         // Bogus nodes
         "CSS_BOGUS",
         "CSS_BOGUS_BLOCK",

@@ -2080,6 +2080,20 @@ impl CssUniversalSelectorBuilder {
         ))
     }
 }
+pub fn css_unknown_block_at_rule(
+    name: CssIdentifier,
+    parameters: CssUnknownAtRuleParameterList,
+    block: AnyCssDeclarationOrRuleBlock,
+) -> CssUnknownBlockAtRule {
+    CssUnknownBlockAtRule::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_UNKNOWN_BLOCK_AT_RULE,
+        [
+            Some(SyntaxElement::Node(name.into_syntax())),
+            Some(SyntaxElement::Node(parameters.into_syntax())),
+            Some(SyntaxElement::Node(block.into_syntax())),
+        ],
+    ))
+}
 pub fn css_unknown_dimension(
     value_token: SyntaxToken,
     unit_token: SyntaxToken,
@@ -2089,6 +2103,20 @@ pub fn css_unknown_dimension(
         [
             Some(SyntaxElement::Token(value_token)),
             Some(SyntaxElement::Token(unit_token)),
+        ],
+    ))
+}
+pub fn css_unknown_value_at_rule(
+    name: CssIdentifier,
+    parameters: CssUnknownAtRuleParameterList,
+    semicolon_token: SyntaxToken,
+) -> CssUnknownValueAtRule {
+    CssUnknownValueAtRule::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_UNKNOWN_VALUE_AT_RULE,
+        [
+            Some(SyntaxElement::Node(name.into_syntax())),
+            Some(SyntaxElement::Node(parameters.into_syntax())),
+            Some(SyntaxElement::Token(semicolon_token)),
         ],
     ))
 }
@@ -2909,6 +2937,16 @@ where
 {
     CssBogusUrlModifier::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_BOGUS_URL_MODIFIER,
+        slots,
+    ))
+}
+pub fn css_unknown_at_rule_parameter_list<I>(slots: I) -> CssUnknownAtRuleParameterList
+where
+    I: IntoIterator<Item = Option<SyntaxElement>>,
+    I::IntoIter: ExactSizeIterator,
+{
+    CssUnknownAtRuleParameterList::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_UNKNOWN_AT_RULE_PARAMETER_LIST,
         slots,
     ))
 }

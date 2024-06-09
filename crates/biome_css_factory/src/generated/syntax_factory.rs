@@ -37,6 +37,7 @@ impl SyntaxFactory for CssSyntaxFactory {
             | CSS_BOGUS_SELECTOR
             | CSS_BOGUS_SUB_SELECTOR
             | CSS_BOGUS_URL_MODIFIER
+            | CSS_UNKNOWN_AT_RULE_PARAMETER_LIST
             | CSS_VALUE_AT_RULE_GENERIC_VALUE => {
                 RawSyntaxNode::new(kind, children.into_iter().map(Some))
             }
@@ -4221,6 +4222,39 @@ impl SyntaxFactory for CssSyntaxFactory {
                 }
                 slots.into_node(CSS_UNIVERSAL_SELECTOR, children)
             }
+            CSS_UNKNOWN_BLOCK_AT_RULE => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<3usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element {
+                    if CssIdentifier::can_cast(element.kind()) {
+                        slots.mark_present();
+                        current_element = elements.next();
+                    }
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element {
+                    if CssUnknownAtRuleParameterList::can_cast(element.kind()) {
+                        slots.mark_present();
+                        current_element = elements.next();
+                    }
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element {
+                    if AnyCssDeclarationOrRuleBlock::can_cast(element.kind()) {
+                        slots.mark_present();
+                        current_element = elements.next();
+                    }
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        CSS_UNKNOWN_BLOCK_AT_RULE.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(CSS_UNKNOWN_BLOCK_AT_RULE, children)
+            }
             CSS_UNKNOWN_DIMENSION => {
                 let mut elements = (&children).into_iter();
                 let mut slots: RawNodeSlots<2usize> = RawNodeSlots::default();
@@ -4246,6 +4280,39 @@ impl SyntaxFactory for CssSyntaxFactory {
                     );
                 }
                 slots.into_node(CSS_UNKNOWN_DIMENSION, children)
+            }
+            CSS_UNKNOWN_VALUE_AT_RULE => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<3usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element {
+                    if CssIdentifier::can_cast(element.kind()) {
+                        slots.mark_present();
+                        current_element = elements.next();
+                    }
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element {
+                    if CssUnknownAtRuleParameterList::can_cast(element.kind()) {
+                        slots.mark_present();
+                        current_element = elements.next();
+                    }
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element {
+                    if element.kind() == T ! [;] {
+                        slots.mark_present();
+                        current_element = elements.next();
+                    }
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        CSS_UNKNOWN_VALUE_AT_RULE.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(CSS_UNKNOWN_VALUE_AT_RULE, children)
             }
             CSS_URL_FUNCTION => {
                 let mut elements = (&children).into_iter();
