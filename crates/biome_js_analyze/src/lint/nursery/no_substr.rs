@@ -57,7 +57,6 @@ impl Rule for NoSubstr {
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
         let value_token = node.value_token()?;
-        println!("value_token: {:?}", value_token.text_trimmed());
 
         if matches!(value_token.text_trimmed(), "substr" | "substring") {
             Some(NoSubstrState { value_token })
@@ -127,6 +126,8 @@ impl NoSubstrState {
     }
 }
 
+// Helper union type to handle both JsExpressionStatement and JsVariableStatement.
+// To handle arguments, we need to know the type of the statement.
 declare_node_union! {
     pub AnyJsStatement = JsExpressionStatement | JsVariableStatement
 }
