@@ -294,7 +294,7 @@ pub fn css_container_and_query(
 pub fn css_container_at_rule(
     container_token: SyntaxToken,
     query: AnyCssContainerQuery,
-    block: AnyCssRuleBlock,
+    block: AnyCssConditionalBlock,
 ) -> CssContainerAtRuleBuilder {
     CssContainerAtRuleBuilder {
         container_token,
@@ -306,7 +306,7 @@ pub fn css_container_at_rule(
 pub struct CssContainerAtRuleBuilder {
     container_token: SyntaxToken,
     query: AnyCssContainerQuery,
-    block: AnyCssRuleBlock,
+    block: AnyCssConditionalBlock,
     name: Option<CssCustomIdentifier>,
 }
 impl CssContainerAtRuleBuilder {
@@ -931,7 +931,7 @@ pub fn css_layer_at_rule(layer_token: SyntaxToken, layer: AnyCssLayer) -> CssLay
 }
 pub fn css_layer_declaration(
     references: CssLayerReferenceList,
-    block: AnyCssRuleBlock,
+    block: AnyCssConditionalBlock,
 ) -> CssLayerDeclaration {
     CssLayerDeclaration::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_LAYER_DECLARATION,
@@ -1008,7 +1008,7 @@ pub fn css_media_and_type_query(
 pub fn css_media_at_rule(
     media_token: SyntaxToken,
     queries: CssMediaQueryList,
-    block: AnyCssRuleBlock,
+    block: AnyCssConditionalBlock,
 ) -> CssMediaAtRule {
     CssMediaAtRule::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_MEDIA_AT_RULE,
@@ -1819,7 +1819,7 @@ pub fn css_rule_block(
 }
 pub fn css_scope_at_rule(
     scope_token: SyntaxToken,
-    block: AnyCssRuleBlock,
+    block: AnyCssConditionalBlock,
 ) -> CssScopeAtRuleBuilder {
     CssScopeAtRuleBuilder {
         scope_token,
@@ -1829,7 +1829,7 @@ pub fn css_scope_at_rule(
 }
 pub struct CssScopeAtRuleBuilder {
     scope_token: SyntaxToken,
-    block: AnyCssRuleBlock,
+    block: AnyCssConditionalBlock,
     range: Option<AnyCssScopeRange>,
 }
 impl CssScopeAtRuleBuilder {
@@ -1927,7 +1927,7 @@ pub fn css_supports_and_condition(
 pub fn css_supports_at_rule(
     supports_token: SyntaxToken,
     condition: AnyCssSupportsCondition,
-    block: AnyCssRuleBlock,
+    block: AnyCssConditionalBlock,
 ) -> CssSupportsAtRule {
     CssSupportsAtRule::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_SUPPORTS_AT_RULE,

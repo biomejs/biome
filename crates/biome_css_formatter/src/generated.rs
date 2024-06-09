@@ -7020,6 +7020,33 @@ impl IntoFormat<CssFormatContext> for biome_css_syntax::AnyCssCompoundSelector {
         )
     }
 }
+impl AsFormat<CssFormatContext> for biome_css_syntax::AnyCssConditionalBlock {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_css_syntax::AnyCssConditionalBlock,
+        crate::css::any::conditional_block::FormatAnyCssConditionalBlock,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        #![allow(clippy::default_constructed_unit_structs)]
+        FormatRefWithRule::new(
+            self,
+            crate::css::any::conditional_block::FormatAnyCssConditionalBlock::default(),
+        )
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::AnyCssConditionalBlock {
+    type Format = FormatOwnedWithRule<
+        biome_css_syntax::AnyCssConditionalBlock,
+        crate::css::any::conditional_block::FormatAnyCssConditionalBlock,
+    >;
+    fn into_format(self) -> Self::Format {
+        #![allow(clippy::default_constructed_unit_structs)]
+        FormatOwnedWithRule::new(
+            self,
+            crate::css::any::conditional_block::FormatAnyCssConditionalBlock::default(),
+        )
+    }
+}
 impl AsFormat<CssFormatContext> for biome_css_syntax::AnyCssContainerAndCombinableQuery {
     type Format<'a> = FormatRefWithRule<
         'a,

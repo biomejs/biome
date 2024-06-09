@@ -262,73 +262,123 @@ a {
      order: 5;
    }
  }
-@@ -49,22 +57,18 @@
-   order: 9;
- }
- 
--a,
--b {
-+a, b {
+@@ -37,7 +45,8 @@
+       order: 3;
+       @media (max-width: 30em) {
+         order: 4;
+-        @nest .rule-prefix & {
++        @
++        nest .rule-prefix & {
+           order: 5;
+         }
+         order: 6;
+@@ -66,9 +75,13 @@
+ a,
+ b {
    order: 1;
--  & c,
--  & d {
-+  & c, & d {
+-  @nest & c, & d {
++  @
++  nest & c,
++  & d {
      order: 2;
--    & e,
--    & f {
-+    & e, & f {
+-    @nest & e, & f {
++    @
++    nest & e,
++    & f {
        order: 3;
      }
      order: 4;
-   }
+@@ -96,20 +109,24 @@
    order: 5;
  }
--a,
--b {
-+a, b {
-   order: 1;
-   @nest & c, & d {
-     order: 2;
-@@ -115,11 +119,9 @@
-   order: 5;
+ a {
+-  @nest & b {
+-    @nest & c {
++  @
++  nest & b {
++    @
++    nest & c {
+       order: 1;
+     }
+   }
  }
- 
--a,
--b {
-+a, b {
+ d {
+   order: 2;
+-  @nest & e {
++  @
++  nest & e {
+     order: 3;
+   }
+ }
+ f {
+-  @nest & g {
++  @
++  nest & g {
+     order: 4;
+   }
+   order: 5;
+@@ -137,18 +154,23 @@
+ a,
+ b {
    order: 1;
--  c,
--  d {
-+  c, d {
+-  @nest c, d {
++  @
++  nest c,
++  d {
      order: 2;
    }
  }
-@@ -134,8 +136,7 @@
+-@nest & e {
++@
++nest & e {
+   order: 3;
+ }
+ f {
+-  @nest & g & {
++  @
++  nest & g & {
+     order: 4;
+   }
+-  @nest &h {
++  @
++  nest &h {
      order: 5;
    }
  }
--a,
--b {
-+a, b {
-   order: 1;
-   @nest c, d {
-     order: 2;
-@@ -199,16 +200,10 @@
+@@ -182,7 +204,8 @@
+     @media (max-width: 200px) {
+       order: 3;
+     }
+-    @nest & b {
++    @
++    nest & b {
+       @media (max-width: 200px) {
+         order: 4;
+       }
+@@ -199,16 +222,19 @@
  }
  a {
    order: 1;
 -  @nest very-very-very-very-very-very-very-very-very-long-selector &,
 -    very-very-very-very-very-very-very-very-very-long-selector & {
-+  @nest very-very-very-very-very-very-very-very-very-long-selector &, very-very-very-very-very-very-very-very-very-long-selector & {
++  @
++  nest very-very-very-very-very-very-very-very-very-long-selector &,
++  very-very-very-very-very-very-very-very-very-long-selector & {
      order: 2;
    }
 -  @nest very-very-very-very-very-very-very-very-very-long-selector
 -      + very-very-very-very-very-very-very-very-very-long-selector
 -      &,
--    very-very-very-very-very-very-very-very-very-long-selector
++  @
++  nest
++    very-very-very-very-very-very-very-very-very-long-selector
++    + very-very-very-very-very-very-very-very-very-long-selector
++    &,
++  very-very-very-very-very-very-very-very-very-long-selector
+     very-very-very-very-very-very-very-very-very-long-selector
 -      very-very-very-very-very-very-very-very-very-long-selector
 -      & {
-+  @nest very-very-very-very-very-very-very-very-very-long-selector + very-very-very-very-very-very-very-very-very-long-selector  &, very-very-very-very-very-very-very-very-very-long-selector very-very-very-very-very-very-very-very-very-long-selector & {
++    & {
      order: 2;
    }
  }
@@ -384,7 +434,8 @@ a {
       order: 3;
       @media (max-width: 30em) {
         order: 4;
-        @nest .rule-prefix & {
+        @
+        nest .rule-prefix & {
           order: 5;
         }
         order: 6;
@@ -396,22 +447,30 @@ a {
   order: 9;
 }
 
-a, b {
+a,
+b {
   order: 1;
-  & c, & d {
+  & c,
+  & d {
     order: 2;
-    & e, & f {
+    & e,
+    & f {
       order: 3;
     }
     order: 4;
   }
   order: 5;
 }
-a, b {
+a,
+b {
   order: 1;
-  @nest & c, & d {
+  @
+  nest & c,
+  & d {
     order: 2;
-    @nest & e, & f {
+    @
+    nest & e,
+    & f {
       order: 3;
     }
     order: 4;
@@ -439,28 +498,34 @@ f {
   order: 5;
 }
 a {
-  @nest & b {
-    @nest & c {
+  @
+  nest & b {
+    @
+    nest & c {
       order: 1;
     }
   }
 }
 d {
   order: 2;
-  @nest & e {
+  @
+  nest & e {
     order: 3;
   }
 }
 f {
-  @nest & g {
+  @
+  nest & g {
     order: 4;
   }
   order: 5;
 }
 
-a, b {
+a,
+b {
   order: 1;
-  c, d {
+  c,
+  d {
     order: 2;
   }
 }
@@ -475,20 +540,26 @@ f {
     order: 5;
   }
 }
-a, b {
+a,
+b {
   order: 1;
-  @nest c, d {
+  @
+  nest c,
+  d {
     order: 2;
   }
 }
-@nest & e {
+@
+nest & e {
   order: 3;
 }
 f {
-  @nest & g & {
+  @
+  nest & g & {
     order: 4;
   }
-  @nest &h {
+  @
+  nest &h {
     order: 5;
   }
 }
@@ -522,7 +593,8 @@ a {
     @media (max-width: 200px) {
       order: 3;
     }
-    @nest & b {
+    @
+    nest & b {
       @media (max-width: 200px) {
         order: 4;
       }
@@ -539,10 +611,19 @@ a {
 }
 a {
   order: 1;
-  @nest very-very-very-very-very-very-very-very-very-long-selector &, very-very-very-very-very-very-very-very-very-long-selector & {
+  @
+  nest very-very-very-very-very-very-very-very-very-long-selector &,
+  very-very-very-very-very-very-very-very-very-long-selector & {
     order: 2;
   }
-  @nest very-very-very-very-very-very-very-very-very-long-selector + very-very-very-very-very-very-very-very-very-long-selector  &, very-very-very-very-very-very-very-very-very-long-selector very-very-very-very-very-very-very-very-very-long-selector & {
+  @
+  nest
+    very-very-very-very-very-very-very-very-very-long-selector
+    + very-very-very-very-very-very-very-very-very-long-selector
+    &,
+  very-very-very-very-very-very-very-very-very-long-selector
+    very-very-very-very-very-very-very-very-very-long-selector
+    & {
     order: 2;
   }
 }
@@ -806,150 +887,6 @@ postcss-nesting.css:27:4 parse ━━━━━━━━━━━━━━━━�
   - viewport
   - scope
   
-postcss-nesting.css:35:12 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Unexpected value or character.
-  
-    33 │   order: 1;
-    34 │   @media screen, print {
-  > 35 │     order: 2;
-       │            ^
-    36 │     &.rule-2 {
-    37 │       order: 3;
-  
-  i Expected one of:
-  
-  - hover
-  - focus
-  - active
-  - first-child
-  - last-child
-  - nth-child
-  - nth-last-child
-  - first-of-type
-  - last-of-type
-  - nth-of-type
-  - nth-last-of-type
-  - only-child
-  - only-of-type
-  - checked
-  - disabled
-  - enabled
-  - required
-  - optional
-  - valid
-  - invalid
-  - in-range
-  - out-of-range
-  - read-only
-  - read-write
-  - placeholder-shown
-  - default
-  - checked
-  - indeterminate
-  - blank
-  - empty
-  - root
-  - target
-  - lang
-  - not
-  - is
-  - where
-  - fullscreen
-  - link
-  - visited
-  - any-link
-  - local-link
-  - scope
-  - current
-  - past
-  - future
-  
-postcss-nesting.css:35:13 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `;`
-  
-    33 │   order: 1;
-    34 │   @media screen, print {
-  > 35 │     order: 2;
-       │             ^
-    36 │     &.rule-2 {
-    37 │       order: 3;
-  
-  i Remove ;
-  
-postcss-nesting.css:39:16 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Unexpected value or character.
-  
-    37 │       order: 3;
-    38 │       @media (max-width: 30em) {
-  > 39 │         order: 4;
-       │                ^
-    40 │         @nest .rule-prefix & {
-    41 │           order: 5;
-  
-  i Expected one of:
-  
-  - hover
-  - focus
-  - active
-  - first-child
-  - last-child
-  - nth-child
-  - nth-last-child
-  - first-of-type
-  - last-of-type
-  - nth-of-type
-  - nth-last-of-type
-  - only-child
-  - only-of-type
-  - checked
-  - disabled
-  - enabled
-  - required
-  - optional
-  - valid
-  - invalid
-  - in-range
-  - out-of-range
-  - read-only
-  - read-write
-  - placeholder-shown
-  - default
-  - checked
-  - indeterminate
-  - blank
-  - empty
-  - root
-  - target
-  - lang
-  - not
-  - is
-  - where
-  - fullscreen
-  - link
-  - visited
-  - any-link
-  - local-link
-  - scope
-  - current
-  - past
-  - future
-  
-postcss-nesting.css:39:17 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `;`
-  
-    37 │       order: 3;
-    38 │       @media (max-width: 30em) {
-  > 39 │         order: 4;
-       │                 ^
-    40 │         @nest .rule-prefix & {
-    41 │           order: 5;
-  
-  i Remove ;
-  
 postcss-nesting.css:40:10 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Unexpected value or character.
@@ -981,294 +918,6 @@ postcss-nesting.css:40:10 parse ━━━━━━━━━━━━━━━━
   - supports
   - viewport
   - scope
-  
-postcss-nesting.css:43:16 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Unexpected value or character.
-  
-    41 │           order: 5;
-    42 │         }
-  > 43 │         order: 6;
-       │                ^
-    44 │       }
-    45 │       order: 7;
-  
-  i Expected one of:
-  
-  - hover
-  - focus
-  - active
-  - first-child
-  - last-child
-  - nth-child
-  - nth-last-child
-  - first-of-type
-  - last-of-type
-  - nth-of-type
-  - nth-last-of-type
-  - only-child
-  - only-of-type
-  - checked
-  - disabled
-  - enabled
-  - required
-  - optional
-  - valid
-  - invalid
-  - in-range
-  - out-of-range
-  - read-only
-  - read-write
-  - placeholder-shown
-  - default
-  - checked
-  - indeterminate
-  - blank
-  - empty
-  - root
-  - target
-  - lang
-  - not
-  - is
-  - where
-  - fullscreen
-  - link
-  - visited
-  - any-link
-  - local-link
-  - scope
-  - current
-  - past
-  - future
-  
-postcss-nesting.css:43:17 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `;`
-  
-    41 │           order: 5;
-    42 │         }
-  > 43 │         order: 6;
-       │                 ^
-    44 │       }
-    45 │       order: 7;
-  
-  i Remove ;
-  
-postcss-nesting.css:45:14 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Unexpected value or character.
-  
-    43 │         order: 6;
-    44 │       }
-  > 45 │       order: 7;
-       │              ^
-    46 │     }
-    47 │     order: 8;
-  
-  i Expected one of:
-  
-  - hover
-  - focus
-  - active
-  - first-child
-  - last-child
-  - nth-child
-  - nth-last-child
-  - first-of-type
-  - last-of-type
-  - nth-of-type
-  - nth-last-of-type
-  - only-child
-  - only-of-type
-  - checked
-  - disabled
-  - enabled
-  - required
-  - optional
-  - valid
-  - invalid
-  - in-range
-  - out-of-range
-  - read-only
-  - read-write
-  - placeholder-shown
-  - default
-  - checked
-  - indeterminate
-  - blank
-  - empty
-  - root
-  - target
-  - lang
-  - not
-  - is
-  - where
-  - fullscreen
-  - link
-  - visited
-  - any-link
-  - local-link
-  - scope
-  - current
-  - past
-  - future
-  
-postcss-nesting.css:45:15 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `;`
-  
-    43 │         order: 6;
-    44 │       }
-  > 45 │       order: 7;
-       │               ^
-    46 │     }
-    47 │     order: 8;
-  
-  i Remove ;
-  
-postcss-nesting.css:47:12 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Unexpected value or character.
-  
-    45 │       order: 7;
-    46 │     }
-  > 47 │     order: 8;
-       │            ^
-    48 │   }
-    49 │   order: 9;
-  
-  i Expected one of:
-  
-  - hover
-  - focus
-  - active
-  - first-child
-  - last-child
-  - nth-child
-  - nth-last-child
-  - first-of-type
-  - last-of-type
-  - nth-of-type
-  - nth-last-of-type
-  - only-child
-  - only-of-type
-  - checked
-  - disabled
-  - enabled
-  - required
-  - optional
-  - valid
-  - invalid
-  - in-range
-  - out-of-range
-  - read-only
-  - read-write
-  - placeholder-shown
-  - default
-  - checked
-  - indeterminate
-  - blank
-  - empty
-  - root
-  - target
-  - lang
-  - not
-  - is
-  - where
-  - fullscreen
-  - link
-  - visited
-  - any-link
-  - local-link
-  - scope
-  - current
-  - past
-  - future
-  
-postcss-nesting.css:47:13 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `;`
-  
-    45 │       order: 7;
-    46 │     }
-  > 47 │     order: 8;
-       │             ^
-    48 │   }
-    49 │   order: 9;
-  
-  i Remove ;
-  
-postcss-nesting.css:49:10 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Unexpected value or character.
-  
-    47 │     order: 8;
-    48 │   }
-  > 49 │   order: 9;
-       │          ^
-    50 │ }
-    51 │ 
-  
-  i Expected one of:
-  
-  - hover
-  - focus
-  - active
-  - first-child
-  - last-child
-  - nth-child
-  - nth-last-child
-  - first-of-type
-  - last-of-type
-  - nth-of-type
-  - nth-last-of-type
-  - only-child
-  - only-of-type
-  - checked
-  - disabled
-  - enabled
-  - required
-  - optional
-  - valid
-  - invalid
-  - in-range
-  - out-of-range
-  - read-only
-  - read-write
-  - placeholder-shown
-  - default
-  - checked
-  - indeterminate
-  - blank
-  - empty
-  - root
-  - target
-  - lang
-  - not
-  - is
-  - where
-  - fullscreen
-  - link
-  - visited
-  - any-link
-  - local-link
-  - scope
-  - current
-  - past
-  - future
-  
-postcss-nesting.css:49:11 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `;`
-  
-    47 │     order: 8;
-    48 │   }
-  > 49 │   order: 9;
-       │           ^
-    50 │ }
-    51 │ 
-  
-  i Remove ;
   
 postcss-nesting.css:65:4 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -1590,222 +1239,6 @@ postcss-nesting.css:144:4 parse ━━━━━━━━━━━━━━━━
   - viewport
   - scope
   
-postcss-nesting.css:152:12 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Unexpected value or character.
-  
-    150 │   order: 1;
-    151 │   @media (min-width: 100px) {
-  > 152 │     order: 2;
-        │            ^
-    153 │     @media (max-width: 200px) {
-    154 │       order: 3;
-  
-  i Expected one of:
-  
-  - hover
-  - focus
-  - active
-  - first-child
-  - last-child
-  - nth-child
-  - nth-last-child
-  - first-of-type
-  - last-of-type
-  - nth-of-type
-  - nth-last-of-type
-  - only-child
-  - only-of-type
-  - checked
-  - disabled
-  - enabled
-  - required
-  - optional
-  - valid
-  - invalid
-  - in-range
-  - out-of-range
-  - read-only
-  - read-write
-  - placeholder-shown
-  - default
-  - checked
-  - indeterminate
-  - blank
-  - empty
-  - root
-  - target
-  - lang
-  - not
-  - is
-  - where
-  - fullscreen
-  - link
-  - visited
-  - any-link
-  - local-link
-  - scope
-  - current
-  - past
-  - future
-  
-postcss-nesting.css:152:13 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `;`
-  
-    150 │   order: 1;
-    151 │   @media (min-width: 100px) {
-  > 152 │     order: 2;
-        │             ^
-    153 │     @media (max-width: 200px) {
-    154 │       order: 3;
-  
-  i Remove ;
-  
-postcss-nesting.css:154:14 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Unexpected value or character.
-  
-    152 │     order: 2;
-    153 │     @media (max-width: 200px) {
-  > 154 │       order: 3;
-        │              ^
-    155 │     }
-    156 │     & b {
-  
-  i Expected one of:
-  
-  - hover
-  - focus
-  - active
-  - first-child
-  - last-child
-  - nth-child
-  - nth-last-child
-  - first-of-type
-  - last-of-type
-  - nth-of-type
-  - nth-last-of-type
-  - only-child
-  - only-of-type
-  - checked
-  - disabled
-  - enabled
-  - required
-  - optional
-  - valid
-  - invalid
-  - in-range
-  - out-of-range
-  - read-only
-  - read-write
-  - placeholder-shown
-  - default
-  - checked
-  - indeterminate
-  - blank
-  - empty
-  - root
-  - target
-  - lang
-  - not
-  - is
-  - where
-  - fullscreen
-  - link
-  - visited
-  - any-link
-  - local-link
-  - scope
-  - current
-  - past
-  - future
-  
-postcss-nesting.css:154:15 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `;`
-  
-    152 │     order: 2;
-    153 │     @media (max-width: 200px) {
-  > 154 │       order: 3;
-        │               ^
-    155 │     }
-    156 │     & b {
-  
-  i Remove ;
-  
-postcss-nesting.css:158:16 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Unexpected value or character.
-  
-    156 │     & b {
-    157 │       @media (max-width: 200px) {
-  > 158 │         order: 4;
-        │                ^
-    159 │       }
-    160 │     }
-  
-  i Expected one of:
-  
-  - hover
-  - focus
-  - active
-  - first-child
-  - last-child
-  - nth-child
-  - nth-last-child
-  - first-of-type
-  - last-of-type
-  - nth-of-type
-  - nth-last-of-type
-  - only-child
-  - only-of-type
-  - checked
-  - disabled
-  - enabled
-  - required
-  - optional
-  - valid
-  - invalid
-  - in-range
-  - out-of-range
-  - read-only
-  - read-write
-  - placeholder-shown
-  - default
-  - checked
-  - indeterminate
-  - blank
-  - empty
-  - root
-  - target
-  - lang
-  - not
-  - is
-  - where
-  - fullscreen
-  - link
-  - visited
-  - any-link
-  - local-link
-  - scope
-  - current
-  - past
-  - future
-  
-postcss-nesting.css:158:17 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `;`
-  
-    156 │     & b {
-    157 │       @media (max-width: 200px) {
-  > 158 │         order: 4;
-        │                 ^
-    159 │       }
-    160 │     }
-  
-  i Remove ;
-  
 postcss-nesting.css:162:28 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `,` but instead found `speech`
@@ -1818,222 +1251,6 @@ postcss-nesting.css:162:28 parse ━━━━━━━━━━━━━━━�
     164 │       order: 5;
   
   i Remove speech
-  
-postcss-nesting.css:164:14 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Unexpected value or character.
-  
-    162 │   @media screen, print and speech {
-    163 │     @media (max-width: 300px), (min-aspect-ratio: 16/9) {
-  > 164 │       order: 5;
-        │              ^
-    165 │       & c {
-    166 │         order: 6;
-  
-  i Expected one of:
-  
-  - hover
-  - focus
-  - active
-  - first-child
-  - last-child
-  - nth-child
-  - nth-last-child
-  - first-of-type
-  - last-of-type
-  - nth-of-type
-  - nth-last-of-type
-  - only-child
-  - only-of-type
-  - checked
-  - disabled
-  - enabled
-  - required
-  - optional
-  - valid
-  - invalid
-  - in-range
-  - out-of-range
-  - read-only
-  - read-write
-  - placeholder-shown
-  - default
-  - checked
-  - indeterminate
-  - blank
-  - empty
-  - root
-  - target
-  - lang
-  - not
-  - is
-  - where
-  - fullscreen
-  - link
-  - visited
-  - any-link
-  - local-link
-  - scope
-  - current
-  - past
-  - future
-  
-postcss-nesting.css:164:15 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `;`
-  
-    162 │   @media screen, print and speech {
-    163 │     @media (max-width: 300px), (min-aspect-ratio: 16/9) {
-  > 164 │       order: 5;
-        │               ^
-    165 │       & c {
-    166 │         order: 6;
-  
-  i Remove ;
-  
-postcss-nesting.css:174:12 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Unexpected value or character.
-  
-    172 │   order: 1;
-    173 │   @media (min-width: 100px) {
-  > 174 │     order: 2;
-        │            ^
-    175 │     @media (max-width: 200px) {
-    176 │       order: 3;
-  
-  i Expected one of:
-  
-  - hover
-  - focus
-  - active
-  - first-child
-  - last-child
-  - nth-child
-  - nth-last-child
-  - first-of-type
-  - last-of-type
-  - nth-of-type
-  - nth-last-of-type
-  - only-child
-  - only-of-type
-  - checked
-  - disabled
-  - enabled
-  - required
-  - optional
-  - valid
-  - invalid
-  - in-range
-  - out-of-range
-  - read-only
-  - read-write
-  - placeholder-shown
-  - default
-  - checked
-  - indeterminate
-  - blank
-  - empty
-  - root
-  - target
-  - lang
-  - not
-  - is
-  - where
-  - fullscreen
-  - link
-  - visited
-  - any-link
-  - local-link
-  - scope
-  - current
-  - past
-  - future
-  
-postcss-nesting.css:174:13 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `;`
-  
-    172 │   order: 1;
-    173 │   @media (min-width: 100px) {
-  > 174 │     order: 2;
-        │             ^
-    175 │     @media (max-width: 200px) {
-    176 │       order: 3;
-  
-  i Remove ;
-  
-postcss-nesting.css:176:14 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Unexpected value or character.
-  
-    174 │     order: 2;
-    175 │     @media (max-width: 200px) {
-  > 176 │       order: 3;
-        │              ^
-    177 │     }
-    178 │     @nest & b {
-  
-  i Expected one of:
-  
-  - hover
-  - focus
-  - active
-  - first-child
-  - last-child
-  - nth-child
-  - nth-last-child
-  - first-of-type
-  - last-of-type
-  - nth-of-type
-  - nth-last-of-type
-  - only-child
-  - only-of-type
-  - checked
-  - disabled
-  - enabled
-  - required
-  - optional
-  - valid
-  - invalid
-  - in-range
-  - out-of-range
-  - read-only
-  - read-write
-  - placeholder-shown
-  - default
-  - checked
-  - indeterminate
-  - blank
-  - empty
-  - root
-  - target
-  - lang
-  - not
-  - is
-  - where
-  - fullscreen
-  - link
-  - visited
-  - any-link
-  - local-link
-  - scope
-  - current
-  - past
-  - future
-  
-postcss-nesting.css:176:15 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `;`
-  
-    174 │     order: 2;
-    175 │     @media (max-width: 200px) {
-  > 176 │       order: 3;
-        │               ^
-    177 │     }
-    178 │     @nest & b {
-  
-  i Remove ;
   
 postcss-nesting.css:178:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -2067,78 +1284,6 @@ postcss-nesting.css:178:6 parse ━━━━━━━━━━━━━━━━
   - viewport
   - scope
   
-postcss-nesting.css:180:16 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Unexpected value or character.
-  
-    178 │     @nest & b {
-    179 │       @media (max-width: 200px) {
-  > 180 │         order: 4;
-        │                ^
-    181 │       }
-    182 │     }
-  
-  i Expected one of:
-  
-  - hover
-  - focus
-  - active
-  - first-child
-  - last-child
-  - nth-child
-  - nth-last-child
-  - first-of-type
-  - last-of-type
-  - nth-of-type
-  - nth-last-of-type
-  - only-child
-  - only-of-type
-  - checked
-  - disabled
-  - enabled
-  - required
-  - optional
-  - valid
-  - invalid
-  - in-range
-  - out-of-range
-  - read-only
-  - read-write
-  - placeholder-shown
-  - default
-  - checked
-  - indeterminate
-  - blank
-  - empty
-  - root
-  - target
-  - lang
-  - not
-  - is
-  - where
-  - fullscreen
-  - link
-  - visited
-  - any-link
-  - local-link
-  - scope
-  - current
-  - past
-  - future
-  
-postcss-nesting.css:180:17 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `;`
-  
-    178 │     @nest & b {
-    179 │       @media (max-width: 200px) {
-  > 180 │         order: 4;
-        │                 ^
-    181 │       }
-    182 │     }
-  
-  i Remove ;
-  
 postcss-nesting.css:184:28 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `,` but instead found `speech`
@@ -2151,78 +1296,6 @@ postcss-nesting.css:184:28 parse ━━━━━━━━━━━━━━━�
     186 │       order: 5;
   
   i Remove speech
-  
-postcss-nesting.css:186:14 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Unexpected value or character.
-  
-    184 │   @media screen, print and speech {
-    185 │     @media (max-width: 300px), (min-aspect-ratio: 16/9) {
-  > 186 │       order: 5;
-        │              ^
-    187 │       @nest & c {
-    188 │         order: 6;
-  
-  i Expected one of:
-  
-  - hover
-  - focus
-  - active
-  - first-child
-  - last-child
-  - nth-child
-  - nth-last-child
-  - first-of-type
-  - last-of-type
-  - nth-of-type
-  - nth-last-of-type
-  - only-child
-  - only-of-type
-  - checked
-  - disabled
-  - enabled
-  - required
-  - optional
-  - valid
-  - invalid
-  - in-range
-  - out-of-range
-  - read-only
-  - read-write
-  - placeholder-shown
-  - default
-  - checked
-  - indeterminate
-  - blank
-  - empty
-  - root
-  - target
-  - lang
-  - not
-  - is
-  - where
-  - fullscreen
-  - link
-  - visited
-  - any-link
-  - local-link
-  - scope
-  - current
-  - past
-  - future
-  
-postcss-nesting.css:186:15 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `;`
-  
-    184 │   @media screen, print and speech {
-    185 │     @media (max-width: 300px), (min-aspect-ratio: 16/9) {
-  > 186 │       order: 5;
-        │               ^
-    187 │       @nest & c {
-    188 │         order: 6;
-  
-  i Remove ;
   
 postcss-nesting.css:187:8 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -2320,27 +1393,5 @@ postcss-nesting.css:198:4 parse ━━━━━━━━━━━━━━━━
   - viewport
   - scope
   
-postcss-nesting.css:202:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected `}` but instead the file ends
-  
-    200 │   }
-    201 │ }
-  > 202 │ 
-        │ 
-  
-  i the file ends here
-  
-    200 │   }
-    201 │ }
-  > 202 │ 
-        │ 
-  
-
-```
-
-# Lines exceeding max width of 80 characters
-```
-  203:   @nest very-very-very-very-very-very-very-very-very-long-selector &, very-very-very-very-very-very-very-very-very-long-selector & {
-  206:   @nest very-very-very-very-very-very-very-very-very-long-selector + very-very-very-very-very-very-very-very-very-long-selector  &, very-very-very-very-very-very-very-very-very-long-selector very-very-very-very-very-very-very-very-very-long-selector & {
 ```

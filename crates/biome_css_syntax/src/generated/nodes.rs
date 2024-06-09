@@ -754,7 +754,7 @@ impl CssContainerAtRule {
     pub fn query(&self) -> SyntaxResult<AnyCssContainerQuery> {
         support::required_node(&self.syntax, 2usize)
     }
-    pub fn block(&self) -> SyntaxResult<AnyCssRuleBlock> {
+    pub fn block(&self) -> SyntaxResult<AnyCssConditionalBlock> {
         support::required_node(&self.syntax, 3usize)
     }
 }
@@ -772,7 +772,7 @@ pub struct CssContainerAtRuleFields {
     pub container_token: SyntaxResult<SyntaxToken>,
     pub name: Option<CssCustomIdentifier>,
     pub query: SyntaxResult<AnyCssContainerQuery>,
-    pub block: SyntaxResult<AnyCssRuleBlock>,
+    pub block: SyntaxResult<AnyCssConditionalBlock>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct CssContainerNotQuery {
@@ -2731,7 +2731,7 @@ impl CssLayerDeclaration {
     pub fn references(&self) -> CssLayerReferenceList {
         support::list(&self.syntax, 0usize)
     }
-    pub fn block(&self) -> SyntaxResult<AnyCssRuleBlock> {
+    pub fn block(&self) -> SyntaxResult<AnyCssConditionalBlock> {
         support::required_node(&self.syntax, 1usize)
     }
 }
@@ -2747,7 +2747,7 @@ impl Serialize for CssLayerDeclaration {
 #[cfg_attr(feature = "serde", derive(Serialize))]
 pub struct CssLayerDeclarationFields {
     pub references: CssLayerReferenceList,
-    pub block: SyntaxResult<AnyCssRuleBlock>,
+    pub block: SyntaxResult<AnyCssConditionalBlock>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct CssLayerReference {
@@ -2991,7 +2991,7 @@ impl CssMediaAtRule {
     pub fn queries(&self) -> CssMediaQueryList {
         support::list(&self.syntax, 1usize)
     }
-    pub fn block(&self) -> SyntaxResult<AnyCssRuleBlock> {
+    pub fn block(&self) -> SyntaxResult<AnyCssConditionalBlock> {
         support::required_node(&self.syntax, 2usize)
     }
 }
@@ -3008,7 +3008,7 @@ impl Serialize for CssMediaAtRule {
 pub struct CssMediaAtRuleFields {
     pub media_token: SyntaxResult<SyntaxToken>,
     pub queries: CssMediaQueryList,
-    pub block: SyntaxResult<AnyCssRuleBlock>,
+    pub block: SyntaxResult<AnyCssConditionalBlock>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct CssMediaConditionInParens {
@@ -5311,7 +5311,7 @@ impl CssScopeAtRule {
     pub fn range(&self) -> Option<AnyCssScopeRange> {
         support::node(&self.syntax, 1usize)
     }
-    pub fn block(&self) -> SyntaxResult<AnyCssRuleBlock> {
+    pub fn block(&self) -> SyntaxResult<AnyCssConditionalBlock> {
         support::required_node(&self.syntax, 2usize)
     }
 }
@@ -5328,7 +5328,7 @@ impl Serialize for CssScopeAtRule {
 pub struct CssScopeAtRuleFields {
     pub scope_token: SyntaxResult<SyntaxToken>,
     pub range: Option<AnyCssScopeRange>,
-    pub block: SyntaxResult<AnyCssRuleBlock>,
+    pub block: SyntaxResult<AnyCssConditionalBlock>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct CssScopeEdge {
@@ -5649,7 +5649,7 @@ impl CssSupportsAtRule {
     pub fn condition(&self) -> SyntaxResult<AnyCssSupportsCondition> {
         support::required_node(&self.syntax, 1usize)
     }
-    pub fn block(&self) -> SyntaxResult<AnyCssRuleBlock> {
+    pub fn block(&self) -> SyntaxResult<AnyCssConditionalBlock> {
         support::required_node(&self.syntax, 2usize)
     }
 }
@@ -5666,7 +5666,7 @@ impl Serialize for CssSupportsAtRule {
 pub struct CssSupportsAtRuleFields {
     pub supports_token: SyntaxResult<SyntaxToken>,
     pub condition: SyntaxResult<AnyCssSupportsCondition>,
-    pub block: SyntaxResult<AnyCssRuleBlock>,
+    pub block: SyntaxResult<AnyCssConditionalBlock>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct CssSupportsConditionInParens {
@@ -6605,6 +6605,26 @@ impl AnyCssCompoundSelector {
     pub fn as_css_compound_selector(&self) -> Option<&CssCompoundSelector> {
         match &self {
             AnyCssCompoundSelector::CssCompoundSelector(item) => Some(item),
+            _ => None,
+        }
+    }
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize))]
+pub enum AnyCssConditionalBlock {
+    AnyCssDeclarationOrRuleBlock(AnyCssDeclarationOrRuleBlock),
+    AnyCssRuleBlock(AnyCssRuleBlock),
+}
+impl AnyCssConditionalBlock {
+    pub fn as_any_css_declaration_or_rule_block(&self) -> Option<&AnyCssDeclarationOrRuleBlock> {
+        match &self {
+            AnyCssConditionalBlock::AnyCssDeclarationOrRuleBlock(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_any_css_rule_block(&self) -> Option<&AnyCssRuleBlock> {
+        match &self {
+            AnyCssConditionalBlock::AnyCssRuleBlock(item) => Some(item),
             _ => None,
         }
     }
@@ -15196,6 +15216,65 @@ impl From<AnyCssCompoundSelector> for SyntaxElement {
         node.into()
     }
 }
+impl AstNode for AnyCssConditionalBlock {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        AnyCssDeclarationOrRuleBlock::KIND_SET.union(AnyCssRuleBlock::KIND_SET);
+    fn can_cast(kind: SyntaxKind) -> bool {
+        match kind {
+            k if AnyCssDeclarationOrRuleBlock::can_cast(k) => true,
+            k if AnyCssRuleBlock::can_cast(k) => true,
+            _ => false,
+        }
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if let Some(any_css_declaration_or_rule_block) =
+            AnyCssDeclarationOrRuleBlock::cast(syntax.clone())
+        {
+            return Some(AnyCssConditionalBlock::AnyCssDeclarationOrRuleBlock(
+                any_css_declaration_or_rule_block,
+            ));
+        }
+        if let Some(any_css_rule_block) = AnyCssRuleBlock::cast(syntax) {
+            return Some(AnyCssConditionalBlock::AnyCssRuleBlock(any_css_rule_block));
+        }
+        None
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        match self {
+            AnyCssConditionalBlock::AnyCssDeclarationOrRuleBlock(it) => it.syntax(),
+            AnyCssConditionalBlock::AnyCssRuleBlock(it) => it.syntax(),
+        }
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        match self {
+            AnyCssConditionalBlock::AnyCssDeclarationOrRuleBlock(it) => it.into_syntax(),
+            AnyCssConditionalBlock::AnyCssRuleBlock(it) => it.into_syntax(),
+        }
+    }
+}
+impl std::fmt::Debug for AnyCssConditionalBlock {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            AnyCssConditionalBlock::AnyCssDeclarationOrRuleBlock(it) => std::fmt::Debug::fmt(it, f),
+            AnyCssConditionalBlock::AnyCssRuleBlock(it) => std::fmt::Debug::fmt(it, f),
+        }
+    }
+}
+impl From<AnyCssConditionalBlock> for SyntaxNode {
+    fn from(n: AnyCssConditionalBlock) -> SyntaxNode {
+        match n {
+            AnyCssConditionalBlock::AnyCssDeclarationOrRuleBlock(it) => it.into(),
+            AnyCssConditionalBlock::AnyCssRuleBlock(it) => it.into(),
+        }
+    }
+}
+impl From<AnyCssConditionalBlock> for SyntaxElement {
+    fn from(n: AnyCssConditionalBlock) -> SyntaxElement {
+        let node: SyntaxNode = n.into();
+        node.into()
+    }
+}
 impl From<CssContainerAndQuery> for AnyCssContainerAndCombinableQuery {
     fn from(node: CssContainerAndQuery) -> AnyCssContainerAndCombinableQuery {
         AnyCssContainerAndCombinableQuery::CssContainerAndQuery(node)
@@ -20924,6 +21003,11 @@ impl std::fmt::Display for AnyCssComposesImportSource {
     }
 }
 impl std::fmt::Display for AnyCssCompoundSelector {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for AnyCssConditionalBlock {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
