@@ -1797,6 +1797,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noUnknownPseudoClassSelector": {
+					"description": "Disallow unknown pseudo-class selectors.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noUnknownSelectorPseudoElement": {
 					"description": "Disallow unknown pseudo-element selectors.",
 					"anyOf": [
