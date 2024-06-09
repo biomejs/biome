@@ -60,13 +60,7 @@ impl Rule for NoSubstr {
         let string_function_name = value_token.text_trimmed();
 
         if matches!(string_function_name, "substr" | "substring") {
-            let arguments = node.arguments().ok()?;
-            let args = arguments.args();
-
-            Some(NoSubstrState {
-                value_token,
-                has_arguments: !args.is_empty(),
-            })
+            Some(NoSubstrState { value_token })
         } else {
             None
         }
@@ -93,15 +87,18 @@ impl Rule for NoSubstr {
         )
     }
 
-    fn action(ctx: &RuleContext<Self>, state: &Self::State) -> Option<JsRuleAction> {
-        if state.has_arguments {
+    fn action(ctx: &RuleContext<Self>, _: &Self::State) -> Option<JsRuleAction> {
+        let node = ctx.query();
+        let arguments = node.arguments().ok()?;
+        let args = arguments.args();
+
+        if !args.is_empty() {
             // If the function has arguments, we cannot replace it with slice() as it has different behavior.
             // - https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/substring#differences_between_substring_and_slice
             // - https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/substr#description
             return None;
         }
 
-        let node = ctx.query();
         let callee = node.callee().ok()?;
         let expression = callee.as_js_static_member_expression()?;
         let member = expression.member().ok()?;
@@ -122,7 +119,6 @@ impl Rule for NoSubstr {
 #[derive(Debug, Clone)]
 pub struct NoSubstrState {
     value_token: JsSyntaxToken,
-    has_arguments: bool,
 }
 
 impl NoSubstrState {
