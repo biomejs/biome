@@ -59,6 +59,8 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 - [noEmptyInterface](https://biomejs.dev/linter/rules/no-empty-interface/) now ignores empty interfaces in ambient modules ([#3110](https://github.com/biomejs/biome/issues/3110)). Contributed by @Conaclos
 
+- [useHookAtTopLevel](https://biomejs.dev/linter/rules/use-hook-at-top-level/) now recognizes properties named as hooks like `foo.useFoo()`.
+
 ### Parser
 
 #### New features
