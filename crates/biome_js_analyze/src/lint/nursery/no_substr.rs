@@ -77,16 +77,15 @@ impl Rule for NoSubstr {
             "Avoid using "{state.member_name().text()}" and consider using slice instead."
         }
         .to_owned();
-        let note_message =
-            markup! {
-                "Use "<Emphasis>"."{state.member_name().text()}"()"</Emphasis>" instead of "<Emphasis>".slice()"</Emphasis>"."
-            }
-            .to_owned();
+        let note_message = markup! {
+        <Emphasis>"slice"</Emphasis>" is more commonly used and has a less surprising behavior."
+        }
+        .to_owned();
         let mdn_link =
             markup! {
                 "See "<Hyperlink href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/substring#the_difference_between_substring_and_substr">"MDN web docs"</Hyperlink>" for more details."
-            }
-            .to_owned();
+        }
+        .to_owned();
         Some(
             RuleDiagnostic::new(rule_category!(), state.span(), diagnostic_message)
                 .note(note_message)
@@ -114,7 +113,7 @@ impl Rule for NoSubstr {
         Some(JsRuleAction::new(
             ActionCategory::QuickFix,
             ctx.metadata().applicability(),
-            markup! { "Replace with "<Emphasis>".slice()"</Emphasis>"." }.to_owned(),
+            markup! { "Use "<Emphasis>".slice()"</Emphasis>" instead." }.to_owned(),
             mutation,
         ))
     }
