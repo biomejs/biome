@@ -69,21 +69,7 @@ info: css/modules/modules.css
 ```diff
 --- Prettier
 +++ Biome
-@@ -2,10 +2,11 @@
- @value first, second, third from colors;
- 
- .title {
--  @nest :global(h1)& {
-+  @
-+  nest :global(h1)& {
-     background: red;
--  }
- }
-+}
- 
- .className {
-   color: green;
-@@ -42,7 +43,7 @@
+@@ -42,7 +42,7 @@
    localAlias: keyFromDep;
  }
  :export {
@@ -101,10 +87,9 @@ info: css/modules/modules.css
 @value first, second, third from colors;
 
 .title {
-  @
-  nest :global(h1)& {
+  @nest :global(h1)& {
     background: red;
-}
+  }
 }
 
 .className {
@@ -157,79 +142,6 @@ info: css/modules/modules.css
 
 # Errors
 ```
-modules.css:5:4 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Unexpected value or character.
-  
-    4 │ .title {
-  > 5 │   @nest :global(h1)& {
-      │    ^^^^
-    6 │     background: red;
-    7 │   }
-  
-  i Expected one of:
-  
-  - charset
-  - color-profile
-  - container
-  - counter-style
-  - document
-  - font-face
-  - font-feature-values
-  - font-palette-values
-  - import
-  - keyframes
-  - layer
-  - media
-  - namespace
-  - page
-  - property
-  - supports
-  - viewport
-  - scope
-  
-modules.css:5:20 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Unexpected value or character.
-  
-    4 │ .title {
-  > 5 │   @nest :global(h1)& {
-      │                    ^^^
-  > 6 │     background: red;
-      │     ^^^^^^^^^^^^^^^
-    7 │   }
-    8 │ }
-  
-  i Expected one of:
-  
-  - identifier
-  - string
-  - number
-  - dimension
-  - ratio
-  - custom property
-  - function
-  
-modules.css:8:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Expected a qualified rule, or an at rule but instead found '}'.
-  
-     6 │     background: red;
-     7 │   }
-   > 8 │ }
-       │ ^
-     9 │ 
-    10 │ .className {
-  
-  i Expected a qualified rule, or an at rule here.
-  
-     6 │     background: red;
-     7 │   }
-   > 8 │ }
-       │ ^
-     9 │ 
-    10 │ .className {
-  
 modules.css:41:8 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `,` but instead found `(`

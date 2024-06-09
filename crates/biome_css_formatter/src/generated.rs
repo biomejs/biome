@@ -5018,6 +5018,46 @@ impl IntoFormat<CssFormatContext> for biome_css_syntax::CssUniversalSelector {
         )
     }
 }
+impl FormatRule<biome_css_syntax::CssUnknownBlockAtRule>
+    for crate::css::statements::unknown_block_at_rule::FormatCssUnknownBlockAtRule
+{
+    type Context = CssFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_css_syntax::CssUnknownBlockAtRule,
+        f: &mut CssFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_css_syntax::CssUnknownBlockAtRule>::fmt(self, node, f)
+    }
+}
+impl AsFormat<CssFormatContext> for biome_css_syntax::CssUnknownBlockAtRule {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_css_syntax::CssUnknownBlockAtRule,
+        crate::css::statements::unknown_block_at_rule::FormatCssUnknownBlockAtRule,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        #![allow(clippy::default_constructed_unit_structs)]
+        FormatRefWithRule::new(
+            self,
+            crate::css::statements::unknown_block_at_rule::FormatCssUnknownBlockAtRule::default(),
+        )
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::CssUnknownBlockAtRule {
+    type Format = FormatOwnedWithRule<
+        biome_css_syntax::CssUnknownBlockAtRule,
+        crate::css::statements::unknown_block_at_rule::FormatCssUnknownBlockAtRule,
+    >;
+    fn into_format(self) -> Self::Format {
+        #![allow(clippy::default_constructed_unit_structs)]
+        FormatOwnedWithRule::new(
+            self,
+            crate::css::statements::unknown_block_at_rule::FormatCssUnknownBlockAtRule::default(),
+        )
+    }
+}
 impl FormatRule<biome_css_syntax::CssUnknownDimension>
     for crate::css::value::unknown_dimension::FormatCssUnknownDimension
 {
@@ -5055,6 +5095,46 @@ impl IntoFormat<CssFormatContext> for biome_css_syntax::CssUnknownDimension {
         FormatOwnedWithRule::new(
             self,
             crate::css::value::unknown_dimension::FormatCssUnknownDimension::default(),
+        )
+    }
+}
+impl FormatRule<biome_css_syntax::CssUnknownValueAtRule>
+    for crate::css::statements::unknown_value_at_rule::FormatCssUnknownValueAtRule
+{
+    type Context = CssFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_css_syntax::CssUnknownValueAtRule,
+        f: &mut CssFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_css_syntax::CssUnknownValueAtRule>::fmt(self, node, f)
+    }
+}
+impl AsFormat<CssFormatContext> for biome_css_syntax::CssUnknownValueAtRule {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_css_syntax::CssUnknownValueAtRule,
+        crate::css::statements::unknown_value_at_rule::FormatCssUnknownValueAtRule,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        #![allow(clippy::default_constructed_unit_structs)]
+        FormatRefWithRule::new(
+            self,
+            crate::css::statements::unknown_value_at_rule::FormatCssUnknownValueAtRule::default(),
+        )
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::CssUnknownValueAtRule {
+    type Format = FormatOwnedWithRule<
+        biome_css_syntax::CssUnknownValueAtRule,
+        crate::css::statements::unknown_value_at_rule::FormatCssUnknownValueAtRule,
+    >;
+    fn into_format(self) -> Self::Format {
+        #![allow(clippy::default_constructed_unit_structs)]
+        FormatOwnedWithRule::new(
+            self,
+            crate::css::statements::unknown_value_at_rule::FormatCssUnknownValueAtRule::default(),
         )
     }
 }
@@ -6943,6 +7023,40 @@ impl IntoFormat<CssFormatContext> for biome_css_syntax::CssBogusUrlModifier {
             self,
             crate::css::bogus::bogus_url_modifier::FormatCssBogusUrlModifier::default(),
         )
+    }
+}
+impl FormatRule<biome_css_syntax::CssUnknownAtRuleComponentList>
+    for crate::css::bogus::unknown_at_rule_component_list::FormatCssUnknownAtRuleComponentList
+{
+    type Context = CssFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_css_syntax::CssUnknownAtRuleComponentList,
+        f: &mut CssFormatter,
+    ) -> FormatResult<()> {
+        FormatBogusNodeRule::<biome_css_syntax::CssUnknownAtRuleComponentList>::fmt(self, node, f)
+    }
+}
+impl AsFormat<CssFormatContext> for biome_css_syntax::CssUnknownAtRuleComponentList {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_css_syntax::CssUnknownAtRuleComponentList,
+        crate::css::bogus::unknown_at_rule_component_list::FormatCssUnknownAtRuleComponentList,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        #![allow(clippy::default_constructed_unit_structs)]
+        FormatRefWithRule :: new (self , crate :: css :: bogus :: unknown_at_rule_component_list :: FormatCssUnknownAtRuleComponentList :: default ())
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::CssUnknownAtRuleComponentList {
+    type Format = FormatOwnedWithRule<
+        biome_css_syntax::CssUnknownAtRuleComponentList,
+        crate::css::bogus::unknown_at_rule_component_list::FormatCssUnknownAtRuleComponentList,
+    >;
+    fn into_format(self) -> Self::Format {
+        #![allow(clippy::default_constructed_unit_structs)]
+        FormatOwnedWithRule :: new (self , crate :: css :: bogus :: unknown_at_rule_component_list :: FormatCssUnknownAtRuleComponentList :: default ())
     }
 }
 impl FormatRule<biome_css_syntax::CssValueAtRuleGenericValue>
