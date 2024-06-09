@@ -40,6 +40,10 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::CssBinaryExpression::new_unchecked(node) };
                     $body
                 }
+                $crate::CssSyntaxKind::CSS_BRACKETED_VALUE => {
+                    let $pattern = unsafe { $crate::CssBracketedValue::new_unchecked(node) };
+                    $body
+                }
                 $crate::CssSyntaxKind::CSS_CHARSET_AT_RULE => {
                     let $pattern = unsafe { $crate::CssCharsetAtRule::new_unchecked(node) };
                     $body
@@ -745,6 +749,10 @@ macro_rules! map_syntax_node {
                 $crate::CssSyntaxKind::CSS_VALUE_AT_RULE_GENERIC_VALUE => {
                     let $pattern =
                         unsafe { $crate::CssValueAtRuleGenericValue::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::CSS_BRACKETED_VALUE_LIST => {
+                    let $pattern = unsafe { $crate::CssBracketedValueList::new_unchecked(node) };
                     $body
                 }
                 $crate::CssSyntaxKind::CSS_COMPONENT_VALUE_LIST => {

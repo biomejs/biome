@@ -668,11 +668,7 @@ CssFontFamilyName =
 
 // @font-feature-values Font Second Gothic { }
 //                      ^^^^^^^^^^^^^^^^^^
-CssCustomIdentifierList = CssCustomIdentifier*
-
-AnyCssCustomIdentifier =
-	CssCustomIdentifier
-	| CssBogusCustomIdentifier
+CssCustomIdentifierList = AnyCssCustomIdentifier*
 
 AnyCssFontFeatureValuesBlock =
 	CssFontFeatureValuesBlock
@@ -1596,6 +1592,7 @@ AnyCssValue =
 	| CssRatio
 	| AnyCssFunction
 	| CssColor
+	| CssBracketedValue
 
 
 // https://drafts.csswg.org/css-syntax/#typedef-dimension-token
@@ -1710,6 +1707,22 @@ CssParenthesizedExpression =
 CssColor =
 	'#'
 	value:'css_color_literal'
+
+// The CssBracketedValue is a special construct used to represent CSS values that are enclosed in brackets.
+// This is commonly seen in properties like grid-template-areas where the value is a list of identifiers representing grid areas.
+// [full-start] 1fr [main-start end] 480px [main-end] 1fr [full-end]
+// ^^^^^^^^^^^^     ^^^^^^^^^^^^^^^^        ^^^^^^^^^^     ^^^^^^^^^^
+// https://drafts.csswg.org/css-grid/#named-lines
+CssBracketedValue =
+	'['
+		items: CssBracketedValueList
+	']'
+
+CssBracketedValueList = AnyCssCustomIdentifier*
+
+AnyCssCustomIdentifier =
+	CssCustomIdentifier
+	| CssBogusCustomIdentifier
 
 // Any identifier. Case insensitve, used for standard property names, values, type selectors, etc.
 CssIdentifier = value: 'ident'

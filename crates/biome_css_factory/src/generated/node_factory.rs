@@ -129,6 +129,20 @@ pub fn css_binary_expression(
         ],
     ))
 }
+pub fn css_bracketed_value(
+    l_brack_token: SyntaxToken,
+    items: CssBracketedValueList,
+    r_brack_token: SyntaxToken,
+) -> CssBracketedValue {
+    CssBracketedValue::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_BRACKETED_VALUE,
+        [
+            Some(SyntaxElement::Token(l_brack_token)),
+            Some(SyntaxElement::Node(items.into_syntax())),
+            Some(SyntaxElement::Token(r_brack_token)),
+        ],
+    ))
+}
 pub fn css_charset_at_rule(
     charset_token: SyntaxToken,
     encoding: CssString,
@@ -2194,6 +2208,18 @@ pub fn css_value_at_rule_named_import_specifier(
         ],
     ))
 }
+pub fn css_bracketed_value_list<I>(items: I) -> CssBracketedValueList
+where
+    I: IntoIterator<Item = AnyCssCustomIdentifier>,
+    I::IntoIter: ExactSizeIterator,
+{
+    CssBracketedValueList::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_BRACKETED_VALUE_LIST,
+        items
+            .into_iter()
+            .map(|item| Some(item.into_syntax().into())),
+    ))
+}
 pub fn css_component_value_list<I>(items: I) -> CssComponentValueList
 where
     I: IntoIterator<Item = AnyCssValue>,
@@ -2241,7 +2267,7 @@ where
 }
 pub fn css_custom_identifier_list<I>(items: I) -> CssCustomIdentifierList
 where
-    I: IntoIterator<Item = CssCustomIdentifier>,
+    I: IntoIterator<Item = AnyCssCustomIdentifier>,
     I::IntoIter: ExactSizeIterator,
 {
     CssCustomIdentifierList::unwrap_cast(SyntaxNode::new_detached(

@@ -240,6 +240,46 @@ impl IntoFormat<CssFormatContext> for biome_css_syntax::CssBinaryExpression {
         )
     }
 }
+impl FormatRule<biome_css_syntax::CssBracketedValue>
+    for crate::css::auxiliary::bracketed_value::FormatCssBracketedValue
+{
+    type Context = CssFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_css_syntax::CssBracketedValue,
+        f: &mut CssFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_css_syntax::CssBracketedValue>::fmt(self, node, f)
+    }
+}
+impl AsFormat<CssFormatContext> for biome_css_syntax::CssBracketedValue {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_css_syntax::CssBracketedValue,
+        crate::css::auxiliary::bracketed_value::FormatCssBracketedValue,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        #![allow(clippy::default_constructed_unit_structs)]
+        FormatRefWithRule::new(
+            self,
+            crate::css::auxiliary::bracketed_value::FormatCssBracketedValue::default(),
+        )
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::CssBracketedValue {
+    type Format = FormatOwnedWithRule<
+        biome_css_syntax::CssBracketedValue,
+        crate::css::auxiliary::bracketed_value::FormatCssBracketedValue,
+    >;
+    fn into_format(self) -> Self::Format {
+        #![allow(clippy::default_constructed_unit_structs)]
+        FormatOwnedWithRule::new(
+            self,
+            crate::css::auxiliary::bracketed_value::FormatCssBracketedValue::default(),
+        )
+    }
+}
 impl FormatRule<biome_css_syntax::CssCharsetAtRule>
     for crate::css::statements::charset_at_rule::FormatCssCharsetAtRule
 {
@@ -5268,6 +5308,33 @@ impl IntoFormat<CssFormatContext> for biome_css_syntax::CssValueAtRuleNamedImpor
     fn into_format(self) -> Self::Format {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule :: new (self , crate :: css :: auxiliary :: value_at_rule_named_import_specifier :: FormatCssValueAtRuleNamedImportSpecifier :: default ())
+    }
+}
+impl AsFormat<CssFormatContext> for biome_css_syntax::CssBracketedValueList {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_css_syntax::CssBracketedValueList,
+        crate::css::lists::bracketed_value_list::FormatCssBracketedValueList,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        #![allow(clippy::default_constructed_unit_structs)]
+        FormatRefWithRule::new(
+            self,
+            crate::css::lists::bracketed_value_list::FormatCssBracketedValueList::default(),
+        )
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::CssBracketedValueList {
+    type Format = FormatOwnedWithRule<
+        biome_css_syntax::CssBracketedValueList,
+        crate::css::lists::bracketed_value_list::FormatCssBracketedValueList,
+    >;
+    fn into_format(self) -> Self::Format {
+        #![allow(clippy::default_constructed_unit_structs)]
+        FormatOwnedWithRule::new(
+            self,
+            crate::css::lists::bracketed_value_list::FormatCssBracketedValueList::default(),
+        )
     }
 }
 impl AsFormat<CssFormatContext> for biome_css_syntax::CssComponentValueList {
