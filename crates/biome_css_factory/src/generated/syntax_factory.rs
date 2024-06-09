@@ -37,7 +37,7 @@ impl SyntaxFactory for CssSyntaxFactory {
             | CSS_BOGUS_SELECTOR
             | CSS_BOGUS_SUB_SELECTOR
             | CSS_BOGUS_URL_MODIFIER
-            | CSS_UNKNOWN_AT_RULE_PARAMETER_LIST
+            | CSS_UNKNOWN_AT_RULE_COMPONENT_LIST
             | CSS_VALUE_AT_RULE_GENERIC_VALUE => {
                 RawSyntaxNode::new(kind, children.into_iter().map(Some))
             }
@@ -4234,7 +4234,7 @@ impl SyntaxFactory for CssSyntaxFactory {
                 }
                 slots.next_slot();
                 if let Some(element) = &current_element {
-                    if CssUnknownAtRuleParameterList::can_cast(element.kind()) {
+                    if CssUnknownAtRuleComponentList::can_cast(element.kind()) {
                         slots.mark_present();
                         current_element = elements.next();
                     }
@@ -4293,7 +4293,7 @@ impl SyntaxFactory for CssSyntaxFactory {
                 }
                 slots.next_slot();
                 if let Some(element) = &current_element {
-                    if CssUnknownAtRuleParameterList::can_cast(element.kind()) {
+                    if CssUnknownAtRuleComponentList::can_cast(element.kind()) {
                         slots.mark_present();
                         current_element = elements.next();
                     }

@@ -8,13 +8,13 @@ impl FormatNodeRule<CssUnknownBlockAtRule> for FormatCssUnknownBlockAtRule {
     fn fmt_fields(&self, node: &CssUnknownBlockAtRule, f: &mut CssFormatter) -> FormatResult<()> {
         let CssUnknownBlockAtRuleFields {
             name,
-            parameters,
+            components,
             block,
         } = node.as_fields();
 
-        write!(f, [name.format(), space(), parameters.format()])?;
+        write!(f, [name.format(), space(), components.format()])?;
 
-        if parameters.map_or(false, |parameters| parameters.items().next().is_some()) {
+        if components.map_or(false, |components| components.items().next().is_some()) {
             write!(f, [space()])?;
         }
 

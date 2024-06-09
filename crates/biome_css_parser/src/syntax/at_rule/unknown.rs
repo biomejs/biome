@@ -43,7 +43,7 @@ pub(crate) fn parse_unknown_at_rule(p: &mut CssParser) -> ParsedSyntax {
             p.bump_any();
         }
 
-        m.complete(p, CSS_UNKNOWN_AT_RULE_PARAMETER_LIST);
+        m.complete(p, CSS_UNKNOWN_AT_RULE_COMPONENT_LIST);
     }
 
     let kind = if p.at(T!['{']) {

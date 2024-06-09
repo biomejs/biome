@@ -2410,7 +2410,7 @@ impl CssUnknownBlockAtRule {
                 .splice_slots(0usize..=0usize, once(Some(element.into_syntax().into()))),
         )
     }
-    pub fn with_parameters(self, element: CssUnknownAtRuleParameterList) -> Self {
+    pub fn with_components(self, element: CssUnknownAtRuleComponentList) -> Self {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(1usize..=1usize, once(Some(element.into_syntax().into()))),
@@ -2444,7 +2444,7 @@ impl CssUnknownValueAtRule {
                 .splice_slots(0usize..=0usize, once(Some(element.into_syntax().into()))),
         )
     }
-    pub fn with_parameters(self, element: CssUnknownAtRuleParameterList) -> Self {
+    pub fn with_components(self, element: CssUnknownAtRuleComponentList) -> Self {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(1usize..=1usize, once(Some(element.into_syntax().into()))),

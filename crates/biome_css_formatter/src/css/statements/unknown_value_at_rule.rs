@@ -8,17 +8,17 @@ impl FormatNodeRule<CssUnknownValueAtRule> for FormatCssUnknownValueAtRule {
     fn fmt_fields(&self, node: &CssUnknownValueAtRule, f: &mut CssFormatter) -> FormatResult<()> {
         let CssUnknownValueAtRuleFields {
             name,
-            parameters,
+            components,
             semicolon_token,
         } = node.as_fields();
 
         write!(f, [name.format()])?;
 
-        if let Ok(parameters) = parameters {
-            if parameters.items().next().is_some() {
+        if let Ok(components) = components {
+            if components.items().next().is_some() {
                 write!(f, [space()])?;
             }
-            write!(f, [parameters.format()])?;
+            write!(f, [components.format()])?;
         }
 
         write!(f, [semicolon_token.format()])

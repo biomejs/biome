@@ -754,9 +754,9 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::CssBogusUrlModifier::new_unchecked(node) };
                     $body
                 }
-                $crate::CssSyntaxKind::CSS_UNKNOWN_AT_RULE_PARAMETER_LIST => {
+                $crate::CssSyntaxKind::CSS_UNKNOWN_AT_RULE_COMPONENT_LIST => {
                     let $pattern =
-                        unsafe { $crate::CssUnknownAtRuleParameterList::new_unchecked(node) };
+                        unsafe { $crate::CssUnknownAtRuleComponentList::new_unchecked(node) };
                     $body
                 }
                 $crate::CssSyntaxKind::CSS_VALUE_AT_RULE_GENERIC_VALUE => {

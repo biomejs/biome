@@ -7025,38 +7025,38 @@ impl IntoFormat<CssFormatContext> for biome_css_syntax::CssBogusUrlModifier {
         )
     }
 }
-impl FormatRule<biome_css_syntax::CssUnknownAtRuleParameterList>
-    for crate::css::bogus::unknown_at_rule_parameter_list::FormatCssUnknownAtRuleParameterList
+impl FormatRule<biome_css_syntax::CssUnknownAtRuleComponentList>
+    for crate::css::bogus::unknown_at_rule_component_list::FormatCssUnknownAtRuleComponentList
 {
     type Context = CssFormatContext;
     #[inline(always)]
     fn fmt(
         &self,
-        node: &biome_css_syntax::CssUnknownAtRuleParameterList,
+        node: &biome_css_syntax::CssUnknownAtRuleComponentList,
         f: &mut CssFormatter,
     ) -> FormatResult<()> {
-        FormatBogusNodeRule::<biome_css_syntax::CssUnknownAtRuleParameterList>::fmt(self, node, f)
+        FormatBogusNodeRule::<biome_css_syntax::CssUnknownAtRuleComponentList>::fmt(self, node, f)
     }
 }
-impl AsFormat<CssFormatContext> for biome_css_syntax::CssUnknownAtRuleParameterList {
+impl AsFormat<CssFormatContext> for biome_css_syntax::CssUnknownAtRuleComponentList {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_css_syntax::CssUnknownAtRuleParameterList,
-        crate::css::bogus::unknown_at_rule_parameter_list::FormatCssUnknownAtRuleParameterList,
+        biome_css_syntax::CssUnknownAtRuleComponentList,
+        crate::css::bogus::unknown_at_rule_component_list::FormatCssUnknownAtRuleComponentList,
     >;
     fn format(&self) -> Self::Format<'_> {
         #![allow(clippy::default_constructed_unit_structs)]
-        FormatRefWithRule :: new (self , crate :: css :: bogus :: unknown_at_rule_parameter_list :: FormatCssUnknownAtRuleParameterList :: default ())
+        FormatRefWithRule :: new (self , crate :: css :: bogus :: unknown_at_rule_component_list :: FormatCssUnknownAtRuleComponentList :: default ())
     }
 }
-impl IntoFormat<CssFormatContext> for biome_css_syntax::CssUnknownAtRuleParameterList {
+impl IntoFormat<CssFormatContext> for biome_css_syntax::CssUnknownAtRuleComponentList {
     type Format = FormatOwnedWithRule<
-        biome_css_syntax::CssUnknownAtRuleParameterList,
-        crate::css::bogus::unknown_at_rule_parameter_list::FormatCssUnknownAtRuleParameterList,
+        biome_css_syntax::CssUnknownAtRuleComponentList,
+        crate::css::bogus::unknown_at_rule_component_list::FormatCssUnknownAtRuleComponentList,
     >;
     fn into_format(self) -> Self::Format {
         #![allow(clippy::default_constructed_unit_structs)]
-        FormatOwnedWithRule :: new (self , crate :: css :: bogus :: unknown_at_rule_parameter_list :: FormatCssUnknownAtRuleParameterList :: default ())
+        FormatOwnedWithRule :: new (self , crate :: css :: bogus :: unknown_at_rule_component_list :: FormatCssUnknownAtRuleComponentList :: default ())
     }
 }
 impl FormatRule<biome_css_syntax::CssValueAtRuleGenericValue>

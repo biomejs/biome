@@ -6079,14 +6079,14 @@ impl CssUnknownBlockAtRule {
     pub fn as_fields(&self) -> CssUnknownBlockAtRuleFields {
         CssUnknownBlockAtRuleFields {
             name: self.name(),
-            parameters: self.parameters(),
+            components: self.components(),
             block: self.block(),
         }
     }
     pub fn name(&self) -> SyntaxResult<CssIdentifier> {
         support::required_node(&self.syntax, 0usize)
     }
-    pub fn parameters(&self) -> SyntaxResult<CssUnknownAtRuleParameterList> {
+    pub fn components(&self) -> SyntaxResult<CssUnknownAtRuleComponentList> {
         support::required_node(&self.syntax, 1usize)
     }
     pub fn block(&self) -> SyntaxResult<AnyCssDeclarationOrRuleBlock> {
@@ -6105,7 +6105,7 @@ impl Serialize for CssUnknownBlockAtRule {
 #[cfg_attr(feature = "serde", derive(Serialize))]
 pub struct CssUnknownBlockAtRuleFields {
     pub name: SyntaxResult<CssIdentifier>,
-    pub parameters: SyntaxResult<CssUnknownAtRuleParameterList>,
+    pub components: SyntaxResult<CssUnknownAtRuleComponentList>,
     pub block: SyntaxResult<AnyCssDeclarationOrRuleBlock>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
@@ -6166,14 +6166,14 @@ impl CssUnknownValueAtRule {
     pub fn as_fields(&self) -> CssUnknownValueAtRuleFields {
         CssUnknownValueAtRuleFields {
             name: self.name(),
-            parameters: self.parameters(),
+            components: self.components(),
             semicolon_token: self.semicolon_token(),
         }
     }
     pub fn name(&self) -> SyntaxResult<CssIdentifier> {
         support::required_node(&self.syntax, 0usize)
     }
-    pub fn parameters(&self) -> SyntaxResult<CssUnknownAtRuleParameterList> {
+    pub fn components(&self) -> SyntaxResult<CssUnknownAtRuleComponentList> {
         support::required_node(&self.syntax, 1usize)
     }
     pub fn semicolon_token(&self) -> SyntaxResult<SyntaxToken> {
@@ -6192,7 +6192,7 @@ impl Serialize for CssUnknownValueAtRule {
 #[cfg_attr(feature = "serde", derive(Serialize))]
 pub struct CssUnknownValueAtRuleFields {
     pub name: SyntaxResult<CssIdentifier>,
-    pub parameters: SyntaxResult<CssUnknownAtRuleParameterList>,
+    pub components: SyntaxResult<CssUnknownAtRuleComponentList>,
     pub semicolon_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
@@ -14598,7 +14598,7 @@ impl std::fmt::Debug for CssUnknownBlockAtRule {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("CssUnknownBlockAtRule")
             .field("name", &support::DebugSyntaxResult(self.name()))
-            .field("parameters", &support::DebugSyntaxResult(self.parameters()))
+            .field("components", &support::DebugSyntaxResult(self.components()))
             .field("block", &support::DebugSyntaxResult(self.block()))
             .finish()
     }
@@ -14680,7 +14680,7 @@ impl std::fmt::Debug for CssUnknownValueAtRule {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("CssUnknownValueAtRule")
             .field("name", &support::DebugSyntaxResult(self.name()))
-            .field("parameters", &support::DebugSyntaxResult(self.parameters()))
+            .field("components", &support::DebugSyntaxResult(self.components()))
             .field(
                 "semicolon_token",
                 &support::DebugSyntaxResult(self.semicolon_token()),
@@ -23789,10 +23789,10 @@ impl From<CssBogusUrlModifier> for SyntaxElement {
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "serde", derive(Serialize))]
-pub struct CssUnknownAtRuleParameterList {
+pub struct CssUnknownAtRuleComponentList {
     syntax: SyntaxNode,
 }
-impl CssUnknownAtRuleParameterList {
+impl CssUnknownAtRuleComponentList {
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]
@@ -23806,12 +23806,12 @@ impl CssUnknownAtRuleParameterList {
         support::elements(&self.syntax)
     }
 }
-impl AstNode for CssUnknownAtRuleParameterList {
+impl AstNode for CssUnknownAtRuleComponentList {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
-        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_UNKNOWN_AT_RULE_PARAMETER_LIST as u16));
+        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_UNKNOWN_AT_RULE_COMPONENT_LIST as u16));
     fn can_cast(kind: SyntaxKind) -> bool {
-        kind == CSS_UNKNOWN_AT_RULE_PARAMETER_LIST
+        kind == CSS_UNKNOWN_AT_RULE_COMPONENT_LIST
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         if Self::can_cast(syntax.kind()) {
@@ -23827,20 +23827,20 @@ impl AstNode for CssUnknownAtRuleParameterList {
         self.syntax
     }
 }
-impl std::fmt::Debug for CssUnknownAtRuleParameterList {
+impl std::fmt::Debug for CssUnknownAtRuleComponentList {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssUnknownAtRuleParameterList")
+        f.debug_struct("CssUnknownAtRuleComponentList")
             .field("items", &DebugSyntaxElementChildren(self.items()))
             .finish()
     }
 }
-impl From<CssUnknownAtRuleParameterList> for SyntaxNode {
-    fn from(n: CssUnknownAtRuleParameterList) -> SyntaxNode {
+impl From<CssUnknownAtRuleComponentList> for SyntaxNode {
+    fn from(n: CssUnknownAtRuleComponentList) -> SyntaxNode {
         n.syntax
     }
 }
-impl From<CssUnknownAtRuleParameterList> for SyntaxElement {
-    fn from(n: CssUnknownAtRuleParameterList) -> SyntaxElement {
+impl From<CssUnknownAtRuleComponentList> for SyntaxElement {
+    fn from(n: CssUnknownAtRuleComponentList) -> SyntaxElement {
         n.syntax.into()
     }
 }

@@ -1587,15 +1587,15 @@ CssValueAtRuleGenericValue = SyntaxElement*
 /// supported by the parser, ensuring that the stylesheet can still be processed without errors.
 CssUnknownBlockAtRule =
 	name: CssIdentifier
-	parameters: CssUnknownAtRuleParameterList
+	components: CssUnknownAtRuleComponentList
 	block: AnyCssDeclarationOrRuleBlock
 
 CssUnknownValueAtRule =
 	name: CssIdentifier
-	parameters: CssUnknownAtRuleParameterList
+	components: CssUnknownAtRuleComponentList
 	';'
 
-CssUnknownAtRuleParameterList = SyntaxElement*
+CssUnknownAtRuleComponentList = SyntaxElement*
 
 ///////////////
 // AUXILIARY

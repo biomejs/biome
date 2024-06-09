@@ -46,7 +46,7 @@ CssRoot {
                             name: CssIdentifier {
                                 value_token: IDENT@15..21 "apply" [] [Whitespace(" ")],
                             },
-                            parameter: CssUnknownAtRuleParameter {
+                            components: CssUnknownAtRuleComponentList {
                                 items: [
                                     IDENT@21..26 "flex" [] [Whitespace(" ")],
                                     IDENT@26..35 "flex-col" [] [Whitespace(" ")],
@@ -75,7 +75,7 @@ CssRoot {
                 name: CssIdentifier {
                     value_token: IDENT@60..69 "tailwind" [] [Whitespace(" ")],
                 },
-                parameter: CssUnknownAtRuleParameter {
+                components: CssUnknownAtRuleComponentList {
                     items: [
                         IDENT@69..73 "base" [] [],
                     ],
@@ -89,7 +89,7 @@ CssRoot {
                 name: CssIdentifier {
                     value_token: IDENT@76..85 "tailwind" [] [Whitespace(" ")],
                 },
-                parameter: CssUnknownAtRuleParameter {
+                components: CssUnknownAtRuleComponentList {
                     items: [
                         IDENT@85..95 "components" [] [],
                     ],
@@ -103,7 +103,7 @@ CssRoot {
                 name: CssIdentifier {
                     value_token: IDENT@98..107 "tailwind" [] [Whitespace(" ")],
                 },
-                parameter: CssUnknownAtRuleParameter {
+                components: CssUnknownAtRuleComponentList {
                     items: [
                         IDENT@107..116 "utilities" [] [],
                     ],
@@ -140,7 +140,7 @@ CssRoot {
             1: CSS_UNKNOWN_VALUE_AT_RULE@15..55
               0: CSS_IDENTIFIER@15..21
                 0: IDENT@15..21 "apply" [] [Whitespace(" ")]
-              1: CSS_UNKNOWN_AT_RULE_PARAMETER@21..54
+              1: CSS_UNKNOWN_AT_RULE_COMPONENT_LIST@21..54
                 0: IDENT@21..26 "flex" [] [Whitespace(" ")]
                 1: IDENT@26..35 "flex-col" [] [Whitespace(" ")]
                 2: IDENT@35..37 "h-" [] []
@@ -160,7 +160,7 @@ CssRoot {
       1: CSS_UNKNOWN_VALUE_AT_RULE@60..74
         0: CSS_IDENTIFIER@60..69
           0: IDENT@60..69 "tailwind" [] [Whitespace(" ")]
-        1: CSS_UNKNOWN_AT_RULE_PARAMETER@69..73
+        1: CSS_UNKNOWN_AT_RULE_COMPONENT_LIST@69..73
           0: IDENT@69..73 "base" [] []
         2: SEMICOLON@73..74 ";" [] []
     2: CSS_AT_RULE@74..96
@@ -168,7 +168,7 @@ CssRoot {
       1: CSS_UNKNOWN_VALUE_AT_RULE@76..96
         0: CSS_IDENTIFIER@76..85
           0: IDENT@76..85 "tailwind" [] [Whitespace(" ")]
-        1: CSS_UNKNOWN_AT_RULE_PARAMETER@85..95
+        1: CSS_UNKNOWN_AT_RULE_COMPONENT_LIST@85..95
           0: IDENT@85..95 "components" [] []
         2: SEMICOLON@95..96 ";" [] []
     3: CSS_AT_RULE@96..117
@@ -176,7 +176,7 @@ CssRoot {
       1: CSS_UNKNOWN_VALUE_AT_RULE@98..117
         0: CSS_IDENTIFIER@98..107
           0: IDENT@98..107 "tailwind" [] [Whitespace(" ")]
-        1: CSS_UNKNOWN_AT_RULE_PARAMETER@107..116
+        1: CSS_UNKNOWN_AT_RULE_COMPONENT_LIST@107..116
           0: IDENT@107..116 "utilities" [] []
         2: SEMICOLON@116..117 ";" [] []
   2: EOF@117..118 "" [Newline("\n")] []
