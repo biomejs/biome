@@ -12,10 +12,11 @@ use biome_css_parser::CssParserOptions;
 use biome_css_syntax::CssLanguage;
 use biome_diagnostics::{Diagnostic, DiagnosticExt, PrintDiagnostic};
 use biome_js_parser::JsParserOptions;
-use biome_js_syntax::{EmbeddingKind, JsFileSource, JsLanguage, ModuleKind};
+use biome_js_syntax::{EmbeddingKind, JsFileSource, JsLanguage};
 use biome_json_parser::JsonParserOptions;
 use biome_json_syntax::JsonLanguage;
 use biome_service::settings::WorkspaceSettings;
+use biome_service::workspace::DocumentFileSource;
 use pulldown_cmark::{CodeBlockKind, Event, Parser, Tag, TagEnd};
 use std::collections::BTreeMap;
 use std::fmt::Write;
@@ -105,18 +106,16 @@ pub fn check_rules() -> anyhow::Result<()> {
 
     Ok(())
 }
-
-enum BlockType {
-    Js(JsFileSource),
-    Json,
-    Css,
-    Foreign(String),
-}
-
 struct CodeBlockTest {
-    block_type: BlockType,
+    lang: String,
     expect_diagnostic: bool,
     ignore: bool,
+}
+
+impl CodeBlockTest {
+    fn document_file_source(&self) -> DocumentFileSource {
+        DocumentFileSource::from_extension(&self.lang)
+    }
 }
 
 impl FromStr for CodeBlockTest {
@@ -131,56 +130,22 @@ impl FromStr for CodeBlockTest {
             .filter(|token| !token.is_empty());
 
         let mut test = CodeBlockTest {
-            block_type: BlockType::Foreign(String::new()),
+            lang: "".to_string(),
             expect_diagnostic: false,
             ignore: false,
         };
 
         for token in tokens {
             match token {
-                // Determine the language, using the same list of extensions as `compute_source_type_from_path_or_extension`
-                "cjs" => {
-                    test.block_type = BlockType::Js(
-                        JsFileSource::js_module().with_module_kind(ModuleKind::Script),
-                    );
-                }
-                "js" | "mjs" | "jsx" => {
-                    test.block_type = BlockType::Js(JsFileSource::jsx());
-                }
-                "ts" | "mts" | "cts" => {
-                    test.block_type = BlockType::Js(JsFileSource::ts());
-                }
-                "tsx" => {
-                    test.block_type = BlockType::Js(JsFileSource::tsx());
-                }
-                "svelte" => {
-                    test.block_type = BlockType::Js(JsFileSource::svelte());
-                }
-                "astro" => {
-                    test.block_type = BlockType::Js(JsFileSource::astro());
-                }
-                "vue" => {
-                    test.block_type = BlockType::Js(JsFileSource::vue());
-                }
-                "json" => {
-                    test.block_type = BlockType::Json;
-                }
-                "css" => {
-                    test.block_type = BlockType::Css;
-                }
+                // languages
+                "cjs" | "js" | "mjs" | "jsx" | "ts" | "mts" | "cts" | "tsx" | "svelte"
+                | "astro" | "vue" | "json" | "jsonc" | "css" => test.lang = token.to_string(),
                 // Other attributes
-                "expect_diagnostic" => {
-                    test.expect_diagnostic = true;
-                }
-                "ignore" => {
-                    test.ignore = true;
-                }
+                "expect_diagnostic" => test.expect_diagnostic = true,
+                "ignore" => test.ignore = true,
                 // A catch-all to regard unknown tokens as foreign languages,
                 // and do not run tests on these code blocks.
-                _ => {
-                    test.block_type = BlockType::Foreign(token.into());
-                    test.ignore = true;
-                }
+                _ => test.ignore = true,
             }
         }
 
@@ -197,7 +162,7 @@ fn assert_lint(
     test: &CodeBlockTest,
     code: &str,
 ) -> anyhow::Result<()> {
-    let file = "rule-doc-code-block";
+    let file_path = format!("code-block.{}", test.lang);
 
     let mut diagnostic_count = 0;
     let mut all_diagnostics = vec![];
@@ -242,10 +207,10 @@ fn assert_lint(
     let mut settings = WorkspaceSettings::default();
     let key = settings.insert_project(PathBuf::new());
     settings.register_current_project(key);
-    match &test.block_type {
-        BlockType::Js(source_type) => {
+    match test.document_file_source() {
+        DocumentFileSource::Js(file_source) => {
             // Temporary support for astro, svelte and vue code blocks
-            let (code, source_type) = match source_type.as_embedding_kind() {
+            let (code, file_source) = match file_source.as_embedding_kind() {
                 EmbeddingKind::Astro => (
                     biome_service::file_handlers::AstroFileHandler::input(code),
                     JsFileSource::ts(),
@@ -258,14 +223,14 @@ fn assert_lint(
                     biome_service::file_handlers::VueFileHandler::input(code),
                     biome_service::file_handlers::VueFileHandler::file_source(code),
                 ),
-                _ => (code, *source_type),
+                _ => (code, file_source),
             };
 
-            let parse = biome_js_parser::parse(code, source_type, JsParserOptions::default());
+            let parse = biome_js_parser::parse(code, file_source, JsParserOptions::default());
 
             if parse.has_errors() {
                 for diag in parse.into_diagnostics() {
-                    let error = diag.with_file_path(file).with_file_source_code(code);
+                    let error = diag.with_file_path(&file_path).with_file_source_code(code);
                     write_diagnostic(code, error)?;
                 }
             } else {
@@ -279,7 +244,7 @@ fn assert_lint(
 
                 let mut options = AnalyzerOptions::default();
                 options.configuration.jsx_runtime = Some(JsxRuntime::default());
-                biome_js_analyze::analyze(&root, filter, &options, source_type, None, |signal| {
+                biome_js_analyze::analyze(&root, filter, &options, file_source, None, |signal| {
                     if let Some(mut diag) = signal.diagnostic() {
                         let category = diag.category().expect("linter diagnostic has no code");
                         let severity = settings.get_current_settings().expect("project").get_severity_from_rule_code(category).expect(
@@ -294,7 +259,7 @@ fn assert_lint(
 
                         let error = diag
                             .with_severity(severity)
-                            .with_file_path(file)
+                            .with_file_path(&file_path)
                             .with_file_source_code(code);
                         let res = write_diagnostic(code, error);
 
@@ -309,12 +274,12 @@ fn assert_lint(
                 });
             }
         }
-        BlockType::Json => {
-            let parse = biome_json_parser::parse_json(code, JsonParserOptions::default());
+        DocumentFileSource::Json(file_source) => {
+            let parse = biome_json_parser::parse_json(code, JsonParserOptions::from(&file_source));
 
             if parse.has_errors() {
                 for diag in parse.into_diagnostics() {
-                    let error = diag.with_file_path(file).with_file_source_code(code);
+                    let error = diag.with_file_path(&file_path).with_file_source_code(code);
                     write_diagnostic(code, error)?;
                 }
             } else {
@@ -342,7 +307,7 @@ fn assert_lint(
 
                         let error = diag
                             .with_severity(severity)
-                            .with_file_path(file)
+                            .with_file_path(&file_path)
                             .with_file_source_code(code);
                         let res = write_diagnostic(code, error);
 
@@ -357,12 +322,12 @@ fn assert_lint(
                 });
             }
         }
-        BlockType::Css => {
+        DocumentFileSource::Css(..) => {
             let parse = biome_css_parser::parse_css(code, CssParserOptions::default());
 
             if parse.has_errors() {
                 for diag in parse.into_diagnostics() {
-                    let error = diag.with_file_path(file).with_file_source_code(code);
+                    let error = diag.with_file_path(&file_path).with_file_source_code(code);
                     write_diagnostic(code, error)?;
                 }
             } else {
@@ -390,7 +355,7 @@ fn assert_lint(
 
                         let error = diag
                             .with_severity(severity)
-                            .with_file_path(file)
+                            .with_file_path(&file_path)
                             .with_file_source_code(code);
                         let res = write_diagnostic(code, error);
 
@@ -405,10 +370,8 @@ fn assert_lint(
                 });
             }
         }
-        // Foreign code blocks should be already ignored by tests
-        BlockType::Foreign(block) => {
-            bail!("Unrecognised block type {}", &block)
-        }
+        // Unknown code blocks should be already ignored by tests
+        DocumentFileSource::Unknown => {}
     }
 
     if test.expect_diagnostic {
