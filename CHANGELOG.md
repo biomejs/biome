@@ -69,6 +69,16 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
   Contributed by @Conaclos
 
+- [noStringCaseMismatch](https://biomejs.dev/linter/rules/no-string-case-mismatch/) now ignores escape sequences ([#3134](https://github.com/biomejs/biome/issues/3134)).
+
+  The following code is no longer reported by the rule:
+
+  ```js
+  s.toUpperCase() === "\u001b";
+  ```
+
+  Contributed by @Conaclos
+
 ### Parser
 
 #### New features
