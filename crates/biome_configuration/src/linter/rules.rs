@@ -2975,6 +2975,9 @@ pub struct Nursery {
     #[doc = "Enforce the use of trimStart() over trimLeft() and trimeEnd() over trimRight()."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_trim_start_end: Option<RuleFixConfiguration<UseTrimStartEnd>>,
+    #[doc = "Use valid values for the autocomplete attribute on input elements."]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub use_valid_autocomplete: Option<RuleConfiguration<UseValidAutocomplete>>,
 }
 impl DeserializableValidator for Nursery {
     fn validate(
@@ -3045,6 +3048,7 @@ impl Nursery {
         "useThrowOnlyError",
         "useTopLevelRegex",
         "useTrimStartEnd",
+        "useValidAutocomplete",
     ];
     const RECOMMENDED_RULES: &'static [&'static str] = &[
         "noDoneCallback",
@@ -3380,9 +3384,29 @@ impl Nursery {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[42]));
             }
         }
-        if let Some(rule) = self.use_trim_start_end.as_ref() {
+        if let Some(rule) = self.use_throw_new_error.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[43]));
+            }
+        }
+        if let Some(rule) = self.use_throw_only_error.as_ref() {
+            if rule.is_enabled() {
+                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[44]));
+            }
+        }
+        if let Some(rule) = self.use_top_level_regex.as_ref() {
+            if rule.is_enabled() {
+                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[45]));
+            }
+        }
+        if let Some(rule) = self.use_trim_start_end.as_ref() {
+            if rule.is_enabled() {
+                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[46]));
+            }
+        }
+        if let Some(rule) = self.use_valid_autocomplete.as_ref() {
+            if rule.is_enabled() {
+                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[47]));
             }
         }
         index_set
@@ -3604,9 +3628,29 @@ impl Nursery {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[42]));
             }
         }
-        if let Some(rule) = self.use_trim_start_end.as_ref() {
+        if let Some(rule) = self.use_throw_new_error.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[43]));
+            }
+        }
+        if let Some(rule) = self.use_throw_only_error.as_ref() {
+            if rule.is_disabled() {
+                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[44]));
+            }
+        }
+        if let Some(rule) = self.use_top_level_regex.as_ref() {
+            if rule.is_disabled() {
+                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[45]));
+            }
+        }
+        if let Some(rule) = self.use_trim_start_end.as_ref() {
+            if rule.is_disabled() {
+                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[46]));
+            }
+        }
+        if let Some(rule) = self.use_valid_autocomplete.as_ref() {
+            if rule.is_disabled() {
+                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[47]));
             }
         }
         index_set
@@ -3851,6 +3895,10 @@ impl Nursery {
                 .map(|conf| (conf.level(), conf.get_options())),
             "useTrimStartEnd" => self
                 .use_trim_start_end
+                .as_ref()
+                .map(|conf| (conf.level(), conf.get_options())),
+            "useValidAutocomplete" => self
+                .use_valid_autocomplete
                 .as_ref()
                 .map(|conf| (conf.level(), conf.get_options())),
             _ => None,

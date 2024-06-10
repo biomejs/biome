@@ -2125,6 +2125,13 @@
 						{ "$ref": "#/definitions/RuleFixConfiguration" },
 						{ "type": "null" }
 					]
+				},
+				"useValidAutocomplete": {
+					"description": "Use valid values for the autocomplete attribute on input elements.",
+					"anyOf": [
+						{ "$ref": "#/definitions/UseValidAutocompleteConfiguration" },
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false

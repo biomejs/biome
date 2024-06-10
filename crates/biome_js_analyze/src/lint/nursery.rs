@@ -34,6 +34,7 @@ pub mod use_throw_new_error;
 pub mod use_throw_only_error;
 pub mod use_top_level_regex;
 pub mod use_trim_start_end;
+pub mod use_valid_autocomplete;
 
 declare_lint_group! {
     pub Nursery {
@@ -71,6 +72,7 @@ declare_lint_group! {
             self :: use_throw_only_error :: UseThrowOnlyError ,
             self :: use_top_level_regex :: UseTopLevelRegex ,
             self :: use_trim_start_end :: UseTrimStartEnd ,
+            self :: use_valid_autocomplete :: UseValidAutocomplete ,
         ]
      }
 }
