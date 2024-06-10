@@ -25,8 +25,10 @@ declare_rule! {
     /// ### Valid
     ///
     /// ```jsx
-    /// <input type="text" autocomplete="name" />
-    /// <MyInput autocomplete="incorrect" />
+    /// <>
+    ///   <input type="text" autocomplete="name" />
+    ///   <MyInput autocomplete="incorrect" />
+    /// </>
     /// ```
     ///
     /// ## Options
