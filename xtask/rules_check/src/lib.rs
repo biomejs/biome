@@ -130,7 +130,7 @@ impl FromStr for CodeBlockTest {
             .filter(|token| !token.is_empty());
 
         let mut test = CodeBlockTest {
-            tag: "".to_string(),
+            tag: String::new(),
             expect_diagnostic: false,
             ignore: false,
         };
