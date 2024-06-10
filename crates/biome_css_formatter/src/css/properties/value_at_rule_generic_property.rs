@@ -14,6 +14,7 @@ impl FormatNodeRule<CssValueAtRuleGenericProperty> for FormatCssValueAtRuleGener
             colon_token,
             value,
         } = node.as_fields();
+
         write!(
             f,
             [name.format(), colon_token.format(), space(), value.format()]
