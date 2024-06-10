@@ -1099,7 +1099,7 @@ export interface Nursery {
 	 */
 	useConsistentBuiltinInstantiation?: RuleFixConfiguration_for_Null;
 	/**
-	 * Disallowing invalid named grid areas in CSS Grid Layouts.
+	 * Disallows invalid named grid areas in CSS Grid Layouts.
 	 */
 	useConsistentGridAreas?: RuleConfiguration_for_Null;
 	/**

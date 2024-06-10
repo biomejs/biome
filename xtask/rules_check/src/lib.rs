@@ -4,8 +4,8 @@
 use anyhow::{bail, ensure};
 use biome_analyze::options::JsxRuntime;
 use biome_analyze::{
-    AnalysisFilter, AnalyzerOptions, FixKind, GroupCategory, Queryable, RegistryVisitor, Rule,
-    RuleCategory, RuleFilter, RuleGroup, RuleMetadata,
+    AnalysisFilter, AnalyzerOptions, GroupCategory, Queryable, RegistryVisitor, Rule, RuleCategory,
+    RuleFilter, RuleGroup, RuleMetadata,
 };
 use biome_console::{markup, Console};
 use biome_css_parser::CssParserOptions;
@@ -99,12 +99,7 @@ pub fn check_rules() -> anyhow::Result<()> {
 
     for (group, rules) in groups {
         for (_, meta) in rules {
-            parse_documentation(
-                group,
-                meta.name,
-                meta.docs,
-                !matches!(meta.fix_kind, FixKind::None),
-            )?;
+            parse_documentation(group, meta.name, meta.docs)?;
         }
     }
 
@@ -201,17 +196,12 @@ fn assert_lint(
     rule: &'static str,
     test: &CodeBlockTest,
     code: &str,
-    has_fix_kind: bool,
 ) -> anyhow::Result<()> {
-    let file = format!("{group}/{rule}.js");
+    let file = "rule-doc-code-block";
 
     let mut diagnostic_count = 0;
-
     let mut all_diagnostics = vec![];
-
     let mut write_diagnostic = |code: &str, diag: biome_diagnostics::Error| {
-        let category = diag.category().map_or("", |code| code.name());
-
         all_diagnostics.push(diag);
         // Fail the test if the analysis returns more diagnostics than expected
         if test.expect_diagnostic {
@@ -226,13 +216,8 @@ fn assert_lint(
                         },
                     );
                 }
+                bail!("Analysis of '{group}/{rule}' on the following code block returned multiple diagnostics.\n\n{code}");
             }
-
-            ensure!(
-                diagnostic_count == 0,
-                "analysis returned multiple diagnostics, code snippet: \n\n{}",
-                code
-            );
         } else {
             // Print all diagnostics to help the user
             let mut console = biome_console::EnvConsole::default();
@@ -244,20 +229,16 @@ fn assert_lint(
                     },
                 );
             }
-
-            bail!(format!(
-                "analysis returned an unexpected diagnostic, code `snippet:\n\n{:?}\n\n{}",
-                category, code
-            ));
+            bail!("Analysis of '{group}/{rule}' on the following code block returned an unexpected diagnostic.\n\n{code}");
         }
-
         diagnostic_count += 1;
         Ok(())
     };
+
     if test.ignore {
         return Ok(());
     }
-    let mut rule_has_code_action = false;
+
     let mut settings = WorkspaceSettings::default();
     let key = settings.insert_project(PathBuf::new());
     settings.register_current_project(key);
@@ -284,9 +265,7 @@ fn assert_lint(
 
             if parse.has_errors() {
                 for diag in parse.into_diagnostics() {
-                    let error = diag
-                        .with_file_path(file.clone())
-                        .with_file_source_code(code);
+                    let error = diag.with_file_path(file).with_file_source_code(code);
                     write_diagnostic(code, error)?;
                 }
             } else {
@@ -300,61 +279,34 @@ fn assert_lint(
 
                 let mut options = AnalyzerOptions::default();
                 options.configuration.jsx_runtime = Some(JsxRuntime::default());
-                let (_, diagnostics) = biome_js_analyze::analyze(
-                    &root,
-                    filter,
-                    &options,
-                    source_type,
-                    None,
-                    |signal| {
-                        if let Some(mut diag) = signal.diagnostic() {
-                            let category = diag.category().expect("linter diagnostic has no code");
-                            let severity = settings.get_current_settings().expect("project").get_severity_from_rule_code(category).expect(
+                biome_js_analyze::analyze(&root, filter, &options, source_type, None, |signal| {
+                    if let Some(mut diag) = signal.diagnostic() {
+                        let category = diag.category().expect("linter diagnostic has no code");
+                        let severity = settings.get_current_settings().expect("project").get_severity_from_rule_code(category).expect(
                                 "If you see this error, it means you need to run cargo codegen-configuration",
                             );
 
-                            for action in signal.actions() {
-                                if !action.is_suppression() {
-                                    rule_has_code_action = true;
-                                    diag = diag.add_code_suggestion(action.into());
-                                }
-                            }
-
-                            let error = diag
-                                .with_severity(severity)
-                                .with_file_path(file.clone())
-                                .with_file_source_code(code);
-                            let res = write_diagnostic(code, error);
-
-                            // Abort the analysis on error
-                            if let Err(err) = res {
-                                return ControlFlow::Break(err);
+                        for action in signal.actions() {
+                            if !action.is_suppression() {
+                                diag = diag.add_code_suggestion(action.into());
                             }
                         }
 
-                        ControlFlow::Continue(())
-                    },
-                );
+                        let error = diag
+                            .with_severity(severity)
+                            .with_file_path(file)
+                            .with_file_source_code(code);
+                        let res = write_diagnostic(code, error);
 
-                // Result is Some(_) if analysis aborted with an error
-                for diagnostic in diagnostics {
-                    write_diagnostic(code, diagnostic)?;
-                }
-            }
+                        // Abort the analysis on error
+                        if let Err(err) = res {
+                            eprintln!("Error: {err}");
+                            return ControlFlow::Break(err);
+                        }
+                    }
 
-            if test.expect_diagnostic && rule_has_code_action && !has_fix_kind {
-                bail!("The rule '{}' emitted code actions via `action` function, but you didn't mark rule with `fix_kind`.", rule)
-            }
-
-            if test.expect_diagnostic {
-                // Fail the test if the analysis didn't emit any diagnostic
-                ensure!(
-                    diagnostic_count == 1,
-                    "analysis of {}/{} returned no diagnostics.\n code snippet:\n {}",
-                    group,
-                    rule,
-                    code
-                );
+                    ControlFlow::Continue(())
+                });
             }
         }
         BlockType::Json => {
@@ -362,9 +314,7 @@ fn assert_lint(
 
             if parse.has_errors() {
                 for diag in parse.into_diagnostics() {
-                    let error = diag
-                        .with_file_path(file.clone())
-                        .with_file_source_code(code);
+                    let error = diag.with_file_path(file).with_file_source_code(code);
                     write_diagnostic(code, error)?;
                 }
             } else {
@@ -377,48 +327,34 @@ fn assert_lint(
                 };
 
                 let options = AnalyzerOptions::default();
-                let (_, diagnostics) = biome_json_analyze::analyze(
-                    &root,
-                    filter,
-                    &options,
-                    |signal| {
-                        if let Some(mut diag) = signal.diagnostic() {
-                            let category = diag.category().expect("linter diagnostic has no code");
-                            let severity = settings.get_current_settings().expect("project").get_severity_from_rule_code(category).expect(
+                biome_json_analyze::analyze(&root, filter, &options, |signal| {
+                    if let Some(mut diag) = signal.diagnostic() {
+                        let category = diag.category().expect("linter diagnostic has no code");
+                        let severity = settings.get_current_settings().expect("project").get_severity_from_rule_code(category).expect(
                                 "If you see this error, it means you need to run cargo codegen-configuration",
                             );
 
-                            for action in signal.actions() {
-                                if !action.is_suppression() {
-                                    rule_has_code_action = true;
-                                    diag = diag.add_code_suggestion(action.into());
-                                }
-                            }
-
-                            let error = diag
-                                .with_severity(severity)
-                                .with_file_path(file.clone())
-                                .with_file_source_code(code);
-                            let res = write_diagnostic(code, error);
-
-                            // Abort the analysis on error
-                            if let Err(err) = res {
-                                return ControlFlow::Break(err);
+                        for action in signal.actions() {
+                            if !action.is_suppression() {
+                                diag = diag.add_code_suggestion(action.into());
                             }
                         }
 
-                        ControlFlow::Continue(())
-                    },
-                );
+                        let error = diag
+                            .with_severity(severity)
+                            .with_file_path(file)
+                            .with_file_source_code(code);
+                        let res = write_diagnostic(code, error);
 
-                // Result is Some(_) if analysis aborted with an error
-                for diagnostic in diagnostics {
-                    write_diagnostic(code, diagnostic)?;
-                }
+                        // Abort the analysis on error
+                        if let Err(err) = res {
+                            eprintln!("Error: {err}");
+                            return ControlFlow::Break(err);
+                        }
+                    }
 
-                if test.expect_diagnostic && rule_has_code_action && !has_fix_kind {
-                    bail!("The rule '{}' emitted code actions via `action` function, but you didn't mark rule with `fix_kind`.", rule)
-                }
+                    ControlFlow::Continue(())
+                });
             }
         }
         BlockType::Css => {
@@ -426,9 +362,7 @@ fn assert_lint(
 
             if parse.has_errors() {
                 for diag in parse.into_diagnostics() {
-                    let error = diag
-                        .with_file_path(file.clone())
-                        .with_file_source_code(code);
+                    let error = diag.with_file_path(file).with_file_source_code(code);
                     write_diagnostic(code, error)?;
                 }
             } else {
@@ -441,48 +375,34 @@ fn assert_lint(
                 };
 
                 let options = AnalyzerOptions::default();
-                let (_, diagnostics) = biome_css_analyze::analyze(
-                    &root,
-                    filter,
-                    &options,
-                    |signal| {
-                        if let Some(mut diag) = signal.diagnostic() {
-                            let category = diag.category().expect("linter diagnostic has no code");
-                            let severity = settings.get_current_settings().expect("project").get_severity_from_rule_code(category).expect(
+                biome_css_analyze::analyze(&root, filter, &options, |signal| {
+                    if let Some(mut diag) = signal.diagnostic() {
+                        let category = diag.category().expect("linter diagnostic has no code");
+                        let severity = settings.get_current_settings().expect("project").get_severity_from_rule_code(category).expect(
                                 "If you see this error, it means you need to run cargo codegen-configuration",
                             );
 
-                            for action in signal.actions() {
-                                if !action.is_suppression() {
-                                    rule_has_code_action = true;
-                                    diag = diag.add_code_suggestion(action.into());
-                                }
-                            }
-
-                            let error = diag
-                                .with_severity(severity)
-                                .with_file_path(file.clone())
-                                .with_file_source_code(code);
-                            let res = write_diagnostic(code, error);
-
-                            // Abort the analysis on error
-                            if let Err(err) = res {
-                                return ControlFlow::Break(err);
+                        for action in signal.actions() {
+                            if !action.is_suppression() {
+                                diag = diag.add_code_suggestion(action.into());
                             }
                         }
 
-                        ControlFlow::Continue(())
-                    },
-                );
+                        let error = diag
+                            .with_severity(severity)
+                            .with_file_path(file)
+                            .with_file_source_code(code);
+                        let res = write_diagnostic(code, error);
 
-                // Result is Some(_) if analysis aborted with an error
-                for diagnostic in diagnostics {
-                    write_diagnostic(code, diagnostic)?;
-                }
+                        // Abort the analysis on error
+                        if let Err(err) = res {
+                            eprintln!("Error: {err}");
+                            return ControlFlow::Break(err);
+                        }
+                    }
 
-                if test.expect_diagnostic && rule_has_code_action && !has_fix_kind {
-                    bail!("The rule '{}' emitted code actions via `action` function, but you didn't mark rule with `fix_kind`.", rule)
-                }
+                    ControlFlow::Continue(())
+                });
             }
         }
         // Foreign code blocks should be already ignored by tests
@@ -491,16 +411,22 @@ fn assert_lint(
         }
     }
 
+    if test.expect_diagnostic {
+        // Fail the test if the analysis didn't emit any diagnostic
+        ensure!(
+            diagnostic_count == 1,
+            "Analysis of '{group}/{rule}' on the following code block returned no diagnostics.\n\n{code}",
+        );
+    }
+
     Ok(())
 }
 
-/// Parse the documentation fragment for a lint rule (in markdown) and generates
-/// the content for the corresponding documentation page
+/// Parse the documentation fragment for a lint rule (in markdown) and lint the code blcoks.
 fn parse_documentation(
     group: &'static str,
     rule: &'static str,
     docs: &'static str,
-    has_fix_kind: bool,
 ) -> anyhow::Result<()> {
     let parser = Parser::new(docs);
 
@@ -517,7 +443,7 @@ fn parse_documentation(
             }
             Event::End(TagEnd::CodeBlock) => {
                 if let Some((test, block)) = language.take() {
-                    assert_lint(group, rule, &test, &block, has_fix_kind)?;
+                    assert_lint(group, rule, &test, &block)?;
                 }
             }
             Event::Text(text) => {

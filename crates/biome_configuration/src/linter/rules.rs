@@ -2905,7 +2905,7 @@ pub struct Nursery {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_consistent_builtin_instantiation:
         Option<RuleFixConfiguration<UseConsistentBuiltinInstantiation>>,
-    #[doc = "Disallowing invalid named grid areas in CSS Grid Layouts."]
+    #[doc = "Disallows invalid named grid areas in CSS Grid Layouts."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_consistent_grid_areas: Option<RuleConfiguration<UseConsistentGridAreas>>,
     #[doc = "Use Date.now() to get the number of milliseconds since the Unix Epoch."]
