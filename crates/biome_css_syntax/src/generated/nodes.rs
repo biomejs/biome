@@ -6063,6 +6063,52 @@ pub struct CssUniversalSelectorFields {
     pub star_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
+pub struct CssUnknownBlockAtRule {
+    pub(crate) syntax: SyntaxNode,
+}
+impl CssUnknownBlockAtRule {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> CssUnknownBlockAtRuleFields {
+        CssUnknownBlockAtRuleFields {
+            name: self.name(),
+            components: self.components(),
+            block: self.block(),
+        }
+    }
+    pub fn name(&self) -> SyntaxResult<CssIdentifier> {
+        support::required_node(&self.syntax, 0usize)
+    }
+    pub fn components(&self) -> SyntaxResult<CssUnknownAtRuleComponentList> {
+        support::required_node(&self.syntax, 1usize)
+    }
+    pub fn block(&self) -> SyntaxResult<AnyCssDeclarationOrRuleBlock> {
+        support::required_node(&self.syntax, 2usize)
+    }
+}
+#[cfg(feature = "serde")]
+impl Serialize for CssUnknownBlockAtRule {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[cfg_attr(feature = "serde", derive(Serialize))]
+pub struct CssUnknownBlockAtRuleFields {
+    pub name: SyntaxResult<CssIdentifier>,
+    pub components: SyntaxResult<CssUnknownAtRuleComponentList>,
+    pub block: SyntaxResult<AnyCssDeclarationOrRuleBlock>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
 pub struct CssUnknownDimension {
     pub(crate) syntax: SyntaxNode,
 }
@@ -6102,6 +6148,52 @@ impl Serialize for CssUnknownDimension {
 pub struct CssUnknownDimensionFields {
     pub value_token: SyntaxResult<SyntaxToken>,
     pub unit_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct CssUnknownValueAtRule {
+    pub(crate) syntax: SyntaxNode,
+}
+impl CssUnknownValueAtRule {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> CssUnknownValueAtRuleFields {
+        CssUnknownValueAtRuleFields {
+            name: self.name(),
+            components: self.components(),
+            semicolon_token: self.semicolon_token(),
+        }
+    }
+    pub fn name(&self) -> SyntaxResult<CssIdentifier> {
+        support::required_node(&self.syntax, 0usize)
+    }
+    pub fn components(&self) -> SyntaxResult<CssUnknownAtRuleComponentList> {
+        support::required_node(&self.syntax, 1usize)
+    }
+    pub fn semicolon_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 2usize)
+    }
+}
+#[cfg(feature = "serde")]
+impl Serialize for CssUnknownValueAtRule {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[cfg_attr(feature = "serde", derive(Serialize))]
+pub struct CssUnknownValueAtRuleFields {
+    pub name: SyntaxResult<CssIdentifier>,
+    pub components: SyntaxResult<CssUnknownAtRuleComponentList>,
+    pub semicolon_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct CssUrlFunction {
@@ -6471,6 +6563,8 @@ pub enum AnyCssAtRule {
     CssScopeAtRule(CssScopeAtRule),
     CssStartingStyleAtRule(CssStartingStyleAtRule),
     CssSupportsAtRule(CssSupportsAtRule),
+    CssUnknownBlockAtRule(CssUnknownBlockAtRule),
+    CssUnknownValueAtRule(CssUnknownValueAtRule),
     CssValueAtRule(CssValueAtRule),
 }
 impl AnyCssAtRule {
@@ -6588,6 +6682,18 @@ impl AnyCssAtRule {
             _ => None,
         }
     }
+    pub fn as_css_unknown_block_at_rule(&self) -> Option<&CssUnknownBlockAtRule> {
+        match &self {
+            AnyCssAtRule::CssUnknownBlockAtRule(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_unknown_value_at_rule(&self) -> Option<&CssUnknownValueAtRule> {
+        match &self {
+            AnyCssAtRule::CssUnknownValueAtRule(item) => Some(item),
+            _ => None,
+        }
+    }
     pub fn as_css_value_at_rule(&self) -> Option<&CssValueAtRule> {
         match &self {
             AnyCssAtRule::CssValueAtRule(item) => Some(item),
@@ -6658,19 +6764,26 @@ impl AnyCssCompoundSelector {
 #[derive(Clone, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "serde", derive(Serialize))]
 pub enum AnyCssConditionalBlock {
-    AnyCssDeclarationOrRuleBlock(AnyCssDeclarationOrRuleBlock),
-    AnyCssRuleBlock(AnyCssRuleBlock),
+    CssBogusBlock(CssBogusBlock),
+    CssDeclarationOrRuleBlock(CssDeclarationOrRuleBlock),
+    CssRuleBlock(CssRuleBlock),
 }
 impl AnyCssConditionalBlock {
-    pub fn as_any_css_declaration_or_rule_block(&self) -> Option<&AnyCssDeclarationOrRuleBlock> {
+    pub fn as_css_bogus_block(&self) -> Option<&CssBogusBlock> {
         match &self {
-            AnyCssConditionalBlock::AnyCssDeclarationOrRuleBlock(item) => Some(item),
+            AnyCssConditionalBlock::CssBogusBlock(item) => Some(item),
             _ => None,
         }
     }
-    pub fn as_any_css_rule_block(&self) -> Option<&AnyCssRuleBlock> {
+    pub fn as_css_declaration_or_rule_block(&self) -> Option<&CssDeclarationOrRuleBlock> {
         match &self {
-            AnyCssConditionalBlock::AnyCssRuleBlock(item) => Some(item),
+            AnyCssConditionalBlock::CssDeclarationOrRuleBlock(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_rule_block(&self) -> Option<&CssRuleBlock> {
+        match &self {
+            AnyCssConditionalBlock::CssRuleBlock(item) => Some(item),
             _ => None,
         }
     }
@@ -14460,6 +14573,46 @@ impl From<CssUniversalSelector> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl AstNode for CssUnknownBlockAtRule {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_UNKNOWN_BLOCK_AT_RULE as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == CSS_UNKNOWN_BLOCK_AT_RULE
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for CssUnknownBlockAtRule {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("CssUnknownBlockAtRule")
+            .field("name", &support::DebugSyntaxResult(self.name()))
+            .field("components", &support::DebugSyntaxResult(self.components()))
+            .field("block", &support::DebugSyntaxResult(self.block()))
+            .finish()
+    }
+}
+impl From<CssUnknownBlockAtRule> for SyntaxNode {
+    fn from(n: CssUnknownBlockAtRule) -> SyntaxNode {
+        n.syntax
+    }
+}
+impl From<CssUnknownBlockAtRule> for SyntaxElement {
+    fn from(n: CssUnknownBlockAtRule) -> SyntaxElement {
+        n.syntax.into()
+    }
+}
 impl AstNode for CssUnknownDimension {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -14499,6 +14652,49 @@ impl From<CssUnknownDimension> for SyntaxNode {
 }
 impl From<CssUnknownDimension> for SyntaxElement {
     fn from(n: CssUnknownDimension) -> SyntaxElement {
+        n.syntax.into()
+    }
+}
+impl AstNode for CssUnknownValueAtRule {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_UNKNOWN_VALUE_AT_RULE as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == CSS_UNKNOWN_VALUE_AT_RULE
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for CssUnknownValueAtRule {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("CssUnknownValueAtRule")
+            .field("name", &support::DebugSyntaxResult(self.name()))
+            .field("components", &support::DebugSyntaxResult(self.components()))
+            .field(
+                "semicolon_token",
+                &support::DebugSyntaxResult(self.semicolon_token()),
+            )
+            .finish()
+    }
+}
+impl From<CssUnknownValueAtRule> for SyntaxNode {
+    fn from(n: CssUnknownValueAtRule) -> SyntaxNode {
+        n.syntax
+    }
+}
+impl From<CssUnknownValueAtRule> for SyntaxElement {
+    fn from(n: CssUnknownValueAtRule) -> SyntaxElement {
         n.syntax.into()
     }
 }
@@ -14932,6 +15128,16 @@ impl From<CssSupportsAtRule> for AnyCssAtRule {
         AnyCssAtRule::CssSupportsAtRule(node)
     }
 }
+impl From<CssUnknownBlockAtRule> for AnyCssAtRule {
+    fn from(node: CssUnknownBlockAtRule) -> AnyCssAtRule {
+        AnyCssAtRule::CssUnknownBlockAtRule(node)
+    }
+}
+impl From<CssUnknownValueAtRule> for AnyCssAtRule {
+    fn from(node: CssUnknownValueAtRule) -> AnyCssAtRule {
+        AnyCssAtRule::CssUnknownValueAtRule(node)
+    }
+}
 impl From<CssValueAtRule> for AnyCssAtRule {
     fn from(node: CssValueAtRule) -> AnyCssAtRule {
         AnyCssAtRule::CssValueAtRule(node)
@@ -14958,6 +15164,8 @@ impl AstNode for AnyCssAtRule {
         .union(CssScopeAtRule::KIND_SET)
         .union(CssStartingStyleAtRule::KIND_SET)
         .union(CssSupportsAtRule::KIND_SET)
+        .union(CssUnknownBlockAtRule::KIND_SET)
+        .union(CssUnknownValueAtRule::KIND_SET)
         .union(CssValueAtRule::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
         matches!(
@@ -14981,6 +15189,8 @@ impl AstNode for AnyCssAtRule {
                 | CSS_SCOPE_AT_RULE
                 | CSS_STARTING_STYLE_AT_RULE
                 | CSS_SUPPORTS_AT_RULE
+                | CSS_UNKNOWN_BLOCK_AT_RULE
+                | CSS_UNKNOWN_VALUE_AT_RULE
                 | CSS_VALUE_AT_RULE
         )
     }
@@ -15021,6 +15231,12 @@ impl AstNode for AnyCssAtRule {
                 AnyCssAtRule::CssStartingStyleAtRule(CssStartingStyleAtRule { syntax })
             }
             CSS_SUPPORTS_AT_RULE => AnyCssAtRule::CssSupportsAtRule(CssSupportsAtRule { syntax }),
+            CSS_UNKNOWN_BLOCK_AT_RULE => {
+                AnyCssAtRule::CssUnknownBlockAtRule(CssUnknownBlockAtRule { syntax })
+            }
+            CSS_UNKNOWN_VALUE_AT_RULE => {
+                AnyCssAtRule::CssUnknownValueAtRule(CssUnknownValueAtRule { syntax })
+            }
             CSS_VALUE_AT_RULE => AnyCssAtRule::CssValueAtRule(CssValueAtRule { syntax }),
             _ => return None,
         };
@@ -15047,6 +15263,8 @@ impl AstNode for AnyCssAtRule {
             AnyCssAtRule::CssScopeAtRule(it) => &it.syntax,
             AnyCssAtRule::CssStartingStyleAtRule(it) => &it.syntax,
             AnyCssAtRule::CssSupportsAtRule(it) => &it.syntax,
+            AnyCssAtRule::CssUnknownBlockAtRule(it) => &it.syntax,
+            AnyCssAtRule::CssUnknownValueAtRule(it) => &it.syntax,
             AnyCssAtRule::CssValueAtRule(it) => &it.syntax,
         }
     }
@@ -15071,6 +15289,8 @@ impl AstNode for AnyCssAtRule {
             AnyCssAtRule::CssScopeAtRule(it) => it.syntax,
             AnyCssAtRule::CssStartingStyleAtRule(it) => it.syntax,
             AnyCssAtRule::CssSupportsAtRule(it) => it.syntax,
+            AnyCssAtRule::CssUnknownBlockAtRule(it) => it.syntax,
+            AnyCssAtRule::CssUnknownValueAtRule(it) => it.syntax,
             AnyCssAtRule::CssValueAtRule(it) => it.syntax,
         }
     }
@@ -15097,6 +15317,8 @@ impl std::fmt::Debug for AnyCssAtRule {
             AnyCssAtRule::CssScopeAtRule(it) => std::fmt::Debug::fmt(it, f),
             AnyCssAtRule::CssStartingStyleAtRule(it) => std::fmt::Debug::fmt(it, f),
             AnyCssAtRule::CssSupportsAtRule(it) => std::fmt::Debug::fmt(it, f),
+            AnyCssAtRule::CssUnknownBlockAtRule(it) => std::fmt::Debug::fmt(it, f),
+            AnyCssAtRule::CssUnknownValueAtRule(it) => std::fmt::Debug::fmt(it, f),
             AnyCssAtRule::CssValueAtRule(it) => std::fmt::Debug::fmt(it, f),
         }
     }
@@ -15123,6 +15345,8 @@ impl From<AnyCssAtRule> for SyntaxNode {
             AnyCssAtRule::CssScopeAtRule(it) => it.into(),
             AnyCssAtRule::CssStartingStyleAtRule(it) => it.into(),
             AnyCssAtRule::CssSupportsAtRule(it) => it.into(),
+            AnyCssAtRule::CssUnknownBlockAtRule(it) => it.into(),
+            AnyCssAtRule::CssUnknownValueAtRule(it) => it.into(),
             AnyCssAtRule::CssValueAtRule(it) => it.into(),
         }
     }
@@ -15315,56 +15539,75 @@ impl From<AnyCssCompoundSelector> for SyntaxElement {
         node.into()
     }
 }
+impl From<CssBogusBlock> for AnyCssConditionalBlock {
+    fn from(node: CssBogusBlock) -> AnyCssConditionalBlock {
+        AnyCssConditionalBlock::CssBogusBlock(node)
+    }
+}
+impl From<CssDeclarationOrRuleBlock> for AnyCssConditionalBlock {
+    fn from(node: CssDeclarationOrRuleBlock) -> AnyCssConditionalBlock {
+        AnyCssConditionalBlock::CssDeclarationOrRuleBlock(node)
+    }
+}
+impl From<CssRuleBlock> for AnyCssConditionalBlock {
+    fn from(node: CssRuleBlock) -> AnyCssConditionalBlock {
+        AnyCssConditionalBlock::CssRuleBlock(node)
+    }
+}
 impl AstNode for AnyCssConditionalBlock {
     type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> =
-        AnyCssDeclarationOrRuleBlock::KIND_SET.union(AnyCssRuleBlock::KIND_SET);
+    const KIND_SET: SyntaxKindSet<Language> = CssBogusBlock::KIND_SET
+        .union(CssDeclarationOrRuleBlock::KIND_SET)
+        .union(CssRuleBlock::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
-        match kind {
-            k if AnyCssDeclarationOrRuleBlock::can_cast(k) => true,
-            k if AnyCssRuleBlock::can_cast(k) => true,
-            _ => false,
-        }
+        matches!(
+            kind,
+            CSS_BOGUS_BLOCK | CSS_DECLARATION_OR_RULE_BLOCK | CSS_RULE_BLOCK
+        )
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
-        if let Some(any_css_declaration_or_rule_block) =
-            AnyCssDeclarationOrRuleBlock::cast(syntax.clone())
-        {
-            return Some(AnyCssConditionalBlock::AnyCssDeclarationOrRuleBlock(
-                any_css_declaration_or_rule_block,
-            ));
-        }
-        if let Some(any_css_rule_block) = AnyCssRuleBlock::cast(syntax) {
-            return Some(AnyCssConditionalBlock::AnyCssRuleBlock(any_css_rule_block));
-        }
-        None
+        let res = match syntax.kind() {
+            CSS_BOGUS_BLOCK => AnyCssConditionalBlock::CssBogusBlock(CssBogusBlock { syntax }),
+            CSS_DECLARATION_OR_RULE_BLOCK => {
+                AnyCssConditionalBlock::CssDeclarationOrRuleBlock(CssDeclarationOrRuleBlock {
+                    syntax,
+                })
+            }
+            CSS_RULE_BLOCK => AnyCssConditionalBlock::CssRuleBlock(CssRuleBlock { syntax }),
+            _ => return None,
+        };
+        Some(res)
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            AnyCssConditionalBlock::AnyCssDeclarationOrRuleBlock(it) => it.syntax(),
-            AnyCssConditionalBlock::AnyCssRuleBlock(it) => it.syntax(),
+            AnyCssConditionalBlock::CssBogusBlock(it) => &it.syntax,
+            AnyCssConditionalBlock::CssDeclarationOrRuleBlock(it) => &it.syntax,
+            AnyCssConditionalBlock::CssRuleBlock(it) => &it.syntax,
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            AnyCssConditionalBlock::AnyCssDeclarationOrRuleBlock(it) => it.into_syntax(),
-            AnyCssConditionalBlock::AnyCssRuleBlock(it) => it.into_syntax(),
+            AnyCssConditionalBlock::CssBogusBlock(it) => it.syntax,
+            AnyCssConditionalBlock::CssDeclarationOrRuleBlock(it) => it.syntax,
+            AnyCssConditionalBlock::CssRuleBlock(it) => it.syntax,
         }
     }
 }
 impl std::fmt::Debug for AnyCssConditionalBlock {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            AnyCssConditionalBlock::AnyCssDeclarationOrRuleBlock(it) => std::fmt::Debug::fmt(it, f),
-            AnyCssConditionalBlock::AnyCssRuleBlock(it) => std::fmt::Debug::fmt(it, f),
+            AnyCssConditionalBlock::CssBogusBlock(it) => std::fmt::Debug::fmt(it, f),
+            AnyCssConditionalBlock::CssDeclarationOrRuleBlock(it) => std::fmt::Debug::fmt(it, f),
+            AnyCssConditionalBlock::CssRuleBlock(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
 impl From<AnyCssConditionalBlock> for SyntaxNode {
     fn from(n: AnyCssConditionalBlock) -> SyntaxNode {
         match n {
-            AnyCssConditionalBlock::AnyCssDeclarationOrRuleBlock(it) => it.into(),
-            AnyCssConditionalBlock::AnyCssRuleBlock(it) => it.into(),
+            AnyCssConditionalBlock::CssBogusBlock(it) => it.into(),
+            AnyCssConditionalBlock::CssDeclarationOrRuleBlock(it) => it.into(),
+            AnyCssConditionalBlock::CssRuleBlock(it) => it.into(),
         }
     }
 }
@@ -22178,7 +22421,17 @@ impl std::fmt::Display for CssUniversalSelector {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
+impl std::fmt::Display for CssUnknownBlockAtRule {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
 impl std::fmt::Display for CssUnknownDimension {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for CssUnknownValueAtRule {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
@@ -23531,6 +23784,63 @@ impl From<CssBogusUrlModifier> for SyntaxNode {
 }
 impl From<CssBogusUrlModifier> for SyntaxElement {
     fn from(n: CssBogusUrlModifier) -> SyntaxElement {
+        n.syntax.into()
+    }
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize))]
+pub struct CssUnknownAtRuleComponentList {
+    syntax: SyntaxNode,
+}
+impl CssUnknownAtRuleComponentList {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn items(&self) -> SyntaxElementChildren {
+        support::elements(&self.syntax)
+    }
+}
+impl AstNode for CssUnknownAtRuleComponentList {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_UNKNOWN_AT_RULE_COMPONENT_LIST as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == CSS_UNKNOWN_AT_RULE_COMPONENT_LIST
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for CssUnknownAtRuleComponentList {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("CssUnknownAtRuleComponentList")
+            .field("items", &DebugSyntaxElementChildren(self.items()))
+            .finish()
+    }
+}
+impl From<CssUnknownAtRuleComponentList> for SyntaxNode {
+    fn from(n: CssUnknownAtRuleComponentList) -> SyntaxNode {
+        n.syntax
+    }
+}
+impl From<CssUnknownAtRuleComponentList> for SyntaxElement {
+    fn from(n: CssUnknownAtRuleComponentList) -> SyntaxElement {
         n.syntax.into()
     }
 }

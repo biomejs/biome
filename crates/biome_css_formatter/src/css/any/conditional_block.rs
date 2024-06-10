@@ -8,8 +8,9 @@ impl FormatRule<AnyCssConditionalBlock> for FormatAnyCssConditionalBlock {
     type Context = CssFormatContext;
     fn fmt(&self, node: &AnyCssConditionalBlock, f: &mut CssFormatter) -> FormatResult<()> {
         match node {
-            AnyCssConditionalBlock::AnyCssDeclarationOrRuleBlock(node) => node.format().fmt(f),
-            AnyCssConditionalBlock::AnyCssRuleBlock(node) => node.format().fmt(f),
+            AnyCssConditionalBlock::CssBogusBlock(node) => node.format().fmt(f),
+            AnyCssConditionalBlock::CssDeclarationOrRuleBlock(node) => node.format().fmt(f),
+            AnyCssConditionalBlock::CssRuleBlock(node) => node.format().fmt(f),
         }
     }
 }
