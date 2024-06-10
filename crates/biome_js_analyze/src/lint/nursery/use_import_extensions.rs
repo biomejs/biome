@@ -28,7 +28,7 @@ declare_rule! {
     /// ```js,expect_diagnostic,ignore
     /// import "./foo";
     /// ```
-    /// ```js,expect_diagnostic,ignore
+    /// ```js,expect_diagnostic
     /// import "./foo/";
     /// ```
     /// ```js,expect_diagnostic,ignore
