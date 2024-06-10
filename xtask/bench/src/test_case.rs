@@ -76,8 +76,8 @@ impl TestCase {
     pub fn filename(&self) -> &str {
         &self.id
     }
-    
-    pub fn filename_hash(&self) -> String  {
+
+    pub fn filename_hash(&self) -> String {
         format!("{}_{}", self.filename(), calculate_hash(&self))
     }
 

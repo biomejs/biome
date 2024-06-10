@@ -26,7 +26,11 @@ pub fn err_to_string<E: std::fmt::Debug>(e: E) -> String {
     format!("{e:?}")
 }
 
-pub fn bench_parser_group(group: &mut BenchmarkGroup<WallTime>, test_case: TestCase, use_hash: bool) {
+pub fn bench_parser_group(
+    group: &mut BenchmarkGroup<WallTime>,
+    test_case: TestCase,
+    use_hash: bool,
+) {
     let parse = Parse::try_from_case(&test_case).expect("Supported language");
 
     let code = test_case.code();
@@ -37,18 +41,14 @@ pub fn bench_parser_group(group: &mut BenchmarkGroup<WallTime>, test_case: TestC
     } else {
         test_case.filename().to_string()
     };
-    group.bench_with_input(
-        BenchmarkId::new(id, "uncached"),
-        &code,
-        |b, _| {
-            b.iter(|| {
-                let result = black_box(parse.parse());
-                for diagnostic in result.into_diagnostics() {
-                    println!("{}", print_diagnostic_to_string(&Error::from(diagnostic)));
-                }
-            })
-        },
-    );
+    group.bench_with_input(BenchmarkId::new(id, "uncached"), &code, |b, _| {
+        b.iter(|| {
+            let result = black_box(parse.parse());
+            for diagnostic in result.into_diagnostics() {
+                println!("{}", print_diagnostic_to_string(&Error::from(diagnostic)));
+            }
+        })
+    });
     group.bench_with_input(
         BenchmarkId::new(test_case.filename(), "cached"),
         &code,
