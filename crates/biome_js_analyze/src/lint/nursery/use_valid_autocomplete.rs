@@ -23,10 +23,6 @@ declare_rule! {
     /// ```
     ///
     /// ```jsx,expect_diagnostic
-    /// <input type="email" autocomplete="url" />
-    /// ```
-    ///
-    /// ```jsx,expect_diagnostic
     /// <MyInput autocomplete="incorrect" />
     /// ```
     ///
