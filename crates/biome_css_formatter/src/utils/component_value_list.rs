@@ -21,10 +21,10 @@ where
     //                          1fr 100px 3em;
     // }
     let has_newline = match layout {
-        ValueListLayout::PreserveInline => node.iter().skip(1).any(|element| {
-            let has_leading_newline = element.syntax().has_leading_newline();
-            has_leading_newline
-        }),
+        ValueListLayout::PreserveInline => node
+            .iter()
+            .skip(1)
+            .any(|element| element.syntax().has_leading_newline()),
         _ => false,
     };
 
