@@ -1,6 +1,6 @@
 use crate::util::TextRangeGritExt;
-use biome_js_syntax::{JsSyntaxKind, JsSyntaxNode, JsSyntaxToken};
-use biome_rowan::{SyntaxKind, SyntaxNodeText, TextRange};
+use biome_js_syntax::{JsLanguage, JsSyntaxKind, JsSyntaxNode, JsSyntaxToken};
+use biome_rowan::{SyntaxKind, SyntaxNodeText, SyntaxSlot, TextRange};
 use grit_util::{AstCursor, AstNode as GritAstNode, ByteRange, CodeRange};
 use std::{borrow::Cow, str::Utf8Error};
 
@@ -25,7 +25,7 @@ use std::{borrow::Cow, str::Utf8Error};
 ///   for this, it may allow us to one day query CSS rules inside a JS template
 ///   literal, for instance.
 macro_rules! generate_target_node {
-    ($([$lang_node:ident, $lang_token:ident, $lang_kind:ident]),+) => {
+    ($([$lang:ident, $lang_node:ident, $lang_token:ident, $lang_kind:ident]),+) => {
         #[derive(Clone, Debug, PartialEq)]
         pub enum GritTargetNode {
             $($lang_node($lang_node)),+
@@ -38,15 +38,27 @@ macro_rules! generate_target_node {
         })+
 
         impl GritTargetNode {
-            fn first_child(&self) -> Option<Self> {
+            pub fn first_child(&self) -> Option<Self> {
                 match self {
                     $(Self::$lang_node(node) => node.first_child().map(Into::into)),+
                 }
             }
 
-            fn first_token(&self) -> Option<GritTargetToken> {
+            pub fn first_token(&self) -> Option<GritTargetToken> {
                 match self {
                     $(Self::$lang_node(node) => node.first_token().map(Into::into)),+
+                }
+            }
+
+            pub fn has_children(&self) -> bool {
+                match self {
+                    $(Self::$lang_node(node) => node.first_child().is_some()),+
+                }
+            }
+
+            pub fn index(&self) -> usize {
+                match self {
+                    $(Self::$lang_node(node) => node.index()),+
                 }
             }
 
@@ -56,9 +68,21 @@ macro_rules! generate_target_node {
                 }
             }
 
+            pub fn slots(&self) -> impl Iterator<Item = GritSyntaxSlot> {
+                match self {
+                    $(Self::$lang_node(node) => node.slots().map(Into::into)),+
+                }
+            }
+
             pub fn text(&self) -> SyntaxNodeText {
                 match self {
                     $(Self::$lang_node(node) => node.text()),+
+                }
+            }
+
+            pub fn text_range(&self) -> TextRange {
+                match self {
+                    $(Self::$lang_node(node) => node.text_range()),+
                 }
             }
 
@@ -157,7 +181,7 @@ macro_rules! generate_target_node {
             }
         }
 
-        #[derive(Clone, Debug)]
+        #[derive(Clone, Debug, PartialEq)]
         pub enum GritTargetToken {
             $($lang_token($lang_token)),+
         }
@@ -169,7 +193,19 @@ macro_rules! generate_target_node {
         })+
 
         impl GritTargetToken {
-            fn text(&self) -> &str {
+            pub fn index(&self) -> usize {
+                match self {
+                    $(Self::$lang_token(token) => token.index()),+
+                }
+            }
+
+            pub fn kind(&self) -> GritTargetSyntaxKind {
+                match self {
+                    $(Self::$lang_token(token) => token.kind().into()),+
+                }
+            }
+
+            pub fn text(&self) -> &str {
                 match self {
                     $(Self::$lang_token(token) => token.text()),+
                 }
@@ -193,18 +229,67 @@ macro_rules! generate_target_node {
                     $(Self::$lang_kind(kind) => kind.is_bogus()),+
                 }
             }
+
+            pub fn is_list(&self) -> bool {
+                match self {
+                    $(Self::$lang_kind(kind) => kind.is_list()),+
+                }
+            }
+
+            pub fn is_token(&self) -> bool {
+                match self {
+                    $(Self::$lang_kind(kind) => kind.is_punct() || kind.is_literal()),+
+                }
+            }
         }
+
+        $(impl From<SyntaxSlot<$lang>> for GritSyntaxSlot {
+            fn from(slot: SyntaxSlot<$lang>) -> Self {
+                match slot {
+                    SyntaxSlot::Node(node) => Self::Node(node.into()),
+                    SyntaxSlot::Token(token) => Self::Token(token.into()),
+                    SyntaxSlot::Empty { index } => Self::Empty { index },
+                }
+            }
+        })+
     };
 }
 
 generate_target_node! {
-    [JsSyntaxNode, JsSyntaxToken, JsSyntaxKind]
+    [JsLanguage, JsSyntaxNode, JsSyntaxToken, JsSyntaxKind]
 }
 
 impl GritTargetSyntaxKind {
     pub fn as_js_kind(&self) -> Option<JsSyntaxKind> {
         match self {
             Self::JsSyntaxKind(kind) => Some(*kind),
+        }
+    }
+}
+
+#[derive(Clone, Debug, PartialEq)]
+pub enum GritSyntaxSlot {
+    /// Slot that stores a node child
+    Node(GritTargetNode),
+    /// Slot that stores a token child
+    Token(GritTargetToken),
+    /// Slot that marks that the child in this position isn't present in the source code.
+    Empty { index: u32 },
+}
+
+impl GritSyntaxSlot {
+    pub fn contains_list(&self) -> bool {
+        match self {
+            GritSyntaxSlot::Node(node) => node.kind().is_list(),
+            GritSyntaxSlot::Token(_) | GritSyntaxSlot::Empty { .. } => false,
+        }
+    }
+
+    pub fn index(&self) -> usize {
+        match self {
+            GritSyntaxSlot::Node(node) => node.index(),
+            GritSyntaxSlot::Token(token) => token.index(),
+            GritSyntaxSlot::Empty { index } => *index as usize,
         }
     }
 }
@@ -261,11 +346,15 @@ impl Iterator for ChildrenIterator {
 #[derive(Clone)]
 struct GritTargetNodeCursor {
     node: GritTargetNode,
+    root: GritTargetNode,
 }
 
 impl GritTargetNodeCursor {
     fn new(node: &GritTargetNode) -> Self {
-        Self { node: node.clone() }
+        Self {
+            node: node.clone(),
+            root: node.clone(),
+        }
     }
 }
 
@@ -283,6 +372,9 @@ impl AstCursor for GritTargetNodeCursor {
     }
 
     fn goto_parent(&mut self) -> bool {
+        if self.node == self.root {
+            return false;
+        }
         match self.node.parent() {
             Some(parent) => {
                 self.node = parent;

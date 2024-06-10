@@ -1,11 +1,12 @@
 use crate::diagnostics::CompilerDiagnostic;
 use crate::grit_context::{GritExecContext, GritQueryContext};
+use crate::grit_resolved_pattern::GritResolvedPattern;
 use crate::grit_target_language::GritTargetLanguage;
+use crate::grit_tree::GritTree;
 use crate::pattern_compiler::PatternCompiler;
 use crate::pattern_compiler::{
     compilation_context::CompilationContext, compilation_context::NodeCompilationContext,
 };
-use crate::resolved_pattern::GritResolvedPattern;
 use crate::variables::{VarRegistry, VariableLocations};
 use crate::CompileError;
 use anyhow::Result;
@@ -19,19 +20,21 @@ use std::collections::BTreeMap;
 pub struct GritQuery {
     pub(crate) pattern: Pattern<GritQueryContext>,
 
+    /// Context for executing the query.
+    context: GritExecContext,
+
     /// Diagnostics discovered during compilation of the query.
     diagnostics: Vec<CompilerDiagnostic>,
 
     /// All variables discovered during query compilation.
-    locations: VariableLocations,
+    variables: VariableLocations,
 }
 
 impl GritQuery {
-    pub fn execute(&self) -> Result<bool> {
-        let var_registry = VarRegistry::from_locations(&self.locations);
+    pub fn execute(&self, tree: &GritTree) -> Result<bool> {
+        let var_registry = VarRegistry::from_locations(&self.variables);
 
-        let binding = GritResolvedPattern;
-        let context = GritExecContext;
+        let binding = GritResolvedPattern::from_tree(tree);
         let mut state = State::new(
             var_registry.into(),
             FileRegistry::new_from_paths(Vec::new()),
@@ -39,7 +42,7 @@ impl GritQuery {
         let mut logs = Vec::new().into();
 
         self.pattern
-            .execute(&binding, &mut state, &context, &mut logs)
+            .execute(&binding, &mut state, &self.context, &mut logs)
     }
 
     pub fn from_node(root: GritRoot, lang: GritTargetLanguage) -> Result<Self, CompileError> {
@@ -66,12 +69,14 @@ impl GritQuery {
             &mut node_context,
         )?;
 
+        let context = GritExecContext::new(context.lang);
         let locations = VariableLocations::new(vars_array);
 
         Ok(Self {
             pattern,
+            context,
             diagnostics,
-            locations,
+            variables: locations,
         })
     }
 }
