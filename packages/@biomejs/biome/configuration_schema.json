@@ -1879,7 +1879,7 @@
 					]
 				},
 				"useConsistentGridAreas": {
-					"description": "Disallowing invalid named grid areas in CSS Grid Layouts.",
+					"description": "Disallows invalid named grid areas in CSS Grid Layouts.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
