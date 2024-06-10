@@ -29,6 +29,8 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 - The [`noUnmatchableAnbSelector`](https://biomejs.dev/linter/rules/no-unmatchable-anb-selector/) rule is now able to catch unmatchable `an+b` selectors like `0n+0` or `-0n+0`. Contributed by @Sec-ant.
 
+- [useHookAtTopLevel](https://biomejs.dev/linter/rules/use-hook-at-top-level/) now recognizes properties named as hooks like `foo.useFoo()`. Contributed by @ksnyder9801
+
 ### Parser
 
 ## v1.8.1 (2024-06-10)
@@ -82,8 +84,6 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
   Contributed by @Conaclos
 
 - [noEmptyInterface](https://biomejs.dev/linter/rules/no-empty-interface/) now ignores empty interfaces in ambient modules ([#3110](https://github.com/biomejs/biome/issues/3110)). Contributed by @Conaclos
-
-- [useHookAtTopLevel](https://biomejs.dev/linter/rules/use-hook-at-top-level/) now recognizes properties named as hooks like `foo.useFoo()`. Contributed by @ksnyder9801
 
 - [noUnusedVariables](https://biomejs.dev/linter/rules/no-unused-variables/) and [noUnusedFunctionParameters](https://biomejs.dev/linter/rules/no-unused-function-parameters/) no longer report the parameters of a constructor type ([#3135](https://github.com/biomejs/biome/issues/3135)).
 
