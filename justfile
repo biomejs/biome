@@ -37,6 +37,7 @@ gen-lint:
   cargo codegen-configuration
   cargo run -p xtask_codegen --features configuration -- migrate-eslint
   just gen-bindings
+  cargo run -p rules_check
   just format
 
 # Generates the initial files for all formatter crates
@@ -119,9 +120,9 @@ test-quick package:
   cargo test -p {{package}} --test quick_test -- quick_test --nocapture --ignored
 
 
-# Alias for `cargo lint`, it runs clippy on the whole codebase
+# Alias for `cargo lint`, it runs clippy on the whole codebase, and if rule docs are semantically correct
 lint:
-	cargo lint
+  cargo lint
 
 # When you finished coding, run this command to run the same commands in the CI.
 ready:
