@@ -16,7 +16,7 @@ impl FormatNodeRule<CssBracketedValue> for FormatCssBracketedValue {
             f,
             [
                 l_brack_token.format(),
-                soft_block_indent(&items.format()),
+                items.format(),
                 r_brack_token.format()
             ]
         )
