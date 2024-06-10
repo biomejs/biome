@@ -25,22 +25,22 @@ declare_rule! {
     ///
     /// ### Invalid
     ///
-    /// ```js,expect_diagnostic,ignore
+    /// ```js,expect_diagnostic
     /// import "./foo";
     /// ```
     /// ```js,expect_diagnostic
     /// import "./foo/";
     /// ```
-    /// ```js,expect_diagnostic,ignore
+    /// ```js,expect_diagnostic
     /// import "../";
     /// ```
-    /// ```js,expect_diagnostic,ignore
+    /// ```js,expect_diagnostic
     /// import "../.";
     /// ```
-    /// ```js,expect_diagnostic,ignore
+    /// ```js,expect_diagnostic
     /// import("./foo");
     /// ```
-    /// ```js,expect_diagnostic,ignore
+    /// ```js,expect_diagnostic
     /// require("./foo");
     /// ```
     ///
@@ -88,7 +88,11 @@ impl Rule for UseImportExtensions {
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
 
-        let file_ext = ctx.file_path().extension()?.to_str()?;
+        let file_ext = ctx
+            .file_path()
+            .extension()
+            .and_then(|ext| ext.to_str())
+            .unwrap_or("js");
 
         get_extensionless_import(file_ext, node)
     }
