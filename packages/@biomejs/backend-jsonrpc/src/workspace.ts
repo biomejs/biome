@@ -1178,6 +1178,10 @@ export interface Nursery {
 	 * Enforce the use of trimStart() over trimLeft() and trimeEnd() over trimRight().
 	 */
 	useTrimStartEnd?: RuleFixConfiguration_for_Null;
+	/**
+	 * Use valid values for the autocomplete attribute on input elements.
+	 */
+	useValidAutocomplete?: RuleConfiguration_for_UseValidAutocompleteOptions;
 }
 /**
  * A list of rules that belong to this group
@@ -2430,6 +2434,7 @@ export type Category =
 	| "lint/nursery/useThrowOnlyError"
 	| "lint/nursery/useTopLevelRegex"
 	| "lint/nursery/useTrimStartEnd"
+	| "lint/nursery/useValidAutocomplete"
 	| "lint/performance/noAccumulatingSpread"
 	| "lint/performance/noBarrelFile"
 	| "lint/performance/noDelete"
