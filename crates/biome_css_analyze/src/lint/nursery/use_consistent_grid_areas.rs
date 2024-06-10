@@ -6,7 +6,7 @@ use biome_rowan::{TextRange, TokenText};
 use rustc_hash::FxHashSet;
 
 declare_rule! {
-    /// Disallowing invalid named grid areas in CSS Grid Layouts.
+    /// Disallows invalid named grid areas in CSS Grid Layouts.
     ///
     /// For a named grid area to be valid, all strings must define:
     ///
