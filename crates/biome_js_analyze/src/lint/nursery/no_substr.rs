@@ -11,12 +11,12 @@ use biome_rowan::{declare_node_union, AstSeparatedList, BatchMutationExt, TextRa
 use crate::JsRuleAction;
 
 declare_rule! {
-    /// Enforce the use of `slice()` over `substr()` and `substring()`.
+    /// Enforce the use of `String.slice()` over `String.substr()` and `String.substring()`.
     ///
-    /// `slice()` is preferred over `substr()` and `substring()` because it is a more popular option with clearer behavior,
+    /// `String.slice()` is preferred over `String.substr()` and `String.substring()` because it is a more popular option with clearer behavior,
     ///  and it has a consistent counterpart in arrays.
     ///
-    /// Note that `substr`, `substring` and `slice` are not identical when arguments are passed.
+    /// Note that `String.substr`, `String.substring` and `String.slice` are not identical when arguments are passed.
     /// For detailed differences, refer to the MDN documentation:
     /// - [The difference between substring() and substr()](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/substring#the_difference_between_substring_and_substr)
     /// - [Differences between substring() and slice()](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/substring#differences_between_substring_and_slice)
