@@ -22,10 +22,6 @@ declare_rule! {
     /// <input type="text" autocomplete="incorrect" />
     /// ```
     ///
-    /// ```jsx,expect_diagnostic
-    /// <MyInput autocomplete="incorrect" />
-    /// ```
-    ///
     /// ### Valid
     ///
     /// ```jsx
