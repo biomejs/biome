@@ -1035,6 +1035,10 @@ export interface Nursery {
 	 */
 	noRestrictedImports?: RuleConfiguration_for_RestrictedImportsOptions;
 	/**
+	 * Disallow shorthand properties that override related longhand properties.
+	 */
+	noShorthandPropertyOverrides?: RuleConfiguration_for_Null;
+	/**
 	 * Enforce the use of String.slice() over String.substr() and String.substring().
 	 */
 	noSubstr?: RuleFixConfiguration_for_Null;
@@ -2352,6 +2356,7 @@ export type Category =
 	| "lint/nursery/noMissingGenericFamilyKeyword"
 	| "lint/nursery/noReactSpecificProps"
 	| "lint/nursery/noRestrictedImports"
+	| "lint/nursery/noShorthandPropertyOverrides"
 	| "lint/nursery/noSubstr"
 	| "lint/nursery/noTypeOnlyImportAttributes"
 	| "lint/nursery/noUndeclaredDependencies"

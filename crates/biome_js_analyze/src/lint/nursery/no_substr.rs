@@ -1,5 +1,6 @@
 use biome_analyze::{
     context::RuleContext, declare_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic,
+    RuleSource,
 };
 use biome_console::markup;
 use biome_js_factory::make;
@@ -44,6 +45,7 @@ declare_rule! {
         name: "noSubstr",
         language: "js",
         recommended: false,
+        sources: &[RuleSource::EslintUnicorn("prefer-string-slice")],
         fix_kind: FixKind::Unsafe,
     }
 }

@@ -1769,6 +1769,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noShorthandPropertyOverrides": {
+					"description": "Disallow shorthand properties that override related longhand properties.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noSubstr": {
 					"description": "Enforce the use of String.slice() over String.substr() and String.substring().",
 					"anyOf": [
