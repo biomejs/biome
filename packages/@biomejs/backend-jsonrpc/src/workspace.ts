@@ -1035,6 +1035,10 @@ export interface Nursery {
 	 */
 	noRestrictedImports?: RuleConfiguration_for_RestrictedImportsOptions;
 	/**
+	 * Disallow shorthand properties that override related longhand properties.
+	 */
+	noShorthandPropertyOverrides?: RuleConfiguration_for_Null;
+	/**
 	 * Disallow the use of dependencies that aren't specified in the package.json.
 	 */
 	noUndeclaredDependencies?: RuleConfiguration_for_Null;
@@ -1050,6 +1054,10 @@ export interface Nursery {
 	 * Disallow unknown properties.
 	 */
 	noUnknownProperty?: RuleConfiguration_for_Null;
+	/**
+	 * Disallow unknown pseudo-class selectors.
+	 */
+	noUnknownPseudoClassSelector?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow unknown pseudo-element selectors.
 	 */
@@ -2340,11 +2348,13 @@ export type Category =
 	| "lint/nursery/noMissingGenericFamilyKeyword"
 	| "lint/nursery/noReactSpecificProps"
 	| "lint/nursery/noRestrictedImports"
+	| "lint/nursery/noShorthandPropertyOverrides"
 	| "lint/nursery/noTypeOnlyImportAttributes"
 	| "lint/nursery/noUndeclaredDependencies"
 	| "lint/nursery/noUnknownFunction"
 	| "lint/nursery/noUnknownMediaFeatureName"
 	| "lint/nursery/noUnknownProperty"
+	| "lint/nursery/noUnknownPseudoClassSelector"
 	| "lint/nursery/noUnknownSelectorPseudoElement"
 	| "lint/nursery/noUnknownUnit"
 	| "lint/nursery/noUnmatchableAnbSelector"

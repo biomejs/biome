@@ -25,7 +25,8 @@
   },
   "json": {
     "formatter": {
-      "indentStyle": "space"
+      "indentStyle": "space",
+      "lineWidth": 1
     }
   },
   "vcs": {

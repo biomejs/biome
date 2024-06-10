@@ -2,7 +2,6 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: css/character-escaping/character_escaping.css
 ---
-
 # Input
 
 ```css
@@ -107,14 +106,6 @@ info: css/character-escaping/character_escaping.css
  }
  #\[attr\=value\] {
  }
-@@ -94,5 +87,6 @@
- }
- 
- .grid {
--  grid-template-rows: [row-1-00\:00] auto;
-+  grid-template-rows:
-+    [row-1-00\:00] auto;
- }
 ```
 
 # Output
@@ -209,8 +200,7 @@ info: css/character-escaping/character_escaping.css
 }
 
 .grid {
-  grid-template-rows:
-    [row-1-00\:00] auto;
+  grid-template-rows: [row-1-00\:00] auto;
 }
 ```
 
@@ -389,27 +379,6 @@ character_escaping.css:7:2 parse ━━━━━━━━━━━━━━━�
     8 │ #\? {}
     9 │ #\@ {}
   
-character_escaping.css:57:5 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Unexpected value or character.
-  
-    55 │ .grid {
-    56 │   grid-template-rows:
-  > 57 │     [row-1-00\:00] auto;
-       │     ^^^^^^^^^^^^^^^^^^^
-    58 │ }
-    59 │ 
-  
-  i Expected one of:
-  
-  - identifier
-  - string
-  - number
-  - dimension
-  - ratio
-  - custom property
-  - function
-  
 
 ```
 
@@ -417,5 +386,3 @@ character_escaping.css:57:5 parse ━━━━━━━━━━━━━━━�
 ```
    26: #\+\+\+\+\+\+\+\+\+\+\[\>\+\+\+\+\+\+\+\>\+\+\+\+\+\+\+\+\+\+\>\+\+\+\>\+\<\<\<\<\-\]\>\+\+\.\>\+\.\+\+\+\+\+\+\+\.\.\+\+\+\.\>\+\+\.\<\<\+\+\+\+\+\+\+\+\+\+\+\+\+\+\+\.\>\.\+\+\+\.\-\-\-\-\-\-\.\-\-\-\-\-\-\-\-\.\>\+\.\>\. {
 ```
-
-

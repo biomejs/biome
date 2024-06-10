@@ -857,6 +857,109 @@ pub const OTHER_PSEUDO_ELEMENTS: [&str; 18] = [
 
 pub const VENDOR_PREFIXES: [&str; 4] = ["-webkit-", "-moz-", "-ms-", "-o-"];
 
+pub const AT_RULE_PAGE_PSEUDO_CLASSES: [&str; 4] = ["first", "right", "left", "blank"];
+
+pub const WEBKIT_SCROLLBAR_PSEUDO_ELEMENTS: [&str; 7] = [
+    "-webkit-resizer",
+    "-webkit-scrollbar",
+    "-webkit-scrollbar-button",
+    "-webkit-scrollbar-corner",
+    "-webkit-scrollbar-thumb",
+    "-webkit-scrollbar-track",
+    "-webkit-scrollbar-track-piece",
+];
+
+pub const WEBKIT_SCROLLBAR_PSEUDO_CLASSES: [&str; 11] = [
+    "horizontal",
+    "vertical",
+    "decrement",
+    "increment",
+    "start",
+    "end",
+    "double-button",
+    "single-button",
+    "no-button",
+    "corner-present",
+    "window-inactive",
+];
+
+pub const A_NPLUS_BNOTATION_PSEUDO_CLASSES: [&str; 4] = [
+    "nth-column",
+    "nth-last-column",
+    "nth-last-of-type",
+    "nth-of-type",
+];
+
+pub const A_NPLUS_BOF_SNOTATION_PSEUDO_CLASSES: [&str; 2] = ["nth-child", "nth-last-child"];
+
+pub const LINGUISTIC_PSEUDO_CLASSES: [&str; 2] = ["dir", "lang"];
+
+pub const LOGICAL_COMBINATIONS_PSEUDO_CLASSES: [&str; 5] = ["has", "is", "matches", "not", "where"];
+
+/// See https://drafts.csswg.org/selectors/#resource-pseudos
+pub const RESOURCE_STATE_PSEUDO_CLASSES: [&str; 7] = [
+    "playing",
+    "paused",
+    "seeking",
+    "buffering",
+    "stalled",
+    "muted",
+    "volume-locked",
+];
+
+pub const OTHER_PSEUDO_CLASSES: [&str; 50] = [
+    "active",
+    "any-link",
+    "autofill",
+    "blank",
+    "checked",
+    "current",
+    "default",
+    "defined",
+    "disabled",
+    "empty",
+    "enabled",
+    "first-child",
+    "first-of-type",
+    "focus",
+    "focus-visible",
+    "focus-within",
+    "fullscreen",
+    "fullscreen-ancestor",
+    "future",
+    "host",
+    "host-context",
+    "hover",
+    "indeterminate",
+    "in-range",
+    "invalid",
+    "last-child",
+    "last-of-type",
+    "link",
+    "modal",
+    "only-child",
+    "only-of-type",
+    "optional",
+    "out-of-range",
+    "past",
+    "placeholder-shown",
+    "picture-in-picture",
+    "popover-open",
+    "read-only",
+    "read-write",
+    "required",
+    "root",
+    "scope",
+    "state",
+    "target",
+    "unresolved",
+    "user-invalid",
+    "user-valid",
+    "valid",
+    "visited",
+    "window-inactive",
+];
+
 // https://github.com/known-css/known-css-properties/blob/master/source/w3c.json
 pub const KNOWN_PROPERTIES: [&str; 588] = [
     "-webkit-line-clamp",
@@ -5021,6 +5124,315 @@ pub const MEDIA_FEATURE_NAMES: [&str; 60] = [
     "width",
 ];
 
+pub const SHORTHAND_PROPERTIES: [&str; 57] = [
+    "animation",
+    "background",
+    "border",
+    "border-block",
+    "border-block-end",
+    "border-block-start",
+    "border-bottom",
+    "border-color",
+    "border-image",
+    "border-inline",
+    "border-inline-end",
+    "border-inline-start",
+    "border-left",
+    "border-radius",
+    "border-right",
+    "border-style",
+    "border-top",
+    "border-width",
+    "column-rule",
+    "columns",
+    "flex",
+    "flex-flow",
+    "font",
+    "font-synthesis",
+    "gap",
+    "grid",
+    "grid-area",
+    "grid-column",
+    "grid-gap",
+    "grid-row",
+    "grid-template",
+    "inset",
+    "inset-block",
+    "inset-inline",
+    "list-style",
+    "margin",
+    "margin-block",
+    "margin-inline",
+    "mask",
+    "outline",
+    "overflow",
+    "overscroll-behavior",
+    "padding",
+    "padding-block",
+    "padding-inline",
+    "place-content",
+    "place-items",
+    "place-self",
+    "scroll-margin",
+    "scroll-margin-block",
+    "scroll-margin-inline",
+    "scroll-padding",
+    "scroll-padding-block",
+    "scroll-padding-inline",
+    "text-decoration",
+    "text-emphasis",
+    "transition",
+];
+
+pub const LONGHAND_SUB_PROPERTIES_OF_SHORTHAND_PROPERTIES: [&[&str]; 57] = [
+    &[
+        "animation-delay",
+        "animation-direction",
+        "animation-duration",
+        "animation-fill-mode",
+        "animation-iteration-count",
+        "animation-name",
+        "animation-play-state",
+        "animation-timing-function",
+    ],
+    &[
+        "background-attachment",
+        "background-clip",
+        "background-color",
+        "background-image",
+        "background-origin",
+        "background-position",
+        "background-repeat",
+        "background-size",
+    ],
+    &[
+        "border-bottom-color",
+        "border-bottom-style",
+        "border-bottom-width",
+        "border-color",
+        "border-left-color",
+        "border-left-style",
+        "border-left-width",
+        "border-right-color",
+        "border-right-style",
+        "border-right-width",
+        "border-style",
+        "border-top-color",
+        "border-top-style",
+        "border-top-width",
+        "border-width",
+    ],
+    &[
+        "border-block-color",
+        "border-block-style",
+        "border-block-width",
+    ],
+    &[
+        "border-block-end-color",
+        "border-block-end-style",
+        "border-block-end-width",
+    ],
+    &[
+        "border-block-start-color",
+        "border-block-start-style",
+        "border-block-start-width",
+    ],
+    &[
+        "border-bottom-color",
+        "border-bottom-style",
+        "border-bottom-width",
+    ],
+    &[
+        "border-bottom-color",
+        "border-left-color",
+        "border-right-color",
+        "border-top-color",
+    ],
+    &[
+        "border-image-outset",
+        "border-image-repeat",
+        "border-image-slice",
+        "border-image-source",
+        "border-image-width",
+    ],
+    &[
+        "border-inline-color",
+        "border-inline-style",
+        "border-inline-width",
+    ],
+    &[
+        "border-inline-end-color",
+        "border-inline-end-style",
+        "border-inline-end-width",
+    ],
+    &[
+        "border-inline-start-color",
+        "border-inline-start-style",
+        "border-inline-start-width",
+    ],
+    &[
+        "border-left-color",
+        "border-left-style",
+        "border-left-width",
+    ],
+    &[
+        "border-bottom-left-radius",
+        "border-bottom-right-radius",
+        "border-top-left-radius",
+        "border-top-right-radius",
+    ],
+    &[
+        "border-right-color",
+        "border-right-style",
+        "border-right-width",
+    ],
+    &[
+        "border-bottom-style",
+        "border-left-style",
+        "border-right-style",
+        "border-top-style",
+    ],
+    &["border-top-color", "border-top-style", "border-top-width"],
+    &[
+        "border-bottom-width",
+        "border-left-width",
+        "border-right-width",
+        "border-top-width",
+    ],
+    &[
+        "column-rule-color",
+        "column-rule-style",
+        "column-rule-width",
+    ],
+    &["column-count", "column-width"],
+    &["flex-basis", "flex-grow", "flex-shrink"],
+    &["flex-direction", "flex-wrap"],
+    &[
+        "font-family",
+        "font-size",
+        "font-stretch",
+        "font-style",
+        "font-variant",
+        "font-weight",
+        "line-height",
+    ],
+    &[
+        "font-synthesis-small-caps",
+        "font-synthesis-style",
+        "font-synthesis-weight",
+    ],
+    &["column-gap", "row-gap"],
+    &[
+        "grid-auto-columns",
+        "grid-auto-flow",
+        "grid-auto-rows",
+        "grid-column-gap",
+        "grid-row-gap",
+        "grid-template-areas",
+        "grid-template-columns",
+        "grid-template-rows",
+    ],
+    &[
+        "grid-column-end",
+        "grid-column-start",
+        "grid-row-end",
+        "grid-row-start",
+    ],
+    &["grid-column-end", "grid-column-start"],
+    &["grid-column-gap", "grid-row-gap"],
+    &["grid-row-end", "grid-row-start"],
+    &[
+        "grid-template-areas",
+        "grid-template-columns",
+        "grid-template-rows",
+    ],
+    &["bottom", "left", "right", "top"],
+    &["inset-block-end", "inset-block-start"],
+    &["inset-inline-end", "inset-inline-start"],
+    &["list-style-image", "list-style-position", "list-style-type"],
+    &["margin-bottom", "margin-left", "margin-right", "margin-top"],
+    &["margin-block-end", "margin-block-start"],
+    &["margin-inline-end", "margin-inline-start"],
+    &[
+        "mask-clip",
+        "mask-composite",
+        "mask-image",
+        "mask-mode",
+        "mask-origin",
+        "mask-position",
+        "mask-repeat",
+        "mask-size",
+    ],
+    &["outline-color", "outline-style", "outline-width"],
+    &["overflow-x", "overflow-y"],
+    &["overscroll-behavior-x", "overscroll-behavior-y"],
+    &[
+        "padding-bottom",
+        "padding-left",
+        "padding-right",
+        "padding-top",
+    ],
+    &["padding-block-end", "padding-block-start"],
+    &["padding-inline-end", "padding-inline-start"],
+    &["align-content", "justify-content"],
+    &["align-items", "justify-items"],
+    &["align-self", "justify-self"],
+    &[
+        "scroll-margin-bottom",
+        "scroll-margin-left",
+        "scroll-margin-right",
+        "scroll-margin-top",
+    ],
+    &["scroll-margin-block-end", "scroll-margin-block-start"],
+    &["scroll-margin-inline-end", "scroll-margin-inline-start"],
+    &[
+        "scroll-padding-bottom",
+        "scroll-padding-left",
+        "scroll-padding-right",
+        "scroll-padding-top",
+    ],
+    &["scroll-padding-block-end", "scroll-padding-block-start"],
+    &["scroll-padding-inline-end", "scroll-padding-inline-start"],
+    &[
+        "text-decoration-color",
+        "text-decoration-line",
+        "text-decoration-style",
+        "text-decoration-thickness",
+    ],
+    &["text-emphasis-color", "text-emphasis-style"],
+    &[
+        "transition-delay",
+        "transition-duration",
+        "transition-property",
+        "transition-timing-function",
+    ],
+];
+
+pub const RESET_TO_INITIAL_PROPERTIES_BY_BORDER: [&str; 6] = [
+    "border-image",
+    "border-image-outset",
+    "border-image-repeat",
+    "border-image-slice",
+    "border-image-source",
+    "border-image-width",
+];
+
+pub const RESET_TO_INITIAL_PROPERTIES_BY_FONT: [&str; 13] = [
+    "font-feature-settings",
+    "font-kerning",
+    "font-language-override",
+    "font-optical-sizing",
+    "font-size-adjust",
+    "font-variant-alternates",
+    "font-variant-caps",
+    "font-variant-east-asian",
+    "font-variant-emoji",
+    "font-variant-ligatures",
+    "font-variant-numeric",
+    "font-variant-position",
+    "font-variation-settings",
+];
+
 #[cfg(test)]
 mod tests {
     use std::collections::HashSet;
@@ -5028,7 +5440,10 @@ mod tests {
     use super::{
         FUNCTION_KEYWORDS, KNOWN_EDGE_PROPERTIES, KNOWN_EXPLORER_PROPERTIES,
         KNOWN_FIREFOX_PROPERTIES, KNOWN_PROPERTIES, KNOWN_SAFARI_PROPERTIES,
-        KNOWN_SAMSUNG_INTERNET_PROPERTIES, KNOWN_US_BROWSER_PROPERTIES, MEDIA_FEATURE_NAMES,
+        KNOWN_SAMSUNG_INTERNET_PROPERTIES, KNOWN_US_BROWSER_PROPERTIES,
+        LONGHAND_SUB_PROPERTIES_OF_SHORTHAND_PROPERTIES, MEDIA_FEATURE_NAMES,
+        RESET_TO_INITIAL_PROPERTIES_BY_BORDER, RESET_TO_INITIAL_PROPERTIES_BY_FONT,
+        SHORTHAND_PROPERTIES,
     };
 
     #[test]
@@ -5099,5 +5514,125 @@ mod tests {
         for items in MEDIA_FEATURE_NAMES.windows(2) {
             assert!(items[0] < items[1], "{} < {}", items[0], items[1]);
         }
+    }
+
+    #[test]
+    fn test_shorthand_properties_sorted() {
+        let mut sorted = SHORTHAND_PROPERTIES.to_vec();
+        sorted.sort_unstable();
+        assert_eq!(SHORTHAND_PROPERTIES, sorted.as_slice());
+    }
+
+    #[test]
+    fn test_shorthand_properties_unique() {
+        let mut set = HashSet::new();
+        let has_duplicates = SHORTHAND_PROPERTIES.iter().any(|&x| !set.insert(x));
+        assert!(!has_duplicates);
+    }
+
+    #[test]
+    fn test_longhand_sub_properties_of_shorthand_properties_sorted() {
+        for longhand_sub_properties in LONGHAND_SUB_PROPERTIES_OF_SHORTHAND_PROPERTIES.iter() {
+            let mut sorted = longhand_sub_properties.to_vec();
+            sorted.sort_unstable();
+            assert_eq!(*longhand_sub_properties, sorted.as_slice());
+        }
+    }
+
+    #[test]
+    fn test_longhand_sub_properties_of_shorthand_properties_unique() {
+        for longhand_sub_properties in LONGHAND_SUB_PROPERTIES_OF_SHORTHAND_PROPERTIES.iter() {
+            let mut set = HashSet::new();
+            let has_duplicates = longhand_sub_properties.iter().any(|&x| !set.insert(x));
+            assert!(!has_duplicates);
+        }
+    }
+
+    #[test]
+    fn test_shorthand_properties_and_longhand_sub_properties_correspond_correctly() {
+        for (shorthand_property, longhand_sub_properties) in SHORTHAND_PROPERTIES
+            .iter()
+            .zip(LONGHAND_SUB_PROPERTIES_OF_SHORTHAND_PROPERTIES.iter())
+        {
+            for longhand_sub_property in longhand_sub_properties.iter() {
+                if [
+                    "border-color",
+                    "border-radius",
+                    "border-style",
+                    "border-width",
+                ]
+                .contains(shorthand_property)
+                {
+                    let (start, end) = shorthand_property.split_at(6);
+                    assert!(longhand_sub_property.starts_with(start));
+                    assert!(longhand_sub_property.ends_with(end));
+                } else if *shorthand_property == "columns" {
+                    assert!(longhand_sub_property.starts_with("column"));
+                } else if *shorthand_property == "flex-flow" {
+                    assert!(["flex-direction", "flex-wrap",].contains(longhand_sub_property));
+                } else if *shorthand_property == "font" {
+                    if *longhand_sub_property != "line-height" {
+                        assert!(longhand_sub_property.starts_with(shorthand_property));
+                    }
+                } else if *shorthand_property == "gap" {
+                    assert!(longhand_sub_property.ends_with(shorthand_property));
+                } else if *shorthand_property == "grid-area" {
+                    assert!(
+                        longhand_sub_property.starts_with("grid-row")
+                            || longhand_sub_property.starts_with("grid-column")
+                    );
+                } else if *shorthand_property == "grid-gap" {
+                    let (start, end) = shorthand_property.split_at(4);
+                    assert!(longhand_sub_property.starts_with(start));
+                    assert!(longhand_sub_property.ends_with(end));
+                } else if *shorthand_property == "inset" {
+                    assert!(["bottom", "left", "right", "top"].contains(longhand_sub_property));
+                } else if ["place-content", "place-items", "place-self"]
+                    .contains(shorthand_property)
+                {
+                    assert!(
+                        longhand_sub_property.starts_with("align")
+                            || longhand_sub_property.starts_with("justify")
+                    );
+
+                    let (_, end) = shorthand_property.split_at(5);
+                    assert!(longhand_sub_property.ends_with(end));
+                } else {
+                    assert!(longhand_sub_property.starts_with(shorthand_property));
+                }
+            }
+        }
+    }
+
+    #[test]
+    fn test_reset_to_initial_properties_by_border_sorted() {
+        let mut sorted = RESET_TO_INITIAL_PROPERTIES_BY_BORDER.to_vec();
+        sorted.sort_unstable();
+        assert_eq!(RESET_TO_INITIAL_PROPERTIES_BY_BORDER, sorted.as_slice());
+    }
+
+    #[test]
+    fn test_reset_to_initial_properties_by_border_unique() {
+        let mut set = HashSet::new();
+        let has_duplicates = RESET_TO_INITIAL_PROPERTIES_BY_BORDER
+            .iter()
+            .any(|&x| !set.insert(x));
+        assert!(!has_duplicates);
+    }
+
+    #[test]
+    fn test_reset_to_initial_properties_by_font_sorted() {
+        let mut sorted = RESET_TO_INITIAL_PROPERTIES_BY_FONT.to_vec();
+        sorted.sort_unstable();
+        assert_eq!(RESET_TO_INITIAL_PROPERTIES_BY_FONT, sorted.as_slice());
+    }
+
+    #[test]
+    fn test_reset_to_initial_properties_by_font_unique() {
+        let mut set = HashSet::new();
+        let has_duplicates = RESET_TO_INITIAL_PROPERTIES_BY_FONT
+            .iter()
+            .any(|&x| !set.insert(x));
+        assert!(!has_duplicates);
     }
 }

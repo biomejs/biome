@@ -174,11 +174,10 @@ pub fn run(test_case: &str, _snapshot_name: &str, test_directory: &str, outcome_
 #[test]
 pub fn quick_test() {
     let code = r#"
-.div {
-  & .class {
-    color: red
-  }
+div {
+  filter: progid:DXImageTransform.Microsoft.BasicImage(rotation=3);
 }
+
 
     "#;
 

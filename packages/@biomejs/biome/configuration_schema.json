@@ -1769,6 +1769,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noShorthandPropertyOverrides": {
+					"description": "Disallow shorthand properties that override related longhand properties.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noUndeclaredDependencies": {
 					"description": "Disallow the use of dependencies that aren't specified in the package.json.",
 					"anyOf": [
@@ -1792,6 +1799,13 @@
 				},
 				"noUnknownProperty": {
 					"description": "Disallow unknown properties.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noUnknownPseudoClassSelector": {
+					"description": "Disallow unknown pseudo-class selectors.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }

@@ -267,12 +267,7 @@ a {
 ```diff
 --- Prettier
 +++ Biome
-@@ -53,14 +53,14 @@
- }
- 
- .foo {
--  --paddingC: calc(var(--widthB) / 2);
-+  --paddingc: calc(var(--widthB) / 2);
+@@ -57,10 +57,10 @@
    content: attr(data-title);
    color: var(--main-bg-color);
    background-color: rgb(255, 0, 0);
@@ -425,7 +420,7 @@ a {
 }
 
 .foo {
-  --paddingc: calc(var(--widthB) / 2);
+  --paddingC: calc(var(--widthB) / 2);
   content: attr(data-title);
   color: var(--main-bg-color);
   background-color: rgb(255, 0, 0);

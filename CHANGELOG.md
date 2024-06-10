@@ -18,8 +18,7 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 #### Bug fixes
 
 - Fix [#3069](https://github.com/biomejs/biome/issues/3069), prevent overwriting paths when using `--staged` or `--changed` options. Contributed by @unvalley
-- Fix the bug where whitespace after the & character in CSS nesting was incorrectly trimmed, ensuring proper targeting of child classes [#3061](https://github.com/biomejs/biome/issues/3061). Contributed by @denbezrukov
-
+- Fix a case where the file link inside a diagnostic wasn't correctly displayed inside a terminal run by VSCode. Contributed by @uncenter
 
 ### Configuration
 
@@ -30,6 +29,10 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 ### Editors
 
 ### Formatter
+
+#### Bug fixes
+- Fix the bug where whitespace after the & character in CSS nesting was incorrectly trimmed, ensuring proper targeting of child classes [#3061](https://github.com/biomejs/biome/issues/3061). Contributed by @denbezrukov
+- Fix [#3068](https://github.com/biomejs/biome/issues/3068) where the CSS formatter was inadvertently converting variable declarations and function calls to lowercase. Contributed by @denbezrukov
 
 ### JavaScript APIs
 
@@ -58,7 +61,24 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 - [noEmptyInterface](https://biomejs.dev/linter/rules/no-empty-interface/) now ignores empty interfaces in ambient modules ([#3110](https://github.com/biomejs/biome/issues/3110)). Contributed by @Conaclos
 
+- [noUnusedVariables](https://biomejs.dev/linter/rules/no-unused-variables/) and [noUnusedFunctionParameters](https://biomejs.dev/linter/rules/no-unused-function-parameters/) no longer report the parameters of a constructor type ([#3135](https://github.com/biomejs/biome/issues/3135)).
+
+  Previously, `arg` was reported as unused in a constructor type like:
+
+  ```ts
+  export type Classlike = new (arg: unknown) => string;
+  ```
+
+  Contributed by @Conaclos
+
 ### Parser
+
+#### New features
+- Implemented CSS Unknown At-Rule parsing, allowing the parser to gracefully handle unsupported or unrecognized CSS at-rules. Contributed by @denbezrukov
+
+#### Bug fixes
+- Fix [#3055](https://github.com/biomejs/biome/issues/3055) CSS: Layout using named grid lines is now correctly parsed. Contributed by @denbezrukov
+- Fix [#3091](https://github.com/biomejs/biome/issues/3091). Allows the parser to handle nested style rules and at-rules properly, enhancing the parser's compatibility with the CSS Nesting Module. Contributed by @denbezrukov
 
 ## 1.8.0 (2024-06-04)
 
@@ -416,6 +436,7 @@ New rules are incubated in the nursery group. Once stable, we promote them to a 
 - Add [nursery/useGenericFontNames](https://biomejs.dev/linter/rules/use-generic-font-names). [#2573](https://github.com/biomejs/biome/pull/2573) Contributed by @togami2864
 - Add [nursery/noYodaExpression](https://biomejs.dev/linter/rules/no-yoda-expression/). Contributed by @michellocana
 - Add [nursery/noUnusedFunctionParameters](https://biomejs.dev/linter/rules/no-unused-function-parameters/) Contributed by @printfn
+- Add [nursery/UseSemanticElements](https://biomejs.dev/linter/rules/use-semantic-elements/). Contributed by @fujiyamaorange
 
 #### Enhancements
 
