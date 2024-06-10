@@ -19,8 +19,8 @@ fn calculate_hash<T: Hash>(t: &T) -> u64 {
 }
 
 impl TestCase {
-    pub fn try_from(test_case: &str) -> Result<TestCase, String> {
-        let url = url::Url::from_str(test_case).map_err(err_to_string)?;
+    pub fn try_from(file_url: &str) -> Result<TestCase, String> {
+        let url = url::Url::from_str(file_url).map_err(err_to_string)?;
         let segments = url
             .path_segments()
             .ok_or_else(|| "lib url has no segments".to_string())?;
@@ -36,18 +36,18 @@ impl TestCase {
         .nth(2)
         .unwrap()
         .join("target")
-        .join(filename);
-
+        .join(format!("{filename}_{}", calculate_hash(&filename.to_string())));
+        
         let content = std::fs::read_to_string(&path)
             .map_err(err_to_string)
             .or_else(|_| {
                 println!(
                     "[{}] - Downloading [{}] to [{}]",
                     filename,
-                    test_case,
+                    file_url,
                     path.display()
                 );
-                match ureq::get(test_case).call() {
+                match ureq::get(file_url).call() {
                     Ok(response) => {
                         let mut reader = response.into_reader();
 
