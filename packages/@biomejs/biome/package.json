@@ -1,14 +1,16 @@
 {
   "name": "@biomejs/biome",
   "version": "1.8.0",
-  "bin": "bin/biome",
+  "bin": {
+    "biome": "bin/biome"
+  },
   "scripts": {
     "postinstall": "node scripts/postinstall.js"
   },
   "homepage": "https://biomejs.dev",
   "repository": {
     "type": "git",
-    "url": "https://github.com/biomejs/biome.git",
+    "url": "git+https://github.com/biomejs/biome.git",
     "directory": "packages/@biomejs/biome"
   },
   "author": "Emanuele Stoppa",
