@@ -26,11 +26,11 @@ declare_rule! {
     /// ### Invalid
     ///
     /// ```js,expect_diagnostic
-    /// foo.substr(start, length);
+    /// foo.substr();
     /// ```
     ///
     /// ```js,expect_diagnostic
-    /// foo.substring(indexStart, indexEnd);
+    /// foo.substring();
     /// ```
     ///
     /// ### Valid
