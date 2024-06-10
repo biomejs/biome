@@ -1984,7 +1984,7 @@
 					]
 				},
 				"useValidAutocomplete": {
-					"description": "Use correct values for the autocomplete attribute on input elements.",
+					"description": "Use valid values for the autocomplete attribute on input elements.",
 					"anyOf": [
 						{ "$ref": "#/definitions/UseValidAutocompleteConfiguration" },
 						{ "type": "null" }
@@ -2415,6 +2415,21 @@
 			},
 			"additionalProperties": false
 		},
+		"RuleWithUseValidAutocompleteOptions": {
+			"type": "object",
+			"required": ["level", "options"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/UseValidAutocompleteOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
 		"RuleWithUtilityClassSortingOptions": {
 			"type": "object",
 			"required": ["level", "options"],
@@ -2449,21 +2464,6 @@
 				"options": {
 					"description": "Rule's options",
 					"allOf": [{ "$ref": "#/definitions/ValidAriaRoleOptions" }]
-				}
-			},
-			"additionalProperties": false
-		},
-		"RuleWithUseValidAutocompleteOptions": {
-			"type": "object",
-			"required": ["level", "options"],
-			"properties": {
-				"level": {
-					"description": "The severity of the emitted diagnostics by the rule",
-					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
-				},
-				"options": {
-					"description": "Rule's options",
-					"allOf": [{ "$ref": "#/definitions/UseValidAutocompleteOptions" }]
 				}
 			},
 			"additionalProperties": false
@@ -3336,12 +3336,6 @@
 				}
 			]
 		},
-		"UtilityClassSortingConfiguration": {
-			"anyOf": [
-				{ "$ref": "#/definitions/RulePlainConfiguration" },
-				{ "$ref": "#/definitions/RuleWithUtilityClassSortingOptions" }
-			]
-    },
 		"UseValidAutocompleteConfiguration": {
 			"anyOf": [
 				{ "$ref": "#/definitions/RulePlainConfiguration" },
@@ -3355,6 +3349,12 @@
 				"inputComponents": { "type": "array", "items": { "type": "string" } }
 			},
 			"additionalProperties": false
+		},
+		"UtilityClassSortingConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithUtilityClassSortingOptions" }
+			]
 		},
 		"UtilityClassSortingOptions": {
 			"type": "object",

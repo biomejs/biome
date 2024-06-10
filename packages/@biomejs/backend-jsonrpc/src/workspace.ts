@@ -1159,7 +1159,7 @@ export interface Nursery {
 	 */
 	useTopLevelRegex?: RuleConfiguration_for_Null;
 	/**
-	 * Use correct values for the autocomplete attribute on input elements.
+	 * Use valid values for the autocomplete attribute on input elements.
 	 */
 	useValidAutocomplete?: RuleConfiguration_for_UseValidAutocompleteOptions;
 }
