@@ -1,0 +1,184 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```css
+.container {
+	@apply flex flex-col h-[100vh] w-[100vh];
+}
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    rules: CssRuleList [
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selector_token: missing (optional),
+                    simple_selector: missing (optional),
+                    sub_selectors: CssSubSelectorList [
+                        CssClassSelector {
+                            dot_token: DOT@0..1 "." [] [],
+                            name: CssCustomIdentifier {
+                                value_token: IDENT@1..11 "container" [] [Whitespace(" ")],
+                            },
+                        },
+                    ],
+                },
+            ],
+            block: CssDeclarationOrRuleBlock {
+                l_curly_token: L_CURLY@11..12 "{" [] [],
+                items: CssDeclarationOrRuleList [
+                    CssAtRule {
+                        at_token: AT@12..15 "@" [Newline("\n"), Whitespace("\t")] [],
+                        rule: CssUnknownValueAtRule {
+                            name: CssIdentifier {
+                                value_token: IDENT@15..21 "apply" [] [Whitespace(" ")],
+                            },
+                            components: CssUnknownAtRuleComponentList {
+                                items: [
+                                    IDENT@21..26 "flex" [] [Whitespace(" ")],
+                                    IDENT@26..35 "flex-col" [] [Whitespace(" ")],
+                                    IDENT@35..37 "h-" [] [],
+                                    L_BRACK@37..38 "[" [] [],
+                                    CSS_DIMENSION_VALUE@38..41 "100" [] [],
+                                    VH_KW@41..43 "vh" [] [],
+                                    R_BRACK@43..45 "]" [] [Whitespace(" ")],
+                                    IDENT@45..47 "w-" [] [],
+                                    L_BRACK@47..48 "[" [] [],
+                                    CSS_DIMENSION_VALUE@48..51 "100" [] [],
+                                    VH_KW@51..53 "vh" [] [],
+                                    R_BRACK@53..54 "]" [] [],
+                                ],
+                            },
+                            semicolon_token: SEMICOLON@54..55 ";" [] [],
+                        },
+                    },
+                ],
+                r_curly_token: R_CURLY@55..57 "}" [Newline("\n")] [],
+            },
+        },
+        CssAtRule {
+            at_token: AT@57..60 "@" [Newline("\n"), Newline("\n")] [],
+            rule: CssUnknownValueAtRule {
+                name: CssIdentifier {
+                    value_token: IDENT@60..69 "tailwind" [] [Whitespace(" ")],
+                },
+                components: CssUnknownAtRuleComponentList {
+                    items: [
+                        IDENT@69..73 "base" [] [],
+                    ],
+                },
+                semicolon_token: SEMICOLON@73..74 ";" [] [],
+            },
+        },
+        CssAtRule {
+            at_token: AT@74..76 "@" [Newline("\n")] [],
+            rule: CssUnknownValueAtRule {
+                name: CssIdentifier {
+                    value_token: IDENT@76..85 "tailwind" [] [Whitespace(" ")],
+                },
+                components: CssUnknownAtRuleComponentList {
+                    items: [
+                        IDENT@85..95 "components" [] [],
+                    ],
+                },
+                semicolon_token: SEMICOLON@95..96 ";" [] [],
+            },
+        },
+        CssAtRule {
+            at_token: AT@96..98 "@" [Newline("\n")] [],
+            rule: CssUnknownValueAtRule {
+                name: CssIdentifier {
+                    value_token: IDENT@98..107 "tailwind" [] [Whitespace(" ")],
+                },
+                components: CssUnknownAtRuleComponentList {
+                    items: [
+                        IDENT@107..116 "utilities" [] [],
+                    ],
+                },
+                semicolon_token: SEMICOLON@116..117 ";" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@117..118 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..118
+  0: (empty)
+  1: CSS_RULE_LIST@0..117
+    0: CSS_QUALIFIED_RULE@0..57
+      0: CSS_SELECTOR_LIST@0..11
+        0: CSS_COMPOUND_SELECTOR@0..11
+          0: (empty)
+          1: (empty)
+          2: CSS_SUB_SELECTOR_LIST@0..11
+            0: CSS_CLASS_SELECTOR@0..11
+              0: DOT@0..1 "." [] []
+              1: CSS_CUSTOM_IDENTIFIER@1..11
+                0: IDENT@1..11 "container" [] [Whitespace(" ")]
+      1: CSS_DECLARATION_OR_RULE_BLOCK@11..57
+        0: L_CURLY@11..12 "{" [] []
+        1: CSS_DECLARATION_OR_RULE_LIST@12..55
+          0: CSS_AT_RULE@12..55
+            0: AT@12..15 "@" [Newline("\n"), Whitespace("\t")] []
+            1: CSS_UNKNOWN_VALUE_AT_RULE@15..55
+              0: CSS_IDENTIFIER@15..21
+                0: IDENT@15..21 "apply" [] [Whitespace(" ")]
+              1: CSS_UNKNOWN_AT_RULE_COMPONENT_LIST@21..54
+                0: IDENT@21..26 "flex" [] [Whitespace(" ")]
+                1: IDENT@26..35 "flex-col" [] [Whitespace(" ")]
+                2: IDENT@35..37 "h-" [] []
+                3: L_BRACK@37..38 "[" [] []
+                4: CSS_DIMENSION_VALUE@38..41 "100" [] []
+                5: VH_KW@41..43 "vh" [] []
+                6: R_BRACK@43..45 "]" [] [Whitespace(" ")]
+                7: IDENT@45..47 "w-" [] []
+                8: L_BRACK@47..48 "[" [] []
+                9: CSS_DIMENSION_VALUE@48..51 "100" [] []
+                10: VH_KW@51..53 "vh" [] []
+                11: R_BRACK@53..54 "]" [] []
+              2: SEMICOLON@54..55 ";" [] []
+        2: R_CURLY@55..57 "}" [Newline("\n")] []
+    1: CSS_AT_RULE@57..74
+      0: AT@57..60 "@" [Newline("\n"), Newline("\n")] []
+      1: CSS_UNKNOWN_VALUE_AT_RULE@60..74
+        0: CSS_IDENTIFIER@60..69
+          0: IDENT@60..69 "tailwind" [] [Whitespace(" ")]
+        1: CSS_UNKNOWN_AT_RULE_COMPONENT_LIST@69..73
+          0: IDENT@69..73 "base" [] []
+        2: SEMICOLON@73..74 ";" [] []
+    2: CSS_AT_RULE@74..96
+      0: AT@74..76 "@" [Newline("\n")] []
+      1: CSS_UNKNOWN_VALUE_AT_RULE@76..96
+        0: CSS_IDENTIFIER@76..85
+          0: IDENT@76..85 "tailwind" [] [Whitespace(" ")]
+        1: CSS_UNKNOWN_AT_RULE_COMPONENT_LIST@85..95
+          0: IDENT@85..95 "components" [] []
+        2: SEMICOLON@95..96 ";" [] []
+    3: CSS_AT_RULE@96..117
+      0: AT@96..98 "@" [Newline("\n")] []
+      1: CSS_UNKNOWN_VALUE_AT_RULE@98..117
+        0: CSS_IDENTIFIER@98..107
+          0: IDENT@98..107 "tailwind" [] [Whitespace(" ")]
+        1: CSS_UNKNOWN_AT_RULE_COMPONENT_LIST@107..116
+          0: IDENT@107..116 "utilities" [] []
+        2: SEMICOLON@116..117 ";" [] []
+  2: EOF@117..118 "" [Newline("\n")] []
+
+```

@@ -64,7 +64,7 @@ struct LintVerboseAdvices {
 impl Advices for LintVerboseAdvices {
     fn record(&self, visitor: &mut dyn Visit) -> io::Result<()> {
         visitor.record_log(LogCategory::Info, &"Apply this fix using `--apply`:")?;
-        visitor.record_command(&format!("biome check --apply {}", self.path))
+        visitor.record_command(&format!("biome check --write {}", self.path))
     }
 }
 

@@ -2,7 +2,6 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: css/selector-list/selectors.css
 ---
-
 # Input
 
 ```css
@@ -326,27 +325,7 @@ ns|* {}
 ```diff
 --- Prettier
 +++ Biome
-@@ -21,15 +21,11 @@
- .asdasldaskdhjkashdahsdkjahskdjhakjsdkjahsdhkas
-   .asdasldaskdhjkashdahsdkjahskdjhakjsdkjahsdhkas {
- }
--.asdasldaskdhjkashdahsdkjahskdjhakjsdkjahsdhkas
--  .asdasldaskdhjkashdahsdkjahskdjhakjsdkjahsdhkas,
--.asdasldaskdhjkashdahsdkjahskdjhakjsdkjahsdhkas
--  .asdasldaskdhjkashdahsdkjahskdjhakjsdkjahsdhkas {
-+.asdasldaskdhjkashdahsdkjahskdjhakjsdkjahsdhkas.asdasldaskdhjkashdahsdkjahskdjhakjsdkjahsdhkas,
-+.asdasldaskdhjkashdahsdkjahskdjhakjsdkjahsdhkas.asdasldaskdhjkashdahsdkjahskdjhakjsdkjahsdhkas {
- }
--.asdasldaskdhjkashdahsdkjahskdjhakjsdkjahsdhkas
--  .asdasldaskdhjkashdahsdkjahskdjhakjsdkjahsdhkas,
--.asdasldaskdhjkashdahsdkjahskdjhakjsdkjahsdhkas
--  .asdasldaskdhjkashdahsdkjahskdjhakjsdkjahsdhkas {
-+.asdasldaskdhjkashdahsdkjahskdjhakjsdkjahsdhkas.asdasldaskdhjkashdahsdkjahskdjhakjsdkjahsdhkas,
-+.asdasldaskdhjkashdahsdkjahskdjhakjsdkjahsdhkas.asdasldaskdhjkashdahsdkjahskdjhakjsdkjahsdhkas {
- }
- 
- .parent,
-@@ -100,35 +96,37 @@
+@@ -100,35 +100,37 @@
  }
  .parent > .child {
  }
@@ -408,7 +387,7 @@ ns|* {}
  }
  .parent {
    > .child-one {
-@@ -167,35 +165,37 @@
+@@ -167,35 +169,37 @@
  }
  .parent + .child {
  }
@@ -470,7 +449,7 @@ ns|* {}
  }
  .parent {
    + .child-one {
-@@ -234,35 +234,37 @@
+@@ -234,35 +238,37 @@
  }
  .parent ~ .child {
  }
@@ -532,10 +511,12 @@ ns|* {}
  }
  .parent {
    ~ .child-one {
-@@ -295,71 +297,60 @@
+@@ -295,71 +301,60 @@
    }
  }
  
+-.parent >>> .child {
+-}
 -.parent >>> .child {
 -}
 -.parent >>> .child {
@@ -546,8 +527,6 @@ ns|* {}
 +  .child-one {}
 +  .child-two {}
  }
--.parent >>> .child {
--}
  .parent >>> {
 -  .child-one {
 -  }
@@ -643,7 +622,7 @@ ns|* {}
  }
  
  /* This matches all XHTML <a> elements, as XHTML is the default unprefixed namespace */
-@@ -374,7 +365,7 @@
+@@ -374,7 +369,7 @@
  *|a {
  }
  
@@ -680,11 +659,15 @@ ns|* {}
 .asdasldaskdhjkashdahsdkjahskdjhakjsdkjahsdhkas
   .asdasldaskdhjkashdahsdkjahskdjhakjsdkjahsdhkas {
 }
-.asdasldaskdhjkashdahsdkjahskdjhakjsdkjahsdhkas.asdasldaskdhjkashdahsdkjahskdjhakjsdkjahsdhkas,
-.asdasldaskdhjkashdahsdkjahskdjhakjsdkjahsdhkas.asdasldaskdhjkashdahsdkjahskdjhakjsdkjahsdhkas {
+.asdasldaskdhjkashdahsdkjahskdjhakjsdkjahsdhkas
+  .asdasldaskdhjkashdahsdkjahskdjhakjsdkjahsdhkas,
+.asdasldaskdhjkashdahsdkjahskdjhakjsdkjahsdhkas
+  .asdasldaskdhjkashdahsdkjahskdjhakjsdkjahsdhkas {
 }
-.asdasldaskdhjkashdahsdkjahskdjhakjsdkjahsdhkas.asdasldaskdhjkashdahsdkjahskdjhakjsdkjahsdhkas,
-.asdasldaskdhjkashdahsdkjahskdjhakjsdkjahsdhkas.asdasldaskdhjkashdahsdkjahskdjhakjsdkjahsdhkas {
+.asdasldaskdhjkashdahsdkjahskdjhakjsdkjahsdhkas
+  .asdasldaskdhjkashdahsdkjahskdjhakjsdkjahsdhkas,
+.asdasldaskdhjkashdahsdkjahskdjhakjsdkjahsdhkas
+  .asdasldaskdhjkashdahsdkjahskdjhakjsdkjahsdhkas {
 }
 
 .parent,
@@ -2160,11 +2143,5 @@ selectors.css:293:6 parse ━━━━━━━━━━━━━━━━━━
 
 # Lines exceeding max width of 80 characters
 ```
-   24: .asdasldaskdhjkashdahsdkjahskdjhakjsdkjahsdhkas.asdasldaskdhjkashdahsdkjahskdjhakjsdkjahsdhkas,
-   25: .asdasldaskdhjkashdahsdkjahskdjhakjsdkjahsdhkas.asdasldaskdhjkashdahsdkjahskdjhakjsdkjahsdhkas {
-   27: .asdasldaskdhjkashdahsdkjahskdjhakjsdkjahsdhkas.asdasldaskdhjkashdahsdkjahskdjhakjsdkjahsdhkas,
-   28: .asdasldaskdhjkashdahsdkjahskdjhakjsdkjahsdhkas.asdasldaskdhjkashdahsdkjahskdjhakjsdkjahsdhkas {
-  356: /* This matches all XHTML <a> elements, as XHTML is the default unprefixed namespace */
+  360: /* This matches all XHTML <a> elements, as XHTML is the default unprefixed namespace */
 ```
-
-

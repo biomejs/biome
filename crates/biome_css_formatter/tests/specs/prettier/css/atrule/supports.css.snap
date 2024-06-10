@@ -2,7 +2,6 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: css/atrule/supports.css
 ---
-
 # Input
 
 ```css
@@ -972,7 +971,7 @@ B
 ```
 supports.css:298:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected `)` but instead found `<`
+  × Expected a compound selector but instead found '<'.
   
     296 │ @supports selector(
     297 │ A
@@ -981,7 +980,14 @@ supports.css:298:1 parse ━━━━━━━━━━━━━━━━━━�
     299 │ B
     300 │ ) {}
   
-  i Remove <
+  i Expected a compound selector here.
+  
+    296 │ @supports selector(
+    297 │ A
+  > 298 │ <
+        │ ^
+    299 │ B
+    300 │ ) {}
   
 supports.css:300:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -1309,5 +1315,3 @@ supports.css:372:45 parse ━━━━━━━━━━━━━━━━━━
   214: @supports selector(.asdasldaskdhjkashdahsdkjahskdjhakjsdkjahsdhkas .asdasldaskdhjkashdahsdkjahskdjhakjsdkjahsdhkas
   216: .asdasldaskdhjkashdahsdkjahskdjhakjsdkjahsdhkas .asdasldaskdhjkashdahsdkjahskdjhakjsdkjahsdhkas){
 ```
-
-

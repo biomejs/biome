@@ -112,9 +112,9 @@ JSON Formatter:
 CSS Formatter:
   Enabled:                      false
   Indent style:                 Tab
-  Indent width:                 0
+  Indent width:                 2
   Line ending:                  Lf
-  Line width:                   LineWidth(80)
+  Line width:                   80
   Quote style:                  Double
 
 Server:

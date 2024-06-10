@@ -7,7 +7,7 @@ use crate::{
 };
 use biome_deserialize::StringSet;
 use biome_deserialize_macros::{Deserializable, Merge};
-use biome_formatter::{AttributePosition, LineEnding, LineWidth};
+use biome_formatter::{AttributePosition, IndentWidth, LineEnding, LineWidth};
 use bpaf::Bpaf;
 use serde::{Deserialize, Serialize};
 use std::str::FromStr;
@@ -110,12 +110,12 @@ pub struct OverrideFormatterConfiguration {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[deserializable(deprecated(use_instead = "formatter.indentWidth"))]
     #[bpaf(long("indent-size"), argument("NUMBER"), optional)]
-    pub indent_size: Option<u8>,
+    pub indent_size: Option<IndentWidth>,
 
     /// The size of the indentation, 2 by default
     #[serde(skip_serializing_if = "Option::is_none")]
     #[bpaf(long("indent-width"), argument("NUMBER"), optional)]
-    pub indent_width: Option<u8>,
+    pub indent_width: Option<IndentWidth>,
 
     /// The type of line ending.
     #[serde(skip_serializing_if = "Option::is_none")]

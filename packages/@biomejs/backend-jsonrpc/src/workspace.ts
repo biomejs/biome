@@ -135,7 +135,7 @@ export interface PartialFormatterConfiguration {
 	/**
 	 * The size of the indentation, 2 by default (deprecated, use `indent-width`)
 	 */
-	indentSize?: number;
+	indentSize?: IndentWidth;
 	/**
 	 * The indent style.
 	 */
@@ -143,7 +143,7 @@ export interface PartialFormatterConfiguration {
 	/**
 	 * The size of the indentation, 2 by default
 	 */
-	indentWidth?: number;
+	indentWidth?: IndentWidth;
 	/**
 	 * The type of line ending.
 	 */
@@ -273,7 +273,7 @@ export interface PartialCssFormatter {
 	/**
 	 * The size of the indentation applied to CSS (and its super languages) files. Default to 2.
 	 */
-	indentWidth?: number;
+	indentWidth?: IndentWidth;
 	/**
 	 * The type of line ending applied to CSS (and its super languages) files.
 	 */
@@ -310,6 +310,7 @@ export interface PartialCssParser {
 	cssModules?: boolean;
 }
 export type AttributePosition = "auto" | "multiline";
+export type IndentWidth = number;
 export type PlainIndentStyle = "tab" | "space";
 export type LineEnding = "lf" | "crlf" | "cr";
 /**
@@ -345,7 +346,7 @@ export interface PartialJavascriptFormatter {
 	/**
 	 * The size of the indentation applied to JavaScript (and its super languages) files. Default to 2.
 	 */
-	indentSize?: number;
+	indentSize?: IndentWidth;
 	/**
 	 * The indent style applied to JavaScript (and its super languages) files.
 	 */
@@ -353,7 +354,7 @@ export interface PartialJavascriptFormatter {
 	/**
 	 * The size of the indentation applied to JavaScript (and its super languages) files. Default to 2.
 	 */
-	indentWidth?: number;
+	indentWidth?: IndentWidth;
 	/**
 	 * The type of quotes used in JSX. Defaults to double.
 	 */
@@ -420,7 +421,7 @@ export interface PartialJsonFormatter {
 	/**
 	 * The size of the indentation applied to JSON (and its super languages) files. Default to 2.
 	 */
-	indentSize?: number;
+	indentSize?: IndentWidth;
 	/**
 	 * The indent style applied to JSON (and its super languages) files.
 	 */
@@ -428,7 +429,7 @@ export interface PartialJsonFormatter {
 	/**
 	 * The size of the indentation applied to JSON (and its super languages) files. Default to 2.
 	 */
-	indentWidth?: number;
+	indentWidth?: IndentWidth;
 	/**
 	 * The type of line ending applied to JSON (and its super languages) files.
 	 */
@@ -1054,6 +1055,10 @@ export interface Nursery {
 	 */
 	noUnknownProperty?: RuleConfiguration_for_Null;
 	/**
+	 * Disallow unknown pseudo-class selectors.
+	 */
+	noUnknownPseudoClassSelector?: RuleConfiguration_for_Null;
+	/**
 	 * Disallow unknown pseudo-element selectors.
 	 */
 	noUnknownSelectorPseudoElement?: RuleConfiguration_for_Null;
@@ -1635,7 +1640,7 @@ export interface OverrideFormatterConfiguration {
 	/**
 	 * The size of the indentation, 2 by default (deprecated, use `indent-width`)
 	 */
-	indentSize?: number;
+	indentSize?: IndentWidth;
 	/**
 	 * The indent style.
 	 */
@@ -1643,7 +1648,7 @@ export interface OverrideFormatterConfiguration {
 	/**
 	 * The size of the indentation, 2 by default
 	 */
-	indentWidth?: number;
+	indentWidth?: IndentWidth;
 	/**
 	 * The type of line ending.
 	 */
@@ -2349,6 +2354,7 @@ export type Category =
 	| "lint/nursery/noUnknownFunction"
 	| "lint/nursery/noUnknownMediaFeatureName"
 	| "lint/nursery/noUnknownProperty"
+	| "lint/nursery/noUnknownPseudoClassSelector"
 	| "lint/nursery/noUnknownSelectorPseudoElement"
 	| "lint/nursery/noUnknownUnit"
 	| "lint/nursery/noUnmatchableAnbSelector"

@@ -2,7 +2,6 @@
 source: crates/biome_css_parser/tests/spec_test.rs
 expression: snapshot
 ---
-
 ## Input
 
 ```css
@@ -207,7 +206,7 @@ CssRoot {
                     CssDeclarationWithSemicolon {
                         declaration: CssDeclaration {
                             property: CssGenericProperty {
-                                name: CssIdentifier {
+                                name: CssDashedIdentifier {
                                     value_token: IDENT@298..363 "--custom-property" [Newline("\n"), Newline("\n"), Whitespace("    "), Comments("/* Custom property, a ..."), Newline("\n"), Whitespace("    ")] [],
                                 },
                                 colon_token: COLON@363..365 ":" [] [Whitespace(" ")],
@@ -227,7 +226,7 @@ CssRoot {
                     CssDeclarationWithSemicolon {
                         declaration: CssDeclaration {
                             property: CssGenericProperty {
-                                name: CssIdentifier {
+                                name: CssDashedIdentifier {
                                     value_token: IDENT@373..395 "--custom-property" [Newline("\n"), Whitespace("    ")] [],
                                 },
                                 colon_token: COLON@395..397 ":" [] [Whitespace(" ")],
@@ -244,7 +243,7 @@ CssRoot {
                     CssDeclarationWithSemicolon {
                         declaration: CssDeclaration {
                             property: CssGenericProperty {
-                                name: CssIdentifier {
+                                name: CssDashedIdentifier {
                                     value_token: IDENT@407..429 "--custom-property" [Newline("\n"), Whitespace("    ")] [],
                                 },
                                 colon_token: COLON@429..431 ":" [] [Whitespace(" ")],
@@ -264,7 +263,7 @@ CssRoot {
                     CssDeclarationWithSemicolon {
                         declaration: CssDeclaration {
                             property: CssGenericProperty {
-                                name: CssIdentifier {
+                                name: CssDashedIdentifier {
                                     value_token: IDENT@447..469 "--custom-property" [Newline("\n"), Whitespace("    ")] [],
                                 },
                                 colon_token: COLON@469..471 ":" [] [Whitespace(" ")],
@@ -287,7 +286,7 @@ CssRoot {
                     CssDeclarationWithSemicolon {
                         declaration: CssDeclaration {
                             property: CssGenericProperty {
-                                name: CssIdentifier {
+                                name: CssDashedIdentifier {
                                     value_token: IDENT@489..511 "--custom-property" [Newline("\n"), Whitespace("    ")] [],
                                 },
                                 colon_token: COLON@511..513 ":" [] [Whitespace(" ")],
@@ -316,7 +315,7 @@ CssRoot {
                     CssDeclarationWithSemicolon {
                         declaration: CssDeclaration {
                             property: CssGenericProperty {
-                                name: CssIdentifier {
+                                name: CssDashedIdentifier {
                                     value_token: IDENT@540..562 "--custom-property" [Newline("\n"), Whitespace("    ")] [],
                                 },
                                 colon_token: COLON@562..564 ":" [] [Whitespace(" ")],
@@ -622,7 +621,7 @@ CssRoot {
           6: CSS_DECLARATION_WITH_SEMICOLON@298..373
             0: CSS_DECLARATION@298..372
               0: CSS_GENERIC_PROPERTY@298..372
-                0: CSS_IDENTIFIER@298..363
+                0: CSS_DASHED_IDENTIFIER@298..363
                   0: IDENT@298..363 "--custom-property" [Newline("\n"), Newline("\n"), Whitespace("    "), Comments("/* Custom property, a ..."), Newline("\n"), Whitespace("    ")] []
                 1: COLON@363..365 ":" [] [Whitespace(" ")]
                 2: CSS_GENERIC_COMPONENT_VALUE_LIST@365..372
@@ -635,7 +634,7 @@ CssRoot {
           7: CSS_DECLARATION_WITH_SEMICOLON@373..407
             0: CSS_DECLARATION@373..406
               0: CSS_GENERIC_PROPERTY@373..406
-                0: CSS_IDENTIFIER@373..395
+                0: CSS_DASHED_IDENTIFIER@373..395
                   0: IDENT@373..395 "--custom-property" [Newline("\n"), Whitespace("    ")] []
                 1: COLON@395..397 ":" [] [Whitespace(" ")]
                 2: CSS_GENERIC_COMPONENT_VALUE_LIST@397..406
@@ -646,7 +645,7 @@ CssRoot {
           8: CSS_DECLARATION_WITH_SEMICOLON@407..447
             0: CSS_DECLARATION@407..446
               0: CSS_GENERIC_PROPERTY@407..446
-                0: CSS_IDENTIFIER@407..429
+                0: CSS_DASHED_IDENTIFIER@407..429
                   0: IDENT@407..429 "--custom-property" [Newline("\n"), Whitespace("    ")] []
                 1: COLON@429..431 ":" [] [Whitespace(" ")]
                 2: CSS_GENERIC_COMPONENT_VALUE_LIST@431..446
@@ -659,7 +658,7 @@ CssRoot {
           9: CSS_DECLARATION_WITH_SEMICOLON@447..489
             0: CSS_DECLARATION@447..488
               0: CSS_GENERIC_PROPERTY@447..488
-                0: CSS_IDENTIFIER@447..469
+                0: CSS_DASHED_IDENTIFIER@447..469
                   0: IDENT@447..469 "--custom-property" [Newline("\n"), Whitespace("    ")] []
                 1: COLON@469..471 ":" [] [Whitespace(" ")]
                 2: CSS_GENERIC_COMPONENT_VALUE_LIST@471..488
@@ -674,7 +673,7 @@ CssRoot {
           10: CSS_DECLARATION_WITH_SEMICOLON@489..540
             0: CSS_DECLARATION@489..539
               0: CSS_GENERIC_PROPERTY@489..539
-                0: CSS_IDENTIFIER@489..511
+                0: CSS_DASHED_IDENTIFIER@489..511
                   0: IDENT@489..511 "--custom-property" [Newline("\n"), Whitespace("    ")] []
                 1: COLON@511..513 ":" [] [Whitespace(" ")]
                 2: CSS_GENERIC_COMPONENT_VALUE_LIST@513..539
@@ -693,7 +692,7 @@ CssRoot {
           11: CSS_DECLARATION_WITH_SEMICOLON@540..597
             0: CSS_DECLARATION@540..596
               0: CSS_GENERIC_PROPERTY@540..596
-                0: CSS_IDENTIFIER@540..562
+                0: CSS_DASHED_IDENTIFIER@540..562
                   0: IDENT@540..562 "--custom-property" [Newline("\n"), Whitespace("    ")] []
                 1: COLON@562..564 ":" [] [Whitespace(" ")]
                 2: CSS_GENERIC_COMPONENT_VALUE_LIST@564..596
@@ -814,5 +813,3 @@ CssRoot {
   2: EOF@827..827 "" [] []
 
 ```
-
-

@@ -1,0 +1,37 @@
+a:hover { }
+a:Hover { }
+a:hOvEr { }
+a:HOVER { }
+a:focus-visible { }
+a:before { }
+a::before { }
+:modal { }
+input:not([type='submit']) { }
+:matches(section, article, aside, nav) h1 { }
+a:has(> img) { }
+section:has(h1, h2, h3, h4, h5, h6) { }
+:root { }
+p:has(img):not(:has(:not(img))) { }
+div.sidebar:has(*:nth-child(5)):not(:has(*:nth-child(6))) { }
+div :nth-child(2 of .widget) { }
+a:hover::before { }
+a:-moz-placeholder { }
+a,
+b > .foo:hover { }
+:--heading { }
+::-webkit-scrollbar-thumb:window-inactive { }
+::selection:window-inactive { }
+@page :first { }
+@page :blank:left { }
+@page foo:left { }
+body:not(div):not(span) {}
+:root { --foo: 1px; }
+html { --foo: 1px; }
+:root { --custom-property-set: {} }
+html { --custom-property-set: {} }
+::-webkit-scrollbar-button:horizontal:decrement {}
+.test::-webkit-scrollbar-button:horizontal:decrement {}
+a:defined { }
+*:is(*) { }
+:popover-open {}
+:seeking, :stalled, :buffering, :volume-locked, :muted {}

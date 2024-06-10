@@ -1,6 +1,6 @@
 use crate::parser::CssParser;
 
-use crate::syntax::block::parse_rule_block;
+use crate::syntax::block::parse_conditional_block;
 use crate::syntax::parse_error::expected_identifier;
 use crate::syntax::parse_regular_identifier;
 use biome_css_syntax::CssSyntaxKind::*;
@@ -37,18 +37,15 @@ pub(crate) fn parse_any_layer(p: &mut CssParser) -> CompletedMarker {
 
     LayerReferenceList.parse_list(p);
 
-    if p.at(T!['{']) {
-        parse_rule_block(p);
-        m.complete(p, CSS_LAYER_DECLARATION)
+    let kind = if p.at(T!['{']) {
+        parse_conditional_block(p);
+        CSS_LAYER_DECLARATION
+    } else if p.expect(T![;]) {
+        CSS_LAYER_REFERENCE
     } else {
-        let kind = if p.expect(T![;]) {
-            CSS_LAYER_REFERENCE
-        } else {
-            CSS_BOGUS_LAYER
-        };
-
-        m.complete(p, kind)
-    }
+        CSS_BOGUS_LAYER
+    };
+    m.complete(p, kind)
 }
 
 const LAYER_REFERENCE_LIST_END_SET: TokenSet<CssSyntaxKind> = token_set!(T!['{'], T![;]);

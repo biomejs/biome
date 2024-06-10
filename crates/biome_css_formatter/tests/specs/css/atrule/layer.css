@@ -18,7 +18,7 @@ framework
 }
 
 @layer   {}
-@layer { 
+@layer {
     }
 
 @layer
@@ -64,5 +64,14 @@ reset.type
 
 	@layer theme {
 		h1, h2 { color: maroon; }
+	}
+}
+
+@layer reSet, MyLayer;
+
+@layer reSet, MyLayer {
+	audio[controls] {
+		/* specificity of 0,1,1 - explicit "reset" layer */
+		display: block;
 	}
 }

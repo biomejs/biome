@@ -360,6 +360,8 @@ pub const CSS_KINDS_SRC: KindsSrc = KindsSrc {
         "CSS_URL_MODIFIER_LIST",
         "CSS_COLOR",
         "CSS_BORDER",
+        "CSS_BRACKETED_VALUE",
+        "CSS_BRACKETED_VALUE_LIST",
         // At rule nodes
         "CSS_AT_RULE",
         "CSS_CHARSET_AT_RULE",
@@ -465,6 +467,9 @@ pub const CSS_KINDS_SRC: KindsSrc = KindsSrc {
         "CSS_VALUE_AT_RULE_DECLARATION_CLAUSE",
         "CSS_VALUE_AT_RULE_GENERIC_PROPERTY",
         "CSS_VALUE_AT_RULE_GENERIC_VALUE",
+        "CSS_UNKNOWN_BLOCK_AT_RULE",
+        "CSS_UNKNOWN_VALUE_AT_RULE",
+        "CSS_UNKNOWN_AT_RULE_COMPONENT_LIST",
         // Bogus nodes
         "CSS_BOGUS",
         "CSS_BOGUS_BLOCK",

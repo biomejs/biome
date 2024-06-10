@@ -2,7 +2,6 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: css/yaml/yaml.css
 ---
-
 # Input
 
 ```css
@@ -67,22 +66,9 @@ yaml.css:1:1 parse ━━━━━━━━━━━━━━━━━━━━�
     2 │ title: Title
     3 │ description: Description
   
-yaml.css:3:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `description`
-  
-    1 │ ---
-    2 │ title: Title
-  > 3 │ description: Description
-      │ ^^^^^^^^^^^
-    4 │ ---
-    5 │ 
-  
-  i Remove description
-  
 yaml.css:4:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected `,` but instead found `-`
+  × Expected a compound selector but instead found '-'.
   
     2 │ title: Title
     3 │ description: Description
@@ -91,7 +77,14 @@ yaml.css:4:1 parse ━━━━━━━━━━━━━━━━━━━━�
     5 │ 
     6 │ a {
   
-  i Remove -
+  i Expected a compound selector here.
+  
+    2 │ title: Title
+    3 │ description: Description
+  > 4 │ ---
+      │ ^
+    5 │ 
+    6 │ a {
   
 yaml.css:4:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -108,5 +101,3 @@ yaml.css:4:3 parse ━━━━━━━━━━━━━━━━━━━━�
   
 
 ```
-
-

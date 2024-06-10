@@ -6,6 +6,14 @@ export interface I {
 	set p2(x: number)
 
 	m1(): void
+
+	"p3": number
+
+	get "p4"(): number
+
+	set "p4"(x: number)
+
+	"m2"(): void
 }
 
 export type T = {
@@ -16,4 +24,12 @@ export type T = {
 	set p2(x: number)
 
 	m1(): void
+
+	"p3": number
+
+	get "p4"(): number
+
+	set "p4"(x: number)
+
+	"m2"(): void
 }

@@ -2857,9 +2857,6 @@ pub struct Nursery {
     #[doc = "Disallow specified modules when loaded by import or require."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_restricted_imports: Option<RuleConfiguration<NoRestrictedImports>>,
-    #[doc = "Disallow shorthand properties that override related longhand properties."]
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_shorthand_property_overrides: Option<RuleConfiguration<NoShorthandPropertyOverrides>>,
     #[doc = "Disallow the use of dependencies that aren't specified in the package.json."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_undeclared_dependencies: Option<RuleConfiguration<NoUndeclaredDependencies>>,
@@ -2872,6 +2869,9 @@ pub struct Nursery {
     #[doc = "Disallow unknown properties."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_unknown_property: Option<RuleConfiguration<NoUnknownProperty>>,
+    #[doc = "Disallow unknown pseudo-class selectors."]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub no_unknown_pseudo_class_selector: Option<RuleConfiguration<NoUnknownPseudoClassSelector>>,
     #[doc = "Disallow unknown pseudo-element selectors."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_unknown_selector_pseudo_element:
@@ -2978,11 +2978,11 @@ impl Nursery {
         "noMisplacedAssertion",
         "noReactSpecificProps",
         "noRestrictedImports",
-        "noShorthandPropertyOverrides",
         "noUndeclaredDependencies",
         "noUnknownFunction",
         "noUnknownMediaFeatureName",
         "noUnknownProperty",
+        "noUnknownPseudoClassSelector",
         "noUnknownSelectorPseudoElement",
         "noUnknownUnit",
         "noUnmatchableAnbSelector",
@@ -3018,8 +3018,8 @@ impl Nursery {
         "noImportantInKeyframe",
         "noInvalidPositionAtImportRule",
         "noLabelWithoutControl",
-        "noShorthandPropertyOverrides",
         "noUnknownFunction",
+        "noUnknownPseudoClassSelector",
         "noUnknownSelectorPseudoElement",
         "noUnknownUnit",
         "noUnmatchableAnbSelector",
@@ -3038,8 +3038,8 @@ impl Nursery {
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[9]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[10]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[11]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[15]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[17]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[16]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[19]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[20]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[21]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[22]),
@@ -3182,27 +3182,27 @@ impl Nursery {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[14]));
             }
         }
-        if let Some(rule) = self.no_shorthand_property_overrides.as_ref() {
+        if let Some(rule) = self.no_undeclared_dependencies.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[15]));
             }
         }
-        if let Some(rule) = self.no_undeclared_dependencies.as_ref() {
+        if let Some(rule) = self.no_unknown_function.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[16]));
             }
         }
-        if let Some(rule) = self.no_unknown_function.as_ref() {
+        if let Some(rule) = self.no_unknown_media_feature_name.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[17]));
             }
         }
-        if let Some(rule) = self.no_unknown_media_feature_name.as_ref() {
+        if let Some(rule) = self.no_unknown_property.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[18]));
             }
         }
-        if let Some(rule) = self.no_unknown_property.as_ref() {
+        if let Some(rule) = self.no_unknown_pseudo_class_selector.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[19]));
             }
@@ -3401,27 +3401,27 @@ impl Nursery {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[14]));
             }
         }
-        if let Some(rule) = self.no_shorthand_property_overrides.as_ref() {
+        if let Some(rule) = self.no_undeclared_dependencies.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[15]));
             }
         }
-        if let Some(rule) = self.no_undeclared_dependencies.as_ref() {
+        if let Some(rule) = self.no_unknown_function.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[16]));
             }
         }
-        if let Some(rule) = self.no_unknown_function.as_ref() {
+        if let Some(rule) = self.no_unknown_media_feature_name.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[17]));
             }
         }
-        if let Some(rule) = self.no_unknown_media_feature_name.as_ref() {
+        if let Some(rule) = self.no_unknown_property.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[18]));
             }
         }
-        if let Some(rule) = self.no_unknown_property.as_ref() {
+        if let Some(rule) = self.no_unknown_pseudo_class_selector.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[19]));
             }
@@ -3637,10 +3637,6 @@ impl Nursery {
                 .no_restricted_imports
                 .as_ref()
                 .map(|conf| (conf.level(), conf.get_options())),
-            "noShorthandPropertyOverrides" => self
-                .no_shorthand_property_overrides
-                .as_ref()
-                .map(|conf| (conf.level(), conf.get_options())),
             "noUndeclaredDependencies" => self
                 .no_undeclared_dependencies
                 .as_ref()
@@ -3655,6 +3651,10 @@ impl Nursery {
                 .map(|conf| (conf.level(), conf.get_options())),
             "noUnknownProperty" => self
                 .no_unknown_property
+                .as_ref()
+                .map(|conf| (conf.level(), conf.get_options())),
+            "noUnknownPseudoClassSelector" => self
+                .no_unknown_pseudo_class_selector
                 .as_ref()
                 .map(|conf| (conf.level(), conf.get_options())),
             "noUnknownSelectorPseudoElement" => self

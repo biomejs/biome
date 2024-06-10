@@ -20,4 +20,6 @@ pub(crate) mod property_at_rule;
 pub(crate) mod scope_at_rule;
 pub(crate) mod starting_style_at_rule;
 pub(crate) mod supports_at_rule;
+pub(crate) mod unknown_block_at_rule;
+pub(crate) mod unknown_value_at_rule;
 pub(crate) mod value_at_rule;
