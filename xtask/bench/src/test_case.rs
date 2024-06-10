@@ -36,8 +36,12 @@ impl TestCase {
         .nth(2)
         .unwrap()
         .join("target")
-        .join(format!("{filename}_{}", calculate_hash(&filename.to_string())));
-        
+        // cache the file name to avoid to save files that have the same name, but they come from different repos
+        .join(format!(
+            "{filename}_{}",
+            calculate_hash(&filename.to_string())
+        ));
+
         let content = std::fs::read_to_string(&path)
             .map_err(err_to_string)
             .or_else(|_| {
