@@ -28,7 +28,7 @@ fn bench_json_parser(criterion: &mut Criterion) {
 
         match test_case {
             Ok(test_case) => {
-                bench_parser_group(&mut group, test_case);
+                bench_parser_group(&mut group, test_case, false);
             }
             Err(e) => println!("{e:?}"),
         }

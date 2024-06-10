@@ -26,15 +26,19 @@ pub fn err_to_string<E: std::fmt::Debug>(e: E) -> String {
     format!("{e:?}")
 }
 
-pub fn bench_parser_group(group: &mut BenchmarkGroup<WallTime>, test_case: TestCase) {
+pub fn bench_parser_group(group: &mut BenchmarkGroup<WallTime>, test_case: TestCase, use_hash: bool) {
     let parse = Parse::try_from_case(&test_case).expect("Supported language");
 
     let code = test_case.code();
 
     group.throughput(Throughput::Bytes(code.len() as u64));
-
+    let id = if use_hash {
+        test_case.filename_hash().to_string()
+    } else {
+        test_case.filename().to_string()
+    };
     group.bench_with_input(
-        BenchmarkId::new(test_case.filename(), "uncached"),
+        BenchmarkId::new(id, "uncached"),
         &code,
         |b, _| {
             b.iter(|| {

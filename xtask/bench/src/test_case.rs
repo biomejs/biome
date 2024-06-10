@@ -1,13 +1,21 @@
 use crate::err_to_string;
 use ansi_rgb::{red, Foreground};
 use std::env;
+use std::hash::{DefaultHasher, Hash, Hasher};
 use std::path::{Path, PathBuf};
 use std::str::FromStr;
 
+#[derive(Hash)]
 pub struct TestCase {
     code: String,
     id: String,
     path: PathBuf,
+}
+
+fn calculate_hash<T: Hash>(t: &T) -> u64 {
+    let mut s = DefaultHasher::new();
+    t.hash(&mut s);
+    s.finish()
 }
 
 impl TestCase {
@@ -67,6 +75,10 @@ impl TestCase {
 
     pub fn filename(&self) -> &str {
         &self.id
+    }
+    
+    pub fn filename_hash(&self) -> String  {
+        format!("{}_{}", self.filename(), calculate_hash(&self))
     }
 
     pub fn path(&self) -> &Path {

@@ -28,7 +28,8 @@ fn bench_css_parser(criterion: &mut Criterion) {
 
         match test_case {
             Ok(test_case) => {
-                bench_parser_group(&mut group, test_case);
+                // use hashing, all files are the same
+                bench_parser_group(&mut group, test_case, true);
             }
             Err(e) => println!("{e:?}"),
         }
