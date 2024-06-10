@@ -27,9 +27,11 @@ declare_rule! {
     /// ### Valid
     ///
     /// ```jsx
-    /// <div>...</div>
-    /// <header>...</header>
-    /// <img alt="" src="image.jpg" />
+    /// <>
+    ///  <div></div>
+    ///  <header></header>
+    ///  <img alt="" src="image.jpg" />
+    /// </>
     /// ```
     ///
     pub UseSemanticElements {

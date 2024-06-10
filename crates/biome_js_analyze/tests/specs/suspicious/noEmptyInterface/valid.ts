@@ -7,6 +7,7 @@ interface Baz extends Foo, Bar {}
 // See https://github.com/biomejs/biome/issues/959
 declare module "external" {
   export interface App extends Services {}
+  export interface Empty {}
 
   global {
     export interface App extends Services {}

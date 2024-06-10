@@ -50,12 +50,12 @@ class C {
 }
 
 class D {
-  fooB(s: string): void;
-  fooB(s: string): void;
-  barB(): void {};
-  fooB(n: number): void;
-  fooB(sn: string | number): void {};
-  fooB(sn: string | number): void {};
+  fooD(s: string): void;
+  fooD(s: string): void;
+  barD(): void {};
+  fooD(n: number): void;
+  fooD(sn: string | number): void {};
+  fooD(sn: string | number): void {};
 }
 
 export function foo(s: string): void;
@@ -200,14 +200,14 @@ invalid.ts:40:3 lint/nursery/useAdjacentOverloadSignatures ━━━━━━━
 ```
 invalid.ts:50:3 lint/nursery/useAdjacentOverloadSignatures ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! All fooB signatures must be adjacent.
+  ! All fooD signatures must be adjacent.
   
-    48 │   fooB(s: string): void;
-    49 │   barB(): void {};
-  > 50 │   fooB(n: number): void;
+    48 │   fooD(s: string): void;
+    49 │   barD(): void {};
+  > 50 │   fooD(n: number): void;
        │   ^^^^
-    51 │   fooB(sn: string | number): void {};
-    52 │   fooB(sn: string | number): void {};
+    51 │   fooD(sn: string | number): void {};
+    52 │   fooD(sn: string | number): void {};
   
 
 ```

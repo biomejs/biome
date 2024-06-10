@@ -2,7 +2,6 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: css/atrule/layer.css
 ---
-
 # Input
 
 ```css
@@ -26,7 +25,7 @@ framework
 }
 
 @layer   {}
-@layer { 
+@layer {
     }
 
 @layer
@@ -72,6 +71,15 @@ reset.type
 
 	@layer theme {
 		h1, h2 { color: maroon; }
+	}
+}
+
+@layer reSet, MyLayer;
+
+@layer reSet, MyLayer {
+	audio[controls] {
+		/* specificity of 0,1,1 - explicit "reset" layer */
+		display: block;
 	}
 }
 
@@ -185,6 +193,13 @@ Quote style: Double Quotes
 		}
 	}
 }
+
+@layer reSet, MyLayer;
+
+@layer reSet, MyLayer {
+	audio[controls] {
+		/* specificity of 0,1,1 - explicit "reset" layer */
+		display: block;
+	}
+}
 ```
-
-

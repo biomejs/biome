@@ -25,22 +25,22 @@ declare_rule! {
     ///
     /// ### Invalid
     ///
-    /// ```js,expect_diagnostic
+    /// ```js,expect_diagnostic,ignore
     /// import "./foo";
     /// ```
-    /// ```js,expect_diagnostic
+    /// ```js,expect_diagnostic,ignore
     /// import "./bar/";
     /// ```
-    /// ```js,expect_diagnostic
+    /// ```js,expect_diagnostic,ignore
     /// import "../";
     /// ```
-    /// ```js,expect_diagnostic
+    /// ```js,expect_diagnostic,ignore
     /// import "../.";
     /// ```
-    /// ```js,expect_diagnostic
+    /// ```js,expect_diagnostic,ignore
     /// import("./foo");
     /// ```
-    /// ```js,expect_diagnostic
+    /// ```js,expect_diagnostic,ignore
     /// require("./foo");
     /// ```
     ///

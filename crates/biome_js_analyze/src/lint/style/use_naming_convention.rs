@@ -400,8 +400,9 @@ declare_rule! {
     ///
     /// In the following example:
     ///
-    /// - We require `static readonly` class members to be in [`CONSTANT_CASE`].
-    /// - We require `private` class members to start with an underscore `_` and to be in [`camelCase`].
+    /// - We require `private` class members to start with an underscore `_`.
+    /// - We require `static readonly` class properties to be in [`CONSTANT_CASE`].
+    ///   A `private static readonly` property must also start with an underscore as dictated by the previous convention.
     /// - We require global constants to be in [`CONSTANT_CASE`] and
     ///   we allow these constants to be enclosed by double underscores or to be named `_SPECIAL_`.
     /// - We require interfaces to start with `I`, except for interfaces ending with `Error`,
@@ -410,23 +411,21 @@ declare_rule! {
     ///
     ///```json5
     /// {
-    ///     "//": "...",
+    ///     // ...
     ///     "options": {
     ///         "conventions": [
     ///             {
     ///                 "selector": {
     ///                     "kind": "classMember",
+    ///                     "modifiers": ["private"]
+    ///                 },
+    ///                 "match": "_(.+)"
+    ///             }, {
+    ///                 "selector": {
+    ///                     "kind": "classProperty",
     ///                     "modifiers": ["static", "readonly"]
     ///                 },
     ///                 "formats": ["CONSTANT_CASE"]
-    ///             },
-    ///             {
-    ///                 "selector": {
-    ///                     "kind": "classMember",
-    ///                     "modifiers": ["private"]
-    ///                 },
-    ///                 "match": "_(.+)",
-    ///                 "formats": ["camelCase"]
     ///             }, {
     ///                 "selector": {
     ///                     "kind": "const",

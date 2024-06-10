@@ -335,7 +335,7 @@ st.css");
 @import url("./test.css") screen and (min-width: 400px);
 @import url("./test.css") layer(default) supports(display: flex)
 	screen and (min-width: 400px);
-@import url("./test.css") layer(default) supports(display: flex)
+@import url("./test.css") layer(DEFAULT) supports(display: flex)
 	screen and (min-width: 400px);
 @import url("./test.css") /* Comment */
 	layer(/* Comment */ /* Comment */ default) /* Comment */

@@ -2,7 +2,6 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: css/case/case.css
 ---
-
 # Input
 
 ```css
@@ -77,15 +76,13 @@ x-panel {
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,4 +1,6 @@
+@@ -1,4 +1,4 @@
 -@custom-media --KeepName (min-width: 500px);
-+@
-+custom-media --KeepName (MIN-WIDTH: 500PX)
-+;
++@custom-media --KeepName (MIN-WIDTH: 500PX);
  
  .foo {
    color: hsl(0.75turn, 60%, 70%);
-@@ -22,7 +24,7 @@
+@@ -22,7 +22,7 @@
    background-color: orange;
  }
  
@@ -94,7 +91,7 @@ x-panel {
  }
  
  /* apply a dashed border to all unresolved elements */
-@@ -53,7 +55,7 @@
+@@ -53,7 +53,7 @@
    max-width: 500px;
    margin: 0 auto;
    border-radius: 8px;
@@ -108,9 +105,7 @@ x-panel {
 # Output
 
 ```css
-@
-custom-media --KeepName (MIN-WIDTH: 500PX)
-;
+@custom-media --KeepName (MIN-WIDTH: 500PX);
 
 .foo {
   color: hsl(0.75turn, 60%, 70%);
@@ -174,157 +169,3 @@ x-panel {
   transform: scale(1.1);
 }
 ```
-
-# Errors
-```
-case.css:1:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Unexpected value or character.
-  
-  > 1 │ @custom-media --KeepName (MIN-WIDTH: 500PX);
-      │  ^^^^^^^^^^^^
-    2 │ 
-    3 │ .foo {
-  
-  i Expected one of:
-  
-  - charset
-  - color-profile
-  - container
-  - counter-style
-  - document
-  - font-face
-  - font-feature-values
-  - font-palette-values
-  - import
-  - keyframes
-  - layer
-  - media
-  - namespace
-  - page
-  - property
-  - supports
-  - viewport
-  - scope
-  
-case.css:1:26 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Expected a compound selector but instead found '('.
-  
-  > 1 │ @custom-media --KeepName (MIN-WIDTH: 500PX);
-      │                          ^
-    2 │ 
-    3 │ .foo {
-  
-  i Expected a compound selector here.
-  
-  > 1 │ @custom-media --KeepName (MIN-WIDTH: 500PX);
-      │                          ^
-    2 │ 
-    3 │ .foo {
-  
-case.css:1:27 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `MIN-WIDTH`
-  
-  > 1 │ @custom-media --KeepName (MIN-WIDTH: 500PX);
-      │                           ^^^^^^^^^
-    2 │ 
-    3 │ .foo {
-  
-  i Remove MIN-WIDTH
-  
-case.css:1:38 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Unexpected value or character.
-  
-  > 1 │ @custom-media --KeepName (MIN-WIDTH: 500PX);
-      │                                      ^^^
-    2 │ 
-    3 │ .foo {
-  
-  i Expected one of:
-  
-  - hover
-  - focus
-  - active
-  - first-child
-  - last-child
-  - nth-child
-  - nth-last-child
-  - first-of-type
-  - last-of-type
-  - nth-of-type
-  - nth-last-of-type
-  - only-child
-  - only-of-type
-  - checked
-  - disabled
-  - enabled
-  - required
-  - optional
-  - valid
-  - invalid
-  - in-range
-  - out-of-range
-  - read-only
-  - read-write
-  - placeholder-shown
-  - default
-  - checked
-  - indeterminate
-  - blank
-  - empty
-  - root
-  - target
-  - lang
-  - not
-  - is
-  - where
-  - fullscreen
-  - link
-  - visited
-  - any-link
-  - local-link
-  - scope
-  - current
-  - past
-  - future
-  
-case.css:1:41 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `PX`
-  
-  > 1 │ @custom-media --KeepName (MIN-WIDTH: 500PX);
-      │                                         ^^
-    2 │ 
-    3 │ .foo {
-  
-  i Remove PX
-  
-case.css:1:43 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `)`
-  
-  > 1 │ @custom-media --KeepName (MIN-WIDTH: 500PX);
-      │                                           ^
-    2 │ 
-    3 │ .foo {
-  
-  i Remove )
-  
-case.css:1:44 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `;`
-  
-  > 1 │ @custom-media --KeepName (MIN-WIDTH: 500PX);
-      │                                            ^
-    2 │ 
-    3 │ .foo {
-  
-  i Remove ;
-  
-
-```
-
-

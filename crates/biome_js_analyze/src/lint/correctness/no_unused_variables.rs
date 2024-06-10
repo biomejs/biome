@@ -97,6 +97,7 @@ declare_rule! {
         sources: &[
             RuleSource::Eslint("no-unused-vars"),
             RuleSource::EslintTypeScript("no-unused-vars"),
+            RuleSource::EslintUnusedImports("no-unused-vars")
         ],
         recommended: false,
         fix_kind: FixKind::Unsafe,

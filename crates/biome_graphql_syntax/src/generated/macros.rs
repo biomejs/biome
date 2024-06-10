@@ -67,11 +67,6 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::GraphqlEnumTypeExtension::new_unchecked(node) };
                     $body
                 }
-                $crate::GraphqlSyntaxKind::GRAPHQL_ENUM_TYPE_EXTENSION_WITH_VALUES => {
-                    let $pattern =
-                        unsafe { $crate::GraphqlEnumTypeExtensionWithValues::new_unchecked(node) };
-                    $body
-                }
                 $crate::GraphqlSyntaxKind::GRAPHQL_ENUM_VALUE => {
                     let $pattern = unsafe { $crate::GraphqlEnumValue::new_unchecked(node) };
                     $body
@@ -133,12 +128,6 @@ macro_rules! map_syntax_node {
                 $crate::GraphqlSyntaxKind::GRAPHQL_INPUT_OBJECT_TYPE_EXTENSION => {
                     let $pattern =
                         unsafe { $crate::GraphqlInputObjectTypeExtension::new_unchecked(node) };
-                    $body
-                }
-                $crate::GraphqlSyntaxKind::GRAPHQL_INPUT_OBJECT_TYPE_EXTENSION_WITH_FIELDS => {
-                    let $pattern = unsafe {
-                        $crate::GraphqlInputObjectTypeExtensionWithFields::new_unchecked(node)
-                    };
                     $body
                 }
                 $crate::GraphqlSyntaxKind::GRAPHQL_INPUT_VALUE_DEFINITION => {
@@ -289,10 +278,6 @@ macro_rules! map_syntax_node {
                 }
                 $crate::GraphqlSyntaxKind::GRAPHQL_BOGUS_DEFINITION => {
                     let $pattern = unsafe { $crate::GraphqlBogusDefinition::new_unchecked(node) };
-                    $body
-                }
-                $crate::GraphqlSyntaxKind::GRAPHQL_BOGUS_EXTENSION => {
-                    let $pattern = unsafe { $crate::GraphqlBogusExtension::new_unchecked(node) };
                     $body
                 }
                 $crate::GraphqlSyntaxKind::GRAPHQL_BOGUS_SELECTION => {

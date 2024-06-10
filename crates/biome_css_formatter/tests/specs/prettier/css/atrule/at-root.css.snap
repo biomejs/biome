@@ -2,7 +2,6 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: css/atrule/at-root.css
 ---
-
 # Input
 
 ```css
@@ -307,238 +306,65 @@ red
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,5 +1,6 @@
- .parent {
--  @at-root {
-+  @
-+  at-root {
-     .child1 {
-       width: 100px;
-     }
-@@ -9,7 +10,8 @@
-   }
- }
- .parent {
--  @at-root {
-+  @
-+  at-root {
-     .child1 {
-       width: 100px;
-     }
-@@ -19,7 +21,8 @@
-   }
- }
- .parent {
--  @at-root {
-+  @
-+  at-root {
-     .child1 {
-       width: 100px;
-     }
-@@ -29,7 +32,8 @@
-   }
- }
- .parent {
--  @at-root {
-+  @
-+  at-root {
-     .child1 {
-       width: 100px;
-     }
-@@ -39,7 +43,8 @@
-   }
- }
- .parent {
--  @at-root {
-+  @
-+  at-root {
-     .child1 {
-       width: 100px;
-     }
-@@ -49,7 +54,8 @@
-   }
- }
- .parent {
--  @at-root {
-+  @
-+  at-root {
-     .child1 {
-       width: 100px;
-     }
-@@ -59,117 +65,171 @@
-   }
- }
- .parent {
--  @at-root .child {
-+  @
-+  at-root .child {
-     width: 100px;
-   }
- }
- .parent {
--  @at-root .child {
-+  @
-+  at-root .child {
-     width: 100px;
-   }
- }
- .parent {
--  @at-root .child {
-+  @
-+  at-root .child {
-     width: 100px;
-   }
- }
- .parent {
--  @at-root .child {
-+  @
-+  at-root .child {
-     width: 100px;
-   }
- }
- .parent {
--  @at-root .child {
-+  @
-+  at-root.child {
-     width: 100px;
-   }
- }
- .parent {
--  @at-root .child {
-+  @
-+  at-root.child {
-     width: 100px;
+@@ -89,7 +89,11 @@
    }
  }
  .parent {
 -  @at-root input[type="radio"] {
--    color: red;
--  }
-+  @
-+  at-root
-+input[
++  @at-root input[
 +type
 +=
 +'radio'
-+]
-+{
-+color
-+:
-+red
-+;
-+}
++] {
+     color: red;
+   }
  }
- @media print {
+@@ -115,7 +119,7 @@
    .page {
      width: 8in;
  
 -    @at-root (with: media) {
--      color: red;
--    }
-+    @
-+    at-root (with: media) {
-+            color: red;
-+        }
++    @at-root (with:media) {
+       color: red;
+     }
    }
- }
- @media print {
+@@ -124,7 +128,7 @@
    .page {
      width: 8in;
  
 -    @at-root (with: media) {
--      color: red;
--    }
-+    @
-+    at-root (with: media) {
-+color: red;
-+}
++    @at-root ( with : media ) {
+       color: red;
+     }
    }
- }
- @media print {
+@@ -133,7 +137,7 @@
    .page {
      width: 8in;
  
 -    @at-root (with: media) {
--      color: red;
--    }
-+    @
-+    at-root (with:media){
-+            color: red;
-+        }
++    @at-root (  with  :  media  ) {
+       color: red;
+     }
    }
- }
- @media print {
-   .page {
-     width: 8in;
- 
--    @at-root (with: media) {
--      color: red;
--    }
-+    @
-+    at-root ( with : media ) {
-+            color: red;
-+        }
-   }
- }
- @media print {
-   .page {
-     width: 8in;
- 
--    @at-root (with: media) {
--      color: red;
--    }
-+    @
-+    at-root  (  with  :  media  ) {
-+            color: red;
-+        }
-   }
- }
- @media print {
-   .page {
-     width: 8in;
- 
--    @at-root (with: media) {
--      color: red;
--    }
-+    @
-+    at-root
-+        (with: media) {
-+            color: red;
-+        }
-   }
- }
+@@ -150,7 +154,11 @@
  @media print {
    .page {
      width: 8in;
 -    @at-root (with: media) {
--      color: red;
--    }
-+    @
-+    at-root
-+(
++    @at-root (
 +with
 +:
 +media
-+)
-+{
-+color
-+:
-+red
-+;
-+}
++) {
+       color: red;
+     }
    }
- }
- @media print {
+@@ -159,7 +167,15 @@
    .page {
      width: 8in;
  
 -    @at-root (with: media) {
--      color: red;
--    }
-+    @
-+    at-root
-+
-+(
++    @at-root (
 +
 +with
 +
@@ -546,41 +372,17 @@ red
 +
 +media
 +
-+)
-+
-+{
-+
-+color
-+:
-+
-+red
-+
-+;
-+
-+}
++) {
+       color: red;
+     }
    }
- }
- @media print {
-   .page {
-     width: 8in;
- 
--    @at-root (without: media) {
--      color: red;
--    }
-+    @
-+    at-root (without: media) {
-+            color: red;
-+        }
-   }
- }
 ```
 
 # Output
 
 ```css
 .parent {
-  @
-  at-root {
+  @at-root {
     .child1 {
       width: 100px;
     }
@@ -590,8 +392,7 @@ red
   }
 }
 .parent {
-  @
-  at-root {
+  @at-root {
     .child1 {
       width: 100px;
     }
@@ -601,8 +402,7 @@ red
   }
 }
 .parent {
-  @
-  at-root {
+  @at-root {
     .child1 {
       width: 100px;
     }
@@ -612,8 +412,7 @@ red
   }
 }
 .parent {
-  @
-  at-root {
+  @at-root {
     .child1 {
       width: 100px;
     }
@@ -623,8 +422,7 @@ red
   }
 }
 .parent {
-  @
-  at-root {
+  @at-root {
     .child1 {
       width: 100px;
     }
@@ -634,8 +432,7 @@ red
   }
 }
 .parent {
-  @
-  at-root {
+  @at-root {
     .child1 {
       width: 100px;
     }
@@ -645,143 +442,115 @@ red
   }
 }
 .parent {
-  @
-  at-root .child {
+  @at-root .child {
     width: 100px;
   }
 }
 .parent {
-  @
-  at-root .child {
+  @at-root .child {
     width: 100px;
   }
 }
 .parent {
-  @
-  at-root .child {
+  @at-root .child {
     width: 100px;
   }
 }
 .parent {
-  @
-  at-root .child {
+  @at-root .child {
     width: 100px;
   }
 }
 .parent {
-  @
-  at-root.child {
+  @at-root .child {
     width: 100px;
   }
 }
 .parent {
-  @
-  at-root.child {
+  @at-root .child {
     width: 100px;
   }
 }
 .parent {
-  @
-  at-root
-input[
+  @at-root input[
 type
 =
 'radio'
-]
-{
-color
-:
-red
-;
-}
-}
-@media print {
-  .page {
-    width: 8in;
-
-    @
-    at-root (with: media) {
-            color: red;
-        }
+] {
+    color: red;
   }
 }
 @media print {
   .page {
     width: 8in;
 
-    @
-    at-root (with: media) {
-color: red;
-}
+    @at-root (with: media) {
+      color: red;
+    }
   }
 }
 @media print {
   .page {
     width: 8in;
 
-    @
-    at-root (with:media){
-            color: red;
-        }
+    @at-root (with: media) {
+      color: red;
+    }
   }
 }
 @media print {
   .page {
     width: 8in;
 
-    @
-    at-root ( with : media ) {
-            color: red;
-        }
+    @at-root (with:media) {
+      color: red;
+    }
   }
 }
 @media print {
   .page {
     width: 8in;
 
-    @
-    at-root  (  with  :  media  ) {
-            color: red;
-        }
+    @at-root ( with : media ) {
+      color: red;
+    }
   }
 }
 @media print {
   .page {
     width: 8in;
 
-    @
-    at-root
-        (with: media) {
-            color: red;
-        }
+    @at-root (  with  :  media  ) {
+      color: red;
+    }
   }
 }
 @media print {
   .page {
     width: 8in;
-    @
-    at-root
-(
+
+    @at-root (with: media) {
+      color: red;
+    }
+  }
+}
+@media print {
+  .page {
+    width: 8in;
+    @at-root (
 with
 :
 media
-)
-{
-color
-:
-red
-;
-}
+) {
+      color: red;
+    }
   }
 }
 @media print {
   .page {
     width: 8in;
 
-    @
-    at-root
-
-(
+    @at-root (
 
 with
 
@@ -789,1147 +558,18 @@ with
 
 media
 
-)
-
-{
-
-color
-:
-
-red
-
-;
-
-}
+) {
+      color: red;
+    }
   }
 }
 @media print {
   .page {
     width: 8in;
 
-    @
-    at-root (without: media) {
-            color: red;
-        }
+    @at-root (without: media) {
+      color: red;
+    }
   }
 }
 ```
-
-# Errors
-```
-at-root.css:2:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Unexpected value or character.
-  
-    1 │ .parent {
-  > 2 │     @at-root {
-      │      ^^^^^^^
-    3 │         .child1 {
-    4 │             width: 100px;
-  
-  i Expected one of:
-  
-  - charset
-  - color-profile
-  - container
-  - counter-style
-  - document
-  - font-face
-  - font-feature-values
-  - font-palette-values
-  - import
-  - keyframes
-  - layer
-  - media
-  - namespace
-  - page
-  - property
-  - supports
-  - viewport
-  - scope
-  
-at-root.css:12:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Unexpected value or character.
-  
-    10 │ }
-    11 │ .parent {
-  > 12 │ @at-root {
-       │  ^^^^^^^
-    13 │ .child1 {
-    14 │ width: 100px;
-  
-  i Expected one of:
-  
-  - charset
-  - color-profile
-  - container
-  - counter-style
-  - document
-  - font-face
-  - font-feature-values
-  - font-palette-values
-  - import
-  - keyframes
-  - layer
-  - media
-  - namespace
-  - page
-  - property
-  - supports
-  - viewport
-  - scope
-  
-at-root.css:22:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Unexpected value or character.
-  
-    20 │ }
-    21 │ .parent {
-  > 22 │     @at-root  {
-       │      ^^^^^^^
-    23 │         .child1 {
-    24 │             width: 100px;
-  
-  i Expected one of:
-  
-  - charset
-  - color-profile
-  - container
-  - counter-style
-  - document
-  - font-face
-  - font-feature-values
-  - font-palette-values
-  - import
-  - keyframes
-  - layer
-  - media
-  - namespace
-  - page
-  - property
-  - supports
-  - viewport
-  - scope
-  
-at-root.css:32:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Unexpected value or character.
-  
-    30 │ }
-    31 │ .parent  {
-  > 32 │     @at-root  {
-       │      ^^^^^^^
-    33 │         .child1  {
-    34 │             width: 100px;
-  
-  i Expected one of:
-  
-  - charset
-  - color-profile
-  - container
-  - counter-style
-  - document
-  - font-face
-  - font-feature-values
-  - font-palette-values
-  - import
-  - keyframes
-  - layer
-  - media
-  - namespace
-  - page
-  - property
-  - supports
-  - viewport
-  - scope
-  
-at-root.css:43:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Unexpected value or character.
-  
-    41 │ .parent
-    42 │ {
-  > 43 │ @at-root
-       │  ^^^^^^^
-    44 │ {
-    45 │ .child1
-  
-  i Expected one of:
-  
-  - charset
-  - color-profile
-  - container
-  - counter-style
-  - document
-  - font-face
-  - font-feature-values
-  - font-palette-values
-  - import
-  - keyframes
-  - layer
-  - media
-  - namespace
-  - page
-  - property
-  - supports
-  - viewport
-  - scope
-  
-at-root.css:65:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Unexpected value or character.
-  
-    63 │ {
-    64 │ 
-  > 65 │ @at-root
-       │  ^^^^^^^
-    66 │ 
-    67 │ {
-  
-  i Expected one of:
-  
-  - charset
-  - color-profile
-  - container
-  - counter-style
-  - document
-  - font-face
-  - font-feature-values
-  - font-palette-values
-  - import
-  - keyframes
-  - layer
-  - media
-  - namespace
-  - page
-  - property
-  - supports
-  - viewport
-  - scope
-  
-at-root.css:100:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Unexpected value or character.
-  
-     98 │ }
-     99 │ .parent {
-  > 100 │     @at-root .child {
-        │      ^^^^^^^
-    101 │         width: 100px;
-    102 │     }
-  
-  i Expected one of:
-  
-  - charset
-  - color-profile
-  - container
-  - counter-style
-  - document
-  - font-face
-  - font-feature-values
-  - font-palette-values
-  - import
-  - keyframes
-  - layer
-  - media
-  - namespace
-  - page
-  - property
-  - supports
-  - viewport
-  - scope
-  
-at-root.css:105:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Unexpected value or character.
-  
-    103 │ }
-    104 │ .parent {
-  > 105 │ @at-root .child {
-        │  ^^^^^^^
-    106 │ width: 100px;
-    107 │ }
-  
-  i Expected one of:
-  
-  - charset
-  - color-profile
-  - container
-  - counter-style
-  - document
-  - font-face
-  - font-feature-values
-  - font-palette-values
-  - import
-  - keyframes
-  - layer
-  - media
-  - namespace
-  - page
-  - property
-  - supports
-  - viewport
-  - scope
-  
-at-root.css:110:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Unexpected value or character.
-  
-    108 │ }
-    109 │ .parent{
-  > 110 │     @at-root .child{
-        │      ^^^^^^^
-    111 │         width: 100px;
-    112 │     }
-  
-  i Expected one of:
-  
-  - charset
-  - color-profile
-  - container
-  - counter-style
-  - document
-  - font-face
-  - font-feature-values
-  - font-palette-values
-  - import
-  - keyframes
-  - layer
-  - media
-  - namespace
-  - page
-  - property
-  - supports
-  - viewport
-  - scope
-  
-at-root.css:115:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Unexpected value or character.
-  
-    113 │ }
-    114 │ .parent  {
-  > 115 │     @at-root  .child  {
-        │      ^^^^^^^
-    116 │         width: 100px;
-    117 │     }
-  
-  i Expected one of:
-  
-  - charset
-  - color-profile
-  - container
-  - counter-style
-  - document
-  - font-face
-  - font-feature-values
-  - font-palette-values
-  - import
-  - keyframes
-  - layer
-  - media
-  - namespace
-  - page
-  - property
-  - supports
-  - viewport
-  - scope
-  
-at-root.css:121:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Unexpected value or character.
-  
-    119 │ .parent
-    120 │ {
-  > 121 │ @at-root
-        │  ^^^^^^^
-    122 │ .child
-    123 │ {
-  
-  i Expected one of:
-  
-  - charset
-  - color-profile
-  - container
-  - counter-style
-  - document
-  - font-face
-  - font-feature-values
-  - font-palette-values
-  - import
-  - keyframes
-  - layer
-  - media
-  - namespace
-  - page
-  - property
-  - supports
-  - viewport
-  - scope
-  
-at-root.css:134:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Unexpected value or character.
-  
-    132 │ {
-    133 │ 
-  > 134 │ @at-root
-        │  ^^^^^^^
-    135 │ 
-    136 │ .child
-  
-  i Expected one of:
-  
-  - charset
-  - color-profile
-  - container
-  - counter-style
-  - document
-  - font-face
-  - font-feature-values
-  - font-palette-values
-  - import
-  - keyframes
-  - layer
-  - media
-  - namespace
-  - page
-  - property
-  - supports
-  - viewport
-  - scope
-  
-at-root.css:152:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Unexpected value or character.
-  
-    150 │ }
-    151 │ .parent {
-  > 152 │ @at-root
-        │  ^^^^^^^
-    153 │ input[
-    154 │ type
-  
-  i Expected one of:
-  
-  - charset
-  - color-profile
-  - container
-  - counter-style
-  - document
-  - font-face
-  - font-feature-values
-  - font-palette-values
-  - import
-  - keyframes
-  - layer
-  - media
-  - namespace
-  - page
-  - property
-  - supports
-  - viewport
-  - scope
-  
-at-root.css:153:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `input`
-  
-    151 │ .parent {
-    152 │ @at-root
-  > 153 │ input[
-        │ ^^^^^
-    154 │ type
-    155 │ =
-  
-  i Remove input
-  
-at-root.css:169:10 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Unexpected value or character.
-  
-    167 │         width: 8in;
-    168 │ 
-  > 169 │         @at-root (with: media) {
-        │          ^^^^^^^
-    170 │             color: red;
-    171 │         }
-  
-  i Expected one of:
-  
-  - charset
-  - color-profile
-  - container
-  - counter-style
-  - document
-  - font-face
-  - font-feature-values
-  - font-palette-values
-  - import
-  - keyframes
-  - layer
-  - media
-  - namespace
-  - page
-  - property
-  - supports
-  - viewport
-  - scope
-  
-at-root.css:169:18 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Expected a compound selector but instead found '('.
-  
-    167 │         width: 8in;
-    168 │ 
-  > 169 │         @at-root (with: media) {
-        │                  ^
-    170 │             color: red;
-    171 │         }
-  
-  i Expected a compound selector here.
-  
-    167 │         width: 8in;
-    168 │ 
-  > 169 │         @at-root (with: media) {
-        │                  ^
-    170 │             color: red;
-    171 │         }
-  
-at-root.css:169:19 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `with`
-  
-    167 │         width: 8in;
-    168 │ 
-  > 169 │         @at-root (with: media) {
-        │                   ^^^^
-    170 │             color: red;
-    171 │         }
-  
-  i Remove with
-  
-at-root.css:169:30 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `)`
-  
-    167 │         width: 8in;
-    168 │ 
-  > 169 │         @at-root (with: media) {
-        │                              ^
-    170 │             color: red;
-    171 │         }
-  
-  i Remove )
-  
-at-root.css:178:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Unexpected value or character.
-  
-    176 │ width: 8in;
-    177 │ 
-  > 178 │ @at-root (with: media) {
-        │  ^^^^^^^
-    179 │ color: red;
-    180 │ }
-  
-  i Expected one of:
-  
-  - charset
-  - color-profile
-  - container
-  - counter-style
-  - document
-  - font-face
-  - font-feature-values
-  - font-palette-values
-  - import
-  - keyframes
-  - layer
-  - media
-  - namespace
-  - page
-  - property
-  - supports
-  - viewport
-  - scope
-  
-at-root.css:178:10 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Expected a compound selector but instead found '('.
-  
-    176 │ width: 8in;
-    177 │ 
-  > 178 │ @at-root (with: media) {
-        │          ^
-    179 │ color: red;
-    180 │ }
-  
-  i Expected a compound selector here.
-  
-    176 │ width: 8in;
-    177 │ 
-  > 178 │ @at-root (with: media) {
-        │          ^
-    179 │ color: red;
-    180 │ }
-  
-at-root.css:178:11 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `with`
-  
-    176 │ width: 8in;
-    177 │ 
-  > 178 │ @at-root (with: media) {
-        │           ^^^^
-    179 │ color: red;
-    180 │ }
-  
-  i Remove with
-  
-at-root.css:178:22 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `)`
-  
-    176 │ width: 8in;
-    177 │ 
-  > 178 │ @at-root (with: media) {
-        │                      ^
-    179 │ color: red;
-    180 │ }
-  
-  i Remove )
-  
-at-root.css:187:10 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Unexpected value or character.
-  
-    185 │         width: 8in;
-    186 │ 
-  > 187 │         @at-root (with:media){
-        │          ^^^^^^^
-    188 │             color: red;
-    189 │         }
-  
-  i Expected one of:
-  
-  - charset
-  - color-profile
-  - container
-  - counter-style
-  - document
-  - font-face
-  - font-feature-values
-  - font-palette-values
-  - import
-  - keyframes
-  - layer
-  - media
-  - namespace
-  - page
-  - property
-  - supports
-  - viewport
-  - scope
-  
-at-root.css:187:18 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Expected a compound selector but instead found '('.
-  
-    185 │         width: 8in;
-    186 │ 
-  > 187 │         @at-root (with:media){
-        │                  ^
-    188 │             color: red;
-    189 │         }
-  
-  i Expected a compound selector here.
-  
-    185 │         width: 8in;
-    186 │ 
-  > 187 │         @at-root (with:media){
-        │                  ^
-    188 │             color: red;
-    189 │         }
-  
-at-root.css:187:19 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `with`
-  
-    185 │         width: 8in;
-    186 │ 
-  > 187 │         @at-root (with:media){
-        │                   ^^^^
-    188 │             color: red;
-    189 │         }
-  
-  i Remove with
-  
-at-root.css:187:29 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `)`
-  
-    185 │         width: 8in;
-    186 │ 
-  > 187 │         @at-root (with:media){
-        │                             ^
-    188 │             color: red;
-    189 │         }
-  
-  i Remove )
-  
-at-root.css:196:10 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Unexpected value or character.
-  
-    194 │         width: 8in;
-    195 │ 
-  > 196 │         @at-root ( with : media ) {
-        │          ^^^^^^^
-    197 │             color: red;
-    198 │         }
-  
-  i Expected one of:
-  
-  - charset
-  - color-profile
-  - container
-  - counter-style
-  - document
-  - font-face
-  - font-feature-values
-  - font-palette-values
-  - import
-  - keyframes
-  - layer
-  - media
-  - namespace
-  - page
-  - property
-  - supports
-  - viewport
-  - scope
-  
-at-root.css:196:18 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Expected a compound selector but instead found '('.
-  
-    194 │         width: 8in;
-    195 │ 
-  > 196 │         @at-root ( with : media ) {
-        │                  ^
-    197 │             color: red;
-    198 │         }
-  
-  i Expected a compound selector here.
-  
-    194 │         width: 8in;
-    195 │ 
-  > 196 │         @at-root ( with : media ) {
-        │                  ^
-    197 │             color: red;
-    198 │         }
-  
-at-root.css:196:20 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `with`
-  
-    194 │         width: 8in;
-    195 │ 
-  > 196 │         @at-root ( with : media ) {
-        │                    ^^^^
-    197 │             color: red;
-    198 │         }
-  
-  i Remove with
-  
-at-root.css:196:33 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `)`
-  
-    194 │         width: 8in;
-    195 │ 
-  > 196 │         @at-root ( with : media ) {
-        │                                 ^
-    197 │             color: red;
-    198 │         }
-  
-  i Remove )
-  
-at-root.css:205:10 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Unexpected value or character.
-  
-    203 │         width: 8in;
-    204 │ 
-  > 205 │         @at-root  (  with  :  media  ) {
-        │          ^^^^^^^
-    206 │             color: red;
-    207 │         }
-  
-  i Expected one of:
-  
-  - charset
-  - color-profile
-  - container
-  - counter-style
-  - document
-  - font-face
-  - font-feature-values
-  - font-palette-values
-  - import
-  - keyframes
-  - layer
-  - media
-  - namespace
-  - page
-  - property
-  - supports
-  - viewport
-  - scope
-  
-at-root.css:205:19 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Expected a compound selector but instead found '('.
-  
-    203 │         width: 8in;
-    204 │ 
-  > 205 │         @at-root  (  with  :  media  ) {
-        │                   ^
-    206 │             color: red;
-    207 │         }
-  
-  i Expected a compound selector here.
-  
-    203 │         width: 8in;
-    204 │ 
-  > 205 │         @at-root  (  with  :  media  ) {
-        │                   ^
-    206 │             color: red;
-    207 │         }
-  
-at-root.css:205:22 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `with`
-  
-    203 │         width: 8in;
-    204 │ 
-  > 205 │         @at-root  (  with  :  media  ) {
-        │                      ^^^^
-    206 │             color: red;
-    207 │         }
-  
-  i Remove with
-  
-at-root.css:205:38 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `)`
-  
-    203 │         width: 8in;
-    204 │ 
-  > 205 │         @at-root  (  with  :  media  ) {
-        │                                      ^
-    206 │             color: red;
-    207 │         }
-  
-  i Remove )
-  
-at-root.css:214:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Unexpected value or character.
-  
-    212 │         width: 8in;
-    213 │ 
-  > 214 │     @at-root
-        │      ^^^^^^^
-    215 │         (with: media) {
-    216 │             color: red;
-  
-  i Expected one of:
-  
-  - charset
-  - color-profile
-  - container
-  - counter-style
-  - document
-  - font-face
-  - font-feature-values
-  - font-palette-values
-  - import
-  - keyframes
-  - layer
-  - media
-  - namespace
-  - page
-  - property
-  - supports
-  - viewport
-  - scope
-  
-at-root.css:215:9 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Expected a compound selector but instead found '('.
-  
-    214 │     @at-root
-  > 215 │         (with: media) {
-        │         ^
-    216 │             color: red;
-    217 │         }
-  
-  i Expected a compound selector here.
-  
-    214 │     @at-root
-  > 215 │         (with: media) {
-        │         ^
-    216 │             color: red;
-    217 │         }
-  
-at-root.css:215:10 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `with`
-  
-    214 │     @at-root
-  > 215 │         (with: media) {
-        │          ^^^^
-    216 │             color: red;
-    217 │         }
-  
-  i Remove with
-  
-at-root.css:215:21 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `)`
-  
-    214 │     @at-root
-  > 215 │         (with: media) {
-        │                     ^
-    216 │             color: red;
-    217 │         }
-  
-  i Remove )
-  
-at-root.css:228:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Unexpected value or character.
-  
-    226 │ 8in
-    227 │ ;
-  > 228 │ @at-root
-        │  ^^^^^^^
-    229 │ (
-    230 │ with
-  
-  i Expected one of:
-  
-  - charset
-  - color-profile
-  - container
-  - counter-style
-  - document
-  - font-face
-  - font-feature-values
-  - font-palette-values
-  - import
-  - keyframes
-  - layer
-  - media
-  - namespace
-  - page
-  - property
-  - supports
-  - viewport
-  - scope
-  
-at-root.css:229:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `(`
-  
-    227 │ ;
-    228 │ @at-root
-  > 229 │ (
-        │ ^
-    230 │ with
-    231 │ :
-  
-  i Remove (
-  
-at-root.css:230:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `with`
-  
-    228 │ @at-root
-    229 │ (
-  > 230 │ with
-        │ ^^^^
-    231 │ :
-    232 │ media
-  
-  i Remove with
-  
-at-root.css:233:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `)`
-  
-    231 │ :
-    232 │ media
-  > 233 │ )
-        │ ^
-    234 │ {
-    235 │ color
-  
-  i Remove )
-  
-at-root.css:258:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Unexpected value or character.
-  
-    256 │ ;
-    257 │ 
-  > 258 │ @at-root
-        │  ^^^^^^^
-    259 │ 
-    260 │ (
-  
-  i Expected one of:
-  
-  - charset
-  - color-profile
-  - container
-  - counter-style
-  - document
-  - font-face
-  - font-feature-values
-  - font-palette-values
-  - import
-  - keyframes
-  - layer
-  - media
-  - namespace
-  - page
-  - property
-  - supports
-  - viewport
-  - scope
-  
-at-root.css:260:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `(`
-  
-    258 │ @at-root
-    259 │ 
-  > 260 │ (
-        │ ^
-    261 │ 
-    262 │ with
-  
-  i Remove (
-  
-at-root.css:262:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `with`
-  
-    260 │ (
-    261 │ 
-  > 262 │ with
-        │ ^^^^
-    263 │ 
-    264 │ :
-  
-  i Remove with
-  
-at-root.css:268:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `)`
-  
-    266 │ media
-    267 │ 
-  > 268 │ )
-        │ ^
-    269 │ 
-    270 │ {
-  
-  i Remove )
-  
-at-root.css:288:10 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Unexpected value or character.
-  
-    286 │         width: 8in;
-    287 │ 
-  > 288 │         @at-root (without: media) {
-        │          ^^^^^^^
-    289 │             color: red;
-    290 │         }
-  
-  i Expected one of:
-  
-  - charset
-  - color-profile
-  - container
-  - counter-style
-  - document
-  - font-face
-  - font-feature-values
-  - font-palette-values
-  - import
-  - keyframes
-  - layer
-  - media
-  - namespace
-  - page
-  - property
-  - supports
-  - viewport
-  - scope
-  
-at-root.css:288:18 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Expected a compound selector but instead found '('.
-  
-    286 │         width: 8in;
-    287 │ 
-  > 288 │         @at-root (without: media) {
-        │                  ^
-    289 │             color: red;
-    290 │         }
-  
-  i Expected a compound selector here.
-  
-    286 │         width: 8in;
-    287 │ 
-  > 288 │         @at-root (without: media) {
-        │                  ^
-    289 │             color: red;
-    290 │         }
-  
-at-root.css:288:19 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `without`
-  
-    286 │         width: 8in;
-    287 │ 
-  > 288 │         @at-root (without: media) {
-        │                   ^^^^^^^
-    289 │             color: red;
-    290 │         }
-  
-  i Remove without
-  
-at-root.css:288:33 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `)`
-  
-    286 │         width: 8in;
-    287 │ 
-  > 288 │         @at-root (without: media) {
-        │                                 ^
-    289 │             color: red;
-    290 │         }
-  
-  i Remove )
-  
-
-```
-
-

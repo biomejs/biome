@@ -1,0 +1,169 @@
+
+
+@media (400px < width < 700px) {
+	color: red;
+
+	> span {
+		color: blue;
+	}
+
+	& .class {
+		background: #0a3FE1;
+	}
+
+	.class {
+		color: green;
+	}
+
+	@supports (display: grid) {
+		color: red;
+
+		> span {
+			color: blue;
+		}
+
+		& .class {
+			background: #0a3FE1;
+		}
+
+		.class {
+			color: green;
+		}
+	}
+}
+
+
+@supports (display: grid) {
+	color: red;
+
+	> span {
+		color: blue;
+	}
+
+	& .class {
+		background: #0a3FE1;
+	}
+
+	.class {
+		color: green;
+	}
+
+	@media (400px < width < 700px) {
+		color: red;
+
+		> span {
+			color: blue;
+		}
+
+		& .class {
+			background: #0a3FE1;
+		}
+
+		.class {
+			color: green;
+		}
+	}
+}
+
+
+
+@layer theme {
+	color: red;
+
+	> span {
+		color: blue;
+	}
+
+	& .class {
+		background: #0a3FE1;
+	}
+
+	.class {
+		color: green;
+	}
+
+	@media (400px < width < 700px) {
+		color: red;
+
+		> span {
+			color: blue;
+		}
+
+		& .class {
+			background: #0a3FE1;
+		}
+
+		.class {
+			color: green;
+		}
+	}
+}
+
+
+@scope (.media-object) to (.content > *) {
+	border-radius: 50%;
+	padding: 1em;
+
+	> span {
+		color: blue;
+	}
+
+	& .class {
+		background: #0a3FE1;
+	}
+
+	.class {
+		color: green;
+	}
+
+	@media (400px < width < 700px) {
+		color: red;
+
+		> span {
+			color: blue;
+		}
+
+		& .class {
+			background: #0a3FE1;
+		}
+
+		.class {
+			color: green;
+		}
+	}
+}
+
+
+@container card (inline-size > 30em) and (inline-size < 45em) {
+	border-radius: 50%;
+	padding: 1em;
+
+	> span {
+		color: blue;
+	}
+
+	& .class {
+		background: #0a3FE1;
+	}
+
+	.class {
+		color: green;
+	}
+
+	@media (400px < width < 700px) {
+		color: red;
+
+		> span {
+			color: blue;
+		}
+
+		& .class {
+			background: #0a3FE1;
+		}
+
+		.class {
+			color: green;
+		}
+	}
+}
+

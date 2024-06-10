@@ -2,7 +2,6 @@
 source: crates/biome_css_parser/tests/spec_test.rs
 expression: snapshot
 ---
-
 ## Input
 
 ```css
@@ -250,7 +249,7 @@ CssRoot {
                     CssDeclarationWithSemicolon {
                         declaration: CssDeclaration {
                             property: CssGenericProperty {
-                                name: CssIdentifier {
+                                name: CssDashedIdentifier {
                                     value_token: IDENT@49..61 "--width" [Newline("\n"), Whitespace("    ")] [],
                                 },
                                 colon_token: COLON@61..63 ":" [] [Whitespace(" ")],
@@ -5062,7 +5061,7 @@ CssRoot {
           0: CSS_DECLARATION_WITH_SEMICOLON@49..80
             0: CSS_DECLARATION@49..79
               0: CSS_GENERIC_PROPERTY@49..79
-                0: CSS_IDENTIFIER@49..61
+                0: CSS_DASHED_IDENTIFIER@49..61
                   0: IDENT@49..61 "--width" [Newline("\n"), Whitespace("    ")] []
                 1: COLON@61..63 ":" [] [Whitespace(" ")]
                 2: CSS_GENERIC_COMPONENT_VALUE_LIST@63..79
@@ -8040,5 +8039,3 @@ CssRoot {
   2: EOF@3559..3559 "" [] []
 
 ```
-
-

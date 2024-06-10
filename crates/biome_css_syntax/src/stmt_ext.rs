@@ -10,6 +10,7 @@ declare_node_union! {
 }
 
 impl CssBlockLike {
+    /// Retrieves the left curly token "{" of the css block-like.
     pub fn l_curly_token(&self) -> SyntaxResult<CssSyntaxToken> {
         match self {
             CssBlockLike::CssKeyframesBlock(block) => block.l_curly_token(),
@@ -22,6 +23,7 @@ impl CssBlockLike {
         }
     }
 
+    /// Retrieves the right curly token "}" of the css block-like.
     pub fn r_curly_token(&self) -> SyntaxResult<CssSyntaxToken> {
         match self {
             CssBlockLike::CssKeyframesBlock(block) => block.r_curly_token(),
@@ -34,6 +36,7 @@ impl CssBlockLike {
         }
     }
 
+    /// Checks if the css block-like is empty, even if it may have comments inside.
     pub fn is_empty(&self) -> bool {
         match self {
             CssBlockLike::CssKeyframesBlock(block) => block.items().is_empty(),
@@ -44,5 +47,16 @@ impl CssBlockLike {
             CssBlockLike::CssPageAtRuleBlock(block) => block.items().is_empty(),
             CssBlockLike::CssDeclarationOrRuleBlock(block) => block.items().is_empty(),
         }
+    }
+
+    /// Checks if the css block-like is empty without comments inside.
+    pub fn is_empty_without_comments(&self) -> bool {
+        self.is_empty()
+            && !self
+                .l_curly_token()
+                .is_ok_and(|token| token.has_trailing_comments())
+            && !self
+                .r_curly_token()
+                .is_ok_and(|token| token.has_leading_comments())
     }
 }

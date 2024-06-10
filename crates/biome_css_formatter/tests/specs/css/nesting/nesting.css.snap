@@ -2,7 +2,6 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: css/nesting/nesting.css
 ---
-
 # Input
 
 ```css
@@ -183,6 +182,115 @@ article {
 	}
 }
 
+/*should be without whitespace*/
+
+.container {
+	&.child {
+		color: blue;
+	}
+}
+.container {&:child {
+	color: blue;
+}
+}
+
+.container {&|d {
+	color: blue;
+}
+}
+
+.container {&* {
+	color: blue;
+}
+}
+
+.container {&*
+.selector{
+	color: blue;
+}
+}
+
+/*should keep whitespace*/
+
+.container {
+	& .child {
+		color: blue;
+	}
+}
+
+.container {
+	&
+	.child {
+		color: blue;
+	}
+}
+
+.container {& :child {
+	color: blue;
+}
+}
+
+.container {&
+:child {
+		color: blue;
+	}
+}
+
+.container {&
+.child {
+		color: blue;
+	}
+}
+
+.container {& .child {
+	color: blue;
+}
+}
+
+.container {&
+|d {
+		color: blue;
+	}
+}
+
+.container {& |d {
+	color: blue;
+}
+}
+
+.container {&
+div {
+		color: blue;
+	}
+}
+
+.container {& div {
+	color: blue;
+}
+}
+
+.container {&
+* {
+		color: blue;
+	}
+}
+
+.container {& * {
+	color: blue;
+}
+}
+
+.container {&
+[lang=ru] {
+	color: blue;
+}
+}
+
+.container {& [lang=ru] {
+	color: blue;
+}
+}
+
 ```
 
 
@@ -202,7 +310,7 @@ Quote style: Double Quotes
 
 ```css
 table.colortable {
-	&td {
+	& td {
 		text-align: center;
 		&.c {
 			text-transform: uppercase;
@@ -213,7 +321,7 @@ table.colortable {
 		}
 	}
 
-	&th {
+	& th {
 		text-align: center;
 		background: black;
 		color: white;
@@ -245,7 +353,7 @@ table.colortable {
 
 .foo {
 	color: blue;
-	&.bar &.baz &.qux {
+	& .bar & .baz & .qux {
 		color: red;
 	}
 }
@@ -324,7 +432,7 @@ figure {
 div {
 	color: red;
 
-	&input {
+	& input {
 		margin: 1em;
 	}
 	/* valid, no longer starts with an identifier */
@@ -347,7 +455,7 @@ div {
 
 .foo {
 	color: blue;
-	&.bar &.baz &.qux {
+	& .bar & .baz & .qux {
 		color: red;
 	}
 }
@@ -380,7 +488,7 @@ div {
 }
 
 .foo {
-	&:is(.bar, &.baz) {
+	& :is(.bar, &.baz) {
 		color: red;
 	}
 }
@@ -389,7 +497,7 @@ div {
 	html {
 		block-size: 100%;
 
-		&body {
+		& body {
 			min-block-size: 100%;
 		}
 	}
@@ -400,7 +508,7 @@ div {
 		block-size: 100%;
 
 		@layer base.support {
-			&body {
+			& body {
 				min-block-size: 100%;
 			}
 		}
@@ -418,12 +526,127 @@ article {
 .foo {
 	color: red;
 	@media (min-width: 480px) {
-		&h1,
-		&h2 {
+		& h1,
+		& h2 {
 			color: blue;
 		}
 	}
 }
+
+/*should be without whitespace*/
+
+.container {
+	&.child {
+		color: blue;
+	}
+}
+.container {
+	&:child {
+		color: blue;
+	}
+}
+
+.container {
+	&|d {
+		color: blue;
+	}
+}
+
+.container {
+	&* {
+		color: blue;
+	}
+}
+
+.container {
+	&* .selector {
+		color: blue;
+	}
+}
+
+/*should keep whitespace*/
+
+.container {
+	& .child {
+		color: blue;
+	}
+}
+
+.container {
+	& .child {
+		color: blue;
+	}
+}
+
+.container {
+	& :child {
+		color: blue;
+	}
+}
+
+.container {
+	& :child {
+		color: blue;
+	}
+}
+
+.container {
+	& .child {
+		color: blue;
+	}
+}
+
+.container {
+	& .child {
+		color: blue;
+	}
+}
+
+.container {
+	& |d {
+		color: blue;
+	}
+}
+
+.container {
+	& |d {
+		color: blue;
+	}
+}
+
+.container {
+	& div {
+		color: blue;
+	}
+}
+
+.container {
+	& div {
+		color: blue;
+	}
+}
+
+.container {
+	& * {
+		color: blue;
+	}
+}
+
+.container {
+	& * {
+		color: blue;
+	}
+}
+
+.container {
+	& [lang="ru"] {
+		color: blue;
+	}
+}
+
+.container {
+	& [lang="ru"] {
+		color: blue;
+	}
+}
 ```
-
-

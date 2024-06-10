@@ -1,6 +1,6 @@
 use crate::PlainIndentStyle;
 use biome_deserialize_macros::{Deserializable, Merge, Partial};
-use biome_formatter::{LineEnding, LineWidth, QuoteStyle};
+use biome_formatter::{IndentWidth, LineEnding, LineWidth, QuoteStyle};
 use bpaf::Bpaf;
 use serde::{Deserialize, Serialize};
 
@@ -54,7 +54,7 @@ pub struct CssFormatter {
 
     /// The size of the indentation applied to CSS (and its super languages) files. Default to 2.
     #[partial(bpaf(long("css-formatter-indent-width"), argument("NUMBER"), optional))]
-    pub indent_width: u8,
+    pub indent_width: IndentWidth,
 
     /// The type of line ending applied to CSS (and its super languages) files.
     #[partial(bpaf(long("css-formatter-line-ending"), argument("lf|crlf|cr"), optional))]
@@ -99,4 +99,12 @@ impl PartialCssLinter {
             enabled: self.enabled.unwrap_or_default(),
         }
     }
+}
+
+#[test]
+fn default_css() {
+    let css_configuration = CssFormatter::default();
+
+    assert_eq!(css_configuration.indent_width, IndentWidth::default());
+    assert_eq!(css_configuration.indent_width.value(), 2);
 }

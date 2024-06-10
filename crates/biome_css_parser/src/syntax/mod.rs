@@ -10,7 +10,7 @@ use crate::lexer::CssLexContext;
 use crate::parser::CssParser;
 use crate::syntax::at_rule::{is_at_at_rule, parse_at_rule};
 use crate::syntax::block::parse_declaration_or_rule_list_block;
-use crate::syntax::parse_error::expected_any_rule;
+use crate::syntax::parse_error::{expected_any_rule, expected_non_css_wide_keyword_identifier};
 use crate::syntax::property::{is_at_any_property, parse_any_property};
 use crate::syntax::selector::is_nth_at_selector;
 use crate::syntax::selector::relative_selector::{is_at_relative_selector, RelativeSelectorList};
@@ -52,7 +52,15 @@ pub(crate) fn is_at_rule_list_element(p: &mut CssParser) -> bool {
     is_at_at_rule(p) || is_at_qualified_rule(p)
 }
 
-struct RuleListParseRecovery;
+struct RuleListParseRecovery {
+    end_kind: CssSyntaxKind,
+}
+
+impl RuleListParseRecovery {
+    fn new(end_kind: CssSyntaxKind) -> Self {
+        Self { end_kind }
+    }
+}
 
 impl ParseRecovery for RuleListParseRecovery {
     type Kind = CssSyntaxKind;
@@ -60,7 +68,7 @@ impl ParseRecovery for RuleListParseRecovery {
     const RECOVERED_KIND: Self::Kind = CSS_BOGUS_RULE;
 
     fn is_at_recovered(&self, p: &mut Self::Parser<'_>) -> bool {
-        is_at_rule_list_element(p)
+        p.at(self.end_kind) || is_at_rule_list_element(p)
     }
 }
 
@@ -88,7 +96,11 @@ impl ParseNodeList for RuleList {
         p: &mut Self::Parser<'_>,
         parsed_element: ParsedSyntax,
     ) -> RecoveryResult {
-        parsed_element.or_recover(p, &RuleListParseRecovery, expected_any_rule)
+        parsed_element.or_recover(
+            p,
+            &RuleListParseRecovery::new(self.end_kind),
+            expected_any_rule,
+        )
     }
 }
 
@@ -244,6 +256,7 @@ pub(crate) fn is_at_any_value(p: &mut CssParser) -> bool {
         || is_at_dashed_identifier(p)
         || is_at_ratio(p)
         || is_at_color(p)
+        || is_at_bracketed_value(p)
 }
 
 #[inline]
@@ -264,6 +277,8 @@ pub(crate) fn parse_any_value(p: &mut CssParser) -> ParsedSyntax {
         parse_regular_number(p)
     } else if is_at_color(p) {
         parse_color(p)
+    } else if is_at_bracketed_value(p) {
+        parse_bracketed_value(p)
     } else {
         Absent
     }
@@ -462,6 +477,80 @@ pub(crate) fn parse_string(p: &mut CssParser) -> ParsedSyntax {
 #[inline]
 pub(crate) fn is_at_string(p: &mut CssParser) -> bool {
     p.at(CSS_STRING_LITERAL)
+}
+
+/// Checks if the parser is currently at the start of a bracketed value.
+#[inline]
+pub(crate) fn is_at_bracketed_value(p: &mut CssParser) -> bool {
+    p.at(T!['['])
+}
+
+/// Parses a bracketed value from the current position in the CSS parser.
+///
+/// This function parses a list of values enclosed in square brackets, commonly used in CSS properties
+/// like `grid-template-areas` where the value is a list of identifiers representing grid areas.
+/// For details on the syntax of bracketed values,
+/// see the [CSS Syntax specification](https://drafts.csswg.org/css-grid/#named-lines)
+#[inline]
+pub(crate) fn parse_bracketed_value(p: &mut CssParser) -> ParsedSyntax {
+    if !is_at_bracketed_value(p) {
+        return Absent;
+    }
+
+    let m = p.start();
+
+    p.bump(T!['[']);
+    BracketedValueList.parse_list(p);
+    p.expect(T![']']);
+
+    Present(m.complete(p, CSS_BRACKETED_VALUE))
+}
+
+/// The list parser for bracketed values.
+///
+/// This parser is responsible for parsing a list of identifiers inside a bracketed value.
+pub(crate) struct BracketedValueList;
+
+impl ParseNodeList for BracketedValueList {
+    type Kind = CssSyntaxKind;
+    type Parser<'source> = CssParser<'source>;
+    const LIST_KIND: Self::Kind = CSS_BRACKETED_VALUE_LIST;
+
+    fn parse_element(&mut self, p: &mut Self::Parser<'_>) -> ParsedSyntax {
+        parse_custom_identifier(p, CssLexContext::Regular)
+    }
+
+    fn is_at_list_end(&self, p: &mut Self::Parser<'_>) -> bool {
+        p.at(T![']'])
+    }
+
+    fn recover(
+        &mut self,
+        p: &mut Self::Parser<'_>,
+        parsed_element: ParsedSyntax,
+    ) -> RecoveryResult {
+        parsed_element.or_recover(
+            p,
+            &BracketedValueListRecovery,
+            expected_non_css_wide_keyword_identifier,
+        )
+    }
+}
+
+/// Recovery strategy for bracketed value lists.
+///
+/// This recovery strategy handles the recovery process when parsing bracketed value lists.
+struct BracketedValueListRecovery;
+
+impl ParseRecovery for BracketedValueListRecovery {
+    type Kind = CssSyntaxKind;
+    type Parser<'source> = CssParser<'source>;
+    const RECOVERED_KIND: Self::Kind = CSS_BOGUS_CUSTOM_IDENTIFIER;
+
+    fn is_at_recovered(&self, p: &mut Self::Parser<'_>) -> bool {
+        // If the next token is the end of the list or the next element, we're at a recovery point.
+        p.at(T![']']) || is_at_identifier(p)
+    }
 }
 
 /// Attempt to parse some input with the given parsing function. If parsing

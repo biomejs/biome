@@ -129,6 +129,20 @@ pub fn css_binary_expression(
         ],
     ))
 }
+pub fn css_bracketed_value(
+    l_brack_token: SyntaxToken,
+    items: CssBracketedValueList,
+    r_brack_token: SyntaxToken,
+) -> CssBracketedValue {
+    CssBracketedValue::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_BRACKETED_VALUE,
+        [
+            Some(SyntaxElement::Token(l_brack_token)),
+            Some(SyntaxElement::Node(items.into_syntax())),
+            Some(SyntaxElement::Token(r_brack_token)),
+        ],
+    ))
+}
 pub fn css_charset_at_rule(
     charset_token: SyntaxToken,
     encoding: CssString,
@@ -294,7 +308,7 @@ pub fn css_container_and_query(
 pub fn css_container_at_rule(
     container_token: SyntaxToken,
     query: AnyCssContainerQuery,
-    block: AnyCssRuleBlock,
+    block: AnyCssConditionalBlock,
 ) -> CssContainerAtRuleBuilder {
     CssContainerAtRuleBuilder {
         container_token,
@@ -306,7 +320,7 @@ pub fn css_container_at_rule(
 pub struct CssContainerAtRuleBuilder {
     container_token: SyntaxToken,
     query: AnyCssContainerQuery,
-    block: AnyCssRuleBlock,
+    block: AnyCssConditionalBlock,
     name: Option<CssCustomIdentifier>,
 }
 impl CssContainerAtRuleBuilder {
@@ -931,7 +945,7 @@ pub fn css_layer_at_rule(layer_token: SyntaxToken, layer: AnyCssLayer) -> CssLay
 }
 pub fn css_layer_declaration(
     references: CssLayerReferenceList,
-    block: AnyCssRuleBlock,
+    block: AnyCssConditionalBlock,
 ) -> CssLayerDeclaration {
     CssLayerDeclaration::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_LAYER_DECLARATION,
@@ -1008,7 +1022,7 @@ pub fn css_media_and_type_query(
 pub fn css_media_at_rule(
     media_token: SyntaxToken,
     queries: CssMediaQueryList,
-    block: AnyCssRuleBlock,
+    block: AnyCssConditionalBlock,
 ) -> CssMediaAtRule {
     CssMediaAtRule::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_MEDIA_AT_RULE,
@@ -1819,7 +1833,7 @@ pub fn css_rule_block(
 }
 pub fn css_scope_at_rule(
     scope_token: SyntaxToken,
-    block: AnyCssRuleBlock,
+    block: AnyCssConditionalBlock,
 ) -> CssScopeAtRuleBuilder {
     CssScopeAtRuleBuilder {
         scope_token,
@@ -1829,7 +1843,7 @@ pub fn css_scope_at_rule(
 }
 pub struct CssScopeAtRuleBuilder {
     scope_token: SyntaxToken,
-    block: AnyCssRuleBlock,
+    block: AnyCssConditionalBlock,
     range: Option<AnyCssScopeRange>,
 }
 impl CssScopeAtRuleBuilder {
@@ -1927,7 +1941,7 @@ pub fn css_supports_and_condition(
 pub fn css_supports_at_rule(
     supports_token: SyntaxToken,
     condition: AnyCssSupportsCondition,
-    block: AnyCssRuleBlock,
+    block: AnyCssConditionalBlock,
 ) -> CssSupportsAtRule {
     CssSupportsAtRule::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_SUPPORTS_AT_RULE,
@@ -2066,6 +2080,20 @@ impl CssUniversalSelectorBuilder {
         ))
     }
 }
+pub fn css_unknown_block_at_rule(
+    name: CssIdentifier,
+    components: CssUnknownAtRuleComponentList,
+    block: AnyCssDeclarationOrRuleBlock,
+) -> CssUnknownBlockAtRule {
+    CssUnknownBlockAtRule::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_UNKNOWN_BLOCK_AT_RULE,
+        [
+            Some(SyntaxElement::Node(name.into_syntax())),
+            Some(SyntaxElement::Node(components.into_syntax())),
+            Some(SyntaxElement::Node(block.into_syntax())),
+        ],
+    ))
+}
 pub fn css_unknown_dimension(
     value_token: SyntaxToken,
     unit_token: SyntaxToken,
@@ -2075,6 +2103,20 @@ pub fn css_unknown_dimension(
         [
             Some(SyntaxElement::Token(value_token)),
             Some(SyntaxElement::Token(unit_token)),
+        ],
+    ))
+}
+pub fn css_unknown_value_at_rule(
+    name: CssIdentifier,
+    components: CssUnknownAtRuleComponentList,
+    semicolon_token: SyntaxToken,
+) -> CssUnknownValueAtRule {
+    CssUnknownValueAtRule::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_UNKNOWN_VALUE_AT_RULE,
+        [
+            Some(SyntaxElement::Node(name.into_syntax())),
+            Some(SyntaxElement::Node(components.into_syntax())),
+            Some(SyntaxElement::Token(semicolon_token)),
         ],
     ))
 }
@@ -2194,6 +2236,18 @@ pub fn css_value_at_rule_named_import_specifier(
         ],
     ))
 }
+pub fn css_bracketed_value_list<I>(items: I) -> CssBracketedValueList
+where
+    I: IntoIterator<Item = AnyCssCustomIdentifier>,
+    I::IntoIter: ExactSizeIterator,
+{
+    CssBracketedValueList::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_BRACKETED_VALUE_LIST,
+        items
+            .into_iter()
+            .map(|item| Some(item.into_syntax().into())),
+    ))
+}
 pub fn css_component_value_list<I>(items: I) -> CssComponentValueList
 where
     I: IntoIterator<Item = AnyCssValue>,
@@ -2241,7 +2295,7 @@ where
 }
 pub fn css_custom_identifier_list<I>(items: I) -> CssCustomIdentifierList
 where
-    I: IntoIterator<Item = CssCustomIdentifier>,
+    I: IntoIterator<Item = AnyCssCustomIdentifier>,
     I::IntoIter: ExactSizeIterator,
 {
     CssCustomIdentifierList::unwrap_cast(SyntaxNode::new_detached(
@@ -2883,6 +2937,16 @@ where
 {
     CssBogusUrlModifier::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_BOGUS_URL_MODIFIER,
+        slots,
+    ))
+}
+pub fn css_unknown_at_rule_component_list<I>(slots: I) -> CssUnknownAtRuleComponentList
+where
+    I: IntoIterator<Item = Option<SyntaxElement>>,
+    I::IntoIter: ExactSizeIterator,
+{
+    CssUnknownAtRuleComponentList::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_UNKNOWN_AT_RULE_COMPONENT_LIST,
         slots,
     ))
 }

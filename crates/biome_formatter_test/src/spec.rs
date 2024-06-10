@@ -225,7 +225,7 @@ where
 
         let (output_code, printed) = self.formatted(&parsed, self.options.clone());
 
-        let max_width = self.options.line_width().get() as usize;
+        let max_width = self.options.line_width().value() as usize;
 
         snapshot_builder = snapshot_builder
             .with_output_and_options(
@@ -263,7 +263,7 @@ where
 
             let (mut output_code, printed) = self.formatted(&parsed, options.clone());
 
-            let max_width = options.line_width().get() as usize;
+            let max_width = options.line_width().value() as usize;
 
             // There are some logs that print different line endings, and we can't snapshot those
             // otherwise we risk automatically having them replaced with LF by git.

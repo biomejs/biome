@@ -5,7 +5,7 @@ use biome_deserialize::{json::deserialize_from_json_str, StringSet};
 use biome_deserialize_macros::Deserializable;
 use biome_diagnostics::{DiagnosticExt, PrintDiagnostic};
 use biome_formatter::{
-    AttributePosition, LineEnding, LineWidth, LineWidthFromIntError, QuoteStyle,
+    AttributePosition, IndentWidth, LineEnding, LineWidth, ParseFormatNumberError, QuoteStyle,
 };
 use biome_fs::{FileSystem, OpenOptions};
 use biome_js_formatter::context::{ArrowParentheses, QuoteProperties, Semicolons, TrailingCommas};
@@ -187,18 +187,19 @@ impl From<QuoteProps> for QuoteProperties {
 }
 
 impl TryFrom<PrettierConfiguration> for biome_configuration::PartialConfiguration {
-    type Error = LineWidthFromIntError;
+    type Error = ParseFormatNumberError;
     fn try_from(value: PrettierConfiguration) -> Result<Self, Self::Error> {
         let mut result = biome_configuration::PartialConfiguration::default();
 
         let line_width = LineWidth::try_from(value.print_width)?;
+        let indent_width = IndentWidth::try_from(value.tab_width)?;
         let indent_style = if value.use_tabs {
             biome_configuration::PlainIndentStyle::Tab
         } else {
             biome_configuration::PlainIndentStyle::Space
         };
         let formatter = biome_configuration::PartialFormatterConfiguration {
-            indent_width: Some(value.tab_width),
+            indent_width: Some(indent_width),
             line_width: Some(line_width),
             indent_style: Some(indent_style),
             line_ending: Some(value.end_of_line.into()),
@@ -266,7 +267,7 @@ impl TryFrom<PrettierConfiguration> for biome_configuration::PartialConfiguratio
 }
 
 impl TryFrom<Override> for biome_configuration::OverridePattern {
-    type Error = LineWidthFromIntError;
+    type Error = ParseFormatNumberError;
     fn try_from(Override { files, options }: Override) -> Result<Self, Self::Error> {
         let mut result = biome_configuration::OverridePattern {
             include: Some(StringSet::new(files.into_iter().collect())),
@@ -283,6 +284,12 @@ impl TryFrom<Override> for biome_configuration::OverridePattern {
             } else {
                 None
             };
+            // are global options are set
+            let indent_width = if let Some(indent_width) = options.tab_width {
+                Some(IndentWidth::try_from(indent_width)?)
+            } else {
+                None
+            };
             let indent_style = options.use_tabs.map(|use_tabs| {
                 if use_tabs {
                     biome_configuration::PlainIndentStyle::Tab
@@ -291,7 +298,7 @@ impl TryFrom<Override> for biome_configuration::OverridePattern {
                 }
             });
             let formatter = biome_configuration::OverrideFormatterConfiguration {
-                indent_width: options.tab_width,
+                indent_width,
                 line_width,
                 indent_style,
                 line_ending: options.end_of_line.map(|end_of_line| end_of_line.into()),

@@ -10,7 +10,7 @@ use crate::variables::{VarRegistry, VariableLocations};
 use crate::CompileError;
 use anyhow::Result;
 use biome_grit_syntax::{GritRoot, GritRootExt};
-use grit_pattern_matcher::pattern::{Matcher, Pattern, State};
+use grit_pattern_matcher::pattern::{FileRegistry, Matcher, Pattern, State};
 use std::collections::BTreeMap;
 
 /// Represents a top-level Grit query.
@@ -32,7 +32,10 @@ impl GritQuery {
 
         let binding = GritResolvedPattern;
         let context = GritExecContext;
-        let mut state = State::new(var_registry.into(), Vec::new());
+        let mut state = State::new(
+            var_registry.into(),
+            FileRegistry::new_from_paths(Vec::new()),
+        );
         let mut logs = Vec::new().into();
 
         self.pattern

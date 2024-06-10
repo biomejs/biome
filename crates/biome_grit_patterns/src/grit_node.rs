@@ -94,12 +94,6 @@ impl GritAstNode for GritNode {
         }
     }
 
-    fn full_source(&self) -> &str {
-        // This should not be a problem anytime soon, though we may want to
-        // reconsider when we implement rewrites.
-        unimplemented!("Full source of file not available")
-    }
-
     fn walk(&self) -> impl AstCursor<Node = Self> {
         GritNodeCursor::new(self)
     }
