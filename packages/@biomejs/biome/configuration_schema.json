@@ -1769,6 +1769,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noShorthandPropertyOverrides": {
+					"description": "Disallow shorthand properties that override related longhand properties.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noUndeclaredDependencies": {
 					"description": "Disallow the use of dependencies that aren't specified in the package.json.",
 					"anyOf": [

@@ -2857,6 +2857,9 @@ pub struct Nursery {
     #[doc = "Disallow specified modules when loaded by import or require."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_restricted_imports: Option<RuleConfiguration<NoRestrictedImports>>,
+    #[doc = "Disallow shorthand properties that override related longhand properties."]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub no_shorthand_property_overrides: Option<RuleConfiguration<NoShorthandPropertyOverrides>>,
     #[doc = "Disallow the use of dependencies that aren't specified in the package.json."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_undeclared_dependencies: Option<RuleConfiguration<NoUndeclaredDependencies>>,
@@ -2902,9 +2905,6 @@ pub struct Nursery {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_consistent_builtin_instantiation:
         Option<RuleFixConfiguration<UseConsistentBuiltinInstantiation>>,
-    #[doc = "Disallowing invalid named grid areas in CSS Grid Layouts."]
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_consistent_grid_areas: Option<RuleConfiguration<UseConsistentGridAreas>>,
     #[doc = "Use Date.now() to get the number of milliseconds since the Unix Epoch."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_date_now: Option<RuleFixConfiguration<UseDateNow>>,
@@ -2981,6 +2981,7 @@ impl Nursery {
         "noMisplacedAssertion",
         "noReactSpecificProps",
         "noRestrictedImports",
+        "noShorthandPropertyOverrides",
         "noUndeclaredDependencies",
         "noUnknownFunction",
         "noUnknownMediaFeatureName",
@@ -2995,7 +2996,6 @@ impl Nursery {
         "noYodaExpression",
         "useAdjacentOverloadSignatures",
         "useConsistentBuiltinInstantiation",
-        "useConsistentGridAreas",
         "useDateNow",
         "useDefaultSwitchClause",
         "useErrorMessage",
@@ -3022,6 +3022,7 @@ impl Nursery {
         "noImportantInKeyframe",
         "noInvalidPositionAtImportRule",
         "noLabelWithoutControl",
+        "noShorthandPropertyOverrides",
         "noUnknownFunction",
         "noUnknownPseudoClassSelector",
         "noUnknownSelectorPseudoElement",
@@ -3042,11 +3043,12 @@ impl Nursery {
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[9]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[10]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[11]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[16]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[19]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[15]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[17]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[20]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[21]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[22]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[23]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[34]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[35]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[39]),
@@ -3187,77 +3189,77 @@ impl Nursery {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[14]));
             }
         }
-        if let Some(rule) = self.no_undeclared_dependencies.as_ref() {
+        if let Some(rule) = self.no_shorthand_property_overrides.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[15]));
             }
         }
-        if let Some(rule) = self.no_unknown_function.as_ref() {
+        if let Some(rule) = self.no_undeclared_dependencies.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[16]));
             }
         }
-        if let Some(rule) = self.no_unknown_media_feature_name.as_ref() {
+        if let Some(rule) = self.no_unknown_function.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[17]));
             }
         }
-        if let Some(rule) = self.no_unknown_property.as_ref() {
+        if let Some(rule) = self.no_unknown_media_feature_name.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[18]));
             }
         }
-        if let Some(rule) = self.no_unknown_pseudo_class_selector.as_ref() {
+        if let Some(rule) = self.no_unknown_property.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[19]));
             }
         }
-        if let Some(rule) = self.no_unknown_selector_pseudo_element.as_ref() {
+        if let Some(rule) = self.no_unknown_pseudo_class_selector.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[20]));
             }
         }
-        if let Some(rule) = self.no_unknown_unit.as_ref() {
+        if let Some(rule) = self.no_unknown_selector_pseudo_element.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[21]));
             }
         }
-        if let Some(rule) = self.no_unmatchable_anb_selector.as_ref() {
+        if let Some(rule) = self.no_unknown_unit.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[22]));
             }
         }
-        if let Some(rule) = self.no_unused_function_parameters.as_ref() {
+        if let Some(rule) = self.no_unmatchable_anb_selector.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[23]));
             }
         }
-        if let Some(rule) = self.no_useless_string_concat.as_ref() {
+        if let Some(rule) = self.no_unused_function_parameters.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[24]));
             }
         }
-        if let Some(rule) = self.no_useless_undefined_initialization.as_ref() {
+        if let Some(rule) = self.no_useless_string_concat.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[25]));
             }
         }
-        if let Some(rule) = self.no_yoda_expression.as_ref() {
+        if let Some(rule) = self.no_useless_undefined_initialization.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[26]));
             }
         }
-        if let Some(rule) = self.use_adjacent_overload_signatures.as_ref() {
+        if let Some(rule) = self.no_yoda_expression.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[27]));
             }
         }
-        if let Some(rule) = self.use_consistent_builtin_instantiation.as_ref() {
+        if let Some(rule) = self.use_adjacent_overload_signatures.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[28]));
             }
         }
-        if let Some(rule) = self.use_consistent_grid_areas.as_ref() {
+        if let Some(rule) = self.use_consistent_builtin_instantiation.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[29]));
             }
@@ -3411,77 +3413,77 @@ impl Nursery {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[14]));
             }
         }
-        if let Some(rule) = self.no_undeclared_dependencies.as_ref() {
+        if let Some(rule) = self.no_shorthand_property_overrides.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[15]));
             }
         }
-        if let Some(rule) = self.no_unknown_function.as_ref() {
+        if let Some(rule) = self.no_undeclared_dependencies.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[16]));
             }
         }
-        if let Some(rule) = self.no_unknown_media_feature_name.as_ref() {
+        if let Some(rule) = self.no_unknown_function.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[17]));
             }
         }
-        if let Some(rule) = self.no_unknown_property.as_ref() {
+        if let Some(rule) = self.no_unknown_media_feature_name.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[18]));
             }
         }
-        if let Some(rule) = self.no_unknown_pseudo_class_selector.as_ref() {
+        if let Some(rule) = self.no_unknown_property.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[19]));
             }
         }
-        if let Some(rule) = self.no_unknown_selector_pseudo_element.as_ref() {
+        if let Some(rule) = self.no_unknown_pseudo_class_selector.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[20]));
             }
         }
-        if let Some(rule) = self.no_unknown_unit.as_ref() {
+        if let Some(rule) = self.no_unknown_selector_pseudo_element.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[21]));
             }
         }
-        if let Some(rule) = self.no_unmatchable_anb_selector.as_ref() {
+        if let Some(rule) = self.no_unknown_unit.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[22]));
             }
         }
-        if let Some(rule) = self.no_unused_function_parameters.as_ref() {
+        if let Some(rule) = self.no_unmatchable_anb_selector.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[23]));
             }
         }
-        if let Some(rule) = self.no_useless_string_concat.as_ref() {
+        if let Some(rule) = self.no_unused_function_parameters.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[24]));
             }
         }
-        if let Some(rule) = self.no_useless_undefined_initialization.as_ref() {
+        if let Some(rule) = self.no_useless_string_concat.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[25]));
             }
         }
-        if let Some(rule) = self.no_yoda_expression.as_ref() {
+        if let Some(rule) = self.no_useless_undefined_initialization.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[26]));
             }
         }
-        if let Some(rule) = self.use_adjacent_overload_signatures.as_ref() {
+        if let Some(rule) = self.no_yoda_expression.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[27]));
             }
         }
-        if let Some(rule) = self.use_consistent_builtin_instantiation.as_ref() {
+        if let Some(rule) = self.use_adjacent_overload_signatures.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[28]));
             }
         }
-        if let Some(rule) = self.use_consistent_grid_areas.as_ref() {
+        if let Some(rule) = self.use_consistent_builtin_instantiation.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[29]));
             }
@@ -3652,6 +3654,10 @@ impl Nursery {
                 .no_restricted_imports
                 .as_ref()
                 .map(|conf| (conf.level(), conf.get_options())),
+            "noShorthandPropertyOverrides" => self
+                .no_shorthand_property_overrides
+                .as_ref()
+                .map(|conf| (conf.level(), conf.get_options())),
             "noUndeclaredDependencies" => self
                 .no_undeclared_dependencies
                 .as_ref()
@@ -3706,10 +3712,6 @@ impl Nursery {
                 .map(|conf| (conf.level(), conf.get_options())),
             "useConsistentBuiltinInstantiation" => self
                 .use_consistent_builtin_instantiation
-                .as_ref()
-                .map(|conf| (conf.level(), conf.get_options())),
-            "useConsistentGridAreas" => self
-                .use_consistent_grid_areas
                 .as_ref()
                 .map(|conf| (conf.level(), conf.get_options())),
             "useDateNow" => self

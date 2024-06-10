@@ -33,6 +33,7 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 #### Bug fixes
 - Fix the bug where whitespace after the & character in CSS nesting was incorrectly trimmed, ensuring proper targeting of child classes [#3061](https://github.com/biomejs/biome/issues/3061). Contributed by @denbezrukov
 - Fix [#3068](https://github.com/biomejs/biome/issues/3068) where the CSS formatter was inadvertently converting variable declarations and function calls to lowercase. Contributed by @denbezrukov
+- Fix the formatting of CSS grid layout properties. Contributed by @denbezrukov
 
 ### JavaScript APIs
 
