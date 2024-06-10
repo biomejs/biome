@@ -107,14 +107,14 @@ pub fn check_rules() -> anyhow::Result<()> {
     Ok(())
 }
 struct CodeBlockTest {
-    lang: String,
+    tag: String,
     expect_diagnostic: bool,
     ignore: bool,
 }
 
 impl CodeBlockTest {
     fn document_file_source(&self) -> DocumentFileSource {
-        DocumentFileSource::from_extension(&self.lang)
+        DocumentFileSource::from_extension(&self.tag)
     }
 }
 
@@ -130,16 +130,16 @@ impl FromStr for CodeBlockTest {
             .filter(|token| !token.is_empty());
 
         let mut test = CodeBlockTest {
-            lang: "".to_string(),
+            tag: "".to_string(),
             expect_diagnostic: false,
             ignore: false,
         };
 
         for token in tokens {
             match token {
-                // languages
+                // language tags
                 "cjs" | "js" | "mjs" | "jsx" | "ts" | "mts" | "cts" | "tsx" | "svelte"
-                | "astro" | "vue" | "json" | "jsonc" | "css" => test.lang = token.to_string(),
+                | "astro" | "vue" | "json" | "jsonc" | "css" => test.tag = token.to_string(),
                 // Other attributes
                 "expect_diagnostic" => test.expect_diagnostic = true,
                 "ignore" => test.ignore = true,
@@ -162,7 +162,7 @@ fn assert_lint(
     test: &CodeBlockTest,
     code: &str,
 ) -> anyhow::Result<()> {
-    let file_path = format!("code-block.{}", test.lang);
+    let file_path = format!("code-block.{}", test.tag);
 
     let mut diagnostic_count = 0;
     let mut all_diagnostics = vec![];
