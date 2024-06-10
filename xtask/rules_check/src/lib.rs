@@ -108,28 +108,6 @@ pub fn check_rules() -> anyhow::Result<()> {
                 &mut content,
                 !matches!(meta.fix_kind, FixKind::None),
             )?;
-
-            // let parser = Parser::new(meta.docs);
-            //
-            // let mut language = None;
-            // for event in parser {
-            //     match event {
-            //         Event::Start(Tag::CodeBlock(CodeBlockKind::Fenced(meta))) => {
-            //             // Track the content of code blocks to pass them through the analyzer
-            //             let test = CodeBlockTest::from_str(meta.as_ref())?;
-            //
-            //             language = Some((test, String::new()));
-            //         },
-            //         Event::End(TagEnd::CodeBlock) => {
-            //
-            //             if let Some((test, block)) = language.take() {
-            //                 assert_lint(group, meta.name, &test, &block, !matches!(meta.fix_kind, FixKind::None))?;
-            //
-            //             }
-            //         },
-            //         _ => {}
-            //     }
-            // }
         }
     }
 
