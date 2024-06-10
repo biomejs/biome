@@ -1878,6 +1878,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useConsistentGridAreas": {
+					"description": "Disallowing invalid named grid areas in CSS Grid Layouts.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useDateNow": {
 					"description": "Use Date.now() to get the number of milliseconds since the Unix Epoch.",
 					"anyOf": [

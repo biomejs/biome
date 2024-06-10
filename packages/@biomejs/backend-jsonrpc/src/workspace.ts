@@ -1099,6 +1099,10 @@ export interface Nursery {
 	 */
 	useConsistentBuiltinInstantiation?: RuleFixConfiguration_for_Null;
 	/**
+	 * Disallowing invalid named grid areas in CSS Grid Layouts.
+	 */
+	useConsistentGridAreas?: RuleConfiguration_for_Null;
+	/**
 	 * Use Date.now() to get the number of milliseconds since the Unix Epoch.
 	 */
 	useDateNow?: RuleFixConfiguration_for_Null;
@@ -2365,6 +2369,7 @@ export type Category =
 	| "lint/nursery/useAdjacentOverloadSignatures"
 	| "lint/nursery/useBiomeSuppressionComment"
 	| "lint/nursery/useConsistentBuiltinInstantiation"
+	| "lint/nursery/useConsistentGridAreas"
 	| "lint/nursery/useDateNow"
 	| "lint/nursery/useDefaultSwitchClause"
 	| "lint/nursery/useErrorMessage"
