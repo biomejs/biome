@@ -170,7 +170,11 @@ fn get_date_method_issue(
         .omit_parentheses();
 
     let new_expr = object.as_js_new_expression()?;
-    let object_name = new_expr.callee().ok()?.get_callee_object_name()?.token_text_trimmed();
+    let object_name = new_expr
+        .callee()
+        .ok()?
+        .get_callee_object_name()?
+        .token_text_trimmed();
 
     if object_name != "Date" || new_expr.arguments()?.args().len() > 0 {
         return None;
