@@ -11,7 +11,7 @@ declare_rule! {
     /// Use valid values for the `autocomplete` attribute on `input` elements.
     ///
     /// The HTML autocomplete attribute only accepts specific predefined values.
-    /// This allows for more detailed purpose definitions compared to the type attribute.
+    /// This allows for more detailed purpose definitions compared to the `type` attribute.
     /// Using these predefined values, user agents and assistive technologies can present input purposes to users in different ways.
     ///
     /// ## Examples
