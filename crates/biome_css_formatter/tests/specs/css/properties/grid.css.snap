@@ -43,7 +43,11 @@ Quote style: Double Quotes
 #grid {
 	display: grid;
 	grid-template-columns: [first nav-start] 150px [main-start] 1fr [last];
-	grid-template-rows: [first header-start] 50px [main-start] 1fr [footer-start]
-		50px [last];
+	grid-template-rows: [first header-start] 50px [main-start] 1fr [footer-start] 50px [last];
 }
+```
+
+# Lines exceeding max width of 80 characters
+```
+    9: 	grid-template-rows: [first header-start] 50px [main-start] 1fr [footer-start] 50px [last];
 ```

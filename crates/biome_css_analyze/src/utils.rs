@@ -7,8 +7,10 @@ use crate::keywords::{
     KNOWN_FIREFOX_PROPERTIES, KNOWN_PROPERTIES, KNOWN_SAFARI_PROPERTIES,
     KNOWN_SAMSUNG_INTERNET_PROPERTIES, KNOWN_US_BROWSER_PROPERTIES,
     LEVEL_ONE_AND_TWO_PSEUDO_ELEMENTS, LINE_HEIGHT_KEYWORDS, LINGUISTIC_PSEUDO_CLASSES,
-    LOGICAL_COMBINATIONS_PSEUDO_CLASSES, MEDIA_FEATURE_NAMES, OTHER_PSEUDO_CLASSES,
-    OTHER_PSEUDO_ELEMENTS, RESOURCE_STATE_PSEUDO_CLASSES, SHADOW_TREE_PSEUDO_ELEMENTS,
+    LOGICAL_COMBINATIONS_PSEUDO_CLASSES, LONGHAND_SUB_PROPERTIES_OF_SHORTHAND_PROPERTIES,
+    MEDIA_FEATURE_NAMES, OTHER_PSEUDO_CLASSES, OTHER_PSEUDO_ELEMENTS,
+    RESET_TO_INITIAL_PROPERTIES_BY_BORDER, RESET_TO_INITIAL_PROPERTIES_BY_FONT,
+    RESOURCE_STATE_PSEUDO_CLASSES, SHADOW_TREE_PSEUDO_ELEMENTS, SHORTHAND_PROPERTIES,
     SYSTEM_FAMILY_NAME_KEYWORDS, VENDOR_PREFIXES, VENDOR_SPECIFIC_PSEUDO_ELEMENTS,
 };
 use biome_css_syntax::{AnyCssGenericComponentValue, AnyCssValue, CssGenericComponentValueList};
@@ -196,4 +198,20 @@ pub fn is_media_feature_name(prop: &str) -> bool {
         }
     }
     false
+}
+
+pub fn get_longhand_sub_properties(shorthand_property: &str) -> &'static [&'static str] {
+    if let Ok(index) = SHORTHAND_PROPERTIES.binary_search(&shorthand_property) {
+        return LONGHAND_SUB_PROPERTIES_OF_SHORTHAND_PROPERTIES[index];
+    }
+
+    &[]
+}
+
+pub fn get_reset_to_initial_properties(shorthand_property: &str) -> &'static [&'static str] {
+    match shorthand_property {
+        "border" => &RESET_TO_INITIAL_PROPERTIES_BY_BORDER,
+        "font" => &RESET_TO_INITIAL_PROPERTIES_BY_FONT,
+        _ => &[],
+    }
 }

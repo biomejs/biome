@@ -4,7 +4,7 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_js_semantic::ReferencesExtensions;
 use biome_js_syntax::{
-    binding_ext::{AnyJsBindingDeclaration, JsAnyParameterParentFunction},
+    binding_ext::{AnyJsBindingDeclaration, AnyJsParameterParentFunction},
     JsIdentifierBinding,
 };
 use biome_rowan::{AstNode, BatchMutationExt};
@@ -65,23 +65,26 @@ pub enum SuggestedFix {
 }
 
 fn is_function_that_is_ok_parameter_not_be_used(
-    parent_function: &Option<JsAnyParameterParentFunction>,
+    parent_function: &Option<AnyJsParameterParentFunction>,
 ) -> bool {
     matches!(
         parent_function,
         Some(
             // bindings in signatures are ok to not be used
-            JsAnyParameterParentFunction::TsMethodSignatureClassMember(_)
-            | JsAnyParameterParentFunction::TsCallSignatureTypeMember(_)
-            | JsAnyParameterParentFunction::TsConstructSignatureTypeMember(_)
-            | JsAnyParameterParentFunction::TsConstructorSignatureClassMember(_)
-            | JsAnyParameterParentFunction::TsMethodSignatureTypeMember(_)
-            | JsAnyParameterParentFunction::TsSetterSignatureClassMember(_)
-            | JsAnyParameterParentFunction::TsSetterSignatureTypeMember(_)
+            AnyJsParameterParentFunction::TsMethodSignatureClassMember(_)
+            | AnyJsParameterParentFunction::TsCallSignatureTypeMember(_)
+            | AnyJsParameterParentFunction::TsConstructSignatureTypeMember(_)
+            | AnyJsParameterParentFunction::TsConstructorSignatureClassMember(_)
+            | AnyJsParameterParentFunction::TsMethodSignatureTypeMember(_)
+            | AnyJsParameterParentFunction::TsSetterSignatureClassMember(_)
+            | AnyJsParameterParentFunction::TsSetterSignatureTypeMember(_)
+            | AnyJsParameterParentFunction::TsIndexSignatureClassMember(_)
             // bindings in function types are ok to not be used
-            | JsAnyParameterParentFunction::TsFunctionType(_)
+            | AnyJsParameterParentFunction::TsFunctionType(_)
+            | AnyJsParameterParentFunction::TsConstructorType(_)
             // binding in declare are ok to not be used
-            | JsAnyParameterParentFunction::TsDeclareFunctionDeclaration(_)
+            | AnyJsParameterParentFunction::TsDeclareFunctionDeclaration(_)
+            | AnyJsParameterParentFunction::TsDeclareFunctionExportDefaultDeclaration(_)
         )
     )
 }
