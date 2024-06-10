@@ -59,6 +59,16 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 - [noEmptyInterface](https://biomejs.dev/linter/rules/no-empty-interface/) now ignores empty interfaces in ambient modules ([#3110](https://github.com/biomejs/biome/issues/3110)). Contributed by @Conaclos
 
+- [noUnusedVariables](https://biomejs.dev/linter/rules/no-unused-variables/) and [noUnusedFunctionParameters](https://biomejs.dev/linter/rules/no-unused-function-parameters/) no longer report the parameters of a constructor type ([#3135](https://github.com/biomejs/biome/issues/3135)).
+
+  Previously, `arg` was reported as unused in a constructor type like:
+
+  ```ts
+  export type Classlike = new (arg: unknown) => string;
+  ```
+
+  Contributed by @Conaclos
+
 ### Parser
 
 #### New features
