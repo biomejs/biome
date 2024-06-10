@@ -137,15 +137,11 @@ impl FromStr for CodeBlockTest {
 
         for token in tokens {
             match token {
-                // language tags
-                "cjs" | "js" | "mjs" | "jsx" | "ts" | "mts" | "cts" | "tsx" | "svelte"
-                | "astro" | "vue" | "json" | "jsonc" | "css" => test.tag = token.to_string(),
                 // Other attributes
                 "expect_diagnostic" => test.expect_diagnostic = true,
                 "ignore" => test.ignore = true,
-                // A catch-all to regard unknown tokens as foreign languages,
-                // and do not run tests on these code blocks.
-                _ => test.ignore = true,
+                // Regard as language tags, last one wins
+                _ => test.tag = token.to_string(),
             }
         }
 
@@ -370,7 +366,7 @@ fn assert_lint(
                 });
             }
         }
-        // Unknown code blocks should be already ignored by tests
+        // Unknown code blocks should be ignored by tests
         DocumentFileSource::Unknown => {}
     }
 
