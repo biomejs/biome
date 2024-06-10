@@ -166,9 +166,7 @@ impl Rule for UseValidAutocomplete {
                 }
                 let attributes = elem.attributes();
                 let autocomplete = attributes.find_by_name("autocomplete").ok()??;
-                if autocomplete.initializer().is_none() {
-                    return None;
-                }
+                let _initializer = autocomplete.initializer()?;
                 let extract_attrs = ctx.extract_attributes(&attributes)?;
                 let autocomplete_values = extract_attrs.get("autocomplete")?;
                 if is_valid_autocomplete(autocomplete_values)? {
@@ -184,9 +182,7 @@ impl Rule for UseValidAutocomplete {
                 }
                 let attributes = elem.attributes();
                 let autocomplete = attributes.find_by_name("autocomplete").ok()??;
-                if autocomplete.initializer().is_none() {
-                    return None;
-                }
+                let _initializer = autocomplete.initializer()?;
                 let extract_attrs = ctx.extract_attributes(&attributes)?;
                 let autocomplete_values = extract_attrs.get("autocomplete")?;
                 if is_valid_autocomplete(autocomplete_values)? {
@@ -219,7 +215,7 @@ impl Rule for UseValidAutocomplete {
 }
 
 /// Checks if the autocomplete attribute values are valid
-fn is_valid_autocomplete(autocomplete_values: &Vec<String>) -> Option<bool> {
+fn is_valid_autocomplete(autocomplete_values: &[String]) -> Option<bool> {
     let is_valid = match autocomplete_values.len() {
         0 => true,
         1 => {
