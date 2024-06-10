@@ -3,9 +3,9 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "check:apply": "cargo biome-cli-dev check --apply-unsafe .",
-    "check": "cargo biome-cli-dev check .",
-    "ci": "cargo biome-cli-dev ci ."
+    "check:apply": "cargo biome-cli-dev check --write --unsafe",
+    "check": "cargo biome-cli-dev check",
+    "ci": "cargo biome-cli-dev ci"
   },
   "keywords": [],
   "author": "Biome Developers and Contributors",

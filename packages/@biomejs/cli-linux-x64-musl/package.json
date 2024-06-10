@@ -11,7 +11,13 @@
     "node": ">=14.21.3"
   },
   "homepage": "https://biomejs.dev",
-  "os": ["linux"],
-  "cpu": ["x64"],
-  "libc": ["musl"]
+  "os": [
+    "linux"
+  ],
+  "cpu": [
+    "x64"
+  ],
+  "libc": [
+    "musl"
+  ]
 }
