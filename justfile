@@ -120,7 +120,7 @@ test-quick package:
   cargo test -p {{package}} --test quick_test -- quick_test --nocapture --ignored
 
 
-# Alias for `cargo lint`, it runs clippy on the whole codebase
+# Alias for `cargo lint`, it runs clippy on the whole codebase, and if rule docs are semantically correct
 lint:
   cargo lint
 
