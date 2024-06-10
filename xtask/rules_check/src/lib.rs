@@ -12,14 +12,13 @@ use biome_css_parser::CssParserOptions;
 use biome_css_syntax::CssLanguage;
 use biome_diagnostics::{Diagnostic, DiagnosticExt, PrintDiagnostic};
 use biome_js_parser::JsParserOptions;
-use biome_js_syntax::{EmbeddingKind, JsFileSource, JsLanguage, Language, ModuleKind};
+use biome_js_syntax::{EmbeddingKind, JsFileSource, JsLanguage, ModuleKind};
 use biome_json_parser::JsonParserOptions;
 use biome_json_syntax::JsonLanguage;
 use biome_service::settings::WorkspaceSettings;
-use pulldown_cmark::{CodeBlockKind, Event, LinkType, Parser, Tag, TagEnd};
+use pulldown_cmark::{CodeBlockKind, Event, Parser, Tag, TagEnd};
 use std::collections::BTreeMap;
 use std::fmt::Write;
-use std::io::Write as _;
 use std::ops::ControlFlow;
 use std::path::PathBuf;
 use std::slice;
@@ -100,12 +99,10 @@ pub fn check_rules() -> anyhow::Result<()> {
 
     for (group, rules) in groups {
         for (_, meta) in rules {
-            let mut content = vec![];
             parse_documentation(
                 group,
                 meta.name,
                 meta.docs,
-                &mut content,
                 !matches!(meta.fix_kind, FixKind::None),
             )?;
         }
@@ -503,236 +500,33 @@ fn parse_documentation(
     group: &'static str,
     rule: &'static str,
     docs: &'static str,
-    content: &mut Vec<u8>,
     has_fix_kind: bool,
 ) -> anyhow::Result<()> {
     let parser = Parser::new(docs);
 
-    // Parser events for the first paragraph of documentation in the resulting
-    // content, used as a short summary of what the rule does in the rules page
-    let mut summary = Vec::new();
-    let mut is_summary = false;
-
     // Tracks the content of the current code block if it's using a
     // language supported for analysis
     let mut language = None;
-    let mut list_order = None;
-    let mut list_indentation = 0;
-
-    // Tracks the type and metadata of the link
-    let mut start_link_tag: Option<Tag> = None;
-
     for event in parser {
-        if is_summary {
-            if matches!(event, Event::End(TagEnd::Paragraph)) {
-                is_summary = false;
-            } else {
-                summary.push(event.clone());
-            }
-        }
-
         match event {
             // CodeBlock-specific handling
             Event::Start(Tag::CodeBlock(CodeBlockKind::Fenced(meta))) => {
                 // Track the content of code blocks to pass them through the analyzer
                 let test = CodeBlockTest::from_str(meta.as_ref())?;
-
-                // Erase the lintdoc-specific attributes in the output by
-                // re-generating the language ID from the source type
-                write!(content, "```")?;
-                if !meta.is_empty() {
-                    match test.block_type {
-                        BlockType::Js(source_type) => match source_type.as_embedding_kind() {
-                            EmbeddingKind::Astro => write!(content, "astro")?,
-                            EmbeddingKind::Svelte => write!(content, "svelte")?,
-                            EmbeddingKind::Vue => write!(content, "vue")?,
-                            _ => {
-                                match source_type.language() {
-                                    Language::JavaScript => write!(content, "js")?,
-                                    Language::TypeScript { .. } => write!(content, "ts")?,
-                                };
-                                if source_type.variant().is_jsx() {
-                                    write!(content, "x")?;
-                                }
-                            }
-                        },
-                        BlockType::Json => write!(content, "json")?,
-                        BlockType::Css => write!(content, "css")?,
-                        BlockType::Foreign(ref lang) => write!(content, "{}", lang)?,
-                    }
-                }
-                writeln!(content)?;
-
                 language = Some((test, String::new()));
             }
-
             Event::End(TagEnd::CodeBlock) => {
-                writeln!(content, "```")?;
-                writeln!(content)?;
-
                 if let Some((test, block)) = language.take() {
-                    if test.expect_diagnostic {
-                        write!(
-                            content,
-                            "<pre class=\"language-text\"><code class=\"language-text\">"
-                        )?;
-                    }
-
                     assert_lint(group, rule, &test, &block, has_fix_kind)?;
-
-                    if test.expect_diagnostic {
-                        writeln!(content, "</code></pre>")?;
-                        writeln!(content)?;
-                    }
                 }
             }
-
             Event::Text(text) => {
                 if let Some((_, block)) = &mut language {
                     write!(block, "{text}")?;
                 }
-
-                write!(content, "{text}")?;
             }
-
-            // Other markdown events are emitted as-is
-            Event::Start(Tag::Heading { level, .. }) => {
-                write!(content, "{} ", "#".repeat(level as usize))?;
-            }
-            Event::End(TagEnd::Heading { .. }) => {
-                writeln!(content)?;
-                writeln!(content)?;
-            }
-
-            Event::Start(Tag::Paragraph) => {
-                if summary.is_empty() && !is_summary {
-                    is_summary = true;
-                }
-            }
-            Event::End(TagEnd::Paragraph) => {
-                writeln!(content)?;
-                writeln!(content)?;
-            }
-
-            Event::Code(text) => {
-                write!(content, "`{text}`")?;
-            }
-            Event::Start(ref link_tag @ Tag::Link { link_type, .. }) => {
-                start_link_tag = Some(link_tag.clone());
-                match link_type {
-                    LinkType::Autolink => {
-                        write!(content, "<")?;
-                    }
-                    LinkType::Inline | LinkType::Reference | LinkType::Shortcut => {
-                        write!(content, "[")?;
-                    }
-                    _ => {
-                        panic!("unimplemented link type")
-                    }
-                }
-            }
-            Event::End(TagEnd::Link) => {
-                if let Some(Tag::Link {
-                    link_type,
-                    dest_url,
-                    title,
-                    ..
-                }) = start_link_tag
-                {
-                    match link_type {
-                        LinkType::Autolink => {
-                            write!(content, ">")?;
-                        }
-                        LinkType::Inline | LinkType::Reference | LinkType::Shortcut => {
-                            write!(content, "]({dest_url}")?;
-                            if !title.is_empty() {
-                                write!(content, " \"{title}\"")?;
-                            }
-                            write!(content, ")")?;
-                        }
-                        _ => {
-                            panic!("unimplemented link type")
-                        }
-                    }
-                    start_link_tag = None;
-                } else {
-                    panic!("missing start link tag");
-                }
-            }
-
-            Event::SoftBreak => {
-                writeln!(content)?;
-            }
-
-            Event::HardBreak => {
-                writeln!(content, "<br />")?;
-            }
-
-            Event::Start(Tag::List(num)) => {
-                list_indentation += 1;
-                if let Some(num) = num {
-                    list_order = Some(num);
-                }
-                if list_indentation > 1 {
-                    writeln!(content)?;
-                }
-            }
-
-            Event::End(TagEnd::List(_)) => {
-                list_order = None;
-                list_indentation -= 1;
-                writeln!(content)?;
-            }
-            Event::Start(Tag::Item) => {
-                write!(content, "{}", "  ".repeat(list_indentation - 1))?;
-                if let Some(num) = list_order {
-                    write!(content, "{num}. ")?;
-                } else {
-                    write!(content, "- ")?;
-                }
-            }
-
-            Event::End(TagEnd::Item) => {
-                list_order = list_order.map(|item| item + 1);
-                writeln!(content)?;
-            }
-
-            Event::Start(Tag::Strong) => {
-                write!(content, "**")?;
-            }
-
-            Event::End(TagEnd::Strong) => {
-                write!(content, "**")?;
-            }
-
-            Event::Start(Tag::Emphasis) => {
-                write!(content, "_")?;
-            }
-
-            Event::End(TagEnd::Emphasis) => {
-                write!(content, "_")?;
-            }
-
-            Event::Start(Tag::Strikethrough) => {
-                write!(content, "~")?;
-            }
-
-            Event::End(TagEnd::Strikethrough) => {
-                write!(content, "~")?;
-            }
-
-            Event::Start(Tag::BlockQuote) => {
-                write!(content, ">")?;
-            }
-
-            Event::End(TagEnd::BlockQuote) => {
-                writeln!(content)?;
-            }
-
-            _ => {
-                // TODO: Implement remaining events as required
-                bail!("unimplemented event {event:?}")
-            }
+            // We don't care other events
+            _ => {}
         }
     }
 
