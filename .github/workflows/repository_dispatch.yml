@@ -76,7 +76,7 @@ jobs:
 
       - name: Publish
         working-directory: packages/@biomejs/wasm-web
-        run: pnpx pkg-pr-new publish --compact
+        run: pnpx pkg-pr-new publish
 
   repository-dispatch:
     name: Repository dispatch
