@@ -25,6 +25,10 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 ### Formatter
 
+#### Bug fixes
+
+- Fix [#3103](https://github.com/biomejs/biome/issues/3103) by correctly resolving CSS formatter options. Contributed by @ah-yu
+
 ### JavaScript APIs
 
 ### Linter
