@@ -9,28 +9,35 @@ use rustc_hash::FxHashMap;
 declare_rule! {
     /// Enforce that non-interactive, visible elements (such as `<div>`) that have click handlers use the role attribute.
     ///
+    /// Static HTML elements do not have semantic meaning. This is clear in the case of `<div>` and `<span>`. It is less so clear in the case of elements that seem semantic, but that do not have a semantic mapping in the accessibility layer. For example `<a>`, `<big>`, `<blockquote>`, `<footer>`, `<picture>`, `<strike>`, and `<time>` -- to name a few -- have no semantic layer mapping. They are as void of meaning as `<div>`.
+    ///
+    /// The [WAI-ARIA role attribute](https://www.w3.org/TR/wai-aria-1.1/#usage_intro) confers a semantic mapping to an element. The semantic value can then be expressed to a user via assistive technology.
+    /// In order to add interactivity such as a mouse or key event listener to a static element, that element must be given a role value as well.
+    ///
+    /// Source: [jsx-a11y/no-static-element-interactions](https://github.com/jsx-eslint/eslint-plugin-jsx-a11y/blob/main/docs/rules/no-static-element-interactions.md)
+    ///
     /// ## Examples
     ///
     /// ### Invalid
     ///
     /// ```jsx,expect_diagnostic
-    /// <div onClick={()=>{})}></div>;
+    /// <div onClick={() => {}}></div>;
     /// ```
     /// ```jsx,expect_diagnostic
-    /// <span onClick={()=>{})}></span>;
+    /// <span onClick={() => {}}></span>;
     /// ```
     ///
     /// When `<a>` does not have "href" attribute, that is non-interactive.
     /// ```jsx,expect_diagnostic
-    /// <a onClick={()=>{})}></a>
+    /// <a onClick={() => {}}></a>
     /// ```
     ///
     /// ### Valid
     ///
     /// ```jsx
-    /// <div role="button" onClick={()=>{})}></div>
-    /// <span role="link" onClick={()=>{})}></span>
-    /// <a href="http://example.com" onClick={()=>{})}></a>
+    /// <div role="button" onClick={() => {}}></div>
+    /// <span role="link" onClick={() => {}}></span>
+    /// <a href="http://example.com" onClick={() => {}}></a>
     /// ```
     ///
     pub NoStaticElementInteractions {
