@@ -17,21 +17,21 @@ declare_rule! {
     ///
     /// ### Invalid
     ///
-    /// ```js,expect_diagnostic
+    /// ```jsx,expect_diagnostic
     /// <div aria-hidden="true" tabIndex="0" />
     /// ```
     ///
-    /// ```js, expect_diagnostic
+    /// ```jsx,expect_diagnostic
     /// <a href="/" aria-hidden="true" />
     /// ```
     ///
     /// ### Valid
     ///
-    /// ```js
+    /// ```jsx
     /// <button aria-hidden="true" tabIndex="-1" />
     /// ```
     ///
-    /// ```js
+    /// ```jsx
     /// <div aria-hidden="true"><a href="#"></a></div>
     /// ```
     ///

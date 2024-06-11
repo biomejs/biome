@@ -15,21 +15,21 @@ declare_rule! {
     ///
     /// ### Invalid
     ///
-    /// ```js,expect_diagnostic
+    /// ```jsx,expect_diagnostic
     /// const a3 = <div>// comment</div>;
     /// ```
     ///
-    /// ```js,expect_diagnostic
+    /// ```jsx,expect_diagnostic
     /// const a4 = <div>/* comment */</div>;
     /// ```
     ///
-    /// ```js,expect_diagnostic
+    /// ```jsx,expect_diagnostic
     /// const a5 = <div>/** comment */</div>;
     /// ```
     ///
     /// ### Valid
     ///
-    /// ```js
+    /// ```jsx
     /// const a = <div>{/* comment */}</div>;
     /// const a1 = <div>{/** comment */}</div>;
     /// const a2 = <div className={"cls" /* comment */}></div>;
