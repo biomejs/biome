@@ -26,7 +26,9 @@ impl TestCase {
             .ok_or_else(|| "lib url has no segments".to_string())?;
         let filename = segments
             .last()
-            .ok_or_else(|| "lib url has no segments".to_string())?;
+            .ok_or_else(|| "lib url has no segments".to_string())
+            // cache the file name to avoid to save files that have the same name, but they come from different repos
+            .map(|filename| format!("{filename}_{}", calculate_hash(&file_url)))?;
 
         let path = Path::new(
             &env::var("CARGO_MANIFEST_DIR")
@@ -36,11 +38,7 @@ impl TestCase {
         .nth(2)
         .unwrap()
         .join("target")
-        // cache the file name to avoid to save files that have the same name, but they come from different repos
-        .join(format!(
-            "{filename}_{}",
-            calculate_hash(&filename.to_string())
-        ));
+        .join(filename);
 
         let content = std::fs::read_to_string(&path)
             .map_err(err_to_string)

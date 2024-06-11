@@ -29,19 +29,13 @@ pub fn err_to_string<E: std::fmt::Debug>(e: E) -> String {
 pub fn bench_parser_group(
     group: &mut BenchmarkGroup<WallTime>,
     test_case: TestCase,
-    use_hash: bool,
 ) {
     let parse = Parse::try_from_case(&test_case).expect("Supported language");
 
     let code = test_case.code();
 
     group.throughput(Throughput::Bytes(code.len() as u64));
-    let id = if use_hash {
-        test_case.filename_hash().to_string()
-    } else {
-        test_case.filename().to_string()
-    };
-    group.bench_with_input(BenchmarkId::new(id, "uncached"), &code, |b, _| {
+    group.bench_with_input(BenchmarkId::new(test_case.filename(), "uncached"), &code, |b, _| {
         b.iter(|| {
             let result = black_box(parse.parse());
             for diagnostic in result.into_diagnostics() {

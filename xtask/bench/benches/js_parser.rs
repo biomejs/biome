@@ -29,7 +29,7 @@ fn bench_js_parser(criterion: &mut Criterion) {
 
         match test_case {
             Ok(test_case) => {
-                bench_parser_group(&mut group, test_case, false);
+                bench_parser_group(&mut group, test_case);
             }
             Err(e) => println!("{e:?}"),
         }
