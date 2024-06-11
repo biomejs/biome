@@ -38,7 +38,7 @@ impl TestCase {
         .nth(2)
         .unwrap()
         .join("target")
-        .join(filename);
+        .join(filename.clone());
 
         let content = std::fs::read_to_string(&path)
             .map_err(err_to_string)
@@ -66,7 +66,11 @@ impl TestCase {
             });
 
         content.map(|code| {
-            println!("[{}] - using [{}]", filename.fg(red()), path.display());
+            println!(
+                "[{}] - using [{}]",
+                filename.clone().fg(red()),
+                path.display()
+            );
             TestCase {
                 id: filename.to_string(),
                 code,
@@ -77,10 +81,6 @@ impl TestCase {
 
     pub fn filename(&self) -> &str {
         &self.id
-    }
-
-    pub fn filename_hash(&self) -> String {
-        format!("{}_{}", self.filename(), calculate_hash(&self))
     }
 
     pub fn path(&self) -> &Path {
