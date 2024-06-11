@@ -421,10 +421,10 @@ pub(crate) fn lint(params: LintParams) -> LintResults {
             let mut rules = None;
             let mut organize_imports_enabled = true;
             if let Some(settings) = params.workspace.settings() {
+                // Compute final rules (taking `overrides` into account)
                 rules = settings.as_rules(params.path.as_path());
                 organize_imports_enabled = settings.organize_imports.enabled;
             }
-            // Compute final rules (taking `overrides` into account)
 
             let has_only_filter = !params.only.is_empty();
             let enabled_rules = if has_only_filter {

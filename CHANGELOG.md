@@ -36,6 +36,46 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 ### Configuration
 
+#### Bug fixes
+
+- Don't conceal previous overrides ([#3176](https://github.com/biomejs/biome/issues/3176)).
+
+  Previously, each override inherited the unset configuration of the base configuration.
+  This means that setting a configuration in an override can be concealed by a subsequent override that inherits of the value from the base configuration.
+
+  For example, in the next example, `noDebugger` was disabled for the `index.js` file.
+
+  ```json
+  {
+    "linter": {
+      "rules": {
+        "suspicious": { "noDebugger": "off" }
+      }
+    },
+    "overrides": [
+      {
+        "include": ["index.js"],
+        "linter": {
+          "rules": {
+            "suspicious": { "noDebugger": "warn" }
+          }
+        }
+      }, {
+        "include": ["index.js"],
+        "linter": {
+          "rules": {
+            "suspicious": { "noDoubleEquals": "off" }
+          }
+        }
+      }
+    ]
+  }
+  ```
+
+  The rule is now correctly enabled for the `index.js` file.
+
+  Contributed by @Conaclos
+
 ### Editors
 
 ### Formatter
