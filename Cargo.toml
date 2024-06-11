@@ -165,6 +165,7 @@ ignore             = "0.4.21"
 indexmap           = { version = "2.2.6", features = ["serde"] }
 insta              = "1.39.0"
 lazy_static        = "1.4.0"
+natord             = "1.0.9"
 oxc_resolver       = "1.8.1"
 proc-macro2        = "1.0.85"
 quickcheck         = "1.0.3"
@@ -182,12 +183,11 @@ slotmap            = "1.0.7"
 smallvec           = { version = "1.13.2", features = ["union", "const_new", "serde"] }
 syn                = "1.0.109"
 termcolor          = "1.4.1"
-tokio              = "1.36.0"
+tokio              = "1.38.0"
 tracing            = { version = "0.1.40", default-features = false, features = ["std"] }
 tracing-subscriber = "0.3.18"
 unicode-bom        = "2.0.3"
 unicode-width      = "0.1.12"
-
 [profile.dev.package.biome_wasm]
 debug     = true
 opt-level = "s"

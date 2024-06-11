@@ -1,23 +1,42 @@
 use crate::grit_context::GritExecContext;
+use crate::grit_file::GritFile;
+use crate::grit_tree::GritTree;
 use crate::{grit_binding::GritBinding, grit_context::GritQueryContext};
 use anyhow::Result;
+use grit_pattern_matcher::binding::Binding;
 use grit_pattern_matcher::constant::Constant;
+use grit_pattern_matcher::context::QueryContext;
 use grit_pattern_matcher::effects::Effect;
 use grit_pattern_matcher::pattern::{
     Accessor, DynamicPattern, DynamicSnippet, FilePtr, FileRegistry, ListIndex, Pattern,
     ResolvedPattern, ResolvedSnippet, State,
 };
 use grit_util::{AnalysisLogs, CodeRange, Range};
-use im::Vector;
+use im::{vector, Vector};
 use std::borrow::Cow;
-use std::collections::HashMap;
+use std::collections::{BTreeMap, HashMap};
 
 #[derive(Clone, Debug, PartialEq)]
-pub(crate) struct GritResolvedPattern;
+pub(crate) enum GritResolvedPattern<'a> {
+    Binding(Vector<GritBinding<'a>>),
+    Snippets(Vector<ResolvedSnippet<'a, GritQueryContext>>),
+    List(Vector<GritResolvedPattern<'a>>),
+    Map(BTreeMap<String, GritResolvedPattern<'a>>),
+    File(GritFile<'a>),
+    Files(Box<GritResolvedPattern<'a>>),
+    Constant(Constant),
+    Tree(GritTree),
+}
 
-impl<'a> ResolvedPattern<'a, GritQueryContext> for GritResolvedPattern {
-    fn from_binding(_binding: GritBinding) -> Self {
-        todo!()
+impl<'a> GritResolvedPattern<'a> {
+    pub fn from_tree(tree: &'a GritTree) -> Self {
+        Self::from_binding(GritBinding::from_tree(tree))
+    }
+}
+
+impl<'a> ResolvedPattern<'a, GritQueryContext> for GritResolvedPattern<'a> {
+    fn from_binding(binding: GritBinding<'a>) -> Self {
+        Self::Binding(vector![binding])
     }
 
     fn from_constant(_constant: Constant) -> Self {
@@ -93,7 +112,7 @@ impl<'a> ResolvedPattern<'a, GritQueryContext> for GritResolvedPattern {
         &mut self,
         _with: Self,
         _effects: &mut Vector<Effect<'a, GritQueryContext>>,
-        _language: &<GritQueryContext as grit_pattern_matcher::context::QueryContext>::Language<'a>,
+        _language: &<GritQueryContext as QueryContext>::Language<'a>,
     ) -> anyhow::Result<()> {
         todo!()
     }
@@ -101,19 +120,25 @@ impl<'a> ResolvedPattern<'a, GritQueryContext> for GritResolvedPattern {
     fn float(
         &self,
         _state: &FileRegistry<'a, GritQueryContext>,
-        _language: &<GritQueryContext as grit_pattern_matcher::context::QueryContext>::Language<'a>,
+        _language: &<GritQueryContext as QueryContext>::Language<'a>,
     ) -> anyhow::Result<f64> {
         todo!()
     }
 
-    fn get_bindings(&self) -> Option<impl Iterator<Item = GritBinding>> {
-        None::<TodoBindingIterator>
+    fn get_bindings(&self) -> Option<impl Iterator<Item = GritBinding<'a>>> {
+        if let Self::Binding(bindings) = self {
+            Some(bindings.iter().cloned())
+        } else {
+            None
+        }
     }
 
-    fn get_file(
-        &self,
-    ) -> Option<&<GritQueryContext as grit_pattern_matcher::context::QueryContext>::File<'a>> {
-        todo!()
+    fn get_file(&self) -> Option<&GritFile<'a>> {
+        if let Self::File(file) = self {
+            Some(file)
+        } else {
+            None
+        }
     }
 
     fn get_file_pointers(&self) -> Option<Vec<FilePtr>> {
@@ -124,8 +149,12 @@ impl<'a> ResolvedPattern<'a, GritQueryContext> for GritResolvedPattern {
         todo!()
     }
 
-    fn get_last_binding(&self) -> Option<&GritBinding> {
-        todo!()
+    fn get_last_binding(&self) -> Option<&GritBinding<'a>> {
+        if let Self::Binding(bindings) = self {
+            bindings.last()
+        } else {
+            None
+        }
     }
 
     fn get_list_item_at(&self, _index: isize) -> Option<&Self> {
@@ -137,44 +166,62 @@ impl<'a> ResolvedPattern<'a, GritQueryContext> for GritResolvedPattern {
     }
 
     fn get_list_items(&self) -> Option<impl Iterator<Item = &Self>> {
-        None::<TodoSelfRefIterator>
+        if let Self::List(items) = self {
+            Some(items.iter())
+        } else {
+            None
+        }
     }
 
     fn get_list_binding_items(&self) -> Option<impl Iterator<Item = Self> + Clone> {
-        None::<TodoSelfIterator>
+        self.get_last_binding()
+            .and_then(Binding::list_items)
+            .map(|items| items.map(GritResolvedPattern::from_node_binding))
     }
 
     fn get_map(&self) -> Option<&std::collections::BTreeMap<String, Self>> {
-        todo!()
+        if let Self::Map(map) = self {
+            Some(map)
+        } else {
+            None
+        }
     }
 
     fn get_map_mut(&mut self) -> Option<&mut std::collections::BTreeMap<String, Self>> {
-        todo!()
+        if let Self::Map(map) = self {
+            Some(map)
+        } else {
+            None
+        }
     }
 
     fn get_snippets(&self) -> Option<impl Iterator<Item = ResolvedSnippet<'a, GritQueryContext>>> {
-        None::<TodoSnippetIterator>
+        if let Self::Snippets(snippets) = self {
+            Some(snippets.iter().cloned())
+        } else {
+            None
+        }
     }
 
     fn is_binding(&self) -> bool {
-        todo!()
+        matches!(self, Self::Binding(_))
     }
 
     fn is_list(&self) -> bool {
-        todo!()
+        matches!(self, Self::List(_))
     }
 
     fn is_truthy(
         &self,
         _state: &mut State<'a, GritQueryContext>,
-        _language: &<GritQueryContext as grit_pattern_matcher::context::QueryContext>::Language<'a>,
+        _language: &<GritQueryContext as QueryContext>::Language<'a>,
     ) -> Result<bool> {
         todo!()
     }
 
     fn linearized_text(
         &self,
-        _language: &<GritQueryContext as grit_pattern_matcher::context::QueryContext>::Language<'a>,
+        _language: &<GritQueryContext as QueryContext>::Language<'a>,
         _effects: &[Effect<'a, GritQueryContext>],
         _files: &FileRegistry<'a, GritQueryContext>,
         _memo: &mut HashMap<CodeRange, Option<String>>,
@@ -196,14 +243,14 @@ impl<'a> ResolvedPattern<'a, GritQueryContext> for GritResolvedPattern {
         &mut self,
         _binding: &GritBinding,
         _is_first: bool,
-        _language: &<GritQueryContext as grit_pattern_matcher::context::QueryContext>::Language<'a>,
+        _language: &<GritQueryContext as QueryContext>::Language<'a>,
     ) -> Result<()> {
         todo!()
     }
 
     fn position(
         &self,
-        _language: &<GritQueryContext as grit_pattern_matcher::context::QueryContext>::Language<'a>,
+        _language: &<GritQueryContext as QueryContext>::Language<'a>,
     ) -> Option<Range> {
         todo!()
     }
@@ -219,17 +266,19 @@ impl<'a> ResolvedPattern<'a, GritQueryContext> for GritResolvedPattern {
     fn text(
         &self,
         _state: &grit_pattern_matcher::pattern::FileRegistry<'a, GritQueryContext>,
-        _language: &<GritQueryContext as grit_pattern_matcher::context::QueryContext>::Language<'a>,
+        _language: &<GritQueryContext as QueryContext>::Language<'a>,
     ) -> Result<Cow<'a, str>> {
         todo!()
     }
 }
 
 #[derive(Clone)]
-struct TodoBindingIterator;
+struct TodoBindingIterator<'a> {
+    _pattern: &'a GritResolvedPattern<'a>,
+}
 
-impl Iterator for TodoBindingIterator {
-    type Item = GritBinding;
+impl<'a> Iterator for TodoBindingIterator<'a> {
+    type Item = GritBinding<'a>;
 
     fn next(&mut self) -> Option<Self::Item> {
         todo!()
@@ -237,10 +286,12 @@ impl Iterator for TodoBindingIterator {
 }
 
 #[derive(Clone)]
-struct TodoSelfIterator;
+struct TodoSelfIterator<'a> {
+    _pattern: &'a GritResolvedPattern<'a>,
+}
 
-impl Iterator for TodoSelfIterator {
-    type Item = GritResolvedPattern;
+impl<'a> Iterator for TodoSelfIterator<'a> {
+    type Item = GritResolvedPattern<'a>;
 
     fn next(&mut self) -> Option<Self::Item> {
         todo!()
@@ -248,11 +299,11 @@ impl Iterator for TodoSelfIterator {
 }
 
 struct TodoSelfRefIterator<'a> {
-    _pattern: &'a GritResolvedPattern,
+    _pattern: &'a GritResolvedPattern<'a>,
 }
 
 impl<'a> Iterator for TodoSelfRefIterator<'a> {
-    type Item = &'a GritResolvedPattern;
+    type Item = &'a GritResolvedPattern<'a>;
 
     fn next(&mut self) -> Option<Self::Item> {
         todo!()
@@ -261,7 +312,7 @@ impl<'a> Iterator for TodoSelfRefIterator<'a> {
 
 #[derive(Clone)]
 struct TodoSnippetIterator<'a> {
-    _pattern: &'a GritResolvedPattern,
+    _pattern: &'a GritResolvedPattern<'a>,
 }
 
 impl<'a> Iterator for TodoSnippetIterator<'a> {

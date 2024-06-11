@@ -1,6 +1,6 @@
 //! Generated file, do not edit by hand, see `xtask/codegen`
 
-use biome_analyze::declare_group;
+use biome_analyze::declare_lint_group;
 
 pub mod no_arguments;
 pub mod no_comma_operator;
@@ -46,7 +46,7 @@ pub mod use_single_var_declarator;
 pub mod use_template;
 pub mod use_while;
 
-declare_group! {
+declare_lint_group! {
     pub Style {
         name : "style" ,
         rules : [

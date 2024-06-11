@@ -1,7 +1,10 @@
-use super::compilation_context::NodeCompilationContext;
+use super::{compilation_context::NodeCompilationContext, PatternCompiler};
 use crate::{
-    grit_code_snippet::GritCodeSnippet, grit_context::GritQueryContext,
-    grit_target_node::GritTargetNode, grit_tree::GritTree, CompileError,
+    grit_code_snippet::GritCodeSnippet,
+    grit_context::GritQueryContext,
+    grit_target_node::{GritTargetNode, GritTargetSyntaxKind},
+    grit_tree::GritTree,
+    CompileError,
 };
 use grit_pattern_matcher::{
     constants::GLOBAL_VARS_SCOPE_INDEX,
@@ -57,7 +60,7 @@ pub(crate) fn parse_snippet_content(
     }
 
     let snippet_trees = context.compilation.lang.parse_snippet_contexts(source);
-    let snippet_nodes = nodes_from_indices(&snippet_trees);
+    let snippet_nodes = nodes_from_trees(&snippet_trees);
     if snippet_nodes.is_empty() {
         // not checking if is_rhs. So could potentially
         // be harder to find bugs where we expect the pattern
@@ -68,9 +71,19 @@ pub(crate) fn parse_snippet_content(
         ));
     }
 
+    let patterns: Vec<(GritTargetSyntaxKind, Pattern<GritQueryContext>)> = snippet_nodes
+        .into_iter()
+        .map(|node| {
+            Ok((
+                node.kind(),
+                PatternCompiler::from_snippet_node(node, range, context, is_rhs)?,
+            ))
+        })
+        .collect::<Result<_, CompileError>>()?;
     let dynamic_snippet = dynamic_snippet_from_source(source, range, context)
         .map_or(None, |s| Some(DynamicPattern::Snippet(s)));
     Ok(Pattern::CodeSnippet(GritCodeSnippet {
+        patterns,
         dynamic_snippet,
         source: source.to_owned(),
     }))
@@ -127,14 +140,11 @@ pub(crate) fn dynamic_snippet_from_source(
     Ok(DynamicSnippet { parts })
 }
 
-pub fn nodes_from_indices(indices: &[SnippetTree<GritTree>]) -> Vec<GritTargetNode> {
-    indices
-        .iter()
-        .filter_map(snippet_nodes_from_index)
-        .collect()
+pub fn nodes_from_trees(indices: &[SnippetTree<GritTree>]) -> Vec<GritTargetNode> {
+    indices.iter().filter_map(snippet_node_from_tree).collect()
 }
 
-fn snippet_nodes_from_index(snippet: &SnippetTree<GritTree>) -> Option<GritTargetNode> {
+fn snippet_node_from_tree(snippet: &SnippetTree<GritTree>) -> Option<GritTargetNode> {
     let mut snippet_root = snippet.tree.root_node();
 
     // find the outermost node with the same index as the snippet

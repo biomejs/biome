@@ -69,7 +69,7 @@ impl<L: Language> SyntaxToken<L> {
         self.raw.text_trimmed_range()
     }
 
-    pub(crate) fn index(&self) -> usize {
+    pub fn index(&self) -> usize {
         self.raw.index()
     }
 

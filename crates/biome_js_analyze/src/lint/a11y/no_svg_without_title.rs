@@ -15,34 +15,34 @@ declare_rule! {
     ///
     /// ### Invalid
     ///
-    /// ```js,expect_diagnostic
+    /// ```jsx,expect_diagnostic
     /// <svg>foo</svg>
     /// ```
     ///
-    /// ```js,expect_diagnostic
+    /// ```jsx,expect_diagnostic
     /// <svg>
     ///     <title></title>
     ///     <circle />
     /// </svg>
     /// ```
     ///
-    /// ```js,expect_diagnostic
+    /// ```jsx,expect_diagnostic
     /// <svg>foo</svg>
     /// ```
     ///
-    /// ```js
+    /// ```jsx
     /// <svg role="img" aria-label="">
     ///     <span id="">Pass</span>
     /// </svg>
     /// ```
     ///
-    /// ```js
+    /// ```jsx
     /// <svg role="presentation">foo</svg>
     /// ```
     ///
     /// ### Valid
     ///
-    /// ```js
+    /// ```jsx
     /// <svg>
     ///     <rect />
     ///     <rect />
@@ -58,33 +58,33 @@ declare_rule! {
     /// </svg>
     /// ```
     ///
-    /// ```js
+    /// ```jsx
     /// <svg>
     ///     <title>Pass</title>
     ///     <circle />
     /// </svg>
     /// ```
     ///
-    /// ```js
+    /// ```jsx
     /// <svg role="img" aria-labelledby="title">
     ///     <span id="title">Pass</span>
     /// </svg>
     /// ```
     ///
-    /// ```js
+    /// ```jsx
     /// <svg role="img" aria-label="title">
     ///     <span id="title">Pass</span>
     /// </svg>
     /// ```
-    /// ```js
+    /// ```jsx
     /// <svg role="graphics-symbol"><rect /></svg>
     /// ```
     ///
-    /// ```js
+    /// ```jsx
     /// <svg role="graphics-symbol img"><rect /></svg>
     /// ```
     ///
-    /// ```js
+    /// ```jsx
     /// <svg aria-hidden="true"><rect /></svg>
     /// ```
     ///

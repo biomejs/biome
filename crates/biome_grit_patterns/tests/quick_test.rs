@@ -1,23 +1,42 @@
 use biome_grit_parser::parse_grit;
-use biome_grit_patterns::{GritQuery, GritTargetLanguage, JsTargetLanguage};
+use biome_grit_patterns::{GritQuery, GritTargetLanguage, GritTree, JsTargetLanguage};
+use biome_js_parser::{parse_module, JsParserOptions};
 
 // Use this test to quickly execute a Grit query against an source snippet.
 #[ignore]
 #[test]
 fn test_query() {
-    let parse_result = parse_grit("`console.log('hello')`");
-    if !parse_result.diagnostics().is_empty() {
+    let parse_grit_result = parse_grit("`console.log('hello')`");
+    if !parse_grit_result.diagnostics().is_empty() {
         println!(
             "Diagnostics from parsing query:\n{:?}",
-            parse_result.diagnostics()
+            parse_grit_result.diagnostics()
         );
     }
 
     let query = GritQuery::from_node(
-        parse_result.tree(),
+        parse_grit_result.tree(),
         GritTargetLanguage::JsTargetLanguage(JsTargetLanguage),
     )
     .expect("could not construct query");
 
-    query.execute().expect("could not execute query");
+    let parse_js_result = parse_module(
+        r#"
+function hello() {
+    console
+        .log("hello");
+}
+"#,
+        JsParserOptions::default(),
+    );
+    if !parse_js_result.diagnostics().is_empty() {
+        println!(
+            "Diagnostics from parsing JS snippet:\n{:?}",
+            parse_js_result.diagnostics()
+        );
+    }
+
+    query
+        .execute(&GritTree::new(parse_js_result.syntax().into()))
+        .expect("could not execute query");
 }
