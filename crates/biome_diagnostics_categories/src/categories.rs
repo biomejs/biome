@@ -269,7 +269,11 @@ define_categories! {
     "lint/suspicious/useIsArray": "https://biomejs.dev/linter/rules/use-is-array",
     "lint/suspicious/useNamespaceKeyword": "https://biomejs.dev/linter/rules/use-namespace-keyword",
     "lint/suspicious/useValidTypeof": "https://biomejs.dev/linter/rules/use-valid-typeof",
-    ;
+    ; // end lint rules
+
+    "assists/nursery/useSortedKeys",
+    // end assist rules
+
     // General categories
     "files/missingHandler",
     "format",

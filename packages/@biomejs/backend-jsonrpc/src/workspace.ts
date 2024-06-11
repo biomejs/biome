@@ -2494,6 +2494,7 @@ export type Category =
 	| "lint/suspicious/useIsArray"
 	| "lint/suspicious/useNamespaceKeyword"
 	| "lint/suspicious/useValidTypeof"
+	| "assists/nursery/useSortedKeys"
 	| "files/missingHandler"
 	| "format"
 	| "check"
@@ -2651,8 +2652,10 @@ export interface CodeSuggestion {
 	suggestion: TextEdit;
 }
 /**
- * The sub-category of a refactor code action
- */
+	* The sub-category of a refactor code action.
+
+[Check the LSP spec](https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#codeActionKind) for more information: 
+	 */
 export type RefactorKind =
 	| "None"
 	| "Extract"

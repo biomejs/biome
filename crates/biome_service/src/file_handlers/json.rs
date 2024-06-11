@@ -32,6 +32,7 @@ use biome_json_syntax::{JsonLanguage, JsonRoot, JsonSyntaxNode};
 use biome_parser::AnyParse;
 use biome_rowan::{AstNode, NodeCache};
 use biome_rowan::{TextRange, TextSize, TokenAtOffset};
+use tracing::{debug_span, trace_span};
 
 #[derive(Debug, Clone, Default, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
@@ -428,10 +429,23 @@ fn lint(params: LintParams) -> LintResults {
         })
 }
 
-fn code_actions(_: CodeActionsParams) -> PullActionsResult {
-    PullActionsResult {
-        actions: Vec::new(),
-    }
+fn code_actions(params: CodeActionsParams) -> PullActionsResult {
+    let CodeActionsParams {
+        parse,
+        range,
+        workspace: _,
+        path,
+        manifest: _,
+        language: _,
+        settings: _,
+    } = params;
+
+    debug_span!("Code actions JSON",  range =? range, path =? path).in_scope(move || {
+        let tree: JsonRoot = parse.tree();
+        trace_span!("Parsed file", tree =? tree).in_scope(move || PullActionsResult {
+            actions: Vec::new(),
+        })
+    })
 }
 
 fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceError> {
