@@ -132,6 +132,7 @@ define_categories! {
     "lint/nursery/noReactSpecificProps": "https://biomejs.dev/linter/rules/no-react-specific-props",
     "lint/nursery/noRestrictedImports": "https://biomejs.dev/linter/rules/no-restricted-imports",
     "lint/nursery/noShorthandPropertyOverrides": "https://biomejs.dev/linter/rules/no-shorthand-property-overrides",
+    "lint/nursery/noSubstr": "https://biomejs.dev/linter/rules/no-substr",
     "lint/nursery/noTypeOnlyImportAttributes": "https://biomejs.dev/linter/rules/no-type-only-import-attributes",
     "lint/nursery/noUndeclaredDependencies": "https://biomejs.dev/linter/rules/no-undeclared-dependencies",
     "lint/nursery/noUnknownFunction": "https://biomejs.dev/linter/rules/no-unknown-function",
@@ -269,7 +270,11 @@ define_categories! {
     "lint/suspicious/useIsArray": "https://biomejs.dev/linter/rules/use-is-array",
     "lint/suspicious/useNamespaceKeyword": "https://biomejs.dev/linter/rules/use-namespace-keyword",
     "lint/suspicious/useValidTypeof": "https://biomejs.dev/linter/rules/use-valid-typeof",
-    ;
+    ; // end lint rules
+
+    "assists/nursery/useSortedKeys",
+    // end assist rules
+
     // General categories
     "files/missingHandler",
     "format",

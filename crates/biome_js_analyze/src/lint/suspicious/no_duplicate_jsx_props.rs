@@ -13,21 +13,21 @@ declare_rule! {
     ///
     /// ### Invalid
     ///
-    /// ```js,expect_diagnostic
+    /// ```jsx,expect_diagnostic
     /// <Hello name="John" name="John" />
     /// ```
     ///
-    /// ```js,expect_diagnostic
+    /// ```jsx,expect_diagnostic
     /// <label xml:lang="en-US" xml:lang="en-US"></label>
     /// ```
     ///
     /// ### Valid
     ///
-    /// ```js
+    /// ```jsx
     /// <Hello firstname="John" lastname="Doe" />
     /// ```
     ///
-    /// ```js
+    /// ```jsx
     /// <label xml:lang="en-US" lang="en-US"></label>
     /// ```
  pub NoDuplicateJsxProps {

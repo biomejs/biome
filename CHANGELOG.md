@@ -13,6 +13,10 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 ### Analyzer
 
+#### New features
+
+- Add [nursery/noShorthandPropertyOverrides](https://biomejs.dev/linter/rules/no-shorthand-property-overrides). [#2958](https://github.com/biomejs/biome/issues/2958) Contributed by @neokidev
+
 ### CLI
 
 ### Configuration
@@ -20,6 +24,10 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 ### Editors
 
 ### Formatter
+
+#### Bug fixes
+
+- Fix [#3103](https://github.com/biomejs/biome/issues/3103) by correctly resolving CSS formatter options. Contributed by @ah-yu
 
 ### JavaScript APIs
 
@@ -32,7 +40,10 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 #### Bug fixes
 
+- Fix [useDateNow](https://biomejs.dev/linter/rules/use-date-now/) false positive when new Date object has arguments `new Date(0).getTime()`. Contributed by @minht11.
 - The [`noUnmatchableAnbSelector`](https://biomejs.dev/linter/rules/no-unmatchable-anb-selector/) rule is now able to catch unmatchable `an+b` selectors like `0n+0` or `-0n+0`. Contributed by @Sec-ant.
+
+- The [`useHookAtTopLevel`](https://biomejs.dev/linter/rules/use-hook-at-top-level/) rule now recognizes properties named as hooks like `foo.useFoo()`. Contributed by @ksnyder9801
 
 ### Parser
 
@@ -468,7 +479,7 @@ New rules are incubated in the nursery group. Once stable, we promote them to a 
 - Add [nursery/noUnknownMediaFeatureName](https://biomejs.dev/linter/rules/no-unknown-media-feature-name). [#2751](https://github.com/biomejs/biome/issues/2751) Contributed by @Kazuhiro-Mimaki
 - Add [nursery/noUnknownProperty](https://biomejs.dev/linter/rules/no-unknown-property). [#2755](https://github.com/biomejs/biome/pull/2755) Contributed by @chansuke
 - Add [nursery/noUnknownSelectorPseudoElement](https://biomejs.dev/linter/rules/no-unknown-selector-pseudo-element). [#2655](https://github.com/biomejs/biome/issues/2655) Contributed by @keita-hino
-- Add [nursery/noUnknownUnit](https://biomejs.dev/linter/rules/no-unknwon-unit). [#2535](https://github.com/biomejs/biome/issues/2535) Contributed by @neokidev
+- Add [nursery/noUnknownUnit](https://biomejs.dev/linter/rules/no-unknown-unit). [#2535](https://github.com/biomejs/biome/issues/2535) Contributed by @neokidev
 - Add [nursery/noUnmatchableAnbSelector](https://biomejs.dev/linter/rules/no-unmatchable-anb-selector). [#2706](https://github.com/biomejs/biome/issues/2706) Contributed by @togami2864
 - Add [nursery/useGenericFontNames](https://biomejs.dev/linter/rules/use-generic-font-names). [#2573](https://github.com/biomejs/biome/pull/2573) Contributed by @togami2864
 - Add [nursery/noYodaExpression](https://biomejs.dev/linter/rules/no-yoda-expression/). Contributed by @michellocana

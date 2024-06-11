@@ -495,9 +495,10 @@ impl From<CssConfiguration> for LanguageSettings<CssLanguage> {
         language_setting.parser.css_modules = css.parser.css_modules;
 
         language_setting.formatter.enabled = Some(css.formatter.enabled);
-        language_setting.formatter.line_width = Some(css.formatter.line_width);
-        language_setting.formatter.indent_width = Some(css.formatter.indent_width);
-        language_setting.formatter.indent_style = Some(css.formatter.indent_style.into());
+        language_setting.formatter.indent_width = css.formatter.indent_width;
+        language_setting.formatter.indent_style = css.formatter.indent_style.map(Into::into);
+        language_setting.formatter.line_width = css.formatter.line_width;
+        language_setting.formatter.line_ending = css.formatter.line_ending;
         language_setting.formatter.quote_style = Some(css.formatter.quote_style);
         language_setting.linter.enabled = Some(css.linter.enabled);
 

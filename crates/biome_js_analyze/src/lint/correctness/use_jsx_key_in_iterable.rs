@@ -21,16 +21,16 @@ declare_rule! {
     ///
     /// ### Invalid
     ///
-    /// ```js,expect_diagnostic
+    /// ```jsx,expect_diagnostic
     /// [<Hello />];
     /// ```
-    /// ```js,expect_diagnostic
+    /// ```jsx,expect_diagnostic
     /// data.map((x) => <Hello>{x}</Hello>);
     /// ```
     ///
     /// ### Valid
     ///
-    /// ```js
+    /// ```jsx
     /// [<Hello key="first" />, <Hello key="second" />, <Hello key="third" />];
     /// data.map((x) => <Hello key={x.id}>{x}</Hello>);
     /// ```
@@ -92,7 +92,7 @@ impl Rule for UseJsxKeyInIterable {
 ///
 /// Examples
 ///
-/// ```js
+/// ```jsx
 /// [<h1></h1>, <h1></h1>]
 /// ```
 fn handle_collections(node: &JsArrayExpression, model: &SemanticModel) -> Vec<TextRange> {
@@ -114,7 +114,7 @@ fn handle_collections(node: &JsArrayExpression, model: &SemanticModel) -> Vec<Te
 ///
 /// Examples
 ///
-/// ```js
+/// ```jsx
 /// data.map(x => <h1>{x}</h1>)
 /// ```
 fn handle_iterators(node: &JsCallExpression, model: &SemanticModel) -> Option<Vec<TextRange>> {
@@ -285,7 +285,7 @@ fn handle_react_component(
 ///
 /// Examples
 ///
-/// ```js
+/// ```jsx
 /// <Hello></Hello>
 /// ```
 fn handle_jsx_tag(node: &JsxTagExpression, model: &SemanticModel) -> Option<Vec<TextRange>> {

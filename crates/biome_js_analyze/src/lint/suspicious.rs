@@ -1,6 +1,6 @@
 //! Generated file, do not edit by hand, see `xtask/codegen`
 
-use biome_analyze::declare_group;
+use biome_analyze::declare_lint_group;
 
 pub mod no_approximative_numeric_constant;
 pub mod no_array_index_key;
@@ -58,7 +58,7 @@ pub mod use_is_array;
 pub mod use_namespace_keyword;
 pub mod use_valid_typeof;
 
-declare_group! {
+declare_lint_group! {
     pub Suspicious {
         name : "suspicious" ,
         rules : [

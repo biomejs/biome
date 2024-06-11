@@ -111,15 +111,17 @@ impl From<(u8, u8, bool)> for ReactHookConfiguration {
 }
 
 fn get_untrimmed_callee_name(call: &JsCallExpression) -> Option<SyntaxToken<JsLanguage>> {
-    let name = call
-        .callee()
-        .ok()?
-        .as_js_identifier_expression()?
-        .name()
-        .ok()?
-        .value_token()
-        .ok()?;
-    Some(name)
+    let callee = call.callee().ok()?;
+
+    if let Some(identifier) = callee.as_js_identifier_expression() {
+        return identifier.name().ok()?.value_token().ok();
+    }
+
+    if let Some(member_expression) = callee.as_js_static_member_expression() {
+        return member_expression.member().ok()?.value_token().ok();
+    }
+
+    None
 }
 
 /// Checks whether the given function name belongs to a React component, based

@@ -1776,6 +1776,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noSubstr": {
+					"description": "Enforce the use of String.slice() over String.substr() and String.substring().",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleFixConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noUndeclaredDependencies": {
 					"description": "Disallow the use of dependencies that aren't specified in the package.json.",
 					"anyOf": [

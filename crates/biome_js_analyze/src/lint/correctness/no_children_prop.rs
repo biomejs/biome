@@ -15,7 +15,7 @@ declare_rule! {
     ///
     /// ### Invalid
     ///
-    /// ```js,expect_diagnostic
+    /// ```jsx,expect_diagnostic
     /// <FirstComponent children={'foo'} />
     /// ```
     ///
