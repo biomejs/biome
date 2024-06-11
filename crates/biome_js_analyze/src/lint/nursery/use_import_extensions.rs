@@ -91,11 +91,7 @@ impl Rule for UseImportExtensions {
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
 
-        let file_ext = ctx
-            .file_path()
-            .extension()
-            .and_then(|ext| ext.to_str())
-            .unwrap_or("js");
+        let file_ext = ctx.file_path().extension().and_then(|ext| ext.to_str())?;
 
         get_extensionless_import(file_ext, node)
     }

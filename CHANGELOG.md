@@ -35,6 +35,7 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 #### Bug fixes
 
+- [useImportExtensions](https://biomejs.dev/linter/rules/use-import-extensions/) now suggests a correct fix for `import '.'` and `import './.'`. Contributed by @minht11
 - Fix [useDateNow](https://biomejs.dev/linter/rules/use-date-now/) false positive when new Date object has arguments `new Date(0).getTime()`. Contributed by @minht11.
 - The [`noUnmatchableAnbSelector`](https://biomejs.dev/linter/rules/no-unmatchable-anb-selector/) rule is now able to catch unmatchable `an+b` selectors like `0n+0` or `-0n+0`. Contributed by @Sec-ant.
 
@@ -74,7 +75,6 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 #### Bug fixes
 
-- [useImportExtensions](https://biomejs.dev/linter/rules/use-import-extensions/) now suggests a correct fix for `import '.'` and `import './.'`. Contributed by @minht11
 - The `noEmptyBlock` css lint rule now treats empty blocks containing comments as valid ones. Contributed by @Sec-ant
 
 - [useLiteralKeys](https://biomejs.dev/linter/rules/use-literal-keys/) no longer reports quoted member names ([#3085](https://github.com/biomejs/biome/issues/3085)).
