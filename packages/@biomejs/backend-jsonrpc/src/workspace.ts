@@ -1039,6 +1039,10 @@ export interface Nursery {
 	 */
 	noShorthandPropertyOverrides?: RuleConfiguration_for_Null;
 	/**
+	 * Enforce the use of String.slice() over String.substr() and String.substring().
+	 */
+	noSubstr?: RuleFixConfiguration_for_Null;
+	/**
 	 * Disallow the use of dependencies that aren't specified in the package.json.
 	 */
 	noUndeclaredDependencies?: RuleConfiguration_for_Null;
@@ -2353,6 +2357,7 @@ export type Category =
 	| "lint/nursery/noReactSpecificProps"
 	| "lint/nursery/noRestrictedImports"
 	| "lint/nursery/noShorthandPropertyOverrides"
+	| "lint/nursery/noSubstr"
 	| "lint/nursery/noTypeOnlyImportAttributes"
 	| "lint/nursery/noUndeclaredDependencies"
 	| "lint/nursery/noUnknownFunction"
