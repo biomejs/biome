@@ -3354,7 +3354,7 @@
 			"required": ["inputComponents"],
 			"properties": {
 				"inputComponents": {
-					"description": "input like custom components that should be checked.",
+					"description": "`input` like custom components that should be checked.",
 					"type": "array",
 					"items": { "type": "string" }
 				}

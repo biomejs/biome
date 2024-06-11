@@ -1954,7 +1954,7 @@ export interface UtilityClassSortingOptions {
 }
 export interface UseValidAutocompleteOptions {
 	/**
-	 * input like custom components that should be checked.
+	 * `input` like custom components that should be checked.
 	 */
 	inputComponents: string[];
 }
