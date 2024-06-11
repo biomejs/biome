@@ -62,77 +62,77 @@ declare_node_union! {
     pub UseValidAutocompleteQuery = JsxSelfClosingElement | JsxOpeningElement
 }
 
+// Sorted for binary search
 const VALID_AUTOCOMPLETE_VALUES: [&str; 55] = [
-    "on",
-    "off",
-    // token-list
-    "name",
-    "honorific-prefix",
-    "given-name",
     "additional-name",
-    "family-name",
-    "honorific-suffix",
-    "nickname",
-    "email",
-    "username",
-    "new-password",
-    "current-password",
-    "one-time-code",
-    "organization-title",
-    "organization",
-    "street-address",
+    "address-level1",
+    "address-level2",
+    "address-level3",
+    "address-level4",
     "address-line1",
     "address-line2",
     "address-line3",
-    "address-level4",
-    "address-level3",
-    "address-level2",
-    "address-level1",
-    "country",
-    "country-name",
-    "postal-code",
-    "cc-name",
-    "cc-given-name",
-    "cc-additional-name",
-    "cc-family-name",
-    "cc-number",
-    "cc-exp",
-    "cc-exp-month",
-    "cc-exp-year",
-    "cc-csc",
-    "cc-type",
-    "transaction-currency",
-    "transaction-amount",
-    "language",
     "bday",
     "bday-day",
     "bday-month",
     "bday-year",
-    "sex",
-    "tel",
-    "tel-country-code",
-    "tel-national",
-    "tel-area-code",
-    "tel-local",
-    "tel-extension",
+    "cc-additional-name",
+    "cc-csc",
+    "cc-exp",
+    "cc-exp-month",
+    "cc-exp-year",
+    "cc-family-name",
+    "cc-given-name",
+    "cc-name",
+    "cc-number",
+    "cc-type",
+    "country",
+    "country-name",
+    "current-password",
+    "email",
+    "family-name",
+    "given-name",
+    "honorific-prefix",
+    "honorific-suffix",
     "impp",
-    "url",
+    "language",
+    "name",
+    "nickname",
+    "new-password",
+    "off",
+    "on",
+    "one-time-code",
+    "organization",
+    "organization-title",
     "photo",
+    "postal-code",
+    "sex",
+    "street-address",
+    "tel",
+    "tel-area-code",
+    "tel-country-code",
+    "tel-extension",
+    "tel-local",
+    "tel-national",
+    "transaction-amount",
+    "transaction-currency",
+    "url",
+    "username",
     "webauthn",
 ];
 
 const BILLING_AND_SHIPPING_ADDRESS: &[&str; 11] = &[
-    "street-address",
+    "address-level1",
+    "address-level2",
+    "address-level3",
+    "address-level4",
     "address-line1",
     "address-line2",
     "address-line3",
-    "address-level4",
-    "address-level3",
-    "address-level2",
-    "address-level1",
     "country",
     "country-name",
     "postal-code",
+    "street-address",
 ];
 
 #[derive(Clone, Debug, Default, Deserialize, Deserializable, Eq, PartialEq, Serialize)]
@@ -216,18 +216,20 @@ fn is_valid_autocomplete(autocomplete_values: &[String]) -> Option<bool> {
             let first = autocomplete_values.first()?.as_str();
             first.is_empty()
                 | first.starts_with("section-")
-                | VALID_AUTOCOMPLETE_VALUES.contains(&first)
+                | VALID_AUTOCOMPLETE_VALUES.binary_search(&first).is_ok()
         }
         _ => {
             let first = autocomplete_values.first()?.as_str();
             let second = autocomplete_values.get(1)?.as_str();
             first.starts_with("section-")
                 || ["billing", "shipping"].contains(&first)
-                    && (BILLING_AND_SHIPPING_ADDRESS.contains(&second)
-                        || VALID_AUTOCOMPLETE_VALUES.contains(&second))
-                || autocomplete_values
-                    .iter()
-                    .all(|val| VALID_AUTOCOMPLETE_VALUES.contains(&val.as_str()))
+                    && (BILLING_AND_SHIPPING_ADDRESS.binary_search(&second).is_ok()
+                        || VALID_AUTOCOMPLETE_VALUES.binary_search(&second).is_ok())
+                || autocomplete_values.iter().all(|val| {
+                    VALID_AUTOCOMPLETE_VALUES
+                        .binary_search(&val.as_str())
+                        .is_ok()
+                })
         }
     };
     Some(is_valid)
