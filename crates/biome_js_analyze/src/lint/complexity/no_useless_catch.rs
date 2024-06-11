@@ -1,7 +1,15 @@
-use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic, RuleSource};
+use biome_analyze::{
+    context::RuleContext, declare_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic,
+    RuleSource,
+};
 use biome_console::markup;
-use biome_js_syntax::{JsCatchClause, TextRange};
-use biome_rowan::{AstNode, AstNodeList};
+use biome_js_syntax::{
+    JsBlockStatement, JsCatchClause, JsSyntaxToken, JsTryFinallyStatement, JsTryStatement,
+    TextRange,
+};
+use biome_rowan::{declare_node_union, AstNode, AstNodeList, BatchMutationExt};
+
+use crate::JsRuleAction;
 
 declare_rule! {
     /// Disallow unnecessary `catch` clauses.
@@ -50,17 +58,26 @@ declare_rule! {
     /// }
     /// ```
     ///
+    /// ```js
+    /// try {
+    ///     doSomething();
+    /// } finally {
+    ///     doCleanUp();
+    /// }
+    /// ```
+    ///
     pub NoUselessCatch {
         version: "1.0.0",
         name: "noUselessCatch",
         language: "js",
         sources: &[RuleSource::Eslint("no-useless-catch")],
         recommended: true,
+        fix_kind: FixKind::Unsafe,
     }
 }
 
 impl Rule for NoUselessCatch {
-    type Query = Ast<JsCatchClause>;
+    type Query = Ast<AnyJsTryStatement>;
     type State = TextRange;
     type Signals = Option<Self::State>;
     type Options = ();
@@ -68,7 +85,9 @@ impl Rule for NoUselessCatch {
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let binding = ctx.query();
 
-        let catch_body = binding.body().ok()?;
+        let catch_clause = binding.catch_clause()?;
+
+        let catch_body = catch_clause.body().ok()?;
         let body_statements = catch_body.statements();
 
         // We need guarantees that body_statements has only one `throw` statement.
@@ -76,7 +95,7 @@ impl Rule for NoUselessCatch {
             return None;
         }
 
-        let catch_declaration = binding.declaration()?;
+        let catch_declaration = catch_clause.declaration()?;
         let catch_binding_err = catch_declaration
             .binding()
             .ok()?
@@ -112,5 +131,71 @@ impl Rule for NoUselessCatch {
                 "These unnecessary "<Emphasis>"catch"</Emphasis>" clauses can be confusing. It is recommended to remove them."
             )),
         )
+    }
+
+    fn action(ctx: &RuleContext<Self>, _: &Self::State) -> Option<JsRuleAction> {
+        let node = ctx.query();
+
+        let try_token = node.try_token()?;
+        let body = node.body()?;
+        let l_token = body.l_curly_token().ok()?;
+        let r_token = body.r_curly_token().ok()?;
+
+        let catch_clause = node.catch_clause()?;
+        let finally_clause = node.finally_clause();
+
+        let mut mutation = ctx.root().begin();
+
+        let note = if finally_clause.is_some() {
+            mutation.remove_node(catch_clause);
+            "catch"
+        } else {
+            mutation.remove_token(try_token);
+            mutation.remove_token(l_token);
+            mutation.remove_token(r_token);
+            mutation.remove_node(catch_clause);
+            "try/catch"
+        };
+
+        return Some(JsRuleAction::new(
+            ActionCategory::QuickFix,
+            ctx.metadata().applicability(),
+            markup!("Remove the "<Emphasis>{note}</Emphasis>" clause.").to_owned(),
+            mutation,
+        ));
+    }
+}
+
+declare_node_union! {
+    pub AnyJsTryStatement = JsTryStatement | JsTryFinallyStatement
+}
+
+impl AnyJsTryStatement {
+    pub fn catch_clause(&self) -> Option<JsCatchClause> {
+        match self {
+            AnyJsTryStatement::JsTryStatement(node) => node.catch_clause().ok(),
+            AnyJsTryStatement::JsTryFinallyStatement(node) => node.catch_clause(),
+        }
+    }
+
+    pub fn finally_clause(&self) -> Option<JsTryFinallyStatement> {
+        match self {
+            AnyJsTryStatement::JsTryStatement(_) => None,
+            AnyJsTryStatement::JsTryFinallyStatement(node) => Some(node.clone()),
+        }
+    }
+
+    pub fn body(&self) -> Option<JsBlockStatement> {
+        match self {
+            AnyJsTryStatement::JsTryStatement(node) => node.body().ok(),
+            AnyJsTryStatement::JsTryFinallyStatement(node) => node.body().ok(),
+        }
+    }
+
+    pub fn try_token(&self) -> Option<JsSyntaxToken> {
+        match self {
+            AnyJsTryStatement::JsTryStatement(node) => node.try_token().ok(),
+            AnyJsTryStatement::JsTryFinallyStatement(node) => node.try_token().ok(),
+        }
     }
 }

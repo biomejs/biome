@@ -1194,7 +1194,7 @@ pub struct Complexity {
     pub no_this_in_static: Option<RuleFixConfiguration<NoThisInStatic>>,
     #[doc = "Disallow unnecessary catch clauses."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_useless_catch: Option<RuleConfiguration<NoUselessCatch>>,
+    pub no_useless_catch: Option<RuleFixConfiguration<NoUselessCatch>>,
     #[doc = "Disallow unnecessary constructors."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_useless_constructor: Option<RuleFixConfiguration<NoUselessConstructor>>,

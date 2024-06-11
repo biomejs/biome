@@ -373,7 +373,7 @@
 				"noUselessCatch": {
 					"description": "Disallow unnecessary catch clauses.",
 					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "$ref": "#/definitions/RuleFixConfiguration" },
 						{ "type": "null" }
 					]
 				},

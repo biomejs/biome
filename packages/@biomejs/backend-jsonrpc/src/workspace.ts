@@ -707,7 +707,7 @@ export interface Complexity {
 	/**
 	 * Disallow unnecessary catch clauses.
 	 */
-	noUselessCatch?: RuleConfiguration_for_Null;
+	noUselessCatch?: RuleFixConfiguration_for_Null;
 	/**
 	 * Disallow unnecessary constructors.
 	 */
