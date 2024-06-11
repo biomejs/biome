@@ -3353,7 +3353,11 @@
 			"type": "object",
 			"required": ["inputComponents"],
 			"properties": {
-				"inputComponents": { "type": "array", "items": { "type": "string" } }
+				"inputComponents": {
+					"description": "input like custom components that should be checked.",
+					"type": "array",
+					"items": { "type": "string" }
+				}
 			},
 			"additionalProperties": false
 		},
