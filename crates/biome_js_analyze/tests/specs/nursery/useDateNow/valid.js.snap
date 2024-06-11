@@ -29,6 +29,8 @@ new Date().notListed(0);
 // More arguments
 new Date().getTime(0);
 new Date().valueOf(...[]);
+new Date(0).getTime()
+new Date(0).valueOf()
 
 // Test `Number(new Date())` and `BigInt(new Date())`
 // Not `CallExpression`
