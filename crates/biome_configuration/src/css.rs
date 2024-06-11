@@ -105,7 +105,7 @@ impl PartialCssLinter {
 fn default_css() {
     let css_configuration = CssFormatter::default();
 
-    assert_eq!(css_configuration.enabled, false);
+    assert!(!css_configuration.enabled);
     assert_eq!(css_configuration.indent_style, None);
     assert_eq!(css_configuration.indent_width, None);
     assert_eq!(css_configuration.line_ending, None);
