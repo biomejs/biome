@@ -111,5 +111,4 @@ fn default_css() {
     assert_eq!(css_configuration.line_ending, None);
     assert_eq!(css_configuration.line_width, None);
     assert_eq!(css_configuration.quote_style, QuoteStyle::Double);
-
 }
