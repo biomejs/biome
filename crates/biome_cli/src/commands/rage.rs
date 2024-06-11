@@ -259,10 +259,10 @@ impl Display for RageConfiguration<'_, '_> {
                         markup! (
                             {Section("CSS Formatter")}
                             {KeyValuePair("Enabled", markup!({DebugDisplay(css_formatter_configuration.enabled)}))}
-                            {KeyValuePair("Indent style", markup!({DebugDisplay(css_formatter_configuration.indent_style)}))}
-                            {KeyValuePair("Indent width", markup!({DebugDisplay(css_formatter_configuration.indent_width)}))}
-                            {KeyValuePair("Line ending", markup!({DebugDisplay(css_formatter_configuration.line_ending)}))}
-                            {KeyValuePair("Line width", markup!({DebugDisplay(css_formatter_configuration.line_width)}))}
+                            {KeyValuePair("Indent style", markup!({DebugDisplayOption(css_formatter_configuration.indent_style)}))}
+                            {KeyValuePair("Indent width", markup!({DebugDisplayOption(css_formatter_configuration.indent_width)}))}
+                            {KeyValuePair("Line ending", markup!({DebugDisplayOption(css_formatter_configuration.line_ending)}))}
+                            {KeyValuePair("Line width", markup!({DebugDisplayOption(css_formatter_configuration.line_width)}))}
                             {KeyValuePair("Quote style", markup!({DebugDisplay(css_formatter_configuration.quote_style)}))}
                         ).fmt(fmt)?;
                     }

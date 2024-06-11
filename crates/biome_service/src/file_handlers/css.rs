@@ -651,3 +651,28 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
         }
     }
 }
+
+#[cfg(test)]
+mod test {
+    use super::*;
+    use biome_css_syntax::CssFileSource;
+
+    #[test]
+    fn inherit_global_format_settings() {
+        let format_options = CssLanguage::resolve_format_options(
+            Some(&FormatSettings::default()),
+            None,
+            None,
+            &BiomePath::new(""),
+            &DocumentFileSource::Css(CssFileSource::css()),
+        );
+        assert_eq!(
+            format_options,
+            CssFormatOptions::default()
+                .with_indent_style(IndentStyle::default())
+                .with_indent_width(IndentWidth::default())
+                .with_line_ending(LineEnding::default())
+                .with_line_width(LineWidth::default())
+        );
+    }
+}
