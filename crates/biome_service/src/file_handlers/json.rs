@@ -433,14 +433,15 @@ fn code_actions(params: CodeActionsParams) -> PullActionsResult {
     let CodeActionsParams {
         parse,
         range,
-        workspace,
+        workspace: _,
         path,
-        manifest,
-        language,
+        manifest: _,
+        language: _,
+        settings: _,
     } = params;
 
     debug_span!("Code actions JSON",  range =? range, path =? path).in_scope(move || {
-        let tree = parse.tree();
+        let tree: JsonRoot = parse.tree();
         trace_span!("Parsed file", tree =? tree).in_scope(move || PullActionsResult {
             actions: Vec::new(),
         })
