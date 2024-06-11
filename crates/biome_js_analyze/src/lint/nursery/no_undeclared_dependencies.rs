@@ -13,7 +13,7 @@ declare_rule! {
     /// The rule ignores imports using a protocol such as `node:`, `bun:`, `jsr:`, `https:`.
     ///
     /// To ensure that Visual Studio Code uses relative imports when it automatically imports a variable,
-    /// you may set [`typescript.preferences.importModuleSpecifier`](https://code.visualstudio.com/updates/v1_24#_preferences-for-auto-imports-and-generated-code) to `relative`.
+    /// you may set [`javascript.preferences.importModuleSpecifier` and `typescript.preferences.importModuleSpecifier`](https://code.visualstudio.com/docs/getstarted/settings) to `relative`.
     ///
     /// ## Examples
     ///
