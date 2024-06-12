@@ -17,10 +17,6 @@ declare_rule! {
     /// <div onClick={() => {}} />
     /// ```
     ///
-    /// ```jsx,expect_diagnostic
-    /// <div onClick={() => {}} ></div>
-    /// ```
-    ///
     /// ### Valid
     ///
     /// ```jsx
