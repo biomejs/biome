@@ -1,0 +1,38 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: content
+---
+## `biome.json`
+
+```json
+{
+  "linter": {
+    "rules": {
+      "correctness": {
+        "noUndeclaredVariables": "error"
+      }
+    }
+  },
+  "overrides": [
+    {
+      "include": ["*.js"],
+      "javascript": { "globals": ["GLOBAL_VAR"] }
+    },
+    {
+      "include": ["*.js"]
+    }
+  ]
+}
+```
+
+## `test.js`
+
+```js
+export { GLOBAL_VAR };
+```
+
+# Emitted Messages
+
+```block
+Checked 2 files in <TIME>. No fixes applied.
+```
