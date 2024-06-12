@@ -244,7 +244,6 @@ fn assert_lint(
                         ..Default::default()
                     },
                     file_path: PathBuf::from(&file_path),
-                    ..Default::default()
                 };
                 biome_js_analyze::analyze(&root, filter, &options, file_source, None, |signal| {
                     if let Some(mut diag) = signal.diagnostic() {
