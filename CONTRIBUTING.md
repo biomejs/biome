@@ -421,6 +421,7 @@ Members are listed in alphabetical order. Members are free to use the full name,
 - [Hiroki Ihoriya @unvalley](https://github.com/unvalley)
 - [Jon Egeland @faultyserver](https://github.com/faultyserver)
 - [Nicolas Hedger @nhedger](https://github.com/nhedger)
+- [Ze-Zheng Wu @Sec-ant](https://github.com/Sec-ant)
 
 ### Maintainers team
 
@@ -429,7 +430,6 @@ Members are listed in alphabetical order. Members are free to use the full name,
 - [Vasu Singh @vasucp1207](https://github.com/vasucp1207)
 - [Yagiz Nizipli @anonrig](https://github.com/anonrig)
 - [Yoshiaki Togami @togami2864](https://github.com/togami2864)
-- [Ze-Zheng Wu @Sec-ant](https://github.com/Sec-ant)
 - [Zheyu Zhang @ah-yu](https://github.com/ah-yu)
 
 ### Past Maintainers
