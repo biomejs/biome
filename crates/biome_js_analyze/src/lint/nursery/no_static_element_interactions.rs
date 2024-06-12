@@ -182,8 +182,7 @@ impl Rule for NoStaticElementInteractions {
     }
 }
 
-/// This function disables interactive elements.
-/// This is because this is an element that is disabled by eslint-plugin-jsx-a11y.
+/// Checks if the given element name is considered invalid, inspired by eslint-plugin-jsx-a11y
 fn is_invalid_element(element_name: &str) -> bool {
     match element_name {
         // These cases are interactive with the is_not_interactive_element method,
