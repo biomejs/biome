@@ -92,6 +92,6 @@ test3.js:1:1 lint/suspicious/noDebugger  FIXABLE  ━━━━━━━━━━
 ```
 
 ```block
-Checked 4 files in <TIME>. No fixes needed.
+Checked 4 files in <TIME>. No fixes applied.
 Found 2 warnings.
 ```
