@@ -4,8 +4,8 @@
 use anyhow::{bail, ensure};
 use biome_analyze::options::JsxRuntime;
 use biome_analyze::{
-    AnalysisFilter, AnalyzerOptions, GroupCategory, Queryable, RegistryVisitor, Rule, RuleCategory,
-    RuleFilter, RuleGroup, RuleMetadata,
+    AnalysisFilter, AnalyzerConfiguration, AnalyzerOptions, GroupCategory, Queryable,
+    RegistryVisitor, Rule, RuleCategory, RuleFilter, RuleGroup, RuleMetadata,
 };
 use biome_console::{markup, Console};
 use biome_css_parser::CssParserOptions;
@@ -238,9 +238,14 @@ fn assert_lint(
                     ..AnalysisFilter::default()
                 };
 
-                let mut options = AnalyzerOptions::default();
-                options.configuration.jsx_runtime = Some(JsxRuntime::default());
-                options.file_path = PathBuf::from(&file_path);
+                let options = AnalyzerOptions {
+                    configuration: AnalyzerConfiguration {
+                        jsx_runtime: Some(JsxRuntime::default()),
+                        ..Default::default()
+                    },
+                    file_path: PathBuf::from(&file_path),
+                    ..Default::default()
+                };
                 biome_js_analyze::analyze(&root, filter, &options, file_source, None, |signal| {
                     if let Some(mut diag) = signal.diagnostic() {
                         let category = diag.category().expect("linter diagnostic has no code");
@@ -288,8 +293,10 @@ fn assert_lint(
                     ..AnalysisFilter::default()
                 };
 
-                let mut options = AnalyzerOptions::default();
-                options.file_path = PathBuf::from(&file_path);
+                let options = AnalyzerOptions {
+                    file_path: PathBuf::from(&file_path),
+                    ..Default::default()
+                };
                 biome_json_analyze::analyze(&root, filter, &options, |signal| {
                     if let Some(mut diag) = signal.diagnostic() {
                         let category = diag.category().expect("linter diagnostic has no code");
@@ -337,8 +344,10 @@ fn assert_lint(
                     ..AnalysisFilter::default()
                 };
 
-                let mut options = AnalyzerOptions::default();
-                options.file_path = PathBuf::from(&file_path);
+                let options = AnalyzerOptions {
+                    file_path: PathBuf::from(&file_path),
+                    ..Default::default()
+                };
                 biome_css_analyze::analyze(&root, filter, &options, |signal| {
                     if let Some(mut diag) = signal.diagnostic() {
                         let category = diag.category().expect("linter diagnostic has no code");
