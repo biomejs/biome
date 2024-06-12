@@ -2,7 +2,6 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: css/case/custom-selectors.css
 ---
-
 # Input
 
 ```css
@@ -20,11 +19,8 @@ info: css/case/custom-selectors.css
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,5 +1,7 @@
--@custom-selector :--camelCase .my-css-selector;
-+@
-+custom-selector :--camelcase .my-css-selector 
-+;
+@@ -1,5 +1,5 @@
+ @custom-selector :--camelCase .my-css-selector;
  
 -:--camelCase {
 +:--camelcase {
@@ -35,59 +31,9 @@ info: css/case/custom-selectors.css
 # Output
 
 ```css
-@
-custom-selector :--camelcase .my-css-selector 
-;
+@custom-selector :--camelCase .my-css-selector;
 
 :--camelcase {
   content: red;
 }
 ```
-
-# Errors
-```
-custom-selectors.css:1:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Unexpected value or character.
-  
-  > 1 │ @custom-selector :--camelCase .my-css-selector;
-      │  ^^^^^^^^^^^^^^^
-    2 │ 
-    3 │ :--camelCase {
-  
-  i Expected one of:
-  
-  - charset
-  - color-profile
-  - container
-  - counter-style
-  - document
-  - font-face
-  - font-feature-values
-  - font-palette-values
-  - import
-  - keyframes
-  - layer
-  - media
-  - namespace
-  - page
-  - property
-  - supports
-  - viewport
-  - scope
-  
-custom-selectors.css:1:47 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `;`
-  
-  > 1 │ @custom-selector :--camelCase .my-css-selector;
-      │                                               ^
-    2 │ 
-    3 │ :--camelCase {
-  
-  i Remove ;
-  
-
-```
-
-

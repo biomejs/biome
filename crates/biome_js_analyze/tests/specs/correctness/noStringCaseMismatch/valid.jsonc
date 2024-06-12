@@ -1,8 +1,0 @@
-[
-	"s.toUpperCase() === 'ABC';",
-	"s.toLowerCase() === 'abc';",
-	"s.toUpperCase() === '20';",
-	"s.toLowerCase() === '20';",
-	"s.toLowerCase() === `eFg${12}`;",
-	"s.toLowerCase() == `eFg${12}`;"
-]

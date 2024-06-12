@@ -1,10 +1,10 @@
 //! Generated file, do not edit by hand, see `xtask/codegen`
 
-use biome_analyze::declare_group;
+use biome_analyze::declare_lint_group;
 
 pub mod no_type_only_import_attributes;
 
-declare_group! {
+declare_lint_group! {
     pub Nursery {
         name : "nursery" ,
         rules : [

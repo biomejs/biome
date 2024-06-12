@@ -1,4 +1,6 @@
-use biome_formatter::{FormatResult, Formatted, IndentStyle, LineEnding, LineWidth, Printed};
+use biome_formatter::{
+    FormatResult, Formatted, IndentStyle, IndentWidth, LineEnding, LineWidth, Printed,
+};
 use biome_formatter_test::TestFormatLanguage;
 use biome_json_formatter::context::{JsonFormatContext, JsonFormatOptions};
 use biome_json_formatter::{format_node, format_range, JsonFormatLanguage};
@@ -112,7 +114,11 @@ impl From<JsonSerializableFormatOptions> for JsonFormatOptions {
     fn from(test: JsonSerializableFormatOptions) -> Self {
         JsonFormatOptions::default()
             .with_indent_style(test.indent_style.map(Into::into).unwrap_or_default())
-            .with_indent_width(test.indent_width.map(Into::into).unwrap_or_default())
+            .with_indent_width(
+                test.indent_width
+                    .and_then(|width| IndentWidth::try_from(width).ok())
+                    .unwrap_or_default(),
+            )
             .with_line_width(
                 test.line_width
                     .and_then(|width| LineWidth::try_from(width).ok())

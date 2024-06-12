@@ -52,15 +52,18 @@ biome.json:6:13 deserialize ━━━━━━━━━━━━━━━━━�
   - noChildrenProp
   - noConstAssign
   - noConstantCondition
+  - noConstantMathMinMaxClamp
   - noConstructorReturn
   - noEmptyCharacterClassInRegex
   - noEmptyPattern
+  - noFlatMapIdentity
   - noGlobalObjectCalls
   - noInnerDeclarations
   - noInvalidConstructorSuper
   - noInvalidNewBuiltin
   - noInvalidUseBeforeDeclaration
   - noNewSymbol
+  - noNodejsModules
   - noNonoctalDecimalEscape
   - noPrecisionLoss
   - noRenderReturnValue
@@ -80,6 +83,7 @@ biome.json:6:13 deserialize ━━━━━━━━━━━━━━━━━�
   - noUnusedVariables
   - noVoidElementsWithChildren
   - noVoidTypeReturn
+  - useArrayLiterals
   - useExhaustiveDependencies
   - useHookAtTopLevel
   - useIsNan

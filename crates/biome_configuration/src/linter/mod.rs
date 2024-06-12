@@ -239,7 +239,10 @@ impl From<RulePlainConfiguration> for Severity {
         match conf {
             RulePlainConfiguration::Warn => Severity::Warning,
             RulePlainConfiguration::Error => Severity::Error,
-            _ => unreachable!("the rule is turned off, it should not step in here"),
+            RulePlainConfiguration::Info => Severity::Information,
+            RulePlainConfiguration::Off => {
+                unreachable!("the rule is turned off, it should not step in here")
+            }
         }
     }
 }
@@ -251,6 +254,7 @@ pub enum RulePlainConfiguration {
     #[default]
     Warn,
     Error,
+    Info,
     Off,
 }
 
@@ -366,6 +370,7 @@ impl<'de> serde::Deserialize<'de> for RuleSelector {
     }
 }
 
+#[cfg(feature = "schema")]
 impl schemars::JsonSchema for RuleSelector {
     fn schema_name() -> String {
         "RuleCode".to_string()

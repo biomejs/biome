@@ -150,7 +150,7 @@ mod test {
 	"$schema": "https://biomejs.dev/schemas/1.0.0/schema.json",
 	"javascript": {
 		"formatter": {
-			"trailingComma": "all",
+			"trailingCommas": "all",
 			"indentSize": 2
 		}
 	},
@@ -159,7 +159,7 @@ mod test {
 			"include": ["scripts/**"],
 			"javascript": {
 				"formatter": {
-					"trailingComma": "es5",
+					"trailingCommas": "es5",
 					"indentSize": 4
 				}
 			}

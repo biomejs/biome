@@ -1,6 +1,6 @@
 use crate::JsRuleAction;
 use biome_analyze::context::RuleContext;
-use biome_analyze::{declare_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic, RuleSource};
+use biome_analyze::{declare_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic};
 use biome_console::markup;
 use biome_js_factory::make;
 use biome_js_syntax::{
@@ -41,7 +41,6 @@ declare_rule! {
         version: "1.0.0",
         name: "noUnusedTemplateLiteral",
         language: "ts",
-        sources: &[RuleSource::EslintTypeScript("no-useless-template-literals")],
         recommended: true,
         fix_kind: FixKind::Unsafe,
     }

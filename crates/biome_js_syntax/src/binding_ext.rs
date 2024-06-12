@@ -410,7 +410,7 @@ impl TsIdentifierBinding {
 }
 
 declare_node_union! {
-    pub JsAnyParameterParentFunction =
+    pub AnyJsParameterParentFunction =
         JsFunctionDeclaration
         | JsFunctionExpression
         | JsArrowFunctionExpression
@@ -440,7 +440,7 @@ declare_node_union! {
         | TsCallSignatureTypeMember
 }
 
-fn parent_function(node: &JsSyntaxNode) -> Option<JsAnyParameterParentFunction> {
+fn parent_function(node: &JsSyntaxNode) -> Option<AnyJsParameterParentFunction> {
     let parent = node.parent()?;
 
     match parent.kind() {
@@ -448,33 +448,33 @@ fn parent_function(node: &JsSyntaxNode) -> Option<JsAnyParameterParentFunction> 
             // SAFETY: kind check above
             let parameters = JsParameterList::unwrap_cast(parent).parent::<JsParameters>()?;
             let parent = parameters.syntax.parent()?;
-            JsAnyParameterParentFunction::cast(parent)
+            AnyJsParameterParentFunction::cast(parent)
         }
         JsSyntaxKind::JS_CONSTRUCTOR_PARAMETER_LIST => {
             // SAFETY: kind check above
             let parameters = JsConstructorParameterList::unwrap_cast(parent)
                 .parent::<JsConstructorParameters>()?;
             let parent = parameters.syntax().parent()?;
-            JsAnyParameterParentFunction::cast(parent)
+            AnyJsParameterParentFunction::cast(parent)
         }
-        _ => JsAnyParameterParentFunction::cast(parent),
+        _ => AnyJsParameterParentFunction::cast(parent),
     }
 }
 
 impl JsFormalParameter {
-    pub fn parent_function(&self) -> Option<JsAnyParameterParentFunction> {
+    pub fn parent_function(&self) -> Option<AnyJsParameterParentFunction> {
         parent_function(&self.syntax)
     }
 }
 
 impl JsRestParameter {
-    pub fn parent_function(&self) -> Option<JsAnyParameterParentFunction> {
+    pub fn parent_function(&self) -> Option<AnyJsParameterParentFunction> {
         parent_function(&self.syntax)
     }
 }
 
 impl TsPropertyParameter {
-    pub fn parent_function(&self) -> Option<JsAnyParameterParentFunction> {
+    pub fn parent_function(&self) -> Option<AnyJsParameterParentFunction> {
         parent_function(&self.syntax)
     }
 }

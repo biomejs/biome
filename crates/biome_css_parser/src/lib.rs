@@ -29,10 +29,10 @@ pub fn parse_css(source: &str, options: CssParserOptions) -> CssParse {
 pub fn parse_css_with_cache(
     source: &str,
     cache: &mut NodeCache,
-    config: CssParserOptions,
+    options: CssParserOptions,
 ) -> CssParse {
     tracing::debug_span!("Parsing phase").in_scope(move || {
-        let mut parser = CssParser::new(source, config);
+        let mut parser = CssParser::new(source, options);
 
         parse_root(&mut parser);
 

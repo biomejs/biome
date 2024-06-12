@@ -42,7 +42,7 @@ declare_rule! {
     /// ```
     ///
     pub UseTopLevelRegex {
-        version: "next",
+        version: "1.8.0",
         name: "useTopLevelRegex",
         language: "js",
         recommended: false,

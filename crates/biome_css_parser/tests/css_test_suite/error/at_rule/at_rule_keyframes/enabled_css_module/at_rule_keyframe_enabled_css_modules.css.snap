@@ -1,0 +1,255 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```css
+@keyframes :invalid(test) {}
+@keyframes :invalid test {}
+@keyframes :global(test {}
+@keyframes :local() {}
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    rules: CssRuleList [
+        CssAtRule {
+            at_token: AT@0..1 "@" [] [],
+            rule: CssKeyframesAtRule {
+                keyframes_token: KEYFRAMES_KW@1..11 "keyframes" [] [Whitespace(" ")],
+                name: CssBogusKeyframesName {
+                    items: [
+                        COLON@11..12 ":" [] [],
+                        CssBogus {
+                            items: [
+                                IDENT@12..19 "invalid" [] [],
+                                L_PAREN@19..20 "(" [] [],
+                                CssCustomIdentifier {
+                                    value_token: IDENT@20..24 "test" [] [],
+                                },
+                                R_PAREN@24..26 ")" [] [Whitespace(" ")],
+                            ],
+                        },
+                    ],
+                },
+                block: CssKeyframesBlock {
+                    l_curly_token: L_CURLY@26..27 "{" [] [],
+                    items: CssKeyframesItemList [],
+                    r_curly_token: R_CURLY@27..28 "}" [] [],
+                },
+            },
+        },
+        CssAtRule {
+            at_token: AT@28..30 "@" [Newline("\n")] [],
+            rule: CssKeyframesAtRule {
+                keyframes_token: KEYFRAMES_KW@30..40 "keyframes" [] [Whitespace(" ")],
+                name: CssBogusKeyframesName {
+                    items: [
+                        COLON@40..41 ":" [] [],
+                        CssBogus {
+                            items: [
+                                IDENT@41..49 "invalid" [] [Whitespace(" ")],
+                                CssCustomIdentifier {
+                                    value_token: IDENT@49..54 "test" [] [Whitespace(" ")],
+                                },
+                            ],
+                        },
+                    ],
+                },
+                block: CssKeyframesBlock {
+                    l_curly_token: L_CURLY@54..55 "{" [] [],
+                    items: CssKeyframesItemList [],
+                    r_curly_token: R_CURLY@55..56 "}" [] [],
+                },
+            },
+        },
+        CssAtRule {
+            at_token: AT@56..58 "@" [Newline("\n")] [],
+            rule: CssKeyframesAtRule {
+                keyframes_token: KEYFRAMES_KW@58..68 "keyframes" [] [Whitespace(" ")],
+                name: CssKeyframesScopedName {
+                    colon_token: COLON@68..69 ":" [] [],
+                    scope: CssKeyframesScopeFunction {
+                        scope: GLOBAL_KW@69..75 "global" [] [],
+                        l_paren_token: L_PAREN@75..76 "(" [] [],
+                        name: CssCustomIdentifier {
+                            value_token: IDENT@76..81 "test" [] [Whitespace(" ")],
+                        },
+                        r_paren_token: missing (required),
+                    },
+                },
+                block: CssKeyframesBlock {
+                    l_curly_token: L_CURLY@81..82 "{" [] [],
+                    items: CssKeyframesItemList [],
+                    r_curly_token: R_CURLY@82..83 "}" [] [],
+                },
+            },
+        },
+        CssAtRule {
+            at_token: AT@83..85 "@" [Newline("\n")] [],
+            rule: CssKeyframesAtRule {
+                keyframes_token: KEYFRAMES_KW@85..95 "keyframes" [] [Whitespace(" ")],
+                name: CssBogusKeyframesName {
+                    items: [
+                        COLON@95..96 ":" [] [],
+                        CssKeyframesScopeFunction {
+                            scope: LOCAL_KW@96..101 "local" [] [],
+                            l_paren_token: L_PAREN@101..102 "(" [] [],
+                            name: missing (required),
+                            r_paren_token: R_PAREN@102..104 ")" [] [Whitespace(" ")],
+                        },
+                    ],
+                },
+                block: CssKeyframesBlock {
+                    l_curly_token: L_CURLY@104..105 "{" [] [],
+                    items: CssKeyframesItemList [],
+                    r_curly_token: R_CURLY@105..106 "}" [] [],
+                },
+            },
+        },
+    ],
+    eof_token: EOF@106..107 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..107
+  0: (empty)
+  1: CSS_RULE_LIST@0..106
+    0: CSS_AT_RULE@0..28
+      0: AT@0..1 "@" [] []
+      1: CSS_KEYFRAMES_AT_RULE@1..28
+        0: KEYFRAMES_KW@1..11 "keyframes" [] [Whitespace(" ")]
+        1: CSS_BOGUS_KEYFRAMES_NAME@11..26
+          0: COLON@11..12 ":" [] []
+          1: CSS_BOGUS@12..26
+            0: IDENT@12..19 "invalid" [] []
+            1: L_PAREN@19..20 "(" [] []
+            2: CSS_CUSTOM_IDENTIFIER@20..24
+              0: IDENT@20..24 "test" [] []
+            3: R_PAREN@24..26 ")" [] [Whitespace(" ")]
+        2: CSS_KEYFRAMES_BLOCK@26..28
+          0: L_CURLY@26..27 "{" [] []
+          1: CSS_KEYFRAMES_ITEM_LIST@27..27
+          2: R_CURLY@27..28 "}" [] []
+    1: CSS_AT_RULE@28..56
+      0: AT@28..30 "@" [Newline("\n")] []
+      1: CSS_KEYFRAMES_AT_RULE@30..56
+        0: KEYFRAMES_KW@30..40 "keyframes" [] [Whitespace(" ")]
+        1: CSS_BOGUS_KEYFRAMES_NAME@40..54
+          0: COLON@40..41 ":" [] []
+          1: CSS_BOGUS@41..54
+            0: IDENT@41..49 "invalid" [] [Whitespace(" ")]
+            1: CSS_CUSTOM_IDENTIFIER@49..54
+              0: IDENT@49..54 "test" [] [Whitespace(" ")]
+        2: CSS_KEYFRAMES_BLOCK@54..56
+          0: L_CURLY@54..55 "{" [] []
+          1: CSS_KEYFRAMES_ITEM_LIST@55..55
+          2: R_CURLY@55..56 "}" [] []
+    2: CSS_AT_RULE@56..83
+      0: AT@56..58 "@" [Newline("\n")] []
+      1: CSS_KEYFRAMES_AT_RULE@58..83
+        0: KEYFRAMES_KW@58..68 "keyframes" [] [Whitespace(" ")]
+        1: CSS_KEYFRAMES_SCOPED_NAME@68..81
+          0: COLON@68..69 ":" [] []
+          1: CSS_KEYFRAMES_SCOPE_FUNCTION@69..81
+            0: GLOBAL_KW@69..75 "global" [] []
+            1: L_PAREN@75..76 "(" [] []
+            2: CSS_CUSTOM_IDENTIFIER@76..81
+              0: IDENT@76..81 "test" [] [Whitespace(" ")]
+            3: (empty)
+        2: CSS_KEYFRAMES_BLOCK@81..83
+          0: L_CURLY@81..82 "{" [] []
+          1: CSS_KEYFRAMES_ITEM_LIST@82..82
+          2: R_CURLY@82..83 "}" [] []
+    3: CSS_AT_RULE@83..106
+      0: AT@83..85 "@" [Newline("\n")] []
+      1: CSS_KEYFRAMES_AT_RULE@85..106
+        0: KEYFRAMES_KW@85..95 "keyframes" [] [Whitespace(" ")]
+        1: CSS_BOGUS_KEYFRAMES_NAME@95..104
+          0: COLON@95..96 ":" [] []
+          1: CSS_KEYFRAMES_SCOPE_FUNCTION@96..104
+            0: LOCAL_KW@96..101 "local" [] []
+            1: L_PAREN@101..102 "(" [] []
+            2: (empty)
+            3: R_PAREN@102..104 ")" [] [Whitespace(" ")]
+        2: CSS_KEYFRAMES_BLOCK@104..106
+          0: L_CURLY@104..105 "{" [] []
+          1: CSS_KEYFRAMES_ITEM_LIST@105..105
+          2: R_CURLY@105..106 "}" [] []
+  2: EOF@106..107 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+at_rule_keyframe_enabled_css_modules.css:1:13 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+  > 1 │ @keyframes :invalid(test) {}
+      │             ^^^^^^^
+    2 │ @keyframes :invalid test {}
+    3 │ @keyframes :global(test {}
+  
+  i Expected one of:
+  
+  - global
+  - local
+  
+at_rule_keyframe_enabled_css_modules.css:2:13 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+    1 │ @keyframes :invalid(test) {}
+  > 2 │ @keyframes :invalid test {}
+      │             ^^^^^^^
+    3 │ @keyframes :global(test {}
+    4 │ @keyframes :local() {}
+  
+  i Expected one of:
+  
+  - global
+  - local
+  
+at_rule_keyframe_enabled_css_modules.css:3:25 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `)` but instead found `{`
+  
+    1 │ @keyframes :invalid(test) {}
+    2 │ @keyframes :invalid test {}
+  > 3 │ @keyframes :global(test {}
+      │                         ^
+    4 │ @keyframes :local() {}
+    5 │ 
+  
+  i Remove {
+  
+at_rule_keyframe_enabled_css_modules.css:4:19 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an identifier but instead found ')'.
+  
+    2 │ @keyframes :invalid test {}
+    3 │ @keyframes :global(test {}
+  > 4 │ @keyframes :local() {}
+      │                   ^
+    5 │ 
+  
+  i Expected an identifier here.
+  
+    2 │ @keyframes :invalid test {}
+    3 │ @keyframes :global(test {}
+  > 4 │ @keyframes :local() {}
+      │                   ^
+    5 │ 
+  
+```

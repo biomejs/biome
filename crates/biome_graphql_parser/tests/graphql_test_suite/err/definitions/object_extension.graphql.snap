@@ -106,7 +106,7 @@ GraphqlRoot {
 ```
 object_extension.graphql:3:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Expected at least one directive, implements interface or fields definition
+  × Expected at least one directive, implements interface or a set of fields definition
   
     1 │ extend type Story
     2 │ 

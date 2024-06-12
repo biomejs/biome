@@ -10,6 +10,12 @@ expression: snapshot
 	align-self: flex-end
 }
 
+#grid {
+	display: grid;
+	grid-template-columns: [first nav-start] 150px [main-start] 1fr [last];
+	grid-template-rows: [first header-start] 50px [main-start] 1fr [footer-start] 50px [last];
+}
+
 ```
 
 
@@ -87,17 +93,173 @@ CssRoot {
                 r_curly_token: R_CURLY@63..65 "}" [Newline("\n")] [],
             },
         },
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selector_token: missing (optional),
+                    simple_selector: missing (optional),
+                    sub_selectors: CssSubSelectorList [
+                        CssIdSelector {
+                            hash_token: HASH@65..68 "#" [Newline("\n"), Newline("\n")] [],
+                            name: CssCustomIdentifier {
+                                value_token: IDENT@68..73 "grid" [] [Whitespace(" ")],
+                            },
+                        },
+                    ],
+                },
+            ],
+            block: CssDeclarationOrRuleBlock {
+                l_curly_token: L_CURLY@73..74 "{" [] [],
+                items: CssDeclarationOrRuleList [
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@74..83 "display" [Newline("\n"), Whitespace("\t")] [],
+                                },
+                                colon_token: COLON@83..85 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssIdentifier {
+                                        value_token: IDENT@85..89 "grid" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@89..90 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@90..113 "grid-template-columns" [Newline("\n"), Whitespace("\t")] [],
+                                },
+                                colon_token: COLON@113..115 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssBracketedValue {
+                                        l_brack_token: L_BRACK@115..116 "[" [] [],
+                                        items: CssBracketedValueList [
+                                            CssCustomIdentifier {
+                                                value_token: IDENT@116..122 "first" [] [Whitespace(" ")],
+                                            },
+                                            CssCustomIdentifier {
+                                                value_token: IDENT@122..131 "nav-start" [] [],
+                                            },
+                                        ],
+                                        r_brack_token: R_BRACK@131..133 "]" [] [Whitespace(" ")],
+                                    },
+                                    CssRegularDimension {
+                                        value_token: CSS_NUMBER_LITERAL@133..136 "150" [] [],
+                                        unit_token: IDENT@136..139 "px" [] [Whitespace(" ")],
+                                    },
+                                    CssBracketedValue {
+                                        l_brack_token: L_BRACK@139..140 "[" [] [],
+                                        items: CssBracketedValueList [
+                                            CssCustomIdentifier {
+                                                value_token: IDENT@140..150 "main-start" [] [],
+                                            },
+                                        ],
+                                        r_brack_token: R_BRACK@150..152 "]" [] [Whitespace(" ")],
+                                    },
+                                    CssRegularDimension {
+                                        value_token: CSS_NUMBER_LITERAL@152..153 "1" [] [],
+                                        unit_token: IDENT@153..156 "fr" [] [Whitespace(" ")],
+                                    },
+                                    CssBracketedValue {
+                                        l_brack_token: L_BRACK@156..157 "[" [] [],
+                                        items: CssBracketedValueList [
+                                            CssCustomIdentifier {
+                                                value_token: IDENT@157..161 "last" [] [],
+                                            },
+                                        ],
+                                        r_brack_token: R_BRACK@161..162 "]" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@162..163 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@163..183 "grid-template-rows" [Newline("\n"), Whitespace("\t")] [],
+                                },
+                                colon_token: COLON@183..185 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssBracketedValue {
+                                        l_brack_token: L_BRACK@185..186 "[" [] [],
+                                        items: CssBracketedValueList [
+                                            CssCustomIdentifier {
+                                                value_token: IDENT@186..192 "first" [] [Whitespace(" ")],
+                                            },
+                                            CssCustomIdentifier {
+                                                value_token: IDENT@192..204 "header-start" [] [],
+                                            },
+                                        ],
+                                        r_brack_token: R_BRACK@204..206 "]" [] [Whitespace(" ")],
+                                    },
+                                    CssRegularDimension {
+                                        value_token: CSS_NUMBER_LITERAL@206..208 "50" [] [],
+                                        unit_token: IDENT@208..211 "px" [] [Whitespace(" ")],
+                                    },
+                                    CssBracketedValue {
+                                        l_brack_token: L_BRACK@211..212 "[" [] [],
+                                        items: CssBracketedValueList [
+                                            CssCustomIdentifier {
+                                                value_token: IDENT@212..222 "main-start" [] [],
+                                            },
+                                        ],
+                                        r_brack_token: R_BRACK@222..224 "]" [] [Whitespace(" ")],
+                                    },
+                                    CssRegularDimension {
+                                        value_token: CSS_NUMBER_LITERAL@224..225 "1" [] [],
+                                        unit_token: IDENT@225..228 "fr" [] [Whitespace(" ")],
+                                    },
+                                    CssBracketedValue {
+                                        l_brack_token: L_BRACK@228..229 "[" [] [],
+                                        items: CssBracketedValueList [
+                                            CssCustomIdentifier {
+                                                value_token: IDENT@229..241 "footer-start" [] [],
+                                            },
+                                        ],
+                                        r_brack_token: R_BRACK@241..243 "]" [] [Whitespace(" ")],
+                                    },
+                                    CssRegularDimension {
+                                        value_token: CSS_NUMBER_LITERAL@243..245 "50" [] [],
+                                        unit_token: IDENT@245..248 "px" [] [Whitespace(" ")],
+                                    },
+                                    CssBracketedValue {
+                                        l_brack_token: L_BRACK@248..249 "[" [] [],
+                                        items: CssBracketedValueList [
+                                            CssCustomIdentifier {
+                                                value_token: IDENT@249..253 "last" [] [],
+                                            },
+                                        ],
+                                        r_brack_token: R_BRACK@253..254 "]" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@254..255 ";" [] [],
+                    },
+                ],
+                r_curly_token: R_CURLY@255..257 "}" [Newline("\n")] [],
+            },
+        },
     ],
-    eof_token: EOF@65..66 "" [Newline("\n")] [],
+    eof_token: EOF@257..258 "" [Newline("\n")] [],
 }
 ```
 
 ## CST
 
 ```
-0: CSS_ROOT@0..66
+0: CSS_ROOT@0..258
   0: (empty)
-  1: CSS_RULE_LIST@0..65
+  1: CSS_RULE_LIST@0..257
     0: CSS_QUALIFIED_RULE@0..65
       0: CSS_SELECTOR_LIST@0..12
         0: CSS_COMPOUND_SELECTOR@0..12
@@ -142,6 +304,110 @@ CssRoot {
               1: (empty)
             1: (empty)
         2: R_CURLY@63..65 "}" [Newline("\n")] []
-  2: EOF@65..66 "" [Newline("\n")] []
+    1: CSS_QUALIFIED_RULE@65..257
+      0: CSS_SELECTOR_LIST@65..73
+        0: CSS_COMPOUND_SELECTOR@65..73
+          0: (empty)
+          1: (empty)
+          2: CSS_SUB_SELECTOR_LIST@65..73
+            0: CSS_ID_SELECTOR@65..73
+              0: HASH@65..68 "#" [Newline("\n"), Newline("\n")] []
+              1: CSS_CUSTOM_IDENTIFIER@68..73
+                0: IDENT@68..73 "grid" [] [Whitespace(" ")]
+      1: CSS_DECLARATION_OR_RULE_BLOCK@73..257
+        0: L_CURLY@73..74 "{" [] []
+        1: CSS_DECLARATION_OR_RULE_LIST@74..255
+          0: CSS_DECLARATION_WITH_SEMICOLON@74..90
+            0: CSS_DECLARATION@74..89
+              0: CSS_GENERIC_PROPERTY@74..89
+                0: CSS_IDENTIFIER@74..83
+                  0: IDENT@74..83 "display" [Newline("\n"), Whitespace("\t")] []
+                1: COLON@83..85 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@85..89
+                  0: CSS_IDENTIFIER@85..89
+                    0: IDENT@85..89 "grid" [] []
+              1: (empty)
+            1: SEMICOLON@89..90 ";" [] []
+          1: CSS_DECLARATION_WITH_SEMICOLON@90..163
+            0: CSS_DECLARATION@90..162
+              0: CSS_GENERIC_PROPERTY@90..162
+                0: CSS_IDENTIFIER@90..113
+                  0: IDENT@90..113 "grid-template-columns" [Newline("\n"), Whitespace("\t")] []
+                1: COLON@113..115 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@115..162
+                  0: CSS_BRACKETED_VALUE@115..133
+                    0: L_BRACK@115..116 "[" [] []
+                    1: CSS_BRACKETED_VALUE_LIST@116..131
+                      0: CSS_CUSTOM_IDENTIFIER@116..122
+                        0: IDENT@116..122 "first" [] [Whitespace(" ")]
+                      1: CSS_CUSTOM_IDENTIFIER@122..131
+                        0: IDENT@122..131 "nav-start" [] []
+                    2: R_BRACK@131..133 "]" [] [Whitespace(" ")]
+                  1: CSS_REGULAR_DIMENSION@133..139
+                    0: CSS_NUMBER_LITERAL@133..136 "150" [] []
+                    1: IDENT@136..139 "px" [] [Whitespace(" ")]
+                  2: CSS_BRACKETED_VALUE@139..152
+                    0: L_BRACK@139..140 "[" [] []
+                    1: CSS_BRACKETED_VALUE_LIST@140..150
+                      0: CSS_CUSTOM_IDENTIFIER@140..150
+                        0: IDENT@140..150 "main-start" [] []
+                    2: R_BRACK@150..152 "]" [] [Whitespace(" ")]
+                  3: CSS_REGULAR_DIMENSION@152..156
+                    0: CSS_NUMBER_LITERAL@152..153 "1" [] []
+                    1: IDENT@153..156 "fr" [] [Whitespace(" ")]
+                  4: CSS_BRACKETED_VALUE@156..162
+                    0: L_BRACK@156..157 "[" [] []
+                    1: CSS_BRACKETED_VALUE_LIST@157..161
+                      0: CSS_CUSTOM_IDENTIFIER@157..161
+                        0: IDENT@157..161 "last" [] []
+                    2: R_BRACK@161..162 "]" [] []
+              1: (empty)
+            1: SEMICOLON@162..163 ";" [] []
+          2: CSS_DECLARATION_WITH_SEMICOLON@163..255
+            0: CSS_DECLARATION@163..254
+              0: CSS_GENERIC_PROPERTY@163..254
+                0: CSS_IDENTIFIER@163..183
+                  0: IDENT@163..183 "grid-template-rows" [Newline("\n"), Whitespace("\t")] []
+                1: COLON@183..185 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@185..254
+                  0: CSS_BRACKETED_VALUE@185..206
+                    0: L_BRACK@185..186 "[" [] []
+                    1: CSS_BRACKETED_VALUE_LIST@186..204
+                      0: CSS_CUSTOM_IDENTIFIER@186..192
+                        0: IDENT@186..192 "first" [] [Whitespace(" ")]
+                      1: CSS_CUSTOM_IDENTIFIER@192..204
+                        0: IDENT@192..204 "header-start" [] []
+                    2: R_BRACK@204..206 "]" [] [Whitespace(" ")]
+                  1: CSS_REGULAR_DIMENSION@206..211
+                    0: CSS_NUMBER_LITERAL@206..208 "50" [] []
+                    1: IDENT@208..211 "px" [] [Whitespace(" ")]
+                  2: CSS_BRACKETED_VALUE@211..224
+                    0: L_BRACK@211..212 "[" [] []
+                    1: CSS_BRACKETED_VALUE_LIST@212..222
+                      0: CSS_CUSTOM_IDENTIFIER@212..222
+                        0: IDENT@212..222 "main-start" [] []
+                    2: R_BRACK@222..224 "]" [] [Whitespace(" ")]
+                  3: CSS_REGULAR_DIMENSION@224..228
+                    0: CSS_NUMBER_LITERAL@224..225 "1" [] []
+                    1: IDENT@225..228 "fr" [] [Whitespace(" ")]
+                  4: CSS_BRACKETED_VALUE@228..243
+                    0: L_BRACK@228..229 "[" [] []
+                    1: CSS_BRACKETED_VALUE_LIST@229..241
+                      0: CSS_CUSTOM_IDENTIFIER@229..241
+                        0: IDENT@229..241 "footer-start" [] []
+                    2: R_BRACK@241..243 "]" [] [Whitespace(" ")]
+                  5: CSS_REGULAR_DIMENSION@243..248
+                    0: CSS_NUMBER_LITERAL@243..245 "50" [] []
+                    1: IDENT@245..248 "px" [] [Whitespace(" ")]
+                  6: CSS_BRACKETED_VALUE@248..254
+                    0: L_BRACK@248..249 "[" [] []
+                    1: CSS_BRACKETED_VALUE_LIST@249..253
+                      0: CSS_CUSTOM_IDENTIFIER@249..253
+                        0: IDENT@249..253 "last" [] []
+                    2: R_BRACK@253..254 "]" [] []
+              1: (empty)
+            1: SEMICOLON@254..255 ";" [] []
+        2: R_CURLY@255..257 "}" [Newline("\n")] []
+  2: EOF@257..258 "" [Newline("\n")] []
 
 ```

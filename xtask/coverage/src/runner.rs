@@ -9,6 +9,7 @@ use biome_js_parser::{parse, JsParserOptions, Parse};
 use biome_js_syntax::{AnyJsRoot, JsFileSource, JsSyntaxNode};
 use biome_rowan::SyntaxKind;
 use std::fmt::Debug;
+use std::io;
 use std::panic::RefUnwindSafe;
 use std::path::Path;
 use walkdir::WalkDir;
@@ -183,6 +184,7 @@ pub(crate) trait TestSuite: Send + Sync {
     fn base_path(&self) -> &str;
     fn is_test(&self, path: &Path) -> bool;
     fn load_test(&self, path: &Path) -> Option<Box<dyn TestCase>>;
+    fn checkout(&self) -> io::Result<()>;
 }
 
 pub(crate) struct TestSuiteInstance {
@@ -221,6 +223,7 @@ pub(crate) fn run_test_suite(
     test_suite: &dyn TestSuite,
     context: &mut TestRunContext,
 ) -> TestResults {
+    test_suite.checkout().expect("To checkout the repository");
     context.reporter.test_suite_started(test_suite);
     let instance = load_tests(test_suite, context);
     context.reporter.test_suite_run_started(&instance);

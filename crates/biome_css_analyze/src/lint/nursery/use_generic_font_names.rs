@@ -58,7 +58,7 @@ declare_rule! {
     /// ```
     ///
     pub UseGenericFontNames {
-        version: "next",
+        version: "1.8.0",
         name: "useGenericFontNames",
         language: "css",
         recommended: true,

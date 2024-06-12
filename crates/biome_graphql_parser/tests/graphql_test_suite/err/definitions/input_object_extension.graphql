@@ -1,0 +1,6 @@
+extend input Point2D
+
+extend input Point2D
+  x: Float
+  y: Float
+}

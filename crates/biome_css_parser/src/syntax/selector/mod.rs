@@ -285,8 +285,9 @@ fn parse_compound_selector(p: &mut CssParser) -> ParsedSyntax {
 
     let m = p.start();
 
-    p.eat(T![&]);
-    parse_simple_selector(p).ok();
+    let context = selector_lex_context(p);
+    p.eat_with_context(T![&], context);
+    parse_simple_selector(p).ok(); // We don't need to handle error here because a simple selector is optional
     SubSelectorList.parse_list(p);
 
     Present(m.complete(p, CSS_COMPOUND_SELECTOR))

@@ -1,0 +1,12 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: validCustomOptions.jsx
+---
+# Input
+```jsx
+<CustomLabel><span>A label<CustomInput /></span></CustomLabel>;
+<CustomLabel><span label="A label"><CustomInput /></span></CustomLabel>;
+<CustomLabel htmlFor="js_id" label="A label" />;
+<CustomLabel for="js_id" label="A label" />;
+
+```

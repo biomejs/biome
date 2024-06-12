@@ -8,7 +8,10 @@ use biome_rowan::{AstNode, SyntaxKind};
 use regex::Regex;
 use std::convert::TryFrom;
 use std::fmt::Write;
+use std::io;
 use std::path::Path;
+use std::process::Command;
+use xtask::project_root;
 
 const CASES_PATH: &str = "xtask/coverage/Typescript/tests/cases";
 const REFERENCE_PATH: &str = "xtask/coverage/Typescript/tests/baselines/reference";
@@ -94,6 +97,25 @@ impl TestSuite for MicrosoftTypescriptTestSuite {
     fn load_test(&self, path: &Path) -> Option<Box<dyn TestCase>> {
         let code = check_file_encoding(path)?;
         Some(Box::new(MicrosoftTypeScriptTestCase::new(path, code)))
+    }
+
+    fn checkout(&self) -> io::Result<()> {
+        let base_path = project_root().join("xtask/coverage/Typescript");
+        let mut command = Command::new("git");
+        command
+            .arg("clone")
+            .arg("https://github.com/microsoft/Typescript.git")
+            .arg("--depth")
+            .arg("1")
+            .arg(base_path.display().to_string());
+        command.output()?;
+        let mut command = Command::new("git");
+        command
+            .arg("reset")
+            .arg("--hard")
+            .arg("61a96b1641abe24c4adc3633eb936df89eb991f2");
+        command.output()?;
+        Ok(())
     }
 }
 

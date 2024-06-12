@@ -289,24 +289,13 @@ fn with_linter_configuration() {
   "linter": {
     "enabled": true,
     "rules": {
-      "recommended": true,
+      "recommended": false,
       "a11y": {
         "noAccessKey": "off",
         "noAutofocus": "off"
       },
       "complexity": {
         "recommended": true
-      },
-      "correctness": {
-        "all": true
-      },
-      "nursery": {
-        "useConsistentArrayType": {
-          "level": "warn",
-          "options": {
-            "syntax": "shorthand"
-          }
-        }
       },
       "suspicious": {
         "noCommentText": {

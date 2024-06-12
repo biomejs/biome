@@ -2,7 +2,6 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: css/atrule/custom-selector.css
 ---
-
 # Input
 
 ```css
@@ -79,8 +78,8 @@ h6
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,48 +1,147 @@
--@custom-selector :--heading h1, h2, h3, h4, h5, h6;
+@@ -1,48 +1,57 @@
+ @custom-selector :--heading h1, h2, h3, h4, h5, h6;
 -@custom-selector :--heading h1, h2, h3, h4, h5, h6;
 -@custom-selector :--heading h1, h2, h3, h4, h5, h6;
 -@custom-selector :--heading h1, h2, h3, h4, h5, h6;
@@ -88,88 +87,7 @@ h6
 -@custom-selector :--heading h1, h2, h3, h4, h5, h6;
 -@custom-selector :--heading h1, h2, h3, h4, h5, h6;
 -@custom-selector :--very-very-very-very-very-very-very-very-very-long-selector-name
-+@
-+custom-selector :--heading h1,
-+h2,
-+h3,
-+h4,
-+h5,
-+h6 
-+;
-+@
-+custom-selector :--heading h1,
-+h2,
-+h3,
-+h4,
-+h5,
-+h6 
-+;
-+@
-+custom-selector  :--heading  h1  ,  h2  ,  h3  ,  h4  ,  h5  ,  h6 
-+;
-+@
-+custom-selector :--heading h1,
-+h2,
-+h3,
-+h4,
-+h5,
-+h6 
-+;
-+@
-+custom-selector :--heading h1,
-+h2,
-+h3,
-+h4,
-+h5,
-+h6 
-+;
-+@
-+custom-selector
-+:--heading
-+h1
-+,
-+h2
-+,
-+h3
-+,
-+h4
-+,
-+h5
-+,
-+h6
-+;
-+@
-+custom-selector
-+
-+:--heading
-+
-+h1
-+
-+,
-+
-+h2
-+
-+,
-+
-+h3
-+
-+,
-+
-+h4
-+
-+,
-+
-+h5
-+
-+,
-+
-+h6
-+
-+;
-+@
-+custom-selector
-+  :--very-very-very-very-very-very-very-very-very-long-selector-name
-   h1,
+-  h1,
 -  h2,
 -  h3,
 -  h4,
@@ -183,27 +101,7 @@ h6
 -  h5,
 -  h6;
 -@custom-selector :--very-very-very-very-very-very-very-very-very-long-selector-name
-+h2,
-+h3,
-+h4,
-+h5,
-+h6 
-+;
-+@
-+custom-selector
-+  :--very-very-very-very-very-very-very-very-very-long-selector-name
-+  h1
-+  + h1,
-+h2,
-+h3,
-+h4,
-+h5,
-+h6 
-+;
-+@
-+custom-selector
-+  :--very-very-very-very-very-very-very-very-very-long-selector-name
-   .very-very-very-very-very-very-very-very-very-long-selector-name
+-  .very-very-very-very-very-very-very-very-very-long-selector-name
 -    + very-very-very-very-very-very-very-very-very-long-selector-name-other,
 -  h2,
 -  h3,
@@ -217,104 +115,88 @@ h6
 -  h4,
 -  h5,
 -  h6;
--@custom-selector :--heading
-+  + very-very-very-very-very-very-very-very-very-long-selector-name-other,
-+h2,
-+h3,
-+h4,
-+h5,
-+h6 
-+;
-+@
-+custom-selector
-+  :--very-very-very-very-very-very-very-very-very-long-selector-name
-+  h1
-+  h1,
-+h2,
-+h3,
-+h4,
-+h5,
-+h6 
-+;
-+@
-+custom-selector
-+  :--heading
-   .very-very-very-very-very-very-very-very-very-very-long-class-name,
++@custom-selector :--heading h1,h2,h3,h4,h5,h6;
++@custom-selector :--heading  h1  ,  h2  ,  h3  ,  h4  ,  h5  ,  h6;
++@custom-selector :--heading
++    h1, h2, h3, h4, h5, h6;
++@custom-selector :--heading
++    h1,
++    h2,
++    h3,
++    h4,
++    h5,
++    h6;
+ @custom-selector :--heading
+-  .very-very-very-very-very-very-very-very-very-very-long-class-name,
 -  .very-very-very-very-very-very-very-very-very-very-long-class-name-other;
--@custom-selector :--enter :hover, :focus;
--@custom-selector :--visible :global.visible;
++h1
++,
++h2
++,
++h3
++,
++h4
++,
++h5
++,
++h6;
++@custom-selector :--heading
++
++h1
++
++,
++
++h2
++
++,
++
++h3
++
++,
++
++h4
++
++,
++
++h5
++
++,
++
++h6;
++@custom-selector :--very-very-very-very-very-very-very-very-very-long-selector-name h1, h2, h3, h4, h5, h6;
++@custom-selector :--very-very-very-very-very-very-very-very-very-long-selector-name h1 + h1, h2, h3, h4, h5, h6;
++@custom-selector :--very-very-very-very-very-very-very-very-very-long-selector-name .very-very-very-very-very-very-very-very-very-long-selector-name + very-very-very-very-very-very-very-very-very-long-selector-name-other, h2, h3, h4, h5, h6;
++@custom-selector :--very-very-very-very-very-very-very-very-very-long-selector-name h1 h1, h2, h3, h4, h5, h6;
++@custom-selector :--heading .very-very-very-very-very-very-very-very-very-very-long-class-name, .very-very-very-very-very-very-very-very-very-very-long-class-name-other;
+ @custom-selector :--enter :hover, :focus;
+ @custom-selector :--visible :global.visible;
 -@custom-selector :--icon i[class^="icon-"], i[class*=" icon-"];
 -@custom-selector :--placeholder
 -  :placehoder-shown,
 -  ::-webkit-input-placeholder,
 -  ::-moz-placeholder,
 -  :-ms-input-placeholder;
--@custom-selector :--enter :matches(:hover, :focus, :active);
-+.very-very-very-very-very-very-very-very-very-very-long-class-name-other 
-+;
-+@
-+custom-selector :--enter :hover,
-+:focus 
-+;
-+@
-+custom-selector :--visible :global.visible 
-+;
-+@
-+custom-selector :--icon i[class^="icon-"],
-+i[class*=" icon-"] 
-+;
-+@
-+custom-selector :--placeholder :placehoder-shown,
-+::-webkit-input-placeholder,
-+::-moz-placeholder,
-+:-ms-input-placeholder 
-+;
-+@
-+custom-selector :--enter :matches(:hover, :focus, :active) 
-+;
++@custom-selector :--icon i[class^='icon-'], i[class*=' icon-'];
++@custom-selector :--placeholder :placehoder-shown, ::-webkit-input-placeholder, ::-moz-placeholder, :-ms-input-placeholder;
+ @custom-selector :--enter :matches(:hover, :focus, :active);
 ```
 
 # Output
 
 ```css
-@
-custom-selector :--heading h1,
-h2,
-h3,
-h4,
-h5,
-h6 
-;
-@
-custom-selector :--heading h1,
-h2,
-h3,
-h4,
-h5,
-h6 
-;
-@
-custom-selector  :--heading  h1  ,  h2  ,  h3  ,  h4  ,  h5  ,  h6 
-;
-@
-custom-selector :--heading h1,
-h2,
-h3,
-h4,
-h5,
-h6 
-;
-@
-custom-selector :--heading h1,
-h2,
-h3,
-h4,
-h5,
-h6 
-;
-@
-custom-selector
-:--heading
+@custom-selector :--heading h1, h2, h3, h4, h5, h6;
+@custom-selector :--heading h1,h2,h3,h4,h5,h6;
+@custom-selector :--heading  h1  ,  h2  ,  h3  ,  h4  ,  h5  ,  h6;
+@custom-selector :--heading
+    h1, h2, h3, h4, h5, h6;
+@custom-selector :--heading
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6;
+@custom-selector :--heading
 h1
 ,
 h2
@@ -325,12 +207,8 @@ h4
 ,
 h5
 ,
-h6
-;
-@
-custom-selector
-
-:--heading
+h6;
+@custom-selector :--heading
 
 h1
 
@@ -352,871 +230,25 @@ h5
 
 ,
 
-h6
-
-;
-@
-custom-selector
-  :--very-very-very-very-very-very-very-very-very-long-selector-name
-  h1,
-h2,
-h3,
-h4,
-h5,
-h6 
-;
-@
-custom-selector
-  :--very-very-very-very-very-very-very-very-very-long-selector-name
-  h1
-  + h1,
-h2,
-h3,
-h4,
-h5,
-h6 
-;
-@
-custom-selector
-  :--very-very-very-very-very-very-very-very-very-long-selector-name
-  .very-very-very-very-very-very-very-very-very-long-selector-name
-  + very-very-very-very-very-very-very-very-very-long-selector-name-other,
-h2,
-h3,
-h4,
-h5,
-h6 
-;
-@
-custom-selector
-  :--very-very-very-very-very-very-very-very-very-long-selector-name
-  h1
-  h1,
-h2,
-h3,
-h4,
-h5,
-h6 
-;
-@
-custom-selector
-  :--heading
-  .very-very-very-very-very-very-very-very-very-very-long-class-name,
-.very-very-very-very-very-very-very-very-very-very-long-class-name-other 
-;
-@
-custom-selector :--enter :hover,
-:focus 
-;
-@
-custom-selector :--visible :global.visible 
-;
-@
-custom-selector :--icon i[class^="icon-"],
-i[class*=" icon-"] 
-;
-@
-custom-selector :--placeholder :placehoder-shown,
-::-webkit-input-placeholder,
-::-moz-placeholder,
-:-ms-input-placeholder 
-;
-@
-custom-selector :--enter :matches(:hover, :focus, :active) 
-;
+h6;
+@custom-selector :--very-very-very-very-very-very-very-very-very-long-selector-name h1, h2, h3, h4, h5, h6;
+@custom-selector :--very-very-very-very-very-very-very-very-very-long-selector-name h1 + h1, h2, h3, h4, h5, h6;
+@custom-selector :--very-very-very-very-very-very-very-very-very-long-selector-name .very-very-very-very-very-very-very-very-very-long-selector-name + very-very-very-very-very-very-very-very-very-long-selector-name-other, h2, h3, h4, h5, h6;
+@custom-selector :--very-very-very-very-very-very-very-very-very-long-selector-name h1 h1, h2, h3, h4, h5, h6;
+@custom-selector :--heading .very-very-very-very-very-very-very-very-very-very-long-class-name, .very-very-very-very-very-very-very-very-very-very-long-class-name-other;
+@custom-selector :--enter :hover, :focus;
+@custom-selector :--visible :global.visible;
+@custom-selector :--icon i[class^='icon-'], i[class*=' icon-'];
+@custom-selector :--placeholder :placehoder-shown, ::-webkit-input-placeholder, ::-moz-placeholder, :-ms-input-placeholder;
+@custom-selector :--enter :matches(:hover, :focus, :active);
 ```
 
-# Errors
+# Lines exceeding max width of 80 characters
 ```
-custom-selector.css:1:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Unexpected value or character.
-  
-  > 1 │ @custom-selector :--heading h1, h2, h3, h4, h5, h6;
-      │  ^^^^^^^^^^^^^^^
-    2 │ @custom-selector :--heading h1,h2,h3,h4,h5,h6;
-    3 │ @custom-selector  :--heading  h1  ,  h2  ,  h3  ,  h4  ,  h5  ,  h6  ;
-  
-  i Expected one of:
-  
-  - charset
-  - color-profile
-  - container
-  - counter-style
-  - document
-  - font-face
-  - font-feature-values
-  - font-palette-values
-  - import
-  - keyframes
-  - layer
-  - media
-  - namespace
-  - page
-  - property
-  - supports
-  - viewport
-  - scope
-  
-custom-selector.css:1:51 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `;`
-  
-  > 1 │ @custom-selector :--heading h1, h2, h3, h4, h5, h6;
-      │                                                   ^
-    2 │ @custom-selector :--heading h1,h2,h3,h4,h5,h6;
-    3 │ @custom-selector  :--heading  h1  ,  h2  ,  h3  ,  h4  ,  h5  ,  h6  ;
-  
-  i Remove ;
-  
-custom-selector.css:2:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Unexpected value or character.
-  
-    1 │ @custom-selector :--heading h1, h2, h3, h4, h5, h6;
-  > 2 │ @custom-selector :--heading h1,h2,h3,h4,h5,h6;
-      │  ^^^^^^^^^^^^^^^
-    3 │ @custom-selector  :--heading  h1  ,  h2  ,  h3  ,  h4  ,  h5  ,  h6  ;
-    4 │ @custom-selector :--heading
-  
-  i Expected one of:
-  
-  - charset
-  - color-profile
-  - container
-  - counter-style
-  - document
-  - font-face
-  - font-feature-values
-  - font-palette-values
-  - import
-  - keyframes
-  - layer
-  - media
-  - namespace
-  - page
-  - property
-  - supports
-  - viewport
-  - scope
-  
-custom-selector.css:2:46 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `;`
-  
-    1 │ @custom-selector :--heading h1, h2, h3, h4, h5, h6;
-  > 2 │ @custom-selector :--heading h1,h2,h3,h4,h5,h6;
-      │                                              ^
-    3 │ @custom-selector  :--heading  h1  ,  h2  ,  h3  ,  h4  ,  h5  ,  h6  ;
-    4 │ @custom-selector :--heading
-  
-  i Remove ;
-  
-custom-selector.css:3:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Unexpected value or character.
-  
-    1 │ @custom-selector :--heading h1, h2, h3, h4, h5, h6;
-    2 │ @custom-selector :--heading h1,h2,h3,h4,h5,h6;
-  > 3 │ @custom-selector  :--heading  h1  ,  h2  ,  h3  ,  h4  ,  h5  ,  h6  ;
-      │  ^^^^^^^^^^^^^^^
-    4 │ @custom-selector :--heading
-    5 │     h1, h2, h3, h4, h5, h6;
-  
-  i Expected one of:
-  
-  - charset
-  - color-profile
-  - container
-  - counter-style
-  - document
-  - font-face
-  - font-feature-values
-  - font-palette-values
-  - import
-  - keyframes
-  - layer
-  - media
-  - namespace
-  - page
-  - property
-  - supports
-  - viewport
-  - scope
-  
-custom-selector.css:3:70 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Expected a compound selector but instead found ';'.
-  
-    1 │ @custom-selector :--heading h1, h2, h3, h4, h5, h6;
-    2 │ @custom-selector :--heading h1,h2,h3,h4,h5,h6;
-  > 3 │ @custom-selector  :--heading  h1  ,  h2  ,  h3  ,  h4  ,  h5  ,  h6  ;
-      │                                                                      ^
-    4 │ @custom-selector :--heading
-    5 │     h1, h2, h3, h4, h5, h6;
-  
-  i Expected a compound selector here.
-  
-    1 │ @custom-selector :--heading h1, h2, h3, h4, h5, h6;
-    2 │ @custom-selector :--heading h1,h2,h3,h4,h5,h6;
-  > 3 │ @custom-selector  :--heading  h1  ,  h2  ,  h3  ,  h4  ,  h5  ,  h6  ;
-      │                                                                      ^
-    4 │ @custom-selector :--heading
-    5 │     h1, h2, h3, h4, h5, h6;
-  
-custom-selector.css:4:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Unexpected value or character.
-  
-    2 │ @custom-selector :--heading h1,h2,h3,h4,h5,h6;
-    3 │ @custom-selector  :--heading  h1  ,  h2  ,  h3  ,  h4  ,  h5  ,  h6  ;
-  > 4 │ @custom-selector :--heading
-      │  ^^^^^^^^^^^^^^^
-    5 │     h1, h2, h3, h4, h5, h6;
-    6 │ @custom-selector
-  
-  i Expected one of:
-  
-  - charset
-  - color-profile
-  - container
-  - counter-style
-  - document
-  - font-face
-  - font-feature-values
-  - font-palette-values
-  - import
-  - keyframes
-  - layer
-  - media
-  - namespace
-  - page
-  - property
-  - supports
-  - viewport
-  - scope
-  
-custom-selector.css:5:27 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `;`
-  
-    3 │ @custom-selector  :--heading  h1  ,  h2  ,  h3  ,  h4  ,  h5  ,  h6  ;
-    4 │ @custom-selector :--heading
-  > 5 │     h1, h2, h3, h4, h5, h6;
-      │                           ^
-    6 │ @custom-selector
-    7 │     :--heading
-  
-  i Remove ;
-  
-custom-selector.css:6:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Unexpected value or character.
-  
-    4 │ @custom-selector :--heading
-    5 │     h1, h2, h3, h4, h5, h6;
-  > 6 │ @custom-selector
-      │  ^^^^^^^^^^^^^^^
-    7 │     :--heading
-    8 │     h1,
-  
-  i Expected one of:
-  
-  - charset
-  - color-profile
-  - container
-  - counter-style
-  - document
-  - font-face
-  - font-feature-values
-  - font-palette-values
-  - import
-  - keyframes
-  - layer
-  - media
-  - namespace
-  - page
-  - property
-  - supports
-  - viewport
-  - scope
-  
-custom-selector.css:13:7 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `;`
-  
-    11 │     h4,
-    12 │     h5,
-  > 13 │     h6;
-       │       ^
-    14 │ @custom-selector
-    15 │ :--heading
-  
-  i Remove ;
-  
-custom-selector.css:14:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Unexpected value or character.
-  
-    12 │     h5,
-    13 │     h6;
-  > 14 │ @custom-selector
-       │  ^^^^^^^^^^^^^^^
-    15 │ :--heading
-    16 │ h1
-  
-  i Expected one of:
-  
-  - charset
-  - color-profile
-  - container
-  - counter-style
-  - document
-  - font-face
-  - font-feature-values
-  - font-palette-values
-  - import
-  - keyframes
-  - layer
-  - media
-  - namespace
-  - page
-  - property
-  - supports
-  - viewport
-  - scope
-  
-custom-selector.css:16:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `h1`
-  
-    14 │ @custom-selector
-    15 │ :--heading
-  > 16 │ h1
-       │ ^^
-    17 │ ,
-    18 │ h2
-  
-  i Remove h1
-  
-custom-selector.css:27:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `;`
-  
-    25 │ ,
-    26 │ h6
-  > 27 │ ;
-       │ ^
-    28 │ @custom-selector
-    29 │ 
-  
-  i Remove ;
-  
-custom-selector.css:28:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Unexpected value or character.
-  
-    26 │ h6
-    27 │ ;
-  > 28 │ @custom-selector
-       │  ^^^^^^^^^^^^^^^
-    29 │ 
-    30 │ :--heading
-  
-  i Expected one of:
-  
-  - charset
-  - color-profile
-  - container
-  - counter-style
-  - document
-  - font-face
-  - font-feature-values
-  - font-palette-values
-  - import
-  - keyframes
-  - layer
-  - media
-  - namespace
-  - page
-  - property
-  - supports
-  - viewport
-  - scope
-  
-custom-selector.css:32:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `h1`
-  
-    30 │ :--heading
-    31 │ 
-  > 32 │ h1
-       │ ^^
-    33 │ 
-    34 │ ,
-  
-  i Remove h1
-  
-custom-selector.css:54:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `;`
-  
-    52 │ h6
-    53 │ 
-  > 54 │ ;
-       │ ^
-    55 │ @custom-selector :--very-very-very-very-very-very-very-very-very-long-selector-name h1, h2, h3, h4, h5, h6;
-    56 │ @custom-selector :--very-very-very-very-very-very-very-very-very-long-selector-name h1 + h1, h2, h3, h4, h5, h6;
-  
-  i Remove ;
-  
-custom-selector.css:55:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Unexpected value or character.
-  
-    54 │ ;
-  > 55 │ @custom-selector :--very-very-very-very-very-very-very-very-very-long-selector-name h1, h2, h3, h4, h5, h6;
-       │  ^^^^^^^^^^^^^^^
-    56 │ @custom-selector :--very-very-very-very-very-very-very-very-very-long-selector-name h1 + h1, h2, h3, h4, h5, h6;
-    57 │ @custom-selector :--very-very-very-very-very-very-very-very-very-long-selector-name .very-very-very-very-very-very-very-very-very-long-selector-name + very-very-very-very-very-very-very-very-very-long-selector-name-other, h2, h3, h4, h5, h6;
-  
-  i Expected one of:
-  
-  - charset
-  - color-profile
-  - container
-  - counter-style
-  - document
-  - font-face
-  - font-feature-values
-  - font-palette-values
-  - import
-  - keyframes
-  - layer
-  - media
-  - namespace
-  - page
-  - property
-  - supports
-  - viewport
-  - scope
-  
-custom-selector.css:55:107 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `;`
-  
-    54 │ ;
-  > 55 │ @custom-selector :--very-very-very-very-very-very-very-very-very-long-selector-name h1, h2, h3, h4, h5, h6;
-       │                                                                                                           ^
-    56 │ @custom-selector :--very-very-very-very-very-very-very-very-very-long-selector-name h1 + h1, h2, h3, h4, h5, h6;
-    57 │ @custom-selector :--very-very-very-very-very-very-very-very-very-long-selector-name .very-very-very-very-very-very-very-very-very-long-selector-name + very-very-very-very-very-very-very-very-very-long-selector-name-other, h2, h3, h4, h5, h6;
-  
-  i Remove ;
-  
-custom-selector.css:56:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Unexpected value or character.
-  
-    54 │ ;
-    55 │ @custom-selector :--very-very-very-very-very-very-very-very-very-long-selector-name h1, h2, h3, h4, h5, h6;
-  > 56 │ @custom-selector :--very-very-very-very-very-very-very-very-very-long-selector-name h1 + h1, h2, h3, h4, h5, h6;
-       │  ^^^^^^^^^^^^^^^
-    57 │ @custom-selector :--very-very-very-very-very-very-very-very-very-long-selector-name .very-very-very-very-very-very-very-very-very-long-selector-name + very-very-very-very-very-very-very-very-very-long-selector-name-other, h2, h3, h4, h5, h6;
-    58 │ @custom-selector :--very-very-very-very-very-very-very-very-very-long-selector-name h1 h1, h2, h3, h4, h5, h6;
-  
-  i Expected one of:
-  
-  - charset
-  - color-profile
-  - container
-  - counter-style
-  - document
-  - font-face
-  - font-feature-values
-  - font-palette-values
-  - import
-  - keyframes
-  - layer
-  - media
-  - namespace
-  - page
-  - property
-  - supports
-  - viewport
-  - scope
-  
-custom-selector.css:56:112 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `;`
-  
-    54 │ ;
-    55 │ @custom-selector :--very-very-very-very-very-very-very-very-very-long-selector-name h1, h2, h3, h4, h5, h6;
-  > 56 │ @custom-selector :--very-very-very-very-very-very-very-very-very-long-selector-name h1 + h1, h2, h3, h4, h5, h6;
-       │                                                                                                                ^
-    57 │ @custom-selector :--very-very-very-very-very-very-very-very-very-long-selector-name .very-very-very-very-very-very-very-very-very-long-selector-name + very-very-very-very-very-very-very-very-very-long-selector-name-other, h2, h3, h4, h5, h6;
-    58 │ @custom-selector :--very-very-very-very-very-very-very-very-very-long-selector-name h1 h1, h2, h3, h4, h5, h6;
-  
-  i Remove ;
-  
-custom-selector.css:57:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Unexpected value or character.
-  
-    55 │ @custom-selector :--very-very-very-very-very-very-very-very-very-long-selector-name h1, h2, h3, h4, h5, h6;
-    56 │ @custom-selector :--very-very-very-very-very-very-very-very-very-long-selector-name h1 + h1, h2, h3, h4, h5, h6;
-  > 57 │ @custom-selector :--very-very-very-very-very-very-very-very-very-long-selector-name .very-very-very-very-very-very-very-very-very-long-selector-name + very-very-very-very-very-very-very-very-very-long-selector-name-other, h2, h3, h4, h5, h6;
-       │  ^^^^^^^^^^^^^^^
-    58 │ @custom-selector :--very-very-very-very-very-very-very-very-very-long-selector-name h1 h1, h2, h3, h4, h5, h6;
-    59 │ @custom-selector :--heading .very-very-very-very-very-very-very-very-very-very-long-class-name, .very-very-very-very-very-very-very-very-very-very-long-class-name-other;
-  
-  i Expected one of:
-  
-  - charset
-  - color-profile
-  - container
-  - counter-style
-  - document
-  - font-face
-  - font-feature-values
-  - font-palette-values
-  - import
-  - keyframes
-  - layer
-  - media
-  - namespace
-  - page
-  - property
-  - supports
-  - viewport
-  - scope
-  
-custom-selector.css:57:241 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `;`
-  
-    55 │ @custom-selector :--very-very-very-very-very-very-very-very-very-long-selector-name h1, h2, h3, h4, h5, h6;
-    56 │ @custom-selector :--very-very-very-very-very-very-very-very-very-long-selector-name h1 + h1, h2, h3, h4, h5, h6;
-  > 57 │ @custom-selector :--very-very-very-very-very-very-very-very-very-long-selector-name .very-very-very-very-very-very-very-very-very-long-selector-name + very-very-very-very-very-very-very-very-very-long-selector-name-other, h2, h3, h4, h5, h6;
-       │                                                                                                                                                                                                                                                 ^
-    58 │ @custom-selector :--very-very-very-very-very-very-very-very-very-long-selector-name h1 h1, h2, h3, h4, h5, h6;
-    59 │ @custom-selector :--heading .very-very-very-very-very-very-very-very-very-very-long-class-name, .very-very-very-very-very-very-very-very-very-very-long-class-name-other;
-  
-  i Remove ;
-  
-custom-selector.css:58:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Unexpected value or character.
-  
-    56 │ @custom-selector :--very-very-very-very-very-very-very-very-very-long-selector-name h1 + h1, h2, h3, h4, h5, h6;
-    57 │ @custom-selector :--very-very-very-very-very-very-very-very-very-long-selector-name .very-very-very-very-very-very-very-very-very-long-selector-name + very-very-very-very-very-very-very-very-very-long-selector-name-other, h2, h3, h4, h5, h6;
-  > 58 │ @custom-selector :--very-very-very-very-very-very-very-very-very-long-selector-name h1 h1, h2, h3, h4, h5, h6;
-       │  ^^^^^^^^^^^^^^^
-    59 │ @custom-selector :--heading .very-very-very-very-very-very-very-very-very-very-long-class-name, .very-very-very-very-very-very-very-very-very-very-long-class-name-other;
-    60 │ @custom-selector :--enter :hover, :focus;
-  
-  i Expected one of:
-  
-  - charset
-  - color-profile
-  - container
-  - counter-style
-  - document
-  - font-face
-  - font-feature-values
-  - font-palette-values
-  - import
-  - keyframes
-  - layer
-  - media
-  - namespace
-  - page
-  - property
-  - supports
-  - viewport
-  - scope
-  
-custom-selector.css:58:110 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `;`
-  
-    56 │ @custom-selector :--very-very-very-very-very-very-very-very-very-long-selector-name h1 + h1, h2, h3, h4, h5, h6;
-    57 │ @custom-selector :--very-very-very-very-very-very-very-very-very-long-selector-name .very-very-very-very-very-very-very-very-very-long-selector-name + very-very-very-very-very-very-very-very-very-long-selector-name-other, h2, h3, h4, h5, h6;
-  > 58 │ @custom-selector :--very-very-very-very-very-very-very-very-very-long-selector-name h1 h1, h2, h3, h4, h5, h6;
-       │                                                                                                              ^
-    59 │ @custom-selector :--heading .very-very-very-very-very-very-very-very-very-very-long-class-name, .very-very-very-very-very-very-very-very-very-very-long-class-name-other;
-    60 │ @custom-selector :--enter :hover, :focus;
-  
-  i Remove ;
-  
-custom-selector.css:59:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Unexpected value or character.
-  
-    57 │ @custom-selector :--very-very-very-very-very-very-very-very-very-long-selector-name .very-very-very-very-very-very-very-very-very-long-selector-name + very-very-very-very-very-very-very-very-very-long-selector-name-other, h2, h3, h4, h5, h6;
-    58 │ @custom-selector :--very-very-very-very-very-very-very-very-very-long-selector-name h1 h1, h2, h3, h4, h5, h6;
-  > 59 │ @custom-selector :--heading .very-very-very-very-very-very-very-very-very-very-long-class-name, .very-very-very-very-very-very-very-very-very-very-long-class-name-other;
-       │  ^^^^^^^^^^^^^^^
-    60 │ @custom-selector :--enter :hover, :focus;
-    61 │ @custom-selector :--visible :global.visible;
-  
-  i Expected one of:
-  
-  - charset
-  - color-profile
-  - container
-  - counter-style
-  - document
-  - font-face
-  - font-feature-values
-  - font-palette-values
-  - import
-  - keyframes
-  - layer
-  - media
-  - namespace
-  - page
-  - property
-  - supports
-  - viewport
-  - scope
-  
-custom-selector.css:59:169 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `;`
-  
-    57 │ @custom-selector :--very-very-very-very-very-very-very-very-very-long-selector-name .very-very-very-very-very-very-very-very-very-long-selector-name + very-very-very-very-very-very-very-very-very-long-selector-name-other, h2, h3, h4, h5, h6;
-    58 │ @custom-selector :--very-very-very-very-very-very-very-very-very-long-selector-name h1 h1, h2, h3, h4, h5, h6;
-  > 59 │ @custom-selector :--heading .very-very-very-very-very-very-very-very-very-very-long-class-name, .very-very-very-very-very-very-very-very-very-very-long-class-name-other;
-       │                                                                                                                                                                         ^
-    60 │ @custom-selector :--enter :hover, :focus;
-    61 │ @custom-selector :--visible :global.visible;
-  
-  i Remove ;
-  
-custom-selector.css:60:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Unexpected value or character.
-  
-    58 │ @custom-selector :--very-very-very-very-very-very-very-very-very-long-selector-name h1 h1, h2, h3, h4, h5, h6;
-    59 │ @custom-selector :--heading .very-very-very-very-very-very-very-very-very-very-long-class-name, .very-very-very-very-very-very-very-very-very-very-long-class-name-other;
-  > 60 │ @custom-selector :--enter :hover, :focus;
-       │  ^^^^^^^^^^^^^^^
-    61 │ @custom-selector :--visible :global.visible;
-    62 │ @custom-selector :--icon i[class^='icon-'], i[class*=' icon-'];
-  
-  i Expected one of:
-  
-  - charset
-  - color-profile
-  - container
-  - counter-style
-  - document
-  - font-face
-  - font-feature-values
-  - font-palette-values
-  - import
-  - keyframes
-  - layer
-  - media
-  - namespace
-  - page
-  - property
-  - supports
-  - viewport
-  - scope
-  
-custom-selector.css:60:41 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `;`
-  
-    58 │ @custom-selector :--very-very-very-very-very-very-very-very-very-long-selector-name h1 h1, h2, h3, h4, h5, h6;
-    59 │ @custom-selector :--heading .very-very-very-very-very-very-very-very-very-very-long-class-name, .very-very-very-very-very-very-very-very-very-very-long-class-name-other;
-  > 60 │ @custom-selector :--enter :hover, :focus;
-       │                                         ^
-    61 │ @custom-selector :--visible :global.visible;
-    62 │ @custom-selector :--icon i[class^='icon-'], i[class*=' icon-'];
-  
-  i Remove ;
-  
-custom-selector.css:61:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Unexpected value or character.
-  
-    59 │ @custom-selector :--heading .very-very-very-very-very-very-very-very-very-very-long-class-name, .very-very-very-very-very-very-very-very-very-very-long-class-name-other;
-    60 │ @custom-selector :--enter :hover, :focus;
-  > 61 │ @custom-selector :--visible :global.visible;
-       │  ^^^^^^^^^^^^^^^
-    62 │ @custom-selector :--icon i[class^='icon-'], i[class*=' icon-'];
-    63 │ @custom-selector :--placeholder :placehoder-shown, ::-webkit-input-placeholder, ::-moz-placeholder, :-ms-input-placeholder;
-  
-  i Expected one of:
-  
-  - charset
-  - color-profile
-  - container
-  - counter-style
-  - document
-  - font-face
-  - font-feature-values
-  - font-palette-values
-  - import
-  - keyframes
-  - layer
-  - media
-  - namespace
-  - page
-  - property
-  - supports
-  - viewport
-  - scope
-  
-custom-selector.css:61:44 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `;`
-  
-    59 │ @custom-selector :--heading .very-very-very-very-very-very-very-very-very-very-long-class-name, .very-very-very-very-very-very-very-very-very-very-long-class-name-other;
-    60 │ @custom-selector :--enter :hover, :focus;
-  > 61 │ @custom-selector :--visible :global.visible;
-       │                                            ^
-    62 │ @custom-selector :--icon i[class^='icon-'], i[class*=' icon-'];
-    63 │ @custom-selector :--placeholder :placehoder-shown, ::-webkit-input-placeholder, ::-moz-placeholder, :-ms-input-placeholder;
-  
-  i Remove ;
-  
-custom-selector.css:62:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Unexpected value or character.
-  
-    60 │ @custom-selector :--enter :hover, :focus;
-    61 │ @custom-selector :--visible :global.visible;
-  > 62 │ @custom-selector :--icon i[class^='icon-'], i[class*=' icon-'];
-       │  ^^^^^^^^^^^^^^^
-    63 │ @custom-selector :--placeholder :placehoder-shown, ::-webkit-input-placeholder, ::-moz-placeholder, :-ms-input-placeholder;
-    64 │ @custom-selector :--enter :matches(:hover, :focus, :active);
-  
-  i Expected one of:
-  
-  - charset
-  - color-profile
-  - container
-  - counter-style
-  - document
-  - font-face
-  - font-feature-values
-  - font-palette-values
-  - import
-  - keyframes
-  - layer
-  - media
-  - namespace
-  - page
-  - property
-  - supports
-  - viewport
-  - scope
-  
-custom-selector.css:62:63 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `;`
-  
-    60 │ @custom-selector :--enter :hover, :focus;
-    61 │ @custom-selector :--visible :global.visible;
-  > 62 │ @custom-selector :--icon i[class^='icon-'], i[class*=' icon-'];
-       │                                                               ^
-    63 │ @custom-selector :--placeholder :placehoder-shown, ::-webkit-input-placeholder, ::-moz-placeholder, :-ms-input-placeholder;
-    64 │ @custom-selector :--enter :matches(:hover, :focus, :active);
-  
-  i Remove ;
-  
-custom-selector.css:63:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Unexpected value or character.
-  
-    61 │ @custom-selector :--visible :global.visible;
-    62 │ @custom-selector :--icon i[class^='icon-'], i[class*=' icon-'];
-  > 63 │ @custom-selector :--placeholder :placehoder-shown, ::-webkit-input-placeholder, ::-moz-placeholder, :-ms-input-placeholder;
-       │  ^^^^^^^^^^^^^^^
-    64 │ @custom-selector :--enter :matches(:hover, :focus, :active);
-    65 │ 
-  
-  i Expected one of:
-  
-  - charset
-  - color-profile
-  - container
-  - counter-style
-  - document
-  - font-face
-  - font-feature-values
-  - font-palette-values
-  - import
-  - keyframes
-  - layer
-  - media
-  - namespace
-  - page
-  - property
-  - supports
-  - viewport
-  - scope
-  
-custom-selector.css:63:123 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `;`
-  
-    61 │ @custom-selector :--visible :global.visible;
-    62 │ @custom-selector :--icon i[class^='icon-'], i[class*=' icon-'];
-  > 63 │ @custom-selector :--placeholder :placehoder-shown, ::-webkit-input-placeholder, ::-moz-placeholder, :-ms-input-placeholder;
-       │                                                                                                                           ^
-    64 │ @custom-selector :--enter :matches(:hover, :focus, :active);
-    65 │ 
-  
-  i Remove ;
-  
-custom-selector.css:64:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Unexpected value or character.
-  
-    62 │ @custom-selector :--icon i[class^='icon-'], i[class*=' icon-'];
-    63 │ @custom-selector :--placeholder :placehoder-shown, ::-webkit-input-placeholder, ::-moz-placeholder, :-ms-input-placeholder;
-  > 64 │ @custom-selector :--enter :matches(:hover, :focus, :active);
-       │  ^^^^^^^^^^^^^^^
-    65 │ 
-  
-  i Expected one of:
-  
-  - charset
-  - color-profile
-  - container
-  - counter-style
-  - document
-  - font-face
-  - font-feature-values
-  - font-palette-values
-  - import
-  - keyframes
-  - layer
-  - media
-  - namespace
-  - page
-  - property
-  - supports
-  - viewport
-  - scope
-  
-custom-selector.css:64:60 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `;`
-  
-    62 │ @custom-selector :--icon i[class^='icon-'], i[class*=' icon-'];
-    63 │ @custom-selector :--placeholder :placehoder-shown, ::-webkit-input-placeholder, ::-moz-placeholder, :-ms-input-placeholder;
-  > 64 │ @custom-selector :--enter :matches(:hover, :focus, :active);
-       │                                                            ^
-    65 │ 
-  
-  i Remove ;
-  
-
+   48: @custom-selector :--very-very-very-very-very-very-very-very-very-long-selector-name h1, h2, h3, h4, h5, h6;
+   49: @custom-selector :--very-very-very-very-very-very-very-very-very-long-selector-name h1 + h1, h2, h3, h4, h5, h6;
+   50: @custom-selector :--very-very-very-very-very-very-very-very-very-long-selector-name .very-very-very-very-very-very-very-very-very-long-selector-name + very-very-very-very-very-very-very-very-very-long-selector-name-other, h2, h3, h4, h5, h6;
+   51: @custom-selector :--very-very-very-very-very-very-very-very-very-long-selector-name h1 h1, h2, h3, h4, h5, h6;
+   52: @custom-selector :--heading .very-very-very-very-very-very-very-very-very-very-long-class-name, .very-very-very-very-very-very-very-very-very-very-long-class-name-other;
+   56: @custom-selector :--placeholder :placehoder-shown, ::-webkit-input-placeholder, ::-moz-placeholder, :-ms-input-placeholder;
 ```
-
-

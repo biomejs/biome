@@ -69,50 +69,7 @@ info: css/modules/modules.css
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,11 +1,18 @@
--@value colors: './colors.css';
--@value first, second, third from colors;
-+@
-+value colors: './colors.css'
-+;
-+@
-+value first,
-+second,
-+third from colors 
-+;
- 
- .title {
--  @nest :global(h1)& {
-+  @
-+  nest :global(h1)& {
-     background: red;
--  }
- }
-+}
- 
- .className {
-   color: green;
-@@ -13,16 +20,16 @@
- }
- 
- .otherClassName {
--  composes: className;
-+  composes: classname;
-   color: yellow;
- }
- 
- .otherClassName {
--  composes: className from "./style.css";
-+  composes: classname from "./style.css";
- }
- 
- .otherClassName {
--  composes: globalClassName from global;
-+  composes: globalclassname from global;
- }
- 
- :global {
-@@ -42,7 +49,7 @@
+@@ -42,7 +42,7 @@
    localAlias: keyFromDep;
  }
  :export {
@@ -126,20 +83,13 @@ info: css/modules/modules.css
 # Output
 
 ```css
-@
-value colors: './colors.css'
-;
-@
-value first,
-second,
-third from colors 
-;
+@value colors: './colors.css';
+@value first, second, third from colors;
 
 .title {
-  @
-  nest :global(h1)& {
+  @nest :global(h1)& {
     background: red;
-}
+  }
 }
 
 .className {
@@ -148,16 +98,16 @@ third from colors
 }
 
 .otherClassName {
-  composes: classname;
+  composes: className;
   color: yellow;
 }
 
 .otherClassName {
-  composes: classname from "./style.css";
+  composes: className from "./style.css";
 }
 
 .otherClassName {
-  composes: globalclassname from global;
+  composes: globalClassName from global;
 }
 
 :global {
@@ -192,220 +142,6 @@ third from colors
 
 # Errors
 ```
-modules.css:1:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Unexpected value or character.
-  
-  > 1 │ @value colors: './colors.css';
-      │  ^^^^^
-    2 │ @value first, second, third from colors;
-    3 │ 
-  
-  i Expected one of:
-  
-  - charset
-  - color-profile
-  - container
-  - counter-style
-  - document
-  - font-face
-  - font-feature-values
-  - font-palette-values
-  - import
-  - keyframes
-  - layer
-  - media
-  - namespace
-  - page
-  - property
-  - supports
-  - viewport
-  - scope
-  
-modules.css:1:16 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Unexpected value or character.
-  
-  > 1 │ @value colors: './colors.css';
-      │                ^^^^^^^^^^^^^^
-    2 │ @value first, second, third from colors;
-    3 │ 
-  
-  i Expected one of:
-  
-  - hover
-  - focus
-  - active
-  - first-child
-  - last-child
-  - nth-child
-  - nth-last-child
-  - first-of-type
-  - last-of-type
-  - nth-of-type
-  - nth-last-of-type
-  - only-child
-  - only-of-type
-  - checked
-  - disabled
-  - enabled
-  - required
-  - optional
-  - valid
-  - invalid
-  - in-range
-  - out-of-range
-  - read-only
-  - read-write
-  - placeholder-shown
-  - default
-  - checked
-  - indeterminate
-  - blank
-  - empty
-  - root
-  - target
-  - lang
-  - not
-  - is
-  - where
-  - fullscreen
-  - link
-  - visited
-  - any-link
-  - local-link
-  - scope
-  - current
-  - past
-  - future
-  
-modules.css:1:30 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `;`
-  
-  > 1 │ @value colors: './colors.css';
-      │                              ^
-    2 │ @value first, second, third from colors;
-    3 │ 
-  
-  i Remove ;
-  
-modules.css:2:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Unexpected value or character.
-  
-    1 │ @value colors: './colors.css';
-  > 2 │ @value first, second, third from colors;
-      │  ^^^^^
-    3 │ 
-    4 │ .title {
-  
-  i Expected one of:
-  
-  - charset
-  - color-profile
-  - container
-  - counter-style
-  - document
-  - font-face
-  - font-feature-values
-  - font-palette-values
-  - import
-  - keyframes
-  - layer
-  - media
-  - namespace
-  - page
-  - property
-  - supports
-  - viewport
-  - scope
-  
-modules.css:2:40 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `;`
-  
-    1 │ @value colors: './colors.css';
-  > 2 │ @value first, second, third from colors;
-      │                                        ^
-    3 │ 
-    4 │ .title {
-  
-  i Remove ;
-  
-modules.css:5:4 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Unexpected value or character.
-  
-    4 │ .title {
-  > 5 │   @nest :global(h1)& {
-      │    ^^^^
-    6 │     background: red;
-    7 │   }
-  
-  i Expected one of:
-  
-  - charset
-  - color-profile
-  - container
-  - counter-style
-  - document
-  - font-face
-  - font-feature-values
-  - font-palette-values
-  - import
-  - keyframes
-  - layer
-  - media
-  - namespace
-  - page
-  - property
-  - supports
-  - viewport
-  - scope
-  
-modules.css:5:20 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Unexpected value or character.
-  
-    4 │ .title {
-  > 5 │   @nest :global(h1)& {
-      │                    ^^^
-  > 6 │     background: red;
-      │     ^^^^^^^^^^^^^^^
-    7 │   }
-    8 │ }
-  
-  i Expected one of:
-  
-  - identifier
-  - string
-  - number
-  - dimension
-  - ratio
-  - custom property
-  - function
-  
-modules.css:8:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Expected a qualified rule, or an at rule but instead found '}'.
-  
-     6 │     background: red;
-     7 │   }
-   > 8 │ }
-       │ ^
-     9 │ 
-    10 │ .className {
-  
-  i Expected a qualified rule, or an at rule here.
-  
-     6 │     background: red;
-     7 │   }
-   > 8 │ }
-       │ ^
-     9 │ 
-    10 │ .className {
-  
 modules.css:41:8 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `,` but instead found `(`
@@ -418,26 +154,6 @@ modules.css:41:8 parse ━━━━━━━━━━━━━━━━━━━
     43 │ }
   
   i Remove (
-  
-modules.css:48:12 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Expected an identifier but instead found ':global(spin)'.
-  
-    46 │ }
-    47 │ 
-  > 48 │ @keyframes :global(spin) {
-       │            ^^^^^^^^^^^^^
-    49 │   from {
-    50 │     transform: rotate(0deg);
-  
-  i Expected an identifier here.
-  
-    46 │ }
-    47 │ 
-  > 48 │ @keyframes :global(spin) {
-       │            ^^^^^^^^^^^^^
-    49 │   from {
-    50 │     transform: rotate(0deg);
   
 
 ```

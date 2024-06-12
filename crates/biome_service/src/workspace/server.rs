@@ -18,7 +18,7 @@ use crate::workspace::{
 use crate::{
     file_handlers::Features, settings::WorkspaceSettingsHandle, Workspace, WorkspaceError,
 };
-use biome_analyze::AnalysisFilter;
+use biome_configuration::DEFAULT_FILE_SIZE_LIMIT;
 use biome_diagnostics::{
     serde::Diagnostic as SerdeDiagnostic, Diagnostic, DiagnosticExt, Severity,
 };
@@ -32,7 +32,6 @@ use biome_project::NodeJsProject;
 use biome_rowan::NodeCache;
 use dashmap::{mapref::entry::Entry, DashMap};
 use indexmap::IndexSet;
-use std::borrow::Borrow;
 use std::ffi::OsStr;
 use std::fs;
 use std::path::Path;
@@ -222,9 +221,10 @@ impl WorkspaceServer {
                     .ok_or_else(self.build_capability_error(biome_path))?;
 
                 let size_limit = {
-                    let settings = self.workspace();
-                    let settings = settings.settings();
-                    let limit = settings.files.max_size.get();
+                    let workspace = self.workspace();
+                    let settings = workspace.settings();
+                    let limit =
+                        settings.map_or(DEFAULT_FILE_SIZE_LIMIT.get(), |s| s.files.max_size.get());
                     usize::try_from(limit).unwrap_or(usize::MAX)
                 };
 
@@ -238,10 +238,11 @@ impl WorkspaceServer {
                     ));
                 }
 
-                let settings = self.workspace();
+                let workspace = self.workspace();
                 let Some(file_source) = self.get_source(document.file_source_index) else {
                     return Err(WorkspaceError::not_found());
                 };
+                let settings = workspace.settings();
                 let parsed = parse(
                     biome_path,
                     file_source,
@@ -285,6 +286,9 @@ impl WorkspaceServer {
     fn is_ignored_by_top_level_config(&self, path: &Path) -> bool {
         let settings = self.workspace();
         let settings = settings.settings();
+        let Some(settings) = settings else {
+            return false;
+        };
         let is_included = settings.files.included_files.is_empty()
             || is_dir(path)
             || settings.files.included_files.matches_path(path);
@@ -314,6 +318,9 @@ impl WorkspaceServer {
     fn is_ignored_by_feature_config(&self, path: &Path, feature: FeatureName) -> bool {
         let settings = self.workspace();
         let settings = settings.settings();
+        let Some(settings) = settings else {
+            return false;
+        };
         let (feature_included_files, feature_ignored_files) = match feature {
             FeatureName::Format => {
                 let formatter = &settings.formatter;
@@ -350,10 +357,13 @@ impl Workspace for WorkspaceServer {
         let settings = self.workspace();
         let settings = settings.settings();
         let mut file_features = FileFeaturesResult::new();
+
         let file_name = path.file_name().and_then(|s| s.to_str());
-        file_features = file_features
-            .with_capabilities(&capabilities)
-            .with_settings_and_language(settings, &language, path);
+        file_features = file_features.with_capabilities(&capabilities);
+        let Some(settings) = settings else {
+            return Ok(file_features);
+        };
+        file_features = file_features.with_settings_and_language(settings, &language, path);
 
         if settings.files.ignore_unknown
             && language == DocumentFileSource::Unknown
@@ -514,8 +524,10 @@ impl Workspace for WorkspaceServer {
         let settings = workspace.settings();
         let parse = self.get_parse(params.path.clone())?;
 
-        if !settings.formatter().format_with_errors && parse.has_errors() {
-            return Err(WorkspaceError::format_with_errors_disabled());
+        if let Some(settings) = settings {
+            if !settings.formatter().format_with_errors && parse.has_errors() {
+                return Err(WorkspaceError::format_with_errors_disabled());
+            }
         }
         let document_file_source = self.get_file_source(&params.path);
 
@@ -570,7 +582,7 @@ impl Workspace for WorkspaceServer {
                 info_span!("Pulling diagnostics", categories =? params.categories).in_scope(|| {
                     let results = lint(LintParams {
                         parse,
-                        settings: self.workspace(),
+                        workspace: &self.workspace(),
                         max_diagnostics: params.max_diagnostics as u32,
                         path: &params.path,
                         only: params.only,
@@ -624,13 +636,18 @@ impl Workspace for WorkspaceServer {
         let workspace = self.workspace();
         let manifest = self.get_current_project()?.map(|pr| pr.manifest);
         let language = self.get_file_source(&params.path);
+        let settings = workspace.settings();
+        let Some(settings) = settings else {
+            return Ok(PullActionsResult { actions: vec![] });
+        };
         Ok(code_actions(CodeActionsParams {
             parse,
             range: params.range,
-            workspace,
+            workspace: &workspace,
             path: &params.path,
             manifest,
             language,
+            settings,
         }))
     }
 
@@ -646,8 +663,10 @@ impl Workspace for WorkspaceServer {
         let settings = workspace.settings();
         let parse = self.get_parse(params.path.clone())?;
 
-        if !settings.formatter().format_with_errors && parse.has_errors() {
-            return Err(WorkspaceError::format_with_errors_disabled());
+        if let Some(settings) = settings {
+            if !settings.formatter().format_with_errors && parse.has_errors() {
+                return Err(WorkspaceError::format_with_errors_disabled());
+            }
         }
         let document_file_source = self.get_file_source(&params.path);
         format(&params.path, &document_file_source, parse, workspace)
@@ -663,8 +682,10 @@ impl Workspace for WorkspaceServer {
         let settings = workspace.settings();
         let parse = self.get_parse(params.path.clone())?;
 
-        if !settings.formatter().format_with_errors && parse.has_errors() {
-            return Err(WorkspaceError::format_with_errors_disabled());
+        if let Some(settings) = settings {
+            if !settings.formatter().format_with_errors && parse.has_errors() {
+                return Err(WorkspaceError::format_with_errors_disabled());
+            }
         }
         let document_file_source = self.get_file_source(&params.path);
         format_range(
@@ -686,8 +707,10 @@ impl Workspace for WorkspaceServer {
         let workspace = self.workspace();
         let settings = workspace.settings();
         let parse = self.get_parse(params.path.clone())?;
-        if !settings.formatter().format_with_errors && parse.has_errors() {
-            return Err(WorkspaceError::format_with_errors_disabled());
+        if let Some(settings) = settings {
+            if !settings.formatter().format_with_errors && parse.has_errors() {
+                return Err(WorkspaceError::format_with_errors_disabled());
+            }
         }
         let document_file_source = self.get_file_source(&params.path);
 
@@ -707,26 +730,16 @@ impl Workspace for WorkspaceServer {
             .analyzer
             .fix_all
             .ok_or_else(self.build_capability_error(&params.path))?;
-        let workspace = self.workspace();
-        let settings = workspace.settings();
         let parse = self.get_parse(params.path.clone())?;
-        // Compute final rules (taking `overrides` into account)
-        let rules = settings.as_rules(params.path.as_path());
-        let rule_filter_list = rules
-            .as_ref()
-            .map(|rules| rules.as_enabled_rules())
-            .unwrap_or_default()
-            .into_iter()
-            .collect::<Vec<_>>();
-        let filter = AnalysisFilter::from_enabled_rules(rule_filter_list.as_slice());
+
         let manifest = self.get_current_project()?.map(|pr| pr.manifest);
         let language = self.get_file_source(&params.path);
         fix_all(FixAllParams {
             parse,
-            rules: rules.as_ref().map(|x| x.borrow()),
+            // rules: rules.as_ref().map(|x| x.borrow()),
             fix_file_mode: params.fix_file_mode,
-            filter,
-            settings: self.workspace(),
+            // filter,
+            workspace: self.workspace(),
             should_format: params.should_format,
             biome_path: &params.path,
             manifest,

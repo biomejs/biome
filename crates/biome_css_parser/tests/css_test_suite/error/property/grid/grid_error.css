@@ -1,0 +1,4 @@
+#grid {
+	display: grid;
+	grid-template-columns: [first 123 nav-start] 150px [main-start 1fr [last];
+}

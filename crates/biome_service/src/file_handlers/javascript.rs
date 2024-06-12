@@ -112,9 +112,9 @@ impl ServiceLanguage for JsLanguage {
     }
 
     fn resolve_format_options(
-        global: &FormatSettings,
-        overrides: &OverrideSettings,
-        language: &JsFormatterSettings,
+        global: Option<&FormatSettings>,
+        overrides: Option<&OverrideSettings>,
+        language: Option<&JsFormatterSettings>,
         path: &BiomePath,
         document_file_source: &DocumentFileSource,
     ) -> JsFormatOptions {
@@ -126,100 +126,135 @@ impl ServiceLanguage for JsLanguage {
         )
         .with_indent_style(
             language
-                .indent_style
-                .or(global.indent_style)
+                .and_then(|l| l.indent_style)
+                .or(global.and_then(|g| g.indent_style))
                 .unwrap_or_default(),
         )
         .with_indent_width(
             language
-                .indent_width
-                .or(global.indent_width)
+                .and_then(|l| l.indent_width)
+                .or(global.and_then(|g| g.indent_width))
                 .unwrap_or_default(),
         )
         .with_line_width(
             language
-                .line_width
-                .or(global.line_width)
+                .and_then(|l| l.line_width)
+                .or(global.and_then(|g| g.line_width))
                 .unwrap_or_default(),
         )
         .with_line_ending(
             language
-                .line_ending
-                .or(global.line_ending)
+                .and_then(|l| l.line_ending)
+                .or(global.and_then(|g| g.line_ending))
                 .unwrap_or_default(),
         )
-        .with_quote_style(language.quote_style.unwrap_or_default())
-        .with_jsx_quote_style(language.jsx_quote_style.unwrap_or_default())
-        .with_quote_properties(language.quote_properties.unwrap_or_default())
-        .with_trailing_commas(language.trailing_commas.unwrap_or_default())
-        .with_semicolons(language.semicolons.unwrap_or_default())
-        .with_arrow_parentheses(language.arrow_parentheses.unwrap_or_default())
-        .with_bracket_spacing(language.bracket_spacing.unwrap_or_default())
-        .with_bracket_same_line(language.bracket_same_line.unwrap_or_default())
+        .with_quote_style(language.and_then(|l| l.quote_style).unwrap_or_default())
+        .with_jsx_quote_style(language.and_then(|l| l.jsx_quote_style).unwrap_or_default())
+        .with_quote_properties(
+            language
+                .and_then(|l| l.quote_properties)
+                .unwrap_or_default(),
+        )
+        .with_trailing_commas(language.and_then(|l| l.trailing_commas).unwrap_or_default())
+        .with_semicolons(language.and_then(|l| l.semicolons).unwrap_or_default())
+        .with_arrow_parentheses(
+            language
+                .and_then(|l| l.arrow_parentheses)
+                .unwrap_or_default(),
+        )
+        .with_bracket_spacing(language.and_then(|l| l.bracket_spacing).unwrap_or_default())
+        .with_bracket_same_line(
+            language
+                .and_then(|l| l.bracket_same_line)
+                .unwrap_or_default(),
+        )
         .with_attribute_position(
             language
-                .attribute_position
-                .or(global.attribute_position)
+                .and_then(|l| l.attribute_position)
+                .or(global.and_then(|g| g.attribute_position))
                 .unwrap_or_default(),
         );
 
-        overrides.override_js_format_options(path, options)
+        if let Some(overrides) = overrides {
+            overrides.override_js_format_options(path, options)
+        } else {
+            options
+        }
     }
 
     fn resolve_analyzer_options(
-        global: &Settings,
-        _linter: &LinterSettings,
-        overrides: &OverrideSettings,
-        _language: &Self::LinterSettings,
+        global: Option<&Settings>,
+        _linter: Option<&LinterSettings>,
+        overrides: Option<&OverrideSettings>,
+        _language: Option<&Self::LinterSettings>,
         path: &BiomePath,
         _file_source: &DocumentFileSource,
     ) -> AnalyzerOptions {
-        let preferred_quote = global
-            .languages
-            .javascript
-            .formatter
-            .quote_style
-            .map(|quote_style: QuoteStyle| {
-                if quote_style == QuoteStyle::Single {
-                    PreferredQuote::Single
-                } else {
-                    PreferredQuote::Double
-                }
-            })
-            .unwrap_or_default();
+        let preferred_quote =
+            global
+                .and_then(|global| {
+                    global.languages.javascript.formatter.quote_style.map(
+                        |quote_style: QuoteStyle| {
+                            if quote_style == QuoteStyle::Single {
+                                PreferredQuote::Single
+                            } else {
+                                PreferredQuote::Double
+                            }
+                        },
+                    )
+                })
+                .unwrap_or_default();
 
-        let jsx_runtime = match overrides
-            .override_jsx_runtime(path, global.languages.javascript.environment.jsx_runtime)
-        {
-            // In the future, we may wish to map an `Auto` variant to a concrete
-            // analyzer value for easy access by the analyzer.
-            JsxRuntime::Transparent => biome_analyze::options::JsxRuntime::Transparent,
-            JsxRuntime::ReactClassic => biome_analyze::options::JsxRuntime::ReactClassic,
-        };
+        let mut jsx_runtime = None;
+        let mut globals = vec![];
 
-        let mut globals: Vec<_> = overrides
-            .override_js_globals(path, &global.languages.javascript.globals)
-            .into_iter()
-            .collect();
-        if path.extension().and_then(OsStr::to_str) == Some("vue") {
+        if let (Some(overrides), Some(global)) = (overrides, global) {
+            jsx_runtime = Some(
+                match overrides
+                    .override_jsx_runtime(path, global.languages.javascript.environment.jsx_runtime)
+                {
+                    // In the future, we may wish to map an `Auto` variant to a concrete
+                    // analyzer value for easy access by the analyzer.
+                    JsxRuntime::Transparent => biome_analyze::options::JsxRuntime::Transparent,
+                    JsxRuntime::ReactClassic => biome_analyze::options::JsxRuntime::ReactClassic,
+                },
+            );
+
             globals.extend(
-                [
-                    "defineEmits",
-                    "defineProps",
-                    "defineExpose",
-                    "defineModel",
-                    "defineOptions",
-                    "defineSlots",
-                ]
-                .map(ToOwned::to_owned),
+                overrides
+                    .override_js_globals(path, &global.languages.javascript.globals)
+                    .into_iter()
+                    .collect::<Vec<_>>(),
             );
         }
 
+        match path.extension().and_then(OsStr::to_str) {
+            Some("vue") => {
+                globals.extend(
+                    [
+                        "defineEmits",
+                        "defineProps",
+                        "defineExpose",
+                        "defineModel",
+                        "defineOptions",
+                        "defineSlots",
+                    ]
+                    .map(ToOwned::to_owned),
+                );
+            }
+            Some("astro") => {
+                globals.extend(["Astro"].map(ToOwned::to_owned));
+            }
+            _ => {}
+        };
+
         let configuration = AnalyzerConfiguration {
-            rules: to_analyzer_rules(global, path),
+            rules: global
+                .map(|g| to_analyzer_rules(g, path.as_path()))
+                .unwrap_or_default(),
             globals,
             preferred_quote,
-            jsx_runtime: Some(jsx_runtime),
+            jsx_runtime,
         };
 
         AnalyzerOptions {
@@ -261,17 +296,26 @@ fn parse(
     biome_path: &BiomePath,
     file_source: DocumentFileSource,
     text: &str,
-    settings: WorkspaceSettingsHandle,
+    settings: Option<&Settings>,
     cache: &mut NodeCache,
 ) -> ParseResult {
-    let parser_settings = &settings.settings().languages.javascript.parser;
-    let overrides = &settings.settings().override_settings;
-    let options = overrides.to_override_js_parser_options(
-        biome_path,
-        JsParserOptions {
-            parse_class_parameter_decorators: parser_settings.parse_class_parameter_decorators,
-        },
-    );
+    let mut options = JsParserOptions {
+        parse_class_parameter_decorators: settings
+            .map(|settings| {
+                settings
+                    .languages
+                    .javascript
+                    .parser
+                    .parse_class_parameter_decorators
+            })
+            .unwrap_or_default(),
+    };
+    if let Some(settings) = settings {
+        options = settings
+            .override_settings
+            .to_override_js_parser_options(biome_path, options);
+    }
+
     let file_source = file_source.to_js_file_source().unwrap_or_default();
     let parse = biome_js_parser::parse_js_with_cache(text, file_source, options, cache);
     let root = parse.syntax();
@@ -357,7 +401,6 @@ fn debug_formatter_ir(
 pub(crate) fn lint(params: LintParams) -> LintResults {
     debug_span!("Linting JavaScript file", path =? params.path, language =? params.language)
         .in_scope(move || {
-            let settings = params.settings.settings();
             let Some(file_source) = params
                 .language
                 .to_js_file_source()
@@ -372,11 +415,16 @@ pub(crate) fn lint(params: LintParams) -> LintResults {
             let tree = params.parse.tree();
             let mut diagnostics = params.parse.into_diagnostics();
             let analyzer_options = &params
-                .settings
+                .workspace
                 .analyzer_options::<JsLanguage>(params.path, &params.language);
 
+            let mut rules = None;
+            let mut organize_imports_enabled = true;
+            if let Some(settings) = params.workspace.settings() {
+                rules = settings.as_rules(params.path.as_path());
+                organize_imports_enabled = settings.organize_imports.enabled;
+            }
             // Compute final rules (taking `overrides` into account)
-            let rules = settings.as_rules(params.path.as_path());
 
             let has_only_filter = !params.only.is_empty();
             let enabled_rules = if has_only_filter {
@@ -392,7 +440,7 @@ pub(crate) fn lint(params: LintParams) -> LintResults {
                     .unwrap_or_default()
                     .into_iter()
                     .collect::<Vec<_>>();
-                if settings.organize_imports.enabled && !params.categories.is_syntax() {
+                if organize_imports_enabled && !params.categories.is_syntax() {
                     rule_filter_list.push(RuleFilter::Rule("correctness", "organizeImports"));
                 }
                 rule_filter_list.push(RuleFilter::Rule(
@@ -534,13 +582,13 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
         path,
         manifest,
         language,
+        settings,
     } = params;
     debug_span!("Code actions JavaScript", range =? range, path =? path).in_scope(move || {
         let tree = parse.tree();
         trace_span!("Parsed file", tree =? tree).in_scope(move || {
             let analyzer_options =
                 workspace.analyzer_options::<JsLanguage>(params.path, &params.language);
-            let settings = workspace.settings();
             let rules = settings.as_rules(params.path);
             let mut actions = Vec::new();
             let mut enabled_rules = vec![];
@@ -608,15 +656,36 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
 pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceError> {
     let FixAllParams {
         parse,
-        rules,
+        // rules,
         fix_file_mode,
-        settings,
         should_format,
         biome_path,
-        mut filter,
+        // mut filter,
         manifest,
         document_file_source,
+        workspace,
     } = params;
+
+    let settings = workspace.settings();
+    let Some(settings) = settings else {
+        let tree: AnyJsRoot = parse.tree();
+
+        return Ok(FixFileResult {
+            actions: vec![],
+            errors: 0,
+            skipped_suggested_fixes: 0,
+            code: tree.syntax().to_string(),
+        });
+    };
+    // Compute final rules (taking `overrides` into account)
+    let rules = settings.as_rules(params.biome_path.as_path());
+    let rule_filter_list = rules
+        .as_ref()
+        .map(|rules| rules.as_enabled_rules())
+        .unwrap_or_default()
+        .into_iter()
+        .collect::<Vec<_>>();
+    let mut filter = AnalysisFilter::from_enabled_rules(rule_filter_list.as_slice());
 
     let Some(file_source) = document_file_source
         .to_js_file_source()
@@ -632,7 +701,7 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
     let mut skipped_suggested_fixes = 0;
     let mut errors: u16 = 0;
     let analyzer_options =
-        settings.analyzer_options::<JsLanguage>(biome_path, &document_file_source);
+        workspace.analyzer_options::<JsLanguage>(biome_path, &document_file_source);
     loop {
         let (action, _) = analyze(
             &tree,
@@ -644,7 +713,7 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
                 let current_diagnostic = signal.diagnostic();
 
                 if let Some(diagnostic) = current_diagnostic.as_ref() {
-                    if is_diagnostic_error(diagnostic, rules) {
+                    if is_diagnostic_error(diagnostic, rules.as_deref()) {
                         errors += 1;
                     }
                 }
@@ -709,7 +778,7 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
             None => {
                 let code = if should_format {
                     format_node(
-                        settings.format_options::<JsLanguage>(biome_path, &document_file_source),
+                        workspace.format_options::<JsLanguage>(biome_path, &document_file_source),
                         tree.syntax(),
                     )?
                     .print()?

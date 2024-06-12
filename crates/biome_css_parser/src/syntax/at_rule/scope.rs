@@ -1,6 +1,6 @@
 use crate::parser::CssParser;
 use crate::syntax::at_rule::parse_error::expected_any_scope_range;
-use crate::syntax::block::parse_rule_block;
+use crate::syntax::block::parse_conditional_block;
 use crate::syntax::selector::SelectorList;
 use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::{CssSyntaxKind, T};
@@ -27,7 +27,7 @@ pub(crate) fn parse_scope_at_rule(p: &mut CssParser) -> ParsedSyntax {
 
     parse_any_scope_range(p).ok(); // it's optional
 
-    parse_rule_block(p);
+    parse_conditional_block(p);
 
     Present(m.complete(p, CSS_SCOPE_AT_RULE))
 }

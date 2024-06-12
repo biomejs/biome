@@ -1,4 +1,4 @@
-use std::ops::Deref;
+use std::{ops::Deref, str::FromStr};
 
 use biome_deserialize_macros::Deserializable;
 
@@ -14,25 +14,11 @@ use biome_deserialize_macros::Deserializable;
 /// - A limited set of escaped characters including all regex special characters
 ///   and regular string escape characters `\f`, `\n`, `\r`, `\t`, `\v`
 ///
-/// A restricted regular expression is implictly delimited by the anchors `^` and `$`.
+/// A restricted regular expression is implicitly delimited by the anchors `^` and `$`.
 #[derive(Clone, Debug, Deserializable, serde::Deserialize, serde::Serialize)]
 #[serde(try_from = "String", into = "String")]
 pub struct RestrictedRegex(regex::Regex);
-impl RestrictedRegex {
-    /// Similar to [regex::Regex::as_str], but returns the original regex representation,
-    /// without the implicit anchors and the implicit group.
-    pub fn as_source(&self) -> &str {
-        let repr = self.0.as_str();
-        debug_assert!(repr.starts_with("^(?:"));
-        debug_assert!(repr.ends_with(")$"));
-        &repr[4..(repr.len() - 2)]
-    }
-}
-impl From<RestrictedRegex> for String {
-    fn from(value: RestrictedRegex) -> Self {
-        value.into()
-    }
-}
+
 impl Deref for RestrictedRegex {
     type Target = regex::Regex;
 
@@ -40,22 +26,39 @@ impl Deref for RestrictedRegex {
         &self.0
     }
 }
-impl TryFrom<String> for RestrictedRegex {
-    type Error = regex::Error;
 
-    fn try_from(value: String) -> Result<Self, Self::Error> {
-        is_restricted_regex(&value)?;
-        regex::Regex::new(&format!("^(?:{value})$")).map(RestrictedRegex)
+impl std::fmt::Display for RestrictedRegex {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let repr = self.0.as_str();
+        debug_assert!(repr.starts_with("^(?:"));
+        debug_assert!(repr.ends_with(")$"));
+        f.write_str(&repr[4..(repr.len() - 2)])
     }
 }
-impl TryFrom<&str> for RestrictedRegex {
-    type Error = regex::Error;
 
-    fn try_from(value: &str) -> Result<Self, Self::Error> {
+impl From<RestrictedRegex> for String {
+    fn from(value: RestrictedRegex) -> Self {
+        value.to_string()
+    }
+}
+
+impl FromStr for RestrictedRegex {
+    type Err = regex::Error;
+
+    fn from_str(value: &str) -> Result<Self, Self::Err> {
         is_restricted_regex(value)?;
         regex::Regex::new(&format!("^(?:{value})$")).map(RestrictedRegex)
     }
 }
+
+impl TryFrom<String> for RestrictedRegex {
+    type Error = regex::Error;
+
+    fn try_from(value: String) -> Result<Self, Self::Error> {
+        value.parse()
+    }
+}
+
 #[cfg(feature = "schemars")]
 impl schemars::JsonSchema for RestrictedRegex {
     fn schema_name() -> String {
@@ -66,7 +69,9 @@ impl schemars::JsonSchema for RestrictedRegex {
         String::json_schema(gen)
     }
 }
+
 impl Eq for RestrictedRegex {}
+
 impl PartialEq for RestrictedRegex {
     fn eq(&self, other: &Self) -> bool {
         self.0.as_str() == other.0.as_str()
@@ -137,31 +142,33 @@ fn is_restricted_regex(pattern: &str) -> Result<(), regex::Error> {
                     )));
                 }
             }
-            b'(' if !is_in_char_class => {
-                if it.next() == Some(b'?') {
-                    match it.next() {
-                        Some(b'P' | b'=' | b'!' | b'<') => {
-                            return if c == b'P'
-                                || (c == b'<' && !matches!(it.next(), Some(b'=' | b'!')))
-                            {
-                                Err(regex::Error::Syntax(
-                                    "Named groups `(?<NAME>)` are not supported.".to_string(),
-                                ))
-                            } else {
-                                Err(regex::Error::Syntax(format!(
-                                    "Assertions `(?{c})` are not supported."
-                                )))
-                            };
-                        }
-                        Some(b':') => {}
-                        _ => {
-                            return Err(regex::Error::Syntax(
-                                "Group flags `(?flags:)` are not supported.".to_string(),
-                            ));
-                        }
-                    }
+            b'(' if !is_in_char_class => match it.next() {
+                Some(b'[') => {
+                    is_in_char_class = true;
                 }
-            }
+                Some(b'?') => match it.next() {
+                    Some(b'P' | b'=' | b'!' | b'<') => {
+                        return if c == b'P'
+                            || (c == b'<' && !matches!(it.next(), Some(b'=' | b'!')))
+                        {
+                            Err(regex::Error::Syntax(
+                                "Named groups `(?<NAME>)` are not supported.".to_string(),
+                            ))
+                        } else {
+                            Err(regex::Error::Syntax(format!(
+                                "Assertions `(?{c})` are not supported."
+                            )))
+                        };
+                    }
+                    Some(b':') => {}
+                    _ => {
+                        return Err(regex::Error::Syntax(
+                            "Group flags `(?flags:)` are not supported.".to_string(),
+                        ));
+                    }
+                },
+                _ => {}
+            },
             _ => {}
         }
     }
@@ -193,5 +200,6 @@ mod tests {
         assert!(is_restricted_regex("(?:a)(.+)z").is_ok());
         assert!(is_restricted_regex("[A-Z][^a-z]").is_ok());
         assert!(is_restricted_regex(r"\n\t\v\f").is_ok());
+        assert!(is_restricted_regex("([^_])").is_ok());
     }
 }

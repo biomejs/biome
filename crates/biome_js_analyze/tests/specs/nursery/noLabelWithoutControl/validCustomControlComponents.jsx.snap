@@ -1,0 +1,9 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: validCustomControlComponents.jsx
+---
+# Input
+```jsx
+<label><span>A label<CustomInput /></span></label>;
+
+```

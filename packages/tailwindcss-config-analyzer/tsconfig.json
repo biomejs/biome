@@ -1,6 +1,8 @@
 {
   "compilerOptions": {
-    "lib": ["ESNext"],
+    "lib": [
+      "ESNext"
+    ],
     "module": "NodeNext",
     "target": "esnext",
     "moduleResolution": "NodeNext",
@@ -14,5 +16,7 @@
     "forceConsistentCasingInFileNames": true,
     "allowJs": true
   },
-  "include": ["src/**/*"]
+  "include": [
+    "src/**/*"
+  ]
 }

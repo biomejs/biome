@@ -42,7 +42,7 @@ declare_rule! {
     /// It does not check the type of the callee.
     ///
     pub UseNumberToFixedDigitsArgument {
-        version: "next",
+        version: "1.8.0",
         name: "useNumberToFixedDigitsArgument",
         language: "js",
         sources: &[RuleSource::EslintUnicorn("require-number-to-fixed-digits-argument")],

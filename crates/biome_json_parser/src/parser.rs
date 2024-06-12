@@ -1,5 +1,5 @@
 use crate::token_source::JsonTokenSource;
-use biome_json_syntax::JsonSyntaxKind;
+use biome_json_syntax::{JsonFileSource, JsonSyntaxKind};
 use biome_parser::diagnostic::merge_diagnostics;
 use biome_parser::event::Event;
 use biome_parser::prelude::*;
@@ -27,6 +27,19 @@ impl JsonParserOptions {
     pub fn with_allow_trailing_commas(mut self) -> Self {
         self.allow_trailing_commas = true;
         self
+    }
+}
+
+impl From<&JsonFileSource> for JsonParserOptions {
+    fn from(file_source: &JsonFileSource) -> Self {
+        let options = Self::default();
+        if file_source.allow_comments() {
+            options.with_allow_comments();
+        }
+        if file_source.allow_trailing_commas() {
+            options.with_allow_trailing_commas();
+        }
+        options
     }
 }
 

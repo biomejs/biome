@@ -103,7 +103,7 @@ declare_rule! {
     /// ```
     ///
     pub NoMisplacedAssertion {
-        version: "next",
+        version: "1.8.0",
         name: "noMisplacedAssertion",
         language: "js",
         recommended: false,

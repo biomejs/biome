@@ -2,7 +2,6 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: css/yaml/with_comments.css
 ---
-
 # Input
 
 ```css
@@ -68,22 +67,9 @@ with_comments.css:1:1 parse ━━━━━━━━━━━━━━━━━�
     2 │ title: Title
     3 │ description: Description
   
-with_comments.css:3:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `description`
-  
-    1 │ ---
-    2 │ title: Title
-  > 3 │ description: Description
-      │ ^^^^^^^^^^^
-    4 │ # This is a comment
-    5 │ ---
-  
-  i Remove description
-  
 with_comments.css:5:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected `,` but instead found `-`
+  × Expected a compound selector but instead found '-'.
   
     3 │ description: Description
     4 │ # This is a comment
@@ -92,7 +78,14 @@ with_comments.css:5:1 parse ━━━━━━━━━━━━━━━━━�
     6 │ 
     7 │ a {
   
-  i Remove -
+  i Expected a compound selector here.
+  
+    3 │ description: Description
+    4 │ # This is a comment
+  > 5 │ ---
+      │ ^
+    6 │ 
+    7 │ a {
   
 with_comments.css:5:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -109,5 +102,3 @@ with_comments.css:5:3 parse ━━━━━━━━━━━━━━━━━�
   
 
 ```
-
-

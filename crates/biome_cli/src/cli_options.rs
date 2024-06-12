@@ -125,6 +125,10 @@ pub enum CliReporter {
     Json,
     /// Reports information using the JSON format, formatted.
     JsonPretty,
+    /// Diagnostics are printed for GitHub workflow commands
+    GitHub,
+    /// Diagnostics and summary are printed in JUnit format
+    Junit,
     /// Reports linter diagnostics grouped by category and number of hits. Reports formatter diagnostics grouped by file.
     Summary,
 }
@@ -137,6 +141,8 @@ impl FromStr for CliReporter {
             "json" => Ok(Self::Json),
             "json-pretty" => Ok(Self::JsonPretty),
             "summary" => Ok(Self::Summary),
+            "github" => Ok(Self::GitHub),
+            "junit" => Ok(Self::Junit),
             _ => Err(format!(
                 "value {s:?} is not valid for the --reporter argument"
             )),
@@ -151,6 +157,8 @@ impl Display for CliReporter {
             CliReporter::Json => f.write_str("json"),
             CliReporter::JsonPretty => f.write_str("json-pretty"),
             CliReporter::Summary => f.write_str("summary"),
+            CliReporter::GitHub => f.write_str("github"),
+            CliReporter::Junit => f.write_str("junit"),
         }
     }
 }

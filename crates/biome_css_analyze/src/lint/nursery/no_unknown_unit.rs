@@ -57,7 +57,7 @@ declare_rule! {
     /// ```
     ///
     pub NoUnknownUnit {
-        version: "next",
+        version: "1.8.0",
         name: "noUnknownUnit",
         language: "css",
         recommended: true,

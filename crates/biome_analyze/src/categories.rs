@@ -108,7 +108,9 @@ impl ActionCategory {
     }
 }
 
-/// The sub-category of a refactor code action
+/// The sub-category of a refactor code action.
+///
+/// [Check the LSP spec](https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#codeActionKind) for more information:
 #[derive(Clone, Debug, PartialEq, Eq)]
 #[cfg_attr(
     feature = "serde",

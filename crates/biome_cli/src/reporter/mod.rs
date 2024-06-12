@@ -1,4 +1,6 @@
+pub(crate) mod github;
 pub(crate) mod json;
+pub(crate) mod junit;
 pub(crate) mod summary;
 pub(crate) mod terminal;
 

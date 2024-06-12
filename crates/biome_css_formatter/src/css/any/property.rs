@@ -9,6 +9,7 @@ impl FormatRule<AnyCssProperty> for FormatAnyCssProperty {
     fn fmt(&self, node: &AnyCssProperty, f: &mut CssFormatter) -> FormatResult<()> {
         match node {
             AnyCssProperty::CssBogusProperty(node) => node.format().fmt(f),
+            AnyCssProperty::CssComposesProperty(node) => node.format().fmt(f),
             AnyCssProperty::CssGenericProperty(node) => node.format().fmt(f),
         }
     }

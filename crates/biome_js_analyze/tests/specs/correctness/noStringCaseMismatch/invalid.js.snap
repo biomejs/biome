@@ -1,0 +1,756 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```jsx
+s.toUpperCase() === 'abc';
+s.toUpperCase() == 'abc';
+'abc' === s.toUpperCase();
+s.toLowerCase() === "\u001aX";
+s.toLowerCase() === "\u{001a}X";
+s.toLowerCase() === "\xaaX";
+s.toLowerCase() === "\nX";
+
+if (s.toUpperCase() === 'abc' && c == d && e == f) {};
+while (s.toUpperCase() === 'abc' && c == d && e == f) {};
+while (s.toUpperCase() === 'abc') {};
+let b = s.toLowerCase() === `eFg`;;
+do {} while (s.toLowerCase() === 'ABC');;
+for (; s.toLowerCase() === 'ABC'; ) {};
+
+switch (s.toUpperCase()) { case 'ABC': case 'abc': case 'aBc': default: }
+
+for (; s['toLowerCase']() === 'ABC'; ) {}
+for (; s[`toUpperCase`]() === 'abc'; ) {}
+
+switch (s['toLowerCase']()) { case 'Abc': case 'aBc': case 'abC': default: }
+
+```
+
+# Diagnostics
+```
+invalid.js:1:1 lint/correctness/noStringCaseMismatch  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This expression always returns false.
+  
+  > 1 │ s.toUpperCase() === 'abc';
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^
+    2 │ s.toUpperCase() == 'abc';
+    3 │ 'abc' === s.toUpperCase();
+  
+  i This call convert the string to upper case
+  
+  > 1 │ s.toUpperCase() === 'abc';
+      │ ^^^^^^^^^^^^^^^
+    2 │ s.toUpperCase() == 'abc';
+    3 │ 'abc' === s.toUpperCase();
+  
+  i ... but this value is not in upper case
+  
+  > 1 │ s.toUpperCase() === 'abc';
+      │                     ^^^^^
+    2 │ s.toUpperCase() == 'abc';
+    3 │ 'abc' === s.toUpperCase();
+  
+  i Unsafe fix: Use upper case string value.
+  
+     1    │ - s.toUpperCase()·===·'abc';
+        1 │ + s.toUpperCase()·===·"ABC";
+     2  2 │   s.toUpperCase() == 'abc';
+     3  3 │   'abc' === s.toUpperCase();
+  
+
+```
+
+```
+invalid.js:2:1 lint/correctness/noStringCaseMismatch  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This expression always returns false.
+  
+    1 │ s.toUpperCase() === 'abc';
+  > 2 │ s.toUpperCase() == 'abc';
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^
+    3 │ 'abc' === s.toUpperCase();
+    4 │ s.toLowerCase() === "\u001aX";
+  
+  i This call convert the string to upper case
+  
+    1 │ s.toUpperCase() === 'abc';
+  > 2 │ s.toUpperCase() == 'abc';
+      │ ^^^^^^^^^^^^^^^
+    3 │ 'abc' === s.toUpperCase();
+    4 │ s.toLowerCase() === "\u001aX";
+  
+  i ... but this value is not in upper case
+  
+    1 │ s.toUpperCase() === 'abc';
+  > 2 │ s.toUpperCase() == 'abc';
+      │                    ^^^^^
+    3 │ 'abc' === s.toUpperCase();
+    4 │ s.toLowerCase() === "\u001aX";
+  
+  i Unsafe fix: Use upper case string value.
+  
+     1  1 │   s.toUpperCase() === 'abc';
+     2    │ - s.toUpperCase()·==·'abc';
+        2 │ + s.toUpperCase()·==·"ABC";
+     3  3 │   'abc' === s.toUpperCase();
+     4  4 │   s.toLowerCase() === "\u001aX";
+  
+
+```
+
+```
+invalid.js:3:1 lint/correctness/noStringCaseMismatch  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This expression always returns false.
+  
+    1 │ s.toUpperCase() === 'abc';
+    2 │ s.toUpperCase() == 'abc';
+  > 3 │ 'abc' === s.toUpperCase();
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ s.toLowerCase() === "\u001aX";
+    5 │ s.toLowerCase() === "\u{001a}X";
+  
+  i This call convert the string to upper case
+  
+    1 │ s.toUpperCase() === 'abc';
+    2 │ s.toUpperCase() == 'abc';
+  > 3 │ 'abc' === s.toUpperCase();
+      │           ^^^^^^^^^^^^^^^
+    4 │ s.toLowerCase() === "\u001aX";
+    5 │ s.toLowerCase() === "\u{001a}X";
+  
+  i ... but this value is not in upper case
+  
+    1 │ s.toUpperCase() === 'abc';
+    2 │ s.toUpperCase() == 'abc';
+  > 3 │ 'abc' === s.toUpperCase();
+      │ ^^^^^
+    4 │ s.toLowerCase() === "\u001aX";
+    5 │ s.toLowerCase() === "\u{001a}X";
+  
+  i Unsafe fix: Use upper case string value.
+  
+     1  1 │   s.toUpperCase() === 'abc';
+     2  2 │   s.toUpperCase() == 'abc';
+     3    │ - 'abc'·===·s.toUpperCase();
+        3 │ + "ABC"·===·s.toUpperCase();
+     4  4 │   s.toLowerCase() === "\u001aX";
+     5  5 │   s.toLowerCase() === "\u{001a}X";
+  
+
+```
+
+```
+invalid.js:5:1 lint/correctness/noStringCaseMismatch  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This expression always returns false.
+  
+    3 │ 'abc' === s.toUpperCase();
+    4 │ s.toLowerCase() === "\u001aX";
+  > 5 │ s.toLowerCase() === "\u{001a}X";
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    6 │ s.toLowerCase() === "\xaaX";
+    7 │ s.toLowerCase() === "\nX";
+  
+  i This call convert the string to lower case
+  
+    3 │ 'abc' === s.toUpperCase();
+    4 │ s.toLowerCase() === "\u001aX";
+  > 5 │ s.toLowerCase() === "\u{001a}X";
+      │ ^^^^^^^^^^^^^^^
+    6 │ s.toLowerCase() === "\xaaX";
+    7 │ s.toLowerCase() === "\nX";
+  
+  i ... but this value is not in lower case
+  
+    3 │ 'abc' === s.toUpperCase();
+    4 │ s.toLowerCase() === "\u001aX";
+  > 5 │ s.toLowerCase() === "\u{001a}X";
+      │                     ^^^^^^^^^^^
+    6 │ s.toLowerCase() === "\xaaX";
+    7 │ s.toLowerCase() === "\nX";
+  
+  i Unsafe fix: Use lower case string value.
+  
+     3  3 │   'abc' === s.toUpperCase();
+     4  4 │   s.toLowerCase() === "\u001aX";
+     5    │ - s.toLowerCase()·===·"\u{001a}X";
+        5 │ + s.toLowerCase()·===·"\u{001a}x";
+     6  6 │   s.toLowerCase() === "\xaaX";
+     7  7 │   s.toLowerCase() === "\nX";
+  
+
+```
+
+```
+invalid.js:6:1 lint/correctness/noStringCaseMismatch  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This expression always returns false.
+  
+    4 │ s.toLowerCase() === "\u001aX";
+    5 │ s.toLowerCase() === "\u{001a}X";
+  > 6 │ s.toLowerCase() === "\xaaX";
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    7 │ s.toLowerCase() === "\nX";
+    8 │ 
+  
+  i This call convert the string to lower case
+  
+    4 │ s.toLowerCase() === "\u001aX";
+    5 │ s.toLowerCase() === "\u{001a}X";
+  > 6 │ s.toLowerCase() === "\xaaX";
+      │ ^^^^^^^^^^^^^^^
+    7 │ s.toLowerCase() === "\nX";
+    8 │ 
+  
+  i ... but this value is not in lower case
+  
+    4 │ s.toLowerCase() === "\u001aX";
+    5 │ s.toLowerCase() === "\u{001a}X";
+  > 6 │ s.toLowerCase() === "\xaaX";
+      │                     ^^^^^^^
+    7 │ s.toLowerCase() === "\nX";
+    8 │ 
+  
+  i Unsafe fix: Use lower case string value.
+  
+     4  4 │   s.toLowerCase() === "\u001aX";
+     5  5 │   s.toLowerCase() === "\u{001a}X";
+     6    │ - s.toLowerCase()·===·"\xaaX";
+        6 │ + s.toLowerCase()·===·"\xaax";
+     7  7 │   s.toLowerCase() === "\nX";
+     8  8 │   
+  
+
+```
+
+```
+invalid.js:9:5 lint/correctness/noStringCaseMismatch  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This expression always returns false.
+  
+     7 │ s.toLowerCase() === "\nX";
+     8 │ 
+   > 9 │ if (s.toUpperCase() === 'abc' && c == d && e == f) {};
+       │     ^^^^^^^^^^^^^^^^^^^^^^^^^
+    10 │ while (s.toUpperCase() === 'abc' && c == d && e == f) {};
+    11 │ while (s.toUpperCase() === 'abc') {};
+  
+  i This call convert the string to upper case
+  
+     7 │ s.toLowerCase() === "\nX";
+     8 │ 
+   > 9 │ if (s.toUpperCase() === 'abc' && c == d && e == f) {};
+       │     ^^^^^^^^^^^^^^^
+    10 │ while (s.toUpperCase() === 'abc' && c == d && e == f) {};
+    11 │ while (s.toUpperCase() === 'abc') {};
+  
+  i ... but this value is not in upper case
+  
+     7 │ s.toLowerCase() === "\nX";
+     8 │ 
+   > 9 │ if (s.toUpperCase() === 'abc' && c == d && e == f) {};
+       │                         ^^^^^
+    10 │ while (s.toUpperCase() === 'abc' && c == d && e == f) {};
+    11 │ while (s.toUpperCase() === 'abc') {};
+  
+  i Unsafe fix: Use upper case string value.
+  
+     7  7 │   s.toLowerCase() === "\nX";
+     8  8 │   
+     9    │ - if·(s.toUpperCase()·===·'abc'·&&·c·==·d·&&·e·==·f)·{};
+        9 │ + if·(s.toUpperCase()·===·"ABC"·&&·c·==·d·&&·e·==·f)·{};
+    10 10 │   while (s.toUpperCase() === 'abc' && c == d && e == f) {};
+    11 11 │   while (s.toUpperCase() === 'abc') {};
+  
+
+```
+
+```
+invalid.js:10:8 lint/correctness/noStringCaseMismatch  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This expression always returns false.
+  
+     9 │ if (s.toUpperCase() === 'abc' && c == d && e == f) {};
+  > 10 │ while (s.toUpperCase() === 'abc' && c == d && e == f) {};
+       │        ^^^^^^^^^^^^^^^^^^^^^^^^^
+    11 │ while (s.toUpperCase() === 'abc') {};
+    12 │ let b = s.toLowerCase() === `eFg`;;
+  
+  i This call convert the string to upper case
+  
+     9 │ if (s.toUpperCase() === 'abc' && c == d && e == f) {};
+  > 10 │ while (s.toUpperCase() === 'abc' && c == d && e == f) {};
+       │        ^^^^^^^^^^^^^^^
+    11 │ while (s.toUpperCase() === 'abc') {};
+    12 │ let b = s.toLowerCase() === `eFg`;;
+  
+  i ... but this value is not in upper case
+  
+     9 │ if (s.toUpperCase() === 'abc' && c == d && e == f) {};
+  > 10 │ while (s.toUpperCase() === 'abc' && c == d && e == f) {};
+       │                            ^^^^^
+    11 │ while (s.toUpperCase() === 'abc') {};
+    12 │ let b = s.toLowerCase() === `eFg`;;
+  
+  i Unsafe fix: Use upper case string value.
+  
+     8  8 │   
+     9  9 │   if (s.toUpperCase() === 'abc' && c == d && e == f) {};
+    10    │ - while·(s.toUpperCase()·===·'abc'·&&·c·==·d·&&·e·==·f)·{};
+       10 │ + while·(s.toUpperCase()·===·"ABC"·&&·c·==·d·&&·e·==·f)·{};
+    11 11 │   while (s.toUpperCase() === 'abc') {};
+    12 12 │   let b = s.toLowerCase() === `eFg`;;
+  
+
+```
+
+```
+invalid.js:11:8 lint/correctness/noStringCaseMismatch  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This expression always returns false.
+  
+     9 │ if (s.toUpperCase() === 'abc' && c == d && e == f) {};
+    10 │ while (s.toUpperCase() === 'abc' && c == d && e == f) {};
+  > 11 │ while (s.toUpperCase() === 'abc') {};
+       │        ^^^^^^^^^^^^^^^^^^^^^^^^^
+    12 │ let b = s.toLowerCase() === `eFg`;;
+    13 │ do {} while (s.toLowerCase() === 'ABC');;
+  
+  i This call convert the string to upper case
+  
+     9 │ if (s.toUpperCase() === 'abc' && c == d && e == f) {};
+    10 │ while (s.toUpperCase() === 'abc' && c == d && e == f) {};
+  > 11 │ while (s.toUpperCase() === 'abc') {};
+       │        ^^^^^^^^^^^^^^^
+    12 │ let b = s.toLowerCase() === `eFg`;;
+    13 │ do {} while (s.toLowerCase() === 'ABC');;
+  
+  i ... but this value is not in upper case
+  
+     9 │ if (s.toUpperCase() === 'abc' && c == d && e == f) {};
+    10 │ while (s.toUpperCase() === 'abc' && c == d && e == f) {};
+  > 11 │ while (s.toUpperCase() === 'abc') {};
+       │                            ^^^^^
+    12 │ let b = s.toLowerCase() === `eFg`;;
+    13 │ do {} while (s.toLowerCase() === 'ABC');;
+  
+  i Unsafe fix: Use upper case string value.
+  
+     9  9 │   if (s.toUpperCase() === 'abc' && c == d && e == f) {};
+    10 10 │   while (s.toUpperCase() === 'abc' && c == d && e == f) {};
+    11    │ - while·(s.toUpperCase()·===·'abc')·{};
+       11 │ + while·(s.toUpperCase()·===·"ABC")·{};
+    12 12 │   let b = s.toLowerCase() === `eFg`;;
+    13 13 │   do {} while (s.toLowerCase() === 'ABC');;
+  
+
+```
+
+```
+invalid.js:12:9 lint/correctness/noStringCaseMismatch  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This expression always returns false.
+  
+    10 │ while (s.toUpperCase() === 'abc' && c == d && e == f) {};
+    11 │ while (s.toUpperCase() === 'abc') {};
+  > 12 │ let b = s.toLowerCase() === `eFg`;;
+       │         ^^^^^^^^^^^^^^^^^^^^^^^^^
+    13 │ do {} while (s.toLowerCase() === 'ABC');;
+    14 │ for (; s.toLowerCase() === 'ABC'; ) {};
+  
+  i This call convert the string to lower case
+  
+    10 │ while (s.toUpperCase() === 'abc' && c == d && e == f) {};
+    11 │ while (s.toUpperCase() === 'abc') {};
+  > 12 │ let b = s.toLowerCase() === `eFg`;;
+       │         ^^^^^^^^^^^^^^^
+    13 │ do {} while (s.toLowerCase() === 'ABC');;
+    14 │ for (; s.toLowerCase() === 'ABC'; ) {};
+  
+  i ... but this value is not in lower case
+  
+    10 │ while (s.toUpperCase() === 'abc' && c == d && e == f) {};
+    11 │ while (s.toUpperCase() === 'abc') {};
+  > 12 │ let b = s.toLowerCase() === `eFg`;;
+       │                             ^^^^^
+    13 │ do {} while (s.toLowerCase() === 'ABC');;
+    14 │ for (; s.toLowerCase() === 'ABC'; ) {};
+  
+  i Unsafe fix: Use lower case string value.
+  
+    10 10 │   while (s.toUpperCase() === 'abc' && c == d && e == f) {};
+    11 11 │   while (s.toUpperCase() === 'abc') {};
+    12    │ - let·b·=·s.toLowerCase()·===·`eFg`;;
+       12 │ + let·b·=·s.toLowerCase()·===·"efg";;
+    13 13 │   do {} while (s.toLowerCase() === 'ABC');;
+    14 14 │   for (; s.toLowerCase() === 'ABC'; ) {};
+  
+
+```
+
+```
+invalid.js:13:14 lint/correctness/noStringCaseMismatch  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This expression always returns false.
+  
+    11 │ while (s.toUpperCase() === 'abc') {};
+    12 │ let b = s.toLowerCase() === `eFg`;;
+  > 13 │ do {} while (s.toLowerCase() === 'ABC');;
+       │              ^^^^^^^^^^^^^^^^^^^^^^^^^
+    14 │ for (; s.toLowerCase() === 'ABC'; ) {};
+    15 │ 
+  
+  i This call convert the string to lower case
+  
+    11 │ while (s.toUpperCase() === 'abc') {};
+    12 │ let b = s.toLowerCase() === `eFg`;;
+  > 13 │ do {} while (s.toLowerCase() === 'ABC');;
+       │              ^^^^^^^^^^^^^^^
+    14 │ for (; s.toLowerCase() === 'ABC'; ) {};
+    15 │ 
+  
+  i ... but this value is not in lower case
+  
+    11 │ while (s.toUpperCase() === 'abc') {};
+    12 │ let b = s.toLowerCase() === `eFg`;;
+  > 13 │ do {} while (s.toLowerCase() === 'ABC');;
+       │                                  ^^^^^
+    14 │ for (; s.toLowerCase() === 'ABC'; ) {};
+    15 │ 
+  
+  i Unsafe fix: Use lower case string value.
+  
+    11 11 │   while (s.toUpperCase() === 'abc') {};
+    12 12 │   let b = s.toLowerCase() === `eFg`;;
+    13    │ - do·{}·while·(s.toLowerCase()·===·'ABC');;
+       13 │ + do·{}·while·(s.toLowerCase()·===·"abc");;
+    14 14 │   for (; s.toLowerCase() === 'ABC'; ) {};
+    15 15 │   
+  
+
+```
+
+```
+invalid.js:14:8 lint/correctness/noStringCaseMismatch  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This expression always returns false.
+  
+    12 │ let b = s.toLowerCase() === `eFg`;;
+    13 │ do {} while (s.toLowerCase() === 'ABC');;
+  > 14 │ for (; s.toLowerCase() === 'ABC'; ) {};
+       │        ^^^^^^^^^^^^^^^^^^^^^^^^^
+    15 │ 
+    16 │ switch (s.toUpperCase()) { case 'ABC': case 'abc': case 'aBc': default: }
+  
+  i This call convert the string to lower case
+  
+    12 │ let b = s.toLowerCase() === `eFg`;;
+    13 │ do {} while (s.toLowerCase() === 'ABC');;
+  > 14 │ for (; s.toLowerCase() === 'ABC'; ) {};
+       │        ^^^^^^^^^^^^^^^
+    15 │ 
+    16 │ switch (s.toUpperCase()) { case 'ABC': case 'abc': case 'aBc': default: }
+  
+  i ... but this value is not in lower case
+  
+    12 │ let b = s.toLowerCase() === `eFg`;;
+    13 │ do {} while (s.toLowerCase() === 'ABC');;
+  > 14 │ for (; s.toLowerCase() === 'ABC'; ) {};
+       │                            ^^^^^
+    15 │ 
+    16 │ switch (s.toUpperCase()) { case 'ABC': case 'abc': case 'aBc': default: }
+  
+  i Unsafe fix: Use lower case string value.
+  
+    12 12 │   let b = s.toLowerCase() === `eFg`;;
+    13 13 │   do {} while (s.toLowerCase() === 'ABC');;
+    14    │ - for·(;·s.toLowerCase()·===·'ABC';·)·{};
+       14 │ + for·(;·s.toLowerCase()·===·"abc";·)·{};
+    15 15 │   
+    16 16 │   switch (s.toUpperCase()) { case 'ABC': case 'abc': case 'aBc': default: }
+  
+
+```
+
+```
+invalid.js:16:45 lint/correctness/noStringCaseMismatch  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This case will never match.
+  
+    14 │ for (; s.toLowerCase() === 'ABC'; ) {};
+    15 │ 
+  > 16 │ switch (s.toUpperCase()) { case 'ABC': case 'abc': case 'aBc': default: }
+       │                                             ^^^^^
+    17 │ 
+    18 │ for (; s['toLowerCase']() === 'ABC'; ) {}
+  
+  i This call convert the string to upper case
+  
+    14 │ for (; s.toLowerCase() === 'ABC'; ) {};
+    15 │ 
+  > 16 │ switch (s.toUpperCase()) { case 'ABC': case 'abc': case 'aBc': default: }
+       │         ^^^^^^^^^^^^^^^
+    17 │ 
+    18 │ for (; s['toLowerCase']() === 'ABC'; ) {}
+  
+  i ... but this value is not in upper case
+  
+    14 │ for (; s.toLowerCase() === 'ABC'; ) {};
+    15 │ 
+  > 16 │ switch (s.toUpperCase()) { case 'ABC': case 'abc': case 'aBc': default: }
+       │                                             ^^^^^
+    17 │ 
+    18 │ for (; s['toLowerCase']() === 'ABC'; ) {}
+  
+  i Unsafe fix: Use upper case string value.
+  
+    14 14 │   for (; s.toLowerCase() === 'ABC'; ) {};
+    15 15 │   
+    16    │ - switch·(s.toUpperCase())·{·case·'ABC':·case·'abc':·case·'aBc':·default:·}
+       16 │ + switch·(s.toUpperCase())·{·case·'ABC':·case·"ABC":·case·'aBc':·default:·}
+    17 17 │   
+    18 18 │   for (; s['toLowerCase']() === 'ABC'; ) {}
+  
+
+```
+
+```
+invalid.js:16:57 lint/correctness/noStringCaseMismatch  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This case will never match.
+  
+    14 │ for (; s.toLowerCase() === 'ABC'; ) {};
+    15 │ 
+  > 16 │ switch (s.toUpperCase()) { case 'ABC': case 'abc': case 'aBc': default: }
+       │                                                         ^^^^^
+    17 │ 
+    18 │ for (; s['toLowerCase']() === 'ABC'; ) {}
+  
+  i This call convert the string to upper case
+  
+    14 │ for (; s.toLowerCase() === 'ABC'; ) {};
+    15 │ 
+  > 16 │ switch (s.toUpperCase()) { case 'ABC': case 'abc': case 'aBc': default: }
+       │         ^^^^^^^^^^^^^^^
+    17 │ 
+    18 │ for (; s['toLowerCase']() === 'ABC'; ) {}
+  
+  i ... but this value is not in upper case
+  
+    14 │ for (; s.toLowerCase() === 'ABC'; ) {};
+    15 │ 
+  > 16 │ switch (s.toUpperCase()) { case 'ABC': case 'abc': case 'aBc': default: }
+       │                                                         ^^^^^
+    17 │ 
+    18 │ for (; s['toLowerCase']() === 'ABC'; ) {}
+  
+  i Unsafe fix: Use upper case string value.
+  
+    14 14 │   for (; s.toLowerCase() === 'ABC'; ) {};
+    15 15 │   
+    16    │ - switch·(s.toUpperCase())·{·case·'ABC':·case·'abc':·case·'aBc':·default:·}
+       16 │ + switch·(s.toUpperCase())·{·case·'ABC':·case·'abc':·case·"ABC":·default:·}
+    17 17 │   
+    18 18 │   for (; s['toLowerCase']() === 'ABC'; ) {}
+  
+
+```
+
+```
+invalid.js:18:8 lint/correctness/noStringCaseMismatch  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This expression always returns false.
+  
+    16 │ switch (s.toUpperCase()) { case 'ABC': case 'abc': case 'aBc': default: }
+    17 │ 
+  > 18 │ for (; s['toLowerCase']() === 'ABC'; ) {}
+       │        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    19 │ for (; s[`toUpperCase`]() === 'abc'; ) {}
+    20 │ 
+  
+  i This call convert the string to lower case
+  
+    16 │ switch (s.toUpperCase()) { case 'ABC': case 'abc': case 'aBc': default: }
+    17 │ 
+  > 18 │ for (; s['toLowerCase']() === 'ABC'; ) {}
+       │        ^^^^^^^^^^^^^^^^^^
+    19 │ for (; s[`toUpperCase`]() === 'abc'; ) {}
+    20 │ 
+  
+  i ... but this value is not in lower case
+  
+    16 │ switch (s.toUpperCase()) { case 'ABC': case 'abc': case 'aBc': default: }
+    17 │ 
+  > 18 │ for (; s['toLowerCase']() === 'ABC'; ) {}
+       │                               ^^^^^
+    19 │ for (; s[`toUpperCase`]() === 'abc'; ) {}
+    20 │ 
+  
+  i Unsafe fix: Use lower case string value.
+  
+    16 16 │   switch (s.toUpperCase()) { case 'ABC': case 'abc': case 'aBc': default: }
+    17 17 │   
+    18    │ - for·(;·s['toLowerCase']()·===·'ABC';·)·{}
+       18 │ + for·(;·s['toLowerCase']()·===·"abc";·)·{}
+    19 19 │   for (; s[`toUpperCase`]() === 'abc'; ) {}
+    20 20 │   
+  
+
+```
+
+```
+invalid.js:19:8 lint/correctness/noStringCaseMismatch  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This expression always returns false.
+  
+    18 │ for (; s['toLowerCase']() === 'ABC'; ) {}
+  > 19 │ for (; s[`toUpperCase`]() === 'abc'; ) {}
+       │        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    20 │ 
+    21 │ switch (s['toLowerCase']()) { case 'Abc': case 'aBc': case 'abC': default: }
+  
+  i This call convert the string to upper case
+  
+    18 │ for (; s['toLowerCase']() === 'ABC'; ) {}
+  > 19 │ for (; s[`toUpperCase`]() === 'abc'; ) {}
+       │        ^^^^^^^^^^^^^^^^^^
+    20 │ 
+    21 │ switch (s['toLowerCase']()) { case 'Abc': case 'aBc': case 'abC': default: }
+  
+  i ... but this value is not in upper case
+  
+    18 │ for (; s['toLowerCase']() === 'ABC'; ) {}
+  > 19 │ for (; s[`toUpperCase`]() === 'abc'; ) {}
+       │                               ^^^^^
+    20 │ 
+    21 │ switch (s['toLowerCase']()) { case 'Abc': case 'aBc': case 'abC': default: }
+  
+  i Unsafe fix: Use upper case string value.
+  
+    17 17 │   
+    18 18 │   for (; s['toLowerCase']() === 'ABC'; ) {}
+    19    │ - for·(;·s[`toUpperCase`]()·===·'abc';·)·{}
+       19 │ + for·(;·s[`toUpperCase`]()·===·"ABC";·)·{}
+    20 20 │   
+    21 21 │   switch (s['toLowerCase']()) { case 'Abc': case 'aBc': case 'abC': default: }
+  
+
+```
+
+```
+invalid.js:21:36 lint/correctness/noStringCaseMismatch  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This case will never match.
+  
+    19 │ for (; s[`toUpperCase`]() === 'abc'; ) {}
+    20 │ 
+  > 21 │ switch (s['toLowerCase']()) { case 'Abc': case 'aBc': case 'abC': default: }
+       │                                    ^^^^^
+    22 │ 
+  
+  i This call convert the string to lower case
+  
+    19 │ for (; s[`toUpperCase`]() === 'abc'; ) {}
+    20 │ 
+  > 21 │ switch (s['toLowerCase']()) { case 'Abc': case 'aBc': case 'abC': default: }
+       │         ^^^^^^^^^^^^^^^^^^
+    22 │ 
+  
+  i ... but this value is not in lower case
+  
+    19 │ for (; s[`toUpperCase`]() === 'abc'; ) {}
+    20 │ 
+  > 21 │ switch (s['toLowerCase']()) { case 'Abc': case 'aBc': case 'abC': default: }
+       │                                    ^^^^^
+    22 │ 
+  
+  i Unsafe fix: Use lower case string value.
+  
+    19 19 │   for (; s[`toUpperCase`]() === 'abc'; ) {}
+    20 20 │   
+    21    │ - switch·(s['toLowerCase']())·{·case·'Abc':·case·'aBc':·case·'abC':·default:·}
+       21 │ + switch·(s['toLowerCase']())·{·case·"abc":·case·'aBc':·case·'abC':·default:·}
+    22 22 │   
+  
+
+```
+
+```
+invalid.js:21:48 lint/correctness/noStringCaseMismatch  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This case will never match.
+  
+    19 │ for (; s[`toUpperCase`]() === 'abc'; ) {}
+    20 │ 
+  > 21 │ switch (s['toLowerCase']()) { case 'Abc': case 'aBc': case 'abC': default: }
+       │                                                ^^^^^
+    22 │ 
+  
+  i This call convert the string to lower case
+  
+    19 │ for (; s[`toUpperCase`]() === 'abc'; ) {}
+    20 │ 
+  > 21 │ switch (s['toLowerCase']()) { case 'Abc': case 'aBc': case 'abC': default: }
+       │         ^^^^^^^^^^^^^^^^^^
+    22 │ 
+  
+  i ... but this value is not in lower case
+  
+    19 │ for (; s[`toUpperCase`]() === 'abc'; ) {}
+    20 │ 
+  > 21 │ switch (s['toLowerCase']()) { case 'Abc': case 'aBc': case 'abC': default: }
+       │                                                ^^^^^
+    22 │ 
+  
+  i Unsafe fix: Use lower case string value.
+  
+    19 19 │   for (; s[`toUpperCase`]() === 'abc'; ) {}
+    20 20 │   
+    21    │ - switch·(s['toLowerCase']())·{·case·'Abc':·case·'aBc':·case·'abC':·default:·}
+       21 │ + switch·(s['toLowerCase']())·{·case·'Abc':·case·"abc":·case·'abC':·default:·}
+    22 22 │   
+  
+
+```
+
+```
+invalid.js:21:60 lint/correctness/noStringCaseMismatch  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This case will never match.
+  
+    19 │ for (; s[`toUpperCase`]() === 'abc'; ) {}
+    20 │ 
+  > 21 │ switch (s['toLowerCase']()) { case 'Abc': case 'aBc': case 'abC': default: }
+       │                                                            ^^^^^
+    22 │ 
+  
+  i This call convert the string to lower case
+  
+    19 │ for (; s[`toUpperCase`]() === 'abc'; ) {}
+    20 │ 
+  > 21 │ switch (s['toLowerCase']()) { case 'Abc': case 'aBc': case 'abC': default: }
+       │         ^^^^^^^^^^^^^^^^^^
+    22 │ 
+  
+  i ... but this value is not in lower case
+  
+    19 │ for (; s[`toUpperCase`]() === 'abc'; ) {}
+    20 │ 
+  > 21 │ switch (s['toLowerCase']()) { case 'Abc': case 'aBc': case 'abC': default: }
+       │                                                            ^^^^^
+    22 │ 
+  
+  i Unsafe fix: Use lower case string value.
+  
+    19 19 │   for (; s[`toUpperCase`]() === 'abc'; ) {}
+    20 20 │   
+    21    │ - switch·(s['toLowerCase']())·{·case·'Abc':·case·'aBc':·case·'abC':·default:·}
+       21 │ + switch·(s['toLowerCase']())·{·case·'Abc':·case·'aBc':·case·"abc":·default:·}
+    22 22 │   
+  
+
+```

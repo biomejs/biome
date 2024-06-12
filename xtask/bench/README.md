@@ -4,6 +4,14 @@ This crate contains benchmark suites for the project.
 
 Criterion is used to generate benchmark results.
 
+## Prerequisites
+
+Install `critcmp` to compare benchmarks between branches.
+
+```bash
+cargo install critcmp
+```
+
 ## Parser Benchmark
 
 To get a benchmark comparison, you need to run the benchmark for `main` branch and your PR:
@@ -11,10 +19,10 @@ To get a benchmark comparison, you need to run the benchmark for `main` branch a
 ```bash
 # (commit your code on pr branch, run)
 git checkout main
-cargo bench --bench js_parser -- --save-baseline main
+cargo bench --bench js_parser -- --save-baseline main # You can also use css_parser
 git checkout -
-cargo bench --bench js_parser -- --save-baseline pr
-critcmp main pr # (cargo install critcmp)
+cargo bench --bench js_parser -- --save-baseline pr # You can also use css_parser
+critcmp main pr
 ```
 
 This will give us
@@ -44,10 +52,23 @@ To get a benchmark comparison, you need to run the benchmark for `main` branch a
 ```bash
 # (commit your code on pr branch, run)
 git checkout main
-cargo bench --bench js_formatter -- --save-baseline main
+cargo bench --bench js_formatter -- --save-baseline main # You can also use css_formatter
 git checkout -
-cargo bench --bench js_formatter -- --save-baseline pr
-critcmp main pr # (cargo install critcmp)
+cargo bench --bench js_formatter -- --save-baseline pr # You can also use css_formatter
+critcmp main pr
+```
+
+## Analyzer benchmark
+
+To get a benchmark comparison, you need to run the benchmark for `main` branch and your PR:
+
+```bash
+# (commit your code on pr branch, run)
+git checkout main
+cargo bench --bench js_analyzer -- --save-baseline main # You can also use css_analyzer
+git checkout -
+cargo bench --bench js_analyzer -- --save-baseline pr # You can also use css_analyzer
+critcmp main pr
 ```
 
 ## Heap Profiling using `dhat`

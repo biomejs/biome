@@ -94,7 +94,11 @@ where
                 } else {
                     let category = key.name();
                     if let Some(rule) = category.strip_prefix("lint/") {
-                        result.push(Ok(SuppressionKind::Rule(rule)));
+                        if let Some(instance) = value {
+                            result.push(Ok(SuppressionKind::RuleInstance(rule, instance)));
+                        } else {
+                            result.push(Ok(SuppressionKind::Rule(rule)));
+                        }
                     }
                 }
             }

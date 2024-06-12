@@ -10,7 +10,7 @@ use biome_rowan::{AstNode, BatchMutationExt};
 
 declare_migration! {
     pub(crate) TrailingComma {
-        version: "next",
+        version: "1.8.0",
         name: "trailingComma",
     }
 }

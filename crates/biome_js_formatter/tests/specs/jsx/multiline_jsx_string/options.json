@@ -1,0 +1,6 @@
+{
+  "$schema": "../../../../../../packages/@biomejs/biome/configuration_schema.json",
+  "formatter": {
+    "lineEnding": "crlf"
+  }
+}

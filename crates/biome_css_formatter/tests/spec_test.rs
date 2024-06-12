@@ -1,5 +1,7 @@
+use biome_configuration::{PartialConfiguration, PartialCssConfiguration, PartialCssFormatter};
 use biome_css_formatter::context::CssFormatOptions;
 use biome_formatter_test::spec::{SpecSnapshot, SpecTestFile};
+use biome_service::workspace::UpdateSettingsParams;
 use std::path::Path;
 
 mod language {
@@ -25,8 +27,24 @@ mod language {
 /// * `null` -> input: `tests/specs/null.css`, expected output: `tests/specs/null.css.snap`
 pub fn run(spec_input_file: &str, _expected_file: &str, test_directory: &str, _file_type: &str) {
     let root_path = Path::new(concat!(env!("CARGO_MANIFEST_DIR"), "/tests/specs/"));
+    let settings = UpdateSettingsParams {
+        configuration: PartialConfiguration {
+            css: Some(PartialCssConfiguration {
+                formatter: Some(PartialCssFormatter {
+                    enabled: Some(true),
+                    ..Default::default()
+                }),
+                ..Default::default()
+            }),
+            ..Default::default()
+        },
+        vcs_base_path: None,
+        gitignore_matches: vec![],
+        workspace_directory: None,
+    };
 
-    let Some(test_file) = SpecTestFile::try_from_file(spec_input_file, root_path) else {
+    let Some(test_file) = SpecTestFile::try_from_file(spec_input_file, root_path, Some(settings))
+    else {
         return;
     };
 

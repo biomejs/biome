@@ -138,6 +138,28 @@ declare_rule! {
     /// }
     /// ```
     ///
+    /// ## Ignoring a specific dependency
+    ///
+    /// Sometimes you may wish to ignore a diagnostic about a specific
+    /// dependency without disabling *all* linting for that hook. To do so,
+    /// you may specify the name of a specific dependency between parentheses,
+    /// like this:
+    ///
+    /// ```js
+    /// import { useEffect } from "react";
+    ///
+    /// function component() {
+    ///     let a = 1;
+    ///     // biome-ignore lint/correctness/useExhaustiveDependencies(a): <explanation>
+    ///     useEffect(() => {
+    ///         console.log(a);
+    ///     }, []);
+    /// }
+    /// ```
+    ///
+    /// If you wish to ignore multiple dependencies, you can add multiple
+    /// comments and add a reason for each.
+    ///
     /// ## Options
     ///
     /// Allows to specify custom hooks - from libraries or internal projects -
@@ -782,6 +804,23 @@ impl Rule for UseExhaustiveDependencies {
                     })
                 });
 
+            // Find duplicated deps from specified ones
+            {
+                let mut dep_list: BTreeMap<String, AnyJsExpression> = BTreeMap::new();
+                for dep in correct_deps.iter() {
+                    let expression_name = dep.to_string();
+                    if dep_list.contains_key(&expression_name) {
+                        signals.push(Fix::RemoveDependency {
+                            function_name_range: result.function_name_range,
+                            component_function: component_function.clone(),
+                            dependencies: vec![dep.clone()],
+                        });
+                        continue;
+                    }
+                    dep_list.insert(expression_name, dep.clone());
+                }
+            }
+
             // Find correctly specified dependencies with an unstable identity,
             // since they would trigger re-evaluation on every render.
             let unstable_deps = correct_deps.into_iter().filter_map(|dep| {
@@ -815,6 +854,22 @@ impl Rule for UseExhaustiveDependencies {
         }
 
         signals
+    }
+
+    fn instances_for_signal(signal: &Self::State) -> Vec<String> {
+        match signal {
+            Fix::AddDependency { captures, .. } => vec![captures.0.clone()],
+            Fix::RemoveDependency { dependencies, .. } => dependencies
+                .iter()
+                .map(|dep| dep.syntax().text_trimmed().to_string())
+                .collect(),
+            Fix::DependencyTooUnstable {
+                dependency_name, ..
+            } => vec![dependency_name.clone()],
+            Fix::DependencyTooDeep {
+                dependency_text, ..
+            } => vec![dependency_text.clone()],
+        }
     }
 
     fn diagnostic(ctx: &RuleContext<Self>, dep: &Self::State) -> Option<RuleDiagnostic> {

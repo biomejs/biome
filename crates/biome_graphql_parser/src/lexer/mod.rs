@@ -656,16 +656,8 @@ impl<'src> GraphqlLexer<'src> {
                     && self.byte_at(2) == Some(b'"')
                 {
                     self.advance(3);
-                    (state, None)
-                } else {
-                    let c = self.current_char_unchecked();
-                    let diagnostic = ParseDiagnostic::new(
-                        "Invalid escape sequence",
-                        escape_start..self.text_position() + c.text_len(),
-                    )
-                    .with_hint(r#"For block string the only valid escape sequences is `\"""`. "#);
-                    (state, Some(diagnostic))
                 }
+                (state, None)
             }
             // should never happen
             _ => (

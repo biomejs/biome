@@ -29,6 +29,22 @@ declare_node_union! {
     pub JsNewOrCallExpression = JsNewExpression | JsCallExpression
 }
 
+impl JsNewOrCallExpression {
+    pub fn callee(&self) -> SyntaxResult<AnyJsExpression> {
+        match self {
+            JsNewOrCallExpression::JsNewExpression(node) => node.callee(),
+            JsNewOrCallExpression::JsCallExpression(node) => node.callee(),
+        }
+    }
+
+    pub fn arguments(&self) -> Option<JsCallArguments> {
+        match self {
+            JsNewOrCallExpression::JsNewExpression(node) => node.arguments(),
+            JsNewOrCallExpression::JsCallExpression(node) => node.arguments().ok(),
+        }
+    }
+}
+
 impl JsReferenceIdentifier {
     /// Returns `true` if this identifier refers to the `undefined` symbol.
     ///

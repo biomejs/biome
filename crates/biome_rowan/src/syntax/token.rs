@@ -69,7 +69,7 @@ impl<L: Language> SyntaxToken<L> {
         self.raw.text_trimmed_range()
     }
 
-    pub(crate) fn index(&self) -> usize {
+    pub fn index(&self) -> usize {
         self.raw.index()
     }
 
@@ -499,6 +499,13 @@ impl<L: Language> SyntaxToken<L> {
             .any(|piece| piece.is_comments())
     }
 
+    /// Checks if the token has any trailing trivia that is a whitespace
+    pub fn has_trailing_whitespace(&self) -> bool {
+        self.trailing_trivia()
+            .pieces()
+            .any(|piece| piece.is_whitespace())
+    }
+
     /// Checks if the current token has leading comments
     pub fn has_leading_comments(&self) -> bool {
         self.leading_trivia()
@@ -506,8 +513,8 @@ impl<L: Language> SyntaxToken<L> {
             .any(|piece| piece.is_comments())
     }
 
-    /// Checks if the token has any leading trivia that isn't a whitespace nor a line break
-    pub fn has_leading_non_whitespace_trivia(&self) -> bool {
+    /// Checks if the token has any leading trivia that is a whitespace or a line break
+    pub fn has_leading_whitespace_or_newline(&self) -> bool {
         self.leading_trivia()
             .pieces()
             .any(|piece| piece.is_whitespace() || piece.is_newline())

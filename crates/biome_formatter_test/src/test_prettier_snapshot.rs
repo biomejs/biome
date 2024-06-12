@@ -203,7 +203,7 @@ where
             .with_output(SnapshotOutput::new(&formatted))
             .with_errors(&parsed, &self.test_file().parse_input);
 
-        let max_width = self.options.line_width().get() as usize;
+        let max_width = self.options.line_width().value() as usize;
         builder = builder.with_lines_exceeding_max_width(&formatted, max_width);
 
         builder.finish(relative_file_name);

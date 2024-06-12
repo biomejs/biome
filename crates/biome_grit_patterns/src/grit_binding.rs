@@ -1,21 +1,32 @@
 use crate::{
     grit_context::GritQueryContext, grit_target_language::GritTargetLanguage,
-    grit_target_node::GritTargetNode,
+    grit_target_node::GritTargetNode, grit_tree::GritTree, source_location_ext::SourceFileExt,
 };
+use biome_diagnostics::{display::SourceFile, SourceCode};
 use grit_pattern_matcher::{binding::Binding, constant::Constant};
-use grit_util::{ByteRange, CodeRange, Range};
+use grit_util::{Ast, AstNode, ByteRange, CodeRange, Range};
 use std::path::Path;
 
 #[derive(Clone, Debug, PartialEq)]
-pub(crate) struct GritBinding;
+pub(crate) enum GritBinding<'a> {
+    Tree(&'a GritTree),
+    Node(GritTargetNode),
+    Constant(&'a Constant),
+}
 
-impl<'a> Binding<'a, GritQueryContext> for GritBinding {
-    fn from_constant(_constant: &'a Constant) -> Self {
-        todo!()
+impl<'a> GritBinding<'a> {
+    pub fn from_tree(tree: &'a GritTree) -> Self {
+        Self::Tree(tree)
+    }
+}
+
+impl<'a> Binding<'a, GritQueryContext> for GritBinding<'a> {
+    fn from_constant(constant: &'a Constant) -> Self {
+        Self::Constant(constant)
     }
 
-    fn from_node(_node: GritTargetNode) -> Self {
-        todo!()
+    fn from_node(node: GritTargetNode) -> Self {
+        Self::Node(node)
     }
 
     fn from_path(_path: &'a Path) -> Self {
@@ -26,24 +37,61 @@ impl<'a> Binding<'a, GritQueryContext> for GritBinding {
         todo!()
     }
 
+    /// Returns the only node bound by this binding.
+    ///
+    /// This includes list bindings that only match a single child.
+    ///
+    /// Returns `None` if the binding has no associated node, or if there is
+    /// more than one associated node.
     fn singleton(&self) -> Option<GritTargetNode> {
-        todo!()
+        match self {
+            Self::Node(node) => Some(node.clone()),
+            Self::Tree(..) | Self::Constant(..) => None,
+        }
     }
 
     fn get_sexp(&self) -> Option<String> {
-        todo!()
+        None
     }
 
     fn position(&self, _language: &GritTargetLanguage) -> Option<Range> {
-        todo!()
+        match self {
+            GritBinding::Tree(tree) => {
+                let source = tree.source();
+                let source = SourceFile::new(SourceCode {
+                    text: &source,
+                    line_starts: None,
+                });
+                source.to_grit_range(tree.root_node().text_range())
+            }
+            GritBinding::Node(node) => {
+                // TODO: This is probably very inefficient.
+                let root = node.ancestors().last()?;
+                let source = root.text().to_string();
+                let source = SourceFile::new(SourceCode {
+                    text: &source,
+                    line_starts: None,
+                });
+                source.to_grit_range(root.text_trimmed_range())
+            }
+            GritBinding::Constant(_) => None,
+        }
     }
 
     fn range(&self, _language: &GritTargetLanguage) -> Option<ByteRange> {
-        todo!()
+        match self {
+            GritBinding::Tree(tree) => Some(tree.root_node().byte_range()),
+            GritBinding::Node(node) => Some(node.byte_range()),
+            GritBinding::Constant(_) => None,
+        }
     }
 
     fn code_range(&self, _language: &GritTargetLanguage) -> Option<CodeRange> {
-        todo!()
+        match self {
+            GritBinding::Tree(tree) => Some(tree.root_node().code_range()),
+            GritBinding::Node(node) => Some(node.code_range()),
+            GritBinding::Constant(_) => None,
+        }
     }
 
     fn is_equivalent_to(&self, _other: &Self, _language: &GritTargetLanguage) -> bool {

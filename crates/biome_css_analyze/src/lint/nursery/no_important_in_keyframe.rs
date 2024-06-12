@@ -39,7 +39,7 @@ declare_rule! {
     /// ```
     ///
     pub NoImportantInKeyframe {
-        version: "next",
+        version: "1.8.0",
         name: "noImportantInKeyframe",
         language: "css",
         recommended: true,

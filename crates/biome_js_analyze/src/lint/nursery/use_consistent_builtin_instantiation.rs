@@ -259,18 +259,13 @@ pub struct UseConsistentBuiltinInstantiationState {
 fn extract_callee_and_rule(
     node: &JsNewOrCallExpression,
 ) -> Option<(AnyJsExpression, BuiltinCreationRule)> {
-    match node {
-        JsNewOrCallExpression::JsNewExpression(node) => {
-            let callee = node.callee().ok()?;
+    let rule = match node {
+        JsNewOrCallExpression::JsNewExpression(_) => BuiltinCreationRule::MustNotUseNew,
+        JsNewOrCallExpression::JsCallExpression(_) => BuiltinCreationRule::MustUseNew,
+    };
+    let callee = node.callee().ok()?;
 
-            Some((callee, BuiltinCreationRule::MustNotUseNew))
-        }
-        JsNewOrCallExpression::JsCallExpression(node) => {
-            let callee: AnyJsExpression = node.callee().ok()?;
-
-            Some((callee, BuiltinCreationRule::MustUseNew))
-        }
-    }
+    Some((callee, rule))
 }
 
 fn convert_new_expression_to_call_expression(expr: &JsNewExpression) -> Option<JsCallExpression> {

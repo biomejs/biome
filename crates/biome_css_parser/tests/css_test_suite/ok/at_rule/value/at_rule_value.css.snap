@@ -1,0 +1,512 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```css
+/* my-component.css */
+/* alias paths for other values or composition */
+@value colors: "./colors.css";
+/* import multiple from a single file */
+@value primary, secondary from colors;
+/* make local aliases to imported values */
+@value small as bp-small, medium, large as bp-large from "./breakpoints.css";
+/* value as selector name */
+@value selectorValue: secondary-color;
+@value small: (max-width: 599px);
+@value medium: (min-width: 600px) and (max-width: 959px);
+@value large: (min-width: 960px);
+@value primary: #BF4040;
+@value secondary: #1F4F7F;
+@value common-gradient: transparent 75%, var(--ring-line-color) 75%, currentColor 79%;
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    rules: CssRuleList [
+        CssAtRule {
+            at_token: AT@0..74 "@" [Comments("/* my-component.css */"), Newline("\n"), Comments("/* alias paths for ot ..."), Newline("\n")] [],
+            rule: CssValueAtRule {
+                value_token: VALUE_KW@74..80 "value" [] [Whitespace(" ")],
+                clause: CssValueAtRuleDeclarationClause {
+                    properties: CssValueAtRulePropertyList [
+                        CssValueAtRuleGenericProperty {
+                            name: CssIdentifier {
+                                value_token: IDENT@80..86 "colors" [] [],
+                            },
+                            colon_token: COLON@86..88 ":" [] [Whitespace(" ")],
+                            value: CssValueAtRuleGenericValue {
+                                items: [
+                                    CSS_STRING_LITERAL@88..102 "\"./colors.css\"" [] [],
+                                ],
+                            },
+                        },
+                    ],
+                },
+                semicolon_token: SEMICOLON@102..103 ";" [] [],
+            },
+        },
+        CssAtRule {
+            at_token: AT@103..146 "@" [Newline("\n"), Comments("/* import multiple fr ..."), Newline("\n")] [],
+            rule: CssValueAtRule {
+                value_token: VALUE_KW@146..152 "value" [] [Whitespace(" ")],
+                clause: CssValueAtRuleImportClause {
+                    specifiers: CssValueAtRuleImportSpecifierList [
+                        CssValueAtRuleImportSpecifier {
+                            name: CssIdentifier {
+                                value_token: IDENT@152..159 "primary" [] [],
+                            },
+                        },
+                        COMMA@159..161 "," [] [Whitespace(" ")],
+                        CssValueAtRuleImportSpecifier {
+                            name: CssIdentifier {
+                                value_token: IDENT@161..171 "secondary" [] [Whitespace(" ")],
+                            },
+                        },
+                    ],
+                    from_token: FROM_KW@171..176 "from" [] [Whitespace(" ")],
+                    source: CssIdentifier {
+                        value_token: IDENT@176..182 "colors" [] [],
+                    },
+                },
+                semicolon_token: SEMICOLON@182..183 ";" [] [],
+            },
+        },
+        CssAtRule {
+            at_token: AT@183..229 "@" [Newline("\n"), Comments("/* make local aliases ..."), Newline("\n")] [],
+            rule: CssValueAtRule {
+                value_token: VALUE_KW@229..235 "value" [] [Whitespace(" ")],
+                clause: CssValueAtRuleImportClause {
+                    specifiers: CssValueAtRuleImportSpecifierList [
+                        CssValueAtRuleNamedImportSpecifier {
+                            name: CssIdentifier {
+                                value_token: IDENT@235..241 "small" [] [Whitespace(" ")],
+                            },
+                            as_token: AS_KW@241..244 "as" [] [Whitespace(" ")],
+                            local_name: CssIdentifier {
+                                value_token: IDENT@244..252 "bp-small" [] [],
+                            },
+                        },
+                        COMMA@252..254 "," [] [Whitespace(" ")],
+                        CssValueAtRuleImportSpecifier {
+                            name: CssIdentifier {
+                                value_token: IDENT@254..260 "medium" [] [],
+                            },
+                        },
+                        COMMA@260..262 "," [] [Whitespace(" ")],
+                        CssValueAtRuleNamedImportSpecifier {
+                            name: CssIdentifier {
+                                value_token: IDENT@262..268 "large" [] [Whitespace(" ")],
+                            },
+                            as_token: AS_KW@268..271 "as" [] [Whitespace(" ")],
+                            local_name: CssIdentifier {
+                                value_token: IDENT@271..280 "bp-large" [] [Whitespace(" ")],
+                            },
+                        },
+                    ],
+                    from_token: FROM_KW@280..285 "from" [] [Whitespace(" ")],
+                    source: CssString {
+                        value_token: CSS_STRING_LITERAL@285..304 "\"./breakpoints.css\"" [] [],
+                    },
+                },
+                semicolon_token: SEMICOLON@304..305 ";" [] [],
+            },
+        },
+        CssAtRule {
+            at_token: AT@305..336 "@" [Newline("\n"), Comments("/* value as selector  ..."), Newline("\n")] [],
+            rule: CssValueAtRule {
+                value_token: VALUE_KW@336..342 "value" [] [Whitespace(" ")],
+                clause: CssValueAtRuleDeclarationClause {
+                    properties: CssValueAtRulePropertyList [
+                        CssValueAtRuleGenericProperty {
+                            name: CssIdentifier {
+                                value_token: IDENT@342..355 "selectorValue" [] [],
+                            },
+                            colon_token: COLON@355..357 ":" [] [Whitespace(" ")],
+                            value: CssValueAtRuleGenericValue {
+                                items: [
+                                    IDENT@357..372 "secondary-color" [] [],
+                                ],
+                            },
+                        },
+                    ],
+                },
+                semicolon_token: SEMICOLON@372..373 ";" [] [],
+            },
+        },
+        CssAtRule {
+            at_token: AT@373..375 "@" [Newline("\n")] [],
+            rule: CssValueAtRule {
+                value_token: VALUE_KW@375..381 "value" [] [Whitespace(" ")],
+                clause: CssValueAtRuleDeclarationClause {
+                    properties: CssValueAtRulePropertyList [
+                        CssValueAtRuleGenericProperty {
+                            name: CssIdentifier {
+                                value_token: IDENT@381..386 "small" [] [],
+                            },
+                            colon_token: COLON@386..388 ":" [] [Whitespace(" ")],
+                            value: CssValueAtRuleGenericValue {
+                                items: [
+                                    L_PAREN@388..389 "(" [] [],
+                                    IDENT@389..398 "max-width" [] [],
+                                    COLON@398..400 ":" [] [Whitespace(" ")],
+                                    CSS_DIMENSION_VALUE@400..403 "599" [] [],
+                                    PX_KW@403..405 "px" [] [],
+                                    R_PAREN@405..406 ")" [] [],
+                                ],
+                            },
+                        },
+                    ],
+                },
+                semicolon_token: SEMICOLON@406..407 ";" [] [],
+            },
+        },
+        CssAtRule {
+            at_token: AT@407..409 "@" [Newline("\n")] [],
+            rule: CssValueAtRule {
+                value_token: VALUE_KW@409..415 "value" [] [Whitespace(" ")],
+                clause: CssValueAtRuleDeclarationClause {
+                    properties: CssValueAtRulePropertyList [
+                        CssValueAtRuleGenericProperty {
+                            name: CssIdentifier {
+                                value_token: IDENT@415..421 "medium" [] [],
+                            },
+                            colon_token: COLON@421..423 ":" [] [Whitespace(" ")],
+                            value: CssValueAtRuleGenericValue {
+                                items: [
+                                    L_PAREN@423..424 "(" [] [],
+                                    IDENT@424..433 "min-width" [] [],
+                                    COLON@433..435 ":" [] [Whitespace(" ")],
+                                    CSS_DIMENSION_VALUE@435..438 "600" [] [],
+                                    PX_KW@438..440 "px" [] [],
+                                    R_PAREN@440..442 ")" [] [Whitespace(" ")],
+                                    AND_KW@442..446 "and" [] [Whitespace(" ")],
+                                    L_PAREN@446..447 "(" [] [],
+                                    IDENT@447..456 "max-width" [] [],
+                                    COLON@456..458 ":" [] [Whitespace(" ")],
+                                    CSS_DIMENSION_VALUE@458..461 "959" [] [],
+                                    PX_KW@461..463 "px" [] [],
+                                    R_PAREN@463..464 ")" [] [],
+                                ],
+                            },
+                        },
+                    ],
+                },
+                semicolon_token: SEMICOLON@464..465 ";" [] [],
+            },
+        },
+        CssAtRule {
+            at_token: AT@465..467 "@" [Newline("\n")] [],
+            rule: CssValueAtRule {
+                value_token: VALUE_KW@467..473 "value" [] [Whitespace(" ")],
+                clause: CssValueAtRuleDeclarationClause {
+                    properties: CssValueAtRulePropertyList [
+                        CssValueAtRuleGenericProperty {
+                            name: CssIdentifier {
+                                value_token: IDENT@473..478 "large" [] [],
+                            },
+                            colon_token: COLON@478..480 ":" [] [Whitespace(" ")],
+                            value: CssValueAtRuleGenericValue {
+                                items: [
+                                    L_PAREN@480..481 "(" [] [],
+                                    IDENT@481..490 "min-width" [] [],
+                                    COLON@490..492 ":" [] [Whitespace(" ")],
+                                    CSS_DIMENSION_VALUE@492..495 "960" [] [],
+                                    PX_KW@495..497 "px" [] [],
+                                    R_PAREN@497..498 ")" [] [],
+                                ],
+                            },
+                        },
+                    ],
+                },
+                semicolon_token: SEMICOLON@498..499 ";" [] [],
+            },
+        },
+        CssAtRule {
+            at_token: AT@499..501 "@" [Newline("\n")] [],
+            rule: CssValueAtRule {
+                value_token: VALUE_KW@501..507 "value" [] [Whitespace(" ")],
+                clause: CssValueAtRuleDeclarationClause {
+                    properties: CssValueAtRulePropertyList [
+                        CssValueAtRuleGenericProperty {
+                            name: CssIdentifier {
+                                value_token: IDENT@507..514 "primary" [] [],
+                            },
+                            colon_token: COLON@514..516 ":" [] [Whitespace(" ")],
+                            value: CssValueAtRuleGenericValue {
+                                items: [
+                                    HASH@516..517 "#" [] [],
+                                    IDENT@517..523 "BF4040" [] [],
+                                ],
+                            },
+                        },
+                    ],
+                },
+                semicolon_token: SEMICOLON@523..524 ";" [] [],
+            },
+        },
+        CssAtRule {
+            at_token: AT@524..526 "@" [Newline("\n")] [],
+            rule: CssValueAtRule {
+                value_token: VALUE_KW@526..532 "value" [] [Whitespace(" ")],
+                clause: CssValueAtRuleDeclarationClause {
+                    properties: CssValueAtRulePropertyList [
+                        CssValueAtRuleGenericProperty {
+                            name: CssIdentifier {
+                                value_token: IDENT@532..541 "secondary" [] [],
+                            },
+                            colon_token: COLON@541..543 ":" [] [Whitespace(" ")],
+                            value: CssValueAtRuleGenericValue {
+                                items: [
+                                    HASH@543..544 "#" [] [],
+                                    CSS_DIMENSION_VALUE@544..545 "1" [] [],
+                                    IDENT@545..550 "F4F7F" [] [],
+                                ],
+                            },
+                        },
+                    ],
+                },
+                semicolon_token: SEMICOLON@550..551 ";" [] [],
+            },
+        },
+        CssAtRule {
+            at_token: AT@551..553 "@" [Newline("\n")] [],
+            rule: CssValueAtRule {
+                value_token: VALUE_KW@553..559 "value" [] [Whitespace(" ")],
+                clause: CssValueAtRuleDeclarationClause {
+                    properties: CssValueAtRulePropertyList [
+                        CssValueAtRuleGenericProperty {
+                            name: CssIdentifier {
+                                value_token: IDENT@559..574 "common-gradient" [] [],
+                            },
+                            colon_token: COLON@574..576 ":" [] [Whitespace(" ")],
+                            value: CssValueAtRuleGenericValue {
+                                items: [
+                                    IDENT@576..588 "transparent" [] [Whitespace(" ")],
+                                    CSS_PERCENTAGE_VALUE@588..590 "75" [] [],
+                                    PERCENT@590..591 "%" [] [],
+                                    COMMA@591..593 "," [] [Whitespace(" ")],
+                                    VAR_KW@593..596 "var" [] [],
+                                    L_PAREN@596..597 "(" [] [],
+                                    IDENT@597..614 "--ring-line-color" [] [],
+                                    R_PAREN@614..616 ")" [] [Whitespace(" ")],
+                                    CSS_PERCENTAGE_VALUE@616..618 "75" [] [],
+                                    PERCENT@618..619 "%" [] [],
+                                    COMMA@619..621 "," [] [Whitespace(" ")],
+                                    IDENT@621..634 "currentColor" [] [Whitespace(" ")],
+                                    CSS_PERCENTAGE_VALUE@634..636 "79" [] [],
+                                    PERCENT@636..637 "%" [] [],
+                                ],
+                            },
+                        },
+                    ],
+                },
+                semicolon_token: SEMICOLON@637..638 ";" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@638..639 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..639
+  0: (empty)
+  1: CSS_RULE_LIST@0..638
+    0: CSS_AT_RULE@0..103
+      0: AT@0..74 "@" [Comments("/* my-component.css */"), Newline("\n"), Comments("/* alias paths for ot ..."), Newline("\n")] []
+      1: CSS_VALUE_AT_RULE@74..103
+        0: VALUE_KW@74..80 "value" [] [Whitespace(" ")]
+        1: CSS_VALUE_AT_RULE_DECLARATION_CLAUSE@80..102
+          0: CSS_VALUE_AT_RULE_PROPERTY_LIST@80..102
+            0: CSS_VALUE_AT_RULE_GENERIC_PROPERTY@80..102
+              0: CSS_IDENTIFIER@80..86
+                0: IDENT@80..86 "colors" [] []
+              1: COLON@86..88 ":" [] [Whitespace(" ")]
+              2: CSS_VALUE_AT_RULE_GENERIC_VALUE@88..102
+                0: CSS_STRING_LITERAL@88..102 "\"./colors.css\"" [] []
+        2: SEMICOLON@102..103 ";" [] []
+    1: CSS_AT_RULE@103..183
+      0: AT@103..146 "@" [Newline("\n"), Comments("/* import multiple fr ..."), Newline("\n")] []
+      1: CSS_VALUE_AT_RULE@146..183
+        0: VALUE_KW@146..152 "value" [] [Whitespace(" ")]
+        1: CSS_VALUE_AT_RULE_IMPORT_CLAUSE@152..182
+          0: CSS_VALUE_AT_RULE_IMPORT_SPECIFIER_LIST@152..171
+            0: CSS_VALUE_AT_RULE_IMPORT_SPECIFIER@152..159
+              0: CSS_IDENTIFIER@152..159
+                0: IDENT@152..159 "primary" [] []
+            1: COMMA@159..161 "," [] [Whitespace(" ")]
+            2: CSS_VALUE_AT_RULE_IMPORT_SPECIFIER@161..171
+              0: CSS_IDENTIFIER@161..171
+                0: IDENT@161..171 "secondary" [] [Whitespace(" ")]
+          1: FROM_KW@171..176 "from" [] [Whitespace(" ")]
+          2: CSS_IDENTIFIER@176..182
+            0: IDENT@176..182 "colors" [] []
+        2: SEMICOLON@182..183 ";" [] []
+    2: CSS_AT_RULE@183..305
+      0: AT@183..229 "@" [Newline("\n"), Comments("/* make local aliases ..."), Newline("\n")] []
+      1: CSS_VALUE_AT_RULE@229..305
+        0: VALUE_KW@229..235 "value" [] [Whitespace(" ")]
+        1: CSS_VALUE_AT_RULE_IMPORT_CLAUSE@235..304
+          0: CSS_VALUE_AT_RULE_IMPORT_SPECIFIER_LIST@235..280
+            0: CSS_VALUE_AT_RULE_NAMED_IMPORT_SPECIFIER@235..252
+              0: CSS_IDENTIFIER@235..241
+                0: IDENT@235..241 "small" [] [Whitespace(" ")]
+              1: AS_KW@241..244 "as" [] [Whitespace(" ")]
+              2: CSS_IDENTIFIER@244..252
+                0: IDENT@244..252 "bp-small" [] []
+            1: COMMA@252..254 "," [] [Whitespace(" ")]
+            2: CSS_VALUE_AT_RULE_IMPORT_SPECIFIER@254..260
+              0: CSS_IDENTIFIER@254..260
+                0: IDENT@254..260 "medium" [] []
+            3: COMMA@260..262 "," [] [Whitespace(" ")]
+            4: CSS_VALUE_AT_RULE_NAMED_IMPORT_SPECIFIER@262..280
+              0: CSS_IDENTIFIER@262..268
+                0: IDENT@262..268 "large" [] [Whitespace(" ")]
+              1: AS_KW@268..271 "as" [] [Whitespace(" ")]
+              2: CSS_IDENTIFIER@271..280
+                0: IDENT@271..280 "bp-large" [] [Whitespace(" ")]
+          1: FROM_KW@280..285 "from" [] [Whitespace(" ")]
+          2: CSS_STRING@285..304
+            0: CSS_STRING_LITERAL@285..304 "\"./breakpoints.css\"" [] []
+        2: SEMICOLON@304..305 ";" [] []
+    3: CSS_AT_RULE@305..373
+      0: AT@305..336 "@" [Newline("\n"), Comments("/* value as selector  ..."), Newline("\n")] []
+      1: CSS_VALUE_AT_RULE@336..373
+        0: VALUE_KW@336..342 "value" [] [Whitespace(" ")]
+        1: CSS_VALUE_AT_RULE_DECLARATION_CLAUSE@342..372
+          0: CSS_VALUE_AT_RULE_PROPERTY_LIST@342..372
+            0: CSS_VALUE_AT_RULE_GENERIC_PROPERTY@342..372
+              0: CSS_IDENTIFIER@342..355
+                0: IDENT@342..355 "selectorValue" [] []
+              1: COLON@355..357 ":" [] [Whitespace(" ")]
+              2: CSS_VALUE_AT_RULE_GENERIC_VALUE@357..372
+                0: IDENT@357..372 "secondary-color" [] []
+        2: SEMICOLON@372..373 ";" [] []
+    4: CSS_AT_RULE@373..407
+      0: AT@373..375 "@" [Newline("\n")] []
+      1: CSS_VALUE_AT_RULE@375..407
+        0: VALUE_KW@375..381 "value" [] [Whitespace(" ")]
+        1: CSS_VALUE_AT_RULE_DECLARATION_CLAUSE@381..406
+          0: CSS_VALUE_AT_RULE_PROPERTY_LIST@381..406
+            0: CSS_VALUE_AT_RULE_GENERIC_PROPERTY@381..406
+              0: CSS_IDENTIFIER@381..386
+                0: IDENT@381..386 "small" [] []
+              1: COLON@386..388 ":" [] [Whitespace(" ")]
+              2: CSS_VALUE_AT_RULE_GENERIC_VALUE@388..406
+                0: L_PAREN@388..389 "(" [] []
+                1: IDENT@389..398 "max-width" [] []
+                2: COLON@398..400 ":" [] [Whitespace(" ")]
+                3: CSS_DIMENSION_VALUE@400..403 "599" [] []
+                4: PX_KW@403..405 "px" [] []
+                5: R_PAREN@405..406 ")" [] []
+        2: SEMICOLON@406..407 ";" [] []
+    5: CSS_AT_RULE@407..465
+      0: AT@407..409 "@" [Newline("\n")] []
+      1: CSS_VALUE_AT_RULE@409..465
+        0: VALUE_KW@409..415 "value" [] [Whitespace(" ")]
+        1: CSS_VALUE_AT_RULE_DECLARATION_CLAUSE@415..464
+          0: CSS_VALUE_AT_RULE_PROPERTY_LIST@415..464
+            0: CSS_VALUE_AT_RULE_GENERIC_PROPERTY@415..464
+              0: CSS_IDENTIFIER@415..421
+                0: IDENT@415..421 "medium" [] []
+              1: COLON@421..423 ":" [] [Whitespace(" ")]
+              2: CSS_VALUE_AT_RULE_GENERIC_VALUE@423..464
+                0: L_PAREN@423..424 "(" [] []
+                1: IDENT@424..433 "min-width" [] []
+                2: COLON@433..435 ":" [] [Whitespace(" ")]
+                3: CSS_DIMENSION_VALUE@435..438 "600" [] []
+                4: PX_KW@438..440 "px" [] []
+                5: R_PAREN@440..442 ")" [] [Whitespace(" ")]
+                6: AND_KW@442..446 "and" [] [Whitespace(" ")]
+                7: L_PAREN@446..447 "(" [] []
+                8: IDENT@447..456 "max-width" [] []
+                9: COLON@456..458 ":" [] [Whitespace(" ")]
+                10: CSS_DIMENSION_VALUE@458..461 "959" [] []
+                11: PX_KW@461..463 "px" [] []
+                12: R_PAREN@463..464 ")" [] []
+        2: SEMICOLON@464..465 ";" [] []
+    6: CSS_AT_RULE@465..499
+      0: AT@465..467 "@" [Newline("\n")] []
+      1: CSS_VALUE_AT_RULE@467..499
+        0: VALUE_KW@467..473 "value" [] [Whitespace(" ")]
+        1: CSS_VALUE_AT_RULE_DECLARATION_CLAUSE@473..498
+          0: CSS_VALUE_AT_RULE_PROPERTY_LIST@473..498
+            0: CSS_VALUE_AT_RULE_GENERIC_PROPERTY@473..498
+              0: CSS_IDENTIFIER@473..478
+                0: IDENT@473..478 "large" [] []
+              1: COLON@478..480 ":" [] [Whitespace(" ")]
+              2: CSS_VALUE_AT_RULE_GENERIC_VALUE@480..498
+                0: L_PAREN@480..481 "(" [] []
+                1: IDENT@481..490 "min-width" [] []
+                2: COLON@490..492 ":" [] [Whitespace(" ")]
+                3: CSS_DIMENSION_VALUE@492..495 "960" [] []
+                4: PX_KW@495..497 "px" [] []
+                5: R_PAREN@497..498 ")" [] []
+        2: SEMICOLON@498..499 ";" [] []
+    7: CSS_AT_RULE@499..524
+      0: AT@499..501 "@" [Newline("\n")] []
+      1: CSS_VALUE_AT_RULE@501..524
+        0: VALUE_KW@501..507 "value" [] [Whitespace(" ")]
+        1: CSS_VALUE_AT_RULE_DECLARATION_CLAUSE@507..523
+          0: CSS_VALUE_AT_RULE_PROPERTY_LIST@507..523
+            0: CSS_VALUE_AT_RULE_GENERIC_PROPERTY@507..523
+              0: CSS_IDENTIFIER@507..514
+                0: IDENT@507..514 "primary" [] []
+              1: COLON@514..516 ":" [] [Whitespace(" ")]
+              2: CSS_VALUE_AT_RULE_GENERIC_VALUE@516..523
+                0: HASH@516..517 "#" [] []
+                1: IDENT@517..523 "BF4040" [] []
+        2: SEMICOLON@523..524 ";" [] []
+    8: CSS_AT_RULE@524..551
+      0: AT@524..526 "@" [Newline("\n")] []
+      1: CSS_VALUE_AT_RULE@526..551
+        0: VALUE_KW@526..532 "value" [] [Whitespace(" ")]
+        1: CSS_VALUE_AT_RULE_DECLARATION_CLAUSE@532..550
+          0: CSS_VALUE_AT_RULE_PROPERTY_LIST@532..550
+            0: CSS_VALUE_AT_RULE_GENERIC_PROPERTY@532..550
+              0: CSS_IDENTIFIER@532..541
+                0: IDENT@532..541 "secondary" [] []
+              1: COLON@541..543 ":" [] [Whitespace(" ")]
+              2: CSS_VALUE_AT_RULE_GENERIC_VALUE@543..550
+                0: HASH@543..544 "#" [] []
+                1: CSS_DIMENSION_VALUE@544..545 "1" [] []
+                2: IDENT@545..550 "F4F7F" [] []
+        2: SEMICOLON@550..551 ";" [] []
+    9: CSS_AT_RULE@551..638
+      0: AT@551..553 "@" [Newline("\n")] []
+      1: CSS_VALUE_AT_RULE@553..638
+        0: VALUE_KW@553..559 "value" [] [Whitespace(" ")]
+        1: CSS_VALUE_AT_RULE_DECLARATION_CLAUSE@559..637
+          0: CSS_VALUE_AT_RULE_PROPERTY_LIST@559..637
+            0: CSS_VALUE_AT_RULE_GENERIC_PROPERTY@559..637
+              0: CSS_IDENTIFIER@559..574
+                0: IDENT@559..574 "common-gradient" [] []
+              1: COLON@574..576 ":" [] [Whitespace(" ")]
+              2: CSS_VALUE_AT_RULE_GENERIC_VALUE@576..637
+                0: IDENT@576..588 "transparent" [] [Whitespace(" ")]
+                1: CSS_PERCENTAGE_VALUE@588..590 "75" [] []
+                2: PERCENT@590..591 "%" [] []
+                3: COMMA@591..593 "," [] [Whitespace(" ")]
+                4: VAR_KW@593..596 "var" [] []
+                5: L_PAREN@596..597 "(" [] []
+                6: IDENT@597..614 "--ring-line-color" [] []
+                7: R_PAREN@614..616 ")" [] [Whitespace(" ")]
+                8: CSS_PERCENTAGE_VALUE@616..618 "75" [] []
+                9: PERCENT@618..619 "%" [] []
+                10: COMMA@619..621 "," [] [Whitespace(" ")]
+                11: IDENT@621..634 "currentColor" [] [Whitespace(" ")]
+                12: CSS_PERCENTAGE_VALUE@634..636 "79" [] []
+                13: PERCENT@636..637 "%" [] []
+        2: SEMICOLON@637..638 ";" [] []
+  2: EOF@638..639 "" [Newline("\n")] []
+
+```

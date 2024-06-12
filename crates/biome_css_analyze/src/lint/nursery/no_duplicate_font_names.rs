@@ -41,7 +41,7 @@ declare_rule! {
     /// b { font: normal 14px/32px -apple-system, BlinkMacSystemFont, sans-serif; }
     /// ```
     pub NoDuplicateFontNames {
-        version: "next",
+        version: "1.8.0",
         name: "noDuplicateFontNames",
         language: "css",
         recommended: true,

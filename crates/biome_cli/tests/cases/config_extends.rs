@@ -325,7 +325,7 @@ fn allows_reverting_fields_in_extended_config_to_default() {
         rome_json.into(),
         format!(
             r#"{{ "extends": ["format.json"], "formatter": {{ "lineWidth": {} }} }}"#,
-            LineWidth::default().get()
+            LineWidth::default().value()
         ),
     );
 

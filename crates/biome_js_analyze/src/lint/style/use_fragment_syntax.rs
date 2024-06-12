@@ -19,11 +19,11 @@ declare_rule! {
     ///
     /// ### Invalid
     ///
-    /// ```js,expect_diagnostic
+    /// ```jsx,expect_diagnostic
     /// <Fragment>child</Fragment>
     /// ```
     ///
-    /// ```js,expect_diagnostic
+    /// ```jsx,expect_diagnostic
     /// <React.Fragment>child</React.Fragment>
     /// ```
     pub UseFragmentSyntax {

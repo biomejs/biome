@@ -25,7 +25,7 @@ GraphqlRoot {
             extend_token: EXTEND_KW@0..7 "extend" [] [Whitespace(" ")],
             schema_token: SCHEMA_KW@7..13 "schema" [] [],
             directives: GraphqlDirectiveList [],
-            root_operation_types: missing (required),
+            root_operation_types: missing (optional),
         },
         GraphqlSchemaExtension {
             extend_token: EXTEND_KW@13..22 "extend" [Newline("\n"), Newline("\n")] [Whitespace(" ")],

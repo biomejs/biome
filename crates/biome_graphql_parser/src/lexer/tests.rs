@@ -219,11 +219,10 @@ fn string() {
         WHITESPACE:1,
     }
 
-    // invalid escape sequence
+    // unescaped backslash
     assert_lex! {
-        r#"""" \" \r \n \"" """ "#,
-        ERROR_TOKEN:20,
-        WHITESPACE:1,
+        r#"""" \" \r \n \"" """"#,
+        GRAPHQL_STRING_LITERAL:20,
     }
 
     // empty

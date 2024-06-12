@@ -8,7 +8,7 @@ use biome_deserialize::json::deserialize_from_json_ast;
 use biome_deserialize::Merge;
 use biome_diagnostics::Diagnostic;
 use biome_diagnostics::{category, PrintDiagnostic};
-use biome_formatter::LineWidthFromIntError;
+use biome_formatter::ParseFormatNumberError;
 use biome_fs::{BiomePath, ConfigName, FileSystemExt, OpenOptions};
 use biome_json_parser::{parse_json_with_cache, JsonParserOptions};
 use biome_json_syntax::{JsonFileSource, JsonRoot};
@@ -93,7 +93,7 @@ pub(crate) fn run(migrate_payload: MigratePayload) -> Result<(), CliDiagnostic> 
             let prettier_biome_config =
                 prettier_config
                     .try_into()
-                    .map_err(|err: LineWidthFromIntError| {
+                    .map_err(|err: ParseFormatNumberError| {
                         CliDiagnostic::MigrateError(MigrationDiagnostic {
                             reason: err.to_string(),
                         })

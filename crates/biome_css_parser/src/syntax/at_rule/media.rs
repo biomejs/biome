@@ -1,7 +1,7 @@
 use super::parse_error::expected_media_query;
 use crate::parser::CssParser;
 use crate::syntax::at_rule::feature::parse_any_query_feature;
-use crate::syntax::block::parse_rule_block;
+use crate::syntax::block::parse_conditional_block;
 use crate::syntax::{is_at_identifier, is_nth_at_identifier, parse_regular_identifier};
 use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::{CssSyntaxKind, T};
@@ -28,7 +28,7 @@ pub(crate) fn parse_media_at_rule(p: &mut CssParser) -> ParsedSyntax {
 
     MediaQueryList::new(T!['{']).parse_list(p);
 
-    parse_rule_block(p);
+    parse_conditional_block(p);
 
     Present(m.complete(p, CSS_MEDIA_AT_RULE))
 }

@@ -1,0 +1,53 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: css/properties/grid.css
+---
+# Input
+
+```css
+.chat-image {
+	grid-row: span 2 / span 2;
+	align-self: flex-end
+}
+
+
+#grid {
+	display: grid;
+	grid-template-columns: [first nav-start] 150px [main-start] 1fr [last];
+	grid-template-rows: [first header-start] 50px [main-start] 1fr [footer-start] 50px [last];
+}
+
+```
+
+
+=============================
+
+# Outputs
+
+## Output 1
+
+-----
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 80
+Quote style: Double Quotes
+-----
+
+```css
+.chat-image {
+	grid-row: span 2 / span 2;
+	align-self: flex-end;
+}
+
+#grid {
+	display: grid;
+	grid-template-columns: [first nav-start] 150px [main-start] 1fr [last];
+	grid-template-rows: [first header-start] 50px [main-start] 1fr [footer-start] 50px [last];
+}
+```
+
+# Lines exceeding max width of 80 characters
+```
+    9: 	grid-template-rows: [first header-start] 50px [main-start] 1fr [footer-start] 50px [last];
+```

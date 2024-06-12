@@ -293,11 +293,14 @@ pub fn create_config(
     mut configuration: PartialConfiguration,
     emit_jsonc: bool,
 ) -> Result<(), WorkspaceError> {
-    let path = if emit_jsonc {
-        PathBuf::from(ConfigName::biome_jsonc())
-    } else {
-        PathBuf::from(ConfigName::biome_json())
-    };
+    let json_path = PathBuf::from(ConfigName::biome_json());
+    let jsonc_path = PathBuf::from(ConfigName::biome_jsonc());
+
+    if fs.path_exists(&json_path) || fs.path_exists(&jsonc_path) {
+        return Err(BiomeDiagnostic::new_already_exists().into());
+    }
+
+    let path = if emit_jsonc { jsonc_path } else { json_path };
 
     let options = OpenOptions::default().write(true).create_new(true);
 

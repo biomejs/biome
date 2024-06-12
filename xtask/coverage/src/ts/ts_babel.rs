@@ -6,7 +6,10 @@ use crate::{
 use biome_js_parser::JsParserOptions;
 use biome_js_syntax::{JsFileSource, LanguageVariant};
 use biome_rowan::SyntaxKind;
+use std::io;
 use std::path::Path;
+use std::process::Command;
+use xtask::project_root;
 
 const CASES_PATH: &str = "xtask/coverage/babel/packages/babel-parser/test/fixtures/typescript";
 
@@ -87,6 +90,26 @@ impl TestSuite for BabelTypescriptTestSuite {
 
     fn base_path(&self) -> &str {
         CASES_PATH
+    }
+
+    fn checkout(&self) -> io::Result<()> {
+        let base_path = project_root().join("xtask/coverage/babel");
+        let mut command = Command::new("git");
+        command
+            .arg("clone")
+            .arg("https://github.com/babel/babel.git")
+            .arg("--depth")
+            .arg("1")
+            .arg(base_path.display().to_string());
+        command.output()?;
+        let mut command = Command::new("git");
+        command
+            .arg("reset")
+            .arg("--hard")
+            .arg("33a6be4e56b149647c15fd6c0157c1413456851d");
+        command.output()?;
+
+        Ok(())
     }
 
     fn is_test(&self, path: &std::path::Path) -> bool {

@@ -5,13 +5,14 @@ use self::{
 pub use crate::file_handlers::astro::{AstroFileHandler, ASTRO_FENCE};
 pub use crate::file_handlers::svelte::{SvelteFileHandler, SVELTE_FENCE};
 pub use crate::file_handlers::vue::{VueFileHandler, VUE_FENCE};
+use crate::settings::Settings;
 use crate::workspace::{FixFileMode, OrganizeImportsResult};
 use crate::{
     settings::WorkspaceSettingsHandle,
     workspace::{FixFileResult, GetSyntaxTreeResult, PullActionsResult, RenameResult},
     WorkspaceError,
 };
-use biome_analyze::{AnalysisFilter, AnalyzerDiagnostic, RuleCategories};
+use biome_analyze::{AnalyzerDiagnostic, RuleCategories};
 use biome_configuration::linter::RuleSelector;
 use biome_configuration::Rules;
 use biome_console::fmt::Formatter;
@@ -301,10 +302,10 @@ impl biome_console::fmt::Display for DocumentFileSource {
 
 pub struct FixAllParams<'a> {
     pub(crate) parse: AnyParse,
-    pub(crate) rules: Option<&'a Rules>,
-    pub(crate) filter: AnalysisFilter<'a>,
+    // pub(crate) rules: Option<&'a Rules>,
+    // pub(crate) filter: AnalysisFilter<'a>,
     pub(crate) fix_file_mode: FixFileMode,
-    pub(crate) settings: WorkspaceSettingsHandle<'a>,
+    pub(crate) workspace: WorkspaceSettingsHandle<'a>,
     /// Whether it should format the code action
     pub(crate) should_format: bool,
     pub(crate) biome_path: &'a BiomePath,
@@ -327,13 +328,8 @@ pub struct ParseResult {
     pub(crate) language: Option<DocumentFileSource>,
 }
 
-type Parse = fn(
-    &BiomePath,
-    DocumentFileSource,
-    &str,
-    WorkspaceSettingsHandle,
-    &mut NodeCache,
-) -> ParseResult;
+type Parse =
+    fn(&BiomePath, DocumentFileSource, &str, Option<&Settings>, &mut NodeCache) -> ParseResult;
 
 #[derive(Default)]
 pub struct ParserCapabilities {
@@ -362,7 +358,7 @@ pub struct DebugCapabilities {
 
 pub(crate) struct LintParams<'a> {
     pub(crate) parse: AnyParse,
-    pub(crate) settings: WorkspaceSettingsHandle<'a>,
+    pub(crate) workspace: &'a WorkspaceSettingsHandle<'a>,
     pub(crate) language: DocumentFileSource,
     pub(crate) max_diagnostics: u32,
     pub(crate) path: &'a BiomePath,
@@ -381,10 +377,11 @@ pub(crate) struct LintResults {
 pub(crate) struct CodeActionsParams<'a> {
     pub(crate) parse: AnyParse,
     pub(crate) range: TextRange,
-    pub(crate) workspace: WorkspaceSettingsHandle<'a>,
+    pub(crate) workspace: &'a WorkspaceSettingsHandle<'a>,
     pub(crate) path: &'a BiomePath,
     pub(crate) manifest: Option<PackageJson>,
     pub(crate) language: DocumentFileSource,
+    pub(crate) settings: &'a Settings,
 }
 
 type Lint = fn(LintParams) -> LintResults;

@@ -28,8 +28,8 @@ impl<'src> CssTokenSource<'src> {
     }
 
     /// Creates a new token source for the given string
-    pub fn from_str(source: &'src str, config: CssParserOptions) -> Self {
-        let lexer = CssLexer::from_str(source).with_config(config);
+    pub fn from_str(source: &'src str, options: CssParserOptions) -> Self {
+        let lexer = CssLexer::from_str(source).with_options(options);
 
         let buffered = BufferedLexer::new(lexer);
         let mut source = CssTokenSource::new(buffered);

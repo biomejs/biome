@@ -31,7 +31,7 @@ use crate::commands::lint::LintCommandPayload;
 pub use crate::commands::{biome_command, BiomeCommand};
 pub use crate::logging::{setup_cli_subscriber, LoggingLevel};
 pub use diagnostics::CliDiagnostic;
-pub use execute::{execute_mode, Execution, TraversalMode};
+pub use execute::{execute_mode, Execution, TraversalMode, VcsTargeted};
 pub use panic::setup_panic_handler;
 pub use reporter::{DiagnosticsPayload, Reporter, ReporterVisitor, TraversalSummary};
 pub use service::{open_transport, SocketTransport};

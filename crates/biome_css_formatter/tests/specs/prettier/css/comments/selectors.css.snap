@@ -2,7 +2,6 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: css/comments/selectors.css
 ---
-
 # Input
 
 ```css
@@ -195,7 +194,7 @@ input:not(/* comment 125 */[/* comment 126 */disabled/* comment 127 */]/* commen
  /* comment 8 */ {
    /* comment 9 */
    /* comment 10 */
-@@ -28,150 +26,143 @@
+@@ -28,150 +26,142 @@
  } /* comment 13 */
  /* comment 14 */
  
@@ -226,8 +225,7 @@ input:not(/* comment 125 */[/* comment 126 */disabled/* comment 127 */]/* commen
 -/* comment 27 */
 -.element
 -/* comment 28 */ {
-+.element/* comment 27 */
-+  .element /* comment 28 */
++.element /* comment 27 */ .element /* comment 28 */
 +{
  }
  
@@ -413,7 +411,7 @@ input:not(/* comment 125 */[/* comment 126 */disabled/* comment 127 */]/* commen
        /* comment 144 */
        color: white;
        /* comment 145 */
-@@ -179,8 +170,7 @@
+@@ -179,8 +169,7 @@
      /* comment 147 */
    } /* comment 148 */
  
@@ -423,7 +421,7 @@ input:not(/* comment 125 */[/* comment 126 */disabled/* comment 127 */]/* commen
      /* comment 151 */
      display: block;
      /* comment 152 */
-@@ -189,11 +179,9 @@
+@@ -189,11 +178,9 @@
  } /* comment 155 */
  
  @media (max-width: 500px) {
@@ -437,7 +435,7 @@ input:not(/* comment 125 */[/* comment 126 */disabled/* comment 127 */]/* commen
        /* comment 161 */
      } /* comment 162 */
      /* comment 163 */
-@@ -201,30 +189,35 @@
+@@ -201,30 +188,35 @@
    /* comment 165 */
  } /* comment 166 */
  
@@ -536,8 +534,7 @@ input:not(/* comment 125 */[/* comment 126 */disabled/* comment 127 */]/* commen
 /* comment 23 */ .element /* comment 24 */ .element /* comment 25 */ {
 }
 /* comment 26 */
-.element/* comment 27 */
-  .element /* comment 28 */
+.element /* comment 27 */ .element /* comment 28 */
 {
 }
 
@@ -852,15 +849,13 @@ selectors.css:156:6 parse ━━━━━━━━━━━━━━━━━━
 
 # Lines exceeding max width of 80 characters
 ```
-   81: /* comment 53 */ .element /* comment 54 */ >>> /* comment 55 */ .element /* comment 56 */ {}
-   93: a[/* comment 63 */ target /* comment 64 */=/* comment 65 */ "_blank" /* comment 66 */] {
-   95: a[/* comment 67 */ target /* comment 68 */~=/* comment 69 */ "_blank" /* comment 70 */] {
-   97: a[/* comment 71 */ target /* comment 72 */|=/* comment 73 */ "_blank" /* comment 74 */] {
-   99: a[/* comment 75 */ target /* comment 76 */^=/* comment 77 */ "_blank" /* comment 78 */] {
-  101: a[/* comment 79 */ target /* comment 80 */$=/* comment 81 */ "_blank" /* comment 82 */] {
-  103: a[/* comment 83 */ target /* comment 84 */*=/* comment 85 */ "_blank" /* comment 86 */] {
-  106: [/* comment 87 */ foo /* comment 88 */| /* comment 89 */att /* comment 90 */=/* comment 91 */ "val" /* comment 92 */] {
-  151:     /* comment 125 */ [/* comment 126 */ disabled /* comment 127 */] /* comment 128 */
+   80: /* comment 53 */ .element /* comment 54 */ >>> /* comment 55 */ .element /* comment 56 */ {}
+   92: a[/* comment 63 */ target /* comment 64 */=/* comment 65 */ "_blank" /* comment 66 */] {
+   94: a[/* comment 67 */ target /* comment 68 */~=/* comment 69 */ "_blank" /* comment 70 */] {
+   96: a[/* comment 71 */ target /* comment 72 */|=/* comment 73 */ "_blank" /* comment 74 */] {
+   98: a[/* comment 75 */ target /* comment 76 */^=/* comment 77 */ "_blank" /* comment 78 */] {
+  100: a[/* comment 79 */ target /* comment 80 */$=/* comment 81 */ "_blank" /* comment 82 */] {
+  102: a[/* comment 83 */ target /* comment 84 */*=/* comment 85 */ "_blank" /* comment 86 */] {
+  105: [/* comment 87 */ foo /* comment 88 */| /* comment 89 */att /* comment 90 */=/* comment 91 */ "val" /* comment 92 */] {
+  150:     /* comment 125 */ [/* comment 126 */ disabled /* comment 127 */] /* comment 128 */
 ```
-
-

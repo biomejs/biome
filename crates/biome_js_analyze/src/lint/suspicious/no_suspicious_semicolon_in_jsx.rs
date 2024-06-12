@@ -12,7 +12,7 @@ declare_rule! {
     ///
     /// ### Invalid
     ///
-    /// ```js,expect_diagnostic
+    /// ```jsx,expect_diagnostic
     /// const Component = () => {
     ///   return (
     ///     <div>
@@ -24,7 +24,7 @@ declare_rule! {
     ///
     /// ### Valid
     ///
-    /// ```js
+    /// ```jsx
     /// const Component = () => {
     ///   return (
     ///     <div>

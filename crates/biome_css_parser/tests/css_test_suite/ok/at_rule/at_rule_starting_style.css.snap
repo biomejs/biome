@@ -86,9 +86,9 @@ CssRoot {
                                             },
                                         ],
                                     ],
-                                    block: CssRuleBlock {
+                                    block: CssDeclarationOrRuleBlock {
                                         l_curly_token: L_CURLY@73..74 "{" [] [],
-                                        rules: CssRuleList [
+                                        items: CssDeclarationOrRuleList [
                                             CssAtRule {
                                                 at_token: AT@74..78 "@" [Newline("\n"), Whitespace("\t\t")] [],
                                                 rule: CssStartingStyleAtRule {
@@ -118,17 +118,20 @@ CssRoot {
                                                     },
                                                 },
                                             },
-                                            CssQualifiedRule {
-                                                prelude: CssSelectorList [
-                                                    CssCompoundSelector {
-                                                        nesting_selector_token: missing (optional),
-                                                        simple_selector: CssTypeSelector {
-                                                            namespace: missing (optional),
-                                                            ident: CssIdentifier {
-                                                                value_token: IDENT@132..140 "div" [Newline("\n"), Newline("\n"), Whitespace("\t\t")] [Whitespace(" ")],
+                                            CssNestedQualifiedRule {
+                                                prelude: CssRelativeSelectorList [
+                                                    CssRelativeSelector {
+                                                        combinator: missing (optional),
+                                                        selector: CssCompoundSelector {
+                                                            nesting_selector_token: missing (optional),
+                                                            simple_selector: CssTypeSelector {
+                                                                namespace: missing (optional),
+                                                                ident: CssIdentifier {
+                                                                    value_token: IDENT@132..140 "div" [Newline("\n"), Newline("\n"), Whitespace("\t\t")] [Whitespace(" ")],
+                                                                },
                                                             },
+                                                            sub_selectors: CssSubSelectorList [],
                                                         },
-                                                        sub_selectors: CssSubSelectorList [],
                                                     },
                                                 ],
                                                 block: CssDeclarationOrRuleBlock {
@@ -218,9 +221,9 @@ CssRoot {
                     0: CSS_LAYER_NAME_LIST@69..73
                       0: CSS_IDENTIFIER@69..73
                         0: IDENT@69..73 "foo" [] [Whitespace(" ")]
-                  1: CSS_RULE_BLOCK@73..166
+                  1: CSS_DECLARATION_OR_RULE_BLOCK@73..166
                     0: L_CURLY@73..74 "{" [] []
-                    1: CSS_RULE_LIST@74..163
+                    1: CSS_DECLARATION_OR_RULE_LIST@74..163
                       0: CSS_AT_RULE@74..132
                         0: AT@74..78 "@" [Newline("\n"), Whitespace("\t\t")] []
                         1: CSS_STARTING_STYLE_AT_RULE@78..132
@@ -240,15 +243,17 @@ CssRoot {
                                   1: (empty)
                                 1: SEMICOLON@127..128 ";" [] []
                             2: R_CURLY@128..132 "}" [Newline("\n"), Whitespace("\t\t")] []
-                      1: CSS_QUALIFIED_RULE@132..163
-                        0: CSS_SELECTOR_LIST@132..140
-                          0: CSS_COMPOUND_SELECTOR@132..140
+                      1: CSS_NESTED_QUALIFIED_RULE@132..163
+                        0: CSS_RELATIVE_SELECTOR_LIST@132..140
+                          0: CSS_RELATIVE_SELECTOR@132..140
                             0: (empty)
-                            1: CSS_TYPE_SELECTOR@132..140
+                            1: CSS_COMPOUND_SELECTOR@132..140
                               0: (empty)
-                              1: CSS_IDENTIFIER@132..140
-                                0: IDENT@132..140 "div" [Newline("\n"), Newline("\n"), Whitespace("\t\t")] [Whitespace(" ")]
-                            2: CSS_SUB_SELECTOR_LIST@140..140
+                              1: CSS_TYPE_SELECTOR@132..140
+                                0: (empty)
+                                1: CSS_IDENTIFIER@132..140
+                                  0: IDENT@132..140 "div" [Newline("\n"), Newline("\n"), Whitespace("\t\t")] [Whitespace(" ")]
+                              2: CSS_SUB_SELECTOR_LIST@140..140
                         1: CSS_DECLARATION_OR_RULE_BLOCK@140..163
                           0: L_CURLY@140..141 "{" [] []
                           1: CSS_DECLARATION_OR_RULE_LIST@141..159

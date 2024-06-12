@@ -91,3 +91,8 @@ React.Children.map(c => React.cloneElement(c, {key: c}));
 	const div = <div key={item.id}>{x}</div>;
 	return div;
 });
+
+[].map((item) => {
+	const node = <button type="button">{item.label}</button>;
+	return <Fragment key={item.label}>{node}</Fragment>;
+})

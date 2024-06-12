@@ -1,4 +1,4 @@
-use crate::utils::escape_string;
+use crate::utils::unescape_string;
 use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
 use biome_js_syntax::{
@@ -184,7 +184,7 @@ fn collect_control_characters_from_expression(
             .and_then(|js_string_literal| js_string_literal.inner_string_text().ok())?
             .to_string();
 
-        let pattern = escape_string(&raw_pattern).unwrap_or(raw_pattern);
+        let pattern = unescape_string(&raw_pattern).unwrap_or(raw_pattern);
 
         let regexp_flags = args
             .next()

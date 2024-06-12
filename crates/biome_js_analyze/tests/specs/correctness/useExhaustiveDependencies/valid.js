@@ -255,7 +255,7 @@ function MyComponent23 ({ arr })  {
 }
 
 // https://github.com/biomejs/biome/issues/2361
-function ComponentWithRecursiveCallback() {  
+function ComponentWithRecursiveCallback() {
     const fib = useCallback((num) => {
       if (num < 2) {
         return num;
@@ -273,4 +273,23 @@ function OutsideFunctionDeclaration() {
       func()
     }, [])
 }
-  
+
+// Specific ignored dependencies
+// https://github.com/biomejs/biome/discussions/2509
+function IgnoredDependencies() {
+    const [foo, setFoo] = useState(1);
+    // biome-ignore lint/correctness/useExhaustiveDependencies(foo): foo should be listed, but we override it
+    // biome-ignore lint/correctness/useExhaustiveDependencies(setFoo): setFoo shouldn't be listed, but we override it
+    useEffect(() => {
+        setFoo(foo + 1);
+    }, [setFoo]);
+}
+
+// Make sure ignoring without specific value also works for this rule.
+function IgnoredDependencies2() {
+    const [foo, setFoo] = useState(1);
+    // biome-ignore lint/correctness/useExhaustiveDependencies: both are ignored.
+    useEffect(() => {
+        setFoo(foo + 1);
+    }, [setFoo]);
+}

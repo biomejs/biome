@@ -93,7 +93,7 @@ info: css/numbers/numbers.css
    a {
      a: 0;
      a: 1;
-@@ -44,23 +44,23 @@
+@@ -44,21 +44,21 @@
  
      a: 1;
      a: 1.005;
@@ -115,23 +115,19 @@ info: css/numbers/numbers.css
      a: 0.005e60;
 -    a: 0e60;
 -    a: 0e60;
-+    a: 0.0e60;
-+    a: 0.0e60;
-+    a: 0.0e60;
-     a: 0e60;
-     a: 0e60;
 -    a: 0e60;
++    a: 0.0e60;
++    a: 0.0e60;
++    a: 0.0e60;
+     a: 0e60;
+     a: 0e60;
      a: 500600.001230045e60;
-     a: 10;
-     a: 9700;
-@@ -72,4 +72,6 @@
+@@ -72,4 +72,4 @@
  @media only screen and (-webkit-min-device-pixel-ratio: 0.5),
    only screen and (min-device-pixel-ratio: 0.5) {
  }
 -@include single-transition(transform, 0.5s ease);
-+@
-+include single-transition(transform, .5s ease)
-+;
++@include single-transition(transform, .5s ease);
 ```
 
 # Output
@@ -211,113 +207,5 @@ info: css/numbers/numbers.css
 @media only screen and (-webkit-min-device-pixel-ratio: 0.5),
   only screen and (min-device-pixel-ratio: 0.5) {
 }
-@
-include single-transition(transform, .5s ease)
-;
-```
-
-# Errors
-```
-numbers.css:73:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Unexpected value or character.
-  
-    72 │ @media only screen and (-webkit-min-device-pixel-ratio : .5), only screen and (min-device-pixel-ratio : .5) { }
-  > 73 │ @include single-transition(transform, .5s ease);
-       │  ^^^^^^^
-    74 │ 
-  
-  i Expected one of:
-  
-  - charset
-  - color-profile
-  - container
-  - counter-style
-  - document
-  - font-face
-  - font-feature-values
-  - font-palette-values
-  - import
-  - keyframes
-  - layer
-  - media
-  - namespace
-  - page
-  - property
-  - supports
-  - viewport
-  - scope
-  
-numbers.css:73:27 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `(`
-  
-    72 │ @media only screen and (-webkit-min-device-pixel-ratio : .5), only screen and (min-device-pixel-ratio : .5) { }
-  > 73 │ @include single-transition(transform, .5s ease);
-       │                           ^
-    74 │ 
-  
-  i Remove (
-  
-numbers.css:73:28 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `transform`
-  
-    72 │ @media only screen and (-webkit-min-device-pixel-ratio : .5), only screen and (min-device-pixel-ratio : .5) { }
-  > 73 │ @include single-transition(transform, .5s ease);
-       │                            ^^^^^^^^^
-    74 │ 
-  
-  i Remove transform
-  
-numbers.css:73:39 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Expected a selector but instead found '.5'.
-  
-    72 │ @media only screen and (-webkit-min-device-pixel-ratio : .5), only screen and (min-device-pixel-ratio : .5) { }
-  > 73 │ @include single-transition(transform, .5s ease);
-       │                                       ^^
-    74 │ 
-  
-  i Expected a selector here.
-  
-    72 │ @media only screen and (-webkit-min-device-pixel-ratio : .5), only screen and (min-device-pixel-ratio : .5) { }
-  > 73 │ @include single-transition(transform, .5s ease);
-       │                                       ^^
-    74 │ 
-  
-numbers.css:73:41 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `s`
-  
-    72 │ @media only screen and (-webkit-min-device-pixel-ratio : .5), only screen and (min-device-pixel-ratio : .5) { }
-  > 73 │ @include single-transition(transform, .5s ease);
-       │                                         ^
-    74 │ 
-  
-  i Remove s
-  
-numbers.css:73:47 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `)`
-  
-    72 │ @media only screen and (-webkit-min-device-pixel-ratio : .5), only screen and (min-device-pixel-ratio : .5) { }
-  > 73 │ @include single-transition(transform, .5s ease);
-       │                                               ^
-    74 │ 
-  
-  i Remove )
-  
-numbers.css:73:48 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `;`
-  
-    72 │ @media only screen and (-webkit-min-device-pixel-ratio : .5), only screen and (min-device-pixel-ratio : .5) { }
-  > 73 │ @include single-transition(transform, .5s ease);
-       │                                                ^
-    74 │ 
-  
-  i Remove ;
-  
-
+@include single-transition(transform, .5s ease);
 ```

@@ -1,0 +1,4 @@
+@keyframes :invalid(test) {}
+@keyframes :invalid test {}
+@keyframes :global(test {}
+@keyframes :local() {}

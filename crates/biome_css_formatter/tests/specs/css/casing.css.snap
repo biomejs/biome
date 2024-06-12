@@ -2,7 +2,6 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: css/casing.css
 ---
-
 # Input
 
 ```css
@@ -72,8 +71,8 @@ div.classNames#AND_Ids.ArePreserved {
 }
 
 div {
-	--preserved-casing: blue;
-	color: var(--Preserved-Casing);
+	--Preserved-Casing: blue;
+	color: VAR(--Preserved-Casing);
 }
 
 @font-palette-values --AnyCASInG-works {
@@ -88,5 +87,3 @@ div {
 @page ThisIsPreserved:first {
 }
 ```
-
-

@@ -1,6 +1,6 @@
 use crate::PlainIndentStyle;
 use biome_deserialize_macros::{Deserializable, Merge, Partial};
-use biome_formatter::{AttributePosition, LineEnding, LineWidth, QuoteStyle};
+use biome_formatter::{AttributePosition, IndentWidth, LineEnding, LineWidth, QuoteStyle};
 use biome_js_formatter::context::{
     trailing_commas::TrailingCommas, ArrowParentheses, QuoteProperties, Semicolons,
 };
@@ -63,7 +63,7 @@ pub struct JavascriptFormatter {
     /// The size of the indentation applied to JavaScript (and its super languages) files. Default to 2.
     #[partial(deserializable(deprecated(use_instead = "javascript.formatter.indentWidth")))]
     #[partial(bpaf(long("javascript-formatter-indent-size"), argument("NUMBER"), optional))]
-    pub indent_size: Option<u8>,
+    pub indent_size: Option<IndentWidth>,
 
     /// The size of the indentation applied to JavaScript (and its super languages) files. Default to 2.
     #[partial(bpaf(
@@ -71,7 +71,7 @@ pub struct JavascriptFormatter {
         argument("NUMBER"),
         optional
     ))]
-    pub indent_width: Option<u8>,
+    pub indent_width: Option<IndentWidth>,
 
     /// The type of line ending applied to JavaScript (and its super languages) files.
     #[partial(bpaf(
@@ -143,31 +143,6 @@ impl Default for JavascriptFormatter {
             line_width: Default::default(),
             quote_style: Default::default(),
             attribute_position: Default::default(),
-        }
-    }
-}
-
-/// Linter options specific to the JavaScript linter
-#[derive(Clone, Debug, Deserialize, Eq, Partial, PartialEq, Serialize)]
-#[partial(derive(Bpaf, Clone, Deserializable, Eq, Merge, PartialEq))]
-#[partial(cfg_attr(feature = "schema", derive(schemars::JsonSchema)))]
-#[partial(serde(rename_all = "camelCase", default, deny_unknown_fields))]
-pub struct JavascriptLinter {
-    /// Control the linter for JavaScript (and its super languages) files.
-    #[partial(bpaf(long("javascript-linter-enabled"), argument("true|false"), optional))]
-    pub enabled: bool,
-}
-
-impl Default for JavascriptLinter {
-    fn default() -> Self {
-        Self { enabled: true }
-    }
-}
-
-impl PartialJavascriptLinter {
-    pub fn get_formatter_configuration(&self) -> JavascriptLinter {
-        JavascriptLinter {
-            enabled: self.enabled.unwrap_or_default(),
         }
     }
 }

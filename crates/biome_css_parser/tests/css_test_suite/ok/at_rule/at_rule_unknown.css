@@ -1,0 +1,7 @@
+.container {
+	@apply flex flex-col h-[100vh] w-[100vh];
+}
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;

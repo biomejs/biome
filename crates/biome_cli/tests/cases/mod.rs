@@ -16,5 +16,7 @@ mod overrides_formatter;
 mod overrides_linter;
 mod overrides_organize_imports;
 mod protected_files;
+mod reporter_github;
+mod reporter_junit;
 mod reporter_summary;
 mod unknown_files;

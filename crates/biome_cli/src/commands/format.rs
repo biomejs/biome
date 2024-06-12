@@ -3,6 +3,7 @@ use crate::commands::{
     get_files_to_process, get_stdin, resolve_manifest, validate_configuration_diagnostics,
 };
 use crate::diagnostics::DeprecatedArgument;
+use crate::execute::VcsTargeted;
 use crate::{
     execute_mode, setup_cli_subscriber, CliDiagnostic, CliSession, Execution, TraversalMode,
 };
@@ -231,6 +232,7 @@ pub(crate) fn format(
         ignore_errors: cli_options.skip_errors,
         write: write || fix,
         stdin,
+        vcs_targeted: VcsTargeted { staged, changed },
     })
     .set_report(&cli_options);
 

@@ -135,7 +135,7 @@ export interface PartialFormatterConfiguration {
 	/**
 	 * The size of the indentation, 2 by default (deprecated, use `indent-width`)
 	 */
-	indentSize?: number;
+	indentSize?: IndentWidth;
 	/**
 	 * The indent style.
 	 */
@@ -143,7 +143,7 @@ export interface PartialFormatterConfiguration {
 	/**
 	 * The size of the indentation, 2 by default
 	 */
-	indentWidth?: number;
+	indentWidth?: IndentWidth;
 	/**
 	 * The type of line ending.
 	 */
@@ -273,7 +273,7 @@ export interface PartialCssFormatter {
 	/**
 	 * The size of the indentation applied to CSS (and its super languages) files. Default to 2.
 	 */
-	indentWidth?: number;
+	indentWidth?: IndentWidth;
 	/**
 	 * The type of line ending applied to CSS (and its super languages) files.
 	 */
@@ -304,8 +304,13 @@ export interface PartialCssParser {
 	 * Allow comments to appear on incorrect lines in `.css` files
 	 */
 	allowWrongLineComments?: boolean;
+	/**
+	 * Enables parsing of CSS Modules specific features.
+	 */
+	cssModules?: boolean;
 }
 export type AttributePosition = "auto" | "multiline";
+export type IndentWidth = number;
 export type PlainIndentStyle = "tab" | "space";
 export type LineEnding = "lf" | "crlf" | "cr";
 /**
@@ -341,7 +346,7 @@ export interface PartialJavascriptFormatter {
 	/**
 	 * The size of the indentation applied to JavaScript (and its super languages) files. Default to 2.
 	 */
-	indentSize?: number;
+	indentSize?: IndentWidth;
 	/**
 	 * The indent style applied to JavaScript (and its super languages) files.
 	 */
@@ -349,7 +354,7 @@ export interface PartialJavascriptFormatter {
 	/**
 	 * The size of the indentation applied to JavaScript (and its super languages) files. Default to 2.
 	 */
-	indentWidth?: number;
+	indentWidth?: IndentWidth;
 	/**
 	 * The type of quotes used in JSX. Defaults to double.
 	 */
@@ -416,7 +421,7 @@ export interface PartialJsonFormatter {
 	/**
 	 * The size of the indentation applied to JSON (and its super languages) files. Default to 2.
 	 */
-	indentSize?: number;
+	indentSize?: IndentWidth;
 	/**
 	 * The indent style applied to JSON (and its super languages) files.
 	 */
@@ -424,7 +429,7 @@ export interface PartialJsonFormatter {
 	/**
 	 * The size of the indentation applied to JSON (and its super languages) files. Default to 2.
 	 */
-	indentWidth?: number;
+	indentWidth?: IndentWidth;
 	/**
 	 * The type of line ending applied to JSON (and its super languages) files.
 	 */
@@ -805,6 +810,10 @@ export interface Correctness {
 	 */
 	noConstantCondition?: RuleConfiguration_for_Null;
 	/**
+	 * Disallow the use of Math.min and Math.max to clamp a value where the result itself is constant.
+	 */
+	noConstantMathMinMaxClamp?: RuleFixConfiguration_for_Null;
+	/**
 	 * Disallow returning a value from a constructor.
 	 */
 	noConstructorReturn?: RuleConfiguration_for_Null;
@@ -816,6 +825,10 @@ export interface Correctness {
 	 * Disallows empty destructuring patterns.
 	 */
 	noEmptyPattern?: RuleConfiguration_for_Null;
+	/**
+	 * Disallow to use unnecessary callback on flatMap.
+	 */
+	noFlatMapIdentity?: RuleFixConfiguration_for_Null;
 	/**
 	 * Disallow calling global object properties as functions
 	 */
@@ -840,6 +853,10 @@ export interface Correctness {
 	 * Disallow new operators with the Symbol object.
 	 */
 	noNewSymbol?: RuleFixConfiguration_for_Null;
+	/**
+	 * Forbid the use of Node.js builtin modules.
+	 */
+	noNodejsModules?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow \8 and \9 escape sequences in string literals.
 	 */
@@ -921,6 +938,10 @@ export interface Correctness {
 	 */
 	recommended?: boolean;
 	/**
+	 * Disallow Array constructors.
+	 */
+	useArrayLiterals?: RuleFixConfiguration_for_Null;
+	/**
 	 * Enforce all dependencies are correctly specified in a React hook.
 	 */
 	useExhaustiveDependencies?: RuleConfiguration_for_HooksOptions;
@@ -958,10 +979,6 @@ export interface Nursery {
 	 */
 	noConsole?: RuleFixConfiguration_for_Null;
 	/**
-	 * Disallow the use of Math.min and Math.max to clamp a value where the result itself is constant.
-	 */
-	noConstantMathMinMaxClamp?: RuleFixConfiguration_for_Null;
-	/**
 	 * Disallow using a callback in asynchronous tests and hooks.
 	 */
 	noDoneCallback?: RuleConfiguration_for_Null;
@@ -992,11 +1009,7 @@ export interface Nursery {
 	/**
 	 * Disallow variables from evolving into any type through reassignments.
 	 */
-	noEvolvingAny?: RuleConfiguration_for_Null;
-	/**
-	 * Disallow to use unnecessary callback on flatMap.
-	 */
-	noFlatMapIdentity?: RuleFixConfiguration_for_Null;
+	noEvolvingTypes?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow invalid !important within keyframe declarations
 	 */
@@ -1006,13 +1019,13 @@ export interface Nursery {
 	 */
 	noInvalidPositionAtImportRule?: RuleConfiguration_for_Null;
 	/**
+	 * Enforce that a label element or component has a text label and an associated input.
+	 */
+	noLabelWithoutControl?: RuleConfiguration_for_NoLabelWithoutControlOptions;
+	/**
 	 * Checks that the assertion function, for example expect, is placed inside an it() function call.
 	 */
 	noMisplacedAssertion?: RuleConfiguration_for_Null;
-	/**
-	 * Forbid the use of Node.js builtin modules.
-	 */
-	noNodejsModules?: RuleConfiguration_for_Null;
 	/**
 	 * Prevents React-specific JSX properties from being used.
 	 */
@@ -1022,9 +1035,13 @@ export interface Nursery {
 	 */
 	noRestrictedImports?: RuleConfiguration_for_RestrictedImportsOptions;
 	/**
-	 * Enforce that non-interactive, visible elements (such as \<div>) that have click handlers use the role attribute.
+	 * Disallow shorthand properties that override related longhand properties.
 	 */
-	noStaticElementInteractions?: RuleConfiguration_for_Null;
+	noShorthandPropertyOverrides?: RuleConfiguration_for_Null;
+	/**
+	 * Enforce the use of String.slice() over String.substr() and String.substring().
+	 */
+	noSubstr?: RuleFixConfiguration_for_Null;
 	/**
 	 * Disallow the use of dependencies that aren't specified in the package.json.
 	 */
@@ -1042,6 +1059,10 @@ export interface Nursery {
 	 */
 	noUnknownProperty?: RuleConfiguration_for_Null;
 	/**
+	 * Disallow unknown pseudo-class selectors.
+	 */
+	noUnknownPseudoClassSelector?: RuleConfiguration_for_Null;
+	/**
 	 * Disallow unknown pseudo-element selectors.
 	 */
 	noUnknownSelectorPseudoElement?: RuleConfiguration_for_Null;
@@ -1053,6 +1074,10 @@ export interface Nursery {
 	 * Disallow unmatchable An+B selectors.
 	 */
 	noUnmatchableAnbSelector?: RuleConfiguration_for_Null;
+	/**
+	 * Disallow unused function parameters.
+	 */
+	noUnusedFunctionParameters?: RuleFixConfiguration_for_Null;
 	/**
 	 * Disallow unnecessary concatenation of string or template literals.
 	 */
@@ -1074,17 +1099,25 @@ export interface Nursery {
 	 */
 	useAdjacentOverloadSignatures?: RuleConfiguration_for_Null;
 	/**
-	 * Disallow Array constructors.
-	 */
-	useArrayLiterals?: RuleFixConfiguration_for_Null;
-	/**
 	 * Enforce the use of new for all builtins, except String, Number, Boolean, Symbol and BigInt.
 	 */
 	useConsistentBuiltinInstantiation?: RuleFixConfiguration_for_Null;
 	/**
+	 * Disallows invalid named grid areas in CSS Grid Layouts.
+	 */
+	useConsistentGridAreas?: RuleConfiguration_for_Null;
+	/**
+	 * Use Date.now() to get the number of milliseconds since the Unix Epoch.
+	 */
+	useDateNow?: RuleFixConfiguration_for_Null;
+	/**
 	 * Require the default clause in switch statements.
 	 */
 	useDefaultSwitchClause?: RuleConfiguration_for_Null;
+	/**
+	 * Enforce passing a message value when creating a built-in error.
+	 */
+	useErrorMessage?: RuleConfiguration_for_Null;
 	/**
 	 * Enforce explicitly comparing the length, size, byteLength or byteOffset property of a value.
 	 */
@@ -1129,6 +1162,10 @@ export interface Nursery {
 	 * Require regex literals to be declared at the top level.
 	 */
 	useTopLevelRegex?: RuleConfiguration_for_Null;
+	/**
+	 * Use valid values for the autocomplete attribute on input elements.
+	 */
+	useValidAutocomplete?: RuleConfiguration_for_UseValidAutocompleteOptions;
 }
 /**
  * A list of rules that belong to this group
@@ -1615,7 +1652,7 @@ export interface OverrideFormatterConfiguration {
 	/**
 	 * The size of the indentation, 2 by default (deprecated, use `indent-width`)
 	 */
-	indentSize?: number;
+	indentSize?: IndentWidth;
 	/**
 	 * The indent style.
 	 */
@@ -1623,7 +1660,7 @@ export interface OverrideFormatterConfiguration {
 	/**
 	 * The size of the indentation, 2 by default
 	 */
-	indentWidth?: number;
+	indentWidth?: IndentWidth;
 	/**
 	 * The type of line ending.
 	 */
@@ -1667,12 +1704,18 @@ export type RuleConfiguration_for_HooksOptions =
 export type RuleConfiguration_for_DeprecatedHooksOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_DeprecatedHooksOptions;
+export type RuleConfiguration_for_NoLabelWithoutControlOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_NoLabelWithoutControlOptions;
 export type RuleConfiguration_for_RestrictedImportsOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_RestrictedImportsOptions;
 export type RuleFixConfiguration_for_UtilityClassSortingOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_UtilityClassSortingOptions;
+export type RuleConfiguration_for_UseValidAutocompleteOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_UseValidAutocompleteOptions;
 export type RuleConfiguration_for_RestrictedGlobalsOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_RestrictedGlobalsOptions;
@@ -1685,7 +1728,7 @@ export type RuleConfiguration_for_FilenamingConventionOptions =
 export type RuleFixConfiguration_for_NamingConventionOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_NamingConventionOptions;
-export type RulePlainConfiguration = "warn" | "error" | "off";
+export type RulePlainConfiguration = "warn" | "error" | "info" | "off";
 export interface RuleWithFixOptions_for_Null {
 	/**
 	 * The kind of the code actions emitted by the rule
@@ -1754,6 +1797,16 @@ export interface RuleWithOptions_for_DeprecatedHooksOptions {
 	 */
 	options: DeprecatedHooksOptions;
 }
+export interface RuleWithOptions_for_NoLabelWithoutControlOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: NoLabelWithoutControlOptions;
+}
 export interface RuleWithOptions_for_RestrictedImportsOptions {
 	/**
 	 * The severity of the emitted diagnostics by the rule
@@ -1777,6 +1830,16 @@ export interface RuleWithFixOptions_for_UtilityClassSortingOptions {
 	 * Rule's options
 	 */
 	options: UtilityClassSortingOptions;
+}
+export interface RuleWithOptions_for_UseValidAutocompleteOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: UseValidAutocompleteOptions;
 }
 export interface RuleWithOptions_for_RestrictedGlobalsOptions {
 	/**
@@ -1856,6 +1919,20 @@ export interface HooksOptions {
  * Options for the `useHookAtTopLevel` rule have been deprecated, since we now use the React hook naming convention to determine whether a function is a hook.
  */
 export interface DeprecatedHooksOptions {}
+export interface NoLabelWithoutControlOptions {
+	/**
+	 * Array of component names that should be considered the same as an `input` element.
+	 */
+	inputComponents: string[];
+	/**
+	 * Array of attributes that should be treated as the `label` accessible text content.
+	 */
+	labelAttributes: string[];
+	/**
+	 * Array of component names that should be considered the same as a `label` element.
+	 */
+	labelComponents: string[];
+}
 /**
  * Options for the rule `noRestrictedImports`.
  */
@@ -1874,6 +1951,12 @@ export interface UtilityClassSortingOptions {
 	 * Names of the functions or tagged templates that will be sorted.
 	 */
 	functions?: string[];
+}
+export interface UseValidAutocompleteOptions {
+	/**
+	 * `input` like custom components that should be checked.
+	 */
+	inputComponents: string[];
 }
 /**
  * Options for the rule `noRestrictedGlobals`.
@@ -2240,15 +2323,18 @@ export type Category =
 	| "lint/correctness/noChildrenProp"
 	| "lint/correctness/noConstAssign"
 	| "lint/correctness/noConstantCondition"
+	| "lint/correctness/noConstantMathMinMaxClamp"
 	| "lint/correctness/noConstructorReturn"
 	| "lint/correctness/noEmptyCharacterClassInRegex"
 	| "lint/correctness/noEmptyPattern"
+	| "lint/correctness/noFlatMapIdentity"
 	| "lint/correctness/noGlobalObjectCalls"
 	| "lint/correctness/noInnerDeclarations"
 	| "lint/correctness/noInvalidConstructorSuper"
 	| "lint/correctness/noInvalidNewBuiltin"
 	| "lint/correctness/noInvalidUseBeforeDeclaration"
 	| "lint/correctness/noNewSymbol"
+	| "lint/correctness/noNodejsModules"
 	| "lint/correctness/noNonoctalDecimalEscape"
 	| "lint/correctness/noPrecisionLoss"
 	| "lint/correctness/noRenderReturnValue"
@@ -2268,6 +2354,7 @@ export type Category =
 	| "lint/correctness/noUnusedVariables"
 	| "lint/correctness/noVoidElementsWithChildren"
 	| "lint/correctness/noVoidTypeReturn"
+	| "lint/correctness/useArrayLiterals"
 	| "lint/correctness/useExhaustiveDependencies"
 	| "lint/correctness/useHookAtTopLevel"
 	| "lint/correctness/useIsNan"
@@ -2277,7 +2364,6 @@ export type Category =
 	| "lint/nursery/colorNoInvalidHex"
 	| "lint/nursery/noColorInvalidHex"
 	| "lint/nursery/noConsole"
-	| "lint/nursery/noConstantMathMinMaxClamp"
 	| "lint/nursery/noDoneCallback"
 	| "lint/nursery/noDuplicateAtImportRules"
 	| "lint/nursery/noDuplicateElseIf"
@@ -2285,32 +2371,36 @@ export type Category =
 	| "lint/nursery/noDuplicateJsonKeys"
 	| "lint/nursery/noDuplicateSelectorsKeyframeBlock"
 	| "lint/nursery/noEmptyBlock"
-	| "lint/nursery/noEvolvingAny"
-	| "lint/nursery/noFlatMapIdentity"
+	| "lint/nursery/noEvolvingTypes"
 	| "lint/nursery/noImportantInKeyframe"
 	| "lint/nursery/noInvalidPositionAtImportRule"
+	| "lint/nursery/noLabelWithoutControl"
 	| "lint/nursery/noMisplacedAssertion"
 	| "lint/nursery/noMissingGenericFamilyKeyword"
-	| "lint/nursery/noNodejsModules"
 	| "lint/nursery/noReactSpecificProps"
 	| "lint/nursery/noRestrictedImports"
-	| "lint/nursery/noStaticElementInteractions"
+	| "lint/nursery/noShorthandPropertyOverrides"
+	| "lint/nursery/noSubstr"
 	| "lint/nursery/noTypeOnlyImportAttributes"
 	| "lint/nursery/noUndeclaredDependencies"
 	| "lint/nursery/noUnknownFunction"
 	| "lint/nursery/noUnknownMediaFeatureName"
 	| "lint/nursery/noUnknownProperty"
+	| "lint/nursery/noUnknownPseudoClassSelector"
 	| "lint/nursery/noUnknownSelectorPseudoElement"
 	| "lint/nursery/noUnknownUnit"
 	| "lint/nursery/noUnmatchableAnbSelector"
+	| "lint/nursery/noUnusedFunctionParameters"
 	| "lint/nursery/noUselessStringConcat"
 	| "lint/nursery/noUselessUndefinedInitialization"
 	| "lint/nursery/noYodaExpression"
 	| "lint/nursery/useAdjacentOverloadSignatures"
-	| "lint/nursery/useArrayLiterals"
 	| "lint/nursery/useBiomeSuppressionComment"
 	| "lint/nursery/useConsistentBuiltinInstantiation"
+	| "lint/nursery/useConsistentGridAreas"
+	| "lint/nursery/useDateNow"
 	| "lint/nursery/useDefaultSwitchClause"
+	| "lint/nursery/useErrorMessage"
 	| "lint/nursery/useExplicitLengthCheck"
 	| "lint/nursery/useFocusableInteractive"
 	| "lint/nursery/useGenericFontNames"
@@ -2322,6 +2412,7 @@ export type Category =
 	| "lint/nursery/useThrowNewError"
 	| "lint/nursery/useThrowOnlyError"
 	| "lint/nursery/useTopLevelRegex"
+	| "lint/nursery/useValidAutocomplete"
 	| "lint/performance/noAccumulatingSpread"
 	| "lint/performance/noBarrelFile"
 	| "lint/performance/noDelete"
@@ -2427,6 +2518,7 @@ export type Category =
 	| "lint/suspicious/useIsArray"
 	| "lint/suspicious/useNamespaceKeyword"
 	| "lint/suspicious/useValidTypeof"
+	| "assists/nursery/useSortedKeys"
 	| "files/missingHandler"
 	| "format"
 	| "check"
@@ -2584,8 +2676,10 @@ export interface CodeSuggestion {
 	suggestion: TextEdit;
 }
 /**
- * The sub-category of a refactor code action
- */
+	* The sub-category of a refactor code action.
+
+[Check the LSP spec](https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#codeActionKind) for more information: 
+	 */
 export type RefactorKind =
 	| "None"
 	| "Extract"

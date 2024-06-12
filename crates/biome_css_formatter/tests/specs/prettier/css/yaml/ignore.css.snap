@@ -63,7 +63,7 @@ ignore.css:1:1 parse ━━━━━━━━━━━━━━━━━━━�
   
 ignore.css:3:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected `,` but instead found `-`
+  × Expected a compound selector but instead found '-'.
   
     1 │ ---
     2 │ hello: world
@@ -72,7 +72,14 @@ ignore.css:3:1 parse ━━━━━━━━━━━━━━━━━━━�
     4 │ 
     5 │ /* biome-ignore format: prettier ignore */
   
-  i Remove -
+  i Expected a compound selector here.
+  
+    1 │ ---
+    2 │ hello: world
+  > 3 │ ---
+      │ ^
+    4 │ 
+    5 │ /* biome-ignore format: prettier ignore */
   
 ignore.css:3:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 

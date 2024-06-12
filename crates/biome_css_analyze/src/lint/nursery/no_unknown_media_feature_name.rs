@@ -65,7 +65,7 @@ declare_rule! {
     /// ```
     ///
     pub NoUnknownMediaFeatureName {
-        version: "next",
+        version: "1.8.0",
         name: "noUnknownMediaFeatureName",
         language: "css",
         recommended: false,

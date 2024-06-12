@@ -1,0 +1,11 @@
+.a {
+	composes: myClass;
+}
+
+.otherClassName {
+	composes: className from "./style.css";
+}
+
+.otherClassName {
+	composes: globalClassName from global;
+}

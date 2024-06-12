@@ -9,7 +9,8 @@ use biome_js_factory::{
     syntax::{AnyTsType, T},
 };
 use biome_js_syntax::{
-    AnyJsDeclarationClause, TriviaPieceKind, TsInterfaceDeclaration, TsTypeAliasDeclaration,
+    AnyJsDeclarationClause, JsSyntaxKind, TriviaPieceKind, TsInterfaceDeclaration,
+    TsTypeAliasDeclaration,
 };
 use biome_rowan::{AstNode, AstNodeList, BatchMutationExt, SyntaxResult};
 
@@ -38,6 +39,11 @@ declare_rule! {
     ///
     /// // Allow empty interfaces that extend a type.
     /// interface B extends A {}
+    ///
+    /// // Allow empty interfaces in ambient modules
+    /// declare module "mod" {
+    ///   interface C {}
+    /// }
     /// ```
     pub NoEmptyInterface {
         version: "1.0.0",
@@ -58,6 +64,15 @@ impl Rule for NoEmptyInterface {
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
+        let is_in_ambient_module = node.syntax().ancestors().skip(1).any(|ancestor| {
+            matches!(
+                ancestor.kind(),
+                JsSyntaxKind::TS_GLOBAL_DECLARATION | JsSyntaxKind::TS_EXTERNAL_MODULE_DECLARATION
+            )
+        });
+        if is_in_ambient_module {
+            return None;
+        }
         (node.members().is_empty() && node.extends_clause().is_none()).then_some(())
     }
 

@@ -276,22 +276,25 @@ CssRoot {
                                         query: missing (required),
                                         block: CssBogusBlock {
                                             items: [
-                                                CssRuleList [
-                                                    CssQualifiedRule {
-                                                        prelude: CssSelectorList [
-                                                            CssComplexSelector {
-                                                                left: CssCompoundSelector {
-                                                                    nesting_selector_token: missing (optional),
-                                                                    simple_selector: CssTypeSelector {
-                                                                        namespace: missing (optional),
-                                                                        ident: CssIdentifier {
-                                                                            value_token: IDENT@257..262 "width" [] [],
+                                                CssDeclarationOrRuleList [
+                                                    CssNestedQualifiedRule {
+                                                        prelude: CssRelativeSelectorList [
+                                                            CssRelativeSelector {
+                                                                combinator: missing (optional),
+                                                                selector: CssComplexSelector {
+                                                                    left: CssCompoundSelector {
+                                                                        nesting_selector_token: missing (optional),
+                                                                        simple_selector: CssTypeSelector {
+                                                                            namespace: missing (optional),
+                                                                            ident: CssIdentifier {
+                                                                                value_token: IDENT@257..262 "width" [] [],
+                                                                            },
                                                                         },
+                                                                        sub_selectors: CssSubSelectorList [],
                                                                     },
-                                                                    sub_selectors: CssSubSelectorList [],
+                                                                    combinator: CSS_SPACE_LITERAL@262..263 " " [] [],
+                                                                    right: missing (required),
                                                                 },
-                                                                combinator: CSS_SPACE_LITERAL@262..263 " " [] [],
-                                                                right: missing (required),
                                                             },
                                                             missing separator,
                                                             CssBogusSelector {
@@ -301,15 +304,18 @@ CssRoot {
                                                                 ],
                                                             },
                                                             missing separator,
-                                                            CssCompoundSelector {
-                                                                nesting_selector_token: missing (optional),
-                                                                simple_selector: CssTypeSelector {
-                                                                    namespace: missing (optional),
-                                                                    ident: CssIdentifier {
-                                                                        value_token: IDENT@269..271 "px" [] [],
+                                                            CssRelativeSelector {
+                                                                combinator: missing (optional),
+                                                                selector: CssCompoundSelector {
+                                                                    nesting_selector_token: missing (optional),
+                                                                    simple_selector: CssTypeSelector {
+                                                                        namespace: missing (optional),
+                                                                        ident: CssIdentifier {
+                                                                            value_token: IDENT@269..271 "px" [] [],
+                                                                        },
                                                                     },
+                                                                    sub_selectors: CssSubSelectorList [],
                                                                 },
-                                                                sub_selectors: CssSubSelectorList [],
                                                             },
                                                             missing separator,
                                                             CssBogusSelector {
@@ -347,9 +353,9 @@ CssRoot {
                                                                 },
                                                                 r_paren_token: missing (required),
                                                             },
-                                                            block: CssRuleBlock {
+                                                            block: CssDeclarationOrRuleBlock {
                                                                 l_curly_token: L_CURLY@310..313 "{" [] [Whitespace("  ")],
-                                                                rules: CssRuleList [],
+                                                                items: CssDeclarationOrRuleList [],
                                                                 r_curly_token: R_CURLY@313..314 "}" [] [],
                                                             },
                                                         },
@@ -374,9 +380,9 @@ CssRoot {
                                                                 },
                                                                 r_paren_token: R_PAREN@339..341 ")" [] [Whitespace(" ")],
                                                             },
-                                                            block: CssRuleBlock {
+                                                            block: CssDeclarationOrRuleBlock {
                                                                 l_curly_token: L_CURLY@341..344 "{" [] [Whitespace("  ")],
-                                                                rules: CssRuleList [],
+                                                                items: CssDeclarationOrRuleList [],
                                                                 r_curly_token: R_CURLY@344..345 "}" [] [],
                                                             },
                                                         },
@@ -389,9 +395,9 @@ CssRoot {
                                                                 value_token: IDENT@357..361 "not" [] [Whitespace(" ")],
                                                             },
                                                             query: missing (required),
-                                                            block: CssRuleBlock {
+                                                            block: CssDeclarationOrRuleBlock {
                                                                 l_curly_token: L_CURLY@361..364 "{" [] [Whitespace("  ")],
-                                                                rules: CssRuleList [],
+                                                                items: CssDeclarationOrRuleList [],
                                                                 r_curly_token: R_CURLY@364..365 "}" [] [],
                                                             },
                                                         },
@@ -419,9 +425,9 @@ CssRoot {
                                                                 },
                                                                 r_paren_token: R_PAREN@407..409 ")" [] [Whitespace(" ")],
                                                             },
-                                                            block: CssRuleBlock {
+                                                            block: CssDeclarationOrRuleBlock {
                                                                 l_curly_token: L_CURLY@409..412 "{" [] [Whitespace("  ")],
-                                                                rules: CssRuleList [],
+                                                                items: CssDeclarationOrRuleList [],
                                                                 r_curly_token: R_CURLY@412..413 "}" [] [],
                                                             },
                                                         },
@@ -453,9 +459,9 @@ CssRoot {
                                                                 or_token: OR_KW@452..455 "or" [] [Whitespace(" ")],
                                                                 right: missing (required),
                                                             },
-                                                            block: CssRuleBlock {
+                                                            block: CssDeclarationOrRuleBlock {
                                                                 l_curly_token: L_CURLY@455..458 "{" [] [Whitespace("  ")],
-                                                                rules: CssRuleList [],
+                                                                items: CssDeclarationOrRuleList [],
                                                                 r_curly_token: R_CURLY@458..459 "}" [] [],
                                                             },
                                                         },
@@ -498,9 +504,9 @@ CssRoot {
                                         container_token: CONTAINER_KW@498..508 "container" [] [Whitespace(" ")],
                                         name: missing (optional),
                                         query: missing (required),
-                                        block: CssRuleBlock {
+                                        block: CssDeclarationOrRuleBlock {
                                             l_curly_token: L_CURLY@508..510 "{" [] [Whitespace(" ")],
-                                            rules: CssRuleList [],
+                                            items: CssDeclarationOrRuleList [],
                                             r_curly_token: R_CURLY@510..511 "}" [] [],
                                         },
                                     },
@@ -515,9 +521,9 @@ CssRoot {
                                             feature: missing (required),
                                             r_paren_token: R_PAREN@524..526 ")" [] [Whitespace(" ")],
                                         },
-                                        block: CssRuleBlock {
+                                        block: CssDeclarationOrRuleBlock {
                                             l_curly_token: L_CURLY@526..528 "{" [] [Whitespace(" ")],
-                                            rules: CssRuleList [],
+                                            items: CssDeclarationOrRuleList [],
                                             r_curly_token: R_CURLY@528..529 "}" [] [],
                                         },
                                     },
@@ -691,31 +697,35 @@ CssRoot {
                   0: IDENT@253..257 "not" [] [Whitespace(" ")]
                 2: (empty)
                 3: CSS_BOGUS_BLOCK@257..495
-                  0: CSS_RULE_LIST@257..494
-                    0: CSS_QUALIFIED_RULE@257..277
-                      0: CSS_SELECTOR_LIST@257..273
-                        0: CSS_COMPLEX_SELECTOR@257..263
-                          0: CSS_COMPOUND_SELECTOR@257..262
-                            0: (empty)
-                            1: CSS_TYPE_SELECTOR@257..262
+                  0: CSS_DECLARATION_OR_RULE_LIST@257..494
+                    0: CSS_NESTED_QUALIFIED_RULE@257..277
+                      0: CSS_RELATIVE_SELECTOR_LIST@257..273
+                        0: CSS_RELATIVE_SELECTOR@257..263
+                          0: (empty)
+                          1: CSS_COMPLEX_SELECTOR@257..263
+                            0: CSS_COMPOUND_SELECTOR@257..262
                               0: (empty)
-                              1: CSS_IDENTIFIER@257..262
-                                0: IDENT@257..262 "width" [] []
-                            2: CSS_SUB_SELECTOR_LIST@262..262
-                          1: CSS_SPACE_LITERAL@262..263 " " [] []
-                          2: (empty)
+                              1: CSS_TYPE_SELECTOR@257..262
+                                0: (empty)
+                                1: CSS_IDENTIFIER@257..262
+                                  0: IDENT@257..262 "width" [] []
+                              2: CSS_SUB_SELECTOR_LIST@262..262
+                            1: CSS_SPACE_LITERAL@262..263 " " [] []
+                            2: (empty)
                         1: (empty)
                         2: CSS_BOGUS_SELECTOR@263..269
                           0: LTEQ@263..266 "<=" [] [Whitespace(" ")]
                           1: CSS_DIMENSION_VALUE@266..269 "500" [] []
                         3: (empty)
-                        4: CSS_COMPOUND_SELECTOR@269..271
+                        4: CSS_RELATIVE_SELECTOR@269..271
                           0: (empty)
-                          1: CSS_TYPE_SELECTOR@269..271
+                          1: CSS_COMPOUND_SELECTOR@269..271
                             0: (empty)
-                            1: CSS_IDENTIFIER@269..271
-                              0: IDENT@269..271 "px" [] []
-                          2: CSS_SUB_SELECTOR_LIST@271..271
+                            1: CSS_TYPE_SELECTOR@269..271
+                              0: (empty)
+                              1: CSS_IDENTIFIER@269..271
+                                0: IDENT@269..271 "px" [] []
+                            2: CSS_SUB_SELECTOR_LIST@271..271
                         5: (empty)
                         6: CSS_BOGUS_SELECTOR@271..273
                           0: R_PAREN@271..273 ")" [] [Whitespace(" ")]
@@ -740,9 +750,9 @@ CssRoot {
                               0: CSS_NUMBER_LITERAL@304..307 "500" [] []
                               1: IDENT@307..310 "px" [] [Whitespace(" ")]
                           2: (empty)
-                        3: CSS_RULE_BLOCK@310..314
+                        3: CSS_DECLARATION_OR_RULE_BLOCK@310..314
                           0: L_CURLY@310..313 "{" [] [Whitespace("  ")]
-                          1: CSS_RULE_LIST@313..313
+                          1: CSS_DECLARATION_OR_RULE_LIST@313..313
                           2: R_CURLY@313..314 "}" [] []
                     2: CSS_AT_RULE@314..345
                       0: AT@314..316 "@" [Newline("\n")] []
@@ -759,9 +769,9 @@ CssRoot {
                               0: LTEQ@337..339 "<=" [] []
                             2: (empty)
                           2: R_PAREN@339..341 ")" [] [Whitespace(" ")]
-                        3: CSS_RULE_BLOCK@341..345
+                        3: CSS_DECLARATION_OR_RULE_BLOCK@341..345
                           0: L_CURLY@341..344 "{" [] [Whitespace("  ")]
-                          1: CSS_RULE_LIST@344..344
+                          1: CSS_DECLARATION_OR_RULE_LIST@344..344
                           2: R_CURLY@344..345 "}" [] []
                     3: CSS_AT_RULE@345..365
                       0: AT@345..347 "@" [Newline("\n")] []
@@ -770,9 +780,9 @@ CssRoot {
                         1: CSS_CUSTOM_IDENTIFIER@357..361
                           0: IDENT@357..361 "not" [] [Whitespace(" ")]
                         2: (empty)
-                        3: CSS_RULE_BLOCK@361..365
+                        3: CSS_DECLARATION_OR_RULE_BLOCK@361..365
                           0: L_CURLY@361..364 "{" [] [Whitespace("  ")]
-                          1: CSS_RULE_LIST@364..364
+                          1: CSS_DECLARATION_OR_RULE_LIST@364..364
                           2: R_CURLY@364..365 "}" [] []
                     4: CSS_AT_RULE@365..413
                       0: AT@365..368 "@" [Newline("\n"), Newline("\n")] []
@@ -791,9 +801,9 @@ CssRoot {
                               0: CSS_NUMBER_LITERAL@403..405 "45" [] []
                               1: IDENT@405..407 "em" [] []
                           2: R_PAREN@407..409 ")" [] [Whitespace(" ")]
-                        3: CSS_RULE_BLOCK@409..413
+                        3: CSS_DECLARATION_OR_RULE_BLOCK@409..413
                           0: L_CURLY@409..412 "{" [] [Whitespace("  ")]
-                          1: CSS_RULE_LIST@412..412
+                          1: CSS_DECLARATION_OR_RULE_LIST@412..412
                           2: R_CURLY@412..413 "}" [] []
                     5: CSS_AT_RULE@413..459
                       0: AT@413..416 "@" [Newline("\n"), Newline("\n")] []
@@ -815,9 +825,9 @@ CssRoot {
                             2: R_PAREN@450..452 ")" [] [Whitespace(" ")]
                           1: OR_KW@452..455 "or" [] [Whitespace(" ")]
                           2: (empty)
-                        3: CSS_RULE_BLOCK@455..459
+                        3: CSS_DECLARATION_OR_RULE_BLOCK@455..459
                           0: L_CURLY@455..458 "{" [] [Whitespace("  ")]
-                          1: CSS_RULE_LIST@458..458
+                          1: CSS_DECLARATION_OR_RULE_LIST@458..458
                           2: R_CURLY@458..459 "}" [] []
                     6: CSS_AT_RULE@459..494
                       0: AT@459..462 "@" [Newline("\n"), Newline("\n")] []
@@ -843,9 +853,9 @@ CssRoot {
                 0: CONTAINER_KW@498..508 "container" [] [Whitespace(" ")]
                 1: (empty)
                 2: (empty)
-                3: CSS_RULE_BLOCK@508..511
+                3: CSS_DECLARATION_OR_RULE_BLOCK@508..511
                   0: L_CURLY@508..510 "{" [] [Whitespace(" ")]
-                  1: CSS_RULE_LIST@510..510
+                  1: CSS_DECLARATION_OR_RULE_LIST@510..510
                   2: R_CURLY@510..511 "}" [] []
             3: CSS_AT_RULE@511..529
               0: AT@511..513 "@" [Newline("\n")] []
@@ -856,9 +866,9 @@ CssRoot {
                   0: L_PAREN@523..524 "(" [] []
                   1: (empty)
                   2: R_PAREN@524..526 ")" [] [Whitespace(" ")]
-                3: CSS_RULE_BLOCK@526..529
+                3: CSS_DECLARATION_OR_RULE_BLOCK@526..529
                   0: L_CURLY@526..528 "{" [] [Whitespace(" ")]
-                  1: CSS_RULE_LIST@528..528
+                  1: CSS_DECLARATION_OR_RULE_LIST@528..528
                   2: R_CURLY@528..529 "}" [] []
   2: EOF@529..530 "" [Newline("\n")] []
 

@@ -255,7 +255,7 @@ fn migrate_eslint_rule(
         eslint_eslint::Rule::TypeScriptNamingConvention(conf) => {
             if migrate_eslint_any_rule(rules, &name, conf.severity(), opts, results) {
                 let severity = conf.severity();
-                let options = eslint_typescript::NamingConventionOptions::override_default(
+                let options = eslint_typescript::NamingConventionOptions::new(
                     conf.into_vec().into_iter().map(|v| *v),
                 );
                 let group = rules.style.get_or_insert_with(Default::default);

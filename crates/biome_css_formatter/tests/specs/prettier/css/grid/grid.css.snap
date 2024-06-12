@@ -128,71 +128,19 @@ div {
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,40 +1,33 @@
- /* quotes */
- div {
--  grid-template-areas:
--    "header header"
--    "main sidebar"
--    "footer footer";
-+  grid-template-areas: "header header" "main sidebar" "footer footer";
- }
- 
+@@ -9,9 +9,9 @@
  /* numbers */
  div {
    grid-template-columns:
 -    [full-start] minmax(1.5em, 1fr)
 -    [main-start] minmax(0.4ch, 75ch)
 -    [main-end] minmax(1em, 1fr)
--    [full-end];
-+      [full-start] minmax(1.50em, 1fr)
-+      [main-start] minmax(.40ch, 75ch)
-+      [main-end] minmax(1em, 1.000fr)
-+      [full-end];
- }
- 
- /* casing */
- div {
--  grid:
-+  GRID:
-     [top] 1fr
-     [middle] 1fr
-     bottom;
- 
--  grid-template:
--    "a a a" 200px
--    "b b b" 200px
--    / 200px 200px auto;
-+  grid-template: "a a a" 200px "b b b" 200px / 200px 200px auto;
- }
- 
- /* break before first line if there are any breaks */
- div {
-   grid-template-columns: 1fr 100px 3em;
--  grid:
--    [wide-start] "header header header" 200px [wide-end]
--    "footer footer footer" 25px
--    / auto 50px auto;
-+  grid: [wide-start] "header header header" 200px [wide-end]
-+      "footer footer footer" 25px
-+      / auto 50px auto;
- }
- 
- /**
-@@ -65,11 +58,8 @@
-     [main-end] minmax(1em, 1fr)
++    [full-start] minmax(1.50em, 1fr)
++    [main-start] minmax(.40ch, 75ch)
++    [main-end] minmax(1em, 1.000fr)
      [full-end];
+ }
  
--  grid-template-areas:
--    "header header header"
--    "main   main   sidebar"
--    "main   main   sidebar2"
--    "footer footer footer";
-+  grid-template-areas: "header header header" "main   main   sidebar"
-+    "main   main   sidebar2" "footer footer footer";
- 
-   /* Shorthand for grid-template-rows, grid-template-columns, and grid-template
-      areas. In one. This can get really crazy. */
 ```
 
 # Output
@@ -200,34 +148,41 @@ div {
 ```css
 /* quotes */
 div {
-  grid-template-areas: "header header" "main sidebar" "footer footer";
+  grid-template-areas:
+    "header header"
+    "main sidebar"
+    "footer footer";
 }
 
 /* numbers */
 div {
   grid-template-columns:
-      [full-start] minmax(1.50em, 1fr)
-      [main-start] minmax(.40ch, 75ch)
-      [main-end] minmax(1em, 1.000fr)
-      [full-end];
+    [full-start] minmax(1.50em, 1fr)
+    [main-start] minmax(.40ch, 75ch)
+    [main-end] minmax(1em, 1.000fr)
+    [full-end];
 }
 
 /* casing */
 div {
-  GRID:
+  grid:
     [top] 1fr
     [middle] 1fr
     bottom;
 
-  grid-template: "a a a" 200px "b b b" 200px / 200px 200px auto;
+  grid-template:
+    "a a a" 200px
+    "b b b" 200px
+    / 200px 200px auto;
 }
 
 /* break before first line if there are any breaks */
 div {
   grid-template-columns: 1fr 100px 3em;
-  grid: [wide-start] "header header header" 200px [wide-end]
-      "footer footer footer" 25px
-      / auto 50px auto;
+  grid:
+    [wide-start] "header header header" 200px [wide-end]
+    "footer footer footer" 25px
+    / auto 50px auto;
 }
 
 /**
@@ -258,8 +213,11 @@ div {
     [main-end] minmax(1em, 1fr)
     [full-end];
 
-  grid-template-areas: "header header header" "main   main   sidebar"
-    "main   main   sidebar2" "footer footer footer";
+  grid-template-areas:
+    "header header header"
+    "main   main   sidebar"
+    "main   main   sidebar2"
+    "footer footer footer";
 
   /* Shorthand for grid-template-rows, grid-template-columns, and grid-template
      areas. In one. This can get really crazy. */
@@ -304,207 +262,7 @@ div {
 }
 ```
 
-# Errors
-```
-grid.css:12:7 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Unexpected value or character.
-  
-    10 │ div {
-    11 │   grid-template-columns:
-  > 12 │       [full-start] minmax(1.50em, 1fr)
-       │       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  > 13 │       [main-start] minmax(.40ch, 75ch)
-  > 14 │       [main-end] minmax(1em, 1.000fr)
-  > 15 │       [full-end];
-       │       ^^^^^^^^^^
-    16 │ }
-    17 │ 
-  
-  i Expected one of:
-  
-  - identifier
-  - string
-  - number
-  - dimension
-  - ratio
-  - custom property
-  - function
-  
-grid.css:21:5 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Unexpected value or character.
-  
-    19 │ div {
-    20 │   GRID:
-  > 21 │     [top] 1fr
-       │     ^^^^^^^^^
-  > 22 │     [middle] 1fr
-  > 23 │     bottom;
-       │     ^^^^^^
-    24 │ 
-    25 │   grid-TEMPLATE:
-  
-  i Expected one of:
-  
-  - identifier
-  - string
-  - number
-  - dimension
-  - ratio
-  - custom property
-  - function
-  
-grid.css:35:9 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Unexpected value or character.
-  
-    33 │   grid-template-columns:
-    34 │       1fr 100px 3em;
-  > 35 │   grid: [wide-start] "header header header" 200px [wide-end]
-       │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  > 36 │       "footer footer footer" 25px
-  > 37 │       / auto 50px auto;
-       │       ^^^^^^^^^^^^^^^^
-    38 │ }
-    39 │ 
-  
-  i Expected one of:
-  
-  - identifier
-  - string
-  - number
-  - dimension
-  - ratio
-  - custom property
-  - function
-  
-grid.css:51:5 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Unexpected value or character.
-  
-    49 │   /* template rows/columns with named grid lines */
-    50 │   grid-template-columns:
-  > 51 │     [wide-start] 1fr
-       │     ^^^^^^^^^^^^^^^^
-  > 52 │     [main-start] 500px
-  > 53 │     [main-end] 1fr
-  > 54 │     [wide-end];
-       │     ^^^^^^^^^^
-    55 │   grid-template-rows:
-    56 │     [top] 1fr
-  
-  i Expected one of:
-  
-  - identifier
-  - string
-  - number
-  - dimension
-  - ratio
-  - custom property
-  - function
-  
-grid.css:56:5 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Unexpected value or character.
-  
-    54 │     [wide-end];
-    55 │   grid-template-rows:
-  > 56 │     [top] 1fr
-       │     ^^^^^^^^^
-  > 57 │     [middle] 1fr
-  > 58 │     [bottom];
-       │     ^^^^^^^^
-    59 │   /* template rows/columns with functions */
-    60 │   grid-template-columns: minmax(1em, 1fr) minmax(1em, 80ch) minmax(1em, 1fr);
-  
-  i Expected one of:
-  
-  - identifier
-  - string
-  - number
-  - dimension
-  - ratio
-  - custom property
-  - function
-  
-grid.css:63:5 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Unexpected value or character.
-  
-    61 │   /* getting really busy with named lines + functions */
-    62 │   grid-template-columns:
-  > 63 │     [full-start] minmax(1em, 1fr)
-       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  > 64 │     [main-start] minmax(1em, 80ch)
-  > 65 │     [main-end] minmax(1em, 1fr)
-  > 66 │     [full-end];
-       │     ^^^^^^^^^^
-    67 │ 
-    68 │   grid-template-areas:
-  
-  i Expected one of:
-  
-  - identifier
-  - string
-  - number
-  - dimension
-  - ratio
-  - custom property
-  - function
-  
-grid.css:77:5 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Unexpected value or character.
-  
-    75 │      areas. In one. This can get really crazy. */
-    76 │   grid-template:
-  > 77 │     [row1-start] "header header header" 25px [row1-end]
-       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  > 78 │     [row2-start] "footer footer footer" 25px [row2-end]
-  > 79 │     / auto 50px auto;
-       │     ^^^^^^^^^^^^^^^^
-    80 │ 
-    81 │   /* The. Worst. This one is shorthand for like everything here smashed into one. But rarely will you actually specify EVERYTHING. */
-  
-  i Expected one of:
-  
-  - identifier
-  - string
-  - number
-  - dimension
-  - ratio
-  - custom property
-  - function
-  
-grid.css:83:5 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Unexpected value or character.
-  
-    81 │   /* The. Worst. This one is shorthand for like everything here smashed into one. But rarely will you actually specify EVERYTHING. */
-    82 │   grid:
-  > 83 │     [row1-start] "header header header" 25px [row1-end]
-       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  > 84 │     [row2-start] "footer footer footer" 25px [row2-end]
-  > 85 │     / auto 50px auto;
-       │     ^^^^^^^^^^^^^^^^
-    86 │   /* simpler use case: */
-    87 │   grid: 200px auto / 1fr auto 1fr;
-  
-  i Expected one of:
-  
-  - identifier
-  - string
-  - number
-  - dimension
-  - ratio
-  - custom property
-  - function
-  
-
-```
-
 # Lines exceeding max width of 80 characters
 ```
-   71:   /* The. Worst. This one is shorthand for like everything here smashed into one. But rarely will you actually specify EVERYTHING. */
+   81:   /* The. Worst. This one is shorthand for like everything here smashed into one. But rarely will you actually specify EVERYTHING. */
 ```

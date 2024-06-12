@@ -3,7 +3,7 @@ use biome_rowan::{TextRange, TextSize};
 
 /// Single instance of a suppression comment, with the following syntax:
 ///
-/// `// rome-ignore { <category> { (<value>) }? }+: <reason>`
+/// `// biome-ignore { <category> { (<value>) }? }+: <reason>`
 ///
 /// The category broadly describes what feature is being suppressed (formatting,
 /// linting, ...) with the value being and optional, category-specific name of
@@ -23,7 +23,7 @@ pub struct Suppression<'a> {
     pub categories: Vec<(&'a Category, Option<&'a str>)>,
     /// Reason for this suppression comment to exist
     pub reason: &'a str,
-    /// If the comment is `// rome-ignore`
+    /// If the comment is `// biome-ignore`
     pub is_legacy: bool,
 }
 

@@ -26,7 +26,7 @@ expression: malformedSelector.js
 ```
 malformedSelector.options:11:21 deserialize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × The `private` and `protected` modifiers cannot be used toghether.
+  × The `private` and `protected` modifiers cannot be used together.
   
      9 │ 						"conventions": [
     10 │ 							{
@@ -45,7 +45,7 @@ malformedSelector.options:11:21 deserialize ━━━━━━━━━━━━
 ```
 malformedSelector.options:17:21 deserialize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × The `abstract` and `static` modifiers cannot be used toghether.
+  × The `abstract` and `static` modifiers cannot be used together.
   
     15 │ 								"match": ".*"
     16 │ 							}, {
@@ -64,7 +64,7 @@ malformedSelector.options:17:21 deserialize ━━━━━━━━━━━━
 ```
 malformedSelector.options:23:21 deserialize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × The `Private` modifier can only be used on class member kinds.
+  × The `private` modifier cannot be used with the `const` kind.
   
     21 │ 								"match": ".*"
     22 │ 							}, {
@@ -83,7 +83,7 @@ malformedSelector.options:23:21 deserialize ━━━━━━━━━━━━
 ```
 malformedSelector.options:29:21 deserialize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × The `readonly` modifier can only be used on class and type property kinds.
+  × The `readonly` modifier cannot be used with the `const` kind.
   
     27 │ 								"match": ".*"
     28 │ 							}, {
@@ -102,7 +102,7 @@ malformedSelector.options:29:21 deserialize ━━━━━━━━━━━━
 ```
 malformedSelector.options:35:21 deserialize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × The `abstract` modifier can only be used on classes and class member kinds.
+  × The `abstract` modifier cannot be used with the `interface` kind.
   
     33 │ 								"match": ".*"
     34 │ 							}, {
@@ -121,7 +121,7 @@ malformedSelector.options:35:21 deserialize ━━━━━━━━━━━━
 ```
 malformedSelector.options:41:21 deserialize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × The `global` scope can only be used on type and variable kinds.
+  × The `global` scope cannot be used with the `class member` kind.
   
     39 │ 								"match": ".*"
     40 │ 							}, {

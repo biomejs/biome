@@ -68,3 +68,12 @@ function fooWithInternalEmptyBlocksTs(){
 
   }
 }
+
+export class FooBar {
+  constructor(
+    private foo: string,
+  ) {
+    function bar() { }
+    bar();
+  }
+}

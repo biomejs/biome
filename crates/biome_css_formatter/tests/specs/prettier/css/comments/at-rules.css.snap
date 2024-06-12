@@ -138,7 +138,7 @@ info: css/comments/at-rules.css
      /* comment 51 */
      nice-style: 4;
      /* comment 52 */
-@@ -40,12 +33,11 @@
+@@ -40,12 +33,10 @@
    /* comment 54 */
  } /* comment 55 */
  
@@ -149,12 +149,11 @@ info: css/comments/at-rules.css
  
 -/* comment 59 */
 -@viewport /* comment 60 */ {
-+/* comment 59 */ @
-+viewport /* comment 60 */ {
++/* comment 59 */ @/* comment 60 */ viewport {
  }
  
  @page /* comment 61 */ {
-@@ -55,80 +47,79 @@
+@@ -55,80 +46,79 @@
  @page /* comment 64 */ vertical /* comment 65 */ {
  }
  
@@ -338,8 +337,7 @@ info: css/comments/at-rules.css
 /* comment 56 */ @counter-style /* comment 57 */ thumbs /* comment 58 */ {
 }
 
-/* comment 59 */ @
-viewport /* comment 60 */ {
+/* comment 59 */ @/* comment 60 */ viewport {
 }
 
 @page /* comment 61 */ {
@@ -428,66 +426,29 @@ viewport /* comment 60 */ {
 } /* comment 216 */
 ```
 
-# Errors
-```
-at-rules.css:27:19 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Unexpected value or character.
-  
-    25 │ /* comment 56 */ @counter-style /* comment 57 */ thumbs /* comment 58 */ {}
-    26 │ 
-  > 27 │ /* comment 59 */ @viewport /* comment 60 */ {}
-       │                   ^^^^^^^^
-    28 │ 
-    29 │ @page /* comment 61 */ {}
-  
-  i Expected one of:
-  
-  - charset
-  - color-profile
-  - container
-  - counter-style
-  - document
-  - font-face
-  - font-feature-values
-  - font-palette-values
-  - import
-  - keyframes
-  - layer
-  - media
-  - namespace
-  - page
-  - property
-  - supports
-  - viewport
-  - scope
-  
-
-```
-
 # Lines exceeding max width of 80 characters
 ```
    17:     /* comment 33 */ /* comment 34 */ /* comment 35 */ orientation: landscape /* comment 36 */
    21: @namespace /* comment 40 */ /* comment 41 */ svg url(http://www.w3.org/2000/svg) /* comment 42 */;
    26: /* comment 45 */ @font-feature-values /* comment 46 */ Font Two /* comment 47 */ {
-   55: @media /* comment 74 */ only /* comment 75 */ screen /* comment 76 */ and /* comment 77 */ (
-   56:     /* comment 78 */ /* comment 79 */ /* comment 80 */ min-width: 320px /* comment 81 */
-   58:     /* comment 84 */ /* comment 85 */ /* comment 86 */ max-width: 480px /* comment 87 */
-   60:     /* comment 90 */ /* comment 91 */ /* comment 92 */ resolution: 150dpi /* comment 93 */
-   63: @media /* comment 95 */ only /* comment 96 */ screen /* comment 97 */ and /* comment 98 */ (
-   64:     /* comment 99 */ /* comment 100 */ /* comment 101 */ min-width: 320px /* comment 102 */
-   66:     /* comment 105 */ /* comment 106 */ /* comment 107 */ max-width: 480px /* comment 108 */
-   68:     /* comment 111 */ /* comment 112 */ /* comment 113 */ resolution: 150dpi /* comment 114 */
-   73:   /* comment 120 */ screen /* comment 121 */ /* comment 123 */ and /* comment 122 */ /* comment 124 */ (
-   79:   ) /* comment 133 */ /* comment 135 */ and /* comment 134 */ /* comment 136 */ (
-   85:   ) /* comment 145 */ /* comment 147 */ and /* comment 146 */ /* comment 148 */ (
-   95:     /* comment 161 */ /* comment 162 */ /* comment 163 */ display: flex /* comment 164 */
-   99:     /* comment 168 */ /* comment 169 */ /* comment 170 */ display: flex /* comment 171 */
-  103:     /* comment 174 */ /* comment 175 */ /* comment 176 */ display: table-cell /* comment 177 */
-  106:     /* comment 180 */ /* comment 181 */ /* comment 182 */ display: list-item /* comment 183 */
-  109:     /* comment 186 */ /* comment 187 */ /* comment 188 */ display: run-in /* comment 189 */
-  113:     /* comment 192 */ /* comment 193 */ /* comment 194 */ --foo: green /* comment 195 */
-  118:     /* comment 199 */ /* comment 200 */ /* comment 201 */ display: flex /* comment 202 */
-  120:   /* comment 204 */ @media /* comment 205 */ screen /* comment 206 */ and /* comment 207 */ (
-  121:       /* comment 208 */ /* comment 209 */ /* comment 210 */ min-width: 900px /* comment 211 */
+   54: @media /* comment 74 */ only /* comment 75 */ screen /* comment 76 */ and /* comment 77 */ (
+   55:     /* comment 78 */ /* comment 79 */ /* comment 80 */ min-width: 320px /* comment 81 */
+   57:     /* comment 84 */ /* comment 85 */ /* comment 86 */ max-width: 480px /* comment 87 */
+   59:     /* comment 90 */ /* comment 91 */ /* comment 92 */ resolution: 150dpi /* comment 93 */
+   62: @media /* comment 95 */ only /* comment 96 */ screen /* comment 97 */ and /* comment 98 */ (
+   63:     /* comment 99 */ /* comment 100 */ /* comment 101 */ min-width: 320px /* comment 102 */
+   65:     /* comment 105 */ /* comment 106 */ /* comment 107 */ max-width: 480px /* comment 108 */
+   67:     /* comment 111 */ /* comment 112 */ /* comment 113 */ resolution: 150dpi /* comment 114 */
+   72:   /* comment 120 */ screen /* comment 121 */ /* comment 123 */ and /* comment 122 */ /* comment 124 */ (
+   78:   ) /* comment 133 */ /* comment 135 */ and /* comment 134 */ /* comment 136 */ (
+   84:   ) /* comment 145 */ /* comment 147 */ and /* comment 146 */ /* comment 148 */ (
+   94:     /* comment 161 */ /* comment 162 */ /* comment 163 */ display: flex /* comment 164 */
+   98:     /* comment 168 */ /* comment 169 */ /* comment 170 */ display: flex /* comment 171 */
+  102:     /* comment 174 */ /* comment 175 */ /* comment 176 */ display: table-cell /* comment 177 */
+  105:     /* comment 180 */ /* comment 181 */ /* comment 182 */ display: list-item /* comment 183 */
+  108:     /* comment 186 */ /* comment 187 */ /* comment 188 */ display: run-in /* comment 189 */
+  112:     /* comment 192 */ /* comment 193 */ /* comment 194 */ --foo: green /* comment 195 */
+  117:     /* comment 199 */ /* comment 200 */ /* comment 201 */ display: flex /* comment 202 */
+  119:   /* comment 204 */ @media /* comment 205 */ screen /* comment 206 */ and /* comment 207 */ (
+  120:       /* comment 208 */ /* comment 209 */ /* comment 210 */ min-width: 900px /* comment 211 */
 ```

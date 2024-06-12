@@ -1,12 +1,12 @@
 //! Generated file, do not edit by hand, see `xtask/codegen`
 
-use biome_analyze::declare_group;
+use biome_analyze::declare_lint_group;
 
 pub mod no_dangerously_set_inner_html;
 pub mod no_dangerously_set_inner_html_with_children;
 pub mod no_global_eval;
 
-declare_group! {
+declare_lint_group! {
     pub Security {
         name : "security" ,
         rules : [

@@ -2,7 +2,6 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: css/atrule/media.css
 ---
-
 # Input
 
 ```css
@@ -204,210 +203,15 @@ black
 ```diff
 --- Prettier
 +++ Biome
-@@ -52,80 +52,144 @@
+@@ -125,7 +125,7 @@
  }
  
- .screen-color {
--  @media screen {
--    color: green;
-+    @media screen {
-+        color: green;
- 
--    @media (min-width: 768px) {
--      color: red;
-+        @media (min-width: 768px) {
-+            color: red;
-+        }
-+    }
-+    @media tv {
-+        color: black;
-     }
--  }
--  @media tv {
--    color: black;
--  }
- }
- .screen-color {
--  @media screen {
--    color: green;
-+@media screen {
-+color: green;
-+
-+@media (min-width: 768px) {
-+color: red;
-+}
-+}
-+@media tv {
-+color: black;
-+}
-+}
-+.screen-color{
-+    @media screen{
-+        color: green;
- 
--    @media (min-width: 768px) {
--      color: red;
-+        @media (min-width: 768px){
-+            color: red;
-+        }
-+    }
-+    @media tv{
-+        color: black;
-     }
--  }
--  @media tv {
--    color: black;
--  }
- }
--.screen-color {
--  @media screen {
--    color: green;
-+.screen-color  {
-+    @media screen  {
-+        color: green;
- 
--    @media (min-width: 768px) {
--      color: red;
-+        @media (min-width: 768px)  {
-+            color: red;
-+        }
-     }
--  }
--  @media tv {
--    color: black;
--  }
-+    @media tv  {
-+        color: black;
-+    }
-+}
-+.screen-color
-+{
-+@media
-+screen
-+{
-+color
-+:
-+green
-+;
-+@media
-+(
-+min-width
-+:
-+768px
-+)
-+{
-+color
-+:
-+red
-+;
-+}
-+}
-+@media
-+tv
-+{
-+color
-+:
-+black
-+;
-+}
- }
--.screen-color {
--  @media screen {
--    color: green;
-+.screen-color
-+
-+{
-+
-+@media
-+
-+screen
-+
-+{
-+
-+color
-+
-+:
-+
-+green
-+
-+;
-+
-+@media
-+
-+(
-+
-+min-width
- 
--    @media (min-width: 768px) {
--      color: red;
--    }
--  }
--  @media tv {
--    color: black;
--  }
-+:
-+
-+768px
-+
-+)
-+
-+{
-+
-+color
-+
-+:
-+
-+red
-+
-+;
-+
- }
--.screen-color {
--  @media screen {
--    color: green;
--    @media (min-width: 768px) {
--      color: red;
--    }
--  }
--  @media tv {
--    color: black;
--  }
-+
- }
--.screen-color {
--  @media screen {
--    color: green;
- 
--    @media (min-width: 768px) {
--      color: red;
--    }
--  }
-+@media
-+
-+tv
-+
-+{
-+
-+color
-+
-+:
-+
-+black
- 
--  @media tv {
--    color: black;
--  }
-+;
-+
- }
- 
--@media all and (-webkit-min-device-pixel-ratio: 1.5),
+ @media all and (-webkit-min-device-pixel-ratio: 1.5),
 -  all and (-o-min-device-pixel-ratio: 3/2),
--  all and (min--moz-device-pixel-ratio: 1.5),
--  all and (min-device-pixel-ratio: 1.5) {
++  all and (-o-min-device-pixel-ratio: 3 / 2),
+   all and (min--moz-device-pixel-ratio: 1.5),
+   all and (min-device-pixel-ratio: 1.5) {
  }
-+
-+@media all and (-webkit-min-device-pixel-ratio: 1.5), all and (-o-min-device-pixel-ratio: 3/2), all and (min--moz-device-pixel-ratio: 1.5), all and (min-device-pixel-ratio: 1.5) {}
 ```
 
 # Output
@@ -467,401 +271,81 @@ black
 }
 
 .screen-color {
-    @media screen {
-        color: green;
+  @media screen {
+    color: green;
 
-        @media (min-width: 768px) {
-            color: red;
-        }
+    @media (min-width: 768px) {
+      color: red;
     }
-    @media tv {
-        color: black;
-    }
+  }
+  @media tv {
+    color: black;
+  }
 }
 .screen-color {
-@media screen {
-color: green;
+  @media screen {
+    color: green;
 
-@media (min-width: 768px) {
-color: red;
-}
-}
-@media tv {
-color: black;
-}
-}
-.screen-color{
-    @media screen{
-        color: green;
-
-        @media (min-width: 768px){
-            color: red;
-        }
+    @media (min-width: 768px) {
+      color: red;
     }
-    @media tv{
-        color: black;
+  }
+  @media tv {
+    color: black;
+  }
+}
+.screen-color {
+  @media screen {
+    color: green;
+
+    @media (min-width: 768px) {
+      color: red;
     }
+  }
+  @media tv {
+    color: black;
+  }
 }
-.screen-color  {
-    @media screen  {
-        color: green;
+.screen-color {
+  @media screen {
+    color: green;
 
-        @media (min-width: 768px)  {
-            color: red;
-        }
+    @media (min-width: 768px) {
+      color: red;
     }
-    @media tv  {
-        color: black;
+  }
+  @media tv {
+    color: black;
+  }
+}
+.screen-color {
+  @media screen {
+    color: green;
+    @media (min-width: 768px) {
+      color: red;
     }
+  }
+  @media tv {
+    color: black;
+  }
 }
-.screen-color
-{
-@media
-screen
-{
-color
-:
-green
-;
-@media
-(
-min-width
-:
-768px
-)
-{
-color
-:
-red
-;
-}
-}
-@media
-tv
-{
-color
-:
-black
-;
-}
-}
-.screen-color
+.screen-color {
+  @media screen {
+    color: green;
 
-{
+    @media (min-width: 768px) {
+      color: red;
+    }
+  }
 
-@media
-
-screen
-
-{
-
-color
-
-:
-
-green
-
-;
-
-@media
-
-(
-
-min-width
-
-:
-
-768px
-
-)
-
-{
-
-color
-
-:
-
-red
-
-;
-
+  @media tv {
+    color: black;
+  }
 }
 
+@media all and (-webkit-min-device-pixel-ratio: 1.5),
+  all and (-o-min-device-pixel-ratio: 3 / 2),
+  all and (min--moz-device-pixel-ratio: 1.5),
+  all and (min-device-pixel-ratio: 1.5) {
 }
-
-@media
-
-tv
-
-{
-
-color
-
-:
-
-black
-
-;
-
-}
-
-}
-
-@media all and (-webkit-min-device-pixel-ratio: 1.5), all and (-o-min-device-pixel-ratio: 3/2), all and (min--moz-device-pixel-ratio: 1.5), all and (min-device-pixel-ratio: 1.5) {}
 ```
-
-# Errors
-```
-media.css:50:21 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `;`
-  
-    48 │ .screen-color {
-    49 │     @media screen {
-  > 50 │         color: green;
-       │                     ^
-    51 │ 
-    52 │         @media (min-width: 768px) {
-  
-  i Remove ;
-  
-media.css:53:23 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `;`
-  
-    52 │         @media (min-width: 768px) {
-  > 53 │             color: red;
-       │                       ^
-    54 │         }
-    55 │     }
-  
-  i Remove ;
-  
-media.css:57:21 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `;`
-  
-    55 │     }
-    56 │     @media tv {
-  > 57 │         color: black;
-       │                     ^
-    58 │     }
-    59 │ }
-  
-  i Remove ;
-  
-media.css:62:13 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `;`
-  
-    60 │ .screen-color {
-    61 │ @media screen {
-  > 62 │ color: green;
-       │             ^
-    63 │ 
-    64 │ @media (min-width: 768px) {
-  
-  i Remove ;
-  
-media.css:65:11 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `;`
-  
-    64 │ @media (min-width: 768px) {
-  > 65 │ color: red;
-       │           ^
-    66 │ }
-    67 │ }
-  
-  i Remove ;
-  
-media.css:69:13 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `;`
-  
-    67 │ }
-    68 │ @media tv {
-  > 69 │ color: black;
-       │             ^
-    70 │ }
-    71 │ }
-  
-  i Remove ;
-  
-media.css:74:21 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `;`
-  
-    72 │ .screen-color{
-    73 │     @media screen{
-  > 74 │         color: green;
-       │                     ^
-    75 │ 
-    76 │         @media (min-width: 768px){
-  
-  i Remove ;
-  
-media.css:77:23 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `;`
-  
-    76 │         @media (min-width: 768px){
-  > 77 │             color: red;
-       │                       ^
-    78 │         }
-    79 │     }
-  
-  i Remove ;
-  
-media.css:81:21 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `;`
-  
-    79 │     }
-    80 │     @media tv{
-  > 81 │         color: black;
-       │                     ^
-    82 │     }
-    83 │ }
-  
-  i Remove ;
-  
-media.css:86:21 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `;`
-  
-    84 │ .screen-color  {
-    85 │     @media screen  {
-  > 86 │         color: green;
-       │                     ^
-    87 │ 
-    88 │         @media (min-width: 768px)  {
-  
-  i Remove ;
-  
-media.css:89:23 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `;`
-  
-    88 │         @media (min-width: 768px)  {
-  > 89 │             color: red;
-       │                       ^
-    90 │         }
-    91 │     }
-  
-  i Remove ;
-  
-media.css:93:21 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `;`
-  
-    91 │     }
-    92 │     @media tv  {
-  > 93 │         color: black;
-       │                     ^
-    94 │     }
-    95 │ }
-  
-  i Remove ;
-  
-media.css:104:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `;`
-  
-    102 │ :
-    103 │ green
-  > 104 │ ;
-        │ ^
-    105 │ @media
-    106 │ (
-  
-  i Remove ;
-  
-media.css:115:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `;`
-  
-    113 │ :
-    114 │ red
-  > 115 │ ;
-        │ ^
-    116 │ }
-    117 │ }
-  
-  i Remove ;
-  
-media.css:124:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `;`
-  
-    122 │ :
-    123 │ black
-  > 124 │ ;
-        │ ^
-    125 │ }
-    126 │ }
-  
-  i Remove ;
-  
-media.css:143:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `;`
-  
-    141 │ green
-    142 │ 
-  > 143 │ ;
-        │ ^
-    144 │ 
-    145 │ @media
-  
-  i Remove ;
-  
-media.css:165:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `;`
-  
-    163 │ red
-    164 │ 
-  > 165 │ ;
-        │ ^
-    166 │ 
-    167 │ }
-  
-  i Remove ;
-  
-media.css:183:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `;`
-  
-    181 │ black
-    182 │ 
-  > 183 │ ;
-        │ ^
-    184 │ 
-    185 │ }
-  
-  i Remove ;
-  
-media.css:190:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `}` but instead the file ends
-  
-    189 │ @media all and (-webkit-min-device-pixel-ratio: 1.5), all and (-o-min-device-pixel-ratio: 3/2), all and (min--moz-device-pixel-ratio: 1.5), all and (min-device-pixel-ratio: 1.5) {}
-  > 190 │ 
-        │ 
-  
-  i the file ends here
-  
-    189 │ @media all and (-webkit-min-device-pixel-ratio: 1.5), all and (-o-min-device-pixel-ratio: 3/2), all and (min--moz-device-pixel-ratio: 1.5), all and (min-device-pixel-ratio: 1.5) {}
-  > 190 │ 
-        │ 
-  
-
-```
-
-# Lines exceeding max width of 80 characters
-```
-  195: @media all and (-webkit-min-device-pixel-ratio: 1.5), all and (-o-min-device-pixel-ratio: 3/2), all and (min--moz-device-pixel-ratio: 1.5), all and (min-device-pixel-ratio: 1.5) {}
-```
-
-

@@ -61,6 +61,10 @@ macro_rules! define_role {
                 }
                 None
             }
+
+            fn concepts_by_role<'a>(&self) -> ElementsAndAttributes<'a> {
+                Some(Self::CONCEPTS.iter())
+            }
         }
     };
 }

@@ -1,0 +1,19 @@
+a { padding: 10px; }
+
+a { padding: 10px; padding-left: 20px; }
+
+@media (color) { a { padding: 10px; padding-left: 20px; }}
+
+a { border-top-width: 1px; top: 0; bottom: 3px; border-bottom: 2px solid blue; }
+
+a { transition-property: opacity; } a { transition: opacity 1s linear; }
+
+a { -webkit-transition-property: opacity; transition: opacity 1s linear; }
+
+a { transition-property: opacity; -webkit-transition: opacity 1s linear; }
+
+a { border-block: 1px solid; border: 20px dashed black; }
+
+a { border-block-end: 1px solid; border: 20px dashed black; }
+
+a { border-block-start: 1px solid; border: 20px dashed black; }

@@ -1154,7 +1154,7 @@ fn is_poorly_breakable_member_or_call_chain(
     expression: &AnyJsExpression,
     f: &Formatter<JsFormatContext>,
 ) -> SyntaxResult<bool> {
-    let threshold = f.options().line_width().get() / 4;
+    let threshold = f.options().line_width().value() / 4;
 
     // Only call and member chains are poorly breakable
     // - `obj.member.prop`

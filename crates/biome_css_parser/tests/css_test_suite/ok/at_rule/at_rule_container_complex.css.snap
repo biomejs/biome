@@ -564,7 +564,7 @@ CssRoot {
                             l_paren_token: L_PAREN@633..634 "(" [] [],
                             query: CssDeclaration {
                                 property: CssGenericProperty {
-                                    name: CssIdentifier {
+                                    name: CssDashedIdentifier {
                                         value_token: IDENT@634..637 "--a" [] [],
                                     },
                                     colon_token: COLON@637..639 ":" [] [Whitespace(" ")],
@@ -630,7 +630,7 @@ CssRoot {
                             l_paren_token: L_PAREN@715..716 "(" [] [],
                             query: CssDeclaration {
                                 property: CssGenericProperty {
-                                    name: CssIdentifier {
+                                    name: CssDashedIdentifier {
                                         value_token: IDENT@716..719 "--a" [] [],
                                     },
                                     colon_token: COLON@719..721 ":" [] [Whitespace(" ")],
@@ -649,7 +649,7 @@ CssRoot {
                             l_paren_token: L_PAREN@731..732 "(" [] [],
                             query: CssDeclaration {
                                 property: CssGenericProperty {
-                                    name: CssIdentifier {
+                                    name: CssDashedIdentifier {
                                         value_token: IDENT@732..735 "--b" [] [],
                                     },
                                     colon_token: COLON@735..737 ":" [] [Whitespace(" ")],
@@ -688,7 +688,7 @@ CssRoot {
                             l_paren_token: L_PAREN@770..771 "(" [] [],
                             query: CssDeclaration {
                                 property: CssGenericProperty {
-                                    name: CssIdentifier {
+                                    name: CssDashedIdentifier {
                                         value_token: IDENT@771..774 "--a" [] [],
                                     },
                                     colon_token: COLON@774..776 ":" [] [Whitespace(" ")],
@@ -710,7 +710,7 @@ CssRoot {
                                     l_paren_token: L_PAREN@787..788 "(" [] [],
                                     query: CssDeclaration {
                                         property: CssGenericProperty {
-                                            name: CssIdentifier {
+                                            name: CssDashedIdentifier {
                                                 value_token: IDENT@788..791 "--b" [] [],
                                             },
                                             colon_token: COLON@791..793 ":" [] [Whitespace(" ")],
@@ -729,7 +729,7 @@ CssRoot {
                                     l_paren_token: L_PAREN@801..802 "(" [] [],
                                     query: CssDeclaration {
                                         property: CssGenericProperty {
-                                            name: CssIdentifier {
+                                            name: CssDashedIdentifier {
                                                 value_token: IDENT@802..805 "--c" [] [],
                                             },
                                             colon_token: COLON@805..807 ":" [] [Whitespace(" ")],
@@ -775,7 +775,7 @@ CssRoot {
                                     l_paren_token: L_PAREN@848..849 "(" [] [],
                                     query: CssDeclaration {
                                         property: CssGenericProperty {
-                                            name: CssIdentifier {
+                                            name: CssDashedIdentifier {
                                                 value_token: IDENT@849..852 "--b" [] [],
                                             },
                                             colon_token: COLON@852..854 ":" [] [Whitespace(" ")],
@@ -797,7 +797,7 @@ CssRoot {
                             l_paren_token: L_PAREN@863..864 "(" [] [],
                             query: CssDeclaration {
                                 property: CssGenericProperty {
-                                    name: CssIdentifier {
+                                    name: CssDashedIdentifier {
                                         value_token: IDENT@864..867 "--c" [] [],
                                     },
                                     colon_token: COLON@867..869 ":" [] [Whitespace(" ")],
@@ -840,7 +840,7 @@ CssRoot {
                                     l_paren_token: L_PAREN@909..910 "(" [] [],
                                     query: CssDeclaration {
                                         property: CssGenericProperty {
-                                            name: CssIdentifier {
+                                            name: CssDashedIdentifier {
                                                 value_token: IDENT@910..913 "--b" [] [],
                                             },
                                             colon_token: COLON@913..915 ":" [] [Whitespace(" ")],
@@ -866,7 +866,7 @@ CssRoot {
                                     l_paren_token: L_PAREN@929..930 "(" [] [],
                                     query: CssDeclaration {
                                         property: CssGenericProperty {
-                                            name: CssIdentifier {
+                                            name: CssDashedIdentifier {
                                                 value_token: IDENT@930..933 "--c" [] [],
                                             },
                                             colon_token: COLON@933..935 ":" [] [Whitespace(" ")],
@@ -912,7 +912,7 @@ CssRoot {
                                     l_paren_token: L_PAREN@976..977 "(" [] [],
                                     query: CssDeclaration {
                                         property: CssGenericProperty {
-                                            name: CssIdentifier {
+                                            name: CssDashedIdentifier {
                                                 value_token: IDENT@977..980 "--b" [] [],
                                             },
                                             colon_token: COLON@980..982 ":" [] [Whitespace(" ")],
@@ -941,7 +941,7 @@ CssRoot {
                                             l_paren_token: L_PAREN@997..998 "(" [] [],
                                             query: CssDeclaration {
                                                 property: CssGenericProperty {
-                                                    name: CssIdentifier {
+                                                    name: CssDashedIdentifier {
                                                         value_token: IDENT@998..1001 "--c" [] [],
                                                     },
                                                     colon_token: COLON@1001..1003 ":" [] [Whitespace(" ")],
@@ -1010,7 +1010,7 @@ CssRoot {
                                     l_paren_token: L_PAREN@1071..1072 "(" [] [],
                                     query: CssDeclaration {
                                         property: CssGenericProperty {
-                                            name: CssIdentifier {
+                                            name: CssDashedIdentifier {
                                                 value_token: IDENT@1072..1075 "--b" [] [],
                                             },
                                             colon_token: COLON@1075..1077 ":" [] [Whitespace(" ")],
@@ -1074,7 +1074,7 @@ CssRoot {
                                         l_paren_token: L_PAREN@1138..1139 "(" [] [],
                                         query: CssDeclaration {
                                             property: CssGenericProperty {
-                                                name: CssIdentifier {
+                                                name: CssDashedIdentifier {
                                                     value_token: IDENT@1139..1142 "--b" [] [],
                                                 },
                                                 colon_token: COLON@1142..1144 ":" [] [Whitespace(" ")],
@@ -1103,7 +1103,7 @@ CssRoot {
                                                 l_paren_token: L_PAREN@1159..1160 "(" [] [],
                                                 query: CssDeclaration {
                                                     property: CssGenericProperty {
-                                                        name: CssIdentifier {
+                                                        name: CssDashedIdentifier {
                                                             value_token: IDENT@1160..1163 "--c" [] [],
                                                         },
                                                         colon_token: COLON@1163..1165 ":" [] [Whitespace(" ")],
@@ -1639,7 +1639,7 @@ CssRoot {
               0: L_PAREN@633..634 "(" [] []
               1: CSS_DECLARATION@634..643
                 0: CSS_GENERIC_PROPERTY@634..643
-                  0: CSS_IDENTIFIER@634..637
+                  0: CSS_DASHED_IDENTIFIER@634..637
                     0: IDENT@634..637 "--a" [] []
                   1: COLON@637..639 ":" [] [Whitespace(" ")]
                   2: CSS_GENERIC_COMPONENT_VALUE_LIST@639..643
@@ -1685,7 +1685,7 @@ CssRoot {
               0: L_PAREN@715..716 "(" [] []
               1: CSS_DECLARATION@716..725
                 0: CSS_GENERIC_PROPERTY@716..725
-                  0: CSS_IDENTIFIER@716..719
+                  0: CSS_DASHED_IDENTIFIER@716..719
                     0: IDENT@716..719 "--a" [] []
                   1: COLON@719..721 ":" [] [Whitespace(" ")]
                   2: CSS_GENERIC_COMPONENT_VALUE_LIST@721..725
@@ -1698,7 +1698,7 @@ CssRoot {
               0: L_PAREN@731..732 "(" [] []
               1: CSS_DECLARATION@732..740
                 0: CSS_GENERIC_PROPERTY@732..740
-                  0: CSS_IDENTIFIER@732..735
+                  0: CSS_DASHED_IDENTIFIER@732..735
                     0: IDENT@732..735 "--b" [] []
                   1: COLON@735..737 ":" [] [Whitespace(" ")]
                   2: CSS_GENERIC_COMPONENT_VALUE_LIST@737..740
@@ -1725,7 +1725,7 @@ CssRoot {
               0: L_PAREN@770..771 "(" [] []
               1: CSS_DECLARATION@771..780
                 0: CSS_GENERIC_PROPERTY@771..780
-                  0: CSS_IDENTIFIER@771..774
+                  0: CSS_DASHED_IDENTIFIER@771..774
                     0: IDENT@771..774 "--a" [] []
                   1: COLON@774..776 ":" [] [Whitespace(" ")]
                   2: CSS_GENERIC_COMPONENT_VALUE_LIST@776..780
@@ -1741,7 +1741,7 @@ CssRoot {
                   0: L_PAREN@787..788 "(" [] []
                   1: CSS_DECLARATION@788..796
                     0: CSS_GENERIC_PROPERTY@788..796
-                      0: CSS_IDENTIFIER@788..791
+                      0: CSS_DASHED_IDENTIFIER@788..791
                         0: IDENT@788..791 "--b" [] []
                       1: COLON@791..793 ":" [] [Whitespace(" ")]
                       2: CSS_GENERIC_COMPONENT_VALUE_LIST@793..796
@@ -1754,7 +1754,7 @@ CssRoot {
                   0: L_PAREN@801..802 "(" [] []
                   1: CSS_DECLARATION@802..812
                     0: CSS_GENERIC_PROPERTY@802..812
-                      0: CSS_IDENTIFIER@802..805
+                      0: CSS_DASHED_IDENTIFIER@802..805
                         0: IDENT@802..805 "--c" [] []
                       1: COLON@805..807 ":" [] [Whitespace(" ")]
                       2: CSS_GENERIC_COMPONENT_VALUE_LIST@807..812
@@ -1786,7 +1786,7 @@ CssRoot {
                   0: L_PAREN@848..849 "(" [] []
                   1: CSS_DECLARATION@849..857
                     0: CSS_GENERIC_PROPERTY@849..857
-                      0: CSS_IDENTIFIER@849..852
+                      0: CSS_DASHED_IDENTIFIER@849..852
                         0: IDENT@849..852 "--b" [] []
                       1: COLON@852..854 ":" [] [Whitespace(" ")]
                       2: CSS_GENERIC_COMPONENT_VALUE_LIST@854..857
@@ -1800,7 +1800,7 @@ CssRoot {
               0: L_PAREN@863..864 "(" [] []
               1: CSS_DECLARATION@864..874
                 0: CSS_GENERIC_PROPERTY@864..874
-                  0: CSS_IDENTIFIER@864..867
+                  0: CSS_DASHED_IDENTIFIER@864..867
                     0: IDENT@864..867 "--c" [] []
                   1: COLON@867..869 ":" [] [Whitespace(" ")]
                   2: CSS_GENERIC_COMPONENT_VALUE_LIST@869..874
@@ -1831,7 +1831,7 @@ CssRoot {
                   0: L_PAREN@909..910 "(" [] []
                   1: CSS_DECLARATION@910..918
                     0: CSS_GENERIC_PROPERTY@910..918
-                      0: CSS_IDENTIFIER@910..913
+                      0: CSS_DASHED_IDENTIFIER@910..913
                         0: IDENT@910..913 "--b" [] []
                       1: COLON@913..915 ":" [] [Whitespace(" ")]
                       2: CSS_GENERIC_COMPONENT_VALUE_LIST@915..918
@@ -1849,7 +1849,7 @@ CssRoot {
                   0: L_PAREN@929..930 "(" [] []
                   1: CSS_DECLARATION@930..940
                     0: CSS_GENERIC_PROPERTY@930..940
-                      0: CSS_IDENTIFIER@930..933
+                      0: CSS_DASHED_IDENTIFIER@930..933
                         0: IDENT@930..933 "--c" [] []
                       1: COLON@933..935 ":" [] [Whitespace(" ")]
                       2: CSS_GENERIC_COMPONENT_VALUE_LIST@935..940
@@ -1881,7 +1881,7 @@ CssRoot {
                   0: L_PAREN@976..977 "(" [] []
                   1: CSS_DECLARATION@977..985
                     0: CSS_GENERIC_PROPERTY@977..985
-                      0: CSS_IDENTIFIER@977..980
+                      0: CSS_DASHED_IDENTIFIER@977..980
                         0: IDENT@977..980 "--b" [] []
                       1: COLON@980..982 ":" [] [Whitespace(" ")]
                       2: CSS_GENERIC_COMPONENT_VALUE_LIST@982..985
@@ -1902,7 +1902,7 @@ CssRoot {
                       0: L_PAREN@997..998 "(" [] []
                       1: CSS_DECLARATION@998..1008
                         0: CSS_GENERIC_PROPERTY@998..1008
-                          0: CSS_IDENTIFIER@998..1001
+                          0: CSS_DASHED_IDENTIFIER@998..1001
                             0: IDENT@998..1001 "--c" [] []
                           1: COLON@1001..1003 ":" [] [Whitespace(" ")]
                           2: CSS_GENERIC_COMPONENT_VALUE_LIST@1003..1008
@@ -1949,7 +1949,7 @@ CssRoot {
                   0: L_PAREN@1071..1072 "(" [] []
                   1: CSS_DECLARATION@1072..1080
                     0: CSS_GENERIC_PROPERTY@1072..1080
-                      0: CSS_IDENTIFIER@1072..1075
+                      0: CSS_DASHED_IDENTIFIER@1072..1075
                         0: IDENT@1072..1075 "--b" [] []
                       1: COLON@1075..1077 ":" [] [Whitespace(" ")]
                       2: CSS_GENERIC_COMPONENT_VALUE_LIST@1077..1080
@@ -1994,7 +1994,7 @@ CssRoot {
                     0: L_PAREN@1138..1139 "(" [] []
                     1: CSS_DECLARATION@1139..1147
                       0: CSS_GENERIC_PROPERTY@1139..1147
-                        0: CSS_IDENTIFIER@1139..1142
+                        0: CSS_DASHED_IDENTIFIER@1139..1142
                           0: IDENT@1139..1142 "--b" [] []
                         1: COLON@1142..1144 ":" [] [Whitespace(" ")]
                         2: CSS_GENERIC_COMPONENT_VALUE_LIST@1144..1147
@@ -2015,7 +2015,7 @@ CssRoot {
                         0: L_PAREN@1159..1160 "(" [] []
                         1: CSS_DECLARATION@1160..1170
                           0: CSS_GENERIC_PROPERTY@1160..1170
-                            0: CSS_IDENTIFIER@1160..1163
+                            0: CSS_DASHED_IDENTIFIER@1160..1163
                               0: IDENT@1160..1163 "--c" [] []
                             1: COLON@1163..1165 ":" [] [Whitespace(" ")]
                             2: CSS_GENERIC_COMPONENT_VALUE_LIST@1165..1170

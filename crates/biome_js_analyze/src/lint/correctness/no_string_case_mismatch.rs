@@ -89,14 +89,17 @@ impl Rule for NoStringCaseMismatch {
 
     fn action(ctx: &RuleContext<Self>, state: &Self::State) -> Option<JsRuleAction> {
         let mut mutation = ctx.root().begin();
+        let expected_value = state
+            .expected_case
+            .convert(state.literal.as_static_value()?.text());
         mutation.replace_node(
             state.literal.clone(),
             AnyJsExpression::AnyJsLiteralExpression(
                 AnyJsLiteralExpression::JsStringLiteralExpression(
                     make::js_string_literal_expression(if ctx.as_preferred_quote().is_double() {
-                        make::js_string_literal(&state.expected_value)
+                        make::js_string_literal(&expected_value)
                     } else {
-                        make::js_string_literal_single_quotes(&state.expected_value)
+                        make::js_string_literal_single_quotes(&expected_value)
                     }),
                 ),
             ),
@@ -115,8 +118,7 @@ declare_node_union! {
 }
 
 pub struct CaseMismatchInfo {
-    expected_case: ExpectedStringCase,
-    expected_value: String,
+    expected_case: StringCase,
     call: JsCallExpression,
     literal: AnyJsExpression,
 }
@@ -155,29 +157,26 @@ impl CaseMismatchInfo {
     }
 
     fn compare_call_with_literal(call: JsCallExpression, literal: AnyJsExpression) -> Option<Self> {
-        let expected_case = ExpectedStringCase::from_call(&call)?;
-        let static_value = literal.as_static_value()?;
-        let literal_value = static_value.text();
-        let expected_value = expected_case.convert(literal_value);
-        if literal_value != expected_value {
-            Some(Self {
-                expected_case,
-                expected_value,
-                call,
-                literal,
-            })
-        } else {
-            None
-        }
+        let expected_case = StringCase::from_call(&call)?;
+        let value = literal.as_static_value()?;
+        let literal_value = value.text();
+        let mut case_iter = CharCaseIterator::from(literal_value);
+        let is_mismatch = case_iter.any(|case| case != expected_case);
+        is_mismatch.then_some(Self {
+            expected_case,
+            call,
+            literal,
+        })
     }
 }
 
-enum ExpectedStringCase {
+#[derive(Debug, Eq, PartialEq)]
+enum StringCase {
     Upper,
     Lower,
 }
 
-impl ExpectedStringCase {
+impl StringCase {
     fn from_call(call: &JsCallExpression) -> Option<Self> {
         if call.arguments().ok()?.args().len() != 0 {
             return None;
@@ -197,15 +196,66 @@ impl ExpectedStringCase {
 
     fn convert(&self, s: &str) -> String {
         match self {
-            ExpectedStringCase::Upper => s.to_uppercase(),
-            ExpectedStringCase::Lower => s.to_lowercase(),
+            StringCase::Upper => s.to_uppercase(),
+            StringCase::Lower => s.to_lowercase(),
         }
     }
 
     fn description(&self) -> &str {
         match self {
-            ExpectedStringCase::Upper => "upper case",
-            ExpectedStringCase::Lower => "lower case",
+            StringCase::Upper => "upper case",
+            StringCase::Lower => "lower case",
         }
+    }
+}
+
+struct CharCaseIterator<'a> {
+    iter: std::str::Chars<'a>,
+}
+impl<'a> CharCaseIterator<'a> {
+    fn from(s: &'a str) -> Self {
+        CharCaseIterator { iter: s.chars() }
+    }
+}
+impl<'a> Iterator for CharCaseIterator<'a> {
+    type Item = StringCase;
+    fn next(&mut self) -> Option<Self::Item> {
+        while let Some(c) = self.iter.next() {
+            match c {
+                '\\' => {
+                    match self.iter.next()? {
+                        'x' => {
+                            // \xHH
+                            self.iter.next();
+                            self.iter.next();
+                        }
+                        'u' => {
+                            if self.iter.next()? == '{' {
+                                // \u{H}, \u{HH}, ..., \u{HHHHHH}
+                                while self.iter.next()? != '}' {}
+                            } else {
+                                // \uHHHH
+                                self.iter.next();
+                                self.iter.next();
+                                self.iter.next();
+                                self.iter.next();
+                            }
+                        }
+                        _ => {
+                            // \n, ...
+                            self.iter.next();
+                        }
+                    }
+                }
+                c => {
+                    if c.is_uppercase() {
+                        return Some(StringCase::Upper);
+                    } else if c.is_lowercase() {
+                        return Some(StringCase::Lower);
+                    }
+                }
+            }
+        }
+        None
     }
 }

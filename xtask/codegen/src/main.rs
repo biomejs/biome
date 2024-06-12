@@ -25,8 +25,8 @@ use crate::promote_rule::promote_rule;
 
 use xtask::Mode::Overwrite;
 use xtask_codegen::{
-    generate_analyzer, generate_ast, generate_crate, generate_formatters, generate_new_lintrule,
-    generate_parser_tests, generate_tables, task_command, TaskCommand,
+    generate_analyzer, generate_ast, generate_crate, generate_formatters,
+    generate_new_analyzer_rule, generate_parser_tests, generate_tables, task_command, TaskCommand,
 };
 
 fn main() -> Result<()> {
@@ -69,8 +69,12 @@ fn main() -> Result<()> {
         TaskCommand::Unicode => {
             generate_tables()?;
         }
-        TaskCommand::NewLintRule(new_rule_kind, rule_name) => {
-            generate_new_lintrule(new_rule_kind, &rule_name);
+        TaskCommand::NewRule {
+            category,
+            name,
+            kind,
+        } => {
+            generate_new_analyzer_rule(kind, category, &name);
         }
         TaskCommand::PromoteRule { name, group } => {
             promote_rule(&name, &group);

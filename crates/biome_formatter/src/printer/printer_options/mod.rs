@@ -112,7 +112,7 @@ impl PrinterOptions {
 impl Default for PrinterOptions {
     fn default() -> Self {
         PrinterOptions {
-            indent_width: 2.into(),
+            indent_width: IndentWidth::default(),
             print_width: PrintWidth::default(),
             indent_style: Default::default(),
             line_ending: LineEnding::Lf,

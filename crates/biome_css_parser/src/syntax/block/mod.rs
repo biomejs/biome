@@ -1,3 +1,4 @@
+mod conditional_block;
 mod declaration_block;
 mod declaration_or_at_rule_list_block;
 mod declaration_or_rule_list_block;
@@ -10,6 +11,7 @@ use biome_parser::diagnostic::{expected_node, ParseDiagnostic};
 use biome_parser::{CompletedMarker, Parser};
 use biome_rowan::TextRange;
 
+pub(crate) use conditional_block::parse_conditional_block;
 pub(crate) use declaration_block::parse_declaration_block;
 pub(crate) use declaration_or_at_rule_list_block::parse_declaration_or_at_rule_list_block;
 pub(crate) use declaration_or_rule_list_block::parse_declaration_or_rule_list_block;

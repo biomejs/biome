@@ -61,7 +61,7 @@ declare_rule! {
     /// - [Wikipedia definition](https://en.wikipedia.org/wiki/Yoda_conditions)
     ///
     pub NoYodaExpression {
-        version: "next",
+        version: "1.8.0",
         name: "noYodaExpression",
         language: "js",
         sources: &[RuleSource::Eslint("yoda")],

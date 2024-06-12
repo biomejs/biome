@@ -2,6 +2,7 @@ use crate::cli_options::CliOptions;
 use crate::commands::{
     get_files_to_process, get_stdin, resolve_manifest, validate_configuration_diagnostics,
 };
+use crate::execute::VcsTargeted;
 use crate::{
     execute_mode, setup_cli_subscriber, CliDiagnostic, CliSession, Execution, TraversalMode,
 };
@@ -54,7 +55,7 @@ pub(crate) fn lint(session: CliSession, payload: LintCommandPayload) -> Result<(
         unsafe_,
         cli_options,
         mut linter_configuration,
-        mut paths,
+        paths,
         only,
         skip,
         stdin_file_path,
@@ -128,16 +129,13 @@ pub(crate) fn lint(session: CliSession, payload: LintCommandPayload) -> Result<(
         json.linter.merge_with(json_linter);
     }
 
+    let vcs_targeted_paths =
+        get_files_to_process(since, changed, staged, &session.app.fs, &fs_configuration)?;
+
     // check if support of git ignore files is enabled
     let vcs_base_path = configuration_path.or(session.app.fs.working_directory());
     let (vcs_base_path, gitignore_matches) =
         fs_configuration.retrieve_gitignore_matches(&session.app.fs, vcs_base_path.as_deref())?;
-
-    if let Some(_paths) =
-        get_files_to_process(since, changed, staged, &session.app.fs, &fs_configuration)?
-    {
-        paths = _paths;
-    }
 
     let stdin = get_stdin(stdin_file_path, &mut *session.app.console, "lint")?;
 
@@ -165,10 +163,11 @@ pub(crate) fn lint(session: CliSession, payload: LintCommandPayload) -> Result<(
             stdin,
             only,
             skip,
+            vcs_targeted: VcsTargeted { staged, changed },
         })
         .set_report(&cli_options),
         session,
         &cli_options,
-        paths,
+        vcs_targeted_paths.unwrap_or(paths),
     )
 }

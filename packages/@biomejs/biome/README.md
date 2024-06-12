@@ -60,7 +60,7 @@ npx @biomejs/biome format --write ./src
 npx @biomejs/biome lint ./src
 
 # run format, lint, etc. and apply the safe suggestions
-npx @biomejs/biome check --apply ./src
+npx @biomejs/biome check --write ./src
 
 # check all files against format, lint, etc. in CI environments
 npx @biomejs/biome ci ./src

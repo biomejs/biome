@@ -1,0 +1,28 @@
+a { grid-template-areas: "" }
+a { grid-template-areas: "a a"
+                         "b b b"; }
+a { grid-template-areas: "b b b"
+                         ""; }
+a { grid-template-areas: "a a a"
+                         "a b a"; }
+a { grid-template-areas: "a a a"
+                         "b b b"
+                         "c c c"
+                         "g g g"
+                         "z y a"; }
+a { grid-template-areas: "a a a"
+                         "b b b"; }
+a { grid-template-areas: "a a a"
+                         "a . a"; }
+a { grid-template-areas: "o o o ,"
+                         "p , p p"
+                         "q q , q"; }
+a { grid-template-areas: "s s t t"
+                         "s s t t"
+                         "u v v"
+                         "u u v v"; }
+a { grid-template-areas: "a a a"
+                         "b z a"; }
+a { grid-template-areas: "a a a"
+                         "g f f"
+                         "b z a"; }

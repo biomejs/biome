@@ -2,6 +2,7 @@ use crate::cli_options::CliOptions;
 use crate::commands::{
     get_files_to_process, get_stdin, resolve_manifest, validate_configuration_diagnostics,
 };
+use crate::execute::VcsTargeted;
 use crate::{
     execute_mode, setup_cli_subscriber, CliDiagnostic, CliSession, Execution, TraversalMode,
 };
@@ -51,7 +52,7 @@ pub(crate) fn check(
         unsafe_,
         cli_options,
         configuration,
-        mut paths,
+        paths,
         stdin_file_path,
         linter_enabled,
         organize_imports_enabled,
@@ -151,11 +152,8 @@ pub(crate) fn check(
 
     let stdin = get_stdin(stdin_file_path, &mut *session.app.console, "check")?;
 
-    if let Some(_paths) =
-        get_files_to_process(since, changed, staged, &session.app.fs, &fs_configuration)?
-    {
-        paths = _paths;
-    }
+    let vcs_targeted_paths =
+        get_files_to_process(since, changed, staged, &session.app.fs, &fs_configuration)?;
 
     session
         .app
@@ -179,10 +177,11 @@ pub(crate) fn check(
         Execution::new(TraversalMode::Check {
             fix_file_mode,
             stdin,
+            vcs_targeted: VcsTargeted { staged, changed },
         })
         .set_report(&cli_options),
         session,
         &cli_options,
-        paths,
+        vcs_targeted_paths.unwrap_or(paths),
     )
 }

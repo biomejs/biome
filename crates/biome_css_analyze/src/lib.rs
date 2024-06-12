@@ -158,12 +158,30 @@ mod tests {
             String::from_utf8(buffer).unwrap()
         }
 
-        const SOURCE: &str = r#"@font-face { font-family: Gentium; }"#;
+        const SOURCE: &str = r#"
+        /* valid */
+        a:hover {}
+        :not(p) {}
+        a:before { }
+        input:not([type='submit'])
+        :root { }
+        :--heading { }
+        :popover-open {}
+        .test::-webkit-scrollbar-button:horizontal:decrement {}
+        @page :first { }
+       
+        /* invalid */
+        a:unknown { }
+        a:pseudo-class { }
+        body:not(div):noot(span) {}
+        :first { }
+        @page :blank:unknown { }
+        "#;
 
         let parsed = parse_css(SOURCE, CssParserOptions::default());
 
         let mut error_ranges: Vec<TextRange> = Vec::new();
-        let rule_filter = RuleFilter::Rule("nursery", "noMissingGenericFamilyKeyword");
+        let rule_filter = RuleFilter::Rule("nursery", "noUnknownPseudoClassSelector");
         let options = AnalyzerOptions::default();
         analyze(
             &parsed.tree(),

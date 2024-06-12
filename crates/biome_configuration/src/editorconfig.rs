@@ -13,7 +13,7 @@ use std::{collections::HashMap, str::FromStr};
 
 use biome_deserialize::StringSet;
 use biome_diagnostics::{adapters::IniError, Error};
-use biome_formatter::{LineEnding, LineWidth};
+use biome_formatter::{IndentWidth, LineEnding, LineWidth};
 use indexmap::IndexSet;
 use serde::{Deserialize, Deserializer};
 
@@ -83,8 +83,8 @@ impl EditorConfig {
 #[serde(default)]
 pub struct EditorConfigOptions {
     indent_style: Option<PlainIndentStyle>,
-    #[serde(deserialize_with = "deserialize_optional_u8_from_string")]
-    indent_size: Option<u8>,
+    #[serde(deserialize_with = "deserialize_optional_indent_width_from_string")]
+    indent_size: Option<IndentWidth>,
     end_of_line: Option<LineEnding>,
     #[serde(deserialize_with = "deserialize_optional_line_width_from_string")]
     max_line_length: Option<LineWidth>,
@@ -146,17 +146,16 @@ where
     deserialize_bool_from_string(deserializer).map(Some)
 }
 
-fn deserialize_optional_u8_from_string<'de, D>(deserializer: D) -> Result<Option<u8>, D::Error>
+fn deserialize_optional_indent_width_from_string<'de, D>(
+    deserializer: D,
+) -> Result<Option<IndentWidth>, D::Error>
 where
     D: Deserializer<'de>,
 {
     let s = String::deserialize(deserializer)?;
-    match s.parse() {
-        Ok(n) => Ok(Some(n)),
-        Err(_) => Err(serde::de::Error::custom(
-            "expected a number between 0 and 255",
-        )),
-    }
+    IndentWidth::from_str(s.as_str())
+        .map_err(serde::de::Error::custom)
+        .map(Some)
 }
 
 fn deserialize_optional_line_width_from_string<'de, D>(
@@ -225,20 +224,20 @@ root = true
 
 [*]
 insert_final_newline = true
-end_of_line = lf
-indent_style = tab
+end_of_line = crlf
+indent_style = space
 indent_size = 4
-max_line_length = 120
+max_line_length = 80
 "#;
 
         let conf = parse_str(input).expect("Failed to parse editorconfig");
         let (conf, _) = conf.to_biome();
         let conf = conf.expect("Failed to convert editorconfig to biome");
         let formatter = conf.formatter.expect("Formatter not set");
-        assert_eq!(formatter.indent_style, Some(PlainIndentStyle::Tab));
-        assert_eq!(formatter.indent_width, Some(4));
-        assert_eq!(formatter.line_ending, Some(LineEnding::Lf));
-        assert_eq!(formatter.line_width.map(|v| v.get()), Some(120));
+        assert_eq!(formatter.indent_style, Some(PlainIndentStyle::Space));
+        assert_eq!(formatter.indent_width.unwrap().value(), 4);
+        assert_eq!(formatter.line_ending, Some(LineEnding::Crlf));
+        assert_eq!(formatter.line_width.map(|v| v.value()), Some(80));
     }
 
     #[test]

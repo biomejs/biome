@@ -174,3 +174,112 @@ article {
 		}
 	}
 }
+
+/*should be without whitespace*/
+
+.container {
+	&.child {
+		color: blue;
+	}
+}
+.container {&:child {
+	color: blue;
+}
+}
+
+.container {&|d {
+	color: blue;
+}
+}
+
+.container {&* {
+	color: blue;
+}
+}
+
+.container {&*
+.selector{
+	color: blue;
+}
+}
+
+/*should keep whitespace*/
+
+.container {
+	& .child {
+		color: blue;
+	}
+}
+
+.container {
+	&
+	.child {
+		color: blue;
+	}
+}
+
+.container {& :child {
+	color: blue;
+}
+}
+
+.container {&
+:child {
+		color: blue;
+	}
+}
+
+.container {&
+.child {
+		color: blue;
+	}
+}
+
+.container {& .child {
+	color: blue;
+}
+}
+
+.container {&
+|d {
+		color: blue;
+	}
+}
+
+.container {& |d {
+	color: blue;
+}
+}
+
+.container {&
+div {
+		color: blue;
+	}
+}
+
+.container {& div {
+	color: blue;
+}
+}
+
+.container {&
+* {
+		color: blue;
+	}
+}
+
+.container {& * {
+	color: blue;
+}
+}
+
+.container {&
+[lang=ru] {
+	color: blue;
+}
+}
+
+.container {& [lang=ru] {
+	color: blue;
+}
+}

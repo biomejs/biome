@@ -1,5 +1,5 @@
 use crate::prelude::*;
-use biome_css_syntax::{AnyCssDeclarationName, CssFunction, CssLanguage, TextLen};
+use biome_css_syntax::{AnyCssDeclarationName, CssFunction, CssIdentifier, CssLanguage, TextLen};
 use biome_diagnostics::category;
 use biome_formatter::comments::{
     is_doc_comment, CommentKind, CommentPlacement, CommentStyle, CommentTextPosition, Comments,
@@ -123,7 +123,7 @@ fn handle_function_comment(
     };
 
     let is_inside_function = CssFunction::can_cast(comment.enclosing_node().kind());
-    let is_after_name = AnyCssDeclarationName::can_cast(preceding_node.kind());
+    let is_after_name = CssIdentifier::can_cast(preceding_node.kind());
     if is_inside_function && is_after_name {
         CommentPlacement::leading(following_node.clone(), comment)
     } else {

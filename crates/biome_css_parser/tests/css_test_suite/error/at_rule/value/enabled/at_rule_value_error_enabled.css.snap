@@ -1,0 +1,110 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```css
+@value ;
+@value f from ;
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    rules: CssRuleList [
+        CssAtRule {
+            at_token: AT@0..1 "@" [] [],
+            rule: CssValueAtRule {
+                value_token: VALUE_KW@1..7 "value" [] [Whitespace(" ")],
+                clause: missing (required),
+                semicolon_token: SEMICOLON@7..8 ";" [] [],
+            },
+        },
+        CssAtRule {
+            at_token: AT@8..10 "@" [Newline("\n")] [],
+            rule: CssValueAtRule {
+                value_token: VALUE_KW@10..16 "value" [] [Whitespace(" ")],
+                clause: CssValueAtRuleImportClause {
+                    specifiers: CssValueAtRuleImportSpecifierList [
+                        CssValueAtRuleImportSpecifier {
+                            name: CssIdentifier {
+                                value_token: IDENT@16..18 "f" [] [Whitespace(" ")],
+                            },
+                        },
+                    ],
+                    from_token: FROM_KW@18..23 "from" [] [Whitespace(" ")],
+                    source: missing (required),
+                },
+                semicolon_token: SEMICOLON@23..24 ";" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@24..25 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..25
+  0: (empty)
+  1: CSS_RULE_LIST@0..24
+    0: CSS_AT_RULE@0..8
+      0: AT@0..1 "@" [] []
+      1: CSS_VALUE_AT_RULE@1..8
+        0: VALUE_KW@1..7 "value" [] [Whitespace(" ")]
+        1: (empty)
+        2: SEMICOLON@7..8 ";" [] []
+    1: CSS_AT_RULE@8..24
+      0: AT@8..10 "@" [Newline("\n")] []
+      1: CSS_VALUE_AT_RULE@10..24
+        0: VALUE_KW@10..16 "value" [] [Whitespace(" ")]
+        1: CSS_VALUE_AT_RULE_IMPORT_CLAUSE@16..23
+          0: CSS_VALUE_AT_RULE_IMPORT_SPECIFIER_LIST@16..18
+            0: CSS_VALUE_AT_RULE_IMPORT_SPECIFIER@16..18
+              0: CSS_IDENTIFIER@16..18
+                0: IDENT@16..18 "f" [] [Whitespace(" ")]
+          1: FROM_KW@18..23 "from" [] [Whitespace(" ")]
+          2: (empty)
+        2: SEMICOLON@23..24 ";" [] []
+  2: EOF@24..25 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+at_rule_value_error_enabled.css:1:8 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+  > 1 │ @value ;
+      │        ^
+    2 │ @value f from ;
+    3 │ 
+  
+  i Expected one of:
+  
+  - declaration at rule clause
+  - import at rule clause
+  
+at_rule_value_error_enabled.css:2:15 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+    1 │ @value ;
+  > 2 │ @value f from ;
+      │               ^
+    3 │ 
+  
+  i Expected one of:
+  
+  - identifier
+  - string
+  
+```

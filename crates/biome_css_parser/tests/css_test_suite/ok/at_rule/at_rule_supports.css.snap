@@ -340,20 +340,23 @@ CssRoot {
                                         },
                                     },
                                 ],
-                                block: CssRuleBlock {
+                                block: CssDeclarationOrRuleBlock {
                                     l_curly_token: L_CURLY@151..152 "{" [] [],
-                                    rules: CssRuleList [
-                                        CssQualifiedRule {
-                                            prelude: CssSelectorList [
-                                                CssCompoundSelector {
-                                                    nesting_selector_token: missing (optional),
-                                                    simple_selector: CssTypeSelector {
-                                                        namespace: missing (optional),
-                                                        ident: CssIdentifier {
-                                                            value_token: IDENT@152..163 "article" [Newline("\n"), Whitespace("\t\t")] [Whitespace(" ")],
+                                    items: CssDeclarationOrRuleList [
+                                        CssNestedQualifiedRule {
+                                            prelude: CssRelativeSelectorList [
+                                                CssRelativeSelector {
+                                                    combinator: missing (optional),
+                                                    selector: CssCompoundSelector {
+                                                        nesting_selector_token: missing (optional),
+                                                        simple_selector: CssTypeSelector {
+                                                            namespace: missing (optional),
+                                                            ident: CssIdentifier {
+                                                                value_token: IDENT@152..163 "article" [Newline("\n"), Whitespace("\t\t")] [Whitespace(" ")],
+                                                            },
                                                         },
+                                                        sub_selectors: CssSubSelectorList [],
                                                     },
-                                                    sub_selectors: CssSubSelectorList [],
                                                 },
                                             ],
                                             block: CssDeclarationOrRuleBlock {
@@ -2301,7 +2304,7 @@ CssRoot {
                     l_paren_token: L_PAREN@2191..2192 "(" [] [],
                     declaration: CssDeclaration {
                         property: CssGenericProperty {
-                            name: CssIdentifier {
+                            name: CssDashedIdentifier {
                                 value_token: IDENT@2192..2197 "--foo" [] [],
                             },
                             colon_token: COLON@2197..2199 ":" [] [Whitespace(" ")],
@@ -3215,7 +3218,7 @@ CssRoot {
                     l_paren_token: L_PAREN@2939..2943 "(" [] [Whitespace("   ")],
                     declaration: CssDeclaration {
                         property: CssGenericProperty {
-                            name: CssIdentifier {
+                            name: CssDashedIdentifier {
                                 value_token: IDENT@2943..2948 "--var" [] [],
                             },
                             colon_token: COLON@2948..2952 ":" [] [Whitespace("   ")],
@@ -3524,18 +3527,20 @@ CssRoot {
                           0: CSS_NUMBER_LITERAL@144..147 "900" [] []
                           1: IDENT@147..149 "px" [] []
                       2: R_PAREN@149..151 ")" [] [Whitespace(" ")]
-                2: CSS_RULE_BLOCK@151..189
+                2: CSS_DECLARATION_OR_RULE_BLOCK@151..189
                   0: L_CURLY@151..152 "{" [] []
-                  1: CSS_RULE_LIST@152..186
-                    0: CSS_QUALIFIED_RULE@152..186
-                      0: CSS_SELECTOR_LIST@152..163
-                        0: CSS_COMPOUND_SELECTOR@152..163
+                  1: CSS_DECLARATION_OR_RULE_LIST@152..186
+                    0: CSS_NESTED_QUALIFIED_RULE@152..186
+                      0: CSS_RELATIVE_SELECTOR_LIST@152..163
+                        0: CSS_RELATIVE_SELECTOR@152..163
                           0: (empty)
-                          1: CSS_TYPE_SELECTOR@152..163
+                          1: CSS_COMPOUND_SELECTOR@152..163
                             0: (empty)
-                            1: CSS_IDENTIFIER@152..163
-                              0: IDENT@152..163 "article" [Newline("\n"), Whitespace("\t\t")] [Whitespace(" ")]
-                          2: CSS_SUB_SELECTOR_LIST@163..163
+                            1: CSS_TYPE_SELECTOR@152..163
+                              0: (empty)
+                              1: CSS_IDENTIFIER@152..163
+                                0: IDENT@152..163 "article" [Newline("\n"), Whitespace("\t\t")] [Whitespace(" ")]
+                            2: CSS_SUB_SELECTOR_LIST@163..163
                       1: CSS_DECLARATION_OR_RULE_BLOCK@163..186
                         0: L_CURLY@163..164 "{" [] []
                         1: CSS_DECLARATION_OR_RULE_LIST@164..182
@@ -4830,7 +4835,7 @@ CssRoot {
           0: L_PAREN@2191..2192 "(" [] []
           1: CSS_DECLARATION@2192..2204
             0: CSS_GENERIC_PROPERTY@2192..2204
-              0: CSS_IDENTIFIER@2192..2197
+              0: CSS_DASHED_IDENTIFIER@2192..2197
                 0: IDENT@2192..2197 "--foo" [] []
               1: COLON@2197..2199 ":" [] [Whitespace(" ")]
               2: CSS_GENERIC_COMPONENT_VALUE_LIST@2199..2204
@@ -5439,7 +5444,7 @@ CssRoot {
           0: L_PAREN@2939..2943 "(" [] [Whitespace("   ")]
           1: CSS_DECLARATION@2943..2961
             0: CSS_GENERIC_PROPERTY@2943..2961
-              0: CSS_IDENTIFIER@2943..2948
+              0: CSS_DASHED_IDENTIFIER@2943..2948
                 0: IDENT@2943..2948 "--var" [] []
               1: COLON@2948..2952 ":" [] [Whitespace("   ")]
               2: CSS_GENERIC_COMPONENT_VALUE_LIST@2952..2961

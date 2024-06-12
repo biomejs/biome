@@ -58,7 +58,7 @@ npx @biomejs/biome format --write ./src
 npx @biomejs/biome lint ./src
 
 # format、lintなどを実行し、安全な提案を適用する
-npx @biomejs/biome check --apply ./src
+npx @biomejs/biome check --write ./src
 
 # CI環境では、すべてのファイルを対象にformatやlintをチェックする
 npx @biomejs/biome ci ./src

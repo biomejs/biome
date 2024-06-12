@@ -2,7 +2,6 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: css/front-matter/custom-parser.css
 ---
-
 # Input
 
 ```css
@@ -69,34 +68,9 @@ custom-parser.css:1:1 parse ━━━━━━━━━━━━━━━━━�
     2 │ title: Title
     3 │ description: Description
   
-custom-parser.css:2:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `title`
-  
-    1 │ ---mycustomparser
-  > 2 │ title: Title
-      │ ^^^^^
-    3 │ description: Description
-    4 │ ---
-  
-  i Remove title
-  
-custom-parser.css:3:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `description`
-  
-    1 │ ---mycustomparser
-    2 │ title: Title
-  > 3 │ description: Description
-      │ ^^^^^^^^^^^
-    4 │ ---
-    5 │ /* comment */
-  
-  i Remove description
-  
 custom-parser.css:4:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected `,` but instead found `-`
+  × Expected a compound selector but instead found '-'.
   
     2 │ title: Title
     3 │ description: Description
@@ -105,7 +79,14 @@ custom-parser.css:4:1 parse ━━━━━━━━━━━━━━━━━�
     5 │ /* comment */
     6 │ .something·
   
-  i Remove -
+  i Expected a compound selector here.
+  
+    2 │ title: Title
+    3 │ description: Description
+  > 4 │ ---
+      │ ^
+    5 │ /* comment */
+    6 │ .something·
   
 custom-parser.css:4:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -122,5 +103,3 @@ custom-parser.css:4:3 parse ━━━━━━━━━━━━━━━━━�
   
 
 ```
-
-

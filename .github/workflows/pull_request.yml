@@ -25,7 +25,7 @@ env:
 
 jobs:
   format:
-    name: Format and Lint Rust Files
+    name: Format project
     runs-on: ubuntu-latest
     steps:
       - name: Checkout PR branch
@@ -44,7 +44,7 @@ jobs:
           taplo format --check
 
   lint:
-    name: Lint Rust Files
+    name: Lint project
     runs-on: ubuntu-latest
     steps:
       - name: Checkout PR Branch
@@ -57,7 +57,9 @@ jobs:
           components: clippy
           cache-base: main
       - name: Run clippy
-        run: cargo lint
+        run: |
+          cargo lint
+          cargo run -p rules_check
 
   check-dependencies:
     name: Check Dependencies

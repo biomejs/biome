@@ -2,11 +2,9 @@
 
 use biome_js_syntax::binding_ext::{AnyJsBindingDeclaration, AnyJsIdentifierBinding};
 use biome_js_syntax::{
-    AnyJsExportNamedSpecifier, AnyJsImportClause, AnyJsNamedImportSpecifier, AnyTsType,
-};
-use biome_js_syntax::{
     AnyJsIdentifierUsage, JsLanguage, JsSyntaxKind, JsSyntaxNode, TextRange, TsTypeParameterName,
 };
+use biome_js_syntax::{AnyJsImportClause, AnyJsNamedImportSpecifier, AnyTsType};
 use biome_rowan::{syntax::Preorder, AstNode, SyntaxNodeOptionExt, TokenText};
 use rustc_hash::FxHashMap;
 use std::collections::VecDeque;
@@ -175,8 +173,8 @@ impl BindingName {
     /// Turn a type into a value and a value into a type.
     fn dual(self) -> Self {
         match self {
-            BindingName::Type(name) => BindingName::Value(name),
-            BindingName::Value(name) => BindingName::Type(name),
+            Self::Type(name) => Self::Value(name),
+            Self::Value(name) => Self::Type(name),
         }
     }
 }
@@ -220,40 +218,31 @@ enum Reference {
     /// export { A }
     /// ```
     Export(TextRange),
-    /// Read and export only a type
-    /// ```ts
-    /// export { type T1 }
-    /// export type { T2, T3 }
-    /// ```
-    ExportType(TextRange),
-    /// All reads that are not an export or part of a `typeof` expression
+    /// Read a value or a type.
     /// ```js
     /// f();
     /// a;
     /// ```
     Read(TextRange),
-    /// Read a value, or an imported type (using `import type`).
+    /// Read a value, or read an imported value as a type (`import type { Value }`).
     /// ```ts
     /// import type Y from ""
     /// typeof Y;
     /// const X = 0;
     /// typeof X;
+    ///
+    /// type T = {[X]: number, [Y]: number };
+    ///
+    /// namespace A { type B = number; }
+    /// let a: A.B = 1;
     /// ```
-    Typeof(TextRange),
+    AmbientRead(TextRange),
     /// Assignment
     /// ```js
     /// a = 0;
     /// a += 1;
     /// ```
     Write(TextRange),
-    /// TS_QUALIFIED_NAME
-    /// ```ts
-    /// namespace A {
-    ///   type B = number;
-    /// }
-    /// let a: A.B = 1;
-    /// ```
-    Qualified(TextRange),
 }
 
 impl Reference {
@@ -265,11 +254,9 @@ impl Reference {
     const fn range(&self) -> &TextRange {
         match self {
             Self::Export(range)
-            | Self::ExportType(range)
             | Self::Read(range)
-            | Self::Typeof(range)
-            | Self::Write(range)
-            | Self::Qualified(range) => range,
+            | Self::AmbientRead(range)
+            | Self::Write(range) => range,
         }
     }
 }
@@ -569,62 +556,110 @@ impl SemanticEventExtractor {
         let name = name_token.token_text_trimmed();
         match node {
             AnyJsIdentifierUsage::JsReferenceIdentifier(node) => {
-                if let Some(specifier) = node.parent::<AnyJsExportNamedSpecifier>() {
-                    if specifier.exports_only_types() {
-                        self.push_reference(BindingName::Type(name), Reference::ExportType(range));
-                    } else {
+                let Some(parent) = node.syntax().parent() else {
+                    self.push_reference(BindingName::Value(name), Reference::Read(range));
+                    return;
+                };
+                match parent.kind() {
+                    JS_EXPORT_NAMED_SHORTHAND_SPECIFIER | JS_EXPORT_NAMED_SPECIFIER => {
                         self.push_reference(
                             BindingName::Value(name.clone()),
                             Reference::Export(range),
                         );
                         self.push_reference(BindingName::Type(name), Reference::Export(range));
                     }
-                } else if matches!(
-                    node.syntax().grand_parent().kind(),
-                    Some(JS_EXPORT_DEFAULT_EXPRESSION_CLAUSE | TS_EXPORT_ASSIGNMENT_CLAUSE)
-                ) {
-                    self.push_reference(BindingName::Value(name.clone()), Reference::Export(range));
-                    self.push_reference(BindingName::Type(name), Reference::Export(range));
-                } else {
-                    if name.text() == "this" {
-                        // Ignore `this` in typeof position. e.g. `typeof this.prop`.
-                        return;
-                    }
-                    match node
-                        .syntax()
-                        .ancestors()
-                        .skip(1)
-                        .find(|x| x.kind() != TS_QUALIFIED_NAME)
-                        .kind()
-                    {
-                        Some(TS_REFERENCE_TYPE) => {
-                            if matches!(node.syntax().parent().kind(), Some(TS_QUALIFIED_NAME)) {
+                    JS_IDENTIFIER_EXPRESSION => {
+                        let Some(grand_parent) = parent.parent() else {
+                            self.push_reference(BindingName::Value(name), Reference::Read(range));
+                            return;
+                        };
+                        match grand_parent.kind() {
+                            JS_EXPORT_DEFAULT_EXPRESSION_CLAUSE | TS_EXPORT_ASSIGNMENT_CLAUSE => {
                                 self.push_reference(
-                                    BindingName::Value(name),
-                                    Reference::Qualified(range),
-                                )
-                            } else {
+                                    BindingName::Value(name.clone()),
+                                    Reference::Export(range),
+                                );
                                 self.push_reference(
                                     BindingName::Type(name),
+                                    Reference::Export(range),
+                                );
+                            }
+                            JS_COMPUTED_MEMBER_NAME => {
+                                if matches!(
+                                    grand_parent.parent().kind(),
+                                    Some(
+                                        TS_PROPERTY_SIGNATURE_CLASS_MEMBER
+                                            | TS_INITIALIZED_PROPERTY_SIGNATURE_CLASS_MEMBER
+                                            | TS_PROPERTY_SIGNATURE_TYPE_MEMBER
+                                            | TS_METHOD_SIGNATURE_CLASS_MEMBER
+                                            | TS_METHOD_SIGNATURE_TYPE_MEMBER
+                                            | TS_GETTER_SIGNATURE_CLASS_MEMBER
+                                            | TS_GETTER_SIGNATURE_TYPE_MEMBER
+                                            | TS_SETTER_SIGNATURE_CLASS_MEMBER
+                                            | TS_SETTER_SIGNATURE_TYPE_MEMBER
+                                    )
+                                ) {
+                                    self.push_reference(
+                                        BindingName::Value(name.clone()),
+                                        Reference::AmbientRead(range),
+                                    );
+                                } else {
+                                    self.push_reference(
+                                        BindingName::Value(name.clone()),
+                                        Reference::Read(range),
+                                    );
+                                }
+                            }
+                            _ => {
+                                self.push_reference(
+                                    BindingName::Value(name),
                                     Reference::Read(range),
                                 );
                             }
                         }
-                        // ignore binding `<X>` from `import().<X>`
-                        Some(TS_IMPORT_TYPE_QUALIFIER) => return,
-                        Some(TS_TYPEOF_TYPE) => {
-                            // a `typeof` type expression refers a value.
-                            // It can also refer to an imported type.
-                            // We handle this particular case in `pop_scope` (unresolved reference)
-                            self.push_reference(
-                                BindingName::Value(name.clone()),
-                                Reference::Typeof(range),
-                            );
+                    }
+                    _ => {
+                        if name.text() == "this" {
+                            // Ignore `this` in typeof position. e.g. `typeof this.prop`.
+                            return;
                         }
-                        _ => {
-                            self.push_reference(BindingName::Value(name), Reference::Read(range));
-                        }
-                    };
+                        match parent
+                            .ancestors()
+                            .find(|x| x.kind() != TS_QUALIFIED_NAME)
+                            .kind()
+                        {
+                            Some(TS_REFERENCE_TYPE) => {
+                                if matches!(parent.kind(), TS_QUALIFIED_NAME) {
+                                    self.push_reference(
+                                        BindingName::Value(name),
+                                        Reference::AmbientRead(range),
+                                    )
+                                } else {
+                                    self.push_reference(
+                                        BindingName::Type(name),
+                                        Reference::Read(range),
+                                    );
+                                }
+                            }
+                            // ignore binding `<X>` from `import().<X>`
+                            Some(TS_IMPORT_TYPE_QUALIFIER) => {}
+                            Some(TS_TYPEOF_TYPE) => {
+                                // a `typeof` type expression refers a value.
+                                // It can also refer to an imported value as a type.
+                                // We handle this particular case in `pop_scope` (unresolved reference)
+                                self.push_reference(
+                                    BindingName::Value(name.clone()),
+                                    Reference::AmbientRead(range),
+                                );
+                            }
+                            _ => {
+                                self.push_reference(
+                                    BindingName::Value(name),
+                                    Reference::Read(range),
+                                );
+                            }
+                        };
+                    }
                 }
             }
             AnyJsIdentifierUsage::JsxReferenceIdentifier(_) => {
@@ -772,12 +807,12 @@ impl SemanticEventExtractor {
                 declaration_kind,
             }) = self.bindings.get(&name)
             {
-                // If we know the declaration of these reference push the correct events...
+                // We know the declaration of these reference.
                 for reference in references {
                     let declaration_before_reference =
                         declared_at.start() < reference.range().start();
                     let event = match reference {
-                        Reference::Export(range) | Reference::ExportType(range) => {
+                        Reference::Export(range) => {
                             self.stash
                                 .push_back(SemanticEvent::Exported { range: declared_at });
                             if declaration_before_reference {
@@ -794,36 +829,21 @@ impl SemanticEventExtractor {
                                 }
                             }
                         }
-                        Reference::Read(range) | Reference::Typeof(range) => {
+                        Reference::Read(range) | Reference::AmbientRead(range) => {
                             if declaration_kind == JsSyntaxKind::JS_NAMESPACE_IMPORT_SPECIFIER
                                 && matches!(name, BindingName::Type(_))
                             {
                                 // An import namespace imported as a type can only be
-                                // used in a qualified name, e.g `Namesapce.Type`.
+                                // used in a qualified name, e.g `Namespace.Type`.
                                 // Thus, the reference is unresolved.
                                 // Note that we don't need to forward the reference in a parent scope,
-                                // becasue an import namespace is laready in the root scope.
+                                // because an import namespace is already in the root scope.
                                 self.stash.push_back(SemanticEvent::UnresolvedReference {
                                     is_read: !reference.is_write(),
                                     range: *reference.range(),
                                 });
                                 continue;
                             }
-                            if declaration_before_reference {
-                                SemanticEvent::Read {
-                                    range,
-                                    declared_at,
-                                    scope_id,
-                                }
-                            } else {
-                                SemanticEvent::HoistedRead {
-                                    range,
-                                    declared_at,
-                                    scope_id,
-                                }
-                            }
-                        }
-                        Reference::Qualified(range) => {
                             if declaration_before_reference {
                                 SemanticEvent::Read {
                                     range,
@@ -861,78 +881,51 @@ impl SemanticEventExtractor {
             {
                 // Don't report an export that exports at least a binding.
             } else if let Some(parent) = self.scopes.last_mut() {
-                // ... if not, promote these references to the parent scope ...
+                // Promote these references to the parent scope
                 let parent_references = parent.references.entry(name).or_default();
                 parent_references.append(&mut references);
-            } else {
-                // ... or raise UnresolvedReference if this is the global scope.
-                let dual_binding = self.bindings.get(&name.dual()).cloned();
+            } else if let Some(info) = self.bindings.get(&name.dual()).cloned() {
+                // We are in the global scope.
+                // Try to bind some of these references to the dual binding of `name`,
+                // otherwise raide `UnresolvedReference`.
                 for reference in references {
                     match reference {
-                        Reference::Export(_) if dual_binding.is_some() => {
+                        Reference::Export(_) => {
                             // An export can export both a value and a type.
                             // If a dual binding exists, then it exports to the dual binding.
-                            continue;
                         }
-                        Reference::ExportType(range) => {
-                            if let Some(info) = &dual_binding {
-                                // TypeScript namespaces and import namespaces can also be exported as a type.
-                                if matches!(
-                                    info.declaration_kind,
-                                    JsSyntaxKind::JS_NAMESPACE_IMPORT_SPECIFIER
-                                        | TS_MODULE_DECLARATION
-                                ) {
-                                    let declared_at = info.range;
-                                    let declaration_before_reference =
-                                        declared_at.start() < reference.range().start();
-                                    self.stash
-                                        .push_back(SemanticEvent::Exported { range: declared_at });
-                                    let event = if declaration_before_reference {
-                                        SemanticEvent::Read {
-                                            range,
-                                            declared_at,
-                                            scope_id: 0,
-                                        }
-                                    } else {
-                                        SemanticEvent::HoistedRead {
-                                            range,
-                                            declared_at,
-                                            scope_id: 0,
-                                        }
-                                    };
-                                    self.stash.push_back(event);
-                                    continue;
+                        Reference::AmbientRead(range) if info.is_imported() => {
+                            // An ambient read can only read a value,
+                            // but also an imported value as a type (with the `type` modifier)
+                            let declared_at = info.range;
+                            let declaration_before_reference =
+                                declared_at.start() < reference.range().start();
+                            let event = if declaration_before_reference {
+                                SemanticEvent::Read {
+                                    range,
+                                    declared_at,
+                                    scope_id: 0,
                                 }
-                            }
-                        }
-                        Reference::Typeof(range) | Reference::Qualified(range) => {
-                            // A typeof can only use a value,
-                            // but also an imported type (with `type` modifier)
-                            if let Some(info) = &dual_binding {
-                                if info.is_imported() {
-                                    let declared_at = info.range;
-                                    let declaration_before_reference =
-                                        declared_at.start() < reference.range().start();
-                                    let event = if declaration_before_reference {
-                                        SemanticEvent::Read {
-                                            range,
-                                            declared_at,
-                                            scope_id: 0,
-                                        }
-                                    } else {
-                                        SemanticEvent::HoistedRead {
-                                            range,
-                                            declared_at,
-                                            scope_id: 0,
-                                        }
-                                    };
-                                    self.stash.push_back(event);
-                                    continue;
+                            } else {
+                                SemanticEvent::HoistedRead {
+                                    range,
+                                    declared_at,
+                                    scope_id: 0,
                                 }
-                            }
+                            };
+                            self.stash.push_back(event);
                         }
-                        _ => {}
+                        _ => {
+                            self.stash.push_back(SemanticEvent::UnresolvedReference {
+                                is_read: !reference.is_write(),
+                                range: *reference.range(),
+                            });
+                        }
                     }
+                }
+            } else {
+                // We are in the global scope. Raise `UnresolvedReference`.
+                for reference in references {
                     self.stash.push_back(SemanticEvent::UnresolvedReference {
                         is_read: !reference.is_write(),
                         range: *reference.range(),

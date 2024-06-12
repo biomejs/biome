@@ -1,4 +1,6 @@
+mod assists;
 mod lint;
+
 pub mod options;
 mod registry;
 mod suppression_action;
@@ -8,10 +10,12 @@ pub use crate::registry::visit_registry;
 use crate::suppression_action::JsonSuppressionAction;
 use biome_analyze::{
     AnalysisFilter, AnalyzerOptions, AnalyzerSignal, ControlFlow, LanguageRoot, MatchQueryParams,
-    MetadataRegistry, RuleRegistry, SuppressionDiagnostic, SuppressionKind,
+    MetadataRegistry, RuleAction, RuleRegistry, SuppressionDiagnostic, SuppressionKind,
 };
 use biome_diagnostics::Error;
 use biome_json_syntax::JsonLanguage;
+
+pub(crate) type JsonRuleAction = RuleAction<JsonLanguage>;
 
 /// Return the static [MetadataRegistry] for the JSON analyzer rules
 pub fn metadata() -> &'static MetadataRegistry {

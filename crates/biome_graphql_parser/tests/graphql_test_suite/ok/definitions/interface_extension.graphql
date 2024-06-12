@@ -1,0 +1,17 @@
+extend interface Story {
+  isHiddenLocally: Boolean
+}
+
+extend interface User @addedDirective
+
+extend interface User implements Character
+
+extend interface User implements Character @deprecated
+
+extend interface User @deprecated {
+  name: String
+}
+
+extend interface User implements Character @deprecated {
+  name: String
+}

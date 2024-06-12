@@ -109,7 +109,31 @@ pub(crate) fn expected_directive_location(p: &GraphqlParser, range: TextRange) -
 
 pub(crate) fn expected_object_extension(p: &GraphqlParser, range: TextRange) -> ParseDiagnostic {
     p.err_builder(
-        "Expected at least one directive, implements interface or fields definition",
+        "Expected at least one directive, implements interface or a set of fields definition",
+        range,
+    )
+}
+
+pub(crate) fn expected_union_extension(p: &GraphqlParser, range: TextRange) -> ParseDiagnostic {
+    p.err_builder(
+        "Expected at least one directive or a set union member types",
+        range,
+    )
+}
+
+pub(crate) fn expected_enum_extension(p: &GraphqlParser, range: TextRange) -> ParseDiagnostic {
+    p.err_builder(
+        "Expected at least one directive or a set of enum values",
+        range,
+    )
+}
+
+pub(crate) fn expected_input_object_extension(
+    p: &GraphqlParser,
+    range: TextRange,
+) -> ParseDiagnostic {
+    p.err_builder(
+        "Expected at least one directive or a set of fields definition",
         range,
     )
 }

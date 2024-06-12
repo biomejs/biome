@@ -1,6 +1,7 @@
 use crate::changed::get_changed_files;
 use crate::cli_options::CliOptions;
 use crate::commands::{resolve_manifest, validate_configuration_diagnostics};
+use crate::execute::VcsTargeted;
 use crate::{execute_mode, setup_cli_subscriber, CliDiagnostic, CliSession, Execution};
 use biome_configuration::{organize_imports::PartialOrganizeImports, PartialConfiguration};
 use biome_configuration::{PartialFormatterConfiguration, PartialLinterConfiguration};
@@ -126,7 +127,11 @@ pub(crate) fn ci(session: CliSession, payload: CiCommandPayload) -> Result<(), C
         })?;
 
     execute_mode(
-        Execution::new_ci().set_report(&cli_options),
+        Execution::new_ci(VcsTargeted {
+            staged: false,
+            changed,
+        })
+        .set_report(&cli_options),
         session,
         &cli_options,
         paths,
