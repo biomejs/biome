@@ -93,7 +93,7 @@ impl fmt::Display for SummaryDetail {
             })
         } else {
             fmt.write_markup(markup! {
-                " No fixes needed."
+                " No fixes were applied."
             })
         }
     }
