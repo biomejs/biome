@@ -23,6 +23,7 @@ declare_rule! {
     /// ```jsx,expect_diagnostic
     /// <div onClick={() => {}}></div>;
     /// ```
+    ///
     /// ```jsx,expect_diagnostic
     /// <span onClick={() => {}}></span>;
     /// ```
@@ -35,9 +36,11 @@ declare_rule! {
     /// ### Valid
     ///
     /// ```jsx
-    /// <div role="button" onClick={() => {}}></div>
-    /// <span role="link" onClick={() => {}}></span>
-    /// <a href="http://example.com" onClick={() => {}}></a>
+    /// <>
+    ///     <div role="button" onClick={() => {}}></div>
+    ///     <span role="link" onClick={() => {}}></span>
+    ///     <a href="http://example.com" onClick={() => {}}></a>
+    /// </>
     /// ```
     ///
     pub NoStaticElementInteractions {
