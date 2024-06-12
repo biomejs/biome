@@ -12,6 +12,7 @@ pub mod no_label_without_control;
 pub mod no_misplaced_assertion;
 pub mod no_react_specific_props;
 pub mod no_restricted_imports;
+pub mod no_static_element_interactions;
 pub mod no_substr;
 pub mod no_undeclared_dependencies;
 pub mod no_unused_function_parameters;
@@ -49,6 +50,7 @@ declare_lint_group! {
             self :: no_misplaced_assertion :: NoMisplacedAssertion ,
             self :: no_react_specific_props :: NoReactSpecificProps ,
             self :: no_restricted_imports :: NoRestrictedImports ,
+            self :: no_static_element_interactions :: NoStaticElementInteractions ,
             self :: no_substr :: NoSubstr ,
             self :: no_undeclared_dependencies :: NoUndeclaredDependencies ,
             self :: no_unused_function_parameters :: NoUnusedFunctionParameters ,
