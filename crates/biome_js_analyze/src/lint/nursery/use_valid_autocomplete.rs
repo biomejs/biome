@@ -97,8 +97,8 @@ const VALID_AUTOCOMPLETE_VALUES: [&str; 55] = [
     "impp",
     "language",
     "name",
-    "nickname",
     "new-password",
+    "nickname",
     "off",
     "on",
     "one-time-code",
@@ -121,6 +121,7 @@ const VALID_AUTOCOMPLETE_VALUES: [&str; 55] = [
     "webauthn",
 ];
 
+// Sorted for binary search
 const BILLING_AND_SHIPPING_ADDRESS: &[&str; 11] = &[
     "address-level1",
     "address-level2",
@@ -234,4 +235,14 @@ fn is_valid_autocomplete(autocomplete_values: &[String]) -> Option<bool> {
         }
     };
     Some(is_valid)
+}
+
+#[test]
+fn test_order() {
+    for items in VALID_AUTOCOMPLETE_VALUES.windows(2) {
+        assert!(items[0] < items[1], "{} < {}", items[0], items[1]);
+    }
+    for items in BILLING_AND_SHIPPING_ADDRESS.windows(2) {
+        assert!(items[0] < items[1], "{} < {}", items[0], items[1]);
+    }
 }
