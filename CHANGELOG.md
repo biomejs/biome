@@ -19,6 +19,21 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 ### CLI
 
+#### Enhancement
+
+- Reword the reporter message `No fixes needed` to `No fixes applied`.
+
+  The former message is misleading when there're still errors or warnings in the files that should be taken care of manually. For example:
+
+  ```block
+  Checked 2 files in <TIME>. No fixes needed.
+  Found 2 errors.
+  ```
+
+  The new message suits better in these cases.
+
+  Contributed by @Sec-ant
+
 ### Configuration
 
 ### Editors

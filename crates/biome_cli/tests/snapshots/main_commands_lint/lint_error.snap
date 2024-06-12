@@ -55,6 +55,6 @@ check.js:1:6 lint/correctness/noConstantCondition ━━━━━━━━━━
 ```
 
 ```block
-Checked 1 file in <TIME>. No fixes needed.
+Checked 1 file in <TIME>. No fixes applied.
 Found 2 errors.
 ```

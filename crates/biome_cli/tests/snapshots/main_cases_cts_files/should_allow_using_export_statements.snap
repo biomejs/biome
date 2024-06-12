@@ -11,5 +11,5 @@ export default { cjs: true };
 # Emitted Messages
 
 ```block
-Checked 1 file in <TIME>. No fixes needed.
+Checked 1 file in <TIME>. No fixes applied.
 ```
