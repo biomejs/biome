@@ -28,22 +28,22 @@ declare_rule! {
     ///
     /// ### Invalid
     ///
-    /// ```js,expect_diagnostic,ignore
+    /// ```js,expect_diagnostic
     /// import "./foo";
     /// ```
-    /// ```js,expect_diagnostic,ignore
-    /// import "./bar/";
+    /// ```js,expect_diagnostic
+    /// import "./foo/";
     /// ```
-    /// ```js,expect_diagnostic,ignore
+    /// ```js,expect_diagnostic
     /// import "../";
     /// ```
-    /// ```js,expect_diagnostic,ignore
+    /// ```js,expect_diagnostic
     /// import "../.";
     /// ```
-    /// ```js,expect_diagnostic,ignore
+    /// ```js,expect_diagnostic
     /// import("./foo");
     /// ```
-    /// ```js,expect_diagnostic,ignore
+    /// ```js,expect_diagnostic
     /// require("./foo");
     /// ```
     ///
@@ -91,7 +91,7 @@ impl Rule for UseImportExtensions {
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
 
-        let file_ext = ctx.file_path().extension()?.to_str()?;
+        let file_ext = ctx.file_path().extension().and_then(|ext| ext.to_str())?;
 
         get_extensionless_import(file_ext, node)
     }
@@ -177,21 +177,21 @@ fn get_extensionless_import(
     let mut path_parts = module_path.text().split('/');
     let mut is_index_file = false;
 
-    // Remove trailing slash.
-    if module_path.ends_with('/') {
+    // Remove trailing slash and useless path segment.
+    if module_path.ends_with('/') || module_path.ends_with("/.") {
         path_parts.next_back();
 
         is_index_file = true;
     }
 
     match last_component {
-        Component::ParentDir => {
+        Component::ParentDir | Component::CurDir => {
             is_index_file = true;
         }
         // `import ".././"` is the same as `import "../"`
         // Rust Path does not expose `./` path segment at very end, likely because it does not do anything.
         // To provide proper fix, we need to remove it as well.
-        Component::Normal(_) if module_path.ends_with("./") || module_path.ends_with('.') => {
+        Component::Normal(_) if module_path.ends_with("./") => {
             // Remove useless path segment.
             path_parts.next_back();
 

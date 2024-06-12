@@ -32,8 +32,8 @@ declare_rule! {
     /// const foo = new Date().valueOf();
     /// ```
     ///
-    /// ```js,expect_diagnostic,ignore
-    /// const foo = +new Date;
+    /// ```js,expect_diagnostic
+    /// const foo = +new Date();
     /// ```
     ///
     /// ```js,expect_diagnostic
