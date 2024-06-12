@@ -21,7 +21,7 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 #### Enhancement
 
-- Reword the reporter message `No fixes needed` to `No fixes were applied`.
+- Reword the reporter message `No fixes needed` to `No fixes applied`.
 
   The former message is misleading when there're still errors or warnings in the files that should be taken care of manually. For example:
 
