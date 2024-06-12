@@ -426,9 +426,7 @@ Members are listed in alphabetical order. Members are free to use the full name,
 
 - [Dani Guardiola @DaniGuardiola](https://github.com/DaniGuardiola)
 - [Madeline Gurriarán @SuperchupuDev](https://github.com/SuperchupuDev)
-- [Takayuki Maeda @TaKO8Ki](https://github.com/TaKO8Ki)
 - [Vasu Singh @vasucp1207](https://github.com/vasucp1207)
-- [Victor Teles @victor-teles](https://github.com/victor-teles)
 - [Yagiz Nizipli @anonrig](https://github.com/anonrig)
 - [Yoshiaki Togami @togami2864](https://github.com/togami2864)
 - [Ze-Zheng Wu @Sec-ant](https://github.com/Sec-ant)
@@ -437,5 +435,7 @@ Members are listed in alphabetical order. Members are free to use the full name,
 ### Past Maintainers
 
 - [Daiki Nishikawa @nissy-dev](https://github.com/nissy-dev) (Core contributor)
+- [Takayuki Maeda @TaKO8Ki](https://github.com/TaKO8Ki) (Maintainer)
+- [Victor Teles @victor-teles](https://github.com/victor-teles) (Maintainer)
 
 
