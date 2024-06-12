@@ -88,7 +88,6 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 ### Linter
 
-
 #### New features
 
 - Add [nursery/useValidAutocomplete](https://biomejs.dev/linter/rules/use-valid-autocomplete/). Contributed by @unvalley
@@ -98,8 +97,8 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 - [useImportExtensions](https://biomejs.dev/linter/rules/use-import-extensions/) now suggests a correct fix for `import '.'` and `import './.'`. Contributed by @minht11
 - Fix [useDateNow](https://biomejs.dev/linter/rules/use-date-now/) false positive when new Date object has arguments `new Date(0).getTime()`. Contributed by @minht11.
 - The [`noUnmatchableAnbSelector`](https://biomejs.dev/linter/rules/no-unmatchable-anb-selector/) rule is now able to catch unmatchable `an+b` selectors like `0n+0` or `-0n+0`. Contributed by @Sec-ant.
-
 - The [`useHookAtTopLevel`](https://biomejs.dev/linter/rules/use-hook-at-top-level/) rule now recognizes properties named as hooks like `foo.useFoo()`. Contributed by @ksnyder9801
+- Fix [#3092](https://github.com/biomejs/biome/issues/3092), prevent warning for `Custom properties (--*)`. Contributed by @chansuke
 
 ### Parser
 
