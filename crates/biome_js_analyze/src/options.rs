@@ -362,6 +362,8 @@ pub type UseValidAriaRole =
     <lint::a11y::use_valid_aria_role::UseValidAriaRole as biome_analyze::Rule>::Options;
 pub type UseValidAriaValues =
     <lint::a11y::use_valid_aria_values::UseValidAriaValues as biome_analyze::Rule>::Options;
+pub type UseValidAutocomplete =
+    <lint::nursery::use_valid_autocomplete::UseValidAutocomplete as biome_analyze::Rule>::Options;
 pub type UseValidForDirection = < lint :: correctness :: use_valid_for_direction :: UseValidForDirection as biome_analyze :: Rule > :: Options ;
 pub type UseValidLang = <lint::a11y::use_valid_lang::UseValidLang as biome_analyze::Rule>::Options;
 pub type UseValidTypeof =

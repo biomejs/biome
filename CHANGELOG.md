@@ -33,6 +33,11 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 ### Linter
 
+
+#### New features
+
+- Add [nursery/useValidAutocomplete](https://biomejs.dev/linter/rules/use-valid-autocomplete/). Contributed by @unvalley
+
 #### Bug fixes
 
 - [useImportExtensions](https://biomejs.dev/linter/rules/use-import-extensions/) now suggests a correct fix for `import '.'` and `import './.'`. Contributed by @minht11
