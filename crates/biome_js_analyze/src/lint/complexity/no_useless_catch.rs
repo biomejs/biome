@@ -3,9 +3,10 @@ use biome_analyze::{
     RuleSource,
 };
 use biome_console::markup;
+use biome_js_factory::make;
 use biome_js_syntax::{
-    JsBlockStatement, JsCatchClause, JsSyntaxToken, JsTryFinallyStatement, JsTryStatement,
-    TextRange,
+    AnyJsModuleItem, AnyJsStatement, JsBlockStatement, JsCatchClause, JsExpressionStatement,
+    JsModule, JsSyntaxToken, JsTryFinallyStatement, JsTryStatement, TextRange,
 };
 use biome_rowan::{declare_node_union, AstNode, AstNodeList, BatchMutationExt};
 
@@ -77,7 +78,7 @@ declare_rule! {
 }
 
 impl Rule for NoUselessCatch {
-    type Query = Ast<AnyJsTryStatement>;
+    type Query = Ast<AnyJsStatementAndModule>;
     type State = TextRange;
     type Signals = Option<Self::State>;
     type Options = ();
@@ -136,10 +137,12 @@ impl Rule for NoUselessCatch {
     fn action(ctx: &RuleContext<Self>, _: &Self::State) -> Option<JsRuleAction> {
         let node = ctx.query();
 
-        let try_token = node.try_token()?;
         let body = node.body()?;
-        let l_token = body.l_curly_token().ok()?;
-        let r_token = body.r_curly_token().ok()?;
+        let stmts = body.statements();
+        let expressions: Vec<JsExpressionStatement> = stmts
+            .iter()
+            .map(|stmt| stmt.as_js_expression_statement().unwrap().clone())
+            .collect();
 
         let catch_clause = node.catch_clause()?;
         let finally_clause = node.finally_clause();
@@ -150,10 +153,20 @@ impl Rule for NoUselessCatch {
             mutation.remove_node(catch_clause);
             "catch"
         } else {
-            mutation.remove_token(try_token);
-            mutation.remove_token(l_token);
-            mutation.remove_token(r_token);
-            mutation.remove_node(catch_clause);
+            let module = make::js_module(
+                make::js_directive_list(None),
+                make::js_module_item_list(expressions.into_iter().map(|expression| {
+                    AnyJsModuleItem::AnyJsStatement(AnyJsStatement::JsExpressionStatement(
+                        expression.clone(),
+                    ))
+                })),
+                make::eof(),
+            )
+            .build();
+            mutation.replace_node_discard_trivia(
+                node.clone(),
+                AnyJsStatementAndModule::JsModule(module),
+            );
             "try/catch"
         };
 
@@ -167,35 +180,39 @@ impl Rule for NoUselessCatch {
 }
 
 declare_node_union! {
-    pub AnyJsTryStatement = JsTryStatement | JsTryFinallyStatement
+    pub AnyJsStatementAndModule = JsTryStatement | JsTryFinallyStatement | JsModule
 }
 
-impl AnyJsTryStatement {
+impl AnyJsStatementAndModule {
     pub fn catch_clause(&self) -> Option<JsCatchClause> {
         match self {
-            AnyJsTryStatement::JsTryStatement(node) => node.catch_clause().ok(),
-            AnyJsTryStatement::JsTryFinallyStatement(node) => node.catch_clause(),
+            AnyJsStatementAndModule::JsTryStatement(node) => node.catch_clause().ok(),
+            AnyJsStatementAndModule::JsTryFinallyStatement(node) => node.catch_clause(),
+            AnyJsStatementAndModule::JsModule(_) => None,
         }
     }
 
     pub fn finally_clause(&self) -> Option<JsTryFinallyStatement> {
         match self {
-            AnyJsTryStatement::JsTryStatement(_) => None,
-            AnyJsTryStatement::JsTryFinallyStatement(node) => Some(node.clone()),
+            AnyJsStatementAndModule::JsTryStatement(_) => None,
+            AnyJsStatementAndModule::JsTryFinallyStatement(node) => Some(node.clone()),
+            AnyJsStatementAndModule::JsModule(_) => None,
         }
     }
 
     pub fn body(&self) -> Option<JsBlockStatement> {
         match self {
-            AnyJsTryStatement::JsTryStatement(node) => node.body().ok(),
-            AnyJsTryStatement::JsTryFinallyStatement(node) => node.body().ok(),
+            AnyJsStatementAndModule::JsTryStatement(node) => node.body().ok(),
+            AnyJsStatementAndModule::JsTryFinallyStatement(node) => node.body().ok(),
+            AnyJsStatementAndModule::JsModule(_) => None,
         }
     }
 
     pub fn try_token(&self) -> Option<JsSyntaxToken> {
         match self {
-            AnyJsTryStatement::JsTryStatement(node) => node.try_token().ok(),
-            AnyJsTryStatement::JsTryFinallyStatement(node) => node.try_token().ok(),
+            AnyJsStatementAndModule::JsTryStatement(node) => node.try_token().ok(),
+            AnyJsStatementAndModule::JsTryFinallyStatement(node) => node.try_token().ok(),
+            AnyJsStatementAndModule::JsModule(_) => None,
         }
     }
 }

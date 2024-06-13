@@ -11,6 +11,13 @@ try {
 }
 
 try {
+	doSomethingThatMightThrowA();
+	doSomethingThatMightThrowB();
+} catch (e) {
+	throw e;
+}
+
+try {
 	doSomethingThatMightThrow();
 } catch (e) {
 	throw e;
@@ -50,29 +57,60 @@ invalid.js:4:2 lint/complexity/noUselessCatch  FIXABLE  ━━━━━━━━
 ```
 
 ```
-invalid.js:10:2 lint/complexity/noUselessCatch  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:11:2 lint/complexity/noUselessCatch  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! The catch clause that only rethrows the original error is redundant.
   
-     8 │ 	doSomethingThatMightThrow();
-     9 │ } catch (e) {
-  > 10 │ 	throw e;
+     9 │ 	doSomethingThatMightThrowB();
+    10 │ } catch (e) {
+  > 11 │ 	throw e;
        │ 	^^^^^^^^
-    11 │ } finally {
-    12 │ 	cleanUp();
+    12 │ }
+    13 │ 
+  
+  i These unnecessary catch clauses can be confusing. It is recommended to remove them.
+  
+  i Unsafe fix: Remove the try/catch clause.
+  
+     4  4 │   	throw e;
+     5  5 │   }
+     6    │ - 
+     7    │ - try·{
+     8  6 │   	doSomethingThatMightThrowA();
+     9  7 │   	doSomethingThatMightThrowB();
+    10    │ - }·catch·(e)·{
+    11    │ - → throw·e;
+    12    │ - }
+    13  8 │   
+    14  9 │   try {
+  
+
+```
+
+```
+invalid.js:17:2 lint/complexity/noUselessCatch  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The catch clause that only rethrows the original error is redundant.
+  
+    15 │ 	doSomethingThatMightThrow();
+    16 │ } catch (e) {
+  > 17 │ 	throw e;
+       │ 	^^^^^^^^
+    18 │ } finally {
+    19 │ 	cleanUp();
   
   i These unnecessary catch clauses can be confusing. It is recommended to remove them.
   
   i Unsafe fix: Remove the catch clause.
   
-     7  7 │   try {
-     8  8 │   	doSomethingThatMightThrow();
-     9    │ - }·catch·(e)·{
-    10    │ - → throw·e;
-    11    │ - }·finally·{
-        9 │ + }·finally·{
-    12 10 │   	cleanUp();
-    13 11 │   }
+    14 14 │   try {
+    15 15 │   	doSomethingThatMightThrow();
+    16    │ - }·catch·(e)·{
+    17    │ - → throw·e;
+    18    │ - }·finally·{
+       16 │ + }·finally·{
+    19 17 │   	cleanUp();
+    20 18 │   }
   
 
 ```
