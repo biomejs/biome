@@ -431,6 +431,7 @@ Members are listed in alphabetical order. Members are free to use the full name,
 - [Vasu Singh @vasucp1207](https://github.com/vasucp1207)
 - [Yagiz Nizipli @anonrig](https://github.com/anonrig)
 - [Yoshiaki Togami @togami2864](https://github.com/togami2864)
+- [Yusuke Abe @chansuke](https://github.com/chansuke)
 - [Zheyu Zhang @ah-yu](https://github.com/ah-yu)
 
 ### Past Maintainers
