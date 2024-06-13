@@ -40,7 +40,7 @@ declare_rule! {
     /// const error = new AggregateError(errors, 'Promises rejected.');
     /// ```
     pub UseErrorMessage {
-        version: "next",
+        version: "1.8.0",
         name: "useErrorMessage",
         language: "js",
         sources: &[RuleSource::EslintUnicorn("error-message")],

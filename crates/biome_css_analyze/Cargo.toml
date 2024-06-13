@@ -23,6 +23,7 @@ biome_rowan              = { workspace = true }
 biome_suppression        = { workspace = true }
 lazy_static              = { workspace = true }
 regex                    = { workspace = true }
+rustc-hash               = { workspace = true }
 schemars                 = { workspace = true, optional = true }
 serde                    = { workspace = true, features = ["derive"] }
 

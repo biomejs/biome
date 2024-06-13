@@ -58,6 +58,7 @@ CssBogusPropertyValue = SyntaxElement*
 CssBogusDocumentMatcher = SyntaxElement*
 CssBogusFontFamilyName = SyntaxElement*
 CssBogusCustomIdentifier = SyntaxElement*
+CssBogusKeyframesName = SyntaxElement*
 
 CssRoot =
 	bom: 'UNICODE_BOM'?
@@ -449,6 +450,13 @@ AnyCssDeclarationOrAtRule =
     CssDeclarationWithSemicolon
     | CssAtRule
 
+// When nested in this way, the contents of a nested group rule's block are parsed as <block-contents> rather than <rule-list>:
+// https://drafts.csswg.org/css-nesting-1/#conditionals
+AnyCssConditionalBlock =
+	CssDeclarationOrRuleBlock
+	| CssRuleBlock
+	| CssBogusBlock
+
 // @page :left { background: red; @media (500px <= width <= 500px) {  } }
 // 						   ^^^^^^^^^^^^^^^^
 // NOTE: ';' is optional for the last declaration in a block. For declarations not at the end, the parser will raise an error if ';' is missing.
@@ -486,12 +494,53 @@ CssDeclaration =
 
 AnyCssProperty =
 	CssGenericProperty
+	| CssComposesProperty
 	| CssBogusProperty
 
 CssGenericProperty =
 	name: AnyCssDeclarationName
 	':'
 	value: CssGenericComponentValueList
+
+// This grammar is specific to CSS Modules and defines how composes classes.
+// https://github.com/css-modules/css-modules/blob/master/docs/composition.md
+// .otherClassName {
+//    composes: globalClassName from global;
+//    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+// }
+// .otherClassName {
+//    composes: className;
+//    ^^^^^^^^^^^^^^^^^^^
+//  }
+// .otherClassName {
+//    composes: className from './style.css';
+//    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+// }
+CssComposesProperty =
+	name: CssIdentifier
+	':'
+	value: CssComposesPropertyValue
+
+CssComposesPropertyValue =
+	classes: CssComposesClassList
+	specifier: CssComposesImportSpecifier?
+
+CssComposesClassList = CssCustomIdentifier*
+
+//  composes: className from './style.css';
+//                      ^^^^^^^^^^^^^^^^^^
+//  composes: className from global;
+//                      ^^^^^^^^^^^
+CssComposesImportSpecifier =
+	'from'
+	source: AnyCssComposesImportSource
+
+//  composes: className from './style.css';
+//                           ^^^^^^^^^^^^^
+//  composes: className from global;
+//                           ^^^^^^
+AnyCssComposesImportSource =
+	CssString | CssIdentifier
 
 // div {
 //	--bs-btn-focus-shadow-rgb: 33, 37, 41;
@@ -550,6 +599,9 @@ AnyCssAtRule =
 	| CssStartingStyleAtRule
 	| CssDocumentAtRule
 	| CssPropertyAtRule
+	| CssValueAtRule
+	| CssUnknownBlockAtRule
+	| CssUnknownValueAtRule
 	| CssBogusAtRule
 
 // @charset "UTF-8";
@@ -619,11 +671,7 @@ CssFontFamilyName =
 
 // @font-feature-values Font Second Gothic { }
 //                      ^^^^^^^^^^^^^^^^^^
-CssCustomIdentifierList = CssCustomIdentifier*
-
-AnyCssCustomIdentifier =
-	CssCustomIdentifier
-	| CssBogusCustomIdentifier
+CssCustomIdentifierList = AnyCssCustomIdentifier*
 
 AnyCssFontFeatureValuesBlock =
 	CssFontFeatureValuesBlock
@@ -693,7 +741,7 @@ CssContainerAtRule =
 	'container'
 	name: CssCustomIdentifier?
 	query: AnyCssContainerQuery
-	block: AnyCssRuleBlock
+	block: AnyCssConditionalBlock
 
 // <container-query>
 AnyCssContainerQuery =
@@ -816,6 +864,8 @@ AnyCssContainerStyleInParens =
 // https://drafts.csswg.org/css-animations/#keyframes
 // @keyframes = @keyframes <keyframes-name> { <qualified-rule-list> }
 // <keyframes-name> = <custom-ident> | <string>
+// 	| :<module-scope>(<keyframes-name>) | :<module-scope> <keyframes-name>  // for CSS Modules
+// <module-scope> = global | local
 // <keyframe-block> = <keyframe-selector># { <declaration-list> }
 // <keyframe-selector> = from | to | <percentage [0,100]>
 
@@ -823,16 +873,49 @@ AnyCssContainerStyleInParens =
 // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 CssKeyframesAtRule =
 	'keyframes'
-	name: AnyCssKeyframeName
+	name: AnyCssKeyframesName
 	block: AnyCssKeyframesBlock
+
+AnyCssKeyframesName =
+	CssKeyframesScopedName
+	| AnyCssKeyframesIdentifier
+	| CssBogusKeyframesName
 
 AnyCssKeyframesBlock =
 	CssKeyframesBlock
 	| CssBogusBlock
 
+// This grammar is specific to CSS Modules and defines how scoped keyframes are parsed.
+// In CSS Modules, keyframes can be scoped locally or globally using the `:local` and `:global` pseudo-classes.
+// @keyframes :local("test") {}
+//            ^^^^^^^^^^^^^^^
+// @keyframes :global test {}
+//            ^^^^^^^^^^^^^
+CssKeyframesScopedName =
+	':'
+	scope: AnyCssKeyframesScope
+
+AnyCssKeyframesScope = CssKeyframesScopeFunction | CssKeyframesScopePrefix
+
+// @keyframes :local("test") {}
+//            ^^^^^^^^^^^^^^^
+CssKeyframesScopeFunction =
+	scope: ('global' | 'local')
+	'('
+	name: AnyCssKeyframesIdentifier
+	')'
+
+// @keyframes :global test {}
+//            ^^^^^^^^^^^^^
+CssKeyframesScopePrefix =
+	scope: ('global' | 'local')
+	name: AnyCssKeyframesIdentifier
+
+// End of CSS Modules specific grammar
+
 // @keyframes "something" { from {} to {} }
 //            ^^^^^^^^^^^
-AnyCssKeyframeName = CssCustomIdentifier | CssString
+AnyCssKeyframesIdentifier = CssCustomIdentifier | CssString
 
 // @keyframes "something" { from {} to {} }
 //                        ^^^^^^^^^^^^^^^^^
@@ -907,7 +990,7 @@ CssKeyframesPercentageSelector =
 CssMediaAtRule =
 	'media'
 	queries: CssMediaQueryList
-	block: AnyCssRuleBlock
+	block: AnyCssConditionalBlock
 
 // @media screen, (width > 500px), print {}
 // 				^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -1171,7 +1254,7 @@ AnyCssLayer =
 //        ^^^^^^^^^^^^^^^^
 CssLayerDeclaration =
 	references: CssLayerReferenceList
-	block: AnyCssRuleBlock
+	block: AnyCssConditionalBlock
 
 // @layer framework, bar.baz;
 //        ^^^^^^^^^^^^^^^^^^^
@@ -1207,7 +1290,7 @@ CssLayerNameList = (CssIdentifier ('.' CssIdentifier)*)
 CssSupportsAtRule =
 	'supports'
 	condition: AnyCssSupportsCondition
-	block: AnyCssRuleBlock
+	block: AnyCssConditionalBlock
 
 AnyCssSupportsCondition =
 	CssSupportsNotCondition
@@ -1284,7 +1367,7 @@ CssSupportsFeatureSelector =
 CssScopeAtRule =
 	'scope'
 	range: AnyCssScopeRange?
-	block: AnyCssRuleBlock
+	block: AnyCssConditionalBlock
 
 AnyCssScopeRange =
 	CssScopeRangeStart
@@ -1421,6 +1504,99 @@ CssDocumentCustomMatcher =
 	value: CssString
 	')'
 
+// https://github.com/css-modules/postcss-modules-values
+// @value selectorValue: secondary-color;
+//        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+// @value small as bp-small, large as bp-large from "./breakpoints.css";
+//        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+CssValueAtRule =
+	'value'
+	clause: AnyCssValueAtRuleClause
+	';'
+
+AnyCssValueAtRuleClause =
+	CssValueAtRuleImportClause
+	| CssValueAtRuleDeclarationClause
+
+// @value small as bp-small, large as bp-large from "./breakpoints.css";
+//        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+CssValueAtRuleImportClause =
+	specifiers: CssValueAtRuleImportSpecifierList
+	'from'
+	source: AnyCssValueAtRuleImportSource
+
+// @value primary, secondary from colors;
+//         												^^^^^^
+// @value small as bp-small, large as bp-large from "./breakpoints.css";
+//          																				^^^^^^^^^^^^^^^^^^^
+AnyCssValueAtRuleImportSource =
+	CssString
+	| CssIdentifier
+
+CssValueAtRuleImportSpecifierList = (AnyCssValueAtRuleImportSpecifier (',' AnyCssValueAtRuleImportSpecifier)*)
+
+AnyCssValueAtRuleImportSpecifier =
+	CssValueAtRuleImportSpecifier
+	| CssValueAtRuleNamedImportSpecifier
+
+// @value small, large as bp-large from "./breakpoints.css";
+//        ^^^^^
+CssValueAtRuleImportSpecifier =
+ name: CssIdentifier
+
+// @value small, large as bp-large from "./breakpoints.css";
+//        			 ^^^^^^^^^^^^^^^^^
+CssValueAtRuleNamedImportSpecifier =
+	name: CssIdentifier
+	'as'
+	local_name: CssIdentifier
+
+// @value small: (max-width: 599px), selectorValue: secondary-color;
+//        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+CssValueAtRuleDeclarationClause =
+	properties: CssValueAtRulePropertyList
+
+CssValueAtRulePropertyList = (AnyCssValueAtRuleProperty (',' AnyCssValueAtRuleProperty)*)
+
+AnyCssValueAtRuleProperty =
+	CssValueAtRuleGenericProperty
+	| CssBogusProperty
+
+CssValueAtRuleGenericProperty =
+	name: AnyCssDeclarationName
+	':'
+	value: CssValueAtRuleGenericValue
+
+// A generic property can be any sequence of tokens, which is why we parse it as an unformed tree.
+// This approach allows for flexibility, as the exact structure of generic properties may not be well-defined.
+// By parsing the property in this manner, we ensure that we can handle a wide variety of cases without
+// requiring specific grammar rules for each possible property structure.
+//
+// If we want to extend the parsing with a specific grammar in the future, we can implement speculative parsing.
+// Speculative parsing would attempt to parse the property according to the new grammar rules.
+// If an error occurs during this process, we can fall back to the current implementation, which treats
+// the property as an unformed tree. This approach ensures backward compatibility and allows for incremental
+// improvements to the parser without breaking existing functionality.
+CssValueAtRuleGenericValue = SyntaxElement*
+
+/// Represents an unknown or unsupported CSS at-rule during parsing.
+///
+/// When encountered during parsing, `CssUnknownAtRule` serves as a fallback mechanism,
+/// allowing the parser to continue processing the stylesheet by treating the unsupported rule
+/// as part of an unformed tree. This enables graceful handling of CSS constructs that are not
+/// supported by the parser, ensuring that the stylesheet can still be processed without errors.
+CssUnknownBlockAtRule =
+	name: CssIdentifier
+	components: CssUnknownAtRuleComponentList
+	block: AnyCssDeclarationOrRuleBlock
+
+CssUnknownValueAtRule =
+	name: CssIdentifier
+	components: CssUnknownAtRuleComponentList
+	';'
+
+CssUnknownAtRuleComponentList = SyntaxElement*
+
 ///////////////
 // AUXILIARY
 ///////////////
@@ -1437,6 +1613,7 @@ AnyCssValue =
 	| CssRatio
 	| AnyCssFunction
 	| CssColor
+	| CssBracketedValue
 
 
 // https://drafts.csswg.org/css-syntax/#typedef-dimension-token
@@ -1551,6 +1728,22 @@ CssParenthesizedExpression =
 CssColor =
 	'#'
 	value:'css_color_literal'
+
+// The CssBracketedValue is a special construct used to represent CSS values that are enclosed in brackets.
+// This is commonly seen in properties like grid-template-areas where the value is a list of identifiers representing grid areas.
+// [full-start] 1fr [main-start end] 480px [main-end] 1fr [full-end]
+// ^^^^^^^^^^^^     ^^^^^^^^^^^^^^^^        ^^^^^^^^^^     ^^^^^^^^^^
+// https://drafts.csswg.org/css-grid/#named-lines
+CssBracketedValue =
+	'['
+		items: CssBracketedValueList
+	']'
+
+CssBracketedValueList = AnyCssCustomIdentifier*
+
+AnyCssCustomIdentifier =
+	CssCustomIdentifier
+	| CssBogusCustomIdentifier
 
 // Any identifier. Case insensitve, used for standard property names, values, type selectors, etc.
 CssIdentifier = value: 'ident'

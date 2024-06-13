@@ -264,22 +264,7 @@ impl Rule for UseExplicitLengthCheck {
         let parent = state.node.syntax().parent()?;
         // In cases like `export default!foo.length` -> `export default foo.length === 0`
         // we need to add a space between keyword and expression
-        if matches!(
-            parent.kind(),
-            JsSyntaxKind::JS_EXPORT_DEFAULT_EXPRESSION_CLAUSE
-                | JsSyntaxKind::JS_INSTANCEOF_EXPRESSION
-                | JsSyntaxKind::JS_YIELD_EXPRESSION
-                | JsSyntaxKind::JS_RETURN_STATEMENT
-                | JsSyntaxKind::JS_THROW_STATEMENT
-                | JsSyntaxKind::JS_NEW_EXPRESSION
-                | JsSyntaxKind::JS_AWAIT_EXPRESSION
-                | JsSyntaxKind::JS_IN_EXPRESSION
-                | JsSyntaxKind::JS_FOR_OF_STATEMENT
-                | JsSyntaxKind::JS_FOR_IN_STATEMENT
-                | JsSyntaxKind::JS_DO_WHILE_STATEMENT
-                | JsSyntaxKind::JS_CASE_CLAUSE
-        ) || does_unary_expr_needs_space(&parent)
-        {
+        if does_node_needs_space_before_child(&parent) {
             // Make fake token to get leading trivia
             let leading_trivia = make::token_decorated_with_space(T![=])
                 .leading_trivia()
@@ -469,4 +454,32 @@ fn does_unary_expr_needs_space(node: &JsSyntaxNode) -> bool {
             Ok(JsUnaryOperator::Typeof | JsUnaryOperator::Void | JsUnaryOperator::Delete)
         )
     })
+}
+
+/// Checks if node needs space in case inserted child
+/// would produce syntax error without it.
+/// ## Example
+/// ```js
+/// export default!foo.length
+/// ```
+/// removing slash would produce syntax error without a space
+/// ```js
+/// export default foo.length
+/// ```
+pub(crate) fn does_node_needs_space_before_child(node: &JsSyntaxNode) -> bool {
+    matches!(
+        node.kind(),
+        JsSyntaxKind::JS_EXPORT_DEFAULT_EXPRESSION_CLAUSE
+            | JsSyntaxKind::JS_INSTANCEOF_EXPRESSION
+            | JsSyntaxKind::JS_YIELD_EXPRESSION
+            | JsSyntaxKind::JS_RETURN_STATEMENT
+            | JsSyntaxKind::JS_THROW_STATEMENT
+            | JsSyntaxKind::JS_NEW_EXPRESSION
+            | JsSyntaxKind::JS_AWAIT_EXPRESSION
+            | JsSyntaxKind::JS_IN_EXPRESSION
+            | JsSyntaxKind::JS_FOR_OF_STATEMENT
+            | JsSyntaxKind::JS_FOR_IN_STATEMENT
+            | JsSyntaxKind::JS_DO_WHILE_STATEMENT
+            | JsSyntaxKind::JS_CASE_CLAUSE
+    ) || does_unary_expr_needs_space(node)
 }

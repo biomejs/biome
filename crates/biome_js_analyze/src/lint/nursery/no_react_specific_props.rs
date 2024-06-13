@@ -9,20 +9,20 @@ use biome_rowan::{AstNode, BatchMutationExt, TextRange};
 declare_rule! {
     /// Prevents React-specific JSX properties from being used.
     ///
-    /// This rule is intended for use in JSX-based frameworks (mainly Solid.js)
+    /// This rule is intended for use in JSX-based frameworks (mainly **Solid.js**)
     /// that do not use React-style prop names.
     ///
     /// ## Examples
     ///
     /// ### Invalid
     ///
-    /// ```js,expect_diagnostic
+    /// ```jsx,expect_diagnostic
     /// <Hello className="John" />
     /// ```
     ///
     /// ### Valid
     ///
-    /// ```js
+    /// ```jsx
     /// <Hello class="Doe" />
     /// ```
  pub NoReactSpecificProps {

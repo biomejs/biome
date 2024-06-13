@@ -2,9 +2,12 @@ mod js_target_language;
 
 pub use js_target_language::JsTargetLanguage;
 
+use crate::grit_js_parser::GritJsParser;
 use crate::grit_target_node::{GritTargetNode, GritTargetSyntaxKind};
+use crate::grit_tree::GritTree;
 use biome_rowan::SyntaxKind;
-use grit_util::Language;
+use grit_util::{Ast, CodeRange, EffectRange, Language, Parser, SnippetTree};
+use std::borrow::Cow;
 
 /// Generates the `GritTargetLanguage` enum.
 ///
@@ -13,7 +16,7 @@ use grit_util::Language;
 /// implement the slightly more convenient [`GritTargetLanguageImpl`] for
 /// creating language-specific implementations.
 macro_rules! generate_target_language {
-    ($($language:ident),+) => {
+    ($([$language:ident, $parser:ident]),+) => {
         #[derive(Clone, Debug)]
         pub enum GritTargetLanguage {
             $($language($language)),+
@@ -32,10 +35,25 @@ macro_rules! generate_target_language {
                 }
             }
 
+            fn get_parser(&self) -> Box<dyn Parser<Tree = GritTree>> {
+                match self {
+                    $(Self::$language(_) => Box::new($parser)),+
+                }
+            }
+
             fn is_alternative_metavariable_kind(&self, kind: GritTargetSyntaxKind) -> bool {
                 match self {
                     $(Self::$language(_) => $language::is_alternative_metavariable_kind(kind)),+
                 }
+            }
+
+            pub fn parse_snippet_contexts(&self, source: &str) -> Vec<SnippetTree<GritTree>> {
+                let source = self.substitute_metavariable_prefix(source);
+                self.snippet_context_strings()
+                    .iter()
+                    .map(|(pre, post)| self.get_parser().parse_snippet(pre, &source, post))
+                    .filter(|result| !result.tree.root_node().kind().is_bogus())
+                    .collect()
             }
         }
 
@@ -65,12 +83,32 @@ macro_rules! generate_target_language {
                     || (self.is_alternative_metavariable_kind(node.kind())
                         && self.exact_replaced_variable_regex().is_match(&node.text_trimmed().to_string()))
             }
+
+            fn align_padding<'a>(
+                &self,
+                _node: &Self::Node<'a>,
+                _range: &CodeRange,
+                _skip_ranges: &[CodeRange],
+                _new_padding: Option<usize>,
+                _offset: usize,
+                _substitutions: &mut [(EffectRange, String)],
+            ) -> Cow<'a, str> {
+                todo!()
+            }
+
+            fn pad_snippet<'a>(&self, _snippet: &'a str, _padding: &str) -> Cow<'a, str> {
+                todo!()
+            }
+
+            fn get_skip_padding_ranges(&self, _node: &Self::Node<'_>) -> Vec<CodeRange> {
+                Vec::new()
+            }
         }
-    };
+    }
 }
 
 generate_target_language! {
-    JsTargetLanguage
+    [JsTargetLanguage, GritJsParser]
 }
 
 /// Trait to be implemented by the language-specific implementations.

@@ -1,0 +1,18 @@
+{
+	"$schema": "../../../../../../packages/@biomejs/biome/configuration_schema.json",
+	"linter": {
+		"enabled": true,
+		"rules": {
+			"nursery": {
+				"noLabelWithoutControl": {
+					"level": "error",
+					"options": {
+						"inputComponents": [],
+						"labelAttributes": [],
+						"labelComponents": ["CustomLabel"]
+					}
+				}
+			}
+		}
+	}
+}

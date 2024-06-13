@@ -1241,12 +1241,71 @@ impl<'a> AriaRoles {
 
         false
     }
+
+    /// Given a role, it returns the corresponding elements and attributes associated to that role
+    pub fn get_elements_by_role(&self, role: &str) -> ElementsAndAttributes {
+        let role_candidate = match role {
+            "checkbox" => &CheckboxRole as &dyn AriaRoleDefinitionWithConcepts,
+            "radio" => &RadioRole as &dyn AriaRoleDefinitionWithConcepts,
+            "option" => &OptionRole as &dyn AriaRoleDefinitionWithConcepts,
+            "combobox" => &ComboBoxRole as &dyn AriaRoleDefinitionWithConcepts,
+            "heading" => &HeadingRole as &dyn AriaRoleDefinitionWithConcepts,
+            "separator" => &SeparatorRole as &dyn AriaRoleDefinitionWithConcepts,
+            "button" => &ButtonRole as &dyn AriaRoleDefinitionWithConcepts,
+            "article" => &ArticleRole as &dyn AriaRoleDefinitionWithConcepts,
+            "dialog" => &DialogRole as &dyn AriaRoleDefinitionWithConcepts,
+            "alert" => &AlertRole as &dyn AriaRoleDefinitionWithConcepts,
+            "alertdialog" => &AlertDialogRole as &dyn AriaRoleDefinitionWithConcepts,
+            "cell" => &CellRole as &dyn AriaRoleDefinitionWithConcepts,
+            "columnheader" => &ColumnHeaderRole as &dyn AriaRoleDefinitionWithConcepts,
+            "definition" => &DefinitionRole as &dyn AriaRoleDefinitionWithConcepts,
+            "figure" => &FigureRole as &dyn AriaRoleDefinitionWithConcepts,
+            "form" => &FormRole as &dyn AriaRoleDefinitionWithConcepts,
+            "graphics-document" => &GraphicsDocumentRole as &dyn AriaRoleDefinitionWithConcepts,
+            "graphics-object" => &GraphicsObjectRole as &dyn AriaRoleDefinitionWithConcepts,
+            "grid" => &GridRole as &dyn AriaRoleDefinitionWithConcepts,
+            "gridcell" => &GridCellRole as &dyn AriaRoleDefinitionWithConcepts,
+            "group" => &GroupRole as &dyn AriaRoleDefinitionWithConcepts,
+            "img" => &ImgRole as &dyn AriaRoleDefinitionWithConcepts,
+            "link" => &LinkRole as &dyn AriaRoleDefinitionWithConcepts,
+            "list" => &ListRole as &dyn AriaRoleDefinitionWithConcepts,
+            "listbox" => &ListBoxRole as &dyn AriaRoleDefinitionWithConcepts,
+            "listitem" => &ListItemRole as &dyn AriaRoleDefinitionWithConcepts,
+            "navigation" => &NavigationRole as &dyn AriaRoleDefinitionWithConcepts,
+            "row" => &RowRole as &dyn AriaRoleDefinitionWithConcepts,
+            "rowgroup" => &RowGroupRole as &dyn AriaRoleDefinitionWithConcepts,
+            "rowheader" => &RowHeaderRole as &dyn AriaRoleDefinitionWithConcepts,
+            "search" => &SearchboxRole as &dyn AriaRoleDefinitionWithConcepts,
+            "searchbox" => &SearchboxRole as &dyn AriaRoleDefinitionWithConcepts,
+            "table" => &TableRole as &dyn AriaRoleDefinitionWithConcepts,
+            "term" => &TermRole as &dyn AriaRoleDefinitionWithConcepts,
+            "textbox" => &TextboxRole as &dyn AriaRoleDefinitionWithConcepts,
+            "generic" => &GenericRole as &dyn AriaRoleDefinitionWithConcepts,
+            "caption" => &CaptionRole as &dyn AriaRoleDefinitionWithConcepts,
+            "main" => &MainRole as &dyn AriaRoleDefinitionWithConcepts,
+            "time" => &TimeRole as &dyn AriaRoleDefinitionWithConcepts,
+            "p" => &ParagraphRole as &dyn AriaRoleDefinitionWithConcepts,
+            "aside" => &ComplementaryRole as &dyn AriaRoleDefinitionWithConcepts,
+            "blockquote" => &BlockQuoteRole as &dyn AriaRoleDefinitionWithConcepts,
+            "associationlist" => &AssociationListRole as &dyn AriaRoleDefinitionWithConcepts,
+            "status" => &StatusRole as &dyn AriaRoleDefinitionWithConcepts,
+            "contentinfo" => &ContentInfoRole as &dyn AriaRoleDefinitionWithConcepts,
+            "region" => &RegionRole as &dyn AriaRoleDefinitionWithConcepts,
+            _ => return None,
+        };
+
+        role_candidate.concepts_by_role()
+    }
 }
 
 type ElementsAndAttributes<'a> = Option<Iter<'a, (&'a str, &'a [(&'a str, &'a str)])>>;
 
 pub trait AriaRoleDefinitionWithConcepts: AriaRoleDefinition {
     fn concepts_by_element_name<'a>(&self, _element_name: &str) -> ElementsAndAttributes<'a> {
+        None
+    }
+
+    fn concepts_by_role<'a>(&self) -> ElementsAndAttributes<'a> {
         None
     }
 }

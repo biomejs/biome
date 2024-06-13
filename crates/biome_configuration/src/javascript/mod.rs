@@ -2,13 +2,11 @@ mod formatter;
 
 use std::str::FromStr;
 
-use crate::javascript::formatter::JavascriptLinter;
 use biome_deserialize::StringSet;
 use biome_deserialize_macros::{Deserializable, Merge, Partial};
 use bpaf::Bpaf;
 pub use formatter::{
-    partial_javascript_formatter, partial_javascript_linter, JavascriptFormatter,
-    PartialJavascriptFormatter, PartialJavascriptLinter,
+    partial_javascript_formatter, JavascriptFormatter, PartialJavascriptFormatter,
 };
 use serde::{Deserialize, Serialize};
 
@@ -94,6 +92,31 @@ impl FromStr for JsxRuntime {
             "transparent" => Ok(Self::Transparent),
             "react-classic" | "reactClassic" => Ok(Self::ReactClassic),
             _ => Err("Unexpected value".to_string()),
+        }
+    }
+}
+
+/// Linter options specific to the JavaScript linter
+#[derive(Clone, Debug, Deserialize, Eq, Partial, PartialEq, Serialize)]
+#[partial(derive(Bpaf, Clone, Deserializable, Eq, Merge, PartialEq))]
+#[partial(cfg_attr(feature = "schema", derive(schemars::JsonSchema)))]
+#[partial(serde(rename_all = "camelCase", default, deny_unknown_fields))]
+pub struct JavascriptLinter {
+    /// Control the linter for JavaScript (and its super languages) files.
+    #[partial(bpaf(long("javascript-linter-enabled"), argument("true|false"), optional))]
+    pub enabled: bool,
+}
+
+impl Default for JavascriptLinter {
+    fn default() -> Self {
+        Self { enabled: true }
+    }
+}
+
+impl PartialJavascriptLinter {
+    pub fn get_linter_configuration(&self) -> JavascriptLinter {
+        JavascriptLinter {
+            enabled: self.enabled.unwrap_or_default(),
         }
     }
 }

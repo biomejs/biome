@@ -2,10 +2,10 @@ use crate::grit_binding::GritBinding;
 use crate::grit_code_snippet::GritCodeSnippet;
 use crate::grit_file::GritFile;
 use crate::grit_node_patterns::{GritLeafNodePattern, GritNodePattern};
+use crate::grit_resolved_pattern::GritResolvedPattern;
 use crate::grit_target_language::GritTargetLanguage;
 use crate::grit_target_node::GritTargetNode;
 use crate::grit_tree::GritTree;
-use crate::resolved_pattern::GritResolvedPattern;
 use anyhow::Result;
 use grit_pattern_matcher::context::{ExecContext, QueryContext};
 use grit_pattern_matcher::file_owners::FileOwners;
@@ -14,7 +14,7 @@ use grit_pattern_matcher::pattern::{
 };
 use grit_util::AnalysisLogs;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq)]
 pub(crate) struct GritQueryContext;
 
 impl QueryContext for GritQueryContext {
@@ -22,16 +22,24 @@ impl QueryContext for GritQueryContext {
     type NodePattern = GritNodePattern;
     type LeafNodePattern = GritLeafNodePattern;
     type ExecContext<'a> = GritExecContext;
-    type Binding<'a> = GritBinding;
+    type Binding<'a> = GritBinding<'a>;
     type CodeSnippet = GritCodeSnippet;
-    type ResolvedPattern<'a> = GritResolvedPattern;
+    type ResolvedPattern<'a> = GritResolvedPattern<'a>;
     type Language<'a> = GritTargetLanguage;
-    type File<'a> = GritFile;
-    type Tree = GritTree;
+    type File<'a> = GritFile<'a>;
+    type Tree<'a> = GritTree;
 }
 
 #[derive(Debug)]
-pub(crate) struct GritExecContext;
+pub(crate) struct GritExecContext {
+    lang: GritTargetLanguage,
+}
+
+impl GritExecContext {
+    pub fn new(lang: GritTargetLanguage) -> Self {
+        Self { lang }
+    }
+}
 
 impl<'a> ExecContext<'a, GritQueryContext> for GritExecContext {
     fn pattern_definitions(&self) -> &[PatternDefinition<GritQueryContext>] {
@@ -56,7 +64,7 @@ impl<'a> ExecContext<'a, GritQueryContext> for GritExecContext {
         _context: &'a Self,
         _state: &mut State<'a, GritQueryContext>,
         _logs: &mut AnalysisLogs,
-    ) -> Result<GritResolvedPattern> {
+    ) -> Result<GritResolvedPattern<'a>> {
         todo!()
     }
 
@@ -65,7 +73,7 @@ impl<'a> ExecContext<'a, GritQueryContext> for GritExecContext {
     }
 
     fn language(&self) -> &GritTargetLanguage {
-        todo!()
+        &self.lang
     }
 
     fn exec_step(
@@ -79,6 +87,15 @@ impl<'a> ExecContext<'a, GritQueryContext> for GritExecContext {
     }
 
     fn name(&self) -> Option<&str> {
+        todo!()
+    }
+
+    fn load_file(
+        &self,
+        _file: &<GritQueryContext as QueryContext>::File<'a>,
+        _state: &mut State<'a, GritQueryContext>,
+        _logs: &mut AnalysisLogs,
+    ) -> Result<bool> {
         todo!()
     }
 }

@@ -33,6 +33,9 @@ expression: content
           }
         }
       }
+    },
+    {
+      "include": ["test3.js"]
     }
   ]
 }
@@ -47,19 +50,48 @@ debugger
 ## `test2.js`
 
 ```js
+debugger
+```
 
+## `test3.js`
+
+```js
+debugger
 ```
 
 # Emitted Messages
 
 ```block
-internalError/fs  DEPRECATED  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+test2.js:1:1 lint/suspicious/noDebugger  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The argument --apply-unsafe is deprecated, it will be removed in the next major release. Use --write --unsafe instead.
+  ! This is an unexpected use of the debugger statement.
   
+  > 1 │ debugger
+      │ ^^^^^^^^
+  
+  i Unsafe fix: Remove debugger statement
+  
+    1 │ debugger
+      │ --------
 
 ```
 
 ```block
-Checked 3 files in <TIME>. Fixed 1 file.
+test3.js:1:1 lint/suspicious/noDebugger  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This is an unexpected use of the debugger statement.
+  
+  > 1 │ debugger
+      │ ^^^^^^^^
+  
+  i Unsafe fix: Remove debugger statement
+  
+    1 │ debugger
+      │ --------
+
+```
+
+```block
+Checked 4 files in <TIME>. No fixes applied.
+Found 2 warnings.
 ```

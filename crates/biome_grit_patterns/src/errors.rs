@@ -1,6 +1,7 @@
 use biome_diagnostics::serde::Diagnostic as SerializableDiagnostic;
 use biome_diagnostics::Diagnostic;
 use biome_rowan::SyntaxError;
+use grit_util::ByteRange;
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Deserialize, Diagnostic, Serialize)]
@@ -37,6 +38,12 @@ pub enum CompileError {
     /// If a function or bubble pattern has multiple parameters with the same name.
     DuplicateParameters,
 
+    /// A metavariable was expected at the given range.
+    InvalidMetavariableRange(ByteRange),
+
+    /// Incorrect reference to a metavariable.
+    MetavariableNotFound(String),
+
     /// Tried to declare or assign a Grit reserved metavariable.
     ReservedMetavariable(String),
 
@@ -51,6 +58,13 @@ pub enum CompileError {
 
     /// A pattern is required to compile a Grit query.
     MissingPattern,
+
+    /// Bracketed metavariables are only allowed on the right-hand side of
+    /// rewrite.
+    InvalidBracketedMetavariable,
+
+    /// Unknown variable.
+    UnknownVariable(String),
 }
 
 impl Diagnostic for CompileError {}

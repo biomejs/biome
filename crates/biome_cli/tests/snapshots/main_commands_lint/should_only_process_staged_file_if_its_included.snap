@@ -30,5 +30,5 @@ console.log('file2');
 # Emitted Messages
 
 ```block
-Checked 1 file in <TIME>. No fixes needed.
+Checked 1 file in <TIME>. No fixes applied.
 ```

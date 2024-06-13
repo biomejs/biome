@@ -1,0 +1,25 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: content
+---
+## `biome.json`
+
+```json
+{
+  "formatter": {
+    "indentStyle": "space",
+    "indentWidth": 4
+  },
+  "json": {
+    "formatter": {
+      "trailingCommas": "all"
+    }
+  }
+}
+```
+
+# Emitted Messages
+
+```block
+Checked 1 file in <TIME>. No fixes applied.
+```

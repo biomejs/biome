@@ -1,6 +1,6 @@
 //! Generated file, do not edit by hand, see `xtask/codegen`
 
-use biome_analyze::declare_group;
+use biome_analyze::declare_lint_group;
 
 pub mod no_access_key;
 pub mod no_aria_hidden_on_focusable;
@@ -33,7 +33,7 @@ pub mod use_valid_aria_role;
 pub mod use_valid_aria_values;
 pub mod use_valid_lang;
 
-declare_group! {
+declare_lint_group! {
     pub A11y {
         name : "a11y" ,
         rules : [

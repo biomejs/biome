@@ -1,0 +1,36 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.ts
+---
+# Input
+```ts
+class D {
+	f(a: D): D | undefined { return; }
+}
+
+```
+
+# Diagnostics
+```
+invalid.ts:2:4 lint/nursery/noUnusedFunctionParameters  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This parameter is unused.
+  
+    1 │ class D {
+  > 2 │ 	f(a: D): D | undefined { return; }
+      │ 	  ^
+    3 │ }
+    4 │ 
+  
+  i Unused parameters might be the result of an incomplete refactoring.
+  
+  i Unsafe fix: If this is intentional, prepend a with an underscore.
+  
+    1 1 │   class D {
+    2   │ - → f(a:·D):·D·|·undefined·{·return;·}
+      2 │ + → f(_a:·D):·D·|·undefined·{·return;·}
+    3 3 │   }
+    4 4 │   
+  
+
+```

@@ -33,6 +33,16 @@ declare_rule! {
     /// The rule ensures that all imports used only as a type use a type-only `import`.
     /// It also groups inline type imports into a grouped `import type`.
     ///
+    /// If you use the TypeScript Compiler (TSC) to compile your code into JavaScript,
+    /// then you can disable this rule, as TSC can remove imports only used as types.
+    /// However, for consistency and compatibility with other transpilers, you may want to enable this rule.
+    /// In that case we recommend to enable TSC's [`verbatimModuleSyntax`](https://www.typescriptlang.org/tsconfig/#verbatimModuleSyntax).
+    /// This configuration ensures that TSC preserves imports not marked with the `type` qualifier.
+    ///
+    /// You may also want to enable the editor setting [`typescript.preferences.preferTypeOnlyAutoImports`](https://devblogs.microsoft.com/typescript/announcing-typescript-5-3-rc/#settings-to-prefer-type-auto-imports) from the TypeScript LSP.
+    /// This setting is available in Visual Studio Code.
+    /// It ensures the `type` is used when the editor automatically imports a type.
+    ///
     /// ## Caveat with TypeScript experimental decorators
     ///
     /// Some frameworks like Angular and NestJS rely on

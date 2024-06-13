@@ -1,6 +1,6 @@
 use biome_deserialize::StringSet;
 use biome_deserialize_macros::{Deserializable, Merge, Partial};
-use biome_formatter::{AttributePosition, IndentStyle, LineEnding, LineWidth};
+use biome_formatter::{AttributePosition, IndentStyle, IndentWidth, LineEnding, LineWidth};
 use bpaf::Bpaf;
 use serde::{Deserialize, Serialize};
 use std::str::FromStr;
@@ -27,11 +27,11 @@ pub struct FormatterConfiguration {
     /// The size of the indentation, 2 by default (deprecated, use `indent-width`)
     #[partial(bpaf(long("indent-size"), argument("NUMBER"), optional))]
     #[partial(deserializable(deprecated(use_instead = "formatter.indentWidth")))]
-    pub indent_size: u8,
+    pub indent_size: IndentWidth,
 
     /// The size of the indentation, 2 by default
     #[partial(bpaf(long("indent-width"), argument("NUMBER"), optional))]
-    pub indent_width: u8,
+    pub indent_width: IndentWidth,
 
     /// The type of line ending.
     #[partial(bpaf(long("line-ending"), argument("lf|crlf|cr"), optional))]
@@ -82,8 +82,8 @@ impl Default for FormatterConfiguration {
         Self {
             enabled: true,
             format_with_errors: false,
-            indent_size: 2,
-            indent_width: 2,
+            indent_size: IndentWidth::default(),
+            indent_width: IndentWidth::default(),
             indent_style: PlainIndentStyle::default(),
             line_ending: LineEnding::default(),
             line_width: LineWidth::default(),

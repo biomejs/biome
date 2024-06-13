@@ -1,0 +1,26 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: content
+---
+## `file1.js`
+
+```js
+console.log('file1');
+```
+
+# Termination Message
+
+```block
+internalError/io ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × No files were processed in the specified paths.
+  
+
+
+```
+
+# Emitted Messages
+
+```block
+Checked 0 files in <TIME>. No fixes applied.
+```

@@ -5,5 +5,5 @@ expression: content
 # Emitted Messages
 
 ```block
-Checked 0 files in <TIME>. No fixes needed.
+Checked 0 files in <TIME>. No fixes applied.
 ```

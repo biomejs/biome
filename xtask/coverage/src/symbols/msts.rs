@@ -8,8 +8,11 @@ use crate::runner::{TestCase, TestCaseFiles, TestRunOutcome, TestSuite};
 use biome_js_parser::JsParserOptions;
 use std::collections::HashSet;
 use std::fmt::Write;
+use std::io;
 use std::path::{Path, PathBuf};
+use std::process::Command;
 use std::str::FromStr;
+use xtask::project_root;
 
 const CASES_PATH: &str = "xtask/coverage/Typescript/tests/baselines/reference";
 const BASE_PATH: &str = "xtask/coverage/Typescript";
@@ -191,6 +194,26 @@ impl TestSuite for SymbolsMicrosoftTestSuite {
             }
             _ => false,
         }
+    }
+
+    fn checkout(&self) -> io::Result<()> {
+        let base_path = project_root().join(BASE_PATH);
+        let mut command = Command::new("git");
+        command
+            .arg("clone")
+            .arg("https://github.com/microsoft/Typescript.git")
+            .arg("--depth")
+            .arg("1")
+            .arg(base_path.display().to_string());
+        command.output()?;
+        let mut command = Command::new("git");
+        command
+            .arg("reset")
+            .arg("--hard")
+            .arg("61a96b1641abe24c4adc3633eb936df89eb991f2");
+        command.output()?;
+
+        Ok(())
     }
 
     fn load_test(&self, path: &Path) -> Option<Box<dyn TestCase>> {

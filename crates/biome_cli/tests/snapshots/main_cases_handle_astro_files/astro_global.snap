@@ -1,0 +1,18 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: content
+---
+## `file.astro`
+
+```astro
+---
+const { some } = Astro.props
+---
+<div>{some}</div>
+```
+
+# Emitted Messages
+
+```block
+Checked 1 file in <TIME>. No fixes applied.
+```

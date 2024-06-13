@@ -11,7 +11,8 @@ use std::path::{Path, PathBuf};
 use crate::configs::{
     CONFIG_FILE_SIZE_LIMIT, CONFIG_IGNORE_SYMLINK, CONFIG_LINTER_AND_FILES_IGNORE,
     CONFIG_LINTER_DISABLED, CONFIG_LINTER_DISABLED_JSONC, CONFIG_LINTER_DOWNGRADE_DIAGNOSTIC,
-    CONFIG_LINTER_IGNORED_FILES, CONFIG_LINTER_SUPPRESSED_GROUP, CONFIG_LINTER_SUPPRESSED_RULE,
+    CONFIG_LINTER_DOWNGRADE_DIAGNOSTIC_INFO, CONFIG_LINTER_IGNORED_FILES,
+    CONFIG_LINTER_SUPPRESSED_GROUP, CONFIG_LINTER_SUPPRESSED_RULE,
     CONFIG_LINTER_UPGRADE_DIAGNOSTIC, CONFIG_RECOMMENDED_GROUP,
 };
 use crate::snap_test::{assert_file_contents, markup_to_string, SnapshotPayload};
@@ -622,6 +623,57 @@ fn downgrade_severity() {
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "downgrade_severity",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn downgrade_severity_info() {
+    let mut fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+    let file_path = Path::new("biome.json");
+    fs.insert(
+        file_path.into(),
+        CONFIG_LINTER_DOWNGRADE_DIAGNOSTIC_INFO.as_bytes(),
+    );
+
+    let file_path = Path::new("file.js");
+    fs.insert(file_path.into(), NO_DEBUGGER.as_bytes());
+
+    let result = run_cli(
+        DynRef::Borrowed(&mut fs),
+        &mut console,
+        Args::from(
+            [
+                ("lint"),
+                "--error-on-warnings",
+                file_path.as_os_str().to_str().unwrap(),
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    let messages = &console.out_buffer;
+
+    assert_eq!(
+        messages
+            .iter()
+            .filter(|m| m.level == LogLevel::Error)
+            .filter(|m| {
+                let content = format!("{:#?}", m.content);
+                content.contains("suspicious/noDebugger")
+            })
+            .count(),
+        1
+    );
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "downgrade_severity_info",
         fs,
         console,
         result,
@@ -4140,6 +4192,55 @@ function f() { arguments; }
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "fix_unsafe_with_error",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn should_error_if_unstaged_files_only_with_staged_flag() {
+    let mut console = BufferConsole::default();
+    let mut fs = MemoryFileSystem::default();
+    // Unstaged
+    fs.insert(
+        Path::new("file1.js").into(),
+        r#"console.log('file1');"#.as_bytes(),
+    );
+    let result = run_cli(
+        DynRef::Borrowed(&mut fs),
+        &mut console,
+        Args::from([("lint"), "--staged"].as_slice()),
+    );
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "should_error_if_unstaged_files_only_with_staged_flag",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn should_error_if_unchanged_files_only_with_changed_flag() {
+    let mut console = BufferConsole::default();
+    let mut fs = MemoryFileSystem::default();
+    // Unchanged
+    fs.insert(
+        Path::new("file1.js").into(),
+        r#"console.log('file1');"#.as_bytes(),
+    );
+    let result = run_cli(
+        DynRef::Borrowed(&mut fs),
+        &mut console,
+        Args::from([("lint"), "--changed", "--since=main"].as_slice()),
+    );
+    assert!(result.is_err(), "run_cli returned {result:?}");
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "should_error_if_unchanged_files_only_with_changed_flag",
         fs,
         console,
         result,

@@ -10,6 +10,7 @@ impl FormatRule<AnyCssValue> for FormatAnyCssValue {
         match node {
             AnyCssValue::AnyCssDimension(node) => node.format().fmt(f),
             AnyCssValue::AnyCssFunction(node) => node.format().fmt(f),
+            AnyCssValue::CssBracketedValue(node) => node.format().fmt(f),
             AnyCssValue::CssColor(node) => node.format().fmt(f),
             AnyCssValue::CssCustomIdentifier(node) => node.format().fmt(f),
             AnyCssValue::CssDashedIdentifier(node) => node.format().fmt(f),

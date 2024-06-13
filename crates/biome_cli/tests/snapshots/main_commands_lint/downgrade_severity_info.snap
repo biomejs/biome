@@ -1,0 +1,45 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: content
+---
+## `biome.json`
+
+```json
+{
+  "linter": {
+    "rules": {
+      "recommended": true,
+      "suspicious": {
+        "noDebugger": "info"
+      }
+    }
+  }
+}
+```
+
+## `file.js`
+
+```js
+debugger;
+```
+
+# Emitted Messages
+
+```block
+file.js:1:1 lint/suspicious/noDebugger  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This is an unexpected use of the debugger statement.
+  
+  > 1 │ debugger;
+      │ ^^^^^^^^^
+  
+  i Unsafe fix: Remove debugger statement
+  
+    1 │ debugger;
+      │ ---------
+
+```
+
+```block
+Checked 1 file in <TIME>. No fixes applied.
+```

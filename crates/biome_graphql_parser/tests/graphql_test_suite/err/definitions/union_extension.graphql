@@ -1,0 +1,3 @@
+extend union SearchResult
+
+extend union SearchResult Photo | Person

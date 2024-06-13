@@ -30,12 +30,17 @@
   ],
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
-  "keywords": ["JavaScript", "bindings", "APIs", "biome"],
+  "keywords": [
+    "JavaScript",
+    "bindings",
+    "APIs",
+    "biome"
+  ],
   "license": "MIT OR Apache-2.0",
   "homepage": "https://biomejs.dev",
   "repository": {
     "type": "git",
-    "url": "https://github.com/biomejs/biome.git",
+    "url": "git+https://github.com/biomejs/biome.git",
     "directory": "packages/@biomejs/js-api"
   },
   "author": "Biome Developers and Contributors",
@@ -45,13 +50,13 @@
     "@biomejs/wasm-nodejs": "link:../wasm-nodejs",
     "@biomejs/wasm-web": "link:../wasm-web",
     "typescript": "5.4.5",
-    "vite": "5.2.11",
+    "vite": "5.2.13",
     "vitest": "1.6.0"
   },
   "peerDependencies": {
-    "@biomejs/wasm-bundler": "^1.7.3",
-    "@biomejs/wasm-nodejs": "^1.7.3",
-    "@biomejs/wasm-web": "^1.7.3"
+    "@biomejs/wasm-bundler": "^1.8.1",
+    "@biomejs/wasm-nodejs": "^1.8.1",
+    "@biomejs/wasm-web": "^1.8.1"
   },
   "peerDependenciesMeta": {
     "@biomejs/wasm-bundler": {

@@ -2,7 +2,6 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: css/atword/atword.css
 ---
-
 # Input
 
 ```css
@@ -16,11 +15,10 @@ info: css/atword/atword.css
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,4 +1,5 @@
+@@ -1,4 +1,4 @@
  .test {
 -  @color: red;
-+  @
-+  color: red;
++  @color : red;
    color: @color;
  }
 ```
@@ -29,43 +27,13 @@ info: css/atword/atword.css
 
 ```css
 .test {
-  @
-  color: red;
+  @color : red;
   color: @color;
 }
 ```
 
 # Errors
 ```
-atword.css:1:10 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Unexpected value or character.
-  
-  > 1 │ .test { @color: red; color: @color; }
-      │          ^^^^^
-    2 │ 
-  
-  i Expected one of:
-  
-  - charset
-  - color-profile
-  - container
-  - counter-style
-  - document
-  - font-face
-  - font-feature-values
-  - font-palette-values
-  - import
-  - keyframes
-  - layer
-  - media
-  - namespace
-  - page
-  - property
-  - supports
-  - viewport
-  - scope
-  
 atword.css:1:29 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Unexpected value or character.
@@ -86,5 +54,3 @@ atword.css:1:29 parse ━━━━━━━━━━━━━━━━━━━�
   
 
 ```
-
-

@@ -28,5 +28,5 @@ expression: content
 # Emitted Messages
 
 ```block
-Checked 2 files in <TIME>. No fixes needed.
+Checked 2 files in <TIME>. No fixes applied.
 ```

@@ -33,9 +33,7 @@ declare_rule! {
     /// ```
     ///
     /// ```css
-    /// p {
-    ///   /* foo */
-    /// }
+    /// p { /* foo */ }
     /// ```
     ///
     /// ```css
@@ -43,7 +41,7 @@ declare_rule! {
     /// ```
     ///
     pub NoEmptyBlock {
-        version: "next",
+        version: "1.8.0",
         name: "noEmptyBlock",
         language: "css",
         recommended: true,
@@ -59,7 +57,7 @@ impl Rule for NoEmptyBlock {
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let node = ctx.query();
-        if node.is_empty() {
+        if node.is_empty_without_comments() {
             return Some(node.clone());
         }
 

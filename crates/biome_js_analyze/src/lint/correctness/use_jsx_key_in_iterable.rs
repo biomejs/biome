@@ -21,16 +21,16 @@ declare_rule! {
     ///
     /// ### Invalid
     ///
-    /// ```js,expect_diagnostic
+    /// ```jsx,expect_diagnostic
     /// [<Hello />];
     /// ```
-    /// ```js,expect_diagnostic
+    /// ```jsx,expect_diagnostic
     /// data.map((x) => <Hello>{x}</Hello>);
     /// ```
     ///
     /// ### Valid
     ///
-    /// ```js
+    /// ```jsx
     /// [<Hello key="first" />, <Hello key="second" />, <Hello key="third" />];
     /// data.map((x) => <Hello key={x.id}>{x}</Hello>);
     /// ```
@@ -92,7 +92,7 @@ impl Rule for UseJsxKeyInIterable {
 ///
 /// Examples
 ///
-/// ```js
+/// ```jsx
 /// [<h1></h1>, <h1></h1>]
 /// ```
 fn handle_collections(node: &JsArrayExpression, model: &SemanticModel) -> Vec<TextRange> {
@@ -114,7 +114,7 @@ fn handle_collections(node: &JsArrayExpression, model: &SemanticModel) -> Vec<Te
 ///
 /// Examples
 ///
-/// ```js
+/// ```jsx
 /// data.map(x => <h1>{x}</h1>)
 /// ```
 fn handle_iterators(node: &JsCallExpression, model: &SemanticModel) -> Option<Vec<TextRange>> {
@@ -184,6 +184,28 @@ fn handle_function_body(
     model: &SemanticModel,
     is_inside_jsx: bool,
 ) -> Vec<TextRange> {
+    // if the return statement definitely has a key prop, don't need to check the rest of the function
+    let return_statement = node
+        .statements()
+        .iter()
+        .find_map(|statement| statement.as_js_return_statement().cloned());
+    let is_return_component = return_statement
+        .as_ref()
+        .and_then(|ret| {
+            let returned_value = ret.argument()?;
+            Some(ReactComponentExpression::can_cast(
+                returned_value.syntax().kind(),
+            ))
+        })
+        .unwrap_or_default();
+    let ranges = return_statement.and_then(|ret| {
+        let returned_value = ret.argument()?;
+        handle_potential_react_component(returned_value, model, is_inside_jsx)
+    });
+    if ranges.is_none() && is_return_component {
+        return vec![];
+    }
+
     node.statements()
         .iter()
         .filter_map(|statement| {
@@ -263,7 +285,7 @@ fn handle_react_component(
 ///
 /// Examples
 ///
-/// ```js
+/// ```jsx
 /// <Hello></Hello>
 /// ```
 fn handle_jsx_tag(node: &JsxTagExpression, model: &SemanticModel) -> Option<Vec<TextRange>> {

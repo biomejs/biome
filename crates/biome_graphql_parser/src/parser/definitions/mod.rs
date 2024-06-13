@@ -23,14 +23,14 @@ use biome_parser::{
 use self::{
     directive::parse_directive_definition,
     fragment::parse_fragment_definition,
-    input_object::parse_input_object_type_definition,
-    interface::parse_interface_type_definition,
+    input_object::{parse_input_object_type_definition, parse_input_object_type_extension},
+    interface::{parse_interface_type_definition, parse_interface_type_extension},
     object::{parse_object_type_definition, parse_object_type_extension},
     operation::{parse_operation_definition, parse_selection_set},
-    r#enum::parse_enum_type_definition,
+    r#enum::{parse_enum_type_definition, parse_enum_type_extension},
     scalar::{parse_scalar_type_definition, parse_scalar_type_extension},
     schema::{parse_schema_definition, parse_schema_extension},
-    union::parse_union_type_definition,
+    union::{parse_union_type_definition, parse_union_type_extension},
 };
 
 use super::value::is_at_string;
@@ -99,6 +99,10 @@ fn parse_extension(p: &mut GraphqlParser) -> ParsedSyntax {
         T![schema] => parse_schema_extension(p),
         T![scalar] => parse_scalar_type_extension(p),
         T![type] => parse_object_type_extension(p),
+        T![interface] => parse_interface_type_extension(p),
+        T![union] => parse_union_type_extension(p),
+        T![enum] => parse_enum_type_extension(p),
+        T![input] => parse_input_object_type_extension(p),
         _ => Absent,
     }
 }

@@ -1,6 +1,6 @@
 use std::{env, path::Path};
 
-use biome_formatter::IndentStyle;
+use biome_formatter::{IndentStyle, IndentWidth};
 use biome_formatter_test::test_prettier_snapshot::{PrettierSnapshot, PrettierTestFile};
 use biome_json_formatter::context::JsonFormatOptions;
 
@@ -19,7 +19,7 @@ fn test_snapshot(input: &'static str, _: &str, _: &str, _: &str) {
     let test_file = PrettierTestFile::new(input, root_path);
     let options = JsonFormatOptions::default()
         .with_indent_style(IndentStyle::Space)
-        .with_indent_width(2.into());
+        .with_indent_width(IndentWidth::default());
     let language = language::JsonTestFormatLanguage::default();
     let snapshot = PrettierSnapshot::new(test_file, language, options);
 

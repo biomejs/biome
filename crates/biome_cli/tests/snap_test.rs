@@ -3,7 +3,7 @@ use biome_console::fmt::{Formatter, Termcolor};
 use biome_console::{markup, BufferConsole, Markup};
 use biome_diagnostics::termcolor::NoColor;
 use biome_diagnostics::{print_diagnostic_to_string, Error};
-use biome_formatter::IndentStyle;
+use biome_formatter::{IndentStyle, IndentWidth};
 use biome_fs::{ConfigName, FileSystemExt, MemoryFileSystem};
 use biome_json_formatter::context::JsonFormatOptions;
 use biome_json_formatter::format_node;
@@ -18,6 +18,7 @@ use std::path::{Path, PathBuf, MAIN_SEPARATOR};
 
 lazy_static! {
     static ref TIME_REGEX: Regex = Regex::new("\\s[0-9]+[mµn]?s\\.").unwrap();
+    static ref TIME_JUNIT_REGEX: Regex = Regex::new("time=\\\"[.0-9]+\\\"").unwrap();
 }
 
 #[derive(Default)]
@@ -68,7 +69,7 @@ impl CliSnapshot {
             let formatted = format_node(
                 JsonFormatOptions::default()
                     .with_indent_style(IndentStyle::Space)
-                    .with_indent_width(2.into()),
+                    .with_indent_width(IndentWidth::default()),
                 &parsed.syntax(),
             )
             .expect("formatted JSON")
@@ -158,6 +159,13 @@ fn redact_snapshot(input: &str) -> Option<Cow<'_, str>> {
         output.to_mut().replace_range(found, " <TIME>.");
     }
 
+    let the_match = TIME_JUNIT_REGEX
+        .find(output.as_ref())
+        .map(|f| f.start()..f.end());
+    if let Some(found) = the_match {
+        output.to_mut().replace_range(found, "time=\"<TIME>\"");
+    }
+
     // Normalize the name of the current executable to "biome"
     let current_exe = current_exe()
         .ok()
@@ -169,32 +177,6 @@ fn redact_snapshot(input: &str) -> Option<Cow<'_, str>> {
 
     output = replace_temp_dir(output);
     output = replace_biome_dir(output);
-
-    // Ref: https://docs.github.com/actions/learn-github-actions/variables#default-environment-variables
-    let is_github = std::env::var("GITHUB_ACTIONS")
-        .ok()
-        .map_or(false, |value| value == "true");
-
-    if is_github {
-        // GitHub actions sets the env var GITHUB_ACTIONS=true in CI
-        // Based on that, biome also has a feature that detects if it's running on GH Actions and
-        // emits additional information in the output (workflow commands, see PR + discussion at #681)
-        // To avoid polluting snapshots with that, we filter out those lines
-
-        let lines: Vec<_> = output
-            .split('\n')
-            .filter(|line| {
-                !line.starts_with("::notice ")
-                    && !line.starts_with("::warning ")
-                    && !line.starts_with("::error ")
-            })
-            .collect();
-
-        output = Cow::Owned(lines.join("\n"));
-        if output.is_empty() {
-            return None;
-        }
-    }
 
     // Normalize Windows-specific path separators to "/"
     if cfg!(windows) {

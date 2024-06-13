@@ -7,7 +7,7 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_js_semantic::ReferencesExtensions;
 use biome_js_syntax::binding_ext::{
-    AnyJsBindingDeclaration, AnyJsIdentifierBinding, JsAnyParameterParentFunction,
+    AnyJsBindingDeclaration, AnyJsIdentifierBinding, AnyJsParameterParentFunction,
 };
 use biome_js_syntax::declaration_ext::is_in_ambient_context;
 use biome_js_syntax::{
@@ -29,6 +29,10 @@ declare_rule! {
     /// This rule won't report unused imports.
     /// If you want to report unused imports,
     /// enable [noUnusedImports](https://biomejs.dev/linter/rules/no-unused-imports/).
+    ///
+    /// From `v1.9.0`, the rule won't check unused function parameters any more.
+    /// Users should switch to
+    /// [noUnusedFunctionParameters](https://biomejs.dev/linter/rules/no-unused-function-parameters/)
     ///
     /// ## Examples
     ///
@@ -65,7 +69,7 @@ declare_rule! {
     /// export function f<T>() {}
     /// ```
     ///
-    /// # Valid
+    /// ### Valid
     ///
     /// ```js
     /// function foo(b) {
@@ -93,13 +97,14 @@ declare_rule! {
         sources: &[
             RuleSource::Eslint("no-unused-vars"),
             RuleSource::EslintTypeScript("no-unused-vars"),
+            RuleSource::EslintUnusedImports("no-unused-vars")
         ],
         recommended: false,
         fix_kind: FixKind::Unsafe,
     }
 }
 
-/// Suggestion if the bindnig is unused
+/// Suggestion if the binding is unused
 #[derive(Debug)]
 pub enum SuggestedFix {
     /// No suggestion will be given
@@ -109,23 +114,26 @@ pub enum SuggestedFix {
 }
 
 fn is_function_that_is_ok_parameter_not_be_used(
-    parent_function: &Option<JsAnyParameterParentFunction>,
+    parent_function: &Option<AnyJsParameterParentFunction>,
 ) -> bool {
     matches!(
         parent_function,
         Some(
             // bindings in signatures are ok to not be used
-            JsAnyParameterParentFunction::TsMethodSignatureClassMember(_)
-            | JsAnyParameterParentFunction::TsCallSignatureTypeMember(_)
-            | JsAnyParameterParentFunction::TsConstructSignatureTypeMember(_)
-            | JsAnyParameterParentFunction::TsConstructorSignatureClassMember(_)
-            | JsAnyParameterParentFunction::TsMethodSignatureTypeMember(_)
-            | JsAnyParameterParentFunction::TsSetterSignatureClassMember(_)
-            | JsAnyParameterParentFunction::TsSetterSignatureTypeMember(_)
+            AnyJsParameterParentFunction::TsMethodSignatureClassMember(_)
+            | AnyJsParameterParentFunction::TsCallSignatureTypeMember(_)
+            | AnyJsParameterParentFunction::TsConstructSignatureTypeMember(_)
+            | AnyJsParameterParentFunction::TsConstructorSignatureClassMember(_)
+            | AnyJsParameterParentFunction::TsMethodSignatureTypeMember(_)
+            | AnyJsParameterParentFunction::TsSetterSignatureClassMember(_)
+            | AnyJsParameterParentFunction::TsSetterSignatureTypeMember(_)
+            | AnyJsParameterParentFunction::TsIndexSignatureClassMember(_)
             // bindings in function types are ok to not be used
-            | JsAnyParameterParentFunction::TsFunctionType(_)
+            | AnyJsParameterParentFunction::TsFunctionType(_)
+            | AnyJsParameterParentFunction::TsConstructorType(_)
             // binding in declare are ok to not be used
-            | JsAnyParameterParentFunction::TsDeclareFunctionDeclaration(_)
+            | AnyJsParameterParentFunction::TsDeclareFunctionDeclaration(_)
+            | AnyJsParameterParentFunction::TsDeclareFunctionExportDefaultDeclaration(_)
         )
     )
 }
@@ -280,10 +288,8 @@ impl Rule for NoUnusedVariables {
         }
 
         let binding = ctx.query();
-        let name = binding.name_token().ok()?;
-        let name = name.text_trimmed();
 
-        if name.starts_with('_') {
+        if binding.name_token().ok()?.text_trimmed().starts_with('_') {
             return None;
         }
 

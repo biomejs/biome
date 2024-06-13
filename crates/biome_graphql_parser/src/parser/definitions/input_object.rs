@@ -1,6 +1,8 @@
 use crate::parser::{
-    directive::DirectiveList, parse_description, parse_error::expected_name, parse_name,
-    GraphqlParser,
+    directive::DirectiveList,
+    parse_description,
+    parse_error::{expected_input_object_extension, expected_name},
+    parse_name, GraphqlParser,
 };
 use biome_graphql_syntax::{
     GraphqlSyntaxKind::{self, *},
@@ -30,6 +32,28 @@ pub(crate) fn parse_input_object_type_definition(p: &mut GraphqlParser) -> Parse
     parse_input_fields_definition(p).ok();
 
     Present(m.complete(p, GRAPHQL_INPUT_OBJECT_TYPE_DEFINITION))
+}
+
+/// Must only be called if the next 2 token is `extend` and `input`, otherwise it will panic.
+#[inline]
+pub(crate) fn parse_input_object_type_extension(p: &mut GraphqlParser) -> ParsedSyntax {
+    let m = p.start();
+
+    p.bump(T![extend]);
+    p.expect(T![input]);
+
+    parse_name(p).or_add_diagnostic(p, expected_name);
+
+    let directive_list = DirectiveList.parse_list(p);
+    let directive_empty = directive_list.range(p).is_empty();
+
+    let input_fields_empty = parse_input_fields_definition(p).is_absent();
+
+    if directive_empty && input_fields_empty {
+        p.error(expected_input_object_extension(p, p.cur_range()));
+    }
+
+    Present(m.complete(p, GRAPHQL_INPUT_OBJECT_TYPE_EXTENSION))
 }
 
 #[inline]

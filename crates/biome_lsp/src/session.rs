@@ -25,14 +25,14 @@ use futures::StreamExt;
 use rustc_hash::FxHashMap;
 use serde_json::Value;
 use std::path::PathBuf;
-use std::sync::atomic::AtomicU8;
 use std::sync::atomic::Ordering;
+use std::sync::atomic::{AtomicBool, AtomicU8};
 use std::sync::Arc;
 use std::sync::RwLock;
 use tokio::sync::Notify;
 use tokio::sync::OnceCell;
 use tower_lsp::lsp_types;
-use tower_lsp::lsp_types::Url;
+use tower_lsp::lsp_types::{Diagnostic, Url};
 use tower_lsp::lsp_types::{MessageType, Registration};
 use tower_lsp::lsp_types::{Unregistration, WorkspaceFolder};
 use tracing::{error, info};
@@ -64,7 +64,12 @@ pub(crate) struct Session {
     pub(crate) extension_settings: RwLock<ExtensionSettings>,
 
     pub(crate) workspace: Arc<dyn Workspace>,
+
     configuration_status: AtomicU8,
+
+    /// A flag to notify a message to the user when the configuration is broken, and the LSP attempts
+    /// to update the diagnostics
+    notified_broken_configuration: AtomicBool,
 
     /// File system to read files inside the workspace
     pub(crate) fs: DynRef<'static, dyn FileSystem>,
@@ -88,7 +93,7 @@ struct InitializeParams {
 }
 
 #[repr(u8)]
-enum ConfigurationStatus {
+pub(crate) enum ConfigurationStatus {
     /// The configuration file was properly loaded
     Loaded = 0,
     /// The configuration file does not exist
@@ -99,6 +104,16 @@ enum ConfigurationStatus {
     Loading = 3,
 }
 
+impl ConfigurationStatus {
+    pub(crate) const fn is_error(&self) -> bool {
+        matches!(self, ConfigurationStatus::Error)
+    }
+
+    pub(crate) const fn is_loaded(&self) -> bool {
+        matches!(self, ConfigurationStatus::Loaded)
+    }
+}
+
 impl TryFrom<u8> for ConfigurationStatus {
     type Error = ();
 
@@ -107,6 +122,7 @@ impl TryFrom<u8> for ConfigurationStatus {
             0 => Ok(Self::Loaded),
             1 => Ok(Self::Missing),
             2 => Ok(Self::Error),
+            3 => Ok(Self::Loading),
             _ => Err(()),
         }
     }
@@ -162,6 +178,7 @@ impl Session {
             cancellation,
             config_path: None,
             manifest_path: None,
+            notified_broken_configuration: AtomicBool::new(false),
         }
     }
 
@@ -284,6 +301,12 @@ impl Session {
     pub(crate) async fn update_diagnostics(&self, url: lsp_types::Url) -> Result<()> {
         let biome_path = self.file_path(&url)?;
         let doc = self.document(&url)?;
+        if self.configuration_status().is_error() && !self.notified_broken_configuration() {
+            self.set_notified_broken_configuration();
+            self.client
+                    .show_message(MessageType::WARNING, "The configuration file has errors. Biome will report only parsing errors until the configuration is fixed.")
+                    .await;
+        }
         let file_features = self.workspace.file_features(SupportsFeatureParams {
             features: FeaturesBuilder::new()
                 .with_linter()
@@ -292,20 +315,15 @@ impl Session {
             path: biome_path.clone(),
         })?;
 
-        let diagnostics = if self.is_linting_and_formatting_disabled() {
-            tracing::trace!("Linting disabled because Biome configuration is missing and `requireConfiguration` is true.");
-            vec![]
-        } else if !file_features.supports_lint() && !file_features.supports_organize_imports() {
-            tracing::trace!("linting and import sorting are not supported: {file_features:?}");
-            // Sending empty vector clears published diagnostics
-            vec![]
-        } else {
+        let diagnostics: Vec<Diagnostic> = {
             let mut categories = RuleCategories::SYNTAX;
-            if file_features.supports_lint() {
-                categories |= RuleCategories::LINT
-            }
-            if file_features.supports_organize_imports() {
-                categories |= RuleCategories::ACTION
+            if self.configuration_status().is_loaded() {
+                if file_features.supports_lint() {
+                    categories |= RuleCategories::LINT
+                }
+                if file_features.supports_organize_imports() {
+                    categories |= RuleCategories::ACTION
+                }
             }
             let result = self.workspace.pull_diagnostics(PullDiagnosticsParams {
                 path: biome_path.clone(),
@@ -339,7 +357,7 @@ impl Session {
                     ) {
                         Ok(diag) => Some(diag),
                         Err(err) => {
-                            tracing::error!("failed to convert diagnostic to LSP: {err:?}");
+                            error!("failed to convert diagnostic to LSP: {err:?}");
                             None
                         }
                     }
@@ -507,6 +525,7 @@ impl Session {
 
                             if let Err(error) = result {
                                 error!("Failed to set workspace settings: {}", error);
+                                self.client.log_message(MessageType::ERROR, &error).await;
                                 ConfigurationStatus::Error
                             } else {
                                 ConfigurationStatus::Loaded
@@ -514,6 +533,7 @@ impl Session {
                         }
                         Err(err) => {
                             error!("Couldn't load the configuration file, reason:\n {}", err);
+                            self.client.log_message(MessageType::ERROR, &err).await;
                             ConfigurationStatus::Error
                         }
                     }
@@ -600,31 +620,40 @@ impl Session {
     }
 
     pub(crate) fn failsafe_rage(&self, params: RageParams) -> RageResult {
-        match self.workspace.rage(params) {
-            Ok(result) => result,
-            Err(err) => {
-                let entries = vec![
-                    RageEntry::section("Workspace"),
-                    RageEntry::markup(markup! {
-                        <Error>"\u{2716} Rage command failed:"</Error> {&format!("{err}")}
-                    }),
-                ];
+        self.workspace.rage(params).unwrap_or_else(|err| {
+            let entries = vec![
+                RageEntry::section("Workspace"),
+                RageEntry::markup(markup! {
+                    <Error>"\u{2716} Rage command failed:"</Error> {&format!("{err}")}
+                }),
+            ];
 
-                RageResult { entries }
-            }
-        }
+            RageResult { entries }
+        })
     }
 
-    fn configuration_status(&self) -> ConfigurationStatus {
+    /// Retrieves information regarding the configuration status
+    pub(crate) fn configuration_status(&self) -> ConfigurationStatus {
         self.configuration_status
             .load(Ordering::Relaxed)
             .try_into()
             .unwrap()
     }
 
+    /// Updates the status of the configuration
     fn set_configuration_status(&self, status: ConfigurationStatus) {
+        self.notified_broken_configuration
+            .store(false, Ordering::Relaxed);
         self.configuration_status
             .store(status as u8, Ordering::Relaxed);
+    }
+
+    fn notified_broken_configuration(&self) -> bool {
+        self.notified_broken_configuration.load(Ordering::Relaxed)
+    }
+    fn set_notified_broken_configuration(&self) {
+        self.notified_broken_configuration
+            .store(true, Ordering::Relaxed);
     }
 
     pub(crate) fn is_linting_and_formatting_disabled(&self) -> bool {
@@ -635,7 +664,7 @@ impl Session {
                 .read()
                 .unwrap()
                 .requires_configuration(),
-            ConfigurationStatus::Error => true,
+            ConfigurationStatus::Error => false,
             ConfigurationStatus::Loading => true,
         }
     }

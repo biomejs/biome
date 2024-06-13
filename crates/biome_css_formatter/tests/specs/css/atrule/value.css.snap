@@ -1,0 +1,101 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: css/atrule/value.css
+---
+# Input
+
+```css
+@value
+colors:
+"./colors.css";
+@value
+primary,
+secondary from
+colors
+;
+@value
+small
+as
+bp-small,
+medium,
+large as
+bp-large from
+"./breakpoints.css";
+@value
+selectorValue:
+secondary-color;
+@value
+small:
+(max-width:
+599px);
+@value
+medium:
+(min-width: 600px) and (max-width: 959px);
+@value
+large:
+(min-width: 960px);
+@value
+primary:
+#BF4040;
+@value
+secondary:
+#1F4F7F;
+@value
+common-gradient:
+transparent 75%,
+var(--ring-line-color) 75%,
+currentColor 79%;
+
+```
+
+
+=============================
+
+# Outputs
+
+## Output 1
+
+-----
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 80
+Quote style: Double Quotes
+-----
+
+```css
+@value colors:
+"./colors.css";
+@value primary, secondary from colors;
+@value small as bp-small, medium, large as bp-large from "./breakpoints.css";
+@value selectorValue:
+secondary-color;
+@value small:
+(max-width:
+599px);
+@value medium:
+(min-width: 600px) and (max-width: 959px);
+@value large:
+(min-width: 960px);
+@value primary:
+#BF4040;
+@value secondary:
+#1F4F7F;
+@value common-gradient:
+transparent 75%,
+var(--ring-line-color) 75%,
+currentColor 79%;
+```
+
+
+
+## Unimplemented nodes/tokens
+
+" colors:\n\"./colors.css\"" => 6..29
+" selectorValue:\nsecondary-color" => 154..185
+" small:\n(max-width:\n599px)" => 193..219
+" medium:\n(min-width: 600px) and (max-width: 959px)" => 227..277
+" large:\n(min-width: 960px)" => 285..311
+" primary:\n#BF4040" => 319..336
+" secondary:\n#1F4F7F" => 344..363
+" common-gradient:\ntransparent 75%,\nvar(--ring-line-color) 75%,\ncurrentColor 79%" => 371..450

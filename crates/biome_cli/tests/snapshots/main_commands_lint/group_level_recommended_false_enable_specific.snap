@@ -59,6 +59,6 @@ fix.jsx:3:16 lint/a11y/useButtonType ━━━━━━━━━━━━━━�
 ```
 
 ```block
-Checked 1 file in <TIME>. No fixes needed.
+Checked 1 file in <TIME>. No fixes applied.
 Found 1 error.
 ```

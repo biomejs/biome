@@ -50,9 +50,9 @@ pub trait TestFormatLanguage {
     ) -> <Self::ServiceLanguage as ServiceLanguage>::FormatOptions {
         let language_settings = self.to_language_settings(settings);
         Self::ServiceLanguage::resolve_format_options(
-            &settings.formatter,
-            &settings.override_settings,
-            language_settings,
+            Some(&settings.formatter),
+            Some(&settings.override_settings),
+            Some(language_settings),
             &BiomePath::new(""),
             file_source,
         )

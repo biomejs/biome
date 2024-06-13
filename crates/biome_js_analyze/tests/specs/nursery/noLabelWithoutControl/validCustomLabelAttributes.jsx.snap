@@ -1,0 +1,9 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: validCustomLabelAttributes.jsx
+---
+# Input
+```jsx
+<label htmlFor="js_id" label="A label" />;
+
+```

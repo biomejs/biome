@@ -2,7 +2,6 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: css/color/color-adjuster.css
 ---
-
 # Input
 
 ```css
@@ -1837,5 +1836,3 @@ color-adjuster.css:120:52 parse ━━━━━━━━━━━━━━━━
 ```
   109:   color: color(color-mod(0deg blue(10%)) rgb(+ 0 10 0) hue(+ 10deg) tint(10%) lightness(+ 10%) saturation(+ 10%) blend(rebeccapurple 50%));
 ```
-
-

@@ -250,7 +250,7 @@ impl Rule for NoArrayIndexKey {
 /// and check if the method called by this function belongs to an array method
 /// and if the parameter is an array index
 ///
-/// ```js
+/// ```jsx
 /// Array.map((_, index) => {
 ///     return <Component key={index} />
 /// })

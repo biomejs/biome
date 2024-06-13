@@ -1,16 +1,21 @@
 use crate::grit_context::{GritExecContext, GritQueryContext};
-use crate::grit_target_node::GritTargetNode;
-use crate::resolved_pattern::GritResolvedPattern;
+use crate::grit_resolved_pattern::GritResolvedPattern;
+use crate::grit_target_node::{GritTargetNode, GritTargetSyntaxKind};
 use anyhow::Result;
 use grit_pattern_matcher::pattern::{
-    AstLeafNodePattern, AstNodePattern, Matcher, PatternName, PatternOrPredicate, State,
+    AstLeafNodePattern, AstNodePattern, Matcher, Pattern, PatternName, PatternOrPredicate, State,
 };
 use grit_util::AnalysisLogs;
 
 #[derive(Clone, Debug)]
-pub(crate) struct GritNodePattern;
+pub(crate) struct GritNodePattern {
+    pub kind: GritTargetSyntaxKind,
+    pub args: Vec<GritNodeArg>,
+}
 
 impl AstNodePattern<GritQueryContext> for GritNodePattern {
+    const INCLUDES_TRIVIA: bool = true;
+
     fn children(&self) -> Vec<PatternOrPredicate<GritQueryContext>> {
         todo!()
     }
@@ -39,9 +44,40 @@ impl PatternName for GritNodePattern {
 }
 
 #[derive(Clone, Debug)]
-pub(crate) struct GritLeafNodePattern;
+pub(crate) struct GritNodeArg {
+    slot_index: usize,
+    pattern: Pattern<GritQueryContext>,
+}
 
-impl AstLeafNodePattern<GritQueryContext> for GritLeafNodePattern {}
+impl GritNodeArg {
+    pub fn new(slot_index: usize, pattern: Pattern<GritQueryContext>) -> Self {
+        Self {
+            slot_index,
+            pattern,
+        }
+    }
+}
+
+#[derive(Clone, Debug)]
+pub(crate) struct GritLeafNodePattern {
+    kind: GritTargetSyntaxKind,
+    text: String,
+}
+
+impl GritLeafNodePattern {
+    pub fn new(kind: GritTargetSyntaxKind, text: impl Into<String>) -> Self {
+        Self {
+            kind,
+            text: text.into(),
+        }
+    }
+}
+
+impl AstLeafNodePattern<GritQueryContext> for GritLeafNodePattern {
+    fn text(&self) -> Option<&str> {
+        Some(&self.text)
+    }
+}
 
 impl Matcher<GritQueryContext> for GritLeafNodePattern {
     fn execute<'a>(
