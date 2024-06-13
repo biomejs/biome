@@ -54,7 +54,7 @@ declare_rule! {
     /// ```
     ///
     pub NoUnknownProperty {
-        version: "next",
+        version: "1.8.0",
         name: "noUnknownProperty",
         language: "css",
         recommended: false,
