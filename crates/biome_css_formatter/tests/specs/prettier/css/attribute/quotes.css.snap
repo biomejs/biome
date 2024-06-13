@@ -2,7 +2,6 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: css/attribute/quotes.css
 ---
-
 # Input
 
 ```css
@@ -23,7 +22,7 @@ section:has(:not([type="radio"], [type="checkbox"])) {}
 ```diff
 --- Prettier
 +++ Biome
-@@ -4,13 +4,12 @@
+@@ -4,8 +4,7 @@
  }
  a[id="test"] {
  }
@@ -33,12 +32,6 @@ section:has(:not([type="radio"], [type="checkbox"])) {}
  a[class="(╯°□°）╯︵ ┻━┻"] {
  }
  input:not([type="radio"]):not([type="checkbox"]) {
- }
- input:not([type="radio"], [type="checkbox"]) {
- }
--section:has(:not([type="radio"], [type="checkbox"])) {
-+section:has( :not([type="radio"], [type="checkbox"])) {
- }
 ```
 
 # Output
@@ -57,7 +50,7 @@ input:not([type="radio"]):not([type="checkbox"]) {
 }
 input:not([type="radio"], [type="checkbox"]) {
 }
-section:has( :not([type="radio"], [type="checkbox"])) {
+section:has(:not([type="radio"], [type="checkbox"])) {
 }
 ```
 
@@ -98,5 +91,3 @@ quotes.css:4:16 parse ━━━━━━━━━━━━━━━━━━━�
   
 
 ```
-
-
