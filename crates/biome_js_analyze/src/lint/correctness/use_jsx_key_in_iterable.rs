@@ -210,8 +210,6 @@ fn handle_function_body(
     node.statements()
         .iter()
         .filter_map(|statement| {
-            // dbg!(statement.syntax().kind());
-            // dbg!(statement.syntax().text());
             if let Some(statement) = statement.as_js_variable_statement() {
                 let declaration = statement.declaration().ok()?;
                 Some(
