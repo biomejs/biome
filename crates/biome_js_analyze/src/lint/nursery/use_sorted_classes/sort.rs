@@ -32,10 +32,21 @@ impl ClassInfo {
         None
     }
 
-    /// Compare based on variants weight. Classes with higher weight go first.
+    /// Compare based on variants weight. Classes with lower weight go first.
+    /// First compare variants weight length. Only if their equal compare their actual weight.
     /// Returns `None` if they have the same weight.
-    fn cmp_variants_weight(&self, _other: &ClassInfo) -> Option<Ordering> {
-        // TODO: implement variant weight comparison.
+    fn cmp_variants_weight(&self, other: &ClassInfo) -> Option<Ordering> {
+        let current_weight = self.variant_weight.clone()?;
+        let other_weight = other.variant_weight.clone()?;
+
+        let mut result = current_weight.len().cmp(&other_weight.len());
+        if result == Ordering::Equal {
+            result = current_weight.cmp(&other_weight);
+        }
+
+        if result != Ordering::Equal {
+            return Some(result);
+        }
         None
     }
 

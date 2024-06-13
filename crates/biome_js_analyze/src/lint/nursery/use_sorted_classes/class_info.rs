@@ -10,6 +10,10 @@
 //! - The list of variants, in order of importance (which is used to compute the variants weight).
 //! - Other options, such as prefix and separator.
 
+use std::cmp::Ordering;
+
+use bitvec::{order::Lsb0, vec::BitVec};
+
 use super::{
     class_lexer::{tokenize_class, ClassSegmentStructure},
     sort_config::SortConfig,
@@ -284,7 +288,7 @@ pub struct ClassInfo {
     /// The full text of the class itself.
     pub text: String,
     /// The total variants weight that results from the combination of all the variants.
-    pub variant_weight: Option<u64>, // TODO: this will need to be Option<bitvec>
+    pub variant_weight: Option<BitVec<u8, Lsb0>>,
     /// The layer the utility belongs to.
     pub layer_index: usize,
     /// The index of the utility within the layer.
@@ -296,14 +300,53 @@ pub struct ClassInfo {
 pub fn get_class_info(class_name: &str, sort_config: &SortConfig) -> Option<ClassInfo> {
     let utility_data = tokenize_class(class_name)?;
     let utility_info = get_utility_info(sort_config.utilities, &utility_data.utility);
+
     if let Some(utility_info) = utility_info {
         return Some(ClassInfo {
             text: class_name.to_string(),
             variant_weight: if utility_data.variants.is_empty() {
                 None
             } else {
-                // TODO: return None if there is an unknown variant.
-                Some(0) // TODO: actually compute variant weight
+                let known_variants = utility_data.variants.iter().any(|variant| {
+                    sort_config
+                        .variants
+                        .iter()
+                        .any(|item| *item.name.to_string() == variant.text)
+                });
+                // If there's a custom variant, their weight isn't important
+                if !known_variants {
+                    return None;
+                }
+
+                // Compute Variants Weight as the BitWise XOR of all the weights
+                // Variants in SortConfig are already sorted when the file is generated
+                let variants_weight: BitVec<u8, Lsb0> =
+                    utility_data
+                        .variants
+                        .iter()
+                        .fold(BitVec::<u8, Lsb0>::new(), |acc, curr| {
+                            if let Some(variant) = sort_config
+                                .variants
+                                .iter()
+                                .find(|&item| *item.name.to_string() == curr.text)
+                            {
+                                let mut accumulator = acc.clone();
+                                let mut current_weight = variant.weight.clone();
+                                let acc_len = accumulator.len();
+                                let current_weight_len = current_weight.len();
+
+                                match acc_len.cmp(&current_weight_len) {
+                                    Ordering::Less => accumulator.resize(current_weight_len, false),
+                                    Ordering::Greater => current_weight.resize(acc_len, false),
+                                    _ => (),
+                                }
+
+                                return accumulator ^ current_weight;
+                            }
+                            acc
+                        });
+
+                Some(variants_weight)
             },
             layer_index: *sort_config.layer_index_map.get(&utility_info.layer)?,
             utility_index: utility_info.index,
@@ -316,21 +359,24 @@ pub fn get_class_info(class_name: &str, sort_config: &SortConfig) -> Option<Clas
 #[cfg(test)]
 mod get_class_info_tests {
     use super::*;
-    use crate::lint::nursery::use_sorted_classes::sort_config::UtilityLayer;
+    use crate::lint::nursery::use_sorted_classes::{
+        sort_config::UtilityLayer, tailwind_preset::get_variant_classes,
+    };
 
     #[test]
     fn test_get_class_info() {
         const UTILITIES_CONFIG: [UtilityLayer; 2] = [
             UtilityLayer {
                 name: "layer0",
-                classes: &["px-", "py-", "block$"],
+                classes: &["px-", "py-", "block$", "bg-"],
             },
             UtilityLayer {
                 name: "layer1",
                 classes: &["mx-", "my-", "inline$"],
             },
         ];
-        let sort_config = SortConfig::new(UTILITIES_CONFIG.as_slice(), vec![]);
+        let variant_classes = get_variant_classes();
+        let sort_config = SortConfig::new(UTILITIES_CONFIG.as_slice(), variant_classes);
         assert_eq!(
             get_class_info("px-2", &sort_config),
             Some(ClassInfo {
@@ -394,6 +440,25 @@ mod get_class_info_tests {
                 utility_index: 0,
             })
         );
+        // TODO: Add Variants tests
+        // assert_eq!(
+        //     get_class_info("hover:bg-red-500", &sort_config),
+        //     Some(ClassInfo {
+        //         text: "hover:bg-red-500".to_string(),
+        //         variant_weight: None, // TODO: Should we hardcode the bitvector or should we find it from the tailwind config?
+        //         layer_index: 0,
+        //         utility_index: 3
+        //     })
+        // );
+        // assert_eq!(
+        //     get_class_info("hover:focus:bg-yellow-600", &sort_config),
+        //     Some(ClassInfo {
+        //         text: "hover:focus:bg-yellow-600".to_string(),
+        //         variant_weight: None, // TODO: Should we hardcode the bitvector or should we find it from the tailwind config?
+        //         layer_index: 0,
+        //         utility_index: 3
+        //     })
+        // );
         assert_eq!(get_class_info("unknown", &sort_config), None);
     }
 }
