@@ -70,9 +70,9 @@ impl Rule for NoUnknownProperty {
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let node = ctx.query();
         let property_name = node.name().ok()?.text().to_lowercase();
-        if !is_known_properties(&property_name)
+        if !property_name.starts_with("--")
+            && !is_known_properties(&property_name)
             && !vendor_prefixed(&property_name)
-            && !property_name.starts_with("--")
         {
             return Some(node.name().ok()?.range());
         }
