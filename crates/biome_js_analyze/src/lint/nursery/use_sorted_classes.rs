@@ -17,6 +17,7 @@ use biome_js_factory::make::{
 };
 use biome_rowan::{AstNode, BatchMutationExt};
 use lazy_static::lazy_static;
+use presets::get_variants_preset;
 
 use crate::JsRuleAction;
 
@@ -49,7 +50,7 @@ declare_rule! {
     ///
     /// Notably, keep in mind that the following features are not supported yet:
     ///
-    /// - Variant sorting.
+    /// - Variant sorting (arbitrary variants are not supported yet).
     /// - Custom utilitites and variants (such as ones introduced by Tailwind CSS plugins). Only the default Tailwind CSS configuration is supported.
     /// - Options such as `prefix` and `separator`.
     /// - Tagged template literals.
@@ -149,7 +150,7 @@ declare_rule! {
 lazy_static! {
     static ref SORT_CONFIG: SortConfig = SortConfig::new(
         get_utilities_preset(&UseSortedClassesPreset::default()),
-        Vec::new(),
+        get_variants_preset(&UseSortedClassesPreset::default()),
     );
 }
 
