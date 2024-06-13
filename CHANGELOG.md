@@ -83,6 +83,7 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 #### Bug fixes
 
 - Fix [#3103](https://github.com/biomejs/biome/issues/3103) by correctly resolving CSS formatter options. Contributed by @ah-yu
+- Fix [#3192](https://github.com/biomejs/biome/issues/3192) don't add an extra whitespace within :has. Contributed by @denbezrukov
 
 ### JavaScript APIs
 

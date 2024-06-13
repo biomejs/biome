@@ -11,6 +11,10 @@ impl FormatNodeRule<CssRelativeSelector> for FormatCssRelativeSelector {
             selector,
         } = node.as_fields();
 
-        write!(f, [combinator.format(), space(), selector.format()])
+        if combinator.is_some() {
+            write!(f, [combinator.format(), space()])?;
+        }
+
+        write!(f, [selector.format()])
     }
 }
