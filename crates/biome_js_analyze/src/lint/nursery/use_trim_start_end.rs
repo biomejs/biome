@@ -10,10 +10,10 @@ use biome_rowan::{BatchMutationExt, TextRange, TokenText};
 use crate::JsRuleAction;
 
 declare_rule! {
-    /// Enforce the use of trimStart() over trimLeft() and trimeEnd() over trimRight().
+    /// Enforce the use of `trimStart()` and `trimEnd()` over `trimLeft()` and `trimRight()`.
     ///
     /// While `trimLeft()` and `trimRight()` are aliases for `trimStart()` and `trimEnd()`,
-    /// using the latter helps maintain consistency and uses direction-independent wording.
+    /// only using the latter pair ensures consistency and is preferable for their direction-independent wording.
     ///
     /// ## Examples
     ///
