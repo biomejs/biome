@@ -2120,7 +2120,7 @@
 					]
 				},
 				"useTrimStartEnd": {
-					"description": "Enforce the use of trimStart() over trimLeft() and trimeEnd() over trimRight().",
+					"description": "Enforce the use of trimStart() and trimEnd() over trimLeft() and trimRight().",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleFixConfiguration" },
 						{ "type": "null" }
