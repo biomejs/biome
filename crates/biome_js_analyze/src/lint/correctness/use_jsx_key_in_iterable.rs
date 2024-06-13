@@ -193,6 +193,7 @@ fn handle_function_body(
         .as_ref()
         .and_then(|ret| {
             let returned_value = ret.argument()?;
+            let returned_value = unwrap_parenthesis(returned_value)?;
             Some(ReactComponentExpression::can_cast(
                 returned_value.syntax().kind(),
             ))
@@ -209,6 +210,8 @@ fn handle_function_body(
     node.statements()
         .iter()
         .filter_map(|statement| {
+            // dbg!(statement.syntax().kind());
+            // dbg!(statement.syntax().text());
             if let Some(statement) = statement.as_js_variable_statement() {
                 let declaration = statement.declaration().ok()?;
                 Some(
