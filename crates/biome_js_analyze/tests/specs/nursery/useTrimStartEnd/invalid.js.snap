@@ -4,17 +4,17 @@ expression: invalid.js
 ---
 # Input
 ```jsx
-foo.trimLeft();
-foo.trimRight();
-trimLeft.trimRight();
-foo.trimLeft.trimRight();
-"foo".trimLeft();
+foo.trimLeft()
+foo.trimRight()
+trimLeft.trimRight()
+foo.trimLeft.trimRight()
+"foo".trimLeft()
 foo
 	// comment
 	.trimRight /* comment */
 	/* comment */
-	();
-foo?.trimLeft();
+	()
+foo?.trimLeft()
 
 ```
 
@@ -24,19 +24,19 @@ invalid.js:1:5 lint/nursery/useTrimStartEnd  FIXABLE  ━━━━━━━━�
 
   ! Use trimLeft instead of trimStart.
   
-  > 1 │ foo.trimLeft();
+  > 1 │ foo.trimLeft()
       │     ^^^^^^^^
-    2 │ foo.trimRight();
-    3 │ trimLeft.trimRight();
+    2 │ foo.trimRight()
+    3 │ trimLeft.trimRight()
   
   i trimLeft() is an alias for trimStart.
   
   i Safe fix: Replace trimLeft with trimStart.
   
-     1    │ - foo.trimLeft();
-        1 │ + foo.trimStart();
-     2  2 │   foo.trimRight();
-     3  3 │   trimLeft.trimRight();
+     1    │ - foo.trimLeft()
+        1 │ + foo.trimStart()
+     2  2 │   foo.trimRight()
+     3  3 │   trimLeft.trimRight()
   
 
 ```
@@ -46,21 +46,21 @@ invalid.js:2:5 lint/nursery/useTrimStartEnd  FIXABLE  ━━━━━━━━�
 
   ! Use trimRight instead of trimEnd.
   
-    1 │ foo.trimLeft();
-  > 2 │ foo.trimRight();
+    1 │ foo.trimLeft()
+  > 2 │ foo.trimRight()
       │     ^^^^^^^^^
-    3 │ trimLeft.trimRight();
-    4 │ foo.trimLeft.trimRight();
+    3 │ trimLeft.trimRight()
+    4 │ foo.trimLeft.trimRight()
   
   i trimRight() is an alias for trimEnd.
   
   i Safe fix: Replace trimRight with trimEnd.
   
-     1  1 │   foo.trimLeft();
-     2    │ - foo.trimRight();
-        2 │ + foo.trimEnd();
-     3  3 │   trimLeft.trimRight();
-     4  4 │   foo.trimLeft.trimRight();
+     1  1 │   foo.trimLeft()
+     2    │ - foo.trimRight()
+        2 │ + foo.trimEnd()
+     3  3 │   trimLeft.trimRight()
+     4  4 │   foo.trimLeft.trimRight()
   
 
 ```
@@ -70,23 +70,23 @@ invalid.js:3:10 lint/nursery/useTrimStartEnd  FIXABLE  ━━━━━━━━�
 
   ! Use trimRight instead of trimEnd.
   
-    1 │ foo.trimLeft();
-    2 │ foo.trimRight();
-  > 3 │ trimLeft.trimRight();
+    1 │ foo.trimLeft()
+    2 │ foo.trimRight()
+  > 3 │ trimLeft.trimRight()
       │          ^^^^^^^^^
-    4 │ foo.trimLeft.trimRight();
-    5 │ "foo".trimLeft();
+    4 │ foo.trimLeft.trimRight()
+    5 │ "foo".trimLeft()
   
   i trimRight() is an alias for trimEnd.
   
   i Safe fix: Replace trimRight with trimEnd.
   
-     1  1 │   foo.trimLeft();
-     2  2 │   foo.trimRight();
-     3    │ - trimLeft.trimRight();
-        3 │ + trimLeft.trimEnd();
-     4  4 │   foo.trimLeft.trimRight();
-     5  5 │   "foo".trimLeft();
+     1  1 │   foo.trimLeft()
+     2  2 │   foo.trimRight()
+     3    │ - trimLeft.trimRight()
+        3 │ + trimLeft.trimEnd()
+     4  4 │   foo.trimLeft.trimRight()
+     5  5 │   "foo".trimLeft()
   
 
 ```
@@ -96,22 +96,22 @@ invalid.js:4:14 lint/nursery/useTrimStartEnd  FIXABLE  ━━━━━━━━�
 
   ! Use trimRight instead of trimEnd.
   
-    2 │ foo.trimRight();
-    3 │ trimLeft.trimRight();
-  > 4 │ foo.trimLeft.trimRight();
+    2 │ foo.trimRight()
+    3 │ trimLeft.trimRight()
+  > 4 │ foo.trimLeft.trimRight()
       │              ^^^^^^^^^
-    5 │ "foo".trimLeft();
+    5 │ "foo".trimLeft()
     6 │ foo
   
   i trimRight() is an alias for trimEnd.
   
   i Safe fix: Replace trimRight with trimEnd.
   
-     2  2 │   foo.trimRight();
-     3  3 │   trimLeft.trimRight();
-     4    │ - foo.trimLeft.trimRight();
-        4 │ + foo.trimLeft.trimEnd();
-     5  5 │   "foo".trimLeft();
+     2  2 │   foo.trimRight()
+     3  3 │   trimLeft.trimRight()
+     4    │ - foo.trimLeft.trimRight()
+        4 │ + foo.trimLeft.trimEnd()
+     5  5 │   "foo".trimLeft()
      6  6 │   foo
   
 
@@ -122,9 +122,9 @@ invalid.js:5:7 lint/nursery/useTrimStartEnd  FIXABLE  ━━━━━━━━�
 
   ! Use trimLeft instead of trimStart.
   
-    3 │ trimLeft.trimRight();
-    4 │ foo.trimLeft.trimRight();
-  > 5 │ "foo".trimLeft();
+    3 │ trimLeft.trimRight()
+    4 │ foo.trimLeft.trimRight()
+  > 5 │ "foo".trimLeft()
       │       ^^^^^^^^
     6 │ foo
     7 │ 	// comment
@@ -133,10 +133,10 @@ invalid.js:5:7 lint/nursery/useTrimStartEnd  FIXABLE  ━━━━━━━━�
   
   i Safe fix: Replace trimLeft with trimStart.
   
-     3  3 │   trimLeft.trimRight();
-     4  4 │   foo.trimLeft.trimRight();
-     5    │ - "foo".trimLeft();
-        5 │ + "foo".trimStart();
+     3  3 │   trimLeft.trimRight()
+     4  4 │   foo.trimLeft.trimRight()
+     5    │ - "foo".trimLeft()
+        5 │ + "foo".trimStart()
      6  6 │   foo
      7  7 │   	// comment
   
@@ -153,7 +153,7 @@ invalid.js:8:3 lint/nursery/useTrimStartEnd  FIXABLE  ━━━━━━━━�
    > 8 │ 	.trimRight /* comment */
        │ 	 ^^^^^^^^^^^^^^^^^^^^^^^
      9 │ 	/* comment */
-    10 │ 	();
+    10 │ 	()
   
   i trimRight() is an alias for trimEnd.
   
@@ -164,7 +164,7 @@ invalid.js:8:3 lint/nursery/useTrimStartEnd  FIXABLE  ━━━━━━━━�
      8    │ - → .trimRight·/*·comment·*/
         8 │ + → .trimEnd·/*·comment·*/
      9  9 │   	/* comment */
-    10 10 │   	();
+    10 10 │   	()
   
 
 ```
@@ -175,8 +175,8 @@ invalid.js:11:6 lint/nursery/useTrimStartEnd  FIXABLE  ━━━━━━━━�
   ! Use trimLeft instead of trimStart.
   
      9 │ 	/* comment */
-    10 │ 	();
-  > 11 │ foo?.trimLeft();
+    10 │ 	()
+  > 11 │ foo?.trimLeft()
        │      ^^^^^^^^
     12 │ 
   
@@ -185,9 +185,9 @@ invalid.js:11:6 lint/nursery/useTrimStartEnd  FIXABLE  ━━━━━━━━�
   i Safe fix: Replace trimLeft with trimStart.
   
      9  9 │   	/* comment */
-    10 10 │   	();
-    11    │ - foo?.trimLeft();
-       11 │ + foo?.trimStart();
+    10 10 │   	()
+    11    │ - foo?.trimLeft()
+       11 │ + foo?.trimStart()
     12 12 │   
   
 
