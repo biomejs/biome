@@ -17,11 +17,16 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 - Add [nursery/noShorthandPropertyOverrides](https://biomejs.dev/linter/rules/no-shorthand-property-overrides). [#2958](https://github.com/biomejs/biome/issues/2958) Contributed by @neokidev
 
+#### Bug fixes
+
+- Fix [[#3084](https://github.com/biomejs/biome/issues/3084)] false positive by correctly recognize parenthesized return statement. Contributed by @unvalley
+
 ### CLI
 
 #### Bug fixes
 
-- Fixes [#3201](https://github.com/biomejs/biome/issues/3201) by correctly injecting the source code of the file when printing the diagnostics. Contributed by @ematipico
+- Fix [#3201](https://github.com/biomejs/biome/issues/3201) by correctly injecting the source code of the file when printing the diagnostics. Contributed by @ematipico
+- Fix [#3179](https://github.com/biomejs/biome/issues/3179) where comma separators are not correctly removed after running `biome migrate` and thus choke the parser. Contributed by @Sec-ant
 
 #### Enhancement
 
@@ -104,6 +109,18 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 - The [`noUnmatchableAnbSelector`](https://biomejs.dev/linter/rules/no-unmatchable-anb-selector/) rule is now able to catch unmatchable `an+b` selectors like `0n+0` or `-0n+0`. Contributed by @Sec-ant.
 - The [`useHookAtTopLevel`](https://biomejs.dev/linter/rules/use-hook-at-top-level/) rule now recognizes properties named as hooks like `foo.useFoo()`. Contributed by @ksnyder9801
 - Fix [#3092](https://github.com/biomejs/biome/issues/3092), prevent warning for `Custom properties (--*)`. Contributed by @chansuke
+- Fix a false positive in the [`useLiteralKeys`](https://biomejs.dev/linter/rules/use-literal-keys/) rule. ([#3160](https://github.com/biomejs/biome/issues/3160))
+
+  This rule now ignores the following kind of computed member name:
+
+  ```js
+  const a = {
+    [`line1
+    line2`]: true,
+  };
+  ```
+
+  Contributed by @Sec-ant
 
 ### Parser
 
