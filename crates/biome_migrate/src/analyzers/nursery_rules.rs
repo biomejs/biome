@@ -6,10 +6,9 @@ use biome_diagnostics::category;
 use biome_json_factory::make::{
     json_member, json_member_list, json_member_name, json_object_value, json_string_literal, token,
 };
-use biome_json_syntax::{AnyJsonValue, JsonLanguage, JsonMember, JsonMemberList, JsonRoot, T};
+use biome_json_syntax::{AnyJsonValue, JsonMember, JsonMemberList, JsonRoot, JsonSyntaxToken, T};
 use biome_rowan::{
-    AstNode, AstNodeExt, AstSeparatedList, BatchMutationExt, SyntaxToken, TextRange,
-    TriviaPieceKind, WalkEvent,
+    AstNode, AstNodeExt, AstSeparatedList, BatchMutationExt, TextRange, TriviaPieceKind, WalkEvent,
 };
 use rustc_hash::FxHashMap;
 use std::iter::repeat;
@@ -29,7 +28,7 @@ pub(crate) struct MigrateRuleState {
     /// The member of the group where the new rule should be moved
     nursery_group: JsonMember,
     /// The comma separator to be deleted
-    optional_separator: Option<SyntaxToken<JsonLanguage>>,
+    optional_separator: Option<JsonSyntaxToken>,
     /// The name of the target rule
     target_rule_name: &'static str,
     /// The new group name
