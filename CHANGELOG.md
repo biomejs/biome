@@ -17,6 +17,10 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 - Add [nursery/noShorthandPropertyOverrides](https://biomejs.dev/linter/rules/no-shorthand-property-overrides). [#2958](https://github.com/biomejs/biome/issues/2958) Contributed by @neokidev
 
+#### Bug fixes
+
+- Fix [[#3084](https://github.com/biomejs/biome/issues/3084)] false positive by correctly recognize parenthesized return statement. Contributed by @unvalley
+
 ### CLI
 
 #### Enhancement
