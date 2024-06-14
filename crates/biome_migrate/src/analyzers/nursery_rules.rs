@@ -120,7 +120,6 @@ const RULES_TO_MIGRATE: &[(&str, (&str, &str))] = &[
         "noSuspiciousSemicolonInJsx",
         ("suspicious", "noSuspiciousSemicolonInJsx"),
     ),
-    ("useImportRestrictions", ("style", "useImportRestrictions")),
     (
         "noConstantMathMinMaxClamp",
         ("correctness", "noConstantMathMinMaxClamp"),
