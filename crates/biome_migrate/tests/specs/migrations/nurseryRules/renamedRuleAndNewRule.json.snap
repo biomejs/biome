@@ -26,7 +26,7 @@ renamedRuleAndNewRule.json:5:9 migrate  FIXABLE  ━━━━━━━━━━�
     3 │     "rules": {
     4 │       "nursery": {
   > 5 │         "noExcessiveNestedTestSuites": "error",
-      │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     6 │         "oldName": "error"
     7 │       }
   
@@ -48,12 +48,14 @@ renamedRuleAndNewRule.json:5:9 migrate  FIXABLE  ━━━━━━━━━━�
 ```
 
 ```
-renamedRuleAndNewRule.json:6:9 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+renamedRuleAndNewRule.json:5:47 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This rule has been promoted to suspicious/noSuspiciousSemicolonInJsx.
   
+    3 │     "rules": {
     4 │       "nursery": {
-    5 │         "noExcessiveNestedTestSuites": "error",
+  > 5 │         "noExcessiveNestedTestSuites": "error",
+      │                                               ^
   > 6 │         "oldName": "error"
       │         ^^^^^^^^^^^^^^^^^^
     7 │       }
