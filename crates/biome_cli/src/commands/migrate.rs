@@ -8,7 +8,7 @@ use biome_service::workspace::RegisterProjectFolderParams;
 
 use super::{check_fix_incompatible_arguments, FixFileModeOptions, MigrateSubCommand};
 
-/// Handler for the "check" command of the Biome CLI
+/// Handler for the "migrate" command of the Biome CLI
 pub(crate) fn migrate(
     session: CliSession,
     cli_options: CliOptions,

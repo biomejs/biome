@@ -23,6 +23,10 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 ### CLI
 
+#### Bug fixes
+
+- Fix [#3179](https://github.com/biomejs/biome/issues/3179) where comma separators are not correctly removed after running `biome migrate` and thus choke the parser. Contributed by @Sec-ant
+
 #### Enhancement
 
 - Reword the reporter message `No fixes needed` to `No fixes applied`.
