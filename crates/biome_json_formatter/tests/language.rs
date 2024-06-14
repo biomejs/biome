@@ -25,19 +25,12 @@ impl TestFormatLanguage for JsonTestFormatLanguage {
         AnyParse::new(parse.syntax().as_send().unwrap(), parse.into_diagnostics())
     }
 
-    fn to_language_settings<'a>(
-        &self,
-        settings: &'a Settings,
-    ) -> &'a <Self::ServiceLanguage as ServiceLanguage>::FormatterSettings {
-        &settings.languages.json.formatter
-    }
-
     fn to_format_language(
         &self,
         settings: &Settings,
         file_source: &biome_service::workspace::DocumentFileSource,
     ) -> Self::FormatLanguage {
-        let language_settings = self.to_language_settings(settings);
+        let language_settings = &settings.languages.json.formatter;
         let options = Self::ServiceLanguage::resolve_format_options(
             Some(&settings.formatter),
             Some(&settings.override_settings),
