@@ -21,7 +21,7 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 #### Bug fixes
 
-- Fixes [#3201](https://github.com/biomejs/biome/issues/3201) by correctly inject the source code of the file when printing the diagnostics. Contributed by @ematipico
+- Fixes [#3201](https://github.com/biomejs/biome/issues/3201) by correctly injecting the source code of the file when printing the diagnostics. Contributed by @ematipico
 
 #### Enhancement
 
