@@ -32,3 +32,17 @@ a = {
 
 // optional chain
 a?.["b"]?.['c']?.d?.e?.["f"]
+a = {
+  ["line1\
+  line2"]: true,
+};
+a = {
+  [`line1\
+  line2`]: true,
+};
+a = {
+  ["line1\nline2"]: true,
+};
+a = {
+  [`line1\nline2`]: true,
+};
