@@ -179,11 +179,9 @@ impl Rule for NurseryRules {
                     continue;
                 };
 
-                let target_group_and_rule = rules_should_be_migrated
-                    .get(nursery_rule_name.text())
-                    .copied();
-
-                if let Some((target_group_name, target_rule_name)) = target_group_and_rule {
+                if let Some((target_group_name, target_rule_name)) =
+                    rules_should_be_migrated.get(nursery_rule_name.text())
+                {
                     rules_to_migrate.push(MigrateRuleState {
                         nursery_rule: nursery_rule.clone(),
                         nursery_group: nursery_group.clone(),
