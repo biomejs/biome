@@ -62,15 +62,19 @@ declare_rule! {
 
 impl Rule for UseLiteralKeys {
     type Query = Ast<AnyJsMember>;
-    type State = (TextRange, String);
+    type State = (TextRange, String, bool);
     type Signals = Option<Self::State>;
     type Options = ();
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
+        let mut is_computed_member_name = false;
         let inner_expression = match node {
             AnyJsMember::AnyJsComputedMember(computed_member) => computed_member.member().ok()?,
-            AnyJsMember::JsComputedMemberName(member) => member.expression().ok()?,
+            AnyJsMember::JsComputedMemberName(member) => {
+                is_computed_member_name = true;
+                member.expression().ok()?
+            }
         };
         let value = inner_expression.as_static_value()?;
         let value = value.as_string_constant()?;
@@ -79,7 +83,7 @@ impl Rule for UseLiteralKeys {
         // The first is a regular property.
         // The second is a special property that changes the object prototype.
         // See https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/proto
-        if matches!(node, AnyJsMember::JsComputedMemberName(_)) && value == "__proto__" {
+        if is_computed_member_name && value == "__proto__" {
             return None;
         }
         // A computed property `["something"]` can always be simplified to a string literal "something",
@@ -90,25 +94,36 @@ impl Rule for UseLiteralKeys {
         //   line2`: true
         // }
         //
-        if (matches!(node, AnyJsMember::JsComputedMemberName(_)) && !has_unescaped_new_line(value))
-            || is_js_ident(value)
-        {
-            return Some((inner_expression.range(), value.to_string()));
+        if (is_computed_member_name && !has_unescaped_new_line(value)) || is_js_ident(value) {
+            return Some((
+                inner_expression.range(),
+                value.to_string(),
+                is_computed_member_name,
+            ));
         }
         None
     }
 
-    fn diagnostic(_ctx: &RuleContext<Self>, (range, _): &Self::State) -> Option<RuleDiagnostic> {
+    fn diagnostic(
+        _ctx: &RuleContext<Self>,
+        (range, _, is_computed_member_name): &Self::State,
+    ) -> Option<RuleDiagnostic> {
         Some(RuleDiagnostic::new(
             rule_category!(),
             range,
-            markup! {
-                "The computed expression can be simplified without the use of a string literal."
+            if *is_computed_member_name {
+                markup! {
+                    "The computed expression can be simplified to a string literal."
+                }
+            } else {
+                markup! {
+                    "The computed expression can be simplified without the use of a string literal."
+                }
             },
         ))
     }
 
-    fn action(ctx: &RuleContext<Self>, (_, identifier): &Self::State) -> Option<JsRuleAction> {
+    fn action(ctx: &RuleContext<Self>, (_, identifier, _): &Self::State) -> Option<JsRuleAction> {
         let node = ctx.query();
         let mut mutation = ctx.root().begin();
         match node {
