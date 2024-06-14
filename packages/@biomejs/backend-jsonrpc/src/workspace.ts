@@ -1258,7 +1258,7 @@ export interface Nursery {
 	 */
 	useTopLevelRegex?: RuleConfiguration_for_Null;
 	/**
-	 * Enforce the use of trimStart() and trimEnd() over trimLeft() and trimRight().
+	 * Enforce the use of String.trimStart() and String.trimEnd() over String.trimLeft() and String.trimRight().
 	 */
 	useTrimStartEnd?: RuleFixConfiguration_for_Null;
 	/**
