@@ -1,6 +1,6 @@
 use std::{env, path::Path};
 
-use biome_css_formatter::context::CssFormatOptions;
+use biome_css_formatter::{context::CssFormatOptions, CssFormatLanguage};
 use biome_formatter::{IndentStyle, IndentWidth};
 use biome_formatter_test::test_prettier_snapshot::{PrettierSnapshot, PrettierTestFile};
 
@@ -21,7 +21,7 @@ fn test_snapshot(input: &'static str, _: &str, _: &str, _: &str) {
         .with_indent_style(IndentStyle::Space)
         .with_indent_width(IndentWidth::default());
     let language = language::CssTestFormatLanguage::default();
-    let snapshot = PrettierSnapshot::new(test_file, language, options);
+    let snapshot = PrettierSnapshot::new(test_file, language, CssFormatLanguage::new(options));
 
     snapshot.test()
 }

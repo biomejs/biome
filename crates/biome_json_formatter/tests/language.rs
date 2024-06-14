@@ -1,13 +1,11 @@
-use biome_formatter::{
-    FormatResult, Formatted, IndentStyle, IndentWidth, LineEnding, LineWidth, Printed,
-};
+use biome_formatter::{IndentStyle, IndentWidth, LineEnding, LineWidth};
 use biome_formatter_test::TestFormatLanguage;
+use biome_fs::BiomePath;
 use biome_json_formatter::context::{JsonFormatContext, JsonFormatOptions};
-use biome_json_formatter::{format_node, format_range, JsonFormatLanguage};
+use biome_json_formatter::JsonFormatLanguage;
 use biome_json_parser::{parse_json, JsonParserOptions};
 use biome_json_syntax::{JsonFileSource, JsonLanguage};
 use biome_parser::AnyParse;
-use biome_rowan::{SyntaxNode, TextRange};
 use biome_service::settings::{ServiceLanguage, Settings};
 use serde::{Deserialize, Serialize};
 
@@ -32,25 +30,20 @@ impl TestFormatLanguage for JsonTestFormatLanguage {
         &settings.languages.json.formatter
     }
 
-    fn format_node(
+    fn to_format_language(
         &self,
-        options: <Self::ServiceLanguage as ServiceLanguage>::FormatOptions,
-        node: &SyntaxNode<Self::ServiceLanguage>,
-    ) -> FormatResult<Formatted<Self::Context>> {
-        format_node(options, node)
-    }
-
-    fn format_range(
-        &self,
-        options: <Self::ServiceLanguage as ServiceLanguage>::FormatOptions,
-        node: &SyntaxNode<Self::ServiceLanguage>,
-        range: TextRange,
-    ) -> FormatResult<Printed> {
-        format_range(options, node, range)
-    }
-
-    fn default_options(&self) -> <Self::ServiceLanguage as ServiceLanguage>::FormatOptions {
-        JsonFormatOptions::default()
+        settings: &Settings,
+        file_source: &biome_service::workspace::DocumentFileSource,
+    ) -> Self::FormatLanguage {
+        let language_settings = self.to_language_settings(settings);
+        let options = Self::ServiceLanguage::resolve_format_options(
+            Some(&settings.formatter),
+            Some(&settings.override_settings),
+            Some(language_settings),
+            &BiomePath::new(""),
+            file_source,
+        );
+        JsonFormatLanguage::new(options)
     }
 }
 

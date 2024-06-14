@@ -1,5 +1,5 @@
 use biome_formatter_test::spec::{SpecSnapshot, SpecTestFile};
-use biome_json_formatter::context::JsonFormatOptions;
+use biome_json_formatter::{context::JsonFormatOptions, JsonFormatLanguage};
 use std::path::Path;
 
 mod language {
@@ -33,7 +33,12 @@ pub fn run(spec_input_file: &str, _expected_file: &str, test_directory: &str, _f
     let options = JsonFormatOptions::default();
     let language = language::JsonTestFormatLanguage::default();
 
-    let snapshot = SpecSnapshot::new(test_file, test_directory, language, options);
+    let snapshot = SpecSnapshot::new(
+        test_file,
+        test_directory,
+        language,
+        JsonFormatLanguage::new(options),
+    );
 
     snapshot.test()
 }

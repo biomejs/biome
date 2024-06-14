@@ -30,6 +30,7 @@ unicode-width                = { workspace = true }
 
 [dev-dependencies]
 biome_formatter_test = { path = "../biome_formatter_test" }
+biome_fs             = { path = "../biome_fs" }
 biome_js_factory     = { path = "../biome_js_factory" }
 biome_js_parser      = { path = "../biome_js_parser" }
 biome_parser         = { path = "../biome_parser" }
