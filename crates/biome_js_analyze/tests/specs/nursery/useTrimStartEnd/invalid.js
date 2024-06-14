@@ -9,3 +9,6 @@ foo
 	/* comment */
 	()
 foo?.trimLeft()
+bar['trimLeft']()
+bar["trimLeft"]()
+bar[`trimLeft`]()
