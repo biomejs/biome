@@ -38,7 +38,20 @@ a = {
 
 // optional chain
 a?.["b"]?.['c']?.d?.e?.["f"]
-
+a = {
+  ["line1\
+  line2"]: true,
+};
+a = {
+  [`line1\
+  line2`]: true,
+};
+a = {
+  ["line1\nline2"]: true,
+};
+a = {
+  [`line1\nline2`]: true,
+};
 ```
 
 # Diagnostics
@@ -566,7 +579,8 @@ invalid.js:34:5 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━�
     33 │ // optional chain
   > 34 │ a?.["b"]?.['c']?.d?.e?.["f"]
        │     ^^^
-    35 │ 
+    35 │ a = {
+    36 │   ["line1\
   
   i Unsafe fix: Use a literal key instead.
   
@@ -583,7 +597,8 @@ invalid.js:34:12 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━�
     33 │ // optional chain
   > 34 │ a?.["b"]?.['c']?.d?.e?.["f"]
        │            ^^^
-    35 │ 
+    35 │ a = {
+    36 │   ["line1\
   
   i Unsafe fix: Use a literal key instead.
   
@@ -600,11 +615,109 @@ invalid.js:34:25 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━�
     33 │ // optional chain
   > 34 │ a?.["b"]?.['c']?.d?.e?.["f"]
        │                         ^^^
-    35 │ 
+    35 │ a = {
+    36 │   ["line1\
   
   i Unsafe fix: Use a literal key instead.
   
     34 │ a?.["b"]?.['c']?.d?.e?.["f"]
        │                        -- --
+
+```
+
+```
+invalid.js:36:4 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The computed expression can be simplified without the use of a string literal.
+  
+    34 │ a?.["b"]?.['c']?.d?.e?.["f"]
+    35 │ a = {
+  > 36 │   ["line1\
+       │    ^^^^^^^
+  > 37 │   line2"]: true,
+       │   ^^^^^^
+    38 │ };
+    39 │ a = {
+  
+  i Unsafe fix: Use a literal key instead.
+  
+    34 34 │   a?.["b"]?.['c']?.d?.e?.["f"]
+    35 35 │   a = {
+    36    │ - ··["line1\
+    37    │ - ··line2"]:·true,
+       36 │ + ··"line1\
+       37 │ + ··line2":·true,
+    38 38 │   };
+    39 39 │   a = {
+  
+
+```
+
+```
+invalid.js:40:4 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The computed expression can be simplified without the use of a string literal.
+  
+    38 │ };
+    39 │ a = {
+  > 40 │   [`line1\
+       │    ^^^^^^^
+  > 41 │   line2`]: true,
+       │   ^^^^^^
+    42 │ };
+    43 │ a = {
+  
+  i Unsafe fix: Use a literal key instead.
+  
+    38 38 │   };
+    39 39 │   a = {
+    40    │ - ··[`line1\
+    41    │ - ··line2`]:·true,
+       40 │ + ··"line1\
+       41 │ + ··line2":·true,
+    42 42 │   };
+    43 43 │   a = {
+  
+
+```
+
+```
+invalid.js:44:4 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The computed expression can be simplified without the use of a string literal.
+  
+    42 │ };
+    43 │ a = {
+  > 44 │   ["line1\nline2"]: true,
+       │    ^^^^^^^^^^^^^^
+    45 │ };
+    46 │ a = {
+  
+  i Unsafe fix: Use a literal key instead.
+  
+    44 │ ··["line1\nline2"]:·true,
+       │   -              -       
+
+```
+
+```
+invalid.js:47:4 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The computed expression can be simplified without the use of a string literal.
+  
+    45 │ };
+    46 │ a = {
+  > 47 │   [`line1\nline2`]: true,
+       │    ^^^^^^^^^^^^^^
+    48 │ };
+  
+  i Unsafe fix: Use a literal key instead.
+  
+    45 45 │   };
+    46 46 │   a = {
+    47    │ - ··[`line1\nline2`]:·true,
+       47 │ + ··"line1\nline2":·true,
+    48 48 │   };
+  
 
 ```

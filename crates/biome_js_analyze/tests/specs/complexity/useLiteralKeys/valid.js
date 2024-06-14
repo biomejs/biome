@@ -32,3 +32,7 @@ a = {
 a = {
 	["__proto__"]: null,
 }
+a = {
+  [`line1
+  line2`]: true,
+};

@@ -74,6 +74,17 @@ impl Rule for UseLiteralKeys {
         };
         let value = inner_expression.as_static_value()?;
         let value = value.as_string_constant()?;
+        // Bail if the value contains unescaped new line characters
+        // that can only appear in template strings.
+        //
+        // const a = {
+        //   `line1
+        //   line2`: true
+        // }
+        //
+        if has_unescaped_new_line(value) {
+            return None;
+        }
         // `{["__proto__"]: null }` and `{"__proto__": null}`/`{"__proto__": null}`
         // have different semantic.
         // The first is a regular property.
@@ -160,4 +171,25 @@ impl Rule for UseLiteralKeys {
 
 declare_node_union! {
     pub AnyJsMember = AnyJsComputedMember | JsComputedMemberName
+}
+
+fn has_unescaped_new_line(text: &str) -> bool {
+    let mut in_escape_mode = false;
+    for c in text.chars() {
+        match c {
+            '\\' => {
+                in_escape_mode = !in_escape_mode;
+                continue;
+            }
+            '\n' => {
+                if !in_escape_mode {
+                    return true;
+                }
+            }
+            _ => {
+                in_escape_mode = false;
+            }
+        }
+    }
+    false
 }
