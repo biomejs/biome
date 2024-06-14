@@ -2,11 +2,10 @@
   "linter": {
     "rules": {
       "nursery": {
+        "nuseryRuleAlways": "error",
         "noExcessiveNestedTestSuites": "error"
       },
-      "complexity": {
-        "noExcessiveNestedTestSuites": "error"
-      }
+      "complexity": {}
     }
   }
 }

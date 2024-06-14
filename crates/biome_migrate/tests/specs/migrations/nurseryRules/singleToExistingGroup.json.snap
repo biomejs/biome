@@ -1,6 +1,6 @@
 ---
 source: crates/biome_migrate/tests/spec_tests.rs
-expression: existingGroup.json
+expression: singleToExistingGroup.json
 ---
 # Input
 ```json
@@ -10,9 +10,7 @@ expression: existingGroup.json
       "nursery": {
         "noExcessiveNestedTestSuites": "error"
       },
-      "complexity": {
-        "noExcessiveNestedTestSuites": "error"
-      }
+      "complexity": {}
     }
   }
 }
@@ -21,7 +19,7 @@ expression: existingGroup.json
 
 # Diagnostics
 ```
-existingGroup.json:5:9 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+singleToExistingGroup.json:5:9 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This rule has been promoted to complexity/noExcessiveNestedTestSuites.
   
@@ -30,7 +28,7 @@ existingGroup.json:5:9 migrate  FIXABLE  ━━━━━━━━━━━━━
   > 5 │         "noExcessiveNestedTestSuites": "error"
       │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     6 │       },
-    7 │       "complexity": {
+    7 │       "complexity": {}
   
   i Unsafe fix: Move the rule to the new stable group.
   
@@ -38,12 +36,10 @@ existingGroup.json:5:9 migrate  FIXABLE  ━━━━━━━━━━━━━
      4  4 │         "nursery": {
      5    │ - ········"noExcessiveNestedTestSuites":·"error"
      6  5 │         },
-     7  6 │         "complexity": {
-     8    │ - ········"noExcessiveNestedTestSuites":·"error"
-        7 │ + ········"noExcessiveNestedTestSuites":·"error",
-        8 │ + ········"noExcessiveNestedTestSuites":·"error"
-     9  9 │         }
-    10 10 │       }
+     7    │ - ······"complexity":·{}
+        6 │ + ······"complexity":·{"noExcessiveNestedTestSuites":·"error"}
+     8  7 │       }
+     9  8 │     }
   
 
 ```
