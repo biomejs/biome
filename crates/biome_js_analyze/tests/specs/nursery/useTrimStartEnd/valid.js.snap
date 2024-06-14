@@ -15,7 +15,7 @@ new foo.trimLeft()
 // Not `MemberExpression`
 trimLeft()
 // `callee.property` is not a `Identifier`
-foo[\'trimLeft\']()
+foo['trimLeft']()
 // Computed
 foo[trimLeft]()
 // Not `trimLeft`/`trimRight`
@@ -29,5 +29,62 @@ foo.bar(foo.trimLeft)
 // `trimLeft` is in `MemberExpression.object`
 trimLeft.foo()
 foo.trimLeft.bar()
+bar['trimStart']()
+bar["trimStart"]()
+bar[`trimStart`]()
+
+
+```
+
+# Diagnostics
+```
+valid.js:18:5 lint/nursery/useTrimStartEnd  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use trimStart instead of trimLeft.
+  
+    16 │ foo.bar()
+    17 │ // More argument(s)
+  > 18 │ foo.trimLeft(extra)
+       │     ^^^^^^^^
+    19 │ foo.trimLeft(...argumentsArray)
+    20 │ // `trimLeft` is in argument
+  
+  i trimLeft() is an alias for trimStart.
+  
+  i Safe fix: Replace trimLeft with trimStart.
+  
+    16 16 │   foo.bar()
+    17 17 │   // More argument(s)
+    18    │ - foo.trimLeft(extra)
+       18 │ + foo.trimStart(extra)
+    19 19 │   foo.trimLeft(...argumentsArray)
+    20 20 │   // `trimLeft` is in argument
+  
+
+```
+
+```
+valid.js:19:5 lint/nursery/useTrimStartEnd  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use trimStart instead of trimLeft.
+  
+    17 │ // More argument(s)
+    18 │ foo.trimLeft(extra)
+  > 19 │ foo.trimLeft(...argumentsArray)
+       │     ^^^^^^^^
+    20 │ // `trimLeft` is in argument
+    21 │ foo.bar(trimLeft)
+  
+  i trimLeft() is an alias for trimStart.
+  
+  i Safe fix: Replace trimLeft with trimStart.
+  
+    17 17 │   // More argument(s)
+    18 18 │   foo.trimLeft(extra)
+    19    │ - foo.trimLeft(...argumentsArray)
+       19 │ + foo.trimStart(...argumentsArray)
+    20 20 │   // `trimLeft` is in argument
+    21 21 │   foo.bar(trimLeft)
+  
 
 ```
