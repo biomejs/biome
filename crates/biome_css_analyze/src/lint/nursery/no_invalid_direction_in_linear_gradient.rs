@@ -50,39 +50,20 @@ declare_rule! {
 
 lazy_static! {
     // It is necessary to find case-insensitive string.
-    // For example, both 'linear-gradinet' and 'Linear-gradient' should pass the check.
-    pub static ref LINEAR_GRADIENT_FUNCTION_NAME: Regex =
-        Regex::new(r"^(?i)(-webkit-|-moz-|-o-|-ms-)?linear-gradient").unwrap();
-
-    // It is necessary to find case-insensitive string.
-    // Also Check if 'in' is a word.
+    // Also Check if 'in' is a word boundary.
     // For examples,`to top in srgb` is valid but `to top insrgb` is not valid.
     pub static ref IN_KEYWORD: Regex = Regex::new(r"(?i)\bin\b").unwrap();
 
     // This regex checks if a string consists of a number immediately followed by a unit, with no space between them.
+    // For examples, `45deg`, `45grad` is valid but `45 deg`, `45de` is not valid.
     pub static ref ANGLE: Regex = Regex::new(r"^[\d.]+(?:deg|grad|rad|turn)$").unwrap();
 
-    // It is necessary to find case-insensitive string.
-    // For example, both 'top' and 'TOP' should pass the check.
-    pub static ref DIRECTION: Regex = Regex::new(r"(?i)top|left|bottom|right").unwrap();
-
-    // This need for capture 'side-or-corner' keyword from linear-gradient function.
-    // Ensure starts with the keyword 'to' and ends with the keyword 'side-or-corner'.
-    pub static ref DIRECTION_WITH_TO: Regex = Regex::new(&format!(
-        r"(?i)^to ({})(?: ({}))?$",
-        DIRECTION.as_str(),
-        DIRECTION.as_str()
-    ))
-    .unwrap();
-
-    // This need for capture 'side-or-corner' keyword from linear-gradient function
-    // Ensure starts with the keyword 'side-or-corner' and ends with the keyword 'side-or-corner'.
+    // This need for capture `side-or-corner` keyword from linear-gradient function.
+    // Ensure starts `side-or-corner` keyword `to` and ends with the keyword `side-or-corner`.
     pub static ref DIRECTION_WITHOUT_TO: Regex = Regex::new(&format!(
-        r"(?i)^({})(?: ({}))?$",
-        DIRECTION.as_str(),
-        DIRECTION.as_str()
-    ))
-    .unwrap();
+        r"(?i)^({0})(?: ({0}))?$",
+        "top|left|bottom|right"
+    )).unwrap();
 }
 
 impl Rule for NoInvalidDirectionInLinearGradient {
@@ -94,8 +75,14 @@ impl Rule for NoInvalidDirectionInLinearGradient {
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
         let node_name = node.name().ok()?.text();
-        let is_linear_gradient = LINEAR_GRADIENT_FUNCTION_NAME.is_match(&node_name);
-        if !is_linear_gradient {
+        let linear_gradient_property = [
+            "linear-gradient",
+            "-webkit-linear-gradient",
+            "-moz-linear-gradient",
+            "-o-linear-gradient",
+            "-ms-linear-gradient",
+        ];
+        if !linear_gradient_property.contains(&node_name.to_lowercase().as_str()) {
             return None;
         }
         let css_parameter = node.items();
@@ -113,7 +100,11 @@ impl Rule for NoInvalidDirectionInLinearGradient {
                 return Some(first_css_parameter);
             }
         }
-        if !DIRECTION.is_match(&first_css_parameter_text) {
+        let direction_property = ["top", "left", "bottom", "right"];
+        if !direction_property
+            .iter()
+            .any(|&keyword| first_css_parameter_text.to_lowercase().contains(keyword))
+        {
             return None;
         }
         let has_prefix = vendor_prefixed(&node_name);
@@ -143,9 +134,10 @@ impl Rule for NoInvalidDirectionInLinearGradient {
 }
 
 fn is_standdard_direction(direction: &str, has_prefix: bool) -> bool {
-    let matches = match has_prefix {
-        true => DIRECTION_WITHOUT_TO.captures(direction),
-        false => DIRECTION_WITH_TO.captures(direction),
+    let matches = match (has_prefix, direction.starts_with("to ")) {
+        (true, false) => DIRECTION_WITHOUT_TO.captures(direction),
+        (false, true) => DIRECTION_WITHOUT_TO.captures(&direction[3..]),
+        _ => None,
     };
     if let Some(matches) = matches {
         match (matches.get(1), matches.get(2)) {
