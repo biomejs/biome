@@ -9,7 +9,7 @@ new foo.trimLeft()
 // Not `MemberExpression`
 trimLeft()
 // `callee.property` is not a `Identifier`
-foo[\'trimLeft\']()
+foo['trimLeft']()
 // Computed
 foo[trimLeft]()
 // Not `trimLeft`/`trimRight`
@@ -23,7 +23,6 @@ foo.bar(foo.trimLeft)
 // `trimLeft` is in `MemberExpression.object`
 trimLeft.foo()
 foo.trimLeft.bar()
-
 bar['trimStart']()
 bar["trimStart"]()
 bar[`trimStart`]()

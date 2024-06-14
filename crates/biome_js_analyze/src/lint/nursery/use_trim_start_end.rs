@@ -83,7 +83,7 @@ impl Rule for UseTrimStartEnd {
         let member_name = state.member_name.text();
         let replaced_member_name = state.replaced_member_name;
         let diagnostic_message = markup! {
-            "Use "{member_name}" instead of "{replaced_member_name}"."
+            "Use "{replaced_member_name}" instead of "{member_name}"."
         }
         .to_owned();
         let note_message = {
