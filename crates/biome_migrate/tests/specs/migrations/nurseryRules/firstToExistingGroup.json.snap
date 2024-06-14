@@ -27,7 +27,7 @@ firstToExistingGroup.json:5:9 migrate  FIXABLE  ━━━━━━━━━━�
     3 │     "rules": {
     4 │       "nursery": {
   > 5 │         "noExcessiveNestedTestSuites": "error",
-      │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     6 │         "nuseryRuleAlways": "error"
     7 │       },
   

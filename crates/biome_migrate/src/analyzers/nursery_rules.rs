@@ -38,12 +38,7 @@ pub(crate) struct MigrateRuleState {
 
 impl MigrateRuleState {
     fn as_rule_name_range(&self) -> TextRange {
-        let range = self.nursery_rule.range();
-        if let Some(separator) = &self.optional_separator {
-            TextRange::cover(separator.text_range(), range)
-        } else {
-            range
-        }
+        self.nursery_rule.range()
     }
 }
 
