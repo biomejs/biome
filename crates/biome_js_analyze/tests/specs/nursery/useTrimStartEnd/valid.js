@@ -23,3 +23,8 @@ foo.bar(foo.trimLeft)
 // `trimLeft` is in `MemberExpression.object`
 trimLeft.foo()
 foo.trimLeft.bar()
+
+bar['trimStart']()
+bar["trimStart"]()
+bar[`trimStart`]()
+
