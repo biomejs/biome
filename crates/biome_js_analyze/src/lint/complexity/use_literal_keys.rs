@@ -74,17 +74,6 @@ impl Rule for UseLiteralKeys {
         };
         let value = inner_expression.as_static_value()?;
         let value = value.as_string_constant()?;
-        // Bail if the value contains unescaped new line characters
-        // that can only appear in template strings.
-        //
-        // const a = {
-        //   `line1
-        //   line2`: true
-        // }
-        //
-        if has_unescaped_new_line(value) {
-            return None;
-        }
         // `{["__proto__"]: null }` and `{"__proto__": null}`/`{"__proto__": null}`
         // have different semantic.
         // The first is a regular property.
@@ -93,8 +82,17 @@ impl Rule for UseLiteralKeys {
         if matches!(node, AnyJsMember::JsComputedMemberName(_)) && value == "__proto__" {
             return None;
         }
-        // A computed property `["something"]` can always be simplified to a string literal "something".
-        if matches!(node, AnyJsMember::JsComputedMemberName(_)) || is_js_ident(value) {
+        // A computed property `["something"]` can always be simplified to a string literal "something",
+        // unless it is a template literal inside that contains unescaped new line characters:
+        //
+        // const a = {
+        //   `line1
+        //   line2`: true
+        // }
+        //
+        if (matches!(node, AnyJsMember::JsComputedMemberName(_)) && !has_unescaped_new_line(value))
+            || is_js_ident(value)
+        {
             return Some((inner_expression.range(), value.to_string()));
         }
         None
@@ -174,21 +172,16 @@ declare_node_union! {
 }
 
 fn has_unescaped_new_line(text: &str) -> bool {
-    let mut in_escape_mode = false;
-    for c in text.chars() {
+    let mut iter = text.as_bytes().iter();
+    while let Some(c) = iter.next() {
         match c {
-            '\\' => {
-                in_escape_mode = !in_escape_mode;
-                continue;
+            b'\\' => {
+                iter.next();
             }
-            '\n' => {
-                if !in_escape_mode {
-                    return true;
-                }
+            b'\n' => {
+                return true;
             }
-            _ => {
-                in_escape_mode = false;
-            }
+            _ => {}
         }
     }
     false
