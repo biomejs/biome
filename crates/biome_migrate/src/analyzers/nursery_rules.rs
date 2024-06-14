@@ -307,7 +307,7 @@ impl Rule for NurseryRules {
                         )),
                     );
 
-                    return Some(new_member);
+                    Some(new_member)
                 })
                 .collect();
 
