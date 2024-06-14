@@ -25,6 +25,7 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 #### Bug fixes
 
+- Fix [#3201](https://github.com/biomejs/biome/issues/3201) by correctly injecting the source code of the file when printing the diagnostics. Contributed by @ematipico
 - Fix [#3179](https://github.com/biomejs/biome/issues/3179) where comma separators are not correctly removed after running `biome migrate` and thus choke the parser. Contributed by @Sec-ant
 
 #### Enhancement

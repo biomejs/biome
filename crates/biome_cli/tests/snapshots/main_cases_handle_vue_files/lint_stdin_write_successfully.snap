@@ -27,11 +27,21 @@ var foo = "";
 ```
 
 ```block
-file.svelte lint/suspicious/noDoubleEquals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+file.svelte:1:3 lint/suspicious/noDoubleEquals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Use === instead of ==
   
+  > 1 │ a == b;
+      │   ^^
+    2 │ delete a.c;
+    3 │ 
+  
   i == is only allowed when comparing against null
+  
+  > 1 │ a == b;
+      │   ^^
+    2 │ delete a.c;
+    3 │ 
   
   i Using == may be unsafe if you are relying on type coercion
   
@@ -43,9 +53,15 @@ file.svelte lint/suspicious/noDoubleEquals  FIXABLE  ━━━━━━━━━
 ```
 
 ```block
-file.svelte lint/performance/noDelete  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+file.svelte:2:1 lint/performance/noDelete  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Avoid the delete operator which can impact performance.
+  
+    1 │ a == b;
+  > 2 │ delete a.c;
+      │ ^^^^^^^^^^
+    3 │ 
+    4 │ var foo = "";
   
   i Unsafe fix: Use an undefined assignment instead.
   
@@ -59,9 +75,15 @@ file.svelte lint/performance/noDelete  FIXABLE  ━━━━━━━━━━�
 ```
 
 ```block
-file.svelte lint/style/noVar  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+file.svelte:4:1 lint/style/noVar  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Use let or const instead of var.
+  
+    2 │ delete a.c;
+    3 │ 
+  > 4 │ var foo = "";
+      │ ^^^^^^^^^^^^
+    5 │ 
   
   i A variable declared with var is accessible in the whole module. Thus, the variable can be accessed before its initialization and outside the block where it is declared.
   
