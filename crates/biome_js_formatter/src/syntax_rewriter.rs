@@ -460,8 +460,8 @@ fn has_type_cast_comment_or_skipped(trivia: &SyntaxTrivia<JsLanguage>) -> bool {
 #[cfg(test)]
 mod tests {
     use super::JsFormatSyntaxRewriter;
-    use crate::{format_node, JsFormatOptions, TextRange};
-    use biome_formatter::{SourceMarker, TransformSourceMap};
+    use crate::{format_node, JsForeignLanguageFormatter, JsFormatOptions, TextRange};
+    use biome_formatter::{FormatError, SourceMarker, TransformSourceMap};
     use biome_js_parser::{parse, parse_module, JsParserOptions};
     use biome_js_syntax::{
         JsArrayExpression, JsBinaryExpression, JsExpressionStatement, JsFileSource,
@@ -834,12 +834,29 @@ mod tests {
         (transformed, source_map)
     }
 
+    #[derive(Debug, Clone)]
+    struct ForeignLanguageFormatter;
+
+    impl JsForeignLanguageFormatter for ForeignLanguageFormatter {
+        fn fmt(
+            &self,
+            _language: crate::ForeignLanguage,
+            _content: &str,
+        ) -> biome_formatter::FormatResult<biome_formatter::prelude::Document> {
+            Err(FormatError::SyntaxError)
+        }
+    }
+
     #[test]
     fn mappings() {
         let (transformed, source_map) = source_map_test("(((a * b) * c)) / 3");
 
-        let formatted =
-            format_node(JsFormatOptions::new(JsFileSource::default()), &transformed).unwrap();
+        let formatted = format_node(
+            JsFormatOptions::new(JsFileSource::default()),
+            ForeignLanguageFormatter,
+            &transformed,
+        )
+        .unwrap();
         let printed = formatted.print().unwrap();
 
         assert_eq!(printed.as_code(), "(a * b * c) / 3;\n");

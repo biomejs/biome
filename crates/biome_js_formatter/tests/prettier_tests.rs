@@ -1,13 +1,38 @@
 use std::{env, path::Path};
 
+use biome_css_formatter::context::CssFormatOptions;
+use biome_css_parser::CssParserOptions;
 use biome_formatter::{IndentStyle, IndentWidth};
 use biome_formatter_test::test_prettier_snapshot::{PrettierSnapshot, PrettierTestFile};
-use biome_js_formatter::{context::JsFormatOptions, JsFormatLanguage};
+use biome_js_formatter::{
+    context::JsFormatOptions, ForeignLanguage, JsForeignLanguageFormatter, JsFormatLanguage,
+};
 use biome_js_syntax::{JsFileSource, LanguageVariant, ModuleKind};
 
 mod language;
 
 tests_macros::gen_tests! {"tests/specs/prettier/{js,typescript,jsx}/**/*.{js,ts,jsx,tsx}", crate::test_snapshot, "script"}
+
+#[derive(Debug, Clone)]
+struct ForeignLanguageFormatter;
+
+impl JsForeignLanguageFormatter for ForeignLanguageFormatter {
+    fn fmt(
+        &self,
+        language: biome_js_formatter::ForeignLanguage,
+        content: &str,
+    ) -> biome_formatter::FormatResult<biome_formatter::prelude::Document> {
+        match language {
+            ForeignLanguage::Css => {
+                let parse_options = CssParserOptions::default();
+                let format_options = CssFormatOptions::default();
+                let parse = biome_css_parser::parse_css(content, parse_options);
+                biome_css_formatter::format_node(format_options, &parse.syntax())
+                    .map(|formatted| formatted.into_document())
+            }
+        }
+    }
+}
 
 fn test_snapshot(input: &'static str, _: &str, _: &str, _: &str) {
     countme::enable(true);
@@ -45,7 +70,11 @@ fn test_snapshot(input: &'static str, _: &str, _: &str, _: &str) {
 
     let language = language::JsTestFormatLanguage::new(source_type);
 
-    let snapshot = PrettierSnapshot::new(test_file, language, JsFormatLanguage::new(options));
+    let snapshot = PrettierSnapshot::new(
+        test_file,
+        language,
+        JsFormatLanguage::new(options, ForeignLanguageFormatter),
+    );
 
     snapshot.test()
 }

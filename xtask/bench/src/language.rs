@@ -6,6 +6,7 @@ use biome_css_parser::CssParserOptions;
 use biome_css_syntax::{CssRoot, CssSyntaxNode};
 use biome_formatter::{FormatResult, Formatted, PrintResult, Printed};
 use biome_js_formatter::context::{JsFormatContext, JsFormatOptions};
+use biome_js_formatter::{ForeignLanguage, JsForeignLanguageFormatter};
 use biome_js_parser::JsParserOptions;
 use biome_js_syntax::{AnyJsRoot, JsFileSource, JsSyntaxNode};
 use biome_json_formatter::context::{JsonFormatContext, JsonFormatOptions};
@@ -123,6 +124,24 @@ impl Parsed {
     }
 }
 
+#[derive(Debug, Clone)]
+struct ForeignLanguageFormatter;
+
+impl JsForeignLanguageFormatter for ForeignLanguageFormatter {
+    fn fmt(
+        &self,
+        language: biome_js_formatter::ForeignLanguage,
+        content: &str,
+    ) -> FormatResult<biome_formatter::prelude::Document> {
+        match language {
+            ForeignLanguage::Css => {
+                let parse = biome_css_parser::parse_css(content, CssParserOptions::default());
+                biome_css_formatter::format_node(CssFormatOptions::default(), &parse.syntax())
+                    .map(|formatted| formatted.into_document())
+            }
+        }
+    }
+}
 pub enum FormatNode {
     JavaScript(JsSyntaxNode, JsFileSource),
     Json(JsonSyntaxNode),
@@ -132,10 +151,12 @@ pub enum FormatNode {
 impl FormatNode {
     pub fn format_node(&self) -> FormatResult<FormattedNode> {
         match self {
-            Self::JavaScript(root, source_type) => {
-                biome_js_formatter::format_node(JsFormatOptions::new(*source_type), root)
-                    .map(FormattedNode::JavaScript)
-            }
+            Self::JavaScript(root, source_type) => biome_js_formatter::format_node(
+                JsFormatOptions::new(*source_type),
+                ForeignLanguageFormatter,
+                root,
+            )
+            .map(FormattedNode::JavaScript),
             Self::Json(root) => {
                 biome_json_formatter::format_node(JsonFormatOptions::default(), root)
                     .map(FormattedNode::Json)

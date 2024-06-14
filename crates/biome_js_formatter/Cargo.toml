@@ -29,6 +29,8 @@ smallvec                     = { workspace = true }
 unicode-width                = { workspace = true }
 
 [dev-dependencies]
+biome_css_formatter  = { path = "../biome_css_formatter" }
+biome_css_parser     = { path = "../biome_css_parser" }
 biome_formatter_test = { path = "../biome_formatter_test" }
 biome_fs             = { path = "../biome_fs" }
 biome_js_factory     = { path = "../biome_js_factory" }
