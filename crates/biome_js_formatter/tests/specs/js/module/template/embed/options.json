@@ -1,0 +1,9 @@
+{
+  "$schema": "../../../../../../../../packages/@biomejs/biome/configuration_schema.json",
+  "css":{
+    "formatter":{
+      "enabled": true,
+      "quoteStyle":"single"
+    }
+  }
+}

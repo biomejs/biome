@@ -2,7 +2,7 @@ use std::{env, path::Path};
 
 use biome_css_formatter::context::CssFormatOptions;
 use biome_css_parser::CssParserOptions;
-use biome_formatter::{IndentStyle, IndentWidth};
+use biome_formatter::{FormatError, IndentStyle, IndentWidth};
 use biome_formatter_test::test_prettier_snapshot::{PrettierSnapshot, PrettierTestFile};
 use biome_js_formatter::{
     context::JsFormatOptions, JsForeignLanguage, JsForeignLanguageFormatter, JsFormatLanguage,
@@ -27,6 +27,9 @@ impl JsForeignLanguageFormatter for ForeignLanguageFormatter {
                 let parse_options = CssParserOptions::default();
                 let format_options = CssFormatOptions::default();
                 let parse = biome_css_parser::parse_css(content, parse_options);
+                if parse.has_errors() {
+                    return Err(FormatError::SyntaxError);
+                }
                 biome_css_formatter::format_node(format_options, &parse.syntax())
                     .map(|formatted| formatted.into_document())
             }

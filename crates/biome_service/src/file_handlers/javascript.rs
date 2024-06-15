@@ -310,6 +310,9 @@ impl JsForeignLanguageFormatter for ForeignLanguageFormatter {
         match language {
             JsForeignLanguage::Css => {
                 let parse = parse_css(content, self.css_parse_options.clone());
+                if parse.has_errors() {
+                    return Err(FormatError::SyntaxError);
+                }
                 biome_css_formatter::format_node(self.css_format_options.clone(), &parse.syntax())
                     .map(|formatted| formatted.into_document())
             }

@@ -2,7 +2,6 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: js/last-argument-expansion/embed.js
 ---
-
 # Input
 
 ```js
@@ -82,5 +81,3 @@ foo(/* ... */ css`color:magenta`);
 const a = (b) => /* HTML */ `<!-- bar1 --> bar <!-- bar2 -->`;
 const c = (b) => /* HTML */ ` <!-- bar1 --> bar <!-- bar2 --> `;
 ```
-
-

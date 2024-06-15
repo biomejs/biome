@@ -2,7 +2,6 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: js/multiparser-css/issue-2883.js
 ---
-
 # Input
 
 ```js
@@ -32,32 +31,21 @@ button.${foo}.${bar} {
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,17 +1,17 @@
+@@ -1,11 +1,13 @@
  export const foo = css`
 -  &.foo .${bar}::before,&.foo[value="hello"] .${bar}::before {
--    position: absolute;
--  }
-+&.foo .${bar}::before,&.foo[value="hello"] .${bar}::before {
-+	position: absolute;
-+}
++  &.foo .${bar}::before,
++  &.foo[value="hello"] .${bar}::before {
+     position: absolute;
+   }
  `;
  
  export const foo2 = css`
 -  a.${bar}:focus,a.${bar}:hover {
--    color: red;
--  }
-+a.${bar}:focus,a.${bar}:hover {
-+  color: red;
-+}
- `;
- 
- export const global = css`
--  button.${foo}.${bar} {
--    color: #fff;
--  }
-+button.${foo}.${bar} {
-+  color: #fff;
-+}
++  a.${bar}:focus,
++  a.${bar}:hover {
+     color: red;
+   }
  `;
 ```
 
@@ -65,22 +53,22 @@ button.${foo}.${bar} {
 
 ```js
 export const foo = css`
-&.foo .${bar}::before,&.foo[value="hello"] .${bar}::before {
-	position: absolute;
-}
+  &.foo .${bar}::before,
+  &.foo[value="hello"] .${bar}::before {
+    position: absolute;
+  }
 `;
 
 export const foo2 = css`
-a.${bar}:focus,a.${bar}:hover {
-  color: red;
-}
+  a.${bar}:focus,
+  a.${bar}:hover {
+    color: red;
+  }
 `;
 
 export const global = css`
-button.${foo}.${bar} {
-  color: #fff;
-}
+  button.${foo}.${bar} {
+    color: #fff;
+  }
 `;
 ```
-
-

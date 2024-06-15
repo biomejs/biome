@@ -4,7 +4,7 @@ use biome_analyze::{AnalysisFilter, AnalyzerOptions, ControlFlow, Never, RuleCat
 use biome_css_formatter::context::{CssFormatContext, CssFormatOptions};
 use biome_css_parser::CssParserOptions;
 use biome_css_syntax::{CssRoot, CssSyntaxNode};
-use biome_formatter::{FormatResult, Formatted, PrintResult, Printed};
+use biome_formatter::{FormatError, FormatResult, Formatted, PrintResult, Printed};
 use biome_js_formatter::context::{JsFormatContext, JsFormatOptions};
 use biome_js_formatter::{JsForeignLanguage, JsForeignLanguageFormatter};
 use biome_js_parser::JsParserOptions;
@@ -136,6 +136,9 @@ impl JsForeignLanguageFormatter for ForeignLanguageFormatter {
         match language {
             JsForeignLanguage::Css => {
                 let parse = biome_css_parser::parse_css(content, CssParserOptions::default());
+                if parse.has_errors() {
+                    return Err(FormatError::SyntaxError);
+                }
                 biome_css_formatter::format_node(CssFormatOptions::default(), &parse.syntax())
                     .map(|formatted| formatted.into_document())
             }
