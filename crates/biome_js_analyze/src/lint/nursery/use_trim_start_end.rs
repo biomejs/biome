@@ -4,8 +4,10 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_js_factory::make;
-use biome_js_syntax::JsCallExpression;
-use biome_rowan::{AstSeparatedList, BatchMutationExt, TextRange, TokenText};
+use biome_js_syntax::{AnyJsExpression, JsCallExpression, JsLanguage};
+use biome_rowan::{
+    AstSeparatedList, BatchMutationExt, NodeOrToken, SyntaxToken, TextRange, TokenText,
+};
 
 use crate::JsRuleAction;
 
@@ -56,7 +58,7 @@ declare_rule! {
 pub struct UseTrimStartEndState {
     member_name: TokenText,
     span: TextRange,
-    replaced_member_name: &'static str,
+    replaced_member_name: String,
 }
 
 impl Rule for UseTrimStartEnd {
@@ -79,25 +81,20 @@ impl Rule for UseTrimStartEnd {
         }
 
         let callee = node.callee().ok()?;
-        let expression = callee.as_js_static_member_expression()?;
-        let value_token = expression.member().ok()?.value_token().ok()?;
-        let name = value_token.text_trimmed();
-        let suggested_name = match name {
-            "trimLeft" => Some("trimStart"),
-            "trimRight" => Some("trimEnd"),
-            _ => None,
-        }?;
+        let token = generate_syntax_token(callee)?;
+        let suggested_name = suggested_name(token.clone());
 
         Some(UseTrimStartEndState {
-            member_name: value_token.token_text_trimmed(),
-            span: value_token.text_range(),
+            member_name: token.token_text_trimmed(),
+            span: token.text_range(),
             replaced_member_name: suggested_name,
         })
     }
 
     fn diagnostic(_: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
         let member_name = state.member_name.text();
-        let replaced_member_name = state.replaced_member_name;
+        let replaced_member_name = state.replaced_member_name.clone();
+
         let diagnostic_message = markup! {
             "Use "{replaced_member_name}" instead of "{member_name}"."
         }
@@ -108,6 +105,7 @@ impl Rule for UseTrimStartEnd {
             }
             .to_owned()
         };
+
         Some(
             RuleDiagnostic::new(rule_category!(), state.span, diagnostic_message)
                 .note(note_message),
@@ -117,14 +115,13 @@ impl Rule for UseTrimStartEnd {
     fn action(ctx: &RuleContext<Self>, state: &Self::State) -> Option<JsRuleAction> {
         let node = ctx.query();
         let callee = node.callee().ok()?;
-        let expression = callee.as_js_static_member_expression()?;
-        let member = expression.member().ok()?;
-        let member_name = state.member_name.text();
-        let replaced_member_name = state.replaced_member_name;
+        let token = generate_syntax_token(callee)?;
 
+        let member_name = state.member_name.text();
+        let replaced_member_name = state.replaced_member_name.clone();
+        let replaced_function = make::js_name(make::ident(&replaced_member_name));
         let mut mutation = ctx.root().begin();
-        let replaced_function = make::js_name(make::ident(replaced_member_name));
-        mutation.replace_element(member.into(), replaced_function.into());
+        mutation.replace_element(NodeOrToken::Token(token), replaced_function.into());
 
         Some(JsRuleAction::new(
             ActionCategory::QuickFix,
@@ -133,5 +130,52 @@ impl Rule for UseTrimStartEnd {
                 .to_owned(),
             mutation,
         ))
+    }
+}
+
+fn generate_syntax_token(callee: AnyJsExpression) -> Option<SyntaxToken<JsLanguage>> {
+    let token = if let AnyJsExpression::JsComputedMemberExpression(expression) = callee {
+        let member = expression.member().ok()?;
+        match member {
+            AnyJsExpression::AnyJsLiteralExpression(literal) => literal.value_token().ok(),
+            AnyJsExpression::JsTemplateExpression(element) => {
+                element.elements().into_iter().find_map(|x| {
+                    x.as_js_template_chunk_element()
+                        .and_then(|chunk| chunk.template_chunk_token().ok())
+                })
+            }
+            _ => None,
+        }
+    } else if let AnyJsExpression::JsStaticMemberExpression(expression) = callee {
+        expression.member().ok()?.value_token().ok()
+    } else {
+        None
+    };
+    token
+}
+
+// Handle "'text'" and "\"text\"" and "text" cases
+fn suggested_name(text: SyntaxToken<JsLanguage>) -> String {
+    let trimmed = text.text_trimmed();
+    let first_char = trimmed.chars().next();
+    let last_char = trimmed.chars().last();
+
+    let is_single_quoted = first_char == Some('\'') && last_char == Some('\'');
+    let is_double_quoted = first_char == Some('"') && last_char == Some('"');
+
+    let unquoted = trimmed.trim_matches(|c| c == '\'' || c == '"');
+
+    let cleaned = match unquoted {
+        "trimLeft" => "trimStart",
+        "trimRight" => "trimEnd",
+        _ => unquoted,
+    };
+
+    if is_single_quoted {
+        format!("'{}'", cleaned)
+    } else if is_double_quoted {
+        format!("\"{}\"", cleaned)
+    } else {
+        cleaned.to_string()
     }
 }
