@@ -58,30 +58,30 @@ declare_rule! {
 lazy_static::lazy_static! {
     static ref EVENT_TO_HANDLERS: FxHashMap<&'static str, Vec<&'static str>> = {
         let mut m = FxHashMap::default();
-        m.insert("clipboard", vec!["onCopy", "onCut", "onPaste"]);
-        m.insert("composition", vec!["onCompositionEnd", "onCompositionStart", "onCompositionUpdate"]);
+        // m.insert("clipboard", vec!["onCopy", "onCut", "onPaste"]);
+        // m.insert("composition", vec!["onCompositionEnd", "onCompositionStart", "onCompositionUpdate"]);
         m.insert("keyboard", vec!["onKeyDown", "onKeyPress", "onKeyUp"]);
         m.insert("focus", vec!["onFocus", "onBlur"]);
-        m.insert("form", vec!["onChange", "onInput", "onSubmit"]);
+        // m.insert("form", vec!["onChange", "onInput", "onSubmit"]);
         m.insert("mouse", vec![
             "onClick", "onContextMenu", "onDblClick", "onDoubleClick", "onDrag", "onDragEnd",
             "onDragEnter", "onDragExit", "onDragLeave", "onDragOver", "onDragStart", "onDrop",
             "onMouseDown", "onMouseEnter", "onMouseLeave", "onMouseMove", "onMouseOut",
             "onMouseOver", "onMouseUp"
         ]);
-        m.insert("selection", vec!["onSelect"]);
-        m.insert("touch", vec!["onTouchCancel", "onTouchEnd", "onTouchMove", "onTouchStart"]);
-        m.insert("ui", vec!["onScroll"]);
-        m.insert("wheel", vec!["onWheel"]);
-        m.insert("media", vec![
-            "onAbort", "onCanPlay", "onCanPlayThrough", "onDurationChange", "onEmptied",
-            "onEncrypted", "onEnded", "onError", "onLoadedData", "onLoadedMetadata", "onLoadStart",
-            "onPause", "onPlay", "onPlaying", "onProgress", "onRateChange", "onSeeked", "onSeeking",
-            "onStalled", "onSuspend", "onTimeUpdate", "onVolumeChange", "onWaiting"
-        ]);
-        m.insert("image", vec!["onLoad", "onError"]);
-        m.insert("animation", vec!["onAnimationStart", "onAnimationEnd", "onAnimationIteration"]);
-        m.insert("transition", vec!["onTransitionEnd"]);
+        // m.insert("selection", vec!["onSelect"]);
+        // m.insert("touch", vec!["onTouchCancel", "onTouchEnd", "onTouchMove", "onTouchStart"]);
+        // m.insert("ui", vec!["onScroll"]);
+        // m.insert("wheel", vec!["onWheel"]);
+        // m.insert("media", vec![
+        //     "onAbort", "onCanPlay", "onCanPlayThrough", "onDurationChange", "onEmptied",
+        //     "onEncrypted", "onEnded", "onError", "onLoadedData", "onLoadedMetadata", "onLoadStart",
+        //     "onPause", "onPlay", "onPlaying", "onProgress", "onRateChange", "onSeeked", "onSeeking",
+        //     "onStalled", "onSuspend", "onTimeUpdate", "onVolumeChange", "onWaiting"
+        // ]);
+        // m.insert("image", vec!["onLoad", "onError"]);
+        // m.insert("animation", vec!["onAnimationStart", "onAnimationEnd", "onAnimationIteration"]);
+        // m.insert("transition", vec!["onTransitionEnd"]);
         m
     };
 }
