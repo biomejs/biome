@@ -160,6 +160,10 @@ export interface PartialFormatterConfiguration {
 	 * What's the max width of a line. Defaults to 80.
 	 */
 	lineWidth?: LineWidth;
+	/**
+	 * Use any `.editorconfig` files to configure the formatter. Configuration in `biome.json` will override `.editorconfig` configuration. Default: false.
+	 */
+	useEditorconfig?: boolean;
 }
 /**
  * Options applied to GraphQL files
