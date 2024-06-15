@@ -1,10 +1,16 @@
-use crate::prelude::*;
-use biome_formatter::write;
+use std::collections::HashMap;
+use std::ops::Deref;
+
+use crate::{prelude::*, JsForeignLanguage};
+use biome_formatter::{write, CstFormatContext};
 
 use crate::js::expressions::static_member_expression::member_chain_callee_needs_parens;
 use crate::js::lists::template_element_list::FormatJsTemplateElementListOptions;
 use crate::parentheses::NeedsParentheses;
-use biome_js_syntax::{AnyJsExpression, JsSyntaxNode, JsTemplateExpression, TsTemplateLiteralType};
+use biome_js_syntax::{
+    AnyJsExpression, AnyJsTemplateElement, JsSyntaxNode, JsTemplateElement, JsTemplateElementList,
+    JsTemplateExpression, TsTemplateLiteralType,
+};
 use biome_js_syntax::{JsSyntaxToken, TsTypeArguments};
 use biome_rowan::{declare_node_union, SyntaxResult};
 
@@ -68,6 +74,29 @@ impl AnyJsTemplate {
     fn write_elements(&self, f: &mut JsFormatter) -> FormatResult<()> {
         match self {
             AnyJsTemplate::JsTemplateExpression(template) => {
+                if is_css_embedded(template)?
+                    && !template
+                        .elements()
+                        .iter()
+                        .map(|element| f.context().comments().is_suppressed(element.syntax()))
+                        .any(|is_suppressed| is_suppressed == true)
+                {
+                    let interned = f.intern(&format_with(|f| {
+                        format_embedded_language(template.elements(), JsForeignLanguage::Css, f)
+                    }));
+
+                    match interned {
+                        Ok(interned) => {
+                            if let Some(interned) = interned {
+                                f.write_element(interned.clone())?;
+                            }
+                            return Ok(());
+                        }
+                        Err(_) => {
+                            // if we failed to format the template as css, we'll fall back to the default
+                        }
+                    }
+                }
                 let is_test_each_pattern = template.is_test_each_pattern();
                 let options = FormatJsTemplateElementListOptions {
                     is_test_each_pattern,
@@ -98,4 +127,134 @@ impl NeedsParentheses for JsTemplateExpression {
             false
         }
     }
+}
+
+fn format_embedded_language(
+    elements: JsTemplateElementList,
+    language: JsForeignLanguage,
+    f: &mut JsFormatter,
+) -> FormatResult<()> {
+    let mut placeholder_map: HashMap<String, JsTemplateElement> = HashMap::new();
+    let mut index = 0;
+    let content = elements
+        .iter()
+        .fold(String::new(), |mut acc, element| match element {
+            AnyJsTemplateElement::JsTemplateChunkElement(element) => {
+                let text = element.text().to_string();
+                acc.push_str(&text);
+                acc
+            }
+            AnyJsTemplateElement::JsTemplateElement(element) => {
+                let placeholder = std::format!("biome-placeholder-{}", index);
+                index += 1;
+                placeholder_map.insert(placeholder.clone(), element.clone());
+                acc.push_str(&placeholder);
+                acc
+            }
+        });
+    let formatted = f
+        .context()
+        .get_foreign_language_formatter()
+        .format(language, &content)?;
+
+    fn replace_placeholder_with_template_element(
+        element: FormatElement,
+        placeholder_map: &HashMap<String, JsTemplateElement>,
+        f: &mut JsFormatter,
+    ) -> FormatElement {
+        match element.clone() {
+            FormatElement::LocatedTokenText { slice, .. } => {
+                let text = slice.to_string();
+                if let Some(template_element) = placeholder_map.get(&text) {
+                    let interned = f.intern(&template_element.format());
+                    if let Ok(Some(element)) = interned {
+                        element.clone()
+                    } else {
+                        element.clone()
+                    }
+                } else {
+                    element.clone()
+                }
+            }
+            FormatElement::Interned(interned) => {
+                let elemets = interned
+                    .iter()
+                    .map(|element| {
+                        replace_placeholder_with_template_element(
+                            element.clone(),
+                            placeholder_map,
+                            f,
+                        )
+                    })
+                    .collect::<Vec<FormatElement>>();
+                FormatElement::Interned(Interned::new(elemets))
+            }
+            FormatElement::BestFitting(best_fitting) => {
+                let variants = best_fitting
+                    .variants()
+                    .iter()
+                    .map(|variant| {
+                        let elements = variant
+                            .iter()
+                            .map(|element| {
+                                replace_placeholder_with_template_element(
+                                    element.clone(),
+                                    placeholder_map,
+                                    f,
+                                )
+                            })
+                            .collect::<Vec<FormatElement>>();
+                        Box::new(elements).into_boxed_slice()
+                    })
+                    .collect::<Vec<Box<[FormatElement]>>>();
+                unsafe {
+                    FormatElement::BestFitting(BestFittingElement::from_vec_unchecked(variants))
+                }
+            }
+            element => element,
+        }
+    }
+
+    let result = formatted
+        .deref()
+        .iter()
+        .map(|element| {
+            replace_placeholder_with_template_element(element.clone(), &placeholder_map, f)
+        })
+        .collect::<Vec<FormatElement>>();
+
+    for element in elements.iter() {
+        match element {
+            AnyJsTemplateElement::JsTemplateChunkElement(element) => {
+                let token = element.template_chunk_token()?;
+                write!(f, [&format_removed(&token)])?;
+            }
+            _ => {}
+        }
+    }
+    write!(
+        f,
+        [
+            &indent(&format_with(|f| {
+                write!(f, [hard_line_break()])?;
+                f.write_elements(result.clone())
+            })),
+            soft_line_break()
+        ]
+    )
+}
+
+fn is_css_embedded(template: &JsTemplateExpression) -> SyntaxResult<bool> {
+    let tag = template.tag();
+    if let Some(tag) = tag {
+        let ident_expr = tag.as_js_identifier_expression();
+        if let Some(ident_expr) = ident_expr {
+            let name = ident_expr.name()?;
+            // TODO: support more css-in-js libraries
+            if name.has_name("css") {
+                return Ok(true);
+            }
+        }
+    }
+    Ok(false)
 }
