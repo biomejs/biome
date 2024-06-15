@@ -64,7 +64,7 @@ impl AriaServices {
                             .collect::<Vec<String>>()
                     } else {
                         // handle dynamic values e.g. `<div onClick={dynamicValue}>`
-                        vec![initializer.syntax().text().to_string()]
+                        vec![initializer.syntax().text_trimmed().to_string()]
                     }
                 } else {
                     vec!["true".to_string()]
