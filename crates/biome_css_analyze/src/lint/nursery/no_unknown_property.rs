@@ -71,6 +71,7 @@ impl Rule for NoUnknownProperty {
         let node = ctx.query();
         let property_name = node.name().ok()?.text().to_lowercase();
         if !property_name.starts_with("--")
+            && property_name != "composes"
             && !is_known_properties(&property_name)
             && !vendor_prefixed(&property_name)
         {
