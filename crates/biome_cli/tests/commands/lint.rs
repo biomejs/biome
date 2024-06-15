@@ -2277,6 +2277,38 @@ fn check_stdin_write_successfully() {
 }
 
 #[test]
+fn check_stdin_shows_parse_diagnostics() {
+    let mut fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    console.in_buffer.push(
+        r#"
+server.get('/', async () => {
+	return { hello: 'world' };
+});
+
+const = ""; "#
+            .to_string(),
+    );
+
+    let result = run_cli(
+        DynRef::Borrowed(&mut fs),
+        &mut console,
+        Args::from([("lint"), "--write", ("--stdin-file-path"), ("mock.ts")].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "check_stdin_shows_parse_diagnostics",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
 fn check_stdin_write_unsafe_successfully() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();

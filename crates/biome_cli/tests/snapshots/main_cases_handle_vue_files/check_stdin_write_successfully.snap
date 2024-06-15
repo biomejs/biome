@@ -27,9 +27,15 @@ delete a.c;
 ```
 
 ```block
-file.vue lint/performance/noDelete  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+file.vue:4:1 lint/performance/noDelete  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Avoid the delete operator which can impact performance.
+  
+    2 │ import { Button } from "./components/Button.vue";
+    3 │ 
+  > 4 │ delete a.c;
+      │ ^^^^^^^^^^
+    5 │ 
   
   i Unsafe fix: Use an undefined assignment instead.
   

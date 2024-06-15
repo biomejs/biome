@@ -27,9 +27,14 @@ delete a.c;
 ```
 
 ```block
-file.vue lint/complexity/noUselessRename  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+file.vue:1:15 lint/complexity/noUselessRename  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Useless rename.
+  
+  > 1 │ import {      Button  as Button  }   from  "./components/Button.vue"   ;
+      │               ^^^^^^^^^^^^^^^^^
+    2 │ import *     as         vueUse  from  "vue-use"   ;
+    3 │ 
   
   i Safe fix: Remove the renaming.
   
@@ -39,9 +44,15 @@ file.vue lint/complexity/noUselessRename  FIXABLE  ━━━━━━━━━�
 ```
 
 ```block
-file.vue lint/performance/noDelete  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+file.vue:4:1 lint/performance/noDelete  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Avoid the delete operator which can impact performance.
+  
+    2 │ import *     as         vueUse  from  "vue-use"   ;
+    3 │ 
+  > 4 │ delete a.c;
+      │ ^^^^^^^^^^
+    5 │ 
   
   i Unsafe fix: Use an undefined assignment instead.
   

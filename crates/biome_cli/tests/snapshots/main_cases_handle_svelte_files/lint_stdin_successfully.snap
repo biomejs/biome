@@ -21,9 +21,13 @@ var foo: string = "";
 ```
 
 ```block
-file.svelte lint/style/noInferrableTypes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+file.svelte:1:8 lint/style/noInferrableTypes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × This type annotation is trivially inferred from its initialization.
+  
+  > 1 │ var foo: string = "";
+      │        ^^^^^^^^
+    2 │ 
   
   i Safe fix: Remove the type annotation.
   
@@ -35,9 +39,13 @@ file.svelte lint/style/noInferrableTypes  FIXABLE  ━━━━━━━━━�
 ```
 
 ```block
-file.svelte lint/style/noVar  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+file.svelte:1:1 lint/style/noVar  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Use let or const instead of var.
+  
+  > 1 │ var foo: string = "";
+      │ ^^^^^^^^^^^^^^^^^^^^
+    2 │ 
   
   i A variable declared with var is accessible in the whole module. Thus, the variable can be accessed before its initialization and outside the block where it is declared.
   

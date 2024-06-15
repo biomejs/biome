@@ -29,9 +29,14 @@ var foo: string = "";
 ```
 
 ```block
-file.astro lint/complexity/noUselessRename  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+file.astro:2:9 lint/complexity/noUselessRename  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Useless rename.
+  
+  > 2 │ import {a as a} from 'mod';
+      │         ^^^^^^
+    3 │ import {    something } from "file.astro";
+    4 │ debugger;
   
   i Safe fix: Remove the renaming.
   
@@ -41,9 +46,16 @@ file.astro lint/complexity/noUselessRename  FIXABLE  ━━━━━━━━━
 ```
 
 ```block
-file.astro lint/suspicious/noDebugger  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+file.astro:4:1 lint/suspicious/noDebugger  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × This is an unexpected use of the debugger statement.
+  
+    2 │ import {a as a} from 'mod';
+    3 │ import {    something } from "file.astro";
+  > 4 │ debugger;
+      │ ^^^^^^^^^
+    5 │ statement ( ) ;
+    6 │ var foo: string = "";
   
   i Unsafe fix: Remove debugger statement
   
@@ -57,9 +69,15 @@ file.astro lint/suspicious/noDebugger  FIXABLE  ━━━━━━━━━━�
 ```
 
 ```block
-file.astro lint/style/noInferrableTypes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+file.astro:6:8 lint/style/noInferrableTypes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × This type annotation is trivially inferred from its initialization.
+  
+    4 │ debugger;
+    5 │ statement ( ) ;
+  > 6 │ var foo: string = "";
+      │        ^^^^^^^^
+    7 │ 
   
   i Safe fix: Remove the type annotation.
   
@@ -73,9 +91,15 @@ file.astro lint/style/noInferrableTypes  FIXABLE  ━━━━━━━━━━
 ```
 
 ```block
-file.astro lint/style/noVar  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+file.astro:6:1 lint/style/noVar  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Use let or const instead of var.
+  
+    4 │ debugger;
+    5 │ statement ( ) ;
+  > 6 │ var foo: string = "";
+      │ ^^^^^^^^^^^^^^^^^^^^
+    7 │ 
   
   i A variable declared with var is accessible in the whole module. Thus, the variable can be accessed before its initialization and outside the block where it is declared.
   
