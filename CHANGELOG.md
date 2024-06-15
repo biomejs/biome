@@ -122,6 +122,8 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
   Contributed by @Sec-ant
 
+- The [noUnnownProperty](https://biomejs.dev/linter/rules/no-unknown-property/) rule now handles `composes` property. [#3000](https://github.com/biomejs/biome/issues/3000) Contributed by @chansuke
+
 ### Parser
 
 ## v1.8.1 (2024-06-10)
