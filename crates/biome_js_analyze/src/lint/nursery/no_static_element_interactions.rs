@@ -273,6 +273,9 @@ const EVENT_TO_HANDLERS: &[(&str, &[&str])] = &[
 // no-static-element-interactions rule checks only focus, keyboard and mouse categories.
 const CATEGORIES_TO_CHECK: &[&str] = &["focus", "keyboard", "mouse"];
 
+// The section element is considered interactive if it has an aria-label or aria-labelledby attribute.
+const SECTION_ARIA_ATTRIBUTES: &[&str] = &["aria-label", "aria-labelledby"];
+
 impl Rule for NoStaticElementInteractions {
     type Query = Aria<AnyJsxElement>;
     type State = ();
@@ -323,7 +326,7 @@ impl Rule for NoStaticElementInteractions {
         }
 
         let is_valid_element = match element_name {
-            "section" => ["aria-label", "aria-labelledby"].iter().any(|&attr_name| {
+            "section" => SECTION_ARIA_ATTRIBUTES.iter().any(|&attr_name| {
                 node.find_attribute_by_name(attr_name)
                     .map_or(false, |attr| {
                         attr.as_static_value()
