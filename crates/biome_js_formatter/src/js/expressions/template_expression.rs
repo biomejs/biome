@@ -256,6 +256,15 @@ fn is_css_embedded(template: &JsTemplateExpression) -> SyntaxResult<bool> {
         if let Some(ident_expr) = ident_expr {
             let name = ident_expr.name()?;
             // TODO: support more css-in-js libraries
+            // css.global``
+            // css.resolve``
+            // styled.foo``
+            // Component.foo``
+            // styled(Component)``
+            // styled.foo.attrs({})`
+            // Component.extend.attrs({})``
+            // styled(Component).attrs({})``
+            // JSX element with CSS prop
             if name.has_name("css") {
                 return Ok(true);
             }
