@@ -289,7 +289,7 @@ mod test {
         assert!(globals[0].is_read());
         assert_eq!(globals[0].syntax().text_trimmed(), "console");
     }
-    
+
     #[test]
     fn all_exported() {
         let r = biome_js_parser::parse(

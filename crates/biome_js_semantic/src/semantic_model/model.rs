@@ -183,7 +183,7 @@ impl SemanticModel {
             index: x.id,
         })
     }
-    
+
     /// Return an iterator over all the bindings that are exported from the current AST.
     ///
     /// ```rust
@@ -197,12 +197,12 @@ impl SemanticModel {
     /// let model = semantic_model(&r.tree(), SemanticModelOptions::default());
     ///
     /// let all_exported: Vec<_> = model.all_exported().collect();
-    /// 
+    ///
     /// assert_eq!(all_exported.len(), 2);
     /// ```
     pub fn all_exported(&self) -> impl Iterator<Item = Binding> + '_ {
         self.data.exported.iter().map(|range| {
-            let id = &self.data.bindings_by_start[&range];
+            let id = &self.data.bindings_by_start[range];
             Binding {
                 data: self.data.clone(),
                 index: (*id).into(),

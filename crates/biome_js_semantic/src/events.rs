@@ -1,7 +1,10 @@
 //! Events emitted by the [SemanticEventExtractor] which are then constructed into the Semantic Model
 
 use biome_js_syntax::binding_ext::{AnyJsBindingDeclaration, AnyJsIdentifierBinding};
-use biome_js_syntax::{AnyJsIdentifierUsage, JsExportDefaultExpressionClause, JsLanguage, JsReferenceIdentifier, JsSyntaxKind, JsSyntaxNode, TextRange, TsTypeParameterName};
+use biome_js_syntax::{
+    AnyJsIdentifierUsage, JsExportDefaultExpressionClause, JsLanguage, JsReferenceIdentifier,
+    JsSyntaxKind, JsSyntaxNode, TextRange, TsTypeParameterName,
+};
 use biome_js_syntax::{AnyJsImportClause, AnyJsNamedImportSpecifier, AnyTsType};
 use biome_rowan::{syntax::Preorder, AstNode, SyntaxNodeOptionExt, TokenText};
 use rustc_hash::FxHashMap;
@@ -733,14 +736,13 @@ impl SemanticEventExtractor {
     fn leave_export_default_expression(&mut self, node: &JsExportDefaultExpressionClause) {
         for node in node.syntax().descendants().skip(1) {
             if let Some(identifier) = JsReferenceIdentifier::cast_ref(&node) {
-                for (_, info) in &self.bindings {
+                for info in self.bindings.values() {
                     let Ok(name) = identifier.name() else {
                         continue;
                     };
                     if name.text() == name.text() {
-                        self.stash.push_back(SemanticEvent::Exported {
-                            range: info.range
-                        })
+                        self.stash
+                            .push_back(SemanticEvent::Exported { range: info.range })
                     }
                 }
             }
