@@ -1,9 +1,7 @@
 //! Events emitted by the [SemanticEventExtractor] which are then constructed into the Semantic Model
 
 use biome_js_syntax::binding_ext::{AnyJsBindingDeclaration, AnyJsIdentifierBinding};
-use biome_js_syntax::{
-    AnyJsIdentifierUsage, JsLanguage, JsSyntaxKind, JsSyntaxNode, TextRange, TsTypeParameterName,
-};
+use biome_js_syntax::{AnyJsIdentifierUsage, JsExportDefaultExpressionClause, JsLanguage, JsReferenceIdentifier, JsSyntaxKind, JsSyntaxNode, TextRange, TsTypeParameterName};
 use biome_js_syntax::{AnyJsImportClause, AnyJsNamedImportSpecifier, AnyTsType};
 use biome_rowan::{syntax::Preorder, AstNode, SyntaxNodeOptionExt, TokenText};
 use rustc_hash::FxHashMap;
@@ -719,8 +717,31 @@ impl SemanticEventExtractor {
                 self.pop_scope(node.text_range());
             }
             _ => {
+                if let Some(node) = JsExportDefaultExpressionClause::cast_ref(node) {
+                    self.leave_export_default_expression(&node);
+                }
                 if let Some(node) = AnyTsType::cast_ref(node) {
                     self.leave_any_type(&node);
+                }
+            }
+        }
+    }
+
+    /// This function inspects the [JsReferenceIdentifier] that are exported by the node [JsExportDefaultExpressionClause].
+    ///
+    /// If these references belong to a binding, they are marked as exported.
+    fn leave_export_default_expression(&mut self, node: &JsExportDefaultExpressionClause) {
+        for node in node.syntax().descendants().skip(1) {
+            if let Some(identifier) = JsReferenceIdentifier::cast_ref(&node) {
+                for (_, info) in &self.bindings {
+                    let Ok(name) = identifier.name() else {
+                        continue;
+                    };
+                    if name.text() == name.text() {
+                        self.stash.push_back(SemanticEvent::Exported {
+                            range: info.range
+                        })
+                    }
                 }
             }
         }

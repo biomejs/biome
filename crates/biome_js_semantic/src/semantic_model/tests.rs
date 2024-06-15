@@ -216,6 +216,7 @@ mod test {
         assert_is_exported(true, "A", "const A = 1; export {A}");
         assert_is_exported(false, "A", "const A = 1; export {type A}");
         assert_is_exported(false, "A", "const A = 1; export type {A}");
+        assert_is_exported(false, "A", "const A = 1; export default {A}");
 
         // Functions
         assert_is_exported(false, "f", "function f() {}");
@@ -287,5 +288,22 @@ mod test {
         assert_eq!(globals.len(), 1);
         assert!(globals[0].is_read());
         assert_eq!(globals[0].syntax().text_trimmed(), "console");
+    }
+    
+    #[test]
+    fn all_exported() {
+        let r = biome_js_parser::parse(
+            "export const bar = 3; const foo = 10; export default { foo }",
+            JsFileSource::js_module(),
+            JsParserOptions::default(),
+        );
+
+        let options = SemanticModelOptions::default();
+
+        let model = semantic_model(&r.tree(), options);
+
+        let exported: Vec<_> = model.all_exported().collect();
+
+        assert_eq!(exported.len(), 2);
     }
 }

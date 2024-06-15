@@ -183,6 +183,32 @@ impl SemanticModel {
             index: x.id,
         })
     }
+    
+    /// Return an iterator over all the bindings that are exported from the current AST.
+    ///
+    /// ```rust
+    /// use biome_js_parser::JsParserOptions;
+    /// use biome_rowan::{AstNode, SyntaxNodeCast};
+    /// use biome_js_syntax::{JsFileSource, AnyJsFunction};
+    /// use biome_js_semantic::{semantic_model, CallsExtensions, SemanticModelOptions};
+    /// use biome_js_syntax::JsReferenceIdentifier;
+    ///
+    /// let r = biome_js_parser::parse("export const bar = 3; const foo = 10; export default { foo }", JsFileSource::js_module(), JsParserOptions::default());
+    /// let model = semantic_model(&r.tree(), SemanticModelOptions::default());
+    ///
+    /// let all_exported: Vec<_> = model.all_exported().collect();
+    /// 
+    /// assert_eq!(all_exported.len(), 2);
+    /// ```
+    pub fn all_exported(&self) -> impl Iterator<Item = Binding> + '_ {
+        self.data.exported.iter().map(|range| {
+            let id = &self.data.bindings_by_start[&range];
+            Binding {
+                data: self.data.clone(),
+                index: (*id).into(),
+            }
+        })
+    }
 
     /// Returns the [Binding] of a reference.
     /// Can also be called from "binding" extension method.

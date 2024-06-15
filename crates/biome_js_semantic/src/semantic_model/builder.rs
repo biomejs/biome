@@ -331,6 +331,8 @@ impl SemanticModelBuilder {
                 }
             }
             Exported { range } => {
+                dbg!(&range);
+                // println!("Custom backtrace: {}", Backtrace::force_capture());
                 self.exported.insert(range.start());
             }
         }
