@@ -41,7 +41,7 @@ use biome_js_formatter::context::trailing_commas::TrailingCommas;
 use biome_js_formatter::context::{
     ArrowParentheses, BracketSameLine, BracketSpacing, JsFormatOptions, QuoteProperties, Semicolons,
 };
-use biome_js_formatter::{format_node, ForeignLanguage, JsForeignLanguageFormatter};
+use biome_js_formatter::{format_node, JsForeignLanguage, JsForeignLanguageFormatter};
 use biome_js_parser::JsParserOptions;
 use biome_js_semantic::{semantic_model, SemanticModelOptions};
 use biome_js_syntax::{
@@ -302,13 +302,13 @@ struct ForeignLanguageFormatter {
 }
 
 impl JsForeignLanguageFormatter for ForeignLanguageFormatter {
-    fn fmt(
+    fn format(
         &self,
-        language: biome_js_formatter::ForeignLanguage,
+        language: biome_js_formatter::JsForeignLanguage,
         content: &str,
     ) -> biome_formatter::FormatResult<biome_formatter::prelude::Document> {
         match language {
-            ForeignLanguage::Css => {
+            JsForeignLanguage::Css => {
                 let parse = parse_css(content, self.css_parse_options.clone());
                 biome_css_formatter::format_node(self.css_format_options.clone(), &parse.syntax())
                     .map(|formatted| formatted.into_document())

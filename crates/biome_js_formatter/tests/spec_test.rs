@@ -2,7 +2,7 @@ use biome_css_formatter::context::CssFormatOptions;
 use biome_css_parser::{parse_css, CssParserOptions};
 use biome_formatter_test::spec::{SpecSnapshot, SpecTestFile};
 use biome_js_formatter::{
-    context::JsFormatOptions, ForeignLanguage, JsForeignLanguageFormatter, JsFormatLanguage,
+    context::JsFormatOptions, JsForeignLanguage, JsForeignLanguageFormatter, JsFormatLanguage,
 };
 use biome_js_syntax::{JsFileSource, ModuleKind};
 use std::path::Path;
@@ -18,13 +18,13 @@ struct ForeignLanguageFormatter {
 }
 
 impl JsForeignLanguageFormatter for ForeignLanguageFormatter {
-    fn fmt(
+    fn format(
         &self,
-        language: biome_js_formatter::ForeignLanguage,
+        language: biome_js_formatter::JsForeignLanguage,
         content: &str,
     ) -> biome_formatter::FormatResult<biome_formatter::prelude::Document> {
         match language {
-            ForeignLanguage::Css => {
+            JsForeignLanguage::Css => {
                 let parse = parse_css(content, self.css_parse_options.clone());
                 biome_css_formatter::format_node(self.css_format_options.clone(), &parse.syntax())
                     .map(|formatted| formatted.into_document())

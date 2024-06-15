@@ -5,7 +5,7 @@ use biome_css_parser::CssParserOptions;
 use biome_formatter::{IndentStyle, IndentWidth};
 use biome_formatter_test::test_prettier_snapshot::{PrettierSnapshot, PrettierTestFile};
 use biome_js_formatter::{
-    context::JsFormatOptions, ForeignLanguage, JsForeignLanguageFormatter, JsFormatLanguage,
+    context::JsFormatOptions, JsForeignLanguage, JsForeignLanguageFormatter, JsFormatLanguage,
 };
 use biome_js_syntax::{JsFileSource, LanguageVariant, ModuleKind};
 
@@ -17,13 +17,13 @@ tests_macros::gen_tests! {"tests/specs/prettier/{js,typescript,jsx}/**/*.{js,ts,
 struct ForeignLanguageFormatter;
 
 impl JsForeignLanguageFormatter for ForeignLanguageFormatter {
-    fn fmt(
+    fn format(
         &self,
-        language: biome_js_formatter::ForeignLanguage,
+        language: biome_js_formatter::JsForeignLanguage,
         content: &str,
     ) -> biome_formatter::FormatResult<biome_formatter::prelude::Document> {
         match language {
-            ForeignLanguage::Css => {
+            JsForeignLanguage::Css => {
                 let parse_options = CssParserOptions::default();
                 let format_options = CssFormatOptions::default();
                 let parse = biome_css_parser::parse_css(content, parse_options);

@@ -838,9 +838,9 @@ mod tests {
     struct ForeignLanguageFormatter;
 
     impl JsForeignLanguageFormatter for ForeignLanguageFormatter {
-        fn fmt(
+        fn format(
             &self,
-            _language: crate::ForeignLanguage,
+            _language: crate::JsForeignLanguage,
             _content: &str,
         ) -> biome_formatter::FormatResult<biome_formatter::prelude::Document> {
             Err(FormatError::SyntaxError)

@@ -91,9 +91,9 @@ fn run_test(input: &'static str, _: &str, _: &str, _: &str) {
 struct ForeignLanguageFormatter;
 
 impl JsForeignLanguageFormatter for ForeignLanguageFormatter {
-    fn fmt(
+    fn format(
         &self,
-        _language: biome_js_formatter::ForeignLanguage,
+        _language: biome_js_formatter::JsForeignLanguage,
         _content: &str,
     ) -> FormatResult<Document> {
         Err(FormatError::SyntaxError)

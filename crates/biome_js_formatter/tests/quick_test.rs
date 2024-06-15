@@ -5,7 +5,7 @@ use biome_formatter::{AttributePosition, IndentStyle, LineWidth, QuoteStyle};
 use biome_formatter_test::check_reformat::CheckReformat;
 use biome_js_formatter::context::{ArrowParentheses, JsFormatOptions, Semicolons};
 use biome_js_formatter::{
-    format_node, ForeignLanguage, JsForeignLanguageFormatter, JsFormatLanguage,
+    format_node, JsForeignLanguage, JsForeignLanguageFormatter, JsFormatLanguage,
 };
 use biome_js_parser::{parse, JsParserOptions};
 use biome_js_syntax::JsFileSource;
@@ -21,13 +21,13 @@ struct ForeignLanguageFormatter {
 }
 
 impl JsForeignLanguageFormatter for ForeignLanguageFormatter {
-    fn fmt(
+    fn format(
         &self,
-        language: biome_js_formatter::ForeignLanguage,
+        language: biome_js_formatter::JsForeignLanguage,
         content: &str,
     ) -> biome_formatter::FormatResult<biome_formatter::prelude::Document> {
         match language {
-            ForeignLanguage::Css => {
+            JsForeignLanguage::Css => {
                 let parse = parse_css(content, self.css_parse_options.clone());
                 css_format_node(self.css_format_options.clone(), &parse.syntax())
                     .map(|formatted| formatted.into_document())

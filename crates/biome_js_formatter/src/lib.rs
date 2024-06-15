@@ -445,12 +445,12 @@ impl IntoFormat<JsFormatContext> for JsSyntaxToken {
     }
 }
 
-pub enum ForeignLanguage {
+pub enum JsForeignLanguage {
     Css,
 }
 
 pub trait JsForeignLanguageFormatter: std::fmt::Debug + 'static {
-    fn fmt(&self, language: ForeignLanguage, content: &str) -> FormatResult<Document>;
+    fn format(&self, language: JsForeignLanguage, content: &str) -> FormatResult<Document>;
 }
 
 #[derive(Debug, Clone)]
@@ -604,9 +604,9 @@ mod tests {
     struct FakeForeignLanguageFormatter;
 
     impl JsForeignLanguageFormatter for FakeForeignLanguageFormatter {
-        fn fmt(
+        fn format(
             &self,
-            _language: super::ForeignLanguage,
+            _language: super::JsForeignLanguage,
             _content: &str,
         ) -> biome_formatter::FormatResult<Document> {
             Err(biome_formatter::FormatError::SyntaxError)
