@@ -93,7 +93,7 @@ impl AnyJsTemplate {
                             return Ok(());
                         }
                         Err(_) => {
-                            // if we failed to format the template as css, we'll fall back to the default
+                            // if we failed to format the template as css, we'll fall back to the default formatting
                         }
                     }
                 }
@@ -134,25 +134,26 @@ fn format_embedded_language(
     language: JsForeignLanguage,
     f: &mut JsFormatter,
 ) -> FormatResult<()> {
+    // keep track of the placeholders we use to replace string interpolations
     let mut placeholder_map: HashMap<String, JsTemplateElement> = HashMap::new();
     let mut index = 0;
+    // we need to replace string interpolations with placeholders to avoid parsing errors
+    // after formatting finished, we'll replace the placeholders with the original string interpolations
     let content = elements
         .iter()
-        .fold(String::new(), |mut acc, element| match element {
+        .fold(String::new(), |acc, element| match element {
             AnyJsTemplateElement::JsTemplateChunkElement(element) => {
-                let text = element.text().to_string();
-                acc.push_str(&text);
-                acc
+                let text = element.text();
+                std::format!("{}{}", acc, text)
             }
             AnyJsTemplateElement::JsTemplateElement(element) => {
                 let placeholder = std::format!("biome-placeholder-{}", index);
                 index += 1;
                 placeholder_map.insert(placeholder.clone(), element.clone());
-                acc.push_str(&placeholder);
-                acc
+                std::format!("{}{}", acc, placeholder)
             }
         });
-    let formatted = f
+    let embedded_language_formatted = f
         .context()
         .get_foreign_language_formatter()
         .format(language, &content)?;
@@ -161,19 +162,19 @@ fn format_embedded_language(
         element: FormatElement,
         placeholder_map: &HashMap<String, JsTemplateElement>,
         f: &mut JsFormatter,
-    ) -> FormatElement {
+    ) -> SyntaxResult<FormatElement> {
         match element.clone() {
             FormatElement::LocatedTokenText { slice, .. } => {
                 let text = slice.to_string();
                 if let Some(template_element) = placeholder_map.get(&text) {
                     let interned = f.intern(&template_element.format());
-                    if let Ok(Some(element)) = interned {
-                        element.clone()
+                    if let Ok(Some(interned_template_element)) = interned {
+                        Ok(interned_template_element)
                     } else {
-                        element.clone()
+                        Ok(FormatElement::Interned(Interned::new(vec![])))
                     }
                 } else {
-                    element.clone()
+                    Ok(element)
                 }
             }
             FormatElement::Interned(interned) => {
@@ -186,8 +187,8 @@ fn format_embedded_language(
                             f,
                         )
                     })
-                    .collect::<Vec<FormatElement>>();
-                FormatElement::Interned(Interned::new(elemets))
+                    .collect::<Result<Vec<FormatElement>, _>>()?;
+                Ok(FormatElement::Interned(Interned::new(elemets)))
             }
             FormatElement::BestFitting(best_fitting) => {
                 let variants = best_fitting
@@ -203,26 +204,30 @@ fn format_embedded_language(
                                     f,
                                 )
                             })
-                            .collect::<Vec<FormatElement>>();
-                        Box::new(elements).into_boxed_slice()
+                            .collect::<Result<Vec<FormatElement>, _>>();
+                        elements.map(|elements| Box::new(elements).into_boxed_slice())
                     })
-                    .collect::<Vec<Box<[FormatElement]>>>();
+                    .collect::<Result<Vec<Box<[FormatElement]>>, _>>()?;
                 unsafe {
-                    FormatElement::BestFitting(BestFittingElement::from_vec_unchecked(variants))
+                    Ok(FormatElement::BestFitting(
+                        BestFittingElement::from_vec_unchecked(variants),
+                    ))
                 }
             }
-            element => element,
+            element => Ok(element),
         }
     }
 
-    let result = formatted
+    // replace placeholders with the original string interpolations
+    let formatted = embedded_language_formatted
         .deref()
         .iter()
         .map(|element| {
             replace_placeholder_with_template_element(element.clone(), &placeholder_map, f)
         })
-        .collect::<Vec<FormatElement>>();
+        .collect::<Result<Vec<FormatElement>, _>>()?;
 
+    // template chunks are formatted by the embedded language formatter, so we need to tell the formatter to ignore them
     for element in elements.iter() {
         match element {
             AnyJsTemplateElement::JsTemplateChunkElement(element) => {
@@ -237,7 +242,7 @@ fn format_embedded_language(
         [
             &indent(&format_with(|f| {
                 write!(f, [hard_line_break()])?;
-                f.write_elements(result.clone())
+                f.write_elements(formatted.clone())
             })),
             soft_line_break()
         ]

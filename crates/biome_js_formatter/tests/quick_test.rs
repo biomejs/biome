@@ -44,8 +44,8 @@ impl JsForeignLanguageFormatter for ForeignLanguageFormatter {
 fn quick_test() {
     let src = r#"
 css`
-.foo {{
-color: ${color}
+.foo {
+color: ${color};
 }
 `
 
