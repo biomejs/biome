@@ -454,6 +454,8 @@ impl From<JavascriptConfiguration> for LanguageSettings<JsLanguage> {
         language_setting.formatter.arrow_parentheses = Some(formatter.arrow_parentheses);
         language_setting.formatter.bracket_spacing = Some(formatter.bracket_spacing.into());
         language_setting.formatter.bracket_same_line = Some(formatter.bracket_same_line.into());
+        language_setting.formatter.embedded_language_formatting =
+            Some(formatter.embedded_language_formatting);
         language_setting.formatter.enabled = Some(formatter.enabled);
         language_setting.formatter.line_width = formatter.line_width;
         language_setting.formatter.indent_width = formatter.indent_width.map(Into::into);
@@ -998,6 +1000,9 @@ impl OverrideSettingPattern {
         if let Some(attribute_position) = js_formatter.attribute_position {
             options.set_attribute_position(attribute_position);
         }
+        if let Some(embedded_language_formatting) = js_formatter.embedded_language_formatting {
+            options.set_embedded_language_formatting(embedded_language_formatting);
+        }
 
         if let Ok(mut writeonly_cache) = self.cached_js_format_options.write() {
             let options = options.clone();
@@ -1280,6 +1285,8 @@ fn to_javascript_language_settings(
     language_setting.formatter.arrow_parentheses = formatter.arrow_parentheses;
     language_setting.formatter.bracket_spacing = formatter.bracket_spacing.map(Into::into);
     language_setting.formatter.bracket_same_line = formatter.bracket_same_line.map(Into::into);
+    language_setting.formatter.embedded_language_formatting =
+        formatter.embedded_language_formatting;
     language_setting.formatter.enabled = formatter.enabled;
     language_setting.formatter.line_width = formatter.line_width;
     language_setting.formatter.line_ending = formatter.line_ending;

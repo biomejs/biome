@@ -239,6 +239,7 @@ impl Display for RageConfiguration<'_, '_> {
                             {KeyValuePair("Line ending", markup!({DebugDisplayOption(javascript_formatter_configuration.line_ending)}))}
                             {KeyValuePair("Line width", markup!({DebugDisplayOption(javascript_formatter_configuration.line_width.map(|lw| lw.value()))}))}
                             {KeyValuePair("Attribute position", markup!({DebugDisplay(javascript_formatter_configuration.attribute_position)}))}
+                            {KeyValuePair("Embedded language formatting", markup!({DebugDisplay(javascript_formatter_configuration.embedded_language_formatting)}))}
                         )
                         .fmt(fmt)?;
 

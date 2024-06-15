@@ -339,6 +339,7 @@ export interface PartialJavascriptFormatter {
 	 * Whether to insert spaces around brackets in object literals. Defaults to true.
 	 */
 	bracketSpacing?: boolean;
+	embeddedLanguageFormatting?: EmbeddedLanguageFormatting;
 	/**
 	 * Control the formatter for JavaScript (and its super languages) files.
 	 */
@@ -520,6 +521,7 @@ export interface OverridePattern {
 export type VcsClientKind = "git";
 export type QuoteStyle = "double" | "single";
 export type ArrowParentheses = "always" | "asNeeded";
+export type EmbeddedLanguageFormatting = "auto" | "off";
 export type QuoteProperties = "asNeeded" | "preserve";
 export type Semicolons = "always" | "asNeeded";
 /**

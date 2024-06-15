@@ -184,6 +184,9 @@ pub struct JsFormatOptions {
 
     /// Attribute position style. By default auto.
     attribute_position: AttributePosition,
+
+    /// Whether to format embedded languages. Defaults to "off".
+    embedded_language_formatting: EmbeddedLanguageFormatting,
 }
 
 impl JsFormatOptions {
@@ -203,6 +206,7 @@ impl JsFormatOptions {
             bracket_spacing: BracketSpacing::default(),
             bracket_same_line: BracketSameLine::default(),
             attribute_position: AttributePosition::default(),
+            embedded_language_formatting: EmbeddedLanguageFormatting::default(),
         }
     }
 
@@ -271,6 +275,14 @@ impl JsFormatOptions {
         self
     }
 
+    pub fn with_embedded_language_formatting(
+        mut self,
+        embedded_language_formatting: EmbeddedLanguageFormatting,
+    ) -> Self {
+        self.embedded_language_formatting = embedded_language_formatting;
+        self
+    }
+
     pub fn set_arrow_parentheses(&mut self, arrow_parentheses: ArrowParentheses) {
         self.arrow_parentheses = arrow_parentheses;
     }
@@ -322,6 +334,13 @@ impl JsFormatOptions {
         self.semicolons = semicolons;
     }
 
+    pub fn set_embedded_language_formatting(
+        &mut self,
+        embedded_language_formatting: EmbeddedLanguageFormatting,
+    ) {
+        self.embedded_language_formatting = embedded_language_formatting;
+    }
+
     pub fn arrow_parentheses(&self) -> ArrowParentheses {
         self.arrow_parentheses
     }
@@ -365,6 +384,10 @@ impl JsFormatOptions {
     pub fn attribute_position(&self) -> AttributePosition {
         self.attribute_position
     }
+
+    pub fn embedded_language_formatting(&self) -> EmbeddedLanguageFormatting {
+        self.embedded_language_formatting
+    }
 }
 
 impl FormatOptions for JsFormatOptions {
@@ -407,7 +430,12 @@ impl fmt::Display for JsFormatOptions {
         writeln!(f, "Arrow parentheses: {}", self.arrow_parentheses)?;
         writeln!(f, "Bracket spacing: {}", self.bracket_spacing.value())?;
         writeln!(f, "Bracket same line: {}", self.bracket_same_line.value())?;
-        writeln!(f, "Attribute Position: {}", self.attribute_position)
+        writeln!(f, "Attribute Position: {}", self.attribute_position)?;
+        writeln!(
+            f,
+            "Embedded language formatting: {}",
+            self.embedded_language_formatting
+        )
     }
 }
 
@@ -577,5 +605,48 @@ impl BracketSameLine {
 impl From<bool> for BracketSameLine {
     fn from(value: bool) -> Self {
         Self(value)
+    }
+}
+
+#[derive(Clone, Copy, Debug, Default, Deserializable, Eq, Hash, Merge, PartialEq)]
+#[cfg_attr(
+    feature = "serde",
+    derive(serde::Serialize, serde::Deserialize, schemars::JsonSchema),
+    serde(rename_all = "camelCase")
+)]
+pub enum EmbeddedLanguageFormatting {
+    Auto,
+    #[default]
+    Off,
+}
+
+impl EmbeddedLanguageFormatting {
+    pub const fn is_auto(&self) -> bool {
+        matches!(self, Self::Auto)
+    }
+
+    pub const fn is_off(&self) -> bool {
+        matches!(self, Self::Off)
+    }
+}
+
+impl FromStr for EmbeddedLanguageFormatting {
+    type Err = &'static str;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s {
+            "auto" | "Auto" => Ok(Self::Auto),
+            "off" | "Off" => Ok(Self::Off),
+            _ => Err("Value not supported for embedded language formatting. Supported values are 'auto' and 'off'."),
+        }
+    }
+}
+
+impl fmt::Display for EmbeddedLanguageFormatting {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            EmbeddedLanguageFormatting::Auto => write!(f, "Auto"),
+            EmbeddedLanguageFormatting::Off => write!(f, "Off"),
+        }
     }
 }

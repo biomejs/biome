@@ -42,12 +42,13 @@ biome.jsonc migrate ━━━━━━━━━━━━━━━━━━━━
       18 │ + → → → "arrowParentheses":·"always",
       19 │ + → → → "bracketSpacing":·true,
       20 │ + → → → "bracketSameLine":·false,
-      21 │ + → → → "quoteStyle":·"single",
-      22 │ + → → → "attributePosition":·"auto"
-      23 │ + → → }
-      24 │ + → }
-      25 │ + }
-      26 │ + 
+      21 │ + → → → "embeddedLanguageFormatting":·"auto",
+      22 │ + → → → "quoteStyle":·"single",
+      23 │ + → → → "attributePosition":·"auto"
+      24 │ + → → }
+      25 │ + → }
+      26 │ + }
+      27 │ + 
   
 
 ```

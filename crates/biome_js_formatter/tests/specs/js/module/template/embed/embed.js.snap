@@ -34,14 +34,15 @@ Arrow parentheses: Always
 Bracket spacing: true
 Bracket same line: false
 Attribute Position: Auto
+Embedded language formatting: Off
 -----
 
 ```js
 css`
-	.foo {
-		background-color: ${bg};
-		color: "color";
-	}
+.foo {
+background-color: ${bg};
+color: "color";
+}
 `;
 ```
 
@@ -61,6 +62,7 @@ Arrow parentheses: Always
 Bracket spacing: true
 Bracket same line: false
 Attribute Position: Auto
+Embedded language formatting: Auto
 -----
 
 ```js

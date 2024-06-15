@@ -4320,6 +4320,7 @@ dependencies = [
  "biome_css_analyze",
  "biome_css_syntax",
  "biome_diagnostics",
+ "biome_formatter",
  "biome_js_analyze",
  "biome_js_factory",
  "biome_js_formatter",

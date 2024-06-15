@@ -5,7 +5,8 @@ use biome_css_parser::CssParserOptions;
 use biome_formatter::{FormatError, IndentStyle, IndentWidth};
 use biome_formatter_test::test_prettier_snapshot::{PrettierSnapshot, PrettierTestFile};
 use biome_js_formatter::{
-    context::JsFormatOptions, JsForeignLanguage, JsForeignLanguageFormatter, JsFormatLanguage,
+    context::{EmbeddedLanguageFormatting, JsFormatOptions},
+    JsForeignLanguage, JsForeignLanguageFormatter, JsFormatLanguage,
 };
 use biome_js_syntax::{JsFileSource, LanguageVariant, ModuleKind};
 
@@ -69,7 +70,8 @@ fn test_snapshot(input: &'static str, _: &str, _: &str, _: &str) {
 
     let options = JsFormatOptions::new(source_type)
         .with_indent_style(IndentStyle::Space)
-        .with_indent_width(IndentWidth::default());
+        .with_indent_width(IndentWidth::default())
+        .with_embedded_language_formatting(EmbeddedLanguageFormatting::Auto);
 
     let language = language::JsTestFormatLanguage::new(source_type);
 

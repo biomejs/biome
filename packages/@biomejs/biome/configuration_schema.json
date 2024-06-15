@@ -978,6 +978,7 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"EmbeddedLanguageFormatting": { "type": "string", "enum": ["auto", "off"] },
 		"FilenameCase": {
 			"description": "Supported cases for file names.",
 			"oneOf": [
@@ -1250,6 +1251,12 @@
 				"bracketSpacing": {
 					"description": "Whether to insert spaces around brackets in object literals. Defaults to true.",
 					"type": ["boolean", "null"]
+				},
+				"embeddedLanguageFormatting": {
+					"anyOf": [
+						{ "$ref": "#/definitions/EmbeddedLanguageFormatting" },
+						{ "type": "null" }
+					]
 				},
 				"enabled": {
 					"description": "Control the formatter for JavaScript (and its super languages) files.",

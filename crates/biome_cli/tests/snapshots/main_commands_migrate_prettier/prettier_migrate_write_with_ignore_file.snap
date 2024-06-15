@@ -26,6 +26,7 @@ expression: content
       "arrowParentheses": "always",
       "bracketSpacing": true,
       "bracketSameLine": false,
+      "embeddedLanguageFormatting": "auto",
       "quoteStyle": "single",
       "attributePosition": "auto"
     }

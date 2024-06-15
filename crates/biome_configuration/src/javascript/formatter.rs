@@ -2,7 +2,8 @@ use crate::PlainIndentStyle;
 use biome_deserialize_macros::{Deserializable, Merge, Partial};
 use biome_formatter::{AttributePosition, IndentWidth, LineEnding, LineWidth, QuoteStyle};
 use biome_js_formatter::context::{
-    trailing_commas::TrailingCommas, ArrowParentheses, QuoteProperties, Semicolons,
+    trailing_commas::TrailingCommas, ArrowParentheses, EmbeddedLanguageFormatting, QuoteProperties,
+    Semicolons,
 };
 use bpaf::Bpaf;
 use serde::{Deserialize, Serialize};
@@ -46,6 +47,10 @@ pub struct JavascriptFormatter {
     /// Whether to hug the closing bracket of multiline HTML/JSX tags to the end of the last line, rather than being alone on the following line. Defaults to false.
     #[partial(bpaf(long("bracket-same-line"), argument("true|false"), optional))]
     pub bracket_same_line: bool,
+
+    /// Whether to format the embedded language in the file. Defaults to "off".
+    #[partial(bpaf(long("embedded-language-formatting"), argument("auto|off"), optional))]
+    pub embedded_language_formatting: EmbeddedLanguageFormatting,
 
     /// Control the formatter for JavaScript (and its super languages) files.
     #[partial(bpaf(long("javascript-formatter-enabled"), argument("true|false"), optional))]
@@ -120,6 +125,7 @@ impl PartialJavascriptFormatter {
             line_width: self.line_width,
             quote_style: self.quote_style.unwrap_or_default(),
             attribute_position: self.attribute_position.unwrap_or_default(),
+            embedded_language_formatting: self.embedded_language_formatting.unwrap_or_default(),
         }
     }
 }
@@ -143,6 +149,7 @@ impl Default for JavascriptFormatter {
             line_width: Default::default(),
             quote_style: Default::default(),
             attribute_position: Default::default(),
+            embedded_language_formatting: Default::default(),
         }
     }
 }

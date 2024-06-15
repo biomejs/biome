@@ -39,7 +39,8 @@ use biome_js_analyze::{
 };
 use biome_js_formatter::context::trailing_commas::TrailingCommas;
 use biome_js_formatter::context::{
-    ArrowParentheses, BracketSameLine, BracketSpacing, JsFormatOptions, QuoteProperties, Semicolons,
+    ArrowParentheses, BracketSameLine, BracketSpacing, EmbeddedLanguageFormatting, JsFormatOptions,
+    QuoteProperties, Semicolons,
 };
 use biome_js_formatter::{format_node, JsForeignLanguage, JsForeignLanguageFormatter};
 use biome_js_parser::JsParserOptions;
@@ -66,6 +67,7 @@ pub struct JsFormatterSettings {
     pub arrow_parentheses: Option<ArrowParentheses>,
     pub bracket_spacing: Option<BracketSpacing>,
     pub bracket_same_line: Option<BracketSameLine>,
+    pub embedded_language_formatting: Option<EmbeddedLanguageFormatting>,
     pub line_ending: Option<LineEnding>,
     pub line_width: Option<LineWidth>,
     pub indent_width: Option<IndentWidth>,
@@ -175,6 +177,11 @@ impl ServiceLanguage for JsLanguage {
             language
                 .and_then(|l| l.attribute_position)
                 .or(global.and_then(|g| g.attribute_position))
+                .unwrap_or_default(),
+        )
+        .with_embedded_language_formatting(
+            language
+                .and_then(|l| l.embedded_language_formatting)
                 .unwrap_or_default(),
         );
 

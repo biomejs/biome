@@ -8,7 +8,9 @@ use biome_formatter::{
     AttributePosition, IndentWidth, LineEnding, LineWidth, ParseFormatNumberError, QuoteStyle,
 };
 use biome_fs::{FileSystem, OpenOptions};
-use biome_js_formatter::context::{ArrowParentheses, QuoteProperties, Semicolons, TrailingCommas};
+use biome_js_formatter::context::{
+    ArrowParentheses, EmbeddedLanguageFormatting, QuoteProperties, Semicolons, TrailingCommas,
+};
 use biome_json_parser::JsonParserOptions;
 use biome_service::DynRef;
 use std::path::Path;
@@ -58,6 +60,8 @@ pub(crate) struct PrettierConfiguration {
     end_of_line: EndOfLine,
     /// https://prettier.io/docs/en/configuration.html#configuration-overrides
     overrides: Vec<Override>,
+    /// https://prettier.io/docs/en/options#embedded-language-formatting
+    embedded_language_formatting: PrettierEmbeddedLanguageFormatting,
 }
 
 impl Default for PrettierConfiguration {
@@ -76,6 +80,7 @@ impl Default for PrettierConfiguration {
             arrow_parens: ArrowParens::default(),
             end_of_line: EndOfLine::default(),
             overrides: vec![],
+            embedded_language_formatting: PrettierEmbeddedLanguageFormatting::default(),
         }
     }
 }
@@ -113,6 +118,8 @@ pub(crate) struct OverrideOptions {
     arrow_parens: Option<ArrowParens>,
     /// https://prettier.io/docs/en/options#end-of-line
     end_of_line: Option<EndOfLine>,
+    /// https://prettier.io/docs/en/options#embedded-language-formatting
+    embedded_language_formatting: Option<PrettierEmbeddedLanguageFormatting>,
 }
 
 #[derive(Clone, Debug, Default, Deserializable, Eq, PartialEq)]
@@ -145,6 +152,13 @@ enum QuoteProps {
     #[deserializable(rename = "as-needed")]
     AsNeeded,
     Preserve,
+}
+
+#[derive(Clone, Debug, Default, Deserializable, Eq, PartialEq)]
+enum PrettierEmbeddedLanguageFormatting {
+    #[default]
+    Auto,
+    Off,
 }
 
 impl From<PrettierTrailingComma> for TrailingCommas {
@@ -182,6 +196,15 @@ impl From<QuoteProps> for QuoteProperties {
         match value {
             QuoteProps::AsNeeded => Self::AsNeeded,
             QuoteProps::Preserve => Self::Preserve,
+        }
+    }
+}
+
+impl From<PrettierEmbeddedLanguageFormatting> for EmbeddedLanguageFormatting {
+    fn from(value: PrettierEmbeddedLanguageFormatting) -> Self {
+        match value {
+            PrettierEmbeddedLanguageFormatting::Auto => Self::Auto,
+            PrettierEmbeddedLanguageFormatting::Off => Self::Off,
         }
     }
 }
@@ -249,6 +272,7 @@ impl TryFrom<PrettierConfiguration> for biome_configuration::PartialConfiguratio
             bracket_spacing: Some(value.bracket_spacing),
             jsx_quote_style: Some(jsx_quote_style),
             attribute_position: Some(AttributePosition::default()),
+            embedded_language_formatting: Some(value.embedded_language_formatting.into()),
         };
         let js_config = biome_configuration::PartialJavascriptConfiguration {
             formatter: Some(js_formatter),
@@ -314,6 +338,7 @@ impl TryFrom<Override> for biome_configuration::OverridePattern {
             && options.trailing_comma.is_none()
             && options.quote_props.is_none()
             && options.bracket_spacing.is_none()
+            && options.embedded_language_formatting.is_none()
         {
             // no js option are set
             return Ok(result);
@@ -351,6 +376,9 @@ impl TryFrom<Override> for biome_configuration::OverridePattern {
             quote_properties: options.quote_props.map(|quote_props| quote_props.into()),
             bracket_spacing: options.bracket_spacing,
             jsx_quote_style,
+            embedded_language_formatting: options
+                .embedded_language_formatting
+                .map(|embedded_language_formatting| embedded_language_formatting.into()),
             ..Default::default()
         };
         let js_config = biome_configuration::PartialJavascriptConfiguration {

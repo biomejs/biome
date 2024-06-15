@@ -34,6 +34,8 @@ Formatting options specific to the JavaScript files
         --bracket-same-line=<true|false>  Whether to hug the closing bracket of multiline HTML/JSX tags
                               to the end of the last line, rather than being alone on the following line.
                               Defaults to false.
+        --embedded-language-formatting=<auto|off>  Whether to format the embedded language in the file.
+                              Defaults to "off".
         --javascript-formatter-enabled=<true|false>  Control the formatter for JavaScript (and its super
                               languages) files.
         --javascript-formatter-indent-style=<tab|space>  The indent style applied to JavaScript (and

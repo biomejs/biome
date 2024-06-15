@@ -2,7 +2,7 @@ use std::collections::HashMap;
 use std::ops::Deref;
 
 use crate::{prelude::*, JsForeignLanguage};
-use biome_formatter::{write, CstFormatContext};
+use biome_formatter::{write, CstFormatContext, FormatContext};
 
 use crate::js::expressions::static_member_expression::member_chain_callee_needs_parens;
 use crate::js::lists::template_element_list::FormatJsTemplateElementListOptions;
@@ -75,6 +75,10 @@ impl AnyJsTemplate {
         match self {
             AnyJsTemplate::JsTemplateExpression(template) => {
                 if is_css_embedded(template)?
+                    && f.context()
+                        .options()
+                        .embedded_language_formatting()
+                        .is_auto()
                     && !template
                         .elements()
                         .iter()

@@ -56,12 +56,13 @@ biome.json migrate ━━━━━━━━━━━━━━━━━━━━�
       19 │ + → → → "arrowParentheses":·"always",
       20 │ + → → → "bracketSpacing":·true,
       21 │ + → → → "bracketSameLine":·false,
-      22 │ + → → → "quoteStyle":·"single",
-      23 │ + → → → "attributePosition":·"auto"
-      24 │ + → → }
-      25 │ + → }
-      26 │ + }
-      27 │ + 
+      22 │ + → → → "embeddedLanguageFormatting":·"auto",
+      23 │ + → → → "quoteStyle":·"single",
+      24 │ + → → → "attributePosition":·"auto"
+      25 │ + → → }
+      26 │ + → }
+      27 │ + }
+      28 │ + 
   
 
 ```

@@ -22,6 +22,7 @@ biome_configuration  = { workspace = true, optional = true }
 biome_css_analyze    = { workspace = true, optional = true }
 biome_css_syntax     = { workspace = true, optional = true }
 biome_diagnostics    = { workspace = true, optional = true }
+biome_formatter      = { workspace = true, optional = true }
 biome_js_analyze     = { workspace = true, optional = true }
 biome_js_factory     = { workspace = true, optional = true }
 biome_js_formatter   = { workspace = true, optional = true }
@@ -59,6 +60,7 @@ schema = [
   "biome_js_syntax",
   "biome_js_factory",
   "biome_js_formatter",
+  "biome_formatter",
   "biome_json_formatter",
   "biome_json_parser",
   "biome_diagnostics",

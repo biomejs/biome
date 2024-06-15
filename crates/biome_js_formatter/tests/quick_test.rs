@@ -3,7 +3,9 @@ use biome_css_formatter::format_node as css_format_node;
 use biome_css_parser::{parse_css, CssParserOptions};
 use biome_formatter::{AttributePosition, IndentStyle, LineWidth, QuoteStyle};
 use biome_formatter_test::check_reformat::CheckReformat;
-use biome_js_formatter::context::{ArrowParentheses, JsFormatOptions, Semicolons};
+use biome_js_formatter::context::{
+    ArrowParentheses, EmbeddedLanguageFormatting, JsFormatOptions, Semicolons,
+};
 use biome_js_formatter::{
     format_node, JsForeignLanguage, JsForeignLanguageFormatter, JsFormatLanguage,
 };
@@ -63,7 +65,8 @@ color: ${color};
         .with_quote_style(QuoteStyle::Double)
         .with_jsx_quote_style(QuoteStyle::Single)
         .with_arrow_parentheses(ArrowParentheses::AsNeeded)
-        .with_attribute_position(AttributePosition::Multiline);
+        .with_attribute_position(AttributePosition::Multiline)
+        .with_embedded_language_formatting(EmbeddedLanguageFormatting::Auto);
 
     let css_parse_options = CssParserOptions::default();
     let css_format_options = CssFormatOptions::default();
