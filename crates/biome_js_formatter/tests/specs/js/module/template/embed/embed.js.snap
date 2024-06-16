@@ -7,10 +7,12 @@ info: js/module/template/embed/embed.js
 ```js
 css`
 .foo {
-background-color: ${bg};
-color: "color";
-}
-`
+  background-color: ${bg}${color};
+        color: "color";
+  background: ${bg} ${color};
+  }
+`;
+
 ```
 
 
@@ -40,9 +42,10 @@ Embedded language formatting: Off
 ```js
 css`
 .foo {
-background-color: ${bg};
-color: "color";
-}
+  background-color: ${bg}${color};
+        color: "color";
+  background: ${bg} ${color};
+  }
 `;
 ```
 
@@ -68,8 +71,9 @@ Embedded language formatting: Auto
 ```js
 css`
 	.foo {
-		background-color: ${bg};
+		background-color: ${bg}${color};
 		color: 'color';
+		background: ${bg} ${color};
 	}
 `;
 ```
