@@ -125,9 +125,9 @@ impl Parsed {
 }
 
 #[derive(Debug, Clone)]
-struct ForeignLanguageFormatter;
+struct MultiLanguageFormatter;
 
-impl JsForeignLanguageFormatter for ForeignLanguageFormatter {
+impl JsForeignLanguageFormatter for MultiLanguageFormatter {
     fn format(
         &self,
         language: biome_js_formatter::JsForeignLanguage,
@@ -156,7 +156,7 @@ impl FormatNode {
         match self {
             Self::JavaScript(root, source_type) => biome_js_formatter::format_node(
                 JsFormatOptions::new(*source_type),
-                ForeignLanguageFormatter,
+                MultiLanguageFormatter,
                 root,
             )
             .map(FormattedNode::JavaScript),

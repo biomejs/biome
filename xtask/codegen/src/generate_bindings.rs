@@ -16,9 +16,9 @@ use xtask::{project_root, Mode, Result};
 use xtask_codegen::update;
 
 #[derive(Debug, Clone)]
-struct FakeJsForeignLanguageFormater;
+struct FakeFormater;
 
-impl JsForeignLanguageFormatter for FakeJsForeignLanguageFormater {
+impl JsForeignLanguageFormatter for FakeFormater {
     fn format(
         &self,
         _language: JsForeignLanguage,
@@ -441,7 +441,7 @@ pub(crate) fn generate_workspace_bindings(mode: Mode) -> Result<()> {
 
     let formatted = format_node(
         JsFormatOptions::new(JsFileSource::ts()),
-        FakeJsForeignLanguageFormater,
+        FakeFormater,
         module.syntax(),
     )
     .unwrap();

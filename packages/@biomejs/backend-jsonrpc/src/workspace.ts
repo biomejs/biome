@@ -339,6 +339,9 @@ export interface PartialJavascriptFormatter {
 	 * Whether to insert spaces around brackets in object literals. Defaults to true.
 	 */
 	bracketSpacing?: boolean;
+	/**
+	 * Whether to format quoted code embedded in the file. Defaults to "off".
+	 */
 	embeddedLanguageFormatting?: EmbeddedLanguageFormatting;
 	/**
 	 * Control the formatter for JavaScript (and its super languages) files.

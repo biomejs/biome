@@ -48,7 +48,7 @@ pub struct JavascriptFormatter {
     #[partial(bpaf(long("bracket-same-line"), argument("true|false"), optional))]
     pub bracket_same_line: bool,
 
-    /// Whether to format the embedded language in the file. Defaults to "off".
+    /// Whether to format quoted code embedded in the file. Defaults to "off".
     #[partial(bpaf(long("embedded-language-formatting"), argument("auto|off"), optional))]
     pub embedded_language_formatting: EmbeddedLanguageFormatting,
 

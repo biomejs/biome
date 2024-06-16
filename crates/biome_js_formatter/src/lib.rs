@@ -601,9 +601,9 @@ mod tests {
     use biome_rowan::{TextRange, TextSize};
 
     #[derive(Debug, Clone)]
-    struct FakeForeignLanguageFormatter;
+    struct FakeFormatter;
 
-    impl JsForeignLanguageFormatter for FakeForeignLanguageFormatter {
+    impl JsForeignLanguageFormatter for FakeFormatter {
         fn format(
             &self,
             _language: super::JsForeignLanguage,
@@ -648,7 +648,7 @@ while(
             JsFormatOptions::new(JsFileSource::js_script())
                 .with_indent_style(IndentStyle::Space)
                 .with_indent_width(4.try_into().unwrap()),
-            FakeForeignLanguageFormatter,
+            FakeFormatter,
             &tree.syntax(),
             TextRange::new(range_start, range_end),
         );
@@ -683,7 +683,7 @@ function() {
             JsFormatOptions::new(JsFileSource::js_script())
                 .with_indent_style(IndentStyle::Space)
                 .with_indent_width(4.try_into().unwrap()),
-            FakeForeignLanguageFormatter,
+            FakeFormatter,
             &tree.syntax(),
             TextRange::new(range_start, range_end),
         );
@@ -713,7 +713,7 @@ function() {
             JsFormatOptions::new(JsFileSource::js_script())
                 .with_indent_style(IndentStyle::Space)
                 .with_indent_width(4.try_into().unwrap()),
-            FakeForeignLanguageFormatter,
+            FakeFormatter,
             &tree.syntax(),
             TextRange::new(range_start, range_end),
         );
@@ -744,7 +744,7 @@ function() {
             JsFormatOptions::new(JsFileSource::js_script())
                 .with_indent_style(IndentStyle::Space)
                 .with_indent_width(4.try_into().unwrap()),
-            FakeForeignLanguageFormatter,
+            FakeFormatter,
             &tree.syntax(),
             range,
         )
@@ -778,7 +778,7 @@ function() {
             JsFormatOptions::new(JsFileSource::js_script())
                 .with_indent_style(IndentStyle::Space)
                 .with_indent_width(4.try_into().unwrap()),
-            FakeForeignLanguageFormatter,
+            FakeFormatter,
             &tree.syntax(),
             range,
         )
@@ -800,7 +800,7 @@ function() {
 
         let result = format_range(
             JsFormatOptions::new(syntax),
-            FakeForeignLanguageFormatter,
+            FakeFormatter,
             &tree.syntax(),
             TextRange::new(TextSize::from(0), TextSize::of(src) + TextSize::from(5)),
         );

@@ -21,12 +21,12 @@ impl JsTestFormatLanguage {
 }
 
 #[derive(Debug, Clone)]
-struct ForeignLanguageFormatter {
+struct MultiLanguageFormatter {
     css_parse_options: CssParserOptions,
     css_format_options: CssFormatOptions,
 }
 
-impl JsForeignLanguageFormatter for ForeignLanguageFormatter {
+impl JsForeignLanguageFormatter for MultiLanguageFormatter {
     fn format(
         &self,
         language: biome_js_formatter::JsForeignLanguage,
@@ -34,7 +34,7 @@ impl JsForeignLanguageFormatter for ForeignLanguageFormatter {
     ) -> biome_formatter::FormatResult<biome_formatter::prelude::Document> {
         match language {
             JsForeignLanguage::Css => {
-                let parse = parse_css(content, self.css_parse_options.clone());
+                let parse = parse_css(content, self.css_parse_options);
                 if parse.has_errors() {
                     return Err(FormatError::SyntaxError);
                 }
@@ -85,7 +85,7 @@ impl TestFormatLanguage for JsTestFormatLanguage {
                 .quote_style
                 .unwrap_or_default(),
         );
-        let foreign_language_formatter = ForeignLanguageFormatter {
+        let foreign_language_formatter = MultiLanguageFormatter {
             css_parse_options,
             css_format_options,
         };

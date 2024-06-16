@@ -15,9 +15,9 @@ use biome_rowan::AstNode;
 use biome_service::workspace_types::{generate_type, methods, ModuleQueue};
 
 #[derive(Debug, Clone)]
-struct ForeignLanguageFormatter;
+struct FakeFormatter;
 
-impl JsForeignLanguageFormatter for ForeignLanguageFormatter {
+impl JsForeignLanguageFormatter for FakeFormatter {
     fn format(
         &self,
         _language: biome_js_formatter::JsForeignLanguage,
@@ -85,7 +85,7 @@ fn main() -> io::Result<()> {
     // ensure it looks good by running it through the formatter
     let formatted = format_node(
         JsFormatOptions::new(JsFileSource::ts()),
-        ForeignLanguageFormatter,
+        FakeFormatter,
         module.syntax(),
     )
     .unwrap();

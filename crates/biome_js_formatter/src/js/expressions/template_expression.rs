@@ -83,7 +83,7 @@ impl AnyJsTemplate {
                         .elements()
                         .iter()
                         .map(|element| f.context().comments().is_suppressed(element.syntax()))
-                        .any(|is_suppressed| is_suppressed == true)
+                        .any(|is_suppressed| is_suppressed)
                 {
                     let interned = f.intern(&format_with(|f| {
                         format_embedded_language(template.elements(), JsForeignLanguage::Css, f)
@@ -133,11 +133,42 @@ impl NeedsParentheses for JsTemplateExpression {
     }
 }
 
+/// A template literal contains `JsTemplateChunkElement` and `JsTemplateElement` elements.
+/// A `JsTemplateElement` is an expression that cannot be directly passed to a foreign language formatter.
+/// This is because formatters for other languages, such as CSS, do not understand JavaScript expressions.
+/// Therefore, we need to replace the JavaScript expression with a placeholder.
+///
+/// Consider the following example:
+/// ```js
+/// const css = css`
+///    background: ${color};
+/// `;
+/// ```
+/// First, we need to replace `${color}` with a placeholder.
+/// After this replacement, the template literal will look like this:
+/// ```js
+/// const css = css`
+///   background: placeholder;
+/// `;
+/// ```
+/// This modified template can then be passed to the CSS formatter.
+/// Once formatting is complete, we need to replace the placeholder with the original expression.
 fn format_embedded_language(
     elements: JsTemplateElementList,
     language: JsForeignLanguage,
     f: &mut JsFormatter,
 ) -> FormatResult<()> {
+    // We need to track the relationship between placeholders and the original expressions.
+    // There is a special scenario we need to handle:
+    // If string interpolations are adjacent to each other, replacing them one by one with placeholders
+    // makes it difficult to replace them back with the original expressions.
+    // Therefore, we need to group adjacent interpolations together and replace them with a single placeholder.
+    //
+    // For example, consider the following:
+    // `background: ${bg}${color}`
+    // We should treat `${bg}${color}` as a group and replace it with a single placeholder:
+    // `background: placeholder`
+    // The placeholder is then mapped to `[bg, color]`.
     let mut placeholder_map: HashMap<String, Vec<JsTemplateElement>> = HashMap::new();
     let mut index = 0;
 
@@ -150,9 +181,6 @@ fn format_embedded_language(
             }
             AnyJsTemplateElement::JsTemplateElement(element) => {
                 let mut string_interpolations = vec![element.clone()];
-                // we need to find string interpolations that are adjacent to each other
-                // for example: `background: ${bg}${color}`
-                // and then treat them as a group and replace them with a single placeholder
                 while let Some(AnyJsTemplateElement::JsTemplateElement(element)) =
                     element_iter.peek()
                 {
@@ -252,12 +280,9 @@ fn format_embedded_language(
 
     // template chunks are formatted by the embedded language formatter, so we need to tell the formatter to ignore them
     for element in elements.iter() {
-        match element {
-            AnyJsTemplateElement::JsTemplateChunkElement(element) => {
-                let token = element.template_chunk_token()?;
-                write!(f, [&format_removed(&token)])?;
-            }
-            _ => {}
+        if let AnyJsTemplateElement::JsTemplateChunkElement(element) = element {
+            let token = element.template_chunk_token()?;
+            write!(f, [&format_removed(&token)])?;
         }
     }
     write!(
@@ -279,6 +304,7 @@ fn is_css_embedded(template: &JsTemplateExpression) -> SyntaxResult<bool> {
         if let Some(ident_expr) = ident_expr {
             let name = ident_expr.name()?;
             // TODO: support more css-in-js libraries
+            // <style jsx>{`div{color:red}`}</style>
             // css.global``
             // css.resolve``
             // styled.foo``

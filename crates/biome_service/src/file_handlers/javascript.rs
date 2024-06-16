@@ -303,12 +303,12 @@ impl ExtensionHandler for JsFileHandler {
 }
 
 #[derive(Clone, Debug)]
-struct ForeignLanguageFormatter {
+struct MultiLanguageFormatter {
     css_parse_options: CssParserOptions,
     css_format_options: CssFormatOptions,
 }
 
-impl JsForeignLanguageFormatter for ForeignLanguageFormatter {
+impl JsForeignLanguageFormatter for MultiLanguageFormatter {
     fn format(
         &self,
         language: biome_js_formatter::JsForeignLanguage,
@@ -316,7 +316,7 @@ impl JsForeignLanguageFormatter for ForeignLanguageFormatter {
     ) -> biome_formatter::FormatResult<biome_formatter::prelude::Document> {
         match language {
             JsForeignLanguage::Css => {
-                let parse = parse_css(content, self.css_parse_options.clone());
+                let parse = parse_css(content, self.css_parse_options);
                 if parse.has_errors() {
                     return Err(FormatError::SyntaxError);
                 }
@@ -434,7 +434,7 @@ fn debug_formatter_ir(
         })
         .unwrap_or_default();
     let css_format_options = settings.format_options::<CssLanguage>(path, document_file_source);
-    let foreign_language_formatter = ForeignLanguageFormatter {
+    let foreign_language_formatter = MultiLanguageFormatter {
         css_parse_options,
         css_format_options,
     };
@@ -834,7 +834,7 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
                     .unwrap_or_default();
                 let css_format_options =
                     workspace.format_options::<CssLanguage>(biome_path, &document_file_source);
-                let foreign_language_formatter = ForeignLanguageFormatter {
+                let foreign_language_formatter = MultiLanguageFormatter {
                     css_parse_options,
                     css_format_options,
                 };
@@ -882,8 +882,8 @@ pub(crate) fn format(
         })
         .unwrap_or_default();
     let css_format_options =
-        settings.format_options::<CssLanguage>(biome_path, &document_file_source);
-    let foreign_language_formatter = ForeignLanguageFormatter {
+        settings.format_options::<CssLanguage>(biome_path, document_file_source);
+    let foreign_language_formatter = MultiLanguageFormatter {
         css_parse_options,
         css_format_options,
     };
@@ -917,8 +917,8 @@ pub(crate) fn format_range(
         })
         .unwrap_or_default();
     let css_format_options =
-        settings.format_options::<CssLanguage>(biome_path, &document_file_source);
-    let foreign_language_formatter = ForeignLanguageFormatter {
+        settings.format_options::<CssLanguage>(biome_path, document_file_source);
+    let foreign_language_formatter = MultiLanguageFormatter {
         css_parse_options,
         css_format_options,
     };
@@ -969,8 +969,8 @@ pub(crate) fn format_on_type(
             allow_wrong_line_comments: settings.allow_wrong_line_comments,
         })
         .unwrap_or_default();
-    let css_format_options = settings.format_options::<CssLanguage>(path, &document_file_source);
-    let foreign_language_formatter = ForeignLanguageFormatter {
+    let css_format_options = settings.format_options::<CssLanguage>(path, document_file_source);
+    let foreign_language_formatter = MultiLanguageFormatter {
         css_parse_options,
         css_format_options,
     };

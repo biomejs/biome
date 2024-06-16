@@ -15,9 +15,9 @@ mod language;
 tests_macros::gen_tests! {"tests/specs/prettier/{js,typescript,jsx}/**/*.{js,ts,jsx,tsx}", crate::test_snapshot, "script"}
 
 #[derive(Debug, Clone)]
-struct ForeignLanguageFormatter;
+struct MultiLanguageFormatter;
 
-impl JsForeignLanguageFormatter for ForeignLanguageFormatter {
+impl JsForeignLanguageFormatter for MultiLanguageFormatter {
     fn format(
         &self,
         language: biome_js_formatter::JsForeignLanguage,
@@ -78,7 +78,7 @@ fn test_snapshot(input: &'static str, _: &str, _: &str, _: &str) {
     let snapshot = PrettierSnapshot::new(
         test_file,
         language,
-        JsFormatLanguage::new(options, ForeignLanguageFormatter),
+        JsFormatLanguage::new(options, MultiLanguageFormatter),
     );
 
     snapshot.test()

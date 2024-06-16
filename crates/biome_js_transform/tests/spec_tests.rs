@@ -88,9 +88,9 @@ fn run_test(input: &'static str, _: &str, _: &str, _: &str) {
 }
 
 #[derive(Debug, Clone)]
-struct ForeignLanguageFormatter;
+struct FakeFormatter;
 
-impl JsForeignLanguageFormatter for ForeignLanguageFormatter {
+impl JsForeignLanguageFormatter for FakeFormatter {
     fn format(
         &self,
         _language: biome_js_formatter::JsForeignLanguage,
@@ -129,12 +129,8 @@ pub(crate) fn analyze_and_snap(
                 );
                 let node = transformation.mutation.commit();
 
-                let formatted = format_node(
-                    JsFormatOptions::new(source_type),
-                    ForeignLanguageFormatter,
-                    &node,
-                )
-                .unwrap();
+                let formatted =
+                    format_node(JsFormatOptions::new(source_type), FakeFormatter, &node).unwrap();
 
                 transformations.push(formatted.print().unwrap().as_code().to_string());
             }

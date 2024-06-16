@@ -835,9 +835,9 @@ mod tests {
     }
 
     #[derive(Debug, Clone)]
-    struct ForeignLanguageFormatter;
+    struct FakeFormatter;
 
-    impl JsForeignLanguageFormatter for ForeignLanguageFormatter {
+    impl JsForeignLanguageFormatter for FakeFormatter {
         fn format(
             &self,
             _language: crate::JsForeignLanguage,
@@ -853,7 +853,7 @@ mod tests {
 
         let formatted = format_node(
             JsFormatOptions::new(JsFileSource::default()),
-            ForeignLanguageFormatter,
+            FakeFormatter,
             &transformed,
         )
         .unwrap();

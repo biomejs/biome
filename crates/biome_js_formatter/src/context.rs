@@ -185,7 +185,7 @@ pub struct JsFormatOptions {
     /// Attribute position style. By default auto.
     attribute_position: AttributePosition,
 
-    /// Whether to format embedded languages. Defaults to "off".
+    /// Whether to format quoted code embedded in the file. Defaults to "off".
     embedded_language_formatting: EmbeddedLanguageFormatting,
 }
 

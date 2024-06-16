@@ -1253,6 +1253,7 @@
 					"type": ["boolean", "null"]
 				},
 				"embeddedLanguageFormatting": {
+					"description": "Whether to format quoted code embedded in the file. Defaults to \"off\".",
 					"anyOf": [
 						{ "$ref": "#/definitions/EmbeddedLanguageFormatting" },
 						{ "type": "null" }
