@@ -14,7 +14,6 @@ use std::{
     num::{NonZeroU16, NonZeroU32, NonZeroU64, NonZeroU8, NonZeroUsize},
     ops::Deref,
     path::PathBuf,
-    u8,
 };
 
 /// Type that allows deserializing a string without heap-allocation.
