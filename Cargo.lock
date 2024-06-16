@@ -548,6 +548,7 @@ dependencies = [
  "grit-pattern-matcher",
  "grit-util",
  "im",
+ "insta",
  "path-absolutize",
  "regex",
  "rustc-hash",
