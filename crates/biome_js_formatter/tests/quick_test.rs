@@ -47,7 +47,7 @@ fn quick_test() {
     let src = r#"
 css`
 .foo {
-color: ${color};
+color:          ${color}${bg};
 }
 `
 

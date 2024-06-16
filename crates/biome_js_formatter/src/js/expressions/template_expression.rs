@@ -138,25 +138,34 @@ fn format_embedded_language(
     language: JsForeignLanguage,
     f: &mut JsFormatter,
 ) -> FormatResult<()> {
-    // keep track of the placeholders we use to replace string interpolations
-    let mut placeholder_map: HashMap<String, JsTemplateElement> = HashMap::new();
+    let mut placeholder_map: HashMap<String, Vec<JsTemplateElement>> = HashMap::new();
     let mut index = 0;
-    // we need to replace string interpolations with placeholders to avoid parsing errors
-    // after formatting finished, we'll replace the placeholders with the original string interpolations
-    let content = elements
-        .iter()
-        .fold(String::new(), |acc, element| match element {
+
+    let mut content = String::new();
+    let mut element_iter = elements.iter().peekable();
+    while let Some(template_element) = element_iter.next() {
+        match template_element {
             AnyJsTemplateElement::JsTemplateChunkElement(element) => {
-                let text = element.text();
-                std::format!("{}{}", acc, text)
+                content.push_str(element.text().as_str());
             }
             AnyJsTemplateElement::JsTemplateElement(element) => {
+                let mut string_interpolations = vec![element.clone()];
+                // we need to find string interpolations that are adjacent to each other
+                // for example: `background: ${bg}${color}`
+                // and then treat them as a group and replace them with a single placeholder
+                while let Some(AnyJsTemplateElement::JsTemplateElement(element)) =
+                    element_iter.peek()
+                {
+                    string_interpolations.push(element.clone());
+                    element_iter.next();
+                }
                 let placeholder = std::format!("biome-placeholder-{}", index);
                 index += 1;
-                placeholder_map.insert(placeholder.clone(), element.clone());
-                std::format!("{}{}", acc, placeholder)
+                placeholder_map.insert(placeholder.clone(), string_interpolations);
+                content.push_str(&placeholder);
             }
-        });
+        }
+    }
     let embedded_language_formatted = f
         .context()
         .get_foreign_language_formatter()
@@ -164,15 +173,20 @@ fn format_embedded_language(
 
     fn replace_placeholder_with_template_element(
         element: FormatElement,
-        placeholder_map: &HashMap<String, JsTemplateElement>,
+        placeholder_map: &mut HashMap<String, Vec<JsTemplateElement>>,
         f: &mut JsFormatter,
-    ) -> SyntaxResult<FormatElement> {
+    ) -> FormatResult<FormatElement> {
         match element.clone() {
             FormatElement::LocatedTokenText { slice, .. } => {
                 let text = slice.to_string();
-                if let Some(template_element) = placeholder_map.get(&text) {
-                    let interned = f.intern(&template_element.format());
-                    if let Ok(Some(interned_template_element)) = interned {
+                if let Some(template_elements) = placeholder_map.remove(&text) {
+                    let interned = f.intern(&format_with(|f| {
+                        for template_element in &template_elements {
+                            write!(f, [template_element.format()])?;
+                        }
+                        Ok(())
+                    }))?;
+                    if let Some(interned_template_element) = interned {
                         Ok(interned_template_element)
                     } else {
                         Ok(FormatElement::Interned(Interned::new(vec![])))
@@ -227,9 +241,14 @@ fn format_embedded_language(
         .deref()
         .iter()
         .map(|element| {
-            replace_placeholder_with_template_element(element.clone(), &placeholder_map, f)
+            replace_placeholder_with_template_element(element.clone(), &mut placeholder_map, f)
         })
         .collect::<Result<Vec<FormatElement>, _>>()?;
+
+    // if there are any placeholders left, we treat it is a error and format the template as normal
+    if !placeholder_map.is_empty() {
+        return Err(FormatError::SyntaxError);
+    }
 
     // template chunks are formatted by the embedded language formatter, so we need to tell the formatter to ignore them
     for element in elements.iter() {
