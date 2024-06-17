@@ -1,0 +1,24 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```jsx
+constfoo='thing';
+
+```
+
+# Diagnostics
+```
+invalid.js:1:1 lint/nursery/noIrregularWhitespace ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Irregular whitespace found.
+  
+  > 1 │ const␋foo␋=␋'thing';
+      │ ^^^^^^^^^^^^^^^^^^^^
+    2 │ 
+  
+  i Replace the irregular whitespace character with a normal whitespace or tab.
+  
+
+```

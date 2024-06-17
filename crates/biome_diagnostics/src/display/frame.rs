@@ -343,12 +343,17 @@ pub(super) fn calculate_print_width(mut value: OneIndexed) -> NonZeroUsize {
 /// characters are printed by [print_invisibles]
 const TAB_WIDTH: usize = 2;
 
+/// Esoteric spaces don't return a width using `char.width()`, so we need to
+/// assume a fixed length for them
+const ESOTERIC_SPACE_WIDTH: usize = 1;
+
 /// Compute the unicode display width of a string, with the width of tab
 /// characters set to [TAB_WIDTH] and the width of control characters set to 0
 pub(super) fn text_width(text: &str) -> usize {
     text.chars()
         .map(|char| match char {
             '\t' => TAB_WIDTH,
+            '\u{b}' => ESOTERIC_SPACE_WIDTH,
             _ => char.width().unwrap_or(0),
         })
         .sum()
