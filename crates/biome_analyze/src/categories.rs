@@ -184,7 +184,7 @@ pub(crate) enum Categories {
 #[derive(Debug, Copy, Clone)]
 /// The categories supported by the analyzer.
 ///
-/// The default implementation of this type returns an instance with no categories.
+/// The default implementation of this type returns an instance with all the categories.
 ///
 /// Use [RuleCategoriesBuilder] to generate the categories you want to query.
 pub struct RuleCategories(BitFlags<Categories>);
@@ -192,6 +192,11 @@ pub struct RuleCategories(BitFlags<Categories>);
 impl RuleCategories {
     pub fn empty() -> Self {
         let empty: BitFlags<Categories> = BitFlags::empty();
+        Self(empty)
+    }
+
+    pub fn all() -> Self {
+        let empty: BitFlags<Categories> = BitFlags::all();
         Self(empty)
     }
 
@@ -203,7 +208,7 @@ impl RuleCategories {
 
 impl Default for RuleCategories {
     fn default() -> Self {
-        Self::empty()
+        Self::all()
     }
 }
 
@@ -302,7 +307,17 @@ impl schemars::JsonSchema for RuleCategories {
 }
 
 #[derive(Debug, Default)]
-/// A convenient type to build
+/// A convenient type create a [RuleCategories] type
+/// 
+/// ```
+/// use biome_analyze::{RuleCategoriesBuilder, RuleCategory};
+/// let mut categories = RuleCategoriesBuilder::default().with_syntax().with_lint().build();
+///
+/// assert!(categories.contains(RuleCategory::Lint));
+/// assert!(categories.contains(RuleCategory::Syntax));
+/// assert!(!categories.contains(RuleCategory::Action));
+/// assert!(!categories.contains(RuleCategory::Transformation));
+/// ```
 pub struct RuleCategoriesBuilder {
     flags: BitFlags<Categories>,
 }
