@@ -1,7 +1,7 @@
 use biome_analyze::{context::RuleContext, declare_lint_rule, Ast, Rule, RuleDiagnostic};
 use biome_console::markup;
 use biome_js_syntax::AnyJsStatement;
-use biome_rowan::{declare_node_union, AstNode, TextRange, TextSize};
+use biome_rowan::{declare_node_union, AstNode, TextRange};
 
 const IRREGULAR_WHITESPACES: &[&str; 2] = &[
     "\u{c}",
@@ -81,32 +81,11 @@ fn get_irregular_whitespace(node: &IrregularWhitespaceNode) -> Option<NoIrregula
     IRREGULAR_WHITESPACES
         .iter()
         .find_map(|whitespace_character| {
-            let character_index = node_text.find(&whitespace_character.to_string())?;
-            let range_start = node
-                .range()
-                .add_start(TextSize::try_from(character_index).ok()?)
-                .start();
-
-            let whitespace_token = node
-                .syntax()
-                .token_at_offset(range_start)
-                .flat_map(|token| {
-                    token
-                        .leading_trivia()
-                        .pieces()
-                        .chain(token.trailing_trivia().pieces())
-                        .filter(|trivia_piece| trivia_piece.is_whitespace())
-                        .collect::<Vec<_>>()
-                })
-                .filter(|whitespace_token| whitespace_token.text().contains(whitespace_character))
-                .collect::<Vec<_>>();
-
-            dbg!(whitespace_token);
-
-            Some(NoIrregularWhitespaceState {
-                // range: TextRange::new(range_start, range_end),
-                range: node.range(),
-                character: whitespace_character,
-            })
+            node_text.find(&whitespace_character.to_string()).and(Some(
+                NoIrregularWhitespaceState {
+                    range: node.range(),
+                    character: whitespace_character,
+                },
+            ))
         })
 }
