@@ -76,7 +76,6 @@ pub use source_map::{TransformSourceMap, TransformSourceMapBuilder};
 use std::marker::PhantomData;
 use std::num::ParseIntError;
 use std::str::FromStr;
-use std::u8;
 use token::string::Quote;
 
 #[derive(Debug, Eq, PartialEq, Clone, Copy, Hash)]
