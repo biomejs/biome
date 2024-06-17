@@ -308,7 +308,7 @@ impl schemars::JsonSchema for RuleCategories {
 
 #[derive(Debug, Default)]
 /// A convenient type create a [RuleCategories] type
-/// 
+///
 /// ```
 /// use biome_analyze::{RuleCategoriesBuilder, RuleCategory};
 /// let mut categories = RuleCategoriesBuilder::default().with_syntax().with_lint().build();
