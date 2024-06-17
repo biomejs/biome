@@ -5,7 +5,7 @@ use crate::grit_node_patterns::{GritLeafNodePattern, GritNodePattern};
 use crate::grit_resolved_pattern::GritResolvedPattern;
 use crate::grit_target_language::GritTargetLanguage;
 use crate::grit_target_node::GritTargetNode;
-use crate::grit_tree::GritTree;
+use crate::grit_tree::GritTargetTree;
 use anyhow::Result;
 use grit_pattern_matcher::context::{ExecContext, QueryContext};
 use grit_pattern_matcher::file_owners::FileOwners;
@@ -15,10 +15,10 @@ use grit_pattern_matcher::pattern::{
 use grit_util::AnalysisLogs;
 
 #[derive(Clone, Debug, PartialEq)]
-pub(crate) struct GritQueryContext;
+pub struct GritQueryContext;
 
 impl QueryContext for GritQueryContext {
-    type Node<'a> = GritTargetNode;
+    type Node<'a> = GritTargetNode<'a>;
     type NodePattern = GritNodePattern;
     type LeafNodePattern = GritLeafNodePattern;
     type ExecContext<'a> = GritExecContext;
@@ -27,11 +27,11 @@ impl QueryContext for GritQueryContext {
     type ResolvedPattern<'a> = GritResolvedPattern<'a>;
     type Language<'a> = GritTargetLanguage;
     type File<'a> = GritFile<'a>;
-    type Tree<'a> = GritTree;
+    type Tree<'a> = GritTargetTree;
 }
 
 #[derive(Debug)]
-pub(crate) struct GritExecContext {
+pub struct GritExecContext {
     lang: GritTargetLanguage,
 }
 
@@ -68,7 +68,7 @@ impl<'a> ExecContext<'a, GritQueryContext> for GritExecContext {
         todo!()
     }
 
-    fn files(&self) -> &FileOwners<GritTree> {
+    fn files(&self) -> &FileOwners<GritTargetTree> {
         todo!()
     }
 
