@@ -8,8 +8,10 @@ use crate::js::expressions::static_member_expression::member_chain_callee_needs_
 use crate::js::lists::template_element_list::FormatJsTemplateElementListOptions;
 use crate::parentheses::NeedsParentheses;
 use biome_js_syntax::{
-    AnyJsExpression, AnyJsTemplateElement, JsSyntaxNode, JsTemplateElement, JsTemplateElementList,
-    JsTemplateExpression, TsTemplateLiteralType,
+    AnyJsExpression, AnyJsName, AnyJsTemplateElement, AnyJsxAttribute, AnyJsxAttributeName,
+    AnyJsxElementName, JsIdentifierExpression, JsStaticMemberExpression, JsSyntaxNode,
+    JsTemplateElement, JsTemplateElementList, JsTemplateExpression, JsxChildList, JsxElement,
+    JsxExpressionChild, TsTemplateLiteralType,
 };
 use biome_js_syntax::{JsSyntaxToken, TsTypeArguments};
 use biome_rowan::{declare_node_union, SyntaxResult};
@@ -74,7 +76,12 @@ impl AnyJsTemplate {
     fn write_elements(&self, f: &mut JsFormatter) -> FormatResult<()> {
         match self {
             AnyJsTemplate::JsTemplateExpression(template) => {
+                // check if the template only contains whitespaces or newlines
+                let is_empty = template.elements().iter().all(|element| {
+                    matches!(element, AnyJsTemplateElement::JsTemplateChunkElement(chunk) if chunk.text().trim().is_empty())
+                });
                 if is_css_embedded(template)?
+                    && !is_empty
                     && f.context()
                         .options()
                         .embedded_language_formatting()
@@ -194,6 +201,7 @@ fn format_embedded_language(
             }
         }
     }
+
     let embedded_language_formatted = f
         .context()
         .get_foreign_language_formatter()
@@ -254,6 +262,8 @@ fn format_embedded_language(
                         elements.map(|elements| Box::new(elements).into_boxed_slice())
                     })
                     .collect::<Result<Vec<Box<[FormatElement]>>, _>>()?;
+
+                // SAFETY: the best fitting element is derived from a valid best fitting element
                 unsafe {
                     Ok(FormatElement::BestFitting(
                         BestFittingElement::from_vec_unchecked(variants),
@@ -285,6 +295,7 @@ fn format_embedded_language(
             write!(f, [&format_removed(&token)])?;
         }
     }
+
     write!(
         f,
         [
@@ -298,26 +309,142 @@ fn format_embedded_language(
 }
 
 fn is_css_embedded(template: &JsTemplateExpression) -> SyntaxResult<bool> {
+    let is_styled_jsx = is_styled_jsx(template)?;
+    let is_styled_component = is_styled_component(template)?;
+    Ok(is_styled_jsx || is_styled_component)
+}
+
+fn is_styled_jsx(template: &JsTemplateExpression) -> SyntaxResult<bool> {
     let tag = template.tag();
     if let Some(tag) = tag {
-        let ident_expr = tag.as_js_identifier_expression();
-        if let Some(ident_expr) = ident_expr {
-            let name = ident_expr.name()?;
-            // TODO: support more css-in-js libraries
-            // <style jsx>{`div{color:red}`}</style>
-            // css.global``
-            // css.resolve``
-            // styled.foo``
-            // Component.foo``
-            // styled(Component)``
-            // styled.foo.attrs({})`
-            // Component.extend.attrs({})``
-            // styled(Component).attrs({})``
-            // JSX element with CSS prop
-            if name.has_name("css") {
-                return Ok(true);
+        // css``
+        // css.global``
+        // css.resolve``
+        match tag {
+            AnyJsExpression::JsIdentifierExpression(ident_expr) => {
+                let name = ident_expr.name()?;
+                return Ok(name.has_name("css"));
+            }
+            AnyJsExpression::JsStaticMemberExpression(member_expr) => {
+                let object = member_expr.object()?;
+                let member = member_expr.member()?;
+                if let AnyJsExpression::JsIdentifierExpression(object) = object {
+                    if let AnyJsName::JsName(member) = member {
+                        return Ok(object.name()?.has_name("css")
+                            && member.value_token()?.text_trimmed() == "global");
+                    }
+                }
+            }
+            _ => {}
+        }
+    }
+
+    // <style jsx>{`div{color:red}`}</style>
+    let parent = template.parent::<JsxExpressionChild>();
+    if let Some(jsx_expr_child) = parent {
+        let parent = jsx_expr_child.parent::<JsxChildList>();
+        if let Some(jsx_child_list) = parent {
+            let parent = jsx_child_list.parent::<JsxElement>();
+            if let Some(jsx_element) = parent {
+                let opening_element = jsx_element.opening_element()?;
+                let name = opening_element.name()?;
+                if let AnyJsxElementName::JsxName(name) = name {
+                    if name.value_token()?.text_trimmed() == "style" {
+                        let attributes = opening_element.attributes();
+                        // only have one attribute and it is jsx attribute
+                        let count = attributes.len();
+                        if count == 1 {
+                            if let Some(AnyJsxAttribute::JsxAttribute(attr)) = attributes.first() {
+                                let name = attr.name()?;
+                                if let AnyJsxAttributeName::JsxName(name) = name {
+                                    if name.value_token()?.text_trimmed() == "jsx" {
+                                        return Ok(true);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
             }
         }
+    }
+
+    Ok(false)
+}
+
+// styled.foo
+fn is_styled_identifier(template: &JsIdentifierExpression) -> SyntaxResult<bool> {
+    let name = template.name()?;
+    Ok(name.has_name("styled"))
+}
+
+// Component.extend
+fn is_styled_extend(template: &JsStaticMemberExpression) -> SyntaxResult<bool> {
+    let object = template.object()?;
+    let member = template.member()?;
+    if let AnyJsExpression::JsIdentifierExpression(ident_expr) = object {
+        let name = ident_expr.name()?.text();
+        // name startwith capital letter
+        let is_first_char_uppercase = name.chars().next().map_or(false, |c| c.is_uppercase());
+        if is_first_char_uppercase {
+            if let AnyJsName::JsName(member) = member {
+                return Ok(member.value_token()?.text_trimmed() == "extend");
+            }
+        }
+    }
+    Ok(false)
+}
+
+fn is_styled_component(template: &JsTemplateExpression) -> SyntaxResult<bool> {
+    let tag = match template.tag() {
+        Some(AnyJsExpression::JsParenthesizedExpression(paren_expr)) => paren_expr.expression()?,
+        Some(expr) => expr,
+        _ => return Ok(false),
+    };
+
+    match tag {
+        AnyJsExpression::JsStaticMemberExpression(member_expr) => {
+            let is_styled_extend = is_styled_extend(&member_expr)?;
+            let is_styled_identifier = {
+                let object = member_expr.object()?;
+                if let AnyJsExpression::JsIdentifierExpression(ident_expr) = object {
+                    is_styled_identifier(&ident_expr)?
+                } else {
+                    false
+                }
+            };
+            return Ok(is_styled_extend || is_styled_identifier);
+        }
+        AnyJsExpression::JsCallExpression(call_expr) => {
+            let callee = call_expr.callee()?;
+            match callee {
+                AnyJsExpression::JsStaticMemberExpression(member_expr) => {
+                    // styled.foo.attrs({})``
+                    if let AnyJsExpression::JsStaticMemberExpression(member_expr) =
+                        member_expr.object()?
+                    {
+                        if let AnyJsExpression::JsIdentifierExpression(ident_expr) =
+                            member_expr.object()?
+                        {
+                            return is_styled_identifier(&ident_expr);
+                        }
+                    }
+                    // styled(Component).attrs({})``
+                    if let AnyJsExpression::JsIdentifierExpression(ident_expr) =
+                        member_expr.object()?
+                    {
+                        return is_styled_identifier(&ident_expr);
+                    }
+                    // Component.extend.attrs({})``
+                    return is_styled_extend(&member_expr);
+                }
+                AnyJsExpression::JsIdentifierExpression(ident_expr) => {
+                    return is_styled_identifier(&ident_expr);
+                }
+                _ => {}
+            }
+        }
+        _ => {}
     }
     Ok(false)
 }

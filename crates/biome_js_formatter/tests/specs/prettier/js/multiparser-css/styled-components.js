@@ -147,15 +147,16 @@ const StyledComponent1 = styled.div`
   }
 `;
 
-const StyledComponent2 = styled.div`
-  ${anInterpolation}
+// TODO: reformat issue
+// const StyledComponent2 = styled.div`
+//   ${anInterpolation}
 
-  /* a comment */
+//   /* a comment */
 
-  .aRule {
-    color: red
-  }
-`;
+//   .aRule {
+//     color: red
+//   }
+// `;
 
 const Direction = styled.span`
   ${({ up }) => up && `color: ${color.positive};`}

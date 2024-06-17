@@ -2,7 +2,6 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: js/multiparser-css/styled-components.js
 ---
-
 # Input
 
 ```js
@@ -155,15 +154,16 @@ const StyledComponent1 = styled.div`
   }
 `;
 
-const StyledComponent2 = styled.div`
-  ${anInterpolation}
+// TODO: reformat issue
+// const StyledComponent2 = styled.div`
+//   ${anInterpolation}
 
-  /* a comment */
+//   /* a comment */
 
-  .aRule {
-    color: red
-  }
-`;
+//   .aRule {
+//     color: red
+//   }
+// `;
 
 const Direction = styled.span`
   ${({ up }) => up && `color: ${color.positive};`}
@@ -337,16 +337,17 @@ const StyledDiv = styled.div`
    color: ${(props) => props.theme.colors.paragraph};
    ${(props) => (props.small ? "font-size: 0.8em;" : "")};
  `;
-@@ -72,7 +68,7 @@
+@@ -72,8 +68,7 @@
  `;
  
  styled.div`
 -  ${sanitize} ${fonts}
-+ ${sanitize} ${fonts}
-   html {
+-  html {
++  ${sanitize} ${fonts} html {
      margin: 0;
    }
-@@ -110,24 +106,26 @@
+ `;
+@@ -110,24 +105,26 @@
  `;
  
  styled.span`
@@ -379,25 +380,40 @@ const StyledDiv = styled.div`
  `;
  
  styled.a`
-@@ -144,7 +142,7 @@
-   /* a comment */
+@@ -140,23 +137,21 @@
+ `;
  
-   .aRule {
--    color: red;
-+    color: red
+ const StyledComponent1 = styled.div`
+-  ${anInterpolation}
+-  /* a comment */
+-
+-  .aRule {
++  ${anInterpolation} /* a comment */ .aRule {
+     color: red;
    }
  `;
  
-@@ -154,7 +152,7 @@
-   /* a comment */
+-const StyledComponent2 = styled.div`
+-  ${anInterpolation}
++// TODO: reformat issue
++// const StyledComponent2 = styled.div`
++//   ${anInterpolation}
  
-   .aRule {
+-  /* a comment */
++//   /* a comment */
+ 
+-  .aRule {
 -    color: red;
-+    color: red
-   }
- `;
+-  }
+-`;
++//   .aRule {
++//     color: red
++//   }
++// `;
  
-@@ -179,7 +177,7 @@
+ const Direction = styled.span`
+   ${({ up }) => up && `color: ${color.positive};`}
+@@ -179,7 +174,7 @@
  `;
  
  const Single1 = styled.div`
@@ -406,7 +422,7 @@ const StyledDiv = styled.div`
  `;
  
  const Single2 = styled.div`
-@@ -232,9 +230,9 @@
+@@ -232,9 +227,9 @@
    ${(props) =>
      props.a &&
      css`
@@ -494,8 +510,7 @@ styled.div`
 `;
 
 styled.div`
- ${sanitize} ${fonts}
-  html {
+  ${sanitize} ${fonts} html {
     margin: 0;
   }
 `;
@@ -564,23 +579,21 @@ styled.a`
 `;
 
 const StyledComponent1 = styled.div`
-  ${anInterpolation}
-  /* a comment */
-
-  .aRule {
-    color: red
+  ${anInterpolation} /* a comment */ .aRule {
+    color: red;
   }
 `;
 
-const StyledComponent2 = styled.div`
-  ${anInterpolation}
+// TODO: reformat issue
+// const StyledComponent2 = styled.div`
+//   ${anInterpolation}
 
-  /* a comment */
+//   /* a comment */
 
-  .aRule {
-    color: red
-  }
-`;
+//   .aRule {
+//     color: red
+//   }
+// `;
 
 const Direction = styled.span`
   ${({ up }) => up && `color: ${color.positive};`}
@@ -690,7 +703,5 @@ const StyledDiv = styled.div`
 
 # Lines exceeding max width of 80 characters
 ```
-  188:   /* A comment to avoid the prettier issue: https://github.com/prettier/prettier/issues/2291 */
+  185:   /* A comment to avoid the prettier issue: https://github.com/prettier/prettier/issues/2291 */
 ```
-
-

@@ -2,7 +2,6 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: js/multiparser-css/styled-components-multiple-expressions.js
 ---
-
 # Input
 
 ```js
@@ -36,23 +35,21 @@ font-family: "${a}", "${b}";
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,27 +1,21 @@
+@@ -1,27 +1,19 @@
  const Header = styled.div`
-   ${something()}
-   & > ${Child}:not(:first-child) {
--    margin-left: 5px;
--  }
-+margin-left:5px;
-+}
+-  ${something()}
+-  & > ${Child}:not(:first-child) {
++  ${something()} & > ${Child}:not(:first-child) {
+     margin-left: 5px;
+   }
  `;
  
  const Header2 = styled.div`
-   ${something()}
-   & > ${Child}${Child2}:not(:first-child) {
--    margin-left: 5px;
--  }
-+margin-left:5px;
-+}
+-  ${something()}
+-  & > ${Child}${Child2}:not(:first-child) {
++  ${something()} & > ${Child}${Child2}:not(:first-child) {
+     margin-left: 5px;
+   }
  `;
  
 -styled.div`
@@ -77,17 +74,15 @@ font-family: "${a}", "${b}";
 
 ```js
 const Header = styled.div`
-  ${something()}
-  & > ${Child}:not(:first-child) {
-margin-left:5px;
-}
+  ${something()} & > ${Child}:not(:first-child) {
+    margin-left: 5px;
+  }
 `;
 
 const Header2 = styled.div`
-  ${something()}
-  & > ${Child}${Child2}:not(:first-child) {
-margin-left:5px;
-}
+  ${something()} & > ${Child}${Child2}:not(:first-child) {
+    margin-left: 5px;
+  }
 `;
 
 styled.div`${foo}-idle { }`;
@@ -98,5 +93,3 @@ styled.div`
 font-family: "${a}", "${b}";
 `;
 ```
-
-
