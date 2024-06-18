@@ -133,6 +133,7 @@ define_categories! {
     "lint/nursery/noRestrictedImports": "https://biomejs.dev/linter/rules/no-restricted-imports",
     "lint/nursery/noShorthandPropertyOverrides": "https://biomejs.dev/linter/rules/no-shorthand-property-overrides",
     "lint/nursery/noSubstr": "https://biomejs.dev/linter/rules/no-substr",
+    "lint/nursery/noStaticElementInteractions": "https://biomejs.dev/linter/rules/no-static-element-interactions",
     "lint/nursery/noTypeOnlyImportAttributes": "https://biomejs.dev/linter/rules/no-type-only-import-attributes",
     "lint/nursery/noUndeclaredDependencies": "https://biomejs.dev/linter/rules/no-undeclared-dependencies",
     "lint/nursery/noUnknownFunction": "https://biomejs.dev/linter/rules/no-unknown-function",

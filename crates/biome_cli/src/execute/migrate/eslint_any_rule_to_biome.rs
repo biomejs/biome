@@ -649,6 +649,16 @@ pub(crate) fn migrate_eslint_any_rule(
             let rule = group.no_redundant_roles.get_or_insert(Default::default());
             rule.set_level(rule_severity.into());
         }
+        "jsx-a11y/no-static-element-interactions" => {
+            if !options.include_nursery {
+                return false;
+            }
+            let group = rules.nursery.get_or_insert_with(Default::default);
+            let rule = group
+                .no_static_element_interactions
+                .get_or_insert(Default::default());
+            rule.set_level(rule_severity.into());
+        }
         "jsx-a11y/prefer-tag-over-role" => {
             if !options.include_nursery {
                 return false;

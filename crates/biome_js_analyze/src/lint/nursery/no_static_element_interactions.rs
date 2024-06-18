@@ -1,0 +1,449 @@
+use crate::services::aria::Aria;
+use biome_analyze::context::RuleContext;
+use biome_analyze::{declare_rule, Rule, RuleDiagnostic, RuleSource};
+use biome_console::markup;
+use biome_js_syntax::jsx_ext::AnyJsxElement;
+use biome_rowan::AstNode;
+
+declare_rule! {
+    /// Enforce that non-interactive, visible elements (such as `<div>`) that have click handlers use the role attribute.
+    ///
+    /// Static HTML elements do not have semantic meaning. This is clear in the case of `<div>` and `<span>`. It is less so clear in the case of elements that seem semantic, but that do not have a semantic mapping in the accessibility layer. For example `<a>`, `<big>`, `<blockquote>`, `<footer>`, `<picture>`, `<strike>`, and `<time>` -- to name a few -- have no semantic layer mapping. They are as void of meaning as `<div>`.
+    ///
+    /// The [WAI-ARIA role attribute](https://www.w3.org/TR/wai-aria-1.1/#usage_intro) confers a semantic mapping to an element. The semantic value can then be expressed to a user via assistive technology.
+    /// In order to add interactivity such as a mouse or key event listener to a static element, that element must be given a role value as well.
+    ///
+    /// Source: [jsx-a11y/no-static-element-interactions](https://github.com/jsx-eslint/eslint-plugin-jsx-a11y/blob/main/docs/rules/no-static-element-interactions.md)
+    ///
+    /// ## Examples
+    ///
+    /// ### Invalid
+    ///
+    /// ```jsx,expect_diagnostic
+    /// <div onClick={() => {}}></div>;
+    /// ```
+    ///
+    /// ```jsx,expect_diagnostic
+    /// <span onClick={() => {}}></span>;
+    /// ```
+    ///
+    /// When `<a>` does not have "href" attribute, that is non-interactive.
+    /// ```jsx,expect_diagnostic
+    /// <a onClick={() => {}}></a>
+    /// ```
+    ///
+    /// ### Valid
+    ///
+    /// ```jsx
+    /// <>
+    ///     <div role="button" onClick={() => {}}></div>
+    ///     <span role="link" onClick={() => {}}></span>
+    ///     <a href="http://example.com" onClick={() => {}}></a>
+    /// </>
+    /// ```
+    ///
+    pub NoStaticElementInteractions {
+        version: "next",
+        name: "noStaticElementInteractions",
+        language: "js",
+        sources: &[RuleSource::EslintJsxA11y("no-static-element-interactions")],
+        recommended: false,
+    }
+}
+
+// EVENT_TO_HANDLERS is a mapping of event categories to their corresponding event handlers.
+// For example, the "keyboard" category includes handlers like "onKeyDown", "onKeyPress", and "onKeyUp".
+const EVENT_TO_HANDLERS: &[(&str, &[&str])] = &[
+    // (
+    //     // ref: https://developer.mozilla.org/en-US/docs/Web/API/ClipboardEvent
+    //     "clipboard",
+    //     &[
+    //         // ref: https://developer.mozilla.org/en-US/docs/Web/API/Element/copy_event
+    //         "onCopy",
+    //         //ref: https://developer.mozilla.org/en-US/docs/Web/API/Element/cut_event
+    //         "onCut",
+    //         // ref: https://developer.mozilla.org/en-US/docs/Web/API/Element/paste_event
+    //         "onPaste",
+    //     ],
+    // ),
+    // (
+    //     // ref: https://developer.mozilla.org/en-US/docs/Web/API/CompositionEvent
+    //     "composition",
+    //     &[
+    //         // ref: https://developer.mozilla.org/en-US/docs/Web/API/Element/compositionstart_event
+    //         "onCompositionStart",
+    //         // ref: https://developer.mozilla.org/en-US/docs/Web/API/Element/compositionend_event
+    //         "onCompositionEnd",
+    //         // ref: https://developer.mozilla.org/en-US/docs/Web/API/Element/compositionupdate_event
+    //         "onCompositionUpdate",
+    //     ],
+    // ),
+    (
+        // ref https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent
+        "keyboard",
+        &[
+            // ref: https://developer.mozilla.org/en-US/docs/Web/API/Element/keydown_event
+            "onKeyDown",
+            // ref: https://developer.mozilla.org/en-US/docs/Web/API/Element/keyup_event
+            "onKeyUp",
+            //ref: https://developer.mozilla.org/en-US/docs/Web/API/Element/keypress_event
+            "onKeyPress",
+        ],
+    ),
+    (
+        // ref: https://developer.mozilla.org/en-US/docs/Web/API/FocusEvent
+        "focus",
+        &[
+            // ref: https://developer.mozilla.org/en-US/docs/Web/API/Element/focus_event
+            "onFocus",
+            // ref: https://developer.mozilla.org/en-US/docs/Web/API/Element/blur_event
+            "onBlur",
+        ],
+    ),
+    // (
+    //     "form",
+    //     &[
+    //         /// ref: https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/change_event
+    //         "onChange",
+    //         // ref: https://developer.mozilla.org/en-US/docs/Web/API/Element/input_event
+    //         "onInput",
+    //         // https://developer.mozilla.org/en-US/docs/Web/API/HTMLFormElement/submit_event
+    //         "onSubmit",
+    //     ],
+    // ),
+    (
+        // ref: https://developer.mozilla.org/en-US/docs/Web/API/MouseEvent
+        "mouse",
+        &[
+            // ref: https://developer.mozilla.org/en-US/docs/Web/API/Element/click_event
+            "onClick",
+            // ref: https://developer.mozilla.org/en-US/docs/Web/API/Element/contextmenu_event
+            "onContextMenu",
+            // ref: https://developer.mozilla.org/en-US/docs/Web/API/Element/dblclick_event
+            "onDblClick",
+            "onDoubleClick",
+            // ref: https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/drag_event
+            "onDrag",
+            // ref: https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/dragend_event
+            "onDragEnd",
+            // ref: https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/dragenter_event
+            "onDragEnter",
+            // ref: https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/dragleave_event
+            "onDragLeave",
+            "onDragExit",
+            // ref: https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/dragover_event
+            "onDragOver",
+            // ref: https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/dragstart_event
+            "onDragStart",
+            // ref: https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/drop_event
+            "onDrop",
+            // ref: https://developer.mozilla.org/en-US/docs/Web/API/Element/mousedown_event
+            "onMouseDown",
+            // ref: https://developer.mozilla.org/en-US/docs/Web/API/Element/mouseenter_event
+            "onMouseEnter",
+            // ref: https://developer.mozilla.org/en-US/docs/Web/API/Element/mouseleave_event
+            "onMouseLeave",
+            // ref: https://developer.mozilla.org/en-US/docs/Web/API/Element/mousemove_event
+            "onMouseMove",
+            // ref: https://developer.mozilla.org/en-US/docs/Web/API/Element/mouseout_event
+            "onMouseOut",
+            // ref: https://developer.mozilla.org/en-US/docs/Web/API/Element/mouseover_event
+            "onMouseOver",
+            // ref: https://developer.mozilla.org/en-US/docs/Web/API/Element/mouseup_event
+            "onMouseUp",
+        ],
+    ),
+    // (
+    //     "selection",
+    //     &[
+    //         // ref: https://developer.mozilla.org/en-US/docs/Web/API/HTMLInputElement/select_event
+    //         "onSelect",
+    //     ],
+    // ),
+    // (
+    //     // ref: https://developer.mozilla.org/en-US/docs/Web/API/TouchEvent
+    //     "touch",
+    //     &[
+    //         // ref: https://developer.mozilla.org/en-US/docs/Web/API/Element/touchcancel_event
+    //         "onTouchCancel",
+    //         // ref: https://developer.mozilla.org/en-US/docs/Web/API/Element/touchend_event
+    //         "onTouchEnd",
+    //         // ref: https://developer.mozilla.org/en-US/docs/Web/API/Element/touchmove_event
+    //         "onTouchMove",
+    //         // ref: https://developer.mozilla.org/en-US/docs/Web/API/Element/touchstart_event
+    //         "onTouchStart",
+    //     ],
+    // ),
+    // (
+    //     // ref: https://developer.mozilla.org/en-US/docs/Web/API/UIEvent
+    //     "ui",
+    //     &[
+    //         // ref: https://developer.mozilla.org/en-US/docs/Web/API/Element/scroll_event
+    //         "onScroll",
+    //     ],
+    // ),
+    // (
+    //     // ref: https://developer.mozilla.org/en-US/docs/Web/API/WheelEvent
+    //     "wheel",
+    //     &[
+    //         // ref: https://developer.mozilla.org/en-US/docs/Web/API/Element/wheel_event
+    //         "onWheel",
+    //     ],
+    // ),
+    // (
+    //     "media",
+    //     &[
+    //         // ref: https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/abort_event
+    //         "onAbort",
+    //         // ref: https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/canplay_event
+    //         "onCanPlay",
+    //         // ref: https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/canplaythrough_event
+    //         "onCanPlayThrough",
+    //         // ref: https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/durationchange_event
+    //         "onDurationChange",
+    //         // ref: https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/emptied_event
+    //         "onEmptied",
+    //         // ref: https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/encrypted_event
+    //         "onEncrypted",
+    //         // ref: https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/ended_event
+    //         "onEnded",
+    //         // ref: https://developer.mozilla.org/en-US/docs/Web/API/ErrorEvent
+    //         "onError",
+    //         // ref: https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/loadeddata_event
+    //         "onLoadedData",
+    //         // ref: https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/loadedmetadata_event
+    //         "onLoadedMetadata",
+    //         // ref: https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/loadstart_event
+    //         "onLoadStart",
+    //         // ref: https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/pause_event
+    //         "onPause",
+    //         // ref: https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/play_event
+    //         "onPlay",
+    //         // ref: https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/playing_event
+    //         "onPlaying",
+    //         // ref: https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/progress_event
+    //         "onProgress",
+    //         // ref: https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/ratechange_event
+    //         "onRateChange",
+    //         // ref: https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/seeked_event
+    //         "onSeeked",
+    //         // ref: https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/seeking_event
+    //         "onSeeking",
+    //         // ref: https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/stalled_event
+    //         "onStalled",
+    //         // ref: https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/suspend_event
+    //         "onSuspend",
+    //         // ref: https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/timeupdate_event
+    //         "onTimeUpdate",
+    //         // ref: https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/volumechange_event
+    //         "onVolumeChange",
+    //         // ref: https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/waiting_event
+    //         "onWaiting",
+    //     ],
+    // ),
+    // (
+    //     "image",
+    //     &[
+    //         // ref: https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/load_event
+    //         "onLoad",
+    //     ],
+    // ),
+    // (
+    //     // ref: https://developer.mozilla.org/en-US/docs/Web/API/AnimationEvent
+    //     "animation",
+    //     &[
+    //         // ref: https://developer.mozilla.org/en-US/docs/Web/API/Element/animationstart_event
+    //         "onAnimationStart",
+    //         // ref: https://developer.mozilla.org/en-US/docs/Web/API/Element/animationend_event
+    //         "onAnimationEnd",
+    //         // ref: https://developer.mozilla.org/en-US/docs/Web/API/Element/animationiteration_event
+    //         "onAnimationIteration",
+    //     ],
+    // ),
+    // (
+    //     // ref: https://developer.mozilla.org/en-US/docs/Web/API/TransitionEvent
+    //     "transition",
+    //     &[
+    //         // ref: https://developer.mozilla.org/en-US/docs/Web/API/Element/transitionend_event
+    //         "onTransitionEnd",
+    //     ],
+    // ),
+];
+
+// no-static-element-interactions rule checks only focus, keyboard and mouse categories.
+const CATEGORIES_TO_CHECK: &[&str] = &["focus", "keyboard", "mouse"];
+
+// The section element is considered interactive if it has an aria-label or aria-labelledby attribute.
+const SECTION_ARIA_ATTRIBUTES: &[&str] = &["aria-label", "aria-labelledby"];
+
+impl Rule for NoStaticElementInteractions {
+    type Query = Aria<AnyJsxElement>;
+    type State = ();
+    type Signals = Option<Self::State>;
+    type Options = ();
+
+    fn run(ctx: &RuleContext<Self>) -> Self::Signals {
+        let node = ctx.query();
+        let element_name = node.name().ok()?.as_jsx_name()?.value_token().ok()?;
+        let aria_roles = ctx.aria_roles();
+        let attributes = ctx.extract_attributes(&node.attributes());
+        let element_name = element_name.text_trimmed();
+
+        if let Some(attributes_ref) = attributes.as_ref() {
+            let has_interactive_handler = CATEGORIES_TO_CHECK.iter().any(|&category| {
+                if let Some(handlers) = EVENT_TO_HANDLERS
+                    .iter()
+                    .find(|&&(cat, _)| cat == category)
+                    .map(|&(_, handlers)| handlers)
+                {
+                    handlers.iter().any(|&handler| {
+                        if let Some(values) = attributes_ref.get(handler) {
+                            values.iter().any(|value| value != "null")
+                        } else {
+                            false
+                        }
+                    })
+                } else {
+                    false
+                }
+            });
+
+            if !has_interactive_handler {
+                return None;
+            }
+        } else {
+            return None;
+        }
+
+        if node
+            .find_attribute_by_name("aria-hidden")
+            .map_or(false, |attr| {
+                attr.as_static_value()
+                    .map_or(true, |val| val.text() == "true")
+            })
+        {
+            return None;
+        }
+
+        let is_valid_element = match element_name {
+            "section" => SECTION_ARIA_ATTRIBUTES.iter().any(|&attr_name| {
+                node.find_attribute_by_name(attr_name)
+                    .map_or(false, |attr| {
+                        attr.as_static_value()
+                            .map_or(false, |val| !val.text().is_empty())
+                    })
+            }),
+            "a" => node.find_attribute_by_name("href").map_or(false, |attr| {
+                attr.as_static_value()
+                    .map_or(false, |val| !val.text().is_empty())
+            }),
+            _ => {
+                // In Biome-managed elements, whether an element is interactive is determined by the is_not_interactive_element function.
+                (!aria_roles.is_not_interactive_element(element_name, attributes.clone())
+                    // Except for elements invalid in the eslint-plugin-jsx-a11y test case.
+                    && !is_invalid_element(element_name))
+                    // Also, elements marked as valid in eslint-plugin-jsx-a11y are marked as “valid” even if they are marked as invalid in Biome.
+                    || is_valid_element(element_name)
+            }
+        };
+
+        if is_valid_element {
+            return None;
+        }
+
+        if let Some(attr) = node.find_attribute_by_name("role") {
+            let role_value = attr.as_static_value()?;
+
+            if aria_roles.is_role_interactive(role_value.text()) {
+                return None;
+            }
+        }
+
+        Some(())
+    }
+
+    fn diagnostic(ctx: &RuleContext<Self>, _: &Self::State) -> Option<RuleDiagnostic> {
+        let node = ctx.query();
+        Some(RuleDiagnostic::new(
+            rule_category!(),
+            node.range(),
+            markup! {{"Static Elements should not be interactive."}},
+        ).note(
+            markup! {{"To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value."}}
+        ))
+    }
+}
+
+/// Checks if the given element name is considered invalid, inspired by eslint-plugin-jsx-a11y
+fn is_invalid_element(element_name: &str) -> bool {
+    match element_name {
+        // These cases are interactive with the is_not_interactive_element method,
+        // but is an invalid test case element for eslint-plugin-jsx-a11y.
+        "link" | "header" => true,
+        "area" | "b" | "bdi" | "bdo" | "hgroup" | "i" | "u" | "q" | "small" | "data" | "samp"
+        | "acronym" | "applet" | "base" | "big" | "blink" | "center" | "cite" | "col"
+        | "colgroup" | "content" | "font" | "frameset" | "head" | "kbd" | "keygen" | "map"
+        | "meta" | "noembed" | "noscript" | "object" | "param" | "picture" | "rp" | "rt"
+        | "rtc" | "s" | "script" | "source" | "spacer" | "strike" | "style" | "summary"
+        | "title" | "track" | "tt" | "var" | "wbr" | "xmp" => true,
+        _ => false,
+    }
+}
+
+/// This function ables non-interactive elements.
+/// This is because this is an element that is abled by eslint-plugin-jsx-a11y.
+fn is_valid_element(element_name: &str) -> bool {
+    matches!(
+        element_name,
+        "input"
+            | "form"
+            | "iframe"
+            | "h1"
+            | "h2"
+            | "h3"
+            | "h4"
+            | "h5"
+            | "h6"
+            | "ruby"
+            | "pre"
+            | "mark"
+            | "aside"
+            | "blockquote"
+            | "address"
+            | "article"
+            | "caption"
+            | "output"
+            | "p"
+            | "li"
+            | "ol"
+            | "ul"
+            | "nav"
+            | "table"
+            | "thead"
+            | "tbody"
+            | "tfoot"
+            | "time"
+            | "dfn"
+            | "main"
+            | "br"
+            | "details"
+            | "dd"
+            | "dir"
+            | "dl"
+            | "dt"
+            | "fieldset"
+            | "figcaption"
+            | "figure"
+            | "footer"
+            | "img"
+            | "label"
+            | "legend"
+            | "marquee"
+            | "menu"
+            | "meter"
+            | "optgroup"
+            | "progress"
+            | "th"
+            | "td"
+    )
+}
