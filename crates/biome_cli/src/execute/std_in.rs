@@ -3,6 +3,7 @@
 use crate::execute::diagnostics::{ContentDiffAdvice, FormatDiffDiagnostic};
 use crate::execute::Execution;
 use crate::{CliDiagnostic, CliSession, TraversalMode};
+use biome_analyze::RuleCategoriesBuilder;
 use biome_console::{markup, ConsoleExt};
 use biome_diagnostics::PrintDiagnostic;
 use biome_diagnostics::{Diagnostic, DiagnosticExt, Error};
@@ -10,8 +11,7 @@ use biome_fs::BiomePath;
 use biome_service::file_handlers::{AstroFileHandler, SvelteFileHandler, VueFileHandler};
 use biome_service::workspace::{
     ChangeFileParams, DropPatternParams, FeaturesBuilder, FixFileParams, FormatFileParams,
-    OpenFileParams, OrganizeImportsParams, PullDiagnosticsParams, RuleCategories,
-    SupportsFeatureParams,
+    OpenFileParams, OrganizeImportsParams, PullDiagnosticsParams, SupportsFeatureParams,
 };
 use biome_service::WorkspaceError;
 use std::borrow::Cow;
@@ -163,7 +163,10 @@ pub(crate) fn run<'a>(
         };
         if !mode.is_check_apply_unsafe() {
             let result = workspace.pull_diagnostics(PullDiagnosticsParams {
-                categories: RuleCategories::LINT | RuleCategories::SYNTAX,
+                categories: RuleCategoriesBuilder::default()
+                    .with_lint()
+                    .with_syntax()
+                    .build(),
                 path: biome_path.clone(),
                 max_diagnostics: mode.max_diagnostics.into(),
                 only,

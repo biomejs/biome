@@ -24,7 +24,8 @@ mod visitor;
 pub use biome_diagnostics::category_concat;
 
 pub use crate::categories::{
-    ActionCategory, RefactorKind, RuleCategories, RuleCategory, SourceActionKind,
+    ActionCategory, RefactorKind, RuleCategories, RuleCategoriesBuilder, RuleCategory,
+    SourceActionKind,
 };
 pub use crate::diagnostics::AnalyzerDiagnostic;
 pub use crate::diagnostics::SuppressionDiagnostic;
@@ -885,7 +886,7 @@ impl<'analysis> AnalysisFilter<'analysis> {
 
     /// Return `true` if the category `C` matches this filter
     pub fn match_category<C: GroupCategory>(&self) -> bool {
-        self.categories.contains(C::CATEGORY.into())
+        self.categories.contains(C::CATEGORY)
     }
 
     /// Return `true` if the group `G` matches this filter

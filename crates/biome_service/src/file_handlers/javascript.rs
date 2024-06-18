@@ -21,7 +21,7 @@ use crate::{
 use biome_analyze::options::PreferredQuote;
 use biome_analyze::{
     AnalysisFilter, AnalyzerConfiguration, AnalyzerOptions, ControlFlow, GroupCategory, Never,
-    QueryMatch, RegistryVisitor, RuleCategories, RuleCategory, RuleFilter, RuleGroup,
+    QueryMatch, RegistryVisitor, RuleCategoriesBuilder, RuleCategory, RuleFilter, RuleGroup,
 };
 use biome_configuration::javascript::JsxRuntime;
 use biome_diagnostics::{category, Applicability, Diagnostic, DiagnosticExt, Severity};
@@ -343,7 +343,7 @@ fn debug_control_flow(parse: AnyParse, cursor: TextSize) -> String {
     let mut control_flow_graph = None;
 
     let filter = AnalysisFilter {
-        categories: RuleCategories::LINT,
+        categories: RuleCategoriesBuilder::default().with_lint().build(),
         enabled_rules: Some(&[RuleFilter::Rule("correctness", "noUnreachable")]),
         ..AnalysisFilter::default()
     };
@@ -468,7 +468,7 @@ pub(crate) fn lint(params: LintParams) -> LintResults {
             // - it is a syntax-only analyzer pass, or
             // - if a single rule is run.
             let ignores_suppression_comment =
-                !filter.categories.contains(RuleCategories::LINT) || has_only_filter;
+                !filter.categories.contains(RuleCategory::Lint) || has_only_filter;
 
             let mut diagnostic_count = diagnostics.len() as u32;
             let mut errors = diagnostics
@@ -614,10 +614,11 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
                 AnalysisFilter::default()
             };
 
-            filter.categories = RuleCategories::SYNTAX | RuleCategories::LINT;
+            let mut categories = RuleCategoriesBuilder::default().with_syntax().with_lint();
             if settings.organize_imports.enabled {
-                filter.categories |= RuleCategories::ACTION;
+                categories = categories.with_action();
             }
+            filter.categories = categories.build();
             filter.range = Some(range);
 
             let Some(source_type) = language.to_js_file_source() else {
@@ -696,7 +697,10 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
     let mut tree: AnyJsRoot = parse.tree();
     let mut actions = Vec::new();
 
-    filter.categories = RuleCategories::SYNTAX | RuleCategories::LINT;
+    filter.categories = RuleCategoriesBuilder::default()
+        .with_syntax()
+        .with_lint()
+        .build();
 
     let mut skipped_suggested_fixes = 0;
     let mut errors: u16 = 0;
@@ -919,7 +923,7 @@ pub(crate) fn organize_imports(parse: AnyParse) -> Result<OrganizeImportsResult,
 
     let filter = AnalysisFilter {
         enabled_rules: Some(&[RuleFilter::Rule("correctness", "organizeImports")]),
-        categories: RuleCategories::ACTION,
+        categories: RuleCategoriesBuilder::default().with_action().build(),
         ..AnalysisFilter::default()
     };
 
