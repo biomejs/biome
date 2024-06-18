@@ -90,8 +90,8 @@ impl Rule for UseLiteralKeys {
         // unless it is a template literal inside that contains unescaped new line characters:
         //
         // const a = {
-        //   `line1
-        //   line2`: true
+        //   [`line1
+        //   line2`]: true
         // }
         //
         if (is_computed_member_name && !has_unescaped_new_line(value)) || is_js_ident(value) {
