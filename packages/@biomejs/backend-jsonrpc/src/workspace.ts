@@ -1015,6 +1015,10 @@ export interface Nursery {
 	 */
 	noImportantInKeyframe?: RuleConfiguration_for_Null;
 	/**
+	 * Disallow non-standard direction values for linear gradient functions.
+	 */
+	noInvalidDirectionInLinearGradient?: RuleConfiguration_for_Null;
+	/**
 	 * Disallow the use of @import at-rules in invalid positions.
 	 */
 	noInvalidPositionAtImportRule?: RuleConfiguration_for_Null;
@@ -2373,6 +2377,7 @@ export type Category =
 	| "lint/nursery/noEmptyBlock"
 	| "lint/nursery/noEvolvingTypes"
 	| "lint/nursery/noImportantInKeyframe"
+	| "lint/nursery/noInvalidDirectionInLinearGradient"
 	| "lint/nursery/noInvalidPositionAtImportRule"
 	| "lint/nursery/noLabelWithoutControl"
 	| "lint/nursery/noMisplacedAssertion"

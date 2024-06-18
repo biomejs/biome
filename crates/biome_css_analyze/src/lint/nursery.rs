@@ -7,6 +7,7 @@ pub mod no_duplicate_font_names;
 pub mod no_duplicate_selectors_keyframe_block;
 pub mod no_empty_block;
 pub mod no_important_in_keyframe;
+pub mod no_invalid_direction_in_linear_gradient;
 pub mod no_invalid_position_at_import_rule;
 pub mod no_shorthand_property_overrides;
 pub mod no_unknown_function;
@@ -28,6 +29,7 @@ declare_lint_group! {
             self :: no_duplicate_selectors_keyframe_block :: NoDuplicateSelectorsKeyframeBlock ,
             self :: no_empty_block :: NoEmptyBlock ,
             self :: no_important_in_keyframe :: NoImportantInKeyframe ,
+            self :: no_invalid_direction_in_linear_gradient :: NoInvalidDirectionInLinearGradient ,
             self :: no_invalid_position_at_import_rule :: NoInvalidPositionAtImportRule ,
             self :: no_shorthand_property_overrides :: NoShorthandPropertyOverrides ,
             self :: no_unknown_function :: NoUnknownFunction ,
