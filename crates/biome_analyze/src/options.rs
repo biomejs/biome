@@ -94,8 +94,7 @@ impl AnalyzerOptions {
 
     pub fn rule_options<R>(&self) -> Option<R::Options>
     where
-        R: Rule + 'static,
-        R::Options: Clone,
+        R: Rule<Options: Clone> + 'static,
     {
         self.configuration
             .rules
@@ -105,8 +104,7 @@ impl AnalyzerOptions {
 
     pub fn rule_fix_kind<R>(&self) -> Option<FixKind>
     where
-        R: Rule + 'static,
-        R::Options: Clone,
+        R: Rule<Options: Clone> + 'static,
     {
         self.configuration
             .rules

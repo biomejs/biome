@@ -29,9 +29,14 @@ var foo: string = "";
 ```
 
 ```block
-file.svelte lint/complexity/noUselessRename  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+file.svelte:1:10 lint/complexity/noUselessRename  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Useless rename.
+  
+  > 1 │ import { Form as   Form }     from './components/Form.svelte' ;
+      │          ^^^^^^^^^^^^^^
+    2 │ import     Button     from "./components/Button.svelte";
+    3 │ debugger;
   
   i Safe fix: Remove the renaming.
   
@@ -41,9 +46,16 @@ file.svelte lint/complexity/noUselessRename  FIXABLE  ━━━━━━━━�
 ```
 
 ```block
-file.svelte lint/suspicious/noDebugger  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+file.svelte:3:1 lint/suspicious/noDebugger  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × This is an unexpected use of the debugger statement.
+  
+    1 │ import { Form as   Form }     from './components/Form.svelte' ;
+    2 │ import     Button     from "./components/Button.svelte";
+  > 3 │ debugger;
+      │ ^^^^^^^^^
+    4 │ statement ( ) ;
+    5 │ var foo: string = "";
   
   i Unsafe fix: Remove debugger statement
   
@@ -57,9 +69,15 @@ file.svelte lint/suspicious/noDebugger  FIXABLE  ━━━━━━━━━━�
 ```
 
 ```block
-file.svelte lint/style/noInferrableTypes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+file.svelte:5:8 lint/style/noInferrableTypes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × This type annotation is trivially inferred from its initialization.
+  
+    3 │ debugger;
+    4 │ statement ( ) ;
+  > 5 │ var foo: string = "";
+      │        ^^^^^^^^
+    6 │ 
   
   i Safe fix: Remove the type annotation.
   
@@ -73,9 +91,15 @@ file.svelte lint/style/noInferrableTypes  FIXABLE  ━━━━━━━━━�
 ```
 
 ```block
-file.svelte lint/style/noVar  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+file.svelte:5:1 lint/style/noVar  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Use let or const instead of var.
+  
+    3 │ debugger;
+    4 │ statement ( ) ;
+  > 5 │ var foo: string = "";
+      │ ^^^^^^^^^^^^^^^^^^^^
+    6 │ 
   
   i A variable declared with var is accessible in the whole module. Thus, the variable can be accessed before its initialization and outside the block where it is declared.
   

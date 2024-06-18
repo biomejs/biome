@@ -3,7 +3,7 @@ use biome_rowan::TextRange;
 
 #[derive(Debug, Diagnostic)]
 #[diagnostic(severity = Warning)]
-pub(crate) struct CompilerDiagnostic {
+pub struct CompilerDiagnostic {
     #[message]
     #[description]
     message: String,

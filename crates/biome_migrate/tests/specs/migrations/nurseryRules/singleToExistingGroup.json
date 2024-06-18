@@ -1,0 +1,10 @@
+{
+  "linter": {
+    "rules": {
+      "nursery": {
+        "noExcessiveNestedTestSuites": "error"
+      },
+      "complexity": {}
+    }
+  }
+}
