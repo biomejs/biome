@@ -124,6 +124,24 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 - The [noUnknownProperty](https://biomejs.dev/linter/rules/no-unknown-property/) rule now ignores the `composes` property often used in css modules. [#3000](https://github.com/biomejs/biome/issues/3000) Contributed by @chansuke
 
+- Fix false positives of the [useExhaustiveDependencies](https://biomejs.dev/linter/rules/use-exhaustive-dependencies/) rule.
+
+  The component itself is considered stable when it is used recursively inside a hook closure defined inside of it:
+
+  ```jsx
+  import { useMemo } from "react";
+
+  function MyRecursiveComponent() {
+    // MyRecursiveComponent is stable, we don't need to add it to the dependencies list.
+    const children = useMemo(() => <MyRecursiveComponent />, []);
+    return <div>{children}</div>;
+  }
+  ```
+
+  Also, `export default function` and `export default class` are considered stable now because they can only appear at the top level of a module.
+
+  Contributed by @Sec-ant
+
 ### Parser
 
 ## v1.8.1 (2024-06-10)
