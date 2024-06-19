@@ -9,12 +9,12 @@ use crate::services::semantic::Semantic;
 declare_rule! {
     /// Disallow accessing namespace imports dynamically.
     ///
-    /// Accessing namespace imports dynamically can prevent efficient tree shaking and increase bundle size,
-    /// because the bundler cannot determine which parts of the namespace are used at compile time so it
-    /// must include the entire namespace in the bundle.
+    /// Accessing namespace imports dynamically can prevent efficient tree shaking and increase bundle size.
+    /// This happens because the bundler cannot determine which parts of the namespace are used at compile time,
+    /// so it must include the entire namespace in the bundle.
     ///
-    /// Instead, consider using named imports to allow the bundler to determine which parts of the namespace are used
-    /// or if that is not possible access the namespaced import properties statically.
+    /// Instead, consider using named imports or if that is not possible
+    /// access the namespaced import properties statically.
     ///
     /// If you want to completely disallow namespace imports, consider using the [noNamespaceImport](https://biomejs.dev/linter/rules/no-namespace-import/) rule.
     ///
@@ -47,13 +47,13 @@ declare_rule! {
     ///
     /// ```js
     /// import messages from "i18n"
-    /// const knowMessagesMap = {
+    /// const knownMessagesMap = {
     ///  hello: messages.hello,
     ///  goodbye: messages.goodbye
     /// }
     ///
     /// const dynamicKey = "hello"
-    /// knowMessagesMap[dynamicKey]
+    /// knownMessagesMap[dynamicKey]
     /// ```
     ///
     pub NoDynamicNamespaceImportAccess {
