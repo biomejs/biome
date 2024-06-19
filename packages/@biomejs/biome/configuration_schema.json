@@ -1714,7 +1714,7 @@
 					]
 				},
 				"noDynamicNamespaceImportAccess": {
-					"description": "Succinct description of the rule.",
+					"description": "Disallow accessing namespace imports dynamically.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }

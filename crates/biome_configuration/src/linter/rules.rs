@@ -2832,7 +2832,7 @@ pub struct Nursery {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_duplicate_selectors_keyframe_block:
         Option<RuleConfiguration<NoDuplicateSelectorsKeyframeBlock>>,
-    #[doc = "Succinct description of the rule."]
+    #[doc = "Disallow accessing namespace imports dynamically."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_dynamic_namespace_import_access:
         Option<RuleConfiguration<NoDynamicNamespaceImportAccess>>,

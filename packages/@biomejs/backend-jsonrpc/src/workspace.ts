@@ -1003,7 +1003,7 @@ export interface Nursery {
 	 */
 	noDuplicateSelectorsKeyframeBlock?: RuleConfiguration_for_Null;
 	/**
-	 * Succinct description of the rule.
+	 * Disallow accessing namespace imports dynamically.
 	 */
 	noDynamicNamespaceImportAccess?: RuleConfiguration_for_Null;
 	/**
