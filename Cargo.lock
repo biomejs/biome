@@ -933,6 +933,8 @@ dependencies = [
  "biome_flags",
  "biome_formatter",
  "biome_fs",
+ "biome_graphql_parser",
+ "biome_graphql_syntax",
  "biome_grit_patterns",
  "biome_js_analyze",
  "biome_js_factory",

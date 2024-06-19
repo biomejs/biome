@@ -3,6 +3,7 @@ use self::{
     unknown::UnknownFileHandler,
 };
 pub use crate::file_handlers::astro::{AstroFileHandler, ASTRO_FENCE};
+use crate::file_handlers::graphql::GraphqlFileHandler;
 pub use crate::file_handlers::svelte::{SvelteFileHandler, SVELTE_FENCE};
 pub use crate::file_handlers::vue::{VueFileHandler, VUE_FENCE};
 use crate::settings::Settings;
@@ -21,6 +22,7 @@ use biome_css_syntax::CssFileSource;
 use biome_diagnostics::{Diagnostic, Severity};
 use biome_formatter::Printed;
 use biome_fs::BiomePath;
+use biome_graphql_syntax::GraphqlFileSource;
 use biome_js_parser::{parse, JsParserOptions};
 use biome_js_syntax::{EmbeddingKind, JsFileSource, Language, TextRange, TextSize};
 use biome_json_syntax::JsonFileSource;
@@ -33,6 +35,7 @@ use std::path::Path;
 
 mod astro;
 mod css;
+mod graphql;
 mod javascript;
 mod json;
 mod svelte;
@@ -47,6 +50,7 @@ pub enum DocumentFileSource {
     Js(JsFileSource),
     Json(JsonFileSource),
     Css(CssFileSource),
+    Graphql(GraphqlFileSource),
     #[default]
     Unknown,
 }
@@ -69,6 +73,12 @@ impl From<CssFileSource> for DocumentFileSource {
     }
 }
 
+impl From<GraphqlFileSource> for DocumentFileSource {
+    fn from(value: GraphqlFileSource) -> Self {
+        Self::Graphql(value)
+    }
+}
+
 impl From<&Path> for DocumentFileSource {
     fn from(path: &Path) -> Self {
         Self::from_path(path)
@@ -85,6 +95,12 @@ impl DocumentFileSource {
         }
         if let Ok(file_source) = CssFileSource::try_from_well_known(file_name) {
             return Ok(file_source.into());
+        }
+        if cfg!(feature = "graphql") {
+            
+            if let Ok(file_source) = GraphqlFileSource::try_from_well_known(file_name) {
+                return Ok(file_source.into());
+            }
         }
         Err(FileSourceError::UnknownFileName(file_name.into()))
     }
@@ -104,6 +120,12 @@ impl DocumentFileSource {
         }
         if let Ok(file_source) = CssFileSource::try_from_extension(extension) {
             return Ok(file_source.into());
+        }
+        if cfg!(feature = "graphql") {
+            
+            if let Ok(file_source) = GraphqlFileSource::try_from_extension(extension) {
+            return Ok(file_source.into());
+        }
         }
         Err(FileSourceError::UnknownExtension(
             Default::default(),
@@ -126,6 +148,11 @@ impl DocumentFileSource {
         }
         if let Ok(file_source) = CssFileSource::try_from_language_id(language_id) {
             return Ok(file_source.into());
+        }
+        if cfg!(feature = "graphql") {
+            if let Ok(file_source) = GraphqlFileSource::try_from_language_id(language_id) {
+                return Ok(file_source.into());
+            }
         }
         Err(FileSourceError::UnknownLanguageId(language_id.into()))
     }
@@ -248,6 +275,13 @@ impl DocumentFileSource {
         }
     }
 
+    pub fn to_graphql_file_source(&self) -> Option<JsonFileSource> {
+        match self {
+            DocumentFileSource::Json(json) => Some(*json),
+            _ => None,
+        }
+    }
+
     pub fn to_css_file_source(&self) -> Option<CssFileSource> {
         match self {
             DocumentFileSource::Css(css) => Some(*css),
@@ -265,6 +299,13 @@ impl DocumentFileSource {
                 EmbeddingKind::None => true,
             },
             DocumentFileSource::Json(_) | DocumentFileSource::Css(_) => true,
+            DocumentFileSource::Graphql(_) => {
+                if cfg!(feature = "graphql") {
+                    true
+                } else {
+                    false
+                }
+            }
             DocumentFileSource::Unknown => false,
         }
     }
@@ -295,6 +336,7 @@ impl biome_console::fmt::Display for DocumentFileSource {
                 }
             }
             DocumentFileSource::Css(_) => fmt.write_markup(markup! { "CSS" }),
+            DocumentFileSource::Graphql(_) => fmt.write_markup(markup! { "GraphQL" }),
             DocumentFileSource::Unknown => fmt.write_markup(markup! { "Unknown" }),
         }
     }
@@ -453,6 +495,7 @@ pub(crate) struct Features {
     vue: VueFileHandler,
     svelte: SvelteFileHandler,
     unknown: UnknownFileHandler,
+    graphql: GraphqlFileHandler,
 }
 
 impl Features {
@@ -464,6 +507,7 @@ impl Features {
             astro: AstroFileHandler {},
             vue: VueFileHandler {},
             svelte: SvelteFileHandler {},
+            graphql: GraphqlFileHandler {},
             unknown: UnknownFileHandler::default(),
         }
     }
@@ -483,6 +527,7 @@ impl Features {
             },
             DocumentFileSource::Json(_) => self.json.capabilities(),
             DocumentFileSource::Css(_) => self.css.capabilities(),
+            DocumentFileSource::Graphql(_) => self.graphql.capabilities(),
             DocumentFileSource::Unknown => self.unknown.capabilities(),
         }
     }
