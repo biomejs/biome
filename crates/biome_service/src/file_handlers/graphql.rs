@@ -16,19 +16,6 @@ use biome_graphql_syntax::{GraphqlLanguage, GraphqlRoot, GraphqlSyntaxNode};
 use biome_parser::AnyParse;
 use biome_rowan::NodeCache;
 
-#[derive(Debug, Clone, Default, serde::Serialize, serde::Deserialize)]
-#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
-pub struct JsonParserSettings {
-    pub allow_comments: bool,
-    pub allow_trailing_commas: bool,
-}
-
-#[derive(Debug, Clone, Default, serde::Serialize, serde::Deserialize)]
-#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
-pub struct JsonLinterSettings {
-    pub enabled: Option<bool>,
-}
-
 impl ServiceLanguage for GraphqlLanguage {
     type FormatterSettings = ();
     type LinterSettings = ();

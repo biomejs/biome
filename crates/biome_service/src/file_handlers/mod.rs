@@ -275,7 +275,7 @@ impl DocumentFileSource {
 
     pub fn to_graphql_file_source(&self) -> Option<GraphqlFileSource> {
         match self {
-            DocumentFileSource::Json(json) => Some(*json),
+            DocumentFileSource::Graphql(graphql) => Some(*graphql),
             _ => None,
         }
     }
