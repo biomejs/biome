@@ -5,6 +5,7 @@ use biome_analyze::declare_lint_group;
 pub mod no_console;
 pub mod no_done_callback;
 pub mod no_duplicate_else_if;
+pub mod no_dynamic_namespace_import_access;
 pub mod no_evolving_types;
 pub mod no_label_without_control;
 pub mod no_misplaced_assertion;
@@ -40,6 +41,7 @@ declare_lint_group! {
             self :: no_console :: NoConsole ,
             self :: no_done_callback :: NoDoneCallback ,
             self :: no_duplicate_else_if :: NoDuplicateElseIf ,
+            self :: no_dynamic_namespace_import_access :: NoDynamicNamespaceImportAccess ,
             self :: no_evolving_types :: NoEvolvingTypes ,
             self :: no_label_without_control :: NoLabelWithoutControl ,
             self :: no_misplaced_assertion :: NoMisplacedAssertion ,
