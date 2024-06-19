@@ -220,7 +220,7 @@ fn parse(
             .map(|s| s.languages.css.parser.allow_wrong_line_comments)
             .unwrap_or_default(),
         css_modules: settings
-            .map(|s| s.languages.css.parser.allow_wrong_line_comments)
+            .map(|s| s.languages.css.parser.css_modules)
             .unwrap_or_default(),
     };
     if let Some(settings) = settings {
