@@ -62,4 +62,15 @@ a {
   --custom-property: 10px;
 }
 
+/* Composition */
+.classA {
+  color: green;
+  background: red;
+}
+
+.classB {
+  composes: classA;
+  color: yellow;
+}
+
 ```

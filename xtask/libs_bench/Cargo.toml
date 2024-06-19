@@ -12,7 +12,7 @@ criterion    = "0.5.1"
 fastbloom-rs = "0.5.9"
 fst          = "0.4.7"
 iai          = "0.1.1"
-memchr       = "2.7.2"
+memchr       = "2.7.4"
 qp-trie      = "0.8.2"
 
 [[bench]]

@@ -22,7 +22,7 @@ mod variables;
 pub use errors::*;
 pub use grit_query::GritQuery;
 pub use grit_target_language::{GritTargetLanguage, JsTargetLanguage};
-pub use grit_tree::GritTree;
+pub use grit_tree::GritTargetTree;
 
 use biome_grit_parser::parse_grit;
 

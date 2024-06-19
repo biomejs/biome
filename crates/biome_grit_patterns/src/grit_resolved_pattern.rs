@@ -1,23 +1,27 @@
+use crate::grit_code_snippet::GritCodeSnippet;
 use crate::grit_context::GritExecContext;
 use crate::grit_file::GritFile;
-use crate::grit_tree::GritTree;
+use crate::grit_target_node::GritTargetNode;
+use crate::grit_tree::GritTargetTree;
+use crate::GritTargetLanguage;
 use crate::{grit_binding::GritBinding, grit_context::GritQueryContext};
-use anyhow::Result;
+use anyhow::{anyhow, Error, Result};
 use grit_pattern_matcher::binding::Binding;
 use grit_pattern_matcher::constant::Constant;
-use grit_pattern_matcher::context::QueryContext;
+use grit_pattern_matcher::context::{ExecContext, QueryContext};
 use grit_pattern_matcher::effects::Effect;
 use grit_pattern_matcher::pattern::{
-    Accessor, DynamicPattern, DynamicSnippet, FilePtr, FileRegistry, ListIndex, Pattern,
-    ResolvedPattern, ResolvedSnippet, State,
+    Accessor, DynamicPattern, DynamicSnippet, DynamicSnippetPart, FilePtr, FileRegistry, GritCall,
+    ListIndex, Pattern, PatternName, PatternOrResolved, ResolvedFile, ResolvedPattern,
+    ResolvedSnippet, State,
 };
-use grit_util::{AnalysisLogs, CodeRange, Range};
+use grit_util::{AnalysisLogs, Ast, CodeRange, Range};
 use im::{vector, Vector};
 use std::borrow::Cow;
 use std::collections::{BTreeMap, HashMap};
 
 #[derive(Clone, Debug, PartialEq)]
-pub(crate) enum GritResolvedPattern<'a> {
+pub enum GritResolvedPattern<'a> {
     Binding(Vector<GritBinding<'a>>),
     Snippets(Vector<ResolvedSnippet<'a, GritQueryContext>>),
     List(Vector<GritResolvedPattern<'a>>),
@@ -25,12 +29,60 @@ pub(crate) enum GritResolvedPattern<'a> {
     File(GritFile<'a>),
     Files(Box<GritResolvedPattern<'a>>),
     Constant(Constant),
-    Tree(GritTree),
 }
 
 impl<'a> GritResolvedPattern<'a> {
-    pub fn from_tree(tree: &'a GritTree) -> Self {
-        Self::from_binding(GritBinding::from_tree(tree))
+    pub fn from_empty_binding(node: GritTargetNode<'a>, slot_index: u32) -> Self {
+        Self::from_binding(GritBinding::Empty(node, slot_index))
+    }
+
+    pub fn from_tree(tree: &'a GritTargetTree) -> Self {
+        Self::from_binding(GritBinding::from_node(tree.root_node()))
+    }
+
+    fn to_snippets(&self) -> Result<Vector<ResolvedSnippet<'a, GritQueryContext>>> {
+        match self {
+            Self::Snippets(snippets) => Ok(snippets.clone()),
+            Self::Binding(bindings) => Ok(vector![ResolvedSnippet::from_binding(
+                bindings
+                    .last()
+                    .ok_or_else(|| {
+                        anyhow::anyhow!("cannot create resolved snippet from unresolved binding")
+                    })?
+                    .to_owned(),
+            )]),
+            Self::List(elements) => {
+                // merge separated by space
+                let mut snippets = Vec::new();
+                for pattern in elements {
+                    snippets.extend(pattern.to_snippets()?);
+                    snippets.push(ResolvedSnippet::Text(" ".into()));
+                }
+                snippets.pop();
+                Ok(snippets.into())
+            }
+            Self::Map(map) => {
+                let mut snippets = Vec::new();
+                snippets.push(ResolvedSnippet::Text("{".into()));
+                for (key, value) in map {
+                    snippets.push(ResolvedSnippet::Text(format!("\"{}\": ", key).into()));
+                    snippets.extend(value.to_snippets()?);
+                    snippets.push(ResolvedSnippet::Text(", ".into()));
+                }
+                snippets.pop();
+                snippets.push(ResolvedSnippet::Text("}".into()));
+                Ok(snippets.into())
+            }
+            Self::File(_) => Err(anyhow::anyhow!(
+                "cannot convert ResolvedPattern::File to ResolvedSnippet"
+            )),
+            Self::Files(_) => Err(anyhow::anyhow!(
+                "cannot convert ResolvedPattern::Files to ResolvedSnippet"
+            )),
+            Self::Constant(constant) => {
+                Ok(vector![ResolvedSnippet::Text(constant.to_string().into())])
+            }
+        }
     }
 }
 
@@ -39,73 +91,241 @@ impl<'a> ResolvedPattern<'a, GritQueryContext> for GritResolvedPattern<'a> {
         Self::Binding(vector![binding])
     }
 
-    fn from_constant(_constant: Constant) -> Self {
-        todo!()
+    fn from_constant(constant: Constant) -> Self {
+        Self::Constant(constant)
     }
 
-    fn from_file_pointer(_file: FilePtr) -> Self {
-        todo!()
+    fn from_file_pointer(file: FilePtr) -> Self {
+        Self::File(GritFile::Ptr(file))
     }
 
-    fn from_files(_files: Self) -> Self {
-        todo!()
+    fn from_files(files: Self) -> Self {
+        Self::Files(Box::new(files))
     }
 
-    fn from_list_parts(_parts: impl Iterator<Item = Self>) -> Self {
-        todo!()
+    fn from_list_parts(parts: impl Iterator<Item = Self>) -> Self {
+        Self::List(parts.collect())
     }
 
-    fn from_string(_string: String) -> Self {
-        todo!()
+    fn from_string(string: String) -> Self {
+        Self::Snippets(vector![ResolvedSnippet::Text(string.into())])
     }
 
-    fn from_resolved_snippet(_snippet: ResolvedSnippet<'a, GritQueryContext>) -> Self {
-        todo!()
+    fn from_resolved_snippet(snippet: ResolvedSnippet<'a, GritQueryContext>) -> Self {
+        Self::Snippets(vector![snippet])
     }
 
     fn from_dynamic_snippet(
-        _snippet: &'a DynamicSnippet,
-        _state: &mut State<'a, GritQueryContext>,
-        _context: &'a GritExecContext,
-        _logs: &mut grit_util::AnalysisLogs,
+        snippet: &'a DynamicSnippet,
+        state: &mut State<'a, GritQueryContext>,
+        context: &'a GritExecContext,
+        logs: &mut grit_util::AnalysisLogs,
     ) -> anyhow::Result<Self> {
-        todo!()
+        let mut parts = Vec::new();
+        for part in &snippet.parts {
+            match part {
+                DynamicSnippetPart::String(string) => {
+                    parts.push(ResolvedSnippet::Text(string.into()));
+                }
+                DynamicSnippetPart::Variable(var) => {
+                    let content = &state.bindings[var.scope].last().unwrap()[var.index];
+                    let name = &content.name;
+                    // feels weird not sure if clone is correct
+                    let value = if let Some(value) = &content.value {
+                        value.clone()
+                    } else if let Some(pattern) = content.pattern {
+                        Self::from_pattern(pattern, state, context, logs)?
+                    } else {
+                        anyhow::bail!(
+                            "cannot create resolved snippet from unresolved variable {name}"
+                        )
+                    };
+                    let value = value.to_snippets()?;
+                    parts.extend(value);
+                }
+            }
+        }
+        Ok(Self::Snippets(parts.into()))
     }
 
     fn from_dynamic_pattern(
-        _pattern: &'a DynamicPattern<GritQueryContext>,
-        _state: &mut State<'a, GritQueryContext>,
-        _context: &'a GritExecContext,
-        _logs: &mut grit_util::AnalysisLogs,
-    ) -> anyhow::Result<Self> {
-        todo!()
+        pattern: &'a DynamicPattern<GritQueryContext>,
+        state: &mut State<'a, GritQueryContext>,
+        context: &'a GritExecContext,
+        logs: &mut AnalysisLogs,
+    ) -> Result<Self> {
+        match pattern {
+            DynamicPattern::Variable(var) => {
+                let content = &state.bindings[var.scope].last().unwrap()[var.index];
+                let name = &content.name;
+                // feels weird not sure if clone is correct
+                if let Some(value) = &content.value {
+                    Ok(value.clone())
+                } else if let Some(pattern) = content.pattern {
+                    Self::from_pattern(pattern, state, context, logs)
+                } else {
+                    anyhow::bail!("cannot create resolved snippet from unresolved variable {name}")
+                }
+            }
+            DynamicPattern::Accessor(accessor) => {
+                Self::from_accessor(accessor, state, context, logs)
+            }
+            DynamicPattern::ListIndex(index) => Self::from_list_index(index, state, context, logs),
+            DynamicPattern::List(list) => {
+                let mut elements = Vec::new();
+                for element in &list.elements {
+                    elements.push(Self::from_dynamic_pattern(element, state, context, logs)?);
+                }
+                Ok(Self::List(elements.into()))
+            }
+            DynamicPattern::Snippet(snippet) => {
+                Self::from_dynamic_snippet(snippet, state, context, logs)
+            }
+            DynamicPattern::CallBuiltIn(built_in) => built_in.call(state, context, logs),
+            DynamicPattern::CallFunction(func) => func.call(state, context, logs),
+            DynamicPattern::CallForeignFunction(_) => unimplemented!(),
+        }
     }
 
     fn from_accessor(
-        _accessor: &'a Accessor<GritQueryContext>,
-        _state: &mut State<'a, GritQueryContext>,
-        _context: &'a GritExecContext,
-        _logs: &mut grit_util::AnalysisLogs,
-    ) -> anyhow::Result<Self> {
-        todo!()
+        accessor: &'a Accessor<GritQueryContext>,
+        state: &mut State<'a, GritQueryContext>,
+        context: &'a GritExecContext,
+        logs: &mut AnalysisLogs,
+    ) -> Result<Self> {
+        match accessor.get(state, context.language())? {
+            Some(PatternOrResolved::Pattern(pattern)) => {
+                Self::from_pattern(pattern, state, context, logs)
+            }
+            Some(PatternOrResolved::ResolvedBinding(resolved)) => Ok(resolved),
+            Some(PatternOrResolved::Resolved(resolved)) => Ok(resolved.clone()),
+            None => Ok(Self::from_constant_binding(&Constant::Undefined)),
+        }
     }
 
     fn from_list_index(
-        _index: &'a ListIndex<GritQueryContext>,
-        _state: &mut State<'a, GritQueryContext>,
-        _context: &'a GritExecContext,
-        _logs: &mut grit_util::AnalysisLogs,
-    ) -> anyhow::Result<Self> {
-        todo!()
+        index: &'a ListIndex<GritQueryContext>,
+        state: &mut State<'a, GritQueryContext>,
+        context: &'a GritExecContext,
+        logs: &mut AnalysisLogs,
+    ) -> Result<Self> {
+        match index.get(state, context.language())? {
+            Some(PatternOrResolved::Pattern(pattern)) => {
+                Self::from_pattern(pattern, state, context, logs)
+            }
+            Some(PatternOrResolved::ResolvedBinding(resolved)) => Ok(resolved),
+            Some(PatternOrResolved::Resolved(resolved)) => Ok(resolved.clone()),
+            None => Ok(Self::from_constant_binding(&Constant::Undefined)),
+        }
     }
 
     fn from_pattern(
-        _pattern: &'a Pattern<GritQueryContext>,
-        _state: &mut State<'a, GritQueryContext>,
-        _context: &'a GritExecContext,
-        _logs: &mut grit_util::AnalysisLogs,
-    ) -> anyhow::Result<Self> {
-        todo!()
+        pattern: &'a Pattern<GritQueryContext>,
+        state: &mut State<'a, GritQueryContext>,
+        context: &'a GritExecContext,
+        logs: &mut AnalysisLogs,
+    ) -> Result<Self> {
+        match pattern {
+            Pattern::Dynamic(pattern) => Self::from_dynamic_pattern(pattern, state, context, logs),
+            Pattern::CodeSnippet(GritCodeSnippet {
+                dynamic_snippet: Some(pattern),
+                ..
+            }) => Self::from_dynamic_pattern(pattern, state, context, logs),
+            Pattern::CallBuiltIn(built_in) => built_in.call(state, context, logs),
+            Pattern::CallFunction(func) => func.call(state, context, logs),
+            Pattern::CallForeignFunction(_) => unimplemented!(),
+            Pattern::StringConstant(string) => Ok(Self::Snippets(vector![ResolvedSnippet::Text(
+                (&string.text).into(),
+            )])),
+            Pattern::IntConstant(int) => Ok(Self::Constant(Constant::Integer(int.value))),
+            Pattern::FloatConstant(double) => Ok(Self::Constant(Constant::Float(double.value))),
+            Pattern::BooleanConstant(bool) => Ok(Self::Constant(Constant::Boolean(bool.value))),
+            Pattern::Variable(var) => {
+                let content = &state.bindings[var.scope].last().unwrap()[var.index];
+                let name = &content.name;
+                // feels weird not sure if clone is correct
+                if let Some(value) = &content.value {
+                    Ok(value.clone())
+                } else if let Some(pattern) = content.pattern {
+                    Self::from_pattern(pattern, state, context, logs)
+                } else {
+                    anyhow::bail!("cannot create resolved snippet from unresolved variable {name}")
+                }
+            }
+            Pattern::List(list) => list
+                .patterns
+                .iter()
+                .map(|pattern| Self::from_pattern(pattern, state, context, logs))
+                .collect::<Result<Vector<_>>>()
+                .map(Self::List),
+            Pattern::ListIndex(index) => Self::from_list_index(index, state, context, logs),
+            Pattern::Map(map) => map
+                .elements
+                .iter()
+                .map(|(key, value)| {
+                    Ok((
+                        key.clone(),
+                        Self::from_pattern(value, state, context, logs)?,
+                    ))
+                })
+                .collect::<Result<BTreeMap<_, _>>>()
+                .map(Self::Map),
+            Pattern::Accessor(accessor) => Self::from_accessor(accessor, state, context, logs),
+            Pattern::File(file_pattern) => {
+                let name = &file_pattern.name;
+                let body = &file_pattern.body;
+                let name = Self::from_pattern(name, state, context, logs)?;
+                let name = name.text(&state.files, context.language())?;
+                let name = Self::Constant(Constant::String(name.to_string()));
+                let body = Self::from_pattern(body, state, context, logs)?;
+                Ok(Self::File(GritFile::Resolved(Box::new(ResolvedFile {
+                    name,
+                    body,
+                }))))
+            }
+            Pattern::Add(add_pattern) => add_pattern.call(state, context, logs),
+            Pattern::Subtract(subtract_pattern) => subtract_pattern.call(state, context, logs),
+            Pattern::Multiply(multiply_pattern) => multiply_pattern.call(state, context, logs),
+            Pattern::Divide(divide_pattern) => divide_pattern.call(state, context, logs),
+            Pattern::Modulo(modulo_pattern) => modulo_pattern.call(state, context, logs),
+            Pattern::Before(before) => before.prev_pattern(state, context, logs),
+            Pattern::After(after) => after.next_pattern(state, context, logs),
+            Pattern::AstNode(_)
+            | Pattern::CodeSnippet(_)
+            | Pattern::Call(_)
+            | Pattern::Regex(_)
+            | Pattern::Files(_)
+            | Pattern::Bubble(_)
+            | Pattern::Limit(_)
+            | Pattern::Assignment(_)
+            | Pattern::Accumulate(_)
+            | Pattern::And(_)
+            | Pattern::Or(_)
+            | Pattern::Maybe(_)
+            | Pattern::Any(_)
+            | Pattern::Not(_)
+            | Pattern::If(_)
+            | Pattern::Undefined
+            | Pattern::Top
+            | Pattern::Bottom
+            | Pattern::Underscore
+            | Pattern::AstLeafNode(_)
+            | Pattern::Rewrite(_)
+            | Pattern::Log(_)
+            | Pattern::Range(_)
+            | Pattern::Contains(_)
+            | Pattern::Includes(_)
+            | Pattern::Within(_)
+            | Pattern::Where(_)
+            | Pattern::Some(_)
+            | Pattern::Every(_)
+            | Pattern::Dots
+            | Pattern::Like(_)
+            | Pattern::Sequential(_) => Err(anyhow::anyhow!(format!(
+                "cannot make resolved pattern from arbitrary pattern {}",
+                pattern.name()
+            ))),
+        }
     }
 
     fn extend(
@@ -119,10 +339,37 @@ impl<'a> ResolvedPattern<'a, GritQueryContext> for GritResolvedPattern<'a> {
 
     fn float(
         &self,
-        _state: &FileRegistry<'a, GritQueryContext>,
-        _language: &<GritQueryContext as QueryContext>::Language<'a>,
-    ) -> anyhow::Result<f64> {
-        todo!()
+        state: &FileRegistry<'a, GritQueryContext>,
+        language: &GritTargetLanguage,
+    ) -> Result<f64> {
+        match self {
+            Self::Constant(c) => match c {
+                Constant::Float(d) => Ok(*d),
+                Constant::Integer(i) => Ok(*i as f64),
+                Constant::String(s) => Ok(s.parse::<f64>()?),
+                Constant::Boolean(_) | Constant::Undefined => Err(anyhow::anyhow!("Cannot convert constant to double. Ensure that you are only attempting arithmetic operations on numeric-parsable types.")),
+            },
+            Self::Snippets(s) => {
+                let text = s
+                    .iter()
+                    .map(|snippet| snippet.text(state, language))
+                    .collect::<Result<Vec<_>>>()?
+                    .join("");
+                text.parse::<f64>().map_err(|_| {
+                    anyhow::anyhow!("Failed to convert snippet to double. Ensure that you are only attempting arithmetic operations on numeric-parsable types.")
+                })
+            }
+            Self::Binding(binding) => {
+                let text = binding
+                    .last()
+                    .ok_or_else(|| anyhow::anyhow!("cannot grab text of resolved_pattern with no binding"))?
+                    .text(language)?;
+                text.parse::<f64>().map_err(|_| {
+                    anyhow::anyhow!("Failed to convert binding to double. Ensure that you are only attempting arithmetic operations on numeric-parsable types.")
+                })
+            }
+            Self::List(_) | Self::Map(_) | Self::File(_) | Self::Files(_) => Err(anyhow::anyhow!("Cannot convert type to double. Ensure that you are only attempting arithmetic operations on numeric-parsable types.")),
+        }
     }
 
     fn get_bindings(&self) -> Option<impl Iterator<Item = GritBinding<'a>>> {
@@ -265,10 +512,29 @@ impl<'a> ResolvedPattern<'a, GritQueryContext> for GritResolvedPattern<'a> {
 
     fn text(
         &self,
-        _state: &grit_pattern_matcher::pattern::FileRegistry<'a, GritQueryContext>,
-        _language: &<GritQueryContext as QueryContext>::Language<'a>,
+        state: &FileRegistry<'a, GritQueryContext>,
+        language: &GritTargetLanguage,
     ) -> Result<Cow<'a, str>> {
-        todo!()
+        match self {
+            GritResolvedPattern::Binding(bindings) => Ok(bindings
+                .last()
+                .ok_or_else(|| anyhow!("cannot grab text of resolved_pattern with no binding"))?
+                .text(language)?
+                .into_owned()
+                .into()),
+            GritResolvedPattern::Snippets(snippets) => Ok(snippets
+                .iter()
+                .try_fold(String::new(), |mut text, snippet| {
+                    text.push_str(&snippet.text(state, language)?);
+                    Ok::<String, Error>(text)
+                })?
+                .into()),
+            GritResolvedPattern::List(_) => todo!(),
+            GritResolvedPattern::Map(_) => todo!(),
+            GritResolvedPattern::File(_) => todo!(),
+            GritResolvedPattern::Files(_) => todo!(),
+            GritResolvedPattern::Constant(_) => todo!(),
+        }
     }
 }
 

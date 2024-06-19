@@ -29,7 +29,7 @@ jobs:
             return response.data.head.sha;
 
       - name: Checkout PR Branch
-        uses: actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29 # v4.1.6
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
         with:
           ref: ${{ steps.sha.outputs.result }}
 
@@ -50,7 +50,7 @@ jobs:
           cp target/release/biome benchmark/target/biome_pr
 
       - name: Checkout Main Branch
-        uses: actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29 # v4.1.6
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
         with:
           clean: false
           ref: main
@@ -61,17 +61,17 @@ jobs:
           cp target/release/biome benchmark/target/biome_main
 
       - name: Checkout webpack
-        uses: actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29 # v4.1.6
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
         with:
           repository: webpack/webpack
           path: benchmark/target/webpack
       - name: Checkout prettier
-        uses: actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29 # v4.1.6
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
         with:
           repository: prettier/prettier
           path: benchmark/target/prettier
       - name: Checkout eslint
-        uses: actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29 # v4.1.6
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
         with:
           repository: eslint/eslint
           path: benchmark/target/eslint

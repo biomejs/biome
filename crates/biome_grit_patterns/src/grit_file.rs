@@ -11,7 +11,7 @@ use grit_util::Ast;
 use path_absolutize::Absolutize;
 
 #[derive(Clone, Debug, PartialEq)]
-pub(crate) enum GritFile<'a> {
+pub enum GritFile<'a> {
     Resolved(Box<ResolvedFile<'a, GritQueryContext>>),
     Ptr(FilePtr),
 }

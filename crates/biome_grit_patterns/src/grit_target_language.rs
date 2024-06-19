@@ -4,7 +4,7 @@ pub use js_target_language::JsTargetLanguage;
 
 use crate::grit_js_parser::GritJsParser;
 use crate::grit_target_node::{GritTargetNode, GritTargetSyntaxKind};
-use crate::grit_tree::GritTree;
+use crate::grit_tree::GritTargetTree;
 use biome_rowan::SyntaxKind;
 use grit_util::{Ast, CodeRange, EffectRange, Language, Parser, SnippetTree};
 use std::borrow::Cow;
@@ -35,7 +35,7 @@ macro_rules! generate_target_language {
                 }
             }
 
-            fn get_parser(&self) -> Box<dyn Parser<Tree = GritTree>> {
+            fn get_parser(&self) -> Box<dyn Parser<Tree = GritTargetTree>> {
                 match self {
                     $(Self::$language(_) => Box::new($parser)),+
                 }
@@ -47,18 +47,15 @@ macro_rules! generate_target_language {
                 }
             }
 
-            pub fn parse_snippet_contexts(&self, source: &str) -> Vec<SnippetTree<GritTree>> {
-                let source = self.substitute_metavariable_prefix(source);
-                self.snippet_context_strings()
-                    .iter()
-                    .map(|(pre, post)| self.get_parser().parse_snippet(pre, &source, post))
-                    .filter(|result| !result.tree.root_node().kind().is_bogus())
-                    .collect()
+            pub fn is_comment_kind(&self, kind: GritTargetSyntaxKind) -> bool {
+                match self {
+                    $(Self::$language(_) => $language::is_comment_kind(kind)),+
+                }
             }
         }
 
         impl Language for GritTargetLanguage {
-            type Node<'a> = GritTargetNode;
+            type Node<'a> = GritTargetNode<'a>;
 
             fn language_name(&self) -> &'static str {
                 match self {
@@ -81,7 +78,7 @@ macro_rules! generate_target_language {
             fn is_metavariable(&self, node: &GritTargetNode) -> bool {
                 node.kind() == self.metavariable_kind()
                     || (self.is_alternative_metavariable_kind(node.kind())
-                        && self.exact_replaced_variable_regex().is_match(&node.text_trimmed().to_string()))
+                        && self.exact_replaced_variable_regex().is_match(node.text()))
             }
 
             fn align_padding<'a>(
@@ -111,6 +108,49 @@ generate_target_language! {
     [JsTargetLanguage, GritJsParser]
 }
 
+impl GritTargetLanguage {
+    /// Returns `true` when the text `content` contains an identifier for a
+    /// metavariable using bracket syntax.
+    ///
+    /// The metavariable may occur anywhere inside `content`.
+    pub fn matches_bracket_metavariable(&self, content: &str) -> bool {
+        self.metavariable_bracket_regex().is_match(content)
+    }
+
+    /// Returns `true` when the text `content` is a metavariable identifier.
+    ///
+    /// No other text is allowed inside `content`.
+    pub fn matches_exact_metavariable(&self, content: &str) -> bool {
+        self.exact_variable_regex().is_match(content)
+    }
+
+    /// Returns `true` when the text `content` contains a metavariable
+    /// identifier with its prefix replaced with the
+    /// `[Self::metavariable_prefix_substitute()].
+    ///
+    /// The metavariable may occur anywhere inside `content`.
+    pub fn matches_replaced_metavariable(&self, content: &str) -> bool {
+        self.replaced_metavariable_regex().is_match(content)
+    }
+
+    pub fn parse_snippet_contexts(&self, source: &str) -> Vec<SnippetTree<GritTargetTree>> {
+        let source = self.substitute_metavariable_prefix(source);
+        self.snippet_context_strings()
+            .iter()
+            .map(|(pre, post)| self.get_parser().parse_snippet(pre, &source, post))
+            .filter(|result| {
+                result
+                    .tree
+                    .root_node()
+                    .descendants()
+                    .map_or(false, |mut descendants| {
+                        !descendants.any(|descendant| descendant.kind().is_bogus())
+                    })
+            })
+            .collect()
+    }
+}
+
 /// Trait to be implemented by the language-specific implementations.
 ///
 /// This is used to make language implementations a little easier, by not
@@ -134,7 +174,15 @@ trait GritTargetLanguageImpl {
     fn snippet_context_strings(&self) -> &[(&'static str, &'static str)];
 
     /// Determines whether the given target node is a comment.
-    fn is_comment(&self, node: &GritTargetNode) -> bool;
+    ///
+    /// This is allowed to return `true` for nodes whose kind would not return
+    /// `true` when passed directly to [is_comment_kind()].
+    fn is_comment(&self, node: &GritTargetNode) -> bool {
+        Self::is_comment_kind(node.kind())
+    }
+
+    /// Determines whether the given kind is a comment kind.
+    fn is_comment_kind(kind: GritTargetSyntaxKind) -> bool;
 
     /// Returns the syntax kind for metavariables.
     fn metavariable_kind() -> Self::Kind;

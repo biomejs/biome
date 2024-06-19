@@ -10,7 +10,7 @@ use grit_pattern_matcher::pattern::{
 use grit_util::AnalysisLogs;
 
 #[derive(Clone, Debug)]
-pub(crate) struct GritCodeSnippet {
+pub struct GritCodeSnippet {
     pub(crate) patterns: Vec<(GritTargetSyntaxKind, Pattern<GritQueryContext>)>,
     pub(crate) source: String,
     pub(crate) dynamic_snippet: Option<DynamicPattern<GritQueryContext>>,

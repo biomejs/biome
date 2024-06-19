@@ -2,9 +2,9 @@ use crate::execute::diagnostics::ResultExt;
 use crate::execute::process_file::workspace_file::WorkspaceFile;
 use crate::execute::process_file::{FileResult, FileStatus, Message, SharedTraversalOptions};
 use crate::TraversalMode;
+use biome_analyze::RuleCategoriesBuilder;
 use biome_diagnostics::{category, Error};
 use biome_service::file_handlers::{AstroFileHandler, SvelteFileHandler, VueFileHandler};
-use biome_service::workspace::RuleCategories;
 use std::path::Path;
 use std::sync::atomic::Ordering;
 
@@ -66,7 +66,10 @@ pub(crate) fn lint_with_guard<'ctx>(
             let pull_diagnostics_result = workspace_file
                 .guard()
                 .pull_diagnostics(
-                    RuleCategories::LINT | RuleCategories::SYNTAX,
+                    RuleCategoriesBuilder::default()
+                        .with_syntax()
+                        .with_lint()
+                        .build(),
                     max_diagnostics.into(),
                     only,
                     skip,

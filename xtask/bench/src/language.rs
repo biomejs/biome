@@ -1,6 +1,6 @@
 use crate::test_case::TestCase;
 use biome_analyze::options::JsxRuntime;
-use biome_analyze::{AnalysisFilter, AnalyzerOptions, ControlFlow, Never, RuleCategories};
+use biome_analyze::{AnalysisFilter, AnalyzerOptions, ControlFlow, Never, RuleCategoriesBuilder};
 use biome_css_formatter::context::{CssFormatContext, CssFormatOptions};
 use biome_css_parser::CssParserOptions;
 use biome_css_syntax::{CssRoot, CssSyntaxNode};
@@ -172,7 +172,10 @@ impl Analyze {
         match self {
             Analyze::JavaScript(root) => {
                 let filter = AnalysisFilter {
-                    categories: RuleCategories::SYNTAX | RuleCategories::LINT,
+                    categories: RuleCategoriesBuilder::default()
+                        .with_syntax()
+                        .with_lint()
+                        .build(),
                     ..AnalysisFilter::default()
                 };
                 let mut options = AnalyzerOptions::default();
@@ -192,7 +195,10 @@ impl Analyze {
             }
             Analyze::Css(root) => {
                 let filter = AnalysisFilter {
-                    categories: RuleCategories::SYNTAX | RuleCategories::LINT,
+                    categories: RuleCategoriesBuilder::default()
+                        .with_syntax()
+                        .with_lint()
+                        .build(),
                     ..AnalysisFilter::default()
                 };
                 let options = AnalyzerOptions::default();

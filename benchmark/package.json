@@ -10,7 +10,7 @@
 	"devDependencies": {
 		"@mixer/parallel-prettier": "2.0.3",
 		"dprint": "0.46.2",
-		"eslint": "9.4.0",
+		"eslint": "9.5.0",
 		"prettier": "3.2.5"
 	}
 }

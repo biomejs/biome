@@ -1,5 +1,5 @@
 use super::GritTargetLanguageImpl;
-use crate::grit_target_node::{GritTargetNode, GritTargetSyntaxKind};
+use crate::grit_target_node::GritTargetSyntaxKind;
 use biome_js_syntax::JsSyntaxKind;
 use biome_parser::{token_set, TokenSet};
 
@@ -39,9 +39,8 @@ impl GritTargetLanguageImpl for JsTargetLanguage {
         ]
     }
 
-    fn is_comment(&self, node: &GritTargetNode) -> bool {
-        node.kind()
-            .as_js_kind()
+    fn is_comment_kind(kind: GritTargetSyntaxKind) -> bool {
+        kind.as_js_kind()
             .map_or(false, |kind| COMMENT_KINDS.contains(kind))
     }
 

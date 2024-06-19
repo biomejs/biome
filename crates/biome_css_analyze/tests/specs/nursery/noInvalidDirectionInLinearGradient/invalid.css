@@ -1,0 +1,83 @@
+.foo {
+	background: linear-gradient(bottom, #fff, #000);
+}
+.foo {
+	background: lInEaR-gRaDiEnT(bottom, #fff, #000);
+}
+.foo {
+	background: LINEAR-GRADIENT(bottom, #fff, #000);
+}
+.foo {
+	background: linear-gradient(bOtToM, #fff, #000);
+}
+.foo {
+	background: linear-gradient(BOTTOM, #fff, #000);
+}
+.foo {
+	background: linear-gradient(top, #fff, #000);
+}
+.foo {
+	background: linear-gradient(left, #fff, #000);
+}
+.foo {
+	background: linear-gradient(right, #fff, #000);
+}
+.foo {
+	background: linear-gradient(to top top, #fff, #000);
+}
+.foo {
+	background: linear-gradient(45, #fff, #000);
+}
+.foo {
+	background: linear-gradient(0.25, #fff, #000);
+}
+.foo {
+	background: linear-gradient(1.577, #fff, #000);
+}
+.foo {
+	background: linear-gradient(topin, #fff, #000);
+}
+.foo {
+	background: -webkit-linear-gradient(to bottom, #fff, #000);
+}
+.foo {
+	background: -moz-linear-gradient(to bottom, #fff, #000);
+}
+.foo {
+	background: -o-linear-gradient(to bottom, #fff, #000);
+}
+.foo {
+	background: url(foo.png), -webkit-linear-gradient(to bottom, #fff, #000);
+}
+.foo {
+	background: url(foo.png), -moz-linear-gradient(to bottom, #fff, #000);
+}
+.foo {
+	background: url(foo.png), -o-linear-gradient(to bottom, #fff, #000);
+}
+.foo {
+	background: -webkit-linear-gradient(to bottom, #fff, #000), url(foo.png);
+}
+.foo {
+	background: url(foo.png), -moz-linear-gradient(to bottom, #fff, #000),
+		url(foo.png);
+}
+.foo {
+	background: -o-linear-gradient(to bottom, #fff, #000), url(foo.png);
+}
+.foo {
+	background: url(foo.png), -webkit-linear-gradient(to bottom, #fff, #000),
+		url(bar.png);
+}
+.foo {
+	background: url(foo.png), -moz-linear-gradient(to bottom, #fff, #000),
+		url(bar.png);
+}
+.foo {
+	background: url(foo.png), -o-linear-gradient(to bottom, #fff, #000),
+		url(bar.png);
+}
+.foo {
+	background: url(foo.png), -ms-linear-gradient(to bottom, #fff, #000),
+		url(bar.png);
+}
