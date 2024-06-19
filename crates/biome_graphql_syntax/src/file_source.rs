@@ -1,6 +1,6 @@
+use biome_rowan::FileSourceError;
 use std::ffi::OsStr;
 use std::path::Path;
-use biome_rowan::FileSourceError;
 
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[derive(
@@ -9,13 +9,12 @@ use biome_rowan::FileSourceError;
 pub struct GraphqlFileSource {}
 
 impl GraphqlFileSource {
-
     /// Try to return the CSS file source corresponding to this file name from well-known files
     pub fn try_from_well_known(file_name: &str) -> Result<Self, FileSourceError> {
         // TODO: to be implemented
         Err(FileSourceError::UnknownFileName(file_name.into()))
     }
-    
+
     /// Try to return the CSS file source corresponding to this file extension
     pub fn try_from_extension(extension: &str) -> Result<Self, FileSourceError> {
         match extension {
@@ -40,7 +39,6 @@ impl GraphqlFileSource {
         }
     }
 }
-
 
 impl TryFrom<&Path> for GraphqlFileSource {
     type Error = FileSourceError;
