@@ -1,9 +1,9 @@
-use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic};
+use biome_analyze::{context::RuleContext, declare_lint_rule, Ast, Rule, RuleDiagnostic};
 use biome_console::markup;
 use biome_js_syntax::{jsx_ext::AnyJsxElement, JsxAttribute, JsxChildList, JsxElement};
 use biome_rowan::{AstNode, AstNodeList};
 
-declare_rule! {
+declare_lint_rule! {
     /// Enforces the usage of the `title` element for the `svg` element.
     ///
     /// It is not possible to specify the `alt` attribute for the `svg` as for the `img`.

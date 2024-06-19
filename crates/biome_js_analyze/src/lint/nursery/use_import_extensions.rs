@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 use std::path::{Component, Path};
 
 use biome_analyze::{
-    context::RuleContext, declare_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic,
+    context::RuleContext, declare_lint_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic,
 };
 use biome_console::markup;
 use biome_deserialize_macros::Deserializable;
@@ -16,7 +16,7 @@ use crate::JsRuleAction;
 #[cfg(feature = "schemars")]
 use schemars::JsonSchema;
 
-declare_rule! {
+declare_lint_rule! {
     /// Enforce file extensions for relative imports.
     ///
     /// Browsers and Node.js do not natively support importing files without extensions. This rule

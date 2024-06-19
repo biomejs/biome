@@ -1,6 +1,7 @@
 use crate::{services::semantic::Semantic, JsRuleAction};
 use biome_analyze::{
-    context::RuleContext, declare_rule, ActionCategory, FixKind, Rule, RuleDiagnostic, RuleSource,
+    context::RuleContext, declare_lint_rule, ActionCategory, FixKind, Rule, RuleDiagnostic,
+    RuleSource,
 };
 use biome_console::markup;
 use biome_js_factory::make;
@@ -11,7 +12,7 @@ use biome_rowan::{chain_trivia_pieces, AstNode, BatchMutationExt};
 
 use super::use_throw_new_error::convert_call_expression_to_new_expression;
 
-declare_rule! {
+declare_lint_rule! {
     /// Enforce the use of `new` for all builtins, except `String`, `Number`, `Boolean`, `Symbol` and `BigInt`.
     ///
     /// `new Builtin()` and `Builtin()` work the same, but new should be preferred for consistency with other constructors.

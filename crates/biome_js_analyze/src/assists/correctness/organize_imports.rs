@@ -1,7 +1,7 @@
 use std::{cell::Cell, cmp::Ordering, collections::BTreeMap, iter, mem::take};
 
 use biome_analyze::{
-    context::RuleContext, declare_rule, ActionCategory, Ast, FixKind, Rule, SourceActionKind,
+    context::RuleContext, declare_lint_rule, ActionCategory, Ast, FixKind, Rule, SourceActionKind,
 };
 use biome_console::markup;
 use biome_js_factory::make;
@@ -16,7 +16,7 @@ use biome_rowan::{
 
 use crate::JsRuleAction;
 
-declare_rule! {
+declare_lint_rule! {
     /// Provides a whole-source code action to sort the imports in the file
     /// using import groups and natural ordering.
     ///

@@ -352,7 +352,7 @@ pub trait RuleMeta {
 /// ```rust,ignore
 ///use biome_analyze::declare_rule;
 ///
-/// declare_rule! {
+/// declare_lint_rule! {
 ///     /// Documentation
 ///     pub(crate) ExampleRule {
 ///         version: "1.0.0",
@@ -365,8 +365,92 @@ pub trait RuleMeta {
 /// Check [crate](module documentation) for a better
 /// understanding of how the macro works
 #[macro_export]
-macro_rules! declare_rule {
+macro_rules! declare_lint_rule {
     ( $( #[doc = $doc:literal] )+ $vis:vis $id:ident {
+        version: $version:literal,
+        name: $name:tt,
+        language: $language:literal,
+        $( $key:ident: $value:expr, )*
+    } ) => {
+
+        biome_analyze::declare_rule!(
+            $( #[doc = $doc] )*
+            $vis $id {
+                version: $version,
+                name: $name,
+                language: $language,
+                $( $key: $value, )*
+            }
+        );
+
+        // Declare a new `rule_category!` macro in the module context that
+        // expands to the category of this rule
+        // This is implemented by calling the `group_category!` macro from the
+        // parent module (that should be declared by a call to `declare_group!`)
+        // and providing it with the name of this rule as a string literal token
+        #[allow(unused_macros)]
+        macro_rules! rule_category {
+            () => { super::group_category!( $name ) };
+        }
+    };
+}
+
+
+/// This macro is used to declare an analyzer rule type, and implement the
+//  [RuleMeta] trait for it
+///  # Example
+///
+/// The macro itself expect the following syntax:
+///
+/// ```rust,ignore
+///use biome_analyze::declare_rule;
+///
+/// declare_lint_rule! {
+///     /// Documentation
+///     pub(crate) ExampleRule {
+///         version: "1.0.0",
+///         name: "ruleName",
+///         recommended: false,
+///     }
+/// }
+/// ```
+///
+/// Check [crate](module documentation) for a better
+/// understanding of how the macro works
+#[macro_export]
+macro_rules! declare_syntax_rule {
+    ( $( #[doc = $doc:literal] )+ $vis:vis $id:ident {
+        version: $version:literal,
+        name: $name:tt,
+        language: $language:literal,
+        $( $key:ident: $value:expr, )*
+    } ) => {
+
+        biome_analyze::declare_rule!(
+            $( #[doc = $doc] )*
+            $vis $id {
+                version: $version,
+                name: $name,
+                language: $language,
+                $( $key: $value, )*
+            }
+        );
+
+        // Declare a new `rule_category!` macro in the module context that
+        // expands to the category of this rule
+        // This is implemented by calling the `group_category!` macro from the
+        // parent module (that should be declared by a call to `declare_group!`)
+        // and providing it with the name of this rule as a string literal token
+        #[allow(unused_macros)]
+        macro_rules! rule_category {
+            () => { super::group_category!( $name ) };
+        }
+    };
+}
+
+#[macro_export]
+macro_rules! declare_rule {
+        ( $( #[doc = $doc:literal] )+ $vis:vis $id:ident {
         version: $version:literal,
         name: $name:tt,
         language: $language:literal,
@@ -380,15 +464,53 @@ macro_rules! declare_rule {
             const METADATA: $crate::RuleMetadata =
                 $crate::RuleMetadata::new($version, $name, concat!( $( $doc, "\n", )* ), $language) $( .$key($value) )*;
         }
+    }
+}
 
-        // Declare a new `rule_category!` macro in the module context that
-        // expands to the category of this rule
-        // This is implemented by calling the `group_category!` macro from the
-        // parent module (that should be declared by a call to `declare_group!`)
-        // and providing it with the name of this rule as a string literal token
+/// This macro is used to declare an analyzer rule type, and implement the
+//  [RuleMeta] trait for it
+///  # Example
+///
+/// The macro itself expect the following syntax:
+///
+/// ```rust,ignore
+///use biome_analyze::declare_refactor;
+///
+/// declare_refactor! {
+///     /// Documentation
+///     pub(crate) ExampleRule {
+///         version: "1.0.0",
+///         name: "ruleName",
+///         recommended: false,
+///     }
+/// }
+/// ```
+///
+/// Check [crate](module documentation) for a better
+/// understanding of how the macro works
+#[macro_export]
+macro_rules! declare_refactor {
+    ( $( #[doc = $doc:literal] )+ $vis:vis $id:ident {
+        version: $version:literal,
+        name: $name:tt,
+        language: $language:literal,
+        $( $key:ident: $value:expr, )*
+    } ) => {
+        biome_analyze::declare_rule!(
+            $( #[doc = $doc] )*
+            $vis $id {
+                version: $version,
+                name: $name,
+                language: $language,
+                fix_kind: biome_analyze::FixKind::None,
+                $( $key: $value, )*
+            }
+        );
+
+        /// This macro returns the corresponding [ActionCategory] to use inside the [RuleAction]
         #[allow(unused_macros)]
-        macro_rules! rule_category {
-            () => { super::group_category!( $name ) };
+        macro_rules! rule_action_category {
+            () => { ActionCategory::Refactor(RefactorKind::Other(Cow::Borrowed(concat!($language, ".", $name) )))  };
         }
     };
 }
@@ -471,6 +593,44 @@ macro_rules! declare_assists_group {
         #[allow(unused_macros)]
         macro_rules! group_category {
             ( $rule_name:tt ) => { $crate::category_concat!( "assists", $name, $rule_name ) };
+        }
+
+        // Re-export the macro for child modules, so `declare_rule!` can access
+        // the category of its parent group by using the `super` module
+        pub(self) use group_category;
+    };
+}
+
+
+/// This macro is used by the codegen script to declare an analyzer rule group,
+/// and implement the [RuleGroup] trait for it
+#[macro_export]
+macro_rules! declare_syntax_group {
+    ( $vis:vis $id:ident { name: $name:tt, rules: [ $( $( $rule:ident )::* , )* ] } ) => {
+        $vis enum $id {}
+
+        impl $crate::RuleGroup for $id {
+            type Language = <( $( $( $rule )::* , )* ) as $crate::GroupLanguage>::Language;
+            type Category = super::Category;
+
+            const NAME: &'static str = $name;
+
+            fn record_rules<V: $crate::RegistryVisitor<Self::Language> + ?Sized>(registry: &mut V) {
+                $( registry.record_rule::<$( $rule )::*>(); )*
+            }
+        }
+
+        pub(self) use $id as Group;
+
+        // Declare a `group_category!` macro in the context of this module (and
+        // all its children). This macro takes the name of a rule as a string
+        // literal token and expands to the category of the lint rule with this
+        // name within this group.
+        // This is implemented by calling the `category_concat!` macro with the
+        // "lint" prefix, the name of this group, and the rule name argument
+        #[allow(unused_macros)]
+        macro_rules! group_category {
+            ( $rule_name:tt ) => { $crate::category_concat!( "syntax", $name, $rule_name ) };
         }
 
         // Re-export the macro for child modules, so `declare_rule!` can access

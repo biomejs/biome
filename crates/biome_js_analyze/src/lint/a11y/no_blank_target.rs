@@ -1,6 +1,8 @@
 use crate::JsRuleAction;
 use biome_analyze::context::RuleContext;
-use biome_analyze::{declare_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic, RuleSource};
+use biome_analyze::{
+    declare_lint_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic, RuleSource,
+};
 use biome_console::markup;
 use biome_js_factory::make::{
     jsx_attribute, jsx_attribute_initializer_clause, jsx_attribute_list, jsx_ident, jsx_name,
@@ -12,7 +14,7 @@ use biome_js_syntax::{
 };
 use biome_rowan::{AstNode, AstNodeList, BatchMutationExt, TriviaPieceKind};
 
-declare_rule! {
+declare_lint_rule! {
     /// Disallow `target="_blank"` attribute without `rel="noreferrer"`
     ///
     /// When creating anchor `a` element, there are times when its link has to be opened in a new browser tab

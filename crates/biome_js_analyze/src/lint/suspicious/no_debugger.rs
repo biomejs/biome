@@ -1,5 +1,5 @@
 use biome_analyze::{
-    context::RuleContext, declare_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic,
+    context::RuleContext, declare_lint_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic,
     RuleSource,
 };
 use biome_console::markup;
@@ -8,7 +8,7 @@ use biome_rowan::{AstNode, BatchMutationExt};
 
 use crate::{utils::batch::JsBatchMutation, JsRuleAction};
 
-declare_rule! {
+declare_lint_rule! {
     /// Disallow the use of `debugger`
     ///
     /// ## Examples

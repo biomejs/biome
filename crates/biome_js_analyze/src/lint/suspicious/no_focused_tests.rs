@@ -1,6 +1,6 @@
 use crate::JsRuleAction;
 use biome_analyze::{
-    context::RuleContext, declare_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic,
+    context::RuleContext, declare_lint_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic,
     RuleSource, RuleSourceKind,
 };
 use biome_console::markup;
@@ -8,7 +8,7 @@ use biome_js_factory::make;
 use biome_js_syntax::{JsCallExpression, TextRange};
 use biome_rowan::{AstNode, BatchMutationExt, NodeOrToken};
 
-declare_rule! {
+declare_lint_rule! {
     /// Disallow focused tests.
     ///
     /// Disabled test are useful when developing and debugging, because it forces the test suite to run only certain tests.

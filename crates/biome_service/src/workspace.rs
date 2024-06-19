@@ -51,7 +51,10 @@
 //! document does not implement the required capability: for instance trying to
 //! format a file with a language that does not have a formatter
 
+pub use self::client::{TransportRequest, WorkspaceClient, WorkspaceTransport};
 use crate::file_handlers::Capabilities;
+pub use crate::file_handlers::DocumentFileSource;
+use crate::settings::Settings;
 use crate::{Deserialize, Serialize, WorkspaceError};
 use biome_analyze::ActionCategory;
 pub use biome_analyze::RuleCategories;
@@ -63,6 +66,7 @@ use biome_formatter::Printed;
 use biome_fs::BiomePath;
 use biome_js_syntax::{TextRange, TextSize};
 use biome_text_edit::TextEdit;
+use enumflags2::{bitflags, BitFlags};
 #[cfg(feature = "schema")]
 use schemars::{gen::SchemaGenerator, schema::Schema, JsonSchema};
 use slotmap::{new_key_type, DenseSlotMap};
@@ -72,10 +76,6 @@ use std::path::{Path, PathBuf};
 use std::{borrow::Cow, panic::RefUnwindSafe, sync::Arc};
 use tracing::debug;
 
-pub use self::client::{TransportRequest, WorkspaceClient, WorkspaceTransport};
-pub use crate::file_handlers::DocumentFileSource;
-use crate::settings::Settings;
-
 mod client;
 mod server;
 
@@ -83,7 +83,7 @@ mod server;
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub struct SupportsFeatureParams {
     pub path: BiomePath,
-    pub features: Vec<FeatureName>,
+    pub features: FeatureName,
 }
 
 #[derive(Debug, serde::Serialize, serde::Deserialize, Default)]
@@ -95,7 +95,7 @@ pub struct SupportsFeatureResult {
 #[derive(Debug, serde::Serialize, serde::Deserialize, Default, Clone, Eq, PartialEq)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub struct FileFeaturesResult {
-    pub features_supported: HashMap<FeatureName, SupportKind>,
+    pub features_supported: HashMap<FeatureKind, SupportKind>,
 }
 
 impl FileFeaturesResult {
@@ -120,11 +120,11 @@ impl FileFeaturesResult {
     }
 
     /// By default, all features are not supported by a file.
-    const WORKSPACE_FEATURES: [(FeatureName, SupportKind); 4] = [
-        (FeatureName::Lint, SupportKind::FileNotSupported),
-        (FeatureName::Format, SupportKind::FileNotSupported),
-        (FeatureName::OrganizeImports, SupportKind::FileNotSupported),
-        (FeatureName::Search, SupportKind::FileNotSupported),
+    const WORKSPACE_FEATURES: [(FeatureKind, SupportKind); 4] = [
+        (FeatureKind::Lint, SupportKind::FileNotSupported),
+        (FeatureKind::Format, SupportKind::FileNotSupported),
+        (FeatureKind::OrganizeImports, SupportKind::FileNotSupported),
+        (FeatureKind::Search, SupportKind::FileNotSupported),
     ];
 
     pub fn new() -> Self {
@@ -136,15 +136,15 @@ impl FileFeaturesResult {
     pub fn with_capabilities(mut self, capabilities: &Capabilities) -> Self {
         if capabilities.formatter.format.is_some() {
             self.features_supported
-                .insert(FeatureName::Format, SupportKind::Supported);
+                .insert(FeatureKind::Format, SupportKind::Supported);
         }
         if capabilities.analyzer.lint.is_some() {
             self.features_supported
-                .insert(FeatureName::Lint, SupportKind::Supported);
+                .insert(FeatureKind::Lint, SupportKind::Supported);
         }
         if capabilities.analyzer.organize_imports.is_some() {
             self.features_supported
-                .insert(FeatureName::OrganizeImports, SupportKind::Supported);
+                .insert(FeatureKind::OrganizeImports, SupportKind::Supported);
         }
 
         self
@@ -170,7 +170,7 @@ impl FileFeaturesResult {
             };
         if formatter_disabled {
             self.features_supported
-                .insert(FeatureName::Format, SupportKind::FeatureNotEnabled);
+                .insert(FeatureKind::Format, SupportKind::FeatureNotEnabled);
         }
         // linter
         let linter_disabled = {
@@ -189,18 +189,18 @@ impl FileFeaturesResult {
 
         if linter_disabled {
             self.features_supported
-                .insert(FeatureName::Lint, SupportKind::FeatureNotEnabled);
+                .insert(FeatureKind::Lint, SupportKind::FeatureNotEnabled);
         }
 
         // organize imports
         if let Some(disabled) = settings.override_settings.organize_imports_disabled(path) {
             if disabled {
                 self.features_supported
-                    .insert(FeatureName::OrganizeImports, SupportKind::FeatureNotEnabled);
+                    .insert(FeatureKind::OrganizeImports, SupportKind::FeatureNotEnabled);
             }
         } else if !settings.organize_imports().enabled {
             self.features_supported
-                .insert(FeatureName::OrganizeImports, SupportKind::FeatureNotEnabled);
+                .insert(FeatureKind::OrganizeImports, SupportKind::FeatureNotEnabled);
         }
 
         debug!(
@@ -225,13 +225,13 @@ impl FileFeaturesResult {
         }
     }
 
-    pub fn ignored(&mut self, feature: FeatureName) {
+    pub fn ignored(&mut self, feature: FeatureKind) {
         self.features_supported
             .insert(feature, SupportKind::Ignored);
     }
 
     /// Checks whether the file support the given `feature`
-    fn supports_for(&self, feature: &FeatureName) -> bool {
+    fn supports_for(&self, feature: &FeatureKind) -> bool {
         self.features_supported
             .get(feature)
             .map(|support_kind| matches!(support_kind, SupportKind::Supported))
@@ -239,15 +239,19 @@ impl FileFeaturesResult {
     }
 
     pub fn supports_lint(&self) -> bool {
-        self.supports_for(&FeatureName::Lint)
+        self.supports_for(&FeatureKind::Lint)
     }
 
     pub fn supports_format(&self) -> bool {
-        self.supports_for(&FeatureName::Format)
+        self.supports_for(&FeatureKind::Format)
     }
 
     pub fn supports_organize_imports(&self) -> bool {
-        self.supports_for(&FeatureName::OrganizeImports)
+        self.supports_for(&FeatureKind::OrganizeImports)
+    }
+
+    pub fn supports_assists(&self) -> bool {
+        self.supports_for(&FeatureKind::Assists)
     }
 
     /// Loops through all the features of the current file, and if a feature is [SupportKind::FileNotSupported],
@@ -260,7 +264,7 @@ impl FileFeaturesResult {
         }
     }
 
-    pub fn support_kind_for(&self, feature: &FeatureName) -> Option<&SupportKind> {
+    pub fn support_kind_for(&self, feature: &FeatureKind) -> Option<&SupportKind> {
         self.features_supported.get(feature)
     }
 
@@ -366,16 +370,41 @@ impl SupportKind {
 }
 
 #[derive(Debug, Copy, Clone, Hash, serde::Serialize, serde::Deserialize, Eq, PartialEq)]
-#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
-pub enum FeatureName {
+#[bitflags]
+#[repr(u8)]
+pub enum FeatureKind {
     Format,
     Lint,
     OrganizeImports,
     Search,
+    Assists,
+}
+
+#[derive(Debug, Copy, Clone, Hash, serde::Serialize, serde::Deserialize, Eq, PartialEq)]
+pub struct FeatureName(BitFlags<FeatureKind>);
+
+impl FeatureName {
+    pub fn iter(&self) -> enumflags2::Iter<FeatureKind> {
+        self.0.iter()
+    }
+    pub fn empty() -> Self {
+        Self(BitFlags::empty())
+    }
+}
+
+#[cfg(feature = "schema")]
+impl schemars::JsonSchema for FeatureName {
+    fn schema_name() -> String {
+        String::from("FeatureName")
+    }
+
+    fn json_schema(gen: &mut SchemaGenerator) -> Schema {
+        <Vec<FeatureName>>::json_schema(gen)
+    }
 }
 
 #[derive(Debug, Default)]
-pub struct FeaturesBuilder(Vec<FeatureName>);
+pub struct FeaturesBuilder(BitFlags<FeatureKind>);
 
 impl FeaturesBuilder {
     pub fn new() -> Self {
@@ -383,27 +412,27 @@ impl FeaturesBuilder {
     }
 
     pub fn with_formatter(mut self) -> Self {
-        self.0.push(FeatureName::Format);
+        self.0.insert(FeatureKind::Format);
         self
     }
 
     pub fn with_linter(mut self) -> Self {
-        self.0.push(FeatureName::Lint);
+        self.0.insert(FeatureKind::Lint);
         self
     }
 
     pub fn with_organize_imports(mut self) -> Self {
-        self.0.push(FeatureName::OrganizeImports);
+        self.0.insert(FeatureKind::OrganizeImports);
         self
     }
 
     pub fn with_search(mut self) -> Self {
-        self.0.push(FeatureName::Search);
+        self.0.insert(FeatureKind::Search);
         self
     }
 
-    pub fn build(self) -> Vec<FeatureName> {
-        self.0
+    pub fn build(self) -> FeatureName {
+        FeatureName(self.0)
     }
 }
 
@@ -740,7 +769,7 @@ impl From<&str> for PatternId {
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub struct IsPathIgnoredParams {
     pub biome_path: BiomePath,
-    pub features: Vec<FeatureName>,
+    pub features: FeatureName,
 }
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]

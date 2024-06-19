@@ -2,14 +2,14 @@ use std::num::IntErrorKind;
 use std::ops::RangeInclusive;
 
 use biome_analyze::context::RuleContext;
-use biome_analyze::{declare_rule, Ast, Rule, RuleDiagnostic, RuleSource};
+use biome_analyze::{declare_lint_rule, Ast, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
 
 use biome_js_syntax::numbers::split_into_radix_and_number;
 use biome_js_syntax::JsNumberLiteralExpression;
 use biome_rowan::AstNode;
 
-declare_rule! {
+declare_lint_rule! {
     /// Disallow literal numbers that lose precision
     ///
     ///

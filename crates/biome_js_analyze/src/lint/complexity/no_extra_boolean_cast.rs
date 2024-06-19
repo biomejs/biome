@@ -1,5 +1,5 @@
 use biome_analyze::{
-    context::RuleContext, declare_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic,
+    context::RuleContext, declare_lint_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic,
     RuleSource,
 };
 use biome_console::markup;
@@ -17,7 +17,7 @@ pub enum ExtraBooleanCastType {
     /// Boolean(x)
     BooleanCall,
 }
-declare_rule! {
+declare_lint_rule! {
     /// Disallow unnecessary boolean casts
     ///
     /// ## Examples

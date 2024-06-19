@@ -1,13 +1,13 @@
 use crate::services::aria::Aria;
 use biome_analyze::context::RuleContext;
-use biome_analyze::{declare_rule, Rule, RuleDiagnostic, RuleSource};
+use biome_analyze::{declare_lint_rule, Rule, RuleDiagnostic, RuleSource};
 use biome_aria::AriaPropertyTypeEnum;
 use biome_console::markup;
 use biome_js_syntax::{JsSyntaxToken, JsxAttribute, TextRange};
 use biome_rowan::AstNode;
 use std::slice::Iter;
 
-declare_rule! {
+declare_lint_rule! {
     /// Enforce that ARIA state and property values are valid.
     ///
     /// ## Examples

@@ -60,7 +60,7 @@ impl Execution {
 }
 
 impl Execution {
-    pub(crate) fn to_features(&self) -> Vec<FeatureName> {
+    pub(crate) fn to_features(&self) -> FeatureName {
         match self.traversal_mode {
             TraversalMode::Format { .. } => FeaturesBuilder::new().with_formatter().build(),
             TraversalMode::Lint { .. } => FeaturesBuilder::new().with_linter().build(),
@@ -69,7 +69,7 @@ impl Execution {
                 .with_formatter()
                 .with_linter()
                 .build(),
-            TraversalMode::Migrate { .. } => vec![],
+            TraversalMode::Migrate { .. } => FeatureName::empty(),
             TraversalMode::Search { .. } => FeaturesBuilder::new().with_search().build(),
         }
     }

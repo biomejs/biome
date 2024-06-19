@@ -1,7 +1,7 @@
 use crate::JsRuleAction;
 use biome_analyze::RuleSource;
 use biome_analyze::{
-    context::RuleContext, declare_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic,
+    context::RuleContext, declare_lint_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic,
 };
 use biome_console::markup;
 use biome_js_syntax::{
@@ -14,7 +14,7 @@ use biome_js_syntax::{AnyJsLiteralExpression, AnyTsType};
 use biome_rowan::AstNode;
 use biome_rowan::BatchMutationExt;
 
-declare_rule! {
+declare_lint_rule! {
     /// Disallow type annotations for variables, parameters, and class properties initialized with a literal expression.
     ///
     /// TypeScript is able to infer the types of parameters, properties, and variables from their default or initial values.
