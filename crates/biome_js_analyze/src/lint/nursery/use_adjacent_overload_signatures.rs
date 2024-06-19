@@ -1,4 +1,6 @@
-use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic, RuleSource};
+use biome_analyze::{
+    context::RuleContext, declare_lint_rule, Ast, Rule, RuleDiagnostic, RuleSource,
+};
 use biome_console::markup;
 use biome_js_syntax::{
     AnyJsModuleItem, JsClassDeclaration, JsFunctionDeclaration, JsModule, JsModuleItemList,
@@ -7,7 +9,7 @@ use biome_js_syntax::{
 use biome_rowan::{declare_node_union, AstNode, TextRange, TokenText};
 use rustc_hash::FxHashSet;
 
-declare_rule! {
+declare_lint_rule! {
     /// Disallow the use of overload signatures that are not next to each other.
     ///
     /// Overload signatures must be adjacent.

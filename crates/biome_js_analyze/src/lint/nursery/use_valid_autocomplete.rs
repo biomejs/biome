@@ -1,4 +1,4 @@
-use biome_analyze::{context::RuleContext, declare_rule, Rule, RuleDiagnostic, RuleSource};
+use biome_analyze::{context::RuleContext, declare_lint_rule, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
 use biome_deserialize_macros::Deserializable;
 use biome_js_syntax::{JsxOpeningElement, JsxSelfClosingElement};
@@ -7,7 +7,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::services::aria::Aria;
 
-declare_rule! {
+declare_lint_rule! {
     /// Use valid values for the `autocomplete` attribute on `input` elements.
     ///
     /// The HTML autocomplete attribute only accepts specific predefined values.

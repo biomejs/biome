@@ -1,9 +1,11 @@
-use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic, RuleSource};
+use biome_analyze::{
+    context::RuleContext, declare_lint_rule, Ast, Rule, RuleDiagnostic, RuleSource,
+};
 use biome_console::{fmt::Display, fmt::Formatter, markup};
 use biome_js_syntax::{jsx_ext::AnyJsxElement, TextRange};
 use biome_rowan::AstNode;
 
-declare_rule! {
+declare_lint_rule! {
     /// Enforce that all elements that require alternative text have meaningful information to relay back to the end user.
     ///
     /// This is a critical component of accessibility for screen reader users in order for them to understand the content's purpose on the page.

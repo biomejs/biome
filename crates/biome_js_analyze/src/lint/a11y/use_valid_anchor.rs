@@ -1,10 +1,10 @@
 use biome_analyze::context::RuleContext;
-use biome_analyze::{declare_rule, Ast, Rule, RuleDiagnostic, RuleSource};
+use biome_analyze::{declare_lint_rule, Ast, Rule, RuleDiagnostic, RuleSource};
 use biome_console::{markup, MarkupBuf};
 use biome_js_syntax::jsx_ext::AnyJsxElement;
 use biome_rowan::{AstNode, TextRange};
 
-declare_rule! {
+declare_lint_rule! {
     /// Enforce that all anchors are valid, and they are navigable elements.
     ///
     /// The anchor element (`<a></a>`) - also called **hyperlink** - is an important element

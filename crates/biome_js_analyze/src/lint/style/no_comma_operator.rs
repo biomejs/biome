@@ -1,9 +1,9 @@
 use biome_analyze::context::RuleContext;
-use biome_analyze::{declare_rule, Ast, Rule, RuleDiagnostic, RuleSource};
+use biome_analyze::{declare_lint_rule, Ast, Rule, RuleDiagnostic, RuleSource};
 use biome_js_syntax::{JsForStatement, JsSequenceExpression};
 use biome_rowan::AstNode;
 
-declare_rule! {
+declare_lint_rule! {
     /// Disallow comma operator.
     ///
     /// The comma operator includes multiple expressions where only one is expected.

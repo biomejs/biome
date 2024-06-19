@@ -1,9 +1,11 @@
-use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic, RuleSource};
+use biome_analyze::{
+    context::RuleContext, declare_lint_rule, Ast, Rule, RuleDiagnostic, RuleSource,
+};
 use biome_console::markup;
 use biome_js_syntax::{AnyJsMemberExpression, JsCallExpression, TextRange};
 use biome_rowan::AstNode;
 
-declare_rule! {
+declare_lint_rule! {
     /// Disallow direct use of `Object.prototype` builtins.
     ///
     /// ECMAScript 5.1 added `Object.create` which allows the creation of an object with a custom prototype.

@@ -1,4 +1,6 @@
-use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic, RuleSource};
+use biome_analyze::{
+    context::RuleContext, declare_lint_rule, Ast, Rule, RuleDiagnostic, RuleSource,
+};
 use biome_console::markup;
 use biome_js_syntax::{
     AnyJsExpression, AnyJsLiteralExpression, AnyJsMemberExpression, JsUnaryOperator,
@@ -7,7 +9,7 @@ use biome_js_syntax::{
 use biome_rowan::{AstNode, TextRange};
 use rustc_hash::FxHashSet;
 
-declare_rule! {
+declare_lint_rule! {
     /// Require all enum members to be literal values.
     ///
     /// Usually, an enum member is initialized with a literal number or a literal string.

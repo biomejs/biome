@@ -1,9 +1,9 @@
 use crate::JsonRuleAction;
 use biome_analyze::{
-    context::RuleContext, declare_rule, ActionCategory, Ast, FixKind, RefactorKind, Rule,
-    RuleAction,
+    context::RuleContext, declare_refactor, ActionCategory, Ast, RefactorKind, Rule, RuleAction,
 };
 use biome_console::markup;
+use biome_diagnostics::Applicability;
 use biome_json_factory::make::{json_member_list, token};
 use biome_json_syntax::{JsonMember, JsonMemberList, T};
 use biome_rowan::{AstNode, AstNodeExt, AstSeparatedList, BatchMutationExt};
@@ -11,22 +11,12 @@ use std::borrow::Cow;
 use std::cmp::Ordering;
 use std::collections::BTreeSet;
 
-declare_rule! {
-    /// Succinct description of the rule.
-    ///
-    /// Put context and details about the rule.
-    /// As a starting point, you can take the description of the corresponding _ESLint_ rule (if any).
-    ///
-    /// Try to stay consistent with the descriptions of implemented rules.
-    ///
-    /// Add a link to the corresponding stylelint rule (if any):
-    ///
+declare_refactor! {
+    /// Sorts the keys of a JSON object in natural order
     pub UseSortedKeys {
         version: "next",
         name: "useSortedKeys",
         language: "json",
-        recommended: false,
-        fix_kind: FixKind::Safe,
     }
 }
 
@@ -37,7 +27,7 @@ pub struct MemberKey {
 
 impl Ord for MemberKey {
     fn cmp(&self, other: &Self) -> Ordering {
-        // Sort imports using natural ordering
+        // Sort keys using natural ordering
         natord::compare(
             &self.node.name().unwrap().text(),
             &other.node.name().unwrap().text(),
@@ -125,8 +115,8 @@ impl Rule for UseSortedKeys {
         mutation.replace_node(node, list);
 
         Some(RuleAction::new(
-            ActionCategory::Refactor(RefactorKind::Other(Cow::Borrowed("useSortedKeys"))),
-            ctx.metadata().applicability(),
+            rule_action_category!(),
+            Applicability::Always,
             markup! {
                 "They keys of the current object can be sorted."
             },

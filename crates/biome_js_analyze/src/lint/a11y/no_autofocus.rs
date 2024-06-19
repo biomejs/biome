@@ -1,13 +1,13 @@
 use crate::JsRuleAction;
 use biome_analyze::{
-    context::RuleContext, declare_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic,
+    context::RuleContext, declare_lint_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic,
     RuleSource,
 };
 use biome_console::markup;
 use biome_js_syntax::{jsx_ext::AnyJsxElement, JsxAttribute};
 use biome_rowan::{AstNode, BatchMutationExt};
 
-declare_rule! {
+declare_lint_rule! {
     /// Enforce that autoFocus prop is not used on elements.
     ///
     /// Autofocusing elements can cause usability issues for sighted and non-sighted users, alike.

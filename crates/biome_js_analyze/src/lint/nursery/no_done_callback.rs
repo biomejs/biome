@@ -1,5 +1,5 @@
 use biome_analyze::{
-    context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic, RuleSource, RuleSourceKind,
+    context::RuleContext, declare_lint_rule, Ast, Rule, RuleDiagnostic, RuleSource, RuleSourceKind,
 };
 use biome_console::markup;
 use biome_js_syntax::{
@@ -8,7 +8,7 @@ use biome_js_syntax::{
 };
 use biome_rowan::{AstNode, TextRange};
 
-declare_rule! {
+declare_lint_rule! {
     /// Disallow using a callback in asynchronous tests and hooks.
     ///
     /// This rule checks the function parameter of hooks & tests for use of the done argument, suggesting you return a promise instead.

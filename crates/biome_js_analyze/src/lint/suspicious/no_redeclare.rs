@@ -1,6 +1,6 @@
 use crate::services::semantic::SemanticServices;
 use biome_analyze::{context::RuleContext, Rule, RuleDiagnostic};
-use biome_analyze::{declare_rule, RuleSource};
+use biome_analyze::{declare_lint_rule, RuleSource};
 use biome_console::markup;
 use biome_js_semantic::Scope;
 use biome_js_syntax::binding_ext::AnyJsBindingDeclaration;
@@ -8,7 +8,7 @@ use biome_js_syntax::{JsSyntaxKind, TextRange};
 use biome_rowan::AstNode;
 use rustc_hash::FxHashMap;
 
-declare_rule! {
+declare_lint_rule! {
     /// Disallow variable, function, class, and type redeclarations in the same scope.
     ///
     /// ## Examples

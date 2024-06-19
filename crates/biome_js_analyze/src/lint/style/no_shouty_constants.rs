@@ -1,6 +1,6 @@
 use crate::{services::semantic::Semantic, utils::batch::JsBatchMutation, JsRuleAction};
 use biome_analyze::{
-    context::RuleContext, declare_rule, ActionCategory, FixKind, Rule, RuleDiagnostic,
+    context::RuleContext, declare_lint_rule, ActionCategory, FixKind, Rule, RuleDiagnostic,
 };
 use biome_console::markup;
 use biome_js_factory::make::{js_literal_member_name, js_property_object_member};
@@ -13,7 +13,7 @@ use biome_js_syntax::{
 };
 use biome_rowan::{AstNode, BatchMutationExt, SyntaxNodeCast, SyntaxToken};
 
-declare_rule! {
+declare_lint_rule! {
     /// Disallow the use of constants which its value is the upper-case version of its name.
     ///
     /// ## Examples

@@ -1,7 +1,7 @@
 use crate::JsRuleAction;
 use biome_analyze::RuleSource;
 use biome_analyze::{
-    context::RuleContext, declare_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic,
+    context::RuleContext, declare_lint_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic,
 };
 use biome_console::markup;
 use biome_js_factory::make;
@@ -13,7 +13,7 @@ use biome_js_syntax::{
 };
 use biome_rowan::{AstNode, AstNodeList, BatchMutationExt, SyntaxNodeOptionExt, TriviaPieceKind};
 
-declare_rule! {
+declare_lint_rule! {
     /// Enforce using function types instead of object type with call signatures.
     ///
     /// TypeScript allows for two common ways to declare a type for a function:

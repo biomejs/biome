@@ -1,6 +1,6 @@
 use crate::services::semantic::SemanticServices;
 use biome_analyze::context::RuleContext;
-use biome_analyze::{declare_rule, Rule, RuleDiagnostic, RuleSource};
+use biome_analyze::{declare_lint_rule, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
 use biome_deserialize_macros::Deserializable;
 use biome_js_semantic::{Binding, BindingExtensions};
@@ -8,7 +8,7 @@ use biome_js_syntax::{AnyJsIdentifierUsage, TextRange};
 use biome_rowan::AstNode;
 use serde::{Deserialize, Serialize};
 
-declare_rule! {
+declare_lint_rule! {
     /// This rule allows you to specify global variable names that you don’t want to use in your application.
     ///
     /// > Disallowing usage of specific global variables can be useful if you want to allow a set of

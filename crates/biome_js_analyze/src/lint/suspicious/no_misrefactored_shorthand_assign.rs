@@ -1,5 +1,5 @@
 use biome_analyze::{
-    context::RuleContext, declare_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic,
+    context::RuleContext, declare_lint_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic,
     RuleSource,
 };
 use biome_console::markup;
@@ -13,7 +13,7 @@ use crate::{
     JsRuleAction,
 };
 
-declare_rule! {
+declare_lint_rule! {
     /// Disallow shorthand assign when variable appears on both sides.
     ///
     /// This rule helps to avoid potential bugs related to incorrect assignments or unintended

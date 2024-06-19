@@ -4,7 +4,7 @@ use crate::{
     JsRuleAction,
 };
 use biome_analyze::{
-    context::RuleContext, declare_rule, options::JsxRuntime, ActionCategory, FixKind, Rule,
+    context::RuleContext, declare_lint_rule, options::JsxRuntime, ActionCategory, FixKind, Rule,
     RuleDiagnostic, RuleSource,
 };
 use biome_console::markup;
@@ -16,7 +16,7 @@ use biome_js_syntax::{
 };
 use biome_rowan::{AstNode, AstSeparatedList, BatchMutation, BatchMutationExt};
 
-declare_rule! {
+declare_lint_rule! {
     /// Disallow unused imports.
     ///
     /// Unused imports might be the result of an incomplete refactoring.

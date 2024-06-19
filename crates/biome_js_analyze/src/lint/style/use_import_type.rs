@@ -4,7 +4,7 @@ use crate::{
     JsRuleAction,
 };
 use biome_analyze::{
-    context::RuleContext, declare_rule, options::JsxRuntime, ActionCategory, FixKind, Rule,
+    context::RuleContext, declare_lint_rule, options::JsxRuntime, ActionCategory, FixKind, Rule,
     RuleDiagnostic, RuleSource, RuleSourceKind,
 };
 use biome_console::markup;
@@ -23,7 +23,7 @@ use biome_rowan::{
 };
 use rustc_hash::FxHashSet;
 
-declare_rule! {
+declare_lint_rule! {
     /// Promotes the use of `import type` for types.
     ///
     /// _TypeScript_ allows specifying a `type` qualifier on an `import` to indicate that the `import` doesn't exist at runtime.

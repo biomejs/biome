@@ -1,11 +1,13 @@
-use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic, RuleSource};
+use biome_analyze::{
+    context::RuleContext, declare_lint_rule, Ast, Rule, RuleDiagnostic, RuleSource,
+};
 use biome_console::markup;
 use biome_js_syntax::{
     AnyJsCallArgument, AnyJsExpression, AnyJsFunction, JsNewExpression, JsNewExpressionFields,
 };
 use biome_rowan::{AstNode, AstSeparatedList};
 
-declare_rule! {
+declare_lint_rule! {
     /// Disallows using an async function as a Promise executor.
     ///
     /// The executor function can also be an async function. However, this is usually a mistake, for a few reasons:

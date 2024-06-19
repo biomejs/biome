@@ -1,5 +1,5 @@
 use biome_analyze::RuleSource;
-use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic};
+use biome_analyze::{context::RuleContext, declare_lint_rule, Ast, Rule, RuleDiagnostic};
 use biome_console::markup;
 use biome_js_syntax::{
     inner_string_text, AnyJsArrayAssignmentPatternElement, AnyJsArrayElement, AnyJsAssignment,
@@ -16,7 +16,7 @@ use biome_rowan::{
 use std::collections::VecDeque;
 use std::iter::FusedIterator;
 
-declare_rule! {
+declare_lint_rule! {
     /// Disallow assignments where both sides are exactly the same.
     ///
     /// Self assignments have no effect, so probably those are an error due to incomplete refactoring.

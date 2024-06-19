@@ -1,9 +1,9 @@
-use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic};
+use biome_analyze::{context::RuleContext, declare_lint_rule, Ast, Rule, RuleDiagnostic};
 use biome_console::markup;
 use biome_js_syntax::{jsx_ext::AnyJsxElement, JsxChildList, JsxElement};
 use biome_rowan::{AstNode, AstNodeList, TextRange};
 
-declare_rule! {
+declare_lint_rule! {
     /// It detects possible "wrong" semicolons inside JSX elements.
     ///
     /// Semicolons that appear after a self-closing element or a closing element are usually the result of a typo of a refactor gone wrong.

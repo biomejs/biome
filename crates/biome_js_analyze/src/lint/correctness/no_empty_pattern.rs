@@ -1,9 +1,11 @@
-use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic, RuleSource};
+use biome_analyze::{
+    context::RuleContext, declare_lint_rule, Ast, Rule, RuleDiagnostic, RuleSource,
+};
 use biome_console::markup;
 use biome_js_syntax::{JsArrayBindingPattern, JsObjectBindingPattern};
 use biome_rowan::{declare_node_union, AstNode, AstSeparatedList};
 
-declare_rule! {
+declare_lint_rule! {
     /// Disallows empty destructuring patterns.
     /// ## Examples
     ///

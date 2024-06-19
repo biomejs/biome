@@ -1,11 +1,11 @@
 use crate::react::{ReactApiCall, ReactCreateElementCall};
 use crate::services::semantic::Semantic;
 use biome_analyze::context::RuleContext;
-use biome_analyze::{declare_rule, Rule, RuleDiagnostic, RuleSource};
+use biome_analyze::{declare_lint_rule, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
 use biome_js_syntax::{JsCallExpression, JsxAttribute};
 use biome_rowan::{declare_node_union, AstNode, TextRange};
-declare_rule! {
+declare_lint_rule! {
     /// Prevent passing of **children** as props.
     ///
     /// When using JSX, the children should be nested between the opening and closing tags.

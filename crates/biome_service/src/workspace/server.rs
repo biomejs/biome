@@ -1,5 +1,5 @@
 use super::{
-    ChangeFileParams, CloseFileParams, FeatureName, FixFileResult, FormatFileParams,
+    ChangeFileParams, CloseFileParams, FeatureKind, FeatureName, FixFileResult, FormatFileParams,
     FormatOnTypeParams, FormatRangeParams, GetControlFlowGraphParams, GetFormatterIRParams,
     GetSyntaxTreeParams, GetSyntaxTreeResult, OpenFileParams, OpenProjectParams,
     ParsePatternParams, ParsePatternResult, PatternId, ProjectKey, PullActionsParams,
@@ -282,11 +282,12 @@ impl WorkspaceServer {
 
     /// Check whether a file is ignored in the top-level config `files.ignore`/`files.include`
     /// or in the feature `ignore`/`include`
-    fn is_ignored(&self, path: &Path, features: Vec<FeatureName>) -> bool {
+    fn is_ignored(&self, path: &Path, features: FeatureName) -> bool {
         let file_name = path.file_name().and_then(|s| s.to_str());
         let ignored_by_features = {
             let mut ignored = false;
-            for feature in features {
+
+            for feature in features.iter() {
                 // a path is ignored if it's ignored by all features
                 ignored &= self.is_ignored_by_feature_config(path, feature)
             }
@@ -333,29 +334,31 @@ impl WorkspaceServer {
     }
 
     /// Check whether a file is ignored in the feature `ignore`/`include`
-    fn is_ignored_by_feature_config(&self, path: &Path, feature: FeatureName) -> bool {
+    fn is_ignored_by_feature_config(&self, path: &Path, feature: FeatureKind) -> bool {
         let settings = self.workspace();
         let settings = settings.settings();
         let Some(settings) = settings else {
             return false;
         };
         let (feature_included_files, feature_ignored_files) = match feature {
-            FeatureName::Format => {
+            FeatureKind::Format => {
                 let formatter = &settings.formatter;
                 (&formatter.included_files, &formatter.ignored_files)
             }
-            FeatureName::Lint => {
+            FeatureKind::Lint => {
                 let linter = &settings.linter;
                 (&linter.included_files, &linter.ignored_files)
             }
-            FeatureName::OrganizeImports => {
+            FeatureKind::OrganizeImports => {
                 let organize_imports = &settings.organize_imports;
                 (
                     &organize_imports.included_files,
                     &organize_imports.ignored_files,
                 )
             }
-            FeatureName::Search => return false, // There is no search-specific config.
+            // TODO: enable once the configuration is available
+            FeatureKind::Assists => return false,
+            FeatureKind::Search => return false, // There is no search-specific config.
         };
         let is_feature_included = feature_included_files.is_empty()
             || is_dir(path)
@@ -395,7 +398,7 @@ impl Workspace for WorkspaceServer {
         } else if self.is_ignored_by_top_level_config(path) {
             file_features.set_ignored_for_all_features();
         } else {
-            for feature in params.features {
+            for feature in params.features.iter() {
                 if self.is_ignored_by_feature_config(path, feature) {
                     file_features.ignored(feature);
                 }

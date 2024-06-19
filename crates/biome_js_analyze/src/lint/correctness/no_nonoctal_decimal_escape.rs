@@ -1,6 +1,6 @@
 use crate::JsRuleAction;
 use biome_analyze::{
-    context::RuleContext, declare_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic,
+    context::RuleContext, declare_lint_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic,
     RuleSource,
 };
 use biome_console::markup;
@@ -10,7 +10,7 @@ use biome_rowan::{AstNode, BatchMutationExt, TextRange};
 use rustc_hash::FxHashSet;
 use std::ops::Range;
 
-declare_rule! {
+declare_lint_rule! {
     /// Disallow `\8` and `\9` escape sequences in string literals.
     ///
     /// Since ECMAScript 2021, the escape sequences \8 and \9 have been defined as non-octal decimal escape sequences.

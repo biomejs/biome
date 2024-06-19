@@ -1,6 +1,6 @@
 use crate::services::semantic::SemanticServices;
 use biome_analyze::{
-    context::RuleContext, declare_rule, Rule, RuleDiagnostic, RuleSource, RuleSourceKind,
+    context::RuleContext, declare_lint_rule, Rule, RuleDiagnostic, RuleSource, RuleSourceKind,
 };
 use biome_console::markup;
 use biome_deserialize_macros::Deserializable;
@@ -15,7 +15,7 @@ use biome_deserialize::{DeserializableValue, DeserializationDiagnostic};
 use schemars::JsonSchema;
 use smallvec::SmallVec;
 
-declare_rule! {
+declare_lint_rule! {
     /// Enforce naming conventions for JavaScript and TypeScript filenames.
     ///
     /// Enforcing [naming conventions](https://en.wikipedia.org/wiki/Naming_convention_(programming)) helps to keep the codebase consistent.

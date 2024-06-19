@@ -1,7 +1,8 @@
 use crate::JsRuleAction;
 use biome_analyze::context::RuleContext;
 use biome_analyze::{
-    declare_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic, RuleSource, RuleSourceKind,
+    declare_lint_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic, RuleSource,
+    RuleSourceKind,
 };
 use biome_console::markup;
 use biome_js_factory::{
@@ -14,7 +15,7 @@ use biome_js_syntax::{
 };
 use biome_rowan::{AstNode, AstNodeList, BatchMutationExt, SyntaxResult};
 
-declare_rule! {
+declare_lint_rule! {
     /// Disallow the declaration of empty interfaces.
     ///
     /// An empty interface in TypeScript does very little: any non-nullable value is assignable to `{}`.

@@ -1,4 +1,6 @@
-use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic, RuleSource};
+use biome_analyze::{
+    context::RuleContext, declare_lint_rule, Ast, Rule, RuleDiagnostic, RuleSource,
+};
 use biome_console::markup;
 use biome_js_syntax::{
     AnyJsAssignmentPattern, AnyJsBindingPattern, AnyJsOptionalChainExpression,
@@ -11,7 +13,7 @@ use biome_js_syntax::{
 };
 use biome_rowan::{declare_node_union, AstNode, TextRange};
 
-declare_rule! {
+declare_lint_rule! {
     /// Disallow the use of optional chaining in contexts where the undefined value is not allowed.
     ///
     /// The optional chaining (?.) expression can short-circuit with a return value of undefined.

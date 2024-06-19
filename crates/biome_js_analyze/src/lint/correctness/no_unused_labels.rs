@@ -1,6 +1,6 @@
 use biome_analyze::context::RuleContext;
 use biome_analyze::{
-    declare_rule, ActionCategory, AddVisitor, FixKind, Phases, QueryMatch, Queryable, Rule,
+    declare_lint_rule, ActionCategory, AddVisitor, FixKind, Phases, QueryMatch, Queryable, Rule,
     RuleDiagnostic, RuleSource, ServiceBag, Visitor, VisitorContext,
 };
 use biome_console::markup;
@@ -15,7 +15,7 @@ use rustc_hash::FxHashSet;
 use crate::services::control_flow::AnyJsControlFlowRoot;
 use crate::JsRuleAction;
 
-declare_rule! {
+declare_lint_rule! {
     /// Disallow unused labels.
     ///
     /// Labels that are declared and never used are most likely an error due to incomplete refactoring.

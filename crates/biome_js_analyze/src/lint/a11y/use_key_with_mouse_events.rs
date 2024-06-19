@@ -1,11 +1,11 @@
 use crate::services::semantic::Semantic;
 use biome_analyze::context::RuleContext;
-use biome_analyze::{declare_rule, Rule, RuleDiagnostic, RuleSource};
+use biome_analyze::{declare_lint_rule, Rule, RuleDiagnostic, RuleSource};
 use biome_console::{markup, MarkupBuf};
 use biome_js_syntax::jsx_ext::AnyJsxElement;
 use biome_rowan::AstNode;
 
-declare_rule! {
+declare_lint_rule! {
     /// Enforce `onMouseOver` / `onMouseOut` are accompanied by `onFocus` / `onBlur`.
     ///
     /// Coding for the keyboard is important for users with physical disabilities who cannot use a mouse, AT compatibility, and screenreader users.

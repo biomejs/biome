@@ -1,5 +1,5 @@
 use biome_analyze::{
-    context::RuleContext, declare_rule, ActionCategory, FixKind, Rule, RuleDiagnostic, RuleSource,
+    context::RuleContext, declare_lint_rule, ActionCategory, FixKind, Rule, RuleDiagnostic, RuleSource,
 };
 use biome_console::markup;
 use biome_js_syntax::{inner_string_text, AnyJsImportLike, JsSyntaxKind, JsSyntaxToken};
@@ -8,7 +8,7 @@ use biome_rowan::BatchMutationExt;
 use crate::services::manifest::Manifest;
 use crate::{globals::is_node_builtin_module, JsRuleAction};
 
-declare_rule! {
+declare_lint_rule! {
     /// Enforces using the `node:` protocol for Node.js builtin modules.
     ///
     /// The rule marks traditional imports like `import fs from "fs";` as invalid,

@@ -202,7 +202,7 @@ fn generate_group(category: &'static str, group: &str, base_path: &Path) -> Resu
     let sp = Punct::new(' ', Spacing::Joint);
     let sp4 = quote! { #sp #sp #sp #sp };
     let (import_macro, use_macro) = match category {
-        "lint" | "syntax" => (
+        "lint" => (
             quote!(
                 use biome_analyze::declare_lint_group
             ),
@@ -213,6 +213,12 @@ fn generate_group(category: &'static str, group: &str, base_path: &Path) -> Resu
                 use biome_analyze::declare_assists_group
             ),
             quote!(declare_assists_group),
+        ),
+        "syntax" => (
+            quote!(
+                use biome_analyze::declare_syntax_group
+            ),
+            quote!(declare_syntax_group),
         ),
 
         _ => panic!("Category not supported: {category}"),

@@ -1,5 +1,5 @@
 use biome_analyze::context::RuleContext;
-use biome_analyze::{declare_rule, ActionCategory, FixKind, Rule, RuleDiagnostic, RuleSource};
+use biome_analyze::{declare_lint_rule, ActionCategory, FixKind, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
 use biome_js_factory::make;
 use biome_js_semantic::SemanticModel;
@@ -11,7 +11,7 @@ use biome_rowan::{declare_node_union, AstNode, BatchMutationExt};
 
 use crate::{services::semantic::Semantic, JsRuleAction};
 
-declare_rule! {
+declare_lint_rule! {
     /// Require calls to `isNaN()` when checking for `NaN`.
     ///
     /// In JavaScript, `NaN` is a special value of the `Number` type.

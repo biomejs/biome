@@ -1,11 +1,13 @@
 use std::ops::Not;
 
-use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic, RuleSource};
+use biome_analyze::{
+    context::RuleContext, declare_lint_rule, Ast, Rule, RuleDiagnostic, RuleSource,
+};
 use biome_console::markup;
 use biome_js_syntax::JsSwitchStatement;
 use biome_rowan::AstNode;
 
-declare_rule! {
+declare_lint_rule! {
     /// Require the default clause in switch statements.
     ///
     /// Some code conventions require that all switch statements have a default clause. The thinking is that it’s better

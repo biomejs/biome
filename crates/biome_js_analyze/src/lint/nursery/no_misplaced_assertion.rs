@@ -1,13 +1,13 @@
 use crate::services::semantic::Semantic;
 use biome_analyze::{
-    context::RuleContext, declare_rule, Rule, RuleDiagnostic, RuleSource, RuleSourceKind,
+    context::RuleContext, declare_lint_rule, Rule, RuleDiagnostic, RuleSource, RuleSourceKind,
 };
 use biome_console::markup;
 use biome_deserialize::TextRange;
 use biome_js_syntax::{AnyJsExpression, JsCallExpression, JsIdentifierBinding, JsImport};
 use biome_rowan::AstNode;
 
-declare_rule! {
+declare_lint_rule! {
     /// Checks that the assertion function, for example `expect`, is placed inside an `it()` function call.
     ///
     /// Placing (and using) the `expect` assertion function can result in unexpected behaviors when executing your testing suite.

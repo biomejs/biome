@@ -1,12 +1,12 @@
 use biome_analyze::context::RuleContext;
-use biome_analyze::{declare_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic};
+use biome_analyze::{declare_lint_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic};
 use biome_console::markup;
 use biome_js_syntax::TsEnumDeclaration;
 use biome_rowan::{chain_trivia_pieces, trim_leading_trivia_pieces, AstNode, BatchMutationExt};
 
 use crate::JsRuleAction;
 
-declare_rule! {
+declare_lint_rule! {
     /// Disallow TypeScript `const enum`
     ///
     /// Const enums are enums that should be inlined at use sites.

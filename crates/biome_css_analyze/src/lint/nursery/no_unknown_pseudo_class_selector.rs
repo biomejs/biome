@@ -2,7 +2,9 @@ use crate::{
     keywords::{WEBKIT_SCROLLBAR_PSEUDO_CLASSES, WEBKIT_SCROLLBAR_PSEUDO_ELEMENTS},
     utils::{is_custom_selector, is_known_pseudo_class, is_page_pseudo_class, vendor_prefixed},
 };
-use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic, RuleSource};
+use biome_analyze::{
+    context::RuleContext, declare_lint_rule, Ast, Rule, RuleDiagnostic, RuleSource,
+};
 use biome_console::markup;
 use biome_css_syntax::{
     CssBogusPseudoClass, CssPageSelectorPseudo, CssPseudoClassFunctionCompoundSelector,
@@ -13,7 +15,7 @@ use biome_css_syntax::{
 };
 use biome_rowan::{declare_node_union, AstNode, TextRange};
 
-declare_rule! {
+declare_lint_rule! {
     /// Disallow unknown pseudo-class selectors.
     ///
     /// For details on known pseudo-class, see the [MDN web docs](https://developer.mozilla.org/en-US/docs/Web/CSS/Pseudo-classes)

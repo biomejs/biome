@@ -1,6 +1,7 @@
 use crate::{services::semantic::Semantic, JsRuleAction};
 use biome_analyze::{
-    context::RuleContext, declare_rule, ActionCategory, FixKind, Rule, RuleDiagnostic, RuleSource,
+    context::RuleContext, declare_lint_rule, ActionCategory, FixKind, Rule, RuleDiagnostic,
+    RuleSource,
 };
 use biome_console::markup;
 use biome_js_factory::make;
@@ -13,7 +14,7 @@ use biome_rowan::{
     declare_node_union, AstNode, AstNodeList, AstSeparatedList, BatchMutationExt, TextRange,
     TriviaPieceKind,
 };
-declare_rule! {
+declare_lint_rule! {
     /// Disallow characters made with multiple code points in character class syntax.
     ///
     /// Unicode includes the characters which are made with multiple code points. e.g. Á, 🇯🇵, 👨‍👩‍👦.

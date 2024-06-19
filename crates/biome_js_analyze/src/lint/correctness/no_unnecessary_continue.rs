@@ -1,5 +1,5 @@
 use biome_analyze::{
-    context::RuleContext, declare_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic,
+    context::RuleContext, declare_lint_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic,
 };
 use biome_console::markup;
 use biome_js_syntax::{JsContinueStatement, JsLabeledStatement, JsSyntaxKind, JsSyntaxNode};
@@ -7,7 +7,7 @@ use biome_rowan::{AstNode, BatchMutationExt};
 
 use crate::{utils::batch::JsBatchMutation, JsRuleAction};
 
-declare_rule! {
+declare_lint_rule! {
     /// Avoid using unnecessary `continue`.
     ///
     /// ## Examples

@@ -1,4 +1,6 @@
-use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic, RuleSource};
+use biome_analyze::{
+    context::RuleContext, declare_lint_rule, Ast, Rule, RuleDiagnostic, RuleSource,
+};
 use biome_console::markup;
 use biome_css_syntax::{
     AnyCssDimension, CssFunction, CssGenericProperty, CssQueryFeaturePlain, CssSyntaxKind,
@@ -8,7 +10,7 @@ use biome_rowan::{SyntaxNodeCast, TextRange};
 const RESOLUTION_MEDIA_FEATURE_NAMES: [&str; 3] =
     ["resolution", "min-resolution", "max-resolution"];
 
-declare_rule! {
+declare_lint_rule! {
     /// Disallow unknown CSS units.
     ///
     /// For details on known CSS units, see the [MDN web docs](https://developer.mozilla.org/en-US/docs/Learn/CSS/Building_blocks/Values_and_units#lengths).

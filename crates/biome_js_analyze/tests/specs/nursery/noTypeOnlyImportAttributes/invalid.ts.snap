@@ -17,7 +17,7 @@ export { E, type F } from "" with { type: "json" };
 
 # Diagnostics
 ```
-invalid.ts:1:23 lint/nursery/noTypeOnlyImportAttributes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:1:23 syntax/nursery/noTypeOnlyImportAttributes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Import attributes cannot be used with a type-only import.
   
@@ -37,7 +37,7 @@ invalid.ts:1:23 lint/nursery/noTypeOnlyImportAttributes ━━━━━━━━
 ```
 
 ```
-invalid.ts:2:28 lint/nursery/noTypeOnlyImportAttributes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:2:28 syntax/nursery/noTypeOnlyImportAttributes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Import attributes cannot be used with a type-only import.
   
@@ -59,7 +59,7 @@ invalid.ts:2:28 lint/nursery/noTypeOnlyImportAttributes ━━━━━━━━
 ```
 
 ```
-invalid.ts:3:27 lint/nursery/noTypeOnlyImportAttributes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:3:27 syntax/nursery/noTypeOnlyImportAttributes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Import attributes cannot be used with a type-only import.
   
@@ -83,7 +83,7 @@ invalid.ts:3:27 lint/nursery/noTypeOnlyImportAttributes ━━━━━━━━
 ```
 
 ```
-invalid.ts:4:27 lint/nursery/noTypeOnlyImportAttributes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:4:27 syntax/nursery/noTypeOnlyImportAttributes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Import attributes cannot be used with a type-only import.
   
@@ -107,7 +107,7 @@ invalid.ts:4:27 lint/nursery/noTypeOnlyImportAttributes ━━━━━━━━
 ```
 
 ```
-invalid.ts:5:30 lint/nursery/noTypeOnlyImportAttributes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:5:30 syntax/nursery/noTypeOnlyImportAttributes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Import attributes cannot be used with a type-only import.
   
@@ -131,7 +131,7 @@ invalid.ts:5:30 lint/nursery/noTypeOnlyImportAttributes ━━━━━━━━
 ```
 
 ```
-invalid.ts:7:27 lint/nursery/noTypeOnlyImportAttributes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:7:27 syntax/nursery/noTypeOnlyImportAttributes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Import attributes cannot be used with a type-only export.
   
@@ -155,7 +155,7 @@ invalid.ts:7:27 lint/nursery/noTypeOnlyImportAttributes ━━━━━━━━
 ```
 
 ```
-invalid.ts:8:28 lint/nursery/noTypeOnlyImportAttributes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:8:28 syntax/nursery/noTypeOnlyImportAttributes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Import attributes cannot be used with a type-only export.
   
@@ -175,7 +175,7 @@ invalid.ts:8:28 lint/nursery/noTypeOnlyImportAttributes ━━━━━━━━
 ```
 
 ```
-invalid.ts:9:30 lint/nursery/noTypeOnlyImportAttributes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:9:30 syntax/nursery/noTypeOnlyImportAttributes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Import attributes cannot be used with a type-only export.
   
@@ -193,5 +193,3 @@ invalid.ts:9:30 lint/nursery/noTypeOnlyImportAttributes ━━━━━━━━
   
 
 ```
-
-

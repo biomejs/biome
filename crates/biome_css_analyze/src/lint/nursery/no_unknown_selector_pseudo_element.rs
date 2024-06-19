@@ -1,11 +1,13 @@
-use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic, RuleSource};
+use biome_analyze::{
+    context::RuleContext, declare_lint_rule, Ast, Rule, RuleDiagnostic, RuleSource,
+};
 use biome_console::markup;
 use biome_css_syntax::{AnyCssPseudoElement, CssPseudoElementSelector};
 use biome_rowan::AstNode;
 
 use crate::utils::{is_pseudo_elements, vender_prefix};
 
-declare_rule! {
+declare_lint_rule! {
     /// Disallow unknown pseudo-element selectors.
     ///
     /// For details on known CSS pseudo-elements, see the [MDN web docs](https://developer.mozilla.org/en-US/docs/Web/CSS/Pseudo-elements#list_of_pseudo-elements).
