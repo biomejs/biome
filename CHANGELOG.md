@@ -144,6 +144,10 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 ### Parser
 
+#### Bug fixes
+
+- Fix CSS modules settings mapping. Contributed by @denbezrukov
+
 ## v1.8.1 (2024-06-10)
 
 ### Analyzer
