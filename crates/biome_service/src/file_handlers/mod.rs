@@ -97,7 +97,6 @@ impl DocumentFileSource {
             return Ok(file_source.into());
         }
         if cfg!(feature = "graphql") {
-            
             if let Ok(file_source) = GraphqlFileSource::try_from_well_known(file_name) {
                 return Ok(file_source.into());
             }
@@ -122,10 +121,9 @@ impl DocumentFileSource {
             return Ok(file_source.into());
         }
         if cfg!(feature = "graphql") {
-            
             if let Ok(file_source) = GraphqlFileSource::try_from_extension(extension) {
-            return Ok(file_source.into());
-        }
+                return Ok(file_source.into());
+            }
         }
         Err(FileSourceError::UnknownExtension(
             Default::default(),
@@ -300,11 +298,7 @@ impl DocumentFileSource {
             },
             DocumentFileSource::Json(_) | DocumentFileSource::Css(_) => true,
             DocumentFileSource::Graphql(_) => {
-                if cfg!(feature = "graphql") {
-                    true
-                } else {
-                    false
-                }
+                cfg!(feature = "graphql")
             }
             DocumentFileSource::Unknown => false,
         }
