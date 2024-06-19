@@ -9,16 +9,16 @@ use std::path::Path;
 pub struct GraphqlFileSource {}
 
 impl GraphqlFileSource {
-    /// Try to return the CSS file source corresponding to this file name from well-known files
+    /// Try to return the GraphQL file source corresponding to this file name from well-known files
     pub fn try_from_well_known(file_name: &str) -> Result<Self, FileSourceError> {
         // TODO: to be implemented
         Err(FileSourceError::UnknownFileName(file_name.into()))
     }
 
-    /// Try to return the CSS file source corresponding to this file extension
+    /// Try to return the GraphQL file source corresponding to this file extension
     pub fn try_from_extension(extension: &str) -> Result<Self, FileSourceError> {
         match extension {
-            "graphql" => Ok(Self::default()),
+            "graphql" | "gql" => Ok(Self::default()),
             _ => Err(FileSourceError::UnknownExtension(
                 Default::default(),
                 extension.into(),
@@ -26,7 +26,7 @@ impl GraphqlFileSource {
         }
     }
 
-    /// Try to return the CSS file source corresponding to this language ID
+    /// Try to return the GraphQL file source corresponding to this language ID
     ///
     /// See the [LSP spec] and [VS Code spec] for a list of language identifiers
     ///
