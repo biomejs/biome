@@ -1,4 +1,4 @@
-use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic, RuleSource};
+use biome_analyze::{context::RuleContext, declare_lint_rule, Ast, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
 use biome_css_syntax::{CssFunction, CssParameter};
 use biome_rowan::AstNode;
@@ -8,7 +8,7 @@ use regex::Regex;
 
 use crate::utils::vendor_prefixed;
 
-declare_rule! {
+declare_lint_rule! {
     /// Disallow non-standard direction values for linear gradient functions.
     ///
     /// A valid and standard direction value is one of the following:
