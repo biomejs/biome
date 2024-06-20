@@ -71,9 +71,7 @@ impl Rule for NoDynamicNamespaceImportAccess {
     type Options = ();
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
-        find_dynamic_namespace_import_accesses(ctx)
-            .or_else(|| Some(vec![]))
-            .unwrap()
+        find_dynamic_namespace_import_accesses(ctx).map_or(vec![], |range| range)
     }
 
     fn diagnostic(_: &RuleContext<Self>, range: &Self::State) -> Option<RuleDiagnostic> {
