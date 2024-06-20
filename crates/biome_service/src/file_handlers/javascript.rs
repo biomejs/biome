@@ -232,12 +232,13 @@ impl ServiceLanguage for JsLanguage {
             Some("vue") => {
                 globals.extend(
                     [
-                        "defineEmits",
-                        "defineProps",
-                        "defineExpose",
-                        "defineModel",
                         "defineOptions",
+                        "defineModel",
+                        "withDefaults",
+                        "defineProps",
+                        "defineEmits",
                         "defineSlots",
+                        "defineExpose",
                     ]
                     .map(ToOwned::to_owned),
                 );

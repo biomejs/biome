@@ -142,6 +142,8 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
   Contributed by @Sec-ant
 
+- Fix missing `withDefaults` macro in vue files for globals variables. Contributed by @Shyam-Chen
+
 ### Parser
 
 #### Bug fixes
