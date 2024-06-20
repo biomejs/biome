@@ -39,8 +39,12 @@ fn main() -> ExitCode {
 
     let color_mode = to_color_mode(command.get_color());
     // we want force colours in CI, to give e better UX experience
-    if matches!(command, BiomeCommand::Ci { .. }) {
-        console.set_color(ColorMode::Enabled);
+    if let BiomeCommand::Ci { cli_options, .. } = &command {
+        if cli_options.colors.is_none() {
+            console.set_color(ColorMode::Enabled);
+        } else {
+            console.set_color(color_mode);
+        }
     } else {
         console.set_color(color_mode);
     }
