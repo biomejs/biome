@@ -343,8 +343,8 @@ pub(super) fn calculate_print_width(mut value: OneIndexed) -> NonZeroUsize {
 /// characters are printed by [print_invisibles]
 const TAB_WIDTH: usize = 2;
 
-/// Esoteric spaces don't return a width using `char.width()`, so we need to
-/// assume a fixed length for them
+/// Some esoteric space characters don't return a width using `char.width()`, so
+/// we need to assume a fixed length for them
 const ESOTERIC_SPACE_WIDTH: usize = 1;
 
 /// Compute the unicode display width of a string, with the width of tab
@@ -353,7 +353,13 @@ pub(super) fn text_width(text: &str) -> usize {
     text.chars()
         .map(|char| match char {
             '\t' => TAB_WIDTH,
+            '\u{c}' => ESOTERIC_SPACE_WIDTH,
             '\u{b}' => ESOTERIC_SPACE_WIDTH,
+            '\u{85}' => ESOTERIC_SPACE_WIDTH,
+            '\u{feff}' => ESOTERIC_SPACE_WIDTH,
+            '\u{180e}' => ESOTERIC_SPACE_WIDTH,
+            '\u{200b}' => ESOTERIC_SPACE_WIDTH,
+            '\u{3000}' => ESOTERIC_SPACE_WIDTH,
             _ => char.width().unwrap_or(0),
         })
         .sum()
@@ -467,14 +473,31 @@ pub(super) fn print_invisibles(
 
 fn show_invisible_char(char: char) -> Option<&'static str> {
     match char {
-        ' ' => Some("\u{b7}"),      // Middle Dot
-        '\r' => Some("\u{240d}"),   // Carriage Return Symbol
-        '\n' => Some("\u{23ce}"),   // Return Symbol
-        '\t' => Some("\u{2192} "),  // Rightwards Arrow
-        '\0' => Some("\u{2400}"),   // Null Symbol
-        '\x0b' => Some("\u{240b}"), // Vertical Tabulation Symbol
-        '\x08' => Some("\u{232b}"), // Backspace Symbol
-        '\x0c' => Some("\u{21a1}"), // Downards Two Headed Arrow
+        ' ' => Some("\u{b7}"),          // Middle Dot
+        '\r' => Some("\u{240d}"),       // Carriage Return Symbol
+        '\n' => Some("\u{23ce}"),       // Return Symbol
+        '\t' => Some("\u{2192} "),      // Rightwards Arrow
+        '\0' => Some("\u{2400}"),       // Null Symbol
+        '\x0b' => Some("\u{240b}"),     // Vertical Tabulation Symbol
+        '\x08' => Some("\u{232b}"),     // Backspace Symbol
+        '\x0c' => Some("\u{21a1}"),     // Downwards Two Headed Arrow
+        '\u{85}' => Some("\u{2420}"),   // Space Symbol
+        '\u{a0}' => Some("\u{2420}"),   // Space Symbol
+        '\u{1680}' => Some("\u{2420}"), // Space Symbol
+        '\u{2000}' => Some("\u{2420}"), // Space Symbol
+        '\u{2001}' => Some("\u{2420}"), // Space Symbol
+        '\u{2002}' => Some("\u{2420}"), // Space Symbol
+        '\u{2003}' => Some("\u{2420}"), // Space Symbol
+        '\u{2004}' => Some("\u{2420}"), // Space Symbol
+        '\u{2005}' => Some("\u{2420}"), // Space Symbol
+        '\u{2006}' => Some("\u{2420}"), // Space Symbol
+        '\u{2007}' => Some("\u{2420}"), // Space Symbol
+        '\u{2008}' => Some("\u{2420}"), // Space Symbol
+        '\u{2009}' => Some("\u{2420}"), // Space Symbol
+        '\u{200a}' => Some("\u{2420}"), // Space Symbol
+        '\u{202f}' => Some("\u{2420}"), // Space Symbol
+        '\u{205f}' => Some("\u{2420}"), // Space Symbol
+        '\u{3000}' => Some("\u{2420}"), // Space Symbol
         _ => None,
     }
 }
