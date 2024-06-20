@@ -2158,7 +2158,8 @@ export type DocumentFileSource =
 	| "Unknown"
 	| { Js: JsFileSource }
 	| { Json: JsonFileSource }
-	| { Css: CssFileSource };
+	| { Css: CssFileSource }
+	| { Graphql: GraphqlFileSource };
 export interface JsFileSource {
 	/**
 	 * Used to mark if the source is being used for an Astro, Svelte or Vue file
@@ -2176,6 +2177,7 @@ export interface JsonFileSource {
 export interface CssFileSource {
 	variant: CssVariant;
 }
+export interface GraphqlFileSource {}
 export type EmbeddingKind = "Astro" | "Vue" | "Svelte" | "None";
 export type Language =
 	| "JavaScript"

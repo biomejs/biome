@@ -378,7 +378,7 @@ fn assert_lint(
             }
         }
         // Unknown code blocks should be ignored by tests
-        DocumentFileSource::Unknown => {}
+        DocumentFileSource::Unknown | DocumentFileSource::Graphql(_) => {}
     }
 
     if test.expect_diagnostic {
