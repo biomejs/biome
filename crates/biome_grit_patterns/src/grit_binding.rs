@@ -12,6 +12,9 @@ use std::{borrow::Cow, collections::HashMap, path::Path};
 
 #[derive(Clone, Debug, PartialEq)]
 pub enum GritBinding<'a> {
+    /// Bindings to the file with the given path.
+    File(&'a Path),
+
     /// Binds to a specific node.
     Node(GritTargetNode<'a>),
 
@@ -34,8 +37,8 @@ impl<'a> Binding<'a, GritQueryContext> for GritBinding<'a> {
         Self::Node(node)
     }
 
-    fn from_path(_path: &'a Path) -> Self {
-        todo!()
+    fn from_path(path: &'a Path) -> Self {
+        Self::File(path)
     }
 
     fn from_range(range: ByteRange, source: &'a str) -> Self {
@@ -54,7 +57,7 @@ impl<'a> Binding<'a, GritQueryContext> for GritBinding<'a> {
     fn singleton(&self) -> Option<GritTargetNode<'a>> {
         match self {
             Self::Node(node) => Some(node.clone()),
-            Self::Range(..) | Self::Empty(..) | Self::Constant(..) => None,
+            Self::File(..) | Self::Range(..) | Self::Empty(..) | Self::Constant(..) => None,
         }
     }
 
@@ -64,37 +67,37 @@ impl<'a> Binding<'a, GritQueryContext> for GritBinding<'a> {
 
     fn position(&self, _language: &GritTargetLanguage) -> Option<Range> {
         match self {
-            GritBinding::Node(node) => {
+            Self::Node(node) => {
                 let source = SourceFile::new(SourceCode {
                     text: node.text(),
                     line_starts: None,
                 });
                 source.to_grit_range(node.text_trimmed_range())
             }
-            GritBinding::Range(range, source) => {
+            Self::Range(range, source) => {
                 let source = SourceFile::new(SourceCode {
                     text: source,
                     line_starts: None,
                 });
                 source.to_grit_range(*range)
             }
-            GritBinding::Empty(..) | GritBinding::Constant(_) => None,
+            Self::File(..) | Self::Empty(..) | Self::Constant(_) => None,
         }
     }
 
     fn range(&self, _language: &GritTargetLanguage) -> Option<ByteRange> {
         match self {
-            GritBinding::Node(node) => Some(node.byte_range()),
-            GritBinding::Range(range, _) => Some(range.to_byte_range()),
-            GritBinding::Empty(..) | GritBinding::Constant(_) => None,
+            Self::Node(node) => Some(node.byte_range()),
+            Self::Range(range, _) => Some(range.to_byte_range()),
+            Self::File(..) | Self::Empty(..) | Self::Constant(_) => None,
         }
     }
 
     fn code_range(&self, _language: &GritTargetLanguage) -> Option<CodeRange> {
         match self {
-            GritBinding::Node(node) => Some(node.code_range()),
-            GritBinding::Range(range, source) => Some(range.to_code_range(source)),
-            GritBinding::Empty(..) | GritBinding::Constant(_) => None,
+            Self::Node(node) => Some(node.code_range()),
+            Self::Range(range, source) => Some(range.to_code_range(source)),
+            Self::File(..) | Self::Empty(..) | Self::Constant(_) => None,
         }
     }
 
@@ -129,31 +132,43 @@ impl<'a> Binding<'a, GritQueryContext> for GritBinding<'a> {
 
     fn text(&self, _language: &GritTargetLanguage) -> anyhow::Result<Cow<'a, str>> {
         match self {
-            GritBinding::Node(node) => Ok(node.text().into()),
-            GritBinding::Range(range, source) => {
+            Self::File(path) => Ok(path.to_string_lossy()),
+            Self::Node(node) => Ok(node.text().into()),
+            Self::Range(range, source) => {
                 Ok((&source[range.start().into()..range.end().into()]).into())
             }
-            GritBinding::Empty(_, _) => Ok("".into()),
-            GritBinding::Constant(constant) => Ok(constant.to_string().into()),
+            Self::Empty(_, _) => Ok("".into()),
+            Self::Constant(constant) => Ok(constant.to_string().into()),
         }
     }
 
     fn source(&self) -> Option<&'a str> {
-        todo!()
+        match self {
+            Self::Node(node) => Some(node.source()),
+            Self::Range(_, source) => Some(*source),
+            Self::Empty(node, _) => Some(node.source()),
+            Self::File(..) | Self::Constant(..) => None,
+        }
     }
 
-    fn as_constant(&self) -> Option<&grit_pattern_matcher::constant::Constant> {
-        todo!()
+    fn as_constant(&self) -> Option<&Constant> {
+        match self {
+            Self::Constant(constant) => Some(constant),
+            _ => None,
+        }
     }
 
-    fn as_filename(&self) -> Option<&std::path::Path> {
-        todo!()
+    fn as_filename(&self) -> Option<&Path> {
+        match self {
+            Self::File(path) => Some(path),
+            _ => None,
+        }
     }
 
     fn as_node(&self) -> Option<GritTargetNode<'a>> {
         match self {
-            GritBinding::Node(node) => Some(node.clone()),
-            GritBinding::Range(..) | GritBinding::Empty(..) | GritBinding::Constant(_) => None,
+            Self::Node(node) => Some(node.clone()),
+            _ => None,
         }
     }
 
@@ -163,7 +178,7 @@ impl<'a> Binding<'a, GritQueryContext> for GritBinding<'a> {
 
     fn list_items(&self) -> Option<impl Iterator<Item = GritTargetNode<'a>> + Clone> {
         match self {
-            GritBinding::Node(node) if node.is_list() => Some(node.children()),
+            Self::Node(node) if node.is_list() => Some(node.children()),
             _ => None,
         }
     }

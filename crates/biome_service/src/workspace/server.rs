@@ -775,6 +775,7 @@ impl Workspace for WorkspaceServer {
     ) -> Result<ParsePatternResult, WorkspaceError> {
         let pattern = biome_grit_patterns::compile_pattern(
             &params.pattern,
+            Path::new("filename"), // TODO: Pass the real filename.
             biome_grit_patterns::JsTargetLanguage.into(),
         )?;
         let pattern_id = PatternId::from("1234"); // TODO: Generate a real ID.

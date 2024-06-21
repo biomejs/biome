@@ -1,4 +1,5 @@
-use crate::{util::TextRangeGritExt, GritTargetTree};
+use crate::grit_tree::GritTargetTree;
+use crate::util::TextRangeGritExt;
 use biome_js_syntax::{JsSyntaxKind, JsSyntaxNode, JsSyntaxToken};
 use biome_rowan::{NodeOrToken, SyntaxKind, SyntaxSlot, TextRange};
 use grit_util::{AstCursor, AstNode as GritAstNode, ByteRange, CodeRange};
@@ -243,13 +244,18 @@ impl<'a> GritTargetNode<'a> {
     }
 
     #[inline]
+    pub fn source(&self) -> &'a str {
+        self.tree.text()
+    }
+
+    #[inline]
     pub fn start_byte(&self) -> u32 {
         self.text_trimmed_range().start().into()
     }
 
     pub fn text(&self) -> &'a str {
         let trimmed_range = self.text_trimmed_range();
-        &self.tree.text()[trimmed_range.start().into()..trimmed_range.end().into()]
+        &self.source()[trimmed_range.start().into()..trimmed_range.end().into()]
     }
 }
 

@@ -4,7 +4,8 @@ use super::{
     compilation_context::NodeCompilationContext, equal_compiler::PrEqualCompiler,
     if_compiler::PrIfCompiler, match_compiler::PrMatchCompiler, maybe_compiler::PrMaybeCompiler,
     not_compiler::PrNotCompiler, or_compiler::PrOrCompiler,
-    predicate_return_compiler::PrReturnCompiler, rewrite_compiler::PrRewriteCompiler,
+    predicate_call_compiler::PrCallCompiler, predicate_return_compiler::PrReturnCompiler,
+    rewrite_compiler::PrRewriteCompiler,
 };
 use crate::{grit_context::GritQueryContext, CompileError};
 use biome_grit_syntax::{AnyGritPredicate, GritSyntaxKind};
@@ -38,7 +39,9 @@ impl PredicateCompiler {
             AnyGritPredicate::GritPredicateAssignment(node) => Ok(Predicate::Assignment(Box::new(
                 PrAssignmentCompiler::from_node(node, context)?,
             ))),
-            AnyGritPredicate::GritPredicateCall(_) => todo!(),
+            AnyGritPredicate::GritPredicateCall(node) => Ok(Predicate::Call(Box::new(
+                PrCallCompiler::from_node(node, context)?,
+            ))),
             AnyGritPredicate::GritPredicateEqual(node) => Ok(Predicate::Equal(Box::new(
                 PrEqualCompiler::from_node(node, context)?,
             ))),

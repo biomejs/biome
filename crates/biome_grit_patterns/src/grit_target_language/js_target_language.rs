@@ -16,6 +16,70 @@ impl GritTargetLanguageImpl for JsTargetLanguage {
         "JavaScript"
     }
 
+    /// Returns the syntax kind for a node by name.
+    ///
+    /// For compatibility with existing Grit snippets (as well as the online
+    /// Grit playground), node names should be aligned with TreeSitter's
+    /// `ts_language_symbol_for_name()`.
+    fn kind_by_name(&self, node_name: &str) -> Option<JsSyntaxKind> {
+        use JsSyntaxKind::*;
+        let kind = match node_name {
+            "assignment_expression" => JS_ASSIGNMENT_EXPRESSION,
+            "call_expression" => JS_CALL_EXPRESSION,
+            "new_expression" => JS_NEW_EXPRESSION,
+            // TODO: Many more of these. We should probably find a way to
+            // generate these impls from TS `grammar.js` files, combined with
+            // our `js.ungram`.
+            _ => return None,
+        };
+
+        Some(kind)
+    }
+
+    /// Returns the node name for a given syntax kind.
+    ///
+    /// For compatibility with existing Grit snippets (as well as the online
+    /// Grit playground), node names should be aligned with TreeSitter's
+    /// `ts_language_symbol_name()`.
+    fn name_for_kind(&self, kind: GritTargetSyntaxKind) -> &'static str {
+        let Some(kind) = kind.as_js_kind() else {
+            return "(unexpected language)";
+        };
+
+        use JsSyntaxKind::*;
+        match kind {
+            JS_ASSIGNMENT_EXPRESSION => "assignment_expression",
+            JS_CALL_EXPRESSION => "call_expression",
+            JS_NEW_EXPRESSION => "new_expression",
+            // TODO: Many more of these. We should probably find a way to
+            // generate these impls from TS `grammar.js` files, combined with
+            // our `js.ungram`.
+            _ => "(unknown node)",
+        }
+    }
+
+    /// Returns the slots with their names for the given node kind.
+    ///
+    /// For compatibility with existing Grit snippets (as well as the online
+    /// Grit playground), node names should be aligned with TreeSitter's
+    /// `ts_language_field_name_for_id()`.
+    fn named_slots_for_kind(&self, kind: GritTargetSyntaxKind) -> &'static [(&'static str, u32)] {
+        let Some(kind) = kind.as_js_kind() else {
+            return &[];
+        };
+
+        use JsSyntaxKind::*;
+        match kind {
+            JS_ASSIGNMENT_EXPRESSION => &[],
+            JS_CALL_EXPRESSION => &[("function", 0), ("type_arguments", 2), ("arguments", 3)],
+            JS_NEW_EXPRESSION => &[],
+            // TODO: Many more of these. We should probably find a way to
+            // generate these impls from TS `grammar.js` files, combined with
+            // our `js.ungram`.
+            _ => &[],
+        }
+    }
+
     fn snippet_context_strings(&self) -> &[(&'static str, &'static str)] {
         &[
             ("", ""),
