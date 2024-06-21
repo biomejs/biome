@@ -96,7 +96,7 @@ impl DocumentFileSource {
         if let Ok(file_source) = CssFileSource::try_from_well_known(file_name) {
             return Ok(file_source.into());
         }
-        if cfg!(feature = "graphql") {
+        if cfg!(feature = "graphql") || cfg!(debug_assertions) {
             if let Ok(file_source) = GraphqlFileSource::try_from_well_known(file_name) {
                 return Ok(file_source.into());
             }
@@ -120,7 +120,7 @@ impl DocumentFileSource {
         if let Ok(file_source) = CssFileSource::try_from_extension(extension) {
             return Ok(file_source.into());
         }
-        if cfg!(feature = "graphql") {
+        if cfg!(feature = "graphql") || cfg!(debug_assertions) {
             if let Ok(file_source) = GraphqlFileSource::try_from_extension(extension) {
                 return Ok(file_source.into());
             }
@@ -147,7 +147,7 @@ impl DocumentFileSource {
         if let Ok(file_source) = CssFileSource::try_from_language_id(language_id) {
             return Ok(file_source.into());
         }
-        if cfg!(feature = "graphql") {
+        if cfg!(feature = "graphql") || cfg!(debug_assertions) {
             if let Ok(file_source) = GraphqlFileSource::try_from_language_id(language_id) {
                 return Ok(file_source.into());
             }
@@ -297,9 +297,7 @@ impl DocumentFileSource {
                 EmbeddingKind::None => true,
             },
             DocumentFileSource::Json(_) | DocumentFileSource::Css(_) => true,
-            DocumentFileSource::Graphql(_) => {
-                cfg!(feature = "graphql")
-            }
+            DocumentFileSource::Graphql(_) => cfg!(feature = "graphql") || cfg!(debug_assertions),
             DocumentFileSource::Unknown => false,
         }
     }
