@@ -175,7 +175,8 @@ pub fn run(test_case: &str, _snapshot_name: &str, test_directory: &str, outcome_
 pub fn quick_test() {
     let code = r#"
 div {
-  filter: progid:DXImageTransform.Microsoft.BasicImage(rotation=3);
+    unicode: U+000;
+  unicode-range: U+000-49F, U+2000-27FF, U+2900-2BFF, U+1D400-1D7FF, U+ff??;
 }
 
 
