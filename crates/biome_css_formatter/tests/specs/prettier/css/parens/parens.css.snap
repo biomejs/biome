@@ -354,9 +354,9 @@ a {
 -  unicode-range: U+26; /* single codepoint */
 -  unicode-range: U+0-7F;
 -  unicode-range: U+0025-00FF; /* codepoint range */
-+  unicode-range: u +26; /* single codepoint */
-+  unicode-range: u +0 -7f;
-+  unicode-range: u +0025 -00ff; /* codepoint range */
++  unicode-range: U +26; /* single codepoint */
++  unicode-range: U +0 -7f;
++  unicode-range: U +0025 -00ff; /* codepoint range */
    unicode-range: U+4??; /* wildcard range */
    unicode-range: U+0025-00FF, U+4??; /* multiple values */
  }
@@ -519,9 +519,9 @@ a {
 
 .unicode-ranges {
   /* <unicode-range> values */
-  unicode-range: u +26; /* single codepoint */
-  unicode-range: u +0 -7f;
-  unicode-range: u +0025 -00ff; /* codepoint range */
+  unicode-range: U +26; /* single codepoint */
+  unicode-range: U +0 -7f;
+  unicode-range: U +0025 -00ff; /* codepoint range */
   unicode-range: U+4??; /* wildcard range */
   unicode-range: U+0025-00FF, U+4??; /* multiple values */
 }
