@@ -219,12 +219,12 @@ impl Rule for {rule_name_upper_camel} {{
         }
         LanguageKind::Json => {
             format!(
-                r#"use biome_analyze::{{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic}};
+                r#"use biome_analyze::{{context::RuleContext, declare_lint_rule, Ast, Rule, RuleDiagnostic}};
 use biome_console::markup;
 use biome_json_syntax::JsonMember;
 use biome_rowan::AstNode;
 
-declare_rule! {{
+declare_lint_rule! {{
     /// Succinct description of the rule.
     ///
     /// Put context and details about the rule.
