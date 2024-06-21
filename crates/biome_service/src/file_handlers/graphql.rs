@@ -1,4 +1,4 @@
-use super::{DocumentFileSource, ExtensionHandler, ParseResult};
+use super::{DocumentFileSource, ExtensionHandler, LintParams, LintResults, ParseResult};
 use crate::file_handlers::DebugCapabilities;
 use crate::file_handlers::{
     AnalyzerCapabilities, Capabilities, FormatterCapabilities, ParserCapabilities,
@@ -66,7 +66,7 @@ impl ExtensionHandler for GraphqlFileHandler {
                 debug_formatter_ir: None,
             },
             analyzer: AnalyzerCapabilities {
-                lint: None,
+                lint: Some(lint),
                 code_actions: None,
                 rename: None,
                 fix_all: None,
@@ -108,5 +108,14 @@ fn debug_syntax_tree(_rome_path: &BiomePath, parse: AnyParse) -> GetSyntaxTreeRe
     GetSyntaxTreeResult {
         cst: format!("{syntax:#?}"),
         ast: format!("{tree:#?}"),
+    }
+}
+
+fn lint(params: LintParams) -> LintResults {
+    let diagnostics = params.parse.into_diagnostics();
+    LintResults {
+        errors: diagnostics.len(),
+        diagnostics,
+        skipped_diagnostics: 0,
     }
 }
