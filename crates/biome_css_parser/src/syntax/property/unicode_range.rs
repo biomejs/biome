@@ -78,7 +78,10 @@ pub(crate) fn parse_unicode_range(p: &mut CssParser) -> ParsedSyntax {
 
         if parse_unicode_codepoint(p).is_absent() {
             // If the parser is positioned to parse a Unicode range wildcard add a diagnostic.
-            if parse_unicode_range_wildcard(p).add_diagnostic_if_present(p, wildcard_not_allowed).is_none() {
+            if parse_unicode_range_wildcard(p)
+                .add_diagnostic_if_present(p, wildcard_not_allowed)
+                .is_none()
+            {
                 // If the parser is not positioned to parse a Unicode codepoint, add a diagnostic.
                 p.error(expected_codepoint(p, p.cur_range()));
             }
