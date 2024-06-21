@@ -9,6 +9,14 @@ New entries must be placed in a section entitled `Unreleased`.
 Read
 our [guidelines for writing a good changelog entry](https://github.com/biomejs/biome/blob/main/CONTRIBUTING.md#changelog).
 
+## Unreleased
+
+### Formatter
+
+#### Bug fixes
+
+- Fix [#3184](https://github.com/biomejs/biome/issues/3184) CSS formatter converts custom identifiers to lowercase. Contributed by @denbezrukov
+
 ## v1.8.2 (2024-06-20)
 
 ### CLI
