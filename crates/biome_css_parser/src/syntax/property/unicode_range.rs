@@ -74,11 +74,14 @@ pub(crate) fn parse_unicode_range(p: &mut CssParser) -> ParsedSyntax {
         let range = codepoint.precede(p);
         p.bump_with_context(T![-], CssLexContext::UnicodeRange);
 
-        if parse_unicode_codepoint(p)
-            .or_add_diagnostic(p, expected_codepoint)
-            .is_none()
-        {
-            // If the parser is not positioned to parse a Unicode codepoint, abandon the range and return a bogus value.
+        // Abandon the range if the parser is not positioned to parse a Unicode codepoint.
+
+        if parse_unicode_codepoint(p).is_absent() {
+            // If the parser is positioned to parse a Unicode range wildcard add a diagnostic.
+            if parse_unicode_range_wildcard(p).add_diagnostic_if_present(p, wildcard_not_allowed).is_none() {
+                // If the parser is not positioned to parse a Unicode codepoint, add a diagnostic.
+                p.error(expected_codepoint(p, p.cur_range()));
+            }
             range.abandon(p);
             return Present(m.complete(p, CSS_BOGUS_UNICODE_RANGE_VALUE));
         }
@@ -147,12 +150,25 @@ fn parse_unicode_range_wildcard(p: &mut CssParser) -> ParsedSyntax {
     Present(m.complete(p, CSS_UNICODE_RANGE_WILDCARD))
 }
 
+/// Provides a diagnostic for invalid wildcard placement within a Unicode range.
+/// Wildcards (`U+????`) are only valid at the beginning of a Unicode range descriptor.
+/// When specifying a range interval (`U+XXXX-YYYY`), wildcards cannot be used in the second position.
+pub(crate) fn wildcard_not_allowed(p: &CssParser, range: TextRange) -> ParseDiagnostic {
+    p.err_builder("Codepoint range wildcard is not valid here.", range)
+        .with_hint(
+            "Wildcards (`U+????`) are only allowed at the beginning of a Unicode range descriptor. \
+             When specifying a range interval (`U+XXXX-YYYY`), wildcards cannot be used in the second position."
+        )
+}
+
 /// Generates a parse diagnostic for an expected "codepoint" error message at the given range.
 pub(crate) fn expected_codepoint(p: &CssParser, range: TextRange) -> ParseDiagnostic {
     expected_node("codepoint", range, p)
+        .with_hint("Expected a valid Unicode codepoint (e.g., U+1234).")
 }
 
 /// Generates a parse diagnostic for an expected "codepoint or wildcard" error message at the given range.
 pub(crate) fn expected_codepoint_value(p: &CssParser, range: TextRange) -> ParseDiagnostic {
     expected_any(&["codepoint", "codepoint range wildcard"], range, p)
+        .with_hint("Expected a valid Unicode codepoint (e.g., U+1234) or a codepoint range wildcard (e.g., U+????).")
 }
