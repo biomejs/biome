@@ -176,6 +176,6 @@ color_error.css:2:19 parse ━━━━━━━━━━━━━━━━━�
     3 │ }
     4 │ 
   
-  i Ensure the color is specified in a valid hexadecimal format (#RRGGBB or #RGB). Examples: #000, #000f, #ffffff, #ffffffff
+  i Ensure the color is specified in a valid hexadecimal format. Examples: #000, #000f, #ffffff, #ffffffff
   
 ```

@@ -31,5 +31,5 @@ pub(crate) fn parse_color(p: &mut CssParser) -> ParsedSyntax {
 /// Generates a parse diagnostic for an expected "color" error message at the given range.
 pub(crate) fn expected_color(p: &CssParser, range: TextRange) -> ParseDiagnostic {
     expected_node("color", range, p)
-        .with_hint("Ensure the color is specified in a valid hexadecimal format (#RRGGBB or #RGB). Examples: #000, #000f, #ffffff, #ffffffff")
+        .with_hint("Ensure the color is specified in a valid hexadecimal format. Examples: #000, #000f, #ffffff, #ffffffff")
 }
