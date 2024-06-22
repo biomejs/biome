@@ -70,7 +70,7 @@ info: css/units/values.css
  
  .postCssLowerCasingValueName {
 -  font: 4XLarge Helvetica;
-+  font: 4xlarge helvetica;
++  font: 4xlarge Helvetica;
  }
  
  .cssUnits {
@@ -112,7 +112,7 @@ XLarge 28/36px
 ;
 
 .postCssLowerCasingValueName {
-  font: 4xlarge helvetica;
+  font: 4xlarge Helvetica;
 }
 
 .cssUnits {
