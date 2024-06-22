@@ -81,9 +81,7 @@ function buildConfigUtilities(spec: TailwindSpec, layerOrder: Array<string>) {
 
 function buildConfigVariants(spec: TailwindSpec): Array<Variant> {
 	const variants: Array<Variant> = [...spec.variants]
-		.sort((variantA, variantB) => {
-			return compareBigInt(variantA.weight, variantB.weight);
-		})
+		.sort((a, b) =>  compareBigInt(a.weight, b.weight))
 		.map((item) => ({ name: item.variant, weight: item.weight }));
 
 	return variants;

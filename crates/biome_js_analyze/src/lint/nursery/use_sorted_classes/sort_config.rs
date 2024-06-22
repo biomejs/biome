@@ -15,16 +15,10 @@ pub struct UtilityLayer {
     pub classes: &'static [&'static str],
 }
 
-pub struct Variant {
-    pub name: &'static str,
-    pub weight: BitVec<u8, Lsb0>,
-}
-
-/// This builds a bit vector ordered from Lsb to Msb in order to perform a simpler BitWise XOR later on
-/// Every variant has one bit set to 1 (Msb) and the others set to 0 and they have fixed size
-pub fn build_variant_weight<const SIZE: usize>() -> BitVec<u8, Lsb0> {
+pub fn build_variant_weight(size: usize) -> BitVec<u8, Lsb0> {
     let mut bit_vec = BitVec::new();
-    bit_vec.extend([false; SIZE]);
+    let iterable = vec![false; size];
+    bit_vec.extend(iterable);
     bit_vec.push(true);
     bit_vec
 }
@@ -33,7 +27,7 @@ pub fn build_variant_weight<const SIZE: usize>() -> BitVec<u8, Lsb0> {
 pub type UtilitiesConfig = &'static [UtilityLayer];
 
 /// The variants config, contains an ordered list of variants.
-pub type VariantsConfig = Vec<Variant>;
+pub type VariantsConfig = &'static [&'static str];
 
 /// The sort config, containing the utility config and the variant config.
 pub struct SortConfig {

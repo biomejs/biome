@@ -3,7 +3,7 @@
 
 use super::{
     sort_config::{UtilitiesConfig, VariantsConfig},
-    tailwind_preset::{get_variant_classes, TAILWIND_LAYERS},
+    tailwind_preset::{TAILWIND_LAYERS, VARIANT_CLASSES},
 };
 
 #[derive(Default)]
@@ -23,7 +23,7 @@ pub fn get_utilities_preset(preset: &UseSortedClassesPreset) -> UtilitiesConfig 
 
 pub fn get_variants_preset(preset: &UseSortedClassesPreset) -> VariantsConfig {
     match preset {
-        UseSortedClassesPreset::None => vec![],
-        UseSortedClassesPreset::TailwindCSS => get_variant_classes(),
+        UseSortedClassesPreset::None => [].as_slice(),
+        UseSortedClassesPreset::TailwindCSS => &*VARIANT_CLASSES,
     }
 }

@@ -48,9 +48,9 @@ type VariantSpec = {
 
 function introspectVariants(context: TailwindContext): Set<VariantSpec> {
 	const variants = new Set<VariantSpec>();
-	// This method returns a list of Variants, each with values but offsets are missing
+	// This method returns a list of Variants, each with values but offsets are missing.
 	const configVariants = context.getVariants();
-	// This Map contains weights for each variant name, including those that are values of a main variant
+	// This Map contains weights for each variant name, including those that are values of a main variant.
 	const variantOffsets = context.offsets.variantOffsets;
 
 	// TODO: Handle isArbitrary like `has-[]` or `group-has-[]`
