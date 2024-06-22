@@ -34,7 +34,7 @@ pub use formatter::{
     partial_formatter_configuration, FormatterConfiguration, PartialFormatterConfiguration,
     PlainIndentStyle,
 };
-use graphql::{
+pub use graphql::{
     partial_graphql_configuration, GraphqlConfiguration, GraphqlFormatter,
     PartialGraphqlConfiguration, PartialGraphqlFormatter,
 };

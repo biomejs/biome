@@ -6,16 +6,12 @@ mod graphql;
 mod prelude;
 mod separated;
 
-use std::borrow::Cow;
-
 use crate::comments::GraphqlCommentStyle;
 pub(crate) use crate::context::GraphqlFormatContext;
 use crate::context::GraphqlFormatOptions;
 use crate::cst::FormatGraphqlSyntaxNode;
 use biome_formatter::comments::Comments;
 use biome_formatter::prelude::*;
-use biome_formatter::token::string::ToAsciiLowercaseCow;
-use biome_formatter::trivia::format_skipped_token_trivia;
 use biome_formatter::{
     write, CstFormatContext, FormatContext, FormatLanguage, FormatOwnedWithRule, FormatRefWithRule,
     FormatToken, TransformSourceMap,
@@ -262,7 +258,7 @@ impl FormatLanguage for GraphqlFormatLanguage {
     type Context = GraphqlFormatContext;
     type FormatRule = FormatGraphqlSyntaxNode;
 
-    fn is_range_formatting_node(&self, node: &SyntaxNode<Self::SyntaxLanguage>) -> bool {
+    fn is_range_formatting_node(&self, _node: &SyntaxNode<Self::SyntaxLanguage>) -> bool {
         // TODO implement range formatting
         true
     }
@@ -339,6 +335,6 @@ mod tests {
         let parse = parse_graphql(src);
         let options = GraphqlFormatOptions::default();
         let formatted = format_node(options, &parse.syntax()).unwrap();
-        assert_eq!(formatted.print().unwrap().as_code(), "query {\n}\n");
+        assert_eq!(formatted.print().unwrap().as_code(), "query {}\n");
     }
 }

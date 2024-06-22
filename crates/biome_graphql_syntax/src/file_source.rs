@@ -6,9 +6,28 @@ use std::path::Path;
 #[derive(
     Debug, Clone, Default, Copy, Eq, PartialEq, Hash, serde::Serialize, serde::Deserialize,
 )]
-pub struct GraphqlFileSource {}
+pub struct GraphqlFileSource {
+    #[allow(unused)]
+    variant: CssVariant,
+}
+
+/// The style of GraphQL contained in the file.
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[derive(
+    Debug, Clone, Default, Copy, Eq, PartialEq, Hash, serde::Serialize, serde::Deserialize,
+)]
+enum CssVariant {
+    #[default]
+    Standard,
+}
 
 impl GraphqlFileSource {
+    pub fn graphql() -> Self {
+        Self {
+            variant: CssVariant::Standard,
+        }
+    }
+
     /// Try to return the GraphQL file source corresponding to this file name from well-known files
     pub fn try_from_well_known(file_name: &str) -> Result<Self, FileSourceError> {
         // TODO: to be implemented
@@ -34,7 +53,7 @@ impl GraphqlFileSource {
     /// [VS Code spec]: https://code.visualstudio.com/docs/languages/identifiers
     pub fn try_from_language_id(language_id: &str) -> Result<Self, FileSourceError> {
         match language_id {
-            "graphql" => Ok(Self::default()),
+            "graphql" | "gql" => Ok(Self::default()),
             _ => Err(FileSourceError::UnknownLanguageId(language_id.into())),
         }
     }
