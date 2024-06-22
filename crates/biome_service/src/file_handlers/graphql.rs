@@ -9,8 +9,8 @@ use crate::settings::{
 };
 use crate::workspace::GetSyntaxTreeResult;
 use biome_analyze::{AnalyzerConfiguration, AnalyzerOptions};
-use biome_formatter::SimpleFormatOptions;
 use biome_fs::BiomePath;
+use biome_graphql_formatter::context::GraphqlFormatOptions;
 use biome_graphql_parser::parse_graphql_with_cache;
 use biome_graphql_syntax::{GraphqlLanguage, GraphqlRoot, GraphqlSyntaxNode};
 use biome_parser::AnyParse;
@@ -20,7 +20,7 @@ impl ServiceLanguage for GraphqlLanguage {
     type FormatterSettings = ();
     type LinterSettings = ();
     type OrganizeImportsSettings = ();
-    type FormatOptions = SimpleFormatOptions;
+    type FormatOptions = GraphqlFormatOptions;
     type ParserSettings = ();
     type EnvironmentSettings = ();
 
@@ -35,7 +35,7 @@ impl ServiceLanguage for GraphqlLanguage {
         _path: &BiomePath,
         _document_file_source: &DocumentFileSource,
     ) -> Self::FormatOptions {
-        SimpleFormatOptions::default()
+        GraphqlFormatOptions::default()
     }
 
     fn resolve_analyzer_options(

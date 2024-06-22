@@ -492,6 +492,26 @@ dependencies = [
 ]
 
 [[package]]
+name = "biome_graphql_formatter"
+version = "0.1.0"
+dependencies = [
+ "biome_configuration",
+ "biome_diagnostics",
+ "biome_formatter",
+ "biome_formatter_test",
+ "biome_graphql_parser",
+ "biome_graphql_syntax",
+ "biome_parser",
+ "biome_rowan",
+ "biome_service",
+ "biome_suppression",
+ "countme",
+ "serde",
+ "serde_json",
+ "tests_macros",
+]
+
+[[package]]
 name = "biome_graphql_parser"
 version = "0.1.0"
 dependencies = [
@@ -956,6 +976,7 @@ dependencies = [
  "biome_flags",
  "biome_formatter",
  "biome_fs",
+ "biome_graphql_formatter",
  "biome_graphql_parser",
  "biome_graphql_syntax",
  "biome_grit_patterns",

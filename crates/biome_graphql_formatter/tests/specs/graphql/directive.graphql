@@ -1,0 +1,17 @@
+{
+  hero @deprecated
+}
+
+{
+  hero @deprecated(reason: "Deprecated")
+}
+
+{
+  hero @input(type: String)
+}
+
+{
+  hero
+		@deprecated(reason: "Deprecated")
+		@addExternalFields(source: "profiles")
+}
