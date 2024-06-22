@@ -117,6 +117,14 @@ CSS Formatter:
   Line width:                   unset
   Quote style:                  Double
 
+GraphQL Formatter:
+  Enabled:                      false
+  Indent style:                 unset
+  Indent width:                 unset
+  Line ending:                  unset
+  Line width:                   unset
+  Quote style:                  Double
+
 Server:
   Version:                      0.0.0
   Name:                         biome_lsp
