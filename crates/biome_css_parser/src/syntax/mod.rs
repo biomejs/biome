@@ -11,6 +11,7 @@ use crate::parser::CssParser;
 use crate::syntax::at_rule::{is_at_at_rule, parse_at_rule};
 use crate::syntax::block::parse_declaration_or_rule_list_block;
 use crate::syntax::parse_error::{expected_any_rule, expected_non_css_wide_keyword_identifier};
+use crate::syntax::property::color::{is_at_color, parse_color};
 use crate::syntax::property::unicode_range::{is_at_unicode_range, parse_unicode_range};
 use crate::syntax::property::{is_at_any_property, parse_any_property};
 use crate::syntax::selector::is_nth_at_selector;
@@ -285,21 +286,6 @@ pub(crate) fn parse_any_value(p: &mut CssParser) -> ParsedSyntax {
     } else {
         Absent
     }
-}
-
-#[inline]
-pub(crate) fn is_at_color(p: &mut CssParser) -> bool {
-    p.at(T![#])
-}
-#[inline]
-pub(crate) fn parse_color(p: &mut CssParser) -> ParsedSyntax {
-    if !is_at_color(p) {
-        return Absent;
-    }
-    let m = p.start();
-    p.bump_with_context(T![#], CssLexContext::Color);
-    p.expect(CSS_COLOR_LITERAL);
-    Present(m.complete(p, CSS_COLOR))
 }
 
 struct CssComponentValueList;
