@@ -33,6 +33,13 @@
 				{ "type": "null" }
 			]
 		},
+		"graphql": {
+			"description": "Specific configuration for the GraphQL language",
+			"anyOf": [
+				{ "$ref": "#/definitions/GraphqlConfiguration" },
+				{ "type": "null" }
+			]
+		},
 		"javascript": {
 			"description": "Specific configuration for the JavaScript language",
 			"anyOf": [
@@ -1135,6 +1142,54 @@
 				"lineWidth": {
 					"description": "What's the max width of a line. Defaults to 80.",
 					"anyOf": [{ "$ref": "#/definitions/LineWidth" }, { "type": "null" }]
+				}
+			},
+			"additionalProperties": false
+		},
+		"GraphqlConfiguration": {
+			"description": "Options applied to GraphQL files",
+			"type": "object",
+			"properties": {
+				"formatter": {
+					"description": "GraphQL formatter options",
+					"anyOf": [
+						{ "$ref": "#/definitions/GraphqlFormatter" },
+						{ "type": "null" }
+					]
+				}
+			},
+			"additionalProperties": false
+		},
+		"GraphqlFormatter": {
+			"description": "Options that changes how the GraphQL formatter behaves",
+			"type": "object",
+			"properties": {
+				"enabled": {
+					"description": "Control the formatter for GraphQL files.",
+					"type": ["boolean", "null"]
+				},
+				"indentStyle": {
+					"description": "The indent style applied to GraphQL files.",
+					"anyOf": [
+						{ "$ref": "#/definitions/PlainIndentStyle" },
+						{ "type": "null" }
+					]
+				},
+				"indentWidth": {
+					"description": "The size of the indentation applied to GraphQL files. Default to 2.",
+					"anyOf": [{ "$ref": "#/definitions/IndentWidth" }, { "type": "null" }]
+				},
+				"lineEnding": {
+					"description": "The type of line ending applied to GraphQL files.",
+					"anyOf": [{ "$ref": "#/definitions/LineEnding" }, { "type": "null" }]
+				},
+				"lineWidth": {
+					"description": "What's the max width of a line applied to GraphQL files. Defaults to 80.",
+					"anyOf": [{ "$ref": "#/definitions/LineWidth" }, { "type": "null" }]
+				},
+				"quoteStyle": {
+					"description": "The type of quotes used in GraphQL code. Defaults to double.",
+					"anyOf": [{ "$ref": "#/definitions/QuoteStyle" }, { "type": "null" }]
 				}
 			},
 			"additionalProperties": false
