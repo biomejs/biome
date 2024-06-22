@@ -24,8 +24,10 @@ use biome_parser::parse_recovery::{ParseRecovery, ParseRecoveryTokenSet, Recover
 use biome_parser::prelude::ParsedSyntax;
 use biome_parser::prelude::ParsedSyntax::{Absent, Present};
 use biome_parser::{token_set, Parser};
+use biome_parser::diagnostic::expected_token;
 use value::dimension::{is_at_any_dimension, parse_any_dimension};
 use value::function::{is_at_any_function, parse_any_function};
+use crate::syntax::property::color::{is_at_color, parse_color};
 
 use self::parse_error::{expected_component_value, expected_declaration_item};
 
@@ -285,21 +287,6 @@ pub(crate) fn parse_any_value(p: &mut CssParser) -> ParsedSyntax {
     } else {
         Absent
     }
-}
-
-#[inline]
-pub(crate) fn is_at_color(p: &mut CssParser) -> bool {
-    p.at(T![#])
-}
-#[inline]
-pub(crate) fn parse_color(p: &mut CssParser) -> ParsedSyntax {
-    if !is_at_color(p) {
-        return Absent;
-    }
-    let m = p.start();
-    p.bump_with_context(T![#], CssLexContext::Color);
-    p.expect(CSS_COLOR_LITERAL);
-    Present(m.complete(p, CSS_COLOR))
 }
 
 struct CssComponentValueList;
