@@ -19,8 +19,8 @@ use biome_analyze::{
     RuleCategoriesBuilder, RuleCategory, RuleError,
 };
 use biome_diagnostics::{category, Applicability, Diagnostic, DiagnosticExt, Severity};
-use biome_formatter::SimpleFormatOptions;
 use biome_fs::BiomePath;
+use biome_graphql_formatter::context::GraphqlFormatOptions;
 use biome_graphql_analyze::analyze;
 use biome_graphql_parser::parse_graphql_with_cache;
 use biome_graphql_syntax::{GraphqlLanguage, GraphqlRoot, GraphqlSyntaxNode};
@@ -33,7 +33,7 @@ impl ServiceLanguage for GraphqlLanguage {
     type FormatterSettings = ();
     type LinterSettings = ();
     type OrganizeImportsSettings = ();
-    type FormatOptions = SimpleFormatOptions;
+    type FormatOptions = GraphqlFormatOptions;
     type ParserSettings = ();
     type EnvironmentSettings = ();
 
@@ -48,7 +48,7 @@ impl ServiceLanguage for GraphqlLanguage {
         _path: &BiomePath,
         _document_file_source: &DocumentFileSource,
     ) -> Self::FormatOptions {
-        SimpleFormatOptions::default()
+        GraphqlFormatOptions::default()
     }
 
     fn resolve_analyzer_options(

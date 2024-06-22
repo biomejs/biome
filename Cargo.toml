@@ -107,6 +107,7 @@ biome_formatter              = { version = "0.5.7", path = "./crates/biome_forma
 biome_fs                     = { version = "0.5.7", path = "./crates/biome_fs" }
 biome_graphql_analyze        = { version = "0.0.1", path = "./crates/biome_graphql_analyze" }
 biome_graphql_factory        = { version = "0.1.0", path = "./crates/biome_graphql_factory" }
+biome_graphql_formatter      = { version = "0.1.0", path = "./crates/biome_graphql_formatter" }
 biome_graphql_parser         = { version = "0.1.0", path = "./crates/biome_graphql_parser" }
 biome_graphql_syntax         = { version = "0.1.0", path = "./crates/biome_graphql_syntax" }
 biome_grit_factory           = { version = "0.5.7", path = "./crates/biome_grit_factory" }

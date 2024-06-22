@@ -7,6 +7,7 @@ pub mod diagnostics;
 pub mod editorconfig;
 pub mod formatter;
 pub mod generated;
+pub mod graphql;
 pub mod javascript;
 pub mod json;
 pub mod linter;
@@ -32,6 +33,10 @@ pub use css::{
 pub use formatter::{
     partial_formatter_configuration, FormatterConfiguration, PartialFormatterConfiguration,
     PlainIndentStyle,
+};
+use graphql::{
+    partial_graphql_configuration, GraphqlConfiguration, GraphqlFormatter,
+    PartialGraphqlConfiguration, PartialGraphqlFormatter,
 };
 pub use javascript::{
     partial_javascript_configuration, JavascriptConfiguration, JavascriptFormatter,
@@ -105,6 +110,10 @@ pub struct Configuration {
     /// Specific configuration for the Css language
     #[partial(type, bpaf(external(partial_css_configuration), optional))]
     pub css: CssConfiguration,
+
+    /// Specific configuration for the GraphQL language
+    #[partial(type, bpaf(external(partial_graphql_configuration), optional))]
+    pub graphql: GraphqlConfiguration,
 
     /// A list of paths to other JSON files, used to extends the current configuration.
     #[partial(bpaf(hide))]
@@ -213,6 +222,18 @@ impl PartialConfiguration {
                 f.linter
                     .as_ref()
                     .map(|f| f.get_linter_configuration())
+                    .unwrap_or_default()
+            })
+            .unwrap_or_default()
+    }
+
+    pub fn get_graphql_formatter_configuration(&self) -> GraphqlFormatter {
+        self.graphql
+            .as_ref()
+            .map(|f| {
+                f.formatter
+                    .as_ref()
+                    .map(|f| f.get_formatter_configuration())
                     .unwrap_or_default()
             })
             .unwrap_or_default()
