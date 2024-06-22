@@ -361,8 +361,7 @@ pub enum BiomeCommand {
     },
 
     /// Searches for Grit patterns across a project.
-    // FIXME: switch back @BackupMiles
-    #[bpaf(command)] // !! Command is hidden until ready for release.
+    #[bpaf(command, hide)] // !! Command is hidden until ready for release.
     Search {
         #[bpaf(external, hide_usage)]
         cli_options: CliOptions,

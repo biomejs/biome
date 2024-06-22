@@ -254,7 +254,6 @@ pub(super) fn print_frame(fmt: &mut fmt::Formatter<'_>, location: Location<'_>) 
     fmt.write_str("\n")
 }
 
-// TODO: clean up @BackupMiles
 pub(super) fn print_highlighted_frame(fmt: &mut fmt::Formatter<'_>, location: Location<'_>) -> io::Result<()> {
     let Some(span) = location.span else {
         return Ok(());
