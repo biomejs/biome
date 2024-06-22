@@ -13,8 +13,24 @@ mod language {
 // use this test check if your snippet prints as you wish, without using a snapshot
 fn quick_test() {
     let src = r#"
-query MyQuery {
+{
+  hero @deprecated
 }
+
+{
+  hero @deprecated(reason: "Deprecated")
+}
+
+{
+  hero @input(type: String)
+}
+
+{
+  hero
+		@deprecated(reason: "Deprecated")
+		@addExternalFields(source: "profiles")
+}
+
 "#;
     let parse = parse_graphql(src);
     println!("{:#?}", parse);

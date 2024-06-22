@@ -8,29 +8,59 @@ use crate::file_handlers::{
 };
 use crate::settings::{
     FormatSettings, LanguageListSettings, LanguageSettings, LinterSettings, OverrideSettings,
-    ServiceLanguage, Settings,
+    ServiceLanguage, Settings, WorkspaceSettingsHandle,
 };
 use crate::workspace::{
     CodeAction, FixAction, FixFileMode, FixFileResult, GetSyntaxTreeResult, PullActionsResult,
 };
+use crate::WorkspaceError;
 use crate::WorkspaceError;
 use biome_analyze::{
     AnalysisFilter, AnalyzerConfiguration, AnalyzerOptions, ControlFlow, Never,
     RuleCategoriesBuilder, RuleCategory, RuleError,
 };
 use biome_diagnostics::{category, Applicability, Diagnostic, DiagnosticExt, Severity};
+use biome_formatter::{
+    FormatError, IndentStyle, IndentWidth, LineEnding, LineWidth, Printed, QuoteStyle,
+};
 use biome_fs::BiomePath;
 use biome_graphql_formatter::context::GraphqlFormatOptions;
 use biome_graphql_analyze::analyze;
+use biome_graphql_formatter::format_node;
 use biome_graphql_parser::parse_graphql_with_cache;
-use biome_graphql_syntax::{GraphqlLanguage, GraphqlRoot, GraphqlSyntaxNode};
+use biome_graphql_syntax::{GraphqlLanguage, GraphqlRoot, GraphqlSyntaxNode, TextRange, TextSize};
 use biome_parser::AnyParse;
 use biome_rowan::{AstNode, NodeCache};
 use std::borrow::Cow;
 use tracing::{debug_span, error, info, trace, trace_span};
+use biome_rowan::{NodeCache, TokenAtOffset};
+
+#[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+pub struct GraphqlFormatterSettings {
+    pub line_ending: Option<LineEnding>,
+    pub line_width: Option<LineWidth>,
+    pub indent_width: Option<IndentWidth>,
+    pub indent_style: Option<IndentStyle>,
+    pub quote_style: Option<QuoteStyle>,
+    pub enabled: Option<bool>,
+}
+
+impl Default for GraphqlFormatterSettings {
+    fn default() -> Self {
+        Self {
+            enabled: Some(false),
+            indent_style: Default::default(),
+            indent_width: Default::default(),
+            line_ending: Default::default(),
+            line_width: Default::default(),
+            quote_style: Default::default(),
+        }
+    }
+}
 
 impl ServiceLanguage for GraphqlLanguage {
-    type FormatterSettings = ();
+    type FormatterSettings = GraphqlFormatterSettings;
     type LinterSettings = ();
     type OrganizeImportsSettings = ();
     type FormatOptions = GraphqlFormatOptions;
@@ -42,13 +72,45 @@ impl ServiceLanguage for GraphqlLanguage {
     }
 
     fn resolve_format_options(
-        _global: Option<&FormatSettings>,
-        _overrides: Option<&OverrideSettings>,
-        _language: Option<&()>,
-        _path: &BiomePath,
-        _document_file_source: &DocumentFileSource,
+        global: Option<&FormatSettings>,
+        overrides: Option<&OverrideSettings>,
+        language: Option<&Self::FormatterSettings>,
+        path: &BiomePath,
+        document_file_source: &DocumentFileSource,
     ) -> Self::FormatOptions {
-        GraphqlFormatOptions::default()
+        let indent_style = language
+            .and_then(|l| l.indent_style)
+            .or(global.and_then(|g| g.indent_style))
+            .unwrap_or_default();
+        let line_width = language
+            .and_then(|l| l.line_width)
+            .or(global.and_then(|g| g.line_width))
+            .unwrap_or_default();
+        let indent_width = language
+            .and_then(|l| l.indent_width)
+            .or(global.and_then(|g| g.indent_width))
+            .unwrap_or_default();
+
+        let line_ending = language
+            .and_then(|l| l.line_ending)
+            .or(global.and_then(|g| g.line_ending))
+            .unwrap_or_default();
+
+        let options = GraphqlFormatOptions::new(
+            document_file_source
+                .to_graphql_file_source()
+                .unwrap_or_default(),
+        )
+        .with_indent_style(indent_style)
+        .with_indent_width(indent_width)
+        .with_line_width(line_width)
+        .with_line_ending(line_ending)
+        .with_quote_style(language.and_then(|l| l.quote_style).unwrap_or_default());
+        if let Some(overrides) = overrides {
+            overrides.to_override_graphql_format_options(path, options)
+        } else {
+            options
+        }
     }
 
     fn resolve_analyzer_options(
@@ -76,7 +138,7 @@ impl ExtensionHandler for GraphqlFileHandler {
             debug: DebugCapabilities {
                 debug_syntax_tree: Some(debug_syntax_tree),
                 debug_control_flow: None,
-                debug_formatter_ir: None,
+                debug_formatter_ir: Some(debug_formatter_ir),
             },
             analyzer: AnalyzerCapabilities {
                 lint: Some(lint),
@@ -86,9 +148,9 @@ impl ExtensionHandler for GraphqlFileHandler {
                 organize_imports: None,
             },
             formatter: FormatterCapabilities {
-                format: None,
-                format_range: None,
-                format_on_type: None,
+                format: Some(format),
+                format_range: Some(format_range),
+                format_on_type: Some(format_on_type),
             },
         }
     }
@@ -122,6 +184,92 @@ fn debug_syntax_tree(_rome_path: &BiomePath, parse: AnyParse) -> GetSyntaxTreeRe
         cst: format!("{syntax:#?}"),
         ast: format!("{tree:#?}"),
     }
+}
+
+fn debug_formatter_ir(
+    biome_path: &BiomePath,
+    document_file_source: &DocumentFileSource,
+    parse: AnyParse,
+    settings: WorkspaceSettingsHandle,
+) -> Result<String, WorkspaceError> {
+    let options = settings.format_options::<GraphqlLanguage>(biome_path, document_file_source);
+
+    let tree = parse.syntax();
+    let formatted = format_node(options, &tree)?;
+
+    let root_element = formatted.into_document();
+    Ok(root_element.to_string())
+}
+
+#[tracing::instrument(level = "debug", skip(parse))]
+fn format(
+    biome_path: &BiomePath,
+    document_file_source: &DocumentFileSource,
+    parse: AnyParse,
+    settings: WorkspaceSettingsHandle,
+) -> Result<Printed, WorkspaceError> {
+    let options = settings.format_options::<GraphqlLanguage>(biome_path, document_file_source);
+
+    tracing::debug!("Format with the following options: \n{}", options);
+
+    let tree = parse.syntax();
+    let formatted = format_node(options, &tree)?;
+
+    match formatted.print() {
+        Ok(printed) => Ok(printed),
+        Err(error) => Err(WorkspaceError::FormatError(error.into())),
+    }
+}
+
+fn format_range(
+    biome_path: &BiomePath,
+    document_file_source: &DocumentFileSource,
+    parse: AnyParse,
+    settings: WorkspaceSettingsHandle,
+    range: TextRange,
+) -> Result<Printed, WorkspaceError> {
+    let options = settings.format_options::<GraphqlLanguage>(biome_path, document_file_source);
+
+    let tree = parse.syntax();
+    let printed = biome_graphql_formatter::format_range(options, &tree, range)?;
+    Ok(printed)
+}
+
+fn format_on_type(
+    biome_path: &BiomePath,
+    document_file_source: &DocumentFileSource,
+    parse: AnyParse,
+    settings: WorkspaceSettingsHandle,
+    offset: TextSize,
+) -> Result<Printed, WorkspaceError> {
+    let options = settings.format_options::<GraphqlLanguage>(biome_path, document_file_source);
+
+    let tree = parse.syntax();
+
+    let range = tree.text_range();
+    if offset < range.start() || offset > range.end() {
+        return Err(WorkspaceError::FormatError(FormatError::RangeError {
+            input: TextRange::at(offset, TextSize::from(0)),
+            tree: range,
+        }));
+    }
+
+    let token = match tree.token_at_offset(offset) {
+        // File is empty, do nothing
+        TokenAtOffset::None => panic!("empty file"),
+        TokenAtOffset::Single(token) => token,
+        // The cursor should be right after the closing character that was just typed,
+        // select the previous token as the correct one
+        TokenAtOffset::Between(token, _) => token,
+    };
+
+    let root_node = match token.parent() {
+        Some(node) => node,
+        None => panic!("found a token with no parent"),
+    };
+
+    let printed = biome_graphql_formatter::format_sub_tree(options, &root_node)?;
+    Ok(printed)
 }
 
 fn lint(params: LintParams) -> LintResults {

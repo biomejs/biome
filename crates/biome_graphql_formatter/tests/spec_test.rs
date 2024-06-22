@@ -35,8 +35,7 @@ pub fn run(spec_input_file: &str, _expected_file: &str, test_directory: &str, _f
                 formatter: Some(PartialGraphqlFormatter {
                     enabled: Some(true),
                     ..Default::default()
-                }),
-                ..Default::default()
+                })
             }),
             ..Default::default()
         },
