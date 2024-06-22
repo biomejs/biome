@@ -29,7 +29,7 @@ use biome_json_parser::{parse_json_with_cache, JsonParserOptions};
 use biome_json_syntax::JsonFileSource;
 use biome_parser::AnyParse;
 use biome_project::NodeJsProject;
-use biome_rowan::{NodeCache, TextRange, TextSize};
+use biome_rowan::{NodeCache, TextLen, TextRange, TextSize};
 use dashmap::{mapref::entry::Entry, DashMap};
 use indexmap::IndexSet;
 use std::ffi::OsStr;
@@ -73,6 +73,24 @@ pub(crate) struct Document {
     /// Use `WorkspaceServer#file_sources` to retrieve the file source that belongs to the document.
     pub(crate) file_source_index: usize,
     node_cache: NodeCache,
+}
+
+// TODO: remove once an actual implementation for the matches is present
+struct DummySearchMatchesProvider;
+
+impl DummySearchMatchesProvider {
+    // a match that goes from the first to the last character of the first line, if present
+    fn get_range(input: &str) -> Vec<TextRange> {
+        let mut lines = input.lines();
+        let first_line = lines.next();
+
+        let max_size = match first_line {
+            Some(v) => v.text_len(),
+            None => return vec![]
+        };
+
+        vec![TextRange::new(TextSize::from(0), max_size)]
+    }
 }
 
 impl WorkspaceServer {
@@ -790,11 +808,14 @@ impl Workspace for WorkspaceServer {
 
         // FIXME: Let's implement some real matching here...
 
-        // TODO: not as random?
-        let match_ranges = vec![
-            TextRange::new(TextSize::from(4), TextSize::from(6)),
-            TextRange::new(TextSize::from(133), TextSize::from(165))
-        ];
+        let document = self
+            .documents
+            .get_mut(&path)
+            .ok_or_else(WorkspaceError::not_found)?;
+
+        let content = document.content.as_str();
+
+        let match_ranges = DummySearchMatchesProvider::get_range(content);
 
         Ok(SearchResults {
             file: path,
