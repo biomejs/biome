@@ -146,6 +146,7 @@ impl FileFeaturesResult {
             self.features_supported
                 .insert(FeatureName::OrganizeImports, SupportKind::Supported);
         }
+        self.features_supported.insert(FeatureName::Search, SupportKind::Supported);
 
         self
     }

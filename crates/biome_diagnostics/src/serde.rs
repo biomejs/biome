@@ -286,6 +286,7 @@ impl From<DiagnosticTag> for DiagnosticTags {
             DiagnosticTag::UnnecessaryCode => DiagnosticTags::UNNECESSARY_CODE,
             DiagnosticTag::DeprecatedCode => DiagnosticTags::DEPRECATED_CODE,
             DiagnosticTag::Verbose => DiagnosticTags::VERBOSE,
+            DiagnosticTag::Search => DiagnosticTags::SEARCH,
         }
     }
 }

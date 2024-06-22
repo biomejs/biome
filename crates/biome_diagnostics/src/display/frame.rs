@@ -254,6 +254,81 @@ pub(super) fn print_frame(fmt: &mut fmt::Formatter<'_>, location: Location<'_>) 
     fmt.write_str("\n")
 }
 
+// TODO: clean up @BackupMiles
+pub(super) fn print_highlighted_frame(fmt: &mut fmt::Formatter<'_>, location: Location<'_>) -> io::Result<()> {
+    let Some(span) = location.span else {
+        return Ok(());
+    };
+    let Some(source_code) = location.source_code else {
+        return Ok(());
+    };
+
+    let source = SourceFile::new(source_code);
+    
+    let start = source.location(span.start())?;
+    let end = source.location(span.end())?;
+
+    let match_line_start = start.line_number;
+    let match_line_end = end.line_number.saturating_add(1);
+
+    for line_index in IntoIter::new(match_line_start..match_line_end) {
+        let current_range = source.line_range(line_index.to_zero_indexed());
+        let current_range = match current_range {
+            Ok(v) => v,
+            Err(_) => continue
+        };
+
+        let current_text = source_code.text[current_range].trim_end_matches(['\r', '\n']);
+
+        let is_first_line = line_index == start.line_number;
+        let is_last_line = line_index == end.line_number;
+
+        let start_index_relative_to_line = span.start().max(current_range.start()) - current_range.start();
+        let end_index_relative_to_line = span.end().min(current_range.end()) - current_range.start();
+
+        let marker = if is_first_line && is_last_line {
+            TextRange::new(
+                start_index_relative_to_line,
+                end_index_relative_to_line,
+            )
+        }  else if is_last_line {
+            let start_index = current_text
+                .text_len()
+                .checked_sub(current_text.trim_start().text_len())
+                .expect("integer overflow");
+            TextRange::new(
+                start_index,
+                end_index_relative_to_line
+            )
+        } else {
+            TextRange::new(
+                start_index_relative_to_line,
+                current_text.text_len()
+            )
+        };
+
+        fmt.write_markup(markup! {
+            <Emphasis>{format_args!("{line_index} \u{2502} ")}</Emphasis>
+        })?;
+
+        let iter = current_text.char_indices().peekable();
+
+        for (i, char) in iter {
+            let should_highlight = i >= marker.start().into() && i < marker.end().into();
+            if should_highlight {
+                fmt.write_markup(markup! { <Emphasis><Info>{char}</Info></Emphasis> })?;
+                continue;
+            }
+
+            write!(fmt, "{char}")?;
+        }
+
+        writeln!(fmt)?;
+    }
+
+    Ok(())
+}
+
 /// Calculate the length of the string representation of `value`
 pub(super) fn calculate_print_width(mut value: OneIndexed) -> NonZeroUsize {
     // SAFETY: Constant is being initialized with a non-zero value

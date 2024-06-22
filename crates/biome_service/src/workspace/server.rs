@@ -29,7 +29,7 @@ use biome_json_parser::{parse_json_with_cache, JsonParserOptions};
 use biome_json_syntax::JsonFileSource;
 use biome_parser::AnyParse;
 use biome_project::NodeJsProject;
-use biome_rowan::NodeCache;
+use biome_rowan::{NodeCache, TextRange, TextSize};
 use dashmap::{mapref::entry::Entry, DashMap};
 use indexmap::IndexSet;
 use std::ffi::OsStr;
@@ -106,7 +106,7 @@ impl WorkspaceServer {
     /// Get the supported capabilities for a given file path
     fn get_file_capabilities(&self, path: &BiomePath) -> Capabilities {
         let language = self.get_file_source(path);
-
+        
         debug!("File capabilities: {:?} {:?}", &language, &path);
         self.features.get_capabilities(path, language)
     }
@@ -783,10 +783,22 @@ impl Workspace for WorkspaceServer {
     }
 
     fn search_pattern(&self, params: SearchPatternParams) -> Result<SearchResults, WorkspaceError> {
+        let SearchPatternParams { 
+            path,
+            pattern: _pattern
+         } = params;
+
         // FIXME: Let's implement some real matching here...
+
+        // TODO: not as random?
+        let match_ranges = vec![
+            TextRange::new(TextSize::from(4), TextSize::from(6)),
+            TextRange::new(TextSize::from(133), TextSize::from(165))
+        ];
+
         Ok(SearchResults {
-            file: params.path,
-            matches: Vec::new(),
+            file: path,
+            matches: match_ranges
         })
     }
 

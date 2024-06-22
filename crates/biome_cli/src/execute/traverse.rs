@@ -2,8 +2,7 @@ use super::process_file::{process_file, DiffKind, FileStatus, Message};
 use super::{Execution, TraversalMode};
 use crate::cli_options::CliOptions;
 use crate::execute::diagnostics::{
-    CIFormatDiffDiagnostic, CIOrganizeImportsDiffDiagnostic, ContentDiffAdvice,
-    FormatDiffDiagnostic, OrganizeImportsDiffDiagnostic, PanicDiagnostic,
+    CIFormatDiffDiagnostic, CIOrganizeImportsDiffDiagnostic, ContentDiffAdvice, FormatDiffDiagnostic, OrganizeImportsDiffDiagnostic, PanicDiagnostic
 };
 use crate::reporter::TraversalSummary;
 use crate::{CliDiagnostic, CliSession};
@@ -241,6 +240,10 @@ impl<'ctx> DiagnosticsPrinter<'ctx> {
     /// - it should not be considered if its severity level is lower than the one provided via CLI;
     /// - it should not be considered if it's a verbose diagnostic and the CLI **didn't** request a `--verbose` option.
     fn should_skip_diagnostic(&self, severity: Severity, diagnostic_tags: DiagnosticTags) -> bool {
+        if diagnostic_tags.is_search() {
+            return false;
+        }
+
         if severity < self.diagnostic_level {
             return true;
         }
@@ -583,7 +586,8 @@ impl<'ctx, 'app> TraversalContext for TraversalOptions<'ctx, 'app> {
             TraversalMode::Lint { .. } => file_features.supports_lint(),
             // Imagine if Biome can't handle its own configuration file...
             TraversalMode::Migrate { .. } => true,
-            TraversalMode::Search { .. } => false,
+            // FIXME: switch back @BackupMiles
+            TraversalMode::Search { .. } => true,
         }
     }
 
