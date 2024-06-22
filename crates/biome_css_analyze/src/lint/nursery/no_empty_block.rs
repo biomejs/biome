@@ -57,7 +57,7 @@ impl Rule for NoEmptyBlock {
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let node = ctx.query();
-        if node.is_empty() {
+        if node.is_empty_without_comments() {
             return Some(node.clone());
         }
 

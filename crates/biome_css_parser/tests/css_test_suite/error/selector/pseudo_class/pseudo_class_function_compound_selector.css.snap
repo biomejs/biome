@@ -2,7 +2,6 @@
 source: crates/biome_css_parser/tests/spec_test.rs
 expression: snapshot
 ---
-
 ## Input
 
 ```css
@@ -307,6 +306,11 @@ CssRoot {
                                             },
                                         ],
                                     },
+                                    CssBogus {
+                                        items: [
+                                            CSS_SPACE_LITERAL@133..134 "\n" [] [],
+                                        ],
+                                    },
                                 ],
                             },
                         },
@@ -318,7 +322,7 @@ CssRoot {
             },
         },
     ],
-    eof_token: EOF@133..134 "" [Newline("\n")] [],
+    eof_token: EOF@134..134 "" [] [],
 }
 ```
 
@@ -327,7 +331,7 @@ CssRoot {
 ```
 0: CSS_ROOT@0..134
   0: (empty)
-  1: CSS_RULE_LIST@0..133
+  1: CSS_RULE_LIST@0..134
     0: CSS_QUALIFIED_RULE@0..9
       0: CSS_SELECTOR_LIST@0..7
         0: CSS_COMPOUND_SELECTOR@0..7
@@ -492,15 +496,15 @@ CssRoot {
         0: L_CURLY@120..121 "{" [] []
         1: CSS_DECLARATION_OR_RULE_LIST@121..121
         2: R_CURLY@121..122 "}" [] []
-    7: CSS_QUALIFIED_RULE@122..133
-      0: CSS_SELECTOR_LIST@122..133
-        0: CSS_COMPOUND_SELECTOR@122..133
+    7: CSS_QUALIFIED_RULE@122..134
+      0: CSS_SELECTOR_LIST@122..134
+        0: CSS_COMPOUND_SELECTOR@122..134
           0: (empty)
           1: (empty)
-          2: CSS_SUB_SELECTOR_LIST@122..133
-            0: CSS_PSEUDO_CLASS_SELECTOR@122..133
+          2: CSS_SUB_SELECTOR_LIST@122..134
+            0: CSS_PSEUDO_CLASS_SELECTOR@122..134
               0: COLON@122..124 ":" [Newline("\n")] []
-              1: CSS_BOGUS_PSEUDO_CLASS@124..133
+              1: CSS_BOGUS_PSEUDO_CLASS@124..134
                 0: HOST_KW@124..128 "host" [] []
                 1: L_PAREN@128..129 "(" [] []
                 2: CSS_COMPOUND_SELECTOR@129..133
@@ -511,8 +515,10 @@ CssRoot {
                       0: DOT@129..130 "." [] []
                       1: CSS_CUSTOM_IDENTIFIER@130..133
                         0: IDENT@130..133 "div" [] []
-      1: CSS_BOGUS_BLOCK@133..133
-  2: EOF@133..134 "" [Newline("\n")] []
+                3: CSS_BOGUS@133..134
+                  0: CSS_SPACE_LITERAL@133..134 "\n" [] []
+      1: CSS_BOGUS_BLOCK@134..134
+  2: EOF@134..134 "" [] []
 
 ```
 
@@ -672,6 +678,27 @@ pseudo_class_function_compound_selector.css:7:12 parse ━━━━━━━━�
   
   i Remove {
   
+pseudo_class_function_compound_selector.css:8:7 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a compound selector but instead found '.div
+    '.
+  
+    6 │ :host(.div .class {}
+    7 │ :host(.div {}
+  > 8 │ :host(.div
+      │       ^^^^
+  > 9 │ 
+      │ 
+  
+  i Expected a compound selector here.
+  
+    6 │ :host(.div .class {}
+    7 │ :host(.div {}
+  > 8 │ :host(.div
+      │       ^^^^
+  > 9 │ 
+      │ 
+  
 pseudo_class_function_compound_selector.css:9:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `)` but instead the file ends
@@ -689,5 +716,3 @@ pseudo_class_function_compound_selector.css:9:1 parse ━━━━━━━━�
       │ 
   
 ```
-
-

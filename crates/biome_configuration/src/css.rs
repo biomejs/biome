@@ -1,6 +1,6 @@
 use crate::PlainIndentStyle;
 use biome_deserialize_macros::{Deserializable, Merge, Partial};
-use biome_formatter::{LineEnding, LineWidth, QuoteStyle};
+use biome_formatter::{IndentWidth, LineEnding, LineWidth, QuoteStyle};
 use bpaf::Bpaf;
 use serde::{Deserialize, Serialize};
 
@@ -50,19 +50,19 @@ pub struct CssFormatter {
 
     /// The indent style applied to CSS (and its super languages) files.
     #[partial(bpaf(long("css-formatter-indent-style"), argument("tab|space"), optional))]
-    pub indent_style: PlainIndentStyle,
+    pub indent_style: Option<PlainIndentStyle>,
 
     /// The size of the indentation applied to CSS (and its super languages) files. Default to 2.
     #[partial(bpaf(long("css-formatter-indent-width"), argument("NUMBER"), optional))]
-    pub indent_width: u8,
+    pub indent_width: Option<IndentWidth>,
 
     /// The type of line ending applied to CSS (and its super languages) files.
     #[partial(bpaf(long("css-formatter-line-ending"), argument("lf|crlf|cr"), optional))]
-    pub line_ending: LineEnding,
+    pub line_ending: Option<LineEnding>,
 
     /// What's the max width of a line applied to CSS (and its super languages) files. Defaults to 80.
     #[partial(bpaf(long("css-formatter-line-width"), argument("NUMBER"), optional))]
-    pub line_width: LineWidth,
+    pub line_width: Option<LineWidth>,
 
     /// The type of quotes used in CSS code. Defaults to double.
     #[partial(bpaf(long("css-formatter-quote-style"), argument("double|single"), optional))]
@@ -73,10 +73,10 @@ impl PartialCssFormatter {
     pub fn get_formatter_configuration(&self) -> CssFormatter {
         CssFormatter {
             enabled: self.enabled.unwrap_or_default(),
-            indent_style: self.indent_style.unwrap_or_default(),
-            indent_width: self.indent_width.unwrap_or_default(),
-            line_ending: self.line_ending.unwrap_or_default(),
-            line_width: self.line_width.unwrap_or_default(),
+            indent_style: self.indent_style,
+            indent_width: self.indent_width,
+            line_ending: self.line_ending,
+            line_width: self.line_width,
             quote_style: self.quote_style.unwrap_or_default(),
         }
     }
@@ -99,4 +99,16 @@ impl PartialCssLinter {
             enabled: self.enabled.unwrap_or_default(),
         }
     }
+}
+
+#[test]
+fn default_css() {
+    let css_configuration = CssFormatter::default();
+
+    assert!(!css_configuration.enabled);
+    assert_eq!(css_configuration.indent_style, None);
+    assert_eq!(css_configuration.indent_width, None);
+    assert_eq!(css_configuration.line_ending, None);
+    assert_eq!(css_configuration.line_width, None);
+    assert_eq!(css_configuration.quote_style, QuoteStyle::Double);
 }

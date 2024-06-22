@@ -4,10 +4,12 @@
 
 #[macro_use]
 mod generated;
+mod file_source;
 mod syntax_node;
 
 use biome_rowan::{AstNode, RawSyntaxKind, SyntaxKind};
 pub use biome_rowan::{TextLen, TextRange, TextSize, TokenAtOffset, TriviaPieceKind, WalkEvent};
+pub use file_source::GraphqlFileSource;
 pub use generated::*;
 pub use syntax_node::*;
 
@@ -47,7 +49,6 @@ impl biome_rowan::SyntaxKind for GraphqlSyntaxKind {
                 | GRAPHQL_BOGUS_SELECTION
                 | GRAPHQL_BOGUS_VALUE
                 | GRAPHQL_BOGUS_TYPE
-                | GRAPHQL_BOGUS_EXTENSION
         )
     }
 
@@ -57,7 +58,6 @@ impl biome_rowan::SyntaxKind for GraphqlSyntaxKind {
             kind if AnyGraphqlSelection::can_cast(*kind) => GRAPHQL_BOGUS_SELECTION,
             kind if AnyGraphqlValue::can_cast(*kind) => GRAPHQL_BOGUS_VALUE,
             kind if AnyGraphqlType::can_cast(*kind) => GRAPHQL_BOGUS_TYPE,
-            kind if AnyGraphqlInputObjectTypeExtension::can_cast(*kind) => GRAPHQL_BOGUS_EXTENSION,
             _ => GRAPHQL_BOGUS,
         }
     }

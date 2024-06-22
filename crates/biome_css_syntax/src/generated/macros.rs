@@ -40,6 +40,10 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::CssBinaryExpression::new_unchecked(node) };
                     $body
                 }
+                $crate::CssSyntaxKind::CSS_BRACKETED_VALUE => {
+                    let $pattern = unsafe { $crate::CssBracketedValue::new_unchecked(node) };
+                    $body
+                }
                 $crate::CssSyntaxKind::CSS_CHARSET_AT_RULE => {
                     let $pattern = unsafe { $crate::CssCharsetAtRule::new_unchecked(node) };
                     $body
@@ -598,6 +602,22 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::CssTypeSelector::new_unchecked(node) };
                     $body
                 }
+                $crate::CssSyntaxKind::CSS_UNICODE_CODEPOINT => {
+                    let $pattern = unsafe { $crate::CssUnicodeCodepoint::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::CSS_UNICODE_RANGE => {
+                    let $pattern = unsafe { $crate::CssUnicodeRange::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::CSS_UNICODE_RANGE_INTERVAL => {
+                    let $pattern = unsafe { $crate::CssUnicodeRangeInterval::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::CSS_UNICODE_RANGE_WILDCARD => {
+                    let $pattern = unsafe { $crate::CssUnicodeRangeWildcard::new_unchecked(node) };
+                    $body
+                }
                 $crate::CssSyntaxKind::CSS_UNIVERSAL_NAMESPACE_PREFIX => {
                     let $pattern =
                         unsafe { $crate::CssUniversalNamespacePrefix::new_unchecked(node) };
@@ -607,8 +627,16 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::CssUniversalSelector::new_unchecked(node) };
                     $body
                 }
+                $crate::CssSyntaxKind::CSS_UNKNOWN_BLOCK_AT_RULE => {
+                    let $pattern = unsafe { $crate::CssUnknownBlockAtRule::new_unchecked(node) };
+                    $body
+                }
                 $crate::CssSyntaxKind::CSS_UNKNOWN_DIMENSION => {
                     let $pattern = unsafe { $crate::CssUnknownDimension::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::CSS_UNKNOWN_VALUE_AT_RULE => {
+                    let $pattern = unsafe { $crate::CssUnknownValueAtRule::new_unchecked(node) };
                     $body
                 }
                 $crate::CssSyntaxKind::CSS_URL_FUNCTION => {
@@ -738,13 +766,27 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::CssBogusSubSelector::new_unchecked(node) };
                     $body
                 }
+                $crate::CssSyntaxKind::CSS_BOGUS_UNICODE_RANGE_VALUE => {
+                    let $pattern =
+                        unsafe { $crate::CssBogusUnicodeRangeValue::new_unchecked(node) };
+                    $body
+                }
                 $crate::CssSyntaxKind::CSS_BOGUS_URL_MODIFIER => {
                     let $pattern = unsafe { $crate::CssBogusUrlModifier::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::CSS_UNKNOWN_AT_RULE_COMPONENT_LIST => {
+                    let $pattern =
+                        unsafe { $crate::CssUnknownAtRuleComponentList::new_unchecked(node) };
                     $body
                 }
                 $crate::CssSyntaxKind::CSS_VALUE_AT_RULE_GENERIC_VALUE => {
                     let $pattern =
                         unsafe { $crate::CssValueAtRuleGenericValue::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::CSS_BRACKETED_VALUE_LIST => {
+                    let $pattern = unsafe { $crate::CssBracketedValueList::new_unchecked(node) };
                     $body
                 }
                 $crate::CssSyntaxKind::CSS_COMPONENT_VALUE_LIST => {

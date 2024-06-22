@@ -1,14 +1,16 @@
 {
   "name": "@biomejs/biome",
-  "version": "1.8.0",
-  "bin": "bin/biome",
+  "version": "1.8.2",
+  "bin": {
+    "biome": "bin/biome"
+  },
   "scripts": {
     "postinstall": "node scripts/postinstall.js"
   },
   "homepage": "https://biomejs.dev",
   "repository": {
     "type": "git",
-    "url": "https://github.com/biomejs/biome.git",
+    "url": "git+https://github.com/biomejs/biome.git",
     "directory": "packages/@biomejs/biome"
   },
   "author": "Emanuele Stoppa",
@@ -40,13 +42,13 @@
     "url": "https://opencollective.com/biome"
   },
   "optionalDependencies": {
-    "@biomejs/cli-win32-x64": "1.7.3",
-    "@biomejs/cli-win32-arm64": "1.7.3",
-    "@biomejs/cli-darwin-x64": "1.7.3",
-    "@biomejs/cli-darwin-arm64": "1.7.3",
-    "@biomejs/cli-linux-x64": "1.7.3",
-    "@biomejs/cli-linux-arm64": "1.7.3",
-    "@biomejs/cli-linux-x64-musl": "1.7.3",
-    "@biomejs/cli-linux-arm64-musl": "1.7.3"
+    "@biomejs/cli-win32-x64": "1.8.1",
+    "@biomejs/cli-win32-arm64": "1.8.1",
+    "@biomejs/cli-darwin-x64": "1.8.1",
+    "@biomejs/cli-darwin-arm64": "1.8.1",
+    "@biomejs/cli-linux-x64": "1.8.1",
+    "@biomejs/cli-linux-arm64": "1.8.1",
+    "@biomejs/cli-linux-x64-musl": "1.8.1",
+    "@biomejs/cli-linux-arm64-musl": "1.8.1"
   }
 }

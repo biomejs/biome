@@ -2,7 +2,6 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: css/attribute/custom-selector.css
 ---
-
 # Input
 
 ```css
@@ -31,21 +30,13 @@ class
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,3 +1,23 @@
+@@ -1,3 +1,14 @@
 -@custom-selector :--icon i[class^="icon-"], i[class*=" icon-"];
 -@custom-selector :--icon i[class^="icon-"], i[class*=" icon-"];
 -@custom-selector :--icon i[class^="icon-"], i[class*=" icon-"];
-+@
-+custom-selector :--icon i[class^="icon-"],
-+i[class*=" icon-"] 
-+;
-+@
-+custom-selector :--icon i[class^="icon-"],
-+i[class*=" icon-"] 
-+;
-+@
-+custom-selector
-+:--icon
++@custom-selector :--icon i[class^='icon-'], i[class*=' icon-'];
++@custom-selector :--icon i[ class ^= 'icon-' ], i[ class *= ' icon-' ];
++@custom-selector :--icon
 +i[
 +class
 +^=
@@ -56,24 +47,15 @@ class
 +class
 +*=
 +' icon-'
-+]
-+;
++];
 ```
 
 # Output
 
 ```css
-@
-custom-selector :--icon i[class^="icon-"],
-i[class*=" icon-"] 
-;
-@
-custom-selector :--icon i[class^="icon-"],
-i[class*=" icon-"] 
-;
-@
-custom-selector
-:--icon
+@custom-selector :--icon i[class^='icon-'], i[class*=' icon-'];
+@custom-selector :--icon i[ class ^= 'icon-' ], i[ class *= ' icon-' ];
+@custom-selector :--icon
 i[
 class
 ^=
@@ -84,154 +66,5 @@ i[
 class
 *=
 ' icon-'
-]
-;
+];
 ```
-
-# Errors
-```
-custom-selector.css:1:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Unexpected value or character.
-  
-  > 1 │ @custom-selector :--icon i[class^='icon-'], i[class*=' icon-'];
-      │  ^^^^^^^^^^^^^^^
-    2 │ @custom-selector :--icon i[ class ^= 'icon-' ], i[ class *= ' icon-' ];
-    3 │ @custom-selector
-  
-  i Expected one of:
-  
-  - charset
-  - color-profile
-  - container
-  - counter-style
-  - document
-  - font-face
-  - font-feature-values
-  - font-palette-values
-  - import
-  - keyframes
-  - layer
-  - media
-  - namespace
-  - page
-  - property
-  - supports
-  - viewport
-  - scope
-  
-custom-selector.css:1:63 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `;`
-  
-  > 1 │ @custom-selector :--icon i[class^='icon-'], i[class*=' icon-'];
-      │                                                               ^
-    2 │ @custom-selector :--icon i[ class ^= 'icon-' ], i[ class *= ' icon-' ];
-    3 │ @custom-selector
-  
-  i Remove ;
-  
-custom-selector.css:2:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Unexpected value or character.
-  
-    1 │ @custom-selector :--icon i[class^='icon-'], i[class*=' icon-'];
-  > 2 │ @custom-selector :--icon i[ class ^= 'icon-' ], i[ class *= ' icon-' ];
-      │  ^^^^^^^^^^^^^^^
-    3 │ @custom-selector
-    4 │ :--icon
-  
-  i Expected one of:
-  
-  - charset
-  - color-profile
-  - container
-  - counter-style
-  - document
-  - font-face
-  - font-feature-values
-  - font-palette-values
-  - import
-  - keyframes
-  - layer
-  - media
-  - namespace
-  - page
-  - property
-  - supports
-  - viewport
-  - scope
-  
-custom-selector.css:2:71 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `;`
-  
-    1 │ @custom-selector :--icon i[class^='icon-'], i[class*=' icon-'];
-  > 2 │ @custom-selector :--icon i[ class ^= 'icon-' ], i[ class *= ' icon-' ];
-      │                                                                       ^
-    3 │ @custom-selector
-    4 │ :--icon
-  
-  i Remove ;
-  
-custom-selector.css:3:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Unexpected value or character.
-  
-    1 │ @custom-selector :--icon i[class^='icon-'], i[class*=' icon-'];
-    2 │ @custom-selector :--icon i[ class ^= 'icon-' ], i[ class *= ' icon-' ];
-  > 3 │ @custom-selector
-      │  ^^^^^^^^^^^^^^^
-    4 │ :--icon
-    5 │ i[
-  
-  i Expected one of:
-  
-  - charset
-  - color-profile
-  - container
-  - counter-style
-  - document
-  - font-face
-  - font-feature-values
-  - font-palette-values
-  - import
-  - keyframes
-  - layer
-  - media
-  - namespace
-  - page
-  - property
-  - supports
-  - viewport
-  - scope
-  
-custom-selector.css:5:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `i`
-  
-    3 │ @custom-selector
-    4 │ :--icon
-  > 5 │ i[
-      │ ^
-    6 │ class
-    7 │ ^=
-  
-  i Remove i
-  
-custom-selector.css:16:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `;`
-  
-    14 │ ' icon-'
-    15 │ ]
-  > 16 │ ;
-       │ ^
-    17 │ 
-  
-  i Remove ;
-  
-
-```
-
-

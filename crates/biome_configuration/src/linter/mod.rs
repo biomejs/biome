@@ -370,6 +370,7 @@ impl<'de> serde::Deserialize<'de> for RuleSelector {
     }
 }
 
+#[cfg(feature = "schema")]
 impl schemars::JsonSchema for RuleSelector {
     fn schema_name() -> String {
         "RuleCode".to_string()

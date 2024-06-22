@@ -49,4 +49,28 @@ a {
   -webkit-mask-image: url(mask.png);
 }
 
+/* Custom property */
+a {
+  --custom-color: #1234560;
+}
+
+a {
+  --custom-margin: 100px;
+}
+
+a {
+  --custom-property: 10px;
+}
+
+/* Composition */
+.classA {
+  color: green;
+  background: red;
+}
+
+.classB {
+  composes: classA;
+  color: yellow;
+}
+
 ```

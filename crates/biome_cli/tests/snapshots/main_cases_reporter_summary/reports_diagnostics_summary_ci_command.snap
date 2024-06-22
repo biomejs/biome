@@ -87,6 +87,6 @@ lint/suspicious/noDebugger                              8 (8 error(s), 0 warning
 ```
 
 ```block
-Checked 2 files in <TIME>. No fixes needed.
+Checked 2 files in <TIME>. No fixes applied.
 Found 44 errors.
 ```

@@ -11,5 +11,5 @@ debugger; delete obj.prop; a === -0;
 # Emitted Messages
 
 ```block
-Checked 1 file in <TIME>. No fixes needed.
+Checked 1 file in <TIME>. No fixes applied.
 ```

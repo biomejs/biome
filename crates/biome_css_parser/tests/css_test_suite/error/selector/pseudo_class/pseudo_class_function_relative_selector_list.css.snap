@@ -2,7 +2,6 @@
 source: crates/biome_css_parser/tests/spec_test.rs
 expression: snapshot
 ---
-
 ## Input
 
 ```css
@@ -350,17 +349,21 @@ CssRoot {
                                     CssRelativeSelectorList [
                                         CssRelativeSelector {
                                             combinator: missing (optional),
-                                            selector: CssCompoundSelector {
-                                                nesting_selector_token: missing (optional),
-                                                simple_selector: missing (optional),
-                                                sub_selectors: CssSubSelectorList [
-                                                    CssClassSelector {
-                                                        dot_token: DOT@147..148 "." [] [],
-                                                        name: CssCustomIdentifier {
-                                                            value_token: IDENT@148..151 "div" [] [],
+                                            selector: CssComplexSelector {
+                                                left: CssCompoundSelector {
+                                                    nesting_selector_token: missing (optional),
+                                                    simple_selector: missing (optional),
+                                                    sub_selectors: CssSubSelectorList [
+                                                        CssClassSelector {
+                                                            dot_token: DOT@147..148 "." [] [],
+                                                            name: CssCustomIdentifier {
+                                                                value_token: IDENT@148..151 "div" [] [],
+                                                            },
                                                         },
-                                                    },
-                                                ],
+                                                    ],
+                                                },
+                                                combinator: CSS_SPACE_LITERAL@151..152 "\n" [] [],
+                                                right: missing (required),
                                             },
                                         },
                                     ],
@@ -375,7 +378,7 @@ CssRoot {
             },
         },
     ],
-    eof_token: EOF@151..152 "" [Newline("\n")] [],
+    eof_token: EOF@152..152 "" [] [],
 }
 ```
 
@@ -384,7 +387,7 @@ CssRoot {
 ```
 0: CSS_ROOT@0..152
   0: (empty)
-  1: CSS_RULE_LIST@0..151
+  1: CSS_RULE_LIST@0..152
     0: CSS_QUALIFIED_RULE@0..8
       0: CSS_SELECTOR_LIST@0..6
         0: CSS_COMPOUND_SELECTOR@0..6
@@ -583,30 +586,33 @@ CssRoot {
         0: L_CURLY@139..140 "{" [] []
         1: CSS_DECLARATION_OR_RULE_LIST@140..140
         2: R_CURLY@140..141 "}" [] []
-    8: CSS_QUALIFIED_RULE@141..151
-      0: CSS_SELECTOR_LIST@141..151
-        0: CSS_COMPOUND_SELECTOR@141..151
+    8: CSS_QUALIFIED_RULE@141..152
+      0: CSS_SELECTOR_LIST@141..152
+        0: CSS_COMPOUND_SELECTOR@141..152
           0: (empty)
           1: (empty)
-          2: CSS_SUB_SELECTOR_LIST@141..151
-            0: CSS_PSEUDO_CLASS_SELECTOR@141..151
+          2: CSS_SUB_SELECTOR_LIST@141..152
+            0: CSS_PSEUDO_CLASS_SELECTOR@141..152
               0: COLON@141..143 ":" [Newline("\n")] []
-              1: CSS_BOGUS_PSEUDO_CLASS@143..151
+              1: CSS_BOGUS_PSEUDO_CLASS@143..152
                 0: HAS_KW@143..146 "has" [] []
                 1: L_PAREN@146..147 "(" [] []
-                2: CSS_RELATIVE_SELECTOR_LIST@147..151
-                  0: CSS_RELATIVE_SELECTOR@147..151
+                2: CSS_RELATIVE_SELECTOR_LIST@147..152
+                  0: CSS_RELATIVE_SELECTOR@147..152
                     0: (empty)
-                    1: CSS_COMPOUND_SELECTOR@147..151
-                      0: (empty)
-                      1: (empty)
-                      2: CSS_SUB_SELECTOR_LIST@147..151
-                        0: CSS_CLASS_SELECTOR@147..151
-                          0: DOT@147..148 "." [] []
-                          1: CSS_CUSTOM_IDENTIFIER@148..151
-                            0: IDENT@148..151 "div" [] []
-      1: CSS_BOGUS_BLOCK@151..151
-  2: EOF@151..152 "" [Newline("\n")] []
+                    1: CSS_COMPLEX_SELECTOR@147..152
+                      0: CSS_COMPOUND_SELECTOR@147..151
+                        0: (empty)
+                        1: (empty)
+                        2: CSS_SUB_SELECTOR_LIST@147..151
+                          0: CSS_CLASS_SELECTOR@147..151
+                            0: DOT@147..148 "." [] []
+                            1: CSS_CUSTOM_IDENTIFIER@148..151
+                              0: IDENT@148..151 "div" [] []
+                      1: CSS_SPACE_LITERAL@151..152 "\n" [] []
+                      2: (empty)
+      1: CSS_BOGUS_BLOCK@152..152
+  2: EOF@152..152 "" [] []
 
 ```
 
@@ -763,14 +769,14 @@ pseudo_class_function_relative_selector_list.css:8:11 parse ━━━━━━�
   
 pseudo_class_function_relative_selector_list.css:10:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected `)` but instead the file ends
+  × Expected a compound selector but instead found the end of the file.
   
      8 │ :has(.div {}
      9 │ :has(.div
   > 10 │ 
        │ 
   
-  i the file ends here
+  i Expected a compound selector here.
   
      8 │ :has(.div {}
      9 │ :has(.div
@@ -778,5 +784,3 @@ pseudo_class_function_relative_selector_list.css:10:1 parse ━━━━━━�
        │ 
   
 ```
-
-

@@ -54,6 +54,6 @@ test.json:1:3 lint/nursery/noDuplicateJsonKeys ━━━━━━━━━━━
 ```
 
 ```block
-Checked 1 file in <TIME>. No fixes needed.
+Checked 1 file in <TIME>. No fixes applied.
 Found 1 error.
 ```

@@ -32,8 +32,8 @@ declare_rule! {
     /// const foo = new Date().valueOf();
     /// ```
     ///
-    /// ```js,expect_diagnostic,ignore
-    /// const foo = +new Date;
+    /// ```js,expect_diagnostic
+    /// const foo = +new Date();
     /// ```
     ///
     /// ```js,expect_diagnostic
@@ -168,14 +168,15 @@ fn get_date_method_issue(
         .object()
         .ok()?
         .omit_parentheses();
-    let object_name = object
-        .as_js_new_expression()?
+
+    let new_expr = object.as_js_new_expression()?;
+    let object_name = new_expr
         .callee()
         .ok()?
         .get_callee_object_name()?
         .token_text_trimmed();
 
-    if object_name != "Date" {
+    if object_name != "Date" || new_expr.arguments()?.args().len() > 0 {
         return None;
     }
 

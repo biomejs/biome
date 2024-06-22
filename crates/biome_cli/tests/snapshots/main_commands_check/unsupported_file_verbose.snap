@@ -35,6 +35,6 @@ check.txt files/missingHandler  VERBOSE  ━━━━━━━━━━━━━
 ```
 
 ```block
-Checked 0 files in <TIME>. No fixes needed.
+Checked 0 files in <TIME>. No fixes applied.
 Found 1 warning.
 ```

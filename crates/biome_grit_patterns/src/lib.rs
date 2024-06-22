@@ -10,11 +10,11 @@ mod grit_js_parser;
 mod grit_node;
 mod grit_node_patterns;
 mod grit_query;
+mod grit_resolved_pattern;
 mod grit_target_language;
 mod grit_target_node;
 mod grit_tree;
 mod pattern_compiler;
-mod resolved_pattern;
 mod source_location_ext;
 mod util;
 mod variables;
@@ -22,6 +22,7 @@ mod variables;
 pub use errors::*;
 pub use grit_query::GritQuery;
 pub use grit_target_language::{GritTargetLanguage, JsTargetLanguage};
+pub use grit_tree::GritTargetTree;
 
 use biome_grit_parser::parse_grit;
 

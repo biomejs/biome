@@ -42,8 +42,6 @@ GraphqlBogusDefinition = SyntaxElement*
 GraphqlBogusSelection = SyntaxElement*
 GraphqlBogusValue = SyntaxElement*
 GraphqlBogusType = SyntaxElement*
-// Extension that don't add anything
-GraphqlBogusExtension = SyntaxElement*
 
 GraphqlName = value: 'graphql_name'
 
@@ -74,7 +72,7 @@ AnyGraphqlDefinition =
 	| GraphqlInterfaceTypeExtension
 	| GraphqlUnionTypeExtension
 	| GraphqlEnumTypeExtension
-	| AnyGraphqlInputObjectTypeExtension
+	| GraphqlInputObjectTypeExtension
 
 // https://spec.graphql.org/October2021/#sec-Language.Operations.Query-shorthand
 AnyGraphqlOperationDefinition = GraphqlOperationDefinition | GraphqlSelectionSet
@@ -310,7 +308,7 @@ GraphqlSchemaExtension =
   'extend'
   'schema'
   directives: GraphqlDirectiveList
-  root_operation_types: GraphqlRootOperationTypes
+  root_operation_types: GraphqlRootOperationTypes?
 
 GraphqlRootOperationTypes =
 	'{'
@@ -521,25 +519,13 @@ GraphqlInputFieldsDefinition =
 GraphqlInputFieldList = GraphqlInputValueDefinition*
 
 // https://spec.graphql.org/October2021/#sec-Input-Object-Extensions
-AnyGraphqlInputObjectTypeExtension =
-	GraphqlInputObjectTypeExtensionWithFields
-	| GraphqlInputObjectTypeExtension
-	| GraphqlBogusExtension
-
 // extend input A @d { x: y }
-GraphqlInputObjectTypeExtensionWithFields =
-	'extend'
-	'input'
-	name: GraphqlName
-	directives: GraphqlDirectiveList
-	input_fields: GraphqlInputFieldsDefinition
-
-// extend input A @d
 GraphqlInputObjectTypeExtension =
 	'extend'
 	'input'
 	name: GraphqlName
 	directives: GraphqlDirectiveList
+	input_fields: GraphqlInputFieldsDefinition?
 
 // directive @a(b: c) repeatable on
 //   | QUERY

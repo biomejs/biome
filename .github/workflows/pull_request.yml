@@ -25,11 +25,11 @@ env:
 
 jobs:
   format:
-    name: Format and Lint Rust Files
+    name: Format project
     runs-on: ubuntu-latest
     steps:
       - name: Checkout PR branch
-        uses: actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29 # v4.1.6
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
       - name: Free Disk Space
         uses: ./.github/actions/free-disk-space
       - name: Install toolchain
@@ -44,11 +44,11 @@ jobs:
           taplo format --check
 
   lint:
-    name: Lint Rust Files
+    name: Lint project
     runs-on: ubuntu-latest
     steps:
       - name: Checkout PR Branch
-        uses: actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29 # v4.1.6
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
       - name: Free Disk Space
         uses: ./.github/actions/free-disk-space
       - name: Install toolchain
@@ -57,14 +57,16 @@ jobs:
           components: clippy
           cache-base: main
       - name: Run clippy
-        run: cargo lint
+        run: |
+          cargo lint
+          cargo run -p rules_check
 
   check-dependencies:
     name: Check Dependencies
     runs-on: ubuntu-latest
     steps:
       - name: Checkout PR Branch
-        uses: actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29 # v4.1.6
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
       - name: Free Disk Space
         uses: ./.github/actions/free-disk-space
       - name: Install toolchain
@@ -84,7 +86,7 @@ jobs:
           - os: ubuntu-latest
     steps:
       - name: Checkout PR branch
-        uses: actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29 # v4.1.6
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
       - name: Free Disk Space
         uses: ./.github/actions/free-disk-space
       - name: Install toolchain
@@ -102,7 +104,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout PR branch
-        uses: actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29 # v4.1.6
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
       - name: Free Disk Space
         uses: ./.github/actions/free-disk-space
       - name: Install toolchain
@@ -146,7 +148,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout PR branch
-        uses: actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29 # v4.1.6
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
       - name: Free Disk Space
         uses: ./.github/actions/free-disk-space
       - name: Install toolchain
@@ -161,7 +163,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout PR branch
-        uses: actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29 # v4.1.6
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
       - name: Free Disk Space
         uses: ./.github/actions/free-disk-space
       - name: Install toolchain

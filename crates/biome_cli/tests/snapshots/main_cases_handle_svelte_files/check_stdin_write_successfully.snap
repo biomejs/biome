@@ -29,9 +29,16 @@ var foo = "";
 ```
 
 ```block
-file.svelte lint/suspicious/noDebugger  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+file.svelte:3:1 lint/suspicious/noDebugger  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × This is an unexpected use of the debugger statement.
+  
+    1 │ import Button from "./components/Button.svelte";
+    2 │ import { Form } from "./components/Form.svelte";
+  > 3 │ debugger;
+      │ ^^^^^^^^^
+    4 │ statement();
+    5 │ var foo = "";
   
   i Unsafe fix: Remove debugger statement
   
@@ -45,9 +52,15 @@ file.svelte lint/suspicious/noDebugger  FIXABLE  ━━━━━━━━━━�
 ```
 
 ```block
-file.svelte lint/style/noVar  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+file.svelte:5:1 lint/style/noVar  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Use let or const instead of var.
+  
+    3 │ debugger;
+    4 │ statement();
+  > 5 │ var foo = "";
+      │ ^^^^^^^^^^^^
+    6 │ 
   
   i A variable declared with var is accessible in the whole module. Thus, the variable can be accessed before its initialization and outside the block where it is declared.
   

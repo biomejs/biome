@@ -81,7 +81,7 @@ use self::{
 };
 use crate::{grit_context::GritQueryContext, CompileError};
 use biome_grit_syntax::{AnyGritMaybeCurlyPattern, AnyGritPattern, GritSyntaxKind};
-use biome_rowan::AstNode;
+use biome_rowan::AstNode as _;
 use grit_pattern_matcher::pattern::{DynamicPattern, DynamicSnippet, DynamicSnippetPart, Pattern};
 
 pub(crate) struct PatternCompiler;

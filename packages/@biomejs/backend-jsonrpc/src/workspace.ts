@@ -135,7 +135,7 @@ export interface PartialFormatterConfiguration {
 	/**
 	 * The size of the indentation, 2 by default (deprecated, use `indent-width`)
 	 */
-	indentSize?: number;
+	indentSize?: IndentWidth;
 	/**
 	 * The indent style.
 	 */
@@ -143,7 +143,7 @@ export interface PartialFormatterConfiguration {
 	/**
 	 * The size of the indentation, 2 by default
 	 */
-	indentWidth?: number;
+	indentWidth?: IndentWidth;
 	/**
 	 * The type of line ending.
 	 */
@@ -273,7 +273,7 @@ export interface PartialCssFormatter {
 	/**
 	 * The size of the indentation applied to CSS (and its super languages) files. Default to 2.
 	 */
-	indentWidth?: number;
+	indentWidth?: IndentWidth;
 	/**
 	 * The type of line ending applied to CSS (and its super languages) files.
 	 */
@@ -310,6 +310,7 @@ export interface PartialCssParser {
 	cssModules?: boolean;
 }
 export type AttributePosition = "auto" | "multiline";
+export type IndentWidth = number;
 export type PlainIndentStyle = "tab" | "space";
 export type LineEnding = "lf" | "crlf" | "cr";
 /**
@@ -345,7 +346,7 @@ export interface PartialJavascriptFormatter {
 	/**
 	 * The size of the indentation applied to JavaScript (and its super languages) files. Default to 2.
 	 */
-	indentSize?: number;
+	indentSize?: IndentWidth;
 	/**
 	 * The indent style applied to JavaScript (and its super languages) files.
 	 */
@@ -353,7 +354,7 @@ export interface PartialJavascriptFormatter {
 	/**
 	 * The size of the indentation applied to JavaScript (and its super languages) files. Default to 2.
 	 */
-	indentWidth?: number;
+	indentWidth?: IndentWidth;
 	/**
 	 * The type of quotes used in JSX. Defaults to double.
 	 */
@@ -420,7 +421,7 @@ export interface PartialJsonFormatter {
 	/**
 	 * The size of the indentation applied to JSON (and its super languages) files. Default to 2.
 	 */
-	indentSize?: number;
+	indentSize?: IndentWidth;
 	/**
 	 * The indent style applied to JSON (and its super languages) files.
 	 */
@@ -428,7 +429,7 @@ export interface PartialJsonFormatter {
 	/**
 	 * The size of the indentation applied to JSON (and its super languages) files. Default to 2.
 	 */
-	indentWidth?: number;
+	indentWidth?: IndentWidth;
 	/**
 	 * The type of line ending applied to JSON (and its super languages) files.
 	 */
@@ -1014,6 +1015,10 @@ export interface Nursery {
 	 */
 	noImportantInKeyframe?: RuleConfiguration_for_Null;
 	/**
+	 * Disallow non-standard direction values for linear gradient functions.
+	 */
+	noInvalidDirectionInLinearGradient?: RuleConfiguration_for_Null;
+	/**
 	 * Disallow the use of @import at-rules in invalid positions.
 	 */
 	noInvalidPositionAtImportRule?: RuleConfiguration_for_Null;
@@ -1034,6 +1039,14 @@ export interface Nursery {
 	 */
 	noRestrictedImports?: RuleConfiguration_for_RestrictedImportsOptions;
 	/**
+	 * Disallow shorthand properties that override related longhand properties.
+	 */
+	noShorthandPropertyOverrides?: RuleConfiguration_for_Null;
+	/**
+	 * Enforce the use of String.slice() over String.substr() and String.substring().
+	 */
+	noSubstr?: RuleFixConfiguration_for_Null;
+	/**
 	 * Disallow the use of dependencies that aren't specified in the package.json.
 	 */
 	noUndeclaredDependencies?: RuleConfiguration_for_Null;
@@ -1049,6 +1062,10 @@ export interface Nursery {
 	 * Disallow unknown properties.
 	 */
 	noUnknownProperty?: RuleConfiguration_for_Null;
+	/**
+	 * Disallow unknown pseudo-class selectors.
+	 */
+	noUnknownPseudoClassSelector?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow unknown pseudo-element selectors.
 	 */
@@ -1089,6 +1106,10 @@ export interface Nursery {
 	 * Enforce the use of new for all builtins, except String, Number, Boolean, Symbol and BigInt.
 	 */
 	useConsistentBuiltinInstantiation?: RuleFixConfiguration_for_Null;
+	/**
+	 * Disallows invalid named grid areas in CSS Grid Layouts.
+	 */
+	useConsistentGridAreas?: RuleConfiguration_for_Null;
 	/**
 	 * Use Date.now() to get the number of milliseconds since the Unix Epoch.
 	 */
@@ -1145,6 +1166,10 @@ export interface Nursery {
 	 * Require regex literals to be declared at the top level.
 	 */
 	useTopLevelRegex?: RuleConfiguration_for_Null;
+	/**
+	 * Use valid values for the autocomplete attribute on input elements.
+	 */
+	useValidAutocomplete?: RuleConfiguration_for_UseValidAutocompleteOptions;
 }
 /**
  * A list of rules that belong to this group
@@ -1631,7 +1656,7 @@ export interface OverrideFormatterConfiguration {
 	/**
 	 * The size of the indentation, 2 by default (deprecated, use `indent-width`)
 	 */
-	indentSize?: number;
+	indentSize?: IndentWidth;
 	/**
 	 * The indent style.
 	 */
@@ -1639,7 +1664,7 @@ export interface OverrideFormatterConfiguration {
 	/**
 	 * The size of the indentation, 2 by default
 	 */
-	indentWidth?: number;
+	indentWidth?: IndentWidth;
 	/**
 	 * The type of line ending.
 	 */
@@ -1692,6 +1717,9 @@ export type RuleConfiguration_for_RestrictedImportsOptions =
 export type RuleFixConfiguration_for_UtilityClassSortingOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_UtilityClassSortingOptions;
+export type RuleConfiguration_for_UseValidAutocompleteOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_UseValidAutocompleteOptions;
 export type RuleConfiguration_for_RestrictedGlobalsOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_RestrictedGlobalsOptions;
@@ -1807,6 +1835,16 @@ export interface RuleWithFixOptions_for_UtilityClassSortingOptions {
 	 */
 	options: UtilityClassSortingOptions;
 }
+export interface RuleWithOptions_for_UseValidAutocompleteOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: UseValidAutocompleteOptions;
+}
 export interface RuleWithOptions_for_RestrictedGlobalsOptions {
 	/**
 	 * The severity of the emitted diagnostics by the rule
@@ -1917,6 +1955,12 @@ export interface UtilityClassSortingOptions {
 	 * Names of the functions or tagged templates that will be sorted.
 	 */
 	functions?: string[];
+}
+export interface UseValidAutocompleteOptions {
+	/**
+	 * `input` like custom components that should be checked.
+	 */
+	inputComponents: string[];
 }
 /**
  * Options for the rule `noRestrictedGlobals`.
@@ -2114,7 +2158,8 @@ export type DocumentFileSource =
 	| "Unknown"
 	| { Js: JsFileSource }
 	| { Json: JsonFileSource }
-	| { Css: CssFileSource };
+	| { Css: CssFileSource }
+	| { Graphql: GraphqlFileSource };
 export interface JsFileSource {
 	/**
 	 * Used to mark if the source is being used for an Astro, Svelte or Vue file
@@ -2132,6 +2177,7 @@ export interface JsonFileSource {
 export interface CssFileSource {
 	variant: CssVariant;
 }
+export interface GraphqlFileSource {}
 export type EmbeddingKind = "Astro" | "Vue" | "Svelte" | "None";
 export type Language =
 	| "JavaScript"
@@ -2333,17 +2379,21 @@ export type Category =
 	| "lint/nursery/noEmptyBlock"
 	| "lint/nursery/noEvolvingTypes"
 	| "lint/nursery/noImportantInKeyframe"
+	| "lint/nursery/noInvalidDirectionInLinearGradient"
 	| "lint/nursery/noInvalidPositionAtImportRule"
 	| "lint/nursery/noLabelWithoutControl"
 	| "lint/nursery/noMisplacedAssertion"
 	| "lint/nursery/noMissingGenericFamilyKeyword"
 	| "lint/nursery/noReactSpecificProps"
 	| "lint/nursery/noRestrictedImports"
+	| "lint/nursery/noShorthandPropertyOverrides"
+	| "lint/nursery/noSubstr"
 	| "lint/nursery/noTypeOnlyImportAttributes"
 	| "lint/nursery/noUndeclaredDependencies"
 	| "lint/nursery/noUnknownFunction"
 	| "lint/nursery/noUnknownMediaFeatureName"
 	| "lint/nursery/noUnknownProperty"
+	| "lint/nursery/noUnknownPseudoClassSelector"
 	| "lint/nursery/noUnknownSelectorPseudoElement"
 	| "lint/nursery/noUnknownUnit"
 	| "lint/nursery/noUnmatchableAnbSelector"
@@ -2354,6 +2404,7 @@ export type Category =
 	| "lint/nursery/useAdjacentOverloadSignatures"
 	| "lint/nursery/useBiomeSuppressionComment"
 	| "lint/nursery/useConsistentBuiltinInstantiation"
+	| "lint/nursery/useConsistentGridAreas"
 	| "lint/nursery/useDateNow"
 	| "lint/nursery/useDefaultSwitchClause"
 	| "lint/nursery/useErrorMessage"
@@ -2368,6 +2419,7 @@ export type Category =
 	| "lint/nursery/useThrowNewError"
 	| "lint/nursery/useThrowOnlyError"
 	| "lint/nursery/useTopLevelRegex"
+	| "lint/nursery/useValidAutocomplete"
 	| "lint/performance/noAccumulatingSpread"
 	| "lint/performance/noBarrelFile"
 	| "lint/performance/noDelete"
@@ -2473,6 +2525,7 @@ export type Category =
 	| "lint/suspicious/useIsArray"
 	| "lint/suspicious/useNamespaceKeyword"
 	| "lint/suspicious/useValidTypeof"
+	| "assists/nursery/useSortedKeys"
 	| "files/missingHandler"
 	| "format"
 	| "check"
@@ -2630,8 +2683,10 @@ export interface CodeSuggestion {
 	suggestion: TextEdit;
 }
 /**
- * The sub-category of a refactor code action
- */
+	* The sub-category of a refactor code action.
+
+[Check the LSP spec](https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#codeActionKind) for more information: 
+	 */
 export type RefactorKind =
 	| "None"
 	| "Extract"

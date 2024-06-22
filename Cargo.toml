@@ -1,7 +1,7 @@
 [workspace]
 # Use the newer version of the cargo resolver
 # https://doc.rust-lang.org/cargo/reference/resolver.html#resolver-versions
-members  = ["crates/*", "xtask/bench", "xtask/codegen", "xtask/coverage", "xtask/libs_bench"]
+members  = ["crates/*", "xtask/bench", "xtask/codegen", "xtask/coverage", "xtask/libs_bench", "xtask/rules_check"]
 resolver = "2"
 
 [workspace.lints.rust]
@@ -159,19 +159,20 @@ bpaf               = { version = "0.9.9", features = ["derive"] }
 countme            = "3.0.1"
 crossbeam          = "0.8.4"
 dashmap            = "5.4.0"
-enumflags2         = "0.7.9"
+enumflags2         = "0.7.10"
 getrandom          = "0.2.15"
 ignore             = "0.4.21"
 indexmap           = { version = "2.2.6", features = ["serde"] }
 insta              = "1.39.0"
 lazy_static        = "1.4.0"
+natord             = "1.0.9"
 oxc_resolver       = "1.8.1"
 proc-macro2        = "1.0.85"
 quickcheck         = "1.0.3"
 quickcheck_macros  = "1.0.0"
 quote              = "1.0.36"
 rayon              = "1.10.0"
-regex              = "1.10.4"
+regex              = "1.10.5"
 rustc-hash         = "1.1.0"
 schemars           = { version = "0.8.21", features = ["indexmap2", "smallvec"] }
 serde              = { version = "1.0.203", features = ["derive"] }
@@ -182,12 +183,11 @@ slotmap            = "1.0.7"
 smallvec           = { version = "1.13.2", features = ["union", "const_new", "serde"] }
 syn                = "1.0.109"
 termcolor          = "1.4.1"
-tokio              = "1.36.0"
+tokio              = "1.38.0"
 tracing            = { version = "0.1.40", default-features = false, features = ["std"] }
 tracing-subscriber = "0.3.18"
 unicode-bom        = "2.0.3"
 unicode-width      = "0.1.12"
-
 [profile.dev.package.biome_wasm]
 debug     = true
 opt-level = "s"

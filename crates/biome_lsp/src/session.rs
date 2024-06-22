@@ -4,7 +4,7 @@ use crate::extension_settings::ExtensionSettings;
 use crate::extension_settings::CONFIGURATION_SECTION;
 use crate::utils;
 use anyhow::Result;
-use biome_analyze::RuleCategories;
+use biome_analyze::RuleCategoriesBuilder;
 use biome_configuration::ConfigurationPathHint;
 use biome_console::markup;
 use biome_diagnostics::PrintDescription;
@@ -316,18 +316,18 @@ impl Session {
         })?;
 
         let diagnostics: Vec<Diagnostic> = {
-            let mut categories = RuleCategories::SYNTAX;
+            let mut categories = RuleCategoriesBuilder::default().with_syntax();
             if self.configuration_status().is_loaded() {
                 if file_features.supports_lint() {
-                    categories |= RuleCategories::LINT
+                    categories = categories.with_lint();
                 }
                 if file_features.supports_organize_imports() {
-                    categories |= RuleCategories::ACTION
+                    categories = categories.with_action();
                 }
             }
             let result = self.workspace.pull_diagnostics(PullDiagnosticsParams {
                 path: biome_path.clone(),
-                categories,
+                categories: categories.build(),
                 max_diagnostics: u64::MAX,
                 only: Vec::new(),
                 skip: Vec::new(),

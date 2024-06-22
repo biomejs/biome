@@ -3,15 +3,15 @@
 use crate::execute::diagnostics::{ContentDiffAdvice, FormatDiffDiagnostic};
 use crate::execute::Execution;
 use crate::{CliDiagnostic, CliSession, TraversalMode};
+use biome_analyze::RuleCategoriesBuilder;
 use biome_console::{markup, ConsoleExt};
-use biome_diagnostics::Diagnostic;
 use biome_diagnostics::PrintDiagnostic;
+use biome_diagnostics::{Diagnostic, DiagnosticExt, Error};
 use biome_fs::BiomePath;
 use biome_service::file_handlers::{AstroFileHandler, SvelteFileHandler, VueFileHandler};
 use biome_service::workspace::{
     ChangeFileParams, DropPatternParams, FeaturesBuilder, FixFileParams, FormatFileParams,
-    OpenFileParams, OrganizeImportsParams, PullDiagnosticsParams, RuleCategories,
-    SupportsFeatureParams,
+    OpenFileParams, OrganizeImportsParams, PullDiagnosticsParams, SupportsFeatureParams,
 };
 use biome_service::WorkspaceError;
 use std::borrow::Cow;
@@ -75,7 +75,7 @@ pub(crate) fn run<'a>(
                 })
         }
     } else if mode.is_check() || mode.is_lint() {
-        let mut diagnostics = Vec::new();
+        let mut diagnostics: Vec<Error> = Vec::new();
         let mut new_content = Cow::Borrowed(content);
 
         workspace.open_file(OpenFileParams {
@@ -163,13 +163,29 @@ pub(crate) fn run<'a>(
         };
         if !mode.is_check_apply_unsafe() {
             let result = workspace.pull_diagnostics(PullDiagnosticsParams {
-                categories: RuleCategories::LINT | RuleCategories::SYNTAX,
+                categories: RuleCategoriesBuilder::default()
+                    .with_lint()
+                    .with_syntax()
+                    .build(),
                 path: biome_path.clone(),
                 max_diagnostics: mode.max_diagnostics.into(),
                 only,
                 skip,
             })?;
-            diagnostics.extend(result.diagnostics);
+            let content = match biome_path.extension_as_str() {
+                Some("astro") => AstroFileHandler::input(&new_content),
+                Some("vue") => VueFileHandler::input(&new_content),
+                Some("svelte") => SvelteFileHandler::input(&new_content),
+                _ => &new_content,
+            };
+            diagnostics.extend(
+                result
+                    .diagnostics
+                    .into_iter()
+                    .map(Error::from)
+                    .map(|diag| diag.with_file_source_code(content.to_string()))
+                    .collect::<Vec<_>>(),
+            );
         }
 
         if file_features.supports_format() && mode.is_check() {
@@ -195,7 +211,7 @@ pub(crate) fn run<'a>(
                         old: content.to_string(),
                     },
                 };
-                diagnostics.push(biome_diagnostics::serde::Diagnostic::new(diagnostic));
+                diagnostics.push(Error::from(diagnostic));
             }
         }
 
@@ -205,7 +221,7 @@ pub(crate) fn run<'a>(
                     {original_content}
                 });
             }
-            Cow::Owned(new_content) => {
+            Cow::Owned(ref new_content) => {
                 console.append(markup! {
                     {new_content}
                 });

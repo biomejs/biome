@@ -185,6 +185,7 @@ pub type NoSparseArray =
 pub type NoStaticOnlyClass =
     <lint::complexity::no_static_only_class::NoStaticOnlyClass as biome_analyze::Rule>::Options;
 pub type NoStringCaseMismatch = < lint :: correctness :: no_string_case_mismatch :: NoStringCaseMismatch as biome_analyze :: Rule > :: Options ;
+pub type NoSubstr = <lint::nursery::no_substr::NoSubstr as biome_analyze::Rule>::Options;
 pub type NoSuspiciousSemicolonInJsx = < lint :: suspicious :: no_suspicious_semicolon_in_jsx :: NoSuspiciousSemicolonInJsx as biome_analyze :: Rule > :: Options ;
 pub type NoSvgWithoutTitle =
     <lint::a11y::no_svg_without_title::NoSvgWithoutTitle as biome_analyze::Rule>::Options;
@@ -361,6 +362,8 @@ pub type UseValidAriaRole =
     <lint::a11y::use_valid_aria_role::UseValidAriaRole as biome_analyze::Rule>::Options;
 pub type UseValidAriaValues =
     <lint::a11y::use_valid_aria_values::UseValidAriaValues as biome_analyze::Rule>::Options;
+pub type UseValidAutocomplete =
+    <lint::nursery::use_valid_autocomplete::UseValidAutocomplete as biome_analyze::Rule>::Options;
 pub type UseValidForDirection = < lint :: correctness :: use_valid_for_direction :: UseValidForDirection as biome_analyze :: Rule > :: Options ;
 pub type UseValidLang = <lint::a11y::use_valid_lang::UseValidLang as biome_analyze::Rule>::Options;
 pub type UseValidTypeof =

@@ -1,14 +1,21 @@
 use super::compilation_context::NodeCompilationContext;
 use crate::{
-    grit_code_snippet::GritCodeSnippet, grit_context::GritQueryContext,
-    grit_target_node::GritTargetNode, grit_tree::GritTree, CompileError,
+    grit_code_snippet::GritCodeSnippet,
+    grit_context::GritQueryContext,
+    grit_node_patterns::{GritLeafNodePattern, GritNodePattern, GritNodePatternArg},
+    grit_target_node::{GritSyntaxSlot, GritTargetNode, GritTargetSyntaxKind},
+    grit_tree::GritTargetTree,
+    CompileError, GritTargetLanguage,
 };
 use grit_pattern_matcher::{
     constants::GLOBAL_VARS_SCOPE_INDEX,
-    pattern::{DynamicPattern, DynamicSnippet, DynamicSnippetPart, Pattern, Variable},
+    pattern::{
+        is_reserved_metavariable, DynamicPattern, DynamicSnippet, DynamicSnippetPart, List,
+        Pattern, RegexLike, RegexPattern, Variable,
+    },
 };
-use grit_util::{Ast, AstNode, ByteRange, Language, SnippetTree};
-use std::borrow::Cow;
+use grit_util::{traverse, Ast, AstNode, ByteRange, GritMetaValue, Language, Order, SnippetTree};
+use std::{borrow::Cow, collections::BTreeMap};
 
 pub(crate) fn parse_snippet_content(
     source: &str,
@@ -28,8 +35,7 @@ pub(crate) fn parse_snippet_content(
     if context
         .compilation
         .lang
-        .metavariable_bracket_regex()
-        .is_match(source)
+        .matches_bracket_metavariable(source)
     {
         return if is_rhs {
             Ok(Pattern::Dynamic(
@@ -43,12 +49,10 @@ pub(crate) fn parse_snippet_content(
     if context
         .compilation
         .lang
-        .exact_variable_regex()
-        .is_match(source.trim())
+        .matches_exact_metavariable(source.trim())
     {
         return match source.trim() {
-            "$_" => Ok(Pattern::Underscore),
-            "^_" => Ok(Pattern::Underscore),
+            "$_" | "^_" => Ok(Pattern::Underscore),
             name => {
                 let var = context.register_variable(name.to_owned(), range)?;
                 Ok(Pattern::Variable(var))
@@ -57,7 +61,7 @@ pub(crate) fn parse_snippet_content(
     }
 
     let snippet_trees = context.compilation.lang.parse_snippet_contexts(source);
-    let snippet_nodes = nodes_from_indices(&snippet_trees);
+    let snippet_nodes = nodes_from_trees(&snippet_trees);
     if snippet_nodes.is_empty() {
         // not checking if is_rhs. So could potentially
         // be harder to find bugs where we expect the pattern
@@ -68,9 +72,18 @@ pub(crate) fn parse_snippet_content(
         ));
     }
 
+    let patterns: Vec<(GritTargetSyntaxKind, Pattern<GritQueryContext>)> = snippet_nodes
+        .into_iter()
+        .map(|node| {
+            let range_map = metavariable_range_mapping(&node, &context.compilation.lang);
+            let pattern = pattern_from_node(&node, range, &range_map, context, is_rhs)?;
+            Ok((node.kind(), pattern))
+        })
+        .collect::<Result<_, CompileError>>()?;
     let dynamic_snippet = dynamic_snippet_from_source(source, range, context)
         .map_or(None, |s| Some(DynamicPattern::Snippet(s)));
     Ok(Pattern::CodeSnippet(GritCodeSnippet {
+        patterns,
         dynamic_snippet,
         source: source.to_owned(),
     }))
@@ -81,15 +94,8 @@ pub(crate) fn dynamic_snippet_from_source(
     source_range: ByteRange,
     context: &mut NodeCompilationContext,
 ) -> Result<DynamicSnippet, CompileError> {
-    let source_string = raw_source
-        .replace("\\n", "\n")
-        .replace("\\$", "$")
-        .replace("\\^", "^")
-        .replace("\\`", "`")
-        .replace("\\\"", "\"")
-        .replace("\\\\", "\\");
-    let source = source_string.as_str();
-    let metavariables = split_snippet(source, &context.compilation.lang);
+    let source = unescape(raw_source);
+    let metavariables = split_snippet(&source, &context.compilation.lang);
     let mut parts = Vec::with_capacity(2 * metavariables.len() + 1);
     let mut last = 0;
     // Reverse the iterator so we go over the variables in ascending order.
@@ -127,19 +133,25 @@ pub(crate) fn dynamic_snippet_from_source(
     Ok(DynamicSnippet { parts })
 }
 
-pub fn nodes_from_indices(indices: &[SnippetTree<GritTree>]) -> Vec<GritTargetNode> {
-    indices
-        .iter()
-        .filter_map(snippet_nodes_from_index)
-        .collect()
+fn nodes_from_trees(snippets: &[SnippetTree<GritTargetTree>]) -> Vec<GritTargetNode> {
+    snippets.iter().filter_map(node_from_tree).collect()
 }
 
-fn snippet_nodes_from_index(snippet: &SnippetTree<GritTree>) -> Option<GritTargetNode> {
+/// Finds the outermost node containing the parsed snippet, but not any snippet
+/// context.
+///
+/// Snippets get parsed with surrounding _context_ strings. Because of this, the
+/// root node of the snippet tree isn't necessarily the root node of the source
+/// snippet. Instead, it's the root node of the snippet with surrounding
+/// context. This function descends from the root node into the tree, to find
+/// the outermost node containing the parsed snippet, while stripping off the
+/// part of the tree that resulted from the given context.
+fn node_from_tree(snippet: &SnippetTree<GritTargetTree>) -> Option<GritTargetNode> {
     let mut snippet_root = snippet.tree.root_node();
 
     // find the outermost node with the same index as the snippet
-    'outer: while snippet_root.start_byte() < snippet.snippet_start
-        || snippet_root.end_byte() > snippet.snippet_end
+    'outer: while snippet_root.start_byte() <= snippet.snippet_start
+        || snippet_root.end_byte() >= snippet.snippet_end
     {
         let mut has_children = false;
         for child in snippet_root.clone().children() {
@@ -168,7 +180,7 @@ fn snippet_nodes_from_index(snippet: &SnippetTree<GritTree>) -> Option<GritTarge
     // stuff in the snippet we assume the root
     // is correct as long as it's the largest node within
     // the snippet length. Maybe this is too permissive?
-    let mut nodes = Vec::new();
+    let mut last_node = None;
     let root_start = snippet_root.start_byte();
     let root_end = snippet_root.end_byte();
     if root_start > snippet.snippet_start || root_end < snippet.snippet_end {
@@ -176,14 +188,225 @@ fn snippet_nodes_from_index(snippet: &SnippetTree<GritTree>) -> Option<GritTarge
     }
     while snippet_root.start_byte() == root_start && snippet_root.end_byte() == root_end {
         let first_child = snippet_root.children().next();
-        nodes.push(snippet_root);
+        last_node = Some(snippet_root);
         if let Some(child) = first_child {
             snippet_root = child
         } else {
             break;
         }
     }
-    nodes.last().cloned()
+    last_node
+}
+
+/// Creates a pattern from the snippet node.
+///
+/// The snippet node is the one returned from [`node_from_tree()`].
+fn pattern_from_node(
+    node: &GritTargetNode,
+    context_range: ByteRange,
+    range_map: &BTreeMap<ByteRange, ByteRange>,
+    context: &mut NodeCompilationContext,
+    is_rhs: bool,
+) -> anyhow::Result<Pattern<GritQueryContext>, CompileError> {
+    let metavariable = metavariable_descendent(node, context_range, range_map, context, is_rhs)?;
+    if let Some(metavariable) = metavariable {
+        return Ok(metavariable);
+    }
+
+    if !node.has_children() {
+        let content = node.text();
+        let pattern = if let Some(regex_pattern) = context
+            .compilation
+            .lang
+            .matches_replaced_metavariable(content)
+            .then(|| implicit_metavariable_regex(node, context_range, range_map, context))
+            .transpose()?
+            .flatten()
+        {
+            Pattern::Regex(Box::new(regex_pattern))
+        } else {
+            Pattern::AstLeafNode(GritLeafNodePattern::new(node.kind(), content))
+        };
+
+        return Ok(pattern);
+    }
+
+    let kind = node.kind();
+    let args = node
+        .slots()
+        .map(|slots| {
+            // TODO: Implement filtering for disregarded snippet fields.
+            // Implementing this will make it more convenient to match
+            // CST nodes without needing to match all the trivia in the
+            // snippet (if I understand correctly).
+            slots
+                .map(|slot| pattern_arg_from_slot(slot, context_range, range_map, context, is_rhs))
+                .collect::<Result<Vec<GritNodePatternArg>, CompileError>>()
+        })
+        .transpose()?
+        .unwrap_or_default();
+
+    Ok(Pattern::AstNode(Box::new(GritNodePattern { kind, args })))
+}
+
+fn pattern_arg_from_slot(
+    slot: GritSyntaxSlot,
+    context_range: ByteRange,
+    range_map: &BTreeMap<ByteRange, ByteRange>,
+    context: &mut NodeCompilationContext,
+    is_rhs: bool,
+) -> Result<GritNodePatternArg, CompileError> {
+    if slot.contains_list() {
+        let mut nodes_list: Vec<Pattern<GritQueryContext>> = match &slot {
+            GritSyntaxSlot::Node(node) => node
+                .children()
+                .map(|n| pattern_from_node(&n, context_range, range_map, context, is_rhs))
+                .collect::<Result<_, CompileError>>()?,
+            _ => Vec::new(),
+        };
+        Ok(GritNodePatternArg::new(
+            slot.index(),
+            if nodes_list.len() == 1
+                && matches!(
+                    nodes_list.first(),
+                    Some(Pattern::Variable(_) | Pattern::Underscore)
+                )
+            {
+                nodes_list.pop().unwrap()
+            } else {
+                Pattern::List(Box::new(List::new(nodes_list)))
+            },
+        ))
+    } else if let GritSyntaxSlot::Node(node) = slot {
+        let pattern = pattern_from_node(&node, context_range, range_map, context, is_rhs)?;
+        Ok(GritNodePatternArg::new(node.index(), pattern))
+    } else {
+        let pattern = Pattern::Dynamic(DynamicPattern::Snippet(DynamicSnippet {
+            parts: vec![DynamicSnippetPart::String(String::new())],
+        }));
+        Ok(GritNodePatternArg::new(slot.index(), pattern))
+    }
+}
+
+fn implicit_metavariable_regex(
+    node: &GritTargetNode,
+    context_range: ByteRange,
+    range_map: &BTreeMap<ByteRange, ByteRange>,
+    context: &mut NodeCompilationContext,
+) -> Result<Option<RegexPattern<GritQueryContext>>, CompileError> {
+    let source = node.text();
+    let capture_string = "(.*)";
+    let uncapture_string = ".*";
+    let variable_regex = context.compilation.lang.replaced_metavariable_regex();
+    let mut last = 0;
+    let mut regex_string = String::new();
+    let mut variables: Vec<Variable> = vec![];
+    for m in variable_regex.find_iter(source) {
+        regex_string.push_str(&regex::escape(&source[last..m.start()]));
+        let range = ByteRange::new(m.start(), m.end());
+        last = range.end;
+        let name = m.as_str();
+        let variable = text_to_var(name, range, context_range, range_map, context)?;
+        match variable {
+            SnippetValues::Dots => return Ok(None),
+            SnippetValues::Underscore => regex_string.push_str(uncapture_string),
+            SnippetValues::Variable(var) => {
+                regex_string.push_str(capture_string);
+                variables.push(var);
+            }
+        }
+    }
+
+    if last < source.len() {
+        regex_string.push_str(&regex::escape(&source[last..]));
+    }
+    let regex = regex_string.to_string();
+    let regex = RegexLike::Regex(regex);
+    Ok(Some(RegexPattern::new(regex, variables)))
+}
+
+fn metavariable_descendent(
+    node: &GritTargetNode,
+    context_range: ByteRange,
+    range_map: &BTreeMap<ByteRange, ByteRange>,
+    context: &mut NodeCompilationContext,
+    is_rhs: bool,
+) -> Result<Option<Pattern<GritQueryContext>>, CompileError> {
+    if !context.compilation.lang.is_metavariable(node) {
+        return Ok(None);
+    }
+
+    let name = node.text();
+    if is_reserved_metavariable(name, Some(&context.compilation.lang)) && !is_rhs {
+        return Err(CompileError::ReservedMetavariable(
+            name.trim_start_matches(context.compilation.lang.metavariable_prefix_substitute())
+                .to_string(),
+        ));
+    }
+
+    let range = node.byte_range();
+    text_to_var(name, range, context_range, range_map, context).map(|s| Some(s.into()))
+}
+
+// assumes that metavariable substitute is 1 byte larger than the original. eg.
+// len(µ) = 2 bytes, len($) = 1 byte
+fn metavariable_range_mapping(
+    node: &GritTargetNode,
+    lang: &GritTargetLanguage,
+) -> BTreeMap<ByteRange, ByteRange> {
+    let mut ranges = metavariable_ranges(node, lang);
+    let snippet_start = node.text().chars().next().unwrap_or_default() as usize;
+
+    // assumes metavariable ranges do not enclose one another
+    ranges.sort_by_key(|r| r.start);
+
+    let mut byte_offset = snippet_start;
+    let mut map = BTreeMap::new();
+    for range in ranges {
+        let start_byte = range.start - byte_offset;
+        if !cfg!(target_arch = "wasm32") {
+            byte_offset += 1;
+        }
+
+        let end_byte = range.end - byte_offset;
+        let new_range = ByteRange::new(start_byte, end_byte);
+        map.insert(range, new_range);
+    }
+
+    map
+}
+
+fn metavariable_ranges(node: &GritTargetNode, lang: &GritTargetLanguage) -> Vec<ByteRange> {
+    let cursor = node.walk();
+    traverse(cursor, Order::Pre)
+        .flat_map(|child| {
+            if lang.is_metavariable(&child) {
+                vec![child.byte_range()]
+            } else {
+                node_sub_variables(&child, lang)
+            }
+        })
+        .collect()
+}
+
+fn node_sub_variables(node: &GritTargetNode, lang: &GritTargetLanguage) -> Vec<ByteRange> {
+    let mut ranges = Vec::new();
+    if node.has_children() {
+        return ranges;
+    }
+
+    let source = node.text();
+    let variable_regex = lang.replaced_metavariable_regex();
+    for m in variable_regex.find_iter(source) {
+        let var_range = ByteRange::new(m.start(), m.end());
+        let start_byte = node.start_byte() as usize;
+        let end_byte = node.end_byte() as usize;
+        if var_range.start >= start_byte && var_range.end <= end_byte {
+            ranges.push(var_range);
+        }
+    }
+
+    ranges
 }
 
 /// Takes a snippet with metavariables and returns a list of ranges and the
@@ -209,4 +432,315 @@ pub fn split_snippet<'a>(snippet: &'a str, lang: &impl Language) -> Vec<(ByteRan
     ranges_and_metavars.sort_by(|a, b| b.0.start.cmp(&a.0.start));
 
     ranges_and_metavars
+}
+
+enum SnippetValues {
+    Dots,
+    Underscore,
+    Variable(Variable),
+}
+
+impl From<SnippetValues> for Pattern<GritQueryContext> {
+    fn from(value: SnippetValues) -> Self {
+        match value {
+            SnippetValues::Dots => Pattern::Dots,
+            SnippetValues::Underscore => Pattern::Underscore,
+            SnippetValues::Variable(v) => Pattern::Variable(v),
+        }
+    }
+}
+
+fn text_to_var(
+    name: &str,
+    range: ByteRange,
+    context_range: ByteRange,
+    range_map: &BTreeMap<ByteRange, ByteRange>,
+    context: &mut NodeCompilationContext,
+) -> Result<SnippetValues, CompileError> {
+    let name = context
+        .compilation
+        .lang
+        .snippet_metavariable_to_grit_metavariable(name)
+        .ok_or_else(|| CompileError::MetavariableNotFound(name.to_string()))?;
+    match name {
+        GritMetaValue::Dots => Ok(SnippetValues::Dots),
+        GritMetaValue::Underscore => Ok(SnippetValues::Underscore),
+        GritMetaValue::Variable(name) => {
+            let range = *range_map
+                .get(&range)
+                .ok_or_else(|| CompileError::InvalidMetavariableRange(range))?;
+            let var = context.register_variable(name, range + context_range.start)?;
+            Ok(SnippetValues::Variable(var))
+        }
+    }
+}
+
+fn unescape(raw_string: &str) -> String {
+    let mut result = String::with_capacity(raw_string.len());
+    let mut is_escape = false;
+    for c in raw_string.chars() {
+        if is_escape {
+            result.push(match c {
+                'n' => '\n',
+                c => c,
+            });
+            is_escape = false;
+        } else if c == '\\' {
+            is_escape = true;
+        } else {
+            result.push(c);
+        }
+    }
+    result
+}
+
+#[cfg(test)]
+mod tests {
+    use std::path::Path;
+
+    use super::*;
+    use crate::{
+        grit_js_parser::GritJsParser, pattern_compiler::compilation_context::CompilationContext,
+        JsTargetLanguage,
+    };
+    use grit_util::Parser;
+
+    #[test]
+    fn test_node_from_tree() {
+        let snippet = GritJsParser.parse_snippet("", "console.log('hello')", "");
+        let node = node_from_tree(&snippet).expect("no node found");
+        let formatted = format!("{node:#?}");
+        insta::assert_snapshot!(&formatted, @r###"
+        GritTargetNode {
+            node: JsLanguage(
+                Node(
+                    0: JS_CALL_EXPRESSION@0..20
+                      0: JS_STATIC_MEMBER_EXPRESSION@0..11
+                        0: JS_IDENTIFIER_EXPRESSION@0..7
+                          0: JS_REFERENCE_IDENTIFIER@0..7
+                            0: IDENT@0..7 "console" [] []
+                        1: DOT@7..8 "." [] []
+                        2: JS_NAME@8..11
+                          0: IDENT@8..11 "log" [] []
+                      1: (empty)
+                      2: (empty)
+                      3: JS_CALL_ARGUMENTS@11..20
+                        0: L_PAREN@11..12 "(" [] []
+                        1: JS_CALL_ARGUMENT_LIST@12..19
+                          0: JS_STRING_LITERAL_EXPRESSION@12..19
+                            0: JS_STRING_LITERAL@12..19 "'hello'" [] []
+                        2: R_PAREN@19..20 ")" [] []
+                    ,
+                ),
+            ),
+            tree: GritTargetTree {
+                root: JsLanguage(
+                    Node(
+                        0: JS_MODULE@0..20
+                          0: (empty)
+                          1: (empty)
+                          2: JS_DIRECTIVE_LIST@0..0
+                          3: JS_MODULE_ITEM_LIST@0..20
+                            0: JS_EXPRESSION_STATEMENT@0..20
+                              0: JS_CALL_EXPRESSION@0..20
+                                0: JS_STATIC_MEMBER_EXPRESSION@0..11
+                                  0: JS_IDENTIFIER_EXPRESSION@0..7
+                                    0: JS_REFERENCE_IDENTIFIER@0..7
+                                      0: IDENT@0..7 "console" [] []
+                                  1: DOT@7..8 "." [] []
+                                  2: JS_NAME@8..11
+                                    0: IDENT@8..11 "log" [] []
+                                1: (empty)
+                                2: (empty)
+                                3: JS_CALL_ARGUMENTS@11..20
+                                  0: L_PAREN@11..12 "(" [] []
+                                  1: JS_CALL_ARGUMENT_LIST@12..19
+                                    0: JS_STRING_LITERAL_EXPRESSION@12..19
+                                      0: JS_STRING_LITERAL@12..19 "'hello'" [] []
+                                  2: R_PAREN@19..20 ")" [] []
+                              1: (empty)
+                          4: EOF@20..20 "" [] []
+                        ,
+                    ),
+                ),
+                source: "console.log('hello')",
+            },
+        }
+        "###);
+    }
+
+    #[test]
+    fn test_pattern_from_node() {
+        let compilation_context = CompilationContext::new(
+            Path::new("test.js"),
+            GritTargetLanguage::JsTargetLanguage(JsTargetLanguage),
+        );
+        let mut vars = BTreeMap::new();
+        let mut vars_array = Vec::new();
+        let mut global_vars = BTreeMap::new();
+        let mut diagnostics = Vec::new();
+        let mut context = NodeCompilationContext::new(
+            &compilation_context,
+            &mut vars,
+            &mut vars_array,
+            &mut global_vars,
+            &mut diagnostics,
+        );
+
+        let snippet_source = "console.log('hello')";
+        let snippet = GritJsParser.parse_snippet("", snippet_source, "");
+        let node = node_from_tree(&snippet).expect("no node found");
+        let range = ByteRange::new(0, snippet_source.len());
+        let range_map = metavariable_range_mapping(&node, &context.compilation.lang);
+        let pattern = pattern_from_node(&node, range, &range_map, &mut context, false)
+            .expect("cannot compile pattern from node");
+        let formatted = format!("{pattern:#?}");
+        insta::assert_snapshot!(&formatted, @r###"
+        AstNode(
+            GritNodePattern {
+                kind: JsSyntaxKind(
+                    JS_CALL_EXPRESSION,
+                ),
+                args: [
+                    GritNodePatternArg {
+                        slot_index: 0,
+                        pattern: AstNode(
+                            GritNodePattern {
+                                kind: JsSyntaxKind(
+                                    JS_STATIC_MEMBER_EXPRESSION,
+                                ),
+                                args: [
+                                    GritNodePatternArg {
+                                        slot_index: 0,
+                                        pattern: AstNode(
+                                            GritNodePattern {
+                                                kind: JsSyntaxKind(
+                                                    JS_IDENTIFIER_EXPRESSION,
+                                                ),
+                                                args: [
+                                                    GritNodePatternArg {
+                                                        slot_index: 0,
+                                                        pattern: AstLeafNode(
+                                                            GritLeafNodePattern {
+                                                                kind: JsSyntaxKind(
+                                                                    JS_REFERENCE_IDENTIFIER,
+                                                                ),
+                                                                text: "console",
+                                                            },
+                                                        ),
+                                                    },
+                                                ],
+                                            },
+                                        ),
+                                    },
+                                    GritNodePatternArg {
+                                        slot_index: 1,
+                                        pattern: AstLeafNode(
+                                            GritLeafNodePattern {
+                                                kind: JsSyntaxKind(
+                                                    DOT,
+                                                ),
+                                                text: ".",
+                                            },
+                                        ),
+                                    },
+                                    GritNodePatternArg {
+                                        slot_index: 2,
+                                        pattern: AstLeafNode(
+                                            GritLeafNodePattern {
+                                                kind: JsSyntaxKind(
+                                                    JS_NAME,
+                                                ),
+                                                text: "log",
+                                            },
+                                        ),
+                                    },
+                                ],
+                            },
+                        ),
+                    },
+                    GritNodePatternArg {
+                        slot_index: 1,
+                        pattern: Dynamic(
+                            Snippet(
+                                DynamicSnippet {
+                                    parts: [
+                                        String(
+                                            "",
+                                        ),
+                                    ],
+                                },
+                            ),
+                        ),
+                    },
+                    GritNodePatternArg {
+                        slot_index: 2,
+                        pattern: Dynamic(
+                            Snippet(
+                                DynamicSnippet {
+                                    parts: [
+                                        String(
+                                            "",
+                                        ),
+                                    ],
+                                },
+                            ),
+                        ),
+                    },
+                    GritNodePatternArg {
+                        slot_index: 3,
+                        pattern: AstNode(
+                            GritNodePattern {
+                                kind: JsSyntaxKind(
+                                    JS_CALL_ARGUMENTS,
+                                ),
+                                args: [
+                                    GritNodePatternArg {
+                                        slot_index: 0,
+                                        pattern: AstLeafNode(
+                                            GritLeafNodePattern {
+                                                kind: JsSyntaxKind(
+                                                    L_PAREN,
+                                                ),
+                                                text: "(",
+                                            },
+                                        ),
+                                    },
+                                    GritNodePatternArg {
+                                        slot_index: 1,
+                                        pattern: List(
+                                            List {
+                                                patterns: [
+                                                    AstLeafNode(
+                                                        GritLeafNodePattern {
+                                                            kind: JsSyntaxKind(
+                                                                JS_STRING_LITERAL_EXPRESSION,
+                                                            ),
+                                                            text: "'hello'",
+                                                        },
+                                                    ),
+                                                ],
+                                            },
+                                        ),
+                                    },
+                                    GritNodePatternArg {
+                                        slot_index: 2,
+                                        pattern: AstLeafNode(
+                                            GritLeafNodePattern {
+                                                kind: JsSyntaxKind(
+                                                    R_PAREN,
+                                                ),
+                                                text: ")",
+                                            },
+                                        ),
+                                    },
+                                ],
+                            },
+                        ),
+                    },
+                ],
+            },
+        )
+        "###);
+    }
 }

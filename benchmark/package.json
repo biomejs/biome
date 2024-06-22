@@ -9,8 +9,8 @@
 	"type": "module",
 	"devDependencies": {
 		"@mixer/parallel-prettier": "2.0.3",
-		"dprint": "0.45.1",
-		"eslint": "9.4.0",
+		"dprint": "0.46.2",
+		"eslint": "9.5.0",
 		"prettier": "3.2.5"
 	}
 }

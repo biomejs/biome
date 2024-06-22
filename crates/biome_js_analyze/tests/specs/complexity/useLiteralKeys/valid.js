@@ -19,5 +19,20 @@ class C { a(){} }
 class C { get a(){} }
 class C { set a(x){} }
 a = {
+	"b": d
+};
+class C { "a" = 0 }
+class C { "a"(){} }
+class C { get "a"(){} }
+class C { set "a"(x){} }
+a = {
+	"__proto__": null,
+}
+// Exception
+a = {
 	["__proto__"]: null,
 }
+a = {
+  [`line1
+  line2`]: true,
+};

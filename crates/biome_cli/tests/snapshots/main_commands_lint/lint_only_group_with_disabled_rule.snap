@@ -62,6 +62,6 @@ check.js:3:9 lint/suspicious/noDebugger  FIXABLE  ━━━━━━━━━━
 ```
 
 ```block
-Checked 1 file in <TIME>. No fixes needed.
+Checked 1 file in <TIME>. No fixes applied.
 Found 1 error.
 ```

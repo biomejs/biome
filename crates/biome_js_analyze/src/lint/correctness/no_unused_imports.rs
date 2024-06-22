@@ -5,7 +5,7 @@ use crate::{
 };
 use biome_analyze::{
     context::RuleContext, declare_rule, options::JsxRuntime, ActionCategory, FixKind, Rule,
-    RuleDiagnostic,
+    RuleDiagnostic, RuleSource,
 };
 use biome_console::markup;
 use biome_js_factory::make;
@@ -79,6 +79,7 @@ declare_rule! {
         version: "1.3.0",
         name: "noUnusedImports",
         language: "js",
+        sources: &[RuleSource::EslintUnusedImports("no-unused-imports")],
         recommended: false,
         fix_kind: FixKind::Safe,
     }

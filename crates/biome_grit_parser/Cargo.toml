@@ -17,7 +17,6 @@ biome_grit_factory = { workspace = true }
 biome_grit_syntax  = { workspace = true }
 biome_parser       = { workspace = true }
 biome_rowan        = { workspace = true }
-bitflags           = { workspace = true }
 schemars           = { workspace = true, optional = true }
 serde              = { workspace = true, features = ["derive"] }
 serde_json         = { workspace = true }
@@ -32,9 +31,7 @@ quickcheck_macros = { workspace = true }
 tests_macros      = { workspace = true }
 
 [features]
-schemars = ["dep:schemars"]
-serde    = ["biome_grit_syntax/serde"]
-tests    = []
+schemars = ["dep:schemars", "biome_grit_syntax/schema"]
 
 # cargo-workspaces metadata
 [package.metadata.workspaces]

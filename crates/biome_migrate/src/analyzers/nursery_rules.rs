@@ -6,11 +6,12 @@ use biome_diagnostics::category;
 use biome_json_factory::make::{
     json_member, json_member_list, json_member_name, json_object_value, json_string_literal, token,
 };
-use biome_json_syntax::{AnyJsonValue, JsonMember, JsonMemberList, JsonRoot, T};
+use biome_json_syntax::{AnyJsonValue, JsonMember, JsonMemberList, JsonRoot, JsonSyntaxToken, T};
 use biome_rowan::{
     AstNode, AstNodeExt, AstSeparatedList, BatchMutationExt, TextRange, TriviaPieceKind, WalkEvent,
 };
 use rustc_hash::FxHashMap;
+use std::iter::repeat;
 
 declare_migration! {
     pub(crate) NurseryRules {
@@ -23,18 +24,20 @@ declare_migration! {
 #[derive(Debug)]
 pub(crate) struct MigrateRuleState {
     /// The member of the new rule
-    nursery_rule_member: JsonMember,
+    nursery_rule: JsonMember,
     /// The member of the group where the new rule should be moved
     nursery_group: JsonMember,
-    /// The name of the new rule
-    new_rule_name: &'static str,
+    /// The comma separator to be deleted
+    optional_separator: Option<JsonSyntaxToken>,
+    /// The name of the target rule
+    target_rule_name: &'static str,
     /// The new group name
-    new_group_name: &'static str,
+    target_group_name: &'static str,
 }
 
 impl MigrateRuleState {
     fn as_rule_name_range(&self) -> TextRange {
-        self.nursery_rule_member.range()
+        self.nursery_rule.range()
     }
 }
 
@@ -69,7 +72,7 @@ fn find_group_by_name(root: &JsonRoot, group_name: &str) -> Option<JsonMember> {
 
 // used for testing purposes
 /// - Left: name of the rule in the nursery group
-/// - Right: name of the new group and name of the new rule (sometimes we change name)
+/// - Right: name of the target group and name of the target rule (sometimes we change name)
 #[cfg(debug_assertions)]
 const RULES_TO_MIGRATE: &[(&str, (&str, &str))] = &[
     (
@@ -111,7 +114,6 @@ const RULES_TO_MIGRATE: &[(&str, (&str, &str))] = &[
         "noSuspiciousSemicolonInJsx",
         ("suspicious", "noSuspiciousSemicolonInJsx"),
     ),
-    ("useImportRestrictions", ("style", "useImportRestrictions")),
     (
         "noConstantMathMinMaxClamp",
         ("correctness", "noConstantMathMinMaxClamp"),
@@ -131,36 +133,54 @@ impl Rule for NurseryRules {
         let node = ctx.query();
         let mut rules_to_migrate = vec![];
 
-        let nursery_group = find_group_by_name(node, "nursery");
-
-        if let Some(nursery_member) = nursery_group {
-            let mut rules = FxHashMap::default();
-            for (group, (new_group, new_name)) in RULES_TO_MIGRATE {
-                rules.insert(*group, (*new_group, *new_name));
+        if let Some(nursery_group) = find_group_by_name(node, "nursery") {
+            let mut rules_should_be_migrated = FxHashMap::default();
+            for (nursery_rule_name, (target_group_name, target_rule_name)) in RULES_TO_MIGRATE {
+                rules_should_be_migrated
+                    .insert(*nursery_rule_name, (*target_group_name, *target_rule_name));
             }
-            let object_value = nursery_member
+            let Some(nursery_group_object) = nursery_group
                 .value()
                 .ok()
-                .and_then(|node| node.as_json_object_value().cloned());
-
-            let Some(object_value) = object_value else {
+                .and_then(|node| node.as_json_object_value().cloned())
+            else {
                 return rules_to_migrate;
             };
 
-            for group_member in object_value.json_member_list().iter().flatten() {
-                let Ok(member_name_text) = group_member
+            let mut separator_iterator = nursery_group_object
+                .json_member_list()
+                .separators()
+                .flatten()
+                .enumerate()
+                // Repeat the first separator,
+                // so when the rule to be deleted is the first rule,
+                // its trailing comma is also deleted:
+                // {
+                //    "ruleA": "error",
+                //    "ruleB": "error",
+                //    "ruleC": "error"
+                // }
+                .flat_map(|(i, s)| repeat(s).take(if i == 0 { 2 } else { 1 }));
+
+            for nursery_rule in nursery_group_object.json_member_list().iter().flatten() {
+                let optional_separator = separator_iterator.next();
+
+                let Ok(nursery_rule_name) = nursery_rule
                     .name()
                     .and_then(|node| node.inner_string_text())
                 else {
                     continue;
                 };
-                let new_rule = rules.get(member_name_text.text()).copied();
-                if let Some((new_group, new_rule)) = new_rule {
+
+                if let Some((target_group_name, target_rule_name)) =
+                    rules_should_be_migrated.get(nursery_rule_name.text())
+                {
                     rules_to_migrate.push(MigrateRuleState {
-                        nursery_rule_member: group_member.clone(),
-                        nursery_group: nursery_member.clone(),
-                        new_rule_name: new_rule,
-                        new_group_name: new_group,
+                        nursery_rule: nursery_rule.clone(),
+                        nursery_group: nursery_group.clone(),
+                        optional_separator,
+                        target_rule_name,
+                        target_group_name,
                     })
                 }
             }
@@ -175,7 +195,7 @@ impl Rule for NurseryRules {
                 category!("migrate"),
                 state.as_rule_name_range(),
                 markup! {
-                    "This rule has been promoted to "<Emphasis>{state.new_group_name}"/"{state.new_rule_name}</Emphasis>"."
+                    "This rule has been promoted to "<Emphasis>{state.target_group_name}"/"{state.target_rule_name}</Emphasis>"."
                 }
                 .to_owned(),
             )
@@ -186,36 +206,55 @@ impl Rule for NurseryRules {
     fn action(ctx: &RuleContext<Self>, state: &Self::State) -> Option<MigrationAction> {
         let node = ctx.query();
         let MigrateRuleState {
-            new_group_name,
-            new_rule_name,
+            target_group_name,
+            target_rule_name,
+            optional_separator,
             nursery_group,
-            nursery_rule_member: nursery_rule,
+            nursery_rule,
         } = state;
         let mut mutation = ctx.root().begin();
+        let mut rule_already_exists = false;
 
-        let new_group = find_group_by_name(node, new_group_name);
+        // If the target group exists, then we just need to delete the rule from the nursery group,
+        // and update the target group by adding a new member with the name of rule we are migrating
+        if let Some(target_group) = find_group_by_name(node, target_group_name) {
+            let target_group_value = target_group.value().ok()?;
+            let target_group_value_object = target_group_value.as_json_object_value()?;
 
-        // If the group exists, then we just need to update that group by adding a new member
-        // with the name of rule we are migrating
-        if let Some(group) = new_group {
-            let value = group.value().ok()?;
-            let value = value.as_json_object_value()?;
+            let current_rules = target_group_value_object.json_member_list();
+            let current_rules_count = current_rules.len();
 
-            let mut separators = vec![];
-            let mut new_list = vec![];
+            let mut separators = Vec::with_capacity(current_rules_count + 1);
+            let mut new_rules = Vec::with_capacity(current_rules_count + 1);
 
-            let old_list_node = value.json_member_list();
-            let new_rule_member =
-                make_new_rule_name_member(new_rule_name, &nursery_rule.clone().detach())?;
-
-            for member in old_list_node.iter() {
-                let member = member.ok()?;
-                new_list.push(member.clone());
+            for current_rule in current_rules.iter() {
+                let current_rule = current_rule.ok()?;
+                if current_rule
+                    .name()
+                    .and_then(|node| node.inner_string_text())
+                    .is_ok_and(|text| text.text() == *target_rule_name)
+                {
+                    rule_already_exists = true;
+                    break;
+                }
+                new_rules.push(current_rule.clone());
                 separators.push(token(T![,]));
             }
-            new_list.push(new_rule_member);
-            mutation.replace_node(old_list_node, json_member_list(new_list, separators));
+
+            // We only add the rule if the rule doesn't already exist in the target group
+            // to avoid duplicate rules in the target group
+            if !rule_already_exists {
+                let new_rule_member =
+                    make_new_rule_name_member(target_rule_name, &nursery_rule.clone().detach())?;
+                new_rules.push(new_rule_member);
+                mutation.replace_node(current_rules, json_member_list(new_rules, separators));
+            }
+
+            // Remove the stale nursery rule and the corresponding comma separator
             mutation.remove_node(nursery_rule.clone());
+            if let Some(separator) = optional_separator {
+                mutation.remove_token(separator.clone());
+            }
         }
         // If we don't have a group, we have to create one. To avoid possible side effects with our mutation logic
         // we recreate the "rules" object by removing the `rules.nursery.<nursery_rule_name>` member (hence we create a new list),
@@ -230,48 +269,49 @@ impl Rule for NurseryRules {
                 .filter_map(|node| {
                     let node = node.ok()?;
 
-                    if &node == nursery_group {
-                        let object = node.value().ok()?;
-                        let object = object.as_json_object_value()?;
-                        let new_nursery_group: Vec<_> = object
-                            .json_member_list()
-                            .iter()
-                            .filter_map(|node| {
-                                let node = node.ok()?;
-                                if &node == nursery_rule {
-                                    None
-                                } else {
-                                    Some(node)
-                                }
-                            })
-                            .collect();
-
-                        let new_member = json_member(
-                            node.name().ok()?.clone(),
-                            token(T![:]),
-                            AnyJsonValue::JsonObjectValue(json_object_value(
-                                token(T!['{']),
-                                json_member_list(new_nursery_group, vec![]),
-                                token(T!['}']),
-                            )),
-                        );
-
-                        return Some(new_member);
+                    if &node != nursery_group {
+                        return Some(node);
                     }
 
-                    Some(node)
+                    let object = node.value().ok()?;
+                    let object = object.as_json_object_value()?;
+                    let new_nursery_group: Vec<_> = object
+                        .json_member_list()
+                        .iter()
+                        .filter_map(|node| {
+                            let node = node.ok()?;
+                            if &node == nursery_rule {
+                                None
+                            } else {
+                                Some(node)
+                            }
+                        })
+                        .collect();
+
+                    let new_member = json_member(
+                        node.name().ok()?.clone(),
+                        token(T![:]),
+                        AnyJsonValue::JsonObjectValue(json_object_value(
+                            token(T!['{']),
+                            json_member_list(new_nursery_group, vec![]),
+                            token(T!['}']),
+                        )),
+                    );
+
+                    Some(new_member)
                 })
                 .collect();
+
             let new_member = json_member(
                 json_member_name(
-                    json_string_literal(new_group_name)
+                    json_string_literal(target_group_name)
                         .with_leading_trivia([(TriviaPieceKind::Whitespace, "\n")]),
                 ),
                 token(T![:]),
                 AnyJsonValue::JsonObjectValue(json_object_value(
                     token(T!['{']),
                     json_member_list(
-                        vec![make_new_rule_name_member(new_rule_name, nursery_rule)?],
+                        vec![make_new_rule_name_member(target_rule_name, nursery_rule)?],
                         vec![],
                     ),
                     token(T!['}']).with_leading_trivia_pieces(
@@ -311,8 +351,14 @@ impl Rule for NurseryRules {
         Some(MigrationAction::new(
             ActionCategory::QuickFix,
             ctx.metadata().applicability(),
-            markup! {
-                "Move the rule to the new stable group."
+            if rule_already_exists {
+                markup! {
+                    "Remove the stale rule from the nursery group."
+                }
+            } else {
+                markup! {
+                    "Move the rule to the new stable group."
+                }
             }
             .to_owned(),
             mutation,

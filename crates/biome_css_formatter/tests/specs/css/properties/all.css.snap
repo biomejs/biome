@@ -30,6 +30,15 @@ div {
 	);
 }
 
+.variable {
+	--myVariableName: 10px;
+	margin: var(--myVariableName);
+}
+
+.function {
+	transform: translateX(10px) translateY(10px);
+}
+
 ```
 
 
@@ -49,8 +58,8 @@ Quote style: Double Quotes
 
 ```css
 div {
-	all: initial;
-	all: inherit;
+	all: InItial;
+	all: inherIT;
 	all: revert-layer;
 
 	all: unknown-value;
@@ -67,5 +76,14 @@ div {
 		180deg,
 		180deg
 	);
+}
+
+.variable {
+	--myVariableName: 10px;
+	margin: var(--myVariableName);
+}
+
+.function {
+	transform: translateX(10px) translateY(10px);
 }
 ```

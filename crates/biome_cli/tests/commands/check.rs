@@ -3293,3 +3293,52 @@ function f() {\n\targuments;\n}
         result,
     ));
 }
+
+#[test]
+fn should_error_if_unstaged_files_only_with_staged_flag() {
+    let mut console = BufferConsole::default();
+    let mut fs = MemoryFileSystem::default();
+    // Unstaged
+    fs.insert(
+        Path::new("file1.js").into(),
+        r#"console.log('file1');"#.as_bytes(),
+    );
+    let result = run_cli(
+        DynRef::Borrowed(&mut fs),
+        &mut console,
+        Args::from([("check"), "--staged"].as_slice()),
+    );
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "should_error_if_unstaged_files_only_with_staged_flag",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn should_error_if_unchanged_files_only_with_changed_flag() {
+    let mut console = BufferConsole::default();
+    let mut fs = MemoryFileSystem::default();
+    // Unchanged
+    fs.insert(
+        Path::new("file1.js").into(),
+        r#"console.log('file1');"#.as_bytes(),
+    );
+    let result = run_cli(
+        DynRef::Borrowed(&mut fs),
+        &mut console,
+        Args::from([("check"), "--changed", "--since=main"].as_slice()),
+    );
+    assert!(result.is_err(), "run_cli returned {result:?}");
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "should_error_if_unchanged_files_only_with_changed_flag",
+        fs,
+        console,
+        result,
+    ));
+}

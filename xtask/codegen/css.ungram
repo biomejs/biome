@@ -59,6 +59,7 @@ CssBogusDocumentMatcher = SyntaxElement*
 CssBogusFontFamilyName = SyntaxElement*
 CssBogusCustomIdentifier = SyntaxElement*
 CssBogusKeyframesName = SyntaxElement*
+CssBogusUnicodeRangeValue = SyntaxElement*
 
 CssRoot =
 	bom: 'UNICODE_BOM'?
@@ -450,6 +451,13 @@ AnyCssDeclarationOrAtRule =
     CssDeclarationWithSemicolon
     | CssAtRule
 
+// When nested in this way, the contents of a nested group rule's block are parsed as <block-contents> rather than <rule-list>:
+// https://drafts.csswg.org/css-nesting-1/#conditionals
+AnyCssConditionalBlock =
+	CssDeclarationOrRuleBlock
+	| CssRuleBlock
+	| CssBogusBlock
+
 // @page :left { background: red; @media (500px <= width <= 500px) {  } }
 // 						   ^^^^^^^^^^^^^^^^
 // NOTE: ';' is optional for the last declaration in a block. For declarations not at the end, the parser will raise an error if ';' is missing.
@@ -593,6 +601,8 @@ AnyCssAtRule =
 	| CssDocumentAtRule
 	| CssPropertyAtRule
 	| CssValueAtRule
+	| CssUnknownBlockAtRule
+	| CssUnknownValueAtRule
 	| CssBogusAtRule
 
 // @charset "UTF-8";
@@ -662,11 +672,7 @@ CssFontFamilyName =
 
 // @font-feature-values Font Second Gothic { }
 //                      ^^^^^^^^^^^^^^^^^^
-CssCustomIdentifierList = CssCustomIdentifier*
-
-AnyCssCustomIdentifier =
-	CssCustomIdentifier
-	| CssBogusCustomIdentifier
+CssCustomIdentifierList = AnyCssCustomIdentifier*
 
 AnyCssFontFeatureValuesBlock =
 	CssFontFeatureValuesBlock
@@ -736,7 +742,7 @@ CssContainerAtRule =
 	'container'
 	name: CssCustomIdentifier?
 	query: AnyCssContainerQuery
-	block: AnyCssRuleBlock
+	block: AnyCssConditionalBlock
 
 // <container-query>
 AnyCssContainerQuery =
@@ -985,7 +991,7 @@ CssKeyframesPercentageSelector =
 CssMediaAtRule =
 	'media'
 	queries: CssMediaQueryList
-	block: AnyCssRuleBlock
+	block: AnyCssConditionalBlock
 
 // @media screen, (width > 500px), print {}
 // 				^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -1249,7 +1255,7 @@ AnyCssLayer =
 //        ^^^^^^^^^^^^^^^^
 CssLayerDeclaration =
 	references: CssLayerReferenceList
-	block: AnyCssRuleBlock
+	block: AnyCssConditionalBlock
 
 // @layer framework, bar.baz;
 //        ^^^^^^^^^^^^^^^^^^^
@@ -1285,7 +1291,7 @@ CssLayerNameList = (CssIdentifier ('.' CssIdentifier)*)
 CssSupportsAtRule =
 	'supports'
 	condition: AnyCssSupportsCondition
-	block: AnyCssRuleBlock
+	block: AnyCssConditionalBlock
 
 AnyCssSupportsCondition =
 	CssSupportsNotCondition
@@ -1362,7 +1368,7 @@ CssSupportsFeatureSelector =
 CssScopeAtRule =
 	'scope'
 	range: AnyCssScopeRange?
-	block: AnyCssRuleBlock
+	block: AnyCssConditionalBlock
 
 AnyCssScopeRange =
 	CssScopeRangeStart
@@ -1574,6 +1580,24 @@ CssValueAtRuleGenericProperty =
 // improvements to the parser without breaking existing functionality.
 CssValueAtRuleGenericValue = SyntaxElement*
 
+/// Represents an unknown or unsupported CSS at-rule during parsing.
+///
+/// When encountered during parsing, `CssUnknownAtRule` serves as a fallback mechanism,
+/// allowing the parser to continue processing the stylesheet by treating the unsupported rule
+/// as part of an unformed tree. This enables graceful handling of CSS constructs that are not
+/// supported by the parser, ensuring that the stylesheet can still be processed without errors.
+CssUnknownBlockAtRule =
+	name: CssIdentifier
+	components: CssUnknownAtRuleComponentList
+	block: AnyCssDeclarationOrRuleBlock
+
+CssUnknownValueAtRule =
+	name: CssIdentifier
+	components: CssUnknownAtRuleComponentList
+	';'
+
+CssUnknownAtRuleComponentList = SyntaxElement*
+
 ///////////////
 // AUXILIARY
 ///////////////
@@ -1590,6 +1614,8 @@ AnyCssValue =
 	| CssRatio
 	| AnyCssFunction
 	| CssColor
+	| CssBracketedValue
+	| CssUnicodeRange
 
 
 // https://drafts.csswg.org/css-syntax/#typedef-dimension-token
@@ -1705,6 +1731,49 @@ CssColor =
 	'#'
 	value:'css_color_literal'
 
+// The CssBracketedValue is a special construct used to represent CSS values that are enclosed in brackets.
+// This is commonly seen in properties like grid-template-areas where the value is a list of identifiers representing grid areas.
+// [full-start] 1fr [main-start end] 480px [main-end] 1fr [full-end]
+// ^^^^^^^^^^^^     ^^^^^^^^^^^^^^^^        ^^^^^^^^^^     ^^^^^^^^^^
+// https://drafts.csswg.org/css-grid/#named-lines
+CssBracketedValue =
+	'['
+		items: CssBracketedValueList
+	']'
+
+CssBracketedValueList = AnyCssCustomIdentifier*
+
+AnyCssCustomIdentifier =
+	CssCustomIdentifier
+	| CssBogusCustomIdentifier
+
+// https://drafts.csswg.org/css-fonts/#unicode-range-desc
+// https://www.w3.org/TR/css-syntax-3/#typedef-urange
+// <urange> =
+// u '+' <ident-token> '?'* |
+// u <dimension-token> '?'* |
+// u <number-token> '?'* |
+// u <number-token> <dimension-token> |
+// u <number-token> <number-token> |
+// u '+' '?'+
+// unicode-range: U+000-49F, U+2000-27FF, U+2900-2BFF, U+1D400-1D7FF, U+ff??;
+// 							  ^^^^^^^^^  ^^^^^^^^^^^  ^^^^^^^^^^^  ^^^^^^^^^^^^^  ^^^^^^
+CssUnicodeRange =
+	prefix: 'U+'
+	value: AnyCssUnicodeValue
+
+AnyCssUnicodeValue =
+	CssUnicodeCodepoint
+	| CssUnicodeRangeWildcard
+	| CssUnicodeRangeInterval
+	| CssBogusUnicodeRangeValue
+
+CssUnicodeRangeInterval =
+	start: CssUnicodeCodepoint
+	'-'
+	end: CssUnicodeCodepoint
+
+
 // Any identifier. Case insensitve, used for standard property names, values, type selectors, etc.
 CssIdentifier = value: 'ident'
 // Any non-standard identifier. Case sensitive, used for class names, ids, etc. Custom identifiers
@@ -1715,4 +1784,6 @@ CssCustomIdentifier = value: 'ident'
 CssDashedIdentifier = value: 'ident'
 CssString = value: 'css_string_literal'
 CssNumber = value: 'css_number_literal'
+CssUnicodeCodepoint = value: 'css_unicode_codepoint_literal'
+CssUnicodeRangeWildcard = value: 'css_unicode_range_wildcard_literal'
 CssUrlValueRaw = value: 'css_url_value_raw_literal'

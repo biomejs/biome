@@ -174,18 +174,9 @@ pub fn run(test_case: &str, _snapshot_name: &str, test_directory: &str, outcome_
 #[test]
 pub fn quick_test() {
     let code = r#"
-.a {
-	composes: myClass;
+.formTable tbody td {
+    border-left: 1px # solid;
 }
-
-.otherClassName {
-	composes: className from "./style.css";
-}
-
-.otherClassName {
-	composes: globalClassName from global;
-}
-
     "#;
 
     let root = parse_css(

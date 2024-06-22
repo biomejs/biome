@@ -114,6 +114,8 @@ pub enum RuleSource {
     EslintTypeScript(&'static str),
     /// Rules from [Eslint Plugin Unicorn](https://github.com/sindresorhus/eslint-plugin-unicorn)
     EslintUnicorn(&'static str),
+    /// Rules from  [Eslint Plugin Unused Imports](https://github.com/sweepline/eslint-plugin-unused-imports)
+    EslintUnusedImports(&'static str),
     /// Rules from [Eslint Plugin Mysticatea](https://github.com/mysticatea/eslint-plugin)
     EslintMysticatea(&'static str),
     /// Rules from [Eslint Plugin Barrel Files](https://github.com/thepassle/eslint-plugin-barrel-files)
@@ -131,22 +133,23 @@ impl PartialEq for RuleSource {
 impl std::fmt::Display for RuleSource {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            RuleSource::Clippy(_) => write!(f, "Clippy"),
-            RuleSource::Eslint(_) => write!(f, "ESLint"),
-            RuleSource::EslintImport(_) => write!(f, "eslint-plugin-import"),
-            RuleSource::EslintImportAccess(_) => write!(f, "eslint-plugin-import-access"),
-            RuleSource::EslintJest(_) => write!(f, "eslint-plugin-jest"),
-            RuleSource::EslintJsxA11y(_) => write!(f, "eslint-plugin-jsx-a11y"),
-            RuleSource::EslintReact(_) => write!(f, "eslint-plugin-react"),
-            RuleSource::EslintReactHooks(_) => write!(f, "eslint-plugin-react-hooks"),
-            RuleSource::EslintSolid(_) => write!(f, "eslint-plugin-solid"),
-            RuleSource::EslintSonarJs(_) => write!(f, "eslint-plugin-sonarjs"),
-            RuleSource::EslintStylistic(_) => write!(f, "eslint-plugin-stylistic"),
-            RuleSource::EslintTypeScript(_) => write!(f, "typescript-eslint"),
-            RuleSource::EslintUnicorn(_) => write!(f, "eslint-plugin-unicorn"),
-            RuleSource::EslintMysticatea(_) => write!(f, "@mysticatea/eslint-plugin"),
-            RuleSource::EslintBarrelFiles(_) => write!(f, "eslint-plugin-barrel-files"),
-            RuleSource::Stylelint(_) => write!(f, "Stylelint"),
+            Self::Clippy(_) => write!(f, "Clippy"),
+            Self::Eslint(_) => write!(f, "ESLint"),
+            Self::EslintImport(_) => write!(f, "eslint-plugin-import"),
+            Self::EslintImportAccess(_) => write!(f, "eslint-plugin-import-access"),
+            Self::EslintJest(_) => write!(f, "eslint-plugin-jest"),
+            Self::EslintJsxA11y(_) => write!(f, "eslint-plugin-jsx-a11y"),
+            Self::EslintReact(_) => write!(f, "eslint-plugin-react"),
+            Self::EslintReactHooks(_) => write!(f, "eslint-plugin-react-hooks"),
+            Self::EslintSolid(_) => write!(f, "eslint-plugin-solid"),
+            Self::EslintSonarJs(_) => write!(f, "eslint-plugin-sonarjs"),
+            Self::EslintStylistic(_) => write!(f, "eslint-plugin-stylistic"),
+            Self::EslintTypeScript(_) => write!(f, "typescript-eslint"),
+            Self::EslintUnicorn(_) => write!(f, "eslint-plugin-unicorn"),
+            Self::EslintUnusedImports(_) => write!(f, "eslint-plugin-unused-imports"),
+            Self::EslintMysticatea(_) => write!(f, "@mysticatea/eslint-plugin"),
+            Self::EslintBarrelFiles(_) => write!(f, "eslint-plugin-barrel-files"),
+            Self::Stylelint(_) => write!(f, "Stylelint"),
         }
     }
 }
@@ -189,6 +192,7 @@ impl RuleSource {
             | Self::EslintSonarJs(rule_name)
             | Self::EslintStylistic(rule_name)
             | Self::EslintUnicorn(rule_name)
+            | Self::EslintUnusedImports(rule_name)
             | Self::EslintMysticatea(rule_name)
             | Self::EslintBarrelFiles(rule_name)
             | Self::Stylelint(rule_name) => rule_name,
@@ -209,6 +213,7 @@ impl RuleSource {
             Self::EslintSonarJs(rule_name) => format!("sonarjs/{rule_name}"),
             Self::EslintStylistic(rule_name) => format!("@stylistic/{rule_name}"),
             Self::EslintUnicorn(rule_name) => format!("unicorn/{rule_name}"),
+            Self::EslintUnusedImports(rule_name) => format!("unused-imports/{rule_name}"),
             Self::EslintMysticatea(rule_name) => format!("@mysticatea/{rule_name}"),
             Self::EslintBarrelFiles(rule_name) => format!("barrel-files/{rule_name}"),
             Self::Stylelint(rule_name) => format!("stylelint/{rule_name}"),
@@ -230,6 +235,7 @@ impl RuleSource {
             Self::EslintSonarJs(rule_name) => format!("https://github.com/SonarSource/eslint-plugin-sonarjs/blob/HEAD/docs/rules/{rule_name}.md"),
             Self::EslintStylistic(rule_name) => format!("https://eslint.style/rules/default/{rule_name}"),
             Self::EslintUnicorn(rule_name) => format!("https://github.com/sindresorhus/eslint-plugin-unicorn/blob/main/docs/rules/{rule_name}.md"),
+            Self::EslintUnusedImports(rule_name) => format!("https://github.com/sweepline/eslint-plugin-unused-imports/blob/master/docs/rules/{rule_name}.md"),
             Self::EslintMysticatea(rule_name) => format!("https://github.com/mysticatea/eslint-plugin/blob/master/docs/rules/{rule_name}.md"),
             Self::EslintBarrelFiles(rule_name) => format!("https://github.com/thepassle/eslint-plugin-barrel-files/blob/main/docs/rules/{rule_name}.md"),
             Self::Stylelint(rule_name) => format!("https://github.com/stylelint/stylelint/blob/main/lib/rules/{rule_name}/README.md"),
@@ -247,7 +253,7 @@ impl RuleSource {
 
     /// All ESLint plugins, exception for the TypeScript one
     pub const fn is_eslint_plugin(&self) -> bool {
-        !matches!(self, Self::Clippy(_) | Self::Eslint(_))
+        !matches!(self, Self::Clippy(_) | Self::Eslint(_) | Self::Stylelint(_))
     }
 
     pub const fn is_stylelint(&self) -> bool {
@@ -402,7 +408,7 @@ pub trait RuleGroup {
 /// This macro is used by the codegen script to declare an analyzer rule group,
 /// and implement the [RuleGroup] trait for it
 #[macro_export]
-macro_rules! declare_group {
+macro_rules! declare_lint_group {
     ( $vis:vis $id:ident { name: $name:tt, rules: [ $( $( $rule:ident )::* , )* ] } ) => {
         $vis enum $id {}
 
@@ -428,6 +434,43 @@ macro_rules! declare_group {
         #[allow(unused_macros)]
         macro_rules! group_category {
             ( $rule_name:tt ) => { $crate::category_concat!( "lint", $name, $rule_name ) };
+        }
+
+        // Re-export the macro for child modules, so `declare_rule!` can access
+        // the category of its parent group by using the `super` module
+        pub(self) use group_category;
+    };
+}
+
+/// This macro is used by the codegen script to declare an analyzer rule group,
+/// and implement the [RuleGroup] trait for it
+#[macro_export]
+macro_rules! declare_assists_group {
+    ( $vis:vis $id:ident { name: $name:tt, rules: [ $( $( $rule:ident )::* , )* ] } ) => {
+        $vis enum $id {}
+
+        impl $crate::RuleGroup for $id {
+            type Language = <( $( $( $rule )::* , )* ) as $crate::GroupLanguage>::Language;
+            type Category = super::Category;
+
+            const NAME: &'static str = $name;
+
+            fn record_rules<V: $crate::RegistryVisitor<Self::Language> + ?Sized>(registry: &mut V) {
+                $( registry.record_rule::<$( $rule )::*>(); )*
+            }
+        }
+
+        pub(self) use $id as Group;
+
+        // Declare a `group_category!` macro in the context of this module (and
+        // all its children). This macro takes the name of a rule as a string
+        // literal token and expands to the category of the lint rule with this
+        // name within this group.
+        // This is implemented by calling the `category_concat!` macro with the
+        // "lint" prefix, the name of this group, and the rule name argument
+        #[allow(unused_macros)]
+        macro_rules! group_category {
+            ( $rule_name:tt ) => { $crate::category_concat!( "assists", $name, $rule_name ) };
         }
 
         // Re-export the macro for child modules, so `declare_rule!` can access
@@ -874,7 +917,7 @@ impl<L: Language> RuleAction<L> {
     pub fn new(
         category: ActionCategory,
         applicability: impl Into<Applicability>,
-        message: impl biome_console::fmt::Display,
+        message: impl Display,
         mutation: BatchMutation<L>,
     ) -> Self {
         Self {

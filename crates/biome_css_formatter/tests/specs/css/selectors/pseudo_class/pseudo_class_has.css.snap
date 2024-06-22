@@ -1,0 +1,72 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: css/selectors/pseudo_class/pseudo_class_has.css
+---
+# Input
+
+```css
+a:has(> img) {}
+a:has(   > img   ) {}
+a:has(   >   img   ) {}
+a:has(   >   img   ,   >   img   ) {}
+a:has(   img   ) {}
+dt:has(+ dt) {}
+section:not(:has(h1, h2, h3, h4, h5, h6)) {}
+section:has(:not(h1, h2, h3, h4, h5, h6)) {}
+div:has(p) {}
+.header-group:has(h2):has(.subtitle) h2 {}
+a:has(> img) .div {}
+
+.container {
+	&:has(.child) {
+		color: blue;
+	}
+}
+
+```
+
+
+=============================
+
+# Outputs
+
+## Output 1
+
+-----
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 80
+Quote style: Double Quotes
+-----
+
+```css
+a:has(> img) {
+}
+a:has(> img) {
+}
+a:has(> img) {
+}
+a:has(> img, > img) {
+}
+a:has(img) {
+}
+dt:has(+ dt) {
+}
+section:not(:has(h1, h2, h3, h4, h5, h6)) {
+}
+section:has(:not(h1, h2, h3, h4, h5, h6)) {
+}
+div:has(p) {
+}
+.header-group:has(h2):has(.subtitle) h2 {
+}
+a:has(> img) .div {
+}
+
+.container {
+	&:has(.child) {
+		color: blue;
+	}
+}
+```

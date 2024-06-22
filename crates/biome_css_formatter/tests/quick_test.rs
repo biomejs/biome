@@ -13,18 +13,11 @@ mod language {
 // use this test check if your snippet prints as you wish, without using a snapshot
 fn quick_test() {
     let src = r#"
-:root {
-		--bs-gradient: linear-gradient(
-			180deg,
-          180deg,
-          180deg,
-          180deg,
-          180deg,
-          180deg,
-          180deg
-		);
+.container {
+  &:has(.child) {
+    color: blue;
+  }
 }
-
 "#;
     let parse = parse_css(src, CssParserOptions::default());
     println!("{:#?}", parse);

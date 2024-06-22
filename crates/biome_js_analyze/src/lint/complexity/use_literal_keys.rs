@@ -10,7 +10,7 @@ use biome_js_factory::make::{
 };
 use biome_js_syntax::{
     AnyJsAssignment, AnyJsComputedMember, AnyJsMemberExpression, AnyJsName, AnyJsObjectMemberName,
-    JsComputedMemberName, JsLiteralMemberName, JsSyntaxKind, T,
+    JsComputedMemberName, T,
 };
 use biome_rowan::{declare_node_union, AstNode, BatchMutationExt, TextRange};
 use biome_unicode_table::is_js_ident;
@@ -62,53 +62,68 @@ declare_rule! {
 
 impl Rule for UseLiteralKeys {
     type Query = Ast<AnyJsMember>;
-    type State = (TextRange, String);
+    type State = (TextRange, String, bool);
     type Signals = Option<Self::State>;
     type Options = ();
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
+        let mut is_computed_member_name = false;
         let inner_expression = match node {
             AnyJsMember::AnyJsComputedMember(computed_member) => computed_member.member().ok()?,
-            AnyJsMember::JsLiteralMemberName(member) => {
-                if member.value().ok()?.kind() == JsSyntaxKind::JS_STRING_LITERAL {
-                    let name = member.name().ok()?;
-                    if is_js_ident(&name) {
-                        return Some((member.range(), name.to_string()));
-                    }
-                }
-                return None;
+            AnyJsMember::JsComputedMemberName(member) => {
+                is_computed_member_name = true;
+                member.expression().ok()?
             }
-            AnyJsMember::JsComputedMemberName(member) => member.expression().ok()?,
         };
         let value = inner_expression.as_static_value()?;
         let value = value.as_string_constant()?;
         // `{["__proto__"]: null }` and `{"__proto__": null}`/`{"__proto__": null}`
         // have different semantic.
         // The first is a regular property.
-        // The second is a specical property that changes the object prototype.
+        // The second is a special property that changes the object prototype.
         // See https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/proto
-        if matches!(node, AnyJsMember::JsComputedMemberName(_)) && value == "__proto__" {
+        if is_computed_member_name && value == "__proto__" {
             return None;
         }
-        // A computed property `["something"]` can always be simplified to a string literal "something".
-        if matches!(node, AnyJsMember::JsComputedMemberName(_)) || is_js_ident(value) {
-            return Some((inner_expression.range(), value.to_string()));
+        // A computed property `["something"]` can always be simplified to a string literal "something",
+        // unless it is a template literal inside that contains unescaped new line characters:
+        //
+        // const a = {
+        //   [`line1
+        //   line2`]: true
+        // }
+        //
+        if (is_computed_member_name && !has_unescaped_new_line(value)) || is_js_ident(value) {
+            return Some((
+                inner_expression.range(),
+                value.to_string(),
+                is_computed_member_name,
+            ));
         }
         None
     }
 
-    fn diagnostic(_ctx: &RuleContext<Self>, (range, _): &Self::State) -> Option<RuleDiagnostic> {
+    fn diagnostic(
+        _ctx: &RuleContext<Self>,
+        (range, _, is_computed_member_name): &Self::State,
+    ) -> Option<RuleDiagnostic> {
         Some(RuleDiagnostic::new(
             rule_category!(),
             range,
-            markup! {
-                "The computed expression can be simplified without the use of a string literal."
+            if *is_computed_member_name {
+                markup! {
+                    "The computed expression can be simplified to a string literal."
+                }
+            } else {
+                markup! {
+                    "The computed expression can be simplified without the use of a string literal."
+                }
             },
         ))
     }
 
-    fn action(ctx: &RuleContext<Self>, (_, identifier): &Self::State) -> Option<JsRuleAction> {
+    fn action(ctx: &RuleContext<Self>, (_, identifier, _): &Self::State) -> Option<JsRuleAction> {
         let node = ctx.query();
         let mut mutation = ctx.root().begin();
         match node {
@@ -142,13 +157,8 @@ impl Rule for UseLiteralKeys {
                     }
                 }
             }
-            AnyJsMember::JsLiteralMemberName(node) => {
-                mutation.replace_token(node.value().ok()?, make::ident(identifier));
-            }
             AnyJsMember::JsComputedMemberName(member) => {
-                let name_token = if is_js_ident(identifier) {
-                    make::ident(identifier)
-                } else if ctx.as_preferred_quote().is_double() {
+                let name_token = if ctx.as_preferred_quote().is_double() {
                     make::js_string_literal(identifier)
                 } else {
                     make::js_string_literal_single_quotes(identifier)
@@ -173,5 +183,21 @@ impl Rule for UseLiteralKeys {
 }
 
 declare_node_union! {
-    pub AnyJsMember = AnyJsComputedMember | JsLiteralMemberName | JsComputedMemberName
+    pub AnyJsMember = AnyJsComputedMember | JsComputedMemberName
+}
+
+fn has_unescaped_new_line(text: &str) -> bool {
+    let mut iter = text.as_bytes().iter();
+    while let Some(c) = iter.next() {
+        match c {
+            b'\\' => {
+                iter.next();
+            }
+            b'\n' => {
+                return true;
+            }
+            _ => {}
+        }
+    }
+    false
 }

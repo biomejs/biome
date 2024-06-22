@@ -43,6 +43,6 @@ input.css:1:6 lint/nursery/noEmptyBlock ━━━━━━━━━━━━━�
 ```
 
 ```block
-Checked 1 file in <TIME>. No fixes needed.
+Checked 1 file in <TIME>. No fixes applied.
 Found 1 error.
 ```

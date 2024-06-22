@@ -44,12 +44,12 @@ class C {
 }
 
 class D {
-  fooB(s: string): void;
-  fooB(s: string): void;
-  barB(): void {};
-  fooB(n: number): void;
-  fooB(sn: string | number): void {};
-  fooB(sn: string | number): void {};
+  fooD(s: string): void;
+  fooD(s: string): void;
+  barD(): void {};
+  fooD(n: number): void;
+  fooD(sn: string | number): void {};
+  fooD(sn: string | number): void {};
 }
 
 export function foo(s: string): void;

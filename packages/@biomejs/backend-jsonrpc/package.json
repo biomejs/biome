@@ -18,31 +18,37 @@
   "homepage": "https://biomejs.dev",
   "repository": {
     "type": "git",
-    "url": "https://github.com/biomejs/biome.git",
+    "url": "git+https://github.com/biomejs/biome.git",
     "directory": "npm/backend-jsonrpc"
   },
   "author": "Biome Developers and Contributors",
   "bugs": "https://github.com/biomejs/biome/issues",
   "description": "Bindings to the JSON-RPC Workspace API of the Biome daemon",
-  "keywords": ["JavaScript", "TypeScript", "format", "lint", "toolchain"],
+  "keywords": [
+    "JavaScript",
+    "TypeScript",
+    "format",
+    "lint",
+    "toolchain"
+  ],
   "engines": {
     "node": ">=14.21.3"
   },
   "license": "MIT OR Apache-2.0",
   "devDependencies": {
-    "@types/node": "20.12.12",
+    "@types/node": "20.14.3",
     "typescript": "5.4.5",
-    "vite": "5.2.11",
+    "vite": "5.3.1",
     "vitest": "1.6.0"
   },
   "optionalDependencies": {
-    "@biomejs/cli-win32-x64": "1.7.3",
-    "@biomejs/cli-win32-arm64": "1.7.3",
-    "@biomejs/cli-darwin-x64": "1.7.3",
-    "@biomejs/cli-darwin-arm64": "1.7.3",
-    "@biomejs/cli-linux-x64": "1.7.3",
-    "@biomejs/cli-linux-arm64": "1.7.3",
-    "@biomejs/cli-linux-x64-musl": "1.7.3",
-    "@biomejs/cli-linux-arm64-musl": "1.7.3"
+    "@biomejs/cli-win32-x64": "1.8.1",
+    "@biomejs/cli-win32-arm64": "1.8.1",
+    "@biomejs/cli-darwin-x64": "1.8.1",
+    "@biomejs/cli-darwin-arm64": "1.8.1",
+    "@biomejs/cli-linux-x64": "1.8.1",
+    "@biomejs/cli-linux-arm64": "1.8.1",
+    "@biomejs/cli-linux-x64-musl": "1.8.1",
+    "@biomejs/cli-linux-arm64-musl": "1.8.1"
   }
 }

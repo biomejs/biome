@@ -98,7 +98,8 @@ fn is_unmatchable(nth: &AnyCssPseudoClassNth) -> bool {
         AnyCssPseudoClassNth::CssPseudoClassNthIdentifier(_) => false,
         AnyCssPseudoClassNth::CssPseudoClassNth(nth) => {
             let coefficient = nth.value();
-            let constant = nth.offset();
+            let constant = nth.offset().and_then(|offset| offset.value().ok());
+
             match (coefficient, constant) {
                 (Some(a), Some(b)) => a.text() == "0" && b.text() == "0",
                 (Some(a), None) => a.text() == "0",

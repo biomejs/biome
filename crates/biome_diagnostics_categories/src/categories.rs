@@ -125,17 +125,21 @@ define_categories! {
     "lint/nursery/noEmptyBlock": "https://biomejs.dev/linter/rules/no-empty-block",
     "lint/nursery/noEvolvingTypes": "https://biomejs.dev/linter/rules/no-evolving-any",
     "lint/nursery/noImportantInKeyframe": "https://biomejs.dev/linter/rules/no-important-in-keyframe",
+    "lint/nursery/noInvalidDirectionInLinearGradient": "https://biomejs.dev/linter/rules/no-invalid-direction-in-linear-gradient",
     "lint/nursery/noInvalidPositionAtImportRule": "https://biomejs.dev/linter/rules/no-invalid-position-at-import-rule",
     "lint/nursery/noLabelWithoutControl": "https://biomejs.dev/linter/rules/no-label-without-control",
     "lint/nursery/noMisplacedAssertion": "https://biomejs.dev/linter/rules/no-misplaced-assertion",
     "lint/nursery/noMissingGenericFamilyKeyword": "https://biomejs.dev/linter/rules/no-missing-generic-family-keyword",
     "lint/nursery/noReactSpecificProps": "https://biomejs.dev/linter/rules/no-react-specific-props",
     "lint/nursery/noRestrictedImports": "https://biomejs.dev/linter/rules/no-restricted-imports",
+    "lint/nursery/noShorthandPropertyOverrides": "https://biomejs.dev/linter/rules/no-shorthand-property-overrides",
+    "lint/nursery/noSubstr": "https://biomejs.dev/linter/rules/no-substr",
     "lint/nursery/noTypeOnlyImportAttributes": "https://biomejs.dev/linter/rules/no-type-only-import-attributes",
     "lint/nursery/noUndeclaredDependencies": "https://biomejs.dev/linter/rules/no-undeclared-dependencies",
     "lint/nursery/noUnknownFunction": "https://biomejs.dev/linter/rules/no-unknown-function",
     "lint/nursery/noUnknownMediaFeatureName": "https://biomejs.dev/linter/rules/no-unknown-media-feature-name",
     "lint/nursery/noUnknownProperty": "https://biomejs.dev/linter/rules/no-unknown-property",
+    "lint/nursery/noUnknownPseudoClassSelector": "https://biomejs.dev/linter/rules/no-unknown-pseudo-class-selector",
     "lint/nursery/noUnknownSelectorPseudoElement": "https://biomejs.dev/linter/rules/no-unknown-selector-pseudo-element",
     "lint/nursery/noUnknownUnit": "https://biomejs.dev/linter/rules/no-unknown-unit",
     "lint/nursery/noUnmatchableAnbSelector": "https://biomejs.dev/linter/rules/no-unmatchable-anb-selector",
@@ -146,6 +150,7 @@ define_categories! {
     "lint/nursery/useAdjacentOverloadSignatures": "https://biomejs.dev/linter/rules/use-adjacent-overload-signatures",
     "lint/nursery/useBiomeSuppressionComment": "https://biomejs.dev/linter/rules/use-biome-suppression-comment",
     "lint/nursery/useConsistentBuiltinInstantiation": "https://biomejs.dev/linter/rules/use-consistent-new-builtin",
+    "lint/nursery/useConsistentGridAreas": "https://biomejs.dev/linter/rules/use-consistent-grid-areas",
     "lint/nursery/useDateNow": "https://biomejs.dev/linter/rules/use-date-now",
     "lint/nursery/useDefaultSwitchClause": "https://biomejs.dev/linter/rules/use-default-switch-clause",
     "lint/nursery/useErrorMessage": "https://biomejs.dev/linter/rules/use-error-message",
@@ -160,6 +165,7 @@ define_categories! {
     "lint/nursery/useThrowNewError": "https://biomejs.dev/linter/rules/use-throw-new-error",
     "lint/nursery/useThrowOnlyError": "https://biomejs.dev/linter/rules/use-throw-only-error",
     "lint/nursery/useTopLevelRegex": "https://biomejs.dev/linter/rules/use-top-level-regex",
+    "lint/nursery/useValidAutocomplete": "https://biomejs.dev/linter/rules/use-valid-autocomplete",
     "lint/performance/noAccumulatingSpread": "https://biomejs.dev/linter/rules/no-accumulating-spread",
     "lint/performance/noBarrelFile": "https://biomejs.dev/linter/rules/no-barrel-file",
     "lint/performance/noDelete": "https://biomejs.dev/linter/rules/no-delete",
@@ -265,7 +271,11 @@ define_categories! {
     "lint/suspicious/useIsArray": "https://biomejs.dev/linter/rules/use-is-array",
     "lint/suspicious/useNamespaceKeyword": "https://biomejs.dev/linter/rules/use-namespace-keyword",
     "lint/suspicious/useValidTypeof": "https://biomejs.dev/linter/rules/use-valid-typeof",
-    ;
+    ; // end lint rules
+
+    "assists/nursery/useSortedKeys",
+    // end assist rules
+
     // General categories
     "files/missingHandler",
     "format",
