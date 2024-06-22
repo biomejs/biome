@@ -26,6 +26,10 @@
 	<div class="lg:absolute sm:top-0 md:right-0 lg:m-4 md:p-2 xl:text-sm sm:bg-red-600 sm:text-white sm:rounded-full lg:custom-alert" />
 	<div class="checked:sm:inline-block bar hover:md:bg-green-300 hover:lg:text-green-800 p-2 rounded border sm:checked:border-green-500 custom-button" />
 	{/* TODO: arbitrary variant */}
+	<div class="[&nth-child(2)]:[&nth-child(6)]:text-red-200 [&nth-child(2)]:text-red-300 group-hover:flex-col focus:bg-red-100 py-4 text-red-500 hover:focus:bg-red-200 has-[:visited]:flex print:text-red-50 [&nth-child(3)]:text-red-200  container" />
+	<div class="text-black [&nth-child(2)]:focus:text-red-100 [&nth-child(1)]:group-first:text-red-100 [&nth-child(2)]:hover:focus:bg-red-900 group-first:text-yellow-400 [&nth-child(2)]:text-black focus:bg-sky-100 py-4 checked:visited:bg-yellow-300 hover:text-red-400" />
+	<div class="group-aria-disabled:bg-red-50 group-[:visited]:text-red-400 group-target:font-bold" />
+	<div class="group-has-[.custom-class]:focus:underline aria-[sort=ascending]:bg-red-300 group-aria-[sort=ascending]:text-yellow-200 has-[:checked]:focus:bg-yellow-300 text-red-400" />
 </>;
 
 // functions

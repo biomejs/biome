@@ -10,13 +10,13 @@
 //! - The list of variants, in order of importance (which is used to compute the variants weight).
 //! - Other options, such as prefix and separator.
 
-use std::cmp::Ordering;
+use std::{cmp::Ordering, collections::HashMap};
 
 use bitvec::{order::Lsb0, vec::BitVec};
 
 use super::{
     class_lexer::{tokenize_class, ClassSegmentStructure},
-    sort_config::SortConfig,
+    sort_config::{build_variant_weight, SortConfig, VariantsConfig},
 };
 use crate::lint::nursery::use_sorted_classes::sort_config::UtilityLayer;
 
@@ -279,6 +279,163 @@ mod get_utility_info_tests {
     }
 }
 
+// variants
+// -------
+
+/// The result of matching a variant against a target.
+#[derive(Debug, Eq, PartialEq)]
+enum VariantMatch {
+    /// The variant matches an exact target.
+    Exact,
+    /// The variant matches a partial target.
+    Partial,
+    /// The variant does not match the target.
+    None,
+}
+
+impl VariantMatch {
+    /// Checks if a variant matches a target, and returns the result.
+    fn from(target: &str, variant_text: &str) -> VariantMatch {
+        // If the target matched exactly the variant text.
+        if target == variant_text {
+            return VariantMatch::Exact;
+        };
+
+        // if it has a custom value thus it starts with the variant text and it's followed by "-["
+        if variant_text.starts_with(format!("{}-[", target).as_str()) {
+            return VariantMatch::Exact;
+        }
+
+        // Check if the variant starts with the (partial) target.
+        if variant_text.starts_with(target) && variant_text != target {
+            return VariantMatch::Partial;
+        }
+        // If all of the above checks fail, there is no match.
+        VariantMatch::None
+    }
+}
+
+#[cfg(test)]
+mod variant_match_tests {
+    use crate::lint::nursery::use_sorted_classes::class_info::VariantMatch;
+
+    #[test]
+    fn test_exact_match() {
+        assert_eq!(VariantMatch::from("hover", "hover"), VariantMatch::Exact);
+        assert_eq!(VariantMatch::from("focus", "focus"), VariantMatch::Exact);
+        assert_eq!(
+            VariantMatch::from("group", "group-[.is-published]"),
+            VariantMatch::Exact
+        );
+        assert_eq!(
+            VariantMatch::from("has", "has-[:checked]"),
+            VariantMatch::Exact
+        );
+        assert_eq!(
+            VariantMatch::from("group-has", "group-has-[.custom-class]"),
+            VariantMatch::Exact
+        );
+        assert_eq!(
+            VariantMatch::from("group-aria-disabled", "group-aria-disabled"),
+            VariantMatch::Exact
+        );
+    }
+
+    #[test]
+    fn test_partial_match() {
+        assert_eq!(
+            VariantMatch::from("group", "group-has-[.custom-class]"),
+            VariantMatch::Partial
+        );
+        assert_eq!(
+            VariantMatch::from("peer", "peer-has-[:checked]"),
+            VariantMatch::Partial
+        );
+    }
+}
+
+fn find_variant_info(config_variants: VariantsConfig, variant_text: &str) -> Option<usize> {
+    let mut variant: &str = "<no match>";
+    let mut match_index: usize = 0;
+    let mut last_size: usize = 0;
+
+    // Iterate over each variant looking for a match.
+    for (index, target) in config_variants.iter().enumerate() {
+        match VariantMatch::from(target, variant_text) {
+            VariantMatch::Exact => {
+                // Exact matches can be returned immediately.
+                return Some(index);
+            }
+            VariantMatch::Partial => {
+                // Multiple partial matches can occur, so we need to keep looking to find
+                // the longest target that matches. For example, if the variant text is
+                // `group-aria-[.custom-class]`, and there are targets like `group` and `group-aria`, we want to
+                // make sure that the `group-aria` target is matched as it is more specific,
+                // so when the target is `group` a Partial match will occur.
+                let target_size = target.chars().count();
+                if target_size > last_size {
+                    variant = target;
+                    match_index = index;
+                    last_size = target_size;
+                }
+            }
+            _ => {}
+        }
+    }
+    if variant != "<no match>" {
+        return Some(match_index);
+    }
+    None
+}
+
+pub fn compute_variants_weight(
+    config_variants: VariantsConfig,
+    current_variants: &[&ClassSegmentStructure],
+) -> Option<BitVec<u8, Lsb0>> {
+    if current_variants.is_empty() {
+        return None;
+    };
+    // Check if it's a known variant
+    // If it is then compute weights for each variant on the fly by using index as size
+    // TODO: Cache the weights for next run?
+    let mut variants_map: HashMap<&str, BitVec<u8, Lsb0>> = HashMap::new();
+    for current_variant in current_variants.iter() {
+        let variant_name = current_variant.text.as_ref();
+        let Some(variant_index) = find_variant_info(config_variants, variant_name) else {
+            continue;
+        };
+
+        if !variants_map.contains_key(variant_name) {
+            variants_map.insert(variant_name, build_variant_weight(variant_index));
+        }
+    }
+
+    // If there's a custom variant, their weight isn't important
+    if variants_map.is_empty() {
+        return None;
+    }
+
+    // Compute Variants Weight as the BitWise XOR of all the recognized variants' weights
+    let variants_weight = variants_map
+        .iter()
+        .fold(BitVec::<u8, Lsb0>::new(), |acc, (_, val)| {
+            let mut accumulator = acc.clone();
+            let mut current_weight = val.clone();
+            let acc_len = accumulator.len();
+            let current_weight_len = current_weight.len();
+
+            match acc_len.cmp(&current_weight_len) {
+                Ordering::Less => accumulator.resize(current_weight_len, false),
+                Ordering::Greater => current_weight.resize(acc_len, false),
+                _ => (),
+            }
+
+            accumulator ^ current_weight
+        });
+
+    Some(variants_weight)
+}
+
 // classes
 // -------
 
@@ -293,6 +450,8 @@ pub struct ClassInfo {
     pub layer_index: usize,
     /// The index of the utility within the layer.
     pub utility_index: usize,
+    /// Arbitrary variants
+    pub arbitrary_variants: Option<Vec<String>>,
 }
 
 /// Computes sort-related information about a CSS class. If the class is not recognized as a utility,
@@ -301,55 +460,28 @@ pub fn get_class_info(class_name: &str, sort_config: &SortConfig) -> Option<Clas
     let utility_data = tokenize_class(class_name)?;
     let utility_info = get_utility_info(sort_config.utilities, &utility_data.utility);
 
+    // Split up variants into arbitrary and known variants.
+    let (arbitrary_variants, current_variants): (
+        Vec<&ClassSegmentStructure>,
+        Vec<&ClassSegmentStructure>,
+    ) = utility_data.variants.iter().partition(|el| el.arbitrary);
+
+    let arbitrary_variants: Vec<String> = arbitrary_variants
+        .iter()
+        .map(|variant| variant.text.clone())
+        .collect();
+
     if let Some(utility_info) = utility_info {
         return Some(ClassInfo {
             text: class_name.to_string(),
-            variant_weight: if utility_data.variants.is_empty() {
-                None
-            } else {
-                let known_variants = utility_data.variants.iter().any(|variant| {
-                    sort_config
-                        .variants
-                        .iter()
-                        .any(|item| *item.name.to_string() == variant.text)
-                });
-                // If there's a custom variant, their weight isn't important
-                if !known_variants {
-                    return None;
-                }
-
-                // Compute Variants Weight as the BitWise XOR of all the weights
-                // Variants in SortConfig are already sorted when the file is generated
-                let variants_weight: BitVec<u8, Lsb0> =
-                    utility_data
-                        .variants
-                        .iter()
-                        .fold(BitVec::<u8, Lsb0>::new(), |acc, curr| {
-                            if let Some(variant) = sort_config
-                                .variants
-                                .iter()
-                                .find(|&item| *item.name.to_string() == curr.text)
-                            {
-                                let mut accumulator = acc.clone();
-                                let mut current_weight = variant.weight.clone();
-                                let acc_len = accumulator.len();
-                                let current_weight_len = current_weight.len();
-
-                                match acc_len.cmp(&current_weight_len) {
-                                    Ordering::Less => accumulator.resize(current_weight_len, false),
-                                    Ordering::Greater => current_weight.resize(acc_len, false),
-                                    _ => (),
-                                }
-
-                                return accumulator ^ current_weight;
-                            }
-                            acc
-                        });
-
-                Some(variants_weight)
-            },
+            variant_weight: compute_variants_weight(sort_config.variants, &current_variants),
             layer_index: *sort_config.layer_index_map.get(&utility_info.layer)?,
             utility_index: utility_info.index,
+            arbitrary_variants: if arbitrary_variants.is_empty() {
+                None
+            } else {
+                Some(arbitrary_variants)
+            },
         });
     }
     // If there is no utility info, the class is not recognized.
@@ -358,10 +490,10 @@ pub fn get_class_info(class_name: &str, sort_config: &SortConfig) -> Option<Clas
 
 #[cfg(test)]
 mod get_class_info_tests {
+    use bitvec::bitvec;
+
     use super::*;
-    use crate::lint::nursery::use_sorted_classes::{
-        sort_config::UtilityLayer, tailwind_preset::get_variant_classes,
-    };
+    use crate::lint::nursery::use_sorted_classes::sort_config::UtilityLayer;
 
     #[test]
     fn test_get_class_info() {
@@ -375,8 +507,10 @@ mod get_class_info_tests {
                 classes: &["mx-", "my-", "inline$"],
             },
         ];
-        let variant_classes = get_variant_classes();
-        let sort_config = SortConfig::new(UTILITIES_CONFIG.as_slice(), variant_classes);
+        let variants: &'static [&'static str; 4] = &["hover", "focus", "focus-visible", "active"];
+
+        let sort_config = SortConfig::new(UTILITIES_CONFIG.as_slice(), variants);
+
         assert_eq!(
             get_class_info("px-2", &sort_config),
             Some(ClassInfo {
@@ -384,6 +518,7 @@ mod get_class_info_tests {
                 variant_weight: None,
                 layer_index: 0,
                 utility_index: 0,
+                arbitrary_variants: None
             })
         );
         assert_eq!(
@@ -393,6 +528,7 @@ mod get_class_info_tests {
                 variant_weight: None,
                 layer_index: 0,
                 utility_index: 1,
+                arbitrary_variants: None,
             })
         );
         assert_eq!(
@@ -402,6 +538,7 @@ mod get_class_info_tests {
                 variant_weight: None,
                 layer_index: 0,
                 utility_index: 2,
+                arbitrary_variants: None
             })
         );
         assert_eq!(
@@ -411,6 +548,7 @@ mod get_class_info_tests {
                 variant_weight: None,
                 layer_index: 1,
                 utility_index: 0,
+                arbitrary_variants: None
             })
         );
         assert_eq!(
@@ -420,6 +558,7 @@ mod get_class_info_tests {
                 variant_weight: None,
                 layer_index: 1,
                 utility_index: 1,
+                arbitrary_variants: None
             })
         );
         assert_eq!(
@@ -429,6 +568,7 @@ mod get_class_info_tests {
                 variant_weight: None,
                 layer_index: 1,
                 utility_index: 2,
+                arbitrary_variants: None
             })
         );
         assert_eq!(
@@ -438,27 +578,49 @@ mod get_class_info_tests {
                 variant_weight: None,
                 layer_index: 2,
                 utility_index: 0,
+                arbitrary_variants: None
             })
         );
-        // TODO: Add Variants tests
-        // assert_eq!(
-        //     get_class_info("hover:bg-red-500", &sort_config),
-        //     Some(ClassInfo {
-        //         text: "hover:bg-red-500".to_string(),
-        //         variant_weight: None, // TODO: Should we hardcode the bitvector or should we find it from the tailwind config?
-        //         layer_index: 0,
-        //         utility_index: 3
-        //     })
-        // );
-        // assert_eq!(
-        //     get_class_info("hover:focus:bg-yellow-600", &sort_config),
-        //     Some(ClassInfo {
-        //         text: "hover:focus:bg-yellow-600".to_string(),
-        //         variant_weight: None, // TODO: Should we hardcode the bitvector or should we find it from the tailwind config?
-        //         layer_index: 0,
-        //         utility_index: 3
-        //     })
-        // );
+        assert_eq!(
+            get_class_info("hover:bg-red-500", &sort_config),
+            Some(ClassInfo {
+                text: "hover:bg-red-500".to_string(),
+                variant_weight: Some(bitvec![u8, Lsb0; 1]),
+                layer_index: 0,
+                utility_index: 3,
+                arbitrary_variants: None
+            })
+        );
+        assert_eq!(
+            get_class_info("hover:focus:bg-yellow-600", &sort_config),
+            Some(ClassInfo {
+                text: "hover:focus:bg-yellow-600".to_string(),
+                variant_weight: Some(bitvec![u8, Lsb0; 1, 1]),
+                layer_index: 0,
+                utility_index: 3,
+                arbitrary_variants: None
+            })
+        );
+        assert_eq!(
+            get_class_info("[&nth-child(2)]:bg-yellow-300", &sort_config),
+            Some(ClassInfo {
+                text: "[&nth-child(2)]:bg-yellow-300".to_string(),
+                variant_weight: None,
+                layer_index: 0,
+                utility_index: 3,
+                arbitrary_variants: Some(vec!["[&nth-child(2)]".to_string()])
+            })
+        );
+        assert_eq!(
+            get_class_info("[&nth-child(1)]:focus:bg-yellow-300", &sort_config),
+            Some(ClassInfo {
+                text: "[&nth-child(1)]:focus:bg-yellow-300".to_string(),
+                variant_weight: Some(bitvec![u8, Lsb0; 0, 1]),
+                layer_index: 0,
+                utility_index: 3,
+                arbitrary_variants: Some(vec!["[&nth-child(1)]".to_string()])
+            })
+        );
         assert_eq!(get_class_info("unknown", &sort_config), None);
     }
 }

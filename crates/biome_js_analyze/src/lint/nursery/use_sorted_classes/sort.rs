@@ -50,6 +50,37 @@ impl ClassInfo {
         None
     }
 
+    /// Compare based on the existence of arbitrary variants. Classes with arbitrary variants go last.
+    /// Returns `None` if both or none of the classes has arbitrary variants.
+    fn cmp_has_arbitrary_variants(&self, other: &ClassInfo) -> Option<Ordering> {
+        if self.arbitrary_variants.is_some() && other.arbitrary_variants.is_some() {
+            return None;
+        }
+        if self.arbitrary_variants.is_some() {
+            return Some(Ordering::Greater);
+        }
+        if other.arbitrary_variants.is_some() {
+            return Some(Ordering::Less);
+        }
+        None
+    }
+
+    /// Compare arbitrary variants based on their length and then lexicographically
+    fn cmp_arbitrary_variants(&self, other: &ClassInfo) -> Option<Ordering> {
+        let a = self.arbitrary_variants.clone()?;
+        let b = other.arbitrary_variants.clone()?;
+
+        let mut result = a.len().cmp(&b.len());
+        if result == Ordering::Equal {
+            result = a.cmp(&b);
+        }
+
+        if result != Ordering::Equal {
+            return Some(result);
+        }
+        None
+    }
+
     /// Compare based on utility index. Classes with lower indexes go first.
     /// Returns `None` if the indexes are equal.
     fn cmp_utilities(&self, other: &ClassInfo) -> Option<Ordering> {
@@ -67,6 +98,16 @@ impl ClassInfo {
 // This comparison function follows a very similar logic to the one in Tailwind CSS, with some
 // simplifications and necessary differences.
 fn compare_classes(a: &ClassInfo, b: &ClassInfo) -> Ordering {
+    // Classes with arbitrary variants go last
+    if let Some(has_arbitrary_variants) = a.cmp_has_arbitrary_variants(b) {
+        return has_arbitrary_variants;
+    }
+
+    // Compare arbitrary variants
+    if let Some(arbitrary_variants_order) = a.cmp_arbitrary_variants(b) {
+        return arbitrary_variants_order;
+    }
+
     // Classes with variants go last.
     if let Some(has_variants_order) = a.cmp_has_variants(b) {
         return has_variants_order;
