@@ -45,7 +45,7 @@ impl<'fmt, D: AsDiagnostic + ?Sized> PrintDiagnostic<'fmt, D> {
         Self {
             diag,
             verbose: false,
-            search: false
+            search: false,
         }
     }
 
@@ -53,7 +53,7 @@ impl<'fmt, D: AsDiagnostic + ?Sized> PrintDiagnostic<'fmt, D> {
         Self {
             diag,
             verbose: true,
-            search: false
+            search: false,
         }
     }
 
@@ -61,7 +61,7 @@ impl<'fmt, D: AsDiagnostic + ?Sized> PrintDiagnostic<'fmt, D> {
         Self {
             diag,
             verbose: false,
-            search: true
+            search: true,
         }
     }
 }
@@ -78,7 +78,7 @@ impl<D: AsDiagnostic + ?Sized> fmt::Display for PrintDiagnostic<'_, D> {
         // Wrap the formatter with an indentation level and print the advices
         let mut slot = None;
         let mut fmt = IndentWriter::wrap(fmt, &mut slot, true, "  ");
-        
+
         if self.search {
             let mut visitor = PrintSearch(&mut fmt);
             print_advices(&mut visitor, diagnostic, self.verbose)

@@ -56,11 +56,10 @@ impl<'a> ReporterVisitor for ConsoleReporterVisitor<'a> {
     ) -> io::Result<()> {
         for diagnostic in &diagnostics_payload.diagnostics {
             if execution.is_search() {
-                self.0
-                    .log(markup! {{PrintDiagnostic::search(diagnostic)}});
+                self.0.log(markup! {{PrintDiagnostic::search(diagnostic)}});
                 continue;
             }
-            
+
             if diagnostic.severity() >= diagnostics_payload.diagnostic_level {
                 if diagnostic.tags().is_verbose() && diagnostics_payload.verbose {
                     self.0
@@ -89,10 +88,7 @@ impl fmt::Display for Files {
     }
 }
 
-struct SummaryDetail<'a>(
-    pub(crate) &'a TraversalMode,
-    usize,
-);
+struct SummaryDetail<'a>(pub(crate) &'a TraversalMode, usize);
 
 impl<'a> fmt::Display for SummaryDetail<'a> {
     fn fmt(&self, fmt: &mut Formatter) -> io::Result<()> {

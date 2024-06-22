@@ -2,7 +2,8 @@ use super::process_file::{process_file, DiffKind, FileStatus, Message};
 use super::{Execution, TraversalMode};
 use crate::cli_options::CliOptions;
 use crate::execute::diagnostics::{
-    CIFormatDiffDiagnostic, CIOrganizeImportsDiffDiagnostic, ContentDiffAdvice, FormatDiffDiagnostic, OrganizeImportsDiffDiagnostic, PanicDiagnostic
+    CIFormatDiffDiagnostic, CIOrganizeImportsDiffDiagnostic, ContentDiffAdvice,
+    FormatDiffDiagnostic, OrganizeImportsDiffDiagnostic, PanicDiagnostic,
 };
 use crate::reporter::TraversalSummary;
 use crate::{CliDiagnostic, CliSession};

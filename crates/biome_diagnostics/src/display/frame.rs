@@ -254,7 +254,10 @@ pub(super) fn print_frame(fmt: &mut fmt::Formatter<'_>, location: Location<'_>) 
     fmt.write_str("\n")
 }
 
-pub(super) fn print_highlighted_frame(fmt: &mut fmt::Formatter<'_>, location: Location<'_>) -> io::Result<()> {
+pub(super) fn print_highlighted_frame(
+    fmt: &mut fmt::Formatter<'_>,
+    location: Location<'_>,
+) -> io::Result<()> {
     let Some(span) = location.span else {
         return Ok(());
     };
@@ -263,7 +266,7 @@ pub(super) fn print_highlighted_frame(fmt: &mut fmt::Formatter<'_>, location: Lo
     };
 
     let source = SourceFile::new(source_code);
-    
+
     let start = source.location(span.start())?;
     let end = source.location(span.end())?;
 
@@ -274,7 +277,7 @@ pub(super) fn print_highlighted_frame(fmt: &mut fmt::Formatter<'_>, location: Lo
         let current_range = source.line_range(line_index.to_zero_indexed());
         let current_range = match current_range {
             Ok(v) => v,
-            Err(_) => continue
+            Err(_) => continue,
         };
 
         let current_text = source_code.text[current_range].trim_end_matches(['\r', '\n']);
@@ -282,28 +285,21 @@ pub(super) fn print_highlighted_frame(fmt: &mut fmt::Formatter<'_>, location: Lo
         let is_first_line = line_index == start.line_number;
         let is_last_line = line_index == end.line_number;
 
-        let start_index_relative_to_line = span.start().max(current_range.start()) - current_range.start();
-        let end_index_relative_to_line = span.end().min(current_range.end()) - current_range.start();
+        let start_index_relative_to_line =
+            span.start().max(current_range.start()) - current_range.start();
+        let end_index_relative_to_line =
+            span.end().min(current_range.end()) - current_range.start();
 
         let marker = if is_first_line && is_last_line {
-            TextRange::new(
-                start_index_relative_to_line,
-                end_index_relative_to_line,
-            )
-        }  else if is_last_line {
+            TextRange::new(start_index_relative_to_line, end_index_relative_to_line)
+        } else if is_last_line {
             let start_index = current_text
                 .text_len()
                 .checked_sub(current_text.trim_start().text_len())
                 .expect("integer overflow");
-            TextRange::new(
-                start_index,
-                end_index_relative_to_line
-            )
+            TextRange::new(start_index, end_index_relative_to_line)
         } else {
-            TextRange::new(
-                start_index_relative_to_line,
-                current_text.text_len()
-            )
+            TextRange::new(start_index_relative_to_line, current_text.text_len())
         };
 
         fmt.write_markup(markup! {

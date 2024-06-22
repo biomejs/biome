@@ -86,7 +86,7 @@ impl DummySearchMatchesProvider {
 
         let max_size = match first_line {
             Some(v) => v.text_len(),
-            None => return vec![]
+            None => return vec![],
         };
 
         vec![TextRange::new(TextSize::from(0), max_size)]
@@ -124,7 +124,7 @@ impl WorkspaceServer {
     /// Get the supported capabilities for a given file path
     fn get_file_capabilities(&self, path: &BiomePath) -> Capabilities {
         let language = self.get_file_source(path);
-        
+
         debug!("File capabilities: {:?} {:?}", &language, &path);
         self.features.get_capabilities(path, language)
     }
@@ -801,10 +801,10 @@ impl Workspace for WorkspaceServer {
     }
 
     fn search_pattern(&self, params: SearchPatternParams) -> Result<SearchResults, WorkspaceError> {
-        let SearchPatternParams { 
+        let SearchPatternParams {
             path,
-            pattern: _pattern
-         } = params;
+            pattern: _pattern,
+        } = params;
 
         // FIXME: Let's implement some real matching here...
 
@@ -819,7 +819,7 @@ impl Workspace for WorkspaceServer {
 
         Ok(SearchResults {
             file: path,
-            matches: match_ranges
+            matches: match_ranges,
         })
     }
 
