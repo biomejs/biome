@@ -92,19 +92,18 @@ struct SummaryDetail<'a>(pub(crate) &'a TraversalMode, usize);
 
 impl<'a> fmt::Display for SummaryDetail<'a> {
     fn fmt(&self, fmt: &mut Formatter) -> io::Result<()> {
-        match self.0 {
-            TraversalMode::Search { .. } => Ok(()),
-            _ => {
-                if self.1 > 0 {
-                    fmt.write_markup(markup! {
-                        " Fixed "{Files(self.1)}"."
-                    })
-                } else {
-                    fmt.write_markup(markup! {
-                        " No fixes applied."
-                    })
-                }
-            }
+        if let TraversalMode::Search { .. } = self.0 {
+            return Ok(());
+        }
+
+        if self.1 > 0 {
+            fmt.write_markup(markup! {
+                " Fixed "{Files(self.1)}"."
+            })
+        } else {
+            fmt.write_markup(markup! {
+                " No fixes applied."
+            })
         }
     }
 }
