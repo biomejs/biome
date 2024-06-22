@@ -30,7 +30,7 @@ pub(crate) fn is_at_unicode_range(p: &mut CssParser) -> bool {
 /// Basic usage in CSS:
 ///
 /// ```css
-/// .class {
+/// @font-face {
 ///     unicode-range: U+000-49F, U+2000-27FF, U+2900-2BFF, U+1D400-1D7FF, U+ff??;
 /// }
 /// ```
