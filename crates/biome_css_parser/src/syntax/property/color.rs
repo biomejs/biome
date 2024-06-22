@@ -18,10 +18,11 @@ pub(crate) fn parse_color(p: &mut CssParser) -> ParsedSyntax {
     }
 
     let m = p.start();
+    let hash_range = p.cur_range();
     p.bump_with_context(T![#], CssLexContext::Color);
 
     if !p.eat(CSS_COLOR_LITERAL) {
-        p.error(expected_color(p, p.cur_range()));
+        p.error(expected_color(p, hash_range));
     }
 
     Present(m.complete(p, CSS_COLOR))
