@@ -1,3 +1,5 @@
+pub(crate) mod unicode_range;
+
 use crate::lexer::CssLexContext;
 use crate::parser::CssParser;
 use crate::syntax::css_modules::{

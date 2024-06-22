@@ -602,6 +602,22 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::CssTypeSelector::new_unchecked(node) };
                     $body
                 }
+                $crate::CssSyntaxKind::CSS_UNICODE_CODEPOINT => {
+                    let $pattern = unsafe { $crate::CssUnicodeCodepoint::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::CSS_UNICODE_RANGE => {
+                    let $pattern = unsafe { $crate::CssUnicodeRange::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::CSS_UNICODE_RANGE_INTERVAL => {
+                    let $pattern = unsafe { $crate::CssUnicodeRangeInterval::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::CSS_UNICODE_RANGE_WILDCARD => {
+                    let $pattern = unsafe { $crate::CssUnicodeRangeWildcard::new_unchecked(node) };
+                    $body
+                }
                 $crate::CssSyntaxKind::CSS_UNIVERSAL_NAMESPACE_PREFIX => {
                     let $pattern =
                         unsafe { $crate::CssUniversalNamespacePrefix::new_unchecked(node) };
@@ -748,6 +764,11 @@ macro_rules! map_syntax_node {
                 }
                 $crate::CssSyntaxKind::CSS_BOGUS_SUB_SELECTOR => {
                     let $pattern = unsafe { $crate::CssBogusSubSelector::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::CSS_BOGUS_UNICODE_RANGE_VALUE => {
+                    let $pattern =
+                        unsafe { $crate::CssBogusUnicodeRangeValue::new_unchecked(node) };
                     $body
                 }
                 $crate::CssSyntaxKind::CSS_BOGUS_URL_MODIFIER => {
