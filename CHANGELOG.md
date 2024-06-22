@@ -11,6 +11,8 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 ## Unreleased
 
+- Implement [the search command output formatter](https://github.com/biomejs/biome/issues/2462). Contributed by @BackupMiles
+
 ### CLI
 
 #### Bug fixes
