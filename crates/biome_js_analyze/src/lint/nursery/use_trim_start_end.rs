@@ -148,6 +148,7 @@ impl Rule for UseTrimStartEnd {
             false
         };
         // Need to keep the original token to replace it with the new token.
+        // `.as_static_value()` strips the information of tick tokens.
         let token = generate_syntax_token(callee.clone())?;
         let replaced_member_name = suggested_name(&token);
 
