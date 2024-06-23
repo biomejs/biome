@@ -4,29 +4,31 @@ expression: valid.js
 ---
 # Input
 ```jsx
-const foo = bar.trimStart()
-const foo = bar.trimEnd()
+const foo = bar.trimStart();
+const foo = bar.trimEnd();
 bar.trimStart?.()
-foo.trimStart()
-foo.trimStart?.()
-foo.trimEnd()
+foo.trimStart(),
+foo.trimStart?.(),
+foo.trimEnd(),
 // Not `CallExpression`
-new foo.trimLeft()
+new foo.trimLeft();,
 // Not `MemberExpression`
-trimLeft()
+trimLeft();,
+// `callee.property` is not a `Identifier`
+foo[\'trimLeft\']();',
 // Computed
-foo[trimLeft]()
+foo[trimLeft]();,
 // Not `trimLeft`/`trimRight`
-foo.bar()
+foo.bar();,
 // More argument(s)
-foo.trimLeft(extra)
-foo.trimLeft(...argumentsArray)
+foo.trimLeft(extra);,
+foo.trimLeft(...argumentsArray),
 // `trimLeft` is in argument
-foo.bar(trimLeft)
-foo.bar(foo.trimLeft)
+foo.bar(trimLeft),
+foo.bar(foo.trimLeft),
 // `trimLeft` is in `MemberExpression.object`
-trimLeft.foo()
-foo.trimLeft.bar()
+trimLeft.foo(),
+foo.trimLeft.bar(),
 bar['trimStart']()
 bar["trimStart"]()
 bar[`trimStart`]()

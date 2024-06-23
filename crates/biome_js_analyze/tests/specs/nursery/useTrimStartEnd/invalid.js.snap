@@ -4,32 +4,19 @@ expression: invalid.js
 ---
 # Input
 ```jsx
-<<<<<<< HEAD
 foo.trimLeft()
 foo.trimRight()
 trimLeft.trimRight()
 foo.trimLeft.trimRight()
 "foo".trimLeft()
-=======
-foo.trimLeft();
-foo.trimRight();
-trimLeft.trimRight();
-foo.trimLeft.trimRight();
-"foo".trimLeft();
->>>>>>> 0ee594f175 (feat(biome_js_analyzer): `useTrimStartEnd`)
 foo
 	// comment
 	.trimRight /* comment */
 	/* comment */
-<<<<<<< HEAD
 	()
 bar['trimLeft']()
 bar["trimLeft"]()
 bar[`trimLeft`]()
-=======
-	();
-foo?.trimLeft();
->>>>>>> 0ee594f175 (feat(biome_js_analyzer): `useTrimStartEnd`)
 
 ```
 
@@ -37,37 +24,21 @@ foo?.trimLeft();
 ```
 invalid.js:1:5 lint/nursery/useTrimStartEnd  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-<<<<<<< HEAD
   ! Use trimStart instead of trimLeft.
   
   > 1 │ foo.trimLeft()
       │     ^^^^^^^^
     2 │ foo.trimRight()
     3 │ trimLeft.trimRight()
-=======
-  ! Use trimLeft instead of trimStart.
-  
-  > 1 │ foo.trimLeft();
-      │     ^^^^^^^^
-    2 │ foo.trimRight();
-    3 │ trimLeft.trimRight();
->>>>>>> 0ee594f175 (feat(biome_js_analyzer): `useTrimStartEnd`)
   
   i trimLeft() is an alias for trimStart.
   
   i Safe fix: Replace trimLeft with trimStart.
   
-<<<<<<< HEAD
      1    │ - foo.trimLeft()
         1 │ + foo.trimStart()
      2  2 │   foo.trimRight()
      3  3 │   trimLeft.trimRight()
-=======
-     1    │ - foo.trimLeft();
-        1 │ + foo.trimStart();
-     2  2 │   foo.trimRight();
-     3  3 │   trimLeft.trimRight();
->>>>>>> 0ee594f175 (feat(biome_js_analyzer): `useTrimStartEnd`)
   
 
 ```
@@ -75,7 +46,6 @@ invalid.js:1:5 lint/nursery/useTrimStartEnd  FIXABLE  ━━━━━━━━�
 ```
 invalid.js:2:5 lint/nursery/useTrimStartEnd  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-<<<<<<< HEAD
   ! Use trimEnd instead of trimRight.
   
     1 │ foo.trimLeft()
@@ -83,33 +53,16 @@ invalid.js:2:5 lint/nursery/useTrimStartEnd  FIXABLE  ━━━━━━━━�
       │     ^^^^^^^^^
     3 │ trimLeft.trimRight()
     4 │ foo.trimLeft.trimRight()
-=======
-  ! Use trimRight instead of trimEnd.
-  
-    1 │ foo.trimLeft();
-  > 2 │ foo.trimRight();
-      │     ^^^^^^^^^
-    3 │ trimLeft.trimRight();
-    4 │ foo.trimLeft.trimRight();
->>>>>>> 0ee594f175 (feat(biome_js_analyzer): `useTrimStartEnd`)
   
   i trimRight() is an alias for trimEnd.
   
   i Safe fix: Replace trimRight with trimEnd.
   
-<<<<<<< HEAD
      1  1 │   foo.trimLeft()
      2    │ - foo.trimRight()
         2 │ + foo.trimEnd()
      3  3 │   trimLeft.trimRight()
      4  4 │   foo.trimLeft.trimRight()
-=======
-     1  1 │   foo.trimLeft();
-     2    │ - foo.trimRight();
-        2 │ + foo.trimEnd();
-     3  3 │   trimLeft.trimRight();
-     4  4 │   foo.trimLeft.trimRight();
->>>>>>> 0ee594f175 (feat(biome_js_analyzer): `useTrimStartEnd`)
   
 
 ```
@@ -117,7 +70,6 @@ invalid.js:2:5 lint/nursery/useTrimStartEnd  FIXABLE  ━━━━━━━━�
 ```
 invalid.js:3:10 lint/nursery/useTrimStartEnd  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-<<<<<<< HEAD
   ! Use trimEnd instead of trimRight.
   
     1 │ foo.trimLeft()
@@ -126,36 +78,17 @@ invalid.js:3:10 lint/nursery/useTrimStartEnd  FIXABLE  ━━━━━━━━�
       │          ^^^^^^^^^
     4 │ foo.trimLeft.trimRight()
     5 │ "foo".trimLeft()
-=======
-  ! Use trimRight instead of trimEnd.
-  
-    1 │ foo.trimLeft();
-    2 │ foo.trimRight();
-  > 3 │ trimLeft.trimRight();
-      │          ^^^^^^^^^
-    4 │ foo.trimLeft.trimRight();
-    5 │ "foo".trimLeft();
->>>>>>> 0ee594f175 (feat(biome_js_analyzer): `useTrimStartEnd`)
   
   i trimRight() is an alias for trimEnd.
   
   i Safe fix: Replace trimRight with trimEnd.
   
-<<<<<<< HEAD
      1  1 │   foo.trimLeft()
      2  2 │   foo.trimRight()
      3    │ - trimLeft.trimRight()
         3 │ + trimLeft.trimEnd()
      4  4 │   foo.trimLeft.trimRight()
      5  5 │   "foo".trimLeft()
-=======
-     1  1 │   foo.trimLeft();
-     2  2 │   foo.trimRight();
-     3    │ - trimLeft.trimRight();
-        3 │ + trimLeft.trimEnd();
-     4  4 │   foo.trimLeft.trimRight();
-     5  5 │   "foo".trimLeft();
->>>>>>> 0ee594f175 (feat(biome_js_analyzer): `useTrimStartEnd`)
   
 
 ```
@@ -163,7 +96,6 @@ invalid.js:3:10 lint/nursery/useTrimStartEnd  FIXABLE  ━━━━━━━━�
 ```
 invalid.js:4:14 lint/nursery/useTrimStartEnd  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-<<<<<<< HEAD
   ! Use trimEnd instead of trimRight.
   
     2 │ foo.trimRight()
@@ -171,34 +103,17 @@ invalid.js:4:14 lint/nursery/useTrimStartEnd  FIXABLE  ━━━━━━━━�
   > 4 │ foo.trimLeft.trimRight()
       │              ^^^^^^^^^
     5 │ "foo".trimLeft()
-=======
-  ! Use trimRight instead of trimEnd.
-  
-    2 │ foo.trimRight();
-    3 │ trimLeft.trimRight();
-  > 4 │ foo.trimLeft.trimRight();
-      │              ^^^^^^^^^
-    5 │ "foo".trimLeft();
->>>>>>> 0ee594f175 (feat(biome_js_analyzer): `useTrimStartEnd`)
     6 │ foo
   
   i trimRight() is an alias for trimEnd.
   
   i Safe fix: Replace trimRight with trimEnd.
   
-<<<<<<< HEAD
      2  2 │   foo.trimRight()
      3  3 │   trimLeft.trimRight()
      4    │ - foo.trimLeft.trimRight()
         4 │ + foo.trimLeft.trimEnd()
      5  5 │   "foo".trimLeft()
-=======
-     2  2 │   foo.trimRight();
-     3  3 │   trimLeft.trimRight();
-     4    │ - foo.trimLeft.trimRight();
-        4 │ + foo.trimLeft.trimEnd();
-     5  5 │   "foo".trimLeft();
->>>>>>> 0ee594f175 (feat(biome_js_analyzer): `useTrimStartEnd`)
      6  6 │   foo
   
 
@@ -207,19 +122,11 @@ invalid.js:4:14 lint/nursery/useTrimStartEnd  FIXABLE  ━━━━━━━━�
 ```
 invalid.js:5:7 lint/nursery/useTrimStartEnd  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-<<<<<<< HEAD
   ! Use trimStart instead of trimLeft.
   
     3 │ trimLeft.trimRight()
     4 │ foo.trimLeft.trimRight()
   > 5 │ "foo".trimLeft()
-=======
-  ! Use trimLeft instead of trimStart.
-  
-    3 │ trimLeft.trimRight();
-    4 │ foo.trimLeft.trimRight();
-  > 5 │ "foo".trimLeft();
->>>>>>> 0ee594f175 (feat(biome_js_analyzer): `useTrimStartEnd`)
       │       ^^^^^^^^
     6 │ foo
     7 │ 	// comment
@@ -228,17 +135,10 @@ invalid.js:5:7 lint/nursery/useTrimStartEnd  FIXABLE  ━━━━━━━━�
   
   i Safe fix: Replace trimLeft with trimStart.
   
-<<<<<<< HEAD
      3  3 │   trimLeft.trimRight()
      4  4 │   foo.trimLeft.trimRight()
      5    │ - "foo".trimLeft()
         5 │ + "foo".trimStart()
-=======
-     3  3 │   trimLeft.trimRight();
-     4  4 │   foo.trimLeft.trimRight();
-     5    │ - "foo".trimLeft();
-        5 │ + "foo".trimStart();
->>>>>>> 0ee594f175 (feat(biome_js_analyzer): `useTrimStartEnd`)
      6  6 │   foo
      7  7 │   	// comment
   
@@ -248,22 +148,14 @@ invalid.js:5:7 lint/nursery/useTrimStartEnd  FIXABLE  ━━━━━━━━�
 ```
 invalid.js:8:3 lint/nursery/useTrimStartEnd  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-<<<<<<< HEAD
   ! Use trimEnd instead of trimRight.
-=======
-  ! Use trimRight instead of trimEnd.
->>>>>>> 0ee594f175 (feat(biome_js_analyzer): `useTrimStartEnd`)
   
      6 │ foo
      7 │ 	// comment
    > 8 │ 	.trimRight /* comment */
        │ 	 ^^^^^^^^^^^^^^^^^^^^^^^
      9 │ 	/* comment */
-<<<<<<< HEAD
     10 │ 	()
-=======
-    10 │ 	();
->>>>>>> 0ee594f175 (feat(biome_js_analyzer): `useTrimStartEnd`)
   
   i trimRight() is an alias for trimEnd.
   
@@ -274,17 +166,12 @@ invalid.js:8:3 lint/nursery/useTrimStartEnd  FIXABLE  ━━━━━━━━�
      8    │ - → .trimRight·/*·comment·*/
         8 │ + → .trimEnd·/*·comment·*/
      9  9 │   	/* comment */
-<<<<<<< HEAD
     10 10 │   	()
-=======
-    10 10 │   	();
->>>>>>> 0ee594f175 (feat(biome_js_analyzer): `useTrimStartEnd`)
   
 
 ```
 
 ```
-<<<<<<< HEAD
 invalid.js:11:5 lint/nursery/useTrimStartEnd  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use trimStart instead of trimLeft.
@@ -346,35 +233,16 @@ invalid.js:13:6 lint/nursery/useTrimStartEnd  FIXABLE  ━━━━━━━━�
   > 13 │ bar[`trimLeft`]()
        │      ^^^^^^^^
     14 │ 
-=======
-invalid.js:11:6 lint/nursery/useTrimStartEnd  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! Use trimLeft instead of trimStart.
-  
-     9 │ 	/* comment */
-    10 │ 	();
-  > 11 │ foo?.trimLeft();
-       │      ^^^^^^^^
-    12 │ 
->>>>>>> 0ee594f175 (feat(biome_js_analyzer): `useTrimStartEnd`)
   
   i trimLeft() is an alias for trimStart.
   
   i Safe fix: Replace trimLeft with trimStart.
   
-<<<<<<< HEAD
     11 11 │   bar['trimLeft']()
     12 12 │   bar["trimLeft"]()
     13    │ - bar[`trimLeft`]()
        13 │ + bar[`trimStart`]()
     14 14 │   
-=======
-     9  9 │   	/* comment */
-    10 10 │   	();
-    11    │ - foo?.trimLeft();
-       11 │ + foo?.trimStart();
-    12 12 │   
->>>>>>> 0ee594f175 (feat(biome_js_analyzer): `useTrimStartEnd`)
   
 
 ```
