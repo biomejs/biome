@@ -2965,9 +2965,12 @@ pub struct Nursery {
     #[doc = "Require regex literals to be declared at the top level."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_top_level_regex: Option<RuleConfiguration<UseTopLevelRegex>>,
-    #[doc = "Enforce the use of trimStart() over trimLeft() and trimeEnd() over trimRight()."]
+    #[doc = "Succinct description of the rule."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_trim_start_end: Option<RuleFixConfiguration<UseTrimStartEnd>>,
+    pub use_trim_start_end: Option<RuleConfiguration<UseTrimStartEnd>>,
+    #[doc = "Use valid values for the autocomplete attribute on input elements."]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub use_valid_autocomplete: Option<RuleConfiguration<UseValidAutocomplete>>,
 }
 impl DeserializableValidator for Nursery {
     fn validate(
@@ -3036,6 +3039,7 @@ impl Nursery {
         "useThrowOnlyError",
         "useTopLevelRegex",
         "useTrimStartEnd",
+        "useValidAutocomplete",
     ];
     const RECOMMENDED_RULES: &'static [&'static str] = &[
         "noDoneCallback",
@@ -3128,6 +3132,11 @@ impl Nursery {
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[41]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[42]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[43]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[44]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[45]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[46]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[47]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[48]),
     ];
     #[doc = r" Retrieves the recommended rules"]
     pub(crate) fn is_recommended_true(&self) -> bool {
@@ -3359,9 +3368,34 @@ impl Nursery {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[42]));
             }
         }
-        if let Some(rule) = self.use_trim_start_end.as_ref() {
+        if let Some(rule) = self.use_sorted_classes.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[43]));
+            }
+        }
+        if let Some(rule) = self.use_throw_new_error.as_ref() {
+            if rule.is_enabled() {
+                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[44]));
+            }
+        }
+        if let Some(rule) = self.use_throw_only_error.as_ref() {
+            if rule.is_enabled() {
+                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[45]));
+            }
+        }
+        if let Some(rule) = self.use_top_level_regex.as_ref() {
+            if rule.is_enabled() {
+                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[46]));
+            }
+        }
+        if let Some(rule) = self.use_trim_start_end.as_ref() {
+            if rule.is_enabled() {
+                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[47]));
+            }
+        }
+        if let Some(rule) = self.use_valid_autocomplete.as_ref() {
+            if rule.is_enabled() {
+                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[48]));
             }
         }
         index_set
@@ -3583,9 +3617,34 @@ impl Nursery {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[42]));
             }
         }
-        if let Some(rule) = self.use_trim_start_end.as_ref() {
+        if let Some(rule) = self.use_sorted_classes.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[43]));
+            }
+        }
+        if let Some(rule) = self.use_throw_new_error.as_ref() {
+            if rule.is_disabled() {
+                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[44]));
+            }
+        }
+        if let Some(rule) = self.use_throw_only_error.as_ref() {
+            if rule.is_disabled() {
+                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[45]));
+            }
+        }
+        if let Some(rule) = self.use_top_level_regex.as_ref() {
+            if rule.is_disabled() {
+                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[46]));
+            }
+        }
+        if let Some(rule) = self.use_trim_start_end.as_ref() {
+            if rule.is_disabled() {
+                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[47]));
+            }
+        }
+        if let Some(rule) = self.use_valid_autocomplete.as_ref() {
+            if rule.is_disabled() {
+                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[48]));
             }
         }
         index_set
@@ -3822,6 +3881,10 @@ impl Nursery {
                 .map(|conf| (conf.level(), conf.get_options())),
             "useTrimStartEnd" => self
                 .use_trim_start_end
+                .as_ref()
+                .map(|conf| (conf.level(), conf.get_options())),
+            "useValidAutocomplete" => self
+                .use_valid_autocomplete
                 .as_ref()
                 .map(|conf| (conf.level(), conf.get_options())),
             _ => None,
