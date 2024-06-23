@@ -147,7 +147,7 @@ impl Rule for UseTrimStartEnd {
         } else {
             false
         };
-
+        // Need to keep the original token to replace it with the new token.
         let token = generate_syntax_token(callee.clone())?;
         let replaced_member_name = suggested_name(&token);
 
