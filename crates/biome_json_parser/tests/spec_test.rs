@@ -35,11 +35,11 @@ pub fn run(test_case: &str, _snapshot_name: &str, test_directory: &str, outcome_
     let content = fs::read_to_string(test_case_path)
         .expect("Expected test path to be a readable file in UTF8 encoding");
 
-    let parse_conifg = JsonParserOptions {
+    let parse_config = JsonParserOptions {
         allow_comments: test_directory.contains("allow_comments"),
         allow_trailing_commas: test_directory.contains("allow_trailing_commas"),
     };
-    let parsed = parse_json(&content, parse_conifg);
+    let parsed = parse_json(&content, parse_config);
     let formatted_ast = format!("{:#?}", parsed.tree());
 
     let mut snapshot = String::new();
