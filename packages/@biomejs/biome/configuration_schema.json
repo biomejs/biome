@@ -2120,9 +2120,16 @@
 					]
 				},
 				"useTrimStartEnd": {
-					"description": "Enforce the use of trimStart() over trimLeft() and trimeEnd() over trimRight().",
+					"description": "Enforce the use of String.trimStart() and String.trimEnd() over String.trimLeft() and String.trimRight().",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleFixConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useValidAutocomplete": {
+					"description": "Use valid values for the autocomplete attribute on input elements.",
+					"anyOf": [
+						{ "$ref": "#/definitions/UseValidAutocompleteConfiguration" },
 						{ "type": "null" }
 					]
 				}

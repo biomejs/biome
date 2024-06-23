@@ -1258,9 +1258,9 @@ export interface Nursery {
 	 */
 	useTopLevelRegex?: RuleConfiguration_for_Null;
 	/**
-	 * Succinct description of the rule.
+	 * Enforce the use of String.trimStart() and String.trimEnd() over String.trimLeft() and String.trimRight().
 	 */
-	useTrimStartEnd?: RuleConfiguration_for_Null;
+	useTrimStartEnd?: RuleFixConfiguration_for_Null;
 	/**
 	 * Use valid values for the autocomplete attribute on input elements.
 	 */

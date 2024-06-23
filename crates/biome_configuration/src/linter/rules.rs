@@ -2972,9 +2972,9 @@ pub struct Nursery {
     #[doc = "Require regex literals to be declared at the top level."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_top_level_regex: Option<RuleConfiguration<UseTopLevelRegex>>,
-    #[doc = "Succinct description of the rule."]
+    #[doc = "Enforce the use of String.trimStart() and String.trimEnd() over String.trimLeft() and String.trimRight()."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_trim_start_end: Option<RuleConfiguration<UseTrimStartEnd>>,
+    pub use_trim_start_end: Option<RuleFixConfiguration<UseTrimStartEnd>>,
     #[doc = "Use valid values for the autocomplete attribute on input elements."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_valid_autocomplete: Option<RuleConfiguration<UseValidAutocomplete>>,
