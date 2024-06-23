@@ -1,9 +1,12 @@
 use std::path::{Component, Path};
+use schemars::JsonSchema;
+use serde::Deserialize;
 
 use biome_analyze::{
     context::RuleContext, declare_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic,
 };
 use biome_console::markup;
+use biome_deserialize_macros::Deserializable;
 use biome_js_factory::make;
 use biome_js_syntax::{inner_string_text, AnyJsImportSpecifierLike, JsLanguage};
 use biome_rowan::{BatchMutationExt, SyntaxToken};
@@ -64,6 +67,26 @@ declare_rule! {
     /// ```js
     /// require("./foo.js");
     /// ```
+    ///
+    /// ### Options
+    ///
+    /// Use the options to specify additional globals that you want to restrict in your
+    /// source code.
+    ///
+    /// ```json
+    /// {
+    ///     "//": "...",
+    ///     "options": {
+    ///         "import_mappings": [
+    ///             {
+    ///                 "file_ext": ["mts"],
+    ///                 "import_ext": "mjs",
+    ///                 "component_import_ext": "jsx"
+    ///             }
+    ///         ]
+    ///     }
+    /// }
+    /// ```
     /// ## Caveats
     ///
     /// If you are using TypeScript, TypeScript version 5.0 and later is required, also make sure to enable
@@ -82,18 +105,36 @@ declare_rule! {
     }
 }
 
+#[derive(Clone, Debug, Default, Deserializable, Deserialize)]
+#[cfg_attr(feature = "schemars", derive(JsonSchema))]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct UseImportExtensionsOptions {
+    pub import_mappings: Vec<ImportMapping>
+}
+
+#[derive(Debug, Clone, Default, Deserializable, Deserialize)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+struct ImportMapping {
+    pub file_ext: Vec<String>,
+    pub import_ext: String,
+    pub component_import_ext: String
+}
+
 impl Rule for UseImportExtensions {
     type Query = Ast<AnyJsImportSpecifierLike>;
     type State = UseImportExtensionsState;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = Box<UseImportExtensionsOptions>;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
 
         let file_ext = ctx.file_path().extension().and_then(|ext| ext.to_str())?;
 
-        get_extensionless_import(file_ext, node)
+        let custom_import_mappings = &ctx.options().import_mappings;
+
+        get_extensionless_import(file_ext, node, custom_import_mappings)
     }
 
     fn diagnostic(_: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
@@ -146,6 +187,7 @@ pub struct UseImportExtensionsState {
 fn get_extensionless_import(
     file_ext: &str,
     node: &AnyJsImportSpecifierLike,
+    custom_import_mappings: &Vec<ImportMapping>,
 ) -> Option<UseImportExtensionsState> {
     let module_name_token = node.module_name_token()?;
     let module_path = inner_string_text(&module_name_token);
@@ -172,7 +214,7 @@ fn get_extensionless_import(
         });
     }
 
-    let import_ext = resolve_import_extension(file_ext, path);
+    let import_ext = resolve_import_extension(file_ext, path, custom_import_mappings);
 
     let mut path_parts = module_path.text().split('/');
     let mut is_index_file = false;
@@ -226,17 +268,23 @@ fn get_extensionless_import(
     })
 }
 
-fn resolve_import_extension<'a>(file_ext: &str, path: &Path) -> &'a str {
-    // TODO. This is not very accurate. We should use file system access to determine the file type.
-    let (potential_ext, potential_component_ext) = match file_ext {
-        "ts" | "tsx" | "astro" => ("ts", "tsx"),
-        "mts" => ("mts", "tsx"),
-        "mjs" => ("mjs", "jsx"),
-        "cjs" => ("cjs", "jsx"),
-        "cts" => ("cts", "tsx"),
-        // Unlikely that these frameworks would import tsx file.
-        "svelte" | "vue" => ("ts", "ts"),
-        _ => ("js", "jsx"),
+fn resolve_import_extension<'a>(file_ext: &str, path: &Path, custom_import_mappings: &Vec<ImportMapping>) -> &'a str {
+    let custom_mapping_match = match_custom_import_mappings(custom_import_mappings, file_ext);
+
+    let (potential_ext, potential_component_ext) = if custom_mapping_match.is_some() {
+        custom_mapping_match.unwrap()
+    } else {
+        // TODO. This is not very accurate. We should use file system access to determine the file type.
+        match file_ext {
+            "ts" | "tsx" | "astro" => ("ts", "tsx"),
+            "mts" => ("mts", "tsx"),
+            "mjs" => ("mjs", "jsx"),
+            "cjs" => ("cjs", "jsx"),
+            "cts" => ("cts", "tsx"),
+            // Unlikely that these frameworks would import tsx file.
+            "svelte" | "vue" => ("ts", "ts"),
+            _ => ("js", "jsx"),
+        }
     };
 
     let maybe_is_component = path
@@ -250,4 +298,18 @@ fn resolve_import_extension<'a>(file_ext: &str, path: &Path) -> &'a str {
     }
 
     potential_ext
+}
+
+fn match_custom_import_mappings<'a>(custom_import_mappings: &Vec<ImportMapping>, file_ext: &str) -> Option<(&'a str, &'a str)> {
+    let mapping = custom_import_mappings
+        .iter()
+        .find(|&&mapping|
+            mapping.file_ext.map(String::as_str).contains(file_ext)
+        );
+
+    if mapping.is_some() {
+        return Some((&mapping.unwrap().import_ext, &mapping.unwrap().component_import_ext))
+    }
+
+    return None
 }
