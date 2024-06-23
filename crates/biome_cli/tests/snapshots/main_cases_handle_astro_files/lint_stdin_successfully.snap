@@ -21,9 +21,13 @@ import {a as a} from 'mod';
 ```
 
 ```block
-file.astro lint/complexity/noUselessRename  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+file.astro:2:9 lint/complexity/noUselessRename  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Useless rename.
+  
+  > 2 │ import {a as a} from 'mod';
+      │         ^^^^^^
+    3 │ 
   
   i Safe fix: Remove the renaming.
   

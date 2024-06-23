@@ -18,7 +18,7 @@ biome_deserialize        = { workspace = true, optional = true }
 biome_deserialize_macros = { workspace = true, optional = true }
 biome_diagnostics        = { workspace = true }
 biome_rowan              = { workspace = true }
-bitflags                 = { workspace = true }
+enumflags2               = { workspace = true }
 rustc-hash               = { workspace = true }
 schemars                 = { workspace = true, optional = true }
 serde                    = { workspace = true, features = ["derive"], optional = true }

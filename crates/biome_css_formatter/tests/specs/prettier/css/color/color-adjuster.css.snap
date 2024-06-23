@@ -135,15 +135,6 @@ info: css/color/color-adjuster.css
 ```diff
 --- Prettier
 +++ Biome
-@@ -4,7 +4,7 @@
-   color: color(swopc, 0 206 190 77);
-   color: color(indigo, 24 160 86 42 0 18 31);
-   color: color(prophoto, 233 150 122);
--  color: color(P3, 97 253 36);
-+  color: color(p3, 97 253 36);
-   color: color(#eb8fa9 alpha(75%) blackness(20%));
-   color: color(red blue(20));
-   color: color(red blue(20%));
 @@ -14,7 +14,7 @@
    color: color(red red(- 20%));
    color: color(red red(- 128));
@@ -195,7 +186,7 @@ info: css/color/color-adjuster.css
   color: color(swopc, 0 206 190 77);
   color: color(indigo, 24 160 86 42 0 18 31);
   color: color(prophoto, 233 150 122);
-  color: color(p3, 97 253 36);
+  color: color(P3, 97 253 36);
   color: color(#eb8fa9 alpha(75%) blackness(20%));
   color: color(red blue(20));
   color: color(red blue(20%));

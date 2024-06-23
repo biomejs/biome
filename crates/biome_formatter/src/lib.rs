@@ -44,6 +44,7 @@ mod verbatim;
 use crate::formatter::Formatter;
 use crate::group_id::UniqueGroupIdBuilder;
 use crate::prelude::TagKind;
+use std::fmt;
 use std::fmt::{Debug, Display};
 
 use crate::builders::syntax_token_cow_slice;
@@ -76,7 +77,6 @@ pub use source_map::{TransformSourceMap, TransformSourceMapBuilder};
 use std::marker::PhantomData;
 use std::num::ParseIntError;
 use std::str::FromStr;
-use std::u8;
 use token::string::Quote;
 
 #[derive(Debug, Eq, PartialEq, Clone, Copy, Hash)]
@@ -674,7 +674,7 @@ impl FormatContext for SimpleFormatContext {
     }
 }
 
-#[derive(Debug, Default, Eq, PartialEq)]
+#[derive(Debug, Default, Eq, PartialEq, Copy, Clone)]
 pub struct SimpleFormatOptions {
     pub indent_style: IndentStyle,
     pub indent_width: IndentWidth,
@@ -711,6 +711,12 @@ impl FormatOptions for SimpleFormatOptions {
             .with_print_width(self.line_width.into())
             .with_line_ending(self.line_ending)
             .with_attribute_position(self.attribute_position)
+    }
+}
+
+impl Display for SimpleFormatOptions {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        fmt::Debug::fmt(self, f)
     }
 }
 

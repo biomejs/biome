@@ -29,5 +29,8 @@ regex                = { workspace = true }
 rustc-hash           = { workspace = true }
 serde                = { workspace = true, features = ["derive"] }
 
+[dev-dependencies]
+insta = { workspace = true }
+
 [lints]
 workspace = true

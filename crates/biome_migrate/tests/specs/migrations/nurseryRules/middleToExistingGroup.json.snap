@@ -1,0 +1,50 @@
+---
+source: crates/biome_migrate/tests/spec_tests.rs
+expression: middleToExistingGroup.json
+---
+# Input
+```json
+{
+  "linter": {
+    "rules": {
+      "nursery": {
+        "nuseryRuleAlways": "error",
+        "noExcessiveNestedTestSuites": "error",
+        "nuseryRuleForever": "error"
+      },
+      "complexity": {}
+    }
+  }
+}
+
+```
+
+# Diagnostics
+```
+middleToExistingGroup.json:6:9 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This rule has been promoted to complexity/noExcessiveNestedTestSuites.
+  
+    4 │       "nursery": {
+    5 │         "nuseryRuleAlways": "error",
+  > 6 │         "noExcessiveNestedTestSuites": "error",
+      │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    7 │         "nuseryRuleForever": "error"
+    8 │       },
+  
+  i Unsafe fix: Move the rule to the new stable group.
+  
+     3  3 │       "rules": {
+     4  4 │         "nursery": {
+     5    │ - ········"nuseryRuleAlways":·"error",
+     6    │ - ········"noExcessiveNestedTestSuites":·"error",
+        5 │ + ········"nuseryRuleAlways":·"error",
+     7  6 │           "nuseryRuleForever": "error"
+     8  7 │         },
+     9    │ - ······"complexity":·{}
+        8 │ + ······"complexity":·{"noExcessiveNestedTestSuites":·"error"}
+    10  9 │       }
+    11 10 │     }
+  
+
+```

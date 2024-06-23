@@ -230,7 +230,7 @@ impl Error for RuleError {}
 #[cfg(test)]
 mod tests {
     use biome_analyze::options::RuleOptions;
-    use biome_analyze::{AnalyzerOptions, Never, RuleCategories, RuleFilter, RuleKey};
+    use biome_analyze::{AnalyzerOptions, Never, RuleCategoriesBuilder, RuleFilter, RuleKey};
     use biome_console::fmt::{Formatter, Termcolor};
     use biome_console::{markup, Markup};
     use biome_diagnostics::category;
@@ -451,7 +451,7 @@ mod tests {
         );
 
         let filter = AnalysisFilter {
-            categories: RuleCategories::SYNTAX,
+            categories: RuleCategoriesBuilder::default().with_syntax().build(),
             ..AnalysisFilter::default()
         };
 

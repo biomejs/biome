@@ -342,8 +342,7 @@ where
 
 impl<'bag, R> AnalyzerSignal<RuleLanguage<R>> for RuleSignal<'bag, R>
 where
-    R: Rule + 'static,
-    <R as Rule>::Options: Default,
+    R: Rule<Options: Default> + 'static,
 {
     fn diagnostic(&self) -> Option<AnalyzerDiagnostic> {
         let globals = self.options.globals();

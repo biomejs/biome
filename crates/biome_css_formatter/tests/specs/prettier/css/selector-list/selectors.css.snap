@@ -532,6 +532,12 @@ ns|* {}
 -  }
 -  .child-two {
 -  }
+-}
+-.parent >>> {
+-  .child-one {
+-  }
+-  .child-two {
+-  }
 +  .child-one {}
 +  .child-two {}
  }
@@ -557,12 +563,6 @@ ns|* {}
 +  .child-two
 +  {}
  }
--.parent >>> {
--  .child-one {
--  }
--  .child-two {
--  }
--}
 -.parent >>> {
 -  .child-one {
 -  }
@@ -622,15 +622,6 @@ ns|* {}
  }
  
  /* This matches all XHTML <a> elements, as XHTML is the default unprefixed namespace */
-@@ -374,7 +369,7 @@
- *|a {
- }
- 
--|B {
-+|b {
- }
- 
- ns|* {
 ```
 
 # Output
@@ -1007,7 +998,7 @@ svg|a {
 *|a {
 }
 
-|b {
+|B {
 }
 
 ns|* {
