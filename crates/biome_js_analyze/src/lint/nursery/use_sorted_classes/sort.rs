@@ -9,17 +9,13 @@ use super::{
 impl ClassInfo {
     /// Compare based on the existence of variants. Classes with variants go last.
     /// Returns `None` if both or none of the classes has variants.
-    fn cmp_has_variants(&self, other: &ClassInfo) -> Option<Ordering> {
-        if self.variant_weight.is_some() && other.variant_weight.is_some() {
-            return None;
+    fn cmp_variants_weight_existence(&self, other: &ClassInfo) -> Option<Ordering> {
+        match (&self.variant_weight, &other.variant_weight) {
+            (Some(_), Some(_)) => None,
+            (Some(_), _) => Some(Ordering::Greater),
+            (_, Some(_)) => Some(Ordering::Less),
+            (None, None) => None,
         }
-        if self.variant_weight.is_some() {
-            return Some(Ordering::Greater);
-        }
-        if other.variant_weight.is_some() {
-            return Some(Ordering::Less);
-        }
-        None
     }
 
     /// Compare based on layer indexes. Classes with lower indexes go first.
@@ -36,12 +32,12 @@ impl ClassInfo {
     /// First compare variants weight length. Only if their equal compare their actual weight.
     /// Returns `None` if they have the same weight.
     fn cmp_variants_weight(&self, other: &ClassInfo) -> Option<Ordering> {
-        let current_weight = self.variant_weight.clone()?;
-        let other_weight = other.variant_weight.clone()?;
+        let current_weight = self.variant_weight.as_ref()?;
+        let other_weight = other.variant_weight.as_ref()?;
 
         let mut result = current_weight.len().cmp(&other_weight.len());
         if result == Ordering::Equal {
-            result = current_weight.cmp(&other_weight);
+            result = current_weight.cmp(other_weight);
         }
 
         if result != Ordering::Equal {
@@ -52,27 +48,23 @@ impl ClassInfo {
 
     /// Compare based on the existence of arbitrary variants. Classes with arbitrary variants go last.
     /// Returns `None` if both or none of the classes has arbitrary variants.
-    fn cmp_has_arbitrary_variants(&self, other: &ClassInfo) -> Option<Ordering> {
-        if self.arbitrary_variants.is_some() && other.arbitrary_variants.is_some() {
-            return None;
+    fn cmp_arbitrary_variants_existence(&self, other: &ClassInfo) -> Option<Ordering> {
+        match (&self.arbitrary_variants, &other.arbitrary_variants) {
+            (Some(_), Some(_)) => None,
+            (Some(_), _) => Some(Ordering::Greater),
+            (_, Some(_)) => Some(Ordering::Less),
+            (None, None) => None,
         }
-        if self.arbitrary_variants.is_some() {
-            return Some(Ordering::Greater);
-        }
-        if other.arbitrary_variants.is_some() {
-            return Some(Ordering::Less);
-        }
-        None
     }
 
     /// Compare arbitrary variants based on their length and then lexicographically
     fn cmp_arbitrary_variants(&self, other: &ClassInfo) -> Option<Ordering> {
-        let a = self.arbitrary_variants.clone()?;
-        let b = other.arbitrary_variants.clone()?;
+        let a = self.arbitrary_variants.as_ref()?;
+        let b = other.arbitrary_variants.as_ref()?;
 
         let mut result = a.len().cmp(&b.len());
         if result == Ordering::Equal {
-            result = a.cmp(&b);
+            result = a.cmp(b);
         }
 
         if result != Ordering::Equal {
@@ -99,7 +91,7 @@ impl ClassInfo {
 // simplifications and necessary differences.
 fn compare_classes(a: &ClassInfo, b: &ClassInfo) -> Ordering {
     // Classes with arbitrary variants go last
-    if let Some(has_arbitrary_variants) = a.cmp_has_arbitrary_variants(b) {
+    if let Some(has_arbitrary_variants) = a.cmp_arbitrary_variants_existence(b) {
         return has_arbitrary_variants;
     }
 
@@ -109,7 +101,7 @@ fn compare_classes(a: &ClassInfo, b: &ClassInfo) -> Ordering {
     }
 
     // Classes with variants go last.
-    if let Some(has_variants_order) = a.cmp_has_variants(b) {
+    if let Some(has_variants_order) = a.cmp_variants_weight_existence(b) {
         return has_variants_order;
     }
 

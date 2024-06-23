@@ -34,9 +34,9 @@ enum UtilityMatch {
     None,
 }
 
-impl UtilityMatch {
+impl From<(&str, &str)> for UtilityMatch {
     /// Checks if a utility matches a target, and returns the result.
-    fn from(target: &str, utility_text: &str) -> UtilityMatch {
+    fn from((target, utility_text): (&str, &str)) -> UtilityMatch {
         // If the target ends with `$`, then it's an exact target.
         if target.ends_with('$') {
             // Check if the utility matches the target (without the final `$`) exactly.
@@ -60,37 +60,40 @@ mod utility_match_tests {
 
     #[test]
     fn test_exact_match() {
-        assert_eq!(UtilityMatch::from("px-2$", "px-2"), UtilityMatch::Exact);
+        assert_eq!(UtilityMatch::from(("px-2$", "px-2")), UtilityMatch::Exact);
         // TODO: support negative values
-        // assert_eq!(UtilityMatch::from("px-2$", "-px-2"), UtilityMatch::Exact);
-        assert_eq!(UtilityMatch::from("px-2$", "not-px-2"), UtilityMatch::None);
-        assert_eq!(UtilityMatch::from("px-2$", "px-2-"), UtilityMatch::None);
-        assert_eq!(UtilityMatch::from("px-2$", "px-4"), UtilityMatch::None);
-        assert_eq!(UtilityMatch::from("px-2$", "px-2$"), UtilityMatch::None);
-        assert_eq!(UtilityMatch::from("px-2$", "px-2-"), UtilityMatch::None);
-        assert_eq!(UtilityMatch::from("px-2$", "px-2.5"), UtilityMatch::None);
-        assert_eq!(UtilityMatch::from("px-2$", "px-2.5$"), UtilityMatch::None);
-        assert_eq!(UtilityMatch::from("px-2$", "px-2.5-"), UtilityMatch::None);
+        // assert_eq!(UtilityMatch::from(("px-2$", "-px-2")), UtilityMatch::Exact);
+        assert_eq!(
+            UtilityMatch::from(("px-2$", "not-px-2")),
+            UtilityMatch::None
+        );
+        assert_eq!(UtilityMatch::from(("px-2$", "px-2-")), UtilityMatch::None);
+        assert_eq!(UtilityMatch::from(("px-2$", "px-4")), UtilityMatch::None);
+        assert_eq!(UtilityMatch::from(("px-2$", "px-2$")), UtilityMatch::None);
+        assert_eq!(UtilityMatch::from(("px-2$", "px-2-")), UtilityMatch::None);
+        assert_eq!(UtilityMatch::from(("px-2$", "px-2.5")), UtilityMatch::None);
+        assert_eq!(UtilityMatch::from(("px-2$", "px-2.5$")), UtilityMatch::None);
+        assert_eq!(UtilityMatch::from(("px-2$", "px-2.5-")), UtilityMatch::None);
     }
 
     #[test]
     fn test_partial_match() {
-        assert_eq!(UtilityMatch::from("px-", "px-2"), UtilityMatch::Partial);
+        assert_eq!(UtilityMatch::from(("px-", "px-2")), UtilityMatch::Partial);
         // TODO: support negative values
-        // assert_eq!(UtilityMatch::from("px-", "-px-2"), UtilityMatch::Partial);
-        assert_eq!(UtilityMatch::from("px-", "px-2.5"), UtilityMatch::Partial);
+        // assert_eq!(UtilityMatch::from(("px-", "-px-2")), UtilityMatch::Partial);
+        assert_eq!(UtilityMatch::from(("px-", "px-2.5")), UtilityMatch::Partial);
         assert_eq!(
-            UtilityMatch::from("px-", "px-anything"),
+            UtilityMatch::from(("px-", "px-anything")),
             UtilityMatch::Partial
         );
         assert_eq!(
-            UtilityMatch::from("px-", "px-%$>?+=-"),
+            UtilityMatch::from(("px-", "px-%$>?+=-")),
             UtilityMatch::Partial
         );
-        assert_eq!(UtilityMatch::from("px-", "px-"), UtilityMatch::None);
+        assert_eq!(UtilityMatch::from(("px-", "px-")), UtilityMatch::None);
         // TODO: support negative values
-        // assert_eq!(UtilityMatch::from("px-", "-px-"), UtilityMatch::None);
-        assert_eq!(UtilityMatch::from("px-", "not-px-2"), UtilityMatch::None);
+        // assert_eq!(UtilityMatch::from(("px-", "-px-")), UtilityMatch::None);
+        assert_eq!(UtilityMatch::from(("px-", "not-px-2")), UtilityMatch::None);
     }
 }
 
@@ -120,15 +123,15 @@ fn get_utility_info(
     }
 
     let utility_text = utility_data.text.as_str();
-    let mut layer: &str = "<no match>";
+    let mut layer: Option<&str> = None;
     let mut match_index: usize = 0;
     let mut last_size: usize = 0;
 
     // Iterate over each layer, looking for a match.
     for layer_data in utility_config.iter() {
         // Iterate over each target in the layer, looking for a match.
-        for (index, target) in layer_data.classes.iter().enumerate() {
-            match UtilityMatch::from(target, utility_text) {
+        for (index, &target) in layer_data.classes.iter().enumerate() {
+            match UtilityMatch::from((target, utility_text)) {
                 UtilityMatch::Exact => {
                     // Exact matches can be returned immediately.
                     return Some(UtilityInfo {
@@ -144,18 +147,18 @@ fn get_utility_info(
                     // regardless of the order in which the targets are defined.
                     let target_size = target.chars().count();
                     if target_size > last_size {
-                        layer = layer_data.name;
+                        layer = Some(layer_data.name);
                         match_index = index;
                         last_size = target_size;
                     }
                 }
-                _ => {}
+                UtilityMatch::None => {}
             }
         }
     }
-    if layer != "<no match>" {
+    if let Some(layer_match) = layer {
         return Some(UtilityInfo {
-            layer,
+            layer: layer_match,
             index: match_index,
         });
     }
@@ -293,16 +296,45 @@ enum VariantMatch {
     None,
 }
 
-impl VariantMatch {
+impl From<(&str, &str)> for VariantMatch {
     /// Checks if a variant matches a target, and returns the result.
-    fn from(target: &str, variant_text: &str) -> VariantMatch {
+    fn from((target, variant_text): (&str, &str)) -> VariantMatch {
         // If the target matched exactly the variant text.
         if target == variant_text {
             return VariantMatch::Exact;
         };
 
-        // if it has a custom value thus it starts with the variant text and it's followed by "-["
-        if variant_text.starts_with(format!("{}-[", target).as_str()) {
+        let variant_chars = variant_text.chars();
+        let mut target_chars = target.chars();
+        let mut target_found = true;
+        let mut dash_found = false;
+        let mut bracket_found = false;
+        // Checks if variant text has a custom value thus it starts with the target and it's followed by "-["
+        for char in variant_chars {
+            match (char, target_chars.next()) {
+                (_, Some(target_char)) => {
+                    if target_char != char {
+                        target_found = false;
+                        break;
+                    }
+                }
+                ('-', None) => {
+                    if target_found {
+                        dash_found = true;
+                    }
+                }
+                ('[', None) => {
+                    if target_found && dash_found {
+                        bracket_found = true;
+                    }
+                }
+                (_, None) => {
+                    break;
+                }
+            }
+        }
+
+        if target_found && dash_found && bracket_found {
             return VariantMatch::Exact;
         }
 
@@ -321,22 +353,22 @@ mod variant_match_tests {
 
     #[test]
     fn test_exact_match() {
-        assert_eq!(VariantMatch::from("hover", "hover"), VariantMatch::Exact);
-        assert_eq!(VariantMatch::from("focus", "focus"), VariantMatch::Exact);
+        assert_eq!(VariantMatch::from(("hover", "hover")), VariantMatch::Exact);
+        assert_eq!(VariantMatch::from(("focus", "focus")), VariantMatch::Exact);
         assert_eq!(
-            VariantMatch::from("group", "group-[.is-published]"),
+            VariantMatch::from(("group", "group-[.is-published]")),
             VariantMatch::Exact
         );
         assert_eq!(
-            VariantMatch::from("has", "has-[:checked]"),
+            VariantMatch::from(("has", "has-[:checked]")),
             VariantMatch::Exact
         );
         assert_eq!(
-            VariantMatch::from("group-has", "group-has-[.custom-class]"),
+            VariantMatch::from(("group-has", "group-has-[.custom-class]")),
             VariantMatch::Exact
         );
         assert_eq!(
-            VariantMatch::from("group-aria-disabled", "group-aria-disabled"),
+            VariantMatch::from(("group-aria-disabled", "group-aria-disabled")),
             VariantMatch::Exact
         );
     }
@@ -344,24 +376,33 @@ mod variant_match_tests {
     #[test]
     fn test_partial_match() {
         assert_eq!(
-            VariantMatch::from("group", "group-has-[.custom-class]"),
+            VariantMatch::from(("group", "group-has-[.custom-class]")),
             VariantMatch::Partial
         );
         assert_eq!(
-            VariantMatch::from("peer", "peer-has-[:checked]"),
+            VariantMatch::from(("peer", "peer-has-[:checked]")),
             VariantMatch::Partial
+        );
+    }
+
+    #[test]
+    fn test_no_match() {
+        assert_eq!(VariantMatch::from(("group", "hover")), VariantMatch::None);
+        assert_eq!(
+            VariantMatch::from(("group-aria-busy", "group-aria-disabled")),
+            VariantMatch::None
         );
     }
 }
 
-fn find_variant_info(config_variants: VariantsConfig, variant_text: &str) -> Option<usize> {
-    let mut variant: &str = "<no match>";
+fn find_variant_position(config_variants: VariantsConfig, variant_text: &str) -> Option<usize> {
+    let mut variant: Option<&str> = None;
     let mut match_index: usize = 0;
     let mut last_size: usize = 0;
 
     // Iterate over each variant looking for a match.
-    for (index, target) in config_variants.iter().enumerate() {
-        match VariantMatch::from(target, variant_text) {
+    for (index, &target) in config_variants.iter().enumerate() {
+        match VariantMatch::from((target, variant_text)) {
             VariantMatch::Exact => {
                 // Exact matches can be returned immediately.
                 return Some(index);
@@ -374,17 +415,17 @@ fn find_variant_info(config_variants: VariantsConfig, variant_text: &str) -> Opt
                 // so when the target is `group` a Partial match will occur.
                 let target_size = target.chars().count();
                 if target_size > last_size {
-                    variant = target;
+                    variant = Some(target);
                     match_index = index;
                     last_size = target_size;
                 }
             }
-            _ => {}
+            VariantMatch::None => {}
         }
     }
-    if variant != "<no match>" {
+    if variant.is_some() {
         return Some(match_index);
-    }
+    };
     None
 }
 
@@ -401,7 +442,7 @@ pub fn compute_variants_weight(
     let mut variants_map: HashMap<&str, BitVec<u8, Lsb0>> = HashMap::new();
     for current_variant in current_variants.iter() {
         let variant_name = current_variant.text.as_ref();
-        let Some(variant_index) = find_variant_info(config_variants, variant_name) else {
+        let Some(variant_index) = find_variant_position(config_variants, variant_name) else {
             continue;
         };
 
@@ -468,7 +509,7 @@ pub fn get_class_info(class_name: &str, sort_config: &SortConfig) -> Option<Clas
 
     let arbitrary_variants: Vec<String> = arbitrary_variants
         .iter()
-        .map(|variant| variant.text.clone())
+        .map(|&variant| variant.text.clone())
         .collect();
 
     if let Some(utility_info) = utility_info {
