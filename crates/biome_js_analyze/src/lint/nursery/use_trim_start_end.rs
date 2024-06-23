@@ -122,7 +122,7 @@ impl Rule for UseTrimStartEnd {
         .to_owned();
         let note_message = {
             markup! {
-                ""{state.member_name}"() is an alias for "{state.suggested_name}"."
+                ""{state.member_name}" is an alias for "{state.suggested_name}"."
             }
             .to_owned()
         };
