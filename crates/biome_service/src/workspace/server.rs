@@ -801,10 +801,7 @@ impl Workspace for WorkspaceServer {
     }
 
     fn search_pattern(&self, params: SearchPatternParams) -> Result<SearchResults, WorkspaceError> {
-        let SearchPatternParams {
-            path,
-            pattern: _pattern,
-        } = params;
+        let SearchPatternParams { path, .. } = params;
 
         // FIXME: Let's implement some real matching here...
 
