@@ -265,6 +265,8 @@ pub(super) fn print_highlighted_frame(
         return Ok(());
     };
 
+    // TODO: instead of calculating lines for every match,
+    // check if the Grit engine is able to pull them out
     let source = SourceFile::new(source_code);
 
     let start = source.location(span.start())?;
@@ -293,11 +295,12 @@ pub(super) fn print_highlighted_frame(
         let marker = if is_first_line && is_last_line {
             TextRange::new(start_index_relative_to_line, end_index_relative_to_line)
         } else if is_last_line {
-            let start_index = current_text
-                .text_len()
-                .checked_sub(current_text.trim_start().text_len())
-                .expect("integer overflow");
-            TextRange::new(start_index, end_index_relative_to_line)
+            let start_index: u32 = current_text.text_len().into();
+
+            let safe_start_index =
+                start_index.saturating_sub(current_text.trim_start().text_len().into());
+
+            TextRange::new(TextSize::from(safe_start_index), end_index_relative_to_line)
         } else {
             TextRange::new(start_index_relative_to_line, current_text.text_len())
         };
@@ -306,17 +309,13 @@ pub(super) fn print_highlighted_frame(
             <Emphasis>{format_args!("{line_index} \u{2502} ")}</Emphasis>
         })?;
 
-        let iter = current_text.char_indices().peekable();
+        let start_range = &current_text[0..marker.start().into()];
+        let highlighted_range = &current_text[marker.start().into()..marker.end().into()];
+        let end_range = &current_text[marker.end().into()..current_text.text_len().into()];
 
-        for (i, char) in iter {
-            let should_highlight = i >= marker.start().into() && i < marker.end().into();
-            if should_highlight {
-                fmt.write_markup(markup! { <Emphasis><Info>{char}</Info></Emphasis> })?;
-                continue;
-            }
-
-            write!(fmt, "{char}")?;
-        }
+        write!(fmt, "{start_range}")?;
+        fmt.write_markup(markup! { <Emphasis><Info>{highlighted_range}</Info></Emphasis> })?;
+        write!(fmt, "{end_range}")?;
 
         writeln!(fmt)?;
     }
