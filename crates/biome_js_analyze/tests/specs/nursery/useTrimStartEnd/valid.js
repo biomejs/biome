@@ -8,8 +8,6 @@ foo.trimEnd()
 new foo.trimLeft()
 // Not `MemberExpression`
 trimLeft()
-// `callee.property` is not a `Identifier`
-foo['trimLeft']()
 // Computed
 foo[trimLeft]()
 // Not `trimLeft`/`trimRight`

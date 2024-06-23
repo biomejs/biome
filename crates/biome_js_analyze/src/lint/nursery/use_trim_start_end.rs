@@ -3,9 +3,12 @@ use biome_analyze::{
     RuleSource,
 };
 use biome_console::markup;
-use biome_js_factory::make;
-use biome_js_syntax::{AnyJsExpression, JsCallExpression};
-use biome_rowan::{AstSeparatedList, BatchMutationExt, NodeOrToken, TextRange};
+use biome_js_factory::make::{self};
+use biome_js_syntax::{
+    AnyJsExpression, AnyJsLiteralExpression, AnyJsName, AnyJsTemplateElement, JsCallExpression,
+    JsLanguage, JsSyntaxKind, JsSyntaxToken, T,
+};
+use biome_rowan::{AstSeparatedList, BatchMutationExt, SyntaxToken, TextRange};
 
 use crate::JsRuleAction;
 
@@ -56,7 +59,7 @@ declare_rule! {
 pub struct UseTrimStartEndState {
     member_name: String,
     span: TextRange,
-    replaced_member_name: &'static str,
+    suggested_name: &'static str,
 }
 
 impl Rule for UseTrimStartEnd {
@@ -108,18 +111,18 @@ impl Rule for UseTrimStartEnd {
         Some(UseTrimStartEndState {
             member_name,
             span,
-            replaced_member_name: suggested_name?,
+            suggested_name: suggested_name?,
         })
     }
 
     fn diagnostic(_: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
         let diagnostic_message = markup! {
-            "Use "{state.replaced_member_name}" instead of "{state.member_name}"."
+            "Use "{state.suggested_name}" instead of "{state.member_name}"."
         }
         .to_owned();
         let note_message = {
             markup! {
-                ""{state.member_name}"() is an alias for "{state.replaced_member_name}"."
+                ""{state.member_name}"() is an alias for "{state.suggested_name}"."
             }
             .to_owned()
         };
@@ -133,21 +136,91 @@ impl Rule for UseTrimStartEnd {
     fn action(ctx: &RuleContext<Self>, state: &Self::State) -> Option<JsRuleAction> {
         let node = ctx.query();
         let callee = node.callee().ok()?;
-        let token = match callee {
-            AnyJsExpression::JsComputedMemberExpression(computed_expression) => computed_expression
-                .member()
-                .ok()?
-                .get_callee_object_name()?,
-            AnyJsExpression::JsStaticMemberExpression(static_expression) => {
-                static_expression.member().ok()?.value_token().ok()?
+
+        let is_computed_member = callee.as_js_computed_member_expression().is_some();
+        let is_template = if is_computed_member {
+            if let Ok(computed_member) = callee.as_js_computed_member_expression()?.member() {
+                computed_member.as_js_template_expression().is_some()
+            } else {
+                false
             }
-            _ => return None,
+        } else {
+            false
         };
 
-        let replaced_member_name = state.replaced_member_name;
-        let replaced_function = make::js_name(make::ident(&replaced_member_name));
+        let token = generate_syntax_token(callee.clone())?;
+        let replaced_member_name = suggested_name(&token);
+
+        let mut elements = vec![];
+        let template_elements = AnyJsTemplateElement::from(make::js_template_chunk_element(
+            make::js_template_chunk(&replaced_member_name),
+        ));
+        elements.push(template_elements);
+
+        let callee_object = match callee {
+            AnyJsExpression::JsStaticMemberExpression(ref expression) => {
+                expression.object().ok()?
+            }
+            AnyJsExpression::JsComputedMemberExpression(ref expression) => {
+                expression.object().ok()?
+            }
+            _ => unreachable!(),
+        };
+
+        let computed_member_expression = if is_template {
+            AnyJsExpression::JsTemplateExpression(
+                make::js_template_expression(
+                    make::token(T!['`']),
+                    make::js_template_element_list(elements),
+                    make::token(T!['`']),
+                )
+                .build(),
+            )
+        } else {
+            AnyJsExpression::AnyJsLiteralExpression(
+                AnyJsLiteralExpression::JsStringLiteralExpression(
+                    make::js_string_literal_expression(JsSyntaxToken::new_detached(
+                        // Need to handle "'text'" and "\"text\"".
+                        // make::js_string_literal() call the function that format the text as below:
+                        // > &format!("\"{text}\"")
+                        JsSyntaxKind::JS_STRING_LITERAL,
+                        &replaced_member_name,
+                        [],
+                        [],
+                    )),
+                ),
+            )
+        };
+
+        let call_expression = if is_computed_member {
+            AnyJsExpression::JsComputedMemberExpression(
+                make::js_computed_member_expression(
+                    callee_object,
+                    callee
+                        .as_js_computed_member_expression()?
+                        .l_brack_token()
+                        .ok()?,
+                    computed_member_expression,
+                    callee
+                        .as_js_computed_member_expression()?
+                        .r_brack_token()
+                        .ok()?,
+                )
+                .build(),
+            )
+        } else {
+            AnyJsExpression::JsStaticMemberExpression(make::js_static_member_expression(
+                callee_object,
+                callee
+                    .as_js_static_member_expression()?
+                    .operator_token()
+                    .ok()?,
+                AnyJsName::JsName(make::js_name(make::ident(&replaced_member_name))),
+            ))
+        };
+
         let mut mutation = ctx.root().begin();
-        mutation.replace_element(NodeOrToken::Token(token), replaced_function.into());
+        mutation.replace_node(callee, call_expression);
 
         Some(JsRuleAction::new(
             ActionCategory::QuickFix,
@@ -156,5 +229,55 @@ impl Rule for UseTrimStartEnd {
                 .to_owned(),
             mutation,
         ))
+    }
+}
+
+fn generate_syntax_token(callee: AnyJsExpression) -> Option<SyntaxToken<JsLanguage>> {
+    let token = if let AnyJsExpression::JsComputedMemberExpression(expression) = callee {
+        let member = expression.member().ok()?;
+        match member {
+            AnyJsExpression::AnyJsLiteralExpression(literal) => literal.value_token().ok(),
+            AnyJsExpression::JsTemplateExpression(element) => {
+                element.elements().into_iter().find_map(|x| {
+                    x.as_js_template_chunk_element()
+                        .and_then(|chunk| chunk.template_chunk_token().ok())
+                })
+            }
+            _ => None,
+        }
+    } else if let AnyJsExpression::JsStaticMemberExpression(expression) = callee {
+        expression.member().ok()?.value_token().ok()
+    } else {
+        None
+    };
+    token
+}
+
+// Handle "'text'" and "\"text\"" and "text" cases
+fn suggested_name(text: &SyntaxToken<JsLanguage>) -> String {
+    let trimmed = text.text_trimmed();
+    let first_char = trimmed.chars().next();
+    let last_char = trimmed.chars().last();
+
+    let is_single_quoted = first_char == Some('\'') && last_char == Some('\'');
+    let is_double_quoted = first_char == Some('"') && last_char == Some('"');
+
+    let unquoted = if first_char.is_some() && last_char.is_some() {
+        trimmed.trim_matches(|c| c == '\'' || c == '"')
+    } else {
+        trimmed
+    };
+    let cleaned = match unquoted {
+        "trimLeft" => "trimStart",
+        "trimRight" => "trimEnd",
+        _ => unquoted,
+    };
+
+    if is_single_quoted {
+        format!("'{}'", cleaned)
+    } else if is_double_quoted {
+        format!("\"{}\"", cleaned)
+    } else {
+        cleaned.to_string()
     }
 }

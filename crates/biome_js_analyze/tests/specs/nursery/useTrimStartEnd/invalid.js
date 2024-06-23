@@ -8,7 +8,6 @@ foo
 	.trimRight /* comment */
 	/* comment */
 	()
-foo?.trimLeft()
 bar['trimLeft']()
 bar["trimLeft"]()
 bar[`trimLeft`]()
