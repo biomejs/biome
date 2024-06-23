@@ -493,7 +493,9 @@ mod get_class_info_tests {
     use bitvec::bitvec;
 
     use super::*;
-    use crate::lint::nursery::use_sorted_classes::sort_config::UtilityLayer;
+    use crate::lint::nursery::use_sorted_classes::{
+        presets::ConfigPreset, sort_config::UtilityLayer,
+    };
 
     #[test]
     fn test_get_class_info() {
@@ -509,7 +511,10 @@ mod get_class_info_tests {
         ];
         let variants: &'static [&'static str; 4] = &["hover", "focus", "focus-visible", "active"];
 
-        let sort_config = SortConfig::new(UTILITIES_CONFIG.as_slice(), variants);
+        let sort_config = SortConfig::new(&ConfigPreset {
+            utilities: &UTILITIES_CONFIG,
+            variants,
+        });
 
         assert_eq!(
             get_class_info("px-2", &sort_config),

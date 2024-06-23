@@ -14,16 +14,28 @@ pub enum UseSortedClassesPreset {
     TailwindCSS,
 }
 
-pub fn get_utilities_preset(preset: &UseSortedClassesPreset) -> UtilitiesConfig {
+pub struct ConfigPreset {
+    pub utilities: UtilitiesConfig,
+    pub variants: VariantsConfig,
+}
+
+pub fn get_config_preset(preset: &UseSortedClassesPreset) -> ConfigPreset {
     match preset {
-        UseSortedClassesPreset::None => [].as_slice(),
-        UseSortedClassesPreset::TailwindCSS => TAILWIND_LAYERS.as_slice(),
+        UseSortedClassesPreset::None => get_empty_preset(),
+        UseSortedClassesPreset::TailwindCSS => get_tailwind_css_preset(),
     }
 }
 
-pub fn get_variants_preset(preset: &UseSortedClassesPreset) -> VariantsConfig {
-    match preset {
-        UseSortedClassesPreset::None => [].as_slice(),
-        UseSortedClassesPreset::TailwindCSS => &*VARIANT_CLASSES,
+pub fn get_empty_preset() -> ConfigPreset {
+    ConfigPreset {
+        utilities: [].as_slice(),
+        variants: [].as_slice(),
+    }
+}
+
+pub fn get_tailwind_css_preset() -> ConfigPreset {
+    ConfigPreset {
+        utilities: TAILWIND_LAYERS.as_slice(),
+        variants: &*VARIANT_CLASSES,
     }
 }

@@ -17,16 +17,14 @@ use biome_js_factory::make::{
 };
 use biome_rowan::{AstNode, BatchMutationExt};
 use lazy_static::lazy_static;
-use presets::get_variants_preset;
+use presets::get_config_preset;
 
 use crate::JsRuleAction;
 
 pub use self::options::UtilityClassSortingOptions;
 use self::{
-    any_class_string_like::AnyClassStringLike,
-    presets::{get_utilities_preset, UseSortedClassesPreset},
-    sort::sort_class_name,
-    sort_config::SortConfig,
+    any_class_string_like::AnyClassStringLike, presets::UseSortedClassesPreset,
+    sort::sort_class_name, sort_config::SortConfig,
 };
 
 declare_rule! {
@@ -148,10 +146,8 @@ declare_rule! {
 }
 
 lazy_static! {
-    static ref SORT_CONFIG: SortConfig = SortConfig::new(
-        get_utilities_preset(&UseSortedClassesPreset::default()),
-        get_variants_preset(&UseSortedClassesPreset::default()),
-    );
+    static ref SORT_CONFIG: SortConfig =
+        SortConfig::new(&get_config_preset(&UseSortedClassesPreset::default()));
 }
 
 impl Rule for UseSortedClasses {

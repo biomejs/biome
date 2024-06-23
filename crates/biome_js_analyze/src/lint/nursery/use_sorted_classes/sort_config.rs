@@ -9,6 +9,8 @@ use std::collections::HashMap;
 
 use bitvec::{order::Lsb0, vec::BitVec};
 
+use super::presets::ConfigPreset;
+
 /// A utility layer, containing its name and an ordered list of classes.
 pub struct UtilityLayer {
     pub name: &'static str,
@@ -38,19 +40,19 @@ pub struct SortConfig {
 
 impl SortConfig {
     /// Creates a new sort config.
-    pub fn new(utilities_config: &'static [UtilityLayer], variants: VariantsConfig) -> Self {
+    pub fn new(preset: &ConfigPreset) -> Self {
         // Compute the layer index map.
         let mut layer_index_map: HashMap<&'static str, usize> = HashMap::new();
         let mut index = 0;
-        for layer in utilities_config.iter() {
+        for layer in preset.utilities.iter() {
             layer_index_map.insert(layer.name, index);
             index += 1;
         }
         layer_index_map.insert("arbitrary", index);
 
         Self {
-            utilities: utilities_config,
-            variants,
+            utilities: preset.utilities,
+            variants: preset.variants,
             layer_index_map,
         }
     }
