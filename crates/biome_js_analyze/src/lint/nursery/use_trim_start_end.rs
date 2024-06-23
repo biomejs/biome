@@ -6,7 +6,7 @@ use biome_console::markup;
 use biome_js_factory::make::{self};
 use biome_js_syntax::{
     AnyJsExpression, AnyJsLiteralExpression, AnyJsName, AnyJsTemplateElement, JsCallExpression,
-    JsLanguage, JsSyntaxKind, JsSyntaxToken, T,
+    JsLanguage, JsSyntaxKind, JsSyntaxToken,
 };
 use biome_rowan::{AstSeparatedList, BatchMutationExt, SyntaxToken, TextRange};
 
@@ -170,9 +170,21 @@ impl Rule for UseTrimStartEnd {
         let computed_member_expression = if is_template {
             AnyJsExpression::JsTemplateExpression(
                 make::js_template_expression(
-                    make::token(T!['`']),
+                    callee
+                        .as_js_computed_member_expression()?
+                        .member()
+                        .ok()?
+                        .as_js_template_expression()?
+                        .l_tick_token()
+                        .ok()?,
                     make::js_template_element_list(elements),
-                    make::token(T!['`']),
+                    callee
+                        .as_js_computed_member_expression()?
+                        .member()
+                        .ok()?
+                        .as_js_template_expression()?
+                        .r_tick_token()
+                        .ok()?,
                 )
                 .build(),
             )
