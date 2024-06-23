@@ -36,6 +36,6 @@ pub fn get_empty_preset() -> ConfigPreset {
 pub fn get_tailwind_css_preset() -> ConfigPreset {
     ConfigPreset {
         utilities: TAILWIND_LAYERS.as_slice(),
-        variants: &*VARIANT_CLASSES,
+        variants: VARIANT_CLASSES.as_slice(),
     }
 }
