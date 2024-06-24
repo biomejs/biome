@@ -1,3 +1,4 @@
+use rustc_hash::FxHashMap;
 use serde::{Deserialize, Serialize};
 use std::path::{Component, Path};
 
@@ -79,13 +80,12 @@ declare_rule! {
     /// {
     ///     "//": "...",
     ///     "options": {
-    ///         "importMappings": [
-    ///             {
-    ///                 "fileExt": ["mts"],
-    ///                 "importExt": "mjs",
-    ///                 "componentImportExt": "jsx"
+    ///         "suggestedExtensions": {
+    ///             "ts": {
+    ///                 "import": "js",
+    ///                 "component": "jsx"
     ///             }
-    ///         ]
+    ///         }
     ///     }
     /// }
     /// ```
@@ -111,20 +111,19 @@ declare_rule! {
 #[cfg_attr(feature = "schemars", derive(JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct UseImportExtensionsOptions {
-    /// List of custom import extension mappings
-    pub import_mappings: Vec<ImportExtensionMapping>,
+    /// A map of custom import extension mappings, where key is inspected file extension
+    /// and value is a pair of `import` extension and `component` import extension
+    pub suggested_extensions: FxHashMap<String, SuggestedExtensionMapping>,
 }
 
 #[derive(Debug, Clone, Default, Deserializable, Deserialize, Serialize, Eq, PartialEq)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
-pub struct ImportExtensionMapping {
-    /// List of inspected file extensions that are subject to this mapping
-    pub file_ext: Vec<String>,
+pub struct SuggestedExtensionMapping {
     /// Extension that should be used for module imports
-    pub import_ext: String,
+    pub import: String,
     /// Extension that should be used for component file imports
-    pub component_import_ext: String,
+    pub component: String,
 }
 
 impl Rule for UseImportExtensions {
@@ -138,9 +137,9 @@ impl Rule for UseImportExtensions {
 
         let file_ext = ctx.file_path().extension().and_then(|ext| ext.to_str())?;
 
-        let custom_import_mappings = &ctx.options().import_mappings;
+        let custom_suggested_imports = &ctx.options().suggested_extensions;
 
-        get_extensionless_import(file_ext, node, custom_import_mappings)
+        get_extensionless_import(file_ext, node, custom_suggested_imports)
     }
 
     fn diagnostic(_: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
@@ -193,7 +192,7 @@ pub struct UseImportExtensionsState {
 fn get_extensionless_import(
     file_ext: &str,
     node: &AnyJsImportSpecifierLike,
-    custom_import_mappings: &[ImportExtensionMapping],
+    custom_suggested_imports: &FxHashMap<String, SuggestedExtensionMapping>,
 ) -> Option<UseImportExtensionsState> {
     let module_name_token = node.module_name_token()?;
     let module_path = inner_string_text(&module_name_token);
@@ -220,7 +219,7 @@ fn get_extensionless_import(
         });
     }
 
-    let import_ext = resolve_import_extension(file_ext, path, custom_import_mappings);
+    let import_ext = resolve_import_extension(file_ext, path, custom_suggested_imports);
 
     let mut path_parts = module_path.text().split('/');
     let mut is_index_file = false;
@@ -277,25 +276,24 @@ fn get_extensionless_import(
 fn resolve_import_extension<'a>(
     file_ext: &str,
     path: &Path,
-    custom_import_mappings: &'a [ImportExtensionMapping],
+    custom_suggested_imports: &'a FxHashMap<String, SuggestedExtensionMapping>,
 ) -> &'a str {
-    let (potential_ext, potential_component_ext) = if let Some(custom_mapping) =
-        match_custom_import_mappings(custom_import_mappings, file_ext)
-    {
-        custom_mapping
-    } else {
-        // TODO. This is not very accurate. We should use file system access to determine the file type.
-        match file_ext {
-            "ts" | "tsx" | "astro" => ("ts", "tsx"),
-            "mts" => ("mts", "tsx"),
-            "mjs" => ("mjs", "jsx"),
-            "cjs" => ("cjs", "jsx"),
-            "cts" => ("cts", "tsx"),
-            // Unlikely that these frameworks would import tsx file.
-            "svelte" | "vue" => ("ts", "ts"),
-            _ => ("js", "jsx"),
-        }
-    };
+    let (potential_ext, potential_component_ext): (&str, &str) =
+        if let Some(custom_mapping) = custom_suggested_imports.get(file_ext) {
+            (&custom_mapping.import, &custom_mapping.component)
+        } else {
+            // TODO. This is not very accurate. We should use file system access to determine the file type.
+            match file_ext {
+                "ts" | "tsx" | "astro" => ("ts", "tsx"),
+                "mts" => ("mts", "tsx"),
+                "mjs" => ("mjs", "jsx"),
+                "cjs" => ("cjs", "jsx"),
+                "cts" => ("cts", "tsx"),
+                // Unlikely that these frameworks would import tsx file.
+                "svelte" | "vue" => ("ts", "ts"),
+                _ => ("js", "jsx"),
+            }
+        };
 
     let maybe_is_component = path
         .file_stem()
@@ -308,15 +306,4 @@ fn resolve_import_extension<'a>(
     }
 
     potential_ext
-}
-
-fn match_custom_import_mappings<'a>(
-    custom_import_mappings: &'a [ImportExtensionMapping],
-    file_ext: &str,
-) -> Option<(&'a str, &'a str)> {
-    let matched = custom_import_mappings
-        .iter()
-        .find(|&mapping| mapping.file_ext.contains(&file_ext.to_string()))?;
-
-    Some((&matched.import_ext, &matched.component_import_ext))
 }

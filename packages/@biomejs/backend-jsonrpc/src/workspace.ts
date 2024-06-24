@@ -1965,9 +1965,9 @@ export interface RestrictedImportsOptions {
 }
 export interface UseImportExtensionsOptions {
 	/**
-	 * List of custom import extension mappings
+	 * A map of custom import extension mappings, where key is inspected file extension and value is a pair of `import` extension and `component` import extension
 	 */
-	importMappings: ImportExtensionMapping[];
+	suggestedExtensions: {};
 }
 export interface UtilityClassSortingOptions {
 	/**
@@ -2060,20 +2060,6 @@ Set to `true` to mark the identity of the hook's return value as stable, or use 
 For example, for React's `useRef()` hook the value would be `true`, while for `useState()` it would be `[1]`. 
 	 */
 	stableResult: StableHookResult;
-}
-export interface ImportExtensionMapping {
-	/**
-	 * Extension that should be used for component file imports
-	 */
-	componentImportExt: string;
-	/**
-	 * List of inspected file extensions that are subject to this mapping
-	 */
-	fileExt: string[];
-	/**
-	 * Extension that should be used for module imports
-	 */
-	importExt: string;
 }
 export type ConsistentArrayType = "shorthand" | "generic";
 export type FilenameCases = FilenameCase[];

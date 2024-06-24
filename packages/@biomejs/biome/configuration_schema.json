@@ -1182,26 +1182,6 @@
 			},
 			"additionalProperties": false
 		},
-		"ImportExtensionMapping": {
-			"type": "object",
-			"required": ["componentImportExt", "fileExt", "importExt"],
-			"properties": {
-				"componentImportExt": {
-					"description": "Extension that should be used for component file imports",
-					"type": "string"
-				},
-				"fileExt": {
-					"description": "List of inspected file extensions that are subject to this mapping",
-					"type": "array",
-					"items": { "type": "string" }
-				},
-				"importExt": {
-					"description": "Extension that should be used for module imports",
-					"type": "string"
-				}
-			},
-			"additionalProperties": false
-		},
 		"IndentWidth": { "type": "integer", "format": "uint8", "minimum": 0.0 },
 		"JavascriptConfiguration": {
 			"description": "A set of options applied to the JavaScript files",
@@ -2955,6 +2935,21 @@
 			},
 			"additionalProperties": false
 		},
+		"SuggestedExtensionMapping": {
+			"type": "object",
+			"required": ["component", "import"],
+			"properties": {
+				"component": {
+					"description": "Extension that should be used for component file imports",
+					"type": "string"
+				},
+				"import": {
+					"description": "Extension that should be used for module imports",
+					"type": "string"
+				}
+			},
+			"additionalProperties": false
+		},
 		"Suspicious": {
 			"description": "A list of rules that belong to this group",
 			"type": "object",
@@ -3397,12 +3392,14 @@
 		},
 		"UseImportExtensionsOptions": {
 			"type": "object",
-			"required": ["importMappings"],
+			"required": ["suggestedExtensions"],
 			"properties": {
-				"importMappings": {
-					"description": "List of custom import extension mappings",
-					"type": "array",
-					"items": { "$ref": "#/definitions/ImportExtensionMapping" }
+				"suggestedExtensions": {
+					"description": "A map of custom import extension mappings, where key is inspected file extension and value is a pair of `import` extension and `component` import extension",
+					"type": "object",
+					"additionalProperties": {
+						"$ref": "#/definitions/SuggestedExtensionMapping"
+					}
 				}
 			},
 			"additionalProperties": false

@@ -7,13 +7,12 @@
 				"useImportExtensions": {
 					"level": "error",
 					"options": {
-                        "importMappings": [
-                            {
-                          		"fileExt": ["ts"],
-                          		"importExt": "js",
-                          		"componentImportExt": "jsx"
-                        	}
-                      	]
+						"suggestedExtensions": {
+							"ts": {
+								"import": "js",
+								"component": "jsx"
+							}
+						}
                     }
 				}
 			}
