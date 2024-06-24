@@ -45,7 +45,11 @@ impl JsForeignLanguageFormatter for MultiLanguageFormatter {
 // use this test check if your snippet prints as you wish, without using a snapshot
 fn quick_test() {
     let src = r#"
-        css``
+        css`
+        .foo {
+          color:            ${color}
+        }
+        `
 
     "#;
     let source_type = JsFileSource::tsx();

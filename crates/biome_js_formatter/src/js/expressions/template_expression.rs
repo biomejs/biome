@@ -1,5 +1,4 @@
 use std::collections::HashMap;
-use std::ops::Deref;
 
 use crate::{prelude::*, JsForeignLanguage};
 use biome_formatter::{write, CstFormatContext, FormatContext};
@@ -197,6 +196,7 @@ fn format_embedded_language(
                 let placeholder = std::format!("biome-placeholder-{}", index);
                 index += 1;
                 placeholder_map.insert(placeholder.clone(), string_interpolations);
+                content.push_str("$");
                 content.push_str(&placeholder);
             }
         }
@@ -274,14 +274,34 @@ fn format_embedded_language(
         }
     }
 
+    let mut iter = embedded_language_formatted.iter().peekable();
+    let mut formatted: Vec<FormatElement> = Vec::new();
+    while let Some(element) = iter.next() {
+        if let FormatElement::LocatedTokenText { slice, .. } = element {
+            let text = slice.to_string();
+            if text == "$" {
+                if let Some(FormatElement::LocatedTokenText { slice, .. }) = iter.peek() {
+                    let next_text = slice.to_string();
+                    if placeholder_map.contains_key(&next_text) {
+                        continue;
+                    }
+                }
+            }
+        }
+        formatted.push(replace_placeholder_with_template_element(
+            element.clone(),
+            &mut placeholder_map,
+            f,
+        )?);
+    }
     // replace placeholders with the original string interpolations
-    let formatted = embedded_language_formatted
-        .deref()
-        .iter()
-        .map(|element| {
-            replace_placeholder_with_template_element(element.clone(), &mut placeholder_map, f)
-        })
-        .collect::<Result<Vec<FormatElement>, _>>()?;
+    // let formatted = embedded_language_formatted
+    //     .deref()
+    //     .iter()
+    //     .map(|element| {
+    //         replace_placeholder_with_template_element(element.clone(), &mut placeholder_map, f)
+    //     })
+    //     .collect::<Result<Vec<FormatElement>, _>>()?;
 
     // if there are any placeholders left, we treat it is a error and format the template as normal
     if !placeholder_map.is_empty() {

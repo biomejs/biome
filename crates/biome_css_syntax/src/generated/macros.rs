@@ -217,6 +217,10 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::CssGenericProperty::new_unchecked(node) };
                     $body
                 }
+                $crate::CssSyntaxKind::CSS_GRIT_METAVARIABLE => {
+                    let $pattern = unsafe { $crate::CssGritMetavariable::new_unchecked(node) };
+                    $body
+                }
                 $crate::CssSyntaxKind::CSS_ID_SELECTOR => {
                     let $pattern = unsafe { $crate::CssIdSelector::new_unchecked(node) };
                     $body

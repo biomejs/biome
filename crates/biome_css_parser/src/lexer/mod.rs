@@ -319,6 +319,13 @@ impl<'src> CssLexer<'src> {
 
             LSS => self.consume_lss(),
 
+            IDT if current == b'$'
+                && self.options.is_grit_variable_enabled()
+                && self.peek_byte() != Some(b'=') =>
+            {
+                self.consume_byte(T![$])
+            }
+
             IDT if self.peek_byte() == Some(b'=') => {
                 self.advance(1);
                 self.consume_byte(T!["$="])

@@ -259,6 +259,22 @@ pub(crate) fn is_at_any_value(p: &mut CssParser) -> bool {
         || is_at_ratio(p)
         || is_at_color(p)
         || is_at_bracketed_value(p)
+        || is_at_grit_metavariable(p)
+}
+
+pub(crate) fn is_at_grit_metavariable(p: &mut CssParser) -> bool {
+    p.at(T![$]) && is_nth_at_identifier(p, 1)
+}
+
+#[inline]
+pub(crate) fn parse_grit_metavariable(p: &mut CssParser) -> ParsedSyntax {
+    if !is_at_grit_metavariable(p) {
+        return Absent;
+    }
+    let m = p.start();
+    p.bump(T![$]);
+    p.bump(IDENT);
+    Present(m.complete(p, CSS_GRIT_METAVARIABLE))
 }
 
 #[inline]
@@ -283,6 +299,8 @@ pub(crate) fn parse_any_value(p: &mut CssParser) -> ParsedSyntax {
         parse_color(p)
     } else if is_at_bracketed_value(p) {
         parse_bracketed_value(p)
+    } else if is_at_grit_metavariable(p) {
+        parse_grit_metavariable(p)
     } else {
         Absent
     }

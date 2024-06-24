@@ -48,6 +48,10 @@ impl CssParserOptions {
     pub fn is_css_modules_disabled(&self) -> bool {
         !self.css_modules
     }
+
+    pub fn is_grit_variable_enabled(&self) -> bool {
+        true
+    }
 }
 
 impl<'source> CssParser<'source> {

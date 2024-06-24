@@ -2100,6 +2100,47 @@ pub struct CssGenericPropertyFields {
     pub value: CssGenericComponentValueList,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
+pub struct CssGritMetavariable {
+    pub(crate) syntax: SyntaxNode,
+}
+impl CssGritMetavariable {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> CssGritMetavariableFields {
+        CssGritMetavariableFields {
+            dollar_token: self.dollar_token(),
+            id_token: self.id_token(),
+        }
+    }
+    pub fn dollar_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn id_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 1usize)
+    }
+}
+#[cfg(feature = "serde")]
+impl Serialize for CssGritMetavariable {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[cfg_attr(feature = "serde", derive(Serialize))]
+pub struct CssGritMetavariableFields {
+    pub dollar_token: SyntaxResult<SyntaxToken>,
+    pub id_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
 pub struct CssIdSelector {
     pub(crate) syntax: SyntaxNode,
 }
@@ -8743,6 +8784,7 @@ pub enum AnyCssValue {
     CssColor(CssColor),
     CssCustomIdentifier(CssCustomIdentifier),
     CssDashedIdentifier(CssDashedIdentifier),
+    CssGritMetavariable(CssGritMetavariable),
     CssIdentifier(CssIdentifier),
     CssNumber(CssNumber),
     CssRatio(CssRatio),
@@ -8783,6 +8825,12 @@ impl AnyCssValue {
     pub fn as_css_dashed_identifier(&self) -> Option<&CssDashedIdentifier> {
         match &self {
             AnyCssValue::CssDashedIdentifier(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_grit_metavariable(&self) -> Option<&CssGritMetavariable> {
+        match &self {
+            AnyCssValue::CssGritMetavariable(item) => Some(item),
             _ => None,
         }
     }
@@ -10907,6 +10955,48 @@ impl From<CssGenericProperty> for SyntaxNode {
 }
 impl From<CssGenericProperty> for SyntaxElement {
     fn from(n: CssGenericProperty) -> SyntaxElement {
+        n.syntax.into()
+    }
+}
+impl AstNode for CssGritMetavariable {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_GRIT_METAVARIABLE as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == CSS_GRIT_METAVARIABLE
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for CssGritMetavariable {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("CssGritMetavariable")
+            .field(
+                "dollar_token",
+                &support::DebugSyntaxResult(self.dollar_token()),
+            )
+            .field("id_token", &support::DebugSyntaxResult(self.id_token()))
+            .finish()
+    }
+}
+impl From<CssGritMetavariable> for SyntaxNode {
+    fn from(n: CssGritMetavariable) -> SyntaxNode {
+        n.syntax
+    }
+}
+impl From<CssGritMetavariable> for SyntaxElement {
+    fn from(n: CssGritMetavariable) -> SyntaxElement {
         n.syntax.into()
     }
 }
@@ -21384,6 +21474,11 @@ impl From<CssDashedIdentifier> for AnyCssValue {
         AnyCssValue::CssDashedIdentifier(node)
     }
 }
+impl From<CssGritMetavariable> for AnyCssValue {
+    fn from(node: CssGritMetavariable) -> AnyCssValue {
+        AnyCssValue::CssGritMetavariable(node)
+    }
+}
 impl From<CssIdentifier> for AnyCssValue {
     fn from(node: CssIdentifier) -> AnyCssValue {
         AnyCssValue::CssIdentifier(node)
@@ -21417,6 +21512,7 @@ impl AstNode for AnyCssValue {
         .union(CssColor::KIND_SET)
         .union(CssCustomIdentifier::KIND_SET)
         .union(CssDashedIdentifier::KIND_SET)
+        .union(CssGritMetavariable::KIND_SET)
         .union(CssIdentifier::KIND_SET)
         .union(CssNumber::KIND_SET)
         .union(CssRatio::KIND_SET)
@@ -21428,6 +21524,7 @@ impl AstNode for AnyCssValue {
             | CSS_COLOR
             | CSS_CUSTOM_IDENTIFIER
             | CSS_DASHED_IDENTIFIER
+            | CSS_GRIT_METAVARIABLE
             | CSS_IDENTIFIER
             | CSS_NUMBER
             | CSS_RATIO
@@ -21447,6 +21544,9 @@ impl AstNode for AnyCssValue {
             }
             CSS_DASHED_IDENTIFIER => {
                 AnyCssValue::CssDashedIdentifier(CssDashedIdentifier { syntax })
+            }
+            CSS_GRIT_METAVARIABLE => {
+                AnyCssValue::CssGritMetavariable(CssGritMetavariable { syntax })
             }
             CSS_IDENTIFIER => AnyCssValue::CssIdentifier(CssIdentifier { syntax }),
             CSS_NUMBER => AnyCssValue::CssNumber(CssNumber { syntax }),
@@ -21471,6 +21571,7 @@ impl AstNode for AnyCssValue {
             AnyCssValue::CssColor(it) => &it.syntax,
             AnyCssValue::CssCustomIdentifier(it) => &it.syntax,
             AnyCssValue::CssDashedIdentifier(it) => &it.syntax,
+            AnyCssValue::CssGritMetavariable(it) => &it.syntax,
             AnyCssValue::CssIdentifier(it) => &it.syntax,
             AnyCssValue::CssNumber(it) => &it.syntax,
             AnyCssValue::CssRatio(it) => &it.syntax,
@@ -21486,6 +21587,7 @@ impl AstNode for AnyCssValue {
             AnyCssValue::CssColor(it) => it.syntax,
             AnyCssValue::CssCustomIdentifier(it) => it.syntax,
             AnyCssValue::CssDashedIdentifier(it) => it.syntax,
+            AnyCssValue::CssGritMetavariable(it) => it.syntax,
             AnyCssValue::CssIdentifier(it) => it.syntax,
             AnyCssValue::CssNumber(it) => it.syntax,
             AnyCssValue::CssRatio(it) => it.syntax,
@@ -21505,6 +21607,7 @@ impl std::fmt::Debug for AnyCssValue {
             AnyCssValue::CssColor(it) => std::fmt::Debug::fmt(it, f),
             AnyCssValue::CssCustomIdentifier(it) => std::fmt::Debug::fmt(it, f),
             AnyCssValue::CssDashedIdentifier(it) => std::fmt::Debug::fmt(it, f),
+            AnyCssValue::CssGritMetavariable(it) => std::fmt::Debug::fmt(it, f),
             AnyCssValue::CssIdentifier(it) => std::fmt::Debug::fmt(it, f),
             AnyCssValue::CssNumber(it) => std::fmt::Debug::fmt(it, f),
             AnyCssValue::CssRatio(it) => std::fmt::Debug::fmt(it, f),
@@ -21522,6 +21625,7 @@ impl From<AnyCssValue> for SyntaxNode {
             AnyCssValue::CssColor(it) => it.into(),
             AnyCssValue::CssCustomIdentifier(it) => it.into(),
             AnyCssValue::CssDashedIdentifier(it) => it.into(),
+            AnyCssValue::CssGritMetavariable(it) => it.into(),
             AnyCssValue::CssIdentifier(it) => it.into(),
             AnyCssValue::CssNumber(it) => it.into(),
             AnyCssValue::CssRatio(it) => it.into(),
@@ -22442,6 +22546,11 @@ impl std::fmt::Display for CssGenericDelimiter {
     }
 }
 impl std::fmt::Display for CssGenericProperty {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for CssGritMetavariable {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }

@@ -1616,6 +1616,7 @@ AnyCssValue =
 	| CssColor
 	| CssBracketedValue
 	| CssUnicodeRange
+	| CssGritMetavariable
 
 
 // https://drafts.csswg.org/css-syntax/#typedef-dimension-token
@@ -1787,3 +1788,8 @@ CssNumber = value: 'css_number_literal'
 CssUnicodeCodepoint = value: 'css_unicode_codepoint_literal'
 CssUnicodeRangeWildcard = value: 'css_unicode_range_wildcard_literal'
 CssUrlValueRaw = value: 'css_url_value_raw_literal'
+
+// Grit metavariable https://github.com/getgrit/gritql/blob/main/resources/metavariable-grammars/css-metavariable-grammar.js
+CssGritMetavariable =
+    dollar: '$'
+    id: 'ident'
