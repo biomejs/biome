@@ -1,7 +1,7 @@
 use crate::execute::diagnostics::{ResultExt, SearchDiagnostic};
 use crate::execute::process_file::workspace_file::WorkspaceFile;
 use crate::execute::process_file::{FileResult, FileStatus, Message, SharedTraversalOptions};
-use biome_diagnostics::{category, DiagnosticExt, Severity};
+use biome_diagnostics::{category, DiagnosticExt};
 use biome_service::workspace::PatternId;
 use std::path::Path;
 
@@ -32,18 +32,13 @@ pub(crate) fn search_with_guard<'ctx>(
             let input = workspace_file.input()?;
             let file_name = workspace_file.path.display().to_string();
 
-            // FIXME: We need to report some real results here...
             let search_results = Message::Diagnostics {
                 name: file_name,
                 content: input,
                 diagnostics: result
                     .matches
                     .into_iter()
-                    .map(|mat| {
-                        SearchDiagnostic
-                            .with_file_span(mat)
-                            .with_severity(Severity::Hint)
-                    })
+                    .map(|mat| SearchDiagnostic.with_file_span(mat))
                     .collect(),
                 skipped_diagnostics: 0,
             };
