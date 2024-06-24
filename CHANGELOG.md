@@ -30,6 +30,12 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 - Fix [#3184](https://github.com/biomejs/biome/issues/3184) CSS formatter converts custom identifiers to lowercase. Contributed by @denbezrukov
 - Fix [#3256](https://github.com/biomejs/biome/issues/3256) constant crashes when editing css files #3256. Contributed by @denbezrukov
 
+### Linter
+
+#### Bug fixes
+
+- `useConsistentArrayType` and `useShorthandArrayType` now ignore `Array` in the `extends` and `implements` clauses. Fix [#3247](https://github.com/biomejs/biome/issues/3247). Contributed by @Conaclos
+
 ## v1.8.2 (2024-06-20)
 
 ### CLI
