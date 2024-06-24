@@ -4,6 +4,7 @@
 //! - The index of the utility within the layer.
 //! - The total variants weight that results from the combination of all the variants.
 //! - The text of the class itself.
+//! - The arbitrary variants of the class.
 //! It is generated according to the information contained in a `SortConfig`, which includes:
 //! - The list of layers, in order.
 //! - The list of utilities, in order, for each layer.
