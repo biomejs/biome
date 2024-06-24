@@ -173,7 +173,6 @@ pub(super) enum DiagnosticTag {
     UnnecessaryCode,
     DeprecatedCode,
     Verbose,
-    Search,
 }
 
 bitflags! {
@@ -191,17 +190,12 @@ bitflags! {
         const DEPRECATED_CODE = 1 << DiagnosticTag::DeprecatedCode as u8;
         /// This diagnostic is verbose and should be printed only if the `--verbose` option is provided
         const VERBOSE = 1 << DiagnosticTag::Verbose as u8;
-        // This diagnostic is a match result from a search operation
-        const SEARCH = 1 << DiagnosticTag::Search as u8;
     }
 }
 
 impl DiagnosticTags {
     pub const fn is_verbose(&self) -> bool {
         self.contains(Self::VERBOSE)
-    }
-    pub const fn is_search(&self) -> bool {
-        self.contains(Self::SEARCH)
     }
 }
 

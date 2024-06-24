@@ -241,10 +241,6 @@ impl<'ctx> DiagnosticsPrinter<'ctx> {
     /// - it should not be considered if its severity level is lower than the one provided via CLI;
     /// - it should not be considered if it's a verbose diagnostic and the CLI **didn't** request a `--verbose` option.
     fn should_skip_diagnostic(&self, severity: Severity, diagnostic_tags: DiagnosticTags) -> bool {
-        if diagnostic_tags.is_search() {
-            return false;
-        }
-
         if severity < self.diagnostic_level {
             return true;
         }
