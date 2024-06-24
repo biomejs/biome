@@ -1186,9 +1186,19 @@
 			"type": "object",
 			"required": ["componentImportExt", "fileExt", "importExt"],
 			"properties": {
-				"componentImportExt": { "type": "string" },
-				"fileExt": { "type": "array", "items": { "type": "string" } },
-				"importExt": { "type": "string" }
+				"componentImportExt": {
+					"description": "Extension that should be used for component file imports",
+					"type": "string"
+				},
+				"fileExt": {
+					"description": "List of inspected file extensions that are subject to this mapping",
+					"type": "array",
+					"items": { "type": "string" }
+				},
+				"importExt": {
+					"description": "Extension that should be used for module imports",
+					"type": "string"
+				}
 			},
 			"additionalProperties": false
 		},
@@ -3390,6 +3400,7 @@
 			"required": ["importMappings"],
 			"properties": {
 				"importMappings": {
+					"description": "List of custom import extension mappings",
 					"type": "array",
 					"items": { "$ref": "#/definitions/ImportExtensionMapping" }
 				}

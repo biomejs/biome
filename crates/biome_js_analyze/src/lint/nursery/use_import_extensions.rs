@@ -111,6 +111,7 @@ declare_rule! {
 #[cfg_attr(feature = "schemars", derive(JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct UseImportExtensionsOptions {
+    /// List of custom import extension mappings
     pub import_mappings: Vec<ImportExtensionMapping>,
 }
 
@@ -118,8 +119,11 @@ pub struct UseImportExtensionsOptions {
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct ImportExtensionMapping {
+    /// List of inspected file extensions that are subject to this mapping
     pub file_ext: Vec<String>,
+    /// Extension that should be used for module imports
     pub import_ext: String,
+    /// Extension that should be used for component file imports
     pub component_import_ext: String,
 }
 

@@ -1964,6 +1964,9 @@ export interface RestrictedImportsOptions {
 	paths: {};
 }
 export interface UseImportExtensionsOptions {
+	/**
+	 * List of custom import extension mappings
+	 */
 	importMappings: ImportExtensionMapping[];
 }
 export interface UtilityClassSortingOptions {
@@ -2059,8 +2062,17 @@ For example, for React's `useRef()` hook the value would be `true`, while for `u
 	stableResult: StableHookResult;
 }
 export interface ImportExtensionMapping {
+	/**
+	 * Extension that should be used for component file imports
+	 */
 	componentImportExt: string;
+	/**
+	 * List of inspected file extensions that are subject to this mapping
+	 */
 	fileExt: string[];
+	/**
+	 * Extension that should be used for module imports
+	 */
 	importExt: string;
 }
 export type ConsistentArrayType = "shorthand" | "generic";
