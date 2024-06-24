@@ -30,6 +30,12 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 - Fix [#3184](https://github.com/biomejs/biome/issues/3184) CSS formatter converts custom identifiers to lowercase. Contributed by @denbezrukov
 - Fix [#3256](https://github.com/biomejs/biome/issues/3256) constant crashes when editing css files #3256. Contributed by @denbezrukov
 
+### Linter
+
+#### Enhancements
+
+- Implement [import mappings option](https://github.com/biomejs/biome/pull/3274) for `useImportExtensions` rule. Contributed by @drdaemos
+
 ## v1.8.2 (2024-06-20)
 
 ### CLI
