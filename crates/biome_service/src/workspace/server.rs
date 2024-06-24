@@ -803,8 +803,7 @@ impl Workspace for WorkspaceServer {
     fn search_pattern(&self, params: SearchPatternParams) -> Result<SearchResults, WorkspaceError> {
         let SearchPatternParams { path, .. } = params;
 
-        // FIXME: Let's implement some real matching here...
-
+        // TODO: Let's implement some real matching here...
         let document = self
             .documents
             .get_mut(&path)
