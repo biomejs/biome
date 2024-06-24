@@ -59,11 +59,11 @@ impl Rule for NoIrregularWhitespace {
                 rule_category!(),
                 state.range,
                 markup! {
-                    "Irregular whitespace found."
+                    "Irregular whitespaces found."
                 },
             )
             .note(markup! {
-                "Replace the irregular whitespace character with a normal whitespace or tab."
+                "Replace the irregular whitespaces with normal whitespaces or tabs."
             }),
         )
     }
