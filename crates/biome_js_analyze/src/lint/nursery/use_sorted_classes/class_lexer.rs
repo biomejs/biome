@@ -271,6 +271,19 @@ mod tests_tokenize_class {
             })
         );
         assert_eq!(
+            tokenize_class("has-[:checked]:bg-red-500"),
+            Some(ClassStructure {
+                variants: vec![ClassSegmentStructure {
+                    arbitrary: false,
+                    text: "has-[:checked]".to_string(),
+                },],
+                utility: ClassSegmentStructure {
+                    arbitrary: false,
+                    text: "bg-red-500".to_string(),
+                },
+            })
+        );
+        assert_eq!(
             tokenize_class("[&:nth-child(3)]:[mask:circle]"),
             Some(ClassStructure {
                 variants: vec![ClassSegmentStructure {
