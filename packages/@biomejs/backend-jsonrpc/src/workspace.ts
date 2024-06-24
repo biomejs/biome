@@ -1007,6 +1007,10 @@ export interface Nursery {
 	 */
 	noEmptyBlock?: RuleConfiguration_for_Null;
 	/**
+	 * Succinct description of the rule.
+	 */
+	noEmptyComment?: RuleConfiguration_for_Null;
+	/**
 	 * Disallow variables from evolving into any type through reassignments.
 	 */
 	noEvolvingTypes?: RuleConfiguration_for_Null;
@@ -2377,6 +2381,7 @@ export type Category =
 	| "lint/nursery/noDuplicateJsonKeys"
 	| "lint/nursery/noDuplicateSelectorsKeyframeBlock"
 	| "lint/nursery/noEmptyBlock"
+	| "lint/nursery/noEmptyComment"
 	| "lint/nursery/noEvolvingTypes"
 	| "lint/nursery/noImportantInKeyframe"
 	| "lint/nursery/noInvalidDirectionInLinearGradient"

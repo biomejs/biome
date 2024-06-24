@@ -1720,6 +1720,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noEmptyComment": {
+					"description": "Succinct description of the rule.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noEvolvingTypes": {
 					"description": "Disallow variables from evolving into any type through reassignments.",
 					"anyOf": [
