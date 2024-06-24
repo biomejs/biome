@@ -440,7 +440,7 @@ declare_rule! {
     /// - A private property starts with `_` and consists of at least two characters
     /// - The captured name (the name without the leading `_`) is in [`camelCase`].
     ///
-    /// ```json
+    /// ```json5
     /// {
     ///     // ...
     ///     "options": {
@@ -486,9 +486,9 @@ declare_rule! {
     /// }
     /// ```
     ///
-    /// If a declaration is not selected or if a capture is forwarded while there is no more conventions,
+    /// If a declaration is not selected or if a capture is forwarded while there are no more conventions,
     /// then the declaration name is verified against the default conventions.
-    /// Because, the default conventions already ensure that class members are in ["camelCase"],
+    /// Because the default conventions already ensure that class members are in ["camelCase"],
     /// the previous example can be simplified to:
     ///
     /// ```json5
@@ -511,7 +511,7 @@ declare_rule! {
     /// ```
     ///
     /// If the capture is identical to the initial name (it is not a part of the initial name),
-    /// then leading and trailing underscore and dollar signs are trimmed before checking against default conventions.
+    /// then, leading and trailing underscore and dollar signs are trimmed before being checked against default conventions.
     /// In the previous example, the capture is a part of the name because `_` is not included in the capture.
     ///
     /// You can reset all default conventions by adding a convention at the end of the array that accepts anything:
@@ -535,8 +535,8 @@ declare_rule! {
     ///
     /// Let's take a more complex example with the following conventions:
     ///
-    /// - Accept variable names `i`, `j`, and check all other names against the next conventions
-    /// - All identifiers must contain at least 2 characters
+    /// - Accept variable names `i`, `j`, and check all other names against the next conventions.
+    /// - All identifiers must contain at least two characters.
     /// - We require `private` class members to start with an underscore `_`.
     /// - We require `static readonly` class properties to be in [`CONSTANT_CASE`].
     ///   A `private static readonly` property must also start with an underscore as dictated by the previous convention.
