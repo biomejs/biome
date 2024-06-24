@@ -1182,6 +1182,26 @@
 			},
 			"additionalProperties": false
 		},
+		"ImportExtensionMapping": {
+			"type": "object",
+			"required": ["fileExt", "importExt", "componentImportExt"],
+			"properties": {
+				"fileExt": {
+					"description": "List of inspected file extensions to fall under this mapping.",
+					"type": "array",
+					"items": { "type":  "string" }
+				},
+				"importExt": {
+					"description": "Which import extension should be used",
+					"type": "string"
+				},
+				"componentImportExt": {
+					"description": "Which import extension should be used in case the file is a JSX or TSX component",
+					"type": "string"
+				}
+			},
+			"additionalProperties": false
+		},
 		"IndentWidth": { "type": "integer", "format": "uint8", "minimum": 0.0 },
 		"JavascriptConfiguration": {
 			"description": "A set of options applied to the JavaScript files",
@@ -1944,7 +1964,7 @@
 				"useImportExtensions": {
 					"description": "Enforce file extensions for relative imports.",
 					"anyOf": [
-						{ "$ref": "#/definitions/RuleFixConfiguration" },
+						{ "$ref": "#/definitions/UseImportExtensionsConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -2425,6 +2445,25 @@
 				"options": {
 					"description": "Rule's options",
 					"allOf": [{ "$ref": "#/definitions/RestrictedImportsOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
+		"RuleWithUseImportExtensionsOptions": {
+			"type": "object",
+			"required": ["level", "options"],
+			"properties": {
+				"fix": {
+					"description": "The kind of the code actions emitted by the rule",
+					"anyOf": [{ "$ref": "#/definitions/FixKind" }, { "type": "null" }]
+				},
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/UseImportExtensionsOptions" }]
 				}
 			},
 			"additionalProperties": false
@@ -3349,6 +3388,23 @@
 					"enum": ["all"]
 				}
 			]
+		},
+		"UseImportExtensionsConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithUseImportExtensionsOptions" }
+			]
+		},
+		"UseImportExtensionsOptions": {
+			"type": "object",
+			"properties": {
+				"importMappings": {
+					"description": "Describes what import extension should be suggested based on the linted file extension",
+					"type": "array",
+					"items": { "$ref": "#/definitions/ImportExtensionMapping" }
+				}
+			},
+			"additionalProperties": false
 		},
 		"UseValidAutocompleteConfiguration": {
 			"anyOf": [

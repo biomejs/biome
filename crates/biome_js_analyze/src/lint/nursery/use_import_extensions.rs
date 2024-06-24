@@ -1,6 +1,6 @@
 use std::path::{Component, Path};
 use schemars::JsonSchema;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 
 use biome_analyze::{
     context::RuleContext, declare_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic,
@@ -70,18 +70,18 @@ declare_rule! {
     ///
     /// ### Options
     ///
-    /// Use the options to specify additional globals that you want to restrict in your
-    /// source code.
+    /// Use the options to specify correct import extensions for your project based on the linted
+    /// file extension. These mappings will override the default guesses from the rule.
     ///
     /// ```json
     /// {
     ///     "//": "...",
     ///     "options": {
-    ///         "import_mappings": [
+    ///         "importMappings": [
     ///             {
-    ///                 "file_ext": ["mts"],
-    ///                 "import_ext": "mjs",
-    ///                 "component_import_ext": "jsx"
+    ///                 "fileExt": ["mts"],
+    ///                 "importExt": "mjs",
+    ///                 "componentImportExt": "jsx"
     ///             }
     ///         ]
     ///     }
@@ -105,17 +105,17 @@ declare_rule! {
     }
 }
 
-#[derive(Clone, Debug, Default, Deserializable, Deserialize)]
+#[derive(Clone, Debug, Default, Deserializable, Deserialize, Serialize, Eq, PartialEq)]
 #[cfg_attr(feature = "schemars", derive(JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct UseImportExtensionsOptions {
-    pub import_mappings: Vec<ImportMapping>
+    pub import_mappings: Vec<ImportExtensionMapping>
 }
 
-#[derive(Debug, Clone, Default, Deserializable, Deserialize)]
+#[derive(Debug, Clone, Default, Deserializable, Deserialize, Serialize, Eq, PartialEq)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
-struct ImportMapping {
+pub struct ImportExtensionMapping {
     pub file_ext: Vec<String>,
     pub import_ext: String,
     pub component_import_ext: String
@@ -187,7 +187,7 @@ pub struct UseImportExtensionsState {
 fn get_extensionless_import(
     file_ext: &str,
     node: &AnyJsImportSpecifierLike,
-    custom_import_mappings: &Vec<ImportMapping>,
+    custom_import_mappings: &Vec<ImportExtensionMapping>,
 ) -> Option<UseImportExtensionsState> {
     let module_name_token = node.module_name_token()?;
     let module_path = inner_string_text(&module_name_token);
@@ -268,7 +268,7 @@ fn get_extensionless_import(
     })
 }
 
-fn resolve_import_extension<'a>(file_ext: &str, path: &Path, custom_import_mappings: &Vec<ImportMapping>) -> &'a str {
+fn resolve_import_extension<'a>(file_ext: &str, path: &Path, custom_import_mappings: &'a Vec<ImportExtensionMapping>) -> &'a str {
     let custom_mapping_match = match_custom_import_mappings(custom_import_mappings, file_ext);
 
     let (potential_ext, potential_component_ext) = if custom_mapping_match.is_some() {
@@ -300,11 +300,11 @@ fn resolve_import_extension<'a>(file_ext: &str, path: &Path, custom_import_mappi
     potential_ext
 }
 
-fn match_custom_import_mappings<'a>(custom_import_mappings: &Vec<ImportMapping>, file_ext: &str) -> Option<(&'a str, &'a str)> {
+fn match_custom_import_mappings<'a>(custom_import_mappings: &'a Vec<ImportExtensionMapping>, file_ext: &str) -> Option<(&'a str, &'a str)> {
     let mapping = custom_import_mappings
         .iter()
-        .find(|&&mapping|
-            mapping.file_ext.map(String::as_str).contains(file_ext)
+        .find(|&mapping|
+            mapping.file_ext.contains(&file_ext.to_string())
         );
 
     if mapping.is_some() {
