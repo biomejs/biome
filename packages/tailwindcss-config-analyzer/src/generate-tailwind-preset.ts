@@ -60,7 +60,7 @@ function generateVariants(variants: SortConfig["variants"]) {
 	for (const { name } of variants) {
 		output += `${INDENT}"${name}",\n`
 	}
-	output += `];\n`;
+	output += "];\n";
 	return output;
 }
 
