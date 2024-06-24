@@ -316,11 +316,7 @@ fn match_custom_import_mappings<'a>(
 ) -> Option<(&'a str, &'a str)> {
     let matched = custom_import_mappings
         .iter()
-        .find(|&mapping| mapping.file_ext.contains(&file_ext.to_string()));
+        .find(|&mapping| mapping.file_ext.contains(&file_ext.to_string()))?;
 
-    if let Some(mapping) = matched {
-        return Some((&mapping.import_ext, &mapping.component_import_ext));
-    }
-
-    None
+    Some((&matched.import_ext, &matched.component_import_ext))
 }
