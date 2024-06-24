@@ -22,8 +22,8 @@ invalidWithImportMappings.ts:1:8 lint/nursery/useImportExtensions  FIXABLE  ━�
   
   i Unsafe fix: Add potential import extension .js.
   
-    1   │ - import·"./sub/foo";␍
-      1 │ + import·"./sub/foo.js";␍
+    1   │ - import·"./sub/foo";
+      1 │ + import·"./sub/foo.js";
     2 2 │   import "./sub/Foo";
   
 
@@ -42,7 +42,7 @@ invalidWithImportMappings.ts:2:8 lint/nursery/useImportExtensions  FIXABLE  ━�
   
   i Unsafe fix: Add potential import extension .jsx.
   
-    1 1 │   import "./sub/foo";␍
+    1 1 │   import "./sub/foo";
     2   │ - import·"./sub/Foo";
       2 │ + import·"./sub/Foo.jsx";
   
