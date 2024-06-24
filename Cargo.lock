@@ -463,6 +463,27 @@ dependencies = [
 ]
 
 [[package]]
+name = "biome_graphql_analyze"
+version = "0.0.1"
+dependencies = [
+ "biome_analyze",
+ "biome_console",
+ "biome_deserialize",
+ "biome_deserialize_macros",
+ "biome_diagnostics",
+ "biome_graphql_parser",
+ "biome_graphql_syntax",
+ "biome_rowan",
+ "biome_suppression",
+ "biome_test_utils",
+ "insta",
+ "lazy_static",
+ "schemars",
+ "serde",
+ "tests_macros",
+]
+
+[[package]]
 name = "biome_graphql_factory"
 version = "0.1.0"
 dependencies = [
