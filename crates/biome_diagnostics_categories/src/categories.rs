@@ -273,8 +273,10 @@ define_categories! {
     "lint/suspicious/useNamespaceKeyword": "https://biomejs.dev/linter/rules/use-namespace-keyword",
     "lint/suspicious/useValidTypeof": "https://biomejs.dev/linter/rules/use-valid-typeof",
     // end lint rules
+    // start assists rules
     "assists/nursery/useSortedKeys": "https://biomejs.dev/linter/rules/use-valid-typeof",
-    ; // end assist rules
+    // end assists rules
+    ; // start syntax rules
     "syntax/nursery/noTypeOnlyImportAttributes",
     "syntax/correctness/noSuperWithoutExtends",
     "syntax/correctness/noInitializerWithDefinite",
