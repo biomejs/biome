@@ -1144,6 +1144,10 @@ export interface Nursery {
 	 */
 	noUnknownSelectorPseudoElement?: RuleConfiguration_for_Null;
 	/**
+	 * Disallow unknown type selectors.
+	 */
+	noUnknownTypeSelector?: RuleConfiguration_for_Null;
+	/**
 	 * Disallow unknown CSS units.
 	 */
 	noUnknownUnit?: RuleConfiguration_for_Null;
@@ -2506,6 +2510,7 @@ export type Category =
 	| "lint/nursery/noUnknownProperty"
 	| "lint/nursery/noUnknownPseudoClassSelector"
 	| "lint/nursery/noUnknownSelectorPseudoElement"
+	| "lint/nursery/noUnknownTypeSelector"
 	| "lint/nursery/noUnknownUnit"
 	| "lint/nursery/noUnmatchableAnbSelector"
 	| "lint/nursery/noUnusedFunctionParameters"
