@@ -1,0 +1,39 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: content
+---
+## `biome.json`
+
+```json
+{
+  "overrides": [
+    {
+      "include": ["**/*.json"],
+      "formatter": { "enabled": false }
+    }
+  ]
+}
+```
+
+## `other.json`
+
+```json
+{
+    "asta": ["lorem", "ipsum", "first", "second"]
+}
+```
+
+## `tsconfig.json`
+
+```json
+{
+    // This is a comment
+    "compilerOptions": {},
+}
+```
+
+# Emitted Messages
+
+```block
+Checked 2 files in <TIME>. No fixes applied.
+```
