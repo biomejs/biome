@@ -1,6 +1,5 @@
-use std::path::{Component, Path};
-use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
+use std::path::{Component, Path};
 
 use biome_analyze::{
     context::RuleContext, declare_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic,
@@ -12,6 +11,9 @@ use biome_js_syntax::{inner_string_text, AnyJsImportSpecifierLike, JsLanguage};
 use biome_rowan::{BatchMutationExt, SyntaxToken};
 
 use crate::JsRuleAction;
+
+#[cfg(feature = "schemars")]
+use schemars::JsonSchema;
 
 declare_rule! {
     /// Enforce file extensions for relative imports.
@@ -109,7 +111,7 @@ declare_rule! {
 #[cfg_attr(feature = "schemars", derive(JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct UseImportExtensionsOptions {
-    pub import_mappings: Vec<ImportExtensionMapping>
+    pub import_mappings: Vec<ImportExtensionMapping>,
 }
 
 #[derive(Debug, Clone, Default, Deserializable, Deserialize, Serialize, Eq, PartialEq)]
@@ -118,7 +120,7 @@ pub struct UseImportExtensionsOptions {
 pub struct ImportExtensionMapping {
     pub file_ext: Vec<String>,
     pub import_ext: String,
-    pub component_import_ext: String
+    pub component_import_ext: String,
 }
 
 impl Rule for UseImportExtensions {
@@ -187,7 +189,7 @@ pub struct UseImportExtensionsState {
 fn get_extensionless_import(
     file_ext: &str,
     node: &AnyJsImportSpecifierLike,
-    custom_import_mappings: &Vec<ImportExtensionMapping>,
+    custom_import_mappings: &[ImportExtensionMapping],
 ) -> Option<UseImportExtensionsState> {
     let module_name_token = node.module_name_token()?;
     let module_path = inner_string_text(&module_name_token);
@@ -268,11 +270,15 @@ fn get_extensionless_import(
     })
 }
 
-fn resolve_import_extension<'a>(file_ext: &str, path: &Path, custom_import_mappings: &'a Vec<ImportExtensionMapping>) -> &'a str {
-    let custom_mapping_match = match_custom_import_mappings(custom_import_mappings, file_ext);
-
-    let (potential_ext, potential_component_ext) = if custom_mapping_match.is_some() {
-        custom_mapping_match.unwrap()
+fn resolve_import_extension<'a>(
+    file_ext: &str,
+    path: &Path,
+    custom_import_mappings: &'a [ImportExtensionMapping],
+) -> &'a str {
+    let (potential_ext, potential_component_ext) = if let Some(custom_mapping) =
+        match_custom_import_mappings(custom_import_mappings, file_ext)
+    {
+        custom_mapping
     } else {
         // TODO. This is not very accurate. We should use file system access to determine the file type.
         match file_ext {
@@ -300,16 +306,17 @@ fn resolve_import_extension<'a>(file_ext: &str, path: &Path, custom_import_mappi
     potential_ext
 }
 
-fn match_custom_import_mappings<'a>(custom_import_mappings: &'a Vec<ImportExtensionMapping>, file_ext: &str) -> Option<(&'a str, &'a str)> {
-    let mapping = custom_import_mappings
+fn match_custom_import_mappings<'a>(
+    custom_import_mappings: &'a [ImportExtensionMapping],
+    file_ext: &str,
+) -> Option<(&'a str, &'a str)> {
+    let matched = custom_import_mappings
         .iter()
-        .find(|&mapping|
-            mapping.file_ext.contains(&file_ext.to_string())
-        );
+        .find(|&mapping| mapping.file_ext.contains(&file_ext.to_string()));
 
-    if mapping.is_some() {
-        return Some((&mapping.unwrap().import_ext, &mapping.unwrap().component_import_ext))
+    if let Some(mapping) = matched {
+        return Some((&mapping.import_ext, &mapping.component_import_ext));
     }
 
-    return None
+    None
 }

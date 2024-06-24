@@ -1184,21 +1184,11 @@
 		},
 		"ImportExtensionMapping": {
 			"type": "object",
-			"required": ["fileExt", "importExt", "componentImportExt"],
+			"required": ["componentImportExt", "fileExt", "importExt"],
 			"properties": {
-				"fileExt": {
-					"description": "List of inspected file extensions to fall under this mapping.",
-					"type": "array",
-					"items": { "type":  "string" }
-				},
-				"importExt": {
-					"description": "Which import extension should be used",
-					"type": "string"
-				},
-				"componentImportExt": {
-					"description": "Which import extension should be used in case the file is a JSX or TSX component",
-					"type": "string"
-				}
+				"componentImportExt": { "type": "string" },
+				"fileExt": { "type": "array", "items": { "type": "string" } },
+				"importExt": { "type": "string" }
 			},
 			"additionalProperties": false
 		},
@@ -3397,9 +3387,9 @@
 		},
 		"UseImportExtensionsOptions": {
 			"type": "object",
+			"required": ["importMappings"],
 			"properties": {
 				"importMappings": {
-					"description": "Describes what import extension should be suggested based on the linted file extension",
 					"type": "array",
 					"items": { "$ref": "#/definitions/ImportExtensionMapping" }
 				}

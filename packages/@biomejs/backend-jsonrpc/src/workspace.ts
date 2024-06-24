@@ -1137,7 +1137,7 @@ export interface Nursery {
 	/**
 	 * Enforce file extensions for relative imports.
 	 */
-	useImportExtensions?: RuleFixConfiguration_for_Null;
+	useImportExtensions?: RuleFixConfiguration_for_UseImportExtensionsOptions;
 	/**
 	 * Disallows package private imports.
 	 */
@@ -1714,6 +1714,9 @@ export type RuleConfiguration_for_NoLabelWithoutControlOptions =
 export type RuleConfiguration_for_RestrictedImportsOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_RestrictedImportsOptions;
+export type RuleFixConfiguration_for_UseImportExtensionsOptions =
+	| RulePlainConfiguration
+	| RuleWithFixOptions_for_UseImportExtensionsOptions;
 export type RuleFixConfiguration_for_UtilityClassSortingOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_UtilityClassSortingOptions;
@@ -1820,6 +1823,20 @@ export interface RuleWithOptions_for_RestrictedImportsOptions {
 	 * Rule's options
 	 */
 	options: RestrictedImportsOptions;
+}
+export interface RuleWithFixOptions_for_UseImportExtensionsOptions {
+	/**
+	 * The kind of the code actions emitted by the rule
+	 */
+	fix?: FixKind;
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: UseImportExtensionsOptions;
 }
 export interface RuleWithFixOptions_for_UtilityClassSortingOptions {
 	/**
@@ -1946,6 +1963,9 @@ export interface RestrictedImportsOptions {
 	 */
 	paths: {};
 }
+export interface UseImportExtensionsOptions {
+	importMappings: ImportExtensionMapping[];
+}
 export interface UtilityClassSortingOptions {
 	/**
 	 * Additional attributes that will be sorted.
@@ -2037,6 +2057,11 @@ Set to `true` to mark the identity of the hook's return value as stable, or use 
 For example, for React's `useRef()` hook the value would be `true`, while for `useState()` it would be `[1]`. 
 	 */
 	stableResult: StableHookResult;
+}
+export interface ImportExtensionMapping {
+	componentImportExt: string;
+	fileExt: string[];
+	importExt: string;
 }
 export type ConsistentArrayType = "shorthand" | "generic";
 export type FilenameCases = FilenameCase[];
