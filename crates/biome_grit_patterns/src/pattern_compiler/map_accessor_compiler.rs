@@ -28,7 +28,7 @@ impl MapAccessorCompiler {
                 AccessorKey::String(name.syntax().text_trimmed().to_string())
             }
             AnyGritMapKey::GritVariable(variable) => {
-                AccessorKey::Variable(VariableCompiler::from_node(&variable, context)?)
+                AccessorKey::Variable(VariableCompiler::from_node(&variable, context))
             }
         };
 

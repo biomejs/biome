@@ -7,6 +7,7 @@ use super::{
     RenameResult, SearchPatternParams, SearchResults, SupportsFeatureParams,
     UnregisterProjectFolderParams, UpdateProjectParams, UpdateSettingsParams,
 };
+use crate::diagnostics::{InvalidPattern, QueryError, SearchError};
 use crate::file_handlers::{
     Capabilities, CodeActionsParams, DocumentFileSource, FixAllParams, LintParams, ParseResult,
 };
@@ -24,17 +25,18 @@ use biome_diagnostics::{
 };
 use biome_formatter::Printed;
 use biome_fs::{BiomePath, ConfigName};
-use biome_grit_patterns::GritQuery;
+use biome_grit_patterns::{GritQuery, GritQueryResult, GritTargetFile};
 use biome_json_parser::{parse_json_with_cache, JsonParserOptions};
 use biome_json_syntax::JsonFileSource;
 use biome_parser::AnyParse;
 use biome_project::NodeJsProject;
-use biome_rowan::{NodeCache, TextLen, TextRange, TextSize};
+use biome_rowan::{NodeCache, TextRange};
 use dashmap::{mapref::entry::Entry, DashMap};
 use indexmap::IndexSet;
 use std::ffi::OsStr;
 use std::fs;
 use std::path::Path;
+use std::sync::atomic::{AtomicUsize, Ordering};
 use std::{panic::RefUnwindSafe, sync::RwLock};
 use tracing::{debug, info, info_span};
 
@@ -73,24 +75,6 @@ pub(crate) struct Document {
     /// Use `WorkspaceServer#file_sources` to retrieve the file source that belongs to the document.
     pub(crate) file_source_index: usize,
     node_cache: NodeCache,
-}
-
-// TODO: remove once an actual implementation for the matches is present
-struct DummySearchMatchesProvider;
-
-impl DummySearchMatchesProvider {
-    // a match that goes from the first to the last character of the first line, if present
-    fn get_range(input: &str) -> Vec<TextRange> {
-        let mut lines = input.lines();
-        let first_line = lines.next();
-
-        let max_size = match first_line {
-            Some(v) => v.text_len(),
-            None => return vec![],
-        };
-
-        vec![TextRange::new(TextSize::from(0), max_size)]
-    }
 }
 
 impl WorkspaceServer {
@@ -793,30 +777,50 @@ impl Workspace for WorkspaceServer {
     ) -> Result<ParsePatternResult, WorkspaceError> {
         let pattern = biome_grit_patterns::compile_pattern(
             &params.pattern,
-            Path::new("filename"), // TODO: Pass the real filename.
+            None,
             biome_grit_patterns::JsTargetLanguage.into(),
         )?;
-        let pattern_id = PatternId::from("1234"); // TODO: Generate a real ID.
+
+        let pattern_id = PatternId::from(make_search_pattern_id());
         self.patterns.insert(pattern_id.clone(), pattern);
         Ok(ParsePatternResult { pattern_id })
     }
 
     fn search_pattern(&self, params: SearchPatternParams) -> Result<SearchResults, WorkspaceError> {
-        let SearchPatternParams { path, .. } = params;
+        let SearchPatternParams { path, pattern } = params;
 
-        // TODO: Let's implement some real matching here...
+        let Some(query) = self.patterns.get(&pattern) else {
+            return Err(WorkspaceError::SearchError(SearchError::InvalidPattern(
+                InvalidPattern,
+            )));
+        };
+
         let document = self
             .documents
-            .get_mut(&path)
+            .get(&path)
             .ok_or_else(WorkspaceError::not_found)?;
 
-        let content = document.content.as_str();
+        let query_result = query
+            .execute(GritTargetFile {
+                path: path.to_path_buf(),
+                content: document.content.clone(),
+            })
+            .map_err(|err| {
+                WorkspaceError::SearchError(SearchError::QueryError(QueryError(err.to_string())))
+            })?;
 
-        let match_ranges = DummySearchMatchesProvider::get_range(content);
+        let matches = query_result
+            .into_iter()
+            .flat_map(|result| match result {
+                GritQueryResult::Match(m) => m.ranges,
+                _ => Vec::new(),
+            })
+            .map(|range| TextRange::new(range.start_byte.into(), range.end_byte.into()))
+            .collect();
 
         Ok(SearchResults {
             file: path,
-            matches: match_ranges,
+            matches,
         })
     }
 
@@ -850,4 +854,10 @@ impl Workspace for WorkspaceServer {
 /// if it is a symlink that resolves to a directory.
 fn is_dir(path: &Path) -> bool {
     path.is_dir() || (path.is_symlink() && fs::read_link(path).is_ok_and(|path| path.is_dir()))
+}
+
+fn make_search_pattern_id() -> String {
+    static COUNTER: AtomicUsize = AtomicUsize::new(1);
+    let counter = COUNTER.fetch_add(1, Ordering::AcqRel);
+    format!("p{counter}")
 }

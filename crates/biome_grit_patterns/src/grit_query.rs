@@ -3,7 +3,7 @@ use crate::grit_context::{GritExecContext, GritQueryContext, GritTargetFile};
 use crate::grit_resolved_pattern::GritResolvedPattern;
 use crate::grit_target_language::GritTargetLanguage;
 use crate::grit_tree::GritTargetTree;
-use crate::pattern_compiler::PatternCompiler;
+use crate::pattern_compiler::{auto_wrap_pattern, PatternCompiler};
 use crate::pattern_compiler::{
     compilation_context::CompilationContext, compilation_context::NodeCompilationContext,
 };
@@ -12,7 +12,6 @@ use crate::CompileError;
 use anyhow::bail;
 use anyhow::Result;
 use biome_grit_syntax::{GritRoot, GritRootExt};
-use grit_pattern_matcher::binding::Binding;
 use grit_pattern_matcher::constants::{
     ABSOLUTE_PATH_INDEX, FILENAME_INDEX, NEW_FILES_INDEX, PROGRAM_INDEX,
 };
@@ -23,6 +22,7 @@ use grit_pattern_matcher::pattern::{
 use grit_util::{Ast, ByteRange, InputRanges, Range, VariableMatch};
 use im::Vector;
 use std::collections::{BTreeMap, BTreeSet};
+use std::ffi::OsStr;
 use std::path::{Path, PathBuf};
 
 // These need to remain ordered by index.
@@ -42,6 +42,9 @@ pub struct GritQuery {
     /// Diagnostics discovered during compilation of the query.
     pub diagnostics: Vec<CompilerDiagnostic>,
 
+    /// The name of the snippet being executed.
+    pub name: Option<String>,
+
     /// Target language for the query.
     language: GritTargetLanguage,
 
@@ -54,7 +57,12 @@ impl GritQuery {
         let file_owners = FileOwners::new();
         let files = vec![file];
         let file_ptr = FilePtr::new(0, 0);
-        let context = GritExecContext::new(self.language.clone(), &files, &file_owners);
+        let context = GritExecContext::new(
+            self.language.clone(),
+            self.name.as_deref(),
+            &files,
+            &file_owners,
+        );
 
         let var_registry = VarRegistry::from_locations(&self.variable_locations);
 
@@ -75,11 +83,6 @@ impl GritQuery {
                     results.push(result)
                 }
             }
-            results.extend(results_from_bindings_history(
-                &files[0].path,
-                &state,
-                &self.language,
-            ));
         }
 
         Ok(results)
@@ -87,16 +90,18 @@ impl GritQuery {
 
     pub fn from_node(
         root: GritRoot,
-        source_path: &Path,
+        path: Option<&Path>,
         lang: GritTargetLanguage,
     ) -> Result<Self, CompileError> {
-        let context = CompilationContext::new(source_path, lang);
+        let context = CompilationContext::new(path, lang);
 
         let mut vars_array = vec![GLOBAL_VARS
             .iter()
             .map(|global_var| VariableSourceLocations {
                 name: global_var.0.to_string(),
-                file: source_path.to_string_lossy().into_owned(),
+                file: path
+                    .map(Path::to_string_lossy)
+                    .map_or_else(|| "unnamed".to_owned(), |p| p.to_string()),
                 locations: BTreeSet::new(),
             })
             .collect::<Vec<VariableSourceLocations>>()];
@@ -105,6 +110,8 @@ impl GritQuery {
             .map(|(global_var, index)| ((*global_var).to_string(), *index))
             .collect();
         let mut diagnostics = Vec::new();
+
+        // Make sure
 
         // We're not in a local scope yet, so this map is kinda useless.
         // It's just there because all node compilers expect one.
@@ -123,11 +130,26 @@ impl GritQuery {
             &mut node_context,
         )?;
 
+        let mut pattern_definitions = Vec::new();
+        let pattern = auto_wrap_pattern(
+            pattern,
+            &mut pattern_definitions,
+            true,
+            None,
+            &mut node_context,
+            None,
+        )?;
+
+        let name = path
+            .and_then(Path::file_stem)
+            .map(OsStr::to_string_lossy)
+            .map(|stem| stem.to_string());
         let language = context.lang;
         let variable_locations = VariableLocations::new(vars_array);
 
         Ok(Self {
             pattern,
+            name,
             language,
             diagnostics,
             variable_locations,
@@ -312,32 +334,4 @@ pub struct Message {
     pub message: String,
     pub range: Vec<Range>,
     pub variable_runtime_id: String,
-}
-
-fn results_from_bindings_history(
-    path: &Path,
-    state: &State<GritQueryContext>,
-    language: &GritTargetLanguage,
-) -> Vec<GritQueryResult> {
-    println!("{state:#?}");
-    let mut results = Vec::new();
-    for scope in state.bindings.iter() {
-        for content in scope.last().unwrap().iter() {
-            for value in content.value_history.iter() {
-                if let Some(bindings) = value.get_bindings() {
-                    for binding in bindings {
-                        if let Some(range) = binding.position(language) {
-                            results.push(GritQueryResult::Match(Match {
-                                messages: Vec::new(),
-                                source_file: path.to_path_buf(),
-                                ranges: vec![range],
-                                variables: Vec::new(),
-                            }));
-                        }
-                    }
-                }
-            }
-        }
-    }
-    results
 }

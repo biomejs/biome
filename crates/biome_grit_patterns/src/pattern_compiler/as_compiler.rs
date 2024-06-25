@@ -11,8 +11,11 @@ use biome_rowan::AstNode as _;
 use grit_pattern_matcher::pattern::{Container, Match, Pattern, Predicate, Where};
 use grit_util::{traverse, AstNode, Language, Order};
 
+// TODO: `as` keyword
+#[allow(dead_code)]
 pub(crate) struct AsCompiler;
 
+#[allow(dead_code)]
 impl AsCompiler {
     pub(crate) fn from_node(
         node: &GritPatternAs,
@@ -35,7 +38,7 @@ impl AsCompiler {
         }
 
         let pattern = PatternCompiler::from_node(&pattern, context)?;
-        let variable = VariableCompiler::from_node(&variable, context)?;
+        let variable = VariableCompiler::from_node(&variable, context);
         Ok(Where::new(
             Pattern::Variable(variable),
             Predicate::Match(Box::new(Match::new(
@@ -46,6 +49,7 @@ impl AsCompiler {
     }
 }
 
+#[allow(dead_code)]
 fn pattern_repeated_variable(
     pattern: &AnyGritPattern,
     name: &str,
@@ -71,6 +75,7 @@ fn pattern_repeated_variable(
         .any(|b| b))
 }
 
+#[allow(dead_code)]
 fn is_variables_in_snippet(name: &str, snippet: &str, lang: &impl Language) -> bool {
     let variables = split_snippet(snippet, lang);
     variables.iter().any(|v| v.1 == name)

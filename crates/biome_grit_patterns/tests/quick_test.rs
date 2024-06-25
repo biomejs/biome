@@ -1,5 +1,3 @@
-use std::path::Path;
-
 use biome_grit_parser::parse_grit;
 use biome_grit_patterns::{GritQuery, GritTargetFile, GritTargetLanguage, JsTargetLanguage};
 
@@ -7,8 +5,7 @@ use biome_grit_patterns::{GritQuery, GritTargetFile, GritTargetLanguage, JsTarge
 #[ignore]
 #[test]
 fn test_query() {
-    // TODO: Still need to implement autowrapping.
-    let parse_grit_result = parse_grit("file(body = contains bubble `\"hello\"`)");
+    let parse_grit_result = parse_grit("`\"hello\"`");
     if !parse_grit_result.diagnostics().is_empty() {
         println!(
             "Diagnostics from parsing query:\n{:?}",
@@ -18,7 +15,7 @@ fn test_query() {
 
     let query = GritQuery::from_node(
         parse_grit_result.tree(),
-        Path::new("quick_test.js"),
+        None,
         GritTargetLanguage::JsTargetLanguage(JsTargetLanguage),
     )
     .expect("could not construct query");

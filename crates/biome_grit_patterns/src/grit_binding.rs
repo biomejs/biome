@@ -106,7 +106,7 @@ impl<'a> Binding<'a, GritQueryContext> for GritBinding<'a> {
     }
 
     fn is_suppressed(&self, _language: &GritTargetLanguage, _current_name: Option<&str>) -> bool {
-        todo!()
+        false // TODO: Implement suppression
     }
 
     fn get_insertion_padding(
@@ -188,7 +188,19 @@ impl<'a> Binding<'a, GritQueryContext> for GritBinding<'a> {
     }
 
     fn is_truthy(&self) -> bool {
-        todo!()
+        match self {
+            Self::File(_) => true,
+            Self::Node(node) => {
+                if node.is_list() {
+                    node.has_children()
+                } else {
+                    true
+                }
+            }
+            Self::Range(..) => true,
+            Self::Empty(..) => false,
+            Self::Constant(c) => c.is_truthy(),
+        }
     }
 
     fn log_empty_field_rewrite_error(
