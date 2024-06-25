@@ -111,8 +111,8 @@ declare_rule! {
 #[cfg_attr(feature = "schemars", derive(JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct UseImportExtensionsOptions {
-    /// A map of custom import extension mappings, where key is inspected file extension
-    /// and value is a pair of `import` extension and `component` import extension
+    /// A map of custom import extension mappings, where the key is the inspected file extension, 
+    /// and the value is a pair of `import` extension and `component` import extension
     pub suggested_extensions: FxHashMap<String, SuggestedExtensionMapping>,
 }
 
