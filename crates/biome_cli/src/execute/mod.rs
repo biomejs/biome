@@ -10,6 +10,7 @@ use crate::diagnostics::ReportDiagnostic;
 use crate::execute::migrate::MigratePayload;
 use crate::execute::traverse::traverse;
 use crate::reporter::github::{GithubReporter, GithubReporterVisitor};
+use crate::reporter::gitlab::{GitLabDiagnosticBuilder, GitLabReporter, GitLabReporterVisitor};
 use crate::reporter::json::{JsonReporter, JsonReporterVisitor};
 use crate::reporter::junit::{JunitReporter, JunitReporterVisitor};
 use crate::reporter::summary::{SummaryReporter, SummaryReporterVisitor};
@@ -23,6 +24,7 @@ use biome_fs::BiomePath;
 use biome_service::workspace::{
     FeatureName, FeaturesBuilder, FixFileMode, FormatFileParams, OpenFileParams, PatternId,
 };
+use std::borrow::Borrow;
 use std::ffi::OsString;
 use std::fmt::{Display, Formatter};
 use std::path::{Path, PathBuf};
@@ -217,6 +219,8 @@ pub enum ReportMode {
     /// JUnit output
     /// Ref: https://github.com/testmoapp/junitxml?tab=readme-ov-file#basic-junit-xml-structure
     Junit,
+    /// Reports information in the [GitLab Code Quality](https://docs.gitlab.com/ee/ci/testing/code_quality.html#implement-a-custom-tool) format.
+    GitLab,
 }
 
 impl Default for ReportMode {
@@ -238,6 +242,7 @@ impl From<CliReporter> for ReportMode {
             CliReporter::JsonPretty => Self::Json { pretty: true },
             CliReporter::GitHub => Self::GitHub,
             CliReporter::Junit => Self::Junit,
+            CliReporter::GitLab => Self::GitLab {},
         }
     }
 }
@@ -503,6 +508,21 @@ pub fn execute_mode(
                     execution: execution.clone(),
                 };
                 reporter.write(&mut GithubReporterVisitor(console))?;
+            }
+            ReportMode::GitLab => {
+                let reporter = GitLabReporter {
+                    summary: summary_result,
+                    diagnostics: DiagnosticsPayload {
+                        verbose: cli_options.verbose,
+                        diagnostic_level: cli_options.diagnostic_level,
+                        diagnostics,
+                    },
+                    execution: execution.clone(),
+                };
+                let mut buffer = GitLabReporterVisitor::new(GitLabDiagnosticBuilder::new(
+                    session.app.fs.borrow().working_directory(),
+                ));
+                reporter.write(&mut buffer)?;
             }
             ReportMode::Junit => {
                 let reporter = JunitReporter {
