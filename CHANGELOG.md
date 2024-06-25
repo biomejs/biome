@@ -17,6 +17,8 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 - Fix [#3104](https://github.com/biomejs/biome/issues/3104) by suppressing node warnings when using `biome migrate`. Contributed by @SuperchupuDev
 
+- Force colors to be off when using the GitHub reporter to properly create annotations in GitHub actions ([#3148](https://github.com/biomejs/biome/issues/3148)). Contributed by @Sec-ant
+
 ### Parser
 
 #### New features
