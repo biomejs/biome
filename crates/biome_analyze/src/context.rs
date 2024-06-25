@@ -160,6 +160,15 @@ where
     pub fn as_preferred_quote(&self) -> &PreferredQuote {
         self.preferred_quote
     }
+
+    /// Attempts to retrieve a service from the current context
+    ///
+    /// ```no_test
+    /// let aria_services = ctx.get_service::<AriaServices>().expect("To have the service available");
+    /// ```
+    pub fn get_service<T: 'static>(&self) -> Option<&T> {
+        self.bag.get_service::<T>()
+    }
 }
 
 impl<'a, R> Deref for RuleContext<'a, R>
