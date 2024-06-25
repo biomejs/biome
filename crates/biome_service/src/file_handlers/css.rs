@@ -18,7 +18,8 @@ use crate::workspace::{
 use crate::WorkspaceError;
 use biome_analyze::options::PreferredQuote;
 use biome_analyze::{
-    AnalysisFilter, AnalyzerConfiguration, AnalyzerOptions, ControlFlow, Never, RuleCategories,
+    AnalysisFilter, AnalyzerConfiguration, AnalyzerOptions, ControlFlow, Never,
+    RuleCategoriesBuilder, RuleCategory,
 };
 use biome_css_analyze::analyze;
 use biome_css_formatter::context::CssFormatOptions;
@@ -219,7 +220,7 @@ fn parse(
             .map(|s| s.languages.css.parser.allow_wrong_line_comments)
             .unwrap_or_default(),
         css_modules: settings
-            .map(|s| s.languages.css.parser.allow_wrong_line_comments)
+            .map(|s| s.languages.css.parser.css_modules)
             .unwrap_or_default(),
     };
     if let Some(settings) = settings {
@@ -386,7 +387,7 @@ fn lint(params: LintParams) -> LintResults {
             // - it is a syntax-only analyzer pass, or
             // - if a single rule is run.
             let ignores_suppression_comment =
-                !filter.categories.contains(RuleCategories::LINT) || has_only_filter;
+                !filter.categories.contains(RuleCategory::Lint) || has_only_filter;
 
             let mut diagnostic_count = diagnostics.len() as u32;
             let mut errors = diagnostics
@@ -488,10 +489,11 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
 
             let mut filter = AnalysisFilter::from_enabled_rules(filter.as_slice());
 
-            filter.categories = RuleCategories::SYNTAX | RuleCategories::LINT;
+            let mut categories = RuleCategoriesBuilder::default().with_syntax().with_lint();
             if settings.organize_imports.enabled {
-                filter.categories |= RuleCategories::ACTION;
+                categories = categories.with_action();
             }
+            filter.categories = categories.build();
             filter.range = Some(range);
 
             let analyzer_options = workspace.analyzer_options::<CssLanguage>(path, &language);

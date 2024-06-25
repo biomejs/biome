@@ -1742,6 +1742,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noInvalidDirectionInLinearGradient": {
+					"description": "Disallow non-standard direction values for linear gradient functions.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noInvalidPositionAtImportRule": {
 					"description": "Disallow the use of @import at-rules in invalid positions.",
 					"anyOf": [

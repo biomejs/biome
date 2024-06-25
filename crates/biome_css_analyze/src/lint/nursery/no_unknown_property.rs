@@ -1,4 +1,4 @@
-use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic};
+use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
 use biome_css_syntax::CssGenericProperty;
 use biome_rowan::{AstNode, TextRange};
@@ -57,7 +57,8 @@ declare_rule! {
         version: "1.8.0",
         name: "noUnknownProperty",
         language: "css",
-        recommended: false,
+        recommended: true,
+        sources: &[RuleSource::Stylelint("property-no-unknown")],
     }
 }
 
@@ -71,6 +72,9 @@ impl Rule for NoUnknownProperty {
         let node = ctx.query();
         let property_name = node.name().ok()?.text().to_lowercase();
         if !property_name.starts_with("--")
+            // Ignore `composes` property.
+            // See https://github.com/css-modules/css-modules/blob/master/docs/composition.md for more details.
+            && property_name != "composes"
             && !is_known_properties(&property_name)
             && !vendor_prefixed(&property_name)
         {

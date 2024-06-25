@@ -41,8 +41,47 @@ function introspectUtilities(
 	return utilities;
 }
 
+type VariantSpec = {
+	variant: string;
+	weight: bigint;
+};
+
+function introspectVariants(context: TailwindContext): Set<VariantSpec> {
+	const variants = new Set<VariantSpec>();
+	// This method returns a list of Variants, each with values but offsets are missing.
+	const configVariants = context.getVariants();
+	// This Map contains weights for each variant name, including those that are values of a main variant.
+	const variantOffsets = context.offsets.variantOffsets;
+
+	// TODO: Handle isArbitrary like `has-[]` or `group-has-[]`
+	for (const { name, isArbitrary, values } of configVariants) {
+		const offset = variantOffsets.get(name);
+		if (!offset) continue;
+
+		variants.add({
+			variant: name,
+			weight: offset,
+		});
+
+		for (const value of values) {
+			const composedVariantName = `${name}-${value}`;
+
+			const composedVariantOffset = variantOffsets.get(composedVariantName);
+			if (!composedVariantOffset) continue;
+
+			variants.add({
+				variant: composedVariantName,
+				weight: composedVariantOffset,
+			});
+		}
+	}
+
+	return variants;
+}
+
 export type TailwindSpec = {
 	utilities: Set<UtilitySpec>;
+	variants: Set<VariantSpec>;
 };
 
 export function introspectTailwindConfig(
@@ -51,5 +90,6 @@ export function introspectTailwindConfig(
 ): TailwindSpec {
 	const context = createContextFromConfig(config);
 	const utilities = introspectUtilities(context, options);
-	return { utilities };
+	const variants = introspectVariants(context);
+	return { utilities, variants };
 }

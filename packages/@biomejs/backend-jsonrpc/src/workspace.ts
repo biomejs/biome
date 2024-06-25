@@ -1020,6 +1020,10 @@ export interface Nursery {
 	 */
 	noImportantInKeyframe?: RuleConfiguration_for_Null;
 	/**
+	 * Disallow non-standard direction values for linear gradient functions.
+	 */
+	noInvalidDirectionInLinearGradient?: RuleConfiguration_for_Null;
+	/**
 	 * Disallow the use of @import at-rules in invalid positions.
 	 */
 	noInvalidPositionAtImportRule?: RuleConfiguration_for_Null;
@@ -2159,7 +2163,8 @@ export type DocumentFileSource =
 	| "Unknown"
 	| { Js: JsFileSource }
 	| { Json: JsonFileSource }
-	| { Css: CssFileSource };
+	| { Css: CssFileSource }
+	| { Graphql: GraphqlFileSource };
 export interface JsFileSource {
 	/**
 	 * Used to mark if the source is being used for an Astro, Svelte or Vue file
@@ -2177,6 +2182,7 @@ export interface JsonFileSource {
 export interface CssFileSource {
 	variant: CssVariant;
 }
+export interface GraphqlFileSource {}
 export type EmbeddingKind = "Astro" | "Vue" | "Svelte" | "None";
 export type Language =
 	| "JavaScript"
@@ -2378,6 +2384,7 @@ export type Category =
 	| "lint/nursery/noEmptyBlock"
 	| "lint/nursery/noEvolvingTypes"
 	| "lint/nursery/noImportantInKeyframe"
+	| "lint/nursery/noInvalidDirectionInLinearGradient"
 	| "lint/nursery/noInvalidPositionAtImportRule"
 	| "lint/nursery/noLabelWithoutControl"
 	| "lint/nursery/noMisplacedAssertion"

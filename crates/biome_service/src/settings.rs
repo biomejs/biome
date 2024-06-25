@@ -18,6 +18,7 @@ use biome_deserialize::{Merge, StringSet};
 use biome_diagnostics::Category;
 use biome_formatter::{AttributePosition, IndentStyle, IndentWidth, LineEnding, LineWidth};
 use biome_fs::BiomePath;
+use biome_graphql_syntax::GraphqlLanguage;
 use biome_js_analyze::metadata;
 use biome_js_formatter::context::JsFormatOptions;
 use biome_js_parser::JsParserOptions;
@@ -439,6 +440,7 @@ pub struct LanguageListSettings {
     pub javascript: LanguageSettings<JsLanguage>,
     pub json: LanguageSettings<JsonLanguage>,
     pub css: LanguageSettings<CssLanguage>,
+    pub graphql: LanguageSettings<GraphqlLanguage>,
 }
 
 impl From<JavascriptConfiguration> for LanguageSettings<JsLanguage> {

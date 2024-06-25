@@ -95,6 +95,7 @@ impl biome_rowan::SyntaxKind for CssSyntaxKind {
                 | CSS_BOGUS_DOCUMENT_MATCHER
                 | CSS_BOGUS_KEYFRAMES_NAME
                 | CSS_BOGUS_CUSTOM_IDENTIFIER
+                | CSS_BOGUS_UNICODE_RANGE_VALUE
         )
     }
 
@@ -122,6 +123,7 @@ impl biome_rowan::SyntaxKind for CssSyntaxKind {
             kind if AnyCssDeclarationOrRuleBlock::can_cast(*kind) => CSS_BOGUS_BLOCK,
             kind if AnyCssConditionalBlock::can_cast(*kind) => CSS_BOGUS_BLOCK,
             kind if AnyCssFontFeatureValuesBlock::can_cast(*kind) => CSS_BOGUS_BLOCK,
+            kind if AnyCssUnicodeValue::can_cast(*kind) => CSS_BOGUS_UNICODE_RANGE_VALUE,
 
             _ => CSS_BOGUS,
         }

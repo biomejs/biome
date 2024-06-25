@@ -128,7 +128,7 @@ div {
 ```diff
 --- Prettier
 +++ Biome
-@@ -9,9 +9,9 @@
+@@ -9,20 +9,20 @@
  /* numbers */
  div {
    grid-template-columns:
@@ -141,6 +141,19 @@ div {
      [full-end];
  }
  
+ /* casing */
+ div {
+-  grid:
++  GRID:
+     [top] 1fr
+     [middle] 1fr
+     bottom;
+ 
+-  grid-template:
++  grid-TEMPLATE:
+     "a a a" 200px
+     "b b b" 200px
+     / 200px 200px auto;
 ```
 
 # Output
@@ -165,12 +178,12 @@ div {
 
 /* casing */
 div {
-  grid:
+  GRID:
     [top] 1fr
     [middle] 1fr
     bottom;
 
-  grid-template:
+  grid-TEMPLATE:
     "a a a" 200px
     "b b b" 200px
     / 200px 200px auto;

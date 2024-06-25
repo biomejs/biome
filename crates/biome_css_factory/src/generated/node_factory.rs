@@ -2048,6 +2048,41 @@ impl CssTypeSelectorBuilder {
         ))
     }
 }
+pub fn css_unicode_codepoint(value_token: SyntaxToken) -> CssUnicodeCodepoint {
+    CssUnicodeCodepoint::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_UNICODE_CODEPOINT,
+        [Some(SyntaxElement::Token(value_token))],
+    ))
+}
+pub fn css_unicode_range(prefix_token: SyntaxToken, value: AnyCssUnicodeValue) -> CssUnicodeRange {
+    CssUnicodeRange::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_UNICODE_RANGE,
+        [
+            Some(SyntaxElement::Token(prefix_token)),
+            Some(SyntaxElement::Node(value.into_syntax())),
+        ],
+    ))
+}
+pub fn css_unicode_range_interval(
+    start: CssUnicodeCodepoint,
+    minus_token: SyntaxToken,
+    end: CssUnicodeCodepoint,
+) -> CssUnicodeRangeInterval {
+    CssUnicodeRangeInterval::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_UNICODE_RANGE_INTERVAL,
+        [
+            Some(SyntaxElement::Node(start.into_syntax())),
+            Some(SyntaxElement::Token(minus_token)),
+            Some(SyntaxElement::Node(end.into_syntax())),
+        ],
+    ))
+}
+pub fn css_unicode_range_wildcard(value_token: SyntaxToken) -> CssUnicodeRangeWildcard {
+    CssUnicodeRangeWildcard::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_UNICODE_RANGE_WILDCARD,
+        [Some(SyntaxElement::Token(value_token))],
+    ))
+}
 pub fn css_universal_namespace_prefix(star_token: SyntaxToken) -> CssUniversalNamespacePrefix {
     CssUniversalNamespacePrefix::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_UNIVERSAL_NAMESPACE_PREFIX,
@@ -2927,6 +2962,16 @@ where
 {
     CssBogusSubSelector::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_BOGUS_SUB_SELECTOR,
+        slots,
+    ))
+}
+pub fn css_bogus_unicode_range_value<I>(slots: I) -> CssBogusUnicodeRangeValue
+where
+    I: IntoIterator<Item = Option<SyntaxElement>>,
+    I::IntoIter: ExactSizeIterator,
+{
+    CssBogusUnicodeRangeValue::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_BOGUS_UNICODE_RANGE_VALUE,
         slots,
     ))
 }

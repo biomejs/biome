@@ -413,6 +413,46 @@ impl Rule for ForLoopCountReferences {
 }
 ```
 
+#### Multiple signals
+
+Some rules require you to find all possible cases upfront in `run` function.
+To achieve that you can change Signals type from `Option<()>` to `Vec<()>`.
+This will call the diagnostic/action function for every item of the vec.
+
+Taking previous example and modifying it a bit we can apply diagnostic for each item easily.
+```rust
+impl Rule for ForLoopCountReferences {
+    type Query = Semantic<JsForStatement>;
+    type State = TextRange;
+    type Signals = Vec<Self::State>; // Replaced Option with Vec
+    type Options = ();
+
+    fn run(ctx: &RuleContext<Self>) -> Self::Signals {
+        let node = ctx.query();
+
+        let model = ctx.model();
+
+        ...
+
+        // Get all write references
+        let write_references = binding.all_writes(model);
+
+        // Find all places where variable is being written to and get node ranges
+        let write_ranges = write_references.into_iter().map(|write| {
+            let syntax = write.syntax();
+            let range = syntax.text_range();
+
+            Some(range)
+        }).collect::<Vec<_>>();
+
+        write_ranges
+    }
+
+    fn diagnostic(_: &RuleContext<Self>, range: &Self::State) -> Option<RuleDiagnostic> {
+        // This will be called for each vector item
+    }
+}
+
 #### Code action
 
 A rule can implement a code action. A code action provides to the final user the option to fix or change their code.
