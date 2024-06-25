@@ -123,6 +123,7 @@ define_categories! {
     "lint/nursery/noDuplicateJsonKeys": "https://biomejs.dev/linter/rules/no-duplicate-json-keys",
     "lint/nursery/noDuplicateSelectorsKeyframeBlock": "https://biomejs.dev/linter/rules/no-duplicate-selectors-keyframe-block",
     "lint/nursery/noEmptyBlock": "https://biomejs.dev/linter/rules/no-empty-block",
+    "lint/nursery/noEmptyComment": "https://biomejs.dev/linter/rules/no-empty-comment",
     "lint/nursery/noEvolvingTypes": "https://biomejs.dev/linter/rules/no-evolving-any",
     "lint/nursery/noImportantInKeyframe": "https://biomejs.dev/linter/rules/no-important-in-keyframe",
     "lint/nursery/noInvalidDirectionInLinearGradient": "https://biomejs.dev/linter/rules/no-invalid-direction-in-linear-gradient",
