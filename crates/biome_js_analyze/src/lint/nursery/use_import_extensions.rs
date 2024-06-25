@@ -73,7 +73,7 @@ declare_rule! {
     ///
     /// ### Options
     ///
-    /// Use the options to specify correct import extensions for your project based on the linted
+    /// Use the options to specify the correct import extensions for your project based on the linted
     /// file extension. These mappings will override the default guesses from the rule.
     ///
     /// ```json
