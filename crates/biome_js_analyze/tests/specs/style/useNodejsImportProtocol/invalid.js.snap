@@ -77,21 +77,21 @@ import assert from /*0*/ "assert" /*b*/;
 invalid.js:1:20 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! A Node.js builtin module should be imported with the node: protocol.
-
+  
   > 1 │ import assert from "assert";
       │                    ^^^^^^^^
     2 │ import assert_strict from "assert/strict";
     3 │ import async_hooks from "async_hooks";
-
+  
   i Using the node: protocol is more explicit and signals that the imported module belongs to Node.js.
-
+  
   i Unsafe fix: Add the node: protocol.
-
+  
      1    │ - import·assert·from·"assert";
         1 │ + import·assert·from·"node:assert";
      2  2 │   import assert_strict from "assert/strict";
      3  3 │   import async_hooks from "async_hooks";
-
+  
 
 ```
 
@@ -99,23 +99,23 @@ invalid.js:1:20 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━�
 invalid.js:2:27 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! A Node.js builtin module should be imported with the node: protocol.
-
+  
     1 │ import assert from "assert";
   > 2 │ import assert_strict from "assert/strict";
       │                           ^^^^^^^^^^^^^^^
     3 │ import async_hooks from "async_hooks";
     4 │ import buffer from "buffer";
-
+  
   i Using the node: protocol is more explicit and signals that the imported module belongs to Node.js.
-
+  
   i Unsafe fix: Add the node: protocol.
-
+  
      1  1 │   import assert from "assert";
      2    │ - import·assert_strict·from·"assert/strict";
         2 │ + import·assert_strict·from·"node:assert/strict";
      3  3 │   import async_hooks from "async_hooks";
      4  4 │   import buffer from "buffer";
-
+  
 
 ```
 
@@ -123,25 +123,25 @@ invalid.js:2:27 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━�
 invalid.js:3:25 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! A Node.js builtin module should be imported with the node: protocol.
-
+  
     1 │ import assert from "assert";
     2 │ import assert_strict from "assert/strict";
   > 3 │ import async_hooks from "async_hooks";
       │                         ^^^^^^^^^^^^^
     4 │ import buffer from "buffer";
     5 │ import child_process from "child_process";
-
+  
   i Using the node: protocol is more explicit and signals that the imported module belongs to Node.js.
-
+  
   i Unsafe fix: Add the node: protocol.
-
+  
      1  1 │   import assert from "assert";
      2  2 │   import assert_strict from "assert/strict";
      3    │ - import·async_hooks·from·"async_hooks";
         3 │ + import·async_hooks·from·"node:async_hooks";
      4  4 │   import buffer from "buffer";
      5  5 │   import child_process from "child_process";
-
+  
 
 ```
 
@@ -149,25 +149,25 @@ invalid.js:3:25 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━�
 invalid.js:4:20 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! A Node.js builtin module should be imported with the node: protocol.
-
+  
     2 │ import assert_strict from "assert/strict";
     3 │ import async_hooks from "async_hooks";
   > 4 │ import buffer from "buffer";
       │                    ^^^^^^^^
     5 │ import child_process from "child_process";
     6 │ import cluster from "cluster";
-
+  
   i Using the node: protocol is more explicit and signals that the imported module belongs to Node.js.
-
+  
   i Unsafe fix: Add the node: protocol.
-
+  
      2  2 │   import assert_strict from "assert/strict";
      3  3 │   import async_hooks from "async_hooks";
      4    │ - import·buffer·from·"buffer";
         4 │ + import·buffer·from·"node:buffer";
      5  5 │   import child_process from "child_process";
      6  6 │   import cluster from "cluster";
-
+  
 
 ```
 
@@ -175,25 +175,25 @@ invalid.js:4:20 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━�
 invalid.js:5:27 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! A Node.js builtin module should be imported with the node: protocol.
-
+  
     3 │ import async_hooks from "async_hooks";
     4 │ import buffer from "buffer";
   > 5 │ import child_process from "child_process";
       │                           ^^^^^^^^^^^^^^^
     6 │ import cluster from "cluster";
     7 │ import console from "console";
-
+  
   i Using the node: protocol is more explicit and signals that the imported module belongs to Node.js.
-
+  
   i Unsafe fix: Add the node: protocol.
-
+  
      3  3 │   import async_hooks from "async_hooks";
      4  4 │   import buffer from "buffer";
      5    │ - import·child_process·from·"child_process";
         5 │ + import·child_process·from·"node:child_process";
      6  6 │   import cluster from "cluster";
      7  7 │   import console from "console";
-
+  
 
 ```
 
@@ -201,25 +201,25 @@ invalid.js:5:27 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━�
 invalid.js:6:21 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! A Node.js builtin module should be imported with the node: protocol.
-
+  
     4 │ import buffer from "buffer";
     5 │ import child_process from "child_process";
   > 6 │ import cluster from "cluster";
       │                     ^^^^^^^^^
     7 │ import console from "console";
     8 │ import constants from "constants";
-
+  
   i Using the node: protocol is more explicit and signals that the imported module belongs to Node.js.
-
+  
   i Unsafe fix: Add the node: protocol.
-
+  
      4  4 │   import buffer from "buffer";
      5  5 │   import child_process from "child_process";
      6    │ - import·cluster·from·"cluster";
         6 │ + import·cluster·from·"node:cluster";
      7  7 │   import console from "console";
      8  8 │   import constants from "constants";
-
+  
 
 ```
 
@@ -227,25 +227,25 @@ invalid.js:6:21 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━�
 invalid.js:7:21 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! A Node.js builtin module should be imported with the node: protocol.
-
+  
     5 │ import child_process from "child_process";
     6 │ import cluster from "cluster";
   > 7 │ import console from "console";
       │                     ^^^^^^^^^
     8 │ import constants from "constants";
     9 │ import crypto from "crypto";
-
+  
   i Using the node: protocol is more explicit and signals that the imported module belongs to Node.js.
-
+  
   i Unsafe fix: Add the node: protocol.
-
+  
      5  5 │   import child_process from "child_process";
      6  6 │   import cluster from "cluster";
      7    │ - import·console·from·"console";
         7 │ + import·console·from·"node:console";
      8  8 │   import constants from "constants";
      9  9 │   import crypto from "crypto";
-
+  
 
 ```
 
@@ -253,25 +253,25 @@ invalid.js:7:21 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━�
 invalid.js:8:23 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! A Node.js builtin module should be imported with the node: protocol.
-
+  
      6 │ import cluster from "cluster";
      7 │ import console from "console";
    > 8 │ import constants from "constants";
        │                       ^^^^^^^^^^^
      9 │ import crypto from "crypto";
     10 │ import dgram from "dgram";
-
+  
   i Using the node: protocol is more explicit and signals that the imported module belongs to Node.js.
-
+  
   i Unsafe fix: Add the node: protocol.
-
+  
      6  6 │   import cluster from "cluster";
      7  7 │   import console from "console";
      8    │ - import·constants·from·"constants";
         8 │ + import·constants·from·"node:constants";
      9  9 │   import crypto from "crypto";
     10 10 │   import dgram from "dgram";
-
+  
 
 ```
 
@@ -279,25 +279,25 @@ invalid.js:8:23 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━�
 invalid.js:9:20 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! A Node.js builtin module should be imported with the node: protocol.
-
+  
      7 │ import console from "console";
      8 │ import constants from "constants";
    > 9 │ import crypto from "crypto";
        │                    ^^^^^^^^
     10 │ import dgram from "dgram";
     11 │ import diagnostics_channel from "diagnostics_channel";
-
+  
   i Using the node: protocol is more explicit and signals that the imported module belongs to Node.js.
-
+  
   i Unsafe fix: Add the node: protocol.
-
+  
      7  7 │   import console from "console";
      8  8 │   import constants from "constants";
      9    │ - import·crypto·from·"crypto";
         9 │ + import·crypto·from·"node:crypto";
     10 10 │   import dgram from "dgram";
     11 11 │   import diagnostics_channel from "diagnostics_channel";
-
+  
 
 ```
 
@@ -305,25 +305,25 @@ invalid.js:9:20 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━�
 invalid.js:10:19 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! A Node.js builtin module should be imported with the node: protocol.
-
+  
      8 │ import constants from "constants";
      9 │ import crypto from "crypto";
   > 10 │ import dgram from "dgram";
        │                   ^^^^^^^
     11 │ import diagnostics_channel from "diagnostics_channel";
     12 │ import dns from "dns";
-
+  
   i Using the node: protocol is more explicit and signals that the imported module belongs to Node.js.
-
+  
   i Unsafe fix: Add the node: protocol.
-
+  
      8  8 │   import constants from "constants";
      9  9 │   import crypto from "crypto";
     10    │ - import·dgram·from·"dgram";
        10 │ + import·dgram·from·"node:dgram";
     11 11 │   import diagnostics_channel from "diagnostics_channel";
     12 12 │   import dns from "dns";
-
+  
 
 ```
 
@@ -331,25 +331,25 @@ invalid.js:10:19 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━
 invalid.js:11:33 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! A Node.js builtin module should be imported with the node: protocol.
-
+  
      9 │ import crypto from "crypto";
     10 │ import dgram from "dgram";
   > 11 │ import diagnostics_channel from "diagnostics_channel";
        │                                 ^^^^^^^^^^^^^^^^^^^^^
     12 │ import dns from "dns";
     13 │ import dns_promises from "dns/promises";
-
+  
   i Using the node: protocol is more explicit and signals that the imported module belongs to Node.js.
-
+  
   i Unsafe fix: Add the node: protocol.
-
+  
      9  9 │   import crypto from "crypto";
     10 10 │   import dgram from "dgram";
     11    │ - import·diagnostics_channel·from·"diagnostics_channel";
        11 │ + import·diagnostics_channel·from·"node:diagnostics_channel";
     12 12 │   import dns from "dns";
     13 13 │   import dns_promises from "dns/promises";
-
+  
 
 ```
 
@@ -357,25 +357,25 @@ invalid.js:11:33 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━
 invalid.js:12:17 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! A Node.js builtin module should be imported with the node: protocol.
-
+  
     10 │ import dgram from "dgram";
     11 │ import diagnostics_channel from "diagnostics_channel";
   > 12 │ import dns from "dns";
        │                 ^^^^^
     13 │ import dns_promises from "dns/promises";
     14 │ import domain from "domain";
-
+  
   i Using the node: protocol is more explicit and signals that the imported module belongs to Node.js.
-
+  
   i Unsafe fix: Add the node: protocol.
-
+  
     10 10 │   import dgram from "dgram";
     11 11 │   import diagnostics_channel from "diagnostics_channel";
     12    │ - import·dns·from·"dns";
        12 │ + import·dns·from·"node:dns";
     13 13 │   import dns_promises from "dns/promises";
     14 14 │   import domain from "domain";
-
+  
 
 ```
 
@@ -383,25 +383,25 @@ invalid.js:12:17 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━
 invalid.js:13:26 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! A Node.js builtin module should be imported with the node: protocol.
-
+  
     11 │ import diagnostics_channel from "diagnostics_channel";
     12 │ import dns from "dns";
   > 13 │ import dns_promises from "dns/promises";
        │                          ^^^^^^^^^^^^^^
     14 │ import domain from "domain";
     15 │ import events from "events";
-
+  
   i Using the node: protocol is more explicit and signals that the imported module belongs to Node.js.
-
+  
   i Unsafe fix: Add the node: protocol.
-
+  
     11 11 │   import diagnostics_channel from "diagnostics_channel";
     12 12 │   import dns from "dns";
     13    │ - import·dns_promises·from·"dns/promises";
        13 │ + import·dns_promises·from·"node:dns/promises";
     14 14 │   import domain from "domain";
     15 15 │   import events from "events";
-
+  
 
 ```
 
@@ -409,25 +409,25 @@ invalid.js:13:26 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━
 invalid.js:14:20 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! A Node.js builtin module should be imported with the node: protocol.
-
+  
     12 │ import dns from "dns";
     13 │ import dns_promises from "dns/promises";
   > 14 │ import domain from "domain";
        │                    ^^^^^^^^
     15 │ import events from "events";
     16 │ import fs from "fs";
-
+  
   i Using the node: protocol is more explicit and signals that the imported module belongs to Node.js.
-
+  
   i Unsafe fix: Add the node: protocol.
-
+  
     12 12 │   import dns from "dns";
     13 13 │   import dns_promises from "dns/promises";
     14    │ - import·domain·from·"domain";
        14 │ + import·domain·from·"node:domain";
     15 15 │   import events from "events";
     16 16 │   import fs from "fs";
-
+  
 
 ```
 
@@ -435,25 +435,25 @@ invalid.js:14:20 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━
 invalid.js:15:20 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! A Node.js builtin module should be imported with the node: protocol.
-
+  
     13 │ import dns_promises from "dns/promises";
     14 │ import domain from "domain";
   > 15 │ import events from "events";
        │                    ^^^^^^^^
     16 │ import fs from "fs";
     17 │ import fs_promises from "fs/promises";
-
+  
   i Using the node: protocol is more explicit and signals that the imported module belongs to Node.js.
-
+  
   i Unsafe fix: Add the node: protocol.
-
+  
     13 13 │   import dns_promises from "dns/promises";
     14 14 │   import domain from "domain";
     15    │ - import·events·from·"events";
        15 │ + import·events·from·"node:events";
     16 16 │   import fs from "fs";
     17 17 │   import fs_promises from "fs/promises";
-
+  
 
 ```
 
@@ -461,25 +461,25 @@ invalid.js:15:20 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━
 invalid.js:16:16 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! A Node.js builtin module should be imported with the node: protocol.
-
+  
     14 │ import domain from "domain";
     15 │ import events from "events";
   > 16 │ import fs from "fs";
        │                ^^^^
     17 │ import fs_promises from "fs/promises";
     18 │ import http from "http";
-
+  
   i Using the node: protocol is more explicit and signals that the imported module belongs to Node.js.
-
+  
   i Unsafe fix: Add the node: protocol.
-
+  
     14 14 │   import domain from "domain";
     15 15 │   import events from "events";
     16    │ - import·fs·from·"fs";
        16 │ + import·fs·from·"node:fs";
     17 17 │   import fs_promises from "fs/promises";
     18 18 │   import http from "http";
-
+  
 
 ```
 
@@ -487,25 +487,25 @@ invalid.js:16:16 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━
 invalid.js:17:25 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! A Node.js builtin module should be imported with the node: protocol.
-
+  
     15 │ import events from "events";
     16 │ import fs from "fs";
   > 17 │ import fs_promises from "fs/promises";
        │                         ^^^^^^^^^^^^^
     18 │ import http from "http";
     19 │ import http2 from "http2";
-
+  
   i Using the node: protocol is more explicit and signals that the imported module belongs to Node.js.
-
+  
   i Unsafe fix: Add the node: protocol.
-
+  
     15 15 │   import events from "events";
     16 16 │   import fs from "fs";
     17    │ - import·fs_promises·from·"fs/promises";
        17 │ + import·fs_promises·from·"node:fs/promises";
     18 18 │   import http from "http";
     19 19 │   import http2 from "http2";
-
+  
 
 ```
 
@@ -513,25 +513,25 @@ invalid.js:17:25 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━
 invalid.js:18:18 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! A Node.js builtin module should be imported with the node: protocol.
-
+  
     16 │ import fs from "fs";
     17 │ import fs_promises from "fs/promises";
   > 18 │ import http from "http";
        │                  ^^^^^^
     19 │ import http2 from "http2";
     20 │ import https from "https";
-
+  
   i Using the node: protocol is more explicit and signals that the imported module belongs to Node.js.
-
+  
   i Unsafe fix: Add the node: protocol.
-
+  
     16 16 │   import fs from "fs";
     17 17 │   import fs_promises from "fs/promises";
     18    │ - import·http·from·"http";
        18 │ + import·http·from·"node:http";
     19 19 │   import http2 from "http2";
     20 20 │   import https from "https";
-
+  
 
 ```
 
@@ -539,25 +539,25 @@ invalid.js:18:18 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━
 invalid.js:19:19 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! A Node.js builtin module should be imported with the node: protocol.
-
+  
     17 │ import fs_promises from "fs/promises";
     18 │ import http from "http";
   > 19 │ import http2 from "http2";
        │                   ^^^^^^^
     20 │ import https from "https";
     21 │ import inspector from "inspector";
-
+  
   i Using the node: protocol is more explicit and signals that the imported module belongs to Node.js.
-
+  
   i Unsafe fix: Add the node: protocol.
-
+  
     17 17 │   import fs_promises from "fs/promises";
     18 18 │   import http from "http";
     19    │ - import·http2·from·"http2";
        19 │ + import·http2·from·"node:http2";
     20 20 │   import https from "https";
     21 21 │   import inspector from "inspector";
-
+  
 
 ```
 
@@ -565,25 +565,25 @@ invalid.js:19:19 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━
 invalid.js:20:19 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! A Node.js builtin module should be imported with the node: protocol.
-
+  
     18 │ import http from "http";
     19 │ import http2 from "http2";
   > 20 │ import https from "https";
        │                   ^^^^^^^
     21 │ import inspector from "inspector";
     22 │ import inspector_promises from "inspector/promises";
-
+  
   i Using the node: protocol is more explicit and signals that the imported module belongs to Node.js.
-
+  
   i Unsafe fix: Add the node: protocol.
-
+  
     18 18 │   import http from "http";
     19 19 │   import http2 from "http2";
     20    │ - import·https·from·"https";
        20 │ + import·https·from·"node:https";
     21 21 │   import inspector from "inspector";
     22 22 │   import inspector_promises from "inspector/promises";
-
+  
 
 ```
 
@@ -591,25 +591,25 @@ invalid.js:20:19 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━
 invalid.js:21:23 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! A Node.js builtin module should be imported with the node: protocol.
-
+  
     19 │ import http2 from "http2";
     20 │ import https from "https";
   > 21 │ import inspector from "inspector";
        │                       ^^^^^^^^^^^
     22 │ import inspector_promises from "inspector/promises";
     23 │ import module from "module";
-
+  
   i Using the node: protocol is more explicit and signals that the imported module belongs to Node.js.
-
+  
   i Unsafe fix: Add the node: protocol.
-
+  
     19 19 │   import http2 from "http2";
     20 20 │   import https from "https";
     21    │ - import·inspector·from·"inspector";
        21 │ + import·inspector·from·"node:inspector";
     22 22 │   import inspector_promises from "inspector/promises";
     23 23 │   import module from "module";
-
+  
 
 ```
 
@@ -617,25 +617,25 @@ invalid.js:21:23 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━
 invalid.js:22:32 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! A Node.js builtin module should be imported with the node: protocol.
-
+  
     20 │ import https from "https";
     21 │ import inspector from "inspector";
   > 22 │ import inspector_promises from "inspector/promises";
        │                                ^^^^^^^^^^^^^^^^^^^^
     23 │ import module from "module";
     24 │ import net from "net";
-
+  
   i Using the node: protocol is more explicit and signals that the imported module belongs to Node.js.
-
+  
   i Unsafe fix: Add the node: protocol.
-
+  
     20 20 │   import https from "https";
     21 21 │   import inspector from "inspector";
     22    │ - import·inspector_promises·from·"inspector/promises";
        22 │ + import·inspector_promises·from·"node:inspector/promises";
     23 23 │   import module from "module";
     24 24 │   import net from "net";
-
+  
 
 ```
 
@@ -643,25 +643,25 @@ invalid.js:22:32 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━
 invalid.js:23:20 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! A Node.js builtin module should be imported with the node: protocol.
-
+  
     21 │ import inspector from "inspector";
     22 │ import inspector_promises from "inspector/promises";
   > 23 │ import module from "module";
        │                    ^^^^^^^^
     24 │ import net from "net";
     25 │ import os from "os";
-
+  
   i Using the node: protocol is more explicit and signals that the imported module belongs to Node.js.
-
+  
   i Unsafe fix: Add the node: protocol.
-
+  
     21 21 │   import inspector from "inspector";
     22 22 │   import inspector_promises from "inspector/promises";
     23    │ - import·module·from·"module";
        23 │ + import·module·from·"node:module";
     24 24 │   import net from "net";
     25 25 │   import os from "os";
-
+  
 
 ```
 
@@ -669,25 +669,25 @@ invalid.js:23:20 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━
 invalid.js:24:17 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! A Node.js builtin module should be imported with the node: protocol.
-
+  
     22 │ import inspector_promises from "inspector/promises";
     23 │ import module from "module";
   > 24 │ import net from "net";
        │                 ^^^^^
     25 │ import os from "os";
     26 │ import path from "path";
-
+  
   i Using the node: protocol is more explicit and signals that the imported module belongs to Node.js.
-
+  
   i Unsafe fix: Add the node: protocol.
-
+  
     22 22 │   import inspector_promises from "inspector/promises";
     23 23 │   import module from "module";
     24    │ - import·net·from·"net";
        24 │ + import·net·from·"node:net";
     25 25 │   import os from "os";
     26 26 │   import path from "path";
-
+  
 
 ```
 
@@ -695,25 +695,25 @@ invalid.js:24:17 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━
 invalid.js:25:16 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! A Node.js builtin module should be imported with the node: protocol.
-
+  
     23 │ import module from "module";
     24 │ import net from "net";
   > 25 │ import os from "os";
        │                ^^^^
     26 │ import path from "path";
     27 │ import path_posix from "path/posix";
-
+  
   i Using the node: protocol is more explicit and signals that the imported module belongs to Node.js.
-
+  
   i Unsafe fix: Add the node: protocol.
-
+  
     23 23 │   import module from "module";
     24 24 │   import net from "net";
     25    │ - import·os·from·"os";
        25 │ + import·os·from·"node:os";
     26 26 │   import path from "path";
     27 27 │   import path_posix from "path/posix";
-
+  
 
 ```
 
@@ -721,25 +721,25 @@ invalid.js:25:16 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━
 invalid.js:26:18 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! A Node.js builtin module should be imported with the node: protocol.
-
+  
     24 │ import net from "net";
     25 │ import os from "os";
   > 26 │ import path from "path";
        │                  ^^^^^^
     27 │ import path_posix from "path/posix";
     28 │ import path_win32 from "path/win32";
-
+  
   i Using the node: protocol is more explicit and signals that the imported module belongs to Node.js.
-
+  
   i Unsafe fix: Add the node: protocol.
-
+  
     24 24 │   import net from "net";
     25 25 │   import os from "os";
     26    │ - import·path·from·"path";
        26 │ + import·path·from·"node:path";
     27 27 │   import path_posix from "path/posix";
     28 28 │   import path_win32 from "path/win32";
-
+  
 
 ```
 
@@ -747,25 +747,25 @@ invalid.js:26:18 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━
 invalid.js:27:24 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! A Node.js builtin module should be imported with the node: protocol.
-
+  
     25 │ import os from "os";
     26 │ import path from "path";
   > 27 │ import path_posix from "path/posix";
        │                        ^^^^^^^^^^^^
     28 │ import path_win32 from "path/win32";
     29 │ import perf_hooks from "perf_hooks";
-
+  
   i Using the node: protocol is more explicit and signals that the imported module belongs to Node.js.
-
+  
   i Unsafe fix: Add the node: protocol.
-
+  
     25 25 │   import os from "os";
     26 26 │   import path from "path";
     27    │ - import·path_posix·from·"path/posix";
        27 │ + import·path_posix·from·"node:path/posix";
     28 28 │   import path_win32 from "path/win32";
     29 29 │   import perf_hooks from "perf_hooks";
-
+  
 
 ```
 
@@ -773,25 +773,25 @@ invalid.js:27:24 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━
 invalid.js:28:24 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! A Node.js builtin module should be imported with the node: protocol.
-
+  
     26 │ import path from "path";
     27 │ import path_posix from "path/posix";
   > 28 │ import path_win32 from "path/win32";
        │                        ^^^^^^^^^^^^
     29 │ import perf_hooks from "perf_hooks";
     30 │ import process from "process";
-
+  
   i Using the node: protocol is more explicit and signals that the imported module belongs to Node.js.
-
+  
   i Unsafe fix: Add the node: protocol.
-
+  
     26 26 │   import path from "path";
     27 27 │   import path_posix from "path/posix";
     28    │ - import·path_win32·from·"path/win32";
        28 │ + import·path_win32·from·"node:path/win32";
     29 29 │   import perf_hooks from "perf_hooks";
     30 30 │   import process from "process";
-
+  
 
 ```
 
@@ -799,25 +799,25 @@ invalid.js:28:24 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━
 invalid.js:29:24 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! A Node.js builtin module should be imported with the node: protocol.
-
+  
     27 │ import path_posix from "path/posix";
     28 │ import path_win32 from "path/win32";
   > 29 │ import perf_hooks from "perf_hooks";
        │                        ^^^^^^^^^^^^
     30 │ import process from "process";
     31 │ import punycode from "punycode";
-
+  
   i Using the node: protocol is more explicit and signals that the imported module belongs to Node.js.
-
+  
   i Unsafe fix: Add the node: protocol.
-
+  
     27 27 │   import path_posix from "path/posix";
     28 28 │   import path_win32 from "path/win32";
     29    │ - import·perf_hooks·from·"perf_hooks";
        29 │ + import·perf_hooks·from·"node:perf_hooks";
     30 30 │   import process from "process";
     31 31 │   import punycode from "punycode";
-
+  
 
 ```
 
@@ -825,25 +825,25 @@ invalid.js:29:24 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━
 invalid.js:30:21 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! A Node.js builtin module should be imported with the node: protocol.
-
+  
     28 │ import path_win32 from "path/win32";
     29 │ import perf_hooks from "perf_hooks";
   > 30 │ import process from "process";
        │                     ^^^^^^^^^
     31 │ import punycode from "punycode";
     32 │ import querystring from "querystring";
-
+  
   i Using the node: protocol is more explicit and signals that the imported module belongs to Node.js.
-
+  
   i Unsafe fix: Add the node: protocol.
-
+  
     28 28 │   import path_win32 from "path/win32";
     29 29 │   import perf_hooks from "perf_hooks";
     30    │ - import·process·from·"process";
        30 │ + import·process·from·"node:process";
     31 31 │   import punycode from "punycode";
     32 32 │   import querystring from "querystring";
-
+  
 
 ```
 
@@ -851,25 +851,25 @@ invalid.js:30:21 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━
 invalid.js:31:22 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! A Node.js builtin module should be imported with the node: protocol.
-
+  
     29 │ import perf_hooks from "perf_hooks";
     30 │ import process from "process";
   > 31 │ import punycode from "punycode";
        │                      ^^^^^^^^^^
     32 │ import querystring from "querystring";
     33 │ import readline from "readline";
-
+  
   i Using the node: protocol is more explicit and signals that the imported module belongs to Node.js.
-
+  
   i Unsafe fix: Add the node: protocol.
-
+  
     29 29 │   import perf_hooks from "perf_hooks";
     30 30 │   import process from "process";
     31    │ - import·punycode·from·"punycode";
        31 │ + import·punycode·from·"node:punycode";
     32 32 │   import querystring from "querystring";
     33 33 │   import readline from "readline";
-
+  
 
 ```
 
@@ -877,25 +877,25 @@ invalid.js:31:22 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━
 invalid.js:32:25 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! A Node.js builtin module should be imported with the node: protocol.
-
+  
     30 │ import process from "process";
     31 │ import punycode from "punycode";
   > 32 │ import querystring from "querystring";
        │                         ^^^^^^^^^^^^^
     33 │ import readline from "readline";
     34 │ import readline_promises from "readline/promises";
-
+  
   i Using the node: protocol is more explicit and signals that the imported module belongs to Node.js.
-
+  
   i Unsafe fix: Add the node: protocol.
-
+  
     30 30 │   import process from "process";
     31 31 │   import punycode from "punycode";
     32    │ - import·querystring·from·"querystring";
        32 │ + import·querystring·from·"node:querystring";
     33 33 │   import readline from "readline";
     34 34 │   import readline_promises from "readline/promises";
-
+  
 
 ```
 
@@ -903,25 +903,25 @@ invalid.js:32:25 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━
 invalid.js:33:22 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! A Node.js builtin module should be imported with the node: protocol.
-
+  
     31 │ import punycode from "punycode";
     32 │ import querystring from "querystring";
   > 33 │ import readline from "readline";
        │                      ^^^^^^^^^^
     34 │ import readline_promises from "readline/promises";
     35 │ import repl from "repl";
-
+  
   i Using the node: protocol is more explicit and signals that the imported module belongs to Node.js.
-
+  
   i Unsafe fix: Add the node: protocol.
-
+  
     31 31 │   import punycode from "punycode";
     32 32 │   import querystring from "querystring";
     33    │ - import·readline·from·"readline";
        33 │ + import·readline·from·"node:readline";
     34 34 │   import readline_promises from "readline/promises";
     35 35 │   import repl from "repl";
-
+  
 
 ```
 
@@ -929,25 +929,25 @@ invalid.js:33:22 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━
 invalid.js:34:31 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! A Node.js builtin module should be imported with the node: protocol.
-
+  
     32 │ import querystring from "querystring";
     33 │ import readline from "readline";
   > 34 │ import readline_promises from "readline/promises";
        │                               ^^^^^^^^^^^^^^^^^^^
     35 │ import repl from "repl";
     36 │ import stream from "stream";
-
+  
   i Using the node: protocol is more explicit and signals that the imported module belongs to Node.js.
-
+  
   i Unsafe fix: Add the node: protocol.
-
+  
     32 32 │   import querystring from "querystring";
     33 33 │   import readline from "readline";
     34    │ - import·readline_promises·from·"readline/promises";
        34 │ + import·readline_promises·from·"node:readline/promises";
     35 35 │   import repl from "repl";
     36 36 │   import stream from "stream";
-
+  
 
 ```
 
@@ -955,25 +955,25 @@ invalid.js:34:31 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━
 invalid.js:35:18 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! A Node.js builtin module should be imported with the node: protocol.
-
+  
     33 │ import readline from "readline";
     34 │ import readline_promises from "readline/promises";
   > 35 │ import repl from "repl";
        │                  ^^^^^^
     36 │ import stream from "stream";
     37 │ import stream_consumers from "stream/consumers";
-
+  
   i Using the node: protocol is more explicit and signals that the imported module belongs to Node.js.
-
+  
   i Unsafe fix: Add the node: protocol.
-
+  
     33 33 │   import readline from "readline";
     34 34 │   import readline_promises from "readline/promises";
     35    │ - import·repl·from·"repl";
        35 │ + import·repl·from·"node:repl";
     36 36 │   import stream from "stream";
     37 37 │   import stream_consumers from "stream/consumers";
-
+  
 
 ```
 
@@ -981,25 +981,25 @@ invalid.js:35:18 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━
 invalid.js:36:20 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! A Node.js builtin module should be imported with the node: protocol.
-
+  
     34 │ import readline_promises from "readline/promises";
     35 │ import repl from "repl";
   > 36 │ import stream from "stream";
        │                    ^^^^^^^^
     37 │ import stream_consumers from "stream/consumers";
     38 │ import stream_promises from "stream/promises";
-
+  
   i Using the node: protocol is more explicit and signals that the imported module belongs to Node.js.
-
+  
   i Unsafe fix: Add the node: protocol.
-
+  
     34 34 │   import readline_promises from "readline/promises";
     35 35 │   import repl from "repl";
     36    │ - import·stream·from·"stream";
        36 │ + import·stream·from·"node:stream";
     37 37 │   import stream_consumers from "stream/consumers";
     38 38 │   import stream_promises from "stream/promises";
-
+  
 
 ```
 
@@ -1007,25 +1007,25 @@ invalid.js:36:20 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━
 invalid.js:37:30 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! A Node.js builtin module should be imported with the node: protocol.
-
+  
     35 │ import repl from "repl";
     36 │ import stream from "stream";
   > 37 │ import stream_consumers from "stream/consumers";
        │                              ^^^^^^^^^^^^^^^^^^
     38 │ import stream_promises from "stream/promises";
     39 │ import stream_web from "stream/web";
-
+  
   i Using the node: protocol is more explicit and signals that the imported module belongs to Node.js.
-
+  
   i Unsafe fix: Add the node: protocol.
-
+  
     35 35 │   import repl from "repl";
     36 36 │   import stream from "stream";
     37    │ - import·stream_consumers·from·"stream/consumers";
        37 │ + import·stream_consumers·from·"node:stream/consumers";
     38 38 │   import stream_promises from "stream/promises";
     39 39 │   import stream_web from "stream/web";
-
+  
 
 ```
 
@@ -1033,25 +1033,25 @@ invalid.js:37:30 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━
 invalid.js:38:29 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! A Node.js builtin module should be imported with the node: protocol.
-
+  
     36 │ import stream from "stream";
     37 │ import stream_consumers from "stream/consumers";
   > 38 │ import stream_promises from "stream/promises";
        │                             ^^^^^^^^^^^^^^^^^
     39 │ import stream_web from "stream/web";
     40 │ import string_decoder from "string_decoder";
-
+  
   i Using the node: protocol is more explicit and signals that the imported module belongs to Node.js.
-
+  
   i Unsafe fix: Add the node: protocol.
-
+  
     36 36 │   import stream from "stream";
     37 37 │   import stream_consumers from "stream/consumers";
     38    │ - import·stream_promises·from·"stream/promises";
        38 │ + import·stream_promises·from·"node:stream/promises";
     39 39 │   import stream_web from "stream/web";
     40 40 │   import string_decoder from "string_decoder";
-
+  
 
 ```
 
@@ -1059,25 +1059,25 @@ invalid.js:38:29 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━
 invalid.js:39:24 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! A Node.js builtin module should be imported with the node: protocol.
-
+  
     37 │ import stream_consumers from "stream/consumers";
     38 │ import stream_promises from "stream/promises";
   > 39 │ import stream_web from "stream/web";
        │                        ^^^^^^^^^^^^
     40 │ import string_decoder from "string_decoder";
     41 │ import sys from "sys";
-
+  
   i Using the node: protocol is more explicit and signals that the imported module belongs to Node.js.
-
+  
   i Unsafe fix: Add the node: protocol.
-
+  
     37 37 │   import stream_consumers from "stream/consumers";
     38 38 │   import stream_promises from "stream/promises";
     39    │ - import·stream_web·from·"stream/web";
        39 │ + import·stream_web·from·"node:stream/web";
     40 40 │   import string_decoder from "string_decoder";
     41 41 │   import sys from "sys";
-
+  
 
 ```
 
@@ -1085,25 +1085,25 @@ invalid.js:39:24 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━
 invalid.js:40:28 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! A Node.js builtin module should be imported with the node: protocol.
-
+  
     38 │ import stream_promises from "stream/promises";
     39 │ import stream_web from "stream/web";
   > 40 │ import string_decoder from "string_decoder";
        │                            ^^^^^^^^^^^^^^^^
     41 │ import sys from "sys";
     42 │ import timers from "timers";
-
+  
   i Using the node: protocol is more explicit and signals that the imported module belongs to Node.js.
-
+  
   i Unsafe fix: Add the node: protocol.
-
+  
     38 38 │   import stream_promises from "stream/promises";
     39 39 │   import stream_web from "stream/web";
     40    │ - import·string_decoder·from·"string_decoder";
        40 │ + import·string_decoder·from·"node:string_decoder";
     41 41 │   import sys from "sys";
     42 42 │   import timers from "timers";
-
+  
 
 ```
 
@@ -1111,25 +1111,25 @@ invalid.js:40:28 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━
 invalid.js:41:17 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! A Node.js builtin module should be imported with the node: protocol.
-
+  
     39 │ import stream_web from "stream/web";
     40 │ import string_decoder from "string_decoder";
   > 41 │ import sys from "sys";
        │                 ^^^^^
     42 │ import timers from "timers";
     43 │ import timers_promises from "timers/promises";
-
+  
   i Using the node: protocol is more explicit and signals that the imported module belongs to Node.js.
-
+  
   i Unsafe fix: Add the node: protocol.
-
+  
     39 39 │   import stream_web from "stream/web";
     40 40 │   import string_decoder from "string_decoder";
     41    │ - import·sys·from·"sys";
        41 │ + import·sys·from·"node:sys";
     42 42 │   import timers from "timers";
     43 43 │   import timers_promises from "timers/promises";
-
+  
 
 ```
 
@@ -1137,25 +1137,25 @@ invalid.js:41:17 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━
 invalid.js:42:20 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! A Node.js builtin module should be imported with the node: protocol.
-
+  
     40 │ import string_decoder from "string_decoder";
     41 │ import sys from "sys";
   > 42 │ import timers from "timers";
        │                    ^^^^^^^^
     43 │ import timers_promises from "timers/promises";
     44 │ import tls from "tls";
-
+  
   i Using the node: protocol is more explicit and signals that the imported module belongs to Node.js.
-
+  
   i Unsafe fix: Add the node: protocol.
-
+  
     40 40 │   import string_decoder from "string_decoder";
     41 41 │   import sys from "sys";
     42    │ - import·timers·from·"timers";
        42 │ + import·timers·from·"node:timers";
     43 43 │   import timers_promises from "timers/promises";
     44 44 │   import tls from "tls";
-
+  
 
 ```
 
@@ -1163,25 +1163,25 @@ invalid.js:42:20 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━
 invalid.js:43:29 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! A Node.js builtin module should be imported with the node: protocol.
-
+  
     41 │ import sys from "sys";
     42 │ import timers from "timers";
   > 43 │ import timers_promises from "timers/promises";
        │                             ^^^^^^^^^^^^^^^^^
     44 │ import tls from "tls";
     45 │ import trace_events from "trace_events";
-
+  
   i Using the node: protocol is more explicit and signals that the imported module belongs to Node.js.
-
+  
   i Unsafe fix: Add the node: protocol.
-
+  
     41 41 │   import sys from "sys";
     42 42 │   import timers from "timers";
     43    │ - import·timers_promises·from·"timers/promises";
        43 │ + import·timers_promises·from·"node:timers/promises";
     44 44 │   import tls from "tls";
     45 45 │   import trace_events from "trace_events";
-
+  
 
 ```
 
@@ -1189,25 +1189,25 @@ invalid.js:43:29 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━
 invalid.js:44:17 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! A Node.js builtin module should be imported with the node: protocol.
-
+  
     42 │ import timers from "timers";
     43 │ import timers_promises from "timers/promises";
   > 44 │ import tls from "tls";
        │                 ^^^^^
     45 │ import trace_events from "trace_events";
     46 │ import tty from "tty";
-
+  
   i Using the node: protocol is more explicit and signals that the imported module belongs to Node.js.
-
+  
   i Unsafe fix: Add the node: protocol.
-
+  
     42 42 │   import timers from "timers";
     43 43 │   import timers_promises from "timers/promises";
     44    │ - import·tls·from·"tls";
        44 │ + import·tls·from·"node:tls";
     45 45 │   import trace_events from "trace_events";
     46 46 │   import tty from "tty";
-
+  
 
 ```
 
@@ -1215,25 +1215,25 @@ invalid.js:44:17 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━
 invalid.js:45:26 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! A Node.js builtin module should be imported with the node: protocol.
-
+  
     43 │ import timers_promises from "timers/promises";
     44 │ import tls from "tls";
   > 45 │ import trace_events from "trace_events";
        │                          ^^^^^^^^^^^^^^
     46 │ import tty from "tty";
     47 │ import url from "url";
-
+  
   i Using the node: protocol is more explicit and signals that the imported module belongs to Node.js.
-
+  
   i Unsafe fix: Add the node: protocol.
-
+  
     43 43 │   import timers_promises from "timers/promises";
     44 44 │   import tls from "tls";
     45    │ - import·trace_events·from·"trace_events";
        45 │ + import·trace_events·from·"node:trace_events";
     46 46 │   import tty from "tty";
     47 47 │   import url from "url";
-
+  
 
 ```
 
@@ -1241,25 +1241,25 @@ invalid.js:45:26 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━
 invalid.js:46:17 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! A Node.js builtin module should be imported with the node: protocol.
-
+  
     44 │ import tls from "tls";
     45 │ import trace_events from "trace_events";
   > 46 │ import tty from "tty";
        │                 ^^^^^
     47 │ import url from "url";
     48 │ import util from "util";
-
+  
   i Using the node: protocol is more explicit and signals that the imported module belongs to Node.js.
-
+  
   i Unsafe fix: Add the node: protocol.
-
+  
     44 44 │   import tls from "tls";
     45 45 │   import trace_events from "trace_events";
     46    │ - import·tty·from·"tty";
        46 │ + import·tty·from·"node:tty";
     47 47 │   import url from "url";
     48 48 │   import util from "util";
-
+  
 
 ```
 
@@ -1267,25 +1267,25 @@ invalid.js:46:17 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━
 invalid.js:47:17 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! A Node.js builtin module should be imported with the node: protocol.
-
+  
     45 │ import trace_events from "trace_events";
     46 │ import tty from "tty";
   > 47 │ import url from "url";
        │                 ^^^^^
     48 │ import util from "util";
     49 │ import util_types from "util/types";
-
+  
   i Using the node: protocol is more explicit and signals that the imported module belongs to Node.js.
-
+  
   i Unsafe fix: Add the node: protocol.
-
+  
     45 45 │   import trace_events from "trace_events";
     46 46 │   import tty from "tty";
     47    │ - import·url·from·"url";
        47 │ + import·url·from·"node:url";
     48 48 │   import util from "util";
     49 49 │   import util_types from "util/types";
-
+  
 
 ```
 
@@ -1293,25 +1293,25 @@ invalid.js:47:17 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━
 invalid.js:48:18 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! A Node.js builtin module should be imported with the node: protocol.
-
+  
     46 │ import tty from "tty";
     47 │ import url from "url";
   > 48 │ import util from "util";
        │                  ^^^^^^
     49 │ import util_types from "util/types";
     50 │ import v8 from "v8";
-
+  
   i Using the node: protocol is more explicit and signals that the imported module belongs to Node.js.
-
+  
   i Unsafe fix: Add the node: protocol.
-
+  
     46 46 │   import tty from "tty";
     47 47 │   import url from "url";
     48    │ - import·util·from·"util";
        48 │ + import·util·from·"node:util";
     49 49 │   import util_types from "util/types";
     50 50 │   import v8 from "v8";
-
+  
 
 ```
 
@@ -1319,25 +1319,25 @@ invalid.js:48:18 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━
 invalid.js:49:24 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! A Node.js builtin module should be imported with the node: protocol.
-
+  
     47 │ import url from "url";
     48 │ import util from "util";
   > 49 │ import util_types from "util/types";
        │                        ^^^^^^^^^^^^
     50 │ import v8 from "v8";
     51 │ import vm from "vm";
-
+  
   i Using the node: protocol is more explicit and signals that the imported module belongs to Node.js.
-
+  
   i Unsafe fix: Add the node: protocol.
-
+  
     47 47 │   import url from "url";
     48 48 │   import util from "util";
     49    │ - import·util_types·from·"util/types";
        49 │ + import·util_types·from·"node:util/types";
     50 50 │   import v8 from "v8";
     51 51 │   import vm from "vm";
-
+  
 
 ```
 
@@ -1345,25 +1345,25 @@ invalid.js:49:24 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━
 invalid.js:50:16 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! A Node.js builtin module should be imported with the node: protocol.
-
+  
     48 │ import util from "util";
     49 │ import util_types from "util/types";
   > 50 │ import v8 from "v8";
        │                ^^^^
     51 │ import vm from "vm";
     52 │ import wasi from "wasi";
-
+  
   i Using the node: protocol is more explicit and signals that the imported module belongs to Node.js.
-
+  
   i Unsafe fix: Add the node: protocol.
-
+  
     48 48 │   import util from "util";
     49 49 │   import util_types from "util/types";
     50    │ - import·v8·from·"v8";
        50 │ + import·v8·from·"node:v8";
     51 51 │   import vm from "vm";
     52 52 │   import wasi from "wasi";
-
+  
 
 ```
 
@@ -1371,25 +1371,25 @@ invalid.js:50:16 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━
 invalid.js:51:16 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! A Node.js builtin module should be imported with the node: protocol.
-
+  
     49 │ import util_types from "util/types";
     50 │ import v8 from "v8";
   > 51 │ import vm from "vm";
        │                ^^^^
     52 │ import wasi from "wasi";
     53 │ import worker_threads from "worker_threads";
-
+  
   i Using the node: protocol is more explicit and signals that the imported module belongs to Node.js.
-
+  
   i Unsafe fix: Add the node: protocol.
-
+  
     49 49 │   import util_types from "util/types";
     50 50 │   import v8 from "v8";
     51    │ - import·vm·from·"vm";
        51 │ + import·vm·from·"node:vm";
     52 52 │   import wasi from "wasi";
     53 53 │   import worker_threads from "worker_threads";
-
+  
 
 ```
 
@@ -1397,25 +1397,25 @@ invalid.js:51:16 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━
 invalid.js:52:18 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! A Node.js builtin module should be imported with the node: protocol.
-
+  
     50 │ import v8 from "v8";
     51 │ import vm from "vm";
   > 52 │ import wasi from "wasi";
        │                  ^^^^^^
     53 │ import worker_threads from "worker_threads";
     54 │ import zlib from "zlib";
-
+  
   i Using the node: protocol is more explicit and signals that the imported module belongs to Node.js.
-
+  
   i Unsafe fix: Add the node: protocol.
-
+  
     50 50 │   import v8 from "v8";
     51 51 │   import vm from "vm";
     52    │ - import·wasi·from·"wasi";
        52 │ + import·wasi·from·"node:wasi";
     53 53 │   import worker_threads from "worker_threads";
     54 54 │   import zlib from "zlib";
-
+  
 
 ```
 
@@ -1423,25 +1423,25 @@ invalid.js:52:18 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━
 invalid.js:53:28 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! A Node.js builtin module should be imported with the node: protocol.
-
+  
     51 │ import vm from "vm";
     52 │ import wasi from "wasi";
   > 53 │ import worker_threads from "worker_threads";
        │                            ^^^^^^^^^^^^^^^^
     54 │ import zlib from "zlib";
-    55 │
-
+    55 │ 
+  
   i Using the node: protocol is more explicit and signals that the imported module belongs to Node.js.
-
+  
   i Unsafe fix: Add the node: protocol.
-
+  
     51 51 │   import vm from "vm";
     52 52 │   import wasi from "wasi";
     53    │ - import·worker_threads·from·"worker_threads";
        53 │ + import·worker_threads·from·"node:worker_threads";
     54 54 │   import zlib from "zlib";
-    55 55 │
-
+    55 55 │   
+  
 
 ```
 
@@ -1449,25 +1449,25 @@ invalid.js:53:28 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━
 invalid.js:54:18 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! A Node.js builtin module should be imported with the node: protocol.
-
+  
     52 │ import wasi from "wasi";
     53 │ import worker_threads from "worker_threads";
   > 54 │ import zlib from "zlib";
        │                  ^^^^^^
-    55 │
+    55 │ 
     56 │ // check for require and import
-
+  
   i Using the node: protocol is more explicit and signals that the imported module belongs to Node.js.
-
+  
   i Unsafe fix: Add the node: protocol.
-
+  
     52 52 │   import wasi from "wasi";
     53 53 │   import worker_threads from "worker_threads";
     54    │ - import·zlib·from·"zlib";
        54 │ + import·zlib·from·"node:zlib";
-    55 55 │
+    55 55 │   
     56 56 │   // check for require and import
-
+  
 
 ```
 
@@ -1475,24 +1475,24 @@ invalid.js:54:18 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━
 invalid.js:57:9 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! A Node.js builtin module should be imported with the node: protocol.
-
+  
     56 │ // check for require and import
   > 57 │ require("fs");
        │         ^^^^
     58 │ import("fs");
-    59 │
-
+    59 │ 
+  
   i Using the node: protocol is more explicit and signals that the imported module belongs to Node.js.
-
+  
   i Unsafe fix: Add the node: protocol.
-
-    55 55 │
+  
+    55 55 │   
     56 56 │   // check for require and import
     57    │ - require("fs");
        57 │ + require("node:fs");
     58 58 │   import("fs");
-    59 59 │
-
+    59 59 │   
+  
 
 ```
 
@@ -1500,25 +1500,25 @@ invalid.js:57:9 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━�
 invalid.js:58:8 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! A Node.js builtin module should be imported with the node: protocol.
-
+  
     56 │ // check for require and import
     57 │ require("fs");
   > 58 │ import("fs");
        │        ^^^^
-    59 │
+    59 │ 
     60 │ // Use same quote style
-
+  
   i Using the node: protocol is more explicit and signals that the imported module belongs to Node.js.
-
+  
   i Unsafe fix: Add the node: protocol.
-
+  
     56 56 │   // check for require and import
     57 57 │   require("fs");
     58    │ - import("fs");
        58 │ + import("node:fs");
-    59 59 │
+    59 59 │   
     60 60 │   // Use same quote style
-
+  
 
 ```
 
@@ -1526,24 +1526,24 @@ invalid.js:58:8 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━�
 invalid.js:61:20 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! A Node.js builtin module should be imported with the node: protocol.
-
+  
     60 │ // Use same quote style
   > 61 │ import assert from "assert";
        │                    ^^^^^^^^
     62 │ import assert from 'assert';
-    63 │
-
+    63 │ 
+  
   i Using the node: protocol is more explicit and signals that the imported module belongs to Node.js.
-
+  
   i Unsafe fix: Add the node: protocol.
-
-    59 59 │
+  
+    59 59 │   
     60 60 │   // Use same quote style
     61    │ - import·assert·from·"assert";
        61 │ + import·assert·from·"node:assert";
     62 62 │   import assert from 'assert';
-    63 63 │
-
+    63 63 │   
+  
 
 ```
 
@@ -1551,25 +1551,25 @@ invalid.js:61:20 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━
 invalid.js:62:20 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! A Node.js builtin module should be imported with the node: protocol.
-
+  
     60 │ // Use same quote style
     61 │ import assert from "assert";
   > 62 │ import assert from 'assert';
        │                    ^^^^^^^^
-    63 │
+    63 │ 
     64 │ // Keep comments
-
+  
   i Using the node: protocol is more explicit and signals that the imported module belongs to Node.js.
-
+  
   i Unsafe fix: Add the node: protocol.
-
+  
     60 60 │   // Use same quote style
     61 61 │   import assert from "assert";
     62    │ - import·assert·from·'assert';
        62 │ + import·assert·from·'node:assert';
-    63 63 │
+    63 63 │   
     64 64 │   // Keep comments
-
+  
 
 ```
 
@@ -1577,21 +1577,21 @@ invalid.js:62:20 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━
 invalid.js:65:26 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! A Node.js builtin module should be imported with the node: protocol.
-
+  
     64 │ // Keep comments
   > 65 │ import assert from /*0*/ "assert" /*b*/;
        │                          ^^^^^^^^
-    66 │
-
+    66 │ 
+  
   i Using the node: protocol is more explicit and signals that the imported module belongs to Node.js.
-
+  
   i Unsafe fix: Add the node: protocol.
-
-    63 63 │
+  
+    63 63 │   
     64 64 │   // Keep comments
     65    │ - import·assert·from·/*0*/·"assert"·/*b*/;
        65 │ + import·assert·from·/*0*/·"node:assert"·/*b*/;
-    66 66 │
-
+    66 66 │   
+  
 
 ```
