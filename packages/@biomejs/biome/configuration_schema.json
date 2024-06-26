@@ -1867,6 +1867,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noValueAtRule": {
+					"description": "Disallow use of @value rule in css modules",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noYodaExpression": {
 					"description": "Disallow the use of yoda expressions.",
 					"anyOf": [

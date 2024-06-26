@@ -146,6 +146,7 @@ define_categories! {
     "lint/nursery/noUnusedFunctionParameters": "https://biomejs.dev/linter/rules/no-unused-function-parameters",
     "lint/nursery/noUselessStringConcat": "https://biomejs.dev/linter/rules/no-useless-string-concat",
     "lint/nursery/noUselessUndefinedInitialization": "https://biomejs.dev/linter/rules/no-useless-undefined-initialization",
+    "lint/nursery/noValueAtRule": "https://biomejs.dev/linter/rules/no-value-at-rule",
     "lint/nursery/noYodaExpression": "https://biomejs.dev/linter/rules/no-yoda-expression",
     "lint/nursery/useAdjacentOverloadSignatures": "https://biomejs.dev/linter/rules/use-adjacent-overload-signatures",
     "lint/nursery/useBiomeSuppressionComment": "https://biomejs.dev/linter/rules/use-biome-suppression-comment",
