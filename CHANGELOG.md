@@ -36,6 +36,7 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 #### New features
 
+- Add `nursery/useDeprecatedReason` rule. Contributed by @vohoanglong0107.
 - Add [nursery/noExportedImports](https://biomejs.dev/linter/rules/no-exported-imports/). Contributed by @Conaclos
 
 #### Bug fixes
