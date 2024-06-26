@@ -5588,7 +5588,7 @@ pub(crate) const HTML_TAGS: [&str; 148] = [
 
 // https://developer.mozilla.org/ja/docs/Web/SVG/Element
 // https://github.com/element-io/svg-tags/blob/master/lib/svg-tags.json
-pub(crate) const SVG_TAGS: [&str; 81] = [
+pub(crate) const SVG_TAGS: [&str; 82] = [
     "a",
     "altGlyph",
     "altGlyphDef",
@@ -5640,6 +5640,7 @@ pub(crate) const SVG_TAGS: [&str; 81] = [
     "g",
     "glyph",
     "glyphRef",
+    "hatch",
     "hatchpath",
     "hkern",
     "image",
