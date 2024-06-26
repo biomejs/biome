@@ -21,7 +21,8 @@ use crate::{
 use biome_analyze::options::PreferredQuote;
 use biome_analyze::{
     AnalysisFilter, AnalyzerConfiguration, AnalyzerOptions, ControlFlow, GroupCategory, Never,
-    QueryMatch, RegistryVisitor, RuleCategoriesBuilder, RuleCategory, RuleFilter, RuleGroup,
+    QueryMatch, RegistryVisitor, RuleCategoriesBuilder, RuleCategory, RuleError, RuleFilter,
+    RuleGroup,
 };
 use biome_configuration::javascript::JsxRuntime;
 use biome_diagnostics::{category, Applicability, Diagnostic, DiagnosticExt, Severity};
@@ -31,9 +32,7 @@ use biome_formatter::{
 };
 use biome_fs::BiomePath;
 use biome_js_analyze::utils::rename::{RenameError, RenameSymbolExtensions};
-use biome_js_analyze::{
-    analyze, analyze_with_inspect_matcher, visit_registry, ControlFlowGraph, RuleError,
-};
+use biome_js_analyze::{analyze, analyze_with_inspect_matcher, visit_registry, ControlFlowGraph};
 use biome_js_formatter::context::trailing_commas::TrailingCommas;
 use biome_js_formatter::context::{
     ArrowParentheses, BracketSameLine, BracketSpacing, JsFormatOptions, QuoteProperties, Semicolons,
