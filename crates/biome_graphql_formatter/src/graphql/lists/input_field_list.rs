@@ -5,6 +5,15 @@ pub(crate) struct FormatGraphqlInputFieldList;
 impl FormatRule<GraphqlInputFieldList> for FormatGraphqlInputFieldList {
     type Context = GraphqlFormatContext;
     fn fmt(&self, node: &GraphqlInputFieldList, f: &mut GraphqlFormatter) -> FormatResult<()> {
-        f.join().entries(node.iter().formatted()).finish()
+        let mut join = f.join_nodes_with_hardline();
+
+        for definition in node {
+            join.entry(
+                definition.syntax(),
+                &format_or_verbatim(definition.format()),
+            );
+        }
+
+        join.finish()
     }
 }

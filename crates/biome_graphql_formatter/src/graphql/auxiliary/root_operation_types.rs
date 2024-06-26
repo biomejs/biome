@@ -1,6 +1,7 @@
 use crate::prelude::*;
-use biome_graphql_syntax::GraphqlRootOperationTypes;
-use biome_rowan::AstNode;
+use biome_formatter::write;
+use biome_graphql_syntax::{GraphqlRootOperationTypes, GraphqlRootOperationTypesFields};
+
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatGraphqlRootOperationTypes;
 impl FormatNodeRule<GraphqlRootOperationTypes> for FormatGraphqlRootOperationTypes {
@@ -9,6 +10,19 @@ impl FormatNodeRule<GraphqlRootOperationTypes> for FormatGraphqlRootOperationTyp
         node: &GraphqlRootOperationTypes,
         f: &mut GraphqlFormatter,
     ) -> FormatResult<()> {
-        format_verbatim_node(node.syntax()).fmt(f)
+        let GraphqlRootOperationTypesFields {
+            l_curly_token,
+            root_operation_type,
+            r_curly_token,
+        } = node.as_fields();
+
+        write!(
+            f,
+            [
+                l_curly_token.format(),
+                block_indent(&root_operation_type.format()),
+                r_curly_token.format(),
+            ]
+        )
     }
 }

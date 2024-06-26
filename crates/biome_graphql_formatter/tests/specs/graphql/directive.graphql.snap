@@ -6,7 +6,62 @@ info: graphql/directive.graphql
 
 ```graphql
 {
-  hero @deprecated
+
+
+	hero
+
+
+	@deprecated
+
+
+}
+
+{
+	hero
+
+
+	@deprecated(reason:
+
+	"Deprecated"
+
+	)
+
+
+}
+
+{
+
+	hero
+
+	@input
+
+	(type:
+
+	String)
+
+
+}
+
+{
+	hero
+
+
+	@deprecated(
+
+		reason:
+
+		"Deprecated"
+
+	)
+	@addExternalFields
+
+
+	(source:
+
+
+	"profiles"
+
+	)
 }
 
 ```
@@ -28,12 +83,18 @@ Quote style: Double Quotes
 
 ```graphql
 {
-  hero @deprecated
+	hero @deprecated
+}
+
+{
+	hero @deprecated(reason: "Deprecated")
+}
+
+{
+	hero @input(type: String)
+}
+
+{
+	hero @deprecated(reason: "Deprecated") @addExternalFields(source: "profiles")
 }
 ```
-
-
-
-## Unimplemented nodes/tokens
-
-"{\n  hero @deprecated\n}" => 0..22

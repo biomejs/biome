@@ -68,10 +68,15 @@ where
             )
         }
 
-        let formatted = self
+        let formatted = match self
             .language
             .format_node(self.options.clone(), &re_parse.syntax())
-            .unwrap();
+        {
+            Ok(formatted) => formatted,
+            Err(err) => {
+                panic!("failed to format: {}", err);
+            }
+        };
 
         let printed = formatted.print().unwrap();
 

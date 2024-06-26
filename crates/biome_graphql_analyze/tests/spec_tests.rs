@@ -50,7 +50,7 @@ fn run_test(input: &'static str, _: &str, _: &str, _: &str) {
             analyze_and_snap(
                 &mut snapshot,
                 &script,
-                GraphqlFileSource {},
+                GraphqlFileSource::default(),
                 filter,
                 file_name,
                 input_file,
@@ -210,7 +210,7 @@ pub(crate) fn _run_suppression_test(input: &'static str, _: &str, _: &str, _: &s
     analyze_and_snap(
         &mut snapshot,
         &input_code,
-        GraphqlFileSource {},
+        GraphqlFileSource::default(),
         filter,
         file_name,
         input_file,

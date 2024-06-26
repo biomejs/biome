@@ -1,6 +1,7 @@
 use crate::prelude::*;
-use biome_graphql_syntax::GraphqlOperationType;
-use biome_rowan::AstNode;
+use biome_formatter::write;
+use biome_graphql_syntax::{GraphqlOperationType, GraphqlOperationTypeFields};
+
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatGraphqlOperationType;
 impl FormatNodeRule<GraphqlOperationType> for FormatGraphqlOperationType {
@@ -9,6 +10,8 @@ impl FormatNodeRule<GraphqlOperationType> for FormatGraphqlOperationType {
         node: &GraphqlOperationType,
         f: &mut GraphqlFormatter,
     ) -> FormatResult<()> {
-        format_verbatim_node(node.syntax()).fmt(f)
+        let GraphqlOperationTypeFields { value_token } = node.as_fields();
+
+        write![f, [value_token.format(),]]
     }
 }

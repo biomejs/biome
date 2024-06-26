@@ -1,6 +1,7 @@
 use crate::prelude::*;
-use biome_graphql_syntax::GraphqlImplementsInterfaces;
-use biome_rowan::AstNode;
+use biome_formatter::write;
+use biome_graphql_syntax::{GraphqlImplementsInterfaces, GraphqlImplementsInterfacesFields};
+
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatGraphqlImplementsInterfaces;
 impl FormatNodeRule<GraphqlImplementsInterfaces> for FormatGraphqlImplementsInterfaces {
@@ -9,6 +10,19 @@ impl FormatNodeRule<GraphqlImplementsInterfaces> for FormatGraphqlImplementsInte
         node: &GraphqlImplementsInterfaces,
         f: &mut GraphqlFormatter,
     ) -> FormatResult<()> {
-        format_verbatim_node(node.syntax()).fmt(f)
+        let GraphqlImplementsInterfacesFields {
+            implements_token,
+            amp_token,
+            interfaces,
+        } = node.as_fields();
+
+        if let Some(amp_token) = amp_token {
+            write!(f, [format_removed(&amp_token)])?;
+        }
+
+        write!(
+            f,
+            [implements_token.format(), space(), interfaces.format(),]
+        )
     }
 }

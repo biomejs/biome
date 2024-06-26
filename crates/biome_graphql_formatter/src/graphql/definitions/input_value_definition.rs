@@ -1,6 +1,7 @@
 use crate::prelude::*;
-use biome_graphql_syntax::GraphqlInputValueDefinition;
-use biome_rowan::AstNode;
+use biome_formatter::write;
+use biome_graphql_syntax::{GraphqlInputValueDefinition, GraphqlInputValueDefinitionFields};
+
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatGraphqlInputValueDefinition;
 impl FormatNodeRule<GraphqlInputValueDefinition> for FormatGraphqlInputValueDefinition {
@@ -9,6 +10,27 @@ impl FormatNodeRule<GraphqlInputValueDefinition> for FormatGraphqlInputValueDefi
         node: &GraphqlInputValueDefinition,
         f: &mut GraphqlFormatter,
     ) -> FormatResult<()> {
-        format_verbatim_node(node.syntax()).fmt(f)
+        let GraphqlInputValueDefinitionFields {
+            description,
+            name,
+            colon_token,
+            ty,
+            default,
+            directives,
+        } = node.as_fields();
+
+        write!(
+            f,
+            [
+                description.format(),
+                soft_line_break(),
+                name.format(),
+                colon_token.format(),
+                space(),
+                ty.format(),
+                default.format(),
+                directives.format(),
+            ]
+        )
     }
 }

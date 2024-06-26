@@ -42,7 +42,7 @@ async function traverseDir(dir, input_config) {
 			const file = entry.name;
 
 			// Ignore spec files
-			if (file.startsWith('jsfmt.spec')) {
+			if (file.startsWith('format.test')) {
 				continue;
 			}
 
@@ -55,7 +55,7 @@ async function traverseDir(dir, input_config) {
 			const snapshotPath = path.resolve(
 				dir,
 				'__snapshots__',
-				'jsfmt.spec.js.snap'
+				'format.test.js.snap'
 			);
 			const snapFile = path.basename(file) + '.prettier-snap';
 			const snapOriginalFile = path.basename(file) + '.prettier-snap-original';

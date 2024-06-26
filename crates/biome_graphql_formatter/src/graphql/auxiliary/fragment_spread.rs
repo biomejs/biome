@@ -1,6 +1,7 @@
 use crate::prelude::*;
-use biome_graphql_syntax::GraphqlFragmentSpread;
-use biome_rowan::AstNode;
+use biome_formatter::write;
+use biome_graphql_syntax::{GraphqlFragmentSpread, GraphqlFragmentSpreadFields};
+
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatGraphqlFragmentSpread;
 impl FormatNodeRule<GraphqlFragmentSpread> for FormatGraphqlFragmentSpread {
@@ -9,6 +10,15 @@ impl FormatNodeRule<GraphqlFragmentSpread> for FormatGraphqlFragmentSpread {
         node: &GraphqlFragmentSpread,
         f: &mut GraphqlFormatter,
     ) -> FormatResult<()> {
-        format_verbatim_node(node.syntax()).fmt(f)
+        let GraphqlFragmentSpreadFields {
+            dotdotdot_token,
+            name,
+            directives,
+        } = node.as_fields();
+
+        write![
+            f,
+            [dotdotdot_token.format(), name.format(), directives.format()]
+        ]
     }
 }

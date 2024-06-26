@@ -68,6 +68,7 @@ fn parse_union_member_types(p: &mut GraphqlParser) -> ParsedSyntax {
     }
     let m = p.start();
     p.expect(T![=]);
+    p.eat(T![|]); // leading pipe separator is optional
 
     UnionMemberTypeList.parse_list(p);
 

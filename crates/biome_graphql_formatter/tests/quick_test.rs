@@ -13,22 +13,27 @@ mod language {
 // use this test check if your snippet prints as you wish, without using a snapshot
 fn quick_test() {
     let src = r#"
-{
-  hero @deprecated
-}
+type Artist implements Node & Entity {
+  # The ID of an object
+  id: ID!
 
-{
-  hero @deprecated(reason: "Deprecated")
-}
+  # The MBID of the entity.
+  mbid: MBID!
 
-{
-  hero @input(type: String)
-}
+  # A list of recordings linked to this entity.
+  recordings(after: String, first: Int): RecordingConnection
 
-{
-  hero
-		@deprecated(reason: "Deprecated")
-		@addExternalFields(source: "profiles")
+  # A list of releases linked to this entity.
+  releases(
+    # Filter by one or more release group types.
+    type: [ReleaseGroupType]
+
+    # Filter by one or more release statuses.
+    status: [ReleaseStatus]
+    after: String
+    first: Int
+  ): ReleaseConnection
+
 }
 
 "#;

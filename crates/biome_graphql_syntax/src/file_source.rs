@@ -8,7 +8,7 @@ use std::path::Path;
 )]
 pub struct GraphqlFileSource {
     #[allow(unused)]
-    variant: CssVariant,
+    variant: GraphqlVariant,
 }
 
 /// The style of GraphQL contained in the file.
@@ -16,7 +16,7 @@ pub struct GraphqlFileSource {
 #[derive(
     Debug, Clone, Default, Copy, Eq, PartialEq, Hash, serde::Serialize, serde::Deserialize,
 )]
-enum CssVariant {
+enum GraphqlVariant {
     #[default]
     Standard,
 }
@@ -24,7 +24,7 @@ enum CssVariant {
 impl GraphqlFileSource {
     pub fn graphql() -> Self {
         Self {
-            variant: CssVariant::Standard,
+            variant: GraphqlVariant::Standard,
         }
     }
 

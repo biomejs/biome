@@ -1,0 +1,59 @@
+{
+	hero
+	@deprecated(reason: "Deprecated", reason: "Deprecated",
+
+
+		reason: "Deprecated")
+	@addExternalFields(source: "profiles")
+}
+{
+	field_value(
+		int_value: 1,
+		float_value: 1.1,
+
+
+		string_value: "string",
+
+
+		boolean_value: true,
+
+
+		null_value: null,
+		enum_value: ENUM_VALUE,
+
+
+
+		enum_value: enum,
+		enum_value: on,
+
+
+		list_value: [12222222222221222222222222122222222222212222222222221222222222222,
+
+
+
+			2,
+
+
+
+			33333],
+		object_value: {key: "value"
+
+
+
+
+			key: "value" key: "value" key: "value" key: "value"}
+	)
+}
+
+
+query ($storyId: ID!,
+
+
+
+	$like: Boolean,
+
+
+
+	$comments: [String!], $tags: [String!]!, $posts: [PostInput]!, $input: [input!]!) {
+	likeStory(storyId: $storyId)
+}

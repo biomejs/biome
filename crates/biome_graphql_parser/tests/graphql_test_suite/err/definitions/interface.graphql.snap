@@ -428,10 +428,8 @@ GraphqlRoot {
             },
             implements: GraphqlImplementsInterfaces {
                 implements_token: IMPLEMENTS_KW@480..491 "implements" [] [Whitespace(" ")],
-                amp_token: missing (optional),
+                amp_token: AMP@491..492 "&" [] [],
                 interfaces: GraphqlImplementsInterfaceList [
-                    missing element,
-                    AMP@491..492 "&" [] [],
                     GraphqlNamedType {
                         name: GraphqlName {
                             value_token: GRAPHQL_NAME@492..504 "interface" [Newline("\n"), Newline("\n")] [Whitespace(" ")],
@@ -961,15 +959,13 @@ GraphqlRoot {
         0: GRAPHQL_NAME@473..480 "Person" [] [Whitespace(" ")]
       3: GRAPHQL_IMPLEMENTS_INTERFACES@480..511
         0: IMPLEMENTS_KW@480..491 "implements" [] [Whitespace(" ")]
-        1: (empty)
-        2: GRAPHQL_IMPLEMENTS_INTERFACE_LIST@491..511
-          0: (empty)
-          1: AMP@491..492 "&" [] []
-          2: GRAPHQL_NAMED_TYPE@492..504
+        1: AMP@491..492 "&" [] []
+        2: GRAPHQL_IMPLEMENTS_INTERFACE_LIST@492..511
+          0: GRAPHQL_NAMED_TYPE@492..504
             0: GRAPHQL_NAME@492..504
               0: GRAPHQL_NAME@492..504 "interface" [Newline("\n"), Newline("\n")] [Whitespace(" ")]
-          3: (empty)
-          4: GRAPHQL_NAMED_TYPE@504..511
+          1: (empty)
+          2: GRAPHQL_NAMED_TYPE@504..511
             0: GRAPHQL_NAME@504..511
               0: GRAPHQL_NAME@504..511 "Person" [] [Whitespace(" ")]
       4: GRAPHQL_DIRECTIVE_LIST@511..524
@@ -1159,427 +1155,427 @@ GraphqlRoot {
 interface.graphql:2:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `{` but instead found `name`
-  
+
     1 │ interface Person
   > 2 │   name: String
       │   ^^^^
     3 │ }
-    4 │ 
-  
+    4 │
+
   i Remove name
-  
+
 interface.graphql:8:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a field definition but instead found 'interface Person'.
-  
+
      6 │   name: String
-     7 │ 
+     7 │
    > 8 │ interface Person
        │ ^^^^^^^^^^^^^^^^
      9 │   name: String
-    10 │ 
-  
+    10 │
+
   i Expected a field definition here.
-  
+
      6 │   name: String
-     7 │ 
+     7 │
    > 8 │ interface Person
        │ ^^^^^^^^^^^^^^^^
      9 │   name: String
-    10 │ 
-  
+    10 │
+
 interface.graphql:11:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a field definition but instead found 'interface Person'.
-  
+
      9 │   name: String
-    10 │ 
+    10 │
   > 11 │ interface Person {
        │ ^^^^^^^^^^^^^^^^
     12 │   name:
     13 │ }
-  
+
   i Expected a field definition here.
-  
+
      9 │   name: String
-    10 │ 
+    10 │
   > 11 │ interface Person {
        │ ^^^^^^^^^^^^^^^^
     12 │   name:
     13 │ }
-  
+
 interface.graphql:11:18 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `}` but instead found `{`
-  
+
      9 │   name: String
-    10 │ 
+    10 │
   > 11 │ interface Person {
        │                  ^
     12 │   name:
     13 │ }
-  
+
   i Remove {
-  
+
 interface.graphql:13:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a name but instead found '}'.
-  
+
     11 │ interface Person {
     12 │   name:
   > 13 │ }
        │ ^
-    14 │ 
+    14 │
     15 │ interface Person {
-  
+
   i Expected a name here.
-  
+
     11 │ interface Person {
     12 │   name:
   > 13 │ }
        │ ^
-    14 │ 
+    14 │
     15 │ interface Person {
-  
+
 interface.graphql:16:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a name but instead found ':'.
-  
+
     15 │ interface Person {
   > 16 │   : String
        │   ^
     17 │ }
-    18 │ 
-  
+    18 │
+
   i Expected a name here.
-  
+
     15 │ interface Person {
   > 16 │   : String
        │   ^
     17 │ }
-    18 │ 
-  
+    18 │
+
 interface.graphql:20:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a name but instead found ':'.
-  
+
     19 │ interface Person {
   > 20 │   :
        │   ^
     21 │ }
-    22 │ 
-  
+    22 │
+
   i Expected a name here.
-  
+
     19 │ interface Person {
   > 20 │   :
        │   ^
     21 │ }
-    22 │ 
-  
+    22 │
+
 interface.graphql:21:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a type but instead found '}'.
-  
+
     19 │ interface Person {
     20 │   :
   > 21 │ }
        │ ^
-    22 │ 
+    22 │
     23 │ interface Person {
-  
+
   i Expected a type here.
-  
+
     19 │ interface Person {
     20 │   :
   > 21 │ }
        │ ^
-    22 │ 
+    22 │
     23 │ interface Person {
-  
+
 interface.graphql:24:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a field definition but instead found 'name String'.
-  
+
     23 │ interface Person {
   > 24 │   name String
        │   ^^^^^^^^^^^
     25 │ }
-    26 │ 
-  
+    26 │
+
   i Expected a field definition here.
-  
+
     23 │ interface Person {
   > 24 │   name String
        │   ^^^^^^^^^^^
     25 │ }
-    26 │ 
-  
+    26 │
+
 interface.graphql:27:18 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a definition but instead found 'deprecated'.
-  
+
     25 │ }
-    26 │ 
+    26 │
   > 27 │ interface Person deprecated {
        │                  ^^^^^^^^^^
     28 │   name: String
     29 │ }
-  
+
   i Expected a definition here.
-  
+
     25 │ }
-    26 │ 
+    26 │
   > 27 │ interface Person deprecated {
        │                  ^^^^^^^^^^
     28 │   name: String
     29 │ }
-  
+
 interface.graphql:31:20 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a name but instead found '{'.
-  
+
     29 │ }
-    30 │ 
+    30 │
   > 31 │ interface Person @ {
        │                    ^
     32 │   name: String
     33 │ }
-  
+
   i Expected a name here.
-  
+
     29 │ }
-    30 │ 
+    30 │
   > 31 │ interface Person @ {
        │                    ^
     32 │   name: String
     33 │ }
-  
+
 interface.graphql:36:7 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `{` but instead found `:`
-  
+
     35 │ interface Person @
   > 36 │   name: String
        │       ^
     37 │ }
-    38 │ 
-  
+    38 │
+
   i Remove :
-  
+
 interface.graphql:39:18 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a definition but instead found 'implement Character @'.
-  
+
     37 │ }
-    38 │ 
+    38 │
   > 39 │ interface Person implement Character @ {
        │                  ^^^^^^^^^^^^^^^^^^^^^
     40 │   name: String
     41 │ }
-  
+
   i Expected a definition here.
-  
+
     37 │ }
-    38 │ 
+    38 │
   > 39 │ interface Person implement Character @ {
        │                  ^^^^^^^^^^^^^^^^^^^^^
     40 │   name: String
     41 │ }
-  
+
 interface.graphql:43:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a definition but instead found 'inter Person'.
-  
+
     41 │ }
-    42 │ 
+    42 │
   > 43 │ inter Person
        │ ^^^^^^^^^^^^
-    44 │ 
+    44 │
     45 │ interface Person implemets Character
-  
+
   i Expected a definition here.
-  
+
     41 │ }
-    42 │ 
+    42 │
   > 43 │ inter Person
        │ ^^^^^^^^^^^^
-    44 │ 
+    44 │
     45 │ interface Person implemets Character
-  
+
 interface.graphql:45:18 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a definition but instead found 'implemets Character'.
-  
+
     43 │ inter Person
-    44 │ 
+    44 │
   > 45 │ interface Person implemets Character
        │                  ^^^^^^^^^^^^^^^^^^^
-    46 │ 
+    46 │
     47 │ interface Person implements &
-  
+
   i Expected a definition here.
-  
+
     43 │ inter Person
-    44 │ 
+    44 │
   > 45 │ interface Person implemets Character
        │                  ^^^^^^^^^^^^^^^^^^^
-    46 │ 
+    46 │
     47 │ interface Person implements &
-  
+
 interface.graphql:49:11 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `&` but instead found `Person`
-  
+
     47 │ interface Person implements &
-    48 │ 
+    48 │
   > 49 │ interface Person @
        │           ^^^^^^
-    50 │ 
+    50 │
     51 │ interface Person implents Character @
-  
+
   i Remove Person
-  
+
 interface.graphql:51:11 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a definition but instead found 'Person implents Character @'.
-  
+
     49 │ interface Person @
-    50 │ 
+    50 │
   > 51 │ interface Person implents Character @
        │           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    52 │ 
+    52 │
     53 │ interface Person implements Character & Character1 & @deprecated
-  
+
   i Expected a definition here.
-  
+
     49 │ interface Person @
-    50 │ 
+    50 │
   > 51 │ interface Person implents Character @
        │           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    52 │ 
+    52 │
     53 │ interface Person implements Character & Character1 & @deprecated
-  
+
 interface.graphql:53:54 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a named type but instead found '@'.
-  
+
     51 │ interface Person implents Character @
-    52 │ 
+    52 │
   > 53 │ interface Person implements Character & Character1 & @deprecated
        │                                                      ^
-    54 │ 
+    54 │
     55 │ interface Person {
-  
+
   i Expected a named type here.
-  
+
     51 │ interface Person implents Character @
-    52 │ 
+    52 │
   > 53 │ interface Person implements Character & Character1 & @deprecated
        │                                                      ^
-    54 │ 
+    54 │
     55 │ interface Person {
-  
+
 interface.graphql:56:19 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a type but instead found ')'.
-  
+
     55 │ interface Person {
   > 56 │   name(start_with:): String
        │                   ^
     57 │   "filder by age age: Int @deprecated
     58 │   picture(: Int = 0): Url
-  
+
   i Expected a type here.
-  
+
     55 │ interface Person {
   > 56 │   name(start_with:): String
        │                   ^
     57 │   "filder by age age: Int @deprecated
     58 │   picture(: Int = 0): Url
-  
+
 interface.graphql:57:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Missing closing quote
-  
+
     55 │ interface Person {
     56 │   name(start_with:): String
   > 57 │   "filder by age age: Int @deprecated
        │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     58 │   picture(: Int = 0): Url
     59 │   height("filter by height" greater_than: @deprecated): Int
-  
+
 interface.graphql:58:11 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a name but instead found ':'.
-  
+
     56 │   name(start_with:): String
     57 │   "filder by age age: Int @deprecated
   > 58 │   picture(: Int = 0): Url
        │           ^
     59 │   height("filter by height" greater_than: @deprecated): Int
     60 │   weight("filter by weight" greater_than: Int = @deprecated): Int
-  
+
   i Expected a name here.
-  
+
     56 │   name(start_with:): String
     57 │   "filder by age age: Int @deprecated
   > 58 │   picture(: Int = 0): Url
        │           ^
     59 │   height("filter by height" greater_than: @deprecated): Int
     60 │   weight("filter by weight" greater_than: Int = @deprecated): Int
-  
+
 interface.graphql:59:43 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a type but instead found '@'.
-  
+
     57 │   "filder by age age: Int @deprecated
     58 │   picture(: Int = 0): Url
   > 59 │   height("filter by height" greater_than: @deprecated): Int
        │                                           ^
     60 │   weight("filter by weight" greater_than: Int = @deprecated): Int
     61 │   name(start_with String): String
-  
+
   i Expected a type here.
-  
+
     57 │   "filder by age age: Int @deprecated
     58 │   picture(: Int = 0): Url
   > 59 │   height("filter by height" greater_than: @deprecated): Int
        │                                           ^
     60 │   weight("filter by weight" greater_than: Int = @deprecated): Int
     61 │   name(start_with String): String
-  
+
 interface.graphql:60:49 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a value but instead found '@'.
-  
+
     58 │   picture(: Int = 0): Url
     59 │   height("filter by height" greater_than: @deprecated): Int
   > 60 │   weight("filter by weight" greater_than: Int = @deprecated): Int
        │                                                 ^
     61 │   name(start_with String): String
     62 │ }
-  
+
   i Expected a value here.
-  
+
     58 │   picture(: Int = 0): Url
     59 │   height("filter by height" greater_than: @deprecated): Int
   > 60 │   weight("filter by weight" greater_than: Int = @deprecated): Int
        │                                                 ^
     61 │   name(start_with String): String
     62 │ }
-  
+
 interface.graphql:61:19 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `:` but instead found `String`
-  
+
     59 │   height("filter by height" greater_than: @deprecated): Int
     60 │   weight("filter by weight" greater_than: Int = @deprecated): Int
   > 61 │   name(start_with String): String
        │                   ^^^^^^
     62 │ }
-    63 │ 
-  
+    63 │
+
   i Remove String
-  
+
 ```

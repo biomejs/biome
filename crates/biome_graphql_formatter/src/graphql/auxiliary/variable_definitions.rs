@@ -1,6 +1,7 @@
 use crate::prelude::*;
-use biome_graphql_syntax::GraphqlVariableDefinitions;
-use biome_rowan::AstNode;
+use biome_formatter::{format_args, write};
+use biome_graphql_syntax::{GraphqlVariableDefinitions, GraphqlVariableDefinitionsFields};
+
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatGraphqlVariableDefinitions;
 impl FormatNodeRule<GraphqlVariableDefinitions> for FormatGraphqlVariableDefinitions {
@@ -9,6 +10,19 @@ impl FormatNodeRule<GraphqlVariableDefinitions> for FormatGraphqlVariableDefinit
         node: &GraphqlVariableDefinitions,
         f: &mut GraphqlFormatter,
     ) -> FormatResult<()> {
-        format_verbatim_node(node.syntax()).fmt(f)
+        let GraphqlVariableDefinitionsFields {
+            l_paren_token,
+            elements,
+            r_paren_token,
+        } = node.as_fields();
+
+        write!(
+            f,
+            [group(&format_args!(
+                l_paren_token.format(),
+                soft_block_indent(&elements.format()),
+                r_paren_token.format(),
+            ))]
+        )
     }
 }
