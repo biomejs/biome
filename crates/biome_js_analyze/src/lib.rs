@@ -7,13 +7,11 @@ use biome_analyze::{
     SuppressionKind,
 };
 use biome_aria::{AriaProperties, AriaRoles};
-use biome_diagnostics::{category, Diagnostic, Error as DiagnosticError};
+use biome_diagnostics::{category, Error as DiagnosticError};
 use biome_js_syntax::{JsFileSource, JsLanguage};
 use biome_project::PackageJson;
 use biome_suppression::{parse_suppression_comment, SuppressionDiagnostic};
-use serde::{Deserialize, Serialize};
 use std::sync::Arc;
-use std::{borrow::Cow, error::Error};
 
 mod assists;
 mod ast_utils;
@@ -171,61 +169,6 @@ where
         emit_signal,
     )
 }
-
-/// Series of errors encountered when running rules on a file
-#[derive(Debug, PartialEq, Eq, Clone, Serialize, Deserialize)]
-pub enum RuleError {
-    /// The rule with the specified name replaced the root of the file with a node that is not a valid root for that language.
-    ReplacedRootWithNonRootError {
-        rule_name: Option<(Cow<'static, str>, Cow<'static, str>)>,
-    },
-}
-
-impl Diagnostic for RuleError {}
-
-impl std::fmt::Display for RuleError {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter) -> std::fmt::Result {
-        match self {
-            RuleError::ReplacedRootWithNonRootError {
-                rule_name: Some((group, rule)),
-            } => {
-                std::write!(
-                    fmt,
-                    "the rule '{group}/{rule}' replaced the root of the file with a non-root node."
-                )
-            }
-            RuleError::ReplacedRootWithNonRootError { rule_name: None } => {
-                std::write!(
-                    fmt,
-                    "a code action replaced the root of the file with a non-root node."
-                )
-            }
-        }
-    }
-}
-
-impl biome_console::fmt::Display for RuleError {
-    fn fmt(&self, fmt: &mut biome_console::fmt::Formatter) -> std::io::Result<()> {
-        match self {
-            RuleError::ReplacedRootWithNonRootError {
-                rule_name: Some((group, rule)),
-            } => {
-                std::write!(
-                    fmt,
-                    "the rule '{group}/{rule}' replaced the root of the file with a non-root node."
-                )
-            }
-            RuleError::ReplacedRootWithNonRootError { rule_name: None } => {
-                std::write!(
-                    fmt,
-                    "a code action replaced the root of the file with a non-root node."
-                )
-            }
-        }
-    }
-}
-
-impl Error for RuleError {}
 
 #[cfg(test)]
 mod tests {
