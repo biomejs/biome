@@ -315,13 +315,7 @@ impl Rule for NoStaticElementInteractions {
             return None;
         }
 
-        if node
-            .find_attribute_by_name("aria-hidden")
-            .map_or(false, |attr| {
-                attr.as_static_value()
-                    .map_or(true, |val| val.text() == "true")
-            })
-        {
+        if is_hidden_from_screen_reader(node, element_name) {
             return None;
         }
 
@@ -372,6 +366,27 @@ impl Rule for NoStaticElementInteractions {
             markup! {{"To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value."}}
         ))
     }
+}
+
+/**
+ * Returns boolean indicating that the aria-hidden prop
+ * is present or the value is true. Will also return true if
+ * there is an input with type='hidden'.
+ *
+ * <div aria-hidden /> is equivalent to the DOM as <div aria-hidden=true />.
+ * ref: https://github.com/jsx-eslint/eslint-plugin-jsx-a11y/blob/main/src/util/isHiddenFromScreenReader.js
+ */
+fn is_hidden_from_screen_reader(node: &AnyJsxElement, element_name: &str) -> bool {
+    node.find_attribute_by_name("aria-hidden")
+        .map_or(false, |attr| {
+            attr.as_static_value()
+                .map_or(true, |val| val.text() == "true")
+        })// <div aria-hidden />
+        || (element_name == "input"
+            && node.find_attribute_by_name("type").map_or(false, |attr| {
+                attr.as_static_value()
+                    .map_or(false, |val| val.text() == "hidden")
+            })) // <input type="hidden" />
 }
 
 /// Checks if the given element name is considered invalid, inspired by eslint-plugin-jsx-a11y
