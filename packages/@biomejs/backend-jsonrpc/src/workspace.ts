@@ -2412,6 +2412,7 @@ export type Category =
 	| "lint/nursery/useConsistentGridAreas"
 	| "lint/nursery/useDateNow"
 	| "lint/nursery/useDefaultSwitchClause"
+	| "lint/nursery/useDeprecatedReason"
 	| "lint/nursery/useErrorMessage"
 	| "lint/nursery/useExplicitLengthCheck"
 	| "lint/nursery/useFocusableInteractive"
