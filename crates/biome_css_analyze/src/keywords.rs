@@ -5435,7 +5435,7 @@ pub const RESET_TO_INITIAL_PROPERTIES_BY_FONT: [&str; 13] = [
 
 // https://developer.mozilla.org/ja/docs/Web/HTML/Element
 // https://github.com/sindresorhus/html-tags/blob/main/html-tags.json
-pub const HTML_TAGS: [&str; 148] = [
+pub(crate) const HTML_TAGS: [&str; 148] = [
     "a",
     "abbr",
     "acronym",
@@ -5588,7 +5588,7 @@ pub const HTML_TAGS: [&str; 148] = [
 
 // https://developer.mozilla.org/ja/docs/Web/SVG/Element
 // https://github.com/element-io/svg-tags/blob/master/lib/svg-tags.json
-pub const SVG_TAGS: [&str; 81] = [
+pub(crate) const SVG_TAGS: [&str; 81] = [
     "a",
     "altGlyph",
     "altGlyphDef",
@@ -5673,7 +5673,7 @@ pub const SVG_TAGS: [&str; 81] = [
 ];
 
 // https://developer.mozilla.org/ja/docs/Web/MathML/Element
-pub const MATH_ML_TAGS: [&str; 32] = [
+pub(crate) const MATH_ML_TAGS: [&str; 32] = [
     "annotation",
     "annotation-xml",
     "maction",
