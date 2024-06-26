@@ -103,6 +103,10 @@ pub(crate) struct UnhandledDiagnostic;
 #[diagnostic(category = "parse", message = "Skipped file with syntax errors")]
 pub(crate) struct SkippedDiagnostic;
 
+#[derive(Debug, Diagnostic)]
+#[diagnostic(category = "search", severity = Information)]
+pub(crate) struct SearchDiagnostic;
+
 /// Extension trait for turning [Display]-able error types into [TraversalError]
 pub(crate) trait ResultExt {
     type Result;

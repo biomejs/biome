@@ -347,19 +347,6 @@ a {
    prop77: calc(-5px);
    prop78: calc(+5px);
    prop79: calc(-100px + 100px);
-@@ -152,9 +152,9 @@
- 
- .unicode-ranges {
-   /* <unicode-range> values */
--  unicode-range: U+26; /* single codepoint */
--  unicode-range: U+0-7F;
--  unicode-range: U+0025-00FF; /* codepoint range */
-+  unicode-range: u +26; /* single codepoint */
-+  unicode-range: u +0 -7f;
-+  unicode-range: u +0025 -00ff; /* codepoint range */
-   unicode-range: U+4??; /* wildcard range */
-   unicode-range: U+0025-00FF, U+4??; /* multiple values */
- }
 ```
 
 # Output
@@ -519,9 +506,9 @@ a {
 
 .unicode-ranges {
   /* <unicode-range> values */
-  unicode-range: u +26; /* single codepoint */
-  unicode-range: u +0 -7f;
-  unicode-range: u +0025 -00ff; /* codepoint range */
+  unicode-range: U+26; /* single codepoint */
+  unicode-range: U+0-7F;
+  unicode-range: U+0025-00FF; /* codepoint range */
   unicode-range: U+4??; /* wildcard range */
   unicode-range: U+0025-00FF, U+4??; /* multiple values */
 }
@@ -1243,50 +1230,6 @@ parens.css:241:19 parse ━━━━━━━━━━━━━━━━━━�
   - ratio
   - custom property
   - function
-  
-parens.css:251:23 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × unexpected character `?`
-  
-    249 │     unicode-range: U+0-7F;
-    250 │     unicode-range: U+0025-00FF;        /* codepoint range */
-  > 251 │     unicode-range: U+4??;              /* wildcard range */
-        │                       ^
-    252 │     unicode-range: U+0025-00FF, U+4??; /* multiple values */
-    253 │ }
-  
-parens.css:251:24 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × unexpected character `?`
-  
-    249 │     unicode-range: U+0-7F;
-    250 │     unicode-range: U+0025-00FF;        /* codepoint range */
-  > 251 │     unicode-range: U+4??;              /* wildcard range */
-        │                        ^
-    252 │     unicode-range: U+0025-00FF, U+4??; /* multiple values */
-    253 │ }
-  
-parens.css:252:36 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × unexpected character `?`
-  
-    250 │     unicode-range: U+0025-00FF;        /* codepoint range */
-    251 │     unicode-range: U+4??;              /* wildcard range */
-  > 252 │     unicode-range: U+0025-00FF, U+4??; /* multiple values */
-        │                                    ^
-    253 │ }
-    254 │ 
-  
-parens.css:252:37 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × unexpected character `?`
-  
-    250 │     unicode-range: U+0025-00FF;        /* codepoint range */
-    251 │     unicode-range: U+4??;              /* wildcard range */
-  > 252 │     unicode-range: U+0025-00FF, U+4??; /* multiple values */
-        │                                     ^
-    253 │ }
-    254 │ 
   
 
 ```

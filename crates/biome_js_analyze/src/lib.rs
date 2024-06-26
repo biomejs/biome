@@ -131,9 +131,7 @@ where
 
     services.insert_service(Arc::new(AriaRoles));
     services.insert_service(Arc::new(AriaProperties));
-    if let Some(manifest) = manifest {
-        services.insert_service(Arc::new(manifest));
-    }
+    services.insert_service(Arc::new(manifest));
     services.insert_service(source_type);
     (
         analyzer.run(AnalyzerContext {
@@ -238,6 +236,7 @@ mod tests {
     use biome_diagnostics::{Diagnostic, DiagnosticExt, PrintDiagnostic, Severity};
     use biome_js_parser::{parse, JsParserOptions};
     use biome_js_syntax::{JsFileSource, TextRange, TextSize};
+    use biome_project::{Dependencies, PackageJson};
     use std::slice;
 
     use crate::lint::correctness::use_exhaustive_dependencies::{Hook, HooksOptions};
@@ -256,7 +255,7 @@ mod tests {
             String::from_utf8(buffer).unwrap()
         }
 
-        const SOURCE: &str = r#"<div class={`px-2 foo p-4 bar ${variable}`}/>"#;
+        const SOURCE: &str = r#"import buffer from "buffer"; "#;
 
         let parsed = parse(SOURCE, JsFileSource::tsx(), JsParserOptions::default());
 
@@ -268,13 +267,15 @@ mod tests {
             dependencies_index: Some(1),
             stable_result: StableHookResult::None,
         };
-        let rule_filter = RuleFilter::Rule("nursery", "useSortedClasses");
+        let rule_filter = RuleFilter::Rule("style", "useNodejsImportProtocol");
 
         options.configuration.rules.push_rule(
             RuleKey::new("nursery", "useHookAtTopLevel"),
             RuleOptions::new(HooksOptions { hooks: vec![hook] }, None),
         );
 
+        let mut dependencies = Dependencies::default();
+        dependencies.add("buffer", "latest");
         analyze(
             &parsed.tree(),
             AnalysisFilter {
@@ -283,7 +284,10 @@ mod tests {
             },
             &options,
             JsFileSource::tsx(),
-            None,
+            Some(PackageJson {
+                dependencies,
+                ..Default::default()
+            }),
             |signal| {
                 if let Some(diag) = signal.diagnostic() {
                     error_ranges.push(diag.location().span.unwrap());

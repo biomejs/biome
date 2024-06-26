@@ -6,6 +6,7 @@ use crate::{diagnostics::MigrationDiagnostic, CliDiagnostic};
 /// returns the JSONified content of its default export.
 pub(crate) fn load_config(specifier: &str) -> Result<Resolution, CliDiagnostic> {
     let content_output = Command::new("node")
+        .env("NODE_NO_WARNINGS", "1")
         .arg("--eval")
         .arg(format!(
             "{UNCYCLE_FUNCTION} import('{specifier}').then((c) => console.log(JSON.stringify(uncycle(c.default))))"
@@ -19,6 +20,7 @@ pub(crate) fn load_config(specifier: &str) -> Result<Resolution, CliDiagnostic> 
         },
         Ok(output) => {
             let path_output = Command::new("node")
+                .env("NODE_NO_WARNINGS", "1")
                 .arg("--print")
                 .arg(format!(
                     "require.resolve('{specifier}')"
@@ -28,6 +30,7 @@ pub(crate) fn load_config(specifier: &str) -> Result<Resolution, CliDiagnostic> 
             if !output.stderr.is_empty() {
                 // Try with `require` before giving up.
                 let output2 = Command::new("node")
+                    .env("NODE_NO_WARNINGS", "1")
                     .arg("--eval")
                     .arg(format!(
                         "{UNCYCLE_FUNCTION} console.log(JSON.stringify(uncycle(require('{specifier}'))))"

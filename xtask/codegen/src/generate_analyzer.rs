@@ -11,6 +11,7 @@ pub fn generate_analyzer() -> Result<()> {
     generate_js_analyzer()?;
     generate_json_analyzer()?;
     generate_css_analyzer()?;
+    generate_graphql_analyzer()?;
     Ok(())
 }
 
@@ -48,6 +49,14 @@ fn generate_css_analyzer() -> Result<()> {
     generate_category("lint", &mut analyzers, &base_path)?;
     generate_options(&base_path)?;
     update_css_registry_builder(analyzers)
+}
+
+fn generate_graphql_analyzer() -> Result<()> {
+    let base_path = project_root().join("crates/biome_graphql_analyze/src");
+    let mut analyzers = BTreeMap::new();
+    generate_category("lint", &mut analyzers, &base_path)?;
+    generate_options(&base_path)?;
+    update_graphql_registry_builder(analyzers)
 }
 
 fn generate_options(base_path: &Path) -> Result<()> {
@@ -290,6 +299,25 @@ fn update_css_registry_builder(analyzers: BTreeMap<&'static str, TokenStream>) -
         use biome_css_syntax::CssLanguage;
 
         pub fn visit_registry<V: RegistryVisitor<CssLanguage>>(registry: &mut V) {
+            #( #categories )*
+        }
+    })?;
+
+    fs2::write(path, tokens)?;
+
+    Ok(())
+}
+
+fn update_graphql_registry_builder(analyzers: BTreeMap<&'static str, TokenStream>) -> Result<()> {
+    let path = project_root().join("crates/biome_graphql_analyze/src/registry.rs");
+
+    let categories = analyzers.into_values();
+
+    let tokens = xtask::reformat(quote! {
+        use biome_analyze::RegistryVisitor;
+        use biome_graphql_syntax::GraphqlLanguage;
+
+        pub fn visit_registry<V: RegistryVisitor<GraphqlLanguage>>(registry: &mut V) {
             #( #categories )*
         }
     })?;

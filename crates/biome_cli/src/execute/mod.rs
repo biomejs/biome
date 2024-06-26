@@ -312,6 +312,10 @@ impl Execution {
         matches!(self.traversal_mode, TraversalMode::CI { .. })
     }
 
+    pub(crate) const fn is_search(&self) -> bool {
+        matches!(self.traversal_mode, TraversalMode::Search { .. })
+    }
+
     pub(crate) const fn is_check(&self) -> bool {
         matches!(self.traversal_mode, TraversalMode::Check { .. })
     }

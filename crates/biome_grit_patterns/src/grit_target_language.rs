@@ -35,9 +35,27 @@ macro_rules! generate_target_language {
                 }
             }
 
-            fn get_parser(&self) -> Box<dyn Parser<Tree = GritTargetTree>> {
+            pub fn get_parser(&self) -> Box<dyn Parser<Tree = GritTargetTree>> {
                 match self {
                     $(Self::$language(_) => Box::new($parser)),+
+                }
+            }
+
+            pub fn kind_by_name(&self, name: &str) -> Option<GritTargetSyntaxKind> {
+                match self {
+                    $(Self::$language(lang) => lang.kind_by_name(name).map(Into::into)),+
+                }
+            }
+
+            pub fn name_for_kind(&self, name: GritTargetSyntaxKind) -> &'static str {
+                match self {
+                    $(Self::$language(lang) => lang.name_for_kind(name)),+
+                }
+            }
+
+            pub fn named_slots_for_kind(&self, kind: GritTargetSyntaxKind) -> &'static [(&'static str, u32)] {
+                match self {
+                    $(Self::$language(lang) => lang.named_slots_for_kind(kind)),+
                 }
             }
 
@@ -159,6 +177,31 @@ trait GritTargetLanguageImpl {
     type Kind: SyntaxKind;
 
     fn language_name(&self) -> &'static str;
+
+    /// Returns the syntax kind for a node by name.
+    ///
+    /// This is the inverse of [Self::name_for_kind()].
+    ///
+    /// For compatibility with existing Grit snippets (as well as the online
+    /// Grit playground), node names should be aligned with TreeSitter's
+    /// `ts_language_symbol_for_name()`.
+    fn kind_by_name(&self, node_name: &str) -> Option<Self::Kind>;
+
+    /// Returns the node name for a given syntax kind.
+    ///
+    /// This is the inverse of [Self::kind_by_name()].
+    ///
+    /// For compatibility with existing Grit snippets (as well as the online
+    /// Grit playground), node names should be aligned with TreeSitter's
+    /// `ts_language_symbol_name()`.
+    fn name_for_kind(&self, kind: GritTargetSyntaxKind) -> &'static str;
+
+    /// Returns the slots with their names for the given node kind.
+    ///
+    /// For compatibility with existing Grit snippets (as well as the online
+    /// Grit playground), node names should be aligned with TreeSitter's
+    /// `ts_language_field_name_for_id()`.
+    fn named_slots_for_kind(&self, kind: GritTargetSyntaxKind) -> &'static [(&'static str, u32)];
 
     /// Strings that provide context for parsing snippets.
     ///

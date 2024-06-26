@@ -57,22 +57,22 @@ Quote style: Double Quotes
  * identifiers. Everything else can and will be re-written in lowercase.
  */
 
-div {
-	color: blue;
+DIV {
+	COLOR: BLUE;
 }
 
-div.classNames#AND_Ids.ArePreserved {
+DIV.classNames#AND_Ids.ArePreserved {
 }
 
 [attr="IdentifierValuesPreserveWhenStringified"] {
 }
 
-@media not screen and (color), print and (color) {
+@media not SCReEN and (CoLOR), PRINT and (COLOR) {
 }
 
-div {
-	--Preserved-Casing: blue;
-	color: VAR(--Preserved-Casing);
+DIV {
+	--Preserved-Casing: BLUE;
+	ColOR: VAR(--Preserved-Casing);
 }
 
 @font-palette-values --AnyCASInG-works {

@@ -1,0 +1,31 @@
+@font-face {
+	unicode-range: U+000-49F, U+2000-27FF, U+2900-2BFF, U+1D400-1D7FF, U+ff??;
+}
+
+@font-face {
+	unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2212, U+2215;
+}
+
+@font-face {
+	unicode-range: U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+
+@font-face {
+	font-family: 'Ampersand';
+	src: local('Times New Roman');
+	unicode-range: U+26;               /* single codepoint */
+	unicode-range: u+26;
+	unicode-range: U+0-7F;
+	unicode-range: U+0025-00FF;        /* codepoint range */
+	unicode-range: U+4??;              /* wildcard range */
+	unicode-range: U+0025-00FF, U+4??; /* multiple values */
+	unicode-range: U+A5, U+4E00-9FFF, U+30??, U+FF00-FF9F; /* multiple values */
+	unicode-range: U+????;
+	unicode-range: U+??????;
+	unicode-range: U+12;
+	unicode-range: U+12e112;
+	unicode-range: U+1e1ee1;
+	unicode-range: U+1e1ee1-FFFFFF;
+	unicode-range: U+1e1ee?;
+	unicode-range: U+12-13;
+}

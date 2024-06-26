@@ -1,7 +1,7 @@
-use crate::execute::diagnostics::ResultExt;
+use crate::execute::diagnostics::{ResultExt, SearchDiagnostic};
 use crate::execute::process_file::workspace_file::WorkspaceFile;
-use crate::execute::process_file::{FileResult, FileStatus, SharedTraversalOptions};
-use biome_diagnostics::category;
+use crate::execute::process_file::{FileResult, FileStatus, Message, SharedTraversalOptions};
+use biome_diagnostics::{category, DiagnosticExt};
 use biome_service::workspace::PatternId;
 use std::path::Path;
 
@@ -21,7 +21,7 @@ pub(crate) fn search_with_guard<'ctx>(
 ) -> FileResult {
     tracing::info_span!("Processes searching", path =? workspace_file.path.display()).in_scope(
         move || {
-            let _result = workspace_file
+            let result = workspace_file
                 .guard()
                 .search_pattern(pattern)
                 .with_file_path_and_code(
@@ -29,8 +29,20 @@ pub(crate) fn search_with_guard<'ctx>(
                     category!("search"),
                 )?;
 
-            // FIXME: We need to report some real results here...
-            Ok(FileStatus::Unchanged)
+            let input = workspace_file.input()?;
+            let file_name = workspace_file.path.display().to_string();
+
+            let search_results = Message::Diagnostics {
+                name: file_name,
+                content: input,
+                diagnostics: result
+                    .matches
+                    .into_iter()
+                    .map(|mat| SearchDiagnostic.with_file_span(mat))
+                    .collect(),
+                skipped_diagnostics: 0,
+            };
+            Ok(FileStatus::Message(search_results))
         },
     )
 }

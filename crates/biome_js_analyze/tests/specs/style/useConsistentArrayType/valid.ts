@@ -26,3 +26,6 @@ type readonlyValid7 = ReadonlyArray<new (string, number) => string>;
 let readonlyValid8: ReadonlyArray<string & number>;
 type readonlyValid9<T> = T extends ReadonlyArray<infer R> ? R : any;
 type readonlyValid10<T> = { [K in keyof T]: T[K] };
+
+interface Args extends Array<string> {}
+class Args2 extends (Array<string>) implements Array<string> {}

@@ -18,6 +18,7 @@ impl FormatRule<AnyCssValue> for FormatAnyCssValue {
             AnyCssValue::CssNumber(node) => node.format().fmt(f),
             AnyCssValue::CssRatio(node) => node.format().fmt(f),
             AnyCssValue::CssString(node) => node.format().fmt(f),
+            AnyCssValue::CssUnicodeRange(node) => node.format().fmt(f),
         }
     }
 }

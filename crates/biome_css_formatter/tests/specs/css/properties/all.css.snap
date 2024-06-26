@@ -58,8 +58,8 @@ Quote style: Double Quotes
 
 ```css
 div {
-	all: initial;
-	all: inherit;
+	all: InItial;
+	all: inherIT;
 	all: revert-layer;
 
 	all: unknown-value;

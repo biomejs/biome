@@ -105,23 +105,25 @@ impl Rule for UseConsistentArrayType {
                 if options.syntax == ConsistentArrayType::Shorthand {
                     return None;
                 }
-                match get_array_kind_by_any_type(query) {
-                    Some(array_kind) => transform_array_type(query.to_owned(), array_kind),
-                    _ => None,
-                }
+                let array_kind = get_array_kind_by_any_type(query)?;
+                transform_array_type(query.to_owned(), array_kind)
             }
             AnyTsType::TsReferenceType(ty) => {
                 if options.syntax == ConsistentArrayType::Generic {
                     return None;
                 }
 
-                match get_array_kind_by_reference(ty) {
-                    Some(array_kind) => {
-                        let type_arguments = &ty.type_arguments()?;
-                        convert_to_array_type(type_arguments, array_kind)
-                    }
-                    _ => None,
+                // Ignore `Array` in the `extends` and `implements` clauses.
+                let parent =
+                    ty.syntax().ancestors().skip(1).find(|ancestor| {
+                        ancestor.kind() != JsSyntaxKind::JS_PARENTHESIZED_EXPRESSION
+                    });
+                if parent.kind() == Some(JsSyntaxKind::TS_TYPE_LIST) {
+                    return None;
                 }
+
+                let array_kind = get_array_kind_by_reference(ty)?;
+                convert_to_array_type(&ty.type_arguments()?, array_kind)
             }
             _ => None,
         }

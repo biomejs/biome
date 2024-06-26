@@ -2,7 +2,6 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: css/range/single_value.css
 ---
-
 # Input
 
 ```css
@@ -32,7 +31,5 @@ Quote style: Double Quotes
 div {
     COLOR: GREEN;
 
-    Border : 1px green   solid   ;
+    Border : 1px GrEeN   solid   ;
 }```
-
-

@@ -1,0 +1,10 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.js
+---
+# Input
+```jsx
+export { A } from "mod";
+export * as ns from "mod";
+export { default as D } from "mod";
+```

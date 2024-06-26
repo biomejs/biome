@@ -1,7 +1,7 @@
 use crate::globals::is_node_builtin_module;
 use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
-use biome_js_syntax::{inner_string_text, AnyJsImportSpecifierLike};
+use biome_js_syntax::{inner_string_text, AnyJsImportLike};
 use biome_rowan::TextRange;
 
 declare_rule! {
@@ -36,7 +36,7 @@ declare_rule! {
 }
 
 impl Rule for NoNodejsModules {
-    type Query = Ast<AnyJsImportSpecifierLike>;
+    type Query = Ast<AnyJsImportLike>;
     type State = TextRange;
     type Signals = Option<Self::State>;
     type Options = ();

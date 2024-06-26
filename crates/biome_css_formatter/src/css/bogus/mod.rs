@@ -23,6 +23,7 @@ pub(crate) mod bogus_rule;
 pub(crate) mod bogus_scope_range;
 pub(crate) mod bogus_selector;
 pub(crate) mod bogus_sub_selector;
+pub(crate) mod bogus_unicode_range_value;
 pub(crate) mod bogus_url_modifier;
 pub(crate) mod unknown_at_rule_component_list;
 pub(crate) mod value_at_rule_generic_value;

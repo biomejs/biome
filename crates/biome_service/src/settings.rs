@@ -6,7 +6,7 @@ use biome_configuration::javascript::JsxRuntime;
 use biome_configuration::organize_imports::OrganizeImports;
 use biome_configuration::{
     push_to_analyzer_rules, BiomeDiagnostic, CssConfiguration, FilesConfiguration,
-    FormatterConfiguration, JavascriptConfiguration, JsonConfiguration, LinterConfiguration,
+    FormatterConfiguration, JavascriptConfiguration, LinterConfiguration,
     OverrideFormatterConfiguration, OverrideLinterConfiguration,
     OverrideOrganizeImportsConfiguration, Overrides, PartialConfiguration, PartialCssConfiguration,
     PartialJavascriptConfiguration, PartialJsonConfiguration, PlainIndentStyle, Rules,
@@ -212,7 +212,7 @@ impl Settings {
         }
         // json settings
         if let Some(json) = configuration.json {
-            self.languages.json = JsonConfiguration::from(json).into();
+            self.languages.json = json.into();
         }
         // css settings
         if let Some(css) = configuration.css {
@@ -471,18 +471,24 @@ impl From<JavascriptConfiguration> for LanguageSettings<JsLanguage> {
     }
 }
 
-impl From<JsonConfiguration> for LanguageSettings<JsonLanguage> {
-    fn from(json: JsonConfiguration) -> Self {
+impl From<PartialJsonConfiguration> for LanguageSettings<JsonLanguage> {
+    fn from(json: PartialJsonConfiguration) -> Self {
         let mut language_setting: LanguageSettings<JsonLanguage> = LanguageSettings::default();
 
-        language_setting.parser.allow_comments = json.parser.allow_comments;
-        language_setting.parser.allow_trailing_commas = json.parser.allow_trailing_commas;
-        language_setting.formatter.trailing_commas = json.formatter.trailing_commas;
-        language_setting.formatter.enabled = Some(json.formatter.enabled);
-        language_setting.formatter.line_width = json.formatter.line_width;
-        language_setting.formatter.indent_width = json.formatter.indent_width.map(Into::into);
-        language_setting.formatter.indent_style = json.formatter.indent_style.map(Into::into);
-        language_setting.linter.enabled = Some(json.linter.enabled);
+        if let Some(parser) = json.parser {
+            language_setting.parser.allow_comments = parser.allow_comments;
+            language_setting.parser.allow_trailing_commas = parser.allow_trailing_commas;
+        }
+        if let Some(formatter) = json.formatter {
+            language_setting.formatter.trailing_commas = formatter.trailing_commas;
+            language_setting.formatter.enabled = formatter.enabled;
+            language_setting.formatter.line_width = formatter.line_width;
+            language_setting.formatter.indent_width = formatter.indent_width.map(Into::into);
+            language_setting.formatter.indent_style = formatter.indent_style.map(Into::into);
+        }
+        if let Some(linter) = json.linter {
+            language_setting.linter.enabled = linter.enabled;
+        }
 
         language_setting
     }
@@ -1101,8 +1107,12 @@ impl OverrideSettingPattern {
 
         let json_parser = &self.languages.json.parser;
 
-        options.allow_trailing_commas = json_parser.allow_trailing_commas;
-        options.allow_comments = json_parser.allow_comments;
+        if let Some(allow_comments) = json_parser.allow_comments {
+            options.allow_comments = allow_comments;
+        }
+        if let Some(allow_trailing_commas) = json_parser.allow_trailing_commas {
+            options.allow_trailing_commas = allow_trailing_commas;
+        }
 
         if let Ok(mut writeonly_cache) = self.cached_json_parser_options.write() {
             let options = *options;
@@ -1328,13 +1338,11 @@ fn to_json_language_settings(
 
     let parser = conf.parser.take().unwrap_or_default();
     let parent_parser = &parent_settings.parser;
-    language_setting.parser.allow_comments = parser
-        .allow_comments
-        .unwrap_or(parent_parser.allow_comments);
+    language_setting.parser.allow_comments = parser.allow_comments.or(parent_parser.allow_comments);
 
     language_setting.parser.allow_trailing_commas = parser
         .allow_trailing_commas
-        .unwrap_or(parent_parser.allow_trailing_commas);
+        .or(parent_parser.allow_trailing_commas);
 
     language_setting
 }

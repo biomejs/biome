@@ -254,6 +254,75 @@ pub(super) fn print_frame(fmt: &mut fmt::Formatter<'_>, location: Location<'_>) 
     fmt.write_str("\n")
 }
 
+pub(super) fn print_highlighted_frame(
+    fmt: &mut fmt::Formatter<'_>,
+    location: Location<'_>,
+) -> io::Result<()> {
+    let Some(span) = location.span else {
+        return Ok(());
+    };
+    let Some(source_code) = location.source_code else {
+        return Ok(());
+    };
+
+    // TODO: instead of calculating lines for every match,
+    // check if the Grit engine is able to pull them out
+    let source = SourceFile::new(source_code);
+
+    let start = source.location(span.start())?;
+    let end = source.location(span.end())?;
+
+    let match_line_start = start.line_number;
+    let match_line_end = end.line_number.saturating_add(1);
+
+    for line_index in IntoIter::new(match_line_start..match_line_end) {
+        let current_range = source.line_range(line_index.to_zero_indexed());
+        let current_range = match current_range {
+            Ok(v) => v,
+            Err(_) => continue,
+        };
+
+        let current_text = source_code.text[current_range].trim_end_matches(['\r', '\n']);
+
+        let is_first_line = line_index == start.line_number;
+        let is_last_line = line_index == end.line_number;
+
+        let start_index_relative_to_line =
+            span.start().max(current_range.start()) - current_range.start();
+        let end_index_relative_to_line =
+            span.end().min(current_range.end()) - current_range.start();
+
+        let marker = if is_first_line && is_last_line {
+            TextRange::new(start_index_relative_to_line, end_index_relative_to_line)
+        } else if is_last_line {
+            let start_index: u32 = current_text.text_len().into();
+
+            let safe_start_index =
+                start_index.saturating_sub(current_text.trim_start().text_len().into());
+
+            TextRange::new(TextSize::from(safe_start_index), end_index_relative_to_line)
+        } else {
+            TextRange::new(start_index_relative_to_line, current_text.text_len())
+        };
+
+        fmt.write_markup(markup! {
+            <Emphasis>{format_args!("{line_index} \u{2502} ")}</Emphasis>
+        })?;
+
+        let start_range = &current_text[0..marker.start().into()];
+        let highlighted_range = &current_text[marker.start().into()..marker.end().into()];
+        let end_range = &current_text[marker.end().into()..current_text.text_len().into()];
+
+        write!(fmt, "{start_range}")?;
+        fmt.write_markup(markup! { <Emphasis><Info>{highlighted_range}</Info></Emphasis> })?;
+        write!(fmt, "{end_range}")?;
+
+        writeln!(fmt)?;
+    }
+
+    Ok(())
+}
+
 /// Calculate the length of the string representation of `value`
 pub(super) fn calculate_print_width(mut value: OneIndexed) -> NonZeroUsize {
     // SAFETY: Constant is being initialized with a non-zero value

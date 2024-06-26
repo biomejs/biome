@@ -31,6 +31,7 @@ mod assignment_compiler;
 mod auto_wrap;
 mod before_compiler;
 mod bubble_compiler;
+mod call_compiler;
 mod container_compiler;
 mod contains_compiler;
 mod divide_compiler;
@@ -49,8 +50,10 @@ mod match_compiler;
 mod maybe_compiler;
 mod modulo_compiler;
 mod multiply_compiler;
+mod node_like_compiler;
 mod not_compiler;
 mod or_compiler;
+mod predicate_call_compiler;
 mod predicate_compiler;
 mod predicate_return_compiler;
 mod rewrite_compiler;
@@ -83,6 +86,7 @@ use crate::{grit_context::GritQueryContext, CompileError};
 use biome_grit_syntax::{AnyGritMaybeCurlyPattern, AnyGritPattern, GritSyntaxKind};
 use biome_rowan::AstNode as _;
 use grit_pattern_matcher::pattern::{DynamicPattern, DynamicSnippet, DynamicSnippetPart, Pattern};
+use node_like_compiler::NodeLikeCompiler;
 
 pub(crate) struct PatternCompiler;
 
@@ -156,7 +160,9 @@ impl PatternCompiler {
             AnyGritPattern::GritMulOperation(node) => Ok(Pattern::Multiply(Box::new(
                 MultiplyCompiler::from_node(node, context)?,
             ))),
-            AnyGritPattern::GritNodeLike(_) => todo!(),
+            AnyGritPattern::GritNodeLike(node) => {
+                NodeLikeCompiler::from_node_with_rhs(node, context, is_rhs)
+            }
             AnyGritPattern::GritPatternAccumulate(node) => Ok(Pattern::Accumulate(Box::new(
                 AccumulateCompiler::from_node(node, context)?,
             ))),

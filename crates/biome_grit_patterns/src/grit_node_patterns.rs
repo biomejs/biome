@@ -20,11 +20,14 @@ impl AstNodePattern<GritQueryContext> for GritNodePattern {
     const INCLUDES_TRIVIA: bool = true;
 
     fn children(&self) -> Vec<PatternOrPredicate<GritQueryContext>> {
-        todo!()
+        self.args
+            .iter()
+            .map(|arg| PatternOrPredicate::Pattern(&arg.pattern))
+            .collect()
     }
 
-    fn matches_kind_of(&self, _node: &GritTargetNode) -> bool {
-        todo!()
+    fn matches_kind_of(&self, node: &GritTargetNode) -> bool {
+        self.kind == node.kind()
     }
 }
 
@@ -108,8 +111,8 @@ impl PatternName for GritNodePattern {
 
 #[derive(Clone, Debug)]
 pub struct GritNodePatternArg {
-    slot_index: u32,
-    pattern: Pattern<GritQueryContext>,
+    pub slot_index: u32,
+    pub pattern: Pattern<GritQueryContext>,
 }
 
 impl GritNodePatternArg {
@@ -145,12 +148,20 @@ impl AstLeafNodePattern<GritQueryContext> for GritLeafNodePattern {
 impl Matcher<GritQueryContext> for GritLeafNodePattern {
     fn execute<'a>(
         &'a self,
-        _binding: &GritResolvedPattern,
+        binding: &GritResolvedPattern,
         _state: &mut State<'a, GritQueryContext>,
         _context: &'a GritExecContext,
         _logs: &mut AnalysisLogs,
     ) -> Result<bool> {
-        todo!()
+        let Some(node) = binding.get_last_binding().and_then(Binding::singleton) else {
+            return Ok(false);
+        };
+        // TODO: Implement leaf node normalization.
+        if self.kind != node.kind() {
+            Ok(false)
+        } else {
+            Ok(node.text() == self.text)
+        }
     }
 }
 

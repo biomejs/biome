@@ -5,7 +5,7 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_js_factory::make;
-use biome_js_syntax::{inner_string_text, AnyJsImportSpecifierLike, JsLanguage};
+use biome_js_syntax::{inner_string_text, AnyJsImportLike, JsLanguage};
 use biome_rowan::{BatchMutationExt, SyntaxToken};
 
 use crate::JsRuleAction;
@@ -83,7 +83,7 @@ declare_rule! {
 }
 
 impl Rule for UseImportExtensions {
-    type Query = Ast<AnyJsImportSpecifierLike>;
+    type Query = Ast<AnyJsImportLike>;
     type State = UseImportExtensionsState;
     type Signals = Option<Self::State>;
     type Options = ();
@@ -145,7 +145,7 @@ pub struct UseImportExtensionsState {
 
 fn get_extensionless_import(
     file_ext: &str,
-    node: &AnyJsImportSpecifierLike,
+    node: &AnyJsImportLike,
 ) -> Option<UseImportExtensionsState> {
     let module_name_token = node.module_name_token()?;
     let module_path = inner_string_text(&module_name_token);

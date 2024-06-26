@@ -2,12 +2,9 @@ use crate::services::semantic::Semantic;
 use biome_analyze::{context::RuleContext, declare_rule, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
 use biome_js_semantic::ReferencesExtensions;
-use biome_js_syntax::{
-    JsDefaultImportSpecifier, JsIdentifierAssignment, JsIdentifierBinding, JsNamedImportSpecifier,
-    JsNamespaceImportSpecifier, JsShorthandNamedImportSpecifier,
-};
+use biome_js_syntax::{AnyJsImportSpecifier, JsIdentifierAssignment, JsIdentifierBinding};
 
-use biome_rowan::{declare_node_union, AstNode};
+use biome_rowan::AstNode;
 
 declare_rule! {
     ///  Disallow assigning to imported bindings
@@ -59,7 +56,7 @@ declare_rule! {
 }
 
 impl Rule for NoImportAssign {
-    type Query = Semantic<AnyJsImportLike>;
+    type Query = Semantic<AnyJsImportSpecifier>;
     /// The first element of the tuple is the invalid `JsIdentifierAssignment`, the second element of the tuple is the imported `JsIdentifierBinding`.
     type State = (JsIdentifierAssignment, JsIdentifierBinding);
     type Signals = Vec<Self::State>;
@@ -71,22 +68,26 @@ impl Rule for NoImportAssign {
         let local_name_binding = match label_statement {
             // `import {x as xx} from 'y'`
             //          ^^^^^^^
-            AnyJsImportLike::JsNamedImportSpecifier(specifier) => specifier.local_name().ok(),
+            AnyJsImportSpecifier::JsNamedImportSpecifier(specifier) => specifier.local_name().ok(),
             // `import {x} from 'y'`
             //          ^
-            AnyJsImportLike::JsShorthandNamedImportSpecifier(specifier) => {
+            AnyJsImportSpecifier::JsShorthandNamedImportSpecifier(specifier) => {
                 specifier.local_name().ok()
             }
             // `import * as xxx from 'y'`
             //         ^^^^^^^^
             // `import a, * as b from 'y'`
             //            ^^^^^^
-            AnyJsImportLike::JsNamespaceImportSpecifier(specifier) => specifier.local_name().ok(),
+            AnyJsImportSpecifier::JsNamespaceImportSpecifier(specifier) => {
+                specifier.local_name().ok()
+            }
             // `import xx from 'y'`
             //         ^^
             // `import a, * as b from 'y'`
             //         ^
-            AnyJsImportLike::JsDefaultImportSpecifier(specifier) => specifier.local_name().ok(),
+            AnyJsImportSpecifier::JsDefaultImportSpecifier(specifier) => {
+                specifier.local_name().ok()
+            }
         };
         local_name_binding
             .and_then(|binding| {
@@ -124,8 +125,4 @@ impl Rule for NoImportAssign {
             ),
         )
     }
-}
-
-declare_node_union! {
-    pub AnyJsImportLike = JsNamedImportSpecifier | JsShorthandNamedImportSpecifier | JsNamespaceImportSpecifier | JsDefaultImportSpecifier
 }

@@ -1,4 +1,4 @@
-use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic};
+use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
 use biome_css_syntax::CssGenericProperty;
 use biome_rowan::{AstNode, TextRange};
@@ -57,7 +57,8 @@ declare_rule! {
         version: "1.8.0",
         name: "noUnknownProperty",
         language: "css",
-        recommended: false,
+        recommended: true,
+        sources: &[RuleSource::Stylelint("property-no-unknown")],
     }
 }
 

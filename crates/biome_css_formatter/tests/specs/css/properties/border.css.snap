@@ -65,18 +65,18 @@ Quote style: Double Quotes
 ```css
 div {
 	/* Generic property tests */
-	border: initial;
+	border: InItial;
 	border: inherit;
 
 	border: zzz-unknown-value;
 	border: a, value list;
 
 	/* <line-style> */
-	border: solid;
+	border: SOLID;
 	border: none;
 
 	/* <line-width> */
-	border: thin;
+	border: ThIn;
 	border: medium;
 	border: 100px;
 

@@ -5986,6 +5986,165 @@ pub struct CssTypeSelectorFields {
     pub ident: SyntaxResult<CssIdentifier>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
+pub struct CssUnicodeCodepoint {
+    pub(crate) syntax: SyntaxNode,
+}
+impl CssUnicodeCodepoint {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> CssUnicodeCodepointFields {
+        CssUnicodeCodepointFields {
+            value_token: self.value_token(),
+        }
+    }
+    pub fn value_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+}
+#[cfg(feature = "serde")]
+impl Serialize for CssUnicodeCodepoint {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[cfg_attr(feature = "serde", derive(Serialize))]
+pub struct CssUnicodeCodepointFields {
+    pub value_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct CssUnicodeRange {
+    pub(crate) syntax: SyntaxNode,
+}
+impl CssUnicodeRange {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> CssUnicodeRangeFields {
+        CssUnicodeRangeFields {
+            prefix_token: self.prefix_token(),
+            value: self.value(),
+        }
+    }
+    pub fn prefix_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn value(&self) -> SyntaxResult<AnyCssUnicodeValue> {
+        support::required_node(&self.syntax, 1usize)
+    }
+}
+#[cfg(feature = "serde")]
+impl Serialize for CssUnicodeRange {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[cfg_attr(feature = "serde", derive(Serialize))]
+pub struct CssUnicodeRangeFields {
+    pub prefix_token: SyntaxResult<SyntaxToken>,
+    pub value: SyntaxResult<AnyCssUnicodeValue>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct CssUnicodeRangeInterval {
+    pub(crate) syntax: SyntaxNode,
+}
+impl CssUnicodeRangeInterval {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> CssUnicodeRangeIntervalFields {
+        CssUnicodeRangeIntervalFields {
+            start: self.start(),
+            minus_token: self.minus_token(),
+            end: self.end(),
+        }
+    }
+    pub fn start(&self) -> SyntaxResult<CssUnicodeCodepoint> {
+        support::required_node(&self.syntax, 0usize)
+    }
+    pub fn minus_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 1usize)
+    }
+    pub fn end(&self) -> SyntaxResult<CssUnicodeCodepoint> {
+        support::required_node(&self.syntax, 2usize)
+    }
+}
+#[cfg(feature = "serde")]
+impl Serialize for CssUnicodeRangeInterval {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[cfg_attr(feature = "serde", derive(Serialize))]
+pub struct CssUnicodeRangeIntervalFields {
+    pub start: SyntaxResult<CssUnicodeCodepoint>,
+    pub minus_token: SyntaxResult<SyntaxToken>,
+    pub end: SyntaxResult<CssUnicodeCodepoint>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct CssUnicodeRangeWildcard {
+    pub(crate) syntax: SyntaxNode,
+}
+impl CssUnicodeRangeWildcard {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> CssUnicodeRangeWildcardFields {
+        CssUnicodeRangeWildcardFields {
+            value_token: self.value_token(),
+        }
+    }
+    pub fn value_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+}
+#[cfg(feature = "serde")]
+impl Serialize for CssUnicodeRangeWildcard {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[cfg_attr(feature = "serde", derive(Serialize))]
+pub struct CssUnicodeRangeWildcardFields {
+    pub value_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
 pub struct CssUniversalNamespacePrefix {
     pub(crate) syntax: SyntaxNode,
 }
@@ -8496,6 +8655,40 @@ impl AnyCssSupportsOrCombinableCondition {
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "serde", derive(Serialize))]
+pub enum AnyCssUnicodeValue {
+    CssBogusUnicodeRangeValue(CssBogusUnicodeRangeValue),
+    CssUnicodeCodepoint(CssUnicodeCodepoint),
+    CssUnicodeRangeInterval(CssUnicodeRangeInterval),
+    CssUnicodeRangeWildcard(CssUnicodeRangeWildcard),
+}
+impl AnyCssUnicodeValue {
+    pub fn as_css_bogus_unicode_range_value(&self) -> Option<&CssBogusUnicodeRangeValue> {
+        match &self {
+            AnyCssUnicodeValue::CssBogusUnicodeRangeValue(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_unicode_codepoint(&self) -> Option<&CssUnicodeCodepoint> {
+        match &self {
+            AnyCssUnicodeValue::CssUnicodeCodepoint(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_unicode_range_interval(&self) -> Option<&CssUnicodeRangeInterval> {
+        match &self {
+            AnyCssUnicodeValue::CssUnicodeRangeInterval(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_unicode_range_wildcard(&self) -> Option<&CssUnicodeRangeWildcard> {
+        match &self {
+            AnyCssUnicodeValue::CssUnicodeRangeWildcard(item) => Some(item),
+            _ => None,
+        }
+    }
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize))]
 pub enum AnyCssUrlModifier {
     CssBogusUrlModifier(CssBogusUrlModifier),
     CssFunction(CssFunction),
@@ -8554,6 +8747,7 @@ pub enum AnyCssValue {
     CssNumber(CssNumber),
     CssRatio(CssRatio),
     CssString(CssString),
+    CssUnicodeRange(CssUnicodeRange),
 }
 impl AnyCssValue {
     pub fn as_any_css_dimension(&self) -> Option<&AnyCssDimension> {
@@ -8613,6 +8807,12 @@ impl AnyCssValue {
     pub fn as_css_string(&self) -> Option<&CssString> {
         match &self {
             AnyCssValue::CssString(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_unicode_range(&self) -> Option<&CssUnicodeRange> {
+        match &self {
+            AnyCssValue::CssUnicodeRange(item) => Some(item),
             _ => None,
         }
     }
@@ -14490,6 +14690,173 @@ impl From<CssTypeSelector> for SyntaxNode {
 }
 impl From<CssTypeSelector> for SyntaxElement {
     fn from(n: CssTypeSelector) -> SyntaxElement {
+        n.syntax.into()
+    }
+}
+impl AstNode for CssUnicodeCodepoint {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_UNICODE_CODEPOINT as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == CSS_UNICODE_CODEPOINT
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for CssUnicodeCodepoint {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("CssUnicodeCodepoint")
+            .field(
+                "value_token",
+                &support::DebugSyntaxResult(self.value_token()),
+            )
+            .finish()
+    }
+}
+impl From<CssUnicodeCodepoint> for SyntaxNode {
+    fn from(n: CssUnicodeCodepoint) -> SyntaxNode {
+        n.syntax
+    }
+}
+impl From<CssUnicodeCodepoint> for SyntaxElement {
+    fn from(n: CssUnicodeCodepoint) -> SyntaxElement {
+        n.syntax.into()
+    }
+}
+impl AstNode for CssUnicodeRange {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_UNICODE_RANGE as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == CSS_UNICODE_RANGE
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for CssUnicodeRange {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("CssUnicodeRange")
+            .field(
+                "prefix_token",
+                &support::DebugSyntaxResult(self.prefix_token()),
+            )
+            .field("value", &support::DebugSyntaxResult(self.value()))
+            .finish()
+    }
+}
+impl From<CssUnicodeRange> for SyntaxNode {
+    fn from(n: CssUnicodeRange) -> SyntaxNode {
+        n.syntax
+    }
+}
+impl From<CssUnicodeRange> for SyntaxElement {
+    fn from(n: CssUnicodeRange) -> SyntaxElement {
+        n.syntax.into()
+    }
+}
+impl AstNode for CssUnicodeRangeInterval {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_UNICODE_RANGE_INTERVAL as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == CSS_UNICODE_RANGE_INTERVAL
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for CssUnicodeRangeInterval {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("CssUnicodeRangeInterval")
+            .field("start", &support::DebugSyntaxResult(self.start()))
+            .field(
+                "minus_token",
+                &support::DebugSyntaxResult(self.minus_token()),
+            )
+            .field("end", &support::DebugSyntaxResult(self.end()))
+            .finish()
+    }
+}
+impl From<CssUnicodeRangeInterval> for SyntaxNode {
+    fn from(n: CssUnicodeRangeInterval) -> SyntaxNode {
+        n.syntax
+    }
+}
+impl From<CssUnicodeRangeInterval> for SyntaxElement {
+    fn from(n: CssUnicodeRangeInterval) -> SyntaxElement {
+        n.syntax.into()
+    }
+}
+impl AstNode for CssUnicodeRangeWildcard {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_UNICODE_RANGE_WILDCARD as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == CSS_UNICODE_RANGE_WILDCARD
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for CssUnicodeRangeWildcard {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("CssUnicodeRangeWildcard")
+            .field(
+                "value_token",
+                &support::DebugSyntaxResult(self.value_token()),
+            )
+            .finish()
+    }
+}
+impl From<CssUnicodeRangeWildcard> for SyntaxNode {
+    fn from(n: CssUnicodeRangeWildcard) -> SyntaxNode {
+        n.syntax
+    }
+}
+impl From<CssUnicodeRangeWildcard> for SyntaxElement {
+    fn from(n: CssUnicodeRangeWildcard) -> SyntaxElement {
         n.syntax.into()
     }
 }
@@ -20769,6 +21136,102 @@ impl From<AnyCssSupportsOrCombinableCondition> for SyntaxElement {
         node.into()
     }
 }
+impl From<CssBogusUnicodeRangeValue> for AnyCssUnicodeValue {
+    fn from(node: CssBogusUnicodeRangeValue) -> AnyCssUnicodeValue {
+        AnyCssUnicodeValue::CssBogusUnicodeRangeValue(node)
+    }
+}
+impl From<CssUnicodeCodepoint> for AnyCssUnicodeValue {
+    fn from(node: CssUnicodeCodepoint) -> AnyCssUnicodeValue {
+        AnyCssUnicodeValue::CssUnicodeCodepoint(node)
+    }
+}
+impl From<CssUnicodeRangeInterval> for AnyCssUnicodeValue {
+    fn from(node: CssUnicodeRangeInterval) -> AnyCssUnicodeValue {
+        AnyCssUnicodeValue::CssUnicodeRangeInterval(node)
+    }
+}
+impl From<CssUnicodeRangeWildcard> for AnyCssUnicodeValue {
+    fn from(node: CssUnicodeRangeWildcard) -> AnyCssUnicodeValue {
+        AnyCssUnicodeValue::CssUnicodeRangeWildcard(node)
+    }
+}
+impl AstNode for AnyCssUnicodeValue {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> = CssBogusUnicodeRangeValue::KIND_SET
+        .union(CssUnicodeCodepoint::KIND_SET)
+        .union(CssUnicodeRangeInterval::KIND_SET)
+        .union(CssUnicodeRangeWildcard::KIND_SET);
+    fn can_cast(kind: SyntaxKind) -> bool {
+        matches!(
+            kind,
+            CSS_BOGUS_UNICODE_RANGE_VALUE
+                | CSS_UNICODE_CODEPOINT
+                | CSS_UNICODE_RANGE_INTERVAL
+                | CSS_UNICODE_RANGE_WILDCARD
+        )
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        let res = match syntax.kind() {
+            CSS_BOGUS_UNICODE_RANGE_VALUE => {
+                AnyCssUnicodeValue::CssBogusUnicodeRangeValue(CssBogusUnicodeRangeValue { syntax })
+            }
+            CSS_UNICODE_CODEPOINT => {
+                AnyCssUnicodeValue::CssUnicodeCodepoint(CssUnicodeCodepoint { syntax })
+            }
+            CSS_UNICODE_RANGE_INTERVAL => {
+                AnyCssUnicodeValue::CssUnicodeRangeInterval(CssUnicodeRangeInterval { syntax })
+            }
+            CSS_UNICODE_RANGE_WILDCARD => {
+                AnyCssUnicodeValue::CssUnicodeRangeWildcard(CssUnicodeRangeWildcard { syntax })
+            }
+            _ => return None,
+        };
+        Some(res)
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        match self {
+            AnyCssUnicodeValue::CssBogusUnicodeRangeValue(it) => &it.syntax,
+            AnyCssUnicodeValue::CssUnicodeCodepoint(it) => &it.syntax,
+            AnyCssUnicodeValue::CssUnicodeRangeInterval(it) => &it.syntax,
+            AnyCssUnicodeValue::CssUnicodeRangeWildcard(it) => &it.syntax,
+        }
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        match self {
+            AnyCssUnicodeValue::CssBogusUnicodeRangeValue(it) => it.syntax,
+            AnyCssUnicodeValue::CssUnicodeCodepoint(it) => it.syntax,
+            AnyCssUnicodeValue::CssUnicodeRangeInterval(it) => it.syntax,
+            AnyCssUnicodeValue::CssUnicodeRangeWildcard(it) => it.syntax,
+        }
+    }
+}
+impl std::fmt::Debug for AnyCssUnicodeValue {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            AnyCssUnicodeValue::CssBogusUnicodeRangeValue(it) => std::fmt::Debug::fmt(it, f),
+            AnyCssUnicodeValue::CssUnicodeCodepoint(it) => std::fmt::Debug::fmt(it, f),
+            AnyCssUnicodeValue::CssUnicodeRangeInterval(it) => std::fmt::Debug::fmt(it, f),
+            AnyCssUnicodeValue::CssUnicodeRangeWildcard(it) => std::fmt::Debug::fmt(it, f),
+        }
+    }
+}
+impl From<AnyCssUnicodeValue> for SyntaxNode {
+    fn from(n: AnyCssUnicodeValue) -> SyntaxNode {
+        match n {
+            AnyCssUnicodeValue::CssBogusUnicodeRangeValue(it) => it.into(),
+            AnyCssUnicodeValue::CssUnicodeCodepoint(it) => it.into(),
+            AnyCssUnicodeValue::CssUnicodeRangeInterval(it) => it.into(),
+            AnyCssUnicodeValue::CssUnicodeRangeWildcard(it) => it.into(),
+        }
+    }
+}
+impl From<AnyCssUnicodeValue> for SyntaxElement {
+    fn from(n: AnyCssUnicodeValue) -> SyntaxElement {
+        let node: SyntaxNode = n.into();
+        node.into()
+    }
+}
 impl From<CssBogusUrlModifier> for AnyCssUrlModifier {
     fn from(node: CssBogusUrlModifier) -> AnyCssUrlModifier {
         AnyCssUrlModifier::CssBogusUrlModifier(node)
@@ -20941,6 +21404,11 @@ impl From<CssString> for AnyCssValue {
         AnyCssValue::CssString(node)
     }
 }
+impl From<CssUnicodeRange> for AnyCssValue {
+    fn from(node: CssUnicodeRange) -> AnyCssValue {
+        AnyCssValue::CssUnicodeRange(node)
+    }
+}
 impl AstNode for AnyCssValue {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> = AnyCssDimension::KIND_SET
@@ -20952,7 +21420,8 @@ impl AstNode for AnyCssValue {
         .union(CssIdentifier::KIND_SET)
         .union(CssNumber::KIND_SET)
         .union(CssRatio::KIND_SET)
-        .union(CssString::KIND_SET);
+        .union(CssString::KIND_SET)
+        .union(CssUnicodeRange::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
         match kind {
             CSS_BRACKETED_VALUE
@@ -20962,7 +21431,8 @@ impl AstNode for AnyCssValue {
             | CSS_IDENTIFIER
             | CSS_NUMBER
             | CSS_RATIO
-            | CSS_STRING => true,
+            | CSS_STRING
+            | CSS_UNICODE_RANGE => true,
             k if AnyCssDimension::can_cast(k) => true,
             k if AnyCssFunction::can_cast(k) => true,
             _ => false,
@@ -20982,6 +21452,7 @@ impl AstNode for AnyCssValue {
             CSS_NUMBER => AnyCssValue::CssNumber(CssNumber { syntax }),
             CSS_RATIO => AnyCssValue::CssRatio(CssRatio { syntax }),
             CSS_STRING => AnyCssValue::CssString(CssString { syntax }),
+            CSS_UNICODE_RANGE => AnyCssValue::CssUnicodeRange(CssUnicodeRange { syntax }),
             _ => {
                 if let Some(any_css_dimension) = AnyCssDimension::cast(syntax.clone()) {
                     return Some(AnyCssValue::AnyCssDimension(any_css_dimension));
@@ -21004,6 +21475,7 @@ impl AstNode for AnyCssValue {
             AnyCssValue::CssNumber(it) => &it.syntax,
             AnyCssValue::CssRatio(it) => &it.syntax,
             AnyCssValue::CssString(it) => &it.syntax,
+            AnyCssValue::CssUnicodeRange(it) => &it.syntax,
             AnyCssValue::AnyCssDimension(it) => it.syntax(),
             AnyCssValue::AnyCssFunction(it) => it.syntax(),
         }
@@ -21018,6 +21490,7 @@ impl AstNode for AnyCssValue {
             AnyCssValue::CssNumber(it) => it.syntax,
             AnyCssValue::CssRatio(it) => it.syntax,
             AnyCssValue::CssString(it) => it.syntax,
+            AnyCssValue::CssUnicodeRange(it) => it.syntax,
             AnyCssValue::AnyCssDimension(it) => it.into_syntax(),
             AnyCssValue::AnyCssFunction(it) => it.into_syntax(),
         }
@@ -21036,6 +21509,7 @@ impl std::fmt::Debug for AnyCssValue {
             AnyCssValue::CssNumber(it) => std::fmt::Debug::fmt(it, f),
             AnyCssValue::CssRatio(it) => std::fmt::Debug::fmt(it, f),
             AnyCssValue::CssString(it) => std::fmt::Debug::fmt(it, f),
+            AnyCssValue::CssUnicodeRange(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
@@ -21052,6 +21526,7 @@ impl From<AnyCssValue> for SyntaxNode {
             AnyCssValue::CssNumber(it) => it.into(),
             AnyCssValue::CssRatio(it) => it.into(),
             AnyCssValue::CssString(it) => it.into(),
+            AnyCssValue::CssUnicodeRange(it) => it.into(),
         }
     }
 }
@@ -21692,6 +22167,11 @@ impl std::fmt::Display for AnyCssSupportsInParens {
     }
 }
 impl std::fmt::Display for AnyCssSupportsOrCombinableCondition {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for AnyCssUnicodeValue {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
@@ -22407,6 +22887,26 @@ impl std::fmt::Display for CssSupportsOrCondition {
     }
 }
 impl std::fmt::Display for CssTypeSelector {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for CssUnicodeCodepoint {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for CssUnicodeRange {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for CssUnicodeRangeInterval {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for CssUnicodeRangeWildcard {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
@@ -23727,6 +24227,63 @@ impl From<CssBogusSubSelector> for SyntaxNode {
 }
 impl From<CssBogusSubSelector> for SyntaxElement {
     fn from(n: CssBogusSubSelector) -> SyntaxElement {
+        n.syntax.into()
+    }
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize))]
+pub struct CssBogusUnicodeRangeValue {
+    syntax: SyntaxNode,
+}
+impl CssBogusUnicodeRangeValue {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn items(&self) -> SyntaxElementChildren {
+        support::elements(&self.syntax)
+    }
+}
+impl AstNode for CssBogusUnicodeRangeValue {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_BOGUS_UNICODE_RANGE_VALUE as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == CSS_BOGUS_UNICODE_RANGE_VALUE
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for CssBogusUnicodeRangeValue {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("CssBogusUnicodeRangeValue")
+            .field("items", &DebugSyntaxElementChildren(self.items()))
+            .finish()
+    }
+}
+impl From<CssBogusUnicodeRangeValue> for SyntaxNode {
+    fn from(n: CssBogusUnicodeRangeValue) -> SyntaxNode {
+        n.syntax
+    }
+}
+impl From<CssBogusUnicodeRangeValue> for SyntaxElement {
+    fn from(n: CssBogusUnicodeRangeValue) -> SyntaxElement {
         n.syntax.into()
     }
 }

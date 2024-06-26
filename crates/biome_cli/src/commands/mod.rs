@@ -1,5 +1,5 @@
 use crate::changed::{get_changed_files, get_staged_files};
-use crate::cli_options::{cli_options, CliOptions, ColorsArg};
+use crate::cli_options::{cli_options, CliOptions, CliReporter, ColorsArg};
 use crate::diagnostics::{DeprecatedArgument, DeprecatedConfigurationFile};
 use crate::execute::Stdin;
 use crate::logging::LoggingKind;
@@ -476,7 +476,19 @@ impl BiomeCommand {
 
     pub const fn get_color(&self) -> Option<&ColorsArg> {
         match self.cli_options() {
-            Some(cli_options) => cli_options.colors.as_ref(),
+            Some(cli_options) => {
+                // To properly display GitHub annotations we need to disable colors
+                if matches!(cli_options.reporter, CliReporter::GitHub) {
+                    return Some(&ColorsArg::Off);
+                }
+                // We want force colors in CI, to give e better UX experience
+                // Unless users explicitly set the colors flag
+                if matches!(self, BiomeCommand::Ci { .. }) && cli_options.colors.is_none() {
+                    return Some(&ColorsArg::Force);
+                }
+                // Normal behaviors
+                cli_options.colors.as_ref()
+            }
             None => None,
         }
     }

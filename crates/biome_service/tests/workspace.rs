@@ -173,4 +173,33 @@ mod test {
             .format_file()
             .is_ok());
     }
+
+    #[test]
+    fn correctly_parses_graphql_files() {
+        let workspace = create_server();
+
+        let graphql_file = FileGuard::open(
+            workspace.as_ref(),
+            OpenFileParams {
+                path: BiomePath::new("file.graphql"),
+                content: r#"type Query {
+  me: User
+}
+ 
+type User {
+  id: ID
+  name: String
+}"#
+                .into(),
+                version: 0,
+                document_file_source: None,
+            },
+        )
+        .unwrap();
+        let result = graphql_file.get_syntax_tree();
+        assert!(result.is_ok());
+        let syntax = result.unwrap().ast;
+
+        assert!(syntax.starts_with("GraphqlRoot"))
+    }
 }

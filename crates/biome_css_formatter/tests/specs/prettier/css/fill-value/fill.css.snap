@@ -21,15 +21,14 @@ div {
 @@ -1,11 +1,6 @@
  div {
    border-left: 1px solid
--    mix($warningBackgroundColors, $warningBorderColors, 50%);
+     mix($warningBackgroundColors, $warningBorderColors, 50%);
 -  $fontFamily:
 -    "Lato",
 -    -apple-system,
 -    "Helvetica Neue",
 -    Helvetica,
 -    Arial,
-+    mix($warningbackgroundcolors, $warningbordercolors, 50%);
-+  $fontfamily: "Lato", -apple-system, "Helvetica Neue", helvetica, arial,
++  $fontFamily: "Lato", -apple-system, "Helvetica Neue", Helvetica, Arial,
      sans-serif;
  }
 ```
@@ -39,8 +38,8 @@ div {
 ```css
 div {
   border-left: 1px solid
-    mix($warningbackgroundcolors, $warningbordercolors, 50%);
-  $fontfamily: "Lato", -apple-system, "Helvetica Neue", helvetica, arial,
+    mix($warningBackgroundColors, $warningBorderColors, 50%);
+  $fontFamily: "Lato", -apple-system, "Helvetica Neue", Helvetica, Arial,
     sans-serif;
 }
 ```

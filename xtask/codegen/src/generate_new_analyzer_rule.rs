@@ -8,6 +8,7 @@ pub enum RuleKind {
     Js,
     Json,
     Css,
+    Graphql,
 }
 
 impl RuleKind {
@@ -16,6 +17,7 @@ impl RuleKind {
             Self::Js => "js",
             Self::Json => "json",
             Self::Css => "css",
+            Self::Graphql => "graphql",
         }
     }
 }
@@ -27,6 +29,7 @@ impl FromStr for RuleKind {
             "js" => Ok(Self::Js),
             "json" => Ok(Self::Json),
             "css" => Ok(Self::Css),
+            "graphql" => Ok(Self::Graphql),
             _ => Err("Unsupported value"),
         }
     }
@@ -254,6 +257,81 @@ declare_rule! {{
 
 impl Rule for {rule_name_upper_camel} {{
     type Query = Ast<JsonMember>;
+    type State = ();
+    type Signals = Option<Self::State>;
+    type Options = ();
+
+    fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {{
+        let _node = ctx.query();
+        None
+    }}
+
+    fn diagnostic(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<RuleDiagnostic> {{
+        //
+        // Read our guidelines to write great diagnostics:
+        // https://docs.rs/biome_analyze/latest/biome_analyze/#what-a-rule-should-say-to-the-user
+        //
+        let span = ctx.query().range();
+        Some(
+            RuleDiagnostic::new(
+                rule_category!(),
+                span,
+                markup! {{
+                    "Unexpected empty block is not allowed"
+                }},
+            )
+            .note(markup! {{
+                    "This note will give you more information."
+            }}),
+        )
+    }}
+}}
+"#
+            )
+        }
+        RuleKind::Graphql => {
+            format!(
+                r#"use biome_analyze::{{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic}};
+use biome_console::markup;
+use biome_graphql_syntax::GraphqlRoot;
+use biome_rowan::AstNode;
+
+declare_rule! {{
+    /// Succinct description of the rule.
+    ///
+    /// Put context and details about the rule.
+    /// As a starting point, you can take the description of the corresponding _ESLint_ rule (if any).
+    ///
+    /// Try to stay consistent with the descriptions of implemented rules.
+    ///
+    /// Add a link to the corresponding stylelint rule (if any):
+    ///
+    /// ## Examples
+    ///
+    /// ### Invalid
+    ///
+    /// ```graphql,expect_diagnostic
+    /// p {{}}
+    /// ```
+    ///
+    /// ### Valid
+    ///
+    /// ```graphql
+    /// p {{
+    ///   color: red;
+    /// }}
+    /// ```
+    ///
+    pub {rule_name_upper_camel} {{
+        version: "next",
+        name: "{rule_name_lower_camel}",
+        language: "graphql",
+        recommended: false,
+    }}
+}}
+
+impl Rule for {rule_name_upper_camel} {{
+    type Query = Ast<GraphqlRoot>;
     type State = ();
     type Signals = Option<Self::State>;
     type Options = ();

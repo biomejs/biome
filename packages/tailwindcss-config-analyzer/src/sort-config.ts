@@ -1,10 +1,16 @@
 import type { TailwindSpec, UtilitySpec } from "./introspect.js";
 
+type Variant = {
+	name: string;
+	weight: bigint;
+};
+
 export type SortConfig = {
 	utilities: Array<{
 		layer: string;
 		classes: Array<string>;
 	}>;
+	variants: Array<Variant>;
 };
 
 function compareBigInt(a: bigint, b: bigint) {
@@ -28,6 +34,13 @@ export function sortConfigFromSpec(
 	spec: TailwindSpec,
 	{ layerOrder }: { layerOrder: Array<string> },
 ): SortConfig {
+	const utilities = buildConfigUtilities(spec, layerOrder);
+	const variants = buildConfigVariants(spec);
+
+	return { utilities, variants };
+}
+
+function buildConfigUtilities(spec: TailwindSpec, layerOrder: Array<string>) {
 	const utilitiesByLayer = new Map<string, Set<UtilitySpec>>();
 	for (const utilitySpec of spec.utilities) {
 		const layer = utilitiesByLayer.get(utilitySpec.layer) ?? new Set();
@@ -63,6 +76,13 @@ export function sortConfigFromSpec(
 				classes: [...new Set(classes)], // remove duplicates
 			};
 		});
+	return utilities;
+}
 
-	return { utilities };
+function buildConfigVariants(spec: TailwindSpec): Array<Variant> {
+	const variants: Array<Variant> = [...spec.variants]
+		.sort((a, b) => compareBigInt(a.weight, b.weight))
+		.map((item) => ({ name: item.variant, weight: item.weight }));
+
+	return variants;
 }

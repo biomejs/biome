@@ -1,11 +1,11 @@
 use biome_analyze::{
-    context::RuleContext, declare_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic,
-    RuleSource,
+    context::RuleContext, declare_rule, ActionCategory, FixKind, Rule, RuleDiagnostic, RuleSource,
 };
 use biome_console::markup;
-use biome_js_syntax::{inner_string_text, AnyJsImportSpecifierLike, JsSyntaxKind, JsSyntaxToken};
+use biome_js_syntax::{inner_string_text, AnyJsImportLike, JsSyntaxKind, JsSyntaxToken};
 use biome_rowan::BatchMutationExt;
 
+use crate::services::manifest::Manifest;
 use crate::{globals::is_node_builtin_module, JsRuleAction};
 
 declare_rule! {
@@ -13,6 +13,13 @@ declare_rule! {
     ///
     /// The rule marks traditional imports like `import fs from "fs";` as invalid,
     /// suggesting the format `import fs from "node:fs";` instead.
+    ///
+    /// The rule also isn't triggered if there are dependencies declared in the `package.json` that match
+    /// the name of a built-in Node.js module.
+    ///
+    /// :::caution
+    /// The rule doesn't support dependencies installed inside a monorepo.
+    /// :::
     ///
     /// ## Examples
     ///
@@ -51,7 +58,7 @@ declare_rule! {
 }
 
 impl Rule for UseNodejsImportProtocol {
-    type Query = Ast<AnyJsImportSpecifierLike>;
+    type Query = Manifest<AnyJsImportLike>;
     type State = JsSyntaxToken;
     type Signals = Option<Self::State>;
     type Options = ();
@@ -62,7 +69,15 @@ impl Rule for UseNodejsImportProtocol {
             return None;
         }
         let module_name = node.module_name_token()?;
-        is_node_module_without_protocol(&inner_string_text(&module_name)).then_some(module_name)
+        let module_name_trimmed = inner_string_text(&module_name);
+        if ctx.is_dependency(&module_name_trimmed)
+            || ctx.is_dev_dependency(&module_name_trimmed)
+            || ctx.is_peer_dependency(&module_name_trimmed)
+            || ctx.is_optional_dependency(&module_name_trimmed)
+        {
+            return None;
+        }
+        is_node_module_without_protocol(&module_name_trimmed).then_some(module_name)
     }
 
     fn diagnostic(_: &RuleContext<Self>, module_name: &Self::State) -> Option<RuleDiagnostic> {

@@ -24,6 +24,7 @@ pub struct ParseSnippetError {
     diagnostics: Vec<SerializableDiagnostic>,
 }
 
+// TODO: We definitely need to improve diagnostics.
 #[derive(Debug, Deserialize, Serialize)]
 pub enum CompileError {
     /// Indicates the (top-level) pattern could not be parsed.
@@ -53,6 +54,9 @@ pub enum CompileError {
     /// When an unexpected node kind was discovered during compilation.
     UnexpectedKind(u16),
 
+    /// When trying to use an unrecognized function or pattern.
+    UnknownFunctionOrPattern(String),
+
     /// A literal value was too large or too small.
     LiteralOutOfRange(String),
 
@@ -62,6 +66,12 @@ pub enum CompileError {
     /// Bracketed metavariables are only allowed on the right-hand side of
     /// rewrite.
     InvalidBracketedMetavariable,
+
+    /// Unexpected function call argument.
+    FunctionArgument(NodeLikeArgumentError),
+
+    /// Unknown function or predicate.
+    UnknownFunctionOrPredicate(String),
 
     /// Unknown variable.
     UnknownVariable(String),
@@ -75,4 +85,34 @@ impl From<SyntaxError> for CompileError {
             SyntaxError::MissingRequiredChild => Self::MissingSyntaxNode,
         }
     }
+}
+
+impl From<NodeLikeArgumentError> for CompileError {
+    fn from(error: NodeLikeArgumentError) -> Self {
+        Self::FunctionArgument(error)
+    }
+}
+
+#[derive(Debug, Deserialize, Serialize)]
+pub enum NodeLikeArgumentError {
+    /// Duplicate arguments in invocation.
+    DuplicateArguments { name: String },
+    /// Only variables are allowed as arguments.
+    ExpectedVariable { name: String },
+    /// When a named argument is missing its name.
+    MissingArgumentName { name: String, variable: String },
+    /// Used when too many arguments are specified.
+    TooManyArguments { name: String, max_args: usize },
+    /// Unknown argument given in function
+    UnknownArgument {
+        name: String,
+        argument: String,
+        valid_args: Vec<String>,
+    },
+    /// Used when an invalid argument is used in a function call.
+    UnknownVariable {
+        name: String,
+        arg_name: String,
+        valid_vars: Vec<String>,
+    },
 }

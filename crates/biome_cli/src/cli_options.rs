@@ -51,7 +51,7 @@ pub struct CliOptions {
     /// Allows to change how diagnostics and summary are reported.
     #[bpaf(
         long("reporter"),
-        argument("json|json-pretty|summary"),
+        argument("json|json-pretty|github|junit|summary"),
         fallback(CliReporter::default())
     )]
     pub reporter: CliReporter,
