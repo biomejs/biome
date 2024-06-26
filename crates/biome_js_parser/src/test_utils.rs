@@ -40,8 +40,7 @@ where
 
     if has_bogus_nodes_or_empty_slots(&syntax) {
         panic!(
-            "modified tree has bogus nodes or empty slots:\n{syntax:#?} \n\n {}",
-            syntax
+            "modified tree has bogus nodes or empty slots:\n{syntax:#?} \n\n {syntax}"
         )
     }
 

@@ -34,15 +34,13 @@ pub fn coverage_compare(
 
     if !base_result_dir.exists() {
         panic!(
-            "The path to the base results doesn't exist: {:?}",
-            base_result_dir
+            "The path to the base results doesn't exist: {base_result_dir:?}"
         );
     }
 
     if !&new_result_dir.exists() {
         panic!(
-            "The path to the new results doesn't exist: {:?}",
-            new_result_dir
+            "The path to the new results doesn't exist: {new_result_dir:?}"
         );
     }
 
@@ -68,15 +66,14 @@ pub fn coverage_compare(
 
 fn read_test_results(path: &Path, name: &'static str) -> HashMap<String, TestResults> {
     let buffer = fs::read(path)
-        .unwrap_or_else(|err| panic!("Can't read the file of the {} results: {:?}", name, err));
+        .unwrap_or_else(|err| panic!("Can't read the file of the {name} results: {err:?}"));
 
     let content = decode_maybe_utf16_string(&buffer)
-        .unwrap_or_else(|err| panic!("Can't read the file of the {} results: {:?}", name, err));
+        .unwrap_or_else(|err| panic!("Can't read the file of the {name} results: {err:?}"));
 
     serde_json::from_str(&content).unwrap_or_else(|err| {
         panic!(
-            "Can't parse the JSON file of the {} results: {:?}",
-            name, err
+            "Can't parse the JSON file of the {name} results: {err:?}"
         )
     })
 }

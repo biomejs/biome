@@ -90,8 +90,7 @@ fn losslessness(string: String) -> bool {
         .recv_timeout(Duration::from_secs(2))
         .unwrap_or_else(|_| {
             panic!(
-                "Lexer is infinitely recursing with this code: ->{}<-",
-                string
+                "Lexer is infinitely recursing with this code: ->{string}<-"
             )
         });
 
@@ -1397,8 +1396,7 @@ fn keywords() {
         let lexed_kind = lexer.current();
         assert_eq!(
             lexed_kind, kind,
-            "Expected token '{keyword}' to be of kind {:?} but is {:?}.",
-            kind, lexed_kind
+            "Expected token '{keyword}' to be of kind {kind:?} but is {lexed_kind:?}."
         );
 
         let lexed_range = lexer.current_range();

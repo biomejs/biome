@@ -51,7 +51,7 @@ fn parse_ts_identifier_binding(
         let name = p.text(ident.range(p));
         let is_reserved_word_this_context = ts_identifier_context.is_reserved_word(name);
         if is_reserved_word_this_context {
-            let error = p.err_builder(format!("Type alias cannot be {}", name), ident.range(p));
+            let error = p.err_builder(format!("Type alias cannot be {name}"), ident.range(p));
             p.error(error);
             ident.change_to_bogus(p);
         }
@@ -100,7 +100,7 @@ fn expect_ts_type_list(p: &mut JsParser, clause_name: &str) -> CompletedMarker {
 
     if parse_ts_reference_type(p, TypeContext::default()).is_absent() {
         p.error(p.err_builder(
-            format!("'{}' list cannot be empty.", clause_name),
+            format!("'{clause_name}' list cannot be empty."),
             p.cur_range().start()..p.cur_range().start(),
         ))
     }

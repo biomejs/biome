@@ -419,11 +419,10 @@ mod tests {
             let actual = t1 == t2;
             assert_eq!(
                 expected, actual,
-                "`{}` (SyntaxText) `{}` (SyntaxText)",
-                t1, t2
+                "`{t1}` (SyntaxText) `{t2}` (SyntaxText)"
             );
             let actual = t1 == *t2.to_string();
-            assert_eq!(expected, actual, "`{}` (SyntaxText) `{}` (&str)", t1, t2);
+            assert_eq!(expected, actual, "`{t1}` (SyntaxText) `{t2}` (&str)");
         }
         fn check(t1: &[&str], t2: &[&str]) {
             do_check(t1, t2);
@@ -451,8 +450,7 @@ mod tests {
 
             assert_eq!(
                 expected, &actual,
-                "`{}` (SyntaxText) `{}` (SyntaxText)",
-                actual, expected
+                "`{actual}` (SyntaxText) `{expected}` (SyntaxText)"
             );
         }
 

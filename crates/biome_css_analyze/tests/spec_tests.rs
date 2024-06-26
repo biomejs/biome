@@ -44,7 +44,7 @@ fn run_test(input: &'static str, _: &str, _: &str, _: &str) {
     let extension = input_file.extension().unwrap_or_default();
 
     let input_code = read_to_string(input_file)
-        .unwrap_or_else(|err| panic!("failed to read {:?}: {:?}", input_file, err));
+        .unwrap_or_else(|err| panic!("failed to read {input_file:?}: {err:?}"));
     let quantity_diagnostics = if let Some(scripts) = scripts_from_json(extension, &input_code) {
         for script in scripts {
             analyze_and_snap(
@@ -185,8 +185,7 @@ fn check_code_action(
 
     if has_bogus_nodes_or_empty_slots(&new_tree) {
         panic!(
-            "modified tree has bogus nodes or empty slots:\n{new_tree:#?} \n\n {}",
-            new_tree
+            "modified tree has bogus nodes or empty slots:\n{new_tree:#?} \n\n {new_tree}"
         )
     }
 
@@ -206,7 +205,7 @@ pub(crate) fn _run_suppression_test(input: &'static str, _: &str, _: &str, _: &s
     let input_file = Path::new(input);
     let file_name = input_file.file_name().and_then(OsStr::to_str).unwrap();
     let input_code = read_to_string(input_file)
-        .unwrap_or_else(|err| panic!("failed to read {:?}: {:?}", input_file, err));
+        .unwrap_or_else(|err| panic!("failed to read {input_file:?}: {err:?}"));
 
     let (group, rule) = parse_test_path(input_file);
 
