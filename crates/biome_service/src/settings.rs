@@ -503,7 +503,7 @@ impl From<PartialCssConfiguration> for LanguageSettings<CssLanguage> {
             language_setting.parser.css_modules = parser.css_modules;
         }
         if let Some(formatter) = css.formatter {
-            // TODO: remove this when css formatting is enabled by defualt
+            // TODO: change RHS to `formatter.enabled` when css formatting is enabled by default
             language_setting.formatter.enabled = Some(formatter.enabled.unwrap_or_default());
             language_setting.formatter.indent_width = formatter.indent_width;
             language_setting.formatter.indent_style = formatter.indent_style.map(Into::into);
@@ -512,7 +512,7 @@ impl From<PartialCssConfiguration> for LanguageSettings<CssLanguage> {
             language_setting.formatter.quote_style = formatter.quote_style;
         }
         if let Some(linter) = css.linter {
-            // TODO: remove this when css linting is enabled by defualt
+            // TODO: change RHS to `linter.enabled` when css linting is enabled by default
             language_setting.linter.enabled = Some(linter.enabled.unwrap_or_default());
         }
 
