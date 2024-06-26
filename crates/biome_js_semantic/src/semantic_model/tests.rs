@@ -173,26 +173,14 @@ mod test {
             JsSyntaxKind::JS_IDENTIFIER_BINDING => {
                 let binding = JsIdentifierBinding::cast(node).unwrap();
                 // These do the same thing, but with different APIs
-                assert!(
-                    is_exported == model.is_exported(&binding),
-                    "at \"{code}\""
-                );
-                assert!(
-                    is_exported == binding.is_exported(&model),
-                    "at \"{code}\""
-                );
+                assert!(is_exported == model.is_exported(&binding), "at \"{code}\"");
+                assert!(is_exported == binding.is_exported(&model), "at \"{code}\"");
             }
             JsSyntaxKind::TS_IDENTIFIER_BINDING => {
                 let binding = TsIdentifierBinding::cast(node).unwrap();
                 // These do the same thing, but with different APIs
-                assert!(
-                    is_exported == model.is_exported(&binding),
-                    "at \"{code}\""
-                );
-                assert!(
-                    is_exported == binding.is_exported(&model),
-                    "at \"{code}\""
-                );
+                assert!(is_exported == model.is_exported(&binding), "at \"{code}\"");
+                assert!(is_exported == binding.is_exported(&model), "at \"{code}\"");
             }
             JsSyntaxKind::JS_REFERENCE_IDENTIFIER => {
                 // Do nothing.

@@ -419,8 +419,6 @@ pub fn quick_test() {
     dbg!(&syntax, root.diagnostics(), root.has_errors());
 
     if has_bogus_nodes_or_empty_slots(&syntax) {
-        panic!(
-            "modified tree has bogus nodes or empty slots:\n{syntax:#?} \n\n {syntax}"
-        )
+        panic!("modified tree has bogus nodes or empty slots:\n{syntax:#?} \n\n {syntax}")
     }
 }

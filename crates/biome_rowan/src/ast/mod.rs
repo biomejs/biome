@@ -804,9 +804,9 @@ pub mod support {
         match parent.slots().nth(slot_index)? {
             SyntaxSlot::Empty { .. } => None,
             SyntaxSlot::Node(node) => Some(N::unwrap_cast(node)),
-            SyntaxSlot::Token(token) => panic!(
-                "expected a node in the slot {slot_index} but found token {token:?}"
-            ),
+            SyntaxSlot::Token(token) => {
+                panic!("expected a node in the slot {slot_index} but found token {token:?}")
+            }
         }
     }
 
@@ -833,9 +833,9 @@ pub mod support {
         match parent.slots().nth(slot_index)? {
             SyntaxSlot::Empty { .. } => None,
             SyntaxSlot::Token(token) => Some(token),
-            SyntaxSlot::Node(node) => panic!(
-                "expected a token in the slot {slot_index} but found node {node:?}"
-            ),
+            SyntaxSlot::Node(node) => {
+                panic!("expected a token in the slot {slot_index} but found node {node:?}")
+            }
         }
     }
 

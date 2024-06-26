@@ -160,9 +160,7 @@ impl ParseDiagnostic {
         }
 
         let msg = if p.source().text().text_len() <= range.start() {
-            format!(
-                "Expected {joined_names} but instead found the end of the file."
-            )
+            format!("Expected {joined_names} but instead found the end of the file.")
         } else {
             format!(
                 "Expected {} but instead found '{}'.",

@@ -148,9 +148,7 @@ pub fn run(test_case: &str, _snapshot_name: &str, test_directory: &str, outcome_
 
             let syntax = parsed.syntax();
             if has_bogus_nodes_or_empty_slots(&syntax) {
-                panic!(
-                    "modified tree has bogus nodes or empty slots:\n{syntax:#?} \n\n {syntax}"
-                )
+                panic!("modified tree has bogus nodes or empty slots:\n{syntax:#?} \n\n {syntax}")
             }
         }
         ExpectedOutcome::Fail => {
@@ -187,8 +185,6 @@ pub fn quick_test() {
     let syntax = root.syntax();
     dbg!(&syntax, root.diagnostics(), root.has_errors());
     if has_bogus_nodes_or_empty_slots(&syntax) {
-        panic!(
-            "modified tree has bogus nodes or empty slots:\n{syntax:#?} \n\n {syntax}"
-        )
+        panic!("modified tree has bogus nodes or empty slots:\n{syntax:#?} \n\n {syntax}")
     }
 }

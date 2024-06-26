@@ -122,9 +122,7 @@ pub fn assert_remove_identifier_a_ok<Anc: AstNode<Language = JsLanguage> + Debug
                     type_name::<Anc>()
                 )
             }),
-        _ => panic!(
-            "Expected exactly one identifier named a, but got {identifiers_a:?}"
-        ),
+        _ => panic!("Expected exactly one identifier named a, but got {identifiers_a:?}"),
     };
 
     let mut batch = r.tree().begin();

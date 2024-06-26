@@ -417,10 +417,7 @@ mod tests {
             let t2 = build_tree(t2).text();
             let expected = t1.to_string() == t2.to_string();
             let actual = t1 == t2;
-            assert_eq!(
-                expected, actual,
-                "`{t1}` (SyntaxText) `{t2}` (SyntaxText)"
-            );
+            assert_eq!(expected, actual, "`{t1}` (SyntaxText) `{t2}` (SyntaxText)");
             let actual = t1 == *t2.to_string();
             assert_eq!(expected, actual, "`{t1}` (SyntaxText) `{t2}` (&str)");
         }
