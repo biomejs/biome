@@ -1,6 +1,7 @@
 #[cfg(test)]
 mod test {
     use biome_analyze::RuleCategories;
+    use biome_configuration::linter::{RuleGroup, RuleSelector};
     use biome_fs::BiomePath;
     use biome_js_syntax::{JsFileSource, TextSize};
     use biome_service::file_handlers::DocumentFileSource;
@@ -221,10 +222,17 @@ type User {
             },
         )
         .unwrap();
-        let result = graphql_file.pull_diagnostics(RuleCategories::all(), 10, vec![], vec![]);
+        let result = graphql_file.pull_diagnostics(
+            RuleCategories::all(),
+            10,
+            vec![RuleSelector::Rule(
+                RuleGroup::Nursery,
+                "useDeprecatedReason",
+            )],
+            vec![],
+        );
         assert!(result.is_ok());
         let diagnostics = result.unwrap().diagnostics;
-
-        dbg!(diagnostics);
+        assert_eq!(diagnostics.len(), 1)
     }
 }

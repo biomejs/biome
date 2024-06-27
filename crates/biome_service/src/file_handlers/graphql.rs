@@ -164,7 +164,6 @@ fn lint(params: LintParams) -> LintResults {
                 .map(|selector| selector.into())
                 .collect::<Vec<_>>();
 
-            dbg!(&enabled_rules);
             let filter = AnalysisFilter {
                 categories: params.categories,
                 enabled_rules: Some(enabled_rules.as_slice()),

@@ -598,7 +598,6 @@ impl Workspace for WorkspaceServer {
         let (diagnostics, errors, skipped_diagnostics) =
             if let Some(lint) = self.get_file_capabilities(&params.path).analyzer.lint {
                 info_span!("Pulling diagnostics", categories =? params.categories).in_scope(|| {
-                    dbg!("here");
                     let results = lint(LintParams {
                         parse,
                         workspace: &self.workspace(),
