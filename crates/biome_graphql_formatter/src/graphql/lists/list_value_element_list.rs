@@ -19,14 +19,3 @@ impl FormatRule<GraphqlListValueElementList> for FormatGraphqlListValueElementLi
         .finish()
     }
 }
-
-// case "ListValue":
-//   return group([
-//     "[",
-//     indent([
-//       softline,
-//       join([ifBreak("", ", "), softline], path.map(print, "values")),
-//     ]),
-//     softline,
-//     "]",
-//   ]);

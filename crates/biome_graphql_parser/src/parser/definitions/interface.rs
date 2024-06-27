@@ -125,10 +125,6 @@ impl ParseSeparatedList for ImplementsInterfaceList {
     fn allow_empty(&self) -> bool {
         false
     }
-
-    fn allow_leading_seperating_element(&self) -> bool {
-        true
-    }
 }
 
 struct ImplementsInterfaceListParseRecovery;

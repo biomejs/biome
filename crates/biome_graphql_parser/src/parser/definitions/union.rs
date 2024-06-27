@@ -108,10 +108,6 @@ impl ParseSeparatedList for UnionMemberTypeList {
         false
     }
 
-    fn allow_leading_seperating_element(&self) -> bool {
-        true
-    }
-
     fn allow_empty(&self) -> bool {
         false
     }
