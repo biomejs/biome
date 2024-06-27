@@ -1124,7 +1124,7 @@ impl DeserializableValidator for Selector {
     ) -> bool {
         if let Err(error) = self.check() {
             diagnostics
-                .push(DeserializationDiagnostic::new(format_args!("{}", error)).with_range(range));
+                .push(DeserializationDiagnostic::new(format_args!("{error}")).with_range(range));
             return false;
         }
         true
@@ -1624,7 +1624,7 @@ impl std::fmt::Display for Kind {
             Self::Var => "var",
             Self::Variable => "variable",
         };
-        write!(f, "{}", repr)
+        write!(f, "{repr}")
     }
 }
 
@@ -1751,7 +1751,7 @@ impl From<TsPropertySignatureModifierList> for Modifiers {
 impl std::fmt::Display for Modifiers {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         for value in self.0.iter() {
-            write!(f, "{} ", value)?;
+            write!(f, "{value} ")?;
         }
         Ok(())
     }

@@ -43,17 +43,17 @@ pub fn emit_compare(
                 match diff.cmp(&0) {
                     std::cmp::Ordering::Less => {
                         if i_am_passed_results {
-                            format!("{}{}", bad, down)
+                            format!("{bad}{down}")
                         } else {
-                            format!("{}{}", good, down)
+                            format!("{good}{down}")
                         }
                     }
                     std::cmp::Ordering::Equal => String::new(),
                     std::cmp::Ordering::Greater => {
                         if i_am_passed_results {
-                            format!("{}{}", good, up)
+                            format!("{good}{up}")
                         } else {
-                            format!("{}{}", bad, up)
+                            format!("{bad}{up}")
                         }
                     }
                 }
@@ -71,7 +71,7 @@ pub fn emit_compare(
             )
         }
 
-        println!("\n### {}\n", test_suite);
+        println!("\n### {test_suite}\n");
 
         println!("| Test result | `main` count | This PR count | Difference |");
         println!("| :---------: | :----------: | :-----------: | :--------: |");
@@ -137,7 +137,7 @@ pub fn emit_compare(
                 let mut test_cases = tests.iter().map(|test| &test.test_case).collect::<Vec<_>>();
                 test_cases.sort_unstable();
                 for test_case in test_cases {
-                    println!("{}", test_case);
+                    println!("{test_case}");
                 }
                 println!("```");
                 println!("</details>");
@@ -159,7 +159,7 @@ pub fn emit_compare(
     } else {
         let mut table = AsciiTable::default();
 
-        println!("{} conformance changes:", test_suite);
+        println!("{test_suite} conformance changes:");
 
         table
             .column(0)

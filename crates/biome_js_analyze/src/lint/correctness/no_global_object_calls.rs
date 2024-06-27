@@ -170,6 +170,6 @@ impl Display for NonCallableGlobals {
             NonCallableGlobals::Reflect => "Reflect",
             NonCallableGlobals::Intl => "Intl",
         };
-        write!(f, "{}", repr)
+        write!(f, "{repr}")
     }
 }

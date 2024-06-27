@@ -280,6 +280,6 @@ impl Display for BannedType {
             Self::Symbol => "Symbol",
             Self::EmptyObject => "{}",
         };
-        write!(f, "{}", representation)
+        write!(f, "{representation}")
     }
 }

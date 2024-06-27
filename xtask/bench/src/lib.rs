@@ -23,7 +23,7 @@ pub fn run_format(format_node: &FormatNode) -> Printed {
 }
 
 pub fn err_to_string<E: std::fmt::Debug>(e: E) -> String {
-    format!("{:?}", e)
+    format!("{e:?}")
 }
 
 pub fn bench_parser_group(group: &mut BenchmarkGroup<WallTime>, test_case: TestCase) {

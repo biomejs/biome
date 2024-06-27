@@ -200,7 +200,7 @@ impl Rule for NoMisleadingCharacterClass {
                     let text = prev_token.text();
                     let next_token = JsSyntaxToken::new_detached(
                         JsSyntaxKind::JS_REGEX_LITERAL,
-                        &format!("{}u", text),
+                        &format!("{text}u"),
                         [],
                         [],
                     );
@@ -367,7 +367,7 @@ fn make_suggestion(
                             AnyJsExpression::AnyJsLiteralExpression(
                                 AnyJsLiteralExpression::JsStringLiteralExpression(
                                     make::js_string_literal_expression(make::js_string_literal(
-                                        &format!("'{}u'", text),
+                                        &format!("'{text}u'"),
                                     )),
                                 ),
                             ),
@@ -567,11 +567,11 @@ fn handle_simple_or_surrogate_escape_sequence(
                 chars_iter.next();
             } else {
                 // If the character is not a valid Unicode char, return as simple string.
-                return Some(format!("\\u{}", high_surrogate_str));
+                return Some(format!("\\u{high_surrogate_str}"));
             }
         } else {
             // If not enough characters, return as if it were a simple string.
-            return Some(format!("\\u{}", high_surrogate_str));
+            return Some(format!("\\u{high_surrogate_str}"));
         }
     }
 
@@ -588,8 +588,8 @@ fn handle_simple_or_surrogate_escape_sequence(
                             // - high surrogate on its own doesn't make sense
                             // - low surrogate is not a valid unicode codepoint
                             // e.g \uD83D\u333
-                            invalid_pair.push_str(&format!("\\u{}", high_surrogate_str));
-                            invalid_pair.push_str(&format!("\\u{}", low_surrogate_str));
+                            invalid_pair.push_str(&format!("\\u{high_surrogate_str}"));
+                            invalid_pair.push_str(&format!("\\u{low_surrogate_str}"));
                             return Some(invalid_pair);
                         }
                         low_surrogate_str.push(*next_char);
@@ -609,7 +609,7 @@ fn handle_simple_or_surrogate_escape_sequence(
         } else {
             match char::from_u32(high_surrogate) {
                 Some(c) => return Some(c.to_string()),
-                None => invalid_pair.push_str(&format!("\\u{}", high_surrogate_str)),
+                None => invalid_pair.push_str(&format!("\\u{high_surrogate_str}")),
             }
         }
     }

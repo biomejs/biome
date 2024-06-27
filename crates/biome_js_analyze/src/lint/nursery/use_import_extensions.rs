@@ -210,12 +210,12 @@ fn get_extensionless_import(
     });
 
     let part = if is_index_file {
-        format!("index.{}", import_ext)
+        format!("index.{import_ext}")
     } else {
         // fold always adds trailing slash, so we need to remove it.
         new_path.pop();
 
-        format!(".{}", import_ext)
+        format!(".{import_ext}")
     };
 
     new_path.push_str(&part);

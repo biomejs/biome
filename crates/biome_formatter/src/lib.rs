@@ -285,7 +285,7 @@ impl biome_console::fmt::Display for IndentWidth {
 impl Display for IndentWidth {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let value = self.value();
-        f.write_str(&std::format!("{}", value))
+        f.write_str(&std::format!("{value}"))
     }
 }
 
@@ -364,7 +364,7 @@ impl biome_console::fmt::Display for LineWidth {
 impl Display for LineWidth {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let value = self.value();
-        f.write_str(&std::format!("{}", value))
+        f.write_str(&std::format!("{value}"))
     }
 }
 

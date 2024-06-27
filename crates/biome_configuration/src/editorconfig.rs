@@ -217,13 +217,13 @@ fn expand_unknown_glob_patterns(pattern: &str) -> Result<Vec<String>, EditorConf
                 let start = start.parse().map_err(|err| {
                     EditorConfigDiagnostic::invalid_glob_pattern(
                         s,
-                        format!("Error parsing the start of the range: {}", err),
+                        format!("Error parsing the start of the range: {err}"),
                     )
                 })?;
                 let end = end.parse().map_err(|err| {
                     EditorConfigDiagnostic::invalid_glob_pattern(
                         s,
-                        format!("Error parsing the end of the range: {}", err),
+                        format!("Error parsing the end of the range: {err}"),
                     )
                 })?;
                 self.variants = Some(VariantType::Range((start, end)));

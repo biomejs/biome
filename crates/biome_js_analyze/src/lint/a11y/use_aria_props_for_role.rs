@@ -60,7 +60,7 @@ impl UseAriaPropsForRoleState {
         }
         self.attribute.as_ref().map(|(attribute, role_name)| {
             let joined_attributes = &self.missing_aria_props.join(", ");
-            let description = format!("The element with the {role_name} ARIA role does not have the required ARIA attributes: {}.", joined_attributes);
+            let description = format!("The element with the {role_name} ARIA role does not have the required ARIA attributes: {joined_attributes}.");
             RuleDiagnostic::new(
                 rule_category!(),
                 attribute.range(),

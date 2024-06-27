@@ -139,7 +139,7 @@ impl TestCase for SymbolsMicrosoftTestCase {
 
             if let Some(actual) = actual {
                 let name = &code[actual.range()].trim();
-                write!(debug_text, "[{}]", name).unwrap();
+                write!(debug_text, "[{name}]").unwrap();
             }
 
             match (expected, actual) {

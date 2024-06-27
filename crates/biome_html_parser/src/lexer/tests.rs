@@ -32,12 +32,7 @@ fn losslessness(string: String) -> bool {
     });
     let token_ranges = receiver
         .recv_timeout(Duration::from_secs(2))
-        .unwrap_or_else(|_| {
-            panic!(
-                "Lexer is infinitely recursing with this code: ->{}<-",
-                string
-            )
-        });
+        .unwrap_or_else(|_| panic!("Lexer is infinitely recursing with this code: ->{string}<-"));
 
     let mut new_str = String::with_capacity(string.len());
     let mut idx = TextSize::from(0);
