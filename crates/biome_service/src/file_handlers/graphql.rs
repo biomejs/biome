@@ -14,7 +14,6 @@ use crate::workspace::{
     CodeAction, FixAction, FixFileMode, FixFileResult, GetSyntaxTreeResult, PullActionsResult,
 };
 use crate::WorkspaceError;
-use crate::WorkspaceError;
 use biome_analyze::{
     AnalysisFilter, AnalyzerConfiguration, AnalyzerOptions, ControlFlow, Never,
     RuleCategoriesBuilder, RuleCategory, RuleError,
@@ -24,16 +23,15 @@ use biome_formatter::{
     FormatError, IndentStyle, IndentWidth, LineEnding, LineWidth, Printed, QuoteStyle,
 };
 use biome_fs::BiomePath;
-use biome_graphql_formatter::context::GraphqlFormatOptions;
 use biome_graphql_analyze::analyze;
+use biome_graphql_formatter::context::GraphqlFormatOptions;
 use biome_graphql_formatter::format_node;
 use biome_graphql_parser::parse_graphql_with_cache;
 use biome_graphql_syntax::{GraphqlLanguage, GraphqlRoot, GraphqlSyntaxNode, TextRange, TextSize};
 use biome_parser::AnyParse;
-use biome_rowan::{AstNode, NodeCache};
+use biome_rowan::{AstNode, NodeCache, TokenAtOffset};
 use std::borrow::Cow;
 use tracing::{debug_span, error, info, trace, trace_span};
-use biome_rowan::{NodeCache, TokenAtOffset};
 
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
