@@ -1255,7 +1255,10 @@ pub(crate) fn migrate_eslint_any_rule(
             rule.set_level(rule_severity.into());
         }
         "react/jsx-key" => {
-            let group = rules.correctness.get_or_insert_with(Default::default);
+            if !options.include_nursery {
+                return false;
+            }
+            let group = rules.nursery.get_or_insert_with(Default::default);
             let rule = group
                 .use_jsx_key_in_iterable
                 .get_or_insert(Default::default());

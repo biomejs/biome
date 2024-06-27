@@ -954,10 +954,6 @@ export interface Correctness {
 	 */
 	useIsNan?: RuleFixConfiguration_for_Null;
 	/**
-	 * Disallow missing key props in iterators/collection literals.
-	 */
-	useJsxKeyInIterable?: RuleConfiguration_for_Null;
-	/**
 	 * Enforce "for" loop update clause moving the counter in the right direction.
 	 */
 	useValidForDirection?: RuleConfiguration_for_Null;
@@ -1150,6 +1146,10 @@ export interface Nursery {
 	 * Disallows package private imports.
 	 */
 	useImportRestrictions?: RuleConfiguration_for_Null;
+	/**
+	 * Disallow missing key props in iterators/collection literals.
+	 */
+	useJsxKeyInIterable?: RuleConfiguration_for_Null;
 	/**
 	 * Enforce using the digits argument with Number#toFixed().
 	 */
@@ -2372,7 +2372,6 @@ export type Category =
 	| "lint/correctness/useExhaustiveDependencies"
 	| "lint/correctness/useHookAtTopLevel"
 	| "lint/correctness/useIsNan"
-	| "lint/correctness/useJsxKeyInIterable"
 	| "lint/correctness/useValidForDirection"
 	| "lint/correctness/useYield"
 	| "lint/nursery/colorNoInvalidHex"
@@ -2421,6 +2420,7 @@ export type Category =
 	| "lint/nursery/useExplicitLengthCheck"
 	| "lint/nursery/useFocusableInteractive"
 	| "lint/nursery/useGenericFontNames"
+	| "lint/nursery/useJsxKeyInIterable"
 	| "lint/nursery/useImportExtensions"
 	| "lint/nursery/useImportRestrictions"
 	| "lint/nursery/useNumberToFixedDigitsArgument"

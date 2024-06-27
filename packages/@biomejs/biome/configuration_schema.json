@@ -861,13 +861,6 @@
 						{ "type": "null" }
 					]
 				},
-				"useJsxKeyInIterable": {
-					"description": "Disallow missing key props in iterators/collection literals.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
-						{ "type": "null" }
-					]
-				},
 				"useValidForDirection": {
 					"description": "Enforce \"for\" loop update clause moving the counter in the right direction.",
 					"anyOf": [
@@ -1964,6 +1957,13 @@
 				},
 				"useImportRestrictions": {
 					"description": "Disallows package private imports.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useJsxKeyInIterable": {
+					"description": "Disallow missing key props in iterators/collection literals.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
