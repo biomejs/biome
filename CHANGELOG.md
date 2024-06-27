@@ -9,7 +9,7 @@ New entries must be placed in a section entitled `Unreleased`.
 Read
 our [guidelines for writing a good changelog entry](https://github.com/biomejs/biome/blob/main/CONTRIBUTING.md#changelog).
 
-## Unreleased
+## v1.8.3 (2022-06-27)
 
 ### CLI
 
@@ -21,7 +21,7 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 ### Parser
 
-#### New features
+#### Bug fixes
 
 - Implement [CSS unicode range](https://github.com/biomejs/biome/pull/3251). Contributed by @denbezrukov
 
