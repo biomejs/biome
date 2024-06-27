@@ -1,6 +1,7 @@
 use crate::prelude::*;
-use biome_graphql_syntax::GraphqlEnumTypeDefinition;
-use biome_rowan::AstNode;
+use biome_formatter::write;
+use biome_graphql_syntax::{GraphqlEnumTypeDefinition, GraphqlEnumTypeDefinitionFields};
+
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatGraphqlEnumTypeDefinition;
 impl FormatNodeRule<GraphqlEnumTypeDefinition> for FormatGraphqlEnumTypeDefinition {
@@ -9,6 +10,28 @@ impl FormatNodeRule<GraphqlEnumTypeDefinition> for FormatGraphqlEnumTypeDefiniti
         node: &GraphqlEnumTypeDefinition,
         f: &mut GraphqlFormatter,
     ) -> FormatResult<()> {
-        format_verbatim_node(node.syntax()).fmt(f)
+        let GraphqlEnumTypeDefinitionFields {
+            description,
+            enum_token,
+            name,
+            directives,
+            enum_values,
+        } = node.as_fields();
+
+        if let Some(description) = description {
+            write!(f, [description.format(), hard_line_break(),])?;
+        }
+
+        write!(
+            f,
+            [
+                enum_token.format(),
+                space(),
+                name.format(),
+                directives.format(),
+                space(),
+                enum_values.format(),
+            ]
+        )
     }
 }

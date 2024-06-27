@@ -1,5 +1,4 @@
 use crate::prelude::*;
-use biome_diagnostics::category;
 use biome_formatter::comments::{
     is_doc_comment, CommentKind, CommentStyle, Comments, SourceComment,
 };
@@ -7,7 +6,6 @@ use biome_formatter::formatter::Formatter;
 use biome_formatter::{write, FormatResult, FormatRule};
 use biome_graphql_syntax::{GraphqlLanguage, TextLen};
 use biome_rowan::SyntaxTriviaPieceComments;
-use biome_suppression::parse_suppression_comment;
 
 pub type GraphqlComments = Comments<GraphqlLanguage>;
 
@@ -64,22 +62,15 @@ pub struct GraphqlCommentStyle;
 impl CommentStyle for GraphqlCommentStyle {
     type Language = GraphqlLanguage;
 
-    fn is_suppression(text: &str) -> bool {
-        parse_suppression_comment(text)
-            .filter_map(Result::ok)
-            .flat_map(|suppression| suppression.categories)
-            .any(|(key, _)| key == category!("format"))
+    fn is_suppression(_text: &str) -> bool {
+        // parse_suppression_comment(text)
+        //     .filter_map(Result::ok)
+        //     .flat_map(|suppression| suppression.categories)
+        //     .any(|(key, _)| key == category!("format"))
+        false
     }
 
-    fn get_comment_kind(comment: &SyntaxTriviaPieceComments<Self::Language>) -> CommentKind {
-        if comment.text().starts_with("/*") {
-            if comment.has_newline() {
-                CommentKind::Block
-            } else {
-                CommentKind::InlineBlock
-            }
-        } else {
-            CommentKind::Line
-        }
+    fn get_comment_kind(_comment: &SyntaxTriviaPieceComments<Self::Language>) -> CommentKind {
+        CommentKind::Line
     }
 }

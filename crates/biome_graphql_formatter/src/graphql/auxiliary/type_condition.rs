@@ -1,6 +1,6 @@
 use crate::prelude::*;
-use biome_graphql_syntax::GraphqlTypeCondition;
-use biome_rowan::AstNode;
+use biome_formatter::write;
+use biome_graphql_syntax::{GraphqlTypeCondition, GraphqlTypeConditionFields};
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatGraphqlTypeCondition;
 impl FormatNodeRule<GraphqlTypeCondition> for FormatGraphqlTypeCondition {
@@ -9,6 +9,8 @@ impl FormatNodeRule<GraphqlTypeCondition> for FormatGraphqlTypeCondition {
         node: &GraphqlTypeCondition,
         f: &mut GraphqlFormatter,
     ) -> FormatResult<()> {
-        format_verbatim_node(node.syntax()).fmt(f)
+        let GraphqlTypeConditionFields { on_token, ty } = node.as_fields();
+
+        write!(f, [on_token.format(), space(), ty.format()])
     }
 }

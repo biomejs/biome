@@ -1,6 +1,7 @@
 use crate::prelude::*;
-use biome_graphql_syntax::GraphqlScalarTypeDefinition;
-use biome_rowan::AstNode;
+use biome_formatter::write;
+use biome_graphql_syntax::{GraphqlScalarTypeDefinition, GraphqlScalarTypeDefinitionFields};
+
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatGraphqlScalarTypeDefinition;
 impl FormatNodeRule<GraphqlScalarTypeDefinition> for FormatGraphqlScalarTypeDefinition {
@@ -9,6 +10,25 @@ impl FormatNodeRule<GraphqlScalarTypeDefinition> for FormatGraphqlScalarTypeDefi
         node: &GraphqlScalarTypeDefinition,
         f: &mut GraphqlFormatter,
     ) -> FormatResult<()> {
-        format_verbatim_node(node.syntax()).fmt(f)
+        let GraphqlScalarTypeDefinitionFields {
+            description,
+            scalar_token,
+            name,
+            directives,
+        } = node.as_fields();
+
+        if let Some(description) = description {
+            write!(f, [description.format(), hard_line_break(),])?;
+        }
+
+        write!(
+            f,
+            [
+                scalar_token.format(),
+                space(),
+                name.format(),
+                directives.format(),
+            ]
+        )
     }
 }

@@ -1,6 +1,7 @@
 use crate::prelude::*;
-use biome_graphql_syntax::GraphqlDirectiveLocation;
-use biome_rowan::AstNode;
+use biome_formatter::write;
+use biome_graphql_syntax::{GraphqlDirectiveLocation, GraphqlDirectiveLocationFields};
+
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatGraphqlDirectiveLocation;
 impl FormatNodeRule<GraphqlDirectiveLocation> for FormatGraphqlDirectiveLocation {
@@ -9,6 +10,8 @@ impl FormatNodeRule<GraphqlDirectiveLocation> for FormatGraphqlDirectiveLocation
         node: &GraphqlDirectiveLocation,
         f: &mut GraphqlFormatter,
     ) -> FormatResult<()> {
-        format_verbatim_node(node.syntax()).fmt(f)
+        let GraphqlDirectiveLocationFields { value_token } = node.as_fields();
+
+        write!(f, [value_token.format()])
     }
 }

@@ -68,6 +68,7 @@ fn parse_union_member_types(p: &mut GraphqlParser) -> ParsedSyntax {
     }
     let m = p.start();
     p.expect(T![=]);
+    p.eat(T![|]); // leading pipe separator is optional
 
     UnionMemberTypeList.parse_list(p);
 
@@ -105,10 +106,6 @@ impl ParseSeparatedList for UnionMemberTypeList {
 
     fn allow_trailing_separating_element(&self) -> bool {
         false
-    }
-
-    fn allow_leading_seperating_element(&self) -> bool {
-        true
     }
 
     fn allow_empty(&self) -> bool {

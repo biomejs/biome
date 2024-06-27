@@ -11,5 +11,3 @@ pub(crate) use biome_formatter::prelude::*;
 pub(crate) use biome_rowan::{
     AstNode as _, AstNodeList as _, AstNodeSlotMap as _, AstSeparatedList as _,
 };
-
-pub(crate) use crate::separated::FormatAstSeparatedListExtension;

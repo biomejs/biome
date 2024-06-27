@@ -1,6 +1,7 @@
 use crate::prelude::*;
-use biome_graphql_syntax::GraphqlObjectTypeExtension;
-use biome_rowan::AstNode;
+use biome_formatter::write;
+use biome_graphql_syntax::{GraphqlObjectTypeExtension, GraphqlObjectTypeExtensionFields};
+
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatGraphqlObjectTypeExtension;
 impl FormatNodeRule<GraphqlObjectTypeExtension> for FormatGraphqlObjectTypeExtension {
@@ -9,6 +10,28 @@ impl FormatNodeRule<GraphqlObjectTypeExtension> for FormatGraphqlObjectTypeExten
         node: &GraphqlObjectTypeExtension,
         f: &mut GraphqlFormatter,
     ) -> FormatResult<()> {
-        format_verbatim_node(node.syntax()).fmt(f)
+        let GraphqlObjectTypeExtensionFields {
+            extend_token,
+            type_token,
+            name,
+            implements,
+            directives,
+            fields,
+        } = node.as_fields();
+
+        write![
+            f,
+            [
+                extend_token.format(),
+                space(),
+                type_token.format(),
+                space(),
+                name.format(),
+                implements.format(),
+                directives.format(),
+                space(),
+                fields.format(),
+            ]
+        ]
     }
 }

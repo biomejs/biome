@@ -1,6 +1,7 @@
 use crate::prelude::*;
-use biome_graphql_syntax::GraphqlUnionTypeExtension;
-use biome_rowan::AstNode;
+use biome_formatter::{format_args, write};
+use biome_graphql_syntax::{GraphqlUnionTypeExtension, GraphqlUnionTypeExtensionFields};
+
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatGraphqlUnionTypeExtension;
 impl FormatNodeRule<GraphqlUnionTypeExtension> for FormatGraphqlUnionTypeExtension {
@@ -9,6 +10,25 @@ impl FormatNodeRule<GraphqlUnionTypeExtension> for FormatGraphqlUnionTypeExtensi
         node: &GraphqlUnionTypeExtension,
         f: &mut GraphqlFormatter,
     ) -> FormatResult<()> {
-        format_verbatim_node(node.syntax()).fmt(f)
+        let GraphqlUnionTypeExtensionFields {
+            extend_token,
+            union_token,
+            name,
+            directives,
+            union_members,
+        } = node.as_fields();
+
+        write![
+            f,
+            [group(&format_args!(
+                extend_token.format(),
+                space(),
+                union_token.format(),
+                space(),
+                name.format(),
+                directives.format(),
+                union_members.format()
+            ))]
+        ]
     }
 }
