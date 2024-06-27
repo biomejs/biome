@@ -19,6 +19,7 @@ pub type NoUnknownProperty =
     <lint::nursery::no_unknown_property::NoUnknownProperty as biome_analyze::Rule>::Options;
 pub type NoUnknownPseudoClassSelector = < lint :: nursery :: no_unknown_pseudo_class_selector :: NoUnknownPseudoClassSelector as biome_analyze :: Rule > :: Options ;
 pub type NoUnknownSelectorPseudoElement = < lint :: nursery :: no_unknown_selector_pseudo_element :: NoUnknownSelectorPseudoElement as biome_analyze :: Rule > :: Options ;
+pub type NoUnknownTypeSelector = < lint :: nursery :: no_unknown_type_selector :: NoUnknownTypeSelector as biome_analyze :: Rule > :: Options ;
 pub type NoUnknownUnit =
     <lint::nursery::no_unknown_unit::NoUnknownUnit as biome_analyze::Rule>::Options;
 pub type NoUnmatchableAnbSelector = < lint :: nursery :: no_unmatchable_anb_selector :: NoUnmatchableAnbSelector as biome_analyze :: Rule > :: Options ;
