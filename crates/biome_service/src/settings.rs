@@ -5,11 +5,11 @@ use biome_configuration::diagnostics::InvalidIgnorePattern;
 use biome_configuration::javascript::JsxRuntime;
 use biome_configuration::organize_imports::OrganizeImports;
 use biome_configuration::{
-    push_to_analyzer_rules, BiomeDiagnostic, CssConfiguration, FilesConfiguration,
-    FormatterConfiguration, JavascriptConfiguration, LinterConfiguration,
-    OverrideFormatterConfiguration, OverrideLinterConfiguration,
-    OverrideOrganizeImportsConfiguration, Overrides, PartialConfiguration, PartialCssConfiguration,
-    PartialJavascriptConfiguration, PartialJsonConfiguration, PlainIndentStyle, Rules,
+    push_to_analyzer_rules, BiomeDiagnostic, FilesConfiguration, FormatterConfiguration,
+    JavascriptConfiguration, LinterConfiguration, OverrideFormatterConfiguration,
+    OverrideLinterConfiguration, OverrideOrganizeImportsConfiguration, Overrides,
+    PartialConfiguration, PartialCssConfiguration, PartialJavascriptConfiguration,
+    PartialJsonConfiguration, PlainIndentStyle, Rules,
 };
 use biome_css_formatter::context::CssFormatOptions;
 use biome_css_parser::CssParserOptions;
@@ -216,7 +216,7 @@ impl Settings {
         }
         // css settings
         if let Some(css) = configuration.css {
-            self.languages.css = CssConfiguration::from(css).into();
+            self.languages.css = css.into();
         }
 
         // NOTE: keep this last. Computing the overrides require reading the settings computed by the parent settings.
@@ -494,20 +494,27 @@ impl From<PartialJsonConfiguration> for LanguageSettings<JsonLanguage> {
     }
 }
 
-impl From<CssConfiguration> for LanguageSettings<CssLanguage> {
-    fn from(css: CssConfiguration) -> Self {
+impl From<PartialCssConfiguration> for LanguageSettings<CssLanguage> {
+    fn from(css: PartialCssConfiguration) -> Self {
         let mut language_setting: LanguageSettings<CssLanguage> = LanguageSettings::default();
 
-        language_setting.parser.allow_wrong_line_comments = css.parser.allow_wrong_line_comments;
-        language_setting.parser.css_modules = css.parser.css_modules;
-
-        language_setting.formatter.enabled = Some(css.formatter.enabled);
-        language_setting.formatter.indent_width = css.formatter.indent_width;
-        language_setting.formatter.indent_style = css.formatter.indent_style.map(Into::into);
-        language_setting.formatter.line_width = css.formatter.line_width;
-        language_setting.formatter.line_ending = css.formatter.line_ending;
-        language_setting.formatter.quote_style = Some(css.formatter.quote_style);
-        language_setting.linter.enabled = Some(css.linter.enabled);
+        if let Some(parser) = css.parser {
+            language_setting.parser.allow_wrong_line_comments = parser.allow_wrong_line_comments;
+            language_setting.parser.css_modules = parser.css_modules;
+        }
+        if let Some(formatter) = css.formatter {
+            // TODO: change RHS to `formatter.enabled` when css formatting is enabled by default
+            language_setting.formatter.enabled = Some(formatter.enabled.unwrap_or_default());
+            language_setting.formatter.indent_width = formatter.indent_width;
+            language_setting.formatter.indent_style = formatter.indent_style.map(Into::into);
+            language_setting.formatter.line_width = formatter.line_width;
+            language_setting.formatter.line_ending = formatter.line_ending;
+            language_setting.formatter.quote_style = formatter.quote_style;
+        }
+        if let Some(linter) = css.linter {
+            // TODO: change RHS to `linter.enabled` when css linting is enabled by default
+            language_setting.linter.enabled = Some(linter.enabled.unwrap_or_default());
+        }
 
         language_setting
     }
@@ -1130,8 +1137,12 @@ impl OverrideSettingPattern {
 
         let css_parser = &self.languages.css.parser;
 
-        options.allow_wrong_line_comments = css_parser.allow_wrong_line_comments;
-        options.css_modules = css_parser.css_modules;
+        if let Some(allow_wrong_line_comments) = css_parser.allow_wrong_line_comments {
+            options.allow_wrong_line_comments = allow_wrong_line_comments;
+        }
+        if let Some(css_modules) = css_parser.css_modules {
+            options.css_modules = css_modules;
+        }
 
         if let Ok(mut writeonly_cache) = self.cached_css_parser_options.write() {
             let options = *options;
@@ -1365,8 +1376,8 @@ fn to_css_language_settings(
     let parent_parser = &parent_settings.parser;
     language_setting.parser.allow_wrong_line_comments = parser
         .allow_wrong_line_comments
-        .unwrap_or(parent_parser.allow_wrong_line_comments);
-    language_setting.parser.css_modules = parser.css_modules.unwrap_or(parent_parser.css_modules);
+        .or(parent_parser.allow_wrong_line_comments);
+    language_setting.parser.css_modules = parser.css_modules.or(parent_parser.css_modules);
 
     language_setting
 }

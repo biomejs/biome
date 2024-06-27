@@ -60,11 +60,11 @@ pub fn run(test_case: &str, _snapshot_name: &str, test_directory: &str, outcome_
 
         let settings = settings.languages.css.parser;
 
-        if settings.css_modules {
+        if settings.css_modules.unwrap_or_default() {
             options = options.allow_css_modules();
         }
 
-        if settings.allow_wrong_line_comments {
+        if settings.allow_wrong_line_comments.unwrap_or_default() {
             options = options.allow_wrong_line_comments();
         }
 

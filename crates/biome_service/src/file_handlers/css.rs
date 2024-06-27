@@ -79,8 +79,8 @@ impl Default for CssLinterSettings {
 #[derive(Debug, Clone, Default, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub struct CssParserSettings {
-    pub allow_wrong_line_comments: bool,
-    pub css_modules: bool,
+    pub allow_wrong_line_comments: Option<bool>,
+    pub css_modules: Option<bool>,
 }
 
 impl ServiceLanguage for CssLanguage {
@@ -215,10 +215,10 @@ fn parse(
 ) -> ParseResult {
     let mut options = CssParserOptions {
         allow_wrong_line_comments: settings
-            .map(|s| s.languages.css.parser.allow_wrong_line_comments)
+            .and_then(|s| s.languages.css.parser.allow_wrong_line_comments)
             .unwrap_or_default(),
         css_modules: settings
-            .map(|s| s.languages.css.parser.css_modules)
+            .and_then(|s| s.languages.css.parser.css_modules)
             .unwrap_or_default(),
     };
     if let Some(settings) = settings {
