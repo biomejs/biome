@@ -204,7 +204,6 @@ dependencies = [
  "biome_flags",
  "biome_formatter",
  "biome_graphql_analyze",
- "biome_graphql_parser",
  "biome_graphql_syntax",
  "biome_js_analyze",
  "biome_js_formatter",
