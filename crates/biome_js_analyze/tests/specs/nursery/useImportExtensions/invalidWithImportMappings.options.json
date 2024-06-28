@@ -9,7 +9,7 @@
 					"options": {
 						"suggestedExtensions": {
 							"ts": {
-								"import": "js",
+								"module": "js",
 								"component": "jsx"
 							}
 						}

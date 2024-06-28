@@ -76,19 +76,34 @@ declare_rule! {
     /// Use the options to specify the correct import extensions for your project based on the linted
     /// file extension. These mappings will override the rule's default logic.
     ///
+    /// Mainly, this is a temporary workaround that allows Biome to propose correct import extensions
+    /// for TypeScript projects that use ES Modules. TypeScript requires you to specify imports to 
+    /// the actual files used in runtime: `.js` or `.mjs` (see more here: https://github.com/microsoft/TypeScript/issues/49083#issuecomment-1435399267).
+    ///
+    /// As of now, Biome determines import extension based on the inspected file extension.
+    /// The `suggestedExtensions` option works as a map, where key is the source file extension and
+    /// value provides two possible mappings for imports:
+    ///
+    ///  - `module` is used for module imports that start with a lower-case character, e.g. `foo.js`
+    ///  - `component` is used for component files that start with an upper-case character, e.g. `Foo.jsx` (which is a common convention for React JSX)
+    /// 
+    /// For example, if you want `.ts` files to import other modules as `.js` (or `.jsx`), you should
+    /// configure the following options in your Biome config:
+    ///
     /// ```json
     /// {
     ///     "//": "...",
     ///     "options": {
     ///         "suggestedExtensions": {
     ///             "ts": {
-    ///                 "import": "js",
+    ///                 "module": "js",
     ///                 "component": "jsx"
     ///             }
     ///         }
     ///     }
     /// }
     /// ```
+    ///
     /// ## Caveats
     ///
     /// If you are using TypeScript, TypeScript version 5.0 and later is required, also make sure to enable
@@ -112,7 +127,7 @@ declare_rule! {
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct UseImportExtensionsOptions {
     /// A map of custom import extension mappings, where the key is the inspected file extension, 
-    /// and the value is a pair of `import` extension and `component` import extension
+    /// and the value is a pair of `module` extension and `component` import extension
     pub suggested_extensions: FxHashMap<String, SuggestedExtensionMapping>,
 }
 
@@ -121,7 +136,7 @@ pub struct UseImportExtensionsOptions {
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct SuggestedExtensionMapping {
     /// Extension that should be used for module imports
-    pub import: String,
+    pub module: String,
     /// Extension that should be used for component file imports
     pub component: String,
 }
@@ -280,7 +295,7 @@ fn resolve_import_extension<'a>(
 ) -> &'a str {
     let (potential_ext, potential_component_ext): (&str, &str) =
         if let Some(custom_mapping) = custom_suggested_imports.get(file_ext) {
-            (&custom_mapping.import, &custom_mapping.component)
+            (&custom_mapping.module, &custom_mapping.component)
         } else {
             // TODO. This is not very accurate. We should use file system access to determine the file type.
             match file_ext {
