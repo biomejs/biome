@@ -27,11 +27,19 @@ impl FormatNodeRule<GraphqlObjectTypeExtension> for FormatGraphqlObjectTypeExten
                 type_token.format(),
                 space(),
                 name.format(),
-                implements.format(),
-                directives.format(),
-                space(),
-                fields.format(),
             ]
-        ]
+        ]?;
+
+        if let Some(implements) = implements {
+            write!(f, [space(), implements.format(),])?;
+        }
+
+        write!(f, [directives.format()])?;
+
+        if let Some(fields) = fields {
+            write!(f, [space(), fields.format(),])?;
+        }
+
+        Ok(())
     }
 }
