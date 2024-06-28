@@ -80,9 +80,9 @@ declare_rule! {
     /// for TypeScript projects that use ES Modules. TypeScript requires you to specify imports to
     /// the actual files used in runtime: `.js` or `.mjs` (see more here: https://github.com/microsoft/TypeScript/issues/49083#issuecomment-1435399267).
     ///
-    /// As of now, Biome determines import extension based on the inspected file extension.
-    /// The `suggestedExtensions` option works as a map, where key is the source file extension and
-    /// value provides two possible mappings for imports:
+    /// Currently, Biome determines the import extension based on the inspected file extension.
+    /// The `suggestedExtensions` option works as a map, where the key is the source file extension
+    /// and the value should provide two possible mappings for imports:
     ///
     ///  - `module` is used for module imports that start with a lower-case character, e.g. `foo.js`
     ///  - `component` is used for component files that start with an upper-case character, e.g. `Foo.jsx` (which is a common convention for React JSX)

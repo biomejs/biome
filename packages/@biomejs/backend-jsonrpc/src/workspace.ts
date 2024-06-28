@@ -1973,7 +1973,7 @@ export interface RestrictedImportsOptions {
 }
 export interface UseImportExtensionsOptions {
 	/**
-	 * A map of custom import extension mappings, where key is inspected file extension and value is a pair of `import` extension and `component` import extension
+	 * A map of custom import extension mappings, where the key is the inspected file extension, and the value is a pair of `module` extension and `component` import extension
 	 */
 	suggestedExtensions: {};
 }

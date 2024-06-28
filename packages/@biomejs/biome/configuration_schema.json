@@ -2951,13 +2951,13 @@
 		},
 		"SuggestedExtensionMapping": {
 			"type": "object",
-			"required": ["component", "import"],
+			"required": ["component", "module"],
 			"properties": {
 				"component": {
 					"description": "Extension that should be used for component file imports",
 					"type": "string"
 				},
-				"import": {
+				"module": {
 					"description": "Extension that should be used for module imports",
 					"type": "string"
 				}
@@ -3409,7 +3409,7 @@
 			"required": ["suggestedExtensions"],
 			"properties": {
 				"suggestedExtensions": {
-					"description": "A map of custom import extension mappings, where key is inspected file extension and value is a pair of `import` extension and `component` import extension",
+					"description": "A map of custom import extension mappings, where the key is the inspected file extension, and the value is a pair of `module` extension and `component` import extension",
 					"type": "object",
 					"additionalProperties": {
 						"$ref": "#/definitions/SuggestedExtensionMapping"
