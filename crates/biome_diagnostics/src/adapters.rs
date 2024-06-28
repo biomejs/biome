@@ -96,7 +96,7 @@ impl Diagnostic for BpafError {
 
     fn description(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         if let bpaf::ParseFailure::Stderr(reason) = &self.error {
-            write!(fmt, "{}", reason)?;
+            write!(fmt, "{reason}")?;
         }
         Ok(())
     }

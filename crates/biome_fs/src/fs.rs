@@ -437,7 +437,7 @@ impl Advices for ErrorKind {
         match self {
 			ErrorKind::CantReadFile(path) => visitor.record_log(
 		        LogCategory::Error,
-			    &format!("Biome can't read the following file, maybe for permissions reasons or it doesn't exist: {}", path)
+			    &format!("Biome can't read the following file, maybe for permissions reasons or it doesn't exist: {path}")
 			),
 
             ErrorKind::UnknownFileType => visitor.record_log(
@@ -446,11 +446,11 @@ impl Advices for ErrorKind {
             ),
             ErrorKind::DereferencedSymlink(path) => visitor.record_log(
                 LogCategory::Info,
-                &format!("Biome encountered a file system entry that is a broken symbolic link: {}", path),
+                &format!("Biome encountered a file system entry that is a broken symbolic link: {path}"),
             ),
             ErrorKind::DeeplyNestedSymlinkExpansion(path) => visitor.record_log(
                 LogCategory::Error,
-                &format!("Biome encountered a file system entry with too many nested symbolic links, possibly forming an infinite cycle: {}", path),
+                &format!("Biome encountered a file system entry with too many nested symbolic links, possibly forming an infinite cycle: {path}"),
             ),
         }
     }

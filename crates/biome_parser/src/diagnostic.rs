@@ -124,7 +124,7 @@ impl ParseDiagnostic {
     pub fn new_single_node(name: &str, range: TextRange, p: &impl Parser) -> Self {
         let names = format!("{} {}", article_for(name), name);
         let msg = if p.source().text().text_len() <= range.start() {
-            format!("Expected {} but instead found the end of the file.", names)
+            format!("Expected {names} but instead found the end of the file.")
         } else {
             format!("Expected {} but instead found '{}'.", names, p.text(range))
         };
@@ -133,7 +133,7 @@ impl ParseDiagnostic {
             message: MessageAndDescription::from(msg),
             advice: ParserAdvice::default(),
         }
-        .with_detail(range, format!("Expected {} here.", names))
+        .with_detail(range, format!("Expected {names} here."))
     }
 
     pub fn new_with_any(names: &[&str], range: TextRange, p: &impl Parser) -> Self {
@@ -160,10 +160,7 @@ impl ParseDiagnostic {
         }
 
         let msg = if p.source().text().text_len() <= range.start() {
-            format!(
-                "Expected {} but instead found the end of the file.",
-                joined_names
-            )
+            format!("Expected {joined_names} but instead found the end of the file.")
         } else {
             format!(
                 "Expected {} but instead found '{}'.",
@@ -177,7 +174,7 @@ impl ParseDiagnostic {
             message: MessageAndDescription::from(msg),
             advice: ParserAdvice::default(),
         }
-        .with_detail(range, format!("Expected {} here.", joined_names))
+        .with_detail(range, format!("Expected {joined_names} here."))
     }
 
     pub const fn is_error(&self) -> bool {

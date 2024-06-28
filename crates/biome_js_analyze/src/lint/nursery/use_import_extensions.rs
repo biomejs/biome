@@ -8,7 +8,7 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_deserialize_macros::Deserializable;
 use biome_js_factory::make;
-use biome_js_syntax::{inner_string_text, AnyJsImportSpecifierLike, JsLanguage};
+use biome_js_syntax::{inner_string_text, AnyJsImportLike, JsLanguage};
 use biome_rowan::{BatchMutationExt, SyntaxToken};
 
 use crate::JsRuleAction;
@@ -77,7 +77,7 @@ declare_rule! {
     /// file extension. These mappings will override the rule's default logic.
     ///
     /// Mainly, this is a temporary workaround that allows Biome to propose correct import extensions
-    /// for TypeScript projects that use ES Modules. TypeScript requires you to specify imports to 
+    /// for TypeScript projects that use ES Modules. TypeScript requires you to specify imports to
     /// the actual files used in runtime: `.js` or `.mjs` (see more here: https://github.com/microsoft/TypeScript/issues/49083#issuecomment-1435399267).
     ///
     /// As of now, Biome determines import extension based on the inspected file extension.
@@ -86,7 +86,7 @@ declare_rule! {
     ///
     ///  - `module` is used for module imports that start with a lower-case character, e.g. `foo.js`
     ///  - `component` is used for component files that start with an upper-case character, e.g. `Foo.jsx` (which is a common convention for React JSX)
-    /// 
+    ///
     /// For example, if you want `.ts` files to import other modules as `.js` (or `.jsx`), you should
     /// configure the following options in your Biome config:
     ///
@@ -126,7 +126,7 @@ declare_rule! {
 #[cfg_attr(feature = "schemars", derive(JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct UseImportExtensionsOptions {
-    /// A map of custom import extension mappings, where the key is the inspected file extension, 
+    /// A map of custom import extension mappings, where the key is the inspected file extension,
     /// and the value is a pair of `module` extension and `component` import extension
     pub suggested_extensions: FxHashMap<String, SuggestedExtensionMapping>,
 }
@@ -142,7 +142,7 @@ pub struct SuggestedExtensionMapping {
 }
 
 impl Rule for UseImportExtensions {
-    type Query = Ast<AnyJsImportSpecifierLike>;
+    type Query = Ast<AnyJsImportLike>;
     type State = UseImportExtensionsState;
     type Signals = Option<Self::State>;
     type Options = Box<UseImportExtensionsOptions>;
@@ -206,7 +206,7 @@ pub struct UseImportExtensionsState {
 
 fn get_extensionless_import(
     file_ext: &str,
-    node: &AnyJsImportSpecifierLike,
+    node: &AnyJsImportLike,
     custom_suggested_imports: &FxHashMap<String, SuggestedExtensionMapping>,
 ) -> Option<UseImportExtensionsState> {
     let module_name_token = node.module_name_token()?;
@@ -272,12 +272,12 @@ fn get_extensionless_import(
     });
 
     let part = if is_index_file {
-        format!("index.{}", import_ext)
+        format!("index.{import_ext}")
     } else {
         // fold always adds trailing slash, so we need to remove it.
         new_path.pop();
 
-        format!(".{}", import_ext)
+        format!(".{import_ext}")
     };
 
     new_path.push_str(&part);

@@ -12,7 +12,7 @@ fn run_invalid_configurations(input: &'static str, _: &str, _: &str, _: &str) {
     let file_name = input_file.file_name().and_then(OsStr::to_str).unwrap();
     let extension = input_file.extension().and_then(OsStr::to_str).unwrap();
     let input_code = read_to_string(input_file)
-        .unwrap_or_else(|err| panic!("failed to read {:?}: {:?}", input_file, err));
+        .unwrap_or_else(|err| panic!("failed to read {input_file:?}: {err:?}"));
 
     let mut project = NodeJsProject::default();
     match extension {
@@ -29,8 +29,7 @@ fn run_invalid_configurations(input: &'static str, _: &str, _: &str, _: &str) {
 
     assert!(
         project.has_errors() || !result.diagnostics.is_empty(),
-        "The file {} should have diagnostics, but it doesn't have any",
-        input
+        "The file {input} should have diagnostics, but it doesn't have any"
     );
 
     let mut diagnostics_string = project

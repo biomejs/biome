@@ -33,7 +33,7 @@ mod tests {
         let initializer = declarator.initializer().unwrap();
         let expr = initializer.expression().ok().unwrap();
 
-        assert_eq!(model.is_constant(&expr), is_const, "{}", code);
+        assert_eq!(model.is_constant(&expr), is_const, "{code}");
     }
 
     #[test]

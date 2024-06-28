@@ -1,4 +1,7 @@
-use super::{DocumentFileSource, ExtensionHandler, LintParams, LintResults, ParseResult};
+use super::{
+    is_diagnostic_error, CodeActionsParams, DocumentFileSource, ExtensionHandler, FixAllParams,
+    LintParams, LintResults, ParseResult,
+};
 use crate::file_handlers::DebugCapabilities;
 use crate::file_handlers::{
     AnalyzerCapabilities, Capabilities, FormatterCapabilities, ParserCapabilities,
@@ -7,14 +10,24 @@ use crate::settings::{
     FormatSettings, LanguageListSettings, LanguageSettings, LinterSettings, OverrideSettings,
     ServiceLanguage, Settings,
 };
-use crate::workspace::GetSyntaxTreeResult;
-use biome_analyze::{AnalyzerConfiguration, AnalyzerOptions};
+use crate::workspace::{
+    CodeAction, FixAction, FixFileMode, FixFileResult, GetSyntaxTreeResult, PullActionsResult,
+};
+use crate::WorkspaceError;
+use biome_analyze::{
+    AnalysisFilter, AnalyzerConfiguration, AnalyzerOptions, ControlFlow, Never,
+    RuleCategoriesBuilder, RuleCategory, RuleError,
+};
+use biome_diagnostics::{category, Applicability, Diagnostic, DiagnosticExt, Severity};
 use biome_formatter::SimpleFormatOptions;
 use biome_fs::BiomePath;
+use biome_graphql_analyze::analyze;
 use biome_graphql_parser::parse_graphql_with_cache;
 use biome_graphql_syntax::{GraphqlLanguage, GraphqlRoot, GraphqlSyntaxNode};
 use biome_parser::AnyParse;
-use biome_rowan::NodeCache;
+use biome_rowan::{AstNode, NodeCache};
+use std::borrow::Cow;
+use tracing::{debug_span, error, info, trace, trace_span};
 
 impl ServiceLanguage for GraphqlLanguage {
     type FormatterSettings = ();
@@ -67,9 +80,9 @@ impl ExtensionHandler for GraphqlFileHandler {
             },
             analyzer: AnalyzerCapabilities {
                 lint: Some(lint),
-                code_actions: None,
+                code_actions: Some(code_actions),
                 rename: None,
-                fix_all: None,
+                fix_all: Some(fix_all),
                 organize_imports: None,
             },
             formatter: FormatterCapabilities {
@@ -112,10 +125,313 @@ fn debug_syntax_tree(_rome_path: &BiomePath, parse: AnyParse) -> GetSyntaxTreeRe
 }
 
 fn lint(params: LintParams) -> LintResults {
-    let diagnostics = params.parse.into_diagnostics();
-    LintResults {
-        errors: diagnostics.len(),
-        diagnostics,
-        skipped_diagnostics: 0,
+    debug_span!("Linting GraphQL file", path =? params.path, language =? params.language).in_scope(
+        move || {
+            let workspace_settings = &params.workspace;
+            let analyzer_options = workspace_settings
+                .analyzer_options::<GraphqlLanguage>(params.path, &params.language);
+            let tree = params.parse.tree();
+            let mut diagnostics = params.parse.into_diagnostics();
+
+            let has_only_filter = !params.only.is_empty();
+            let mut rules = None;
+
+            let enabled_rules = if let Some(settings) = params.workspace.settings() {
+                // Compute final rules (taking `overrides` into account)
+                rules = settings.as_rules(params.path.as_path());
+
+                if has_only_filter {
+                    params
+                        .only
+                        .into_iter()
+                        .map(|selector| selector.into())
+                        .collect::<Vec<_>>()
+                } else {
+                    rules
+                        .as_ref()
+                        .map(|rules| rules.as_enabled_rules())
+                        .unwrap_or_default()
+                        .into_iter()
+                        .collect::<Vec<_>>()
+                }
+            } else {
+                vec![]
+            };
+
+            let disabled_rules = params
+                .skip
+                .into_iter()
+                .map(|selector| selector.into())
+                .collect::<Vec<_>>();
+
+            let filter = AnalysisFilter {
+                categories: params.categories,
+                enabled_rules: Some(enabled_rules.as_slice()),
+                disabled_rules: &disabled_rules,
+                range: None,
+            };
+
+            // Do not report unused suppression comment diagnostics if:
+            // - it is a syntax-only analyzer pass, or
+            // - if a single rule is run.
+            let ignores_suppression_comment =
+                !filter.categories.contains(RuleCategory::Lint) || has_only_filter;
+
+            let mut diagnostic_count = diagnostics.len() as u32;
+            let mut errors = diagnostics
+                .iter()
+                .filter(|diag| diag.severity() <= Severity::Error)
+                .count();
+
+            info!("Analyze file {}", params.path.display());
+            let (_, analyze_diagnostics) = analyze(&tree, filter, &analyzer_options, |signal| {
+                if let Some(mut diagnostic) = signal.diagnostic() {
+                    // Do not report unused suppression comment diagnostics if this is a syntax-only analyzer pass
+                    if ignores_suppression_comment
+                        && diagnostic.category() == Some(category!("suppressions/unused"))
+                    {
+                        return ControlFlow::<Never>::Continue(());
+                    }
+
+                    diagnostic_count += 1;
+
+                    // We do now check if the severity of the diagnostics should be changed.
+                    // The configuration allows to change the severity of the diagnostics emitted by rules.
+                    let severity = diagnostic
+                        .category()
+                        .filter(|category| category.name().starts_with("lint/"))
+                        .map_or_else(
+                            || diagnostic.severity(),
+                            |category| {
+                                rules
+                                    .as_ref()
+                                    .and_then(|rules| rules.get_severity_from_code(category))
+                                    .unwrap_or(Severity::Warning)
+                            },
+                        );
+
+                    if severity >= Severity::Error {
+                        errors += 1;
+                    }
+
+                    if diagnostic_count <= params.max_diagnostics {
+                        for action in signal.actions() {
+                            if !action.is_suppression() {
+                                diagnostic = diagnostic.add_code_suggestion(action.into());
+                            }
+                        }
+
+                        let error = diagnostic.with_severity(severity);
+
+                        diagnostics.push(biome_diagnostics::serde::Diagnostic::new(error));
+                    }
+                }
+
+                ControlFlow::<Never>::Continue(())
+            });
+
+            diagnostics.extend(
+                analyze_diagnostics
+                    .into_iter()
+                    .map(biome_diagnostics::serde::Diagnostic::new)
+                    .collect::<Vec<_>>(),
+            );
+            let skipped_diagnostics = diagnostic_count.saturating_sub(diagnostics.len() as u32);
+
+            LintResults {
+                diagnostics,
+                errors,
+                skipped_diagnostics,
+            }
+        },
+    )
+}
+
+#[tracing::instrument(level = "debug", skip(params))]
+pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
+    let CodeActionsParams {
+        parse,
+        range,
+        workspace,
+        path,
+        manifest: _,
+        language,
+        settings,
+    } = params;
+    debug_span!("Code actions GraphQL", range =? range, path =? path).in_scope(move || {
+        let tree = parse.tree();
+        trace_span!("Parsed file", tree =? tree).in_scope(move || {
+            let rules = settings.as_rules(params.path.as_path());
+            let filter = rules
+                .as_ref()
+                .map(|rules| rules.as_enabled_rules())
+                .unwrap_or_default()
+                .into_iter()
+                .collect::<Vec<_>>();
+
+            let mut filter = AnalysisFilter::from_enabled_rules(filter.as_slice());
+
+            let mut categories = RuleCategoriesBuilder::default().with_syntax().with_lint();
+            if settings.organize_imports.enabled {
+                categories = categories.with_action();
+            }
+            filter.categories = categories.build();
+            filter.range = Some(range);
+
+            let analyzer_options = workspace.analyzer_options::<GraphqlLanguage>(path, &language);
+
+            let Some(_) = language.to_graphql_file_source() else {
+                error!("Could not determine the file source of the file");
+                return PullActionsResult { actions: vec![] };
+            };
+
+            trace!("GraphQL runs the analyzer");
+            let mut actions = Vec::new();
+
+            analyze(&tree, filter, &analyzer_options, |signal| {
+                actions.extend(signal.actions().into_code_action_iter().map(|item| {
+                    CodeAction {
+                        category: item.category.clone(),
+                        rule_name: item
+                            .rule_name
+                            .map(|(group, name)| (Cow::Borrowed(group), Cow::Borrowed(name))),
+                        suggestion: item.suggestion,
+                    }
+                }));
+
+                ControlFlow::<Never>::Continue(())
+            });
+
+            PullActionsResult { actions }
+        })
+    })
+}
+
+/// If applies all the safe fixes to the given syntax tree.
+pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceError> {
+    let FixAllParams {
+        parse,
+        fix_file_mode,
+        workspace,
+        should_format: _, // we don't have a formatter yet
+        biome_path,
+        manifest: _,
+        document_file_source,
+    } = params;
+
+    let settings = workspace.settings();
+    let Some(settings) = settings else {
+        let tree: GraphqlRoot = parse.tree();
+
+        return Ok(FixFileResult {
+            actions: vec![],
+            errors: 0,
+            skipped_suggested_fixes: 0,
+            code: tree.syntax().to_string(),
+        });
+    };
+
+    let mut tree: GraphqlRoot = parse.tree();
+    let mut actions = Vec::new();
+
+    // Compute final rules (taking `overrides` into account)
+    let rules = settings.as_rules(params.biome_path.as_path());
+    let rule_filter_list = rules
+        .as_ref()
+        .map(|rules| rules.as_enabled_rules())
+        .unwrap_or_default()
+        .into_iter()
+        .collect::<Vec<_>>();
+    let filter = AnalysisFilter::from_enabled_rules(rule_filter_list.as_slice());
+
+    let mut skipped_suggested_fixes = 0;
+    let mut errors: u16 = 0;
+    let analyzer_options =
+        workspace.analyzer_options::<GraphqlLanguage>(biome_path, &document_file_source);
+    loop {
+        let (action, _) = analyze(&tree, filter, &analyzer_options, |signal| {
+            let current_diagnostic = signal.diagnostic();
+
+            if let Some(diagnostic) = current_diagnostic.as_ref() {
+                if is_diagnostic_error(diagnostic, rules.as_deref()) {
+                    errors += 1;
+                }
+            }
+
+            for action in signal.actions() {
+                // suppression actions should not be part of the fixes (safe or suggested)
+                if action.is_suppression() {
+                    continue;
+                }
+
+                match fix_file_mode {
+                    FixFileMode::SafeFixes => {
+                        if action.applicability == Applicability::MaybeIncorrect {
+                            skipped_suggested_fixes += 1;
+                        }
+                        if action.applicability == Applicability::Always {
+                            errors = errors.saturating_sub(1);
+                            return ControlFlow::Break(action);
+                        }
+                    }
+                    FixFileMode::SafeAndUnsafeFixes => {
+                        if matches!(
+                            action.applicability,
+                            Applicability::Always | Applicability::MaybeIncorrect
+                        ) {
+                            errors = errors.saturating_sub(1);
+                            return ControlFlow::Break(action);
+                        }
+                    }
+                }
+            }
+
+            ControlFlow::Continue(())
+        });
+
+        match action {
+            Some(action) => {
+                if let (root, Some((range, _))) =
+                    action.mutation.commit_with_text_range_and_edit(true)
+                {
+                    tree = match GraphqlRoot::cast(root) {
+                        Some(tree) => tree,
+                        None => {
+                            return Err(WorkspaceError::RuleError(
+                                RuleError::ReplacedRootWithNonRootError {
+                                    rule_name: action.rule_name.map(|(group, rule)| {
+                                        (Cow::Borrowed(group), Cow::Borrowed(rule))
+                                    }),
+                                },
+                            ));
+                        }
+                    };
+                    actions.push(FixAction {
+                        rule_name: action
+                            .rule_name
+                            .map(|(group, rule)| (Cow::Borrowed(group), Cow::Borrowed(rule))),
+                        range,
+                    });
+                }
+            }
+            None => {
+                // let code = if should_format {
+                //     format_node(
+                //         workspace.format_options::<GraphqlLanguage>(biome_path, &document_file_source),
+                //         tree.syntax(),
+                //     )?
+                //         .print()?
+                //         .into_code()
+                // } else {
+                let code = tree.syntax().to_string();
+                // };
+                return Ok(FixFileResult {
+                    code,
+                    skipped_suggested_fixes,
+                    actions,
+                    errors: errors.into(),
+                });
+            }
+        }
     }
 }

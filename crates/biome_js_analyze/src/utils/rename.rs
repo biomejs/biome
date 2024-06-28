@@ -91,8 +91,7 @@ impl std::fmt::Display for RenameError {
             } => {
                 write!(
                     f,
-                    "encountered an error while renaming the symbol \"{}\" to \"{}\"",
-                    original_name, new_name
+                    "encountered an error while renaming the symbol \"{original_name}\" to \"{new_name}\""
                 )
             }
             RenameError::CannotFindDeclaration(_) => {

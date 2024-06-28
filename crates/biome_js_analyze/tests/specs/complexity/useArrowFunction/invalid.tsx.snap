@@ -1,0 +1,72 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.tsx
+---
+# Input
+```tsx
+const f1 = function<T> (x: T): T {
+	return x;
+}
+
+const f2 = async function<T> (x: T): Promise<T> {
+	return x;
+}
+
+```
+
+# Diagnostics
+```
+invalid.tsx:1:12 lint/complexity/useArrowFunction  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This function expression can be turned into an arrow function.
+  
+  > 1 │ const f1 = function<T> (x: T): T {
+      │            ^^^^^^^^^^^^^^^^^^^^^^^
+  > 2 │ 	return x;
+  > 3 │ }
+      │ ^
+    4 │ 
+    5 │ const f2 = async function<T> (x: T): Promise<T> {
+  
+  i Function expressions that don't use this can be turned into arrow functions.
+  
+  i Safe fix: Use an arrow function instead.
+  
+    1   │ - const·f1·=·function<T>·(x:·T):·T·{
+    2   │ - → return·x;
+    3   │ - }
+      1 │ + const·f1·=·<T,>(x:·T):·T·=>·x
+    4 2 │   
+    5 3 │   const f2 = async function<T> (x: T): Promise<T> {
+  
+
+```
+
+```
+invalid.tsx:5:12 lint/complexity/useArrowFunction  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This function expression can be turned into an arrow function.
+  
+    3 │ }
+    4 │ 
+  > 5 │ const f2 = async function<T> (x: T): Promise<T> {
+      │            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 6 │ 	return x;
+  > 7 │ }
+      │ ^
+    8 │ 
+  
+  i Function expressions that don't use this can be turned into arrow functions.
+  
+  i Safe fix: Use an arrow function instead.
+  
+    3 3 │   }
+    4 4 │   
+    5   │ - const·f2·=·async·function<T>·(x:·T):·Promise<T>·{
+    6   │ - → return·x;
+    7   │ - }
+      5 │ + const·f2·=·async·<T,>(x:·T):·Promise<T>·=>·x
+    8 6 │   
+  
+
+```

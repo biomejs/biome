@@ -7,11 +7,11 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_js_factory::make;
 use biome_js_syntax::{
-    AnyJsExpression, AnyJsFunctionBody, AnyJsStatement, JsConstructorClassMember, JsFunctionBody,
-    JsFunctionDeclaration, JsFunctionExportDefaultDeclaration, JsFunctionExpression,
-    JsGetterClassMember, JsGetterObjectMember, JsLanguage, JsMethodClassMember,
-    JsMethodObjectMember, JsModule, JsScript, JsSetterClassMember, JsSetterObjectMember,
-    JsStaticInitializationBlockClassMember, JsSyntaxKind, T,
+    AnyJsExpression, AnyJsFunctionBody, AnyJsStatement, JsConstructorClassMember, JsFileSource,
+    JsFunctionBody, JsFunctionDeclaration, JsFunctionExportDefaultDeclaration,
+    JsFunctionExpression, JsGetterClassMember, JsGetterObjectMember, JsLanguage,
+    JsMethodClassMember, JsMethodObjectMember, JsModule, JsScript, JsSetterClassMember,
+    JsSetterObjectMember, JsStaticInitializationBlockClassMember, JsSyntaxKind, T,
 };
 use biome_rowan::{
     declare_node_union, AstNode, AstNodeList, AstSeparatedList, BatchMutationExt, Language,
@@ -154,6 +154,23 @@ impl Rule for UseArrowFunction {
             arrow_function_builder = arrow_function_builder.with_async_token(async_token);
         }
         if let Some(type_parameters) = function_expression.type_parameters() {
+            let mut type_parameters_iter =
+                type_parameters.items().iter().filter_map(|item| item.ok());
+            let type_parameter = type_parameters_iter.next();
+            // Keep a trailing comma when there is a single type parameter in arrow functions and JSX is enabled
+            // Or the parser will treat it as a JSX tag and fail to parse it.
+            let type_parameters = if type_parameter.is_some()
+                && type_parameters_iter.next().is_none()
+                && ctx.source_type::<JsFileSource>().is_jsx()
+            {
+                make::ts_type_parameters(
+                    make::token(T![<]),
+                    make::ts_type_parameter_list(type_parameter, Some(make::token(T![,]))),
+                    make::token(T![>]),
+                )
+            } else {
+                type_parameters
+            };
             arrow_function_builder = arrow_function_builder.with_type_parameters(type_parameters);
         }
         if let Some(return_type_annotation) = function_expression.return_type_annotation() {

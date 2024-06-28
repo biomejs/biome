@@ -11,8 +11,8 @@ use grit_pattern_matcher::constant::Constant;
 use grit_pattern_matcher::context::{ExecContext, QueryContext};
 use grit_pattern_matcher::effects::Effect;
 use grit_pattern_matcher::pattern::{
-    Accessor, DynamicPattern, DynamicSnippet, DynamicSnippetPart, FilePtr, FileRegistry, GritCall,
-    ListIndex, Pattern, PatternName, PatternOrResolved, ResolvedFile, ResolvedPattern,
+    Accessor, DynamicPattern, DynamicSnippet, DynamicSnippetPart, File, FilePtr, FileRegistry,
+    GritCall, ListIndex, Pattern, PatternName, PatternOrResolved, ResolvedFile, ResolvedPattern,
     ResolvedSnippet, State,
 };
 use grit_util::{AnalysisLogs, Ast, CodeRange, Range};
@@ -65,7 +65,7 @@ impl<'a> GritResolvedPattern<'a> {
                 let mut snippets = Vec::new();
                 snippets.push(ResolvedSnippet::Text("{".into()));
                 for (key, value) in map {
-                    snippets.push(ResolvedSnippet::Text(format!("\"{}\": ", key).into()));
+                    snippets.push(ResolvedSnippet::Text(format!("\"{key}\": ").into()));
                     snippets.extend(value.to_snippets()?);
                     snippets.push(ResolvedSnippet::Text(", ".into()));
                 }
@@ -531,7 +531,12 @@ impl<'a> ResolvedPattern<'a, GritQueryContext> for GritResolvedPattern<'a> {
                 .into()),
             GritResolvedPattern::List(_) => todo!(),
             GritResolvedPattern::Map(_) => todo!(),
-            GritResolvedPattern::File(_) => todo!(),
+            GritResolvedPattern::File(file) => Ok(format!(
+                "{}:\n{}",
+                file.name(state).text(state, language)?,
+                file.body(state).text(state, language)?
+            )
+            .into()),
             GritResolvedPattern::Files(_) => todo!(),
             GritResolvedPattern::Constant(_) => todo!(),
         }

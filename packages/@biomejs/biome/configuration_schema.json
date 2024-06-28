@@ -1727,6 +1727,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noExportedImports": {
+					"description": "Disallow exporting an imported variable.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noImportantInKeyframe": {
 					"description": "Disallow invalid !important within keyframe declarations",
 					"anyOf": [
@@ -1908,6 +1915,13 @@
 				},
 				"useDefaultSwitchClause": {
 					"description": "Require the default clause in switch statements.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useDeprecatedReason": {
+					"description": "Require specifying the reason argument when using @deprecated directive",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }

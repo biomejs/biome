@@ -383,7 +383,7 @@ mod tests {
 
     #[quickcheck]
     fn to_ascii_lowercase_cow_returns_owned_when_some_chars_are_not_lowercase(txt: AsciiString) {
-        let txt = std::format!("{}A", txt); //guarantees at least one uppercase letter
+        let txt = std::format!("{txt}A"); //guarantees at least one uppercase letter
         assert!(matches!(txt.to_ascii_lowercase_cow(), Cow::Owned(s) if s == txt.to_lowercase()));
     }
 

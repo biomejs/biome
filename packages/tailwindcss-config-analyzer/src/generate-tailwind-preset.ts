@@ -55,12 +55,12 @@ function generateLayerArray(layers: SortConfig["utilities"]) {
 
 // Generate Variants using their name, already ordered by weight
 function generateVariants(variants: SortConfig["variants"]) {
-	let output = `pub const VARIANT_CLASSES: [&str; ${variants.length}] = [\n`
+	let output = `pub const VARIANT_CLASSES: [&str; ${variants.length}] = [\n`;
 
 	for (const { name } of variants) {
-		output += `${INDENT}"${name}",\n`
+		output += `${INDENT}"${name}",\n`;
 	}
-	output += `];\n`;
+	output += "];\n";
 	return output;
 }
 

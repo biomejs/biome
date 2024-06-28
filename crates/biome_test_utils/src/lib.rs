@@ -232,7 +232,7 @@ pub fn assert_errors_are_absent<L: ServiceLanguage>(
     diagnostics: &[ParseDiagnostic],
     path: &Path,
 ) {
-    let debug_tree = format!("{:?}", program);
+    let debug_tree = format!("{program:?}");
     let has_missing_children = debug_tree.contains("missing (required)");
 
     if diagnostics.is_empty() && !has_bogus_nodes_or_empty_slots(program) && !has_missing_children {
@@ -269,7 +269,7 @@ pub fn write_analyzer_snapshot(
 ) {
     writeln!(snapshot, "# Input").unwrap();
     writeln!(snapshot, "```{markdown_language}").unwrap();
-    writeln!(snapshot, "{}", input_code).unwrap();
+    writeln!(snapshot, "{input_code}").unwrap();
     writeln!(snapshot, "```").unwrap();
     writeln!(snapshot).unwrap();
 
@@ -277,7 +277,7 @@ pub fn write_analyzer_snapshot(
         writeln!(snapshot, "# Diagnostics").unwrap();
         for diagnostic in diagnostics {
             writeln!(snapshot, "```").unwrap();
-            writeln!(snapshot, "{}", diagnostic).unwrap();
+            writeln!(snapshot, "{diagnostic}").unwrap();
             writeln!(snapshot, "```").unwrap();
             writeln!(snapshot).unwrap();
         }
@@ -287,7 +287,7 @@ pub fn write_analyzer_snapshot(
         writeln!(snapshot, "# Actions").unwrap();
         for action in code_fixes {
             writeln!(snapshot, "```diff").unwrap();
-            writeln!(snapshot, "{}", action).unwrap();
+            writeln!(snapshot, "{action}").unwrap();
             writeln!(snapshot, "```").unwrap();
             writeln!(snapshot).unwrap();
         }
@@ -301,16 +301,16 @@ pub fn write_transformation_snapshot(
     extension: &str,
 ) {
     writeln!(snapshot, "# Input").unwrap();
-    writeln!(snapshot, "```{}", extension).unwrap();
-    writeln!(snapshot, "{}", input_code).unwrap();
+    writeln!(snapshot, "```{extension}").unwrap();
+    writeln!(snapshot, "{input_code}").unwrap();
     writeln!(snapshot, "```").unwrap();
     writeln!(snapshot).unwrap();
 
     if !transformations.is_empty() {
         writeln!(snapshot, "# Transformations").unwrap();
         for transformation in transformations {
-            writeln!(snapshot, "```{}", extension).unwrap();
-            writeln!(snapshot, "{}", transformation).unwrap();
+            writeln!(snapshot, "```{extension}").unwrap();
+            writeln!(snapshot, "{transformation}").unwrap();
             writeln!(snapshot, "```").unwrap();
             writeln!(snapshot).unwrap();
         }

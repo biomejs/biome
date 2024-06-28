@@ -595,7 +595,7 @@ impl NodeDialect {
             "Css" => NodeDialect::Css,
             "Grit" => NodeDialect::Grit,
             _ => {
-                eprintln!("missing prefix {}", name);
+                eprintln!("missing prefix {name}");
                 NodeDialect::Js
             }
         }

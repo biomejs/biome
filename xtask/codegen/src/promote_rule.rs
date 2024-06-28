@@ -49,14 +49,14 @@ pub fn promote_rule(rule_name: &str, new_group: &str) {
     if let (Some(rule_path), Some(analyzers_path)) = (rule_path, analyzers_path) {
         // rule found!
         let new_group_path = analyzers_path.join(new_group);
-        let new_rule_path = new_group_path.join(format!("{}.rs", rule_name_snake));
+        let new_rule_path = new_group_path.join(format!("{rule_name_snake}.rs"));
 
         let categories_path = "crates/biome_diagnostics_categories/src/categories.rs";
         let categories = std::fs::read_to_string(categories_path).unwrap();
 
         let mut categories = categories.replace(
-            &format!("lint/nursery/{}", rule_name),
-            &format!("lint/{}/{}", new_group, rule_name),
+            &format!("lint/nursery/{rule_name}"),
+            &format!("lint/{new_group}/{rule_name}"),
         );
 
         // We sort rules to reduce conflicts between contributions made in parallel.
@@ -93,6 +93,6 @@ pub fn promote_rule(rule_name: &str, new_group: &str) {
             .join(rule_name);
         fs::rename(old_test_path, new_test_path).unwrap();
     } else {
-        panic!("Couldn't find the rule {}", rule_name);
+        panic!("Couldn't find the rule {rule_name}");
     }
 }
