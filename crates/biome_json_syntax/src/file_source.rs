@@ -66,7 +66,7 @@ impl JsonFileSource {
         // https://github.com/palantir/tslint/blob/285fc1db18d1fd24680d6a2282c6445abf1566ee/src/configuration.ts#L268
         "tslint.json",
         // Just strip comments
-        // https://github.com/vercel/turbo/blob/54ea3f06989860e98c4245ba085106e1f725f602/crates/turbopack-core/src/asset.rs#L71
+        // https://github.com/vercel/turbo/blob/0f327961157a5ab07bbb353ac6ecb9a9df7e29b3/crates/turborepo-lib/src/turbo_json/mod.rs#L963
         "turbo.json",
     ];
 
