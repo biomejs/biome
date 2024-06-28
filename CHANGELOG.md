@@ -11,9 +11,27 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 ## Unreleased
 
+### Analyzer
+
+#### Enhancements
+
 - Implement [css suppression action](https://github.com/biomejs/biome/issues/3278). Contributed by @togami2864
 
-## v1.8.3 (2022-06-27)
+### CLI
+
+### Configuration
+
+### Editors
+
+### Formatter
+
+### JavaScript APIs
+
+### Linter
+
+### Parser
+
+## v1.8.3 (2024-06-27)
 
 ### CLI
 
