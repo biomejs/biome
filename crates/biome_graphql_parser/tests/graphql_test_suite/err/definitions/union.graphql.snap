@@ -352,149 +352,149 @@ GraphqlRoot {
 union.graphql:3:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a named type but instead found 'union'.
-
+  
     1 │ union SearchResult = Photo |
-    2 │
+    2 │ 
   > 3 │ union SearchResult
       │ ^^^^^
     4 │ 	| Photo
     5 │ 	| Person
-
+  
   i Expected a named type here.
-
+  
     1 │ union SearchResult = Photo |
-    2 │
+    2 │ 
   > 3 │ union SearchResult
       │ ^^^^^
     4 │ 	| Photo
     5 │ 	| Person
-
+  
 union.graphql:4:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `=` but instead found `|`
-
+  
     3 │ union SearchResult
   > 4 │ 	| Photo
       │ 	^
     5 │ 	| Person
-    6 │
-
+    6 │ 
+  
   i Remove |
-
+  
 union.graphql:13:4 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `|` but instead found `Person`
-
+  
     11 │ union SearchResult =
     12 │ 	| Photo
   > 13 │ 	  Person
        │ 	  ^^^^^^
     14 │ 	| union
-    15 │
-
+    15 │ 
+  
   i Remove Person
-
+  
 union.graphql:18:7 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `=` but instead found `SearchResult`
-
+  
     16 │ union SearchResult @
-    17 │
+    17 │ 
   > 18 │ union SearchResult |
        │       ^^^^^^^^^^^^
-    19 │
+    19 │ 
     20 │ union SearchResult =
-
+  
   i Remove SearchResult
-
+  
 union.graphql:20:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a named type but instead found 'union'.
-
+  
     18 │ union SearchResult |
-    19 │
+    19 │ 
   > 20 │ union SearchResult =
        │ ^^^^^
-    21 │
+    21 │ 
     22 │ union SearchResult = |
-
+  
   i Expected a named type here.
-
+  
     18 │ union SearchResult |
-    19 │
+    19 │ 
   > 20 │ union SearchResult =
        │ ^^^^^
-    21 │
+    21 │ 
     22 │ union SearchResult = |
-
+  
 union.graphql:22:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a named type but instead found 'union'.
-
+  
     20 │ union SearchResult =
-    21 │
+    21 │ 
   > 22 │ union SearchResult = |
        │ ^^^^^
-    23 │
+    23 │ 
     24 │ union SearchResult @ =
-
+  
   i Expected a named type here.
-
+  
     20 │ union SearchResult =
-    21 │
+    21 │ 
   > 22 │ union SearchResult = |
        │ ^^^^^
-    23 │
+    23 │ 
     24 │ union SearchResult @ =
-
+  
 union.graphql:24:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a named type but instead found 'union'.
-
+  
     22 │ union SearchResult = |
-    23 │
+    23 │ 
   > 24 │ union SearchResult @ =
        │ ^^^^^
-    25 │
-
+    25 │ 
+  
   i Expected a named type here.
-
+  
     22 │ union SearchResult = |
-    23 │
+    23 │ 
   > 24 │ union SearchResult @ =
        │ ^^^^^
-    25 │
-
+    25 │ 
+  
 union.graphql:24:22 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a name but instead found '='.
-
+  
     22 │ union SearchResult = |
-    23 │
+    23 │ 
   > 24 │ union SearchResult @ =
        │                      ^
-    25 │
-
+    25 │ 
+  
   i Expected a name here.
-
+  
     22 │ union SearchResult = |
-    23 │
+    23 │ 
   > 24 │ union SearchResult @ =
        │                      ^
-    25 │
-
+    25 │ 
+  
 union.graphql:25:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a named type but instead found the end of the file.
-
+  
     24 │ union SearchResult @ =
-  > 25 │
-       │
-
+  > 25 │ 
+       │ 
+  
   i Expected a named type here.
-
+  
     24 │ union SearchResult @ =
-  > 25 │
-       │
-
+  > 25 │ 
+       │ 
+  
 ```

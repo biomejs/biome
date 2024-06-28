@@ -2228,7 +2228,7 @@ export interface CssFileSource {
 	variant: CssVariant;
 }
 export interface GraphqlFileSource {
-	variant: CssVariant2;
+	variant: GraphqlVariant;
 }
 export type EmbeddingKind = "Astro" | "Vue" | "Svelte" | "None";
 export type Language =
@@ -2254,7 +2254,7 @@ export type CssVariant = "Standard";
 /**
  * The style of GraphQL contained in the file.
  */
-export type CssVariant2 = "Standard";
+export type GraphqlVariant = "Standard";
 export interface ChangeFileParams {
 	content: string;
 	path: BiomePath;
