@@ -1394,7 +1394,6 @@ fn to_javascript_language_settings(
         formatter.trailing_commas.or(formatter.trailing_comma);
     language_setting.formatter.semicolons = formatter.semicolons;
     language_setting.formatter.arrow_parentheses = formatter.arrow_parentheses;
-    dbg!(formatter.bracket_spacing);
     language_setting.formatter.bracket_spacing = formatter.bracket_spacing;
     language_setting.formatter.bracket_same_line = formatter.bracket_same_line.map(Into::into);
     language_setting.formatter.enabled = formatter.enabled;
