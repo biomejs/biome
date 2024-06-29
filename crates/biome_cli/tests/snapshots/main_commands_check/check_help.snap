@@ -31,6 +31,8 @@ The configuration that is contained inside the file `biome.json`
         --line-width=NUMBER   What's the max width of a line. Defaults to 80.
         --attribute-position=<multiline|auto>  The attribute position style in HTMLish languages. By
                               default auto.
+        --bracket-spacing=<true|false>  Whether to insert spaces around brackets in object literals.
+                              Defaults to true.
         --jsx-quote-style=<double|single>  The type of quotes used in JSX. Defaults to double.
         --quote-properties=<preserve|as-needed>  When properties in objects are quoted. Defaults to asNeeded.
         --trailing-comma=<all|es5|none>  Print trailing commas wherever possible in multi-line comma-separated
@@ -41,8 +43,6 @@ The configuration that is contained inside the file `biome.json`
                               only in for statements where it is necessary because of ASI.
         --arrow-parentheses=<always|as-needed>  Whether to add non-necessary parentheses to arrow functions.
                               Defaults to "always".
-        --bracket-spacing=<true|false>  Whether to insert spaces around brackets in object literals.
-                              Defaults to true.
         --bracket-same-line=<true|false>  Whether to hug the closing bracket of multiline HTML/JSX tags
                               to the end of the last line, rather than being alone on the following line.
                               Defaults to false.

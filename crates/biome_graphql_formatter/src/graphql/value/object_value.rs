@@ -1,5 +1,5 @@
 use crate::prelude::*;
-use biome_formatter::{format_args, write};
+use biome_formatter::{format_args, write, FormatOptions};
 use biome_graphql_syntax::{GraphqlObjectValue, GraphqlObjectValueFields};
 
 #[derive(Debug, Clone, Default)]
@@ -16,7 +16,10 @@ impl FormatNodeRule<GraphqlObjectValue> for FormatGraphqlObjectValue {
             f,
             [group(&format_args![
                 l_curly_token.format(),
-                soft_block_indent_with_maybe_space(&members.format(), true), // TODO implement options.bracket_spacing
+                soft_block_indent_with_maybe_space(
+                    &members.format(),
+                    f.options().bracket_spacing().value()
+                ),
                 r_curly_token.format()
             ])]
         )

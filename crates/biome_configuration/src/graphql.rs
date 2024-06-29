@@ -1,6 +1,6 @@
 use crate::PlainIndentStyle;
 use biome_deserialize_macros::{Deserializable, Merge, Partial};
-use biome_formatter::{IndentWidth, LineEnding, LineWidth, QuoteStyle};
+use biome_formatter::{BracketSpacing, IndentWidth, LineEnding, LineWidth, QuoteStyle};
 use bpaf::Bpaf;
 use serde::{Deserialize, Serialize};
 
@@ -55,7 +55,12 @@ pub struct GraphqlFormatter {
         argument("double|single"),
         optional
     ))]
-    pub quote_style: QuoteStyle,
+    pub quote_style: Option<QuoteStyle>,
+
+    // it's also a top-level configurable property.
+    /// Whether to insert spaces around brackets in object literals. Defaults to true.
+    #[partial(bpaf(long("bracket-spacing"), argument("true|false"), optional))]
+    pub bracket_spacing: Option<BracketSpacing>,
 }
 
 impl PartialGraphqlFormatter {
@@ -66,7 +71,8 @@ impl PartialGraphqlFormatter {
             indent_width: self.indent_width,
             line_ending: self.line_ending,
             line_width: self.line_width,
-            quote_style: self.quote_style.unwrap_or_default(),
+            quote_style: self.quote_style,
+            bracket_spacing: self.bracket_spacing,
         }
     }
 }
@@ -80,5 +86,5 @@ fn default_graphql() {
     assert_eq!(graphql_configuration.indent_width, None);
     assert_eq!(graphql_configuration.line_ending, None);
     assert_eq!(graphql_configuration.line_width, None);
-    assert_eq!(graphql_configuration.quote_style, QuoteStyle::Double);
+    assert_eq!(graphql_configuration.quote_style, None);
 }

@@ -123,6 +123,10 @@ export interface PartialFormatterConfiguration {
 	 * The attribute position style in HTMLish languages. By default auto.
 	 */
 	attributePosition?: AttributePosition;
+	/**
+	 * Whether to insert spaces around brackets in object literals. Defaults to true.
+	 */
+	bracketSpacing?: BracketSpacing;
 	enabled?: boolean;
 	/**
 	 * Stores whether formatting should be allowed to proceed if a given file has syntax errors
@@ -323,6 +327,7 @@ export interface PartialCssParser {
 	cssModules?: boolean;
 }
 export type AttributePosition = "auto" | "multiline";
+export type BracketSpacing = boolean;
 export type IndentWidth = number;
 export type PlainIndentStyle = "tab" | "space";
 export type LineEnding = "lf" | "crlf" | "cr";
@@ -336,6 +341,10 @@ export type LineWidth = number;
  * Options that changes how the GraphQL formatter behaves
  */
 export interface PartialGraphqlFormatter {
+	/**
+	 * Whether to insert spaces around brackets in object literals. Defaults to true.
+	 */
+	bracketSpacing?: BracketSpacing;
 	/**
 	 * Control the formatter for GraphQL files.
 	 */
@@ -380,7 +389,7 @@ export interface PartialJavascriptFormatter {
 	/**
 	 * Whether to insert spaces around brackets in object literals. Defaults to true.
 	 */
-	bracketSpacing?: boolean;
+	bracketSpacing?: BracketSpacing;
 	/**
 	 * Control the formatter for JavaScript (and its super languages) files.
 	 */
@@ -534,6 +543,10 @@ export interface OverridePattern {
 	 * Specific configuration for the Json language
 	 */
 	formatter?: OverrideFormatterConfiguration;
+	/**
+	 * Specific configuration for the Graphql language
+	 */
+	graphql?: PartialGraphqlConfiguration;
 	/**
 	 * A list of Unix shell style patterns. The formatter will ignore files/folders that will match these patterns.
 	 */
@@ -1698,6 +1711,10 @@ export interface OverrideFormatterConfiguration {
 	 * The attribute position style.
 	 */
 	attributePosition?: AttributePosition;
+	/**
+	 * Whether to insert spaces around brackets in object literals. Defaults to true.
+	 */
+	bracketSpacing?: BracketSpacing;
 	enabled?: boolean;
 	/**
 	 * Stores whether formatting should be allowed to proceed if a given file has syntax errors

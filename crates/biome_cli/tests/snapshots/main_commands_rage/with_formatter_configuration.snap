@@ -82,6 +82,7 @@ Formatter:
   Line ending:                  Lf
   Line width:                   120
   Attribute position:           Multiline
+  Bracket spacing:              BracketSpacing(true)
   Ignore:                       ["configuration-schema.json"]
   Include:                      ["**/*.html", "**/*.css", "**/*.js", "**/*.ts", "**/*.tsx", "**/*.jsx", "**/*.json", "**/*.md"]
 
@@ -92,14 +93,14 @@ JavaScript Formatter:
   Trailing commas:              All
   Semicolons:                   Always
   Arrow parentheses:            Always
-  Bracket spacing:              false
+  Bracket spacing:              None
   Bracket same line:            false
   Quote style:                  Double
   Indent style:                 Tab
   Indent width:                 2
   Line ending:                  Lf
   Line width:                   100
-  Attribute position:           Auto
+  Attribute position:           None
 
 JSON Formatter:
   Enabled:                      true
@@ -123,7 +124,8 @@ GraphQL Formatter:
   Indent width:                 unset
   Line ending:                  unset
   Line width:                   unset
-  Quote style:                  Double
+  Bracket spacing:              None
+  Quote style:                  None
 
 Server:
   Version:                      0.0.0

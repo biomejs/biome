@@ -179,6 +179,7 @@ Indent style: Tab
 Indent width: 2
 Line ending: LF
 Line width: 80
+Bracket spacing: true
 Quote style: Double Quotes
 -----
 
