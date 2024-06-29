@@ -3786,7 +3786,10 @@ fn applies_custom_bracket_spacing_for_graphql() {
     let mut console = BufferConsole::default();
 
     let file_path = Path::new("file.graphql");
-    fs.insert(file_path.into(), APPLY_BRACKET_SPACING_BEFORE_GRAPHQL.as_bytes());
+    fs.insert(
+        file_path.into(),
+        APPLY_BRACKET_SPACING_BEFORE_GRAPHQL.as_bytes(),
+    );
 
     let result = run_cli(
         DynRef::Borrowed(&mut fs),
@@ -3799,7 +3802,7 @@ fn applies_custom_bracket_spacing_for_graphql() {
                 ("--write"),
                 file_path.as_os_str().to_str().unwrap(),
             ]
-                .as_slice(),
+            .as_slice(),
         ),
     );
 
