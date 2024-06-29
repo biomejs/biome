@@ -1,6 +1,7 @@
 use std::collections::HashSet;
 
 use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic};
+use biome_analyze::{RuleSource, RuleSourceKind};
 use biome_console::markup;
 use biome_graphql_syntax::AnyGraphqlOperationDefinition;
 use biome_graphql_syntax::AnyGraphqlSelection;
@@ -42,6 +43,8 @@ declare_rule! {
         version: "next",
         name: "noDuplicatedGraphqlFields",
         language: "graphql",
+        sources: &[RuleSource::EslintGraphql("no-duplicate-fields")],
+        source_kind: RuleSourceKind::SameLogic,
         recommended: true,
     }
 }
