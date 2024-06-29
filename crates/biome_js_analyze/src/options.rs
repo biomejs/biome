@@ -83,6 +83,8 @@ pub type NoExcessiveCognitiveComplexity = < lint :: complexity :: no_excessive_c
 pub type NoExcessiveNestedTestSuites = < lint :: complexity :: no_excessive_nested_test_suites :: NoExcessiveNestedTestSuites as biome_analyze :: Rule > :: Options ;
 pub type NoExplicitAny =
     <lint::suspicious::no_explicit_any::NoExplicitAny as biome_analyze::Rule>::Options;
+pub type NoExportedImports =
+    <lint::nursery::no_exported_imports::NoExportedImports as biome_analyze::Rule>::Options;
 pub type NoExportsInTest =
     <lint::suspicious::no_exports_in_test::NoExportsInTest as biome_analyze::Rule>::Options;
 pub type NoExtraBooleanCast =
