@@ -59,7 +59,7 @@ declare_rule! {
 pub struct UseTrimStartEndState {
     member_name: String,
     span: TextRange,
-    suggested_name: &'static str,
+    suggested_name: String,
 }
 
 impl Rule for UseTrimStartEnd {
@@ -88,22 +88,14 @@ impl Rule for UseTrimStartEnd {
                 let value = member.as_static_value()?;
                 let span = value.range();
                 let member_name = value.as_string_constant()?.to_string();
-                let suggested_name = match member_name.as_ref() {
-                    "trimLeft" => Some("trimStart"),
-                    "trimRight" => Some("trimEnd"),
-                    _ => return None,
-                };
+                let suggested_name = generate_suggested_name(&member_name);
                 (member_name, span, suggested_name)
             }
             AnyJsExpression::JsStaticMemberExpression(callee) => {
                 let token = callee.member().ok()?.value_token().ok()?;
                 let span = token.text_range();
                 let member_name = token.text_trimmed().to_string();
-                let suggested_name = match member_name.as_ref() {
-                    "trimLeft" => Some("trimStart"),
-                    "trimRight" => Some("trimEnd"),
-                    _ => return None,
-                };
+                let suggested_name = generate_suggested_name(&member_name);
                 (member_name, span, suggested_name)
             }
             _ => return None,
@@ -280,17 +272,21 @@ fn suggested_name(text: &SyntaxToken<JsLanguage>) -> String {
     } else {
         trimmed
     };
-    let cleaned = match unquoted {
-        "trimLeft" => "trimStart",
-        "trimRight" => "trimEnd",
-        _ => unquoted,
-    };
+    let suggested_name = generate_suggested_name(unquoted).unwrap();
 
     if is_single_quoted {
-        format!("'{}'", cleaned)
+        format!("'{}'", suggested_name)
     } else if is_double_quoted {
-        format!("\"{}\"", cleaned)
+        format!("\"{}\"", suggested_name)
     } else {
-        cleaned.to_string()
+        suggested_name.to_string()
+    }
+}
+
+fn generate_suggested_name(member_name: &str) -> Option<String> {
+    match member_name {
+        "trimLeft" => Some("trimStart".to_string()),
+        "trimRight" => Some("trimEnd".to_string()),
+        _ => None,
     }
 }
