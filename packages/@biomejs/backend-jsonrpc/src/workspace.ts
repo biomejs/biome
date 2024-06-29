@@ -1011,10 +1011,6 @@ export interface Nursery {
 	 */
 	noEvolvingTypes?: RuleConfiguration_for_Null;
 	/**
-	 * Disallow exporting an imported variable.
-	 */
-	noExportedImports?: RuleConfiguration_for_Null;
-	/**
 	 * Disallow invalid !important within keyframe declarations
 	 */
 	noImportantInKeyframe?: RuleConfiguration_for_Null;
@@ -1123,10 +1119,6 @@ export interface Nursery {
 	 */
 	useDefaultSwitchClause?: RuleConfiguration_for_Null;
 	/**
-	 * Require specifying the reason argument when using @deprecated directive
-	 */
-	useDeprecatedReason?: RuleConfiguration_for_Null;
-	/**
 	 * Enforce passing a message value when creating a built-in error.
 	 */
 	useErrorMessage?: RuleConfiguration_for_Null;
@@ -1175,9 +1167,9 @@ export interface Nursery {
 	 */
 	useTopLevelRegex?: RuleConfiguration_for_Null;
 	/**
-	 * Succinct description of the rule.
+	 * Enforce the use of String.trimStart() and String.trimEnd() over String.trimLeft() and String.trimRight().
 	 */
-	useTrimStartEnd?: RuleConfiguration_for_Null;
+	useTrimStartEnd?: RuleFixConfiguration_for_Null;
 	/**
 	 * Use valid values for the autocomplete attribute on input elements.
 	 */
