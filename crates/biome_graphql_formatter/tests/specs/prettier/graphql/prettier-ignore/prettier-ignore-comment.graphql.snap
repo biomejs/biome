@@ -1,0 +1,45 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: graphql/prettier-ignore/prettier-ignore-comment.graphql
+---
+# Input
+
+```graphql
+{
+  # prettier-ignore
+  hero {
+       name
+    height
+  }
+}
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,7 +1,7 @@
+ {
+   # prettier-ignore
+   hero {
+-       name
++    name
+     height
+   }
+ }
+```
+
+# Output
+
+```graphql
+{
+  # prettier-ignore
+  hero {
+    name
+    height
+  }
+}
+```

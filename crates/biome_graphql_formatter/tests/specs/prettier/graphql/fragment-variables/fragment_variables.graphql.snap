@@ -1,0 +1,160 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: graphql/fragment-variables/fragment_variables.graphql
+---
+# Input
+
+```graphql
+fragment F($var: Int) on Type {
+  field
+}
+
+fragment G($first_variable: Int,   $second_variable: String =  "Very complex default argument value") on Type {
+  field
+}
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -2,9 +2,6 @@
+   field
+ }
+ 
+-fragment G(
+-  $first_variable: Int
+-  $second_variable: String = "Very complex default argument value"
+-) on Type {
++fragment G($first_variable: Int,   $second_variable: String =  "Very complex default argument value") on Type {
+   field
+ }
+```
+
+# Output
+
+```graphql
+fragment F($var: Int) on Type {
+  field
+}
+
+fragment G($first_variable: Int,   $second_variable: String =  "Very complex default argument value") on Type {
+  field
+}
+```
+
+# Errors
+```
+fragment_variables.graphql:1:11 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `on` but instead found `(`
+  
+  > 1 │ fragment F($var: Int) on Type {
+      │           ^
+    2 │   field
+    3 │ }
+  
+  i Remove (
+  
+fragment_variables.graphql:1:21 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a field, a fragment spread, or an inline fragment but instead found ')'.
+  
+  > 1 │ fragment F($var: Int) on Type {
+      │                     ^
+    2 │   field
+    3 │ }
+  
+  i Expected a field, a fragment spread, or an inline fragment here.
+  
+  > 1 │ fragment F($var: Int) on Type {
+      │                     ^
+    2 │   field
+    3 │ }
+  
+fragment_variables.graphql:5:12 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an argument but instead found '$'.
+  
+    3 │ }
+    4 │ 
+  > 5 │ fragment G($first_variable: Int,   $second_variable: String =  "Very complex default argument value") on Type {
+      │            ^
+    6 │   field
+    7 │ }
+  
+  i Expected an argument here.
+  
+    3 │ }
+    4 │ 
+  > 5 │ fragment G($first_variable: Int,   $second_variable: String =  "Very complex default argument value") on Type {
+      │            ^
+    6 │   field
+    7 │ }
+  
+fragment_variables.graphql:5:36 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an argument but instead found '$'.
+  
+    3 │ }
+    4 │ 
+  > 5 │ fragment G($first_variable: Int,   $second_variable: String =  "Very complex default argument value") on Type {
+      │                                    ^
+    6 │   field
+    7 │ }
+  
+  i Expected an argument here.
+  
+    3 │ }
+    4 │ 
+  > 5 │ fragment G($first_variable: Int,   $second_variable: String =  "Very complex default argument value") on Type {
+      │                                    ^
+    6 │   field
+    7 │ }
+  
+fragment_variables.graphql:5:61 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an argument but instead found '=  "Very complex default argument value"'.
+  
+    3 │ }
+    4 │ 
+  > 5 │ fragment G($first_variable: Int,   $second_variable: String =  "Very complex default argument value") on Type {
+      │                                                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    6 │   field
+    7 │ }
+  
+  i Expected an argument here.
+  
+    3 │ }
+    4 │ 
+  > 5 │ fragment G($first_variable: Int,   $second_variable: String =  "Very complex default argument value") on Type {
+      │                                                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    6 │   field
+    7 │ }
+  
+fragment_variables.graphql:8:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `}` but instead the file ends
+  
+    6 │   field
+    7 │ }
+  > 8 │ 
+      │ 
+  
+  i the file ends here
+  
+    6 │   field
+    7 │ }
+  > 8 │ 
+      │ 
+  
+
+```
+
+# Lines exceeding max width of 80 characters
+```
+    5: fragment G($first_variable: Int,   $second_variable: String =  "Very complex default argument value") on Type {
+```

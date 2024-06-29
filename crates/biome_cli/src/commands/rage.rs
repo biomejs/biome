@@ -265,6 +265,18 @@ impl Display for RageConfiguration<'_, '_> {
                             {KeyValuePair("Line width", markup!({DebugDisplayOption(css_formatter_configuration.line_width)}))}
                             {KeyValuePair("Quote style", markup!({DebugDisplay(css_formatter_configuration.quote_style)}))}
                         ).fmt(fmt)?;
+
+                        let graphql_formatter_configuration =
+                            configuration.get_graphql_formatter_configuration();
+                        markup! (
+                            {Section("GraphQL Formatter")}
+                            {KeyValuePair("Enabled", markup!({DebugDisplay(graphql_formatter_configuration.enabled)}))}
+                            {KeyValuePair("Indent style", markup!({DebugDisplayOption(graphql_formatter_configuration.indent_style)}))}
+                            {KeyValuePair("Indent width", markup!({DebugDisplayOption(graphql_formatter_configuration.indent_width)}))}
+                            {KeyValuePair("Line ending", markup!({DebugDisplayOption(graphql_formatter_configuration.line_ending)}))}
+                            {KeyValuePair("Line width", markup!({DebugDisplayOption(graphql_formatter_configuration.line_width)}))}
+                            {KeyValuePair("Quote style", markup!({DebugDisplay(graphql_formatter_configuration.quote_style)}))}
+                        ).fmt(fmt)?;
                     }
 
                     // Print linter configuration if --linter option is true

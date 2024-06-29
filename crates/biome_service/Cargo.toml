@@ -28,6 +28,7 @@ biome_flags              = { workspace = true }
 biome_formatter          = { workspace = true, features = ["serde"] }
 biome_fs                 = { workspace = true, features = ["serde"] }
 biome_graphql_analyze    = { workspace = true }
+biome_graphql_formatter  = { workspace = true }
 biome_graphql_parser     = { workspace = true }
 biome_graphql_syntax     = { workspace = true }
 biome_grit_patterns      = { workspace = true }

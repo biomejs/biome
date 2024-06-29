@@ -127,11 +127,6 @@ pub trait ParseSeparatedList {
         false
     }
 
-    /// `true` if the list allows for an optional leading separator
-    fn allow_leading_seperating_element(&self) -> bool {
-        false
-    }
-
     /// Method called at each iteration of the loop and checks if the expected
     /// separator is present.
     ///
@@ -154,9 +149,6 @@ pub trait ParseSeparatedList {
             || (!p.at(<Self::Parser<'_> as Parser>::Kind::EOF) && !self.is_at_list_end(p))
         {
             if first {
-                if self.allow_leading_seperating_element() {
-                    p.eat(self.separating_element_kind());
-                }
                 first = false;
             } else {
                 self.expect_separator(p);
