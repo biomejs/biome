@@ -2,5 +2,6 @@
 
 use crate::lint;
 
+pub type NoDuplicatedGraphqlFields = < lint :: nursery :: no_duplicated_graphql_fields :: NoDuplicatedGraphqlFields as biome_analyze :: Rule > :: Options ;
 pub type UseDeprecatedReason =
     <lint::nursery::use_deprecated_reason::UseDeprecatedReason as biome_analyze::Rule>::Options;
