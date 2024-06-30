@@ -20,11 +20,13 @@ impl FormatNodeRule<GraphqlInputObjectTypeDefinition> for FormatGraphqlInputObje
             input_fields,
         } = node.as_fields();
 
+        if let Some(description) = description {
+            write!(f, [description.format(), hard_line_break(),])?;
+        }
+
         write!(
             f,
             [
-                description.format(),
-                hard_line_break(),
                 input_token.format(),
                 space(),
                 name.format(),

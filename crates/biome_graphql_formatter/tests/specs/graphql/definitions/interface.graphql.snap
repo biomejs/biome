@@ -153,8 +153,8 @@ interface Person {
 
 	picture(size: Int = 0): Url
 
-	height("filter by height"greater_than: Int @deprecated): Int
-	weight("filter by weight"greater_than: Int = 0 @deprecated): Int
+	height("filter by height" greater_than: Int @deprecated): Int
+	weight("filter by weight" greater_than: Int = 0 @deprecated): Int
 }
 
 interface interface implements interface {

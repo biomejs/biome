@@ -163,10 +163,10 @@ type Person {
 	"filder by age"
 	age: Int @deprecated
 	picture(size: Int = 0): Url
-	height("filter by height"greater_than: Int @deprecated): Int
-	weight("filter by weight"greater_than: Int = 0 @deprecated): Int
+	height("filter by height" greater_than: Int @deprecated): Int
+	weight("filter by weight" greater_than: Int = 0 @deprecated): Int
 	"filter by weight"
-	weight("filter by weight"greater_than: Int = 0 @deprecated): Int
+	weight("filter by weight" greater_than: Int = 0 @deprecated): Int
 }
 
 type type implements type {
