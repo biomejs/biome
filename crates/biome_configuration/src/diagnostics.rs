@@ -332,7 +332,7 @@ mod test {
     use crate::{BiomeDiagnostic, PartialConfiguration};
     use biome_deserialize::json::deserialize_from_json_str;
     use biome_diagnostics::{print_diagnostic_to_string, DiagnosticExt, Error};
-    use biome_json_parser::JsonParserOptions;
+    use biome_json_parser::JsonParseOptions;
 
     fn snap_diagnostic(test_name: &str, diagnostic: Error) {
         let content = print_diagnostic_to_string(&diagnostic);
@@ -362,7 +362,7 @@ mod test {
         let content = "{ \n\n\"formatter\" }";
         let result = deserialize_from_json_str::<PartialConfiguration>(
             content,
-            JsonParserOptions::default(),
+            JsonParseOptions::default(),
             "",
         );
 
@@ -389,7 +389,7 @@ mod test {
 }"#;
         let _result = deserialize_from_json_str::<PartialConfiguration>(
             content,
-            JsonParserOptions::default(),
+            JsonParseOptions::default(),
             "",
         )
         .into_deserialized()

@@ -1,7 +1,7 @@
 use biome_configuration::PartialConfiguration;
 use biome_console::fmt::{Formatter, Termcolor};
 use biome_console::markup;
-use biome_css_parser::{parse_css, CssParserOptions};
+use biome_css_parser::{parse_css, CssParseOptions};
 use biome_deserialize::json::deserialize_from_str;
 use biome_diagnostics::display::PrintDiagnostic;
 use biome_diagnostics::DiagnosticExt;
@@ -40,7 +40,7 @@ pub fn run(test_case: &str, _snapshot_name: &str, test_directory: &str, outcome_
     let content = fs::read_to_string(test_case_path)
         .expect("Expected test path to be a readable file in UTF8 encoding");
 
-    let mut options = CssParserOptions::default();
+    let mut options = CssParseOptions::default();
 
     let options_path = Path::new(test_directory).join("options.json");
 
@@ -178,7 +178,7 @@ pub fn quick_test() {
 
     let root = parse_css(
         code,
-        CssParserOptions::default()
+        CssParseOptions::default()
             .allow_wrong_line_comments()
             .allow_css_modules(),
     );

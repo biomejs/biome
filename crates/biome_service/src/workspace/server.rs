@@ -25,7 +25,7 @@ use biome_diagnostics::{
 use biome_formatter::Printed;
 use biome_fs::{BiomePath, ConfigName};
 use biome_grit_patterns::GritQuery;
-use biome_json_parser::{parse_json_with_cache, JsonParserOptions};
+use biome_json_parser::{parse_json_with_cache, JsonParseOptions};
 use biome_json_syntax::JsonFileSource;
 use biome_parser::AnyParse;
 use biome_project::NodeJsProject;
@@ -179,7 +179,7 @@ impl WorkspaceServer {
                     let parsed = parse_json_with_cache(
                         document.content.as_str(),
                         &mut document.node_cache,
-                        JsonParserOptions::default(),
+                        JsonParseOptions::default(),
                     );
 
                     let mut node_js_project = NodeJsProject::default();

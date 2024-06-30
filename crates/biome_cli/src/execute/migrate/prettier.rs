@@ -10,7 +10,7 @@ use biome_formatter::{
 };
 use biome_fs::{FileSystem, OpenOptions};
 use biome_js_formatter::context::{ArrowParentheses, QuoteProperties, Semicolons, TrailingCommas};
-use biome_json_parser::JsonParserOptions;
+use biome_json_parser::JsonParseOptions;
 use biome_service::DynRef;
 use std::path::Path;
 
@@ -425,7 +425,7 @@ fn load_config(
             if path.file_name().is_some_and(|name| name == PACKAGE_JSON) {
                 let (deserialized, _) = deserialize_from_json_str::<PrettierPackageJson>(
                     &content,
-                    JsonParserOptions::default()
+                    JsonParseOptions::default()
                         .with_allow_trailing_commas()
                         .with_allow_comments(),
                     "",
@@ -438,7 +438,7 @@ fn load_config(
             } else {
                 deserialize_from_json_str::<PrettierConfiguration>(
                     &content,
-                    JsonParserOptions::default()
+                    JsonParseOptions::default()
                         .with_allow_trailing_commas()
                         .with_allow_comments(),
                     "",
@@ -450,7 +450,7 @@ fn load_config(
             let node::Resolution { content, .. } = node::load_config(&path.to_string_lossy())?;
             deserialize_from_json_str::<PrettierConfiguration>(
                 &content,
-                JsonParserOptions::default(),
+                JsonParseOptions::default(),
                 "",
             )
             .consume()
@@ -505,13 +505,13 @@ fn load_config(
 mod tests {
     use crate::execute::migrate::prettier::{PrettierConfiguration, PrettierTrailingComma};
     use biome_deserialize::json::deserialize_from_json_str;
-    use biome_json_parser::JsonParserOptions;
+    use biome_json_parser::JsonParseOptions;
 
     #[test]
     fn ok() {
         let configuration = deserialize_from_json_str::<PrettierConfiguration>(
             r#"{ "useTabs": true }"#,
-            JsonParserOptions::default(),
+            JsonParseOptions::default(),
             "",
         )
         .into_deserialized()
@@ -537,7 +537,7 @@ mod tests {
   "jsxSingleQuote": true
 }
             "#,
-            JsonParserOptions::default(),
+            JsonParseOptions::default(),
             "",
         )
         .into_deserialized()

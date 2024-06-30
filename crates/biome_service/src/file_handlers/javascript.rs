@@ -9,7 +9,7 @@ use crate::settings::{LinterSettings, OverrideSettings, Settings};
 use crate::workspace::{DocumentFileSource, OrganizeImportsResult};
 use crate::{
     settings::{
-        FormatSettings, LanguageListSettings, LanguageSettings, ServiceLanguage,
+        FormatterSettings, LanguageListSettings, LanguageSettings, ServiceLanguage,
         WorkspaceSettingsHandle,
     },
     workspace::{
@@ -38,7 +38,7 @@ use biome_js_formatter::context::{
     ArrowParentheses, BracketSameLine, JsFormatOptions, QuoteProperties, Semicolons,
 };
 use biome_js_formatter::format_node;
-use biome_js_parser::JsParserOptions;
+use biome_js_parser::JsParseOptions;
 use biome_js_semantic::{semantic_model, SemanticModelOptions};
 use biome_js_syntax::{
     AnyJsRoot, JsFileSource, JsLanguage, JsSyntaxNode, TextRange, TextSize, TokenAtOffset,
@@ -73,7 +73,7 @@ pub struct JsFormatterSettings {
 #[derive(Debug, Clone, Default, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub struct JsParserSettings {
-    pub parse_class_parameter_decorators: bool,
+    pub parse_class_parameter_decorators: Option<bool>,
 }
 
 #[derive(Debug, Clone, Default, serde::Serialize, serde::Deserialize)]
@@ -89,12 +89,14 @@ pub struct JsOrganizeImportsSettings {}
 #[derive(Clone, Debug, Default, Deserialize, Serialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub struct JsEnvironmentSettings {
-    pub jsx_runtime: JsxRuntime,
+    pub jsx_runtime: Option<JsxRuntime>,
 }
 
 impl From<JsxRuntime> for JsEnvironmentSettings {
     fn from(jsx_runtime: JsxRuntime) -> Self {
-        Self { jsx_runtime }
+        Self {
+            jsx_runtime: Some(jsx_runtime),
+        }
     }
 }
 
@@ -111,7 +113,7 @@ impl ServiceLanguage for JsLanguage {
     }
 
     fn resolve_format_options(
-        global: Option<&FormatSettings>,
+        global: Option<&FormatterSettings>,
         overrides: Option<&OverrideSettings>,
         language: Option<&JsFormatterSettings>,
         path: &BiomePath,
@@ -180,13 +182,13 @@ impl ServiceLanguage for JsLanguage {
         );
 
         if let Some(overrides) = overrides {
-            overrides.override_js_format_options(path, options)
+            overrides.to_override_js_format_options(path, options)
         } else {
             options
         }
     }
 
-    fn resolve_analyzer_options(
+    fn resolve_analyze_options(
         global: Option<&Settings>,
         _linter: Option<&LinterSettings>,
         overrides: Option<&OverrideSettings>,
@@ -215,7 +217,7 @@ impl ServiceLanguage for JsLanguage {
         if let (Some(overrides), Some(global)) = (overrides, global) {
             jsx_runtime = Some(
                 match overrides
-                    .override_jsx_runtime(path, global.languages.javascript.environment.jsx_runtime)
+                    .to_override_jsx_runtime(path, global.languages.javascript.environment.jsx_runtime)
                 {
                     // In the future, we may wish to map an `Auto` variant to a concrete
                     // analyzer value for easy access by the analyzer.
@@ -226,7 +228,7 @@ impl ServiceLanguage for JsLanguage {
 
             globals.extend(
                 overrides
-                    .override_js_globals(path, &global.languages.javascript.globals)
+                    .to_override_js_globals(path, &global.languages.javascript.globals)
                     .into_iter()
                     .collect::<Vec<_>>(),
             );
@@ -304,9 +306,9 @@ fn parse(
     settings: Option<&Settings>,
     cache: &mut NodeCache,
 ) -> ParseResult {
-    let mut options = JsParserOptions {
+    let mut options = JsParseOptions {
         parse_class_parameter_decorators: settings
-            .map(|settings| {
+            .and_then(|settings| {
                 settings
                     .languages
                     .javascript
@@ -318,7 +320,7 @@ fn parse(
     if let Some(settings) = settings {
         options = settings
             .override_settings
-            .to_override_js_parser_options(biome_path, options);
+            .to_override_js_parse_options(biome_path, options);
     }
 
     let file_source = file_source.to_js_file_source().unwrap_or_default();
@@ -421,7 +423,7 @@ pub(crate) fn lint(params: LintParams) -> LintResults {
             let mut diagnostics = params.parse.into_diagnostics();
             let analyzer_options = &params
                 .workspace
-                .analyzer_options::<JsLanguage>(params.path, &params.language);
+                .analyze_options::<JsLanguage>(params.path, &params.language);
 
             let mut rules = None;
             let mut organize_imports_enabled = true;
@@ -593,7 +595,7 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
         let tree = parse.tree();
         trace_span!("Parsed file", tree =? tree).in_scope(move || {
             let analyzer_options =
-                workspace.analyzer_options::<JsLanguage>(params.path, &params.language);
+                workspace.analyze_options::<JsLanguage>(params.path, &params.language);
             let rules = settings.as_rules(params.path);
             let mut actions = Vec::new();
             let mut enabled_rules = vec![];
@@ -710,7 +712,7 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
     let mut skipped_suggested_fixes = 0;
     let mut errors: u16 = 0;
     let analyzer_options =
-        workspace.analyzer_options::<JsLanguage>(biome_path, &document_file_source);
+        workspace.analyze_options::<JsLanguage>(biome_path, &document_file_source);
     loop {
         let (action, _) = analyze(
             &tree,

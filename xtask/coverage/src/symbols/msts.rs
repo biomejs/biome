@@ -5,7 +5,7 @@ use biome_rowan::TextSize;
 use super::utils::{parse_separated_list, parse_str, parse_until_chr, parse_whitespace0};
 use crate::check_file_encoding;
 use crate::runner::{TestCase, TestCaseFiles, TestRunOutcome, TestSuite};
-use biome_js_parser::JsParserOptions;
+use biome_js_parser::JsParseOptions;
 use std::collections::HashSet;
 use std::fmt::Write;
 use std::io;
@@ -38,7 +38,7 @@ impl TestCase for SymbolsMicrosoftTestCase {
     }
 
     fn run(&self) -> TestRunOutcome {
-        let options = JsParserOptions::default().with_parse_class_parameter_decorators();
+        let options = JsParseOptions::default().with_parse_class_parameter_decorators();
         let symbols = check_file_encoding(&self.path).unwrap();
         let expected = load_symbols_file(&symbols);
 

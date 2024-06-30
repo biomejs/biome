@@ -115,7 +115,7 @@ pub(crate) fn find_variable_position(
 #[cfg(test)]
 mod test {
     use crate::utils::{find_variable_position, VariablePosition};
-    use biome_js_parser::{parse, JsParserOptions};
+    use biome_js_parser::{parse, JsParseOptions};
     use biome_js_syntax::{JsBinaryExpression, JsFileSource};
     use biome_rowan::AstNode;
 
@@ -125,7 +125,7 @@ mod test {
         let parsed = parse(
             source,
             JsFileSource::js_module(),
-            JsParserOptions::default(),
+            JsParseOptions::default(),
         );
 
         let binary_expression = parsed
@@ -148,7 +148,7 @@ mod test {
         let parsed = parse(
             source,
             JsFileSource::js_module(),
-            JsParserOptions::default(),
+            JsParseOptions::default(),
         );
 
         let binary_expression = parsed
@@ -171,7 +171,7 @@ mod test {
         let parsed = parse(
             source,
             JsFileSource::js_module(),
-            JsParserOptions::default(),
+            JsParseOptions::default(),
         );
 
         let binary_expression = parsed
@@ -194,7 +194,7 @@ mod test {
         let parsed = parse(
             source,
             JsFileSource::js_module(),
-            JsParserOptions::default(),
+            JsParseOptions::default(),
         );
 
         let binary_expression = parsed

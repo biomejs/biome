@@ -1,14 +1,14 @@
 /// Options to pass to the JavaScript parser
 #[derive(Debug, Clone, Default, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schemars", derive(schemars::JsonSchema))]
-pub struct JsParserOptions {
+pub struct JsParseOptions {
     /// Whether the parsing of the class parameter decorators should happen.
     ///
     /// This parameter decorators belong to the old language proposal.
     pub parse_class_parameter_decorators: bool,
 }
 
-impl JsParserOptions {
+impl JsParseOptions {
     pub fn with_parse_class_parameter_decorators(mut self) -> Self {
         self.parse_class_parameter_decorators = true;
         self

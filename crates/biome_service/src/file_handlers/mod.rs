@@ -23,7 +23,7 @@ use biome_diagnostics::{Diagnostic, Severity};
 use biome_formatter::Printed;
 use biome_fs::BiomePath;
 use biome_graphql_syntax::GraphqlFileSource;
-use biome_js_parser::{parse, JsParserOptions};
+use biome_js_parser::{parse, JsParseOptions};
 use biome_js_syntax::{EmbeddingKind, JsFileSource, Language, TextRange, TextSize};
 use biome_json_syntax::JsonFileSource;
 use biome_parser::AnyParse;
@@ -557,7 +557,7 @@ pub(crate) fn parse_lang_from_script_opening_tag(script_opening_tag: &str) -> La
     parse(
         script_opening_tag,
         JsFileSource::jsx(),
-        JsParserOptions::default(),
+        JsParseOptions::default(),
     )
     .try_tree()
     .and_then(|tree| {

@@ -1,7 +1,7 @@
 use biome_analyze::{AnalysisFilter, ControlFlow, Never, RuleFilter};
 use biome_diagnostics::advice::CodeSuggestionAdvice;
 use biome_diagnostics::{DiagnosticExt, Severity};
-use biome_js_parser::{parse, JsParserOptions};
+use biome_js_parser::{parse, JsParseOptions};
 use biome_js_syntax::JsFileSource;
 use biome_test_utils::{
     code_fix_to_string, create_analyzer_options, diagnostic_to_string, load_manifest,
@@ -63,7 +63,7 @@ fn analyze(
     file_name: &str,
     input_file: &Path,
 ) {
-    let parsed = parse(input_code, source_type, JsParserOptions::default());
+    let parsed = parse(input_code, source_type, JsParseOptions::default());
     let root = parsed.tree();
 
     let mut diagnostics = Vec::new();

@@ -6,13 +6,13 @@ use biome_configuration::javascript::JsxRuntime;
 use biome_configuration::organize_imports::OrganizeImports;
 use biome_configuration::{
     push_to_analyzer_rules, BiomeDiagnostic, FilesConfiguration, FormatterConfiguration,
-    JavascriptConfiguration, LinterConfiguration, OverrideFormatterConfiguration,
-    OverrideLinterConfiguration, OverrideOrganizeImportsConfiguration, Overrides,
-    PartialConfiguration, PartialCssConfiguration, PartialGraphqlConfiguration,
-    PartialJavascriptConfiguration, PartialJsonConfiguration, PlainIndentStyle, Rules,
+    LinterConfiguration, OverrideFormatterConfiguration, OverrideLinterConfiguration,
+    OverrideOrganizeImportsConfiguration, Overrides, PartialConfiguration, PartialCssConfiguration,
+    PartialGraphqlConfiguration, PartialJavascriptConfiguration, PartialJsonConfiguration,
+    PlainIndentStyle, Rules,
 };
 use biome_css_formatter::context::CssFormatOptions;
-use biome_css_parser::CssParserOptions;
+use biome_css_parser::CssParseOptions;
 use biome_css_syntax::CssLanguage;
 use biome_deserialize::{Merge, StringSet};
 use biome_diagnostics::Category;
@@ -24,10 +24,10 @@ use biome_graphql_formatter::context::GraphqlFormatOptions;
 use biome_graphql_syntax::GraphqlLanguage;
 use biome_js_analyze::metadata;
 use biome_js_formatter::context::JsFormatOptions;
-use biome_js_parser::JsParserOptions;
+use biome_js_parser::JsParseOptions;
 use biome_js_syntax::{JsFileSource, JsLanguage};
 use biome_json_formatter::context::JsonFormatOptions;
-use biome_json_parser::JsonParserOptions;
+use biome_json_parser::JsonParseOptions;
 use biome_json_syntax::JsonLanguage;
 use ignore::gitignore::{Gitignore, GitignoreBuilder};
 use indexmap::IndexSet;
@@ -155,7 +155,7 @@ impl WorkspaceSettings {
 #[derive(Debug, Default)]
 pub struct Settings {
     /// Formatter settings applied to all files in the workspaces
-    pub formatter: FormatSettings,
+    pub formatter: FormatterSettings,
     /// Linter settings applied to all files in the workspace
     pub linter: LinterSettings,
     /// Language specific settings
@@ -211,7 +211,7 @@ impl Settings {
 
         // javascript settings
         if let Some(javascript) = configuration.javascript {
-            self.languages.javascript = JavascriptConfiguration::from(javascript).into();
+            self.languages.javascript = javascript.into();
         }
         // json settings
         if let Some(json) = configuration.json {
@@ -236,7 +236,7 @@ impl Settings {
     }
 
     /// Retrieves the settings of the formatter
-    pub fn formatter(&self) -> &FormatSettings {
+    pub fn formatter(&self) -> &FormatterSettings {
         &self.formatter
     }
 
@@ -327,7 +327,7 @@ impl Settings {
 
 /// Formatter settings for the entire workspace
 #[derive(Debug)]
-pub struct FormatSettings {
+pub struct FormatterSettings {
     /// Enabled by default
     pub enabled: bool,
     /// Stores whether formatting should be allowed to proceed if a given file
@@ -345,7 +345,7 @@ pub struct FormatSettings {
     pub included_files: Matcher,
 }
 
-impl Default for FormatSettings {
+impl Default for FormatterSettings {
     fn default() -> Self {
         Self {
             enabled: true,
@@ -364,7 +364,7 @@ impl Default for FormatSettings {
 
 /// Formatter settings for the entire workspace
 #[derive(Debug, Default)]
-pub struct OverrideFormatSettings {
+pub struct OverrideFormatterSettings {
     /// Enabled by default
     pub enabled: Option<bool>,
     /// Stores whether formatting should be allowed to proceed if a given file
@@ -454,30 +454,43 @@ pub struct LanguageListSettings {
     pub graphql: LanguageSettings<GraphqlLanguage>,
 }
 
-impl From<JavascriptConfiguration> for LanguageSettings<JsLanguage> {
-    fn from(javascript: JavascriptConfiguration) -> Self {
+impl From<PartialJavascriptConfiguration> for LanguageSettings<JsLanguage> {
+    fn from(javascript: PartialJavascriptConfiguration) -> Self {
         let mut language_setting: LanguageSettings<JsLanguage> = LanguageSettings::default();
 
-        let formatter = javascript.formatter;
-        language_setting.formatter.quote_style = Some(formatter.quote_style);
-        language_setting.formatter.jsx_quote_style = Some(formatter.jsx_quote_style);
-        language_setting.formatter.quote_properties = Some(formatter.quote_properties);
-        language_setting.formatter.trailing_commas = Some(formatter.trailing_commas);
-        language_setting.formatter.semicolons = Some(formatter.semicolons);
-        language_setting.formatter.arrow_parentheses = Some(formatter.arrow_parentheses);
-        language_setting.formatter.bracket_same_line = Some(formatter.bracket_same_line.into());
-        language_setting.formatter.enabled = Some(formatter.enabled);
-        language_setting.formatter.line_width = formatter.line_width;
-        language_setting.formatter.bracket_spacing = formatter.bracket_spacing;
-        language_setting.formatter.attribute_position = formatter.attribute_position;
-        language_setting.formatter.indent_width = formatter.indent_width.map(Into::into);
-        language_setting.formatter.indent_style = formatter.indent_style.map(Into::into);
-        language_setting.parser.parse_class_parameter_decorators =
-            javascript.parser.unsafe_parameter_decorators_enabled;
+        if let Some(parser) = javascript.parser {
+            language_setting.parser.parse_class_parameter_decorators =
+                parser.unsafe_parameter_decorators_enabled;
+        }
 
-        language_setting.globals = Some(javascript.globals.into_index_set());
-        language_setting.environment = javascript.jsx_runtime.into();
-        language_setting.linter.enabled = Some(javascript.linter.enabled);
+        if let Some(formatter) = javascript.formatter {
+            language_setting.formatter.quote_style = formatter.quote_style;
+            language_setting.formatter.jsx_quote_style = formatter.jsx_quote_style;
+            language_setting.formatter.quote_properties = formatter.quote_properties;
+            language_setting.formatter.trailing_commas = formatter.trailing_commas;
+            language_setting.formatter.semicolons = formatter.semicolons;
+            language_setting.formatter.arrow_parentheses = formatter.arrow_parentheses;
+            language_setting.formatter.bracket_same_line =
+                formatter.bracket_same_line.map(Into::into);
+            language_setting.formatter.enabled = formatter.enabled;
+            language_setting.formatter.line_width = formatter.line_width;
+            language_setting.formatter.bracket_spacing = formatter.bracket_spacing;
+            language_setting.formatter.attribute_position = formatter.attribute_position;
+            language_setting.formatter.indent_width = formatter.indent_width.map(Into::into);
+            language_setting.formatter.indent_style = formatter.indent_style.map(Into::into);
+        }
+
+        if let Some(linter) = javascript.linter {
+            language_setting.linter.enabled = linter.enabled;
+        }
+
+        if let Some(jsx_runtime) = javascript.jsx_runtime {
+            language_setting.environment = jsx_runtime.into();
+        }
+
+        if let Some(globals) = javascript.globals {
+            language_setting.globals = Some(globals.into_index_set());
+        }
 
         language_setting
     }
@@ -491,6 +504,7 @@ impl From<PartialJsonConfiguration> for LanguageSettings<JsonLanguage> {
             language_setting.parser.allow_comments = parser.allow_comments;
             language_setting.parser.allow_trailing_commas = parser.allow_trailing_commas;
         }
+
         if let Some(formatter) = json.formatter {
             language_setting.formatter.trailing_commas = formatter.trailing_commas;
             language_setting.formatter.enabled = formatter.enabled;
@@ -498,6 +512,7 @@ impl From<PartialJsonConfiguration> for LanguageSettings<JsonLanguage> {
             language_setting.formatter.indent_width = formatter.indent_width.map(Into::into);
             language_setting.formatter.indent_style = formatter.indent_style.map(Into::into);
         }
+
         if let Some(linter) = json.linter {
             language_setting.linter.enabled = linter.enabled;
         }
@@ -514,6 +529,7 @@ impl From<PartialCssConfiguration> for LanguageSettings<CssLanguage> {
             language_setting.parser.allow_wrong_line_comments = parser.allow_wrong_line_comments;
             language_setting.parser.css_modules = parser.css_modules;
         }
+
         if let Some(formatter) = css.formatter {
             // TODO: change RHS to `formatter.enabled` when css formatting is enabled by default
             language_setting.formatter.enabled = Some(formatter.enabled.unwrap_or_default());
@@ -523,6 +539,7 @@ impl From<PartialCssConfiguration> for LanguageSettings<CssLanguage> {
             language_setting.formatter.line_ending = formatter.line_ending;
             language_setting.formatter.quote_style = formatter.quote_style;
         }
+
         if let Some(linter) = css.linter {
             // TODO: change RHS to `linter.enabled` when css linting is enabled by default
             language_setting.linter.enabled = Some(linter.enabled.unwrap_or_default());
@@ -552,39 +569,40 @@ impl From<PartialGraphqlConfiguration> for LanguageSettings<GraphqlLanguage> {
 }
 
 pub trait ServiceLanguage: biome_rowan::Language {
+    /// Parser settings type for this language
+    type ParserSettings: Default;
+
     /// Formatter settings type for this language
     type FormatterSettings: Default;
 
+    /// Linter settings type for this language
     type LinterSettings: Default;
 
     /// Organize imports settings type for this language
     type OrganizeImportsSettings: Default;
 
-    /// Fully resolved formatter options type for this language
-    type FormatOptions: biome_formatter::FormatOptions + Clone + std::fmt::Display;
-
-    /// Settings that belong to the parser
-    type ParserSettings: Default;
-
     /// Settings related to the environment/runtime in which the language is used.
     type EnvironmentSettings: Default;
+
+    /// Fully resolved formatter options type for this language
+    type FormatOptions: biome_formatter::FormatOptions + Clone + std::fmt::Display;
 
     /// Read the settings type for this language from the [LanguageListSettings] map
     fn lookup_settings(languages: &LanguageListSettings) -> &LanguageSettings<Self>;
 
-    /// Resolve the formatter options from the global (workspace level),
+    /// Resolve the format options from the global (workspace level),
     /// per-language and editor provided formatter settings
     fn resolve_format_options(
-        global: Option<&FormatSettings>,
+        global: Option<&FormatterSettings>,
         overrides: Option<&OverrideSettings>,
         language: Option<&Self::FormatterSettings>,
         path: &BiomePath,
         file_source: &DocumentFileSource,
     ) -> Self::FormatOptions;
 
-    /// Resolve the linter options from the global (workspace level),
-    /// per-language and editor provided formatter settings
-    fn resolve_analyzer_options(
+    /// Resolve the analyze options from the global (workspace level),
+    /// per-language and editor provided analyzer settings
+    fn resolve_analyze_options(
         global: Option<&Settings>,
         linter: Option<&LinterSettings>,
         overrides: Option<&OverrideSettings>,
@@ -596,6 +614,9 @@ pub trait ServiceLanguage: biome_rowan::Language {
 
 #[derive(Debug, Default)]
 pub struct LanguageSettings<L: ServiceLanguage> {
+    /// Parser settings for this language
+    pub parser: L::ParserSettings,
+
     /// Formatter settings for this language
     pub formatter: L::FormatterSettings,
 
@@ -607,9 +628,6 @@ pub struct LanguageSettings<L: ServiceLanguage> {
 
     /// Organize imports settings for this language
     pub organize_imports: L::OrganizeImportsSettings,
-
-    /// Parser settings for this language
-    pub parser: L::ParserSettings,
 
     /// Environment settings for this language
     pub environment: L::EnvironmentSettings,
@@ -726,7 +744,7 @@ impl<'a> WorkspaceSettingsHandle<'a> {
         L::resolve_format_options(formatter, overrides, editor_settings, path, file_source)
     }
 
-    pub(crate) fn analyzer_options<L>(
+    pub(crate) fn analyze_options<L>(
         &self,
         path: &BiomePath,
         file_source: &DocumentFileSource,
@@ -740,7 +758,7 @@ impl<'a> WorkspaceSettingsHandle<'a> {
         let editor_settings = settings
             .map(|s| L::lookup_settings(&s.languages))
             .map(|result| &result.linter);
-        L::resolve_analyzer_options(
+        L::resolve_analyze_options(
             settings,
             linter,
             overrides,
@@ -775,158 +793,7 @@ pub struct OverrideSettings {
 }
 
 impl OverrideSettings {
-    /// Checks whether at least one override excludes the provided `path`
-    pub fn is_path_excluded(&self, path: &Path) -> Option<bool> {
-        for pattern in &self.patterns {
-            if pattern.exclude.matches_path(path) {
-                return Some(true);
-            }
-        }
-        None
-    }
-    /// Checks whether at least one override include the provided `path`
-    pub fn is_path_included(&self, path: &Path) -> Option<bool> {
-        for pattern in &self.patterns {
-            if pattern.include.matches_path(path) {
-                return Some(true);
-            }
-        }
-        None
-    }
-
-    /// It scans the current override rules and return the formatting options that of the first override is matched
-    pub fn override_js_format_options(
-        &self,
-        path: &Path,
-        mut options: JsFormatOptions,
-    ) -> JsFormatOptions {
-        for pattern in self.patterns.iter() {
-            if pattern.include.matches_path(path) && !pattern.exclude.matches_path(path) {
-                pattern.apply_overrides_to_js_format_options(&mut options);
-            }
-        }
-        options
-    }
-
-    pub fn override_js_globals(
-        &self,
-        path: &BiomePath,
-        base_set: &Option<IndexSet<String>>,
-    ) -> IndexSet<String> {
-        self.patterns
-            .iter()
-            // Reverse the traversal as only the last override takes effect
-            .rev()
-            .find_map(|pattern| {
-                if pattern.languages.javascript.globals.is_some()
-                    && pattern.include.matches_path(path)
-                    && !pattern.exclude.matches_path(path)
-                {
-                    pattern.languages.javascript.globals.clone()
-                } else {
-                    None
-                }
-            })
-            .or_else(|| base_set.clone())
-            .unwrap_or_default()
-    }
-
-    pub fn override_jsx_runtime(&self, path: &BiomePath, base_setting: JsxRuntime) -> JsxRuntime {
-        self.patterns
-            .iter()
-            // Reverse the traversal as only the last override takes effect
-            .rev()
-            .find_map(|pattern| {
-                if pattern.include.matches_path(path) && !pattern.exclude.matches_path(path) {
-                    Some(pattern.languages.javascript.environment.jsx_runtime)
-                } else {
-                    None
-                }
-            })
-            .unwrap_or(base_setting)
-    }
-
-    /// It scans the current override rules and return the json format that of the first override is matched
-    pub fn to_override_json_format_options(
-        &self,
-        path: &Path,
-        mut options: JsonFormatOptions,
-    ) -> JsonFormatOptions {
-        for pattern in self.patterns.iter() {
-            if pattern.include.matches_path(path) && !pattern.exclude.matches_path(path) {
-                pattern.apply_overrides_to_json_format_options(&mut options);
-            }
-        }
-        options
-    }
-
-    /// It scans the current override rules and return the formatting options that of the first override is matched
-    pub fn to_override_css_format_options(
-        &self,
-        path: &Path,
-        mut options: CssFormatOptions,
-    ) -> CssFormatOptions {
-        for pattern in self.patterns.iter() {
-            if pattern.include.matches_path(path) && !pattern.exclude.matches_path(path) {
-                pattern.apply_overrides_to_css_format_options(&mut options);
-            }
-        }
-        options
-    }
-
-    /// It scans the current override rules and return the formatting options that of the first override is matched
-    pub fn to_override_graphql_format_options(
-        &self,
-        path: &Path,
-        mut options: GraphqlFormatOptions,
-    ) -> GraphqlFormatOptions {
-        for pattern in self.patterns.iter() {
-            if pattern.include.matches_path(path) && !pattern.exclude.matches_path(path) {
-                pattern.apply_overrides_to_graphql_format_options(&mut options);
-            }
-        }
-        options
-    }
-
-    pub fn to_override_js_parser_options(
-        &self,
-        path: &Path,
-        mut options: JsParserOptions,
-    ) -> JsParserOptions {
-        for pattern in self.patterns.iter() {
-            if pattern.include.matches_path(path) && !pattern.exclude.matches_path(path) {
-                pattern.apply_overrides_to_js_parser_options(&mut options);
-            }
-        }
-        options
-    }
-
-    pub fn to_override_json_parser_options(
-        &self,
-        path: &Path,
-        mut options: JsonParserOptions,
-    ) -> JsonParserOptions {
-        for pattern in self.patterns.iter() {
-            if pattern.include.matches_path(path) && !pattern.exclude.matches_path(path) {
-                pattern.apply_overrides_to_json_parser_options(&mut options);
-            }
-        }
-        options
-    }
-
-    /// It scans the current override rules and return the parser options that of the first override is matched
-    pub fn to_override_css_parser_options(
-        &self,
-        path: &Path,
-        mut options: CssParserOptions,
-    ) -> CssParserOptions {
-        for pattern in self.patterns.iter() {
-            if pattern.include.matches_path(path) && !pattern.exclude.matches_path(path) {
-                pattern.apply_overrides_to_css_parser_options(&mut options);
-            }
-        }
-        options
-    }
+    // ---------------- Common methods ----------------
 
     /// Retrieves the options of lint rules that have been overridden
     pub fn override_analyzer_rules(
@@ -935,7 +802,7 @@ impl OverrideSettings {
         mut analyzer_rules: AnalyzerRules,
     ) -> AnalyzerRules {
         for pattern in self.patterns.iter() {
-            if !pattern.exclude.matches_path(path) && pattern.include.matches_path(path) {
+            if pattern.include.matches_path(path) && !pattern.exclude.matches_path(path) {
                 if let Some(rules) = pattern.linter.rules.as_ref() {
                     push_to_analyzer_rules(rules, metadata(), &mut analyzer_rules);
                 }
@@ -982,6 +849,158 @@ impl OverrideSettings {
             None
         })
     }
+
+    // ---------------- Javascript-specific methods ----------------
+
+    /// Scans and aggregates all the overrides into a single `JsParseOptions`
+    pub fn to_override_js_parse_options(
+        &self,
+        path: &Path,
+        mut options: JsParseOptions,
+    ) -> JsParseOptions {
+        for pattern in self.patterns.iter() {
+            if pattern.include.matches_path(path) && !pattern.exclude.matches_path(path) {
+                pattern.apply_overrides_to_js_parse_options(&mut options);
+            }
+        }
+        options
+    }
+
+    /// Scans and aggregates all the overrides into a single `JsFormatOptions`
+    pub fn to_override_js_format_options(
+        &self,
+        path: &Path,
+        mut options: JsFormatOptions,
+    ) -> JsFormatOptions {
+        for pattern in self.patterns.iter() {
+            if pattern.include.matches_path(path) && !pattern.exclude.matches_path(path) {
+                pattern.apply_overrides_to_js_format_options(&mut options);
+            }
+        }
+        options
+    }
+
+    /// Scans and uses the last override to override the `globals`
+    pub fn to_override_js_globals(
+        &self,
+        path: &BiomePath,
+        base_globals: &Option<IndexSet<String>>,
+    ) -> IndexSet<String> {
+        self.patterns
+            .iter()
+            // Reverse the traversal as only the last override takes effect
+            .rev()
+            .find_map(|pattern| {
+                // Early return to avoid unnecessary clone
+                if pattern.languages.javascript.globals.is_none() {
+                    return None;
+                }
+                if pattern.include.matches_path(path) && !pattern.exclude.matches_path(path) {
+                    pattern.languages.javascript.globals.clone()
+                } else {
+                    None
+                }
+            })
+            .or(base_globals.clone())
+            .unwrap_or_default()
+    }
+
+    /// Scans and uses the last override to override the `JsxRuntime`
+    pub fn to_override_jsx_runtime(
+        &self,
+        path: &BiomePath,
+        base_jsx_runtime: Option<JsxRuntime>,
+    ) -> JsxRuntime {
+        self.patterns
+            .iter()
+            // Reverse the traversal as only the last override takes effect
+            .rev()
+            .find_map(|pattern| {
+                if pattern.include.matches_path(path) && !pattern.exclude.matches_path(path) {
+                    pattern.languages.javascript.environment.jsx_runtime
+                } else {
+                    None
+                }
+            })
+            .or(base_jsx_runtime)
+            .unwrap_or_default()
+    }
+
+    // ---------------- JSON-specific methods ----------------
+
+    /// Scans and aggregates all the overrides into a single `JsonParseOptions`
+    pub fn to_override_json_parse_options(
+        &self,
+        path: &Path,
+        mut options: JsonParseOptions,
+    ) -> JsonParseOptions {
+        for pattern in self.patterns.iter() {
+            if pattern.include.matches_path(path) && !pattern.exclude.matches_path(path) {
+                pattern.apply_overrides_to_json_parse_options(&mut options);
+            }
+        }
+        options
+    }
+
+    /// Scans and aggregates all the overrides into a single `JsonFormatOptions`
+    pub fn to_override_json_format_options(
+        &self,
+        path: &Path,
+        mut options: JsonFormatOptions,
+    ) -> JsonFormatOptions {
+        for pattern in self.patterns.iter() {
+            if pattern.include.matches_path(path) && !pattern.exclude.matches_path(path) {
+                pattern.apply_overrides_to_json_format_options(&mut options);
+            }
+        }
+        options
+    }
+
+    // ---------------- CSS-specific methods ----------------
+
+    /// Scans and aggregates all the overrides into a single `CssParseOptions`
+    pub fn to_override_css_parse_options(
+        &self,
+        path: &Path,
+        mut options: CssParseOptions,
+    ) -> CssParseOptions {
+        for pattern in self.patterns.iter() {
+            if pattern.include.matches_path(path) && !pattern.exclude.matches_path(path) {
+                pattern.apply_overrides_to_css_parse_options(&mut options);
+            }
+        }
+        options
+    }
+
+    /// Scans and aggregates all the overrides into a single `CssFormatOptions`
+    pub fn to_override_css_format_options(
+        &self,
+        path: &Path,
+        mut options: CssFormatOptions,
+    ) -> CssFormatOptions {
+        for pattern in self.patterns.iter() {
+            if pattern.include.matches_path(path) && !pattern.exclude.matches_path(path) {
+                pattern.apply_overrides_to_css_format_options(&mut options);
+            }
+        }
+        options
+    }
+
+    // ---------------- GraphQL-specific methods ----------------
+
+    /// Scans and aggregates all the overrides into a single `GraphqlFormatOptions`
+    pub fn to_override_graphql_format_options(
+        &self,
+        path: &Path,
+        mut options: GraphqlFormatOptions,
+    ) -> GraphqlFormatOptions {
+        for pattern in self.patterns.iter() {
+            if pattern.include.matches_path(path) && !pattern.exclude.matches_path(path) {
+                pattern.apply_overrides_to_graphql_format_options(&mut options);
+            }
+        }
+        options
+    }
 }
 
 #[derive(Debug, Default)]
@@ -989,7 +1008,7 @@ pub struct OverrideSettingPattern {
     pub exclude: Matcher,
     pub include: Matcher,
     /// Formatter settings applied to all files in the workspaces
-    pub formatter: OverrideFormatSettings,
+    pub formatter: OverrideFormatterSettings,
     /// Linter settings applied to all files in the workspace
     pub linter: OverrideLinterSettings,
     /// Linter settings applied to all files in the workspace
@@ -1005,9 +1024,9 @@ pub struct OverrideSettingPattern {
     pub(crate) cached_json_format_options: RwLock<Option<JsonFormatOptions>>,
     pub(crate) cached_css_format_options: RwLock<Option<CssFormatOptions>>,
     pub(crate) cached_graphql_format_options: RwLock<Option<GraphqlFormatOptions>>,
-    pub(crate) cached_js_parser_options: RwLock<Option<JsParserOptions>>,
-    pub(crate) _cached_json_parser_options: RwLock<Option<JsonParserOptions>>,
-    pub(crate) cached_css_parser_options: RwLock<Option<CssParserOptions>>,
+    pub(crate) cached_js_parse_options: RwLock<Option<JsParseOptions>>,
+    pub(crate) _cached_json_parse_options: RwLock<Option<JsonParseOptions>>,
+    pub(crate) cached_css_parse_options: RwLock<Option<CssParseOptions>>,
 }
 impl OverrideSettingPattern {
     fn apply_overrides_to_js_format_options(&self, options: &mut JsFormatOptions) {
@@ -1174,8 +1193,8 @@ impl OverrideSettingPattern {
         }
     }
 
-    fn apply_overrides_to_js_parser_options(&self, options: &mut JsParserOptions) {
-        if let Ok(readonly_cache) = self.cached_js_parser_options.read() {
+    fn apply_overrides_to_js_parse_options(&self, options: &mut JsParseOptions) {
+        if let Ok(readonly_cache) = self.cached_js_parse_options.read() {
             if let Some(cached_options) = readonly_cache.as_ref() {
                 *options = cached_options.clone();
                 return;
@@ -1184,16 +1203,25 @@ impl OverrideSettingPattern {
 
         let js_parser = &self.languages.javascript.parser;
 
-        options.parse_class_parameter_decorators = js_parser.parse_class_parameter_decorators;
+        if let Some(parse_class_parameter_decorators) = js_parser.parse_class_parameter_decorators {
+            options.parse_class_parameter_decorators = parse_class_parameter_decorators
+        }
 
-        if let Ok(mut writeonly_cache) = self.cached_js_parser_options.write() {
+        if let Ok(mut writeonly_cache) = self.cached_js_parse_options.write() {
             let options = options.clone();
             let _ = writeonly_cache.insert(options);
         }
     }
 
-    fn apply_overrides_to_json_parser_options(&self, options: &mut JsonParserOptions) {
+    fn apply_overrides_to_json_parse_options(&self, options: &mut JsonParseOptions) {
         // these options are no longer cached because it was causing incorrect override behavior, see #3260
+        // if let Ok(readonly_cache) = self.cached_json_parse_options.read() {
+        //     if let Some(cached_options) = readonly_cache.as_ref() {
+        //         *options = *cached_options;
+        //         return;
+        //     }
+        // }
+
         let json_parser = &self.languages.json.parser;
 
         if let Some(allow_comments) = json_parser.allow_comments {
@@ -1202,10 +1230,15 @@ impl OverrideSettingPattern {
         if let Some(allow_trailing_commas) = json_parser.allow_trailing_commas {
             options.allow_trailing_commas = allow_trailing_commas;
         }
+
+        // if let Ok(mut writeonly_cache) = self.cached_json_parse_options.write() {
+        //     let options = *options;
+        //     let _ = writeonly_cache.insert(options);
+        // }
     }
 
-    fn apply_overrides_to_css_parser_options(&self, options: &mut CssParserOptions) {
-        if let Ok(readonly_cache) = self.cached_css_parser_options.read() {
+    fn apply_overrides_to_css_parse_options(&self, options: &mut CssParseOptions) {
+        if let Ok(readonly_cache) = self.cached_css_parse_options.read() {
             if let Some(cached_options) = readonly_cache.as_ref() {
                 *options = *cached_options;
                 return;
@@ -1221,7 +1254,7 @@ impl OverrideSettingPattern {
             options.css_modules = css_modules;
         }
 
-        if let Ok(mut writeonly_cache) = self.cached_css_parser_options.write() {
+        if let Ok(mut writeonly_cache) = self.cached_css_parse_options.write() {
             let options = *options;
             let _ = writeonly_cache.insert(options);
         }
@@ -1315,7 +1348,7 @@ pub fn to_override_settings(
     for mut pattern in overrides.0 {
         let formatter = pattern
             .formatter
-            .map(|formatter| OverrideFormatSettings {
+            .map(|formatter| OverrideFormatterSettings {
                 enabled: formatter.enabled,
                 format_with_errors: formatter
                     .format_with_errors
@@ -1400,16 +1433,15 @@ fn to_javascript_language_settings(
     let parent_parser = &parent_settings.parser;
     language_setting.parser.parse_class_parameter_decorators = parser
         .unsafe_parameter_decorators_enabled
-        .unwrap_or(parent_parser.parse_class_parameter_decorators);
+        .or(parent_parser.parse_class_parameter_decorators);
 
     let organize_imports = conf.organize_imports;
     if let Some(_organize_imports) = organize_imports {}
 
     language_setting.globals = conf.globals.map(StringSet::into_index_set);
 
-    language_setting.environment.jsx_runtime = conf
-        .jsx_runtime
-        .unwrap_or(parent_settings.environment.jsx_runtime);
+    language_setting.environment.jsx_runtime =
+        conf.jsx_runtime.or(parent_settings.environment.jsx_runtime);
 
     language_setting
 }
@@ -1487,14 +1519,14 @@ fn to_graphql_language_settings(
 pub fn to_format_settings(
     working_directory: Option<PathBuf>,
     conf: FormatterConfiguration,
-) -> Result<FormatSettings, WorkspaceError> {
+) -> Result<FormatterSettings, WorkspaceError> {
     let indent_style = match conf.indent_style {
         PlainIndentStyle::Tab => IndentStyle::Tab,
         PlainIndentStyle::Space => IndentStyle::Space,
     };
     let indent_width = conf.indent_width;
 
-    Ok(FormatSettings {
+    Ok(FormatterSettings {
         enabled: conf.enabled,
         indent_style: Some(indent_style),
         indent_width: Some(indent_width),
@@ -1508,7 +1540,7 @@ pub fn to_format_settings(
     })
 }
 
-impl TryFrom<OverrideFormatterConfiguration> for FormatSettings {
+impl TryFrom<OverrideFormatterConfiguration> for FormatterSettings {
     type Error = WorkspaceError;
 
     fn try_from(conf: OverrideFormatterConfiguration) -> Result<Self, Self::Error> {

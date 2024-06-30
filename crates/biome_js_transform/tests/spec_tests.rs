@@ -1,7 +1,7 @@
 use biome_analyze::{AnalysisFilter, AnalyzerTransformation, ControlFlow, Never, RuleFilter};
 use biome_js_formatter::context::JsFormatOptions;
 use biome_js_formatter::format_node;
-use biome_js_parser::{parse, JsParserOptions};
+use biome_js_parser::{parse, JsParseOptions};
 use biome_js_syntax::{JsFileSource, JsLanguage};
 use biome_rowan::AstNode;
 use biome_test_utils::{
@@ -53,7 +53,7 @@ fn run_test(input: &'static str, _: &str, _: &str, _: &str) {
                 filter,
                 file_name,
                 input_file,
-                JsParserOptions::default(),
+                JsParseOptions::default(),
             );
         }
 
@@ -69,7 +69,7 @@ fn run_test(input: &'static str, _: &str, _: &str, _: &str) {
             filter,
             file_name,
             input_file,
-            JsParserOptions::default(),
+            JsParseOptions::default(),
         )
     };
 
@@ -93,9 +93,9 @@ pub(crate) fn analyze_and_snap(
     filter: AnalysisFilter,
     file_name: &str,
     input_file: &Path,
-    parser_options: JsParserOptions,
+    parse_options: JsParseOptions,
 ) -> usize {
-    let parsed = parse(input_code, source_type, parser_options.clone());
+    let parsed = parse(input_code, source_type, parse_options.clone());
     let root = parsed.tree();
 
     let mut diagnostics = Vec::new();
@@ -110,7 +110,7 @@ pub(crate) fn analyze_and_snap(
                     input_code,
                     source_type,
                     &transformation,
-                    parser_options.clone(),
+                    parse_options.clone(),
                 );
                 let node = transformation.mutation.commit();
 
@@ -140,7 +140,7 @@ fn check_transformation(
     source: &str,
     source_type: JsFileSource,
     transformation: &AnalyzerTransformation<JsLanguage>,
-    options: JsParserOptions,
+    options: JsParseOptions,
 ) {
     let (new_tree, text_edit) = match transformation
         .mutation

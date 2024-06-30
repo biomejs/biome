@@ -15,7 +15,7 @@ use biome_diagnostics::{DiagnosticExt, Error, Severity};
 use biome_fs::{AutoSearchResult, ConfigName, FileSystem, OpenOptions};
 use biome_js_analyze::metadata as js_lint_metadata;
 use biome_json_formatter::context::JsonFormatOptions;
-use biome_json_parser::{parse_json, JsonParserOptions};
+use biome_json_parser::{parse_json, JsonParseOptions};
 use std::ffi::OsStr;
 use std::fmt::Debug;
 use std::io::ErrorKind;
@@ -186,14 +186,14 @@ fn load_config(
     if let ConfigurationPathHint::FromUser(ref configuration_file_path) = base_path {
         if file_system.path_is_file(configuration_file_path) {
             let content = file_system.read_file_from_path(configuration_file_path)?;
-            let parser_options = match configuration_file_path.extension().and_then(OsStr::to_str) {
-                Some("json") => JsonParserOptions::default(),
-                _ => JsonParserOptions::default()
+            let parse_options = match configuration_file_path.extension().and_then(OsStr::to_str) {
+                Some("json") => JsonParseOptions::default(),
+                _ => JsonParseOptions::default()
                     .with_allow_comments()
                     .with_allow_trailing_commas(),
             };
             let deserialized =
-                deserialize_from_json_str::<PartialConfiguration>(&content, parser_options, "");
+                deserialize_from_json_str::<PartialConfiguration>(&content, parse_options, "");
             return Ok(Some(ConfigurationPayload {
                 deserialized,
                 configuration_file_path: PathBuf::from(configuration_file_path),
@@ -239,15 +239,15 @@ fn load_config(
     } {
         let AutoSearchResult { content, file_path } = auto_search_result;
 
-        let parser_options = match file_path.extension().and_then(OsStr::to_str) {
-            Some("json") => JsonParserOptions::default(),
-            _ => JsonParserOptions::default()
+        let parse_options = match file_path.extension().and_then(OsStr::to_str) {
+            Some("json") => JsonParseOptions::default(),
+            _ => JsonParseOptions::default()
                 .with_allow_comments()
                 .with_allow_trailing_commas(),
         };
 
         let deserialized =
-            deserialize_from_json_str::<PartialConfiguration>(&content, parser_options, "");
+            deserialize_from_json_str::<PartialConfiguration>(&content, parse_options, "");
 
         Ok(Some(ConfigurationPayload {
             deserialized,
@@ -347,7 +347,7 @@ pub fn create_config(
     let contents = serde_json::to_string_pretty(&configuration)
         .map_err(|_| BiomeDiagnostic::new_serialization_error())?;
 
-    let parsed = parse_json(&contents, JsonParserOptions::default());
+    let parsed = parse_json(&contents, JsonParseOptions::default());
     let formatted =
         biome_json_formatter::format_node(JsonFormatOptions::default(), &parsed.syntax())?
             .print()
@@ -513,8 +513,8 @@ impl PartialConfigurationExt for PartialConfiguration {
                     .extension()
                     .and_then(OsStr::to_str)
                 {
-                    Some("json") => JsonParserOptions::default(),
-                    _ => JsonParserOptions::default()
+                    Some("json") => JsonParseOptions::default(),
+                    _ => JsonParseOptions::default()
                         .with_allow_comments()
                         .with_allow_trailing_commas(),
                 },

@@ -1,6 +1,6 @@
 use super::rename::*;
 use crate::utils::batch::JsBatchMutation;
-use biome_js_parser::JsParserOptions;
+use biome_js_parser::JsParseOptions;
 use biome_js_semantic::{semantic_model, SemanticModelOptions};
 use biome_js_syntax::{
     AnyJsObjectMember, JsFileSource, JsFormalParameter, JsIdentifierBinding, JsLanguage,
@@ -16,7 +16,7 @@ pub fn assert_rename_binding_a_to_b_ok(before: &str, expected: &str) {
     let r = biome_js_parser::parse(
         before,
         JsFileSource::js_module(),
-        JsParserOptions::default(),
+        JsParseOptions::default(),
     );
     let model = semantic_model(&r.tree(), SemanticModelOptions::default());
 
@@ -46,7 +46,7 @@ pub fn assert_rename_binding_a_to_b_ok(before: &str, expected: &str) {
 }
 
 pub fn assert_rename_ts_binding_a_to_b_ok(before: &str, expected: &str) {
-    let r = biome_js_parser::parse(before, JsFileSource::tsx(), JsParserOptions::default());
+    let r = biome_js_parser::parse(before, JsFileSource::tsx(), JsParseOptions::default());
     let model = semantic_model(&r.tree(), SemanticModelOptions::default());
 
     let bindings: Vec<TsIdentifierBinding> = r
@@ -80,7 +80,7 @@ pub fn assert_rename_binding_a_to_b_nok(before: &str) {
     let r = biome_js_parser::parse(
         before,
         JsFileSource::js_module(),
-        JsParserOptions::default(),
+        JsParseOptions::default(),
     );
     let model = semantic_model(&r.tree(), SemanticModelOptions::default());
 
@@ -104,7 +104,7 @@ pub fn assert_remove_identifier_a_ok<Anc: AstNode<Language = JsLanguage> + Debug
     let r = biome_js_parser::parse(
         before,
         JsFileSource::js_module(),
-        JsParserOptions::default(),
+        JsParseOptions::default(),
     );
 
     let identifiers_a: Vec<JsSyntaxNode> = r
@@ -188,7 +188,7 @@ pub fn ok_find_attributes_by_name() {
     let r = biome_js_parser::parse(
         r#"<a a="A" c="C" b="B" />"#,
         JsFileSource::jsx(),
-        JsParserOptions::default(),
+        JsParseOptions::default(),
     );
     let list = r
         .syntax()

@@ -8,7 +8,7 @@ use crate::file_handlers::{
     LintResults, ParserCapabilities,
 };
 use crate::settings::{
-    FormatSettings, LanguageListSettings, LanguageSettings, LinterSettings, OverrideSettings,
+    FormatterSettings, LanguageListSettings, LanguageSettings, LinterSettings, OverrideSettings,
     ServiceLanguage, Settings, WorkspaceSettingsHandle,
 };
 use crate::workspace::{
@@ -27,7 +27,7 @@ use biome_fs::{BiomePath, ConfigName, ROME_JSON};
 use biome_json_analyze::analyze;
 use biome_json_formatter::context::{JsonFormatOptions, TrailingCommas};
 use biome_json_formatter::format_node;
-use biome_json_parser::JsonParserOptions;
+use biome_json_parser::JsonParseOptions;
 use biome_json_syntax::{JsonLanguage, JsonRoot, JsonSyntaxNode};
 use biome_parser::AnyParse;
 use biome_rowan::{AstNode, NodeCache};
@@ -71,7 +71,7 @@ impl ServiceLanguage for JsonLanguage {
     }
 
     fn resolve_format_options(
-        global: Option<&FormatSettings>,
+        global: Option<&FormatterSettings>,
         overrides: Option<&OverrideSettings>,
         language: Option<&JsonFormatterSettings>,
         path: &BiomePath,
@@ -117,7 +117,7 @@ impl ServiceLanguage for JsonLanguage {
         }
     }
 
-    fn resolve_analyzer_options(
+    fn resolve_analyze_options(
         global: Option<&Settings>,
         _linter: Option<&LinterSettings>,
         _overrides: Option<&OverrideSettings>,
@@ -178,7 +178,7 @@ fn parse(
     let parser = settings.map(|s| &s.languages.json.parser);
     let overrides = settings.map(|s| &s.override_settings);
     let optional_json_file_source = file_source.to_json_file_source();
-    let options = JsonParserOptions {
+    let options = JsonParseOptions {
         allow_comments: parser.and_then(|p| p.allow_comments).map_or_else(
             || optional_json_file_source.map_or(false, |x| x.allow_comments()),
             |value| value,
@@ -189,7 +189,7 @@ fn parse(
         ),
     };
     let options = if let Some(overrides) = overrides {
-        overrides.to_override_json_parser_options(biome_path, options)
+        overrides.to_override_json_parse_options(biome_path, options)
     } else {
         options
     };
@@ -326,7 +326,7 @@ fn lint(params: LintParams) -> LintResults {
 
             let analyzer_options = &params
                 .workspace
-                .analyzer_options::<JsonLanguage>(params.path, &params.language);
+                .analyze_options::<JsonLanguage>(params.path, &params.language);
 
             let mut rules = None;
             if let Some(settings) = params.workspace.settings() {

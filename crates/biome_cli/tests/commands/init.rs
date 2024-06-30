@@ -4,7 +4,7 @@ use crate::snap_test::{assert_cli_snapshot, assert_file_contents, SnapshotPayloa
 use biome_console::BufferConsole;
 use biome_fs::MemoryFileSystem;
 use biome_json_formatter::context::JsonFormatOptions;
-use biome_json_parser::{parse_json, JsonParserOptions};
+use biome_json_parser::{parse_json, JsonParseOptions};
 use biome_service::DynRef;
 use bpaf::Args;
 use std::path::Path;
@@ -44,7 +44,7 @@ fn creates_config_file() {
     assert!(result.is_ok(), "run_cli returned {result:?}");
 
     let file_path = Path::new("biome.json");
-    let parsed = parse_json(CONFIG_INIT_DEFAULT, JsonParserOptions::default());
+    let parsed = parse_json(CONFIG_INIT_DEFAULT, JsonParseOptions::default());
     let formatted =
         biome_json_formatter::format_node(JsonFormatOptions::default(), &parsed.syntax())
             .expect("valid format document")
@@ -77,7 +77,7 @@ fn creates_config_jsonc_file() {
     let file_path = Path::new("biome.jsonc");
     let parsed = parse_json(
         CONFIG_INIT_DEFAULT,
-        JsonParserOptions::default()
+        JsonParseOptions::default()
             .with_allow_comments()
             .with_allow_trailing_commas(),
     );
@@ -117,7 +117,7 @@ fn creates_config_file_when_biome_installed_via_package_manager() {
 
     let parsed = parse_json(
         CONFIG_INIT_DEFAULT_WHEN_INSTALLED,
-        JsonParserOptions::default(),
+        JsonParseOptions::default(),
     );
     let formatted =
         biome_json_formatter::format_node(JsonFormatOptions::default(), &parsed.syntax())

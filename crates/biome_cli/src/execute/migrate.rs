@@ -10,7 +10,7 @@ use biome_diagnostics::Diagnostic;
 use biome_diagnostics::{category, PrintDiagnostic};
 use biome_formatter::ParseFormatNumberError;
 use biome_fs::{BiomePath, ConfigName, FileSystemExt, OpenOptions};
-use biome_json_parser::{parse_json_with_cache, JsonParserOptions};
+use biome_json_parser::{parse_json_with_cache, JsonParseOptions};
 use biome_json_syntax::{JsonFileSource, JsonRoot};
 use biome_migrate::{migrate_configuration, ControlFlow};
 use biome_rowan::{AstNode, NodeCache};
@@ -74,7 +74,7 @@ pub(crate) fn run(migrate_payload: MigratePayload) -> Result<(), CliDiagnostic> 
     let parsed = parse_json_with_cache(
         &biome_config_content,
         &mut cache,
-        JsonParserOptions::default(),
+        JsonParseOptions::default(),
     );
 
     match sub_command {
