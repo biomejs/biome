@@ -27,15 +27,15 @@ use biome_analyze::{
 use biome_configuration::javascript::JsxRuntime;
 use biome_diagnostics::{category, Applicability, Diagnostic, DiagnosticExt, Severity};
 use biome_formatter::{
-    AttributePosition, FormatError, IndentStyle, IndentWidth, LineEnding, LineWidth, Printed,
-    QuoteStyle,
+    AttributePosition, BracketSpacing, FormatError, IndentStyle, IndentWidth, LineEnding,
+    LineWidth, Printed, QuoteStyle,
 };
 use biome_fs::BiomePath;
 use biome_js_analyze::utils::rename::{RenameError, RenameSymbolExtensions};
 use biome_js_analyze::{analyze, analyze_with_inspect_matcher, visit_registry, ControlFlowGraph};
 use biome_js_formatter::context::trailing_commas::TrailingCommas;
 use biome_js_formatter::context::{
-    ArrowParentheses, BracketSameLine, BracketSpacing, JsFormatOptions, QuoteProperties, Semicolons,
+    ArrowParentheses, BracketSameLine, JsFormatOptions, QuoteProperties, Semicolons,
 };
 use biome_js_formatter::format_node;
 use biome_js_parser::JsParserOptions;
@@ -161,7 +161,12 @@ impl ServiceLanguage for JsLanguage {
                 .and_then(|l| l.arrow_parentheses)
                 .unwrap_or_default(),
         )
-        .with_bracket_spacing(language.and_then(|l| l.bracket_spacing).unwrap_or_default())
+        .with_bracket_spacing(
+            language
+                .and_then(|l| l.bracket_spacing)
+                .or(global.and_then(|g| g.bracket_spacing))
+                .unwrap_or_default(),
+        )
         .with_bracket_same_line(
             language
                 .and_then(|l| l.bracket_same_line)

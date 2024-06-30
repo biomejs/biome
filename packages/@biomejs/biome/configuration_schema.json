@@ -306,6 +306,7 @@
 		},
 		"ArrowParentheses": { "type": "string", "enum": ["always", "asNeeded"] },
 		"AttributePosition": { "type": "string", "enum": ["auto", "multiline"] },
+		"BracketSpacing": { "type": "boolean" },
 		"Complexity": {
 			"description": "A list of rules that belong to this group",
 			"type": "object",
@@ -1107,6 +1108,13 @@
 						{ "type": "null" }
 					]
 				},
+				"bracketSpacing": {
+					"description": "Whether to insert spaces around brackets in object literals. Defaults to true.",
+					"anyOf": [
+						{ "$ref": "#/definitions/BracketSpacing" },
+						{ "type": "null" }
+					]
+				},
 				"enabled": { "type": ["boolean", "null"] },
 				"formatWithErrors": {
 					"description": "Stores whether formatting should be allowed to proceed if a given file has syntax errors",
@@ -1164,6 +1172,13 @@
 			"description": "Options that changes how the GraphQL formatter behaves",
 			"type": "object",
 			"properties": {
+				"bracketSpacing": {
+					"description": "Whether to insert spaces around brackets in object literals. Defaults to true.",
+					"anyOf": [
+						{ "$ref": "#/definitions/BracketSpacing" },
+						{ "type": "null" }
+					]
+				},
 				"enabled": {
 					"description": "Control the formatter for GraphQL files.",
 					"type": ["boolean", "null"]
@@ -1304,7 +1319,10 @@
 				},
 				"bracketSpacing": {
 					"description": "Whether to insert spaces around brackets in object literals. Defaults to true.",
-					"type": ["boolean", "null"]
+					"anyOf": [
+						{ "$ref": "#/definitions/BracketSpacing" },
+						{ "type": "null" }
+					]
 				},
 				"enabled": {
 					"description": "Control the formatter for JavaScript (and its super languages) files.",
@@ -2104,6 +2122,13 @@
 						{ "type": "null" }
 					]
 				},
+				"bracketSpacing": {
+					"description": "Whether to insert spaces around brackets in object literals. Defaults to true.",
+					"anyOf": [
+						{ "$ref": "#/definitions/BracketSpacing" },
+						{ "type": "null" }
+					]
+				},
 				"enabled": { "type": ["boolean", "null"] },
 				"formatWithErrors": {
 					"description": "Stores whether formatting should be allowed to proceed if a given file has syntax errors",
@@ -2173,6 +2198,13 @@
 					"description": "Specific configuration for the Json language",
 					"anyOf": [
 						{ "$ref": "#/definitions/OverrideFormatterConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"graphql": {
+					"description": "Specific configuration for the Graphql language",
+					"anyOf": [
+						{ "$ref": "#/definitions/GraphqlConfiguration" },
 						{ "type": "null" }
 					]
 				},

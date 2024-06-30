@@ -20,7 +20,8 @@ use biome_analyze::{
 };
 use biome_diagnostics::{category, Applicability, Diagnostic, DiagnosticExt, Severity};
 use biome_formatter::{
-    FormatError, IndentStyle, IndentWidth, LineEnding, LineWidth, Printed, QuoteStyle,
+    BracketSpacing, FormatError, IndentStyle, IndentWidth, LineEnding, LineWidth, Printed,
+    QuoteStyle,
 };
 use biome_fs::BiomePath;
 use biome_graphql_analyze::analyze;
@@ -41,6 +42,7 @@ pub struct GraphqlFormatterSettings {
     pub indent_width: Option<IndentWidth>,
     pub indent_style: Option<IndentStyle>,
     pub quote_style: Option<QuoteStyle>,
+    pub bracket_spacing: Option<BracketSpacing>,
     pub enabled: Option<bool>,
 }
 
@@ -53,6 +55,7 @@ impl Default for GraphqlFormatterSettings {
             line_ending: Default::default(),
             line_width: Default::default(),
             quote_style: Default::default(),
+            bracket_spacing: Default::default(),
         }
     }
 }
@@ -94,6 +97,11 @@ impl ServiceLanguage for GraphqlLanguage {
             .or(global.and_then(|g| g.line_ending))
             .unwrap_or_default();
 
+        let bracket_spacing = language
+            .and_then(|l| l.bracket_spacing)
+            .or(global.and_then(|g| g.bracket_spacing))
+            .unwrap_or_default();
+
         let options = GraphqlFormatOptions::new(
             document_file_source
                 .to_graphql_file_source()
@@ -103,6 +111,7 @@ impl ServiceLanguage for GraphqlLanguage {
         .with_indent_width(indent_width)
         .with_line_width(line_width)
         .with_line_ending(line_ending)
+        .with_bracket_spacing(bracket_spacing)
         .with_quote_style(language.and_then(|l| l.quote_style).unwrap_or_default());
         if let Some(overrides) = overrides {
             overrides.to_override_graphql_format_options(path, options)

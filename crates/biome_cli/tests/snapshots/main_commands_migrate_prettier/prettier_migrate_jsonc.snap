@@ -30,24 +30,25 @@ biome.jsonc migrate ━━━━━━━━━━━━━━━━━━━━
        6 │ + → → "indentWidth":·2,
        7 │ + → → "lineEnding":·"lf",
        8 │ + → → "lineWidth":·80,
-       9 │ + → → "attributePosition":·"auto"
-      10 │ + → },
-      11 │ + → "linter":·{·"enabled":·true·},
-      12 │ + → "javascript":·{
-      13 │ + → → "formatter":·{
-      14 │ + → → → "jsxQuoteStyle":·"double",
-      15 │ + → → → "quoteProperties":·"asNeeded",
-      16 │ + → → → "trailingCommas":·"all",
-      17 │ + → → → "semicolons":·"always",
-      18 │ + → → → "arrowParentheses":·"always",
-      19 │ + → → → "bracketSpacing":·true,
+       9 │ + → → "attributePosition":·"auto",
+      10 │ + → → "bracketSpacing":·true
+      11 │ + → },
+      12 │ + → "linter":·{·"enabled":·true·},
+      13 │ + → "javascript":·{
+      14 │ + → → "formatter":·{
+      15 │ + → → → "jsxQuoteStyle":·"double",
+      16 │ + → → → "quoteProperties":·"asNeeded",
+      17 │ + → → → "trailingCommas":·"all",
+      18 │ + → → → "semicolons":·"always",
+      19 │ + → → → "arrowParentheses":·"always",
       20 │ + → → → "bracketSameLine":·false,
       21 │ + → → → "quoteStyle":·"single",
-      22 │ + → → → "attributePosition":·"auto"
-      23 │ + → → }
-      24 │ + → }
-      25 │ + }
-      26 │ + 
+      22 │ + → → → "attributePosition":·"auto",
+      23 │ + → → → "bracketSpacing":·true
+      24 │ + → → }
+      25 │ + → }
+      26 │ + }
+      27 │ + 
   
 
 ```

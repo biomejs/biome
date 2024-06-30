@@ -8,15 +8,17 @@ use biome_configuration::{
     push_to_analyzer_rules, BiomeDiagnostic, FilesConfiguration, FormatterConfiguration,
     JavascriptConfiguration, LinterConfiguration, OverrideFormatterConfiguration,
     OverrideLinterConfiguration, OverrideOrganizeImportsConfiguration, Overrides,
-    PartialConfiguration, PartialCssConfiguration, PartialJavascriptConfiguration,
-    PartialJsonConfiguration, PlainIndentStyle, Rules,
+    PartialConfiguration, PartialCssConfiguration, PartialGraphqlConfiguration,
+    PartialJavascriptConfiguration, PartialJsonConfiguration, PlainIndentStyle, Rules,
 };
 use biome_css_formatter::context::CssFormatOptions;
 use biome_css_parser::CssParserOptions;
 use biome_css_syntax::CssLanguage;
 use biome_deserialize::{Merge, StringSet};
 use biome_diagnostics::Category;
-use biome_formatter::{AttributePosition, IndentStyle, IndentWidth, LineEnding, LineWidth};
+use biome_formatter::{
+    AttributePosition, BracketSpacing, IndentStyle, IndentWidth, LineEnding, LineWidth,
+};
 use biome_fs::BiomePath;
 use biome_graphql_formatter::context::GraphqlFormatOptions;
 use biome_graphql_syntax::GraphqlLanguage;
@@ -219,6 +221,10 @@ impl Settings {
         if let Some(css) = configuration.css {
             self.languages.css = css.into();
         }
+        // graphql settings
+        if let Some(graphql) = configuration.graphql {
+            self.languages.graphql = graphql.into();
+        }
 
         // NOTE: keep this last. Computing the overrides require reading the settings computed by the parent settings.
         if let Some(overrides) = configuration.overrides {
@@ -332,6 +338,7 @@ pub struct FormatSettings {
     pub line_ending: Option<LineEnding>,
     pub line_width: Option<LineWidth>,
     pub attribute_position: Option<AttributePosition>,
+    pub bracket_spacing: Option<BracketSpacing>,
     /// List of ignore paths/files
     pub ignored_files: Matcher,
     /// List of included paths/files
@@ -348,6 +355,7 @@ impl Default for FormatSettings {
             line_ending: Some(LineEnding::default()),
             line_width: Some(LineWidth::default()),
             attribute_position: Some(AttributePosition::default()),
+            bracket_spacing: Some(BracketSpacing::default()),
             ignored_files: Matcher::empty(),
             included_files: Matcher::empty(),
         }
@@ -366,6 +374,8 @@ pub struct OverrideFormatSettings {
     pub indent_width: Option<IndentWidth>,
     pub line_ending: Option<LineEnding>,
     pub line_width: Option<LineWidth>,
+    pub bracket_spacing: Option<BracketSpacing>,
+    pub attribute_position: Option<AttributePosition>,
 }
 
 /// Linter settings for the entire workspace
@@ -455,10 +465,11 @@ impl From<JavascriptConfiguration> for LanguageSettings<JsLanguage> {
         language_setting.formatter.trailing_commas = Some(formatter.trailing_commas);
         language_setting.formatter.semicolons = Some(formatter.semicolons);
         language_setting.formatter.arrow_parentheses = Some(formatter.arrow_parentheses);
-        language_setting.formatter.bracket_spacing = Some(formatter.bracket_spacing.into());
         language_setting.formatter.bracket_same_line = Some(formatter.bracket_same_line.into());
         language_setting.formatter.enabled = Some(formatter.enabled);
         language_setting.formatter.line_width = formatter.line_width;
+        language_setting.formatter.bracket_spacing = formatter.bracket_spacing;
+        language_setting.formatter.attribute_position = formatter.attribute_position;
         language_setting.formatter.indent_width = formatter.indent_width.map(Into::into);
         language_setting.formatter.indent_style = formatter.indent_style.map(Into::into);
         language_setting.parser.parse_class_parameter_decorators =
@@ -515,6 +526,25 @@ impl From<PartialCssConfiguration> for LanguageSettings<CssLanguage> {
         if let Some(linter) = css.linter {
             // TODO: change RHS to `linter.enabled` when css linting is enabled by default
             language_setting.linter.enabled = Some(linter.enabled.unwrap_or_default());
+        }
+
+        language_setting
+    }
+}
+
+impl From<PartialGraphqlConfiguration> for LanguageSettings<GraphqlLanguage> {
+    fn from(graphql: PartialGraphqlConfiguration) -> Self {
+        let mut language_setting: LanguageSettings<GraphqlLanguage> = LanguageSettings::default();
+
+        if let Some(formatter) = graphql.formatter {
+            // TODO: change RHS to `formatter.enabled` when graphql formatting is enabled by default
+            language_setting.formatter.enabled = Some(formatter.enabled.unwrap_or_default());
+            language_setting.formatter.indent_width = formatter.indent_width;
+            language_setting.formatter.indent_style = formatter.indent_style.map(Into::into);
+            language_setting.formatter.line_width = formatter.line_width;
+            language_setting.formatter.line_ending = formatter.line_ending;
+            language_setting.formatter.quote_style = formatter.quote_style;
+            language_setting.formatter.bracket_spacing = formatter.bracket_spacing;
         }
 
         language_setting
@@ -1020,13 +1050,16 @@ impl OverrideSettingPattern {
         if let Some(arrow_parentheses) = js_formatter.arrow_parentheses {
             options.set_arrow_parentheses(arrow_parentheses);
         }
-        if let Some(bracket_spacing) = js_formatter.bracket_spacing {
+        if let Some(bracket_spacing) = js_formatter.bracket_spacing.or(formatter.bracket_spacing) {
             options.set_bracket_spacing(bracket_spacing);
         }
         if let Some(bracket_same_line) = js_formatter.bracket_same_line {
             options.set_bracket_same_line(bracket_same_line);
         }
-        if let Some(attribute_position) = js_formatter.attribute_position {
+        if let Some(attribute_position) = js_formatter
+            .attribute_position
+            .or(formatter.attribute_position)
+        {
             options.set_attribute_position(attribute_position);
         }
 
@@ -1124,6 +1157,12 @@ impl OverrideSettingPattern {
         }
         if let Some(line_width) = graphql_formatter.line_width.or(formatter.line_width) {
             options.set_line_width(line_width);
+        }
+        if let Some(bracket_spacing) = graphql_formatter
+            .bracket_spacing
+            .or(formatter.bracket_spacing)
+        {
+            options.set_bracket_spacing(bracket_spacing);
         }
         if let Some(quote_style) = graphql_formatter.quote_style {
             options.set_quote_style(quote_style);
@@ -1296,6 +1335,8 @@ pub fn to_override_settings(
                 indent_width: formatter.indent_width,
                 line_ending: formatter.line_ending,
                 line_width: formatter.line_width,
+                bracket_spacing: formatter.bracket_spacing,
+                attribute_position: formatter.attribute_position,
             })
             .unwrap_or_default();
         let linter = pattern
@@ -1315,11 +1356,14 @@ pub fn to_override_settings(
         let javascript = pattern.javascript.take().unwrap_or_default();
         let json = pattern.json.take().unwrap_or_default();
         let css = pattern.css.take().unwrap_or_default();
+        let graphql = pattern.graphql.take().unwrap_or_default();
         languages.javascript =
             to_javascript_language_settings(javascript, &current_settings.languages.javascript);
 
         languages.json = to_json_language_settings(json, &current_settings.languages.json);
         languages.css = to_css_language_settings(css, &current_settings.languages.css);
+        languages.graphql =
+            to_graphql_language_settings(graphql, &current_settings.languages.graphql);
 
         let pattern_setting = OverrideSettingPattern {
             include: to_matcher(working_directory.clone(), pattern.include.as_ref())?,
@@ -1350,7 +1394,7 @@ fn to_javascript_language_settings(
         formatter.trailing_commas.or(formatter.trailing_comma);
     language_setting.formatter.semicolons = formatter.semicolons;
     language_setting.formatter.arrow_parentheses = formatter.arrow_parentheses;
-    language_setting.formatter.bracket_spacing = formatter.bracket_spacing.map(Into::into);
+    language_setting.formatter.bracket_spacing = formatter.bracket_spacing;
     language_setting.formatter.bracket_same_line = formatter.bracket_same_line.map(Into::into);
     language_setting.formatter.enabled = formatter.enabled;
     language_setting.formatter.line_width = formatter.line_width;
@@ -1431,6 +1475,24 @@ fn to_css_language_settings(
     language_setting
 }
 
+fn to_graphql_language_settings(
+    mut conf: PartialGraphqlConfiguration,
+    _parent_settings: &LanguageSettings<GraphqlLanguage>,
+) -> LanguageSettings<GraphqlLanguage> {
+    let mut language_setting: LanguageSettings<GraphqlLanguage> = LanguageSettings::default();
+    let formatter = conf.formatter.take().unwrap_or_default();
+
+    language_setting.formatter.enabled = formatter.enabled;
+    language_setting.formatter.line_width = formatter.line_width;
+    language_setting.formatter.line_ending = formatter.line_ending;
+    language_setting.formatter.indent_width = formatter.indent_width.map(Into::into);
+    language_setting.formatter.indent_style = formatter.indent_style.map(Into::into);
+    language_setting.formatter.quote_style = formatter.quote_style;
+    language_setting.formatter.bracket_spacing = formatter.bracket_spacing;
+
+    language_setting
+}
+
 pub fn to_format_settings(
     working_directory: Option<PathBuf>,
     conf: FormatterConfiguration,
@@ -1449,6 +1511,7 @@ pub fn to_format_settings(
         line_width: Some(conf.line_width),
         format_with_errors: conf.format_with_errors,
         attribute_position: Some(conf.attribute_position),
+        bracket_spacing: Some(conf.bracket_spacing),
         ignored_files: to_matcher(working_directory.clone(), Some(&conf.ignore))?,
         included_files: to_matcher(working_directory, Some(&conf.include))?,
     })
@@ -1476,6 +1539,7 @@ impl TryFrom<OverrideFormatterConfiguration> for FormatSettings {
             line_ending: conf.line_ending,
             line_width: conf.line_width,
             attribute_position: Some(AttributePosition::default()),
+            bracket_spacing: Some(BracketSpacing::default()),
             format_with_errors: conf.format_with_errors.unwrap_or_default(),
             ignored_files: Matcher::empty(),
             included_files: Matcher::empty(),

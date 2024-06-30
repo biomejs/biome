@@ -1,5 +1,5 @@
 use crate::GraphqlCommentStyle;
-use biome_formatter::{prelude::*, AttributePosition, IndentWidth, QuoteStyle};
+use biome_formatter::{prelude::*, AttributePosition, BracketSpacing, IndentWidth, QuoteStyle};
 use biome_formatter::{
     CstFormatContext, FormatContext, FormatOptions, IndentStyle, LineEnding, LineWidth,
     TransformSourceMap,
@@ -63,6 +63,7 @@ pub struct GraphqlFormatOptions {
     line_width: LineWidth,
     quote_style: QuoteStyle,
     attribute_position: AttributePosition,
+    bracket_spacing: BracketSpacing,
     _file_source: GraphqlFileSource,
 }
 
@@ -76,6 +77,7 @@ impl GraphqlFormatOptions {
             line_width: LineWidth::default(),
             quote_style: QuoteStyle::default(),
             attribute_position: AttributePosition::default(),
+            bracket_spacing: BracketSpacing::default(),
         }
     }
 
@@ -96,6 +98,11 @@ impl GraphqlFormatOptions {
 
     pub fn with_line_width(mut self, line_width: LineWidth) -> Self {
         self.line_width = line_width;
+        self
+    }
+
+    pub fn with_bracket_spacing(mut self, bracket_spacing: BracketSpacing) -> Self {
+        self.bracket_spacing = bracket_spacing;
         self
     }
 
@@ -124,6 +131,10 @@ impl GraphqlFormatOptions {
         self.quote_style = quote_style;
     }
 
+    pub fn set_bracket_spacing(&mut self, bracket_spacing: BracketSpacing) {
+        self.bracket_spacing = bracket_spacing;
+    }
+
     pub fn quote_style(&self) -> QuoteStyle {
         self.quote_style
     }
@@ -138,20 +149,24 @@ impl FormatOptions for GraphqlFormatOptions {
         self.indent_width
     }
 
-    fn line_ending(&self) -> LineEnding {
-        self.line_ending
-    }
-
     fn line_width(&self) -> LineWidth {
         self.line_width
     }
 
-    fn as_print_options(&self) -> PrinterOptions {
-        PrinterOptions::from(self)
+    fn line_ending(&self) -> LineEnding {
+        self.line_ending
     }
 
     fn attribute_position(&self) -> AttributePosition {
         self.attribute_position
+    }
+
+    fn bracket_spacing(&self) -> BracketSpacing {
+        self.bracket_spacing
+    }
+
+    fn as_print_options(&self) -> PrinterOptions {
+        PrinterOptions::from(self)
     }
 }
 
@@ -161,6 +176,7 @@ impl fmt::Display for GraphqlFormatOptions {
         writeln!(f, "Indent width: {}", self.indent_width.value())?;
         writeln!(f, "Line ending: {}", self.line_ending)?;
         writeln!(f, "Line width: {}", self.line_width.value())?;
+        writeln!(f, "Bracket spacing: {}", self.bracket_spacing.value())?;
         writeln!(f, "Quote style: {}", self.quote_style)
     }
 }
