@@ -13,11 +13,13 @@ mod language {
 // use this test check if your snippet prints as you wish, without using a snapshot
 fn quick_test() {
     let src = r#"
-"""
-    1
-  2
-"""
-type Person {name: String}
+type Type1 implements A & B &
+# comment 1
+C & D &
+# comment 2
+E {
+	a: a
+}
 
 
 "#;
