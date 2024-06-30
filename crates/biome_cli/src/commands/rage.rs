@@ -276,7 +276,7 @@ impl Display for RageConfiguration<'_, '_> {
                             {KeyValuePair("Indent width", markup!({DebugDisplayOption(graphql_formatter_configuration.indent_width)}))}
                             {KeyValuePair("Line ending", markup!({DebugDisplayOption(graphql_formatter_configuration.line_ending)}))}
                             {KeyValuePair("Line width", markup!({DebugDisplayOption(graphql_formatter_configuration.line_width)}))}
-                            {KeyValuePair("Bracket spacing", markup!({DebugDisplay(graphql_formatter_configuration.bracket_spacing)}))}
+                            {KeyValuePair("Bracket spacing", markup!({DebugDisplayOption(graphql_formatter_configuration.bracket_spacing)}))}
                             {KeyValuePair("Quote style", markup!({DebugDisplay(graphql_formatter_configuration.quote_style)}))}
                         ).fmt(fmt)?;
                     }
