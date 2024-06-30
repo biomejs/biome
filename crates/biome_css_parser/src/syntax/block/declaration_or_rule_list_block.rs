@@ -2,10 +2,7 @@ use crate::parser::CssParser;
 use crate::syntax::at_rule::{is_at_at_rule, parse_at_rule};
 use crate::syntax::block::ParseBlockBody;
 use crate::syntax::parse_error::expected_any_declaration_or_at_rule;
-use crate::syntax::{
-    is_at_declaration, is_at_nested_qualified_rule, parse_declaration_with_semicolon,
-    parse_nested_qualified_rule,
-};
+use crate::syntax::{is_at_declaration, is_at_nested_qualified_rule, parse_declaration_with_semicolon, parse_nested_qualified_rule, speculative_parse_nested_qualified_rule};
 use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::{CssSyntaxKind, T};
 use biome_parser::parse_lists::ParseNodeList;
@@ -59,7 +56,17 @@ impl ParseNodeList for DeclarationOrRuleList {
         if is_at_at_rule(p) {
             parse_at_rule(p)
         } else if is_at_declaration(p) {
-            parse_declaration_with_semicolon(p)
+            // if we are at a declaration, we need to check if it is a nested qualified rule
+            // because it can be parsed as a declaration or a nested qualified rule
+            // main {
+            //     label:hover {  <--- it looks like a declaration because we have but it is a nested qualified rule
+            //         font-weight: 500;
+            //     }
+            // }
+            speculative_parse_nested_qualified_rule(p).or_else(|| {
+                parse_declaration_with_semicolon(p)
+            })
+
         } else if is_at_nested_qualified_rule(p) {
             parse_nested_qualified_rule(p)
         } else {

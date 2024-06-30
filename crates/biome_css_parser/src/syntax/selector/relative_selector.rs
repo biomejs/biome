@@ -23,7 +23,7 @@ use biome_parser::{token_set, Parser, TokenSet};
 /// parsed from a string like `"div > p, ul > li:first-child"`.
 pub(crate) struct RelativeSelectorList {
     /// The type of CSS syntax that marks the end of this selector list.
-    end_kind: CssSyntaxKind,
+    end_kind_ts: TokenSet<CssSyntaxKind>,
     /// Flag indicating whether error recovery is disabled.
     is_recovery_disabled: bool,
 }
@@ -35,10 +35,10 @@ impl RelativeSelectorList {
     ///
     /// # Arguments
     ///
-    /// * `end_kind` - A `CssSyntaxKind` that indicates the end of the selector list.
-    pub(crate) fn new(end_kind: CssSyntaxKind) -> Self {
+    /// * `end_kind` - A `TokenSet<CssSyntaxKind>` that indicates the end of the selector list.
+    pub(crate) fn new(end_kind_ts: TokenSet<CssSyntaxKind>) -> Self {
         RelativeSelectorList {
-            end_kind,
+            end_kind_ts,
             is_recovery_disabled: false,
         }
     }
@@ -59,7 +59,7 @@ impl RelativeSelectorList {
 /// a list of relative CSS selectors, allowing it to recover and continue.
 pub(crate) struct RelativeSelectorListParseRecovery {
     /// The type of CSS syntax that indicates a potential recovery point.
-    end_kind: CssSyntaxKind,
+    end_kind_ts: TokenSet<CssSyntaxKind>,
 }
 
 impl RelativeSelectorListParseRecovery {
@@ -69,9 +69,9 @@ impl RelativeSelectorListParseRecovery {
     ///
     /// # Arguments
     ///
-    /// * `end_kind` - A `CssSyntaxKind` used to determine the recovery point.
-    pub(crate) fn new(end_kind: CssSyntaxKind) -> Self {
-        RelativeSelectorListParseRecovery { end_kind }
+    /// * `end_kind_ts` - A `TokenSet<CssSyntaxKind>` used to determine the recovery point.
+    pub(crate) fn new(end_kind_ts: TokenSet<CssSyntaxKind>) -> Self {
+        RelativeSelectorListParseRecovery { end_kind_ts }
     }
 }
 
@@ -108,7 +108,7 @@ impl ParseRecovery for RelativeSelectorListParseRecovery {
     ///     /*        ^^^^^^^^ invalid selector     ^ recovery point at new relative selector */
     ///     ```
     fn is_at_recovered(&self, p: &mut Self::Parser<'_>) -> bool {
-        p.at(self.end_kind) || p.at(T![,]) || is_at_relative_selector(p)
+        p.at_ts(self.end_kind_ts) || p.at(T![,]) || is_at_relative_selector(p)
     }
 }
 
@@ -123,7 +123,7 @@ impl ParseSeparatedList for RelativeSelectorList {
     }
 
     fn is_at_list_end(&self, p: &mut CssParser) -> bool {
-        p.at(self.end_kind)
+        p.at_ts(self.end_kind_ts)
     }
 
     fn recover(&mut self, p: &mut CssParser, parsed_element: ParsedSyntax) -> RecoveryResult {
@@ -132,7 +132,7 @@ impl ParseSeparatedList for RelativeSelectorList {
         } else {
             parsed_element.or_recover(
                 p,
-                &RelativeSelectorListParseRecovery::new(self.end_kind),
+                &RelativeSelectorListParseRecovery::new(self.end_kind_ts),
                 expected_relative_selector,
             )
         }
