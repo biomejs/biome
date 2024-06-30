@@ -93,14 +93,14 @@ JavaScript Formatter:
   Trailing commas:              All
   Semicolons:                   Always
   Arrow parentheses:            Always
-  Bracket spacing:              None
+  Bracket spacing:              unset
   Bracket same line:            false
   Quote style:                  Double
   Indent style:                 Tab
   Indent width:                 2
   Line ending:                  Lf
   Line width:                   100
-  Attribute position:           None
+  Attribute position:           unset
 
 JSON Formatter:
   Enabled:                      true
@@ -124,8 +124,8 @@ GraphQL Formatter:
   Indent width:                 unset
   Line ending:                  unset
   Line width:                   unset
-  Bracket spacing:              None
-  Quote style:                  None
+  Bracket spacing:              unset
+  Quote style:                  unset
 
 Server:
   Version:                      0.0.0
