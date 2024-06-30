@@ -9,9 +9,7 @@ use biome_configuration::ConfigurationPathHint;
 use biome_console::markup;
 use biome_diagnostics::PrintDescription;
 use biome_fs::{BiomePath, FileSystem};
-use biome_service::configuration::{
-    load_configuration, LoadedConfiguration, PartialConfigurationExt,
-};
+use biome_service::configuration::{load_configuration, ConfigurationExt, LoadedConfiguration};
 use biome_service::file_handlers::{AstroFileHandler, SvelteFileHandler, VueFileHandler};
 use biome_service::workspace::{
     FeaturesBuilder, GetFileContentParams, OpenProjectParams, PullDiagnosticsParams,

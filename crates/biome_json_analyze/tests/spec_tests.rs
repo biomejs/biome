@@ -1,7 +1,7 @@
 use biome_analyze::{AnalysisFilter, AnalyzerAction, ControlFlow, Never, RuleFilter};
 use biome_diagnostics::advice::CodeSuggestionAdvice;
 use biome_diagnostics::{DiagnosticExt, Severity};
-use biome_json_parser::{parse_json, JsonParserOptions};
+use biome_json_parser::{parse_json, JsonParseOptions};
 use biome_json_syntax::{JsonFileSource, JsonLanguage};
 use biome_rowan::AstNode;
 use biome_test_utils::{
@@ -78,7 +78,7 @@ pub(crate) fn analyze_and_snap(
     file_name: &str,
     input_file: &Path,
 ) -> usize {
-    let parsed = parse_json(input_code, JsonParserOptions::default());
+    let parsed = parse_json(input_code, JsonParseOptions::default());
     let root = parsed.tree();
 
     let mut diagnostics = Vec::new();
@@ -149,6 +149,6 @@ fn check_code_action(path: &Path, source: &str, action: &AnalyzerAction<JsonLang
     }
 
     // Re-parse the modified code and panic if the resulting tree has syntax errors
-    let re_parse = parse_json(&output, JsonParserOptions::default());
+    let re_parse = parse_json(&output, JsonParseOptions::default());
     assert_errors_are_absent(re_parse.tree().syntax(), re_parse.diagnostics(), path);
 }

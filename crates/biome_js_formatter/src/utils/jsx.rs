@@ -577,7 +577,7 @@ mod tests {
         jsx_split_children, JsxChild, JsxChildrenIterator, JsxSplitChunksIterator, JsxTextChunk,
     };
     use biome_formatter::comments::Comments;
-    use biome_js_parser::{parse, JsParserOptions};
+    use biome_js_parser::{parse, JsParseOptions};
     use biome_js_syntax::{JsFileSource, JsxChildList, JsxText};
     use biome_rowan::{AstNode, TextSize};
 
@@ -609,7 +609,7 @@ mod tests {
         let parse = parse(
             &std::format!("<>{text}</>"),
             JsFileSource::jsx(),
-            JsParserOptions::default(),
+            JsParseOptions::default(),
         );
         assert!(
             !parse.has_errors(),
@@ -684,7 +684,7 @@ mod tests {
         let parse = parse(
             &std::format!("<div>{children}</div>"),
             JsFileSource::jsx(),
-            JsParserOptions::default(),
+            JsParseOptions::default(),
         );
 
         assert!(

@@ -67,10 +67,10 @@ pub use validator::*;
 /// }
 ///
 /// use biome_deserialize::json::deserialize_from_json_str;
-/// use biome_json_parser::JsonParserOptions;
+/// use biome_json_parser::JsonParseOptions;
 ///
 /// let source = r#""a""#;
-/// let deserialized = deserialize_from_json_str::<Variant>(&source, JsonParserOptions::default(), "");
+/// let deserialized = deserialize_from_json_str::<Variant>(&source, JsonParseOptions::default(), "");
 /// assert!(!deserialized.has_errors());
 /// assert!(matches!(deserialized.into_deserialized(), Some(Variant::A)));
 /// ```
@@ -181,10 +181,10 @@ pub trait DeserializableValue: Sized {
 /// }
 ///
 /// use biome_deserialize::json::deserialize_from_json_str;
-/// use biome_json_parser::JsonParserOptions;
+/// use biome_json_parser::JsonParseOptions;
 ///
 /// let source = r#"{ "name": "Isaac Asimov" }"#;
-/// let deserialized = deserialize_from_json_str::<Person>(&source, JsonParserOptions::default(), "");
+/// let deserialized = deserialize_from_json_str::<Person>(&source, JsonParseOptions::default(), "");
 /// assert!(!deserialized.has_errors());
 /// assert_eq!(deserialized.into_deserialized(), Some(Person { name: "Isaac Asimov".to_string() }));
 /// ```
@@ -236,15 +236,15 @@ pub trait DeserializableValue: Sized {
 /// }
 ///
 /// use biome_deserialize::json::deserialize_from_json_str;
-/// use biome_json_parser::JsonParserOptions;
+/// use biome_json_parser::JsonParseOptions;
 ///
 /// let source = r#" "string" "#;
-/// let deserialized = deserialize_from_json_str::<Union>(&source, JsonParserOptions::default(), "");
+/// let deserialized = deserialize_from_json_str::<Union>(&source, JsonParseOptions::default(), "");
 /// assert!(!deserialized.has_errors());
 /// assert_eq!(deserialized.into_deserialized(), Some(Union::Str("string".to_string())));
 ///
 /// let source = "true";
-/// let deserialized = deserialize_from_json_str::<Union>(&source, JsonParserOptions::default(), "");
+/// let deserialized = deserialize_from_json_str::<Union>(&source, JsonParseOptions::default(), "");
 /// assert!(!deserialized.has_errors());
 /// assert_eq!(deserialized.into_deserialized(), Some(Union::Bool(true)));
 /// ```

@@ -1055,7 +1055,7 @@ pub(crate) fn debug_assert_is_parent(node: &JsSyntaxNode, parent: &JsSyntaxNode)
 pub(crate) mod tests {
     use super::NeedsParentheses;
     use crate::transform;
-    use biome_js_parser::JsParserOptions;
+    use biome_js_parser::JsParseOptions;
     use biome_js_syntax::{JsFileSource, JsLanguage};
     use biome_rowan::AstNode;
 
@@ -1066,7 +1066,7 @@ pub(crate) mod tests {
         index: Option<usize>,
         source_type: JsFileSource,
     ) {
-        let parse = biome_js_parser::parse(input, source_type, JsParserOptions::default());
+        let parse = biome_js_parser::parse(input, source_type, JsParseOptions::default());
 
         let diagnostics = parse.diagnostics();
         assert!(
@@ -1107,7 +1107,7 @@ pub(crate) mod tests {
         index: Option<usize>,
         source_type: JsFileSource,
     ) {
-        let parse = biome_js_parser::parse(input, source_type, JsParserOptions::default());
+        let parse = biome_js_parser::parse(input, source_type, JsParseOptions::default());
 
         let diagnostics = parse.diagnostics();
         assert!(

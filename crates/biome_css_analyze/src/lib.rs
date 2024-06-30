@@ -138,7 +138,7 @@ mod tests {
     use biome_analyze::{AnalyzerOptions, Never, RuleFilter};
     use biome_console::fmt::{Formatter, Termcolor};
     use biome_console::{markup, Markup};
-    use biome_css_parser::{parse_css, CssParserOptions};
+    use biome_css_parser::{parse_css, CssParseOptions};
     use biome_css_syntax::TextRange;
     use biome_diagnostics::termcolor::NoColor;
     use biome_diagnostics::{Diagnostic, DiagnosticExt, PrintDiagnostic, Severity};
@@ -169,7 +169,7 @@ mod tests {
         :popover-open {}
         .test::-webkit-scrollbar-button:horizontal:decrement {}
         @page :first { }
-       
+
         /* invalid */
         a:unknown { }
         a:pseudo-class { }
@@ -178,7 +178,7 @@ mod tests {
         @page :blank:unknown { }
         "#;
 
-        let parsed = parse_css(SOURCE, CssParserOptions::default());
+        let parsed = parse_css(SOURCE, CssParseOptions::default());
 
         let mut error_ranges: Vec<TextRange> = Vec::new();
         let rule_filter = RuleFilter::Rule("nursery", "noUnknownPseudoClassSelector");

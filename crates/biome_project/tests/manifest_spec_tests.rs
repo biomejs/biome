@@ -1,5 +1,5 @@
 use biome_diagnostics::{print_diagnostic_to_string, DiagnosticExt};
-use biome_json_parser::{parse_json, JsonParserOptions};
+use biome_json_parser::{parse_json, JsonParseOptions};
 use biome_project::{NodeJsProject, Project};
 use std::ffi::OsStr;
 use std::fs::read_to_string;
@@ -17,7 +17,7 @@ fn run_invalid_configurations(input: &'static str, _: &str, _: &str, _: &str) {
     let mut project = NodeJsProject::default();
     match extension {
         "json" => {
-            let parsed = parse_json(input_code.as_str(), JsonParserOptions::default());
+            let parsed = parse_json(input_code.as_str(), JsonParseOptions::default());
             project.from_root(&parsed.tree());
         }
         _ => {

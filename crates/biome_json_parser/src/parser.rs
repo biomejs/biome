@@ -9,16 +9,16 @@ use biome_parser::ParserContext;
 pub(crate) struct JsonParser<'source> {
     context: ParserContext<JsonSyntaxKind>,
     source: JsonTokenSource<'source>,
-    options: JsonParserOptions,
+    options: JsonParseOptions,
 }
 
 #[derive(Default, Debug, Clone, Copy)]
-pub struct JsonParserOptions {
+pub struct JsonParseOptions {
     pub allow_comments: bool,
     pub allow_trailing_commas: bool,
 }
 
-impl JsonParserOptions {
+impl JsonParseOptions {
     pub fn with_allow_comments(mut self) -> Self {
         self.allow_comments = true;
         self
@@ -30,7 +30,7 @@ impl JsonParserOptions {
     }
 }
 
-impl From<&JsonFileSource> for JsonParserOptions {
+impl From<&JsonFileSource> for JsonParseOptions {
     fn from(file_source: &JsonFileSource) -> Self {
         let options = Self::default();
         if file_source.allow_comments() {
@@ -44,7 +44,7 @@ impl From<&JsonFileSource> for JsonParserOptions {
 }
 
 impl<'source> JsonParser<'source> {
-    pub fn new(source: &'source str, options: JsonParserOptions) -> Self {
+    pub fn new(source: &'source str, options: JsonParseOptions) -> Self {
         Self {
             context: ParserContext::default(),
             source: JsonTokenSource::from_str(source, options),
@@ -67,7 +67,7 @@ impl<'source> JsonParser<'source> {
         (events, diagnostics, trivia)
     }
 
-    pub fn options(&self) -> &JsonParserOptions {
+    pub fn options(&self) -> &JsonParseOptions {
         &self.options
     }
 }

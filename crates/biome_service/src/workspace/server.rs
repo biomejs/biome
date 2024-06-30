@@ -19,7 +19,6 @@ use crate::workspace::{
 use crate::{
     file_handlers::Features, settings::WorkspaceSettingsHandle, Workspace, WorkspaceError,
 };
-use biome_configuration::DEFAULT_FILE_SIZE_LIMIT;
 use biome_diagnostics::{
     serde::Diagnostic as SerdeDiagnostic, Diagnostic, DiagnosticExt, Severity,
 };
@@ -27,7 +26,7 @@ use biome_formatter::Printed;
 use biome_fs::{BiomePath, ConfigName};
 use biome_grit_patterns::GritQuery;
 use biome_js_syntax::ModuleKind;
-use biome_json_parser::{parse_json_with_cache, JsonParserOptions};
+use biome_json_parser::{parse_json_with_cache, JsonParseOptions};
 use biome_json_syntax::JsonFileSource;
 use biome_parser::AnyParse;
 use biome_project::{NodeJsProject, PackageType};
@@ -164,7 +163,7 @@ impl WorkspaceServer {
                     let parsed = parse_json_with_cache(
                         document.content.as_str(),
                         &mut document.node_cache,
-                        JsonParserOptions::default(),
+                        JsonParseOptions::default(),
                     );
 
                     let mut node_js_project = NodeJsProject::default();
@@ -226,9 +225,7 @@ impl WorkspaceServer {
                 let size_limit = {
                     let workspace = self.workspace();
                     let settings = workspace.settings();
-                    let limit =
-                        settings.map_or(DEFAULT_FILE_SIZE_LIMIT.get(), |s| s.files.max_size.get());
-                    usize::try_from(limit).unwrap_or(usize::MAX)
+                    usize::from(settings.and_then(|s| s.files.max_size).unwrap_or_default())
                 };
 
                 let document = &mut *document;
@@ -371,7 +368,7 @@ impl Workspace for WorkspaceServer {
         };
         file_features = file_features.with_settings_and_language(settings, &language, path);
 
-        if settings.files.ignore_unknown
+        if settings.ignore_unknown_enabled()
             && language == DocumentFileSource::Unknown
             && self.get_file_source(&params.path) == DocumentFileSource::Unknown
         {
@@ -540,7 +537,9 @@ impl Workspace for WorkspaceServer {
         let parse = self.get_parse(params.path.clone())?;
 
         if let Some(settings) = settings {
-            if !settings.formatter().format_with_errors && parse.has_errors() {
+            if !settings.format_with_errors_enabled_for_this_file_path(&params.path)
+                && parse.has_errors()
+            {
                 return Err(WorkspaceError::format_with_errors_disabled());
             }
         }
@@ -679,7 +678,9 @@ impl Workspace for WorkspaceServer {
         let parse = self.get_parse(params.path.clone())?;
 
         if let Some(settings) = settings {
-            if !settings.formatter().format_with_errors && parse.has_errors() {
+            if !settings.format_with_errors_enabled_for_this_file_path(&params.path)
+                && parse.has_errors()
+            {
                 return Err(WorkspaceError::format_with_errors_disabled());
             }
         }
@@ -698,7 +699,9 @@ impl Workspace for WorkspaceServer {
         let parse = self.get_parse(params.path.clone())?;
 
         if let Some(settings) = settings {
-            if !settings.formatter().format_with_errors && parse.has_errors() {
+            if !settings.format_with_errors_enabled_for_this_file_path(&params.path)
+                && parse.has_errors()
+            {
                 return Err(WorkspaceError::format_with_errors_disabled());
             }
         }
@@ -723,7 +726,9 @@ impl Workspace for WorkspaceServer {
         let settings = workspace.settings();
         let parse = self.get_parse(params.path.clone())?;
         if let Some(settings) = settings {
-            if !settings.formatter().format_with_errors && parse.has_errors() {
+            if !settings.format_with_errors_enabled_for_this_file_path(&params.path)
+                && parse.has_errors()
+            {
                 return Err(WorkspaceError::format_with_errors_disabled());
             }
         }

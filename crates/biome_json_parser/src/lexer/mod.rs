@@ -10,7 +10,7 @@ use std::iter::FusedIterator;
 use std::ops::Add;
 use unicode_bom::Bom;
 
-use crate::JsonParserOptions;
+use crate::JsonParseOptions;
 
 pub struct Token {
     kind: JsonSyntaxKind,
@@ -37,7 +37,7 @@ pub(crate) struct Lexer<'src> {
     position: usize,
 
     diagnostics: Vec<ParseDiagnostic>,
-    options: JsonParserOptions,
+    options: JsonParseOptions,
 }
 
 impl<'src> Lexer<'src> {
@@ -47,7 +47,7 @@ impl<'src> Lexer<'src> {
             source: string,
             position: 0,
             diagnostics: vec![],
-            options: JsonParserOptions::default(),
+            options: JsonParseOptions::default(),
         }
     }
 
@@ -790,7 +790,7 @@ impl<'src> Lexer<'src> {
         }
     }
 
-    pub(crate) fn with_options(mut self, options: JsonParserOptions) -> Self {
+    pub(crate) fn with_options(mut self, options: JsonParseOptions) -> Self {
         self.options = options;
         self
     }

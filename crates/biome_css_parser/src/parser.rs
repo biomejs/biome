@@ -12,11 +12,11 @@ pub(crate) struct CssParser<'source> {
     context: ParserContext<CssSyntaxKind>,
     source: CssTokenSource<'source>,
     state: CssParserState,
-    options: CssParserOptions,
+    options: CssParseOptions,
 }
 
 #[derive(Default, Debug, Clone, Copy)]
-pub struct CssParserOptions {
+pub struct CssParseOptions {
     /// If this is `true`, **wrong** comments starting with `//` will be treated
     /// as a comment.
     ///
@@ -35,7 +35,7 @@ pub struct CssParserOptions {
     pub grit_metavariable: bool,
 }
 
-impl CssParserOptions {
+impl CssParseOptions {
     /// Allows the parser to parse wrong line comments.
     pub fn allow_wrong_line_comments(mut self) -> Self {
         self.allow_wrong_line_comments = true;
@@ -66,7 +66,7 @@ impl CssParserOptions {
 }
 
 impl<'source> CssParser<'source> {
-    pub fn new(source: &'source str, options: CssParserOptions) -> Self {
+    pub fn new(source: &'source str, options: CssParseOptions) -> Self {
         Self {
             context: ParserContext::default(),
             source: CssTokenSource::from_str(source, options),
@@ -75,7 +75,7 @@ impl<'source> CssParser<'source> {
         }
     }
 
-    pub fn options(&self) -> &CssParserOptions {
+    pub fn options(&self) -> &CssParseOptions {
         &self.options
     }
 

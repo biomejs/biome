@@ -1,7 +1,7 @@
 use biome_formatter_test::check_reformat::CheckReformat;
 use biome_json_formatter::format_node;
 use biome_json_formatter::{context::JsonFormatOptions, JsonFormatLanguage};
-use biome_json_parser::{parse_json, JsonParserOptions};
+use biome_json_parser::{parse_json, JsonParseOptions};
 
 mod language {
     include!("language.rs");
@@ -15,7 +15,7 @@ fn quick_test() {
  // comment
  { "test": "test"} /** comment **/
 "#;
-    let parse = parse_json(src, JsonParserOptions::default().with_allow_comments());
+    let parse = parse_json(src, JsonParseOptions::default().with_allow_comments());
     let options = JsonFormatOptions::default();
     let result = format_node(options.clone(), &parse.syntax())
         .unwrap()

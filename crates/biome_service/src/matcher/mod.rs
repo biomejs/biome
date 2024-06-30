@@ -11,8 +11,9 @@ use std::sync::RwLock;
 /// a unix shell style patterns
 #[derive(Debug, Default)]
 pub struct Matcher {
+    // TODO: where is this root used?
     root: Option<PathBuf>,
-    patterns: Vec<Pattern>,
+    patterns: Option<Vec<Pattern>>,
     options: MatchOptions,
     /// Whether the string was already checked
     already_checked: RwLock<HashMap<String, bool>>,
@@ -24,20 +25,13 @@ impl Matcher {
     /// Check [glob website](https://docs.rs/glob/latest/glob/struct.MatchOptions.html) for [MatchOptions]
     pub fn new(options: MatchOptions) -> Self {
         Self {
-            root: None,
-            patterns: Vec::new(),
             options,
-            already_checked: RwLock::new(HashMap::default()),
+            ..Default::default()
         }
     }
 
     pub fn empty() -> Self {
-        Self {
-            root: None,
-            patterns: Vec::new(),
-            options: MatchOptions::default(),
-            already_checked: RwLock::new(HashMap::default()),
-        }
+        Self::default()
     }
 
     pub fn set_root(&mut self, root: PathBuf) {
@@ -47,7 +41,8 @@ impl Matcher {
     /// It adds a unix shell style pattern
     pub fn add_pattern(&mut self, pattern: &str) -> Result<(), PatternError> {
         let pattern = Pattern::new(pattern)?;
-        self.patterns.push(pattern);
+        let patterns = self.patterns.get_or_insert(Default::default());
+        patterns.push(pattern);
         Ok(())
     }
 
@@ -55,68 +50,69 @@ impl Matcher {
     ///
     /// It returns [true] if there's at least a match
     pub fn matches(&self, source: &str) -> bool {
-        let mut already_ignored = self.already_checked.write().unwrap();
-        if let Some(matches) = already_ignored.get(source) {
+        let mut already_checked = self.already_checked.write().unwrap();
+        if let Some(matches) = already_checked.get(source) {
             return *matches;
         }
-        for pattern in &self.patterns {
-            if pattern.matches_with(source, self.options) || source.contains(pattern.as_str()) {
-                already_ignored.insert(source.to_string(), true);
-                return true;
+        if let Some(patterns) = &self.patterns {
+            for pattern in patterns {
+                // TODO: this needs to be better handled
+                if pattern.matches_with(source, self.options) || source.contains(pattern.as_str()) {
+                    already_checked.insert(source.to_string(), true);
+                    return true;
+                }
             }
         }
-        already_ignored.insert(source.to_string(), false);
+        already_checked.insert(source.to_string(), false);
         false
     }
 
-    pub fn is_empty(&self) -> bool {
-        self.patterns.is_empty()
+    pub fn is_none(&self) -> bool {
+        self.patterns.is_none()
     }
 
     /// It matches the given path against the stored patterns
     ///
     /// It returns [true] if there's at least one match
     pub fn matches_path(&self, source: &Path) -> bool {
-        if self.is_empty() {
-            return false;
-        }
         let mut already_checked = self.already_checked.write().unwrap();
-        let source_as_string = source.to_str();
-        if let Some(source_as_string) = source_as_string {
-            if let Some(matches) = already_checked.get(source_as_string) {
+        let source_str = source.to_str();
+        if let Some(source_str) = source_str {
+            if let Some(matches) = already_checked.get(source_str) {
                 return *matches;
             }
         }
         let matches = self.run_match(source);
-
-        if let Some(source_as_string) = source_as_string {
-            already_checked.insert(source_as_string.to_string(), matches);
+        if let Some(source_str) = source_str {
+            already_checked.insert(source_str.to_string(), matches);
         }
-
         matches
     }
 
     fn run_match(&self, source: &Path) -> bool {
-        for pattern in &self.patterns {
-            let matches = if pattern.matches_path_with(source, self.options) {
-                true
-            } else {
-                // Here we cover cases where the user specifies single files inside the patterns.
-                // The pattern library doesn't support single files, we here we just do a check
-                // on contains
-                //
-                // Given the pattern `out`:
-                // - `out/index.html` -> matches
-                // - `out/` -> matches
-                // - `layout.tsx` -> does not match
-                // - `routes/foo.ts` -> does not match
-                source
-                    .ancestors()
-                    .any(|ancestor| ancestor.ends_with(pattern.as_str()))
-            };
-
-            if matches {
-                return true;
+        if let Some(patterns) = &self.patterns {
+            for pattern in patterns {
+                let matches = if pattern.matches_path_with(source, self.options) {
+                    true
+                } else {
+                    // TODO: this needs to be better handled
+                    // Here we cover cases where the user specifies single files inside the patterns.
+                    // The pattern library doesn't support single files, we here we just do a check
+                    // on contains
+                    //
+                    // Given the pattern `out`:
+                    // - `out/index.html` -> matches
+                    // - `out/` -> matches
+                    // - `layout.tsx` -> does not match
+                    // - `routes/foo.ts` -> does not match
+                    source
+                        .ancestors()
+                        // TODO: should this be starts_with? And what about "out_123/index.html"?
+                        .any(|ancestor| ancestor.ends_with(pattern.as_str()))
+                };
+                if matches {
+                    return true;
+                }
             }
         }
         false

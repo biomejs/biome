@@ -1987,11 +1987,11 @@ pub fn is_in_boolean_context(node: &JsSyntaxNode) -> Option<bool> {
 mod test {
     use biome_js_factory::syntax::{JsCallExpression, JsTemplateExpression};
     use biome_js_parser::parse_module;
-    use biome_js_parser::JsParserOptions;
+    use biome_js_parser::JsParseOptions;
     use biome_rowan::AstNodeList;
 
     fn extract_call_expression(src: &str) -> JsCallExpression {
-        let result = parse_module(src, JsParserOptions::default());
+        let result = parse_module(src, JsParseOptions::default());
         let module = result.tree().items().first().unwrap();
 
         module
@@ -2007,7 +2007,7 @@ mod test {
     }
 
     fn extract_template(src: &str) -> JsTemplateExpression {
-        let result = parse_module(src, JsParserOptions::default());
+        let result = parse_module(src, JsParseOptions::default());
         let module = result.tree().items().first().unwrap();
 
         module

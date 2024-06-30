@@ -8,12 +8,12 @@ use biome_analyze::{
     RegistryVisitor, Rule, RuleCategory, RuleFilter, RuleGroup, RuleMetadata,
 };
 use biome_console::{markup, Console};
-use biome_css_parser::CssParserOptions;
+use biome_css_parser::CssParseOptions;
 use biome_css_syntax::CssLanguage;
 use biome_diagnostics::{Diagnostic, DiagnosticExt, PrintDiagnostic};
-use biome_js_parser::JsParserOptions;
+use biome_js_parser::JsParseOptions;
 use biome_js_syntax::{EmbeddingKind, JsFileSource, JsLanguage};
-use biome_json_parser::JsonParserOptions;
+use biome_json_parser::JsonParseOptions;
 use biome_json_syntax::JsonLanguage;
 use biome_service::settings::WorkspaceSettings;
 use biome_service::workspace::DocumentFileSource;
@@ -224,7 +224,7 @@ fn assert_lint(
                 _ => (code, file_source),
             };
 
-            let parse = biome_js_parser::parse(code, file_source, JsParserOptions::default());
+            let parse = biome_js_parser::parse(code, file_source, JsParseOptions::default());
 
             if parse.has_errors() {
                 for diag in parse.into_diagnostics() {
@@ -278,7 +278,7 @@ fn assert_lint(
             }
         }
         DocumentFileSource::Json(file_source) => {
-            let parse = biome_json_parser::parse_json(code, JsonParserOptions::from(&file_source));
+            let parse = biome_json_parser::parse_json(code, JsonParseOptions::from(&file_source));
 
             if parse.has_errors() {
                 for diag in parse.into_diagnostics() {
@@ -329,7 +329,7 @@ fn assert_lint(
             }
         }
         DocumentFileSource::Css(..) => {
-            let parse = biome_css_parser::parse_css(code, CssParserOptions::default());
+            let parse = biome_css_parser::parse_css(code, CssParseOptions::default());
 
             if parse.has_errors() {
                 for diag in parse.into_diagnostics() {

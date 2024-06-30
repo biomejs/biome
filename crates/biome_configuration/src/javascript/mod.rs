@@ -1,64 +1,67 @@
 mod formatter;
-
+use crate::bool::Bool;
+use biome_deserialize::StringSet;
+use biome_deserialize_macros::{Deserializable, Merge};
+use bpaf::Bpaf;
+pub use formatter::*;
+use serde::{Deserialize, Serialize};
 use std::str::FromStr;
 
-use biome_deserialize::StringSet;
-use biome_deserialize_macros::{Deserializable, Merge, Partial};
-use bpaf::Bpaf;
-pub use formatter::{
-    partial_javascript_formatter, JavascriptFormatter, PartialJavascriptFormatter,
-};
-use serde::{Deserialize, Serialize};
-
 /// A set of options applied to the JavaScript files
-#[derive(Clone, Debug, Default, Deserialize, Eq, Partial, PartialEq, Serialize)]
-#[partial(derive(Bpaf, Clone, Deserializable, Eq, Merge, PartialEq))]
-#[partial(cfg_attr(feature = "schema", derive(schemars::JsonSchema)))]
-#[partial(serde(rename_all = "camelCase", default, deny_unknown_fields))]
-pub struct JavascriptConfiguration {
+#[derive(
+    Bpaf, Clone, Debug, Default, Deserializable, Deserialize, Eq, Merge, PartialEq, Serialize,
+)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase", default, deny_unknown_fields)]
+pub struct JsConfiguration {
+    /// Parsing options
+    #[bpaf(external(js_parser_configuration), optional)]
+    pub parser: Option<JsParserConfiguration>,
+
     /// Formatting options
-    #[partial(type, bpaf(external(partial_javascript_formatter), optional))]
-    pub formatter: JavascriptFormatter,
+    #[bpaf(external(js_formatter_configuration), optional)]
+    pub formatter: Option<JsFormatterConfiguration>,
 
     /// Linter options
-    #[partial(type, bpaf(external(partial_javascript_linter), optional))]
-    pub linter: JavascriptLinter,
-
-    /// Parsing options
-    #[partial(type, bpaf(external(partial_javascript_parser), optional))]
-    pub parser: JavascriptParser,
+    #[bpaf(external(js_linter_configuration), optional)]
+    pub linter: Option<JsLinterConfiguration>,
 
     /// A list of global bindings that should be ignored by the analyzers
     ///
     /// If defined here, they should not emit diagnostics.
-    #[partial(bpaf(hide))]
-    pub globals: StringSet,
+    #[bpaf(hide)]
+    pub globals: Option<StringSet>,
 
     /// Indicates the type of runtime or transformation used for interpreting JSX.
-    #[partial(bpaf(hide))]
-    pub jsx_runtime: JsxRuntime,
+    #[bpaf(hide)]
+    pub jsx_runtime: Option<JsxRuntime>,
 
-    #[partial(type, bpaf(external(partial_javascript_organize_imports), optional))]
-    pub organize_imports: JavascriptOrganizeImports,
+    #[bpaf(external(js_organize_imports_configuration), optional)]
+    pub organize_imports: Option<JsOrganizeImportsConfiguration>,
 }
 
-#[derive(Clone, Debug, Default, Deserialize, Eq, Partial, PartialEq, Serialize)]
-#[partial(derive(Bpaf, Clone, Deserializable, Eq, Merge, PartialEq))]
-#[partial(cfg_attr(feature = "schema", derive(schemars::JsonSchema)))]
-#[partial(serde(default, deny_unknown_fields))]
-pub struct JavascriptOrganizeImports {}
+// TODO(zzwu): Revisit this
+#[derive(
+    Bpaf, Clone, Debug, Default, Deserializable, Deserialize, Eq, Merge, PartialEq, Serialize,
+)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(default, deny_unknown_fields)]
+pub struct JsOrganizeImportsConfiguration {}
+
+pub type UnsafeParameterDecoratorsEnabled = Bool<false>;
 
 /// Options that changes how the JavaScript parser behaves
-#[derive(Clone, Debug, Default, Deserialize, Eq, Partial, PartialEq, Serialize)]
-#[partial(derive(Bpaf, Clone, Deserializable, Eq, Merge, PartialEq))]
-#[partial(cfg_attr(feature = "schema", derive(schemars::JsonSchema)))]
-#[partial(serde(rename_all = "camelCase", default, deny_unknown_fields))]
-pub struct JavascriptParser {
+#[derive(
+    Bpaf, Clone, Debug, Default, Deserializable, Deserialize, Eq, Merge, PartialEq, Serialize,
+)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase", default, deny_unknown_fields)]
+pub struct JsParserConfiguration {
     /// It enables the experimental and unsafe parsing of parameter decorators
     ///
     /// These decorators belong to an old proposal, and they are subject to change.
-    #[partial(bpaf(hide))]
-    pub unsafe_parameter_decorators_enabled: bool,
+    #[bpaf(hide)]
+    pub unsafe_parameter_decorators_enabled: Option<UnsafeParameterDecoratorsEnabled>,
 }
 
 /// Indicates the type of runtime or transformation used for interpreting JSX.
@@ -96,27 +99,22 @@ impl FromStr for JsxRuntime {
     }
 }
 
+pub type JsLinterEnabled = Bool<true>;
+
 /// Linter options specific to the JavaScript linter
-#[derive(Clone, Debug, Deserialize, Eq, Partial, PartialEq, Serialize)]
-#[partial(derive(Bpaf, Clone, Deserializable, Eq, Merge, PartialEq))]
-#[partial(cfg_attr(feature = "schema", derive(schemars::JsonSchema)))]
-#[partial(serde(rename_all = "camelCase", default, deny_unknown_fields))]
-pub struct JavascriptLinter {
+#[derive(
+    Bpaf, Clone, Debug, Default, Deserializable, Deserialize, Eq, Merge, PartialEq, Serialize,
+)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase", default, deny_unknown_fields)]
+pub struct JsLinterConfiguration {
     /// Control the linter for JavaScript (and its super languages) files.
-    #[partial(bpaf(long("javascript-linter-enabled"), argument("true|false"), optional))]
-    pub enabled: bool,
+    #[bpaf(long("javascript-linter-enabled"), argument("true|false"))]
+    pub enabled: Option<JsLinterEnabled>,
 }
 
-impl Default for JavascriptLinter {
-    fn default() -> Self {
-        Self { enabled: true }
-    }
-}
-
-impl PartialJavascriptLinter {
-    pub fn get_linter_configuration(&self) -> JavascriptLinter {
-        JavascriptLinter {
-            enabled: self.enabled.unwrap_or_default(),
-        }
+impl JsLinterConfiguration {
+    pub fn enabled_resolved(&self) -> bool {
+        self.enabled.unwrap_or_default().into()
     }
 }

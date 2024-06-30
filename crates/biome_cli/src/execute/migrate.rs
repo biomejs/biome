@@ -2,7 +2,7 @@ use crate::commands::MigrateSubCommand;
 use crate::diagnostics::MigrationDiagnostic;
 use crate::execute::diagnostics::{ContentDiffAdvice, MigrateDiffDiagnostic};
 use crate::{CliDiagnostic, CliSession};
-use biome_configuration::PartialConfiguration;
+use biome_configuration::Configuration;
 use biome_console::{markup, ConsoleExt};
 use biome_deserialize::json::deserialize_from_json_ast;
 use biome_deserialize::Merge;
@@ -10,7 +10,7 @@ use biome_diagnostics::Diagnostic;
 use biome_diagnostics::{category, PrintDiagnostic};
 use biome_formatter::ParseFormatNumberError;
 use biome_fs::{BiomePath, ConfigName, FileSystemExt, OpenOptions};
-use biome_json_parser::{parse_json_with_cache, JsonParserOptions};
+use biome_json_parser::{parse_json_with_cache, JsonParseOptions};
 use biome_json_syntax::{JsonFileSource, JsonRoot};
 use biome_migrate::{migrate_configuration, ControlFlow};
 use biome_rowan::{AstNode, NodeCache};
@@ -74,7 +74,7 @@ pub(crate) fn run(migrate_payload: MigratePayload) -> Result<(), CliDiagnostic> 
     let parsed = parse_json_with_cache(
         &biome_config_content,
         &mut cache,
-        JsonParserOptions::default(),
+        JsonParseOptions::default(),
     );
 
     match sub_command {
@@ -84,8 +84,7 @@ pub(crate) fn run(migrate_payload: MigratePayload) -> Result<(), CliDiagnostic> 
                 data: prettier_config,
             } = prettier::read_config_file(fs, console)?;
             let biome_config =
-                deserialize_from_json_ast::<PartialConfiguration>(&parsed.tree(), "")
-                    .into_deserialized();
+                deserialize_from_json_ast::<Configuration>(&parsed.tree(), "").into_deserialized();
             let Some(mut biome_config) = biome_config else {
                 return Ok(());
             };
@@ -164,8 +163,7 @@ pub(crate) fn run(migrate_payload: MigratePayload) -> Result<(), CliDiagnostic> 
                 data: eslint_config,
             } = eslint::read_eslint_config(fs, console)?;
             let biome_config =
-                deserialize_from_json_ast::<PartialConfiguration>(&parsed.tree(), "")
-                    .into_deserialized();
+                deserialize_from_json_ast::<Configuration>(&parsed.tree(), "").into_deserialized();
             let Some(mut biome_config) = biome_config else {
                 return Ok(());
             };

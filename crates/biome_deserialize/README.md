@@ -50,13 +50,13 @@ In the following example, we deserialize a boolean, an array of integers, and an
 ```rust
 use biome_deserialize::json::deserialize_from_json_str;
 use biome_deserialize::Deserialized;
-use biome_json_parser::JsonParserOptions;
+use biome_json_parser::JsonParseOptions;
 
 let json = "false";
 let Deserialized {
     deserialized,
     diagnostics,
-} = deserialize_from_json_str::<bool>(&source, JsonParserOptions::default());
+} = deserialize_from_json_str::<bool>(&source, JsonParseOptions::default());
 assert_eq!(deserialized, Some(false));
 assert!(diagnostics.is_empty());
 
@@ -64,7 +64,7 @@ let json = "[0, 1]";
 let Deserialized {
     deserialized,
     diagnostics,
-} = deserialize_from_json_str::<Vec<u8>>(&source, JsonParserOptions::default());
+} = deserialize_from_json_str::<Vec<u8>>(&source, JsonParseOptions::default());
 assert_eq!(deserialized, Some(vec![0, 1]));
 assert!(diagnostics.is_empty());
 
@@ -73,7 +73,7 @@ let json = r#"{ "a": 0, "b": 1 }"#;
 let Deserialized {
     deserialized,
     diagnostics,
-} = deserialize_from_json_str::<HashMap<String, u8>>(&source, JsonParserOptions::default());
+} = deserialize_from_json_str::<HashMap<String, u8>>(&source, JsonParseOptions::default());
 assert_eq!(deserialized, Some(HashMap::from([("a".to_string(), 0), ("b".to_string(), 1)])));
 assert!(diagnostics.is_empty());
 ```
@@ -206,13 +206,13 @@ impl Deserializable for Day {
 
 use biome_deserialize::json::deserialize_from_json_str;
 use biome_deserialize::Deserialized;
-use biome_json_parser::JsonParserOptions;
+use biome_json_parser::JsonParseOptions;
 
 let json = "42";
 let Deserialized {
     deserialized,
     diagnostics,
-} = deserialize_from_json_str::<Day>(&source, JsonParserOptions::default());
+} = deserialize_from_json_str::<Day>(&source, JsonParseOptions::default());
 assert_eq!(deserialized, Some(Day(42)));
 assert!(diagnostics.is_empty());
 
@@ -220,7 +220,7 @@ let json = "999";
 let Deserialized {
     deserialized,
     diagnostics,
-} = deserialize_from_json_str::<Day>(&source, JsonParserOptions::default());
+} = deserialize_from_json_str::<Day>(&source, JsonParseOptions::default());
 assert_eq!(deserialized, None);
 assert_eq!(diagnostics..len(), 1);
 ```
@@ -260,15 +260,15 @@ impl Deserializable for Union {
 }
 
 use biome_deserialize::json::deserialize_from_json_str;
-use biome_json_parser::JsonParserOptions;
+use biome_json_parser::JsonParseOptions;
 
 let source = r#" "string" "#;
-let deserialized = deserialize_from_json_str::<Union>(&source, JsonParserOptions::default());
+let deserialized = deserialize_from_json_str::<Union>(&source, JsonParseOptions::default());
 assert!(!deserialized.has_errors());
 assert_eq!(deserialized.into_deserialized(), Some(Union::Str("string".to_string())));
 
 let source = "true";
-let deserialized = deserialize_from_json_str::<Union>(&source, JsonParserOptions::default());
+let deserialized = deserialize_from_json_str::<Union>(&source, JsonParseOptions::default());
 assert!(!deserialized.has_errors());
 assert_eq!(deserialized.into_deserialized(), Some(Union::Bool(true)));
 ```
@@ -374,13 +374,13 @@ impl Deserializable for Variant {
 
 use biome_deserialize::json::deserialize_from_json_str;
 use biome_deserialize::Deserialized;
-use biome_json_parser::JsonParserOptions;
+use biome_json_parser::JsonParseOptions;
 
 let json = "\"A\"";
 let Deserialized {
     deserialized,
     diagnostics,
-} = deserialize_from_json_str::<Day>(&source, JsonParserOptions::default());
+} = deserialize_from_json_str::<Day>(&source, JsonParseOptions::default());
 assert_eq!(deserialized, Some(Variant::A));
 assert!(diagnostics.is_empty());
 ```
@@ -519,10 +519,10 @@ impl DeserializationVisitor for PersonVisitor {
 }
 
 use biome_deserialize::json::deserialize_from_json_str;
-use biome_json_parser::JsonParserOptions;
+use biome_json_parser::JsonParseOptions;
 
 let source = r#"{ "name": "Isaac Asimov" }"#;
-let deserialized = deserialize_from_json_str::<Person>(&source, JsonParserOptions::default());
+let deserialized = deserialize_from_json_str::<Person>(&source, JsonParseOptions::default());
 assert!(!deserialized.has_errors());
 assert_eq!(deserialized.into_deserialized(), Some(Person { name: "Isaac Asimov".to_string() }));
 ```

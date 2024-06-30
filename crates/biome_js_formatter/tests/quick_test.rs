@@ -2,7 +2,7 @@ use biome_formatter::{AttributePosition, IndentStyle, LineWidth, QuoteStyle};
 use biome_formatter_test::check_reformat::CheckReformat;
 use biome_js_formatter::context::{ArrowParentheses, JsFormatOptions, Semicolons};
 use biome_js_formatter::{format_node, JsFormatLanguage};
-use biome_js_parser::{parse, JsParserOptions};
+use biome_js_parser::{parse, JsParseOptions};
 use biome_js_syntax::JsFileSource;
 
 mod language {
@@ -29,7 +29,7 @@ function outerFunctionToForceIndent() {
     let tree = parse(
         src,
         source_type,
-        JsParserOptions::default().with_parse_class_parameter_decorators(),
+        JsParseOptions::default().with_parse_class_parameter_decorators(),
     );
     let options = JsFormatOptions::new(source_type)
         .with_indent_style(IndentStyle::Space)

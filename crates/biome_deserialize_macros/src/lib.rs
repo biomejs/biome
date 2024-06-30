@@ -437,8 +437,8 @@ pub fn derive_mergeable(input: TokenStream) -> TokenStream {
 /// using the `#[partial(type)]`.
 ///
 /// In the example above, where `CssConfiguration` has a field of type
-/// `CssParser`, this will make sure the `PartialCssConfiguration` uses
-/// `PartialCssParser` instead.
+/// `CssParser`, this will make sure the `CssConfiguration` uses
+/// `CssParserConfiguration` instead.
 ///
 /// If you need to use a fully custom in the partial struct instead, you can do
 /// so using `#[partial(type = "MyPartialType")]`.

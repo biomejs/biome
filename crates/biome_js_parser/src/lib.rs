@@ -132,7 +132,7 @@ use crate::prelude::*;
 pub(crate) use crate::ParsedSyntax::{Absent, Present};
 pub use crate::{
     lexer::{JsLexContext, JsReLexContext},
-    options::JsParserOptions,
+    options::JsParseOptions,
     parse::*,
 };
 use biome_js_factory::JsSyntaxFactory;

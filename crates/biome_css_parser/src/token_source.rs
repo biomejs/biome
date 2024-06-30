@@ -1,5 +1,5 @@
 use crate::lexer::{CssLexContext, CssLexer, CssReLexContext};
-use crate::CssParserOptions;
+use crate::CssParseOptions;
 use biome_css_syntax::CssSyntaxKind::EOF;
 use biome_css_syntax::{CssSyntaxKind, TextRange};
 use biome_parser::diagnostic::ParseDiagnostic;
@@ -28,7 +28,7 @@ impl<'src> CssTokenSource<'src> {
     }
 
     /// Creates a new token source for the given string
-    pub fn from_str(source: &'src str, options: CssParserOptions) -> Self {
+    pub fn from_str(source: &'src str, options: CssParseOptions) -> Self {
         let lexer = CssLexer::from_str(source).with_options(options);
 
         let buffered = BufferedLexer::new(lexer);

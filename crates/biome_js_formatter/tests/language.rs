@@ -2,7 +2,7 @@ use biome_formatter_test::TestFormatLanguage;
 use biome_fs::BiomePath;
 use biome_js_formatter::context::JsFormatContext;
 use biome_js_formatter::JsFormatLanguage;
-use biome_js_parser::{parse, JsParserOptions};
+use biome_js_parser::{parse, JsParseOptions};
 use biome_js_syntax::{JsFileSource, JsLanguage};
 use biome_parser::AnyParse;
 use biome_service::{
@@ -26,7 +26,7 @@ impl TestFormatLanguage for JsTestFormatLanguage {
     type FormatLanguage = JsFormatLanguage;
 
     fn parse(&self, text: &str) -> AnyParse {
-        let options = JsParserOptions::default().with_parse_class_parameter_decorators();
+        let options = JsParseOptions::default().with_parse_class_parameter_decorators();
 
         parse(text, self.source_type, options).into()
     }

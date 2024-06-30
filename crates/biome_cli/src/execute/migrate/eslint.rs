@@ -3,7 +3,7 @@ use biome_deserialize::json::deserialize_from_json_str;
 use biome_deserialize::Merge;
 use biome_diagnostics::{DiagnosticExt, PrintDiagnostic};
 use biome_fs::{FileSystem, OpenOptions};
-use biome_json_parser::JsonParserOptions;
+use biome_json_parser::JsonParseOptions;
 use biome_service::DynRef;
 use std::borrow::Cow;
 use std::path::{Path, PathBuf};
@@ -122,7 +122,7 @@ fn load_flat_config_data(
     let node::Resolution { content, .. } = node::load_config(&path.to_string_lossy())?;
     let (deserialized, diagnostics) = deserialize_from_json_str::<eslint_eslint::FlatConfigData>(
         &content,
-        JsonParserOptions::default(),
+        JsonParseOptions::default(),
         "",
     )
     .consume();
@@ -164,7 +164,7 @@ fn load_legacy_config_data(
                 let (deserialized, diagnostics) =
                     deserialize_from_json_str::<eslint_eslint::EslintPackageJson>(
                         &content,
-                        JsonParserOptions::default()
+                        JsonParseOptions::default()
                             .with_allow_trailing_commas()
                             .with_allow_comments(),
                         "",
@@ -184,7 +184,7 @@ fn load_legacy_config_data(
             } else {
                 deserialize_from_json_str::<eslint_eslint::LegacyConfigData>(
                     &content,
-                    JsonParserOptions::default()
+                    JsonParseOptions::default()
                         .with_allow_trailing_commas()
                         .with_allow_comments(),
                     "",
@@ -196,7 +196,7 @@ fn load_legacy_config_data(
             let node::Resolution { content, .. } = node::load_config(&path.to_string_lossy())?;
             deserialize_from_json_str::<eslint_eslint::LegacyConfigData>(
                 &content,
-                JsonParserOptions::default(),
+                JsonParseOptions::default(),
                 "",
             )
             .consume()
@@ -285,7 +285,7 @@ fn load_eslint_extends_config(
         } = node::load_config(&module_name)?;
         let deserialized = deserialize_from_json_str::<eslint_eslint::PluginExport>(
             &content,
-            JsonParserOptions::default(),
+            JsonParseOptions::default(),
             "",
         )
         .into_deserialized();
@@ -314,7 +314,7 @@ fn load_eslint_extends_config(
         } = node::load_config(&module_name)?;
         let deserialized = deserialize_from_json_str::<eslint_eslint::LegacyConfigData>(
             &content,
-            JsonParserOptions::default(),
+            JsonParseOptions::default(),
             "",
         )
         .into_deserialized();

@@ -6,19 +6,15 @@ use crate::execute::VcsTargeted;
 use crate::{
     execute_mode, setup_cli_subscriber, CliDiagnostic, CliSession, Execution, TraversalMode,
 };
-use biome_configuration::css::PartialCssLinter;
-use biome_configuration::javascript::PartialJavascriptLinter;
-use biome_configuration::json::PartialJsonLinter;
+use biome_configuration::css::CssLinterConfiguration;
+use biome_configuration::graphql::GraphqlLinterConfiguration;
+use biome_configuration::javascript::JsLinterConfiguration;
+use biome_configuration::json::JsonLinterConfiguration;
 use biome_configuration::linter::RuleSelector;
-use biome_configuration::vcs::PartialVcsConfiguration;
-use biome_configuration::{
-    PartialConfiguration, PartialFilesConfiguration, PartialGraphqlLinter,
-    PartialLinterConfiguration,
-};
+use biome_configuration::vcs::VcsConfiguration;
+use biome_configuration::{Configuration, FilesConfiguration, LinterConfiguration};
 use biome_deserialize::Merge;
-use biome_service::configuration::{
-    load_configuration, LoadedConfiguration, PartialConfigurationExt,
-};
+use biome_service::configuration::{load_configuration, ConfigurationExt, LoadedConfiguration};
 use biome_service::workspace::{RegisterProjectFolderParams, UpdateSettingsParams};
 use std::ffi::OsString;
 
@@ -31,9 +27,9 @@ pub(crate) struct LintCommandPayload {
     pub(crate) fix: bool,
     pub(crate) unsafe_: bool,
     pub(crate) cli_options: CliOptions,
-    pub(crate) linter_configuration: Option<PartialLinterConfiguration>,
-    pub(crate) vcs_configuration: Option<PartialVcsConfiguration>,
-    pub(crate) files_configuration: Option<PartialFilesConfiguration>,
+    pub(crate) linter_configuration: Option<LinterConfiguration>,
+    pub(crate) vcs_configuration: Option<VcsConfiguration>,
+    pub(crate) files_configuration: Option<FilesConfiguration>,
     pub(crate) paths: Vec<OsString>,
     pub(crate) only: Vec<RuleSelector>,
     pub(crate) skip: Vec<RuleSelector>,
@@ -41,10 +37,10 @@ pub(crate) struct LintCommandPayload {
     pub(crate) staged: bool,
     pub(crate) changed: bool,
     pub(crate) since: Option<String>,
-    pub(crate) javascript_linter: Option<PartialJavascriptLinter>,
-    pub(crate) json_linter: Option<PartialJsonLinter>,
-    pub(crate) css_linter: Option<PartialCssLinter>,
-    pub(crate) graphql_linter: Option<PartialGraphqlLinter>,
+    pub(crate) javascript_linter: Option<JsLinterConfiguration>,
+    pub(crate) json_linter: Option<JsonLinterConfiguration>,
+    pub(crate) css_linter: Option<CssLinterConfiguration>,
+    pub(crate) graphql_linter: Option<GraphqlLinterConfiguration>,
 }
 
 /// Handler for the "lint" command of the Biome CLI
@@ -98,11 +94,11 @@ pub(crate) fn lint(session: CliSession, payload: LintCommandPayload) -> Result<(
         directory_path: configuration_path,
         ..
     } = loaded_configuration;
-    fs_configuration.merge_with(PartialConfiguration {
+    fs_configuration.merge_with(Configuration {
         linter: if fs_configuration
             .linter
             .as_ref()
-            .is_some_and(PartialLinterConfiguration::is_disabled)
+            .is_some_and(LinterConfiguration::is_disabled)
         {
             None
         } else {

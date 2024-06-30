@@ -331,7 +331,7 @@ mod tests {
 
     use crate::context::JsonFormatOptions;
     use crate::format_node;
-    use biome_json_parser::{parse_json, JsonParserOptions};
+    use biome_json_parser::{parse_json, JsonParseOptions};
 
     #[test]
     fn smoke_test() {
@@ -344,7 +344,7 @@ mod tests {
     "e": false
 }
 "#;
-        let parse = parse_json(src, JsonParserOptions::default());
+        let parse = parse_json(src, JsonParseOptions::default());
         let options = JsonFormatOptions::default();
         let formatted = format_node(options, &parse.syntax()).unwrap();
         assert_eq!(

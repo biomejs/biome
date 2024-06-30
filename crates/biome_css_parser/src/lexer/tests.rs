@@ -3,7 +3,7 @@
 
 use super::{CssLexer, TextSize};
 use crate::lexer::CssLexContext;
-use crate::CssParserOptions;
+use crate::CssParseOptions;
 use biome_css_syntax::CssSyntaxKind::EOF;
 use biome_parser::lexer::Lexer;
 use quickcheck_macros::quickcheck;
@@ -15,7 +15,7 @@ use std::time::Duration;
 // and make sure the tokens yielded are fully lossless and the source can be reconstructed from only the tokens
 macro_rules! assert_lex {
     ($src:expr, $($kind:ident:$len:expr $(,)?)*) => {{
-        let options = CssParserOptions::default().allow_wrong_line_comments().allow_css_modules();
+        let options = CssParseOptions::default().allow_wrong_line_comments().allow_css_modules();
         let mut lexer = CssLexer::from_str($src).with_options(options);
         let mut idx = 0;
         let mut tok_idx = TextSize::default();
@@ -88,11 +88,7 @@ fn losslessness(string: String) -> bool {
     });
     let token_ranges = receiver
         .recv_timeout(Duration::from_secs(2))
-        .unwrap_or_else(|_| {
-            panic!(
-                "Lexer is infinitely recursing with this code: ->{string}<-"
-            )
-        });
+        .unwrap_or_else(|_| panic!("Lexer is infinitely recursing with this code: ->{string}<-"));
 
     let mut new_str = String::with_capacity(string.len());
     let mut idx = TextSize::from(0);

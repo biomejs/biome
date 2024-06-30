@@ -2,7 +2,7 @@ use crate::check_file_encoding;
 use crate::runner::{
     create_bogus_node_in_tree_diagnostic, TestCase, TestCaseFiles, TestRunOutcome, TestSuite,
 };
-use biome_js_parser::JsParserOptions;
+use biome_js_parser::JsParseOptions;
 use biome_js_syntax::{JsFileSource, ModuleKind};
 use biome_rowan::{AstNode, SyntaxKind};
 use regex::Regex;
@@ -211,7 +211,7 @@ fn add_file_if_supported(files: &mut TestCaseFiles, name: String, content: Strin
             name,
             content,
             source_type,
-            JsParserOptions::default().with_parse_class_parameter_decorators(),
+            JsParseOptions::default().with_parse_class_parameter_decorators(),
         )
     }
 }

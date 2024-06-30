@@ -1,7 +1,7 @@
 use crate::runner::{
     create_bogus_node_in_tree_diagnostic, TestCase, TestCaseFiles, TestRunOutcome, TestSuite,
 };
-use biome_js_parser::{parse, JsParserOptions};
+use biome_js_parser::{parse, JsParseOptions};
 use biome_js_syntax::JsFileSource;
 use biome_rowan::syntax::SyntaxKind;
 use biome_rowan::AstNode;
@@ -99,7 +99,7 @@ impl Test262TestCase {
             .filter(|neg| neg.phase == Phase::Parse)
             .is_some();
 
-        let options = JsParserOptions::default().with_parse_class_parameter_decorators();
+        let options = JsParseOptions::default().with_parse_class_parameter_decorators();
         let files = TestCaseFiles::single(
             self.name.clone(),
             self.code.clone(),

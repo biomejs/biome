@@ -200,10 +200,10 @@ impl Display for RageConfiguration<'_, '_> {
 
                     markup! (
                         {KeyValuePair("Status", status)}
-                        {KeyValuePair("Formatter disabled", markup!({DebugDisplay(configuration.is_formatter_disabled())}))}
-                        {KeyValuePair("Linter disabled", markup!({DebugDisplay(configuration.is_linter_disabled())}))}
-                        {KeyValuePair("Organize imports disabled", markup!({DebugDisplay(configuration.is_organize_imports_disabled())}))}
-                        {KeyValuePair("VCS disabled", markup!({DebugDisplay(configuration.is_vcs_disabled())}))}
+                        {KeyValuePair("Formatter disabled", markup!({DebugDisplay(!configuration.is_formatter_enabled())}))}
+                        {KeyValuePair("Linter disabled", markup!({DebugDisplay(!configuration.is_linter_enabled())}))}
+                        {KeyValuePair("Organize imports disabled", markup!({DebugDisplay(!configuration.is_organize_imports_enabled())}))}
+                        {KeyValuePair("VCS disabled", markup!({DebugDisplay(!configuration.is_vcs_enabled())}))}
                     ).fmt(fmt)?;
 
                     // Print formatter configuration if --formatter option is true
@@ -211,35 +211,41 @@ impl Display for RageConfiguration<'_, '_> {
                         let formatter_configuration = configuration.get_formatter_configuration();
                         markup! (
                             {Section("Formatter")}
-                            {KeyValuePair("Format with errors", markup!({DebugDisplay(configuration.get_formatter_configuration().format_with_errors)}))}
-                            {KeyValuePair("Indent style", markup!({DebugDisplay(formatter_configuration.indent_style)}))}
-                            {KeyValuePair("Indent width", markup!({DebugDisplay(formatter_configuration.indent_width)}))}
-                            {KeyValuePair("Line ending", markup!({DebugDisplay(formatter_configuration.line_ending)}))}
-                            {KeyValuePair("Line width", markup!({DebugDisplay(formatter_configuration.line_width.value())}))}
-                            {KeyValuePair("Attribute position", markup!({DebugDisplay(formatter_configuration.attribute_position)}))}
-                            {KeyValuePair("Bracket spacing", markup!({DebugDisplay(formatter_configuration.bracket_spacing)}))}
-                            {KeyValuePair("Ignore", markup!({DebugDisplay(formatter_configuration.ignore.iter().collect::<Vec<_>>())}))}
-                            {KeyValuePair("Include", markup!({DebugDisplay(formatter_configuration.include.iter().collect::<Vec<_>>())}))}
+                            // Should display resolved values
+                            {KeyValuePair("Format with errors", markup!({DebugDisplay(formatter_configuration.format_with_errors_resolved())}))}
+                            {KeyValuePair("Indent style", markup!({DebugDisplay(formatter_configuration.indent_style_resolved())}))}
+                            {KeyValuePair("Indent width", markup!({DebugDisplay(formatter_configuration.indent_width_resolved())}))}
+                            {KeyValuePair("Line ending", markup!({DebugDisplay(formatter_configuration.line_ending_resolved())}))}
+                            {KeyValuePair("Line width", markup!({DebugDisplay(formatter_configuration.line_width_resolved())}))}
+                            {KeyValuePair("Attribute position", markup!({DebugDisplay(formatter_configuration.attribute_position_resolved())}))}
+                            {KeyValuePair("Bracket spacing", markup!({DebugDisplay(formatter_configuration.bracket_spacing_resolved())}))}
+                            {KeyValuePair("Ignore", markup!({DebugDisplay(formatter_configuration.ignore_resolved().iter().collect::<Vec<_>>())}))}
+                            {KeyValuePair("Include", markup!({DebugDisplay(formatter_configuration.include_resolved().iter().collect::<Vec<_>>())}))}
                         ).fmt(fmt)?;
 
                         let javascript_formatter_configuration =
                             configuration.get_javascript_formatter_configuration();
                         markup! (
                             {Section("JavaScript Formatter")}
-                            {KeyValuePair("Enabled", markup!({DebugDisplay(javascript_formatter_configuration.enabled)}))}
-                            {KeyValuePair("JSX quote style", markup!({DebugDisplay(javascript_formatter_configuration.jsx_quote_style)}))}
-                            {KeyValuePair("Quote properties", markup!({DebugDisplay(javascript_formatter_configuration.quote_properties)}))}
-                            {KeyValuePair("Trailing commas", markup!({DebugDisplay(javascript_formatter_configuration.trailing_commas)}))}
-                            {KeyValuePair("Semicolons", markup!({DebugDisplay(javascript_formatter_configuration.semicolons)}))}
-                            {KeyValuePair("Arrow parentheses", markup!({DebugDisplay(javascript_formatter_configuration.arrow_parentheses)}))}
-                            {KeyValuePair("Bracket spacing", markup!({DebugDisplayOption(javascript_formatter_configuration.bracket_spacing)}))}
-                            {KeyValuePair("Bracket same line", markup!({DebugDisplay(javascript_formatter_configuration.bracket_same_line)}))}
-                            {KeyValuePair("Quote style", markup!({DebugDisplay(javascript_formatter_configuration.quote_style)}))}
+                            // Enabled
+                            {KeyValuePair("Enabled", markup!({DebugDisplay(javascript_formatter_configuration.enabled_resolved())}))}
+                            // These options will fallback to their language agnostic counterparts when they're `None`,
+                            // So we should use `DebugDisplayOption` to indicate whether values are unset
+                            // instead of resolving them to a concrete value
                             {KeyValuePair("Indent style", markup!({DebugDisplayOption(javascript_formatter_configuration.indent_style)}))}
                             {KeyValuePair("Indent width", markup!({DebugDisplayOption(javascript_formatter_configuration.indent_width)}))}
                             {KeyValuePair("Line ending", markup!({DebugDisplayOption(javascript_formatter_configuration.line_ending)}))}
-                            {KeyValuePair("Line width", markup!({DebugDisplayOption(javascript_formatter_configuration.line_width.map(|lw| lw.value()))}))}
+                            {KeyValuePair("Line width", markup!({DebugDisplayOption(javascript_formatter_configuration.line_width)}))}
                             {KeyValuePair("Attribute position", markup!({DebugDisplayOption(javascript_formatter_configuration.attribute_position)}))}
+                            {KeyValuePair("Bracket spacing", markup!({DebugDisplayOption(javascript_formatter_configuration.bracket_spacing)}))}
+                            // Should use `DebugDisplay` to display resolved values
+                            {KeyValuePair("JSX quote style", markup!({DebugDisplay(javascript_formatter_configuration.jsx_quote_style_resolved())}))}
+                            {KeyValuePair("Quote properties", markup!({DebugDisplay(javascript_formatter_configuration.quote_properties_resolved())}))}
+                            {KeyValuePair("Trailing commas", markup!({DebugDisplay(javascript_formatter_configuration.trailing_commas_resolved())}))}
+                            {KeyValuePair("Semicolons", markup!({DebugDisplay(javascript_formatter_configuration.semicolons_resolved())}))}
+                            {KeyValuePair("Arrow parentheses", markup!({DebugDisplay(javascript_formatter_configuration.arrow_parentheses_resolved())}))}
+                            {KeyValuePair("Bracket same line", markup!({DebugDisplay(javascript_formatter_configuration.bracket_same_line_resolved())}))}
+                            {KeyValuePair("Quote style", markup!({DebugDisplay(javascript_formatter_configuration.quote_style_resolved())}))}
                         )
                         .fmt(fmt)?;
 
@@ -247,37 +253,52 @@ impl Display for RageConfiguration<'_, '_> {
                             configuration.get_json_formatter_configuration();
                         markup! (
                             {Section("JSON Formatter")}
-                            {KeyValuePair("Enabled", markup!({DebugDisplay(json_formatter_configuration.enabled)}))}
+                            // Enabled
+                            {KeyValuePair("Enabled", markup!({DebugDisplay(json_formatter_configuration.enabled_resolved())}))}
+                            // These options will fallback to their language agnostic counterparts when they're `None`,
+                            // So we should use `DebugDisplayOption` to indicate whether values are unset
+                            // instead of resolving them to a concrete value
                             {KeyValuePair("Indent style", markup!({DebugDisplayOption(json_formatter_configuration.indent_style)}))}
                             {KeyValuePair("Indent width", markup!({DebugDisplayOption(json_formatter_configuration.indent_width)}))}
                             {KeyValuePair("Line ending", markup!({DebugDisplayOption(json_formatter_configuration.line_ending)}))}
-                            {KeyValuePair("Line width", markup!({DebugDisplayOption(json_formatter_configuration.line_width.map(|lw| lw.value()))}))}
-                            {KeyValuePair("Trailing Commas", markup!({DebugDisplayOption(json_formatter_configuration.trailing_commas)}))}
+                            {KeyValuePair("Line width", markup!({DebugDisplayOption(json_formatter_configuration.line_width)}))}
+                            // Should use `DebugDisplay` to display resolved values
+                            {KeyValuePair("Trailing Commas", markup!({DebugDisplay(json_formatter_configuration.trailing_commas_resolved())}))}
                         ).fmt(fmt)?;
 
                         let css_formatter_configuration =
                             configuration.get_css_formatter_configuration();
                         markup! (
                             {Section("CSS Formatter")}
-                            {KeyValuePair("Enabled", markup!({DebugDisplay(css_formatter_configuration.enabled)}))}
+                            // Enabled
+                            {KeyValuePair("Enabled", markup!({DebugDisplay(css_formatter_configuration.enabled_resolved())}))}
+                            // These options will fallback to their language agnostic counterparts when they're `None`,
+                            // So we should use `DebugDisplayOption` to indicate whether values are unset
+                            // instead of resolving them to a concrete value
                             {KeyValuePair("Indent style", markup!({DebugDisplayOption(css_formatter_configuration.indent_style)}))}
                             {KeyValuePair("Indent width", markup!({DebugDisplayOption(css_formatter_configuration.indent_width)}))}
                             {KeyValuePair("Line ending", markup!({DebugDisplayOption(css_formatter_configuration.line_ending)}))}
                             {KeyValuePair("Line width", markup!({DebugDisplayOption(css_formatter_configuration.line_width)}))}
-                            {KeyValuePair("Quote style", markup!({DebugDisplay(css_formatter_configuration.quote_style)}))}
+                            // Should use `DebugDisplay` to display resolved values
+                            {KeyValuePair("Quote style", markup!({DebugDisplay(css_formatter_configuration.quote_style_resolved())}))}
                         ).fmt(fmt)?;
 
                         let graphql_formatter_configuration =
                             configuration.get_graphql_formatter_configuration();
                         markup! (
                             {Section("GraphQL Formatter")}
-                            {KeyValuePair("Enabled", markup!({DebugDisplayOption(graphql_formatter_configuration.enabled)}))}
+                            // Enabled
+                            {KeyValuePair("Enabled", markup!({DebugDisplay(graphql_formatter_configuration.enabled_resolved())}))}
+                            // These options will fallback to their language agnostic counterparts when they're `None`,
+                            // So we should use `DebugDisplayOption` to indicate whether values are unset
+                            // instead of resolving them to a concrete value
                             {KeyValuePair("Indent style", markup!({DebugDisplayOption(graphql_formatter_configuration.indent_style)}))}
                             {KeyValuePair("Indent width", markup!({DebugDisplayOption(graphql_formatter_configuration.indent_width)}))}
                             {KeyValuePair("Line ending", markup!({DebugDisplayOption(graphql_formatter_configuration.line_ending)}))}
                             {KeyValuePair("Line width", markup!({DebugDisplayOption(graphql_formatter_configuration.line_width)}))}
                             {KeyValuePair("Bracket spacing", markup!({DebugDisplayOption(graphql_formatter_configuration.bracket_spacing)}))}
-                            {KeyValuePair("Quote style", markup!({DebugDisplayOption(graphql_formatter_configuration.quote_style)}))}
+                            // Should use `DebugDisplay` to display resolved values
+                            {KeyValuePair("Quote style", markup!({DebugDisplay(graphql_formatter_configuration.quote_style_resolved())}))}
                         ).fmt(fmt)?;
                     }
 
@@ -291,10 +312,10 @@ impl Display for RageConfiguration<'_, '_> {
                         let graphq_linter = configuration.get_graphql_linter_configuration();
                         markup! (
                             {Section("Linter")}
-                            {KeyValuePair("JavaScript enabled", markup!({DebugDisplay(javascript_linter.enabled)}))}
-                            {KeyValuePair("JSON enabled", markup!({DebugDisplay(json_linter.enabled)}))}
-                            {KeyValuePair("CSS enabled", markup!({DebugDisplay(css_linter.enabled)}))}
-                            {KeyValuePair("GraphQL enabled", markup!({DebugDisplayOption(graphq_linter.enabled)}))}
+                            {KeyValuePair("JavaScript enabled", markup!({DebugDisplay(javascript_linter.enabled_resolved())}))}
+                            {KeyValuePair("JSON enabled", markup!({DebugDisplay(json_linter.enabled_resolved())}))}
+                            {KeyValuePair("CSS enabled", markup!({DebugDisplay(css_linter.enabled_resolved())}))}
+                            {KeyValuePair("GraphQL enabled", markup!({DebugDisplay(graphq_linter.enabled_resolved())}))}
                             {KeyValuePair("Recommended", markup!({DebugDisplay(linter_configuration.recommended.unwrap_or_default())}))}
                             {KeyValuePair("All", markup!({DebugDisplay(linter_configuration.all.unwrap_or_default())}))}
                             {RageConfigurationLintRules("Enabled rules",linter_configuration)}

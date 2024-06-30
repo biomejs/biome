@@ -131,7 +131,7 @@ mod test {
     use biome_console::{markup, Markup};
     use biome_diagnostics::termcolor::NoColor;
     use biome_diagnostics::{DiagnosticExt, PrintDiagnostic, Severity};
-    use biome_json_parser::{parse_json, JsonParserOptions};
+    use biome_json_parser::{parse_json, JsonParseOptions};
     use std::path::Path;
 
     fn markup_to_string(markup: Markup) -> String {
@@ -168,7 +168,7 @@ mod test {
 }
 "#;
 
-        let parsed = parse_json(source, JsonParserOptions::default());
+        let parsed = parse_json(source, JsonParseOptions::default());
 
         migrate_configuration(
             &parsed.tree(),

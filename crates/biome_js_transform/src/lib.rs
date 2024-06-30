@@ -121,7 +121,7 @@ pub(crate) type JsBatchMutation = BatchMutation<JsLanguage>;
 #[cfg(test)]
 mod tests {
     use biome_analyze::{AnalyzerOptions, Never, RuleCategoriesBuilder, RuleFilter};
-    use biome_js_parser::{parse, JsParserOptions};
+    use biome_js_parser::{parse, JsParseOptions};
     use biome_js_syntax::JsFileSource;
     use std::slice;
 
@@ -132,7 +132,7 @@ mod tests {
     fn quick_test() {
         const SOURCE: &str = r#"enum Foo { Lorem, Ipsum }"#;
 
-        let parsed = parse(SOURCE, JsFileSource::tsx(), JsParserOptions::default());
+        let parsed = parse(SOURCE, JsFileSource::tsx(), JsParseOptions::default());
 
         let options = AnalyzerOptions::default();
         let rule_filter = RuleFilter::Rule("transformations", "transformEnum");

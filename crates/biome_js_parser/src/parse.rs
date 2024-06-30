@@ -45,7 +45,7 @@ impl<T> Parse<T> {
     /// The syntax node represented by this Parse result
     ///
     /// ```
-    /// use biome_js_parser::{JsParserOptions, parse_script};
+    /// use biome_js_parser::{JsParseOptions, parse_script};
     /// use biome_js_syntax::{JsIfStatement, JsSyntaxKind};
     /// use biome_rowan::{AstNode, AstNodeList};
     ///
@@ -55,7 +55,7 @@ impl<T> Parse<T> {
     ///         /* something */
     ///     }
     /// ",
-    ///  JsParserOptions::default()
+    ///  JsParseOptions::default()
     /// );
     ///
     /// // The first stmt in the root syntax node (Script) is the if statement.
@@ -128,7 +128,7 @@ impl<T> From<Parse<T>> for AnyParse {
 fn parse_common(
     text: &str,
     source_type: JsFileSource,
-    options: JsParserOptions,
+    options: JsParseOptions,
 ) -> (Vec<Event<JsSyntaxKind>>, Vec<ParseDiagnostic>, Vec<Trivia>) {
     let mut parser = JsParser::new(text, source_type, options);
     syntax::program::parse(&mut parser);
@@ -142,11 +142,11 @@ fn parse_common(
 /// Or turned into a typed [`JsScript`](JsScript) with [`tree`](Parse::tree).
 ///
 /// ```
-/// use biome_js_parser::{JsParserOptions, parse_script};
+/// use biome_js_parser::{JsParseOptions, parse_script};
 /// use biome_js_syntax::{JsSyntaxToken, JsFileSource, JsSyntaxList, JsComputedMemberExpression};
 /// use biome_rowan::{AstNode, Direction};
 ///
-/// let parse = parse_script("foo.bar[2]", JsParserOptions::default());
+/// let parse = parse_script("foo.bar[2]", JsParseOptions::default());
 /// // Parse returns a JS Root which contains two lists, the directives and the statements, let's get the statements
 /// let stmt = parse.syntax().children().nth(1).unwrap();
 /// // The untyped syntax node of `foo.bar[2]`, the root node is `Script`.
@@ -169,7 +169,7 @@ fn parse_common(
 ///
 /// assert_eq!(&tokens, &vec!["foo", ".", "bar", "[", "2", "]"]);
 /// ```
-pub fn parse_script(text: &str, options: JsParserOptions) -> Parse<JsScript> {
+pub fn parse_script(text: &str, options: JsParseOptions) -> Parse<JsScript> {
     parse(
         text,
         JsFileSource::js_module().with_module_kind(ModuleKind::Script),
@@ -185,14 +185,14 @@ pub fn parse_script(text: &str, options: JsParserOptions) -> Parse<JsScript> {
 ///
 /// Check the diagnostics emitted by the code
 /// ```
-/// use biome_js_parser::{JsParserOptions, parse_module};
+/// use biome_js_parser::{JsParseOptions, parse_module};
 /// let source = r#"
 /// import { someModule } from "./someModule.js";
 ///
 /// someModule();
 /// "#;
 ///
-/// let parse = parse_module(source, JsParserOptions::default());
+/// let parse = parse_module(source, JsParseOptions::default());
 ///
 /// // Retrieve the diagnostics emitted
 /// assert_eq!(parse.diagnostics().len(), 0);
@@ -200,7 +200,7 @@ pub fn parse_script(text: &str, options: JsParserOptions) -> Parse<JsScript> {
 ///
 /// Retrieve the emitted AST and check its kind:
 /// ```
-/// use biome_js_parser::{JsParserOptions, parse_module};
+/// use biome_js_parser::{JsParseOptions, parse_module};
 /// use biome_js_syntax::JsSyntaxKind;
 /// use biome_rowan::AstNode;
 /// let source = r#"
@@ -208,14 +208,14 @@ pub fn parse_script(text: &str, options: JsParserOptions) -> Parse<JsScript> {
 ///
 /// someModule();
 /// "#;
-/// let parse = parse_module(source, JsParserOptions::default());
+/// let parse = parse_module(source, JsParseOptions::default());
 ///
 /// let tree = parse.tree();
 ///
 /// assert_eq!(tree.syntax().kind(), JsSyntaxKind::JS_MODULE);
 /// ```
 ///
-pub fn parse_module(text: &str, options: JsParserOptions) -> Parse<JsModule> {
+pub fn parse_module(text: &str, options: JsParseOptions) -> Parse<JsModule> {
     parse(text, JsFileSource::js_module(), options)
         .cast::<JsModule>()
         .unwrap()
@@ -226,25 +226,25 @@ pub fn parse_module(text: &str, options: JsParserOptions) -> Parse<JsModule> {
 /// ### Examples
 ///
 /// ```
-/// use biome_js_parser::{JsParserOptions, parse};
+/// use biome_js_parser::{JsParseOptions, parse};
 /// use biome_js_syntax::{LanguageVariant, LanguageVersion, ModuleKind, JsFileSource};
 /// // parse source text as TypeScript
 /// let mut module = JsFileSource::ts();
-/// let mut parsed = parse("type F = {}", module, JsParserOptions::default());
+/// let mut parsed = parse("type F = {}", module, JsParseOptions::default());
 /// assert_eq!(parsed.diagnostics().len(), 0);
 /// // parse source text as JSX
 /// module = JsFileSource::jsx();
-/// parsed = parse("<Component></Component>", module, JsParserOptions::default());
+/// parsed = parse("<Component></Component>", module, JsParseOptions::default());
 /// assert_eq!(parsed.diagnostics().len(), 0);
 /// // parse source text with granular control
 /// module = JsFileSource::default()
 ///   .with_version(LanguageVersion::ESNext)
 ///   .with_module_kind(ModuleKind::Module)
 ///   .with_variant(LanguageVariant::Jsx);
-/// parsed = parse("foo[bar]", module, JsParserOptions::default());
+/// parsed = parse("foo[bar]", module, JsParseOptions::default());
 /// assert_eq!(parsed.diagnostics().len(), 0);
 /// ```
-pub fn parse(text: &str, source_type: JsFileSource, options: JsParserOptions) -> Parse<AnyJsRoot> {
+pub fn parse(text: &str, source_type: JsFileSource, options: JsParseOptions) -> Parse<AnyJsRoot> {
     let mut cache = NodeCache::default();
     parse_js_with_cache(text, source_type, options, &mut cache)
 }
@@ -254,7 +254,7 @@ pub fn parse(text: &str, source_type: JsFileSource, options: JsParserOptions) ->
 /// ### Examples
 ///
 /// ```
-/// use biome_js_parser::{JsParserOptions, parse_js_with_cache};
+/// use biome_js_parser::{JsParseOptions, parse_js_with_cache};
 /// use biome_js_syntax::JsFileSource;
 /// use biome_rowan::NodeCache;
 ///
@@ -262,17 +262,17 @@ pub fn parse(text: &str, source_type: JsFileSource, options: JsParserOptions) ->
 /// let mut cache = NodeCache::default();
 /// let mut source = "function f() { return 2 }";
 ///
-/// let parsed = parse_js_with_cache(source, source_type, JsParserOptions::default(), &mut cache);
+/// let parsed = parse_js_with_cache(source, source_type, JsParseOptions::default(), &mut cache);
 /// assert_eq!(parsed.diagnostics().len(), 0);
 ///
 /// source = "function bar() { return 3 }";
-/// let parsed  = parse_js_with_cache(source, source_type, JsParserOptions::default(), &mut cache);
+/// let parsed  = parse_js_with_cache(source, source_type, JsParseOptions::default(), &mut cache);
 /// assert_eq!(parsed.diagnostics().len(), 0);
 /// ```
 pub fn parse_js_with_cache(
     text: &str,
     source_type: JsFileSource,
-    options: JsParserOptions,
+    options: JsParseOptions,
     cache: &mut NodeCache,
 ) -> Parse<AnyJsRoot> {
     tracing::debug_span!("parse").in_scope(move || {

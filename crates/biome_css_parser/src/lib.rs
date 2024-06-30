@@ -8,7 +8,7 @@ use biome_css_syntax::{CssLanguage, CssRoot, CssSyntaxNode};
 pub use biome_parser::prelude::*;
 use biome_parser::{tree_sink::LosslessTreeSink, AnyParse};
 use biome_rowan::{AstNode, NodeCache};
-pub use parser::CssParserOptions;
+pub use parser::CssParseOptions;
 
 mod lexer;
 mod parser;
@@ -20,7 +20,7 @@ mod token_source;
 pub(crate) type CssLosslessTreeSink<'source> =
     LosslessTreeSink<'source, CssLanguage, CssSyntaxFactory>;
 
-pub fn parse_css(source: &str, options: CssParserOptions) -> CssParse {
+pub fn parse_css(source: &str, options: CssParseOptions) -> CssParse {
     let mut cache = NodeCache::default();
     parse_css_with_cache(source, &mut cache, options)
 }
@@ -29,7 +29,7 @@ pub fn parse_css(source: &str, options: CssParserOptions) -> CssParse {
 pub fn parse_css_with_cache(
     source: &str,
     cache: &mut NodeCache,
-    options: CssParserOptions,
+    options: CssParseOptions,
 ) -> CssParse {
     tracing::debug_span!("Parsing phase").in_scope(move || {
         let mut parser = CssParser::new(source, options);
@@ -67,8 +67,8 @@ impl CssParse {
     ///
     /// # fn main() -> Result<(), SyntaxError> {
     /// use biome_css_syntax::CssSyntaxKind;
-    /// use biome_css_parser::CssParserOptions;
-    /// let parse = parse_css(r#""#, CssParserOptions::default());
+    /// use biome_css_parser::CssParseOptions;
+    /// let parse = parse_css(r#""#, CssParseOptions::default());
     ///
     /// let root_value = parse.tree().rules();
     ///
@@ -121,13 +121,13 @@ impl From<CssParse> for AnyParse {
 
 #[cfg(test)]
 mod tests {
-    use crate::{parse_css, CssParserOptions};
+    use crate::{parse_css, CssParseOptions};
 
     #[test]
     fn parser_smoke_test() {
         let src = r#"
 "#;
 
-        let _css = parse_css(src, CssParserOptions::default());
+        let _css = parse_css(src, CssParseOptions::default());
     }
 }
