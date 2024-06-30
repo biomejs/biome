@@ -1341,7 +1341,7 @@ impl<'a> AriaRoles {
                 None
             }
         } else {
-            self.get_implicit_role(element_name, &attributes)
+            self.get_implicit_role(element_name, attributes)
         };
 
         if let Some(role) = role_name {
@@ -1353,7 +1353,7 @@ impl<'a> AriaRoles {
             }
         }
 
-        return false;
+        false
     }
 }
 

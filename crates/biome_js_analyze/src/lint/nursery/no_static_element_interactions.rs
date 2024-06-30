@@ -292,7 +292,7 @@ impl Rule for NoStaticElementInteractions {
         }
 
         if let Some(attributes) = &attributes {
-            if aria_roles.is_not_static_element(&element_name, &attributes) {
+            if aria_roles.is_not_static_element(element_name, attributes) {
                 return None;
             }
 
