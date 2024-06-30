@@ -166,7 +166,7 @@ pub(crate) fn parse_nested_qualified_rule(p: &mut CssParser) -> ParsedSyntax {
 pub(crate) fn speculative_parse_nested_qualified_rule(p: &mut CssParser) -> ParsedSyntax {
     let m = p.start();
 
-    if try_parse(p, |p| {
+    let list = try_parse(p, |p| {
         RelativeSelectorList::new(RELATIVE_SELECTOR_END_SPECULATIVE_PARSING_SET).parse_list(p);
 
         if p.at(T!['{']) {
@@ -177,9 +177,9 @@ pub(crate) fn speculative_parse_nested_qualified_rule(p: &mut CssParser) -> Pars
             // return the error to rewind the parser state
             Err(())
         }
-    })
-    .is_err()
-    {
+    });
+
+    if list.is_err() {
         m.abandon(p);
         return Absent;
     }
