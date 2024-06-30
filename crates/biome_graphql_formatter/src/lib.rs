@@ -4,6 +4,7 @@ mod cst;
 mod generated;
 mod graphql;
 mod prelude;
+mod utils;
 
 use crate::comments::GraphqlCommentStyle;
 pub(crate) use crate::context::GraphqlFormatContext;
