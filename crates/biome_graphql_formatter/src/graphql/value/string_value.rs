@@ -1,6 +1,5 @@
 use crate::prelude::*;
 use biome_formatter::write;
-use biome_graphql_syntax::string_value_ext::is_string_value_block;
 use biome_graphql_syntax::{GraphqlStringValue, GraphqlStringValueFields};
 use biome_rowan::TextSize;
 
