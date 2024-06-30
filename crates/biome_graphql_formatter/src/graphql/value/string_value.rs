@@ -1,7 +1,6 @@
 use crate::prelude::*;
 use biome_formatter::write;
-use biome_graphql_syntax::{GraphqlStringValue, GraphqlStringValueFields};
-use biome_rowan::TextSize;
+use biome_graphql_syntax::{GraphqlStringValue, GraphqlStringValueFields, TextLen};
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatGraphqlStringValue;
@@ -44,7 +43,7 @@ impl FormatNodeRule<GraphqlStringValue> for FormatGraphqlStringValue {
                     // Write the line with the minimum indentation level removed
                     // SAFETY: min_indent is always less than or equal to the length of the line
                     join.entry(&dynamic_text(&line[min_indent..], start));
-                    start += TextSize::from(line.len() as u32);
+                    start += line.text_len();
 
                     if line.is_empty() {
                         // if the line is empty,
