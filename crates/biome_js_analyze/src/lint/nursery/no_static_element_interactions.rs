@@ -273,9 +273,6 @@ const EVENT_TO_HANDLERS: &[(&str, &[&str])] = &[
 // no-static-element-interactions rule checks only focus, keyboard and mouse categories.
 const CATEGORIES_TO_CHECK: &[&str] = &["focus", "keyboard", "mouse"];
 
-// The section element is considered interactive if it has an aria-label or aria-labelledby attribute.
-const SECTION_ARIA_ATTRIBUTES: &[&str] = &["aria-label", "aria-labelledby"];
-
 impl Rule for NoStaticElementInteractions {
     type Query = Aria<AnyJsxElement>;
     type State = ();
@@ -289,15 +286,25 @@ impl Rule for NoStaticElementInteractions {
         let attributes = ctx.extract_attributes(&node.attributes());
         let element_name = element_name.text_trimmed();
 
-        if let Some(attributes_ref) = attributes.as_ref() {
-            let has_interactive_handler = CATEGORIES_TO_CHECK.iter().any(|&category| {
+        // Check if the element is hidden from screen readers.
+        if is_hidden_from_screen_reader(node, element_name) {
+            return None;
+        }
+
+        if let Some(attributes) = &attributes {
+            if aria_roles.is_not_static_element(&element_name, &attributes) {
+                return None;
+            }
+
+            // Check if the element has any interactive event handlers.
+            if !CATEGORIES_TO_CHECK.iter().any(|&category| {
                 if let Some(handlers) = EVENT_TO_HANDLERS
                     .iter()
                     .find(|&&(cat, _)| cat == category)
                     .map(|&(_, handlers)| handlers)
                 {
                     handlers.iter().any(|&handler| {
-                        if let Some(values) = attributes_ref.get(handler) {
+                        if let Some(values) = &attributes.get(handler) {
                             values.iter().any(|value| value != "null")
                         } else {
                             false
@@ -306,49 +313,7 @@ impl Rule for NoStaticElementInteractions {
                 } else {
                     false
                 }
-            });
-
-            if !has_interactive_handler {
-                return None;
-            }
-        } else {
-            return None;
-        }
-
-        if is_hidden_from_screen_reader(node, element_name) {
-            return None;
-        }
-
-        let is_valid_element = match element_name {
-            "section" => SECTION_ARIA_ATTRIBUTES.iter().any(|&attr_name| {
-                node.find_attribute_by_name(attr_name)
-                    .map_or(false, |attr| {
-                        attr.as_static_value()
-                            .map_or(false, |val| !val.text().is_empty())
-                    })
-            }),
-            "a" => node.find_attribute_by_name("href").map_or(false, |attr| {
-                attr.as_static_value()
-                    .map_or(false, |val| !val.text().is_empty())
-            }),
-            _ => {
-                // In Biome-managed elements, whether an element is interactive is determined by the is_not_interactive_element function.
-                (!aria_roles.is_not_interactive_element(element_name, attributes.clone())
-                    // Except for elements invalid in the eslint-plugin-jsx-a11y test case.
-                    && !is_invalid_element(element_name))
-                    // Also, elements marked as valid in eslint-plugin-jsx-a11y are marked as “valid” even if they are marked as invalid in Biome.
-                    || is_valid_element(element_name)
-            }
-        };
-
-        if is_valid_element {
-            return None;
-        }
-
-        if let Some(attr) = node.find_attribute_by_name("role") {
-            let role_value = attr.as_static_value()?;
-
-            if aria_roles.is_role_interactive(role_value.text()) {
+            }) {
                 return None;
             }
         }
@@ -387,78 +352,4 @@ fn is_hidden_from_screen_reader(node: &AnyJsxElement, element_name: &str) -> boo
                 attr.as_static_value()
                     .map_or(false, |val| val.text() == "hidden")
             })) // <input type="hidden" />
-}
-
-/// Checks if the given element name is considered invalid, inspired by eslint-plugin-jsx-a11y
-fn is_invalid_element(element_name: &str) -> bool {
-    match element_name {
-        // These cases are interactive with the is_not_interactive_element method,
-        // but is an invalid test case element for eslint-plugin-jsx-a11y.
-        "link" | "header" => true,
-        "area" | "b" | "bdi" | "bdo" | "hgroup" | "i" | "u" | "q" | "small" | "data" | "samp"
-        | "acronym" | "applet" | "base" | "big" | "blink" | "center" | "cite" | "col"
-        | "colgroup" | "content" | "font" | "frameset" | "head" | "kbd" | "keygen" | "map"
-        | "meta" | "noembed" | "noscript" | "object" | "param" | "picture" | "rp" | "rt"
-        | "rtc" | "s" | "script" | "source" | "spacer" | "strike" | "style" | "summary"
-        | "title" | "track" | "tt" | "var" | "wbr" | "xmp" => true,
-        _ => false,
-    }
-}
-
-/// This function ables non-interactive elements.
-/// This is because this is an element that is abled by eslint-plugin-jsx-a11y.
-fn is_valid_element(element_name: &str) -> bool {
-    matches!(
-        element_name,
-        "input"
-            | "form"
-            | "iframe"
-            | "h1"
-            | "h2"
-            | "h3"
-            | "h4"
-            | "h5"
-            | "h6"
-            | "ruby"
-            | "pre"
-            | "mark"
-            | "aside"
-            | "blockquote"
-            | "address"
-            | "article"
-            | "caption"
-            | "output"
-            | "p"
-            | "li"
-            | "ol"
-            | "ul"
-            | "nav"
-            | "table"
-            | "thead"
-            | "tbody"
-            | "tfoot"
-            | "time"
-            | "dfn"
-            | "main"
-            | "br"
-            | "details"
-            | "dd"
-            | "dir"
-            | "dl"
-            | "dt"
-            | "fieldset"
-            | "figcaption"
-            | "figure"
-            | "footer"
-            | "img"
-            | "label"
-            | "legend"
-            | "marquee"
-            | "menu"
-            | "meter"
-            | "optgroup"
-            | "progress"
-            | "th"
-            | "td"
-    )
 }

@@ -7,62 +7,45 @@
 	<a onClick={() => void 0} />
 	<a onClick={() => {}} />
 	<a tabIndex="0" onClick={() => void 0} />
-	<area onClick={() => {}} />
-	<acronym onClick={() => {}} />
-	<applet onClick={() => {}} />
+	<area onClick={() => { }} />
 	<b onClick={() => {}} />
 	<base onClick={() => {}} />
 	<bdi onClick={() => {}} />
-	<bdo onClick={() => {}} />
-	<big onClick={() => {}} />
-	<blink onClick={() => {}} />
-	<body onClick={() => {}} />
-	<center onClick={() => {}} />
-	<cite onClick={() => {}} />
+	<bdo onClick={() => { }} />
+	<body onClick={() => { }} />
+	<cite onClick={() => { }} />
 	<col onClick={() => {}} />
-	<colgroup onClick={() => {}} />
-	<content onClick={() => {}} />
+	<colgroup onClick={() => { }} />
 	<data onClick={() => {}} />
-	<div onClick={() => {}} />
-	<font onClick={() => {}} />
-	<frame onClick={() => {}} />
-	<frameset onClick={() => {}} />
+	<div onClick={() => { }} />
 	<head onClick={() => {}} />
 	<header onClick={() => {}} />
 	<hgroup onClick={() => {}} />
 	<i onClick={() => {}} />
 	<kbd onClick={() => {}} />
-	<keygen onClick={() => {}} />
 	<link onClick={() => {}} href="#" />
 	<map onClick={() => {}} />
 	<meta onClick={() => {}} />
-	<noembed onClick={() => {}} />
 	<noscript onClick={() => {}} />
 	<object onClick={() => {}} />
-	<param onClick={() => {}} />
 	<picture onClick={() => {}} />
 	<q onClick={() => {}} />
 	<rp onClick={() => {}} />
 	<rt onClick={() => {}} />
-	<rtc onClick={() => {}} />
 	<s onClick={() => {}} />
 	<samp onClick={() => {}} />
 	<script onClick={() => {}} />
 	<section onClick={() => {}} />
 	<small onClick={() => {}} />
 	<source onClick={() => {}} />
-	<spacer onClick={() => {}} />
 	<span onClick={() => {}} />
-	<strike onClick={() => {}} />
 	<style onClick={() => {}} />
-	<summary onClick={() => {}} />
 	<title onClick={() => {}} />
 	<track onClick={() => {}} />
-	<tt onClick={() => {}} />
 	<u onClick={() => {}} />
 	<var onClick={() => {}} />
 	<wbr onClick={() => {}} />
-	<xmp onClick={() => {}} />
+	
 	{/* // Handlers */}
 	<div onKeyDown={() => {}} />
 	<div onKeyPress={() => {}} />
@@ -85,5 +68,33 @@
 	<div role="select" onClick={() => {}} />
 	<div role="structure" onClick={() => {}} />
 	<div role="widget" onClick={() => {}} />
-	<div role="window" onClick={() => {}} />
+	<div role="window" onClick={() => { }} />
+	
+	{/* <summary> is inherently an interactive element, but in eslint-plugin-jsx-a11y, 
+	    it was made non-interactive due to the influence of an external library. */}
+	{/* ref: https://github.com/jsx-eslint/eslint-plugin-jsx-a11y/blob/0be7ea95f560c6afc6817d381054d914ebd0b2ca/src/util/isInteractiveElement.js#L86-L89 */}
+	{/* <summary onClick={() => {}} /> */}
+	
+	{/* This element is rejected by HTML Standard */}
+	{/* ref: https://lists.w3.org/Archives/Public/public-whatwg-archive/2012Aug/0298.html */}
+	{/* <content onClick={() => {}} /> */}
+
+	{/* This element is rejected by HTML Standard */}
+	{/* ref: https://html.spec.whatwg.org/multipage/obsolete.html */}
+	{/* <acronym onClick={() => {}} /> */}
+	{/* <applet onClick={() => {}} /> */}
+	{/* <frame onClick={() => { }} /> */}
+	{/* <frameset onClick={() => { }} /> */}
+	{/* <center onClick={() => {}} /> */}
+	{/* <font onClick={() => {}} /> */}	
+	{/* <big onClick={() => {}} /> */}
+	{/* <blink onClick={() => {}} /> */}
+	{/* <rtc onClick={() => {}} /> */}
+	{/* <xmp onClick={() => {}} /> */}
+	{/* <strike onClick={() => {}} /> */}
+	{/* <param onClick={() => {}} /> */}
+	{/* <keygen onClick={() => {}} /> */}
+	{/* <noembed onClick={() => {}} /> */}
+	{/* <spacer onClick={() => {}} /> */}
+	{/* <tt onClick={() => {}} /> */}
 </>;
