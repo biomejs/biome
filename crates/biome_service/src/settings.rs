@@ -892,9 +892,8 @@ impl OverrideSettings {
             .rev()
             .find_map(|pattern| {
                 // Early return to avoid unnecessary clone
-                if pattern.languages.javascript.globals.is_none() {
-                    return None;
-                }
+                pattern.languages.javascript.globals.as_ref()?;
+
                 if pattern.include.matches_path(path) && !pattern.exclude.matches_path(path) {
                     pattern.languages.javascript.globals.clone()
                 } else {
