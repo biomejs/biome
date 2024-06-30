@@ -5,6 +5,7 @@
 #[macro_use]
 mod generated;
 mod file_source;
+pub mod string_value_ext;
 mod syntax_node;
 
 use biome_rowan::{AstNode, RawSyntaxKind, SyntaxKind};
