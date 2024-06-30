@@ -154,7 +154,6 @@ pub(crate) fn parse_nested_qualified_rule(p: &mut CssParser) -> ParsedSyntax {
     Present(m.complete(p, CSS_NESTED_QUALIFIED_RULE))
 }
 
-
 /// Speculatively parses a nested qualified rule from the current position in the CSS parser.
 ///
 /// This function attempts to speculatively parse a nested qualified rule to determine if it is valid without
@@ -178,7 +177,9 @@ pub(crate) fn speculative_parse_nested_qualified_rule(p: &mut CssParser) -> Pars
             // return the error to rewind the parser state
             Err(())
         }
-    }).is_err() {
+    })
+    .is_err()
+    {
         m.abandon(p);
         return Absent;
     }
@@ -189,8 +190,7 @@ pub(crate) fn speculative_parse_nested_qualified_rule(p: &mut CssParser) -> Pars
 }
 
 /// `{` - The block start token.
-const RELATIVE_SELECTOR_END_SET: TokenSet<CssSyntaxKind> =
-    token_set![T!['{']];
+const RELATIVE_SELECTOR_END_SET: TokenSet<CssSyntaxKind> = token_set![T!['{']];
 
 /// When we use speculative parsing for a relative selector list,
 /// we may encounter a situation where we need to parse the list of relative selectors
