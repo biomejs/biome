@@ -59,7 +59,7 @@ impl ParseNodeList for DeclarationOrRuleList {
             // if we are at a declaration, we need to check if it is a nested qualified rule
             // because it can be parsed as a declaration or a nested qualified rule
             // main {
-            //     label:hover {  <--- it looks like a declaration because we have but it is a nested qualified rule
+            //     label:hover {  <--- it looks like a declaration but it is a nested qualified rule
             //         font-weight: 500;
             //     }
             // }
