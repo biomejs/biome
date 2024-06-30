@@ -13,11 +13,7 @@ use std::{any::type_name, fmt::Debug};
 /// Search and renames alls bindings where the name contains "a" replacing it to "b".
 /// Asserts the renaming worked.
 pub fn assert_rename_binding_a_to_b_ok(before: &str, expected: &str) {
-    let r = biome_js_parser::parse(
-        before,
-        JsFileSource::js_module(),
-        JsParseOptions::default(),
-    );
+    let r = biome_js_parser::parse(before, JsFileSource::js_module(), JsParseOptions::default());
     let model = semantic_model(&r.tree(), SemanticModelOptions::default());
 
     let bindings: Vec<JsIdentifierBinding> = r
@@ -77,11 +73,7 @@ pub fn assert_rename_ts_binding_a_to_b_ok(before: &str, expected: &str) {
 /// Search and renames one binding named "a" to "b".
 /// Asserts the renaming fails.
 pub fn assert_rename_binding_a_to_b_nok(before: &str) {
-    let r = biome_js_parser::parse(
-        before,
-        JsFileSource::js_module(),
-        JsParseOptions::default(),
-    );
+    let r = biome_js_parser::parse(before, JsFileSource::js_module(), JsParseOptions::default());
     let model = semantic_model(&r.tree(), SemanticModelOptions::default());
 
     let binding_a = r
@@ -101,11 +93,7 @@ pub fn assert_remove_identifier_a_ok<Anc: AstNode<Language = JsLanguage> + Debug
     before: &str,
     expected: &str,
 ) {
-    let r = biome_js_parser::parse(
-        before,
-        JsFileSource::js_module(),
-        JsParseOptions::default(),
-    );
+    let r = biome_js_parser::parse(before, JsFileSource::js_module(), JsParseOptions::default());
 
     let identifiers_a: Vec<JsSyntaxNode> = r
         .syntax()

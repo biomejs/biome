@@ -306,11 +306,7 @@ mod tests {
             }
         ";
 
-        let parsed = parse(
-            SOURCE,
-            JsFileSource::js_module(),
-            JsParseOptions::default(),
-        );
+        let parsed = parse(SOURCE, JsFileSource::js_module(), JsParseOptions::default());
 
         let mut lint_ranges: Vec<TextRange> = Vec::new();
         let mut parse_ranges: Vec<TextRange> = Vec::new();
@@ -391,11 +387,7 @@ mod tests {
             a == b;
         ";
 
-        let parsed = parse(
-            SOURCE,
-            JsFileSource::js_module(),
-            JsParseOptions::default(),
-        );
+        let parsed = parse(SOURCE, JsFileSource::js_module(), JsParseOptions::default());
 
         let filter = AnalysisFilter {
             categories: RuleCategoriesBuilder::default().with_syntax().build(),

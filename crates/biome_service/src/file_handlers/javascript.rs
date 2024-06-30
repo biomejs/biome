@@ -216,9 +216,10 @@ impl ServiceLanguage for JsLanguage {
 
         if let (Some(overrides), Some(global)) = (overrides, global) {
             jsx_runtime = Some(
-                match overrides
-                    .to_override_jsx_runtime(path, global.languages.javascript.environment.jsx_runtime)
-                {
+                match overrides.to_override_jsx_runtime(
+                    path,
+                    global.languages.javascript.environment.jsx_runtime,
+                ) {
                     // In the future, we may wish to map an `Auto` variant to a concrete
                     // analyzer value for easy access by the analyzer.
                     JsxRuntime::Transparent => biome_analyze::options::JsxRuntime::Transparent,

@@ -122,11 +122,7 @@ mod test {
     #[test]
     fn find_variable_position_matches_on_left() {
         let source = "(a) + b";
-        let parsed = parse(
-            source,
-            JsFileSource::js_module(),
-            JsParseOptions::default(),
-        );
+        let parsed = parse(source, JsFileSource::js_module(), JsParseOptions::default());
 
         let binary_expression = parsed
             .syntax()
@@ -145,11 +141,7 @@ mod test {
     #[test]
     fn find_variable_position_matches_on_right() {
         let source = "a + b";
-        let parsed = parse(
-            source,
-            JsFileSource::js_module(),
-            JsParseOptions::default(),
-        );
+        let parsed = parse(source, JsFileSource::js_module(), JsParseOptions::default());
 
         let binary_expression = parsed
             .syntax()
@@ -168,11 +160,7 @@ mod test {
     #[test]
     fn find_variable_position_not_match() {
         let source = "a + b";
-        let parsed = parse(
-            source,
-            JsFileSource::js_module(),
-            JsParseOptions::default(),
-        );
+        let parsed = parse(source, JsFileSource::js_module(), JsParseOptions::default());
 
         let binary_expression = parsed
             .syntax()
@@ -191,11 +179,7 @@ mod test {
     #[test]
     fn find_variable_position_when_the_operator_has_no_spaces_around() {
         let source = "l-c";
-        let parsed = parse(
-            source,
-            JsFileSource::js_module(),
-            JsParseOptions::default(),
-        );
+        let parsed = parse(source, JsFileSource::js_module(), JsParseOptions::default());
 
         let binary_expression = parsed
             .syntax()
