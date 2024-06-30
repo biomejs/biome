@@ -29,6 +29,10 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 ### Linter
 
+#### Bug fixes
+
+- Don't request alt text for elements hidden from assistive technologies ([#3316](https://github.com/biomejs/biome/issues/3316)). Contributed by @robintown
+
 ### Parser
 
 ## v1.8.3 (2024-06-27)
