@@ -4523,6 +4523,7 @@ dependencies = [
  "biome_css_syntax",
  "biome_diagnostics",
  "biome_formatter",
+ "biome_graphql_formatter",
  "biome_graphql_parser",
  "biome_graphql_syntax",
  "biome_js_analyze",
