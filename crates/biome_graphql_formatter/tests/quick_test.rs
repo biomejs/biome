@@ -13,28 +13,14 @@ mod language {
 // use this test check if your snippet prints as you wish, without using a snapshot
 fn quick_test() {
     let src = r#"
-type Artist implements Node & Entity {
-  # The ID of an object
-  id: ID!
-
-  # The MBID of the entity.
-  mbid: MBID!
-
-  # A list of recordings linked to this entity.
-  recordings(after: String, first: Int): RecordingConnection
-
-  # A list of releases linked to this entity.
-  releases(
-    # Filter by one or more release group types.
-    type: [ReleaseGroupType]
-
-    # Filter by one or more release statuses.
-    status: [ReleaseStatus]
-    after: String
-    first: Int
-  ): ReleaseConnection
-
+type Type1 implements A & B &
+# comment 1
+C & D &
+# comment 2
+E {
+	a: a
 }
+
 
 "#;
     let parse = parse_graphql(src);
