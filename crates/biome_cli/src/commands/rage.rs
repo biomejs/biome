@@ -217,7 +217,7 @@ impl Display for RageConfiguration<'_, '_> {
                             {KeyValuePair("Line ending", markup!({DebugDisplay(formatter_configuration.line_ending)}))}
                             {KeyValuePair("Line width", markup!({DebugDisplay(formatter_configuration.line_width.value())}))}
                             {KeyValuePair("Attribute position", markup!({DebugDisplay(formatter_configuration.attribute_position)}))}
-                            {KeyValuePair("Bracket spacing", markup!({DebugDisplay(formatter_configuration.bracket_spacing)}))}
+                            {KeyValuePair("Bracket spacing", markup!({DebugDisplayOption(formatter_configuration.bracket_spacing)}))}
                             {KeyValuePair("Ignore", markup!({DebugDisplay(formatter_configuration.ignore.iter().collect::<Vec<_>>())}))}
                             {KeyValuePair("Include", markup!({DebugDisplay(formatter_configuration.include.iter().collect::<Vec<_>>())}))}
                         ).fmt(fmt)?;
