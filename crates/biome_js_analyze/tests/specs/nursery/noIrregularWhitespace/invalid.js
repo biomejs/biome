@@ -1,5 +1,5 @@
-/* \u{c} 		*/ constfoo='thing';
 /* \u{b} 		*/ constfoo='thing';
+/* \u{c} 		*/ constfoo='thing';
 /* \u{85} 	*/ constfoo='thing';
 /* \u{feff}	*/ const﻿foo﻿=﻿'thing';
 /* \u{a0} 	*/ const foo = 'thing';
