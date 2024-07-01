@@ -1234,6 +1234,10 @@ export interface Nursery {
 	 */
 	useTopLevelRegex?: RuleConfiguration_for_Null;
 	/**
+	 * Enforce the use of String.trimStart() and String.trimEnd() over String.trimLeft() and String.trimRight().
+	 */
+	useTrimStartEnd?: RuleFixConfiguration_for_Null;
+	/**
 	 * Use valid values for the autocomplete attribute on input elements.
 	 */
 	useValidAutocomplete?: RuleConfiguration_for_UseValidAutocompleteOptions;
@@ -2521,6 +2525,7 @@ export type Category =
 	| "lint/nursery/useThrowNewError"
 	| "lint/nursery/useThrowOnlyError"
 	| "lint/nursery/useTopLevelRegex"
+	| "lint/nursery/useTrimStartEnd"
 	| "lint/nursery/useValidAutocomplete"
 	| "lint/performance/noAccumulatingSpread"
 	| "lint/performance/noBarrelFile"
