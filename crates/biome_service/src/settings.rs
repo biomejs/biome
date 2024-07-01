@@ -1027,169 +1027,7 @@ pub struct OverrideSettingPattern {
     pub(crate) cached_css_parse_options: RwLock<Option<CssParseOptions>>,
 }
 impl OverrideSettingPattern {
-    fn apply_overrides_to_js_format_options(&self, options: &mut JsFormatOptions) {
-        if let Ok(readonly_cache) = self.cached_js_format_options.read() {
-            if let Some(cached_options) = readonly_cache.get(&options.source_type()) {
-                *options = cached_options.clone();
-                return;
-            }
-        }
-
-        let js_formatter = &self.languages.javascript.formatter;
-        let formatter = &self.formatter;
-        if let Some(indent_style) = js_formatter.indent_style.or(formatter.indent_style) {
-            options.set_indent_style(indent_style);
-        }
-        if let Some(indent_width) = js_formatter.indent_width.or(formatter.indent_width) {
-            options.set_indent_width(indent_width);
-        }
-        if let Some(line_ending) = js_formatter.line_ending.or(formatter.line_ending) {
-            options.set_line_ending(line_ending);
-        }
-        if let Some(line_width) = js_formatter.line_width.or(formatter.line_width) {
-            options.set_line_width(line_width);
-        }
-        if let Some(quote_style) = js_formatter.quote_style {
-            options.set_quote_style(quote_style);
-        }
-        if let Some(jsx_quote_style) = js_formatter.jsx_quote_style {
-            options.set_jsx_quote_style(jsx_quote_style);
-        }
-        if let Some(quote_properties) = js_formatter.quote_properties {
-            options.set_quote_properties(quote_properties);
-        }
-        if let Some(trailing_commas) = js_formatter.trailing_commas {
-            options.set_trailing_commas(trailing_commas);
-        }
-        if let Some(semicolons) = js_formatter.semicolons {
-            options.set_semicolons(semicolons);
-        }
-        if let Some(arrow_parentheses) = js_formatter.arrow_parentheses {
-            options.set_arrow_parentheses(arrow_parentheses);
-        }
-        if let Some(bracket_spacing) = js_formatter.bracket_spacing.or(formatter.bracket_spacing) {
-            options.set_bracket_spacing(bracket_spacing);
-        }
-        if let Some(bracket_same_line) = js_formatter.bracket_same_line {
-            options.set_bracket_same_line(bracket_same_line);
-        }
-        if let Some(attribute_position) = js_formatter
-            .attribute_position
-            .or(formatter.attribute_position)
-        {
-            options.set_attribute_position(attribute_position);
-        }
-
-        if let Ok(mut writeonly_cache) = self.cached_js_format_options.write() {
-            let options = options.clone();
-            writeonly_cache.insert(options.source_type(), options);
-        }
-    }
-
-    fn apply_overrides_to_json_format_options(&self, options: &mut JsonFormatOptions) {
-        if let Ok(readonly_cache) = self.cached_json_format_options.read() {
-            if let Some(cached_options) = readonly_cache.as_ref() {
-                *options = cached_options.clone();
-                return;
-            }
-        }
-
-        let json_formatter = &self.languages.json.formatter;
-        let formatter = &self.formatter;
-
-        if let Some(indent_style) = json_formatter.indent_style.or(formatter.indent_style) {
-            options.set_indent_style(indent_style);
-        }
-        if let Some(indent_width) = json_formatter.indent_width.or(formatter.indent_width) {
-            options.set_indent_width(indent_width)
-        }
-        if let Some(line_ending) = json_formatter.line_ending.or(formatter.line_ending) {
-            options.set_line_ending(line_ending);
-        }
-        if let Some(line_width) = json_formatter.line_width.or(formatter.line_width) {
-            options.set_line_width(line_width);
-        }
-        if let Some(trailing_commas) = json_formatter.trailing_commas {
-            options.set_trailing_commas(trailing_commas);
-        }
-
-        if let Ok(mut writeonly_cache) = self.cached_json_format_options.write() {
-            let options = options.clone();
-            let _ = writeonly_cache.insert(options);
-        }
-    }
-
-    fn apply_overrides_to_css_format_options(&self, options: &mut CssFormatOptions) {
-        if let Ok(readonly_cache) = self.cached_css_format_options.read() {
-            if let Some(cached_options) = readonly_cache.as_ref() {
-                *options = cached_options.clone();
-                return;
-            }
-        }
-
-        let css_formatter = &self.languages.css.formatter;
-        let formatter = &self.formatter;
-
-        if let Some(indent_style) = css_formatter.indent_style.or(formatter.indent_style) {
-            options.set_indent_style(indent_style);
-        }
-        if let Some(indent_width) = css_formatter.indent_width.or(formatter.indent_width) {
-            options.set_indent_width(indent_width)
-        }
-        if let Some(line_ending) = css_formatter.line_ending.or(formatter.line_ending) {
-            options.set_line_ending(line_ending);
-        }
-        if let Some(line_width) = css_formatter.line_width.or(formatter.line_width) {
-            options.set_line_width(line_width);
-        }
-        if let Some(quote_style) = css_formatter.quote_style {
-            options.set_quote_style(quote_style);
-        }
-
-        if let Ok(mut writeonly_cache) = self.cached_css_format_options.write() {
-            let options = options.clone();
-            let _ = writeonly_cache.insert(options);
-        }
-    }
-
-    fn apply_overrides_to_graphql_format_options(&self, options: &mut GraphqlFormatOptions) {
-        if let Ok(readonly_cache) = self.cached_graphql_format_options.read() {
-            if let Some(cached_options) = readonly_cache.as_ref() {
-                *options = cached_options.clone();
-                return;
-            }
-        }
-
-        let graphql_formatter = &self.languages.graphql.formatter;
-        let formatter = &self.formatter;
-
-        if let Some(indent_style) = graphql_formatter.indent_style.or(formatter.indent_style) {
-            options.set_indent_style(indent_style);
-        }
-        if let Some(indent_width) = graphql_formatter.indent_width.or(formatter.indent_width) {
-            options.set_indent_width(indent_width)
-        }
-        if let Some(line_ending) = graphql_formatter.line_ending.or(formatter.line_ending) {
-            options.set_line_ending(line_ending);
-        }
-        if let Some(line_width) = graphql_formatter.line_width.or(formatter.line_width) {
-            options.set_line_width(line_width);
-        }
-        if let Some(bracket_spacing) = graphql_formatter
-            .bracket_spacing
-            .or(formatter.bracket_spacing)
-        {
-            options.set_bracket_spacing(bracket_spacing);
-        }
-        if let Some(quote_style) = graphql_formatter.quote_style {
-            options.set_quote_style(quote_style);
-        }
-
-        if let Ok(mut writeonly_cache) = self.cached_graphql_format_options.write() {
-            let options = options.clone();
-            let _ = writeonly_cache.insert(options);
-        }
-    }
+    // JavaScript
 
     fn apply_overrides_to_js_parse_options(&self, options: &mut JsParseOptions) {
         if let Ok(readonly_cache) = self.cached_js_parse_options.read() {
@@ -1210,6 +1048,73 @@ impl OverrideSettingPattern {
             let _ = writeonly_cache.insert(options);
         }
     }
+
+    fn apply_overrides_to_js_format_options(&self, options: &mut JsFormatOptions) {
+        if let Ok(readonly_cache) = self.cached_js_format_options.read() {
+            if let Some(cached_options) = readonly_cache.get(&options.source_type()) {
+                *options = cached_options.clone();
+                return;
+            }
+        }
+
+        let js_formatter = &self.languages.javascript.formatter;
+        let formatter = &self.formatter;
+
+        // Formatter settings which are also in top-level
+
+        if let Some(indent_style) = js_formatter.indent_style.or(formatter.indent_style) {
+            options.set_indent_style(indent_style);
+        }
+        if let Some(indent_width) = js_formatter.indent_width.or(formatter.indent_width) {
+            options.set_indent_width(indent_width);
+        }
+        if let Some(line_ending) = js_formatter.line_ending.or(formatter.line_ending) {
+            options.set_line_ending(line_ending);
+        }
+        if let Some(line_width) = js_formatter.line_width.or(formatter.line_width) {
+            options.set_line_width(line_width);
+        }
+        if let Some(bracket_spacing) = js_formatter.bracket_spacing.or(formatter.bracket_spacing) {
+            options.set_bracket_spacing(bracket_spacing);
+        }
+        if let Some(attribute_position) = js_formatter
+            .attribute_position
+            .or(formatter.attribute_position)
+        {
+            options.set_attribute_position(attribute_position);
+        }
+
+        // Formatter settings which are language-specific
+
+        if let Some(quote_style) = js_formatter.quote_style {
+            options.set_quote_style(quote_style);
+        }
+        if let Some(jsx_quote_style) = js_formatter.jsx_quote_style {
+            options.set_jsx_quote_style(jsx_quote_style);
+        }
+        if let Some(quote_properties) = js_formatter.quote_properties {
+            options.set_quote_properties(quote_properties);
+        }
+        if let Some(trailing_commas) = js_formatter.trailing_commas {
+            options.set_trailing_commas(trailing_commas);
+        }
+        if let Some(semicolons) = js_formatter.semicolons {
+            options.set_semicolons(semicolons);
+        }
+        if let Some(arrow_parentheses) = js_formatter.arrow_parentheses {
+            options.set_arrow_parentheses(arrow_parentheses);
+        }
+        if let Some(bracket_same_line) = js_formatter.bracket_same_line {
+            options.set_bracket_same_line(bracket_same_line);
+        }
+
+        if let Ok(mut writeonly_cache) = self.cached_js_format_options.write() {
+            let options = options.clone();
+            writeonly_cache.insert(options.source_type(), options);
+        }
+    }
+
+    // JSON
 
     fn apply_overrides_to_json_parse_options(&self, options: &mut JsonParseOptions) {
         // these options are no longer cached because it was causing incorrect override behavior, see #3260
@@ -1235,6 +1140,46 @@ impl OverrideSettingPattern {
         // }
     }
 
+    fn apply_overrides_to_json_format_options(&self, options: &mut JsonFormatOptions) {
+        if let Ok(readonly_cache) = self.cached_json_format_options.read() {
+            if let Some(cached_options) = readonly_cache.as_ref() {
+                *options = cached_options.clone();
+                return;
+            }
+        }
+
+        let json_formatter = &self.languages.json.formatter;
+        let formatter = &self.formatter;
+
+        // Formatter settings which are also in top-level
+
+        if let Some(indent_style) = json_formatter.indent_style.or(formatter.indent_style) {
+            options.set_indent_style(indent_style);
+        }
+        if let Some(indent_width) = json_formatter.indent_width.or(formatter.indent_width) {
+            options.set_indent_width(indent_width)
+        }
+        if let Some(line_ending) = json_formatter.line_ending.or(formatter.line_ending) {
+            options.set_line_ending(line_ending);
+        }
+        if let Some(line_width) = json_formatter.line_width.or(formatter.line_width) {
+            options.set_line_width(line_width);
+        }
+
+        // Formatter settings which are language-specific
+
+        if let Some(trailing_commas) = json_formatter.trailing_commas {
+            options.set_trailing_commas(trailing_commas);
+        }
+
+        if let Ok(mut writeonly_cache) = self.cached_json_format_options.write() {
+            let options = options.clone();
+            let _ = writeonly_cache.insert(options);
+        }
+    }
+
+    // CSS
+
     fn apply_overrides_to_css_parse_options(&self, options: &mut CssParseOptions) {
         if let Ok(readonly_cache) = self.cached_css_parse_options.read() {
             if let Some(cached_options) = readonly_cache.as_ref() {
@@ -1254,6 +1199,90 @@ impl OverrideSettingPattern {
 
         if let Ok(mut writeonly_cache) = self.cached_css_parse_options.write() {
             let options = *options;
+            let _ = writeonly_cache.insert(options);
+        }
+    }
+
+    fn apply_overrides_to_css_format_options(&self, options: &mut CssFormatOptions) {
+        if let Ok(readonly_cache) = self.cached_css_format_options.read() {
+            if let Some(cached_options) = readonly_cache.as_ref() {
+                *options = cached_options.clone();
+                return;
+            }
+        }
+
+        let css_formatter = &self.languages.css.formatter;
+        let formatter = &self.formatter;
+
+        // Formatter settings which are also in top-level
+
+        if let Some(indent_style) = css_formatter.indent_style.or(formatter.indent_style) {
+            options.set_indent_style(indent_style);
+        }
+        if let Some(indent_width) = css_formatter.indent_width.or(formatter.indent_width) {
+            options.set_indent_width(indent_width)
+        }
+        if let Some(line_ending) = css_formatter.line_ending.or(formatter.line_ending) {
+            options.set_line_ending(line_ending);
+        }
+        if let Some(line_width) = css_formatter.line_width.or(formatter.line_width) {
+            options.set_line_width(line_width);
+        }
+
+        // Formatter settings which are language-specific
+
+        if let Some(quote_style) = css_formatter.quote_style {
+            options.set_quote_style(quote_style);
+        }
+
+        if let Ok(mut writeonly_cache) = self.cached_css_format_options.write() {
+            let options = options.clone();
+            let _ = writeonly_cache.insert(options);
+        }
+    }
+
+    // GraphQL
+
+    fn apply_overrides_to_graphql_format_options(&self, options: &mut GraphqlFormatOptions) {
+        if let Ok(readonly_cache) = self.cached_graphql_format_options.read() {
+            if let Some(cached_options) = readonly_cache.as_ref() {
+                *options = cached_options.clone();
+                return;
+            }
+        }
+
+        let graphql_formatter = &self.languages.graphql.formatter;
+        let formatter = &self.formatter;
+
+        // Formatter settings which are also in top-level
+
+        if let Some(indent_style) = graphql_formatter.indent_style.or(formatter.indent_style) {
+            options.set_indent_style(indent_style);
+        }
+        if let Some(indent_width) = graphql_formatter.indent_width.or(formatter.indent_width) {
+            options.set_indent_width(indent_width)
+        }
+        if let Some(line_ending) = graphql_formatter.line_ending.or(formatter.line_ending) {
+            options.set_line_ending(line_ending);
+        }
+        if let Some(line_width) = graphql_formatter.line_width.or(formatter.line_width) {
+            options.set_line_width(line_width);
+        }
+        if let Some(bracket_spacing) = graphql_formatter
+            .bracket_spacing
+            .or(formatter.bracket_spacing)
+        {
+            options.set_bracket_spacing(bracket_spacing);
+        }
+
+        // Formatter settings which are language-specific
+
+        if let Some(quote_style) = graphql_formatter.quote_style {
+            options.set_quote_style(quote_style);
+        }
+
+        if let Ok(mut writeonly_cache) = self.cached_graphql_format_options.write() {
+            let options = options.clone();
             let _ = writeonly_cache.insert(options);
         }
     }
