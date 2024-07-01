@@ -29,11 +29,16 @@ impl TestCase {
             .ok_or_else(|| "lib url has no segments".to_string())
             // cache the file name to avoid to save files that have the same name, but they come from different repos
             .map(|filename| {
-                let filename = PathBuf::from(filename);
-                let file_stem = filename.file_stem().unwrap().to_str().unwrap();
-                let file_extension = filename.extension().unwrap().to_str().unwrap();
+                let filename_path = PathBuf::from(filename);
+                
+                let file_stem = filename_path.file_stem().unwrap().to_str().unwrap();
+                let file_extension = if filename.ends_with(".d.ts") {
+                    "d.ts"
+                }  else {
+                    filename_path.extension().unwrap().to_str().unwrap()
+                };
 
-                format!("{file_stem}_{}_{file_extension}", calculate_hash(&file_url))
+                format!("{file_stem}_{}.{file_extension}", calculate_hash(&file_url))
             })?;
 
         let path = Path::new(
@@ -104,4 +109,10 @@ impl TestCase {
             .to_str()
             .expect("Expected extension to be valid UTF8")
     }
+}
+
+#[test]
+fn file_extension() {
+    let path = PathBuf::from("io.d.ts");
+    dbg!(path.extension().unwrap());
 }
