@@ -105,7 +105,7 @@ declare_rule! {
     /// for TypeScript projects that use ES Modules. TypeScript requires you to specify imports to
     /// the actual files used in runtime: `.js` or `.mjs` (see more here: https://github.com/microsoft/TypeScript/issues/49083#issuecomment-1435399267).
     /// :::
-    /// 
+    ///
     /// ## Caveats
     ///
     /// If you are using TypeScript, TypeScript version 5.0 and later is required, also make sure to enable
