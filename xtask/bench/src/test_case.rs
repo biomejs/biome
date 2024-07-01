@@ -30,11 +30,11 @@ impl TestCase {
             // cache the file name to avoid to save files that have the same name, but they come from different repos
             .map(|filename| {
                 let filename_path = PathBuf::from(filename);
-                
+
                 let file_stem = filename_path.file_stem().unwrap().to_str().unwrap();
                 let file_extension = if filename.ends_with(".d.ts") {
                     "d.ts"
-                }  else {
+                } else {
                     filename_path.extension().unwrap().to_str().unwrap()
                 };
 
