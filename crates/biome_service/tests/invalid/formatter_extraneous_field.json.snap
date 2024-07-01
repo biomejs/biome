@@ -16,6 +16,7 @@ formatter_extraneous_field.json:3:3 deserialize ━━━━━━━━━━�
   i Known keys:
   
   - enabled
+  - useEditorconfig
   - formatWithErrors
   - indentStyle
   - indentWidth

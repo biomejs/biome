@@ -1006,7 +1006,7 @@ pub struct OverrideSettingPattern {
     pub(crate) cached_css_format_options: RwLock<Option<CssFormatOptions>>,
     pub(crate) cached_graphql_format_options: RwLock<Option<GraphqlFormatOptions>>,
     pub(crate) cached_js_parser_options: RwLock<Option<JsParserOptions>>,
-    pub(crate) cached_json_parser_options: RwLock<Option<JsonParserOptions>>,
+    pub(crate) _cached_json_parser_options: RwLock<Option<JsonParserOptions>>,
     pub(crate) cached_css_parser_options: RwLock<Option<CssParserOptions>>,
 }
 impl OverrideSettingPattern {
@@ -1193,13 +1193,7 @@ impl OverrideSettingPattern {
     }
 
     fn apply_overrides_to_json_parser_options(&self, options: &mut JsonParserOptions) {
-        if let Ok(readonly_cache) = self.cached_json_parser_options.read() {
-            if let Some(cached_options) = readonly_cache.as_ref() {
-                *options = *cached_options;
-                return;
-            }
-        }
-
+        // these options are no longer cached because it was causing incorrect override behavior, see #3260
         let json_parser = &self.languages.json.parser;
 
         if let Some(allow_comments) = json_parser.allow_comments {
@@ -1207,11 +1201,6 @@ impl OverrideSettingPattern {
         }
         if let Some(allow_trailing_commas) = json_parser.allow_trailing_commas {
             options.allow_trailing_commas = allow_trailing_commas;
-        }
-
-        if let Ok(mut writeonly_cache) = self.cached_json_parser_options.write() {
-            let options = *options;
-            let _ = writeonly_cache.insert(options);
         }
     }
 
@@ -1279,12 +1268,14 @@ fn to_git_ignore(path: PathBuf, matches: &[String]) -> Result<Gitignore, Workspa
             .map_err(|err| {
                 BiomeDiagnostic::InvalidIgnorePattern(InvalidIgnorePattern {
                     message: err.to_string(),
+                    file_path: path.to_str().map(|s| s.to_string()),
                 })
             })?;
     }
     let gitignore = gitignore_builder.build().map_err(|err| {
         BiomeDiagnostic::InvalidIgnorePattern(InvalidIgnorePattern {
             message: err.to_string(),
+            file_path: path.to_str().map(|s| s.to_string()),
         })
     })?;
     Ok(gitignore)

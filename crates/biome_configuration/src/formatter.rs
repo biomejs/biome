@@ -17,6 +17,10 @@ pub struct FormatterConfiguration {
     #[partial(bpaf(hide))]
     pub enabled: bool,
 
+    #[partial(bpaf(long("use-editorconfig"), argument("true|false"), optional))]
+    /// Use any `.editorconfig` files to configure the formatter. Configuration in `biome.json` will override `.editorconfig` configuration. Default: false.
+    pub use_editorconfig: bool,
+
     /// Stores whether formatting should be allowed to proceed if a given file
     /// has syntax errors
     #[partial(bpaf(hide))]
@@ -80,6 +84,7 @@ impl PartialFormatterConfiguration {
             bracket_spacing: self.bracket_spacing.unwrap_or_default(),
             ignore: self.ignore.clone().unwrap_or_default(),
             include: self.include.clone().unwrap_or_default(),
+            use_editorconfig: self.use_editorconfig.unwrap_or_default(),
         }
     }
 }
@@ -98,6 +103,8 @@ impl Default for FormatterConfiguration {
             bracket_spacing: Default::default(),
             ignore: Default::default(),
             include: Default::default(),
+            // TODO: Biome 2.0: change to true
+            use_editorconfig: Default::default(),
         }
     }
 }
