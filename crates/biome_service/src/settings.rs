@@ -1390,6 +1390,7 @@ pub fn to_override_settings(
                 attribute_position: formatter.attribute_position,
             })
             .unwrap_or_default();
+
         let linter = pattern
             .linter
             .map(|linter| OverrideLinterSettings {
@@ -1397,6 +1398,7 @@ pub fn to_override_settings(
                 rules: linter.rules,
             })
             .unwrap_or_default();
+
         let organize_imports = OverrideOrganizeImportsSettings {
             enabled: pattern
                 .organize_imports
@@ -1404,17 +1406,18 @@ pub fn to_override_settings(
         };
 
         let mut languages = LanguageListSettings::default();
-        let javascript = pattern.javascript.take().unwrap_or_default();
-        let json = pattern.json.take().unwrap_or_default();
-        let css = pattern.css.take().unwrap_or_default();
-        let graphql = pattern.graphql.take().unwrap_or_default();
-        languages.javascript =
-            to_javascript_language_settings(javascript, &current_settings.languages.javascript);
 
-        languages.json = to_json_language_settings(json, &current_settings.languages.json);
-        languages.css = to_css_language_settings(css, &current_settings.languages.css);
-        languages.graphql =
-            to_graphql_language_settings(graphql, &current_settings.languages.graphql);
+        let javascript = pattern.javascript.take().unwrap_or_default();
+        languages.javascript = javascript.into();
+
+        let json = pattern.json.take().unwrap_or_default();
+        languages.json = json.into();
+
+        let css = pattern.css.take().unwrap_or_default();
+        languages.css = css.into();
+
+        let graphql = pattern.graphql.take().unwrap_or_default();
+        languages.graphql = graphql.into();
 
         let pattern_setting = OverrideSettingPattern {
             include: to_matcher(working_directory.clone(), pattern.include.as_ref())?,
@@ -1430,117 +1433,6 @@ pub fn to_override_settings(
     }
 
     Ok(override_settings)
-}
-
-fn to_javascript_language_settings(
-    mut conf: PartialJavascriptConfiguration,
-    parent_settings: &LanguageSettings<JsLanguage>,
-) -> LanguageSettings<JsLanguage> {
-    let mut language_setting: LanguageSettings<JsLanguage> = LanguageSettings::default();
-    let formatter = conf.formatter.take().unwrap_or_default();
-    language_setting.formatter.quote_style = formatter.quote_style;
-    language_setting.formatter.jsx_quote_style = formatter.jsx_quote_style;
-    language_setting.formatter.quote_properties = formatter.quote_properties;
-    language_setting.formatter.trailing_commas =
-        formatter.trailing_commas.or(formatter.trailing_comma);
-    language_setting.formatter.semicolons = formatter.semicolons;
-    language_setting.formatter.arrow_parentheses = formatter.arrow_parentheses;
-    language_setting.formatter.bracket_spacing = formatter.bracket_spacing;
-    language_setting.formatter.bracket_same_line = formatter.bracket_same_line.map(Into::into);
-    language_setting.formatter.enabled = formatter.enabled;
-    language_setting.formatter.line_width = formatter.line_width;
-    language_setting.formatter.line_ending = formatter.line_ending;
-    language_setting.formatter.indent_width = formatter
-        .indent_width
-        .map(Into::into)
-        .or(formatter.indent_size.map(Into::into));
-    language_setting.formatter.indent_style = formatter.indent_style.map(Into::into);
-
-    let parser = conf.parser.take().unwrap_or_default();
-    let parent_parser = &parent_settings.parser;
-    language_setting.parser.parse_class_parameter_decorators = parser
-        .unsafe_parameter_decorators_enabled
-        .or(parent_parser.parse_class_parameter_decorators);
-
-    let organize_imports = conf.organize_imports;
-    if let Some(_organize_imports) = organize_imports {}
-
-    language_setting.globals = conf.globals.map(StringSet::into_index_set);
-
-    language_setting.environment.jsx_runtime =
-        conf.jsx_runtime.or(parent_settings.environment.jsx_runtime);
-
-    language_setting
-}
-
-fn to_json_language_settings(
-    mut conf: PartialJsonConfiguration,
-    parent_settings: &LanguageSettings<JsonLanguage>,
-) -> LanguageSettings<JsonLanguage> {
-    let mut language_setting: LanguageSettings<JsonLanguage> = LanguageSettings::default();
-    let formatter = conf.formatter.take().unwrap_or_default();
-
-    language_setting.formatter.enabled = formatter.enabled;
-    language_setting.formatter.line_width = formatter.line_width;
-    language_setting.formatter.line_ending = formatter.line_ending;
-    language_setting.formatter.indent_width = formatter
-        .indent_width
-        .map(Into::into)
-        .or(formatter.indent_size.map(Into::into));
-    language_setting.formatter.indent_style = formatter.indent_style.map(Into::into);
-    language_setting.formatter.trailing_commas = formatter.trailing_commas;
-
-    let parser = conf.parser.take().unwrap_or_default();
-    let parent_parser = &parent_settings.parser;
-    language_setting.parser.allow_comments = parser.allow_comments.or(parent_parser.allow_comments);
-
-    language_setting.parser.allow_trailing_commas = parser
-        .allow_trailing_commas
-        .or(parent_parser.allow_trailing_commas);
-
-    language_setting
-}
-
-fn to_css_language_settings(
-    mut conf: PartialCssConfiguration,
-    parent_settings: &LanguageSettings<CssLanguage>,
-) -> LanguageSettings<CssLanguage> {
-    let mut language_setting: LanguageSettings<CssLanguage> = LanguageSettings::default();
-    let formatter = conf.formatter.take().unwrap_or_default();
-
-    language_setting.formatter.enabled = formatter.enabled;
-    language_setting.formatter.line_width = formatter.line_width;
-    language_setting.formatter.line_ending = formatter.line_ending;
-    language_setting.formatter.indent_width = formatter.indent_width.map(Into::into);
-    language_setting.formatter.indent_style = formatter.indent_style.map(Into::into);
-    language_setting.formatter.quote_style = formatter.quote_style;
-
-    let parser = conf.parser.take().unwrap_or_default();
-    let parent_parser = &parent_settings.parser;
-    language_setting.parser.allow_wrong_line_comments = parser
-        .allow_wrong_line_comments
-        .or(parent_parser.allow_wrong_line_comments);
-    language_setting.parser.css_modules = parser.css_modules.or(parent_parser.css_modules);
-
-    language_setting
-}
-
-fn to_graphql_language_settings(
-    mut conf: PartialGraphqlConfiguration,
-    _parent_settings: &LanguageSettings<GraphqlLanguage>,
-) -> LanguageSettings<GraphqlLanguage> {
-    let mut language_setting: LanguageSettings<GraphqlLanguage> = LanguageSettings::default();
-    let formatter = conf.formatter.take().unwrap_or_default();
-
-    language_setting.formatter.enabled = formatter.enabled;
-    language_setting.formatter.line_width = formatter.line_width;
-    language_setting.formatter.line_ending = formatter.line_ending;
-    language_setting.formatter.indent_width = formatter.indent_width.map(Into::into);
-    language_setting.formatter.indent_style = formatter.indent_style.map(Into::into);
-    language_setting.formatter.quote_style = formatter.quote_style;
-    language_setting.formatter.bracket_spacing = formatter.bracket_spacing;
-
-    language_setting
 }
 
 pub fn to_format_settings(
