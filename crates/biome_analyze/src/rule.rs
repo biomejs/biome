@@ -395,7 +395,6 @@ macro_rules! declare_lint_rule {
     };
 }
 
-
 /// This macro is used to declare an analyzer rule type, and implement the
 //  [RuleMeta] trait for it
 ///  # Example
@@ -600,7 +599,6 @@ macro_rules! declare_assists_group {
         pub(self) use group_category;
     };
 }
-
 
 /// This macro is used by the codegen script to declare an analyzer rule group,
 /// and implement the [RuleGroup] trait for it
