@@ -62,7 +62,7 @@ impl FromStr for LanguageKind {
             "html" => Ok(LanguageKind::Html),
             "yaml" => Ok(LanguageKind::Yaml),
             _ => Err(format!(
-                "Language {kind} not supported, please use: `js`, `css`, `json`, `grit`, `graphql`, `html`, `yaml` or yml"
+                "Language {kind} not supported, please use: `js`, `css`, `json`, `grit`, `graphql`, `html` or `yaml`"
             )),
         }
     }
