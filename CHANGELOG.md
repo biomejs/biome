@@ -16,7 +16,7 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 #### Enhancements
 
 - Implement [css suppression action](https://github.com/biomejs/biome/issues/3278). Contributed by @togami2864
-- Feature [#3306](https://github.com/biomejs/biome/pull/3306) support comments in `turbo.json`. Contributed by @Netail
+- Add support of comments in `turbo.json`. Contributed by @Netail
 
 ### CLI
 
