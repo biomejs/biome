@@ -162,6 +162,7 @@ pub(crate) fn parse_nested_qualified_rule(p: &mut CssParser) -> ParsedSyntax {
 /// relative selectors are followed by a block start (`{`), the speculative parse is considered successful
 /// and the function proceeds to parse the declaration or rule list block. If the speculative parse fails,
 /// the parser state is rewound and the function returns `Absent`.
+#[allow(dead_code)]
 #[inline]
 pub(crate) fn speculative_parse_nested_qualified_rule(p: &mut CssParser) -> ParsedSyntax {
     let m = p.start();

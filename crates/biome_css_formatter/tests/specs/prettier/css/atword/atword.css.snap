@@ -15,21 +15,18 @@ info: css/atword/atword.css
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,4 +1,4 @@
- .test {
+@@ -1,4 +1 @@
+-.test {
 -  @color: red;
-+  @color : red;
-   color: @color;
- }
+-  color: @color;
+-}
++.test { @color: red; color: @color; }
 ```
 
 # Output
 
 ```css
-.test {
-  @color : red;
-  color: @color;
-}
+.test { @color: red; color: @color; }
 ```
 
 # Errors
@@ -39,18 +36,90 @@ atword.css:1:29 parse ━━━━━━━━━━━━━━━━━━━�
   × Unexpected value or character.
   
   > 1 │ .test { @color: red; color: @color; }
-      │                             ^^^^^^
+      │                             ^
     2 │ 
   
   i Expected one of:
   
-  - identifier
-  - string
-  - number
-  - dimension
-  - ratio
-  - custom property
-  - function
+  - hover
+  - focus
+  - active
+  - first-child
+  - last-child
+  - nth-child
+  - nth-last-child
+  - first-of-type
+  - last-of-type
+  - nth-of-type
+  - nth-last-of-type
+  - only-child
+  - only-of-type
+  - checked
+  - disabled
+  - enabled
+  - required
+  - optional
+  - valid
+  - invalid
+  - in-range
+  - out-of-range
+  - read-only
+  - read-write
+  - placeholder-shown
+  - default
+  - checked
+  - indeterminate
+  - blank
+  - empty
+  - root
+  - target
+  - lang
+  - not
+  - is
+  - where
+  - fullscreen
+  - link
+  - visited
+  - any-link
+  - local-link
+  - scope
+  - current
+  - past
+  - future
+  
+atword.css:1:30 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `color`
+  
+  > 1 │ .test { @color: red; color: @color; }
+      │                              ^^^^^
+    2 │ 
+  
+  i Remove color
+  
+atword.css:1:35 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `;`
+  
+  > 1 │ .test { @color: red; color: @color; }
+      │                                   ^
+    2 │ 
+  
+  i Remove ;
+  
+atword.css:2:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `{` but instead the file ends
+  
+    1 │ .test { @color: red; color: @color; }
+  > 2 │ 
+      │ 
+  
+  i the file ends here
+  
+    1 │ .test { @color: red; color: @color; }
+  > 2 │ 
+      │ 
   
 
 ```

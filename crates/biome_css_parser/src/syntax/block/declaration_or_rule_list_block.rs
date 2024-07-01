@@ -4,7 +4,7 @@ use crate::syntax::block::ParseBlockBody;
 use crate::syntax::parse_error::expected_any_declaration_or_at_rule;
 use crate::syntax::{
     is_at_declaration, is_at_nested_qualified_rule, parse_declaration_with_semicolon,
-    parse_nested_qualified_rule, speculative_parse_nested_qualified_rule,
+    parse_nested_qualified_rule, try_parse,
 };
 use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::{CssSyntaxKind, T};
@@ -66,8 +66,16 @@ impl ParseNodeList for DeclarationOrRuleList {
             //         font-weight: 500;
             //     }
             // }
-            speculative_parse_nested_qualified_rule(p)
-                .or_else(|| parse_declaration_with_semicolon(p))
+            let result = try_parse(p, |p| {
+                let declaration = parse_declaration_with_semicolon(p);
+                if matches!(p.last(), Some(T![;])) || p.at(T!['}']) {
+                    Ok(declaration)
+                } else {
+                    Err(())
+                }
+            });
+
+            result.unwrap_or_else(|_| parse_nested_qualified_rule(p))
         } else if is_at_nested_qualified_rule(p) {
             parse_nested_qualified_rule(p)
         } else {
