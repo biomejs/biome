@@ -403,9 +403,9 @@ macro_rules! declare_lint_rule {
 /// The macro itself expect the following syntax:
 ///
 /// ```rust,ignore
-///use biome_analyze::declare_rule;
+///use biome_analyze::declare_syntax_rule;
 ///
-/// declare_lint_rule! {
+/// declare_syntax_rule! {
 ///     /// Documentation
 ///     pub(crate) ExampleRule {
 ///         version: "1.0.0",
@@ -474,9 +474,9 @@ macro_rules! declare_rule {
 /// The macro itself expect the following syntax:
 ///
 /// ```rust,ignore
-///use biome_analyze::declare_refactor;
+///use biome_analyze::declare_refactor_rule;
 ///
-/// declare_refactor! {
+/// declare_refactor_rule! {
 ///     /// Documentation
 ///     pub(crate) ExampleRule {
 ///         version: "1.0.0",
@@ -489,7 +489,7 @@ macro_rules! declare_rule {
 /// Check [crate](module documentation) for a better
 /// understanding of how the macro works
 #[macro_export]
-macro_rules! declare_refactor {
+macro_rules! declare_refactor_rule {
     ( $( #[doc = $doc:literal] )+ $vis:vis $id:ident {
         version: $version:literal,
         name: $name:tt,
