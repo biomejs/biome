@@ -76,10 +76,6 @@ declare_rule! {
     /// Use the options to specify the correct import extensions for your project based on the linted
     /// file extension. These mappings will override the rule's default logic.
     ///
-    /// Mainly, this is a temporary workaround that allows Biome to propose correct import extensions
-    /// for TypeScript projects that use ES Modules. TypeScript requires you to specify imports to
-    /// the actual files used in runtime: `.js` or `.mjs` (see more here: https://github.com/microsoft/TypeScript/issues/49083#issuecomment-1435399267).
-    ///
     /// Currently, Biome determines the import extension based on the inspected file extension.
     /// The `suggestedExtensions` option works as a map, where the key is the source file extension
     /// and the value should provide two possible mappings for imports:
@@ -104,6 +100,12 @@ declare_rule! {
     /// }
     /// ```
     ///
+    /// :::caution
+    /// Mainly, this is a temporary workaround that allows Biome to propose correct import extensions
+    /// for TypeScript projects that use ES Modules. TypeScript requires you to specify imports to
+    /// the actual files used in runtime: `.js` or `.mjs` (see more here: https://github.com/microsoft/TypeScript/issues/49083#issuecomment-1435399267).
+    /// :::
+    /// 
     /// ## Caveats
     ///
     /// If you are using TypeScript, TypeScript version 5.0 and later is required, also make sure to enable
