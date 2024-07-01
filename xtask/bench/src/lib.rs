@@ -32,7 +32,6 @@ pub fn bench_parser_group(group: &mut BenchmarkGroup<WallTime>, test_case: TestC
     let code = test_case.code();
 
     group.throughput(Throughput::Bytes(code.len() as u64));
-
     group.bench_with_input(
         BenchmarkId::new(test_case.filename(), "uncached"),
         &code,
