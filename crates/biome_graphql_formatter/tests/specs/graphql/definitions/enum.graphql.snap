@@ -1,0 +1,87 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: graphql/definitions/enum.graphql
+---
+# Input
+
+```graphql
+			enum 				name
+			{
+  NORTH
+  EAST
+
+
+  	SOUTH
+ 				 WEST
+
+
+  union
+  			type
+  				interface
+  enum
+}
+
+enum Direction {				}
+
+enum Direction
+
+enum
+Direction
+
+@deprecated
+
+{
+  "north"			 NORTH
+
+
+	@deprecated
+}
+
+"This is an enum"
+
+enum Direction @deprecated
+
+```
+
+
+=============================
+
+# Outputs
+
+## Output 1
+
+-----
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 80
+Bracket spacing: true
+Quote style: Double Quotes
+-----
+
+```graphql
+enum name {
+	NORTH
+	EAST
+
+	SOUTH
+	WEST
+
+	union
+	type
+	interface
+	enum
+}
+
+enum Direction {}
+
+enum Direction
+
+enum Direction @deprecated {
+	"north"
+	NORTH @deprecated
+}
+
+"This is an enum"
+enum Direction @deprecated
+```

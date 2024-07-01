@@ -92,7 +92,7 @@ impl CliSnapshot {
                 let redacted_content =
                     redact_snapshot(file_content).unwrap_or(String::new().into());
 
-                let _ = write!(content, "## `{}`\n\n", redacted_name);
+                let _ = write!(content, "## `{redacted_name}`\n\n");
                 let _ = write!(content, "```{extension}");
                 content.push('\n');
                 content.push_str(&redacted_content);

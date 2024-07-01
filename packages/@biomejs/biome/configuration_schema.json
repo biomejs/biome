@@ -33,6 +33,13 @@
 				{ "type": "null" }
 			]
 		},
+		"graphql": {
+			"description": "Specific configuration for the GraphQL language",
+			"anyOf": [
+				{ "$ref": "#/definitions/GraphqlConfiguration" },
+				{ "type": "null" }
+			]
+		},
 		"javascript": {
 			"description": "Specific configuration for the JavaScript language",
 			"anyOf": [
@@ -299,6 +306,7 @@
 		},
 		"ArrowParentheses": { "type": "string", "enum": ["always", "asNeeded"] },
 		"AttributePosition": { "type": "string", "enum": ["auto", "multiline"] },
+		"BracketSpacing": { "type": "boolean" },
 		"Complexity": {
 			"description": "A list of rules that belong to this group",
 			"type": "object",
@@ -1100,6 +1108,13 @@
 						{ "type": "null" }
 					]
 				},
+				"bracketSpacing": {
+					"description": "Whether to insert spaces around brackets in object literals. Defaults to true.",
+					"anyOf": [
+						{ "$ref": "#/definitions/BracketSpacing" },
+						{ "type": "null" }
+					]
+				},
 				"enabled": { "type": ["boolean", "null"] },
 				"formatWithErrors": {
 					"description": "Stores whether formatting should be allowed to proceed if a given file has syntax errors",
@@ -1135,6 +1150,61 @@
 				"lineWidth": {
 					"description": "What's the max width of a line. Defaults to 80.",
 					"anyOf": [{ "$ref": "#/definitions/LineWidth" }, { "type": "null" }]
+				}
+			},
+			"additionalProperties": false
+		},
+		"GraphqlConfiguration": {
+			"description": "Options applied to GraphQL files",
+			"type": "object",
+			"properties": {
+				"formatter": {
+					"description": "GraphQL formatter options",
+					"anyOf": [
+						{ "$ref": "#/definitions/GraphqlFormatter" },
+						{ "type": "null" }
+					]
+				}
+			},
+			"additionalProperties": false
+		},
+		"GraphqlFormatter": {
+			"description": "Options that changes how the GraphQL formatter behaves",
+			"type": "object",
+			"properties": {
+				"bracketSpacing": {
+					"description": "Whether to insert spaces around brackets in object literals. Defaults to true.",
+					"anyOf": [
+						{ "$ref": "#/definitions/BracketSpacing" },
+						{ "type": "null" }
+					]
+				},
+				"enabled": {
+					"description": "Control the formatter for GraphQL files.",
+					"type": ["boolean", "null"]
+				},
+				"indentStyle": {
+					"description": "The indent style applied to GraphQL files.",
+					"anyOf": [
+						{ "$ref": "#/definitions/PlainIndentStyle" },
+						{ "type": "null" }
+					]
+				},
+				"indentWidth": {
+					"description": "The size of the indentation applied to GraphQL files. Default to 2.",
+					"anyOf": [{ "$ref": "#/definitions/IndentWidth" }, { "type": "null" }]
+				},
+				"lineEnding": {
+					"description": "The type of line ending applied to GraphQL files.",
+					"anyOf": [{ "$ref": "#/definitions/LineEnding" }, { "type": "null" }]
+				},
+				"lineWidth": {
+					"description": "What's the max width of a line applied to GraphQL files. Defaults to 80.",
+					"anyOf": [{ "$ref": "#/definitions/LineWidth" }, { "type": "null" }]
+				},
+				"quoteStyle": {
+					"description": "The type of quotes used in GraphQL code. Defaults to double.",
+					"anyOf": [{ "$ref": "#/definitions/QuoteStyle" }, { "type": "null" }]
 				}
 			},
 			"additionalProperties": false
@@ -1249,7 +1319,10 @@
 				},
 				"bracketSpacing": {
 					"description": "Whether to insert spaces around brackets in object literals. Defaults to true.",
-					"type": ["boolean", "null"]
+					"anyOf": [
+						{ "$ref": "#/definitions/BracketSpacing" },
+						{ "type": "null" }
+					]
 				},
 				"enabled": {
 					"description": "Control the formatter for JavaScript (and its super languages) files.",
@@ -1734,6 +1807,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noExportedImports": {
+					"description": "Disallow exporting an imported variable.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noImportantInKeyframe": {
 					"description": "Disallow invalid !important within keyframe declarations",
 					"anyOf": [
@@ -1920,6 +2000,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useDeprecatedReason": {
+					"description": "Require specifying the reason argument when using @deprecated directive",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useErrorMessage": {
 					"description": "Enforce passing a message value when creating a built-in error.",
 					"anyOf": [
@@ -2042,6 +2129,13 @@
 						{ "type": "null" }
 					]
 				},
+				"bracketSpacing": {
+					"description": "Whether to insert spaces around brackets in object literals. Defaults to true.",
+					"anyOf": [
+						{ "$ref": "#/definitions/BracketSpacing" },
+						{ "type": "null" }
+					]
+				},
 				"enabled": { "type": ["boolean", "null"] },
 				"formatWithErrors": {
 					"description": "Stores whether formatting should be allowed to proceed if a given file has syntax errors",
@@ -2111,6 +2205,13 @@
 					"description": "Specific configuration for the Json language",
 					"anyOf": [
 						{ "$ref": "#/definitions/OverrideFormatterConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"graphql": {
+					"description": "Specific configuration for the Graphql language",
+					"anyOf": [
+						{ "$ref": "#/definitions/GraphqlConfiguration" },
 						{ "type": "null" }
 					]
 				},

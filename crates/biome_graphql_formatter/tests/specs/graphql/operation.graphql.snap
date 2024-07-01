@@ -1,0 +1,240 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: graphql/operation.graphql
+---
+# Input
+
+```graphql
+query {
+
+
+	likeStory
+
+
+}
+
+# shorthand
+{
+
+
+  likeStory
+
+
+
+}
+
+mutation
+
+{
+
+
+	likeStory
+
+
+}
+
+subscription
+
+{
+
+
+	storyLiked
+
+
+}
+
+# with name
+query    likeStory
+
+  {
+
+
+		likeStory
+}
+
+query    query
+
+   {
+
+
+	likeStory
+
+
+	 }
+
+# with variables
+query    (   $storyId: ID!) {
+
+
+	likeStory
+
+	(
+
+		storyId: $storyId
+
+	)
+
+
+
+}
+
+query
+
+(   $storyId:
+
+ID =
+
+"1"
+
+
+ ) {
+
+
+	likeStory
+
+	(
+
+		storyId:
+
+
+		  $storyId
+
+	)
+
+
+
+}
+
+# with directives
+query (
+
+	$storyId:
+
+	ID!
+
+)
+
+@skip
+
+(if:
+true)
+
+  {
+
+
+		likeStory(
+
+			  storyId:
+
+				$storyId
+
+		 )
+
+
+
+}
+
+query
+
+enum(
+	$true: false
+) {
+
+  null
+
+  mutation
+
+  enum
+
+
+	Direction
+
+	@deprecated {
+
+        NORTH
+
+
+
+    WEST
+
+
+
+
+	}
+
+
+}
+
+```
+
+
+=============================
+
+# Outputs
+
+## Output 1
+
+-----
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 80
+Bracket spacing: true
+Quote style: Double Quotes
+-----
+
+```graphql
+query {
+	likeStory
+}
+
+# shorthand
+{
+	likeStory
+}
+
+mutation {
+	likeStory
+}
+
+subscription {
+	storyLiked
+}
+
+# with name
+query likeStory {
+	likeStory
+}
+
+query query {
+	likeStory
+}
+
+# with variables
+query ($storyId: ID!) {
+	likeStory(storyId: $storyId)
+}
+
+query ($storyId: ID = "1") {
+	likeStory(storyId: $storyId)
+}
+
+# with directives
+query ($storyId: ID!) @skip(if: true) {
+	likeStory(storyId: $storyId)
+}
+
+query enum($true: false) {
+	null
+
+	mutation
+
+	enum
+
+	Direction @deprecated {
+		NORTH
+
+		WEST
+	}
+}
+```

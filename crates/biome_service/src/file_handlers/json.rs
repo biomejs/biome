@@ -48,8 +48,8 @@ pub struct JsonFormatterSettings {
 #[derive(Debug, Clone, Default, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub struct JsonParserSettings {
-    pub allow_comments: bool,
-    pub allow_trailing_commas: bool,
+    pub allow_comments: Option<bool>,
+    pub allow_trailing_commas: Option<bool>,
 }
 
 #[derive(Debug, Clone, Default, serde::Serialize, serde::Deserialize)]
@@ -179,10 +179,14 @@ fn parse(
     let overrides = settings.map(|s| &s.override_settings);
     let optional_json_file_source = file_source.to_json_file_source();
     let options = JsonParserOptions {
-        allow_comments: parser.map(|p| p.allow_comments).unwrap_or_default()
+        allow_comments: parser.and_then(|p| p.allow_comments).map_or_else(
             || optional_json_file_source.map_or(false, |x| x.allow_comments()),
-        allow_trailing_commas: parser.map(|p| p.allow_trailing_commas).unwrap_or_default()
+            |value| value,
+        ),
+        allow_trailing_commas: parser.and_then(|p| p.allow_trailing_commas).map_or_else(
             || optional_json_file_source.map_or(false, |x| x.allow_trailing_commas()),
+            |value| value,
+        ),
     };
     let options = if let Some(overrides) = overrides {
         overrides.to_override_json_parser_options(biome_path, options)

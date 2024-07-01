@@ -1,0 +1,1301 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```css
+@font-face {
+	unicode-range: U+000-49F, U+2000-27FF, U+2900-2BFF, U+1D400-1D7FF, U+ff??;
+}
+
+@font-face {
+	unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2212, U+2215;
+}
+
+@font-face {
+	unicode-range: U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+
+@font-face {
+	font-family: 'Ampersand';
+	src: local('Times New Roman');
+	unicode-range: U+26;               /* single codepoint */
+	unicode-range: u+26;
+	unicode-range: U+0-7F;
+	unicode-range: U+0025-00FF;        /* codepoint range */
+	unicode-range: U+4??;              /* wildcard range */
+	unicode-range: U+0025-00FF, U+4??; /* multiple values */
+	unicode-range: U+A5, U+4E00-9FFF, U+30??, U+FF00-FF9F; /* multiple values */
+	unicode-range: U+????;
+	unicode-range: U+??????;
+	unicode-range: U+12;
+	unicode-range: U+12e112;
+	unicode-range: U+1e1ee1;
+	unicode-range: U+1e1ee1-FFFFFF;
+	unicode-range: U+1e1ee?;
+	unicode-range: U+12-13;
+}
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    rules: CssRuleList [
+        CssAtRule {
+            at_token: AT@0..1 "@" [] [],
+            rule: CssFontFaceAtRule {
+                font_face_token: FONT_FACE_KW@1..11 "font-face" [] [Whitespace(" ")],
+                block: CssDeclarationBlock {
+                    l_curly_token: L_CURLY@11..12 "{" [] [],
+                    declarations: CssDeclarationList [
+                        CssDeclarationWithSemicolon {
+                            declaration: CssDeclaration {
+                                property: CssGenericProperty {
+                                    name: CssIdentifier {
+                                        value_token: IDENT@12..27 "unicode-range" [Newline("\n"), Whitespace("\t")] [],
+                                    },
+                                    colon_token: COLON@27..29 ":" [] [Whitespace(" ")],
+                                    value: CssGenericComponentValueList [
+                                        CssUnicodeRange {
+                                            prefix_token: UNICODE@29..31 "U+" [] [],
+                                            value: CssUnicodeRangeInterval {
+                                                start: CssUnicodeCodepoint {
+                                                    value_token: CSS_UNICODE_CODEPOINT_LITERAL@31..34 "000" [] [],
+                                                },
+                                                minus_token: MINUS@34..35 "-" [] [],
+                                                end: CssUnicodeCodepoint {
+                                                    value_token: CSS_UNICODE_CODEPOINT_LITERAL@35..38 "49F" [] [],
+                                                },
+                                            },
+                                        },
+                                        CssGenericDelimiter {
+                                            value: COMMA@38..40 "," [] [Whitespace(" ")],
+                                        },
+                                        CssUnicodeRange {
+                                            prefix_token: UNICODE@40..42 "U+" [] [],
+                                            value: CssUnicodeRangeInterval {
+                                                start: CssUnicodeCodepoint {
+                                                    value_token: CSS_UNICODE_CODEPOINT_LITERAL@42..46 "2000" [] [],
+                                                },
+                                                minus_token: MINUS@46..47 "-" [] [],
+                                                end: CssUnicodeCodepoint {
+                                                    value_token: CSS_UNICODE_CODEPOINT_LITERAL@47..51 "27FF" [] [],
+                                                },
+                                            },
+                                        },
+                                        CssGenericDelimiter {
+                                            value: COMMA@51..53 "," [] [Whitespace(" ")],
+                                        },
+                                        CssUnicodeRange {
+                                            prefix_token: UNICODE@53..55 "U+" [] [],
+                                            value: CssUnicodeRangeInterval {
+                                                start: CssUnicodeCodepoint {
+                                                    value_token: CSS_UNICODE_CODEPOINT_LITERAL@55..59 "2900" [] [],
+                                                },
+                                                minus_token: MINUS@59..60 "-" [] [],
+                                                end: CssUnicodeCodepoint {
+                                                    value_token: CSS_UNICODE_CODEPOINT_LITERAL@60..64 "2BFF" [] [],
+                                                },
+                                            },
+                                        },
+                                        CssGenericDelimiter {
+                                            value: COMMA@64..66 "," [] [Whitespace(" ")],
+                                        },
+                                        CssUnicodeRange {
+                                            prefix_token: UNICODE@66..68 "U+" [] [],
+                                            value: CssUnicodeRangeInterval {
+                                                start: CssUnicodeCodepoint {
+                                                    value_token: CSS_UNICODE_CODEPOINT_LITERAL@68..73 "1D400" [] [],
+                                                },
+                                                minus_token: MINUS@73..74 "-" [] [],
+                                                end: CssUnicodeCodepoint {
+                                                    value_token: CSS_UNICODE_CODEPOINT_LITERAL@74..79 "1D7FF" [] [],
+                                                },
+                                            },
+                                        },
+                                        CssGenericDelimiter {
+                                            value: COMMA@79..81 "," [] [Whitespace(" ")],
+                                        },
+                                        CssUnicodeRange {
+                                            prefix_token: UNICODE@81..83 "U+" [] [],
+                                            value: CssUnicodeRangeWildcard {
+                                                value_token: CSS_UNICODE_RANGE_WILDCARD_LITERAL@83..87 "ff??" [] [],
+                                            },
+                                        },
+                                    ],
+                                },
+                                important: missing (optional),
+                            },
+                            semicolon_token: SEMICOLON@87..88 ";" [] [],
+                        },
+                    ],
+                    r_curly_token: R_CURLY@88..90 "}" [Newline("\n")] [],
+                },
+            },
+        },
+        CssAtRule {
+            at_token: AT@90..93 "@" [Newline("\n"), Newline("\n")] [],
+            rule: CssFontFaceAtRule {
+                font_face_token: FONT_FACE_KW@93..103 "font-face" [] [Whitespace(" ")],
+                block: CssDeclarationBlock {
+                    l_curly_token: L_CURLY@103..104 "{" [] [],
+                    declarations: CssDeclarationList [
+                        CssDeclarationWithSemicolon {
+                            declaration: CssDeclaration {
+                                property: CssGenericProperty {
+                                    name: CssIdentifier {
+                                        value_token: IDENT@104..119 "unicode-range" [Newline("\n"), Whitespace("\t")] [],
+                                    },
+                                    colon_token: COLON@119..121 ":" [] [Whitespace(" ")],
+                                    value: CssGenericComponentValueList [
+                                        CssUnicodeRange {
+                                            prefix_token: UNICODE@121..123 "U+" [] [],
+                                            value: CssUnicodeRangeInterval {
+                                                start: CssUnicodeCodepoint {
+                                                    value_token: CSS_UNICODE_CODEPOINT_LITERAL@123..127 "0000" [] [],
+                                                },
+                                                minus_token: MINUS@127..128 "-" [] [],
+                                                end: CssUnicodeCodepoint {
+                                                    value_token: CSS_UNICODE_CODEPOINT_LITERAL@128..132 "00FF" [] [],
+                                                },
+                                            },
+                                        },
+                                        CssGenericDelimiter {
+                                            value: COMMA@132..134 "," [] [Whitespace(" ")],
+                                        },
+                                        CssUnicodeRange {
+                                            prefix_token: UNICODE@134..136 "U+" [] [],
+                                            value: CssUnicodeCodepoint {
+                                                value_token: CSS_UNICODE_CODEPOINT_LITERAL@136..140 "0131" [] [],
+                                            },
+                                        },
+                                        CssGenericDelimiter {
+                                            value: COMMA@140..142 "," [] [Whitespace(" ")],
+                                        },
+                                        CssUnicodeRange {
+                                            prefix_token: UNICODE@142..144 "U+" [] [],
+                                            value: CssUnicodeRangeInterval {
+                                                start: CssUnicodeCodepoint {
+                                                    value_token: CSS_UNICODE_CODEPOINT_LITERAL@144..148 "0152" [] [],
+                                                },
+                                                minus_token: MINUS@148..149 "-" [] [],
+                                                end: CssUnicodeCodepoint {
+                                                    value_token: CSS_UNICODE_CODEPOINT_LITERAL@149..153 "0153" [] [],
+                                                },
+                                            },
+                                        },
+                                        CssGenericDelimiter {
+                                            value: COMMA@153..155 "," [] [Whitespace(" ")],
+                                        },
+                                        CssUnicodeRange {
+                                            prefix_token: UNICODE@155..157 "U+" [] [],
+                                            value: CssUnicodeCodepoint {
+                                                value_token: CSS_UNICODE_CODEPOINT_LITERAL@157..161 "02C6" [] [],
+                                            },
+                                        },
+                                        CssGenericDelimiter {
+                                            value: COMMA@161..163 "," [] [Whitespace(" ")],
+                                        },
+                                        CssUnicodeRange {
+                                            prefix_token: UNICODE@163..165 "U+" [] [],
+                                            value: CssUnicodeCodepoint {
+                                                value_token: CSS_UNICODE_CODEPOINT_LITERAL@165..169 "02DA" [] [],
+                                            },
+                                        },
+                                        CssGenericDelimiter {
+                                            value: COMMA@169..171 "," [] [Whitespace(" ")],
+                                        },
+                                        CssUnicodeRange {
+                                            prefix_token: UNICODE@171..173 "U+" [] [],
+                                            value: CssUnicodeCodepoint {
+                                                value_token: CSS_UNICODE_CODEPOINT_LITERAL@173..177 "02DC" [] [],
+                                            },
+                                        },
+                                        CssGenericDelimiter {
+                                            value: COMMA@177..179 "," [] [Whitespace(" ")],
+                                        },
+                                        CssUnicodeRange {
+                                            prefix_token: UNICODE@179..181 "U+" [] [],
+                                            value: CssUnicodeRangeInterval {
+                                                start: CssUnicodeCodepoint {
+                                                    value_token: CSS_UNICODE_CODEPOINT_LITERAL@181..185 "2000" [] [],
+                                                },
+                                                minus_token: MINUS@185..186 "-" [] [],
+                                                end: CssUnicodeCodepoint {
+                                                    value_token: CSS_UNICODE_CODEPOINT_LITERAL@186..190 "206F" [] [],
+                                                },
+                                            },
+                                        },
+                                        CssGenericDelimiter {
+                                            value: COMMA@190..192 "," [] [Whitespace(" ")],
+                                        },
+                                        CssUnicodeRange {
+                                            prefix_token: UNICODE@192..194 "U+" [] [],
+                                            value: CssUnicodeCodepoint {
+                                                value_token: CSS_UNICODE_CODEPOINT_LITERAL@194..198 "2074" [] [],
+                                            },
+                                        },
+                                        CssGenericDelimiter {
+                                            value: COMMA@198..200 "," [] [Whitespace(" ")],
+                                        },
+                                        CssUnicodeRange {
+                                            prefix_token: UNICODE@200..202 "U+" [] [],
+                                            value: CssUnicodeCodepoint {
+                                                value_token: CSS_UNICODE_CODEPOINT_LITERAL@202..206 "20AC" [] [],
+                                            },
+                                        },
+                                        CssGenericDelimiter {
+                                            value: COMMA@206..208 "," [] [Whitespace(" ")],
+                                        },
+                                        CssUnicodeRange {
+                                            prefix_token: UNICODE@208..210 "U+" [] [],
+                                            value: CssUnicodeCodepoint {
+                                                value_token: CSS_UNICODE_CODEPOINT_LITERAL@210..214 "2212" [] [],
+                                            },
+                                        },
+                                        CssGenericDelimiter {
+                                            value: COMMA@214..216 "," [] [Whitespace(" ")],
+                                        },
+                                        CssUnicodeRange {
+                                            prefix_token: UNICODE@216..218 "U+" [] [],
+                                            value: CssUnicodeCodepoint {
+                                                value_token: CSS_UNICODE_CODEPOINT_LITERAL@218..222 "2215" [] [],
+                                            },
+                                        },
+                                    ],
+                                },
+                                important: missing (optional),
+                            },
+                            semicolon_token: SEMICOLON@222..223 ";" [] [],
+                        },
+                    ],
+                    r_curly_token: R_CURLY@223..225 "}" [Newline("\n")] [],
+                },
+            },
+        },
+        CssAtRule {
+            at_token: AT@225..228 "@" [Newline("\n"), Newline("\n")] [],
+            rule: CssFontFaceAtRule {
+                font_face_token: FONT_FACE_KW@228..238 "font-face" [] [Whitespace(" ")],
+                block: CssDeclarationBlock {
+                    l_curly_token: L_CURLY@238..239 "{" [] [],
+                    declarations: CssDeclarationList [
+                        CssDeclarationWithSemicolon {
+                            declaration: CssDeclaration {
+                                property: CssGenericProperty {
+                                    name: CssIdentifier {
+                                        value_token: IDENT@239..254 "unicode-range" [Newline("\n"), Whitespace("\t")] [],
+                                    },
+                                    colon_token: COLON@254..256 ":" [] [Whitespace(" ")],
+                                    value: CssGenericComponentValueList [
+                                        CssUnicodeRange {
+                                            prefix_token: UNICODE@256..258 "U+" [] [],
+                                            value: CssUnicodeRangeInterval {
+                                                start: CssUnicodeCodepoint {
+                                                    value_token: CSS_UNICODE_CODEPOINT_LITERAL@258..262 "0400" [] [],
+                                                },
+                                                minus_token: MINUS@262..263 "-" [] [],
+                                                end: CssUnicodeCodepoint {
+                                                    value_token: CSS_UNICODE_CODEPOINT_LITERAL@263..267 "045F" [] [],
+                                                },
+                                            },
+                                        },
+                                        CssGenericDelimiter {
+                                            value: COMMA@267..269 "," [] [Whitespace(" ")],
+                                        },
+                                        CssUnicodeRange {
+                                            prefix_token: UNICODE@269..271 "U+" [] [],
+                                            value: CssUnicodeRangeInterval {
+                                                start: CssUnicodeCodepoint {
+                                                    value_token: CSS_UNICODE_CODEPOINT_LITERAL@271..275 "0490" [] [],
+                                                },
+                                                minus_token: MINUS@275..276 "-" [] [],
+                                                end: CssUnicodeCodepoint {
+                                                    value_token: CSS_UNICODE_CODEPOINT_LITERAL@276..280 "0491" [] [],
+                                                },
+                                            },
+                                        },
+                                        CssGenericDelimiter {
+                                            value: COMMA@280..282 "," [] [Whitespace(" ")],
+                                        },
+                                        CssUnicodeRange {
+                                            prefix_token: UNICODE@282..284 "U+" [] [],
+                                            value: CssUnicodeRangeInterval {
+                                                start: CssUnicodeCodepoint {
+                                                    value_token: CSS_UNICODE_CODEPOINT_LITERAL@284..288 "04B0" [] [],
+                                                },
+                                                minus_token: MINUS@288..289 "-" [] [],
+                                                end: CssUnicodeCodepoint {
+                                                    value_token: CSS_UNICODE_CODEPOINT_LITERAL@289..293 "04B1" [] [],
+                                                },
+                                            },
+                                        },
+                                        CssGenericDelimiter {
+                                            value: COMMA@293..295 "," [] [Whitespace(" ")],
+                                        },
+                                        CssUnicodeRange {
+                                            prefix_token: UNICODE@295..297 "U+" [] [],
+                                            value: CssUnicodeCodepoint {
+                                                value_token: CSS_UNICODE_CODEPOINT_LITERAL@297..301 "2116" [] [],
+                                            },
+                                        },
+                                    ],
+                                },
+                                important: missing (optional),
+                            },
+                            semicolon_token: SEMICOLON@301..302 ";" [] [],
+                        },
+                    ],
+                    r_curly_token: R_CURLY@302..304 "}" [Newline("\n")] [],
+                },
+            },
+        },
+        CssAtRule {
+            at_token: AT@304..307 "@" [Newline("\n"), Newline("\n")] [],
+            rule: CssFontFaceAtRule {
+                font_face_token: FONT_FACE_KW@307..317 "font-face" [] [Whitespace(" ")],
+                block: CssDeclarationBlock {
+                    l_curly_token: L_CURLY@317..318 "{" [] [],
+                    declarations: CssDeclarationList [
+                        CssDeclarationWithSemicolon {
+                            declaration: CssDeclaration {
+                                property: CssGenericProperty {
+                                    name: CssIdentifier {
+                                        value_token: IDENT@318..331 "font-family" [Newline("\n"), Whitespace("\t")] [],
+                                    },
+                                    colon_token: COLON@331..333 ":" [] [Whitespace(" ")],
+                                    value: CssGenericComponentValueList [
+                                        CssString {
+                                            value_token: CSS_STRING_LITERAL@333..344 "'Ampersand'" [] [],
+                                        },
+                                    ],
+                                },
+                                important: missing (optional),
+                            },
+                            semicolon_token: SEMICOLON@344..345 ";" [] [],
+                        },
+                        CssDeclarationWithSemicolon {
+                            declaration: CssDeclaration {
+                                property: CssGenericProperty {
+                                    name: CssIdentifier {
+                                        value_token: IDENT@345..350 "src" [Newline("\n"), Whitespace("\t")] [],
+                                    },
+                                    colon_token: COLON@350..352 ":" [] [Whitespace(" ")],
+                                    value: CssGenericComponentValueList [
+                                        CssFunction {
+                                            name: CssIdentifier {
+                                                value_token: IDENT@352..357 "local" [] [],
+                                            },
+                                            l_paren_token: L_PAREN@357..358 "(" [] [],
+                                            items: CssParameterList [
+                                                CssParameter {
+                                                    any_css_expression: CssListOfComponentValuesExpression {
+                                                        css_component_value_list: CssComponentValueList [
+                                                            CssString {
+                                                                value_token: CSS_STRING_LITERAL@358..375 "'Times New Roman'" [] [],
+                                                            },
+                                                        ],
+                                                    },
+                                                },
+                                            ],
+                                            r_paren_token: R_PAREN@375..376 ")" [] [],
+                                        },
+                                    ],
+                                },
+                                important: missing (optional),
+                            },
+                            semicolon_token: SEMICOLON@376..377 ";" [] [],
+                        },
+                        CssDeclarationWithSemicolon {
+                            declaration: CssDeclaration {
+                                property: CssGenericProperty {
+                                    name: CssIdentifier {
+                                        value_token: IDENT@377..392 "unicode-range" [Newline("\n"), Whitespace("\t")] [],
+                                    },
+                                    colon_token: COLON@392..394 ":" [] [Whitespace(" ")],
+                                    value: CssGenericComponentValueList [
+                                        CssUnicodeRange {
+                                            prefix_token: UNICODE@394..396 "U+" [] [],
+                                            value: CssUnicodeCodepoint {
+                                                value_token: CSS_UNICODE_CODEPOINT_LITERAL@396..398 "26" [] [],
+                                            },
+                                        },
+                                    ],
+                                },
+                                important: missing (optional),
+                            },
+                            semicolon_token: SEMICOLON@398..436 ";" [] [Whitespace("               "), Comments("/* single codepoint */")],
+                        },
+                        CssDeclarationWithSemicolon {
+                            declaration: CssDeclaration {
+                                property: CssGenericProperty {
+                                    name: CssIdentifier {
+                                        value_token: IDENT@436..451 "unicode-range" [Newline("\n"), Whitespace("\t")] [],
+                                    },
+                                    colon_token: COLON@451..453 ":" [] [Whitespace(" ")],
+                                    value: CssGenericComponentValueList [
+                                        CssUnicodeRange {
+                                            prefix_token: UNICODE@453..455 "u+" [] [],
+                                            value: CssUnicodeCodepoint {
+                                                value_token: CSS_UNICODE_CODEPOINT_LITERAL@455..457 "26" [] [],
+                                            },
+                                        },
+                                    ],
+                                },
+                                important: missing (optional),
+                            },
+                            semicolon_token: SEMICOLON@457..458 ";" [] [],
+                        },
+                        CssDeclarationWithSemicolon {
+                            declaration: CssDeclaration {
+                                property: CssGenericProperty {
+                                    name: CssIdentifier {
+                                        value_token: IDENT@458..473 "unicode-range" [Newline("\n"), Whitespace("\t")] [],
+                                    },
+                                    colon_token: COLON@473..475 ":" [] [Whitespace(" ")],
+                                    value: CssGenericComponentValueList [
+                                        CssUnicodeRange {
+                                            prefix_token: UNICODE@475..477 "U+" [] [],
+                                            value: CssUnicodeRangeInterval {
+                                                start: CssUnicodeCodepoint {
+                                                    value_token: CSS_UNICODE_CODEPOINT_LITERAL@477..478 "0" [] [],
+                                                },
+                                                minus_token: MINUS@478..479 "-" [] [],
+                                                end: CssUnicodeCodepoint {
+                                                    value_token: CSS_UNICODE_CODEPOINT_LITERAL@479..481 "7F" [] [],
+                                                },
+                                            },
+                                        },
+                                    ],
+                                },
+                                important: missing (optional),
+                            },
+                            semicolon_token: SEMICOLON@481..482 ";" [] [],
+                        },
+                        CssDeclarationWithSemicolon {
+                            declaration: CssDeclaration {
+                                property: CssGenericProperty {
+                                    name: CssIdentifier {
+                                        value_token: IDENT@482..497 "unicode-range" [Newline("\n"), Whitespace("\t")] [],
+                                    },
+                                    colon_token: COLON@497..499 ":" [] [Whitespace(" ")],
+                                    value: CssGenericComponentValueList [
+                                        CssUnicodeRange {
+                                            prefix_token: UNICODE@499..501 "U+" [] [],
+                                            value: CssUnicodeRangeInterval {
+                                                start: CssUnicodeCodepoint {
+                                                    value_token: CSS_UNICODE_CODEPOINT_LITERAL@501..505 "0025" [] [],
+                                                },
+                                                minus_token: MINUS@505..506 "-" [] [],
+                                                end: CssUnicodeCodepoint {
+                                                    value_token: CSS_UNICODE_CODEPOINT_LITERAL@506..510 "00FF" [] [],
+                                                },
+                                            },
+                                        },
+                                    ],
+                                },
+                                important: missing (optional),
+                            },
+                            semicolon_token: SEMICOLON@510..540 ";" [] [Whitespace("        "), Comments("/* codepoint range */")],
+                        },
+                        CssDeclarationWithSemicolon {
+                            declaration: CssDeclaration {
+                                property: CssGenericProperty {
+                                    name: CssIdentifier {
+                                        value_token: IDENT@540..555 "unicode-range" [Newline("\n"), Whitespace("\t")] [],
+                                    },
+                                    colon_token: COLON@555..557 ":" [] [Whitespace(" ")],
+                                    value: CssGenericComponentValueList [
+                                        CssUnicodeRange {
+                                            prefix_token: UNICODE@557..559 "U+" [] [],
+                                            value: CssUnicodeRangeWildcard {
+                                                value_token: CSS_UNICODE_RANGE_WILDCARD_LITERAL@559..562 "4??" [] [],
+                                            },
+                                        },
+                                    ],
+                                },
+                                important: missing (optional),
+                            },
+                            semicolon_token: SEMICOLON@562..597 ";" [] [Whitespace("              "), Comments("/* wildcard range */")],
+                        },
+                        CssDeclarationWithSemicolon {
+                            declaration: CssDeclaration {
+                                property: CssGenericProperty {
+                                    name: CssIdentifier {
+                                        value_token: IDENT@597..612 "unicode-range" [Newline("\n"), Whitespace("\t")] [],
+                                    },
+                                    colon_token: COLON@612..614 ":" [] [Whitespace(" ")],
+                                    value: CssGenericComponentValueList [
+                                        CssUnicodeRange {
+                                            prefix_token: UNICODE@614..616 "U+" [] [],
+                                            value: CssUnicodeRangeInterval {
+                                                start: CssUnicodeCodepoint {
+                                                    value_token: CSS_UNICODE_CODEPOINT_LITERAL@616..620 "0025" [] [],
+                                                },
+                                                minus_token: MINUS@620..621 "-" [] [],
+                                                end: CssUnicodeCodepoint {
+                                                    value_token: CSS_UNICODE_CODEPOINT_LITERAL@621..625 "00FF" [] [],
+                                                },
+                                            },
+                                        },
+                                        CssGenericDelimiter {
+                                            value: COMMA@625..627 "," [] [Whitespace(" ")],
+                                        },
+                                        CssUnicodeRange {
+                                            prefix_token: UNICODE@627..629 "U+" [] [],
+                                            value: CssUnicodeRangeWildcard {
+                                                value_token: CSS_UNICODE_RANGE_WILDCARD_LITERAL@629..632 "4??" [] [],
+                                            },
+                                        },
+                                    ],
+                                },
+                                important: missing (optional),
+                            },
+                            semicolon_token: SEMICOLON@632..655 ";" [] [Whitespace(" "), Comments("/* multiple values */")],
+                        },
+                        CssDeclarationWithSemicolon {
+                            declaration: CssDeclaration {
+                                property: CssGenericProperty {
+                                    name: CssIdentifier {
+                                        value_token: IDENT@655..670 "unicode-range" [Newline("\n"), Whitespace("\t")] [],
+                                    },
+                                    colon_token: COLON@670..672 ":" [] [Whitespace(" ")],
+                                    value: CssGenericComponentValueList [
+                                        CssUnicodeRange {
+                                            prefix_token: UNICODE@672..674 "U+" [] [],
+                                            value: CssUnicodeCodepoint {
+                                                value_token: CSS_UNICODE_CODEPOINT_LITERAL@674..676 "A5" [] [],
+                                            },
+                                        },
+                                        CssGenericDelimiter {
+                                            value: COMMA@676..678 "," [] [Whitespace(" ")],
+                                        },
+                                        CssUnicodeRange {
+                                            prefix_token: UNICODE@678..680 "U+" [] [],
+                                            value: CssUnicodeRangeInterval {
+                                                start: CssUnicodeCodepoint {
+                                                    value_token: CSS_UNICODE_CODEPOINT_LITERAL@680..684 "4E00" [] [],
+                                                },
+                                                minus_token: MINUS@684..685 "-" [] [],
+                                                end: CssUnicodeCodepoint {
+                                                    value_token: CSS_UNICODE_CODEPOINT_LITERAL@685..689 "9FFF" [] [],
+                                                },
+                                            },
+                                        },
+                                        CssGenericDelimiter {
+                                            value: COMMA@689..691 "," [] [Whitespace(" ")],
+                                        },
+                                        CssUnicodeRange {
+                                            prefix_token: UNICODE@691..693 "U+" [] [],
+                                            value: CssUnicodeRangeWildcard {
+                                                value_token: CSS_UNICODE_RANGE_WILDCARD_LITERAL@693..697 "30??" [] [],
+                                            },
+                                        },
+                                        CssGenericDelimiter {
+                                            value: COMMA@697..699 "," [] [Whitespace(" ")],
+                                        },
+                                        CssUnicodeRange {
+                                            prefix_token: UNICODE@699..701 "U+" [] [],
+                                            value: CssUnicodeRangeInterval {
+                                                start: CssUnicodeCodepoint {
+                                                    value_token: CSS_UNICODE_CODEPOINT_LITERAL@701..705 "FF00" [] [],
+                                                },
+                                                minus_token: MINUS@705..706 "-" [] [],
+                                                end: CssUnicodeCodepoint {
+                                                    value_token: CSS_UNICODE_CODEPOINT_LITERAL@706..710 "FF9F" [] [],
+                                                },
+                                            },
+                                        },
+                                    ],
+                                },
+                                important: missing (optional),
+                            },
+                            semicolon_token: SEMICOLON@710..733 ";" [] [Whitespace(" "), Comments("/* multiple values */")],
+                        },
+                        CssDeclarationWithSemicolon {
+                            declaration: CssDeclaration {
+                                property: CssGenericProperty {
+                                    name: CssIdentifier {
+                                        value_token: IDENT@733..748 "unicode-range" [Newline("\n"), Whitespace("\t")] [],
+                                    },
+                                    colon_token: COLON@748..750 ":" [] [Whitespace(" ")],
+                                    value: CssGenericComponentValueList [
+                                        CssUnicodeRange {
+                                            prefix_token: UNICODE@750..752 "U+" [] [],
+                                            value: CssUnicodeRangeWildcard {
+                                                value_token: CSS_UNICODE_RANGE_WILDCARD_LITERAL@752..756 "????" [] [],
+                                            },
+                                        },
+                                    ],
+                                },
+                                important: missing (optional),
+                            },
+                            semicolon_token: SEMICOLON@756..757 ";" [] [],
+                        },
+                        CssDeclarationWithSemicolon {
+                            declaration: CssDeclaration {
+                                property: CssGenericProperty {
+                                    name: CssIdentifier {
+                                        value_token: IDENT@757..772 "unicode-range" [Newline("\n"), Whitespace("\t")] [],
+                                    },
+                                    colon_token: COLON@772..774 ":" [] [Whitespace(" ")],
+                                    value: CssGenericComponentValueList [
+                                        CssUnicodeRange {
+                                            prefix_token: UNICODE@774..776 "U+" [] [],
+                                            value: CssUnicodeRangeWildcard {
+                                                value_token: CSS_UNICODE_RANGE_WILDCARD_LITERAL@776..782 "??????" [] [],
+                                            },
+                                        },
+                                    ],
+                                },
+                                important: missing (optional),
+                            },
+                            semicolon_token: SEMICOLON@782..783 ";" [] [],
+                        },
+                        CssDeclarationWithSemicolon {
+                            declaration: CssDeclaration {
+                                property: CssGenericProperty {
+                                    name: CssIdentifier {
+                                        value_token: IDENT@783..798 "unicode-range" [Newline("\n"), Whitespace("\t")] [],
+                                    },
+                                    colon_token: COLON@798..800 ":" [] [Whitespace(" ")],
+                                    value: CssGenericComponentValueList [
+                                        CssUnicodeRange {
+                                            prefix_token: UNICODE@800..802 "U+" [] [],
+                                            value: CssUnicodeCodepoint {
+                                                value_token: CSS_UNICODE_CODEPOINT_LITERAL@802..804 "12" [] [],
+                                            },
+                                        },
+                                    ],
+                                },
+                                important: missing (optional),
+                            },
+                            semicolon_token: SEMICOLON@804..805 ";" [] [],
+                        },
+                        CssDeclarationWithSemicolon {
+                            declaration: CssDeclaration {
+                                property: CssGenericProperty {
+                                    name: CssIdentifier {
+                                        value_token: IDENT@805..820 "unicode-range" [Newline("\n"), Whitespace("\t")] [],
+                                    },
+                                    colon_token: COLON@820..822 ":" [] [Whitespace(" ")],
+                                    value: CssGenericComponentValueList [
+                                        CssUnicodeRange {
+                                            prefix_token: UNICODE@822..824 "U+" [] [],
+                                            value: CssUnicodeCodepoint {
+                                                value_token: CSS_UNICODE_CODEPOINT_LITERAL@824..830 "12e112" [] [],
+                                            },
+                                        },
+                                    ],
+                                },
+                                important: missing (optional),
+                            },
+                            semicolon_token: SEMICOLON@830..831 ";" [] [],
+                        },
+                        CssDeclarationWithSemicolon {
+                            declaration: CssDeclaration {
+                                property: CssGenericProperty {
+                                    name: CssIdentifier {
+                                        value_token: IDENT@831..846 "unicode-range" [Newline("\n"), Whitespace("\t")] [],
+                                    },
+                                    colon_token: COLON@846..848 ":" [] [Whitespace(" ")],
+                                    value: CssGenericComponentValueList [
+                                        CssUnicodeRange {
+                                            prefix_token: UNICODE@848..850 "U+" [] [],
+                                            value: CssUnicodeCodepoint {
+                                                value_token: CSS_UNICODE_CODEPOINT_LITERAL@850..856 "1e1ee1" [] [],
+                                            },
+                                        },
+                                    ],
+                                },
+                                important: missing (optional),
+                            },
+                            semicolon_token: SEMICOLON@856..857 ";" [] [],
+                        },
+                        CssDeclarationWithSemicolon {
+                            declaration: CssDeclaration {
+                                property: CssGenericProperty {
+                                    name: CssIdentifier {
+                                        value_token: IDENT@857..872 "unicode-range" [Newline("\n"), Whitespace("\t")] [],
+                                    },
+                                    colon_token: COLON@872..874 ":" [] [Whitespace(" ")],
+                                    value: CssGenericComponentValueList [
+                                        CssUnicodeRange {
+                                            prefix_token: UNICODE@874..876 "U+" [] [],
+                                            value: CssUnicodeRangeInterval {
+                                                start: CssUnicodeCodepoint {
+                                                    value_token: CSS_UNICODE_CODEPOINT_LITERAL@876..882 "1e1ee1" [] [],
+                                                },
+                                                minus_token: MINUS@882..883 "-" [] [],
+                                                end: CssUnicodeCodepoint {
+                                                    value_token: CSS_UNICODE_CODEPOINT_LITERAL@883..889 "FFFFFF" [] [],
+                                                },
+                                            },
+                                        },
+                                    ],
+                                },
+                                important: missing (optional),
+                            },
+                            semicolon_token: SEMICOLON@889..890 ";" [] [],
+                        },
+                        CssDeclarationWithSemicolon {
+                            declaration: CssDeclaration {
+                                property: CssGenericProperty {
+                                    name: CssIdentifier {
+                                        value_token: IDENT@890..905 "unicode-range" [Newline("\n"), Whitespace("\t")] [],
+                                    },
+                                    colon_token: COLON@905..907 ":" [] [Whitespace(" ")],
+                                    value: CssGenericComponentValueList [
+                                        CssUnicodeRange {
+                                            prefix_token: UNICODE@907..909 "U+" [] [],
+                                            value: CssUnicodeRangeWildcard {
+                                                value_token: CSS_UNICODE_RANGE_WILDCARD_LITERAL@909..915 "1e1ee?" [] [],
+                                            },
+                                        },
+                                    ],
+                                },
+                                important: missing (optional),
+                            },
+                            semicolon_token: SEMICOLON@915..916 ";" [] [],
+                        },
+                        CssDeclarationWithSemicolon {
+                            declaration: CssDeclaration {
+                                property: CssGenericProperty {
+                                    name: CssIdentifier {
+                                        value_token: IDENT@916..931 "unicode-range" [Newline("\n"), Whitespace("\t")] [],
+                                    },
+                                    colon_token: COLON@931..933 ":" [] [Whitespace(" ")],
+                                    value: CssGenericComponentValueList [
+                                        CssUnicodeRange {
+                                            prefix_token: UNICODE@933..935 "U+" [] [],
+                                            value: CssUnicodeRangeInterval {
+                                                start: CssUnicodeCodepoint {
+                                                    value_token: CSS_UNICODE_CODEPOINT_LITERAL@935..937 "12" [] [],
+                                                },
+                                                minus_token: MINUS@937..938 "-" [] [],
+                                                end: CssUnicodeCodepoint {
+                                                    value_token: CSS_UNICODE_CODEPOINT_LITERAL@938..940 "13" [] [],
+                                                },
+                                            },
+                                        },
+                                    ],
+                                },
+                                important: missing (optional),
+                            },
+                            semicolon_token: SEMICOLON@940..941 ";" [] [],
+                        },
+                    ],
+                    r_curly_token: R_CURLY@941..943 "}" [Newline("\n")] [],
+                },
+            },
+        },
+    ],
+    eof_token: EOF@943..944 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..944
+  0: (empty)
+  1: CSS_RULE_LIST@0..943
+    0: CSS_AT_RULE@0..90
+      0: AT@0..1 "@" [] []
+      1: CSS_FONT_FACE_AT_RULE@1..90
+        0: FONT_FACE_KW@1..11 "font-face" [] [Whitespace(" ")]
+        1: CSS_DECLARATION_BLOCK@11..90
+          0: L_CURLY@11..12 "{" [] []
+          1: CSS_DECLARATION_LIST@12..88
+            0: CSS_DECLARATION_WITH_SEMICOLON@12..88
+              0: CSS_DECLARATION@12..87
+                0: CSS_GENERIC_PROPERTY@12..87
+                  0: CSS_IDENTIFIER@12..27
+                    0: IDENT@12..27 "unicode-range" [Newline("\n"), Whitespace("\t")] []
+                  1: COLON@27..29 ":" [] [Whitespace(" ")]
+                  2: CSS_GENERIC_COMPONENT_VALUE_LIST@29..87
+                    0: CSS_UNICODE_RANGE@29..38
+                      0: UNICODE@29..31 "U+" [] []
+                      1: CSS_UNICODE_RANGE_INTERVAL@31..38
+                        0: CSS_UNICODE_CODEPOINT@31..34
+                          0: CSS_UNICODE_CODEPOINT_LITERAL@31..34 "000" [] []
+                        1: MINUS@34..35 "-" [] []
+                        2: CSS_UNICODE_CODEPOINT@35..38
+                          0: CSS_UNICODE_CODEPOINT_LITERAL@35..38 "49F" [] []
+                    1: CSS_GENERIC_DELIMITER@38..40
+                      0: COMMA@38..40 "," [] [Whitespace(" ")]
+                    2: CSS_UNICODE_RANGE@40..51
+                      0: UNICODE@40..42 "U+" [] []
+                      1: CSS_UNICODE_RANGE_INTERVAL@42..51
+                        0: CSS_UNICODE_CODEPOINT@42..46
+                          0: CSS_UNICODE_CODEPOINT_LITERAL@42..46 "2000" [] []
+                        1: MINUS@46..47 "-" [] []
+                        2: CSS_UNICODE_CODEPOINT@47..51
+                          0: CSS_UNICODE_CODEPOINT_LITERAL@47..51 "27FF" [] []
+                    3: CSS_GENERIC_DELIMITER@51..53
+                      0: COMMA@51..53 "," [] [Whitespace(" ")]
+                    4: CSS_UNICODE_RANGE@53..64
+                      0: UNICODE@53..55 "U+" [] []
+                      1: CSS_UNICODE_RANGE_INTERVAL@55..64
+                        0: CSS_UNICODE_CODEPOINT@55..59
+                          0: CSS_UNICODE_CODEPOINT_LITERAL@55..59 "2900" [] []
+                        1: MINUS@59..60 "-" [] []
+                        2: CSS_UNICODE_CODEPOINT@60..64
+                          0: CSS_UNICODE_CODEPOINT_LITERAL@60..64 "2BFF" [] []
+                    5: CSS_GENERIC_DELIMITER@64..66
+                      0: COMMA@64..66 "," [] [Whitespace(" ")]
+                    6: CSS_UNICODE_RANGE@66..79
+                      0: UNICODE@66..68 "U+" [] []
+                      1: CSS_UNICODE_RANGE_INTERVAL@68..79
+                        0: CSS_UNICODE_CODEPOINT@68..73
+                          0: CSS_UNICODE_CODEPOINT_LITERAL@68..73 "1D400" [] []
+                        1: MINUS@73..74 "-" [] []
+                        2: CSS_UNICODE_CODEPOINT@74..79
+                          0: CSS_UNICODE_CODEPOINT_LITERAL@74..79 "1D7FF" [] []
+                    7: CSS_GENERIC_DELIMITER@79..81
+                      0: COMMA@79..81 "," [] [Whitespace(" ")]
+                    8: CSS_UNICODE_RANGE@81..87
+                      0: UNICODE@81..83 "U+" [] []
+                      1: CSS_UNICODE_RANGE_WILDCARD@83..87
+                        0: CSS_UNICODE_RANGE_WILDCARD_LITERAL@83..87 "ff??" [] []
+                1: (empty)
+              1: SEMICOLON@87..88 ";" [] []
+          2: R_CURLY@88..90 "}" [Newline("\n")] []
+    1: CSS_AT_RULE@90..225
+      0: AT@90..93 "@" [Newline("\n"), Newline("\n")] []
+      1: CSS_FONT_FACE_AT_RULE@93..225
+        0: FONT_FACE_KW@93..103 "font-face" [] [Whitespace(" ")]
+        1: CSS_DECLARATION_BLOCK@103..225
+          0: L_CURLY@103..104 "{" [] []
+          1: CSS_DECLARATION_LIST@104..223
+            0: CSS_DECLARATION_WITH_SEMICOLON@104..223
+              0: CSS_DECLARATION@104..222
+                0: CSS_GENERIC_PROPERTY@104..222
+                  0: CSS_IDENTIFIER@104..119
+                    0: IDENT@104..119 "unicode-range" [Newline("\n"), Whitespace("\t")] []
+                  1: COLON@119..121 ":" [] [Whitespace(" ")]
+                  2: CSS_GENERIC_COMPONENT_VALUE_LIST@121..222
+                    0: CSS_UNICODE_RANGE@121..132
+                      0: UNICODE@121..123 "U+" [] []
+                      1: CSS_UNICODE_RANGE_INTERVAL@123..132
+                        0: CSS_UNICODE_CODEPOINT@123..127
+                          0: CSS_UNICODE_CODEPOINT_LITERAL@123..127 "0000" [] []
+                        1: MINUS@127..128 "-" [] []
+                        2: CSS_UNICODE_CODEPOINT@128..132
+                          0: CSS_UNICODE_CODEPOINT_LITERAL@128..132 "00FF" [] []
+                    1: CSS_GENERIC_DELIMITER@132..134
+                      0: COMMA@132..134 "," [] [Whitespace(" ")]
+                    2: CSS_UNICODE_RANGE@134..140
+                      0: UNICODE@134..136 "U+" [] []
+                      1: CSS_UNICODE_CODEPOINT@136..140
+                        0: CSS_UNICODE_CODEPOINT_LITERAL@136..140 "0131" [] []
+                    3: CSS_GENERIC_DELIMITER@140..142
+                      0: COMMA@140..142 "," [] [Whitespace(" ")]
+                    4: CSS_UNICODE_RANGE@142..153
+                      0: UNICODE@142..144 "U+" [] []
+                      1: CSS_UNICODE_RANGE_INTERVAL@144..153
+                        0: CSS_UNICODE_CODEPOINT@144..148
+                          0: CSS_UNICODE_CODEPOINT_LITERAL@144..148 "0152" [] []
+                        1: MINUS@148..149 "-" [] []
+                        2: CSS_UNICODE_CODEPOINT@149..153
+                          0: CSS_UNICODE_CODEPOINT_LITERAL@149..153 "0153" [] []
+                    5: CSS_GENERIC_DELIMITER@153..155
+                      0: COMMA@153..155 "," [] [Whitespace(" ")]
+                    6: CSS_UNICODE_RANGE@155..161
+                      0: UNICODE@155..157 "U+" [] []
+                      1: CSS_UNICODE_CODEPOINT@157..161
+                        0: CSS_UNICODE_CODEPOINT_LITERAL@157..161 "02C6" [] []
+                    7: CSS_GENERIC_DELIMITER@161..163
+                      0: COMMA@161..163 "," [] [Whitespace(" ")]
+                    8: CSS_UNICODE_RANGE@163..169
+                      0: UNICODE@163..165 "U+" [] []
+                      1: CSS_UNICODE_CODEPOINT@165..169
+                        0: CSS_UNICODE_CODEPOINT_LITERAL@165..169 "02DA" [] []
+                    9: CSS_GENERIC_DELIMITER@169..171
+                      0: COMMA@169..171 "," [] [Whitespace(" ")]
+                    10: CSS_UNICODE_RANGE@171..177
+                      0: UNICODE@171..173 "U+" [] []
+                      1: CSS_UNICODE_CODEPOINT@173..177
+                        0: CSS_UNICODE_CODEPOINT_LITERAL@173..177 "02DC" [] []
+                    11: CSS_GENERIC_DELIMITER@177..179
+                      0: COMMA@177..179 "," [] [Whitespace(" ")]
+                    12: CSS_UNICODE_RANGE@179..190
+                      0: UNICODE@179..181 "U+" [] []
+                      1: CSS_UNICODE_RANGE_INTERVAL@181..190
+                        0: CSS_UNICODE_CODEPOINT@181..185
+                          0: CSS_UNICODE_CODEPOINT_LITERAL@181..185 "2000" [] []
+                        1: MINUS@185..186 "-" [] []
+                        2: CSS_UNICODE_CODEPOINT@186..190
+                          0: CSS_UNICODE_CODEPOINT_LITERAL@186..190 "206F" [] []
+                    13: CSS_GENERIC_DELIMITER@190..192
+                      0: COMMA@190..192 "," [] [Whitespace(" ")]
+                    14: CSS_UNICODE_RANGE@192..198
+                      0: UNICODE@192..194 "U+" [] []
+                      1: CSS_UNICODE_CODEPOINT@194..198
+                        0: CSS_UNICODE_CODEPOINT_LITERAL@194..198 "2074" [] []
+                    15: CSS_GENERIC_DELIMITER@198..200
+                      0: COMMA@198..200 "," [] [Whitespace(" ")]
+                    16: CSS_UNICODE_RANGE@200..206
+                      0: UNICODE@200..202 "U+" [] []
+                      1: CSS_UNICODE_CODEPOINT@202..206
+                        0: CSS_UNICODE_CODEPOINT_LITERAL@202..206 "20AC" [] []
+                    17: CSS_GENERIC_DELIMITER@206..208
+                      0: COMMA@206..208 "," [] [Whitespace(" ")]
+                    18: CSS_UNICODE_RANGE@208..214
+                      0: UNICODE@208..210 "U+" [] []
+                      1: CSS_UNICODE_CODEPOINT@210..214
+                        0: CSS_UNICODE_CODEPOINT_LITERAL@210..214 "2212" [] []
+                    19: CSS_GENERIC_DELIMITER@214..216
+                      0: COMMA@214..216 "," [] [Whitespace(" ")]
+                    20: CSS_UNICODE_RANGE@216..222
+                      0: UNICODE@216..218 "U+" [] []
+                      1: CSS_UNICODE_CODEPOINT@218..222
+                        0: CSS_UNICODE_CODEPOINT_LITERAL@218..222 "2215" [] []
+                1: (empty)
+              1: SEMICOLON@222..223 ";" [] []
+          2: R_CURLY@223..225 "}" [Newline("\n")] []
+    2: CSS_AT_RULE@225..304
+      0: AT@225..228 "@" [Newline("\n"), Newline("\n")] []
+      1: CSS_FONT_FACE_AT_RULE@228..304
+        0: FONT_FACE_KW@228..238 "font-face" [] [Whitespace(" ")]
+        1: CSS_DECLARATION_BLOCK@238..304
+          0: L_CURLY@238..239 "{" [] []
+          1: CSS_DECLARATION_LIST@239..302
+            0: CSS_DECLARATION_WITH_SEMICOLON@239..302
+              0: CSS_DECLARATION@239..301
+                0: CSS_GENERIC_PROPERTY@239..301
+                  0: CSS_IDENTIFIER@239..254
+                    0: IDENT@239..254 "unicode-range" [Newline("\n"), Whitespace("\t")] []
+                  1: COLON@254..256 ":" [] [Whitespace(" ")]
+                  2: CSS_GENERIC_COMPONENT_VALUE_LIST@256..301
+                    0: CSS_UNICODE_RANGE@256..267
+                      0: UNICODE@256..258 "U+" [] []
+                      1: CSS_UNICODE_RANGE_INTERVAL@258..267
+                        0: CSS_UNICODE_CODEPOINT@258..262
+                          0: CSS_UNICODE_CODEPOINT_LITERAL@258..262 "0400" [] []
+                        1: MINUS@262..263 "-" [] []
+                        2: CSS_UNICODE_CODEPOINT@263..267
+                          0: CSS_UNICODE_CODEPOINT_LITERAL@263..267 "045F" [] []
+                    1: CSS_GENERIC_DELIMITER@267..269
+                      0: COMMA@267..269 "," [] [Whitespace(" ")]
+                    2: CSS_UNICODE_RANGE@269..280
+                      0: UNICODE@269..271 "U+" [] []
+                      1: CSS_UNICODE_RANGE_INTERVAL@271..280
+                        0: CSS_UNICODE_CODEPOINT@271..275
+                          0: CSS_UNICODE_CODEPOINT_LITERAL@271..275 "0490" [] []
+                        1: MINUS@275..276 "-" [] []
+                        2: CSS_UNICODE_CODEPOINT@276..280
+                          0: CSS_UNICODE_CODEPOINT_LITERAL@276..280 "0491" [] []
+                    3: CSS_GENERIC_DELIMITER@280..282
+                      0: COMMA@280..282 "," [] [Whitespace(" ")]
+                    4: CSS_UNICODE_RANGE@282..293
+                      0: UNICODE@282..284 "U+" [] []
+                      1: CSS_UNICODE_RANGE_INTERVAL@284..293
+                        0: CSS_UNICODE_CODEPOINT@284..288
+                          0: CSS_UNICODE_CODEPOINT_LITERAL@284..288 "04B0" [] []
+                        1: MINUS@288..289 "-" [] []
+                        2: CSS_UNICODE_CODEPOINT@289..293
+                          0: CSS_UNICODE_CODEPOINT_LITERAL@289..293 "04B1" [] []
+                    5: CSS_GENERIC_DELIMITER@293..295
+                      0: COMMA@293..295 "," [] [Whitespace(" ")]
+                    6: CSS_UNICODE_RANGE@295..301
+                      0: UNICODE@295..297 "U+" [] []
+                      1: CSS_UNICODE_CODEPOINT@297..301
+                        0: CSS_UNICODE_CODEPOINT_LITERAL@297..301 "2116" [] []
+                1: (empty)
+              1: SEMICOLON@301..302 ";" [] []
+          2: R_CURLY@302..304 "}" [Newline("\n")] []
+    3: CSS_AT_RULE@304..943
+      0: AT@304..307 "@" [Newline("\n"), Newline("\n")] []
+      1: CSS_FONT_FACE_AT_RULE@307..943
+        0: FONT_FACE_KW@307..317 "font-face" [] [Whitespace(" ")]
+        1: CSS_DECLARATION_BLOCK@317..943
+          0: L_CURLY@317..318 "{" [] []
+          1: CSS_DECLARATION_LIST@318..941
+            0: CSS_DECLARATION_WITH_SEMICOLON@318..345
+              0: CSS_DECLARATION@318..344
+                0: CSS_GENERIC_PROPERTY@318..344
+                  0: CSS_IDENTIFIER@318..331
+                    0: IDENT@318..331 "font-family" [Newline("\n"), Whitespace("\t")] []
+                  1: COLON@331..333 ":" [] [Whitespace(" ")]
+                  2: CSS_GENERIC_COMPONENT_VALUE_LIST@333..344
+                    0: CSS_STRING@333..344
+                      0: CSS_STRING_LITERAL@333..344 "'Ampersand'" [] []
+                1: (empty)
+              1: SEMICOLON@344..345 ";" [] []
+            1: CSS_DECLARATION_WITH_SEMICOLON@345..377
+              0: CSS_DECLARATION@345..376
+                0: CSS_GENERIC_PROPERTY@345..376
+                  0: CSS_IDENTIFIER@345..350
+                    0: IDENT@345..350 "src" [Newline("\n"), Whitespace("\t")] []
+                  1: COLON@350..352 ":" [] [Whitespace(" ")]
+                  2: CSS_GENERIC_COMPONENT_VALUE_LIST@352..376
+                    0: CSS_FUNCTION@352..376
+                      0: CSS_IDENTIFIER@352..357
+                        0: IDENT@352..357 "local" [] []
+                      1: L_PAREN@357..358 "(" [] []
+                      2: CSS_PARAMETER_LIST@358..375
+                        0: CSS_PARAMETER@358..375
+                          0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@358..375
+                            0: CSS_COMPONENT_VALUE_LIST@358..375
+                              0: CSS_STRING@358..375
+                                0: CSS_STRING_LITERAL@358..375 "'Times New Roman'" [] []
+                      3: R_PAREN@375..376 ")" [] []
+                1: (empty)
+              1: SEMICOLON@376..377 ";" [] []
+            2: CSS_DECLARATION_WITH_SEMICOLON@377..436
+              0: CSS_DECLARATION@377..398
+                0: CSS_GENERIC_PROPERTY@377..398
+                  0: CSS_IDENTIFIER@377..392
+                    0: IDENT@377..392 "unicode-range" [Newline("\n"), Whitespace("\t")] []
+                  1: COLON@392..394 ":" [] [Whitespace(" ")]
+                  2: CSS_GENERIC_COMPONENT_VALUE_LIST@394..398
+                    0: CSS_UNICODE_RANGE@394..398
+                      0: UNICODE@394..396 "U+" [] []
+                      1: CSS_UNICODE_CODEPOINT@396..398
+                        0: CSS_UNICODE_CODEPOINT_LITERAL@396..398 "26" [] []
+                1: (empty)
+              1: SEMICOLON@398..436 ";" [] [Whitespace("               "), Comments("/* single codepoint */")]
+            3: CSS_DECLARATION_WITH_SEMICOLON@436..458
+              0: CSS_DECLARATION@436..457
+                0: CSS_GENERIC_PROPERTY@436..457
+                  0: CSS_IDENTIFIER@436..451
+                    0: IDENT@436..451 "unicode-range" [Newline("\n"), Whitespace("\t")] []
+                  1: COLON@451..453 ":" [] [Whitespace(" ")]
+                  2: CSS_GENERIC_COMPONENT_VALUE_LIST@453..457
+                    0: CSS_UNICODE_RANGE@453..457
+                      0: UNICODE@453..455 "u+" [] []
+                      1: CSS_UNICODE_CODEPOINT@455..457
+                        0: CSS_UNICODE_CODEPOINT_LITERAL@455..457 "26" [] []
+                1: (empty)
+              1: SEMICOLON@457..458 ";" [] []
+            4: CSS_DECLARATION_WITH_SEMICOLON@458..482
+              0: CSS_DECLARATION@458..481
+                0: CSS_GENERIC_PROPERTY@458..481
+                  0: CSS_IDENTIFIER@458..473
+                    0: IDENT@458..473 "unicode-range" [Newline("\n"), Whitespace("\t")] []
+                  1: COLON@473..475 ":" [] [Whitespace(" ")]
+                  2: CSS_GENERIC_COMPONENT_VALUE_LIST@475..481
+                    0: CSS_UNICODE_RANGE@475..481
+                      0: UNICODE@475..477 "U+" [] []
+                      1: CSS_UNICODE_RANGE_INTERVAL@477..481
+                        0: CSS_UNICODE_CODEPOINT@477..478
+                          0: CSS_UNICODE_CODEPOINT_LITERAL@477..478 "0" [] []
+                        1: MINUS@478..479 "-" [] []
+                        2: CSS_UNICODE_CODEPOINT@479..481
+                          0: CSS_UNICODE_CODEPOINT_LITERAL@479..481 "7F" [] []
+                1: (empty)
+              1: SEMICOLON@481..482 ";" [] []
+            5: CSS_DECLARATION_WITH_SEMICOLON@482..540
+              0: CSS_DECLARATION@482..510
+                0: CSS_GENERIC_PROPERTY@482..510
+                  0: CSS_IDENTIFIER@482..497
+                    0: IDENT@482..497 "unicode-range" [Newline("\n"), Whitespace("\t")] []
+                  1: COLON@497..499 ":" [] [Whitespace(" ")]
+                  2: CSS_GENERIC_COMPONENT_VALUE_LIST@499..510
+                    0: CSS_UNICODE_RANGE@499..510
+                      0: UNICODE@499..501 "U+" [] []
+                      1: CSS_UNICODE_RANGE_INTERVAL@501..510
+                        0: CSS_UNICODE_CODEPOINT@501..505
+                          0: CSS_UNICODE_CODEPOINT_LITERAL@501..505 "0025" [] []
+                        1: MINUS@505..506 "-" [] []
+                        2: CSS_UNICODE_CODEPOINT@506..510
+                          0: CSS_UNICODE_CODEPOINT_LITERAL@506..510 "00FF" [] []
+                1: (empty)
+              1: SEMICOLON@510..540 ";" [] [Whitespace("        "), Comments("/* codepoint range */")]
+            6: CSS_DECLARATION_WITH_SEMICOLON@540..597
+              0: CSS_DECLARATION@540..562
+                0: CSS_GENERIC_PROPERTY@540..562
+                  0: CSS_IDENTIFIER@540..555
+                    0: IDENT@540..555 "unicode-range" [Newline("\n"), Whitespace("\t")] []
+                  1: COLON@555..557 ":" [] [Whitespace(" ")]
+                  2: CSS_GENERIC_COMPONENT_VALUE_LIST@557..562
+                    0: CSS_UNICODE_RANGE@557..562
+                      0: UNICODE@557..559 "U+" [] []
+                      1: CSS_UNICODE_RANGE_WILDCARD@559..562
+                        0: CSS_UNICODE_RANGE_WILDCARD_LITERAL@559..562 "4??" [] []
+                1: (empty)
+              1: SEMICOLON@562..597 ";" [] [Whitespace("              "), Comments("/* wildcard range */")]
+            7: CSS_DECLARATION_WITH_SEMICOLON@597..655
+              0: CSS_DECLARATION@597..632
+                0: CSS_GENERIC_PROPERTY@597..632
+                  0: CSS_IDENTIFIER@597..612
+                    0: IDENT@597..612 "unicode-range" [Newline("\n"), Whitespace("\t")] []
+                  1: COLON@612..614 ":" [] [Whitespace(" ")]
+                  2: CSS_GENERIC_COMPONENT_VALUE_LIST@614..632
+                    0: CSS_UNICODE_RANGE@614..625
+                      0: UNICODE@614..616 "U+" [] []
+                      1: CSS_UNICODE_RANGE_INTERVAL@616..625
+                        0: CSS_UNICODE_CODEPOINT@616..620
+                          0: CSS_UNICODE_CODEPOINT_LITERAL@616..620 "0025" [] []
+                        1: MINUS@620..621 "-" [] []
+                        2: CSS_UNICODE_CODEPOINT@621..625
+                          0: CSS_UNICODE_CODEPOINT_LITERAL@621..625 "00FF" [] []
+                    1: CSS_GENERIC_DELIMITER@625..627
+                      0: COMMA@625..627 "," [] [Whitespace(" ")]
+                    2: CSS_UNICODE_RANGE@627..632
+                      0: UNICODE@627..629 "U+" [] []
+                      1: CSS_UNICODE_RANGE_WILDCARD@629..632
+                        0: CSS_UNICODE_RANGE_WILDCARD_LITERAL@629..632 "4??" [] []
+                1: (empty)
+              1: SEMICOLON@632..655 ";" [] [Whitespace(" "), Comments("/* multiple values */")]
+            8: CSS_DECLARATION_WITH_SEMICOLON@655..733
+              0: CSS_DECLARATION@655..710
+                0: CSS_GENERIC_PROPERTY@655..710
+                  0: CSS_IDENTIFIER@655..670
+                    0: IDENT@655..670 "unicode-range" [Newline("\n"), Whitespace("\t")] []
+                  1: COLON@670..672 ":" [] [Whitespace(" ")]
+                  2: CSS_GENERIC_COMPONENT_VALUE_LIST@672..710
+                    0: CSS_UNICODE_RANGE@672..676
+                      0: UNICODE@672..674 "U+" [] []
+                      1: CSS_UNICODE_CODEPOINT@674..676
+                        0: CSS_UNICODE_CODEPOINT_LITERAL@674..676 "A5" [] []
+                    1: CSS_GENERIC_DELIMITER@676..678
+                      0: COMMA@676..678 "," [] [Whitespace(" ")]
+                    2: CSS_UNICODE_RANGE@678..689
+                      0: UNICODE@678..680 "U+" [] []
+                      1: CSS_UNICODE_RANGE_INTERVAL@680..689
+                        0: CSS_UNICODE_CODEPOINT@680..684
+                          0: CSS_UNICODE_CODEPOINT_LITERAL@680..684 "4E00" [] []
+                        1: MINUS@684..685 "-" [] []
+                        2: CSS_UNICODE_CODEPOINT@685..689
+                          0: CSS_UNICODE_CODEPOINT_LITERAL@685..689 "9FFF" [] []
+                    3: CSS_GENERIC_DELIMITER@689..691
+                      0: COMMA@689..691 "," [] [Whitespace(" ")]
+                    4: CSS_UNICODE_RANGE@691..697
+                      0: UNICODE@691..693 "U+" [] []
+                      1: CSS_UNICODE_RANGE_WILDCARD@693..697
+                        0: CSS_UNICODE_RANGE_WILDCARD_LITERAL@693..697 "30??" [] []
+                    5: CSS_GENERIC_DELIMITER@697..699
+                      0: COMMA@697..699 "," [] [Whitespace(" ")]
+                    6: CSS_UNICODE_RANGE@699..710
+                      0: UNICODE@699..701 "U+" [] []
+                      1: CSS_UNICODE_RANGE_INTERVAL@701..710
+                        0: CSS_UNICODE_CODEPOINT@701..705
+                          0: CSS_UNICODE_CODEPOINT_LITERAL@701..705 "FF00" [] []
+                        1: MINUS@705..706 "-" [] []
+                        2: CSS_UNICODE_CODEPOINT@706..710
+                          0: CSS_UNICODE_CODEPOINT_LITERAL@706..710 "FF9F" [] []
+                1: (empty)
+              1: SEMICOLON@710..733 ";" [] [Whitespace(" "), Comments("/* multiple values */")]
+            9: CSS_DECLARATION_WITH_SEMICOLON@733..757
+              0: CSS_DECLARATION@733..756
+                0: CSS_GENERIC_PROPERTY@733..756
+                  0: CSS_IDENTIFIER@733..748
+                    0: IDENT@733..748 "unicode-range" [Newline("\n"), Whitespace("\t")] []
+                  1: COLON@748..750 ":" [] [Whitespace(" ")]
+                  2: CSS_GENERIC_COMPONENT_VALUE_LIST@750..756
+                    0: CSS_UNICODE_RANGE@750..756
+                      0: UNICODE@750..752 "U+" [] []
+                      1: CSS_UNICODE_RANGE_WILDCARD@752..756
+                        0: CSS_UNICODE_RANGE_WILDCARD_LITERAL@752..756 "????" [] []
+                1: (empty)
+              1: SEMICOLON@756..757 ";" [] []
+            10: CSS_DECLARATION_WITH_SEMICOLON@757..783
+              0: CSS_DECLARATION@757..782
+                0: CSS_GENERIC_PROPERTY@757..782
+                  0: CSS_IDENTIFIER@757..772
+                    0: IDENT@757..772 "unicode-range" [Newline("\n"), Whitespace("\t")] []
+                  1: COLON@772..774 ":" [] [Whitespace(" ")]
+                  2: CSS_GENERIC_COMPONENT_VALUE_LIST@774..782
+                    0: CSS_UNICODE_RANGE@774..782
+                      0: UNICODE@774..776 "U+" [] []
+                      1: CSS_UNICODE_RANGE_WILDCARD@776..782
+                        0: CSS_UNICODE_RANGE_WILDCARD_LITERAL@776..782 "??????" [] []
+                1: (empty)
+              1: SEMICOLON@782..783 ";" [] []
+            11: CSS_DECLARATION_WITH_SEMICOLON@783..805
+              0: CSS_DECLARATION@783..804
+                0: CSS_GENERIC_PROPERTY@783..804
+                  0: CSS_IDENTIFIER@783..798
+                    0: IDENT@783..798 "unicode-range" [Newline("\n"), Whitespace("\t")] []
+                  1: COLON@798..800 ":" [] [Whitespace(" ")]
+                  2: CSS_GENERIC_COMPONENT_VALUE_LIST@800..804
+                    0: CSS_UNICODE_RANGE@800..804
+                      0: UNICODE@800..802 "U+" [] []
+                      1: CSS_UNICODE_CODEPOINT@802..804
+                        0: CSS_UNICODE_CODEPOINT_LITERAL@802..804 "12" [] []
+                1: (empty)
+              1: SEMICOLON@804..805 ";" [] []
+            12: CSS_DECLARATION_WITH_SEMICOLON@805..831
+              0: CSS_DECLARATION@805..830
+                0: CSS_GENERIC_PROPERTY@805..830
+                  0: CSS_IDENTIFIER@805..820
+                    0: IDENT@805..820 "unicode-range" [Newline("\n"), Whitespace("\t")] []
+                  1: COLON@820..822 ":" [] [Whitespace(" ")]
+                  2: CSS_GENERIC_COMPONENT_VALUE_LIST@822..830
+                    0: CSS_UNICODE_RANGE@822..830
+                      0: UNICODE@822..824 "U+" [] []
+                      1: CSS_UNICODE_CODEPOINT@824..830
+                        0: CSS_UNICODE_CODEPOINT_LITERAL@824..830 "12e112" [] []
+                1: (empty)
+              1: SEMICOLON@830..831 ";" [] []
+            13: CSS_DECLARATION_WITH_SEMICOLON@831..857
+              0: CSS_DECLARATION@831..856
+                0: CSS_GENERIC_PROPERTY@831..856
+                  0: CSS_IDENTIFIER@831..846
+                    0: IDENT@831..846 "unicode-range" [Newline("\n"), Whitespace("\t")] []
+                  1: COLON@846..848 ":" [] [Whitespace(" ")]
+                  2: CSS_GENERIC_COMPONENT_VALUE_LIST@848..856
+                    0: CSS_UNICODE_RANGE@848..856
+                      0: UNICODE@848..850 "U+" [] []
+                      1: CSS_UNICODE_CODEPOINT@850..856
+                        0: CSS_UNICODE_CODEPOINT_LITERAL@850..856 "1e1ee1" [] []
+                1: (empty)
+              1: SEMICOLON@856..857 ";" [] []
+            14: CSS_DECLARATION_WITH_SEMICOLON@857..890
+              0: CSS_DECLARATION@857..889
+                0: CSS_GENERIC_PROPERTY@857..889
+                  0: CSS_IDENTIFIER@857..872
+                    0: IDENT@857..872 "unicode-range" [Newline("\n"), Whitespace("\t")] []
+                  1: COLON@872..874 ":" [] [Whitespace(" ")]
+                  2: CSS_GENERIC_COMPONENT_VALUE_LIST@874..889
+                    0: CSS_UNICODE_RANGE@874..889
+                      0: UNICODE@874..876 "U+" [] []
+                      1: CSS_UNICODE_RANGE_INTERVAL@876..889
+                        0: CSS_UNICODE_CODEPOINT@876..882
+                          0: CSS_UNICODE_CODEPOINT_LITERAL@876..882 "1e1ee1" [] []
+                        1: MINUS@882..883 "-" [] []
+                        2: CSS_UNICODE_CODEPOINT@883..889
+                          0: CSS_UNICODE_CODEPOINT_LITERAL@883..889 "FFFFFF" [] []
+                1: (empty)
+              1: SEMICOLON@889..890 ";" [] []
+            15: CSS_DECLARATION_WITH_SEMICOLON@890..916
+              0: CSS_DECLARATION@890..915
+                0: CSS_GENERIC_PROPERTY@890..915
+                  0: CSS_IDENTIFIER@890..905
+                    0: IDENT@890..905 "unicode-range" [Newline("\n"), Whitespace("\t")] []
+                  1: COLON@905..907 ":" [] [Whitespace(" ")]
+                  2: CSS_GENERIC_COMPONENT_VALUE_LIST@907..915
+                    0: CSS_UNICODE_RANGE@907..915
+                      0: UNICODE@907..909 "U+" [] []
+                      1: CSS_UNICODE_RANGE_WILDCARD@909..915
+                        0: CSS_UNICODE_RANGE_WILDCARD_LITERAL@909..915 "1e1ee?" [] []
+                1: (empty)
+              1: SEMICOLON@915..916 ";" [] []
+            16: CSS_DECLARATION_WITH_SEMICOLON@916..941
+              0: CSS_DECLARATION@916..940
+                0: CSS_GENERIC_PROPERTY@916..940
+                  0: CSS_IDENTIFIER@916..931
+                    0: IDENT@916..931 "unicode-range" [Newline("\n"), Whitespace("\t")] []
+                  1: COLON@931..933 ":" [] [Whitespace(" ")]
+                  2: CSS_GENERIC_COMPONENT_VALUE_LIST@933..940
+                    0: CSS_UNICODE_RANGE@933..940
+                      0: UNICODE@933..935 "U+" [] []
+                      1: CSS_UNICODE_RANGE_INTERVAL@935..940
+                        0: CSS_UNICODE_CODEPOINT@935..937
+                          0: CSS_UNICODE_CODEPOINT_LITERAL@935..937 "12" [] []
+                        1: MINUS@937..938 "-" [] []
+                        2: CSS_UNICODE_CODEPOINT@938..940
+                          0: CSS_UNICODE_CODEPOINT_LITERAL@938..940 "13" [] []
+                1: (empty)
+              1: SEMICOLON@940..941 ";" [] []
+          2: R_CURLY@941..943 "}" [Newline("\n")] []
+  2: EOF@943..944 "" [Newline("\n")] []
+
+```

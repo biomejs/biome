@@ -60,11 +60,11 @@ pub fn run(test_case: &str, _snapshot_name: &str, test_directory: &str, outcome_
 
         let settings = settings.languages.css.parser;
 
-        if settings.css_modules {
+        if settings.css_modules.unwrap_or_default() {
             options = options.allow_css_modules();
         }
 
-        if settings.allow_wrong_line_comments {
+        if settings.allow_wrong_line_comments.unwrap_or_default() {
             options = options.allow_wrong_line_comments();
         }
 
@@ -143,15 +143,12 @@ pub fn run(test_case: &str, _snapshot_name: &str, test_directory: &str, outcome_
                     .descendants()
                     .any(|node| node.kind().is_bogus())
             {
-                panic!("Parsed tree of a 'OK' test case should not contain any missing required children or bogus nodes: \n {formatted_ast:#?} \n\n {}", formatted_ast);
+                panic!("Parsed tree of a 'OK' test case should not contain any missing required children or bogus nodes: \n {formatted_ast:#?} \n\n {formatted_ast}");
             }
 
             let syntax = parsed.syntax();
             if has_bogus_nodes_or_empty_slots(&syntax) {
-                panic!(
-                    "modified tree has bogus nodes or empty slots:\n{syntax:#?} \n\n {}",
-                    syntax
-                )
+                panic!("modified tree has bogus nodes or empty slots:\n{syntax:#?} \n\n {syntax}")
             }
         }
         ExpectedOutcome::Fail => {
@@ -174,11 +171,9 @@ pub fn run(test_case: &str, _snapshot_name: &str, test_directory: &str, outcome_
 #[test]
 pub fn quick_test() {
     let code = r#"
-div {
-  filter: progid:DXImageTransform.Microsoft.BasicImage(rotation=3);
+.formTable tbody td {
+    border-left: 1px # solid;
 }
-
-
     "#;
 
     let root = parse_css(
@@ -190,9 +185,6 @@ div {
     let syntax = root.syntax();
     dbg!(&syntax, root.diagnostics(), root.has_errors());
     if has_bogus_nodes_or_empty_slots(&syntax) {
-        panic!(
-            "modified tree has bogus nodes or empty slots:\n{syntax:#?} \n\n {}",
-            syntax
-        )
+        panic!("modified tree has bogus nodes or empty slots:\n{syntax:#?} \n\n {syntax}")
     }
 }

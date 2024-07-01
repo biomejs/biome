@@ -1,0 +1,29 @@
+extend
+
+input
+
+Point2D
+
+{
+  x: Float
+
+
+  y: Float
+}
+
+extend input
+
+Point2D
+
+@deprecated
+
+extend
+
+input Point2D
+
+@deprecated {
+  x: Float
+
+
+  y: Float
+}

@@ -218,7 +218,7 @@ mod tests {
 
         assert_eq!("let", t.text_trimmed());
 
-        assert_eq!("\n\t let \t\t", format!("{}", t));
+        assert_eq!("\n\t let \t\t", format!("{t}"));
     }
 
     #[test]

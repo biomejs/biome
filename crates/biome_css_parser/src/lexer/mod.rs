@@ -36,6 +36,12 @@ pub enum CssLexContext {
     /// support #000 #000f #ffffff #ffffffff
     /// https://drafts.csswg.org/css-color/#typedef-hex-color
     Color,
+
+    /// Applied when lexing CSS unicode range.
+    /// Starting from U+ or u+
+    /// support U+0-9A-F? U+0-9A-F{1,6} U+0-9A-F{1,6}?
+    /// https://drafts.csswg.org/css-fonts/#unicode-range-desc
+    UnicodeRange,
 }
 
 impl LexContext for CssLexContext {
@@ -47,7 +53,12 @@ impl LexContext for CssLexContext {
 
 /// Context in which the [CssLexContext]'s current should be re-lexed.
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
-pub enum CssReLexContext {}
+pub enum CssReLexContext {
+    #[allow(dead_code)]
+    Regular,
+    /// See [CssLexContext::UnicodeRange]
+    UnicodeRange,
+}
 
 /// An extremely fast, lookup table based, lossless CSS lexer
 #[derive(Debug)]
@@ -119,6 +130,7 @@ impl<'src> Lexer<'src> for CssLexer<'src> {
                 CssLexContext::PseudoNthSelector => self.consume_pseudo_nth_selector_token(current),
                 CssLexContext::UrlRawValue => self.consume_url_raw_value_token(current),
                 CssLexContext::Color => self.consume_color_token(current),
+                CssLexContext::UnicodeRange => self.consume_unicode_range_token(current),
             },
             None => EOF,
         };
@@ -375,6 +387,62 @@ impl<'src> CssLexer<'src> {
         CSS_COLOR_LITERAL
     }
 
+    /// Consumes a Unicode range token and returns its corresponding syntax kind.
+    fn consume_unicode_range_token(&mut self, current: u8) -> CssSyntaxKind {
+        match current {
+            b'u' | b'U' if matches!(self.peek_byte(), Some(b'+')) => {
+                self.advance(1);
+                self.consume_byte(T![U+])
+            }
+            b'0'..=b'9' | b'a'..=b'f' | b'A'..=b'F' | b'?' => self.consume_unicode_range(),
+            b'-' => self.consume_byte(T![-]),
+            _ => self.consume_token(current),
+        }
+    }
+
+    /// Consumes a Unicode range and determines its syntax kind.
+    ///
+    /// This method reads consecutive bytes representing valid hexadecimal characters ('0'-'9', 'a'-'f',
+    /// 'A'-'F') or the wildcard character '?'.
+    /// It tracks the length of the range and detects if it contains a wildcard.
+    /// If the length is invalid (either zero or greater than six), it generates
+    /// a `ParseDiagnostic` indicating an invalid Unicode range.
+    fn consume_unicode_range(&mut self) -> CssSyntaxKind {
+        let start = self.text_position();
+        let mut length = 0;
+        let mut is_wildcard = false;
+
+        while matches!(
+            self.current_byte(),
+            Some(b'0'..=b'9' | b'a'..=b'f' | b'A'..=b'F' | b'?')
+        ) {
+            // If the current byte is a wildcard character, set the wildcard flag to true.
+            if self.current_byte() == Some(b'?') {
+                is_wildcard = true;
+            }
+
+            self.advance(1);
+            length += 1;
+        }
+
+        if length == 0 || length > 6 {
+            let diagnostic = ParseDiagnostic::new(
+                "Invalid unicode range",
+                start..self.text_position(),
+            )
+            .with_hint(
+                "Valid length (minimum 1 or maximum 6 hex digits) in the start of unicode range.",
+            );
+            self.diagnostics.push(diagnostic);
+        }
+
+        if is_wildcard {
+            CSS_UNICODE_RANGE_WILDCARD_LITERAL
+        } else {
+            CSS_UNICODE_CODEPOINT_LITERAL
+        }
+    }
+
     fn consume_selector_token(&mut self, current: u8) -> CssSyntaxKind {
         let dispatched = lookup_byte(current);
 
@@ -383,6 +451,7 @@ impl<'src> CssLexer<'src> {
             _ => self.consume_token(current),
         }
     }
+
     fn consume_url_raw_value_token(&mut self, current: u8) -> CssSyntaxKind {
         if let Some(chr) = self.current_byte() {
             let dispatch = lookup_byte(chr);
@@ -395,6 +464,7 @@ impl<'src> CssLexer<'src> {
         }
         self.consume_token(current)
     }
+
     fn consume_url_raw_value(&mut self) -> CssSyntaxKind {
         let start = self.text_position();
         while let Some(chr) = self.current_byte() {
@@ -1167,7 +1237,7 @@ impl<'src> CssLexer<'src> {
 
         let char = self.current_char_unchecked();
         let err = ParseDiagnostic::new(
-            format!("unexpected character `{}`", char),
+            format!("unexpected character `{char}`"),
             self.text_position()..self.text_position() + char.text_len(),
         );
         self.diagnostics.push(err);
@@ -1248,12 +1318,15 @@ impl<'src> CssLexer<'src> {
 }
 
 impl<'src> ReLexer<'src> for CssLexer<'src> {
-    fn re_lex(&mut self, _context: Self::ReLexContext) -> Self::Kind {
+    fn re_lex(&mut self, context: Self::ReLexContext) -> Self::Kind {
         let old_position = self.position;
         self.position = u32::from(self.current_start) as usize;
 
         let re_lexed_kind = match self.current_byte() {
-            Some(current) => self.consume_selector_token(current),
+            Some(current) => match context {
+                CssReLexContext::Regular => self.consume_token(current),
+                CssReLexContext::UnicodeRange => self.consume_unicode_range_token(current),
+            },
             None => EOF,
         };
 

@@ -17,15 +17,14 @@ use biome_js_factory::make::{
 };
 use biome_rowan::{AstNode, BatchMutationExt};
 use lazy_static::lazy_static;
+use presets::get_config_preset;
 
 use crate::JsRuleAction;
 
 pub use self::options::UtilityClassSortingOptions;
 use self::{
-    any_class_string_like::AnyClassStringLike,
-    presets::{get_utilities_preset, UseSortedClassesPreset},
-    sort::sort_class_name,
-    sort_config::SortConfig,
+    any_class_string_like::AnyClassStringLike, presets::UseSortedClassesPreset,
+    sort::sort_class_name, sort_config::SortConfig,
 };
 
 declare_rule! {
@@ -49,10 +48,9 @@ declare_rule! {
     ///
     /// Notably, keep in mind that the following features are not supported yet:
     ///
-    /// - Variant sorting.
+    /// - Screen variant sorting (e.g. `md:`, `max-lg:`). Only static, dynamic and arbitrary variants are supported.
     /// - Custom utilitites and variants (such as ones introduced by Tailwind CSS plugins). Only the default Tailwind CSS configuration is supported.
     /// - Options such as `prefix` and `separator`.
-    /// - Tagged template literals.
     /// - Object properties (e.g. in `clsx` calls).
     ///
     /// Please don't report issues about these features.
@@ -64,6 +62,10 @@ declare_rule! {
     ///
     /// ```jsx,expect_diagnostic
     /// <div class="px-2 foo p-4 bar" />;
+    /// ```
+    ///
+    /// ```jsx,expect_diagnostic
+    /// <div class="hover:focus:m-2 foo hover:px-2 p-4">
     /// ```
     ///
     /// ## Options
@@ -99,10 +101,6 @@ declare_rule! {
     /// tw`px-2`;
     /// tw.div`px-2`;
     /// ```
-    ///
-    /// :::caution
-    /// Tagged template literal support has not been implemented yet.
-    /// :::
     ///
     /// ### Sort-related
     ///
@@ -147,10 +145,8 @@ declare_rule! {
 }
 
 lazy_static! {
-    static ref SORT_CONFIG: SortConfig = SortConfig::new(
-        get_utilities_preset(&UseSortedClassesPreset::default()),
-        Vec::new(),
-    );
+    static ref SORT_CONFIG: SortConfig =
+        SortConfig::new(&get_config_preset(&UseSortedClassesPreset::default()));
 }
 
 impl Rule for UseSortedClasses {

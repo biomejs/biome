@@ -39,12 +39,28 @@ impl Dependencies {
     pub fn contains(&self, specifier: &str) -> bool {
         self.0.contains_key(specifier)
     }
+
+    pub fn add(&mut self, dependency: impl Into<String>, version: impl Into<Version>) {
+        self.0.insert(dependency.into(), version.into());
+    }
 }
 
 #[derive(Debug, Clone)]
 pub enum Version {
     SemVer(node_semver::Version),
     Literal(String),
+}
+
+impl From<&str> for Version {
+    fn from(value: &str) -> Self {
+        Self::Literal(value.to_string())
+    }
+}
+
+impl From<String> for Version {
+    fn from(value: String) -> Self {
+        Self::Literal(value)
+    }
 }
 
 impl Deserializable for PackageJson {

@@ -143,8 +143,7 @@ impl FromStr for Severity {
             "warn" => Ok(Self::Warning),
             "error" => Ok(Self::Error),
             v => Err(format!(
-                "Found unexpected value ({}), valid values are: info, warn, error.",
-                v
+                "Found unexpected value ({v}), valid values are: info, warn, error."
             )),
         }
     }

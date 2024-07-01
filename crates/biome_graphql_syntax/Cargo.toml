@@ -15,10 +15,10 @@ version              = "0.1.0"
 [dependencies]
 biome_rowan = { workspace = true }
 schemars    = { workspace = true, optional = true }
-serde       = { workspace = true, features = ["derive"], optional = true }
+serde       = { workspace = true, features = ["derive"] }
 
 [features]
-serde = ["dep:serde", "schemars", "biome_rowan/serde"]
+schema = ["schemars", "biome_rowan/serde"]
 
 [lints]
 workspace = true

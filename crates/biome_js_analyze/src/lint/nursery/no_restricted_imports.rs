@@ -2,7 +2,7 @@ use biome_analyze::context::RuleContext;
 use biome_analyze::{declare_rule, Ast, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
 use biome_deserialize_macros::Deserializable;
-use biome_js_syntax::{inner_string_text, AnyJsImportSpecifierLike};
+use biome_js_syntax::{inner_string_text, AnyJsImportLike};
 use biome_rowan::TextRange;
 use rustc_hash::FxHashMap;
 use serde::{Deserialize, Serialize};
@@ -47,7 +47,7 @@ pub struct RestrictedImportsOptions {
 }
 
 impl Rule for NoRestrictedImports {
-    type Query = Ast<AnyJsImportSpecifierLike>;
+    type Query = Ast<AnyJsImportLike>;
     type State = (TextRange, String);
     type Signals = Option<Self::State>;
     type Options = Box<RestrictedImportsOptions>;

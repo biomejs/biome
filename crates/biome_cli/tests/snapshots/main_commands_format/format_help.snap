@@ -17,6 +17,8 @@ Generic options applied to all files
         --line-width=NUMBER   What's the max width of a line. Defaults to 80.
         --attribute-position=<multiline|auto>  The attribute position style in HTMLish languages. By
                               default auto.
+        --bracket-spacing=<true|false>  Whether to insert spaces around brackets in object literals.
+                              Defaults to true.
 
 Formatting options specific to the JavaScript files
         --jsx-quote-style=<double|single>  The type of quotes used in JSX. Defaults to double.
@@ -29,8 +31,6 @@ Formatting options specific to the JavaScript files
                               only in for statements where it is necessary because of ASI.
         --arrow-parentheses=<always|as-needed>  Whether to add non-necessary parentheses to arrow functions.
                               Defaults to "always".
-        --bracket-spacing=<true|false>  Whether to insert spaces around brackets in object literals.
-                              Defaults to true.
         --bracket-same-line=<true|false>  Whether to hug the closing bracket of multiline HTML/JSX tags
                               to the end of the last line, rather than being alone on the following line.
                               Defaults to false.
@@ -49,6 +49,8 @@ Formatting options specific to the JavaScript files
         --quote-style=<double|single>  The type of quotes used in JavaScript code. Defaults to double.
         --javascript-attribute-position=<multiline|auto>  The attribute position style in jsx elements.
                               Defaults to auto.
+        --bracket-spacing=<true|false>  Whether to insert spaces around brackets in object literals.
+                              Defaults to true.
 
 Set of properties to integrate Biome with a VCS software.
         --vcs-client-kind=<git>  The kind of client.
@@ -83,7 +85,8 @@ Global options applied to all commands
         --no-errors-on-unmatched  Silence errors that would be emitted in case no files were processed
                               during the execution of the command.
         --error-on-warnings   Tell Biome to exit with an error code if some diagnostics emit warnings.
-        --reporter=<json|json-pretty|summary>  Allows to change how diagnostics and summary are reported.
+        --reporter=<json|json-pretty|github|junit|summary>  Allows to change how diagnostics and summary
+                              are reported.
         --log-level=<none|debug|info|warn|error>  The level of logging. In order, from the most verbose
                               to the least verbose: debug, info, warn, error.
                               The value `none` won't show any logging.

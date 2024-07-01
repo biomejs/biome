@@ -1,0 +1,5 @@
+{
+	field_value(
+		object_value: {key: "value"}
+	)
+}

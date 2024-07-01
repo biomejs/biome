@@ -2,7 +2,6 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: css/range/selector_list.css
 ---
-
 # Input
 
 ```css
@@ -26,9 +25,7 @@ Quote style: Double Quotes
 
 ```css
 .foo,
-.bar:first-child,
-div {
+.bar:FIRST-CHILD,
+DIV {
 	color: blue;
 }```
-
-

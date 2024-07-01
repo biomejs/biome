@@ -1558,8 +1558,7 @@ pub(super) fn parse_identifier(p: &mut JsParser, kind: JsSyntaxKind) -> ParsedSy
                 let name = p.cur_text();
                 Some(p.err_builder(
                     format!(
-                        "Illegal use of reserved keyword `{}` as an identifier in strict mode",
-                        name
+                        "Illegal use of reserved keyword `{name}` as an identifier in strict mode"
                     ),
                     p.cur_range(),
                 ))
