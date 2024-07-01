@@ -4,11 +4,11 @@ expression: invalid.js
 ---
 # Input
 ```jsx
-/* \u{b} 		*/ constfoo='thing';
-/* \u{c} 		*/ constfoo='thing';
-/* \u{85} 	*/ constfoo='thing';
-/* \u{feff}	*/ const﻿foo﻿=﻿'thing';
-/* \u{a0} 	*/ const foo = 'thing';
+/* \u{b}    */ constfoo='thing';
+/* \u{c}    */ constfoo='thing';
+/* \u{85}   */ constfoo='thing';
+/* \u{feff} */ const﻿foo﻿=﻿'thing';
+/* \u{a0}   */ const foo = 'thing';
 /* \u{1680} */ const foo = 'thing';
 /* \u{180e} */ const᠎foo᠎=᠎'thing';
 /* \u{2000} */ const foo = 'thing';
@@ -31,14 +31,14 @@ expression: invalid.js
 
 # Diagnostics
 ```
-invalid.js:1:15 lint/nursery/noIrregularWhitespace ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:1:16 lint/nursery/noIrregularWhitespace ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Irregular whitespaces found.
   
-  > 1 │ /* \u{b} 		*/ const␋foo␋=␋'thing';
-      │          		   ^^^^^^^^^^^^^^^^^^^^
-    2 │ /* \u{c} 		*/ const↡foo↡=↡'thing';
-    3 │ /* \u{85} 	*/ const␠foo␠=␠'thing';
+  > 1 │ /* \u{b}    */ const␋foo␋=␋'thing';
+      │                ^^^^^^^^^^^^^^^^^^^^
+    2 │ /* \u{c}    */ const↡foo↡=↡'thing';
+    3 │ /* \u{85}   */ const␠foo␠=␠'thing';
   
   i Replace the irregular whitespaces with normal whitespaces or tabs.
   
@@ -46,15 +46,15 @@ invalid.js:1:15 lint/nursery/noIrregularWhitespace ━━━━━━━━━�
 ```
 
 ```
-invalid.js:2:15 lint/nursery/noIrregularWhitespace ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:2:16 lint/nursery/noIrregularWhitespace ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Irregular whitespaces found.
   
-    1 │ /* \u{b} 		*/ const␋foo␋=␋'thing';
-  > 2 │ /* \u{c} 		*/ const↡foo↡=↡'thing';
-      │          		   ^^^^^^^^^^^^^^^^^^^^
-    3 │ /* \u{85} 	*/ const␠foo␠=␠'thing';
-    4 │ /* \u{feff}	*/ const�foo�=�'thing';
+    1 │ /* \u{b}    */ const␋foo␋=␋'thing';
+  > 2 │ /* \u{c}    */ const↡foo↡=↡'thing';
+      │                ^^^^^^^^^^^^^^^^^^^^
+    3 │ /* \u{85}   */ const␠foo␠=␠'thing';
+    4 │ /* \u{feff} */ const�foo�=�'thing';
   
   i Replace the irregular whitespaces with normal whitespaces or tabs.
   
@@ -62,16 +62,16 @@ invalid.js:2:15 lint/nursery/noIrregularWhitespace ━━━━━━━━━�
 ```
 
 ```
-invalid.js:3:15 lint/nursery/noIrregularWhitespace ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:3:16 lint/nursery/noIrregularWhitespace ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Irregular whitespaces found.
   
-    1 │ /* \u{b} 		*/ const␋foo␋=␋'thing';
-    2 │ /* \u{c} 		*/ const↡foo↡=↡'thing';
-  > 3 │ /* \u{85} 	*/ const␠foo␠=␠'thing';
-      │           	   ^^^^^^^^^^^^^^^^^^^^
-    4 │ /* \u{feff}	*/ const�foo�=�'thing';
-    5 │ /* \u{a0} 	*/ const␠foo␠=␠'thing';
+    1 │ /* \u{b}    */ const␋foo␋=␋'thing';
+    2 │ /* \u{c}    */ const↡foo↡=↡'thing';
+  > 3 │ /* \u{85}   */ const␠foo␠=␠'thing';
+      │                ^^^^^^^^^^^^^^^^^^^^
+    4 │ /* \u{feff} */ const�foo�=�'thing';
+    5 │ /* \u{a0}   */ const␠foo␠=␠'thing';
   
   i Replace the irregular whitespaces with normal whitespaces or tabs.
   
@@ -83,11 +83,11 @@ invalid.js:4:16 lint/nursery/noIrregularWhitespace ━━━━━━━━━�
 
   ! Irregular whitespaces found.
   
-    2 │ /* \u{c} 		*/ const↡foo↡=↡'thing';
-    3 │ /* \u{85} 	*/ const␠foo␠=␠'thing';
-  > 4 │ /* \u{feff}	*/ const�foo�=�'thing';
-      │            	   ^^^^^^^^^^^^^^^^^^^^
-    5 │ /* \u{a0} 	*/ const␠foo␠=␠'thing';
+    2 │ /* \u{c}    */ const↡foo↡=↡'thing';
+    3 │ /* \u{85}   */ const␠foo␠=␠'thing';
+  > 4 │ /* \u{feff} */ const�foo�=�'thing';
+      │                ^^^^^^^^^^^^^^^^^^^^
+    5 │ /* \u{a0}   */ const␠foo␠=␠'thing';
     6 │ /* \u{1680} */ const␠foo␠=␠'thing';
   
   i Replace the irregular whitespaces with normal whitespaces or tabs.
@@ -96,14 +96,14 @@ invalid.js:4:16 lint/nursery/noIrregularWhitespace ━━━━━━━━━�
 ```
 
 ```
-invalid.js:5:15 lint/nursery/noIrregularWhitespace ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:5:16 lint/nursery/noIrregularWhitespace ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Irregular whitespaces found.
   
-    3 │ /* \u{85} 	*/ const␠foo␠=␠'thing';
-    4 │ /* \u{feff}	*/ const�foo�=�'thing';
-  > 5 │ /* \u{a0} 	*/ const␠foo␠=␠'thing';
-      │           	   ^^^^^^^^^^^^^^^^^^^^
+    3 │ /* \u{85}   */ const␠foo␠=␠'thing';
+    4 │ /* \u{feff} */ const�foo�=�'thing';
+  > 5 │ /* \u{a0}   */ const␠foo␠=␠'thing';
+      │                ^^^^^^^^^^^^^^^^^^^^
     6 │ /* \u{1680} */ const␠foo␠=␠'thing';
     7 │ /* \u{180e} */ const�foo�=�'thing';
   
@@ -117,8 +117,8 @@ invalid.js:6:16 lint/nursery/noIrregularWhitespace ━━━━━━━━━�
 
   ! Irregular whitespaces found.
   
-    4 │ /* \u{feff}	*/ const�foo�=�'thing';
-    5 │ /* \u{a0} 	*/ const␠foo␠=␠'thing';
+    4 │ /* \u{feff} */ const�foo�=�'thing';
+    5 │ /* \u{a0}   */ const␠foo␠=␠'thing';
   > 6 │ /* \u{1680} */ const␠foo␠=␠'thing';
       │                ^^^^^^^^^^^^^^^^^^^^
     7 │ /* \u{180e} */ const�foo�=�'thing';
@@ -134,7 +134,7 @@ invalid.js:7:16 lint/nursery/noIrregularWhitespace ━━━━━━━━━�
 
   ! Irregular whitespaces found.
   
-    5 │ /* \u{a0} 	*/ const␠foo␠=␠'thing';
+    5 │ /* \u{a0}   */ const␠foo␠=␠'thing';
     6 │ /* \u{1680} */ const␠foo␠=␠'thing';
   > 7 │ /* \u{180e} */ const�foo�=�'thing';
       │                ^^^^^^^^^^^^^^^^^^^^

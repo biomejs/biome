@@ -1,8 +1,8 @@
-/* \u{b} 		*/ constfoo='thing';
-/* \u{c} 		*/ constfoo='thing';
-/* \u{85} 	*/ constfoo='thing';
-/* \u{feff}	*/ const﻿foo﻿=﻿'thing';
-/* \u{a0} 	*/ const foo = 'thing';
+/* \u{b}    */ constfoo='thing';
+/* \u{c}    */ constfoo='thing';
+/* \u{85}   */ constfoo='thing';
+/* \u{feff} */ const﻿foo﻿=﻿'thing';
+/* \u{a0}   */ const foo = 'thing';
 /* \u{1680} */ const foo = 'thing';
 /* \u{180e} */ const᠎foo᠎=᠎'thing';
 /* \u{2000} */ const foo = 'thing';
