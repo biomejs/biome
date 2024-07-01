@@ -262,8 +262,7 @@ impl Rule for NoDuplicateObjectKeys {
             rule_category!(),
             member_definition.range(),
             format!(
-                "This {} is later overwritten by an object member with the same name.",
-                member_definition
+                "This {member_definition} is later overwritten by an object member with the same name."
             ),
         );
         diagnostic = match defined_property {

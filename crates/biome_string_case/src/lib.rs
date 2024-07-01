@@ -267,7 +267,7 @@ impl std::fmt::Display for Case {
             Case::Uni => "unicase",
             Case::Upper => "UPPERCASE",
         };
-        write!(f, "{}", repr)
+        write!(f, "{repr}")
     }
 }
 

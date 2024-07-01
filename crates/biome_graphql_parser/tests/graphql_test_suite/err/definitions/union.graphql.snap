@@ -67,10 +67,8 @@ GraphqlRoot {
             directives: GraphqlDirectiveList [],
             union_members: GraphqlUnionMemberTypes {
                 eq_token: missing (required),
-                bitwise_or_token: missing (optional),
+                bitwise_or_token: PIPE@48..52 "|" [Newline("\n"), Whitespace("\t")] [Whitespace(" ")],
                 members: GraphqlUnionMemberTypeList [
-                    missing element,
-                    PIPE@48..52 "|" [Newline("\n"), Whitespace("\t")] [Whitespace(" ")],
                     GraphqlNamedType {
                         name: GraphqlName {
                             value_token: GRAPHQL_NAME@52..57 "Photo" [] [],
@@ -94,10 +92,8 @@ GraphqlRoot {
             directives: GraphqlDirectiveList [],
             union_members: GraphqlUnionMemberTypes {
                 eq_token: EQ@88..89 "=" [] [],
-                bitwise_or_token: missing (optional),
+                bitwise_or_token: PIPE@89..92 "|" [Newline("\n"), Whitespace("\t")] [],
                 members: GraphqlUnionMemberTypeList [
-                    missing element,
-                    PIPE@89..92 "|" [Newline("\n"), Whitespace("\t")] [],
                     missing element,
                     PIPE@92..96 "|" [Newline("\n"), Whitespace("\t")] [Whitespace(" ")],
                     GraphqlNamedType {
@@ -117,10 +113,8 @@ GraphqlRoot {
             directives: GraphqlDirectiveList [],
             union_members: GraphqlUnionMemberTypes {
                 eq_token: EQ@123..124 "=" [] [],
-                bitwise_or_token: missing (optional),
+                bitwise_or_token: PIPE@124..128 "|" [Newline("\n"), Whitespace("\t")] [Whitespace(" ")],
                 members: GraphqlUnionMemberTypeList [
-                    missing element,
-                    PIPE@124..128 "|" [Newline("\n"), Whitespace("\t")] [Whitespace(" ")],
                     GraphqlNamedType {
                         name: GraphqlName {
                             value_token: GRAPHQL_NAME@128..133 "Photo" [] [],
@@ -192,12 +186,8 @@ GraphqlRoot {
             directives: GraphqlDirectiveList [],
             union_members: GraphqlUnionMemberTypes {
                 eq_token: EQ@239..241 "=" [] [Whitespace(" ")],
-                bitwise_or_token: missing (optional),
-                members: GraphqlUnionMemberTypeList [
-                    missing element,
-                    PIPE@241..242 "|" [] [],
-                    missing element,
-                ],
+                bitwise_or_token: PIPE@241..242 "|" [] [],
+                members: GraphqlUnionMemberTypeList [],
             },
         },
         GraphqlUnionTypeDefinition {
@@ -253,15 +243,13 @@ GraphqlRoot {
       3: GRAPHQL_DIRECTIVE_LIST@48..48
       4: GRAPHQL_UNION_MEMBER_TYPES@48..67
         0: (empty)
-        1: (empty)
-        2: GRAPHQL_UNION_MEMBER_TYPE_LIST@48..67
-          0: (empty)
-          1: PIPE@48..52 "|" [Newline("\n"), Whitespace("\t")] [Whitespace(" ")]
-          2: GRAPHQL_NAMED_TYPE@52..57
+        1: PIPE@48..52 "|" [Newline("\n"), Whitespace("\t")] [Whitespace(" ")]
+        2: GRAPHQL_UNION_MEMBER_TYPE_LIST@52..67
+          0: GRAPHQL_NAMED_TYPE@52..57
             0: GRAPHQL_NAME@52..57
               0: GRAPHQL_NAME@52..57 "Photo" [] []
-          3: PIPE@57..61 "|" [Newline("\n"), Whitespace("\t")] [Whitespace(" ")]
-          4: GRAPHQL_NAMED_TYPE@61..67
+          1: PIPE@57..61 "|" [Newline("\n"), Whitespace("\t")] [Whitespace(" ")]
+          2: GRAPHQL_NAMED_TYPE@61..67
             0: GRAPHQL_NAME@61..67
               0: GRAPHQL_NAME@61..67 "Person" [] []
     2: GRAPHQL_UNION_TYPE_DEFINITION@67..102
@@ -272,13 +260,11 @@ GraphqlRoot {
       3: GRAPHQL_DIRECTIVE_LIST@88..88
       4: GRAPHQL_UNION_MEMBER_TYPES@88..102
         0: EQ@88..89 "=" [] []
-        1: (empty)
-        2: GRAPHQL_UNION_MEMBER_TYPE_LIST@89..102
+        1: PIPE@89..92 "|" [Newline("\n"), Whitespace("\t")] []
+        2: GRAPHQL_UNION_MEMBER_TYPE_LIST@92..102
           0: (empty)
-          1: PIPE@89..92 "|" [Newline("\n"), Whitespace("\t")] []
-          2: (empty)
-          3: PIPE@92..96 "|" [Newline("\n"), Whitespace("\t")] [Whitespace(" ")]
-          4: GRAPHQL_NAMED_TYPE@96..102
+          1: PIPE@92..96 "|" [Newline("\n"), Whitespace("\t")] [Whitespace(" ")]
+          2: GRAPHQL_NAMED_TYPE@96..102
             0: GRAPHQL_NAME@96..102
               0: GRAPHQL_NAME@96..102 "Person" [] []
     3: GRAPHQL_UNION_TYPE_DEFINITION@102..152
@@ -289,19 +275,17 @@ GraphqlRoot {
       3: GRAPHQL_DIRECTIVE_LIST@123..123
       4: GRAPHQL_UNION_MEMBER_TYPES@123..152
         0: EQ@123..124 "=" [] []
-        1: (empty)
-        2: GRAPHQL_UNION_MEMBER_TYPE_LIST@124..152
-          0: (empty)
-          1: PIPE@124..128 "|" [Newline("\n"), Whitespace("\t")] [Whitespace(" ")]
-          2: GRAPHQL_NAMED_TYPE@128..133
+        1: PIPE@124..128 "|" [Newline("\n"), Whitespace("\t")] [Whitespace(" ")]
+        2: GRAPHQL_UNION_MEMBER_TYPE_LIST@128..152
+          0: GRAPHQL_NAMED_TYPE@128..133
             0: GRAPHQL_NAME@128..133
               0: GRAPHQL_NAME@128..133 "Photo" [] []
-          3: (empty)
-          4: GRAPHQL_NAMED_TYPE@133..143
+          1: (empty)
+          2: GRAPHQL_NAMED_TYPE@133..143
             0: GRAPHQL_NAME@133..143
               0: GRAPHQL_NAME@133..143 "Person" [Newline("\n"), Whitespace("\t  ")] []
-          5: PIPE@143..147 "|" [Newline("\n"), Whitespace("\t")] [Whitespace(" ")]
-          6: GRAPHQL_NAMED_TYPE@147..152
+          3: PIPE@143..147 "|" [Newline("\n"), Whitespace("\t")] [Whitespace(" ")]
+          4: GRAPHQL_NAMED_TYPE@147..152
             0: GRAPHQL_NAME@147..152
               0: GRAPHQL_NAME@147..152 "union" [] []
     4: GRAPHQL_UNION_TYPE_DEFINITION@152..196
@@ -342,11 +326,8 @@ GraphqlRoot {
       3: GRAPHQL_DIRECTIVE_LIST@239..239
       4: GRAPHQL_UNION_MEMBER_TYPES@239..242
         0: EQ@239..241 "=" [] [Whitespace(" ")]
-        1: (empty)
-        2: GRAPHQL_UNION_MEMBER_TYPE_LIST@241..242
-          0: (empty)
-          1: PIPE@241..242 "|" [] []
-          2: (empty)
+        1: PIPE@241..242 "|" [] []
+        2: GRAPHQL_UNION_MEMBER_TYPE_LIST@242..242
     7: GRAPHQL_UNION_TYPE_DEFINITION@242..266
       0: (empty)
       1: UNION_KW@242..250 "union" [Newline("\n"), Newline("\n")] [Whitespace(" ")]

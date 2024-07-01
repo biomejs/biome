@@ -2,7 +2,7 @@ use super::tag::Tag;
 use crate::format_element::tag::DedentMode;
 use crate::prelude::tag::GroupMode;
 use crate::prelude::*;
-use crate::{format, write, AttributePosition};
+use crate::{format, write, AttributePosition, BracketSpacing};
 use crate::{
     BufferExtensions, Format, FormatContext, FormatElement, FormatOptions, FormatResult, Formatter,
     IndentStyle, IndentWidth, LineEnding, LineWidth, PrinterOptions, TransformSourceMap,
@@ -203,6 +203,10 @@ impl FormatOptions for IrFormatOptions {
         AttributePosition::default()
     }
 
+    fn bracket_spacing(&self) -> BracketSpacing {
+        BracketSpacing::default()
+    }
+
     fn as_print_options(&self) -> PrinterOptions {
         PrinterOptions {
             indent_width: self.indent_width(),
@@ -210,6 +214,7 @@ impl FormatOptions for IrFormatOptions {
             line_ending: LineEnding::Lf,
             indent_style: IndentStyle::Space,
             attribute_position: self.attribute_position(),
+            bracket_spacing: self.bracket_spacing(),
         }
     }
 }

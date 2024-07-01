@@ -1,6 +1,8 @@
 use crate::PlainIndentStyle;
 use biome_deserialize_macros::{Deserializable, Merge, Partial};
-use biome_formatter::{AttributePosition, IndentWidth, LineEnding, LineWidth, QuoteStyle};
+use biome_formatter::{
+    AttributePosition, BracketSpacing, IndentWidth, LineEnding, LineWidth, QuoteStyle,
+};
 use biome_js_formatter::context::{
     trailing_commas::TrailingCommas, ArrowParentheses, QuoteProperties, Semicolons,
 };
@@ -38,10 +40,6 @@ pub struct JavascriptFormatter {
     /// Whether to add non-necessary parentheses to arrow functions. Defaults to "always".
     #[partial(bpaf(long("arrow-parentheses"), argument("always|as-needed"), optional))]
     pub arrow_parentheses: ArrowParentheses,
-
-    /// Whether to insert spaces around brackets in object literals. Defaults to true.
-    #[partial(bpaf(long("bracket-spacing"), argument("true|false"), optional))]
-    pub bracket_spacing: bool,
 
     /// Whether to hug the closing bracket of multiline HTML/JSX tags to the end of the last line, rather than being alone on the following line. Defaults to false.
     #[partial(bpaf(long("bracket-same-line"), argument("true|false"), optional))]
@@ -98,7 +96,12 @@ pub struct JavascriptFormatter {
         argument("multiline|auto"),
         optional
     ))]
-    pub attribute_position: AttributePosition,
+    pub attribute_position: Option<AttributePosition>,
+
+    // it's also a top-level configurable property.
+    /// Whether to insert spaces around brackets in object literals. Defaults to true.
+    #[partial(bpaf(long("bracket-spacing"), argument("true|false"), optional))]
+    pub bracket_spacing: Option<BracketSpacing>,
 }
 
 impl PartialJavascriptFormatter {
@@ -111,7 +114,7 @@ impl PartialJavascriptFormatter {
             trailing_commas: self.trailing_commas.unwrap_or_default(),
             semicolons: self.semicolons.unwrap_or_default(),
             arrow_parentheses: self.arrow_parentheses.unwrap_or_default(),
-            bracket_spacing: self.bracket_spacing.unwrap_or_default(),
+            bracket_spacing: self.bracket_spacing,
             bracket_same_line: self.bracket_same_line.unwrap_or_default(),
             indent_style: self.indent_style,
             indent_size: self.indent_size,
@@ -119,7 +122,7 @@ impl PartialJavascriptFormatter {
             line_ending: self.line_ending,
             line_width: self.line_width,
             quote_style: self.quote_style.unwrap_or_default(),
-            attribute_position: self.attribute_position.unwrap_or_default(),
+            attribute_position: self.attribute_position,
         }
     }
 }
@@ -134,7 +137,7 @@ impl Default for JavascriptFormatter {
             trailing_commas: Default::default(),
             semicolons: Default::default(),
             arrow_parentheses: Default::default(),
-            bracket_spacing: true,
+            bracket_spacing: Default::default(),
             bracket_same_line: Default::default(),
             indent_style: Default::default(),
             indent_size: Default::default(),

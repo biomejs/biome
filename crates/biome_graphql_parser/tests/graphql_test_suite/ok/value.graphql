@@ -10,5 +10,6 @@
 		enum_value: on,
 		list_value: [1, 2, 3],
 		object_value: {key: "value"}
+		list_object_value: [{key: "value"}, {key: "value"}]
 	)
 }

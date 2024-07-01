@@ -1,0 +1,31 @@
+fragment friendFields
+
+on
+
+User
+{
+  id
+
+
+  name
+
+  		profilePic(size: 50)
+}
+
+fragment 					friendFields 			on 		User					 @deprecated {
+  id
+
+
+  name
+
+
+  profilePic(size: 50)
+
+
+	query
+
+		{
+   				 fragment
+	}
+
+}

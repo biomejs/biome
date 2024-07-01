@@ -64,7 +64,7 @@ fn instance_type<'a>(
 
                     let mut property = make::ident(property);
                     if let Some(description) = description {
-                        let comment = format!("/**\n\t* {} \n\t */", description);
+                        let comment = format!("/**\n\t* {description} \n\t */");
                         let trivia = vec![
                             (TriviaPieceKind::Newline, "\n"),
                             (TriviaPieceKind::MultiLineComment, comment.as_str()),
@@ -341,7 +341,7 @@ pub fn generate_type<'a>(
 
                 let mut property = make::ident(property);
                 if let Some(description) = description {
-                    let comment = format!("/**\n\t* {} \n\t */", description);
+                    let comment = format!("/**\n\t* {description} \n\t */");
                     let trivia = vec![
                         (TriviaPieceKind::Newline, "\n"),
                         (TriviaPieceKind::MultiLineComment, comment.as_str()),

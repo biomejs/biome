@@ -14,6 +14,7 @@ expression: content
     "lineEnding": "lf",
     "lineWidth": 80,
     "attributePosition": "auto",
+    "bracketSpacing": true,
     "ignore": ["dist/**", "node_modules/**", "generated/*.spec.js"]
   },
   "linter": { "enabled": true },
@@ -24,10 +25,10 @@ expression: content
       "trailingCommas": "all",
       "semicolons": "always",
       "arrowParentheses": "always",
-      "bracketSpacing": true,
       "bracketSameLine": false,
       "quoteStyle": "single",
-      "attributePosition": "auto"
+      "attributePosition": "auto",
+      "bracketSpacing": true
     }
   }
 }

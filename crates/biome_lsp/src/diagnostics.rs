@@ -26,10 +26,10 @@ impl Display for LspError {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         match self {
             LspError::WorkspaceError(err) => {
-                write!(f, "{}", err)
+                write!(f, "{err}")
             }
             LspError::Anyhow(err) => {
-                write!(f, "{}", err)
+                write!(f, "{err}")
             }
         }
     }
@@ -48,13 +48,13 @@ pub(crate) async fn handle_lsp_error<T>(
             WorkspaceError::FormatWithErrorsDisabled(_)
             | WorkspaceError::FileIgnored(_)
             | WorkspaceError::FileTooLarge(_) => {
-                let message = format!("{}", err);
+                let message = format!("{err}");
                 client.log_message(MessageType::WARNING, message).await;
                 Ok(None)
             }
 
             _ => {
-                let message = format!("{}", err);
+                let message = format!("{err}");
                 client.log_message(MessageType::ERROR, message).await;
                 Ok(None)
             }

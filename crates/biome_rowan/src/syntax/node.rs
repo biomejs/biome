@@ -770,7 +770,7 @@ impl<L: Language> fmt::Debug for SyntaxNode<L> {
                                 SyntaxToken::<L>::from(token)
                             )?,
                             cursor::SyntaxSlot::Empty { index, .. } => {
-                                writeln!(f, "{}: (empty)", index)?
+                                writeln!(f, "{index}: (empty)")?
                             }
                         }
                         level += 1;

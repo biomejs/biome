@@ -20,9 +20,7 @@ incorrect_key.json:4:4 deserialize ━━━━━━━━━━━━━━━
   - javascript
   - json
   - css
+  - graphql
   - formatter
   - linter
   - organizeImports
-  
-
-

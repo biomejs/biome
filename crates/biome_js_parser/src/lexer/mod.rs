@@ -1416,7 +1416,7 @@ impl<'src> JsLexer<'src> {
     #[inline]
     fn flag_err(&self, flag: char) -> ParseDiagnostic {
         ParseDiagnostic::new(
-            format!("Duplicate flag `{}`.", flag),
+            format!("Duplicate flag `{flag}`."),
             self.position..self.position + 1,
         )
         .with_hint("This flag was already used.")
@@ -1915,7 +1915,7 @@ impl<'src> JsLexer<'src> {
                         self.resolve_identifier(chr)
                     } else {
                         let err = ParseDiagnostic::new(
-                            format!("Unexpected token `{}`", chr),
+                            format!("Unexpected token `{chr}`"),
                             start..self.position + 1,
                         );
                         self.push_diagnostic(err);

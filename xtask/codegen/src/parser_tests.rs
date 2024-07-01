@@ -54,7 +54,7 @@ pub fn generate_parser_tests(mode: Mode) -> Result<()> {
         let existing = existing_tests(&tests_dir, true)?;
 
         if let Some(t) = existing.keys().find(|&t| !tests.contains_key(t)) {
-            panic!("Test is deleted: '{}'", t);
+            panic!("Test is deleted: '{t}'");
         }
 
         let mut some_file_was_updated = false;
@@ -172,7 +172,7 @@ fn collect_tests(s: &str) -> Vec<Test> {
             Some(("d.ts", suffix)) => (Language::TypeScriptDefinition, suffix),
             Some(("tsx", suffix)) => (Language::Tsx, suffix),
             Some((_, suffix)) => (Language::JavaScript, suffix),
-            _ => panic!("wrong test configuration: {:?}", suffix),
+            _ => panic!("wrong test configuration: {suffix:?}"),
         };
 
         let (name, options) = match suffix.split_once(' ') {
@@ -251,7 +251,7 @@ fn existing_tests(dir: &Path, ok: bool) -> Result<HashMap<String, (PathBuf, Test
                 language,
             };
             if let Some(old) = res.insert(name, (path, test)) {
-                println!("Duplicate test: {:?}", old);
+                println!("Duplicate test: {old:?}");
             }
         }
     }

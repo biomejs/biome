@@ -102,7 +102,7 @@ fn decode_escaped_code_point_to_code_point(iter: &mut Peekable<Chars>) -> Option
             if c == '}' {
                 iter.next();
                 let code_point = i64::from_str_radix(&digits, 16).ok()?;
-                return Some((format!("{{{}}}", digits), code_point));
+                return Some((format!("{{{digits}}}"), code_point));
             } else {
                 digits.push(iter.next()?);
             }

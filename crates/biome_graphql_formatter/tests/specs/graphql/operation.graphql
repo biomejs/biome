@@ -1,0 +1,159 @@
+query {
+
+
+	likeStory
+
+
+}
+
+# shorthand
+{
+
+
+  likeStory
+
+
+
+}
+
+mutation
+
+{
+
+
+	likeStory
+
+
+}
+
+subscription
+
+{
+
+
+	storyLiked
+
+
+}
+
+# with name
+query    likeStory
+
+  {
+
+
+		likeStory
+}
+
+query    query
+
+   {
+
+
+	likeStory
+
+
+	 }
+
+# with variables
+query    (   $storyId: ID!) {
+
+
+	likeStory
+
+	(
+
+		storyId: $storyId
+
+	)
+
+
+
+}
+
+query
+
+(   $storyId:
+
+ID =
+
+"1"
+
+
+ ) {
+
+
+	likeStory
+
+	(
+
+		storyId:
+
+
+		  $storyId
+
+	)
+
+
+
+}
+
+# with directives
+query (
+
+	$storyId:
+
+	ID!
+
+)
+
+@skip
+
+(if:
+true)
+
+  {
+
+
+		likeStory(
+
+			  storyId:
+
+				$storyId
+
+		 )
+
+
+
+}
+
+query
+
+enum(
+	$true: false
+) {
+
+  null
+
+  mutation
+
+  enum
+
+
+	Direction
+
+	@deprecated {
+
+        NORTH
+
+
+
+    WEST
+
+
+
+
+	}
+
+
+}

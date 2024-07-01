@@ -649,12 +649,12 @@ impl<L: Language> SyntaxTrivia<L> {
 fn print_debug_str<S: AsRef<str>>(text: S, f: &mut fmt::Formatter<'_>) -> fmt::Result {
     let text = text.as_ref();
     if text.len() < 25 {
-        write!(f, "{:?}", text)
+        write!(f, "{text:?}")
     } else {
         for idx in 21..25 {
             if text.is_char_boundary(idx) {
                 let text = format!("{} ...", &text[..idx]);
-                return write!(f, "{:?}", text);
+                return write!(f, "{text:?}");
             }
         }
         write!(f, "")
@@ -671,7 +671,7 @@ impl<L: Language> std::fmt::Debug for SyntaxTrivia<L> {
                 write!(f, ", ")?;
             }
             first_piece = false;
-            write!(f, "{:?}", piece)?;
+            write!(f, "{piece:?}")?;
         }
 
         write!(f, "]")

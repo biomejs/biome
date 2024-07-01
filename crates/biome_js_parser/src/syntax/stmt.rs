@@ -450,11 +450,11 @@ fn parse_labeled_statement(p: &mut JsParser, context: StatementContext) -> Parse
 					.err_builder("Duplicate statement labels are not allowed", identifier_range)
 					.with_detail(
 						identifier_range,
-						format!("a second use of `{}` here is not allowed", label),
+						format!("a second use of `{label}` here is not allowed"),
 					)
 					.with_detail(
 						*label_item.range(),
-						format!("`{}` is first used as a label here", label),
+						format!("`{label}` is first used as a label here"),
 					);
 
 				p.error(err);
@@ -605,7 +605,7 @@ fn parse_break_statement(p: &mut JsParser) -> ParsedSyntax {
             Some(_) => None,
             None => Some(
                 p.err_builder(
-                    format!("Use of undefined statement label `{}`", label_name,),
+                    format!("Use of undefined statement label `{label_name}`",),
                     p.cur_range(),
                 )
                 .with_hint("This label is used, but it is never defined"),
@@ -670,8 +670,7 @@ fn parse_continue_statement(p: &mut JsParser) -> ParsedSyntax {
 			None => {
 				Some(p
 					.err_builder(format!(
-						"Use of undefined statement label `{}`",
-						label_name
+						"Use of undefined statement label `{label_name}`"
 					), p.cur_range())
 					.with_hint(
 

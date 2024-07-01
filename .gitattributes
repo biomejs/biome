@@ -27,6 +27,8 @@ pnpm-lock.yaml linguist-generated=true text=auto eol=lf
 /crates/biome_js_analyze/tests/specs/**/*.snap linguist-language=Markdown
 /crates/biome_css_formatter/tests/**/*.css.prettier-snap linguist-language=CSS
 /crates/biome_css_formatter/tests/**/*.css.snap linguist-language=Markdown
+/crates/biome_graphql_formatter/tests/**/*.css.prettier-snap linguist-language=GraphQL
+/crates/biome_graphql_formatter/tests/**/*.css.snap linguist-language=Markdown
 /crates/biome_js_formatter/tests/**/*.ts.prettier-snap linguist-language=TypeScript
 /crates/biome_js_formatter/tests/**/*.js.prettier-snap linguist-language=JavaScript
 /crates/biome_js_formatter/tests/**/*.ts.snap linguist-language=Markdown

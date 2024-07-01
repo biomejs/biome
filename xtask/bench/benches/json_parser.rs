@@ -30,7 +30,7 @@ fn bench_json_parser(criterion: &mut Criterion) {
             Ok(test_case) => {
                 bench_parser_group(&mut group, test_case);
             }
-            Err(e) => println!("{:?}", e),
+            Err(e) => println!("{e:?}"),
         }
     }
     group.finish();

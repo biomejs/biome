@@ -1,0 +1,57 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: graphql/definitions/union.graphql
+---
+# Input
+
+```graphql
+union
+SearchResult =
+	Photo | Person
+
+union
+SearchResult =
+				| Photo
+	| Person
+				| union
+
+union
+union = union
+| union
+
+union
+SearchResult
+			@deprecated
+
+union SearchResult
+@deprecated = Photo 		| Person
+
+```
+
+
+=============================
+
+# Outputs
+
+## Output 1
+
+-----
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 80
+Bracket spacing: true
+Quote style: Double Quotes
+-----
+
+```graphql
+union SearchResult = Photo | Person
+
+union SearchResult = Photo | Person | union
+
+union union = union | union
+
+union SearchResult @deprecated
+
+union SearchResult @deprecated = Photo | Person
+```

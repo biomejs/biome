@@ -142,7 +142,7 @@ impl fmt::Display for GreenNode {
 impl fmt::Display for GreenNodeData {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         for child in self.slots() {
-            write!(f, "{}", child)?;
+            write!(f, "{child}")?;
         }
         Ok(())
     }

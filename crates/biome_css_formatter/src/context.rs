@@ -1,5 +1,5 @@
 use crate::CssCommentStyle;
-use biome_formatter::{prelude::*, AttributePosition, IndentWidth, QuoteStyle};
+use biome_formatter::{prelude::*, AttributePosition, BracketSpacing, IndentWidth, QuoteStyle};
 use biome_formatter::{
     CstFormatContext, FormatContext, FormatOptions, IndentStyle, LineEnding, LineWidth,
     TransformSourceMap,
@@ -62,7 +62,6 @@ pub struct CssFormatOptions {
     line_ending: LineEnding,
     line_width: LineWidth,
     quote_style: QuoteStyle,
-    attribute_position: AttributePosition,
     _file_source: CssFileSource,
 }
 
@@ -75,7 +74,6 @@ impl CssFormatOptions {
             line_ending: LineEnding::default(),
             line_width: LineWidth::default(),
             quote_style: QuoteStyle::default(),
-            attribute_position: AttributePosition::default(),
         }
     }
 
@@ -138,20 +136,24 @@ impl FormatOptions for CssFormatOptions {
         self.indent_width
     }
 
-    fn line_ending(&self) -> LineEnding {
-        self.line_ending
-    }
-
     fn line_width(&self) -> LineWidth {
         self.line_width
     }
 
-    fn as_print_options(&self) -> PrinterOptions {
-        PrinterOptions::from(self)
+    fn line_ending(&self) -> LineEnding {
+        self.line_ending
     }
 
     fn attribute_position(&self) -> AttributePosition {
-        self.attribute_position
+        AttributePosition::default()
+    }
+
+    fn bracket_spacing(&self) -> BracketSpacing {
+        BracketSpacing::default()
+    }
+
+    fn as_print_options(&self) -> PrinterOptions {
+        PrinterOptions::from(self)
     }
 }
 

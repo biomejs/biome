@@ -156,7 +156,7 @@ impl TestCaseFiles {
             if let Err(err) = Formatter::new(&mut Termcolor(&mut *buffer)).write_markup(markup! {
                 {PrintDiagnostic::verbose(error)}
             }) {
-                eprintln!("Failed to print diagnostic: {}", err);
+                eprintln!("Failed to print diagnostic: {err}");
             }
         }
     }
@@ -246,20 +246,20 @@ pub(crate) fn run_test_suite(
 
                     let _ = write!(stacktrace, "{}", file.display());
                 } else if let Some(name) = s.name().and_then(|x| x.as_str()) {
-                    let _ = write!(stacktrace, "{}", name);
+                    let _ = write!(stacktrace, "{name}");
                 } else {
                     let _ = write!(stacktrace, "<unknown>");
                 }
 
                 match (s.lineno(), s.colno()) {
                     (Some(line), Some(col)) => {
-                        let _ = write!(stacktrace, " @ line {} col {}", line, col);
+                        let _ = write!(stacktrace, " @ line {line} col {col}");
                     }
                     (Some(line), None) => {
-                        let _ = write!(stacktrace, " @ line {}", line);
+                        let _ = write!(stacktrace, " @ line {line}");
                     }
                     (None, Some(col)) => {
-                        let _ = write!(stacktrace, " @ col {}", col);
+                        let _ = write!(stacktrace, " @ col {col}");
                     }
                     _ => {}
                 }
@@ -271,7 +271,7 @@ pub(crate) fn run_test_suite(
         let stacktrace = String::from_utf8(stacktrace).unwrap();
 
         let mut msg = vec![];
-        let _ = write!(msg, "{}", info);
+        let _ = write!(msg, "{info}");
         let msg = String::from_utf8(msg).unwrap();
 
         tracing::error!(

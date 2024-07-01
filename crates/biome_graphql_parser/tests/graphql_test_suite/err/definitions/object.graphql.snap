@@ -428,10 +428,8 @@ GraphqlRoot {
             },
             implements: GraphqlImplementsInterfaces {
                 implements_token: IMPLEMENTS_KW@413..424 "implements" [] [Whitespace(" ")],
-                amp_token: missing (optional),
+                amp_token: AMP@424..425 "&" [] [],
                 interfaces: GraphqlImplementsInterfaceList [
-                    missing element,
-                    AMP@424..425 "&" [] [],
                     GraphqlNamedType {
                         name: GraphqlName {
                             value_token: GRAPHQL_NAME@425..432 "type" [Newline("\n"), Newline("\n")] [Whitespace(" ")],
@@ -961,15 +959,13 @@ GraphqlRoot {
         0: GRAPHQL_NAME@406..413 "Person" [] [Whitespace(" ")]
       3: GRAPHQL_IMPLEMENTS_INTERFACES@413..439
         0: IMPLEMENTS_KW@413..424 "implements" [] [Whitespace(" ")]
-        1: (empty)
-        2: GRAPHQL_IMPLEMENTS_INTERFACE_LIST@424..439
-          0: (empty)
-          1: AMP@424..425 "&" [] []
-          2: GRAPHQL_NAMED_TYPE@425..432
+        1: AMP@424..425 "&" [] []
+        2: GRAPHQL_IMPLEMENTS_INTERFACE_LIST@425..439
+          0: GRAPHQL_NAMED_TYPE@425..432
             0: GRAPHQL_NAME@425..432
               0: GRAPHQL_NAME@425..432 "type" [Newline("\n"), Newline("\n")] [Whitespace(" ")]
-          3: (empty)
-          4: GRAPHQL_NAMED_TYPE@432..439
+          1: (empty)
+          2: GRAPHQL_NAMED_TYPE@432..439
             0: GRAPHQL_NAME@432..439
               0: GRAPHQL_NAME@432..439 "Person" [] [Whitespace(" ")]
       4: GRAPHQL_DIRECTIVE_LIST@439..447

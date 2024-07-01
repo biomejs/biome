@@ -115,7 +115,7 @@ impl<D: Diagnostic + ?Sized> fmt::Display for PrintHeader<'_, D> {
             } else {
                 let path_name = Path::new(name);
                 if path_name.is_absolute() {
-                    let link = format!("file://{}", name);
+                    let link = format!("file://{name}");
                     fmt.write_markup(markup! {
                         <Hyperlink href={link}>{name}</Hyperlink>
                     })?;

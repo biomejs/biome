@@ -1,0 +1,91 @@
+interface
+	Person
+
+{
+
+  name: String
+
+  age: Int
+  				picture: 			Url
+}
+
+interface
+
+Person
+
+@deprecated
+
+{
+  		name:
+
+				String
+}
+
+interface Person
+
+implements		 Character			 @deprecated{
+
+	name:String
+}
+
+interface 		Person
+
+implements Character
+
+{
+  name:
+
+	String
+}
+
+interface			 Person
+
+interface			 Person implements
+
+	Character
+
+interface 		Person
+
+@deprecated
+
+interface Person
+
+implements Character
+
+@deprecated
+
+interface Person
+
+implements Character
+
+& Character1 @deprecated
+
+interface Person {
+  name(start_with:
+
+				String): String
+
+				"filder by age" age:
+
+			Int @deprecated
+
+
+				picture(size: Int = 0): Url
+
+
+				height("filter by height"
+
+				greater_than: Int @deprecated): Int
+				weight("filter by weight"
+
+			greater_than: Int = 0 @deprecated): Int
+}
+
+interface
+
+interface
+implements interface {
+  interface:
+
+	interface
+}

@@ -557,6 +557,7 @@ enum NodeDialect {
     Json,
     Css,
     Grit,
+    Graphql,
 }
 
 impl NodeDialect {
@@ -568,6 +569,7 @@ impl NodeDialect {
             NodeDialect::Json,
             NodeDialect::Css,
             NodeDialect::Grit,
+            NodeDialect::Graphql,
         ]
     }
 
@@ -583,6 +585,7 @@ impl NodeDialect {
             NodeDialect::Json => "json",
             NodeDialect::Css => "css",
             NodeDialect::Grit => "grit",
+            NodeDialect::Graphql => "graphql",
         }
     }
 
@@ -594,8 +597,9 @@ impl NodeDialect {
             "Json" => NodeDialect::Json,
             "Css" => NodeDialect::Css,
             "Grit" => NodeDialect::Grit,
+            "Graphql" => NodeDialect::Graphql,
             _ => {
-                eprintln!("missing prefix {}", name);
+                eprintln!("missing prefix {name}");
                 NodeDialect::Js
             }
         }
@@ -633,6 +637,10 @@ enum NodeConcept {
     // GritQL
     Pattern,
     Predicate,
+
+    // GraphQL
+    Definition,
+    Extension,
 }
 
 impl NodeConcept {
@@ -659,6 +667,8 @@ impl NodeConcept {
             NodeConcept::Property => "properties",
             NodeConcept::Pattern => "patterns",
             NodeConcept::Predicate => "predicates",
+            NodeConcept::Definition => "definitions",
+            NodeConcept::Extension => "extensions",
         }
     }
 }
@@ -789,8 +799,12 @@ fn get_node_concept(
                 _ => NodeConcept::Auxiliary,
             },
 
-            // TODO: implement formatter
-            LanguageKind::Graphql => NodeConcept::Auxiliary,
+            LanguageKind::Graphql => match name {
+                _ if name.contains("Extension") => NodeConcept::Extension,
+                _ if name.ends_with("Definition") => NodeConcept::Definition,
+                _ if name.ends_with("Value") => NodeConcept::Value,
+                _ => NodeConcept::Auxiliary,
+            },
 
             LanguageKind::Grit => match name {
                 _ if name.contains("Operation") || name.contains("Pattern") => NodeConcept::Pattern,

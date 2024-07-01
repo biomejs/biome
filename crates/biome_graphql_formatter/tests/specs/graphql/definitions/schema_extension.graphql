@@ -1,0 +1,27 @@
+extend schema {
+  query: MyQueryRootType
+
+
+  mutation: MyMutationRootType
+
+  subscription: MySubscriptionRootType
+}
+
+extend
+schema
+
+@decs {
+  query:
+	MyQueryRootType
+
+
+	mutation: 			MyMutationRootType
+}
+
+extend
+schema @decs{
+  query:MyQueryRootType
+  mutation:
+
+	MyMutationRootType
+}

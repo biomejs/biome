@@ -20,7 +20,7 @@ fn quick_test() {
 }
 "#;
     let parse = parse_css(src, CssParserOptions::default());
-    println!("{:#?}", parse);
+    println!("{parse:#?}");
 
     let options = CssFormatOptions::default()
         .with_line_width(LineWidth::try_from(80).unwrap())

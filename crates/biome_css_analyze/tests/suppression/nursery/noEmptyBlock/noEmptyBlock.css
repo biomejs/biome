@@ -1,0 +1,55 @@
+/* CssDeclarationOrRuleBlock */
+a {}
+a { }
+a {
+
+}
+
+.b {}
+.b { }
+.b {
+
+}
+
+/* CssRuleBlock */
+@media print {}
+@media print {
+
+}
+@media print { a {} }
+
+/* CssDeclarationBlock */
+@font-palette-values --ident {}
+@font-face {}
+
+/* CssKeyframesBlock */
+@keyframes slidein {}
+@keyframes slidein {
+    from {
+    }
+
+    to {
+      transform: translateX(100%);
+    }
+  }
+
+/* CssFontFeatureValuesBlock */
+@font-feature-values Font One {
+  @styleset {
+
+  }
+}
+
+/* CssPageAtRuleBlock */
+@page {}
+@page :right {
+}
+
+
+/* CssDeclarationOrAtRuleBlock */
+@page :left { @left-middle {} background: red; }
+@page {
+    @top-right {
+
+    }
+}

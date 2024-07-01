@@ -101,8 +101,7 @@ fn losslessness(string: String) -> bool {
         .recv_timeout(Duration::from_secs(2))
         .unwrap_or_else(|_| {
             panic!(
-                "Lexer is infinitely recursing with this code: ->{}<-",
-                string
+                "Lexer is infinitely recursing with this code: ->{string}<-"
             )
         });
 

@@ -111,7 +111,7 @@ impl Rule for UseSemanticElements {
                     value = attribute.1
                 ));
             } else {
-                error_message.push_str(&format!("<{element}>\n", element = element));
+                error_message.push_str(&format!("<{element}>\n"));
             }
         }
 

@@ -1,0 +1,35 @@
+			enum 				name
+			{
+  NORTH
+  EAST
+
+
+  	SOUTH
+ 				 WEST
+
+
+  union
+  			type
+  				interface
+  enum
+}
+
+enum Direction {				}
+
+enum Direction
+
+enum
+Direction
+
+@deprecated
+
+{
+  "north"			 NORTH
+
+
+	@deprecated
+}
+
+"This is an enum"
+
+enum Direction @deprecated

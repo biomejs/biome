@@ -1,0 +1,32 @@
+schema {
+  query: MyQueryRootType
+  			mutation: MyMutationRootType
+
+
+
+
+	subscription: MySubscriptionRootType
+}
+
+"decs" schema
+{
+  				query: MyQueryRootType
+  mutation: MyMutationRootType
+}
+
+"""sth"""
+
+schema {
+
+
+  query: MyQueryRootType
+}
+
+schema {
+
+  query: query
+
+
+  			mutation: mutation
+	subscription: subscription
+}

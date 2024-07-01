@@ -352,7 +352,7 @@ impl DiffReport {
                         }
 
                         let line = line.strip_suffix('\n').unwrap_or(line);
-                        writeln!(diff, "{}{}", tag, line).unwrap();
+                        writeln!(diff, "{tag}{line}").unwrap();
                     }
 
                     let ratio = matched_lines as f64 / biome_lines.max(prettier_lines) as f64;
@@ -402,7 +402,7 @@ impl DiffReport {
             diff,
         } in report_metric_data.files.iter()
         {
-            writeln!(report, "### {}", filename).unwrap();
+            writeln!(report, "### {filename}").unwrap();
 
             if let Some(diff) = diff {
                 writeln!(report, "```diff").unwrap();

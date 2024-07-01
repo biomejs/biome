@@ -156,7 +156,7 @@ impl Rule for NoUnusedFunctionParameters {
 
                 let name = binding.name_token().ok()?;
                 let name_trimmed = name.text_trimmed();
-                let new_name = format!("_{}", name_trimmed);
+                let new_name = format!("_{name_trimmed}");
 
                 let model = ctx.model();
                 mutation.rename_node_declaration(model, binding, &new_name);

@@ -30,7 +30,12 @@ pub struct Suppression<'a> {
 pub fn parse_suppression_comment(
     base: &str,
 ) -> impl Iterator<Item = Result<Suppression, SuppressionDiagnostic>> {
-    let (head, mut comment) = base.split_at(2);
+    let (head, mut comment) = if base.starts_with('#') {
+        base.split_at(1)
+    } else {
+        base.split_at(2)
+    };
+
     let is_block_comment = match head {
         "//" => false,
         "/*" => {
@@ -40,6 +45,7 @@ pub fn parse_suppression_comment(
                 .unwrap_or(comment);
             true
         }
+        "#" => false,
         token => panic!("comment with unknown opening token {token:?}, from {comment}"),
     };
 

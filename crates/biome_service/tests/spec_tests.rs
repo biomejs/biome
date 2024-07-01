@@ -14,7 +14,7 @@ fn run_invalid_configurations(input: &'static str, _: &str, _: &str, _: &str) {
     let file_name = input_file.file_name().and_then(OsStr::to_str).unwrap();
     let extension = input_file.extension().and_then(OsStr::to_str).unwrap();
     let input_code = read_to_string(input_file)
-        .unwrap_or_else(|err| panic!("failed to read {:?}: {:?}", input_file, err));
+        .unwrap_or_else(|err| panic!("failed to read {input_file:?}: {err:?}"));
 
     let result = match extension {
         "json" => deserialize_from_json_str::<PartialConfiguration>(
@@ -65,7 +65,7 @@ fn run_valid_configurations(input: &'static str, _: &str, _: &str, _: &str) {
     let file_name = input_file.file_name().and_then(OsStr::to_str).unwrap();
     let extension = input_file.extension().and_then(OsStr::to_str).unwrap();
     let input_code = read_to_string(input_file)
-        .unwrap_or_else(|err| panic!("failed to read {:?}: {:?}", input_file, err));
+        .unwrap_or_else(|err| panic!("failed to read {input_file:?}: {err:?}"));
 
     let result = match extension {
         "json" => deserialize_from_json_str::<PartialConfiguration>(
@@ -102,8 +102,7 @@ fn run_valid_configurations(input: &'static str, _: &str, _: &str, _: &str) {
             .join("\n\n");
         if has_errors {
             panic!(
-                "This test should not have diagnostics, but some have been emitted.\n {}",
-                diagnostics
+                "This test should not have diagnostics, but some have been emitted.\n {diagnostics}"
             );
         }
     } else {

@@ -40,7 +40,7 @@ fn run_test() {
     let extension = input_file.extension().unwrap_or_default();
 
     let input_code = read_to_string(input_file)
-        .unwrap_or_else(|err| panic!("failed to read {:?}: {:?}", input_file, err));
+        .unwrap_or_else(|err| panic!("failed to read {input_file:?}: {err:?}"));
     if let Some(scripts) = scripts_from_json(extension, &input_code) {
         for script in scripts {
             analyze(

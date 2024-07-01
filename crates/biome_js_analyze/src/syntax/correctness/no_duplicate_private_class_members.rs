@@ -81,7 +81,7 @@ impl Rule for NoDuplicatePrivateClassMembers {
         let diagnostic = RuleDiagnostic::new(
             category!("parse/noDuplicatePrivateClassMembers"),
             range,
-            format!("Duplicate private class member {:?}", member_name),
+            format!("Duplicate private class member {member_name:?}"),
         );
 
         Some(diagnostic)

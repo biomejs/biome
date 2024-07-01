@@ -49,7 +49,7 @@ fn bench_analyzer(criterion: &mut Criterion) {
                     },
                 );
             }
-            Err(e) => println!("{:?}", e),
+            Err(e) => println!("{e:?}"),
         }
     }
 

@@ -1,5 +1,7 @@
 #[cfg(test)]
 mod test {
+    use biome_analyze::RuleCategories;
+    use biome_configuration::linter::{RuleGroup, RuleSelector};
     use biome_fs::BiomePath;
     use biome_js_syntax::{JsFileSource, TextSize};
     use biome_service::file_handlers::DocumentFileSource;
@@ -185,7 +187,7 @@ mod test {
                 content: r#"type Query {
   me: User
 }
- 
+
 type User {
   id: ID
   name: String
@@ -201,5 +203,36 @@ type User {
         let syntax = result.unwrap().ast;
 
         assert!(syntax.starts_with("GraphqlRoot"))
+    }
+
+    #[test]
+    fn correctly_pulls_lint_diagnostics() {
+        let workspace = create_server();
+
+        let graphql_file = FileGuard::open(
+            workspace.as_ref(),
+            OpenFileParams {
+                path: BiomePath::new("file.graphql"),
+                content: r#"query {
+  member @deprecated(abc: 123)
+}"#
+                .into(),
+                version: 0,
+                document_file_source: None,
+            },
+        )
+        .unwrap();
+        let result = graphql_file.pull_diagnostics(
+            RuleCategories::all(),
+            10,
+            vec![RuleSelector::Rule(
+                RuleGroup::Nursery,
+                "useDeprecatedReason",
+            )],
+            vec![],
+        );
+        assert!(result.is_ok());
+        let diagnostics = result.unwrap().diagnostics;
+        assert_eq!(diagnostics.len(), 1)
     }
 }

@@ -74,7 +74,7 @@ impl Rule for NoExportedImports {
                 rule_category!(),
                 specifier.range(),
                 markup! {
-                    "An import should not be exported. Use "<Emphasis>"export from"</Emphasis>"instead."
+                    "An import should not be exported. Use "<Emphasis>"export from"</Emphasis>" instead."
                 },
             )
             .note(markup! {

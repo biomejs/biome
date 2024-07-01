@@ -1,0 +1,73 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: graphql/definitions/schema_extension.graphql
+---
+# Input
+
+```graphql
+extend schema {
+  query: MyQueryRootType
+
+
+  mutation: MyMutationRootType
+
+  subscription: MySubscriptionRootType
+}
+
+extend
+schema
+
+@decs {
+  query:
+	MyQueryRootType
+
+
+	mutation: 			MyMutationRootType
+}
+
+extend
+schema @decs{
+  query:MyQueryRootType
+  mutation:
+
+	MyMutationRootType
+}
+
+```
+
+
+=============================
+
+# Outputs
+
+## Output 1
+
+-----
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 80
+Bracket spacing: true
+Quote style: Double Quotes
+-----
+
+```graphql
+extend schema {
+	query: MyQueryRootType
+
+	mutation: MyMutationRootType
+
+	subscription: MySubscriptionRootType
+}
+
+extend schema @decs {
+	query: MyQueryRootType
+
+	mutation: MyMutationRootType
+}
+
+extend schema @decs {
+	query: MyQueryRootType
+	mutation: MyMutationRootType
+}
+```

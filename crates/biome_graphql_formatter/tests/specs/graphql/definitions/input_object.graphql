@@ -1,0 +1,57 @@
+input Point2D {
+  x: Float
+  y: Float
+}
+
+input Point2D {
+
+
+}
+
+input Point2D
+
+input Point2D
+
+
+@deprecated
+
+
+{
+
+
+
+	x: Float
+}
+
+"This is an input object"
+
+
+input
+Point2D
+
+
+@deprecated
+
+input Point2D
+
+{
+  x:
+
+	Float = 0
+  "this is y"
+
+	y: Float
+
+	@deprecated
+}
+
+input
+
+input
+
+@input {
+	input:
+
+	input
+}
+

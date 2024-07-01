@@ -73,8 +73,7 @@ pub(crate) fn parse_identifier_binding(p: &mut JsParser) -> ParsedSyntax {
         if StrictMode.is_supported(p) && matches!(identifier_name, "eval" | "arguments") {
             let err = p.err_builder(
                 format!(
-                    "Illegal use of `{}` as an identifier in strict mode",
-                    identifier_name
+                    "Illegal use of `{identifier_name}` as an identifier in strict mode"
                 ),
                 identifier.range(p),
             );
@@ -89,8 +88,7 @@ pub(crate) fn parse_identifier_binding(p: &mut JsParser) -> ParsedSyntax {
                 let err = p
                     .err_builder(
                         format!(
-                        "`let` cannot be declared as a variable name inside of a `{}` declaration",
-                        parent,
+                        "`let` cannot be declared as a variable name inside of a `{parent}` declaration",
 
                     ),
                         identifier.range(p),
@@ -106,21 +104,19 @@ pub(crate) fn parse_identifier_binding(p: &mut JsParser) -> ParsedSyntax {
                 let err = p
                     .err_builder(
                         format!(
-                            "Declarations inside of a `{}` declaration may not have duplicates",
-                            parent
+                            "Declarations inside of a `{parent}` declaration may not have duplicates"
                         ),
                         identifier.range(p),
                     )
                     .with_detail(
                         identifier.range(p),
                         format!(
-                            "a second declaration of `{}` is not allowed",
-                            identifier_name
+                            "a second declaration of `{identifier_name}` is not allowed"
                         ),
                     )
                     .with_detail(
                         *existing,
-                        format!("`{}` is first declared here", identifier_name),
+                        format!("`{identifier_name}` is first declared here"),
                     );
                 p.error(err);
                 identifier.change_to_bogus(p);

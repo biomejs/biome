@@ -472,7 +472,7 @@ impl RewriteParseEvents for ReparseAssignment {
                     let name = completed.text(p);
                     if matches!(name, "eval" | "arguments") && p.is_strict_mode() {
                         let error = p.err_builder(
-                            format!("Illegal use of `{}` as an identifier in strict mode", name),
+                            format!("Illegal use of `{name}` as an identifier in strict mode"),
                             completed.range(p),
                         );
                         p.error(error);

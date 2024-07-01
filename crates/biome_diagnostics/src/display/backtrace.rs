@@ -275,11 +275,11 @@ pub(super) fn print_backtrace(
 
                 if let Some(lineno) = symbol.lineno() {
                     // SAFETY: Writing a `u32` to a string should not fail
-                    write!(text, ":{}", lineno).unwrap();
+                    write!(text, ":{lineno}").unwrap();
 
                     if let Some(colno) = symbol.colno() {
                         // SAFETY: Writing a `u32` to a string should not fail
-                        write!(text, ":{}", colno).unwrap();
+                        write!(text, ":{colno}").unwrap();
                     }
                 }
 

@@ -37,7 +37,7 @@ query }
 }
 
 {
-  ironMan: hero(name: "Tony Stark" {
+  ironMan: hero(name: "Tony Stark") {
 		country,
 		firstWife: wife(name: "Pepper"){
 		}

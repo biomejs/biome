@@ -38,7 +38,7 @@ impl std::fmt::Display for VisitableType {
                 VisitableType::MAP => "an object",
                 _ => unreachable!("Unhandled deserialization type."),
             };
-            write!(fmt, "{}", expected_type)?;
+            write!(fmt, "{expected_type}")?;
         }
         Ok(())
     }

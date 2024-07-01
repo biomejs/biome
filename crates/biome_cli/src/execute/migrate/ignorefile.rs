@@ -60,7 +60,7 @@ pub(crate) fn convert_pattern(line: &str) -> Result<String, &'static str> {
     }
     let result = if let Some(stripped_line) = line.strip_prefix('/') {
         // Patterns tha tstarts with `/` are relative to the ignore file
-        format!("./{}", stripped_line)
+        format!("./{stripped_line}")
     } else if line.find('/').is_some_and(|index| index < (line.len() - 1))
         || line == "**"
         || line == "**/"

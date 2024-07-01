@@ -30,7 +30,7 @@ fn bench_css_formatter(criterion: &mut Criterion) {
             Ok(test_case) => {
                 bench_formatter_group(&mut group, test_case);
             }
-            Err(e) => println!("{:?}", e),
+            Err(e) => println!("{e:?}"),
         }
     }
     group.finish();

@@ -759,7 +759,7 @@ pub fn generate_nodes(ast: &AstSrc, language_kind: LanguageKind) -> Result<Strin
             }
         };
 
-        let padded_name = format!("{} ", name);
+        let padded_name = format!("{name} ");
 
         let list_impl = if list.separator.is_some() {
             quote! {

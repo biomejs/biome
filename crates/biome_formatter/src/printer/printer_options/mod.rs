@@ -1,4 +1,7 @@
-use crate::{AttributePosition, FormatOptions, IndentStyle, IndentWidth, LineEnding, LineWidth};
+use crate::{
+    AttributePosition, BracketSpacing, FormatOptions, IndentStyle, IndentWidth, LineEnding,
+    LineWidth,
+};
 
 /// Options that affect how the [crate::Printer] prints the format tokens
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -18,6 +21,9 @@ pub struct PrinterOptions {
 
     /// The attribute position style
     pub attribute_position: AttributePosition,
+
+    /// Whether to insert spaces around brackets in object literals. Defaults to true.
+    pub bracket_spacing: BracketSpacing,
 }
 
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
@@ -57,6 +63,7 @@ where
             .with_indent_width(options.indent_width())
             .with_print_width(options.line_width().into())
             .with_line_ending(options.line_ending())
+            .with_bracket_spacing(options.bracket_spacing())
     }
 }
 
@@ -89,6 +96,13 @@ impl PrinterOptions {
 
         self
     }
+
+    pub fn with_bracket_spacing(mut self, bracket_spacing: BracketSpacing) -> Self {
+        self.bracket_spacing = bracket_spacing;
+
+        self
+    }
+
     pub(crate) fn indent_style(&self) -> IndentStyle {
         self.indent_style
     }
@@ -107,6 +121,11 @@ impl PrinterOptions {
     pub(crate) fn attribute_position(&self) -> AttributePosition {
         self.attribute_position
     }
+
+    #[allow(dead_code)]
+    pub(crate) fn bracket_spacing(&self) -> BracketSpacing {
+        self.bracket_spacing
+    }
 }
 
 impl Default for PrinterOptions {
@@ -117,6 +136,7 @@ impl Default for PrinterOptions {
             indent_style: Default::default(),
             line_ending: LineEnding::Lf,
             attribute_position: AttributePosition::default(),
+            bracket_spacing: BracketSpacing::default(),
         }
     }
 }

@@ -94,7 +94,7 @@ impl<'a> SnapshotBuilder<'a> {
         writeln!(self.snapshot).unwrap();
 
         writeln!(self.snapshot, "-----").unwrap();
-        write!(self.snapshot, "{}", options).unwrap();
+        write!(self.snapshot, "{options}").unwrap();
         writeln!(self.snapshot, "-----").unwrap();
         writeln!(self.snapshot).unwrap();
 
@@ -128,7 +128,7 @@ impl<'a> SnapshotBuilder<'a> {
             writeln!(self.snapshot).unwrap();
 
             for (range, text) in formatted.verbatim() {
-                writeln!(self.snapshot, "{:?} => {:?}", text, range).unwrap();
+                writeln!(self.snapshot, "{text:?} => {range:?}").unwrap();
             }
         }
 

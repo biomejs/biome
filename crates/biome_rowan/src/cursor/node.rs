@@ -325,9 +325,7 @@ impl SyntaxNode {
         let range = self.text_range();
         assert!(
             range.start() <= offset && offset <= range.end(),
-            "Bad offset: range {:?} offset {:?}",
-            range,
-            offset
+            "Bad offset: range {range:?} offset {offset:?}"
         );
         if range.is_empty() {
             return TokenAtOffset::None;

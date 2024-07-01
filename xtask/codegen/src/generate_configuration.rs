@@ -2,6 +2,7 @@ use biome_analyze::{
     FixKind, GroupCategory, Queryable, RegistryVisitor, Rule, RuleCategory, RuleGroup, RuleMetadata,
 };
 use biome_css_syntax::CssLanguage;
+use biome_graphql_syntax::GraphqlLanguage;
 use biome_js_syntax::JsLanguage;
 use biome_json_syntax::JsonLanguage;
 use biome_string_case::Case;
@@ -81,10 +82,31 @@ pub(crate) fn generate_rules_configuration(mode: Mode) -> Result<()> {
         }
     }
 
+    impl RegistryVisitor<GraphqlLanguage> for LintRulesVisitor {
+        fn record_category<C: GroupCategory<Language = GraphqlLanguage>>(&mut self) {
+            if matches!(C::CATEGORY, RuleCategory::Lint) {
+                C::record_groups(self);
+            }
+        }
+
+        fn record_rule<R>(&mut self)
+        where
+            R: Rule + 'static,
+            R::Query: Queryable<Language = GraphqlLanguage>,
+            <R::Query as Queryable>::Output: Clone,
+        {
+            self.groups
+                .entry(<R::Group as RuleGroup>::NAME)
+                .or_insert_with(BTreeMap::new)
+                .insert(R::METADATA.name, R::METADATA);
+        }
+    }
+
     let mut visitor = LintRulesVisitor::default();
     biome_js_analyze::visit_registry(&mut visitor);
     biome_json_analyze::visit_registry(&mut visitor);
     biome_css_analyze::visit_registry(&mut visitor);
+    biome_graphql_analyze::visit_registry(&mut visitor);
 
     let LintRulesVisitor { groups } = visitor;
 
@@ -140,6 +162,7 @@ pub(crate) fn generate_rules_configuration(mode: Mode) -> Result<()> {
         use biome_js_analyze::options::*;
         use biome_json_analyze::options::*;
         use biome_css_analyze::options::*;
+        use biome_graphql_analyze::options::*;
         use biome_rowan::TextRange;
         use rustc_hash::FxHashSet;
         use serde::{Deserialize, Serialize};

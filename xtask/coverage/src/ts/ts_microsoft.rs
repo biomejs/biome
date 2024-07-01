@@ -144,7 +144,7 @@ fn extract_metadata(code: &str, path: &str) -> TestCaseMetadata {
             let option_value = option.name("value").unwrap().as_str().trim();
 
             if option_name == "alwaysstrict" {
-                write!(current_file_content, "\"use strict\";{}", line_ending).unwrap();
+                write!(current_file_content, "\"use strict\";{line_ending}").unwrap();
             } else if matches!(option_name.as_str(), "module" | "target") && files.is_empty() {
                 run_options.extend(
                     option_value
@@ -172,7 +172,7 @@ fn extract_metadata(code: &str, path: &str) -> TestCaseMetadata {
                 // skip leading whitespace
                 continue;
             }
-            write!(current_file_content, "{}{}", line, line_ending).unwrap();
+            write!(current_file_content, "{line}{line_ending}").unwrap();
         }
     }
 

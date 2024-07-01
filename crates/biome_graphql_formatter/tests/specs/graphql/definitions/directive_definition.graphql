@@ -1,0 +1,35 @@
+directive
+@example
+
+on
+	FIELD
+
+directive @example
+on
+	FIELD_DEFINITION
+
+	|
+	ARGUMENT_DEFINITION
+
+directive @example
+on
+  | FIELD
+
+  |
+	FRAGMENT_SPREAD
+  |
+	INLINE_FRAGMENT
+
+"deprecated"
+directive
+@delegateField(name: String!)
+repeatable on
+	OBJECT
+	| INTERFACE
+
+directive
+@directive(directive:
+	directive)
+
+
+on FIELD

@@ -65,7 +65,7 @@ impl<'a> GritResolvedPattern<'a> {
                 let mut snippets = Vec::new();
                 snippets.push(ResolvedSnippet::Text("{".into()));
                 for (key, value) in map {
-                    snippets.push(ResolvedSnippet::Text(format!("\"{}\": ", key).into()));
+                    snippets.push(ResolvedSnippet::Text(format!("\"{key}\": ").into()));
                     snippets.extend(value.to_snippets()?);
                     snippets.push(ResolvedSnippet::Text(", ".into()));
                 }

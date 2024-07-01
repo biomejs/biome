@@ -122,10 +122,7 @@ pub fn assert_remove_identifier_a_ok<Anc: AstNode<Language = JsLanguage> + Debug
                     type_name::<Anc>()
                 )
             }),
-        _ => panic!(
-            "Expected exactly one identifier named a, but got {:?}",
-            identifiers_a
-        ),
+        _ => panic!("Expected exactly one identifier named a, but got {identifiers_a:?}"),
     };
 
     let mut batch = r.tree().begin();
@@ -137,7 +134,7 @@ pub fn assert_remove_identifier_a_ok<Anc: AstNode<Language = JsLanguage> + Debug
     } else if let Some(member) = AnyJsObjectMember::cast_ref(node_to_remove.syntax()) {
         batch.remove_js_object_member(member)
     } else {
-        panic!("Don't know how to remove this node: {:?}", node_to_remove);
+        panic!("Don't know how to remove this node: {node_to_remove:?}");
     };
     assert!(batch_result);
     let root = batch.commit();

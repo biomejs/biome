@@ -78,6 +78,7 @@ pub(super) fn parse_implements_interface(p: &mut GraphqlParser) -> ParsedSyntax 
     let m = p.start();
 
     p.bump(T![implements]);
+    p.eat(T![&]); // leading ampersand separator is optional
 
     ImplementsInterfaceList.parse_list(p);
 
@@ -123,10 +124,6 @@ impl ParseSeparatedList for ImplementsInterfaceList {
 
     fn allow_empty(&self) -> bool {
         false
-    }
-
-    fn allow_leading_seperating_element(&self) -> bool {
-        true
     }
 }
 

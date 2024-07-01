@@ -43,13 +43,11 @@ pub fn generate_crate(crate_name: String) -> Result<()> {
     let end_content = "\n## End of crates. DO NOT CHANGE!";
     debug_assert!(
         knope_contents.contains(start_content),
-        "The file knope.toml must contains `{}`",
-        start_content
+        "The file knope.toml must contains `{start_content}`"
     );
     debug_assert!(
         knope_contents.contains(end_content),
-        "The file knope.toml must contains `{}`",
-        end_content
+        "The file knope.toml must contains `{end_content}`"
     );
 
     let file_start_index = knope_contents.find(start_content).unwrap() + start_content.len();

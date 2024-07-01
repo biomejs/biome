@@ -22,7 +22,7 @@ fn main() {
     for (k, v_setup) in tests.iter() {
         if let Some(name) = k.strip_suffix("_setup") {
             let v_all = tests[name];
-            println!("{}", name);
+            println!("{name}");
             println!(
                 "\tdiff inst: {} is {} - {}",
                 v_all.0 - v_setup.0,

@@ -4,8 +4,8 @@ use crate::comments::{FormatJsLeadingComment, JsCommentStyle, JsComments};
 use biome_deserialize_macros::{Deserializable, Merge};
 use biome_formatter::printer::PrinterOptions;
 use biome_formatter::{
-    AttributePosition, CstFormatContext, FormatContext, FormatElement, FormatOptions, IndentStyle,
-    IndentWidth, LineEnding, LineWidth, QuoteStyle, TransformSourceMap,
+    AttributePosition, BracketSpacing, CstFormatContext, FormatContext, FormatElement,
+    FormatOptions, IndentStyle, IndentWidth, LineEnding, LineWidth, QuoteStyle, TransformSourceMap,
 };
 use biome_js_syntax::{AnyJsFunctionBody, JsFileSource, JsLanguage};
 use std::fmt;
@@ -376,6 +376,10 @@ impl FormatOptions for JsFormatOptions {
         self.attribute_position
     }
 
+    fn bracket_spacing(&self) -> BracketSpacing {
+        self.bracket_spacing
+    }
+
     fn as_print_options(&self) -> PrinterOptions {
         PrinterOptions::from(self)
     }
@@ -517,33 +521,6 @@ impl fmt::Display for ArrowParentheses {
             ArrowParentheses::AsNeeded => write!(f, "As needed"),
             ArrowParentheses::Always => write!(f, "Always"),
         }
-    }
-}
-
-#[derive(Clone, Copy, Debug, Eq, Hash, Merge, PartialEq)]
-#[cfg_attr(
-    feature = "serde",
-    derive(serde::Serialize, serde::Deserialize, schemars::JsonSchema),
-    serde(rename_all = "camelCase")
-)]
-pub struct BracketSpacing(bool);
-
-impl BracketSpacing {
-    /// Return the boolean value for this [BracketSpacing]
-    pub fn value(&self) -> bool {
-        self.0
-    }
-}
-
-impl Default for BracketSpacing {
-    fn default() -> Self {
-        Self(true)
-    }
-}
-
-impl From<bool> for BracketSpacing {
-    fn from(value: bool) -> Self {
-        Self(value)
     }
 }
 
