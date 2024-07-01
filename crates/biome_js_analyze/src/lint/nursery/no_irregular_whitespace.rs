@@ -3,10 +3,10 @@ use biome_console::markup;
 use biome_js_syntax::AnyJsStatement;
 use biome_rowan::{AstNode, TextRange, TextSize};
 
-const IRREGULAR_WHITESPACES: &[&str; 22] = &[
-    "\u{c}", "\u{b}", "\u{85}", "\u{feff}", "\u{a0}", "\u{1680}", "\u{180e}", "\u{2000}",
-    "\u{2001}", "\u{2002}", "\u{2003}", "\u{2004}", "\u{2005}", "\u{2006}", "\u{2007}", "\u{2008}",
-    "\u{2009}", "\u{200a}", "\u{200b}", "\u{202f}", "\u{205f}", "\u{3000}",
+const IRREGULAR_WHITESPACES: &[char; 22] = &[
+    '\u{c}', '\u{b}', '\u{85}', '\u{feff}', '\u{a0}', '\u{1680}', '\u{180e}', '\u{2000}',
+    '\u{2001}', '\u{2002}', '\u{2003}', '\u{2004}', '\u{2005}', '\u{2006}', '\u{2007}', '\u{2008}',
+    '\u{2009}', '\u{200a}', '\u{200b}', '\u{202f}', '\u{205f}', '\u{3000}',
 ];
 
 declare_lint_rule! {
@@ -75,14 +75,15 @@ impl Rule for NoIrregularWhitespace {
 
 fn get_irregular_whitespace(node: &AnyJsStatement) -> Option<()> {
     let syntax = node.syntax();
-    let node_text = syntax.text_trimmed().to_string();
+    let node_text = syntax.text_trimmed();
+    let range_start: u32 = node.range().start().into();
 
     IRREGULAR_WHITESPACES
         .iter()
         .find_map(|whitespace_character| {
-            let range_start: usize = node.range().start().into();
-            let char_index = range_start + node_text.find(&whitespace_character.to_string())?;
-            let text_size = TextSize::from(u32::try_from(char_index).ok()?);
+            let text_size = node_text
+                .find_char(*whitespace_character)?
+                .checked_add(TextSize::from(range_start))?;
             let text_range = TextRange::new(text_size, text_size);
 
             let element_at_index = node
@@ -102,7 +103,8 @@ fn get_irregular_whitespace(node: &AnyJsStatement) -> Option<()> {
             }
 
             node_text
-                .find(&whitespace_character.to_string())
+                .chars()
+                .find(|char| whitespace_character.eq(char))
                 .and(Some(()))
         })
 }
