@@ -28,7 +28,13 @@ impl TestCase {
             .last()
             .ok_or_else(|| "lib url has no segments".to_string())
             // cache the file name to avoid to save files that have the same name, but they come from different repos
-            .map(|filename| format!("{filename}_{}", calculate_hash(&file_url)))?;
+            .map(|filename| {
+                let filename = PathBuf::from(filename);
+                let file_stem = filename.file_stem().unwrap().to_str().unwrap();
+                let file_extension = filename.extension().unwrap().to_str().unwrap();
+
+                format!("{file_stem}_{}_{file_extension}", calculate_hash(&file_url))
+            })?;
 
         let path = Path::new(
             &env::var("CARGO_MANIFEST_DIR")
