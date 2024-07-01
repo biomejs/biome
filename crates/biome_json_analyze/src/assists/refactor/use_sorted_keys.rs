@@ -1,6 +1,7 @@
 use crate::JsonRuleAction;
 use biome_analyze::{
-    context::RuleContext, declare_refactor_rule, ActionCategory, Ast, RefactorKind, Rule, RuleAction,
+    context::RuleContext, declare_refactor_rule, ActionCategory, Ast, RefactorKind, Rule,
+    RuleAction,
 };
 use biome_console::markup;
 use biome_diagnostics::Applicability;

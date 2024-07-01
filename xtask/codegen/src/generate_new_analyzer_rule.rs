@@ -59,14 +59,14 @@ impl FromStr for Category {
 
 fn generate_rule_template(
     kind: &LanguageKind,
-    category: &Category, 
+    category: &Category,
     rule_name_upper_camel: &str,
     rule_name_lower_camel: &str,
 ) -> String {
-    let macro_name= match category {
+    let macro_name = match category {
         Category::Lint => "declare_lint_rule",
         Category::Assist => "declare_assist_rule",
-        Category::Syntax => "declare_syntax_rule"
+        Category::Syntax => "declare_syntax_rule",
     };
     match kind {
         LanguageKind::Js => {
@@ -297,7 +297,7 @@ impl Rule for {rule_name_upper_camel} {{
 "#
             )
         }
-        RuleKind::Graphql => {
+        LanguageKind::Graphql => {
             format!(
                 r#"use biome_analyze::{{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic}};
 use biome_console::markup;
@@ -400,7 +400,7 @@ pub fn generate_new_analyzer_rule(kind: LanguageKind, category: Category, rule_n
         rule_folder.display(),
         Case::Snake.convert(rule_name)
     );
-    std::fs::write(file_name.clone(), code).expect(&format!("To write {}", &file_name));
+    std::fs::write(file_name.clone(), code).unwrap_or_else(|_| panic!("To write {}", &file_name));
 
     let categories_path = "crates/biome_diagnostics_categories/src/categories.rs";
     let mut categories = std::fs::read_to_string(categories_path).unwrap();
