@@ -22,10 +22,18 @@ declare_lint_rule! {
     /// constcount=1;
     /// ```
     ///
+    /// ```js,expect_diagnostic
+    /// const foo = 'thing';
+    /// ```
+    ///
     /// ### Valid
     ///
     /// ```js
     /// const count = 1;
+    /// ```
+    ///
+    /// ```js
+    /// const foo = '';
     /// ```
     ///
     pub NoIrregularWhitespace {
