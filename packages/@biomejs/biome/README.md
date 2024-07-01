@@ -35,7 +35,7 @@ Translation:
 * [हिन्दी](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.hi.md)
 * [日本語](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.ja.md)
 * English
-* [Português do Brasil](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.pt-br.md)
+* [Português do Brasil](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.pt-BR.md)
 * [简体中文](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.zh-CN.md)
 
 **Biome** is a performant toolchain for web projects, it aims to provide developer tools to maintain the health of said projects.

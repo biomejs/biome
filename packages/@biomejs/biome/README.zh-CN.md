@@ -35,7 +35,7 @@
 * [हिन्दी](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.hi.md)
 * [日本語](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.ja.md)
 * [English](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.md)
-* [Português do Brasil](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.pt-br.md)
+* [Português do Brasil](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.pt-BR.md)
 * 简体中文
 
 **Biome** 是一个用于 Web 项目的高性能工具链，旨在为开发者提供维护项目的工具。

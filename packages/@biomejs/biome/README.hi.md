@@ -35,7 +35,7 @@
 * हिन्दी
 * [日本語](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.ja.md)
 * [English](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.md)
-* [Português do Brasil](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.pt-br.md)
+* [Português do Brasil](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.pt-BR.md)
 * [简体中文](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.zh-CN.md)
 
 **Biome** वेब[^1] परियोजना[^2]ओं के लिए एक प्रदर्शनकारी उपकरण-श्रृंखला[^3] है, इसका उद्देश्य उक्त परियोजना[^2]ओं के स्वास्थ्य को बनाए रखने के लिए डेवलपर[^4] उपकरण प्रदान करना है।
