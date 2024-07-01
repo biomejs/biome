@@ -1,6 +1,6 @@
 use crate::JsRuleAction;
 use biome_analyze::{
-    context::RuleContext, declare_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic,
+    context::RuleContext, declare_lint_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic,
     RuleSource,
 };
 use biome_console::{markup, Markup, MarkupBuf};
@@ -16,7 +16,7 @@ use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 use std::str::FromStr;
 
-declare_rule! {
+declare_lint_rule! {
     /// Require consistently using either `T[]` or `Array<T>`
     ///
     /// _TypeScript_ provides two equivalent ways to define an array type: `T[]` and `Array<T>`.

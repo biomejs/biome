@@ -1,13 +1,15 @@
 use std::collections::HashSet;
 
-use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic, RuleSource};
+use biome_analyze::{
+    context::RuleContext, declare_lint_rule, Ast, Rule, RuleDiagnostic, RuleSource,
+};
 use biome_console::markup;
 use biome_css_syntax::{AnyCssGenericComponentValue, AnyCssValue, CssGenericProperty};
 use biome_rowan::{AstNode, TextRange};
 
 use crate::utils::{find_font_family, is_font_family_keyword};
 
-declare_rule! {
+declare_lint_rule! {
     /// Disallow duplicate names within font families.
     ///
     /// This rule checks the `font` and `font-family` properties for duplicate font names.

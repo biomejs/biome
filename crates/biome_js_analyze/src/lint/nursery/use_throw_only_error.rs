@@ -1,5 +1,5 @@
 use biome_analyze::{
-    context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic, RuleSource, RuleSourceKind,
+    context::RuleContext, declare_lint_rule, Ast, Rule, RuleDiagnostic, RuleSource, RuleSourceKind,
 };
 use biome_console::markup;
 use biome_js_syntax::{
@@ -8,7 +8,7 @@ use biome_js_syntax::{
 };
 use biome_rowan::AstNode;
 
-declare_rule! {
+declare_lint_rule! {
     /// Disallow throwing non-`Error` values.
     ///
     /// It is considered good practice only to throw the `Error` object itself or an object using the `Error` object

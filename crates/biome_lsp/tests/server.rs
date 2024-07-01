@@ -750,7 +750,7 @@ async fn pull_diagnostics_of_syntax_rules() -> Result<()> {
                     },
                     severity: Some(lsp::DiagnosticSeverity::ERROR),
                     code: Some(lsp::NumberOrString::String(String::from(
-                        "parse/noDuplicatePrivateClassMembers",
+                        "syntax/correctness/noDuplicatePrivateClassMembers",
                     ))),
                     code_description: None,
                     source: Some(String::from("biome")),

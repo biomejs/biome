@@ -1,6 +1,6 @@
 use std::collections::VecDeque;
 
-use biome_analyze::{context::RuleContext, declare_rule, Rule, RuleDiagnostic, RuleSource};
+use biome_analyze::{context::RuleContext, declare_lint_rule, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
 use biome_control_flow::{
     builder::{BlockId, ROOT_BLOCK_ID},
@@ -13,7 +13,7 @@ use rustc_hash::FxHashMap;
 
 use crate::{services::control_flow::AnyJsControlFlowRoot, ControlFlowGraph};
 
-declare_rule! {
+declare_lint_rule! {
     /// Disallow fallthrough of `switch` clauses.
     ///
     /// Switch clauses in `switch` statements fall through by default.

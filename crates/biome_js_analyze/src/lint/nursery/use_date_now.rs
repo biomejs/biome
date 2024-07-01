@@ -1,5 +1,5 @@
 use biome_analyze::{
-    context::RuleContext, declare_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic,
+    context::RuleContext, declare_lint_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic,
     RuleSource,
 };
 use biome_console::markup;
@@ -14,7 +14,7 @@ use crate::JsRuleAction;
 
 use super::use_explicit_length_check::does_node_needs_space_before_child;
 
-declare_rule! {
+declare_lint_rule! {
     /// Use `Date.now()` to get the number of milliseconds since the Unix Epoch.
     ///
     /// `Date.now()` is more readable than `new Date().getTime()` and its variants,

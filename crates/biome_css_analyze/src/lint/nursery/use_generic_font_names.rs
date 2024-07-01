@@ -1,4 +1,6 @@
-use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic, RuleSource};
+use biome_analyze::{
+    context::RuleContext, declare_lint_rule, Ast, Rule, RuleDiagnostic, RuleSource,
+};
 use biome_console::markup;
 use biome_css_syntax::{
     AnyCssAtRule, AnyCssGenericComponentValue, AnyCssValue, CssAtRule,
@@ -10,7 +12,7 @@ use crate::utils::{
     find_font_family, is_css_variable, is_font_family_keyword, is_system_family_name_keyword,
 };
 
-declare_rule! {
+declare_lint_rule! {
     /// Disallow a missing generic family keyword within font families.
     ///
     /// The generic font family can be:

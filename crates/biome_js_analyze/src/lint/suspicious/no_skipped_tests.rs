@@ -1,5 +1,5 @@
 use biome_analyze::{
-    context::RuleContext, declare_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic,
+    context::RuleContext, declare_lint_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic,
     RuleSource, RuleSourceKind,
 };
 use biome_console::markup;
@@ -9,7 +9,7 @@ use biome_rowan::{BatchMutationExt, TextRange};
 
 use crate::JsRuleAction;
 
-declare_rule! {
+declare_lint_rule! {
     /// Disallow disabled tests.
     ///
     /// Disabled test are useful when developing and debugging, although they should not be committed in production.

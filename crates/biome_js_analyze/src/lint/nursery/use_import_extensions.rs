@@ -1,7 +1,7 @@
 use std::path::{Component, Path};
 
 use biome_analyze::{
-    context::RuleContext, declare_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic,
+    context::RuleContext, declare_lint_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic,
 };
 use biome_console::markup;
 use biome_js_factory::make;
@@ -10,7 +10,7 @@ use biome_rowan::{BatchMutationExt, SyntaxToken};
 
 use crate::JsRuleAction;
 
-declare_rule! {
+declare_lint_rule! {
     /// Enforce file extensions for relative imports.
     ///
     /// Browsers and Node.js do not natively support importing files without extensions. This rule

@@ -1,5 +1,5 @@
 use biome_analyze::{
-    context::RuleContext, declare_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic,
+    context::RuleContext, declare_lint_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic,
     RuleSource,
 };
 use biome_console::markup;
@@ -15,7 +15,7 @@ use crate::{
     JsRuleAction,
 };
 
-declare_rule! {
+declare_lint_rule! {
     /// Require assignment operator shorthand where possible.
     ///
     /// JavaScript provides shorthand operators combining a variable assignment and simple mathematical operation.

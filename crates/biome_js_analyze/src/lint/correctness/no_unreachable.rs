@@ -1,6 +1,6 @@
 use std::{cmp::Ordering, collections::VecDeque, num::NonZeroU32, vec::IntoIter};
 
-use biome_analyze::{context::RuleContext, declare_rule, Rule, RuleDiagnostic, RuleSource};
+use biome_analyze::{context::RuleContext, declare_lint_rule, Rule, RuleDiagnostic, RuleSource};
 use biome_control_flow::{
     builder::{BlockId, ROOT_BLOCK_ID},
     ExceptionHandler, ExceptionHandlerKind, Instruction, InstructionKind,
@@ -17,7 +17,7 @@ use rustc_hash::FxHashMap;
 
 use crate::services::control_flow::{ControlFlowGraph, JsControlFlowGraph};
 
-declare_rule! {
+declare_lint_rule! {
     /// Disallow unreachable code
     ///
     /// ## Examples

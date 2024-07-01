@@ -1,5 +1,5 @@
 use biome_analyze::{
-    context::RuleContext, declare_rule, AddVisitor, Phases, QueryMatch, Queryable, Rule,
+    context::RuleContext, declare_lint_rule, AddVisitor, Phases, QueryMatch, Queryable, Rule,
     RuleDiagnostic, RuleSource, ServiceBag, Visitor, VisitorContext,
 };
 use biome_console::markup;
@@ -8,7 +8,7 @@ use biome_js_syntax::{
 };
 use biome_rowan::{AstNode, AstNodeList, Language, SyntaxNode, TextSize};
 
-declare_rule! {
+declare_lint_rule! {
     /// Ensure `async` functions utilize `await`.
     ///
     /// This rule reports `async` functions that lack an `await` expression. As `async`

@@ -1,5 +1,5 @@
 use crate::{services::control_flow::AnyJsControlFlowRoot, services::semantic::SemanticServices};
-use biome_analyze::{context::RuleContext, declare_rule, Rule, RuleDiagnostic, RuleSource};
+use biome_analyze::{context::RuleContext, declare_lint_rule, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
 use biome_js_syntax::{
     binding_ext::{AnyJsBindingDeclaration, AnyJsIdentifierBinding},
@@ -7,7 +7,7 @@ use biome_js_syntax::{
 };
 use biome_rowan::{AstNode, SyntaxNodeOptionExt, TextRange};
 
-declare_rule! {
+declare_lint_rule! {
     /// Disallow the use of variables and function parameters before their declaration
     ///
     /// JavaScript doesn't allow the use of block-scoped variables (`let`, `const`) and function parameters before their declaration.

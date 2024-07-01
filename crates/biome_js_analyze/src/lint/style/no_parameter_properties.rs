@@ -1,10 +1,10 @@
 use biome_analyze::context::RuleContext;
-use biome_analyze::{declare_rule, Ast, Rule, RuleDiagnostic, RuleSource, RuleSourceKind};
+use biome_analyze::{declare_lint_rule, Ast, Rule, RuleDiagnostic, RuleSource, RuleSourceKind};
 use biome_console::markup;
 use biome_js_syntax::TsPropertyParameter;
 use biome_rowan::AstNode;
 
-declare_rule! {
+declare_lint_rule! {
     /// Disallow the use of parameter properties in class constructors.
     ///
     /// TypeScript includes a "parameter properties" shorthand for declaring a class constructor parameter and class property in one location.

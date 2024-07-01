@@ -2,7 +2,7 @@ use crate::react::{jsx_member_name_is_react_fragment, jsx_reference_identifier_i
 use crate::services::semantic::Semantic;
 use crate::JsRuleAction;
 use biome_analyze::context::RuleContext;
-use biome_analyze::{declare_rule, ActionCategory, FixKind, Rule, RuleDiagnostic, RuleSource};
+use biome_analyze::{declare_lint_rule, ActionCategory, FixKind, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
 use biome_js_factory::make::{
     jsx_child_list, jsx_closing_fragment, jsx_fragment, jsx_opening_fragment,
@@ -10,7 +10,7 @@ use biome_js_factory::make::{
 use biome_js_syntax::{AnyJsxElementName, JsxElement};
 use biome_rowan::{AstNode, AstNodeList, BatchMutationExt};
 
-declare_rule! {
+declare_lint_rule! {
     /// This rule enforces the use of `<>...</>` over `<Fragment>...</Fragment>`.
     ///
     /// The shorthand fragment syntax saves keystrokes and is only inapplicable when keys are required.

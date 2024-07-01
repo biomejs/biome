@@ -1,4 +1,6 @@
-use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic, RuleSource};
+use biome_analyze::{
+    context::RuleContext, declare_lint_rule, Ast, Rule, RuleDiagnostic, RuleSource,
+};
 use biome_console::markup;
 use biome_js_syntax::{
     AnyJsClass, AnyJsClassMember, JsGetterClassMember, JsMethodClassMember, JsPropertyClassMember,
@@ -8,7 +10,7 @@ use biome_js_syntax::{
 };
 use biome_rowan::{AstNode, AstNodeList};
 
-declare_rule! {
+declare_lint_rule! {
     /// This rule reports when a class has no non-static members, such as for a class used exclusively as a static namespace.
     ///
     /// Users who come from a [OOP](https://en.wikipedia.org/wiki/Object-oriented_programming) paradigm may wrap their utility functions in an extra class,

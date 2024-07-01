@@ -1,10 +1,10 @@
 use biome_analyze::context::RuleContext;
-use biome_analyze::{declare_rule, Ast, Rule, RuleDiagnostic, RuleSource};
+use biome_analyze::{declare_lint_rule, Ast, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
 use biome_js_syntax::*;
 use biome_rowan::{declare_node_union, AstNode};
 
-declare_rule! {
+declare_lint_rule! {
     /// Disallow control flow statements in finally blocks.
     ///
     /// JavaScript suspends the control flow statements of `try` and `catch` blocks until

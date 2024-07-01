@@ -1,4 +1,6 @@
-use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic, RuleSource};
+use biome_analyze::{
+    context::RuleContext, declare_lint_rule, Ast, Rule, RuleDiagnostic, RuleSource,
+};
 use biome_console::markup;
 use biome_deserialize_macros::Deserializable;
 use biome_js_syntax::{
@@ -8,7 +10,7 @@ use biome_js_syntax::{
 use biome_rowan::AstNode;
 use serde::{Deserialize, Serialize};
 
-declare_rule! {
+declare_lint_rule! {
     /// Enforce that a label element or component has a text label and an associated input.
     ///
     /// An "input" is considered one of the following elements: `input`, `meter`, `output`, `progress`, `select` or `textarea`.

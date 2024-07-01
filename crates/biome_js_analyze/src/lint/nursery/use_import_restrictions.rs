@@ -1,5 +1,5 @@
 use biome_analyze::{
-    context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic, RuleSource, RuleSourceKind,
+    context::RuleContext, declare_lint_rule, Ast, Rule, RuleDiagnostic, RuleSource, RuleSourceKind,
 };
 use biome_console::markup;
 use biome_js_syntax::JsModuleSource;
@@ -9,7 +9,7 @@ const INDEX_BASENAMES: &[&str] = &["index", "mod"];
 
 const SOURCE_EXTENSIONS: &[&str] = &["js", "ts", "cjs", "cts", "mjs", "mts", "jsx", "tsx"];
 
-declare_rule! {
+declare_lint_rule! {
     /// Disallows package private imports.
     ///
     /// This rules enforces the following restrictions:

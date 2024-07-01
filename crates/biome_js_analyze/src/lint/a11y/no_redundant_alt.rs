@@ -1,5 +1,5 @@
 use biome_analyze::context::RuleContext;
-use biome_analyze::{declare_rule, Ast, Rule, RuleDiagnostic, RuleSource};
+use biome_analyze::{declare_lint_rule, Ast, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
 use biome_js_syntax::jsx_ext::AnyJsxElement;
 use biome_js_syntax::{
@@ -7,7 +7,7 @@ use biome_js_syntax::{
 };
 use biome_rowan::AstNode;
 
-declare_rule! {
+declare_lint_rule! {
     /// Enforce `img` alt prop does not contain the word "image", "picture", or "photo".
     ///
     /// The rule will first check if `aria-hidden` is truthy to determine whether to enforce the rule. If the image is

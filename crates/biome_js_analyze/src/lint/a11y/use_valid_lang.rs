@@ -1,10 +1,10 @@
 use crate::services::aria::Aria;
 use biome_analyze::context::RuleContext;
-use biome_analyze::{declare_rule, Rule, RuleDiagnostic, RuleSource};
+use biome_analyze::{declare_lint_rule, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
 use biome_js_syntax::jsx_ext::AnyJsxElement;
 use biome_rowan::{AstNode, TextRange};
-declare_rule! {
+declare_lint_rule! {
     /// Ensure that the attribute passed to the `lang` attribute is a correct ISO language and/or country.
     ///
     /// ## Examples

@@ -1,4 +1,4 @@
-use biome_analyze::{context::RuleContext, declare_rule, Rule, RuleDiagnostic, RuleSource};
+use biome_analyze::{context::RuleContext, declare_lint_rule, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
 use biome_js_semantic::{ReferencesExtensions, SemanticModel};
 use biome_js_syntax::{
@@ -13,7 +13,7 @@ use biome_rowan::{declare_node_union, AstNode, AstSeparatedList, TextRange};
 
 use crate::{services::semantic::Semantic, utils::is_node_equal};
 
-declare_rule! {
+declare_lint_rule! {
     /// This rule recommends a `for-of` loop when in a `for` loop, the index used to extract an item from the iterated array.
     ///
     /// ## Examples

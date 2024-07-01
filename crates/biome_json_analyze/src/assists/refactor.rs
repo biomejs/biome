@@ -5,8 +5,8 @@ use biome_analyze::declare_assists_group;
 pub mod use_sorted_keys;
 
 declare_assists_group! {
-    pub Nursery {
-        name : "nursery" ,
+    pub Refactor {
+        name : "refactor" ,
         rules : [
             self :: use_sorted_keys :: UseSortedKeys ,
         ]

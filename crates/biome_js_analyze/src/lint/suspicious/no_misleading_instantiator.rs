@@ -1,4 +1,6 @@
-use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic, RuleSource};
+use biome_analyze::{
+    context::RuleContext, declare_lint_rule, Ast, Rule, RuleDiagnostic, RuleSource,
+};
 use biome_console::{markup, MarkupBuf};
 use biome_js_syntax::{
     AnyJsClassMember, AnyTsType, AnyTsTypeMember, JsClassDeclaration, JsLanguage,
@@ -6,7 +8,7 @@ use biome_js_syntax::{
 };
 use biome_rowan::{declare_node_union, AstNode, SyntaxToken, TextRange};
 
-declare_rule! {
+declare_lint_rule! {
     /// Enforce proper usage of `new` and `constructor`.
     ///
     /// In JavaScript, classes utilize the `constructor` method to initialize a new instance. On the other hand, TypeScript interfaces can describe a class type with a `new()` method signature, though this pattern is not commonly seen in real-world code. Developers, especially those new to JavaScript or TypeScript, might occasionally confuse the use of `constructor` with `new`.

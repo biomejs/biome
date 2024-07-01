@@ -4,14 +4,14 @@ use std::str::FromStr;
 use xtask::project_root;
 
 #[derive(Debug, Clone, Bpaf)]
-pub enum RuleKind {
+pub enum LanguageKind {
     Js,
     Json,
     Css,
     Graphql,
 }
 
-impl RuleKind {
+impl LanguageKind {
     fn as_str(&self) -> &str {
         match self {
             Self::Js => "js",
@@ -22,7 +22,7 @@ impl RuleKind {
     }
 }
 
-impl FromStr for RuleKind {
+impl FromStr for LanguageKind {
     type Err = &'static str;
     fn from_str(s: &str) -> std::result::Result<Self, Self::Err> {
         match s {
@@ -41,6 +41,8 @@ pub enum Category {
     Lint,
     /// Assist rules
     Assist,
+    /// Syntax rule
+    Syntax,
 }
 
 impl FromStr for Category {
@@ -56,21 +58,27 @@ impl FromStr for Category {
 }
 
 fn generate_rule_template(
-    kind: &RuleKind,
+    kind: &LanguageKind,
+    category: &Category,
     rule_name_upper_camel: &str,
     rule_name_lower_camel: &str,
 ) -> String {
+    let macro_name = match category {
+        Category::Lint => "declare_lint_rule",
+        Category::Assist => "declare_assist_rule",
+        Category::Syntax => "declare_syntax_rule",
+    };
     match kind {
-        RuleKind::Js => {
+        LanguageKind::Js => {
             format!(
                 r#"use biome_analyze::{{
-    context::RuleContext, declare_rule, Rule, RuleDiagnostic, Ast
+    context::RuleContext, {macro_name}, Rule, RuleDiagnostic, Ast
 }};
 use biome_console::markup;
 use biome_js_syntax::JsIdentifierBinding;
 use biome_rowan::AstNode;
 
-declare_rule! {{
+{macro_name}! {{
     /// Succinct description of the rule.
     ///
     /// Put context and details about the rule.
@@ -137,14 +145,14 @@ impl Rule for {rule_name_upper_camel} {{
 "#
             )
         }
-        RuleKind::Css => {
+        LanguageKind::Css => {
             format!(
-                r#"use biome_analyze::{{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic}};
+                r#"use biome_analyze::{{context::RuleContext, {macro_name}, Ast, Rule, RuleDiagnostic}};
 use biome_console::markup;
 use biome_css_syntax::CssDeclarationOrRuleBlock;
 use biome_rowan::AstNode;
 
-declare_rule! {{
+{macro_name}! {{
     /// Succinct description of the rule.
     ///
     /// Put context and details about the rule.
@@ -215,14 +223,14 @@ impl Rule for {rule_name_upper_camel} {{
 "#
             )
         }
-        RuleKind::Json => {
+        LanguageKind::Json => {
             format!(
-                r#"use biome_analyze::{{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic}};
+                r#"use biome_analyze::{{context::RuleContext, {macro_name}, Ast, Rule, RuleDiagnostic}};
 use biome_console::markup;
 use biome_json_syntax::JsonMember;
 use biome_rowan::AstNode;
 
-declare_rule! {{
+{macro_name}! {{
     /// Succinct description of the rule.
     ///
     /// Put context and details about the rule.
@@ -289,7 +297,7 @@ impl Rule for {rule_name_upper_camel} {{
 "#
             )
         }
-        RuleKind::Graphql => {
+        LanguageKind::Graphql => {
             format!(
                 r#"use biome_analyze::{{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic}};
 use biome_console::markup;
@@ -367,7 +375,7 @@ impl Rule for {rule_name_upper_camel} {{
     }
 }
 
-pub fn generate_new_analyzer_rule(kind: RuleKind, category: Category, rule_name: &str) {
+pub fn generate_new_analyzer_rule(kind: LanguageKind, category: Category, rule_name: &str) {
     let rule_name_camel = Case::Camel.convert(rule_name);
     let rule_kind = kind.as_str();
     let crate_folder = project_root().join(format!("crates/biome_{rule_kind}_analyze"));
@@ -375,19 +383,24 @@ pub fn generate_new_analyzer_rule(kind: RuleKind, category: Category, rule_name:
     let rule_folder = match &category {
         Category::Lint => crate_folder.join("src/lint/nursery"),
         Category::Assist => crate_folder.join("src/assists/nursery"),
+        Category::Syntax => crate_folder.join("src/syntax/nursery"),
     };
     // Generate rule code
     let code = generate_rule_template(
         &kind,
+        &category,
         Case::Pascal.convert(rule_name).as_str(),
         rule_name_camel.as_str(),
     );
+    if !rule_folder.exists() {
+        std::fs::create_dir(rule_folder.clone()).expect("To create the rule folder");
+    }
     let file_name = format!(
         "{}/{}.rs",
         rule_folder.display(),
         Case::Snake.convert(rule_name)
     );
-    std::fs::write(file_name, code).unwrap();
+    std::fs::write(file_name.clone(), code).unwrap_or_else(|_| panic!("To write {}", &file_name));
 
     let categories_path = "crates/biome_diagnostics_categories/src/categories.rs";
     let mut categories = std::fs::read_to_string(categories_path).unwrap();
@@ -399,18 +412,23 @@ pub fn generate_new_analyzer_rule(kind: RuleKind, category: Category, rule_name:
             Category::Lint => format!(
                 r#"    "lint/nursery/{rule_name_camel}": "https://biomejs.dev/linter/rules/{kebab_case_rule}","#
             ),
-            Category::Assist => format!(r#"    "assists/nursery/{rule_name_camel}","#),
+            Category::Assist => format!(
+                r#"    "assists/nursery/{rule_name_camel}": "https://biomejs.dev/assists/{kebab_case_rule}","#
+            ),
+            Category::Syntax => format!(r#"    "syntax/nursery/{rule_name_camel}","#),
         };
         let lint_start = match category {
             Category::Lint => "define_categories! {\n",
-            Category::Assist => "    ; // end lint rules\n\n",
+            Category::Assist => "    // start assists rules\n",
+            Category::Syntax => "    // start syntax rules\n",
         };
         let lint_end = match category {
-            Category::Lint => "\n    ; // end lint rules\n",
-            Category::Assist => "\n    // end assist rules\n",
+            Category::Lint => "\n    // end lint rules\n",
+            Category::Assist => "\n    // end assists rules\n",
+            Category::Syntax => "\n  ;  // end syntax rules\n",
         };
-        debug_assert!(categories.contains(lint_start));
-        debug_assert!(categories.contains(lint_end));
+        debug_assert!(categories.contains(lint_start), "{}", lint_start);
+        debug_assert!(categories.contains(lint_end), "{}", lint_end);
         let lint_start_index = categories.find(lint_start).unwrap() + lint_start.len();
         let lint_end_index = categories.find(lint_end).unwrap();
         let lint_rule_text = &categories[lint_start_index..lint_end_index];

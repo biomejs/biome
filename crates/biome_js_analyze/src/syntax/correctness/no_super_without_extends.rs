@@ -1,11 +1,10 @@
 use biome_analyze::context::RuleContext;
-use biome_analyze::{declare_rule, Ast, Rule, RuleDiagnostic};
+use biome_analyze::{declare_lint_rule, Ast, Rule, RuleDiagnostic};
 use biome_console::markup;
-use biome_diagnostics::category;
 use biome_js_syntax::{JsClassDeclaration, JsClassExpression, JsSuperExpression};
 use biome_rowan::AstNode;
 
-declare_rule! {
+declare_lint_rule! {
     /// Catch a `SyntaxError` when writing calling `super()` on a class that doesn't extends any class
     ///
     /// ## Examples
@@ -57,7 +56,7 @@ impl Rule for NoSuperWithoutExtends {
         let node = ctx.query();
 
         Some(RuleDiagnostic::new(
-            category!("parse/noSuperWithoutExtends"),
+            rule_category!(),
             node.syntax().text_trimmed_range(),
             markup! {
                 "super() is only valid in derived class constructors"

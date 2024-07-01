@@ -1,10 +1,10 @@
-use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic};
+use biome_analyze::{context::RuleContext, declare_lint_rule, Ast, Rule, RuleDiagnostic};
 use biome_console::markup;
 use biome_json_syntax::{JsonMemberName, JsonObjectValue, TextRange};
 use biome_rowan::{AstNode, AstSeparatedList};
 use rustc_hash::FxHashMap;
 
-declare_rule! {
+declare_lint_rule! {
     /// Disallow two keys with the same name inside a JSON object.
     ///
     /// ## Examples

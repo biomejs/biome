@@ -2,8 +2,8 @@ use crate::react::hooks::{is_react_component, is_react_hook, is_react_hook_call}
 use crate::services::semantic::{SemanticModelBuilderVisitor, SemanticServices};
 use biome_analyze::RuleSource;
 use biome_analyze::{
-    context::RuleContext, declare_rule, AddVisitor, FromServices, MissingServicesDiagnostic, Phase,
-    Phases, QueryMatch, Queryable, Rule, RuleDiagnostic, RuleKey, ServiceBag, Visitor,
+    context::RuleContext, declare_lint_rule, AddVisitor, FromServices, MissingServicesDiagnostic,
+    Phase, Phases, QueryMatch, Queryable, Rule, RuleDiagnostic, RuleKey, ServiceBag, Visitor,
     VisitorContext, VisitorFinishContext,
 };
 use biome_console::markup;
@@ -27,7 +27,7 @@ use std::ops::{Deref, DerefMut};
 #[cfg(feature = "schemars")]
 use schemars::JsonSchema;
 
-declare_rule! {
+declare_lint_rule! {
     /// Enforce that all React hooks are being called from the Top Level component functions.
     ///
     /// To understand why this required see https://reactjs.org/docs/hooks-rules.html#only-call-hooks-at-the-top-level
