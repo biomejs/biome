@@ -1,0 +1,94 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: graphql/definitions/fields.graphql
+---
+# Input
+
+```graphql
+query MyFirstQuery {
+  hello
+}
+
+mutation
+MyFirstMutation {
+  world
+}
+
+subscription, ThisIsASub, {
+  excellent
+}
+
+, query, ThisIsASub, {
+  excellent
+}
+
+query {
+  noName
+}
+
+{
+  noOperationType
+}
+
+query ($unnamed: String) {
+  id
+}
+
+query Named($var: String) {
+  id
+}
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -10,7 +10,7 @@
+   excellent
+ }
+ 
+-query ThisIsASub {
++, query ThisIsASub {
+   excellent
+ }
+ 
+```
+
+# Output
+
+```graphql
+query MyFirstQuery {
+  hello
+}
+
+mutation MyFirstMutation {
+  world
+}
+
+subscription ThisIsASub {
+  excellent
+}
+
+, query ThisIsASub {
+  excellent
+}
+
+query {
+  noName
+}
+
+{
+  noOperationType
+}
+
+query ($unnamed: String) {
+  id
+}
+
+query Named($var: String) {
+  id
+}
+```

@@ -19,7 +19,7 @@ use crate::WorkspaceError;
 use biome_analyze::options::PreferredQuote;
 use biome_analyze::{
     AnalysisFilter, AnalyzerConfiguration, AnalyzerOptions, ControlFlow, Never,
-    RuleCategoriesBuilder, RuleCategory,
+    RuleCategoriesBuilder, RuleCategory, RuleError,
 };
 use biome_css_analyze::analyze;
 use biome_css_formatter::context::CssFormatOptions;
@@ -31,8 +31,6 @@ use biome_formatter::{
     FormatError, IndentStyle, IndentWidth, LineEnding, LineWidth, Printed, QuoteStyle,
 };
 use biome_fs::BiomePath;
-use biome_js_analyze::RuleError;
-use biome_js_syntax::AnyJsRoot;
 use biome_parser::AnyParse;
 use biome_rowan::{AstNode, NodeCache};
 use biome_rowan::{TextRange, TextSize, TokenAtOffset};
@@ -81,8 +79,8 @@ impl Default for CssLinterSettings {
 #[derive(Debug, Clone, Default, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub struct CssParserSettings {
-    pub allow_wrong_line_comments: bool,
-    pub css_modules: bool,
+    pub allow_wrong_line_comments: Option<bool>,
+    pub css_modules: Option<bool>,
 }
 
 impl ServiceLanguage for CssLanguage {
@@ -218,10 +216,10 @@ fn parse(
 ) -> ParseResult {
     let mut options = CssParserOptions {
         allow_wrong_line_comments: settings
-            .map(|s| s.languages.css.parser.allow_wrong_line_comments)
+            .and_then(|s| s.languages.css.parser.allow_wrong_line_comments)
             .unwrap_or_default(),
         css_modules: settings
-            .map(|s| s.languages.css.parser.css_modules)
+            .and_then(|s| s.languages.css.parser.css_modules)
             .unwrap_or_default(),
     };
     if let Some(settings) = settings {
@@ -471,7 +469,7 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
         language,
         settings,
     } = params;
-    debug_span!("Code actions JavaScript", range =? range, path =? path).in_scope(move || {
+    debug_span!("Code actions CSS", range =? range, path =? path).in_scope(move || {
         let tree = parse.tree();
         trace_span!("Parsed file", tree =? tree).in_scope(move || {
             let rules = settings.as_rules(params.path.as_path());
@@ -534,7 +532,7 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
 
     let settings = workspace.settings();
     let Some(settings) = settings else {
-        let tree: AnyJsRoot = parse.tree();
+        let tree: CssRoot = parse.tree();
 
         return Ok(FixFileResult {
             actions: vec![],

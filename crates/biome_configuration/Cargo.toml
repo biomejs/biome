@@ -22,6 +22,8 @@ biome_deserialize_macros = { workspace = true }
 biome_diagnostics        = { workspace = true }
 biome_flags              = { workspace = true }
 biome_formatter          = { workspace = true, features = ["serde"] }
+biome_graphql_analyze    = { workspace = true }
+biome_graphql_syntax     = { workspace = true }
 biome_js_analyze         = { workspace = true }
 biome_js_formatter       = { workspace = true, features = ["serde"] }
 biome_js_syntax          = { workspace = true, features = ["serde", "schema"] }
@@ -47,6 +49,7 @@ schema = [
   "biome_formatter/serde",
   "biome_json_syntax/schema",
   "biome_css_syntax/schema",
+  "biome_graphql_syntax/schema",
 ]
 
 [dev-dependencies]

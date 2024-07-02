@@ -48,6 +48,10 @@ export interface PartialConfiguration {
 	 */
 	formatter?: PartialFormatterConfiguration;
 	/**
+	 * Specific configuration for the GraphQL language
+	 */
+	graphql?: PartialGraphqlConfiguration;
+	/**
 	 * Specific configuration for the JavaScript language
 	 */
 	javascript?: PartialJavascriptConfiguration;
@@ -119,6 +123,10 @@ export interface PartialFormatterConfiguration {
 	 * The attribute position style in HTMLish languages. By default auto.
 	 */
 	attributePosition?: AttributePosition;
+	/**
+	 * Whether to insert spaces around brackets in object literals. Defaults to true.
+	 */
+	bracketSpacing?: BracketSpacing;
 	enabled?: boolean;
 	/**
 	 * Stores whether formatting should be allowed to proceed if a given file has syntax errors
@@ -152,6 +160,19 @@ export interface PartialFormatterConfiguration {
 	 * What's the max width of a line. Defaults to 80.
 	 */
 	lineWidth?: LineWidth;
+	/**
+	 * Use any `.editorconfig` files to configure the formatter. Configuration in `biome.json` will override `.editorconfig` configuration. Default: false.
+	 */
+	useEditorconfig?: boolean;
+}
+/**
+ * Options applied to GraphQL files
+ */
+export interface PartialGraphqlConfiguration {
+	/**
+	 * GraphQL formatter options
+	 */
+	formatter?: PartialGraphqlFormatter;
 }
 /**
  * A set of options applied to the JavaScript files
@@ -310,6 +331,7 @@ export interface PartialCssParser {
 	cssModules?: boolean;
 }
 export type AttributePosition = "auto" | "multiline";
+export type BracketSpacing = boolean;
 export type IndentWidth = number;
 export type PlainIndentStyle = "tab" | "space";
 export type LineEnding = "lf" | "crlf" | "cr";
@@ -319,6 +341,39 @@ export type LineEnding = "lf" | "crlf" | "cr";
 The allowed range of values is 1..=320 
 	 */
 export type LineWidth = number;
+/**
+ * Options that changes how the GraphQL formatter behaves
+ */
+export interface PartialGraphqlFormatter {
+	/**
+	 * Whether to insert spaces around brackets in object literals. Defaults to true.
+	 */
+	bracketSpacing?: BracketSpacing;
+	/**
+	 * Control the formatter for GraphQL files.
+	 */
+	enabled?: boolean;
+	/**
+	 * The indent style applied to GraphQL files.
+	 */
+	indentStyle?: PlainIndentStyle;
+	/**
+	 * The size of the indentation applied to GraphQL files. Default to 2.
+	 */
+	indentWidth?: IndentWidth;
+	/**
+	 * The type of line ending applied to GraphQL files.
+	 */
+	lineEnding?: LineEnding;
+	/**
+	 * What's the max width of a line applied to GraphQL files. Defaults to 80.
+	 */
+	lineWidth?: LineWidth;
+	/**
+	 * The type of quotes used in GraphQL code. Defaults to double.
+	 */
+	quoteStyle?: QuoteStyle;
+}
 /**
  * Formatting options specific to the JavaScript files
  */
@@ -338,7 +393,7 @@ export interface PartialJavascriptFormatter {
 	/**
 	 * Whether to insert spaces around brackets in object literals. Defaults to true.
 	 */
-	bracketSpacing?: boolean;
+	bracketSpacing?: BracketSpacing;
 	/**
 	 * Control the formatter for JavaScript (and its super languages) files.
 	 */
@@ -492,6 +547,10 @@ export interface OverridePattern {
 	 * Specific configuration for the Json language
 	 */
 	formatter?: OverrideFormatterConfiguration;
+	/**
+	 * Specific configuration for the Graphql language
+	 */
+	graphql?: PartialGraphqlConfiguration;
 	/**
 	 * A list of Unix shell style patterns. The formatter will ignore files/folders that will match these patterns.
 	 */
@@ -1123,6 +1182,10 @@ export interface Nursery {
 	 */
 	useDefaultSwitchClause?: RuleConfiguration_for_Null;
 	/**
+	 * Require specifying the reason argument when using @deprecated directive
+	 */
+	useDeprecatedReason?: RuleConfiguration_for_Null;
+	/**
 	 * Enforce passing a message value when creating a built-in error.
 	 */
 	useErrorMessage?: RuleConfiguration_for_Null;
@@ -1141,7 +1204,7 @@ export interface Nursery {
 	/**
 	 * Enforce file extensions for relative imports.
 	 */
-	useImportExtensions?: RuleFixConfiguration_for_Null;
+	useImportExtensions?: RuleFixConfiguration_for_UseImportExtensionsOptions;
 	/**
 	 * Disallows package private imports.
 	 */
@@ -1652,6 +1715,10 @@ export interface OverrideFormatterConfiguration {
 	 * The attribute position style.
 	 */
 	attributePosition?: AttributePosition;
+	/**
+	 * Whether to insert spaces around brackets in object literals. Defaults to true.
+	 */
+	bracketSpacing?: BracketSpacing;
 	enabled?: boolean;
 	/**
 	 * Stores whether formatting should be allowed to proceed if a given file has syntax errors
@@ -1718,6 +1785,9 @@ export type RuleConfiguration_for_NoLabelWithoutControlOptions =
 export type RuleConfiguration_for_RestrictedImportsOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_RestrictedImportsOptions;
+export type RuleFixConfiguration_for_UseImportExtensionsOptions =
+	| RulePlainConfiguration
+	| RuleWithFixOptions_for_UseImportExtensionsOptions;
 export type RuleFixConfiguration_for_UtilityClassSortingOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_UtilityClassSortingOptions;
@@ -1824,6 +1894,20 @@ export interface RuleWithOptions_for_RestrictedImportsOptions {
 	 * Rule's options
 	 */
 	options: RestrictedImportsOptions;
+}
+export interface RuleWithFixOptions_for_UseImportExtensionsOptions {
+	/**
+	 * The kind of the code actions emitted by the rule
+	 */
+	fix?: FixKind;
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: UseImportExtensionsOptions;
 }
 export interface RuleWithFixOptions_for_UtilityClassSortingOptions {
 	/**
@@ -1949,6 +2033,12 @@ export interface RestrictedImportsOptions {
 	 * A list of names that should trigger the rule
 	 */
 	paths: {};
+}
+export interface UseImportExtensionsOptions {
+	/**
+	 * A map of custom import extension mappings, where the key is the inspected file extension, and the value is a pair of `module` extension and `component` import extension
+	 */
+	suggestedExtensions: {};
 }
 export interface UtilityClassSortingOptions {
 	/**
@@ -2181,7 +2271,9 @@ export interface JsonFileSource {
 export interface CssFileSource {
 	variant: CssVariant;
 }
-export interface GraphqlFileSource {}
+export interface GraphqlFileSource {
+	variant: GraphqlVariant;
+}
 export type EmbeddingKind = "Astro" | "Vue" | "Svelte" | "None";
 export type Language =
 	| "JavaScript"
@@ -2203,6 +2295,10 @@ export type LanguageVersion = "ES2022" | "ESNext";
 Currently, Biome only supports plain CSS, and aims to be compatible with the latest Recommendation level standards. 
 	 */
 export type CssVariant = "Standard";
+/**
+ * The style of GraphQL contained in the file.
+ */
+export type GraphqlVariant = "Standard";
 export interface ChangeFileParams {
 	content: string;
 	path: BiomePath;
@@ -2412,6 +2508,7 @@ export type Category =
 	| "lint/nursery/useConsistentGridAreas"
 	| "lint/nursery/useDateNow"
 	| "lint/nursery/useDefaultSwitchClause"
+	| "lint/nursery/useDeprecatedReason"
 	| "lint/nursery/useErrorMessage"
 	| "lint/nursery/useExplicitLengthCheck"
 	| "lint/nursery/useFocusableInteractive"

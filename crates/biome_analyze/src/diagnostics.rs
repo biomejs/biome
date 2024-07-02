@@ -4,6 +4,7 @@ use biome_diagnostics::{
     DiagnosticTags, Error, Location, Severity, Visit,
 };
 use biome_rowan::TextRange;
+use std::borrow::Cow;
 use std::fmt::{Debug, Display, Formatter};
 
 use crate::rule::RuleDiagnostic;
@@ -171,3 +172,60 @@ impl SuppressionDiagnostic {
         self
     }
 }
+
+/// Series of errors encountered when running rules on a file
+#[derive(Debug, PartialEq, Eq, Clone)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[cfg_attr(feature = "serde", serde(rename_all = "camelCase"))]
+pub enum RuleError {
+    /// The rule with the specified name replaced the root of the file with a node that is not a valid root for that language.
+    ReplacedRootWithNonRootError {
+        rule_name: Option<(Cow<'static, str>, Cow<'static, str>)>,
+    },
+}
+
+impl Diagnostic for RuleError {}
+
+impl std::fmt::Display for RuleError {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter) -> std::fmt::Result {
+        match self {
+            RuleError::ReplacedRootWithNonRootError {
+                rule_name: Some((group, rule)),
+            } => {
+                std::write!(
+                    fmt,
+                    "the rule '{group}/{rule}' replaced the root of the file with a non-root node."
+                )
+            }
+            RuleError::ReplacedRootWithNonRootError { rule_name: None } => {
+                std::write!(
+                    fmt,
+                    "a code action replaced the root of the file with a non-root node."
+                )
+            }
+        }
+    }
+}
+
+impl biome_console::fmt::Display for RuleError {
+    fn fmt(&self, fmt: &mut biome_console::fmt::Formatter) -> std::io::Result<()> {
+        match self {
+            RuleError::ReplacedRootWithNonRootError {
+                rule_name: Some((group, rule)),
+            } => {
+                std::write!(
+                    fmt,
+                    "the rule '{group}/{rule}' replaced the root of the file with a non-root node."
+                )
+            }
+            RuleError::ReplacedRootWithNonRootError { rule_name: None } => {
+                std::write!(
+                    fmt,
+                    "a code action replaced the root of the file with a non-root node."
+                )
+            }
+        }
+    }
+}
+
+impl std::error::Error for RuleError {}

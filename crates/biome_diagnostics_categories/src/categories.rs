@@ -154,6 +154,7 @@ define_categories! {
     "lint/nursery/useConsistentGridAreas": "https://biomejs.dev/linter/rules/use-consistent-grid-areas",
     "lint/nursery/useDateNow": "https://biomejs.dev/linter/rules/use-date-now",
     "lint/nursery/useDefaultSwitchClause": "https://biomejs.dev/linter/rules/use-default-switch-clause",
+    "lint/nursery/useDeprecatedReason": "https://biomejs.dev/linter/rules/use-deprecated-reason",
     "lint/nursery/useErrorMessage": "https://biomejs.dev/linter/rules/use-error-message",
     "lint/nursery/useExplicitLengthCheck": "https://biomejs.dev/linter/rules/use-explicit-length-check",
     "lint/nursery/useFocusableInteractive": "https://biomejs.dev/linter/rules/use-focusable-interactive",

@@ -1,6 +1,8 @@
 use biome_deserialize::StringSet;
 use biome_deserialize_macros::{Deserializable, Merge, Partial};
-use biome_formatter::{AttributePosition, IndentStyle, IndentWidth, LineEnding, LineWidth};
+use biome_formatter::{
+    AttributePosition, BracketSpacing, IndentStyle, IndentWidth, LineEnding, LineWidth,
+};
 use bpaf::Bpaf;
 use serde::{Deserialize, Serialize};
 use std::str::FromStr;
@@ -14,6 +16,10 @@ pub struct FormatterConfiguration {
     // if `false`, it disables the feature. `true` by default
     #[partial(bpaf(hide))]
     pub enabled: bool,
+
+    #[partial(bpaf(long("use-editorconfig"), argument("true|false"), optional))]
+    /// Use any `.editorconfig` files to configure the formatter. Configuration in `biome.json` will override `.editorconfig` configuration. Default: false.
+    pub use_editorconfig: bool,
 
     /// Stores whether formatting should be allowed to proceed if a given file
     /// has syntax errors
@@ -45,6 +51,10 @@ pub struct FormatterConfiguration {
     #[partial(bpaf(long("attribute-position"), argument("multiline|auto"), optional))]
     pub attribute_position: AttributePosition,
 
+    /// Whether to insert spaces around brackets in object literals. Defaults to true.
+    #[partial(bpaf(long("bracket-spacing"), argument("true|false"), optional))]
+    pub bracket_spacing: BracketSpacing,
+
     /// A list of Unix shell style patterns. The formatter will ignore files/folders that will
     /// match these patterns.
     #[partial(bpaf(hide))]
@@ -71,8 +81,10 @@ impl PartialFormatterConfiguration {
             line_ending: self.line_ending.unwrap_or_default(),
             line_width: self.line_width.unwrap_or_default(),
             attribute_position: self.attribute_position.unwrap_or_default(),
+            bracket_spacing: self.bracket_spacing.unwrap_or_default(),
             ignore: self.ignore.clone().unwrap_or_default(),
             include: self.include.clone().unwrap_or_default(),
+            use_editorconfig: self.use_editorconfig.unwrap_or_default(),
         }
     }
 }
@@ -88,8 +100,11 @@ impl Default for FormatterConfiguration {
             line_ending: LineEnding::default(),
             line_width: LineWidth::default(),
             attribute_position: AttributePosition::default(),
+            bracket_spacing: Default::default(),
             ignore: Default::default(),
             include: Default::default(),
+            // TODO: Biome 2.0: change to true
+            use_editorconfig: Default::default(),
         }
     }
 }

@@ -673,7 +673,6 @@ fn takes_last_formatter_enabled_into_account() {
 }
 
 #[test]
-#[ignore = "Enable when we fix the behavior of how overrides are applied for json files"]
 fn does_not_override_well_known_special_files_when_config_override_is_present() {
     let mut console = BufferConsole::default();
     let mut fs = MemoryFileSystem::default();

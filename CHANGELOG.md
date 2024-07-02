@@ -11,6 +11,33 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 ## Unreleased
 
+### Analyzer
+
+#### Enhancements
+
+- Implement [css suppression action](https://github.com/biomejs/biome/issues/3278). Contributed by @togami2864
+- Add support of comments in `turbo.json`. Contributed by @Netail
+
+### CLI
+
+### Configuration
+
+### Editors
+
+### Formatter
+
+### JavaScript APIs
+
+### Linter
+
+#### Bug fixes
+
+- Don't request alt text for elements hidden from assistive technologies ([#3316](https://github.com/biomejs/biome/issues/3316)). Contributed by @robintown
+
+### Parser
+
+## v1.8.3 (2024-06-27)
+
 ### CLI
 
 #### Bug fixes
@@ -21,7 +48,7 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 ### Parser
 
-#### New features
+#### Bug fixes
 
 - Implement [CSS unicode range](https://github.com/biomejs/biome/pull/3251). Contributed by @denbezrukov
 
@@ -36,12 +63,30 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 #### New features
 
+- Add `nursery/useDeprecatedReason` rule. Contributed by @vohoanglong0107.
 - Add [nursery/noExportedImports](https://biomejs.dev/linter/rules/no-exported-imports/). Contributed by @Conaclos
+
+#### Enhancements
+
+- Implement [suggestedExtensions option](https://github.com/biomejs/biome/pull/3274) for `useImportExtensions` rule. Contributed by @drdaemos
 
 #### Bug fixes
 
 - `useConsistentArrayType` and `useShorthandArrayType` now ignore `Array` in the `extends` and `implements` clauses. Fix [#3247](https://github.com/biomejs/biome/issues/3247). Contributed by @Conaclos
 - Fixes [#3066](https://github.com/biomejs/biome/issues/3066) by taking into account the dependencies declared in the `package.json`. Contributed by @ematipico
+- The code action of the `useArrowFunction` rule now preserves a trailing comma when there is only a single type parameter in the arrow function and JSX is enabled. Fixes [#3292](https://github.com/biomejs/biome/issues/3292). Contributed by @Sec-ant
+
+#### Enhancements
+- Enhance tailwind sorting lint rule [#1274](https://github.com/biomejs/biome/issues/1274) with variant support.
+
+  Every preconfigured variant is assigned a `weight` that concurs on establishing the output sorting order.
+  Since nesting variants on the same utility class is possible, the resulting `weight` is the Bitwise XOR of all the variants weight for that class.
+  Dynamic variants (e.g. `has-[.custom-class]`, `group-[:checked]`) are also supported and they take the `weight` of their base variant name the custom value attached (e.g. `has-[.custom-class]` takes `has` weight).
+  Arbitrary variants (e.g. `[&nth-child(2)]`) don't have a weight assigned and they are placed after every known variant.
+  Classes with the same amount of arbitrary variants follow lexicographical order. The class that has the highest number of nested arbitrary variants is placed last.
+  Screen variants (e.g. `sm:`, `max-md:`, `min-lg:`) are not supported yet.
+
+  Contributed by @lutaok
 
 ## v1.8.2 (2024-06-20)
 

@@ -23,7 +23,7 @@ pub fn run_format(format_node: &FormatNode) -> Printed {
 }
 
 pub fn err_to_string<E: std::fmt::Debug>(e: E) -> String {
-    format!("{:?}", e)
+    format!("{e:?}")
 }
 
 pub fn bench_parser_group(group: &mut BenchmarkGroup<WallTime>, test_case: TestCase) {
@@ -32,7 +32,6 @@ pub fn bench_parser_group(group: &mut BenchmarkGroup<WallTime>, test_case: TestC
     let code = test_case.code();
 
     group.throughput(Throughput::Bytes(code.len() as u64));
-
     group.bench_with_input(
         BenchmarkId::new(test_case.filename(), "uncached"),
         &code,

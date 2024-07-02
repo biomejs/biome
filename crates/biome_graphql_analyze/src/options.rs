@@ -2,5 +2,5 @@
 
 use crate::lint;
 
-pub type UseDummyRule =
-    <lint::nursery::use_dummy_rule::UseDummyRule as biome_analyze::Rule>::Options;
+pub type UseDeprecatedReason =
+    <lint::nursery::use_deprecated_reason::UseDeprecatedReason as biome_analyze::Rule>::Options;

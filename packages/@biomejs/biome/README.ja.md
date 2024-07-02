@@ -27,11 +27,15 @@
 
 </div>
 
+<!-- Insert new entries lexicographically by language code.
+     For example given below is the same order as these files appear on page:
+     https://github.com/biomejs/biome/tree/main/packages/%40biomejs/biome -->
 <div align="center">
 
-[English](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.md) | [简体中文](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.zh-CN.md) | 日本語 | [Português do Brasil](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.pt-br.md)
+[हिन्दी](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.hi.md) | [English](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.md) | [简体中文](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.zh-CN.md) | 日本語 | [Português do Brasil](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.pt-br.md)
 
 </div>
+
 
 **Biome** はWebプロジェクトのための高性能なツールチェーンであり、プロジェクトの健全性を維持するための開発者ツールの提供を目的としています。
 

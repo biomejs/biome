@@ -1,4 +1,5 @@
 use crate::workspace::DocumentFileSource;
+use biome_analyze::RuleError;
 use biome_configuration::diagnostics::{ConfigurationDiagnostic, EditorConfigDiagnostic};
 use biome_configuration::{BiomeDiagnostic, CantLoadExtendFile};
 use biome_console::fmt::Bytes;
@@ -10,7 +11,6 @@ use biome_formatter::{FormatError, PrintError};
 use biome_fs::{BiomePath, FileSystemDiagnostic};
 use biome_grit_patterns::{CompileError, ParsePatternError};
 use biome_js_analyze::utils::rename::RenameError;
-use biome_js_analyze::RuleError;
 use serde::{Deserialize, Serialize};
 use std::error::Error;
 use std::ffi::OsStr;

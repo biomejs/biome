@@ -1,0 +1,406 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: graphql/selection_set.graphql
+---
+# Input
+
+```graphql
+{
+
+	hero
+
+
+}
+
+# with nested fields
+{
+
+
+	hero {
+
+
+
+		name,                age
+
+
+	}
+
+
+}
+
+# with argument
+{
+
+	hero(
+
+		name: "Tony Stark"
+
+	)
+}
+
+{
+	hero(
+
+		   name: "Tony Stark"
+
+				) {
+		country,
+
+
+
+
+					name,
+		age
+
+
+	}
+
+
+}
+
+{
+	hero			(
+
+
+		name: "Tony Stark",
+
+
+
+
+						age: 53,
+
+
+										height: 6.1
+
+
+		alive: false,
+
+
+
+		location: null
+
+
+		birthplace: {city: "New York", state: "NY", country: "USA"}
+
+
+		friends: ["Pepper", "Rhodey"]
+
+
+	) {
+		country,
+
+
+		name,
+
+
+		age,
+
+
+					height(unit: FOOT),
+		wife(			name: "Pepper"){
+
+
+			name
+		}
+
+
+	}
+}
+
+{
+	hero
+
+	(name:
+	$name
+	)
+}
+
+# with aliases
+{
+  ironMan:
+
+	hero(
+		name:
+		"Tony Stark"
+						)
+}
+
+{
+  ironMan:
+
+	hero(name: "Tony Stark") {
+					country,
+
+
+		name,
+							age,
+
+
+		firstWife:
+
+					wife(name: "Pepper")
+
+					{
+			name
+		}
+
+
+	}
+
+}
+
+# with directives
+{
+
+
+  hero
+
+		@deprecated
+
+
+}
+
+{
+  ironMan:
+
+	hero(name: "Tony Stark"
+
+	) @deprecated
+
+	{
+		country @deprecated,
+
+
+		name,
+
+
+		age
+	}
+
+
+}
+
+# Fragment spread
+{
+  ...heroFragment
+}
+
+{
+
+
+  ...heroFragment
+
+	@deprecated
+
+
+}
+
+{
+  ironMan:
+
+
+		hero(name: "Tony Stark")
+
+	@deprecated {
+
+
+		...heroAttributes
+
+
+	}
+
+
+}
+
+# Inline Fragment spread
+{
+
+
+  ... {
+
+
+		hero
+	}
+
+
+}
+
+{
+
+
+	... @deprecated {
+
+
+		hero
+	}
+
+
+}
+
+{
+  ironMan:
+
+
+	hero(name:
+
+	"Tony Stark") @deprecated {
+		... on Hero @deprecated
+
+		{
+			name,
+
+
+			age
+		}
+	}
+}
+
+```
+
+
+=============================
+
+# Outputs
+
+## Output 1
+
+-----
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 80
+Bracket spacing: true
+Quote style: Double Quotes
+-----
+
+```graphql
+{
+	hero
+}
+
+# with nested fields
+{
+	hero {
+		name
+		age
+	}
+}
+
+# with argument
+{
+	hero(name: "Tony Stark")
+}
+
+{
+	hero(name: "Tony Stark") {
+		country
+
+		name
+		age
+	}
+}
+
+{
+	hero(
+		name: "Tony Stark"
+
+		age: 53
+
+		height: 6.1
+
+		alive: false
+
+		location: null
+
+		birthplace: { city: "New York", state: "NY", country: "USA" }
+
+		friends: ["Pepper", "Rhodey"]
+	) {
+		country
+
+		name
+
+		age
+
+		height(unit: FOOT)
+		wife(name: "Pepper") {
+			name
+		}
+	}
+}
+
+{
+	hero(name: $name)
+}
+
+# with aliases
+{
+	ironMan: hero(name: "Tony Stark")
+}
+
+{
+	ironMan: hero(name: "Tony Stark") {
+		country
+
+		name
+		age
+
+		firstWife: wife(name: "Pepper") {
+			name
+		}
+	}
+}
+
+# with directives
+{
+	hero @deprecated
+}
+
+{
+	ironMan: hero(name: "Tony Stark") @deprecated {
+		country @deprecated
+
+		name
+
+		age
+	}
+}
+
+# Fragment spread
+{
+	...heroFragment
+}
+
+{
+	...heroFragment @deprecated
+}
+
+{
+	ironMan: hero(name: "Tony Stark") @deprecated {
+		...heroAttributes
+	}
+}
+
+# Inline Fragment spread
+{
+	... {
+		hero
+	}
+}
+
+{
+	... @deprecated {
+		hero
+	}
+}
+
+{
+	ironMan: hero(name: "Tony Stark") @deprecated {
+		... on Hero @deprecated {
+			name
+
+			age
+		}
+	}
+}
+```

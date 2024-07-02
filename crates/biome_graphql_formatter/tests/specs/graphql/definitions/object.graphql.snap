@@ -1,0 +1,175 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: graphql/definitions/object.graphql
+---
+# Input
+
+```graphql
+type Person {
+  name: String
+  age: Int
+  picture: Url
+}
+
+type
+
+Person
+
+@deprecated {
+  name: String
+}
+
+type Animal
+
+{
+"type of the animal"
+
+
+type:String
+}
+
+type Person
+implements 				Character @deprecated {
+  name:
+
+	String
+}
+
+type Person implements Character {
+  name: String
+}
+
+type Person
+
+type Person
+
+implements Character
+
+type Person
+
+implements Character & type
+
+type Person
+
+@deprecated
+
+type Person implements
+
+Character @deprecated
+
+type Person
+
+implements
+
+Character & Character1
+
+@deprecated
+
+"This is a person"
+
+
+				type Person{
+  			name(start_with:
+	String): String
+  			"filder by age" age: Int @deprecated
+ 					 picture(size: Int = 0): Url
+  height(
+
+		"filter by height"
+
+	greater_than: Int @deprecated):
+
+					Int
+					weight("filter by weight"
+
+		greater_than: Int = 0 @deprecated):
+
+		Int
+		"filter by weight"
+
+		weight("filter by weight" greater_than:
+
+					Int = 0 @deprecated): Int
+}
+
+type type
+
+implements type
+
+{
+  type:
+
+	type
+}
+
+
+```
+
+
+=============================
+
+# Outputs
+
+## Output 1
+
+-----
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 80
+Bracket spacing: true
+Quote style: Double Quotes
+-----
+
+```graphql
+type Person {
+	name: String
+	age: Int
+	picture: Url
+}
+
+type Person @deprecated {
+	name: String
+}
+
+type Animal {
+	"type of the animal"
+	type: String
+}
+
+type Person implements Character @deprecated {
+	name: String
+}
+
+type Person implements Character {
+	name: String
+}
+
+type Person
+
+type Person implements Character
+
+type Person implements Character & type
+
+type Person @deprecated
+
+type Person implements Character @deprecated
+
+type Person implements Character & Character1 @deprecated
+
+"This is a person"
+type Person {
+	name(start_with: String): String
+	"filder by age"
+	age: Int @deprecated
+	picture(size: Int = 0): Url
+	height("filter by height" greater_than: Int @deprecated): Int
+	weight("filter by weight" greater_than: Int = 0 @deprecated): Int
+	"filter by weight"
+	weight("filter by weight" greater_than: Int = 0 @deprecated): Int
+}
+
+type type implements type {
+	type: type
+}
+```

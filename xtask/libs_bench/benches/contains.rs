@@ -13,7 +13,7 @@ pub fn keywords() -> Vec<String> {
     let v = &["undefined", "NaN", "Infinity", "arguments", "eval"].repeat(repeat);
     v.iter()
         .enumerate()
-        .map(|(i, x)| format!("{}{}", x, i))
+        .map(|(i, x)| format!("{x}{i}"))
         .collect()
 }
 

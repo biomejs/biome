@@ -10,8 +10,10 @@ use biome_configuration::{
     organize_imports::PartialOrganizeImports, PartialConfiguration, PartialFormatterConfiguration,
     PartialLinterConfiguration,
 };
+use biome_console::{markup, ConsoleExt};
 use biome_deserialize::Merge;
-use biome_service::configuration::PartialConfigurationExt;
+use biome_diagnostics::PrintDiagnostic;
+use biome_service::configuration::{load_editorconfig, PartialConfigurationExt};
 use biome_service::workspace::RegisterProjectFolderParams;
 use biome_service::{
     configuration::{load_configuration, LoadedConfiguration},
@@ -81,34 +83,46 @@ pub(crate) fn check(
         session.app.console,
         cli_options.verbose,
     )?;
-    // let fs = &session.app.fs;
-    // let (editorconfig, editorconfig_diagnostics) = {
-    //     let search_path = loaded_configuration
-    //         .directory_path
-    //         .clone()
-    //         .unwrap_or_else(|| fs.working_directory().unwrap_or_default());
-    //     load_editorconfig(fs, search_path)?
-    // };
-    // for diagnostic in editorconfig_diagnostics {
-    //     session.app.console.error(markup! {
-    //         {PrintDiagnostic::simple(&diagnostic)}
-    //     })
-    // }
 
     resolve_manifest(&session)?;
 
+    let editorconfig_search_path = loaded_configuration.directory_path.clone();
     let LoadedConfiguration {
-        configuration: mut fs_configuration,
+        configuration: biome_configuration,
         directory_path: configuration_path,
         ..
     } = loaded_configuration;
-    // let mut fs_configuration = if let Some(mut fs_configuration) = editorconfig {
-    //     // this makes biome configuration take precedence over editorconfig configuration
-    //     fs_configuration.merge_with(biome_configuration);
-    //     fs_configuration
-    // } else {
-    //     biome_configuration
-    // };
+
+    let should_use_editorconfig = configuration
+        .as_ref()
+        .and_then(|f| f.formatter.as_ref())
+        .and_then(|f| f.use_editorconfig)
+        .unwrap_or(
+            biome_configuration
+                .formatter
+                .as_ref()
+                .and_then(|f| f.use_editorconfig)
+                .unwrap_or_default(),
+        );
+    let mut fs_configuration = if should_use_editorconfig {
+        let (editorconfig, editorconfig_diagnostics) = {
+            let search_path = editorconfig_search_path.unwrap_or_else(|| {
+                let fs = &session.app.fs;
+                fs.working_directory().unwrap_or_default()
+            });
+            load_editorconfig(&session.app.fs, search_path)?
+        };
+        for diagnostic in editorconfig_diagnostics {
+            session.app.console.error(markup! {
+                {PrintDiagnostic::simple(&diagnostic)}
+            })
+        }
+        editorconfig.unwrap_or_default()
+    } else {
+        Default::default()
+    };
+    // this makes biome configuration take precedence over editorconfig configuration
+    fs_configuration.merge_with(biome_configuration);
 
     let formatter = fs_configuration
         .formatter

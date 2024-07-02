@@ -285,7 +285,7 @@ impl biome_console::fmt::Display for IndentWidth {
 impl Display for IndentWidth {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let value = self.value();
-        f.write_str(&std::format!("{}", value))
+        f.write_str(&std::format!("{value}"))
     }
 }
 
@@ -364,7 +364,7 @@ impl biome_console::fmt::Display for LineWidth {
 impl Display for LineWidth {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let value = self.value();
-        f.write_str(&std::format!("{}", value))
+        f.write_str(&std::format!("{value}"))
     }
 }
 
@@ -567,6 +567,54 @@ impl From<QuoteStyle> for Quote {
     }
 }
 
+#[derive(Clone, Copy, Debug, Deserializable, Eq, Hash, Merge, PartialEq)]
+#[cfg_attr(
+    feature = "serde",
+    derive(serde::Serialize, serde::Deserialize, schemars::JsonSchema),
+    serde(rename_all = "camelCase")
+)]
+pub struct BracketSpacing(bool);
+
+impl BracketSpacing {
+    /// Return the boolean value for this [BracketSpacing]
+    pub fn value(&self) -> bool {
+        self.0
+    }
+}
+
+impl Default for BracketSpacing {
+    fn default() -> Self {
+        Self(true)
+    }
+}
+
+impl From<bool> for BracketSpacing {
+    fn from(value: bool) -> Self {
+        Self(value)
+    }
+}
+
+impl std::fmt::Display for BracketSpacing {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::write!(f, "{}", self.value())
+    }
+}
+
+impl FromStr for BracketSpacing {
+    type Err = &'static str;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let value = bool::from_str(s);
+
+        match value {
+            Ok(value) => Ok(Self(value)),
+            Err(_) => Err(
+                "Value not supported for BracketSpacing. Supported values are 'true' and 'false'.",
+            ),
+        }
+    }
+}
+
 #[derive(Clone, Copy, Debug, Default, Deserializable, Eq, Hash, Merge, PartialEq)]
 #[cfg_attr(
     feature = "serde",
@@ -632,6 +680,9 @@ pub trait FormatOptions {
     /// The attribute position.
     fn attribute_position(&self) -> AttributePosition;
 
+    /// Whether to insert spaces around brackets in object literals. Defaults to true.
+    fn bracket_spacing(&self) -> BracketSpacing;
+
     /// Derives the print options from the these format options
     fn as_print_options(&self) -> PrinterOptions;
 }
@@ -681,6 +732,7 @@ pub struct SimpleFormatOptions {
     pub line_width: LineWidth,
     pub line_ending: LineEnding,
     pub attribute_position: AttributePosition,
+    pub bracket_spacing: BracketSpacing,
 }
 
 impl FormatOptions for SimpleFormatOptions {
@@ -704,6 +756,10 @@ impl FormatOptions for SimpleFormatOptions {
         self.attribute_position
     }
 
+    fn bracket_spacing(&self) -> BracketSpacing {
+        self.bracket_spacing
+    }
+
     fn as_print_options(&self) -> PrinterOptions {
         PrinterOptions::default()
             .with_indent_style(self.indent_style)
@@ -711,6 +767,7 @@ impl FormatOptions for SimpleFormatOptions {
             .with_print_width(self.line_width.into())
             .with_line_ending(self.line_ending)
             .with_attribute_position(self.attribute_position)
+            .with_bracket_spacing(self.bracket_spacing)
     }
 }
 

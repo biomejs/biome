@@ -1,0 +1,12 @@
+query ($storyId: ID!, $like: Boolean,
+
+	$comments: [String!], $tags: [String!]!,
+
+	$posts: [PostInput]!, $input: [input!]!
+
+) {
+
+
+	likeStory(storyId: $storyId)
+}
+

@@ -1,0 +1,101 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: graphql/directive.graphql
+---
+# Input
+
+```graphql
+{
+
+
+	hero
+
+
+	@deprecated
+
+
+}
+
+{
+	hero
+
+
+	@deprecated(reason:
+
+	"Deprecated"
+
+	)
+
+
+}
+
+{
+
+	hero
+
+	@input
+
+	(type:
+
+	String)
+
+
+}
+
+{
+	hero
+
+
+	@deprecated(
+
+		reason:
+
+		"Deprecated"
+
+	)
+	@addExternalFields
+
+
+	(source:
+
+
+	"profiles"
+
+	)
+}
+
+```
+
+
+=============================
+
+# Outputs
+
+## Output 1
+
+-----
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 80
+Bracket spacing: true
+Quote style: Double Quotes
+-----
+
+```graphql
+{
+	hero @deprecated
+}
+
+{
+	hero @deprecated(reason: "Deprecated")
+}
+
+{
+	hero @input(type: String)
+}
+
+{
+	hero @deprecated(reason: "Deprecated") @addExternalFields(source: "profiles")
+}
+```
