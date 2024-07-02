@@ -3,13 +3,13 @@ use crate::{Matcher, WorkspaceError};
 use biome_analyze::{AnalyzerOptions, AnalyzerRules};
 use biome_configuration::diagnostics::InvalidIgnorePattern;
 use biome_configuration::javascript::JsxRuntime;
-use biome_configuration::organize_imports::OrganizeImports;
+use biome_configuration::organize_imports::PartialOrganizeImports;
 use biome_configuration::{
-    push_to_analyzer_rules, BiomeDiagnostic, FilesConfiguration, FormatterConfiguration,
-    LinterConfiguration, OverrideFormatterConfiguration, OverrideLinterConfiguration,
-    OverrideOrganizeImportsConfiguration, Overrides, PartialConfiguration, PartialCssConfiguration,
+    push_to_analyzer_rules, BiomeDiagnostic, FilesConfiguration, OverrideFormatterConfiguration,
+    OverrideLinterConfiguration, OverrideOrganizeImportsConfiguration, Overrides,
+    PartialConfiguration, PartialCssConfiguration, PartialFormatterConfiguration,
     PartialGraphqlConfiguration, PartialJavascriptConfiguration, PartialJsonConfiguration,
-    PlainIndentStyle, Rules,
+    PartialLinterConfiguration, Rules,
 };
 use biome_css_formatter::context::CssFormatOptions;
 use biome_css_parser::CssParseOptions;
@@ -180,16 +180,12 @@ impl Settings {
     ) -> Result<(), WorkspaceError> {
         // formatter settings
         if let Some(formatter) = configuration.formatter {
-            self.formatter = to_formatter_settings(
-                working_directory.clone(),
-                FormatterConfiguration::from(formatter),
-            )?;
+            self.formatter = to_formatter_settings(working_directory.clone(), formatter)?;
         }
 
         // linter settings
         if let Some(linter) = configuration.linter {
-            self.linter =
-                to_linter_settings(working_directory.clone(), LinterConfiguration::from(linter))?;
+            self.linter = to_linter_settings(working_directory.clone(), linter)?;
         }
 
         // filesystem settings
@@ -204,10 +200,8 @@ impl Settings {
 
         // organize imports settings
         if let Some(organize_imports) = configuration.organize_imports {
-            self.organize_imports = to_organize_imports_settings(
-                working_directory.clone(),
-                OrganizeImports::from(organize_imports),
-            )?;
+            self.organize_imports =
+                to_organize_imports_settings(working_directory.clone(), organize_imports)?;
         }
 
         // javascript settings
@@ -502,26 +496,22 @@ impl Default for FormatterSettings {
     }
 }
 
+// TODO：Rethink about partial and defaults
 pub fn to_formatter_settings(
     working_directory: Option<PathBuf>,
-    conf: FormatterConfiguration,
+    conf: PartialFormatterConfiguration,
 ) -> Result<FormatterSettings, WorkspaceError> {
-    let indent_style = match conf.indent_style {
-        PlainIndentStyle::Tab => IndentStyle::Tab,
-        PlainIndentStyle::Space => IndentStyle::Space,
-    };
-
     Ok(FormatterSettings {
-        enabled: conf.enabled,
-        indent_style: Some(indent_style),
-        indent_width: Some(conf.indent_width),
-        line_ending: Some(conf.line_ending),
-        line_width: Some(conf.line_width),
-        format_with_errors: conf.format_with_errors,
-        attribute_position: Some(conf.attribute_position),
-        bracket_spacing: Some(conf.bracket_spacing),
-        ignored_files: to_matcher(working_directory.clone(), Some(&conf.ignore))?,
-        included_files: to_matcher(working_directory, Some(&conf.include))?,
+        enabled: conf.enabled.unwrap_or(true),
+        format_with_errors: conf.format_with_errors.unwrap_or(false),
+        indent_style: conf.indent_style.map(Into::into),
+        indent_width: conf.indent_width,
+        line_ending: conf.line_ending,
+        line_width: conf.line_width,
+        attribute_position: conf.attribute_position,
+        bracket_spacing: conf.bracket_spacing,
+        ignored_files: to_matcher(working_directory.clone(), conf.ignore.as_ref())?,
+        included_files: to_matcher(working_directory, conf.include.as_ref())?,
     })
 }
 
@@ -588,15 +578,16 @@ impl Default for LinterSettings {
     }
 }
 
+// TODO：Rethink about partial and defaults
 pub fn to_linter_settings(
     working_directory: Option<PathBuf>,
-    conf: LinterConfiguration,
+    conf: PartialLinterConfiguration,
 ) -> Result<LinterSettings, WorkspaceError> {
     Ok(LinterSettings {
-        enabled: conf.enabled,
-        rules: Some(conf.rules),
-        ignored_files: to_matcher(working_directory.clone(), Some(&conf.ignore))?,
-        included_files: to_matcher(working_directory, Some(&conf.include))?,
+        enabled: conf.enabled.unwrap_or(true),
+        rules: Some(conf.rules.unwrap_or_default()),
+        ignored_files: to_matcher(working_directory.clone(), conf.ignore.as_ref())?,
+        included_files: to_matcher(working_directory, conf.include.as_ref())?,
     })
 }
 
@@ -647,14 +638,15 @@ impl Default for OrganizeImportsSettings {
     }
 }
 
+// TODO：Rethink about partial and defaults
 pub fn to_organize_imports_settings(
     working_directory: Option<PathBuf>,
-    organize_imports: OrganizeImports,
+    organize_imports: PartialOrganizeImports,
 ) -> Result<OrganizeImportsSettings, WorkspaceError> {
     Ok(OrganizeImportsSettings {
-        enabled: organize_imports.enabled,
-        ignored_files: to_matcher(working_directory.clone(), Some(&organize_imports.ignore))?,
-        included_files: to_matcher(working_directory, Some(&organize_imports.include))?,
+        enabled: organize_imports.enabled.unwrap_or(true),
+        ignored_files: to_matcher(working_directory.clone(), organize_imports.ignore.as_ref())?,
+        included_files: to_matcher(working_directory, organize_imports.include.as_ref())?,
     })
 }
 
@@ -679,6 +671,8 @@ impl From<OverrideOrganizeImportsConfiguration> for OverrideOrganizeImportsSetti
 // endregion
 
 // region: File settings (base)
+
+// TODO: This isn't refactored yet.
 
 /// Filesystem settings for the entire workspace
 #[derive(Debug)]
