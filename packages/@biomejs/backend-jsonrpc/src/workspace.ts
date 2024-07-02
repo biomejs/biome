@@ -173,6 +173,7 @@ export interface PartialGraphqlConfiguration {
 	 * GraphQL formatter options
 	 */
 	formatter?: PartialGraphqlFormatter;
+	linter?: PartialGraphqlLinter;
 }
 /**
  * A set of options applied to the JavaScript files
@@ -373,6 +374,15 @@ export interface PartialGraphqlFormatter {
 	 * The type of quotes used in GraphQL code. Defaults to double.
 	 */
 	quoteStyle?: QuoteStyle;
+}
+/**
+ * Options that changes how the GraphQL linter behaves
+ */
+export interface PartialGraphqlLinter {
+	/**
+	 * Control the formatter for GraphQL files.
+	 */
+	enabled?: boolean;
 }
 /**
  * Formatting options specific to the JavaScript files

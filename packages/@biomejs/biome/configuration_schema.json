@@ -1168,6 +1168,12 @@
 						{ "$ref": "#/definitions/GraphqlFormatter" },
 						{ "type": "null" }
 					]
+				},
+				"linter": {
+					"anyOf": [
+						{ "$ref": "#/definitions/GraphqlLinter" },
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false
@@ -1209,6 +1215,17 @@
 				"quoteStyle": {
 					"description": "The type of quotes used in GraphQL code. Defaults to double.",
 					"anyOf": [{ "$ref": "#/definitions/QuoteStyle" }, { "type": "null" }]
+				}
+			},
+			"additionalProperties": false
+		},
+		"GraphqlLinter": {
+			"description": "Options that changes how the GraphQL linter behaves",
+			"type": "object",
+			"properties": {
+				"enabled": {
+					"description": "Control the formatter for GraphQL files.",
+					"type": ["boolean", "null"]
 				}
 			},
 			"additionalProperties": false
