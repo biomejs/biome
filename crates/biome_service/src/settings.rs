@@ -6,8 +6,7 @@ use biome_configuration::javascript::JsxRuntime;
 use biome_configuration::organize_imports::OrganizeImports;
 use biome_configuration::{
     push_to_analyzer_rules, BiomeDiagnostic, FilesConfiguration, FormatterConfiguration,
-    LinterConfiguration, OverrideFormatterConfiguration, OverrideLinterConfiguration,
-    OverrideOrganizeImportsConfiguration, Overrides, PartialConfiguration, PartialCssConfiguration,
+    LinterConfiguration, Overrides, PartialConfiguration, PartialCssConfiguration,
     PartialGraphqlConfiguration, PartialJavascriptConfiguration, PartialJsonConfiguration,
     PlainIndentStyle, Rules,
 };
@@ -213,23 +212,25 @@ impl Settings {
         if let Some(javascript) = configuration.javascript {
             self.languages.javascript = javascript.into();
         }
+
         // json settings
         if let Some(json) = configuration.json {
             self.languages.json = json.into();
         }
+
         // css settings
         if let Some(css) = configuration.css {
             self.languages.css = css.into();
         }
+
         // graphql settings
         if let Some(graphql) = configuration.graphql {
             self.languages.graphql = graphql.into();
         }
 
-        // NOTE: keep this last. Computing the overrides require reading the settings computed by the parent settings.
+        // overrides settings
         if let Some(overrides) = configuration.overrides {
-            self.override_settings =
-                to_override_settings(working_directory.clone(), overrides, self)?;
+            self.override_settings = to_override_settings(working_directory.clone(), overrides)?;
         }
 
         Ok(())
@@ -369,7 +370,7 @@ pub struct OverrideFormatterSettings {
     pub enabled: Option<bool>,
     /// Stores whether formatting should be allowed to proceed if a given file
     /// has syntax errors
-    pub format_with_errors: bool,
+    pub format_with_errors: Option<bool>,
     pub indent_style: Option<IndentStyle>,
     pub indent_width: Option<IndentWidth>,
     pub line_ending: Option<LineEnding>,
@@ -818,6 +819,20 @@ impl OverrideSettings {
             if let Some(enabled) = pattern.formatter.enabled {
                 if pattern.include.matches_path(path) && !pattern.exclude.matches_path(path) {
                     return Some(!enabled);
+                }
+            }
+            None
+        })
+    }
+
+    // TODO: This is not used
+    /// Scans the overrides and checks if there's an override that enables the "format with errors" for `path`
+    pub fn format_with_errors_enabled(&self, path: &Path) -> Option<bool> {
+        // Reverse the traversal as only the last override takes effect
+        self.patterns.iter().rev().find_map(|pattern| {
+            if let Some(enabled) = pattern.formatter.format_with_errors {
+                if pattern.include.matches_path(path) && !pattern.exclude.matches_path(path) {
+                    return Some(enabled);
                 }
             }
             None
@@ -1341,35 +1356,9 @@ fn to_git_ignore(path: PathBuf, matches: &[String]) -> Result<Gitignore, Workspa
     Ok(gitignore)
 }
 
-pub fn to_organize_imports_settings(
-    working_directory: Option<PathBuf>,
-    organize_imports: OrganizeImports,
-) -> Result<OrganizeImportsSettings, WorkspaceError> {
-    Ok(OrganizeImportsSettings {
-        enabled: organize_imports.enabled,
-        ignored_files: to_matcher(working_directory.clone(), Some(&organize_imports.ignore))?,
-        included_files: to_matcher(working_directory, Some(&organize_imports.include))?,
-    })
-}
-
-impl TryFrom<OverrideOrganizeImportsConfiguration> for OrganizeImportsSettings {
-    type Error = WorkspaceError;
-
-    fn try_from(
-        organize_imports: OverrideOrganizeImportsConfiguration,
-    ) -> Result<Self, Self::Error> {
-        Ok(Self {
-            enabled: organize_imports.enabled.unwrap_or_default(),
-            ignored_files: Matcher::empty(),
-            included_files: Matcher::empty(),
-        })
-    }
-}
-
 pub fn to_override_settings(
     working_directory: Option<PathBuf>,
     overrides: Overrides,
-    current_settings: &Settings,
 ) -> Result<OverrideSettings, WorkspaceError> {
     let mut override_settings = OverrideSettings::default();
     for mut pattern in overrides.0 {
@@ -1377,12 +1366,8 @@ pub fn to_override_settings(
             .formatter
             .map(|formatter| OverrideFormatterSettings {
                 enabled: formatter.enabled,
-                format_with_errors: formatter
-                    .format_with_errors
-                    .unwrap_or(current_settings.formatter.format_with_errors),
-                indent_style: formatter
-                    .indent_style
-                    .map(|indent_style| indent_style.into()),
+                format_with_errors: formatter.format_with_errors,
+                indent_style: formatter.indent_style.map(Into::into),
                 indent_width: formatter.indent_width,
                 line_ending: formatter.line_ending,
                 line_width: formatter.line_width,
@@ -1405,19 +1390,12 @@ pub fn to_override_settings(
                 .and_then(|organize_imports| organize_imports.enabled),
         };
 
-        let mut languages = LanguageListSettings::default();
-
-        let javascript = pattern.javascript.take().unwrap_or_default();
-        languages.javascript = javascript.into();
-
-        let json = pattern.json.take().unwrap_or_default();
-        languages.json = json.into();
-
-        let css = pattern.css.take().unwrap_or_default();
-        languages.css = css.into();
-
-        let graphql = pattern.graphql.take().unwrap_or_default();
-        languages.graphql = graphql.into();
+        let languages = LanguageListSettings {
+            javascript: pattern.javascript.take().unwrap_or_default().into(),
+            json: pattern.json.take().unwrap_or_default().into(),
+            css: pattern.css.take().unwrap_or_default().into(),
+            graphql: pattern.graphql.take().unwrap_or_default().into(),
+        };
 
         let pattern_setting = OverrideSettingPattern {
             include: to_matcher(working_directory.clone(), pattern.include.as_ref())?,
@@ -1443,12 +1421,11 @@ pub fn to_format_settings(
         PlainIndentStyle::Tab => IndentStyle::Tab,
         PlainIndentStyle::Space => IndentStyle::Space,
     };
-    let indent_width = conf.indent_width;
 
     Ok(FormatterSettings {
         enabled: conf.enabled,
         indent_style: Some(indent_style),
-        indent_width: Some(indent_width),
+        indent_width: Some(conf.indent_width),
         line_ending: Some(conf.line_ending),
         line_width: Some(conf.line_width),
         format_with_errors: conf.format_with_errors,
@@ -1459,36 +1436,6 @@ pub fn to_format_settings(
     })
 }
 
-impl TryFrom<OverrideFormatterConfiguration> for FormatterSettings {
-    type Error = WorkspaceError;
-
-    fn try_from(conf: OverrideFormatterConfiguration) -> Result<Self, Self::Error> {
-        let indent_style = match conf.indent_style {
-            Some(PlainIndentStyle::Tab) => IndentStyle::Tab,
-            Some(PlainIndentStyle::Space) => IndentStyle::Space,
-            None => IndentStyle::default(),
-        };
-        let indent_width = conf
-            .indent_width
-            .map(Into::into)
-            .or(conf.indent_size.map(Into::into))
-            .unwrap_or_default();
-
-        Ok(Self {
-            enabled: conf.enabled.unwrap_or_default(),
-            indent_style: Some(indent_style),
-            indent_width: Some(indent_width),
-            line_ending: conf.line_ending,
-            line_width: conf.line_width,
-            attribute_position: Some(AttributePosition::default()),
-            bracket_spacing: Some(BracketSpacing::default()),
-            format_with_errors: conf.format_with_errors.unwrap_or_default(),
-            ignored_files: Matcher::empty(),
-            included_files: Matcher::empty(),
-        })
-    }
-}
-
 pub fn to_linter_settings(
     working_directory: Option<PathBuf>,
     conf: LinterConfiguration,
@@ -1497,19 +1444,17 @@ pub fn to_linter_settings(
         enabled: conf.enabled,
         rules: Some(conf.rules),
         ignored_files: to_matcher(working_directory.clone(), Some(&conf.ignore))?,
-        included_files: to_matcher(working_directory.clone(), Some(&conf.include))?,
+        included_files: to_matcher(working_directory, Some(&conf.include))?,
     })
 }
 
-impl TryFrom<OverrideLinterConfiguration> for LinterSettings {
-    type Error = WorkspaceError;
-
-    fn try_from(conf: OverrideLinterConfiguration) -> Result<Self, Self::Error> {
-        Ok(Self {
-            enabled: conf.enabled.unwrap_or_default(),
-            rules: conf.rules,
-            ignored_files: Matcher::empty(),
-            included_files: Matcher::empty(),
-        })
-    }
+pub fn to_organize_imports_settings(
+    working_directory: Option<PathBuf>,
+    organize_imports: OrganizeImports,
+) -> Result<OrganizeImportsSettings, WorkspaceError> {
+    Ok(OrganizeImportsSettings {
+        enabled: organize_imports.enabled,
+        ignored_files: to_matcher(working_directory.clone(), Some(&organize_imports.ignore))?,
+        included_files: to_matcher(working_directory, Some(&organize_imports.include))?,
+    })
 }
