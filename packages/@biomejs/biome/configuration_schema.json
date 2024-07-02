@@ -2046,6 +2046,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useJsxCurlyBraceConvention": {
+					"description": "This rule allows you to enforce curly braces or disallow unnecessary curly braces in JSX props and/or children.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleFixConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useNumberToFixedDigitsArgument": {
 					"description": "Enforce using the digits argument with Number#toFixed().",
 					"anyOf": [

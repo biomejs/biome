@@ -1,0 +1,74 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.jsx
+---
+# Input
+```jsx
+<Foo>{'Hello world'}</Foo>;
+
+<Foo foo={'bar'} />;
+
+<Foo foo=<Bar /> />;
+
+```
+
+# Diagnostics
+```
+invalid.jsx:1:6 lint/nursery/useJsxCurlyBraceConvention  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Should not have curly braces around expression.
+  
+  > 1 │ <Foo>{'Hello world'}</Foo>;
+      │      ^^^^^^^^^^^^^^^
+    2 │ 
+    3 │ <Foo foo={'bar'} />;
+  
+  i JSX child does not need to be wrapped in curly braces.
+  
+  i Safe fix: Remove curly braces around the expression.
+  
+    1 │ <Foo>{'Hello·world'}</Foo>;
+      │      --           --       
+
+```
+
+```
+invalid.jsx:3:10 lint/nursery/useJsxCurlyBraceConvention  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Should not have curly braces around expression.
+  
+    1 │ <Foo>{'Hello world'}</Foo>;
+    2 │ 
+  > 3 │ <Foo foo={'bar'} />;
+      │          ^^^^^^^
+    4 │ 
+    5 │ <Foo foo=<Bar /> />;
+  
+  i JSX attribute value does not need to be wrapped in curly braces.
+  
+  i Safe fix: Remove curly braces around the expression.
+  
+    3 │ <Foo·foo={'bar'}·/>;
+      │          -     -    
+
+```
+
+```
+invalid.jsx:5:10 lint/nursery/useJsxCurlyBraceConvention  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Should have curly braces around expression.
+  
+    3 │ <Foo foo={'bar'} />;
+    4 │ 
+  > 5 │ <Foo foo=<Bar /> />;
+      │          ^^^^^^^
+    6 │ 
+  
+  i JSX attribute value should be wrapped in curly braces. This will make the JSX attribute value more readable.
+  
+  i Safe fix: Add curly braces around the expression.
+  
+    5 │ <Foo·foo={<Bar·/>·}·/>;
+      │          +        ++   
+
+```
