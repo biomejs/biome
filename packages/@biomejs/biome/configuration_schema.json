@@ -1790,6 +1790,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noDynamicNamespaceImportAccess": {
+					"description": "Disallow accessing namespace imports dynamically.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noEmptyBlock": {
 					"description": "Disallow CSS empty blocks.",
 					"anyOf": [
