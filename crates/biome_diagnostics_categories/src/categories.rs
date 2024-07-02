@@ -128,6 +128,7 @@ define_categories! {
     "lint/nursery/noImportantInKeyframe": "https://biomejs.dev/linter/rules/no-important-in-keyframe",
     "lint/nursery/noInvalidDirectionInLinearGradient": "https://biomejs.dev/linter/rules/no-invalid-direction-in-linear-gradient",
     "lint/nursery/noInvalidPositionAtImportRule": "https://biomejs.dev/linter/rules/no-invalid-position-at-import-rule",
+    "lint/nursery/noIrregularWhitespace": "https://biomejs.dev/linter/rules/no-irregular-whitespace",
     "lint/nursery/noLabelWithoutControl": "https://biomejs.dev/linter/rules/no-label-without-control",
     "lint/nursery/noMisplacedAssertion": "https://biomejs.dev/linter/rules/no-misplaced-assertion",
     "lint/nursery/noMissingGenericFamilyKeyword": "https://biomejs.dev/linter/rules/no-missing-generic-family-keyword",

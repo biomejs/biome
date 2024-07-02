@@ -123,6 +123,8 @@ pub type NoInteractiveElementToNoninteractiveRole = < lint :: a11y :: no_interac
 pub type NoInvalidConstructorSuper = < lint :: correctness :: no_invalid_constructor_super :: NoInvalidConstructorSuper as biome_analyze :: Rule > :: Options ;
 pub type NoInvalidNewBuiltin = < lint :: correctness :: no_invalid_new_builtin :: NoInvalidNewBuiltin as biome_analyze :: Rule > :: Options ;
 pub type NoInvalidUseBeforeDeclaration = < lint :: correctness :: no_invalid_use_before_declaration :: NoInvalidUseBeforeDeclaration as biome_analyze :: Rule > :: Options ;
+pub type NoIrregularWhitespace =
+    <lint::nursery::no_irregular_whitespace::NoIrregularWhitespace as biome_analyze::Rule>::Options;
 pub type NoLabelVar = <lint::suspicious::no_label_var::NoLabelVar as biome_analyze::Rule>::Options;
 pub type NoLabelWithoutControl = < lint :: nursery :: no_label_without_control :: NoLabelWithoutControl as biome_analyze :: Rule > :: Options ;
 pub type NoMisleadingCharacterClass = < lint :: suspicious :: no_misleading_character_class :: NoMisleadingCharacterClass as biome_analyze :: Rule > :: Options ;

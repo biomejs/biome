@@ -70,7 +70,7 @@ array_spaces_vertical_tab_formfeed.json:1:3 parse ━━━━━━━━━━
   × Control character '\u000b' is not allowed in string literals.
   
   > 1 │ ["␋a"\f]
-      │   
+      │   ^
   
   i Use the escape sequence '\u000b' instead.
   
