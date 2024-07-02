@@ -535,6 +535,7 @@ impl From<PartialCssConfiguration> for LanguageSettings<CssLanguage> {
 impl From<PartialGraphqlConfiguration> for LanguageSettings<GraphqlLanguage> {
     fn from(graphql: PartialGraphqlConfiguration) -> Self {
         let mut language_setting: LanguageSettings<GraphqlLanguage> = LanguageSettings::default();
+        dbg!(&graphql);
 
         if let Some(formatter) = graphql.formatter {
             // TODO: change RHS to `formatter.enabled` when graphql formatting is enabled by default
@@ -545,6 +546,10 @@ impl From<PartialGraphqlConfiguration> for LanguageSettings<GraphqlLanguage> {
             language_setting.formatter.line_ending = formatter.line_ending;
             language_setting.formatter.quote_style = formatter.quote_style;
             language_setting.formatter.bracket_spacing = formatter.bracket_spacing;
+        }
+
+        if let Some(linter) = graphql.linter {
+            language_setting.linter.enabled = linter.enabled;
         }
 
         language_setting
