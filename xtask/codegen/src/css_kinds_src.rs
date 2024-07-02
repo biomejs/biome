@@ -271,6 +271,7 @@ pub const CSS_KINDS_SRC: KindsSrc = KindsSrc {
         "WHITESPACE",
         "COMMENT",
         "MULTILINE_COMMENT",
+        "GRIT_METAVARIABLE",
     ],
     nodes: &[
         "CSS_ROOT",
@@ -505,5 +506,7 @@ pub const CSS_KINDS_SRC: KindsSrc = KindsSrc {
         "CSS_BOGUS_CUSTOM_IDENTIFIER",
         "CSS_BOGUS_KEYFRAMES_NAME",
         "CSS_BOGUS_UNICODE_RANGE_VALUE",
+        //Grit metavariable
+        "CSS_GRIT_METAVARIABLE",
     ],
 };

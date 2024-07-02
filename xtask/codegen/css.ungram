@@ -1795,3 +1795,5 @@ CssNumber = value: 'css_number_literal'
 CssUnicodeCodepoint = value: 'css_unicode_codepoint_literal'
 CssUnicodeRangeWildcard = value: 'css_unicode_range_wildcard_literal'
 CssUrlValueRaw = value: 'css_url_value_raw_literal'
+
+CssGritMetavariable = value: 'grit_metavariable'
