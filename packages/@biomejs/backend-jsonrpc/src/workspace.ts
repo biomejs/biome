@@ -2030,7 +2030,7 @@ export interface NoLabelWithoutControlOptions {
  */
 export interface RestrictedImportsOptions {
 	/**
-	 * A list of names that should trigger the rule
+	 * A list of imports that should trigger the rule
 	 */
 	paths: {};
 }

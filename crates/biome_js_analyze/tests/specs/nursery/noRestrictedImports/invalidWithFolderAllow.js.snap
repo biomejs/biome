@@ -1,0 +1,22 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidWithFolderAllow.js
+---
+# Input
+```jsx
+import eslint from 'eslint';
+
+```
+
+# Diagnostics
+```
+invalidWithFolderAllow.js:1:20 lint/nursery/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Importing Eslint is forbidden
+  
+  > 1 │ import eslint from 'eslint';
+      │                    ^^^^^^^^
+    2 │ 
+  
+
+```

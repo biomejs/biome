@@ -6,6 +6,7 @@ expression: invalid.js
 ```jsx
 import eslint from 'eslint';
 const l = require('lodash');
+import ComponentA from 'antd/componentA';
 
 ```
 
@@ -18,7 +19,7 @@ invalid.js:1:20 lint/nursery/noRestrictedImports ━━━━━━━━━━�
   > 1 │ import eslint from 'eslint';
       │                    ^^^^^^^^
     2 │ const l = require('lodash');
-    3 │ 
+    3 │ import ComponentA from 'antd/componentA';
   
 
 ```
@@ -31,9 +32,22 @@ invalid.js:2:19 lint/nursery/noRestrictedImports ━━━━━━━━━━�
     1 │ import eslint from 'eslint';
   > 2 │ const l = require('lodash');
       │                   ^^^^^^^^
-    3 │ 
+    3 │ import ComponentA from 'antd/componentA';
+    4 │ 
   
 
 ```
 
+```
+invalid.js:3:24 lint/nursery/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
+  ! It's not recommended to use any submodule of antd
+  
+    1 │ import eslint from 'eslint';
+    2 │ const l = require('lodash');
+  > 3 │ import ComponentA from 'antd/componentA';
+      │                        ^^^^^^^^^^^^^^^^^
+    4 │ 
+  
+
+```
