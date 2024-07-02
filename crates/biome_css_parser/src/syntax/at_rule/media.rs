@@ -1,8 +1,12 @@
 use super::parse_error::expected_media_query;
+use crate::lexer::CssReLexContext;
 use crate::parser::CssParser;
 use crate::syntax::at_rule::feature::parse_any_query_feature;
 use crate::syntax::block::parse_conditional_block;
-use crate::syntax::{is_at_identifier, is_nth_at_identifier, parse_regular_identifier};
+use crate::syntax::{
+    is_at_grit_metavariable, is_at_identifier, is_nth_at_identifier, parse_grit_metavariable,
+    parse_regular_identifier,
+};
 use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::{CssSyntaxKind, T};
 use biome_parser::parse_lists::ParseSeparatedList;
@@ -75,8 +79,13 @@ impl ParseSeparatedList for MediaQueryList {
 
 #[inline]
 fn parse_any_media_query(p: &mut CssParser) -> ParsedSyntax {
+    if p.options().is_grit_metavariable_enabled() {
+        p.re_lex(CssReLexContext::GritMetavariable);
+    }
     if is_at_media_type_query(p) {
         parse_any_media_type_query(p)
+    } else if is_at_grit_metavariable(p) {
+        parse_grit_metavariable(p)
     } else {
         let m = p.start();
         parse_any_media_condition(p).ok(); // TODO handle error

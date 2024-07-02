@@ -7889,6 +7889,7 @@ impl AnyCssMediaOrCombinableCondition {
 pub enum AnyCssMediaQuery {
     AnyCssMediaTypeQuery(AnyCssMediaTypeQuery),
     CssBogusMediaQuery(CssBogusMediaQuery),
+    CssGritMetavariable(CssGritMetavariable),
     CssMediaConditionQuery(CssMediaConditionQuery),
 }
 impl AnyCssMediaQuery {
@@ -7901,6 +7902,12 @@ impl AnyCssMediaQuery {
     pub fn as_css_bogus_media_query(&self) -> Option<&CssBogusMediaQuery> {
         match &self {
             AnyCssMediaQuery::CssBogusMediaQuery(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_grit_metavariable(&self) -> Option<&CssGritMetavariable> {
+        match &self {
+            AnyCssMediaQuery::CssGritMetavariable(item) => Some(item),
             _ => None,
         }
     }
@@ -18896,6 +18903,11 @@ impl From<CssBogusMediaQuery> for AnyCssMediaQuery {
         AnyCssMediaQuery::CssBogusMediaQuery(node)
     }
 }
+impl From<CssGritMetavariable> for AnyCssMediaQuery {
+    fn from(node: CssGritMetavariable) -> AnyCssMediaQuery {
+        AnyCssMediaQuery::CssGritMetavariable(node)
+    }
+}
 impl From<CssMediaConditionQuery> for AnyCssMediaQuery {
     fn from(node: CssMediaConditionQuery) -> AnyCssMediaQuery {
         AnyCssMediaQuery::CssMediaConditionQuery(node)
@@ -18905,10 +18917,11 @@ impl AstNode for AnyCssMediaQuery {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> = AnyCssMediaTypeQuery::KIND_SET
         .union(CssBogusMediaQuery::KIND_SET)
+        .union(CssGritMetavariable::KIND_SET)
         .union(CssMediaConditionQuery::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
         match kind {
-            CSS_BOGUS_MEDIA_QUERY | CSS_MEDIA_CONDITION_QUERY => true,
+            CSS_BOGUS_MEDIA_QUERY | CSS_GRIT_METAVARIABLE | CSS_MEDIA_CONDITION_QUERY => true,
             k if AnyCssMediaTypeQuery::can_cast(k) => true,
             _ => false,
         }
@@ -18917,6 +18930,9 @@ impl AstNode for AnyCssMediaQuery {
         let res = match syntax.kind() {
             CSS_BOGUS_MEDIA_QUERY => {
                 AnyCssMediaQuery::CssBogusMediaQuery(CssBogusMediaQuery { syntax })
+            }
+            CSS_GRIT_METAVARIABLE => {
+                AnyCssMediaQuery::CssGritMetavariable(CssGritMetavariable { syntax })
             }
             CSS_MEDIA_CONDITION_QUERY => {
                 AnyCssMediaQuery::CssMediaConditionQuery(CssMediaConditionQuery { syntax })
@@ -18935,6 +18951,7 @@ impl AstNode for AnyCssMediaQuery {
     fn syntax(&self) -> &SyntaxNode {
         match self {
             AnyCssMediaQuery::CssBogusMediaQuery(it) => &it.syntax,
+            AnyCssMediaQuery::CssGritMetavariable(it) => &it.syntax,
             AnyCssMediaQuery::CssMediaConditionQuery(it) => &it.syntax,
             AnyCssMediaQuery::AnyCssMediaTypeQuery(it) => it.syntax(),
         }
@@ -18942,6 +18959,7 @@ impl AstNode for AnyCssMediaQuery {
     fn into_syntax(self) -> SyntaxNode {
         match self {
             AnyCssMediaQuery::CssBogusMediaQuery(it) => it.syntax,
+            AnyCssMediaQuery::CssGritMetavariable(it) => it.syntax,
             AnyCssMediaQuery::CssMediaConditionQuery(it) => it.syntax,
             AnyCssMediaQuery::AnyCssMediaTypeQuery(it) => it.into_syntax(),
         }
@@ -18952,6 +18970,7 @@ impl std::fmt::Debug for AnyCssMediaQuery {
         match self {
             AnyCssMediaQuery::AnyCssMediaTypeQuery(it) => std::fmt::Debug::fmt(it, f),
             AnyCssMediaQuery::CssBogusMediaQuery(it) => std::fmt::Debug::fmt(it, f),
+            AnyCssMediaQuery::CssGritMetavariable(it) => std::fmt::Debug::fmt(it, f),
             AnyCssMediaQuery::CssMediaConditionQuery(it) => std::fmt::Debug::fmt(it, f),
         }
     }
@@ -18961,6 +18980,7 @@ impl From<AnyCssMediaQuery> for SyntaxNode {
         match n {
             AnyCssMediaQuery::AnyCssMediaTypeQuery(it) => it.into(),
             AnyCssMediaQuery::CssBogusMediaQuery(it) => it.into(),
+            AnyCssMediaQuery::CssGritMetavariable(it) => it.into(),
             AnyCssMediaQuery::CssMediaConditionQuery(it) => it.into(),
         }
     }

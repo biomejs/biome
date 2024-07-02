@@ -1010,6 +1010,7 @@ AnyCssMediaQuery =
 	CssMediaConditionQuery
 	| AnyCssMediaTypeQuery
 	| CssBogusMediaQuery
+	| CssGritMetavariable
 
 // @media screen, (width > 500px), print {}
 // 				        ^^^^^^^^^^^^^^^
