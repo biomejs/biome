@@ -69,7 +69,7 @@ pub struct GraphqlLinterSettings {
 impl Default for GraphqlLinterSettings {
     fn default() -> Self {
         Self {
-            enabled: Some(false)
+            enabled: Some(false),
         }
     }
 }
