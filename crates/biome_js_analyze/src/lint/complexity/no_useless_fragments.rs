@@ -5,13 +5,13 @@ use biome_analyze::context::RuleContext;
 use biome_analyze::{declare_rule, ActionCategory, FixKind, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
 use biome_js_factory::make::{
-    js_expression_statement, js_string_literal_expression, jsx_expression_child, jsx_string,
-    jsx_string_literal, jsx_tag_expression, token, JsxExpressionChildBuilder,
+    js_string_literal_expression, jsx_expression_child, jsx_string, jsx_string_literal,
+    jsx_tag_expression, token, JsxExpressionChildBuilder,
 };
 use biome_js_syntax::{
-    AnyJsExpression, AnyJsxChild, AnyJsxElementName, AnyJsxTag, JsLanguage,
-    JsParenthesizedExpression, JsSyntaxKind, JsxChildList, JsxElement, JsxExpressionAttributeValue,
-    JsxFragment, JsxTagExpression, JsxText, T,
+    AnyJsxChild, AnyJsxElementName, AnyJsxTag, JsLanguage, JsParenthesizedExpression, JsSyntaxKind,
+    JsxChildList, JsxElement, JsxExpressionAttributeValue, JsxFragment, JsxTagExpression, JsxText,
+    T,
 };
 use biome_rowan::{declare_node_union, AstNode, AstNodeList, BatchMutation, BatchMutationExt};
 
@@ -294,13 +294,9 @@ impl Rule for NoUselessFragments {
                                 .into_syntax()
                             })
                         } else {
-                            child.expression().map(|expression| {
-                                if let AnyJsExpression::JsIdentifierExpression(node) = expression {
-                                    node.into_syntax()
-                                } else {
-                                    js_expression_statement(expression).build().into_syntax()
-                                }
-                            })
+                            child
+                                .expression()
+                                .map(|expression| expression.into_syntax())
                         }
                     }
 
