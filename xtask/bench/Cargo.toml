@@ -81,5 +81,9 @@ name    = "css_analyzer"
 harness = false
 name    = "graphql_parser"
 
+[[bench]]
+harness = false
+name    = "graphql_formatter"
+
 [lints]
 workspace = true
