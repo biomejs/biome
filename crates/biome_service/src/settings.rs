@@ -6,7 +6,8 @@ use biome_configuration::javascript::JsxRuntime;
 use biome_configuration::organize_imports::OrganizeImports;
 use biome_configuration::{
     push_to_analyzer_rules, BiomeDiagnostic, FilesConfiguration, FormatterConfiguration,
-    LinterConfiguration, Overrides, PartialConfiguration, PartialCssConfiguration,
+    LinterConfiguration, OverrideFormatterConfiguration, OverrideLinterConfiguration,
+    OverrideOrganizeImportsConfiguration, Overrides, PartialConfiguration, PartialCssConfiguration,
     PartialGraphqlConfiguration, PartialJavascriptConfiguration, PartialJsonConfiguration,
     PlainIndentStyle, Rules,
 };
@@ -363,13 +364,10 @@ impl Default for FormatterSettings {
     }
 }
 
-/// Formatter settings for the entire workspace
+/// Formatter settings in a override entry
 #[derive(Debug, Default)]
 pub struct OverrideFormatterSettings {
-    /// Enabled by default
     pub enabled: Option<bool>,
-    /// Stores whether formatting should be allowed to proceed if a given file
-    /// has syntax errors
     pub format_with_errors: Option<bool>,
     pub indent_style: Option<IndentStyle>,
     pub indent_width: Option<IndentWidth>,
@@ -377,6 +375,21 @@ pub struct OverrideFormatterSettings {
     pub line_width: Option<LineWidth>,
     pub bracket_spacing: Option<BracketSpacing>,
     pub attribute_position: Option<AttributePosition>,
+}
+
+impl From<OverrideFormatterConfiguration> for OverrideFormatterSettings {
+    fn from(conf: OverrideFormatterConfiguration) -> Self {
+        Self {
+            enabled: conf.enabled,
+            format_with_errors: conf.format_with_errors,
+            indent_style: conf.indent_style.map(Into::into),
+            indent_width: conf.indent_width,
+            line_ending: conf.line_ending,
+            line_width: conf.line_width,
+            bracket_spacing: conf.bracket_spacing,
+            attribute_position: conf.attribute_position,
+        }
+    }
 }
 
 /// Linter settings for the entire workspace
@@ -406,17 +419,23 @@ impl Default for LinterSettings {
     }
 }
 
-/// Linter settings for the entire workspace
+/// Linter settings in an override entry
 #[derive(Debug, Default)]
 pub struct OverrideLinterSettings {
-    /// Enabled by default
     pub enabled: Option<bool>,
-
-    /// List of rules
     pub rules: Option<Rules>,
 }
 
-/// Linter settings for the entire workspace
+impl From<OverrideLinterConfiguration> for OverrideLinterSettings {
+    fn from(conf: OverrideLinterConfiguration) -> Self {
+        Self {
+            enabled: conf.enabled,
+            rules: conf.rules,
+        }
+    }
+}
+
+/// Organize imports settings for the entire workspace
 #[derive(Debug)]
 pub struct OrganizeImportsSettings {
     /// Enabled by default
@@ -439,11 +458,18 @@ impl Default for OrganizeImportsSettings {
     }
 }
 
-/// Linter settings for the entire workspace
+/// Organize imports settings in an override entry
 #[derive(Debug, Default)]
 pub struct OverrideOrganizeImportsSettings {
-    /// Enabled by default
     pub enabled: Option<bool>,
+}
+
+impl From<OverrideOrganizeImportsConfiguration> for OverrideOrganizeImportsSettings {
+    fn from(conf: OverrideOrganizeImportsConfiguration) -> Self {
+        Self {
+            enabled: conf.enabled,
+        }
+    }
 }
 
 /// Static map of language names to language-specific settings
@@ -1361,40 +1387,18 @@ pub fn to_override_settings(
     overrides: Overrides,
 ) -> Result<OverrideSettings, WorkspaceError> {
     let mut override_settings = OverrideSettings::default();
-    for mut pattern in overrides.0 {
-        let formatter = pattern
-            .formatter
-            .map(|formatter| OverrideFormatterSettings {
-                enabled: formatter.enabled,
-                format_with_errors: formatter.format_with_errors,
-                indent_style: formatter.indent_style.map(Into::into),
-                indent_width: formatter.indent_width,
-                line_ending: formatter.line_ending,
-                line_width: formatter.line_width,
-                bracket_spacing: formatter.bracket_spacing,
-                attribute_position: formatter.attribute_position,
-            })
-            .unwrap_or_default();
+    for pattern in overrides.0 {
+        let formatter = pattern.formatter.map(Into::into).unwrap_or_default();
 
-        let linter = pattern
-            .linter
-            .map(|linter| OverrideLinterSettings {
-                enabled: linter.enabled,
-                rules: linter.rules,
-            })
-            .unwrap_or_default();
+        let linter = pattern.linter.map(Into::into).unwrap_or_default();
 
-        let organize_imports = OverrideOrganizeImportsSettings {
-            enabled: pattern
-                .organize_imports
-                .and_then(|organize_imports| organize_imports.enabled),
-        };
+        let organize_imports = pattern.organize_imports.map(Into::into).unwrap_or_default();
 
         let languages = LanguageListSettings {
-            javascript: pattern.javascript.take().unwrap_or_default().into(),
-            json: pattern.json.take().unwrap_or_default().into(),
-            css: pattern.css.take().unwrap_or_default().into(),
-            graphql: pattern.graphql.take().unwrap_or_default().into(),
+            javascript: pattern.javascript.unwrap_or_default().into(),
+            json: pattern.json.unwrap_or_default().into(),
+            css: pattern.css.unwrap_or_default().into(),
+            graphql: pattern.graphql.unwrap_or_default().into(),
         };
 
         let pattern_setting = OverrideSettingPattern {
