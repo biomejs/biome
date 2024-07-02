@@ -7,7 +7,7 @@ use biome_js_syntax::JsFileSource;
 #[ignore]
 #[test]
 fn test_query() {
-    let parse_grit_result = parse_grit("`\"hello\"`");
+    let parse_grit_result = parse_grit("`hello`");
     if !parse_grit_result.diagnostics().is_empty() {
         println!(
             "Diagnostics from parsing query:\n{:?}",

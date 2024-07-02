@@ -33,5 +33,15 @@ pub fn compile_pattern(
     language: GritTargetLanguage,
 ) -> Result<GritQuery, CompileError> {
     let parsed = parse_grit(source);
+    if parsed.has_errors() {
+        return Err(CompileError::ParsePatternError(ParsePatternError {
+            diagnostics: parsed
+                .into_diagnostics()
+                .into_iter()
+                .map(biome_diagnostics::serde::Diagnostic::new)
+                .collect(),
+        }));
+    }
+
     GritQuery::from_node(parsed.tree(), path, language)
 }

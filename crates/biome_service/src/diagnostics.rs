@@ -8,7 +8,7 @@ use biome_diagnostics::{
 };
 use biome_formatter::{FormatError, PrintError};
 use biome_fs::{BiomePath, FileSystemDiagnostic};
-use biome_grit_patterns::CompileError;
+use biome_grit_patterns::{CompileError, ParsePatternError};
 use biome_js_analyze::utils::rename::RenameError;
 use biome_js_analyze::RuleError;
 use serde::{Deserialize, Serialize};
@@ -343,15 +343,29 @@ pub enum SearchError {
 )]
 pub struct InvalidPattern;
 
-#[derive(Debug, Serialize, Deserialize, Diagnostic)]
-#[diagnostic(
-    category = "search",
-    message(
-        message("Error executing the Grit query."),
-        description = "For reference, please consult: https://docs.grit.io/language/syntax"
-    )
-)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct QueryError(pub String);
+
+impl Diagnostic for QueryError {
+    fn category(&self) -> Option<&'static Category> {
+        Some(category!("search"))
+    }
+
+    fn severity(&self) -> Severity {
+        Severity::Error
+    }
+
+    fn message(&self, fmt: &mut biome_console::fmt::Formatter<'_>) -> std::io::Result<()> {
+        fmt.write_markup(markup! { "Error executing the Grit query: "{{&self.0}} })
+    }
+
+    fn verbose_advices(&self, visitor: &mut dyn Visit) -> std::io::Result<()> {
+        visitor.record_log(
+            LogCategory::Info,
+            &markup! { "For reference, please consult: https://docs.grit.io/language/syntax" },
+        )
+    }
+}
 
 pub fn extension_error(path: &BiomePath) -> WorkspaceError {
     let file_source = DocumentFileSource::from_path(path);
@@ -439,8 +453,13 @@ impl From<VcsDiagnostic> for WorkspaceError {
 
 impl From<CompileError> for WorkspaceError {
     fn from(value: CompileError) -> Self {
-        // FIXME: This really needs proper diagnostics
-        Self::SearchError(SearchError::QueryError(QueryError(format!("{value:?}"))))
+        match &value {
+            CompileError::ParsePatternError(ParsePatternError { .. }) => {
+                Self::SearchError(SearchError::PatternCompilationError(value))
+            }
+            // FIXME: This really needs proper diagnostics
+            _ => Self::SearchError(SearchError::QueryError(QueryError(format!("{value:?}")))),
+        }
     }
 }
 
