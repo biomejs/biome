@@ -178,7 +178,7 @@ impl Settings {
         vcs_path: Option<PathBuf>,
         gitignore_matches: &[String],
     ) -> Result<(), WorkspaceError> {
-        // formatter part
+        // formatter settings
         if let Some(formatter) = configuration.formatter {
             self.formatter = to_formatter_settings(
                 working_directory.clone(),
@@ -186,13 +186,13 @@ impl Settings {
             )?;
         }
 
-        // linter part
+        // linter settings
         if let Some(linter) = configuration.linter {
             self.linter =
                 to_linter_settings(working_directory.clone(), LinterConfiguration::from(linter))?;
         }
 
-        // Filesystem settings
+        // filesystem settings
         if let Some(files) = to_file_settings(
             working_directory.clone(),
             configuration.files.map(FilesConfiguration::from),
@@ -202,6 +202,7 @@ impl Settings {
             self.files = files;
         }
 
+        // organize imports settings
         if let Some(organize_imports) = configuration.organize_imports {
             self.organize_imports = to_organize_imports_settings(
                 working_directory.clone(),
@@ -327,6 +328,143 @@ impl Settings {
     }
 }
 
+/// Handle object holding a temporary lock on the workspace settings until
+/// the deferred language-specific options resolution is called
+#[derive(Debug)]
+pub struct WorkspaceSettingsHandle<'a> {
+    inner: RwLockReadGuard<'a, WorkspaceSettings>,
+}
+
+impl<'a> WorkspaceSettingsHandle<'a> {
+    pub(crate) fn new(settings: &'a RwLock<WorkspaceSettings>) -> Self {
+        Self {
+            inner: settings.read().unwrap(),
+        }
+    }
+
+    pub(crate) fn settings(&self) -> Option<&Settings> {
+        self.inner.get_current_settings()
+    }
+}
+
+impl<'a> AsRef<WorkspaceSettings> for WorkspaceSettingsHandle<'a> {
+    fn as_ref(&self) -> &WorkspaceSettings {
+        &self.inner
+    }
+}
+
+impl<'a> WorkspaceSettingsHandle<'a> {
+    /// Resolve the formatting context for the given language
+    pub(crate) fn format_options<L>(
+        &self,
+        path: &BiomePath,
+        file_source: &DocumentFileSource,
+    ) -> L::FormatOptions
+    where
+        L: ServiceLanguage,
+    {
+        let settings = self.inner.get_current_settings();
+        let formatter = settings.map(|s| &s.formatter);
+        let overrides = settings.map(|s| &s.override_settings);
+        let editor_settings = settings
+            .map(|s| L::lookup_settings(&s.languages))
+            .map(|result| &result.formatter);
+        L::resolve_format_options(formatter, overrides, editor_settings, path, file_source)
+    }
+
+    pub(crate) fn analyze_options<L>(
+        &self,
+        path: &BiomePath,
+        file_source: &DocumentFileSource,
+    ) -> AnalyzerOptions
+    where
+        L: ServiceLanguage,
+    {
+        let settings = self.inner.get_current_settings();
+        let linter = settings.map(|s| &s.linter);
+        let overrides = settings.map(|s| &s.override_settings);
+        let editor_settings = settings
+            .map(|s| L::lookup_settings(&s.languages))
+            .map(|result| &result.linter);
+        L::resolve_analyze_options(
+            settings,
+            linter,
+            overrides,
+            editor_settings,
+            path,
+            file_source,
+        )
+    }
+}
+
+pub struct WorkspaceSettingsHandleMut<'a> {
+    inner: RwLockWriteGuard<'a, WorkspaceSettings>,
+}
+
+impl<'a> WorkspaceSettingsHandleMut<'a> {
+    pub(crate) fn new(settings: &'a RwLock<WorkspaceSettings>) -> Self {
+        Self {
+            inner: settings.write().unwrap(),
+        }
+    }
+}
+
+impl<'a> AsMut<WorkspaceSettings> for WorkspaceSettingsHandleMut<'a> {
+    fn as_mut(&mut self) -> &mut WorkspaceSettings {
+        &mut self.inner
+    }
+}
+
+/// Creates a [Matcher] from a [StringSet]
+///
+/// ## Errors
+///
+/// It can raise an error if the patterns aren't valid
+pub fn to_matcher(
+    working_directory: Option<PathBuf>,
+    string_set: Option<&StringSet>,
+) -> Result<Matcher, WorkspaceError> {
+    let mut matcher = Matcher::empty();
+    if let Some(working_directory) = working_directory {
+        matcher.set_root(working_directory)
+    }
+    if let Some(string_set) = string_set {
+        for pattern in string_set.iter() {
+            matcher.add_pattern(pattern).map_err(|err| {
+                BiomeDiagnostic::new_invalid_ignore_pattern(
+                    pattern.to_string(),
+                    err.msg.to_string(),
+                )
+            })?;
+        }
+    }
+    Ok(matcher)
+}
+
+fn to_git_ignore(path: PathBuf, matches: &[String]) -> Result<Gitignore, WorkspaceError> {
+    let mut gitignore_builder = GitignoreBuilder::new(path.clone());
+
+    for the_match in matches {
+        gitignore_builder
+            .add_line(Some(path.clone()), the_match)
+            .map_err(|err| {
+                BiomeDiagnostic::InvalidIgnorePattern(InvalidIgnorePattern {
+                    message: err.to_string(),
+                    file_path: path.to_str().map(|s| s.to_string()),
+                })
+            })?;
+    }
+    let gitignore = gitignore_builder.build().map_err(|err| {
+        BiomeDiagnostic::InvalidIgnorePattern(InvalidIgnorePattern {
+            message: err.to_string(),
+            file_path: path.to_str().map(|s| s.to_string()),
+        })
+    })?;
+    Ok(gitignore)
+}
+
+// region: Formatter settings (base)
+
 /// Formatter settings for the entire workspace
 #[derive(Debug)]
 pub struct FormatterSettings {
@@ -364,6 +502,33 @@ impl Default for FormatterSettings {
     }
 }
 
+pub fn to_formatter_settings(
+    working_directory: Option<PathBuf>,
+    conf: FormatterConfiguration,
+) -> Result<FormatterSettings, WorkspaceError> {
+    let indent_style = match conf.indent_style {
+        PlainIndentStyle::Tab => IndentStyle::Tab,
+        PlainIndentStyle::Space => IndentStyle::Space,
+    };
+
+    Ok(FormatterSettings {
+        enabled: conf.enabled,
+        indent_style: Some(indent_style),
+        indent_width: Some(conf.indent_width),
+        line_ending: Some(conf.line_ending),
+        line_width: Some(conf.line_width),
+        format_with_errors: conf.format_with_errors,
+        attribute_position: Some(conf.attribute_position),
+        bracket_spacing: Some(conf.bracket_spacing),
+        ignored_files: to_matcher(working_directory.clone(), Some(&conf.ignore))?,
+        included_files: to_matcher(working_directory, Some(&conf.include))?,
+    })
+}
+
+// endregion
+
+// region: Formatter settings (override)
+
 /// Formatter settings in a override entry
 #[derive(Debug, Default)]
 pub struct OverrideFormatterSettings {
@@ -392,6 +557,10 @@ impl From<OverrideFormatterConfiguration> for OverrideFormatterSettings {
     }
 }
 
+// endregion
+
+// region: Linter settings (base)
+
 /// Linter settings for the entire workspace
 #[derive(Debug)]
 pub struct LinterSettings {
@@ -419,6 +588,22 @@ impl Default for LinterSettings {
     }
 }
 
+pub fn to_linter_settings(
+    working_directory: Option<PathBuf>,
+    conf: LinterConfiguration,
+) -> Result<LinterSettings, WorkspaceError> {
+    Ok(LinterSettings {
+        enabled: conf.enabled,
+        rules: Some(conf.rules),
+        ignored_files: to_matcher(working_directory.clone(), Some(&conf.ignore))?,
+        included_files: to_matcher(working_directory, Some(&conf.include))?,
+    })
+}
+
+// endregion
+
+// region: Linter settings (override)
+
 /// Linter settings in an override entry
 #[derive(Debug, Default)]
 pub struct OverrideLinterSettings {
@@ -434,6 +619,10 @@ impl From<OverrideLinterConfiguration> for OverrideLinterSettings {
         }
     }
 }
+
+// endregion
+
+// region: Organize import settings (base)
 
 /// Organize imports settings for the entire workspace
 #[derive(Debug)]
@@ -458,6 +647,21 @@ impl Default for OrganizeImportsSettings {
     }
 }
 
+pub fn to_organize_imports_settings(
+    working_directory: Option<PathBuf>,
+    organize_imports: OrganizeImports,
+) -> Result<OrganizeImportsSettings, WorkspaceError> {
+    Ok(OrganizeImportsSettings {
+        enabled: organize_imports.enabled,
+        ignored_files: to_matcher(working_directory.clone(), Some(&organize_imports.ignore))?,
+        included_files: to_matcher(working_directory, Some(&organize_imports.include))?,
+    })
+}
+
+// endregion
+
+// region: Organize import settings (override)
+
 /// Organize imports settings in an override entry
 #[derive(Debug, Default)]
 pub struct OverrideOrganizeImportsSettings {
@@ -470,6 +674,102 @@ impl From<OverrideOrganizeImportsConfiguration> for OverrideOrganizeImportsSetti
             enabled: conf.enabled,
         }
     }
+}
+
+// endregion
+
+// region: File settings (base)
+
+/// Filesystem settings for the entire workspace
+#[derive(Debug)]
+pub struct FilesSettings {
+    /// File size limit in bytes
+    pub max_size: NonZeroU64,
+
+    /// gitignore file patterns
+    pub git_ignore: Option<Gitignore>,
+
+    /// List of paths/files to matcher
+    pub ignored_files: Matcher,
+
+    /// List of paths/files to matcher
+    pub included_files: Matcher,
+
+    /// Files not recognized by Biome should not emit a diagnostic
+    pub ignore_unknown: bool,
+}
+
+/// Limit the size of files to 1.0 MiB by default
+pub(crate) const DEFAULT_FILE_SIZE_LIMIT: NonZeroU64 =
+    // SAFETY: This constant is initialized with a non-zero value
+    unsafe { NonZeroU64::new_unchecked(1024 * 1024) };
+
+impl Default for FilesSettings {
+    fn default() -> Self {
+        Self {
+            max_size: DEFAULT_FILE_SIZE_LIMIT,
+            git_ignore: None,
+            ignored_files: Matcher::empty(),
+            included_files: Matcher::empty(),
+            ignore_unknown: false,
+        }
+    }
+}
+
+fn to_file_settings(
+    working_directory: Option<PathBuf>,
+    config: Option<FilesConfiguration>,
+    vcs_config_path: Option<PathBuf>,
+    gitignore_matches: &[String],
+) -> Result<Option<FilesSettings>, WorkspaceError> {
+    let config = if let Some(config) = config {
+        Some(config)
+    } else if vcs_config_path.is_some() {
+        Some(FilesConfiguration::default())
+    } else {
+        None
+    };
+    let git_ignore = if let Some(vcs_config_path) = vcs_config_path {
+        Some(to_git_ignore(vcs_config_path, gitignore_matches)?)
+    } else {
+        None
+    };
+    Ok(if let Some(config) = config {
+        Some(FilesSettings {
+            max_size: config.max_size,
+            git_ignore,
+            ignored_files: to_matcher(working_directory.clone(), Some(&config.ignore))?,
+            included_files: to_matcher(working_directory, Some(&config.include))?,
+            ignore_unknown: config.ignore_unknown,
+        })
+    } else {
+        None
+    })
+}
+
+// endregion
+
+// region: Language Settings
+
+#[derive(Debug, Default)]
+pub struct LanguageSettings<L: ServiceLanguage> {
+    /// Parser settings for this language
+    pub parser: L::ParserSettings,
+
+    /// Formatter settings for this language
+    pub formatter: L::FormatterSettings,
+
+    /// Linter settings for this language
+    pub linter: L::LinterSettings,
+
+    /// Globals variables/bindings that can be found in a file
+    pub globals: Option<IndexSet<String>>,
+
+    /// Organize imports settings for this language
+    pub organize_imports: L::OrganizeImportsSettings,
+
+    /// Environment settings for this language
+    pub environment: L::EnvironmentSettings,
 }
 
 /// Static map of language names to language-specific settings
@@ -639,188 +939,52 @@ pub trait ServiceLanguage: biome_rowan::Language {
     ) -> AnalyzerOptions;
 }
 
-#[derive(Debug, Default)]
-pub struct LanguageSettings<L: ServiceLanguage> {
-    /// Parser settings for this language
-    pub parser: L::ParserSettings,
+// endregion
 
-    /// Formatter settings for this language
-    pub formatter: L::FormatterSettings,
-
-    /// Linter settings for this language
-    pub linter: L::LinterSettings,
-
-    /// Globals variables/bindings that can be found in a file
-    pub globals: Option<IndexSet<String>>,
-
-    /// Organize imports settings for this language
-    pub organize_imports: L::OrganizeImportsSettings,
-
-    /// Environment settings for this language
-    pub environment: L::EnvironmentSettings,
-}
-
-/// Filesystem settings for the entire workspace
-#[derive(Debug)]
-pub struct FilesSettings {
-    /// File size limit in bytes
-    pub max_size: NonZeroU64,
-
-    /// gitignore file patterns
-    pub git_ignore: Option<Gitignore>,
-
-    /// List of paths/files to matcher
-    pub ignored_files: Matcher,
-
-    /// List of paths/files to matcher
-    pub included_files: Matcher,
-
-    /// Files not recognized by Biome should not emit a diagnostic
-    pub ignore_unknown: bool,
-}
-
-/// Limit the size of files to 1.0 MiB by default
-pub(crate) const DEFAULT_FILE_SIZE_LIMIT: NonZeroU64 =
-    // SAFETY: This constant is initialized with a non-zero value
-    unsafe { NonZeroU64::new_unchecked(1024 * 1024) };
-
-impl Default for FilesSettings {
-    fn default() -> Self {
-        Self {
-            max_size: DEFAULT_FILE_SIZE_LIMIT,
-            git_ignore: None,
-            ignored_files: Matcher::empty(),
-            included_files: Matcher::empty(),
-            ignore_unknown: false,
-        }
-    }
-}
-
-fn to_file_settings(
-    working_directory: Option<PathBuf>,
-    config: Option<FilesConfiguration>,
-    vcs_config_path: Option<PathBuf>,
-    gitignore_matches: &[String],
-) -> Result<Option<FilesSettings>, WorkspaceError> {
-    let config = if let Some(config) = config {
-        Some(config)
-    } else if vcs_config_path.is_some() {
-        Some(FilesConfiguration::default())
-    } else {
-        None
-    };
-    let git_ignore = if let Some(vcs_config_path) = vcs_config_path {
-        Some(to_git_ignore(vcs_config_path, gitignore_matches)?)
-    } else {
-        None
-    };
-    Ok(if let Some(config) = config {
-        Some(FilesSettings {
-            max_size: config.max_size,
-            git_ignore,
-            ignored_files: to_matcher(working_directory.clone(), Some(&config.ignore))?,
-            included_files: to_matcher(working_directory, Some(&config.include))?,
-            ignore_unknown: config.ignore_unknown,
-        })
-    } else {
-        None
-    })
-}
-
-/// Handle object holding a temporary lock on the workspace settings until
-/// the deferred language-specific options resolution is called
-#[derive(Debug)]
-pub struct WorkspaceSettingsHandle<'a> {
-    inner: RwLockReadGuard<'a, WorkspaceSettings>,
-}
-
-impl<'a> WorkspaceSettingsHandle<'a> {
-    pub(crate) fn new(settings: &'a RwLock<WorkspaceSettings>) -> Self {
-        Self {
-            inner: settings.read().unwrap(),
-        }
-    }
-
-    pub(crate) fn settings(&self) -> Option<&Settings> {
-        self.inner.get_current_settings()
-    }
-}
-
-impl<'a> AsRef<WorkspaceSettings> for WorkspaceSettingsHandle<'a> {
-    fn as_ref(&self) -> &WorkspaceSettings {
-        &self.inner
-    }
-}
-
-impl<'a> WorkspaceSettingsHandle<'a> {
-    /// Resolve the formatting context for the given language
-    pub(crate) fn format_options<L>(
-        &self,
-        path: &BiomePath,
-        file_source: &DocumentFileSource,
-    ) -> L::FormatOptions
-    where
-        L: ServiceLanguage,
-    {
-        let settings = self.inner.get_current_settings();
-        let formatter = settings.map(|s| &s.formatter);
-        let overrides = settings.map(|s| &s.override_settings);
-        let editor_settings = settings
-            .map(|s| L::lookup_settings(&s.languages))
-            .map(|result| &result.formatter);
-        L::resolve_format_options(formatter, overrides, editor_settings, path, file_source)
-    }
-
-    pub(crate) fn analyze_options<L>(
-        &self,
-        path: &BiomePath,
-        file_source: &DocumentFileSource,
-    ) -> AnalyzerOptions
-    where
-        L: ServiceLanguage,
-    {
-        let settings = self.inner.get_current_settings();
-        let linter = settings.map(|s| &s.linter);
-        let overrides = settings.map(|s| &s.override_settings);
-        let editor_settings = settings
-            .map(|s| L::lookup_settings(&s.languages))
-            .map(|result| &result.linter);
-        L::resolve_analyze_options(
-            settings,
-            linter,
-            overrides,
-            editor_settings,
-            path,
-            file_source,
-        )
-    }
-}
-
-pub struct WorkspaceSettingsHandleMut<'a> {
-    inner: RwLockWriteGuard<'a, WorkspaceSettings>,
-}
-
-impl<'a> WorkspaceSettingsHandleMut<'a> {
-    pub(crate) fn new(settings: &'a RwLock<WorkspaceSettings>) -> Self {
-        Self {
-            inner: settings.write().unwrap(),
-        }
-    }
-}
-
-impl<'a> AsMut<WorkspaceSettings> for WorkspaceSettingsHandleMut<'a> {
-    fn as_mut(&mut self) -> &mut WorkspaceSettings {
-        &mut self.inner
-    }
-}
+// region: Overrides Settings
 
 #[derive(Debug, Default)]
 pub struct OverrideSettings {
     pub patterns: Vec<OverrideSettingPattern>,
 }
 
+pub fn to_override_settings(
+    working_directory: Option<PathBuf>,
+    overrides: Overrides,
+) -> Result<OverrideSettings, WorkspaceError> {
+    let mut override_settings = OverrideSettings::default();
+    for pattern in overrides.0 {
+        let formatter = pattern.formatter.map(Into::into).unwrap_or_default();
+
+        let linter = pattern.linter.map(Into::into).unwrap_or_default();
+
+        let organize_imports = pattern.organize_imports.map(Into::into).unwrap_or_default();
+
+        let languages = LanguageListSettings {
+            javascript: pattern.javascript.unwrap_or_default().into(),
+            json: pattern.json.unwrap_or_default().into(),
+            css: pattern.css.unwrap_or_default().into(),
+            graphql: pattern.graphql.unwrap_or_default().into(),
+        };
+
+        let pattern_setting = OverrideSettingPattern {
+            include: to_matcher(working_directory.clone(), pattern.include.as_ref())?,
+            exclude: to_matcher(working_directory.clone(), pattern.ignore.as_ref())?,
+            formatter,
+            linter,
+            organize_imports,
+            languages,
+            ..OverrideSettingPattern::default()
+        };
+
+        override_settings.patterns.push(pattern_setting);
+    }
+
+    Ok(override_settings)
+}
+
 impl OverrideSettings {
-    // ---------------- Common methods ----------------
+    // region: Common methods
 
     /// Retrieves the options of lint rules that have been overridden
     pub fn override_analyzer_rules(
@@ -891,7 +1055,9 @@ impl OverrideSettings {
         })
     }
 
-    // ---------------- Javascript-specific methods ----------------
+    // endregion
+
+    // region: Javascript-specific methods
 
     /// Scans and aggregates all the overrides into a single `JsParseOptions`
     pub fn to_override_js_parse_options(
@@ -965,7 +1131,9 @@ impl OverrideSettings {
             .unwrap_or_default()
     }
 
-    // ---------------- JSON-specific methods ----------------
+    // endregion
+
+    // region: JSON-specific methods
 
     /// Scans and aggregates all the overrides into a single `JsonParseOptions`
     pub fn to_override_json_parse_options(
@@ -995,7 +1163,9 @@ impl OverrideSettings {
         options
     }
 
-    // ---------------- CSS-specific methods ----------------
+    // endregion
+
+    // region: CSS-specific methods
 
     /// Scans and aggregates all the overrides into a single `CssParseOptions`
     pub fn to_override_css_parse_options(
@@ -1025,7 +1195,9 @@ impl OverrideSettings {
         options
     }
 
-    // ---------------- GraphQL-specific methods ----------------
+    // endregion
+
+    // region: GraphQL-specific methods
 
     /// Scans and aggregates all the overrides into a single `GraphqlFormatOptions`
     pub fn to_override_graphql_format_options(
@@ -1040,6 +1212,8 @@ impl OverrideSettings {
         }
         options
     }
+
+    // endregion
 }
 
 #[derive(Debug, Default)]
@@ -1067,8 +1241,9 @@ pub struct OverrideSettingPattern {
     pub(crate) _cached_json_parse_options: RwLock<Option<JsonParseOptions>>,
     pub(crate) cached_css_parse_options: RwLock<Option<CssParseOptions>>,
 }
+
 impl OverrideSettingPattern {
-    // JavaScript
+    // region: JavaScript
 
     fn apply_overrides_to_js_parse_options(&self, options: &mut JsParseOptions) {
         if let Ok(readonly_cache) = self.cached_js_parse_options.read() {
@@ -1155,7 +1330,9 @@ impl OverrideSettingPattern {
         }
     }
 
-    // JSON
+    // endregion
+
+    // region: JSON
 
     fn apply_overrides_to_json_parse_options(&self, options: &mut JsonParseOptions) {
         // these options are no longer cached because it was causing incorrect override behavior, see #3260
@@ -1219,7 +1396,9 @@ impl OverrideSettingPattern {
         }
     }
 
-    // CSS
+    // endregion
+
+    // region: CSS
 
     fn apply_overrides_to_css_parse_options(&self, options: &mut CssParseOptions) {
         if let Ok(readonly_cache) = self.cached_css_parse_options.read() {
@@ -1282,7 +1461,9 @@ impl OverrideSettingPattern {
         }
     }
 
-    // GraphQL
+    // endregion
+
+    // region: GraphQL
 
     fn apply_overrides_to_graphql_format_options(&self, options: &mut GraphqlFormatOptions) {
         if let Ok(readonly_cache) = self.cached_graphql_format_options.read() {
@@ -1328,137 +1509,12 @@ impl OverrideSettingPattern {
         }
     }
 
+    // endregion
+
     #[allow(dead_code)]
     // NOTE: Currently not used because the rule options are typed using TypeId and Any, which isn't thread safe.
     // TODO: Find a way to cache this
     fn analyzer_rules_mut(&self, _analyzer_rules: &mut AnalyzerRules) {}
 }
 
-/// Creates a [Matcher] from a [StringSet]
-///
-/// ## Errors
-///
-/// It can raise an error if the patterns aren't valid
-pub fn to_matcher(
-    working_directory: Option<PathBuf>,
-    string_set: Option<&StringSet>,
-) -> Result<Matcher, WorkspaceError> {
-    let mut matcher = Matcher::empty();
-    if let Some(working_directory) = working_directory {
-        matcher.set_root(working_directory)
-    }
-    if let Some(string_set) = string_set {
-        for pattern in string_set.iter() {
-            matcher.add_pattern(pattern).map_err(|err| {
-                BiomeDiagnostic::new_invalid_ignore_pattern(
-                    pattern.to_string(),
-                    err.msg.to_string(),
-                )
-            })?;
-        }
-    }
-    Ok(matcher)
-}
-
-fn to_git_ignore(path: PathBuf, matches: &[String]) -> Result<Gitignore, WorkspaceError> {
-    let mut gitignore_builder = GitignoreBuilder::new(path.clone());
-
-    for the_match in matches {
-        gitignore_builder
-            .add_line(Some(path.clone()), the_match)
-            .map_err(|err| {
-                BiomeDiagnostic::InvalidIgnorePattern(InvalidIgnorePattern {
-                    message: err.to_string(),
-                    file_path: path.to_str().map(|s| s.to_string()),
-                })
-            })?;
-    }
-    let gitignore = gitignore_builder.build().map_err(|err| {
-        BiomeDiagnostic::InvalidIgnorePattern(InvalidIgnorePattern {
-            message: err.to_string(),
-            file_path: path.to_str().map(|s| s.to_string()),
-        })
-    })?;
-    Ok(gitignore)
-}
-
-pub fn to_override_settings(
-    working_directory: Option<PathBuf>,
-    overrides: Overrides,
-) -> Result<OverrideSettings, WorkspaceError> {
-    let mut override_settings = OverrideSettings::default();
-    for pattern in overrides.0 {
-        let formatter = pattern.formatter.map(Into::into).unwrap_or_default();
-
-        let linter = pattern.linter.map(Into::into).unwrap_or_default();
-
-        let organize_imports = pattern.organize_imports.map(Into::into).unwrap_or_default();
-
-        let languages = LanguageListSettings {
-            javascript: pattern.javascript.unwrap_or_default().into(),
-            json: pattern.json.unwrap_or_default().into(),
-            css: pattern.css.unwrap_or_default().into(),
-            graphql: pattern.graphql.unwrap_or_default().into(),
-        };
-
-        let pattern_setting = OverrideSettingPattern {
-            include: to_matcher(working_directory.clone(), pattern.include.as_ref())?,
-            exclude: to_matcher(working_directory.clone(), pattern.ignore.as_ref())?,
-            formatter,
-            linter,
-            organize_imports,
-            languages,
-            ..OverrideSettingPattern::default()
-        };
-
-        override_settings.patterns.push(pattern_setting);
-    }
-
-    Ok(override_settings)
-}
-
-pub fn to_formatter_settings(
-    working_directory: Option<PathBuf>,
-    conf: FormatterConfiguration,
-) -> Result<FormatterSettings, WorkspaceError> {
-    let indent_style = match conf.indent_style {
-        PlainIndentStyle::Tab => IndentStyle::Tab,
-        PlainIndentStyle::Space => IndentStyle::Space,
-    };
-
-    Ok(FormatterSettings {
-        enabled: conf.enabled,
-        indent_style: Some(indent_style),
-        indent_width: Some(conf.indent_width),
-        line_ending: Some(conf.line_ending),
-        line_width: Some(conf.line_width),
-        format_with_errors: conf.format_with_errors,
-        attribute_position: Some(conf.attribute_position),
-        bracket_spacing: Some(conf.bracket_spacing),
-        ignored_files: to_matcher(working_directory.clone(), Some(&conf.ignore))?,
-        included_files: to_matcher(working_directory, Some(&conf.include))?,
-    })
-}
-
-pub fn to_linter_settings(
-    working_directory: Option<PathBuf>,
-    conf: LinterConfiguration,
-) -> Result<LinterSettings, WorkspaceError> {
-    Ok(LinterSettings {
-        enabled: conf.enabled,
-        rules: Some(conf.rules),
-        ignored_files: to_matcher(working_directory.clone(), Some(&conf.ignore))?,
-        included_files: to_matcher(working_directory, Some(&conf.include))?,
-    })
-}
-
-pub fn to_organize_imports_settings(
-    working_directory: Option<PathBuf>,
-    organize_imports: OrganizeImports,
-) -> Result<OrganizeImportsSettings, WorkspaceError> {
-    Ok(OrganizeImportsSettings {
-        enabled: organize_imports.enabled,
-        ignored_files: to_matcher(working_directory.clone(), Some(&organize_imports.ignore))?,
-        included_files: to_matcher(working_directory, Some(&organize_imports.include))?,
-    })
-}
+// endregion
