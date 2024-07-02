@@ -1,5 +1,5 @@
 use crate::lexer::{Lexer, Token};
-use crate::JsonParserOptions;
+use crate::JsonParseOptions;
 use biome_json_syntax::JsonSyntaxKind::{EOF, TOMBSTONE};
 use biome_json_syntax::{JsonSyntaxKind, TextRange};
 use biome_parser::diagnostic::ParseDiagnostic;
@@ -13,11 +13,11 @@ pub(crate) struct JsonTokenSource<'source> {
     current: JsonSyntaxKind,
     current_range: TextRange,
     preceding_line_break: bool,
-    options: JsonParserOptions,
+    options: JsonParseOptions,
 }
 
 impl<'source> JsonTokenSource<'source> {
-    pub fn from_str(source: &'source str, options: JsonParserOptions) -> Self {
+    pub fn from_str(source: &'source str, options: JsonParseOptions) -> Self {
         let lexer = Lexer::from_str(source).with_options(options);
 
         let mut source = Self {

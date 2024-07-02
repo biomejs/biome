@@ -4,7 +4,7 @@ use biome_formatter::{
 use biome_formatter_test::TestFormatLanguage;
 use biome_json_formatter::context::{JsonFormatContext, JsonFormatOptions};
 use biome_json_formatter::{format_node, format_range, JsonFormatLanguage};
-use biome_json_parser::{parse_json, JsonParserOptions};
+use biome_json_parser::{parse_json, JsonParseOptions};
 use biome_json_syntax::{JsonFileSource, JsonLanguage};
 use biome_parser::AnyParse;
 use biome_rowan::{SyntaxNode, TextRange};
@@ -22,7 +22,7 @@ impl TestFormatLanguage for JsonTestFormatLanguage {
     type FormatLanguage = JsonFormatLanguage;
 
     fn parse(&self, text: &str) -> AnyParse {
-        let parse = parse_json(text, JsonParserOptions::default().with_allow_comments());
+        let parse = parse_json(text, JsonParseOptions::default().with_allow_comments());
 
         AnyParse::new(parse.syntax().as_send().unwrap(), parse.into_diagnostics())
     }

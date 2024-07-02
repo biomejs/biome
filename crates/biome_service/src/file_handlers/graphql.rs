@@ -7,7 +7,7 @@ use crate::file_handlers::{
     AnalyzerCapabilities, Capabilities, FormatterCapabilities, ParserCapabilities,
 };
 use crate::settings::{
-    FormatSettings, LanguageListSettings, LanguageSettings, LinterSettings, OverrideSettings,
+    FormatterSettings, LanguageListSettings, LanguageSettings, LinterSettings, OverrideSettings,
     ServiceLanguage, Settings, WorkspaceSettingsHandle,
 };
 use crate::workspace::{
@@ -73,7 +73,7 @@ impl ServiceLanguage for GraphqlLanguage {
     }
 
     fn resolve_format_options(
-        global: Option<&FormatSettings>,
+        global: Option<&FormatterSettings>,
         overrides: Option<&OverrideSettings>,
         language: Option<&Self::FormatterSettings>,
         path: &BiomePath,
@@ -120,7 +120,7 @@ impl ServiceLanguage for GraphqlLanguage {
         }
     }
 
-    fn resolve_analyzer_options(
+    fn resolve_analyze_options(
         _global: Option<&Settings>,
         _linter: Option<&LinterSettings>,
         _overrides: Option<&OverrideSettings>,
@@ -284,7 +284,7 @@ fn lint(params: LintParams) -> LintResults {
         move || {
             let workspace_settings = &params.workspace;
             let analyzer_options = workspace_settings
-                .analyzer_options::<GraphqlLanguage>(params.path, &params.language);
+                .analyze_options::<GraphqlLanguage>(params.path, &params.language);
             let tree = params.parse.tree();
             let mut diagnostics = params.parse.into_diagnostics();
 
@@ -433,7 +433,7 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
             filter.categories = categories.build();
             filter.range = Some(range);
 
-            let analyzer_options = workspace.analyzer_options::<GraphqlLanguage>(path, &language);
+            let analyzer_options = workspace.analyze_options::<GraphqlLanguage>(path, &language);
 
             let Some(_) = language.to_graphql_file_source() else {
                 error!("Could not determine the file source of the file");
@@ -502,7 +502,7 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
     let mut skipped_suggested_fixes = 0;
     let mut errors: u16 = 0;
     let analyzer_options =
-        workspace.analyzer_options::<GraphqlLanguage>(biome_path, &document_file_source);
+        workspace.analyze_options::<GraphqlLanguage>(biome_path, &document_file_source);
     loop {
         let (action, _) = analyze(&tree, filter, &analyzer_options, |signal| {
             let current_diagnostic = signal.diagnostic();

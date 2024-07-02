@@ -177,7 +177,7 @@ mod tests {
     use biome_diagnostics::category;
     use biome_diagnostics::termcolor::NoColor;
     use biome_diagnostics::{Diagnostic, DiagnosticExt, PrintDiagnostic, Severity};
-    use biome_js_parser::{parse, JsParserOptions};
+    use biome_js_parser::{parse, JsParseOptions};
     use biome_js_syntax::{JsFileSource, TextRange, TextSize};
     use biome_project::{Dependencies, PackageJson};
     use std::slice;
@@ -200,7 +200,7 @@ mod tests {
 
         const SOURCE: &str = r#"import buffer from "buffer"; "#;
 
-        let parsed = parse(SOURCE, JsFileSource::tsx(), JsParserOptions::default());
+        let parsed = parse(SOURCE, JsFileSource::tsx(), JsParseOptions::default());
 
         let mut error_ranges: Vec<TextRange> = Vec::new();
         let mut options = AnalyzerOptions::default();
@@ -306,11 +306,7 @@ mod tests {
             }
         ";
 
-        let parsed = parse(
-            SOURCE,
-            JsFileSource::js_module(),
-            JsParserOptions::default(),
-        );
+        let parsed = parse(SOURCE, JsFileSource::js_module(), JsParseOptions::default());
 
         let mut lint_ranges: Vec<TextRange> = Vec::new();
         let mut parse_ranges: Vec<TextRange> = Vec::new();
@@ -391,11 +387,7 @@ mod tests {
             a == b;
         ";
 
-        let parsed = parse(
-            SOURCE,
-            JsFileSource::js_module(),
-            JsParserOptions::default(),
-        );
+        let parsed = parse(SOURCE, JsFileSource::js_module(), JsParseOptions::default());
 
         let filter = AnalysisFilter {
             categories: RuleCategoriesBuilder::default().with_syntax().build(),

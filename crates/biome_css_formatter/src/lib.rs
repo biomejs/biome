@@ -373,12 +373,12 @@ pub fn format_sub_tree(options: CssFormatOptions, root: &CssSyntaxNode) -> Forma
 mod tests {
     use crate::context::CssFormatOptions;
     use crate::format_node;
-    use biome_css_parser::{parse_css, CssParserOptions};
+    use biome_css_parser::{parse_css, CssParseOptions};
 
     #[test]
     fn smoke_test() {
         let src = r#"html {}"#;
-        let parse = parse_css(src, CssParserOptions::default());
+        let parse = parse_css(src, CssParseOptions::default());
         let options = CssFormatOptions::default();
         let formatted = format_node(options, &parse.syntax()).unwrap();
         assert_eq!(formatted.print().unwrap().as_code(), "html {\n}\n");

@@ -1,7 +1,7 @@
 use biome_analyze::{AnalysisFilter, AnalyzerAction, ControlFlow, Never, RuleFilter};
 use biome_diagnostics::advice::CodeSuggestionAdvice;
 use biome_diagnostics::{DiagnosticExt, Severity};
-use biome_js_parser::{parse, JsParserOptions};
+use biome_js_parser::{parse, JsParseOptions};
 use biome_js_syntax::{JsFileSource, JsLanguage};
 use biome_rowan::AstNode;
 use biome_test_utils::{
@@ -55,7 +55,7 @@ fn run_test(input: &'static str, _: &str, _: &str, _: &str) {
                 file_name,
                 input_file,
                 CheckActionType::Lint,
-                JsParserOptions::default(),
+                JsParseOptions::default(),
             );
         }
 
@@ -72,7 +72,7 @@ fn run_test(input: &'static str, _: &str, _: &str, _: &str) {
             file_name,
             input_file,
             CheckActionType::Lint,
-            JsParserOptions::default(),
+            JsParseOptions::default(),
         )
     };
 
@@ -97,9 +97,9 @@ pub(crate) fn analyze_and_snap(
     file_name: &str,
     input_file: &Path,
     check_action_type: CheckActionType,
-    parser_options: JsParserOptions,
+    parse_options: JsParseOptions,
 ) -> usize {
-    let parsed = parse(input_code, source_type, parser_options.clone());
+    let parsed = parse(input_code, source_type, parse_options.clone());
     let root = parsed.tree();
 
     let mut diagnostics = Vec::new();
@@ -118,7 +118,7 @@ pub(crate) fn analyze_and_snap(
                                 input_code,
                                 source_type,
                                 &action,
-                                parser_options.clone(),
+                                parse_options.clone(),
                             );
                             diag = diag.add_code_suggestion(CodeSuggestionAdvice::from(action));
                         }
@@ -128,7 +128,7 @@ pub(crate) fn analyze_and_snap(
                             input_code,
                             source_type,
                             &action,
-                            parser_options.clone(),
+                            parse_options.clone(),
                         );
                         diag = diag.add_code_suggestion(CodeSuggestionAdvice::from(action));
                     }
@@ -147,7 +147,7 @@ pub(crate) fn analyze_and_snap(
                             input_code,
                             source_type,
                             &action,
-                            parser_options.clone(),
+                            parse_options.clone(),
                         );
                         code_fixes.push(code_fix_to_string(input_code, action));
                     }
@@ -157,7 +157,7 @@ pub(crate) fn analyze_and_snap(
                         input_code,
                         source_type,
                         &action,
-                        parser_options.clone(),
+                        parse_options.clone(),
                     );
                     code_fixes.push(code_fix_to_string(input_code, action));
                 }
@@ -186,7 +186,7 @@ fn check_code_action(
     source: &str,
     source_type: JsFileSource,
     action: &AnalyzerAction<JsLanguage>,
-    options: JsParserOptions,
+    options: JsParseOptions,
 ) {
     let (new_tree, text_edit) = match action
         .mutation
@@ -252,7 +252,7 @@ pub(crate) fn run_suppression_test(input: &'static str, _: &str, _: &str, _: &st
         file_name,
         input_file,
         CheckActionType::Suppression,
-        JsParserOptions::default(),
+        JsParseOptions::default(),
     );
 
     insta::with_settings!({

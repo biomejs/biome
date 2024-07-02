@@ -5,7 +5,7 @@ use biome_diagnostics::console::markup;
 use biome_diagnostics::termcolor::Buffer;
 use biome_diagnostics::Error;
 use biome_diagnostics::PrintDiagnostic;
-use biome_js_parser::{parse, JsParserOptions, Parse};
+use biome_js_parser::{parse, JsParseOptions, Parse};
 use biome_js_syntax::{AnyJsRoot, JsFileSource, JsSyntaxNode};
 use biome_rowan::SyntaxKind;
 use std::fmt::Debug;
@@ -80,7 +80,7 @@ pub(crate) struct TestCaseFile {
     /// The source type used to parse the file
     source_type: JsFileSource,
 
-    options: JsParserOptions,
+    options: JsParseOptions,
 }
 
 impl TestCaseFile {
@@ -116,7 +116,7 @@ impl TestCaseFiles {
         name: String,
         code: String,
         source_type: JsFileSource,
-        options: JsParserOptions,
+        options: JsParseOptions,
     ) -> Self {
         Self {
             files: vec![TestCaseFile {
@@ -137,7 +137,7 @@ impl TestCaseFiles {
         name: String,
         code: String,
         source_type: JsFileSource,
-        options: JsParserOptions,
+        options: JsParseOptions,
     ) {
         self.files.push(TestCaseFile {
             name,
