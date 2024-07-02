@@ -7331,6 +7331,7 @@ pub enum AnyCssDeclarationOrRule {
     AnyCssRule(AnyCssRule),
     CssBogus(CssBogus),
     CssDeclarationWithSemicolon(CssDeclarationWithSemicolon),
+    CssGritMetavariable(CssGritMetavariable),
 }
 impl AnyCssDeclarationOrRule {
     pub fn as_any_css_rule(&self) -> Option<&AnyCssRule> {
@@ -7348,6 +7349,12 @@ impl AnyCssDeclarationOrRule {
     pub fn as_css_declaration_with_semicolon(&self) -> Option<&CssDeclarationWithSemicolon> {
         match &self {
             AnyCssDeclarationOrRule::CssDeclarationWithSemicolon(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_grit_metavariable(&self) -> Option<&CssGritMetavariable> {
+        match &self {
+            AnyCssDeclarationOrRule::CssGritMetavariable(item) => Some(item),
             _ => None,
         }
     }
@@ -17152,14 +17159,20 @@ impl From<CssDeclarationWithSemicolon> for AnyCssDeclarationOrRule {
         AnyCssDeclarationOrRule::CssDeclarationWithSemicolon(node)
     }
 }
+impl From<CssGritMetavariable> for AnyCssDeclarationOrRule {
+    fn from(node: CssGritMetavariable) -> AnyCssDeclarationOrRule {
+        AnyCssDeclarationOrRule::CssGritMetavariable(node)
+    }
+}
 impl AstNode for AnyCssDeclarationOrRule {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> = AnyCssRule::KIND_SET
         .union(CssBogus::KIND_SET)
-        .union(CssDeclarationWithSemicolon::KIND_SET);
+        .union(CssDeclarationWithSemicolon::KIND_SET)
+        .union(CssGritMetavariable::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
         match kind {
-            CSS_BOGUS | CSS_DECLARATION_WITH_SEMICOLON => true,
+            CSS_BOGUS | CSS_DECLARATION_WITH_SEMICOLON | CSS_GRIT_METAVARIABLE => true,
             k if AnyCssRule::can_cast(k) => true,
             _ => false,
         }
@@ -17171,6 +17184,9 @@ impl AstNode for AnyCssDeclarationOrRule {
                 AnyCssDeclarationOrRule::CssDeclarationWithSemicolon(CssDeclarationWithSemicolon {
                     syntax,
                 })
+            }
+            CSS_GRIT_METAVARIABLE => {
+                AnyCssDeclarationOrRule::CssGritMetavariable(CssGritMetavariable { syntax })
             }
             _ => {
                 if let Some(any_css_rule) = AnyCssRule::cast(syntax) {
@@ -17185,6 +17201,7 @@ impl AstNode for AnyCssDeclarationOrRule {
         match self {
             AnyCssDeclarationOrRule::CssBogus(it) => &it.syntax,
             AnyCssDeclarationOrRule::CssDeclarationWithSemicolon(it) => &it.syntax,
+            AnyCssDeclarationOrRule::CssGritMetavariable(it) => &it.syntax,
             AnyCssDeclarationOrRule::AnyCssRule(it) => it.syntax(),
         }
     }
@@ -17192,6 +17209,7 @@ impl AstNode for AnyCssDeclarationOrRule {
         match self {
             AnyCssDeclarationOrRule::CssBogus(it) => it.syntax,
             AnyCssDeclarationOrRule::CssDeclarationWithSemicolon(it) => it.syntax,
+            AnyCssDeclarationOrRule::CssGritMetavariable(it) => it.syntax,
             AnyCssDeclarationOrRule::AnyCssRule(it) => it.into_syntax(),
         }
     }
@@ -17202,6 +17220,7 @@ impl std::fmt::Debug for AnyCssDeclarationOrRule {
             AnyCssDeclarationOrRule::AnyCssRule(it) => std::fmt::Debug::fmt(it, f),
             AnyCssDeclarationOrRule::CssBogus(it) => std::fmt::Debug::fmt(it, f),
             AnyCssDeclarationOrRule::CssDeclarationWithSemicolon(it) => std::fmt::Debug::fmt(it, f),
+            AnyCssDeclarationOrRule::CssGritMetavariable(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
@@ -17211,6 +17230,7 @@ impl From<AnyCssDeclarationOrRule> for SyntaxNode {
             AnyCssDeclarationOrRule::AnyCssRule(it) => it.into(),
             AnyCssDeclarationOrRule::CssBogus(it) => it.into(),
             AnyCssDeclarationOrRule::CssDeclarationWithSemicolon(it) => it.into(),
+            AnyCssDeclarationOrRule::CssGritMetavariable(it) => it.into(),
         }
     }
 }

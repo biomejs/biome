@@ -441,6 +441,7 @@ AnyCssDeclarationOrRule =
 	AnyCssRule
 	| CssDeclarationWithSemicolon
 	| CssBogus
+	| CssGritMetavariable
 
 // @page :left { background: red; @media (500px <= width <= 500px) {  } }
 // 						 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

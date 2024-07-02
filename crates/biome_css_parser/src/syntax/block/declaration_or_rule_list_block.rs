@@ -1,10 +1,12 @@
+use crate::lexer::CssReLexContext;
 use crate::parser::CssParser;
 use crate::syntax::at_rule::{is_at_at_rule, parse_at_rule};
 use crate::syntax::block::ParseBlockBody;
 use crate::syntax::parse_error::expected_any_declaration_or_at_rule;
 use crate::syntax::{
-    is_at_declaration, is_at_nested_qualified_rule, parse_declaration_with_semicolon,
-    parse_nested_qualified_rule, try_parse,
+    is_at_declaration, is_at_grit_metavariable, is_at_identifier, is_at_nested_qualified_rule,
+    parse_declaration_with_semicolon, parse_grit_metavariable, parse_nested_qualified_rule,
+    try_parse,
 };
 use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::{CssSyntaxKind, T};
@@ -35,7 +37,10 @@ impl ParseBlockBody for DeclarationOrRuleListBlock {
 
 #[inline]
 fn is_at_declaration_or_rule_item(p: &mut CssParser) -> bool {
-    is_at_at_rule(p) || is_at_nested_qualified_rule(p) || is_at_declaration(p)
+    is_at_at_rule(p)
+        || is_at_nested_qualified_rule(p)
+        || is_at_declaration(p)
+        || is_at_identifier(p)
 }
 
 struct DeclarationOrRuleListParseRecovery;
@@ -56,6 +61,9 @@ impl ParseNodeList for DeclarationOrRuleList {
     const LIST_KIND: Self::Kind = CSS_DECLARATION_OR_RULE_LIST;
 
     fn parse_element(&mut self, p: &mut Self::Parser<'_>) -> ParsedSyntax {
+        if p.options().is_grit_metavariable_enabled() {
+            p.re_lex(CssReLexContext::GritMetavariable);
+        }
         if is_at_at_rule(p) {
             parse_at_rule(p)
         } else if is_at_declaration(p) {
@@ -124,6 +132,8 @@ impl ParseNodeList for DeclarationOrRuleList {
             parse_declaration_with_semicolon(p)
         } else if is_at_nested_qualified_rule(p) {
             parse_nested_qualified_rule(p)
+        } else if is_at_grit_metavariable(p) {
+            parse_grit_metavariable(p)
         } else {
             Absent
         }
