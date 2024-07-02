@@ -88,6 +88,8 @@ use biome_rowan::AstNode as _;
 use grit_pattern_matcher::pattern::{DynamicPattern, DynamicSnippet, DynamicSnippetPart, Pattern};
 use node_like_compiler::NodeLikeCompiler;
 
+pub(crate) use self::auto_wrap::auto_wrap_pattern;
+
 pub(crate) struct PatternCompiler;
 
 impl PatternCompiler {
@@ -221,7 +223,7 @@ impl PatternCompiler {
             ))),
             AnyGritPattern::GritUnderscore(_) => Ok(Pattern::Underscore),
             AnyGritPattern::GritVariable(node) => Ok(Pattern::Variable(
-                VariableCompiler::from_node(node, context)?,
+                VariableCompiler::from_node(node, context),
             )),
             AnyGritPattern::GritWithin(node) => Ok(Pattern::Within(Box::new(
                 WithinCompiler::from_node(node, context)?,

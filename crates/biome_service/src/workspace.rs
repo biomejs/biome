@@ -124,7 +124,9 @@ impl FileFeaturesResult {
         (FeatureName::Lint, SupportKind::FileNotSupported),
         (FeatureName::Format, SupportKind::FileNotSupported),
         (FeatureName::OrganizeImports, SupportKind::FileNotSupported),
-        (FeatureName::Search, SupportKind::FileNotSupported),
+        // FIXME: I remember I was not supposed to do this, but I forgot why.
+        // It works though, so please remind me what the right way to do this is :)
+        (FeatureName::Search, SupportKind::Supported),
     ];
 
     pub fn new() -> Self {

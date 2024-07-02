@@ -17,15 +17,9 @@ pub(crate) struct CompilationContext<'a> {
 }
 
 impl<'a> CompilationContext<'a> {
-    pub(crate) fn new(source_path: &'a Path, lang: GritTargetLanguage) -> Self {
-        let mut this = Self::new_anonymous(lang);
-        this.source_path = Some(source_path);
-        this
-    }
-
-    pub(crate) fn new_anonymous(lang: GritTargetLanguage) -> Self {
+    pub(crate) fn new(source_path: Option<&'a Path>, lang: GritTargetLanguage) -> Self {
         Self {
-            source_path: None,
+            source_path,
             lang,
             pattern_definition_info: Default::default(),
             predicate_definition_info: Default::default(),

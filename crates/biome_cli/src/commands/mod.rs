@@ -386,7 +386,7 @@ pub enum BiomeCommand {
         /// The GritQL pattern to search for.
         ///
         /// Note that the search command (currently) does not support rewrites.
-        #[bpaf(positional("PATH"))]
+        #[bpaf(positional("PATTERN"))]
         pattern: String,
 
         /// Single file, single path or list of paths.

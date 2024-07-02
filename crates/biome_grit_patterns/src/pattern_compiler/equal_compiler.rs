@@ -13,7 +13,7 @@ impl PrEqualCompiler {
         node: &GritPredicateEqual,
         context: &mut NodeCompilationContext,
     ) -> Result<Equal<GritQueryContext>, CompileError> {
-        let variable = VariableCompiler::from_node(&node.left()?, context)?;
+        let variable = VariableCompiler::from_node(&node.left()?, context);
         let pattern = PatternCompiler::from_node_with_rhs(&node.right()?, context, true)?;
 
         Ok(Equal::new(variable, pattern))

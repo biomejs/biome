@@ -50,7 +50,7 @@ impl PrRewriteCompiler {
         node: &GritPredicateRewrite,
         context: &mut NodeCompilationContext,
     ) -> Result<Rewrite<GritQueryContext>, CompileError> {
-        let left = Pattern::Variable(VariableCompiler::from_node(&node.left()?, context)?);
+        let left = Pattern::Variable(VariableCompiler::from_node(&node.left()?, context));
 
         let right = node.right()?;
         let right = to_dynamic_pattern(

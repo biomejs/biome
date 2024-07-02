@@ -329,6 +329,8 @@ pub enum SearchError {
     PatternCompilationError(CompileError),
     /// No pattern with the given ID
     InvalidPattern(InvalidPattern),
+    /// Error while executing the search query.
+    QueryError(QueryError),
 }
 
 #[derive(Debug, Serialize, Deserialize, Diagnostic)]
@@ -340,6 +342,16 @@ pub enum SearchError {
     )
 )]
 pub struct InvalidPattern;
+
+#[derive(Debug, Serialize, Deserialize, Diagnostic)]
+#[diagnostic(
+    category = "search",
+    message(
+        message("Error executing the Grit query."),
+        description = "For reference, please consult: https://docs.grit.io/language/syntax"
+    )
+)]
+pub struct QueryError(pub String);
 
 pub fn extension_error(path: &BiomePath) -> WorkspaceError {
     let file_source = DocumentFileSource::from_path(path);
@@ -427,7 +439,8 @@ impl From<VcsDiagnostic> for WorkspaceError {
 
 impl From<CompileError> for WorkspaceError {
     fn from(value: CompileError) -> Self {
-        Self::SearchError(SearchError::PatternCompilationError(value))
+        // FIXME: This really needs proper diagnostics
+        Self::SearchError(SearchError::QueryError(QueryError(format!("{value:?}"))))
     }
 }
 

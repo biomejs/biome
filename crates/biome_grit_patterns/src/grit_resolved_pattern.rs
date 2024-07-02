@@ -5,15 +5,15 @@ use crate::grit_target_node::GritTargetNode;
 use crate::grit_tree::GritTargetTree;
 use crate::GritTargetLanguage;
 use crate::{grit_binding::GritBinding, grit_context::GritQueryContext};
-use anyhow::{anyhow, Error, Result};
+use anyhow::{anyhow, bail, Error, Result};
 use grit_pattern_matcher::binding::Binding;
 use grit_pattern_matcher::constant::Constant;
 use grit_pattern_matcher::context::{ExecContext, QueryContext};
 use grit_pattern_matcher::effects::Effect;
 use grit_pattern_matcher::pattern::{
-    Accessor, DynamicPattern, DynamicSnippet, DynamicSnippetPart, File, FilePtr, FileRegistry,
-    GritCall, ListIndex, Pattern, PatternName, PatternOrResolved, ResolvedFile, ResolvedPattern,
-    ResolvedSnippet, State,
+    to_unsigned, Accessor, DynamicPattern, DynamicSnippet, DynamicSnippetPart, File, FilePtr,
+    FileRegistry, GritCall, ListIndex, Pattern, PatternName, PatternOrResolved, ResolvedFile,
+    ResolvedPattern, ResolvedSnippet, State,
 };
 use grit_util::{AnalysisLogs, Ast, CodeRange, Range};
 use im::{vector, Vector};
@@ -389,11 +389,23 @@ impl<'a> ResolvedPattern<'a, GritQueryContext> for GritResolvedPattern<'a> {
     }
 
     fn get_file_pointers(&self) -> Option<Vec<FilePtr>> {
-        todo!()
+        match self {
+            Self::Binding(_) => None,
+            Self::Snippets(_) => None,
+            Self::List(_) => handle_files(self),
+            Self::Map(_) => None,
+            Self::File(file) => extract_file_pointer(file).map(|f| vec![f]),
+            Self::Files(files) => handle_files(files),
+            Self::Constant(_) => None,
+        }
     }
 
     fn get_files(&self) -> Option<&Self> {
-        todo!()
+        if let Self::Files(files) = self {
+            Some(files)
+        } else {
+            None
+        }
     }
 
     fn get_last_binding(&self) -> Option<&GritBinding<'a>> {
@@ -404,12 +416,20 @@ impl<'a> ResolvedPattern<'a, GritQueryContext> for GritResolvedPattern<'a> {
         }
     }
 
-    fn get_list_item_at(&self, _index: isize) -> Option<&Self> {
-        todo!()
+    fn get_list_item_at(&self, index: isize) -> Option<&Self> {
+        if let Self::List(items) = self {
+            to_unsigned(index, items.len()).and_then(|index| items.get(index))
+        } else {
+            None
+        }
     }
 
-    fn get_list_item_at_mut(&mut self, _index: isize) -> Option<&mut Self> {
-        todo!()
+    fn get_list_item_at_mut(&mut self, index: isize) -> Option<&mut Self> {
+        if let Self::List(items) = self {
+            to_unsigned(index, items.len()).and_then(|index| items.get_mut(index))
+        } else {
+            None
+        }
     }
 
     fn get_list_items(&self) -> Option<impl Iterator<Item = &Self>> {
@@ -460,10 +480,25 @@ impl<'a> ResolvedPattern<'a, GritQueryContext> for GritResolvedPattern<'a> {
 
     fn is_truthy(
         &self,
-        _state: &mut State<'a, GritQueryContext>,
-        _language: &<GritQueryContext as QueryContext>::Language<'a>,
+        state: &mut State<'a, GritQueryContext>,
+        language: &GritTargetLanguage,
     ) -> Result<bool> {
-        todo!()
+        let truthiness = match self {
+            Self::Binding(bindings) => bindings.last().map_or(false, Binding::is_truthy),
+            Self::List(elements) => !elements.is_empty(),
+            Self::Map(map) => !map.is_empty(),
+            Self::Constant(c) => c.is_truthy(),
+            Self::Snippets(s) => {
+                if let Some(s) = s.last() {
+                    s.is_truthy(state, language)?
+                } else {
+                    false
+                }
+            }
+            Self::File(..) => true,
+            Self::Files(..) => true,
+        };
+        Ok(truthiness)
     }
 
     fn linearized_text(
@@ -479,35 +514,65 @@ impl<'a> ResolvedPattern<'a, GritQueryContext> for GritResolvedPattern<'a> {
     }
 
     fn matches_undefined(&self) -> bool {
-        todo!()
+        match self {
+            Self::Binding(b) => b
+                .last()
+                .and_then(Binding::as_constant)
+                .map_or(false, Constant::is_undefined),
+            Self::Constant(Constant::Undefined) => true,
+            Self::Constant(_)
+            | Self::Snippets(_)
+            | Self::List(_)
+            | Self::Map(_)
+            | Self::File(_)
+            | Self::Files(_) => false,
+        }
     }
 
     fn matches_false_or_undefined(&self) -> bool {
-        todo!()
+        // should this match a binding to the constant `false` as well?
+        matches!(self, Self::Constant(Constant::Boolean(false))) || self.matches_undefined()
     }
 
     fn normalize_insert(
         &mut self,
         _binding: &GritBinding,
         _is_first: bool,
-        _language: &<GritQueryContext as QueryContext>::Language<'a>,
+        _language: &GritTargetLanguage,
     ) -> Result<()> {
         todo!()
     }
 
-    fn position(
-        &self,
-        _language: &<GritQueryContext as QueryContext>::Language<'a>,
-    ) -> Option<Range> {
-        todo!()
+    fn position(&self, language: &GritTargetLanguage) -> Option<Range> {
+        if let Self::Binding(binding) = self {
+            if let Some(binding) = binding.last() {
+                return binding.position(language);
+            }
+        }
+
+        None
     }
 
-    fn push_binding(&mut self, _binding: GritBinding) -> Result<()> {
-        todo!()
+    fn push_binding(&mut self, binding: GritBinding<'a>) -> Result<()> {
+        let Self::Binding(bindings) = self else {
+            bail!("can only push to bindings");
+        };
+
+        bindings.push_back(binding);
+        Ok(())
     }
 
-    fn set_list_item_at_mut(&mut self, _index: isize, _value: Self) -> anyhow::Result<bool> {
-        todo!()
+    fn set_list_item_at_mut(&mut self, index: isize, value: Self) -> Result<bool> {
+        let Self::List(items) = self else {
+            bail!("can only set items on a list");
+        };
+
+        let Some(index) = to_unsigned(index, items.len()) else {
+            return Ok(false);
+        };
+
+        items.insert(index, value);
+        Ok(true)
     }
 
     fn text(
@@ -543,53 +608,26 @@ impl<'a> ResolvedPattern<'a, GritQueryContext> for GritResolvedPattern<'a> {
     }
 }
 
-#[derive(Clone)]
-struct TodoBindingIterator<'a> {
-    _pattern: &'a GritResolvedPattern<'a>,
-}
-
-impl<'a> Iterator for TodoBindingIterator<'a> {
-    type Item = GritBinding<'a>;
-
-    fn next(&mut self) -> Option<Self::Item> {
-        todo!()
+fn extract_file_pointer(file: &GritFile) -> Option<FilePtr> {
+    match file {
+        GritFile::Resolved(_) => None,
+        GritFile::Ptr(ptr) => Some(*ptr),
     }
 }
 
-#[derive(Clone)]
-struct TodoSelfIterator<'a> {
-    _pattern: &'a GritResolvedPattern<'a>,
-}
+fn handle_files(files_list: &GritResolvedPattern) -> Option<Vec<FilePtr>> {
+    let GritResolvedPattern::List(files) = files_list else {
+        return None;
+    };
 
-impl<'a> Iterator for TodoSelfIterator<'a> {
-    type Item = GritResolvedPattern<'a>;
-
-    fn next(&mut self) -> Option<Self::Item> {
-        todo!()
-    }
-}
-
-struct TodoSelfRefIterator<'a> {
-    _pattern: &'a GritResolvedPattern<'a>,
-}
-
-impl<'a> Iterator for TodoSelfRefIterator<'a> {
-    type Item = &'a GritResolvedPattern<'a>;
-
-    fn next(&mut self) -> Option<Self::Item> {
-        todo!()
-    }
-}
-
-#[derive(Clone)]
-struct TodoSnippetIterator<'a> {
-    _pattern: &'a GritResolvedPattern<'a>,
-}
-
-impl<'a> Iterator for TodoSnippetIterator<'a> {
-    type Item = ResolvedSnippet<'a, GritQueryContext>;
-
-    fn next(&mut self) -> Option<Self::Item> {
-        todo!()
-    }
+    files
+        .iter()
+        .map(|resolved| {
+            if let GritResolvedPattern::File(GritFile::Ptr(ptr)) = resolved {
+                Some(*ptr)
+            } else {
+                None
+            }
+        })
+        .collect()
 }
