@@ -96,6 +96,7 @@ AnyCssSelector =
 	CssComplexSelector
 	| CssCompoundSelector
 	| CssBogusSelector
+	| CssGritMetavariable
 
 // div a {}
 // ^^^^^

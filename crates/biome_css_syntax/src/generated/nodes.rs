@@ -8508,6 +8508,7 @@ pub enum AnyCssSelector {
     CssBogusSelector(CssBogusSelector),
     CssComplexSelector(CssComplexSelector),
     CssCompoundSelector(CssCompoundSelector),
+    CssGritMetavariable(CssGritMetavariable),
 }
 impl AnyCssSelector {
     pub fn as_css_bogus_selector(&self) -> Option<&CssBogusSelector> {
@@ -8525,6 +8526,12 @@ impl AnyCssSelector {
     pub fn as_css_compound_selector(&self) -> Option<&CssCompoundSelector> {
         match &self {
             AnyCssSelector::CssCompoundSelector(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_grit_metavariable(&self) -> Option<&CssGritMetavariable> {
+        match &self {
+            AnyCssSelector::CssGritMetavariable(item) => Some(item),
             _ => None,
         }
     }
@@ -20654,15 +20661,24 @@ impl From<CssCompoundSelector> for AnyCssSelector {
         AnyCssSelector::CssCompoundSelector(node)
     }
 }
+impl From<CssGritMetavariable> for AnyCssSelector {
+    fn from(node: CssGritMetavariable) -> AnyCssSelector {
+        AnyCssSelector::CssGritMetavariable(node)
+    }
+}
 impl AstNode for AnyCssSelector {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> = CssBogusSelector::KIND_SET
         .union(CssComplexSelector::KIND_SET)
-        .union(CssCompoundSelector::KIND_SET);
+        .union(CssCompoundSelector::KIND_SET)
+        .union(CssGritMetavariable::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
         matches!(
             kind,
-            CSS_BOGUS_SELECTOR | CSS_COMPLEX_SELECTOR | CSS_COMPOUND_SELECTOR
+            CSS_BOGUS_SELECTOR
+                | CSS_COMPLEX_SELECTOR
+                | CSS_COMPOUND_SELECTOR
+                | CSS_GRIT_METAVARIABLE
         )
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
@@ -20674,6 +20690,9 @@ impl AstNode for AnyCssSelector {
             CSS_COMPOUND_SELECTOR => {
                 AnyCssSelector::CssCompoundSelector(CssCompoundSelector { syntax })
             }
+            CSS_GRIT_METAVARIABLE => {
+                AnyCssSelector::CssGritMetavariable(CssGritMetavariable { syntax })
+            }
             _ => return None,
         };
         Some(res)
@@ -20683,6 +20702,7 @@ impl AstNode for AnyCssSelector {
             AnyCssSelector::CssBogusSelector(it) => &it.syntax,
             AnyCssSelector::CssComplexSelector(it) => &it.syntax,
             AnyCssSelector::CssCompoundSelector(it) => &it.syntax,
+            AnyCssSelector::CssGritMetavariable(it) => &it.syntax,
         }
     }
     fn into_syntax(self) -> SyntaxNode {
@@ -20690,6 +20710,7 @@ impl AstNode for AnyCssSelector {
             AnyCssSelector::CssBogusSelector(it) => it.syntax,
             AnyCssSelector::CssComplexSelector(it) => it.syntax,
             AnyCssSelector::CssCompoundSelector(it) => it.syntax,
+            AnyCssSelector::CssGritMetavariable(it) => it.syntax,
         }
     }
 }
@@ -20699,6 +20720,7 @@ impl std::fmt::Debug for AnyCssSelector {
             AnyCssSelector::CssBogusSelector(it) => std::fmt::Debug::fmt(it, f),
             AnyCssSelector::CssComplexSelector(it) => std::fmt::Debug::fmt(it, f),
             AnyCssSelector::CssCompoundSelector(it) => std::fmt::Debug::fmt(it, f),
+            AnyCssSelector::CssGritMetavariable(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
@@ -20708,6 +20730,7 @@ impl From<AnyCssSelector> for SyntaxNode {
             AnyCssSelector::CssBogusSelector(it) => it.into(),
             AnyCssSelector::CssComplexSelector(it) => it.into(),
             AnyCssSelector::CssCompoundSelector(it) => it.into(),
+            AnyCssSelector::CssGritMetavariable(it) => it.into(),
         }
     }
 }

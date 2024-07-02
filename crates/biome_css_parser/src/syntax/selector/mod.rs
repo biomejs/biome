@@ -4,7 +4,7 @@ mod pseudo_class;
 mod pseudo_element;
 pub(crate) mod relative_selector;
 
-use crate::lexer::CssLexContext;
+use crate::lexer::{CssLexContext, CssReLexContext};
 use crate::parser::CssParser;
 use crate::syntax::parse_error::{
     expected_any_sub_selector, expected_compound_selector, expected_identifier, expected_selector,
@@ -27,6 +27,8 @@ use biome_parser::parse_recovery::{
 use biome_parser::prelude::ParsedSyntax;
 use biome_parser::prelude::ParsedSyntax::{Absent, Present};
 use biome_parser::{token_set, CompletedMarker, Parser, ParserProgress, TokenSet};
+
+use super::{is_at_grit_metavariable, parse_grit_metavariable};
 
 /// Determines the lexical context for parsing CSS selectors.
 ///
@@ -197,7 +199,7 @@ impl ParseRecovery for SelectorListParseRecovery {
 /// the elements to which a set of CSS rules apply.
 #[inline]
 pub(crate) fn is_nth_at_selector(p: &mut CssParser, n: usize) -> bool {
-    is_nth_at_compound_selector(p, n)
+    is_nth_at_compound_selector(p, n) || is_nth_at_identifier(p, n)
 }
 
 /// Parses a CSS selector.
@@ -214,11 +216,19 @@ pub(crate) fn parse_selector(p: &mut CssParser) -> ParsedSyntax {
         return Absent;
     }
 
-    // In CSS, we have compound selectors and complex selectors.
-    // Compound selectors are simple, unseparated chains of selectors,
-    // while complex selectors are compound selectors separated by combinators.
-    // After parsing the compound selector, it then checks if this compound selector is a part of a complex selector.
-    parse_compound_selector(p).and_then(|selector| parse_complex_selector(p, selector))
+    if p.options().is_grit_metavariable_enabled() {
+        p.re_lex(CssReLexContext::GritMetavariable);
+    }
+
+    if is_at_grit_metavariable(p) {
+        parse_grit_metavariable(p)
+    } else {
+        // In CSS, we have compound selectors and complex selectors.
+        // Compound selectors are simple, unseparated chains of selectors,
+        // while complex selectors are compound selectors separated by combinators.
+        // After parsing the compound selector, it then checks if this compound selector is a part of a complex selector.
+        parse_compound_selector(p).and_then(|selector| parse_complex_selector(p, selector))
+    }
 }
 
 const COMPLEX_SELECTOR_COMBINATOR_SET: TokenSet<CssSyntaxKind> =
