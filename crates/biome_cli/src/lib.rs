@@ -135,6 +135,7 @@ impl<'app> CliSession<'app> {
                 css_linter,
                 javascript_linter,
                 json_linter,
+                graphql_linter,
             } => commands::lint::lint(
                 self,
                 LintCommandPayload {
@@ -157,6 +158,7 @@ impl<'app> CliSession<'app> {
                     css_linter,
                     javascript_linter,
                     json_linter,
+                    graphql_linter,
                 },
             ),
             BiomeCommand::Ci {
@@ -193,6 +195,7 @@ impl<'app> CliSession<'app> {
                 files_configuration,
                 json_formatter,
                 css_formatter,
+                graphql_formatter,
                 staged,
                 changed,
                 since,
@@ -210,6 +213,7 @@ impl<'app> CliSession<'app> {
                     files_configuration,
                     json_formatter,
                     css_formatter,
+                    graphql_formatter,
                     staged,
                     changed,
                     since,

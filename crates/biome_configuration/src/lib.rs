@@ -35,8 +35,8 @@ pub use formatter::{
     PlainIndentStyle,
 };
 pub use graphql::{
-    partial_graphql_configuration, GraphqlConfiguration, GraphqlFormatter,
-    PartialGraphqlConfiguration, PartialGraphqlFormatter,
+    partial_graphql_configuration, GraphqlConfiguration, GraphqlFormatter, GraphqlLinter,
+    PartialGraphqlConfiguration, PartialGraphqlFormatter, PartialGraphqlLinter,
 };
 pub use javascript::{
     partial_javascript_configuration, JavascriptConfiguration, JavascriptFormatter,

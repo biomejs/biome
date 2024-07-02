@@ -13,6 +13,10 @@ pub struct GraphqlConfiguration {
     /// GraphQL formatter options
     #[partial(type, bpaf(external(partial_graphql_formatter), optional))]
     pub formatter: GraphqlFormatter,
+
+    // GraphQL linter options
+    #[partial(type, bpaf(external(partial_graphql_linter), optional))]
+    pub linter: GraphqlLinter,
 }
 
 /// Options that changes how the GraphQL formatter behaves
@@ -63,6 +67,15 @@ pub struct GraphqlFormatter {
     pub bracket_spacing: Option<BracketSpacing>,
 }
 
+// impl Default for GraphqlFormatter {
+//     fn default() -> Self {
+//         Self {
+//             enabled: Some(false),
+//             ..Default::default()
+//         }
+//     }
+// }
+
 impl PartialGraphqlFormatter {
     pub fn get_formatter_configuration(&self) -> GraphqlFormatter {
         GraphqlFormatter {
@@ -77,8 +90,27 @@ impl PartialGraphqlFormatter {
     }
 }
 
+/// Options that changes how the GraphQL linter behaves
+#[derive(Clone, Debug, Deserialize, Eq, Partial, PartialEq, Serialize)]
+#[partial(derive(Bpaf, Clone, Deserializable, Eq, Merge, PartialEq))]
+#[partial(cfg_attr(feature = "schema", derive(schemars::JsonSchema)))]
+#[partial(serde(rename_all = "camelCase", default, deny_unknown_fields))]
+pub struct GraphqlLinter {
+    /// Control the formatter for GraphQL files.
+    #[partial(bpaf(long("graphql-linter-enabled"), argument("true|false"), optional))]
+    pub enabled: Option<bool>,
+}
+
+impl Default for GraphqlLinter {
+    fn default() -> Self {
+        Self {
+            enabled: Some(false),
+        }
+    }
+}
+
 #[test]
-fn default_graphql() {
+fn default_graphql_formatter() {
     let graphql_configuration = GraphqlFormatter::default();
 
     assert!(!graphql_configuration.enabled);
@@ -87,4 +119,11 @@ fn default_graphql() {
     assert_eq!(graphql_configuration.line_ending, None);
     assert_eq!(graphql_configuration.line_width, None);
     assert_eq!(graphql_configuration.quote_style, None);
+}
+
+#[test]
+fn default_graphql_linter() {
+    let graphql_configuration = GraphqlLinter::default();
+
+    assert_eq!(graphql_configuration.enabled, Some(false));
 }
