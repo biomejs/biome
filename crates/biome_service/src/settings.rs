@@ -5,11 +5,11 @@ use biome_configuration::diagnostics::InvalidIgnorePattern;
 use biome_configuration::javascript::JsxRuntime;
 use biome_configuration::organize_imports::PartialOrganizeImports;
 use biome_configuration::{
-    push_to_analyzer_rules, BiomeDiagnostic, FilesConfiguration, OverrideFormatterConfiguration,
+    push_to_analyzer_rules, BiomeDiagnostic, OverrideFormatterConfiguration,
     OverrideLinterConfiguration, OverrideOrganizeImportsConfiguration, Overrides,
-    PartialConfiguration, PartialCssConfiguration, PartialFormatterConfiguration,
-    PartialGraphqlConfiguration, PartialJavascriptConfiguration, PartialJsonConfiguration,
-    PartialLinterConfiguration, Rules,
+    PartialConfiguration, PartialCssConfiguration, PartialFilesConfiguration,
+    PartialFormatterConfiguration, PartialGraphqlConfiguration, PartialJavascriptConfiguration,
+    PartialJsonConfiguration, PartialLinterConfiguration, Rules, DEFAULT_FILE_SIZE_LIMIT,
 };
 use biome_css_formatter::context::CssFormatOptions;
 use biome_css_parser::CssParseOptions;
@@ -189,13 +189,13 @@ impl Settings {
         }
 
         // filesystem settings
-        if let Some(files) = to_file_settings(
-            working_directory.clone(),
-            configuration.files.map(FilesConfiguration::from),
-            vcs_path,
-            gitignore_matches,
-        )? {
-            self.files = files;
+        if let Some(files) = configuration.files {
+            self.files = to_file_settings(
+                working_directory.clone(),
+                files,
+                vcs_path,
+                gitignore_matches,
+            )?;
         }
 
         // organize imports settings
@@ -672,8 +672,6 @@ impl From<OverrideOrganizeImportsConfiguration> for OverrideOrganizeImportsSetti
 
 // region: File settings (base)
 
-// TODO: This isn't refactored yet.
-
 /// Filesystem settings for the entire workspace
 #[derive(Debug)]
 pub struct FilesSettings {
@@ -693,11 +691,6 @@ pub struct FilesSettings {
     pub ignore_unknown: bool,
 }
 
-/// Limit the size of files to 1.0 MiB by default
-pub(crate) const DEFAULT_FILE_SIZE_LIMIT: NonZeroU64 =
-    // SAFETY: This constant is initialized with a non-zero value
-    unsafe { NonZeroU64::new_unchecked(1024 * 1024) };
-
 impl Default for FilesSettings {
     fn default() -> Self {
         Self {
@@ -710,34 +703,25 @@ impl Default for FilesSettings {
     }
 }
 
+// TODO：Rethink about partial and defaults
 fn to_file_settings(
     working_directory: Option<PathBuf>,
-    config: Option<FilesConfiguration>,
+    config: PartialFilesConfiguration,
     vcs_config_path: Option<PathBuf>,
     gitignore_matches: &[String],
-) -> Result<Option<FilesSettings>, WorkspaceError> {
-    let config = if let Some(config) = config {
-        Some(config)
-    } else if vcs_config_path.is_some() {
-        Some(FilesConfiguration::default())
-    } else {
-        None
-    };
+) -> Result<FilesSettings, WorkspaceError> {
     let git_ignore = if let Some(vcs_config_path) = vcs_config_path {
         Some(to_git_ignore(vcs_config_path, gitignore_matches)?)
     } else {
         None
     };
-    Ok(if let Some(config) = config {
-        Some(FilesSettings {
-            max_size: config.max_size,
-            git_ignore,
-            ignored_files: to_matcher(working_directory.clone(), Some(&config.ignore))?,
-            included_files: to_matcher(working_directory, Some(&config.include))?,
-            ignore_unknown: config.ignore_unknown,
-        })
-    } else {
-        None
+
+    Ok(FilesSettings {
+        max_size: config.max_size.unwrap_or(DEFAULT_FILE_SIZE_LIMIT),
+        git_ignore,
+        ignore_unknown: config.ignore_unknown.unwrap_or(false),
+        ignored_files: to_matcher(working_directory.clone(), config.ignore.as_ref())?,
+        included_files: to_matcher(working_directory, config.include.as_ref())?,
     })
 }
 
