@@ -27,16 +27,14 @@
 
 </div>
 
-Traduções:
-
 <!-- Insert new entries lexicographically by language code.
      For example given below is the same order as these files appear on page:
      https://github.com/biomejs/biome/tree/main/packages/%40biomejs/biome -->
-* [हिन्दी](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.hi.md)
-* [日本語](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.ja.md)
-* [English](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.md)
-* Português do Brasil
-* [简体中文](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.zh-CN.md)
+<div align="center">
+
+[हिन्दी](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.hi.md) | [English](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.md) | [简体中文](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.zh-CN.md) | [日本語](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.ja.md) | Português do Brasil
+
+</div>
 
 **Biome** é um conjunto de ferramentas de alto desempenho para projetos web, visando fornecer recursos de desenvolvimento para manter a saúde desses projetos.
 

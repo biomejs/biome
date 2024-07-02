@@ -27,16 +27,15 @@
 
 </div>
 
-अनुवाद[^0]:
-
 <!-- Insert new entries lexicographically by language code.
      For example given below is the same order as these files appear on page:
      https://github.com/biomejs/biome/tree/main/packages/%40biomejs/biome -->
-* हिन्दी
-* [日本語](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.ja.md)
-* [English](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.md)
-* [Português do Brasil](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.pt-BR.md)
-* [简体中文](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.zh-CN.md)
+<div align="center">
+
+हिन्दी | [English](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.md) | [简体中文](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.zh-CN.md) |  [日本語](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.ja.md) | [Português do Brasil](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.pt-br.md)
+
+</div>
+
 
 **Biome** वेब[^1] परियोजना[^2]ओं के लिए एक प्रदर्शनकारी उपकरण-श्रृंखला[^3] है, इसका उद्देश्य उक्त परियोजना[^2]ओं के स्वास्थ्य को बनाए रखने के लिए डेवलपर[^4] उपकरण प्रदान करना है।
 
@@ -172,7 +171,6 @@ Biome एक सरल प्रायोजन[^37] कार्यक्रम
 
 नीचे दिए गए तिरछे शब्द आगत शब्द हैं।
 
-[^0]: अनुवाद - translation
 [^1]: *वेब* - web: the internet
 [^2]: परियोजना - project
 [^3]: उपकरण-श्रृंखला - toolchain
