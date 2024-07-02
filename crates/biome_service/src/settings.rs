@@ -179,7 +179,7 @@ impl Settings {
     ) -> Result<(), WorkspaceError> {
         // formatter part
         if let Some(formatter) = configuration.formatter {
-            self.formatter = to_format_settings(
+            self.formatter = to_formatter_settings(
                 working_directory.clone(),
                 FormatterConfiguration::from(formatter),
             )?;
@@ -1413,7 +1413,7 @@ pub fn to_override_settings(
     Ok(override_settings)
 }
 
-pub fn to_format_settings(
+pub fn to_formatter_settings(
     working_directory: Option<PathBuf>,
     conf: FormatterConfiguration,
 ) -> Result<FormatterSettings, WorkspaceError> {
