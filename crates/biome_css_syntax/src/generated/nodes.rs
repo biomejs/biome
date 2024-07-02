@@ -8815,6 +8815,7 @@ pub enum AnyCssValue {
     CssColor(CssColor),
     CssCustomIdentifier(CssCustomIdentifier),
     CssDashedIdentifier(CssDashedIdentifier),
+    CssGritMetavariable(CssGritMetavariable),
     CssIdentifier(CssIdentifier),
     CssNumber(CssNumber),
     CssRatio(CssRatio),
@@ -8855,6 +8856,12 @@ impl AnyCssValue {
     pub fn as_css_dashed_identifier(&self) -> Option<&CssDashedIdentifier> {
         match &self {
             AnyCssValue::CssDashedIdentifier(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_grit_metavariable(&self) -> Option<&CssGritMetavariable> {
+        match &self {
+            AnyCssValue::CssGritMetavariable(item) => Some(item),
             _ => None,
         }
     }
@@ -21532,6 +21539,11 @@ impl From<CssDashedIdentifier> for AnyCssValue {
         AnyCssValue::CssDashedIdentifier(node)
     }
 }
+impl From<CssGritMetavariable> for AnyCssValue {
+    fn from(node: CssGritMetavariable) -> AnyCssValue {
+        AnyCssValue::CssGritMetavariable(node)
+    }
+}
 impl From<CssIdentifier> for AnyCssValue {
     fn from(node: CssIdentifier) -> AnyCssValue {
         AnyCssValue::CssIdentifier(node)
@@ -21565,6 +21577,7 @@ impl AstNode for AnyCssValue {
         .union(CssColor::KIND_SET)
         .union(CssCustomIdentifier::KIND_SET)
         .union(CssDashedIdentifier::KIND_SET)
+        .union(CssGritMetavariable::KIND_SET)
         .union(CssIdentifier::KIND_SET)
         .union(CssNumber::KIND_SET)
         .union(CssRatio::KIND_SET)
@@ -21576,6 +21589,7 @@ impl AstNode for AnyCssValue {
             | CSS_COLOR
             | CSS_CUSTOM_IDENTIFIER
             | CSS_DASHED_IDENTIFIER
+            | CSS_GRIT_METAVARIABLE
             | CSS_IDENTIFIER
             | CSS_NUMBER
             | CSS_RATIO
@@ -21595,6 +21609,9 @@ impl AstNode for AnyCssValue {
             }
             CSS_DASHED_IDENTIFIER => {
                 AnyCssValue::CssDashedIdentifier(CssDashedIdentifier { syntax })
+            }
+            CSS_GRIT_METAVARIABLE => {
+                AnyCssValue::CssGritMetavariable(CssGritMetavariable { syntax })
             }
             CSS_IDENTIFIER => AnyCssValue::CssIdentifier(CssIdentifier { syntax }),
             CSS_NUMBER => AnyCssValue::CssNumber(CssNumber { syntax }),
@@ -21619,6 +21636,7 @@ impl AstNode for AnyCssValue {
             AnyCssValue::CssColor(it) => &it.syntax,
             AnyCssValue::CssCustomIdentifier(it) => &it.syntax,
             AnyCssValue::CssDashedIdentifier(it) => &it.syntax,
+            AnyCssValue::CssGritMetavariable(it) => &it.syntax,
             AnyCssValue::CssIdentifier(it) => &it.syntax,
             AnyCssValue::CssNumber(it) => &it.syntax,
             AnyCssValue::CssRatio(it) => &it.syntax,
@@ -21634,6 +21652,7 @@ impl AstNode for AnyCssValue {
             AnyCssValue::CssColor(it) => it.syntax,
             AnyCssValue::CssCustomIdentifier(it) => it.syntax,
             AnyCssValue::CssDashedIdentifier(it) => it.syntax,
+            AnyCssValue::CssGritMetavariable(it) => it.syntax,
             AnyCssValue::CssIdentifier(it) => it.syntax,
             AnyCssValue::CssNumber(it) => it.syntax,
             AnyCssValue::CssRatio(it) => it.syntax,
@@ -21653,6 +21672,7 @@ impl std::fmt::Debug for AnyCssValue {
             AnyCssValue::CssColor(it) => std::fmt::Debug::fmt(it, f),
             AnyCssValue::CssCustomIdentifier(it) => std::fmt::Debug::fmt(it, f),
             AnyCssValue::CssDashedIdentifier(it) => std::fmt::Debug::fmt(it, f),
+            AnyCssValue::CssGritMetavariable(it) => std::fmt::Debug::fmt(it, f),
             AnyCssValue::CssIdentifier(it) => std::fmt::Debug::fmt(it, f),
             AnyCssValue::CssNumber(it) => std::fmt::Debug::fmt(it, f),
             AnyCssValue::CssRatio(it) => std::fmt::Debug::fmt(it, f),
@@ -21670,6 +21690,7 @@ impl From<AnyCssValue> for SyntaxNode {
             AnyCssValue::CssColor(it) => it.into(),
             AnyCssValue::CssCustomIdentifier(it) => it.into(),
             AnyCssValue::CssDashedIdentifier(it) => it.into(),
+            AnyCssValue::CssGritMetavariable(it) => it.into(),
             AnyCssValue::CssIdentifier(it) => it.into(),
             AnyCssValue::CssNumber(it) => it.into(),
             AnyCssValue::CssRatio(it) => it.into(),

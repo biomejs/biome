@@ -6,7 +6,7 @@ mod property;
 mod selector;
 mod value;
 
-use crate::lexer::CssLexContext;
+use crate::lexer::{CssLexContext, CssReLexContext};
 use crate::parser::CssParser;
 use crate::syntax::at_rule::{is_at_at_rule, parse_at_rule};
 use crate::syntax::block::parse_declaration_or_rule_list_block;
@@ -249,6 +249,21 @@ fn parse_declaration_important(p: &mut CssParser) -> ParsedSyntax {
 }
 
 #[inline]
+fn is_at_grit_metavariable(p: &mut CssParser) -> bool {
+    p.at(GRIT_METAVARIABLE)
+}
+
+#[inline]
+fn parse_grit_metavariable(p: &mut CssParser) -> ParsedSyntax {
+    if !is_at_grit_metavariable(p) {
+        return Absent;
+    }
+    let m = p.start();
+    p.bump(GRIT_METAVARIABLE);
+    Present(m.complete(p, CSS_GRIT_METAVARIABLE))
+}
+
+#[inline]
 pub(crate) fn is_at_any_value(p: &mut CssParser) -> bool {
     is_at_any_function(p)
         || is_at_identifier(p)
@@ -263,6 +278,9 @@ pub(crate) fn is_at_any_value(p: &mut CssParser) -> bool {
 
 #[inline]
 pub(crate) fn parse_any_value(p: &mut CssParser) -> ParsedSyntax {
+    if p.options().is_grit_metavariable_enabled() {
+        p.re_lex(CssReLexContext::GritMetavariable);
+    }
     if is_at_any_function(p) {
         parse_any_function(p)
     } else if is_at_dashed_identifier(p) {
@@ -283,6 +301,8 @@ pub(crate) fn parse_any_value(p: &mut CssParser) -> ParsedSyntax {
         parse_color(p)
     } else if is_at_bracketed_value(p) {
         parse_bracketed_value(p)
+    } else if is_at_grit_metavariable(p) {
+        parse_grit_metavariable(p)
     } else {
         Absent
     }

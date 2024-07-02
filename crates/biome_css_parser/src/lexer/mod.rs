@@ -58,6 +58,7 @@ pub enum CssReLexContext {
     Regular,
     /// See [CssLexContext::UnicodeRange]
     UnicodeRange,
+    GritMetavariable,
 }
 
 /// An extremely fast, lookup table based, lossless CSS lexer
@@ -1315,6 +1316,29 @@ impl<'src> CssLexer<'src> {
             _ => false,
         }
     }
+
+    // $[a-zA-Z_][a-zA-Z0-9_]*
+    fn re_lex_grit_metavariable(&mut self, current_end: usize) -> CssSyntaxKind {
+        if self.current_kind == T![ident] {
+            if self.current_byte() == Some(b'$') {
+                if matches!(self.next_byte(), Some(b'a'..=b'z' | b'0'..=b'9' | b'_')) {
+                    while let Some(chr) = self.current_byte() {
+                        match chr {
+                            b'a'..=b'z' | b'A'..=b'Z' | b'0'..=b'9' | b'_' => {
+                                self.advance(1);
+                            }
+                            _ => break,
+                        }
+                    }
+                    if current_end == self.position {
+                        return GRIT_METAVARIABLE;
+                    }
+                }
+            }
+        }
+
+        self.current_kind
+    }
 }
 
 impl<'src> ReLexer<'src> for CssLexer<'src> {
@@ -1326,6 +1350,7 @@ impl<'src> ReLexer<'src> for CssLexer<'src> {
             Some(current) => match context {
                 CssReLexContext::Regular => self.consume_token(current),
                 CssReLexContext::UnicodeRange => self.consume_unicode_range_token(current),
+                CssReLexContext::GritMetavariable => self.re_lex_grit_metavariable(old_position),
             },
             None => EOF,
         };
