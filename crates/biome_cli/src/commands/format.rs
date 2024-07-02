@@ -202,7 +202,7 @@ pub(crate) fn format(
         let graphql = configuration.graphql.get_or_insert_with(Default::default);
         graphql.formatter.merge_with(graphql_formatter);
     }
-    
+
     if javascript_formatter.is_some() {
         let javascript = configuration
             .javascript
