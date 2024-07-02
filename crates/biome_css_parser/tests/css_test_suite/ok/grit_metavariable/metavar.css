@@ -1,0 +1,13 @@
+.foo {
+    color: $color;
+}
+
+.foo {
+    $bar
+}
+
+.foo {
+    @media $baz {}
+}
+
+$qux {}
