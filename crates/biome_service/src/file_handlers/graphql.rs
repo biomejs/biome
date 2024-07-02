@@ -1,4 +1,6 @@
-use super::{DocumentFileSource, ExtensionHandler, LintParams, LintResults, ParseResult};
+use super::{
+    DocumentFileSource, ExtensionHandler, LintParams, LintResults, ParseResult, SearchCapabilities,
+};
 use crate::file_handlers::DebugCapabilities;
 use crate::file_handlers::{
     AnalyzerCapabilities, Capabilities, FormatterCapabilities, ParserCapabilities,
@@ -77,6 +79,7 @@ impl ExtensionHandler for GraphqlFileHandler {
                 format_range: None,
                 format_on_type: None,
             },
+            search: SearchCapabilities { search_file: None },
         }
     }
 }
@@ -89,15 +92,9 @@ fn parse(
     cache: &mut NodeCache,
 ) -> ParseResult {
     let parse = parse_graphql_with_cache(text, cache);
-    let root = parse.syntax();
-    let diagnostics = parse.into_diagnostics();
 
     ParseResult {
-        any_parse: AnyParse::new(
-            // SAFETY: the parser should always return a root node
-            root.as_send().unwrap(),
-            diagnostics,
-        ),
+        any_parse: parse.into(),
         language: Some(file_source),
     }
 }

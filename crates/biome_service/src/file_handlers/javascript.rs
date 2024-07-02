@@ -1,6 +1,7 @@
 use super::{
-    AnalyzerCapabilities, CodeActionsParams, DebugCapabilities, ExtensionHandler,
+    search_file, AnalyzerCapabilities, CodeActionsParams, DebugCapabilities, ExtensionHandler,
     FormatterCapabilities, LintParams, LintResults, ParseResult, ParserCapabilities,
+    SearchCapabilities,
 };
 use crate::configuration::to_analyzer_rules;
 use crate::diagnostics::extension_error;
@@ -289,6 +290,9 @@ impl ExtensionHandler for JsFileHandler {
                 format_range: Some(format_range),
                 format_on_type: Some(format_on_type),
             },
+            search: SearchCapabilities {
+                search_file: Some(search_file),
+            },
         }
     }
 }
@@ -319,14 +323,8 @@ fn parse(
 
     let file_source = file_source.to_js_file_source().unwrap_or_default();
     let parse = biome_js_parser::parse_js_with_cache(text, file_source, options, cache);
-    let root = parse.syntax();
-    let diagnostics = parse.into_diagnostics();
     ParseResult {
-        any_parse: AnyParse::new(
-            // SAFETY: the parser should always return a root node
-            root.as_send().unwrap(),
-            diagnostics,
-        ),
+        any_parse: parse.into(),
         language: None,
     }
 }

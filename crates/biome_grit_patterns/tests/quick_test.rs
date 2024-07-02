@@ -1,5 +1,7 @@
 use biome_grit_parser::parse_grit;
 use biome_grit_patterns::{GritQuery, GritTargetFile, GritTargetLanguage, JsTargetLanguage};
+use biome_js_parser::{parse, JsParserOptions};
+use biome_js_syntax::JsFileSource;
 
 // Use this test to quickly execute a Grit query against a source snippet.
 #[ignore]
@@ -24,15 +26,16 @@ fn test_query() {
         println!("Diagnostics from compiling query:\n{:?}", query.diagnostics);
     }
 
-    let file = GritTargetFile {
-        path: "test.js".into(),
-        content: r#"
+    let body = r#"
 function hello() {
     console
         .log("hello");
 }
-"#
-        .to_string(),
+"#;
+
+    let file = GritTargetFile {
+        path: "test.js".into(),
+        parse: parse(body, JsFileSource::tsx(), JsParserOptions::default()).into(),
     };
     let results = query.execute(file).expect("could not execute query");
 

@@ -584,7 +584,7 @@ impl<'ctx, 'app> TraversalContext for TraversalOptions<'ctx, 'app> {
             TraversalMode::Lint { .. } => file_features.supports_lint(),
             // Imagine if Biome can't handle its own configuration file...
             TraversalMode::Migrate { .. } => true,
-            TraversalMode::Search { .. } => true,
+            TraversalMode::Search { .. } => file_features.supports_search(),
         }
     }
 
@@ -614,7 +614,6 @@ fn handle_file(ctx: &TraversalOptions, path: &Path) {
         }
         Ok(Ok(FileStatus::Ignored)) => {}
         Ok(Err(err)) => {
-            println!("Oh no! {err:?}");
             ctx.increment_unchanged();
             ctx.skipped.fetch_add(1, Ordering::Relaxed);
             ctx.push_message(err);

@@ -7,7 +7,7 @@ use super::{
     RenameResult, SearchPatternParams, SearchResults, SupportsFeatureParams,
     UnregisterProjectFolderParams, UpdateProjectParams, UpdateSettingsParams,
 };
-use crate::diagnostics::{InvalidPattern, QueryError, SearchError};
+use crate::diagnostics::{InvalidPattern, SearchError};
 use crate::file_handlers::{
     Capabilities, CodeActionsParams, DocumentFileSource, FixAllParams, LintParams, ParseResult,
 };
@@ -25,12 +25,12 @@ use biome_diagnostics::{
 };
 use biome_formatter::Printed;
 use biome_fs::{BiomePath, ConfigName};
-use biome_grit_patterns::{GritQuery, GritQueryResult, GritTargetFile};
+use biome_grit_patterns::GritQuery;
 use biome_json_parser::{parse_json_with_cache, JsonParserOptions};
 use biome_json_syntax::JsonFileSource;
 use biome_parser::AnyParse;
 use biome_project::NodeJsProject;
-use biome_rowan::{NodeCache, TextRange};
+use biome_rowan::NodeCache;
 use dashmap::{mapref::entry::Entry, DashMap};
 use indexmap::IndexSet;
 use std::ffi::OsStr;
@@ -787,39 +787,31 @@ impl Workspace for WorkspaceServer {
     }
 
     fn search_pattern(&self, params: SearchPatternParams) -> Result<SearchResults, WorkspaceError> {
-        let SearchPatternParams { path, pattern } = params;
-
-        let Some(query) = self.patterns.get(&pattern) else {
+        let Some(query) = self.patterns.get(&params.pattern) else {
             return Err(WorkspaceError::SearchError(SearchError::InvalidPattern(
                 InvalidPattern,
             )));
         };
 
-        let document = self
-            .documents
-            .get(&path)
-            .ok_or_else(WorkspaceError::not_found)?;
+        let capabilities = self.get_file_capabilities(&params.path);
+        let search_file = capabilities
+            .search
+            .search_file
+            .ok_or_else(self.build_capability_error(&params.path))?;
+        let workspace = self.workspace();
+        let parse = self.get_parse(params.path.clone())?;
 
-        let query_result = query
-            .execute(GritTargetFile {
-                path: path.to_path_buf(),
-                content: document.content.clone(),
-            })
-            .map_err(|err| {
-                WorkspaceError::SearchError(SearchError::QueryError(QueryError(err.to_string())))
-            })?;
-
-        let matches = query_result
-            .into_iter()
-            .flat_map(|result| match result {
-                GritQueryResult::Match(m) => m.ranges,
-                _ => Vec::new(),
-            })
-            .map(|range| TextRange::new(range.start_byte.into(), range.end_byte.into()))
-            .collect();
+        let document_file_source = self.get_file_source(&params.path);
+        let matches = search_file(
+            &params.path,
+            &document_file_source,
+            parse,
+            &query,
+            workspace,
+        )?;
 
         Ok(SearchResults {
-            file: path,
+            file: params.path,
             matches,
         })
     }

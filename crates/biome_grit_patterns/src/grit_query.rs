@@ -36,6 +36,7 @@ const GLOBAL_VARS: [(&str, usize); 4] = [
 /// Represents a top-level Grit query.
 ///
 /// Grit queries provide the
+#[derive(Clone, Debug)]
 pub struct GritQuery {
     pub pattern: Pattern<GritQueryContext>,
 
@@ -110,8 +111,6 @@ impl GritQuery {
             .map(|(global_var, index)| ((*global_var).to_string(), *index))
             .collect();
         let mut diagnostics = Vec::new();
-
-        // Make sure
 
         // We're not in a local scope yet, so this map is kinda useless.
         // It's just there because all node compilers expect one.

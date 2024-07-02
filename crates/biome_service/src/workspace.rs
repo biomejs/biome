@@ -124,9 +124,7 @@ impl FileFeaturesResult {
         (FeatureName::Lint, SupportKind::FileNotSupported),
         (FeatureName::Format, SupportKind::FileNotSupported),
         (FeatureName::OrganizeImports, SupportKind::FileNotSupported),
-        // FIXME: I remember I was not supposed to do this, but I forgot why.
-        // It works though, so please remind me what the right way to do this is :)
-        (FeatureName::Search, SupportKind::Supported),
+        (FeatureName::Search, SupportKind::FileNotSupported),
     ];
 
     pub fn new() -> Self {
@@ -147,6 +145,10 @@ impl FileFeaturesResult {
         if capabilities.analyzer.organize_imports.is_some() {
             self.features_supported
                 .insert(FeatureName::OrganizeImports, SupportKind::Supported);
+        }
+        if capabilities.search.search_file.is_some() {
+            self.features_supported
+                .insert(FeatureName::Search, SupportKind::Supported);
         }
 
         self
@@ -250,6 +252,10 @@ impl FileFeaturesResult {
 
     pub fn supports_organize_imports(&self) -> bool {
         self.supports_for(&FeatureName::OrganizeImports)
+    }
+
+    pub fn supports_search(&self) -> bool {
+        self.supports_for(&FeatureName::Search)
     }
 
     /// Loops through all the features of the current file, and if a feature is [SupportKind::FileNotSupported],

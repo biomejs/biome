@@ -7,6 +7,7 @@ use crate::grit_target_language::GritTargetLanguage;
 use crate::grit_target_node::GritTargetNode;
 use crate::grit_tree::GritTargetTree;
 use anyhow::{anyhow, bail, Result};
+use biome_parser::AnyParse;
 use grit_pattern_matcher::constants::{GLOBAL_VARS_SCOPE_INDEX, NEW_FILES_INDEX};
 use grit_pattern_matcher::context::{ExecContext, QueryContext};
 use grit_pattern_matcher::file_owners::{FileOwner, FileOwners};
@@ -184,20 +185,13 @@ impl<'a> ExecContext<'a, GritQueryContext> for GritExecContext<'a> {
                 .body(&state.files)
                 .text(&state.files, &self.lang)
                 .unwrap();
-            let owned_file = file_owner_from_matches(
-                name.clone(),
-                &body,
-                None,
-                FileOrigin::New,
-                &self.lang,
-                logs,
-            )?
-            .ok_or_else(|| {
-                anyhow!(
-                    "failed to construct new file for file {}",
-                    name.to_string_lossy()
-                )
-            })?;
+            let owned_file =
+                new_file_owner(name.clone(), &body, &self.lang, logs)?.ok_or_else(|| {
+                    anyhow!(
+                        "failed to construct new file for file {}",
+                        name.to_string_lossy()
+                    )
+                })?;
             self.files().push(owned_file);
             let _ = state.files.push_new_file(self.files().last().unwrap());
         }
@@ -233,7 +227,7 @@ impl<'a> ExecContext<'a, GritQueryContext> for GritExecContext<'a> {
 
                 let file = file_owner_from_matches(
                     &file.path,
-                    &file.content,
+                    &file.parse,
                     None,
                     FileOrigin::Fresh,
                     &self.lang,
@@ -251,7 +245,7 @@ impl<'a> ExecContext<'a, GritQueryContext> for GritExecContext<'a> {
 
 fn file_owner_from_matches(
     name: impl Into<PathBuf>,
-    source: &str,
+    parse: &AnyParse,
     matches: Option<MatchRanges>,
     old_tree: FileOrigin<'_, GritTargetTree>,
     language: &GritTargetLanguage,
@@ -262,7 +256,7 @@ fn file_owner_from_matches(
 
     let Some(tree) = language
         .get_parser()
-        .parse_file(source, Some(&name), logs, old_tree)
+        .from_cached_parse_result(parse, Some(&name), logs)
     else {
         return Ok(None);
     };
@@ -277,6 +271,31 @@ fn file_owner_from_matches(
     }))
 }
 
+fn new_file_owner(
+    name: impl Into<PathBuf>,
+    source: &str,
+    language: &GritTargetLanguage,
+    logs: &mut AnalysisLogs,
+) -> Result<Option<FileOwner<GritTargetTree>>> {
+    let name = name.into();
+
+    let Some(tree) = language
+        .get_parser()
+        .parse_file(source, Some(&name), logs, FileOrigin::New)
+    else {
+        return Ok(None);
+    };
+
+    let absolute_path = name.absolutize()?.to_path_buf();
+    Ok(Some(FileOwner {
+        name,
+        absolute_path,
+        tree,
+        matches: Default::default(),
+        new: true,
+    }))
+}
+
 /// Simple wrapper for target files so that we can avoid doing file I/O inside
 /// the Grit engine.
 ///
@@ -286,5 +305,5 @@ fn file_owner_from_matches(
 #[derive(Clone, Debug)]
 pub struct GritTargetFile {
     pub path: PathBuf,
-    pub content: String,
+    pub parse: AnyParse,
 }

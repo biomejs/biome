@@ -5,7 +5,7 @@ use crate::syntax::parse_root;
 use biome_json_factory::JsonSyntaxFactory;
 use biome_json_syntax::{JsonLanguage, JsonRoot, JsonSyntaxNode};
 pub use biome_parser::prelude::*;
-use biome_parser::tree_sink::LosslessTreeSink;
+use biome_parser::{tree_sink::LosslessTreeSink, AnyParse};
 use biome_rowan::{AstNode, NodeCache};
 pub use parser::JsonParserOptions;
 
@@ -103,5 +103,17 @@ impl JsonParse {
     /// Panics if the node represented by this parse result mismatches.
     pub fn tree(&self) -> JsonRoot {
         JsonRoot::unwrap_cast(self.syntax())
+    }
+}
+
+impl From<JsonParse> for AnyParse {
+    fn from(parse: JsonParse) -> Self {
+        let root = parse.syntax();
+        let diagnostics = parse.into_diagnostics();
+        Self::new(
+            // SAFETY: the parser should always return a root node
+            root.as_send().unwrap(),
+            diagnostics,
+        )
     }
 }
