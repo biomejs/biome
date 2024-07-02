@@ -5,6 +5,8 @@ use biome_css_formatter::context::{CssFormatContext, CssFormatOptions};
 use biome_css_parser::CssParserOptions;
 use biome_css_syntax::{CssRoot, CssSyntaxNode};
 use biome_formatter::{FormatResult, Formatted, PrintResult, Printed};
+use biome_graphql_formatter::context::{GraphqlFormatContext, GraphqlFormatOptions};
+use biome_graphql_syntax::GraphqlSyntaxNode;
 use biome_js_formatter::context::{JsFormatContext, JsFormatOptions};
 use biome_js_parser::JsParserOptions;
 use biome_js_syntax::{AnyJsRoot, JsFileSource, JsSyntaxNode};
@@ -100,7 +102,7 @@ impl Parsed {
             }
             Parsed::Json(parse) => Some(FormatNode::Json(parse.syntax())),
             Parsed::Css(parse) => Some(FormatNode::Css(parse.syntax())),
-            Parsed::Graphql(_parse) => None,
+            Parsed::Graphql(parse) => Some(FormatNode::Graphql(parse.syntax())),
         }
     }
 
@@ -127,6 +129,7 @@ pub enum FormatNode {
     JavaScript(JsSyntaxNode, JsFileSource),
     Json(JsonSyntaxNode),
     Css(CssSyntaxNode),
+    Graphql(GraphqlSyntaxNode),
 }
 
 impl FormatNode {
@@ -142,6 +145,10 @@ impl FormatNode {
             }
             Self::Css(root) => biome_css_formatter::format_node(CssFormatOptions::default(), root)
                 .map(FormattedNode::Css),
+            FormatNode::Graphql(root) => {
+                biome_graphql_formatter::format_node(GraphqlFormatOptions::default(), root)
+                    .map(FormattedNode::Graphql)
+            }
         }
     }
 }
@@ -150,6 +157,7 @@ pub enum FormattedNode {
     JavaScript(Formatted<JsFormatContext>),
     Json(Formatted<JsonFormatContext>),
     Css(Formatted<CssFormatContext>),
+    Graphql(Formatted<GraphqlFormatContext>),
 }
 
 impl FormattedNode {
@@ -158,6 +166,7 @@ impl FormattedNode {
             FormattedNode::JavaScript(formatted) => formatted.print(),
             FormattedNode::Json(formatted) => formatted.print(),
             FormattedNode::Css(formatted) => formatted.print(),
+            FormattedNode::Graphql(formatted) => formatted.print(),
         }
     }
 }
