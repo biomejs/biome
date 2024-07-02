@@ -160,6 +160,10 @@ export interface PartialFormatterConfiguration {
 	 * What's the max width of a line. Defaults to 80.
 	 */
 	lineWidth?: LineWidth;
+	/**
+	 * Use any `.editorconfig` files to configure the formatter. Configuration in `biome.json` will override `.editorconfig` configuration. Default: false.
+	 */
+	useEditorconfig?: boolean;
 }
 /**
  * Options applied to GraphQL files
@@ -1200,7 +1204,7 @@ export interface Nursery {
 	/**
 	 * Enforce file extensions for relative imports.
 	 */
-	useImportExtensions?: RuleFixConfiguration_for_Null;
+	useImportExtensions?: RuleFixConfiguration_for_UseImportExtensionsOptions;
 	/**
 	 * Disallows package private imports.
 	 */
@@ -1781,6 +1785,9 @@ export type RuleConfiguration_for_NoLabelWithoutControlOptions =
 export type RuleConfiguration_for_RestrictedImportsOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_RestrictedImportsOptions;
+export type RuleFixConfiguration_for_UseImportExtensionsOptions =
+	| RulePlainConfiguration
+	| RuleWithFixOptions_for_UseImportExtensionsOptions;
 export type RuleFixConfiguration_for_UtilityClassSortingOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_UtilityClassSortingOptions;
@@ -1887,6 +1894,20 @@ export interface RuleWithOptions_for_RestrictedImportsOptions {
 	 * Rule's options
 	 */
 	options: RestrictedImportsOptions;
+}
+export interface RuleWithFixOptions_for_UseImportExtensionsOptions {
+	/**
+	 * The kind of the code actions emitted by the rule
+	 */
+	fix?: FixKind;
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: UseImportExtensionsOptions;
 }
 export interface RuleWithFixOptions_for_UtilityClassSortingOptions {
 	/**
@@ -2012,6 +2033,12 @@ export interface RestrictedImportsOptions {
 	 * A list of names that should trigger the rule
 	 */
 	paths: {};
+}
+export interface UseImportExtensionsOptions {
+	/**
+	 * A map of custom import extension mappings, where the key is the inspected file extension, and the value is a pair of `module` extension and `component` import extension
+	 */
+	suggestedExtensions: {};
 }
 export interface UtilityClassSortingOptions {
 	/**

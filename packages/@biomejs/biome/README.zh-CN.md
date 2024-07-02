@@ -27,11 +27,16 @@
 
 </div>
 
-<div align="center">
+翻译:
 
-[English](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.md) | 简体中文 | [日本語](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.ja.md) | [Português do Brasil](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.pt-br.md)
-
-</div>
+<!-- Insert new entries lexicographically by language code.
+     For example given below is the same order as these files appear on page:
+     https://github.com/biomejs/biome/tree/main/packages/%40biomejs/biome -->
+* [हिन्दी](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.hi.md)
+* [日本語](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.ja.md)
+* [English](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.md)
+* [Português do Brasil](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.pt-BR.md)
+* 简体中文
 
 **Biome** 是一个用于 Web 项目的高性能工具链，旨在为开发者提供维护项目的工具。
 

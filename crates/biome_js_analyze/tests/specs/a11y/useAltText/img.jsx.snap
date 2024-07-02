@@ -18,8 +18,10 @@ expression: img.jsx
   <img role="none" />
   <img aria-label={undefined} />
   <img aria-labelledby={undefined} />
+  <img aria-hidden={undefined} />
   <img aria-label="" />
   <img aria-labelledby="" />
+  <img aria-hidden={false} />
 </>;
 
 // valid
@@ -56,6 +58,8 @@ expression: img.jsx
   <img alt={plugin.name + " Logo"} />
   <img aria-label="foo" />
   <img aria-labelledby="id1" />
+  <img aria-hidden />
+  <img aria-hidden={true} />
 </>;
 
 ```
@@ -75,6 +79,8 @@ img.jsx:3:3 lint/a11y/useAltText ━━━━━━━━━━━━━━━�
   
   i Meaningful alternative text on elements helps users relying on screen readers to understand content's purpose within a page.
   
+  i If the content is decorative, redundant, or obscured, consider hiding it from assistive technologies with the aria-hidden attribute.
+  
 
 ```
 
@@ -91,6 +97,8 @@ img.jsx:4:3 lint/a11y/useAltText ━━━━━━━━━━━━━━━�
     6 │   <img src="xyz" />
   
   i Meaningful alternative text on elements helps users relying on screen readers to understand content's purpose within a page.
+  
+  i If the content is decorative, redundant, or obscured, consider hiding it from assistive technologies with the aria-hidden attribute.
   
 
 ```
@@ -109,6 +117,8 @@ img.jsx:5:3 lint/a11y/useAltText ━━━━━━━━━━━━━━━�
   
   i Meaningful alternative text on elements helps users relying on screen readers to understand content's purpose within a page.
   
+  i If the content is decorative, redundant, or obscured, consider hiding it from assistive technologies with the aria-hidden attribute.
+  
 
 ```
 
@@ -125,6 +135,8 @@ img.jsx:6:3 lint/a11y/useAltText ━━━━━━━━━━━━━━━�
     8 │   <img {...this.props} />
   
   i Meaningful alternative text on elements helps users relying on screen readers to understand content's purpose within a page.
+  
+  i If the content is decorative, redundant, or obscured, consider hiding it from assistive technologies with the aria-hidden attribute.
   
 
 ```
@@ -143,6 +155,8 @@ img.jsx:7:3 lint/a11y/useAltText ━━━━━━━━━━━━━━━�
   
   i Meaningful alternative text on elements helps users relying on screen readers to understand content's purpose within a page.
   
+  i If the content is decorative, redundant, or obscured, consider hiding it from assistive technologies with the aria-hidden attribute.
+  
 
 ```
 
@@ -159,6 +173,8 @@ img.jsx:8:3 lint/a11y/useAltText ━━━━━━━━━━━━━━━�
     10 │   <img alt role="presentation" />
   
   i Meaningful alternative text on elements helps users relying on screen readers to understand content's purpose within a page.
+  
+  i If the content is decorative, redundant, or obscured, consider hiding it from assistive technologies with the aria-hidden attribute.
   
 
 ```
@@ -177,6 +193,8 @@ img.jsx:9:3 lint/a11y/useAltText ━━━━━━━━━━━━━━━�
   
   i Meaningful alternative text on elements helps users relying on screen readers to understand content's purpose within a page.
   
+  i If the content is decorative, redundant, or obscured, consider hiding it from assistive technologies with the aria-hidden attribute.
+  
 
 ```
 
@@ -193,6 +211,8 @@ img.jsx:10:3 lint/a11y/useAltText ━━━━━━━━━━━━━━━�
     12 │   <img role="none" />
   
   i Meaningful alternative text on elements helps users relying on screen readers to understand content's purpose within a page.
+  
+  i If the content is decorative, redundant, or obscured, consider hiding it from assistive technologies with the aria-hidden attribute.
   
 
 ```
@@ -211,6 +231,8 @@ img.jsx:11:3 lint/a11y/useAltText ━━━━━━━━━━━━━━━�
   
   i Meaningful alternative text on elements helps users relying on screen readers to understand content's purpose within a page.
   
+  i If the content is decorative, redundant, or obscured, consider hiding it from assistive technologies with the aria-hidden attribute.
+  
 
 ```
 
@@ -228,6 +250,8 @@ img.jsx:12:3 lint/a11y/useAltText ━━━━━━━━━━━━━━━�
   
   i Meaningful alternative text on elements helps users relying on screen readers to understand content's purpose within a page.
   
+  i If the content is decorative, redundant, or obscured, consider hiding it from assistive technologies with the aria-hidden attribute.
+  
 
 ```
 
@@ -241,9 +265,11 @@ img.jsx:13:3 lint/a11y/useAltText ━━━━━━━━━━━━━━━�
   > 13 │   <img aria-label={undefined} />
        │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     14 │   <img aria-labelledby={undefined} />
-    15 │   <img aria-label="" />
+    15 │   <img aria-hidden={undefined} />
   
   i Meaningful alternative text on elements helps users relying on screen readers to understand content's purpose within a page.
+  
+  i If the content is decorative, redundant, or obscured, consider hiding it from assistive technologies with the aria-hidden attribute.
   
 
 ```
@@ -257,10 +283,12 @@ img.jsx:14:3 lint/a11y/useAltText ━━━━━━━━━━━━━━━�
     13 │   <img aria-label={undefined} />
   > 14 │   <img aria-labelledby={undefined} />
        │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    15 │   <img aria-label="" />
-    16 │   <img aria-labelledby="" />
+    15 │   <img aria-hidden={undefined} />
+    16 │   <img aria-label="" />
   
   i Meaningful alternative text on elements helps users relying on screen readers to understand content's purpose within a page.
+  
+  i If the content is decorative, redundant, or obscured, consider hiding it from assistive technologies with the aria-hidden attribute.
   
 
 ```
@@ -272,12 +300,14 @@ img.jsx:15:3 lint/a11y/useAltText ━━━━━━━━━━━━━━━�
   
     13 │   <img aria-label={undefined} />
     14 │   <img aria-labelledby={undefined} />
-  > 15 │   <img aria-label="" />
-       │   ^^^^^^^^^^^^^^^^^^^^^
-    16 │   <img aria-labelledby="" />
-    17 │ </>;
+  > 15 │   <img aria-hidden={undefined} />
+       │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    16 │   <img aria-label="" />
+    17 │   <img aria-labelledby="" />
   
   i Meaningful alternative text on elements helps users relying on screen readers to understand content's purpose within a page.
+  
+  i If the content is decorative, redundant, or obscured, consider hiding it from assistive technologies with the aria-hidden attribute.
   
 
 ```
@@ -288,15 +318,53 @@ img.jsx:16:3 lint/a11y/useAltText ━━━━━━━━━━━━━━━�
   ! Provide a text alternative through the alt, aria-label or aria-labelledby attribute
   
     14 │   <img aria-labelledby={undefined} />
-    15 │   <img aria-label="" />
-  > 16 │   <img aria-labelledby="" />
-       │   ^^^^^^^^^^^^^^^^^^^^^^^^^^
-    17 │ </>;
-    18 │ 
+    15 │   <img aria-hidden={undefined} />
+  > 16 │   <img aria-label="" />
+       │   ^^^^^^^^^^^^^^^^^^^^^
+    17 │   <img aria-labelledby="" />
+    18 │   <img aria-hidden={false} />
   
   i Meaningful alternative text on elements helps users relying on screen readers to understand content's purpose within a page.
+  
+  i If the content is decorative, redundant, or obscured, consider hiding it from assistive technologies with the aria-hidden attribute.
   
 
 ```
 
+```
+img.jsx:17:3 lint/a11y/useAltText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
+  ! Provide a text alternative through the alt, aria-label or aria-labelledby attribute
+  
+    15 │   <img aria-hidden={undefined} />
+    16 │   <img aria-label="" />
+  > 17 │   <img aria-labelledby="" />
+       │   ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    18 │   <img aria-hidden={false} />
+    19 │ </>;
+  
+  i Meaningful alternative text on elements helps users relying on screen readers to understand content's purpose within a page.
+  
+  i If the content is decorative, redundant, or obscured, consider hiding it from assistive technologies with the aria-hidden attribute.
+  
+
+```
+
+```
+img.jsx:18:3 lint/a11y/useAltText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide a text alternative through the alt, aria-label or aria-labelledby attribute
+  
+    16 │   <img aria-label="" />
+    17 │   <img aria-labelledby="" />
+  > 18 │   <img aria-hidden={false} />
+       │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    19 │ </>;
+    20 │ 
+  
+  i Meaningful alternative text on elements helps users relying on screen readers to understand content's purpose within a page.
+  
+  i If the content is decorative, redundant, or obscured, consider hiding it from assistive technologies with the aria-hidden attribute.
+  
+
+```

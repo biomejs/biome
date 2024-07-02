@@ -1150,6 +1150,10 @@
 				"lineWidth": {
 					"description": "What's the max width of a line. Defaults to 80.",
 					"anyOf": [{ "$ref": "#/definitions/LineWidth" }, { "type": "null" }]
+				},
+				"useEditorconfig": {
+					"description": "Use any `.editorconfig` files to configure the formatter. Configuration in `biome.json` will override `.editorconfig` configuration. Default: false.",
+					"type": ["boolean", "null"]
 				}
 			},
 			"additionalProperties": false
@@ -2031,7 +2035,7 @@
 				"useImportExtensions": {
 					"description": "Enforce file extensions for relative imports.",
 					"anyOf": [
-						{ "$ref": "#/definitions/RuleFixConfiguration" },
+						{ "$ref": "#/definitions/UseImportExtensionsConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -2530,6 +2534,25 @@
 			},
 			"additionalProperties": false
 		},
+		"RuleWithUseImportExtensionsOptions": {
+			"type": "object",
+			"required": ["level", "options"],
+			"properties": {
+				"fix": {
+					"description": "The kind of the code actions emitted by the rule",
+					"anyOf": [{ "$ref": "#/definitions/FixKind" }, { "type": "null" }]
+				},
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/UseImportExtensionsOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
 		"RuleWithUseValidAutocompleteOptions": {
 			"type": "object",
 			"required": ["level", "options"],
@@ -3017,6 +3040,21 @@
 			},
 			"additionalProperties": false
 		},
+		"SuggestedExtensionMapping": {
+			"type": "object",
+			"required": ["component", "module"],
+			"properties": {
+				"component": {
+					"description": "Extension that should be used for component file imports",
+					"type": "string"
+				},
+				"module": {
+					"description": "Extension that should be used for module imports",
+					"type": "string"
+				}
+			},
+			"additionalProperties": false
+		},
 		"Suspicious": {
 			"description": "A list of rules that belong to this group",
 			"type": "object",
@@ -3450,6 +3488,26 @@
 					"enum": ["all"]
 				}
 			]
+		},
+		"UseImportExtensionsConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithUseImportExtensionsOptions" }
+			]
+		},
+		"UseImportExtensionsOptions": {
+			"type": "object",
+			"required": ["suggestedExtensions"],
+			"properties": {
+				"suggestedExtensions": {
+					"description": "A map of custom import extension mappings, where the key is the inspected file extension, and the value is a pair of `module` extension and `component` import extension",
+					"type": "object",
+					"additionalProperties": {
+						"$ref": "#/definitions/SuggestedExtensionMapping"
+					}
+				}
+			},
+			"additionalProperties": false
 		},
 		"UseValidAutocompleteConfiguration": {
 			"anyOf": [

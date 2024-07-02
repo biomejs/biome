@@ -12,8 +12,10 @@
   <img role="none" />
   <img aria-label={undefined} />
   <img aria-labelledby={undefined} />
+  <img aria-hidden={undefined} />
   <img aria-label="" />
   <img aria-labelledby="" />
+  <img aria-hidden={false} />
 </>;
 
 // valid
@@ -50,4 +52,6 @@
   <img alt={plugin.name + " Logo"} />
   <img aria-label="foo" />
   <img aria-labelledby="id1" />
+  <img aria-hidden />
+  <img aria-hidden={true} />
 </>;

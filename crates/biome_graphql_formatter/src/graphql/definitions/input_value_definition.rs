@@ -19,11 +19,13 @@ impl FormatNodeRule<GraphqlInputValueDefinition> for FormatGraphqlInputValueDefi
             directives,
         } = node.as_fields();
 
+        if let Some(description) = description {
+            write!(f, [description.format(), soft_line_break_or_space(),])?;
+        }
+
         write!(
             f,
             [
-                description.format(),
-                soft_line_break(),
                 name.format(),
                 colon_token.format(),
                 space(),

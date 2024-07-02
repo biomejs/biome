@@ -16,6 +16,7 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 #### Enhancements
 
 - Implement [css suppression action](https://github.com/biomejs/biome/issues/3278). Contributed by @togami2864
+- Add support of comments in `turbo.json`. Contributed by @Netail
 
 ### CLI
 
@@ -28,6 +29,10 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 ### JavaScript APIs
 
 ### Linter
+
+#### Bug fixes
+
+- Don't request alt text for elements hidden from assistive technologies ([#3316](https://github.com/biomejs/biome/issues/3316)). Contributed by @robintown
 
 ### Parser
 
@@ -60,6 +65,10 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 - Add `nursery/useDeprecatedReason` rule. Contributed by @vohoanglong0107.
 - Add [nursery/noExportedImports](https://biomejs.dev/linter/rules/no-exported-imports/). Contributed by @Conaclos
+
+#### Enhancements
+
+- Implement [suggestedExtensions option](https://github.com/biomejs/biome/pull/3274) for `useImportExtensions` rule. Contributed by @drdaemos
 
 #### Bug fixes
 

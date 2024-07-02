@@ -1,0 +1,21 @@
+{
+	"$schema": "../../../../../../packages/@biomejs/biome/configuration_schema.json",
+	"linter": {
+		"enabled": true,
+		"rules": {
+			"nursery": {
+				"useImportExtensions": {
+					"level": "error",
+					"options": {
+						"suggestedExtensions": {
+							"ts": {
+								"module": "js",
+								"component": "jsx"
+							}
+						}
+                    }
+				}
+			}
+		}
+	}
+}
