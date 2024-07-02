@@ -1319,21 +1319,20 @@ impl<'src> CssLexer<'src> {
 
     // $[a-zA-Z_][a-zA-Z0-9_]*
     fn re_lex_grit_metavariable(&mut self, current_end: usize) -> CssSyntaxKind {
-        if self.current_kind == T![ident] {
-            if self.current_byte() == Some(b'$') {
-                if matches!(self.next_byte(), Some(b'a'..=b'z' | b'0'..=b'9' | b'_')) {
-                    while let Some(chr) = self.current_byte() {
-                        match chr {
-                            b'a'..=b'z' | b'A'..=b'Z' | b'0'..=b'9' | b'_' => {
-                                self.advance(1);
-                            }
-                            _ => break,
-                        }
+        if self.current_kind == T![ident]
+            && self.current_byte() == Some(b'$')
+            && matches!(self.next_byte(), Some(b'a'..=b'z' | b'A'..=b'Z' | b'_'))
+        {
+            while let Some(chr) = self.current_byte() {
+                match chr {
+                    b'a'..=b'z' | b'A'..=b'Z' | b'0'..=b'9' | b'_' => {
+                        self.advance(1);
                     }
-                    if current_end == self.position {
-                        return GRIT_METAVARIABLE;
-                    }
+                    _ => break,
                 }
+            }
+            if current_end == self.position {
+                return GRIT_METAVARIABLE;
             }
         }
 
