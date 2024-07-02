@@ -2,7 +2,6 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: css/postcss-plugins/postcss-nested-props.css
 ---
-
 # Input
 
 ```css
@@ -28,25 +27,14 @@ info: css/postcss-plugins/postcss-nested-props.css
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,13 +1,13 @@
- .funky {
-   font: {
--    family: fantasy;
--    size: 30em;
--    weight: bold;
--  }
-+        family: fantasy;
-+  size: 30em;
-+  weight: bold;
-+}
- }
+@@ -8,6 +8,6 @@
  
  .funky {
    font: 20px/24px fantasy {
 -    weight: bold;
 -  }
 +        weight: bold;
-+}
++    }
  }
 ```
 
@@ -55,16 +43,16 @@ info: css/postcss-plugins/postcss-nested-props.css
 ```css
 .funky {
   font: {
-        family: fantasy;
-  size: 30em;
-  weight: bold;
-}
+    family: fantasy;
+    size: 30em;
+    weight: bold;
+  }
 }
 
 .funky {
   font: 20px/24px fantasy {
         weight: bold;
-}
+    }
 }
 ```
 
@@ -77,82 +65,150 @@ postcss-nested-props.css:2:11 parse ━━━━━━━━━━━━━━�
     1 │ .funky {
   > 2 │     font: {
       │           ^
-  > 3 │         family: fantasy;
-      │         ^^^^^^^^^^^^^^^
+    3 │         family: fantasy;
     4 │         size: 30em;
-    5 │         weight: bold;
   
   i Expected one of:
   
-  - identifier
-  - string
-  - number
-  - dimension
-  - ratio
-  - custom property
-  - function
+  - hover
+  - focus
+  - active
+  - first-child
+  - last-child
+  - nth-child
+  - nth-last-child
+  - first-of-type
+  - last-of-type
+  - nth-of-type
+  - nth-last-of-type
+  - only-child
+  - only-of-type
+  - checked
+  - disabled
+  - enabled
+  - required
+  - optional
+  - valid
+  - invalid
+  - in-range
+  - out-of-range
+  - read-only
+  - read-write
+  - placeholder-shown
+  - default
+  - checked
+  - indeterminate
+  - blank
+  - empty
+  - root
+  - target
+  - lang
+  - not
+  - is
+  - where
+  - fullscreen
+  - link
+  - visited
+  - any-link
+  - local-link
+  - scope
+  - current
+  - past
+  - future
   
-postcss-nested-props.css:7:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Expected a qualified rule, or an at rule but instead found '}'.
-  
-    5 │         weight: bold;
-    6 │     }
-  > 7 │ }
-      │ ^
-    8 │ 
-    9 │ .funky {
-  
-  i Expected a qualified rule, or an at rule here.
-  
-    5 │         weight: bold;
-    6 │     }
-  > 7 │ }
-      │ ^
-    8 │ 
-    9 │ .funky {
-  
-postcss-nested-props.css:10:29 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+postcss-nested-props.css:10:11 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Unexpected value or character.
   
      9 │ .funky {
   > 10 │     font: 20px/24px fantasy {
-       │                             ^
-  > 11 │         weight: bold;
-       │         ^^^^^^^^^^^^
+       │           ^^
+    11 │         weight: bold;
     12 │     }
-    13 │ }
   
   i Expected one of:
   
-  - identifier
-  - string
-  - number
-  - dimension
-  - ratio
-  - custom property
-  - function
+  - hover
+  - focus
+  - active
+  - first-child
+  - last-child
+  - nth-child
+  - nth-last-child
+  - first-of-type
+  - last-of-type
+  - nth-of-type
+  - nth-last-of-type
+  - only-child
+  - only-of-type
+  - checked
+  - disabled
+  - enabled
+  - required
+  - optional
+  - valid
+  - invalid
+  - in-range
+  - out-of-range
+  - read-only
+  - read-write
+  - placeholder-shown
+  - default
+  - checked
+  - indeterminate
+  - blank
+  - empty
+  - root
+  - target
+  - lang
+  - not
+  - is
+  - where
+  - fullscreen
+  - link
+  - visited
+  - any-link
+  - local-link
+  - scope
+  - current
+  - past
+  - future
   
-postcss-nested-props.css:13:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+postcss-nested-props.css:10:13 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Expected a qualified rule, or an at rule but instead found '}'.
+  × expected `,` but instead found `px`
   
+     9 │ .funky {
+  > 10 │     font: 20px/24px fantasy {
+       │             ^^
     11 │         weight: bold;
     12 │     }
-  > 13 │ }
-       │ ^
-    14 │ 
   
-  i Expected a qualified rule, or an at rule here.
+  i Remove px
   
+postcss-nested-props.css:10:15 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `/`
+  
+     9 │ .funky {
+  > 10 │     font: 20px/24px fantasy {
+       │               ^
     11 │         weight: bold;
     12 │     }
-  > 13 │ }
-       │ ^
-    14 │ 
+  
+  i Remove /
+  
+postcss-nested-props.css:10:18 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `px`
+  
+     9 │ .funky {
+  > 10 │     font: 20px/24px fantasy {
+       │                  ^^
+    11 │         weight: bold;
+    12 │     }
+  
+  i Remove px
   
 
 ```
-
-

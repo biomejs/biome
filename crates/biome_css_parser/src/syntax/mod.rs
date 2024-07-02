@@ -24,7 +24,7 @@ use biome_parser::parse_lists::{ParseNodeList, ParseSeparatedList};
 use biome_parser::parse_recovery::{ParseRecovery, ParseRecoveryTokenSet, RecoveryResult};
 use biome_parser::prelude::ParsedSyntax;
 use biome_parser::prelude::ParsedSyntax::{Absent, Present};
-use biome_parser::{token_set, Parser};
+use biome_parser::{token_set, Parser, TokenSet};
 use value::dimension::{is_at_any_dimension, parse_any_dimension};
 use value::function::{is_at_any_function, parse_any_function};
 
@@ -147,12 +147,61 @@ pub(crate) fn parse_nested_qualified_rule(p: &mut CssParser) -> ParsedSyntax {
 
     let m = p.start();
 
-    RelativeSelectorList::new(T!['{']).parse_list(p);
+    RelativeSelectorList::new(RELATIVE_SELECTOR_END_SET).parse_list(p);
 
     parse_declaration_or_rule_list_block(p);
 
     Present(m.complete(p, CSS_NESTED_QUALIFIED_RULE))
 }
+
+/// Speculatively parses a nested qualified rule from the current position in the CSS parser.
+///
+/// This function attempts to speculatively parse a nested qualified rule to determine if it is valid without
+/// fully committing to the parse state. If the current position is identified as the start of a nested
+/// qualified rule, it proceeds to parse the rule by first parsing the list of relative selectors. If the
+/// relative selectors are followed by a block start (`{`), the speculative parse is considered successful
+/// and the function proceeds to parse the declaration or rule list block. If the speculative parse fails,
+/// the parser state is rewound and the function returns `Absent`.
+#[allow(dead_code)]
+#[inline]
+pub(crate) fn speculative_parse_nested_qualified_rule(p: &mut CssParser) -> ParsedSyntax {
+    let m = p.start();
+
+    let list = try_parse(p, |p| {
+        RelativeSelectorList::new(RELATIVE_SELECTOR_END_SPECULATIVE_PARSING_SET).parse_list(p);
+
+        if p.at(T!['{']) {
+            // if we're at the block start,
+            // we're good and speculatively parsed the rule is successful
+            Ok(())
+        } else {
+            // return the error to rewind the parser state
+            Err(())
+        }
+    });
+
+    if list.is_err() {
+        m.abandon(p);
+        return Absent;
+    }
+
+    parse_declaration_or_rule_list_block(p);
+
+    Present(m.complete(p, CSS_NESTED_QUALIFIED_RULE))
+}
+
+/// `{` - The block start token.
+const RELATIVE_SELECTOR_END_SET: TokenSet<CssSyntaxKind> = token_set![T!['{']];
+
+/// When we use speculative parsing for a relative selector list,
+/// we may encounter a situation where we need to parse the list of relative selectors
+/// and then check if the next token is a block start - `{` token.
+/// If we parsed a declaration, it means we encounter an error in the following cases:
+///
+/// 1. `;` - A semicolon indicates the end of a declaration.
+/// 2. `}` - A closing brace indicates the end of a block, and the last declaration can omit a semicolon.
+const RELATIVE_SELECTOR_END_SPECULATIVE_PARSING_SET: TokenSet<CssSyntaxKind> =
+    RELATIVE_SELECTOR_END_SET.union(token_set!(T![;], T!['}']));
 
 pub(crate) struct DeclarationList;
 

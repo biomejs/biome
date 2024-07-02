@@ -31,7 +31,7 @@ pub(crate) fn parse_pseudo_class_function_relative_selector_list(
     p.bump_ts(PSEUDO_CLASS_FUNCTION_RELATIVE_SELECTOR_LIST_SET);
     p.bump(T!['(']);
 
-    let list = RelativeSelectorList::new(T![')'])
+    let list = RelativeSelectorList::new(token_set!(T![')']))
         // we don't need to recover here, because we have a better diagnostic message in a close token
         .disable_recovery()
         .parse_list(p);

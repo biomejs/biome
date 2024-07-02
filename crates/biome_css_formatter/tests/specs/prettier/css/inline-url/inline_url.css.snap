@@ -75,17 +75,15 @@ info: css/inline-url/inline_url.css
    background-image: url(/images/product/simple_product_manager/breadcrumb/chevron_right.png);
    background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mO4/B8AAqgB0yr7dJgAAAAASUVORK5CYII=);
    background-image: url(data:application/font-woff;charset=utf-8;base64,ThisIsNormalBut/+0ThisIsLowerCased);
-@@ -42,7 +43,7 @@
-   background-image: url(http://123.com);
-   background: url(path/to/123.jpg);
-   background: url(#123.foo);
--  background: no-repeat center/80% url(http://123.com);
--  background: no-repeat center/80% url(path/to/123.jpg);
--  background: no-repeat center/80% url(#123.foo);
-+  background: no-repeat center / 80% url(http://123.com);
-+  background: no-repeat center / 80% url(path/to/123.jpg);
-+  background: no-repeat center / 80% url(#123.foo);
+@@ -34,7 +35,7 @@
  }
+ 
+ .invalidUnquotedUrlsButWeParseThemAnyway {
+-  background: url(--var(foo-bar, #dadce0));
++  background: url(--var(foo-bar,#dadce0));
+   -fb-sprite: url(fbglyph:cross-outline, fig-white);
+ }
+ 
 ```
 
 # Output
@@ -128,7 +126,7 @@ info: css/inline-url/inline_url.css
 }
 
 .invalidUnquotedUrlsButWeParseThemAnyway {
-  background: url(--var(foo-bar, #dadce0));
+  background: url(--var(foo-bar,#dadce0));
   -fb-sprite: url(fbglyph:cross-outline, fig-white);
 }
 
@@ -136,28 +134,78 @@ info: css/inline-url/inline_url.css
   background-image: url(http://123.com);
   background: url(path/to/123.jpg);
   background: url(#123.foo);
-  background: no-repeat center / 80% url(http://123.com);
-  background: no-repeat center / 80% url(path/to/123.jpg);
-  background: no-repeat center / 80% url(#123.foo);
+  background: no-repeat center/80% url(http://123.com);
+  background: no-repeat center/80% url(path/to/123.jpg);
+  background: no-repeat center/80% url(#123.foo);
 }
 ```
 
 # Errors
 ```
-inline_url.css:29:19 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+inline_url.css:29:18 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected value or character.
+  × expected `,` but instead found `(`
   
     28 │ .validUnqotedUrlsThatAreParsedByLess {
   > 29 │   background: url(@foo);
-       │                   ^
+       │                  ^
     30 │ }
     31 │ 
   
-  i Expected one of:
+  i Remove (
   
-  - function
-  - identifier
+inline_url.css:29:20 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `foo`
+  
+    28 │ .validUnqotedUrlsThatAreParsedByLess {
+  > 29 │   background: url(@foo);
+       │                    ^^^
+    30 │ }
+    31 │ 
+  
+  i Remove foo
+  
+inline_url.css:29:23 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `)`
+  
+    28 │ .validUnqotedUrlsThatAreParsedByLess {
+  > 29 │   background: url(@foo);
+       │                       ^
+    30 │ }
+    31 │ 
+  
+  i Remove )
+  
+inline_url.css:32:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `.`
+  
+    30 │ }
+    31 │ 
+  > 32 │ .validUnquotedUrlsThatAreParsedBySass {
+       │ ^
+    33 │   background: url($foo);
+    34 │   background: url($foo+$bar);
+  
+  i Remove .
+  
+inline_url.css:52:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `}` but instead the file ends
+  
+    50 │   background: no-repeat center/80% url(#123.foo);
+    51 │ }
+  > 52 │ 
+       │ 
+  
+  i the file ends here
+  
+    50 │   background: no-repeat center/80% url(#123.foo);
+    51 │ }
+  > 52 │ 
+       │ 
   
 
 ```

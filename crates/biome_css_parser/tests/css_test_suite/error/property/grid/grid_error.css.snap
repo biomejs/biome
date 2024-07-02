@@ -34,88 +34,84 @@ CssRoot {
                     ],
                 },
             ],
-            block: CssDeclarationOrRuleBlock {
-                l_curly_token: L_CURLY@6..7 "{" [] [],
-                items: CssDeclarationOrRuleList [
-                    CssDeclarationWithSemicolon {
-                        declaration: CssDeclaration {
-                            property: CssGenericProperty {
-                                name: CssIdentifier {
-                                    value_token: IDENT@7..16 "display" [Newline("\n"), Whitespace("\t")] [],
-                                },
-                                colon_token: COLON@16..18 ":" [] [Whitespace(" ")],
-                                value: CssGenericComponentValueList [
-                                    CssIdentifier {
-                                        value_token: IDENT@18..22 "grid" [] [],
+            block: CssBogusBlock {
+                items: [
+                    L_CURLY@6..7 "{" [] [],
+                    CssDeclarationOrRuleList [
+                        CssDeclarationWithSemicolon {
+                            declaration: CssDeclaration {
+                                property: CssGenericProperty {
+                                    name: CssIdentifier {
+                                        value_token: IDENT@7..16 "display" [Newline("\n"), Whitespace("\t")] [],
                                     },
-                                ],
-                            },
-                            important: missing (optional),
-                        },
-                        semicolon_token: SEMICOLON@22..23 ";" [] [],
-                    },
-                    CssDeclarationWithSemicolon {
-                        declaration: CssDeclaration {
-                            property: CssGenericProperty {
-                                name: CssIdentifier {
-                                    value_token: IDENT@23..46 "grid-template-columns" [Newline("\n"), Whitespace("\t")] [],
+                                    colon_token: COLON@16..18 ":" [] [Whitespace(" ")],
+                                    value: CssGenericComponentValueList [
+                                        CssIdentifier {
+                                            value_token: IDENT@18..22 "grid" [] [],
+                                        },
+                                    ],
                                 },
-                                colon_token: COLON@46..48 ":" [] [Whitespace(" ")],
-                                value: CssGenericComponentValueList [
-                                    CssBracketedValue {
-                                        l_brack_token: L_BRACK@48..49 "[" [] [],
-                                        items: CssBracketedValueList [
-                                            CssCustomIdentifier {
-                                                value_token: IDENT@49..55 "first" [] [Whitespace(" ")],
+                                important: missing (optional),
+                            },
+                            semicolon_token: SEMICOLON@22..23 ";" [] [],
+                        },
+                        CssNestedQualifiedRule {
+                            prelude: CssRelativeSelectorList [
+                                CssRelativeSelector {
+                                    combinator: missing (optional),
+                                    selector: CssCompoundSelector {
+                                        nesting_selector_token: missing (optional),
+                                        simple_selector: CssTypeSelector {
+                                            namespace: missing (optional),
+                                            ident: CssIdentifier {
+                                                value_token: IDENT@23..46 "grid-template-columns" [Newline("\n"), Whitespace("\t")] [],
                                             },
-                                            CssBogusCustomIdentifier {
+                                        },
+                                        sub_selectors: CssSubSelectorList [
+                                            CssBogusSubSelector {
                                                 items: [
-                                                    CSS_NUMBER_LITERAL@55..59 "123" [] [Whitespace(" ")],
+                                                    COLON@46..48 ":" [] [Whitespace(" ")],
                                                 ],
                                             },
-                                            CssCustomIdentifier {
-                                                value_token: IDENT@59..68 "nav-start" [] [],
+                                            CssBogusSubSelector {
+                                                items: [
+                                                    L_BRACK@48..49 "[" [] [],
+                                                    CssAttributeName {
+                                                        namespace: missing (optional),
+                                                        name: CssIdentifier {
+                                                            value_token: IDENT@49..55 "first" [] [Whitespace(" ")],
+                                                        },
+                                                    },
+                                                    CssBogus {
+                                                        items: [
+                                                            CSS_NUMBER_LITERAL@55..59 "123" [] [Whitespace(" ")],
+                                                            IDENT@59..68 "nav-start" [] [],
+                                                            R_BRACK@68..70 "]" [] [Whitespace(" ")],
+                                                            CSS_DIMENSION_VALUE@70..73 "150" [] [],
+                                                            PX_KW@73..76 "px" [] [Whitespace(" ")],
+                                                            L_BRACK@76..77 "[" [] [],
+                                                            IDENT@77..88 "main-start" [] [Whitespace(" ")],
+                                                            CSS_DIMENSION_VALUE@88..89 "1" [] [],
+                                                            FR_KW@89..92 "fr" [] [Whitespace(" ")],
+                                                            L_BRACK@92..93 "[" [] [],
+                                                            IDENT@93..97 "last" [] [],
+                                                            R_BRACK@97..98 "]" [] [],
+                                                            SEMICOLON@98..99 ";" [] [],
+                                                            R_CURLY@99..101 "}" [Newline("\n")] [],
+                                                        ],
+                                                    },
+                                                ],
                                             },
                                         ],
-                                        r_brack_token: R_BRACK@68..70 "]" [] [Whitespace(" ")],
                                     },
-                                    CssRegularDimension {
-                                        value_token: CSS_NUMBER_LITERAL@70..73 "150" [] [],
-                                        unit_token: IDENT@73..76 "px" [] [Whitespace(" ")],
-                                    },
-                                    CssBracketedValue {
-                                        l_brack_token: L_BRACK@76..77 "[" [] [],
-                                        items: CssBracketedValueList [
-                                            CssCustomIdentifier {
-                                                value_token: IDENT@77..88 "main-start" [] [Whitespace(" ")],
-                                            },
-                                            CssBogusCustomIdentifier {
-                                                items: [
-                                                    CSS_DIMENSION_VALUE@88..89 "1" [] [],
-                                                ],
-                                            },
-                                            CssCustomIdentifier {
-                                                value_token: IDENT@89..92 "fr" [] [Whitespace(" ")],
-                                            },
-                                            CssBogusCustomIdentifier {
-                                                items: [
-                                                    L_BRACK@92..93 "[" [] [],
-                                                ],
-                                            },
-                                            CssCustomIdentifier {
-                                                value_token: IDENT@93..97 "last" [] [],
-                                            },
-                                        ],
-                                        r_brack_token: R_BRACK@97..98 "]" [] [],
-                                    },
-                                ],
+                                },
+                            ],
+                            block: CssBogusBlock {
+                                items: [],
                             },
-                            important: missing (optional),
                         },
-                        semicolon_token: SEMICOLON@98..99 ";" [] [],
-                    },
+                    ],
                 ],
-                r_curly_token: R_CURLY@99..101 "}" [Newline("\n")] [],
             },
         },
     ],
@@ -139,9 +135,9 @@ CssRoot {
               0: HASH@0..1 "#" [] []
               1: CSS_CUSTOM_IDENTIFIER@1..6
                 0: IDENT@1..6 "grid" [] [Whitespace(" ")]
-      1: CSS_DECLARATION_OR_RULE_BLOCK@6..101
+      1: CSS_BOGUS_BLOCK@6..101
         0: L_CURLY@6..7 "{" [] []
-        1: CSS_DECLARATION_OR_RULE_LIST@7..99
+        1: CSS_DECLARATION_OR_RULE_LIST@7..101
           0: CSS_DECLARATION_WITH_SEMICOLON@7..23
             0: CSS_DECLARATION@7..22
               0: CSS_GENERIC_PROPERTY@7..22
@@ -153,43 +149,41 @@ CssRoot {
                     0: IDENT@18..22 "grid" [] []
               1: (empty)
             1: SEMICOLON@22..23 ";" [] []
-          1: CSS_DECLARATION_WITH_SEMICOLON@23..99
-            0: CSS_DECLARATION@23..98
-              0: CSS_GENERIC_PROPERTY@23..98
-                0: CSS_IDENTIFIER@23..46
-                  0: IDENT@23..46 "grid-template-columns" [Newline("\n"), Whitespace("\t")] []
-                1: COLON@46..48 ":" [] [Whitespace(" ")]
-                2: CSS_GENERIC_COMPONENT_VALUE_LIST@48..98
-                  0: CSS_BRACKETED_VALUE@48..70
-                    0: L_BRACK@48..49 "[" [] []
-                    1: CSS_BRACKETED_VALUE_LIST@49..68
-                      0: CSS_CUSTOM_IDENTIFIER@49..55
-                        0: IDENT@49..55 "first" [] [Whitespace(" ")]
-                      1: CSS_BOGUS_CUSTOM_IDENTIFIER@55..59
+          1: CSS_NESTED_QUALIFIED_RULE@23..101
+            0: CSS_RELATIVE_SELECTOR_LIST@23..101
+              0: CSS_RELATIVE_SELECTOR@23..101
+                0: (empty)
+                1: CSS_COMPOUND_SELECTOR@23..101
+                  0: (empty)
+                  1: CSS_TYPE_SELECTOR@23..46
+                    0: (empty)
+                    1: CSS_IDENTIFIER@23..46
+                      0: IDENT@23..46 "grid-template-columns" [Newline("\n"), Whitespace("\t")] []
+                  2: CSS_SUB_SELECTOR_LIST@46..101
+                    0: CSS_BOGUS_SUB_SELECTOR@46..48
+                      0: COLON@46..48 ":" [] [Whitespace(" ")]
+                    1: CSS_BOGUS_SUB_SELECTOR@48..101
+                      0: L_BRACK@48..49 "[" [] []
+                      1: CSS_ATTRIBUTE_NAME@49..55
+                        0: (empty)
+                        1: CSS_IDENTIFIER@49..55
+                          0: IDENT@49..55 "first" [] [Whitespace(" ")]
+                      2: CSS_BOGUS@55..101
                         0: CSS_NUMBER_LITERAL@55..59 "123" [] [Whitespace(" ")]
-                      2: CSS_CUSTOM_IDENTIFIER@59..68
-                        0: IDENT@59..68 "nav-start" [] []
-                    2: R_BRACK@68..70 "]" [] [Whitespace(" ")]
-                  1: CSS_REGULAR_DIMENSION@70..76
-                    0: CSS_NUMBER_LITERAL@70..73 "150" [] []
-                    1: IDENT@73..76 "px" [] [Whitespace(" ")]
-                  2: CSS_BRACKETED_VALUE@76..98
-                    0: L_BRACK@76..77 "[" [] []
-                    1: CSS_BRACKETED_VALUE_LIST@77..97
-                      0: CSS_CUSTOM_IDENTIFIER@77..88
-                        0: IDENT@77..88 "main-start" [] [Whitespace(" ")]
-                      1: CSS_BOGUS_CUSTOM_IDENTIFIER@88..89
-                        0: CSS_DIMENSION_VALUE@88..89 "1" [] []
-                      2: CSS_CUSTOM_IDENTIFIER@89..92
-                        0: IDENT@89..92 "fr" [] [Whitespace(" ")]
-                      3: CSS_BOGUS_CUSTOM_IDENTIFIER@92..93
-                        0: L_BRACK@92..93 "[" [] []
-                      4: CSS_CUSTOM_IDENTIFIER@93..97
-                        0: IDENT@93..97 "last" [] []
-                    2: R_BRACK@97..98 "]" [] []
-              1: (empty)
-            1: SEMICOLON@98..99 ";" [] []
-        2: R_CURLY@99..101 "}" [Newline("\n")] []
+                        1: IDENT@59..68 "nav-start" [] []
+                        2: R_BRACK@68..70 "]" [] [Whitespace(" ")]
+                        3: CSS_DIMENSION_VALUE@70..73 "150" [] []
+                        4: PX_KW@73..76 "px" [] [Whitespace(" ")]
+                        5: L_BRACK@76..77 "[" [] []
+                        6: IDENT@77..88 "main-start" [] [Whitespace(" ")]
+                        7: CSS_DIMENSION_VALUE@88..89 "1" [] []
+                        8: FR_KW@89..92 "fr" [] [Whitespace(" ")]
+                        9: L_BRACK@92..93 "[" [] []
+                        10: IDENT@93..97 "last" [] []
+                        11: R_BRACK@97..98 "]" [] []
+                        12: SEMICOLON@98..99 ";" [] []
+                        13: R_CURLY@99..101 "}" [Newline("\n")] []
+            1: CSS_BOGUS_BLOCK@101..101
   2: EOF@101..102 "" [Newline("\n")] []
 
 ```
@@ -197,64 +191,79 @@ CssRoot {
 ## Diagnostics
 
 ```
-grid_error.css:3:32 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+grid_error.css:3:25 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Expected an identifier but instead found '123'.
+  × Unexpected value or character.
   
     1 │ #grid {
     2 │ 	display: grid;
   > 3 │ 	grid-template-columns: [first 123 nav-start] 150px [main-start 1fr [last];
-      │ 	                              ^^^
+      │ 	                       ^
     4 │ }
     5 │ 
   
-  i Expected an identifier here.
+  i Expected one of:
   
-    1 │ #grid {
-    2 │ 	display: grid;
-  > 3 │ 	grid-template-columns: [first 123 nav-start] 150px [main-start 1fr [last];
-      │ 	                              ^^^
-    4 │ }
-    5 │ 
+  - hover
+  - focus
+  - active
+  - first-child
+  - last-child
+  - nth-child
+  - nth-last-child
+  - first-of-type
+  - last-of-type
+  - nth-of-type
+  - nth-last-of-type
+  - only-child
+  - only-of-type
+  - checked
+  - disabled
+  - enabled
+  - required
+  - optional
+  - valid
+  - invalid
+  - in-range
+  - out-of-range
+  - read-only
+  - read-write
+  - placeholder-shown
+  - default
+  - checked
+  - indeterminate
+  - blank
+  - empty
+  - root
+  - target
+  - lang
+  - not
+  - is
+  - where
+  - fullscreen
+  - link
+  - visited
+  - any-link
+  - local-link
+  - scope
+  - current
+  - past
+  - future
   
-grid_error.css:3:65 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+grid_error.css:5:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Expected an identifier but instead found '1'.
+  × expected `{` but instead the file ends
   
-    1 │ #grid {
-    2 │ 	display: grid;
-  > 3 │ 	grid-template-columns: [first 123 nav-start] 150px [main-start 1fr [last];
-      │ 	                                                               ^
+    3 │ 	grid-template-columns: [first 123 nav-start] 150px [main-start 1fr [last];
     4 │ }
-    5 │ 
+  > 5 │ 
+      │ 
   
-  i Expected an identifier here.
+  i the file ends here
   
-    1 │ #grid {
-    2 │ 	display: grid;
-  > 3 │ 	grid-template-columns: [first 123 nav-start] 150px [main-start 1fr [last];
-      │ 	                                                               ^
+    3 │ 	grid-template-columns: [first 123 nav-start] 150px [main-start 1fr [last];
     4 │ }
-    5 │ 
-  
-grid_error.css:3:69 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Expected an identifier but instead found '['.
-  
-    1 │ #grid {
-    2 │ 	display: grid;
-  > 3 │ 	grid-template-columns: [first 123 nav-start] 150px [main-start 1fr [last];
-      │ 	                                                                   ^
-    4 │ }
-    5 │ 
-  
-  i Expected an identifier here.
-  
-    1 │ #grid {
-    2 │ 	display: grid;
-  > 3 │ 	grid-template-columns: [first 123 nav-start] 150px [main-start 1fr [last];
-      │ 	                                                                   ^
-    4 │ }
-    5 │ 
+  > 5 │ 
+      │ 
   
 ```

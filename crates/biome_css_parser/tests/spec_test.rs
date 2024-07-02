@@ -171,9 +171,17 @@ pub fn run(test_case: &str, _snapshot_name: &str, test_directory: &str, outcome_
 #[test]
 pub fn quick_test() {
     let code = r#"
-.formTable tbody td {
-    border-left: 1px # solid;
+
+main {
+	label:hover {
+		font-weight: 500;
+	}
+
+	a:link, a:visited {
+		color: inherit;
+	}
 }
+
     "#;
 
     let root = parse_css(

@@ -476,16 +476,13 @@ input:not(/* comment 125 */[/* comment 126 */disabled/* comment 127 */]/* commen
  :root {
 -  /* comments 192 */
 -  --centered/* comments 193 */ : /* comments 194 */ {
--    display: flex;
--    align-items: center;
--    justify-content: center;
--  };
 +  /* comments 192 */ --centered /* comments 193 */ : /* comments 194 */ {
-+        display: flex;
-+  align-items: center;
-+  justify-content: center;
-+}
-+;
+     display: flex;
+     align-items: center;
+     justify-content: center;
+-  };
++  }
++  ;
  }
 ```
 
@@ -708,11 +705,11 @@ input:not(
 /* custom properties set & @apply rule */
 :root {
   /* comments 192 */ --centered /* comments 193 */ : /* comments 194 */ {
-        display: flex;
-  align-items: center;
-  justify-content: center;
-}
-;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  ;
 }
 ```
 
@@ -806,42 +803,75 @@ selectors.css:152:75 parse ━━━━━━━━━━━━━━━━━�
     151 │ :root {
   > 152 │     /* comments 192 */ --centered /* comments 193 */ : /* comments 194 */ {
         │                                                                           ^
-  > 153 │         display: flex;
-        │         ^^^^^^^^^^^^^
+    153 │         display: flex;
     154 │         align-items: center;
-    155 │         justify-content: center;
   
   i Expected one of:
   
-  - identifier
-  - string
-  - number
-  - dimension
-  - ratio
-  - custom property
-  - function
+  - hover
+  - focus
+  - active
+  - first-child
+  - last-child
+  - nth-child
+  - nth-last-child
+  - first-of-type
+  - last-of-type
+  - nth-of-type
+  - nth-last-of-type
+  - only-child
+  - only-of-type
+  - checked
+  - disabled
+  - enabled
+  - required
+  - optional
+  - valid
+  - invalid
+  - in-range
+  - out-of-range
+  - read-only
+  - read-write
+  - placeholder-shown
+  - default
+  - checked
+  - indeterminate
+  - blank
+  - empty
+  - root
+  - target
+  - lang
+  - not
+  - is
+  - where
+  - fullscreen
+  - link
+  - visited
+  - any-link
+  - local-link
+  - scope
+  - current
+  - past
+  - future
   
 selectors.css:156:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Expected a qualified rule, or an at rule but instead found ';
-    }'.
+  × Expected a declaration, or an at rule but instead found ';'.
   
     154 │         align-items: center;
     155 │         justify-content: center;
   > 156 │     };
         │      ^
-  > 157 │ }
-        │ ^
+    157 │ }
     158 │ 
   
-  i Expected a qualified rule, or an at rule here.
+  i Expected a declaration, or an at rule here.
   
     154 │         align-items: center;
     155 │         justify-content: center;
   > 156 │     };
         │      ^
-  > 157 │ }
-        │ ^
+    157 │ }
     158 │ 
   
 
