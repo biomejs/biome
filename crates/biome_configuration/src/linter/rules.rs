@@ -2906,6 +2906,9 @@ pub struct Nursery {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_useless_undefined_initialization:
         Option<RuleFixConfiguration<NoUselessUndefinedInitialization>>,
+    #[doc = "Disallow use of @value rule in css modules"]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub no_value_at_rule: Option<RuleConfiguration<NoValueAtRule>>,
     #[doc = "Disallow the use of yoda expressions."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_yoda_expression: Option<RuleFixConfiguration<NoYodaExpression>>,
@@ -3016,6 +3019,7 @@ impl Nursery {
         "noUnusedFunctionParameters",
         "noUselessStringConcat",
         "noUselessUndefinedInitialization",
+        "noValueAtRule",
         "noYodaExpression",
         "useAdjacentOverloadSignatures",
         "useConsistentBuiltinInstantiation",
@@ -3295,6 +3299,12 @@ impl Nursery {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[28]));
             }
         }
+        if let Some(rule) = self.no_value_at_rule.as_ref() {
+            if rule.is_enabled() {
+                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[29]));
+            }
+        }
+
         if let Some(rule) = self.no_useless_undefined_initialization.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[29]));
@@ -3547,6 +3557,11 @@ impl Nursery {
         if let Some(rule) = self.no_useless_string_concat.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[28]));
+            }
+        }
+        if let Some(rule) = self.no_value_at_rule.as_ref() {
+          if rule.is_disabled() {
+                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[29]));
             }
         }
         if let Some(rule) = self.no_useless_undefined_initialization.as_ref() {
@@ -3808,6 +3823,10 @@ impl Nursery {
                 .map(|conf| (conf.level(), conf.get_options())),
             "noUselessUndefinedInitialization" => self
                 .no_useless_undefined_initialization
+                .as_ref()
+                .map(|conf| (conf.level(), conf.get_options())),
+            "noValueAtRule" => self
+                .no_value_at_rule
                 .as_ref()
                 .map(|conf| (conf.level(), conf.get_options())),
             "noYodaExpression" => self

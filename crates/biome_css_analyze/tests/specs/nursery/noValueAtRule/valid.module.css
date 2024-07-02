@@ -1,0 +1,4 @@
+@import "./colors.module.css";
+:root {
+    --main-color: red;
+}
