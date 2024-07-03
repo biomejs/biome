@@ -68,7 +68,7 @@ Let's say we want to create a new **lint** rule called `useMyRuleName`, follow t
    just new-js-lintrule useMyRuleName
    ```
    The script will generate a bunch of files for the _JavaScript_ language, inside the `biome_js_analyze` crate.
-   Among the other files, you'll fine a file called `use_my_new_rule_name.rs` inside the `biome_js_analyze/lib/src/lint/nursery` folder. You'll implement your rule in this file.
+   Among the other files, you'll find a file called `use_my_new_rule_name.rs` inside the `biome_js_analyze/lib/src/lint/nursery` folder. You'll implement your rule in this file.
 
    If you want to create a _CSS_ lint rule, run this script. It will generate a new lint rule in `biome_css_analyze`
    ```shell
