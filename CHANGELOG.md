@@ -34,6 +34,8 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 - Don't request alt text for elements hidden from assistive technologies ([#3316](https://github.com/biomejs/biome/issues/3316)). Contributed by @robintown
 
+- Fix [[#3149](https://github.com/biomejs/biome/issues/3149)] crashes that occurred when applying the `noUselessFragments` unsafe fixes in certain scenarios. Contributed by @unvalley
+
 ### Parser
 
 ## v1.8.3 (2024-06-27)
