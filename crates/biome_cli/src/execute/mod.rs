@@ -60,7 +60,7 @@ impl Execution {
 }
 
 impl Execution {
-    pub(crate) fn to_features(&self) -> FeatureName {
+    pub(crate) fn to_feature(&self) -> FeatureName {
         match self.traversal_mode {
             TraversalMode::Format { .. } => FeaturesBuilder::new().with_formatter().build(),
             TraversalMode::Lint { .. } => FeaturesBuilder::new().with_linter().build(),

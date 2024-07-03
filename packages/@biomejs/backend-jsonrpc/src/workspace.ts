@@ -4,10 +4,16 @@ export interface SupportsFeatureParams {
 	features: FeatureName;
 	path: BiomePath;
 }
-export type FeatureName = FeatureName[];
+export type FeatureName = FeatureKind[];
 export interface BiomePath {
 	path: string;
 }
+export type FeatureKind =
+	| "Format"
+	| "Lint"
+	| "OrganizeImports"
+	| "Search"
+	| "Assists";
 export interface SupportsFeatureResult {
 	reason?: SupportKind;
 }

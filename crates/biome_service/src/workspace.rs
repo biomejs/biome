@@ -357,7 +357,6 @@ impl SupportKind {
     pub const fn is_not_enabled(&self) -> bool {
         matches!(self, SupportKind::FeatureNotEnabled)
     }
-
     pub const fn is_not_supported(&self) -> bool {
         matches!(self, SupportKind::FileNotSupported)
     }
@@ -372,6 +371,7 @@ impl SupportKind {
 #[derive(Debug, Copy, Clone, Hash, serde::Serialize, serde::Deserialize, Eq, PartialEq)]
 #[bitflags]
 #[repr(u8)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub enum FeatureKind {
     Format,
     Lint,
@@ -399,7 +399,7 @@ impl schemars::JsonSchema for FeatureName {
     }
 
     fn json_schema(gen: &mut SchemaGenerator) -> Schema {
-        <Vec<FeatureName>>::json_schema(gen)
+        <Vec<FeatureKind>>::json_schema(gen)
     }
 }
 

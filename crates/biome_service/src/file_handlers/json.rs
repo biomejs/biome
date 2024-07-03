@@ -493,9 +493,7 @@ fn code_actions(params: CodeActionsParams) -> PullActionsResult {
             let rules = settings.as_rules(params.path);
             let mut actions = Vec::new();
             let mut enabled_rules = vec![];
-            if settings.organize_imports.enabled {
-                enabled_rules.push(RuleFilter::Rule("correctness", "organizeImports"));
-            }
+            // TODO: remove once the actions will be configurable via configuration
             if let Some(rules) = rules.as_ref() {
                 let rules = rules.as_enabled_rules().into_iter().collect();
 
@@ -527,7 +525,7 @@ fn code_actions(params: CodeActionsParams) -> PullActionsResult {
                 return PullActionsResult { actions: vec![] };
             };
 
-            trace!("Javascript runs the analyzer");
+            trace!("JSON runs the analyzer");
             analyze(&tree, filter, &analyzer_options, file_source, |signal| {
                 actions.extend(signal.actions().into_code_action_iter().map(|item| {
                     CodeAction {
