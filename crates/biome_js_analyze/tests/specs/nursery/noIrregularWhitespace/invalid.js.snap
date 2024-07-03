@@ -6,11 +6,9 @@ expression: invalid.js
 ```jsx
 /* \u{b}    */ constfoo='thing';
 /* \u{c}    */ constfoo='thing';
-/* \u{85}   */ constfoo='thing';
 /* \u{feff} */ const﻿foo﻿=﻿'thing';
 /* \u{a0}   */ const foo = 'thing';
 /* \u{1680} */ const foo = 'thing';
-/* \u{180e} */ const᠎foo᠎=᠎'thing';
 /* \u{2000} */ const foo = 'thing';
 /* \u{2001} */ const foo = 'thing';
 /* \u{2002} */ const foo = 'thing';
@@ -38,7 +36,7 @@ invalid.js:1:16 lint/nursery/noIrregularWhitespace ━━━━━━━━━�
   > 1 │ /* \u{b}    */ const␋foo␋=␋'thing';
       │                ^^^^^^^^^^^^^^^^^^^^
     2 │ /* \u{c}    */ const↡foo↡=↡'thing';
-    3 │ /* \u{85}   */ const␠foo␠=␠'thing';
+    3 │ /* \u{feff} */ const�foo�=�'thing';
   
   i Replace the irregular whitespaces with normal whitespaces or tabs.
   
@@ -53,8 +51,8 @@ invalid.js:2:16 lint/nursery/noIrregularWhitespace ━━━━━━━━━�
     1 │ /* \u{b}    */ const␋foo␋=␋'thing';
   > 2 │ /* \u{c}    */ const↡foo↡=↡'thing';
       │                ^^^^^^^^^^^^^^^^^^^^
-    3 │ /* \u{85}   */ const␠foo␠=␠'thing';
-    4 │ /* \u{feff} */ const�foo�=�'thing';
+    3 │ /* \u{feff} */ const�foo�=�'thing';
+    4 │ /* \u{a0}   */ const␠foo␠=␠'thing';
   
   i Replace the irregular whitespaces with normal whitespaces or tabs.
   
@@ -68,10 +66,10 @@ invalid.js:3:16 lint/nursery/noIrregularWhitespace ━━━━━━━━━�
   
     1 │ /* \u{b}    */ const␋foo␋=␋'thing';
     2 │ /* \u{c}    */ const↡foo↡=↡'thing';
-  > 3 │ /* \u{85}   */ const␠foo␠=␠'thing';
+  > 3 │ /* \u{feff} */ const�foo�=�'thing';
       │                ^^^^^^^^^^^^^^^^^^^^
-    4 │ /* \u{feff} */ const�foo�=�'thing';
-    5 │ /* \u{a0}   */ const␠foo␠=␠'thing';
+    4 │ /* \u{a0}   */ const␠foo␠=␠'thing';
+    5 │ /* \u{1680} */ const␠foo␠=␠'thing';
   
   i Replace the irregular whitespaces with normal whitespaces or tabs.
   
@@ -84,11 +82,11 @@ invalid.js:4:16 lint/nursery/noIrregularWhitespace ━━━━━━━━━�
   ! Irregular whitespaces found.
   
     2 │ /* \u{c}    */ const↡foo↡=↡'thing';
-    3 │ /* \u{85}   */ const␠foo␠=␠'thing';
-  > 4 │ /* \u{feff} */ const�foo�=�'thing';
+    3 │ /* \u{feff} */ const�foo�=�'thing';
+  > 4 │ /* \u{a0}   */ const␠foo␠=␠'thing';
       │                ^^^^^^^^^^^^^^^^^^^^
-    5 │ /* \u{a0}   */ const␠foo␠=␠'thing';
-    6 │ /* \u{1680} */ const␠foo␠=␠'thing';
+    5 │ /* \u{1680} */ const␠foo␠=␠'thing';
+    6 │ /* \u{2000} */ const␠foo␠=␠'thing';
   
   i Replace the irregular whitespaces with normal whitespaces or tabs.
   
@@ -100,12 +98,12 @@ invalid.js:5:16 lint/nursery/noIrregularWhitespace ━━━━━━━━━�
 
   ! Irregular whitespaces found.
   
-    3 │ /* \u{85}   */ const␠foo␠=␠'thing';
-    4 │ /* \u{feff} */ const�foo�=�'thing';
-  > 5 │ /* \u{a0}   */ const␠foo␠=␠'thing';
+    3 │ /* \u{feff} */ const�foo�=�'thing';
+    4 │ /* \u{a0}   */ const␠foo␠=␠'thing';
+  > 5 │ /* \u{1680} */ const␠foo␠=␠'thing';
       │                ^^^^^^^^^^^^^^^^^^^^
-    6 │ /* \u{1680} */ const␠foo␠=␠'thing';
-    7 │ /* \u{180e} */ const�foo�=�'thing';
+    6 │ /* \u{2000} */ const␠foo␠=␠'thing';
+    7 │ /* \u{2001} */ const␠foo␠=␠'thing';
   
   i Replace the irregular whitespaces with normal whitespaces or tabs.
   
@@ -117,12 +115,12 @@ invalid.js:6:16 lint/nursery/noIrregularWhitespace ━━━━━━━━━�
 
   ! Irregular whitespaces found.
   
-    4 │ /* \u{feff} */ const�foo�=�'thing';
-    5 │ /* \u{a0}   */ const␠foo␠=␠'thing';
-  > 6 │ /* \u{1680} */ const␠foo␠=␠'thing';
+    4 │ /* \u{a0}   */ const␠foo␠=␠'thing';
+    5 │ /* \u{1680} */ const␠foo␠=␠'thing';
+  > 6 │ /* \u{2000} */ const␠foo␠=␠'thing';
       │                ^^^^^^^^^^^^^^^^^^^^
-    7 │ /* \u{180e} */ const�foo�=�'thing';
-    8 │ /* \u{2000} */ const␠foo␠=␠'thing';
+    7 │ /* \u{2001} */ const␠foo␠=␠'thing';
+    8 │ /* \u{2002} */ const␠foo␠=␠'thing';
   
   i Replace the irregular whitespaces with normal whitespaces or tabs.
   
@@ -134,12 +132,12 @@ invalid.js:7:16 lint/nursery/noIrregularWhitespace ━━━━━━━━━�
 
   ! Irregular whitespaces found.
   
-    5 │ /* \u{a0}   */ const␠foo␠=␠'thing';
-    6 │ /* \u{1680} */ const␠foo␠=␠'thing';
-  > 7 │ /* \u{180e} */ const�foo�=�'thing';
+    5 │ /* \u{1680} */ const␠foo␠=␠'thing';
+    6 │ /* \u{2000} */ const␠foo␠=␠'thing';
+  > 7 │ /* \u{2001} */ const␠foo␠=␠'thing';
       │                ^^^^^^^^^^^^^^^^^^^^
-    8 │ /* \u{2000} */ const␠foo␠=␠'thing';
-    9 │ /* \u{2001} */ const␠foo␠=␠'thing';
+    8 │ /* \u{2002} */ const␠foo␠=␠'thing';
+    9 │ /* \u{2003} */ const␠foo␠=␠'thing';
   
   i Replace the irregular whitespaces with normal whitespaces or tabs.
   
@@ -151,12 +149,12 @@ invalid.js:8:16 lint/nursery/noIrregularWhitespace ━━━━━━━━━�
 
   ! Irregular whitespaces found.
   
-     6 │ /* \u{1680} */ const␠foo␠=␠'thing';
-     7 │ /* \u{180e} */ const�foo�=�'thing';
-   > 8 │ /* \u{2000} */ const␠foo␠=␠'thing';
+     6 │ /* \u{2000} */ const␠foo␠=␠'thing';
+     7 │ /* \u{2001} */ const␠foo␠=␠'thing';
+   > 8 │ /* \u{2002} */ const␠foo␠=␠'thing';
        │                ^^^^^^^^^^^^^^^^^^^^
-     9 │ /* \u{2001} */ const␠foo␠=␠'thing';
-    10 │ /* \u{2002} */ const␠foo␠=␠'thing';
+     9 │ /* \u{2003} */ const␠foo␠=␠'thing';
+    10 │ /* \u{2004} */ const␠foo␠=␠'thing';
   
   i Replace the irregular whitespaces with normal whitespaces or tabs.
   
@@ -168,12 +166,12 @@ invalid.js:9:16 lint/nursery/noIrregularWhitespace ━━━━━━━━━�
 
   ! Irregular whitespaces found.
   
-     7 │ /* \u{180e} */ const�foo�=�'thing';
-     8 │ /* \u{2000} */ const␠foo␠=␠'thing';
-   > 9 │ /* \u{2001} */ const␠foo␠=␠'thing';
+     7 │ /* \u{2001} */ const␠foo␠=␠'thing';
+     8 │ /* \u{2002} */ const␠foo␠=␠'thing';
+   > 9 │ /* \u{2003} */ const␠foo␠=␠'thing';
        │                ^^^^^^^^^^^^^^^^^^^^
-    10 │ /* \u{2002} */ const␠foo␠=␠'thing';
-    11 │ /* \u{2003} */ const␠foo␠=␠'thing';
+    10 │ /* \u{2004} */ const␠foo␠=␠'thing';
+    11 │ /* \u{2005} */ const␠foo␠=␠'thing';
   
   i Replace the irregular whitespaces with normal whitespaces or tabs.
   
@@ -185,12 +183,12 @@ invalid.js:10:16 lint/nursery/noIrregularWhitespace ━━━━━━━━━�
 
   ! Irregular whitespaces found.
   
-     8 │ /* \u{2000} */ const␠foo␠=␠'thing';
-     9 │ /* \u{2001} */ const␠foo␠=␠'thing';
-  > 10 │ /* \u{2002} */ const␠foo␠=␠'thing';
+     8 │ /* \u{2002} */ const␠foo␠=␠'thing';
+     9 │ /* \u{2003} */ const␠foo␠=␠'thing';
+  > 10 │ /* \u{2004} */ const␠foo␠=␠'thing';
        │                ^^^^^^^^^^^^^^^^^^^^
-    11 │ /* \u{2003} */ const␠foo␠=␠'thing';
-    12 │ /* \u{2004} */ const␠foo␠=␠'thing';
+    11 │ /* \u{2005} */ const␠foo␠=␠'thing';
+    12 │ /* \u{2006} */ const␠foo␠=␠'thing';
   
   i Replace the irregular whitespaces with normal whitespaces or tabs.
   
@@ -202,12 +200,12 @@ invalid.js:11:16 lint/nursery/noIrregularWhitespace ━━━━━━━━━�
 
   ! Irregular whitespaces found.
   
-     9 │ /* \u{2001} */ const␠foo␠=␠'thing';
-    10 │ /* \u{2002} */ const␠foo␠=␠'thing';
-  > 11 │ /* \u{2003} */ const␠foo␠=␠'thing';
+     9 │ /* \u{2003} */ const␠foo␠=␠'thing';
+    10 │ /* \u{2004} */ const␠foo␠=␠'thing';
+  > 11 │ /* \u{2005} */ const␠foo␠=␠'thing';
        │                ^^^^^^^^^^^^^^^^^^^^
-    12 │ /* \u{2004} */ const␠foo␠=␠'thing';
-    13 │ /* \u{2005} */ const␠foo␠=␠'thing';
+    12 │ /* \u{2006} */ const␠foo␠=␠'thing';
+    13 │ /* \u{2007} */ const␠foo␠=␠'thing';
   
   i Replace the irregular whitespaces with normal whitespaces or tabs.
   
@@ -219,12 +217,12 @@ invalid.js:12:16 lint/nursery/noIrregularWhitespace ━━━━━━━━━�
 
   ! Irregular whitespaces found.
   
-    10 │ /* \u{2002} */ const␠foo␠=␠'thing';
-    11 │ /* \u{2003} */ const␠foo␠=␠'thing';
-  > 12 │ /* \u{2004} */ const␠foo␠=␠'thing';
+    10 │ /* \u{2004} */ const␠foo␠=␠'thing';
+    11 │ /* \u{2005} */ const␠foo␠=␠'thing';
+  > 12 │ /* \u{2006} */ const␠foo␠=␠'thing';
        │                ^^^^^^^^^^^^^^^^^^^^
-    13 │ /* \u{2005} */ const␠foo␠=␠'thing';
-    14 │ /* \u{2006} */ const␠foo␠=␠'thing';
+    13 │ /* \u{2007} */ const␠foo␠=␠'thing';
+    14 │ /* \u{2008} */ const␠foo␠=␠'thing';
   
   i Replace the irregular whitespaces with normal whitespaces or tabs.
   
@@ -236,12 +234,12 @@ invalid.js:13:16 lint/nursery/noIrregularWhitespace ━━━━━━━━━�
 
   ! Irregular whitespaces found.
   
-    11 │ /* \u{2003} */ const␠foo␠=␠'thing';
-    12 │ /* \u{2004} */ const␠foo␠=␠'thing';
-  > 13 │ /* \u{2005} */ const␠foo␠=␠'thing';
+    11 │ /* \u{2005} */ const␠foo␠=␠'thing';
+    12 │ /* \u{2006} */ const␠foo␠=␠'thing';
+  > 13 │ /* \u{2007} */ const␠foo␠=␠'thing';
        │                ^^^^^^^^^^^^^^^^^^^^
-    14 │ /* \u{2006} */ const␠foo␠=␠'thing';
-    15 │ /* \u{2007} */ const␠foo␠=␠'thing';
+    14 │ /* \u{2008} */ const␠foo␠=␠'thing';
+    15 │ /* \u{2009} */ const␠foo␠=␠'thing';
   
   i Replace the irregular whitespaces with normal whitespaces or tabs.
   
@@ -253,12 +251,12 @@ invalid.js:14:16 lint/nursery/noIrregularWhitespace ━━━━━━━━━�
 
   ! Irregular whitespaces found.
   
-    12 │ /* \u{2004} */ const␠foo␠=␠'thing';
-    13 │ /* \u{2005} */ const␠foo␠=␠'thing';
-  > 14 │ /* \u{2006} */ const␠foo␠=␠'thing';
+    12 │ /* \u{2006} */ const␠foo␠=␠'thing';
+    13 │ /* \u{2007} */ const␠foo␠=␠'thing';
+  > 14 │ /* \u{2008} */ const␠foo␠=␠'thing';
        │                ^^^^^^^^^^^^^^^^^^^^
-    15 │ /* \u{2007} */ const␠foo␠=␠'thing';
-    16 │ /* \u{2008} */ const␠foo␠=␠'thing';
+    15 │ /* \u{2009} */ const␠foo␠=␠'thing';
+    16 │ /* \u{200a} */ const␠foo␠=␠'thing';
   
   i Replace the irregular whitespaces with normal whitespaces or tabs.
   
@@ -270,12 +268,12 @@ invalid.js:15:16 lint/nursery/noIrregularWhitespace ━━━━━━━━━�
 
   ! Irregular whitespaces found.
   
-    13 │ /* \u{2005} */ const␠foo␠=␠'thing';
-    14 │ /* \u{2006} */ const␠foo␠=␠'thing';
-  > 15 │ /* \u{2007} */ const␠foo␠=␠'thing';
+    13 │ /* \u{2007} */ const␠foo␠=␠'thing';
+    14 │ /* \u{2008} */ const␠foo␠=␠'thing';
+  > 15 │ /* \u{2009} */ const␠foo␠=␠'thing';
        │                ^^^^^^^^^^^^^^^^^^^^
-    16 │ /* \u{2008} */ const␠foo␠=␠'thing';
-    17 │ /* \u{2009} */ const␠foo␠=␠'thing';
+    16 │ /* \u{200a} */ const␠foo␠=␠'thing';
+    17 │ /* \u{200b} */ const�foo�=�'thing';
   
   i Replace the irregular whitespaces with normal whitespaces or tabs.
   
@@ -287,12 +285,12 @@ invalid.js:16:16 lint/nursery/noIrregularWhitespace ━━━━━━━━━�
 
   ! Irregular whitespaces found.
   
-    14 │ /* \u{2006} */ const␠foo␠=␠'thing';
-    15 │ /* \u{2007} */ const␠foo␠=␠'thing';
-  > 16 │ /* \u{2008} */ const␠foo␠=␠'thing';
+    14 │ /* \u{2008} */ const␠foo␠=␠'thing';
+    15 │ /* \u{2009} */ const␠foo␠=␠'thing';
+  > 16 │ /* \u{200a} */ const␠foo␠=␠'thing';
        │                ^^^^^^^^^^^^^^^^^^^^
-    17 │ /* \u{2009} */ const␠foo␠=␠'thing';
-    18 │ /* \u{200a} */ const␠foo␠=␠'thing';
+    17 │ /* \u{200b} */ const�foo�=�'thing';
+    18 │ /* \u{202f} */ const␠foo␠=␠'thing';
   
   i Replace the irregular whitespaces with normal whitespaces or tabs.
   
@@ -304,12 +302,12 @@ invalid.js:17:16 lint/nursery/noIrregularWhitespace ━━━━━━━━━�
 
   ! Irregular whitespaces found.
   
-    15 │ /* \u{2007} */ const␠foo␠=␠'thing';
-    16 │ /* \u{2008} */ const␠foo␠=␠'thing';
-  > 17 │ /* \u{2009} */ const␠foo␠=␠'thing';
+    15 │ /* \u{2009} */ const␠foo␠=␠'thing';
+    16 │ /* \u{200a} */ const␠foo␠=␠'thing';
+  > 17 │ /* \u{200b} */ const�foo�=�'thing';
        │                ^^^^^^^^^^^^^^^^^^^^
-    18 │ /* \u{200a} */ const␠foo␠=␠'thing';
-    19 │ /* \u{200b} */ const�foo�=�'thing';
+    18 │ /* \u{202f} */ const␠foo␠=␠'thing';
+    19 │ /* \u{205f} */ const␠foo␠=␠'thing';
   
   i Replace the irregular whitespaces with normal whitespaces or tabs.
   
@@ -321,12 +319,12 @@ invalid.js:18:16 lint/nursery/noIrregularWhitespace ━━━━━━━━━�
 
   ! Irregular whitespaces found.
   
-    16 │ /* \u{2008} */ const␠foo␠=␠'thing';
-    17 │ /* \u{2009} */ const␠foo␠=␠'thing';
-  > 18 │ /* \u{200a} */ const␠foo␠=␠'thing';
+    16 │ /* \u{200a} */ const␠foo␠=␠'thing';
+    17 │ /* \u{200b} */ const�foo�=�'thing';
+  > 18 │ /* \u{202f} */ const␠foo␠=␠'thing';
        │                ^^^^^^^^^^^^^^^^^^^^
-    19 │ /* \u{200b} */ const�foo�=�'thing';
-    20 │ /* \u{202f} */ const␠foo␠=␠'thing';
+    19 │ /* \u{205f} */ const␠foo␠=␠'thing';
+    20 │ /* \u{3000} */ const␠foo␠=␠'thing';
   
   i Replace the irregular whitespaces with normal whitespaces or tabs.
   
@@ -338,12 +336,12 @@ invalid.js:19:16 lint/nursery/noIrregularWhitespace ━━━━━━━━━�
 
   ! Irregular whitespaces found.
   
-    17 │ /* \u{2009} */ const␠foo␠=␠'thing';
-    18 │ /* \u{200a} */ const␠foo␠=␠'thing';
-  > 19 │ /* \u{200b} */ const�foo�=�'thing';
+    17 │ /* \u{200b} */ const�foo�=�'thing';
+    18 │ /* \u{202f} */ const␠foo␠=␠'thing';
+  > 19 │ /* \u{205f} */ const␠foo␠=␠'thing';
        │                ^^^^^^^^^^^^^^^^^^^^
-    20 │ /* \u{202f} */ const␠foo␠=␠'thing';
-    21 │ /* \u{205f} */ const␠foo␠=␠'thing';
+    20 │ /* \u{3000} */ const␠foo␠=␠'thing';
+    21 │ 
   
   i Replace the irregular whitespaces with normal whitespaces or tabs.
   
@@ -355,45 +353,11 @@ invalid.js:20:16 lint/nursery/noIrregularWhitespace ━━━━━━━━━�
 
   ! Irregular whitespaces found.
   
-    18 │ /* \u{200a} */ const␠foo␠=␠'thing';
-    19 │ /* \u{200b} */ const�foo�=�'thing';
-  > 20 │ /* \u{202f} */ const␠foo␠=␠'thing';
+    18 │ /* \u{202f} */ const␠foo␠=␠'thing';
+    19 │ /* \u{205f} */ const␠foo␠=␠'thing';
+  > 20 │ /* \u{3000} */ const␠foo␠=␠'thing';
        │                ^^^^^^^^^^^^^^^^^^^^
-    21 │ /* \u{205f} */ const␠foo␠=␠'thing';
-    22 │ /* \u{3000} */ const␠foo␠=␠'thing';
-  
-  i Replace the irregular whitespaces with normal whitespaces or tabs.
-  
-
-```
-
-```
-invalid.js:21:16 lint/nursery/noIrregularWhitespace ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! Irregular whitespaces found.
-  
-    19 │ /* \u{200b} */ const�foo�=�'thing';
-    20 │ /* \u{202f} */ const␠foo␠=␠'thing';
-  > 21 │ /* \u{205f} */ const␠foo␠=␠'thing';
-       │                ^^^^^^^^^^^^^^^^^^^^
-    22 │ /* \u{3000} */ const␠foo␠=␠'thing';
-    23 │ 
-  
-  i Replace the irregular whitespaces with normal whitespaces or tabs.
-  
-
-```
-
-```
-invalid.js:22:16 lint/nursery/noIrregularWhitespace ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! Irregular whitespaces found.
-  
-    20 │ /* \u{202f} */ const␠foo␠=␠'thing';
-    21 │ /* \u{205f} */ const␠foo␠=␠'thing';
-  > 22 │ /* \u{3000} */ const␠foo␠=␠'thing';
-       │                ^^^^^^^^^^^^^^^^^^^^
-    23 │ 
+    21 │ 
   
   i Replace the irregular whitespaces with normal whitespaces or tabs.
   

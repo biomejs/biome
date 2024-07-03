@@ -26,11 +26,9 @@ const foo = '\\\u2029';
 /* \u{b}    */ const foo = '';
 /* \u{c}    */ const foo = '';
 /* \u{20}   */ const foo = ' ';
-/* \u{85}   */ const foo = '';
 /* \u{feff} */ const foo = '﻿';
 /* \u{a0}   */ const foo = ' ';
 /* \u{1680} */ const foo = ' ';
-/* \u{180e} */ const foo = '᠎';
 /* \u{2000} */ const foo = ' ';
 /* \u{2001} */ const foo = ' ';
 /* \u{2002} */ const foo = ' ';

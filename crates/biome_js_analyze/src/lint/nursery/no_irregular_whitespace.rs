@@ -1,7 +1,7 @@
 use biome_analyze::{context::RuleContext, declare_lint_rule, Ast, Rule, RuleDiagnostic};
 use biome_console::markup;
 use biome_js_syntax::AnyJsStatement;
-use biome_rowan::{AstNode, TextRange, TextSize};
+use biome_rowan::{AstNode, Direction};
 
 const IRREGULAR_WHITESPACES: &[char; 22] = &[
     '\u{c}', '\u{b}', '\u{85}', '\u{feff}', '\u{a0}', '\u{1680}', '\u{180e}', '\u{2000}',
@@ -52,6 +52,12 @@ impl Rule for NoIrregularWhitespace {
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
+        // let syntax = node.syntax();
+
+        // for tree in syntax.descendants_tokens(Direction::Next) {
+        //     dbg!(tree.leading_trivia(), tree.trailing_trivia());
+        // }
+
         get_irregular_whitespace(node)
     }
 
@@ -75,36 +81,23 @@ impl Rule for NoIrregularWhitespace {
 
 fn get_irregular_whitespace(node: &AnyJsStatement) -> Option<()> {
     let syntax = node.syntax();
-    let node_text = syntax.text_trimmed();
-    let range_start: u32 = node.range().start().into();
+    let has_irregular_whitespace = syntax.descendants_tokens(Direction::Next).any(|token| {
+        let pieces = token
+            .leading_trivia()
+            .pieces()
+            .chain(token.trailing_trivia().pieces());
 
-    IRREGULAR_WHITESPACES
-        .iter()
-        .find_map(|whitespace_character| {
-            let text_size = node_text
-                .find_char(*whitespace_character)?
-                .checked_add(TextSize::from(range_start))?;
-            let text_range = TextRange::new(text_size, text_size);
+        pieces.filter(|trivia| trivia.is_whitespace()).any(
+            |trivia: biome_rowan::SyntaxTriviaPiece<biome_js_syntax::JsLanguage>| {
+                IRREGULAR_WHITESPACES.iter().any(|irregular_whitespace| {
+                    trivia
+                        .text()
+                        .chars()
+                        .any(|char| &char == irregular_whitespace)
+                })
+            },
+        )
+    });
 
-            let element_at_index = node
-                .range()
-                .contains(text_size)
-                .then(|| syntax.covering_element(text_range))?;
-
-            let is_string_literal = matches!(
-                element_at_index.kind(),
-                biome_js_syntax::JsSyntaxKind::JS_STRING_LITERAL
-                    | biome_js_syntax::JsSyntaxKind::JSX_TEXT_LITERAL
-                    | biome_js_syntax::JsSyntaxKind::TEMPLATE_CHUNK
-            );
-
-            if is_string_literal {
-                return None;
-            }
-
-            node_text
-                .chars()
-                .find(|char| whitespace_character.eq(char))
-                .and(Some(()))
-        })
+    has_irregular_whitespace.then_some(())
 }
