@@ -41,7 +41,7 @@ const FLAT_CONFIG_FILES: [&str; 3] = [
 /// Order is important.
 /// It translates the priority of the files.
 /// For example, ESLint looks for `./.eslintrc.js` before looking for `./.eslintrc.json`.
-const LEGACY_CONFIG_FILES: [&str; 5] = [
+const LEGACY_CONFIG_FILES: [&str; 6] = [
     // Prefixed with `./` to ensure that it is loadable via Node.js's `import()`
     "./.eslintrc.js",
     // Prefixed with `./` to ensure that it is loadable via Node.js's `import()`
@@ -49,6 +49,7 @@ const LEGACY_CONFIG_FILES: [&str; 5] = [
     ".eslintrc.yaml",
     ".eslintrc.yml",
     ".eslintrc.json",
+    ".eslintrc",
 ];
 
 /// An ESLint config can be embedded in `package.json`
@@ -101,7 +102,7 @@ pub(crate) fn read_eslint_config(
             data: data.into(),
         });
     }
-    Err(CliDiagnostic::MigrateError(MigrationDiagnostic { reason: "The default ESLint configuration file `.eslintrc.*` was not found in the working directory.".to_string()}))
+    Err(CliDiagnostic::MigrateError(MigrationDiagnostic { reason: "The default ESLint configuration file `.eslintrc[.*]` was not found in the working directory.".to_string()}))
 }
 
 #[derive(Debug)]
@@ -154,7 +155,7 @@ fn load_legacy_config_data(
     console: &mut dyn Console,
 ) -> Result<eslint_eslint::LegacyConfigData, CliDiagnostic> {
     let (deserialized, diagnostics) = match path.extension().and_then(|file_ext| file_ext.to_str()) {
-        Some("json") => {
+        None | Some("json") => {
             let mut file = fs.open_with_options(path, OpenOptions::default().read(true))?;
             let mut content = String::new();
             file.read_to_string(&mut content)?;
@@ -191,7 +192,6 @@ fn load_legacy_config_data(
             ).consume()
         },
         Some(ext) => return Err(CliDiagnostic::MigrateError(MigrationDiagnostic{ reason: format!("ESLint configuration ending with the extension `{ext}` are not supported.") })),
-        None => return Err(CliDiagnostic::MigrateError(MigrationDiagnostic{ reason: "The ESLint configuration format cannot be determined because the file has no extension.".to_string() })),
     };
     let path_str = path.to_string_lossy();
     for diagnostic in diagnostics.into_iter().filter(|diag| {
