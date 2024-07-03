@@ -502,6 +502,7 @@ dependencies = [
  "biome_diagnostics",
  "biome_formatter",
  "biome_formatter_test",
+ "biome_fs",
  "biome_graphql_parser",
  "biome_graphql_syntax",
  "biome_parser",
