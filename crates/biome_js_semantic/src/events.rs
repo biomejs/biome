@@ -2,7 +2,8 @@
 
 use biome_js_syntax::binding_ext::{AnyJsBindingDeclaration, AnyJsIdentifierBinding};
 use biome_js_syntax::{
-    AnyJsIdentifierUsage, JsLanguage, JsSyntaxKind, JsSyntaxNode, TextRange, TsTypeParameterName,
+    inner_string_text, AnyJsIdentifierUsage, JsLanguage, JsSyntaxKind, JsSyntaxNode, TextRange,
+    TsTypeParameterName,
 };
 use biome_js_syntax::{AnyJsImportClause, AnyJsNamedImportSpecifier, AnyTsType};
 use biome_rowan::{syntax::Preorder, AstNode, SyntaxNodeOptionExt, TokenText};
@@ -297,7 +298,10 @@ impl SemanticEventExtractor {
         // If you push a scope for a given node type, don't forget to also update `Self::leave`.
         // You should also edit [SemanticModelBuilder::push_node].
         match node.kind() {
-            JS_IDENTIFIER_BINDING | TS_IDENTIFIER_BINDING | TS_TYPE_PARAMETER_NAME => {
+            JS_IDENTIFIER_BINDING
+            | TS_IDENTIFIER_BINDING
+            | TS_TYPE_PARAMETER_NAME
+            | TS_LITERAL_ENUM_MEMBER_NAME => {
                 self.enter_identifier_binding(&AnyJsIdentifierBinding::unwrap_cast(node.clone()));
             }
 
@@ -427,6 +431,12 @@ impl SemanticEventExtractor {
                     | AnyJsBindingDeclaration::JsFunctionExportDefaultDeclaration(_) => {
                         hoisted_scope_id = self.scope_index_to_hoist_declarations(1);
                         self.push_binding(hoisted_scope_id, BindingName::Value(name), info);
+                    }
+                    AnyJsBindingDeclaration::TsEnumMember(_) => {
+                        // Handle quoted names.
+                        let name = inner_string_text(&name_token);
+                        self.push_binding(None, BindingName::Value(name.clone()), info.clone());
+                        self.push_binding(None, BindingName::Type(name), info);
                     }
                     AnyJsBindingDeclaration::JsClassExpression(_)
                     | AnyJsBindingDeclaration::JsFunctionExpression(_) => {

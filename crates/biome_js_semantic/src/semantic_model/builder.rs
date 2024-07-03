@@ -54,6 +54,7 @@ impl SemanticModelBuilder {
             | JS_REFERENCE_IDENTIFIER
             | JSX_REFERENCE_IDENTIFIER
             | TS_TYPE_PARAMETER_NAME
+            | TS_LITERAL_ENUM_MEMBER_NAME
             | JS_IDENTIFIER_ASSIGNMENT => {
                 self.node_by_range.insert(node.text_range(), node.clone());
             }

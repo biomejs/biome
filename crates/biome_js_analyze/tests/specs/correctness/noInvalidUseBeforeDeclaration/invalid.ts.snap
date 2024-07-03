@@ -8,6 +8,11 @@ class C {
     constructor(readonly a = b, readonly b = 0) {}
 }
 
+enum E {
+    A = B,
+    B,
+}
+
 ```
 
 # Diagnostics
@@ -33,4 +38,25 @@ invalid.ts:2:30 lint/correctness/noInvalidUseBeforeDeclaration ━━━━━�
 
 ```
 
+```
+invalid.ts:6:9 lint/correctness/noInvalidUseBeforeDeclaration ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
+  ! This enum member is used before its declaration.
+  
+    5 │ enum E {
+  > 6 │     A = B,
+      │         ^
+    7 │     B,
+    8 │ }
+  
+  i The enum member is declared here:
+  
+    5 │ enum E {
+    6 │     A = B,
+  > 7 │     B,
+      │     ^
+    8 │ }
+    9 │ 
+  
+
+```

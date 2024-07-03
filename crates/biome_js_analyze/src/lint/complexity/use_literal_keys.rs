@@ -4,15 +4,12 @@ use biome_analyze::{
     RuleSource,
 };
 use biome_console::markup;
-use biome_js_factory::make::{
-    self, ident, js_literal_member_name, js_name, js_static_member_assignment,
-    js_static_member_expression, token,
-};
+use biome_js_factory::make;
 use biome_js_syntax::{
     AnyJsAssignment, AnyJsComputedMember, AnyJsMemberExpression, AnyJsName, AnyJsObjectMemberName,
-    JsComputedMemberName, T,
+    AnyTsEnumMemberName, JsComputedMemberName, JsSyntaxKind, T,
 };
-use biome_rowan::{declare_node_union, AstNode, BatchMutationExt, TextRange};
+use biome_rowan::{declare_node_union, AstNode, BatchMutationExt, SyntaxNodeOptionExt, TextRange};
 use biome_unicode_table::is_js_ident;
 
 declare_lint_rule! {
@@ -129,12 +126,14 @@ impl Rule for UseLiteralKeys {
         match node {
             AnyJsMember::AnyJsComputedMember(node) => {
                 let object = node.object().ok()?;
-                let member = js_name(ident(identifier));
-                let dot_token = node.optional_chain_token().unwrap_or_else(|| token(T![.]));
+                let member = make::js_name(make::ident(identifier));
+                let dot_token = node
+                    .optional_chain_token()
+                    .unwrap_or_else(|| make::token(T![.]));
 
                 match node {
                     AnyJsComputedMember::JsComputedMemberExpression(node) => {
-                        let static_expression = js_static_member_expression(
+                        let static_expression = make::js_static_member_expression(
                             object,
                             dot_token,
                             AnyJsName::JsName(member),
@@ -145,7 +144,7 @@ impl Rule for UseLiteralKeys {
                         );
                     }
                     AnyJsComputedMember::JsComputedMemberAssignment(node) => {
-                        let static_member = js_static_member_assignment(
+                        let static_member = make::js_static_member_assignment(
                             object,
                             dot_token,
                             AnyJsName::JsName(member),
@@ -163,11 +162,19 @@ impl Rule for UseLiteralKeys {
                 } else {
                     make::js_string_literal_single_quotes(identifier)
                 };
-                let literal_member_name = js_literal_member_name(name_token);
-                mutation.replace_node(
-                    AnyJsObjectMemberName::from(member.clone()),
-                    literal_member_name.into(),
-                );
+                if member.syntax().parent().kind() == Some(JsSyntaxKind::TS_ENUM_MEMBER) {
+                    let literal_enum_member_name = make::ts_literal_enum_member_name(name_token);
+                    mutation.replace_node(
+                        AnyTsEnumMemberName::from(member.clone()),
+                        literal_enum_member_name.into(),
+                    );
+                } else {
+                    let literal_member_name = make::js_literal_member_name(name_token);
+                    mutation.replace_node(
+                        AnyJsObjectMemberName::from(member.clone()),
+                        literal_member_name.into(),
+                    );
+                }
             }
         }
         Some(JsRuleAction::new(

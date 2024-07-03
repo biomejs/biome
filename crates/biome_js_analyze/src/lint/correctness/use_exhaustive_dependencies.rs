@@ -475,7 +475,8 @@ fn capture_needs_to_be_in_the_dependency_list(
         | AnyJsBindingDeclaration::TsModuleDeclaration(_)
         | AnyJsBindingDeclaration::TsInferType(_)
         | AnyJsBindingDeclaration::TsMappedType(_)
-        | AnyJsBindingDeclaration::TsTypeParameter(_) => false,
+        | AnyJsBindingDeclaration::TsTypeParameter(_)
+        | AnyJsBindingDeclaration::TsEnumMember(_) => false,
         // Function declarations are stable if ...
         AnyJsBindingDeclaration::JsFunctionDeclaration(declaration) => {
             let declaration_range = declaration.syntax().text_range();
