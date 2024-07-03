@@ -58,6 +58,7 @@ pub enum CssReLexContext {
     Regular,
     /// See [CssLexContext::UnicodeRange]
     UnicodeRange,
+    /// Re-lexes an identifier as a Grit metavariable if it exactly matches the RegExp `$[a-zA-Z_][a-zA-Z0-9_]*`.
     GritMetavariable,
 }
 
@@ -1317,7 +1318,6 @@ impl<'src> CssLexer<'src> {
         }
     }
 
-    // $[a-zA-Z_][a-zA-Z0-9_]*
     fn re_lex_grit_metavariable(&mut self, current_end: usize) -> CssSyntaxKind {
         if self.current_kind == T![ident]
             && self.current_byte() == Some(b'$')
