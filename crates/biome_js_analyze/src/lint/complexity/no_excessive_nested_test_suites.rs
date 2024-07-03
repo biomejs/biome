@@ -152,6 +152,10 @@ fn is_member(call: &JsCallExpression) -> bool {
         .parent()
         .kind()
         .map_or(false, JsStaticMemberExpression::can_cast)
+        || call
+            .callee()
+            .map(|callee| callee.syntax().kind())
+            .map_or(false, JsStaticMemberExpression::can_cast)
 }
 
 // Declare a query match struct type containing a JavaScript function node
