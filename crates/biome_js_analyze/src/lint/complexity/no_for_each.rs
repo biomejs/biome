@@ -1,9 +1,11 @@
-use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic, RuleSource};
+use biome_analyze::{
+    context::RuleContext, declare_lint_rule, Ast, Rule, RuleDiagnostic, RuleSource,
+};
 use biome_console::markup;
 use biome_js_syntax::{AnyJsExpression, AnyJsMemberExpression, JsCallExpression};
 use biome_rowan::{AstNode, AstSeparatedList};
 
-declare_rule! {
+declare_lint_rule! {
     /// Prefer `for...of` statement instead of `Array.forEach`.
     ///
     /// Here's a summary of why `forEach` may be disallowed, and why `for...of` is preferred for almost any use-case of `forEach`:

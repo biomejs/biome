@@ -1,12 +1,12 @@
 //! Generated file, do not edit by hand, see `xtask/codegen`
 
-use biome_analyze::declare_lint_group;
+use biome_analyze::declare_syntax_group;
 
 pub mod no_duplicate_private_class_members;
 pub mod no_initializer_with_definite;
 pub mod no_super_without_extends;
 
-declare_lint_group! {
+declare_syntax_group! {
     pub Correctness {
         name : "correctness" ,
         rules : [

@@ -14,7 +14,7 @@ class A {
 
 # Diagnostics
 ```
-invalid.js:3:9 parse/noSuperWithoutExtends ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:3:9 syntax/correctness/noSuperWithoutExtends ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! super() is only valid in derived class constructors
   
@@ -27,5 +27,3 @@ invalid.js:3:9 parse/noSuperWithoutExtends ━━━━━━━━━━━━�
   
 
 ```
-
-

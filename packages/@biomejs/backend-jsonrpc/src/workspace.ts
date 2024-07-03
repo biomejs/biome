@@ -1,13 +1,19 @@
 // Generated file, do not edit by hand, see `xtask/codegen`
 import type { Transport } from "./transport";
 export interface SupportsFeatureParams {
-	features: FeatureName[];
+	features: FeatureName;
 	path: BiomePath;
 }
-export type FeatureName = "Format" | "Lint" | "OrganizeImports" | "Search";
+export type FeatureName = FeatureKind[];
 export interface BiomePath {
 	path: string;
 }
+export type FeatureKind =
+	| "Format"
+	| "Lint"
+	| "OrganizeImports"
+	| "Search"
+	| "Assists";
 export interface SupportsFeatureResult {
 	reason?: SupportKind;
 }
@@ -2489,7 +2495,6 @@ export type Category =
 	| "lint/nursery/noRestrictedImports"
 	| "lint/nursery/noShorthandPropertyOverrides"
 	| "lint/nursery/noSubstr"
-	| "lint/nursery/noTypeOnlyImportAttributes"
 	| "lint/nursery/noUndeclaredDependencies"
 	| "lint/nursery/noUnknownFunction"
 	| "lint/nursery/noUnknownMediaFeatureName"
@@ -2628,6 +2633,10 @@ export type Category =
 	| "lint/suspicious/useNamespaceKeyword"
 	| "lint/suspicious/useValidTypeof"
 	| "assists/nursery/useSortedKeys"
+	| "syntax/nursery/noTypeOnlyImportAttributes"
+	| "syntax/correctness/noSuperWithoutExtends"
+	| "syntax/correctness/noInitializerWithDefinite"
+	| "syntax/correctness/noDuplicatePrivateClassMembers"
 	| "files/missingHandler"
 	| "format"
 	| "check"
@@ -2642,9 +2651,6 @@ export type Category =
 	| "internalError/fs"
 	| "internalError/panic"
 	| "parse"
-	| "parse/noSuperWithoutExtends"
-	| "parse/noInitializerWithDefinite"
-	| "parse/noDuplicatePrivateClassMembers"
 	| "lint"
 	| "lint/a11y"
 	| "lint/complexity"

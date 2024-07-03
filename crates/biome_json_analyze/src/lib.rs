@@ -13,7 +13,7 @@ use biome_analyze::{
     MetadataRegistry, RuleAction, RuleRegistry, SuppressionDiagnostic, SuppressionKind,
 };
 use biome_diagnostics::Error;
-use biome_json_syntax::JsonLanguage;
+use biome_json_syntax::{JsonFileSource, JsonLanguage};
 
 pub(crate) type JsonRuleAction = RuleAction<JsonLanguage>;
 
@@ -37,13 +37,14 @@ pub fn analyze<'a, F, B>(
     root: &LanguageRoot<JsonLanguage>,
     filter: AnalysisFilter,
     options: &'a AnalyzerOptions,
+    file_source: JsonFileSource,
     emit_signal: F,
 ) -> (Option<B>, Vec<Error>)
 where
     F: FnMut(&dyn AnalyzerSignal<JsonLanguage>) -> ControlFlow<B> + 'a,
     B: 'a,
 {
-    analyze_with_inspect_matcher(root, filter, |_| {}, options, emit_signal)
+    analyze_with_inspect_matcher(root, filter, |_| {}, options, file_source, emit_signal)
 }
 
 /// Run the analyzer on the provided `root`: this process will use the given `filter`
@@ -57,6 +58,7 @@ pub fn analyze_with_inspect_matcher<'a, V, F, B>(
     filter: AnalysisFilter,
     inspect_matcher: V,
     options: &'a AnalyzerOptions,
+    file_source: JsonFileSource,
     mut emit_signal: F,
 ) -> (Option<B>, Vec<Error>)
 where
@@ -72,7 +74,7 @@ where
     let mut registry = RuleRegistry::builder(&filter, root);
     visit_registry(&mut registry);
 
-    let (registry, services, diagnostics, visitors) = registry.build();
+    let (registry, mut services, diagnostics, visitors) = registry.build();
 
     // Bail if we can't parse a rule option
     if !diagnostics.is_empty() {
@@ -90,6 +92,8 @@ where
     for ((phase, _), visitor) in visitors {
         analyzer.add_visitor(phase, visitor);
     }
+
+    services.insert_service(file_source);
 
     (
         analyzer.run(biome_analyze::AnalyzerContext {
@@ -110,7 +114,7 @@ mod tests {
     use biome_diagnostics::termcolor::NoColor;
     use biome_diagnostics::{Diagnostic, DiagnosticExt, PrintDiagnostic, Severity};
     use biome_json_parser::{parse_json, JsonParserOptions};
-    use biome_json_syntax::TextRange;
+    use biome_json_syntax::{JsonFileSource, TextRange};
     use std::slice;
 
     use crate::{analyze, AnalysisFilter, ControlFlow};
@@ -146,6 +150,7 @@ mod tests {
                 ..AnalysisFilter::default()
             },
             &options,
+            JsonFileSource::json(),
             |signal| {
                 if let Some(diag) = signal.diagnostic() {
                     error_ranges.push(diag.location().span.unwrap());

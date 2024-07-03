@@ -1,12 +1,12 @@
 use biome_analyze::context::RuleContext;
-use biome_analyze::{declare_rule, Ast, Rule, RuleDiagnostic, RuleSource};
+use biome_analyze::{declare_lint_rule, Ast, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
 use biome_js_syntax::jsx_ext::AnyJsxElement;
 use biome_js_syntax::{AnyJsxAttribute, JsxAttribute};
 use biome_rowan::AstNode;
 use rustc_hash::FxHashMap;
 
-declare_rule! {
+declare_lint_rule! {
     /// Prevents JSX properties to be assigned multiple times.
     ///
     /// ## Examples

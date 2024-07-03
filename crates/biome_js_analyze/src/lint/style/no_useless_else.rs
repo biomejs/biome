@@ -1,7 +1,7 @@
 use std::borrow::Cow;
 
 use biome_analyze::{
-    context::RuleContext, declare_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic,
+    context::RuleContext, declare_lint_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic,
     RuleSource, RuleSourceKind,
 };
 use biome_console::markup;
@@ -14,7 +14,7 @@ use biome_rowan::{
 
 use crate::JsRuleAction;
 
-declare_rule! {
+declare_lint_rule! {
     /// Disallow `else` block when the `if` block breaks early.
     ///
     /// If an `if` block breaks early using a breaking statement (`return`, `break`, `continue`, or `throw`),

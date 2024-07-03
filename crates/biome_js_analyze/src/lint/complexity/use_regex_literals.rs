@@ -1,5 +1,6 @@
 use biome_analyze::{
-    context::RuleContext, declare_rule, ActionCategory, FixKind, Rule, RuleDiagnostic, RuleSource,
+    context::RuleContext, declare_lint_rule, ActionCategory, FixKind, Rule, RuleDiagnostic,
+    RuleSource,
 };
 use biome_console::markup;
 use biome_js_factory::make::js_regex_literal_expression;
@@ -13,7 +14,7 @@ use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt, SyntaxError, Toke
 
 use crate::{services::semantic::Semantic, JsRuleAction};
 
-declare_rule! {
+declare_lint_rule! {
     /// Enforce the use of the regular expression literals instead of the RegExp constructor if possible.
     ///
     /// There are two ways to create a regular expression:

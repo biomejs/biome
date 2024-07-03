@@ -1,7 +1,7 @@
 use std::fmt::Display;
 
 use biome_analyze::context::RuleContext;
-use biome_analyze::{declare_rule, ActionCategory, FixKind, Rule, RuleDiagnostic, RuleSource};
+use biome_analyze::{declare_lint_rule, ActionCategory, FixKind, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
 use biome_js_factory::make;
 use biome_js_syntax::{
@@ -13,7 +13,7 @@ use biome_rowan::{declare_node_union, AstNode, AstNodeList, BatchMutationExt};
 use crate::services::semantic::Semantic;
 use crate::JsRuleAction;
 
-declare_rule! {
+declare_lint_rule! {
     /// Disallow primitive type aliases and misleading types.
     ///
     /// - Enforce consistent names for primitive types

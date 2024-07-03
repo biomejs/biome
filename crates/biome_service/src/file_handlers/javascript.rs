@@ -21,8 +21,8 @@ use crate::{
 use biome_analyze::options::PreferredQuote;
 use biome_analyze::{
     AnalysisFilter, AnalyzerConfiguration, AnalyzerOptions, ControlFlow, GroupCategory, Never,
-    QueryMatch, RegistryVisitor, RuleCategoriesBuilder, RuleCategory, RuleError, RuleFilter,
-    RuleGroup,
+    QueryMatch, Queryable, RegistryVisitor, RuleCategoriesBuilder, RuleCategory, RuleError,
+    RuleFilter, RuleGroup,
 };
 use biome_configuration::javascript::JsxRuntime;
 use biome_diagnostics::{category, Applicability, Diagnostic, DiagnosticExt, Severity};
@@ -567,9 +567,7 @@ impl RegistryVisitor<JsLanguage> for ActionsVisitor<'_> {
 
     fn record_rule<R>(&mut self)
     where
-        R: biome_analyze::Rule + 'static,
-        R::Query: biome_analyze::Queryable<Language = JsLanguage>,
-        <R::Query as biome_analyze::Queryable>::Output: Clone,
+        R: biome_analyze::Rule<Query: Queryable<Language = JsLanguage, Output: Clone>> + 'static,
     {
         self.enabled_rules.push(RuleFilter::Rule(
             <R::Group as RuleGroup>::NAME,

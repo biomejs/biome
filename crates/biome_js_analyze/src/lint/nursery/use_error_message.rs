@@ -1,11 +1,11 @@
-use biome_analyze::{context::RuleContext, declare_rule, Rule, RuleDiagnostic, RuleSource};
+use biome_analyze::{context::RuleContext, declare_lint_rule, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
 use biome_js_syntax::{global_identifier, AnyJsExpression, JsNewOrCallExpression};
 use biome_rowan::AstNode;
 
 use crate::services::semantic::Semantic;
 
-declare_rule! {
+declare_lint_rule! {
     /// Enforce passing a message value when creating a built-in error.
     ///
     /// This rule enforces a message value to be passed in when creating an instance of a built-in `Error` object,

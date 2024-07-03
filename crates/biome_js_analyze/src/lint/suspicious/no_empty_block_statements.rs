@@ -1,4 +1,6 @@
-use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic, RuleSource};
+use biome_analyze::{
+    context::RuleContext, declare_lint_rule, Ast, Rule, RuleDiagnostic, RuleSource,
+};
 use biome_console::markup;
 use biome_js_syntax::{
     AnyJsConstructorParameter, JsBlockStatement, JsConstructorClassMember, JsFunctionBody,
@@ -6,7 +8,7 @@ use biome_js_syntax::{
 };
 use biome_rowan::{declare_node_union, AstNode, AstNodeList, SyntaxNodeCast};
 
-declare_rule! {
+declare_lint_rule! {
     /// Disallow empty block statements and static blocks.
     ///
     /// Empty static blocks and block statements, while not technically errors, usually occur due to refactoring that wasn’t completed. They can cause confusion when reading code.

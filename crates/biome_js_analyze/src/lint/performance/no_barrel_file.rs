@@ -1,4 +1,4 @@
-use biome_analyze::{context::RuleContext, declare_rule, Rule, RuleDiagnostic};
+use biome_analyze::{context::RuleContext, declare_lint_rule, Rule, RuleDiagnostic};
 use biome_analyze::{Ast, RuleSource, RuleSourceKind};
 use biome_console::markup;
 use biome_js_syntax::{
@@ -6,7 +6,7 @@ use biome_js_syntax::{
 };
 use biome_rowan::AstNode;
 
-declare_rule! {
+declare_lint_rule! {
     /// Disallow the use of barrel file.
     ///
     /// A barrel file is a file that re-exports all of the exports from other files in a directory.

@@ -999,6 +999,7 @@ dependencies = [
  "biome_text_edit",
  "bpaf",
  "dashmap",
+ "enumflags2",
  "getrandom 0.2.15",
  "ignore",
  "indexmap 2.2.6",
@@ -1664,6 +1665,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d232db7f5956f3f14313dc2f87985c58bd2c695ce124c8cdd984e08e15ac133d"
 dependencies = [
  "enumflags2_derive",
+ "serde",
 ]
 
 [[package]]

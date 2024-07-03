@@ -296,7 +296,7 @@ fn assert_lint(
                     file_path: PathBuf::from(&file_path),
                     ..Default::default()
                 };
-                biome_json_analyze::analyze(&root, filter, &options, |signal| {
+                biome_json_analyze::analyze(&root, filter, &options, file_source, |signal| {
                     if let Some(mut diag) = signal.diagnostic() {
                         let category = diag.category().expect("linter diagnostic has no code");
                         let severity = settings.get_current_settings().expect("project").get_severity_from_rule_code(category).expect(

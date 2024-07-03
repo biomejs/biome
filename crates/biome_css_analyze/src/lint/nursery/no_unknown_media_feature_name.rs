@@ -1,4 +1,6 @@
-use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic, RuleSource};
+use biome_analyze::{
+    context::RuleContext, declare_lint_rule, Ast, Rule, RuleDiagnostic, RuleSource,
+};
 use biome_console::markup;
 use biome_css_syntax::{
     AnyCssMediaAndCombinableCondition, AnyCssMediaCondition, AnyCssMediaInParens,
@@ -10,7 +12,7 @@ use biome_rowan::AstNode;
 
 use crate::utils::is_media_feature_name;
 
-declare_rule! {
+declare_lint_rule! {
     /// Disallow unknown media feature names.
     ///
     /// This rule considers media feature names defined in the CSS Specifications, up to and including Editor's Drafts, to be known.

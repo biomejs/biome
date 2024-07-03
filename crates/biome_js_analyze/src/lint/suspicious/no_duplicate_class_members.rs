@@ -1,5 +1,5 @@
 use biome_analyze::RuleSource;
-use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic};
+use biome_analyze::{context::RuleContext, declare_lint_rule, Ast, Rule, RuleDiagnostic};
 use biome_js_syntax::{
     AnyJsClassMemberName, JsClassMemberList, JsGetterClassMember, JsMethodClassMember,
     JsPropertyClassMember, JsSetterClassMember, JsStaticModifier, JsSyntaxList, TextRange,
@@ -8,7 +8,7 @@ use biome_rowan::{declare_node_union, AstNode};
 use biome_rowan::{AstNodeList, TokenText};
 use rustc_hash::{FxHashMap, FxHashSet};
 
-declare_rule! {
+declare_lint_rule! {
     /// Disallow duplicate class members.
     ///
     /// If there are declarations of the same name among class members,

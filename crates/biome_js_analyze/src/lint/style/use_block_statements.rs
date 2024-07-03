@@ -1,5 +1,7 @@
 use biome_analyze::context::RuleContext;
-use biome_analyze::{declare_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic, RuleSource};
+use biome_analyze::{
+    declare_lint_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic, RuleSource,
+};
 use biome_console::markup;
 use biome_js_factory::make;
 use biome_js_syntax::{
@@ -13,7 +15,7 @@ use biome_rowan::{declare_node_union, AstNode, BatchMutationExt, SyntaxTriviaPie
 use crate::JsRuleAction;
 use crate::{use_block_statements_diagnostic, use_block_statements_replace_body};
 
-declare_rule! {
+declare_lint_rule! {
     /// Requires following curly brace conventions.
     ///
     /// JavaScript allows the omission of curly braces when a block contains only one statement. However, it is considered by many to be best practice to never omit curly braces around blocks, even when they are optional, because it can lead to bugs and reduces code clarity.

@@ -1,8 +1,8 @@
-use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic};
+use biome_analyze::{context::RuleContext, declare_lint_rule, Ast, Rule, RuleDiagnostic};
 use biome_console::markup;
 use biome_js_syntax::{AnyJsExpression, JsFileSource, JsVariableDeclaration, JsVariableDeclarator};
 
-declare_rule! {
+declare_lint_rule! {
     /// Disallow variables from evolving into `any` type through reassignments.
     ///
     /// In TypeScript, variables without explicit type annotations can evolve their types based on subsequent assignments.

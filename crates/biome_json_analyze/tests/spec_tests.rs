@@ -2,7 +2,7 @@ use biome_analyze::{AnalysisFilter, AnalyzerAction, ControlFlow, Never, RuleFilt
 use biome_diagnostics::advice::CodeSuggestionAdvice;
 use biome_diagnostics::{DiagnosticExt, Severity};
 use biome_json_parser::{parse_json, JsonParserOptions};
-use biome_json_syntax::JsonLanguage;
+use biome_json_syntax::{JsonFileSource, JsonLanguage};
 use biome_rowan::AstNode;
 use biome_test_utils::{
     assert_errors_are_absent, code_fix_to_string, create_analyzer_options, diagnostic_to_string,
@@ -45,8 +45,18 @@ fn run_test(input: &'static str, _: &str, _: &str, _: &str) {
     let input_code = read_to_string(input_file)
         .unwrap_or_else(|err| panic!("failed to read {input_file:?}: {err:?}"));
 
-    let quantity_diagnostics =
-        analyze_and_snap(&mut snapshot, &input_code, filter, file_name, input_file);
+    let Ok(file_source) = input_file.try_into() else {
+        return;
+    };
+
+    let quantity_diagnostics = analyze_and_snap(
+        &mut snapshot,
+        &input_code,
+        file_source,
+        filter,
+        file_name,
+        input_file,
+    );
 
     insta::with_settings!({
         prepend_module_to_snapshot => false,
@@ -63,6 +73,7 @@ fn run_test(input: &'static str, _: &str, _: &str, _: &str) {
 pub(crate) fn analyze_and_snap(
     snapshot: &mut String,
     input_code: &str,
+    file_source: JsonFileSource,
     filter: AnalysisFilter,
     file_name: &str,
     input_file: &Path,
@@ -74,7 +85,7 @@ pub(crate) fn analyze_and_snap(
     let mut code_fixes = Vec::new();
     let options = create_analyzer_options(input_file, &mut diagnostics);
 
-    let (_, errors) = biome_json_analyze::analyze(&root, filter, &options, |event| {
+    let (_, errors) = biome_json_analyze::analyze(&root, filter, &options, file_source, |event| {
         if let Some(mut diag) = event.diagnostic() {
             for action in event.actions() {
                 if !action.is_suppression() {

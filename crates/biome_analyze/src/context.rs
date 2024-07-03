@@ -67,7 +67,7 @@ where
     ///
     /// ## Examples
     /// ```rust,ignore
-    /// declare_rule! {
+    /// declare_lint_rule! {
     ///     /// Some doc
     ///     pub(crate) Foo {
     ///         version: "0.0.0",
@@ -101,10 +101,10 @@ where
     /// ## Examples
     ///
     /// ```rust,ignore
-    /// use biome_analyze::{declare_rule, Rule, RuleCategory, RuleMeta, RuleMetadata};
+    /// use biome_analyze::{declare_lint_rule, Rule, RuleCategory, RuleMeta, RuleMetadata};
     /// use biome_analyze::context::RuleContext;
     /// use serde::Deserialize;
-    /// declare_rule! {
+    /// declare_lint_rule! {
     ///     /// Some doc
     ///     pub(crate) Name {
     ///         version: "0.0.0",

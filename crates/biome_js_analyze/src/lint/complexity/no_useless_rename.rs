@@ -1,5 +1,7 @@
 use biome_analyze::context::RuleContext;
-use biome_analyze::{declare_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic, RuleSource};
+use biome_analyze::{
+    declare_lint_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic, RuleSource,
+};
 use biome_console::markup;
 use biome_js_factory::make;
 use biome_js_syntax::{
@@ -11,7 +13,7 @@ use biome_rowan::{declare_node_union, trim_leading_trivia_pieces, AstNode, Batch
 
 use crate::JsRuleAction;
 
-declare_rule! {
+declare_lint_rule! {
     /// Disallow renaming import, export, and destructured assignments to the same name.
     ///
     /// ES2015 allows for the renaming of references in import and export statements as well as destructuring assignments.
