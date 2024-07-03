@@ -22,11 +22,6 @@ pub trait TestFormatLanguage {
 
     fn parse(&self, text: &str) -> AnyParse;
 
-    fn to_language_settings<'a>(
-        &self,
-        settings: &'a Settings,
-    ) -> &'a <Self::ServiceLanguage as ServiceLanguage>::FormatterSettings;
-
     fn format_node(
         &self,
         language: Self::FormatLanguage,

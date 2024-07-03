@@ -28,19 +28,12 @@ impl TestFormatLanguage for JsTestFormatLanguage {
         parse(text, self.source_type, options).into()
     }
 
-    fn to_language_settings<'a>(
-        &self,
-        settings: &'a Settings,
-    ) -> &'a <Self::ServiceLanguage as ServiceLanguage>::FormatterSettings {
-        &settings.languages.javascript.formatter
-    }
-
     fn to_format_language(
         &self,
         settings: &Settings,
         file_source: &biome_service::workspace::DocumentFileSource,
     ) -> Self::FormatLanguage {
-        let language_settings = self.to_language_settings(settings);
+        let language_settings = &settings.languages.javascript.formatter;
         let options = Self::ServiceLanguage::resolve_format_options(
             Some(&settings.formatter),
             Some(&settings.override_settings),
