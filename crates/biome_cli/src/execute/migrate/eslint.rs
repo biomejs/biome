@@ -154,25 +154,33 @@ fn load_legacy_config_data(
     path: &Path,
     console: &mut dyn Console,
 ) -> Result<eslint_eslint::LegacyConfigData, CliDiagnostic> {
-    let (deserialized, diagnostics) = match path.extension().and_then(|file_ext| file_ext.to_str()) {
+    let (deserialized, diagnostics) = match path.extension().and_then(|file_ext| file_ext.to_str())
+    {
         None | Some("json") => {
             let mut file = fs.open_with_options(path, OpenOptions::default().read(true))?;
             let mut content = String::new();
             file.read_to_string(&mut content)?;
             if path.file_name().is_some_and(|name| name == PACKAGE_JSON) {
-                let (deserialized, diagnostics) = deserialize_from_json_str::<eslint_eslint::EslintPackageJson>(
-                    &content,
-                    JsonParserOptions::default()
-                        .with_allow_trailing_commas()
-                        .with_allow_comments(),
-                    "",
-                ).consume();
-                (deserialized.and_then(|mut packagejson| {
-                    if let Some(eslint_config) = packagejson.eslint_config.as_mut() {
-                        eslint_config.ignore_patterns.extend(packagejson.eslint_ignore);
-                    }
-                    packagejson.eslint_config
-                }), diagnostics)
+                let (deserialized, diagnostics) =
+                    deserialize_from_json_str::<eslint_eslint::EslintPackageJson>(
+                        &content,
+                        JsonParserOptions::default()
+                            .with_allow_trailing_commas()
+                            .with_allow_comments(),
+                        "",
+                    )
+                    .consume();
+                (
+                    deserialized.and_then(|mut packagejson| {
+                        if let Some(eslint_config) = packagejson.eslint_config.as_mut() {
+                            eslint_config
+                                .ignore_patterns
+                                .extend(packagejson.eslint_ignore);
+                        }
+                        packagejson.eslint_config
+                    }),
+                    diagnostics,
+                )
             } else {
                 deserialize_from_json_str::<eslint_eslint::LegacyConfigData>(
                     &content,
@@ -180,18 +188,26 @@ fn load_legacy_config_data(
                         .with_allow_trailing_commas()
                         .with_allow_comments(),
                     "",
-                ).consume()
+                )
+                .consume()
             }
-        },
+        }
         Some("js" | "cjs") => {
-            let node::Resolution { content, ..} = node::load_config(&path.to_string_lossy())?;
+            let node::Resolution { content, .. } = node::load_config(&path.to_string_lossy())?;
             deserialize_from_json_str::<eslint_eslint::LegacyConfigData>(
                 &content,
                 JsonParserOptions::default(),
                 "",
-            ).consume()
-        },
-        Some(ext) => return Err(CliDiagnostic::MigrateError(MigrationDiagnostic{ reason: format!("ESLint configuration ending with the extension `{ext}` are not supported.") })),
+            )
+            .consume()
+        }
+        Some(ext) => {
+            return Err(CliDiagnostic::MigrateError(MigrationDiagnostic {
+                reason: format!(
+                    "ESLint configuration ending with the extension `{ext}` are not supported."
+                ),
+            }))
+        }
     };
     let path_str = path.to_string_lossy();
     for diagnostic in diagnostics.into_iter().filter(|diag| {
