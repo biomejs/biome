@@ -1,4 +1,4 @@
-use biome_analyze::{context::RuleContext, declare_rule, Rule, RuleDiagnostic};
+use biome_analyze::{context::RuleContext, declare_lint_rule, Rule, RuleDiagnostic};
 use biome_console::markup;
 use biome_js_semantic::ReferencesExtensions;
 use biome_js_syntax::{JsComputedMemberExpression, JsImportNamespaceClause};
@@ -6,7 +6,7 @@ use biome_rowan::{AstNode, TextRange};
 
 use crate::services::semantic::Semantic;
 
-declare_rule! {
+declare_lint_rule! {
     /// Disallow accessing namespace imports dynamically.
     ///
     /// Accessing namespace imports dynamically can prevent efficient tree shaking and increase bundle size.
