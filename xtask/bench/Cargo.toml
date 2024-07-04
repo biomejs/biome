@@ -5,24 +5,25 @@ publish = false
 version = "0.0.0"
 
 [dependencies]
-biome_analyze        = { workspace = true }
-biome_css_analyze    = { workspace = true }
-biome_css_formatter  = { workspace = true }
-biome_css_parser     = { workspace = true }
-biome_css_syntax     = { workspace = true }
-biome_diagnostics    = { workspace = true }
-biome_formatter      = { workspace = true }
-biome_graphql_parser = { workspace = true }
-biome_graphql_syntax = { workspace = true }
-biome_js_analyze     = { workspace = true }
-biome_js_formatter   = { workspace = true }
-biome_js_parser      = { workspace = true }
-biome_js_syntax      = { workspace = true }
-biome_json_formatter = { workspace = true }
-biome_json_parser    = { workspace = true }
-biome_json_syntax    = { workspace = true }
-biome_parser         = { workspace = true }
-biome_rowan          = { workspace = true }
+biome_analyze           = { workspace = true }
+biome_css_analyze       = { workspace = true }
+biome_css_formatter     = { workspace = true }
+biome_css_parser        = { workspace = true }
+biome_css_syntax        = { workspace = true }
+biome_diagnostics       = { workspace = true }
+biome_formatter         = { workspace = true }
+biome_graphql_formatter = { workspace = true }
+biome_graphql_parser    = { workspace = true }
+biome_graphql_syntax    = { workspace = true }
+biome_js_analyze        = { workspace = true }
+biome_js_formatter      = { workspace = true }
+biome_js_parser         = { workspace = true }
+biome_js_syntax         = { workspace = true }
+biome_json_formatter    = { workspace = true }
+biome_json_parser       = { workspace = true }
+biome_json_syntax       = { workspace = true }
+biome_parser            = { workspace = true }
+biome_rowan             = { workspace = true }
 
 
 ansi_rgb                  = "0.2.0"
@@ -79,6 +80,10 @@ name    = "css_analyzer"
 [[bench]]
 harness = false
 name    = "graphql_parser"
+
+[[bench]]
+harness = false
+name    = "graphql_formatter"
 
 [lints]
 workspace = true
