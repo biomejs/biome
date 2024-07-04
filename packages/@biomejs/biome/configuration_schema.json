@@ -1923,6 +1923,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noUnknownTypeSelector": {
+					"description": "Disallow unknown type selectors.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noUnknownUnit": {
 					"description": "Disallow unknown CSS units.",
 					"anyOf": [
