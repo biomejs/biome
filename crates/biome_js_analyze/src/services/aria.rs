@@ -59,7 +59,7 @@ impl AriaServices {
                         // handle multiple values e.g. `<div class="wrapper document">`
                         static_value
                             .text()
-                            .split(' ')
+                            .split_whitespace()
                             .map(|s| s.to_string())
                             .collect::<Vec<String>>()
                     } else {
