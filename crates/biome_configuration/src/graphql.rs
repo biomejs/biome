@@ -20,14 +20,14 @@ pub struct GraphqlConfiguration {
 }
 
 /// Options that changes how the GraphQL formatter behaves
-#[derive(Clone, Debug, Default, Deserialize, Eq, Partial, PartialEq, Serialize)]
+#[derive(Clone, Debug, Deserialize, Eq, Partial, PartialEq, Serialize)]
 #[partial(derive(Bpaf, Clone, Deserializable, Eq, Merge, PartialEq))]
 #[partial(cfg_attr(feature = "schema", derive(schemars::JsonSchema)))]
 #[partial(serde(rename_all = "camelCase", default, deny_unknown_fields))]
 pub struct GraphqlFormatter {
     /// Control the formatter for GraphQL files.
     #[partial(bpaf(long("graphql-formatter-enabled"), argument("true|false"), optional))]
-    pub enabled: bool,
+    pub enabled: Option<bool>,
 
     /// The indent style applied to GraphQL files.
     #[partial(bpaf(
@@ -67,19 +67,24 @@ pub struct GraphqlFormatter {
     pub bracket_spacing: Option<BracketSpacing>,
 }
 
-// impl Default for GraphqlFormatter {
-//     fn default() -> Self {
-//         Self {
-//             enabled: Some(false),
-//             ..Default::default()
-//         }
-//     }
-// }
+impl Default for GraphqlFormatter {
+    fn default() -> Self {
+        Self {
+            enabled: Some(false),
+            indent_style: Default::default(),
+            indent_width: Default::default(),
+            line_ending: Default::default(),
+            line_width: Default::default(),
+            quote_style: Default::default(),
+            bracket_spacing: Default::default(),
+        }
+    }
+}
 
 impl PartialGraphqlFormatter {
     pub fn get_formatter_configuration(&self) -> GraphqlFormatter {
         GraphqlFormatter {
-            enabled: self.enabled.unwrap_or_default(),
+            enabled: self.enabled,
             indent_style: self.indent_style,
             indent_width: self.indent_width,
             line_ending: self.line_ending,
@@ -109,11 +114,19 @@ impl Default for GraphqlLinter {
     }
 }
 
+impl PartialGraphqlLinter {
+    pub fn get_linter_configuration(&self) -> GraphqlLinter {
+        GraphqlLinter {
+            enabled: self.enabled,
+        }
+    }
+}
+
 #[test]
 fn default_graphql_formatter() {
     let graphql_configuration = GraphqlFormatter::default();
 
-    assert!(!graphql_configuration.enabled);
+    assert_eq!(graphql_configuration.enabled, Some(false));
     assert_eq!(graphql_configuration.indent_style, None);
     assert_eq!(graphql_configuration.indent_width, None);
     assert_eq!(graphql_configuration.line_ending, None);

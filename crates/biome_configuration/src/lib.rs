@@ -226,6 +226,17 @@ impl PartialConfiguration {
             })
             .unwrap_or_default()
     }
+    pub fn get_graphql_linter_configuration(&self) -> GraphqlLinter {
+        self.graphql
+            .as_ref()
+            .map(|f| {
+                f.linter
+                    .as_ref()
+                    .map(|f| f.get_linter_configuration())
+                    .unwrap_or_default()
+            })
+            .unwrap_or_default()
+    }
 
     pub fn get_graphql_formatter_configuration(&self) -> GraphqlFormatter {
         self.graphql

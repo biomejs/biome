@@ -271,7 +271,7 @@ impl Display for RageConfiguration<'_, '_> {
                             configuration.get_graphql_formatter_configuration();
                         markup! (
                             {Section("GraphQL Formatter")}
-                            {KeyValuePair("Enabled", markup!({DebugDisplay(graphql_formatter_configuration.enabled)}))}
+                            {KeyValuePair("Enabled", markup!({DebugDisplayOption(graphql_formatter_configuration.enabled)}))}
                             {KeyValuePair("Indent style", markup!({DebugDisplayOption(graphql_formatter_configuration.indent_style)}))}
                             {KeyValuePair("Indent width", markup!({DebugDisplayOption(graphql_formatter_configuration.indent_width)}))}
                             {KeyValuePair("Line ending", markup!({DebugDisplayOption(graphql_formatter_configuration.line_ending)}))}
@@ -288,11 +288,13 @@ impl Display for RageConfiguration<'_, '_> {
                         let javascript_linter = configuration.get_javascript_linter_configuration();
                         let json_linter = configuration.get_json_linter_configuration();
                         let css_linter = configuration.get_css_linter_configuration();
+                        let graphq_linter = configuration.get_graphql_linter_configuration();
                         markup! (
                             {Section("Linter")}
                             {KeyValuePair("JavaScript enabled", markup!({DebugDisplay(javascript_linter.enabled)}))}
                             {KeyValuePair("JSON enabled", markup!({DebugDisplay(json_linter.enabled)}))}
                             {KeyValuePair("CSS enabled", markup!({DebugDisplay(css_linter.enabled)}))}
+                            {KeyValuePair("GraphQL enabled", markup!({DebugDisplayOption(graphq_linter.enabled)}))}
                             {KeyValuePair("Recommended", markup!({DebugDisplay(linter_configuration.recommended.unwrap_or_default())}))}
                             {KeyValuePair("All", markup!({DebugDisplay(linter_configuration.all.unwrap_or_default())}))}
                             {RageConfigurationLintRules("Enabled rules",linter_configuration)}

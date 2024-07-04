@@ -149,7 +149,6 @@ pub(crate) fn lint(session: CliSession, payload: LintCommandPayload) -> Result<(
 
     let stdin = get_stdin(stdin_file_path, &mut *session.app.console, "lint")?;
 
-    dbg!(&fs_configuration);
     session
         .app
         .workspace

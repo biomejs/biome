@@ -20,6 +20,10 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 ### CLI
 
+#### New features
+
+- Add `--graphql-linter-enabled` option, to control whether the linter should enabled or not for GraphQL files. Contributed by @ematipico
+
 ### Configuration
 
 - Add support for loading configuration from `.editorconfig` files ([#1724](https://github.com/biomejs/biome/issues/1724)). Contributed by @dyc3
@@ -68,6 +72,10 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
   Filenames consisting only of numbers are now accepted.
 
   Contributed by @Conaclos
+
+#### New features
+
+- Add support for GraphQL linting. Contributed by @ematipico
 
 #### Bug fixes
 
