@@ -22,6 +22,16 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 ### Configuration
 
+- Add support for loading configuration from `.editorconfig` files ([#1724](https://github.com/biomejs/biome/issues/1724)). Contributed by @dyc3
+  Configuration supplied in `.editorconfig` will be overridden by the configuration in `biome.json`. Support is disabled by default and can be enabled by adding the following to your formatter configuration in `biome.json`:
+  ```json
+  {
+    "formatter": {
+      "useEditorconfig": true
+    }
+  }
+  ```
+
 ### Editors
 
 ### Formatter
