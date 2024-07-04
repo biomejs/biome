@@ -1068,6 +1068,10 @@ export interface Nursery {
 	 */
 	noDuplicateSelectorsKeyframeBlock?: RuleConfiguration_for_Null;
 	/**
+	 * Disallow accessing namespace imports dynamically.
+	 */
+	noDynamicNamespaceImportAccess?: RuleConfiguration_for_Null;
+	/**
 	 * Disallow CSS empty blocks.
 	 */
 	noEmptyBlock?: RuleConfiguration_for_Null;
@@ -2482,6 +2486,7 @@ export type Category =
 	| "lint/nursery/noDuplicateFontNames"
 	| "lint/nursery/noDuplicateJsonKeys"
 	| "lint/nursery/noDuplicateSelectorsKeyframeBlock"
+	| "lint/nursery/noDynamicNamespaceImportAccess"
 	| "lint/nursery/noEmptyBlock"
 	| "lint/nursery/noEvolvingTypes"
 	| "lint/nursery/noExportedImports"
