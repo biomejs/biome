@@ -54,30 +54,6 @@ declare_lint_rule! {
 // EVENT_TO_HANDLERS is a mapping of event categories to their corresponding event handlers.
 // For example, the "keyboard" category includes handlers like "onKeyDown", "onKeyPress", and "onKeyUp".
 const EVENT_TO_HANDLERS: &[(&str, &[&str])] = &[
-    // (
-    //     // ref: https://developer.mozilla.org/en-US/docs/Web/API/ClipboardEvent
-    //     "clipboard",
-    //     &[
-    //         // ref: https://developer.mozilla.org/en-US/docs/Web/API/Element/copy_event
-    //         "onCopy",
-    //         //ref: https://developer.mozilla.org/en-US/docs/Web/API/Element/cut_event
-    //         "onCut",
-    //         // ref: https://developer.mozilla.org/en-US/docs/Web/API/Element/paste_event
-    //         "onPaste",
-    //     ],
-    // ),
-    // (
-    //     // ref: https://developer.mozilla.org/en-US/docs/Web/API/CompositionEvent
-    //     "composition",
-    //     &[
-    //         // ref: https://developer.mozilla.org/en-US/docs/Web/API/Element/compositionstart_event
-    //         "onCompositionStart",
-    //         // ref: https://developer.mozilla.org/en-US/docs/Web/API/Element/compositionend_event
-    //         "onCompositionEnd",
-    //         // ref: https://developer.mozilla.org/en-US/docs/Web/API/Element/compositionupdate_event
-    //         "onCompositionUpdate",
-    //     ],
-    // ),
     (
         // ref https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent
         "keyboard",
@@ -100,17 +76,6 @@ const EVENT_TO_HANDLERS: &[(&str, &[&str])] = &[
             "onBlur",
         ],
     ),
-    // (
-    //     "form",
-    //     &[
-    //         /// ref: https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/change_event
-    //         "onChange",
-    //         // ref: https://developer.mozilla.org/en-US/docs/Web/API/Element/input_event
-    //         "onInput",
-    //         // https://developer.mozilla.org/en-US/docs/Web/API/HTMLFormElement/submit_event
-    //         "onSubmit",
-    //     ],
-    // ),
     (
         // ref: https://developer.mozilla.org/en-US/docs/Web/API/MouseEvent
         "mouse",
@@ -153,121 +118,6 @@ const EVENT_TO_HANDLERS: &[(&str, &[&str])] = &[
             "onMouseUp",
         ],
     ),
-    // (
-    //     "selection",
-    //     &[
-    //         // ref: https://developer.mozilla.org/en-US/docs/Web/API/HTMLInputElement/select_event
-    //         "onSelect",
-    //     ],
-    // ),
-    // (
-    //     // ref: https://developer.mozilla.org/en-US/docs/Web/API/TouchEvent
-    //     "touch",
-    //     &[
-    //         // ref: https://developer.mozilla.org/en-US/docs/Web/API/Element/touchcancel_event
-    //         "onTouchCancel",
-    //         // ref: https://developer.mozilla.org/en-US/docs/Web/API/Element/touchend_event
-    //         "onTouchEnd",
-    //         // ref: https://developer.mozilla.org/en-US/docs/Web/API/Element/touchmove_event
-    //         "onTouchMove",
-    //         // ref: https://developer.mozilla.org/en-US/docs/Web/API/Element/touchstart_event
-    //         "onTouchStart",
-    //     ],
-    // ),
-    // (
-    //     // ref: https://developer.mozilla.org/en-US/docs/Web/API/UIEvent
-    //     "ui",
-    //     &[
-    //         // ref: https://developer.mozilla.org/en-US/docs/Web/API/Element/scroll_event
-    //         "onScroll",
-    //     ],
-    // ),
-    // (
-    //     // ref: https://developer.mozilla.org/en-US/docs/Web/API/WheelEvent
-    //     "wheel",
-    //     &[
-    //         // ref: https://developer.mozilla.org/en-US/docs/Web/API/Element/wheel_event
-    //         "onWheel",
-    //     ],
-    // ),
-    // (
-    //     "media",
-    //     &[
-    //         // ref: https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/abort_event
-    //         "onAbort",
-    //         // ref: https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/canplay_event
-    //         "onCanPlay",
-    //         // ref: https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/canplaythrough_event
-    //         "onCanPlayThrough",
-    //         // ref: https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/durationchange_event
-    //         "onDurationChange",
-    //         // ref: https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/emptied_event
-    //         "onEmptied",
-    //         // ref: https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/encrypted_event
-    //         "onEncrypted",
-    //         // ref: https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/ended_event
-    //         "onEnded",
-    //         // ref: https://developer.mozilla.org/en-US/docs/Web/API/ErrorEvent
-    //         "onError",
-    //         // ref: https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/loadeddata_event
-    //         "onLoadedData",
-    //         // ref: https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/loadedmetadata_event
-    //         "onLoadedMetadata",
-    //         // ref: https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/loadstart_event
-    //         "onLoadStart",
-    //         // ref: https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/pause_event
-    //         "onPause",
-    //         // ref: https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/play_event
-    //         "onPlay",
-    //         // ref: https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/playing_event
-    //         "onPlaying",
-    //         // ref: https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/progress_event
-    //         "onProgress",
-    //         // ref: https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/ratechange_event
-    //         "onRateChange",
-    //         // ref: https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/seeked_event
-    //         "onSeeked",
-    //         // ref: https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/seeking_event
-    //         "onSeeking",
-    //         // ref: https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/stalled_event
-    //         "onStalled",
-    //         // ref: https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/suspend_event
-    //         "onSuspend",
-    //         // ref: https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/timeupdate_event
-    //         "onTimeUpdate",
-    //         // ref: https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/volumechange_event
-    //         "onVolumeChange",
-    //         // ref: https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/waiting_event
-    //         "onWaiting",
-    //     ],
-    // ),
-    // (
-    //     "image",
-    //     &[
-    //         // ref: https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/load_event
-    //         "onLoad",
-    //     ],
-    // ),
-    // (
-    //     // ref: https://developer.mozilla.org/en-US/docs/Web/API/AnimationEvent
-    //     "animation",
-    //     &[
-    //         // ref: https://developer.mozilla.org/en-US/docs/Web/API/Element/animationstart_event
-    //         "onAnimationStart",
-    //         // ref: https://developer.mozilla.org/en-US/docs/Web/API/Element/animationend_event
-    //         "onAnimationEnd",
-    //         // ref: https://developer.mozilla.org/en-US/docs/Web/API/Element/animationiteration_event
-    //         "onAnimationIteration",
-    //     ],
-    // ),
-    // (
-    //     // ref: https://developer.mozilla.org/en-US/docs/Web/API/TransitionEvent
-    //     "transition",
-    //     &[
-    //         // ref: https://developer.mozilla.org/en-US/docs/Web/API/Element/transitionend_event
-    //         "onTransitionEnd",
-    //     ],
-    // ),
 ];
 
 // no-static-element-interactions rule checks only focus, keyboard and mouse categories.

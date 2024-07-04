@@ -174,18 +174,4 @@
 	<div role="separator" onClick={() => {}} />
 	<div role="scrollbar" onClick={() => {}} />
 	<td onClick={() => { }} />
-	
-	{/* This element is rejected by HTML Standard */}
-	{/* ref: https://html.spec.whatwg.org/multipage/obsolete.html */}
-	{/* <marquee onClick={() => {}} /> */}
-	{/* <dir onClick={() => {}} /> */}
-	{/* <menuitem onClick={() => {}} /> */}
-
-	{/* <footer> elements do not technically have semantics, unless the
-        element is a direct descendant of <body>, and this crate cannot
-        reliably test that.
-        
-        Check: https://www.w3.org/WAI/ARIA/apg/patterns/landmarks/examples/contentinfo.html */}
-	{/* <footer onClick={() => {}} /> */}
-
 </>;
