@@ -458,6 +458,7 @@ impl Rule for ForLoopCountReferences {
         // This will be called for each vector item
     }
 }
+```
 
 #### Code action
 
