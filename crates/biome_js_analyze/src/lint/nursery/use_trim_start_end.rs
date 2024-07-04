@@ -59,7 +59,6 @@ declare_rule! {
 pub struct UseTrimStartEndState {
     member_name: String,
     span: TextRange,
-    suggested_name: String,
 }
 
 impl Rule for UseTrimStartEnd {
@@ -82,39 +81,36 @@ impl Rule for UseTrimStartEnd {
         }
 
         let callee = node.callee().ok()?;
-        let (member_name, span, suggested_name) = match callee {
+        let (member_name, span) = match callee {
             AnyJsExpression::JsComputedMemberExpression(callee) => {
                 let member = callee.member().ok()?;
                 let value = member.as_static_value()?;
                 let span = value.range();
                 let member_name = value.as_string_constant()?.to_string();
-                let suggested_name = generate_suggested_name(&member_name);
-                (member_name, span, suggested_name)
+                (member_name, span)
             }
             AnyJsExpression::JsStaticMemberExpression(callee) => {
                 let token = callee.member().ok()?.value_token().ok()?;
                 let span = token.text_range();
                 let member_name = token.text_trimmed().to_string();
-                let suggested_name = generate_suggested_name(&member_name);
-                (member_name, span, suggested_name)
+                (member_name, span)
             }
             _ => return None,
         };
-        Some(UseTrimStartEndState {
-            member_name,
-            span,
-            suggested_name: suggested_name?,
-        })
+
+        Some(UseTrimStartEndState { member_name, span })
     }
 
     fn diagnostic(_: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
+        let suggested_name = generate_suggested_name(&state.member_name)?;
+
         let diagnostic_message = markup! {
-            "Use "{state.suggested_name}" instead of "{state.member_name}"."
+            "Use "{suggested_name}" instead of "{state.member_name}"."
         }
         .to_owned();
         let note_message = {
             markup! {
-                ""{state.member_name}" is an alias for "{state.suggested_name}"."
+                ""{state.member_name}" is an alias for "{suggested_name}"."
             }
             .to_owned()
         };
@@ -283,10 +279,10 @@ fn suggested_name(text: &SyntaxToken<JsLanguage>) -> String {
     }
 }
 
-fn generate_suggested_name(member_name: &str) -> Option<String> {
+fn generate_suggested_name(member_name: &str) -> Option<&str> {
     match member_name {
-        "trimLeft" => Some("trimStart".to_string()),
-        "trimRight" => Some("trimEnd".to_string()),
+        "trimLeft" => Some("trimStart"),
+        "trimRight" => Some("trimEnd"),
         _ => None,
     }
 }
