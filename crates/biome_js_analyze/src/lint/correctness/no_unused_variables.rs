@@ -175,7 +175,8 @@ fn suggested_fix_if_unused(binding: &AnyJsIdentifierBinding) -> Option<Suggested
         | AnyJsBindingDeclaration::JsClassExpression(_)
         | AnyJsBindingDeclaration::JsFunctionExpression(_)
         | AnyJsBindingDeclaration::TsIndexSignatureParameter(_)
-        | AnyJsBindingDeclaration::TsMappedType(_) => None,
+        | AnyJsBindingDeclaration::TsMappedType(_)
+        | AnyJsBindingDeclaration::TsEnumMember(_) => None,
 
         // Some parameters are ok to not be used
         AnyJsBindingDeclaration::JsArrowFunctionExpression(_) => {
@@ -288,6 +289,10 @@ impl Rule for NoUnusedVariables {
         }
 
         let binding = ctx.query();
+        if matches!(binding, AnyJsIdentifierBinding::TsLiteralEnumMemberName(_)) {
+            // Enum members can be unused.
+            return None;
+        }
 
         if binding.name_token().ok()?.text_trimmed().starts_with('_') {
             return None;
@@ -422,6 +427,9 @@ impl Rule for NoUnusedVariables {
                     }
                     AnyJsIdentifierBinding::TsTypeParameterName(binding) => {
                         binding.ident_token().ok()?
+                    }
+                    AnyJsIdentifierBinding::TsLiteralEnumMemberName(_) => {
+                        return None;
                     }
                 };
                 let name_trimmed = name.text_trimmed();

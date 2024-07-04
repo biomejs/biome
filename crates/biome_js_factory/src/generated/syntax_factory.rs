@@ -6987,7 +6987,7 @@ impl SyntaxFactory for JsSyntaxFactory {
                 let mut slots: RawNodeSlots<2usize> = RawNodeSlots::default();
                 let mut current_element = elements.next();
                 if let Some(element) = &current_element {
-                    if AnyJsObjectMemberName::can_cast(element.kind()) {
+                    if AnyTsEnumMemberName::can_cast(element.kind()) {
                         slots.mark_present();
                         current_element = elements.next();
                     }
@@ -7958,6 +7958,25 @@ impl SyntaxFactory for JsSyntaxFactory {
                     );
                 }
                 slots.into_node(TS_INTERSECTION_TYPE, children)
+            }
+            TS_LITERAL_ENUM_MEMBER_NAME => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<1usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element {
+                    if matches!(element.kind(), IDENT | JS_STRING_LITERAL) {
+                        slots.mark_present();
+                        current_element = elements.next();
+                    }
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        TS_LITERAL_ENUM_MEMBER_NAME.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(TS_LITERAL_ENUM_MEMBER_NAME, children)
             }
             TS_MAPPED_TYPE => {
                 let mut elements = (&children).into_iter();

@@ -974,6 +974,10 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::TsIntersectionType::new_unchecked(node) };
                     $body
                 }
+                $crate::JsSyntaxKind::TS_LITERAL_ENUM_MEMBER_NAME => {
+                    let $pattern = unsafe { $crate::TsLiteralEnumMemberName::new_unchecked(node) };
+                    $body
+                }
                 $crate::JsSyntaxKind::TS_MAPPED_TYPE => {
                     let $pattern = unsafe { $crate::TsMappedType::new_unchecked(node) };
                     $body

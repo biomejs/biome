@@ -1,10 +1,11 @@
 use crate::prelude::*;
 
 use crate::js::declarations::function_declaration::should_group_function_parameters;
+use crate::utils::object::AnyJsMemberName;
 use biome_formatter::write;
 use biome_js_syntax::{
-    AnyJsClassMemberName, AnyJsObjectMemberName, JsConstructorClassMember, JsConstructorParameters,
-    JsFunctionBody, JsParameters, TsMethodSignatureClassMember, TsMethodSignatureTypeMember,
+    AnyJsClassMemberName, JsConstructorClassMember, JsConstructorParameters, JsFunctionBody,
+    JsParameters, TsMethodSignatureClassMember, TsMethodSignatureTypeMember,
     TsReturnTypeAnnotation, TsTypeParameters,
 };
 use biome_js_syntax::{JsMethodClassMember, JsMethodObjectMember, JsSyntaxToken};
@@ -110,12 +111,12 @@ impl FormatAnyJsMethodMember {
         }
     }
 
-    fn name(&self) -> SyntaxResult<AnyMemberName> {
+    fn name(&self) -> SyntaxResult<AnyJsMemberName> {
         Ok(match self {
             FormatAnyJsMethodMember::JsMethodClassMember(member) => member.name()?.into(),
             FormatAnyJsMethodMember::JsMethodObjectMember(member) => member.name()?.into(),
             FormatAnyJsMethodMember::JsConstructorClassMember(member) => {
-                AnyMemberName::from(AnyJsClassMemberName::from(member.name()?))
+                AnyJsMemberName::from(AnyJsClassMemberName::from(member.name()?))
             }
             FormatAnyJsMethodMember::TsMethodSignatureClassMember(signature) => {
                 signature.name()?.into()
@@ -190,19 +191,6 @@ impl FormatAnyJsMethodMember {
             FormatAnyJsMethodMember::TsMethodSignatureClassMember(_) => None,
             FormatAnyJsMethodMember::TsMethodSignatureTypeMember(_) => None,
         })
-    }
-}
-
-declare_node_union! {
-     AnyMemberName = AnyJsClassMemberName | AnyJsObjectMemberName
-}
-
-impl Format<JsFormatContext> for AnyMemberName {
-    fn fmt(&self, f: &mut Formatter<JsFormatContext>) -> FormatResult<()> {
-        match self {
-            AnyMemberName::AnyJsClassMemberName(name) => name.format().fmt(f),
-            AnyMemberName::AnyJsObjectMemberName(name) => name.format().fmt(f),
-        }
     }
 }
 
