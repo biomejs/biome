@@ -52,11 +52,6 @@ impl Rule for NoIrregularWhitespace {
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
-        // let syntax = node.syntax();
-
-        // for tree in syntax.descendants_tokens(Direction::Next) {
-        //     dbg!(tree.leading_trivia(), tree.trailing_trivia());
-        // }
 
         get_irregular_whitespace(node)
     }
