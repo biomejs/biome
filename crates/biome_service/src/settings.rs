@@ -548,7 +548,8 @@ impl From<PartialGraphqlConfiguration> for LanguageSettings<GraphqlLanguage> {
         }
 
         if let Some(linter) = graphql.linter {
-            language_setting.linter.enabled = linter.enabled;
+            // TODO: change RHS to `linter.enabled` when graphql linting is enabled by default
+            language_setting.linter.enabled = Some(linter.enabled.unwrap_or_default());
         }
 
         language_setting
