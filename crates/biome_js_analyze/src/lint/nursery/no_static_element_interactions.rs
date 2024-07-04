@@ -6,9 +6,9 @@ use biome_js_syntax::jsx_ext::AnyJsxElement;
 use biome_rowan::AstNode;
 
 declare_lint_rule! {
-    /// Enforce that non-interactive, visible elements (such as `<div>`) that have click handlers use the role attribute.
+    /// Enforce that static, visible elements (such as `<div>`) that have click handlers use the valid role attribute.
     ///
-    /// Static HTML elements do not have semantic meaning. This is clear in the case of `<div>` and `<span>`. It is less so clear in the case of elements that seem semantic, but that do not have a semantic mapping in the accessibility layer. For example `<a>`, `<big>`, `<blockquote>`, `<footer>`, `<picture>`, `<strike>`, and `<time>` -- to name a few -- have no semantic layer mapping. They are as void of meaning as `<div>`.
+    /// Static HTML elements do not have semantic meaning. This is clear in the case of `<div>` and `<span>`. It is less so clear in the case of elements that seem semantic, but that do not have a semantic mapping in the accessibility layer. For example `<a>` without href attribute, `<meta>`, `<script>`, `<picture>`, `<section>`, and `<colgroup>` -- to name a few -- have no semantic layer mapping. They are as void of meaning as `<div>`.
     ///
     /// The [WAI-ARIA role attribute](https://www.w3.org/TR/wai-aria-1.1/#usage_intro) confers a semantic mapping to an element. The semantic value can then be expressed to a user via assistive technology.
     /// In order to add interactivity such as a mouse or key event listener to a static element, that element must be given a role value as well.
@@ -37,7 +37,7 @@ declare_lint_rule! {
     /// ```jsx
     /// <>
     ///     <div role="button" onClick={() => {}}></div>
-    ///     <span role="link" onClick={() => {}}></span>
+    ///     <span role="scrollbar" onClick={() => {}}></span>
     ///     <a href="http://example.com" onClick={() => {}}></a>
     /// </>
     /// ```
