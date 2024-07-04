@@ -82,16 +82,16 @@ fn get_irregular_whitespace(node: &AnyJsStatement) -> Option<()> {
             .pieces()
             .chain(token.trailing_trivia().pieces());
 
-        pieces.filter(|trivia| trivia.is_whitespace()).any(
-            |trivia: biome_rowan::SyntaxTriviaPiece<biome_js_syntax::JsLanguage>| {
+        pieces
+            .filter(|trivia| trivia.is_whitespace())
+            .any(|trivia| {
                 IRREGULAR_WHITESPACES.iter().any(|irregular_whitespace| {
                     trivia
                         .text()
                         .chars()
                         .any(|char| &char == irregular_whitespace)
                 })
-            },
-        )
+            })
     });
 
     has_irregular_whitespace.then_some(())
