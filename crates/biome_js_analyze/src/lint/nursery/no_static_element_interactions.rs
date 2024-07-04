@@ -51,8 +51,6 @@ declare_lint_rule! {
     }
 }
 
-// EVENT_TO_HANDLERS is a mapping of event categories to their corresponding event handlers.
-// For example, the "keyboard" category includes handlers like "onKeyDown", "onKeyPress", and "onKeyUp".
 const EVENT_TO_HANDLERS: &[(&str, &[&str])] = &[
     (
         // ref https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent
