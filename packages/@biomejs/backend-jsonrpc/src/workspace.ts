@@ -1068,6 +1068,10 @@ export interface Nursery {
 	 */
 	noDuplicateSelectorsKeyframeBlock?: RuleConfiguration_for_Null;
 	/**
+	 * No duplicated fields in GraphQL operations.
+	 */
+	noDuplicatedFields?: RuleConfiguration_for_Null;
+	/**
 	 * Disallow accessing namespace imports dynamically.
 	 */
 	noDynamicNamespaceImportAccess?: RuleConfiguration_for_Null;
@@ -2486,6 +2490,7 @@ export type Category =
 	| "lint/nursery/noDuplicateFontNames"
 	| "lint/nursery/noDuplicateJsonKeys"
 	| "lint/nursery/noDuplicateSelectorsKeyframeBlock"
+	| "lint/nursery/noDuplicatedFields"
 	| "lint/nursery/noDynamicNamespaceImportAccess"
 	| "lint/nursery/noEmptyBlock"
 	| "lint/nursery/noEvolvingTypes"

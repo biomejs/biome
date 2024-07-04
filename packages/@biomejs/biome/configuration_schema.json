@@ -1790,6 +1790,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noDuplicatedFields": {
+					"description": "No duplicated fields in GraphQL operations.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noDynamicNamespaceImportAccess": {
 					"description": "Disallow accessing namespace imports dynamically.",
 					"anyOf": [
