@@ -5435,7 +5435,7 @@ pub const RESET_TO_INITIAL_PROPERTIES_BY_FONT: [&str; 13] = [
 
 // https://developer.mozilla.org/ja/docs/Web/HTML/Element
 // https://github.com/sindresorhus/html-tags/blob/main/html-tags.json
-pub(crate) const HTML_TAGS: [&str; 148] = [
+pub(crate) const HTML_TAGS: [&str; 150] = [
     "a",
     "abbr",
     "acronym",
@@ -5471,6 +5471,7 @@ pub(crate) const HTML_TAGS: [&str; 148] = [
     "del",
     "details",
     "dfn",
+    "dialog",
     "dir",
     "div",
     "dl",
@@ -5553,6 +5554,7 @@ pub(crate) const HTML_TAGS: [&str; 148] = [
     "section",
     "select",
     "selectlist",
+    "shadow",
     "slot",
     "small",
     "source",
