@@ -1,11 +1,11 @@
 use crate::services::aria::Aria;
 use biome_analyze::context::RuleContext;
-use biome_analyze::{declare_rule, Rule, RuleDiagnostic, RuleSource};
+use biome_analyze::{declare_lint_rule, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
 use biome_js_syntax::jsx_ext::AnyJsxElement;
 use biome_rowan::AstNode;
 
-declare_rule! {
+declare_lint_rule! {
     /// Enforce that non-interactive, visible elements (such as `<div>`) that have click handlers use the role attribute.
     ///
     /// Static HTML elements do not have semantic meaning. This is clear in the case of `<div>` and `<span>`. It is less so clear in the case of elements that seem semantic, but that do not have a semantic mapping in the accessibility layer. For example `<a>`, `<big>`, `<blockquote>`, `<footer>`, `<picture>`, `<strike>`, and `<time>` -- to name a few -- have no semantic layer mapping. They are as void of meaning as `<div>`.
