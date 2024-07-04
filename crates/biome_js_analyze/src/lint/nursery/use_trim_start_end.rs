@@ -138,11 +138,11 @@ impl Rule for UseTrimStartEnd {
         // Need to keep the original token to replace it with the new token.
         // `.as_static_value()` strips the information of tick tokens.
         let token = generate_syntax_token(callee.clone())?;
-        let replaced_member_name = suggested_name(&token);
+        let replaced_member_name = suggested_name(&token)?;
 
         let mut elements = vec![];
         let template_elements = AnyJsTemplateElement::from(make::js_template_chunk_element(
-            make::js_template_chunk(&replaced_member_name),
+            make::js_template_chunk(replaced_member_name.as_str()),
         ));
         elements.push(template_elements);
 
@@ -255,7 +255,7 @@ fn generate_syntax_token(callee: AnyJsExpression) -> Option<SyntaxToken<JsLangua
 }
 
 // Handle "'text'" and "\"text\"" and "text" cases
-fn suggested_name(text: &SyntaxToken<JsLanguage>) -> String {
+fn suggested_name(text: &SyntaxToken<JsLanguage>) -> Option<String> {
     let trimmed = text.text_trimmed();
     let first_char = trimmed.chars().next();
     let last_char = trimmed.chars().last();
@@ -268,15 +268,16 @@ fn suggested_name(text: &SyntaxToken<JsLanguage>) -> String {
     } else {
         trimmed
     };
-    let suggested_name = generate_suggested_name(unquoted).unwrap();
 
-    if is_single_quoted {
-        format!("'{}'", suggested_name)
-    } else if is_double_quoted {
-        format!("\"{}\"", suggested_name)
-    } else {
-        suggested_name.to_string()
-    }
+    generate_suggested_name(unquoted).map(|suggested_name| {
+        if is_single_quoted {
+            format!("'{}'", suggested_name)
+        } else if is_double_quoted {
+            format!("\"{}\"", suggested_name)
+        } else {
+            suggested_name.to_string()
+        }
+    })
 }
 
 fn generate_suggested_name(member_name: &str) -> Option<&str> {
