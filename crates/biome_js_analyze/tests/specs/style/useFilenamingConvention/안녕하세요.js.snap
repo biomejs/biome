@@ -1,0 +1,8 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: 안녕하세요.js
+---
+# Input
+```jsx
+
+```

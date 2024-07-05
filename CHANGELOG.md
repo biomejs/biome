@@ -55,6 +55,20 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
   Contributed by @Conaclos
 
+- [useFilenamingConvention](https://biomejs.dev/linter/rules/use-filenaming-convention) now supports [unicase](https://en.wikipedia.org/wiki/Unicase) letters.
+
+  [unicase](https://en.wikipedia.org/wiki/Unicase) letters have a single case: they are neither uppercase nor lowercase.
+  Biome now accepts filenames in unicase.
+  For example, the filename `안녕하세요` is now accepted.
+
+  We still reject a name that mixes unicase characters with lowercase or uppercase characters.
+  For example, the filename `A안녕하세요` is rejected.
+
+  This change also fixes [#3353](https://github.com/biomejs/biome/issues/3353).
+  Filenames consisting only of numbers are now accepted.
+
+  Contributed by @Conaclos
+
 #### Bug fixes
 
 - Don't request alt text for elements hidden from assistive technologies ([#3316](https://github.com/biomejs/biome/issues/3316)). Contributed by @robintown
