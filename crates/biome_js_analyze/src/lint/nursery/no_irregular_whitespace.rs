@@ -52,9 +52,7 @@ impl Rule for NoIrregularWhitespace {
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
-        let ranges = get_irregular_whitespace(node);
-        dbg!(ranges.clone());
-        ranges
+        get_irregular_whitespace(node)
     }
 
     fn diagnostic(_ctx: &RuleContext<Self>, range: &Self::State) -> Option<RuleDiagnostic> {
