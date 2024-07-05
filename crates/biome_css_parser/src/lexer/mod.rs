@@ -58,7 +58,7 @@ pub enum CssReLexContext {
     Regular,
     /// See [CssLexContext::UnicodeRange]
     UnicodeRange,
-    /// Re-lexes an identifier as a Grit metavariable if it exactly matches the RegExp `$[a-zA-Z_][a-zA-Z0-9_]*`.
+    /// Re-lexes an identifier as a Grit metavariable if it exactly matches the RegExp `μ[a-zA-Z_][a-zA-Z0-9_]*`.
     GritMetavariable,
 }
 
@@ -1319,20 +1319,24 @@ impl<'src> CssLexer<'src> {
     }
 
     fn re_lex_grit_metavariable(&mut self, current_end: usize) -> CssSyntaxKind {
-        if self.current_kind == T![ident]
-            && self.current_byte() == Some(b'$')
-            && matches!(self.next_byte(), Some(b'a'..=b'z' | b'A'..=b'Z' | b'_'))
-        {
-            while let Some(chr) = self.current_byte() {
-                match chr {
-                    b'a'..=b'z' | b'A'..=b'Z' | b'0'..=b'9' | b'_' => {
-                        self.advance(1);
+        if self.current_kind == T![ident] {
+            let current_char = self.current_char_unchecked();
+            if current_char == 'μ' {
+                self.advance(current_char.len_utf8());
+                if matches!(self.current_byte(), Some(b'a'..=b'z' | b'A'..=b'Z' | b'_')) {
+                    self.advance(1);
+                    while let Some(chr) = self.current_byte() {
+                        match chr {
+                            b'a'..=b'z' | b'A'..=b'Z' | b'0'..=b'9' | b'_' => {
+                                self.advance(1);
+                            }
+                            _ => break,
+                        }
                     }
-                    _ => break,
+                    if current_end == self.position {
+                        return GRIT_METAVARIABLE;
+                    }
                 }
-            }
-            if current_end == self.position {
-                return GRIT_METAVARIABLE;
             }
         }
 

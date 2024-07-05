@@ -1,13 +1,13 @@
 .foo {
-    color: $color;
+    color: μcolor;
 }
 
 .foo {
-    $bar
+    μbar
 }
 
 .foo {
-    @media $baz {}
+    @media μbaz {}
 }
 
-$qux {}
+μqux {}

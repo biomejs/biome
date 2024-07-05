@@ -6,18 +6,18 @@ expression: snapshot
 
 ```css
 .foo {
-    color: $color;
+    color: μcolor;
 }
 
 .foo {
-    $bar
+    μbar
 }
 
 .foo {
-    @media $baz {}
+    @media μbaz {}
 }
 
-$qux {}
+μqux {}
 ```
 
 
@@ -54,16 +54,16 @@ CssRoot {
                                 colon_token: COLON@16..18 ":" [] [Whitespace(" ")],
                                 value: CssGenericComponentValueList [
                                     CssGritMetavariable {
-                                        value_token: GRIT_METAVARIABLE@18..24 "$color" [] [],
+                                        value_token: GRIT_METAVARIABLE@18..25 "μcolor" [] [],
                                     },
                                 ],
                             },
                             important: missing (optional),
                         },
-                        semicolon_token: SEMICOLON@24..25 ";" [] [],
+                        semicolon_token: SEMICOLON@25..26 ";" [] [],
                     },
                 ],
-                r_curly_token: R_CURLY@25..27 "}" [Newline("\n")] [],
+                r_curly_token: R_CURLY@26..28 "}" [Newline("\n")] [],
             },
         },
         CssQualifiedRule {
@@ -73,22 +73,22 @@ CssRoot {
                     simple_selector: missing (optional),
                     sub_selectors: CssSubSelectorList [
                         CssClassSelector {
-                            dot_token: DOT@27..30 "." [Newline("\n"), Newline("\n")] [],
+                            dot_token: DOT@28..31 "." [Newline("\n"), Newline("\n")] [],
                             name: CssCustomIdentifier {
-                                value_token: IDENT@30..34 "foo" [] [Whitespace(" ")],
+                                value_token: IDENT@31..35 "foo" [] [Whitespace(" ")],
                             },
                         },
                     ],
                 },
             ],
             block: CssDeclarationOrRuleBlock {
-                l_curly_token: L_CURLY@34..35 "{" [] [],
+                l_curly_token: L_CURLY@35..36 "{" [] [],
                 items: CssDeclarationOrRuleList [
                     CssGritMetavariable {
-                        value_token: GRIT_METAVARIABLE@35..44 "$bar" [Newline("\n"), Whitespace("    ")] [],
+                        value_token: GRIT_METAVARIABLE@36..46 "μbar" [Newline("\n"), Whitespace("    ")] [],
                     },
                 ],
-                r_curly_token: R_CURLY@44..46 "}" [Newline("\n")] [],
+                r_curly_token: R_CURLY@46..48 "}" [Newline("\n")] [],
             },
         },
         CssQualifiedRule {
@@ -98,61 +98,61 @@ CssRoot {
                     simple_selector: missing (optional),
                     sub_selectors: CssSubSelectorList [
                         CssClassSelector {
-                            dot_token: DOT@46..49 "." [Newline("\n"), Newline("\n")] [],
+                            dot_token: DOT@48..51 "." [Newline("\n"), Newline("\n")] [],
                             name: CssCustomIdentifier {
-                                value_token: IDENT@49..53 "foo" [] [Whitespace(" ")],
+                                value_token: IDENT@51..55 "foo" [] [Whitespace(" ")],
                             },
                         },
                     ],
                 },
             ],
             block: CssDeclarationOrRuleBlock {
-                l_curly_token: L_CURLY@53..54 "{" [] [],
+                l_curly_token: L_CURLY@55..56 "{" [] [],
                 items: CssDeclarationOrRuleList [
                     CssAtRule {
-                        at_token: AT@54..60 "@" [Newline("\n"), Whitespace("    ")] [],
+                        at_token: AT@56..62 "@" [Newline("\n"), Whitespace("    ")] [],
                         rule: CssMediaAtRule {
-                            media_token: MEDIA_KW@60..66 "media" [] [Whitespace(" ")],
+                            media_token: MEDIA_KW@62..68 "media" [] [Whitespace(" ")],
                             queries: CssMediaQueryList [
                                 CssGritMetavariable {
-                                    value_token: GRIT_METAVARIABLE@66..71 "$baz" [] [Whitespace(" ")],
+                                    value_token: GRIT_METAVARIABLE@68..74 "μbaz" [] [Whitespace(" ")],
                                 },
                             ],
                             block: CssDeclarationOrRuleBlock {
-                                l_curly_token: L_CURLY@71..72 "{" [] [],
+                                l_curly_token: L_CURLY@74..75 "{" [] [],
                                 items: CssDeclarationOrRuleList [],
-                                r_curly_token: R_CURLY@72..73 "}" [] [],
+                                r_curly_token: R_CURLY@75..76 "}" [] [],
                             },
                         },
                     },
                 ],
-                r_curly_token: R_CURLY@73..75 "}" [Newline("\n")] [],
+                r_curly_token: R_CURLY@76..78 "}" [Newline("\n")] [],
             },
         },
         CssQualifiedRule {
             prelude: CssSelectorList [
                 CssGritMetavariable {
-                    value_token: GRIT_METAVARIABLE@75..82 "$qux" [Newline("\n"), Newline("\n")] [Whitespace(" ")],
+                    value_token: GRIT_METAVARIABLE@78..86 "μqux" [Newline("\n"), Newline("\n")] [Whitespace(" ")],
                 },
             ],
             block: CssDeclarationOrRuleBlock {
-                l_curly_token: L_CURLY@82..83 "{" [] [],
+                l_curly_token: L_CURLY@86..87 "{" [] [],
                 items: CssDeclarationOrRuleList [],
-                r_curly_token: R_CURLY@83..84 "}" [] [],
+                r_curly_token: R_CURLY@87..88 "}" [] [],
             },
         },
     ],
-    eof_token: EOF@84..84 "" [] [],
+    eof_token: EOF@88..88 "" [] [],
 }
 ```
 
 ## CST
 
 ```
-0: CSS_ROOT@0..84
+0: CSS_ROOT@0..88
   0: (empty)
-  1: CSS_RULE_LIST@0..84
-    0: CSS_QUALIFIED_RULE@0..27
+  1: CSS_RULE_LIST@0..88
+    0: CSS_QUALIFIED_RULE@0..28
       0: CSS_SELECTOR_LIST@0..5
         0: CSS_COMPOUND_SELECTOR@0..5
           0: (empty)
@@ -162,70 +162,70 @@ CssRoot {
               0: DOT@0..1 "." [] []
               1: CSS_CUSTOM_IDENTIFIER@1..5
                 0: IDENT@1..5 "foo" [] [Whitespace(" ")]
-      1: CSS_DECLARATION_OR_RULE_BLOCK@5..27
+      1: CSS_DECLARATION_OR_RULE_BLOCK@5..28
         0: L_CURLY@5..6 "{" [] []
-        1: CSS_DECLARATION_OR_RULE_LIST@6..25
-          0: CSS_DECLARATION_WITH_SEMICOLON@6..25
-            0: CSS_DECLARATION@6..24
-              0: CSS_GENERIC_PROPERTY@6..24
+        1: CSS_DECLARATION_OR_RULE_LIST@6..26
+          0: CSS_DECLARATION_WITH_SEMICOLON@6..26
+            0: CSS_DECLARATION@6..25
+              0: CSS_GENERIC_PROPERTY@6..25
                 0: CSS_IDENTIFIER@6..16
                   0: IDENT@6..16 "color" [Newline("\n"), Whitespace("    ")] []
                 1: COLON@16..18 ":" [] [Whitespace(" ")]
-                2: CSS_GENERIC_COMPONENT_VALUE_LIST@18..24
-                  0: CSS_GRIT_METAVARIABLE@18..24
-                    0: GRIT_METAVARIABLE@18..24 "$color" [] []
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@18..25
+                  0: CSS_GRIT_METAVARIABLE@18..25
+                    0: GRIT_METAVARIABLE@18..25 "μcolor" [] []
               1: (empty)
-            1: SEMICOLON@24..25 ";" [] []
-        2: R_CURLY@25..27 "}" [Newline("\n")] []
-    1: CSS_QUALIFIED_RULE@27..46
-      0: CSS_SELECTOR_LIST@27..34
-        0: CSS_COMPOUND_SELECTOR@27..34
+            1: SEMICOLON@25..26 ";" [] []
+        2: R_CURLY@26..28 "}" [Newline("\n")] []
+    1: CSS_QUALIFIED_RULE@28..48
+      0: CSS_SELECTOR_LIST@28..35
+        0: CSS_COMPOUND_SELECTOR@28..35
           0: (empty)
           1: (empty)
-          2: CSS_SUB_SELECTOR_LIST@27..34
-            0: CSS_CLASS_SELECTOR@27..34
-              0: DOT@27..30 "." [Newline("\n"), Newline("\n")] []
-              1: CSS_CUSTOM_IDENTIFIER@30..34
-                0: IDENT@30..34 "foo" [] [Whitespace(" ")]
-      1: CSS_DECLARATION_OR_RULE_BLOCK@34..46
-        0: L_CURLY@34..35 "{" [] []
-        1: CSS_DECLARATION_OR_RULE_LIST@35..44
-          0: CSS_GRIT_METAVARIABLE@35..44
-            0: GRIT_METAVARIABLE@35..44 "$bar" [Newline("\n"), Whitespace("    ")] []
-        2: R_CURLY@44..46 "}" [Newline("\n")] []
-    2: CSS_QUALIFIED_RULE@46..75
-      0: CSS_SELECTOR_LIST@46..53
-        0: CSS_COMPOUND_SELECTOR@46..53
+          2: CSS_SUB_SELECTOR_LIST@28..35
+            0: CSS_CLASS_SELECTOR@28..35
+              0: DOT@28..31 "." [Newline("\n"), Newline("\n")] []
+              1: CSS_CUSTOM_IDENTIFIER@31..35
+                0: IDENT@31..35 "foo" [] [Whitespace(" ")]
+      1: CSS_DECLARATION_OR_RULE_BLOCK@35..48
+        0: L_CURLY@35..36 "{" [] []
+        1: CSS_DECLARATION_OR_RULE_LIST@36..46
+          0: CSS_GRIT_METAVARIABLE@36..46
+            0: GRIT_METAVARIABLE@36..46 "μbar" [Newline("\n"), Whitespace("    ")] []
+        2: R_CURLY@46..48 "}" [Newline("\n")] []
+    2: CSS_QUALIFIED_RULE@48..78
+      0: CSS_SELECTOR_LIST@48..55
+        0: CSS_COMPOUND_SELECTOR@48..55
           0: (empty)
           1: (empty)
-          2: CSS_SUB_SELECTOR_LIST@46..53
-            0: CSS_CLASS_SELECTOR@46..53
-              0: DOT@46..49 "." [Newline("\n"), Newline("\n")] []
-              1: CSS_CUSTOM_IDENTIFIER@49..53
-                0: IDENT@49..53 "foo" [] [Whitespace(" ")]
-      1: CSS_DECLARATION_OR_RULE_BLOCK@53..75
-        0: L_CURLY@53..54 "{" [] []
-        1: CSS_DECLARATION_OR_RULE_LIST@54..73
-          0: CSS_AT_RULE@54..73
-            0: AT@54..60 "@" [Newline("\n"), Whitespace("    ")] []
-            1: CSS_MEDIA_AT_RULE@60..73
-              0: MEDIA_KW@60..66 "media" [] [Whitespace(" ")]
-              1: CSS_MEDIA_QUERY_LIST@66..71
-                0: CSS_GRIT_METAVARIABLE@66..71
-                  0: GRIT_METAVARIABLE@66..71 "$baz" [] [Whitespace(" ")]
-              2: CSS_DECLARATION_OR_RULE_BLOCK@71..73
-                0: L_CURLY@71..72 "{" [] []
-                1: CSS_DECLARATION_OR_RULE_LIST@72..72
-                2: R_CURLY@72..73 "}" [] []
-        2: R_CURLY@73..75 "}" [Newline("\n")] []
-    3: CSS_QUALIFIED_RULE@75..84
-      0: CSS_SELECTOR_LIST@75..82
-        0: CSS_GRIT_METAVARIABLE@75..82
-          0: GRIT_METAVARIABLE@75..82 "$qux" [Newline("\n"), Newline("\n")] [Whitespace(" ")]
-      1: CSS_DECLARATION_OR_RULE_BLOCK@82..84
-        0: L_CURLY@82..83 "{" [] []
-        1: CSS_DECLARATION_OR_RULE_LIST@83..83
-        2: R_CURLY@83..84 "}" [] []
-  2: EOF@84..84 "" [] []
+          2: CSS_SUB_SELECTOR_LIST@48..55
+            0: CSS_CLASS_SELECTOR@48..55
+              0: DOT@48..51 "." [Newline("\n"), Newline("\n")] []
+              1: CSS_CUSTOM_IDENTIFIER@51..55
+                0: IDENT@51..55 "foo" [] [Whitespace(" ")]
+      1: CSS_DECLARATION_OR_RULE_BLOCK@55..78
+        0: L_CURLY@55..56 "{" [] []
+        1: CSS_DECLARATION_OR_RULE_LIST@56..76
+          0: CSS_AT_RULE@56..76
+            0: AT@56..62 "@" [Newline("\n"), Whitespace("    ")] []
+            1: CSS_MEDIA_AT_RULE@62..76
+              0: MEDIA_KW@62..68 "media" [] [Whitespace(" ")]
+              1: CSS_MEDIA_QUERY_LIST@68..74
+                0: CSS_GRIT_METAVARIABLE@68..74
+                  0: GRIT_METAVARIABLE@68..74 "μbaz" [] [Whitespace(" ")]
+              2: CSS_DECLARATION_OR_RULE_BLOCK@74..76
+                0: L_CURLY@74..75 "{" [] []
+                1: CSS_DECLARATION_OR_RULE_LIST@75..75
+                2: R_CURLY@75..76 "}" [] []
+        2: R_CURLY@76..78 "}" [Newline("\n")] []
+    3: CSS_QUALIFIED_RULE@78..88
+      0: CSS_SELECTOR_LIST@78..86
+        0: CSS_GRIT_METAVARIABLE@78..86
+          0: GRIT_METAVARIABLE@78..86 "μqux" [Newline("\n"), Newline("\n")] [Whitespace(" ")]
+      1: CSS_DECLARATION_OR_RULE_BLOCK@86..88
+        0: L_CURLY@86..87 "{" [] []
+        1: CSS_DECLARATION_OR_RULE_LIST@87..87
+        2: R_CURLY@87..88 "}" [] []
+  2: EOF@88..88 "" [] []
 
 ```
