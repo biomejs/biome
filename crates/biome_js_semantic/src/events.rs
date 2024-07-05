@@ -24,8 +24,8 @@ pub enum SemanticEvent {
     /// - Type parameters
     DeclarationFound {
         range: TextRange,
-        scope_id: usize,
-        hoisted_scope_id: Option<usize>,
+        scope_id: u32,
+        hoisted_scope_id: Option<u32>,
     },
 
     /// Tracks where a symbol is read, but only if its declaration is before this reference.
@@ -34,7 +34,7 @@ pub enum SemanticEvent {
     Read {
         range: TextRange,
         declared_at: TextRange,
-        scope_id: usize,
+        scope_id: u32,
     },
 
     /// Tracks where a symbol is read, but only if its declaration was hoisted.
@@ -43,7 +43,7 @@ pub enum SemanticEvent {
     HoistedRead {
         range: TextRange,
         declared_at: TextRange,
-        scope_id: usize,
+        scope_id: u32,
     },
 
     /// Tracks where a symbol is written, but only if its declaration is before this reference.
@@ -52,7 +52,7 @@ pub enum SemanticEvent {
     Write {
         range: TextRange,
         declared_at: TextRange,
-        scope_id: usize,
+        scope_id: u32,
     },
 
     /// Tracks where a symbol is written, but only if its declaration was hoisted.
@@ -62,7 +62,7 @@ pub enum SemanticEvent {
     HoistedWrite {
         range: TextRange,
         declared_at: TextRange,
-        scope_id: usize,
+        scope_id: u32,
     },
 
     /// Tracks references that do no have any matching binding
@@ -77,8 +77,8 @@ pub enum SemanticEvent {
     ScopeStarted {
         /// Scope range
         range: TextRange,
-        scope_id: usize,
-        parent_scope_id: Option<usize>,
+        scope_id: u32,
+        parent_scope_id: Option<u32>,
         is_closure: bool,
     },
 
@@ -89,7 +89,7 @@ pub enum SemanticEvent {
     ScopeEnded {
         /// Scope range
         range: TextRange,
-        scope_id: usize,
+        scope_id: u32,
     },
 
     /// Tracks where a symbol is exported.
@@ -131,7 +131,7 @@ impl SemanticEvent {
 /// use biome_js_syntax::*;
 /// use biome_js_semantic::*;
 /// let tree = parse("let a = 1", JsFileSource::js_script(), JsParserOptions::default());
-/// let mut extractor = SemanticEventExtractor::new();
+/// let mut extractor = SemanticEventExtractor::default();
 /// for e in tree.syntax().preorder() {
 ///     match e {
 ///         WalkEvent::Enter(node) => extractor.enter(&node),
@@ -144,15 +144,15 @@ impl SemanticEvent {
 ///     }
 /// }
 /// ```
-#[derive(Default, Debug)]
+#[derive(Debug, Default)]
 pub struct SemanticEventExtractor {
     /// Event queue
     stash: VecDeque<SemanticEvent>,
     /// Stack of scopes
     scopes: Vec<Scope>,
     /// Number of generated scopes
-    /// This allows assigning a unique scope id to every scope.
-    scope_count: usize,
+    /// This allows assigning a unique id to every scope.
+    scope_count: u32,
     /// At any point this is the set of available bindings and their range in the current scope
     bindings: FxHashMap<BindingName, BindingInfo>,
     /// Type parameters bound in a `infer T` clause.
@@ -270,7 +270,7 @@ enum ScopeHoisting {
 
 #[derive(Debug)]
 struct Scope {
-    scope_id: usize,
+    scope_id: u32,
     /// All bindings declared inside this scope
     bindings: Vec<BindingName>,
     /// References that still needs to be bound and will be solved at the end of the scope
@@ -282,16 +282,6 @@ struct Scope {
 }
 
 impl SemanticEventExtractor {
-    pub fn new() -> Self {
-        Self {
-            stash: VecDeque::new(),
-            scopes: vec![],
-            scope_count: 0,
-            bindings: FxHashMap::default(),
-            infers: vec![],
-        }
-    }
-
     /// See [SemanticEvent] for a more detailed description of which events [JsSyntaxNode] generates.
     #[inline]
     pub fn enter(&mut self, node: &JsSyntaxNode) {
@@ -980,8 +970,8 @@ impl SemanticEventExtractor {
     ///
     /// This method when called inside the `f` scope will return
     /// the `f` scope index.
-    fn scope_index_to_hoist_declarations(&mut self, skip: usize) -> Option<usize> {
-        debug_assert!(self.scopes.len() > skip);
+    fn scope_index_to_hoist_declarations(&mut self, skip: u32) -> Option<u32> {
+        debug_assert!(self.scopes.len() > (skip as usize));
         // We should at least have the global scope
         // that do not hoist
         debug_assert!(matches!(
@@ -991,7 +981,7 @@ impl SemanticEventExtractor {
         self.scopes
             .iter()
             .rev()
-            .skip(skip)
+            .skip(skip as usize)
             .find(|scope| scope.hoisting == ScopeHoisting::DontHoistDeclarationsToParent)
             .map(|x| x.scope_id)
             .filter(|scope_id| self.current_scope_mut().scope_id != *scope_id)
@@ -1000,7 +990,7 @@ impl SemanticEventExtractor {
     /// Push the binding `binding` into the hoisted scope if it exists, or into the current scope.
     fn push_binding(
         &mut self,
-        hoisted_scope_id: Option<usize>,
+        hoisted_scope_id: Option<u32>,
         binding_name: BindingName,
         binding_info: BindingInfo,
     ) {

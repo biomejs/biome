@@ -124,7 +124,7 @@ pub fn assert(code: &str, test_name: &str) {
     // Extract semantic events and index by range
 
     let mut events_by_pos: FxHashMap<TextSize, Vec<SemanticEvent>> = FxHashMap::default();
-    let mut scope_start_by_id: FxHashMap<usize, TextSize> = FxHashMap::default();
+    let mut scope_start_by_id: FxHashMap<u32, TextSize> = FxHashMap::default();
     for event in semantic_events(r.syntax()) {
         let pos = if let SemanticEvent::ScopeEnded {
             range, scope_id, ..
@@ -199,13 +199,13 @@ struct DeclarationAssertion {
 #[derive(Clone, Debug)]
 struct ReadAssertion {
     range: TextRange,
-    declaration_asertion_name: String,
+    declaration_assertion_name: String,
 }
 
 #[derive(Clone, Debug)]
 struct WriteAssertion {
     range: TextRange,
-    declaration_asertion_name: String,
+    declaration_assertion_name: String,
 }
 
 #[derive(Clone, Debug)]
@@ -278,7 +278,7 @@ impl SemanticAssertion {
 
             Some(SemanticAssertion::Read(ReadAssertion {
                 range: token.parent().unwrap().text_range(),
-                declaration_asertion_name: symbol_name,
+                declaration_assertion_name: symbol_name,
             }))
         } else if assertion_text.starts_with("/*WRITE ") {
             let symbol_name = assertion_text
@@ -290,7 +290,7 @@ impl SemanticAssertion {
 
             Some(SemanticAssertion::Write(WriteAssertion {
                 range: token.parent().unwrap().text_range(),
-                declaration_asertion_name: symbol_name,
+                declaration_assertion_name: symbol_name,
             }))
         } else if assertion_text.contains("/*START") {
             let scope_name = assertion_text
@@ -447,7 +447,7 @@ impl SemanticAssertions {
         code: &str,
         test_name: &str,
         events_by_pos: FxHashMap<TextSize, Vec<SemanticEvent>>,
-        scope_start: FxHashMap<usize, TextSize>,
+        scope_start: FxHashMap<u32, TextSize>,
     ) {
         // Check every declaration assertion is ok
 
@@ -480,13 +480,13 @@ impl SemanticAssertions {
         for assertion in self.read_assertions.iter() {
             let decl = match self
                 .declarations_assertions
-                .get(&assertion.declaration_asertion_name)
+                .get(&assertion.declaration_assertion_name)
             {
                 Some(decl) => decl,
                 None => {
                     panic!(
                         "No declaration found with name: {}",
-                        assertion.declaration_asertion_name
+                        assertion.declaration_assertion_name
                     );
                 }
             };
@@ -545,13 +545,13 @@ impl SemanticAssertions {
         for assertion in self.write_assertions.iter() {
             let decl = match self
                 .declarations_assertions
-                .get(&assertion.declaration_asertion_name)
+                .get(&assertion.declaration_assertion_name)
             {
                 Some(decl) => decl,
                 None => {
                     panic!(
                         "No declaration found with name: {}",
-                        assertion.declaration_asertion_name
+                        assertion.declaration_assertion_name
                     );
                 }
             };
