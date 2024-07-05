@@ -1,4 +1,5 @@
 use biome_analyze::{context::RuleContext, declare_lint_rule, Ast, Rule, RuleDiagnostic};
+use biome_analyze::{RuleSource, RuleSourceKind};
 use biome_console::markup;
 use biome_js_syntax::{JsLanguage, JsModule};
 use biome_rowan::{AstNode, Direction, SyntaxTriviaPiece, TextRange};
@@ -41,6 +42,8 @@ declare_lint_rule! {
         name: "noIrregularWhitespace",
         language: "js",
         recommended: false,
+        sources: &[RuleSource::Eslint("no-irregular-whitespace")],
+        source_kind: RuleSourceKind::SameLogic,
     }
 }
 
