@@ -1,7 +1,7 @@
 use biome_analyze::{context::RuleContext, declare_lint_rule, Ast, Rule, RuleDiagnostic};
 use biome_console::markup;
-use biome_js_syntax::AnyJsStatement;
-use biome_rowan::{AstNode, Direction};
+use biome_js_syntax::{JsLanguage, JsModule};
+use biome_rowan::{AstNode, Direction, SyntaxTriviaPiece, TextRange};
 
 const IRREGULAR_WHITESPACES: &[char; 22] = &[
     '\u{c}', '\u{b}', '\u{85}', '\u{feff}', '\u{a0}', '\u{1680}', '\u{180e}', '\u{2000}',
@@ -45,24 +45,23 @@ declare_lint_rule! {
 }
 
 impl Rule for NoIrregularWhitespace {
-    type Query = Ast<AnyJsStatement>;
-    type State = ();
-    type Signals = Option<Self::State>;
+    type Query = Ast<JsModule>;
+    type State = TextRange;
+    type Signals = Vec<Self::State>;
     type Options = ();
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
-
-        get_irregular_whitespace(node)
+        let ranges = get_irregular_whitespace(node);
+        dbg!(ranges.clone());
+        ranges
     }
 
-    fn diagnostic(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<RuleDiagnostic> {
-        let node = ctx.query();
-
+    fn diagnostic(_ctx: &RuleContext<Self>, range: &Self::State) -> Option<RuleDiagnostic> {
         Some(
             RuleDiagnostic::new(
                 rule_category!(),
-                node.range(),
+                range,
                 markup! {
                     "Irregular whitespaces found."
                 },
@@ -74,25 +73,33 @@ impl Rule for NoIrregularWhitespace {
     }
 }
 
-fn get_irregular_whitespace(node: &AnyJsStatement) -> Option<()> {
+fn get_irregular_whitespace(node: &JsModule) -> Vec<TextRange> {
     let syntax = node.syntax();
-    let has_irregular_whitespace = syntax.descendants_tokens(Direction::Next).any(|token| {
-        let pieces = token
-            .leading_trivia()
-            .pieces()
-            .chain(token.trailing_trivia().pieces());
 
-        pieces
-            .filter(|trivia| trivia.is_whitespace())
-            .any(|trivia| {
-                IRREGULAR_WHITESPACES.iter().any(|irregular_whitespace| {
+    let all_whitespaces_trivia: Vec<SyntaxTriviaPiece<JsLanguage>> = syntax
+        .descendants_tokens(Direction::Next)
+        .flat_map(|token| {
+            token
+                .leading_trivia()
+                .pieces()
+                .chain(token.trailing_trivia().pieces())
+                .filter(|trivia| trivia.is_whitespace())
+        })
+        .collect();
+
+    IRREGULAR_WHITESPACES
+        .iter()
+        .flat_map(|irregular_whitespace| {
+            all_whitespaces_trivia
+                .iter()
+                .filter(|trivia| {
                     trivia
                         .text()
                         .chars()
                         .any(|char| &char == irregular_whitespace)
                 })
-            })
-    });
-
-    has_irregular_whitespace.then_some(())
+                .map(|trivia| trivia.text_range())
+                .collect::<Vec<TextRange>>()
+        })
+        .collect()
 }

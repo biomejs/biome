@@ -2,7 +2,6 @@
 source: crates/biome_json_parser/tests/spec_test.rs
 expression: snapshot
 ---
-
 ## Input
 
 ```json
@@ -38,13 +37,11 @@ structure_UTF8_BOM_no_data.json:1:2 parse ━━━━━━━━━━━━�
   × Expected an array, an object, or a literal but instead found the end of the file.
   
   > 1 │ �
-      │ 
+      │  
   
   i Expected an array, an object, or a literal here.
   
   > 1 │ �
-      │ 
+      │  
   
 ```
-
-
