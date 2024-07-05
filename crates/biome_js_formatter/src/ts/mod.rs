@@ -10,5 +10,6 @@ pub(crate) mod declarations;
 pub(crate) mod expressions;
 pub(crate) mod lists;
 pub(crate) mod module;
+pub(crate) mod objects;
 pub(crate) mod statements;
 pub(crate) mod types;

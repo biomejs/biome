@@ -28,6 +28,11 @@ export type T = {
 	[""]: number
 }
 
+export enum E {
+	["A"],
+	["B"],
+}
+
 ```
 
 # Diagnostics
@@ -216,5 +221,42 @@ invalid.ts:22:3 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━�
   
     22 │ → [""]:·number
        │   -  -        
+
+```
+
+```
+invalid.ts:26:3 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The computed expression can be simplified to a string literal.
+  
+    25 │ export enum E {
+  > 26 │ 	["A"],
+       │ 	 ^^^
+    27 │ 	["B"],
+    28 │ }
+  
+  i Unsafe fix: Use a literal key instead.
+  
+    26 │ → ["A"],
+       │   -   - 
+
+```
+
+```
+invalid.ts:27:3 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The computed expression can be simplified to a string literal.
+  
+    25 │ export enum E {
+    26 │ 	["A"],
+  > 27 │ 	["B"],
+       │ 	 ^^^
+    28 │ }
+    29 │ 
+  
+  i Unsafe fix: Use a literal key instead.
+  
+    27 │ → ["B"],
+       │   -   - 
 
 ```

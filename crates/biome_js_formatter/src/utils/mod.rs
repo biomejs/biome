@@ -10,7 +10,7 @@ pub(crate) mod format_node_without_comments;
 pub(crate) mod function_body;
 pub mod jsx;
 pub(crate) mod member_chain;
-mod object;
+pub(crate) mod object;
 mod object_like;
 mod object_pattern_like;
 #[cfg(test)]

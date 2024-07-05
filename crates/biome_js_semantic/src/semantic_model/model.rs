@@ -34,9 +34,9 @@ pub(crate) struct SemanticModelData {
     pub(crate) root: AnyJsRoot,
     // All scopes of this model
     pub(crate) scopes: Vec<SemanticModelScopeData>,
-    pub(crate) scope_by_range: rust_lapper::Lapper<usize, usize>,
+    pub(crate) scope_by_range: rust_lapper::Lapper<u32, u32>,
     // Maps the start of a node range to a scope id
-    pub(crate) scope_hoisted_to_by_range: FxHashMap<TextSize, usize>,
+    pub(crate) scope_hoisted_to_by_range: FxHashMap<TextSize, u32>,
     // Map to each by its range
     pub(crate) node_by_range: FxHashMap<TextRange, JsSyntaxNode>,
     // Maps any range start in the code to its bindings (usize points to bindings vec)
@@ -68,7 +68,7 @@ impl SemanticModelData {
         binding.references.get(index.1 + 1)
     }
 
-    pub(crate) fn scope(&self, range: &TextRange) -> usize {
+    pub(crate) fn scope(&self, range: &TextRange) -> u32 {
         let start = range.start().into();
         let end = range.end().into();
         let scopes = self
@@ -84,7 +84,7 @@ impl SemanticModelData {
         }
     }
 
-    fn scope_hoisted_to(&self, range: &TextRange) -> Option<usize> {
+    fn scope_hoisted_to(&self, range: &TextRange) -> Option<u32> {
         self.scope_hoisted_to_by_range.get(&range.start()).copied()
     }
 
@@ -122,7 +122,7 @@ impl SemanticModel {
     pub fn scopes(&self) -> impl Iterator<Item = Scope> + '_ {
         self.data.scopes.iter().enumerate().map(|(id, _)| Scope {
             data: self.data.clone(),
-            id,
+            id: id as u32,
         })
     }
 

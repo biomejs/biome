@@ -34,7 +34,7 @@ declare_lint_rule! {
     ///
     /// ## Ignoring some files
     ///
-    /// Sometimes you want to completly ignore some files.
+    /// Sometimes you want to completely ignore some files.
     /// Biome ignore comments cannot be used because the rule applies on filenames not file contents.
     /// To ignore files, you can use [`overrides`](https://biomejs.dev/reference/configuration/#overrides).
     /// If you want to ignore all files in the `test` directory, then you can disable the rule for those files only:
@@ -151,7 +151,7 @@ impl Rule for UseFilenamingConvention {
         if !allowed_cases.is_empty() {
             let trimmed_name = name.trim_matches('_');
             let case = Case::identify(trimmed_name, options.strict_case);
-            if allowed_cases.contains(case) {
+            if (allowed_cases | Case::Uni).contains(case) {
                 return None;
             }
         }
