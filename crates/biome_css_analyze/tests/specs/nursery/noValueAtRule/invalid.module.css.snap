@@ -1,6 +1,5 @@
 ---
 source: crates/biome_css_analyze/tests/spec_tests.rs
-assertion_line: 92
 expression: invalid.module.css
 ---
 # Input
@@ -29,7 +28,7 @@ expression: invalid.module.css
 ```
 invalid.module.css:2:1 lint/nursery/noValueAtRule ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected @value rule
+  ! Use of @value rule is disallowed
   
     1 │ /* css variables */
   > 2 │ @value primary: #BF4040;
@@ -47,7 +46,7 @@ invalid.module.css:2:1 lint/nursery/noValueAtRule ━━━━━━━━━━
 ```
 invalid.module.css:3:1 lint/nursery/noValueAtRule ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected @value rule
+  ! Use of @value rule is disallowed
   
     1 │ /* css variables */
     2 │ @value primary: #BF4040;
@@ -66,7 +65,7 @@ invalid.module.css:3:1 lint/nursery/noValueAtRule ━━━━━━━━━━
 ```
 invalid.module.css:6:1 lint/nursery/noValueAtRule ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected @value rule
+  ! Use of @value rule is disallowed
   
     5 │ /* breakpoints */
   > 6 │ @value small: (max-width: 599px);
@@ -84,7 +83,7 @@ invalid.module.css:6:1 lint/nursery/noValueAtRule ━━━━━━━━━━
 ```
 invalid.module.css:7:1 lint/nursery/noValueAtRule ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected @value rule
+  ! Use of @value rule is disallowed
   
     5 │ /* breakpoints */
     6 │ @value small: (max-width: 599px);
@@ -103,7 +102,7 @@ invalid.module.css:7:1 lint/nursery/noValueAtRule ━━━━━━━━━━
 ```
 invalid.module.css:8:1 lint/nursery/noValueAtRule ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected @value rule
+  ! Use of @value rule is disallowed
   
      6 │ @value small: (max-width: 599px);
      7 │ @value medium: (min-width: 600px) and (max-width: 959px);
@@ -122,7 +121,7 @@ invalid.module.css:8:1 lint/nursery/noValueAtRule ━━━━━━━━━━
 ```
 invalid.module.css:11:1 lint/nursery/noValueAtRule ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected @value rule
+  ! Use of @value rule is disallowed
   
     10 │ /* alias paths for other values or composition */
   > 11 │ @value colors: "./colors.css";
@@ -140,7 +139,7 @@ invalid.module.css:11:1 lint/nursery/noValueAtRule ━━━━━━━━━�
 ```
 invalid.module.css:13:1 lint/nursery/noValueAtRule ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected @value rule
+  ! Use of @value rule is disallowed
   
     11 │ @value colors: "./colors.css";
     12 │ /* import multiple from a single file */
@@ -159,7 +158,7 @@ invalid.module.css:13:1 lint/nursery/noValueAtRule ━━━━━━━━━�
 ```
 invalid.module.css:15:1 lint/nursery/noValueAtRule ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected @value rule
+  ! Use of @value rule is disallowed
   
     13 │ @value primary, secondary from colors;
     14 │ /* make local aliases to imported values */
@@ -178,7 +177,7 @@ invalid.module.css:15:1 lint/nursery/noValueAtRule ━━━━━━━━━�
 ```
 invalid.module.css:17:1 lint/nursery/noValueAtRule ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected @value rule
+  ! Use of @value rule is disallowed
   
     15 │ @value small as bp-small, large as bp-large from "./breakpoints.css";
     16 │ /* value as selector name */

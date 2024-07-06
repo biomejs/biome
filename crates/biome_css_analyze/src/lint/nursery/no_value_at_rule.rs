@@ -4,9 +4,9 @@ use biome_css_syntax::CssAtRule;
 use biome_rowan::AstNode;
 
 declare_rule! {
-    /// Disallow use of @value rule in css modules
+    /// Disallow use of `@value` rule in css modules.
     ///
-    /// Use of CSS variables is recommeneded instead of @value rule
+    /// Use of CSS variables is recommended instead of `@value` rule.
     ///
     /// ## Examples
     ///
@@ -59,7 +59,7 @@ impl Rule for NoValueAtRule {
                 rule_category!(),
                 span,
                 markup! {
-                    "Unexpected @value rule"
+                    "Use of "<Emphasis>"@value"</Emphasis>" rule is disallowed"
                 },
             )
             .note(markup! {
