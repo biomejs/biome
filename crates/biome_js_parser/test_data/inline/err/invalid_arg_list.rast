@@ -15,7 +15,6 @@ JsModule {
                 l_paren_token: L_PAREN@12..13 "(" [] [],
                 items: JsParameterList [
                     JsRestParameter {
-                        decorators: JsDecoratorList [],
                         dotdotdot_token: DOT3@13..16 "..." [] [],
                         binding: JsIdentifierBinding {
                             name_token: IDENT@16..20 "args" [] [],
@@ -211,11 +210,10 @@ JsModule {
         0: L_PAREN@12..13 "(" [] []
         1: JS_PARAMETER_LIST@13..20
           0: JS_REST_PARAMETER@13..20
-            0: JS_DECORATOR_LIST@13..13
-            1: DOT3@13..16 "..." [] []
-            2: JS_IDENTIFIER_BINDING@16..20
+            0: DOT3@13..16 "..." [] []
+            1: JS_IDENTIFIER_BINDING@16..20
               0: IDENT@16..20 "args" [] []
-            3: (empty)
+            2: (empty)
         2: R_PAREN@20..22 ")" [] [Whitespace(" ")]
       6: (empty)
       7: JS_FUNCTION_BODY@22..24

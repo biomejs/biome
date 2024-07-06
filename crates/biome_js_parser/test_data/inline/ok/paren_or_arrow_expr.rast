@@ -152,7 +152,6 @@ JsModule {
                         },
                         COMMA@69..71 "," [] [Whitespace(" ")],
                         JsRestParameter {
-                            decorators: JsDecoratorList [],
                             dotdotdot_token: DOT3@71..74 "..." [] [],
                             binding: JsIdentifierBinding {
                                 name_token: IDENT@74..77 "bar" [] [],
@@ -293,11 +292,10 @@ JsModule {
               4: (empty)
             1: COMMA@69..71 "," [] [Whitespace(" ")]
             2: JS_REST_PARAMETER@71..77
-              0: JS_DECORATOR_LIST@71..71
-              1: DOT3@71..74 "..." [] []
-              2: JS_IDENTIFIER_BINDING@74..77
+              0: DOT3@71..74 "..." [] []
+              1: JS_IDENTIFIER_BINDING@74..77
                 0: IDENT@74..77 "bar" [] []
-              3: (empty)
+              2: (empty)
           2: R_PAREN@77..79 ")" [] [Whitespace(" ")]
         3: (empty)
         4: FAT_ARROW@79..82 "=>" [] [Whitespace(" ")]

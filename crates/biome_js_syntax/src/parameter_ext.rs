@@ -489,7 +489,7 @@ impl AnyJsConstructorParameter {
     pub fn decorators(&self) -> Option<JsDecoratorList> {
         match self {
             AnyJsConstructorParameter::AnyJsFormalParameter(parameter) => parameter.decorators(),
-            AnyJsConstructorParameter::JsRestParameter(parameter) => Some(parameter.decorators()),
+            AnyJsConstructorParameter::JsRestParameter(_) => None,
             AnyJsConstructorParameter::TsPropertyParameter(parameter) => {
                 Some(parameter.decorators())
             }
@@ -521,7 +521,7 @@ impl AnyJsParameter {
     pub fn decorators(&self) -> Option<JsDecoratorList> {
         match self {
             AnyJsParameter::AnyJsFormalParameter(parameter) => parameter.decorators(),
-            AnyJsParameter::JsRestParameter(parameter) => Some(parameter.decorators()),
+            AnyJsParameter::JsRestParameter(_) => None,
             AnyJsParameter::TsThisParameter(_) => None,
         }
     }

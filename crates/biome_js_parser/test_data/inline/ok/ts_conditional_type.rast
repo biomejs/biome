@@ -511,7 +511,6 @@ JsModule {
                             l_paren_token: L_PAREN@500..501 "(" [] [],
                             items: JsParameterList [
                                 JsRestParameter {
-                                    decorators: JsDecoratorList [],
                                     dotdotdot_token: DOT3@501..504 "..." [] [],
                                     binding: JsIdentifierBinding {
                                         name_token: IDENT@504..505 "a" [] [],
@@ -669,7 +668,6 @@ JsModule {
                                         l_paren_token: L_PAREN@639..640 "(" [] [],
                                         items: JsParameterList [
                                             JsRestParameter {
-                                                decorators: JsDecoratorList [],
                                                 dotdotdot_token: DOT3@640..643 "..." [] [],
                                                 binding: JsIdentifierBinding {
                                                     name_token: IDENT@643..647 "args" [] [],
@@ -726,7 +724,6 @@ JsModule {
                     l_paren_token: L_PAREN@686..687 "(" [] [],
                     items: JsParameterList [
                         JsRestParameter {
-                            decorators: JsDecoratorList [],
                             dotdotdot_token: DOT3@687..690 "..." [] [],
                             binding: JsIdentifierBinding {
                                 name_token: IDENT@690..694 "args" [] [],
@@ -887,7 +884,6 @@ JsModule {
                                         l_paren_token: L_PAREN@829..830 "(" [] [],
                                         items: JsParameterList [
                                             JsRestParameter {
-                                                decorators: JsDecoratorList [],
                                                 dotdotdot_token: DOT3@830..833 "..." [] [],
                                                 binding: JsIdentifierBinding {
                                                     name_token: IDENT@833..837 "args" [] [],
@@ -1777,11 +1773,10 @@ JsModule {
               0: L_PAREN@500..501 "(" [] []
               1: JS_PARAMETER_LIST@501..512
                 0: JS_REST_PARAMETER@501..512
-                  0: JS_DECORATOR_LIST@501..501
-                  1: DOT3@501..504 "..." [] []
-                  2: JS_IDENTIFIER_BINDING@504..505
+                  0: DOT3@501..504 "..." [] []
+                  1: JS_IDENTIFIER_BINDING@504..505
                     0: IDENT@504..505 "a" [] []
-                  3: TS_TYPE_ANNOTATION@505..512
+                  2: TS_TYPE_ANNOTATION@505..512
                     0: COLON@505..507 ":" [] [Whitespace(" ")]
                     1: TS_ARRAY_TYPE@507..512
                       0: TS_ANY_TYPE@507..510
@@ -1890,11 +1885,10 @@ JsModule {
                     0: L_PAREN@639..640 "(" [] []
                     1: JS_PARAMETER_LIST@640..652
                       0: JS_REST_PARAMETER@640..652
-                        0: JS_DECORATOR_LIST@640..640
-                        1: DOT3@640..643 "..." [] []
-                        2: JS_IDENTIFIER_BINDING@643..647
+                        0: DOT3@640..643 "..." [] []
+                        1: JS_IDENTIFIER_BINDING@643..647
                           0: IDENT@643..647 "args" [] []
-                        3: TS_TYPE_ANNOTATION@647..652
+                        2: TS_TYPE_ANNOTATION@647..652
                           0: COLON@647..649 ":" [] [Whitespace(" ")]
                           1: TS_ANY_TYPE@649..652
                             0: ANY_KW@649..652 "any" [] []
@@ -1927,11 +1921,10 @@ JsModule {
           0: L_PAREN@686..687 "(" [] []
           1: JS_PARAMETER_LIST@687..749
             0: JS_REST_PARAMETER@687..749
-              0: JS_DECORATOR_LIST@687..687
-              1: DOT3@687..690 "..." [] []
-              2: JS_IDENTIFIER_BINDING@690..694
+              0: DOT3@687..690 "..." [] []
+              1: JS_IDENTIFIER_BINDING@690..694
                 0: IDENT@690..694 "args" [] []
-              3: TS_TYPE_ANNOTATION@694..749
+              2: TS_TYPE_ANNOTATION@694..749
                 0: COLON@694..696 ":" [] [Whitespace(" ")]
                 1: TS_REFERENCE_TYPE@696..749
                   0: TS_QUALIFIED_NAME@696..706
@@ -2038,11 +2031,10 @@ JsModule {
                     0: L_PAREN@829..830 "(" [] []
                     1: JS_PARAMETER_LIST@830..910
                       0: JS_REST_PARAMETER@830..910
-                        0: JS_DECORATOR_LIST@830..830
-                        1: DOT3@830..833 "..." [] []
-                        2: JS_IDENTIFIER_BINDING@833..837
+                        0: DOT3@830..833 "..." [] []
+                        1: JS_IDENTIFIER_BINDING@833..837
                           0: IDENT@833..837 "args" [] []
-                        3: TS_TYPE_ANNOTATION@837..910
+                        2: TS_TYPE_ANNOTATION@837..910
                           0: COLON@837..839 ":" [] [Whitespace(" ")]
                           1: TS_CONDITIONAL_TYPE@839..910
                             0: TS_REFERENCE_TYPE@839..864

@@ -1610,7 +1610,6 @@ JsFormalParameter =
 // (...a) => {}
 //  ^^^^
 JsRestParameter =
-	decorators: JsDecoratorList
 	'...'
 	binding: AnyJsBindingPattern
 	type_annotation: TsTypeAnnotation?

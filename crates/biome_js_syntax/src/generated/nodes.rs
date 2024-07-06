@@ -5831,23 +5831,19 @@ impl JsRestParameter {
     }
     pub fn as_fields(&self) -> JsRestParameterFields {
         JsRestParameterFields {
-            decorators: self.decorators(),
             dotdotdot_token: self.dotdotdot_token(),
             binding: self.binding(),
             type_annotation: self.type_annotation(),
         }
     }
-    pub fn decorators(&self) -> JsDecoratorList {
-        support::list(&self.syntax, 0usize)
-    }
     pub fn dotdotdot_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 1usize)
+        support::required_token(&self.syntax, 0usize)
     }
     pub fn binding(&self) -> SyntaxResult<AnyJsBindingPattern> {
-        support::required_node(&self.syntax, 2usize)
+        support::required_node(&self.syntax, 1usize)
     }
     pub fn type_annotation(&self) -> Option<TsTypeAnnotation> {
-        support::node(&self.syntax, 3usize)
+        support::node(&self.syntax, 2usize)
     }
 }
 #[cfg(feature = "serde")]
@@ -5861,7 +5857,6 @@ impl Serialize for JsRestParameter {
 }
 #[cfg_attr(feature = "serde", derive(Serialize))]
 pub struct JsRestParameterFields {
-    pub decorators: JsDecoratorList,
     pub dotdotdot_token: SyntaxResult<SyntaxToken>,
     pub binding: SyntaxResult<AnyJsBindingPattern>,
     pub type_annotation: Option<TsTypeAnnotation>,
@@ -21957,7 +21952,6 @@ impl AstNode for JsRestParameter {
 impl std::fmt::Debug for JsRestParameter {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("JsRestParameter")
-            .field("decorators", &self.decorators())
             .field(
                 "dotdotdot_token",
                 &support::DebugSyntaxResult(self.dotdotdot_token()),

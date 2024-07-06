@@ -3005,19 +3005,16 @@ pub fn js_regex_literal_expression(value_token: SyntaxToken) -> JsRegexLiteralEx
     ))
 }
 pub fn js_rest_parameter(
-    decorators: JsDecoratorList,
     dotdotdot_token: SyntaxToken,
     binding: AnyJsBindingPattern,
 ) -> JsRestParameterBuilder {
     JsRestParameterBuilder {
-        decorators,
         dotdotdot_token,
         binding,
         type_annotation: None,
     }
 }
 pub struct JsRestParameterBuilder {
-    decorators: JsDecoratorList,
     dotdotdot_token: SyntaxToken,
     binding: AnyJsBindingPattern,
     type_annotation: Option<TsTypeAnnotation>,
@@ -3031,7 +3028,6 @@ impl JsRestParameterBuilder {
         JsRestParameter::unwrap_cast(SyntaxNode::new_detached(
             JsSyntaxKind::JS_REST_PARAMETER,
             [
-                Some(SyntaxElement::Node(self.decorators.into_syntax())),
                 Some(SyntaxElement::Token(self.dotdotdot_token)),
                 Some(SyntaxElement::Node(self.binding.into_syntax())),
                 self.type_annotation

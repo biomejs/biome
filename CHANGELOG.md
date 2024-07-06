@@ -95,6 +95,8 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 ### Parser
 
+- Remove decorators from rest arguments in the JS parser. Contributed by @denbezrukov
+
 ## v1.8.3 (2024-06-27)
 
 ### CLI

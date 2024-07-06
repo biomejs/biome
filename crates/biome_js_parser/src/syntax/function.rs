@@ -912,7 +912,7 @@ pub(crate) fn parse_any_parameter(
     type_context: TypeContext,
 ) -> ParsedSyntax {
     let parameter = match p.cur() {
-        T![...] => parse_rest_parameter(p, decorator_list, expression_context, type_context),
+        T![...] => parse_rest_parameter(p, expression_context, type_context),
         T![this] => {
             // test_err ts ts_decorator_this_parameter_option { "parse_class_parameter_decorators": true }
             // class A {
@@ -963,17 +963,14 @@ pub(crate) fn parse_any_parameter(
 
 pub(crate) fn parse_rest_parameter(
     p: &mut JsParser,
-    decorator_list: ParsedSyntax,
     expression_context: ExpressionContext,
     type_context: TypeContext,
 ) -> ParsedSyntax {
     if !p.at(T![...]) {
         return Absent;
     }
+    let m = p.start();
 
-    let m = decorator_list
-        .or_else(|| empty_decorator_list(p))
-        .precede(p);
     p.bump(T![...]);
     parse_binding_pattern(p, expression_context).or_add_diagnostic(p, expected_binding);
 

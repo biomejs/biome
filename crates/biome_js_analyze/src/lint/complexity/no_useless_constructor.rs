@@ -143,7 +143,7 @@ impl Rule for NoUselessConstructor {
             return None;
         }
         for parameter in constructor.parameters().ok()?.parameters() {
-            let decorators = match parameter.ok()? {
+            match parameter.ok()? {
                 AnyJsConstructorParameter::AnyJsFormalParameter(
                     AnyJsFormalParameter::JsBogusParameter(_),
                 )
@@ -153,13 +153,15 @@ impl Rule for NoUselessConstructor {
                 }
                 AnyJsConstructorParameter::AnyJsFormalParameter(
                     AnyJsFormalParameter::JsFormalParameter(parameter),
-                ) => parameter.decorators(),
-                AnyJsConstructorParameter::JsRestParameter(parameter) => parameter.decorators(),
+                ) => {
+                    if !parameter.decorators().is_empty() {
+                        // Ignore constructors with decorated parameters
+                        return None;
+                    }
+                },
+                AnyJsConstructorParameter::JsRestParameter(_) => {},
             };
-            if !decorators.is_empty() {
-                // Ignore constructors with decorated parameters
-                return None;
-            }
+
         }
         let class = constructor.syntax().ancestors().find_map(AnyJsClass::cast);
         if let Some(class) = &class {

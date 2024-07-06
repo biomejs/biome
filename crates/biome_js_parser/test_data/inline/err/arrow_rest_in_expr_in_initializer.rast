@@ -14,7 +14,6 @@ JsModule {
                     items: JsParameterList [
                         JsBogusParameter {
                             items: [
-                                JsDecoratorList [],
                                 DOT3@6..9 "..." [] [],
                                 JsIdentifierBinding {
                                     name_token: IDENT@9..11 "a" [] [Whitespace(" ")],
@@ -77,11 +76,10 @@ JsModule {
           0: L_PAREN@5..6 "(" [] []
           1: JS_PARAMETER_LIST@6..22
             0: JS_BOGUS_PARAMETER@6..22
-              0: JS_DECORATOR_LIST@6..6
-              1: DOT3@6..9 "..." [] []
-              2: JS_IDENTIFIER_BINDING@9..11
+              0: DOT3@6..9 "..." [] []
+              1: JS_IDENTIFIER_BINDING@9..11
                 0: IDENT@9..11 "a" [] [Whitespace(" ")]
-              3: JS_INITIALIZER_CLAUSE@11..22
+              2: JS_INITIALIZER_CLAUSE@11..22
                 0: EQ@11..13 "=" [] [Whitespace(" ")]
                 1: JS_IN_EXPRESSION@13..22
                   0: JS_STRING_LITERAL_EXPRESSION@13..17

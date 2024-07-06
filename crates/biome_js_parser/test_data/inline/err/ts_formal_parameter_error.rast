@@ -57,7 +57,6 @@ JsModule {
                 items: JsParameterList [
                     JsBogusParameter {
                         items: [
-                            JsDecoratorList [],
                             DOT3@46..49 "..." [] [],
                             JsIdentifierBinding {
                                 name_token: IDENT@49..53 "rest" [] [],
@@ -104,7 +103,6 @@ JsModule {
                 items: JsParameterList [
                     JsBogusParameter {
                         items: [
-                            JsDecoratorList [],
                             DOT3@88..91 "..." [] [],
                             JsIdentifierBinding {
                                 name_token: IDENT@91..95 "rest" [] [],
@@ -187,18 +185,17 @@ JsModule {
         0: L_PAREN@45..46 "(" [] []
         1: JS_PARAMETER_LIST@46..72
           0: JS_BOGUS_PARAMETER@46..72
-            0: JS_DECORATOR_LIST@46..46
-            1: DOT3@46..49 "..." [] []
-            2: JS_IDENTIFIER_BINDING@49..53
+            0: DOT3@46..49 "..." [] []
+            1: JS_IDENTIFIER_BINDING@49..53
               0: IDENT@49..53 "rest" [] []
-            3: TS_TYPE_ANNOTATION@53..64
+            2: TS_TYPE_ANNOTATION@53..64
               0: COLON@53..55 ":" [] [Whitespace(" ")]
               1: TS_ARRAY_TYPE@55..64
                 0: TS_STRING_TYPE@55..61
                   0: STRING_KW@55..61 "string" [] []
                 1: L_BRACK@61..62 "[" [] []
                 2: R_BRACK@62..64 "]" [] [Whitespace(" ")]
-            4: JS_INITIALIZER_CLAUSE@64..72
+            3: JS_INITIALIZER_CLAUSE@64..72
               0: EQ@64..66 "=" [] [Whitespace(" ")]
               1: JS_STRING_LITERAL_EXPRESSION@66..72
                 0: JS_STRING_LITERAL@66..72 "\"init\"" [] []
@@ -220,9 +217,8 @@ JsModule {
         0: L_PAREN@87..88 "(" [] []
         1: JS_PARAMETER_LIST@88..106
           0: JS_BOGUS_PARAMETER@88..95
-            0: JS_DECORATOR_LIST@88..88
-            1: DOT3@88..91 "..." [] []
-            2: JS_IDENTIFIER_BINDING@91..95
+            0: DOT3@88..91 "..." [] []
+            1: JS_IDENTIFIER_BINDING@91..95
               0: IDENT@91..95 "rest" [] []
           1: COMMA@95..97 "," [] [Whitespace(" ")]
           2: JS_FORMAL_PARAMETER@97..106
