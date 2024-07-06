@@ -158,10 +158,9 @@ impl Rule for NoUselessConstructor {
                         // Ignore constructors with decorated parameters
                         return None;
                     }
-                },
-                AnyJsConstructorParameter::JsRestParameter(_) => {},
+                }
+                AnyJsConstructorParameter::JsRestParameter(_) => {}
             };
-
         }
         let class = constructor.syntax().ancestors().find_map(AnyJsClass::cast);
         if let Some(class) = &class {
