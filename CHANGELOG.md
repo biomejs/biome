@@ -9,6 +9,40 @@ New entries must be placed in a section entitled `Unreleased`.
 Read
 our [guidelines for writing a good changelog entry](https://github.com/biomejs/biome/blob/main/CONTRIBUTING.md#changelog).
 
+## Unreleased
+
+### CLI
+
+#### Bug fixes
+
+- Fix [#3104](https://github.com/biomejs/biome/issues/3104) by suppressing node warnings when using `biome migrate`. Contributed by @SuperchupuDev
+
+- Force colors to be off when using the GitHub reporter to properly create annotations in GitHub actions ([#3148](https://github.com/biomejs/biome/issues/3148)). Contributed by @Sec-ant
+
+### Parser
+
+#### New features
+
+- Implement [CSS unicode range](https://github.com/biomejs/biome/pull/3251). Contributed by @denbezrukov
+
+### Formatter
+
+#### Bug fixes
+
+- Fix [#3184](https://github.com/biomejs/biome/issues/3184) CSS formatter converts custom identifiers to lowercase. Contributed by @denbezrukov
+- Fix [#3256](https://github.com/biomejs/biome/issues/3256) constant crashes when editing css files #3256. Contributed by @denbezrukov
+
+### Linter
+
+#### New features
+
+- Add [nursery/noExportedImports](https://biomejs.dev/linter/rules/no-exported-imports/). Contributed by @Conaclos
+
+#### Bug fixes
+
+- `useConsistentArrayType` and `useShorthandArrayType` now ignore `Array` in the `extends` and `implements` clauses. Fix [#3247](https://github.com/biomejs/biome/issues/3247). Contributed by @Conaclos
+- Fixes [#3066](https://github.com/biomejs/biome/issues/3066) by taking into account the dependencies declared in the `package.json`. Contributed by @ematipico
+
 ## v1.8.2 (2024-06-20)
 
 ### CLI
@@ -18,6 +52,7 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 - Fix [#3201](https://github.com/biomejs/biome/issues/3201) by correctly injecting the source code of the file when printing the diagnostics. Contributed by @ematipico
 - Fix [#3179](https://github.com/biomejs/biome/issues/3179) where comma separators are not correctly removed after running `biome migrate` and thus choke the parser. Contributed by @Sec-ant
 - Fix [#3232](https://github.com/biomejs/biome/issues/3232) by correctly using the colors set by the user. Contributed by @ematipico
+
 #### Enhancement
 
 - Reword the reporter message `No fixes needed` to `No fixes applied`.
