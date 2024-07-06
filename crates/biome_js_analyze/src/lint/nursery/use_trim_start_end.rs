@@ -6,9 +6,9 @@ use biome_console::markup;
 use biome_js_factory::make::{self};
 use biome_js_syntax::{
     AnyJsExpression, AnyJsLiteralExpression, AnyJsName, AnyJsTemplateElement, JsCallExpression,
-    JsLanguage, JsSyntaxKind, JsSyntaxToken,
+    JsComputedMemberExpression, JsLanguage, JsSyntaxKind, JsSyntaxToken, JsTemplateExpression,
 };
-use biome_rowan::{AstSeparatedList, BatchMutationExt, SyntaxToken, TextRange};
+use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt, SyntaxToken, TextRange};
 
 use crate::JsRuleAction;
 
@@ -125,10 +125,10 @@ impl Rule for UseTrimStartEnd {
         let node = ctx.query();
         let callee = node.callee().ok()?;
 
-        let is_computed_member = callee.as_js_computed_member_expression().is_some();
+        let is_computed_member = JsComputedMemberExpression::can_cast(callee.syntax().kind());
         let is_template = if is_computed_member {
             if let Ok(computed_member) = callee.as_js_computed_member_expression()?.member() {
-                computed_member.as_js_template_expression().is_some()
+                JsTemplateExpression::can_cast(computed_member.syntax().kind())
             } else {
                 false
             }
