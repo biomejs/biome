@@ -1,0 +1,428 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: invalid.css
+---
+# Input
+```css
+/* \u{b}    */
+.firstClass.secondClass {
+	padding: 10px;
+}
+/* \u{c}    */
+.firstClass.secondClass {
+	padding: 10px;
+}
+/* \u{feff} */
+.firstClass﻿.secondClass {
+	padding: 10px;
+}
+/* \u{a0}   */
+.firstClass .secondClass {
+	padding: 10px;
+}
+/* \u{1680} */
+.firstClass .secondClass {
+	padding: 10px;
+}
+/* \u{2000} */
+.firstClass .secondClass {
+	padding: 10px;
+}
+/* \u{2001} */
+.firstClass .secondClass {
+	padding: 10px;
+}
+/* \u{2002} */
+.firstClass .secondClass {
+	padding: 10px;
+}
+/* \u{2003} */
+.firstClass .secondClass {
+	padding: 10px;
+}
+/* \u{2004} */
+.firstClass .secondClass {
+	padding: 10px;
+}
+/* \u{2005} */
+.firstClass .secondClass {
+	padding: 10px;
+}
+/* \u{2006} */
+.firstClass .secondClass {
+	padding: 10px;
+}
+/* \u{2007} */
+.firstClass .secondClass {
+	padding: 10px;
+}
+/* \u{2008} */
+.firstClass .secondClass {
+	padding: 10px;
+}
+/* \u{2009} */
+.firstClass .secondClass {
+	padding: 10px;
+}
+/* \u{200a} */
+.firstClass .secondClass {
+	padding: 10px;
+}
+/* \u{200b} */
+.firstClass​.secondClass {
+	padding: 10px;
+}
+/* \u{202f} */
+.firstClass .secondClass {
+	padding: 10px;
+}
+/* \u{205f} */
+.firstClass .secondClass {
+	padding: 10px;
+}
+/* \u{3000} */
+.firstClass　.secondClass {
+	padding: 10px;
+}
+
+```
+
+# Diagnostics
+```
+invalid.css:2:12 lint/nursery/noIrregularWhitespace ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Irregular whitespace found.
+  
+    1 │ /* \u{b}    */
+  > 2 │ .firstClass␋.secondClass {
+      │            
+    3 │ 	padding: 10px;
+    4 │ }
+  
+  i Replace the irregular whitespace with normal whitespaces.
+  
+
+```
+
+```
+invalid.css:6:12 lint/nursery/noIrregularWhitespace ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Irregular whitespace found.
+  
+    4 │ }
+    5 │ /* \u{c}    */
+  > 6 │ .firstClass↡.secondClass {
+      │            
+    7 │ 	padding: 10px;
+    8 │ }
+  
+  i Replace the irregular whitespace with normal whitespaces.
+  
+
+```
+
+```
+invalid.css:10:12 lint/nursery/noIrregularWhitespace ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Irregular whitespace found.
+  
+     8 │ }
+     9 │ /* \u{feff} */
+  > 10 │ .firstClass�.secondClass {
+       │            
+    11 │ 	padding: 10px;
+    12 │ }
+  
+  i Replace the irregular whitespace with normal whitespaces.
+  
+
+```
+
+```
+invalid.css:14:12 lint/nursery/noIrregularWhitespace ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Irregular whitespace found.
+  
+    12 │ }
+    13 │ /* \u{a0}   */
+  > 14 │ .firstClassU+a0.secondClass {
+       │            ^
+    15 │ 	padding: 10px;
+    16 │ }
+  
+  i Replace the irregular whitespace with normal whitespaces.
+  
+
+```
+
+```
+invalid.css:18:12 lint/nursery/noIrregularWhitespace ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Irregular whitespace found.
+  
+    16 │ }
+    17 │ /* \u{1680} */
+  > 18 │ .firstClassU+1680.secondClass {
+       │            ^
+    19 │ 	padding: 10px;
+    20 │ }
+  
+  i Replace the irregular whitespace with normal whitespaces.
+  
+
+```
+
+```
+invalid.css:22:12 lint/nursery/noIrregularWhitespace ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Irregular whitespace found.
+  
+    20 │ }
+    21 │ /* \u{2000} */
+  > 22 │ .firstClassU+2000.secondClass {
+       │            ^
+    23 │ 	padding: 10px;
+    24 │ }
+  
+  i Replace the irregular whitespace with normal whitespaces.
+  
+
+```
+
+```
+invalid.css:26:12 lint/nursery/noIrregularWhitespace ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Irregular whitespace found.
+  
+    24 │ }
+    25 │ /* \u{2001} */
+  > 26 │ .firstClassU+2001.secondClass {
+       │            ^
+    27 │ 	padding: 10px;
+    28 │ }
+  
+  i Replace the irregular whitespace with normal whitespaces.
+  
+
+```
+
+```
+invalid.css:30:12 lint/nursery/noIrregularWhitespace ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Irregular whitespace found.
+  
+    28 │ }
+    29 │ /* \u{2002} */
+  > 30 │ .firstClassU+2002.secondClass {
+       │            ^
+    31 │ 	padding: 10px;
+    32 │ }
+  
+  i Replace the irregular whitespace with normal whitespaces.
+  
+
+```
+
+```
+invalid.css:34:12 lint/nursery/noIrregularWhitespace ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Irregular whitespace found.
+  
+    32 │ }
+    33 │ /* \u{2003} */
+  > 34 │ .firstClassU+2003.secondClass {
+       │            ^
+    35 │ 	padding: 10px;
+    36 │ }
+  
+  i Replace the irregular whitespace with normal whitespaces.
+  
+
+```
+
+```
+invalid.css:38:12 lint/nursery/noIrregularWhitespace ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Irregular whitespace found.
+  
+    36 │ }
+    37 │ /* \u{2004} */
+  > 38 │ .firstClassU+2004.secondClass {
+       │            ^
+    39 │ 	padding: 10px;
+    40 │ }
+  
+  i Replace the irregular whitespace with normal whitespaces.
+  
+
+```
+
+```
+invalid.css:42:12 lint/nursery/noIrregularWhitespace ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Irregular whitespace found.
+  
+    40 │ }
+    41 │ /* \u{2005} */
+  > 42 │ .firstClassU+2005.secondClass {
+       │            ^
+    43 │ 	padding: 10px;
+    44 │ }
+  
+  i Replace the irregular whitespace with normal whitespaces.
+  
+
+```
+
+```
+invalid.css:46:12 lint/nursery/noIrregularWhitespace ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Irregular whitespace found.
+  
+    44 │ }
+    45 │ /* \u{2006} */
+  > 46 │ .firstClassU+2006.secondClass {
+       │            ^
+    47 │ 	padding: 10px;
+    48 │ }
+  
+  i Replace the irregular whitespace with normal whitespaces.
+  
+
+```
+
+```
+invalid.css:50:12 lint/nursery/noIrregularWhitespace ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Irregular whitespace found.
+  
+    48 │ }
+    49 │ /* \u{2007} */
+  > 50 │ .firstClassU+2007.secondClass {
+       │            ^
+    51 │ 	padding: 10px;
+    52 │ }
+  
+  i Replace the irregular whitespace with normal whitespaces.
+  
+
+```
+
+```
+invalid.css:54:12 lint/nursery/noIrregularWhitespace ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Irregular whitespace found.
+  
+    52 │ }
+    53 │ /* \u{2008} */
+  > 54 │ .firstClassU+2008.secondClass {
+       │            ^
+    55 │ 	padding: 10px;
+    56 │ }
+  
+  i Replace the irregular whitespace with normal whitespaces.
+  
+
+```
+
+```
+invalid.css:58:12 lint/nursery/noIrregularWhitespace ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Irregular whitespace found.
+  
+    56 │ }
+    57 │ /* \u{2009} */
+  > 58 │ .firstClassU+2009.secondClass {
+       │            ^
+    59 │ 	padding: 10px;
+    60 │ }
+  
+  i Replace the irregular whitespace with normal whitespaces.
+  
+
+```
+
+```
+invalid.css:62:12 lint/nursery/noIrregularWhitespace ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Irregular whitespace found.
+  
+    60 │ }
+    61 │ /* \u{200a} */
+  > 62 │ .firstClassU+200a.secondClass {
+       │            ^
+    63 │ 	padding: 10px;
+    64 │ }
+  
+  i Replace the irregular whitespace with normal whitespaces.
+  
+
+```
+
+```
+invalid.css:66:12 lint/nursery/noIrregularWhitespace ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Irregular whitespace found.
+  
+    64 │ }
+    65 │ /* \u{200b} */
+  > 66 │ .firstClass�.secondClass {
+       │            
+    67 │ 	padding: 10px;
+    68 │ }
+  
+  i Replace the irregular whitespace with normal whitespaces.
+  
+
+```
+
+```
+invalid.css:70:12 lint/nursery/noIrregularWhitespace ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Irregular whitespace found.
+  
+    68 │ }
+    69 │ /* \u{202f} */
+  > 70 │ .firstClassU+202f.secondClass {
+       │            ^
+    71 │ 	padding: 10px;
+    72 │ }
+  
+  i Replace the irregular whitespace with normal whitespaces.
+  
+
+```
+
+```
+invalid.css:74:12 lint/nursery/noIrregularWhitespace ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Irregular whitespace found.
+  
+    72 │ }
+    73 │ /* \u{205f} */
+  > 74 │ .firstClassU+205f.secondClass {
+       │            ^
+    75 │ 	padding: 10px;
+    76 │ }
+  
+  i Replace the irregular whitespace with normal whitespaces.
+  
+
+```
+
+```
+invalid.css:78:12 lint/nursery/noIrregularWhitespace ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Irregular whitespace found.
+  
+    76 │ }
+    77 │ /* \u{3000} */
+  > 78 │ .firstClassU+3000.secondClass {
+       │            ^^
+    79 │ 	padding: 10px;
+    80 │ }
+  
+  i Replace the irregular whitespace with normal whitespaces.
+  
+
+```

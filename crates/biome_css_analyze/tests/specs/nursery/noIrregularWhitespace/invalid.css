@@ -1,0 +1,80 @@
+/* \u{b}    */
+.firstClass.secondClass {
+	padding: 10px;
+}
+/* \u{c}    */
+.firstClass.secondClass {
+	padding: 10px;
+}
+/* \u{feff} */
+.firstClass﻿.secondClass {
+	padding: 10px;
+}
+/* \u{a0}   */
+.firstClass .secondClass {
+	padding: 10px;
+}
+/* \u{1680} */
+.firstClass .secondClass {
+	padding: 10px;
+}
+/* \u{2000} */
+.firstClass .secondClass {
+	padding: 10px;
+}
+/* \u{2001} */
+.firstClass .secondClass {
+	padding: 10px;
+}
+/* \u{2002} */
+.firstClass .secondClass {
+	padding: 10px;
+}
+/* \u{2003} */
+.firstClass .secondClass {
+	padding: 10px;
+}
+/* \u{2004} */
+.firstClass .secondClass {
+	padding: 10px;
+}
+/* \u{2005} */
+.firstClass .secondClass {
+	padding: 10px;
+}
+/* \u{2006} */
+.firstClass .secondClass {
+	padding: 10px;
+}
+/* \u{2007} */
+.firstClass .secondClass {
+	padding: 10px;
+}
+/* \u{2008} */
+.firstClass .secondClass {
+	padding: 10px;
+}
+/* \u{2009} */
+.firstClass .secondClass {
+	padding: 10px;
+}
+/* \u{200a} */
+.firstClass .secondClass {
+	padding: 10px;
+}
+/* \u{200b} */
+.firstClass​.secondClass {
+	padding: 10px;
+}
+/* \u{202f} */
+.firstClass .secondClass {
+	padding: 10px;
+}
+/* \u{205f} */
+.firstClass .secondClass {
+	padding: 10px;
+}
+/* \u{3000} */
+.firstClass　.secondClass {
+	padding: 10px;
+}

@@ -1,0 +1,17 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: valid.css
+---
+# Input
+```css
+/* normal whitespace in selector */
+.first .second {
+	padding: 10px;
+}
+
+.firstClass .secondClass {
+	/* irregular whitespace in comments */
+	padding: 10px;
+}
+
+```
