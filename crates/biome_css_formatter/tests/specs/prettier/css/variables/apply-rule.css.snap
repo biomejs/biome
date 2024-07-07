@@ -44,56 +44,46 @@ info: css/variables/apply-rule.css
 ```diff
 --- Prettier
 +++ Biome
-@@ -3,30 +3,35 @@
- :root {
-   --toolbar-theme: {
+@@ -5,28 +5,33 @@
      background-color: hsl(120, 70%, 95%);
--    border-radius: 4px;
--    border: 1px solid var(--theme-color late);
+     border-radius: 4px;
+     border: 1px solid var(--theme-color late);
 -  };
--  --toolbar-title-theme: {
--    color: green;
++  }
++  ;
+   --toolbar-title-theme: {
+     color: green;
 -  };
-+  border-radius: 4px;
-+  border: 1px solid var(--theme-color late);
-+}
-+;
-+--toolbar-title-theme: {
-+  color: green;
-+}
-+;
++  }
++  ;
  }
  
  :root {
--  --without-semi: {
--    color: red;
+   --without-semi: {
+     color: red;
 -  };
-+  --without-semi: {color:red;
-+}
++  }
  }
  
  :root {
    --like-a-apply-rule: {
 -  color:red;} /* no semi here*/
--  --another-prop: blue;
-+  color:red;
-+} /* no semi here*/
-+--another-prop:blue 
-+;
++    color: red;
++  } /* no semi here*/
+   --another-prop: blue;
  }
  
  :root {
    --like-a-apply-rule: {
 -  color:red;} /* no semi here*/
--  --another-one-like-a-apply-rule: {
++    color: red;
++  } /* no semi here*/
+   --another-one-like-a-apply-rule: {
 -    color:red;
 -  };
-+  color:red;
-+} /* no semi here*/
-+--another-one-like-a-apply-rule: {
-+  color: red;
-+}
-+;
++    color: red;
++  }
++  ;
  }
 ```
 
@@ -105,37 +95,37 @@ info: css/variables/apply-rule.css
 :root {
   --toolbar-theme: {
     background-color: hsl(120, 70%, 95%);
-  border-radius: 4px;
-  border: 1px solid var(--theme-color late);
-}
-;
---toolbar-title-theme: {
-  color: green;
-}
-;
-}
-
-:root {
-  --without-semi: {color:red;
-}
+    border-radius: 4px;
+    border: 1px solid var(--theme-color late);
+  }
+  ;
+  --toolbar-title-theme: {
+    color: green;
+  }
+  ;
 }
 
 :root {
-  --like-a-apply-rule: {
-  color:red;
-} /* no semi here*/
---another-prop:blue 
-;
+  --without-semi: {
+    color: red;
+  }
 }
 
 :root {
   --like-a-apply-rule: {
-  color:red;
-} /* no semi here*/
---another-one-like-a-apply-rule: {
-  color: red;
+    color: red;
+  } /* no semi here*/
+  --another-prop: blue;
 }
-;
+
+:root {
+  --like-a-apply-rule: {
+    color: red;
+  } /* no semi here*/
+  --another-one-like-a-apply-rule: {
+    color: red;
+  }
+  ;
 }
 ```
 
@@ -148,24 +138,60 @@ apply-rule.css:4:20 parse ━━━━━━━━━━━━━━━━━━
     3 │ :root {
   > 4 │   --toolbar-theme: {
       │                    ^
-  > 5 │     background-color: hsl(120, 70%, 95%);
-      │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │     background-color: hsl(120, 70%, 95%);
     6 │     border-radius: 4px;
-    7 │     border: 1px solid var(--theme-color late);
   
   i Expected one of:
   
-  - identifier
-  - string
-  - number
-  - dimension
-  - ratio
-  - custom property
-  - function
+  - hover
+  - focus
+  - active
+  - first-child
+  - last-child
+  - nth-child
+  - nth-last-child
+  - first-of-type
+  - last-of-type
+  - nth-of-type
+  - nth-last-of-type
+  - only-child
+  - only-of-type
+  - checked
+  - disabled
+  - enabled
+  - required
+  - optional
+  - valid
+  - invalid
+  - in-range
+  - out-of-range
+  - read-only
+  - read-write
+  - placeholder-shown
+  - default
+  - checked
+  - indeterminate
+  - blank
+  - empty
+  - root
+  - target
+  - lang
+  - not
+  - is
+  - where
+  - fullscreen
+  - link
+  - visited
+  - any-link
+  - local-link
+  - scope
+  - current
+  - past
+  - future
   
 apply-rule.css:8:4 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Expected a qualified rule, or an at rule but instead found ';'.
+  × Expected a declaration, or an at rule but instead found ';'.
   
      6 │     border-radius: 4px;
      7 │     border: 1px solid var(--theme-color late);
@@ -174,7 +200,7 @@ apply-rule.css:8:4 parse ━━━━━━━━━━━━━━━━━━�
      9 │   --toolbar-title-theme: {
     10 │     color: green;
   
-  i Expected a qualified rule, or an at rule here.
+  i Expected a declaration, or an at rule here.
   
      6 │     border-radius: 4px;
      7 │     border: 1px solid var(--theme-color late);
@@ -244,28 +270,23 @@ apply-rule.css:9:26 parse ━━━━━━━━━━━━━━━━━━
   
 apply-rule.css:11:4 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Expected a qualified rule, or an at rule but instead found ';
-    }'.
+  × Expected a declaration, or an at rule but instead found ';'.
   
      9 │   --toolbar-title-theme: {
     10 │     color: green;
   > 11 │   };
        │    ^
-  > 12 │ }
-       │ ^
+    12 │ }
     13 │ 
-    14 │ :root {
   
-  i Expected a qualified rule, or an at rule here.
+  i Expected a declaration, or an at rule here.
   
      9 │   --toolbar-title-theme: {
     10 │     color: green;
   > 11 │   };
        │    ^
-  > 12 │ }
-       │ ^
+    12 │ }
     13 │ 
-    14 │ :root {
   
 apply-rule.css:15:19 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -273,39 +294,57 @@ apply-rule.css:15:19 parse ━━━━━━━━━━━━━━━━━�
   
     14 │ :root {
   > 15 │   --without-semi: {color:red;}
-       │                   ^^^^^^^^^^
+       │                   ^
     16 │ }
     17 │ 
   
   i Expected one of:
   
-  - identifier
-  - string
-  - number
-  - dimension
-  - ratio
-  - custom property
-  - function
-  
-apply-rule.css:16:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Expected a qualified rule, or an at rule but instead found '}'.
-  
-    14 │ :root {
-    15 │   --without-semi: {color:red;}
-  > 16 │ }
-       │ ^
-    17 │ 
-    18 │ :root {
-  
-  i Expected a qualified rule, or an at rule here.
-  
-    14 │ :root {
-    15 │   --without-semi: {color:red;}
-  > 16 │ }
-       │ ^
-    17 │ 
-    18 │ :root {
+  - hover
+  - focus
+  - active
+  - first-child
+  - last-child
+  - nth-child
+  - nth-last-child
+  - first-of-type
+  - last-of-type
+  - nth-of-type
+  - nth-last-of-type
+  - only-child
+  - only-of-type
+  - checked
+  - disabled
+  - enabled
+  - required
+  - optional
+  - valid
+  - invalid
+  - in-range
+  - out-of-range
+  - read-only
+  - read-write
+  - placeholder-shown
+  - default
+  - checked
+  - indeterminate
+  - blank
+  - empty
+  - root
+  - target
+  - lang
+  - not
+  - is
+  - where
+  - fullscreen
+  - link
+  - visited
+  - any-link
+  - local-link
+  - scope
+  - current
+  - past
+  - future
   
 apply-rule.css:19:24 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -314,33 +353,56 @@ apply-rule.css:19:24 parse ━━━━━━━━━━━━━━━━━�
     18 │ :root {
   > 19 │   --like-a-apply-rule: {
        │                        ^
-  > 20 │   color:red;} /* no semi here*/
-       │   ^^^^^^^^^
+    20 │   color:red;} /* no semi here*/
     21 │   --another-prop: blue;
-    22 │ }
   
   i Expected one of:
   
-  - identifier
-  - string
-  - number
-  - dimension
-  - ratio
-  - custom property
-  - function
-  
-apply-rule.css:21:23 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `;`
-  
-    19 │   --like-a-apply-rule: {
-    20 │   color:red;} /* no semi here*/
-  > 21 │   --another-prop: blue;
-       │                       ^
-    22 │ }
-    23 │ 
-  
-  i Remove ;
+  - hover
+  - focus
+  - active
+  - first-child
+  - last-child
+  - nth-child
+  - nth-last-child
+  - first-of-type
+  - last-of-type
+  - nth-of-type
+  - nth-last-of-type
+  - only-child
+  - only-of-type
+  - checked
+  - disabled
+  - enabled
+  - required
+  - optional
+  - valid
+  - invalid
+  - in-range
+  - out-of-range
+  - read-only
+  - read-write
+  - placeholder-shown
+  - default
+  - checked
+  - indeterminate
+  - blank
+  - empty
+  - root
+  - target
+  - lang
+  - not
+  - is
+  - where
+  - fullscreen
+  - link
+  - visited
+  - any-link
+  - local-link
+  - scope
+  - current
+  - past
+  - future
   
 apply-rule.css:25:24 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -349,20 +411,56 @@ apply-rule.css:25:24 parse ━━━━━━━━━━━━━━━━━�
     24 │ :root {
   > 25 │   --like-a-apply-rule: {
        │                        ^
-  > 26 │   color:red;} /* no semi here*/
-       │   ^^^^^^^^^
+    26 │   color:red;} /* no semi here*/
     27 │   --another-one-like-a-apply-rule: {
-    28 │     color:red;
   
   i Expected one of:
   
-  - identifier
-  - string
-  - number
-  - dimension
-  - ratio
-  - custom property
-  - function
+  - hover
+  - focus
+  - active
+  - first-child
+  - last-child
+  - nth-child
+  - nth-last-child
+  - first-of-type
+  - last-of-type
+  - nth-of-type
+  - nth-last-of-type
+  - only-child
+  - only-of-type
+  - checked
+  - disabled
+  - enabled
+  - required
+  - optional
+  - valid
+  - invalid
+  - in-range
+  - out-of-range
+  - read-only
+  - read-write
+  - placeholder-shown
+  - default
+  - checked
+  - indeterminate
+  - blank
+  - empty
+  - root
+  - target
+  - lang
+  - not
+  - is
+  - where
+  - fullscreen
+  - link
+  - visited
+  - any-link
+  - local-link
+  - scope
+  - current
+  - past
+  - future
   
 apply-rule.css:27:36 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -425,25 +523,22 @@ apply-rule.css:27:36 parse ━━━━━━━━━━━━━━━━━�
   
 apply-rule.css:29:4 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Expected a qualified rule, or an at rule but instead found ';
-    }'.
+  × Expected a declaration, or an at rule but instead found ';'.
   
     27 │   --another-one-like-a-apply-rule: {
     28 │     color:red;
   > 29 │   };
        │    ^
-  > 30 │ }
-       │ ^
+    30 │ }
     31 │ 
   
-  i Expected a qualified rule, or an at rule here.
+  i Expected a declaration, or an at rule here.
   
     27 │   --another-one-like-a-apply-rule: {
     28 │     color:red;
   > 29 │   };
        │    ^
-  > 30 │ }
-       │ ^
+    30 │ }
     31 │ 
   
 

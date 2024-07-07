@@ -95,6 +95,10 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 ### Parser
 
+#### Bug fixes
+
+- Fix [#3287](https://github.com/biomejs/biome/issues/3287) nested selectors with pseudo-classes. Contributed by @denbezrukov
+
 ## v1.8.3 (2024-06-27)
 
 ### CLI
