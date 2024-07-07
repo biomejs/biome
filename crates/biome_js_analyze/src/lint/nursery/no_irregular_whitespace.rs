@@ -96,7 +96,7 @@ fn get_irregular_whitespace(node: &JsModule) -> Vec<TextRange> {
                     .iter()
                     .any(|irregular_whitespace| &char == irregular_whitespace)
             });
-            has_irregular_whitespace.then_some(trivia.text_range())
+            has_irregular_whitespace.then(|| trivia.text_range())
         })
         .collect::<Vec<TextRange>>()
 }
