@@ -52,67 +52,29 @@ declare_lint_rule! {
 }
 
 const EVENT_TO_HANDLERS: &[(&str, &[&str])] = &[
+    ("keyboard", &["onKeyDown", "onKeyUp", "onKeyPress"]),
+    ("focus", &["onFocus", "onBlur"]),
     (
-        // ref https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent
-        "keyboard",
-        &[
-            // ref: https://developer.mozilla.org/en-US/docs/Web/API/Element/keydown_event
-            "onKeyDown",
-            // ref: https://developer.mozilla.org/en-US/docs/Web/API/Element/keyup_event
-            "onKeyUp",
-            //ref: https://developer.mozilla.org/en-US/docs/Web/API/Element/keypress_event
-            "onKeyPress",
-        ],
-    ),
-    (
-        // ref: https://developer.mozilla.org/en-US/docs/Web/API/FocusEvent
-        "focus",
-        &[
-            // ref: https://developer.mozilla.org/en-US/docs/Web/API/Element/focus_event
-            "onFocus",
-            // ref: https://developer.mozilla.org/en-US/docs/Web/API/Element/blur_event
-            "onBlur",
-        ],
-    ),
-    (
-        // ref: https://developer.mozilla.org/en-US/docs/Web/API/MouseEvent
         "mouse",
         &[
-            // ref: https://developer.mozilla.org/en-US/docs/Web/API/Element/click_event
             "onClick",
-            // ref: https://developer.mozilla.org/en-US/docs/Web/API/Element/contextmenu_event
             "onContextMenu",
-            // ref: https://developer.mozilla.org/en-US/docs/Web/API/Element/dblclick_event
             "onDblClick",
             "onDoubleClick",
-            // ref: https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/drag_event
             "onDrag",
-            // ref: https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/dragend_event
             "onDragEnd",
-            // ref: https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/dragenter_event
             "onDragEnter",
-            // ref: https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/dragleave_event
             "onDragLeave",
             "onDragExit",
-            // ref: https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/dragover_event
             "onDragOver",
-            // ref: https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/dragstart_event
             "onDragStart",
-            // ref: https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/drop_event
             "onDrop",
-            // ref: https://developer.mozilla.org/en-US/docs/Web/API/Element/mousedown_event
             "onMouseDown",
-            // ref: https://developer.mozilla.org/en-US/docs/Web/API/Element/mouseenter_event
             "onMouseEnter",
-            // ref: https://developer.mozilla.org/en-US/docs/Web/API/Element/mouseleave_event
             "onMouseLeave",
-            // ref: https://developer.mozilla.org/en-US/docs/Web/API/Element/mousemove_event
             "onMouseMove",
-            // ref: https://developer.mozilla.org/en-US/docs/Web/API/Element/mouseout_event
             "onMouseOut",
-            // ref: https://developer.mozilla.org/en-US/docs/Web/API/Element/mouseover_event
             "onMouseOver",
-            // ref: https://developer.mozilla.org/en-US/docs/Web/API/Element/mouseup_event
             "onMouseUp",
         ],
     ),
