@@ -70,7 +70,6 @@ impl<'source> CssParser<'source> {
         self.source_mut().re_lex(context)
     }
 
-    #[allow(dead_code)] //TODO remove this allow once we actually use it
     pub(crate) fn state(&self) -> &CssParserState {
         &self.state
     }
