@@ -26,10 +26,11 @@ use biome_diagnostics::{
 use biome_formatter::Printed;
 use biome_fs::{BiomePath, ConfigName};
 use biome_grit_patterns::GritQuery;
+use biome_js_syntax::ModuleKind;
 use biome_json_parser::{parse_json_with_cache, JsonParserOptions};
 use biome_json_syntax::JsonFileSource;
 use biome_parser::AnyParse;
-use biome_project::NodeJsProject;
+use biome_project::{NodeJsProject, PackageType};
 use biome_rowan::NodeCache;
 use dashmap::{mapref::entry::Entry, DashMap};
 use indexmap::IndexSet;
@@ -422,11 +423,20 @@ impl Workspace for WorkspaceServer {
     }
     /// Add a new file to the workspace
     fn open_file(&self, params: OpenFileParams) -> Result<(), WorkspaceError> {
-        let index = self.set_source(
-            params
-                .document_file_source
-                .unwrap_or(DocumentFileSource::from_path(&params.path)),
-        );
+        let mut source = params
+            .document_file_source
+            .unwrap_or(DocumentFileSource::from_path(&params.path));
+        let manifest = self.get_current_project()?.map(|pr| pr.manifest);
+
+        if let DocumentFileSource::Js(js) = &mut source {
+            if let Some(manifest) = manifest {
+                if manifest.r#type == Some(PackageType::Commonjs) && js.file_extension() == "js" {
+                    js.set_module_kind(ModuleKind::Script);
+                }
+            }
+        }
+
+        let index = self.set_source(source);
         self.syntax.remove(&params.path);
         self.documents.insert(
             params.path.clone(),

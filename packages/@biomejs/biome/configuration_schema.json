@@ -2098,6 +2098,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useStrictMode": {
+					"description": "Enforce the use of the directive \"use strict\" in script files.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useThrowNewError": {
 					"description": "Require new when throwing an error.",
 					"anyOf": [

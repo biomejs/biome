@@ -1246,6 +1246,10 @@ export interface Nursery {
 	 */
 	useSortedClasses?: RuleFixConfiguration_for_UtilityClassSortingOptions;
 	/**
+	 * Enforce the use of the directive "use strict" in script files.
+	 */
+	useStrictMode?: RuleConfiguration_for_Null;
+	/**
 	 * Require new when throwing an error.
 	 */
 	useThrowNewError?: RuleFixConfiguration_for_Null;
@@ -2543,6 +2547,7 @@ export type Category =
 	| "lint/nursery/useNumberToFixedDigitsArgument"
 	| "lint/nursery/useSemanticElements"
 	| "lint/nursery/useSortedClasses"
+	| "lint/nursery/useStrictMode"
 	| "lint/nursery/useThrowNewError"
 	| "lint/nursery/useThrowOnlyError"
 	| "lint/nursery/useTopLevelRegex"

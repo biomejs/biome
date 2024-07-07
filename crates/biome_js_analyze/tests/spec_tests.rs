@@ -2,7 +2,8 @@ use biome_analyze::{AnalysisFilter, AnalyzerAction, ControlFlow, Never, RuleFilt
 use biome_diagnostics::advice::CodeSuggestionAdvice;
 use biome_diagnostics::{DiagnosticExt, Severity};
 use biome_js_parser::{parse, JsParserOptions};
-use biome_js_syntax::{JsFileSource, JsLanguage};
+use biome_js_syntax::{JsFileSource, JsLanguage, ModuleKind};
+use biome_project::PackageType;
 use biome_rowan::AstNode;
 use biome_test_utils::{
     assert_errors_are_absent, code_fix_to_string, create_analyzer_options, diagnostic_to_string,
@@ -92,20 +93,29 @@ fn run_test(input: &'static str, _: &str, _: &str, _: &str) {
 pub(crate) fn analyze_and_snap(
     snapshot: &mut String,
     input_code: &str,
-    source_type: JsFileSource,
+    mut source_type: JsFileSource,
     filter: AnalysisFilter,
     file_name: &str,
     input_file: &Path,
     check_action_type: CheckActionType,
     parser_options: JsParserOptions,
 ) -> usize {
+    let mut diagnostics = Vec::new();
+    let mut code_fixes = Vec::new();
+    let manifest = load_manifest(input_file, &mut diagnostics);
+
+    if let Some(manifest) = &manifest {
+        if manifest.r#type == Some(PackageType::Commonjs) && 
+            // At the moment we treat JS and JSX at the same way
+            (source_type.file_extension() == "js" || source_type.file_extension() == "jsx" )
+        {
+            source_type.set_module_kind(ModuleKind::Script)
+        }
+    }
     let parsed = parse(input_code, source_type, parser_options.clone());
     let root = parsed.tree();
 
-    let mut diagnostics = Vec::new();
-    let mut code_fixes = Vec::new();
     let options = create_analyzer_options(input_file, &mut diagnostics);
-    let manifest = load_manifest(input_file, &mut diagnostics);
 
     let (_, errors) =
         biome_js_analyze::analyze(&root, filter, &options, source_type, manifest, |event| {

@@ -165,6 +165,7 @@ define_categories! {
     "lint/nursery/useNumberToFixedDigitsArgument": "https://biomejs.dev/linter/rules/use-number-to-fixed-digits-argument",
     "lint/nursery/useSemanticElements": "https://biomejs.dev/linter/rules/use-semantic-elements",
     "lint/nursery/useSortedClasses": "https://biomejs.dev/linter/rules/use-sorted-classes",
+    "lint/nursery/useStrictMode": "https://biomejs.dev/linter/rules/use-strict-mode",
     "lint/nursery/useThrowNewError": "https://biomejs.dev/linter/rules/use-throw-new-error",
     "lint/nursery/useThrowOnlyError": "https://biomejs.dev/linter/rules/use-throw-only-error",
     "lint/nursery/useTopLevelRegex": "https://biomejs.dev/linter/rules/use-top-level-regex",
