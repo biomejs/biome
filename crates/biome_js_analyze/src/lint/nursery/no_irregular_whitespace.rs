@@ -1,8 +1,8 @@
 use biome_analyze::{context::RuleContext, declare_lint_rule, Ast, Rule, RuleDiagnostic};
 use biome_analyze::{RuleSource, RuleSourceKind};
 use biome_console::markup;
-use biome_js_syntax::JsModule;
-use biome_rowan::{AstNode, Direction, TextRange};
+use biome_js_syntax::{JsLanguage, JsModule};
+use biome_rowan::{AstNode, Direction, SyntaxTriviaPiece, TextRange};
 
 const IRREGULAR_WHITESPACES: &[char; 22] = &[
     '\u{c}', '\u{b}', '\u{85}', '\u{feff}', '\u{a0}', '\u{1680}', '\u{180e}', '\u{2000}',
@@ -76,20 +76,30 @@ impl Rule for NoIrregularWhitespace {
 
 fn get_irregular_whitespace(node: &JsModule) -> Vec<TextRange> {
     let syntax = node.syntax();
+    let mut all_whitespaces_trivia: Vec<SyntaxTriviaPiece<JsLanguage>> = vec![];
+    let is_whitespace = |trivia: &SyntaxTriviaPiece<JsLanguage>| {
+        trivia.is_whitespace() && !trivia.text().replace(' ', "").is_empty()
+    };
 
-    let all_whitespaces_trivia = syntax
-        .descendants_tokens(Direction::Next)
-        .flat_map(|token| {
-            token
-                .leading_trivia()
-                .pieces()
-                .chain(token.trailing_trivia().pieces())
-                .filter(|trivia| {
-                    trivia.is_whitespace() && !trivia.text().replace(' ', "").is_empty()
-                })
-        });
+    for token in syntax.descendants_tokens(Direction::Next) {
+        let leading_trivia_pieces = token.leading_trivia().pieces();
+        let trailing_trivia_pieces = token.trailing_trivia().pieces();
+
+        for trivia in leading_trivia_pieces {
+            if is_whitespace(&trivia) {
+                all_whitespaces_trivia.push(trivia);
+            }
+        }
+
+        for trivia in trailing_trivia_pieces {
+            if is_whitespace(&trivia) {
+                all_whitespaces_trivia.push(trivia);
+            }
+        }
+    }
 
     all_whitespaces_trivia
+        .iter()
         .filter_map(|trivia| {
             let has_irregular_whitespace = trivia.text().chars().any(|char| {
                 IRREGULAR_WHITESPACES
