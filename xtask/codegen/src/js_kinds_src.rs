@@ -686,6 +686,9 @@ impl Field {
                     ("$", LanguageKind::Graphql) => "dollar",
                     ("~=", _) => "whitespace_like",
                     (",", _) => "comma",
+                    ("{{", LanguageKind::Html) => "l_double_curly",
+                    ("}}", LanguageKind::Html) => "r_double_curly",
+                    ("v-", LanguageKind::Html) => "v_dash",
                     _ => name,
                 };
 

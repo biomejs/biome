@@ -230,6 +230,122 @@ pub fn html_string(value_token: SyntaxToken) -> HtmlString {
         [Some(SyntaxElement::Token(value_token))],
     ))
 }
+pub fn vue_directive(
+    v_dash_token: SyntaxToken,
+    name: HtmlName,
+    argument: VueDirectiveArgument,
+    modifier: VueDirectiveModifierList,
+    value: VueDirectiveValue,
+) -> VueDirective {
+    VueDirective::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::VUE_DIRECTIVE,
+        [
+            Some(SyntaxElement::Token(v_dash_token)),
+            Some(SyntaxElement::Node(name.into_syntax())),
+            Some(SyntaxElement::Node(argument.into_syntax())),
+            Some(SyntaxElement::Node(modifier.into_syntax())),
+            Some(SyntaxElement::Node(value.into_syntax())),
+        ],
+    ))
+}
+pub fn vue_directive_argument(
+    colon_token: SyntaxToken,
+    any_vue_directive_argument: AnyVueDirectiveArgument,
+) -> VueDirectiveArgument {
+    VueDirectiveArgument::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::VUE_DIRECTIVE_ARGUMENT,
+        [
+            Some(SyntaxElement::Token(colon_token)),
+            Some(SyntaxElement::Node(
+                any_vue_directive_argument.into_syntax(),
+            )),
+        ],
+    ))
+}
+pub fn vue_directive_argument_dynamic(
+    l_brack_token: SyntaxToken,
+    argument: HtmlName,
+    r_brack_token: SyntaxToken,
+) -> VueDirectiveArgumentDynamic {
+    VueDirectiveArgumentDynamic::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::VUE_DIRECTIVE_ARGUMENT_DYNAMIC,
+        [
+            Some(SyntaxElement::Token(l_brack_token)),
+            Some(SyntaxElement::Node(argument.into_syntax())),
+            Some(SyntaxElement::Token(r_brack_token)),
+        ],
+    ))
+}
+pub fn vue_directive_argument_static(argument: HtmlName) -> VueDirectiveArgumentStatic {
+    VueDirectiveArgumentStatic::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::VUE_DIRECTIVE_ARGUMENT_STATIC,
+        [Some(SyntaxElement::Node(argument.into_syntax()))],
+    ))
+}
+pub fn vue_directive_modifier(dot_token: SyntaxToken, modifier: HtmlName) -> VueDirectiveModifier {
+    VueDirectiveModifier::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::VUE_DIRECTIVE_MODIFIER,
+        [
+            Some(SyntaxElement::Token(dot_token)),
+            Some(SyntaxElement::Node(modifier.into_syntax())),
+        ],
+    ))
+}
+pub fn vue_directive_value(eq_token: SyntaxToken, value: HtmlString) -> VueDirectiveValue {
+    VueDirectiveValue::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::VUE_DIRECTIVE_VALUE,
+        [
+            Some(SyntaxElement::Token(eq_token)),
+            Some(SyntaxElement::Node(value.into_syntax())),
+        ],
+    ))
+}
+pub fn vue_template_interpolation(
+    l_double_curly_token: SyntaxToken,
+    value: HtmlContent,
+    r_double_curly_token: SyntaxToken,
+) -> VueTemplateInterpolation {
+    VueTemplateInterpolation::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::VUE_TEMPLATE_INTERPOLATION,
+        [
+            Some(SyntaxElement::Token(l_double_curly_token)),
+            Some(SyntaxElement::Node(value.into_syntax())),
+            Some(SyntaxElement::Token(r_double_curly_token)),
+        ],
+    ))
+}
+pub fn vue_v_bind_shorthand(
+    colon_token: SyntaxToken,
+    argument: VueDirectiveArgument,
+    modifier: VueDirectiveModifierList,
+    value: VueDirectiveValue,
+) -> VueVBindShorthand {
+    VueVBindShorthand::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::VUE_V_BIND_SHORTHAND,
+        [
+            Some(SyntaxElement::Token(colon_token)),
+            Some(SyntaxElement::Node(argument.into_syntax())),
+            Some(SyntaxElement::Node(modifier.into_syntax())),
+            Some(SyntaxElement::Node(value.into_syntax())),
+        ],
+    ))
+}
+pub fn vue_v_on_shorthand(
+    at_token: SyntaxToken,
+    argument: VueDirectiveArgument,
+    modifier: VueDirectiveModifierList,
+    value: VueDirectiveValue,
+) -> VueVOnShorthand {
+    VueVOnShorthand::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::VUE_V_ON_SHORTHAND,
+        [
+            Some(SyntaxElement::Token(at_token)),
+            Some(SyntaxElement::Node(argument.into_syntax())),
+            Some(SyntaxElement::Node(modifier.into_syntax())),
+            Some(SyntaxElement::Node(value.into_syntax())),
+        ],
+    ))
+}
 pub fn html_attribute_list<I>(items: I) -> HtmlAttributeList
 where
     I: IntoIterator<Item = AnyHtmlAttribute>,
@@ -249,6 +365,18 @@ where
 {
     HtmlElementList::unwrap_cast(SyntaxNode::new_detached(
         HtmlSyntaxKind::HTML_ELEMENT_LIST,
+        items
+            .into_iter()
+            .map(|item| Some(item.into_syntax().into())),
+    ))
+}
+pub fn vue_directive_modifier_list<I>(items: I) -> VueDirectiveModifierList
+where
+    I: IntoIterator<Item = VueDirectiveModifier>,
+    I::IntoIter: ExactSizeIterator,
+{
+    VueDirectiveModifierList::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::VUE_DIRECTIVE_MODIFIER_LIST,
         items
             .into_iter()
             .map(|item| Some(item.into_syntax().into())),

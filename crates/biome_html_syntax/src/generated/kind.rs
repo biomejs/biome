@@ -19,6 +19,14 @@ pub enum HtmlSyntaxKind {
     EQ,
     BANG,
     MINUS,
+    COLON,
+    PERIOD,
+    L_DOUBLE_CURLY,
+    R_DOUBLE_CURLY,
+    AT,
+    V_DASH,
+    L_BRACK,
+    R_BRACK,
     NULL_KW,
     TRUE_KW,
     FALSE_KW,
@@ -49,6 +57,16 @@ pub enum HtmlSyntaxKind {
     HTML_BOGUS,
     HTML_BOGUS_ELEMENT,
     HTML_BOGUS_ATTRIBUTE,
+    VUE_DIRECTIVE,
+    VUE_DIRECTIVE_ARGUMENT,
+    VUE_DIRECTIVE_ARGUMENT_DYNAMIC,
+    VUE_DIRECTIVE_ARGUMENT_STATIC,
+    VUE_DIRECTIVE_MODIFIER,
+    VUE_DIRECTIVE_MODIFIER_LIST,
+    VUE_DIRECTIVE_VALUE,
+    VUE_V_BIND_SHORTHAND,
+    VUE_V_ON_SHORTHAND,
+    VUE_TEMPLATE_INTERPOLATION,
     #[doc(hidden)]
     __LAST,
 }
@@ -56,7 +74,8 @@ use self::HtmlSyntaxKind::*;
 impl HtmlSyntaxKind {
     pub const fn is_punct(self) -> bool {
         match self {
-            L_ANGLE | R_ANGLE | SLASH | EQ | BANG | MINUS => true,
+            L_ANGLE | R_ANGLE | SLASH | EQ | BANG | MINUS | COLON | PERIOD | L_DOUBLE_CURLY
+            | R_DOUBLE_CURLY | AT | V_DASH | L_BRACK | R_BRACK => true,
             _ => false,
         }
     }
@@ -68,7 +87,7 @@ impl HtmlSyntaxKind {
     }
     pub const fn is_list(self) -> bool {
         match self {
-            HTML_ELEMENT_LIST | HTML_ATTRIBUTE_LIST => true,
+            HTML_ELEMENT_LIST | HTML_ATTRIBUTE_LIST | VUE_DIRECTIVE_MODIFIER_LIST => true,
             _ => false,
         }
     }
@@ -91,6 +110,14 @@ impl HtmlSyntaxKind {
             EQ => "=",
             BANG => "!",
             MINUS => "-",
+            COLON => ":",
+            PERIOD => ".",
+            L_DOUBLE_CURLY => "{{",
+            R_DOUBLE_CURLY => "}}",
+            AT => "@",
+            V_DASH => "v-",
+            L_BRACK => "[",
+            R_BRACK => "]",
             NULL_KW => "null",
             TRUE_KW => "true",
             FALSE_KW => "false",
@@ -104,4 +131,4 @@ impl HtmlSyntaxKind {
 }
 #[doc = r" Utility macro for creating a SyntaxKind through simple macro syntax"]
 #[macro_export]
-macro_rules ! T { [<] => { $ crate :: HtmlSyntaxKind :: L_ANGLE } ; [>] => { $ crate :: HtmlSyntaxKind :: R_ANGLE } ; [/] => { $ crate :: HtmlSyntaxKind :: SLASH } ; [=] => { $ crate :: HtmlSyntaxKind :: EQ } ; [!] => { $ crate :: HtmlSyntaxKind :: BANG } ; [-] => { $ crate :: HtmlSyntaxKind :: MINUS } ; [null] => { $ crate :: HtmlSyntaxKind :: NULL_KW } ; [true] => { $ crate :: HtmlSyntaxKind :: TRUE_KW } ; [false] => { $ crate :: HtmlSyntaxKind :: FALSE_KW } ; [doctype] => { $ crate :: HtmlSyntaxKind :: DOCTYPE_KW } ; [html] => { $ crate :: HtmlSyntaxKind :: HTML_KW } ; [ident] => { $ crate :: HtmlSyntaxKind :: IDENT } ; [EOF] => { $ crate :: HtmlSyntaxKind :: EOF } ; [UNICODE_BOM] => { $ crate :: HtmlSyntaxKind :: UNICODE_BOM } ; [#] => { $ crate :: HtmlSyntaxKind :: HASH } ; }
+macro_rules ! T { [<] => { $ crate :: HtmlSyntaxKind :: L_ANGLE } ; [>] => { $ crate :: HtmlSyntaxKind :: R_ANGLE } ; [/] => { $ crate :: HtmlSyntaxKind :: SLASH } ; [=] => { $ crate :: HtmlSyntaxKind :: EQ } ; [!] => { $ crate :: HtmlSyntaxKind :: BANG } ; [-] => { $ crate :: HtmlSyntaxKind :: MINUS } ; [:] => { $ crate :: HtmlSyntaxKind :: COLON } ; [.] => { $ crate :: HtmlSyntaxKind :: PERIOD } ; ["{{"] => { $ crate :: HtmlSyntaxKind :: L_DOUBLE_CURLY } ; ["}}"] => { $ crate :: HtmlSyntaxKind :: R_DOUBLE_CURLY } ; [@] => { $ crate :: HtmlSyntaxKind :: AT } ; [v-] => { $ crate :: HtmlSyntaxKind :: V_DASH } ; ['['] => { $ crate :: HtmlSyntaxKind :: L_BRACK } ; [']'] => { $ crate :: HtmlSyntaxKind :: R_BRACK } ; [null] => { $ crate :: HtmlSyntaxKind :: NULL_KW } ; [true] => { $ crate :: HtmlSyntaxKind :: TRUE_KW } ; [false] => { $ crate :: HtmlSyntaxKind :: FALSE_KW } ; [doctype] => { $ crate :: HtmlSyntaxKind :: DOCTYPE_KW } ; [html] => { $ crate :: HtmlSyntaxKind :: HTML_KW } ; [ident] => { $ crate :: HtmlSyntaxKind :: IDENT } ; [EOF] => { $ crate :: HtmlSyntaxKind :: EOF } ; [UNICODE_BOM] => { $ crate :: HtmlSyntaxKind :: UNICODE_BOM } ; [#] => { $ crate :: HtmlSyntaxKind :: HASH } ; }
