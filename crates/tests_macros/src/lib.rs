@@ -175,7 +175,7 @@ impl Arguments {
             "{}{}",
             file_stem.to_snake(),
             if let Some(extension) = path.extension().and_then(|ext| ext.to_str()) {
-                format!("_{}", extension)
+                format!("_{extension}")
             } else {
                 String::new()
             }
@@ -190,7 +190,7 @@ impl Arguments {
 
         let mut test_expected_file = path.to_path_buf();
         test_expected_file.pop();
-        test_expected_file.push(format!("{}.expected{}", file_stem, extension));
+        test_expected_file.push(format!("{file_stem}.expected{extension}"));
         let test_expected_fullpath = test_expected_file.display().to_string();
 
         Some(Variables {

@@ -124,7 +124,7 @@ pub fn assert(code: &str, test_name: &str) {
     // Extract semantic events and index by range
 
     let mut events_by_pos: FxHashMap<TextSize, Vec<SemanticEvent>> = FxHashMap::default();
-    let mut scope_start_by_id: FxHashMap<usize, TextSize> = FxHashMap::default();
+    let mut scope_start_by_id: FxHashMap<u32, TextSize> = FxHashMap::default();
     for event in semantic_events(r.syntax()) {
         let pos = if let SemanticEvent::ScopeEnded {
             range, scope_id, ..
@@ -199,13 +199,13 @@ struct DeclarationAssertion {
 #[derive(Clone, Debug)]
 struct ReadAssertion {
     range: TextRange,
-    declaration_asertion_name: String,
+    declaration_assertion_name: String,
 }
 
 #[derive(Clone, Debug)]
 struct WriteAssertion {
     range: TextRange,
-    declaration_asertion_name: String,
+    declaration_assertion_name: String,
 }
 
 #[derive(Clone, Debug)]
@@ -278,7 +278,7 @@ impl SemanticAssertion {
 
             Some(SemanticAssertion::Read(ReadAssertion {
                 range: token.parent().unwrap().text_range(),
-                declaration_asertion_name: symbol_name,
+                declaration_assertion_name: symbol_name,
             }))
         } else if assertion_text.starts_with("/*WRITE ") {
             let symbol_name = assertion_text
@@ -290,7 +290,7 @@ impl SemanticAssertion {
 
             Some(SemanticAssertion::Write(WriteAssertion {
                 range: token.parent().unwrap().text_range(),
-                declaration_asertion_name: symbol_name,
+                declaration_assertion_name: symbol_name,
             }))
         } else if assertion_text.contains("/*START") {
             let scope_name = assertion_text
@@ -447,7 +447,7 @@ impl SemanticAssertions {
         code: &str,
         test_name: &str,
         events_by_pos: FxHashMap<TextSize, Vec<SemanticEvent>>,
-        scope_start: FxHashMap<usize, TextSize>,
+        scope_start: FxHashMap<u32, TextSize>,
     ) {
         // Check every declaration assertion is ok
 
@@ -458,8 +458,8 @@ impl SemanticAssertions {
                         // OK because we are attached to a declaration
                     }
                     _ => {
-                        println!("Assertion: {:?}", assertion);
-                        println!("Events: {:#?}", events_by_pos);
+                        println!("Assertion: {assertion:?}");
+                        println!("Events: {events_by_pos:#?}");
                         error_assertion_not_attached_to_a_declaration(
                             code,
                             assertion.range,
@@ -468,8 +468,8 @@ impl SemanticAssertions {
                     }
                 }
             } else {
-                println!("Assertion: {:?}", assertion);
-                println!("Events: {:#?}", events_by_pos);
+                println!("Assertion: {assertion:?}");
+                println!("Events: {events_by_pos:#?}");
                 error_assertion_not_attached_to_a_declaration(code, assertion.range, test_name);
             }
         }
@@ -480,13 +480,13 @@ impl SemanticAssertions {
         for assertion in self.read_assertions.iter() {
             let decl = match self
                 .declarations_assertions
-                .get(&assertion.declaration_asertion_name)
+                .get(&assertion.declaration_assertion_name)
             {
                 Some(decl) => decl,
                 None => {
                     panic!(
                         "No declaration found with name: {}",
-                        assertion.declaration_asertion_name
+                        assertion.declaration_assertion_name
                     );
                 }
             };
@@ -526,17 +526,15 @@ impl SemanticAssertions {
             });
 
             if !at_least_one_match {
-                println!("Assertion: {:?}", assertion);
-                println!("Events: {:#?}", events_by_pos);
+                println!("Assertion: {assertion:?}");
+                println!("Events: {events_by_pos:#?}");
                 if let Some(unused_match) = unused_match {
                     panic!(
-                        "A read event was found, but was discarded because [{}] when checking {:?}",
-                        unused_match, assertion
+                        "A read event was found, but was discarded because [{unused_match}] when checking {assertion:?}"
                     );
                 } else {
                     panic!(
-                        "No matching read event found at this range when checking {:?}",
-                        assertion
+                        "No matching read event found at this range when checking {assertion:?}"
                     );
                 }
             }
@@ -547,13 +545,13 @@ impl SemanticAssertions {
         for assertion in self.write_assertions.iter() {
             let decl = match self
                 .declarations_assertions
-                .get(&assertion.declaration_asertion_name)
+                .get(&assertion.declaration_assertion_name)
             {
                 Some(decl) => decl,
                 None => {
                     panic!(
                         "No declaration found with name: {}",
-                        assertion.declaration_asertion_name
+                        assertion.declaration_assertion_name
                     );
                 }
             };
@@ -561,8 +559,8 @@ impl SemanticAssertions {
             let events = match events_by_pos.get(&assertion.range.start()) {
                 Some(events) => events,
                 None => {
-                    println!("Assertion: {:?}", assertion);
-                    println!("Events: {:#?}", events_by_pos);
+                    println!("Assertion: {assertion:?}");
+                    println!("Events: {events_by_pos:#?}");
                     panic!("No write event found at this range");
                 }
             };
@@ -588,8 +586,8 @@ impl SemanticAssertions {
             });
 
             if !at_least_one_match {
-                println!("Assertion: {:?}", assertion);
-                println!("Events: {:#?}", events_by_pos);
+                println!("Assertion: {assertion:?}");
+                println!("Events: {events_by_pos:#?}");
                 panic!("No matching write event found at this range");
             }
         }

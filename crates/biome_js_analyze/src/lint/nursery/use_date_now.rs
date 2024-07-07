@@ -1,5 +1,5 @@
 use biome_analyze::{
-    context::RuleContext, declare_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic,
+    context::RuleContext, declare_lint_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic,
     RuleSource,
 };
 use biome_console::markup;
@@ -14,7 +14,7 @@ use crate::JsRuleAction;
 
 use super::use_explicit_length_check::does_node_needs_space_before_child;
 
-declare_rule! {
+declare_lint_rule! {
     /// Use `Date.now()` to get the number of milliseconds since the Unix Epoch.
     ///
     /// `Date.now()` is more readable than `new Date().getTime()` and its variants,
@@ -80,7 +80,7 @@ impl Rule for UseDateNow {
 
     fn diagnostic(_: &RuleContext<Self>, (node, kind): &Self::State) -> Option<RuleDiagnostic> {
         let message = match kind {
-            UseDateNowIssueKind::ReplaceMethod(method) => format!("new Date().{}", method),
+            UseDateNowIssueKind::ReplaceMethod(method) => format!("new Date().{method}"),
             UseDateNowIssueKind::ReplaceConstructor => "new Date()".to_string(),
             UseDateNowIssueKind::ReplaceNumberConstructor => "Number(new Date())".to_string(),
         };

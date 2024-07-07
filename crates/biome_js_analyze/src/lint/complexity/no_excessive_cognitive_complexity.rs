@@ -1,5 +1,5 @@
 use biome_analyze::{
-    context::RuleContext, declare_rule, AddVisitor, Phases, QueryMatch, Queryable, Rule,
+    context::RuleContext, declare_lint_rule, AddVisitor, Phases, QueryMatch, Queryable, Rule,
     RuleDiagnostic, RuleSource, ServiceBag, Visitor, VisitorContext,
 };
 use biome_console::markup;
@@ -18,7 +18,7 @@ use schemars::JsonSchema;
 const MAX_FUNCTION_DEPTH: usize = 10;
 const MAX_SCORE: u8 = u8::MAX;
 
-declare_rule! {
+declare_lint_rule! {
     /// Disallow functions that exceed a given Cognitive Complexity score.
     ///
     /// The more complexity a function contains, the harder it is to understand

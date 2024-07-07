@@ -60,7 +60,7 @@ query {
 }
 
 query ($storyId: ID!) {
-	likeStory(storyId: $storyId
+	likeStory(storyId: $storyId)
 }
 
 query ($storyId: ID!)  {

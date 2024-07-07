@@ -2,7 +2,7 @@ use crate::react::{ReactApiCall, ReactCreateElementCall};
 use crate::services::semantic::Semantic;
 use crate::JsRuleAction;
 use biome_analyze::context::RuleContext;
-use biome_analyze::{declare_rule, FixKind, Rule, RuleDiagnostic, RuleSource};
+use biome_analyze::{declare_lint_rule, FixKind, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
 use biome_js_factory::make;
 use biome_js_factory::make::{jsx_string, jsx_string_literal};
@@ -14,7 +14,7 @@ use biome_js_syntax::{
 };
 use biome_rowan::{declare_node_union, AstNode, BatchMutationExt};
 
-declare_rule! {
+declare_lint_rule! {
     /// Prevent the usage of positive integers on `tabIndex` property
     ///
     /// Avoid positive `tabIndex` property values to synchronize the flow of the page with keyboard tab order.

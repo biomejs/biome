@@ -201,7 +201,7 @@ impl SummaryReporter {
     }
 
     fn writeln(&mut self, msg: &str) {
-        writeln!(self.buffer, "{}", msg).unwrap();
+        writeln!(self.buffer, "{msg}").unwrap();
     }
 
     fn summary_table(results: HashMap<String, Summary>) -> String {
@@ -364,7 +364,7 @@ impl TestReporter for SummaryReporter {
             .write_all(self.buffer.as_slice())
             .unwrap();
 
-        writeln!(self.output_target, "{}", table).unwrap();
+        writeln!(self.output_target, "{table}").unwrap();
     }
 }
 

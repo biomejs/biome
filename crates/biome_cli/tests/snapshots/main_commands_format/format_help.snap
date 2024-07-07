@@ -10,6 +10,8 @@ Run the formatter on a set of files.
 Usage: format [--write] [--staged] [--changed] [--since=REF] [PATH]...
 
 Generic options applied to all files
+        --use-editorconfig=<true|false>  Use any `.editorconfig` files to configure the formatter. Configuration
+                              in `biome.json` will override `.editorconfig` configuration. Default: false.
         --indent-style=<tab|space>  The indent style.
         --indent-size=NUMBER  The size of the indentation, 2 by default (deprecated, use `indent-width`)
         --indent-width=NUMBER  The size of the indentation, 2 by default
@@ -17,6 +19,8 @@ Generic options applied to all files
         --line-width=NUMBER   What's the max width of a line. Defaults to 80.
         --attribute-position=<multiline|auto>  The attribute position style in HTMLish languages. By
                               default auto.
+        --bracket-spacing=<true|false>  Whether to insert spaces around brackets in object literals.
+                              Defaults to true.
 
 Formatting options specific to the JavaScript files
         --jsx-quote-style=<double|single>  The type of quotes used in JSX. Defaults to double.
@@ -29,8 +33,6 @@ Formatting options specific to the JavaScript files
                               only in for statements where it is necessary because of ASI.
         --arrow-parentheses=<always|as-needed>  Whether to add non-necessary parentheses to arrow functions.
                               Defaults to "always".
-        --bracket-spacing=<true|false>  Whether to insert spaces around brackets in object literals.
-                              Defaults to true.
         --bracket-same-line=<true|false>  Whether to hug the closing bracket of multiline HTML/JSX tags
                               to the end of the last line, rather than being alone on the following line.
                               Defaults to false.
@@ -49,6 +51,8 @@ Formatting options specific to the JavaScript files
         --quote-style=<double|single>  The type of quotes used in JavaScript code. Defaults to double.
         --javascript-attribute-position=<multiline|auto>  The attribute position style in jsx elements.
                               Defaults to auto.
+        --bracket-spacing=<true|false>  Whether to insert spaces around brackets in object literals.
+                              Defaults to true.
 
 Set of properties to integrate Biome with a VCS software.
         --vcs-client-kind=<git>  The kind of client.

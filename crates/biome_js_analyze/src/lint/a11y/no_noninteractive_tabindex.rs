@@ -1,6 +1,7 @@
 use crate::{services::aria::Aria, JsRuleAction};
 use biome_analyze::{
-    context::RuleContext, declare_rule, ActionCategory, FixKind, Rule, RuleDiagnostic, RuleSource,
+    context::RuleContext, declare_lint_rule, ActionCategory, FixKind, Rule, RuleDiagnostic,
+    RuleSource,
 };
 use biome_aria::AriaRoles;
 use biome_console::markup;
@@ -10,7 +11,7 @@ use biome_js_syntax::{
 };
 use biome_rowan::{declare_node_union, AstNode, BatchMutationExt};
 
-declare_rule! {
+declare_lint_rule! {
     /// Enforce that `tabIndex` is not assigned to non-interactive HTML elements.
     ///
     /// When using the tab key to navigate a webpage, limit it to interactive elements.

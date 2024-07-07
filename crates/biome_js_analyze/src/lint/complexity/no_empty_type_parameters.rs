@@ -1,10 +1,10 @@
 use biome_analyze::Ast;
-use biome_analyze::{context::RuleContext, declare_rule, Rule, RuleDiagnostic};
+use biome_analyze::{context::RuleContext, declare_lint_rule, Rule, RuleDiagnostic};
 use biome_console::markup;
 use biome_js_syntax::{JsSyntaxKind, TsTypeParameters};
 use biome_rowan::{AstNode, AstSeparatedList, SyntaxNodeOptionExt};
 
-declare_rule! {
+declare_lint_rule! {
     /// Disallow empty type parameters in type aliases and interfaces.
     ///
     /// TypeScript permits the use of empty type parameter lists in type alias and interface declarations; however, this practice is generally discouraged.

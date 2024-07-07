@@ -1,6 +1,6 @@
 use crate::react::{is_react_call_api, ReactLibrary};
 use crate::services::semantic::Semantic;
-use biome_analyze::{context::RuleContext, declare_rule, Rule, RuleDiagnostic};
+use biome_analyze::{context::RuleContext, declare_lint_rule, Rule, RuleDiagnostic};
 use biome_analyze::{RuleSource, RuleSourceKind};
 use biome_console::markup;
 use biome_js_semantic::SemanticModel;
@@ -11,7 +11,7 @@ use biome_js_syntax::{
 };
 use biome_rowan::{declare_node_union, AstNode, AstNodeList, AstSeparatedList, TextRange};
 
-declare_rule! {
+declare_lint_rule! {
     /// Disallow missing key props in iterators/collection literals.
     ///
     /// Warn if an element that likely requires a key prop--namely, one present in an array literal or an arrow function expression.

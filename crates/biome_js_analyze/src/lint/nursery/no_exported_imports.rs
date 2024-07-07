@@ -1,4 +1,4 @@
-use biome_analyze::{context::RuleContext, declare_rule, Rule, RuleDiagnostic};
+use biome_analyze::{context::RuleContext, declare_lint_rule, Rule, RuleDiagnostic};
 use biome_console::markup;
 use biome_js_semantic::CanBeImportedExported;
 use biome_js_syntax::AnyJsImportSpecifier;
@@ -6,7 +6,7 @@ use biome_rowan::AstNode;
 
 use crate::services::semantic::Semantic;
 
-declare_rule! {
+declare_lint_rule! {
     /// Disallow exporting an imported variable.
     ///
     /// In JavaScript, you can re-export a variable either by using `export from` or
@@ -74,7 +74,7 @@ impl Rule for NoExportedImports {
                 rule_category!(),
                 specifier.range(),
                 markup! {
-                    "An import should not be exported. Use "<Emphasis>"export from"</Emphasis>"instead."
+                    "An import should not be exported. Use "<Emphasis>"export from"</Emphasis>" instead."
                 },
             )
             .note(markup! {

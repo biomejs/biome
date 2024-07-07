@@ -16,7 +16,7 @@ static GLOBAL: tikv_jemallocator::Jemalloc = tikv_jemallocator::Jemalloc;
 #[cfg(all(target_env = "musl", target_os = "linux", target_arch = "aarch64"))]
 #[global_allocator]
 static GLOBAL: std::alloc::System = std::alloc::System;
-fn bench_css_parser(criterion: &mut Criterion) {
+fn bench_graphql_parser(criterion: &mut Criterion) {
     let mut all_suites = HashMap::new();
     all_suites.insert("graphql", include_str!("libs-graphql.txt"));
     let mut libs = vec![];
@@ -30,11 +30,11 @@ fn bench_css_parser(criterion: &mut Criterion) {
             Ok(test_case) => {
                 bench_parser_group(&mut group, test_case);
             }
-            Err(e) => println!("{:?}", e),
+            Err(e) => println!("{e:?}"),
         }
     }
     group.finish();
 }
 
-criterion_group!(graphql_parser, bench_css_parser);
+criterion_group!(graphql_parser, bench_graphql_parser);
 criterion_main!(graphql_parser);

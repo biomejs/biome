@@ -1,6 +1,6 @@
 use crate::JsRuleAction;
 use biome_analyze::{
-    context::RuleContext, declare_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic,
+    context::RuleContext, declare_lint_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic,
     RuleSource,
 };
 use biome_console::markup;
@@ -12,7 +12,7 @@ use biome_js_syntax::{
 };
 use biome_rowan::{declare_node_union, AstNode, BatchMutationExt, TextRange};
 
-declare_rule! {
+declare_lint_rule! {
     /// Enforce the use of `as const` over literal type and type annotation.
     ///
     /// In TypeScript, there are three common ways to specify that a value is of a specific type such as `2` and not a general type such as `number`:

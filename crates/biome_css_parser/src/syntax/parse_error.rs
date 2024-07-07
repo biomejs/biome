@@ -31,12 +31,11 @@ pub(crate) fn expected_non_css_wide_keyword_identifier(
         // two details being added, but since we're adding the hint as well, we
         // only want to show one code frame.
         ParseDiagnostic::new(
-            format!("Expected an identifier but instead found '{}'", text),
+            format!("Expected an identifier but instead found '{text}'"),
             range,
         )
         .with_hint(format!(
-            "'{}' is a CSS-wide keyword that cannot be used here",
-            text
+            "'{text}' is a CSS-wide keyword that cannot be used here"
         ))
     } else {
         expected_identifier(p, range)

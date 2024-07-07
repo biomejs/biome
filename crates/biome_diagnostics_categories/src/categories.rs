@@ -122,6 +122,7 @@ define_categories! {
     "lint/nursery/noDuplicateFontNames": "https://biomejs.dev/linter/rules/no-font-family-duplicate-names",
     "lint/nursery/noDuplicateJsonKeys": "https://biomejs.dev/linter/rules/no-duplicate-json-keys",
     "lint/nursery/noDuplicateSelectorsKeyframeBlock": "https://biomejs.dev/linter/rules/no-duplicate-selectors-keyframe-block",
+    "lint/nursery/noDynamicNamespaceImportAccess": "https://biomejs.dev/linter/rules/no-dynamic-namespace-import-access",
     "lint/nursery/noEmptyBlock": "https://biomejs.dev/linter/rules/no-empty-block",
     "lint/nursery/noEvolvingTypes": "https://biomejs.dev/linter/rules/no-evolving-any",
     "lint/nursery/noExportedImports": "https://biomejs.dev/linter/rules/no-exported-imports",
@@ -135,7 +136,6 @@ define_categories! {
     "lint/nursery/noRestrictedImports": "https://biomejs.dev/linter/rules/no-restricted-imports",
     "lint/nursery/noShorthandPropertyOverrides": "https://biomejs.dev/linter/rules/no-shorthand-property-overrides",
     "lint/nursery/noSubstr": "https://biomejs.dev/linter/rules/no-substr",
-    "lint/nursery/noTypeOnlyImportAttributes": "https://biomejs.dev/linter/rules/no-type-only-import-attributes",
     "lint/nursery/noUndeclaredDependencies": "https://biomejs.dev/linter/rules/no-undeclared-dependencies",
     "lint/nursery/noUnknownFunction": "https://biomejs.dev/linter/rules/no-unknown-function",
     "lint/nursery/noUnknownMediaFeatureName": "https://biomejs.dev/linter/rules/no-unknown-media-feature-name",
@@ -155,6 +155,7 @@ define_categories! {
     "lint/nursery/useConsistentGridAreas": "https://biomejs.dev/linter/rules/use-consistent-grid-areas",
     "lint/nursery/useDateNow": "https://biomejs.dev/linter/rules/use-date-now",
     "lint/nursery/useDefaultSwitchClause": "https://biomejs.dev/linter/rules/use-default-switch-clause",
+    "lint/nursery/useDeprecatedReason": "https://biomejs.dev/linter/rules/use-deprecated-reason",
     "lint/nursery/useErrorMessage": "https://biomejs.dev/linter/rules/use-error-message",
     "lint/nursery/useExplicitLengthCheck": "https://biomejs.dev/linter/rules/use-explicit-length-check",
     "lint/nursery/useFocusableInteractive": "https://biomejs.dev/linter/rules/use-focusable-interactive",
@@ -273,10 +274,16 @@ define_categories! {
     "lint/suspicious/useIsArray": "https://biomejs.dev/linter/rules/use-is-array",
     "lint/suspicious/useNamespaceKeyword": "https://biomejs.dev/linter/rules/use-namespace-keyword",
     "lint/suspicious/useValidTypeof": "https://biomejs.dev/linter/rules/use-valid-typeof",
-    ; // end lint rules
-
-    "assists/nursery/useSortedKeys",
-    // end assist rules
+    // end lint rules
+    // start assists rules
+    "assists/nursery/useSortedKeys": "https://biomejs.dev/linter/rules/use-valid-typeof",
+    // end assists rules
+    ; // start syntax rules
+    "syntax/nursery/noTypeOnlyImportAttributes",
+    "syntax/correctness/noSuperWithoutExtends",
+    "syntax/correctness/noInitializerWithDefinite",
+    "syntax/correctness/noDuplicatePrivateClassMembers",
+    // end syntax rules
 
     // General categories
     "files/missingHandler",
@@ -294,9 +301,6 @@ define_categories! {
     "internalError/panic",
     // parse categories
     "parse",
-    "parse/noSuperWithoutExtends",
-    "parse/noInitializerWithDefinite",
-    "parse/noDuplicatePrivateClassMembers",
 
     // Lint groups
     "lint",

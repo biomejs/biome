@@ -628,7 +628,7 @@ pub mod test {
         let batch = before.begin();
         let after = batch.commit();
 
-        assert_eq!(before_debug, format!("{:#?}", after));
+        assert_eq!(before_debug, format!("{after:#?}"));
     }
 
     #[test]
@@ -643,7 +643,7 @@ pub mod test {
         batch.replace_node(a, b);
         let root = batch.commit();
 
-        assert_eq!(expected_debug, format!("{:#?}", root));
+        assert_eq!(expected_debug, format!("{root:#?}"));
     }
 
     #[test]
@@ -661,6 +661,6 @@ pub mod test {
         batch.replace_node(b, d);
         let after = batch.commit();
 
-        assert_eq!(expected_debug, format!("{:#?}", after));
+        assert_eq!(expected_debug, format!("{after:#?}"));
     }
 }

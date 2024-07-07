@@ -2,7 +2,7 @@ use crate::JsRuleAction;
 use crate::{services::semantic::Semantic, utils::rename::RenameSymbolExtensions};
 use biome_analyze::RuleSource;
 use biome_analyze::{
-    context::RuleContext, declare_rule, ActionCategory, FixKind, Rule, RuleDiagnostic,
+    context::RuleContext, declare_lint_rule, ActionCategory, FixKind, Rule, RuleDiagnostic,
 };
 use biome_console::markup;
 use biome_js_semantic::ReferencesExtensions;
@@ -17,7 +17,7 @@ use biome_js_syntax::{
 };
 use biome_rowan::{AstNode, BatchMutationExt, Direction, SyntaxResult};
 
-declare_rule! {
+declare_lint_rule! {
     /// Disallow unused variables.
     ///
     /// There is an exception to this rule:
@@ -175,7 +175,8 @@ fn suggested_fix_if_unused(binding: &AnyJsIdentifierBinding) -> Option<Suggested
         | AnyJsBindingDeclaration::JsClassExpression(_)
         | AnyJsBindingDeclaration::JsFunctionExpression(_)
         | AnyJsBindingDeclaration::TsIndexSignatureParameter(_)
-        | AnyJsBindingDeclaration::TsMappedType(_) => None,
+        | AnyJsBindingDeclaration::TsMappedType(_)
+        | AnyJsBindingDeclaration::TsEnumMember(_) => None,
 
         // Some parameters are ok to not be used
         AnyJsBindingDeclaration::JsArrowFunctionExpression(_) => {
@@ -288,6 +289,10 @@ impl Rule for NoUnusedVariables {
         }
 
         let binding = ctx.query();
+        if matches!(binding, AnyJsIdentifierBinding::TsLiteralEnumMemberName(_)) {
+            // Enum members can be unused.
+            return None;
+        }
 
         if binding.name_token().ok()?.text_trimmed().starts_with('_') {
             return None;
@@ -423,9 +428,12 @@ impl Rule for NoUnusedVariables {
                     AnyJsIdentifierBinding::TsTypeParameterName(binding) => {
                         binding.ident_token().ok()?
                     }
+                    AnyJsIdentifierBinding::TsLiteralEnumMemberName(_) => {
+                        return None;
+                    }
                 };
                 let name_trimmed = name.text_trimmed();
-                let new_name = format!("_{}", name_trimmed);
+                let new_name = format!("_{name_trimmed}");
 
                 let model = ctx.model();
                 mutation.rename_node_declaration(model, binding, &new_name);

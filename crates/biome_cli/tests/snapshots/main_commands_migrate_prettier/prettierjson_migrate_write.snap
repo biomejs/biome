@@ -8,12 +8,14 @@ expression: content
 {
   "formatter": {
     "enabled": true,
+    "useEditorconfig": true,
     "formatWithErrors": false,
     "indentStyle": "space",
     "indentWidth": 2,
     "lineEnding": "lf",
     "lineWidth": 80,
-    "attributePosition": "auto"
+    "attributePosition": "auto",
+    "bracketSpacing": true
   },
   "linter": { "enabled": true },
   "javascript": {
@@ -23,10 +25,10 @@ expression: content
       "trailingCommas": "all",
       "semicolons": "always",
       "arrowParentheses": "always",
-      "bracketSpacing": true,
       "bracketSameLine": false,
       "quoteStyle": "single",
-      "attributePosition": "auto"
+      "attributePosition": "auto",
+      "bracketSpacing": true
     }
   }
 }

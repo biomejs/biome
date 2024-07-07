@@ -113,7 +113,7 @@ pub fn get_prettier_diff(
     let input_extension = input_file.extension().and_then(OsStr::to_str);
 
     let prettier_snapshot_path = input_extension
-        .map(|ext| input_file.with_extension(format!("{}.prettier-snap", ext)))
+        .map(|ext| input_file.with_extension(format!("{ext}.prettier-snap")))
         .filter(|path| path.exists());
 
     let prettier_snapshot_path = prettier_snapshot_path.expect("failed to find prettier snapshot");
@@ -128,14 +128,14 @@ pub fn get_prettier_diff(
         // The output matches prettier's output. There's no need for a snapshot that duplicates the output.
         // Delete the snapshot file if it already exists, otherwise return early to not create a new snapshot.
         if let Some(input_extension) = input_extension {
-            let snapshot_file_name = input_file.with_extension(format!("{}.snap", input_extension));
+            let snapshot_file_name = input_file.with_extension(format!("{input_extension}.snap"));
 
             if snapshot_file_name.exists() && snapshot_file_name.is_file() {
                 remove_file(snapshot_file_name).ok(); // not the end of the world if it fails
             }
 
             let new_snapshot_file_name =
-                input_file.with_extension(format!("{}.snap.new", input_extension));
+                input_file.with_extension(format!("{input_extension}.snap.new"));
             if new_snapshot_file_name.exists() && new_snapshot_file_name.is_file() {
                 remove_file(new_snapshot_file_name).ok(); // not the end of the world if it fails
             }

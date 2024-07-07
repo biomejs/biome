@@ -1,5 +1,6 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
+assertion_line: 424
 expression: content
 ---
 ## `biome.json`
@@ -22,7 +23,7 @@ expression: content
 ```block
 migrate ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Migration has encountered an error: The default ESLint configuration file `.eslintrc.*` was not found in the working directory.
+  × Migration has encountered an error: The default ESLint configuration file `.eslintrc[.*]` was not found in the working directory.
   
 
 

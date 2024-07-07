@@ -1,11 +1,11 @@
-use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic};
+use biome_analyze::{context::RuleContext, declare_lint_rule, Ast, Rule, RuleDiagnostic};
 use biome_console::markup;
 use biome_js_syntax::{AnyJsPropertyModifier, JsPropertyClassMember, JsRegexLiteralExpression};
 use biome_rowan::{AstNode, AstNodeList};
 
 use crate::services::control_flow::AnyJsControlFlowRoot;
 
-declare_rule! {
+declare_lint_rule! {
     /// Require regex literals to be declared at the top level.
     ///
     /// This rule is useful to avoid performance issues when using regex literals inside functions called many times (hot paths). Regex literals create a new RegExp object when they are evaluated. (See https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/RegExp) By declaring them at the top level, this overhead can be avoided.

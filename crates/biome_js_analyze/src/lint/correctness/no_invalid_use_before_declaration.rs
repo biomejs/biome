@@ -1,5 +1,5 @@
 use crate::{services::control_flow::AnyJsControlFlowRoot, services::semantic::SemanticServices};
-use biome_analyze::{context::RuleContext, declare_rule, Rule, RuleDiagnostic, RuleSource};
+use biome_analyze::{context::RuleContext, declare_lint_rule, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
 use biome_js_syntax::{
     binding_ext::{AnyJsBindingDeclaration, AnyJsIdentifierBinding},
@@ -7,7 +7,7 @@ use biome_js_syntax::{
 };
 use biome_rowan::{AstNode, SyntaxNodeOptionExt, TextRange};
 
-declare_rule! {
+declare_lint_rule! {
     /// Disallow the use of variables and function parameters before their declaration
     ///
     /// JavaScript doesn't allow the use of block-scoped variables (`let`, `const`) and function parameters before their declaration.
@@ -79,7 +79,12 @@ impl Rule for NoInvalidUseBeforeDeclaration {
         let model = ctx.model();
         let mut result = vec![];
         for binding in model.all_bindings() {
-            let AnyJsIdentifierBinding::JsIdentifierBinding(id) = binding.tree() else {
+            let id = binding.tree();
+            if matches!(
+                id,
+                AnyJsIdentifierBinding::TsIdentifierBinding(_)
+                    | AnyJsIdentifierBinding::TsTypeParameterName(_)
+            ) {
                 // Ignore type declarations (interfaces, type-aliases, ...)
                 continue;
             };
@@ -162,6 +167,7 @@ impl Rule for NoInvalidUseBeforeDeclaration {
             binding_range: declaration_range,
         } = state;
         let declaration_kind_text = match declaration_kind {
+            DeclarationKind::EnumMember => "enum member",
             DeclarationKind::Parameter => "parameter",
             DeclarationKind::Variable => "variable",
         };
@@ -188,6 +194,7 @@ pub struct InvalidUseBeforeDeclaration {
 
 #[derive(Debug, Copy, Clone)]
 pub enum DeclarationKind {
+    EnumMember,
     Parameter,
     Variable,
 }
@@ -197,6 +204,7 @@ impl TryFrom<&AnyJsBindingDeclaration> for DeclarationKind {
 
     fn try_from(value: &AnyJsBindingDeclaration) -> Result<Self, Self::Error> {
         match value {
+            AnyJsBindingDeclaration::TsEnumMember(_) => Ok(DeclarationKind::EnumMember),
             // Variable declaration
             AnyJsBindingDeclaration::JsArrayBindingPatternElement(_)
             | AnyJsBindingDeclaration::JsArrayBindingPatternRestElement(_)

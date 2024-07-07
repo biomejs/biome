@@ -1,11 +1,11 @@
-use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic};
+use biome_analyze::{context::RuleContext, declare_syntax_rule, Ast, Rule, RuleDiagnostic};
 use biome_console::markup;
 use biome_js_syntax::{
     AnyJsExportClause, AnyJsImportClause, AnyJsModuleItem, JsNamedImportSpecifiers, JsSyntaxToken,
 };
 use biome_rowan::{AstNode, AstSeparatedList, TextRange};
 
-declare_rule! {
+declare_syntax_rule! {
     /// Disallow type-only imports and exports with import attributes.
     ///
     /// ## Examples

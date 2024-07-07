@@ -25,29 +25,31 @@ biome.jsonc migrate ━━━━━━━━━━━━━━━━━━━━
        1 │ + {
        2 │ + → "formatter":·{
        3 │ + → → "enabled":·true,
-       4 │ + → → "formatWithErrors":·false,
-       5 │ + → → "indentStyle":·"space",
-       6 │ + → → "indentWidth":·2,
-       7 │ + → → "lineEnding":·"lf",
-       8 │ + → → "lineWidth":·80,
-       9 │ + → → "attributePosition":·"auto"
-      10 │ + → },
-      11 │ + → "linter":·{·"enabled":·true·},
-      12 │ + → "javascript":·{
-      13 │ + → → "formatter":·{
-      14 │ + → → → "jsxQuoteStyle":·"double",
-      15 │ + → → → "quoteProperties":·"asNeeded",
-      16 │ + → → → "trailingCommas":·"all",
-      17 │ + → → → "semicolons":·"always",
-      18 │ + → → → "arrowParentheses":·"always",
-      19 │ + → → → "bracketSpacing":·true,
-      20 │ + → → → "bracketSameLine":·false,
-      21 │ + → → → "quoteStyle":·"single",
-      22 │ + → → → "attributePosition":·"auto"
-      23 │ + → → }
-      24 │ + → }
-      25 │ + }
-      26 │ + 
+       4 │ + → → "useEditorconfig":·true,
+       5 │ + → → "formatWithErrors":·false,
+       6 │ + → → "indentStyle":·"space",
+       7 │ + → → "indentWidth":·2,
+       8 │ + → → "lineEnding":·"lf",
+       9 │ + → → "lineWidth":·80,
+      10 │ + → → "attributePosition":·"auto",
+      11 │ + → → "bracketSpacing":·true
+      12 │ + → },
+      13 │ + → "linter":·{·"enabled":·true·},
+      14 │ + → "javascript":·{
+      15 │ + → → "formatter":·{
+      16 │ + → → → "jsxQuoteStyle":·"double",
+      17 │ + → → → "quoteProperties":·"asNeeded",
+      18 │ + → → → "trailingCommas":·"all",
+      19 │ + → → → "semicolons":·"always",
+      20 │ + → → → "arrowParentheses":·"always",
+      21 │ + → → → "bracketSameLine":·false,
+      22 │ + → → → "quoteStyle":·"single",
+      23 │ + → → → "attributePosition":·"auto",
+      24 │ + → → → "bracketSpacing":·true
+      25 │ + → → }
+      26 │ + → }
+      27 │ + }
+      28 │ + 
   
 
 ```

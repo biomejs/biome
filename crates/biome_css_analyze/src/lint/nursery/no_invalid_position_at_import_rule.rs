@@ -1,9 +1,11 @@
-use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic, RuleSource};
+use biome_analyze::{
+    context::RuleContext, declare_lint_rule, Ast, Rule, RuleDiagnostic, RuleSource,
+};
 use biome_console::markup;
 use biome_css_syntax::{AnyCssRule, CssRuleList};
 use biome_rowan::{AstNode, TextRange};
 
-declare_rule! {
+declare_lint_rule! {
     /// Disallow the use of `@import` at-rules in invalid positions.
     ///
     /// Any `@import` rules must precede all other valid at-rules and style rules in a stylesheet (ignoring `@charset` and `@layer`), or else the `@import` rule is invalid.

@@ -1,12 +1,14 @@
 use biome_analyze::context::RuleContext;
-use biome_analyze::{declare_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic, RuleSource};
+use biome_analyze::{
+    declare_lint_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic, RuleSource,
+};
 use biome_console::markup;
 use biome_js_syntax::{AnyJsStatement, JsLabeledStatement, JsSyntaxKind};
 
 use crate::JsRuleAction;
 use biome_rowan::{AstNode, BatchMutationExt};
 
-declare_rule! {
+declare_lint_rule! {
     /// Disallow unnecessary labels.
     ///
     /// If a loop contains no nested loops or switches, labeling the loop is unnecessary.

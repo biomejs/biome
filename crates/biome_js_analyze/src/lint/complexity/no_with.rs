@@ -1,11 +1,11 @@
 use biome_analyze::context::RuleContext;
-use biome_analyze::{declare_rule, Ast, Rule, RuleDiagnostic, RuleSource};
+use biome_analyze::{declare_lint_rule, Ast, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
 use biome_js_syntax::JsWithStatement;
 
 use biome_rowan::AstNode;
 
-declare_rule! {
+declare_lint_rule! {
     /// Disallow `with` statements in non-strict contexts.
     ///
     /// The `with` statement is potentially problematic because it adds members of an object to the current

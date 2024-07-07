@@ -1,4 +1,4 @@
-use biome_analyze::{context::RuleContext, declare_rule, Rule, RuleDiagnostic, RuleSource};
+use biome_analyze::{context::RuleContext, declare_lint_rule, Rule, RuleDiagnostic, RuleSource};
 use biome_aria::AriaRoles;
 use biome_console::markup;
 use biome_js_syntax::{jsx_ext::AnyJsxElement, AnyJsxAttributeValue};
@@ -6,7 +6,7 @@ use biome_rowan::AstNode;
 
 use crate::services::aria::Aria;
 
-declare_rule! {
+declare_lint_rule! {
     /// Elements with an interactive role and interaction handlers must be focusable.
     ///
     /// HTML elements with interactive roles must have `tabIndex` defined to ensure they are

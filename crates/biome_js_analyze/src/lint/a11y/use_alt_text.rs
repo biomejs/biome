@@ -1,9 +1,11 @@
-use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic, RuleSource};
+use biome_analyze::{
+    context::RuleContext, declare_lint_rule, Ast, Rule, RuleDiagnostic, RuleSource,
+};
 use biome_console::{fmt::Display, fmt::Formatter, markup};
-use biome_js_syntax::{jsx_ext::AnyJsxElement, TextRange};
+use biome_js_syntax::{jsx_ext::AnyJsxElement, static_value::StaticValue, TextRange};
 use biome_rowan::AstNode;
 
-declare_rule! {
+declare_lint_rule! {
     /// Enforce that all elements that require alternative text have meaningful information to relay back to the end user.
     ///
     /// This is a critical component of accessibility for screen reader users in order for them to understand the content's purpose on the page.
@@ -84,11 +86,12 @@ impl Rule for UseAltText {
         let has_alt = has_valid_alt_text(element);
         let has_aria_label = has_valid_label(element, "aria-label");
         let has_aria_labelledby = has_valid_label(element, "aria-labelledby");
+        let aria_hidden = is_aria_hidden(element);
         match element.name_value_token()?.text_trimmed() {
             "object" => {
                 let has_title = has_valid_label(element, "title");
 
-                if !has_title && !has_aria_label && !has_aria_labelledby {
+                if !has_title && !has_aria_label && !has_aria_labelledby && !aria_hidden {
                     match element {
                         AnyJsxElement::JsxOpeningElement(opening_element) => {
                             if !opening_element.has_accessible_child() {
@@ -105,12 +108,12 @@ impl Rule for UseAltText {
                 }
             }
             "img" => {
-                if !has_alt && !has_aria_label && !has_aria_labelledby {
+                if !has_alt && !has_aria_label && !has_aria_labelledby && !aria_hidden {
                     return Some((ValidatedElement::Img, element.syntax().text_range()));
                 }
             }
             "area" => {
-                if !has_alt && !has_aria_label && !has_aria_labelledby {
+                if !has_alt && !has_aria_label && !has_aria_labelledby && !aria_hidden {
                     return Some((ValidatedElement::Area, element.syntax().text_range()));
                 }
             }
@@ -119,6 +122,7 @@ impl Rule for UseAltText {
                     && !has_alt
                     && !has_aria_label
                     && !has_aria_labelledby
+                    && !aria_hidden
                 {
                     return Some((ValidatedElement::Input, element.syntax().text_range()));
                 }
@@ -137,7 +141,7 @@ impl Rule for UseAltText {
         Some(
             RuleDiagnostic::new(rule_category!(), range, message).note(markup! {
                 "Meaningful alternative text on elements helps users relying on screen readers to understand content's purpose within a page."
-            }),
+            }).note(markup! { "If the content is decorative, redundant, or obscured, consider hiding it from assistive technologies with the "<Emphasis>"aria-hidden"</Emphasis>" attribute."}),
         )
     }
 }
@@ -177,5 +181,18 @@ fn has_valid_label(element: &AnyJsxElement, name_to_lookup: &str) -> bool {
             attribute.as_static_value().map_or(true, |value| {
                 !value.is_null_or_undefined() && value.is_not_string_constant("")
             }) && !element.has_trailing_spread_prop(&attribute)
+        })
+}
+
+fn is_aria_hidden(element: &AnyJsxElement) -> bool {
+    element
+        .find_attribute_by_name("aria-hidden")
+        .map_or(false, |attribute| {
+            attribute
+                .as_static_value()
+                .map_or(true, |value| match value {
+                    StaticValue::Boolean(token) => token.text_trimmed() == "true",
+                    _ => false,
+                })
         })
 }

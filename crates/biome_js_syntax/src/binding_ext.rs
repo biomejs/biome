@@ -12,11 +12,12 @@ use crate::{
     JsSyntaxNode, JsSyntaxToken, JsVariableDeclarator, TsCallSignatureTypeMember,
     TsConstructSignatureTypeMember, TsConstructorSignatureClassMember, TsConstructorType,
     TsDeclareFunctionDeclaration, TsDeclareFunctionExportDefaultDeclaration, TsEnumDeclaration,
-    TsFunctionType, TsIdentifierBinding, TsImportEqualsDeclaration, TsIndexSignatureClassMember,
-    TsIndexSignatureParameter, TsInferType, TsInterfaceDeclaration, TsMappedType,
-    TsMethodSignatureClassMember, TsMethodSignatureTypeMember, TsModuleDeclaration,
-    TsPropertyParameter, TsSetterSignatureClassMember, TsSetterSignatureTypeMember,
-    TsTypeAliasDeclaration, TsTypeParameter, TsTypeParameterName,
+    TsEnumMember, TsFunctionType, TsIdentifierBinding, TsImportEqualsDeclaration,
+    TsIndexSignatureClassMember, TsIndexSignatureParameter, TsInferType, TsInterfaceDeclaration,
+    TsLiteralEnumMemberName, TsMappedType, TsMethodSignatureClassMember,
+    TsMethodSignatureTypeMember, TsModuleDeclaration, TsPropertyParameter,
+    TsSetterSignatureClassMember, TsSetterSignatureTypeMember, TsTypeAliasDeclaration,
+    TsTypeParameter, TsTypeParameterName,
 };
 use biome_rowan::{declare_node_union, AstNode, SyntaxResult};
 
@@ -38,6 +39,8 @@ declare_node_union! {
         // functions
             | JsFunctionDeclaration | JsFunctionExpression
             | TsDeclareFunctionDeclaration
+        // enum member
+            | TsEnumMember
         // classes, objects, interface, type, enum, module
             | JsClassDeclaration | JsClassExpression
             | TsInterfaceDeclaration | TsTypeAliasDeclaration | TsEnumDeclaration | TsModuleDeclaration
@@ -235,7 +238,7 @@ impl AnyJsBindingDeclaration {
 }
 
 declare_node_union! {
-    pub AnyJsIdentifierBinding = JsIdentifierBinding | TsIdentifierBinding | TsTypeParameterName
+    pub AnyJsIdentifierBinding = JsIdentifierBinding | TsIdentifierBinding | TsTypeParameterName | TsLiteralEnumMemberName
 }
 
 fn declaration(node: JsSyntaxNode) -> Option<AnyJsBindingDeclaration> {
@@ -310,9 +313,10 @@ fn is_under_object_pattern_binding(node: &JsSyntaxNode) -> Option<bool> {
 impl AnyJsIdentifierBinding {
     pub fn name_token(&self) -> SyntaxResult<JsSyntaxToken> {
         match self {
-            AnyJsIdentifierBinding::JsIdentifierBinding(binding) => binding.name_token(),
-            AnyJsIdentifierBinding::TsIdentifierBinding(binding) => binding.name_token(),
-            AnyJsIdentifierBinding::TsTypeParameterName(binding) => binding.ident_token(),
+            Self::JsIdentifierBinding(binding) => binding.name_token(),
+            Self::TsIdentifierBinding(binding) => binding.name_token(),
+            Self::TsTypeParameterName(binding) => binding.ident_token(),
+            Self::TsLiteralEnumMemberName(binding) => binding.value(),
         }
     }
 
@@ -335,7 +339,7 @@ impl AnyJsIdentifierBinding {
     /// Returns true if this binding is only a type and not a runtime value.
     pub fn is_type_only(&self) -> bool {
         match self {
-            AnyJsIdentifierBinding::JsIdentifierBinding(binding) => {
+            Self::JsIdentifierBinding(binding) => {
                 if let Some(specifier) = binding.parent::<AnyJsNamedImportSpecifier>() {
                     return specifier.imports_only_types();
                 }
@@ -347,11 +351,11 @@ impl AnyJsIdentifierBinding {
                     return clause.type_token().is_some();
                 }
             }
-            AnyJsIdentifierBinding::TsIdentifierBinding(binding) => {
+            Self::TsIdentifierBinding(binding) => {
                 // ignore TypeScript namespaces
                 return binding.parent::<TsModuleDeclaration>().is_none();
             }
-            AnyJsIdentifierBinding::TsTypeParameterName(_) => {}
+            Self::TsTypeParameterName(_) | Self::TsLiteralEnumMemberName(_) => {}
         }
         false
     }
@@ -366,6 +370,9 @@ impl AnyJsIdentifierBinding {
             }
             Self::TsTypeParameterName(binding) => {
                 Self::TsTypeParameterName(binding.with_ident_token(name_token))
+            }
+            Self::TsLiteralEnumMemberName(binding) => {
+                Self::TsLiteralEnumMemberName(binding.with_value_token(name_token))
             }
         }
     }

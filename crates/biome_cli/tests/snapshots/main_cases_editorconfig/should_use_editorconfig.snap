@@ -1,0 +1,25 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: content
+---
+## `.editorconfig`
+
+```editorconfig
+
+[*]
+max_line_length = 300
+
+```
+
+## `test.js`
+
+```js
+console.log("really long string that should cause a break if the line width remains at the default 80 characters");
+
+```
+
+# Emitted Messages
+
+```block
+Formatted 1 file in <TIME>. No fixes applied.
+```

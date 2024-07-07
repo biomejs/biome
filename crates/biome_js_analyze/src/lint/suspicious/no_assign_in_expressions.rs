@@ -1,5 +1,5 @@
 use biome_analyze::context::RuleContext;
-use biome_analyze::{declare_rule, Ast, Rule, RuleDiagnostic, RuleSource, RuleSourceKind};
+use biome_analyze::{declare_lint_rule, Ast, Rule, RuleDiagnostic, RuleSource, RuleSourceKind};
 use biome_console::markup;
 use biome_js_syntax::{
     JsAssignmentExpression, JsExpressionStatement, JsForStatement, JsParenthesizedExpression,
@@ -7,7 +7,7 @@ use biome_js_syntax::{
 };
 use biome_rowan::AstNode;
 
-declare_rule! {
+declare_lint_rule! {
     /// Disallow assignments in expressions.
     ///
     /// In expressions, it is common to mistype a comparison operator (such as `==`) as an assignment operator (such as `=`).

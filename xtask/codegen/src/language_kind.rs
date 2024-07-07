@@ -62,8 +62,7 @@ impl FromStr for LanguageKind {
             "html" => Ok(LanguageKind::Html),
             "yaml" => Ok(LanguageKind::Yaml),
             _ => Err(format!(
-                "Language {} not supported, please use: `js`, `css`, `json`, `grit`, `graphql`, `html`, `yaml` or yml",
-                kind
+                "Language {kind} not supported, please use: `js`, `css`, `json`, `grit`, `graphql`, `html` or `yaml`"
             )),
         }
     }
@@ -170,15 +169,15 @@ impl LanguageKind {
     }
 
     pub fn formatter_crate_name(&self) -> String {
-        format!("biome_{}_formatter", self)
+        format!("biome_{self}_formatter")
     }
 
     pub fn syntax_crate_name(&self) -> String {
-        format!("biome_{}_syntax", self)
+        format!("biome_{self}_syntax")
     }
 
     pub fn factory_crate_name(&self) -> String {
-        format!("biome_{}_factory", self)
+        format!("biome_{self}_factory")
     }
 
     pub fn kinds(&self) -> KindsSrc {

@@ -25,7 +25,7 @@ pub(crate) fn ts_member_cannot_be(
     member_type_name: &str,
     modifier_name: &str,
 ) -> ParseDiagnostic {
-    let msg = format!("{} members cannot be {}", member_type_name, modifier_name);
+    let msg = format!("{member_type_name} members cannot be {modifier_name}");
     p.err_builder(msg, range)
 }
 
@@ -87,7 +87,7 @@ pub(crate) fn ts_only_syntax_error(
     syntax: &str,
     range: TextRange,
 ) -> ParseDiagnostic {
-    p.err_builder(format!("{} are a TypeScript only feature. Convert your file to a TypeScript file or remove the syntax.", syntax)
+    p.err_builder(format!("{syntax} are a TypeScript only feature. Convert your file to a TypeScript file or remove the syntax.")
         ,range).with_hint( "TypeScript only syntax")
 }
 

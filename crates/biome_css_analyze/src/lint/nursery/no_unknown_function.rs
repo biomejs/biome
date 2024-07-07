@@ -1,11 +1,13 @@
-use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic, RuleSource};
+use biome_analyze::{
+    context::RuleContext, declare_lint_rule, Ast, Rule, RuleDiagnostic, RuleSource,
+};
 use biome_console::markup;
 use biome_css_syntax::CssFunction;
 use biome_rowan::{AstNode, TextRange};
 
 use crate::utils::{is_custom_function, is_function_keyword};
 
-declare_rule! {
+declare_lint_rule! {
     /// Disallow unknown CSS value functions.
     ///
     /// This rule ignores double-dashed custom functions, e.g. `--custom-function()`.

@@ -9445,7 +9445,7 @@ impl TsEnumMember {
             initializer: self.initializer(),
         }
     }
-    pub fn name(&self) -> SyntaxResult<AnyJsObjectMemberName> {
+    pub fn name(&self) -> SyntaxResult<AnyTsEnumMemberName> {
         support::required_node(&self.syntax, 0usize)
     }
     pub fn initializer(&self) -> Option<JsInitializerClause> {
@@ -9463,7 +9463,7 @@ impl Serialize for TsEnumMember {
 }
 #[cfg_attr(feature = "serde", derive(Serialize))]
 pub struct TsEnumMemberFields {
-    pub name: SyntaxResult<AnyJsObjectMemberName>,
+    pub name: SyntaxResult<AnyTsEnumMemberName>,
     pub initializer: Option<JsInitializerClause>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
@@ -10705,6 +10705,42 @@ impl Serialize for TsIntersectionType {
 pub struct TsIntersectionTypeFields {
     pub leading_separator_token: Option<SyntaxToken>,
     pub types: TsIntersectionTypeElementList,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct TsLiteralEnumMemberName {
+    pub(crate) syntax: SyntaxNode,
+}
+impl TsLiteralEnumMemberName {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> TsLiteralEnumMemberNameFields {
+        TsLiteralEnumMemberNameFields {
+            value: self.value(),
+        }
+    }
+    pub fn value(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+}
+#[cfg(feature = "serde")]
+impl Serialize for TsLiteralEnumMemberName {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[cfg_attr(feature = "serde", derive(Serialize))]
+pub struct TsLiteralEnumMemberNameFields {
+    pub value: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct TsMappedType {
@@ -15605,6 +15641,26 @@ impl AnyJsxTag {
     pub fn as_jsx_self_closing_element(&self) -> Option<&JsxSelfClosingElement> {
         match &self {
             AnyJsxTag::JsxSelfClosingElement(item) => Some(item),
+            _ => None,
+        }
+    }
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize))]
+pub enum AnyTsEnumMemberName {
+    JsComputedMemberName(JsComputedMemberName),
+    TsLiteralEnumMemberName(TsLiteralEnumMemberName),
+}
+impl AnyTsEnumMemberName {
+    pub fn as_js_computed_member_name(&self) -> Option<&JsComputedMemberName> {
+        match &self {
+            AnyTsEnumMemberName::JsComputedMemberName(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_ts_literal_enum_member_name(&self) -> Option<&TsLiteralEnumMemberName> {
+        match &self {
+            AnyTsEnumMemberName::TsLiteralEnumMemberName(item) => Some(item),
             _ => None,
         }
     }
@@ -26676,6 +26732,44 @@ impl From<TsIntersectionType> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl AstNode for TsLiteralEnumMemberName {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(TS_LITERAL_ENUM_MEMBER_NAME as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == TS_LITERAL_ENUM_MEMBER_NAME
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for TsLiteralEnumMemberName {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("TsLiteralEnumMemberName")
+            .field("value", &support::DebugSyntaxResult(self.value()))
+            .finish()
+    }
+}
+impl From<TsLiteralEnumMemberName> for SyntaxNode {
+    fn from(n: TsLiteralEnumMemberName) -> SyntaxNode {
+        n.syntax
+    }
+}
+impl From<TsLiteralEnumMemberName> for SyntaxElement {
+    fn from(n: TsLiteralEnumMemberName) -> SyntaxElement {
+        n.syntax.into()
+    }
+}
 impl AstNode for TsMappedType {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -35042,6 +35136,70 @@ impl From<AnyJsxTag> for SyntaxElement {
         node.into()
     }
 }
+impl From<JsComputedMemberName> for AnyTsEnumMemberName {
+    fn from(node: JsComputedMemberName) -> AnyTsEnumMemberName {
+        AnyTsEnumMemberName::JsComputedMemberName(node)
+    }
+}
+impl From<TsLiteralEnumMemberName> for AnyTsEnumMemberName {
+    fn from(node: TsLiteralEnumMemberName) -> AnyTsEnumMemberName {
+        AnyTsEnumMemberName::TsLiteralEnumMemberName(node)
+    }
+}
+impl AstNode for AnyTsEnumMemberName {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        JsComputedMemberName::KIND_SET.union(TsLiteralEnumMemberName::KIND_SET);
+    fn can_cast(kind: SyntaxKind) -> bool {
+        matches!(kind, JS_COMPUTED_MEMBER_NAME | TS_LITERAL_ENUM_MEMBER_NAME)
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        let res = match syntax.kind() {
+            JS_COMPUTED_MEMBER_NAME => {
+                AnyTsEnumMemberName::JsComputedMemberName(JsComputedMemberName { syntax })
+            }
+            TS_LITERAL_ENUM_MEMBER_NAME => {
+                AnyTsEnumMemberName::TsLiteralEnumMemberName(TsLiteralEnumMemberName { syntax })
+            }
+            _ => return None,
+        };
+        Some(res)
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        match self {
+            AnyTsEnumMemberName::JsComputedMemberName(it) => &it.syntax,
+            AnyTsEnumMemberName::TsLiteralEnumMemberName(it) => &it.syntax,
+        }
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        match self {
+            AnyTsEnumMemberName::JsComputedMemberName(it) => it.syntax,
+            AnyTsEnumMemberName::TsLiteralEnumMemberName(it) => it.syntax,
+        }
+    }
+}
+impl std::fmt::Debug for AnyTsEnumMemberName {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            AnyTsEnumMemberName::JsComputedMemberName(it) => std::fmt::Debug::fmt(it, f),
+            AnyTsEnumMemberName::TsLiteralEnumMemberName(it) => std::fmt::Debug::fmt(it, f),
+        }
+    }
+}
+impl From<AnyTsEnumMemberName> for SyntaxNode {
+    fn from(n: AnyTsEnumMemberName) -> SyntaxNode {
+        match n {
+            AnyTsEnumMemberName::JsComputedMemberName(it) => it.into(),
+            AnyTsEnumMemberName::TsLiteralEnumMemberName(it) => it.into(),
+        }
+    }
+}
+impl From<AnyTsEnumMemberName> for SyntaxElement {
+    fn from(n: AnyTsEnumMemberName) -> SyntaxElement {
+        let node: SyntaxNode = n.into();
+        node.into()
+    }
+}
 impl From<TsEmptyExternalModuleDeclarationBody> for AnyTsExternalModuleDeclarationBody {
     fn from(node: TsEmptyExternalModuleDeclarationBody) -> AnyTsExternalModuleDeclarationBody {
         AnyTsExternalModuleDeclarationBody::TsEmptyExternalModuleDeclarationBody(node)
@@ -37212,6 +37370,11 @@ impl std::fmt::Display for AnyJsxTag {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
+impl std::fmt::Display for AnyTsEnumMemberName {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
 impl std::fmt::Display for AnyTsExternalModuleDeclarationBody {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
@@ -38423,6 +38586,11 @@ impl std::fmt::Display for TsInterfaceDeclaration {
     }
 }
 impl std::fmt::Display for TsIntersectionType {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for TsLiteralEnumMemberName {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }

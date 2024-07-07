@@ -67,7 +67,7 @@ where
     ///
     /// ## Examples
     /// ```rust,ignore
-    /// declare_rule! {
+    /// declare_lint_rule! {
     ///     /// Some doc
     ///     pub(crate) Foo {
     ///         version: "0.0.0",
@@ -101,10 +101,10 @@ where
     /// ## Examples
     ///
     /// ```rust,ignore
-    /// use biome_analyze::{declare_rule, Rule, RuleCategory, RuleMeta, RuleMetadata};
+    /// use biome_analyze::{declare_lint_rule, Rule, RuleCategory, RuleMeta, RuleMetadata};
     /// use biome_analyze::context::RuleContext;
     /// use serde::Deserialize;
-    /// declare_rule! {
+    /// declare_lint_rule! {
     ///     /// Some doc
     ///     pub(crate) Name {
     ///         version: "0.0.0",
@@ -159,6 +159,15 @@ where
     /// Returns the preferred quote that should be used when providing code actions
     pub fn as_preferred_quote(&self) -> &PreferredQuote {
         self.preferred_quote
+    }
+
+    /// Attempts to retrieve a service from the current context
+    ///
+    /// ```no_test
+    /// let aria_services = ctx.get_service::<AriaServices>().expect("To have the service available");
+    /// ```
+    pub fn get_service<T: 'static>(&self) -> Option<&T> {
+        self.bag.get_service::<T>()
     }
 }
 

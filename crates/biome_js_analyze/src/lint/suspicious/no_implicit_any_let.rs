@@ -1,8 +1,8 @@
-use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic};
+use biome_analyze::{context::RuleContext, declare_lint_rule, Ast, Rule, RuleDiagnostic};
 use biome_console::markup;
 use biome_js_syntax::{JsFileSource, JsVariableDeclaration, JsVariableDeclarator};
 
-declare_rule! {
+declare_lint_rule! {
     /// Disallow use of implicit `any` type on variable declarations.
     ///
     /// TypeScript variable declaration without any type annotation and initialization have the `any` type.

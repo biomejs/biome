@@ -1,3 +1,4 @@
+use crate::matcher::Pattern;
 use crate::settings::Settings;
 use crate::{DynRef, WorkspaceError, VERSION};
 use biome_analyze::AnalyzerRules;
@@ -272,10 +273,30 @@ pub fn load_editorconfig(
     {
         let AutoSearchResult {
             content,
-            file_path: _path,
+            file_path: path,
         } = auto_search_result;
         let editorconfig = biome_configuration::editorconfig::parse_str(&content)?;
-        Ok(editorconfig.to_biome())
+        let config = editorconfig.to_biome();
+
+        // test the patterns to see if they are parsable so we can emit a better diagnostic
+        if let Some(overrides) = config.0.as_ref().and_then(|c| c.overrides.as_ref()) {
+            for override_pattern in &overrides.0 {
+                if let Some(pattern_set) = &override_pattern.include {
+                    for pattern in pattern_set.iter() {
+                        if let Err(err) = Pattern::new(pattern) {
+                            return Err(BiomeDiagnostic::new_invalid_ignore_pattern_with_path(
+                                pattern,
+                                err.to_string(),
+                                path.to_str(),
+                            )
+                            .into());
+                        }
+                    }
+                }
+            }
+        }
+
+        Ok(config)
     } else {
         Ok((None, vec![]))
     }

@@ -1,10 +1,10 @@
 use crate::services::semantic::Semantic;
-use biome_analyze::{context::RuleContext, declare_rule, Rule, RuleDiagnostic, RuleSource};
+use biome_analyze::{context::RuleContext, declare_lint_rule, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
 use biome_js_syntax::{global_identifier, AnyJsExpression};
 use biome_rowan::AstNode;
 
-declare_rule! {
+declare_lint_rule! {
     /// Disallow the use of global `eval()`.
     ///
     /// The `eval()` function evaluates the passed string as a _JavaScript_ code.

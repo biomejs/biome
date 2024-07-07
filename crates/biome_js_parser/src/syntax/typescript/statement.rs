@@ -34,14 +34,15 @@ fn parse_literal_as_ts_enum_member(p: &mut JsParser) -> ParsedSyntax {
         JS_NUMBER_LITERAL => {
             let err = p.err_builder("An enum member cannot have a numeric name", p.cur_range());
             p.error(err);
-            p.bump_any()
+            m.abandon(p);
+            return Absent;
         }
         _ => {
             m.abandon(p);
             return Absent;
         }
     }
-    Present(m.complete(p, JS_LITERAL_MEMBER_NAME))
+    Present(m.complete(p, TS_LITERAL_ENUM_MEMBER_NAME))
 }
 
 /// An individual enum member
@@ -119,8 +120,7 @@ fn parse_ts_enum_id(p: &mut JsParser, enum_token_range: TextRange) {
             if is_reserved_enum_name(text) {
                 let err = p.err_builder(
                     format!(
-                        "`{}` cannot be used as a enum name because it is already reserved",
-                        text
+                        "`{text}` cannot be used as a enum name because it is already reserved"
                     ),
                     id.range(p),
                 );

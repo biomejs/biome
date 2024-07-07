@@ -54,12 +54,13 @@ impl EditorConfig {
             .into_iter()
             .map(|(k, v)| {
                 let patterns = match expand_unknown_glob_patterns(&k) {
-                    Ok(patterns) => patterns,
+                    Ok(patterns) => patterns.into_iter().map(hack_convert_double_star).collect(),
                     Err(err) => {
                         errors.push(err);
                         vec![k]
                     }
                 };
+
                 OverridePattern {
                     include: Some(patterns.into_iter().collect()),
                     formatter: Some(v.to_biome_override()),
@@ -217,13 +218,13 @@ fn expand_unknown_glob_patterns(pattern: &str) -> Result<Vec<String>, EditorConf
                 let start = start.parse().map_err(|err| {
                     EditorConfigDiagnostic::invalid_glob_pattern(
                         s,
-                        format!("Error parsing the start of the range: {}", err),
+                        format!("Error parsing the start of the range: {err}"),
                     )
                 })?;
                 let end = end.parse().map_err(|err| {
                     EditorConfigDiagnostic::invalid_glob_pattern(
                         s,
-                        format!("Error parsing the end of the range: {}", err),
+                        format!("Error parsing the end of the range: {err}"),
                     )
                 })?;
                 self.variants = Some(VariantType::Range((start, end)));
@@ -304,6 +305,24 @@ fn expand_unknown_glob_patterns(pattern: &str) -> Result<Vec<String>, EditorConf
     }
 
     Ok(expanded_patterns)
+}
+
+/// The EditorConfig spec allows for patterns like `**.yml`, which is not supported by biome. This function corrects such patterns so that they can be parsed by biome's glob parser.
+fn hack_convert_double_star(pattern: impl Into<String>) -> String {
+    pattern
+        .into()
+        .split('/')
+        .map(|component| {
+            if component == "**" {
+                component.to_string()
+            } else if component.contains("**") {
+                component.replace("**", "**/*")
+            } else {
+                component.to_string()
+            }
+        })
+        .collect::<Vec<_>>()
+        .join("/")
 }
 
 #[cfg(test)]
@@ -433,5 +452,16 @@ insert_final_newline = false
             expanded,
             vec!["**/bar.1.js", "**/bar.2.js", "**/bar.3.js", "**/bar.4.js",]
         );
+    }
+
+    #[test]
+    fn should_correct_double_star() {
+        let pattern = "**.yml";
+        let corrected = hack_convert_double_star(pattern);
+        assert_eq!(corrected, "**/*.yml",);
+
+        let pattern = "**/*.yml";
+        let corrected = hack_convert_double_star(pattern);
+        assert_eq!(corrected, "**/*.yml",);
     }
 }

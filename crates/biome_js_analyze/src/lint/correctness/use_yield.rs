@@ -1,13 +1,13 @@
 use biome_analyze::context::RuleContext;
 use biome_analyze::{
-    declare_rule, AddVisitor, Phases, QueryMatch, Queryable, Rule, RuleDiagnostic, RuleSource,
+    declare_lint_rule, AddVisitor, Phases, QueryMatch, Queryable, Rule, RuleDiagnostic, RuleSource,
     ServiceBag, Visitor, VisitorContext,
 };
 use biome_console::markup;
 use biome_js_syntax::{AnyFunctionLike, JsLanguage, JsYieldExpression, TextRange, WalkEvent};
 use biome_rowan::{AstNode, AstNodeList, Language, SyntaxNode, TextSize};
 
-declare_rule! {
+declare_lint_rule! {
     /// Require generator functions to contain `yield`.
     ///
     /// This rule generates warnings for generator functions that do not have the `yield` keyword.

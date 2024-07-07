@@ -1,5 +1,5 @@
 use biome_analyze::context::RuleContext;
-use biome_analyze::{declare_rule, Ast, Rule, RuleDiagnostic, RuleSource};
+use biome_analyze::{declare_lint_rule, Ast, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
 use biome_deserialize_macros::Deserializable;
 use biome_js_syntax::{inner_string_text, AnyJsImportLike};
@@ -7,7 +7,7 @@ use biome_rowan::TextRange;
 use rustc_hash::FxHashMap;
 use serde::{Deserialize, Serialize};
 
-declare_rule! {
+declare_lint_rule! {
     /// Disallow specified modules when loaded by import or require.
     ///
     /// ## Options

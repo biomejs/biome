@@ -11,6 +11,92 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 ## Unreleased
 
+### Analyzer
+
+#### Enhancements
+
+- Implement [css suppression action](https://github.com/biomejs/biome/issues/3278). Contributed by @togami2864
+- Add support of comments in `turbo.json`. Contributed by @Netail
+
+### CLI
+
+### Configuration
+
+- Add support for loading configuration from `.editorconfig` files ([#1724](https://github.com/biomejs/biome/issues/1724)). Contributed by @dyc3
+  Configuration supplied in `.editorconfig` will be overridden by the configuration in `biome.json`. Support is disabled by default and can be enabled by adding the following to your formatter configuration in `biome.json`:
+  ```json
+  {
+    "formatter": {
+      "useEditorconfig": true
+    }
+  }
+  ```
+
+### Editors
+
+### Formatter
+
+### JavaScript APIs
+
+### Linter
+
+#### Enhancements
+
+- [noInvalidUseBeforeDeclaration](https://biomejs.dev/linter/rules/no-invalid-use-before-declaration) now reports direct use of an enum member before its declaration.
+
+  In the following code, `A` is reported as use before its declaration.
+
+  ```ts
+  enum E {
+    B = A << 1,
+    A = 1,
+  }
+  ```
+
+  Contributed by @Conaclos
+
+- [useFilenamingConvention](https://biomejs.dev/linter/rules/use-filenaming-convention) now supports [unicase](https://en.wikipedia.org/wiki/Unicase) letters.
+
+  [unicase](https://en.wikipedia.org/wiki/Unicase) letters have a single case: they are neither uppercase nor lowercase.
+  Biome now accepts filenames in unicase.
+  For example, the filename `안녕하세요` is now accepted.
+
+  We still reject a name that mixes unicase characters with lowercase or uppercase characters.
+  For example, the filename `A안녕하세요` is rejected.
+
+  This change also fixes [#3353](https://github.com/biomejs/biome/issues/3353).
+  Filenames consisting only of numbers are now accepted.
+
+  Contributed by @Conaclos
+
+#### Bug fixes
+
+- Don't request alt text for elements hidden from assistive technologies ([#3316](https://github.com/biomejs/biome/issues/3316)). Contributed by @robintown
+- Fix [[#3149](https://github.com/biomejs/biome/issues/3149)] crashes that occurred when applying the `noUselessFragments` unsafe fixes in certain scenarios. Contributed by @unvalley
+- `noExcessiveNestedTestSuites`: Fix another edge case where the rule would alert on heavily nested zod schemas. Contributed by @dyc3
+
+#### New rules
+
+- Add [nursery/noDynamicNamespaceImportAccess](https://biomejs.dev/linter/no-dynamic-namespace-import-access/). Contributed by @minht11
+
+
+- [noUndeclaredVariables](https://biomejs.dev/linter/rules/no-undeclared-variables/) n longer report a direct reference to an enum member ([#2974](https://github.com/biomejs/biome/issues/2974)).
+
+  In the following code, the `A` reference is no longer reported as an undeclared variable.
+
+  ```ts
+  enum E {
+    A = 1,
+    B = A << 1,
+  }
+  ```
+
+  Contributed by @Conaclos
+
+### Parser
+
+## v1.8.3 (2024-06-27)
+
 ### CLI
 
 #### Bug fixes
@@ -21,7 +107,7 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 ### Parser
 
-#### New features
+#### Bug fixes
 
 - Implement [CSS unicode range](https://github.com/biomejs/biome/pull/3251). Contributed by @denbezrukov
 
@@ -36,12 +122,30 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 #### New features
 
+- Add `nursery/useDeprecatedReason` rule. Contributed by @vohoanglong0107.
 - Add [nursery/noExportedImports](https://biomejs.dev/linter/rules/no-exported-imports/). Contributed by @Conaclos
+
+#### Enhancements
+
+- Implement [suggestedExtensions option](https://github.com/biomejs/biome/pull/3274) for `useImportExtensions` rule. Contributed by @drdaemos
 
 #### Bug fixes
 
 - `useConsistentArrayType` and `useShorthandArrayType` now ignore `Array` in the `extends` and `implements` clauses. Fix [#3247](https://github.com/biomejs/biome/issues/3247). Contributed by @Conaclos
 - Fixes [#3066](https://github.com/biomejs/biome/issues/3066) by taking into account the dependencies declared in the `package.json`. Contributed by @ematipico
+- The code action of the `useArrowFunction` rule now preserves a trailing comma when there is only a single type parameter in the arrow function and JSX is enabled. Fixes [#3292](https://github.com/biomejs/biome/issues/3292). Contributed by @Sec-ant
+
+#### Enhancements
+- Enhance tailwind sorting lint rule [#1274](https://github.com/biomejs/biome/issues/1274) with variant support.
+
+  Every preconfigured variant is assigned a `weight` that concurs on establishing the output sorting order.
+  Since nesting variants on the same utility class is possible, the resulting `weight` is the Bitwise XOR of all the variants weight for that class.
+  Dynamic variants (e.g. `has-[.custom-class]`, `group-[:checked]`) are also supported and they take the `weight` of their base variant name the custom value attached (e.g. `has-[.custom-class]` takes `has` weight).
+  Arbitrary variants (e.g. `[&nth-child(2)]`) don't have a weight assigned and they are placed after every known variant.
+  Classes with the same amount of arbitrary variants follow lexicographical order. The class that has the highest number of nested arbitrary variants is placed last.
+  Screen variants (e.g. `sm:`, `max-md:`, `min-lg:`) are not supported yet.
+
+  Contributed by @lutaok
 
 ## v1.8.2 (2024-06-20)
 

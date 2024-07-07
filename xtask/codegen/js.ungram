@@ -1582,7 +1582,6 @@ JsComputedMemberName =
 	expression: AnyJsExpression
 	']'
 
-
 JsParameters =
 	'('
 	items: JsParameterList
@@ -1752,8 +1751,14 @@ TsEnumDeclaration =
 TsEnumMemberList = (TsEnumMember (',' TsEnumMember)* ','?)
 
 TsEnumMember =
-	name: AnyJsObjectMemberName
+	name: AnyTsEnumMemberName
 	initializer: JsInitializerClause?
+
+AnyTsEnumMemberName =
+	TsLiteralEnumMemberName
+	| JsComputedMemberName
+
+TsLiteralEnumMemberName = value: ('ident' | 'js_string_literal')
 
 TsImportEqualsDeclaration =
 	'import'

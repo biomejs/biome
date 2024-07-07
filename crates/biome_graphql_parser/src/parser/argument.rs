@@ -91,9 +91,6 @@ pub(crate) fn is_at_argument_list_end(p: &mut GraphqlParser<'_>) -> bool {
     p.at(T![')'])
     // at the start af a new arguments list
     || p.at(T!['('])
-    // at a selection set or body of a definition
-    || p.at(T!['{'])
-    || p.at(T!['}'])
     // at the start of a new directive
     || is_at_directive(p)
     // if we can't find any of the above, we can't be sure if we're outside of
