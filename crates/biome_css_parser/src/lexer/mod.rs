@@ -58,7 +58,7 @@ pub enum CssReLexContext {
     Regular,
     /// See [CssLexContext::UnicodeRange]
     UnicodeRange,
-    /// Re-lexes an identifier as a Grit metavariable if it exactly matches the RegExp `μ[a-zA-Z_][a-zA-Z0-9_]*`.
+    /// Re-lexes an identifier as a Grit metavariable if it exactly matches `μ...` or the RegExp `μ[a-zA-Z_][a-zA-Z0-9_]*`.
     GritMetavariable,
 }
 
@@ -1323,19 +1323,30 @@ impl<'src> CssLexer<'src> {
             let current_char = self.current_char_unchecked();
             if current_char == 'μ' {
                 self.advance(current_char.len_utf8());
-                if matches!(self.current_byte(), Some(b'a'..=b'z' | b'A'..=b'Z' | b'_')) {
-                    self.advance(1);
-                    while let Some(chr) = self.current_byte() {
-                        match chr {
-                            b'a'..=b'z' | b'A'..=b'Z' | b'0'..=b'9' | b'_' => {
-                                self.advance(1);
+                match self.current_byte() {
+                    // μ[a-zA-Z_][a-zA-Z0-9_]*
+                    Some(b'a'..=b'z' | b'A'..=b'Z' | b'_') => {
+                        self.advance(1);
+                        while let Some(chr) = self.current_byte() {
+                            match chr {
+                                b'a'..=b'z' | b'A'..=b'Z' | b'0'..=b'9' | b'_' => {
+                                    self.advance(1);
+                                }
+                                _ => break,
                             }
-                            _ => break,
+                        }
+                        if current_end == self.position {
+                            return GRIT_METAVARIABLE;
                         }
                     }
-                    if current_end == self.position {
-                        return GRIT_METAVARIABLE;
+                    // μ...
+                    Some(b'.') => {
+                        if self.byte_at(1) == Some(b'.') && self.byte_at(2) == Some(b'.') {
+                            self.advance(3);
+                            return GRIT_METAVARIABLE;
+                        }
                     }
+                    _ => {}
                 }
             }
         }

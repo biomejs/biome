@@ -199,7 +199,7 @@ impl ParseRecovery for SelectorListParseRecovery {
 /// the elements to which a set of CSS rules apply.
 #[inline]
 pub(crate) fn is_nth_at_selector(p: &mut CssParser, n: usize) -> bool {
-    is_nth_at_compound_selector(p, n) || is_nth_at_identifier(p, n)
+    is_nth_at_compound_selector(p, n)
 }
 
 /// Parses a CSS selector.

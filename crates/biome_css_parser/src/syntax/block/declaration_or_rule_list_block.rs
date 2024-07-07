@@ -4,7 +4,7 @@ use crate::syntax::at_rule::{is_at_at_rule, parse_at_rule};
 use crate::syntax::block::ParseBlockBody;
 use crate::syntax::parse_error::expected_any_declaration_or_at_rule;
 use crate::syntax::{
-    is_at_declaration, is_at_grit_metavariable, is_at_identifier, is_at_nested_qualified_rule,
+    is_at_declaration, is_at_grit_metavariable, is_at_nested_qualified_rule,
     parse_declaration_with_semicolon, parse_grit_metavariable, parse_nested_qualified_rule,
     try_parse,
 };
@@ -37,10 +37,7 @@ impl ParseBlockBody for DeclarationOrRuleListBlock {
 
 #[inline]
 fn is_at_declaration_or_rule_item(p: &mut CssParser) -> bool {
-    is_at_at_rule(p)
-        || is_at_nested_qualified_rule(p)
-        || is_at_declaration(p)
-        || is_at_identifier(p)
+    is_at_at_rule(p) || is_at_nested_qualified_rule(p) || is_at_declaration(p)
 }
 
 struct DeclarationOrRuleListParseRecovery;

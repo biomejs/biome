@@ -174,7 +174,7 @@ pub fn run(test_case: &str, _snapshot_name: &str, test_directory: &str, outcome_
 #[test]
 pub fn quick_test() {
     let code = r#"
-μfoo {}
+μ... {}
     "#;
 
     let root = parse_css(
