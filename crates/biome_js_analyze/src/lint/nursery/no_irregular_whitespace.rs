@@ -1,8 +1,8 @@
 use biome_analyze::{context::RuleContext, declare_lint_rule, Ast, Rule, RuleDiagnostic};
 use biome_analyze::{RuleSource, RuleSourceKind};
 use biome_console::markup;
-use biome_js_syntax::{JsLanguage, JsModule};
-use biome_rowan::{AstNode, Direction, SyntaxTriviaPiece, TextRange};
+use biome_js_syntax::JsModule;
+use biome_rowan::{AstNode, Direction, TextRange};
 
 const IRREGULAR_WHITESPACES: &[char; 22] = &[
     '\u{c}', '\u{b}', '\u{85}', '\u{feff}', '\u{a0}', '\u{1680}', '\u{180e}', '\u{2000}',
@@ -77,30 +77,26 @@ impl Rule for NoIrregularWhitespace {
 fn get_irregular_whitespace(node: &JsModule) -> Vec<TextRange> {
     let syntax = node.syntax();
 
-    let all_whitespaces_trivia: Vec<SyntaxTriviaPiece<JsLanguage>> = syntax
+    let all_whitespaces_trivia = syntax
         .descendants_tokens(Direction::Next)
         .flat_map(|token| {
             token
                 .leading_trivia()
                 .pieces()
                 .chain(token.trailing_trivia().pieces())
-                .filter(|trivia| trivia.is_whitespace())
-        })
-        .collect();
-
-    IRREGULAR_WHITESPACES
-        .iter()
-        .flat_map(|irregular_whitespace| {
-            all_whitespaces_trivia
-                .iter()
                 .filter(|trivia| {
-                    trivia
-                        .text()
-                        .chars()
-                        .any(|char| &char == irregular_whitespace)
+                    trivia.is_whitespace() && !trivia.text().replace(' ', "").is_empty()
                 })
-                .map(|trivia| trivia.text_range())
-                .collect::<Vec<TextRange>>()
+        });
+
+    all_whitespaces_trivia
+        .filter_map(|trivia| {
+            let has_irregular_whitespace = trivia.text().chars().any(|char| {
+                IRREGULAR_WHITESPACES
+                    .iter()
+                    .any(|irregular_whitespace| &char == irregular_whitespace)
+            });
+            has_irregular_whitespace.then_some(trivia.text_range())
         })
-        .collect()
+        .collect::<Vec<TextRange>>()
 }
