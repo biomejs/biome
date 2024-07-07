@@ -2872,7 +2872,7 @@ pub struct Nursery {
     #[doc = "Disallow shorthand properties that override related longhand properties."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_shorthand_property_overrides: Option<RuleConfiguration<NoShorthandPropertyOverrides>>,
-    #[doc = "Enforce that non-interactive, visible elements (such as \\<div>) that have click handlers use the role attribute."]
+    #[doc = "Enforce that static, visible elements (such as \\<div>) that have click handlers use the valid role attribute."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_static_element_interactions: Option<RuleConfiguration<NoStaticElementInteractions>>,
     #[doc = "Enforce the use of String.slice() over String.substr() and String.substring()."]

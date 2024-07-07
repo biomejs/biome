@@ -1116,7 +1116,7 @@ export interface Nursery {
 	 */
 	noShorthandPropertyOverrides?: RuleConfiguration_for_Null;
 	/**
-	 * Enforce that non-interactive, visible elements (such as \<div>) that have click handlers use the role attribute.
+	 * Enforce that static, visible elements (such as \<div>) that have click handlers use the valid role attribute.
 	 */
 	noStaticElementInteractions?: RuleConfiguration_for_Null;
 	/**
