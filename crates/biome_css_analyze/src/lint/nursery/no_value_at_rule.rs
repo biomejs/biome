@@ -1,9 +1,9 @@
-use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic};
+use biome_analyze::{context::RuleContext, declare_lint_rule, Ast, Rule, RuleDiagnostic};
 use biome_console::markup;
 use biome_css_syntax::CssAtRule;
 use biome_rowan::AstNode;
 
-declare_rule! {
+declare_lint_rule! {
     /// Disallow use of `@value` rule in css modules.
     ///
     /// Use of CSS variables is recommended instead of `@value` rule.
