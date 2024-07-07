@@ -2,7 +2,6 @@
 source: crates/biome_css_parser/tests/spec_test.rs
 expression: snapshot
 ---
-
 ## Input
 
 ```css
@@ -22,7 +21,7 @@ CssRoot {
         CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
-                    nesting_selector_token: missing (optional),
+                    nesting_selectors: CssNestedSelectorList [],
                     simple_selector: CssTypeSelector {
                         namespace: missing (optional),
                         ident: CssIdentifier {
@@ -50,7 +49,7 @@ CssRoot {
         CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
-                    nesting_selector_token: missing (optional),
+                    nesting_selectors: CssNestedSelectorList [],
                     simple_selector: CssTypeSelector {
                         namespace: missing (optional),
                         ident: CssIdentifier {
@@ -66,7 +65,7 @@ CssRoot {
                                 },
                                 l_paren_token: L_PAREN@38..39 "(" [] [],
                                 selector: CssCompoundSelector {
-                                    nesting_selector_token: missing (optional),
+                                    nesting_selectors: CssNestedSelectorList [],
                                     simple_selector: missing (optional),
                                     sub_selectors: CssSubSelectorList [
                                         CssIdSelector {
@@ -92,7 +91,7 @@ CssRoot {
         CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
-                    nesting_selector_token: missing (optional),
+                    nesting_selectors: CssNestedSelectorList [],
                     simple_selector: CssTypeSelector {
                         namespace: missing (optional),
                         ident: CssIdentifier {
@@ -108,7 +107,7 @@ CssRoot {
                                 },
                                 l_paren_token: L_PAREN@68..72 "(" [] [Whitespace("   ")],
                                 selector: CssCompoundSelector {
-                                    nesting_selector_token: missing (optional),
+                                    nesting_selectors: CssNestedSelectorList [],
                                     simple_selector: missing (optional),
                                     sub_selectors: CssSubSelectorList [
                                         CssIdSelector {
@@ -145,7 +144,7 @@ CssRoot {
     0: CSS_QUALIFIED_RULE@0..20
       0: CSS_SELECTOR_LIST@0..18
         0: CSS_COMPOUND_SELECTOR@0..18
-          0: (empty)
+          0: CSS_NESTED_SELECTOR_LIST@0..0
           1: CSS_TYPE_SELECTOR@0..5
             0: (empty)
             1: CSS_IDENTIFIER@0..5
@@ -163,7 +162,7 @@ CssRoot {
     1: CSS_QUALIFIED_RULE@20..50
       0: CSS_SELECTOR_LIST@20..48
         0: CSS_COMPOUND_SELECTOR@20..48
-          0: (empty)
+          0: CSS_NESTED_SELECTOR_LIST@20..20
           1: CSS_TYPE_SELECTOR@20..26
             0: (empty)
             1: CSS_IDENTIFIER@20..26
@@ -176,7 +175,7 @@ CssRoot {
                   0: IDENT@28..38 "cue-region" [] []
                 1: L_PAREN@38..39 "(" [] []
                 2: CSS_COMPOUND_SELECTOR@39..46
-                  0: (empty)
+                  0: CSS_NESTED_SELECTOR_LIST@39..39
                   1: (empty)
                   2: CSS_SUB_SELECTOR_LIST@39..46
                     0: CSS_ID_SELECTOR@39..46
@@ -191,7 +190,7 @@ CssRoot {
     2: CSS_QUALIFIED_RULE@50..86
       0: CSS_SELECTOR_LIST@50..84
         0: CSS_COMPOUND_SELECTOR@50..84
-          0: (empty)
+          0: CSS_NESTED_SELECTOR_LIST@50..50
           1: CSS_TYPE_SELECTOR@50..56
             0: (empty)
             1: CSS_IDENTIFIER@50..56
@@ -204,7 +203,7 @@ CssRoot {
                   0: IDENT@58..68 "cue-region" [] []
                 1: L_PAREN@68..72 "(" [] [Whitespace("   ")]
                 2: CSS_COMPOUND_SELECTOR@72..82
-                  0: (empty)
+                  0: CSS_NESTED_SELECTOR_LIST@72..72
                   1: (empty)
                   2: CSS_SUB_SELECTOR_LIST@72..82
                     0: CSS_ID_SELECTOR@72..82
@@ -219,5 +218,3 @@ CssRoot {
   2: EOF@86..87 "" [Newline("\n")] []
 
 ```
-
-

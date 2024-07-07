@@ -98,6 +98,14 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 #### Bug fixes
 
 - Fix [#3287](https://github.com/biomejs/biome/issues/3287) nested selectors with pseudo-classes. Contributed by @denbezrukov
+- Fix [#3349](https://github.com/biomejs/biome/issues/3349) allow CSS multiple ampersand support. Contributed by @denbezrukov
+```css
+.class {
+  && {
+    color: red;
+  }
+}
+```
 
 ## v1.8.3 (2024-06-27)
 

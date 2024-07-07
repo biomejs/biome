@@ -2,7 +2,6 @@
 source: crates/biome_css_parser/tests/spec_test.rs
 expression: snapshot
 ---
-
 ## Input
 
 ```css
@@ -25,7 +24,7 @@ CssRoot {
         CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
-                    nesting_selector_token: missing (optional),
+                    nesting_selectors: CssNestedSelectorList [],
                     simple_selector: missing (optional),
                     sub_selectors: CssSubSelectorList [
                         CssBogusSubSelector {
@@ -51,7 +50,7 @@ CssRoot {
         CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
-                    nesting_selector_token: missing (optional),
+                    nesting_selectors: CssNestedSelectorList [],
                     simple_selector: missing (optional),
                     sub_selectors: CssSubSelectorList [
                         CssBogusSubSelector {
@@ -89,7 +88,7 @@ CssRoot {
         CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
-                    nesting_selector_token: missing (optional),
+                    nesting_selectors: CssNestedSelectorList [],
                     simple_selector: missing (optional),
                     sub_selectors: CssSubSelectorList [
                         CssAttributeSelector {
@@ -123,7 +122,7 @@ CssRoot {
         CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
-                    nesting_selector_token: missing (optional),
+                    nesting_selectors: CssNestedSelectorList [],
                     simple_selector: missing (optional),
                     sub_selectors: CssSubSelectorList [
                         CssAttributeSelector {
@@ -166,7 +165,7 @@ CssRoot {
     0: CSS_QUALIFIED_RULE@0..11
       0: CSS_SELECTOR_LIST@0..9
         0: CSS_COMPOUND_SELECTOR@0..9
-          0: (empty)
+          0: CSS_NESTED_SELECTOR_LIST@0..0
           1: (empty)
           2: CSS_SUB_SELECTOR_LIST@0..9
             0: CSS_BOGUS_SUB_SELECTOR@0..9
@@ -181,7 +180,7 @@ CssRoot {
     1: CSS_QUALIFIED_RULE@11..31
       0: CSS_SELECTOR_LIST@11..29
         0: CSS_COMPOUND_SELECTOR@11..29
-          0: (empty)
+          0: CSS_NESTED_SELECTOR_LIST@11..11
           1: (empty)
           2: CSS_SUB_SELECTOR_LIST@11..29
             0: CSS_BOGUS_SUB_SELECTOR@11..29
@@ -204,7 +203,7 @@ CssRoot {
     2: CSS_QUALIFIED_RULE@31..50
       0: CSS_SELECTOR_LIST@31..48
         0: CSS_COMPOUND_SELECTOR@31..48
-          0: (empty)
+          0: CSS_NESTED_SELECTOR_LIST@31..31
           1: (empty)
           2: CSS_SUB_SELECTOR_LIST@31..48
             0: CSS_ATTRIBUTE_SELECTOR@31..48
@@ -227,7 +226,7 @@ CssRoot {
     3: CSS_QUALIFIED_RULE@50..65
       0: CSS_SELECTOR_LIST@50..65
         0: CSS_COMPOUND_SELECTOR@50..65
-          0: (empty)
+          0: CSS_NESTED_SELECTOR_LIST@50..50
           1: (empty)
           2: CSS_SUB_SELECTOR_LIST@50..65
             0: CSS_ATTRIBUTE_SELECTOR@50..65
@@ -301,5 +300,3 @@ attribute_selector.css:7:1 parse ━━━━━━━━━━━━━━━�
       │ 
   
 ```
-
-

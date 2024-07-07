@@ -21,7 +21,7 @@ CssRoot {
         CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
-                    nesting_selector_token: missing (optional),
+                    nesting_selectors: CssNestedSelectorList [],
                     simple_selector: missing (optional),
                     sub_selectors: CssSubSelectorList [
                         CssBogusSubSelector {
@@ -47,7 +47,7 @@ CssRoot {
         CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
-                    nesting_selector_token: missing (optional),
+                    nesting_selectors: CssNestedSelectorList [],
                     simple_selector: missing (optional),
                     sub_selectors: CssSubSelectorList [
                         CssBogusSubSelector {
@@ -76,7 +76,7 @@ CssRoot {
         CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
-                    nesting_selector_token: missing (optional),
+                    nesting_selectors: CssNestedSelectorList [],
                     simple_selector: missing (optional),
                     sub_selectors: CssSubSelectorList [
                         CssBogusSubSelector {
@@ -119,7 +119,7 @@ CssRoot {
     0: CSS_QUALIFIED_RULE@0..22
       0: CSS_SELECTOR_LIST@0..20
         0: CSS_COMPOUND_SELECTOR@0..20
-          0: (empty)
+          0: CSS_NESTED_SELECTOR_LIST@0..0
           1: (empty)
           2: CSS_SUB_SELECTOR_LIST@0..20
             0: CSS_BOGUS_SUB_SELECTOR@0..20
@@ -137,7 +137,7 @@ CssRoot {
     1: CSS_QUALIFIED_RULE@22..50
       0: CSS_SELECTOR_LIST@22..48
         0: CSS_COMPOUND_SELECTOR@22..48
-          0: (empty)
+          0: CSS_NESTED_SELECTOR_LIST@22..22
           1: (empty)
           2: CSS_SUB_SELECTOR_LIST@22..48
             0: CSS_BOGUS_SUB_SELECTOR@22..48
@@ -158,7 +158,7 @@ CssRoot {
     2: CSS_QUALIFIED_RULE@50..78
       0: CSS_SELECTOR_LIST@50..76
         0: CSS_COMPOUND_SELECTOR@50..76
-          0: (empty)
+          0: CSS_NESTED_SELECTOR_LIST@50..50
           1: (empty)
           2: CSS_SUB_SELECTOR_LIST@50..76
             0: CSS_BOGUS_SUB_SELECTOR@50..71

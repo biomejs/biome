@@ -166,7 +166,7 @@ CssRoot {
         CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
-                    nesting_selector_token: missing (optional),
+                    nesting_selectors: CssNestedSelectorList [],
                     simple_selector: missing (optional),
                     sub_selectors: CssSubSelectorList [
                         CssPseudoClassSelector {
@@ -233,7 +233,7 @@ CssRoot {
         CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
-                    nesting_selector_token: missing (optional),
+                    nesting_selectors: CssNestedSelectorList [],
                     simple_selector: CssTypeSelector {
                         namespace: missing (optional),
                         ident: CssIdentifier {
@@ -1458,7 +1458,7 @@ CssRoot {
         CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
-                    nesting_selector_token: missing (optional),
+                    nesting_selectors: CssNestedSelectorList [],
                     simple_selector: missing (optional),
                     sub_selectors: CssSubSelectorList [
                         CssClassSelector {
@@ -1888,7 +1888,7 @@ CssRoot {
         CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
-                    nesting_selector_token: missing (optional),
+                    nesting_selectors: CssNestedSelectorList [],
                     simple_selector: missing (optional),
                     sub_selectors: CssSubSelectorList [
                         CssClassSelector {
@@ -2014,7 +2014,7 @@ CssRoot {
         CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
-                    nesting_selector_token: missing (optional),
+                    nesting_selectors: CssNestedSelectorList [],
                     simple_selector: CssTypeSelector {
                         namespace: missing (optional),
                         ident: CssIdentifier {
@@ -2033,7 +2033,7 @@ CssRoot {
         CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
-                    nesting_selector_token: missing (optional),
+                    nesting_selectors: CssNestedSelectorList [],
                     simple_selector: CssTypeSelector {
                         namespace: missing (optional),
                         ident: CssIdentifier {
@@ -2096,7 +2096,7 @@ CssRoot {
         CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
-                    nesting_selector_token: missing (optional),
+                    nesting_selectors: CssNestedSelectorList [],
                     simple_selector: CssTypeSelector {
                         namespace: missing (optional),
                         ident: CssIdentifier {
@@ -2160,7 +2160,7 @@ CssRoot {
         CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
-                    nesting_selector_token: missing (optional),
+                    nesting_selectors: CssNestedSelectorList [],
                     simple_selector: CssTypeSelector {
                         namespace: missing (optional),
                         ident: CssIdentifier {
@@ -2242,7 +2242,7 @@ CssRoot {
         CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
-                    nesting_selector_token: missing (optional),
+                    nesting_selectors: CssNestedSelectorList [],
                     simple_selector: missing (optional),
                     sub_selectors: CssSubSelectorList [
                         CssClassSelector {
@@ -2368,7 +2368,7 @@ CssRoot {
         CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
-                    nesting_selector_token: missing (optional),
+                    nesting_selectors: CssNestedSelectorList [],
                     simple_selector: missing (optional),
                     sub_selectors: CssSubSelectorList [
                         CssClassSelector {
@@ -2469,7 +2469,7 @@ CssRoot {
         CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
-                    nesting_selector_token: missing (optional),
+                    nesting_selectors: CssNestedSelectorList [],
                     simple_selector: missing (optional),
                     sub_selectors: CssSubSelectorList [
                         CssClassSelector {
@@ -2581,7 +2581,7 @@ CssRoot {
         CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
-                    nesting_selector_token: missing (optional),
+                    nesting_selectors: CssNestedSelectorList [],
                     simple_selector: missing (optional),
                     sub_selectors: CssSubSelectorList [
                         CssClassSelector {
@@ -3540,7 +3540,7 @@ CssRoot {
         CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
-                    nesting_selector_token: missing (optional),
+                    nesting_selectors: CssNestedSelectorList [],
                     simple_selector: missing (optional),
                     sub_selectors: CssSubSelectorList [
                         CssClassSelector {
@@ -3760,7 +3760,7 @@ CssRoot {
         CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
-                    nesting_selector_token: missing (optional),
+                    nesting_selectors: CssNestedSelectorList [],
                     simple_selector: missing (optional),
                     sub_selectors: CssSubSelectorList [
                         CssClassSelector {
@@ -3826,7 +3826,7 @@ CssRoot {
         CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
-                    nesting_selector_token: missing (optional),
+                    nesting_selectors: CssNestedSelectorList [],
                     simple_selector: missing (optional),
                     sub_selectors: CssSubSelectorList [
                         CssClassSelector {
@@ -3949,7 +3949,7 @@ CssRoot {
         CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
-                    nesting_selector_token: missing (optional),
+                    nesting_selectors: CssNestedSelectorList [],
                     simple_selector: missing (optional),
                     sub_selectors: CssSubSelectorList [
                         CssClassSelector {
@@ -4072,7 +4072,7 @@ CssRoot {
         CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
-                    nesting_selector_token: missing (optional),
+                    nesting_selectors: CssNestedSelectorList [],
                     simple_selector: missing (optional),
                     sub_selectors: CssSubSelectorList [
                         CssClassSelector {
@@ -4199,7 +4199,7 @@ CssRoot {
         CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
-                    nesting_selector_token: missing (optional),
+                    nesting_selectors: CssNestedSelectorList [],
                     simple_selector: missing (optional),
                     sub_selectors: CssSubSelectorList [
                         CssClassSelector {
@@ -4326,7 +4326,7 @@ CssRoot {
         CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
-                    nesting_selector_token: missing (optional),
+                    nesting_selectors: CssNestedSelectorList [],
                     simple_selector: missing (optional),
                     sub_selectors: CssSubSelectorList [
                         CssClassSelector {
@@ -4401,7 +4401,7 @@ CssRoot {
         CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
-                    nesting_selector_token: missing (optional),
+                    nesting_selectors: CssNestedSelectorList [],
                     simple_selector: missing (optional),
                     sub_selectors: CssSubSelectorList [
                         CssClassSelector {
@@ -4480,7 +4480,7 @@ CssRoot {
         CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
-                    nesting_selector_token: missing (optional),
+                    nesting_selectors: CssNestedSelectorList [],
                     simple_selector: missing (optional),
                     sub_selectors: CssSubSelectorList [
                         CssClassSelector {
@@ -4534,7 +4534,7 @@ CssRoot {
         CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
-                    nesting_selector_token: missing (optional),
+                    nesting_selectors: CssNestedSelectorList [],
                     simple_selector: missing (optional),
                     sub_selectors: CssSubSelectorList [
                         CssClassSelector {
@@ -4598,7 +4598,7 @@ CssRoot {
         CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
-                    nesting_selector_token: missing (optional),
+                    nesting_selectors: CssNestedSelectorList [],
                     simple_selector: missing (optional),
                     sub_selectors: CssSubSelectorList [
                         CssClassSelector {
@@ -4679,7 +4679,7 @@ CssRoot {
         CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
-                    nesting_selector_token: missing (optional),
+                    nesting_selectors: CssNestedSelectorList [],
                     simple_selector: missing (optional),
                     sub_selectors: CssSubSelectorList [
                         CssClassSelector {
@@ -5007,7 +5007,7 @@ CssRoot {
     0: CSS_QUALIFIED_RULE@0..42
       0: CSS_SELECTOR_LIST@0..6
         0: CSS_COMPOUND_SELECTOR@0..6
-          0: (empty)
+          0: CSS_NESTED_SELECTOR_LIST@0..0
           1: (empty)
           2: CSS_SUB_SELECTOR_LIST@0..6
             0: CSS_PSEUDO_CLASS_SELECTOR@0..6
@@ -5049,7 +5049,7 @@ CssRoot {
     1: CSS_QUALIFIED_RULE@42..848
       0: CSS_SELECTOR_LIST@42..48
         0: CSS_COMPOUND_SELECTOR@42..48
-          0: (empty)
+          0: CSS_NESTED_SELECTOR_LIST@42..42
           1: CSS_TYPE_SELECTOR@42..48
             0: (empty)
             1: CSS_IDENTIFIER@42..48
@@ -5819,7 +5819,7 @@ CssRoot {
     2: CSS_QUALIFIED_RULE@848..1105
       0: CSS_SELECTOR_LIST@848..855
         0: CSS_COMPOUND_SELECTOR@848..855
-          0: (empty)
+          0: CSS_NESTED_SELECTOR_LIST@848..848
           1: (empty)
           2: CSS_SUB_SELECTOR_LIST@848..855
             0: CSS_CLASS_SELECTOR@848..855
@@ -6085,7 +6085,7 @@ CssRoot {
     3: CSS_QUALIFIED_RULE@1105..1216
       0: CSS_SELECTOR_LIST@1105..1113
         0: CSS_COMPOUND_SELECTOR@1105..1113
-          0: (empty)
+          0: CSS_NESTED_SELECTOR_LIST@1105..1105
           1: (empty)
           2: CSS_SUB_SELECTOR_LIST@1105..1113
             0: CSS_CLASS_SELECTOR@1105..1113
@@ -6165,7 +6165,7 @@ CssRoot {
     4: CSS_QUALIFIED_RULE@1216..1320
       0: CSS_SELECTOR_LIST@1216..1222
         0: CSS_COMPOUND_SELECTOR@1216..1222
-          0: (empty)
+          0: CSS_NESTED_SELECTOR_LIST@1216..1216
           1: CSS_TYPE_SELECTOR@1216..1222
             0: (empty)
             1: CSS_IDENTIFIER@1216..1222
@@ -6178,7 +6178,7 @@ CssRoot {
     5: CSS_QUALIFIED_RULE@1320..1351
       0: CSS_SELECTOR_LIST@1320..1325
         0: CSS_COMPOUND_SELECTOR@1320..1325
-          0: (empty)
+          0: CSS_NESTED_SELECTOR_LIST@1320..1320
           1: CSS_TYPE_SELECTOR@1320..1325
             0: (empty)
             1: CSS_IDENTIFIER@1320..1325
@@ -6218,7 +6218,7 @@ CssRoot {
     6: CSS_QUALIFIED_RULE@1351..1390
       0: CSS_SELECTOR_LIST@1351..1356
         0: CSS_COMPOUND_SELECTOR@1351..1356
-          0: (empty)
+          0: CSS_NESTED_SELECTOR_LIST@1351..1351
           1: CSS_TYPE_SELECTOR@1351..1356
             0: (empty)
             1: CSS_IDENTIFIER@1351..1356
@@ -6259,7 +6259,7 @@ CssRoot {
     7: CSS_QUALIFIED_RULE@1390..1436
       0: CSS_SELECTOR_LIST@1390..1395
         0: CSS_COMPOUND_SELECTOR@1390..1395
-          0: (empty)
+          0: CSS_NESTED_SELECTOR_LIST@1390..1390
           1: CSS_TYPE_SELECTOR@1390..1395
             0: (empty)
             1: CSS_IDENTIFIER@1390..1395
@@ -6312,7 +6312,7 @@ CssRoot {
     8: CSS_QUALIFIED_RULE@1436..1551
       0: CSS_SELECTOR_LIST@1436..1444
         0: CSS_COMPOUND_SELECTOR@1436..1444
-          0: (empty)
+          0: CSS_NESTED_SELECTOR_LIST@1436..1436
           1: (empty)
           2: CSS_SUB_SELECTOR_LIST@1436..1444
             0: CSS_CLASS_SELECTOR@1436..1444
@@ -6392,7 +6392,7 @@ CssRoot {
     9: CSS_QUALIFIED_RULE@1551..1708
       0: CSS_SELECTOR_LIST@1551..1559
         0: CSS_COMPOUND_SELECTOR@1551..1559
-          0: (empty)
+          0: CSS_NESTED_SELECTOR_LIST@1551..1551
           1: (empty)
           2: CSS_SUB_SELECTOR_LIST@1551..1559
             0: CSS_CLASS_SELECTOR@1551..1559
@@ -6456,7 +6456,7 @@ CssRoot {
     10: CSS_QUALIFIED_RULE@1708..1837
       0: CSS_SELECTOR_LIST@1708..1716
         0: CSS_COMPOUND_SELECTOR@1708..1716
-          0: (empty)
+          0: CSS_NESTED_SELECTOR_LIST@1708..1708
           1: (empty)
           2: CSS_SUB_SELECTOR_LIST@1708..1716
             0: CSS_CLASS_SELECTOR@1708..1716
@@ -6527,7 +6527,7 @@ CssRoot {
     11: CSS_QUALIFIED_RULE@1837..2477
       0: CSS_SELECTOR_LIST@1837..1845
         0: CSS_COMPOUND_SELECTOR@1837..1845
-          0: (empty)
+          0: CSS_NESTED_SELECTOR_LIST@1837..1837
           1: (empty)
           2: CSS_SUB_SELECTOR_LIST@1837..1845
             0: CSS_CLASS_SELECTOR@1837..1845
@@ -7124,7 +7124,7 @@ CssRoot {
     12: CSS_QUALIFIED_RULE@2477..2635
       0: CSS_SELECTOR_LIST@2477..2488
         0: CSS_COMPOUND_SELECTOR@2477..2488
-          0: (empty)
+          0: CSS_NESTED_SELECTOR_LIST@2477..2477
           1: (empty)
           2: CSS_SUB_SELECTOR_LIST@2477..2488
             0: CSS_CLASS_SELECTOR@2477..2488
@@ -7264,7 +7264,7 @@ CssRoot {
     13: CSS_QUALIFIED_RULE@2635..2673
       0: CSS_SELECTOR_LIST@2635..2642
         0: CSS_COMPOUND_SELECTOR@2635..2642
-          0: (empty)
+          0: CSS_NESTED_SELECTOR_LIST@2635..2635
           1: (empty)
           2: CSS_SUB_SELECTOR_LIST@2635..2642
             0: CSS_CLASS_SELECTOR@2635..2642
@@ -7306,7 +7306,7 @@ CssRoot {
     14: CSS_QUALIFIED_RULE@2673..2759
       0: CSS_SELECTOR_LIST@2673..2680
         0: CSS_COMPOUND_SELECTOR@2673..2680
-          0: (empty)
+          0: CSS_NESTED_SELECTOR_LIST@2673..2673
           1: (empty)
           2: CSS_SUB_SELECTOR_LIST@2673..2680
             0: CSS_CLASS_SELECTOR@2673..2680
@@ -7383,7 +7383,7 @@ CssRoot {
     15: CSS_QUALIFIED_RULE@2759..2845
       0: CSS_SELECTOR_LIST@2759..2766
         0: CSS_COMPOUND_SELECTOR@2759..2766
-          0: (empty)
+          0: CSS_NESTED_SELECTOR_LIST@2759..2759
           1: (empty)
           2: CSS_SUB_SELECTOR_LIST@2759..2766
             0: CSS_CLASS_SELECTOR@2759..2766
@@ -7460,7 +7460,7 @@ CssRoot {
     16: CSS_QUALIFIED_RULE@2845..2929
       0: CSS_SELECTOR_LIST@2845..2853
         0: CSS_COMPOUND_SELECTOR@2845..2853
-          0: (empty)
+          0: CSS_NESTED_SELECTOR_LIST@2845..2845
           1: (empty)
           2: CSS_SUB_SELECTOR_LIST@2845..2853
             0: CSS_CLASS_SELECTOR@2845..2853
@@ -7539,7 +7539,7 @@ CssRoot {
     17: CSS_QUALIFIED_RULE@2929..3013
       0: CSS_SELECTOR_LIST@2929..2937
         0: CSS_COMPOUND_SELECTOR@2929..2937
-          0: (empty)
+          0: CSS_NESTED_SELECTOR_LIST@2929..2929
           1: (empty)
           2: CSS_SUB_SELECTOR_LIST@2929..2937
             0: CSS_CLASS_SELECTOR@2929..2937
@@ -7618,7 +7618,7 @@ CssRoot {
     18: CSS_QUALIFIED_RULE@3013..3061
       0: CSS_SELECTOR_LIST@3013..3021
         0: CSS_COMPOUND_SELECTOR@3013..3021
-          0: (empty)
+          0: CSS_NESTED_SELECTOR_LIST@3013..3013
           1: (empty)
           2: CSS_SUB_SELECTOR_LIST@3013..3021
             0: CSS_CLASS_SELECTOR@3013..3021
@@ -7665,7 +7665,7 @@ CssRoot {
     19: CSS_QUALIFIED_RULE@3061..3110
       0: CSS_SELECTOR_LIST@3061..3070
         0: CSS_COMPOUND_SELECTOR@3061..3070
-          0: (empty)
+          0: CSS_NESTED_SELECTOR_LIST@3061..3061
           1: (empty)
           2: CSS_SUB_SELECTOR_LIST@3061..3070
             0: CSS_CLASS_SELECTOR@3061..3070
@@ -7714,7 +7714,7 @@ CssRoot {
     20: CSS_QUALIFIED_RULE@3110..3142
       0: CSS_SELECTOR_LIST@3110..3118
         0: CSS_COMPOUND_SELECTOR@3110..3118
-          0: (empty)
+          0: CSS_NESTED_SELECTOR_LIST@3110..3110
           1: (empty)
           2: CSS_SUB_SELECTOR_LIST@3110..3118
             0: CSS_CLASS_SELECTOR@3110..3118
@@ -7748,7 +7748,7 @@ CssRoot {
     21: CSS_QUALIFIED_RULE@3142..3176
       0: CSS_SELECTOR_LIST@3142..3149
         0: CSS_COMPOUND_SELECTOR@3142..3149
-          0: (empty)
+          0: CSS_NESTED_SELECTOR_LIST@3142..3142
           1: (empty)
           2: CSS_SUB_SELECTOR_LIST@3142..3149
             0: CSS_CLASS_SELECTOR@3142..3149
@@ -7788,7 +7788,7 @@ CssRoot {
     22: CSS_QUALIFIED_RULE@3176..3234
       0: CSS_SELECTOR_LIST@3176..3183
         0: CSS_COMPOUND_SELECTOR@3176..3183
-          0: (empty)
+          0: CSS_NESTED_SELECTOR_LIST@3176..3176
           1: (empty)
           2: CSS_SUB_SELECTOR_LIST@3176..3183
             0: CSS_CLASS_SELECTOR@3176..3183
@@ -7839,7 +7839,7 @@ CssRoot {
     23: CSS_QUALIFIED_RULE@3234..3559
       0: CSS_SELECTOR_LIST@3234..3242
         0: CSS_COMPOUND_SELECTOR@3234..3242
-          0: (empty)
+          0: CSS_NESTED_SELECTOR_LIST@3234..3234
           1: (empty)
           2: CSS_SUB_SELECTOR_LIST@3234..3242
             0: CSS_CLASS_SELECTOR@3234..3242

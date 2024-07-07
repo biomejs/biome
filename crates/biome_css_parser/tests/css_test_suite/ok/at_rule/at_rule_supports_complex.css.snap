@@ -265,7 +265,7 @@ CssRoot {
                                 selector_token: SELECTOR_KW@243..251 "selector" [] [],
                                 l_paren_token: L_PAREN@251..252 "(" [] [],
                                 selector: CssCompoundSelector {
-                                    nesting_selector_token: missing (optional),
+                                    nesting_selectors: CssNestedSelectorList [],
                                     simple_selector: missing (optional),
                                     sub_selectors: CssSubSelectorList [
                                         CssPseudoClassSelector {
@@ -345,7 +345,7 @@ CssRoot {
                                 selector_token: SELECTOR_KW@333..341 "selector" [] [],
                                 l_paren_token: L_PAREN@341..342 "(" [] [],
                                 selector: CssCompoundSelector {
-                                    nesting_selector_token: missing (optional),
+                                    nesting_selectors: CssNestedSelectorList [],
                                     simple_selector: missing (optional),
                                     sub_selectors: CssSubSelectorList [
                                         CssPseudoClassSelector {
@@ -433,7 +433,7 @@ CssRoot {
                                     selector_token: SELECTOR_KW@429..437 "selector" [] [],
                                     l_paren_token: L_PAREN@437..438 "(" [] [],
                                     selector: CssCompoundSelector {
-                                        nesting_selector_token: missing (optional),
+                                        nesting_selectors: CssNestedSelectorList [],
                                         simple_selector: missing (optional),
                                         sub_selectors: CssSubSelectorList [
                                             CssPseudoClassSelector {
@@ -689,7 +689,7 @@ CssRoot {
                 0: SELECTOR_KW@243..251 "selector" [] []
                 1: L_PAREN@251..252 "(" [] []
                 2: CSS_COMPOUND_SELECTOR@252..266
-                  0: (empty)
+                  0: CSS_NESTED_SELECTOR_LIST@252..252
                   1: (empty)
                   2: CSS_SUB_SELECTOR_LIST@252..266
                     0: CSS_PSEUDO_CLASS_SELECTOR@252..266
@@ -744,7 +744,7 @@ CssRoot {
                 0: SELECTOR_KW@333..341 "selector" [] []
                 1: L_PAREN@341..342 "(" [] []
                 2: CSS_COMPOUND_SELECTOR@342..356
-                  0: (empty)
+                  0: CSS_NESTED_SELECTOR_LIST@342..342
                   1: (empty)
                   2: CSS_SUB_SELECTOR_LIST@342..356
                     0: CSS_PSEUDO_CLASS_SELECTOR@342..356
@@ -805,7 +805,7 @@ CssRoot {
                   0: SELECTOR_KW@429..437 "selector" [] []
                   1: L_PAREN@437..438 "(" [] []
                   2: CSS_COMPOUND_SELECTOR@438..452
-                    0: (empty)
+                    0: CSS_NESTED_SELECTOR_LIST@438..438
                     1: (empty)
                     2: CSS_SUB_SELECTOR_LIST@438..452
                       0: CSS_PSEUDO_CLASS_SELECTOR@438..452

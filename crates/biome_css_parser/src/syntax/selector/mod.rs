@@ -1,4 +1,5 @@
 mod attribute;
+mod nested_selector;
 mod pseudo_class;
 mod pseudo_element;
 pub(crate) mod relative_selector;
@@ -9,6 +10,7 @@ use crate::syntax::parse_error::{
     expected_any_sub_selector, expected_compound_selector, expected_identifier, expected_selector,
 };
 use crate::syntax::selector::attribute::parse_attribute_selector;
+use crate::syntax::selector::nested_selector::NestedSelectorList;
 use crate::syntax::selector::pseudo_class::parse_pseudo_class_selector;
 use crate::syntax::selector::pseudo_element::parse_pseudo_element_selector;
 use crate::syntax::{
@@ -285,8 +287,7 @@ fn parse_compound_selector(p: &mut CssParser) -> ParsedSyntax {
 
     let m = p.start();
 
-    let context = selector_lex_context(p);
-    p.eat_with_context(T![&], context);
+    NestedSelectorList.parse_list(p);
     parse_simple_selector(p).ok(); // We don't need to handle error here because a simple selector is optional
     SubSelectorList.parse_list(p);
 

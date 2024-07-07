@@ -40,7 +40,7 @@ CssRoot {
                         CssQualifiedRule {
                             prelude: CssSelectorList [
                                 CssCompoundSelector {
-                                    nesting_selector_token: missing (optional),
+                                    nesting_selectors: CssNestedSelectorList [],
                                     simple_selector: CssTypeSelector {
                                         namespace: missing (optional),
                                         ident: CssIdentifier {
@@ -123,7 +123,7 @@ CssRoot {
                                                     CssRelativeSelector {
                                                         combinator: missing (optional),
                                                         selector: CssCompoundSelector {
-                                                            nesting_selector_token: missing (optional),
+                                                            nesting_selectors: CssNestedSelectorList [],
                                                             simple_selector: CssTypeSelector {
                                                                 namespace: missing (optional),
                                                                 ident: CssIdentifier {
@@ -191,7 +191,7 @@ CssRoot {
             0: CSS_QUALIFIED_RULE@17..59
               0: CSS_SELECTOR_LIST@17..22
                 0: CSS_COMPOUND_SELECTOR@17..22
-                  0: (empty)
+                  0: CSS_NESTED_SELECTOR_LIST@17..17
                   1: CSS_TYPE_SELECTOR@17..22
                     0: (empty)
                     1: CSS_IDENTIFIER@17..22
@@ -248,7 +248,7 @@ CssRoot {
                           0: CSS_RELATIVE_SELECTOR@132..140
                             0: (empty)
                             1: CSS_COMPOUND_SELECTOR@132..140
-                              0: (empty)
+                              0: CSS_NESTED_SELECTOR_LIST@132..132
                               1: CSS_TYPE_SELECTOR@132..140
                                 0: (empty)
                                 1: CSS_IDENTIFIER@132..140

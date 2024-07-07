@@ -111,9 +111,17 @@ CssComplexSelector =
 // a.class {}
 // ^^^^^^^
 CssCompoundSelector =
-	nesting_selector: '&'?
+	nesting_selectors: CssNestedSelectorList
 	simple_selector: AnyCssSimpleSelector?
 	sub_selectors: CssSubSelectorList
+
+// .class {
+// &&&&&&&.class {}
+// ^^^^^^^
+// }
+CssNestedSelectorList = CssNestedSelector*
+CssNestedSelector =
+	'&'
 
 CssSubSelectorList = AnyCssSubSelector*
 

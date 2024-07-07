@@ -394,7 +394,7 @@ CssRoot {
                             CssQualifiedRule {
                                 prelude: CssSelectorList [
                                     CssCompoundSelector {
-                                        nesting_selector_token: missing (optional),
+                                        nesting_selectors: CssNestedSelectorList [],
                                         simple_selector: CssTypeSelector {
                                             namespace: missing (optional),
                                             ident: CssIdentifier {
@@ -452,7 +452,7 @@ CssRoot {
                             CssQualifiedRule {
                                 prelude: CssSelectorList [
                                     CssCompoundSelector {
-                                        nesting_selector_token: missing (optional),
+                                        nesting_selectors: CssNestedSelectorList [],
                                         simple_selector: missing (optional),
                                         sub_selectors: CssSubSelectorList [
                                             CssClassSelector {
@@ -508,7 +508,7 @@ CssRoot {
                                                         CssRelativeSelector {
                                                             combinator: missing (optional),
                                                             selector: CssCompoundSelector {
-                                                                nesting_selector_token: missing (optional),
+                                                                nesting_selectors: CssNestedSelectorList [],
                                                                 simple_selector: CssTypeSelector {
                                                                     namespace: missing (optional),
                                                                     ident: CssIdentifier {
@@ -522,7 +522,7 @@ CssRoot {
                                                         CssRelativeSelector {
                                                             combinator: missing (optional),
                                                             selector: CssCompoundSelector {
-                                                                nesting_selector_token: missing (optional),
+                                                                nesting_selectors: CssNestedSelectorList [],
                                                                 simple_selector: CssTypeSelector {
                                                                     namespace: missing (optional),
                                                                     ident: CssIdentifier {
@@ -587,7 +587,7 @@ CssRoot {
                             CssQualifiedRule {
                                 prelude: CssSelectorList [
                                     CssCompoundSelector {
-                                        nesting_selector_token: missing (optional),
+                                        nesting_selectors: CssNestedSelectorList [],
                                         simple_selector: missing (optional),
                                         sub_selectors: CssSubSelectorList [
                                             CssAttributeSelector {
@@ -669,7 +669,7 @@ CssRoot {
                                                         CssRelativeSelector {
                                                             combinator: missing (optional),
                                                             selector: CssCompoundSelector {
-                                                                nesting_selector_token: missing (optional),
+                                                                nesting_selectors: CssNestedSelectorList [],
                                                                 simple_selector: CssTypeSelector {
                                                                     namespace: missing (optional),
                                                                     ident: CssIdentifier {
@@ -731,7 +731,7 @@ CssRoot {
                                                         CssRelativeSelector {
                                                             combinator: missing (optional),
                                                             selector: CssCompoundSelector {
-                                                                nesting_selector_token: missing (optional),
+                                                                nesting_selectors: CssNestedSelectorList [],
                                                                 simple_selector: CssTypeSelector {
                                                                     namespace: missing (optional),
                                                                     ident: CssIdentifier {
@@ -800,7 +800,7 @@ CssRoot {
                             CssQualifiedRule {
                                 prelude: CssSelectorList [
                                     CssCompoundSelector {
-                                        nesting_selector_token: missing (optional),
+                                        nesting_selectors: CssNestedSelectorList [],
                                         simple_selector: CssTypeSelector {
                                             namespace: missing (optional),
                                             ident: CssIdentifier {
@@ -889,7 +889,7 @@ CssRoot {
                                                     CssRelativeSelector {
                                                         combinator: missing (optional),
                                                         selector: CssCompoundSelector {
-                                                            nesting_selector_token: missing (optional),
+                                                            nesting_selectors: CssNestedSelectorList [],
                                                             simple_selector: CssTypeSelector {
                                                                 namespace: missing (optional),
                                                                 ident: CssIdentifier {
@@ -937,7 +937,7 @@ CssRoot {
                             CssQualifiedRule {
                                 prelude: CssSelectorList [
                                     CssCompoundSelector {
-                                        nesting_selector_token: missing (optional),
+                                        nesting_selectors: CssNestedSelectorList [],
                                         simple_selector: missing (optional),
                                         sub_selectors: CssSubSelectorList [
                                             CssClassSelector {
@@ -993,7 +993,7 @@ CssRoot {
                                                         CssRelativeSelector {
                                                             combinator: missing (optional),
                                                             selector: CssCompoundSelector {
-                                                                nesting_selector_token: missing (optional),
+                                                                nesting_selectors: CssNestedSelectorList [],
                                                                 simple_selector: CssTypeSelector {
                                                                     namespace: missing (optional),
                                                                     ident: CssIdentifier {
@@ -1007,7 +1007,7 @@ CssRoot {
                                                         CssRelativeSelector {
                                                             combinator: missing (optional),
                                                             selector: CssCompoundSelector {
-                                                                nesting_selector_token: missing (optional),
+                                                                nesting_selectors: CssNestedSelectorList [],
                                                                 simple_selector: CssTypeSelector {
                                                                     namespace: missing (optional),
                                                                     ident: CssIdentifier {
@@ -1395,7 +1395,7 @@ CssRoot {
               0: CSS_QUALIFIED_RULE@351..382
                 0: CSS_SELECTOR_LIST@351..360
                   0: CSS_COMPOUND_SELECTOR@351..360
-                    0: (empty)
+                    0: CSS_NESTED_SELECTOR_LIST@351..351
                     1: CSS_TYPE_SELECTOR@351..360
                       0: (empty)
                       1: CSS_IDENTIFIER@351..360
@@ -1432,7 +1432,7 @@ CssRoot {
               0: CSS_QUALIFIED_RULE@404..434
                 0: CSS_SELECTOR_LIST@404..413
                   0: CSS_COMPOUND_SELECTOR@404..413
-                    0: (empty)
+                    0: CSS_NESTED_SELECTOR_LIST@404..404
                     1: (empty)
                     2: CSS_SUB_SELECTOR_LIST@404..413
                       0: CSS_CLASS_SELECTOR@404..413
@@ -1471,7 +1471,7 @@ CssRoot {
                             0: CSS_RELATIVE_SELECTOR@451..456
                               0: (empty)
                               1: CSS_COMPOUND_SELECTOR@451..456
-                                0: (empty)
+                                0: CSS_NESTED_SELECTOR_LIST@451..451
                                 1: CSS_TYPE_SELECTOR@451..456
                                   0: (empty)
                                   1: CSS_IDENTIFIER@451..456
@@ -1481,7 +1481,7 @@ CssRoot {
                             2: CSS_RELATIVE_SELECTOR@458..461
                               0: (empty)
                               1: CSS_COMPOUND_SELECTOR@458..461
-                                0: (empty)
+                                0: CSS_NESTED_SELECTOR_LIST@458..458
                                 1: CSS_TYPE_SELECTOR@458..461
                                   0: (empty)
                                   1: CSS_IDENTIFIER@458..461
@@ -1519,7 +1519,7 @@ CssRoot {
               0: CSS_QUALIFIED_RULE@500..529
                 0: CSS_SELECTOR_LIST@500..511
                   0: CSS_COMPOUND_SELECTOR@500..511
-                    0: (empty)
+                    0: CSS_NESTED_SELECTOR_LIST@500..500
                     1: (empty)
                     2: CSS_SUB_SELECTOR_LIST@500..511
                       0: CSS_ATTRIBUTE_SELECTOR@500..511
@@ -1575,7 +1575,7 @@ CssRoot {
                             0: CSS_RELATIVE_SELECTOR@569..574
                               0: (empty)
                               1: CSS_COMPOUND_SELECTOR@569..574
-                                0: (empty)
+                                0: CSS_NESTED_SELECTOR_LIST@569..569
                                 1: CSS_TYPE_SELECTOR@569..574
                                   0: (empty)
                                   1: CSS_IDENTIFIER@569..574
@@ -1615,7 +1615,7 @@ CssRoot {
                             0: CSS_RELATIVE_SELECTOR@619..624
                               0: (empty)
                               1: CSS_COMPOUND_SELECTOR@619..624
-                                0: (empty)
+                                0: CSS_NESTED_SELECTOR_LIST@619..619
                                 1: CSS_TYPE_SELECTOR@619..624
                                   0: (empty)
                                   1: CSS_IDENTIFIER@619..624
@@ -1656,7 +1656,7 @@ CssRoot {
               0: CSS_QUALIFIED_RULE@670..788
                 0: CSS_SELECTOR_LIST@670..763
                   0: CSS_COMPOUND_SELECTOR@670..763
-                    0: (empty)
+                    0: CSS_NESTED_SELECTOR_LIST@670..670
                     1: CSS_TYPE_SELECTOR@670..763
                       0: (empty)
                       1: CSS_IDENTIFIER@670..763
@@ -1716,7 +1716,7 @@ CssRoot {
                           0: CSS_RELATIVE_SELECTOR@845..856
                             0: (empty)
                             1: CSS_COMPOUND_SELECTOR@845..856
-                              0: (empty)
+                              0: CSS_NESTED_SELECTOR_LIST@845..845
                               1: CSS_TYPE_SELECTOR@845..856
                                 0: (empty)
                                 1: CSS_IDENTIFIER@845..856
@@ -1745,7 +1745,7 @@ CssRoot {
               1: CSS_QUALIFIED_RULE@887..917
                 0: CSS_SELECTOR_LIST@887..896
                   0: CSS_COMPOUND_SELECTOR@887..896
-                    0: (empty)
+                    0: CSS_NESTED_SELECTOR_LIST@887..887
                     1: (empty)
                     2: CSS_SUB_SELECTOR_LIST@887..896
                       0: CSS_CLASS_SELECTOR@887..896
@@ -1784,7 +1784,7 @@ CssRoot {
                             0: CSS_RELATIVE_SELECTOR@934..939
                               0: (empty)
                               1: CSS_COMPOUND_SELECTOR@934..939
-                                0: (empty)
+                                0: CSS_NESTED_SELECTOR_LIST@934..934
                                 1: CSS_TYPE_SELECTOR@934..939
                                   0: (empty)
                                   1: CSS_IDENTIFIER@934..939
@@ -1794,7 +1794,7 @@ CssRoot {
                             2: CSS_RELATIVE_SELECTOR@941..944
                               0: (empty)
                               1: CSS_COMPOUND_SELECTOR@941..944
-                                0: (empty)
+                                0: CSS_NESTED_SELECTOR_LIST@941..941
                                 1: CSS_TYPE_SELECTOR@941..944
                                   0: (empty)
                                   1: CSS_IDENTIFIER@941..944

@@ -2,7 +2,6 @@
 source: crates/biome_css_parser/tests/spec_test.rs
 expression: snapshot
 ---
-
 ## Input
 
 ```css
@@ -24,7 +23,7 @@ CssRoot {
         CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
-                    nesting_selector_token: missing (optional),
+                    nesting_selectors: CssNestedSelectorList [],
                     simple_selector: missing (optional),
                     sub_selectors: CssSubSelectorList [
                         CssPseudoElementSelector {
@@ -50,7 +49,7 @@ CssRoot {
         CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
-                    nesting_selector_token: missing (optional),
+                    nesting_selectors: CssNestedSelectorList [],
                     simple_selector: missing (optional),
                     sub_selectors: CssSubSelectorList [
                         CssPseudoElementSelector {
@@ -77,7 +76,7 @@ CssRoot {
         CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
-                    nesting_selector_token: missing (optional),
+                    nesting_selectors: CssNestedSelectorList [],
                     simple_selector: missing (optional),
                     sub_selectors: CssSubSelectorList [
                         CssPseudoElementSelector {
@@ -89,7 +88,7 @@ CssRoot {
                                     },
                                     L_PAREN@29..30 "(" [] [],
                                     CssCompoundSelector {
-                                        nesting_selector_token: missing (optional),
+                                        nesting_selectors: CssNestedSelectorList [],
                                         simple_selector: missing (optional),
                                         sub_selectors: CssSubSelectorList [
                                             CssClassSelector {
@@ -123,7 +122,7 @@ CssRoot {
         CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
-                    nesting_selector_token: missing (optional),
+                    nesting_selectors: CssNestedSelectorList [],
                     simple_selector: missing (optional),
                     sub_selectors: CssSubSelectorList [
                         CssPseudoElementSelector {
@@ -135,7 +134,7 @@ CssRoot {
                                     },
                                     L_PAREN@53..54 "(" [] [],
                                     CssCompoundSelector {
-                                        nesting_selector_token: missing (optional),
+                                        nesting_selectors: CssNestedSelectorList [],
                                         simple_selector: missing (optional),
                                         sub_selectors: CssSubSelectorList [
                                             CssClassSelector {
@@ -168,7 +167,7 @@ CssRoot {
         CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
-                    nesting_selector_token: missing (optional),
+                    nesting_selectors: CssNestedSelectorList [],
                     simple_selector: missing (optional),
                     sub_selectors: CssSubSelectorList [
                         CssPseudoElementSelector {
@@ -181,7 +180,7 @@ CssRoot {
                                     L_PAREN@76..77 "(" [] [],
                                     CssComplexSelector {
                                         left: CssCompoundSelector {
-                                            nesting_selector_token: missing (optional),
+                                            nesting_selectors: CssNestedSelectorList [],
                                             simple_selector: missing (optional),
                                             sub_selectors: CssSubSelectorList [
                                                 CssClassSelector {
@@ -194,7 +193,7 @@ CssRoot {
                                         },
                                         combinator: CSS_SPACE_LITERAL@81..82 " " [] [],
                                         right: CssCompoundSelector {
-                                            nesting_selector_token: missing (optional),
+                                            nesting_selectors: CssNestedSelectorList [],
                                             simple_selector: missing (optional),
                                             sub_selectors: CssSubSelectorList [
                                                 CssClassSelector {
@@ -232,7 +231,7 @@ CssRoot {
     0: CSS_QUALIFIED_RULE@0..10
       0: CSS_SELECTOR_LIST@0..8
         0: CSS_COMPOUND_SELECTOR@0..8
-          0: (empty)
+          0: CSS_NESTED_SELECTOR_LIST@0..0
           1: (empty)
           2: CSS_SUB_SELECTOR_LIST@0..8
             0: CSS_PSEUDO_ELEMENT_SELECTOR@0..8
@@ -248,7 +247,7 @@ CssRoot {
     1: CSS_QUALIFIED_RULE@10..22
       0: CSS_SELECTOR_LIST@10..20
         0: CSS_COMPOUND_SELECTOR@10..20
-          0: (empty)
+          0: CSS_NESTED_SELECTOR_LIST@10..10
           1: (empty)
           2: CSS_SUB_SELECTOR_LIST@10..20
             0: CSS_PSEUDO_ELEMENT_SELECTOR@10..20
@@ -265,7 +264,7 @@ CssRoot {
     2: CSS_QUALIFIED_RULE@22..46
       0: CSS_SELECTOR_LIST@22..44
         0: CSS_COMPOUND_SELECTOR@22..44
-          0: (empty)
+          0: CSS_NESTED_SELECTOR_LIST@22..22
           1: (empty)
           2: CSS_SUB_SELECTOR_LIST@22..44
             0: CSS_PSEUDO_ELEMENT_SELECTOR@22..44
@@ -275,7 +274,7 @@ CssRoot {
                   0: IDENT@25..29 "cure" [] []
                 1: L_PAREN@29..30 "(" [] []
                 2: CSS_COMPOUND_SELECTOR@30..34
-                  0: (empty)
+                  0: CSS_NESTED_SELECTOR_LIST@30..30
                   1: (empty)
                   2: CSS_SUB_SELECTOR_LIST@30..34
                     0: CSS_CLASS_SELECTOR@30..34
@@ -294,7 +293,7 @@ CssRoot {
     3: CSS_QUALIFIED_RULE@46..69
       0: CSS_SELECTOR_LIST@46..67
         0: CSS_COMPOUND_SELECTOR@46..67
-          0: (empty)
+          0: CSS_NESTED_SELECTOR_LIST@46..46
           1: (empty)
           2: CSS_SUB_SELECTOR_LIST@46..67
             0: CSS_PSEUDO_ELEMENT_SELECTOR@46..67
@@ -304,7 +303,7 @@ CssRoot {
                   0: IDENT@49..53 "cure" [] []
                 1: L_PAREN@53..54 "(" [] []
                 2: CSS_COMPOUND_SELECTOR@54..58
-                  0: (empty)
+                  0: CSS_NESTED_SELECTOR_LIST@54..54
                   1: (empty)
                   2: CSS_SUB_SELECTOR_LIST@54..58
                     0: CSS_CLASS_SELECTOR@54..58
@@ -322,7 +321,7 @@ CssRoot {
     4: CSS_QUALIFIED_RULE@69..91
       0: CSS_SELECTOR_LIST@69..89
         0: CSS_COMPOUND_SELECTOR@69..89
-          0: (empty)
+          0: CSS_NESTED_SELECTOR_LIST@69..69
           1: (empty)
           2: CSS_SUB_SELECTOR_LIST@69..89
             0: CSS_PSEUDO_ELEMENT_SELECTOR@69..89
@@ -333,7 +332,7 @@ CssRoot {
                 1: L_PAREN@76..77 "(" [] []
                 2: CSS_COMPLEX_SELECTOR@77..89
                   0: CSS_COMPOUND_SELECTOR@77..81
-                    0: (empty)
+                    0: CSS_NESTED_SELECTOR_LIST@77..77
                     1: (empty)
                     2: CSS_SUB_SELECTOR_LIST@77..81
                       0: CSS_CLASS_SELECTOR@77..81
@@ -342,7 +341,7 @@ CssRoot {
                           0: IDENT@78..81 "div" [] []
                   1: CSS_SPACE_LITERAL@81..82 " " [] []
                   2: CSS_COMPOUND_SELECTOR@82..89
-                    0: (empty)
+                    0: CSS_NESTED_SELECTOR_LIST@82..82
                     1: (empty)
                     2: CSS_SUB_SELECTOR_LIST@82..89
                       0: CSS_CLASS_SELECTOR@82..89
@@ -460,5 +459,3 @@ pseudo_element_function_selector.css:5:20 parse ━━━━━━━━━━�
   i Remove {
   
 ```
-
-
