@@ -1334,26 +1334,19 @@ impl<'a> AriaRoles {
         }
 
         // if the element has a interactive role, it is considered interactive.
-        let role_name = if let Some(role) = attributes.get("role") {
-            if let Some(r) = role.first() {
-                self.get_role(r)
-            } else {
-                None
-            }
-        } else {
-            self.get_implicit_role(element_name, attributes)
-        };
+        let role_name = attributes
+            .get("role")
+            .and_then(|role| role.first())
+            .map(|r| self.get_role(r))
+            .unwrap_or_else(|| self.get_implicit_role(element_name, attributes));
 
-        if let Some(role) = role_name {
-            match role.type_name() {
-                "biome_aria::roles::PresentationRole" | "biome_aria::roles::GenericRole" => {
-                    return false
-                }
-                _ => return true,
+        match role_name.map(|role| role.type_name()) {
+            Some("biome_aria::roles::PresentationRole" | "biome_aria::roles::GenericRole") => {
+                return false
             }
+            Some(_) => return true,
+            None => return false,
         }
-
-        false
     }
 }
 
