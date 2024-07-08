@@ -2,8 +2,8 @@ use crate::{
     services::control_flow::AnyJsControlFlowRoot, services::semantic::Semantic, JsRuleAction,
 };
 use biome_analyze::{
-    context::RuleContext, declare_rule, ActionCategory, FixKind, Rule, RuleDiagnostic, RuleSource,
-    RuleSourceKind,
+    context::RuleContext, declare_lint_rule, ActionCategory, FixKind, Rule, RuleDiagnostic,
+    RuleSource, RuleSourceKind,
 };
 use biome_console::markup;
 use biome_js_factory::make;
@@ -15,7 +15,7 @@ use biome_js_syntax::{
 };
 use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt};
 
-declare_rule! {
+declare_lint_rule! {
     /// Disallow useless `this` aliasing.
     ///
     /// Arrow functions inherits `this` from their enclosing scope;

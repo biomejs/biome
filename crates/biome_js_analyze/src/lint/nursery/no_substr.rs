@@ -1,5 +1,5 @@
 use biome_analyze::{
-    context::RuleContext, declare_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic,
+    context::RuleContext, declare_lint_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic,
     RuleSource,
 };
 use biome_console::markup;
@@ -11,7 +11,7 @@ use biome_rowan::{declare_node_union, AstSeparatedList, BatchMutationExt, TextRa
 
 use crate::JsRuleAction;
 
-declare_rule! {
+declare_lint_rule! {
     /// Enforce the use of `String.slice()` over `String.substr()` and `String.substring()`.
     ///
     /// `String.slice()` is preferred over `String.substr()` and `String.substring()` because it is a more popular option with clearer behavior,

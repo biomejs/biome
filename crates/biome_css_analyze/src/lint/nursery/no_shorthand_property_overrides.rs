@@ -1,6 +1,6 @@
 use crate::utils::{get_longhand_sub_properties, get_reset_to_initial_properties, vender_prefix};
 use biome_analyze::{
-    context::RuleContext, declare_rule, AddVisitor, Phases, QueryMatch, Queryable, Rule,
+    context::RuleContext, declare_lint_rule, AddVisitor, Phases, QueryMatch, Queryable, Rule,
     RuleDiagnostic, RuleSource, ServiceBag, Visitor, VisitorContext,
 };
 use biome_console::markup;
@@ -44,7 +44,7 @@ fn get_override_props(property: &str) -> Vec<&str> {
     merged
 }
 
-declare_rule! {
+declare_lint_rule! {
     /// Disallow shorthand properties that override related longhand properties.
     ///
     /// For details on shorthand properties, see the [MDN web docs](https://developer.mozilla.org/en-US/docs/Web/CSS/Shorthand_properties).

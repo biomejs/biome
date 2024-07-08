@@ -1,5 +1,5 @@
 use biome_analyze::RuleSource;
-use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic};
+use biome_analyze::{context::RuleContext, declare_lint_rule, Ast, Rule, RuleDiagnostic};
 use biome_console::markup;
 use biome_js_syntax::parameter_ext::{AnyJsParameterList, AnyJsParameters, AnyParameter};
 use biome_js_syntax::{
@@ -9,7 +9,7 @@ use biome_js_syntax::{
 use biome_rowan::AstNode;
 use rustc_hash::FxHashSet;
 
-declare_rule! {
+declare_lint_rule! {
     ///  Disallow duplicate function parameter name.
     ///
     /// If more than one parameter has the same name in a function definition,

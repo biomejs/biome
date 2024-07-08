@@ -1,7 +1,7 @@
 use crate::JsRuleAction;
 use biome_analyze::{
-    context::RuleContext, declare_rule, ActionCategory, AddVisitor, FixKind, Phases, QueryMatch,
-    Queryable, Rule, RuleDiagnostic, RuleSource, RuleSourceKind, ServiceBag, Visitor,
+    context::RuleContext, declare_lint_rule, ActionCategory, AddVisitor, FixKind, Phases,
+    QueryMatch, Queryable, Rule, RuleDiagnostic, RuleSource, RuleSourceKind, ServiceBag, Visitor,
     VisitorContext,
 };
 use biome_console::markup;
@@ -18,7 +18,7 @@ use biome_rowan::{
     SyntaxNode, TextRange, TriviaPieceKind, WalkEvent,
 };
 
-declare_rule! {
+declare_lint_rule! {
     /// Use arrow functions over function expressions.
     ///
     /// An arrow function expression is a compact alternative to a regular function expression,

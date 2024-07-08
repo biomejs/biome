@@ -1,6 +1,6 @@
 use crate::services::semantic::SemanticServices;
 use biome_analyze::{
-    context::RuleContext, declare_rule, Rule, RuleDiagnostic, RuleSource, RuleSourceKind,
+    context::RuleContext, declare_lint_rule, Rule, RuleDiagnostic, RuleSource, RuleSourceKind,
 };
 use biome_console::markup;
 use biome_deserialize_macros::Deserializable;
@@ -15,7 +15,7 @@ use biome_deserialize::{DeserializableValue, DeserializationDiagnostic};
 use schemars::JsonSchema;
 use smallvec::SmallVec;
 
-declare_rule! {
+declare_lint_rule! {
     /// Enforce naming conventions for JavaScript and TypeScript filenames.
     ///
     /// Enforcing [naming conventions](https://en.wikipedia.org/wiki/Naming_convention_(programming)) helps to keep the codebase consistent.
@@ -34,7 +34,7 @@ declare_rule! {
     ///
     /// ## Ignoring some files
     ///
-    /// Sometimes you want to completly ignore some files.
+    /// Sometimes you want to completely ignore some files.
     /// Biome ignore comments cannot be used because the rule applies on filenames not file contents.
     /// To ignore files, you can use [`overrides`](https://biomejs.dev/reference/configuration/#overrides).
     /// If you want to ignore all files in the `test` directory, then you can disable the rule for those files only:
@@ -151,7 +151,7 @@ impl Rule for UseFilenamingConvention {
         if !allowed_cases.is_empty() {
             let trimmed_name = name.trim_matches('_');
             let case = Case::identify(trimmed_name, options.strict_case);
-            if allowed_cases.contains(case) {
+            if (allowed_cases | Case::Uni).contains(case) {
                 return None;
             }
         }

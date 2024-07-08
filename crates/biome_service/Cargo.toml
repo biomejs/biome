@@ -48,6 +48,7 @@ biome_rowan              = { workspace = true, features = ["serde"] }
 biome_text_edit          = { workspace = true }
 bpaf                     = { workspace = true }
 dashmap                  = { workspace = true }
+enumflags2               = { workspace = true, features = ["serde"] }
 getrandom                = { workspace = true, features = ["js"] }
 ignore                   = { workspace = true }
 indexmap                 = { workspace = true, features = ["serde"] }
@@ -60,6 +61,7 @@ serde                    = { workspace = true, features = ["derive"] }
 serde_json               = { workspace = true, features = ["raw_value"] }
 slotmap                  = { workspace = true, features = ["serde"] }
 tracing                  = { workspace = true, features = ["attributes", "log"] }
+
 [features]
 schema = [
   "dep:schemars",
@@ -71,8 +73,6 @@ schema = [
   "biome_css_syntax/schema",
   "biome_graphql_syntax/schema",
 ]
-
-graphql = []
 
 [dev-dependencies]
 insta        = { workspace = true }

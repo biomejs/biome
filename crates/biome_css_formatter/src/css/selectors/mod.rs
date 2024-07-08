@@ -7,6 +7,7 @@ pub(crate) mod compound_selector;
 pub(crate) mod id_selector;
 pub(crate) mod keyframes_ident_selector;
 pub(crate) mod keyframes_percentage_selector;
+pub(crate) mod nested_selector;
 pub(crate) mod page_selector;
 pub(crate) mod pseudo_class_function_compound_selector;
 pub(crate) mod pseudo_class_function_selector;

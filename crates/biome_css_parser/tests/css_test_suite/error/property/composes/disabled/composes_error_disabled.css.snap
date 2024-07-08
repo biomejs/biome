@@ -29,7 +29,7 @@ CssRoot {
         CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
-                    nesting_selector_token: missing (optional),
+                    nesting_selectors: CssNestedSelectorList [],
                     simple_selector: missing (optional),
                     sub_selectors: CssSubSelectorList [
                         CssClassSelector {
@@ -68,7 +68,7 @@ CssRoot {
         CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
-                    nesting_selector_token: missing (optional),
+                    nesting_selectors: CssNestedSelectorList [],
                     simple_selector: missing (optional),
                     sub_selectors: CssSubSelectorList [
                         CssClassSelector {
@@ -113,7 +113,7 @@ CssRoot {
         CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
-                    nesting_selector_token: missing (optional),
+                    nesting_selectors: CssNestedSelectorList [],
                     simple_selector: missing (optional),
                     sub_selectors: CssSubSelectorList [
                         CssClassSelector {
@@ -169,7 +169,7 @@ CssRoot {
     0: CSS_QUALIFIED_RULE@0..26
       0: CSS_SELECTOR_LIST@0..3
         0: CSS_COMPOUND_SELECTOR@0..3
-          0: (empty)
+          0: CSS_NESTED_SELECTOR_LIST@0..0
           1: (empty)
           2: CSS_SUB_SELECTOR_LIST@0..3
             0: CSS_CLASS_SELECTOR@0..3
@@ -194,7 +194,7 @@ CssRoot {
     1: CSS_QUALIFIED_RULE@26..88
       0: CSS_SELECTOR_LIST@26..44
         0: CSS_COMPOUND_SELECTOR@26..44
-          0: (empty)
+          0: CSS_NESTED_SELECTOR_LIST@26..26
           1: (empty)
           2: CSS_SUB_SELECTOR_LIST@26..44
             0: CSS_CLASS_SELECTOR@26..44
@@ -223,7 +223,7 @@ CssRoot {
     2: CSS_QUALIFIED_RULE@88..149
       0: CSS_SELECTOR_LIST@88..106
         0: CSS_COMPOUND_SELECTOR@88..106
-          0: (empty)
+          0: CSS_NESTED_SELECTOR_LIST@88..88
           1: (empty)
           2: CSS_SUB_SELECTOR_LIST@88..106
             0: CSS_CLASS_SELECTOR@88..106

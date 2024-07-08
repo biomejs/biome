@@ -8154,6 +8154,46 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::TsIntersectionType {
         )
     }
 }
+impl FormatRule<biome_js_syntax::TsLiteralEnumMemberName>
+    for crate::ts::objects::literal_enum_member_name::FormatTsLiteralEnumMemberName
+{
+    type Context = JsFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_js_syntax::TsLiteralEnumMemberName,
+        f: &mut JsFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_js_syntax::TsLiteralEnumMemberName>::fmt(self, node, f)
+    }
+}
+impl AsFormat<JsFormatContext> for biome_js_syntax::TsLiteralEnumMemberName {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_js_syntax::TsLiteralEnumMemberName,
+        crate::ts::objects::literal_enum_member_name::FormatTsLiteralEnumMemberName,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        #![allow(clippy::default_constructed_unit_structs)]
+        FormatRefWithRule::new(
+            self,
+            crate::ts::objects::literal_enum_member_name::FormatTsLiteralEnumMemberName::default(),
+        )
+    }
+}
+impl IntoFormat<JsFormatContext> for biome_js_syntax::TsLiteralEnumMemberName {
+    type Format = FormatOwnedWithRule<
+        biome_js_syntax::TsLiteralEnumMemberName,
+        crate::ts::objects::literal_enum_member_name::FormatTsLiteralEnumMemberName,
+    >;
+    fn into_format(self) -> Self::Format {
+        #![allow(clippy::default_constructed_unit_structs)]
+        FormatOwnedWithRule::new(
+            self,
+            crate::ts::objects::literal_enum_member_name::FormatTsLiteralEnumMemberName::default(),
+        )
+    }
+}
 impl FormatRule<biome_js_syntax::TsMappedType>
     for crate::ts::types::mapped_type::FormatTsMappedType
 {
@@ -13004,6 +13044,33 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::AnyJsxTag {
     fn into_format(self) -> Self::Format {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(self, crate::jsx::any::tag::FormatAnyJsxTag::default())
+    }
+}
+impl AsFormat<JsFormatContext> for biome_js_syntax::AnyTsEnumMemberName {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_js_syntax::AnyTsEnumMemberName,
+        crate::ts::any::enum_member_name::FormatAnyTsEnumMemberName,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        #![allow(clippy::default_constructed_unit_structs)]
+        FormatRefWithRule::new(
+            self,
+            crate::ts::any::enum_member_name::FormatAnyTsEnumMemberName::default(),
+        )
+    }
+}
+impl IntoFormat<JsFormatContext> for biome_js_syntax::AnyTsEnumMemberName {
+    type Format = FormatOwnedWithRule<
+        biome_js_syntax::AnyTsEnumMemberName,
+        crate::ts::any::enum_member_name::FormatAnyTsEnumMemberName,
+    >;
+    fn into_format(self) -> Self::Format {
+        #![allow(clippy::default_constructed_unit_structs)]
+        FormatOwnedWithRule::new(
+            self,
+            crate::ts::any::enum_member_name::FormatAnyTsEnumMemberName::default(),
+        )
     }
 }
 impl AsFormat<JsFormatContext> for biome_js_syntax::AnyTsExternalModuleDeclarationBody {

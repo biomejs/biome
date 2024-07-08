@@ -1,6 +1,6 @@
 use crate::services::semantic::Semantic;
 use biome_analyze::RuleSource;
-use biome_analyze::{context::RuleContext, declare_rule, Rule, RuleDiagnostic};
+use biome_analyze::{context::RuleContext, declare_lint_rule, Rule, RuleDiagnostic};
 use biome_console::{markup, MarkupBuf};
 use biome_js_syntax::{
     AnyJsArrayElement, AnyJsAssignment, AnyJsAssignmentPattern, AnyJsCallArgument,
@@ -13,7 +13,7 @@ use biome_js_syntax::{
 };
 use biome_rowan::{declare_node_union, AstNode, AstSeparatedList, TextRange};
 
-declare_rule! {
+declare_lint_rule! {
     /// Disallow `then` property.
     ///
     /// When combining objects with a `then` method (thenable objects) with await expressions or dynamic imports, caution is necessary.

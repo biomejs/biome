@@ -21,7 +21,7 @@ invalid.js:1:1 lint/suspicious/noGlobalAssign ━━━━━━━━━━━�
   ! A global variable should not be reassigned.
   
   > 1 │ window = {};
-      │ ^^^^^^^
+      │ ^^^^^^
     2 │ Object = null;
     3 │ undefined = 1;
   
@@ -31,14 +31,13 @@ invalid.js:1:1 lint/suspicious/noGlobalAssign ━━━━━━━━━━━�
 ```
 
 ```
-invalid.js:1:13 lint/suspicious/noGlobalAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:2:1 lint/suspicious/noGlobalAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! A global variable should not be reassigned.
   
-  > 1 │ window = {};
-      │             
+    1 │ window = {};
   > 2 │ Object = null;
-      │ ^^^^^^^
+      │ ^^^^^^
     3 │ undefined = 1;
     4 │ length = 1;
   
@@ -48,15 +47,14 @@ invalid.js:1:13 lint/suspicious/noGlobalAssign ━━━━━━━━━━━
 ```
 
 ```
-invalid.js:2:15 lint/suspicious/noGlobalAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:3:1 lint/suspicious/noGlobalAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! A global variable should not be reassigned.
   
     1 │ window = {};
-  > 2 │ Object = null;
-      │               
+    2 │ Object = null;
   > 3 │ undefined = 1;
-      │ ^^^^^^^^^^
+      │ ^^^^^^^^^
     4 │ length = 1;
     5 │ top = 1;
   
@@ -66,16 +64,14 @@ invalid.js:2:15 lint/suspicious/noGlobalAssign ━━━━━━━━━━━
 ```
 
 ```
-invalid.js:3:15 lint/suspicious/noGlobalAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:4:1 lint/suspicious/noGlobalAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! A global variable should not be reassigned.
   
-    1 │ window = {};
     2 │ Object = null;
-  > 3 │ undefined = 1;
-      │               
+    3 │ undefined = 1;
   > 4 │ length = 1;
-      │ ^^^^^^^
+      │ ^^^^^^
     5 │ top = 1;
     6 │ String++;
   
@@ -85,16 +81,14 @@ invalid.js:3:15 lint/suspicious/noGlobalAssign ━━━━━━━━━━━
 ```
 
 ```
-invalid.js:4:12 lint/suspicious/noGlobalAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:5:1 lint/suspicious/noGlobalAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! A global variable should not be reassigned.
   
-    2 │ Object = null;
     3 │ undefined = 1;
-  > 4 │ length = 1;
-      │            
+    4 │ length = 1;
   > 5 │ top = 1;
-      │ ^^^^
+      │ ^^^
     6 │ String++;
     7 │ ({Object = 0, String = 0} = {});
   
@@ -104,14 +98,12 @@ invalid.js:4:12 lint/suspicious/noGlobalAssign ━━━━━━━━━━━
 ```
 
 ```
-invalid.js:5:9 lint/suspicious/noGlobalAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:6:1 lint/suspicious/noGlobalAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! A global variable should not be reassigned.
   
-    3 │ undefined = 1;
     4 │ length = 1;
-  > 5 │ top = 1;
-      │         
+    5 │ top = 1;
   > 6 │ String++;
       │ ^^^^^^
     7 │ ({Object = 0, String = 0} = {});
@@ -130,7 +122,7 @@ invalid.js:7:3 lint/suspicious/noGlobalAssign ━━━━━━━━━━━�
     5 │ top = 1;
     6 │ String++;
   > 7 │ ({Object = 0, String = 0} = {});
-      │   ^^^^^^^
+      │   ^^^^^^
     8 │ require = 0;
   
   i Assigning to a global variable can override essential functionality.
@@ -146,7 +138,7 @@ invalid.js:7:15 lint/suspicious/noGlobalAssign ━━━━━━━━━━━
     5 │ top = 1;
     6 │ String++;
   > 7 │ ({Object = 0, String = 0} = {});
-      │               ^^^^^^^
+      │               ^^^^^^
     8 │ require = 0;
   
   i Assigning to a global variable can override essential functionality.
@@ -155,20 +147,16 @@ invalid.js:7:15 lint/suspicious/noGlobalAssign ━━━━━━━━━━━
 ```
 
 ```
-invalid.js:7:33 lint/suspicious/noGlobalAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:8:1 lint/suspicious/noGlobalAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! A global variable should not be reassigned.
   
-    5 │ top = 1;
     6 │ String++;
-  > 7 │ ({Object = 0, String = 0} = {});
-      │                                 
+    7 │ ({Object = 0, String = 0} = {});
   > 8 │ require = 0;
-      │ ^^^^^^^^
+      │ ^^^^^^^
   
   i Assigning to a global variable can override essential functionality.
   
 
 ```
-
-

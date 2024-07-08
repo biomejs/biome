@@ -70,7 +70,7 @@ impl Reference {
 
     /// Returns the node of this reference
     pub fn syntax(&self) -> &JsSyntaxNode {
-        &self.data.node_by_range[self.range()]
+        &self.data.binding_node_by_start[&self.range().start()]
     }
 
     /// Returns the binding of this reference
@@ -137,7 +137,7 @@ impl FunctionCall {
 
     /// Returns the node of this reference
     pub fn syntax(&self) -> &JsSyntaxNode {
-        &self.data.node_by_range[self.range()]
+        &self.data.binding_node_by_start[&self.range().start()]
     }
 
     /// Returns the typed AST node of this reference
@@ -182,13 +182,13 @@ pub struct SemanticModelUnresolvedReference {
 #[derive(Debug)]
 pub struct UnresolvedReference {
     pub(crate) data: Rc<SemanticModelData>,
-    pub(crate) id: usize,
+    pub(crate) id: u32,
 }
 
 impl UnresolvedReference {
     pub fn syntax(&self) -> &JsSyntaxNode {
-        let reference = &self.data.unresolved_references[self.id];
-        &self.data.node_by_range[&reference.range]
+        let reference = &self.data.unresolved_references[self.id as usize];
+        &self.data.binding_node_by_start[&reference.range.start()]
     }
 
     pub fn tree(&self) -> AnyJsIdentifierUsage {
@@ -196,7 +196,7 @@ impl UnresolvedReference {
     }
 
     pub fn range(&self) -> &TextRange {
-        let reference = &self.data.unresolved_references[self.id];
+        let reference = &self.data.unresolved_references[self.id as usize];
         &reference.range
     }
 }

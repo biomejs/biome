@@ -60,9 +60,23 @@ impl Default for GraphqlFormatterSettings {
     }
 }
 
+#[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+pub struct GraphqlLinterSettings {
+    pub enabled: Option<bool>,
+}
+
+impl Default for GraphqlLinterSettings {
+    fn default() -> Self {
+        Self {
+            enabled: Some(false),
+        }
+    }
+}
+
 impl ServiceLanguage for GraphqlLanguage {
     type FormatterSettings = GraphqlFormatterSettings;
-    type LinterSettings = ();
+    type LinterSettings = GraphqlLinterSettings;
     type OrganizeImportsSettings = ();
     type FormatOptions = GraphqlFormatOptions;
     type ParserSettings = ();
@@ -203,7 +217,7 @@ fn debug_formatter_ir(
     Ok(root_element.to_string())
 }
 
-#[tracing::instrument(level = "debug", skip(parse))]
+#[tracing::instrument(level = "debug", skip(parse, settings))]
 fn format(
     biome_path: &BiomePath,
     document_file_source: &DocumentFileSource,

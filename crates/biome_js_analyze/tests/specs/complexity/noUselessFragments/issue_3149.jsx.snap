@@ -1,0 +1,76 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: issue_3149.jsx
+---
+# Input
+```jsx
+function fn(member) {
+  fn(<>{member.expression}</>);
+  fn(<>{member.expression()}</>);
+  (<>{1}</>).toString();
+}
+
+```
+
+# Diagnostics
+```
+issue_3149.jsx:2:6 lint/complexity/noUselessFragments  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid using unnecessary Fragment.
+  
+    1 │ function fn(member) {
+  > 2 │   fn(<>{member.expression}</>);
+      │      ^^^^^^^^^^^^^^^^^^^^^^^^
+    3 │   fn(<>{member.expression()}</>);
+    4 │   (<>{1}</>).toString();
+  
+  i A fragment is redundant if it contains only one child, or if it is the child of a html element, and is not a keyed fragment.
+  
+  i Unsafe fix: Remove the Fragment
+  
+    2 │ ··fn(<>{member.expression}</>);
+      │      ---                 ----  
+
+```
+
+```
+issue_3149.jsx:3:6 lint/complexity/noUselessFragments  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid using unnecessary Fragment.
+  
+    1 │ function fn(member) {
+    2 │   fn(<>{member.expression}</>);
+  > 3 │   fn(<>{member.expression()}</>);
+      │      ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │   (<>{1}</>).toString();
+    5 │ }
+  
+  i A fragment is redundant if it contains only one child, or if it is the child of a html element, and is not a keyed fragment.
+  
+  i Unsafe fix: Remove the Fragment
+  
+    3 │ ··fn(<>{member.expression()}</>);
+      │      ---                   ----  
+
+```
+
+```
+issue_3149.jsx:4:4 lint/complexity/noUselessFragments  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid using unnecessary Fragment.
+  
+    2 │   fn(<>{member.expression}</>);
+    3 │   fn(<>{member.expression()}</>);
+  > 4 │   (<>{1}</>).toString();
+      │    ^^^^^^^^
+    5 │ }
+    6 │ 
+  
+  i A fragment is redundant if it contains only one child, or if it is the child of a html element, and is not a keyed fragment.
+  
+  i Unsafe fix: Remove the Fragment
+  
+    4 │ ··(<>{1}</>).toString();
+      │    --- ----             
+
+```

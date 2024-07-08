@@ -1,14 +1,14 @@
 use crate::services::semantic::Semantic;
 use crate::JsRuleAction;
 use biome_analyze::context::RuleContext;
-use biome_analyze::{declare_rule, ActionCategory, FixKind, Rule, RuleDiagnostic, RuleSource};
+use biome_analyze::{declare_lint_rule, ActionCategory, FixKind, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
 use biome_js_factory::make::{self};
 use biome_js_syntax::binding_ext::AnyJsBindingDeclaration;
 use biome_js_syntax::{JsIdentifierAssignment, JsSyntaxKind};
 use biome_rowan::{AstNode, BatchMutationExt, TextRange};
 
-declare_rule! {
+declare_lint_rule! {
     /// Prevents from having `const` variables being re-assigned.
     ///
     /// Trying to assign a value to a `const` will cause an `TypeError` when the code is executed.

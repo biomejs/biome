@@ -535,7 +535,7 @@ impl<'ctx, 'app> TraversalContext for TraversalOptions<'ctx, 'app> {
                 .workspace
                 .is_path_ignored(IsPathIgnoredParams {
                     biome_path: biome_path.clone(),
-                    features: self.execution.to_features(),
+                    features: self.execution.to_feature(),
                 })
                 .unwrap_or_else(|err| {
                     self.push_diagnostic(err.into());
@@ -551,7 +551,7 @@ impl<'ctx, 'app> TraversalContext for TraversalOptions<'ctx, 'app> {
 
         let file_features = self.workspace.file_features(SupportsFeatureParams {
             path: biome_path.clone(),
-            features: self.execution.to_features(),
+            features: self.execution.to_feature(),
         });
 
         let file_features = match file_features {

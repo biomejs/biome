@@ -171,9 +171,11 @@ pub fn run(test_case: &str, _snapshot_name: &str, test_directory: &str, outcome_
 #[test]
 pub fn quick_test() {
     let code = r#"
-.formTable tbody td {
-    border-left: 1px # solid;
+.test {
+&&&&& {
+color: red;
 }
+ }
     "#;
 
     let root = parse_css(

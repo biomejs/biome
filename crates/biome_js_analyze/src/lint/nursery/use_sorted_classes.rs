@@ -8,7 +8,7 @@ mod sort_config;
 mod tailwind_preset;
 
 use biome_analyze::{
-    context::RuleContext, declare_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic,
+    context::RuleContext, declare_lint_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic,
 };
 use biome_console::markup;
 use biome_js_factory::make::{
@@ -27,7 +27,7 @@ use self::{
     sort::sort_class_name, sort_config::SortConfig,
 };
 
-declare_rule! {
+declare_lint_rule! {
     /// Enforce the sorting of CSS utility classes.
     ///
     /// This rule implements the same sorting algorithm as [Tailwind CSS](https://tailwindcss.com/blog/automatic-class-sorting-with-prettier#how-classes-are-sorted), but supports any utility class framework including [UnoCSS](https://unocss.dev/).

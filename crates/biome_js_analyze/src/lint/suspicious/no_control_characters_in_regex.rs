@@ -1,5 +1,7 @@
 use crate::utils::unescape_string;
-use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic, RuleSource};
+use biome_analyze::{
+    context::RuleContext, declare_lint_rule, Ast, Rule, RuleDiagnostic, RuleSource,
+};
 use biome_console::markup;
 use biome_js_syntax::{
     AnyJsExpression, JsCallArguments, JsCallExpression, JsNewExpression, JsRegexLiteralExpression,
@@ -8,7 +10,7 @@ use biome_js_syntax::{
 use biome_rowan::{declare_node_union, AstNode, AstSeparatedList};
 use std::{iter::Peekable, str::Chars};
 
-declare_rule! {
+declare_lint_rule! {
     /// Prevents from having control characters and some escape sequences that match control characters in regular expressions.
     ///
     /// Control characters are hidden special characters that are numbered from 0 to 31 in the ASCII system.

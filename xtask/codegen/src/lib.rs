@@ -36,7 +36,7 @@ pub use self::ast::generate_ast;
 pub use self::formatter::generate_formatters;
 pub use self::generate_analyzer::generate_analyzer;
 pub use self::generate_crate::generate_crate;
-pub use self::generate_new_analyzer_rule::{generate_new_analyzer_rule, RuleKind};
+pub use self::generate_new_analyzer_rule::{generate_new_analyzer_rule, LanguageKind};
 pub use self::parser_tests::generate_parser_tests;
 pub use self::unicode::generate_tables;
 
@@ -109,7 +109,7 @@ pub enum TaskCommand {
     NewRule {
         /// Path of the rule
         #[bpaf(long("kind"))]
-        kind: RuleKind,
+        kind: LanguageKind,
 
         /// Name of the rule
         #[bpaf(long("name"))]

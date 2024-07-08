@@ -1,5 +1,5 @@
 use crate::{services::semantic::Semantic, utils::rename::RenamableNode};
-use biome_analyze::{context::RuleContext, declare_rule, Rule, RuleDiagnostic, RuleSource};
+use biome_analyze::{context::RuleContext, declare_lint_rule, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
 use biome_js_semantic::SemanticModel;
 use biome_js_syntax::{
@@ -10,7 +10,7 @@ use biome_js_syntax::{
 };
 use biome_rowan::{declare_node_union, AstNode, AstSeparatedList};
 
-declare_rule! {
+declare_lint_rule! {
     /// Disallow constant expressions in conditions
     ///
     /// ## Examples

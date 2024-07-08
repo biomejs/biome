@@ -98,11 +98,10 @@ impl DocumentFileSource {
         if let Ok(file_source) = CssFileSource::try_from_well_known(file_name) {
             return Ok(file_source.into());
         }
-        if cfg!(feature = "graphql") || cfg!(debug_assertions) {
-            if let Ok(file_source) = GraphqlFileSource::try_from_well_known(file_name) {
-                return Ok(file_source.into());
-            }
+        if let Ok(file_source) = GraphqlFileSource::try_from_well_known(file_name) {
+            return Ok(file_source.into());
         }
+
         Err(FileSourceError::UnknownFileName(file_name.into()))
     }
 
@@ -122,10 +121,8 @@ impl DocumentFileSource {
         if let Ok(file_source) = CssFileSource::try_from_extension(extension) {
             return Ok(file_source.into());
         }
-        if cfg!(feature = "graphql") || cfg!(debug_assertions) {
-            if let Ok(file_source) = GraphqlFileSource::try_from_extension(extension) {
-                return Ok(file_source.into());
-            }
+        if let Ok(file_source) = GraphqlFileSource::try_from_extension(extension) {
+            return Ok(file_source.into());
         }
         Err(FileSourceError::UnknownExtension(
             Default::default(),
@@ -149,10 +146,8 @@ impl DocumentFileSource {
         if let Ok(file_source) = CssFileSource::try_from_language_id(language_id) {
             return Ok(file_source.into());
         }
-        if cfg!(feature = "graphql") || cfg!(debug_assertions) {
-            if let Ok(file_source) = GraphqlFileSource::try_from_language_id(language_id) {
-                return Ok(file_source.into());
-            }
+        if let Ok(file_source) = GraphqlFileSource::try_from_language_id(language_id) {
+            return Ok(file_source.into());
         }
         Err(FileSourceError::UnknownLanguageId(language_id.into()))
     }
@@ -299,7 +294,7 @@ impl DocumentFileSource {
                 EmbeddingKind::None => true,
             },
             DocumentFileSource::Json(_) | DocumentFileSource::Css(_) => true,
-            DocumentFileSource::Graphql(_) => cfg!(feature = "graphql") || cfg!(debug_assertions),
+            DocumentFileSource::Graphql(_) => true,
             DocumentFileSource::Unknown => false,
         }
     }

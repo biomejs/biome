@@ -1,13 +1,19 @@
 // Generated file, do not edit by hand, see `xtask/codegen`
 import type { Transport } from "./transport";
 export interface SupportsFeatureParams {
-	features: FeatureName[];
+	features: FeatureName;
 	path: BiomePath;
 }
-export type FeatureName = "Format" | "Lint" | "OrganizeImports" | "Search";
+export type FeatureName = FeatureKind[];
 export interface BiomePath {
 	path: string;
 }
+export type FeatureKind =
+	| "Format"
+	| "Lint"
+	| "OrganizeImports"
+	| "Search"
+	| "Assists";
 export interface SupportsFeatureResult {
 	reason?: SupportKind;
 }
@@ -173,6 +179,7 @@ export interface PartialGraphqlConfiguration {
 	 * GraphQL formatter options
 	 */
 	formatter?: PartialGraphqlFormatter;
+	linter?: PartialGraphqlLinter;
 }
 /**
  * A set of options applied to the JavaScript files
@@ -373,6 +380,15 @@ export interface PartialGraphqlFormatter {
 	 * The type of quotes used in GraphQL code. Defaults to double.
 	 */
 	quoteStyle?: QuoteStyle;
+}
+/**
+ * Options that changes how the GraphQL linter behaves
+ */
+export interface PartialGraphqlLinter {
+	/**
+	 * Control the formatter for GraphQL files.
+	 */
+	enabled?: boolean;
 }
 /**
  * Formatting options specific to the JavaScript files
@@ -1061,6 +1077,14 @@ export interface Nursery {
 	 * Disallow duplicate selectors within keyframe blocks.
 	 */
 	noDuplicateSelectorsKeyframeBlock?: RuleConfiguration_for_Null;
+	/**
+	 * No duplicated fields in GraphQL operations.
+	 */
+	noDuplicatedFields?: RuleConfiguration_for_Null;
+	/**
+	 * Disallow accessing namespace imports dynamically.
+	 */
+	noDynamicNamespaceImportAccess?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow CSS empty blocks.
 	 */
@@ -2476,6 +2500,8 @@ export type Category =
 	| "lint/nursery/noDuplicateFontNames"
 	| "lint/nursery/noDuplicateJsonKeys"
 	| "lint/nursery/noDuplicateSelectorsKeyframeBlock"
+	| "lint/nursery/noDuplicatedFields"
+	| "lint/nursery/noDynamicNamespaceImportAccess"
 	| "lint/nursery/noEmptyBlock"
 	| "lint/nursery/noEvolvingTypes"
 	| "lint/nursery/noExportedImports"
@@ -2489,7 +2515,6 @@ export type Category =
 	| "lint/nursery/noRestrictedImports"
 	| "lint/nursery/noShorthandPropertyOverrides"
 	| "lint/nursery/noSubstr"
-	| "lint/nursery/noTypeOnlyImportAttributes"
 	| "lint/nursery/noUndeclaredDependencies"
 	| "lint/nursery/noUnknownFunction"
 	| "lint/nursery/noUnknownMediaFeatureName"
@@ -2628,6 +2653,10 @@ export type Category =
 	| "lint/suspicious/useNamespaceKeyword"
 	| "lint/suspicious/useValidTypeof"
 	| "assists/nursery/useSortedKeys"
+	| "syntax/nursery/noTypeOnlyImportAttributes"
+	| "syntax/correctness/noSuperWithoutExtends"
+	| "syntax/correctness/noInitializerWithDefinite"
+	| "syntax/correctness/noDuplicatePrivateClassMembers"
 	| "files/missingHandler"
 	| "format"
 	| "check"
@@ -2642,9 +2671,6 @@ export type Category =
 	| "internalError/fs"
 	| "internalError/panic"
 	| "parse"
-	| "parse/noSuperWithoutExtends"
-	| "parse/noInitializerWithDefinite"
-	| "parse/noDuplicatePrivateClassMembers"
 	| "lint"
 	| "lint/a11y"
 	| "lint/complexity"

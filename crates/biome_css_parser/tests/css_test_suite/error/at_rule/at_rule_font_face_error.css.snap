@@ -2,7 +2,6 @@
 source: crates/biome_css_parser/tests/spec_test.rs
 expression: snapshot
 ---
-
 ## Input
 
 ```css
@@ -30,7 +29,7 @@ CssRoot {
         CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
-                    nesting_selector_token: missing (optional),
+                    nesting_selectors: CssNestedSelectorList [],
                     simple_selector: CssTypeSelector {
                         namespace: missing (optional),
                         ident: CssIdentifier {
@@ -58,7 +57,7 @@ CssRoot {
         CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
-                    nesting_selector_token: missing (optional),
+                    nesting_selectors: CssNestedSelectorList [],
                     simple_selector: CssTypeSelector {
                         namespace: missing (optional),
                         ident: CssIdentifier {
@@ -110,7 +109,7 @@ CssRoot {
     1: CSS_QUALIFIED_RULE@11..17
       0: CSS_SELECTOR_LIST@11..15
         0: CSS_COMPOUND_SELECTOR@11..15
-          0: (empty)
+          0: CSS_NESTED_SELECTOR_LIST@11..11
           1: CSS_TYPE_SELECTOR@11..15
             0: (empty)
             1: CSS_IDENTIFIER@11..15
@@ -128,7 +127,7 @@ CssRoot {
     3: CSS_QUALIFIED_RULE@29..32
       0: CSS_SELECTOR_LIST@29..32
         0: CSS_COMPOUND_SELECTOR@29..32
-          0: (empty)
+          0: CSS_NESTED_SELECTOR_LIST@29..29
           1: CSS_TYPE_SELECTOR@29..32
             0: (empty)
             1: CSS_IDENTIFIER@29..32
@@ -196,5 +195,3 @@ at_rule_font_face_error.css:3:12 parse ━━━━━━━━━━━━━�
   i Remove ;
   
 ```
-
-

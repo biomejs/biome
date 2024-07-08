@@ -2,7 +2,6 @@
 source: crates/biome_css_parser/tests/spec_test.rs
 expression: snapshot
 ---
-
 ## Input
 
 ```css
@@ -21,7 +20,7 @@ CssRoot {
         CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
-                    nesting_selector_token: missing (optional),
+                    nesting_selectors: CssNestedSelectorList [],
                     simple_selector: CssTypeSelector {
                         namespace: missing (optional),
                         ident: CssIdentifier {
@@ -52,7 +51,7 @@ CssRoot {
         CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
-                    nesting_selector_token: missing (optional),
+                    nesting_selectors: CssNestedSelectorList [],
                     simple_selector: CssTypeSelector {
                         namespace: missing (optional),
                         ident: CssIdentifier {
@@ -94,7 +93,7 @@ CssRoot {
     0: CSS_QUALIFIED_RULE@0..38
       0: CSS_SELECTOR_LIST@0..36
         0: CSS_COMPOUND_SELECTOR@0..36
-          0: (empty)
+          0: CSS_NESTED_SELECTOR_LIST@0..0
           1: CSS_TYPE_SELECTOR@0..21
             0: (empty)
             1: CSS_IDENTIFIER@0..21
@@ -115,7 +114,7 @@ CssRoot {
     1: CSS_QUALIFIED_RULE@38..83
       0: CSS_SELECTOR_LIST@38..81
         0: CSS_COMPOUND_SELECTOR@38..81
-          0: (empty)
+          0: CSS_NESTED_SELECTOR_LIST@38..38
           1: CSS_TYPE_SELECTOR@38..60
             0: (empty)
             1: CSS_IDENTIFIER@38..60
@@ -136,5 +135,3 @@ CssRoot {
   2: EOF@83..84 "" [Newline("\n")] []
 
 ```
-
-

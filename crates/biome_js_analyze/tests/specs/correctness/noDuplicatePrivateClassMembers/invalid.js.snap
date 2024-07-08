@@ -22,7 +22,7 @@ class A { #foo; accessor #foo; }
 
 # Diagnostics
 ```
-invalid.js:1:17 parse/noDuplicatePrivateClassMembers ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:1:17 syntax/correctness/noDuplicatePrivateClassMembers ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Duplicate private class member "#foo"
   
@@ -35,7 +35,7 @@ invalid.js:1:17 parse/noDuplicatePrivateClassMembers ━━━━━━━━━
 ```
 
 ```
-invalid.js:2:22 parse/noDuplicatePrivateClassMembers ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:2:22 syntax/correctness/noDuplicatePrivateClassMembers ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Duplicate private class member "#foo"
   
@@ -49,7 +49,7 @@ invalid.js:2:22 parse/noDuplicatePrivateClassMembers ━━━━━━━━━
 ```
 
 ```
-invalid.js:3:17 parse/noDuplicatePrivateClassMembers ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:3:17 syntax/correctness/noDuplicatePrivateClassMembers ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Duplicate private class member "#foo"
   
@@ -64,7 +64,7 @@ invalid.js:3:17 parse/noDuplicatePrivateClassMembers ━━━━━━━━━
 ```
 
 ```
-invalid.js:4:17 parse/noDuplicatePrivateClassMembers ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:4:17 syntax/correctness/noDuplicatePrivateClassMembers ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Duplicate private class member "#foo"
   
@@ -79,7 +79,7 @@ invalid.js:4:17 parse/noDuplicatePrivateClassMembers ━━━━━━━━━
 ```
 
 ```
-invalid.js:5:25 parse/noDuplicatePrivateClassMembers ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:5:25 syntax/correctness/noDuplicatePrivateClassMembers ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Duplicate private class member "#foo"
   
@@ -94,7 +94,7 @@ invalid.js:5:25 parse/noDuplicatePrivateClassMembers ━━━━━━━━━
 ```
 
 ```
-invalid.js:6:26 parse/noDuplicatePrivateClassMembers ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:6:26 syntax/correctness/noDuplicatePrivateClassMembers ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Duplicate private class member "#foo"
   
@@ -109,7 +109,7 @@ invalid.js:6:26 parse/noDuplicatePrivateClassMembers ━━━━━━━━━
 ```
 
 ```
-invalid.js:7:30 parse/noDuplicatePrivateClassMembers ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:7:30 syntax/correctness/noDuplicatePrivateClassMembers ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Duplicate private class member "#foo"
   
@@ -124,7 +124,7 @@ invalid.js:7:30 parse/noDuplicatePrivateClassMembers ━━━━━━━━━
 ```
 
 ```
-invalid.js:8:44 parse/noDuplicatePrivateClassMembers ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:8:44 syntax/correctness/noDuplicatePrivateClassMembers ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Duplicate private class member "#foo"
   
@@ -139,7 +139,7 @@ invalid.js:8:44 parse/noDuplicatePrivateClassMembers ━━━━━━━━━
 ```
 
 ```
-invalid.js:9:17 parse/noDuplicatePrivateClassMembers ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:9:17 syntax/correctness/noDuplicatePrivateClassMembers ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Duplicate private class member "#foo"
   
@@ -154,7 +154,7 @@ invalid.js:9:17 parse/noDuplicatePrivateClassMembers ━━━━━━━━━
 ```
 
 ```
-invalid.js:9:29 parse/noDuplicatePrivateClassMembers ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:9:29 syntax/correctness/noDuplicatePrivateClassMembers ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Duplicate private class member "#bar"
   
@@ -169,7 +169,7 @@ invalid.js:9:29 parse/noDuplicatePrivateClassMembers ━━━━━━━━━
 ```
 
 ```
-invalid.js:10:17 parse/noDuplicatePrivateClassMembers ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:10:17 syntax/correctness/noDuplicatePrivateClassMembers ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Duplicate private class member "#foo"
   
@@ -184,7 +184,7 @@ invalid.js:10:17 parse/noDuplicatePrivateClassMembers ━━━━━━━━�
 ```
 
 ```
-invalid.js:10:31 parse/noDuplicatePrivateClassMembers ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:10:31 syntax/correctness/noDuplicatePrivateClassMembers ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Duplicate private class member "#foo"
   
@@ -199,7 +199,7 @@ invalid.js:10:31 parse/noDuplicatePrivateClassMembers ━━━━━━━━�
 ```
 
 ```
-invalid.js:11:27 parse/noDuplicatePrivateClassMembers ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:11:27 syntax/correctness/noDuplicatePrivateClassMembers ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Duplicate private class member "#bar"
   
@@ -214,7 +214,7 @@ invalid.js:11:27 parse/noDuplicatePrivateClassMembers ━━━━━━━━�
 ```
 
 ```
-invalid.js:12:17 parse/noDuplicatePrivateClassMembers ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:12:17 syntax/correctness/noDuplicatePrivateClassMembers ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Duplicate private class member "#foo"
   
@@ -229,7 +229,7 @@ invalid.js:12:17 parse/noDuplicatePrivateClassMembers ━━━━━━━━�
 ```
 
 ```
-invalid.js:13:17 parse/noDuplicatePrivateClassMembers ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:13:17 syntax/correctness/noDuplicatePrivateClassMembers ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Duplicate private class member "#foo"
   
@@ -241,5 +241,3 @@ invalid.js:13:17 parse/noDuplicatePrivateClassMembers ━━━━━━━━�
   
 
 ```
-
-

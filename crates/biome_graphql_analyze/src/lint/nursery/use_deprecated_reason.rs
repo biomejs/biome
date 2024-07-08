@@ -1,9 +1,11 @@
-use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic};
+use biome_analyze::{
+    context::RuleContext, declare_lint_rule, Ast, Rule, RuleDiagnostic, RuleSource, RuleSourceKind,
+};
 use biome_console::markup;
 use biome_graphql_syntax::GraphqlDirective;
 use biome_rowan::AstNode;
 
-declare_rule! {
+declare_lint_rule! {
     /// Require specifying the reason argument when using @deprecated directive
     ///
     /// This rule checks the parameter of @deprecated directive for the use of reason argument,
@@ -30,7 +32,9 @@ declare_rule! {
         version: "next",
         name: "useDeprecatedReason",
         language: "graphql",
-        recommended: false,
+        sources: &[RuleSource::EslintGraphql("require-deprecation-reason")],
+        source_kind: RuleSourceKind::SameLogic,
+        recommended: true,
     }
 }
 

@@ -1,11 +1,11 @@
 use crate::services::semantic::Semantic;
-use biome_analyze::{context::RuleContext, declare_rule, Rule, RuleDiagnostic, RuleSource};
+use biome_analyze::{context::RuleContext, declare_lint_rule, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
 use biome_js_syntax::{global_identifier, AnyJsExpression, JsCallExpression, JsNewExpression};
 use biome_rowan::{declare_node_union, SyntaxResult, TextRange};
 use std::{fmt::Display, str::FromStr};
 
-declare_rule! {
+declare_lint_rule! {
     /// Disallow calling global object properties as functions
     ///
     /// ECMAScript provides several global objects that are intended to be used as-is.

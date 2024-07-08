@@ -9,8 +9,8 @@ use crate::{
     JsRuleAction,
 };
 use biome_analyze::{
-    context::RuleContext, declare_rule, ActionCategory, FixKind, Rule, RuleDiagnostic, RuleSource,
-    RuleSourceKind,
+    context::RuleContext, declare_lint_rule, ActionCategory, FixKind, Rule, RuleDiagnostic,
+    RuleSource, RuleSourceKind,
 };
 use biome_console::markup;
 use biome_deserialize::{DeserializableValidator, DeserializationDiagnostic};
@@ -20,9 +20,9 @@ use biome_js_syntax::{
     binding_ext::AnyJsBindingDeclaration, AnyJsClassMember, AnyJsObjectMember,
     AnyJsVariableDeclaration, AnyTsTypeMember, JsIdentifierBinding, JsLiteralExportName,
     JsLiteralMemberName, JsMethodModifierList, JsPrivateClassMemberName, JsPropertyModifierList,
-    JsSyntaxKind, JsSyntaxToken, JsVariableDeclarator, JsVariableKind, Modifier, TsEnumMember,
-    TsIdentifierBinding, TsMethodSignatureModifierList, TsPropertySignatureModifierList,
-    TsTypeParameterName,
+    JsSyntaxKind, JsSyntaxToken, JsVariableDeclarator, JsVariableKind, Modifier,
+    TsIdentifierBinding, TsLiteralEnumMemberName, TsMethodSignatureModifierList,
+    TsPropertySignatureModifierList, TsTypeParameterName,
 };
 use biome_rowan::{
     declare_node_union, AstNode, BatchMutationExt, SyntaxResult, TextRange, TextSize,
@@ -35,7 +35,7 @@ use smallvec::SmallVec;
 #[cfg(feature = "schemars")]
 use schemars::JsonSchema;
 
-declare_rule! {
+declare_lint_rule! {
     /// Enforce naming conventions for everything across a codebase.
     ///
     /// Enforcing [naming conventions](https://en.wikipedia.org/wiki/Naming_convention_(programming)) helps to keep the codebase consistent,
@@ -843,6 +843,7 @@ declare_node_union! {
         JsPrivateClassMemberName |
         JsLiteralExportName |
         TsIdentifierBinding |
+        TsLiteralEnumMemberName |
         TsTypeParameterName
 }
 
@@ -856,6 +857,7 @@ impl AnyIdentifierBindingLike {
             }
             AnyIdentifierBindingLike::JsLiteralExportName(export_name) => export_name.value(),
             AnyIdentifierBindingLike::TsIdentifierBinding(binding) => binding.name_token(),
+            AnyIdentifierBindingLike::TsLiteralEnumMemberName(member_name) => member_name.value(),
             AnyIdentifierBindingLike::TsTypeParameterName(type_parameter) => {
                 type_parameter.ident_token()
             }
@@ -1177,8 +1179,6 @@ impl Selector {
                     Selector::from_type_member(&member)
                 } else if let Some(member) = member_name.parent::<AnyJsObjectMember>() {
                     Selector::from_object_member(&member)
-                } else if member_name.parent::<TsEnumMember>().is_some() {
-                    Some(Kind::EnumMember.into())
                 } else {
                     None
                 }
@@ -1202,6 +1202,7 @@ impl Selector {
                     _ => None,
                 }
             }
+            AnyIdentifierBindingLike::TsLiteralEnumMemberName(_) => Some(Kind::EnumMember.into()),
             AnyIdentifierBindingLike::TsTypeParameterName(_) => Some(Kind::TypeParameter.into()),
         }
     }
@@ -1298,7 +1299,8 @@ impl Selector {
             // Type parameters should be handled at call site
             | AnyJsBindingDeclaration::TsInferType(_)
             | AnyJsBindingDeclaration::TsMappedType(_)
-            | AnyJsBindingDeclaration::TsTypeParameter(_) => None,
+            | AnyJsBindingDeclaration::TsTypeParameter(_)
+            | AnyJsBindingDeclaration::TsEnumMember(_) => None,
         }
     }
 

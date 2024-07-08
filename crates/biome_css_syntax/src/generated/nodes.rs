@@ -693,13 +693,13 @@ impl CssCompoundSelector {
     }
     pub fn as_fields(&self) -> CssCompoundSelectorFields {
         CssCompoundSelectorFields {
-            nesting_selector_token: self.nesting_selector_token(),
+            nesting_selectors: self.nesting_selectors(),
             simple_selector: self.simple_selector(),
             sub_selectors: self.sub_selectors(),
         }
     }
-    pub fn nesting_selector_token(&self) -> Option<SyntaxToken> {
-        support::token(&self.syntax, 0usize)
+    pub fn nesting_selectors(&self) -> CssNestedSelectorList {
+        support::list(&self.syntax, 0usize)
     }
     pub fn simple_selector(&self) -> Option<AnyCssSimpleSelector> {
         support::node(&self.syntax, 1usize)
@@ -719,7 +719,7 @@ impl Serialize for CssCompoundSelector {
 }
 #[cfg_attr(feature = "serde", derive(Serialize))]
 pub struct CssCompoundSelectorFields {
-    pub nesting_selector_token: Option<SyntaxToken>,
+    pub nesting_selectors: CssNestedSelectorList,
     pub simple_selector: Option<AnyCssSimpleSelector>,
     pub sub_selectors: CssSubSelectorList,
 }
@@ -3514,6 +3514,42 @@ impl Serialize for CssNestedQualifiedRule {
 pub struct CssNestedQualifiedRuleFields {
     pub prelude: CssRelativeSelectorList,
     pub block: SyntaxResult<AnyCssDeclarationOrRuleBlock>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct CssNestedSelector {
+    pub(crate) syntax: SyntaxNode,
+}
+impl CssNestedSelector {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> CssNestedSelectorFields {
+        CssNestedSelectorFields {
+            amp_token: self.amp_token(),
+        }
+    }
+    pub fn amp_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+}
+#[cfg(feature = "serde")]
+impl Serialize for CssNestedSelector {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[cfg_attr(feature = "serde", derive(Serialize))]
+pub struct CssNestedSelectorFields {
+    pub amp_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct CssNthOffset {
@@ -9556,10 +9592,7 @@ impl AstNode for CssCompoundSelector {
 impl std::fmt::Debug for CssCompoundSelector {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("CssCompoundSelector")
-            .field(
-                "nesting_selector_token",
-                &support::DebugOptionalElement(self.nesting_selector_token()),
-            )
+            .field("nesting_selectors", &self.nesting_selectors())
             .field(
                 "simple_selector",
                 &support::DebugOptionalElement(self.simple_selector()),
@@ -12286,6 +12319,44 @@ impl From<CssNestedQualifiedRule> for SyntaxNode {
 }
 impl From<CssNestedQualifiedRule> for SyntaxElement {
     fn from(n: CssNestedQualifiedRule) -> SyntaxElement {
+        n.syntax.into()
+    }
+}
+impl AstNode for CssNestedSelector {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_NESTED_SELECTOR as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == CSS_NESTED_SELECTOR
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for CssNestedSelector {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("CssNestedSelector")
+            .field("amp_token", &support::DebugSyntaxResult(self.amp_token()))
+            .finish()
+    }
+}
+impl From<CssNestedSelector> for SyntaxNode {
+    fn from(n: CssNestedSelector) -> SyntaxNode {
+        n.syntax
+    }
+}
+impl From<CssNestedSelector> for SyntaxElement {
+    fn from(n: CssNestedSelector) -> SyntaxElement {
         n.syntax.into()
     }
 }
@@ -22611,6 +22682,11 @@ impl std::fmt::Display for CssNestedQualifiedRule {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
+impl std::fmt::Display for CssNestedSelector {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
 impl std::fmt::Display for CssNthOffset {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
@@ -25865,6 +25941,89 @@ impl IntoIterator for CssMediaQueryList {
 impl IntoIterator for &CssMediaQueryList {
     type Item = SyntaxResult<AnyCssMediaQuery>;
     type IntoIter = AstSeparatedListNodesIterator<Language, AnyCssMediaQuery>;
+    fn into_iter(self) -> Self::IntoIter {
+        self.iter()
+    }
+}
+#[derive(Clone, Eq, PartialEq, Hash)]
+pub struct CssNestedSelectorList {
+    syntax_list: SyntaxList,
+}
+impl CssNestedSelectorList {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self {
+            syntax_list: syntax.into_list(),
+        }
+    }
+}
+impl AstNode for CssNestedSelectorList {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_NESTED_SELECTOR_LIST as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == CSS_NESTED_SELECTOR_LIST
+    }
+    fn cast(syntax: SyntaxNode) -> Option<CssNestedSelectorList> {
+        if Self::can_cast(syntax.kind()) {
+            Some(CssNestedSelectorList {
+                syntax_list: syntax.into_list(),
+            })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        self.syntax_list.node()
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax_list.into_node()
+    }
+}
+#[cfg(feature = "serde")]
+impl Serialize for CssNestedSelectorList {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut seq = serializer.serialize_seq(Some(self.len()))?;
+        for e in self.iter() {
+            seq.serialize_element(&e)?;
+        }
+        seq.end()
+    }
+}
+impl AstNodeList for CssNestedSelectorList {
+    type Language = Language;
+    type Node = CssNestedSelector;
+    fn syntax_list(&self) -> &SyntaxList {
+        &self.syntax_list
+    }
+    fn into_syntax_list(self) -> SyntaxList {
+        self.syntax_list
+    }
+}
+impl Debug for CssNestedSelectorList {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        f.write_str("CssNestedSelectorList ")?;
+        f.debug_list().entries(self.iter()).finish()
+    }
+}
+impl IntoIterator for &CssNestedSelectorList {
+    type Item = CssNestedSelector;
+    type IntoIter = AstNodeListIterator<Language, CssNestedSelector>;
+    fn into_iter(self) -> Self::IntoIter {
+        self.iter()
+    }
+}
+impl IntoIterator for CssNestedSelectorList {
+    type Item = CssNestedSelector;
+    type IntoIter = AstNodeListIterator<Language, CssNestedSelector>;
     fn into_iter(self) -> Self::IntoIter {
         self.iter()
     }

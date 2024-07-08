@@ -1,5 +1,5 @@
 use biome_analyze::{
-    context::RuleContext, declare_rule, AddVisitor, Phases, QueryMatch, Queryable, Rule,
+    context::RuleContext, declare_lint_rule, AddVisitor, Phases, QueryMatch, Queryable, Rule,
     RuleDiagnostic, RuleSource, RuleSourceKind, ServiceBag, Visitor,
 };
 use biome_console::markup;
@@ -9,7 +9,7 @@ use biome_js_syntax::{
 };
 use biome_rowan::{declare_node_union, AstNode, Language, TextRange, WalkEvent};
 
-declare_rule! {
+declare_lint_rule! {
     /// Disallow using `export` or `module.exports` in files containing tests
     ///
     /// This rule aims to eliminate duplicate runs of tests by exporting things from test files.

@@ -1,5 +1,5 @@
 use biome_analyze::context::RuleContext;
-use biome_analyze::{declare_rule, Ast, Rule, RuleDiagnostic};
+use biome_analyze::{declare_lint_rule, Ast, Rule, RuleDiagnostic};
 use biome_console::markup;
 use biome_js_syntax::{
     AnyTsReturnType, JsArrowFunctionExpression, JsFunctionDeclaration,
@@ -10,7 +10,7 @@ use biome_rowan::{declare_node_union, AstNode};
 
 use crate::services::control_flow::AnyJsControlFlowRoot;
 
-declare_rule! {
+declare_lint_rule! {
     /// Disallow returning a value from a function with the return type 'void'
     ///
     /// 'void' signals the absence of value. The returned value is likely to be ignored by the caller.
