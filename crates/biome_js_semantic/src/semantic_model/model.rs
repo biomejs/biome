@@ -38,8 +38,8 @@ pub(crate) struct SemanticModelData {
     // Maps the start of a node range to a scope id
     pub(crate) scope_hoisted_to_by_range: FxHashMap<TextSize, u32>,
     // Map to each by its range
-    pub(crate) binding_nodes: FxHashMap<TextSize, JsSyntaxNode>,
-    pub(crate) scope_nodes: FxHashMap<TextRange, JsSyntaxNode>,
+    pub(crate) binding_node_by_start: FxHashMap<TextSize, JsSyntaxNode>,
+    pub(crate) scope_node_by_range: FxHashMap<TextRange, JsSyntaxNode>,
     // Maps any range start in the code to its bindings (usize points to bindings vec)
     pub(crate) declared_at_by_start: FxHashMap<TextSize, u32>,
     // List of all the declarations

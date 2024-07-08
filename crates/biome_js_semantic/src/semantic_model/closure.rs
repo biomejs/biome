@@ -135,7 +135,7 @@ impl Iterator for AllCapturesIter {
                     let reference = &binding.references[reference.reference_id as usize];
                     return Some(Capture {
                         data: self.data.clone(),
-                        node: self.data.binding_nodes[&reference.range.start()].clone(), // TODO change node to store the range
+                        node: self.data.binding_node_by_start[&reference.range.start()].clone(), // TODO change node to store the range
                         ty: CaptureType::ByReference,
                         binding_id: binding.id,
                     });
@@ -235,7 +235,7 @@ impl Closure {
     }
 
     pub(super) fn from_scope(data: Rc<SemanticModelData>, scope_id: u32) -> Option<Closure> {
-        let node = &data.scope_nodes[&data.scopes[scope_id as usize].range];
+        let node = &data.scope_node_by_range[&data.scopes[scope_id as usize].range];
         match node.kind() {
             JsSyntaxKind::JS_FUNCTION_DECLARATION
             | JsSyntaxKind::JS_FUNCTION_EXPRESSION

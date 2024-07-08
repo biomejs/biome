@@ -112,7 +112,7 @@ impl Scope {
     }
 
     pub fn syntax(&self) -> &JsSyntaxNode {
-        &self.data.scope_nodes[self.range()]
+        &self.data.scope_node_by_range[self.range()]
     }
 
     /// Return the [Closure] associated with this scope if

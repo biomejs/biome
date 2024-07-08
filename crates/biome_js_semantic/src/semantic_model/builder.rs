@@ -11,8 +11,8 @@ use std::collections::hash_map::Entry;
 /// [std::sync::Arc] and stored inside the [SemanticModel].
 pub struct SemanticModelBuilder {
     root: AnyJsRoot,
-    binding_nodes: FxHashMap<TextSize, JsSyntaxNode>,
-    scope_nodes: FxHashMap<TextRange, JsSyntaxNode>,
+    binding_node_by_start: FxHashMap<TextSize, JsSyntaxNode>,
+    scope_node_by_range: FxHashMap<TextRange, JsSyntaxNode>,
     globals: Vec<SemanticModelGlobalBindingData>,
     globals_by_name: FxHashMap<String, Option<u32>>,
     scopes: Vec<SemanticModelScopeData>,
@@ -31,8 +31,8 @@ impl SemanticModelBuilder {
     pub fn new(root: AnyJsRoot) -> Self {
         Self {
             root,
-            binding_nodes: FxHashMap::default(),
-            scope_nodes: FxHashMap::default(),
+            binding_node_by_start: FxHashMap::default(),
+            scope_node_by_range: FxHashMap::default(),
             globals: vec![],
             globals_by_name: FxHashMap::default(),
             scopes: vec![],
@@ -58,7 +58,7 @@ impl SemanticModelBuilder {
             | TS_TYPE_PARAMETER_NAME
             | TS_LITERAL_ENUM_MEMBER_NAME
             | JS_IDENTIFIER_ASSIGNMENT => {
-                self.binding_nodes
+                self.binding_node_by_start
                     .insert(node.text_trimmed_range().start(), node.clone());
             }
 
@@ -101,14 +101,15 @@ impl SemanticModelBuilder {
             | JS_CATCH_CLAUSE
             | TS_FUNCTION_TYPE
             | TS_MAPPED_TYPE => {
-                self.scope_nodes
+                self.scope_node_by_range
                     .insert(node.text_trimmed_range(), node.clone());
             }
             _ => {
                 if let Some(conditional_type) = TsConditionalType::cast_ref(node) {
                     if let Ok(conditional_true_type) = conditional_type.true_type() {
                         let syntax = conditional_true_type.into_syntax();
-                        self.scope_nodes.insert(syntax.text_trimmed_range(), syntax);
+                        self.scope_node_by_range
+                            .insert(syntax.text_trimmed_range(), syntax);
                     }
                 }
             }
@@ -184,7 +185,7 @@ impl SemanticModelBuilder {
 
                 scope.bindings.push(binding_id);
                 // Handle bindings with a bogus name
-                if let Some(node) = self.binding_nodes.get(&range.start()) {
+                if let Some(node) = self.binding_node_by_start.get(&range.start()) {
                     if let Some(node) = JsIdentifierBinding::cast_ref(node) {
                         if let Ok(name_token) = node.name_token() {
                             let name = name_token.token_text_trimmed();
@@ -308,7 +309,7 @@ impl SemanticModelBuilder {
                     SemanticModelReferenceType::Write { hoisted: false }
                 };
 
-                let node = &self.binding_nodes[&range.start()];
+                let node = &self.binding_node_by_start[&range.start()];
                 let name = node.text_trimmed().to_string();
 
                 match self.globals_by_name.entry(name) {
@@ -356,8 +357,8 @@ impl SemanticModelBuilder {
                     .collect(),
             ),
             scope_hoisted_to_by_range: self.scope_hoisted_to_by_range,
-            binding_nodes: self.binding_nodes,
-            scope_nodes: self.scope_nodes,
+            binding_node_by_start: self.binding_node_by_start,
+            scope_node_by_range: self.scope_node_by_range,
             bindings: self.bindings,
             bindings_by_start: self.bindings_by_start,
             declared_at_by_start: self.declared_at_by_start,
