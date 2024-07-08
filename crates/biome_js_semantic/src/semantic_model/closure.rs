@@ -18,7 +18,7 @@ macro_rules! SyntaxTextRangeHasClosureAstNode {
             impl HasClosureAstNode for $node {
                 #[inline(always)]
                 fn node_text_range(&self) -> TextRange {
-                    self.syntax().text_range()
+                    self.syntax().text_trimmed_range()
                 }
             }
         )*
@@ -50,7 +50,7 @@ macro_rules! SyntaxTextRangeHasClosureAstNode {
             fn node_text_range(&self) -> TextRange {
                 match self {
                     $(
-                        AnyHasClosureNode::$node(node) => node.syntax().text_range(),
+                        AnyHasClosureNode::$node(node) => node.syntax().text_trimmed_range(),
                     )*
                 }
             }
@@ -109,7 +109,7 @@ impl Capture {
     /// This is equivalent, but faster, to:
     ///
     /// ```rs, ignore
-    /// self.declaration().text_range()
+    /// self.declaration().text_trimmed_range()
     /// ```
     pub fn declaration_range(&self) -> &TextRange {
         let binding = self.data.binding(self.binding_id);

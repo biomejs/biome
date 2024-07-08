@@ -265,7 +265,7 @@ impl SemanticAssertion {
                 .to_string();
 
             Some(SemanticAssertion::Declaration(DeclarationAssertion {
-                range: token.parent().unwrap().text_range(),
+                range: token.parent().unwrap().text_trimmed_range(),
                 declaration_name: name,
             }))
         } else if assertion_text.starts_with("/*READ ") {
@@ -277,7 +277,7 @@ impl SemanticAssertion {
                 .to_string();
 
             Some(SemanticAssertion::Read(ReadAssertion {
-                range: token.parent().unwrap().text_range(),
+                range: token.parent().unwrap().text_trimmed_range(),
                 declaration_assertion_name: symbol_name,
             }))
         } else if assertion_text.starts_with("/*WRITE ") {
@@ -289,7 +289,7 @@ impl SemanticAssertion {
                 .to_string();
 
             Some(SemanticAssertion::Write(WriteAssertion {
-                range: token.parent().unwrap().text_range(),
+                range: token.parent().unwrap().text_trimmed_range(),
                 declaration_assertion_name: symbol_name,
             }))
         } else if assertion_text.contains("/*START") {
@@ -300,7 +300,7 @@ impl SemanticAssertion {
                 .trim()
                 .to_string();
             Some(SemanticAssertion::ScopeStart(ScopeStartAssertion {
-                range: token.parent().unwrap().text_range(),
+                range: token.parent().unwrap().text_trimmed_range(),
                 scope_name,
             }))
         } else if assertion_text.contains("/*END") {
@@ -311,7 +311,7 @@ impl SemanticAssertion {
                 .trim()
                 .to_string();
             Some(SemanticAssertion::ScopeEnd(ScopeEndAssertion {
-                range: token.parent().unwrap().text_range(),
+                range: token.parent().unwrap().text_trimmed_range(),
                 scope_name,
             }))
         } else if assertion_text.starts_with("/*@") {
@@ -322,21 +322,21 @@ impl SemanticAssertion {
                 .trim()
                 .to_string();
             Some(SemanticAssertion::AtScope(AtScopeAssertion {
-                range: token.parent().unwrap().text_range(),
+                range: token.parent().unwrap().text_trimmed_range(),
                 scope_name,
             }))
         } else if assertion_text.contains("/*NOEVENT") {
             Some(SemanticAssertion::NoEvent(NoEventAssertion {
-                range: token.parent().unwrap().text_range(),
+                range: token.parent().unwrap().text_trimmed_range(),
             }))
         } else if assertion_text.contains("/*UNIQUE") {
             Some(SemanticAssertion::Unique(UniqueAssertion {
-                range: token.parent().unwrap().text_range(),
+                range: token.parent().unwrap().text_trimmed_range(),
             }))
         } else if assertion_text.contains("/*?") {
             Some(SemanticAssertion::UnresolvedReference(
                 UnresolvedReferenceAssertion {
-                    range: token.parent().unwrap().text_range(),
+                    range: token.parent().unwrap().text_trimmed_range(),
                 },
             ))
         } else {
@@ -906,9 +906,9 @@ fn error_assertion_name_clash(
     // If there is already an assertion with the same name. Suggest a rename
 
     let mut diagnostic =
-        TestSemanticDiagnostic::new("Assertion label conflict.", token.text_range());
+        TestSemanticDiagnostic::new("Assertion label conflict.", token.text_trimmed_range());
     diagnostic.push_advice(
-        token.text_range(),
+        token.text_trimmed_range(),
         "There is already a assertion with the same name. Consider renaming this one.",
     );
     diagnostic.push_advice(old_range, "Previous assertion");
