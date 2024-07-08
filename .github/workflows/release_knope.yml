@@ -52,10 +52,10 @@ jobs:
           - os: ubuntu-20.04
             target: aarch64-unknown-linux-musl
             code-target: linux-arm64-musl
-          - os: macos-11
+          - os: macos-14
             target: x86_64-apple-darwin
             code-target: darwin-x64
-          - os: macos-11
+          - os: macos-14
             target: aarch64-apple-darwin
             code-target: darwin-arm64
     name: Package ${{ matrix.code-target }}
