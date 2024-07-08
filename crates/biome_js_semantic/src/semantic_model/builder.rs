@@ -14,15 +14,15 @@ pub struct SemanticModelBuilder {
     binding_nodes: FxHashMap<TextSize, JsSyntaxNode>,
     scope_nodes: FxHashMap<TextRange, JsSyntaxNode>,
     globals: Vec<SemanticModelGlobalBindingData>,
-    globals_by_name: FxHashMap<String, Option<usize>>,
+    globals_by_name: FxHashMap<String, Option<u32>>,
     scopes: Vec<SemanticModelScopeData>,
     scope_range_by_start: FxHashMap<TextSize, BTreeSet<Interval<u32, u32>>>,
     scope_hoisted_to_by_range: FxHashMap<TextSize, u32>,
     bindings: Vec<SemanticModelBindingData>,
     /// maps a binding range start to its index inside SemanticModelBuilder::bindings vec
-    bindings_by_start: FxHashMap<TextSize, usize>,
-    /// maps a reference range start to its bindings. usize points to SemanticModelBuilder::bindings vec
-    declared_at_by_start: FxHashMap<TextSize, usize>,
+    bindings_by_start: FxHashMap<TextSize, u32>,
+    /// maps a reference range start to its bindings. u32 points to SemanticModelBuilder::bindings vec
+    declared_at_by_start: FxHashMap<TextSize, u32>,
     exported: FxHashSet<TextSize>,
     unresolved_references: Vec<SemanticModelUnresolvedReference>,
 }
@@ -172,7 +172,7 @@ impl SemanticModelBuilder {
                 // event extractor
                 debug_assert!((binding_scope_id as usize) < self.scopes.len());
 
-                let binding_id = self.bindings.len();
+                let binding_id = self.bindings.len() as u32;
                 self.bindings.push(SemanticModelBindingData {
                     id: binding_id.into(),
                     range,
@@ -206,7 +206,7 @@ impl SemanticModelBuilder {
                 let binding_id = match self.bindings_by_start.entry(declaration_at.start()) {
                     Entry::Occupied(entry) => *entry.get(),
                     Entry::Vacant(entry) => {
-                        let id = self.bindings.len();
+                        let id = self.bindings.len() as u32;
                         self.bindings.push(SemanticModelBindingData {
                             id: id.into(),
                             range,
@@ -215,8 +215,8 @@ impl SemanticModelBuilder {
                         *entry.insert(id)
                     }
                 };
-                let binding = &mut self.bindings[binding_id];
-                let reference_index = binding.references.len();
+                let binding = &mut self.bindings[binding_id as usize];
+                let reference_index = binding.references.len() as u32;
 
                 binding.references.push(SemanticModelReference {
                     index: (binding.id, reference_index).into(),
@@ -238,9 +238,9 @@ impl SemanticModelBuilder {
                 scope_id,
             } => {
                 let binding_id = self.bindings_by_start[&declaration_at.start()];
-                let binding = &mut self.bindings[binding_id];
+                let binding = &mut self.bindings[binding_id as usize];
 
-                let reference_index = binding.references.len();
+                let reference_index = binding.references.len() as u32;
                 binding.references.push(SemanticModelReference {
                     index: (binding.id, reference_index).into(),
                     range,
@@ -261,9 +261,9 @@ impl SemanticModelBuilder {
                 scope_id,
             } => {
                 let binding_id = self.bindings_by_start[&declaration_at.start()];
-                let binding = &mut self.bindings[binding_id];
+                let binding = &mut self.bindings[binding_id as usize];
 
-                let reference_index = binding.references.len();
+                let reference_index = binding.references.len() as u32;
                 binding.references.push(SemanticModelReference {
                     index: (binding.id, reference_index).into(),
                     range,
@@ -284,9 +284,9 @@ impl SemanticModelBuilder {
                 scope_id,
             } => {
                 let binding_id = self.bindings_by_start[&declaration_at.start()];
-                let binding = &mut self.bindings[binding_id];
+                let binding = &mut self.bindings[binding_id as usize];
 
-                let reference_index = binding.references.len();
+                let reference_index = binding.references.len() as u32;
                 binding.references.push(SemanticModelReference {
                     index: (binding.id, reference_index).into(),
                     range,
@@ -316,12 +316,12 @@ impl SemanticModelBuilder {
                         let entry = entry.get_mut();
                         match entry {
                             Some(index) => {
-                                self.globals[*index]
+                                self.globals[(*index) as usize]
                                     .references
                                     .push(SemanticModelGlobalReferenceData { range, ty });
                             }
                             None => {
-                                let id = self.globals.len();
+                                let id = self.globals.len() as u32;
                                 self.globals.push(SemanticModelGlobalBindingData {
                                     references: vec![SemanticModelGlobalReferenceData {
                                         range,

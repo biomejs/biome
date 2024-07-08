@@ -182,12 +182,12 @@ pub struct SemanticModelUnresolvedReference {
 #[derive(Debug)]
 pub struct UnresolvedReference {
     pub(crate) data: Rc<SemanticModelData>,
-    pub(crate) id: usize,
+    pub(crate) id: u32,
 }
 
 impl UnresolvedReference {
     pub fn syntax(&self) -> &JsSyntaxNode {
-        let reference = &self.data.unresolved_references[self.id];
+        let reference = &self.data.unresolved_references[self.id as usize];
         &self.data.binding_nodes[&reference.range.start()]
     }
 
@@ -196,7 +196,7 @@ impl UnresolvedReference {
     }
 
     pub fn range(&self) -> &TextRange {
-        let reference = &self.data.unresolved_references[self.id];
+        let reference = &self.data.unresolved_references[self.id as usize];
         &reference.range
     }
 }
