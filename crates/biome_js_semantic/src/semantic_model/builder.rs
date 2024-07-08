@@ -204,18 +204,7 @@ impl SemanticModelBuilder {
                 declared_at: declaration_at, //TODO change to binding_id like we do with scope_id
                 scope_id,
             } => {
-                let binding_id = match self.bindings_by_start.entry(declaration_at.start()) {
-                    Entry::Occupied(entry) => *entry.get(),
-                    Entry::Vacant(entry) => {
-                        let id = self.bindings.len() as u32;
-                        self.bindings.push(SemanticModelBindingData {
-                            id: id.into(),
-                            range,
-                            references: vec![],
-                        });
-                        *entry.insert(id)
-                    }
-                };
+                let binding_id = self.bindings_by_start[&declaration_at.start()];
                 let binding = &mut self.bindings[binding_id as usize];
                 let reference_index = binding.references.len() as u32;
 
