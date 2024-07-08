@@ -74,8 +74,6 @@ schema = [
   "biome_graphql_syntax/schema",
 ]
 
-graphql = []
-
 [dev-dependencies]
 insta        = { workspace = true }
 tests_macros = { workspace = true }
