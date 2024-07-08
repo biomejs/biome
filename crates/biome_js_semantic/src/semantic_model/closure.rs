@@ -135,7 +135,7 @@ impl Iterator for AllCapturesIter {
                     let reference = &binding.references[reference.reference_id];
                     return Some(Capture {
                         data: self.data.clone(),
-                        node: self.data.binding_nodes[&reference.range].clone(), // TODO change node to store the range
+                        node: self.data.binding_nodes[&reference.range.start()].clone(), // TODO change node to store the range
                         ty: CaptureType::ByReference,
                         binding_id: binding.id,
                     });

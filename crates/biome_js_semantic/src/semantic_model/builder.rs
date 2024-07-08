@@ -11,7 +11,7 @@ use std::collections::hash_map::Entry;
 /// [std::sync::Arc] and stored inside the [SemanticModel].
 pub struct SemanticModelBuilder {
     root: AnyJsRoot,
-    binding_nodes: FxHashMap<TextRange, JsSyntaxNode>,
+    binding_nodes: FxHashMap<TextSize, JsSyntaxNode>,
     scope_nodes: FxHashMap<TextRange, JsSyntaxNode>,
     globals: Vec<SemanticModelGlobalBindingData>,
     globals_by_name: FxHashMap<String, Option<usize>>,
@@ -59,7 +59,7 @@ impl SemanticModelBuilder {
             | TS_LITERAL_ENUM_MEMBER_NAME
             | JS_IDENTIFIER_ASSIGNMENT => {
                 self.binding_nodes
-                    .insert(node.text_trimmed_range(), node.clone());
+                    .insert(node.text_trimmed_range().start(), node.clone());
             }
 
             // Accessible from scopes, closures
@@ -184,7 +184,7 @@ impl SemanticModelBuilder {
 
                 scope.bindings.push(binding_id);
                 // Handle bindings with a bogus name
-                if let Some(node) = self.binding_nodes.get(&range) {
+                if let Some(node) = self.binding_nodes.get(&range.start()) {
                     if let Some(node) = JsIdentifierBinding::cast_ref(node) {
                         if let Ok(name_token) = node.name_token() {
                             let name = name_token.token_text_trimmed();
@@ -308,7 +308,7 @@ impl SemanticModelBuilder {
                     SemanticModelReferenceType::Write { hoisted: false }
                 };
 
-                let node = &self.binding_nodes[&range];
+                let node = &self.binding_nodes[&range.start()];
                 let name = node.text_trimmed().to_string();
 
                 match self.globals_by_name.entry(name) {
