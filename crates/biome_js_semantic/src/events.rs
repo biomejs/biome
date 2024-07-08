@@ -300,7 +300,7 @@ impl SemanticEventExtractor {
             }
 
             JS_MODULE | JS_SCRIPT => self.push_scope(
-                node.text_range(),
+                node.text_trimmed_range(),
                 ScopeHoisting::DontHoistDeclarationsToParent,
                 false,
             ),
@@ -316,7 +316,7 @@ impl SemanticEventExtractor {
             | JS_GETTER_OBJECT_MEMBER
             | JS_SETTER_OBJECT_MEMBER => {
                 self.push_scope(
-                    node.text_range(),
+                    node.text_trimmed_range(),
                     ScopeHoisting::DontHoistDeclarationsToParent,
                     true,
                 );
@@ -341,7 +341,7 @@ impl SemanticEventExtractor {
             | TS_INDEX_SIGNATURE_CLASS_MEMBER
             | TS_INDEX_SIGNATURE_TYPE_MEMBER => {
                 self.push_scope(
-                    node.text_range(),
+                    node.text_trimmed_range(),
                     ScopeHoisting::DontHoistDeclarationsToParent,
                     false,
                 );
@@ -350,7 +350,7 @@ impl SemanticEventExtractor {
             JS_BLOCK_STATEMENT | JS_FOR_STATEMENT | JS_FOR_OF_STATEMENT | JS_FOR_IN_STATEMENT
             | JS_SWITCH_STATEMENT | JS_CATCH_CLAUSE => {
                 self.push_scope(
-                    node.text_range(),
+                    node.text_trimmed_range(),
                     ScopeHoisting::HoistDeclarationsToParent,
                     false,
                 );
@@ -367,7 +367,7 @@ impl SemanticEventExtractor {
     fn enter_any_type(&mut self, node: &AnyTsType) {
         if node.in_conditional_true_type() {
             self.push_scope(
-                node.syntax().text_range(),
+                node.syntax().text_trimmed_range(),
                 ScopeHoisting::DontHoistDeclarationsToParent,
                 false,
             );
@@ -380,7 +380,7 @@ impl SemanticEventExtractor {
             JsSyntaxKind::TS_FUNCTION_TYPE | JsSyntaxKind::TS_MAPPED_TYPE
         ) {
             self.push_scope(
-                node.text_range(),
+                node.text_trimmed_range(),
                 ScopeHoisting::DontHoistDeclarationsToParent,
                 false,
             );
@@ -392,7 +392,8 @@ impl SemanticEventExtractor {
         let is_exported = if let Ok(name_token) = node.name_token() {
             let name = name_token.token_text_trimmed();
             if let Some(declaration) = node.declaration() {
-                let info = BindingInfo::new(name_token.text_range(), declaration.syntax().kind());
+                let info =
+                    BindingInfo::new(name_token.text_trimmed_range(), declaration.syntax().kind());
                 let is_exported = declaration.export().is_some();
                 match declaration {
                     AnyJsBindingDeclaration::JsArrayBindingPatternElement(_)
@@ -527,7 +528,7 @@ impl SemanticEventExtractor {
                 is_exported
             } else {
                 // Handle identifiers in bogus nodes
-                let info = BindingInfo::new(name_token.text_range(), node.syntax().kind());
+                let info = BindingInfo::new(name_token.text_trimmed_range(), node.syntax().kind());
                 self.push_binding(None, BindingName::Value(name), info);
                 false
             }
@@ -539,17 +540,17 @@ impl SemanticEventExtractor {
         self.stash.push_back(SemanticEvent::DeclarationFound {
             scope_id,
             hoisted_scope_id,
-            range: node.syntax().text_range(),
+            range: node.syntax().text_trimmed_range(),
         });
         if is_exported {
             self.stash.push_back(SemanticEvent::Exported {
-                range: node.syntax().text_range(),
+                range: node.syntax().text_trimmed_range(),
             });
         }
     }
 
     fn enter_identifier_usage(&mut self, node: AnyJsIdentifierUsage) {
-        let range = node.syntax().text_range();
+        let range = node.syntax().text_trimmed_range();
         let Ok(name_token) = node.value_token() else {
             return;
         };
@@ -716,7 +717,7 @@ impl SemanticEventExtractor {
             | TS_TYPE_ALIAS_DECLARATION
             | TS_MODULE_DECLARATION
             | TS_EXTERNAL_MODULE_DECLARATION => {
-                self.pop_scope(node.text_range());
+                self.pop_scope(node.text_trimmed_range());
             }
             _ => {
                 if let Some(node) = AnyTsType::cast_ref(node) {
@@ -728,7 +729,7 @@ impl SemanticEventExtractor {
 
     fn leave_any_type(&mut self, node: &AnyTsType) {
         if node.in_conditional_true_type() {
-            self.pop_scope(node.syntax().text_range());
+            self.pop_scope(node.syntax().text_trimmed_range());
             return;
         }
         let node = node.syntax();
@@ -736,7 +737,7 @@ impl SemanticEventExtractor {
             node.kind(),
             JsSyntaxKind::TS_FUNCTION_TYPE | JsSyntaxKind::TS_MAPPED_TYPE
         ) {
-            self.pop_scope(node.text_range());
+            self.pop_scope(node.text_trimmed_range());
         }
         // FALLBACK
         // If the conditional type has a bogus true type,
@@ -759,7 +760,7 @@ impl SemanticEventExtractor {
         for infer in infers {
             if let Ok(name_token) = infer.ident_token() {
                 let name = name_token.token_text_trimmed();
-                let name_range = name_token.text_range();
+                let name_range = name_token.text_trimmed_range();
                 let binding_info = BindingInfo::new(name_range, JsSyntaxKind::TS_INFER_TYPE);
                 self.push_binding(None, BindingName::Type(name), binding_info);
                 let scope_id = self.current_scope_mut().scope_id;

@@ -158,7 +158,7 @@ impl SemanticModel {
     /// let block_scope = arguments_reference.scope(&model);
     /// ```
     pub fn scope(&self, node: &JsSyntaxNode) -> Scope {
-        let range = node.text_range();
+        let range = node.text_trimmed_range();
         let id = self.data.scope(&range);
         Scope {
             data: self.data.clone(),
@@ -169,7 +169,7 @@ impl SemanticModel {
     /// Returns the [Scope] which the specified syntax node was hoisted to, if any.
     /// Can also be called from [AstNode]::scope_hoisted_to extension method.
     pub fn scope_hoisted_to(&self, node: &JsSyntaxNode) -> Option<Scope> {
-        let range = node.text_range();
+        let range = node.text_trimmed_range();
         let id = self.data.scope_hoisted_to(&range)?;
         Some(Scope {
             data: self.data.clone(),
@@ -209,7 +209,7 @@ impl SemanticModel {
     /// ```
     pub fn binding(&self, reference: &impl HasDeclarationAstNode) -> Option<Binding> {
         let reference = reference.node();
-        let range = reference.syntax().text_range();
+        let range = reference.syntax().text_trimmed_range();
         let id = *self.data.declared_at_by_start.get(&range.start())?;
         Some(Binding {
             data: self.data.clone(),
@@ -330,7 +330,7 @@ impl SemanticModel {
     }
 
     pub fn as_binding(&self, binding: &impl IsBindingAstNode) -> Binding {
-        let range = binding.syntax().text_range();
+        let range = binding.syntax().text_trimmed_range();
         let id = &self.data.bindings_by_start[&range.start()];
         Binding {
             data: self.data.clone(),

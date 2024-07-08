@@ -56,7 +56,8 @@ impl SemanticModelBuilder {
             | TS_TYPE_PARAMETER_NAME
             | TS_LITERAL_ENUM_MEMBER_NAME
             | JS_IDENTIFIER_ASSIGNMENT => {
-                self.node_by_range.insert(node.text_range(), node.clone());
+                self.node_by_range
+                    .insert(node.text_trimmed_range(), node.clone());
             }
 
             // Accessible from scopes, closures
@@ -98,13 +99,15 @@ impl SemanticModelBuilder {
             | JS_CATCH_CLAUSE
             | TS_FUNCTION_TYPE
             | TS_MAPPED_TYPE => {
-                self.node_by_range.insert(node.text_range(), node.clone());
+                self.node_by_range
+                    .insert(node.text_trimmed_range(), node.clone());
             }
             _ => {
                 if let Some(conditional_type) = TsConditionalType::cast_ref(node) {
                     if let Ok(conditional_true_type) = conditional_type.true_type() {
                         let syntax = conditional_true_type.into_syntax();
-                        self.node_by_range.insert(syntax.text_range(), syntax);
+                        self.node_by_range
+                            .insert(syntax.text_trimmed_range(), syntax);
                     }
                 }
             }
