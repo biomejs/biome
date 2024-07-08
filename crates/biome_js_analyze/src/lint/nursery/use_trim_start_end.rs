@@ -126,8 +126,13 @@ impl Rule for UseTrimStartEnd {
         let callee = node.callee().ok()?;
 
         let is_computed_member = JsComputedMemberExpression::can_cast(callee.syntax().kind());
+        let computed_member_expression_opt = if is_computed_member {
+            callee.as_js_computed_member_expression()
+        } else {
+            None
+        };
         let is_template = if is_computed_member {
-            if let Ok(computed_member) = callee.as_js_computed_member_expression()?.member() {
+            if let Ok(computed_member) = computed_member_expression_opt?.member() {
                 JsTemplateExpression::can_cast(computed_member.syntax().kind())
             } else {
                 false
@@ -156,19 +161,17 @@ impl Rule for UseTrimStartEnd {
             _ => unreachable!(),
         };
 
-        let computed_member_expression = if is_template {
+        let transformed_expression = if is_template {
             AnyJsExpression::JsTemplateExpression(
                 make::js_template_expression(
-                    callee
-                        .as_js_computed_member_expression()?
+                    computed_member_expression_opt?
                         .member()
                         .ok()?
                         .as_js_template_expression()?
                         .l_tick_token()
                         .ok()?,
                     make::js_template_element_list(elements),
-                    callee
-                        .as_js_computed_member_expression()?
+                    computed_member_expression_opt?
                         .member()
                         .ok()?
                         .as_js_template_expression()?
@@ -197,15 +200,9 @@ impl Rule for UseTrimStartEnd {
             AnyJsExpression::JsComputedMemberExpression(
                 make::js_computed_member_expression(
                     callee_object,
-                    callee
-                        .as_js_computed_member_expression()?
-                        .l_brack_token()
-                        .ok()?,
-                    computed_member_expression,
-                    callee
-                        .as_js_computed_member_expression()?
-                        .r_brack_token()
-                        .ok()?,
+                    computed_member_expression_opt?.l_brack_token().ok()?,
+                    transformed_expression,
+                    computed_member_expression_opt?.r_brack_token().ok()?,
                 )
                 .build(),
             )
