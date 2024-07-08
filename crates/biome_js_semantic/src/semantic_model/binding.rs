@@ -68,7 +68,7 @@ impl Binding {
     /// Returns the syntax node associated with this binding.
     pub fn syntax(&self) -> &JsSyntaxNode {
         let binding = self.data.binding(self.index);
-        &self.data.node_by_range[&binding.range]
+        &self.data.binding_nodes[&binding.range]
     }
 
     /// Returns the typed AST node associated with this binding.

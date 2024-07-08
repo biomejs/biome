@@ -22,7 +22,7 @@ pub struct GlobalReference {
 impl GlobalReference {
     pub fn syntax(&self) -> &JsSyntaxNode {
         let reference = &self.data.globals[self.global_id].references[self.id];
-        &self.data.node_by_range[&reference.range]
+        &self.data.binding_nodes[&reference.range]
     }
 
     /// Returns if this reference is just reading its binding

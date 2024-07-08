@@ -135,7 +135,7 @@ impl Iterator for AllCapturesIter {
                     let reference = &binding.references[reference.reference_id];
                     return Some(Capture {
                         data: self.data.clone(),
-                        node: self.data.node_by_range[&reference.range].clone(), // TODO change node to store the range
+                        node: self.data.binding_nodes[&reference.range].clone(), // TODO change node to store the range
                         ty: CaptureType::ByReference,
                         binding_id: binding.id,
                     });
@@ -246,7 +246,7 @@ impl Closure {
         scope_id: u32,
         closure_range: &TextRange,
     ) -> Option<Closure> {
-        let node = &data.node_by_range[closure_range];
+        let node = &data.scope_nodes[closure_range];
         match node.kind() {
             JsSyntaxKind::JS_FUNCTION_DECLARATION
             | JsSyntaxKind::JS_FUNCTION_EXPRESSION

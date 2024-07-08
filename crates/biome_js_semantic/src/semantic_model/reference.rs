@@ -70,7 +70,7 @@ impl Reference {
 
     /// Returns the node of this reference
     pub fn syntax(&self) -> &JsSyntaxNode {
-        &self.data.node_by_range[self.range()]
+        &self.data.binding_nodes[self.range()]
     }
 
     /// Returns the binding of this reference
@@ -137,7 +137,7 @@ impl FunctionCall {
 
     /// Returns the node of this reference
     pub fn syntax(&self) -> &JsSyntaxNode {
-        &self.data.node_by_range[self.range()]
+        &self.data.binding_nodes[self.range()]
     }
 
     /// Returns the typed AST node of this reference
@@ -188,7 +188,7 @@ pub struct UnresolvedReference {
 impl UnresolvedReference {
     pub fn syntax(&self) -> &JsSyntaxNode {
         let reference = &self.data.unresolved_references[self.id];
-        &self.data.node_by_range[&reference.range]
+        &self.data.binding_nodes[&reference.range]
     }
 
     pub fn tree(&self) -> AnyJsIdentifierUsage {
