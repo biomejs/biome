@@ -180,7 +180,6 @@ impl Iterator for ChildrenIter {
                 return Some(Closure {
                     data: self.data.clone(),
                     scope_id,
-                    closure_range: scope.range,
                 });
             } else {
                 self.scopes.extend(scope.children.iter());
@@ -210,7 +209,6 @@ impl Iterator for DescendentsIter {
                 return Some(Closure {
                     data: self.data.clone(),
                     scope_id,
-                    closure_range: scope.range,
                 });
             }
         }
@@ -226,7 +224,6 @@ impl FusedIterator for DescendentsIter {}
 pub struct Closure {
     data: Rc<SemanticModelData>,
     scope_id: u32,
-    closure_range: TextRange,
 }
 
 impl Closure {
@@ -234,34 +231,22 @@ impl Closure {
         let closure_range = node.node_text_range();
         let scope_id = data.scope(&closure_range);
 
-        Closure {
-            data,
-            scope_id,
-            closure_range,
-        }
+        Closure { data, scope_id }
     }
 
-    pub(super) fn from_scope(
-        data: Rc<SemanticModelData>,
-        scope_id: u32,
-        closure_range: &TextRange,
-    ) -> Option<Closure> {
-        let node = &data.scope_nodes[closure_range];
+    pub(super) fn from_scope(data: Rc<SemanticModelData>, scope_id: u32) -> Option<Closure> {
+        let node = &data.scope_nodes[&data.scopes[scope_id as usize].range];
         match node.kind() {
             JsSyntaxKind::JS_FUNCTION_DECLARATION
             | JsSyntaxKind::JS_FUNCTION_EXPRESSION
-            | JsSyntaxKind::JS_ARROW_FUNCTION_EXPRESSION => Some(Closure {
-                data,
-                scope_id,
-                closure_range: *closure_range,
-            }),
+            | JsSyntaxKind::JS_ARROW_FUNCTION_EXPRESSION => Some(Closure { data, scope_id }),
             _ => None,
         }
     }
 
     /// Range of this [Closure]
     pub fn closure_range(&self) -> &TextRange {
-        &self.closure_range
+        &self.data.scopes[self.scope_id as usize].range
     }
 
     /// Return all [Reference] this closure captures, not taking into
@@ -287,7 +272,7 @@ impl Closure {
 
         AllCapturesIter {
             data: self.data.clone(),
-            closure_range: self.closure_range,
+            closure_range: *self.closure_range(),
             scopes,
             references,
         }

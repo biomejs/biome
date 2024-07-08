@@ -119,7 +119,7 @@ impl Scope {
     /// it has one, otherwise returns None.
     /// See [HasClosureAstNode] for nodes that have closure.
     pub fn closure(&self) -> Option<Closure> {
-        Closure::from_scope(self.data.clone(), self.id, self.range())
+        Closure::from_scope(self.data.clone(), self.id)
     }
 }
 
