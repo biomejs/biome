@@ -1,0 +1,25 @@
+.test {
+	& {
+		color: pink;
+	}
+	&& {
+		color: pink;
+	}
+	& & {
+		color: pink;
+	}
+	div {
+		&&& {
+			color: pink;
+		}
+		& && {
+			color: pink;
+		}
+		&& & {
+			color: pink;
+		}
+		& & & {
+			color: pink;
+		}
+	}
+}

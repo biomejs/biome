@@ -23,7 +23,7 @@ CssRoot {
                 CssComplexSelector {
                     left: CssComplexSelector {
                         left: CssCompoundSelector {
-                            nesting_selector_token: missing (optional),
+                            nesting_selectors: CssNestedSelectorList [],
                             simple_selector: missing (optional),
                             sub_selectors: CssSubSelectorList [
                                 CssClassSelector {
@@ -36,7 +36,7 @@ CssRoot {
                         },
                         combinator: CSS_SPACE_LITERAL@10..11 " " [] [],
                         right: CssCompoundSelector {
-                            nesting_selector_token: missing (optional),
+                            nesting_selectors: CssNestedSelectorList [],
                             simple_selector: CssTypeSelector {
                                 namespace: missing (optional),
                                 ident: CssIdentifier {
@@ -48,7 +48,7 @@ CssRoot {
                     },
                     combinator: CSS_SPACE_LITERAL@16..17 " " [] [],
                     right: CssCompoundSelector {
-                        nesting_selector_token: missing (optional),
+                        nesting_selectors: CssNestedSelectorList [],
                         simple_selector: CssTypeSelector {
                             namespace: missing (optional),
                             ident: CssIdentifier {
@@ -107,7 +107,7 @@ CssRoot {
         0: CSS_COMPLEX_SELECTOR@0..20
           0: CSS_COMPLEX_SELECTOR@0..16
             0: CSS_COMPOUND_SELECTOR@0..10
-              0: (empty)
+              0: CSS_NESTED_SELECTOR_LIST@0..0
               1: (empty)
               2: CSS_SUB_SELECTOR_LIST@0..10
                 0: CSS_CLASS_SELECTOR@0..10
@@ -116,7 +116,7 @@ CssRoot {
                     0: IDENT@1..10 "formTable" [] []
             1: CSS_SPACE_LITERAL@10..11 " " [] []
             2: CSS_COMPOUND_SELECTOR@11..16
-              0: (empty)
+              0: CSS_NESTED_SELECTOR_LIST@11..11
               1: CSS_TYPE_SELECTOR@11..16
                 0: (empty)
                 1: CSS_IDENTIFIER@11..16
@@ -124,7 +124,7 @@ CssRoot {
               2: CSS_SUB_SELECTOR_LIST@16..16
           1: CSS_SPACE_LITERAL@16..17 " " [] []
           2: CSS_COMPOUND_SELECTOR@17..20
-            0: (empty)
+            0: CSS_NESTED_SELECTOR_LIST@17..17
             1: CSS_TYPE_SELECTOR@17..20
               0: (empty)
               1: CSS_IDENTIFIER@17..20

@@ -27,7 +27,7 @@ CssRoot {
         CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
-                    nesting_selector_token: missing (optional),
+                    nesting_selectors: CssNestedSelectorList [],
                     simple_selector: missing (optional),
                     sub_selectors: CssSubSelectorList [
                         CssPseudoClassSelector {
@@ -52,7 +52,7 @@ CssRoot {
         CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
-                    nesting_selector_token: missing (optional),
+                    nesting_selectors: CssNestedSelectorList [],
                     simple_selector: missing (optional),
                     sub_selectors: CssSubSelectorList [
                         CssPseudoClassSelector {
@@ -78,7 +78,7 @@ CssRoot {
         CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
-                    nesting_selector_token: missing (optional),
+                    nesting_selectors: CssNestedSelectorList [],
                     simple_selector: missing (optional),
                     sub_selectors: CssSubSelectorList [
                         CssPseudoClassSelector {
@@ -110,7 +110,7 @@ CssRoot {
         CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
-                    nesting_selector_token: missing (optional),
+                    nesting_selectors: CssNestedSelectorList [],
                     simple_selector: missing (optional),
                     sub_selectors: CssSubSelectorList [
                         CssPseudoClassSelector {
@@ -141,7 +141,7 @@ CssRoot {
         CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
-                    nesting_selector_token: missing (optional),
+                    nesting_selectors: CssNestedSelectorList [],
                     simple_selector: missing (optional),
                     sub_selectors: CssSubSelectorList [
                         CssPseudoClassSelector {
@@ -175,7 +175,7 @@ CssRoot {
         CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
-                    nesting_selector_token: missing (optional),
+                    nesting_selectors: CssNestedSelectorList [],
                     simple_selector: missing (optional),
                     sub_selectors: CssSubSelectorList [
                         CssPseudoClassSelector {
@@ -189,7 +189,7 @@ CssRoot {
                                             combinator: missing (optional),
                                             selector: CssComplexSelector {
                                                 left: CssCompoundSelector {
-                                                    nesting_selector_token: missing (optional),
+                                                    nesting_selectors: CssNestedSelectorList [],
                                                     simple_selector: missing (optional),
                                                     sub_selectors: CssSubSelectorList [
                                                         CssClassSelector {
@@ -202,7 +202,7 @@ CssRoot {
                                                 },
                                                 combinator: CSS_SPACE_LITERAL@88..89 " " [] [],
                                                 right: CssCompoundSelector {
-                                                    nesting_selector_token: missing (optional),
+                                                    nesting_selectors: CssNestedSelectorList [],
                                                     simple_selector: missing (optional),
                                                     sub_selectors: CssSubSelectorList [
                                                         CssClassSelector {
@@ -240,7 +240,7 @@ CssRoot {
         CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
-                    nesting_selector_token: missing (optional),
+                    nesting_selectors: CssNestedSelectorList [],
                     simple_selector: missing (optional),
                     sub_selectors: CssSubSelectorList [
                         CssPseudoClassSelector {
@@ -254,7 +254,7 @@ CssRoot {
                                             combinator: missing (optional),
                                             selector: CssComplexSelector {
                                                 left: CssCompoundSelector {
-                                                    nesting_selector_token: missing (optional),
+                                                    nesting_selectors: CssNestedSelectorList [],
                                                     simple_selector: missing (optional),
                                                     sub_selectors: CssSubSelectorList [
                                                         CssClassSelector {
@@ -267,7 +267,7 @@ CssRoot {
                                                 },
                                                 combinator: CSS_SPACE_LITERAL@118..119 " " [] [],
                                                 right: CssCompoundSelector {
-                                                    nesting_selector_token: missing (optional),
+                                                    nesting_selectors: CssNestedSelectorList [],
                                                     simple_selector: missing (optional),
                                                     sub_selectors: CssSubSelectorList [
                                                         CssClassSelector {
@@ -296,7 +296,7 @@ CssRoot {
         CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
-                    nesting_selector_token: missing (optional),
+                    nesting_selectors: CssNestedSelectorList [],
                     simple_selector: missing (optional),
                     sub_selectors: CssSubSelectorList [
                         CssPseudoClassSelector {
@@ -309,7 +309,7 @@ CssRoot {
                                         CssRelativeSelector {
                                             combinator: missing (optional),
                                             selector: CssCompoundSelector {
-                                                nesting_selector_token: missing (optional),
+                                                nesting_selectors: CssNestedSelectorList [],
                                                 simple_selector: missing (optional),
                                                 sub_selectors: CssSubSelectorList [
                                                     CssClassSelector {
@@ -337,7 +337,7 @@ CssRoot {
         CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
-                    nesting_selector_token: missing (optional),
+                    nesting_selectors: CssNestedSelectorList [],
                     simple_selector: missing (optional),
                     sub_selectors: CssSubSelectorList [
                         CssPseudoClassSelector {
@@ -351,7 +351,7 @@ CssRoot {
                                             combinator: missing (optional),
                                             selector: CssComplexSelector {
                                                 left: CssCompoundSelector {
-                                                    nesting_selector_token: missing (optional),
+                                                    nesting_selectors: CssNestedSelectorList [],
                                                     simple_selector: missing (optional),
                                                     sub_selectors: CssSubSelectorList [
                                                         CssClassSelector {
@@ -391,7 +391,7 @@ CssRoot {
     0: CSS_QUALIFIED_RULE@0..8
       0: CSS_SELECTOR_LIST@0..6
         0: CSS_COMPOUND_SELECTOR@0..6
-          0: (empty)
+          0: CSS_NESTED_SELECTOR_LIST@0..0
           1: (empty)
           2: CSS_SUB_SELECTOR_LIST@0..6
             0: CSS_PSEUDO_CLASS_SELECTOR@0..6
@@ -407,7 +407,7 @@ CssRoot {
     1: CSS_QUALIFIED_RULE@8..18
       0: CSS_SELECTOR_LIST@8..16
         0: CSS_COMPOUND_SELECTOR@8..16
-          0: (empty)
+          0: CSS_NESTED_SELECTOR_LIST@8..8
           1: (empty)
           2: CSS_SUB_SELECTOR_LIST@8..16
             0: CSS_PSEUDO_CLASS_SELECTOR@8..16
@@ -424,7 +424,7 @@ CssRoot {
     2: CSS_QUALIFIED_RULE@18..36
       0: CSS_SELECTOR_LIST@18..34
         0: CSS_COMPOUND_SELECTOR@18..34
-          0: (empty)
+          0: CSS_NESTED_SELECTOR_LIST@18..18
           1: (empty)
           2: CSS_SUB_SELECTOR_LIST@18..34
             0: CSS_PSEUDO_CLASS_SELECTOR@18..34
@@ -444,7 +444,7 @@ CssRoot {
     3: CSS_QUALIFIED_RULE@36..53
       0: CSS_SELECTOR_LIST@36..51
         0: CSS_COMPOUND_SELECTOR@36..51
-          0: (empty)
+          0: CSS_NESTED_SELECTOR_LIST@36..36
           1: (empty)
           2: CSS_SUB_SELECTOR_LIST@36..51
             0: CSS_PSEUDO_CLASS_SELECTOR@36..51
@@ -463,7 +463,7 @@ CssRoot {
     4: CSS_QUALIFIED_RULE@53..78
       0: CSS_SELECTOR_LIST@53..76
         0: CSS_COMPOUND_SELECTOR@53..76
-          0: (empty)
+          0: CSS_NESTED_SELECTOR_LIST@53..53
           1: (empty)
           2: CSS_SUB_SELECTOR_LIST@53..76
             0: CSS_PSEUDO_CLASS_SELECTOR@53..76
@@ -485,7 +485,7 @@ CssRoot {
     5: CSS_QUALIFIED_RULE@78..108
       0: CSS_SELECTOR_LIST@78..106
         0: CSS_COMPOUND_SELECTOR@78..106
-          0: (empty)
+          0: CSS_NESTED_SELECTOR_LIST@78..78
           1: (empty)
           2: CSS_SUB_SELECTOR_LIST@78..106
             0: CSS_PSEUDO_CLASS_SELECTOR@78..106
@@ -498,7 +498,7 @@ CssRoot {
                     0: (empty)
                     1: CSS_COMPLEX_SELECTOR@84..95
                       0: CSS_COMPOUND_SELECTOR@84..88
-                        0: (empty)
+                        0: CSS_NESTED_SELECTOR_LIST@84..84
                         1: (empty)
                         2: CSS_SUB_SELECTOR_LIST@84..88
                           0: CSS_CLASS_SELECTOR@84..88
@@ -507,7 +507,7 @@ CssRoot {
                               0: IDENT@85..88 "div" [] []
                       1: CSS_SPACE_LITERAL@88..89 " " [] []
                       2: CSS_COMPOUND_SELECTOR@89..95
-                        0: (empty)
+                        0: CSS_NESTED_SELECTOR_LIST@89..89
                         1: (empty)
                         2: CSS_SUB_SELECTOR_LIST@89..95
                           0: CSS_CLASS_SELECTOR@89..95
@@ -527,7 +527,7 @@ CssRoot {
     6: CSS_QUALIFIED_RULE@108..128
       0: CSS_SELECTOR_LIST@108..126
         0: CSS_COMPOUND_SELECTOR@108..126
-          0: (empty)
+          0: CSS_NESTED_SELECTOR_LIST@108..108
           1: (empty)
           2: CSS_SUB_SELECTOR_LIST@108..126
             0: CSS_PSEUDO_CLASS_SELECTOR@108..126
@@ -540,7 +540,7 @@ CssRoot {
                     0: (empty)
                     1: CSS_COMPLEX_SELECTOR@114..126
                       0: CSS_COMPOUND_SELECTOR@114..118
-                        0: (empty)
+                        0: CSS_NESTED_SELECTOR_LIST@114..114
                         1: (empty)
                         2: CSS_SUB_SELECTOR_LIST@114..118
                           0: CSS_CLASS_SELECTOR@114..118
@@ -549,7 +549,7 @@ CssRoot {
                               0: IDENT@115..118 "div" [] []
                       1: CSS_SPACE_LITERAL@118..119 " " [] []
                       2: CSS_COMPOUND_SELECTOR@119..126
-                        0: (empty)
+                        0: CSS_NESTED_SELECTOR_LIST@119..119
                         1: (empty)
                         2: CSS_SUB_SELECTOR_LIST@119..126
                           0: CSS_CLASS_SELECTOR@119..126
@@ -563,7 +563,7 @@ CssRoot {
     7: CSS_QUALIFIED_RULE@128..141
       0: CSS_SELECTOR_LIST@128..139
         0: CSS_COMPOUND_SELECTOR@128..139
-          0: (empty)
+          0: CSS_NESTED_SELECTOR_LIST@128..128
           1: (empty)
           2: CSS_SUB_SELECTOR_LIST@128..139
             0: CSS_PSEUDO_CLASS_SELECTOR@128..139
@@ -575,7 +575,7 @@ CssRoot {
                   0: CSS_RELATIVE_SELECTOR@134..139
                     0: (empty)
                     1: CSS_COMPOUND_SELECTOR@134..139
-                      0: (empty)
+                      0: CSS_NESTED_SELECTOR_LIST@134..134
                       1: (empty)
                       2: CSS_SUB_SELECTOR_LIST@134..139
                         0: CSS_CLASS_SELECTOR@134..139
@@ -589,7 +589,7 @@ CssRoot {
     8: CSS_QUALIFIED_RULE@141..152
       0: CSS_SELECTOR_LIST@141..152
         0: CSS_COMPOUND_SELECTOR@141..152
-          0: (empty)
+          0: CSS_NESTED_SELECTOR_LIST@141..141
           1: (empty)
           2: CSS_SUB_SELECTOR_LIST@141..152
             0: CSS_PSEUDO_CLASS_SELECTOR@141..152
@@ -602,7 +602,7 @@ CssRoot {
                     0: (empty)
                     1: CSS_COMPLEX_SELECTOR@147..152
                       0: CSS_COMPOUND_SELECTOR@147..151
-                        0: (empty)
+                        0: CSS_NESTED_SELECTOR_LIST@147..147
                         1: (empty)
                         2: CSS_SUB_SELECTOR_LIST@147..151
                           0: CSS_CLASS_SELECTOR@147..151

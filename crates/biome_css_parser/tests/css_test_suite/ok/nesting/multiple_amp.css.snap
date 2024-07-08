@@ -1,0 +1,325 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```css
+.test {
+	& {
+		color: pink;
+	}
+	&& {
+		color: pink;
+	}
+	div {
+		&&& {
+			color: pink;
+		}
+	}
+}
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    rules: CssRuleList [
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selectors: CssNestedSelectorList [],
+                    simple_selector: missing (optional),
+                    sub_selectors: CssSubSelectorList [
+                        CssClassSelector {
+                            dot_token: DOT@0..1 "." [] [],
+                            name: CssCustomIdentifier {
+                                value_token: IDENT@1..6 "test" [] [Whitespace(" ")],
+                            },
+                        },
+                    ],
+                },
+            ],
+            block: CssDeclarationOrRuleBlock {
+                l_curly_token: L_CURLY@6..7 "{" [] [],
+                items: CssDeclarationOrRuleList [
+                    CssNestedQualifiedRule {
+                        prelude: CssRelativeSelectorList [
+                            CssRelativeSelector {
+                                combinator: missing (optional),
+                                selector: CssCompoundSelector {
+                                    nesting_selectors: CssNestedSelectorList [
+                                        CssNestedSelector {
+                                            amp_token: AMP@7..11 "&" [Newline("\n"), Whitespace("\t")] [Whitespace(" ")],
+                                        },
+                                    ],
+                                    simple_selector: missing (optional),
+                                    sub_selectors: CssSubSelectorList [],
+                                },
+                            },
+                        ],
+                        block: CssDeclarationOrRuleBlock {
+                            l_curly_token: L_CURLY@11..12 "{" [] [],
+                            items: CssDeclarationOrRuleList [
+                                CssDeclarationWithSemicolon {
+                                    declaration: CssDeclaration {
+                                        property: CssGenericProperty {
+                                            name: CssIdentifier {
+                                                value_token: IDENT@12..20 "color" [Newline("\n"), Whitespace("\t\t")] [],
+                                            },
+                                            colon_token: COLON@20..22 ":" [] [Whitespace(" ")],
+                                            value: CssGenericComponentValueList [
+                                                CssIdentifier {
+                                                    value_token: IDENT@22..26 "pink" [] [],
+                                                },
+                                            ],
+                                        },
+                                        important: missing (optional),
+                                    },
+                                    semicolon_token: SEMICOLON@26..27 ";" [] [],
+                                },
+                            ],
+                            r_curly_token: R_CURLY@27..30 "}" [Newline("\n"), Whitespace("\t")] [],
+                        },
+                    },
+                    CssNestedQualifiedRule {
+                        prelude: CssRelativeSelectorList [
+                            CssRelativeSelector {
+                                combinator: missing (optional),
+                                selector: CssCompoundSelector {
+                                    nesting_selectors: CssNestedSelectorList [
+                                        CssNestedSelector {
+                                            amp_token: AMP@30..33 "&" [Newline("\n"), Whitespace("\t")] [],
+                                        },
+                                        CssNestedSelector {
+                                            amp_token: AMP@33..35 "&" [] [Whitespace(" ")],
+                                        },
+                                    ],
+                                    simple_selector: missing (optional),
+                                    sub_selectors: CssSubSelectorList [],
+                                },
+                            },
+                        ],
+                        block: CssDeclarationOrRuleBlock {
+                            l_curly_token: L_CURLY@35..36 "{" [] [],
+                            items: CssDeclarationOrRuleList [
+                                CssDeclarationWithSemicolon {
+                                    declaration: CssDeclaration {
+                                        property: CssGenericProperty {
+                                            name: CssIdentifier {
+                                                value_token: IDENT@36..44 "color" [Newline("\n"), Whitespace("\t\t")] [],
+                                            },
+                                            colon_token: COLON@44..46 ":" [] [Whitespace(" ")],
+                                            value: CssGenericComponentValueList [
+                                                CssIdentifier {
+                                                    value_token: IDENT@46..50 "pink" [] [],
+                                                },
+                                            ],
+                                        },
+                                        important: missing (optional),
+                                    },
+                                    semicolon_token: SEMICOLON@50..51 ";" [] [],
+                                },
+                            ],
+                            r_curly_token: R_CURLY@51..54 "}" [Newline("\n"), Whitespace("\t")] [],
+                        },
+                    },
+                    CssNestedQualifiedRule {
+                        prelude: CssRelativeSelectorList [
+                            CssRelativeSelector {
+                                combinator: missing (optional),
+                                selector: CssCompoundSelector {
+                                    nesting_selectors: CssNestedSelectorList [],
+                                    simple_selector: CssTypeSelector {
+                                        namespace: missing (optional),
+                                        ident: CssIdentifier {
+                                            value_token: IDENT@54..60 "div" [Newline("\n"), Whitespace("\t")] [Whitespace(" ")],
+                                        },
+                                    },
+                                    sub_selectors: CssSubSelectorList [],
+                                },
+                            },
+                        ],
+                        block: CssDeclarationOrRuleBlock {
+                            l_curly_token: L_CURLY@60..61 "{" [] [],
+                            items: CssDeclarationOrRuleList [
+                                CssNestedQualifiedRule {
+                                    prelude: CssRelativeSelectorList [
+                                        CssRelativeSelector {
+                                            combinator: missing (optional),
+                                            selector: CssCompoundSelector {
+                                                nesting_selectors: CssNestedSelectorList [
+                                                    CssNestedSelector {
+                                                        amp_token: AMP@61..65 "&" [Newline("\n"), Whitespace("\t\t")] [],
+                                                    },
+                                                    CssNestedSelector {
+                                                        amp_token: AMP@65..66 "&" [] [],
+                                                    },
+                                                    CssNestedSelector {
+                                                        amp_token: AMP@66..68 "&" [] [Whitespace(" ")],
+                                                    },
+                                                ],
+                                                simple_selector: missing (optional),
+                                                sub_selectors: CssSubSelectorList [],
+                                            },
+                                        },
+                                    ],
+                                    block: CssDeclarationOrRuleBlock {
+                                        l_curly_token: L_CURLY@68..69 "{" [] [],
+                                        items: CssDeclarationOrRuleList [
+                                            CssDeclarationWithSemicolon {
+                                                declaration: CssDeclaration {
+                                                    property: CssGenericProperty {
+                                                        name: CssIdentifier {
+                                                            value_token: IDENT@69..78 "color" [Newline("\n"), Whitespace("\t\t\t")] [],
+                                                        },
+                                                        colon_token: COLON@78..80 ":" [] [Whitespace(" ")],
+                                                        value: CssGenericComponentValueList [
+                                                            CssIdentifier {
+                                                                value_token: IDENT@80..84 "pink" [] [],
+                                                            },
+                                                        ],
+                                                    },
+                                                    important: missing (optional),
+                                                },
+                                                semicolon_token: SEMICOLON@84..85 ";" [] [],
+                                            },
+                                        ],
+                                        r_curly_token: R_CURLY@85..89 "}" [Newline("\n"), Whitespace("\t\t")] [],
+                                    },
+                                },
+                            ],
+                            r_curly_token: R_CURLY@89..92 "}" [Newline("\n"), Whitespace("\t")] [],
+                        },
+                    },
+                ],
+                r_curly_token: R_CURLY@92..94 "}" [Newline("\n")] [],
+            },
+        },
+    ],
+    eof_token: EOF@94..95 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..95
+  0: (empty)
+  1: CSS_RULE_LIST@0..94
+    0: CSS_QUALIFIED_RULE@0..94
+      0: CSS_SELECTOR_LIST@0..6
+        0: CSS_COMPOUND_SELECTOR@0..6
+          0: CSS_NESTED_SELECTOR_LIST@0..0
+          1: (empty)
+          2: CSS_SUB_SELECTOR_LIST@0..6
+            0: CSS_CLASS_SELECTOR@0..6
+              0: DOT@0..1 "." [] []
+              1: CSS_CUSTOM_IDENTIFIER@1..6
+                0: IDENT@1..6 "test" [] [Whitespace(" ")]
+      1: CSS_DECLARATION_OR_RULE_BLOCK@6..94
+        0: L_CURLY@6..7 "{" [] []
+        1: CSS_DECLARATION_OR_RULE_LIST@7..92
+          0: CSS_NESTED_QUALIFIED_RULE@7..30
+            0: CSS_RELATIVE_SELECTOR_LIST@7..11
+              0: CSS_RELATIVE_SELECTOR@7..11
+                0: (empty)
+                1: CSS_COMPOUND_SELECTOR@7..11
+                  0: CSS_NESTED_SELECTOR_LIST@7..11
+                    0: CSS_NESTED_SELECTOR@7..11
+                      0: AMP@7..11 "&" [Newline("\n"), Whitespace("\t")] [Whitespace(" ")]
+                  1: (empty)
+                  2: CSS_SUB_SELECTOR_LIST@11..11
+            1: CSS_DECLARATION_OR_RULE_BLOCK@11..30
+              0: L_CURLY@11..12 "{" [] []
+              1: CSS_DECLARATION_OR_RULE_LIST@12..27
+                0: CSS_DECLARATION_WITH_SEMICOLON@12..27
+                  0: CSS_DECLARATION@12..26
+                    0: CSS_GENERIC_PROPERTY@12..26
+                      0: CSS_IDENTIFIER@12..20
+                        0: IDENT@12..20 "color" [Newline("\n"), Whitespace("\t\t")] []
+                      1: COLON@20..22 ":" [] [Whitespace(" ")]
+                      2: CSS_GENERIC_COMPONENT_VALUE_LIST@22..26
+                        0: CSS_IDENTIFIER@22..26
+                          0: IDENT@22..26 "pink" [] []
+                    1: (empty)
+                  1: SEMICOLON@26..27 ";" [] []
+              2: R_CURLY@27..30 "}" [Newline("\n"), Whitespace("\t")] []
+          1: CSS_NESTED_QUALIFIED_RULE@30..54
+            0: CSS_RELATIVE_SELECTOR_LIST@30..35
+              0: CSS_RELATIVE_SELECTOR@30..35
+                0: (empty)
+                1: CSS_COMPOUND_SELECTOR@30..35
+                  0: CSS_NESTED_SELECTOR_LIST@30..35
+                    0: CSS_NESTED_SELECTOR@30..33
+                      0: AMP@30..33 "&" [Newline("\n"), Whitespace("\t")] []
+                    1: CSS_NESTED_SELECTOR@33..35
+                      0: AMP@33..35 "&" [] [Whitespace(" ")]
+                  1: (empty)
+                  2: CSS_SUB_SELECTOR_LIST@35..35
+            1: CSS_DECLARATION_OR_RULE_BLOCK@35..54
+              0: L_CURLY@35..36 "{" [] []
+              1: CSS_DECLARATION_OR_RULE_LIST@36..51
+                0: CSS_DECLARATION_WITH_SEMICOLON@36..51
+                  0: CSS_DECLARATION@36..50
+                    0: CSS_GENERIC_PROPERTY@36..50
+                      0: CSS_IDENTIFIER@36..44
+                        0: IDENT@36..44 "color" [Newline("\n"), Whitespace("\t\t")] []
+                      1: COLON@44..46 ":" [] [Whitespace(" ")]
+                      2: CSS_GENERIC_COMPONENT_VALUE_LIST@46..50
+                        0: CSS_IDENTIFIER@46..50
+                          0: IDENT@46..50 "pink" [] []
+                    1: (empty)
+                  1: SEMICOLON@50..51 ";" [] []
+              2: R_CURLY@51..54 "}" [Newline("\n"), Whitespace("\t")] []
+          2: CSS_NESTED_QUALIFIED_RULE@54..92
+            0: CSS_RELATIVE_SELECTOR_LIST@54..60
+              0: CSS_RELATIVE_SELECTOR@54..60
+                0: (empty)
+                1: CSS_COMPOUND_SELECTOR@54..60
+                  0: CSS_NESTED_SELECTOR_LIST@54..54
+                  1: CSS_TYPE_SELECTOR@54..60
+                    0: (empty)
+                    1: CSS_IDENTIFIER@54..60
+                      0: IDENT@54..60 "div" [Newline("\n"), Whitespace("\t")] [Whitespace(" ")]
+                  2: CSS_SUB_SELECTOR_LIST@60..60
+            1: CSS_DECLARATION_OR_RULE_BLOCK@60..92
+              0: L_CURLY@60..61 "{" [] []
+              1: CSS_DECLARATION_OR_RULE_LIST@61..89
+                0: CSS_NESTED_QUALIFIED_RULE@61..89
+                  0: CSS_RELATIVE_SELECTOR_LIST@61..68
+                    0: CSS_RELATIVE_SELECTOR@61..68
+                      0: (empty)
+                      1: CSS_COMPOUND_SELECTOR@61..68
+                        0: CSS_NESTED_SELECTOR_LIST@61..68
+                          0: CSS_NESTED_SELECTOR@61..65
+                            0: AMP@61..65 "&" [Newline("\n"), Whitespace("\t\t")] []
+                          1: CSS_NESTED_SELECTOR@65..66
+                            0: AMP@65..66 "&" [] []
+                          2: CSS_NESTED_SELECTOR@66..68
+                            0: AMP@66..68 "&" [] [Whitespace(" ")]
+                        1: (empty)
+                        2: CSS_SUB_SELECTOR_LIST@68..68
+                  1: CSS_DECLARATION_OR_RULE_BLOCK@68..89
+                    0: L_CURLY@68..69 "{" [] []
+                    1: CSS_DECLARATION_OR_RULE_LIST@69..85
+                      0: CSS_DECLARATION_WITH_SEMICOLON@69..85
+                        0: CSS_DECLARATION@69..84
+                          0: CSS_GENERIC_PROPERTY@69..84
+                            0: CSS_IDENTIFIER@69..78
+                              0: IDENT@69..78 "color" [Newline("\n"), Whitespace("\t\t\t")] []
+                            1: COLON@78..80 ":" [] [Whitespace(" ")]
+                            2: CSS_GENERIC_COMPONENT_VALUE_LIST@80..84
+                              0: CSS_IDENTIFIER@80..84
+                                0: IDENT@80..84 "pink" [] []
+                          1: (empty)
+                        1: SEMICOLON@84..85 ";" [] []
+                    2: R_CURLY@85..89 "}" [Newline("\n"), Whitespace("\t\t")] []
+              2: R_CURLY@89..92 "}" [Newline("\n"), Whitespace("\t")] []
+        2: R_CURLY@92..94 "}" [Newline("\n")] []
+  2: EOF@94..95 "" [Newline("\n")] []
+
+```

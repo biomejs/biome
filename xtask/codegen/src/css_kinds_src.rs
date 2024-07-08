@@ -320,6 +320,8 @@ pub const CSS_KINDS_SRC: KindsSrc = KindsSrc {
         "CSS_COMPLEX_SELECTOR",
         "CSS_COMPOUND_SELECTOR",
         "CSS_SUB_SELECTOR_LIST",
+        "CSS_NESTED_SELECTOR_LIST",
+        "CSS_NESTED_SELECTOR",
         "CSS_ID_SELECTOR",
         "CSS_CLASS_SELECTOR",
         "CSS_TYPE_SELECTOR",

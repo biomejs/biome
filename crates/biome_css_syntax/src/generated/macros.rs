@@ -354,6 +354,10 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::CssNestedQualifiedRule::new_unchecked(node) };
                     $body
                 }
+                $crate::CssSyntaxKind::CSS_NESTED_SELECTOR => {
+                    let $pattern = unsafe { $crate::CssNestedSelector::new_unchecked(node) };
+                    $body
+                }
                 $crate::CssSyntaxKind::CSS_NTH_OFFSET => {
                     let $pattern = unsafe { $crate::CssNthOffset::new_unchecked(node) };
                     $body
@@ -854,6 +858,10 @@ macro_rules! map_syntax_node {
                 }
                 $crate::CssSyntaxKind::CSS_MEDIA_QUERY_LIST => {
                     let $pattern = unsafe { $crate::CssMediaQueryList::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::CSS_NESTED_SELECTOR_LIST => {
+                    let $pattern = unsafe { $crate::CssNestedSelectorList::new_unchecked(node) };
                     $body
                 }
                 $crate::CssSyntaxKind::CSS_PAGE_AT_RULE_ITEM_LIST => {
