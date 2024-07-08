@@ -11,17 +11,18 @@ use std::collections::hash_map::Entry;
 /// [std::sync::Arc] and stored inside the [SemanticModel].
 pub struct SemanticModelBuilder {
     root: AnyJsRoot,
-    node_by_range: FxHashMap<TextRange, JsSyntaxNode>,
+    binding_node_by_start: FxHashMap<TextSize, JsSyntaxNode>,
+    scope_node_by_range: FxHashMap<TextRange, JsSyntaxNode>,
     globals: Vec<SemanticModelGlobalBindingData>,
-    globals_by_name: FxHashMap<String, Option<usize>>,
+    globals_by_name: FxHashMap<String, Option<u32>>,
     scopes: Vec<SemanticModelScopeData>,
     scope_range_by_start: FxHashMap<TextSize, BTreeSet<Interval<u32, u32>>>,
     scope_hoisted_to_by_range: FxHashMap<TextSize, u32>,
     bindings: Vec<SemanticModelBindingData>,
     /// maps a binding range start to its index inside SemanticModelBuilder::bindings vec
-    bindings_by_start: FxHashMap<TextSize, usize>,
-    /// maps a reference range start to its bindings. usize points to SemanticModelBuilder::bindings vec
-    declared_at_by_start: FxHashMap<TextSize, usize>,
+    bindings_by_start: FxHashMap<TextSize, u32>,
+    /// maps a reference range start to its bindings. u32 points to SemanticModelBuilder::bindings vec
+    declared_at_by_start: FxHashMap<TextSize, u32>,
     exported: FxHashSet<TextSize>,
     unresolved_references: Vec<SemanticModelUnresolvedReference>,
 }
@@ -30,7 +31,8 @@ impl SemanticModelBuilder {
     pub fn new(root: AnyJsRoot) -> Self {
         Self {
             root,
-            node_by_range: FxHashMap::default(),
+            binding_node_by_start: FxHashMap::default(),
+            scope_node_by_range: FxHashMap::default(),
             globals: vec![],
             globals_by_name: FxHashMap::default(),
             scopes: vec![],
@@ -56,8 +58,8 @@ impl SemanticModelBuilder {
             | TS_TYPE_PARAMETER_NAME
             | TS_LITERAL_ENUM_MEMBER_NAME
             | JS_IDENTIFIER_ASSIGNMENT => {
-                self.node_by_range
-                    .insert(node.text_trimmed_range(), node.clone());
+                self.binding_node_by_start
+                    .insert(node.text_trimmed_range().start(), node.clone());
             }
 
             // Accessible from scopes, closures
@@ -99,14 +101,14 @@ impl SemanticModelBuilder {
             | JS_CATCH_CLAUSE
             | TS_FUNCTION_TYPE
             | TS_MAPPED_TYPE => {
-                self.node_by_range
+                self.scope_node_by_range
                     .insert(node.text_trimmed_range(), node.clone());
             }
             _ => {
                 if let Some(conditional_type) = TsConditionalType::cast_ref(node) {
                     if let Ok(conditional_true_type) = conditional_type.true_type() {
                         let syntax = conditional_true_type.into_syntax();
-                        self.node_by_range
+                        self.scope_node_by_range
                             .insert(syntax.text_trimmed_range(), syntax);
                     }
                 }
@@ -171,7 +173,7 @@ impl SemanticModelBuilder {
                 // event extractor
                 debug_assert!((binding_scope_id as usize) < self.scopes.len());
 
-                let binding_id = self.bindings.len();
+                let binding_id = self.bindings.len() as u32;
                 self.bindings.push(SemanticModelBindingData {
                     id: binding_id.into(),
                     range,
@@ -183,7 +185,7 @@ impl SemanticModelBuilder {
 
                 scope.bindings.push(binding_id);
                 // Handle bindings with a bogus name
-                if let Some(node) = self.node_by_range.get(&range) {
+                if let Some(node) = self.binding_node_by_start.get(&range.start()) {
                     if let Some(node) = JsIdentifierBinding::cast_ref(node) {
                         if let Ok(name_token) = node.name_token() {
                             let name = name_token.token_text_trimmed();
@@ -205,7 +207,7 @@ impl SemanticModelBuilder {
                 let binding_id = match self.bindings_by_start.entry(declaration_at.start()) {
                     Entry::Occupied(entry) => *entry.get(),
                     Entry::Vacant(entry) => {
-                        let id = self.bindings.len();
+                        let id = self.bindings.len() as u32;
                         self.bindings.push(SemanticModelBindingData {
                             id: id.into(),
                             range,
@@ -214,8 +216,8 @@ impl SemanticModelBuilder {
                         *entry.insert(id)
                     }
                 };
-                let binding = &mut self.bindings[binding_id];
-                let reference_index = binding.references.len();
+                let binding = &mut self.bindings[binding_id as usize];
+                let reference_index = binding.references.len() as u32;
 
                 binding.references.push(SemanticModelReference {
                     index: (binding.id, reference_index).into(),
@@ -237,9 +239,9 @@ impl SemanticModelBuilder {
                 scope_id,
             } => {
                 let binding_id = self.bindings_by_start[&declaration_at.start()];
-                let binding = &mut self.bindings[binding_id];
+                let binding = &mut self.bindings[binding_id as usize];
 
-                let reference_index = binding.references.len();
+                let reference_index = binding.references.len() as u32;
                 binding.references.push(SemanticModelReference {
                     index: (binding.id, reference_index).into(),
                     range,
@@ -260,9 +262,9 @@ impl SemanticModelBuilder {
                 scope_id,
             } => {
                 let binding_id = self.bindings_by_start[&declaration_at.start()];
-                let binding = &mut self.bindings[binding_id];
+                let binding = &mut self.bindings[binding_id as usize];
 
-                let reference_index = binding.references.len();
+                let reference_index = binding.references.len() as u32;
                 binding.references.push(SemanticModelReference {
                     index: (binding.id, reference_index).into(),
                     range,
@@ -283,9 +285,9 @@ impl SemanticModelBuilder {
                 scope_id,
             } => {
                 let binding_id = self.bindings_by_start[&declaration_at.start()];
-                let binding = &mut self.bindings[binding_id];
+                let binding = &mut self.bindings[binding_id as usize];
 
-                let reference_index = binding.references.len();
+                let reference_index = binding.references.len() as u32;
                 binding.references.push(SemanticModelReference {
                     index: (binding.id, reference_index).into(),
                     range,
@@ -307,7 +309,7 @@ impl SemanticModelBuilder {
                     SemanticModelReferenceType::Write { hoisted: false }
                 };
 
-                let node = &self.node_by_range[&range];
+                let node = &self.binding_node_by_start[&range.start()];
                 let name = node.text_trimmed().to_string();
 
                 match self.globals_by_name.entry(name) {
@@ -315,12 +317,12 @@ impl SemanticModelBuilder {
                         let entry = entry.get_mut();
                         match entry {
                             Some(index) => {
-                                self.globals[*index]
+                                self.globals[(*index) as usize]
                                     .references
                                     .push(SemanticModelGlobalReferenceData { range, ty });
                             }
                             None => {
-                                let id = self.globals.len();
+                                let id = self.globals.len() as u32;
                                 self.globals.push(SemanticModelGlobalBindingData {
                                     references: vec![SemanticModelGlobalReferenceData {
                                         range,
@@ -355,7 +357,8 @@ impl SemanticModelBuilder {
                     .collect(),
             ),
             scope_hoisted_to_by_range: self.scope_hoisted_to_by_range,
-            node_by_range: self.node_by_range,
+            binding_node_by_start: self.binding_node_by_start,
+            scope_node_by_range: self.scope_node_by_range,
             bindings: self.bindings,
             bindings_by_start: self.bindings_by_start,
             declared_at_by_start: self.declared_at_by_start,
