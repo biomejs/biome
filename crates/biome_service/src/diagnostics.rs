@@ -330,7 +330,7 @@ pub enum SearchError {
     /// No pattern with the given ID
     InvalidPattern(InvalidPattern),
     /// Error while executing the search query.
-    QueryError(QueryError),
+    QueryError(QueryDiagnostic),
 }
 
 #[derive(Debug, Serialize, Deserialize, Diagnostic)]
@@ -344,9 +344,9 @@ pub enum SearchError {
 pub struct InvalidPattern;
 
 #[derive(Debug, Serialize, Deserialize)]
-pub struct QueryError(pub String);
+pub struct QueryDiagnostic(pub String);
 
-impl Diagnostic for QueryError {
+impl Diagnostic for QueryDiagnostic {
     fn category(&self) -> Option<&'static Category> {
         Some(category!("search"))
     }
@@ -356,13 +356,17 @@ impl Diagnostic for QueryError {
     }
 
     fn message(&self, fmt: &mut biome_console::fmt::Formatter<'_>) -> std::io::Result<()> {
-        fmt.write_markup(markup! { "Error executing the Grit query: "{{&self.0}} })
+        fmt.write_str("Error executing the Grit query")
+    }
+
+    fn description(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        fmt.write_str(&self.0)
     }
 
     fn verbose_advices(&self, visitor: &mut dyn Visit) -> std::io::Result<()> {
         visitor.record_log(
             LogCategory::Info,
-            &markup! { "For reference, please consult: https://docs.grit.io/language/syntax" },
+            &markup! { "Please consult "<Hyperlink href="https://docs.grit.io/language/syntax">"the official grit syntax page"</Hyperlink>"." }
         )
     }
 }
@@ -458,7 +462,9 @@ impl From<CompileError> for WorkspaceError {
                 Self::SearchError(SearchError::PatternCompilationError(value))
             }
             // FIXME: This really needs proper diagnostics
-            _ => Self::SearchError(SearchError::QueryError(QueryError(format!("{value:?}")))),
+            _ => Self::SearchError(SearchError::QueryError(QueryDiagnostic(format!(
+                "{value:?}"
+            )))),
         }
     }
 }

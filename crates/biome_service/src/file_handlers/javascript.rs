@@ -1,5 +1,5 @@
 use super::{
-    search_file, AnalyzerCapabilities, CodeActionsParams, DebugCapabilities, ExtensionHandler,
+    search, AnalyzerCapabilities, CodeActionsParams, DebugCapabilities, ExtensionHandler,
     FormatterCapabilities, LintParams, LintResults, ParseResult, ParserCapabilities,
     SearchCapabilities,
 };
@@ -295,7 +295,7 @@ impl ExtensionHandler for JsFileHandler {
                 format_on_type: Some(format_on_type),
             },
             search: SearchCapabilities {
-                search_file: Some(search_file),
+                search: Some(search),
             },
         }
     }

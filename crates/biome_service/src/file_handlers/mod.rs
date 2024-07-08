@@ -2,7 +2,7 @@ use self::{
     css::CssFileHandler, javascript::JsFileHandler, json::JsonFileHandler,
     unknown::UnknownFileHandler,
 };
-use crate::diagnostics::{QueryError, SearchError};
+use crate::diagnostics::{QueryDiagnostic, SearchError};
 pub use crate::file_handlers::astro::{AstroFileHandler, ASTRO_FENCE};
 use crate::file_handlers::graphql::GraphqlFileHandler;
 pub use crate::file_handlers::svelte::{SvelteFileHandler, SVELTE_FENCE};
@@ -483,7 +483,7 @@ type Search = fn(
 #[derive(Default)]
 pub(crate) struct SearchCapabilities {
     /// It searches through a file
-    pub(crate) search_file: Option<Search>,
+    pub(crate) search: Option<Search>,
 }
 
 /// Main trait to use to add a new language to Biome
@@ -601,7 +601,7 @@ pub(crate) fn parse_lang_from_script_opening_tag(script_opening_tag: &str) -> La
     .map_or(Language::JavaScript, |lang| lang)
 }
 
-pub(crate) fn search_file(
+pub(crate) fn search(
     path: &BiomePath,
     _file_source: &DocumentFileSource,
     parse: AnyParse,
@@ -614,7 +614,7 @@ pub(crate) fn search_file(
             parse,
         })
         .map_err(|err| {
-            WorkspaceError::SearchError(SearchError::QueryError(QueryError(err.to_string())))
+            WorkspaceError::SearchError(SearchError::QueryError(QueryDiagnostic(err.to_string())))
         })?;
 
     let matches = query_result

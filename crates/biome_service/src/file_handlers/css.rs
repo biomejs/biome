@@ -202,7 +202,7 @@ impl ExtensionHandler for CssFileHandler {
                 format_range: Some(format_range),
                 format_on_type: Some(format_on_type),
             },
-            search: SearchCapabilities { search_file: None },
+            search: SearchCapabilities { search: None },
         }
     }
 }

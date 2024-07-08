@@ -781,7 +781,7 @@ impl Workspace for WorkspaceServer {
             biome_grit_patterns::JsTargetLanguage.into(),
         )?;
 
-        let pattern_id = PatternId::from(make_search_pattern_id());
+        let pattern_id = make_search_pattern_id();
         self.patterns.insert(pattern_id.clone(), pattern);
         Ok(ParsePatternResult { pattern_id })
     }
@@ -794,15 +794,15 @@ impl Workspace for WorkspaceServer {
         };
 
         let capabilities = self.get_file_capabilities(&params.path);
-        let search_file = capabilities
+        let search = capabilities
             .search
-            .search_file
+            .search
             .ok_or_else(self.build_capability_error(&params.path))?;
         let workspace = self.workspace();
         let parse = self.get_parse(params.path.clone())?;
 
         let document_file_source = self.get_file_source(&params.path);
-        let matches = search_file(
+        let matches = search(
             &params.path,
             &document_file_source,
             parse,
@@ -848,8 +848,10 @@ fn is_dir(path: &Path) -> bool {
     path.is_dir() || (path.is_symlink() && fs::read_link(path).is_ok_and(|path| path.is_dir()))
 }
 
-fn make_search_pattern_id() -> String {
+/// Generates a pattern ID that we can use as "handle" for referencing
+/// previously parsed search queries.
+fn make_search_pattern_id() -> PatternId {
     static COUNTER: AtomicUsize = AtomicUsize::new(1);
     let counter = COUNTER.fetch_add(1, Ordering::AcqRel);
-    format!("p{counter}")
+    format!("p{counter}").into()
 }

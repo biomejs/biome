@@ -146,7 +146,7 @@ impl FileFeaturesResult {
             self.features_supported
                 .insert(FeatureName::OrganizeImports, SupportKind::Supported);
         }
-        if capabilities.search.search_file.is_some() {
+        if capabilities.search.search.is_some() {
             self.features_supported
                 .insert(FeatureName::Search, SupportKind::Supported);
         }

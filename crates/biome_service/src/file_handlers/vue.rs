@@ -107,7 +107,7 @@ impl ExtensionHandler for VueFileHandler {
                 format_on_type: Some(format_on_type),
             },
             // TODO: We should be able to search JS portions already
-            search: SearchCapabilities { search_file: None },
+            search: SearchCapabilities { search: None },
         }
     }
 }

@@ -177,14 +177,10 @@ impl<'a> ExecContext<'a, GritQueryContext> for GritExecContext<'a> {
 
             let name: PathBuf = file
                 .name(&state.files)
-                .text(&state.files, &self.lang)
-                .unwrap()
+                .text(&state.files, &self.lang)?
                 .as_ref()
                 .into();
-            let body = file
-                .body(&state.files)
-                .text(&state.files, &self.lang)
-                .unwrap();
+            let body = file.body(&state.files).text(&state.files, &self.lang)?;
             let owned_file =
                 new_file_owner(name.clone(), &body, &self.lang, logs)?.ok_or_else(|| {
                     anyhow!(
@@ -193,6 +189,7 @@ impl<'a> ExecContext<'a, GritQueryContext> for GritExecContext<'a> {
                     )
                 })?;
             self.files().push(owned_file);
+            // SAFETY: We just pushed to the list of files, so there must be one.
             let _ = state.files.push_new_file(self.files().last().unwrap());
         }
 
