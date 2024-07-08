@@ -1,4 +1,3 @@
-use crate::lexer::CssReLexContext;
 use crate::parser::CssParser;
 use crate::syntax::at_rule::{is_at_at_rule, parse_at_rule};
 use crate::syntax::block::ParseBlockBody;
@@ -37,7 +36,10 @@ impl ParseBlockBody for DeclarationOrRuleListBlock {
 
 #[inline]
 fn is_at_declaration_or_rule_item(p: &mut CssParser) -> bool {
-    is_at_at_rule(p) || is_at_nested_qualified_rule(p) || is_at_declaration(p)
+    is_at_at_rule(p)
+        || is_at_nested_qualified_rule(p)
+        || is_at_declaration(p)
+        || is_at_grit_metavariable(p)
 }
 
 struct DeclarationOrRuleListParseRecovery;
@@ -58,9 +60,6 @@ impl ParseNodeList for DeclarationOrRuleList {
     const LIST_KIND: Self::Kind = CSS_DECLARATION_OR_RULE_LIST;
 
     fn parse_element(&mut self, p: &mut Self::Parser<'_>) -> ParsedSyntax {
-        if p.options().is_grit_metavariable_enabled() {
-            p.re_lex(CssReLexContext::GritMetavariable);
-        }
         if is_at_at_rule(p) {
             parse_at_rule(p)
         } else if is_at_declaration(p) {

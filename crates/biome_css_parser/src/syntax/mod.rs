@@ -6,7 +6,7 @@ mod property;
 mod selector;
 mod value;
 
-use crate::lexer::{CssLexContext, CssReLexContext};
+use crate::lexer::CssLexContext;
 use crate::parser::CssParser;
 use crate::syntax::at_rule::{is_at_at_rule, parse_at_rule};
 use crate::syntax::block::parse_declaration_or_rule_list_block;
@@ -254,6 +254,11 @@ fn is_at_grit_metavariable(p: &mut CssParser) -> bool {
 }
 
 #[inline]
+fn is_nth_at_grit_metavariable(p: &mut CssParser, n: usize) -> bool {
+    p.nth_at(n, GRIT_METAVARIABLE)
+}
+
+#[inline]
 fn parse_grit_metavariable(p: &mut CssParser) -> ParsedSyntax {
     if !is_at_grit_metavariable(p) {
         return Absent;
@@ -274,13 +279,11 @@ pub(crate) fn is_at_any_value(p: &mut CssParser) -> bool {
         || is_at_ratio(p)
         || is_at_color(p)
         || is_at_bracketed_value(p)
+        || is_at_grit_metavariable(p)
 }
 
 #[inline]
 pub(crate) fn parse_any_value(p: &mut CssParser) -> ParsedSyntax {
-    if p.options().is_grit_metavariable_enabled() {
-        p.re_lex(CssReLexContext::GritMetavariable);
-    }
     if is_at_any_function(p) {
         parse_any_function(p)
     } else if is_at_dashed_identifier(p) {

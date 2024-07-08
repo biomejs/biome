@@ -1,5 +1,4 @@
 use super::parse_error::expected_media_query;
-use crate::lexer::CssReLexContext;
 use crate::parser::CssParser;
 use crate::syntax::at_rule::feature::parse_any_query_feature;
 use crate::syntax::block::parse_conditional_block;
@@ -79,9 +78,6 @@ impl ParseSeparatedList for MediaQueryList {
 
 #[inline]
 fn parse_any_media_query(p: &mut CssParser) -> ParsedSyntax {
-    if p.options().is_grit_metavariable_enabled() {
-        p.re_lex(CssReLexContext::GritMetavariable);
-    }
     if is_at_media_type_query(p) {
         parse_any_media_type_query(p)
     } else if is_at_grit_metavariable(p) {
