@@ -4,6 +4,7 @@ use biome_configuration::diagnostics::{ConfigurationDiagnostic, EditorConfigDiag
 use biome_configuration::{BiomeDiagnostic, CantLoadExtendFile};
 use biome_console::fmt::Bytes;
 use biome_console::markup;
+use biome_diagnostics::serde::Diagnostic as SerdeDiagnostic;
 use biome_diagnostics::{
     category, Advices, Category, Diagnostic, DiagnosticTags, Location, LogCategory, Severity, Visit,
 };
@@ -323,14 +324,19 @@ impl Diagnostic for SourceFileNotSupported {
     }
 }
 
-#[derive(Debug, Serialize, Deserialize, Diagnostic)]
+#[derive(Debug, Deserialize, Diagnostic, Serialize)]
 pub enum SearchError {
     /// An invalid pattern was given
-    PatternCompilationError(CompileError),
+    PatternCompilationError(PatternCompilationError),
     /// No pattern with the given ID
     InvalidPattern(InvalidPattern),
     /// Error while executing the search query.
     QueryError(QueryDiagnostic),
+}
+
+#[derive(Debug, Deserialize, Diagnostic, Serialize)]
+pub struct PatternCompilationError {
+    pub diagnostics: Vec<SerdeDiagnostic>,
 }
 
 #[derive(Debug, Serialize, Deserialize, Diagnostic)]
@@ -343,7 +349,7 @@ pub enum SearchError {
 )]
 pub struct InvalidPattern;
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct QueryDiagnostic(pub String);
 
 impl Diagnostic for QueryDiagnostic {
@@ -458,8 +464,16 @@ impl From<VcsDiagnostic> for WorkspaceError {
 impl From<CompileError> for WorkspaceError {
     fn from(value: CompileError) -> Self {
         match &value {
-            CompileError::ParsePatternError(ParsePatternError { .. }) => {
-                Self::SearchError(SearchError::PatternCompilationError(value))
+            CompileError::ParsePatternError(ParsePatternError { diagnostics }) => {
+                Self::SearchError(SearchError::PatternCompilationError(
+                    PatternCompilationError {
+                        diagnostics: diagnostics
+                            .iter()
+                            .cloned()
+                            .map(SerdeDiagnostic::new)
+                            .collect(),
+                    },
+                ))
             }
             // FIXME: This really needs proper diagnostics
             _ => Self::SearchError(SearchError::QueryError(QueryDiagnostic(format!(

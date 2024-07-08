@@ -468,7 +468,7 @@ fn text_to_var(
         GritMetaValue::Variable(name) => {
             let range = *range_map
                 .get(&range)
-                .ok_or_else(|| CompileError::InvalidMetavariableRange(range))?;
+                .ok_or(CompileError::InvalidMetavariableRange(range))?;
             let var = context.register_variable(name, range + context_range.start);
             Ok(SnippetValues::Variable(var))
         }

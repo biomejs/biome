@@ -1,34 +1,34 @@
 use std::fmt::Debug;
 
 use biome_console::{fmt::Formatter, markup};
+use biome_diagnostics::Location;
 use biome_diagnostics::{category, Category, Diagnostic, LogCategory, Severity};
-use biome_diagnostics::{serde::Diagnostic as SerializableDiagnostic, Location};
+use biome_parser::diagnostic::ParseDiagnostic;
 use biome_rowan::SyntaxError;
 use grit_util::ByteRange;
-use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Deserialize, Diagnostic, Serialize)]
+#[derive(Debug, Diagnostic)]
 #[diagnostic(
     category = "parse",
     severity = Error,
     message = "Error(s) parsing pattern",
 )]
 pub struct ParsePatternError {
-    pub diagnostics: Vec<SerializableDiagnostic>,
+    pub diagnostics: Vec<ParseDiagnostic>,
 }
 
-#[derive(Debug, Deserialize, Diagnostic, Serialize)]
+#[derive(Debug, Diagnostic)]
 #[diagnostic(
     category = "parse",
     severity = Error,
     message = "Error(s) parsing pattern snippet",
 )]
 pub struct ParseSnippetError {
-    diagnostics: Vec<SerializableDiagnostic>,
+    diagnostics: Vec<ParseDiagnostic>,
 }
 
 // TODO: We definitely need to improve diagnostics.
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug)]
 pub enum CompileError {
     /// Indicates the (top-level) pattern could not be parsed.
     ParsePatternError(ParsePatternError),
@@ -205,7 +205,7 @@ impl From<NodeLikeArgumentError> for CompileError {
     }
 }
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug)]
 pub enum NodeLikeArgumentError {
     /// Duplicate arguments in invocation.
     DuplicateArguments { name: String },

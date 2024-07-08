@@ -35,11 +35,7 @@ pub fn compile_pattern(
     let parsed = parse_grit(source);
     if parsed.has_errors() {
         return Err(CompileError::ParsePatternError(ParsePatternError {
-            diagnostics: parsed
-                .into_diagnostics()
-                .into_iter()
-                .map(biome_diagnostics::serde::Diagnostic::new)
-                .collect(),
+            diagnostics: parsed.into_diagnostics(),
         }));
     }
 
