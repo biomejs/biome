@@ -651,7 +651,7 @@ pub trait SyntaxFeature: Sized {
 ///
 /// It can be dynamically downcast into a concrete [SyntaxNode] or [AstNode] of
 /// the corresponding language, generally through a language-specific capability
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct AnyParse {
     pub(crate) root: SendNode,
     pub(crate) diagnostics: Vec<ParseDiagnostic>,

@@ -25,13 +25,9 @@ impl TestFormatLanguage for JsTestFormatLanguage {
     type FormatLanguage = JsFormatLanguage;
 
     fn parse(&self, text: &str) -> AnyParse {
-        let parse = parse(
-            text,
-            self.source_type,
-            JsParserOptions::default().with_parse_class_parameter_decorators(),
-        );
+        let options = JsParserOptions::default().with_parse_class_parameter_decorators();
 
-        AnyParse::new(parse.syntax().as_send().unwrap(), parse.into_diagnostics())
+        parse(text, self.source_type, options).into()
     }
 
     fn to_language_settings<'a>(

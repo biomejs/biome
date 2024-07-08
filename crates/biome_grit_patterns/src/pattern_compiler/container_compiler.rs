@@ -21,7 +21,7 @@ impl ContainerCompiler {
                 MapAccessorCompiler::from_node(accessor, context)?,
             ))),
             AnyGritContainer::GritVariable(variable) => Ok(Container::Variable(
-                VariableCompiler::from_node(variable, context)?,
+                VariableCompiler::from_node(variable, context),
             )),
             AnyGritContainer::GritBogusContainer(_) => Err(CompileError::UnexpectedKind(
                 GritSyntaxKind::GRIT_BOGUS_CONTAINER.into(),

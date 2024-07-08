@@ -146,6 +146,10 @@ impl FileFeaturesResult {
             self.features_supported
                 .insert(FeatureKind::OrganizeImports, SupportKind::Supported);
         }
+        if capabilities.search.search.is_some() {
+            self.features_supported
+                .insert(FeatureKind::Search, SupportKind::Supported);
+        }
 
         self
     }
@@ -252,6 +256,10 @@ impl FileFeaturesResult {
 
     pub fn supports_assists(&self) -> bool {
         self.supports_for(&FeatureKind::Assists)
+    }
+
+    pub fn supports_search(&self) -> bool {
+        self.supports_for(&FeatureKind::Search)
     }
 
     /// Loops through all the features of the current file, and if a feature is [SupportKind::FileNotSupported],

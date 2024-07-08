@@ -1,13 +1,15 @@
 mod js_target_language;
 
+use biome_parser::AnyParse;
 pub use js_target_language::JsTargetLanguage;
 
 use crate::grit_js_parser::GritJsParser;
 use crate::grit_target_node::{GritTargetNode, GritTargetSyntaxKind};
 use crate::grit_tree::GritTargetTree;
 use biome_rowan::SyntaxKind;
-use grit_util::{Ast, CodeRange, EffectRange, Language, Parser, SnippetTree};
+use grit_util::{AnalysisLogs, Ast, CodeRange, EffectRange, Language, Parser, SnippetTree};
 use std::borrow::Cow;
+use std::path::Path;
 
 /// Generates the `GritTargetLanguage` enum.
 ///
@@ -35,7 +37,7 @@ macro_rules! generate_target_language {
                 }
             }
 
-            pub fn get_parser(&self) -> Box<dyn Parser<Tree = GritTargetTree>> {
+            pub fn get_parser(&self) -> Box<dyn GritTargetParser> {
                 match self {
                     $(Self::$language(_) => Box::new($parser)),+
                 }
@@ -242,4 +244,14 @@ trait GritTargetLanguageImpl {
     fn is_alternative_metavariable_kind(_kind: GritTargetSyntaxKind) -> bool {
         false
     }
+}
+
+pub trait GritTargetParser: Parser<Tree = GritTargetTree> {
+    #[allow(clippy::wrong_self_convention)]
+    fn from_cached_parse_result(
+        &self,
+        parse: &AnyParse,
+        path: Option<&Path>,
+        logs: &mut AnalysisLogs,
+    ) -> Option<GritTargetTree>;
 }
