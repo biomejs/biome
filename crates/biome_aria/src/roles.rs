@@ -1337,15 +1337,15 @@ impl<'a> AriaRoles {
         let role_name = attributes
             .get("role")
             .and_then(|role| role.first())
-            .map(|r| self.get_role(r))
-            .unwrap_or_else(|| self.get_implicit_role(element_name, attributes));
+            .map_or_else(
+                || self.get_implicit_role(element_name, attributes),
+                |r| self.get_role(r),
+            );
 
         match role_name.map(|role| role.type_name()) {
-            Some("biome_aria::roles::PresentationRole" | "biome_aria::roles::GenericRole") => {
-                return false
-            }
-            Some(_) => return true,
-            None => return false,
+            Some("biome_aria::roles::PresentationRole" | "biome_aria::roles::GenericRole") => false,
+            Some(_) => true,
+            None => false,
         }
     }
 }
