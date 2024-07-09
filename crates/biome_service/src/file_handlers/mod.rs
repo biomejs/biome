@@ -18,7 +18,7 @@ use biome_analyze::{
     AnalyzerDiagnostic, GroupCategory, Queryable, RegistryVisitor, Rule, RuleCategories,
     RuleCategory, RuleFilter, RuleGroup,
 };
-use biome_configuration::linter::RuleSelector;
+use biome_configuration::analyzer::RuleSelector;
 use biome_configuration::Rules;
 use biome_console::fmt::Formatter;
 use biome_console::markup;

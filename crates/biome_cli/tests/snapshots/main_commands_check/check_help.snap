@@ -112,6 +112,9 @@ The configuration that is contained inside the file `biome.json`
         --graphql-formatter-quote-style=<double|single>  The type of quotes used in GraphQL code.
                               Defaults to double.
         --graphql-linter-enabled=<true|false>  Control the formatter for GraphQL files.
+        --assists-enabled=<true|false>  Whether Biome should enable assists via LSP.
+        --assists-enforce=<true|false>  Whether Biome should fail in CLI if the assists were not applied
+                              to the code.
 
 Global options applied to all commands
         --colors=<off|force>  Set the formatting mode for markup: "off" prints everything as plain

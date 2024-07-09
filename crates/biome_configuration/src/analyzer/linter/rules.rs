@@ -1,7 +1,6 @@
 //! Generated file, do not edit by hand, see `xtask/codegen`
 
-use super::RulePlainConfiguration;
-use crate::{RuleConfiguration, RuleFixConfiguration};
+use crate::analyzer::{RuleConfiguration, RuleFixConfiguration, RulePlainConfiguration};
 use biome_analyze::{options::RuleOptions, RuleFilter};
 use biome_console::markup;
 use biome_css_analyze::options::*;

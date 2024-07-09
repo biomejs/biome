@@ -4,10 +4,10 @@ use crate::diagnostics::{DeprecatedArgument, DeprecatedConfigurationFile};
 use crate::execute::Stdin;
 use crate::logging::LoggingKind;
 use crate::{CliDiagnostic, CliSession, LoggingLevel, VERSION};
+use biome_configuration::analyzer::RuleSelector;
 use biome_configuration::css::PartialCssLinter;
 use biome_configuration::javascript::PartialJavascriptLinter;
 use biome_configuration::json::PartialJsonLinter;
-use biome_configuration::linter::RuleSelector;
 use biome_configuration::{
     css::partial_css_formatter, css::partial_css_linter, graphql::partial_graphql_formatter,
     graphql::partial_graphql_linter, javascript::partial_javascript_formatter,

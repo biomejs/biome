@@ -2,6 +2,7 @@
 //!
 //! The configuration is divided by "tool", and then it's possible to further customise it
 //! by language. The language might further options divided by tool.
+pub mod analyzer;
 pub mod css;
 pub mod diagnostics;
 pub mod editorconfig;
@@ -10,19 +11,24 @@ pub mod generated;
 pub mod graphql;
 pub mod javascript;
 pub mod json;
-pub mod linter;
 pub mod organize_imports;
 mod overrides;
 pub mod vcs;
 
+use crate::analyzer::assists::{partial_assists, Assists, PartialAssists};
 use crate::css::CssLinter;
 pub use crate::diagnostics::BiomeDiagnostic;
 pub use crate::diagnostics::CantLoadExtendFile;
-pub use crate::generated::push_to_analyzer_rules;
+pub use crate::generated::{push_to_analyzer_assists, push_to_analyzer_rules};
 use crate::javascript::JavascriptLinter;
 use crate::json::JsonLinter;
 use crate::organize_imports::{partial_organize_imports, OrganizeImports, PartialOrganizeImports};
 use crate::vcs::{partial_vcs_configuration, PartialVcsConfiguration, VcsConfiguration};
+pub use analyzer::{
+    partial_linter_configuration, LinterConfiguration, PartialLinterConfiguration,
+    RuleConfiguration, RuleFixConfiguration, RulePlainConfiguration, RuleWithFixOptions,
+    RuleWithOptions, Rules,
+};
 use biome_deserialize::{Deserialized, StringSet};
 use biome_deserialize_macros::{Deserializable, Merge, Partial};
 use biome_formatter::QuoteStyle;
@@ -46,11 +52,6 @@ pub use javascript::{
 pub use json::{
     partial_json_configuration, JsonConfiguration, JsonFormatter, PartialJsonConfiguration,
     PartialJsonFormatter,
-};
-pub use linter::{
-    partial_linter_configuration, LinterConfiguration, PartialLinterConfiguration,
-    RuleConfiguration, RuleFixConfiguration, RulePlainConfiguration, RuleWithFixOptions,
-    RuleWithOptions, Rules,
 };
 pub use overrides::{
     OverrideFormatterConfiguration, OverrideLinterConfiguration,
@@ -129,6 +130,10 @@ pub struct Configuration {
     /// A list of granular patterns that should be applied only to a sub set of files
     #[partial(bpaf(hide))]
     pub overrides: Overrides,
+
+    /// Specific configuration for assists
+    #[partial(type, bpaf(external(partial_assists), optional))]
+    pub assists: Assists,
 }
 
 impl PartialConfiguration {

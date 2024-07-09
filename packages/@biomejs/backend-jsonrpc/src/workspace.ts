@@ -38,6 +38,10 @@ export interface PartialConfiguration {
 	 */
 	$schema?: string;
 	/**
+	 * Specific configuration for assists
+	 */
+	assists?: PartialAssists;
+	/**
 	 * Specific configuration for the Css language
 	 */
 	css?: PartialCssConfiguration;
@@ -81,6 +85,20 @@ export interface PartialConfiguration {
 	 * The configuration of the VCS integration
 	 */
 	vcs?: PartialVcsConfiguration;
+}
+export interface PartialAssists {
+	/**
+	 * Whether Biome should enable assists via LSP.
+	 */
+	enabled?: boolean;
+	/**
+	 * Whether Biome should fail in CLI if the assists were not applied to the code.
+	 */
+	enforce?: boolean;
+	/**
+	 * Whether Biome should fail in CLI if the assists were not applied to the code.
+	 */
+	rules?: Rules2;
 }
 /**
  * Options applied to CSS files
@@ -285,6 +303,17 @@ If Biome can't find the configuration, it will attempt to use the current workin
 	 * Whether Biome should use the VCS ignore file. When [true], Biome will ignore the files specified in the ignore file.
 	 */
 	useIgnoreFile?: boolean;
+}
+export interface Rules2 {
+	/**
+	 * It enables ALL rules. The rules that belong to `nursery` won't be enabled.
+	 */
+	all?: boolean;
+	/**
+	 * It enables the lint rules recommended by Biome. `true` by default.
+	 */
+	recommended?: boolean;
+	refactor?: Refactor;
 }
 /**
  * Options that changes how the CSS formatter behaves
@@ -593,6 +622,27 @@ export interface OverridePattern {
 	organizeImports?: OverrideOrganizeImportsConfiguration;
 }
 export type VcsClientKind = "git";
+/**
+ * A list of rules that belong to this group
+ */
+export interface Refactor {
+	/**
+	 * It enables ALL rules for this group.
+	 */
+	all?: boolean;
+	/**
+	 * Provides a whole-source code action to sort the imports in the file using import groups and natural ordering.
+	 */
+	organizeImports?: RuleFixConfiguration_for_Null;
+	/**
+	 * It enables the recommended rules for this group
+	 */
+	recommended?: boolean;
+	/**
+	 * Sorts the keys of a JSON object in natural order
+	 */
+	useSortedKeys?: RuleConfiguration_for_Null;
+}
 export type QuoteStyle = "double" | "single";
 export type ArrowParentheses = "always" | "asNeeded";
 export type QuoteProperties = "asNeeded" | "preserve";

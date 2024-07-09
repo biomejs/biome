@@ -579,7 +579,7 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
             let mut actions = Vec::new();
             let mut enabled_rules = Vec::new();
             if settings.organize_imports.enabled {
-                enabled_rules.push(RuleFilter::Rule("correctness", "organizeImports"));
+                enabled_rules.push(RuleFilter::Rule("refactor", "organizeImports"));
             }
             if let Some(rules) = rules.as_ref() {
                 let rules = rules.as_enabled_rules().into_iter().collect();
@@ -911,7 +911,7 @@ pub(crate) fn organize_imports(parse: AnyParse) -> Result<OrganizeImportsResult,
     let mut tree: AnyJsRoot = parse.tree();
 
     let filter = AnalysisFilter {
-        enabled_rules: Some(&[RuleFilter::Rule("correctness", "organizeImports")]),
+        enabled_rules: Some(&[RuleFilter::Rule("refactor", "organizeImports")]),
         categories: RuleCategoriesBuilder::default().with_action().build(),
         ..AnalysisFilter::default()
     };

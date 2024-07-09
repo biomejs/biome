@@ -1,7 +1,7 @@
 #[cfg(test)]
 mod test {
     use biome_analyze::RuleCategories;
-    use biome_configuration::linter::{RuleGroup, RuleSelector};
+    use biome_configuration::analyzer::{RuleGroup, RuleSelector};
     use biome_fs::BiomePath;
     use biome_js_syntax::{JsFileSource, TextSize};
     use biome_service::file_handlers::DocumentFileSource;

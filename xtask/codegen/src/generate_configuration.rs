@@ -10,106 +10,218 @@ use proc_macro2::{Ident, Literal, Span, TokenStream};
 use pulldown_cmark::{Event, Parser, Tag};
 use quote::quote;
 use std::collections::BTreeMap;
+use std::path::Path;
 use xtask::*;
 use xtask_codegen::{to_capitalized, update};
 
+// ======= LINT ======
+#[derive(Default)]
+struct LintRulesVisitor {
+    groups: BTreeMap<&'static str, BTreeMap<&'static str, RuleMetadata>>,
+}
+
+impl RegistryVisitor<JsLanguage> for LintRulesVisitor {
+    fn record_category<C: GroupCategory<Language = JsLanguage>>(&mut self) {
+        if matches!(C::CATEGORY, RuleCategory::Lint) {
+            C::record_groups(self);
+        }
+    }
+
+    fn record_rule<R>(&mut self)
+    where
+        R: Rule<Options: Default, Query: Queryable<Language = JsLanguage, Output: Clone>> + 'static,
+    {
+        self.groups
+            .entry(<R::Group as RuleGroup>::NAME)
+            .or_insert_with(BTreeMap::new)
+            .insert(R::METADATA.name, R::METADATA);
+    }
+}
+
+impl RegistryVisitor<JsonLanguage> for LintRulesVisitor {
+    fn record_category<C: GroupCategory<Language = JsonLanguage>>(&mut self) {
+        if matches!(C::CATEGORY, RuleCategory::Lint) {
+            C::record_groups(self);
+        }
+    }
+
+    fn record_rule<R>(&mut self)
+    where
+        R: Rule<Options: Default, Query: Queryable<Language = JsonLanguage, Output: Clone>>
+            + 'static,
+    {
+        self.groups
+            .entry(<R::Group as RuleGroup>::NAME)
+            .or_insert_with(BTreeMap::new)
+            .insert(R::METADATA.name, R::METADATA);
+    }
+}
+
+impl RegistryVisitor<CssLanguage> for LintRulesVisitor {
+    fn record_category<C: GroupCategory<Language = CssLanguage>>(&mut self) {
+        if matches!(C::CATEGORY, RuleCategory::Lint) {
+            C::record_groups(self);
+        }
+    }
+
+    fn record_rule<R>(&mut self)
+    where
+        R: Rule<Options: Default, Query: Queryable<Language = CssLanguage, Output: Clone>>
+            + 'static,
+    {
+        self.groups
+            .entry(<R::Group as RuleGroup>::NAME)
+            .or_insert_with(BTreeMap::new)
+            .insert(R::METADATA.name, R::METADATA);
+    }
+}
+
+impl RegistryVisitor<GraphqlLanguage> for LintRulesVisitor {
+    fn record_category<C: GroupCategory<Language = GraphqlLanguage>>(&mut self) {
+        if matches!(C::CATEGORY, RuleCategory::Lint) {
+            C::record_groups(self);
+        }
+    }
+
+    fn record_rule<R>(&mut self)
+    where
+        R: Rule + 'static,
+        R::Query: Queryable<Language = GraphqlLanguage>,
+        <R::Query as Queryable>::Output: Clone,
+    {
+        self.groups
+            .entry(<R::Group as RuleGroup>::NAME)
+            .or_insert_with(BTreeMap::new)
+            .insert(R::METADATA.name, R::METADATA);
+    }
+}
+
+// ======= ASSISTS ======
+#[derive(Default)]
+struct AssistsRulesVisitor {
+    groups: BTreeMap<&'static str, BTreeMap<&'static str, RuleMetadata>>,
+}
+
+impl RegistryVisitor<JsLanguage> for AssistsRulesVisitor {
+    fn record_category<C: GroupCategory<Language = JsLanguage>>(&mut self) {
+        if matches!(C::CATEGORY, RuleCategory::Action) {
+            C::record_groups(self);
+        }
+    }
+
+    fn record_rule<R>(&mut self)
+    where
+        R: Rule<Options: Default, Query: Queryable<Language = JsLanguage, Output: Clone>> + 'static,
+    {
+        self.groups
+            .entry(<R::Group as RuleGroup>::NAME)
+            .or_insert_with(BTreeMap::new)
+            .insert(R::METADATA.name, R::METADATA);
+    }
+}
+
+impl RegistryVisitor<JsonLanguage> for AssistsRulesVisitor {
+    fn record_category<C: GroupCategory<Language = JsonLanguage>>(&mut self) {
+        if matches!(C::CATEGORY, RuleCategory::Action) {
+            C::record_groups(self);
+        }
+    }
+
+    fn record_rule<R>(&mut self)
+    where
+        R: Rule<Options: Default, Query: Queryable<Language = JsonLanguage, Output: Clone>>
+            + 'static,
+    {
+        self.groups
+            .entry(<R::Group as RuleGroup>::NAME)
+            .or_insert_with(BTreeMap::new)
+            .insert(R::METADATA.name, R::METADATA);
+    }
+}
+
+impl RegistryVisitor<CssLanguage> for AssistsRulesVisitor {
+    fn record_category<C: GroupCategory<Language = CssLanguage>>(&mut self) {
+        if matches!(C::CATEGORY, RuleCategory::Action) {
+            C::record_groups(self);
+        }
+    }
+
+    fn record_rule<R>(&mut self)
+    where
+        R: Rule<Options: Default, Query: Queryable<Language = CssLanguage, Output: Clone>>
+            + 'static,
+    {
+        self.groups
+            .entry(<R::Group as RuleGroup>::NAME)
+            .or_insert_with(BTreeMap::new)
+            .insert(R::METADATA.name, R::METADATA);
+    }
+}
+
+impl RegistryVisitor<GraphqlLanguage> for AssistsRulesVisitor {
+    fn record_category<C: GroupCategory<Language = GraphqlLanguage>>(&mut self) {
+        if matches!(C::CATEGORY, RuleCategory::Action) {
+            C::record_groups(self);
+        }
+    }
+
+    fn record_rule<R>(&mut self)
+    where
+        R: Rule + 'static,
+        R::Query: Queryable<Language = GraphqlLanguage>,
+        <R::Query as Queryable>::Output: Clone,
+    {
+        self.groups
+            .entry(<R::Group as RuleGroup>::NAME)
+            .or_insert_with(BTreeMap::new)
+            .insert(R::METADATA.name, R::METADATA);
+    }
+}
+
 pub(crate) fn generate_rules_configuration(mode: Mode) -> Result<()> {
-    let config_root = project_root().join("crates/biome_configuration/src/linter");
-    let push_rules_directory = project_root().join("crates/biome_configuration/src");
+    let linter_config_root = project_root().join("crates/biome_configuration/src/analyzer/linter");
+    let assists_config_root =
+        project_root().join("crates/biome_configuration/src/analyzer/assists");
+    let push_rules_directory = project_root().join("crates/biome_configuration/src/generated");
 
-    #[derive(Default)]
-    struct LintRulesVisitor {
-        groups: BTreeMap<&'static str, BTreeMap<&'static str, RuleMetadata>>,
-    }
+    let mut lint_visitor = LintRulesVisitor::default();
+    let mut assists_visitor = AssistsRulesVisitor::default();
+    biome_js_analyze::visit_registry(&mut lint_visitor);
+    biome_js_analyze::visit_registry(&mut assists_visitor);
+    biome_json_analyze::visit_registry(&mut lint_visitor);
+    biome_json_analyze::visit_registry(&mut assists_visitor);
+    biome_css_analyze::visit_registry(&mut lint_visitor);
+    biome_css_analyze::visit_registry(&mut assists_visitor);
+    biome_graphql_analyze::visit_registry(&mut lint_visitor);
+    biome_graphql_analyze::visit_registry(&mut assists_visitor);
 
-    impl RegistryVisitor<JsLanguage> for LintRulesVisitor {
-        fn record_category<C: GroupCategory<Language = JsLanguage>>(&mut self) {
-            if matches!(C::CATEGORY, RuleCategory::Lint) {
-                C::record_groups(self);
-            }
-        }
+    // let LintRulesVisitor { groups } = lint_visitor;
 
-        fn record_rule<R>(&mut self)
-        where
-            R: Rule + 'static,
-            R::Query: Queryable<Language = JsLanguage>,
-            <R::Query as Queryable>::Output: Clone,
-        {
-            self.groups
-                .entry(<R::Group as RuleGroup>::NAME)
-                .or_insert_with(BTreeMap::new)
-                .insert(R::METADATA.name, R::METADATA);
-        }
-    }
+    generate_for_groups(
+        lint_visitor.groups,
+        linter_config_root.as_path(),
+        push_rules_directory.as_path(),
+        &mode,
+        RuleCategory::Lint,
+    )?;
+    generate_for_groups(
+        assists_visitor.groups,
+        assists_config_root.as_path(),
+        push_rules_directory.as_path(),
+        &mode,
+        RuleCategory::Action,
+    )?;
 
-    impl RegistryVisitor<JsonLanguage> for LintRulesVisitor {
-        fn record_category<C: GroupCategory<Language = JsonLanguage>>(&mut self) {
-            if matches!(C::CATEGORY, RuleCategory::Lint) {
-                C::record_groups(self);
-            }
-        }
+    Ok(())
+}
 
-        fn record_rule<R>(&mut self)
-        where
-            R: Rule + 'static,
-            R::Query: Queryable<Language = JsonLanguage>,
-            <R::Query as Queryable>::Output: Clone,
-        {
-            self.groups
-                .entry(<R::Group as RuleGroup>::NAME)
-                .or_insert_with(BTreeMap::new)
-                .insert(R::METADATA.name, R::METADATA);
-        }
-    }
-
-    impl RegistryVisitor<CssLanguage> for LintRulesVisitor {
-        fn record_category<C: GroupCategory<Language = CssLanguage>>(&mut self) {
-            if matches!(C::CATEGORY, RuleCategory::Lint) {
-                C::record_groups(self);
-            }
-        }
-
-        fn record_rule<R>(&mut self)
-        where
-            R: Rule + 'static,
-            R::Query: Queryable<Language = CssLanguage>,
-            <R::Query as Queryable>::Output: Clone,
-        {
-            self.groups
-                .entry(<R::Group as RuleGroup>::NAME)
-                .or_insert_with(BTreeMap::new)
-                .insert(R::METADATA.name, R::METADATA);
-        }
-    }
-
-    impl RegistryVisitor<GraphqlLanguage> for LintRulesVisitor {
-        fn record_category<C: GroupCategory<Language = GraphqlLanguage>>(&mut self) {
-            if matches!(C::CATEGORY, RuleCategory::Lint) {
-                C::record_groups(self);
-            }
-        }
-
-        fn record_rule<R>(&mut self)
-        where
-            R: Rule + 'static,
-            R::Query: Queryable<Language = GraphqlLanguage>,
-            <R::Query as Queryable>::Output: Clone,
-        {
-            self.groups
-                .entry(<R::Group as RuleGroup>::NAME)
-                .or_insert_with(BTreeMap::new)
-                .insert(R::METADATA.name, R::METADATA);
-        }
-    }
-
-    let mut visitor = LintRulesVisitor::default();
-    biome_js_analyze::visit_registry(&mut visitor);
-    biome_json_analyze::visit_registry(&mut visitor);
-    biome_css_analyze::visit_registry(&mut visitor);
-    biome_graphql_analyze::visit_registry(&mut visitor);
-
-    let LintRulesVisitor { groups } = visitor;
-
+fn generate_for_groups(
+    groups: BTreeMap<&'static str, BTreeMap<&'static str, RuleMetadata>>,
+    root: &Path,
+    push_directory: &Path,
+    mode: &Mode,
+    kind: RuleCategory,
+) -> Result<()> {
     let mut struct_groups = Vec::with_capacity(groups.len());
     let mut group_pascal_idents = Vec::with_capacity(groups.len());
     let mut group_idents = Vec::with_capacity(groups.len());
@@ -153,7 +265,7 @@ pub(crate) fn generate_rules_configuration(mode: Mode) -> Result<()> {
     }
 
     let groups = quote! {
-        use crate::{RuleConfiguration, RuleFixConfiguration};
+        use crate::analyzer::{RuleConfiguration, RulePlainConfiguration, RuleFixConfiguration};
         use biome_analyze::{options::RuleOptions, RuleFilter};
         use biome_console::markup;
         use biome_deserialize::{DeserializableValidator, DeserializationDiagnostic};
@@ -161,15 +273,11 @@ pub(crate) fn generate_rules_configuration(mode: Mode) -> Result<()> {
         use biome_diagnostics::{Category, Severity};
         use biome_js_analyze::options::*;
         use biome_json_analyze::options::*;
-        use biome_css_analyze::options::*;
-        use biome_graphql_analyze::options::*;
         use biome_rowan::TextRange;
         use rustc_hash::FxHashSet;
         use serde::{Deserialize, Serialize};
         #[cfg(feature = "schema")]
         use schemars::JsonSchema;
-
-        use super::RulePlainConfiguration;
 
         #[derive(Clone, Copy, Debug, Deserializable, Eq, Hash, Merge, Ord, PartialEq, PartialOrd, serde::Deserialize, serde::Serialize)]
         #[cfg_attr(feature = "schema", derive(JsonSchema))]
@@ -329,44 +437,74 @@ pub(crate) fn generate_rules_configuration(mode: Mode) -> Result<()> {
         }
     };
 
-    let push_rules = quote! {
-        use crate::linter::*;
-        use crate::Rules;
-        use biome_analyze::{AnalyzerRules, MetadataRegistry};
+    let push_rules = match kind {
+        RuleCategory::Lint => {
+            quote! {
+                use crate::analyzer::linter::*;
+                use biome_analyze::{AnalyzerRules, MetadataRegistry};
 
-        pub fn push_to_analyzer_rules(
-            rules: &Rules,
-            metadata: &MetadataRegistry,
-            analyzer_rules: &mut AnalyzerRules,
-        ) {
-            #(
-                if let Some(rules) = rules.#group_idents.as_ref() {
-                    for rule_name in #group_pascal_idents::GROUP_RULES {
-                        if let Some((_, Some(rule_options))) = rules.get_rule_configuration(rule_name) {
-                            if let Some(rule_key) = metadata.find_rule(#group_strings, rule_name) {
-                                analyzer_rules.push_rule(rule_key, rule_options);
+                pub fn push_to_analyzer_rules(
+                    rules: &Rules,
+                    metadata: &MetadataRegistry,
+                    analyzer_rules: &mut AnalyzerRules,
+                ) {
+                    #(
+                        if let Some(rules) = rules.#group_idents.as_ref() {
+                            for rule_name in #group_pascal_idents::GROUP_RULES {
+                                if let Some((_, Some(rule_options))) = rules.get_rule_configuration(rule_name) {
+                                    if let Some(rule_key) = metadata.find_rule(#group_strings, rule_name) {
+                                        analyzer_rules.push_rule(rule_key, rule_options);
+                                    }
+                                }
                             }
                         }
-                    }
+                    )*
                 }
-            )*
+            }
         }
+        RuleCategory::Action => {
+            quote! {
+                use crate::analyzer::assists::*;
+                use biome_analyze::{AnalyzerRules, MetadataRegistry};
+
+                pub fn push_to_analyzer_assists(
+                    rules: &Rules,
+                    metadata: &MetadataRegistry,
+                    analyzer_rules: &mut AnalyzerRules,
+                ) {
+                    #(
+                        if let Some(rules) = rules.#group_idents.as_ref() {
+                            for rule_name in #group_pascal_idents::GROUP_RULES {
+                                if let Some((_, Some(rule_options))) = rules.get_rule_configuration(rule_name) {
+                                    if let Some(rule_key) = metadata.find_rule(#group_strings, rule_name) {
+                                        analyzer_rules.push_rule(rule_key, rule_options);
+                                    }
+                                }
+                            }
+                        }
+                    )*
+                }
+            }
+        }
+        RuleCategory::Syntax | RuleCategory::Transformation => unimplemented!(),
     };
 
     let configuration = groups.to_string();
     let push_rules = push_rules.to_string();
 
-    update(
-        &config_root.join("rules.rs"),
-        &xtask::reformat(configuration)?,
-        &mode,
-    )?;
+    let file_name = match kind {
+        RuleCategory::Lint => &push_directory.join("linter.rs"),
+        RuleCategory::Action => &push_directory.join("assists.rs"),
+        RuleCategory::Syntax | RuleCategory::Transformation => unimplemented!(),
+    };
 
     update(
-        &push_rules_directory.join("generated.rs"),
-        &xtask::reformat(push_rules)?,
-        &mode,
+        &root.join("rules.rs"),
+        &xtask::reformat(configuration)?,
+        mode,
     )?;
+
+    update(file_name, &xtask::reformat(push_rules)?, mode)?;
 
     Ok(())
 }

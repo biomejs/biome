@@ -15,7 +15,7 @@ use crate::reporter::junit::{JunitReporter, JunitReporterVisitor};
 use crate::reporter::summary::{SummaryReporter, SummaryReporterVisitor};
 use crate::reporter::terminal::{ConsoleReporter, ConsoleReporterVisitor};
 use crate::{CliDiagnostic, CliSession, DiagnosticsPayload, Reporter};
-use biome_configuration::linter::RuleSelector;
+use biome_configuration::analyzer::RuleSelector;
 use biome_console::{markup, ConsoleExt};
 use biome_diagnostics::adapters::SerdeJsonError;
 use biome_diagnostics::{category, Category};

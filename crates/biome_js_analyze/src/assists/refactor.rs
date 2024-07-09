@@ -5,8 +5,8 @@ use biome_analyze::declare_assists_group;
 pub mod organize_imports;
 
 declare_assists_group! {
-    pub Correctness {
-        name : "correctness" ,
+    pub Refactor {
+        name : "refactor" ,
         rules : [
             self :: organize_imports :: OrganizeImports ,
         ]
