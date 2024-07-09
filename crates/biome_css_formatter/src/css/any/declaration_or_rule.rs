@@ -11,6 +11,7 @@ impl FormatRule<AnyCssDeclarationOrRule> for FormatAnyCssDeclarationOrRule {
             AnyCssDeclarationOrRule::AnyCssRule(node) => node.format().fmt(f),
             AnyCssDeclarationOrRule::CssBogus(node) => node.format().fmt(f),
             AnyCssDeclarationOrRule::CssDeclarationWithSemicolon(node) => node.format().fmt(f),
+            AnyCssDeclarationOrRule::CssGritMetavariable(node) => node.format().fmt(f),
         }
     }
 }
