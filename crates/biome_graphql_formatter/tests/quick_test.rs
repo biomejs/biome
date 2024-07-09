@@ -1,7 +1,7 @@
 use biome_formatter::{IndentStyle, LineWidth};
 use biome_formatter_test::check_reformat::CheckReformat;
 use biome_graphql_formatter::context::GraphqlFormatOptions;
-use biome_graphql_formatter::format_node;
+use biome_graphql_formatter::{format_node, GraphqlFormatLanguage};
 use biome_graphql_parser::parse_graphql;
 
 mod language {
@@ -38,5 +38,12 @@ E {
     println!("{}", doc.into_document());
     eprintln!("{}", result.as_code());
 
-    CheckReformat::new(root, result.as_code(), "quick_test", &language, options).check_reformat();
+    CheckReformat::new(
+        root,
+        result.as_code(),
+        "quick_test",
+        &language,
+        GraphqlFormatLanguage::new(options),
+    )
+    .check_reformat();
 }

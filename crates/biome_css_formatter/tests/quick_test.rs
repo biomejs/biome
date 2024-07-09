@@ -1,5 +1,5 @@
-use biome_css_formatter::context::CssFormatOptions;
 use biome_css_formatter::format_node;
+use biome_css_formatter::{context::CssFormatOptions, CssFormatLanguage};
 use biome_css_parser::{parse_css, CssParserOptions};
 use biome_formatter::{IndentStyle, LineWidth};
 use biome_formatter_test::check_reformat::CheckReformat;
@@ -34,5 +34,12 @@ fn quick_test() {
     println!("{}", doc.into_document());
     eprintln!("{}", result.as_code());
 
-    CheckReformat::new(root, result.as_code(), "quick_test", &language, options).check_reformat();
+    CheckReformat::new(
+        root,
+        result.as_code(),
+        "quick_test",
+        &language,
+        CssFormatLanguage::new(options),
+    )
+    .check_reformat();
 }

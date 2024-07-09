@@ -2,7 +2,7 @@ use biome_configuration::{
     PartialConfiguration, PartialGraphqlConfiguration, PartialGraphqlFormatter,
 };
 use biome_formatter_test::spec::{SpecSnapshot, SpecTestFile};
-use biome_graphql_formatter::context::GraphqlFormatOptions;
+use biome_graphql_formatter::{context::GraphqlFormatOptions, GraphqlFormatLanguage};
 use biome_service::workspace::UpdateSettingsParams;
 use std::path::Path;
 
@@ -53,7 +53,12 @@ pub fn run(spec_input_file: &str, _expected_file: &str, test_directory: &str, _f
     let options = GraphqlFormatOptions::default();
     let language = language::GraphqlTestFormatLanguage::default();
 
-    let snapshot = SpecSnapshot::new(test_file, test_directory, language, options);
+    let snapshot = SpecSnapshot::new(
+        test_file,
+        test_directory,
+        language,
+        GraphqlFormatLanguage::new(options),
+    );
 
     snapshot.test()
 }

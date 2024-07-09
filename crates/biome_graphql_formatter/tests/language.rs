@@ -1,12 +1,14 @@
-use biome_formatter::{FormatResult, Formatted, Printed};
 use biome_formatter_test::TestFormatLanguage;
-use biome_graphql_formatter::context::{GraphqlFormatContext, GraphqlFormatOptions};
-use biome_graphql_formatter::{format_node, format_range, GraphqlFormatLanguage};
+use biome_fs::BiomePath;
+use biome_graphql_formatter::context::GraphqlFormatContext;
+use biome_graphql_formatter::GraphqlFormatLanguage;
 use biome_graphql_parser::parse_graphql;
 use biome_graphql_syntax::{GraphqlFileSource, GraphqlLanguage};
 use biome_parser::AnyParse;
-use biome_rowan::{SyntaxNode, TextRange};
-use biome_service::settings::{ServiceLanguage, Settings};
+use biome_service::{
+    settings::{ServiceLanguage, Settings},
+    workspace::DocumentFileSource,
+};
 
 #[derive(Default)]
 pub struct GraphqlTestFormatLanguage {
@@ -24,31 +26,19 @@ impl TestFormatLanguage for GraphqlTestFormatLanguage {
         AnyParse::new(parse.syntax().as_send().unwrap(), parse.into_diagnostics())
     }
 
-    fn to_language_settings<'a>(
+    fn to_format_language(
         &self,
-        settings: &'a Settings,
-    ) -> &'a <Self::ServiceLanguage as ServiceLanguage>::FormatterSettings {
-        &settings.languages.graphql.formatter
-    }
-
-    fn format_node(
-        &self,
-        options: <Self::ServiceLanguage as ServiceLanguage>::FormatOptions,
-        node: &SyntaxNode<Self::ServiceLanguage>,
-    ) -> FormatResult<Formatted<Self::Context>> {
-        format_node(options, node)
-    }
-
-    fn format_range(
-        &self,
-        options: <Self::ServiceLanguage as ServiceLanguage>::FormatOptions,
-        node: &SyntaxNode<Self::ServiceLanguage>,
-        range: TextRange,
-    ) -> FormatResult<Printed> {
-        format_range(options, node, range)
-    }
-
-    fn default_options(&self) -> <Self::ServiceLanguage as ServiceLanguage>::FormatOptions {
-        GraphqlFormatOptions::default()
+        settings: &Settings,
+        file_source: &DocumentFileSource,
+    ) -> Self::FormatLanguage {
+        let language_settings = &settings.languages.graphql.formatter;
+        let options = Self::ServiceLanguage::resolve_format_options(
+            Some(&settings.formatter),
+            Some(&settings.override_settings),
+            Some(language_settings),
+            &BiomePath::new(""),
+            file_source,
+        );
+        GraphqlFormatLanguage::new(options)
     }
 }
