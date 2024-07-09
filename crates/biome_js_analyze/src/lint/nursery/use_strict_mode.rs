@@ -30,7 +30,7 @@ declare_lint_rule! {
     /// ### Valid
     ///
     /// ```cjs
-    /// "use strict"
+    /// "use strict";
     ///
     /// var a = 1;
     /// ```
