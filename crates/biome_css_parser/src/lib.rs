@@ -6,7 +6,7 @@ use crate::syntax::parse_root;
 use biome_css_factory::CssSyntaxFactory;
 use biome_css_syntax::{CssLanguage, CssRoot, CssSyntaxNode};
 pub use biome_parser::prelude::*;
-use biome_parser::tree_sink::LosslessTreeSink;
+use biome_parser::{tree_sink::LosslessTreeSink, AnyParse};
 use biome_rowan::{AstNode, NodeCache};
 pub use parser::CssParserOptions;
 
@@ -104,6 +104,18 @@ impl CssParse {
     /// Panics if the node represented by this parse result mismatches.
     pub fn tree(&self) -> CssRoot {
         CssRoot::unwrap_cast(self.syntax())
+    }
+}
+
+impl From<CssParse> for AnyParse {
+    fn from(parse: CssParse) -> Self {
+        let root = parse.syntax();
+        let diagnostics = parse.into_diagnostics();
+        Self::new(
+            // SAFETY: the parser should always return a root node
+            root.as_send().unwrap(),
+            diagnostics,
+        )
     }
 }
 

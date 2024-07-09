@@ -18,7 +18,7 @@ macro_rules! SyntaxTextRangeHasClosureAstNode {
             impl HasClosureAstNode for $node {
                 #[inline(always)]
                 fn node_text_range(&self) -> TextRange {
-                    self.syntax().text_range()
+                    self.syntax().text_trimmed_range()
                 }
             }
         )*
@@ -50,7 +50,7 @@ macro_rules! SyntaxTextRangeHasClosureAstNode {
             fn node_text_range(&self) -> TextRange {
                 match self {
                     $(
-                        AnyHasClosureNode::$node(node) => node.syntax().text_range(),
+                        AnyHasClosureNode::$node(node) => node.syntax().text_trimmed_range(),
                     )*
                 }
             }
@@ -109,7 +109,7 @@ impl Capture {
     /// This is equivalent, but faster, to:
     ///
     /// ```rs, ignore
-    /// self.declaration().text_range()
+    /// self.declaration().text_trimmed_range()
     /// ```
     pub fn declaration_range(&self) -> &TextRange {
         let binding = self.data.binding(self.binding_id);
@@ -130,12 +130,12 @@ impl Iterator for AllCapturesIter {
     fn next(&mut self) -> Option<Self::Item> {
         'references: loop {
             while let Some(reference) = self.references.pop() {
-                let binding = &self.data.bindings[reference.binding_id];
+                let binding = &self.data.bindings[reference.binding_id as usize];
                 if self.closure_range.intersect(binding.range).is_none() {
-                    let reference = &binding.references[reference.reference_id];
+                    let reference = &binding.references[reference.reference_id as usize];
                     return Some(Capture {
                         data: self.data.clone(),
-                        node: self.data.node_by_range[&reference.range].clone(), // TODO change node to store the range
+                        node: self.data.binding_node_by_start[&reference.range.start()].clone(), // TODO change node to store the range
                         ty: CaptureType::ByReference,
                         binding_id: binding.id,
                     });
@@ -180,7 +180,6 @@ impl Iterator for ChildrenIter {
                 return Some(Closure {
                     data: self.data.clone(),
                     scope_id,
-                    closure_range: scope.range,
                 });
             } else {
                 self.scopes.extend(scope.children.iter());
@@ -210,7 +209,6 @@ impl Iterator for DescendentsIter {
                 return Some(Closure {
                     data: self.data.clone(),
                     scope_id,
-                    closure_range: scope.range,
                 });
             }
         }
@@ -226,7 +224,6 @@ impl FusedIterator for DescendentsIter {}
 pub struct Closure {
     data: Rc<SemanticModelData>,
     scope_id: u32,
-    closure_range: TextRange,
 }
 
 impl Closure {
@@ -234,34 +231,22 @@ impl Closure {
         let closure_range = node.node_text_range();
         let scope_id = data.scope(&closure_range);
 
-        Closure {
-            data,
-            scope_id,
-            closure_range,
-        }
+        Closure { data, scope_id }
     }
 
-    pub(super) fn from_scope(
-        data: Rc<SemanticModelData>,
-        scope_id: u32,
-        closure_range: &TextRange,
-    ) -> Option<Closure> {
-        let node = &data.node_by_range[closure_range];
+    pub(super) fn from_scope(data: Rc<SemanticModelData>, scope_id: u32) -> Option<Closure> {
+        let node = &data.scope_node_by_range[&data.scopes[scope_id as usize].range];
         match node.kind() {
             JsSyntaxKind::JS_FUNCTION_DECLARATION
             | JsSyntaxKind::JS_FUNCTION_EXPRESSION
-            | JsSyntaxKind::JS_ARROW_FUNCTION_EXPRESSION => Some(Closure {
-                data,
-                scope_id,
-                closure_range: *closure_range,
-            }),
+            | JsSyntaxKind::JS_ARROW_FUNCTION_EXPRESSION => Some(Closure { data, scope_id }),
             _ => None,
         }
     }
 
     /// Range of this [Closure]
     pub fn closure_range(&self) -> &TextRange {
-        &self.closure_range
+        &self.data.scopes[self.scope_id as usize].range
     }
 
     /// Return all [Reference] this closure captures, not taking into
@@ -287,7 +272,7 @@ impl Closure {
 
         AllCapturesIter {
             data: self.data.clone(),
-            closure_range: self.closure_range,
+            closure_range: *self.closure_range(),
             scopes,
             references,
         }

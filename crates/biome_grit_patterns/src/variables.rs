@@ -9,7 +9,7 @@ use im::{vector, Vector};
 /// to separate scopes, while the inner vector contains the variables. For each
 /// variable, we track the separate locations (plural) where that variable
 /// occurs.
-#[derive(Debug, Default)]
+#[derive(Clone, Debug, Default)]
 pub struct VariableLocations(Vec<Vec<VariableSourceLocations>>);
 
 impl VariableLocations {
@@ -17,6 +17,7 @@ impl VariableLocations {
         Self(locations)
     }
 
+    #[allow(dead_code)]
     pub(crate) fn compiled_vars(&self) -> Vec<VariableBinding> {
         let mut variables = Vec::new();
         for (i, scope) in self.0.iter().enumerate() {

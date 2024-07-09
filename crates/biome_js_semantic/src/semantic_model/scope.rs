@@ -13,9 +13,9 @@ pub(crate) struct SemanticModelScopeData {
     // All children scope of this scope
     pub(crate) children: Vec<u32>,
     // All bindings of this scope (points to SemanticModelData::bindings)
-    pub(crate) bindings: Vec<usize>,
+    pub(crate) bindings: Vec<u32>,
     // Map pointing to the [bindings] vec of each bindings by its name
-    pub(crate) bindings_by_name: FxHashMap<TokenText, usize>,
+    pub(crate) bindings_by_name: FxHashMap<TokenText, u32>,
     // All read references of a scope
     pub(crate) read_references: Vec<SemanticModelScopeReference>,
     // All write references of a scope
@@ -112,14 +112,14 @@ impl Scope {
     }
 
     pub fn syntax(&self) -> &JsSyntaxNode {
-        &self.data.node_by_range[self.range()]
+        &self.data.scope_node_by_range[self.range()]
     }
 
     /// Return the [Closure] associated with this scope if
     /// it has one, otherwise returns None.
     /// See [HasClosureAstNode] for nodes that have closure.
     pub fn closure(&self) -> Option<Closure> {
-        Closure::from_scope(self.data.clone(), self.id, self.range())
+        Closure::from_scope(self.data.clone(), self.id)
     }
 }
 
@@ -127,9 +127,9 @@ impl Scope {
 #[derive(Clone, Debug, Hash, PartialEq, Eq)]
 pub(crate) struct SemanticModelScopeReference {
     // Points to [SemanticModel]::bindings vec
-    pub(crate) binding_id: usize,
+    pub(crate) binding_id: u32,
     // Points do [SemanticModelBinding]::references vec
-    pub(crate) reference_id: usize,
+    pub(crate) reference_id: u32,
 }
 
 /// Iterate all descendents scopes of the specified scope in breadth-first order.
@@ -163,7 +163,7 @@ impl FusedIterator for ScopeDescendentsIter {}
 pub struct ScopeBindingsIter {
     data: Rc<SemanticModelData>,
     scope_id: u32,
-    binding_index: usize,
+    binding_index: u32,
 }
 
 impl Iterator for ScopeBindingsIter {
@@ -176,7 +176,7 @@ impl Iterator for ScopeBindingsIter {
 
         let id = self.data.scopes[self.scope_id as usize]
             .bindings
-            .get(self.binding_index)?;
+            .get(self.binding_index as usize)?;
 
         self.binding_index += 1;
 

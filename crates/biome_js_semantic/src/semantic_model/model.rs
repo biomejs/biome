@@ -2,16 +2,16 @@ use super::*;
 use biome_js_syntax::{AnyJsFunction, AnyJsRoot};
 
 #[derive(Copy, Clone, Debug)]
-pub(crate) struct BindingIndex(usize);
+pub(crate) struct BindingIndex(u32);
 
-impl From<usize> for BindingIndex {
-    fn from(v: usize) -> Self {
+impl From<u32> for BindingIndex {
+    fn from(v: u32) -> Self {
         BindingIndex(v)
     }
 }
 
 #[derive(Copy, Clone, Debug)]
-pub(crate) struct ReferenceIndex(usize, usize);
+pub(crate) struct ReferenceIndex(u32, u32);
 
 impl ReferenceIndex {
     pub(crate) fn binding(&self) -> BindingIndex {
@@ -19,8 +19,8 @@ impl ReferenceIndex {
     }
 }
 
-impl From<(BindingIndex, usize)> for ReferenceIndex {
-    fn from((binding_index, index): (BindingIndex, usize)) -> Self {
+impl From<(BindingIndex, u32)> for ReferenceIndex {
+    fn from((binding_index, index): (BindingIndex, u32)) -> Self {
         ReferenceIndex(binding_index.0, index)
     }
 }
@@ -38,13 +38,14 @@ pub(crate) struct SemanticModelData {
     // Maps the start of a node range to a scope id
     pub(crate) scope_hoisted_to_by_range: FxHashMap<TextSize, u32>,
     // Map to each by its range
-    pub(crate) node_by_range: FxHashMap<TextRange, JsSyntaxNode>,
+    pub(crate) binding_node_by_start: FxHashMap<TextSize, JsSyntaxNode>,
+    pub(crate) scope_node_by_range: FxHashMap<TextRange, JsSyntaxNode>,
     // Maps any range start in the code to its bindings (usize points to bindings vec)
-    pub(crate) declared_at_by_start: FxHashMap<TextSize, usize>,
+    pub(crate) declared_at_by_start: FxHashMap<TextSize, u32>,
     // List of all the declarations
     pub(crate) bindings: Vec<SemanticModelBindingData>,
     // Index bindings by range start
-    pub(crate) bindings_by_start: FxHashMap<TextSize, usize>,
+    pub(crate) bindings_by_start: FxHashMap<TextSize, u32>,
     // All bindings that were exported
     pub(crate) exported: FxHashSet<TextSize>,
     /// All references that could not be resolved
@@ -55,17 +56,17 @@ pub(crate) struct SemanticModelData {
 
 impl SemanticModelData {
     pub(crate) fn binding(&self, index: BindingIndex) -> &SemanticModelBindingData {
-        &self.bindings[index.0]
+        &self.bindings[index.0 as usize]
     }
 
     pub(crate) fn reference(&self, index: ReferenceIndex) -> &SemanticModelReference {
-        let binding = &self.bindings[index.0];
-        &binding.references[index.1]
+        let binding = &self.bindings[index.0 as usize];
+        &binding.references[index.1 as usize]
     }
 
     pub(crate) fn next_reference(&self, index: ReferenceIndex) -> Option<&SemanticModelReference> {
-        let binding = &self.bindings[index.0];
-        binding.references.get(index.1 + 1)
+        let binding = &self.bindings[index.0 as usize];
+        binding.references.get(index.1 as usize + 1)
     }
 
     pub(crate) fn scope(&self, range: &TextRange) -> u32 {
@@ -158,7 +159,7 @@ impl SemanticModel {
     /// let block_scope = arguments_reference.scope(&model);
     /// ```
     pub fn scope(&self, node: &JsSyntaxNode) -> Scope {
-        let range = node.text_range();
+        let range = node.text_trimmed_range();
         let id = self.data.scope(&range);
         Scope {
             data: self.data.clone(),
@@ -169,7 +170,7 @@ impl SemanticModel {
     /// Returns the [Scope] which the specified syntax node was hoisted to, if any.
     /// Can also be called from [AstNode]::scope_hoisted_to extension method.
     pub fn scope_hoisted_to(&self, node: &JsSyntaxNode) -> Option<Scope> {
-        let range = node.text_range();
+        let range = node.text_trimmed_range();
         let id = self.data.scope_hoisted_to(&range)?;
         Some(Scope {
             data: self.data.clone(),
@@ -209,11 +210,11 @@ impl SemanticModel {
     /// ```
     pub fn binding(&self, reference: &impl HasDeclarationAstNode) -> Option<Binding> {
         let reference = reference.node();
-        let range = reference.syntax().text_range();
+        let range = reference.syntax().text_trimmed_range();
         let id = *self.data.declared_at_by_start.get(&range.start())?;
         Some(Binding {
             data: self.data.clone(),
-            index: id.into(),
+            index: (id).into(),
         })
     }
 
@@ -235,12 +236,12 @@ impl SemanticModel {
         fn succ(current: &GlobalReference) -> Option<GlobalReference> {
             let mut global_id = current.global_id;
             let mut id = current.id + 1;
-            while global_id < current.data.globals.len() {
+            while (global_id as usize) < current.data.globals.len() {
                 let reference = current
                     .data
                     .globals
-                    .get(global_id)
-                    .and_then(|global| global.references.get(id))
+                    .get(global_id as usize)
+                    .and_then(|global| global.references.get(id as usize))
                     .map(|_| GlobalReference {
                         data: current.data.clone(),
                         global_id,
@@ -281,7 +282,7 @@ impl SemanticModel {
             current
                 .data
                 .unresolved_references
-                .get(id)
+                .get(id as usize)
                 .map(|_| UnresolvedReference {
                     data: current.data.clone(),
                     id,
@@ -330,7 +331,7 @@ impl SemanticModel {
     }
 
     pub fn as_binding(&self, binding: &impl IsBindingAstNode) -> Binding {
-        let range = binding.syntax().text_range();
+        let range = binding.syntax().text_trimmed_range();
         let id = &self.data.bindings_by_start[&range.start()];
         Binding {
             data: self.data.clone(),

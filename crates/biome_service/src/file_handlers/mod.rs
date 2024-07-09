@@ -2,6 +2,7 @@ use self::{
     css::CssFileHandler, javascript::JsFileHandler, json::JsonFileHandler,
     unknown::UnknownFileHandler,
 };
+use crate::diagnostics::{QueryDiagnostic, SearchError};
 pub use crate::file_handlers::astro::{AstroFileHandler, ASTRO_FENCE};
 use crate::file_handlers::graphql::GraphqlFileHandler;
 pub use crate::file_handlers::svelte::{SvelteFileHandler, SVELTE_FENCE};
@@ -23,6 +24,7 @@ use biome_diagnostics::{Diagnostic, Severity};
 use biome_formatter::Printed;
 use biome_fs::BiomePath;
 use biome_graphql_syntax::GraphqlFileSource;
+use biome_grit_patterns::{GritQuery, GritQueryResult, GritTargetFile};
 use biome_js_parser::{parse, JsParserOptions};
 use biome_js_syntax::{EmbeddingKind, JsFileSource, Language, TextRange, TextSize};
 use biome_json_syntax::JsonFileSource;
@@ -349,6 +351,7 @@ pub struct Capabilities {
     pub(crate) debug: DebugCapabilities,
     pub(crate) analyzer: AnalyzerCapabilities,
     pub(crate) formatter: FormatterCapabilities,
+    pub(crate) search: SearchCapabilities,
 }
 
 #[derive(Clone)]
@@ -464,6 +467,20 @@ pub(crate) struct FormatterCapabilities {
     pub(crate) format_on_type: Option<FormatOnType>,
 }
 
+type Search = fn(
+    &BiomePath,
+    &DocumentFileSource,
+    AnyParse,
+    &GritQuery,
+    WorkspaceSettingsHandle,
+) -> Result<Vec<TextRange>, WorkspaceError>;
+
+#[derive(Default)]
+pub(crate) struct SearchCapabilities {
+    /// It searches through a file
+    pub(crate) search: Option<Search>,
+}
+
 /// Main trait to use to add a new language to Biome
 pub(crate) trait ExtensionHandler {
     /// Capabilities that can applied to a file
@@ -577,6 +594,34 @@ pub(crate) fn parse_lang_from_script_opening_tag(script_opening_tag: &str) -> La
         })
     })
     .map_or(Language::JavaScript, |lang| lang)
+}
+
+pub(crate) fn search(
+    path: &BiomePath,
+    _file_source: &DocumentFileSource,
+    parse: AnyParse,
+    query: &GritQuery,
+    _settings: WorkspaceSettingsHandle,
+) -> Result<Vec<TextRange>, WorkspaceError> {
+    let query_result = query
+        .execute(GritTargetFile {
+            path: path.to_path_buf(),
+            parse,
+        })
+        .map_err(|err| {
+            WorkspaceError::SearchError(SearchError::QueryError(QueryDiagnostic(err.to_string())))
+        })?;
+
+    let matches = query_result
+        .into_iter()
+        .flat_map(|result| match result {
+            GritQueryResult::Match(m) => m.ranges,
+            _ => Vec::new(),
+        })
+        .map(|range| TextRange::new(range.start_byte.into(), range.end_byte.into()))
+        .collect();
+
+    Ok(matches)
 }
 
 #[test]
