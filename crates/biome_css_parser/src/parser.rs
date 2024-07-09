@@ -49,7 +49,7 @@ impl CssParserOptions {
     }
 
     /// Enables parsing of Grit metavariables.
-    pub fn allow_grit_metavariable(mut self) -> Self {
+    pub fn allow_grit_metavariables(mut self) -> Self {
         self.grit_metavariable = true;
         self
     }

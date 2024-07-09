@@ -43,7 +43,7 @@ pub fn run(test_case: &str, _snapshot_name: &str, test_directory: &str, outcome_
     let mut options = CssParserOptions::default()
         // it is an internal option that cannot be configured via options.json
         // TODO: find a way to make it configurable
-        .allow_grit_metavariable();
+        .allow_grit_metavariables();
 
     let options_path = Path::new(test_directory).join("options.json");
 
@@ -182,7 +182,7 @@ pub fn quick_test() {
         CssParserOptions::default()
             .allow_wrong_line_comments()
             .allow_css_modules()
-            .allow_grit_metavariable(),
+            .allow_grit_metavariables(),
     );
     let syntax = root.syntax();
     dbg!(&syntax, root.diagnostics(), root.has_errors());
