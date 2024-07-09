@@ -1325,19 +1325,19 @@ impl<'src> CssLexer<'src> {
     fn is_grit_metavariable_start(&mut self) -> bool {
         let current_char = self.current_char_unchecked();
         if current_char == 'μ' {
-            let current_char_lenth = current_char.len_utf8();
+            let current_char_length = current_char.len_utf8();
             // μ[a-zA-Z_][a-zA-Z0-9_]*
             if matches!(
-                self.byte_at(current_char_lenth),
+                self.byte_at(current_char_length),
                 Some(b'a'..=b'z' | b'A'..=b'Z' | b'_')
             ) {
                 return true;
             }
 
             // μ...
-            if self.byte_at(current_char_lenth) == Some(b'.')
-                && self.byte_at(current_char_lenth + 1) == Some(b'.')
-                && self.byte_at(current_char_lenth + 2) == Some(b'.')
+            if self.byte_at(current_char_length) == Some(b'.')
+                && self.byte_at(current_char_length + 1) == Some(b'.')
+                && self.byte_at(current_char_length + 2) == Some(b'.')
             {
                 return true;
             }
