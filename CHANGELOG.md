@@ -44,7 +44,6 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 ### Linter
 
-<<<<<<< HEAD
 #### Enhancements
 
 - [noInvalidUseBeforeDeclaration](https://biomejs.dev/linter/rules/no-invalid-use-before-declaration) now reports direct use of an enum member before its declaration.
@@ -77,6 +76,7 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 #### New features
 
 - Add support for GraphQL linting. Contributed by @ematipico
+- Add [nursery/useTrimStartEnd](https://biomejs.dev/linter/rules/use-trim-start-end/). Contributed by @chansuke
 
 #### Bug fixes
 
@@ -101,11 +101,6 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
   ```
 
   Contributed by @Conaclos
-=======
-#### New features
-
-- Add [nursery/useTrimStartEnd](https://biomejs.dev/linter/rules/use-trim-start-end/). Contributed by @chansuke
->>>>>>> 5b73c02b47 (chore: update changelog entry)
 
 ### Parser
 
