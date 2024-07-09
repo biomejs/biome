@@ -2101,7 +2101,7 @@
 				"useStrictMode": {
 					"description": "Enforce the use of the directive \"use strict\" in script files.",
 					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "$ref": "#/definitions/RuleFixConfiguration" },
 						{ "type": "null" }
 					]
 				},

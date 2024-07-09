@@ -1248,7 +1248,7 @@ export interface Nursery {
 	/**
 	 * Enforce the use of the directive "use strict" in script files.
 	 */
-	useStrictMode?: RuleConfiguration_for_Null;
+	useStrictMode?: RuleFixConfiguration_for_Null;
 	/**
 	 * Require new when throwing an error.
 	 */
