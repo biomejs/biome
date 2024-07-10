@@ -2963,6 +2963,9 @@ pub struct Nursery {
     #[doc = "Enforce the sorting of CSS utility classes."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_sorted_classes: Option<RuleFixConfiguration<UseSortedClasses>>,
+    #[doc = "Enforce the use of the directive \"use strict\" in script files."]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub use_strict_mode: Option<RuleFixConfiguration<UseStrictMode>>,
     #[doc = "Require new when throwing an error."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_throw_new_error: Option<RuleFixConfiguration<UseThrowNewError>>,
@@ -3044,6 +3047,7 @@ impl Nursery {
         "useNumberToFixedDigitsArgument",
         "useSemanticElements",
         "useSortedClasses",
+        "useStrictMode",
         "useThrowNewError",
         "useThrowOnlyError",
         "useTopLevelRegex",
@@ -3074,6 +3078,7 @@ impl Nursery {
         "useFocusableInteractive",
         "useGenericFontNames",
         "useSemanticElements",
+        "useStrictMode",
     ];
     const RECOMMENDED_RULES_AS_FILTERS: &'static [RuleFilter<'static>] = &[
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[1]),
@@ -3099,6 +3104,7 @@ impl Nursery {
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[41]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[42]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[46]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[48]),
     ];
     const ALL_RULES_AS_FILTERS: &'static [RuleFilter<'static>] = &[
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[0]),
@@ -3410,17 +3416,17 @@ impl Nursery {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[47]));
             }
         }
-        if let Some(rule) = self.use_throw_new_error.as_ref() {
+        if let Some(rule) = self.use_strict_mode.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[48]));
             }
         }
-        if let Some(rule) = self.use_throw_only_error.as_ref() {
+        if let Some(rule) = self.use_throw_new_error.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[49]));
             }
         }
-        if let Some(rule) = self.use_top_level_regex.as_ref() {
+        if let Some(rule) = self.use_throw_only_error.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[50]));
             }
@@ -3679,17 +3685,17 @@ impl Nursery {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[47]));
             }
         }
-        if let Some(rule) = self.use_throw_new_error.as_ref() {
+        if let Some(rule) = self.use_strict_mode.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[48]));
             }
         }
-        if let Some(rule) = self.use_throw_only_error.as_ref() {
+        if let Some(rule) = self.use_throw_new_error.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[49]));
             }
         }
-        if let Some(rule) = self.use_top_level_regex.as_ref() {
+        if let Some(rule) = self.use_throw_only_error.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[50]));
             }
@@ -3930,6 +3936,10 @@ impl Nursery {
                 .map(|conf| (conf.level(), conf.get_options())),
             "useSortedClasses" => self
                 .use_sorted_classes
+                .as_ref()
+                .map(|conf| (conf.level(), conf.get_options())),
+            "useStrictMode" => self
+                .use_strict_mode
                 .as_ref()
                 .map(|conf| (conf.level(), conf.get_options())),
             "useThrowNewError" => self

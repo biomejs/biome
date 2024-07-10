@@ -18,6 +18,7 @@ pub struct PackageJson {
     pub peer_dependencies: Dependencies,
     pub optional_dependencies: Dependencies,
     pub license: Option<(String, TextRange)>,
+    pub r#type: Option<PackageType>,
 }
 
 impl Manifest for PackageJson {
@@ -132,6 +133,9 @@ impl DeserializationVisitor for PackageJsonVisitor {
                         result.optional_dependencies = deps;
                     }
                 }
+                "type" => {
+                    result.r#type = Deserializable::deserialize(&value, &key_text, diagnostics);
+                }
                 _ => {
                     // each package can add their own field, so we should ignore any extraneous key
                     // and only deserialize the ones that Biome deems important
@@ -154,4 +158,11 @@ impl Deserializable for Version {
             Err(_) => Some(Version::Literal(value.text().to_string())),
         }
     }
+}
+
+#[derive(Debug, Default, Clone, Eq, PartialEq, biome_deserialize_macros::Deserializable)]
+pub enum PackageType {
+    #[default]
+    Module,
+    Commonjs,
 }
