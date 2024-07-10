@@ -1,5 +1,7 @@
 use biome_js_factory::make;
-use biome_js_formatter::{context::JsFormatOptions, format_node};
+use biome_js_formatter::{
+    context::JsFormatOptions, format_node, JsForeignLanguage, JsForeignLanguageFormatter,
+};
 use biome_js_syntax::{
     AnyJsBinding, AnyJsBindingPattern, AnyJsCallArgument, AnyJsDeclaration, AnyJsDeclarationClause,
     AnyJsExportClause, AnyJsExpression, AnyJsFormalParameter, AnyJsImportClause,
@@ -12,6 +14,19 @@ use biome_service::workspace_types::{generate_type, methods, ModuleQueue};
 use biome_string_case::Case;
 use xtask::{project_root, Mode, Result};
 use xtask_codegen::update;
+
+#[derive(Debug, Clone)]
+struct FakeFormater;
+
+impl JsForeignLanguageFormatter for FakeFormater {
+    fn format(
+        &self,
+        _language: JsForeignLanguage,
+        _content: &str,
+    ) -> biome_formatter::FormatResult<biome_formatter::prelude::Document> {
+        Err(biome_formatter::FormatError::SyntaxError)
+    }
+}
 
 pub(crate) fn generate_workspace_bindings(mode: Mode) -> Result<()> {
     let bindings_path = project_root().join("packages/@biomejs/backend-jsonrpc/src/workspace.ts");
@@ -424,7 +439,12 @@ pub(crate) fn generate_workspace_bindings(mode: Mode) -> Result<()> {
     )
     .build();
 
-    let formatted = format_node(JsFormatOptions::new(JsFileSource::ts()), module.syntax()).unwrap();
+    let formatted = format_node(
+        JsFormatOptions::new(JsFileSource::ts()),
+        FakeFormater,
+        module.syntax(),
+    )
+    .unwrap();
     let printed = formatted.print().unwrap();
     let code = printed.into_code();
 
