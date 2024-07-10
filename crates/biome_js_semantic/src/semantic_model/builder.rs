@@ -201,10 +201,10 @@ impl SemanticModelBuilder {
             }
             Read {
                 range,
-                declared_at: declaration_at, //TODO change to binding_id like we do with scope_id
+                declaration_at,
                 scope_id,
             } => {
-                let binding_id = self.bindings_by_start[&declaration_at.start()];
+                let binding_id = self.bindings_by_start[&declaration_at];
                 let binding = &mut self.bindings[binding_id as usize];
                 let reference_index = binding.references.len() as u32;
 
@@ -224,13 +224,13 @@ impl SemanticModelBuilder {
             }
             HoistedRead {
                 range,
-                declared_at: declaration_at,
+                declaration_at,
                 scope_id,
             } => {
-                let binding_id = self.bindings_by_start[&declaration_at.start()];
+                let binding_id = self.bindings_by_start[&declaration_at];
                 let binding = &mut self.bindings[binding_id as usize];
-
                 let reference_index = binding.references.len() as u32;
+
                 binding.references.push(SemanticModelReference {
                     index: (binding.id, reference_index).into(),
                     range,
@@ -247,10 +247,10 @@ impl SemanticModelBuilder {
             }
             Write {
                 range,
-                declared_at: declaration_at,
+                declaration_at,
                 scope_id,
             } => {
-                let binding_id = self.bindings_by_start[&declaration_at.start()];
+                let binding_id = self.bindings_by_start[&declaration_at];
                 let binding = &mut self.bindings[binding_id as usize];
 
                 let reference_index = binding.references.len() as u32;
@@ -270,10 +270,10 @@ impl SemanticModelBuilder {
             }
             HoistedWrite {
                 range,
-                declared_at: declaration_at,
+                declaration_at,
                 scope_id,
             } => {
-                let binding_id = self.bindings_by_start[&declaration_at.start()];
+                let binding_id = self.bindings_by_start[&declaration_at];
                 let binding = &mut self.bindings[binding_id as usize];
 
                 let reference_index = binding.references.len() as u32;
@@ -327,8 +327,8 @@ impl SemanticModelBuilder {
                         .push(SemanticModelUnresolvedReference { range }),
                 }
             }
-            Exported { range } => {
-                self.exported.insert(range.start());
+            Export { declaration_at, .. } => {
+                self.exported.insert(declaration_at);
             }
         }
     }
