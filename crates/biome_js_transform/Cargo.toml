@@ -22,6 +22,7 @@ biome_rowan       = { workspace = true }
 
 [dev-dependencies]
 biome_analyze      = { path = "../biome_analyze" }
+biome_formatter    = { path = "../biome_formatter" }
 biome_js_formatter = { path = "../biome_js_formatter" }
 biome_js_parser    = { path = "../biome_js_parser" }
 biome_test_utils   = { path = "../biome_test_utils" }

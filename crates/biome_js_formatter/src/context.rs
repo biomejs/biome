@@ -1,6 +1,7 @@
 pub mod trailing_commas;
 
 use crate::comments::{FormatJsLeadingComment, JsCommentStyle, JsComments};
+use crate::JsForeignLanguageFormatter;
 use biome_deserialize_macros::{Deserializable, Merge};
 use biome_formatter::printer::PrinterOptions;
 use biome_formatter::{
@@ -44,12 +45,19 @@ pub struct JsFormatContext {
     cached_function_body: Option<(AnyJsFunctionBody, FormatElement)>,
 
     source_map: Option<TransformSourceMap>,
+
+    foreign_language_formatter: Rc<dyn JsForeignLanguageFormatter>,
 }
 
 impl JsFormatContext {
-    pub fn new(options: JsFormatOptions, comments: JsComments) -> Self {
+    pub fn new(
+        options: JsFormatOptions,
+        foreign_language_formatter: Rc<dyn JsForeignLanguageFormatter>,
+        comments: JsComments,
+    ) -> Self {
         Self {
             options,
+            foreign_language_formatter,
             comments: Rc::new(comments),
             cached_function_body: None,
             source_map: None,
@@ -89,6 +97,10 @@ impl JsFormatContext {
     pub fn with_source_map(mut self, source_map: Option<TransformSourceMap>) -> Self {
         self.source_map = source_map;
         self
+    }
+
+    pub fn get_foreign_language_formatter(&self) -> &dyn JsForeignLanguageFormatter {
+        self.foreign_language_formatter.as_ref()
     }
 }
 

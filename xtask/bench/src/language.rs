@@ -8,6 +8,7 @@ use biome_formatter::{FormatResult, Formatted, PrintResult, Printed};
 use biome_graphql_formatter::context::{GraphqlFormatContext, GraphqlFormatOptions};
 use biome_graphql_syntax::GraphqlSyntaxNode;
 use biome_js_formatter::context::{JsFormatContext, JsFormatOptions};
+use biome_js_formatter::{JsForeignLanguage, JsForeignLanguageFormatter};
 use biome_js_parser::JsParserOptions;
 use biome_js_syntax::{AnyJsRoot, JsFileSource, JsSyntaxNode};
 use biome_json_formatter::context::{JsonFormatContext, JsonFormatOptions};
@@ -125,6 +126,27 @@ impl Parsed {
     }
 }
 
+#[derive(Debug, Clone)]
+struct MultiLanguageFormatter;
+
+impl JsForeignLanguageFormatter for MultiLanguageFormatter {
+    fn format(
+        &self,
+        language: biome_js_formatter::JsForeignLanguage,
+        source: &str,
+    ) -> FormatResult<biome_formatter::prelude::Document> {
+        match language {
+            JsForeignLanguage::Css => {
+                let parse = biome_css_parser::parse_css(
+                    source,
+                    CssParserOptions::default().allow_grit_metavariables(),
+                );
+                biome_css_formatter::format_node(CssFormatOptions::default(), &parse.syntax())
+                    .map(|formatted| formatted.into_document())
+            }
+        }
+    }
+}
 pub enum FormatNode {
     JavaScript(JsSyntaxNode, JsFileSource),
     Json(JsonSyntaxNode),
@@ -135,10 +157,12 @@ pub enum FormatNode {
 impl FormatNode {
     pub fn format_node(&self) -> FormatResult<FormattedNode> {
         match self {
-            Self::JavaScript(root, source_type) => {
-                biome_js_formatter::format_node(JsFormatOptions::new(*source_type), root)
-                    .map(FormattedNode::JavaScript)
-            }
+            Self::JavaScript(root, source_type) => biome_js_formatter::format_node(
+                JsFormatOptions::new(*source_type),
+                MultiLanguageFormatter,
+                root,
+            )
+            .map(FormattedNode::JavaScript),
             Self::Json(root) => {
                 biome_json_formatter::format_node(JsonFormatOptions::default(), root)
                     .map(FormattedNode::Json)

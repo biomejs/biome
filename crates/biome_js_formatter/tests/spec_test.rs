@@ -1,10 +1,36 @@
+use biome_css_formatter::context::CssFormatOptions;
+use biome_css_parser::{parse_css, CssParserOptions};
 use biome_formatter_test::spec::{SpecSnapshot, SpecTestFile};
-use biome_js_formatter::{context::JsFormatOptions, JsFormatLanguage};
+use biome_js_formatter::{
+    context::JsFormatOptions, JsForeignLanguage, JsForeignLanguageFormatter, JsFormatLanguage,
+};
 use biome_js_syntax::{JsFileSource, ModuleKind};
 use std::path::Path;
 
 mod language {
     include!("language.rs");
+}
+
+#[derive(Debug, Clone)]
+struct MultiLanguageFormatter {
+    css_parse_options: CssParserOptions,
+    css_format_options: CssFormatOptions,
+}
+
+impl JsForeignLanguageFormatter for MultiLanguageFormatter {
+    fn format(
+        &self,
+        language: biome_js_formatter::JsForeignLanguage,
+        source: &str,
+    ) -> biome_formatter::FormatResult<biome_formatter::prelude::Document> {
+        match language {
+            JsForeignLanguage::Css => {
+                let parse = parse_css(source, self.css_parse_options);
+                biome_css_formatter::format_node(self.css_format_options.clone(), &parse.syntax())
+                    .map(|formatted| formatted.into_document())
+            }
+        }
+    }
 }
 
 /// [insta.rs](https://insta.rs/docs) snapshot testing
@@ -37,13 +63,19 @@ pub fn run(spec_input_file: &str, _expected_file: &str, test_directory: &str, fi
     }
 
     let options = JsFormatOptions::new(source_type);
+    let css_parse_options = CssParserOptions::default().allow_grit_metavariables();
+    let css_format_options = CssFormatOptions::default();
+    let multi_language_formatter = MultiLanguageFormatter {
+        css_parse_options,
+        css_format_options,
+    };
     let language = language::JsTestFormatLanguage::new(source_type);
 
     let snapshot = SpecSnapshot::new(
         test_file,
         test_directory,
         language,
-        JsFormatLanguage::new(options),
+        JsFormatLanguage::new(options, multi_language_formatter),
     );
 
     snapshot.test()
