@@ -1,5 +1,6 @@
 use biome_css_formatter::context::CssFormatOptions;
 use biome_css_parser::{parse_css, CssParserOptions};
+use biome_formatter::FormatError;
 use biome_formatter_test::TestFormatLanguage;
 use biome_fs::BiomePath;
 use biome_js_formatter::{context::JsFormatContext, JsForeignLanguageFormatter};
@@ -24,6 +25,7 @@ impl JsTestFormatLanguage {
 
 #[derive(Debug, Clone)]
 struct MultiLanguageFormatter {
+    format_with_errors: bool,
     css_parse_options: CssParserOptions,
     css_format_options: CssFormatOptions,
 }
@@ -37,6 +39,9 @@ impl JsForeignLanguageFormatter for MultiLanguageFormatter {
         match language {
             JsForeignLanguage::Css => {
                 let parse = parse_css(source, self.css_parse_options);
+                if !self.format_with_errors && parse.has_errors() {
+                    return Err(FormatError::SyntaxError);
+                }
                 biome_css_formatter::format_node(self.css_format_options.clone(), &parse.syntax())
                     .map(|formatted| formatted.into_document())
             }
@@ -91,9 +96,11 @@ impl TestFormatLanguage for JsTestFormatLanguage {
                 .quote_style
                 .unwrap_or_default(),
         );
+        let format_with_errors = settings.formatter.format_with_errors;
         let multi_language_formatter = MultiLanguageFormatter {
             css_parse_options,
             css_format_options,
+            format_with_errors,
         };
         JsFormatLanguage::new(js_formatter_options, multi_language_formatter)
     }

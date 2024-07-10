@@ -1,7 +1,9 @@
 use biome_css_formatter::context::CssFormatOptions;
 use biome_css_parser::{parse_css, CssParserOptions};
 use biome_formatter::prelude::Document;
-use biome_formatter::{AttributePosition, FormatResult, IndentStyle, LineWidth, QuoteStyle};
+use biome_formatter::{
+    AttributePosition, FormatError, FormatResult, IndentStyle, LineWidth, QuoteStyle,
+};
 use biome_formatter_test::check_reformat::CheckReformat;
 use biome_js_formatter::context::{ArrowParentheses, JsFormatOptions, Semicolons};
 use biome_js_formatter::{
@@ -16,6 +18,7 @@ mod language {
 
 #[derive(Debug, Clone)]
 struct MultiLanguageFormatter {
+    format_with_errors: bool,
     css_parse_options: CssParserOptions,
     css_format_options: CssFormatOptions,
 }
@@ -25,6 +28,9 @@ impl JsForeignLanguageFormatter for MultiLanguageFormatter {
         match language {
             JsForeignLanguage::Css => {
                 let parse = parse_css(source, self.css_parse_options);
+                if parse.has_errors() && !self.format_with_errors {
+                    return Err(FormatError::SyntaxError);
+                }
                 biome_css_formatter::format_node(self.css_format_options.clone(), &parse.syntax())
                     .map(|formatted| formatted.into_document())
             }
@@ -68,6 +74,7 @@ function outerFunctionToForceIndent() {
     let multi_language_formatter = MultiLanguageFormatter {
         css_parse_options,
         css_format_options,
+        format_with_errors: false,
     };
 
     let doc = format_node(

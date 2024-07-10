@@ -2,9 +2,10 @@ use crate::test_case::TestCase;
 use biome_analyze::options::JsxRuntime;
 use biome_analyze::{AnalysisFilter, AnalyzerOptions, ControlFlow, Never, RuleCategoriesBuilder};
 use biome_css_formatter::context::{CssFormatContext, CssFormatOptions};
-use biome_css_parser::CssParserOptions;
+use biome_css_parser::{parse_css, CssParserOptions};
 use biome_css_syntax::{CssRoot, CssSyntaxNode};
-use biome_formatter::{FormatResult, Formatted, PrintResult, Printed};
+use biome_formatter::prelude::Document;
+use biome_formatter::{FormatError, FormatResult, Formatted, PrintResult, Printed};
 use biome_graphql_formatter::context::{GraphqlFormatContext, GraphqlFormatOptions};
 use biome_graphql_syntax::GraphqlSyntaxNode;
 use biome_js_formatter::context::{JsFormatContext, JsFormatOptions};
@@ -130,17 +131,16 @@ impl Parsed {
 struct MultiLanguageFormatter;
 
 impl JsForeignLanguageFormatter for MultiLanguageFormatter {
-    fn format(
-        &self,
-        language: biome_js_formatter::JsForeignLanguage,
-        source: &str,
-    ) -> FormatResult<biome_formatter::prelude::Document> {
+    fn format(&self, language: JsForeignLanguage, source: &str) -> FormatResult<Document> {
         match language {
             JsForeignLanguage::Css => {
-                let parse = biome_css_parser::parse_css(
+                let parse = parse_css(
                     source,
                     CssParserOptions::default().allow_grit_metavariables(),
                 );
+                if parse.has_errors() {
+                    return Err(FormatError::SyntaxError);
+                }
                 biome_css_formatter::format_node(CssFormatOptions::default(), &parse.syntax())
                     .map(|formatted| formatted.into_document())
             }

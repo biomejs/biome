@@ -319,6 +319,7 @@ impl ExtensionHandler for JsFileHandler {
 
 #[derive(Clone, Debug)]
 struct MultiLanguageFormatter {
+    format_with_errors: bool,
     css_parse_options: CssParserOptions,
     css_format_options: CssFormatOptions,
 }
@@ -332,6 +333,9 @@ impl JsForeignLanguageFormatter for MultiLanguageFormatter {
         match language {
             JsForeignLanguage::Css => {
                 let parse = parse_css(content, self.css_parse_options);
+                if parse.has_errors() && !self.format_with_errors {
+                    return Err(FormatError::SyntaxError);
+                }
                 biome_css_formatter::format_node(self.css_format_options.clone(), &parse.syntax())
                     .map(|formatted| formatted.into_document())
             }
@@ -440,9 +444,14 @@ fn debug_formatter_ir(
         })
         .unwrap_or_default();
     let css_format_options = settings.format_options::<CssLanguage>(path, document_file_source);
+    let format_with_errors = settings
+        .settings()
+        .map(|settings| settings.formatter.format_with_errors)
+        .unwrap_or_default();
     let multi_language_formatter = MultiLanguageFormatter {
         css_parse_options,
         css_format_options,
+        format_with_errors,
     };
 
     let tree = parse.syntax();
@@ -768,9 +777,14 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
                     .unwrap_or_default();
                 let css_format_options =
                     workspace.format_options::<CssLanguage>(biome_path, &document_file_source);
+                let format_with_errors = workspace
+                    .settings()
+                    .map(|settings| settings.formatter.format_with_errors)
+                    .unwrap_or_default();
                 let multi_language_formatter = MultiLanguageFormatter {
                     css_parse_options,
                     css_format_options,
+                    format_with_errors,
                 };
                 let code = if params.should_format {
                     format_node(
@@ -821,9 +835,14 @@ pub(crate) fn format(
         .unwrap_or_default();
     let css_format_options =
         settings.format_options::<CssLanguage>(biome_path, document_file_source);
+    let format_with_errors = settings
+        .settings()
+        .map(|settings| settings.formatter.format_with_errors)
+        .unwrap_or_default();
     let multi_language_formatter = MultiLanguageFormatter {
         css_parse_options,
         css_format_options,
+        format_with_errors,
     };
     let formatted = format_node(options, multi_language_formatter, &tree)?;
     match formatted.print() {
@@ -857,9 +876,14 @@ pub(crate) fn format_range(
         .unwrap_or_default();
     let css_format_options =
         settings.format_options::<CssLanguage>(biome_path, document_file_source);
+    let format_with_errors = settings
+        .settings()
+        .map(|settings| settings.formatter.format_with_errors)
+        .unwrap_or_default();
     let multi_language_formatter = MultiLanguageFormatter {
         css_parse_options,
         css_format_options,
+        format_with_errors,
     };
     let printed =
         biome_js_formatter::format_range(options, multi_language_formatter, &tree, range)?;
@@ -910,9 +934,14 @@ pub(crate) fn format_on_type(
         })
         .unwrap_or_default();
     let css_format_options = settings.format_options::<CssLanguage>(path, document_file_source);
+    let format_with_errors = settings
+        .settings()
+        .map(|settings| settings.formatter.format_with_errors)
+        .unwrap_or_default();
     let multi_language_formatter = MultiLanguageFormatter {
         css_parse_options,
         css_format_options,
+        format_with_errors,
     };
 
     let printed =
