@@ -124,12 +124,12 @@ pub fn assert(code: &str, test_name: &str) {
     // Extract semantic events and index by range
 
     let mut events_by_pos: FxHashMap<TextSize, Vec<SemanticEvent>> = FxHashMap::default();
-    let mut declaration_range_by_start: FxHashMap<TextSize, TextRange> = FxHashMap::default();
+    let mut declaration_ranges: Vec<TextRange> = vec![];
     let mut scope_ranges: Vec<TextRange> = vec![];
     for event in semantic_events(r.syntax()) {
         let pos = match event {
             SemanticEvent::DeclarationFound { range, .. } => {
-                declaration_range_by_start.insert(range.start(), range);
+                declaration_ranges.push(range);
                 range.start()
             }
             SemanticEvent::ScopeStarted { range, .. } => {
@@ -156,7 +156,7 @@ pub fn assert(code: &str, test_name: &str) {
         code,
         test_name,
         events_by_pos,
-        declaration_range_by_start,
+        declaration_ranges,
         scope_ranges,
     );
 }
@@ -462,7 +462,7 @@ impl SemanticAssertions {
         code: &str,
         test_name: &str,
         events_by_pos: FxHashMap<TextSize, Vec<SemanticEvent>>,
-        declaration_range_by_start: FxHashMap<TextSize, TextRange>,
+        declaration_ranges: Vec<TextRange>,
         scope_ranges: Vec<TextRange>,
     ) {
         // Check every declaration assertion is ok
@@ -519,9 +519,9 @@ impl SemanticAssertions {
             let mut unused_match = None;
             let at_least_one_match = events.iter().any(|e| {
                 let declaration_at_range = match &e {
-                    SemanticEvent::Read { declaration_at, .. }
-                    | SemanticEvent::HoistedRead { declaration_at, .. } => {
-                        declaration_range_by_start.get(declaration_at)
+                    SemanticEvent::Read { declaration_id, .. }
+                    | SemanticEvent::HoistedRead { declaration_id, .. } => {
+                        declaration_ranges.get(declaration_id.index())
                     }
                     _ => None,
                 };
@@ -579,9 +579,9 @@ impl SemanticAssertions {
 
             let at_least_one_match = events.iter().any(|e| {
                 let declaration_at_range = match &e {
-                    SemanticEvent::Write { declaration_at, .. }
-                    | SemanticEvent::HoistedWrite { declaration_at, .. } => {
-                        declaration_range_by_start.get(declaration_at)
+                    SemanticEvent::Write { declaration_id, .. }
+                    | SemanticEvent::HoistedWrite { declaration_id, .. } => {
+                        declaration_ranges.get(declaration_id.index())
                     }
                     _ => None,
                 };
