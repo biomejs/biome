@@ -6,6 +6,7 @@ use biome_js_syntax::{
     TsTypeParameterName,
 };
 use biome_js_syntax::{AnyJsImportClause, AnyJsNamedImportSpecifier, AnyTsType};
+use biome_rowan::TextSize;
 use biome_rowan::{syntax::Preorder, AstNode, SyntaxNodeOptionExt, TokenText};
 use rustc_hash::FxHashMap;
 use std::collections::VecDeque;
@@ -33,7 +34,7 @@ pub enum SemanticEvent {
     /// - All reference identifiers
     Read {
         range: TextRange,
-        declared_at: TextRange,
+        declaration_at: TextSize,
         scope_id: u32,
     },
 
@@ -42,7 +43,7 @@ pub enum SemanticEvent {
     /// - All reference identifiers
     HoistedRead {
         range: TextRange,
-        declared_at: TextRange,
+        declaration_at: TextSize,
         scope_id: u32,
     },
 
@@ -51,7 +52,7 @@ pub enum SemanticEvent {
     /// - All identifier assignments
     Write {
         range: TextRange,
-        declared_at: TextRange,
+        declaration_at: TextSize,
         scope_id: u32,
     },
 
@@ -61,7 +62,7 @@ pub enum SemanticEvent {
     /// - All identifier assignments
     HoistedWrite {
         range: TextRange,
-        declared_at: TextRange,
+        declaration_at: TextSize,
         scope_id: u32,
     },
 
@@ -94,7 +95,10 @@ pub enum SemanticEvent {
 
     /// Tracks where a symbol is exported.
     /// The range points to the binding that is being exported.
-    Exported { range: TextRange },
+    Export {
+        range: TextRange,
+        declaration_at: TextSize,
+    },
 }
 
 impl SemanticEvent {
@@ -108,7 +112,7 @@ impl SemanticEvent {
             | Self::Write { range, .. }
             | Self::HoistedWrite { range, .. }
             | Self::UnresolvedReference { range, .. }
-            | Self::Exported { range } => *range,
+            | Self::Export { range, .. } => *range,
         }
     }
 }
@@ -537,14 +541,16 @@ impl SemanticEventExtractor {
             false
         };
         let scope_id = self.current_scope_mut().scope_id;
+        let range = node.syntax().text_trimmed_range();
         self.stash.push_back(SemanticEvent::DeclarationFound {
             scope_id,
             hoisted_scope_id,
-            range: node.syntax().text_trimmed_range(),
+            range,
         });
         if is_exported {
-            self.stash.push_back(SemanticEvent::Exported {
-                range: node.syntax().text_trimmed_range(),
+            self.stash.push_back(SemanticEvent::Export {
+                range,
+                declaration_at: range.start(),
             });
         }
     }
@@ -804,28 +810,30 @@ impl SemanticEventExtractor {
         // Bind references to declarations
         for (name, mut references) in scope.references {
             if let Some(&BindingInfo {
-                range: declared_at,
+                range: declaration_range,
                 declaration_kind,
             }) = self.bindings.get(&name)
             {
+                let declaration_at = declaration_range.start();
                 // We know the declaration of these reference.
                 for reference in references {
-                    let declaration_before_reference =
-                        declared_at.start() < reference.range().start();
+                    let declaration_before_reference = declaration_at < reference.range().start();
                     let event = match reference {
                         Reference::Export(range) => {
-                            self.stash
-                                .push_back(SemanticEvent::Exported { range: declared_at });
+                            self.stash.push_back(SemanticEvent::Export {
+                                range,
+                                declaration_at,
+                            });
                             if declaration_before_reference {
                                 SemanticEvent::Read {
                                     range,
-                                    declared_at,
+                                    declaration_at,
                                     scope_id,
                                 }
                             } else {
                                 SemanticEvent::HoistedRead {
                                     range,
-                                    declared_at,
+                                    declaration_at,
                                     scope_id,
                                 }
                             }
@@ -848,13 +856,13 @@ impl SemanticEventExtractor {
                             if declaration_before_reference {
                                 SemanticEvent::Read {
                                     range,
-                                    declared_at,
+                                    declaration_at,
                                     scope_id,
                                 }
                             } else {
                                 SemanticEvent::HoistedRead {
                                     range,
-                                    declared_at,
+                                    declaration_at,
                                     scope_id,
                                 }
                             }
@@ -863,13 +871,13 @@ impl SemanticEventExtractor {
                             if declaration_before_reference {
                                 SemanticEvent::Write {
                                     range,
-                                    declared_at,
+                                    declaration_at,
                                     scope_id,
                                 }
                             } else {
                                 SemanticEvent::HoistedWrite {
                                     range,
-                                    declared_at,
+                                    declaration_at,
                                     scope_id,
                                 }
                             }
@@ -898,19 +906,19 @@ impl SemanticEventExtractor {
                         Reference::AmbientRead(range) if info.is_imported() => {
                             // An ambient read can only read a value,
                             // but also an imported value as a type (with the `type` modifier)
-                            let declared_at = info.range;
+                            let declaration_at = info.range.start();
                             let declaration_before_reference =
-                                declared_at.start() < reference.range().start();
+                                declaration_at < reference.range().start();
                             let event = if declaration_before_reference {
                                 SemanticEvent::Read {
                                     range,
-                                    declared_at,
+                                    declaration_at,
                                     scope_id: 0,
                                 }
                             } else {
                                 SemanticEvent::HoistedRead {
                                     range,
-                                    declared_at,
+                                    declaration_at,
                                     scope_id: 0,
                                 }
                             };

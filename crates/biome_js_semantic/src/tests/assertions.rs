@@ -124,16 +124,27 @@ pub fn assert(code: &str, test_name: &str) {
     // Extract semantic events and index by range
 
     let mut events_by_pos: FxHashMap<TextSize, Vec<SemanticEvent>> = FxHashMap::default();
-    let mut scope_start_by_id: FxHashMap<u32, TextSize> = FxHashMap::default();
+    let mut declaration_range_by_start: FxHashMap<TextSize, TextRange> = FxHashMap::default();
+    let mut scope_range_by_id: FxHashMap<u32, TextRange> = FxHashMap::default();
     for event in semantic_events(r.syntax()) {
-        let pos = if let SemanticEvent::ScopeEnded {
-            range, scope_id, ..
-        } = event
-        {
-            scope_start_by_id.insert(scope_id, range.start());
-            range.end()
-        } else {
-            event.range().start()
+        let pos = match event {
+            SemanticEvent::DeclarationFound { range, .. } => {
+                declaration_range_by_start.insert(range.start(), range);
+                range.start()
+            }
+            SemanticEvent::ScopeStarted {
+                range, scope_id, ..
+            } => {
+                scope_range_by_id.insert(scope_id, range);
+                range.start()
+            }
+            SemanticEvent::Read { range, .. }
+            | SemanticEvent::HoistedRead { range, .. }
+            | SemanticEvent::Write { range, .. }
+            | SemanticEvent::HoistedWrite { range, .. }
+            | SemanticEvent::UnresolvedReference { range, .. } => range.start(),
+            SemanticEvent::ScopeEnded { range, .. } => range.end(),
+            SemanticEvent::Export { .. } => continue,
         };
         let v = events_by_pos.entry(pos).or_default();
         v.push(event);
@@ -143,7 +154,13 @@ pub fn assert(code: &str, test_name: &str) {
 
     // check
 
-    assertions.check(code, test_name, events_by_pos, scope_start_by_id);
+    assertions.check(
+        code,
+        test_name,
+        events_by_pos,
+        declaration_range_by_start,
+        scope_range_by_id,
+    );
 }
 
 #[derive(Debug, Diagnostic)]
@@ -447,7 +464,8 @@ impl SemanticAssertions {
         code: &str,
         test_name: &str,
         events_by_pos: FxHashMap<TextSize, Vec<SemanticEvent>>,
-        scope_start: FxHashMap<u32, TextSize>,
+        declaration_range_by_start: FxHashMap<TextSize, TextRange>,
+        scope_range_by_id: FxHashMap<u32, TextRange>,
     ) {
         // Check every declaration assertion is ok
 
@@ -503,23 +521,19 @@ impl SemanticAssertions {
             let mut unused_match = None;
             let at_least_one_match = events.iter().any(|e| {
                 let declaration_at_range = match &e {
-                    SemanticEvent::Read {
-                        declared_at: declaration_at,
-                        ..
-                    } => Some(*declaration_at),
-                    SemanticEvent::HoistedRead {
-                        declared_at: declaration_at,
-                        ..
-                    } => Some(*declaration_at),
+                    SemanticEvent::Read { declaration_at, .. }
+                    | SemanticEvent::HoistedRead { declaration_at, .. } => {
+                        declaration_range_by_start.get(declaration_at)
+                    }
                     _ => None,
                 };
 
                 if let Some(declaration_at_range) = declaration_at_range {
                     unused_match = Some(format!(
                         "{} != {}",
-                        &code[declaration_at_range], &code[decl.range]
+                        &code[*declaration_at_range], &code[decl.range]
                     ));
-                    code[declaration_at_range] == code[decl.range]
+                    code[*declaration_at_range] == code[decl.range]
                 } else {
                     false
                 }
@@ -567,19 +581,15 @@ impl SemanticAssertions {
 
             let at_least_one_match = events.iter().any(|e| {
                 let declaration_at_range = match &e {
-                    SemanticEvent::Write {
-                        declared_at: declaration_at,
-                        ..
-                    } => Some(*declaration_at),
-                    SemanticEvent::HoistedWrite {
-                        declared_at: declaration_at,
-                        ..
-                    } => Some(*declaration_at),
+                    SemanticEvent::Write { declaration_at, .. }
+                    | SemanticEvent::HoistedWrite { declaration_at, .. } => {
+                        declaration_range_by_start.get(declaration_at)
+                    }
                     _ => None,
                 };
 
                 if let Some(declaration_at_range) = declaration_at_range {
-                    code[declaration_at_range] == code[decl.range]
+                    code[*declaration_at_range] == code[decl.range]
                 } else {
                     false
                 }
@@ -614,7 +624,7 @@ impl SemanticAssertions {
                     {
                         Some(scope_start_assertion) => {
                             let scope_started_at =
-                                &scope_start[&hoisted_scope_id.unwrap_or(*scope_id)];
+                                &scope_range_by_id[&hoisted_scope_id.unwrap_or(*scope_id)].start();
                             if scope_start_assertion.range.start() != *scope_started_at {
                                 show_all_events(test_name, code, events_by_pos, is_scope_event);
                                 show_unmatched_assertion(
