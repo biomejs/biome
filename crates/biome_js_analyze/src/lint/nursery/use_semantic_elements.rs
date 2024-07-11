@@ -61,6 +61,7 @@ impl Rule for UseSemanticElements {
 
             let aria_roles = ctx.aria_roles();
             let extract_attributes = ctx.extract_attributes(&node.attributes());
+            let extract_attributes = ctx.convert_all_attribute_values(extract_attributes);
             let is_not_interative =
                 aria_roles.is_not_interactive_element(element_name, extract_attributes);
 

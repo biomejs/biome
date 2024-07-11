@@ -61,6 +61,7 @@ impl Rule for UseFocusableInteractive {
         let element_name = node.name().ok()?.as_jsx_name()?.value_token().ok()?;
         let aria_roles = ctx.aria_roles();
         let attributes = ctx.extract_attributes(&node.attributes());
+        let attributes = ctx.convert_all_attribute_values(attributes);
 
         if aria_roles.is_not_interactive_element(element_name.text_trimmed(), attributes) {
             let role_attribute = node.find_attribute_by_name("role");

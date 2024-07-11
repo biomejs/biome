@@ -94,6 +94,7 @@ impl Rule for NoStaticElementInteractions {
         let element_name = node.name().ok()?.as_jsx_name()?.value_token().ok()?;
         let aria_roles = ctx.aria_roles();
         let attributes = ctx.extract_attributes(&node.attributes());
+        let attributes = ctx.convert_all_attribute_values(attributes);
         let element_name = element_name.text_trimmed();
 
         // Check if the element is hidden from screen readers.
