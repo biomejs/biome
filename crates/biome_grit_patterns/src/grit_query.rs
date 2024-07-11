@@ -281,7 +281,7 @@ impl Rewrite {
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct CreateFile {
     pub rewritten: OutputFile,
-    range: Option<Vec<Range>>,
+    pub ranges: Option<Vec<Range>>,
 }
 
 impl From<CreateFile> for GritQueryResult {
@@ -294,7 +294,7 @@ impl CreateFile {
     fn new(path: &Path, body: &str) -> Self {
         CreateFile {
             rewritten: OutputFile::new(path, body, None),
-            range: None,
+            ranges: None,
         }
     }
 }

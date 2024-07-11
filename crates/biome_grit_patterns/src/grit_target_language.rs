@@ -129,6 +129,16 @@ generate_target_language! {
 }
 
 impl GritTargetLanguage {
+    /// Returns the target language to use for the given file extension.
+    pub fn from_extension(extension: &str) -> Option<Self> {
+        match extension {
+            "cjs" | "js" | "jsx" | "mjs" | "ts" | "tsx" => {
+                Some(Self::JsTargetLanguage(JsTargetLanguage))
+            }
+            _ => None,
+        }
+    }
+
     /// Returns `true` when the text `content` contains an identifier for a
     /// metavariable using bracket syntax.
     ///

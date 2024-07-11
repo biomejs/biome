@@ -590,6 +590,7 @@ dependencies = [
  "biome_js_syntax",
  "biome_parser",
  "biome_rowan",
+ "biome_test_utils",
  "grit-pattern-matcher",
  "grit-util",
  "im",
@@ -598,6 +599,7 @@ dependencies = [
  "regex",
  "rustc-hash",
  "serde",
+ "tests_macros",
 ]
 
 [[package]]
