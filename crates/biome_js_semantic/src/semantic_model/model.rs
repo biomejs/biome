@@ -1,27 +1,38 @@
 use super::*;
 use biome_js_syntax::{AnyJsFunction, AnyJsRoot};
 
-#[derive(Copy, Clone, Debug)]
-pub(crate) struct BindingIndex(u32);
+#[derive(Copy, Clone, Debug, Eq, Hash, PartialEq)]
+pub(crate) struct BindingId(u32);
 
-impl From<u32> for BindingIndex {
-    fn from(v: u32) -> Self {
-        BindingIndex(v)
+impl BindingId {
+    pub(crate) fn new(index: usize) -> Self {
+        // SAFETY: We didn't handle files execedding `u32::MAX` bytes.
+        // Thus, it isn't possible to execedd `u32::MAX` bindings.
+        Self(index as u32)
+    }
+
+    pub(crate) fn index(self) -> usize {
+        self.0 as usize
     }
 }
 
 #[derive(Copy, Clone, Debug)]
-pub(crate) struct ReferenceIndex(u32, u32);
+pub(crate) struct ReferenceId(BindingId, u32);
 
-impl ReferenceIndex {
-    pub(crate) fn binding(&self) -> BindingIndex {
-        BindingIndex(self.0)
+impl ReferenceId {
+    pub(crate) fn new(binding_id: BindingId, index: usize) -> Self {
+        // SAFETY: We didn't handle files execedding `u32::MAX` bytes.
+        // Thus, it isn't possible to execedd `u32::MAX` refernces.
+        Self(binding_id, index as u32)
     }
-}
 
-impl From<(BindingIndex, u32)> for ReferenceIndex {
-    fn from((binding_index, index): (BindingIndex, u32)) -> Self {
-        ReferenceIndex(binding_index.0, index)
+    // Points to [SemanticModel]::bindings vec
+    pub(crate) fn binding_id(&self) -> BindingId {
+        self.0
+    }
+
+    pub(crate) fn index(self) -> usize {
+        self.1 as usize
     }
 }
 
@@ -67,11 +78,11 @@ pub(crate) struct SemanticModelData {
     pub(crate) binding_node_by_start: FxHashMap<TextSize, JsSyntaxNode>,
     pub(crate) scope_node_by_range: FxHashMap<TextRange, JsSyntaxNode>,
     // Maps any range start in the code to its bindings (usize points to bindings vec)
-    pub(crate) declared_at_by_start: FxHashMap<TextSize, u32>,
+    pub(crate) declared_at_by_start: FxHashMap<TextSize, BindingId>,
     // List of all the declarations
     pub(crate) bindings: Vec<SemanticModelBindingData>,
     // Index bindings by range start
-    pub(crate) bindings_by_start: FxHashMap<TextSize, u32>,
+    pub(crate) bindings_by_start: FxHashMap<TextSize, BindingId>,
     // All bindings that were exported
     pub(crate) exported: FxHashSet<TextSize>,
     /// All references that could not be resolved
@@ -81,17 +92,17 @@ pub(crate) struct SemanticModelData {
 }
 
 impl SemanticModelData {
-    pub(crate) fn binding(&self, index: BindingIndex) -> &SemanticModelBindingData {
+    pub(crate) fn binding(&self, index: BindingId) -> &SemanticModelBindingData {
         &self.bindings[index.0 as usize]
     }
 
-    pub(crate) fn reference(&self, index: ReferenceIndex) -> &SemanticModelReference {
-        let binding = &self.bindings[index.0 as usize];
+    pub(crate) fn reference(&self, index: ReferenceId) -> &SemanticModelReference {
+        let binding = &self.bindings[index.0.index()];
         &binding.references[index.1 as usize]
     }
 
-    pub(crate) fn next_reference(&self, index: ReferenceIndex) -> Option<&SemanticModelReference> {
-        let binding = &self.bindings[index.0 as usize];
+    pub(crate) fn next_reference(&self, index: ReferenceId) -> Option<&SemanticModelReference> {
+        let binding = &self.bindings[index.0.index()];
         binding.references.get(index.1 as usize + 1)
     }
 
@@ -207,7 +218,7 @@ impl SemanticModel {
     pub fn all_bindings(&self) -> impl Iterator<Item = Binding> + '_ {
         self.data.bindings.iter().map(|x| Binding {
             data: self.data.clone(),
-            index: x.id,
+            id: x.id,
         })
     }
 
@@ -240,7 +251,7 @@ impl SemanticModel {
         let id = *self.data.declared_at_by_start.get(&range.start())?;
         Some(Binding {
             data: self.data.clone(),
-            index: (id).into(),
+            id,
         })
     }
 
@@ -358,10 +369,10 @@ impl SemanticModel {
 
     pub fn as_binding(&self, binding: &impl IsBindingAstNode) -> Binding {
         let range = binding.syntax().text_trimmed_range();
-        let id = &self.data.bindings_by_start[&range.start()];
+        let id = self.data.bindings_by_start[&range.start()];
         Binding {
             data: self.data.clone(),
-            index: (*id).into(),
+            id,
         }
     }
 

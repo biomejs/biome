@@ -7,7 +7,7 @@ use std::rc::Rc;
 #[derive(Debug)]
 pub struct Reference {
     pub(crate) data: Rc<SemanticModelData>,
-    pub(crate) index: ReferenceIndex,
+    pub(crate) index: ReferenceId,
 }
 
 impl Reference {
@@ -15,7 +15,7 @@ impl Reference {
         let reference = self.data.next_reference(self.index)?;
         Some(Reference {
             data: self.data.clone(),
-            index: reference.index,
+            index: reference.id,
         })
     }
 
@@ -26,10 +26,10 @@ impl Reference {
             if reference.is_read() {
                 return Some(Reference {
                     data: self.data.clone(),
-                    index: reference.index,
+                    index: reference.id,
                 });
             } else {
-                index = reference.index;
+                index = reference.id;
             }
         }
 
@@ -43,10 +43,10 @@ impl Reference {
             if reference.is_write() {
                 return Some(Reference {
                     data: self.data.clone(),
-                    index: reference.index,
+                    index: reference.id,
                 });
             } else {
-                index = reference.index;
+                index = reference.id;
             }
         }
 
@@ -77,7 +77,7 @@ impl Reference {
     pub fn binding(&self) -> Option<Binding> {
         Some(Binding {
             data: self.data.clone(),
-            index: self.index.binding(),
+            id: self.index.binding_id(),
         })
     }
 
@@ -125,7 +125,7 @@ impl Reference {
 #[derive(Debug)]
 pub struct FunctionCall {
     pub(crate) data: Rc<SemanticModelData>,
-    pub(crate) index: ReferenceIndex,
+    pub(crate) index: ReferenceId,
 }
 
 impl FunctionCall {
