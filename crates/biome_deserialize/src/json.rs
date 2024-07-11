@@ -254,9 +254,9 @@ impl DeserializableValue for JsonMemberName {
     }
 }
 
-/// Rteurns an unescaped version of `s`.
+/// Returns an unescaped version of `s`.
 /// If nothing is escaped, then `s` is returned without any allocation.
-/// If at lest one character is escaped, then a string is allocated and hold the unescaped string.
+/// If at least one character is escaped, then a string is allocated and holds the unescaped string.
 fn unescape_json(s: TokenText) -> Text {
     if s.text().bytes().any(|c| c == b'\\') {
         // Searching and replacing at the same time should be more optimal.
