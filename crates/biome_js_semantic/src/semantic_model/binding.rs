@@ -4,7 +4,7 @@ use biome_js_syntax::{binding_ext::AnyJsIdentifierBinding, TextRange, TsTypePara
 /// Internal type with all the semantic data of a specific binding
 #[derive(Debug)]
 pub(crate) struct SemanticModelBindingData {
-    pub id: BindingIndex,
+    pub id: BindingId,
     pub range: TextRange,
     pub references: Vec<SemanticModelReference>,
 }
@@ -18,7 +18,7 @@ pub(crate) enum SemanticModelReferenceType {
 /// Internal type with all the semantic data of a specific reference
 #[derive(Debug)]
 pub(crate) struct SemanticModelReference {
-    pub(crate) index: ReferenceIndex,
+    pub(crate) id: ReferenceId,
     pub(crate) range: TextRange,
     pub(crate) ty: SemanticModelReferenceType,
 }
@@ -45,19 +45,19 @@ pub type AllBindingWriteReferencesIter =
 /// Provides access to all semantic data of a specific binding.
 pub struct Binding {
     pub(crate) data: Rc<SemanticModelData>,
-    pub(crate) index: BindingIndex,
+    pub(crate) id: BindingId,
 }
 
 impl std::fmt::Debug for Binding {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("Binding").field("id", &self.index).finish()
+        f.debug_struct("Binding").field("id", &self.id).finish()
     }
 }
 
 impl Binding {
     /// Returns the scope of this binding
     pub fn scope(&self) -> Scope {
-        let binding = self.data.binding(self.index);
+        let binding = self.data.binding(self.id);
         let id = self.data.scope(&binding.range); //TODO declaration can have its scope id
         Scope {
             data: self.data.clone(),
@@ -67,7 +67,7 @@ impl Binding {
 
     /// Returns the syntax node associated with this binding.
     pub fn syntax(&self) -> &JsSyntaxNode {
-        let binding = self.data.binding(self.index);
+        let binding = self.data.binding(self.id);
         &self.data.binding_node_by_start[&binding.range.start()]
     }
 
@@ -81,38 +81,38 @@ impl Binding {
 
     /// Returns an iterator to all references of this binding.
     pub fn all_references(&self) -> AllBindingReferencesIter {
-        let binding = self.data.binding(self.index);
+        let binding = self.data.binding(self.id);
         let first = binding.references.first().map(|reference| Reference {
             data: self.data.clone(),
-            index: reference.index,
+            index: reference.id,
         });
         std::iter::successors(first, Reference::find_next)
     }
 
     /// Returns an iterator to all reads references of this binding.
     pub fn all_reads(&self) -> AllBindingReadReferencesIter {
-        let binding = self.data.binding(self.index);
+        let binding = self.data.binding(self.id);
         let first = binding
             .references
             .iter()
             .find(|x| x.is_read())
             .map(|reference| Reference {
                 data: self.data.clone(),
-                index: reference.index,
+                index: reference.id,
             });
         std::iter::successors(first, Reference::find_next_read)
     }
 
     /// Returns an iterator to all write references of this binding.
     pub fn all_writes(&self) -> AllBindingWriteReferencesIter {
-        let binding = self.data.binding(self.index);
+        let binding = self.data.binding(self.id);
         let first = binding
             .references
             .iter()
             .find(|x| x.is_write())
             .map(|reference| Reference {
                 data: self.data.clone(),
-                index: reference.index,
+                index: reference.id,
             });
         std::iter::successors(first, Reference::find_next_write)
     }
