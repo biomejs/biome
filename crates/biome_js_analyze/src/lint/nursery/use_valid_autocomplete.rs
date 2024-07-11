@@ -171,8 +171,7 @@ impl Rule for UseValidAutocomplete {
                     return None;
                 }
 
-                let autocomplete_values =
-                    ctx.convert_attribute_values(autocomplete_values.to_vec());
+                let autocomplete_values = ctx.convert_attribute_values(autocomplete_values.clone());
 
                 if autocomplete_values.first() == Some(&"none".to_string())
                     || is_valid_autocomplete(&autocomplete_values)?
@@ -199,8 +198,7 @@ impl Rule for UseValidAutocomplete {
                     return None;
                 }
 
-                let autocomplete_values =
-                    ctx.convert_attribute_values(autocomplete_values.to_vec());
+                let autocomplete_values = ctx.convert_attribute_values(autocomplete_values.clone());
 
                 if autocomplete_values.first() == Some(&"none".to_string())
                     || is_valid_autocomplete(&autocomplete_values)?
