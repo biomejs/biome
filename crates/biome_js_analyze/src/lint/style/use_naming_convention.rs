@@ -583,7 +583,7 @@ declare_lint_rule! {
     ///                 "selector": {
     ///                     "kind": "interface"
     ///                 },
-    ///                 "match": "I(.*)|(.*)Error",
+    ///                 "match": "I(.*)|(.*?)Error",
     ///                 "formats": ["PascalCase"]
     ///             }
     ///             // default conventions
