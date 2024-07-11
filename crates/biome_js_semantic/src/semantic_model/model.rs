@@ -2,7 +2,7 @@ use super::*;
 use biome_js_syntax::{AnyJsFunction, AnyJsRoot};
 
 #[derive(Copy, Clone, Debug, Eq, Hash, PartialEq)]
-pub(crate) struct BindingId(u32);
+pub struct BindingId(u32);
 
 impl BindingId {
     pub(crate) fn new(index: usize) -> Self {
@@ -84,7 +84,7 @@ pub(crate) struct SemanticModelData {
     // Index bindings by range start
     pub(crate) bindings_by_start: FxHashMap<TextSize, BindingId>,
     // All bindings that were exported
-    pub(crate) exported: FxHashSet<TextSize>,
+    pub(crate) exported: FxHashSet<BindingId>,
     /// All references that could not be resolved
     pub(crate) unresolved_references: Vec<SemanticModelUnresolvedReference>,
     /// All globals references
@@ -127,7 +127,8 @@ impl SemanticModelData {
     }
 
     pub fn is_exported(&self, range: TextRange) -> bool {
-        self.exported.contains(&range.start())
+        self.exported
+            .contains(&self.bindings_by_start[&range.start()])
     }
 }
 

@@ -23,7 +23,7 @@ pub struct SemanticModelBuilder {
     bindings_by_start: FxHashMap<TextSize, BindingId>,
     /// maps a reference range start to its bindings. u32 points to SemanticModelBuilder::bindings vec
     declared_at_by_start: FxHashMap<TextSize, BindingId>,
-    exported: FxHashSet<TextSize>,
+    exported: FxHashSet<BindingId>,
     unresolved_references: Vec<SemanticModelUnresolvedReference>,
 }
 
@@ -198,11 +198,10 @@ impl SemanticModelBuilder {
             }
             Read {
                 range,
-                declaration_at,
+                declaration_id,
                 scope_id,
             } => {
-                let binding_id = self.bindings_by_start[&declaration_at];
-                let binding = &mut self.bindings[binding_id.index()];
+                let binding = &mut self.bindings[declaration_id.index()];
                 let reference_id = ReferenceId::new(binding.id, binding.references.len());
                 binding.references.push(SemanticModelReference {
                     id: reference_id,
@@ -213,15 +212,15 @@ impl SemanticModelBuilder {
                 let scope = &mut self.scopes[scope_id.index()];
                 scope.read_references.push(reference_id);
 
-                self.declared_at_by_start.insert(range.start(), binding_id);
+                self.declared_at_by_start
+                    .insert(range.start(), declaration_id);
             }
             HoistedRead {
                 range,
-                declaration_at,
+                declaration_id,
                 scope_id,
             } => {
-                let binding_id = self.bindings_by_start[&declaration_at];
-                let binding = &mut self.bindings[binding_id.index()];
+                let binding = &mut self.bindings[declaration_id.index()];
                 let reference_id = ReferenceId::new(binding.id, binding.references.len());
                 binding.references.push(SemanticModelReference {
                     id: reference_id,
@@ -232,15 +231,15 @@ impl SemanticModelBuilder {
                 let scope = &mut self.scopes[scope_id.index()];
                 scope.read_references.push(reference_id);
 
-                self.declared_at_by_start.insert(range.start(), binding_id);
+                self.declared_at_by_start
+                    .insert(range.start(), declaration_id);
             }
             Write {
                 range,
-                declaration_at,
+                declaration_id,
                 scope_id,
             } => {
-                let binding_id = self.bindings_by_start[&declaration_at];
-                let binding = &mut self.bindings[binding_id.index()];
+                let binding = &mut self.bindings[declaration_id.index()];
                 let reference_id = ReferenceId::new(binding.id, binding.references.len());
                 binding.references.push(SemanticModelReference {
                     id: reference_id,
@@ -251,15 +250,15 @@ impl SemanticModelBuilder {
                 let scope = &mut self.scopes[scope_id.index()];
                 scope.read_references.push(reference_id);
 
-                self.declared_at_by_start.insert(range.start(), binding_id);
+                self.declared_at_by_start
+                    .insert(range.start(), declaration_id);
             }
             HoistedWrite {
                 range,
-                declaration_at,
+                declaration_id,
                 scope_id,
             } => {
-                let binding_id = self.bindings_by_start[&declaration_at];
-                let binding = &mut self.bindings[binding_id.index()];
+                let binding = &mut self.bindings[declaration_id.index()];
                 let reference_id = ReferenceId::new(binding.id, binding.references.len());
                 binding.references.push(SemanticModelReference {
                     id: reference_id,
@@ -270,7 +269,8 @@ impl SemanticModelBuilder {
                 let scope = &mut self.scopes[scope_id.index()];
                 scope.read_references.push(reference_id);
 
-                self.declared_at_by_start.insert(range.start(), binding_id);
+                self.declared_at_by_start
+                    .insert(range.start(), declaration_id);
             }
             UnresolvedReference { is_read, range } => {
                 let ty = if is_read {
@@ -308,8 +308,8 @@ impl SemanticModelBuilder {
                         .push(SemanticModelUnresolvedReference { range }),
                 }
             }
-            Export { declaration_at, .. } => {
-                self.exported.insert(declaration_at);
+            Export { declaration_id, .. } => {
+                self.exported.insert(declaration_id);
             }
         }
     }
