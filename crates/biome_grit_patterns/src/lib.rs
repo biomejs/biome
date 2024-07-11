@@ -20,7 +20,7 @@ mod variables;
 
 pub use errors::*;
 pub use grit_context::GritTargetFile;
-pub use grit_query::{GritQuery, GritQueryResult};
+pub use grit_query::{CreateFile, GritQuery, GritQueryResult, Message, OutputFile};
 pub use grit_target_language::{GritTargetLanguage, JsTargetLanguage};
 
 use biome_grit_parser::parse_grit;

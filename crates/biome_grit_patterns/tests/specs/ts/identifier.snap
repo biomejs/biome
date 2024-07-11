@@ -1,0 +1,47 @@
+---
+source: crates/biome_grit_patterns/tests/spec_tests.rs
+expression: identifier
+---
+SnapshotResult {
+    messages: [],
+    matched_ranges: [
+        Range {
+            start: Position {
+                line: 1,
+                column: 4,
+            },
+            end: Position {
+                line: 1,
+                column: 4,
+            },
+            start_byte: 25,
+            end_byte: 28,
+        },
+        Range {
+            start: Position {
+                line: 1,
+                column: 4,
+            },
+            end: Position {
+                line: 1,
+                column: 4,
+            },
+            start_byte: 52,
+            end_byte: 55,
+        },
+        Range {
+            start: Position {
+                line: 1,
+                column: 4,
+            },
+            end: Position {
+                line: 1,
+                column: 4,
+            },
+            start_byte: 99,
+            end_byte: 102,
+        },
+    ],
+    rewritten_files: [],
+    created_files: [],
+}
