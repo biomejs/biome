@@ -172,7 +172,6 @@ impl SemanticModelBuilder {
 
                 let binding_id = BindingId::new(self.bindings.len());
                 self.bindings.push(SemanticModelBindingData {
-                    id: binding_id,
                     range,
                     references: vec![],
                 });
@@ -203,10 +202,9 @@ impl SemanticModelBuilder {
             } => {
                 let binding_id = self.bindings_by_start[&declaration_at];
                 let binding = &mut self.bindings[binding_id.index()];
-                let reference_id = ReferenceId::new(binding.id, binding.references.len());
+                let reference_id = ReferenceId::new(binding_id, binding.references.len());
                 binding.references.push(SemanticModelReference {
-                    id: reference_id,
-                    range,
+                    range_start: range.start(),
                     ty: SemanticModelReferenceType::Read { hoisted: false },
                 });
 
@@ -222,10 +220,9 @@ impl SemanticModelBuilder {
             } => {
                 let binding_id = self.bindings_by_start[&declaration_at];
                 let binding = &mut self.bindings[binding_id.index()];
-                let reference_id = ReferenceId::new(binding.id, binding.references.len());
+                let reference_id = ReferenceId::new(binding_id, binding.references.len());
                 binding.references.push(SemanticModelReference {
-                    id: reference_id,
-                    range,
+                    range_start: range.start(),
                     ty: SemanticModelReferenceType::Read { hoisted: true },
                 });
 
@@ -241,10 +238,9 @@ impl SemanticModelBuilder {
             } => {
                 let binding_id = self.bindings_by_start[&declaration_at];
                 let binding = &mut self.bindings[binding_id.index()];
-                let reference_id = ReferenceId::new(binding.id, binding.references.len());
+                let reference_id = ReferenceId::new(binding_id, binding.references.len());
                 binding.references.push(SemanticModelReference {
-                    id: reference_id,
-                    range,
+                    range_start: range.start(),
                     ty: SemanticModelReferenceType::Write { hoisted: false },
                 });
 
@@ -260,10 +256,9 @@ impl SemanticModelBuilder {
             } => {
                 let binding_id = self.bindings_by_start[&declaration_at];
                 let binding = &mut self.bindings[binding_id.index()];
-                let reference_id = ReferenceId::new(binding.id, binding.references.len());
+                let reference_id = ReferenceId::new(binding_id, binding.references.len());
                 binding.references.push(SemanticModelReference {
-                    id: reference_id,
-                    range,
+                    range_start: range.start(),
                     ty: SemanticModelReferenceType::Write { hoisted: true },
                 });
 
@@ -287,15 +282,18 @@ impl SemanticModelBuilder {
                         let entry = entry.get_mut();
                         match entry {
                             Some(index) => {
-                                self.globals[(*index) as usize]
-                                    .references
-                                    .push(SemanticModelGlobalReferenceData { range, ty });
+                                self.globals[(*index) as usize].references.push(
+                                    SemanticModelGlobalReferenceData {
+                                        range_start: range.start(),
+                                        ty,
+                                    },
+                                );
                             }
                             None => {
                                 let id = self.globals.len() as u32;
                                 self.globals.push(SemanticModelGlobalBindingData {
                                     references: vec![SemanticModelGlobalReferenceData {
-                                        range,
+                                        range_start: range.start(),
                                         ty,
                                     }],
                                 });

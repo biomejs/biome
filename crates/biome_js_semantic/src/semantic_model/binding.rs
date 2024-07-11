@@ -4,9 +4,8 @@ use biome_js_syntax::{binding_ext::AnyJsIdentifierBinding, TextRange, TsTypePara
 /// Internal type with all the semantic data of a specific binding
 #[derive(Debug)]
 pub(crate) struct SemanticModelBindingData {
-    pub id: BindingId,
-    pub range: TextRange,
-    pub references: Vec<SemanticModelReference>,
+    pub(crate) range: TextRange,
+    pub(crate) references: Vec<SemanticModelReference>,
 }
 
 #[derive(Clone, Copy, Debug)]
@@ -18,8 +17,7 @@ pub(crate) enum SemanticModelReferenceType {
 /// Internal type with all the semantic data of a specific reference
 #[derive(Debug)]
 pub(crate) struct SemanticModelReference {
-    pub(crate) id: ReferenceId,
-    pub(crate) range: TextRange,
+    pub(crate) range_start: TextSize,
     pub(crate) ty: SemanticModelReferenceType,
 }
 
@@ -58,10 +56,9 @@ impl Binding {
     /// Returns the scope of this binding
     pub fn scope(&self) -> Scope {
         let binding = self.data.binding(self.id);
-        let id = self.data.scope(&binding.range); //TODO declaration can have its scope id
         Scope {
             data: self.data.clone(),
-            id,
+            id: self.data.scope(binding.range),
         }
     }
 
@@ -73,19 +70,20 @@ impl Binding {
 
     /// Returns the typed AST node associated with this binding.
     pub fn tree(&self) -> AnyJsIdentifierBinding {
-        let node = self.syntax();
-        let binding = AnyJsIdentifierBinding::cast_ref(node);
-        debug_assert!(binding.is_some());
-        binding.unwrap()
+        AnyJsIdentifierBinding::unwrap_cast(self.syntax().clone())
     }
 
     /// Returns an iterator to all references of this binding.
     pub fn all_references(&self) -> AllBindingReferencesIter {
         let binding = self.data.binding(self.id);
-        let first = binding.references.first().map(|reference| Reference {
-            data: self.data.clone(),
-            index: reference.id,
-        });
+        let first = if binding.references.is_empty() {
+            None
+        } else {
+            Some(Reference {
+                data: self.data.clone(),
+                id: ReferenceId::new(self.id, 0),
+            })
+        };
         std::iter::successors(first, Reference::find_next)
     }
 
@@ -95,10 +93,11 @@ impl Binding {
         let first = binding
             .references
             .iter()
-            .find(|x| x.is_read())
-            .map(|reference| Reference {
+            .enumerate()
+            .find(|(_, x)| x.is_read())
+            .map(|(index, _)| Reference {
                 data: self.data.clone(),
-                index: reference.id,
+                id: ReferenceId::new(self.id, index),
             });
         std::iter::successors(first, Reference::find_next_read)
     }
@@ -109,10 +108,11 @@ impl Binding {
         let first = binding
             .references
             .iter()
-            .find(|x| x.is_write())
-            .map(|reference| Reference {
+            .enumerate()
+            .find(|(_, x)| x.is_write())
+            .map(|(index, _)| Reference {
                 data: self.data.clone(),
-                index: reference.id,
+                id: ReferenceId::new(self.id, index),
             });
         std::iter::successors(first, Reference::find_next_write)
     }
