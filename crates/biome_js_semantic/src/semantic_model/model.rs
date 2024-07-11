@@ -25,6 +25,32 @@ impl From<(BindingIndex, u32)> for ReferenceIndex {
     }
 }
 
+// We use `NonZeroU32` to allow niche optimizations.
+#[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+pub struct ScopeId(std::num::NonZeroU32);
+
+// We don't implement `From<usize> for ScopeId` and `From<ScopeId> for usize`
+// to ensure that the API consumers don't create `ScopeId`.
+impl ScopeId {
+    pub(crate) fn new(index: usize) -> Self {
+        // SAFETY: We didn't handle files execedding `u32::MAX` bytes.
+        // Thus, it isn't possible to execedd `u32::MAX` scopes.
+        //
+        // Adding 1 ensurtes that the value is never equal to 0.
+        // Instead of adding 1, we could XOR the value with `u32::MAX`.
+        // This is what the [nonmax](https://docs.rs/nonmax/latest/nonmax/) crate does.
+        // However, this doesn't preserve the order.
+        // It is why we opted for adding 1.
+        Self(unsafe { std::num::NonZeroU32::new_unchecked(index.unchecked_add(1) as u32) })
+    }
+
+    pub(crate) fn index(self) -> usize {
+        // SAFETY: The internal representation ensures that the value is never equal to 0.
+        // Thus, it is safe to substract 1.
+        (unsafe { self.0.get().unchecked_sub(1) }) as usize
+    }
+}
+
 /// Contains all the data of the [SemanticModel] and only lives behind an [Arc].
 ///
 /// That allows any returned struct (like [Scope], [Binding])
@@ -34,9 +60,9 @@ pub(crate) struct SemanticModelData {
     pub(crate) root: AnyJsRoot,
     // All scopes of this model
     pub(crate) scopes: Vec<SemanticModelScopeData>,
-    pub(crate) scope_by_range: rust_lapper::Lapper<u32, u32>,
+    pub(crate) scope_by_range: rust_lapper::Lapper<u32, ScopeId>,
     // Maps the start of a node range to a scope id
-    pub(crate) scope_hoisted_to_by_range: FxHashMap<TextSize, u32>,
+    pub(crate) scope_hoisted_to_by_range: FxHashMap<TextSize, ScopeId>,
     // Map to each by its range
     pub(crate) binding_node_by_start: FxHashMap<TextSize, JsSyntaxNode>,
     pub(crate) scope_node_by_range: FxHashMap<TextRange, JsSyntaxNode>,
@@ -69,7 +95,7 @@ impl SemanticModelData {
         binding.references.get(index.1 as usize + 1)
     }
 
-    pub(crate) fn scope(&self, range: &TextRange) -> u32 {
+    pub(crate) fn scope(&self, range: &TextRange) -> ScopeId {
         let start = range.start().into();
         let end = range.end().into();
         let scopes = self
@@ -85,7 +111,7 @@ impl SemanticModelData {
         }
     }
 
-    fn scope_hoisted_to(&self, range: &TextRange) -> Option<u32> {
+    fn scope_hoisted_to(&self, range: &TextRange) -> Option<ScopeId> {
         self.scope_hoisted_to_by_range.get(&range.start()).copied()
     }
 
@@ -123,7 +149,7 @@ impl SemanticModel {
     pub fn scopes(&self) -> impl Iterator<Item = Scope> + '_ {
         self.data.scopes.iter().enumerate().map(|(id, _)| Scope {
             data: self.data.clone(),
-            id: id as u32,
+            id: ScopeId::new(id),
         })
     }
 
@@ -131,7 +157,7 @@ impl SemanticModel {
     pub fn global_scope(&self) -> Scope {
         Scope {
             data: self.data.clone(),
-            id: 0,
+            id: ScopeId::new(0),
         }
     }
 

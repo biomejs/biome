@@ -125,17 +125,15 @@ pub fn assert(code: &str, test_name: &str) {
 
     let mut events_by_pos: FxHashMap<TextSize, Vec<SemanticEvent>> = FxHashMap::default();
     let mut declaration_range_by_start: FxHashMap<TextSize, TextRange> = FxHashMap::default();
-    let mut scope_range_by_id: FxHashMap<u32, TextRange> = FxHashMap::default();
+    let mut scope_ranges: Vec<TextRange> = vec![];
     for event in semantic_events(r.syntax()) {
         let pos = match event {
             SemanticEvent::DeclarationFound { range, .. } => {
                 declaration_range_by_start.insert(range.start(), range);
                 range.start()
             }
-            SemanticEvent::ScopeStarted {
-                range, scope_id, ..
-            } => {
-                scope_range_by_id.insert(scope_id, range);
+            SemanticEvent::ScopeStarted { range, .. } => {
+                scope_ranges.push(range);
                 range.start()
             }
             SemanticEvent::Read { range, .. }
@@ -159,7 +157,7 @@ pub fn assert(code: &str, test_name: &str) {
         test_name,
         events_by_pos,
         declaration_range_by_start,
-        scope_range_by_id,
+        scope_ranges,
     );
 }
 
@@ -465,7 +463,7 @@ impl SemanticAssertions {
         test_name: &str,
         events_by_pos: FxHashMap<TextSize, Vec<SemanticEvent>>,
         declaration_range_by_start: FxHashMap<TextSize, TextRange>,
-        scope_range_by_id: FxHashMap<u32, TextRange>,
+        scope_ranges: Vec<TextRange>,
     ) {
         // Check every declaration assertion is ok
 
@@ -623,8 +621,9 @@ impl SemanticAssertions {
                         .get(&at_scope_assertion.scope_name)
                     {
                         Some(scope_start_assertion) => {
-                            let scope_started_at =
-                                &scope_range_by_id[&hoisted_scope_id.unwrap_or(*scope_id)].start();
+                            let scope_started_at = &scope_ranges
+                                [hoisted_scope_id.unwrap_or(*scope_id).index()]
+                            .start();
                             if scope_start_assertion.range.start() != *scope_started_at {
                                 show_all_events(test_name, code, events_by_pos, is_scope_event);
                                 show_unmatched_assertion(
