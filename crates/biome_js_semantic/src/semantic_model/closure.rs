@@ -120,7 +120,7 @@ impl Capture {
 pub struct AllCapturesIter {
     data: Rc<SemanticModelData>,
     closure_range: TextRange,
-    scopes: Vec<u32>,
+    scopes: Vec<ScopeId>,
     references: Vec<SemanticModelScopeReference>,
 }
 
@@ -143,7 +143,7 @@ impl Iterator for AllCapturesIter {
             }
 
             'scopes: while let Some(scope_id) = self.scopes.pop() {
-                let scope = &self.data.scopes[scope_id as usize];
+                let scope = &self.data.scopes[scope_id.index()];
 
                 if scope.is_closure {
                     continue 'scopes;
@@ -167,7 +167,7 @@ impl FusedIterator for AllCapturesIter {}
 /// Iterate all immediate children closures of a specific closure
 pub struct ChildrenIter {
     data: Rc<SemanticModelData>,
-    scopes: Vec<u32>,
+    scopes: Vec<ScopeId>,
 }
 
 impl Iterator for ChildrenIter {
@@ -175,7 +175,7 @@ impl Iterator for ChildrenIter {
 
     fn next(&mut self) -> Option<Self::Item> {
         while let Some(scope_id) = self.scopes.pop() {
-            let scope = &self.data.scopes[scope_id as usize];
+            let scope = &self.data.scopes[scope_id.index()];
             if scope.is_closure {
                 return Some(Closure {
                     data: self.data.clone(),
@@ -195,7 +195,7 @@ impl FusedIterator for ChildrenIter {}
 /// Iterate all descendents closures of a specific closure
 pub struct DescendentsIter {
     data: Rc<SemanticModelData>,
-    scopes: Vec<u32>,
+    scopes: Vec<ScopeId>,
 }
 
 impl Iterator for DescendentsIter {
@@ -203,7 +203,7 @@ impl Iterator for DescendentsIter {
 
     fn next(&mut self) -> Option<Self::Item> {
         while let Some(scope_id) = self.scopes.pop() {
-            let scope = &self.data.scopes[scope_id as usize];
+            let scope = &self.data.scopes[scope_id.index()];
             self.scopes.extend(scope.children.iter());
             if scope.is_closure {
                 return Some(Closure {
@@ -223,7 +223,7 @@ impl FusedIterator for DescendentsIter {}
 #[derive(Clone)]
 pub struct Closure {
     data: Rc<SemanticModelData>,
-    scope_id: u32,
+    scope_id: ScopeId,
 }
 
 impl Closure {
@@ -234,8 +234,8 @@ impl Closure {
         Closure { data, scope_id }
     }
 
-    pub(super) fn from_scope(data: Rc<SemanticModelData>, scope_id: u32) -> Option<Closure> {
-        let node = &data.scope_node_by_range[&data.scopes[scope_id as usize].range];
+    pub(super) fn from_scope(data: Rc<SemanticModelData>, scope_id: ScopeId) -> Option<Closure> {
+        let node = &data.scope_node_by_range[&data.scopes[scope_id.index()].range];
         match node.kind() {
             JsSyntaxKind::JS_FUNCTION_DECLARATION
             | JsSyntaxKind::JS_FUNCTION_EXPRESSION
@@ -246,7 +246,7 @@ impl Closure {
 
     /// Range of this [Closure]
     pub fn closure_range(&self) -> &TextRange {
-        &self.data.scopes[self.scope_id as usize].range
+        &self.data.scopes[self.scope_id.index()].range
     }
 
     /// Return all [Reference] this closure captures, not taking into
@@ -263,7 +263,7 @@ impl Closure {
     /// assert!(model.closure(function_f).all_captures(), &["a"]);
     /// ```
     pub fn all_captures(&self) -> impl Iterator<Item = Capture> {
-        let scope = &self.data.scopes[self.scope_id as usize];
+        let scope = &self.data.scopes[self.scope_id.index()];
 
         let scopes = scope.children.clone();
 
@@ -293,7 +293,7 @@ impl Closure {
     /// assert!(model.closure(function_f).children(), &["g"]);
     /// ```
     pub fn children(&self) -> impl Iterator<Item = Closure> {
-        let scope = &self.data.scopes[self.scope_id as usize];
+        let scope = &self.data.scopes[self.scope_id.index()];
         ChildrenIter {
             data: self.data.clone(),
             scopes: scope.children.clone(),

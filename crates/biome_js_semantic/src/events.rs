@@ -13,6 +13,8 @@ use std::collections::VecDeque;
 use std::mem;
 use JsSyntaxKind::*;
 
+use crate::ScopeId;
+
 /// Events emitted by the [SemanticEventExtractor].
 /// These events are later made into the Semantic Model.
 #[derive(Debug, Eq, PartialEq)]
@@ -25,8 +27,8 @@ pub enum SemanticEvent {
     /// - Type parameters
     DeclarationFound {
         range: TextRange,
-        scope_id: u32,
-        hoisted_scope_id: Option<u32>,
+        scope_id: ScopeId,
+        hoisted_scope_id: Option<ScopeId>,
     },
 
     /// Tracks where a symbol is read, but only if its declaration is before this reference.
@@ -35,7 +37,7 @@ pub enum SemanticEvent {
     Read {
         range: TextRange,
         declaration_at: TextSize,
-        scope_id: u32,
+        scope_id: ScopeId,
     },
 
     /// Tracks where a symbol is read, but only if its declaration was hoisted.
@@ -44,7 +46,7 @@ pub enum SemanticEvent {
     HoistedRead {
         range: TextRange,
         declaration_at: TextSize,
-        scope_id: u32,
+        scope_id: ScopeId,
     },
 
     /// Tracks where a symbol is written, but only if its declaration is before this reference.
@@ -53,7 +55,7 @@ pub enum SemanticEvent {
     Write {
         range: TextRange,
         declaration_at: TextSize,
-        scope_id: u32,
+        scope_id: ScopeId,
     },
 
     /// Tracks where a symbol is written, but only if its declaration was hoisted.
@@ -63,7 +65,7 @@ pub enum SemanticEvent {
     HoistedWrite {
         range: TextRange,
         declaration_at: TextSize,
-        scope_id: u32,
+        scope_id: ScopeId,
     },
 
     /// Tracks references that do no have any matching binding
@@ -78,8 +80,7 @@ pub enum SemanticEvent {
     ScopeStarted {
         /// Scope range
         range: TextRange,
-        scope_id: u32,
-        parent_scope_id: Option<u32>,
+        parent_scope_id: Option<ScopeId>,
         is_closure: bool,
     },
 
@@ -90,7 +91,7 @@ pub enum SemanticEvent {
     ScopeEnded {
         /// Scope range
         range: TextRange,
-        scope_id: u32,
+        scope_id: ScopeId,
     },
 
     /// Tracks where a symbol is exported.
@@ -156,7 +157,7 @@ pub struct SemanticEventExtractor {
     scopes: Vec<Scope>,
     /// Number of generated scopes
     /// This allows assigning a unique id to every scope.
-    scope_count: u32,
+    scope_count: usize,
     /// At any point this is the set of available bindings and their range in the current scope
     bindings: FxHashMap<BindingName, BindingInfo>,
     /// Type parameters bound in a `infer T` clause.
@@ -274,7 +275,7 @@ enum ScopeHoisting {
 
 #[derive(Debug)]
 struct Scope {
-    scope_id: u32,
+    scope_id: ScopeId,
     /// All bindings declared inside this scope
     bindings: Vec<BindingName>,
     /// References that still needs to be bound and will be solved at the end of the scope
@@ -780,11 +781,10 @@ impl SemanticEventExtractor {
     }
 
     fn push_scope(&mut self, range: TextRange, hoisting: ScopeHoisting, is_closure: bool) {
-        let scope_id = self.scope_count;
+        let scope_id = ScopeId::new(self.scope_count);
         self.scope_count += 1;
         self.stash.push_back(SemanticEvent::ScopeStarted {
             range,
-            scope_id,
             parent_scope_id: self.scopes.iter().last().map(|x| x.scope_id),
             is_closure,
         });
@@ -913,13 +913,13 @@ impl SemanticEventExtractor {
                                 SemanticEvent::Read {
                                     range,
                                     declaration_at,
-                                    scope_id: 0,
+                                    scope_id: ScopeId::new(0),
                                 }
                             } else {
                                 SemanticEvent::HoistedRead {
                                     range,
                                     declaration_at,
-                                    scope_id: 0,
+                                    scope_id: ScopeId::new(0),
                                 }
                             };
                             self.stash.push_back(event);
@@ -979,7 +979,7 @@ impl SemanticEventExtractor {
     ///
     /// This method when called inside the `f` scope will return
     /// the `f` scope index.
-    fn scope_index_to_hoist_declarations(&mut self, skip: u32) -> Option<u32> {
+    fn scope_index_to_hoist_declarations(&mut self, skip: u32) -> Option<ScopeId> {
         debug_assert!(self.scopes.len() > (skip as usize));
         // We should at least have the global scope
         // that do not hoist
@@ -999,7 +999,7 @@ impl SemanticEventExtractor {
     /// Push the binding `binding` into the hoisted scope if it exists, or into the current scope.
     fn push_binding(
         &mut self,
-        hoisted_scope_id: Option<u32>,
+        hoisted_scope_id: Option<ScopeId>,
         binding_name: BindingName,
         binding_info: BindingInfo,
     ) {
