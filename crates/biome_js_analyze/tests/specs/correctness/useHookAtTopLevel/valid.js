@@ -125,3 +125,8 @@ test('c', () => {
 
     expect(result.current).toBeDefined();
 });
+
+describe("foo", () => {
+  beforeEach(() => jest.useFakeTimers('legacy'));
+  afterEach(() => jest.useRealTimers());
+})
