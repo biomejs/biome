@@ -69,7 +69,7 @@ impl<'a> Binding<'a, GritQueryContext> for GritBinding<'a> {
         match self {
             Self::Node(node) => {
                 let source = SourceFile::new(SourceCode {
-                    text: node.text(),
+                    text: node.source(),
                     line_starts: None,
                 });
                 source.to_grit_range(node.text_trimmed_range())
