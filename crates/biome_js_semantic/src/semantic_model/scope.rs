@@ -107,12 +107,12 @@ impl Scope {
         other.ancestors().any(|s| s == *self)
     }
 
-    pub fn range(&self) -> &TextRange {
-        &self.data.scopes[self.id.index()].range
+    pub fn range(&self) -> TextRange {
+        self.data.scopes[self.id.index()].range
     }
 
     pub fn syntax(&self) -> &JsSyntaxNode {
-        &self.data.scope_node_by_range[self.range()]
+        &self.data.scope_node_by_range[&self.range()]
     }
 
     /// Return the [Closure] associated with this scope if
@@ -163,7 +163,7 @@ impl Iterator for ScopeBindingsIter {
     fn next(&mut self) -> Option<Self::Item> {
         // scope_id will always be a valid scope because
         // it was created by [Scope::bindings] method.
-        debug_assert!((self.scope_id.index()) < self.data.scopes.len());
+        debug_assert!(self.scope_id.index() < self.data.scopes.len());
 
         let id = *self.data.scopes[self.scope_id.index()]
             .bindings
@@ -182,7 +182,7 @@ impl ExactSizeIterator for ScopeBindingsIter {
     fn len(&self) -> usize {
         // scope_id will always be a valid scope because
         // it was created by [Scope::bindings] method.
-        debug_assert!((self.scope_id.index()) < self.data.scopes.len());
+        debug_assert!(self.scope_id.index() < self.data.scopes.len());
 
         self.data.scopes[self.scope_id.index()].bindings.len()
     }

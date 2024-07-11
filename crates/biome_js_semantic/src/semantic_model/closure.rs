@@ -105,15 +105,14 @@ impl Capture {
         }
     }
 
-    /// Returns the non trimmed text range of declaration of this capture.
+    /// Returns the trimmed text range of the declaration of this capture.
     /// This is equivalent, but faster, to:
     ///
     /// ```rs, ignore
-    /// self.declaration().text_trimmed_range()
+    /// self.binding().syntax().text_trimmed_range()
     /// ```
-    pub fn declaration_range(&self) -> &TextRange {
-        let binding = self.data.binding(self.binding_id);
-        &binding.range
+    pub fn declaration_range(&self) -> TextRange {
+        self.data.binding(self.binding_id).range
     }
 }
 
@@ -130,14 +129,15 @@ impl Iterator for AllCapturesIter {
     fn next(&mut self) -> Option<Self::Item> {
         'references: loop {
             while let Some(reference) = self.references.pop() {
-                let binding = &self.data.bindings[reference.binding_id().index()];
-                if self.closure_range.intersect(binding.range).is_none() {
+                let binding_id = reference.binding_id();
+                let binding = &self.data.binding(binding_id);
+                if !self.closure_range.contains(binding.range.start()) {
                     let reference = &binding.references[reference.index()];
                     return Some(Capture {
                         data: self.data.clone(),
-                        node: self.data.binding_node_by_start[&reference.range.start()].clone(), // TODO change node to store the range
+                        node: self.data.binding_node_by_start[&reference.range_start].clone(), // TODO change node to store the range
                         ty: CaptureType::ByReference,
-                        binding_id: binding.id,
+                        binding_id,
                     });
                 }
             }
@@ -229,7 +229,7 @@ pub struct Closure {
 impl Closure {
     pub(super) fn from_node(data: Rc<SemanticModelData>, node: &impl HasClosureAstNode) -> Closure {
         let closure_range = node.node_text_range();
-        let scope_id = data.scope(&closure_range);
+        let scope_id = data.scope(closure_range);
 
         Closure { data, scope_id }
     }
@@ -245,8 +245,8 @@ impl Closure {
     }
 
     /// Range of this [Closure]
-    pub fn closure_range(&self) -> &TextRange {
-        &self.data.scopes[self.scope_id.index()].range
+    pub fn closure_range(&self) -> TextRange {
+        self.data.scopes[self.scope_id.index()].range
     }
 
     /// Return all [Reference] this closure captures, not taking into
@@ -272,7 +272,7 @@ impl Closure {
 
         AllCapturesIter {
             data: self.data.clone(),
-            closure_range: *self.closure_range(),
+            closure_range: self.closure_range(),
             scopes,
             references,
         }

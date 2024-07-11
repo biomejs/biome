@@ -257,12 +257,12 @@ impl Reference {
     }
 
     /// Range of the referenced binding
-    const fn range(&self) -> &TextRange {
+    const fn range(&self) -> TextRange {
         match self {
             Self::Export(range)
             | Self::Read(range)
             | Self::AmbientRead(range)
-            | Self::Write(range) => range,
+            | Self::Write(range) => *range,
         }
     }
 }
@@ -849,7 +849,7 @@ impl SemanticEventExtractor {
                                 // because an import namespace is already in the root scope.
                                 self.stash.push_back(SemanticEvent::UnresolvedReference {
                                     is_read: !reference.is_write(),
-                                    range: *reference.range(),
+                                    range: reference.range(),
                                 });
                                 continue;
                             }
@@ -927,7 +927,7 @@ impl SemanticEventExtractor {
                         _ => {
                             self.stash.push_back(SemanticEvent::UnresolvedReference {
                                 is_read: !reference.is_write(),
-                                range: *reference.range(),
+                                range: reference.range(),
                             });
                         }
                     }
@@ -937,7 +937,7 @@ impl SemanticEventExtractor {
                 for reference in references {
                     self.stash.push_back(SemanticEvent::UnresolvedReference {
                         is_read: !reference.is_write(),
-                        range: *reference.range(),
+                        range: reference.range(),
                     });
                 }
             }

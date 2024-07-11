@@ -77,7 +77,7 @@ pub(crate) struct SemanticModelData {
     // Map to each by its range
     pub(crate) binding_node_by_start: FxHashMap<TextSize, JsSyntaxNode>,
     pub(crate) scope_node_by_range: FxHashMap<TextRange, JsSyntaxNode>,
-    // Maps any range start in the code to its bindings (usize points to bindings vec)
+    // Maps any range start in the code to its bindings
     pub(crate) declared_at_by_start: FxHashMap<TextSize, BindingId>,
     // List of all the declarations
     pub(crate) bindings: Vec<SemanticModelBindingData>,
@@ -92,21 +92,38 @@ pub(crate) struct SemanticModelData {
 }
 
 impl SemanticModelData {
-    pub(crate) fn binding(&self, index: BindingId) -> &SemanticModelBindingData {
-        &self.bindings[index.0 as usize]
+    pub(crate) fn binding(&self, binding_id: BindingId) -> &SemanticModelBindingData {
+        &self.bindings[binding_id.index()]
     }
 
-    pub(crate) fn reference(&self, index: ReferenceId) -> &SemanticModelReference {
-        let binding = &self.bindings[index.0.index()];
-        &binding.references[index.1 as usize]
+    pub(crate) fn global(&self, global_id: u32) -> &SemanticModelGlobalBindingData {
+        &self.globals[global_id as usize]
     }
 
-    pub(crate) fn next_reference(&self, index: ReferenceId) -> Option<&SemanticModelReference> {
-        let binding = &self.bindings[index.0.index()];
-        binding.references.get(index.1 as usize + 1)
+    pub(crate) fn unresolved_reference(
+        &self,
+        unresolved_reference_id: u32,
+    ) -> &SemanticModelUnresolvedReference {
+        &self.unresolved_references[unresolved_reference_id as usize]
     }
 
-    pub(crate) fn scope(&self, range: &TextRange) -> ScopeId {
+    pub(crate) fn reference(&self, reference_id: ReferenceId) -> &SemanticModelReference {
+        let binding = &self.binding(reference_id.binding_id());
+        &binding.references[reference_id.index()]
+    }
+
+    pub(crate) fn next_reference(&self, reference_id: ReferenceId) -> Option<ReferenceId> {
+        let binding = &self.binding(reference_id.binding_id());
+        let next_index = reference_id.index() + 1;
+        if next_index < binding.references.len() {
+            Some(ReferenceId::new(reference_id.binding_id(), next_index))
+        } else {
+            None
+        }
+    }
+
+    /// Returns the [ScopeId] which the syntax is part of.
+    pub(crate) fn scope(&self, range: TextRange) -> ScopeId {
         let start = range.start().into();
         let end = range.end().into();
         let scopes = self
@@ -122,7 +139,8 @@ impl SemanticModelData {
         }
     }
 
-    fn scope_hoisted_to(&self, range: &TextRange) -> Option<ScopeId> {
+    /// Returns the [ScopeId] which the specified syntax node was hoisted to, if any.
+    fn scope_hoisted_to(&self, range: TextRange) -> Option<ScopeId> {
         self.scope_hoisted_to_by_range.get(&range.start()).copied()
     }
 
@@ -197,7 +215,7 @@ impl SemanticModel {
     /// ```
     pub fn scope(&self, node: &JsSyntaxNode) -> Scope {
         let range = node.text_trimmed_range();
-        let id = self.data.scope(&range);
+        let id = self.data.scope(range);
         Scope {
             data: self.data.clone(),
             id,
@@ -208,7 +226,7 @@ impl SemanticModel {
     /// Can also be called from [AstNode]::scope_hoisted_to extension method.
     pub fn scope_hoisted_to(&self, node: &JsSyntaxNode) -> Option<Scope> {
         let range = node.text_trimmed_range();
-        let id = self.data.scope_hoisted_to(&range)?;
+        let id = self.data.scope_hoisted_to(range)?;
         Some(Scope {
             data: self.data.clone(),
             id,
@@ -216,10 +234,14 @@ impl SemanticModel {
     }
 
     pub fn all_bindings(&self) -> impl Iterator<Item = Binding> + '_ {
-        self.data.bindings.iter().map(|x| Binding {
-            data: self.data.clone(),
-            id: x.id,
-        })
+        self.data
+            .bindings
+            .iter()
+            .enumerate()
+            .map(|(index, _)| Binding {
+                data: self.data.clone(),
+                id: BindingId::new(index),
+            })
     }
 
     /// Returns the [Binding] of a reference.
