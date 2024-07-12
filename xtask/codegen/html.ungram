@@ -68,6 +68,7 @@ AnyHtmlElement =
 	HtmlSelfClosingElement
 	| HtmlElement
 	| HtmlContent
+	| VueTemplateInterpolation
 	| HtmlBogusElement
 
 
@@ -108,6 +109,7 @@ HtmlAttributeList = AnyHtmlAttribute*
 
 AnyHtmlAttribute =
 	HtmlAttribute
+	| AnyVueDirective
 	| HtmlBogusAttribute
 
 HtmlAttribute =
@@ -125,3 +127,76 @@ HtmlAttributeInitializerClause =
 HtmlString = value: 'html_string_literal'
 HtmlName = value: 'html_literal'
 HtmlContent = value: 'html_literal'
+
+// ==================================
+// Vue Specific
+// ==================================
+
+AnyVueDirective = VueDirective | VueVBindShorthand | VueVOnShorthand
+
+// Its possible to have custom directives: https://vuejs.org/guide/reusability/custom-directives
+VueDirective =
+	'v-'
+	name: HtmlName
+	argument: VueDirectiveArgument
+	modifier: VueDirectiveModifierList
+	value: VueDirectiveValue
+
+// v-bind:foo="5"
+//       ^^^^
+VueDirectiveArgument =
+	':'
+	AnyVueDirectiveArgument
+
+AnyVueDirectiveArgument =
+	VueDirectiveArgumentStatic
+	| VueDirectiveArgumentDynamic
+
+// v-bind:foo="5"
+//        ^^^
+VueDirectiveArgumentStatic =
+	argument: HtmlName
+
+// v-bind:[foo]="5"
+//        ^^^^^
+VueDirectiveArgumentDynamic =
+	'['
+	argument: HtmlName
+	']'
+
+// Directives can have multiple modifiers
+// https://vuejs.org/guide/reusability/custom-directives
+// v-example:foo.bar.baz="handler"
+//              ^^^^^^^^
+VueDirectiveModifierList = VueDirectiveModifier*
+
+// @click.prevent="handler"
+//       ^^^^^^^^
+VueDirectiveModifier =
+	'.'
+	modifier: HtmlName
+
+// v-bind:foo="5"
+//           ^^^^
+VueDirectiveValue =
+	'='
+	value: HtmlString // TODO: This should be a AnyJsExpression, surrounded by double quotes. Unclear how to do this, since it's defined in the JS grammar
+
+// :foo="5"
+VueVBindShorthand =
+	':'
+	argument: VueDirectiveArgument
+	modifier: VueDirectiveModifierList
+	value: VueDirectiveValue
+
+// @click="handler"
+VueVOnShorthand =
+	'@'
+	argument: VueDirectiveArgument
+	modifier: VueDirectiveModifierList
+	value: VueDirectiveValue
+
+VueTemplateInterpolation =
+	'{{'
+	value: HtmlContent // TODO: This should be a AnyJsExpression, surrounded by double quotes. Unclear how to do this, since it's defined in the JS grammar
+	'}}'

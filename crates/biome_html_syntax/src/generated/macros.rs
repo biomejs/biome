@@ -61,6 +61,44 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::HtmlString::new_unchecked(node) };
                     $body
                 }
+                $crate::HtmlSyntaxKind::VUE_DIRECTIVE => {
+                    let $pattern = unsafe { $crate::VueDirective::new_unchecked(node) };
+                    $body
+                }
+                $crate::HtmlSyntaxKind::VUE_DIRECTIVE_ARGUMENT => {
+                    let $pattern = unsafe { $crate::VueDirectiveArgument::new_unchecked(node) };
+                    $body
+                }
+                $crate::HtmlSyntaxKind::VUE_DIRECTIVE_ARGUMENT_DYNAMIC => {
+                    let $pattern =
+                        unsafe { $crate::VueDirectiveArgumentDynamic::new_unchecked(node) };
+                    $body
+                }
+                $crate::HtmlSyntaxKind::VUE_DIRECTIVE_ARGUMENT_STATIC => {
+                    let $pattern =
+                        unsafe { $crate::VueDirectiveArgumentStatic::new_unchecked(node) };
+                    $body
+                }
+                $crate::HtmlSyntaxKind::VUE_DIRECTIVE_MODIFIER => {
+                    let $pattern = unsafe { $crate::VueDirectiveModifier::new_unchecked(node) };
+                    $body
+                }
+                $crate::HtmlSyntaxKind::VUE_DIRECTIVE_VALUE => {
+                    let $pattern = unsafe { $crate::VueDirectiveValue::new_unchecked(node) };
+                    $body
+                }
+                $crate::HtmlSyntaxKind::VUE_TEMPLATE_INTERPOLATION => {
+                    let $pattern = unsafe { $crate::VueTemplateInterpolation::new_unchecked(node) };
+                    $body
+                }
+                $crate::HtmlSyntaxKind::VUE_V_BIND_SHORTHAND => {
+                    let $pattern = unsafe { $crate::VueVBindShorthand::new_unchecked(node) };
+                    $body
+                }
+                $crate::HtmlSyntaxKind::VUE_V_ON_SHORTHAND => {
+                    let $pattern = unsafe { $crate::VueVOnShorthand::new_unchecked(node) };
+                    $body
+                }
                 $crate::HtmlSyntaxKind::HTML_BOGUS => {
                     let $pattern = unsafe { $crate::HtmlBogus::new_unchecked(node) };
                     $body
@@ -79,6 +117,10 @@ macro_rules! map_syntax_node {
                 }
                 $crate::HtmlSyntaxKind::HTML_ELEMENT_LIST => {
                     let $pattern = unsafe { $crate::HtmlElementList::new_unchecked(node) };
+                    $body
+                }
+                $crate::HtmlSyntaxKind::VUE_DIRECTIVE_MODIFIER_LIST => {
+                    let $pattern = unsafe { $crate::VueDirectiveModifierList::new_unchecked(node) };
                     $body
                 }
                 _ => unreachable!(),
