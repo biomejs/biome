@@ -41,6 +41,9 @@
     "type": "opencollective",
     "url": "https://opencollective.com/biome"
   },
+  "publishConfig": {
+    "provenance": true
+  },
   "optionalDependencies": {
     "@biomejs/cli-win32-x64": "1.8.3",
     "@biomejs/cli-win32-arm64": "1.8.3",
