@@ -114,6 +114,13 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
   }
 }
 ```
+- Fix [#3410](https://github.com/biomejs/biome/issues/3410) by correctly parsing break statements containing keywords. 
+  ```js
+  out: while (true) {
+    break out;
+  }
+  ```
+  Contributed by @ah-yu
 
 ## v1.8.3 (2024-06-27)
 
