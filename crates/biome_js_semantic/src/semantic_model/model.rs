@@ -72,9 +72,9 @@ pub(crate) struct SemanticModelData {
     // All scopes of this model
     pub(crate) scopes: Vec<SemanticModelScopeData>,
     pub(crate) scope_by_range: rust_lapper::Lapper<u32, ScopeId>,
-    // Maps the start of a node range to a scope id
+    // Maps the start of a node range to its scope id
     pub(crate) scope_hoisted_to_by_range: FxHashMap<TextSize, ScopeId>,
-    // Map to each by its range
+    /// Binding and reference nodes indexed by their range start
     pub(crate) binding_node_by_start: FxHashMap<TextSize, JsSyntaxNode>,
     pub(crate) scope_node_by_range: FxHashMap<TextRange, JsSyntaxNode>,
     // Maps any range start in the code to its bindings

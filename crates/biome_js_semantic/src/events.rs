@@ -85,17 +85,12 @@ pub enum SemanticEvent {
     },
 
     /// Tracks where a scope ends
-    /// Generated for:
-    /// - Blocks
-    /// - Function body
     ScopeEnded {
         /// Scope range
         range: TextRange,
-        scope_id: ScopeId,
     },
 
     /// Tracks where a symbol is exported.
-    /// The range points to the binding that is being exported.
     Export {
         range: TextRange,
         declaration_at: TextSize,
@@ -107,7 +102,7 @@ impl SemanticEvent {
         match self {
             Self::DeclarationFound { range, .. }
             | Self::ScopeStarted { range, .. }
-            | Self::ScopeEnded { range, .. }
+            | Self::ScopeEnded { range }
             | Self::Read { range, .. }
             | Self::HoistedRead { range, .. }
             | Self::Write { range, .. }
@@ -190,7 +185,7 @@ struct BindingInfo {
     /// range of the name
     range: TextRange,
     /// Kind of the declaration,
-    /// or in the acse of a bogus declaration, the kind of the name
+    /// or in the case of a bogus declaration, the kind of the name
     declaration_kind: JsSyntaxKind,
 }
 
@@ -276,13 +271,13 @@ enum ScopeHoisting {
 #[derive(Debug)]
 struct Scope {
     scope_id: ScopeId,
-    /// All bindings declared inside this scope
+    /// All bindings declared inside this scope.
     bindings: Vec<BindingName>,
-    /// References that still needs to be bound and will be solved at the end of the scope
+    /// References that still needs to be bound and will be solved at the end of the scope.
     references: FxHashMap<BindingName, Vec<Reference>>,
-    /// All bindings that where shadowed and will be restored after this scope ends.
+    /// All bindings that were shadowed and will be restored after this scope ends.
     shadowed: Vec<(BindingName, BindingInfo)>,
-    /// If this scope allows declarations to be hoisted to parent scope or not
+    /// If this scope allows declarations to be hoisted to parent scope or not.
     hoisting: ScopeHoisting,
 }
 
@@ -290,8 +285,8 @@ impl SemanticEventExtractor {
     /// See [SemanticEvent] for a more detailed description of which events [JsSyntaxNode] generates.
     #[inline]
     pub fn enter(&mut self, node: &JsSyntaxNode) {
-        // If you push a scope for a given node type, don't forget to also update `Self::leave`.
-        // You should also edit [SemanticModelBuilder::push_node].
+        // IMPORTANT: If you push a scope for a given node type, don't forget to
+        // update `Self::leave`. You should also edit [SemanticModelBuilder::push_node].
         match node.kind() {
             JS_IDENTIFIER_BINDING
             | TS_IDENTIFIER_BINDING
@@ -649,10 +644,10 @@ impl SemanticEventExtractor {
                                     );
                                 }
                             }
-                            // ignore binding `<X>` from `import().<X>`
+                            // Ignore binding `<X>` from `import().<X>`.
                             Some(TS_IMPORT_TYPE_QUALIFIER) => {}
                             Some(TS_TYPEOF_TYPE) => {
-                                // a `typeof` type expression refers a value.
+                                // A `typeof` type expression refers a value.
                                 // It can also refer to an imported value as a type.
                                 // We handle this particular case in `pop_scope` (unresolved reference)
                                 self.push_reference(
@@ -951,10 +946,8 @@ impl SemanticEventExtractor {
         // Restore shadowed bindings
         self.bindings.extend(scope.shadowed);
 
-        self.stash.push_back(SemanticEvent::ScopeEnded {
-            range: scope_range,
-            scope_id: scope.scope_id,
-        });
+        self.stash
+            .push_back(SemanticEvent::ScopeEnded { range: scope_range });
     }
 
     fn current_scope_mut(&mut self) -> &mut Scope {
@@ -963,8 +956,8 @@ impl SemanticEventExtractor {
         self.scopes.last_mut().unwrap()
     }
 
-    /// Finds the scope where declarations that are hoisted
-    /// will be declared at. For example:
+    /// Finds the scope where declarations that are hoisted will be declared at.
+    /// For example:
     ///
     /// ```js
     /// function f() {
@@ -996,7 +989,7 @@ impl SemanticEventExtractor {
             .filter(|scope_id| self.current_scope_mut().scope_id != *scope_id)
     }
 
-    /// Push the binding `binding` into the hoisted scope if it exists, or into the current scope.
+    /// Push `binding` into the hoisted scope if it exists, or into the current scope.
     fn push_binding(
         &mut self,
         hoisted_scope_id: Option<ScopeId>,

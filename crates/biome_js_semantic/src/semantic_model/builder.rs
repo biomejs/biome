@@ -11,6 +11,7 @@ use std::collections::hash_map::Entry;
 /// [std::sync::Arc] and stored inside the [SemanticModel].
 pub struct SemanticModelBuilder {
     root: AnyJsRoot,
+    /// Binding and reference nodes indexed by their range start
     binding_node_by_start: FxHashMap<TextSize, JsSyntaxNode>,
     scope_node_by_range: FxHashMap<TextRange, JsSyntaxNode>,
     globals: Vec<SemanticModelGlobalBindingData>,
@@ -19,9 +20,9 @@ pub struct SemanticModelBuilder {
     scope_range_by_start: FxHashMap<TextSize, BTreeSet<Interval<u32, ScopeId>>>,
     scope_hoisted_to_by_range: FxHashMap<TextSize, ScopeId>,
     bindings: Vec<SemanticModelBindingData>,
-    /// maps a binding range start to its index inside SemanticModelBuilder::bindings vec
+    /// maps a binding range start to its index inside [SemanticModelBuilder::bindings] vec
     bindings_by_start: FxHashMap<TextSize, BindingId>,
-    /// maps a reference range start to its bindings. u32 points to SemanticModelBuilder::bindings vec
+    /// maps a reference range start to its binding index inside [SemanticModelBuilder::bindings] vec
     declared_at_by_start: FxHashMap<TextSize, BindingId>,
     exported: FxHashSet<TextSize>,
     unresolved_references: Vec<SemanticModelUnresolvedReference>,
