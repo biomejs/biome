@@ -1,5 +1,6 @@
 ---
 source: crates/biome_css_parser/tests/spec_test.rs
+assertion_line: 169
 expression: snapshot
 ---
 ## Input
@@ -104,7 +105,7 @@ at_rule_value_disabled.css:1:2 parse ━━━━━━━━━━━━━━�
     2 │ @value common-gradient: transparent 75%, var(--ring-line-color) 75%, currentColor 79%;
     3 │ 
   
-  i You can enable @value at-rule parsing by setting the `css_modules` option to `true` in your configuration file.
+  i You can enable @value at-rule parsing by setting the `css.parser.cssModules` option to `true` in your configuration file.
   
 at_rule_value_disabled.css:2:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -115,6 +116,6 @@ at_rule_value_disabled.css:2:2 parse ━━━━━━━━━━━━━━�
       │  ^^^^^
     3 │ 
   
-  i You can enable @value at-rule parsing by setting the `css_modules` option to `true` in your configuration file.
+  i You can enable @value at-rule parsing by setting the `css.parser.cssModules` option to `true` in your configuration file.
   
 ```
