@@ -24,7 +24,7 @@ pub(crate) fn is_at_pseudo_class_function_selector(p: &mut CssParser) -> bool {
 /// Parses a pseudo-class function selector for CSS Modules.
 ///
 /// This function parses a pseudo-class function selector, specifically `:local` or `:global`, in CSS Modules.
-/// If the `css_modules` option is not enabled, it generates a diagnostic error and skips the selector.
+/// If the `css.parser.cssModules` option is not enabled, it generates a diagnostic error and skips the selector.
 /// ```css
 /// :local(.className) {
 ///     color: red;
