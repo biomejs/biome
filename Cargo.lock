@@ -535,6 +535,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "biome_graphql_semantic"
+version = "0.0.0"
+dependencies = [
+ "biome_graphql_parser",
+ "biome_graphql_syntax",
+ "biome_rowan",
+ "rustc-hash",
+]
+
+[[package]]
 name = "biome_graphql_syntax"
 version = "0.1.0"
 dependencies = [
