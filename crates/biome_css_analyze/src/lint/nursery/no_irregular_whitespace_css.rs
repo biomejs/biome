@@ -40,7 +40,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoIrregularWhitespaceCss {
-        version: "1.8.0",
+        version: "next",
         name: "noIrregularWhitespaceCss",
         language: "css",
         recommended: false,
@@ -60,10 +60,6 @@ impl Rule for NoIrregularWhitespaceCss {
     }
 
     fn diagnostic(_: &RuleContext<Self>, range: &Self::State) -> Option<RuleDiagnostic> {
-        //
-        // Read our guidelines to write great diagnostics:
-        // https://docs.rs/biome_analyze/latest/biome_analyze/#what-a-rule-should-say-to-the-user
-        //
         Some(
             RuleDiagnostic::new(
                 rule_category!(),
@@ -81,7 +77,7 @@ impl Rule for NoIrregularWhitespaceCss {
 
 fn get_irregular_whitespace(node: &AnyCssRule) -> Vec<TextRange> {
     let syntax = node.syntax();
-    let mut all_whitespaces_token: Vec<SyntaxToken<CssLanguage>> = vec![];
+    let mut all_whitespaces_token: Vec<TextRange> = vec![];
     let matches_irregular_whitespace = |token: &SyntaxToken<CssLanguage>| {
         !token.has_leading_comments()
             && !token.has_trailing_comments()
@@ -94,12 +90,9 @@ fn get_irregular_whitespace(node: &AnyCssRule) -> Vec<TextRange> {
 
     for token in syntax.descendants_tokens(Direction::Next) {
         if matches_irregular_whitespace(&token) {
-            all_whitespaces_token.push(token);
+            all_whitespaces_token.push(token.text_range());
         }
     }
 
     all_whitespaces_token
-        .iter()
-        .map(|token| token.text_range())
-        .collect::<Vec<TextRange>>()
 }
