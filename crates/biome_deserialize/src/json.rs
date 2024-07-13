@@ -6,7 +6,7 @@ use crate::{
 use biome_diagnostics::{DiagnosticExt, Error};
 use biome_json_parser::{parse_json, JsonParserOptions};
 use biome_json_syntax::{AnyJsonValue, JsonMemberName, JsonRoot, T};
-use biome_rowan::{AstNode, AstSeparatedList};
+use biome_rowan::{AstNode, AstSeparatedList, TokenText};
 
 /// It attempts to parse and deserialize a source file in JSON. Diagnostics from the parse phase
 /// are consumed and joined with the diagnostics emitted during the deserialization.
@@ -119,8 +119,8 @@ impl DeserializableValue for AnyJsonValue {
                 visitor.visit_map(members, range, name, diagnostics)
             }
             AnyJsonValue::JsonStringValue(value) => {
-                let value = value.inner_string_text().ok()?;
-                visitor.visit_str(Text(value), range, name, diagnostics)
+                let value = unescape_json(value.inner_string_text().ok()?);
+                visitor.visit_str(value, range, name, diagnostics)
             }
         }
     }
@@ -245,12 +245,25 @@ impl DeserializableValue for JsonMemberName {
         name: &str,
         diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<V::Output> {
-        let value = self.inner_string_text().ok()?;
-        visitor.visit_str(Text(value), AstNode::range(self), name, diagnostics)
+        let value = unescape_json(self.inner_string_text().ok()?);
+        visitor.visit_str(value, AstNode::range(self), name, diagnostics)
     }
 
     fn visitable_type(&self) -> Option<VisitableType> {
         Some(VisitableType::STR)
+    }
+}
+
+/// Returns an unescaped version of `s`.
+/// If nothing is escaped, then `s` is returned without any allocation.
+/// If at least one character is escaped, then a string is allocated and holds the unescaped string.
+fn unescape_json(s: TokenText) -> Text {
+    if s.text().bytes().any(|c| c == b'\\') {
+        // Searching and replacing at the same time should be more optimal.
+        // However, strings are expected to be small and escapees are expected to be rare.
+        Text::Owned(s.text().replace(r"\\", r"\"))
+    } else {
+        Text::Borrowed(s)
     }
 }
 

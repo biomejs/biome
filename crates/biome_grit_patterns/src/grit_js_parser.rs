@@ -1,10 +1,29 @@
-use crate::{grit_analysis_ext::GritAnalysisExt, grit_tree::GritTargetTree};
+use crate::{
+    grit_analysis_ext::GritAnalysisExt, grit_target_language::GritTargetParser,
+    grit_tree::GritTargetTree,
+};
 use biome_js_parser::{parse, JsParserOptions};
 use biome_js_syntax::JsFileSource;
+use biome_parser::AnyParse;
 use grit_util::{AnalysisLogs, FileOrigin, Parser, SnippetTree};
 use std::path::Path;
 
 pub struct GritJsParser;
+
+impl GritTargetParser for GritJsParser {
+    fn from_cached_parse_result(
+        &self,
+        parse: &AnyParse,
+        path: Option<&Path>,
+        logs: &mut AnalysisLogs,
+    ) -> Option<GritTargetTree> {
+        for diagnostic in parse.diagnostics() {
+            logs.push(diagnostic.to_log(path));
+        }
+
+        Some(GritTargetTree::new(parse.syntax().into()))
+    }
+}
 
 impl Parser for GritJsParser {
     type Tree = GritTargetTree;

@@ -60,6 +60,7 @@ Linter:
   JavaScript enabled:           true
   JSON enabled:                 true
   CSS enabled:                  false
+  GraphQL enabled:              false
   Recommended:                  false
   All:                          false
   Enabled rules:

@@ -271,6 +271,7 @@ pub const CSS_KINDS_SRC: KindsSrc = KindsSrc {
         "WHITESPACE",
         "COMMENT",
         "MULTILINE_COMMENT",
+        "GRIT_METAVARIABLE",
     ],
     nodes: &[
         "CSS_ROOT",
@@ -320,6 +321,8 @@ pub const CSS_KINDS_SRC: KindsSrc = KindsSrc {
         "CSS_COMPLEX_SELECTOR",
         "CSS_COMPOUND_SELECTOR",
         "CSS_SUB_SELECTOR_LIST",
+        "CSS_NESTED_SELECTOR_LIST",
+        "CSS_NESTED_SELECTOR",
         "CSS_ID_SELECTOR",
         "CSS_CLASS_SELECTOR",
         "CSS_TYPE_SELECTOR",
@@ -503,5 +506,7 @@ pub const CSS_KINDS_SRC: KindsSrc = KindsSrc {
         "CSS_BOGUS_CUSTOM_IDENTIFIER",
         "CSS_BOGUS_KEYFRAMES_NAME",
         "CSS_BOGUS_UNICODE_RANGE_VALUE",
+        // Grit metavariable
+        "CSS_GRIT_METAVARIABLE",
     ],
 };

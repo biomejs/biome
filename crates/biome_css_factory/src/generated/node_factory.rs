@@ -257,23 +257,22 @@ impl CssComposesPropertyValueBuilder {
         ))
     }
 }
-pub fn css_compound_selector(sub_selectors: CssSubSelectorList) -> CssCompoundSelectorBuilder {
+pub fn css_compound_selector(
+    nesting_selectors: CssNestedSelectorList,
+    sub_selectors: CssSubSelectorList,
+) -> CssCompoundSelectorBuilder {
     CssCompoundSelectorBuilder {
+        nesting_selectors,
         sub_selectors,
-        nesting_selector_token: None,
         simple_selector: None,
     }
 }
 pub struct CssCompoundSelectorBuilder {
+    nesting_selectors: CssNestedSelectorList,
     sub_selectors: CssSubSelectorList,
-    nesting_selector_token: Option<SyntaxToken>,
     simple_selector: Option<AnyCssSimpleSelector>,
 }
 impl CssCompoundSelectorBuilder {
-    pub fn with_nesting_selector_token(mut self, nesting_selector_token: SyntaxToken) -> Self {
-        self.nesting_selector_token = Some(nesting_selector_token);
-        self
-    }
     pub fn with_simple_selector(mut self, simple_selector: AnyCssSimpleSelector) -> Self {
         self.simple_selector = Some(simple_selector);
         self
@@ -282,8 +281,7 @@ impl CssCompoundSelectorBuilder {
         CssCompoundSelector::unwrap_cast(SyntaxNode::new_detached(
             CssSyntaxKind::CSS_COMPOUND_SELECTOR,
             [
-                self.nesting_selector_token
-                    .map(|token| SyntaxElement::Token(token)),
+                Some(SyntaxElement::Node(self.nesting_selectors.into_syntax())),
                 self.simple_selector
                     .map(|token| SyntaxElement::Node(token.into_syntax())),
                 Some(SyntaxElement::Node(self.sub_selectors.into_syntax())),
@@ -737,6 +735,12 @@ pub fn css_generic_property(
             Some(SyntaxElement::Token(colon_token)),
             Some(SyntaxElement::Node(value.into_syntax())),
         ],
+    ))
+}
+pub fn css_grit_metavariable(value_token: SyntaxToken) -> CssGritMetavariable {
+    CssGritMetavariable::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_GRIT_METAVARIABLE,
+        [Some(SyntaxElement::Token(value_token))],
     ))
 }
 pub fn css_id_selector(hash_token: SyntaxToken, name: CssCustomIdentifier) -> CssIdSelector {
@@ -1202,6 +1206,12 @@ pub fn css_nested_qualified_rule(
             Some(SyntaxElement::Node(prelude.into_syntax())),
             Some(SyntaxElement::Node(block.into_syntax())),
         ],
+    ))
+}
+pub fn css_nested_selector(amp_token: SyntaxToken) -> CssNestedSelector {
+    CssNestedSelector::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_NESTED_SELECTOR,
+        [Some(SyntaxElement::Token(amp_token))],
     ))
 }
 pub fn css_nth_offset(sign_token: SyntaxToken, value: CssNumber) -> CssNthOffset {
@@ -2536,6 +2546,18 @@ where
                 Some(separators.next()?.into())
             }
         }),
+    ))
+}
+pub fn css_nested_selector_list<I>(items: I) -> CssNestedSelectorList
+where
+    I: IntoIterator<Item = CssNestedSelector>,
+    I::IntoIter: ExactSizeIterator,
+{
+    CssNestedSelectorList::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_NESTED_SELECTOR_LIST,
+        items
+            .into_iter()
+            .map(|item| Some(item.into_syntax().into())),
     ))
 }
 pub fn css_page_at_rule_item_list<I>(items: I) -> CssPageAtRuleItemList

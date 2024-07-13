@@ -1,7 +1,9 @@
 use std::borrow::Cow;
 use std::ffi::OsStr;
 
-use super::{CodeActionsParams, DocumentFileSource, ExtensionHandler, ParseResult};
+use super::{
+    CodeActionsParams, DocumentFileSource, ExtensionHandler, ParseResult, SearchCapabilities,
+};
 use crate::configuration::to_analyzer_rules;
 use crate::file_handlers::DebugCapabilities;
 use crate::file_handlers::{
@@ -167,6 +169,7 @@ impl ExtensionHandler for JsonFileHandler {
                 format_range: Some(format_range),
                 format_on_type: Some(format_on_type),
             },
+            search: SearchCapabilities { search: None },
         }
     }
 }
@@ -197,15 +200,9 @@ fn parse(
         options
     };
     let parse = biome_json_parser::parse_json_with_cache(text, cache, options);
-    let root = parse.syntax();
-    let diagnostics = parse.into_diagnostics();
 
     ParseResult {
-        any_parse: AnyParse::new(
-            // SAFETY: the parser should always return a root node
-            root.as_send().unwrap(),
-            diagnostics,
-        ),
+        any_parse: parse.into(),
         language: Some(file_source),
     }
 }

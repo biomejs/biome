@@ -217,6 +217,10 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::CssGenericProperty::new_unchecked(node) };
                     $body
                 }
+                $crate::CssSyntaxKind::CSS_GRIT_METAVARIABLE => {
+                    let $pattern = unsafe { $crate::CssGritMetavariable::new_unchecked(node) };
+                    $body
+                }
                 $crate::CssSyntaxKind::CSS_ID_SELECTOR => {
                     let $pattern = unsafe { $crate::CssIdSelector::new_unchecked(node) };
                     $body
@@ -352,6 +356,10 @@ macro_rules! map_syntax_node {
                 }
                 $crate::CssSyntaxKind::CSS_NESTED_QUALIFIED_RULE => {
                     let $pattern = unsafe { $crate::CssNestedQualifiedRule::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::CSS_NESTED_SELECTOR => {
+                    let $pattern = unsafe { $crate::CssNestedSelector::new_unchecked(node) };
                     $body
                 }
                 $crate::CssSyntaxKind::CSS_NTH_OFFSET => {
@@ -854,6 +862,10 @@ macro_rules! map_syntax_node {
                 }
                 $crate::CssSyntaxKind::CSS_MEDIA_QUERY_LIST => {
                     let $pattern = unsafe { $crate::CssMediaQueryList::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::CSS_NESTED_SELECTOR_LIST => {
+                    let $pattern = unsafe { $crate::CssNestedSelectorList::new_unchecked(node) };
                     $body
                 }
                 $crate::CssSyntaxKind::CSS_PAGE_AT_RULE_ITEM_LIST => {

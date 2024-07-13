@@ -1,5 +1,6 @@
 ---
 source: crates/biome_css_parser/tests/spec_test.rs
+assertion_line: 169
 expression: snapshot
 ---
 ## Input
@@ -29,7 +30,7 @@ CssRoot {
         CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
-                    nesting_selector_token: missing (optional),
+                    nesting_selectors: CssNestedSelectorList [],
                     simple_selector: missing (optional),
                     sub_selectors: CssSubSelectorList [
                         CssClassSelector {
@@ -68,7 +69,7 @@ CssRoot {
         CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
-                    nesting_selector_token: missing (optional),
+                    nesting_selectors: CssNestedSelectorList [],
                     simple_selector: missing (optional),
                     sub_selectors: CssSubSelectorList [
                         CssClassSelector {
@@ -113,7 +114,7 @@ CssRoot {
         CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
-                    nesting_selector_token: missing (optional),
+                    nesting_selectors: CssNestedSelectorList [],
                     simple_selector: missing (optional),
                     sub_selectors: CssSubSelectorList [
                         CssClassSelector {
@@ -169,7 +170,7 @@ CssRoot {
     0: CSS_QUALIFIED_RULE@0..26
       0: CSS_SELECTOR_LIST@0..3
         0: CSS_COMPOUND_SELECTOR@0..3
-          0: (empty)
+          0: CSS_NESTED_SELECTOR_LIST@0..0
           1: (empty)
           2: CSS_SUB_SELECTOR_LIST@0..3
             0: CSS_CLASS_SELECTOR@0..3
@@ -194,7 +195,7 @@ CssRoot {
     1: CSS_QUALIFIED_RULE@26..88
       0: CSS_SELECTOR_LIST@26..44
         0: CSS_COMPOUND_SELECTOR@26..44
-          0: (empty)
+          0: CSS_NESTED_SELECTOR_LIST@26..26
           1: (empty)
           2: CSS_SUB_SELECTOR_LIST@26..44
             0: CSS_CLASS_SELECTOR@26..44
@@ -223,7 +224,7 @@ CssRoot {
     2: CSS_QUALIFIED_RULE@88..149
       0: CSS_SELECTOR_LIST@88..106
         0: CSS_COMPOUND_SELECTOR@88..106
-          0: (empty)
+          0: CSS_NESTED_SELECTOR_LIST@88..88
           1: (empty)
           2: CSS_SUB_SELECTOR_LIST@88..106
             0: CSS_CLASS_SELECTOR@88..106
@@ -266,7 +267,7 @@ composes_error_disabled.css:2:2 parse ━━━━━━━━━━━━━━
     3 │ }
     4 │ 
   
-  i You can enable `composes` declaration parsing by setting the `css_modules` option to `true` in your configuration file.
+  i You can enable `composes` declaration parsing by setting the `css.parser.cssModules` option to `true` in your configuration file.
   
 composes_error_disabled.css:6:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -278,7 +279,7 @@ composes_error_disabled.css:6:2 parse ━━━━━━━━━━━━━━
     7 │ }
     8 │ 
   
-  i You can enable `composes` declaration parsing by setting the `css_modules` option to `true` in your configuration file.
+  i You can enable `composes` declaration parsing by setting the `css.parser.cssModules` option to `true` in your configuration file.
   
 composes_error_disabled.css:10:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -290,6 +291,6 @@ composes_error_disabled.css:10:2 parse ━━━━━━━━━━━━━�
     11 │ }
     12 │ 
   
-  i You can enable `composes` declaration parsing by setting the `css_modules` option to `true` in your configuration file.
+  i You can enable `composes` declaration parsing by setting the `css.parser.cssModules` option to `true` in your configuration file.
   
 ```

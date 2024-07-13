@@ -8,6 +8,7 @@ pub mod no_duplicate_else_if;
 pub mod no_dynamic_namespace_import_access;
 pub mod no_evolving_types;
 pub mod no_exported_imports;
+pub mod no_irregular_whitespace;
 pub mod no_label_without_control;
 pub mod no_misplaced_assertion;
 pub mod no_react_specific_props;
@@ -30,6 +31,7 @@ pub mod use_import_restrictions;
 pub mod use_number_to_fixed_digits_argument;
 pub mod use_semantic_elements;
 pub mod use_sorted_classes;
+pub mod use_strict_mode;
 pub mod use_throw_new_error;
 pub mod use_throw_only_error;
 pub mod use_top_level_regex;
@@ -45,6 +47,7 @@ declare_lint_group! {
             self :: no_dynamic_namespace_import_access :: NoDynamicNamespaceImportAccess ,
             self :: no_evolving_types :: NoEvolvingTypes ,
             self :: no_exported_imports :: NoExportedImports ,
+            self :: no_irregular_whitespace :: NoIrregularWhitespace ,
             self :: no_label_without_control :: NoLabelWithoutControl ,
             self :: no_misplaced_assertion :: NoMisplacedAssertion ,
             self :: no_react_specific_props :: NoReactSpecificProps ,
@@ -67,6 +70,7 @@ declare_lint_group! {
             self :: use_number_to_fixed_digits_argument :: UseNumberToFixedDigitsArgument ,
             self :: use_semantic_elements :: UseSemanticElements ,
             self :: use_sorted_classes :: UseSortedClasses ,
+            self :: use_strict_mode :: UseStrictMode ,
             self :: use_throw_new_error :: UseThrowNewError ,
             self :: use_throw_only_error :: UseThrowOnlyError ,
             self :: use_top_level_regex :: UseTopLevelRegex ,

@@ -22,7 +22,7 @@ impl CanBeImportedExported for JsIdentifierBinding {
     type Result = bool;
 
     fn is_exported(&self, model: &SemanticModel) -> Self::Result {
-        let range = self.syntax().text_range();
+        let range = self.syntax().text_trimmed_range();
         model.data.is_exported(range)
     }
 
@@ -35,7 +35,7 @@ impl CanBeImportedExported for TsIdentifierBinding {
     type Result = bool;
 
     fn is_exported(&self, model: &SemanticModel) -> Self::Result {
-        let range = self.syntax().text_range();
+        let range = self.syntax().text_trimmed_range();
         model.data.is_exported(range)
     }
 
@@ -48,7 +48,7 @@ impl CanBeImportedExported for AnyJsIdentifierBinding {
     type Result = bool;
 
     fn is_exported(&self, model: &SemanticModel) -> Self::Result {
-        let range = self.syntax().text_range();
+        let range = self.syntax().text_trimmed_range();
         model.data.is_exported(range)
     }
 
@@ -61,7 +61,7 @@ impl<T: HasDeclarationAstNode> CanBeImportedExported for T {
     type Result = Option<bool>;
 
     fn is_exported(&self, model: &SemanticModel) -> Self::Result {
-        let range = self.binding(model)?.syntax().text_range();
+        let range = self.binding(model)?.syntax().text_trimmed_range();
         Some(model.data.is_exported(range))
     }
 

@@ -7,7 +7,7 @@ pub(crate) struct FormatCssCompoundSelector;
 impl FormatNodeRule<CssCompoundSelector> for FormatCssCompoundSelector {
     fn fmt_fields(&self, node: &CssCompoundSelector, f: &mut CssFormatter) -> FormatResult<()> {
         let CssCompoundSelectorFields {
-            nesting_selector_token,
+            nesting_selectors,
             simple_selector,
             sub_selectors,
         } = node.as_fields();
@@ -15,7 +15,7 @@ impl FormatNodeRule<CssCompoundSelector> for FormatCssCompoundSelector {
         write!(
             f,
             [group(&format_args![
-                nesting_selector_token.format(),
+                nesting_selectors.format(),
                 simple_selector.format(),
                 sub_selectors.format()
             ])]

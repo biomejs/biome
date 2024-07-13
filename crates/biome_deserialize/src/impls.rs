@@ -16,27 +16,39 @@ use std::{
     path::PathBuf,
 };
 
-/// Type that allows deserializing a string without heap-allocation.
+/// Type that allows deserializing a string without heap-allocation when possible.
+/// This is analog to [std::borrow::Cow]:
 #[derive(Debug, Eq, PartialEq, Hash, Clone)]
-pub struct Text(pub(crate) TokenText);
+pub enum Text {
+    Borrowed(TokenText),
+    Owned(String),
+}
 impl Text {
     pub fn text(&self) -> &str {
-        self.0.text()
+        match self {
+            Text::Borrowed(token_text) => token_text.text(),
+            Text::Owned(string) => string,
+        }
     }
 }
-
+impl From<Text> for String {
+    fn from(value: Text) -> Self {
+        match value {
+            Text::Borrowed(token_text) => token_text.text().to_string(),
+            Text::Owned(string) => string,
+        }
+    }
+}
 impl PartialOrd for Text {
     fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
         Some(self.cmp(other))
     }
 }
-
 impl Ord for Text {
     fn cmp(&self, other: &Self) -> std::cmp::Ordering {
         self.text().cmp(other.text())
     }
 }
-
 impl Deref for Text {
     type Target = str;
     fn deref(&self) -> &Self::Target {
@@ -482,7 +494,7 @@ impl Deserializable for String {
         name: &str,
         diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<Self> {
-        Text::deserialize(value, name, diagnostics).map(|value| value.text().to_string())
+        Text::deserialize(value, name, diagnostics).map(|value| value.into())
     }
 }
 

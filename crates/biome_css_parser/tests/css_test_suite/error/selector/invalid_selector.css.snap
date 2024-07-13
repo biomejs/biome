@@ -2,7 +2,6 @@
 source: crates/biome_css_parser/tests/spec_test.rs
 expression: snapshot
 ---
-
 ## Input
 
 ```css
@@ -27,7 +26,7 @@ CssRoot {
         CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
-                    nesting_selector_token: missing (optional),
+                    nesting_selectors: CssNestedSelectorList [],
                     simple_selector: missing (optional),
                     sub_selectors: CssSubSelectorList [
                         CssClassSelector {
@@ -61,7 +60,7 @@ CssRoot {
     1: CSS_QUALIFIED_RULE@1..15
       0: CSS_SELECTOR_LIST@1..11
         0: CSS_COMPOUND_SELECTOR@1..11
-          0: (empty)
+          0: CSS_NESTED_SELECTOR_LIST@1..1
           1: (empty)
           2: CSS_SUB_SELECTOR_LIST@1..11
             0: CSS_CLASS_SELECTOR@1..11
@@ -96,5 +95,3 @@ invalid_selector.css:1:1 parse ━━━━━━━━━━━━━━━━�
     3 │ }
   
 ```
-
-

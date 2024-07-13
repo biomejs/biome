@@ -14,6 +14,7 @@ impl FormatRule<AnyCssValue> for FormatAnyCssValue {
             AnyCssValue::CssColor(node) => node.format().fmt(f),
             AnyCssValue::CssCustomIdentifier(node) => node.format().fmt(f),
             AnyCssValue::CssDashedIdentifier(node) => node.format().fmt(f),
+            AnyCssValue::CssGritMetavariable(node) => node.format().fmt(f),
             AnyCssValue::CssIdentifier(node) => node.format().fmt(f),
             AnyCssValue::CssNumber(node) => node.format().fmt(f),
             AnyCssValue::CssRatio(node) => node.format().fmt(f),

@@ -7,61 +7,60 @@ use std::rc::Rc;
 #[derive(Debug)]
 pub struct Reference {
     pub(crate) data: Rc<SemanticModelData>,
-    pub(crate) index: ReferenceIndex,
+    pub(crate) id: ReferenceId,
 }
 
 impl Reference {
     pub(crate) fn find_next(&self) -> Option<Reference> {
-        let reference = self.data.next_reference(self.index)?;
+        let id = self.data.next_reference(self.id)?;
         Some(Reference {
             data: self.data.clone(),
-            index: reference.index,
+            id,
         })
     }
 
     pub(crate) fn find_next_read(&self) -> Option<Reference> {
-        let mut index = self.index;
-
-        while let Some(reference) = self.data.next_reference(index) {
-            if reference.is_read() {
+        let references = &self.data.binding(self.id.binding_id()).references;
+        let mut index = self.id.index() + 1;
+        while index < references.len() {
+            if references[index].is_read() {
                 return Some(Reference {
                     data: self.data.clone(),
-                    index: reference.index,
+                    id: ReferenceId::new(self.id.binding_id(), index),
                 });
             } else {
-                index = reference.index;
+                index += 1;
             }
         }
-
         None
     }
 
     pub(crate) fn find_next_write(&self) -> Option<Reference> {
-        let mut index = self.index;
-
-        while let Some(reference) = self.data.next_reference(index) {
-            if reference.is_write() {
+        let references = &self.data.binding(self.id.binding_id()).references;
+        let mut index = self.id.index() + 1;
+        while index < references.len() {
+            if references[index].is_write() {
                 return Some(Reference {
                     data: self.data.clone(),
-                    index: reference.index,
+                    id: ReferenceId::new(self.id.binding_id(), index),
                 });
             } else {
-                index = reference.index;
+                index += 1;
             }
         }
-
         None
     }
 
     /// Returns the range of this reference
-    pub fn range(&self) -> &TextRange {
-        let reference = self.data.reference(self.index);
-        &reference.range
+    pub fn range_start(&self) -> TextSize {
+        self.data.reference(self.id).range_start
     }
 
     /// Returns the scope of this reference
     pub fn scope(&self) -> Scope {
-        let id = self.data.scope(self.range());
+        let id = self
+            .data
+            .scope(TextRange::new(self.range_start(), self.range_start()));
         Scope {
             data: self.data.clone(),
             id,
@@ -70,20 +69,20 @@ impl Reference {
 
     /// Returns the node of this reference
     pub fn syntax(&self) -> &JsSyntaxNode {
-        &self.data.node_by_range[self.range()]
+        &self.data.binding_node_by_start[&self.range_start()]
     }
 
     /// Returns the binding of this reference
     pub fn binding(&self) -> Option<Binding> {
         Some(Binding {
             data: self.data.clone(),
-            index: self.index.binding(),
+            id: self.id.binding_id(),
         })
     }
 
     /// Returns if the declaration of this reference is hoisted or not
     pub fn is_using_hoisted_declaration(&self) -> bool {
-        let reference = &self.data.reference(self.index);
+        let reference = &self.data.reference(self.id);
         match reference.ty {
             SemanticModelReferenceType::Read { hoisted } => hoisted,
             SemanticModelReferenceType::Write { hoisted } => hoisted,
@@ -92,13 +91,13 @@ impl Reference {
 
     /// Returns if this reference is just reading its binding
     pub fn is_read(&self) -> bool {
-        let reference = self.data.reference(self.index);
+        let reference = self.data.reference(self.id);
         matches!(reference.ty, SemanticModelReferenceType::Read { .. })
     }
 
     /// Returns if this reference is writing its binding
     pub fn is_write(&self) -> bool {
-        let reference = self.data.reference(self.index);
+        let reference = self.data.reference(self.id);
         matches!(reference.ty, SemanticModelReferenceType::Write { .. })
     }
 
@@ -114,7 +113,7 @@ impl Reference {
         match call {
             Some(node) if node.kind() == JsSyntaxKind::JS_CALL_EXPRESSION => Some(FunctionCall {
                 data: self.data.clone(),
-                index: self.index,
+                id: self.id,
             }),
             _ => None,
         }
@@ -125,19 +124,18 @@ impl Reference {
 #[derive(Debug)]
 pub struct FunctionCall {
     pub(crate) data: Rc<SemanticModelData>,
-    pub(crate) index: ReferenceIndex,
+    pub(crate) id: ReferenceId,
 }
 
 impl FunctionCall {
-    /// Returns the range of this reference
-    pub fn range(&self) -> &TextRange {
-        let reference = self.data.reference(self.index);
-        &reference.range
+    /// Returns the start of the range of this reference
+    pub fn range_start(&self) -> TextSize {
+        self.data.reference(self.id).range_start
     }
 
     /// Returns the node of this reference
     pub fn syntax(&self) -> &JsSyntaxNode {
-        &self.data.node_by_range[self.range()]
+        &self.data.binding_node_by_start[&self.range_start()]
     }
 
     /// Returns the typed AST node of this reference
@@ -182,22 +180,21 @@ pub struct SemanticModelUnresolvedReference {
 #[derive(Debug)]
 pub struct UnresolvedReference {
     pub(crate) data: Rc<SemanticModelData>,
-    pub(crate) id: usize,
+    pub(crate) id: u32,
 }
 
 impl UnresolvedReference {
     pub fn syntax(&self) -> &JsSyntaxNode {
-        let reference = &self.data.unresolved_references[self.id];
-        &self.data.node_by_range[&reference.range]
+        let reference = &self.data.unresolved_reference(self.id);
+        &self.data.binding_node_by_start[&reference.range.start()]
     }
 
     pub fn tree(&self) -> AnyJsIdentifierUsage {
         AnyJsIdentifierUsage::unwrap_cast(self.syntax().clone())
     }
 
-    pub fn range(&self) -> &TextRange {
-        let reference = &self.data.unresolved_references[self.id];
-        &reference.range
+    pub fn range(&self) -> TextRange {
+        self.data.unresolved_reference(self.id).range
     }
 }
 

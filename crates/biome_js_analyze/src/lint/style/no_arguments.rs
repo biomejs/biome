@@ -47,8 +47,7 @@ impl Rule for NoArguments {
         for unresolved_reference in model.all_unresolved_references() {
             let name = unresolved_reference.syntax().text_trimmed();
             if name == "arguments" {
-                let range = unresolved_reference.range();
-                found_arguments.push(*range);
+                found_arguments.push(unresolved_reference.range());
             }
         }
 

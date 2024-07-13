@@ -1,11 +1,5 @@
-use crate::css_kinds_src::CSS_KINDS_SRC;
-use crate::graphql_kind_src::GRAPHQL_KINDS_SRC;
-use crate::grit_kinds_src::GRIT_KINDS_SRC;
-use crate::html_kinds_src::HTML_KINDS_SRC;
-use crate::js_kinds_src::{AstNodeSrc, AstSrc, Field, TokenKind, JS_KINDS_SRC};
-use crate::json_kinds_src::JSON_KINDS_SRC;
+use crate::js_kinds_src::{AstNodeSrc, AstSrc, Field, TokenKind};
 use crate::language_kind::LanguageKind;
-use crate::yaml_kinds_src::YAML_KINDS_SRC;
 use biome_string_case::Case;
 use proc_macro2::{Literal, TokenStream};
 use quote::{format_ident, quote};
@@ -963,15 +957,7 @@ pub fn generate_nodes(ast: &AstSrc, language_kind: LanguageKind) -> Result<Strin
 pub(crate) fn token_kind_to_code(name: &str, language_kind: LanguageKind) -> TokenStream {
     let kind_variant_name = Case::Constant.convert(name);
 
-    let kind_source = match language_kind {
-        LanguageKind::Js => JS_KINDS_SRC,
-        LanguageKind::Css => CSS_KINDS_SRC,
-        LanguageKind::Json => JSON_KINDS_SRC,
-        LanguageKind::Grit => GRIT_KINDS_SRC,
-        LanguageKind::Html => HTML_KINDS_SRC,
-        LanguageKind::Graphql => GRAPHQL_KINDS_SRC,
-        LanguageKind::Yaml => YAML_KINDS_SRC,
-    };
+    let kind_source = language_kind.kinds();
     if kind_source.literals.contains(&kind_variant_name.as_str())
         || kind_source.tokens.contains(&kind_variant_name.as_str())
     {

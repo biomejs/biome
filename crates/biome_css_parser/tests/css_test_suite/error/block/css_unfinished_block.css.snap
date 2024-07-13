@@ -2,7 +2,6 @@
 source: crates/biome_css_parser/tests/spec_test.rs
 expression: snapshot
 ---
-
 ## Input
 
 ```css
@@ -22,7 +21,7 @@ CssRoot {
             prelude: CssSelectorList [
                 CssComplexSelector {
                     left: CssCompoundSelector {
-                        nesting_selector_token: missing (optional),
+                        nesting_selectors: CssNestedSelectorList [],
                         simple_selector: CssTypeSelector {
                             namespace: missing (optional),
                             ident: CssIdentifier {
@@ -47,7 +46,7 @@ CssRoot {
         CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
-                    nesting_selector_token: missing (optional),
+                    nesting_selectors: CssNestedSelectorList [],
                     simple_selector: missing (optional),
                     sub_selectors: CssSubSelectorList [
                         CssClassSelector {
@@ -81,7 +80,7 @@ CssRoot {
       0: CSS_SELECTOR_LIST@0..4
         0: CSS_COMPLEX_SELECTOR@0..4
           0: CSS_COMPOUND_SELECTOR@0..3
-            0: (empty)
+            0: CSS_NESTED_SELECTOR_LIST@0..0
             1: CSS_TYPE_SELECTOR@0..3
               0: (empty)
               1: CSS_IDENTIFIER@0..3
@@ -95,7 +94,7 @@ CssRoot {
     2: CSS_QUALIFIED_RULE@5..15
       0: CSS_SELECTOR_LIST@5..14
         0: CSS_COMPOUND_SELECTOR@5..14
-          0: (empty)
+          0: CSS_NESTED_SELECTOR_LIST@5..5
           1: (empty)
           2: CSS_SUB_SELECTOR_LIST@5..14
             0: CSS_CLASS_SELECTOR@5..14
@@ -145,5 +144,3 @@ css_unfinished_block.css:3:1 parse ━━━━━━━━━━━━━━━
       │ 
   
 ```
-
-

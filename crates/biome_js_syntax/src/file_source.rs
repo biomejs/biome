@@ -213,6 +213,10 @@ impl JsFileSource {
         self
     }
 
+    pub fn set_module_kind(&mut self, kind: ModuleKind) {
+        self.module_kind = kind;
+    }
+
     pub const fn with_version(mut self, version: LanguageVersion) -> Self {
         self.version = version;
         self
@@ -246,6 +250,10 @@ impl JsFileSource {
 
     pub const fn is_module(&self) -> bool {
         self.module_kind.is_module()
+    }
+
+    pub const fn is_script(&self) -> bool {
+        self.module_kind.is_script()
     }
 
     pub const fn is_typescript(&self) -> bool {

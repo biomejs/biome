@@ -1,4 +1,3 @@
-#![allow(dead_code)] // FIXME: Remove when more stuff is ready
 mod diagnostics;
 mod errors;
 mod grit_analysis_ext;
@@ -21,7 +20,7 @@ mod variables;
 
 pub use errors::*;
 pub use grit_context::GritTargetFile;
-pub use grit_query::GritQuery;
+pub use grit_query::{CreateFile, GritQuery, GritQueryResult, Message, OutputFile};
 pub use grit_target_language::{GritTargetLanguage, JsTargetLanguage};
 
 use biome_grit_parser::parse_grit;
@@ -30,9 +29,15 @@ use std::path::Path;
 /// Compiles a Grit pattern from the given source string.
 pub fn compile_pattern(
     source: &str,
-    path: &Path,
+    path: Option<&Path>,
     language: GritTargetLanguage,
 ) -> Result<GritQuery, CompileError> {
     let parsed = parse_grit(source);
+    if parsed.has_errors() {
+        return Err(CompileError::ParsePatternError(ParsePatternError {
+            diagnostics: parsed.into_diagnostics(),
+        }));
+    }
+
     GritQuery::from_node(parsed.tree(), path, language)
 }

@@ -1,0 +1,77 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: css/nesting/nesting_1.css
+---
+# Input
+
+```css
+.test {
+	& {
+		color: pink;
+	}
+	&& {
+		color: pink;
+	}
+	& & {
+		color: pink;
+	}
+	div {
+		&&& {
+			color: pink;
+		}
+		& && {
+			color: pink;
+		}
+		&& & {
+			color: pink;
+		}
+		& & & {
+			color: pink;
+		}
+	}
+}
+
+```
+
+
+=============================
+
+# Outputs
+
+## Output 1
+
+-----
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 80
+Quote style: Double Quotes
+-----
+
+```css
+.test {
+	& {
+		color: pink;
+	}
+	&& {
+		color: pink;
+	}
+	& & {
+		color: pink;
+	}
+	div {
+		&&& {
+			color: pink;
+		}
+		& && {
+			color: pink;
+		}
+		&& & {
+			color: pink;
+		}
+		& & & {
+			color: pink;
+		}
+	}
+}
+```

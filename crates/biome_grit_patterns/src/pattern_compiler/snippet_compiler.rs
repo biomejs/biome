@@ -54,7 +54,7 @@ pub(crate) fn parse_snippet_content(
         return match source.trim() {
             "$_" | "^_" => Ok(Pattern::Underscore),
             name => {
-                let var = context.register_variable(name.to_owned(), range)?;
+                let var = context.register_variable(name.to_owned(), range);
                 Ok(Pattern::Variable(var))
             }
         };
@@ -121,7 +121,7 @@ pub(crate) fn dynamic_snippet_from_source(
                 *var,
             )));
         } else if var.starts_with("$GLOBAL_") {
-            let variable = context.register_variable(var.to_string(), range)?;
+            let variable = context.register_variable(var.to_string(), range);
             parts.push(DynamicSnippetPart::Variable(variable));
         } else {
             return Err(CompileError::UnknownVariable(var.to_string()));
@@ -468,8 +468,8 @@ fn text_to_var(
         GritMetaValue::Variable(name) => {
             let range = *range_map
                 .get(&range)
-                .ok_or_else(|| CompileError::InvalidMetavariableRange(range))?;
-            let var = context.register_variable(name, range + context_range.start)?;
+                .ok_or(CompileError::InvalidMetavariableRange(range))?;
+            let var = context.register_variable(name, range + context_range.start);
             Ok(SnippetValues::Variable(var))
         }
     }
@@ -496,8 +496,6 @@ fn unescape(raw_string: &str) -> String {
 
 #[cfg(test)]
 mod tests {
-    use std::path::Path;
-
     use super::*;
     use crate::{
         grit_js_parser::GritJsParser, pattern_compiler::compilation_context::CompilationContext,
@@ -571,10 +569,8 @@ mod tests {
 
     #[test]
     fn test_pattern_from_node() {
-        let compilation_context = CompilationContext::new(
-            Path::new("test.js"),
-            GritTargetLanguage::JsTargetLanguage(JsTargetLanguage),
-        );
+        let compilation_context =
+            CompilationContext::new(None, GritTargetLanguage::JsTargetLanguage(JsTargetLanguage));
         let mut vars = BTreeMap::new();
         let mut vars_array = Vec::new();
         let mut global_vars = BTreeMap::new();

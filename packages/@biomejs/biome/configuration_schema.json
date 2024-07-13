@@ -1168,6 +1168,12 @@
 						{ "$ref": "#/definitions/GraphqlFormatter" },
 						{ "type": "null" }
 					]
+				},
+				"linter": {
+					"anyOf": [
+						{ "$ref": "#/definitions/GraphqlLinter" },
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false
@@ -1209,6 +1215,17 @@
 				"quoteStyle": {
 					"description": "The type of quotes used in GraphQL code. Defaults to double.",
 					"anyOf": [{ "$ref": "#/definitions/QuoteStyle" }, { "type": "null" }]
+				}
+			},
+			"additionalProperties": false
+		},
+		"GraphqlLinter": {
+			"description": "Options that changes how the GraphQL linter behaves",
+			"type": "object",
+			"properties": {
+				"enabled": {
+					"description": "Control the formatter for GraphQL files.",
+					"type": ["boolean", "null"]
 				}
 			},
 			"additionalProperties": false
@@ -1790,6 +1807,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noDuplicatedFields": {
+					"description": "No duplicated fields in GraphQL operations.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noDynamicNamespaceImportAccess": {
 					"description": "Disallow accessing namespace imports dynamically.",
 					"anyOf": [
@@ -1834,6 +1858,13 @@
 				},
 				"noInvalidPositionAtImportRule": {
 					"description": "Disallow the use of @import at-rules in invalid positions.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noIrregularWhitespace": {
+					"description": "Disallows the use of irregular whitespace characters.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
@@ -2078,6 +2109,13 @@
 					"description": "Enforce the sorting of CSS utility classes.",
 					"anyOf": [
 						{ "$ref": "#/definitions/UtilityClassSortingConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useStrictMode": {
+					"description": "Enforce the use of the directive \"use strict\" in script files.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleFixConfiguration" },
 						{ "type": "null" }
 					]
 				},

@@ -2,7 +2,7 @@ use std::{env, path::Path};
 
 use biome_formatter::{IndentStyle, IndentWidth};
 use biome_formatter_test::test_prettier_snapshot::{PrettierSnapshot, PrettierTestFile};
-use biome_js_formatter::context::JsFormatOptions;
+use biome_js_formatter::{context::JsFormatOptions, JsFormatLanguage};
 use biome_js_syntax::{JsFileSource, LanguageVariant, ModuleKind};
 
 mod language;
@@ -45,7 +45,7 @@ fn test_snapshot(input: &'static str, _: &str, _: &str, _: &str) {
 
     let language = language::JsTestFormatLanguage::new(source_type);
 
-    let snapshot = PrettierSnapshot::new(test_file, language, options);
+    let snapshot = PrettierSnapshot::new(test_file, language, JsFormatLanguage::new(options));
 
     snapshot.test()
 }

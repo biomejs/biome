@@ -60,6 +60,11 @@ pub fn update(path: &Path, contents: &str, mode: &Mode) -> Result<UpdateResult> 
     }
 
     eprintln!("updating {}", path.display());
+    if let Some(parent) = path.parent() {
+        if !parent.exists() {
+            fs2::create_dir_all(parent)?;
+        }
+    }
     fs2::write(path, contents)?;
     Ok(UpdateResult::Updated)
 }
