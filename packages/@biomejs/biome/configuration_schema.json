@@ -1871,7 +1871,7 @@
 					]
 				},
 				"noIrregularWhitespaceCss": {
-					"description": "Succinct description of the rule.",
+					"description": "Disallows the use of irregular whitespace.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }

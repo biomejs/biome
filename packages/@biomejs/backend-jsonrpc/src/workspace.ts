@@ -1114,7 +1114,7 @@ export interface Nursery {
 	 */
 	noIrregularWhitespace?: RuleConfiguration_for_Null;
 	/**
-	 * Succinct description of the rule.
+	 * Disallows the use of irregular whitespace.
 	 */
 	noIrregularWhitespaceCss?: RuleConfiguration_for_Null;
 	/**

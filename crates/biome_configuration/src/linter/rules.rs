@@ -2863,7 +2863,7 @@ pub struct Nursery {
     #[doc = "Disallows the use of irregular whitespace characters."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_irregular_whitespace: Option<RuleConfiguration<NoIrregularWhitespace>>,
-    #[doc = "Succinct description of the rule."]
+    #[doc = "Disallows the use of irregular whitespace."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_irregular_whitespace_css: Option<RuleConfiguration<NoIrregularWhitespaceCss>>,
     #[doc = "Enforce that a label element or component has a text label and an associated input."]
