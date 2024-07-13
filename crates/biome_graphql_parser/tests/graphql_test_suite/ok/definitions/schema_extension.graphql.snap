@@ -40,10 +40,8 @@ GraphqlRoot {
                             value_token: QUERY_KW@15..23 "query" [Newline("\n"), Whitespace("  ")] [],
                         },
                         colon_token: COLON@23..25 ":" [] [Whitespace(" ")],
-                        named_type: GraphqlNamedType {
-                            name: GraphqlName {
-                                value_token: GRAPHQL_NAME@25..40 "MyQueryRootType" [] [],
-                            },
+                        named_type: GraphqlNameReference {
+                            value_token: IDENT@25..40 "MyQueryRootType" [] [],
                         },
                     },
                     GraphqlRootOperationTypeDefinition {
@@ -51,10 +49,8 @@ GraphqlRoot {
                             value_token: MUTATION_KW@40..51 "mutation" [Newline("\n"), Whitespace("  ")] [],
                         },
                         colon_token: COLON@51..53 ":" [] [Whitespace(" ")],
-                        named_type: GraphqlNamedType {
-                            name: GraphqlName {
-                                value_token: GRAPHQL_NAME@53..71 "MyMutationRootType" [] [],
-                            },
+                        named_type: GraphqlNameReference {
+                            value_token: IDENT@53..71 "MyMutationRootType" [] [],
                         },
                     },
                     GraphqlRootOperationTypeDefinition {
@@ -62,10 +58,8 @@ GraphqlRoot {
                             value_token: SUBSCRIPTION_KW@71..86 "subscription" [Newline("\n"), Whitespace("  ")] [],
                         },
                         colon_token: COLON@86..88 ":" [] [Whitespace(" ")],
-                        named_type: GraphqlNamedType {
-                            name: GraphqlName {
-                                value_token: GRAPHQL_NAME@88..110 "MySubscriptionRootType" [] [],
-                            },
+                        named_type: GraphqlNameReference {
+                            value_token: IDENT@88..110 "MySubscriptionRootType" [] [],
                         },
                     },
                 ],
@@ -78,8 +72,8 @@ GraphqlRoot {
             directives: GraphqlDirectiveList [
                 GraphqlDirective {
                     at_token: AT@128..129 "@" [] [],
-                    name: GraphqlName {
-                        value_token: GRAPHQL_NAME@129..134 "decs" [] [Whitespace(" ")],
+                    name: GraphqlNameReference {
+                        value_token: IDENT@129..134 "decs" [] [Whitespace(" ")],
                     },
                     arguments: missing (optional),
                 },
@@ -92,10 +86,8 @@ GraphqlRoot {
                             value_token: QUERY_KW@135..143 "query" [Newline("\n"), Whitespace("  ")] [],
                         },
                         colon_token: COLON@143..145 ":" [] [Whitespace(" ")],
-                        named_type: GraphqlNamedType {
-                            name: GraphqlName {
-                                value_token: GRAPHQL_NAME@145..160 "MyQueryRootType" [] [],
-                            },
+                        named_type: GraphqlNameReference {
+                            value_token: IDENT@145..160 "MyQueryRootType" [] [],
                         },
                     },
                     GraphqlRootOperationTypeDefinition {
@@ -103,10 +95,8 @@ GraphqlRoot {
                             value_token: MUTATION_KW@160..171 "mutation" [Newline("\n"), Whitespace("  ")] [],
                         },
                         colon_token: COLON@171..173 ":" [] [Whitespace(" ")],
-                        named_type: GraphqlNamedType {
-                            name: GraphqlName {
-                                value_token: GRAPHQL_NAME@173..191 "MyMutationRootType" [] [],
-                            },
+                        named_type: GraphqlNameReference {
+                            value_token: IDENT@173..191 "MyMutationRootType" [] [],
                         },
                     },
                 ],
@@ -119,8 +109,8 @@ GraphqlRoot {
             directives: GraphqlDirectiveList [
                 GraphqlDirective {
                     at_token: AT@209..210 "@" [] [],
-                    name: GraphqlName {
-                        value_token: GRAPHQL_NAME@210..215 "decs" [] [Whitespace(" ")],
+                    name: GraphqlNameReference {
+                        value_token: IDENT@210..215 "decs" [] [Whitespace(" ")],
                     },
                     arguments: missing (optional),
                 },
@@ -133,10 +123,8 @@ GraphqlRoot {
                             value_token: QUERY_KW@216..224 "query" [Newline("\n"), Whitespace("  ")] [],
                         },
                         colon_token: COLON@224..226 ":" [] [Whitespace(" ")],
-                        named_type: GraphqlNamedType {
-                            name: GraphqlName {
-                                value_token: GRAPHQL_NAME@226..241 "MyQueryRootType" [] [],
-                            },
+                        named_type: GraphqlNameReference {
+                            value_token: IDENT@226..241 "MyQueryRootType" [] [],
                         },
                     },
                     GraphqlRootOperationTypeDefinition {
@@ -144,10 +132,8 @@ GraphqlRoot {
                             value_token: MUTATION_KW@241..252 "mutation" [Newline("\n"), Whitespace("  ")] [],
                         },
                         colon_token: COLON@252..254 ":" [] [Whitespace(" ")],
-                        named_type: GraphqlNamedType {
-                            name: GraphqlName {
-                                value_token: GRAPHQL_NAME@254..272 "MyMutationRootType" [] [],
-                            },
+                        named_type: GraphqlNameReference {
+                            value_token: IDENT@254..272 "MyMutationRootType" [] [],
                         },
                     },
                 ],
@@ -176,23 +162,20 @@ GraphqlRoot {
             0: GRAPHQL_OPERATION_TYPE@15..23
               0: QUERY_KW@15..23 "query" [Newline("\n"), Whitespace("  ")] []
             1: COLON@23..25 ":" [] [Whitespace(" ")]
-            2: GRAPHQL_NAMED_TYPE@25..40
-              0: GRAPHQL_NAME@25..40
-                0: GRAPHQL_NAME@25..40 "MyQueryRootType" [] []
+            2: GRAPHQL_NAME_REFERENCE@25..40
+              0: IDENT@25..40 "MyQueryRootType" [] []
           1: GRAPHQL_ROOT_OPERATION_TYPE_DEFINITION@40..71
             0: GRAPHQL_OPERATION_TYPE@40..51
               0: MUTATION_KW@40..51 "mutation" [Newline("\n"), Whitespace("  ")] []
             1: COLON@51..53 ":" [] [Whitespace(" ")]
-            2: GRAPHQL_NAMED_TYPE@53..71
-              0: GRAPHQL_NAME@53..71
-                0: GRAPHQL_NAME@53..71 "MyMutationRootType" [] []
+            2: GRAPHQL_NAME_REFERENCE@53..71
+              0: IDENT@53..71 "MyMutationRootType" [] []
           2: GRAPHQL_ROOT_OPERATION_TYPE_DEFINITION@71..110
             0: GRAPHQL_OPERATION_TYPE@71..86
               0: SUBSCRIPTION_KW@71..86 "subscription" [Newline("\n"), Whitespace("  ")] []
             1: COLON@86..88 ":" [] [Whitespace(" ")]
-            2: GRAPHQL_NAMED_TYPE@88..110
-              0: GRAPHQL_NAME@88..110
-                0: GRAPHQL_NAME@88..110 "MySubscriptionRootType" [] []
+            2: GRAPHQL_NAME_REFERENCE@88..110
+              0: IDENT@88..110 "MySubscriptionRootType" [] []
         2: R_CURLY@110..112 "}" [Newline("\n")] []
     1: GRAPHQL_SCHEMA_EXTENSION@112..193
       0: EXTEND_KW@112..121 "extend" [Newline("\n"), Newline("\n")] [Whitespace(" ")]
@@ -200,8 +183,8 @@ GraphqlRoot {
       2: GRAPHQL_DIRECTIVE_LIST@128..134
         0: GRAPHQL_DIRECTIVE@128..134
           0: AT@128..129 "@" [] []
-          1: GRAPHQL_NAME@129..134
-            0: GRAPHQL_NAME@129..134 "decs" [] [Whitespace(" ")]
+          1: GRAPHQL_NAME_REFERENCE@129..134
+            0: IDENT@129..134 "decs" [] [Whitespace(" ")]
           2: (empty)
       3: GRAPHQL_ROOT_OPERATION_TYPES@134..193
         0: L_CURLY@134..135 "{" [] []
@@ -210,16 +193,14 @@ GraphqlRoot {
             0: GRAPHQL_OPERATION_TYPE@135..143
               0: QUERY_KW@135..143 "query" [Newline("\n"), Whitespace("  ")] []
             1: COLON@143..145 ":" [] [Whitespace(" ")]
-            2: GRAPHQL_NAMED_TYPE@145..160
-              0: GRAPHQL_NAME@145..160
-                0: GRAPHQL_NAME@145..160 "MyQueryRootType" [] []
+            2: GRAPHQL_NAME_REFERENCE@145..160
+              0: IDENT@145..160 "MyQueryRootType" [] []
           1: GRAPHQL_ROOT_OPERATION_TYPE_DEFINITION@160..191
             0: GRAPHQL_OPERATION_TYPE@160..171
               0: MUTATION_KW@160..171 "mutation" [Newline("\n"), Whitespace("  ")] []
             1: COLON@171..173 ":" [] [Whitespace(" ")]
-            2: GRAPHQL_NAMED_TYPE@173..191
-              0: GRAPHQL_NAME@173..191
-                0: GRAPHQL_NAME@173..191 "MyMutationRootType" [] []
+            2: GRAPHQL_NAME_REFERENCE@173..191
+              0: IDENT@173..191 "MyMutationRootType" [] []
         2: R_CURLY@191..193 "}" [Newline("\n")] []
     2: GRAPHQL_SCHEMA_EXTENSION@193..274
       0: EXTEND_KW@193..202 "extend" [Newline("\n"), Newline("\n")] [Whitespace(" ")]
@@ -227,8 +208,8 @@ GraphqlRoot {
       2: GRAPHQL_DIRECTIVE_LIST@209..215
         0: GRAPHQL_DIRECTIVE@209..215
           0: AT@209..210 "@" [] []
-          1: GRAPHQL_NAME@210..215
-            0: GRAPHQL_NAME@210..215 "decs" [] [Whitespace(" ")]
+          1: GRAPHQL_NAME_REFERENCE@210..215
+            0: IDENT@210..215 "decs" [] [Whitespace(" ")]
           2: (empty)
       3: GRAPHQL_ROOT_OPERATION_TYPES@215..274
         0: L_CURLY@215..216 "{" [] []
@@ -237,16 +218,14 @@ GraphqlRoot {
             0: GRAPHQL_OPERATION_TYPE@216..224
               0: QUERY_KW@216..224 "query" [Newline("\n"), Whitespace("  ")] []
             1: COLON@224..226 ":" [] [Whitespace(" ")]
-            2: GRAPHQL_NAMED_TYPE@226..241
-              0: GRAPHQL_NAME@226..241
-                0: GRAPHQL_NAME@226..241 "MyQueryRootType" [] []
+            2: GRAPHQL_NAME_REFERENCE@226..241
+              0: IDENT@226..241 "MyQueryRootType" [] []
           1: GRAPHQL_ROOT_OPERATION_TYPE_DEFINITION@241..272
             0: GRAPHQL_OPERATION_TYPE@241..252
               0: MUTATION_KW@241..252 "mutation" [Newline("\n"), Whitespace("  ")] []
             1: COLON@252..254 ":" [] [Whitespace(" ")]
-            2: GRAPHQL_NAMED_TYPE@254..272
-              0: GRAPHQL_NAME@254..272
-                0: GRAPHQL_NAME@254..272 "MyMutationRootType" [] []
+            2: GRAPHQL_NAME_REFERENCE@254..272
+              0: IDENT@254..272 "MyMutationRootType" [] []
         2: R_CURLY@272..274 "}" [Newline("\n")] []
   2: EOF@274..275 "" [Newline("\n")] []
 

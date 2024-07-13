@@ -1,7 +1,7 @@
 use crate::parser::{
-    parse_description,
+    parse_binding, parse_description,
     parse_error::{expected_directive_location, expected_name},
-    parse_name, GraphqlParser,
+    GraphqlParser,
 };
 use biome_graphql_syntax::{
     GraphqlSyntaxKind::{self, *},
@@ -46,7 +46,7 @@ pub(crate) fn parse_directive_definition(p: &mut GraphqlParser) -> ParsedSyntax 
 
     p.bump(T![directive]);
     p.expect(T![@]);
-    parse_name(p).or_add_diagnostic(p, expected_name);
+    parse_binding(p).or_add_diagnostic(p, expected_name);
 
     // arguments are optional
     parse_arguments_definition(p).ok();

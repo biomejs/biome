@@ -1,9 +1,8 @@
 use crate::parser::{
     directive::DirectiveList,
+    parse_binding,
     parse_error::{expected_name, expected_named_type, fragment_name_must_not_be_on},
-    parse_name,
-    r#type::parse_named_type,
-    GraphqlParser,
+    parse_reference, GraphqlParser,
 };
 use biome_graphql_syntax::{GraphqlSyntaxKind::*, T};
 use biome_parser::{
@@ -21,7 +20,7 @@ pub(crate) fn parse_fragment_definition(p: &mut GraphqlParser) -> ParsedSyntax {
     if p.at(T![on]) {
         p.error(fragment_name_must_not_be_on(p, p.cur_range()));
     }
-    parse_name(p).or_add_diagnostic(p, expected_name);
+    parse_binding(p).or_add_diagnostic(p, expected_name);
     parse_type_condition(p);
 
     DirectiveList.parse_list(p);
@@ -34,7 +33,7 @@ pub(crate) fn parse_fragment_definition(p: &mut GraphqlParser) -> ParsedSyntax {
 pub(crate) fn parse_type_condition(p: &mut GraphqlParser) -> CompletedMarker {
     let m = p.start();
     p.expect(T![on]);
-    parse_named_type(p).or_add_diagnostic(p, expected_named_type);
+    parse_reference(p).or_add_diagnostic(p, expected_named_type);
     m.complete(p, GRAPHQL_TYPE_CONDITION)
 }
 

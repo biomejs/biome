@@ -1,8 +1,8 @@
 use crate::parser::{
     directive::{is_at_directive, DirectiveList},
-    is_nth_at_name, parse_description,
+    is_nth_at_name, parse_binding, parse_description,
     parse_error::{expected_name, expected_named_type, expected_object_extension},
-    parse_name,
+    parse_reference,
     r#type::parse_named_type,
     GraphqlParser,
 };
@@ -32,7 +32,7 @@ pub(super) fn parse_interface_type_definition(p: &mut GraphqlParser) -> ParsedSy
 
     p.bump(T![interface]);
 
-    parse_name(p).or_add_diagnostic(p, expected_name);
+    parse_binding(p).or_add_diagnostic(p, expected_name);
 
     // implements interface is optional
     parse_implements_interface(p).ok();
@@ -53,7 +53,7 @@ pub(super) fn parse_interface_type_extension(p: &mut GraphqlParser) -> ParsedSyn
     p.bump(T![extend]);
     p.bump(T![interface]);
 
-    parse_name(p).or_add_diagnostic(p, expected_name);
+    parse_reference(p).or_add_diagnostic(p, expected_name);
 
     let implements_interface_empty = parse_implements_interface(p).is_absent();
 
