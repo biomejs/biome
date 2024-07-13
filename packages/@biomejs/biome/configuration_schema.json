@@ -1990,7 +1990,7 @@
 					]
 				},
 				"noValueAtRule": {
-					"description": "Disallow use of @value rule in css modules",
+					"description": "Disallow use of @value rule in css modules.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }

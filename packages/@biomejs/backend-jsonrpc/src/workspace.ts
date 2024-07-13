@@ -1182,7 +1182,7 @@ export interface Nursery {
 	 */
 	noUselessUndefinedInitialization?: RuleFixConfiguration_for_Null;
 	/**
-	 * Disallow use of @value rule in css modules
+	 * Disallow use of @value rule in css modules.
 	 */
 	noValueAtRule?: RuleConfiguration_for_Null;
 	/**
