@@ -1,0 +1,10 @@
+/* should not generate diagnostics */
+.firstClass .secondClass {
+	padding: 10px;
+}
+
+.firstClass .secondClass {
+	/* whitespace can be in comments */
+	padding: 10px;
+}
+
