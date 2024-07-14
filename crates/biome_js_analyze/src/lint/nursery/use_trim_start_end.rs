@@ -143,6 +143,9 @@ impl Rule for UseTrimStartEnd {
         // Need to keep the original token to replace it with the new token.
         // `.as_static_value()` strips the information of tick tokens.
         let token = extract_token_from_expression(callee.clone())?;
+        let unquoted = token.text().trim_matches('"');
+        println!("unquoted: {:?}", unquoted);
+        println!("is_single: {:?}", ctx.as_preferred_quote().is_single());
         let replaced_member_name = suggested_name(&token)?;
 
         let mut elements = vec![];
@@ -254,14 +257,14 @@ fn extract_token_from_expression(callee: AnyJsExpression) -> Option<SyntaxToken<
 // Handle "'text'" and "\"text\"" and "text" cases
 fn suggested_name(text: &SyntaxToken<JsLanguage>) -> Option<String> {
     let trimmed = text.text_trimmed();
-    let first_char = trimmed.chars().next();
-    let last_char = trimmed.chars().last();
 
-    let is_single_quoted = first_char == Some('\'') && last_char == Some('\'');
-    let is_double_quoted = first_char == Some('"') && last_char == Some('"');
+    let is_single_quoted = trimmed.starts_with('\'') && trimmed.ends_with('\'');
+    let is_double_quoted = trimmed.starts_with('"') && trimmed.ends_with('"');
 
-    let unquoted = if first_char.is_some() && last_char.is_some() {
-        trimmed.trim_matches(|c| c == '\'' || c == '"')
+    let unquoted = if is_single_quoted {
+        trimmed.trim_matches('\'')
+    } else if is_double_quoted {
+        trimmed.trim_matches('"')
     } else {
         trimmed
     };
