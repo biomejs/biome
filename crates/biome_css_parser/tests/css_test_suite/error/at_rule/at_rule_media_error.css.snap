@@ -1,0 +1,121 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```css
+@media (--umrel-breakpoints$-breakpoint) {}
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    rules: CssRuleList [
+        CssAtRule {
+            at_token: AT@0..1 "@" [] [],
+            rule: CssMediaAtRule {
+                media_token: MEDIA_KW@1..7 "media" [] [Whitespace(" ")],
+                queries: CssMediaQueryList [
+                    CssMediaConditionQuery {
+                        condition: CssMediaFeatureInParens {
+                            l_paren_token: L_PAREN@7..8 "(" [] [],
+                            feature: CssQueryFeatureBoolean {
+                                name: CssIdentifier {
+                                    value_token: IDENT@8..27 "--umrel-breakpoints" [] [],
+                                },
+                            },
+                            r_paren_token: missing (required),
+                        },
+                    },
+                    missing separator,
+                    CssMediaTypeQuery {
+                        modifier: missing (optional),
+                        ty: CssMediaType {
+                            value: CssIdentifier {
+                                value_token: IDENT@27..39 "$-breakpoint" [] [],
+                            },
+                        },
+                    },
+                    missing separator,
+                    CssBogusMediaQuery {
+                        items: [
+                            R_PAREN@39..41 ")" [] [Whitespace(" ")],
+                        ],
+                    },
+                ],
+                block: CssRuleBlock {
+                    l_curly_token: L_CURLY@41..42 "{" [] [],
+                    rules: CssRuleList [],
+                    r_curly_token: R_CURLY@42..43 "}" [] [],
+                },
+            },
+        },
+    ],
+    eof_token: EOF@43..44 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..44
+  0: (empty)
+  1: CSS_RULE_LIST@0..43
+    0: CSS_AT_RULE@0..43
+      0: AT@0..1 "@" [] []
+      1: CSS_MEDIA_AT_RULE@1..43
+        0: MEDIA_KW@1..7 "media" [] [Whitespace(" ")]
+        1: CSS_MEDIA_QUERY_LIST@7..41
+          0: CSS_MEDIA_CONDITION_QUERY@7..27
+            0: CSS_MEDIA_FEATURE_IN_PARENS@7..27
+              0: L_PAREN@7..8 "(" [] []
+              1: CSS_QUERY_FEATURE_BOOLEAN@8..27
+                0: CSS_IDENTIFIER@8..27
+                  0: IDENT@8..27 "--umrel-breakpoints" [] []
+              2: (empty)
+          1: (empty)
+          2: CSS_MEDIA_TYPE_QUERY@27..39
+            0: (empty)
+            1: CSS_MEDIA_TYPE@27..39
+              0: CSS_IDENTIFIER@27..39
+                0: IDENT@27..39 "$-breakpoint" [] []
+          3: (empty)
+          4: CSS_BOGUS_MEDIA_QUERY@39..41
+            0: R_PAREN@39..41 ")" [] [Whitespace(" ")]
+        2: CSS_RULE_BLOCK@41..43
+          0: L_CURLY@41..42 "{" [] []
+          1: CSS_RULE_LIST@42..42
+          2: R_CURLY@42..43 "}" [] []
+  2: EOF@43..44 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+at_rule_media_error.css:1:28 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `)` but instead found `$-breakpoint`
+
+  > 1 │ @media (--umrel-breakpoints$-breakpoint) {}
+      │                            ^^^^^^^^^^^^
+    2 │
+
+  i Remove $-breakpoint
+
+at_rule_media_error.css:1:40 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `)`
+
+  > 1 │ @media (--umrel-breakpoints$-breakpoint) {}
+      │                                        ^
+    2 │
+
+  i Remove )
+
+```
