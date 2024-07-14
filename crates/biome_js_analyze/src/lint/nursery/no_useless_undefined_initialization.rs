@@ -4,8 +4,8 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_js_factory::make::js_variable_declarator_list;
-use biome_js_syntax::{JsLanguage, JsVariableDeclarator, JsVariableStatement};
-use biome_rowan::{chain_trivia_pieces, SyntaxToken, SyntaxTriviaPiece};
+use biome_js_syntax::{JsLanguage, JsVariableDeclarator, JsVariableStatement, JsSyntaxToken};
+use biome_rowan::{chain_trivia_pieces, SyntaxTriviaPiece};
 use biome_rowan::{AstNode, BatchMutationExt, TextRange};
 
 use crate::JsRuleAction;
@@ -147,7 +147,7 @@ impl Rule for NoUselessUndefinedInitialization {
 
         // Save the separators too
         let separators_syntax = declarators.clone().into_syntax();
-        let separators: Vec<SyntaxToken<JsLanguage>> = separators_syntax.tokens().collect();
+        let separators: Vec<JsSyntaxToken> = separators_syntax.tokens().collect();
 
         let new_declaration = current_declaration.clone().with_initializer(None);
         let new_declarators: Vec<JsVariableDeclarator> = declarators
