@@ -3,7 +3,8 @@ use biome_analyze::{
 };
 use biome_console::{markup, MarkupBuf};
 use biome_js_syntax::{
-    AnyJsClassMember, AnyTsType, AnyTsTypeMember, JsClassDeclaration, JsSyntaxToken, TsDeclareStatement, TsInterfaceDeclaration, TsReferenceType, TsTypeAliasDeclaration
+    AnyJsClassMember, AnyTsType, AnyTsTypeMember, JsClassDeclaration, JsSyntaxToken,
+    TsDeclareStatement, TsInterfaceDeclaration, TsReferenceType, TsTypeAliasDeclaration,
 };
 use biome_rowan::{declare_node_union, AstNode, TextRange};
 

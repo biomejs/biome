@@ -4,7 +4,7 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_js_factory::make::js_variable_declarator_list;
-use biome_js_syntax::{JsLanguage, JsVariableDeclarator, JsVariableStatement, JsSyntaxToken};
+use biome_js_syntax::{JsLanguage, JsSyntaxToken, JsVariableDeclarator, JsVariableStatement};
 use biome_rowan::{chain_trivia_pieces, SyntaxTriviaPiece};
 use biome_rowan::{AstNode, BatchMutationExt, TextRange};
 
