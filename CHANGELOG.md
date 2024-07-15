@@ -62,6 +62,7 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
   Contributed by @Conaclos
 
 - Add [nursery/noIrregularWhitespace](https://biomejs.dev/linter/rules/no-irregular-whitespace). Contributed by @michellocana
+- Implement `noIrreguluarWhitespace` for CSS. Contributed by @DerTimonius
 
 #### Enhancements
 
