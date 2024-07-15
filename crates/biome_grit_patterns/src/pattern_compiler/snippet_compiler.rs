@@ -259,7 +259,7 @@ fn pattern_arg_from_slot(
     if slot.contains_list() {
         let mut nodes_list: Vec<Pattern<GritQueryContext>> = match &slot {
             GritSyntaxSlot::Node(node) => node
-                .children()
+                .named_children()
                 .map(|n| pattern_from_node(&n, context_range, range_map, context, is_rhs))
                 .collect::<Result<_, CompileError>>()?,
             _ => Vec::new(),

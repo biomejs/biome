@@ -216,6 +216,10 @@ impl<'a> GritTargetNode<'a> {
         })
     }
 
+    pub fn named_children(&self) -> impl Iterator<Item = Self> + Clone {
+        NamedChildrenIterator::new(self)
+    }
+
     #[inline]
     pub fn end_byte(&self) -> u32 {
         self.text_trimmed_range().end().into()
@@ -416,6 +420,47 @@ impl<'a> Iterator for ChildrenIterator<'a> {
 }
 
 #[derive(Clone, Debug)]
+pub struct NamedChildrenIterator<'a> {
+    cursor: Option<GritTargetNodeCursor<'a>>,
+}
+
+impl<'a> NamedChildrenIterator<'a> {
+    fn new(node: &GritTargetNode<'a>) -> Self {
+        let mut cursor = GritTargetNodeCursor::new(node);
+        let mut cursor = cursor.goto_first_child().then_some(cursor);
+        if let Some(c) = cursor.as_mut() {
+            while c.is_at_token() {
+                if !c.goto_next_sibling() {
+                    cursor = None;
+                    break;
+                }
+            }
+        }
+        Self { cursor }
+    }
+}
+
+impl<'a> Iterator for NamedChildrenIterator<'a> {
+    type Item = GritTargetNode<'a>;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        let c = self.cursor.as_mut()?;
+        let node = c.node();
+        if c.goto_next_sibling() {
+            while c.is_at_token() {
+                if !c.goto_next_sibling() {
+                    self.cursor = None;
+                    break;
+                }
+            }
+        } else {
+            self.cursor = None;
+        }
+        Some(node)
+    }
+}
+
+#[derive(Clone, Debug)]
 struct GritTargetNodeCursor<'a> {
     node: GritTargetNode<'a>,
     root: GritTargetNode<'a>,
@@ -427,6 +472,10 @@ impl<'a> GritTargetNodeCursor<'a> {
             node: node.clone(),
             root: node.clone(),
         }
+    }
+
+    fn is_at_token(&self) -> bool {
+        self.node.is_token()
     }
 }
 
