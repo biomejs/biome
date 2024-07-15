@@ -70,9 +70,10 @@ impl Rule for NoRedundantRoles {
         let aria_roles = ctx.aria_roles();
 
         let (element_name, attributes) = get_element_name_and_attributes(node)?;
-        let attribute_name_to_values = ctx.extract_attributes(&attributes)?;
-        let implicit_role =
-            aria_roles.get_implicit_role(&element_name, &attribute_name_to_values)?;
+        let attribute_name_to_values = ctx.extract_attributes(&attributes);
+        let attribute_name_to_values = ctx.convert_all_attribute_values(attribute_name_to_values);
+        let attr = attribute_name_to_values?;
+        let implicit_role = aria_roles.get_implicit_role(&element_name, &attr)?;
 
         let role_attribute = node.find_attribute_by_name("role")?;
         let role_attribute_value = role_attribute.initializer()?.value().ok()?;

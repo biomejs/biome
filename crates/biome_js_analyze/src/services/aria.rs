@@ -47,28 +47,64 @@ impl AriaServices {
     pub fn extract_attributes(
         &self,
         attribute_list: &JsxAttributeList,
-    ) -> Option<FxHashMap<String, Vec<String>>> {
-        let mut defined_attributes: FxHashMap<String, Vec<String>> = FxHashMap::default();
+    ) -> Option<FxHashMap<String, Vec<AttributeValue>>> {
+        let mut defined_attributes: FxHashMap<String, Vec<AttributeValue>> = FxHashMap::default();
         for attribute in attribute_list {
             if let AnyJsxAttribute::JsxAttribute(attr) = attribute {
                 let name = attr.name().ok()?.syntax().text_trimmed().to_string();
-                // handle an attribute without values e.g. `<img aria-hidden />`
-                let Some(initializer) = attr.initializer() else {
-                    defined_attributes
-                        .entry(name)
-                        .or_insert(vec!["true".to_string()]);
-                    continue;
+                let values = if let Some(initializer) = attr.initializer() {
+                    let initializer = initializer.value().ok()?;
+                    if let Some(static_value) = initializer.as_static_value() {
+                        static_value
+                            .text()
+                            .split_whitespace()
+                            .map(|s| AttributeValue::StaticValue(s.to_string()))
+                            .collect()
+                    } else {
+                        vec![AttributeValue::DynamicValue(
+                            initializer.syntax().text_trimmed().to_string(),
+                        )]
+                    }
+                } else {
+                    vec![AttributeValue::StaticValue("true".to_string())]
                 };
-                let initializer = initializer.value().ok()?;
-                let static_value = initializer.as_static_value()?;
-                // handle multiple values e.g. `<div class="wrapper document">`
-                let values = static_value.text().split(' ');
-                let values = values.map(|s| s.to_string()).collect::<Vec<String>>();
+
                 defined_attributes.entry(name).or_insert(values);
             }
         }
         Some(defined_attributes)
     }
+
+    pub fn convert_all_attribute_values(
+        &self,
+        attributes: Option<FxHashMap<String, Vec<AttributeValue>>>,
+    ) -> Option<FxHashMap<String, Vec<String>>> {
+        attributes.map(|attr_map| {
+            attr_map
+                .into_iter()
+                .map(|(key, values)| {
+                    let string_values = self.convert_attribute_values(values);
+                    (key, string_values)
+                })
+                .collect()
+        })
+    }
+
+    pub fn convert_attribute_values(&self, values: Vec<AttributeValue>) -> Vec<String> {
+        values
+            .into_iter()
+            .map(|value| match value {
+                AttributeValue::StaticValue(s) => s,
+                AttributeValue::DynamicValue(s) => s,
+            })
+            .collect()
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub enum AttributeValue {
+    StaticValue(String),
+    DynamicValue(String),
 }
 
 impl FromServices for AriaServices {
@@ -124,7 +160,7 @@ where
 
 #[cfg(test)]
 mod tests {
-    use crate::services::aria::AriaServices;
+    use crate::services::aria::{AriaServices, AttributeValue};
     use biome_aria::{AriaProperties, AriaRoles};
     use biome_js_factory::make::{
         ident, jsx_attribute, jsx_attribute_initializer_clause, jsx_attribute_list, jsx_name,
@@ -164,12 +200,15 @@ mod tests {
         let attribute_name_to_values = services.extract_attributes(&attribute_list).unwrap();
 
         assert_eq!(
-            &attribute_name_to_values["class"],
-            &vec!["wrapper".to_string(), "document".to_string()]
+            attribute_name_to_values["class"],
+            vec![
+                AttributeValue::StaticValue("wrapper".to_string()),
+                AttributeValue::StaticValue("document".to_string())
+            ]
         );
         assert_eq!(
-            &attribute_name_to_values["role"],
-            &vec!["article".to_string()]
-        )
+            attribute_name_to_values["role"],
+            vec![AttributeValue::StaticValue("article".to_string())]
+        );
     }
 }

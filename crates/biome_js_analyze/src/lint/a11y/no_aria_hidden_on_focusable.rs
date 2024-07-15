@@ -69,6 +69,7 @@ impl Rule for NoAriaHiddenOnFocusable {
             let attr_text = attr_static_val.text();
 
             let attributes = ctx.extract_attributes(&node.attributes());
+            let attributes = ctx.convert_all_attribute_values(attributes);
 
             if attr_text == "false" {
                 return None;

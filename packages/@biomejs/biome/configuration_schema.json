@@ -1905,6 +1905,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noStaticElementInteractions": {
+					"description": "Enforce that static, visible elements (such as \\<div>) that have click handlers use the valid role attribute.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noSubstr": {
 					"description": "Enforce the use of String.slice() over String.substr() and String.substring().",
 					"anyOf": [
@@ -2016,6 +2023,13 @@
 				},
 				"useConsistentBuiltinInstantiation": {
 					"description": "Enforce the use of new for all builtins, except String, Number, Boolean, Symbol and BigInt.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleFixConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useConsistentCurlyBraces": {
+					"description": "This rule enforces consistent use of curly braces inside JSX attributes and JSX children.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleFixConfiguration" },
 						{ "type": "null" }

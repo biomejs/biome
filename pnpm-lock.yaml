@@ -9,31 +9,6 @@ importers:
   .: {}
 
   packages/@biomejs/backend-jsonrpc:
-    optionalDependencies:
-      '@biomejs/cli-darwin-arm64':
-        specifier: 1.8.3
-        version: 1.8.3
-      '@biomejs/cli-darwin-x64':
-        specifier: 1.8.3
-        version: 1.8.3
-      '@biomejs/cli-linux-arm64':
-        specifier: 1.8.3
-        version: 1.8.3
-      '@biomejs/cli-linux-arm64-musl':
-        specifier: 1.8.3
-        version: 1.8.3
-      '@biomejs/cli-linux-x64':
-        specifier: 1.8.3
-        version: 1.8.3
-      '@biomejs/cli-linux-x64-musl':
-        specifier: 1.8.3
-        version: 1.8.3
-      '@biomejs/cli-win32-arm64':
-        specifier: 1.8.3
-        version: 1.8.3
-      '@biomejs/cli-win32-x64':
-        specifier: 1.8.3
-        version: 1.8.3
     devDependencies:
       '@types/node':
         specifier: 20.14.10

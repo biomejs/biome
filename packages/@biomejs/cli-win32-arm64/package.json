@@ -1,11 +1,11 @@
 {
-  "name": "@biomejs/cli-darwin-arm64",
-  "version": "1.7.3",
+  "name": "@biomejs/cli-win32-arm64",
+  "version": "1.8.3",
   "license": "MIT OR Apache-2.0",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/biomejs/biome.git",
-    "directory": "packages/@biomejs/biome"
+    "directory": "packages/@biomejs/biome/cli-win32-arm64"
   },
   "engines": {
     "node": ">=14.21.3"

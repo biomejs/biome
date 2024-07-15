@@ -82,10 +82,12 @@ fn parse_any_media_query(p: &mut CssParser) -> ParsedSyntax {
         parse_any_media_type_query(p)
     } else if is_at_grit_metavariable(p) {
         parse_grit_metavariable(p)
-    } else {
+    } else if is_at_any_media_condition(p) {
         let m = p.start();
         parse_any_media_condition(p).ok(); // TODO handle error
         Present(m.complete(p, CSS_MEDIA_CONDITION_QUERY))
+    } else {
+        Absent
     }
 }
 
