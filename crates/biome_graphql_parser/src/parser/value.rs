@@ -1,6 +1,6 @@
 /// Parse all inpul value
 /// https://spec.graphql.org/October2021/#sec-Input-Values
-use crate::parser::{parse_name, GraphqlParser};
+use crate::parser::GraphqlParser;
 use biome_graphql_syntax::{
     GraphqlSyntaxKind::{self, *},
     T,
@@ -14,7 +14,8 @@ use super::{
     argument::is_at_argument_list_end,
     is_nth_at_name,
     parse_error::{expected_object_field, expected_value},
-    variable::{is_at_variable, parse_variable},
+    parse_literal_name,
+    variable::{is_at_variable, parse_variable_reference},
 };
 
 const BOOLEAN_VALUE_SET: TokenSet<GraphqlSyntaxKind> = token_set![TRUE_KW, FALSE_KW];
@@ -114,7 +115,7 @@ pub(crate) fn parse_default_value(p: &mut GraphqlParser) -> ParsedSyntax {
 #[inline]
 pub(crate) fn parse_value(p: &mut GraphqlParser) -> ParsedSyntax {
     if is_at_variable(p) {
-        parse_variable(p)
+        parse_variable_reference(p)
     } else if is_at_int(p) {
         parse_int(p)
     } else if is_at_float(p) {
@@ -187,12 +188,12 @@ fn parse_null(p: &mut GraphqlParser) -> ParsedSyntax {
 }
 
 #[inline]
-pub(crate) fn parse_enum_value(p: &mut GraphqlParser) -> ParsedSyntax {
+fn parse_enum_value(p: &mut GraphqlParser) -> ParsedSyntax {
     if !is_at_enum(p) {
         return Absent;
     }
     let m = p.start();
-    parse_name(p).ok();
+    parse_literal_name(p).ok();
     Present(m.complete(p, GRAPHQL_ENUM_VALUE))
 }
 
@@ -226,7 +227,7 @@ fn parse_object_field(p: &mut GraphqlParser) -> ParsedSyntax {
         return Absent;
     }
     let m = p.start();
-    parse_name(p).ok();
+    parse_literal_name(p).ok();
     p.expect(T![:]);
     parse_value(p).or_add_diagnostic(p, expected_value);
     Present(m.complete(p, GRAPHQL_OBJECT_FIELD))

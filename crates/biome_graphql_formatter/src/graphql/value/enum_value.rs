@@ -5,8 +5,8 @@ use biome_graphql_syntax::{GraphqlEnumValue, GraphqlEnumValueFields};
 pub(crate) struct FormatGraphqlEnumValue;
 impl FormatNodeRule<GraphqlEnumValue> for FormatGraphqlEnumValue {
     fn fmt_fields(&self, node: &GraphqlEnumValue, f: &mut GraphqlFormatter) -> FormatResult<()> {
-        let GraphqlEnumValueFields { graphql_name } = node.as_fields();
+        let GraphqlEnumValueFields { value } = node.as_fields();
 
-        write!(f, [graphql_name.format()])
+        write!(f, [value.format()])
     }
 }
