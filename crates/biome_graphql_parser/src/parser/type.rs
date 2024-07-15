@@ -1,12 +1,11 @@
-use crate::parser::{parse_name, GraphqlParser};
 use biome_graphql_syntax::{GraphqlSyntaxKind::*, T};
 use biome_parser::{
     parsed_syntax::ParsedSyntax, prelude::ParsedSyntax::*, CompletedMarker, Parser,
 };
 
 use super::{
-    is_nth_at_name,
     parse_error::{expected_named_or_list_type, expected_type},
+    parse_reference, GraphqlParser,
 };
 
 #[inline]
@@ -42,13 +41,7 @@ fn parse_list_type(p: &mut GraphqlParser) -> CompletedMarker {
 
 #[inline]
 pub(crate) fn parse_named_type(p: &mut GraphqlParser) -> ParsedSyntax {
-    if !is_nth_at_name(p, 0) {
-        return Absent;
-    }
-    let m = p.start();
-    parse_name(p).ok();
-
-    Present(m.complete(p, GRAPHQL_NAMED_TYPE))
+    parse_reference(p)
 }
 
 #[inline]

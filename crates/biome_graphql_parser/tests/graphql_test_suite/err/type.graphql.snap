@@ -32,10 +32,10 @@ GraphqlRoot {
                         GraphqlBogus {
                             items: [
                                 GraphqlVariableDefinition {
-                                    variable: GraphqlVariable {
+                                    variable: GraphqlVariableBinding {
                                         dollar_token: DOLLAR@7..8 "$" [] [],
-                                        name: GraphqlName {
-                                            value_token: GRAPHQL_NAME@8..15 "storyId" [] [],
+                                        name: GraphqlLiteralName {
+                                            value_token: IDENT@8..15 "storyId" [] [],
                                         },
                                     },
                                     colon_token: COLON@15..17 ":" [] [Whitespace(" ")],
@@ -47,10 +47,10 @@ GraphqlRoot {
                                     directives: GraphqlDirectiveList [],
                                 },
                                 GraphqlVariableDefinition {
-                                    variable: GraphqlVariable {
+                                    variable: GraphqlVariableBinding {
                                         dollar_token: DOLLAR@20..21 "$" [] [],
-                                        name: GraphqlName {
-                                            value_token: GRAPHQL_NAME@21..29 "comments" [] [],
+                                        name: GraphqlLiteralName {
+                                            value_token: IDENT@21..29 "comments" [] [],
                                         },
                                     },
                                     colon_token: COLON@29..31 ":" [] [Whitespace(" ")],
@@ -66,10 +66,10 @@ GraphqlRoot {
                                     directives: GraphqlDirectiveList [],
                                 },
                                 GraphqlVariableDefinition {
-                                    variable: GraphqlVariable {
+                                    variable: GraphqlVariableBinding {
                                         dollar_token: DOLLAR@36..37 "$" [] [],
-                                        name: GraphqlName {
-                                            value_token: GRAPHQL_NAME@37..41 "tags" [] [],
+                                        name: GraphqlLiteralName {
+                                            value_token: IDENT@37..41 "tags" [] [],
                                         },
                                     },
                                     colon_token: COLON@41..43 ":" [] [Whitespace(" ")],
@@ -88,17 +88,15 @@ GraphqlRoot {
                                     directives: GraphqlDirectiveList [],
                                 },
                                 GraphqlVariableDefinition {
-                                    variable: GraphqlVariable {
+                                    variable: GraphqlVariableBinding {
                                         dollar_token: DOLLAR@49..50 "$" [] [],
-                                        name: GraphqlName {
-                                            value_token: GRAPHQL_NAME@50..55 "posts" [] [],
+                                        name: GraphqlLiteralName {
+                                            value_token: IDENT@50..55 "posts" [] [],
                                         },
                                     },
                                     colon_token: COLON@55..57 ":" [] [Whitespace(" ")],
-                                    ty: GraphqlNamedType {
-                                        name: GraphqlName {
-                                            value_token: GRAPHQL_NAME@57..66 "PostInput" [] [],
-                                        },
+                                    ty: GraphqlNameReference {
+                                        value_token: IDENT@57..66 "PostInput" [] [],
                                     },
                                     default: missing (optional),
                                     directives: GraphqlDirectiveList [],
@@ -110,20 +108,18 @@ GraphqlRoot {
                                     ],
                                 },
                                 GraphqlVariableDefinition {
-                                    variable: GraphqlVariable {
+                                    variable: GraphqlVariableBinding {
                                         dollar_token: DOLLAR@70..71 "$" [] [],
-                                        name: GraphqlName {
-                                            value_token: GRAPHQL_NAME@71..76 "input" [] [],
+                                        name: GraphqlLiteralName {
+                                            value_token: IDENT@71..76 "input" [] [],
                                         },
                                     },
                                     colon_token: COLON@76..78 ":" [] [Whitespace(" ")],
                                     ty: GraphqlListType {
                                         l_brack_token: L_BRACK@78..79 "[" [] [],
                                         element: GraphqlNonNullType {
-                                            base: GraphqlNamedType {
-                                                name: GraphqlName {
-                                                    value_token: GRAPHQL_NAME@79..88 "InputType" [] [],
-                                                },
+                                            base: GraphqlNameReference {
+                                                value_token: IDENT@79..88 "InputType" [] [],
                                             },
                                             excl_token: BANG@88..89 "!" [] [],
                                         },
@@ -143,8 +139,8 @@ GraphqlRoot {
                     selections: GraphqlSelectionList [
                         GraphqlField {
                             alias: missing (optional),
-                            name: GraphqlName {
-                                value_token: GRAPHQL_NAME@92..103 "likeStory" [Newline("\n"), Whitespace("\t")] [],
+                            name: GraphqlLiteralName {
+                                value_token: IDENT@92..103 "likeStory" [Newline("\n"), Whitespace("\t")] [],
                             },
                             arguments: missing (optional),
                             directives: GraphqlDirectiveList [],
@@ -166,10 +162,10 @@ GraphqlRoot {
                         GraphqlBogus {
                             items: [
                                 GraphqlVariableDefinition {
-                                    variable: GraphqlVariable {
+                                    variable: GraphqlVariableBinding {
                                         dollar_token: DOLLAR@114..115 "$" [] [],
-                                        name: GraphqlName {
-                                            value_token: GRAPHQL_NAME@115..122 "storyId" [] [],
+                                        name: GraphqlLiteralName {
+                                            value_token: IDENT@115..122 "storyId" [] [],
                                         },
                                     },
                                     colon_token: COLON@122..124 ":" [] [Whitespace(" ")],
@@ -186,10 +182,10 @@ GraphqlRoot {
                                     ],
                                 },
                                 GraphqlVariableDefinition {
-                                    variable: GraphqlVariable {
+                                    variable: GraphqlVariableBinding {
                                         dollar_token: DOLLAR@128..129 "$" [] [],
-                                        name: GraphqlName {
-                                            value_token: GRAPHQL_NAME@129..137 "comments" [] [],
+                                        name: GraphqlLiteralName {
+                                            value_token: IDENT@129..137 "comments" [] [],
                                         },
                                     },
                                     colon_token: COLON@137..139 ":" [] [Whitespace(" ")],
@@ -206,10 +202,10 @@ GraphqlRoot {
                                     ],
                                 },
                                 GraphqlVariableDefinition {
-                                    variable: GraphqlVariable {
+                                    variable: GraphqlVariableBinding {
                                         dollar_token: DOLLAR@143..144 "$" [] [],
-                                        name: GraphqlName {
-                                            value_token: GRAPHQL_NAME@144..148 "tags" [] [],
+                                        name: GraphqlLiteralName {
+                                            value_token: IDENT@144..148 "tags" [] [],
                                         },
                                     },
                                     colon_token: COLON@148..150 ":" [] [Whitespace(" ")],
@@ -240,8 +236,8 @@ GraphqlRoot {
                     selections: GraphqlSelectionList [
                         GraphqlField {
                             alias: missing (optional),
-                            name: GraphqlName {
-                                value_token: GRAPHQL_NAME@156..167 "likeStory" [Newline("\n"), Whitespace("\t")] [],
+                            name: GraphqlLiteralName {
+                                value_token: IDENT@156..167 "likeStory" [Newline("\n"), Whitespace("\t")] [],
                             },
                             arguments: missing (optional),
                             directives: GraphqlDirectiveList [],
@@ -270,10 +266,10 @@ GraphqlRoot {
         0: L_PAREN@6..7 "(" [] []
         1: GRAPHQL_BOGUS@7..89
           0: GRAPHQL_VARIABLE_DEFINITION@7..20
-            0: GRAPHQL_VARIABLE@7..15
+            0: GRAPHQL_VARIABLE_BINDING@7..15
               0: DOLLAR@7..8 "$" [] []
-              1: GRAPHQL_NAME@8..15
-                0: GRAPHQL_NAME@8..15 "storyId" [] []
+              1: GRAPHQL_LITERAL_NAME@8..15
+                0: IDENT@8..15 "storyId" [] []
             1: COLON@15..17 ":" [] [Whitespace(" ")]
             2: GRAPHQL_NON_NULL_TYPE@17..20
               0: (empty)
@@ -281,10 +277,10 @@ GraphqlRoot {
             3: (empty)
             4: GRAPHQL_DIRECTIVE_LIST@20..20
           1: GRAPHQL_VARIABLE_DEFINITION@20..36
-            0: GRAPHQL_VARIABLE@20..29
+            0: GRAPHQL_VARIABLE_BINDING@20..29
               0: DOLLAR@20..21 "$" [] []
-              1: GRAPHQL_NAME@21..29
-                0: GRAPHQL_NAME@21..29 "comments" [] []
+              1: GRAPHQL_LITERAL_NAME@21..29
+                0: IDENT@21..29 "comments" [] []
             1: COLON@29..31 ":" [] [Whitespace(" ")]
             2: GRAPHQL_LIST_TYPE@31..36
               0: L_BRACK@31..32 "[" [] []
@@ -295,10 +291,10 @@ GraphqlRoot {
             3: (empty)
             4: GRAPHQL_DIRECTIVE_LIST@36..36
           2: GRAPHQL_VARIABLE_DEFINITION@36..49
-            0: GRAPHQL_VARIABLE@36..41
+            0: GRAPHQL_VARIABLE_BINDING@36..41
               0: DOLLAR@36..37 "$" [] []
-              1: GRAPHQL_NAME@37..41
-                0: GRAPHQL_NAME@37..41 "tags" [] []
+              1: GRAPHQL_LITERAL_NAME@37..41
+                0: IDENT@37..41 "tags" [] []
             1: COLON@41..43 ":" [] [Whitespace(" ")]
             2: GRAPHQL_NON_NULL_TYPE@43..49
               0: GRAPHQL_LIST_TYPE@43..46
@@ -311,31 +307,29 @@ GraphqlRoot {
             3: (empty)
             4: GRAPHQL_DIRECTIVE_LIST@49..49
           3: GRAPHQL_VARIABLE_DEFINITION@49..66
-            0: GRAPHQL_VARIABLE@49..55
+            0: GRAPHQL_VARIABLE_BINDING@49..55
               0: DOLLAR@49..50 "$" [] []
-              1: GRAPHQL_NAME@50..55
-                0: GRAPHQL_NAME@50..55 "posts" [] []
+              1: GRAPHQL_LITERAL_NAME@50..55
+                0: IDENT@50..55 "posts" [] []
             1: COLON@55..57 ":" [] [Whitespace(" ")]
-            2: GRAPHQL_NAMED_TYPE@57..66
-              0: GRAPHQL_NAME@57..66
-                0: GRAPHQL_NAME@57..66 "PostInput" [] []
+            2: GRAPHQL_NAME_REFERENCE@57..66
+              0: IDENT@57..66 "PostInput" [] []
             3: (empty)
             4: GRAPHQL_DIRECTIVE_LIST@66..66
           4: GRAPHQL_BOGUS@66..70
             0: R_BRACK@66..67 "]" [] []
             1: BANG@67..70 "!" [] [Skipped(","), Whitespace(" ")]
           5: GRAPHQL_VARIABLE_DEFINITION@70..89
-            0: GRAPHQL_VARIABLE@70..76
+            0: GRAPHQL_VARIABLE_BINDING@70..76
               0: DOLLAR@70..71 "$" [] []
-              1: GRAPHQL_NAME@71..76
-                0: GRAPHQL_NAME@71..76 "input" [] []
+              1: GRAPHQL_LITERAL_NAME@71..76
+                0: IDENT@71..76 "input" [] []
             1: COLON@76..78 ":" [] [Whitespace(" ")]
             2: GRAPHQL_LIST_TYPE@78..89
               0: L_BRACK@78..79 "[" [] []
               1: GRAPHQL_NON_NULL_TYPE@79..89
-                0: GRAPHQL_NAMED_TYPE@79..88
-                  0: GRAPHQL_NAME@79..88
-                    0: GRAPHQL_NAME@79..88 "InputType" [] []
+                0: GRAPHQL_NAME_REFERENCE@79..88
+                  0: IDENT@79..88 "InputType" [] []
                 1: BANG@88..89 "!" [] []
               2: (empty)
             3: (empty)
@@ -347,8 +341,8 @@ GraphqlRoot {
         1: GRAPHQL_SELECTION_LIST@92..103
           0: GRAPHQL_FIELD@92..103
             0: (empty)
-            1: GRAPHQL_NAME@92..103
-              0: GRAPHQL_NAME@92..103 "likeStory" [Newline("\n"), Whitespace("\t")] []
+            1: GRAPHQL_LITERAL_NAME@92..103
+              0: IDENT@92..103 "likeStory" [Newline("\n"), Whitespace("\t")] []
             2: (empty)
             3: GRAPHQL_DIRECTIVE_LIST@103..103
             4: (empty)
@@ -360,10 +354,10 @@ GraphqlRoot {
         0: L_PAREN@113..114 "(" [] []
         1: GRAPHQL_BOGUS@114..153
           0: GRAPHQL_VARIABLE_DEFINITION@114..125
-            0: GRAPHQL_VARIABLE@114..122
+            0: GRAPHQL_VARIABLE_BINDING@114..122
               0: DOLLAR@114..115 "$" [] []
-              1: GRAPHQL_NAME@115..122
-                0: GRAPHQL_NAME@115..122 "storyId" [] []
+              1: GRAPHQL_LITERAL_NAME@115..122
+                0: IDENT@115..122 "storyId" [] []
             1: COLON@122..124 ":" [] [Whitespace(" ")]
             2: GRAPHQL_NON_NULL_TYPE@124..125
               0: (empty)
@@ -373,10 +367,10 @@ GraphqlRoot {
           1: GRAPHQL_BOGUS@125..128
             0: L_BRACK@125..128 "[" [] [Skipped(","), Whitespace(" ")]
           2: GRAPHQL_VARIABLE_DEFINITION@128..140
-            0: GRAPHQL_VARIABLE@128..137
+            0: GRAPHQL_VARIABLE_BINDING@128..137
               0: DOLLAR@128..129 "$" [] []
-              1: GRAPHQL_NAME@129..137
-                0: GRAPHQL_NAME@129..137 "comments" [] []
+              1: GRAPHQL_LITERAL_NAME@129..137
+                0: IDENT@129..137 "comments" [] []
             1: COLON@137..139 ":" [] [Whitespace(" ")]
             2: GRAPHQL_NON_NULL_TYPE@139..140
               0: (empty)
@@ -386,10 +380,10 @@ GraphqlRoot {
           3: GRAPHQL_BOGUS@140..143
             0: R_BRACK@140..143 "]" [] [Skipped(","), Whitespace(" ")]
           4: GRAPHQL_VARIABLE_DEFINITION@143..153
-            0: GRAPHQL_VARIABLE@143..148
+            0: GRAPHQL_VARIABLE_BINDING@143..148
               0: DOLLAR@143..144 "$" [] []
-              1: GRAPHQL_NAME@144..148
-                0: GRAPHQL_NAME@144..148 "tags" [] []
+              1: GRAPHQL_LITERAL_NAME@144..148
+                0: IDENT@144..148 "tags" [] []
             1: COLON@148..150 ":" [] [Whitespace(" ")]
             2: GRAPHQL_LIST_TYPE@150..153
               0: L_BRACK@150..151 "[" [] []
@@ -410,8 +404,8 @@ GraphqlRoot {
         1: GRAPHQL_SELECTION_LIST@156..167
           0: GRAPHQL_FIELD@156..167
             0: (empty)
-            1: GRAPHQL_NAME@156..167
-              0: GRAPHQL_NAME@156..167 "likeStory" [Newline("\n"), Whitespace("\t")] []
+            1: GRAPHQL_LITERAL_NAME@156..167
+              0: IDENT@156..167 "likeStory" [Newline("\n"), Whitespace("\t")] []
             2: (empty)
             3: GRAPHQL_DIRECTIVE_LIST@167..167
             4: (empty)

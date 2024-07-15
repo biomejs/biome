@@ -43,7 +43,9 @@ GraphqlBogusSelection = SyntaxElement*
 GraphqlBogusValue = SyntaxElement*
 GraphqlBogusType = SyntaxElement*
 
-GraphqlName = value: 'graphql_name'
+GraphqlLiteralName = value: 'ident'
+GraphqlNameBinding = value: 'ident'
+GraphqlNameReference = value: 'ident'
 
 GraphqlRoot =
 	bom: 'UNICODE_BOM'?
@@ -53,21 +55,26 @@ GraphqlRoot =
 GraphqlDefinitionList = AnyGraphqlDefinition*
 
 AnyGraphqlDefinition =
-	AnyGraphqlOperationDefinition
+	GraphqlOperationDefinition
+	| GraphqlSelectionSet
 	| GraphqlFragmentDefinition
 	| GraphqlDirectiveDefinition
 	| GraphqlSchemaDefinition
-	// Type Definitions
-	| GraphqlScalarTypeDefinition
+	| GraphqlSchemaExtension
+	| AnyGraphqlTypeDefinition
+	| AnyGraphqlTypeExtension
+	| GraphqlBogusDefinition
+
+AnyGraphqlTypeDefinition =
+	GraphqlScalarTypeDefinition
 	| GraphqlObjectTypeDefinition
 	| GraphqlInterfaceTypeDefinition
 	| GraphqlUnionTypeDefinition
 	| GraphqlEnumTypeDefinition
 	| GraphqlInputObjectTypeDefinition
-	| GraphqlBogusDefinition
-	// Type System Extensions: we may possible want to group those in an enum outside of 'Definition'
-	| GraphqlSchemaExtension
-	| GraphqlScalarTypeExtension
+
+AnyGraphqlTypeExtension =
+	GraphqlScalarTypeExtension
 	| GraphqlObjectTypeExtension
 	| GraphqlInterfaceTypeExtension
 	| GraphqlUnionTypeExtension
@@ -81,7 +88,7 @@ AnyGraphqlOperationDefinition = GraphqlOperationDefinition | GraphqlSelectionSet
 // https://spec.graphql.org/October2021/#sec-Language.Operations
 GraphqlOperationDefinition =
 	type: GraphqlOperationType
-	name: GraphqlName?
+	name: GraphqlNameBinding?
 	variables: GraphqlVariableDefinitions?
 	directives: GraphqlDirectiveList
 	selection_set: GraphqlSelectionSet
@@ -111,7 +118,7 @@ AnyGraphqlSelection =
 // https://spec.graphql.org/October2021/#sec-Language.Fields
 GraphqlField =
 	alias: GraphqlAlias?
-	name: GraphqlName
+	name: GraphqlLiteralName
 	arguments: GraphqlArguments?
 	directives: GraphqlDirectiveList
 	selection_set: GraphqlSelectionSet?
@@ -120,7 +127,7 @@ GraphqlField =
 //   ^^^
 // https://spec.graphql.org/October2021/#Alias
 GraphqlAlias =
-	value: GraphqlName
+	value: GraphqlLiteralName
 	':'
 
 // { b(c: d) }
@@ -137,7 +144,7 @@ GraphqlArgumentList = GraphqlArgument*
 //     ^^^^
 // https://spec.graphql.org/October2021/#sec-Language.Arguments
 GraphqlArgument =
-	name: GraphqlName
+	name: GraphqlLiteralName
 	':'
 	value: AnyGraphqlValue
 
@@ -146,7 +153,7 @@ GraphqlArgument =
 // https://spec.graphql.org/October2021/#sec-Language.Fragments
 GraphqlFragmentSpread =
 	'...'
-	name: GraphqlName
+	name: GraphqlNameReference
 	directives: GraphqlDirectiveList
 
 // { ... on A { b } }
@@ -162,17 +169,17 @@ GraphqlInlineFragment =
 // https://spec.graphql.org/October2021/#sec-Language.Fragments
 GraphqlFragmentDefinition =
 	'fragment'
-	name: GraphqlName
+	name: GraphqlNameBinding
 	type_condition: GraphqlTypeCondition
 	directives: GraphqlDirectiveList
 	selection_set: GraphqlSelectionSet
 
 GraphqlTypeCondition =
 	'on'
-	type: GraphqlNamedType
+	type: GraphqlNameReference
 
 AnyGraphqlValue =
-	GraphqlVariable
+	GraphqlVariableReference
 	| GraphqlStringValue
 	| GraphqlFloatValue
 	| GraphqlIntValue
@@ -199,7 +206,7 @@ GraphqlBooleanValue = value_token: ('true' | 'false')
 GraphqlNullValue = 'null'
 
 // https://spec.graphql.org/October2021/#sec-Enum-Value
-GraphqlEnumValue = GraphqlName
+GraphqlEnumValue = value: GraphqlLiteralName
 
 // https://spec.graphql.org/October2021/#sec-List-Value
 GraphqlListValue =
@@ -219,7 +226,7 @@ GraphqlObjectValueMemberList = GraphqlObjectField*
 
 // https://spec.graphql.org/October2021/#ObjectField
 GraphqlObjectField =
-	name: GraphqlName
+	name: GraphqlLiteralName
 	':'
 	value: AnyGraphqlValue
 
@@ -234,16 +241,21 @@ GraphqlVariableDefinitionList = GraphqlVariableDefinition*
 // $episode: Episode = JEDI
 // https://spec.graphql.org/October2021/#VariableDefinition
 GraphqlVariableDefinition =
-	variable: GraphqlVariable
+	variable: GraphqlVariableBinding
 	':'
 	type: AnyGraphqlType
 	default: GraphqlDefaultValue?
 	directives: GraphqlDirectiveList
 
 // https://spec.graphql.org/October2021/#Variable
-GraphqlVariable =
+GraphqlVariableBinding =
 	'$'
-	name: GraphqlName
+	name: GraphqlLiteralName
+
+// https://spec.graphql.org/October2021/#Variable
+GraphqlVariableReference =
+	'$'
+	name: GraphqlLiteralName
 
 // https://spec.graphql.org/October2021/#DefaultValue
 GraphqlDefaultValue =
@@ -256,12 +268,7 @@ AnyGraphqlType =
 	| GraphqlNonNullType
 	| GraphqlBogusType
 
-AnyGraphqlPrimitiveType = GraphqlNamedType | GraphqlListType
-
-// nullable, like String
-// https://spec.graphql.org/October2021/#NamedType
-GraphqlNamedType =
-	name: GraphqlName
+AnyGraphqlPrimitiveType = GraphqlNameReference | GraphqlListType
 
 // nullable, [String]
 // https://spec.graphql.org/October2021/#ListType
@@ -286,7 +293,7 @@ GraphqlDirectiveList =
 // https://spec.graphql.org/October2021/#Directive
 GraphqlDirective =
 	'@'
-	name: GraphqlName
+	name: GraphqlNameReference
 	arguments: GraphqlArguments?
 
 // "abc" schema {query: Query}
@@ -321,7 +328,7 @@ GraphqlRootOperationTypes =
 GraphqlRootOperationTypeDefinition =
 	operation_type: GraphqlOperationType
 	':'
-	named_type: GraphqlNamedType
+	named_type: GraphqlNameReference
 
 // "abc" schema {query: Query}
 // ^^^^^
@@ -332,14 +339,14 @@ GraphqlDescription =
 GraphqlScalarTypeDefinition =
 	description: GraphqlDescription?
 	'scalar'
-	name: GraphqlName
+	name: GraphqlNameBinding
 	directives: GraphqlDirectiveList
 
 // https://spec.graphql.org/October2021/#sec-Scalar-Extensions
 GraphqlScalarTypeExtension =
 	'extend'
 	'scalar'
-	name: GraphqlName
+	name: GraphqlNameReference
 	directives: GraphqlDirectiveList
 
 // type A implements B {c: d}
@@ -347,7 +354,7 @@ GraphqlScalarTypeExtension =
 GraphqlObjectTypeDefinition =
 	description: GraphqlDescription?
 	'type'
-	name: GraphqlName
+	name: GraphqlNameBinding
 	implements: GraphqlImplementsInterfaces?
 	directives: GraphqlDirectiveList
 	fields: GraphqlFieldsDefinition?
@@ -357,7 +364,7 @@ GraphqlObjectTypeDefinition =
 GraphqlObjectTypeExtension =
 	'extend'
 	'type'
-	name: GraphqlName
+	name: GraphqlNameReference
 	implements: GraphqlImplementsInterfaces?
 	directives: GraphqlDirectiveList
 	fields: GraphqlFieldsDefinition?
@@ -372,7 +379,7 @@ GraphqlImplementsInterfaces =
 	interfaces: GraphqlImplementsInterfaceList
 
 // A & B & C
-GraphqlImplementsInterfaceList = (GraphqlNamedType ('&' GraphqlNamedType)*)
+GraphqlImplementsInterfaceList = (GraphqlNameReference ('&' GraphqlNameReference)*)
 
 // type A implements B {c: d}
 //                     ^^^^^^
@@ -387,7 +394,7 @@ GraphqlFieldDefinitionList = GraphqlFieldDefinition*
 // https://spec.graphql.org/October2021/#FieldDefinition
 GraphqlFieldDefinition =
 	description: GraphqlDescription?
-	name: GraphqlName
+	name: GraphqlLiteralName
 	arguments: GraphqlArgumentsDefinition?
 	':'
 	type: AnyGraphqlType
@@ -407,7 +414,7 @@ GraphqlArgumentDefinitionList = GraphqlInputValueDefinition*
 // https://spec.graphql.org/October2021/#InputValueDefinition
 GraphqlInputValueDefinition =
 	description: GraphqlDescription?
-	name: GraphqlName
+	name: GraphqlLiteralName
 	':'
 	type: AnyGraphqlType
 	default: GraphqlDefaultValue?
@@ -418,7 +425,7 @@ GraphqlInputValueDefinition =
 GraphqlInterfaceTypeDefinition =
 	description: GraphqlDescription?
 	'interface'
-	name: GraphqlName
+	name: GraphqlNameBinding
 	implements: GraphqlImplementsInterfaces?
 	directives: GraphqlDirectiveList
 	fields: GraphqlFieldsDefinition?
@@ -428,7 +435,7 @@ GraphqlInterfaceTypeDefinition =
 GraphqlInterfaceTypeExtension =
 	'extend'
 	'interface'
-	name: GraphqlName
+	name: GraphqlNameReference
 	implements: GraphqlImplementsInterfaces?
 	directives: GraphqlDirectiveList
 	fields: GraphqlFieldsDefinition?
@@ -440,7 +447,7 @@ GraphqlInterfaceTypeExtension =
 GraphqlUnionTypeDefinition =
 	description: GraphqlDescription?
 	'union'
-	name: GraphqlName
+	name: GraphqlNameBinding
 	directives: GraphqlDirectiveList
 	union_members: GraphqlUnionMemberTypes?
 
@@ -451,14 +458,14 @@ GraphqlUnionMemberTypes =
 	members: GraphqlUnionMemberTypeList
 
 // A | B | C
-GraphqlUnionMemberTypeList = (GraphqlNamedType ('|' GraphqlNamedType)*)
+GraphqlUnionMemberTypeList = (GraphqlNameReference ('|' GraphqlNameReference)*)
 
 // https://spec.graphql.org/October2021/#sec-Union-Extensions
 // extend union A @d
 GraphqlUnionTypeExtension =
 	'extend'
 	'union'
-	name: GraphqlName
+	name: GraphqlNameReference
 	directives: GraphqlDirectiveList
 	union_members: GraphqlUnionMemberTypes?
 
@@ -470,7 +477,7 @@ GraphqlUnionTypeExtension =
 GraphqlEnumTypeDefinition =
 	description: GraphqlDescription?
 	'enum'
-	name: GraphqlName
+	name: GraphqlNameBinding
 	directives: GraphqlDirectiveList
 	enum_values: GraphqlEnumValuesDefinition?
 
@@ -489,7 +496,7 @@ GraphqlEnumValueList = GraphqlEnumValueDefinition*
 // https://spec.graphql.org/October2021/#EnumValueDefinition
 GraphqlEnumValueDefinition =
 	description: GraphqlDescription?
-	value: GraphqlEnumValue
+	value: GraphqlLiteralName
 	directives: GraphqlDirectiveList
 
 // https://spec.graphql.org/October2021/#sec-Enum-Extensions
@@ -497,7 +504,7 @@ GraphqlEnumValueDefinition =
 GraphqlEnumTypeExtension =
 	'extend'
 	'enum'
-	name: GraphqlName
+	name: GraphqlNameReference
 	directives: GraphqlDirectiveList
 	enum_values: GraphqlEnumValuesDefinition?
 
@@ -506,7 +513,7 @@ GraphqlEnumTypeExtension =
 GraphqlInputObjectTypeDefinition =
 	description: GraphqlDescription?
 	'input'
-	name: GraphqlName
+	name: GraphqlNameBinding
 	directives: GraphqlDirectiveList
 	input_fields: GraphqlInputFieldsDefinition?
 
@@ -523,7 +530,7 @@ GraphqlInputFieldList = GraphqlInputValueDefinition*
 GraphqlInputObjectTypeExtension =
 	'extend'
 	'input'
-	name: GraphqlName
+	name: GraphqlNameReference
 	directives: GraphqlDirectiveList
 	input_fields: GraphqlInputFieldsDefinition?
 
@@ -535,7 +542,7 @@ GraphqlDirectiveDefinition =
 	description: GraphqlDescription?
 	'directive'
 	'@'
-	name: GraphqlName
+	name: GraphqlNameBinding
 	arguments: GraphqlArgumentsDefinition?
 	'repeatable'?
 	'on'

@@ -103,8 +103,8 @@ GraphqlRoot {
             selections: GraphqlSelectionList [
                 GraphqlField {
                     alias: missing (optional),
-                    name: GraphqlName {
-                        value_token: GRAPHQL_NAME@1..8 "hero" [Newline("\n"), Whitespace("\t")] [Whitespace(" ")],
+                    name: GraphqlLiteralName {
+                        value_token: IDENT@1..8 "hero" [Newline("\n"), Whitespace("\t")] [Whitespace(" ")],
                     },
                     arguments: missing (optional),
                     directives: GraphqlDirectiveList [],
@@ -113,8 +113,8 @@ GraphqlRoot {
                         selections: GraphqlSelectionList [
                             GraphqlField {
                                 alias: missing (optional),
-                                name: GraphqlName {
-                                    value_token: GRAPHQL_NAME@9..17 "name" [Newline("\n"), Whitespace("\t\t")] [Skipped(",")],
+                                name: GraphqlLiteralName {
+                                    value_token: IDENT@9..17 "name" [Newline("\n"), Whitespace("\t\t")] [Skipped(",")],
                                 },
                                 arguments: missing (optional),
                                 directives: GraphqlDirectiveList [],
@@ -122,8 +122,8 @@ GraphqlRoot {
                             },
                             GraphqlField {
                                 alias: missing (optional),
-                                name: GraphqlName {
-                                    value_token: GRAPHQL_NAME@17..23 "age" [Newline("\n"), Whitespace("\t\t")] [],
+                                name: GraphqlLiteralName {
+                                    value_token: IDENT@17..23 "age" [Newline("\n"), Whitespace("\t\t")] [],
                                 },
                                 arguments: missing (optional),
                                 directives: GraphqlDirectiveList [],
@@ -135,8 +135,8 @@ GraphqlRoot {
                 },
                 GraphqlField {
                     alias: missing (optional),
-                    name: GraphqlName {
-                        value_token: GRAPHQL_NAME@26..34 "query" [Newline("\n"), Newline("\n")] [Whitespace(" ")],
+                    name: GraphqlLiteralName {
+                        value_token: IDENT@26..34 "query" [Newline("\n"), Newline("\n")] [Whitespace(" ")],
                     },
                     arguments: missing (optional),
                     directives: GraphqlDirectiveList [],
@@ -150,8 +150,8 @@ GraphqlRoot {
             selections: GraphqlSelectionList [
                 GraphqlBogusSelection {
                     items: [
-                        GraphqlName {
-                            value_token: GRAPHQL_NAME@38..44 "hero" [Newline("\n"), Whitespace("\t")] [],
+                        GraphqlLiteralName {
+                            value_token: IDENT@38..44 "hero" [Newline("\n"), Whitespace("\t")] [],
                         },
                         GraphqlBogus {
                             items: [
@@ -159,8 +159,8 @@ GraphqlRoot {
                                 GraphqlBogus {
                                     items: [
                                         GraphqlArgument {
-                                            name: GraphqlName {
-                                                value_token: GRAPHQL_NAME@45..49 "name" [] [],
+                                            name: GraphqlLiteralName {
+                                                value_token: IDENT@45..49 "name" [] [],
                                             },
                                             colon_token: COLON@49..51 ":" [] [Whitespace(" ")],
                                             value: GraphqlStringValue {
@@ -174,8 +174,8 @@ GraphqlRoot {
                                             ],
                                         },
                                         GraphqlArgument {
-                                            name: GraphqlName {
-                                                value_token: GRAPHQL_NAME@68..74 "hero" [Newline("\n"), Whitespace("\t")] [],
+                                            name: GraphqlLiteralName {
+                                                value_token: IDENT@68..74 "hero" [Newline("\n"), Whitespace("\t")] [],
                                             },
                                             colon_token: missing (required),
                                             value: missing (required),
@@ -194,8 +194,8 @@ GraphqlRoot {
                 },
                 GraphqlField {
                     alias: missing (optional),
-                    name: GraphqlName {
-                        value_token: GRAPHQL_NAME@75..80 "name" [] [Whitespace(" ")],
+                    name: GraphqlLiteralName {
+                        value_token: IDENT@75..80 "name" [] [Whitespace(" ")],
                     },
                     arguments: missing (optional),
                     directives: GraphqlDirectiveList [],
@@ -209,8 +209,8 @@ GraphqlRoot {
                 },
                 GraphqlField {
                     alias: missing (optional),
-                    name: GraphqlName {
-                        value_token: GRAPHQL_NAME@93..104 "country" [Newline("\n"), Whitespace("\t\t")] [Skipped(",")],
+                    name: GraphqlLiteralName {
+                        value_token: IDENT@93..104 "country" [Newline("\n"), Whitespace("\t\t")] [Skipped(",")],
                     },
                     arguments: missing (optional),
                     directives: GraphqlDirectiveList [],
@@ -218,8 +218,8 @@ GraphqlRoot {
                 },
                 GraphqlField {
                     alias: missing (optional),
-                    name: GraphqlName {
-                        value_token: GRAPHQL_NAME@104..112 "name" [Newline("\n"), Whitespace("\t\t")] [Skipped(",")],
+                    name: GraphqlLiteralName {
+                        value_token: IDENT@104..112 "name" [Newline("\n"), Whitespace("\t\t")] [Skipped(",")],
                     },
                     arguments: missing (optional),
                     directives: GraphqlDirectiveList [],
@@ -227,8 +227,8 @@ GraphqlRoot {
                 },
                 GraphqlField {
                     alias: missing (optional),
-                    name: GraphqlName {
-                        value_token: GRAPHQL_NAME@112..118 "age" [Newline("\n"), Whitespace("\t\t")] [],
+                    name: GraphqlLiteralName {
+                        value_token: IDENT@112..118 "age" [Newline("\n"), Whitespace("\t\t")] [],
                     },
                     arguments: missing (optional),
                     directives: GraphqlDirectiveList [],
@@ -247,15 +247,15 @@ GraphqlRoot {
             selections: GraphqlSelectionList [
                 GraphqlField {
                     alias: missing (optional),
-                    name: GraphqlName {
-                        value_token: GRAPHQL_NAME@126..132 "hero" [Newline("\n"), Whitespace("\t")] [],
+                    name: GraphqlLiteralName {
+                        value_token: IDENT@126..132 "hero" [Newline("\n"), Whitespace("\t")] [],
                     },
                     arguments: GraphqlArguments {
                         l_paren_token: L_PAREN@132..133 "(" [] [],
                         arguments: GraphqlArgumentList [
                             GraphqlArgument {
-                                name: GraphqlName {
-                                    value_token: GRAPHQL_NAME@133..137 "name" [] [],
+                                name: GraphqlLiteralName {
+                                    value_token: IDENT@133..137 "name" [] [],
                                 },
                                 colon_token: COLON@137..139 ":" [] [Whitespace(" ")],
                                 value: GraphqlStringValue {
@@ -271,8 +271,8 @@ GraphqlRoot {
                         selections: GraphqlSelectionList [
                             GraphqlField {
                                 alias: missing (optional),
-                                name: GraphqlName {
-                                    value_token: GRAPHQL_NAME@154..165 "country" [Newline("\n"), Whitespace("\t\t")] [Skipped(",")],
+                                name: GraphqlLiteralName {
+                                    value_token: IDENT@154..165 "country" [Newline("\n"), Whitespace("\t\t")] [Skipped(",")],
                                 },
                                 arguments: missing (optional),
                                 directives: GraphqlDirectiveList [],
@@ -280,8 +280,8 @@ GraphqlRoot {
                             },
                             GraphqlField {
                                 alias: missing (optional),
-                                name: GraphqlName {
-                                    value_token: GRAPHQL_NAME@165..173 "name" [Newline("\n"), Whitespace("\t\t")] [Skipped(",")],
+                                name: GraphqlLiteralName {
+                                    value_token: IDENT@165..173 "name" [Newline("\n"), Whitespace("\t\t")] [Skipped(",")],
                                 },
                                 arguments: missing (optional),
                                 directives: GraphqlDirectiveList [],
@@ -289,8 +289,8 @@ GraphqlRoot {
                             },
                             GraphqlField {
                                 alias: missing (optional),
-                                name: GraphqlName {
-                                    value_token: GRAPHQL_NAME@173..180 "age" [Newline("\n"), Whitespace("\t\t")] [Skipped(",")],
+                                name: GraphqlLiteralName {
+                                    value_token: IDENT@173..180 "age" [Newline("\n"), Whitespace("\t\t")] [Skipped(",")],
                                 },
                                 arguments: missing (optional),
                                 directives: GraphqlDirectiveList [],
@@ -298,8 +298,8 @@ GraphqlRoot {
                             },
                             GraphqlBogusSelection {
                                 items: [
-                                    GraphqlName {
-                                        value_token: GRAPHQL_NAME@180..189 "height" [Newline("\n"), Whitespace("\t\t")] [],
+                                    GraphqlLiteralName {
+                                        value_token: IDENT@180..189 "height" [Newline("\n"), Whitespace("\t\t")] [],
                                     },
                                     GraphqlBogus {
                                         items: [
@@ -307,13 +307,13 @@ GraphqlRoot {
                                             GraphqlBogus {
                                                 items: [
                                                     GraphqlArgument {
-                                                        name: GraphqlName {
-                                                            value_token: GRAPHQL_NAME@190..195 "unit" [] [Whitespace(" ")],
+                                                        name: GraphqlLiteralName {
+                                                            value_token: IDENT@190..195 "unit" [] [Whitespace(" ")],
                                                         },
                                                         colon_token: missing (required),
                                                         value: GraphqlEnumValue {
-                                                            graphql_name: GraphqlName {
-                                                                value_token: GRAPHQL_NAME@195..200 "FOOT" [] [Skipped(",")],
+                                                            value: GraphqlLiteralName {
+                                                                value_token: IDENT@195..200 "FOOT" [] [Skipped(",")],
                                                             },
                                                         },
                                                     },
@@ -325,8 +325,8 @@ GraphqlRoot {
                                                         ],
                                                     },
                                                     GraphqlArgument {
-                                                        name: GraphqlName {
-                                                            value_token: GRAPHQL_NAME@208..218 "ironMan" [Newline("\n"), Whitespace("  ")] [],
+                                                        name: GraphqlLiteralName {
+                                                            value_token: IDENT@208..218 "ironMan" [Newline("\n"), Whitespace("  ")] [],
                                                         },
                                                         colon_token: COLON@218..220 ":" [] [Whitespace(" ")],
                                                         value: missing (required),
@@ -345,8 +345,8 @@ GraphqlRoot {
                             },
                             GraphqlField {
                                 alias: GraphqlAlias {
-                                    value: GraphqlName {
-                                        value_token: GRAPHQL_NAME@221..225 "name" [] [],
+                                    value: GraphqlLiteralName {
+                                        value_token: IDENT@221..225 "name" [] [],
                                     },
                                     colon_token: COLON@225..227 ":" [] [Whitespace(" ")],
                                 },
@@ -382,8 +382,8 @@ GraphqlRoot {
                             l_paren_token: L_PAREN@251..252 "(" [] [],
                             arguments: GraphqlArgumentList [
                                 GraphqlArgument {
-                                    name: GraphqlName {
-                                        value_token: GRAPHQL_NAME@252..256 "name" [] [],
+                                    name: GraphqlLiteralName {
+                                        value_token: IDENT@252..256 "name" [] [],
                                     },
                                     colon_token: COLON@256..258 ":" [] [Whitespace(" ")],
                                     value: GraphqlStringValue {
@@ -404,20 +404,20 @@ GraphqlRoot {
             selections: GraphqlSelectionList [
                 GraphqlField {
                     alias: GraphqlAlias {
-                        value: GraphqlName {
-                            value_token: GRAPHQL_NAME@276..286 "ironMan" [Newline("\n"), Whitespace("  ")] [],
+                        value: GraphqlLiteralName {
+                            value_token: IDENT@276..286 "ironMan" [Newline("\n"), Whitespace("  ")] [],
                         },
                         colon_token: COLON@286..288 ":" [] [Whitespace(" ")],
                     },
-                    name: GraphqlName {
-                        value_token: GRAPHQL_NAME@288..292 "hero" [] [],
+                    name: GraphqlLiteralName {
+                        value_token: IDENT@288..292 "hero" [] [],
                     },
                     arguments: GraphqlArguments {
                         l_paren_token: L_PAREN@292..293 "(" [] [],
                         arguments: GraphqlArgumentList [
                             GraphqlArgument {
-                                name: GraphqlName {
-                                    value_token: GRAPHQL_NAME@293..297 "name" [] [],
+                                name: GraphqlLiteralName {
+                                    value_token: IDENT@293..297 "name" [] [],
                                 },
                                 colon_token: COLON@297..299 ":" [] [Whitespace(" ")],
                                 value: GraphqlStringValue {
@@ -433,8 +433,8 @@ GraphqlRoot {
                         selections: GraphqlSelectionList [
                             GraphqlField {
                                 alias: missing (optional),
-                                name: GraphqlName {
-                                    value_token: GRAPHQL_NAME@314..325 "country" [Newline("\n"), Whitespace("\t\t")] [Skipped(",")],
+                                name: GraphqlLiteralName {
+                                    value_token: IDENT@314..325 "country" [Newline("\n"), Whitespace("\t\t")] [Skipped(",")],
                                 },
                                 arguments: missing (optional),
                                 directives: GraphqlDirectiveList [],
@@ -442,20 +442,20 @@ GraphqlRoot {
                             },
                             GraphqlField {
                                 alias: GraphqlAlias {
-                                    value: GraphqlName {
-                                        value_token: GRAPHQL_NAME@325..337 "firstWife" [Newline("\n"), Whitespace("\t\t")] [],
+                                    value: GraphqlLiteralName {
+                                        value_token: IDENT@325..337 "firstWife" [Newline("\n"), Whitespace("\t\t")] [],
                                     },
                                     colon_token: COLON@337..339 ":" [] [Whitespace(" ")],
                                 },
-                                name: GraphqlName {
-                                    value_token: GRAPHQL_NAME@339..343 "wife" [] [],
+                                name: GraphqlLiteralName {
+                                    value_token: IDENT@339..343 "wife" [] [],
                                 },
                                 arguments: GraphqlArguments {
                                     l_paren_token: L_PAREN@343..344 "(" [] [],
                                     arguments: GraphqlArgumentList [
                                         GraphqlArgument {
-                                            name: GraphqlName {
-                                                value_token: GRAPHQL_NAME@344..348 "name" [] [],
+                                            name: GraphqlLiteralName {
+                                                value_token: IDENT@344..348 "name" [] [],
                                             },
                                             colon_token: COLON@348..350 ":" [] [Whitespace(" ")],
                                             value: GraphqlStringValue {
@@ -484,20 +484,20 @@ GraphqlRoot {
             selections: GraphqlSelectionList [
                 GraphqlField {
                     alias: GraphqlAlias {
-                        value: GraphqlName {
-                            value_token: GRAPHQL_NAME@372..382 "ironMan" [Newline("\n"), Whitespace("  ")] [],
+                        value: GraphqlLiteralName {
+                            value_token: IDENT@372..382 "ironMan" [Newline("\n"), Whitespace("  ")] [],
                         },
                         colon_token: COLON@382..384 ":" [] [Whitespace(" ")],
                     },
-                    name: GraphqlName {
-                        value_token: GRAPHQL_NAME@384..388 "hero" [] [],
+                    name: GraphqlLiteralName {
+                        value_token: IDENT@384..388 "hero" [] [],
                     },
                     arguments: GraphqlArguments {
                         l_paren_token: L_PAREN@388..389 "(" [] [],
                         arguments: GraphqlArgumentList [
                             GraphqlArgument {
-                                name: GraphqlName {
-                                    value_token: GRAPHQL_NAME@389..393 "name" [] [],
+                                name: GraphqlLiteralName {
+                                    value_token: IDENT@389..393 "name" [] [],
                                 },
                                 colon_token: COLON@393..395 ":" [] [Whitespace(" ")],
                                 value: GraphqlStringValue {
@@ -519,15 +519,15 @@ GraphqlRoot {
                         selections: GraphqlSelectionList [
                             GraphqlField {
                                 alias: missing (optional),
-                                name: GraphqlName {
-                                    value_token: GRAPHQL_NAME@411..422 "country" [Newline("\n"), Whitespace("\t\t")] [Whitespace(" ")],
+                                name: GraphqlLiteralName {
+                                    value_token: IDENT@411..422 "country" [Newline("\n"), Whitespace("\t\t")] [Whitespace(" ")],
                                 },
                                 arguments: missing (optional),
                                 directives: GraphqlDirectiveList [
                                     GraphqlDirective {
                                         at_token: AT@422..424 "@" [] [Skipped(",")],
-                                        name: GraphqlName {
-                                            value_token: GRAPHQL_NAME@424..432 "name" [Newline("\n"), Whitespace("\t\t")] [Skipped(",")],
+                                        name: GraphqlNameReference {
+                                            value_token: IDENT@424..432 "name" [Newline("\n"), Whitespace("\t\t")] [Skipped(",")],
                                         },
                                         arguments: missing (optional),
                                     },
@@ -536,8 +536,8 @@ GraphqlRoot {
                             },
                             GraphqlField {
                                 alias: missing (optional),
-                                name: GraphqlName {
-                                    value_token: GRAPHQL_NAME@432..438 "age" [Newline("\n"), Whitespace("\t\t")] [],
+                                name: GraphqlLiteralName {
+                                    value_token: IDENT@432..438 "age" [Newline("\n"), Whitespace("\t\t")] [],
                                 },
                                 arguments: missing (optional),
                                 directives: GraphqlDirectiveList [],
@@ -556,8 +556,8 @@ GraphqlRoot {
                 GraphqlBogusSelection {
                     items: [
                         GraphqlAlias {
-                            value: GraphqlName {
-                                value_token: GRAPHQL_NAME@464..474 "ironMan" [Newline("\n"), Whitespace("  ")] [],
+                            value: GraphqlLiteralName {
+                                value_token: IDENT@464..474 "ironMan" [Newline("\n"), Whitespace("  ")] [],
                             },
                             colon_token: COLON@474..476 ":" [] [Whitespace(" ")],
                         },
@@ -617,8 +617,8 @@ GraphqlRoot {
                         selections: GraphqlSelectionList [
                             GraphqlField {
                                 alias: missing (optional),
-                                name: GraphqlName {
-                                    value_token: GRAPHQL_NAME@520..527 "hero" [Newline("\n"), Whitespace("\t\t")] [],
+                                name: GraphqlLiteralName {
+                                    value_token: IDENT@520..527 "hero" [Newline("\n"), Whitespace("\t\t")] [],
                                 },
                                 arguments: missing (optional),
                                 directives: GraphqlDirectiveList [],
@@ -640,8 +640,8 @@ GraphqlRoot {
                     directives: GraphqlDirectiveList [
                         GraphqlDirective {
                             at_token: AT@542..543 "@" [] [],
-                            name: GraphqlName {
-                                value_token: GRAPHQL_NAME@543..550 "hero" [Newline("\n"), Whitespace("\t\t")] [],
+                            name: GraphqlNameReference {
+                                value_token: IDENT@543..550 "hero" [Newline("\n"), Whitespace("\t\t")] [],
                             },
                             arguments: missing (optional),
                         },
@@ -660,8 +660,8 @@ GraphqlRoot {
             selections: GraphqlSelectionList [
                 GraphqlFragmentSpread {
                     dotdotdot_token: DOT3@558..565 "..." [Newline("\n"), Whitespace("\t")] [Whitespace("  ")],
-                    name: GraphqlName {
-                        value_token: GRAPHQL_NAME@565..570 "Hero" [] [Whitespace(" ")],
+                    name: GraphqlNameReference {
+                        value_token: IDENT@565..570 "Hero" [] [Whitespace(" ")],
                     },
                     directives: GraphqlDirectiveList [
                         GraphqlDirective {
@@ -678,8 +678,8 @@ GraphqlRoot {
                 },
                 GraphqlField {
                     alias: missing (optional),
-                    name: GraphqlName {
-                        value_token: GRAPHQL_NAME@573..581 "name" [Newline("\n"), Whitespace("\t\t")] [Skipped(",")],
+                    name: GraphqlLiteralName {
+                        value_token: IDENT@573..581 "name" [Newline("\n"), Whitespace("\t\t")] [Skipped(",")],
                     },
                     arguments: missing (optional),
                     directives: GraphqlDirectiveList [],
@@ -687,8 +687,8 @@ GraphqlRoot {
                 },
                 GraphqlField {
                     alias: missing (optional),
-                    name: GraphqlName {
-                        value_token: GRAPHQL_NAME@581..587 "age" [Newline("\n"), Whitespace("\t\t")] [],
+                    name: GraphqlLiteralName {
+                        value_token: IDENT@581..587 "age" [Newline("\n"), Whitespace("\t\t")] [],
                     },
                     arguments: missing (optional),
                     directives: GraphqlDirectiveList [],
@@ -734,8 +734,8 @@ GraphqlRoot {
       1: GRAPHQL_SELECTION_LIST@1..34
         0: GRAPHQL_FIELD@1..26
           0: (empty)
-          1: GRAPHQL_NAME@1..8
-            0: GRAPHQL_NAME@1..8 "hero" [Newline("\n"), Whitespace("\t")] [Whitespace(" ")]
+          1: GRAPHQL_LITERAL_NAME@1..8
+            0: IDENT@1..8 "hero" [Newline("\n"), Whitespace("\t")] [Whitespace(" ")]
           2: (empty)
           3: GRAPHQL_DIRECTIVE_LIST@8..8
           4: GRAPHQL_SELECTION_SET@8..26
@@ -743,23 +743,23 @@ GraphqlRoot {
             1: GRAPHQL_SELECTION_LIST@9..23
               0: GRAPHQL_FIELD@9..17
                 0: (empty)
-                1: GRAPHQL_NAME@9..17
-                  0: GRAPHQL_NAME@9..17 "name" [Newline("\n"), Whitespace("\t\t")] [Skipped(",")]
+                1: GRAPHQL_LITERAL_NAME@9..17
+                  0: IDENT@9..17 "name" [Newline("\n"), Whitespace("\t\t")] [Skipped(",")]
                 2: (empty)
                 3: GRAPHQL_DIRECTIVE_LIST@17..17
                 4: (empty)
               1: GRAPHQL_FIELD@17..23
                 0: (empty)
-                1: GRAPHQL_NAME@17..23
-                  0: GRAPHQL_NAME@17..23 "age" [Newline("\n"), Whitespace("\t\t")] []
+                1: GRAPHQL_LITERAL_NAME@17..23
+                  0: IDENT@17..23 "age" [Newline("\n"), Whitespace("\t\t")] []
                 2: (empty)
                 3: GRAPHQL_DIRECTIVE_LIST@23..23
                 4: (empty)
             2: R_CURLY@23..26 "}" [Newline("\n"), Newline("\n")] []
         1: GRAPHQL_FIELD@26..34
           0: (empty)
-          1: GRAPHQL_NAME@26..34
-            0: GRAPHQL_NAME@26..34 "query" [Newline("\n"), Newline("\n")] [Whitespace(" ")]
+          1: GRAPHQL_LITERAL_NAME@26..34
+            0: IDENT@26..34 "query" [Newline("\n"), Newline("\n")] [Whitespace(" ")]
           2: (empty)
           3: GRAPHQL_DIRECTIVE_LIST@34..34
           4: (empty)
@@ -768,14 +768,14 @@ GraphqlRoot {
       0: L_CURLY@35..38 "{" [Newline("\n"), Newline("\n")] []
       1: GRAPHQL_SELECTION_LIST@38..118
         0: GRAPHQL_BOGUS_SELECTION@38..74
-          0: GRAPHQL_NAME@38..44
-            0: GRAPHQL_NAME@38..44 "hero" [Newline("\n"), Whitespace("\t")] []
+          0: GRAPHQL_LITERAL_NAME@38..44
+            0: IDENT@38..44 "hero" [Newline("\n"), Whitespace("\t")] []
           1: GRAPHQL_BOGUS@44..74
             0: L_PAREN@44..45 "(" [] []
             1: GRAPHQL_BOGUS@45..74
               0: GRAPHQL_ARGUMENT@45..63
-                0: GRAPHQL_NAME@45..49
-                  0: GRAPHQL_NAME@45..49 "name" [] []
+                0: GRAPHQL_LITERAL_NAME@45..49
+                  0: IDENT@45..49 "name" [] []
                 1: COLON@49..51 ":" [] [Whitespace(" ")]
                 2: GRAPHQL_STRING_VALUE@51..63
                   0: GRAPHQL_STRING_LITERAL@51..63 "\"Tony Stark\"" [] []
@@ -783,8 +783,8 @@ GraphqlRoot {
                 0: R_CURLY@63..65 "}" [Newline("\n")] []
                 1: L_CURLY@65..68 "{" [Newline("\n"), Newline("\n")] []
               2: GRAPHQL_ARGUMENT@68..74
-                0: GRAPHQL_NAME@68..74
-                  0: GRAPHQL_NAME@68..74 "hero" [Newline("\n"), Whitespace("\t")] []
+                0: GRAPHQL_LITERAL_NAME@68..74
+                  0: IDENT@68..74 "hero" [Newline("\n"), Whitespace("\t")] []
                 1: (empty)
                 2: (empty)
           2: GRAPHQL_DIRECTIVE_LIST@74..74
@@ -792,8 +792,8 @@ GraphqlRoot {
           0: L_PAREN@74..75 "(" [] []
         2: GRAPHQL_FIELD@75..80
           0: (empty)
-          1: GRAPHQL_NAME@75..80
-            0: GRAPHQL_NAME@75..80 "name" [] [Whitespace(" ")]
+          1: GRAPHQL_LITERAL_NAME@75..80
+            0: IDENT@75..80 "name" [] [Whitespace(" ")]
           2: (empty)
           3: GRAPHQL_DIRECTIVE_LIST@80..80
           4: (empty)
@@ -802,22 +802,22 @@ GraphqlRoot {
           1: R_PAREN@92..93 ")" [] []
         4: GRAPHQL_FIELD@93..104
           0: (empty)
-          1: GRAPHQL_NAME@93..104
-            0: GRAPHQL_NAME@93..104 "country" [Newline("\n"), Whitespace("\t\t")] [Skipped(",")]
+          1: GRAPHQL_LITERAL_NAME@93..104
+            0: IDENT@93..104 "country" [Newline("\n"), Whitespace("\t\t")] [Skipped(",")]
           2: (empty)
           3: GRAPHQL_DIRECTIVE_LIST@104..104
           4: (empty)
         5: GRAPHQL_FIELD@104..112
           0: (empty)
-          1: GRAPHQL_NAME@104..112
-            0: GRAPHQL_NAME@104..112 "name" [Newline("\n"), Whitespace("\t\t")] [Skipped(",")]
+          1: GRAPHQL_LITERAL_NAME@104..112
+            0: IDENT@104..112 "name" [Newline("\n"), Whitespace("\t\t")] [Skipped(",")]
           2: (empty)
           3: GRAPHQL_DIRECTIVE_LIST@112..112
           4: (empty)
         6: GRAPHQL_FIELD@112..118
           0: (empty)
-          1: GRAPHQL_NAME@112..118
-            0: GRAPHQL_NAME@112..118 "age" [Newline("\n"), Whitespace("\t\t")] []
+          1: GRAPHQL_LITERAL_NAME@112..118
+            0: IDENT@112..118 "age" [Newline("\n"), Whitespace("\t\t")] []
           2: (empty)
           3: GRAPHQL_DIRECTIVE_LIST@118..118
           4: (empty)
@@ -829,14 +829,14 @@ GraphqlRoot {
       1: GRAPHQL_SELECTION_LIST@126..271
         0: GRAPHQL_FIELD@126..242
           0: (empty)
-          1: GRAPHQL_NAME@126..132
-            0: GRAPHQL_NAME@126..132 "hero" [Newline("\n"), Whitespace("\t")] []
+          1: GRAPHQL_LITERAL_NAME@126..132
+            0: IDENT@126..132 "hero" [Newline("\n"), Whitespace("\t")] []
           2: GRAPHQL_ARGUMENTS@132..153
             0: L_PAREN@132..133 "(" [] []
             1: GRAPHQL_ARGUMENT_LIST@133..151
               0: GRAPHQL_ARGUMENT@133..151
-                0: GRAPHQL_NAME@133..137
-                  0: GRAPHQL_NAME@133..137 "name" [] []
+                0: GRAPHQL_LITERAL_NAME@133..137
+                  0: IDENT@133..137 "name" [] []
                 1: COLON@137..139 ":" [] [Whitespace(" ")]
                 2: GRAPHQL_STRING_VALUE@139..151
                   0: GRAPHQL_STRING_LITERAL@139..151 "\"Tony Stark\"" [] []
@@ -847,45 +847,45 @@ GraphqlRoot {
             1: GRAPHQL_SELECTION_LIST@154..240
               0: GRAPHQL_FIELD@154..165
                 0: (empty)
-                1: GRAPHQL_NAME@154..165
-                  0: GRAPHQL_NAME@154..165 "country" [Newline("\n"), Whitespace("\t\t")] [Skipped(",")]
+                1: GRAPHQL_LITERAL_NAME@154..165
+                  0: IDENT@154..165 "country" [Newline("\n"), Whitespace("\t\t")] [Skipped(",")]
                 2: (empty)
                 3: GRAPHQL_DIRECTIVE_LIST@165..165
                 4: (empty)
               1: GRAPHQL_FIELD@165..173
                 0: (empty)
-                1: GRAPHQL_NAME@165..173
-                  0: GRAPHQL_NAME@165..173 "name" [Newline("\n"), Whitespace("\t\t")] [Skipped(",")]
+                1: GRAPHQL_LITERAL_NAME@165..173
+                  0: IDENT@165..173 "name" [Newline("\n"), Whitespace("\t\t")] [Skipped(",")]
                 2: (empty)
                 3: GRAPHQL_DIRECTIVE_LIST@173..173
                 4: (empty)
               2: GRAPHQL_FIELD@173..180
                 0: (empty)
-                1: GRAPHQL_NAME@173..180
-                  0: GRAPHQL_NAME@173..180 "age" [Newline("\n"), Whitespace("\t\t")] [Skipped(",")]
+                1: GRAPHQL_LITERAL_NAME@173..180
+                  0: IDENT@173..180 "age" [Newline("\n"), Whitespace("\t\t")] [Skipped(",")]
                 2: (empty)
                 3: GRAPHQL_DIRECTIVE_LIST@180..180
                 4: (empty)
               3: GRAPHQL_BOGUS_SELECTION@180..220
-                0: GRAPHQL_NAME@180..189
-                  0: GRAPHQL_NAME@180..189 "height" [Newline("\n"), Whitespace("\t\t")] []
+                0: GRAPHQL_LITERAL_NAME@180..189
+                  0: IDENT@180..189 "height" [Newline("\n"), Whitespace("\t\t")] []
                 1: GRAPHQL_BOGUS@189..220
                   0: L_PAREN@189..190 "(" [] []
                   1: GRAPHQL_BOGUS@190..220
                     0: GRAPHQL_ARGUMENT@190..200
-                      0: GRAPHQL_NAME@190..195
-                        0: GRAPHQL_NAME@190..195 "unit" [] [Whitespace(" ")]
+                      0: GRAPHQL_LITERAL_NAME@190..195
+                        0: IDENT@190..195 "unit" [] [Whitespace(" ")]
                       1: (empty)
                       2: GRAPHQL_ENUM_VALUE@195..200
-                        0: GRAPHQL_NAME@195..200
-                          0: GRAPHQL_NAME@195..200 "FOOT" [] [Skipped(",")]
+                        0: GRAPHQL_LITERAL_NAME@195..200
+                          0: IDENT@195..200 "FOOT" [] [Skipped(",")]
                     1: GRAPHQL_BOGUS@200..208
                       0: R_CURLY@200..203 "}" [Newline("\n"), Whitespace("\t")] []
                       1: R_CURLY@203..205 "}" [Newline("\n")] []
                       2: L_CURLY@205..208 "{" [Newline("\n"), Newline("\n")] []
                     2: GRAPHQL_ARGUMENT@208..220
-                      0: GRAPHQL_NAME@208..218
-                        0: GRAPHQL_NAME@208..218 "ironMan" [Newline("\n"), Whitespace("  ")] []
+                      0: GRAPHQL_LITERAL_NAME@208..218
+                        0: IDENT@208..218 "ironMan" [Newline("\n"), Whitespace("  ")] []
                       1: COLON@218..220 ":" [] [Whitespace(" ")]
                       2: (empty)
                 2: GRAPHQL_DIRECTIVE_LIST@220..220
@@ -893,8 +893,8 @@ GraphqlRoot {
                 0: L_PAREN@220..221 "(" [] []
               5: GRAPHQL_FIELD@221..227
                 0: GRAPHQL_ALIAS@221..227
-                  0: GRAPHQL_NAME@221..225
-                    0: GRAPHQL_NAME@221..225 "name" [] []
+                  0: GRAPHQL_LITERAL_NAME@221..225
+                    0: IDENT@221..225 "name" [] []
                   1: COLON@225..227 ":" [] [Whitespace(" ")]
                 1: (empty)
                 2: (empty)
@@ -914,8 +914,8 @@ GraphqlRoot {
             0: L_PAREN@251..252 "(" [] []
             1: GRAPHQL_ARGUMENT_LIST@252..270
               0: GRAPHQL_ARGUMENT@252..270
-                0: GRAPHQL_NAME@252..256
-                  0: GRAPHQL_NAME@252..256 "name" [] []
+                0: GRAPHQL_LITERAL_NAME@252..256
+                  0: IDENT@252..256 "name" [] []
                 1: COLON@256..258 ":" [] [Whitespace(" ")]
                 2: GRAPHQL_STRING_VALUE@258..270
                   0: GRAPHQL_STRING_LITERAL@258..270 "\"Tony Stark\"" [] []
@@ -927,17 +927,17 @@ GraphqlRoot {
       1: GRAPHQL_SELECTION_LIST@276..367
         0: GRAPHQL_FIELD@276..367
           0: GRAPHQL_ALIAS@276..288
-            0: GRAPHQL_NAME@276..286
-              0: GRAPHQL_NAME@276..286 "ironMan" [Newline("\n"), Whitespace("  ")] []
+            0: GRAPHQL_LITERAL_NAME@276..286
+              0: IDENT@276..286 "ironMan" [Newline("\n"), Whitespace("  ")] []
             1: COLON@286..288 ":" [] [Whitespace(" ")]
-          1: GRAPHQL_NAME@288..292
-            0: GRAPHQL_NAME@288..292 "hero" [] []
+          1: GRAPHQL_LITERAL_NAME@288..292
+            0: IDENT@288..292 "hero" [] []
           2: GRAPHQL_ARGUMENTS@292..313
             0: L_PAREN@292..293 "(" [] []
             1: GRAPHQL_ARGUMENT_LIST@293..311
               0: GRAPHQL_ARGUMENT@293..311
-                0: GRAPHQL_NAME@293..297
-                  0: GRAPHQL_NAME@293..297 "name" [] []
+                0: GRAPHQL_LITERAL_NAME@293..297
+                  0: IDENT@293..297 "name" [] []
                 1: COLON@297..299 ":" [] [Whitespace(" ")]
                 2: GRAPHQL_STRING_VALUE@299..311
                   0: GRAPHQL_STRING_LITERAL@299..311 "\"Tony Stark\"" [] []
@@ -948,24 +948,24 @@ GraphqlRoot {
             1: GRAPHQL_SELECTION_LIST@314..364
               0: GRAPHQL_FIELD@314..325
                 0: (empty)
-                1: GRAPHQL_NAME@314..325
-                  0: GRAPHQL_NAME@314..325 "country" [Newline("\n"), Whitespace("\t\t")] [Skipped(",")]
+                1: GRAPHQL_LITERAL_NAME@314..325
+                  0: IDENT@314..325 "country" [Newline("\n"), Whitespace("\t\t")] [Skipped(",")]
                 2: (empty)
                 3: GRAPHQL_DIRECTIVE_LIST@325..325
                 4: (empty)
               1: GRAPHQL_FIELD@325..364
                 0: GRAPHQL_ALIAS@325..339
-                  0: GRAPHQL_NAME@325..337
-                    0: GRAPHQL_NAME@325..337 "firstWife" [Newline("\n"), Whitespace("\t\t")] []
+                  0: GRAPHQL_LITERAL_NAME@325..337
+                    0: IDENT@325..337 "firstWife" [Newline("\n"), Whitespace("\t\t")] []
                   1: COLON@337..339 ":" [] [Whitespace(" ")]
-                1: GRAPHQL_NAME@339..343
-                  0: GRAPHQL_NAME@339..343 "wife" [] []
+                1: GRAPHQL_LITERAL_NAME@339..343
+                  0: IDENT@339..343 "wife" [] []
                 2: GRAPHQL_ARGUMENTS@343..359
                   0: L_PAREN@343..344 "(" [] []
                   1: GRAPHQL_ARGUMENT_LIST@344..358
                     0: GRAPHQL_ARGUMENT@344..358
-                      0: GRAPHQL_NAME@344..348
-                        0: GRAPHQL_NAME@344..348 "name" [] []
+                      0: GRAPHQL_LITERAL_NAME@344..348
+                        0: IDENT@344..348 "name" [] []
                       1: COLON@348..350 ":" [] [Whitespace(" ")]
                       2: GRAPHQL_STRING_VALUE@350..358
                         0: GRAPHQL_STRING_LITERAL@350..358 "\"Pepper\"" [] []
@@ -982,17 +982,17 @@ GraphqlRoot {
       1: GRAPHQL_SELECTION_LIST@372..441
         0: GRAPHQL_FIELD@372..441
           0: GRAPHQL_ALIAS@372..384
-            0: GRAPHQL_NAME@372..382
-              0: GRAPHQL_NAME@372..382 "ironMan" [Newline("\n"), Whitespace("  ")] []
+            0: GRAPHQL_LITERAL_NAME@372..382
+              0: IDENT@372..382 "ironMan" [Newline("\n"), Whitespace("  ")] []
             1: COLON@382..384 ":" [] [Whitespace(" ")]
-          1: GRAPHQL_NAME@384..388
-            0: GRAPHQL_NAME@384..388 "hero" [] []
+          1: GRAPHQL_LITERAL_NAME@384..388
+            0: IDENT@384..388 "hero" [] []
           2: GRAPHQL_ARGUMENTS@388..409
             0: L_PAREN@388..389 "(" [] []
             1: GRAPHQL_ARGUMENT_LIST@389..407
               0: GRAPHQL_ARGUMENT@389..407
-                0: GRAPHQL_NAME@389..393
-                  0: GRAPHQL_NAME@389..393 "name" [] []
+                0: GRAPHQL_LITERAL_NAME@389..393
+                  0: IDENT@389..393 "name" [] []
                 1: COLON@393..395 ":" [] [Whitespace(" ")]
                 2: GRAPHQL_STRING_VALUE@395..407
                   0: GRAPHQL_STRING_LITERAL@395..407 "\"Tony Stark\"" [] []
@@ -1007,20 +1007,20 @@ GraphqlRoot {
             1: GRAPHQL_SELECTION_LIST@411..438
               0: GRAPHQL_FIELD@411..432
                 0: (empty)
-                1: GRAPHQL_NAME@411..422
-                  0: GRAPHQL_NAME@411..422 "country" [Newline("\n"), Whitespace("\t\t")] [Whitespace(" ")]
+                1: GRAPHQL_LITERAL_NAME@411..422
+                  0: IDENT@411..422 "country" [Newline("\n"), Whitespace("\t\t")] [Whitespace(" ")]
                 2: (empty)
                 3: GRAPHQL_DIRECTIVE_LIST@422..432
                   0: GRAPHQL_DIRECTIVE@422..432
                     0: AT@422..424 "@" [] [Skipped(",")]
-                    1: GRAPHQL_NAME@424..432
-                      0: GRAPHQL_NAME@424..432 "name" [Newline("\n"), Whitespace("\t\t")] [Skipped(",")]
+                    1: GRAPHQL_NAME_REFERENCE@424..432
+                      0: IDENT@424..432 "name" [Newline("\n"), Whitespace("\t\t")] [Skipped(",")]
                     2: (empty)
                 4: (empty)
               1: GRAPHQL_FIELD@432..438
                 0: (empty)
-                1: GRAPHQL_NAME@432..438
-                  0: GRAPHQL_NAME@432..438 "age" [Newline("\n"), Whitespace("\t\t")] []
+                1: GRAPHQL_LITERAL_NAME@432..438
+                  0: IDENT@432..438 "age" [Newline("\n"), Whitespace("\t\t")] []
                 2: (empty)
                 3: GRAPHQL_DIRECTIVE_LIST@438..438
                 4: (empty)
@@ -1031,8 +1031,8 @@ GraphqlRoot {
       1: GRAPHQL_SELECTION_LIST@464..507
         0: GRAPHQL_BOGUS_SELECTION@464..507
           0: GRAPHQL_ALIAS@464..476
-            0: GRAPHQL_NAME@464..474
-              0: GRAPHQL_NAME@464..474 "ironMan" [Newline("\n"), Whitespace("  ")] []
+            0: GRAPHQL_LITERAL_NAME@464..474
+              0: IDENT@464..474 "ironMan" [Newline("\n"), Whitespace("  ")] []
             1: COLON@474..476 ":" [] [Whitespace(" ")]
           1: GRAPHQL_BOGUS@476..493
             0: L_PAREN@476..477 "(" [] []
@@ -1071,8 +1071,8 @@ GraphqlRoot {
             1: GRAPHQL_SELECTION_LIST@520..527
               0: GRAPHQL_FIELD@520..527
                 0: (empty)
-                1: GRAPHQL_NAME@520..527
-                  0: GRAPHQL_NAME@520..527 "hero" [Newline("\n"), Whitespace("\t\t")] []
+                1: GRAPHQL_LITERAL_NAME@520..527
+                  0: IDENT@520..527 "hero" [Newline("\n"), Whitespace("\t\t")] []
                 2: (empty)
                 3: GRAPHQL_DIRECTIVE_LIST@527..527
                 4: (empty)
@@ -1087,8 +1087,8 @@ GraphqlRoot {
           2: GRAPHQL_DIRECTIVE_LIST@542..550
             0: GRAPHQL_DIRECTIVE@542..550
               0: AT@542..543 "@" [] []
-              1: GRAPHQL_NAME@543..550
-                0: GRAPHQL_NAME@543..550 "hero" [Newline("\n"), Whitespace("\t\t")] []
+              1: GRAPHQL_NAME_REFERENCE@543..550
+                0: IDENT@543..550 "hero" [Newline("\n"), Whitespace("\t\t")] []
               2: (empty)
           3: GRAPHQL_SELECTION_SET@550..553
             0: (empty)
@@ -1100,8 +1100,8 @@ GraphqlRoot {
       1: GRAPHQL_SELECTION_LIST@558..587
         0: GRAPHQL_FRAGMENT_SPREAD@558..572
           0: DOT3@558..565 "..." [Newline("\n"), Whitespace("\t")] [Whitespace("  ")]
-          1: GRAPHQL_NAME@565..570
-            0: GRAPHQL_NAME@565..570 "Hero" [] [Whitespace(" ")]
+          1: GRAPHQL_NAME_REFERENCE@565..570
+            0: IDENT@565..570 "Hero" [] [Whitespace(" ")]
           2: GRAPHQL_DIRECTIVE_LIST@570..572
             0: GRAPHQL_DIRECTIVE@570..572
               0: AT@570..572 "@" [] [Whitespace(" ")]
@@ -1111,15 +1111,15 @@ GraphqlRoot {
           0: L_CURLY@572..573 "{" [] []
         2: GRAPHQL_FIELD@573..581
           0: (empty)
-          1: GRAPHQL_NAME@573..581
-            0: GRAPHQL_NAME@573..581 "name" [Newline("\n"), Whitespace("\t\t")] [Skipped(",")]
+          1: GRAPHQL_LITERAL_NAME@573..581
+            0: IDENT@573..581 "name" [Newline("\n"), Whitespace("\t\t")] [Skipped(",")]
           2: (empty)
           3: GRAPHQL_DIRECTIVE_LIST@581..581
           4: (empty)
         3: GRAPHQL_FIELD@581..587
           0: (empty)
-          1: GRAPHQL_NAME@581..587
-            0: GRAPHQL_NAME@581..587 "age" [Newline("\n"), Whitespace("\t\t")] []
+          1: GRAPHQL_LITERAL_NAME@581..587
+            0: IDENT@581..587 "age" [Newline("\n"), Whitespace("\t\t")] []
           2: (empty)
           3: GRAPHQL_DIRECTIVE_LIST@587..587
           4: (empty)
