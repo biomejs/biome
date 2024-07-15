@@ -1,6 +1,8 @@
 use crate::grit_context::{GritExecContext, GritQueryContext};
 use crate::grit_resolved_pattern::GritResolvedPattern;
+use crate::grit_target_language::LeafEquivalenceClass;
 use crate::grit_target_node::{GritTargetNode, GritTargetSyntaxKind};
+use crate::{CompileError, GritTargetLanguage};
 use anyhow::Result;
 use grit_pattern_matcher::binding::Binding;
 use grit_pattern_matcher::context::ExecContext;
@@ -119,15 +121,23 @@ impl GritNodePatternArg {
 #[derive(Clone, Debug)]
 pub struct GritLeafNodePattern {
     kind: GritTargetSyntaxKind,
+    equivalence_class: Option<LeafEquivalenceClass>,
     text: String,
 }
 
 impl GritLeafNodePattern {
-    pub fn new(kind: GritTargetSyntaxKind, text: impl Into<String>) -> Self {
-        Self {
+    pub fn new(
+        kind: GritTargetSyntaxKind,
+        text: impl Into<String>,
+        lang: &GritTargetLanguage,
+    ) -> Result<Self, CompileError> {
+        let text = text.into();
+        let equivalence_class = lang.get_equivalence_class(kind, &text)?;
+        Ok(Self {
             kind,
-            text: text.into(),
-        }
+            equivalence_class,
+            text,
+        })
     }
 }
 
@@ -148,8 +158,9 @@ impl Matcher<GritQueryContext> for GritLeafNodePattern {
         let Some(node) = binding.get_last_binding().and_then(Binding::singleton) else {
             return Ok(false);
         };
-        // TODO: Implement leaf node normalization.
-        if self.kind != node.kind() {
+        if let Some(class) = &self.equivalence_class {
+            Ok(class.are_equivalent(node.kind(), node.text()))
+        } else if self.kind != node.kind() {
             Ok(false)
         } else {
             Ok(node.text() == self.text)

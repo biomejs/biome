@@ -66,6 +66,10 @@ pub enum CompileError {
     /// A pattern is required to compile a Grit query.
     MissingPattern,
 
+    /// A node inside a code snippet failed to be normalized for its
+    /// equivalence class.
+    NormalizationError,
+
     /// Bracketed metavariables are only allowed on the right-hand side of
     /// rewrite.
     InvalidBracketedMetavariable,
@@ -135,6 +139,9 @@ impl Diagnostic for CompileError {
                 fmt.write_markup(markup! { "Literal value out of range: "{{value}} })
             }
             CompileError::MissingPattern => fmt.write_markup(markup! { "Missing pattern" }),
+            CompileError::NormalizationError => {
+                fmt.write_markup(markup! { "Could not normalize node in code snippet" })
+            }
             CompileError::InvalidBracketedMetavariable => {
                 fmt.write_markup(markup! { "Invalid bracketed metavariable" })
             }
