@@ -1,0 +1,23 @@
+---
+source: crates/biome_grit_patterns/tests/spec_tests.rs
+expression: objectLiteral
+---
+SnapshotResult {
+    messages: [],
+    matched_ranges: [
+        Range {
+            start: Position {
+                line: 3,
+                column: 15,
+            },
+            end: Position {
+                line: 6,
+                column: 6,
+            },
+            start_byte: 42,
+            end_byte: 85,
+        },
+    ],
+    rewritten_files: [],
+    created_files: [],
+}
