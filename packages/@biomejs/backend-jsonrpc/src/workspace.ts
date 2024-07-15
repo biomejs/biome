@@ -1134,6 +1134,10 @@ export interface Nursery {
 	 */
 	noShorthandPropertyOverrides?: RuleConfiguration_for_Null;
 	/**
+	 * Enforce that static, visible elements (such as \<div>) that have click handlers use the valid role attribute.
+	 */
+	noStaticElementInteractions?: RuleConfiguration_for_Null;
+	/**
 	 * Enforce the use of String.slice() over String.substr() and String.substring().
 	 */
 	noSubstr?: RuleFixConfiguration_for_Null;
@@ -2526,6 +2530,7 @@ export type Category =
 	| "lint/nursery/noMissingGenericFamilyKeyword"
 	| "lint/nursery/noReactSpecificProps"
 	| "lint/nursery/noRestrictedImports"
+	| "lint/nursery/noStaticElementInteractions"
 	| "lint/nursery/noShorthandPropertyOverrides"
 	| "lint/nursery/noSubstr"
 	| "lint/nursery/noUndeclaredDependencies"
