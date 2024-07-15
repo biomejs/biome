@@ -1,6 +1,6 @@
 use crate::prelude::*;
 use biome_formatter::write;
-use biome_graphql_syntax::{GraphqlLanguage, GraphqlNamedType, GraphqlUnionMemberTypeList};
+use biome_graphql_syntax::{GraphqlLanguage, GraphqlNameReference, GraphqlUnionMemberTypeList};
 use biome_rowan::AstSeparatedElement;
 
 #[derive(Debug, Clone, Default)]
@@ -25,7 +25,7 @@ impl FormatRule<GraphqlUnionMemberTypeList> for FormatGraphqlUnionMemberTypeList
 
 pub struct FormatTypeVariant {
     last: bool,
-    element: AstSeparatedElement<GraphqlLanguage, GraphqlNamedType>,
+    element: AstSeparatedElement<GraphqlLanguage, GraphqlNameReference>,
 }
 
 impl Format<GraphqlFormatContext> for FormatTypeVariant {

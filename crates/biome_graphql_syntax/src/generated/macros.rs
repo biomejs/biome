@@ -157,12 +157,16 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::GraphqlListValue::new_unchecked(node) };
                     $body
                 }
-                $crate::GraphqlSyntaxKind::GRAPHQL_NAME => {
-                    let $pattern = unsafe { $crate::GraphqlName::new_unchecked(node) };
+                $crate::GraphqlSyntaxKind::GRAPHQL_LITERAL_NAME => {
+                    let $pattern = unsafe { $crate::GraphqlLiteralName::new_unchecked(node) };
                     $body
                 }
-                $crate::GraphqlSyntaxKind::GRAPHQL_NAMED_TYPE => {
-                    let $pattern = unsafe { $crate::GraphqlNamedType::new_unchecked(node) };
+                $crate::GraphqlSyntaxKind::GRAPHQL_NAME_BINDING => {
+                    let $pattern = unsafe { $crate::GraphqlNameBinding::new_unchecked(node) };
+                    $body
+                }
+                $crate::GraphqlSyntaxKind::GRAPHQL_NAME_REFERENCE => {
+                    let $pattern = unsafe { $crate::GraphqlNameReference::new_unchecked(node) };
                     $body
                 }
                 $crate::GraphqlSyntaxKind::GRAPHQL_NON_NULL_TYPE => {
@@ -258,8 +262,8 @@ macro_rules! map_syntax_node {
                         unsafe { $crate::GraphqlUnionTypeExtension::new_unchecked(node) };
                     $body
                 }
-                $crate::GraphqlSyntaxKind::GRAPHQL_VARIABLE => {
-                    let $pattern = unsafe { $crate::GraphqlVariable::new_unchecked(node) };
+                $crate::GraphqlSyntaxKind::GRAPHQL_VARIABLE_BINDING => {
+                    let $pattern = unsafe { $crate::GraphqlVariableBinding::new_unchecked(node) };
                     $body
                 }
                 $crate::GraphqlSyntaxKind::GRAPHQL_VARIABLE_DEFINITION => {
@@ -270,6 +274,10 @@ macro_rules! map_syntax_node {
                 $crate::GraphqlSyntaxKind::GRAPHQL_VARIABLE_DEFINITIONS => {
                     let $pattern =
                         unsafe { $crate::GraphqlVariableDefinitions::new_unchecked(node) };
+                    $body
+                }
+                $crate::GraphqlSyntaxKind::GRAPHQL_VARIABLE_REFERENCE => {
+                    let $pattern = unsafe { $crate::GraphqlVariableReference::new_unchecked(node) };
                     $body
                 }
                 $crate::GraphqlSyntaxKind::GRAPHQL_BOGUS => {

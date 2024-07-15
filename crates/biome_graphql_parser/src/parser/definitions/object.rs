@@ -1,8 +1,8 @@
 use crate::parser::{
     directive::DirectiveList,
-    parse_description,
+    parse_binding, parse_description,
     parse_error::{expected_name, expected_object_extension},
-    parse_name, GraphqlParser,
+    parse_reference, GraphqlParser,
 };
 use biome_graphql_syntax::{GraphqlSyntaxKind::*, T};
 use biome_parser::{
@@ -21,7 +21,7 @@ pub(crate) fn parse_object_type_definition(p: &mut GraphqlParser) -> ParsedSynta
 
     p.bump(T![type]);
 
-    parse_name(p).or_add_diagnostic(p, expected_name);
+    parse_binding(p).or_add_diagnostic(p, expected_name);
 
     // implements interface is optional
     parse_implements_interface(p).ok();
@@ -41,7 +41,7 @@ pub(crate) fn parse_object_type_extension(p: &mut GraphqlParser) -> ParsedSyntax
     p.bump(T![extend]);
     p.bump(T![type]);
 
-    parse_name(p).or_add_diagnostic(p, expected_name);
+    parse_reference(p).or_add_diagnostic(p, expected_name);
 
     let implements_interface_empty = parse_implements_interface(p).is_absent();
 

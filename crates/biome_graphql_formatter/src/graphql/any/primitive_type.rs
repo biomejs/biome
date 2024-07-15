@@ -9,7 +9,7 @@ impl FormatRule<AnyGraphqlPrimitiveType> for FormatAnyGraphqlPrimitiveType {
     fn fmt(&self, node: &AnyGraphqlPrimitiveType, f: &mut GraphqlFormatter) -> FormatResult<()> {
         match node {
             AnyGraphqlPrimitiveType::GraphqlListType(node) => node.format().fmt(f),
-            AnyGraphqlPrimitiveType::GraphqlNamedType(node) => node.format().fmt(f),
+            AnyGraphqlPrimitiveType::GraphqlNameReference(node) => node.format().fmt(f),
         }
     }
 }
