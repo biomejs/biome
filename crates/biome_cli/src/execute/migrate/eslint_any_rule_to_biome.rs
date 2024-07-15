@@ -893,6 +893,16 @@ pub(crate) fn migrate_eslint_any_rule(
                 .get_or_insert(Default::default());
             rule.set_level(rule_severity.into());
         }
+        "no-irregular-whitespace" => {
+            if !options.include_nursery {
+                return false;
+            }
+            let group = rules.nursery.get_or_insert_with(Default::default);
+            let rule = group
+                .no_irregular_whitespace
+                .get_or_insert(Default::default());
+            rule.set_level(rule_severity.into());
+        }
         "no-label-var" => {
             let group = rules.suspicious.get_or_insert_with(Default::default);
             let rule = group.no_label_var.get_or_insert(Default::default());

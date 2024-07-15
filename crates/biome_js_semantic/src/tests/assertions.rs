@@ -686,7 +686,7 @@ impl SemanticAssertions {
                 None => {
                     error_scope_end_assertion_points_to_non_existing_scope_start_assertion(
                         code,
-                        &scope_end_assertion.range,
+                        scope_end_assertion.range,
                         test_name,
                     );
                     continue;
@@ -706,7 +706,7 @@ impl SemanticAssertions {
                 if e.is_none() {
                     error_scope_end_assertion_points_to_the_wrong_scope_start(
                         code,
-                        &scope_end_assertion.range,
+                        scope_end_assertion.range,
                         events,
                         test_name,
                     );
@@ -935,7 +935,7 @@ fn error_assertion_name_clash(
 
 fn error_scope_end_assertion_points_to_non_existing_scope_start_assertion(
     code: &str,
-    range: &TextRange,
+    range: TextRange,
     file_name: &str,
 ) {
     let mut diagnostic = TestSemanticDiagnostic::new("Scope start assertion not found.", range);
@@ -957,7 +957,7 @@ fn error_scope_end_assertion_points_to_non_existing_scope_start_assertion(
 
 fn error_scope_end_assertion_points_to_the_wrong_scope_start(
     code: &str,
-    range: &TextRange,
+    range: TextRange,
     events: &[SemanticEvent],
     file_name: &str,
 ) {

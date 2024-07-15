@@ -1,5 +1,6 @@
 ---
 source: crates/biome_css_parser/tests/spec_test.rs
+assertion_line: 169
 expression: snapshot
 ---
 ## Input
@@ -358,7 +359,7 @@ at_rule_keyframe_disabled_css_modules.css:3:13 parse ━━━━━━━━━
     4 │ @keyframes :local("test") {}
     5 │ @keyframes :local test {}
   
-  i You can enable `:local` and `:global` pseudo-class parsing by setting the `css_modules` option to `true` in your configuration file.
+  i You can enable `:local` and `:global` pseudo-class parsing by setting the `css.parser.cssModules` option to `true` in your configuration file.
   
 at_rule_keyframe_disabled_css_modules.css:4:13 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -371,7 +372,7 @@ at_rule_keyframe_disabled_css_modules.css:4:13 parse ━━━━━━━━━
     5 │ @keyframes :local test {}
     6 │ @keyframes :local "test" {}
   
-  i You can enable `:local` and `:global` pseudo-class parsing by setting the `css_modules` option to `true` in your configuration file.
+  i You can enable `:local` and `:global` pseudo-class parsing by setting the `css.parser.cssModules` option to `true` in your configuration file.
   
 at_rule_keyframe_disabled_css_modules.css:5:13 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -384,7 +385,7 @@ at_rule_keyframe_disabled_css_modules.css:5:13 parse ━━━━━━━━━
     6 │ @keyframes :local "test" {}
     7 │ @keyframes :global(test) {}
   
-  i You can enable `:local` and `:global` pseudo-class parsing by setting the `css_modules` option to `true` in your configuration file.
+  i You can enable `:local` and `:global` pseudo-class parsing by setting the `css.parser.cssModules` option to `true` in your configuration file.
   
 at_rule_keyframe_disabled_css_modules.css:6:13 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -397,7 +398,7 @@ at_rule_keyframe_disabled_css_modules.css:6:13 parse ━━━━━━━━━
     7 │ @keyframes :global(test) {}
     8 │ @keyframes :global("test") {}
   
-  i You can enable `:local` and `:global` pseudo-class parsing by setting the `css_modules` option to `true` in your configuration file.
+  i You can enable `:local` and `:global` pseudo-class parsing by setting the `css.parser.cssModules` option to `true` in your configuration file.
   
 at_rule_keyframe_disabled_css_modules.css:7:13 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -410,7 +411,7 @@ at_rule_keyframe_disabled_css_modules.css:7:13 parse ━━━━━━━━━
     8 │ @keyframes :global("test") {}
     9 │ @keyframes :global test {}
   
-  i You can enable `:local` and `:global` pseudo-class parsing by setting the `css_modules` option to `true` in your configuration file.
+  i You can enable `:local` and `:global` pseudo-class parsing by setting the `css.parser.cssModules` option to `true` in your configuration file.
   
 at_rule_keyframe_disabled_css_modules.css:8:13 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -423,7 +424,7 @@ at_rule_keyframe_disabled_css_modules.css:8:13 parse ━━━━━━━━━
      9 │ @keyframes :global test {}
     10 │ @keyframes :global "test" {}
   
-  i You can enable `:local` and `:global` pseudo-class parsing by setting the `css_modules` option to `true` in your configuration file.
+  i You can enable `:local` and `:global` pseudo-class parsing by setting the `css.parser.cssModules` option to `true` in your configuration file.
   
 at_rule_keyframe_disabled_css_modules.css:9:13 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -436,7 +437,7 @@ at_rule_keyframe_disabled_css_modules.css:9:13 parse ━━━━━━━━━
     10 │ @keyframes :global "test" {}
     11 │ 
   
-  i You can enable `:local` and `:global` pseudo-class parsing by setting the `css_modules` option to `true` in your configuration file.
+  i You can enable `:local` and `:global` pseudo-class parsing by setting the `css.parser.cssModules` option to `true` in your configuration file.
   
 at_rule_keyframe_disabled_css_modules.css:10:13 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -448,6 +449,6 @@ at_rule_keyframe_disabled_css_modules.css:10:13 parse ━━━━━━━━�
        │             ^^^^^^
     11 │ 
   
-  i You can enable `:local` and `:global` pseudo-class parsing by setting the `css_modules` option to `true` in your configuration file.
+  i You can enable `:local` and `:global` pseudo-class parsing by setting the `css.parser.cssModules` option to `true` in your configuration file.
   
 ```

@@ -1,5 +1,6 @@
 ---
 source: crates/biome_css_parser/tests/spec_test.rs
+assertion_line: 169
 expression: snapshot
 ---
 ## Input
@@ -193,7 +194,7 @@ pseudo_class_function_selector_disabled.css:1:2 parse ━━━━━━━━�
     2 │ :local(.class div + #id) {}
     3 │ :global(.class div) .div {}
   
-  i You can enable `:local` and `:global` pseudo-class parsing by setting the `css_modules` option to `true` in your configuration file.
+  i You can enable `:local` and `:global` pseudo-class parsing by setting the `css.parser.cssModules` option to `true` in your configuration file.
   
 pseudo_class_function_selector_disabled.css:2:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -205,7 +206,7 @@ pseudo_class_function_selector_disabled.css:2:2 parse ━━━━━━━━�
     3 │ :global(.class div) .div {}
     4 │ 
   
-  i You can enable `:local` and `:global` pseudo-class parsing by setting the `css_modules` option to `true` in your configuration file.
+  i You can enable `:local` and `:global` pseudo-class parsing by setting the `css.parser.cssModules` option to `true` in your configuration file.
   
 pseudo_class_function_selector_disabled.css:3:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -217,6 +218,6 @@ pseudo_class_function_selector_disabled.css:3:2 parse ━━━━━━━━�
       │  ^^^^^^
     4 │ 
   
-  i You can enable `:local` and `:global` pseudo-class parsing by setting the `css_modules` option to `true` in your configuration file.
+  i You can enable `:local` and `:global` pseudo-class parsing by setting the `css.parser.cssModules` option to `true` in your configuration file.
   
 ```

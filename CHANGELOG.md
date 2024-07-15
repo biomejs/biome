@@ -44,6 +44,25 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 ### Linter
 
+#### New features
+
+- Add support for GraphQL linting. Contributed by @ematipico
+- Add [nursery/noDynamicNamespaceImportAccess](https://biomejs.dev/linter/no-dynamic-namespace-import-access/). Contributed by @minht11
+- [noUndeclaredVariables](https://biomejs.dev/linter/rules/no-undeclared-variables/) n longer report a direct reference to an enum member ([#2974](https://github.com/biomejs/biome/issues/2974)).
+
+  In the following code, the `A` reference is no longer reported as an undeclared variable.
+
+  ```ts
+  enum E {
+    A = 1,
+    B = A << 1,
+  }
+  ```
+
+  Contributed by @Conaclos
+
+- Add [nursery/noIrregularWhitespace](https://biomejs.dev/linter/rules/no-irregular-whitespace). Contributed by @michellocana
+
 #### Enhancements
 
 - [noInvalidUseBeforeDeclaration](https://biomejs.dev/linter/rules/no-invalid-use-before-declaration) now reports direct use of an enum member before its declaration.
@@ -73,33 +92,11 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
   Contributed by @Conaclos
 
-#### New features
-
-- Add support for GraphQL linting. Contributed by @ematipico
-
 #### Bug fixes
 
 - Don't request alt text for elements hidden from assistive technologies ([#3316](https://github.com/biomejs/biome/issues/3316)). Contributed by @robintown
 - Fix [[#3149](https://github.com/biomejs/biome/issues/3149)] crashes that occurred when applying the `noUselessFragments` unsafe fixes in certain scenarios. Contributed by @unvalley
 - `noExcessiveNestedTestSuites`: Fix another edge case where the rule would alert on heavily nested zod schemas. Contributed by @dyc3
-
-#### New rules
-
-- Add [nursery/noDynamicNamespaceImportAccess](https://biomejs.dev/linter/no-dynamic-namespace-import-access/). Contributed by @minht11
-
-
-- [noUndeclaredVariables](https://biomejs.dev/linter/rules/no-undeclared-variables/) n longer report a direct reference to an enum member ([#2974](https://github.com/biomejs/biome/issues/2974)).
-
-  In the following code, the `A` reference is no longer reported as an undeclared variable.
-
-  ```ts
-  enum E {
-    A = 1,
-    B = A << 1,
-  }
-  ```
-
-  Contributed by @Conaclos
 
 ### Parser
 
@@ -114,6 +111,13 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
   }
 }
 ```
+- Fix [#3410](https://github.com/biomejs/biome/issues/3410) by correctly parsing break statements containing keywords. 
+  ```js
+  out: while (true) {
+    break out;
+  }
+  ```
+  Contributed by @ah-yu
 
 ## v1.8.3 (2024-06-27)
 

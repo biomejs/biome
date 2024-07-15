@@ -109,8 +109,8 @@ impl Rule for NoInvalidUseBeforeDeclaration {
                     None
                 };
             for reference in binding.all_references() {
-                let reference_range = reference.range();
-                if reference_range.start() < declaration_end
+                if reference.range_start() < declaration_end {
+                    let reference_syntax = reference.syntax();
                     // References that are exports, such as `export { a }` are always valid,
                     // even when they appear before the declaration.
                     // For example:
@@ -119,41 +119,40 @@ impl Rule for NoInvalidUseBeforeDeclaration {
                     // export { X };
                     // const X = 0;
                     // ```
-                    && reference
-                        .syntax()
+                    if reference_syntax
                         .parent()
                         .kind()
                         .filter(|parent_kind| AnyJsExportNamedSpecifier::can_cast(*parent_kind))
                         .is_none()
-                    // Don't report variables used in another control flow root (function, classes, ...)
-                    // For example:
-                    //
-                    // ```js
-                    // function f() { X; }
-                    // const X = 0;
-                    // ```
-                    && (declaration_control_flow_root.is_none() ||
-                        declaration_control_flow_root == reference
-                            .syntax()
-                            .ancestors()
-                            .skip(1)
-                            .find(|ancestor| AnyJsControlFlowRoot::can_cast(ancestor.kind()))
-                    )
-                    // ignore when used as a type.
-                    // For example:
-                    //
-                    // ```js
-                    // type Y = typeof X;
-                    // const X = 0;
-                    // ```
-                    && !AnyJsIdentifierUsage::cast_ref(reference.syntax())
-                        .is_some_and(|usage| usage.is_only_type())
-                {
-                    result.push(InvalidUseBeforeDeclaration {
-                        declaration_kind,
-                        reference_range: *reference_range,
-                        binding_range: id.range(),
-                    });
+                        // Don't report variables used in another control flow root (function, classes, ...)
+                        // For example:
+                        //
+                        // ```js
+                        // function f() { X; }
+                        // const X = 0;
+                        // ```
+                        && (declaration_control_flow_root.is_none() ||
+                            declaration_control_flow_root == reference_syntax
+                                .ancestors()
+                                .skip(1)
+                                .find(|ancestor| AnyJsControlFlowRoot::can_cast(ancestor.kind()))
+                        )
+                        // ignore when used as a type.
+                        // For example:
+                        //
+                        // ```js
+                        // type Y = typeof X;
+                        // const X = 0;
+                        // ```
+                        && !AnyJsIdentifierUsage::cast_ref(reference_syntax)
+                            .is_some_and(|usage| usage.is_only_type())
+                    {
+                        result.push(InvalidUseBeforeDeclaration {
+                            declaration_kind,
+                            reference_range: reference_syntax.text_trimmed_range(),
+                            binding_range: id.range(),
+                        });
+                    }
                 }
             }
         }

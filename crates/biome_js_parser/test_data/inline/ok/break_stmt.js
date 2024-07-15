@@ -4,3 +4,6 @@ while (true) {
    break foo;
   }
 }
+out: while (true) {
+  break out;
+}

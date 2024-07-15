@@ -83,7 +83,7 @@ pub struct Capture {
     data: Rc<SemanticModelData>,
     ty: CaptureType,
     node: JsSyntaxNode,
-    binding_id: BindingIndex,
+    binding_id: BindingId,
 }
 
 impl Capture {
@@ -101,19 +101,18 @@ impl Capture {
     pub fn binding(&self) -> Binding {
         Binding {
             data: self.data.clone(),
-            index: self.binding_id,
+            id: self.binding_id,
         }
     }
 
-    /// Returns the non trimmed text range of declaration of this capture.
+    /// Returns the trimmed text range of the declaration of this capture.
     /// This is equivalent, but faster, to:
     ///
     /// ```rs, ignore
-    /// self.declaration().text_trimmed_range()
+    /// self.binding().syntax().text_trimmed_range()
     /// ```
-    pub fn declaration_range(&self) -> &TextRange {
-        let binding = self.data.binding(self.binding_id);
-        &binding.range
+    pub fn declaration_range(&self) -> TextRange {
+        self.data.binding(self.binding_id).range
     }
 }
 
@@ -121,7 +120,7 @@ pub struct AllCapturesIter {
     data: Rc<SemanticModelData>,
     closure_range: TextRange,
     scopes: Vec<ScopeId>,
-    references: Vec<SemanticModelScopeReference>,
+    references: Vec<ReferenceId>,
 }
 
 impl Iterator for AllCapturesIter {
@@ -130,14 +129,15 @@ impl Iterator for AllCapturesIter {
     fn next(&mut self) -> Option<Self::Item> {
         'references: loop {
             while let Some(reference) = self.references.pop() {
-                let binding = &self.data.bindings[reference.binding_id as usize];
-                if self.closure_range.intersect(binding.range).is_none() {
-                    let reference = &binding.references[reference.reference_id as usize];
+                let binding_id = reference.binding_id();
+                let binding = &self.data.binding(binding_id);
+                if !self.closure_range.contains(binding.range.start()) {
+                    let reference = &binding.references[reference.index()];
                     return Some(Capture {
                         data: self.data.clone(),
-                        node: self.data.binding_node_by_start[&reference.range.start()].clone(), // TODO change node to store the range
+                        node: self.data.binding_node_by_start[&reference.range_start].clone(), // TODO change node to store the range
                         ty: CaptureType::ByReference,
-                        binding_id: binding.id,
+                        binding_id,
                     });
                 }
             }
@@ -150,9 +150,9 @@ impl Iterator for AllCapturesIter {
                 }
                 self.references.clear();
                 self.references
-                    .extend(scope.read_references.iter().cloned());
+                    .extend(scope.read_references.iter().copied());
                 self.references
-                    .extend(scope.write_references.iter().cloned());
+                    .extend(scope.write_references.iter().copied());
                 self.scopes.extend(scope.children.iter());
                 continue 'references;
             }
@@ -229,7 +229,7 @@ pub struct Closure {
 impl Closure {
     pub(super) fn from_node(data: Rc<SemanticModelData>, node: &impl HasClosureAstNode) -> Closure {
         let closure_range = node.node_text_range();
-        let scope_id = data.scope(&closure_range);
+        let scope_id = data.scope(closure_range);
 
         Closure { data, scope_id }
     }
@@ -245,8 +245,8 @@ impl Closure {
     }
 
     /// Range of this [Closure]
-    pub fn closure_range(&self) -> &TextRange {
-        &self.data.scopes[self.scope_id.index()].range
+    pub fn closure_range(&self) -> TextRange {
+        self.data.scopes[self.scope_id.index()].range
     }
 
     /// Return all [Reference] this closure captures, not taking into
@@ -268,11 +268,11 @@ impl Closure {
         let scopes = scope.children.clone();
 
         let mut references = scope.read_references.clone();
-        references.extend(scope.write_references.iter().cloned());
+        references.extend(scope.write_references.iter().copied());
 
         AllCapturesIter {
             data: self.data.clone(),
-            closure_range: *self.closure_range(),
+            closure_range: self.closure_range(),
             scopes,
             references,
         }

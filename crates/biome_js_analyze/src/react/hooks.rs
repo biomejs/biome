@@ -67,11 +67,11 @@ impl ReactCallWithDependencyResult {
             .and_then(|node| AnyJsFunctionExpression::try_from(node.clone()).ok())
             .map(|function_expression| {
                 let closure = function_expression.closure(model);
-                let range = *closure.closure_range();
+                let range = closure.closure_range();
                 closure
                     .descendents()
                     .flat_map(|closure| closure.all_captures())
-                    .filter(move |capture| capture.declaration_range().intersect(range).is_none())
+                    .filter(move |capture| !range.contains(capture.declaration_range().start()))
             })
             .into_iter()
             .flatten()
