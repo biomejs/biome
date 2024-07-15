@@ -1202,6 +1202,10 @@ export interface Nursery {
 	 */
 	useConsistentBuiltinInstantiation?: RuleFixConfiguration_for_Null;
 	/**
+	 * This rule enforces consistent use of curly braces inside JSX attributes and JSX children.
+	 */
+	useConsistentCurlyBraces?: RuleFixConfiguration_for_Null;
+	/**
 	 * Disallows invalid named grid areas in CSS Grid Layouts.
 	 */
 	useConsistentGridAreas?: RuleConfiguration_for_Null;
@@ -2544,6 +2548,7 @@ export type Category =
 	| "lint/nursery/useAdjacentOverloadSignatures"
 	| "lint/nursery/useBiomeSuppressionComment"
 	| "lint/nursery/useConsistentBuiltinInstantiation"
+	| "lint/nursery/useConsistentCurlyBraces"
 	| "lint/nursery/useConsistentGridAreas"
 	| "lint/nursery/useDateNow"
 	| "lint/nursery/useDefaultSwitchClause"
@@ -2554,6 +2559,7 @@ export type Category =
 	| "lint/nursery/useGenericFontNames"
 	| "lint/nursery/useImportExtensions"
 	| "lint/nursery/useImportRestrictions"
+	| "lint/nursery/useJsxCurlyBraceConvention"
 	| "lint/nursery/useNumberToFixedDigitsArgument"
 	| "lint/nursery/useSemanticElements"
 	| "lint/nursery/useSortedClasses"
