@@ -9,12 +9,14 @@ use biome_configuration::javascript::PartialJavascriptLinter;
 use biome_configuration::json::PartialJsonLinter;
 use biome_configuration::linter::RuleSelector;
 use biome_configuration::{
-    css::partial_css_formatter, css::partial_css_linter, javascript::partial_javascript_formatter,
+    css::partial_css_formatter, css::partial_css_linter, graphql::partial_graphql_formatter,
+    graphql::partial_graphql_linter, javascript::partial_javascript_formatter,
     javascript::partial_javascript_linter, json::partial_json_formatter, json::partial_json_linter,
     partial_configuration, partial_files_configuration, partial_formatter_configuration,
     partial_linter_configuration, vcs::partial_vcs_configuration, vcs::PartialVcsConfiguration,
     PartialCssFormatter, PartialFilesConfiguration, PartialFormatterConfiguration,
-    PartialJavascriptFormatter, PartialJsonFormatter, PartialLinterConfiguration,
+    PartialGraphqlFormatter, PartialGraphqlLinter, PartialJavascriptFormatter,
+    PartialJsonFormatter, PartialLinterConfiguration,
 };
 use biome_configuration::{BiomeDiagnostic, PartialConfiguration};
 use biome_console::{markup, Console, ConsoleExt};
@@ -190,6 +192,9 @@ pub enum BiomeCommand {
         #[bpaf(external(partial_css_linter), optional, hide_usage, hide)]
         css_linter: Option<PartialCssLinter>,
 
+        #[bpaf(external(partial_graphql_linter), optional, hide_usage, hide)]
+        graphql_linter: Option<PartialGraphqlLinter>,
+
         #[bpaf(external, hide_usage)]
         cli_options: CliOptions,
 
@@ -245,6 +250,9 @@ pub enum BiomeCommand {
 
         #[bpaf(external(partial_css_formatter), optional, hide_usage, hide)]
         css_formatter: Option<PartialCssFormatter>,
+
+        #[bpaf(external(partial_graphql_formatter), optional, hide_usage, hide)]
+        graphql_formatter: Option<PartialGraphqlFormatter>,
 
         #[bpaf(external(partial_vcs_configuration), optional, hide_usage)]
         vcs_configuration: Option<PartialVcsConfiguration>,
@@ -386,7 +394,7 @@ pub enum BiomeCommand {
         /// The GritQL pattern to search for.
         ///
         /// Note that the search command (currently) does not support rewrites.
-        #[bpaf(positional("PATH"))]
+        #[bpaf(positional("PATTERN"))]
         pattern: String,
 
         /// Single file, single path or list of paths.

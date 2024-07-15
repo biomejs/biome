@@ -2,7 +2,7 @@ use std::{env, path::Path};
 
 use biome_formatter::{IndentStyle, IndentWidth};
 use biome_formatter_test::test_prettier_snapshot::{PrettierSnapshot, PrettierTestFile};
-use biome_graphql_formatter::context::GraphqlFormatOptions;
+use biome_graphql_formatter::{context::GraphqlFormatOptions, GraphqlFormatLanguage};
 
 mod language;
 
@@ -22,7 +22,7 @@ fn test_snapshot(input: &'static str, _: &str, _: &str, _: &str) {
         .with_indent_style(IndentStyle::Space)
         .with_indent_width(IndentWidth::default());
     let language = language::GraphqlTestFormatLanguage::default();
-    let snapshot = PrettierSnapshot::new(test_file, language, options);
+    let snapshot = PrettierSnapshot::new(test_file, language, GraphqlFormatLanguage::new(options));
 
     snapshot.test()
 }

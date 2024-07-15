@@ -18,7 +18,7 @@ use lazy_static::lazy_static;
 use regex::{Match, Regex};
 use tracing::debug;
 
-use super::parse_lang_from_script_opening_tag;
+use super::{parse_lang_from_script_opening_tag, SearchCapabilities};
 
 #[derive(Debug, Default, PartialEq, Eq)]
 pub struct VueFileHandler;
@@ -106,6 +106,8 @@ impl ExtensionHandler for VueFileHandler {
                 format_range: Some(format_range),
                 format_on_type: Some(format_on_type),
             },
+            // TODO: We should be able to search JS portions already
+            search: SearchCapabilities { search: None },
         }
     }
 }
@@ -123,15 +125,9 @@ fn parse(
     debug!("Parsing file with language {:?}", file_source);
 
     let parse = parse_js_with_cache(script, file_source, JsParserOptions::default(), cache);
-    let root = parse.syntax();
-    let diagnostics = parse.into_diagnostics();
 
     ParseResult {
-        any_parse: AnyParse::new(
-            // SAFETY: the parser should always return a root node
-            root.as_send().unwrap(),
-            diagnostics,
-        ),
+        any_parse: parse.into(),
         language: Some(file_source.into()),
     }
 }

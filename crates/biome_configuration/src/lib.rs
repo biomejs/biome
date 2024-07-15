@@ -35,8 +35,8 @@ pub use formatter::{
     PlainIndentStyle,
 };
 pub use graphql::{
-    partial_graphql_configuration, GraphqlConfiguration, GraphqlFormatter,
-    PartialGraphqlConfiguration, PartialGraphqlFormatter,
+    partial_graphql_configuration, GraphqlConfiguration, GraphqlFormatter, GraphqlLinter,
+    PartialGraphqlConfiguration, PartialGraphqlFormatter, PartialGraphqlLinter,
 };
 pub use javascript::{
     partial_javascript_configuration, JavascriptConfiguration, JavascriptFormatter,
@@ -217,6 +217,17 @@ impl PartialConfiguration {
 
     pub fn get_css_linter_configuration(&self) -> CssLinter {
         self.css
+            .as_ref()
+            .map(|f| {
+                f.linter
+                    .as_ref()
+                    .map(|f| f.get_linter_configuration())
+                    .unwrap_or_default()
+            })
+            .unwrap_or_default()
+    }
+    pub fn get_graphql_linter_configuration(&self) -> GraphqlLinter {
+        self.graphql
             .as_ref()
             .map(|f| {
                 f.linter

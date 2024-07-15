@@ -1,13 +1,14 @@
-use biome_formatter::{FormatResult, Formatted, Printed};
 use biome_formatter_test::TestFormatLanguage;
-use biome_js_formatter::context::{JsFormatContext, JsFormatOptions};
-use biome_js_formatter::{format_node, format_range, JsFormatLanguage};
+use biome_fs::BiomePath;
+use biome_js_formatter::context::JsFormatContext;
+use biome_js_formatter::JsFormatLanguage;
 use biome_js_parser::{parse, JsParserOptions};
 use biome_js_syntax::{JsFileSource, JsLanguage};
 use biome_parser::AnyParse;
-use biome_rowan::SyntaxNode;
-use biome_service::settings::{ServiceLanguage, Settings};
-use biome_text_size::TextRange;
+use biome_service::{
+    settings::{ServiceLanguage, Settings},
+    workspace::DocumentFileSource,
+};
 
 pub struct JsTestFormatLanguage {
     source_type: JsFileSource,
@@ -25,40 +26,24 @@ impl TestFormatLanguage for JsTestFormatLanguage {
     type FormatLanguage = JsFormatLanguage;
 
     fn parse(&self, text: &str) -> AnyParse {
-        let parse = parse(
-            text,
-            self.source_type,
-            JsParserOptions::default().with_parse_class_parameter_decorators(),
+        let options = JsParserOptions::default().with_parse_class_parameter_decorators();
+
+        parse(text, self.source_type, options).into()
+    }
+
+    fn to_format_language(
+        &self,
+        settings: &Settings,
+        file_source: &DocumentFileSource,
+    ) -> Self::FormatLanguage {
+        let language_settings = &settings.languages.javascript.formatter;
+        let options = Self::ServiceLanguage::resolve_format_options(
+            Some(&settings.formatter),
+            Some(&settings.override_settings),
+            Some(language_settings),
+            &BiomePath::new(""),
+            file_source,
         );
-
-        AnyParse::new(parse.syntax().as_send().unwrap(), parse.into_diagnostics())
-    }
-
-    fn to_language_settings<'a>(
-        &self,
-        settings: &'a Settings,
-    ) -> &'a <Self::ServiceLanguage as ServiceLanguage>::FormatterSettings {
-        &settings.languages.javascript.formatter
-    }
-
-    fn format_node(
-        &self,
-        options: <Self::ServiceLanguage as ServiceLanguage>::FormatOptions,
-        node: &SyntaxNode<Self::ServiceLanguage>,
-    ) -> FormatResult<Formatted<Self::Context>> {
-        format_node(options, node)
-    }
-
-    fn format_range(
-        &self,
-        options: <Self::ServiceLanguage as ServiceLanguage>::FormatOptions,
-        node: &SyntaxNode<Self::ServiceLanguage>,
-        range: TextRange,
-    ) -> FormatResult<Printed> {
-        format_range(options, node, range)
-    }
-
-    fn default_options(&self) -> <Self::ServiceLanguage as ServiceLanguage>::FormatOptions {
-        JsFormatOptions::new(self.source_type)
+        JsFormatLanguage::new(options)
     }
 }

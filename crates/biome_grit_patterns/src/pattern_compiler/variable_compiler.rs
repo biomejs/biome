@@ -1,6 +1,5 @@
 use super::compilation_context::NodeCompilationContext;
 use crate::util::TextRangeGritExt;
-use crate::CompileError;
 use biome_grit_syntax::GritVariable;
 use biome_rowan::AstNode;
 use grit_pattern_matcher::constants::GLOBAL_VARS_SCOPE_INDEX;
@@ -12,10 +11,7 @@ use std::path::Path;
 pub(crate) struct VariableCompiler;
 
 impl VariableCompiler {
-    pub(crate) fn from_node(
-        node: &GritVariable,
-        context: &mut NodeCompilationContext,
-    ) -> Result<Variable, CompileError> {
+    pub(crate) fn from_node(node: &GritVariable, context: &mut NodeCompilationContext) -> Variable {
         let name = node.syntax().text_trimmed().to_string();
         let range = node.range().to_byte_range();
         context.register_variable(name, range)
@@ -23,28 +19,24 @@ impl VariableCompiler {
 }
 
 impl<'a> NodeCompilationContext<'a> {
-    pub(super) fn variable_from_name(&mut self, name: String) -> Result<Variable, CompileError> {
+    pub(super) fn variable_from_name(&mut self, name: String) -> Variable {
         self.register_variable_with_optional_range(name, None)
     }
 
     pub(super) fn get_variables(
         &mut self,
         params: &[(String, ByteRange)],
-    ) -> Result<Vec<(String, Variable)>, CompileError> {
+    ) -> Vec<(String, Variable)> {
         params
             .iter()
             .map(|(name, range)| {
-                let index = self.register_variable(name.clone(), *range)?;
-                Ok((name.to_owned(), index))
+                let index = self.register_variable(name.clone(), *range);
+                (name.to_owned(), index)
             })
             .collect()
     }
 
-    pub(super) fn register_variable(
-        &mut self,
-        name: String,
-        range: ByteRange,
-    ) -> Result<Variable, CompileError> {
+    pub fn register_variable(&mut self, name: String, range: ByteRange) -> Variable {
         self.register_variable_with_optional_range(
             name,
             Some(FileLocation {
@@ -54,11 +46,11 @@ impl<'a> NodeCompilationContext<'a> {
         )
     }
 
-    fn register_variable_with_optional_range(
+    pub fn register_variable_with_optional_range(
         &mut self,
         name: String,
         location: Option<FileLocation>,
-    ) -> Result<Variable, CompileError> {
+    ) -> Variable {
         let Self {
             vars,
             vars_array,
@@ -71,7 +63,7 @@ impl<'a> NodeCompilationContext<'a> {
             if let Some(FileLocation { range, .. }) = location {
                 vars_array[*scope_index][*i].locations.insert(range);
             }
-            return Ok(Variable::new(*scope_index, *i));
+            return Variable::new(*scope_index, *i);
         }
 
         if let Some(i) = global_vars.get(&name) {
@@ -82,7 +74,7 @@ impl<'a> NodeCompilationContext<'a> {
                         .insert(range);
                 }
             }
-            return Ok(Variable::new(GLOBAL_VARS_SCOPE_INDEX, *i));
+            return Variable::new(GLOBAL_VARS_SCOPE_INDEX, *i);
         }
         let (name_map, scope_index) = if name.starts_with("$GLOBAL_") {
             (global_vars, GLOBAL_VARS_SCOPE_INDEX)
@@ -108,11 +100,11 @@ impl<'a> NodeCompilationContext<'a> {
                 .unwrap_or_default(),
             locations,
         });
-        Ok(Variable::new(scope_index, index))
+        Variable::new(scope_index, index)
     }
 }
 
-struct FileLocation<'a> {
+pub struct FileLocation<'a> {
     path: Option<&'a Path>,
     range: ByteRange,
 }

@@ -26,6 +26,7 @@ serde                    = { workspace = true, features = ["derive"], optional =
 
 [dev-dependencies]
 biome_formatter_test = { path = "../biome_formatter_test" }
+biome_fs             = { path = "../biome_fs" }
 biome_json_parser    = { path = "../biome_json_parser" }
 biome_parser         = { path = "../biome_parser" }
 biome_service        = { path = "../biome_service" }

@@ -32,7 +32,7 @@ enumflags2               = { workspace = true }
 lazy_static              = { workspace = true }
 natord                   = { workspace = true }
 regex                    = { workspace = true }
-roaring                  = "0.10.5"
+roaring                  = "0.10.6"
 rustc-hash               = { workspace = true }
 schemars                 = { workspace = true, optional = true }
 serde                    = { workspace = true, features = ["derive"] }

@@ -17,6 +17,8 @@ use biome_rowan::NodeCache;
 use lazy_static::lazy_static;
 use regex::{Matches, Regex, RegexBuilder};
 
+use super::SearchCapabilities;
+
 #[derive(Debug, Default, PartialEq, Eq)]
 pub struct AstroFileHandler;
 
@@ -86,6 +88,8 @@ impl ExtensionHandler for AstroFileHandler {
                 format_range: Some(format_range),
                 format_on_type: Some(format_on_type),
             },
+            // TODO: We should be able to search JS portions already
+            search: SearchCapabilities { search: None },
         }
     }
 }
@@ -106,15 +110,9 @@ fn parse(
         JsParserOptions::default(),
         cache,
     );
-    let root = parse.syntax();
-    let diagnostics = parse.into_diagnostics();
 
     ParseResult {
-        any_parse: AnyParse::new(
-            // SAFETY: the parser should always return a root node
-            root.as_send().unwrap(),
-            diagnostics,
-        ),
+        any_parse: parse.into(),
         language: Some(JsFileSource::astro().into()),
     }
 }

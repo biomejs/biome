@@ -1,0 +1,10 @@
+
+main {
+	label:hover {
+		font-weight: 500;
+	}
+
+	a:link, a:visited {
+		color: inherit;
+	}
+}

@@ -96,6 +96,7 @@ AnyCssSelector =
 	CssComplexSelector
 	| CssCompoundSelector
 	| CssBogusSelector
+	| CssGritMetavariable
 
 // div a {}
 // ^^^^^
@@ -111,9 +112,17 @@ CssComplexSelector =
 // a.class {}
 // ^^^^^^^
 CssCompoundSelector =
-	nesting_selector: '&'?
+	nesting_selectors: CssNestedSelectorList
 	simple_selector: AnyCssSimpleSelector?
 	sub_selectors: CssSubSelectorList
+
+// .class {
+// &&&&&&&.class {}
+// ^^^^^^^
+// }
+CssNestedSelectorList = CssNestedSelector*
+CssNestedSelector =
+	'&'
 
 CssSubSelectorList = AnyCssSubSelector*
 
@@ -433,6 +442,7 @@ AnyCssDeclarationOrRule =
 	AnyCssRule
 	| CssDeclarationWithSemicolon
 	| CssBogus
+	| CssGritMetavariable
 
 // @page :left { background: red; @media (500px <= width <= 500px) {  } }
 // 						 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -1001,6 +1011,7 @@ AnyCssMediaQuery =
 	CssMediaConditionQuery
 	| AnyCssMediaTypeQuery
 	| CssBogusMediaQuery
+	| CssGritMetavariable
 
 // @media screen, (width > 500px), print {}
 // 				        ^^^^^^^^^^^^^^^
@@ -1616,6 +1627,7 @@ AnyCssValue =
 	| CssColor
 	| CssBracketedValue
 	| CssUnicodeRange
+	| CssGritMetavariable
 
 
 // https://drafts.csswg.org/css-syntax/#typedef-dimension-token
@@ -1787,3 +1799,6 @@ CssNumber = value: 'css_number_literal'
 CssUnicodeCodepoint = value: 'css_unicode_codepoint_literal'
 CssUnicodeRangeWildcard = value: 'css_unicode_range_wildcard_literal'
 CssUrlValueRaw = value: 'css_url_value_raw_literal'
+
+// https://github.com/getgrit/gritql/blob/main/resources/language-metavariables/tree-sitter-css/grammar.js
+CssGritMetavariable = value: 'grit_metavariable'

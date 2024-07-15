@@ -179,6 +179,7 @@ export interface PartialGraphqlConfiguration {
 	 * GraphQL formatter options
 	 */
 	formatter?: PartialGraphqlFormatter;
+	linter?: PartialGraphqlLinter;
 }
 /**
  * A set of options applied to the JavaScript files
@@ -379,6 +380,15 @@ export interface PartialGraphqlFormatter {
 	 * The type of quotes used in GraphQL code. Defaults to double.
 	 */
 	quoteStyle?: QuoteStyle;
+}
+/**
+ * Options that changes how the GraphQL linter behaves
+ */
+export interface PartialGraphqlLinter {
+	/**
+	 * Control the formatter for GraphQL files.
+	 */
+	enabled?: boolean;
 }
 /**
  * Formatting options specific to the JavaScript files
@@ -1068,6 +1078,10 @@ export interface Nursery {
 	 */
 	noDuplicateSelectorsKeyframeBlock?: RuleConfiguration_for_Null;
 	/**
+	 * No duplicated fields in GraphQL operations.
+	 */
+	noDuplicatedFields?: RuleConfiguration_for_Null;
+	/**
 	 * Disallow accessing namespace imports dynamically.
 	 */
 	noDynamicNamespaceImportAccess?: RuleConfiguration_for_Null;
@@ -1095,6 +1109,10 @@ export interface Nursery {
 	 * Disallow the use of @import at-rules in invalid positions.
 	 */
 	noInvalidPositionAtImportRule?: RuleConfiguration_for_Null;
+	/**
+	 * Disallows the use of irregular whitespace characters.
+	 */
+	noIrregularWhitespace?: RuleConfiguration_for_Null;
 	/**
 	 * Enforce that a label element or component has a text label and an associated input.
 	 */
@@ -1235,6 +1253,10 @@ export interface Nursery {
 	 * Enforce the sorting of CSS utility classes.
 	 */
 	useSortedClasses?: RuleFixConfiguration_for_UtilityClassSortingOptions;
+	/**
+	 * Enforce the use of the directive "use strict" in script files.
+	 */
+	useStrictMode?: RuleFixConfiguration_for_Null;
 	/**
 	 * Require new when throwing an error.
 	 */
@@ -2490,6 +2512,7 @@ export type Category =
 	| "lint/nursery/noDuplicateFontNames"
 	| "lint/nursery/noDuplicateJsonKeys"
 	| "lint/nursery/noDuplicateSelectorsKeyframeBlock"
+	| "lint/nursery/noDuplicatedFields"
 	| "lint/nursery/noDynamicNamespaceImportAccess"
 	| "lint/nursery/noEmptyBlock"
 	| "lint/nursery/noEvolvingTypes"
@@ -2497,6 +2520,7 @@ export type Category =
 	| "lint/nursery/noImportantInKeyframe"
 	| "lint/nursery/noInvalidDirectionInLinearGradient"
 	| "lint/nursery/noInvalidPositionAtImportRule"
+	| "lint/nursery/noIrregularWhitespace"
 	| "lint/nursery/noLabelWithoutControl"
 	| "lint/nursery/noMisplacedAssertion"
 	| "lint/nursery/noMissingGenericFamilyKeyword"
@@ -2534,6 +2558,7 @@ export type Category =
 	| "lint/nursery/useNumberToFixedDigitsArgument"
 	| "lint/nursery/useSemanticElements"
 	| "lint/nursery/useSortedClasses"
+	| "lint/nursery/useStrictMode"
 	| "lint/nursery/useThrowNewError"
 	| "lint/nursery/useThrowOnlyError"
 	| "lint/nursery/useTopLevelRegex"

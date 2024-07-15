@@ -12,7 +12,8 @@ use biome_configuration::json::PartialJsonLinter;
 use biome_configuration::linter::RuleSelector;
 use biome_configuration::vcs::PartialVcsConfiguration;
 use biome_configuration::{
-    PartialConfiguration, PartialFilesConfiguration, PartialLinterConfiguration,
+    PartialConfiguration, PartialFilesConfiguration, PartialGraphqlLinter,
+    PartialLinterConfiguration,
 };
 use biome_deserialize::Merge;
 use biome_service::configuration::{
@@ -43,6 +44,7 @@ pub(crate) struct LintCommandPayload {
     pub(crate) javascript_linter: Option<PartialJavascriptLinter>,
     pub(crate) json_linter: Option<PartialJsonLinter>,
     pub(crate) css_linter: Option<PartialCssLinter>,
+    pub(crate) graphql_linter: Option<PartialGraphqlLinter>,
 }
 
 /// Handler for the "lint" command of the Biome CLI
@@ -67,6 +69,7 @@ pub(crate) fn lint(session: CliSession, payload: LintCommandPayload) -> Result<(
         javascript_linter,
         css_linter,
         json_linter,
+        graphql_linter,
     } = payload;
     setup_cli_subscriber(cli_options.log_level, cli_options.log_kind);
 
@@ -117,6 +120,13 @@ pub(crate) fn lint(session: CliSession, payload: LintCommandPayload) -> Result<(
     if css_linter.is_some() {
         let css = fs_configuration.css.get_or_insert_with(Default::default);
         css.linter.merge_with(css_linter);
+    }
+
+    if graphql_linter.is_some() {
+        let graphql = fs_configuration
+            .graphql
+            .get_or_insert_with(Default::default);
+        graphql.linter.merge_with(graphql_linter);
     }
     if javascript_linter.is_some() {
         let javascript = fs_configuration

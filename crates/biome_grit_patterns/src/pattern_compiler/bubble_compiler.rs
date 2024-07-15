@@ -39,13 +39,13 @@ impl BubbleCompiler {
             return Err(CompileError::DuplicateParameters);
         }
 
-        let params = local_context.get_variables(&parameters)?;
+        let params = local_context.get_variables(&parameters);
 
         let body = PatternCompiler::from_maybe_curly_node(&node.pattern()?, &mut local_context)?;
 
         let args = parameters
             .into_iter()
-            .map(|(name, range)| Ok(Pattern::Variable(context.register_variable(name, range)?)))
+            .map(|(name, range)| Ok(Pattern::Variable(context.register_variable(name, range))))
             .collect::<Result<Vec<_>, CompileError>>()?;
 
         let pattern_def = PatternDefinition::new(

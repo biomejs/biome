@@ -2,7 +2,6 @@
 source: crates/biome_css_parser/tests/spec_test.rs
 expression: snapshot
 ---
-
 ## Input
 
 ```css
@@ -27,7 +26,7 @@ CssRoot {
         CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
-                    nesting_selector_token: missing (optional),
+                    nesting_selectors: CssNestedSelectorList [],
                     simple_selector: missing (optional),
                     sub_selectors: CssSubSelectorList [
                         CssPseudoElementSelector {
@@ -53,7 +52,7 @@ CssRoot {
         CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
-                    nesting_selector_token: missing (optional),
+                    nesting_selectors: CssNestedSelectorList [],
                     simple_selector: CssTypeSelector {
                         namespace: missing (optional),
                         ident: CssIdentifier {
@@ -84,7 +83,7 @@ CssRoot {
         CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
-                    nesting_selector_token: missing (optional),
+                    nesting_selectors: CssNestedSelectorList [],
                     simple_selector: CssTypeSelector {
                         namespace: missing (optional),
                         ident: CssIdentifier {
@@ -126,7 +125,7 @@ CssRoot {
     0: CSS_QUALIFIED_RULE@0..23
       0: CSS_SELECTOR_LIST@0..20
         0: CSS_COMPOUND_SELECTOR@0..20
-          0: (empty)
+          0: CSS_NESTED_SELECTOR_LIST@0..0
           1: (empty)
           2: CSS_SUB_SELECTOR_LIST@0..20
             0: CSS_PSEUDO_ELEMENT_SELECTOR@0..20
@@ -144,7 +143,7 @@ CssRoot {
     1: CSS_QUALIFIED_RULE@23..48
       0: CSS_SELECTOR_LIST@23..45
         0: CSS_COMPOUND_SELECTOR@23..45
-          0: (empty)
+          0: CSS_NESTED_SELECTOR_LIST@23..23
           1: CSS_TYPE_SELECTOR@23..28
             0: (empty)
             1: CSS_IDENTIFIER@23..28
@@ -165,7 +164,7 @@ CssRoot {
     2: CSS_QUALIFIED_RULE@48..73
       0: CSS_SELECTOR_LIST@48..70
         0: CSS_COMPOUND_SELECTOR@48..70
-          0: (empty)
+          0: CSS_NESTED_SELECTOR_LIST@48..48
           1: CSS_TYPE_SELECTOR@48..53
             0: (empty)
             1: CSS_IDENTIFIER@48..53
@@ -186,5 +185,3 @@ CssRoot {
   2: EOF@73..74 "" [Newline("\n")] []
 
 ```
-
-

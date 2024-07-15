@@ -1,6 +1,6 @@
 use super::{
     is_diagnostic_error, CodeActionsParams, ExtensionHandler, FixAllParams, LintParams,
-    LintResults, ParseResult,
+    LintResults, ParseResult, SearchCapabilities,
 };
 use crate::configuration::to_analyzer_rules;
 use crate::file_handlers::DebugCapabilities;
@@ -202,6 +202,7 @@ impl ExtensionHandler for CssFileHandler {
                 format_range: Some(format_range),
                 format_on_type: Some(format_on_type),
             },
+            search: SearchCapabilities { search: None },
         }
     }
 }
@@ -220,6 +221,7 @@ fn parse(
         css_modules: settings
             .and_then(|s| s.languages.css.parser.css_modules)
             .unwrap_or_default(),
+        grit_metavariable: false,
     };
     if let Some(settings) = settings {
         options = settings
@@ -227,14 +229,8 @@ fn parse(
             .to_override_css_parser_options(biome_path, options);
     }
     let parse = biome_css_parser::parse_css_with_cache(text, cache, options);
-    let root = parse.syntax();
-    let diagnostics = parse.into_diagnostics();
     ParseResult {
-        any_parse: AnyParse::new(
-            // SAFETY: the parser should always return a root node
-            root.as_send().unwrap(),
-            diagnostics,
-        ),
+        any_parse: parse.into(),
         language: None,
     }
 }

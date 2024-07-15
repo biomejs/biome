@@ -124,6 +124,8 @@ pub type NoInteractiveElementToNoninteractiveRole = < lint :: a11y :: no_interac
 pub type NoInvalidConstructorSuper = < lint :: correctness :: no_invalid_constructor_super :: NoInvalidConstructorSuper as biome_analyze :: Rule > :: Options ;
 pub type NoInvalidNewBuiltin = < lint :: correctness :: no_invalid_new_builtin :: NoInvalidNewBuiltin as biome_analyze :: Rule > :: Options ;
 pub type NoInvalidUseBeforeDeclaration = < lint :: correctness :: no_invalid_use_before_declaration :: NoInvalidUseBeforeDeclaration as biome_analyze :: Rule > :: Options ;
+pub type NoIrregularWhitespace =
+    <lint::nursery::no_irregular_whitespace::NoIrregularWhitespace as biome_analyze::Rule>::Options;
 pub type NoLabelVar = <lint::suspicious::no_label_var::NoLabelVar as biome_analyze::Rule>::Options;
 pub type NoLabelWithoutControl = < lint :: nursery :: no_label_without_control :: NoLabelWithoutControl as biome_analyze :: Rule > :: Options ;
 pub type NoMisleadingCharacterClass = < lint :: suspicious :: no_misleading_character_class :: NoMisleadingCharacterClass as biome_analyze :: Rule > :: Options ;
@@ -351,6 +353,8 @@ pub type UseSingleCaseStatement = < lint :: style :: use_single_case_statement :
 pub type UseSingleVarDeclarator = < lint :: style :: use_single_var_declarator :: UseSingleVarDeclarator as biome_analyze :: Rule > :: Options ;
 pub type UseSortedClasses =
     <lint::nursery::use_sorted_classes::UseSortedClasses as biome_analyze::Rule>::Options;
+pub type UseStrictMode =
+    <lint::nursery::use_strict_mode::UseStrictMode as biome_analyze::Rule>::Options;
 pub type UseTemplate = <lint::style::use_template::UseTemplate as biome_analyze::Rule>::Options;
 pub type UseThrowNewError =
     <lint::nursery::use_throw_new_error::UseThrowNewError as biome_analyze::Rule>::Options;

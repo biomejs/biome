@@ -5,7 +5,7 @@ use std::ops::Range;
 use std::{borrow::Borrow, ops::Deref};
 
 /// Represents the location of a diagnostic in a resource.
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Default, Clone, Copy)]
 pub struct Location<'a> {
     /// The resource this diagnostic is associated with.
     pub resource: Option<Resource<&'a str>>,

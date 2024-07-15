@@ -686,6 +686,7 @@ impl Field {
                     ("$", LanguageKind::Graphql) => "dollar",
                     ("~=", _) => "whitespace_like",
                     (",", _) => "comma",
+                    ("---", LanguageKind::Yaml) => "dashdashdash",
                     _ => name,
                 };
 
