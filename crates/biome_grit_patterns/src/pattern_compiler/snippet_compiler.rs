@@ -215,9 +215,8 @@ fn pattern_from_node(
 
     if !node.has_children() {
         let content = node.text();
-        let pattern = if let Some(regex_pattern) = context
-            .compilation
-            .lang
+        let lang = &context.compilation.lang;
+        let pattern = if let Some(regex_pattern) = lang
             .matches_replaced_metavariable(content)
             .then(|| implicit_metavariable_regex(node, context_range, range_map, context))
             .transpose()?
@@ -225,7 +224,7 @@ fn pattern_from_node(
         {
             Pattern::Regex(Box::new(regex_pattern))
         } else {
-            Pattern::AstLeafNode(GritLeafNodePattern::new(node.kind(), content))
+            Pattern::AstLeafNode(GritLeafNodePattern::new(node.kind(), content, lang)?)
         };
 
         return Ok(pattern);
@@ -502,6 +501,7 @@ mod tests {
         JsTargetLanguage,
     };
     use grit_util::Parser;
+    use regex::Regex;
 
     #[test]
     fn test_node_from_tree() {
@@ -591,7 +591,11 @@ mod tests {
         let pattern = pattern_from_node(&node, range, &range_map, &mut context, false)
             .expect("cannot compile pattern from node");
         let formatted = format!("{pattern:#?}");
-        insta::assert_snapshot!(&formatted, @r###"
+        let snapshot = Regex::new("normalizer: 0x[0-9a-f]{16}")
+            .unwrap()
+            .replace_all(&formatted, "normalizer: [address redacted]");
+
+        insta::assert_snapshot!(&snapshot, @r###"
         AstNode(
             GritNodePattern {
                 kind: JsSyntaxKind(
@@ -621,6 +625,7 @@ mod tests {
                                                                 kind: JsSyntaxKind(
                                                                     JS_REFERENCE_IDENTIFIER,
                                                                 ),
+                                                                equivalence_class: None,
                                                                 text: "console",
                                                             },
                                                         ),
@@ -636,6 +641,7 @@ mod tests {
                                                 kind: JsSyntaxKind(
                                                     DOT,
                                                 ),
+                                                equivalence_class: None,
                                                 text: ".",
                                             },
                                         ),
@@ -647,6 +653,7 @@ mod tests {
                                                 kind: JsSyntaxKind(
                                                     JS_NAME,
                                                 ),
+                                                equivalence_class: None,
                                                 text: "log",
                                             },
                                         ),
@@ -698,6 +705,7 @@ mod tests {
                                                 kind: JsSyntaxKind(
                                                     L_PAREN,
                                                 ),
+                                                equivalence_class: None,
                                                 text: "(",
                                             },
                                         ),
@@ -711,6 +719,25 @@ mod tests {
                                                         GritLeafNodePattern {
                                                             kind: JsSyntaxKind(
                                                                 JS_STRING_LITERAL_EXPRESSION,
+                                                            ),
+                                                            equivalence_class: Some(
+                                                                LeafEquivalenceClass {
+                                                                    representative: "hello",
+                                                                    class: [
+                                                                        LeafNormalizer {
+                                                                            kind: JsSyntaxKind(
+                                                                                JS_STRING_LITERAL,
+                                                                            ),
+                                                                            normalizer: [address redacted],
+                                                                        },
+                                                                        LeafNormalizer {
+                                                                            kind: JsSyntaxKind(
+                                                                                JS_STRING_LITERAL_EXPRESSION,
+                                                                            ),
+                                                                            normalizer: [address redacted],
+                                                                        },
+                                                                    ],
+                                                                },
                                                             ),
                                                             text: "'hello'",
                                                         },
@@ -726,6 +753,7 @@ mod tests {
                                                 kind: JsSyntaxKind(
                                                     R_PAREN,
                                                 ),
+                                                equivalence_class: None,
                                                 text: ")",
                                             },
                                         ),
