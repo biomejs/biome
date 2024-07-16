@@ -3,13 +3,9 @@
 use crate::analyzer::{RuleConfiguration, RuleFixConfiguration, RulePlainConfiguration};
 use biome_analyze::{options::RuleOptions, RuleFilter};
 use biome_console::markup;
-use biome_css_analyze::options::*;
 use biome_deserialize::{DeserializableValidator, DeserializationDiagnostic};
 use biome_deserialize_macros::{Deserializable, Merge};
 use biome_diagnostics::{Category, Severity};
-use biome_graphql_analyze::options::*;
-use biome_js_analyze::options::*;
-use biome_json_analyze::options::*;
 use biome_rowan::TextRange;
 use rustc_hash::FxHashSet;
 #[cfg(feature = "schema")]
@@ -170,10 +166,10 @@ pub struct Refactor {
     pub all: Option<bool>,
     #[doc = "Provides a whole-source code action to sort the imports in the file using import groups and natural ordering."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub organize_imports: Option<RuleFixConfiguration<OrganizeImports>>,
+    pub organize_imports: Option<RuleFixConfiguration<biome_js_analyze::options::OrganizeImports>>,
     #[doc = "Sorts the keys of a JSON object in natural order"]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_sorted_keys: Option<RuleConfiguration<UseSortedKeys>>,
+    pub use_sorted_keys: Option<RuleConfiguration<biome_json_analyze::options::UseSortedKeys>>,
 }
 impl DeserializableValidator for Refactor {
     fn validate(

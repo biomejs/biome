@@ -271,8 +271,6 @@ fn generate_for_groups(
         use biome_deserialize::{DeserializableValidator, DeserializationDiagnostic};
         use biome_deserialize_macros::{Deserializable, Merge};
         use biome_diagnostics::{Category, Severity};
-        use biome_js_analyze::options::*;
-        use biome_json_analyze::options::*;
         use biome_rowan::TextRange;
         use rustc_hash::FxHashSet;
         use serde::{Deserialize, Serialize};
@@ -590,10 +588,25 @@ fn generate_struct(group: &str, rules: &BTreeMap<&'static str, RuleMetadata>) ->
         lines_rule.push(quote! {
              #rule
         });
+        let rule_option_type = match metadata.language {
+            "css" => quote! {
+                biome_css_analyze::options::#rule_name
+            },
+            "graphql" => quote! {
+                biome_graphql_analyze::options::#rule_name
+            },
+            "json" => quote! {
+                biome_json_analyze::options::#rule_name
+            },
+            "ts" | "js" | "jsx" | "tsx" => quote! {
+                biome_js_analyze::options::#rule_name
+            },
+            _ => panic!("Language not supported"),
+        };
         schema_lines_rules.push(quote! {
             #[doc = #summary]
             #[serde(skip_serializing_if = "Option::is_none")]
-            pub #rule_identifier: Option<#rule_config_type<#rule_name>>
+            pub #rule_identifier: Option<#rule_config_type<#rule_option_type>>
         });
 
         rule_enabled_check_line.push(quote! {
