@@ -118,14 +118,12 @@ impl Rule for NoCommentText {
 
         // Replace the comments with JSX comments
         let new_jsx_value = COMMENT_REGEX.replace_all(&node_text, |caps: &regex::Captures| {
-            format!(
-                "{{/*{}*/}}",
-                &caps[0]
-                    .trim_start_matches("//")
-                    .trim_start_matches("/*")
-                    .trim_end_matches("*/")
-                    .trim()
-            )
+            let comment = caps[0].trim();
+            match comment {
+                c if c.starts_with("//") => format!("{{/* {} */}}", c[2..].trim()),
+                c if c.starts_with("/**") => format!("{{/** {} */}}", &c[3..c.len() - 2].trim()),
+                c => format!("{{/* {} */}}", &c[2..c.len() - 2].trim()),
+            }
         });
 
         // Create a new JSX text node with the new value
