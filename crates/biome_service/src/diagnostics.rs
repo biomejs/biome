@@ -10,7 +10,7 @@ use biome_diagnostics::{
 };
 use biome_formatter::{FormatError, PrintError};
 use biome_fs::{BiomePath, FileSystemDiagnostic};
-use biome_grit_patterns::{CompileError, ParsePatternError};
+use biome_grit_patterns::CompileError;
 use biome_js_analyze::utils::rename::RenameError;
 use serde::{Deserialize, Serialize};
 use std::error::Error;
@@ -327,16 +327,11 @@ impl Diagnostic for SourceFileNotSupported {
 #[derive(Debug, Deserialize, Diagnostic, Serialize)]
 pub enum SearchError {
     /// An invalid pattern was given
-    PatternCompilationError(PatternCompilationError),
+    PatternCompilationError(SerdeDiagnostic),
     /// No pattern with the given ID
     InvalidPattern(InvalidPattern),
     /// Error while executing the search query.
     QueryError(QueryDiagnostic),
-}
-
-#[derive(Debug, Deserialize, Diagnostic, Serialize)]
-pub struct PatternCompilationError {
-    pub diagnostics: Vec<SerdeDiagnostic>,
 }
 
 #[derive(Debug, Serialize, Deserialize, Diagnostic)]
@@ -463,18 +458,10 @@ impl From<VcsDiagnostic> for WorkspaceError {
 
 impl From<CompileError> for WorkspaceError {
     fn from(value: CompileError) -> Self {
-        match &value {
-            CompileError::ParsePatternError(ParsePatternError { diagnostics }) => {
-                Self::SearchError(SearchError::PatternCompilationError(
-                    PatternCompilationError {
-                        diagnostics: diagnostics
-                            .iter()
-                            .cloned()
-                            .map(SerdeDiagnostic::new)
-                            .collect(),
-                    },
-                ))
-            }
+        match value {
+            CompileError::ParsePatternError(diagnostic) => Self::SearchError(
+                SearchError::PatternCompilationError(SerdeDiagnostic::new(diagnostic)),
+            ),
             // FIXME: This really needs proper diagnostics
             _ => Self::SearchError(SearchError::QueryError(QueryDiagnostic(format!(
                 "{value:?}"
