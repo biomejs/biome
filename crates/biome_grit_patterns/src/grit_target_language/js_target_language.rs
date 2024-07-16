@@ -1,10 +1,12 @@
 use super::GritTargetLanguageImpl;
 use crate::grit_target_node::GritTargetSyntaxKind;
-use biome_js_syntax::JsSyntaxKind;
-use biome_parser::{token_set, TokenSet};
+use biome_js_syntax::{JsLanguage, JsSyntaxKind};
+use biome_rowan::{RawSyntaxKind, SyntaxKindSet};
 
-const COMMENT_KINDS: TokenSet<JsSyntaxKind> =
-    token_set![JsSyntaxKind::COMMENT, JsSyntaxKind::MULTILINE_COMMENT];
+const COMMENT_KINDS: SyntaxKindSet<JsLanguage> =
+    SyntaxKindSet::from_raw(RawSyntaxKind(JsSyntaxKind::COMMENT as u16)).union(
+        SyntaxKindSet::from_raw(RawSyntaxKind(JsSyntaxKind::MULTILINE_COMMENT as u16)),
+    );
 
 #[derive(Clone, Debug)]
 pub struct JsTargetLanguage;
@@ -105,7 +107,7 @@ impl GritTargetLanguageImpl for JsTargetLanguage {
 
     fn is_comment_kind(kind: GritTargetSyntaxKind) -> bool {
         kind.as_js_kind()
-            .map_or(false, |kind| COMMENT_KINDS.contains(kind))
+            .map_or(false, |kind| COMMENT_KINDS.matches(kind))
     }
 
     fn metavariable_kind() -> Self::Kind {

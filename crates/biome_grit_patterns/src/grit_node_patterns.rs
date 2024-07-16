@@ -45,14 +45,6 @@ impl Matcher<GritQueryContext> for GritNodePattern {
         let Some(node) = binding.singleton() else {
             return Ok(false);
         };
-        if binding.is_list() {
-            return self.execute(
-                &ResolvedPattern::from_node_binding(node),
-                init_state,
-                context,
-                logs,
-            );
-        }
 
         if node.kind() != self.kind {
             return Ok(false);
