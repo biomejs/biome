@@ -5,18 +5,7 @@ expression: arrayType
 SnapshotResult {
     messages: [],
     matched_ranges: [
-        Range {
-            start: Position {
-                line: 2,
-                column: 22,
-            },
-            end: Position {
-                line: 2,
-                column: 30,
-            },
-            start_byte: 22,
-            end_byte: 30,
-        },
+        "2:22-2:30",
     ],
     rewritten_files: [],
     created_files: [],
