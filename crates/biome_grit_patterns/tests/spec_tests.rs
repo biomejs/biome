@@ -93,7 +93,7 @@ fn parse_test_path(file: &Path) -> (&str, &str) {
 #[derive(Debug, Default)]
 struct SnapshotResult {
     messages: Vec<Message>,
-    matched_ranges: Vec<Range>,
+    matched_ranges: Vec<String>,
     rewritten_files: Vec<OutputFile>,
     created_files: Vec<OutputFile>,
 }
@@ -105,18 +105,22 @@ impl SnapshotResult {
             match result {
                 GritQueryResult::Match(m) => {
                     snapshot_result.messages.extend(m.messages);
-                    snapshot_result.matched_ranges.extend(m.ranges);
+                    snapshot_result
+                        .matched_ranges
+                        .extend(m.ranges.into_iter().map(format_range));
                 }
                 GritQueryResult::Rewrite(rewrite) => {
                     snapshot_result.messages.extend(rewrite.original.messages);
                     snapshot_result
                         .matched_ranges
-                        .extend(rewrite.original.ranges);
+                        .extend(rewrite.original.ranges.into_iter().map(format_range));
                     snapshot_result.rewritten_files.push(rewrite.rewritten);
                 }
                 GritQueryResult::CreateFile(create_file) => {
                     if let Some(ranges) = create_file.ranges {
-                        snapshot_result.matched_ranges.extend(ranges);
+                        snapshot_result
+                            .matched_ranges
+                            .extend(ranges.into_iter().map(format_range));
                     }
                     snapshot_result.created_files.push(create_file.rewritten);
                 }
@@ -125,4 +129,11 @@ impl SnapshotResult {
 
         snapshot_result
     }
+}
+
+fn format_range(range: Range) -> String {
+    format!(
+        "{}:{}-{}:{}",
+        range.start.line, range.start.column, range.end.line, range.end.column
+    )
 }
