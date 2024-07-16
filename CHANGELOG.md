@@ -40,6 +40,10 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 ### Formatter
 
+#### Bug fixes
+
+- Keep the parentheses around `infer` declarations in type unions and type intersections ([#3419](https://github.com/biomejs/biome/issues/3419)). Contributed by @Conaclos
+
 ### JavaScript APIs
 
 ### Linter

@@ -33,6 +33,12 @@ impl NeedsParentheses for TsInferType {
     fn needs_parentheses_with_parent(&self, parent: &JsSyntaxNode) -> bool {
         if parent.kind() == JsSyntaxKind::TS_REST_TUPLE_TYPE_ELEMENT {
             false
+        } else if matches!(
+            parent.kind(),
+            JsSyntaxKind::TS_INTERSECTION_TYPE_ELEMENT_LIST
+                | JsSyntaxKind::TS_UNION_TYPE_VARIANT_LIST
+        ) {
+            true
         } else {
             operator_type_or_higher_needs_parens(self.syntax(), parent)
         }
@@ -62,6 +68,10 @@ mod tests {
         );
         assert_needs_parentheses!(
             "type A = T extends [(infer string)?] ? string : never",
+            TsInferType
+        );
+        assert_needs_parentheses!(
+            "type A = T extends [(infer string) | undefined] ? string : never",
             TsInferType
         );
 
