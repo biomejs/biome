@@ -65,11 +65,13 @@ declare_lint_rule! {
     /// ### Valid
     ///
     /// ```jsx
-    /// <div>{/* comment */}</div>;
-    /// <div>{/** comment */}</div>;
-    /// <div className={"cls" /* comment */}></div>;
-    /// <div>text {/* comment */}</div>;
-    /// <div>{/* comment */} text</div>;
+    /// <>
+    ///    <div>{/* comment */}</div>;
+    ///    <div>{/** comment */}</div>;
+    ///    <div className={"cls" /* comment */}></div>;
+    ///    <div>text {/* comment */}</div>;
+    ///    <div>{/* comment */} text</div>;
+    /// </>
     /// ```
     pub NoCommentText {
         version: "1.0.0",
