@@ -1,13 +1,14 @@
 use biome_console::fmt::Formatter;
 use biome_console::markup;
 use biome_diagnostics::{Diagnostic, Location, Severity};
+use biome_js_factory::make;
 use biome_js_semantic::{ReferencesExtensions, SemanticModel};
 use biome_js_syntax::{
-    binding_ext::AnyJsIdentifierBinding, JsIdentifierAssignment, JsIdentifierBinding, JsLanguage,
-    JsReferenceIdentifier, JsSyntaxKind, JsSyntaxNode, JsSyntaxToken, JsxReferenceIdentifier,
-    TextRange, TsIdentifierBinding,
+    binding_ext::AnyJsIdentifierBinding, AnyJsIdentifierUsage, JsIdentifierAssignment,
+    JsIdentifierBinding, JsLanguage, JsReferenceIdentifier, JsSyntaxKind, JsSyntaxNode, TextRange,
+    TsIdentifierBinding, T,
 };
-use biome_rowan::{AstNode, BatchMutation, SyntaxNodeCast, TriviaPiece};
+use biome_rowan::{AstNode, BatchMutation, SyntaxNodeCast, TriviaPieceKind};
 use serde::{Deserialize, Serialize};
 use std::fmt;
 
@@ -211,28 +212,6 @@ pub trait RenameSymbolExtensions {
     }
 }
 
-fn token_with_new_text(token: &JsSyntaxToken, new_text: &str) -> JsSyntaxToken {
-    let new_text = format!(
-        "{}{}{}",
-        token.leading_trivia().text(),
-        new_text,
-        token.trailing_trivia().text()
-    );
-
-    let leading = token
-        .leading_trivia()
-        .pieces()
-        .map(|item| TriviaPiece::new(item.kind(), item.text_len()))
-        .collect::<Vec<_>>();
-    let trailing = token
-        .trailing_trivia()
-        .pieces()
-        .map(|item| TriviaPiece::new(item.kind(), item.text_len()))
-        .collect::<Vec<_>>();
-
-    JsSyntaxToken::new_detached(JsSyntaxKind::IDENT, new_text.as_str(), leading, trailing)
-}
-
 impl RenameSymbolExtensions for BatchMutation<JsLanguage> {
     /// Rename the binding and all its references to "new_name".
     /// If we can´t rename the binding, the [BatchMutation] is never changes and it is left
@@ -250,7 +229,6 @@ impl RenameSymbolExtensions for BatchMutation<JsLanguage> {
 
         // We can rename a binding if there is no conflicts in the current scope.
         // We can shadow parent scopes, so we don´t check them.
-
         let syntax = prev_binding.syntax();
         let scope = model
             .scope_hoisted_to(syntax)
@@ -259,66 +237,71 @@ impl RenameSymbolExtensions for BatchMutation<JsLanguage> {
             return false;
         }
 
-        let name_token = match prev_binding.name_token() {
-            Ok(name_token) => name_token,
-            Err(_) => {
-                return false;
-            }
+        let Ok(prev_name_token) = prev_binding.name_token() else {
+            return false;
         };
 
         // We can rename references, if there is no conflicts in any scope
         // until the root.
 
         let all_references: Vec<_> = prev_binding.all_references(model).collect();
-        let mut changes = Vec::with_capacity(all_references.len());
+        let mut token_changes = Vec::with_capacity(all_references.len());
+        let mut node_changes = vec![];
 
         for reference in all_references {
-            let scope = reference.scope();
-            if scope
+            // We can rename a reference if there is no binding named `new_name`
+            // in the current scope or a parent scope.
+            if reference
+                .scope()
                 .ancestors()
-                .find_map(|scope| scope.get_binding(new_name))
-                .is_some()
+                .any(|scope| scope.get_binding(new_name).is_some())
             {
                 return false;
             }
 
-            let prev_token = match reference.syntax().kind() {
-                JsSyntaxKind::JS_REFERENCE_IDENTIFIER => reference
-                    .syntax()
-                    .clone()
-                    .cast::<JsReferenceIdentifier>()
-                    .and_then(|node| node.value_token().ok()),
-                JsSyntaxKind::JS_IDENTIFIER_ASSIGNMENT => reference
-                    .syntax()
-                    .clone()
-                    .cast::<JsIdentifierAssignment>()
-                    .and_then(|node| node.name_token().ok()),
-                JsSyntaxKind::JSX_REFERENCE_IDENTIFIER => reference
-                    .syntax()
-                    .clone()
-                    .cast::<JsxReferenceIdentifier>()
-                    .and_then(|node| node.value_token().ok()),
-                _ => None,
+            let reference_syntax = reference.syntax();
+            let Some(id_usage) = AnyJsIdentifierUsage::cast_ref(reference_syntax) else {
+                continue;
+            };
+            let Ok(prev_ref_token) = id_usage.value_token() else {
+                continue;
             };
 
-            if let Some(prev_token) = prev_token {
-                let next_token = token_with_new_text(&prev_token, new_name);
-                changes.push((prev_token, next_token));
+            let new_name = make::ident(new_name);
+            if let Some(reference_parent) = reference_syntax.parent() {
+                if reference_parent.kind() == JsSyntaxKind::JS_SHORTHAND_PROPERTY_OBJECT_MEMBER {
+                    // Handle renaming of shorthand properties.
+                    // For example renaming `color` into `colorNew` in
+                    // `let color = ...; const c = { color }` must result in
+                    // `let colorNew = ...; const c = { color: colorNew }`
+                    let trailing_trivia = prev_ref_token.trailing_trivia().pieces();
+                    let new_property = make::js_property_object_member(
+                        make::js_literal_member_name(prev_ref_token.with_trailing_trivia([]))
+                            .into(),
+                        make::token(T![:])
+                            .with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
+                        make::js_identifier_expression(make::js_reference_identifier(
+                            new_name.append_trivia_pieces(trailing_trivia),
+                        ))
+                        .into(),
+                    );
+                    node_changes.push((reference_parent, new_property.into_syntax()));
+                    continue;
+                }
             }
+            token_changes.push((prev_ref_token, new_name));
         }
 
         // Now it is safe to push changes to the batch mutation
         // Rename binding
-        let Ok(prev_name_token) = prev_binding.name_token() else {
-            return false;
-        };
-
-        let next_name_token = token_with_new_text(&name_token, new_name);
-        self.replace_token(prev_name_token, next_name_token);
+        self.replace_token(prev_name_token, make::ident(new_name));
 
         // Rename all references
-        for (prev_token, next_token) in changes {
+        for (prev_token, next_token) in token_changes {
             self.replace_token(prev_token, next_token);
+        }
+        for (prev_node, next_node) in node_changes {
+            self.replace_element(prev_node.into(), next_node.into());
         }
 
         true
