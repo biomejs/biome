@@ -1584,6 +1584,32 @@ impl AnyTsEnumMemberName {
     }
 }
 
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
+pub enum ClassMemberName {
+    /// Name that is preceded in the source code by the private marker `#`.
+    /// For example `class { #f(){} }`
+    Private(TokenText),
+    /// Name that is NOT preceded in the source code by the private marker `#`.
+    /// For example `class { f(){} }`
+    Public(TokenText),
+}
+impl ClassMemberName {
+    pub fn text(&self) -> &str {
+        match self {
+            Self::Private(name) => name.text(),
+            Self::Public(name) => name.text(),
+        }
+    }
+}
+impl From<ClassMemberName> for TokenText {
+    fn from(value: ClassMemberName) -> Self {
+        match value {
+            ClassMemberName::Private(name) => name,
+            ClassMemberName::Public(name) => name,
+        }
+    }
+}
+
 impl AnyJsClassMemberName {
     /// Returns the member name of the current node
     /// if it is a literal, a computed, or a private class member with a literal value.
@@ -1612,7 +1638,7 @@ impl AnyJsClassMemberName {
     /// let computed = AnyJsClassMemberName::JsComputedMemberName(computed);
     /// assert_eq!(computed.name().unwrap().text(), "a");
     /// ```
-    pub fn name(&self) -> Option<TokenText> {
+    pub fn name(&self) -> Option<ClassMemberName> {
         let token = match self {
             AnyJsClassMemberName::JsComputedMemberName(expr) => {
                 let expr = expr.expression().ok()?;
@@ -1630,9 +1656,13 @@ impl AnyJsClassMemberName {
                 }
             }
             AnyJsClassMemberName::JsLiteralMemberName(expr) => expr.value().ok()?,
-            AnyJsClassMemberName::JsPrivateClassMemberName(expr) => expr.id_token().ok()?,
+            AnyJsClassMemberName::JsPrivateClassMemberName(expr) => {
+                return Some(ClassMemberName::Private(inner_string_text(
+                    &expr.id_token().ok()?,
+                )));
+            }
         };
-        Some(inner_string_text(&token))
+        Some(ClassMemberName::Public(inner_string_text(&token)))
     }
 }
 
