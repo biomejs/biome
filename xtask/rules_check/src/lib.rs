@@ -5,7 +5,7 @@ use anyhow::{bail, ensure};
 use biome_analyze::options::JsxRuntime;
 use biome_analyze::{
     AnalysisFilter, AnalyzerConfiguration, AnalyzerOptions, GroupCategory, Queryable,
-    RegistryVisitor, Rule, RuleCategory, RuleFilter, RuleGroup, RuleMetadata,
+    RegistryVisitor, Rule, RuleCategory, RuleFilter, RuleGroup, RuleMetadata, ControlFlow
 };
 use biome_console::{markup, Console};
 use biome_css_parser::CssParserOptions;
@@ -20,7 +20,6 @@ use biome_service::workspace::DocumentFileSource;
 use pulldown_cmark::{CodeBlockKind, Event, Parser, Tag, TagEnd};
 use std::collections::BTreeMap;
 use std::fmt::Write;
-use std::ops::ControlFlow;
 use std::path::PathBuf;
 use std::slice;
 use std::str::FromStr;
@@ -162,6 +161,7 @@ fn assert_lint(
 
     let mut diagnostic_count = 0;
     let mut all_diagnostics = vec![];
+    let mut has_error = false;
     let mut write_diagnostic = |code: &str, diag: biome_diagnostics::Error| {
         all_diagnostics.push(diag);
         // Fail the test if the analysis returns more diagnostics than expected
@@ -177,6 +177,7 @@ fn assert_lint(
                         },
                     );
                 }
+                has_error =true;
                 bail!("Analysis of '{group}/{rule}' on the following code block returned multiple diagnostics.\n\n{code}");
             }
         } else {
@@ -190,6 +191,7 @@ fn assert_lint(
                     },
                 );
             }
+            has_error =true;
             bail!("Analysis of '{group}/{rule}' on the following code block returned an unexpected diagnostic.\n\n{code}");
         }
         diagnostic_count += 1;
@@ -387,6 +389,10 @@ fn assert_lint(
             diagnostic_count == 1,
             "Analysis of '{group}/{rule}' on the following code block returned no diagnostics.\n\n{code}",
         );
+    }
+    
+    if has_error {
+        bail!("A code snippet must emit one single diagnostic, but it seems multiple diagnostics were emitted. Make sure that all the snippets inside the code block 'expect_diagnostic' emit only one diagnostic.")
     }
 
     Ok(())
