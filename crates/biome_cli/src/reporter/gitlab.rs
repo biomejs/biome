@@ -1,5 +1,5 @@
 use crate::{DiagnosticsPayload, Execution, Reporter, ReporterVisitor, TraversalSummary};
-use biome_console::fmt::Formatter;
+use biome_console::{markup, Console, ConsoleExt};
 use biome_diagnostics::{LineIndexBuf, PrintDescription};
 use serde::Serialize;
 use std::{
@@ -75,28 +75,18 @@ impl Reporter for GitLabReporter {
     }
 }
 
-pub(crate) struct GitLabReporterVisitor {
-    diagnostics: Vec<GitLabDiagnostic>,
+pub(crate) struct GitLabReporterVisitor<'a> {
+    console: &'a mut dyn Console,
     builder: GitLabDiagnosticBuilder,
 }
 
-impl GitLabReporterVisitor {
-    pub fn new(builder: GitLabDiagnosticBuilder) -> Self {
-        Self {
-            diagnostics: Vec::new(),
-            builder,
-        }
+impl<'a> GitLabReporterVisitor<'a> {
+    pub fn new(builder: GitLabDiagnosticBuilder, console: &'a mut dyn Console) -> Self {
+        Self { builder, console }
     }
 }
 
-impl biome_console::fmt::Display for GitLabReporterVisitor {
-    fn fmt(&self, fmt: &mut Formatter) -> std::io::Result<()> {
-        let content = serde_json::to_string(&self.diagnostics)?;
-        fmt.write_str(content.as_str())
-    }
-}
-
-impl ReporterVisitor for GitLabReporterVisitor {
+impl<'a> ReporterVisitor for GitLabReporterVisitor<'a> {
     fn report_summary(&mut self, _: &Execution, _: TraversalSummary) -> std::io::Result<()> {
         Ok(())
     }
@@ -106,19 +96,25 @@ impl ReporterVisitor for GitLabReporterVisitor {
         _execution: &Execution,
         payload: DiagnosticsPayload,
     ) -> std::io::Result<()> {
-        for biome_diagnostic in payload.diagnostics {
+        self.console.log(markup!("["));
+
+        let total_diagnostics = payload.diagnostics.len();
+        for (index, biome_diagnostic) in payload.diagnostics.into_iter().enumerate() {
             if biome_diagnostic.severity() >= payload.diagnostic_level {
-                if biome_diagnostic.tags().is_verbose() {
-                    if payload.verbose {
-                        self.diagnostics
-                            .push(self.builder.gitlab_diagnostic(biome_diagnostic))
-                    }
-                } else {
-                    self.diagnostics
-                        .push(self.builder.gitlab_diagnostic(biome_diagnostic))
+                if biome_diagnostic.tags().is_verbose() && !payload.verbose {
+                    continue;
                 }
+
+                let diagnostic = self.builder.gitlab_diagnostic(biome_diagnostic);
+                let mut content = serde_json::to_string(&diagnostic)?;
+                if index < total_diagnostics - 1 {
+                    content.push(',')
+                }
+
+                self.console.log(markup!({ content }));
             }
         }
+        self.console.log(markup!("]"));
         Ok(())
     }
 }

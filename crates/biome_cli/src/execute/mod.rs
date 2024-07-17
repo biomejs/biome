@@ -536,10 +536,10 @@ pub fn execute_mode(
                     },
                     execution: execution.clone(),
                 };
-                let mut buffer = GitLabReporterVisitor::new(GitLabDiagnosticBuilder::new(
-                    session.app.fs.borrow().working_directory(),
-                ));
-                reporter.write(&mut buffer)?;
+                reporter.write(&mut GitLabReporterVisitor::new(
+                    GitLabDiagnosticBuilder::new(session.app.fs.borrow().working_directory()),
+                    console,
+                ))?;
             }
             ReportMode::Junit => {
                 let reporter = JunitReporter {
