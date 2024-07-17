@@ -152,13 +152,9 @@ impl Rule for UseTrimStartEnd {
         elements.push(template_elements);
 
         let callee_object = match callee {
-            AnyJsExpression::JsStaticMemberExpression(ref expression) => {
-                expression.object().ok()?
-            }
-            AnyJsExpression::JsComputedMemberExpression(ref expression) => {
-                expression.object().ok()?
-            }
-            _ => unreachable!(),
+            AnyJsExpression::JsStaticMemberExpression(ref expression) => expression.object().ok(),
+            AnyJsExpression::JsComputedMemberExpression(ref expression) => expression.object().ok(),
+            _ => None,
         };
 
         let transformed_expression = if is_template {
@@ -199,7 +195,7 @@ impl Rule for UseTrimStartEnd {
         let call_expression = if is_computed_member {
             AnyJsExpression::JsComputedMemberExpression(
                 make::js_computed_member_expression(
-                    callee_object,
+                    callee_object?,
                     computed_member_expression_opt?.l_brack_token().ok()?,
                     transformed_expression,
                     computed_member_expression_opt?.r_brack_token().ok()?,
@@ -208,7 +204,7 @@ impl Rule for UseTrimStartEnd {
             )
         } else {
             AnyJsExpression::JsStaticMemberExpression(make::js_static_member_expression(
-                callee_object,
+                callee_object?,
                 callee
                     .as_js_static_member_expression()?
                     .operator_token()
