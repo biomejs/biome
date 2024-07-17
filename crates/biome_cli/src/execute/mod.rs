@@ -26,6 +26,7 @@ use biome_service::workspace::{
 use std::ffi::OsString;
 use std::fmt::{Display, Formatter};
 use std::path::{Path, PathBuf};
+use tracing::info;
 
 /// Useful information during the traversal of files and virtual content
 #[derive(Debug, Clone)]
@@ -399,6 +400,7 @@ pub fn execute_mode(
     execution.max_diagnostics = if cli_options.reporter.is_default() {
         cli_options.max_diagnostics.into()
     } else {
+        info!("Removing the limit of --max-diagnostics, because of a reporter different from the default one: {}", cli_options.reporter);
         u32::MAX
     };
 
