@@ -37,7 +37,7 @@ pub struct Execution {
     traversal_mode: TraversalMode,
 
     /// The maximum number of diagnostics that can be printed in console
-    max_diagnostics: u16,
+    max_diagnostics: u32,
 }
 
 impl Execution {
@@ -281,7 +281,7 @@ impl Execution {
         &self.traversal_mode
     }
 
-    pub(crate) fn get_max_diagnostics(&self) -> u16 {
+    pub(crate) fn get_max_diagnostics(&self) -> u32 {
         self.max_diagnostics
     }
 
@@ -395,7 +395,12 @@ pub fn execute_mode(
     cli_options: &CliOptions,
     paths: Vec<OsString>,
 ) -> Result<(), CliDiagnostic> {
-    execution.max_diagnostics = cli_options.max_diagnostics;
+    // If a custom reporter was provided, let's lift the limit so users can see all of them
+    execution.max_diagnostics = if cli_options.reporter.is_default() {
+        cli_options.max_diagnostics.into()
+    } else {
+        u32::MAX
+    };
 
     // don't do any traversal if there's some content coming from stdin
     if let Some(stdin) = execution.as_stdin_file() {
