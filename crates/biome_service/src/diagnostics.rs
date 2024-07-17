@@ -4,9 +4,10 @@ use biome_configuration::diagnostics::{ConfigurationDiagnostic, EditorConfigDiag
 use biome_configuration::{BiomeDiagnostic, CantLoadExtendFile};
 use biome_console::fmt::Bytes;
 use biome_console::markup;
-use biome_diagnostics::serde::Diagnostic as SerdeDiagnostic;
+use biome_css_parser::ParseDiagnostic;
 use biome_diagnostics::{
-    category, Advices, Category, Diagnostic, DiagnosticTags, Location, LogCategory, Severity, Visit,
+    category, Advices, Category, Diagnostic, DiagnosticTags, Location, LogCategory,
+    MessageAndDescription, Severity, Visit,
 };
 use biome_formatter::{FormatError, PrintError};
 use biome_fs::{BiomePath, FileSystemDiagnostic};
@@ -327,11 +328,26 @@ impl Diagnostic for SourceFileNotSupported {
 #[derive(Debug, Deserialize, Diagnostic, Serialize)]
 pub enum SearchError {
     /// An invalid pattern was given
-    PatternCompilationError(SerdeDiagnostic),
+    PatternCompilationError(PatternCompilationError),
     /// No pattern with the given ID
     InvalidPattern(InvalidPattern),
     /// Error while executing the search query.
     QueryError(QueryDiagnostic),
+}
+
+#[derive(Debug, Deserialize, Diagnostic, Serialize)]
+pub struct PatternCompilationError {
+    #[message]
+    #[description]
+    message: MessageAndDescription,
+}
+
+impl From<ParseDiagnostic> for PatternCompilationError {
+    fn from(diagnostic: ParseDiagnostic) -> Self {
+        Self {
+            message: diagnostic.message,
+        }
+    }
 }
 
 #[derive(Debug, Serialize, Deserialize, Diagnostic)]
@@ -460,7 +476,7 @@ impl From<CompileError> for WorkspaceError {
     fn from(value: CompileError) -> Self {
         match value {
             CompileError::ParsePatternError(diagnostic) => Self::SearchError(
-                SearchError::PatternCompilationError(SerdeDiagnostic::new(diagnostic)),
+                SearchError::PatternCompilationError(PatternCompilationError::from(diagnostic)),
             ),
             // FIXME: This really needs proper diagnostics
             _ => Self::SearchError(SearchError::QueryError(QueryDiagnostic(format!(
