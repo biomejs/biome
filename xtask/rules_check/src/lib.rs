@@ -4,8 +4,8 @@
 use anyhow::{bail, ensure};
 use biome_analyze::options::JsxRuntime;
 use biome_analyze::{
-    AnalysisFilter, AnalyzerConfiguration, AnalyzerOptions, GroupCategory, Queryable,
-    RegistryVisitor, Rule, RuleCategory, RuleFilter, RuleGroup, RuleMetadata, ControlFlow
+    AnalysisFilter, AnalyzerConfiguration, AnalyzerOptions, ControlFlow, GroupCategory, Queryable,
+    RegistryVisitor, Rule, RuleCategory, RuleFilter, RuleGroup, RuleMetadata,
 };
 use biome_console::{markup, Console};
 use biome_css_parser::CssParserOptions;
@@ -177,7 +177,7 @@ fn assert_lint(
                         },
                     );
                 }
-                has_error =true;
+                has_error = true;
                 bail!("Analysis of '{group}/{rule}' on the following code block returned multiple diagnostics.\n\n{code}");
             }
         } else {
@@ -191,7 +191,7 @@ fn assert_lint(
                     },
                 );
             }
-            has_error =true;
+            has_error = true;
             bail!("Analysis of '{group}/{rule}' on the following code block returned an unexpected diagnostic.\n\n{code}");
         }
         diagnostic_count += 1;
@@ -390,7 +390,7 @@ fn assert_lint(
             "Analysis of '{group}/{rule}' on the following code block returned no diagnostics.\n\n{code}",
         );
     }
-    
+
     if has_error {
         bail!("A code snippet must emit one single diagnostic, but it seems multiple diagnostics were emitted. Make sure that all the snippets inside the code block 'expect_diagnostic' emit only one diagnostic.")
     }
