@@ -49,3 +49,7 @@ interface foo {
 interface foo {
   new <T>(): 'x';
 }
+
+class C {
+  #new(): C;
+}

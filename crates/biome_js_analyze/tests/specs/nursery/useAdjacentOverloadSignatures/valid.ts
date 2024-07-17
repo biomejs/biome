@@ -62,3 +62,10 @@ function f (): {
   functionA(x: number): number,
 } {
 }
+
+// Issue https://github.com/biomejs/biome/issues/3309#issuecomment-2208870371
+class C {
+  #f(): void {}
+  g(): void {}
+  f(): void {}
+}
