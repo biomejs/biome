@@ -144,8 +144,6 @@ impl Rule for UseTrimStartEnd {
         // `.as_static_value()` strips the information of tick tokens.
         let token = extract_token_from_expression(callee.clone())?;
         let unquoted = token.text().trim_matches('"');
-        println!("unquoted: {:?}", unquoted);
-        println!("is_single: {:?}", ctx.as_preferred_quote().is_single());
         let replaced_member_name = suggested_name(&token)?;
 
         let mut elements = vec![];
