@@ -143,7 +143,6 @@ impl Rule for UseTrimStartEnd {
         // Need to keep the original token to replace it with the new token.
         // `.as_static_value()` strips the information of tick tokens.
         let token = extract_token_from_expression(callee.clone())?;
-        let unquoted = token.text().trim_matches('"');
         let replaced_member_name = suggested_name(&token)?;
 
         let mut elements = vec![];
