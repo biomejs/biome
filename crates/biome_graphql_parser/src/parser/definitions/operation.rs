@@ -1,15 +1,15 @@
 use crate::parser::{
     argument::parse_arguments,
     directive::{is_at_directive, DirectiveList},
-    is_nth_at_name,
+    is_nth_at_name, parse_binding,
     parse_error::{
         expected_any_selection, expected_name, expected_type, expected_variable,
         expected_variable_definition,
     },
-    parse_name,
+    parse_literal_name, parse_reference,
     r#type::parse_type,
     value::parse_default_value,
-    variable::{is_at_variable, parse_variable},
+    variable::{is_at_variable, parse_variable_binding},
     GraphqlParser,
 };
 use biome_graphql_syntax::{
@@ -117,7 +117,7 @@ pub(crate) fn parse_operation_definition(p: &mut GraphqlParser) -> ParsedSyntax 
     }
 
     // we don't need diagnostic here, because name is optional
-    parse_name(p).ok();
+    parse_binding(p).ok();
     // we don't need diagnostic here, because variable definitions are optional
     parse_variable_definitions(p).ok();
 
@@ -161,7 +161,8 @@ fn parse_field(p: &mut GraphqlParser) -> ParsedSyntax {
         if p.at(T![:]) {
             p.error(expected_name(p, p.cur_range()));
         } else if is_nth_at_name(p, 0) {
-            parse_name(p).ok();
+            // parse alias
+            parse_literal_name(p).ok();
         } else {
             p.error(expected_name(p, p.cur_range()));
             p.bump_any();
@@ -170,9 +171,9 @@ fn parse_field(p: &mut GraphqlParser) -> ParsedSyntax {
         p.bump(T![:]);
         m.complete(p, GRAPHQL_ALIAS);
 
-        parse_name(p).or_add_diagnostic(p, expected_name);
+        parse_literal_name(p).or_add_diagnostic(p, expected_name);
     } else {
-        parse_name(p).or_add_diagnostic(p, expected_name);
+        parse_literal_name(p).or_add_diagnostic(p, expected_name);
     }
 
     // arguments are optional
@@ -194,7 +195,7 @@ fn parse_fragment(p: &mut GraphqlParser) -> ParsedSyntax {
     p.expect(DOT3);
     if is_nth_at_name(p, 0) && !p.nth_at(0, T![on]) {
         // name is checked for in `is_at_name`
-        parse_name(p).ok();
+        parse_reference(p).ok();
         DirectiveList.parse_list(p);
         Present(m.complete(p, GRAPHQL_FRAGMENT_SPREAD))
     } else {
@@ -235,7 +236,7 @@ fn parse_variable_definition(p: &mut GraphqlParser) -> ParsedSyntax {
         p.error(expected_variable(p, p.cur_range()));
         p.bump_any()
     } else {
-        parse_variable(p).or_add_diagnostic(p, expected_variable);
+        parse_variable_binding(p).or_add_diagnostic(p, expected_variable);
     }
     p.expect(T![:]);
     parse_type(p).or_add_diagnostic(p, expected_type);

@@ -12,8 +12,8 @@ use biome_js_syntax::{
     AnyJsMemberExpression, JsArrowFunctionExpression, JsCallExpression, JsFunctionExpression,
     TextRange,
 };
-use biome_js_syntax::{JsArrayBindingPatternElement, JsLanguage};
-use biome_rowan::{AstNode, SyntaxToken};
+use biome_js_syntax::{JsArrayBindingPatternElement, JsSyntaxToken};
+use biome_rowan::AstNode;
 use rustc_hash::{FxHashMap, FxHashSet};
 use serde::{Deserialize, Serialize};
 
@@ -110,7 +110,7 @@ impl From<(u8, u8, bool)> for ReactHookConfiguration {
     }
 }
 
-fn get_untrimmed_callee_name(call: &JsCallExpression) -> Option<SyntaxToken<JsLanguage>> {
+fn get_untrimmed_callee_name(call: &JsCallExpression) -> Option<JsSyntaxToken> {
     let callee = call.callee().ok()?;
 
     if let Some(identifier) = callee.as_js_identifier_expression() {

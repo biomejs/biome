@@ -1,8 +1,9 @@
 [package]
-edition = "2021"
-name    = "rules_check"
-publish = false
-version = "0.0.0"
+description = "Internal script to make sure that the metadata or the rules are correct"
+edition     = "2021"
+name        = "rules_check"
+publish     = false
+version     = "0.0.0"
 
 [dependencies]
 anyhow             = { workspace = true }

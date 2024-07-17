@@ -1,9 +1,9 @@
 use crate::parser::{
     directive::{is_at_directive, DirectiveList},
-    is_nth_at_name, is_nth_at_non_kw_name, parse_description,
+    is_nth_at_name, is_nth_at_non_kw_name, parse_binding, parse_description,
     parse_error::{expected_enum_extension, expected_name},
-    parse_name,
-    value::{is_at_string, parse_enum_value},
+    parse_literal_name, parse_reference,
+    value::is_at_string,
     GraphqlParser,
 };
 use biome_graphql_syntax::{
@@ -24,7 +24,7 @@ pub(crate) fn parse_enum_type_definition(p: &mut GraphqlParser) -> ParsedSyntax 
 
     p.bump(T![enum]);
 
-    parse_name(p).or_add_diagnostic(p, expected_name);
+    parse_binding(p).or_add_diagnostic(p, expected_name);
 
     DirectiveList.parse_list(p);
 
@@ -42,7 +42,7 @@ pub(crate) fn parse_enum_type_extension(p: &mut GraphqlParser) -> ParsedSyntax {
     p.bump(T![extend]);
     p.expect(T![enum]);
 
-    parse_name(p).or_add_diagnostic(p, expected_name);
+    parse_reference(p).or_add_diagnostic(p, expected_name);
 
     let directive_list = DirectiveList.parse_list(p);
     let directive_empty = directive_list.range(p).is_empty();
@@ -118,7 +118,7 @@ pub(crate) fn parse_enum_value_definition(p: &mut GraphqlParser) -> ParsedSyntax
     // description is optional
     parse_description(p).ok();
 
-    parse_enum_value(p).or_add_diagnostic(p, expected_name);
+    parse_literal_name(p).or_add_diagnostic(p, expected_name);
 
     DirectiveList.parse_list(p);
 

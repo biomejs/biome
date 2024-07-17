@@ -17,7 +17,7 @@ impl FormatRule<AnyGraphqlValue> for FormatAnyGraphqlValue {
             AnyGraphqlValue::GraphqlNullValue(node) => node.format().fmt(f),
             AnyGraphqlValue::GraphqlObjectValue(node) => node.format().fmt(f),
             AnyGraphqlValue::GraphqlStringValue(node) => node.format().fmt(f),
-            AnyGraphqlValue::GraphqlVariable(node) => node.format().fmt(f),
+            AnyGraphqlValue::GraphqlVariableReference(node) => node.format().fmt(f),
         }
     }
 }
