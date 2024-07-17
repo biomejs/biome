@@ -40,9 +40,33 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 ### Formatter
 
+#### Bug fixes
+
+- Keep the parentheses around `infer` declarations in type unions and type intersections ([#3419](https://github.com/biomejs/biome/issues/3419)). Contributed by @Conaclos
+
 ### JavaScript APIs
 
 ### Linter
+
+#### New features
+
+- Add support for GraphQL linting. Contributed by @ematipico
+- Add [nursery/noDynamicNamespaceImportAccess](https://biomejs.dev/linter/no-dynamic-namespace-import-access/). Contributed by @minht11
+- [noUndeclaredVariables](https://biomejs.dev/linter/rules/no-undeclared-variables/) n longer report a direct reference to an enum member ([#2974](https://github.com/biomejs/biome/issues/2974)).
+
+  In the following code, the `A` reference is no longer reported as an undeclared variable.
+
+  ```ts
+  enum E {
+    A = 1,
+    B = A << 1,
+  }
+  ```
+
+  Contributed by @Conaclos
+
+- Add [nursery/noIrregularWhitespace](https://biomejs.dev/linter/rules/no-irregular-whitespace). Contributed by @michellocana
+- Add [nursery/useTrimStartEnd](https://biomejs.dev/linter/rules/use-trim-start-end/). Contributed by @chansuke
 
 #### Enhancements
 
@@ -73,34 +97,14 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
   Contributed by @Conaclos
 
-#### New features
-
-- Add support for GraphQL linting. Contributed by @ematipico
-- Add [nursery/useTrimStartEnd](https://biomejs.dev/linter/rules/use-trim-start-end/). Contributed by @chansuke
-
 #### Bug fixes
 
 - Don't request alt text for elements hidden from assistive technologies ([#3316](https://github.com/biomejs/biome/issues/3316)). Contributed by @robintown
 - Fix [[#3149](https://github.com/biomejs/biome/issues/3149)] crashes that occurred when applying the `noUselessFragments` unsafe fixes in certain scenarios. Contributed by @unvalley
 - `noExcessiveNestedTestSuites`: Fix another edge case where the rule would alert on heavily nested zod schemas. Contributed by @dyc3
 
-#### New rules
+- `noExtraNonNullAssertion` no longer reports a single non-null assertion enclosed in parentheses ([#3352](https://github.com/biomejs/biome/issues/3352)). Contributed by @Conaclos
 
-- Add [nursery/noDynamicNamespaceImportAccess](https://biomejs.dev/linter/no-dynamic-namespace-import-access/). Contributed by @minht11
-
-
-- [noUndeclaredVariables](https://biomejs.dev/linter/rules/no-undeclared-variables/) n longer report a direct reference to an enum member ([#2974](https://github.com/biomejs/biome/issues/2974)).
-
-  In the following code, the `A` reference is no longer reported as an undeclared variable.
-
-  ```ts
-  enum E {
-    A = 1,
-    B = A << 1,
-  }
-  ```
-
-  Contributed by @Conaclos
 
 ### Parser
 
@@ -115,6 +119,13 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
   }
 }
 ```
+- Fix [#3410](https://github.com/biomejs/biome/issues/3410) by correctly parsing break statements containing keywords. 
+  ```js
+  out: while (true) {
+    break out;
+  }
+  ```
+  Contributed by @ah-yu
 
 ## v1.8.3 (2024-06-27)
 

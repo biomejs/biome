@@ -69,7 +69,7 @@ impl<'a> Binding<'a, GritQueryContext> for GritBinding<'a> {
         match self {
             Self::Node(node) => {
                 let source = SourceFile::new(SourceCode {
-                    text: node.text(),
+                    text: node.source(),
                     line_starts: None,
                 });
                 source.to_grit_range(node.text_trimmed_range())
@@ -178,7 +178,7 @@ impl<'a> Binding<'a, GritQueryContext> for GritBinding<'a> {
 
     fn list_items(&self) -> Option<impl Iterator<Item = GritTargetNode<'a>> + Clone> {
         match self {
-            Self::Node(node) if node.is_list() => Some(node.children()),
+            Self::Node(node) if node.is_list() => Some(node.named_children()),
             _ => None,
         }
     }

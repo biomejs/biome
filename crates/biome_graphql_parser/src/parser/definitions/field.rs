@@ -2,7 +2,7 @@ use crate::parser::{
     directive::DirectiveList,
     is_nth_at_name, is_nth_at_non_kw_name, parse_description,
     parse_error::{expected_field_definition, expected_name, expected_type},
-    parse_name,
+    parse_literal_name,
     r#type::parse_type,
     value::{is_at_string, parse_default_value},
     GraphqlParser,
@@ -81,7 +81,7 @@ fn parse_field_definition(p: &mut GraphqlParser) -> ParsedSyntax {
 
     // description is optional
     parse_description(p).ok();
-    parse_name(p).or_add_diagnostic(p, expected_name);
+    parse_literal_name(p).or_add_diagnostic(p, expected_name);
 
     // arguments are optional
     parse_arguments_definition(p).ok();
@@ -157,7 +157,7 @@ pub(super) fn parse_input_value_definition(p: &mut GraphqlParser) -> ParsedSynta
 
     // description is optional
     parse_description(p).ok();
-    parse_name(p).or_add_diagnostic(p, expected_name);
+    parse_literal_name(p).or_add_diagnostic(p, expected_name);
 
     p.expect(T![:]);
 

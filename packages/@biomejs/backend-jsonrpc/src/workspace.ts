@@ -1110,6 +1110,10 @@ export interface Nursery {
 	 */
 	noInvalidPositionAtImportRule?: RuleConfiguration_for_Null;
 	/**
+	 * Disallows the use of irregular whitespace characters.
+	 */
+	noIrregularWhitespace?: RuleConfiguration_for_Null;
+	/**
 	 * Enforce that a label element or component has a text label and an associated input.
 	 */
 	noLabelWithoutControl?: RuleConfiguration_for_NoLabelWithoutControlOptions;
@@ -1129,6 +1133,10 @@ export interface Nursery {
 	 * Disallow shorthand properties that override related longhand properties.
 	 */
 	noShorthandPropertyOverrides?: RuleConfiguration_for_Null;
+	/**
+	 * Enforce that static, visible elements (such as \<div>) that have click handlers use the valid role attribute.
+	 */
+	noStaticElementInteractions?: RuleConfiguration_for_Null;
 	/**
 	 * Enforce the use of String.slice() over String.substr() and String.substring().
 	 */
@@ -1193,6 +1201,10 @@ export interface Nursery {
 	 * Enforce the use of new for all builtins, except String, Number, Boolean, Symbol and BigInt.
 	 */
 	useConsistentBuiltinInstantiation?: RuleFixConfiguration_for_Null;
+	/**
+	 * This rule enforces consistent use of curly braces inside JSX attributes and JSX children.
+	 */
+	useConsistentCurlyBraces?: RuleFixConfiguration_for_Null;
 	/**
 	 * Disallows invalid named grid areas in CSS Grid Layouts.
 	 */
@@ -2516,11 +2528,13 @@ export type Category =
 	| "lint/nursery/noImportantInKeyframe"
 	| "lint/nursery/noInvalidDirectionInLinearGradient"
 	| "lint/nursery/noInvalidPositionAtImportRule"
+	| "lint/nursery/noIrregularWhitespace"
 	| "lint/nursery/noLabelWithoutControl"
 	| "lint/nursery/noMisplacedAssertion"
 	| "lint/nursery/noMissingGenericFamilyKeyword"
 	| "lint/nursery/noReactSpecificProps"
 	| "lint/nursery/noRestrictedImports"
+	| "lint/nursery/noStaticElementInteractions"
 	| "lint/nursery/noShorthandPropertyOverrides"
 	| "lint/nursery/noSubstr"
 	| "lint/nursery/noUndeclaredDependencies"
@@ -2538,6 +2552,7 @@ export type Category =
 	| "lint/nursery/useAdjacentOverloadSignatures"
 	| "lint/nursery/useBiomeSuppressionComment"
 	| "lint/nursery/useConsistentBuiltinInstantiation"
+	| "lint/nursery/useConsistentCurlyBraces"
 	| "lint/nursery/useConsistentGridAreas"
 	| "lint/nursery/useDateNow"
 	| "lint/nursery/useDefaultSwitchClause"
@@ -2548,6 +2563,7 @@ export type Category =
 	| "lint/nursery/useGenericFontNames"
 	| "lint/nursery/useImportExtensions"
 	| "lint/nursery/useImportRestrictions"
+	| "lint/nursery/useJsxCurlyBraceConvention"
 	| "lint/nursery/useNumberToFixedDigitsArgument"
 	| "lint/nursery/useSemanticElements"
 	| "lint/nursery/useSortedClasses"

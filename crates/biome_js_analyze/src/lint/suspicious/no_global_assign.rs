@@ -63,7 +63,7 @@ impl Rule for NoGlobalAssign {
                 let text = identifier.to_string();
                 let is_global_var = is_js_global(text.as_str());
                 if is_global_var {
-                    result.push(*global_ref.range());
+                    result.push(global_ref.range());
                 }
             }
         }

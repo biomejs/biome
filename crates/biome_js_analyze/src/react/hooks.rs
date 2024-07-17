@@ -12,8 +12,8 @@ use biome_js_syntax::{
     AnyJsMemberExpression, JsArrowFunctionExpression, JsCallExpression, JsFunctionExpression,
     TextRange,
 };
-use biome_js_syntax::{JsArrayBindingPatternElement, JsLanguage};
-use biome_rowan::{AstNode, SyntaxToken};
+use biome_js_syntax::{JsArrayBindingPatternElement, JsSyntaxToken};
+use biome_rowan::AstNode;
 use rustc_hash::{FxHashMap, FxHashSet};
 use serde::{Deserialize, Serialize};
 
@@ -67,11 +67,11 @@ impl ReactCallWithDependencyResult {
             .and_then(|node| AnyJsFunctionExpression::try_from(node.clone()).ok())
             .map(|function_expression| {
                 let closure = function_expression.closure(model);
-                let range = *closure.closure_range();
+                let range = closure.closure_range();
                 closure
                     .descendents()
                     .flat_map(|closure| closure.all_captures())
-                    .filter(move |capture| capture.declaration_range().intersect(range).is_none())
+                    .filter(move |capture| !range.contains(capture.declaration_range().start()))
             })
             .into_iter()
             .flatten()
@@ -110,7 +110,7 @@ impl From<(u8, u8, bool)> for ReactHookConfiguration {
     }
 }
 
-fn get_untrimmed_callee_name(call: &JsCallExpression) -> Option<SyntaxToken<JsLanguage>> {
+fn get_untrimmed_callee_name(call: &JsCallExpression) -> Option<JsSyntaxToken> {
     let callee = call.callee().ok()?;
 
     if let Some(identifier) = callee.as_js_identifier_expression() {

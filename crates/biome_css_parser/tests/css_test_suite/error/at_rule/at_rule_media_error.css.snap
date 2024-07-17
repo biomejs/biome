@@ -1,0 +1,609 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```css
+@media (--umrel-breakpoints$-breakpoint) {}
+
+@media only screen and width <= 500px {
+	.left-block {
+		width: 100%;
+	}
+}
+
+@media only screen and (width 500px) {
+.left-block {
+	width: 100%;
+}
+}
+
+@media only screen and (width => 500px) {
+.left-block {
+	width: 100%;
+}
+}
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    rules: CssRuleList [
+        CssAtRule {
+            at_token: AT@0..1 "@" [] [],
+            rule: CssMediaAtRule {
+                media_token: MEDIA_KW@1..7 "media" [] [Whitespace(" ")],
+                queries: CssMediaQueryList [
+                    CssMediaConditionQuery {
+                        condition: CssMediaFeatureInParens {
+                            l_paren_token: L_PAREN@7..8 "(" [] [],
+                            feature: CssQueryFeatureBoolean {
+                                name: CssIdentifier {
+                                    value_token: IDENT@8..27 "--umrel-breakpoints" [] [],
+                                },
+                            },
+                            r_paren_token: missing (required),
+                        },
+                    },
+                    missing separator,
+                    CssMediaTypeQuery {
+                        modifier: missing (optional),
+                        ty: CssMediaType {
+                            value: CssIdentifier {
+                                value_token: IDENT@27..39 "$-breakpoint" [] [],
+                            },
+                        },
+                    },
+                    missing separator,
+                    CssBogusMediaQuery {
+                        items: [
+                            R_PAREN@39..41 ")" [] [Whitespace(" ")],
+                        ],
+                    },
+                ],
+                block: CssRuleBlock {
+                    l_curly_token: L_CURLY@41..42 "{" [] [],
+                    rules: CssRuleList [],
+                    r_curly_token: R_CURLY@42..43 "}" [] [],
+                },
+            },
+        },
+        CssAtRule {
+            at_token: AT@43..46 "@" [Newline("\n"), Newline("\n")] [],
+            rule: CssMediaAtRule {
+                media_token: MEDIA_KW@46..52 "media" [] [Whitespace(" ")],
+                queries: CssMediaQueryList [
+                    CssMediaAndTypeQuery {
+                        left: CssMediaTypeQuery {
+                            modifier: ONLY_KW@52..57 "only" [] [Whitespace(" ")],
+                            ty: CssMediaType {
+                                value: CssIdentifier {
+                                    value_token: IDENT@57..64 "screen" [] [Whitespace(" ")],
+                                },
+                            },
+                        },
+                        and_token: AND_KW@64..68 "and" [] [Whitespace(" ")],
+                        right: missing (required),
+                    },
+                    missing separator,
+                    CssMediaTypeQuery {
+                        modifier: missing (optional),
+                        ty: CssMediaType {
+                            value: CssIdentifier {
+                                value_token: IDENT@68..74 "width" [] [Whitespace(" ")],
+                            },
+                        },
+                    },
+                    missing separator,
+                    CssBogusMediaQuery {
+                        items: [
+                            LTEQ@74..77 "<=" [] [Whitespace(" ")],
+                            CSS_DIMENSION_VALUE@77..80 "500" [] [],
+                            PX_KW@80..83 "px" [] [Whitespace(" ")],
+                        ],
+                    },
+                ],
+                block: CssRuleBlock {
+                    l_curly_token: L_CURLY@83..84 "{" [] [],
+                    rules: CssRuleList [
+                        CssQualifiedRule {
+                            prelude: CssSelectorList [
+                                CssCompoundSelector {
+                                    nesting_selectors: CssNestedSelectorList [],
+                                    simple_selector: missing (optional),
+                                    sub_selectors: CssSubSelectorList [
+                                        CssClassSelector {
+                                            dot_token: DOT@84..87 "." [Newline("\n"), Whitespace("\t")] [],
+                                            name: CssCustomIdentifier {
+                                                value_token: IDENT@87..98 "left-block" [] [Whitespace(" ")],
+                                            },
+                                        },
+                                    ],
+                                },
+                            ],
+                            block: CssDeclarationOrRuleBlock {
+                                l_curly_token: L_CURLY@98..99 "{" [] [],
+                                items: CssDeclarationOrRuleList [
+                                    CssDeclarationWithSemicolon {
+                                        declaration: CssDeclaration {
+                                            property: CssGenericProperty {
+                                                name: CssIdentifier {
+                                                    value_token: IDENT@99..107 "width" [Newline("\n"), Whitespace("\t\t")] [],
+                                                },
+                                                colon_token: COLON@107..109 ":" [] [Whitespace(" ")],
+                                                value: CssGenericComponentValueList [
+                                                    CssPercentage {
+                                                        value_token: CSS_NUMBER_LITERAL@109..112 "100" [] [],
+                                                        percent_token: PERCENT@112..113 "%" [] [],
+                                                    },
+                                                ],
+                                            },
+                                            important: missing (optional),
+                                        },
+                                        semicolon_token: SEMICOLON@113..114 ";" [] [],
+                                    },
+                                ],
+                                r_curly_token: R_CURLY@114..117 "}" [Newline("\n"), Whitespace("\t")] [],
+                            },
+                        },
+                    ],
+                    r_curly_token: R_CURLY@117..119 "}" [Newline("\n")] [],
+                },
+            },
+        },
+        CssAtRule {
+            at_token: AT@119..122 "@" [Newline("\n"), Newline("\n")] [],
+            rule: CssMediaAtRule {
+                media_token: MEDIA_KW@122..128 "media" [] [Whitespace(" ")],
+                queries: CssMediaQueryList [
+                    CssMediaAndTypeQuery {
+                        left: CssMediaTypeQuery {
+                            modifier: ONLY_KW@128..133 "only" [] [Whitespace(" ")],
+                            ty: CssMediaType {
+                                value: CssIdentifier {
+                                    value_token: IDENT@133..140 "screen" [] [Whitespace(" ")],
+                                },
+                            },
+                        },
+                        and_token: AND_KW@140..144 "and" [] [Whitespace(" ")],
+                        right: CssMediaFeatureInParens {
+                            l_paren_token: L_PAREN@144..145 "(" [] [],
+                            feature: CssQueryFeatureBoolean {
+                                name: CssIdentifier {
+                                    value_token: IDENT@145..151 "width" [] [Whitespace(" ")],
+                                },
+                            },
+                            r_paren_token: missing (required),
+                        },
+                    },
+                    missing separator,
+                    CssBogusMediaQuery {
+                        items: [
+                            CSS_DIMENSION_VALUE@151..154 "500" [] [],
+                            PX_KW@154..156 "px" [] [],
+                            R_PAREN@156..158 ")" [] [Whitespace(" ")],
+                        ],
+                    },
+                ],
+                block: CssRuleBlock {
+                    l_curly_token: L_CURLY@158..159 "{" [] [],
+                    rules: CssRuleList [
+                        CssQualifiedRule {
+                            prelude: CssSelectorList [
+                                CssCompoundSelector {
+                                    nesting_selectors: CssNestedSelectorList [],
+                                    simple_selector: missing (optional),
+                                    sub_selectors: CssSubSelectorList [
+                                        CssClassSelector {
+                                            dot_token: DOT@159..161 "." [Newline("\n")] [],
+                                            name: CssCustomIdentifier {
+                                                value_token: IDENT@161..172 "left-block" [] [Whitespace(" ")],
+                                            },
+                                        },
+                                    ],
+                                },
+                            ],
+                            block: CssDeclarationOrRuleBlock {
+                                l_curly_token: L_CURLY@172..173 "{" [] [],
+                                items: CssDeclarationOrRuleList [
+                                    CssDeclarationWithSemicolon {
+                                        declaration: CssDeclaration {
+                                            property: CssGenericProperty {
+                                                name: CssIdentifier {
+                                                    value_token: IDENT@173..180 "width" [Newline("\n"), Whitespace("\t")] [],
+                                                },
+                                                colon_token: COLON@180..182 ":" [] [Whitespace(" ")],
+                                                value: CssGenericComponentValueList [
+                                                    CssPercentage {
+                                                        value_token: CSS_NUMBER_LITERAL@182..185 "100" [] [],
+                                                        percent_token: PERCENT@185..186 "%" [] [],
+                                                    },
+                                                ],
+                                            },
+                                            important: missing (optional),
+                                        },
+                                        semicolon_token: SEMICOLON@186..187 ";" [] [],
+                                    },
+                                ],
+                                r_curly_token: R_CURLY@187..189 "}" [Newline("\n")] [],
+                            },
+                        },
+                    ],
+                    r_curly_token: R_CURLY@189..191 "}" [Newline("\n")] [],
+                },
+            },
+        },
+        CssAtRule {
+            at_token: AT@191..194 "@" [Newline("\n"), Newline("\n")] [],
+            rule: CssMediaAtRule {
+                media_token: MEDIA_KW@194..200 "media" [] [Whitespace(" ")],
+                queries: CssMediaQueryList [
+                    CssMediaAndTypeQuery {
+                        left: CssMediaTypeQuery {
+                            modifier: ONLY_KW@200..205 "only" [] [Whitespace(" ")],
+                            ty: CssMediaType {
+                                value: CssIdentifier {
+                                    value_token: IDENT@205..212 "screen" [] [Whitespace(" ")],
+                                },
+                            },
+                        },
+                        and_token: AND_KW@212..216 "and" [] [Whitespace(" ")],
+                        right: CssMediaFeatureInParens {
+                            l_paren_token: L_PAREN@216..217 "(" [] [],
+                            feature: CssQueryFeatureRange {
+                                left: CssIdentifier {
+                                    value_token: IDENT@217..223 "width" [] [Whitespace(" ")],
+                                },
+                                comparison: CssQueryFeatureRangeComparison {
+                                    operator: EQ@223..224 "=" [] [],
+                                },
+                                right: missing (required),
+                            },
+                            r_paren_token: missing (required),
+                        },
+                    },
+                    missing separator,
+                    CssBogusMediaQuery {
+                        items: [
+                            R_ANGLE@224..226 ">" [] [Whitespace(" ")],
+                            CSS_DIMENSION_VALUE@226..229 "500" [] [],
+                            PX_KW@229..231 "px" [] [],
+                            R_PAREN@231..233 ")" [] [Whitespace(" ")],
+                        ],
+                    },
+                ],
+                block: CssRuleBlock {
+                    l_curly_token: L_CURLY@233..234 "{" [] [],
+                    rules: CssRuleList [
+                        CssQualifiedRule {
+                            prelude: CssSelectorList [
+                                CssCompoundSelector {
+                                    nesting_selectors: CssNestedSelectorList [],
+                                    simple_selector: missing (optional),
+                                    sub_selectors: CssSubSelectorList [
+                                        CssClassSelector {
+                                            dot_token: DOT@234..236 "." [Newline("\n")] [],
+                                            name: CssCustomIdentifier {
+                                                value_token: IDENT@236..247 "left-block" [] [Whitespace(" ")],
+                                            },
+                                        },
+                                    ],
+                                },
+                            ],
+                            block: CssDeclarationOrRuleBlock {
+                                l_curly_token: L_CURLY@247..248 "{" [] [],
+                                items: CssDeclarationOrRuleList [
+                                    CssDeclarationWithSemicolon {
+                                        declaration: CssDeclaration {
+                                            property: CssGenericProperty {
+                                                name: CssIdentifier {
+                                                    value_token: IDENT@248..255 "width" [Newline("\n"), Whitespace("\t")] [],
+                                                },
+                                                colon_token: COLON@255..257 ":" [] [Whitespace(" ")],
+                                                value: CssGenericComponentValueList [
+                                                    CssPercentage {
+                                                        value_token: CSS_NUMBER_LITERAL@257..260 "100" [] [],
+                                                        percent_token: PERCENT@260..261 "%" [] [],
+                                                    },
+                                                ],
+                                            },
+                                            important: missing (optional),
+                                        },
+                                        semicolon_token: SEMICOLON@261..262 ";" [] [],
+                                    },
+                                ],
+                                r_curly_token: R_CURLY@262..264 "}" [Newline("\n")] [],
+                            },
+                        },
+                    ],
+                    r_curly_token: R_CURLY@264..266 "}" [Newline("\n")] [],
+                },
+            },
+        },
+    ],
+    eof_token: EOF@266..267 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..267
+  0: (empty)
+  1: CSS_RULE_LIST@0..266
+    0: CSS_AT_RULE@0..43
+      0: AT@0..1 "@" [] []
+      1: CSS_MEDIA_AT_RULE@1..43
+        0: MEDIA_KW@1..7 "media" [] [Whitespace(" ")]
+        1: CSS_MEDIA_QUERY_LIST@7..41
+          0: CSS_MEDIA_CONDITION_QUERY@7..27
+            0: CSS_MEDIA_FEATURE_IN_PARENS@7..27
+              0: L_PAREN@7..8 "(" [] []
+              1: CSS_QUERY_FEATURE_BOOLEAN@8..27
+                0: CSS_IDENTIFIER@8..27
+                  0: IDENT@8..27 "--umrel-breakpoints" [] []
+              2: (empty)
+          1: (empty)
+          2: CSS_MEDIA_TYPE_QUERY@27..39
+            0: (empty)
+            1: CSS_MEDIA_TYPE@27..39
+              0: CSS_IDENTIFIER@27..39
+                0: IDENT@27..39 "$-breakpoint" [] []
+          3: (empty)
+          4: CSS_BOGUS_MEDIA_QUERY@39..41
+            0: R_PAREN@39..41 ")" [] [Whitespace(" ")]
+        2: CSS_RULE_BLOCK@41..43
+          0: L_CURLY@41..42 "{" [] []
+          1: CSS_RULE_LIST@42..42
+          2: R_CURLY@42..43 "}" [] []
+    1: CSS_AT_RULE@43..119
+      0: AT@43..46 "@" [Newline("\n"), Newline("\n")] []
+      1: CSS_MEDIA_AT_RULE@46..119
+        0: MEDIA_KW@46..52 "media" [] [Whitespace(" ")]
+        1: CSS_MEDIA_QUERY_LIST@52..83
+          0: CSS_MEDIA_AND_TYPE_QUERY@52..68
+            0: CSS_MEDIA_TYPE_QUERY@52..64
+              0: ONLY_KW@52..57 "only" [] [Whitespace(" ")]
+              1: CSS_MEDIA_TYPE@57..64
+                0: CSS_IDENTIFIER@57..64
+                  0: IDENT@57..64 "screen" [] [Whitespace(" ")]
+            1: AND_KW@64..68 "and" [] [Whitespace(" ")]
+            2: (empty)
+          1: (empty)
+          2: CSS_MEDIA_TYPE_QUERY@68..74
+            0: (empty)
+            1: CSS_MEDIA_TYPE@68..74
+              0: CSS_IDENTIFIER@68..74
+                0: IDENT@68..74 "width" [] [Whitespace(" ")]
+          3: (empty)
+          4: CSS_BOGUS_MEDIA_QUERY@74..83
+            0: LTEQ@74..77 "<=" [] [Whitespace(" ")]
+            1: CSS_DIMENSION_VALUE@77..80 "500" [] []
+            2: PX_KW@80..83 "px" [] [Whitespace(" ")]
+        2: CSS_RULE_BLOCK@83..119
+          0: L_CURLY@83..84 "{" [] []
+          1: CSS_RULE_LIST@84..117
+            0: CSS_QUALIFIED_RULE@84..117
+              0: CSS_SELECTOR_LIST@84..98
+                0: CSS_COMPOUND_SELECTOR@84..98
+                  0: CSS_NESTED_SELECTOR_LIST@84..84
+                  1: (empty)
+                  2: CSS_SUB_SELECTOR_LIST@84..98
+                    0: CSS_CLASS_SELECTOR@84..98
+                      0: DOT@84..87 "." [Newline("\n"), Whitespace("\t")] []
+                      1: CSS_CUSTOM_IDENTIFIER@87..98
+                        0: IDENT@87..98 "left-block" [] [Whitespace(" ")]
+              1: CSS_DECLARATION_OR_RULE_BLOCK@98..117
+                0: L_CURLY@98..99 "{" [] []
+                1: CSS_DECLARATION_OR_RULE_LIST@99..114
+                  0: CSS_DECLARATION_WITH_SEMICOLON@99..114
+                    0: CSS_DECLARATION@99..113
+                      0: CSS_GENERIC_PROPERTY@99..113
+                        0: CSS_IDENTIFIER@99..107
+                          0: IDENT@99..107 "width" [Newline("\n"), Whitespace("\t\t")] []
+                        1: COLON@107..109 ":" [] [Whitespace(" ")]
+                        2: CSS_GENERIC_COMPONENT_VALUE_LIST@109..113
+                          0: CSS_PERCENTAGE@109..113
+                            0: CSS_NUMBER_LITERAL@109..112 "100" [] []
+                            1: PERCENT@112..113 "%" [] []
+                      1: (empty)
+                    1: SEMICOLON@113..114 ";" [] []
+                2: R_CURLY@114..117 "}" [Newline("\n"), Whitespace("\t")] []
+          2: R_CURLY@117..119 "}" [Newline("\n")] []
+    2: CSS_AT_RULE@119..191
+      0: AT@119..122 "@" [Newline("\n"), Newline("\n")] []
+      1: CSS_MEDIA_AT_RULE@122..191
+        0: MEDIA_KW@122..128 "media" [] [Whitespace(" ")]
+        1: CSS_MEDIA_QUERY_LIST@128..158
+          0: CSS_MEDIA_AND_TYPE_QUERY@128..151
+            0: CSS_MEDIA_TYPE_QUERY@128..140
+              0: ONLY_KW@128..133 "only" [] [Whitespace(" ")]
+              1: CSS_MEDIA_TYPE@133..140
+                0: CSS_IDENTIFIER@133..140
+                  0: IDENT@133..140 "screen" [] [Whitespace(" ")]
+            1: AND_KW@140..144 "and" [] [Whitespace(" ")]
+            2: CSS_MEDIA_FEATURE_IN_PARENS@144..151
+              0: L_PAREN@144..145 "(" [] []
+              1: CSS_QUERY_FEATURE_BOOLEAN@145..151
+                0: CSS_IDENTIFIER@145..151
+                  0: IDENT@145..151 "width" [] [Whitespace(" ")]
+              2: (empty)
+          1: (empty)
+          2: CSS_BOGUS_MEDIA_QUERY@151..158
+            0: CSS_DIMENSION_VALUE@151..154 "500" [] []
+            1: PX_KW@154..156 "px" [] []
+            2: R_PAREN@156..158 ")" [] [Whitespace(" ")]
+        2: CSS_RULE_BLOCK@158..191
+          0: L_CURLY@158..159 "{" [] []
+          1: CSS_RULE_LIST@159..189
+            0: CSS_QUALIFIED_RULE@159..189
+              0: CSS_SELECTOR_LIST@159..172
+                0: CSS_COMPOUND_SELECTOR@159..172
+                  0: CSS_NESTED_SELECTOR_LIST@159..159
+                  1: (empty)
+                  2: CSS_SUB_SELECTOR_LIST@159..172
+                    0: CSS_CLASS_SELECTOR@159..172
+                      0: DOT@159..161 "." [Newline("\n")] []
+                      1: CSS_CUSTOM_IDENTIFIER@161..172
+                        0: IDENT@161..172 "left-block" [] [Whitespace(" ")]
+              1: CSS_DECLARATION_OR_RULE_BLOCK@172..189
+                0: L_CURLY@172..173 "{" [] []
+                1: CSS_DECLARATION_OR_RULE_LIST@173..187
+                  0: CSS_DECLARATION_WITH_SEMICOLON@173..187
+                    0: CSS_DECLARATION@173..186
+                      0: CSS_GENERIC_PROPERTY@173..186
+                        0: CSS_IDENTIFIER@173..180
+                          0: IDENT@173..180 "width" [Newline("\n"), Whitespace("\t")] []
+                        1: COLON@180..182 ":" [] [Whitespace(" ")]
+                        2: CSS_GENERIC_COMPONENT_VALUE_LIST@182..186
+                          0: CSS_PERCENTAGE@182..186
+                            0: CSS_NUMBER_LITERAL@182..185 "100" [] []
+                            1: PERCENT@185..186 "%" [] []
+                      1: (empty)
+                    1: SEMICOLON@186..187 ";" [] []
+                2: R_CURLY@187..189 "}" [Newline("\n")] []
+          2: R_CURLY@189..191 "}" [Newline("\n")] []
+    3: CSS_AT_RULE@191..266
+      0: AT@191..194 "@" [Newline("\n"), Newline("\n")] []
+      1: CSS_MEDIA_AT_RULE@194..266
+        0: MEDIA_KW@194..200 "media" [] [Whitespace(" ")]
+        1: CSS_MEDIA_QUERY_LIST@200..233
+          0: CSS_MEDIA_AND_TYPE_QUERY@200..224
+            0: CSS_MEDIA_TYPE_QUERY@200..212
+              0: ONLY_KW@200..205 "only" [] [Whitespace(" ")]
+              1: CSS_MEDIA_TYPE@205..212
+                0: CSS_IDENTIFIER@205..212
+                  0: IDENT@205..212 "screen" [] [Whitespace(" ")]
+            1: AND_KW@212..216 "and" [] [Whitespace(" ")]
+            2: CSS_MEDIA_FEATURE_IN_PARENS@216..224
+              0: L_PAREN@216..217 "(" [] []
+              1: CSS_QUERY_FEATURE_RANGE@217..224
+                0: CSS_IDENTIFIER@217..223
+                  0: IDENT@217..223 "width" [] [Whitespace(" ")]
+                1: CSS_QUERY_FEATURE_RANGE_COMPARISON@223..224
+                  0: EQ@223..224 "=" [] []
+                2: (empty)
+              2: (empty)
+          1: (empty)
+          2: CSS_BOGUS_MEDIA_QUERY@224..233
+            0: R_ANGLE@224..226 ">" [] [Whitespace(" ")]
+            1: CSS_DIMENSION_VALUE@226..229 "500" [] []
+            2: PX_KW@229..231 "px" [] []
+            3: R_PAREN@231..233 ")" [] [Whitespace(" ")]
+        2: CSS_RULE_BLOCK@233..266
+          0: L_CURLY@233..234 "{" [] []
+          1: CSS_RULE_LIST@234..264
+            0: CSS_QUALIFIED_RULE@234..264
+              0: CSS_SELECTOR_LIST@234..247
+                0: CSS_COMPOUND_SELECTOR@234..247
+                  0: CSS_NESTED_SELECTOR_LIST@234..234
+                  1: (empty)
+                  2: CSS_SUB_SELECTOR_LIST@234..247
+                    0: CSS_CLASS_SELECTOR@234..247
+                      0: DOT@234..236 "." [Newline("\n")] []
+                      1: CSS_CUSTOM_IDENTIFIER@236..247
+                        0: IDENT@236..247 "left-block" [] [Whitespace(" ")]
+              1: CSS_DECLARATION_OR_RULE_BLOCK@247..264
+                0: L_CURLY@247..248 "{" [] []
+                1: CSS_DECLARATION_OR_RULE_LIST@248..262
+                  0: CSS_DECLARATION_WITH_SEMICOLON@248..262
+                    0: CSS_DECLARATION@248..261
+                      0: CSS_GENERIC_PROPERTY@248..261
+                        0: CSS_IDENTIFIER@248..255
+                          0: IDENT@248..255 "width" [Newline("\n"), Whitespace("\t")] []
+                        1: COLON@255..257 ":" [] [Whitespace(" ")]
+                        2: CSS_GENERIC_COMPONENT_VALUE_LIST@257..261
+                          0: CSS_PERCENTAGE@257..261
+                            0: CSS_NUMBER_LITERAL@257..260 "100" [] []
+                            1: PERCENT@260..261 "%" [] []
+                      1: (empty)
+                    1: SEMICOLON@261..262 ";" [] []
+                2: R_CURLY@262..264 "}" [Newline("\n")] []
+          2: R_CURLY@264..266 "}" [Newline("\n")] []
+  2: EOF@266..267 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+at_rule_media_error.css:1:28 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `)` but instead found `$-breakpoint`
+  
+  > 1 │ @media (--umrel-breakpoints$-breakpoint) {}
+      │                            ^^^^^^^^^^^^
+    2 │ 
+    3 │ @media only screen and width <= 500px {
+  
+  i Remove $-breakpoint
+  
+at_rule_media_error.css:1:40 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `)`
+  
+  > 1 │ @media (--umrel-breakpoints$-breakpoint) {}
+      │                                        ^
+    2 │ 
+    3 │ @media only screen and width <= 500px {
+  
+  i Remove )
+  
+at_rule_media_error.css:3:24 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `width`
+  
+    1 │ @media (--umrel-breakpoints$-breakpoint) {}
+    2 │ 
+  > 3 │ @media only screen and width <= 500px {
+      │                        ^^^^^
+    4 │ 	.left-block {
+    5 │ 		width: 100%;
+  
+  i Remove width
+  
+at_rule_media_error.css:3:30 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `<=`
+  
+    1 │ @media (--umrel-breakpoints$-breakpoint) {}
+    2 │ 
+  > 3 │ @media only screen and width <= 500px {
+      │                              ^^
+    4 │ 	.left-block {
+    5 │ 		width: 100%;
+  
+  i Remove <=
+  
+at_rule_media_error.css:9:31 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `)` but instead found `500`
+  
+     7 │ }
+     8 │ 
+   > 9 │ @media only screen and (width 500px) {
+       │                               ^^^
+    10 │ .left-block {
+    11 │ 	width: 100%;
+  
+  i Remove 500
+  
+at_rule_media_error.css:15:32 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `)` but instead found `>`
+  
+    13 │ }
+    14 │ 
+  > 15 │ @media only screen and (width => 500px) {
+       │                                ^
+    16 │ .left-block {
+    17 │ 	width: 100%;
+  
+  i Remove >
+  
+```

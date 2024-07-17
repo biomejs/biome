@@ -17,8 +17,8 @@ GraphqlRoot {
         GraphqlScalarTypeExtension {
             extend_token: EXTEND_KW@0..7 "extend" [] [Whitespace(" ")],
             scalar_token: SCALAR_KW@7..14 "scalar" [] [Whitespace(" ")],
-            name: GraphqlName {
-                value_token: GRAPHQL_NAME@14..18 "Date" [] [],
+            name: GraphqlNameReference {
+                value_token: IDENT@14..18 "Date" [] [],
             },
             directives: GraphqlDirectiveList [],
         },
@@ -36,8 +36,8 @@ GraphqlRoot {
     0: GRAPHQL_SCALAR_TYPE_EXTENSION@0..18
       0: EXTEND_KW@0..7 "extend" [] [Whitespace(" ")]
       1: SCALAR_KW@7..14 "scalar" [] [Whitespace(" ")]
-      2: GRAPHQL_NAME@14..18
-        0: GRAPHQL_NAME@14..18 "Date" [] []
+      2: GRAPHQL_NAME_REFERENCE@14..18
+        0: IDENT@14..18 "Date" [] []
       3: GRAPHQL_DIRECTIVE_LIST@18..18
   2: EOF@18..19 "" [Newline("\n")] []
 

@@ -30,14 +30,66 @@ YamlBogus = SyntaxElement*
 YamlBogusValue = SyntaxElement*
 
 YamlRoot =
-    bom: 'UNICODE_BOM'?
-    documents: YamlDocumentList
-    eof: 'EOF'
+	bom: 'UNICODE_BOM'?
+	documents: YamlDocumentList
+	eof: 'EOF'
 
 YamlDocumentList = YamlDocument*
-YamlDocument = content: YamlContentList
-YamlContentList = AnyYamlContent*
+YamlDocument =
+	'---'? // Document start marker
+	body: AnyYamlValue
+	'...'?
 
-AnyYamlContent = YamlScalar | YamlBogusValue
-YamlScalar = value: 'yaml_scalar'
-YamlStringLiteral = value: 'yaml_string_literal'
+AnyYamlScalar =
+	YamlStringValue
+	| YamlNumberValue
+	| YamlBooleanValue
+	| YamlNullValue
+
+YamlArrayInline =
+	'['
+	items: YamlArrayInlineList
+	']'
+
+YamlArrayInlineList = (AnyYamlScalar (',' AnyYamlScalar)* ','?)
+
+AnyYamlValue =
+	AnyYamlScalar
+	| YamlArray
+	| YamlArrayInline
+	| YamlObject
+	| YamlBogusValue
+
+YamlArray =
+	items: YamlArrayItemList
+
+YamlArrayItem =
+	'-'
+	item: AnyYamlValue
+
+YamlArrayItemList = YamlArrayItem*
+
+YamlObject =
+	members: YamlObjectMemberList
+
+YamlObjectMember =
+	key: YamlIdentifier
+	':'
+	value: AnyYamlValue
+
+YamlObjectMemberList = YamlObjectMember*
+
+YamlBlockLiteral =
+	'|'
+	value: YamlBlockValue
+
+YamlBlockFolded =
+	'>'
+	value: YamlBlockValue
+
+YamlNumberValue = value: 'yaml_number_value'
+YamlStringValue = value: 'yaml_string_value'
+YamlBooleanValue = value: 'yaml_boolean_value'
+YamlNullValue = value: 'yaml_null_value'
+YamlIdentifier = value: 'yaml_identifier'
+YamlBlockValue = 'yaml_block_value'

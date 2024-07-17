@@ -19,8 +19,8 @@ GraphqlRoot {
         GraphqlUnionTypeExtension {
             extend_token: EXTEND_KW@0..7 "extend" [] [Whitespace(" ")],
             union_token: UNION_KW@7..13 "union" [] [Whitespace(" ")],
-            name: GraphqlName {
-                value_token: GRAPHQL_NAME@13..25 "SearchResult" [] [],
+            name: GraphqlNameReference {
+                value_token: IDENT@13..25 "SearchResult" [] [],
             },
             directives: GraphqlDirectiveList [],
             union_members: missing (optional),
@@ -28,24 +28,20 @@ GraphqlRoot {
         GraphqlUnionTypeExtension {
             extend_token: EXTEND_KW@25..34 "extend" [Newline("\n"), Newline("\n")] [Whitespace(" ")],
             union_token: UNION_KW@34..40 "union" [] [Whitespace(" ")],
-            name: GraphqlName {
-                value_token: GRAPHQL_NAME@40..53 "SearchResult" [] [Whitespace(" ")],
+            name: GraphqlNameReference {
+                value_token: IDENT@40..53 "SearchResult" [] [Whitespace(" ")],
             },
             directives: GraphqlDirectiveList [],
             union_members: GraphqlUnionMemberTypes {
                 eq_token: missing (required),
                 bitwise_or_token: missing (optional),
                 members: GraphqlUnionMemberTypeList [
-                    GraphqlNamedType {
-                        name: GraphqlName {
-                            value_token: GRAPHQL_NAME@53..59 "Photo" [] [Whitespace(" ")],
-                        },
+                    GraphqlNameReference {
+                        value_token: IDENT@53..59 "Photo" [] [Whitespace(" ")],
                     },
                     PIPE@59..61 "|" [] [Whitespace(" ")],
-                    GraphqlNamedType {
-                        name: GraphqlName {
-                            value_token: GRAPHQL_NAME@61..67 "Person" [] [],
-                        },
+                    GraphqlNameReference {
+                        value_token: IDENT@61..67 "Person" [] [],
                     },
                 ],
             },
@@ -64,27 +60,25 @@ GraphqlRoot {
     0: GRAPHQL_UNION_TYPE_EXTENSION@0..25
       0: EXTEND_KW@0..7 "extend" [] [Whitespace(" ")]
       1: UNION_KW@7..13 "union" [] [Whitespace(" ")]
-      2: GRAPHQL_NAME@13..25
-        0: GRAPHQL_NAME@13..25 "SearchResult" [] []
+      2: GRAPHQL_NAME_REFERENCE@13..25
+        0: IDENT@13..25 "SearchResult" [] []
       3: GRAPHQL_DIRECTIVE_LIST@25..25
       4: (empty)
     1: GRAPHQL_UNION_TYPE_EXTENSION@25..67
       0: EXTEND_KW@25..34 "extend" [Newline("\n"), Newline("\n")] [Whitespace(" ")]
       1: UNION_KW@34..40 "union" [] [Whitespace(" ")]
-      2: GRAPHQL_NAME@40..53
-        0: GRAPHQL_NAME@40..53 "SearchResult" [] [Whitespace(" ")]
+      2: GRAPHQL_NAME_REFERENCE@40..53
+        0: IDENT@40..53 "SearchResult" [] [Whitespace(" ")]
       3: GRAPHQL_DIRECTIVE_LIST@53..53
       4: GRAPHQL_UNION_MEMBER_TYPES@53..67
         0: (empty)
         1: (empty)
         2: GRAPHQL_UNION_MEMBER_TYPE_LIST@53..67
-          0: GRAPHQL_NAMED_TYPE@53..59
-            0: GRAPHQL_NAME@53..59
-              0: GRAPHQL_NAME@53..59 "Photo" [] [Whitespace(" ")]
+          0: GRAPHQL_NAME_REFERENCE@53..59
+            0: IDENT@53..59 "Photo" [] [Whitespace(" ")]
           1: PIPE@59..61 "|" [] [Whitespace(" ")]
-          2: GRAPHQL_NAMED_TYPE@61..67
-            0: GRAPHQL_NAME@61..67
-              0: GRAPHQL_NAME@61..67 "Person" [] []
+          2: GRAPHQL_NAME_REFERENCE@61..67
+            0: IDENT@61..67 "Person" [] []
   2: EOF@67..68 "" [Newline("\n")] []
 
 ```
