@@ -60,3 +60,173 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
 
 
 ```
+
+# Emitted Messages
+
+```block
+[
+```
+
+```block
+{"description":"Use === instead of ==.\n== is only allowed when comparing against `null`","check_name":"lint/suspicious/noDoubleEquals","fingerprint":"6143155163249580709","severity":"critical","location":{"path":"main.ts","lines":{"begin":4}}},
+```
+
+```block
+{"description":"Use === instead of ==.\n== is only allowed when comparing against `null`","check_name":"lint/suspicious/noDoubleEquals","fingerprint":"17321400456513041114","severity":"critical","location":{"path":"main.ts","lines":{"begin":5}}},
+```
+
+```block
+{"description":"Use === instead of ==.\n== is only allowed when comparing against `null`","check_name":"lint/suspicious/noDoubleEquals","fingerprint":"5920280837780200873","severity":"critical","location":{"path":"main.ts","lines":{"begin":6}}},
+```
+
+```block
+{"description":"Use === instead of ==.\n== is only allowed when comparing against `null`","check_name":"lint/suspicious/noDoubleEquals","fingerprint":"11509729109081015132","severity":"critical","location":{"path":"main.ts","lines":{"begin":7}}},
+```
+
+```block
+{"description":"This is an unexpected use of the debugger statement.","check_name":"lint/suspicious/noDebugger","fingerprint":"1649488708621366899","severity":"critical","location":{"path":"main.ts","lines":{"begin":8}}},
+```
+
+```block
+{"description":"This is an unexpected use of the debugger statement.","check_name":"lint/suspicious/noDebugger","fingerprint":"8310999440656109329","severity":"critical","location":{"path":"main.ts","lines":{"begin":9}}},
+```
+
+```block
+{"description":"This is an unexpected use of the debugger statement.","check_name":"lint/suspicious/noDebugger","fingerprint":"18033745882782037349","severity":"critical","location":{"path":"main.ts","lines":{"begin":10}}},
+```
+
+```block
+{"description":"This is an unexpected use of the debugger statement.","check_name":"lint/suspicious/noDebugger","fingerprint":"5405195050502833768","severity":"critical","location":{"path":"main.ts","lines":{"begin":11}}},
+```
+
+```block
+{"description":"This variable implicitly has the any type.","check_name":"lint/suspicious/noImplicitAnyLet","fingerprint":"5606951167272714146","severity":"critical","location":{"path":"main.ts","lines":{"begin":14}}},
+```
+
+```block
+{"description":"This variable implicitly has the any type.","check_name":"lint/suspicious/noImplicitAnyLet","fingerprint":"18271027001089795127","severity":"critical","location":{"path":"main.ts","lines":{"begin":15}}},
+```
+
+```block
+{"description":"This variable implicitly has the any type.","check_name":"lint/suspicious/noImplicitAnyLet","fingerprint":"16897371067057465368","severity":"critical","location":{"path":"main.ts","lines":{"begin":16}}},
+```
+
+```block
+{"description":"This variable implicitly has the any type.","check_name":"lint/suspicious/noImplicitAnyLet","fingerprint":"4985652007524100191","severity":"critical","location":{"path":"main.ts","lines":{"begin":17}}},
+```
+
+```block
+{"description":"This variable implicitly has the any type.","check_name":"lint/suspicious/noImplicitAnyLet","fingerprint":"16282632614809011715","severity":"critical","location":{"path":"main.ts","lines":{"begin":18}}},
+```
+
+```block
+{"description":"This variable implicitly has the any type.","check_name":"lint/suspicious/noImplicitAnyLet","fingerprint":"15690202166725913358","severity":"critical","location":{"path":"main.ts","lines":{"begin":1}}},
+```
+
+```block
+{"description":"Shouldn't redeclare 'z'. Consider to delete it or rename it.","check_name":"lint/suspicious/noRedeclare","fingerprint":"4177467054814594004","severity":"critical","location":{"path":"main.ts","lines":{"begin":2}}},
+```
+
+```block
+{"description":"Shouldn't redeclare 'f'. Consider to delete it or rename it.","check_name":"lint/suspicious/noRedeclare","fingerprint":"710662920264236176","severity":"critical","location":{"path":"main.ts","lines":{"begin":15}}},
+```
+
+```block
+{"description":"Shouldn't redeclare 'f'. Consider to delete it or rename it.","check_name":"lint/suspicious/noRedeclare","fingerprint":"15087884986860960092","severity":"critical","location":{"path":"main.ts","lines":{"begin":16}}},
+```
+
+```block
+{"description":"Shouldn't redeclare 'f'. Consider to delete it or rename it.","check_name":"lint/suspicious/noRedeclare","fingerprint":"9141054691334740077","severity":"critical","location":{"path":"main.ts","lines":{"begin":17}}},
+```
+
+```block
+{"description":"Shouldn't redeclare 'f'. Consider to delete it or rename it.","check_name":"lint/suspicious/noRedeclare","fingerprint":"16467994578324553997","severity":"critical","location":{"path":"main.ts","lines":{"begin":18}}},
+```
+
+```block
+{"description":"Shouldn't redeclare 'f'. Consider to delete it or rename it.","check_name":"lint/suspicious/noRedeclare","fingerprint":"15569466089627795172","severity":"critical","location":{"path":"main.ts","lines":{"begin":1}}},
+```
+
+```block
+{"description":"Use === instead of ==.\n== is only allowed when comparing against `null`","check_name":"lint/suspicious/noDoubleEquals","fingerprint":"8145265504203493155","severity":"critical","location":{"path":"index.ts","lines":{"begin":4}}},
+```
+
+```block
+{"description":"Use === instead of ==.\n== is only allowed when comparing against `null`","check_name":"lint/suspicious/noDoubleEquals","fingerprint":"16182919707811659960","severity":"critical","location":{"path":"index.ts","lines":{"begin":5}}},
+```
+
+```block
+{"description":"Use === instead of ==.\n== is only allowed when comparing against `null`","check_name":"lint/suspicious/noDoubleEquals","fingerprint":"3585230788531902770","severity":"critical","location":{"path":"index.ts","lines":{"begin":6}}},
+```
+
+```block
+{"description":"Use === instead of ==.\n== is only allowed when comparing against `null`","check_name":"lint/suspicious/noDoubleEquals","fingerprint":"4994833126836599009","severity":"critical","location":{"path":"index.ts","lines":{"begin":7}}},
+```
+
+```block
+{"description":"This is an unexpected use of the debugger statement.","check_name":"lint/suspicious/noDebugger","fingerprint":"13874281744783264721","severity":"critical","location":{"path":"index.ts","lines":{"begin":8}}},
+```
+
+```block
+{"description":"This is an unexpected use of the debugger statement.","check_name":"lint/suspicious/noDebugger","fingerprint":"8465029566572754121","severity":"critical","location":{"path":"index.ts","lines":{"begin":9}}},
+```
+
+```block
+{"description":"This is an unexpected use of the debugger statement.","check_name":"lint/suspicious/noDebugger","fingerprint":"11985703304627320084","severity":"critical","location":{"path":"index.ts","lines":{"begin":10}}},
+```
+
+```block
+{"description":"This is an unexpected use of the debugger statement.","check_name":"lint/suspicious/noDebugger","fingerprint":"12808354640074380170","severity":"critical","location":{"path":"index.ts","lines":{"begin":11}}},
+```
+
+```block
+{"description":"This variable implicitly has the any type.","check_name":"lint/suspicious/noImplicitAnyLet","fingerprint":"2162620893763553997","severity":"critical","location":{"path":"index.ts","lines":{"begin":14}}},
+```
+
+```block
+{"description":"This variable implicitly has the any type.","check_name":"lint/suspicious/noImplicitAnyLet","fingerprint":"1853523145490961852","severity":"critical","location":{"path":"index.ts","lines":{"begin":15}}},
+```
+
+```block
+{"description":"This variable implicitly has the any type.","check_name":"lint/suspicious/noImplicitAnyLet","fingerprint":"2998175501061458453","severity":"critical","location":{"path":"index.ts","lines":{"begin":16}}},
+```
+
+```block
+{"description":"This variable implicitly has the any type.","check_name":"lint/suspicious/noImplicitAnyLet","fingerprint":"6858366370449074830","severity":"critical","location":{"path":"index.ts","lines":{"begin":17}}},
+```
+
+```block
+{"description":"This variable implicitly has the any type.","check_name":"lint/suspicious/noImplicitAnyLet","fingerprint":"4545991621265962530","severity":"critical","location":{"path":"index.ts","lines":{"begin":18}}},
+```
+
+```block
+{"description":"This variable implicitly has the any type.","check_name":"lint/suspicious/noImplicitAnyLet","fingerprint":"10323571307504402073","severity":"critical","location":{"path":"index.ts","lines":{"begin":1}}},
+```
+
+```block
+{"description":"Shouldn't redeclare 'z'. Consider to delete it or rename it.","check_name":"lint/suspicious/noRedeclare","fingerprint":"8595162422023295635","severity":"critical","location":{"path":"index.ts","lines":{"begin":2}}},
+```
+
+```block
+{"description":"Shouldn't redeclare 'f'. Consider to delete it or rename it.","check_name":"lint/suspicious/noRedeclare","fingerprint":"13204486605360217019","severity":"critical","location":{"path":"index.ts","lines":{"begin":15}}},
+```
+
+```block
+{"description":"Shouldn't redeclare 'f'. Consider to delete it or rename it.","check_name":"lint/suspicious/noRedeclare","fingerprint":"18060949892273518543","severity":"critical","location":{"path":"index.ts","lines":{"begin":16}}},
+```
+
+```block
+{"description":"Shouldn't redeclare 'f'. Consider to delete it or rename it.","check_name":"lint/suspicious/noRedeclare","fingerprint":"10400775362184654959","severity":"critical","location":{"path":"index.ts","lines":{"begin":17}}},
+```
+
+```block
+{"description":"Shouldn't redeclare 'f'. Consider to delete it or rename it.","check_name":"lint/suspicious/noRedeclare","fingerprint":"9377651608617436453","severity":"critical","location":{"path":"index.ts","lines":{"begin":18}}},
+```
+
+```block
+{"description":"Shouldn't redeclare 'f'. Consider to delete it or rename it.","check_name":"lint/suspicious/noRedeclare","fingerprint":"327536939249947130","severity":"critical","location":{"path":"index.ts","lines":{"begin":1}}}
+```
+
+```block
+]
+```
