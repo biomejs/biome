@@ -3,9 +3,8 @@ use crate::parentheses::AnyJsParenthesized;
 use biome_formatter::{TransformSourceMap, TransformSourceMapBuilder};
 use biome_js_syntax::{
     AnyJsAssignment, AnyJsExpression, AnyJsOptionalChainExpression, AnyTsType, JsLanguage,
-    JsLogicalExpression, JsSyntaxKind, JsSyntaxNode,
+    JsLogicalExpression, JsSyntaxKind, JsSyntaxNode, JsSyntaxTrivia,
 };
-use biome_rowan::syntax::SyntaxTrivia;
 use biome_rowan::{
     chain_trivia_pieces, AstNode, SyntaxKind, SyntaxRewriter, SyntaxToken, TextSize,
     VisitNodeSignal,
@@ -447,7 +446,7 @@ impl SyntaxRewriter for JsFormatSyntaxRewriter {
     }
 }
 
-fn has_type_cast_comment_or_skipped(trivia: &SyntaxTrivia<JsLanguage>) -> bool {
+fn has_type_cast_comment_or_skipped(trivia: &JsSyntaxTrivia) -> bool {
     trivia.pieces().any(|piece| {
         if let Some(comment) = piece.as_comments() {
             is_type_comment(&comment)

@@ -547,6 +547,11 @@ impl From<PartialGraphqlConfiguration> for LanguageSettings<GraphqlLanguage> {
             language_setting.formatter.bracket_spacing = formatter.bracket_spacing;
         }
 
+        if let Some(linter) = graphql.linter {
+            // TODO: change RHS to `linter.enabled` when graphql linting is enabled by default
+            language_setting.linter.enabled = Some(linter.enabled.unwrap_or_default());
+        }
+
         language_setting
     }
 }

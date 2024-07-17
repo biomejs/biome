@@ -1,6 +1,6 @@
 use biome_formatter_test::check_reformat::CheckReformat;
-use biome_json_formatter::context::JsonFormatOptions;
 use biome_json_formatter::format_node;
+use biome_json_formatter::{context::JsonFormatOptions, JsonFormatLanguage};
 use biome_json_parser::{parse_json, JsonParserOptions};
 
 mod language {
@@ -25,8 +25,13 @@ fn quick_test() {
     let root = &parse.syntax();
     let language = language::JsonTestFormatLanguage::default();
 
-    let check_reformat =
-        CheckReformat::new(root, result.as_code(), "quick_test", &language, options);
+    let check_reformat = CheckReformat::new(
+        root,
+        result.as_code(),
+        "quick_test",
+        &language,
+        JsonFormatLanguage::new(options),
+    );
     check_reformat.check_reformat();
 
     assert_eq!(

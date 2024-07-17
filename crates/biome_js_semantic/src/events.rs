@@ -2,14 +2,18 @@
 
 use biome_js_syntax::binding_ext::{AnyJsBindingDeclaration, AnyJsIdentifierBinding};
 use biome_js_syntax::{
-    AnyJsIdentifierUsage, JsLanguage, JsSyntaxKind, JsSyntaxNode, TextRange, TsTypeParameterName,
+    inner_string_text, AnyJsIdentifierUsage, JsLanguage, JsSyntaxKind, JsSyntaxNode, TextRange,
+    TsTypeParameterName,
 };
 use biome_js_syntax::{AnyJsImportClause, AnyJsNamedImportSpecifier, AnyTsType};
+use biome_rowan::TextSize;
 use biome_rowan::{syntax::Preorder, AstNode, SyntaxNodeOptionExt, TokenText};
 use rustc_hash::FxHashMap;
 use std::collections::VecDeque;
 use std::mem;
 use JsSyntaxKind::*;
+
+use crate::ScopeId;
 
 /// Events emitted by the [SemanticEventExtractor].
 /// These events are later made into the Semantic Model.
@@ -23,8 +27,8 @@ pub enum SemanticEvent {
     /// - Type parameters
     DeclarationFound {
         range: TextRange,
-        scope_id: usize,
-        hoisted_scope_id: Option<usize>,
+        scope_id: ScopeId,
+        hoisted_scope_id: Option<ScopeId>,
     },
 
     /// Tracks where a symbol is read, but only if its declaration is before this reference.
@@ -32,8 +36,8 @@ pub enum SemanticEvent {
     /// - All reference identifiers
     Read {
         range: TextRange,
-        declared_at: TextRange,
-        scope_id: usize,
+        declaration_at: TextSize,
+        scope_id: ScopeId,
     },
 
     /// Tracks where a symbol is read, but only if its declaration was hoisted.
@@ -41,8 +45,8 @@ pub enum SemanticEvent {
     /// - All reference identifiers
     HoistedRead {
         range: TextRange,
-        declared_at: TextRange,
-        scope_id: usize,
+        declaration_at: TextSize,
+        scope_id: ScopeId,
     },
 
     /// Tracks where a symbol is written, but only if its declaration is before this reference.
@@ -50,8 +54,8 @@ pub enum SemanticEvent {
     /// - All identifier assignments
     Write {
         range: TextRange,
-        declared_at: TextRange,
-        scope_id: usize,
+        declaration_at: TextSize,
+        scope_id: ScopeId,
     },
 
     /// Tracks where a symbol is written, but only if its declaration was hoisted.
@@ -60,8 +64,8 @@ pub enum SemanticEvent {
     /// - All identifier assignments
     HoistedWrite {
         range: TextRange,
-        declared_at: TextRange,
-        scope_id: usize,
+        declaration_at: TextSize,
+        scope_id: ScopeId,
     },
 
     /// Tracks references that do no have any matching binding
@@ -76,24 +80,21 @@ pub enum SemanticEvent {
     ScopeStarted {
         /// Scope range
         range: TextRange,
-        scope_id: usize,
-        parent_scope_id: Option<usize>,
+        parent_scope_id: Option<ScopeId>,
         is_closure: bool,
     },
 
     /// Tracks where a scope ends
-    /// Generated for:
-    /// - Blocks
-    /// - Function body
     ScopeEnded {
         /// Scope range
         range: TextRange,
-        scope_id: usize,
     },
 
     /// Tracks where a symbol is exported.
-    /// The range points to the binding that is being exported.
-    Exported { range: TextRange },
+    Export {
+        range: TextRange,
+        declaration_at: TextSize,
+    },
 }
 
 impl SemanticEvent {
@@ -101,13 +102,13 @@ impl SemanticEvent {
         match self {
             Self::DeclarationFound { range, .. }
             | Self::ScopeStarted { range, .. }
-            | Self::ScopeEnded { range, .. }
+            | Self::ScopeEnded { range }
             | Self::Read { range, .. }
             | Self::HoistedRead { range, .. }
             | Self::Write { range, .. }
             | Self::HoistedWrite { range, .. }
             | Self::UnresolvedReference { range, .. }
-            | Self::Exported { range } => *range,
+            | Self::Export { range, .. } => *range,
         }
     }
 }
@@ -130,7 +131,7 @@ impl SemanticEvent {
 /// use biome_js_syntax::*;
 /// use biome_js_semantic::*;
 /// let tree = parse("let a = 1", JsFileSource::js_script(), JsParserOptions::default());
-/// let mut extractor = SemanticEventExtractor::new();
+/// let mut extractor = SemanticEventExtractor::default();
 /// for e in tree.syntax().preorder() {
 ///     match e {
 ///         WalkEvent::Enter(node) => extractor.enter(&node),
@@ -143,14 +144,14 @@ impl SemanticEvent {
 ///     }
 /// }
 /// ```
-#[derive(Default, Debug)]
+#[derive(Debug, Default)]
 pub struct SemanticEventExtractor {
     /// Event queue
     stash: VecDeque<SemanticEvent>,
     /// Stack of scopes
     scopes: Vec<Scope>,
     /// Number of generated scopes
-    /// This allows assigning a unique scope id to every scope.
+    /// This allows assigning a unique id to every scope.
     scope_count: usize,
     /// At any point this is the set of available bindings and their range in the current scope
     bindings: FxHashMap<BindingName, BindingInfo>,
@@ -184,7 +185,7 @@ struct BindingInfo {
     /// range of the name
     range: TextRange,
     /// Kind of the declaration,
-    /// or in the acse of a bogus declaration, the kind of the name
+    /// or in the case of a bogus declaration, the kind of the name
     declaration_kind: JsSyntaxKind,
 }
 
@@ -251,12 +252,12 @@ impl Reference {
     }
 
     /// Range of the referenced binding
-    const fn range(&self) -> &TextRange {
+    const fn range(&self) -> TextRange {
         match self {
             Self::Export(range)
             | Self::Read(range)
             | Self::AmbientRead(range)
-            | Self::Write(range) => range,
+            | Self::Write(range) => *range,
         }
     }
 }
@@ -269,35 +270,28 @@ enum ScopeHoisting {
 
 #[derive(Debug)]
 struct Scope {
-    scope_id: usize,
-    /// All bindings declared inside this scope
+    scope_id: ScopeId,
+    /// All bindings declared inside this scope.
     bindings: Vec<BindingName>,
-    /// References that still needs to be bound and will be solved at the end of the scope
+    /// References that still needs to be bound and will be solved at the end of the scope.
     references: FxHashMap<BindingName, Vec<Reference>>,
-    /// All bindings that where shadowed and will be restored after this scope ends.
+    /// All bindings that were shadowed and will be restored after this scope ends.
     shadowed: Vec<(BindingName, BindingInfo)>,
-    /// If this scope allows declarations to be hoisted to parent scope or not
+    /// If this scope allows declarations to be hoisted to parent scope or not.
     hoisting: ScopeHoisting,
 }
 
 impl SemanticEventExtractor {
-    pub fn new() -> Self {
-        Self {
-            stash: VecDeque::new(),
-            scopes: vec![],
-            scope_count: 0,
-            bindings: FxHashMap::default(),
-            infers: vec![],
-        }
-    }
-
     /// See [SemanticEvent] for a more detailed description of which events [JsSyntaxNode] generates.
     #[inline]
     pub fn enter(&mut self, node: &JsSyntaxNode) {
-        // If you push a scope for a given node type, don't forget to also update `Self::leave`.
-        // You should also edit [SemanticModelBuilder::push_node].
+        // IMPORTANT: If you push a scope for a given node type, don't forget to
+        // update `Self::leave`. You should also edit [SemanticModelBuilder::push_node].
         match node.kind() {
-            JS_IDENTIFIER_BINDING | TS_IDENTIFIER_BINDING | TS_TYPE_PARAMETER_NAME => {
+            JS_IDENTIFIER_BINDING
+            | TS_IDENTIFIER_BINDING
+            | TS_TYPE_PARAMETER_NAME
+            | TS_LITERAL_ENUM_MEMBER_NAME => {
                 self.enter_identifier_binding(&AnyJsIdentifierBinding::unwrap_cast(node.clone()));
             }
 
@@ -306,7 +300,7 @@ impl SemanticEventExtractor {
             }
 
             JS_MODULE | JS_SCRIPT => self.push_scope(
-                node.text_range(),
+                node.text_trimmed_range(),
                 ScopeHoisting::DontHoistDeclarationsToParent,
                 false,
             ),
@@ -322,7 +316,7 @@ impl SemanticEventExtractor {
             | JS_GETTER_OBJECT_MEMBER
             | JS_SETTER_OBJECT_MEMBER => {
                 self.push_scope(
-                    node.text_range(),
+                    node.text_trimmed_range(),
                     ScopeHoisting::DontHoistDeclarationsToParent,
                     true,
                 );
@@ -347,7 +341,7 @@ impl SemanticEventExtractor {
             | TS_INDEX_SIGNATURE_CLASS_MEMBER
             | TS_INDEX_SIGNATURE_TYPE_MEMBER => {
                 self.push_scope(
-                    node.text_range(),
+                    node.text_trimmed_range(),
                     ScopeHoisting::DontHoistDeclarationsToParent,
                     false,
                 );
@@ -356,7 +350,7 @@ impl SemanticEventExtractor {
             JS_BLOCK_STATEMENT | JS_FOR_STATEMENT | JS_FOR_OF_STATEMENT | JS_FOR_IN_STATEMENT
             | JS_SWITCH_STATEMENT | JS_CATCH_CLAUSE => {
                 self.push_scope(
-                    node.text_range(),
+                    node.text_trimmed_range(),
                     ScopeHoisting::HoistDeclarationsToParent,
                     false,
                 );
@@ -373,7 +367,7 @@ impl SemanticEventExtractor {
     fn enter_any_type(&mut self, node: &AnyTsType) {
         if node.in_conditional_true_type() {
             self.push_scope(
-                node.syntax().text_range(),
+                node.syntax().text_trimmed_range(),
                 ScopeHoisting::DontHoistDeclarationsToParent,
                 false,
             );
@@ -386,7 +380,7 @@ impl SemanticEventExtractor {
             JsSyntaxKind::TS_FUNCTION_TYPE | JsSyntaxKind::TS_MAPPED_TYPE
         ) {
             self.push_scope(
-                node.text_range(),
+                node.text_trimmed_range(),
                 ScopeHoisting::DontHoistDeclarationsToParent,
                 false,
             );
@@ -398,7 +392,8 @@ impl SemanticEventExtractor {
         let is_exported = if let Ok(name_token) = node.name_token() {
             let name = name_token.token_text_trimmed();
             if let Some(declaration) = node.declaration() {
-                let info = BindingInfo::new(name_token.text_range(), declaration.syntax().kind());
+                let info =
+                    BindingInfo::new(name_token.text_trimmed_range(), declaration.syntax().kind());
                 let is_exported = declaration.export().is_some();
                 match declaration {
                     AnyJsBindingDeclaration::JsArrayBindingPatternElement(_)
@@ -427,6 +422,12 @@ impl SemanticEventExtractor {
                     | AnyJsBindingDeclaration::JsFunctionExportDefaultDeclaration(_) => {
                         hoisted_scope_id = self.scope_index_to_hoist_declarations(1);
                         self.push_binding(hoisted_scope_id, BindingName::Value(name), info);
+                    }
+                    AnyJsBindingDeclaration::TsEnumMember(_) => {
+                        // Handle quoted names.
+                        let name = inner_string_text(&name_token);
+                        self.push_binding(None, BindingName::Value(name.clone()), info.clone());
+                        self.push_binding(None, BindingName::Type(name), info);
                     }
                     AnyJsBindingDeclaration::JsClassExpression(_)
                     | AnyJsBindingDeclaration::JsFunctionExpression(_) => {
@@ -527,7 +528,7 @@ impl SemanticEventExtractor {
                 is_exported
             } else {
                 // Handle identifiers in bogus nodes
-                let info = BindingInfo::new(name_token.text_range(), node.syntax().kind());
+                let info = BindingInfo::new(name_token.text_trimmed_range(), node.syntax().kind());
                 self.push_binding(None, BindingName::Value(name), info);
                 false
             }
@@ -536,20 +537,22 @@ impl SemanticEventExtractor {
             false
         };
         let scope_id = self.current_scope_mut().scope_id;
+        let range = node.syntax().text_trimmed_range();
         self.stash.push_back(SemanticEvent::DeclarationFound {
             scope_id,
             hoisted_scope_id,
-            range: node.syntax().text_range(),
+            range,
         });
         if is_exported {
-            self.stash.push_back(SemanticEvent::Exported {
-                range: node.syntax().text_range(),
+            self.stash.push_back(SemanticEvent::Export {
+                range,
+                declaration_at: range.start(),
             });
         }
     }
 
     fn enter_identifier_usage(&mut self, node: AnyJsIdentifierUsage) {
-        let range = node.syntax().text_range();
+        let range = node.syntax().text_trimmed_range();
         let Ok(name_token) = node.value_token() else {
             return;
         };
@@ -641,10 +644,10 @@ impl SemanticEventExtractor {
                                     );
                                 }
                             }
-                            // ignore binding `<X>` from `import().<X>`
+                            // Ignore binding `<X>` from `import().<X>`.
                             Some(TS_IMPORT_TYPE_QUALIFIER) => {}
                             Some(TS_TYPEOF_TYPE) => {
-                                // a `typeof` type expression refers a value.
+                                // A `typeof` type expression refers a value.
                                 // It can also refer to an imported value as a type.
                                 // We handle this particular case in `pop_scope` (unresolved reference)
                                 self.push_reference(
@@ -716,7 +719,7 @@ impl SemanticEventExtractor {
             | TS_TYPE_ALIAS_DECLARATION
             | TS_MODULE_DECLARATION
             | TS_EXTERNAL_MODULE_DECLARATION => {
-                self.pop_scope(node.text_range());
+                self.pop_scope(node.text_trimmed_range());
             }
             _ => {
                 if let Some(node) = AnyTsType::cast_ref(node) {
@@ -728,7 +731,7 @@ impl SemanticEventExtractor {
 
     fn leave_any_type(&mut self, node: &AnyTsType) {
         if node.in_conditional_true_type() {
-            self.pop_scope(node.syntax().text_range());
+            self.pop_scope(node.syntax().text_trimmed_range());
             return;
         }
         let node = node.syntax();
@@ -736,7 +739,7 @@ impl SemanticEventExtractor {
             node.kind(),
             JsSyntaxKind::TS_FUNCTION_TYPE | JsSyntaxKind::TS_MAPPED_TYPE
         ) {
-            self.pop_scope(node.text_range());
+            self.pop_scope(node.text_trimmed_range());
         }
         // FALLBACK
         // If the conditional type has a bogus true type,
@@ -759,7 +762,7 @@ impl SemanticEventExtractor {
         for infer in infers {
             if let Ok(name_token) = infer.ident_token() {
                 let name = name_token.token_text_trimmed();
-                let name_range = name_token.text_range();
+                let name_range = name_token.text_trimmed_range();
                 let binding_info = BindingInfo::new(name_range, JsSyntaxKind::TS_INFER_TYPE);
                 self.push_binding(None, BindingName::Type(name), binding_info);
                 let scope_id = self.current_scope_mut().scope_id;
@@ -773,11 +776,10 @@ impl SemanticEventExtractor {
     }
 
     fn push_scope(&mut self, range: TextRange, hoisting: ScopeHoisting, is_closure: bool) {
-        let scope_id = self.scope_count;
+        let scope_id = ScopeId::new(self.scope_count);
         self.scope_count += 1;
         self.stash.push_back(SemanticEvent::ScopeStarted {
             range,
-            scope_id,
             parent_scope_id: self.scopes.iter().last().map(|x| x.scope_id),
             is_closure,
         });
@@ -803,28 +805,30 @@ impl SemanticEventExtractor {
         // Bind references to declarations
         for (name, mut references) in scope.references {
             if let Some(&BindingInfo {
-                range: declared_at,
+                range: declaration_range,
                 declaration_kind,
             }) = self.bindings.get(&name)
             {
+                let declaration_at = declaration_range.start();
                 // We know the declaration of these reference.
                 for reference in references {
-                    let declaration_before_reference =
-                        declared_at.start() < reference.range().start();
+                    let declaration_before_reference = declaration_at < reference.range().start();
                     let event = match reference {
                         Reference::Export(range) => {
-                            self.stash
-                                .push_back(SemanticEvent::Exported { range: declared_at });
+                            self.stash.push_back(SemanticEvent::Export {
+                                range,
+                                declaration_at,
+                            });
                             if declaration_before_reference {
                                 SemanticEvent::Read {
                                     range,
-                                    declared_at,
+                                    declaration_at,
                                     scope_id,
                                 }
                             } else {
                                 SemanticEvent::HoistedRead {
                                     range,
-                                    declared_at,
+                                    declaration_at,
                                     scope_id,
                                 }
                             }
@@ -840,20 +844,20 @@ impl SemanticEventExtractor {
                                 // because an import namespace is already in the root scope.
                                 self.stash.push_back(SemanticEvent::UnresolvedReference {
                                     is_read: !reference.is_write(),
-                                    range: *reference.range(),
+                                    range: reference.range(),
                                 });
                                 continue;
                             }
                             if declaration_before_reference {
                                 SemanticEvent::Read {
                                     range,
-                                    declared_at,
+                                    declaration_at,
                                     scope_id,
                                 }
                             } else {
                                 SemanticEvent::HoistedRead {
                                     range,
-                                    declared_at,
+                                    declaration_at,
                                     scope_id,
                                 }
                             }
@@ -862,13 +866,13 @@ impl SemanticEventExtractor {
                             if declaration_before_reference {
                                 SemanticEvent::Write {
                                     range,
-                                    declared_at,
+                                    declaration_at,
                                     scope_id,
                                 }
                             } else {
                                 SemanticEvent::HoistedWrite {
                                     range,
-                                    declared_at,
+                                    declaration_at,
                                     scope_id,
                                 }
                             }
@@ -897,20 +901,20 @@ impl SemanticEventExtractor {
                         Reference::AmbientRead(range) if info.is_imported() => {
                             // An ambient read can only read a value,
                             // but also an imported value as a type (with the `type` modifier)
-                            let declared_at = info.range;
+                            let declaration_at = info.range.start();
                             let declaration_before_reference =
-                                declared_at.start() < reference.range().start();
+                                declaration_at < reference.range().start();
                             let event = if declaration_before_reference {
                                 SemanticEvent::Read {
                                     range,
-                                    declared_at,
-                                    scope_id: 0,
+                                    declaration_at,
+                                    scope_id: ScopeId::new(0),
                                 }
                             } else {
                                 SemanticEvent::HoistedRead {
                                     range,
-                                    declared_at,
-                                    scope_id: 0,
+                                    declaration_at,
+                                    scope_id: ScopeId::new(0),
                                 }
                             };
                             self.stash.push_back(event);
@@ -918,7 +922,7 @@ impl SemanticEventExtractor {
                         _ => {
                             self.stash.push_back(SemanticEvent::UnresolvedReference {
                                 is_read: !reference.is_write(),
-                                range: *reference.range(),
+                                range: reference.range(),
                             });
                         }
                     }
@@ -928,7 +932,7 @@ impl SemanticEventExtractor {
                 for reference in references {
                     self.stash.push_back(SemanticEvent::UnresolvedReference {
                         is_read: !reference.is_write(),
-                        range: *reference.range(),
+                        range: reference.range(),
                     });
                 }
             }
@@ -942,10 +946,8 @@ impl SemanticEventExtractor {
         // Restore shadowed bindings
         self.bindings.extend(scope.shadowed);
 
-        self.stash.push_back(SemanticEvent::ScopeEnded {
-            range: scope_range,
-            scope_id: scope.scope_id,
-        });
+        self.stash
+            .push_back(SemanticEvent::ScopeEnded { range: scope_range });
     }
 
     fn current_scope_mut(&mut self) -> &mut Scope {
@@ -954,8 +956,8 @@ impl SemanticEventExtractor {
         self.scopes.last_mut().unwrap()
     }
 
-    /// Finds the scope where declarations that are hoisted
-    /// will be declared at. For example:
+    /// Finds the scope where declarations that are hoisted will be declared at.
+    /// For example:
     ///
     /// ```js
     /// function f() {
@@ -970,8 +972,8 @@ impl SemanticEventExtractor {
     ///
     /// This method when called inside the `f` scope will return
     /// the `f` scope index.
-    fn scope_index_to_hoist_declarations(&mut self, skip: usize) -> Option<usize> {
-        debug_assert!(self.scopes.len() > skip);
+    fn scope_index_to_hoist_declarations(&mut self, skip: u32) -> Option<ScopeId> {
+        debug_assert!(self.scopes.len() > (skip as usize));
         // We should at least have the global scope
         // that do not hoist
         debug_assert!(matches!(
@@ -981,16 +983,16 @@ impl SemanticEventExtractor {
         self.scopes
             .iter()
             .rev()
-            .skip(skip)
+            .skip(skip as usize)
             .find(|scope| scope.hoisting == ScopeHoisting::DontHoistDeclarationsToParent)
             .map(|x| x.scope_id)
             .filter(|scope_id| self.current_scope_mut().scope_id != *scope_id)
     }
 
-    /// Push the binding `binding` into the hoisted scope if it exists, or into the current scope.
+    /// Push `binding` into the hoisted scope if it exists, or into the current scope.
     fn push_binding(
         &mut self,
-        hoisted_scope_id: Option<usize>,
+        hoisted_scope_id: Option<ScopeId>,
         binding_name: BindingName,
         binding_info: BindingInfo,
     ) {

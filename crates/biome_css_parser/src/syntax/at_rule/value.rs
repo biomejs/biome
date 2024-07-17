@@ -308,7 +308,7 @@ fn expected_at_rule_declaration_clause(p: &CssParser, range: TextRange) -> Parse
 ///
 /// This function returns an error diagnostic indicating that the @value at-rule
 /// is not a standard CSS feature. It also provides a hint on how to enable
-/// parsing of @value at-rules by setting the `css_modules` option to `true`
+/// parsing of @value at-rules by setting the `css.parser.cssModules` option to `true`
 /// in the configuration file.
 pub(crate) fn value_at_rule_not_allowed(p: &CssParser, range: TextRange) -> ParseDiagnostic {
     p.err_builder(
@@ -316,6 +316,6 @@ pub(crate) fn value_at_rule_not_allowed(p: &CssParser, range: TextRange) -> Pars
         range,
     )
         .with_hint(
-            "You can enable @value at-rule parsing by setting the `css_modules` option to `true` in your configuration file.",
+            "You can enable @value at-rule parsing by setting the `css.parser.cssModules` option to `true` in your configuration file.",
         )
 }

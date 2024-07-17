@@ -1,0 +1,272 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```css
+
+main {
+	label:hover {
+		font-weight: 500;
+	}
+
+	a:link, a:visited {
+		color: inherit;
+	}
+}
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    rules: CssRuleList [
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selectors: CssNestedSelectorList [],
+                    simple_selector: CssTypeSelector {
+                        namespace: missing (optional),
+                        ident: CssIdentifier {
+                            value_token: IDENT@0..6 "main" [Newline("\n")] [Whitespace(" ")],
+                        },
+                    },
+                    sub_selectors: CssSubSelectorList [],
+                },
+            ],
+            block: CssDeclarationOrRuleBlock {
+                l_curly_token: L_CURLY@6..7 "{" [] [],
+                items: CssDeclarationOrRuleList [
+                    CssNestedQualifiedRule {
+                        prelude: CssRelativeSelectorList [
+                            CssRelativeSelector {
+                                combinator: missing (optional),
+                                selector: CssCompoundSelector {
+                                    nesting_selectors: CssNestedSelectorList [],
+                                    simple_selector: CssTypeSelector {
+                                        namespace: missing (optional),
+                                        ident: CssIdentifier {
+                                            value_token: IDENT@7..14 "label" [Newline("\n"), Whitespace("\t")] [],
+                                        },
+                                    },
+                                    sub_selectors: CssSubSelectorList [
+                                        CssPseudoClassSelector {
+                                            colon_token: COLON@14..15 ":" [] [],
+                                            class: CssPseudoClassIdentifier {
+                                                name: CssIdentifier {
+                                                    value_token: IDENT@15..21 "hover" [] [Whitespace(" ")],
+                                                },
+                                            },
+                                        },
+                                    ],
+                                },
+                            },
+                        ],
+                        block: CssDeclarationOrRuleBlock {
+                            l_curly_token: L_CURLY@21..22 "{" [] [],
+                            items: CssDeclarationOrRuleList [
+                                CssDeclarationWithSemicolon {
+                                    declaration: CssDeclaration {
+                                        property: CssGenericProperty {
+                                            name: CssIdentifier {
+                                                value_token: IDENT@22..36 "font-weight" [Newline("\n"), Whitespace("\t\t")] [],
+                                            },
+                                            colon_token: COLON@36..38 ":" [] [Whitespace(" ")],
+                                            value: CssGenericComponentValueList [
+                                                CssNumber {
+                                                    value_token: CSS_NUMBER_LITERAL@38..41 "500" [] [],
+                                                },
+                                            ],
+                                        },
+                                        important: missing (optional),
+                                    },
+                                    semicolon_token: SEMICOLON@41..42 ";" [] [],
+                                },
+                            ],
+                            r_curly_token: R_CURLY@42..45 "}" [Newline("\n"), Whitespace("\t")] [],
+                        },
+                    },
+                    CssNestedQualifiedRule {
+                        prelude: CssRelativeSelectorList [
+                            CssRelativeSelector {
+                                combinator: missing (optional),
+                                selector: CssCompoundSelector {
+                                    nesting_selectors: CssNestedSelectorList [],
+                                    simple_selector: CssTypeSelector {
+                                        namespace: missing (optional),
+                                        ident: CssIdentifier {
+                                            value_token: IDENT@45..49 "a" [Newline("\n"), Newline("\n"), Whitespace("\t")] [],
+                                        },
+                                    },
+                                    sub_selectors: CssSubSelectorList [
+                                        CssPseudoClassSelector {
+                                            colon_token: COLON@49..50 ":" [] [],
+                                            class: CssPseudoClassIdentifier {
+                                                name: CssIdentifier {
+                                                    value_token: IDENT@50..54 "link" [] [],
+                                                },
+                                            },
+                                        },
+                                    ],
+                                },
+                            },
+                            COMMA@54..56 "," [] [Whitespace(" ")],
+                            CssRelativeSelector {
+                                combinator: missing (optional),
+                                selector: CssCompoundSelector {
+                                    nesting_selectors: CssNestedSelectorList [],
+                                    simple_selector: CssTypeSelector {
+                                        namespace: missing (optional),
+                                        ident: CssIdentifier {
+                                            value_token: IDENT@56..57 "a" [] [],
+                                        },
+                                    },
+                                    sub_selectors: CssSubSelectorList [
+                                        CssPseudoClassSelector {
+                                            colon_token: COLON@57..58 ":" [] [],
+                                            class: CssPseudoClassIdentifier {
+                                                name: CssIdentifier {
+                                                    value_token: IDENT@58..66 "visited" [] [Whitespace(" ")],
+                                                },
+                                            },
+                                        },
+                                    ],
+                                },
+                            },
+                        ],
+                        block: CssDeclarationOrRuleBlock {
+                            l_curly_token: L_CURLY@66..67 "{" [] [],
+                            items: CssDeclarationOrRuleList [
+                                CssDeclarationWithSemicolon {
+                                    declaration: CssDeclaration {
+                                        property: CssGenericProperty {
+                                            name: CssIdentifier {
+                                                value_token: IDENT@67..75 "color" [Newline("\n"), Whitespace("\t\t")] [],
+                                            },
+                                            colon_token: COLON@75..77 ":" [] [Whitespace(" ")],
+                                            value: CssGenericComponentValueList [
+                                                CssIdentifier {
+                                                    value_token: IDENT@77..84 "inherit" [] [],
+                                                },
+                                            ],
+                                        },
+                                        important: missing (optional),
+                                    },
+                                    semicolon_token: SEMICOLON@84..85 ";" [] [],
+                                },
+                            ],
+                            r_curly_token: R_CURLY@85..88 "}" [Newline("\n"), Whitespace("\t")] [],
+                        },
+                    },
+                ],
+                r_curly_token: R_CURLY@88..90 "}" [Newline("\n")] [],
+            },
+        },
+    ],
+    eof_token: EOF@90..91 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..91
+  0: (empty)
+  1: CSS_RULE_LIST@0..90
+    0: CSS_QUALIFIED_RULE@0..90
+      0: CSS_SELECTOR_LIST@0..6
+        0: CSS_COMPOUND_SELECTOR@0..6
+          0: CSS_NESTED_SELECTOR_LIST@0..0
+          1: CSS_TYPE_SELECTOR@0..6
+            0: (empty)
+            1: CSS_IDENTIFIER@0..6
+              0: IDENT@0..6 "main" [Newline("\n")] [Whitespace(" ")]
+          2: CSS_SUB_SELECTOR_LIST@6..6
+      1: CSS_DECLARATION_OR_RULE_BLOCK@6..90
+        0: L_CURLY@6..7 "{" [] []
+        1: CSS_DECLARATION_OR_RULE_LIST@7..88
+          0: CSS_NESTED_QUALIFIED_RULE@7..45
+            0: CSS_RELATIVE_SELECTOR_LIST@7..21
+              0: CSS_RELATIVE_SELECTOR@7..21
+                0: (empty)
+                1: CSS_COMPOUND_SELECTOR@7..21
+                  0: CSS_NESTED_SELECTOR_LIST@7..7
+                  1: CSS_TYPE_SELECTOR@7..14
+                    0: (empty)
+                    1: CSS_IDENTIFIER@7..14
+                      0: IDENT@7..14 "label" [Newline("\n"), Whitespace("\t")] []
+                  2: CSS_SUB_SELECTOR_LIST@14..21
+                    0: CSS_PSEUDO_CLASS_SELECTOR@14..21
+                      0: COLON@14..15 ":" [] []
+                      1: CSS_PSEUDO_CLASS_IDENTIFIER@15..21
+                        0: CSS_IDENTIFIER@15..21
+                          0: IDENT@15..21 "hover" [] [Whitespace(" ")]
+            1: CSS_DECLARATION_OR_RULE_BLOCK@21..45
+              0: L_CURLY@21..22 "{" [] []
+              1: CSS_DECLARATION_OR_RULE_LIST@22..42
+                0: CSS_DECLARATION_WITH_SEMICOLON@22..42
+                  0: CSS_DECLARATION@22..41
+                    0: CSS_GENERIC_PROPERTY@22..41
+                      0: CSS_IDENTIFIER@22..36
+                        0: IDENT@22..36 "font-weight" [Newline("\n"), Whitespace("\t\t")] []
+                      1: COLON@36..38 ":" [] [Whitespace(" ")]
+                      2: CSS_GENERIC_COMPONENT_VALUE_LIST@38..41
+                        0: CSS_NUMBER@38..41
+                          0: CSS_NUMBER_LITERAL@38..41 "500" [] []
+                    1: (empty)
+                  1: SEMICOLON@41..42 ";" [] []
+              2: R_CURLY@42..45 "}" [Newline("\n"), Whitespace("\t")] []
+          1: CSS_NESTED_QUALIFIED_RULE@45..88
+            0: CSS_RELATIVE_SELECTOR_LIST@45..66
+              0: CSS_RELATIVE_SELECTOR@45..54
+                0: (empty)
+                1: CSS_COMPOUND_SELECTOR@45..54
+                  0: CSS_NESTED_SELECTOR_LIST@45..45
+                  1: CSS_TYPE_SELECTOR@45..49
+                    0: (empty)
+                    1: CSS_IDENTIFIER@45..49
+                      0: IDENT@45..49 "a" [Newline("\n"), Newline("\n"), Whitespace("\t")] []
+                  2: CSS_SUB_SELECTOR_LIST@49..54
+                    0: CSS_PSEUDO_CLASS_SELECTOR@49..54
+                      0: COLON@49..50 ":" [] []
+                      1: CSS_PSEUDO_CLASS_IDENTIFIER@50..54
+                        0: CSS_IDENTIFIER@50..54
+                          0: IDENT@50..54 "link" [] []
+              1: COMMA@54..56 "," [] [Whitespace(" ")]
+              2: CSS_RELATIVE_SELECTOR@56..66
+                0: (empty)
+                1: CSS_COMPOUND_SELECTOR@56..66
+                  0: CSS_NESTED_SELECTOR_LIST@56..56
+                  1: CSS_TYPE_SELECTOR@56..57
+                    0: (empty)
+                    1: CSS_IDENTIFIER@56..57
+                      0: IDENT@56..57 "a" [] []
+                  2: CSS_SUB_SELECTOR_LIST@57..66
+                    0: CSS_PSEUDO_CLASS_SELECTOR@57..66
+                      0: COLON@57..58 ":" [] []
+                      1: CSS_PSEUDO_CLASS_IDENTIFIER@58..66
+                        0: CSS_IDENTIFIER@58..66
+                          0: IDENT@58..66 "visited" [] [Whitespace(" ")]
+            1: CSS_DECLARATION_OR_RULE_BLOCK@66..88
+              0: L_CURLY@66..67 "{" [] []
+              1: CSS_DECLARATION_OR_RULE_LIST@67..85
+                0: CSS_DECLARATION_WITH_SEMICOLON@67..85
+                  0: CSS_DECLARATION@67..84
+                    0: CSS_GENERIC_PROPERTY@67..84
+                      0: CSS_IDENTIFIER@67..75
+                        0: IDENT@67..75 "color" [Newline("\n"), Whitespace("\t\t")] []
+                      1: COLON@75..77 ":" [] [Whitespace(" ")]
+                      2: CSS_GENERIC_COMPONENT_VALUE_LIST@77..84
+                        0: CSS_IDENTIFIER@77..84
+                          0: IDENT@77..84 "inherit" [] []
+                    1: (empty)
+                  1: SEMICOLON@84..85 ";" [] []
+              2: R_CURLY@85..88 "}" [Newline("\n"), Whitespace("\t")] []
+        2: R_CURLY@88..90 "}" [Newline("\n")] []
+  2: EOF@90..91 "" [Newline("\n")] []
+
+```

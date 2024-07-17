@@ -2,7 +2,6 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: css/comments/custom-properties.css
 ---
-
 # Input
 
 ```css
@@ -33,20 +32,16 @@ font-size: 12px;
  :root {
    /* comment 2 */
 -  --prop: {
--    /* comment 3 */
--    color/* comment 4 */: /* comment 5 */ #fff /* comment 6 */; /* comment 7 */
--    /* comment 8 */
--    font-size: 12px;
--    /* comment 9 */
--  };
 +  --prop : {
-+  /* comment 3 */
-+color/* comment 4 */: /* comment 5 */#fff /* comment 6 */; /* comment 7 */
-+  /* comment 8 */
-+  font-size: 12px;
-+  /* comment 9 */
-+}
-+;
+     /* comment 3 */
+-    color/* comment 4 */: /* comment 5 */ #fff /* comment 6 */; /* comment 7 */
++    /* comment 4 */ /* comment 5 */ color: #fff /* comment 6 */; /* comment 7 */
+     /* comment 8 */
+     font-size: 12px;
+     /* comment 9 */
+-  };
++  }
++  ;
    /* comment 10 */
  }
  /* comment 11 */
@@ -59,13 +54,13 @@ font-size: 12px;
 :root {
   /* comment 2 */
   --prop : {
-  /* comment 3 */
-color/* comment 4 */: /* comment 5 */#fff /* comment 6 */; /* comment 7 */
-  /* comment 8 */
-  font-size: 12px;
-  /* comment 9 */
-}
-;
+    /* comment 3 */
+    /* comment 4 */ /* comment 5 */ color: #fff /* comment 6 */; /* comment 7 */
+    /* comment 8 */
+    font-size: 12px;
+    /* comment 9 */
+  }
+  ;
   /* comment 10 */
 }
 /* comment 11 */
@@ -81,51 +76,76 @@ custom-properties.css:4:12 parse ━━━━━━━━━━━━━━━�
     3 │   /* comment 2 */
   > 4 │   --prop : {
       │            ^
-  > 5 │   /* comment 3 */
-  > 6 │ color/* comment 4 */: /* comment 5 */#fff/* comment 6 */;/* comment 7 */
-      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    7 │   /* comment 8 */
-    8 │ font-size: 12px;
+    5 │   /* comment 3 */
+    6 │ color/* comment 4 */: /* comment 5 */#fff/* comment 6 */;/* comment 7 */
   
   i Expected one of:
   
-  - identifier
-  - string
-  - number
-  - dimension
-  - ratio
-  - custom property
-  - function
+  - hover
+  - focus
+  - active
+  - first-child
+  - last-child
+  - nth-child
+  - nth-last-child
+  - first-of-type
+  - last-of-type
+  - nth-of-type
+  - nth-last-of-type
+  - only-child
+  - only-of-type
+  - checked
+  - disabled
+  - enabled
+  - required
+  - optional
+  - valid
+  - invalid
+  - in-range
+  - out-of-range
+  - read-only
+  - read-write
+  - placeholder-shown
+  - default
+  - checked
+  - indeterminate
+  - blank
+  - empty
+  - root
+  - target
+  - lang
+  - not
+  - is
+  - where
+  - fullscreen
+  - link
+  - visited
+  - any-link
+  - local-link
+  - scope
+  - current
+  - past
+  - future
   
 custom-properties.css:10:4 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Expected a qualified rule, or an at rule but instead found ';
-      /* comment 10 */
-    }'.
+  × Expected a declaration, or an at rule but instead found ';'.
   
      8 │ font-size: 12px;
      9 │   /* comment 9 */
   > 10 │   };
        │    ^
-  > 11 │   /* comment 10 */
-  > 12 │ }
-       │ ^
-    13 │      /* comment 11 */
-    14 │ 
+    11 │   /* comment 10 */
+    12 │ }
   
-  i Expected a qualified rule, or an at rule here.
+  i Expected a declaration, or an at rule here.
   
      8 │ font-size: 12px;
      9 │   /* comment 9 */
   > 10 │   };
        │    ^
-  > 11 │   /* comment 10 */
-  > 12 │ }
-       │ ^
-    13 │      /* comment 11 */
-    14 │ 
+    11 │   /* comment 10 */
+    12 │ }
   
 
 ```
-
-

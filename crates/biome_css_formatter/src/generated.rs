@@ -1747,6 +1747,46 @@ impl IntoFormat<CssFormatContext> for biome_css_syntax::CssGenericProperty {
         )
     }
 }
+impl FormatRule<biome_css_syntax::CssGritMetavariable>
+    for crate::css::auxiliary::grit_metavariable::FormatCssGritMetavariable
+{
+    type Context = CssFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_css_syntax::CssGritMetavariable,
+        f: &mut CssFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_css_syntax::CssGritMetavariable>::fmt(self, node, f)
+    }
+}
+impl AsFormat<CssFormatContext> for biome_css_syntax::CssGritMetavariable {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_css_syntax::CssGritMetavariable,
+        crate::css::auxiliary::grit_metavariable::FormatCssGritMetavariable,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        #![allow(clippy::default_constructed_unit_structs)]
+        FormatRefWithRule::new(
+            self,
+            crate::css::auxiliary::grit_metavariable::FormatCssGritMetavariable::default(),
+        )
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::CssGritMetavariable {
+    type Format = FormatOwnedWithRule<
+        biome_css_syntax::CssGritMetavariable,
+        crate::css::auxiliary::grit_metavariable::FormatCssGritMetavariable,
+    >;
+    fn into_format(self) -> Self::Format {
+        #![allow(clippy::default_constructed_unit_structs)]
+        FormatOwnedWithRule::new(
+            self,
+            crate::css::auxiliary::grit_metavariable::FormatCssGritMetavariable::default(),
+        )
+    }
+}
 impl FormatRule<biome_css_syntax::CssIdSelector>
     for crate::css::selectors::id_selector::FormatCssIdSelector
 {
@@ -3009,6 +3049,46 @@ impl IntoFormat<CssFormatContext> for biome_css_syntax::CssNestedQualifiedRule {
         FormatOwnedWithRule::new(
             self,
             crate::css::auxiliary::nested_qualified_rule::FormatCssNestedQualifiedRule::default(),
+        )
+    }
+}
+impl FormatRule<biome_css_syntax::CssNestedSelector>
+    for crate::css::selectors::nested_selector::FormatCssNestedSelector
+{
+    type Context = CssFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_css_syntax::CssNestedSelector,
+        f: &mut CssFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_css_syntax::CssNestedSelector>::fmt(self, node, f)
+    }
+}
+impl AsFormat<CssFormatContext> for biome_css_syntax::CssNestedSelector {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_css_syntax::CssNestedSelector,
+        crate::css::selectors::nested_selector::FormatCssNestedSelector,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        #![allow(clippy::default_constructed_unit_structs)]
+        FormatRefWithRule::new(
+            self,
+            crate::css::selectors::nested_selector::FormatCssNestedSelector::default(),
+        )
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::CssNestedSelector {
+    type Format = FormatOwnedWithRule<
+        biome_css_syntax::CssNestedSelector,
+        crate::css::selectors::nested_selector::FormatCssNestedSelector,
+    >;
+    fn into_format(self) -> Self::Format {
+        #![allow(clippy::default_constructed_unit_structs)]
+        FormatOwnedWithRule::new(
+            self,
+            crate::css::selectors::nested_selector::FormatCssNestedSelector::default(),
         )
     }
 }
@@ -5988,6 +6068,33 @@ impl IntoFormat<CssFormatContext> for biome_css_syntax::CssMediaQueryList {
         FormatOwnedWithRule::new(
             self,
             crate::css::lists::media_query_list::FormatCssMediaQueryList::default(),
+        )
+    }
+}
+impl AsFormat<CssFormatContext> for biome_css_syntax::CssNestedSelectorList {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_css_syntax::CssNestedSelectorList,
+        crate::css::lists::nested_selector_list::FormatCssNestedSelectorList,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        #![allow(clippy::default_constructed_unit_structs)]
+        FormatRefWithRule::new(
+            self,
+            crate::css::lists::nested_selector_list::FormatCssNestedSelectorList::default(),
+        )
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::CssNestedSelectorList {
+    type Format = FormatOwnedWithRule<
+        biome_css_syntax::CssNestedSelectorList,
+        crate::css::lists::nested_selector_list::FormatCssNestedSelectorList,
+    >;
+    fn into_format(self) -> Self::Format {
+        #![allow(clippy::default_constructed_unit_structs)]
+        FormatOwnedWithRule::new(
+            self,
+            crate::css::lists::nested_selector_list::FormatCssNestedSelectorList::default(),
         )
     }
 }

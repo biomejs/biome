@@ -10,7 +10,7 @@ use grit_pattern_matcher::pattern::{
 use grit_util::FileRange;
 use std::collections::BTreeMap;
 
-pub(super) fn auto_wrap_pattern<Q: QueryContext>(
+pub fn auto_wrap_pattern<Q: QueryContext>(
     pattern: Pattern<Q>,
     pattern_definitions: &mut [PatternDefinition<Q>],
     is_not_multifile: bool,
@@ -362,7 +362,7 @@ fn wrap_pattern_in_range<Q: QueryContext>(
     ranges: Vec<FileRange>,
     context: &mut NodeCompilationContext,
 ) -> Result<Pattern<Q>, CompileError> {
-    let var = context.variable_from_name(var_name)?;
+    let var = context.variable_from_name(var_name);
     let mut predicates = Vec::new();
     for file_range in ranges {
         let range = file_range.range.clone();
@@ -403,7 +403,7 @@ fn wrap_pattern_in_contains<Q: QueryContext>(
     pattern: Pattern<Q>,
     context: &mut NodeCompilationContext,
 ) -> Result<Pattern<Q>, CompileError> {
-    let var = context.variable_from_name(var_name)?;
+    let var = context.variable_from_name(var_name);
     let pattern = Pattern::Where(Box::new(Where::new(
         Pattern::Variable(var),
         Predicate::Match(Box::new(Match::new(

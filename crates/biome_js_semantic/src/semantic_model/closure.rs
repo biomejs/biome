@@ -1,10 +1,10 @@
 use super::*;
 use biome_js_syntax::{
     JsArrowFunctionExpression, JsConstructorClassMember, JsFunctionDeclaration,
-    JsFunctionExpression, JsGetterClassMember, JsGetterObjectMember, JsLanguage,
-    JsMethodClassMember, JsMethodObjectMember, JsSetterClassMember, JsSetterObjectMember,
+    JsFunctionExpression, JsGetterClassMember, JsGetterObjectMember, JsMethodClassMember,
+    JsMethodObjectMember, JsSetterClassMember, JsSetterObjectMember,
 };
-use biome_rowan::{AstNode, SyntaxNode, SyntaxNodeCast};
+use biome_rowan::{AstNode, SyntaxNodeCast};
 use std::rc::Rc;
 
 /// Marker trait that groups all "AstNode" that have closure
@@ -18,7 +18,7 @@ macro_rules! SyntaxTextRangeHasClosureAstNode {
             impl HasClosureAstNode for $node {
                 #[inline(always)]
                 fn node_text_range(&self) -> TextRange {
-                    self.syntax().text_range()
+                    self.syntax().text_trimmed_range()
                 }
             }
         )*
@@ -32,7 +32,7 @@ macro_rules! SyntaxTextRangeHasClosureAstNode {
         }
 
         impl AnyHasClosureNode {
-            pub fn from_node(node: &SyntaxNode<JsLanguage>) -> Option<AnyHasClosureNode> {
+            pub fn from_node(node: &JsSyntaxNode) -> Option<AnyHasClosureNode> {
                 match node.kind() {
                     $(
                     JsSyntaxKind::$kind => node
@@ -50,7 +50,7 @@ macro_rules! SyntaxTextRangeHasClosureAstNode {
             fn node_text_range(&self) -> TextRange {
                 match self {
                     $(
-                        AnyHasClosureNode::$node(node) => node.syntax().text_range(),
+                        AnyHasClosureNode::$node(node) => node.syntax().text_trimmed_range(),
                     )*
                 }
             }
@@ -83,7 +83,7 @@ pub struct Capture {
     data: Rc<SemanticModelData>,
     ty: CaptureType,
     node: JsSyntaxNode,
-    binding_id: BindingIndex,
+    binding_id: BindingId,
 }
 
 impl Capture {
@@ -93,7 +93,7 @@ impl Capture {
     }
 
     /// Returns the reference node of the capture
-    pub fn node(&self) -> &SyntaxNode<JsLanguage> {
+    pub fn node(&self) -> &JsSyntaxNode {
         &self.node
     }
 
@@ -101,27 +101,26 @@ impl Capture {
     pub fn binding(&self) -> Binding {
         Binding {
             data: self.data.clone(),
-            index: self.binding_id,
+            id: self.binding_id,
         }
     }
 
-    /// Returns the non trimmed text range of declaration of this capture.
+    /// Returns the trimmed text range of the declaration of this capture.
     /// This is equivalent, but faster, to:
     ///
     /// ```rs, ignore
-    /// self.declaration().text_range()
+    /// self.binding().syntax().text_trimmed_range()
     /// ```
-    pub fn declaration_range(&self) -> &TextRange {
-        let binding = self.data.binding(self.binding_id);
-        &binding.range
+    pub fn declaration_range(&self) -> TextRange {
+        self.data.binding(self.binding_id).range
     }
 }
 
 pub struct AllCapturesIter {
     data: Rc<SemanticModelData>,
     closure_range: TextRange,
-    scopes: Vec<usize>,
-    references: Vec<SemanticModelScopeReference>,
+    scopes: Vec<ScopeId>,
+    references: Vec<ReferenceId>,
 }
 
 impl Iterator for AllCapturesIter {
@@ -130,29 +129,30 @@ impl Iterator for AllCapturesIter {
     fn next(&mut self) -> Option<Self::Item> {
         'references: loop {
             while let Some(reference) = self.references.pop() {
-                let binding = &self.data.bindings[reference.binding_id];
-                if self.closure_range.intersect(binding.range).is_none() {
-                    let reference = &binding.references[reference.reference_id];
+                let binding_id = reference.binding_id();
+                let binding = &self.data.binding(binding_id);
+                if !self.closure_range.contains(binding.range.start()) {
+                    let reference = &binding.references[reference.index()];
                     return Some(Capture {
                         data: self.data.clone(),
-                        node: self.data.node_by_range[&reference.range].clone(), // TODO change node to store the range
+                        node: self.data.binding_node_by_start[&reference.range_start].clone(), // TODO change node to store the range
                         ty: CaptureType::ByReference,
-                        binding_id: binding.id,
+                        binding_id,
                     });
                 }
             }
 
             'scopes: while let Some(scope_id) = self.scopes.pop() {
-                let scope = &self.data.scopes[scope_id];
+                let scope = &self.data.scopes[scope_id.index()];
 
                 if scope.is_closure {
                     continue 'scopes;
                 }
                 self.references.clear();
                 self.references
-                    .extend(scope.read_references.iter().cloned());
+                    .extend(scope.read_references.iter().copied());
                 self.references
-                    .extend(scope.write_references.iter().cloned());
+                    .extend(scope.write_references.iter().copied());
                 self.scopes.extend(scope.children.iter());
                 continue 'references;
             }
@@ -167,7 +167,7 @@ impl FusedIterator for AllCapturesIter {}
 /// Iterate all immediate children closures of a specific closure
 pub struct ChildrenIter {
     data: Rc<SemanticModelData>,
-    scopes: Vec<usize>,
+    scopes: Vec<ScopeId>,
 }
 
 impl Iterator for ChildrenIter {
@@ -175,12 +175,11 @@ impl Iterator for ChildrenIter {
 
     fn next(&mut self) -> Option<Self::Item> {
         while let Some(scope_id) = self.scopes.pop() {
-            let scope = &self.data.scopes[scope_id];
+            let scope = &self.data.scopes[scope_id.index()];
             if scope.is_closure {
                 return Some(Closure {
                     data: self.data.clone(),
                     scope_id,
-                    closure_range: scope.range,
                 });
             } else {
                 self.scopes.extend(scope.children.iter());
@@ -196,7 +195,7 @@ impl FusedIterator for ChildrenIter {}
 /// Iterate all descendents closures of a specific closure
 pub struct DescendentsIter {
     data: Rc<SemanticModelData>,
-    scopes: Vec<usize>,
+    scopes: Vec<ScopeId>,
 }
 
 impl Iterator for DescendentsIter {
@@ -204,13 +203,12 @@ impl Iterator for DescendentsIter {
 
     fn next(&mut self) -> Option<Self::Item> {
         while let Some(scope_id) = self.scopes.pop() {
-            let scope = &self.data.scopes[scope_id];
+            let scope = &self.data.scopes[scope_id.index()];
             self.scopes.extend(scope.children.iter());
             if scope.is_closure {
                 return Some(Closure {
                     data: self.data.clone(),
                     scope_id,
-                    closure_range: scope.range,
                 });
             }
         }
@@ -225,43 +223,30 @@ impl FusedIterator for DescendentsIter {}
 #[derive(Clone)]
 pub struct Closure {
     data: Rc<SemanticModelData>,
-    scope_id: usize,
-    closure_range: TextRange,
+    scope_id: ScopeId,
 }
 
 impl Closure {
     pub(super) fn from_node(data: Rc<SemanticModelData>, node: &impl HasClosureAstNode) -> Closure {
         let closure_range = node.node_text_range();
-        let scope_id = data.scope(&closure_range);
+        let scope_id = data.scope(closure_range);
 
-        Closure {
-            data,
-            scope_id,
-            closure_range,
-        }
+        Closure { data, scope_id }
     }
 
-    pub(super) fn from_scope(
-        data: Rc<SemanticModelData>,
-        scope_id: usize,
-        closure_range: &TextRange,
-    ) -> Option<Closure> {
-        let node = &data.node_by_range[closure_range];
+    pub(super) fn from_scope(data: Rc<SemanticModelData>, scope_id: ScopeId) -> Option<Closure> {
+        let node = &data.scope_node_by_range[&data.scopes[scope_id.index()].range];
         match node.kind() {
             JsSyntaxKind::JS_FUNCTION_DECLARATION
             | JsSyntaxKind::JS_FUNCTION_EXPRESSION
-            | JsSyntaxKind::JS_ARROW_FUNCTION_EXPRESSION => Some(Closure {
-                data,
-                scope_id,
-                closure_range: *closure_range,
-            }),
+            | JsSyntaxKind::JS_ARROW_FUNCTION_EXPRESSION => Some(Closure { data, scope_id }),
             _ => None,
         }
     }
 
     /// Range of this [Closure]
-    pub fn closure_range(&self) -> &TextRange {
-        &self.closure_range
+    pub fn closure_range(&self) -> TextRange {
+        self.data.scopes[self.scope_id.index()].range
     }
 
     /// Return all [Reference] this closure captures, not taking into
@@ -278,16 +263,16 @@ impl Closure {
     /// assert!(model.closure(function_f).all_captures(), &["a"]);
     /// ```
     pub fn all_captures(&self) -> impl Iterator<Item = Capture> {
-        let scope = &self.data.scopes[self.scope_id];
+        let scope = &self.data.scopes[self.scope_id.index()];
 
         let scopes = scope.children.clone();
 
         let mut references = scope.read_references.clone();
-        references.extend(scope.write_references.iter().cloned());
+        references.extend(scope.write_references.iter().copied());
 
         AllCapturesIter {
             data: self.data.clone(),
-            closure_range: self.closure_range,
+            closure_range: self.closure_range(),
             scopes,
             references,
         }
@@ -308,7 +293,7 @@ impl Closure {
     /// assert!(model.closure(function_f).children(), &["g"]);
     /// ```
     pub fn children(&self) -> impl Iterator<Item = Closure> {
-        let scope = &self.data.scopes[self.scope_id];
+        let scope = &self.data.scopes[self.scope_id.index()];
         ChildrenIter {
             data: self.data.clone(),
             scopes: scope.children.clone(),

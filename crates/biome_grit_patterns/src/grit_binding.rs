@@ -69,7 +69,7 @@ impl<'a> Binding<'a, GritQueryContext> for GritBinding<'a> {
         match self {
             Self::Node(node) => {
                 let source = SourceFile::new(SourceCode {
-                    text: node.text(),
+                    text: node.source(),
                     line_starts: None,
                 });
                 source.to_grit_range(node.text_trimmed_range())
@@ -106,7 +106,7 @@ impl<'a> Binding<'a, GritQueryContext> for GritBinding<'a> {
     }
 
     fn is_suppressed(&self, _language: &GritTargetLanguage, _current_name: Option<&str>) -> bool {
-        todo!()
+        false // TODO: Implement suppression
     }
 
     fn get_insertion_padding(
@@ -178,7 +178,7 @@ impl<'a> Binding<'a, GritQueryContext> for GritBinding<'a> {
 
     fn list_items(&self) -> Option<impl Iterator<Item = GritTargetNode<'a>> + Clone> {
         match self {
-            Self::Node(node) if node.is_list() => Some(node.children()),
+            Self::Node(node) if node.is_list() => Some(node.named_children()),
             _ => None,
         }
     }
@@ -188,7 +188,19 @@ impl<'a> Binding<'a, GritQueryContext> for GritBinding<'a> {
     }
 
     fn is_truthy(&self) -> bool {
-        todo!()
+        match self {
+            Self::File(_) => true,
+            Self::Node(node) => {
+                if node.is_list() {
+                    node.has_children()
+                } else {
+                    true
+                }
+            }
+            Self::Range(..) => true,
+            Self::Empty(..) => false,
+            Self::Constant(c) => c.is_truthy(),
+        }
     }
 
     fn log_empty_field_rewrite_error(

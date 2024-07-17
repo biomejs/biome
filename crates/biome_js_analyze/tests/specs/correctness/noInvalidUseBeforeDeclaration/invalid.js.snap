@@ -72,15 +72,12 @@ invalid.js:4:11 lint/correctness/noInvalidUseBeforeDeclaration ━━━━━�
 ```
 
 ```
-invalid.js:4:13 lint/correctness/noInvalidUseBeforeDeclaration ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:6:1 lint/correctness/noInvalidUseBeforeDeclaration ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This variable is used before its declaration.
   
-    2 │ const a = 0;
-    3 │ 
-  > 4 │ const b = b;
-      │             
-  > 5 │ 
+    4 │ const b = b;
+    5 │ 
   > 6 │ c;
       │ ^
     7 │ let c;
@@ -122,15 +119,12 @@ invalid.js:9:9 lint/correctness/noInvalidUseBeforeDeclaration ━━━━━━
 ```
 
 ```
-invalid.js:9:11 lint/correctness/noInvalidUseBeforeDeclaration ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:11:1 lint/correctness/noInvalidUseBeforeDeclaration ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This variable is used before its declaration.
   
-     7 │ let c;
-     8 │ 
-   > 9 │ let d = d;
-       │           
-  > 10 │ 
+     9 │ let d = d;
+    10 │ 
   > 11 │ e;
        │ ^
     12 │ var e;
@@ -192,5 +186,3 @@ invalid.js:18:16 lint/correctness/noInvalidUseBeforeDeclaration ━━━━━�
   
 
 ```
-
-

@@ -17,7 +17,6 @@ crate-type = ["cdylib", "rlib"]
 
 [features]
 default = ["console_error_panic_hook"]
-graphql = ["biome_service/graphql"]
 
 [dependencies]
 biome_console      = { workspace = true }

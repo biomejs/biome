@@ -23,6 +23,7 @@ biome_suppression = { workspace = true }
 biome_configuration  = { path = "../biome_configuration" }
 biome_css_parser     = { path = "../biome_css_parser" }
 biome_formatter_test = { path = "../biome_formatter_test" }
+biome_fs             = { path = "../biome_fs" }
 biome_parser         = { path = "../biome_parser" }
 biome_service        = { path = "../biome_service" }
 countme              = { workspace = true, features = ["enable"] }

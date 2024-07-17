@@ -1,5 +1,5 @@
 use biome_formatter_test::spec::{SpecSnapshot, SpecTestFile};
-use biome_js_formatter::context::JsFormatOptions;
+use biome_js_formatter::{context::JsFormatOptions, JsFormatLanguage};
 use biome_js_syntax::{JsFileSource, ModuleKind};
 use std::path::Path;
 
@@ -39,7 +39,12 @@ pub fn run(spec_input_file: &str, _expected_file: &str, test_directory: &str, fi
     let options = JsFormatOptions::new(source_type);
     let language = language::JsTestFormatLanguage::new(source_type);
 
-    let snapshot = SpecSnapshot::new(test_file, test_directory, language, options);
+    let snapshot = SpecSnapshot::new(
+        test_file,
+        test_directory,
+        language,
+        JsFormatLanguage::new(options),
+    );
 
     snapshot.test()
 }

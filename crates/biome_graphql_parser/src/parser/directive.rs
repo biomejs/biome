@@ -1,4 +1,4 @@
-use crate::parser::{parse_error::expected_name, parse_name, GraphqlParser};
+use crate::parser::{parse_error::expected_name, GraphqlParser};
 use biome_graphql_syntax::{
     GraphqlSyntaxKind::{self, *},
     T,
@@ -8,7 +8,7 @@ use biome_parser::{
     prelude::ParsedSyntax::*, Parser,
 };
 
-use super::{argument::parse_arguments, parse_error::expected_directive};
+use super::{argument::parse_arguments, parse_error::expected_directive, parse_reference};
 struct DirectiveListParseRecovery;
 
 impl ParseRecovery for DirectiveListParseRecovery {
@@ -55,7 +55,7 @@ pub(crate) fn parse_directive(p: &mut GraphqlParser) -> ParsedSyntax {
 
     let m = p.start();
     p.bump(T![@]);
-    parse_name(p).or_add_diagnostic(p, expected_name);
+    parse_reference(p).or_add_diagnostic(p, expected_name);
 
     // arguments are optional
     parse_arguments(p).ok();

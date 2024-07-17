@@ -1,4 +1,5 @@
 mod attribute;
+mod nested_selector;
 mod pseudo_class;
 mod pseudo_element;
 pub(crate) mod relative_selector;
@@ -9,6 +10,7 @@ use crate::syntax::parse_error::{
     expected_any_sub_selector, expected_compound_selector, expected_identifier, expected_selector,
 };
 use crate::syntax::selector::attribute::parse_attribute_selector;
+use crate::syntax::selector::nested_selector::NestedSelectorList;
 use crate::syntax::selector::pseudo_class::parse_pseudo_class_selector;
 use crate::syntax::selector::pseudo_element::parse_pseudo_element_selector;
 use crate::syntax::{
@@ -25,6 +27,8 @@ use biome_parser::parse_recovery::{
 use biome_parser::prelude::ParsedSyntax;
 use biome_parser::prelude::ParsedSyntax::{Absent, Present};
 use biome_parser::{token_set, CompletedMarker, Parser, ParserProgress, TokenSet};
+
+use super::{is_nth_at_grit_metavariable, parse_grit_metavariable};
 
 /// Determines the lexical context for parsing CSS selectors.
 ///
@@ -195,7 +199,7 @@ impl ParseRecovery for SelectorListParseRecovery {
 /// the elements to which a set of CSS rules apply.
 #[inline]
 pub(crate) fn is_nth_at_selector(p: &mut CssParser, n: usize) -> bool {
-    is_nth_at_compound_selector(p, n)
+    is_nth_at_compound_selector(p, n) || is_nth_at_grit_metavariable(p, n)
 }
 
 /// Parses a CSS selector.
@@ -211,12 +215,15 @@ pub(crate) fn parse_selector(p: &mut CssParser) -> ParsedSyntax {
     if !is_nth_at_selector(p, 0) {
         return Absent;
     }
-
-    // In CSS, we have compound selectors and complex selectors.
-    // Compound selectors are simple, unseparated chains of selectors,
-    // while complex selectors are compound selectors separated by combinators.
-    // After parsing the compound selector, it then checks if this compound selector is a part of a complex selector.
-    parse_compound_selector(p).and_then(|selector| parse_complex_selector(p, selector))
+    if is_nth_at_grit_metavariable(p, 0) {
+        parse_grit_metavariable(p)
+    } else {
+        // In CSS, we have compound selectors and complex selectors.
+        // Compound selectors are simple, unseparated chains of selectors,
+        // while complex selectors are compound selectors separated by combinators.
+        // After parsing the compound selector, it then checks if this compound selector is a part of a complex selector.
+        parse_compound_selector(p).and_then(|selector| parse_complex_selector(p, selector))
+    }
 }
 
 const COMPLEX_SELECTOR_COMBINATOR_SET: TokenSet<CssSyntaxKind> =
@@ -285,8 +292,7 @@ fn parse_compound_selector(p: &mut CssParser) -> ParsedSyntax {
 
     let m = p.start();
 
-    let context = selector_lex_context(p);
-    p.eat_with_context(T![&], context);
+    NestedSelectorList.parse_list(p);
     parse_simple_selector(p).ok(); // We don't need to handle error here because a simple selector is optional
     SubSelectorList.parse_list(p);
 

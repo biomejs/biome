@@ -16,7 +16,7 @@ use biome_js_syntax::{
     AnyFunctionLike, AnyJsBinding, AnyJsExpression, AnyJsFunction, AnyJsObjectMemberName,
     JsArrayAssignmentPatternElement, JsArrayBindingPatternElement, JsCallExpression,
     JsConditionalExpression, JsIfStatement, JsLanguage, JsLogicalExpression, JsMethodObjectMember,
-    JsObjectBindingPatternShorthandProperty, JsReturnStatement, JsSyntaxKind,
+    JsObjectBindingPatternShorthandProperty, JsReturnStatement, JsSyntaxKind, JsSyntaxNode,
     JsTryFinallyStatement, TextRange,
 };
 use biome_rowan::{declare_node_union, AstNode, Language, SyntaxNode, WalkEvent};
@@ -148,10 +148,7 @@ fn enclosing_function_if_call_is_at_top_level(
 /// // ^^^^^^^^---------------------------- This node is always executed.
 /// //            ^^^^^^^^^^---^^^^^^^^^--- These nodes are conditionally executed.
 /// ```
-fn is_conditional_expression(
-    parent_node: &SyntaxNode<JsLanguage>,
-    node: &SyntaxNode<JsLanguage>,
-) -> bool {
+fn is_conditional_expression(parent_node: &JsSyntaxNode, node: &JsSyntaxNode) -> bool {
     if let Some(assignment_with_default) = JsArrayAssignmentPatternElement::cast_ref(parent_node) {
         return assignment_with_default
             .init()

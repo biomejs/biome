@@ -809,7 +809,7 @@ impl<L: Language> From<cursor::SyntaxNode> for SyntaxNode<L> {
 
 /// Language-agnostic representation of the root node of a syntax tree, can be
 /// sent or shared between threads
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct SendNode {
     language: TypeId,
     green: GreenNode,

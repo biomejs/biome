@@ -21,3 +21,8 @@ export type T = {
 
 	[""]: number
 }
+
+export enum E {
+	["A"],
+	["B"],
+}

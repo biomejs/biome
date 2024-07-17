@@ -649,6 +649,16 @@ pub(crate) fn migrate_eslint_any_rule(
             let rule = group.no_redundant_roles.get_or_insert(Default::default());
             rule.set_level(rule_severity.into());
         }
+        "jsx-a11y/no-static-element-interactions" => {
+            if !options.include_nursery {
+                return false;
+            }
+            let group = rules.nursery.get_or_insert_with(Default::default);
+            let rule = group
+                .no_static_element_interactions
+                .get_or_insert(Default::default());
+            rule.set_level(rule_severity.into());
+        }
         "jsx-a11y/prefer-tag-over-role" => {
             if !options.include_nursery {
                 return false;
@@ -880,6 +890,16 @@ pub(crate) fn migrate_eslint_any_rule(
             let group = rules.correctness.get_or_insert_with(Default::default);
             let rule = group
                 .no_inner_declarations
+                .get_or_insert(Default::default());
+            rule.set_level(rule_severity.into());
+        }
+        "no-irregular-whitespace" => {
+            if !options.include_nursery {
+                return false;
+            }
+            let group = rules.nursery.get_or_insert_with(Default::default);
+            let rule = group
+                .no_irregular_whitespace
                 .get_or_insert(Default::default());
             rule.set_level(rule_severity.into());
         }
@@ -1247,6 +1267,20 @@ pub(crate) fn migrate_eslint_any_rule(
             }
             let group = rules.style.get_or_insert_with(Default::default);
             let rule = group.no_implicit_boolean.get_or_insert(Default::default());
+            rule.set_level(rule_severity.into());
+        }
+        "react/jsx-curly-brace-presence" => {
+            if !options.include_inspired {
+                results.has_inspired_rules = true;
+                return false;
+            }
+            if !options.include_nursery {
+                return false;
+            }
+            let group = rules.nursery.get_or_insert_with(Default::default);
+            let rule = group
+                .use_consistent_curly_braces
+                .get_or_insert(Default::default());
             rule.set_level(rule_severity.into());
         }
         "react/jsx-fragments" => {

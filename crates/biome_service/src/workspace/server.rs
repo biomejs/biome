@@ -7,6 +7,7 @@ use super::{
     RenameResult, SearchPatternParams, SearchResults, SupportsFeatureParams,
     UnregisterProjectFolderParams, UpdateProjectParams, UpdateSettingsParams,
 };
+use crate::diagnostics::{InvalidPattern, SearchError};
 use crate::file_handlers::{
     Capabilities, CodeActionsParams, DocumentFileSource, FixAllParams, LintParams, ParseResult,
 };
@@ -25,16 +26,18 @@ use biome_diagnostics::{
 use biome_formatter::Printed;
 use biome_fs::{BiomePath, ConfigName};
 use biome_grit_patterns::GritQuery;
+use biome_js_syntax::ModuleKind;
 use biome_json_parser::{parse_json_with_cache, JsonParserOptions};
 use biome_json_syntax::JsonFileSource;
 use biome_parser::AnyParse;
-use biome_project::NodeJsProject;
-use biome_rowan::{NodeCache, TextLen, TextRange, TextSize};
+use biome_project::{NodeJsProject, PackageType};
+use biome_rowan::NodeCache;
 use dashmap::{mapref::entry::Entry, DashMap};
 use indexmap::IndexSet;
 use std::ffi::OsStr;
 use std::fs;
 use std::path::Path;
+use std::sync::atomic::{AtomicUsize, Ordering};
 use std::{panic::RefUnwindSafe, sync::RwLock};
 use tracing::{debug, info, info_span};
 
@@ -73,24 +76,6 @@ pub(crate) struct Document {
     /// Use `WorkspaceServer#file_sources` to retrieve the file source that belongs to the document.
     pub(crate) file_source_index: usize,
     node_cache: NodeCache,
-}
-
-// TODO: remove once an actual implementation for the matches is present
-struct DummySearchMatchesProvider;
-
-impl DummySearchMatchesProvider {
-    // a match that goes from the first to the last character of the first line, if present
-    fn get_range(input: &str) -> Vec<TextRange> {
-        let mut lines = input.lines();
-        let first_line = lines.next();
-
-        let max_size = match first_line {
-            Some(v) => v.text_len(),
-            None => return vec![],
-        };
-
-        vec![TextRange::new(TextSize::from(0), max_size)]
-    }
 }
 
 impl WorkspaceServer {
@@ -438,11 +423,20 @@ impl Workspace for WorkspaceServer {
     }
     /// Add a new file to the workspace
     fn open_file(&self, params: OpenFileParams) -> Result<(), WorkspaceError> {
-        let index = self.set_source(
-            params
-                .document_file_source
-                .unwrap_or(DocumentFileSource::from_path(&params.path)),
-        );
+        let mut source = params
+            .document_file_source
+            .unwrap_or(DocumentFileSource::from_path(&params.path));
+        let manifest = self.get_current_project()?.map(|pr| pr.manifest);
+
+        if let DocumentFileSource::Js(js) = &mut source {
+            if let Some(manifest) = manifest {
+                if manifest.r#type == Some(PackageType::Commonjs) && js.file_extension() == "js" {
+                    js.set_module_kind(ModuleKind::Script);
+                }
+            }
+        }
+
+        let index = self.set_source(source);
         self.syntax.remove(&params.path);
         self.documents.insert(
             params.path.clone(),
@@ -796,30 +790,42 @@ impl Workspace for WorkspaceServer {
     ) -> Result<ParsePatternResult, WorkspaceError> {
         let pattern = biome_grit_patterns::compile_pattern(
             &params.pattern,
-            Path::new("filename"), // TODO: Pass the real filename.
+            None,
             biome_grit_patterns::JsTargetLanguage.into(),
         )?;
-        let pattern_id = PatternId::from("1234"); // TODO: Generate a real ID.
+
+        let pattern_id = make_search_pattern_id();
         self.patterns.insert(pattern_id.clone(), pattern);
         Ok(ParsePatternResult { pattern_id })
     }
 
     fn search_pattern(&self, params: SearchPatternParams) -> Result<SearchResults, WorkspaceError> {
-        let SearchPatternParams { path, .. } = params;
+        let Some(query) = self.patterns.get(&params.pattern) else {
+            return Err(WorkspaceError::SearchError(SearchError::InvalidPattern(
+                InvalidPattern,
+            )));
+        };
 
-        // TODO: Let's implement some real matching here...
-        let document = self
-            .documents
-            .get_mut(&path)
-            .ok_or_else(WorkspaceError::not_found)?;
+        let capabilities = self.get_file_capabilities(&params.path);
+        let search = capabilities
+            .search
+            .search
+            .ok_or_else(self.build_capability_error(&params.path))?;
+        let workspace = self.workspace();
+        let parse = self.get_parse(params.path.clone())?;
 
-        let content = document.content.as_str();
-
-        let match_ranges = DummySearchMatchesProvider::get_range(content);
+        let document_file_source = self.get_file_source(&params.path);
+        let matches = search(
+            &params.path,
+            &document_file_source,
+            parse,
+            &query,
+            workspace,
+        )?;
 
         Ok(SearchResults {
-            file: path,
-            matches: match_ranges,
+            file: params.path,
+            matches,
         })
     }
 
@@ -853,4 +859,12 @@ impl Workspace for WorkspaceServer {
 /// if it is a symlink that resolves to a directory.
 fn is_dir(path: &Path) -> bool {
     path.is_dir() || (path.is_symlink() && fs::read_link(path).is_ok_and(|path| path.is_dir()))
+}
+
+/// Generates a pattern ID that we can use as "handle" for referencing
+/// previously parsed search queries.
+fn make_search_pattern_id() -> PatternId {
+    static COUNTER: AtomicUsize = AtomicUsize::new(1);
+    let counter = COUNTER.fetch_add(1, Ordering::AcqRel);
+    format!("p{counter}").into()
 }

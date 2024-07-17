@@ -3,10 +3,10 @@ use biome_analyze::{
 };
 use biome_console::{markup, MarkupBuf};
 use biome_js_syntax::{
-    AnyJsClassMember, AnyTsType, AnyTsTypeMember, JsClassDeclaration, JsLanguage,
+    AnyJsClassMember, AnyTsType, AnyTsTypeMember, JsClassDeclaration, JsSyntaxToken,
     TsDeclareStatement, TsInterfaceDeclaration, TsReferenceType, TsTypeAliasDeclaration,
 };
-use biome_rowan::{declare_node_union, AstNode, SyntaxToken, TextRange};
+use biome_rowan::{declare_node_union, AstNode, TextRange};
 
 declare_lint_rule! {
     /// Enforce proper usage of `new` and `constructor`.
@@ -230,7 +230,7 @@ fn check_type_alias(decl: &TsTypeAliasDeclaration) -> Option<RuleState> {
 }
 
 /// Extracts the identifier from a reference type.
-fn extract_return_type_ident(reference_type: &TsReferenceType) -> Option<SyntaxToken<JsLanguage>> {
+fn extract_return_type_ident(reference_type: &TsReferenceType) -> Option<JsSyntaxToken> {
     reference_type
         .name()
         .ok()?

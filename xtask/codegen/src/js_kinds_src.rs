@@ -470,6 +470,7 @@ pub const JS_KINDS_SRC: KindsSrc = KindsSrc {
         "TS_ENUM_DECLARATION",
         "TS_ENUM_MEMBER_LIST",
         "TS_ENUM_MEMBER",
+        "TS_LITERAL_ENUM_MEMBER_NAME",
         "TS_IMPORT_EQUALS_DECLARATION",
         "TS_EXTERNAL_MODULE_REFERENCE",
         "TS_DECLARE_FUNCTION_DECLARATION",
@@ -685,6 +686,7 @@ impl Field {
                     ("$", LanguageKind::Graphql) => "dollar",
                     ("~=", _) => "whitespace_like",
                     (",", _) => "comma",
+                    ("---", LanguageKind::Yaml) => "dashdashdash",
                     _ => name,
                 };
 

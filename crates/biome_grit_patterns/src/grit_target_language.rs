@@ -1,13 +1,16 @@
 mod js_target_language;
 
+use biome_parser::AnyParse;
 pub use js_target_language::JsTargetLanguage;
 
 use crate::grit_js_parser::GritJsParser;
 use crate::grit_target_node::{GritTargetNode, GritTargetSyntaxKind};
 use crate::grit_tree::GritTargetTree;
+use crate::CompileError;
 use biome_rowan::SyntaxKind;
-use grit_util::{Ast, CodeRange, EffectRange, Language, Parser, SnippetTree};
+use grit_util::{AnalysisLogs, Ast, CodeRange, EffectRange, Language, Parser, SnippetTree};
 use std::borrow::Cow;
+use std::path::Path;
 
 /// Generates the `GritTargetLanguage` enum.
 ///
@@ -35,7 +38,7 @@ macro_rules! generate_target_language {
                 }
             }
 
-            pub fn get_parser(&self) -> Box<dyn Parser<Tree = GritTargetTree>> {
+            pub fn get_parser(&self) -> Box<dyn GritTargetParser> {
                 match self {
                     $(Self::$language(_) => Box::new($parser)),+
                 }
@@ -68,6 +71,16 @@ macro_rules! generate_target_language {
             pub fn is_comment_kind(&self, kind: GritTargetSyntaxKind) -> bool {
                 match self {
                     $(Self::$language(_) => $language::is_comment_kind(kind)),+
+                }
+            }
+
+            pub fn get_equivalence_class(
+                &self,
+                kind: GritTargetSyntaxKind,
+                text: &str,
+            ) -> Result<Option<LeafEquivalenceClass>, CompileError> {
+                match self {
+                    $(Self::$language(lang) => lang.get_equivalence_class(kind, text)),+
                 }
             }
         }
@@ -127,6 +140,16 @@ generate_target_language! {
 }
 
 impl GritTargetLanguage {
+    /// Returns the target language to use for the given file extension.
+    pub fn from_extension(extension: &str) -> Option<Self> {
+        match extension {
+            "cjs" | "js" | "jsx" | "mjs" | "ts" | "tsx" => {
+                Some(Self::JsTargetLanguage(JsTargetLanguage))
+            }
+            _ => None,
+        }
+    }
+
     /// Returns `true` when the text `content` contains an identifier for a
     /// metavariable using bracket syntax.
     ///
@@ -242,4 +265,91 @@ trait GritTargetLanguageImpl {
     fn is_alternative_metavariable_kind(_kind: GritTargetSyntaxKind) -> bool {
         false
     }
+
+    /// Returns an optional "equivalence class" for the given syntax kind.
+    ///
+    /// Equivalence classes allow leaf nodes to be classified as being equal,
+    /// even when their text representations or syntax kinds differ.
+    fn get_equivalence_class(
+        &self,
+        _kind: GritTargetSyntaxKind,
+        _text: &str,
+    ) -> Result<Option<LeafEquivalenceClass>, CompileError> {
+        Ok(None)
+    }
+}
+
+pub trait GritTargetParser: Parser<Tree = GritTargetTree> {
+    #[allow(clippy::wrong_self_convention)]
+    fn from_cached_parse_result(
+        &self,
+        parse: &AnyParse,
+        path: Option<&Path>,
+        logs: &mut AnalysisLogs,
+    ) -> Option<GritTargetTree>;
+}
+
+#[derive(Clone, Debug)]
+pub struct LeafEquivalenceClass {
+    representative: String,
+    class: Vec<LeafNormalizer>,
+}
+
+impl LeafEquivalenceClass {
+    pub fn are_equivalent(&self, kind: GritTargetSyntaxKind, text: &str) -> bool {
+        self.class
+            .iter()
+            .find(|eq| eq.kind == kind)
+            .is_some_and(|normalizer| {
+                normalizer
+                    .normalize(text)
+                    .is_some_and(|s| s == self.representative)
+            })
+    }
+
+    pub(crate) fn new(
+        representative: &str,
+        kind: GritTargetSyntaxKind,
+        members: &[LeafNormalizer],
+    ) -> Result<Option<Self>, CompileError> {
+        if let Some(normalizer) = members.iter().find(|norm| norm.kind == kind) {
+            let rep = normalizer
+                .normalize(representative)
+                .ok_or(CompileError::NormalizationError)?;
+            Ok(Some(Self {
+                representative: rep.to_owned(),
+                class: members.to_owned(),
+            }))
+        } else {
+            Ok(None)
+        }
+    }
+}
+
+#[derive(Clone, Debug)]
+pub(crate) struct LeafNormalizer {
+    kind: GritTargetSyntaxKind,
+    normalizer: fn(&str) -> Option<&str>,
+}
+
+impl LeafNormalizer {
+    fn normalize<'a>(&self, s: &'a str) -> Option<&'a str> {
+        (self.normalizer)(s)
+    }
+
+    pub(crate) const fn new(
+        kind: GritTargetSyntaxKind,
+        normalizer: fn(&str) -> Option<&str>,
+    ) -> Self {
+        Self { kind, normalizer }
+    }
+
+    pub(crate) fn kind(&self) -> GritTargetSyntaxKind {
+        self.kind
+    }
+}
+
+fn normalize_quoted_string(string: &str) -> Option<&str> {
+    // Strip the quotes, regardless of type:
+    (string.len() >= 2).then(|| &string[1..string.len() - 1])
 }

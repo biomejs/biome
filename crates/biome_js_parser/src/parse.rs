@@ -4,8 +4,8 @@ use crate::*;
 use biome_js_syntax::{
     AnyJsRoot, JsFileSource, JsLanguage, JsModule, JsScript, JsSyntaxNode, ModuleKind,
 };
-use biome_parser::event::Event;
 use biome_parser::token_source::Trivia;
+use biome_parser::{event::Event, AnyParse};
 use biome_rowan::{AstNode, NodeCache};
 use std::marker::PhantomData;
 
@@ -110,6 +110,18 @@ impl<T: AstNode<Language = JsLanguage>> Parse<T> {
         } else {
             Err(self.errors)
         }
+    }
+}
+
+impl<T> From<Parse<T>> for AnyParse {
+    fn from(parse: Parse<T>) -> Self {
+        let root = parse.syntax();
+        let diagnostics = parse.into_diagnostics();
+        Self::new(
+            // SAFETY: the parser should always return a root node
+            root.as_send().unwrap(),
+            diagnostics,
+        )
     }
 }
 

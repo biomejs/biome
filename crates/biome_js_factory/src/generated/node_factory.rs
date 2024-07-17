@@ -4580,14 +4580,14 @@ impl TsEnumDeclarationBuilder {
         ))
     }
 }
-pub fn ts_enum_member(name: AnyJsObjectMemberName) -> TsEnumMemberBuilder {
+pub fn ts_enum_member(name: AnyTsEnumMemberName) -> TsEnumMemberBuilder {
     TsEnumMemberBuilder {
         name,
         initializer: None,
     }
 }
 pub struct TsEnumMemberBuilder {
-    name: AnyJsObjectMemberName,
+    name: AnyTsEnumMemberName,
     initializer: Option<JsInitializerClause>,
 }
 impl TsEnumMemberBuilder {
@@ -5307,6 +5307,12 @@ impl TsIntersectionTypeBuilder {
             ],
         ))
     }
+}
+pub fn ts_literal_enum_member_name(value_token: SyntaxToken) -> TsLiteralEnumMemberName {
+    TsLiteralEnumMemberName::unwrap_cast(SyntaxNode::new_detached(
+        JsSyntaxKind::TS_LITERAL_ENUM_MEMBER_NAME,
+        [Some(SyntaxElement::Token(value_token))],
+    ))
 }
 pub fn ts_mapped_type(
     l_curly_token: SyntaxToken,

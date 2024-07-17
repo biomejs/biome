@@ -54,7 +54,7 @@ pub(crate) fn parse_snippet_content(
         return match source.trim() {
             "$_" | "^_" => Ok(Pattern::Underscore),
             name => {
-                let var = context.register_variable(name.to_owned(), range)?;
+                let var = context.register_variable(name.to_owned(), range);
                 Ok(Pattern::Variable(var))
             }
         };
@@ -121,7 +121,7 @@ pub(crate) fn dynamic_snippet_from_source(
                 *var,
             )));
         } else if var.starts_with("$GLOBAL_") {
-            let variable = context.register_variable(var.to_string(), range)?;
+            let variable = context.register_variable(var.to_string(), range);
             parts.push(DynamicSnippetPart::Variable(variable));
         } else {
             return Err(CompileError::UnknownVariable(var.to_string()));
@@ -215,9 +215,8 @@ fn pattern_from_node(
 
     if !node.has_children() {
         let content = node.text();
-        let pattern = if let Some(regex_pattern) = context
-            .compilation
-            .lang
+        let lang = &context.compilation.lang;
+        let pattern = if let Some(regex_pattern) = lang
             .matches_replaced_metavariable(content)
             .then(|| implicit_metavariable_regex(node, context_range, range_map, context))
             .transpose()?
@@ -225,7 +224,7 @@ fn pattern_from_node(
         {
             Pattern::Regex(Box::new(regex_pattern))
         } else {
-            Pattern::AstLeafNode(GritLeafNodePattern::new(node.kind(), content))
+            Pattern::AstLeafNode(GritLeafNodePattern::new(node.kind(), content, lang)?)
         };
 
         return Ok(pattern);
@@ -259,7 +258,7 @@ fn pattern_arg_from_slot(
     if slot.contains_list() {
         let mut nodes_list: Vec<Pattern<GritQueryContext>> = match &slot {
             GritSyntaxSlot::Node(node) => node
-                .children()
+                .named_children()
                 .map(|n| pattern_from_node(&n, context_range, range_map, context, is_rhs))
                 .collect::<Result<_, CompileError>>()?,
             _ => Vec::new(),
@@ -468,8 +467,8 @@ fn text_to_var(
         GritMetaValue::Variable(name) => {
             let range = *range_map
                 .get(&range)
-                .ok_or_else(|| CompileError::InvalidMetavariableRange(range))?;
-            let var = context.register_variable(name, range + context_range.start)?;
+                .ok_or(CompileError::InvalidMetavariableRange(range))?;
+            let var = context.register_variable(name, range + context_range.start);
             Ok(SnippetValues::Variable(var))
         }
     }
@@ -496,14 +495,13 @@ fn unescape(raw_string: &str) -> String {
 
 #[cfg(test)]
 mod tests {
-    use std::path::Path;
-
     use super::*;
     use crate::{
         grit_js_parser::GritJsParser, pattern_compiler::compilation_context::CompilationContext,
         JsTargetLanguage,
     };
     use grit_util::Parser;
+    use regex::Regex;
 
     #[test]
     fn test_node_from_tree() {
@@ -571,10 +569,8 @@ mod tests {
 
     #[test]
     fn test_pattern_from_node() {
-        let compilation_context = CompilationContext::new(
-            Path::new("test.js"),
-            GritTargetLanguage::JsTargetLanguage(JsTargetLanguage),
-        );
+        let compilation_context =
+            CompilationContext::new(None, GritTargetLanguage::JsTargetLanguage(JsTargetLanguage));
         let mut vars = BTreeMap::new();
         let mut vars_array = Vec::new();
         let mut global_vars = BTreeMap::new();
@@ -595,7 +591,11 @@ mod tests {
         let pattern = pattern_from_node(&node, range, &range_map, &mut context, false)
             .expect("cannot compile pattern from node");
         let formatted = format!("{pattern:#?}");
-        insta::assert_snapshot!(&formatted, @r###"
+        let snapshot = Regex::new("normalizer: 0x[0-9a-f]{16}")
+            .unwrap()
+            .replace_all(&formatted, "normalizer: [address redacted]");
+
+        insta::assert_snapshot!(&snapshot, @r###"
         AstNode(
             GritNodePattern {
                 kind: JsSyntaxKind(
@@ -625,6 +625,7 @@ mod tests {
                                                                 kind: JsSyntaxKind(
                                                                     JS_REFERENCE_IDENTIFIER,
                                                                 ),
+                                                                equivalence_class: None,
                                                                 text: "console",
                                                             },
                                                         ),
@@ -640,6 +641,7 @@ mod tests {
                                                 kind: JsSyntaxKind(
                                                     DOT,
                                                 ),
+                                                equivalence_class: None,
                                                 text: ".",
                                             },
                                         ),
@@ -651,6 +653,7 @@ mod tests {
                                                 kind: JsSyntaxKind(
                                                     JS_NAME,
                                                 ),
+                                                equivalence_class: None,
                                                 text: "log",
                                             },
                                         ),
@@ -702,6 +705,7 @@ mod tests {
                                                 kind: JsSyntaxKind(
                                                     L_PAREN,
                                                 ),
+                                                equivalence_class: None,
                                                 text: "(",
                                             },
                                         ),
@@ -715,6 +719,25 @@ mod tests {
                                                         GritLeafNodePattern {
                                                             kind: JsSyntaxKind(
                                                                 JS_STRING_LITERAL_EXPRESSION,
+                                                            ),
+                                                            equivalence_class: Some(
+                                                                LeafEquivalenceClass {
+                                                                    representative: "hello",
+                                                                    class: [
+                                                                        LeafNormalizer {
+                                                                            kind: JsSyntaxKind(
+                                                                                JS_STRING_LITERAL,
+                                                                            ),
+                                                                            normalizer: [address redacted],
+                                                                        },
+                                                                        LeafNormalizer {
+                                                                            kind: JsSyntaxKind(
+                                                                                JS_STRING_LITERAL_EXPRESSION,
+                                                                            ),
+                                                                            normalizer: [address redacted],
+                                                                        },
+                                                                    ],
+                                                                },
                                                             ),
                                                             text: "'hello'",
                                                         },
@@ -730,6 +753,7 @@ mod tests {
                                                 kind: JsSyntaxKind(
                                                     R_PAREN,
                                                 ),
+                                                equivalence_class: None,
                                                 text: ")",
                                             },
                                         ),

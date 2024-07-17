@@ -22,21 +22,21 @@ JsModule {
             l_curly_token: L_CURLY@17..19 "{" [] [Whitespace(" ")],
             members: TsEnumMemberList [
                 TsEnumMember {
-                    name: JsLiteralMemberName {
+                    name: TsLiteralEnumMemberName {
                         value: IDENT@19..20 "a" [] [],
                     },
                     initializer: missing (optional),
                 },
                 COMMA@20..22 "," [] [Whitespace(" ")],
                 TsEnumMember {
-                    name: JsLiteralMemberName {
+                    name: TsLiteralEnumMemberName {
                         value: IDENT@22..23 "b" [] [],
                     },
                     initializer: missing (optional),
                 },
                 COMMA@23..25 "," [] [Whitespace(" ")],
                 TsEnumMember {
-                    name: JsLiteralMemberName {
+                    name: TsLiteralEnumMemberName {
                         value: IDENT@25..27 "c" [] [Whitespace(" ")],
                     },
                     initializer: missing (optional),
@@ -53,7 +53,7 @@ JsModule {
             l_curly_token: L_CURLY@42..44 "{" [] [Whitespace(" ")],
             members: TsEnumMemberList [
                 TsEnumMember {
-                    name: JsLiteralMemberName {
+                    name: TsLiteralEnumMemberName {
                         value: IDENT@44..46 "A" [] [Whitespace(" ")],
                     },
                     initializer: JsInitializerClause {
@@ -65,7 +65,7 @@ JsModule {
                 },
                 COMMA@49..51 "," [] [Whitespace(" ")],
                 TsEnumMember {
-                    name: JsLiteralMemberName {
+                    name: TsLiteralEnumMemberName {
                         value: IDENT@51..53 "B" [] [Whitespace(" ")],
                     },
                     initializer: JsInitializerClause {
@@ -128,17 +128,17 @@ JsModule {
       3: L_CURLY@17..19 "{" [] [Whitespace(" ")]
       4: TS_ENUM_MEMBER_LIST@19..27
         0: TS_ENUM_MEMBER@19..20
-          0: JS_LITERAL_MEMBER_NAME@19..20
+          0: TS_LITERAL_ENUM_MEMBER_NAME@19..20
             0: IDENT@19..20 "a" [] []
           1: (empty)
         1: COMMA@20..22 "," [] [Whitespace(" ")]
         2: TS_ENUM_MEMBER@22..23
-          0: JS_LITERAL_MEMBER_NAME@22..23
+          0: TS_LITERAL_ENUM_MEMBER_NAME@22..23
             0: IDENT@22..23 "b" [] []
           1: (empty)
         3: COMMA@23..25 "," [] [Whitespace(" ")]
         4: TS_ENUM_MEMBER@25..27
-          0: JS_LITERAL_MEMBER_NAME@25..27
+          0: TS_LITERAL_ENUM_MEMBER_NAME@25..27
             0: IDENT@25..27 "c" [] [Whitespace(" ")]
           1: (empty)
       5: R_CURLY@27..28 "}" [] []
@@ -150,7 +150,7 @@ JsModule {
       3: L_CURLY@42..44 "{" [] [Whitespace(" ")]
       4: TS_ENUM_MEMBER_LIST@44..73
         0: TS_ENUM_MEMBER@44..49
-          0: JS_LITERAL_MEMBER_NAME@44..46
+          0: TS_LITERAL_ENUM_MEMBER_NAME@44..46
             0: IDENT@44..46 "A" [] [Whitespace(" ")]
           1: JS_INITIALIZER_CLAUSE@46..49
             0: EQ@46..48 "=" [] [Whitespace(" ")]
@@ -158,7 +158,7 @@ JsModule {
               0: JS_NUMBER_LITERAL@48..49 "1" [] []
         1: COMMA@49..51 "," [] [Whitespace(" ")]
         2: TS_ENUM_MEMBER@51..60
-          0: JS_LITERAL_MEMBER_NAME@51..53
+          0: TS_LITERAL_ENUM_MEMBER_NAME@51..53
             0: IDENT@51..53 "B" [] [Whitespace(" ")]
           1: JS_INITIALIZER_CLAUSE@53..60
             0: EQ@53..55 "=" [] [Whitespace(" ")]

@@ -1,6 +1,6 @@
 use super::{
     is_diagnostic_error, CodeActionsParams, DocumentFileSource, ExtensionHandler, FixAllParams,
-    LintParams, LintResults, ParseResult,
+    LintParams, LintResults, ParseResult, SearchCapabilities,
 };
 use crate::file_handlers::DebugCapabilities;
 use crate::file_handlers::{
@@ -60,9 +60,23 @@ impl Default for GraphqlFormatterSettings {
     }
 }
 
+#[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+pub struct GraphqlLinterSettings {
+    pub enabled: Option<bool>,
+}
+
+impl Default for GraphqlLinterSettings {
+    fn default() -> Self {
+        Self {
+            enabled: Some(false),
+        }
+    }
+}
+
 impl ServiceLanguage for GraphqlLanguage {
     type FormatterSettings = GraphqlFormatterSettings;
-    type LinterSettings = ();
+    type LinterSettings = GraphqlLinterSettings;
     type OrganizeImportsSettings = ();
     type FormatOptions = GraphqlFormatOptions;
     type ParserSettings = ();
@@ -159,6 +173,7 @@ impl ExtensionHandler for GraphqlFileHandler {
                 format_range: Some(format_range),
                 format_on_type: Some(format_on_type),
             },
+            search: SearchCapabilities { search: None },
         }
     }
 }
@@ -171,15 +186,9 @@ fn parse(
     cache: &mut NodeCache,
 ) -> ParseResult {
     let parse = parse_graphql_with_cache(text, cache);
-    let root = parse.syntax();
-    let diagnostics = parse.into_diagnostics();
 
     ParseResult {
-        any_parse: AnyParse::new(
-            // SAFETY: the parser should always return a root node
-            root.as_send().unwrap(),
-            diagnostics,
-        ),
+        any_parse: parse.into(),
         language: Some(file_source),
     }
 }
@@ -208,7 +217,7 @@ fn debug_formatter_ir(
     Ok(root_element.to_string())
 }
 
-#[tracing::instrument(level = "debug", skip(parse))]
+#[tracing::instrument(level = "debug", skip(parse, settings))]
 fn format(
     biome_path: &BiomePath,
     document_file_source: &DocumentFileSource,

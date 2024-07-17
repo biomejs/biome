@@ -4,15 +4,15 @@ use crate::static_value::StaticValue;
 use crate::{
     inner_string_text, AnyJsArrowFunctionParameters, AnyJsCallArgument, AnyJsClassMemberName,
     AnyJsExpression, AnyJsFunctionBody, AnyJsLiteralExpression, AnyJsName, AnyJsObjectMemberName,
-    AnyJsTemplateElement, JsArrayExpression, JsArrayHole, JsAssignmentExpression,
-    JsBinaryExpression, JsCallArgumentList, JsCallArguments, JsCallExpression,
-    JsComputedMemberAssignment, JsComputedMemberExpression, JsConditionalExpression,
-    JsDoWhileStatement, JsForStatement, JsIfStatement, JsLiteralMemberName, JsLogicalExpression,
-    JsNewExpression, JsNumberLiteralExpression, JsObjectExpression, JsPostUpdateExpression,
-    JsReferenceIdentifier, JsRegexLiteralExpression, JsStaticMemberExpression,
-    JsStringLiteralExpression, JsSyntaxKind, JsSyntaxNode, JsSyntaxToken, JsTemplateChunkElement,
-    JsTemplateExpression, JsUnaryExpression, JsWhileStatement, OperatorPrecedence,
-    TsStringLiteralType, T,
+    AnyJsTemplateElement, AnyTsEnumMemberName, JsArrayExpression, JsArrayHole,
+    JsAssignmentExpression, JsBinaryExpression, JsCallArgumentList, JsCallArguments,
+    JsCallExpression, JsComputedMemberAssignment, JsComputedMemberExpression,
+    JsConditionalExpression, JsDoWhileStatement, JsForStatement, JsIfStatement,
+    JsLiteralMemberName, JsLogicalExpression, JsNewExpression, JsNumberLiteralExpression,
+    JsObjectExpression, JsPostUpdateExpression, JsReferenceIdentifier, JsRegexLiteralExpression,
+    JsStaticMemberExpression, JsStringLiteralExpression, JsSyntaxKind, JsSyntaxNode, JsSyntaxToken,
+    JsTemplateChunkElement, JsTemplateExpression, JsUnaryExpression, JsWhileStatement,
+    OperatorPrecedence, TsStringLiteralType, T,
 };
 use crate::{JsPreUpdateExpression, JsSyntaxKind::*};
 use biome_rowan::{
@@ -1528,6 +1528,57 @@ impl AnyJsObjectMemberName {
                 }
             }
             AnyJsObjectMemberName::JsLiteralMemberName(expr) => expr.value().ok()?,
+        };
+        Some(inner_string_text(&token))
+    }
+}
+
+impl AnyTsEnumMemberName {
+    /// Returns the member name of the current node
+    /// if it is a literal member name or a computed member with a literal value.
+    ///
+    /// ## Examples
+    ///
+    /// ```
+    /// use biome_js_syntax::{AnyTsEnumMemberName, AnyJsExpression, AnyJsLiteralExpression, T};
+    /// use biome_js_factory::make;
+    ///
+    /// let name = make::ts_literal_enum_member_name(make::ident("a"));
+    /// let name = AnyTsEnumMemberName::TsLiteralEnumMemberName(name);
+    /// assert_eq!(name.name().unwrap().text(), "a");
+    ///
+    /// let quoted_name = make::ts_literal_enum_member_name(make::js_string_literal("a"));
+    /// let quoted_name = AnyTsEnumMemberName::TsLiteralEnumMemberName(quoted_name);
+    /// assert_eq!(quoted_name.name().unwrap().text(), "a");
+    ///
+    /// let number_name = make::ts_literal_enum_member_name(make::js_number_literal(42));
+    /// let number_name = AnyTsEnumMemberName::TsLiteralEnumMemberName(number_name);
+    /// assert_eq!(number_name.name().unwrap().text(), "42");
+    ///
+    /// let string_literal = make::js_string_literal_expression(make::js_string_literal("a"));
+    /// let string_literal = AnyJsExpression::AnyJsLiteralExpression(AnyJsLiteralExpression::from(string_literal));
+    /// let computed = make::js_computed_member_name(make::token(T!['[']), string_literal, make::token(T![']']));
+    /// let computed = AnyTsEnumMemberName::JsComputedMemberName(computed);
+    /// assert_eq!(computed.name().unwrap().text(), "a");
+    /// ```
+    pub fn name(&self) -> Option<TokenText> {
+        let token = match self {
+            AnyTsEnumMemberName::JsComputedMemberName(expr) => {
+                let expr = expr.expression().ok()?;
+                match expr.omit_parentheses() {
+                    AnyJsExpression::AnyJsLiteralExpression(expr) => expr.value_token().ok()?,
+                    AnyJsExpression::JsTemplateExpression(expr) => {
+                        if !expr.is_constant() {
+                            return None;
+                        }
+                        let chunk = expr.elements().first()?;
+                        let chunk = chunk.as_js_template_chunk_element()?;
+                        chunk.template_chunk_token().ok()?
+                    }
+                    _ => return None,
+                }
+            }
+            AnyTsEnumMemberName::TsLiteralEnumMemberName(expr) => expr.value().ok()?,
         };
         Some(inner_string_text(&token))
     }

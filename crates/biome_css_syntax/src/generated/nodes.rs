@@ -693,13 +693,13 @@ impl CssCompoundSelector {
     }
     pub fn as_fields(&self) -> CssCompoundSelectorFields {
         CssCompoundSelectorFields {
-            nesting_selector_token: self.nesting_selector_token(),
+            nesting_selectors: self.nesting_selectors(),
             simple_selector: self.simple_selector(),
             sub_selectors: self.sub_selectors(),
         }
     }
-    pub fn nesting_selector_token(&self) -> Option<SyntaxToken> {
-        support::token(&self.syntax, 0usize)
+    pub fn nesting_selectors(&self) -> CssNestedSelectorList {
+        support::list(&self.syntax, 0usize)
     }
     pub fn simple_selector(&self) -> Option<AnyCssSimpleSelector> {
         support::node(&self.syntax, 1usize)
@@ -719,7 +719,7 @@ impl Serialize for CssCompoundSelector {
 }
 #[cfg_attr(feature = "serde", derive(Serialize))]
 pub struct CssCompoundSelectorFields {
-    pub nesting_selector_token: Option<SyntaxToken>,
+    pub nesting_selectors: CssNestedSelectorList,
     pub simple_selector: Option<AnyCssSimpleSelector>,
     pub sub_selectors: CssSubSelectorList,
 }
@@ -2098,6 +2098,42 @@ pub struct CssGenericPropertyFields {
     pub name: SyntaxResult<AnyCssDeclarationName>,
     pub colon_token: SyntaxResult<SyntaxToken>,
     pub value: CssGenericComponentValueList,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct CssGritMetavariable {
+    pub(crate) syntax: SyntaxNode,
+}
+impl CssGritMetavariable {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> CssGritMetavariableFields {
+        CssGritMetavariableFields {
+            value_token: self.value_token(),
+        }
+    }
+    pub fn value_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+}
+#[cfg(feature = "serde")]
+impl Serialize for CssGritMetavariable {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[cfg_attr(feature = "serde", derive(Serialize))]
+pub struct CssGritMetavariableFields {
+    pub value_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct CssIdSelector {
@@ -3514,6 +3550,42 @@ impl Serialize for CssNestedQualifiedRule {
 pub struct CssNestedQualifiedRuleFields {
     pub prelude: CssRelativeSelectorList,
     pub block: SyntaxResult<AnyCssDeclarationOrRuleBlock>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct CssNestedSelector {
+    pub(crate) syntax: SyntaxNode,
+}
+impl CssNestedSelector {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> CssNestedSelectorFields {
+        CssNestedSelectorFields {
+            amp_token: self.amp_token(),
+        }
+    }
+    pub fn amp_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+}
+#[cfg(feature = "serde")]
+impl Serialize for CssNestedSelector {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[cfg_attr(feature = "serde", derive(Serialize))]
+pub struct CssNestedSelectorFields {
+    pub amp_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct CssNthOffset {
@@ -7259,6 +7331,7 @@ pub enum AnyCssDeclarationOrRule {
     AnyCssRule(AnyCssRule),
     CssBogus(CssBogus),
     CssDeclarationWithSemicolon(CssDeclarationWithSemicolon),
+    CssGritMetavariable(CssGritMetavariable),
 }
 impl AnyCssDeclarationOrRule {
     pub fn as_any_css_rule(&self) -> Option<&AnyCssRule> {
@@ -7276,6 +7349,12 @@ impl AnyCssDeclarationOrRule {
     pub fn as_css_declaration_with_semicolon(&self) -> Option<&CssDeclarationWithSemicolon> {
         match &self {
             AnyCssDeclarationOrRule::CssDeclarationWithSemicolon(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_grit_metavariable(&self) -> Option<&CssGritMetavariable> {
+        match &self {
+            AnyCssDeclarationOrRule::CssGritMetavariable(item) => Some(item),
             _ => None,
         }
     }
@@ -7810,6 +7889,7 @@ impl AnyCssMediaOrCombinableCondition {
 pub enum AnyCssMediaQuery {
     AnyCssMediaTypeQuery(AnyCssMediaTypeQuery),
     CssBogusMediaQuery(CssBogusMediaQuery),
+    CssGritMetavariable(CssGritMetavariable),
     CssMediaConditionQuery(CssMediaConditionQuery),
 }
 impl AnyCssMediaQuery {
@@ -7822,6 +7902,12 @@ impl AnyCssMediaQuery {
     pub fn as_css_bogus_media_query(&self) -> Option<&CssBogusMediaQuery> {
         match &self {
             AnyCssMediaQuery::CssBogusMediaQuery(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_grit_metavariable(&self) -> Option<&CssGritMetavariable> {
+        match &self {
+            AnyCssMediaQuery::CssGritMetavariable(item) => Some(item),
             _ => None,
         }
     }
@@ -8422,6 +8508,7 @@ pub enum AnyCssSelector {
     CssBogusSelector(CssBogusSelector),
     CssComplexSelector(CssComplexSelector),
     CssCompoundSelector(CssCompoundSelector),
+    CssGritMetavariable(CssGritMetavariable),
 }
 impl AnyCssSelector {
     pub fn as_css_bogus_selector(&self) -> Option<&CssBogusSelector> {
@@ -8439,6 +8526,12 @@ impl AnyCssSelector {
     pub fn as_css_compound_selector(&self) -> Option<&CssCompoundSelector> {
         match &self {
             AnyCssSelector::CssCompoundSelector(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_grit_metavariable(&self) -> Option<&CssGritMetavariable> {
+        match &self {
+            AnyCssSelector::CssGritMetavariable(item) => Some(item),
             _ => None,
         }
     }
@@ -8743,6 +8836,7 @@ pub enum AnyCssValue {
     CssColor(CssColor),
     CssCustomIdentifier(CssCustomIdentifier),
     CssDashedIdentifier(CssDashedIdentifier),
+    CssGritMetavariable(CssGritMetavariable),
     CssIdentifier(CssIdentifier),
     CssNumber(CssNumber),
     CssRatio(CssRatio),
@@ -8783,6 +8877,12 @@ impl AnyCssValue {
     pub fn as_css_dashed_identifier(&self) -> Option<&CssDashedIdentifier> {
         match &self {
             AnyCssValue::CssDashedIdentifier(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_grit_metavariable(&self) -> Option<&CssGritMetavariable> {
+        match &self {
+            AnyCssValue::CssGritMetavariable(item) => Some(item),
             _ => None,
         }
     }
@@ -9556,10 +9656,7 @@ impl AstNode for CssCompoundSelector {
 impl std::fmt::Debug for CssCompoundSelector {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("CssCompoundSelector")
-            .field(
-                "nesting_selector_token",
-                &support::DebugOptionalElement(self.nesting_selector_token()),
-            )
+            .field("nesting_selectors", &self.nesting_selectors())
             .field(
                 "simple_selector",
                 &support::DebugOptionalElement(self.simple_selector()),
@@ -10907,6 +11004,47 @@ impl From<CssGenericProperty> for SyntaxNode {
 }
 impl From<CssGenericProperty> for SyntaxElement {
     fn from(n: CssGenericProperty) -> SyntaxElement {
+        n.syntax.into()
+    }
+}
+impl AstNode for CssGritMetavariable {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_GRIT_METAVARIABLE as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == CSS_GRIT_METAVARIABLE
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for CssGritMetavariable {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("CssGritMetavariable")
+            .field(
+                "value_token",
+                &support::DebugSyntaxResult(self.value_token()),
+            )
+            .finish()
+    }
+}
+impl From<CssGritMetavariable> for SyntaxNode {
+    fn from(n: CssGritMetavariable) -> SyntaxNode {
+        n.syntax
+    }
+}
+impl From<CssGritMetavariable> for SyntaxElement {
+    fn from(n: CssGritMetavariable) -> SyntaxElement {
         n.syntax.into()
     }
 }
@@ -12286,6 +12424,44 @@ impl From<CssNestedQualifiedRule> for SyntaxNode {
 }
 impl From<CssNestedQualifiedRule> for SyntaxElement {
     fn from(n: CssNestedQualifiedRule) -> SyntaxElement {
+        n.syntax.into()
+    }
+}
+impl AstNode for CssNestedSelector {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_NESTED_SELECTOR as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == CSS_NESTED_SELECTOR
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for CssNestedSelector {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("CssNestedSelector")
+            .field("amp_token", &support::DebugSyntaxResult(self.amp_token()))
+            .finish()
+    }
+}
+impl From<CssNestedSelector> for SyntaxNode {
+    fn from(n: CssNestedSelector) -> SyntaxNode {
+        n.syntax
+    }
+}
+impl From<CssNestedSelector> for SyntaxElement {
+    fn from(n: CssNestedSelector) -> SyntaxElement {
         n.syntax.into()
     }
 }
@@ -16997,14 +17173,20 @@ impl From<CssDeclarationWithSemicolon> for AnyCssDeclarationOrRule {
         AnyCssDeclarationOrRule::CssDeclarationWithSemicolon(node)
     }
 }
+impl From<CssGritMetavariable> for AnyCssDeclarationOrRule {
+    fn from(node: CssGritMetavariable) -> AnyCssDeclarationOrRule {
+        AnyCssDeclarationOrRule::CssGritMetavariable(node)
+    }
+}
 impl AstNode for AnyCssDeclarationOrRule {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> = AnyCssRule::KIND_SET
         .union(CssBogus::KIND_SET)
-        .union(CssDeclarationWithSemicolon::KIND_SET);
+        .union(CssDeclarationWithSemicolon::KIND_SET)
+        .union(CssGritMetavariable::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
         match kind {
-            CSS_BOGUS | CSS_DECLARATION_WITH_SEMICOLON => true,
+            CSS_BOGUS | CSS_DECLARATION_WITH_SEMICOLON | CSS_GRIT_METAVARIABLE => true,
             k if AnyCssRule::can_cast(k) => true,
             _ => false,
         }
@@ -17016,6 +17198,9 @@ impl AstNode for AnyCssDeclarationOrRule {
                 AnyCssDeclarationOrRule::CssDeclarationWithSemicolon(CssDeclarationWithSemicolon {
                     syntax,
                 })
+            }
+            CSS_GRIT_METAVARIABLE => {
+                AnyCssDeclarationOrRule::CssGritMetavariable(CssGritMetavariable { syntax })
             }
             _ => {
                 if let Some(any_css_rule) = AnyCssRule::cast(syntax) {
@@ -17030,6 +17215,7 @@ impl AstNode for AnyCssDeclarationOrRule {
         match self {
             AnyCssDeclarationOrRule::CssBogus(it) => &it.syntax,
             AnyCssDeclarationOrRule::CssDeclarationWithSemicolon(it) => &it.syntax,
+            AnyCssDeclarationOrRule::CssGritMetavariable(it) => &it.syntax,
             AnyCssDeclarationOrRule::AnyCssRule(it) => it.syntax(),
         }
     }
@@ -17037,6 +17223,7 @@ impl AstNode for AnyCssDeclarationOrRule {
         match self {
             AnyCssDeclarationOrRule::CssBogus(it) => it.syntax,
             AnyCssDeclarationOrRule::CssDeclarationWithSemicolon(it) => it.syntax,
+            AnyCssDeclarationOrRule::CssGritMetavariable(it) => it.syntax,
             AnyCssDeclarationOrRule::AnyCssRule(it) => it.into_syntax(),
         }
     }
@@ -17047,6 +17234,7 @@ impl std::fmt::Debug for AnyCssDeclarationOrRule {
             AnyCssDeclarationOrRule::AnyCssRule(it) => std::fmt::Debug::fmt(it, f),
             AnyCssDeclarationOrRule::CssBogus(it) => std::fmt::Debug::fmt(it, f),
             AnyCssDeclarationOrRule::CssDeclarationWithSemicolon(it) => std::fmt::Debug::fmt(it, f),
+            AnyCssDeclarationOrRule::CssGritMetavariable(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
@@ -17056,6 +17244,7 @@ impl From<AnyCssDeclarationOrRule> for SyntaxNode {
             AnyCssDeclarationOrRule::AnyCssRule(it) => it.into(),
             AnyCssDeclarationOrRule::CssBogus(it) => it.into(),
             AnyCssDeclarationOrRule::CssDeclarationWithSemicolon(it) => it.into(),
+            AnyCssDeclarationOrRule::CssGritMetavariable(it) => it.into(),
         }
     }
 }
@@ -18721,6 +18910,11 @@ impl From<CssBogusMediaQuery> for AnyCssMediaQuery {
         AnyCssMediaQuery::CssBogusMediaQuery(node)
     }
 }
+impl From<CssGritMetavariable> for AnyCssMediaQuery {
+    fn from(node: CssGritMetavariable) -> AnyCssMediaQuery {
+        AnyCssMediaQuery::CssGritMetavariable(node)
+    }
+}
 impl From<CssMediaConditionQuery> for AnyCssMediaQuery {
     fn from(node: CssMediaConditionQuery) -> AnyCssMediaQuery {
         AnyCssMediaQuery::CssMediaConditionQuery(node)
@@ -18730,10 +18924,11 @@ impl AstNode for AnyCssMediaQuery {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> = AnyCssMediaTypeQuery::KIND_SET
         .union(CssBogusMediaQuery::KIND_SET)
+        .union(CssGritMetavariable::KIND_SET)
         .union(CssMediaConditionQuery::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
         match kind {
-            CSS_BOGUS_MEDIA_QUERY | CSS_MEDIA_CONDITION_QUERY => true,
+            CSS_BOGUS_MEDIA_QUERY | CSS_GRIT_METAVARIABLE | CSS_MEDIA_CONDITION_QUERY => true,
             k if AnyCssMediaTypeQuery::can_cast(k) => true,
             _ => false,
         }
@@ -18742,6 +18937,9 @@ impl AstNode for AnyCssMediaQuery {
         let res = match syntax.kind() {
             CSS_BOGUS_MEDIA_QUERY => {
                 AnyCssMediaQuery::CssBogusMediaQuery(CssBogusMediaQuery { syntax })
+            }
+            CSS_GRIT_METAVARIABLE => {
+                AnyCssMediaQuery::CssGritMetavariable(CssGritMetavariable { syntax })
             }
             CSS_MEDIA_CONDITION_QUERY => {
                 AnyCssMediaQuery::CssMediaConditionQuery(CssMediaConditionQuery { syntax })
@@ -18760,6 +18958,7 @@ impl AstNode for AnyCssMediaQuery {
     fn syntax(&self) -> &SyntaxNode {
         match self {
             AnyCssMediaQuery::CssBogusMediaQuery(it) => &it.syntax,
+            AnyCssMediaQuery::CssGritMetavariable(it) => &it.syntax,
             AnyCssMediaQuery::CssMediaConditionQuery(it) => &it.syntax,
             AnyCssMediaQuery::AnyCssMediaTypeQuery(it) => it.syntax(),
         }
@@ -18767,6 +18966,7 @@ impl AstNode for AnyCssMediaQuery {
     fn into_syntax(self) -> SyntaxNode {
         match self {
             AnyCssMediaQuery::CssBogusMediaQuery(it) => it.syntax,
+            AnyCssMediaQuery::CssGritMetavariable(it) => it.syntax,
             AnyCssMediaQuery::CssMediaConditionQuery(it) => it.syntax,
             AnyCssMediaQuery::AnyCssMediaTypeQuery(it) => it.into_syntax(),
         }
@@ -18777,6 +18977,7 @@ impl std::fmt::Debug for AnyCssMediaQuery {
         match self {
             AnyCssMediaQuery::AnyCssMediaTypeQuery(it) => std::fmt::Debug::fmt(it, f),
             AnyCssMediaQuery::CssBogusMediaQuery(it) => std::fmt::Debug::fmt(it, f),
+            AnyCssMediaQuery::CssGritMetavariable(it) => std::fmt::Debug::fmt(it, f),
             AnyCssMediaQuery::CssMediaConditionQuery(it) => std::fmt::Debug::fmt(it, f),
         }
     }
@@ -18786,6 +18987,7 @@ impl From<AnyCssMediaQuery> for SyntaxNode {
         match n {
             AnyCssMediaQuery::AnyCssMediaTypeQuery(it) => it.into(),
             AnyCssMediaQuery::CssBogusMediaQuery(it) => it.into(),
+            AnyCssMediaQuery::CssGritMetavariable(it) => it.into(),
             AnyCssMediaQuery::CssMediaConditionQuery(it) => it.into(),
         }
     }
@@ -20459,15 +20661,24 @@ impl From<CssCompoundSelector> for AnyCssSelector {
         AnyCssSelector::CssCompoundSelector(node)
     }
 }
+impl From<CssGritMetavariable> for AnyCssSelector {
+    fn from(node: CssGritMetavariable) -> AnyCssSelector {
+        AnyCssSelector::CssGritMetavariable(node)
+    }
+}
 impl AstNode for AnyCssSelector {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> = CssBogusSelector::KIND_SET
         .union(CssComplexSelector::KIND_SET)
-        .union(CssCompoundSelector::KIND_SET);
+        .union(CssCompoundSelector::KIND_SET)
+        .union(CssGritMetavariable::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
         matches!(
             kind,
-            CSS_BOGUS_SELECTOR | CSS_COMPLEX_SELECTOR | CSS_COMPOUND_SELECTOR
+            CSS_BOGUS_SELECTOR
+                | CSS_COMPLEX_SELECTOR
+                | CSS_COMPOUND_SELECTOR
+                | CSS_GRIT_METAVARIABLE
         )
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
@@ -20479,6 +20690,9 @@ impl AstNode for AnyCssSelector {
             CSS_COMPOUND_SELECTOR => {
                 AnyCssSelector::CssCompoundSelector(CssCompoundSelector { syntax })
             }
+            CSS_GRIT_METAVARIABLE => {
+                AnyCssSelector::CssGritMetavariable(CssGritMetavariable { syntax })
+            }
             _ => return None,
         };
         Some(res)
@@ -20488,6 +20702,7 @@ impl AstNode for AnyCssSelector {
             AnyCssSelector::CssBogusSelector(it) => &it.syntax,
             AnyCssSelector::CssComplexSelector(it) => &it.syntax,
             AnyCssSelector::CssCompoundSelector(it) => &it.syntax,
+            AnyCssSelector::CssGritMetavariable(it) => &it.syntax,
         }
     }
     fn into_syntax(self) -> SyntaxNode {
@@ -20495,6 +20710,7 @@ impl AstNode for AnyCssSelector {
             AnyCssSelector::CssBogusSelector(it) => it.syntax,
             AnyCssSelector::CssComplexSelector(it) => it.syntax,
             AnyCssSelector::CssCompoundSelector(it) => it.syntax,
+            AnyCssSelector::CssGritMetavariable(it) => it.syntax,
         }
     }
 }
@@ -20504,6 +20720,7 @@ impl std::fmt::Debug for AnyCssSelector {
             AnyCssSelector::CssBogusSelector(it) => std::fmt::Debug::fmt(it, f),
             AnyCssSelector::CssComplexSelector(it) => std::fmt::Debug::fmt(it, f),
             AnyCssSelector::CssCompoundSelector(it) => std::fmt::Debug::fmt(it, f),
+            AnyCssSelector::CssGritMetavariable(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
@@ -20513,6 +20730,7 @@ impl From<AnyCssSelector> for SyntaxNode {
             AnyCssSelector::CssBogusSelector(it) => it.into(),
             AnyCssSelector::CssComplexSelector(it) => it.into(),
             AnyCssSelector::CssCompoundSelector(it) => it.into(),
+            AnyCssSelector::CssGritMetavariable(it) => it.into(),
         }
     }
 }
@@ -21384,6 +21602,11 @@ impl From<CssDashedIdentifier> for AnyCssValue {
         AnyCssValue::CssDashedIdentifier(node)
     }
 }
+impl From<CssGritMetavariable> for AnyCssValue {
+    fn from(node: CssGritMetavariable) -> AnyCssValue {
+        AnyCssValue::CssGritMetavariable(node)
+    }
+}
 impl From<CssIdentifier> for AnyCssValue {
     fn from(node: CssIdentifier) -> AnyCssValue {
         AnyCssValue::CssIdentifier(node)
@@ -21417,6 +21640,7 @@ impl AstNode for AnyCssValue {
         .union(CssColor::KIND_SET)
         .union(CssCustomIdentifier::KIND_SET)
         .union(CssDashedIdentifier::KIND_SET)
+        .union(CssGritMetavariable::KIND_SET)
         .union(CssIdentifier::KIND_SET)
         .union(CssNumber::KIND_SET)
         .union(CssRatio::KIND_SET)
@@ -21428,6 +21652,7 @@ impl AstNode for AnyCssValue {
             | CSS_COLOR
             | CSS_CUSTOM_IDENTIFIER
             | CSS_DASHED_IDENTIFIER
+            | CSS_GRIT_METAVARIABLE
             | CSS_IDENTIFIER
             | CSS_NUMBER
             | CSS_RATIO
@@ -21447,6 +21672,9 @@ impl AstNode for AnyCssValue {
             }
             CSS_DASHED_IDENTIFIER => {
                 AnyCssValue::CssDashedIdentifier(CssDashedIdentifier { syntax })
+            }
+            CSS_GRIT_METAVARIABLE => {
+                AnyCssValue::CssGritMetavariable(CssGritMetavariable { syntax })
             }
             CSS_IDENTIFIER => AnyCssValue::CssIdentifier(CssIdentifier { syntax }),
             CSS_NUMBER => AnyCssValue::CssNumber(CssNumber { syntax }),
@@ -21471,6 +21699,7 @@ impl AstNode for AnyCssValue {
             AnyCssValue::CssColor(it) => &it.syntax,
             AnyCssValue::CssCustomIdentifier(it) => &it.syntax,
             AnyCssValue::CssDashedIdentifier(it) => &it.syntax,
+            AnyCssValue::CssGritMetavariable(it) => &it.syntax,
             AnyCssValue::CssIdentifier(it) => &it.syntax,
             AnyCssValue::CssNumber(it) => &it.syntax,
             AnyCssValue::CssRatio(it) => &it.syntax,
@@ -21486,6 +21715,7 @@ impl AstNode for AnyCssValue {
             AnyCssValue::CssColor(it) => it.syntax,
             AnyCssValue::CssCustomIdentifier(it) => it.syntax,
             AnyCssValue::CssDashedIdentifier(it) => it.syntax,
+            AnyCssValue::CssGritMetavariable(it) => it.syntax,
             AnyCssValue::CssIdentifier(it) => it.syntax,
             AnyCssValue::CssNumber(it) => it.syntax,
             AnyCssValue::CssRatio(it) => it.syntax,
@@ -21505,6 +21735,7 @@ impl std::fmt::Debug for AnyCssValue {
             AnyCssValue::CssColor(it) => std::fmt::Debug::fmt(it, f),
             AnyCssValue::CssCustomIdentifier(it) => std::fmt::Debug::fmt(it, f),
             AnyCssValue::CssDashedIdentifier(it) => std::fmt::Debug::fmt(it, f),
+            AnyCssValue::CssGritMetavariable(it) => std::fmt::Debug::fmt(it, f),
             AnyCssValue::CssIdentifier(it) => std::fmt::Debug::fmt(it, f),
             AnyCssValue::CssNumber(it) => std::fmt::Debug::fmt(it, f),
             AnyCssValue::CssRatio(it) => std::fmt::Debug::fmt(it, f),
@@ -21522,6 +21753,7 @@ impl From<AnyCssValue> for SyntaxNode {
             AnyCssValue::CssColor(it) => it.into(),
             AnyCssValue::CssCustomIdentifier(it) => it.into(),
             AnyCssValue::CssDashedIdentifier(it) => it.into(),
+            AnyCssValue::CssGritMetavariable(it) => it.into(),
             AnyCssValue::CssIdentifier(it) => it.into(),
             AnyCssValue::CssNumber(it) => it.into(),
             AnyCssValue::CssRatio(it) => it.into(),
@@ -22446,6 +22678,11 @@ impl std::fmt::Display for CssGenericProperty {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
+impl std::fmt::Display for CssGritMetavariable {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
 impl std::fmt::Display for CssIdSelector {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
@@ -22607,6 +22844,11 @@ impl std::fmt::Display for CssNamespaceAtRule {
     }
 }
 impl std::fmt::Display for CssNestedQualifiedRule {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for CssNestedSelector {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
@@ -25865,6 +26107,89 @@ impl IntoIterator for CssMediaQueryList {
 impl IntoIterator for &CssMediaQueryList {
     type Item = SyntaxResult<AnyCssMediaQuery>;
     type IntoIter = AstSeparatedListNodesIterator<Language, AnyCssMediaQuery>;
+    fn into_iter(self) -> Self::IntoIter {
+        self.iter()
+    }
+}
+#[derive(Clone, Eq, PartialEq, Hash)]
+pub struct CssNestedSelectorList {
+    syntax_list: SyntaxList,
+}
+impl CssNestedSelectorList {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self {
+            syntax_list: syntax.into_list(),
+        }
+    }
+}
+impl AstNode for CssNestedSelectorList {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_NESTED_SELECTOR_LIST as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == CSS_NESTED_SELECTOR_LIST
+    }
+    fn cast(syntax: SyntaxNode) -> Option<CssNestedSelectorList> {
+        if Self::can_cast(syntax.kind()) {
+            Some(CssNestedSelectorList {
+                syntax_list: syntax.into_list(),
+            })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        self.syntax_list.node()
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax_list.into_node()
+    }
+}
+#[cfg(feature = "serde")]
+impl Serialize for CssNestedSelectorList {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut seq = serializer.serialize_seq(Some(self.len()))?;
+        for e in self.iter() {
+            seq.serialize_element(&e)?;
+        }
+        seq.end()
+    }
+}
+impl AstNodeList for CssNestedSelectorList {
+    type Language = Language;
+    type Node = CssNestedSelector;
+    fn syntax_list(&self) -> &SyntaxList {
+        &self.syntax_list
+    }
+    fn into_syntax_list(self) -> SyntaxList {
+        self.syntax_list
+    }
+}
+impl Debug for CssNestedSelectorList {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        f.write_str("CssNestedSelectorList ")?;
+        f.debug_list().entries(self.iter()).finish()
+    }
+}
+impl IntoIterator for &CssNestedSelectorList {
+    type Item = CssNestedSelector;
+    type IntoIter = AstNodeListIterator<Language, CssNestedSelector>;
+    fn into_iter(self) -> Self::IntoIter {
+        self.iter()
+    }
+}
+impl IntoIterator for CssNestedSelectorList {
+    type Item = CssNestedSelector;
+    type IntoIter = AstNodeListIterator<Language, CssNestedSelector>;
     fn into_iter(self) -> Self::IntoIter {
         self.iter()
     }

@@ -2,7 +2,6 @@
 source: crates/biome_css_parser/tests/spec_test.rs
 expression: snapshot
 ---
-
 ## Input
 
 ```css
@@ -24,7 +23,7 @@ CssRoot {
         CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
-                    nesting_selector_token: missing (optional),
+                    nesting_selectors: CssNestedSelectorList [],
                     simple_selector: CssTypeSelector {
                         namespace: missing (optional),
                         ident: CssIdentifier {
@@ -68,7 +67,7 @@ CssRoot {
         CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
-                    nesting_selector_token: missing (optional),
+                    nesting_selectors: CssNestedSelectorList [],
                     simple_selector: CssUniversalSelector {
                         namespace: missing (optional),
                         star_token: STAR@26..28 "*" [Newline("\n")] [],
@@ -110,7 +109,7 @@ CssRoot {
         CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
-                    nesting_selector_token: missing (optional),
+                    nesting_selectors: CssNestedSelectorList [],
                     simple_selector: missing (optional),
                     sub_selectors: CssSubSelectorList [
                         CssClassSelector {
@@ -149,7 +148,7 @@ CssRoot {
         CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
-                    nesting_selector_token: missing (optional),
+                    nesting_selectors: CssNestedSelectorList [],
                     simple_selector: CssTypeSelector {
                         namespace: missing (optional),
                         ident: CssIdentifier {
@@ -185,7 +184,7 @@ CssRoot {
                 },
                 COMMA@102..104 "," [] [Whitespace(" ")],
                 CssCompoundSelector {
-                    nesting_selector_token: missing (optional),
+                    nesting_selectors: CssNestedSelectorList [],
                     simple_selector: CssUniversalSelector {
                         namespace: missing (optional),
                         star_token: STAR@104..105 "*" [] [],
@@ -219,7 +218,7 @@ CssRoot {
                 },
                 COMMA@126..128 "," [] [Whitespace(" ")],
                 CssCompoundSelector {
-                    nesting_selector_token: missing (optional),
+                    nesting_selectors: CssNestedSelectorList [],
                     simple_selector: missing (optional),
                     sub_selectors: CssSubSelectorList [
                         CssClassSelector {
@@ -269,7 +268,7 @@ CssRoot {
     0: CSS_QUALIFIED_RULE@0..26
       0: CSS_SELECTOR_LIST@0..24
         0: CSS_COMPOUND_SELECTOR@0..24
-          0: (empty)
+          0: CSS_NESTED_SELECTOR_LIST@0..0
           1: CSS_TYPE_SELECTOR@0..3
             0: (empty)
             1: CSS_IDENTIFIER@0..3
@@ -298,7 +297,7 @@ CssRoot {
     1: CSS_QUALIFIED_RULE@26..52
       0: CSS_SELECTOR_LIST@26..50
         0: CSS_COMPOUND_SELECTOR@26..50
-          0: (empty)
+          0: CSS_NESTED_SELECTOR_LIST@26..26
           1: CSS_UNIVERSAL_SELECTOR@26..28
             0: (empty)
             1: STAR@26..28 "*" [Newline("\n")] []
@@ -326,7 +325,7 @@ CssRoot {
     2: CSS_QUALIFIED_RULE@52..77
       0: CSS_SELECTOR_LIST@52..75
         0: CSS_COMPOUND_SELECTOR@52..75
-          0: (empty)
+          0: CSS_NESTED_SELECTOR_LIST@52..52
           1: (empty)
           2: CSS_SUB_SELECTOR_LIST@52..75
             0: CSS_CLASS_SELECTOR@52..59
@@ -352,7 +351,7 @@ CssRoot {
     3: CSS_QUALIFIED_RULE@77..152
       0: CSS_SELECTOR_LIST@77..150
         0: CSS_COMPOUND_SELECTOR@77..102
-          0: (empty)
+          0: CSS_NESTED_SELECTOR_LIST@77..77
           1: CSS_TYPE_SELECTOR@77..82
             0: (empty)
             1: CSS_IDENTIFIER@77..82
@@ -376,7 +375,7 @@ CssRoot {
                 0: IDENT@100..102 "id" [] []
         1: COMMA@102..104 "," [] [Whitespace(" ")]
         2: CSS_COMPOUND_SELECTOR@104..126
-          0: (empty)
+          0: CSS_NESTED_SELECTOR_LIST@104..104
           1: CSS_UNIVERSAL_SELECTOR@104..105
             0: (empty)
             1: STAR@104..105 "*" [] []
@@ -399,7 +398,7 @@ CssRoot {
                 0: IDENT@123..126 "id1" [] []
         3: COMMA@126..128 "," [] [Whitespace(" ")]
         4: CSS_COMPOUND_SELECTOR@128..150
-          0: (empty)
+          0: CSS_NESTED_SELECTOR_LIST@128..128
           1: (empty)
           2: CSS_SUB_SELECTOR_LIST@128..150
             0: CSS_CLASS_SELECTOR@128..134
@@ -425,5 +424,3 @@ CssRoot {
   2: EOF@152..153 "" [Newline("\n")] []
 
 ```
-
-

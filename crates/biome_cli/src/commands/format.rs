@@ -10,7 +10,7 @@ use crate::{
 use biome_configuration::vcs::PartialVcsConfiguration;
 use biome_configuration::{
     PartialCssFormatter, PartialFilesConfiguration, PartialFormatterConfiguration,
-    PartialJavascriptFormatter, PartialJsonFormatter,
+    PartialGraphqlFormatter, PartialJavascriptFormatter, PartialJsonFormatter,
 };
 use biome_console::{markup, ConsoleExt};
 use biome_deserialize::Merge;
@@ -27,6 +27,7 @@ pub(crate) struct FormatCommandPayload {
     pub(crate) javascript_formatter: Option<PartialJavascriptFormatter>,
     pub(crate) json_formatter: Option<PartialJsonFormatter>,
     pub(crate) css_formatter: Option<PartialCssFormatter>,
+    pub(crate) graphql_formatter: Option<PartialGraphqlFormatter>,
     pub(crate) formatter_configuration: Option<PartialFormatterConfiguration>,
     pub(crate) vcs_configuration: Option<PartialVcsConfiguration>,
     pub(crate) files_configuration: Option<PartialFilesConfiguration>,
@@ -57,6 +58,7 @@ pub(crate) fn format(
         fix,
         mut json_formatter,
         css_formatter,
+        graphql_formatter,
         since,
         staged,
         changed,
@@ -196,6 +198,11 @@ pub(crate) fn format(
         let css = configuration.css.get_or_insert_with(Default::default);
         css.formatter.merge_with(css_formatter);
     }
+    if graphql_formatter.is_some() {
+        let graphql = configuration.graphql.get_or_insert_with(Default::default);
+        graphql.formatter.merge_with(graphql_formatter);
+    }
+
     if javascript_formatter.is_some() {
         let javascript = configuration
             .javascript

@@ -42,7 +42,8 @@ pub(crate) fn traverse(
             TraversalMode::Check { .. }
             | TraversalMode::Lint { .. }
             | TraversalMode::Format { .. }
-            | TraversalMode::CI { .. } => {
+            | TraversalMode::CI { .. }
+            | TraversalMode::Search { .. } => {
                 // If `--staged` or `--changed` is specified, it's acceptable for them to be empty, so ignore it.
                 if !execution.is_vcs_targeted() {
                     match current_dir() {
@@ -583,7 +584,7 @@ impl<'ctx, 'app> TraversalContext for TraversalOptions<'ctx, 'app> {
             TraversalMode::Lint { .. } => file_features.supports_lint(),
             // Imagine if Biome can't handle its own configuration file...
             TraversalMode::Migrate { .. } => true,
-            TraversalMode::Search { .. } => false,
+            TraversalMode::Search { .. } => file_features.supports_search(),
         }
     }
 
