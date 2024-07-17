@@ -5,3 +5,6 @@ type D = {
 	a: string
  b: number
 }
+type E = {
+ with: { 'resolution-mode': 'import' }
+}
