@@ -141,9 +141,15 @@ impl GitLabDiagnosticBuilder {
         let check_name = self.check_name(&value).unwrap_or_default();
         let path = self.path(&value).unwrap_or_default();
         let line = self.line(&value).map_or(1, |line| max(line, 1));
-        let source_code = self.source_code(&value).unwrap_or_default();
         let fingerprint = self
-            .ensure_fingerprint_uniqueness(self.fingerprint(&check_name, &path, &source_code), 0)
+            .ensure_fingerprint_uniqueness(
+                calculate_hash(&Fingerprint {
+                    check_name: check_name.as_str(),
+                    path: path.as_str(),
+                    code: self.source_code(&value).unwrap_or_default().as_str(),
+                }),
+                0,
+            )
             .to_string();
 
         GitLabDiagnostic {
@@ -171,20 +177,6 @@ impl GitLabDiagnosticBuilder {
         let span = location.span?;
 
         Some(source_code.text[span].to_string())
-    }
-
-    /// Generates a fingerprint for a diagnostic.
-    fn fingerprint(&self, check_name: &String, path: &String, code: &String) -> u64 {
-        let mut hasher = DefaultHasher::new();
-
-        // Including the source code in our hash leads to more stable
-        // fingerprints. If you instead rely on e.g. the line number and change
-        // the first line of a file, all of its fingerprint would change.
-        code.hash(&mut hasher);
-        check_name.hash(&mut hasher);
-        path.hash(&mut hasher);
-
-        hasher.finish()
     }
 
     /// Enforces uniqueness of generated fingerprints in the context of a
@@ -236,6 +228,27 @@ impl GitLabDiagnosticBuilder {
         buf.iter()
             .enumerate()
             .find(|(_, line_offset)| **line_offset >= diagnostic_offset)
-            .map(|(line_number, _)| u32::try_from(line_number).unwrap())
+            .map(|(line_number, _)| match u32::try_from(line_number) {
+                Ok(number) => Some(number),
+                Err(_) => None,
+            })
+            .flatten()
     }
+}
+
+#[derive(Hash)]
+struct Fingerprint<'a> {
+    // Including the source code in our hash leads to more stable
+    // fingerprints. If you instead rely on e.g. the line number and change
+    // the first line of a file, all of its fingerprint would change.
+    code: &'a str,
+    check_name: &'a str,
+    path: &'a str,
+    salt: u64,
+}
+
+fn calculate_hash<T: Hash>(t: &T) -> u64 {
+    let mut s = DefaultHasher::new();
+    t.hash(&mut s);
+    s.finish()
 }
