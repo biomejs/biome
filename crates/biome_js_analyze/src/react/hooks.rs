@@ -152,6 +152,21 @@ pub(crate) fn is_react_hook_call(call: &JsCallExpression) -> bool {
         return false;
     };
 
+    // HACK: jest has some functions that start with `use` and are not hooks
+    if let Some(expr) = call
+        .callee()
+        .ok()
+        .and_then(|callee| callee.as_js_static_member_expression().cloned())
+        .and_then(|member| member.object().ok())
+        .and_then(|object| object.as_js_identifier_expression().cloned())
+        .and_then(|ident| ident.name().ok())
+        .and_then(|name| name.value_token().ok())
+    {
+        if expr.text_trimmed() == "jest" {
+            return false;
+        }
+    }
+
     is_react_hook(name.text_trimmed())
 }
 

@@ -66,6 +66,7 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
   Contributed by @Conaclos
 
 - Add [nursery/noIrregularWhitespace](https://biomejs.dev/linter/rules/no-irregular-whitespace). Contributed by @michellocana
+- Add [nursery/useTrimStartEnd](https://biomejs.dev/linter/rules/use-trim-start-end/). Contributed by @chansuke
 
 #### Enhancements
 
@@ -103,6 +104,20 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 - `noExcessiveNestedTestSuites`: Fix another edge case where the rule would alert on heavily nested zod schemas. Contributed by @dyc3
 
 - `noExtraNonNullAssertion` no longer reports a single non-null assertion enclosed in parentheses ([#3352](https://github.com/biomejs/biome/issues/3352)). Contributed by @Conaclos
+
+- `useAdjacentOverloadSignatures` no longer reports a `#private` class member and a public class member that share the same name ([#3309](https://github.com/biomejs/biome/issues/3309)).
+
+  The following code is no longer reported:
+
+  ```js
+  class C {
+    #f() {}
+    g() {}
+    f() {}
+  }
+  ```
+
+  Contributed by @Conaclos
 
 
 ### Parser

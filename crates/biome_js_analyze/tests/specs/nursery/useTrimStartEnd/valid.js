@@ -1,9 +1,3 @@
----
-source: crates/biome_js_analyze/tests/spec_tests.rs
-expression: valid.js
----
-# Input
-```jsx
 const foo = bar.trimStart();
 const foo = bar.trimEnd();
 bar.trimStart?.()
@@ -32,5 +26,3 @@ foo.trimLeft.bar(),
 bar['trimStart']()
 bar["trimStart"]()
 bar[`trimStart`]()
-
-```
