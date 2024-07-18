@@ -13,7 +13,7 @@ declare_lint_rule! {
     /// ### Invalid
     ///
     /// ```css,expect_diagnostic
-    /// @value red: #FF0000
+    /// @value red: #FF0000;
     /// ```
     ///
     /// ### Valid
