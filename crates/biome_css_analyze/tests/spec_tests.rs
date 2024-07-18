@@ -43,6 +43,15 @@ fn run_test(input: &'static str, _: &str, _: &str, _: &str) {
     let mut snapshot = String::new();
     let extension = input_file.extension().unwrap_or_default();
 
+    let parser_options = if file_name.ends_with(".module.css") {
+        CssParserOptions {
+            css_modules: true,
+            ..CssParserOptions::default()
+        }
+    } else {
+        CssParserOptions::default()
+    };
+
     let input_code = read_to_string(input_file)
         .unwrap_or_else(|err| panic!("failed to read {input_file:?}: {err:?}"));
     let quantity_diagnostics = if let Some(scripts) = scripts_from_json(extension, &input_code) {
@@ -55,7 +64,7 @@ fn run_test(input: &'static str, _: &str, _: &str, _: &str) {
                 file_name,
                 input_file,
                 CheckActionType::Lint,
-                CssParserOptions::default(),
+                parser_options,
             );
         }
 
@@ -72,7 +81,7 @@ fn run_test(input: &'static str, _: &str, _: &str, _: &str) {
             file_name,
             input_file,
             CheckActionType::Lint,
-            CssParserOptions::default(),
+            parser_options,
         )
     };
 

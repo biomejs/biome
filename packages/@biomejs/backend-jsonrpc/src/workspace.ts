@@ -1186,6 +1186,10 @@ export interface Nursery {
 	 */
 	noUselessUndefinedInitialization?: RuleFixConfiguration_for_Null;
 	/**
+	 * Disallow use of @value rule in css modules.
+	 */
+	noValueAtRule?: RuleConfiguration_for_Null;
+	/**
 	 * Disallow the use of yoda expressions.
 	 */
 	noYodaExpression?: RuleFixConfiguration_for_Null;
@@ -2548,6 +2552,7 @@ export type Category =
 	| "lint/nursery/noUnusedFunctionParameters"
 	| "lint/nursery/noUselessStringConcat"
 	| "lint/nursery/noUselessUndefinedInitialization"
+	| "lint/nursery/noValueAtRule"
 	| "lint/nursery/noYodaExpression"
 	| "lint/nursery/useAdjacentOverloadSignatures"
 	| "lint/nursery/useBiomeSuppressionComment"
