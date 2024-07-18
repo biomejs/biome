@@ -36,7 +36,7 @@ struct Location {
 #[derive(Serialize)]
 struct Lines {
     /// The line on which the code quality violation occurred.
-    begin: u8,
+    begin: u32,
 }
 
 #[derive(Serialize)]
@@ -228,7 +228,7 @@ impl GitLabDiagnosticBuilder {
     }
 
     /// Extracts the line number from the diagnostic.
-    fn line(&self, value: &biome_diagnostics::error::Error) -> Option<u8> {
+    fn line(&self, value: &biome_diagnostics::error::Error) -> Option<u32> {
         let location = value.location();
         let buf = LineIndexBuf::from_source_text(location.source_code?.text);
         let diagnostic_offset = location.span?.start();
@@ -236,6 +236,6 @@ impl GitLabDiagnosticBuilder {
         buf.iter()
             .enumerate()
             .find(|(_, line_offset)| **line_offset >= diagnostic_offset)
-            .map(|(line_number, _)| u8::try_from(line_number).unwrap())
+            .map(|(line_number, _)| u32::try_from(line_number).unwrap())
     }
 }
