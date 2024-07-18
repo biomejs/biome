@@ -5,7 +5,6 @@ use biome_fs::MemoryFileSystem;
 use biome_service::DynRef;
 use bpaf::Args;
 use std::path::{Path, PathBuf};
-use std::u8;
 
 const TEST_CONTENTS: &str = "debugger;";
 
