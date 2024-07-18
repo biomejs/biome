@@ -528,7 +528,6 @@ pub fn execute_mode(
             }
             ReportMode::GitLab => {
                 let reporter = GitLabReporter {
-                    summary: summary_result,
                     diagnostics: DiagnosticsPayload {
                         verbose: cli_options.verbose,
                         diagnostic_level: cli_options.diagnostic_level,

@@ -64,12 +64,10 @@ impl From<biome_diagnostics::diagnostic::Severity> for GitLabSeverity {
 pub struct GitLabReporter {
     pub execution: Execution,
     pub diagnostics: DiagnosticsPayload,
-    pub summary: TraversalSummary,
 }
 
 impl Reporter for GitLabReporter {
     fn write(self, visitor: &mut dyn ReporterVisitor) -> std::io::Result<()> {
-        visitor.report_summary(&self.execution, self.summary)?;
         visitor.report_diagnostics(&self.execution, self.diagnostics)?;
         Ok(())
     }
