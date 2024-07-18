@@ -1,11 +1,11 @@
 use crate::{DiagnosticsPayload, Execution, Reporter, ReporterVisitor, TraversalSummary};
 use biome_console::{markup, Console, ConsoleExt};
 use biome_diagnostics::{LineIndexBuf, PrintDescription};
+use path_absolutize::Absolutize;
 use serde::Serialize;
 use std::{
     cmp::max,
     collections::HashSet,
-    fs::canonicalize,
     hash::{DefaultHasher, Hash, Hasher},
     path::{Path, PathBuf},
 };
@@ -216,7 +216,7 @@ impl GitLabDiagnosticBuilder {
             return Some(path);
         };
 
-        let Ok(resolved) = canonicalize(Path::new(path.as_str())) else {
+        let Ok(resolved) = Path::new(path.as_str()).absolutize() else {
             return Some(path);
         };
 

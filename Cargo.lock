@@ -175,6 +175,7 @@ dependencies = [
  "lazy_static",
  "libc",
  "mimalloc",
+ "path-absolutize",
  "quick-junit",
  "rayon",
  "regex",
