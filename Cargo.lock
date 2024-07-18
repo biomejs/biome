@@ -3455,6 +3455,7 @@ dependencies = [
 name = "tests_macros"
 version = "0.0.0"
 dependencies = [
+ "biome_string_case",
  "case",
  "globwalk",
  "proc-macro-error",
