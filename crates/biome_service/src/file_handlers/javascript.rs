@@ -1,7 +1,7 @@
 use super::{
     search, AnalyzerCapabilities, CodeActionsParams, DebugCapabilities, ExtensionHandler,
     FormatterCapabilities, LintParams, LintResults, ParseResult, ParserCapabilities,
-    SearchCapabilities,
+    SearchCapabilities, SyntaxVisitor,
 };
 use crate::configuration::to_analyzer_rules;
 use crate::diagnostics::extension_error;
@@ -446,13 +446,10 @@ pub(crate) fn lint(params: LintParams) -> LintResults {
                 if organize_imports_enabled && !params.categories.is_syntax() {
                     rule_filter_list.push(RuleFilter::Rule("correctness", "organizeImports"));
                 }
-                rule_filter_list.push(RuleFilter::Rule(
-                    "correctness",
-                    "noDuplicatePrivateClassMembers",
-                ));
-                rule_filter_list.push(RuleFilter::Rule("correctness", "noInitializerWithDefinite"));
-                rule_filter_list.push(RuleFilter::Rule("correctness", "noSuperWithoutExtends"));
-                rule_filter_list.push(RuleFilter::Rule("nursery", "noSuperWithoutExtends"));
+                let mut syntax_visitor = SyntaxVisitor::default();
+                visit_registry(&mut syntax_visitor);
+                rule_filter_list.extend(syntax_visitor.enabled_rules);
+
                 rule_filter_list
             };
             let disabled_rules = params
