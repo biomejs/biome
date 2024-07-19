@@ -3,6 +3,7 @@ use std::ffi::OsStr;
 
 use super::{
     CodeActionsParams, DocumentFileSource, ExtensionHandler, ParseResult, SearchCapabilities,
+    SyntaxVisitor,
 };
 use crate::configuration::to_analyzer_rules;
 use crate::file_handlers::DebugCapabilities;
@@ -345,7 +346,7 @@ fn lint(params: LintParams) -> LintResults {
             }
 
             let has_only_filter = !params.only.is_empty();
-            let enabled_rules = if has_only_filter {
+            let mut enabled_rules = if has_only_filter {
                 params
                     .only
                     .into_iter()
@@ -359,6 +360,9 @@ fn lint(params: LintParams) -> LintResults {
                     .into_iter()
                     .collect::<Vec<_>>()
             };
+            let mut syntax_visitor = SyntaxVisitor::default();
+            biome_js_analyze::visit_registry(&mut syntax_visitor);
+            enabled_rules.extend(syntax_visitor.enabled_rules);
             let disabled_rules = params
                 .skip
                 .into_iter()

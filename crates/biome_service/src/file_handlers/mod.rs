@@ -14,20 +14,23 @@ use crate::{
     workspace::{FixFileResult, GetSyntaxTreeResult, PullActionsResult, RenameResult},
     WorkspaceError,
 };
-use biome_analyze::{AnalyzerDiagnostic, RuleCategories};
+use biome_analyze::{
+    AnalyzerDiagnostic, GroupCategory, Queryable, RegistryVisitor, Rule, RuleCategories,
+    RuleCategory, RuleFilter, RuleGroup,
+};
 use biome_configuration::linter::RuleSelector;
 use biome_configuration::Rules;
 use biome_console::fmt::Formatter;
 use biome_console::markup;
-use biome_css_syntax::CssFileSource;
+use biome_css_syntax::{CssFileSource, CssLanguage};
 use biome_diagnostics::{Diagnostic, Severity};
 use biome_formatter::Printed;
 use biome_fs::BiomePath;
-use biome_graphql_syntax::GraphqlFileSource;
+use biome_graphql_syntax::{GraphqlFileSource, GraphqlLanguage};
 use biome_grit_patterns::{GritQuery, GritQueryResult, GritTargetFile};
 use biome_js_parser::{parse, JsParserOptions};
-use biome_js_syntax::{EmbeddingKind, JsFileSource, Language, TextRange, TextSize};
-use biome_json_syntax::JsonFileSource;
+use biome_js_syntax::{EmbeddingKind, JsFileSource, JsLanguage, Language, TextRange, TextSize};
+use biome_json_syntax::{JsonFileSource, JsonLanguage};
 use biome_parser::AnyParse;
 use biome_project::PackageJson;
 use biome_rowan::{FileSourceError, NodeCache};
@@ -642,6 +645,90 @@ fn test_svelte_script_lang() {
         parse_lang_from_script_opening_tag(SVELTE_CONTEXT_MODULE_TS_SCRIPT_OPENING_TAG)
             .is_typescript()
     );
+}
+
+/// Type meant to register all the syntax rules for each language supported by Biome
+///
+/// When a new language is introduced, it must be implemented it. Syntax rules aren't negotiable via configuration, so it's safe
+/// to pull all of them.
+#[derive(Default, Debug)]
+pub(crate) struct SyntaxVisitor<'a> {
+    pub(crate) enabled_rules: Vec<RuleFilter<'a>>,
+}
+
+impl<'a> RegistryVisitor<JsLanguage> for SyntaxVisitor<'a> {
+    fn record_category<C: GroupCategory<Language = JsLanguage>>(&mut self) {
+        if C::CATEGORY == RuleCategory::Syntax {
+            C::record_groups(self)
+        }
+    }
+
+    fn record_rule<R>(&mut self)
+    where
+        R: Rule<Options: Default, Query: Queryable<Language = JsLanguage, Output: Clone>> + 'static,
+    {
+        self.enabled_rules.push(RuleFilter::Rule(
+            <R::Group as RuleGroup>::NAME,
+            R::METADATA.name,
+        ))
+    }
+}
+
+impl<'a> RegistryVisitor<JsonLanguage> for SyntaxVisitor<'a> {
+    fn record_category<C: GroupCategory<Language = JsonLanguage>>(&mut self) {
+        if C::CATEGORY == RuleCategory::Syntax {
+            C::record_groups(self)
+        }
+    }
+
+    fn record_rule<R>(&mut self)
+    where
+        R: Rule<Options: Default, Query: Queryable<Language = JsonLanguage, Output: Clone>>
+            + 'static,
+    {
+        self.enabled_rules.push(RuleFilter::Rule(
+            <R::Group as RuleGroup>::NAME,
+            R::METADATA.name,
+        ))
+    }
+}
+
+impl<'a> RegistryVisitor<CssLanguage> for SyntaxVisitor<'a> {
+    fn record_category<C: GroupCategory<Language = CssLanguage>>(&mut self) {
+        if C::CATEGORY == RuleCategory::Syntax {
+            C::record_groups(self)
+        }
+    }
+
+    fn record_rule<R>(&mut self)
+    where
+        R: Rule<Options: Default, Query: Queryable<Language = CssLanguage, Output: Clone>>
+            + 'static,
+    {
+        self.enabled_rules.push(RuleFilter::Rule(
+            <R::Group as RuleGroup>::NAME,
+            R::METADATA.name,
+        ))
+    }
+}
+
+impl<'a> RegistryVisitor<GraphqlLanguage> for SyntaxVisitor<'a> {
+    fn record_category<C: GroupCategory<Language = GraphqlLanguage>>(&mut self) {
+        if C::CATEGORY == RuleCategory::Syntax {
+            C::record_groups(self)
+        }
+    }
+
+    fn record_rule<R>(&mut self)
+    where
+        R: Rule<Options: Default, Query: Queryable<Language = GraphqlLanguage, Output: Clone>>
+            + 'static,
+    {
+        self.enabled_rules.push(RuleFilter::Rule(
+            <R::Group as RuleGroup>::NAME,
+            R::METADATA.name,
+        ))
+    }
 }
 
 #[test]

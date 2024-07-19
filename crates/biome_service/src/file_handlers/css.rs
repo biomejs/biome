@@ -1,6 +1,6 @@
 use super::{
     is_diagnostic_error, CodeActionsParams, ExtensionHandler, FixAllParams, LintParams,
-    LintResults, ParseResult, SearchCapabilities,
+    LintResults, ParseResult, SearchCapabilities, SyntaxVisitor,
 };
 use crate::configuration::to_analyzer_rules;
 use crate::file_handlers::DebugCapabilities;
@@ -31,6 +31,7 @@ use biome_formatter::{
     FormatError, IndentStyle, IndentWidth, LineEnding, LineWidth, Printed, QuoteStyle,
 };
 use biome_fs::BiomePath;
+use biome_js_analyze::visit_registry;
 use biome_parser::AnyParse;
 use biome_rowan::{AstNode, NodeCache};
 use biome_rowan::{TextRange, TextSize, TokenAtOffset};
@@ -342,7 +343,7 @@ fn lint(params: LintParams) -> LintResults {
             let has_only_filter = !params.only.is_empty();
             let mut rules = None;
 
-            let enabled_rules = if let Some(settings) = params.workspace.settings() {
+            let mut enabled_rules = if let Some(settings) = params.workspace.settings() {
                 // Compute final rules (taking `overrides` into account)
                 rules = settings.as_rules(params.path.as_path());
 
@@ -363,6 +364,10 @@ fn lint(params: LintParams) -> LintResults {
             } else {
                 vec![]
             };
+
+            let mut syntax_visitor = SyntaxVisitor::default();
+            visit_registry(&mut syntax_visitor);
+            enabled_rules.extend(syntax_visitor.enabled_rules);
 
             let disabled_rules = params
                 .skip
