@@ -15,6 +15,7 @@ use biome_js_factory::make::{
     js_literal_member_name, js_string_literal, js_string_literal_expression,
     js_string_literal_single_quotes, js_template_chunk, js_template_chunk_element, jsx_string,
 };
+use biome_js_syntax::JsTemplateElement;
 use biome_rowan::{AstNode, BatchMutationExt};
 use lazy_static::lazy_static;
 use presets::get_config_preset;
@@ -161,7 +162,19 @@ impl Rule for UseSortedClasses {
 
         if node.should_visit(options)? {
             if let Some(value) = node.value() {
-                let sorted_value = sort_class_name(&value, &SORT_CONFIG);
+                // in some case we need to ignore the last element
+                // for example, in the case of template literals <div class={`mx-2 m-5 bar-${variable}`} /> we should ignore the last element
+                let ignore_last =
+                    if let AnyClassStringLike::JsTemplateChunkElement(_template) = node {
+                        node.syntax()
+                            .next_sibling()
+                            .and_then(|sibling| JsTemplateElement::cast_ref(&sibling))
+                            .is_some()
+                    } else {
+                        false
+                    };
+
+                let sorted_value = sort_class_name(&value, &SORT_CONFIG, ignore_last);
                 if value.text() != sorted_value {
                     return Some(sorted_value);
                 }

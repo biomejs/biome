@@ -126,10 +126,25 @@ fn compare_classes(a: &ClassInfo, b: &ClassInfo) -> Ordering {
 }
 
 /// Sort the given class string according to the given sort config.
-pub fn sort_class_name(class_name: &TokenText, sort_config: &SortConfig) -> String {
+pub fn sort_class_name(
+    class_name: &TokenText,
+    sort_config: &SortConfig,
+    ignore_last: bool,
+) -> String {
     // Obtain classes by splitting the class string by whitespace.
-    let classes = class_name.split_whitespace().collect::<Vec<&str>>();
+    let mut classes = class_name.split_whitespace().collect::<Vec<&str>>();
     let classes_len = classes.len();
+
+    // If the last class should be ignored, store it and remove it from the classes list.
+    let last_class_strs = if ignore_last {
+        classes[classes_len - 1]
+    } else {
+        ""
+    };
+
+    if ignore_last {
+        classes.pop();
+    }
 
     // Separate custom classes from recognized classes, and compute the recognized classes' info.
     // Custom classes always go first, in the order that they appear in.
@@ -162,7 +177,13 @@ pub fn sort_class_name(class_name: &TokenText, sort_config: &SortConfig) -> Stri
             .map(|class_info| class_info.text.as_str()),
     );
 
+    // Add the last class back if it was ignored.
+    if last_class_strs != "" {
+        sorted_classes.push(last_class_strs);
+    }
+
     let mut result = sorted_classes.join(" ");
+
     if classes_len > 0 {
         // restore front space
         if class_name.starts_with(' ') {
