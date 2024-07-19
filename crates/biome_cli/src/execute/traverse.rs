@@ -22,7 +22,7 @@ use std::{
     panic::catch_unwind,
     path::{Path, PathBuf},
     sync::{
-        atomic::{AtomicU16, AtomicUsize, Ordering},
+        atomic::{AtomicUsize, Ordering},
         Once,
     },
     thread,
@@ -74,7 +74,7 @@ pub(crate) fn traverse(
     let workspace = &*session.app.workspace;
 
     let max_diagnostics = execution.get_max_diagnostics();
-    let remaining_diagnostics = AtomicU16::new(max_diagnostics);
+    let remaining_diagnostics = AtomicU32::new(max_diagnostics);
 
     let printer = DiagnosticsPrinter::new(execution)
         .with_verbose(cli_options.verbose)
@@ -212,8 +212,8 @@ impl<'ctx> DiagnosticsPrinter<'ctx> {
         self
     }
 
-    fn with_max_diagnostics(mut self, value: u16) -> Self {
-        self.max_diagnostics = value as u32;
+    fn with_max_diagnostics(mut self, value: u32) -> Self {
+        self.max_diagnostics = value;
         self
     }
 
@@ -482,7 +482,7 @@ pub(crate) struct TraversalOptions<'ctx, 'app> {
     pub(crate) messages: Sender<Message>,
     /// The approximate number of diagnostics the console will print before
     /// folding the rest into the "skipped diagnostics" counter
-    pub(crate) remaining_diagnostics: &'ctx AtomicU16,
+    pub(crate) remaining_diagnostics: &'ctx AtomicU32,
 }
 
 impl<'ctx, 'app> TraversalOptions<'ctx, 'app> {

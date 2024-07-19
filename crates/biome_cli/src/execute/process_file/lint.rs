@@ -70,7 +70,7 @@ pub(crate) fn lint_with_guard<'ctx>(
                         .with_syntax()
                         .with_lint()
                         .build(),
-                    max_diagnostics.into(),
+                    max_diagnostics,
                     only,
                     skip,
                 )
