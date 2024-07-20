@@ -1,0 +1,23 @@
+
+[package]
+authors.workspace    = true
+categories.workspace = true
+description          = "Biome's semantic model for GraphQL"
+edition.workspace    = true
+homepage.workspace   = true
+keywords.workspace   = true
+license.workspace    = true
+name                 = "biome_graphql_semantic"
+repository.workspace = true
+version              = "0.0.0"
+
+[lints]
+workspace = true
+
+[dependencies]
+biome_graphql_syntax = { workspace = true }
+biome_rowan          = { workspace = true }
+rustc-hash           = { workspace = true }
+
+[dev-dependencies]
+biome_graphql_parser = { path = "../biome_graphql_parser" }
