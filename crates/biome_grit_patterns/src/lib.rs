@@ -34,9 +34,10 @@ pub fn compile_pattern(
 ) -> Result<GritQuery, CompileError> {
     let parsed = parse_grit(source);
     if parsed.has_errors() {
-        return Err(CompileError::ParsePatternError(ParsePatternError {
-            diagnostics: parsed.into_diagnostics(),
-        }));
+        return Err(CompileError::ParsePatternError(
+            // TODO: We may want to preserve other diagnostics too.
+            parsed.into_diagnostics().remove(0),
+        ));
     }
 
     GritQuery::from_node(parsed.tree(), path, language)

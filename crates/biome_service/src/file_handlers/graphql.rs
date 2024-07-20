@@ -1,6 +1,6 @@
 use super::{
     is_diagnostic_error, CodeActionsParams, DocumentFileSource, ExtensionHandler, FixAllParams,
-    LintParams, LintResults, ParseResult, SearchCapabilities,
+    LintParams, LintResults, ParseResult, SearchCapabilities, SyntaxVisitor,
 };
 use crate::file_handlers::DebugCapabilities;
 use crate::file_handlers::{
@@ -29,6 +29,7 @@ use biome_graphql_formatter::context::GraphqlFormatOptions;
 use biome_graphql_formatter::format_node;
 use biome_graphql_parser::parse_graphql_with_cache;
 use biome_graphql_syntax::{GraphqlLanguage, GraphqlRoot, GraphqlSyntaxNode, TextRange, TextSize};
+use biome_js_analyze::visit_registry;
 use biome_parser::AnyParse;
 use biome_rowan::{AstNode, NodeCache, TokenAtOffset};
 use std::borrow::Cow;
@@ -300,7 +301,7 @@ fn lint(params: LintParams) -> LintResults {
             let has_only_filter = !params.only.is_empty();
             let mut rules = None;
 
-            let enabled_rules = if let Some(settings) = params.workspace.settings() {
+            let mut enabled_rules = if let Some(settings) = params.workspace.settings() {
                 // Compute final rules (taking `overrides` into account)
                 rules = settings.as_rules(params.path.as_path());
 
@@ -327,6 +328,10 @@ fn lint(params: LintParams) -> LintResults {
                 .into_iter()
                 .map(|selector| selector.into())
                 .collect::<Vec<_>>();
+
+            let mut syntax_visitor = SyntaxVisitor::default();
+            visit_registry(&mut syntax_visitor);
+            enabled_rules.extend(syntax_visitor.enabled_rules);
 
             let filter = AnalysisFilter {
                 categories: params.categories,

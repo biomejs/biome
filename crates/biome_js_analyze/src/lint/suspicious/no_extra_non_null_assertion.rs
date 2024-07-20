@@ -4,7 +4,8 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_js_syntax::{
-    AnyJsAssignment, AnyJsExpression, TsNonNullAssertionAssignment, TsNonNullAssertionExpression,
+    AnyJsAssignment, AnyJsExpression, JsSyntaxKind, TsNonNullAssertionAssignment,
+    TsNonNullAssertionExpression,
 };
 use biome_rowan::{declare_node_union, AstNode, BatchMutationExt};
 
@@ -80,14 +81,19 @@ impl Rule for NoExtraNonNullAssertion {
                 }
             }
             AnyTsNonNullAssertion::TsNonNullAssertionExpression(_) => {
-                let parent = node.parent::<AnyJsExpression>()?;
+                let parent = node
+                    .syntax()
+                    .ancestors()
+                    .skip(1)
+                    .find(|ancestor| ancestor.kind() != JsSyntaxKind::JS_PARENTHESIZED_EXPRESSION)
+                    .and_then(AnyJsExpression::cast)?;
 
                 // Cases considered as invalid:
                 // - TsNonNullAssertionAssignment > TsNonNullAssertionExpression
                 // - TsNonNullAssertionExpression > TsNonNullAssertionExpression
                 // - JsCallExpression[optional] > TsNonNullAssertionExpression
                 // - JsStaticMemberExpression[optional] > TsNonNullAssertionExpression
-                let has_extra_non_assertion = match parent.omit_parentheses() {
+                let has_extra_non_assertion = match parent {
                     AnyJsExpression::JsAssignmentExpression(expr) => expr
                         .left()
                         .ok()?

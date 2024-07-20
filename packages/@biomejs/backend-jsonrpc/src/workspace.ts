@@ -1186,6 +1186,10 @@ export interface Nursery {
 	 */
 	noUselessUndefinedInitialization?: RuleFixConfiguration_for_Null;
 	/**
+	 * Disallow use of @value rule in css modules.
+	 */
+	noValueAtRule?: RuleConfiguration_for_Null;
+	/**
 	 * Disallow the use of yoda expressions.
 	 */
 	noYodaExpression?: RuleFixConfiguration_for_Null;
@@ -1273,6 +1277,10 @@ export interface Nursery {
 	 * Require regex literals to be declared at the top level.
 	 */
 	useTopLevelRegex?: RuleConfiguration_for_Null;
+	/**
+	 * Enforce the use of String.trimStart() and String.trimEnd() over String.trimLeft() and String.trimRight().
+	 */
+	useTrimStartEnd?: RuleFixConfiguration_for_Null;
 	/**
 	 * Use valid values for the autocomplete attribute on input elements.
 	 */
@@ -2544,6 +2552,7 @@ export type Category =
 	| "lint/nursery/noUnusedFunctionParameters"
 	| "lint/nursery/noUselessStringConcat"
 	| "lint/nursery/noUselessUndefinedInitialization"
+	| "lint/nursery/noValueAtRule"
 	| "lint/nursery/noYodaExpression"
 	| "lint/nursery/useAdjacentOverloadSignatures"
 	| "lint/nursery/useBiomeSuppressionComment"
@@ -2567,6 +2576,7 @@ export type Category =
 	| "lint/nursery/useThrowNewError"
 	| "lint/nursery/useThrowOnlyError"
 	| "lint/nursery/useTopLevelRegex"
+	| "lint/nursery/useTrimStartEnd"
 	| "lint/nursery/useValidAutocomplete"
 	| "lint/performance/noAccumulatingSpread"
 	| "lint/performance/noBarrelFile"

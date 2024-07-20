@@ -4,8 +4,8 @@ use biome_analyze::{context::RuleContext, declare_lint_rule, Rule, RuleDiagnosti
 use biome_console::{markup, MarkupBuf};
 use biome_js_syntax::{
     AnyJsArrayElement, AnyJsAssignment, AnyJsAssignmentPattern, AnyJsCallArgument,
-    AnyJsClassMemberName, AnyJsDeclarationClause, AnyJsExportClause, AnyJsExportNamedSpecifier,
-    AnyJsExpression, AnyJsObjectMemberName, AnyJsTemplateElement, JsMethodObjectMember,
+    AnyJsDeclarationClause, AnyJsExportClause, AnyJsExportNamedSpecifier, AnyJsExpression,
+    AnyJsObjectMemberName, AnyJsTemplateElement, ClassMemberName, JsMethodObjectMember,
 };
 use biome_js_syntax::{
     AnyJsClassMember, AnyJsObjectMember, JsAssignmentExpression, JsCallExpression,
@@ -222,43 +222,14 @@ fn process_js_method_object_member(node: &JsMethodObjectMember) -> Option<RuleSt
 }
 
 fn process_js_class_member(node: &AnyJsClassMember) -> Option<RuleState> {
-    if let Some(AnyJsClassMemberName::JsPrivateClassMemberName(_)) = node.name().ok()? {
-        return None;
-    }
-    match node {
-        AnyJsClassMember::JsGetterClassMember(node) => {
-            if node.name().ok()?.name()? == "then" {
-                return Some(RuleState {
-                    range: node.name().ok()?.range(),
-                    message: NoThenPropertyMessage::Class,
-                });
-            }
+    let any_class_member_name = node.name().ok()??;
+    if let Some(ClassMemberName::Public(name)) = any_class_member_name.name() {
+        if name == "then" {
+            return Some(RuleState {
+                range: any_class_member_name.range(),
+                message: NoThenPropertyMessage::Class,
+            });
         }
-        AnyJsClassMember::JsMethodClassMember(node) => {
-            if node.name().ok()?.name()? == "then" {
-                return Some(RuleState {
-                    range: node.name().ok()?.range(),
-                    message: NoThenPropertyMessage::Class,
-                });
-            }
-        }
-        AnyJsClassMember::JsPropertyClassMember(node) => {
-            if node.name().ok()?.name()? == "then" {
-                return Some(RuleState {
-                    range: node.name().ok()?.range(),
-                    message: NoThenPropertyMessage::Class,
-                });
-            }
-        }
-        AnyJsClassMember::JsSetterClassMember(node) => {
-            if node.name().ok()?.name()? == "then" {
-                return Some(RuleState {
-                    range: node.name().ok()?.range(),
-                    message: NoThenPropertyMessage::Class,
-                });
-            }
-        }
-        _ => return None,
     }
     None
 }

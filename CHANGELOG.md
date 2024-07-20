@@ -20,9 +20,14 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 ### CLI
 
+#### Bug fixes
+
+- When a `--reporter` is provided, and it's different from the default one, the value provided by via `--max-diagnostics` is ignored and **the limit is lifted**. Contributed by @ematipico
+
 #### New features
 
-- Add `--graphql-linter-enabled` option, to control whether the linter should enabled or not for GraphQL files. Contributed by @ematipico
+- Add `--graphql-linter-enabled` option, to control whether the linter should be enabled or not for GraphQL files. Contributed by @ematipico
+- The option `--max-diagnostics` now accept a `none` value, which lifts the limit of diagnostics shown. Contributed by @ematipico
 
 ### Configuration
 
@@ -40,6 +45,10 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 ### Formatter
 
+#### Bug fixes
+
+- Keep the parentheses around `infer` declarations in type unions and type intersections ([#3419](https://github.com/biomejs/biome/issues/3419)). Contributed by @Conaclos
+
 ### JavaScript APIs
 
 ### Linter
@@ -48,7 +57,7 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 - Add support for GraphQL linting. Contributed by @ematipico
 - Add [nursery/noDynamicNamespaceImportAccess](https://biomejs.dev/linter/no-dynamic-namespace-import-access/). Contributed by @minht11
-- [noUndeclaredVariables](https://biomejs.dev/linter/rules/no-undeclared-variables/) n longer report a direct reference to an enum member ([#2974](https://github.com/biomejs/biome/issues/2974)).
+- [noUndeclaredVariables](https://biomejs.dev/linter/rules/no-undeclared-variables/) no longer reports a direct reference to an enum member ([#2974](https://github.com/biomejs/biome/issues/2974)).
 
   In the following code, the `A` reference is no longer reported as an undeclared variable.
 
@@ -62,6 +71,7 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
   Contributed by @Conaclos
 
 - Add [nursery/noIrregularWhitespace](https://biomejs.dev/linter/rules/no-irregular-whitespace). Contributed by @michellocana
+- Add [nursery/useTrimStartEnd](https://biomejs.dev/linter/rules/use-trim-start-end/). Contributed by @chansuke
 
 #### Enhancements
 
@@ -98,6 +108,24 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 - Fix [[#3149](https://github.com/biomejs/biome/issues/3149)] crashes that occurred when applying the `noUselessFragments` unsafe fixes in certain scenarios. Contributed by @unvalley
 - `noExcessiveNestedTestSuites`: Fix another edge case where the rule would alert on heavily nested zod schemas. Contributed by @dyc3
 
+- `noExtraNonNullAssertion` no longer reports a single non-null assertion enclosed in parentheses ([#3352](https://github.com/biomejs/biome/issues/3352)). Contributed by @Conaclos
+
+- `useAdjacentOverloadSignatures` no longer reports a `#private` class member and a public class member that share the same name ([#3309](https://github.com/biomejs/biome/issues/3309)).
+
+  The following code is no longer reported:
+
+  ```js
+  class C {
+    #f() {}
+    g() {}
+    f() {}
+  }
+  ```
+
+  Contributed by @Conaclos
+
+- [useNamingConvention](https://biomejs.dev/linter/rules/use-naming-convention/) now accepts applying custom convention on abstract classes. Contributed by @Conaclos
+
 ### Parser
 
 #### Bug fixes
@@ -111,7 +139,7 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
   }
 }
 ```
-- Fix [#3410](https://github.com/biomejs/biome/issues/3410) by correctly parsing break statements containing keywords. 
+- Fix [#3410](https://github.com/biomejs/biome/issues/3410) by correctly parsing break statements containing keywords.
   ```js
   out: while (true) {
     break out;

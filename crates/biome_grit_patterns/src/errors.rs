@@ -7,34 +7,10 @@ use biome_parser::diagnostic::ParseDiagnostic;
 use biome_rowan::SyntaxError;
 use grit_util::ByteRange;
 
-#[derive(Debug, Diagnostic)]
-#[diagnostic(
-    category = "parse",
-    severity = Error,
-    message = "Error(s) parsing pattern",
-)]
-pub struct ParsePatternError {
-    pub diagnostics: Vec<ParseDiagnostic>,
-}
-
-#[derive(Debug, Diagnostic)]
-#[diagnostic(
-    category = "parse",
-    severity = Error,
-    message = "Error(s) parsing pattern snippet",
-)]
-pub struct ParseSnippetError {
-    diagnostics: Vec<ParseDiagnostic>,
-}
-
-// TODO: We definitely need to improve diagnostics.
 #[derive(Debug)]
 pub enum CompileError {
     /// Indicates the (top-level) pattern could not be parsed.
-    ParsePatternError(ParsePatternError),
-
-    /// Indicates one of the pattern's snippets could not be parsed.
-    ParseSnippetError(ParseSnippetError),
+    ParsePatternError(ParseDiagnostic),
 
     /// Used for missing syntax nodes.
     MissingSyntaxNode,
@@ -66,6 +42,10 @@ pub enum CompileError {
     /// A pattern is required to compile a Grit query.
     MissingPattern,
 
+    /// A node inside a code snippet failed to be normalized for its
+    /// equivalence class.
+    NormalizationError,
+
     /// Bracketed metavariables are only allowed on the right-hand side of
     /// rewrite.
     InvalidBracketedMetavariable,
@@ -87,25 +67,9 @@ impl Diagnostic for CompileError {
 
     fn message(&self, fmt: &mut Formatter<'_>) -> std::io::Result<()> {
         match self {
-            CompileError::ParsePatternError(error) => {
-                fmt.write_markup(markup! { "Error parsing pattern" })?;
-                match error.diagnostics.first() {
-                    Some(diag) => {
-                        fmt.write_str(": ")?;
-                        diag.message(fmt)
-                    }
-                    None => Ok(()),
-                }
-            }
-            CompileError::ParseSnippetError(error) => {
-                fmt.write_markup(markup! { "Error parsing snippet" })?;
-                match error.diagnostics.first() {
-                    Some(diag) => {
-                        fmt.write_str(": ")?;
-                        diag.message(fmt)
-                    }
-                    None => Ok(()),
-                }
+            CompileError::ParsePatternError(diagnostic) => {
+                fmt.write_markup(markup! { "Error parsing pattern: " })?;
+                diagnostic.message(fmt)
             }
             CompileError::MissingSyntaxNode => {
                 fmt.write_markup(markup! { "A syntax node was missing" })
@@ -135,6 +99,9 @@ impl Diagnostic for CompileError {
                 fmt.write_markup(markup! { "Literal value out of range: "{{value}} })
             }
             CompileError::MissingPattern => fmt.write_markup(markup! { "Missing pattern" }),
+            CompileError::NormalizationError => {
+                fmt.write_markup(markup! { "Could not normalize node in code snippet" })
+            }
             CompileError::InvalidBracketedMetavariable => {
                 fmt.write_markup(markup! { "Invalid bracketed metavariable" })
             }
@@ -152,25 +119,14 @@ impl Diagnostic for CompileError {
 
     fn location(&self) -> Location<'_> {
         match self {
-            CompileError::ParsePatternError(error) => error
-                .diagnostics
-                .first()
-                .map(Diagnostic::location)
-                .unwrap_or_default(),
+            CompileError::ParsePatternError(diagnostic) => diagnostic.location(),
             _ => Location::default(),
         }
     }
 
     fn description(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            CompileError::ParsePatternError(error) => match error.diagnostics.first() {
-                Some(diag) => diag.description(fmt),
-                None => Ok(()),
-            },
-            CompileError::ParseSnippetError(error) => match error.diagnostics.first() {
-                Some(diag) => diag.description(fmt),
-                None => Ok(()),
-            },
+            CompileError::ParsePatternError(diagnostic) => diagnostic.description(fmt),
             CompileError::FunctionArgument(error) => error.fmt(fmt),
             _ => Ok(()),
         }

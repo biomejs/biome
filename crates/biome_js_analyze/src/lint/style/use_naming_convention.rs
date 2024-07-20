@@ -1062,28 +1062,6 @@ pub struct Selector {
 impl Selector {
     /// Returns an error if the current selector is not valid.
     pub fn check(self) -> Result<(), InvalidSelector> {
-        if self.modifiers.intersects(Modifier::CLASS_MEMBER) {
-            let accessibility = Modifier::Private | Modifier::Protected;
-            if *self.modifiers & accessibility == accessibility {
-                return Err(InvalidSelector::IncompatibleModifiers(
-                    Modifier::Private,
-                    Modifier::Protected,
-                ));
-            }
-            let abstarct_or_static = Modifier::Abstract | Modifier::Static;
-            if *self.modifiers & abstarct_or_static == abstarct_or_static {
-                return Err(InvalidSelector::IncompatibleModifiers(
-                    Modifier::Abstract,
-                    Modifier::Static,
-                ));
-            }
-            if !Kind::ClassMember.contains(self.kind) {
-                let modifiers = self.modifiers.0 & Modifier::CLASS_MEMBER;
-                if let Some(modifier) = modifiers.iter().next() {
-                    return Err(InvalidSelector::UnsupportedModifiers(self.kind, modifier));
-                }
-            }
-        }
         if self.modifiers.contains(Modifier::Abstract) {
             if self.kind != Kind::Class && !Kind::ClassMember.contains(self.kind) {
                 return Err(InvalidSelector::UnsupportedModifiers(
@@ -1104,6 +1082,30 @@ impl Selector {
             return Err(InvalidSelector::UnsupportedModifiers(
                 self.kind,
                 Modifier::Readonly,
+            ));
+        }
+        if self.modifiers.intersects(Modifier::CLASS_MEMBER_ONLY)
+            && !Kind::ClassMember.contains(self.kind)
+        {
+            let modifiers = self.modifiers.0 & Modifier::CLASS_MEMBER_ONLY;
+            if let Some(modifier) = modifiers.iter().next() {
+                return Err(InvalidSelector::UnsupportedModifiers(self.kind, modifier));
+            }
+        }
+        // The rule doesn't allow `Modifier::Public`.
+        // So we only need to check for `Modifier::Private`/`Modifier::Protected` incompatibility.
+        let accessibility = Modifier::Private | Modifier::Protected;
+        if *self.modifiers & accessibility == accessibility {
+            return Err(InvalidSelector::IncompatibleModifiers(
+                Modifier::Private,
+                Modifier::Protected,
+            ));
+        }
+        let abstarct_or_static = Modifier::Abstract | Modifier::Static;
+        if *self.modifiers & abstarct_or_static == abstarct_or_static {
+            return Err(InvalidSelector::IncompatibleModifiers(
+                Modifier::Abstract,
+                Modifier::Static,
             ));
         }
         if self.scope == Scope::Global
@@ -1261,7 +1263,7 @@ impl Selector {
             | AnyJsBindingDeclaration::JsArrayBindingPatternRestElement(_)
             | AnyJsBindingDeclaration::JsObjectBindingPatternProperty(_)
             | AnyJsBindingDeclaration::JsObjectBindingPatternRest(_) => {
-                Self::from_parent_binding_pattern_declaration(decl.parent_binding_pattern_declaration()?)
+                Self::from_parent_binding_pattern_declaration(&decl.parent_binding_pattern_declaration()?)
             }
             AnyJsBindingDeclaration::JsVariableDeclarator(var) => {
                 Selector::from_variable_declarator(var, Scope::from_declaration(decl)?)
@@ -1286,11 +1288,31 @@ impl Selector {
             | AnyJsBindingDeclaration::JsNamedImportSpecifier(_) => Some(Selector::with_scope(Kind::ImportAlias, Scope::Global)),
             AnyJsBindingDeclaration::TsModuleDeclaration(_) => Some(Selector::with_scope(Kind::Namespace, Scope::Global)),
             AnyJsBindingDeclaration::TsTypeAliasDeclaration(_) => Some(Selector::with_scope(Kind::TypeAlias, Scope::from_declaration(decl)?)),
-            AnyJsBindingDeclaration::JsClassDeclaration(_)
-            | AnyJsBindingDeclaration::JsClassExpression(_)
-            | AnyJsBindingDeclaration::JsClassExportDefaultDeclaration(_) => {
+            AnyJsBindingDeclaration::JsClassDeclaration(class) => {
+                Some(Selector {
+                    kind: Kind::Class,
+                    modifiers: if class.abstract_token().is_some() {
+                        Modifier::Abstract.into()
+                    } else {
+                        Modifiers::default()
+                    },
+                    scope: Scope::from_declaration(decl)?,
+                })
+            }
+            AnyJsBindingDeclaration::JsClassExportDefaultDeclaration(class) => {
+                Some(Selector {
+                    kind: Kind::Class,
+                    modifiers: if class.abstract_token().is_some() {
+                        Modifier::Abstract.into()
+                    } else {
+                        Modifiers::default()
+                    },
+                    scope: Scope::from_declaration(decl)?,
+                })
+            }
+            AnyJsBindingDeclaration::JsClassExpression(_) => {
                 Some(Selector::with_scope(Kind::Class, Scope::from_declaration(decl)?))
-            },
+            }
             AnyJsBindingDeclaration::TsInterfaceDeclaration(_) => Some(Selector::with_scope(Kind::Interface, Scope::from_declaration(decl)?)),
             AnyJsBindingDeclaration::TsEnumDeclaration(_) => Some(Selector::with_scope(Kind::Enum, Scope::from_declaration(decl)?)),
             AnyJsBindingDeclaration::JsObjectBindingPatternShorthandProperty(_)
@@ -1304,10 +1326,10 @@ impl Selector {
         }
     }
 
-    fn from_parent_binding_pattern_declaration(decl: AnyJsBindingDeclaration) -> Option<Selector> {
-        let scope = Scope::from_declaration(&decl)?;
+    fn from_parent_binding_pattern_declaration(decl: &AnyJsBindingDeclaration) -> Option<Selector> {
+        let scope = Scope::from_declaration(decl)?;
         if let AnyJsBindingDeclaration::JsVariableDeclarator(declarator) = decl {
-            Selector::from_variable_declarator(&declarator, scope)
+            Selector::from_variable_declarator(declarator, scope)
         } else {
             Some(Selector::with_scope(Kind::Variable, scope))
         }

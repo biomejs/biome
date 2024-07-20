@@ -1,5 +1,7 @@
-use super::GritTargetLanguageImpl;
-use crate::grit_target_node::GritTargetSyntaxKind;
+use super::{
+    normalize_quoted_string, GritTargetLanguageImpl, LeafEquivalenceClass, LeafNormalizer,
+};
+use crate::{grit_target_node::GritTargetSyntaxKind, CompileError};
 use biome_js_syntax::{JsLanguage, JsSyntaxKind};
 use biome_rowan::{RawSyntaxKind, SyntaxKindSet};
 
@@ -7,6 +9,17 @@ const COMMENT_KINDS: SyntaxKindSet<JsLanguage> =
     SyntaxKindSet::from_raw(RawSyntaxKind(JsSyntaxKind::COMMENT as u16)).union(
         SyntaxKindSet::from_raw(RawSyntaxKind(JsSyntaxKind::MULTILINE_COMMENT as u16)),
     );
+
+const EQUIVALENT_LEAF_NODES: &[&[LeafNormalizer]] = &[&[
+    LeafNormalizer::new(
+        GritTargetSyntaxKind::JsSyntaxKind(JsSyntaxKind::JS_STRING_LITERAL),
+        normalize_quoted_string,
+    ),
+    LeafNormalizer::new(
+        GritTargetSyntaxKind::JsSyntaxKind(JsSyntaxKind::JS_STRING_LITERAL_EXPRESSION),
+        normalize_quoted_string,
+    ),
+]];
 
 #[derive(Clone, Debug)]
 pub struct JsTargetLanguage;
@@ -119,5 +132,20 @@ impl GritTargetLanguageImpl for JsTargetLanguage {
             kind == JsSyntaxKind::JS_TEMPLATE_ELEMENT_LIST
                 || kind == JsSyntaxKind::TS_TEMPLATE_ELEMENT_LIST
         })
+    }
+
+    fn get_equivalence_class(
+        &self,
+        kind: GritTargetSyntaxKind,
+        text: &str,
+    ) -> Result<Option<LeafEquivalenceClass>, CompileError> {
+        if let Some(class) = EQUIVALENT_LEAF_NODES
+            .iter()
+            .find(|v| v.iter().any(|normalizer| normalizer.kind() == kind))
+        {
+            LeafEquivalenceClass::new(text, kind, class)
+        } else {
+            Ok(None)
+        }
     }
 }

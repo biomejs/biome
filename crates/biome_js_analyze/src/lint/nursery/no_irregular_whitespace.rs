@@ -13,18 +13,18 @@ const IRREGULAR_WHITESPACES: &[char; 22] = &[
 declare_lint_rule! {
     /// Disallows the use of irregular whitespace characters.
     ///
-    /// Invalid or irregular whitespace causes issues with ECMAScript 5 parsers and also makes code harder to debug.
+    /// Invalid or irregular whitespace causes issues with various parsers and also makes code harder to debug.
     ///
     /// ## Examples
     ///
     /// ### Invalid
     ///
     /// ```js,expect_diagnostic
-    /// constcount=1;
+    /// constcount;
     /// ```
     ///
     /// ```js,expect_diagnostic
-    /// const foo = 'thing';
+    /// const foo;
     /// ```
     ///
     /// ### Valid
@@ -67,6 +67,9 @@ impl Rule for NoIrregularWhitespace {
                     "Irregular whitespaces found."
                 },
             )
+            .note(markup!{
+                "Irregular whitespaces can cause issues to other parsers, and make the code harder to debug."
+            })
             .note(markup! {
                 "Replace the irregular whitespaces with normal whitespaces or tabs."
             }),

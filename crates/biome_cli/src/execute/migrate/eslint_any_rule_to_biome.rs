@@ -1488,6 +1488,14 @@ pub(crate) fn migrate_eslint_any_rule(
             let rule = group.no_substr.get_or_insert(Default::default());
             rule.set_level(rule_severity.into());
         }
+        "unicorn/prefer-string-trim-start-end" => {
+            if !options.include_nursery {
+                return false;
+            }
+            let group = rules.nursery.get_or_insert_with(Default::default);
+            let rule = group.use_trim_start_end.get_or_insert(Default::default());
+            rule.set_level(rule_severity.into());
+        }
         "unicorn/require-number-to-fixed-digits-argument" => {
             if !options.include_nursery {
                 return false;

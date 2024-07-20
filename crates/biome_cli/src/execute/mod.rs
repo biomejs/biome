@@ -26,6 +26,7 @@ use biome_service::workspace::{
 use std::ffi::OsString;
 use std::fmt::{Display, Formatter};
 use std::path::{Path, PathBuf};
+use tracing::info;
 
 /// Useful information during the traversal of files and virtual content
 #[derive(Debug, Clone)]
@@ -37,7 +38,7 @@ pub struct Execution {
     traversal_mode: TraversalMode,
 
     /// The maximum number of diagnostics that can be printed in console
-    max_diagnostics: u16,
+    max_diagnostics: u32,
 }
 
 impl Execution {
@@ -281,7 +282,7 @@ impl Execution {
         &self.traversal_mode
     }
 
-    pub(crate) fn get_max_diagnostics(&self) -> u16 {
+    pub(crate) fn get_max_diagnostics(&self) -> u32 {
         self.max_diagnostics
     }
 
@@ -395,7 +396,13 @@ pub fn execute_mode(
     cli_options: &CliOptions,
     paths: Vec<OsString>,
 ) -> Result<(), CliDiagnostic> {
-    execution.max_diagnostics = cli_options.max_diagnostics;
+    // If a custom reporter was provided, let's lift the limit so users can see all of them
+    execution.max_diagnostics = if cli_options.reporter.is_default() {
+        cli_options.max_diagnostics.into()
+    } else {
+        info!("Removing the limit of --max-diagnostics, because of a reporter different from the default one: {}", cli_options.reporter);
+        u32::MAX
+    };
 
     // don't do any traversal if there's some content coming from stdin
     if let Some(stdin) = execution.as_stdin_file() {
