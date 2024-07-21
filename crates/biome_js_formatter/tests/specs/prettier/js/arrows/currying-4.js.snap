@@ -2,7 +2,6 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: js/arrows/currying-4.js
 ---
-
 # Input
 
 ```js
@@ -211,5 +210,3 @@ a(
    17:       : "Prettier takes your code and reprints it from scratch by taking the line length into account.",
    24:       : "Prettier takes your code and reprints it from scratch by taking the line length into account.",
 ```
-
-

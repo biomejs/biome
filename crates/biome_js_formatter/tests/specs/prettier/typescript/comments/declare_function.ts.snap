@@ -2,7 +2,6 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: typescript/comments/declare_function.ts
 ---
-
 # Input
 
 ```ts
@@ -43,5 +42,3 @@ declare function /* foo */ f(/* baz */ a /* taz */) /* bar */;
 ```
     3:   // TODO this is a very very very very long comment that makes it go > 80 columns
 ```
-
-

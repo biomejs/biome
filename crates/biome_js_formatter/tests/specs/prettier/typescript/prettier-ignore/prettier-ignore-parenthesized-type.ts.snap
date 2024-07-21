@@ -2,7 +2,6 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: typescript/prettier-ignore/prettier-ignore-parenthesized-type.ts
 ---
-
 # Input
 
 ```ts
@@ -38,5 +37,3 @@ type Foo =
     aa
   );
 ```
-
-

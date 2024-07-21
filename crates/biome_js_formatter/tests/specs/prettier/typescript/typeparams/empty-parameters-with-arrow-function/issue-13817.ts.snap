@@ -2,7 +2,6 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: typescript/typeparams/empty-parameters-with-arrow-function/issue-13817.ts
 ---
-
 # Input
 
 ```ts
@@ -124,5 +123,3 @@ issue-13817.ts:10:1 parse ━━━━━━━━━━━━━━━━━━
 ```
     4: const xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx: xxxxxxxxxxxxxxxxxxxxxx</* comment */> =
 ```
-
-

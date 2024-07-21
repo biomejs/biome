@@ -2,7 +2,6 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: js/multiparser-graphql/react-relay.js
 ---
-
 # Input
 
 ```js
@@ -87,5 +86,3 @@ graphql.experimental`
 { markReadNotification(data: $input ) { notification {seenState} } }
 `;
 ```
-
-

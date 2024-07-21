@@ -2,7 +2,6 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: typescript/decorators-ts/angular.ts
 ---
-
 # Input
 
 ```ts
@@ -45,5 +44,3 @@ export class HeroButtonComponent {
   @Input() label: string;
 }
 ```
-
-

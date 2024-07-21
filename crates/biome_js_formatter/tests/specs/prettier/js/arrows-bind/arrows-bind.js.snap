@@ -2,7 +2,6 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: js/arrows-bind/arrows-bind.js
 ---
-
 # Input
 
 ```js
@@ -100,5 +99,3 @@ arrows-bind.js:3:3 parse ━━━━━━━━━━━━━━━━━━�
   
 
 ```
-
-

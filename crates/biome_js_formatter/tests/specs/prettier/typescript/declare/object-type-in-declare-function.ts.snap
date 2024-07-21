@@ -2,7 +2,6 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: typescript/declare/object-type-in-declare-function.ts
 ---
-
 # Input
 
 ```ts
@@ -61,5 +60,3 @@ declare function bar(
   ...x: { a: boolean; b: string; c: number }
 ): Promise<Array<foo>>;
 ```
-
-

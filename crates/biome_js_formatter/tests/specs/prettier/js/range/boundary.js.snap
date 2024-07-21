@@ -1,9 +1,7 @@
 ---
 source: crates/biome_formatter_test/src/snapshot_builder.rs
-assertion_line: 212
 info: js/range/boundary.js
 ---
-
 # Input
 
 ```js
@@ -37,5 +35,3 @@ foo = 1.0000;bar = 1.0;baz=1.0000;
 // `foo` ends at 13, should not format
 // `bar` ends at 26, should format
 ```
-
-

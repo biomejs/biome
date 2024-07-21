@@ -2,7 +2,6 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: js/template-literals/styled-components-with-expressions.js
 ---
-
 # Input
 
 ```js
@@ -181,5 +180,3 @@ margin: 0;
 }
 `;
 ```
-
-

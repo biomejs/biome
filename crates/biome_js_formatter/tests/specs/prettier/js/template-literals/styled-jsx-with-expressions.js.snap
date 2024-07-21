@@ -2,7 +2,6 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: js/template-literals/styled-jsx-with-expressions.js
 ---
-
 # Input
 
 ```js
@@ -166,5 +165,3 @@ info: js/template-literals/styled-jsx-with-expressions.js
 ```
    39:   animation: 3s ease-in 1s ${(foo) => foo.getIterations()} reverse both paused slidein;
 ```
-
-
