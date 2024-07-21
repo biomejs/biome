@@ -1,6 +1,6 @@
 use super::{
-    is_diagnostic_error, CodeActionsParams, ExtensionHandler, FixAllParams, LintParams,
-    LintResults, ParseResult, SearchCapabilities, SyntaxVisitor,
+    is_diagnostic_error, ActionVisitor, CodeActionsParams, ExtensionHandler, FixAllParams,
+    LintParams, LintResults, LintVisitor, ParseResult, SearchCapabilities, SyntaxVisitor,
 };
 use crate::configuration::to_analyzer_rules;
 use crate::file_handlers::DebugCapabilities;
@@ -21,7 +21,7 @@ use biome_analyze::{
     AnalysisFilter, AnalyzerConfiguration, AnalyzerOptions, ControlFlow, Never,
     RuleCategoriesBuilder, RuleCategory, RuleError,
 };
-use biome_css_analyze::analyze;
+use biome_css_analyze::{analyze, visit_registry};
 use biome_css_formatter::context::CssFormatOptions;
 use biome_css_formatter::format_node;
 use biome_css_parser::CssParserOptions;
@@ -31,7 +31,6 @@ use biome_formatter::{
     FormatError, IndentStyle, IndentWidth, LineEnding, LineWidth, Printed, QuoteStyle,
 };
 use biome_fs::BiomePath;
-use biome_js_analyze::visit_registry;
 use biome_parser::AnyParse;
 use biome_rowan::{AstNode, NodeCache};
 use biome_rowan::{TextRange, TextSize, TokenAtOffset};
@@ -338,42 +337,28 @@ fn lint(params: LintParams) -> LintResults {
             let analyzer_options =
                 workspace_settings.analyzer_options::<CssLanguage>(params.path, &params.language);
             let tree = params.parse.tree();
-            let mut diagnostics = params.parse.into_diagnostics();
 
             let has_only_filter = !params.only.is_empty();
-            let mut rules = None;
+            let rules = params
+                .workspace
+                .settings()
+                .as_ref()
+                .and_then(|settings| settings.as_rules(params.path.as_path()));
 
-            let mut enabled_rules = if let Some(settings) = params.workspace.settings() {
-                // Compute final rules (taking `overrides` into account)
-                rules = settings.as_rules(params.path.as_path());
-
-                if has_only_filter {
-                    params
-                        .only
-                        .into_iter()
-                        .map(|selector| selector.into())
-                        .collect::<Vec<_>>()
-                } else {
-                    rules
-                        .as_ref()
-                        .map(|rules| rules.as_enabled_rules())
-                        .unwrap_or_default()
-                        .into_iter()
-                        .collect::<Vec<_>>()
-                }
-            } else {
-                Vec::new()
-            };
-
+            let mut enabled_rules = vec![];
+            let mut disabled_rules = vec![];
             let mut syntax_visitor = SyntaxVisitor::default();
+            let mut lint_visitor = LintVisitor::new(&params);
+            let mut action_visitor = ActionVisitor::new(&params);
             visit_registry(&mut syntax_visitor);
+            visit_registry(&mut lint_visitor);
+            visit_registry(&mut action_visitor);
             enabled_rules.extend(syntax_visitor.enabled_rules);
-
-            let disabled_rules = params
-                .skip
-                .into_iter()
-                .map(|selector| selector.into())
-                .collect::<Vec<_>>();
+            let (lint_enabled_rules, lint_disabled_rules) = lint_visitor.finish();
+            enabled_rules.extend(lint_enabled_rules);
+            disabled_rules.extend(lint_disabled_rules);
+            enabled_rules.extend(action_visitor.enabled_rules);
+            let mut diagnostics = params.parse.into_diagnostics();
 
             let filter = AnalysisFilter {
                 categories: params.categories,

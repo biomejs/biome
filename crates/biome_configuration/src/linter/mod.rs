@@ -311,6 +311,15 @@ impl From<RuleSelector> for RuleFilter<'static> {
     }
 }
 
+impl<'a> From<&'a RuleSelector> for RuleFilter<'static> {
+    fn from(value: &'a RuleSelector) -> Self {
+        match value {
+            RuleSelector::Group(group) => RuleFilter::Group(group.as_str()),
+            RuleSelector::Rule(group, name) => RuleFilter::Rule(group.as_str(), name),
+        }
+    }
+}
+
 impl FromStr for RuleSelector {
     type Err = &'static str;
     fn from_str(selector: &str) -> Result<Self, Self::Err> {
