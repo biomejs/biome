@@ -7,13 +7,12 @@ use crate::{
     execute_mode, setup_cli_subscriber, CliDiagnostic, CliSession, Execution, TraversalMode,
 };
 use biome_configuration::{
-    organize_imports::PartialOrganizeImports, PartialConfiguration, PartialFormatterConfiguration,
-    PartialLinterConfiguration,
+    organize_imports::OrganizeImports, Configuration, FormatterConfiguration, LinterConfiguration,
 };
 use biome_console::{markup, ConsoleExt};
 use biome_deserialize::Merge;
 use biome_diagnostics::PrintDiagnostic;
-use biome_service::configuration::{load_editorconfig, PartialConfigurationExt};
+use biome_service::configuration::{load_editorconfig, ConfigurationExt};
 use biome_service::workspace::RegisterProjectFolderParams;
 use biome_service::{
     configuration::{load_configuration, LoadedConfiguration},
@@ -30,7 +29,7 @@ pub(crate) struct CheckCommandPayload {
     pub(crate) fix: bool,
     pub(crate) unsafe_: bool,
     pub(crate) cli_options: CliOptions,
-    pub(crate) configuration: Option<PartialConfiguration>,
+    pub(crate) configuration: Option<Configuration>,
     pub(crate) paths: Vec<OsString>,
     pub(crate) stdin_file_path: Option<String>,
     pub(crate) formatter_enabled: Option<bool>,
@@ -103,7 +102,8 @@ pub(crate) fn check(
                 .as_ref()
                 .and_then(|f| f.use_editorconfig)
                 .unwrap_or_default(),
-        );
+        )
+        .into();
     let mut fs_configuration = if should_use_editorconfig {
         let (editorconfig, editorconfig_diagnostics) = {
             let search_path = editorconfig_search_path.unwrap_or_else(|| {
@@ -126,26 +126,26 @@ pub(crate) fn check(
 
     let formatter = fs_configuration
         .formatter
-        .get_or_insert_with(PartialFormatterConfiguration::default);
+        .get_or_insert_with(FormatterConfiguration::default);
 
     if formatter_enabled.is_some() {
-        formatter.enabled = formatter_enabled;
+        formatter.enabled = formatter_enabled.map(Into::into);
     }
 
     let linter = fs_configuration
         .linter
-        .get_or_insert_with(PartialLinterConfiguration::default);
+        .get_or_insert_with(LinterConfiguration::default);
 
     if linter_enabled.is_some() {
-        linter.enabled = linter_enabled;
+        linter.enabled = linter_enabled.map(Into::into);
     }
 
     let organize_imports = fs_configuration
         .organize_imports
-        .get_or_insert_with(PartialOrganizeImports::default);
+        .get_or_insert_with(OrganizeImports::default);
 
     if organize_imports_enabled.is_some() {
-        organize_imports.enabled = organize_imports_enabled;
+        organize_imports.enabled = organize_imports_enabled.map(Into::into);
     }
 
     if let Some(mut configuration) = configuration {

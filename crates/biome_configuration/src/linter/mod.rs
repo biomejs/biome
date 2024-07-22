@@ -1,12 +1,12 @@
 #[rustfmt::skip]
 mod rules;
-
+use crate::bool::Bool;
 pub use crate::linter::rules::Rules;
 use biome_analyze::options::RuleOptions;
 use biome_analyze::{FixKind, RuleFilter};
 use biome_deserialize::{Deserializable, StringSet};
 use biome_deserialize::{DeserializableValue, DeserializationDiagnostic, Merge, VisitableType};
-use biome_deserialize_macros::{Deserializable, Merge, Partial};
+use biome_deserialize_macros::{Deserializable, Merge};
 use biome_diagnostics::Severity;
 use bpaf::Bpaf;
 pub use rules::*;
@@ -15,54 +15,36 @@ use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 use std::str::FromStr;
 
-#[derive(Clone, Debug, Deserialize, Eq, Partial, PartialEq, Serialize)]
-#[partial(derive(Bpaf, Clone, Deserializable, Eq, Merge, PartialEq))]
-#[partial(cfg_attr(feature = "schema", derive(schemars::JsonSchema)))]
-#[partial(serde(rename_all = "camelCase", default, deny_unknown_fields))]
+pub type LinterEnabled = Bool<true>;
+
+#[derive(
+    Bpaf, Clone, Debug, Default, Deserializable, Deserialize, Eq, Merge, PartialEq, Serialize,
+)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase", default, deny_unknown_fields)]
 pub struct LinterConfiguration {
     /// if `false`, it disables the feature and the linter won't be executed. `true` by default
-    #[partial(bpaf(hide))]
-    pub enabled: bool,
+    #[bpaf(hide)]
+    pub enabled: Option<LinterEnabled>,
 
     /// List of rules
-    #[partial(bpaf(pure(Default::default()), optional, hide))]
-    pub rules: Rules,
+    #[bpaf(pure(Default::default()), hide)]
+    pub rules: Option<Rules>,
 
     /// A list of Unix shell style patterns. The formatter will ignore files/folders that will
     /// match these patterns.
-    #[partial(bpaf(hide))]
-    pub ignore: StringSet,
+    #[bpaf(hide)]
+    pub ignore: Option<StringSet>,
 
     /// A list of Unix shell style patterns. The formatter will include files/folders that will
     /// match these patterns.
-    #[partial(bpaf(hide))]
-    pub include: StringSet,
+    #[bpaf(hide)]
+    pub include: Option<StringSet>,
 }
 
 impl LinterConfiguration {
-    pub const fn is_disabled(&self) -> bool {
-        !self.enabled
-    }
-}
-
-impl Default for LinterConfiguration {
-    fn default() -> Self {
-        Self {
-            enabled: true,
-            rules: Default::default(),
-            ignore: Default::default(),
-            include: Default::default(),
-        }
-    }
-}
-
-impl PartialLinterConfiguration {
-    pub const fn is_disabled(&self) -> bool {
-        matches!(self.enabled, Some(false))
-    }
-
-    pub fn get_rules(&self) -> Rules {
-        self.rules.as_ref().unwrap_or(&Rules::default()).clone()
+    pub fn is_enabled(&self) -> bool {
+        self.enabled.unwrap_or_default().into()
     }
 }
 

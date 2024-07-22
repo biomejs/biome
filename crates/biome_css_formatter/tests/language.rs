@@ -1,6 +1,6 @@
 use biome_css_formatter::context::CssFormatContext;
 use biome_css_formatter::CssFormatLanguage;
-use biome_css_parser::{parse_css, CssParserOptions};
+use biome_css_parser::{parse_css, CssParseOptions};
 use biome_css_syntax::{CssFileSource, CssLanguage};
 use biome_formatter_test::TestFormatLanguage;
 use biome_fs::BiomePath;
@@ -21,7 +21,7 @@ impl TestFormatLanguage for CssTestFormatLanguage {
     type FormatLanguage = CssFormatLanguage;
 
     fn parse(&self, text: &str) -> AnyParse {
-        let options = CssParserOptions::default()
+        let options = CssParseOptions::default()
             .allow_wrong_line_comments()
             .allow_css_modules();
 

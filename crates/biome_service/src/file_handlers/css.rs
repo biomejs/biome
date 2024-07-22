@@ -8,7 +8,7 @@ use crate::file_handlers::{
     AnalyzerCapabilities, Capabilities, FormatterCapabilities, ParserCapabilities,
 };
 use crate::settings::{
-    FormatSettings, LanguageListSettings, LanguageSettings, LinterSettings, OverrideSettings,
+    FormatterSettings, LanguageListSettings, LanguageSettings, LinterSettings, OverrideSettings,
     ServiceLanguage, Settings, WorkspaceSettingsHandle,
 };
 use crate::workspace::{
@@ -21,10 +21,14 @@ use biome_analyze::{
     AnalysisFilter, AnalyzerConfiguration, AnalyzerOptions, ControlFlow, Never,
     RuleCategoriesBuilder, RuleCategory, RuleError,
 };
+use biome_configuration::bool::Bool;
+use biome_configuration::css::{
+    AllowWrongLineCommentsEnabled, CssFormatterEnabled, CssLinterEnabled, CssModulesEnabled,
+};
 use biome_css_analyze::analyze;
 use biome_css_formatter::context::CssFormatOptions;
 use biome_css_formatter::format_node;
-use biome_css_parser::CssParserOptions;
+use biome_css_parser::CssParseOptions;
 use biome_css_syntax::{CssLanguage, CssRoot, CssSyntaxNode};
 use biome_diagnostics::{category, Applicability, Diagnostic, DiagnosticExt, Severity};
 use biome_formatter::{
@@ -38,7 +42,14 @@ use biome_rowan::{TextRange, TextSize, TokenAtOffset};
 use std::borrow::Cow;
 use tracing::{debug_span, error, info, trace, trace_span};
 
-#[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
+#[derive(Clone, Debug, Default, serde::Serialize, serde::Deserialize)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+pub struct CssParserSettings {
+    pub allow_wrong_line_comments: Option<AllowWrongLineCommentsEnabled>,
+    pub css_modules: Option<CssModulesEnabled>,
+}
+
+#[derive(Clone, Debug, Default, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub struct CssFormatterSettings {
     pub line_ending: Option<LineEnding>,
@@ -46,48 +57,39 @@ pub struct CssFormatterSettings {
     pub indent_width: Option<IndentWidth>,
     pub indent_style: Option<IndentStyle>,
     pub quote_style: Option<QuoteStyle>,
-    pub enabled: Option<bool>,
+    pub enabled: Option<CssFormatterEnabled>,
 }
 
-impl Default for CssFormatterSettings {
-    fn default() -> Self {
-        Self {
-            enabled: Some(false),
-            indent_style: Default::default(),
-            indent_width: Default::default(),
-            line_ending: Default::default(),
-            line_width: Default::default(),
-            quote_style: Default::default(),
-        }
+impl CssFormatterSettings {
+    pub fn is_enabled(&self) -> bool {
+        self.enabled.unwrap_or_default().into()
     }
 }
 
-#[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
+#[derive(Clone, Debug, Default, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub struct CssLinterSettings {
-    pub enabled: Option<bool>,
+    pub enabled: Option<CssLinterEnabled>,
 }
 
-// NOTE: we want to make the linter opt-in for now
-impl Default for CssLinterSettings {
-    fn default() -> Self {
-        Self {
-            enabled: Some(false),
-        }
+impl CssLinterSettings {
+    pub fn is_enabled(&self) -> bool {
+        self.enabled.unwrap_or_default().into()
     }
 }
+
+pub type CssOrganizeImportsEnabled = Bool<false>;
 
 #[derive(Debug, Clone, Default, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
-pub struct CssParserSettings {
-    pub allow_wrong_line_comments: Option<bool>,
-    pub css_modules: Option<bool>,
+pub struct CssOrganizeImportsSettings {
+    pub enabled: Option<CssOrganizeImportsEnabled>,
 }
 
 impl ServiceLanguage for CssLanguage {
     type FormatterSettings = CssFormatterSettings;
     type LinterSettings = CssLinterSettings;
-    type OrganizeImportsSettings = ();
+    type OrganizeImportsSettings = CssOrganizeImportsSettings;
     type FormatOptions = CssFormatOptions;
     type ParserSettings = CssParserSettings;
     type EnvironmentSettings = ();
@@ -97,7 +99,7 @@ impl ServiceLanguage for CssLanguage {
     }
 
     fn resolve_format_options(
-        global: Option<&FormatSettings>,
+        global: Option<&FormatterSettings>,
         overrides: Option<&OverrideSettings>,
         language: Option<&Self::FormatterSettings>,
         path: &BiomePath,
@@ -138,7 +140,7 @@ impl ServiceLanguage for CssLanguage {
         }
     }
 
-    fn resolve_analyzer_options(
+    fn resolve_analyze_options(
         global: Option<&Settings>,
         _linter: Option<&LinterSettings>,
         _overrides: Option<&OverrideSettings>,
@@ -215,19 +217,22 @@ fn parse(
     settings: Option<&Settings>,
     cache: &mut NodeCache,
 ) -> ParseResult {
-    let mut options = CssParserOptions {
+    // TODO(zzwu): implement resolve_parser_options
+    let mut options = CssParseOptions {
         allow_wrong_line_comments: settings
             .and_then(|s| s.languages.css.parser.allow_wrong_line_comments)
-            .unwrap_or_default(),
+            .unwrap_or_default()
+            .into(),
         css_modules: settings
             .and_then(|s| s.languages.css.parser.css_modules)
-            .unwrap_or_default(),
+            .unwrap_or_default()
+            .into(),
         grit_metavariable: false,
     };
     if let Some(settings) = settings {
         options = settings
             .override_settings
-            .to_override_css_parser_options(biome_path, options);
+            .to_override_css_parse_options(biome_path, options);
     }
     let parse = biome_css_parser::parse_css_with_cache(text, cache, options);
     ParseResult {
@@ -336,7 +341,7 @@ fn lint(params: LintParams) -> LintResults {
         move || {
             let workspace_settings = &params.workspace;
             let analyzer_options =
-                workspace_settings.analyzer_options::<CssLanguage>(params.path, &params.language);
+                workspace_settings.analyze_options::<CssLanguage>(params.path, &params.language);
             let tree = params.parse.tree();
             let mut diagnostics = params.parse.into_diagnostics();
 
@@ -489,13 +494,14 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
             let mut filter = AnalysisFilter::from_enabled_rules(filter.as_slice());
 
             let mut categories = RuleCategoriesBuilder::default().with_syntax().with_lint();
-            if settings.organize_imports.enabled {
+            // TODO(zzwu): take overrides into consideration
+            if settings.organize_imports.enabled.unwrap_or_default().into() {
                 categories = categories.with_action();
             }
             filter.categories = categories.build();
             filter.range = Some(range);
 
-            let analyzer_options = workspace.analyzer_options::<CssLanguage>(path, &language);
+            let analyzer_options = workspace.analyze_options::<CssLanguage>(path, &language);
 
             let Some(_) = language.to_css_file_source() else {
                 error!("Could not determine the file source of the file");
@@ -564,7 +570,7 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
     let mut skipped_suggested_fixes = 0;
     let mut errors: u16 = 0;
     let analyzer_options =
-        workspace.analyzer_options::<CssLanguage>(biome_path, &document_file_source);
+        workspace.analyze_options::<CssLanguage>(biome_path, &document_file_source);
     loop {
         let (action, _) = analyze(&tree, filter, &analyzer_options, |signal| {
             let current_diagnostic = signal.diagnostic();
@@ -661,7 +667,7 @@ mod test {
     #[test]
     fn inherit_global_format_settings() {
         let format_options = CssLanguage::resolve_format_options(
-            Some(&FormatSettings::default()),
+            Some(&FormatterSettings::default()),
             None,
             None,
             &BiomePath::new(""),

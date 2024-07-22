@@ -12,7 +12,7 @@ use crate::file_handlers::{
     LintResults, ParserCapabilities,
 };
 use crate::settings::{
-    FormatSettings, LanguageListSettings, LanguageSettings, LinterSettings, OverrideSettings,
+    FormatterSettings, LanguageListSettings, LanguageSettings, LinterSettings, OverrideSettings,
     ServiceLanguage, Settings, WorkspaceSettingsHandle,
 };
 use crate::workspace::{
@@ -24,7 +24,11 @@ use biome_analyze::{
     AnalysisFilter, AnalyzerConfiguration, AnalyzerOptions, ControlFlow, GroupCategory, Never,
     Queryable, RegistryVisitor, RuleCategoriesBuilder, RuleCategory, RuleFilter, RuleGroup,
 };
-use biome_configuration::PartialConfiguration;
+use biome_configuration::bool::Bool;
+use biome_configuration::json::{
+    AllowCommentsEnabled, AllowTrailingCommasEnabled, JsonFormatterEnabled, JsonLinterEnabled,
+};
+use biome_configuration::Configuration;
 use biome_deserialize::json::deserialize_from_json_ast;
 use biome_diagnostics::{category, Diagnostic, DiagnosticExt, Severity};
 use biome_formatter::{FormatError, IndentStyle, IndentWidth, LineEnding, LineWidth, Printed};
@@ -33,7 +37,7 @@ use biome_json_analyze::analyze;
 use biome_json_analyze::visit_registry;
 use biome_json_formatter::context::{JsonFormatOptions, TrailingCommas};
 use biome_json_formatter::format_node;
-use biome_json_parser::JsonParserOptions;
+use biome_json_parser::JsonParseOptions;
 use biome_json_syntax::{JsonFileSource, JsonLanguage, JsonRoot, JsonSyntaxNode};
 use biome_parser::AnyParse;
 use biome_rowan::{AstNode, NodeCache};
@@ -48,26 +52,46 @@ pub struct JsonFormatterSettings {
     pub indent_width: Option<IndentWidth>,
     pub indent_style: Option<IndentStyle>,
     pub trailing_commas: Option<TrailingCommas>,
-    pub enabled: Option<bool>,
+    pub enabled: Option<JsonFormatterEnabled>,
+}
+
+impl JsonFormatterSettings {
+    pub fn is_enabled(&self) -> bool {
+        self.enabled.unwrap_or_default().into()
+    }
 }
 
 #[derive(Debug, Clone, Default, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub struct JsonParserSettings {
-    pub allow_comments: Option<bool>,
-    pub allow_trailing_commas: Option<bool>,
+    pub allow_comments: Option<AllowCommentsEnabled>,
+    pub allow_trailing_commas: Option<AllowTrailingCommasEnabled>,
 }
 
 #[derive(Debug, Clone, Default, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub struct JsonLinterSettings {
-    pub enabled: Option<bool>,
+    pub enabled: Option<JsonLinterEnabled>,
+}
+
+impl JsonLinterSettings {
+    pub fn is_enabled(&self) -> bool {
+        self.enabled.unwrap_or_default().into()
+    }
+}
+
+pub type JsonOrganizeImportsEnabled = Bool<true>;
+
+#[derive(Debug, Clone, Default, serde::Serialize, serde::Deserialize)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+pub struct JsonOrganizeImportsSettings {
+    pub enabled: Option<JsonOrganizeImportsEnabled>,
 }
 
 impl ServiceLanguage for JsonLanguage {
     type FormatterSettings = JsonFormatterSettings;
     type LinterSettings = JsonLinterSettings;
-    type OrganizeImportsSettings = ();
+    type OrganizeImportsSettings = JsonOrganizeImportsSettings;
     type FormatOptions = JsonFormatOptions;
     type ParserSettings = JsonParserSettings;
     type EnvironmentSettings = ();
@@ -77,7 +101,7 @@ impl ServiceLanguage for JsonLanguage {
     }
 
     fn resolve_format_options(
-        global: Option<&FormatSettings>,
+        global: Option<&FormatterSettings>,
         overrides: Option<&OverrideSettings>,
         language: Option<&JsonFormatterSettings>,
         path: &BiomePath,
@@ -123,7 +147,7 @@ impl ServiceLanguage for JsonLanguage {
         }
     }
 
-    fn resolve_analyzer_options(
+    fn resolve_analyze_options(
         global: Option<&Settings>,
         _linter: Option<&LinterSettings>,
         _overrides: Option<&OverrideSettings>,
@@ -185,18 +209,19 @@ fn parse(
     let parser = settings.map(|s| &s.languages.json.parser);
     let overrides = settings.map(|s| &s.override_settings);
     let optional_json_file_source = file_source.to_json_file_source();
-    let options = JsonParserOptions {
+    // TODO: well-known files handle
+    let options = JsonParseOptions {
         allow_comments: parser.and_then(|p| p.allow_comments).map_or_else(
             || optional_json_file_source.map_or(false, |x| x.allow_comments()),
-            |value| value,
+            |value| value.into(),
         ),
         allow_trailing_commas: parser.and_then(|p| p.allow_trailing_commas).map_or_else(
             || optional_json_file_source.map_or(false, |x| x.allow_trailing_commas()),
-            |value| value,
+            |value| value.into(),
         ),
     };
     let options = if let Some(overrides) = overrides {
-        overrides.to_override_json_parser_options(biome_path, options)
+        overrides.to_override_json_parse_options(biome_path, options)
     } else {
         options
     };
@@ -326,7 +351,7 @@ fn lint(params: LintParams) -> LintResults {
                 || params.path.ends_with(ConfigName::biome_json())
                 || params.path.ends_with(ConfigName::biome_jsonc())
             {
-                let deserialized = deserialize_from_json_ast::<PartialConfiguration>(&root, "");
+                let deserialized = deserialize_from_json_ast::<Configuration>(&root, "");
                 diagnostics.extend(
                     deserialized
                         .into_diagnostics()
@@ -338,7 +363,7 @@ fn lint(params: LintParams) -> LintResults {
 
             let analyzer_options = &params
                 .workspace
-                .analyzer_options::<JsonLanguage>(params.path, &params.language);
+                .analyze_options::<JsonLanguage>(params.path, &params.language);
 
             let mut rules = None;
             if let Some(settings) = params.workspace.settings() {
@@ -490,7 +515,7 @@ fn code_actions(params: CodeActionsParams) -> PullActionsResult {
         let tree: JsonRoot = parse.tree();
         trace_span!("Parsed file", tree =? tree).in_scope(move || {
             let analyzer_options =
-                workspace.analyzer_options::<JsonLanguage>(params.path, &params.language);
+                workspace.analyze_options::<JsonLanguage>(params.path, &params.language);
             let rules = settings.as_rules(params.path);
             let mut actions = Vec::new();
             let mut enabled_rules = vec![];
@@ -515,7 +540,7 @@ fn code_actions(params: CodeActionsParams) -> PullActionsResult {
             };
 
             let mut categories = RuleCategoriesBuilder::default().with_syntax().with_lint();
-            if settings.organize_imports.enabled {
+            if settings.organize_imports.enabled.unwrap_or_default().into() {
                 categories = categories.with_action();
             }
             filter.categories = categories.build();

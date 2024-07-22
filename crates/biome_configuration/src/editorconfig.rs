@@ -17,8 +17,8 @@ use serde::{Deserialize, Deserializer};
 
 use crate::{
     diagnostics::{EditorConfigDiagnostic, ParseFailedDiagnostic},
-    OverrideFormatterConfiguration, OverridePattern, Overrides, PartialConfiguration,
-    PartialFormatterConfiguration, PlainIndentStyle,
+    Configuration, FormatterConfiguration, OverrideFormatterConfiguration, OverridePattern,
+    Overrides, PlainIndentStyle,
 };
 
 pub fn parse_str(s: &str) -> Result<EditorConfig, EditorConfigDiagnostic> {
@@ -41,10 +41,10 @@ pub struct EditorConfig {
 }
 
 impl EditorConfig {
-    pub fn to_biome(mut self) -> (Option<PartialConfiguration>, Vec<EditorConfigDiagnostic>) {
+    pub fn to_biome(mut self) -> (Option<Configuration>, Vec<EditorConfigDiagnostic>) {
         let diagnostics = self.validate();
 
-        let mut config = PartialConfiguration {
+        let mut config = Configuration {
             formatter: self.options.remove("*").map(|o| o.to_biome()),
             ..Default::default()
         };
@@ -95,8 +95,8 @@ pub struct EditorConfigOptions {
 }
 
 impl EditorConfigOptions {
-    pub fn to_biome(self) -> PartialFormatterConfiguration {
-        PartialFormatterConfiguration {
+    pub fn to_biome(self) -> FormatterConfiguration {
+        FormatterConfiguration {
             indent_style: self.indent_style,
             indent_width: self.indent_size,
             line_ending: self.end_of_line,

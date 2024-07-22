@@ -1,114 +1,119 @@
-use crate::PlainIndentStyle;
-use biome_deserialize_macros::{Deserializable, Merge, Partial};
+use crate::{bool::Bool, PlainIndentStyle};
+use biome_deserialize_macros::{Deserializable, Merge};
 use biome_formatter::{IndentWidth, LineEnding, LineWidth, QuoteStyle};
 use bpaf::Bpaf;
 use serde::{Deserialize, Serialize};
 
 /// Options applied to CSS files
-#[derive(Clone, Default, Debug, Deserialize, Eq, Partial, PartialEq, Serialize)]
-#[partial(derive(Bpaf, Clone, Deserializable, Eq, Merge, PartialEq))]
-#[partial(cfg_attr(feature = "schema", derive(schemars::JsonSchema)))]
-#[partial(serde(rename_all = "camelCase", default, deny_unknown_fields))]
+#[derive(
+    Bpaf, Clone, Debug, Default, Deserializable, Deserialize, Eq, Merge, PartialEq, Serialize,
+)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase", default, deny_unknown_fields)]
 pub struct CssConfiguration {
     /// CSS parsing options
-    #[partial(type, bpaf(external(partial_css_parser), optional))]
-    pub parser: CssParser,
+    #[bpaf(external(css_parser_configuration), optional)]
+    pub parser: Option<CssParserConfiguration>,
 
     /// CSS formatter options
-    #[partial(type, bpaf(external(partial_css_formatter), optional))]
-    pub formatter: CssFormatter,
+    #[bpaf(external(css_formatter_configuration), optional)]
+    pub formatter: Option<CssFormatterConfiguration>,
 
     /// CSS linter options
-    #[partial(type, bpaf(external(partial_css_linter), optional))]
-    pub linter: CssLinter,
+    #[bpaf(external(css_linter_configuration), optional)]
+    pub linter: Option<CssLinterConfiguration>,
 }
+
+pub type AllowWrongLineCommentsEnabled = Bool<false>;
+pub type CssModulesEnabled = Bool<false>;
 
 /// Options that changes how the CSS parser behaves
-#[derive(Clone, Default, Debug, Deserialize, Eq, Partial, PartialEq, Serialize)]
-#[partial(derive(Bpaf, Clone, Deserializable, Eq, Merge, PartialEq))]
-#[partial(cfg_attr(feature = "schema", derive(schemars::JsonSchema)))]
-#[partial(serde(rename_all = "camelCase", default, deny_unknown_fields))]
-pub struct CssParser {
+#[derive(
+    Bpaf, Clone, Default, Debug, Deserializable, Deserialize, Eq, Merge, PartialEq, Serialize,
+)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase", default, deny_unknown_fields)]
+pub struct CssParserConfiguration {
     /// Allow comments to appear on incorrect lines in `.css` files
-    #[partial(bpaf(hide))]
-    pub allow_wrong_line_comments: bool,
+    #[bpaf(hide)]
+    pub allow_wrong_line_comments: Option<AllowWrongLineCommentsEnabled>,
 
     /// Enables parsing of CSS Modules specific features.
-    #[partial(bpaf(hide))]
-    pub css_modules: bool,
+    #[bpaf(hide)]
+    pub css_modules: Option<CssModulesEnabled>,
 }
 
+pub type CssFormatterEnabled = Bool<false>;
+
 /// Options that changes how the CSS formatter behaves
-#[derive(Clone, Debug, Default, Deserialize, Eq, Partial, PartialEq, Serialize)]
-#[partial(derive(Bpaf, Clone, Deserializable, Eq, Merge, PartialEq))]
-#[partial(cfg_attr(feature = "schema", derive(schemars::JsonSchema)))]
-#[partial(serde(rename_all = "camelCase", default, deny_unknown_fields))]
-pub struct CssFormatter {
+#[derive(
+    Bpaf, Clone, Debug, Default, Deserializable, Deserialize, Eq, Merge, PartialEq, Serialize,
+)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase", default, deny_unknown_fields)]
+pub struct CssFormatterConfiguration {
     /// Control the formatter for CSS (and its super languages) files.
-    #[partial(bpaf(long("css-formatter-enabled"), argument("true|false"), optional))]
-    pub enabled: bool,
+    #[bpaf(long("css-formatter-enabled"), argument("true|false"))]
+    pub enabled: Option<CssFormatterEnabled>,
 
     /// The indent style applied to CSS (and its super languages) files.
-    #[partial(bpaf(long("css-formatter-indent-style"), argument("tab|space"), optional))]
+    #[bpaf(long("css-formatter-indent-style"), argument("tab|space"))]
     pub indent_style: Option<PlainIndentStyle>,
 
     /// The size of the indentation applied to CSS (and its super languages) files. Default to 2.
-    #[partial(bpaf(long("css-formatter-indent-width"), argument("NUMBER"), optional))]
+    #[bpaf(long("css-formatter-indent-width"), argument("NUMBER"))]
     pub indent_width: Option<IndentWidth>,
 
     /// The type of line ending applied to CSS (and its super languages) files.
-    #[partial(bpaf(long("css-formatter-line-ending"), argument("lf|crlf|cr"), optional))]
+    #[bpaf(long("css-formatter-line-ending"), argument("lf|crlf|cr"))]
     pub line_ending: Option<LineEnding>,
 
     /// What's the max width of a line applied to CSS (and its super languages) files. Defaults to 80.
-    #[partial(bpaf(long("css-formatter-line-width"), argument("NUMBER"), optional))]
+    #[bpaf(long("css-formatter-line-width"), argument("NUMBER"))]
     pub line_width: Option<LineWidth>,
 
     /// The type of quotes used in CSS code. Defaults to double.
-    #[partial(bpaf(long("css-formatter-quote-style"), argument("double|single"), optional))]
-    pub quote_style: QuoteStyle,
+    #[bpaf(long("css-formatter-quote-style"), argument("double|single"))]
+    pub quote_style: Option<QuoteStyle>,
 }
 
-impl PartialCssFormatter {
-    pub fn get_formatter_configuration(&self) -> CssFormatter {
-        CssFormatter {
-            enabled: self.enabled.unwrap_or_default(),
-            indent_style: self.indent_style,
-            indent_width: self.indent_width,
-            line_ending: self.line_ending,
-            line_width: self.line_width,
-            quote_style: self.quote_style.unwrap_or_default(),
-        }
+impl CssFormatterConfiguration {
+    pub fn enabled_resolved(&self) -> bool {
+        self.enabled.unwrap_or_default().into()
+    }
+
+    pub fn quote_style_resolved(&self) -> QuoteStyle {
+        self.quote_style.unwrap_or_default()
     }
 }
 
+pub type CssLinterEnabled = Bool<false>;
 /// Options that changes how the CSS linter behaves
-#[derive(Clone, Debug, Deserialize, Eq, Partial, PartialEq, Default, Serialize)]
-#[partial(derive(Bpaf, Clone, Deserializable, Eq, Merge, PartialEq))]
-#[partial(cfg_attr(feature = "schema", derive(schemars::JsonSchema)))]
-#[partial(serde(rename_all = "camelCase", default, deny_unknown_fields))]
-pub struct CssLinter {
+#[derive(
+    Bpaf, Clone, Debug, Default, Deserializable, Deserialize, Eq, Merge, PartialEq, Serialize,
+)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase", default, deny_unknown_fields)]
+pub struct CssLinterConfiguration {
     /// Control the linter for CSS (and its super languages) files.
-    #[partial(bpaf(long("css-linter-enabled"), argument("true|false"), optional))]
-    pub enabled: bool,
+    #[bpaf(long("css-linter-enabled"), argument("true|false"))]
+    pub enabled: Option<CssLinterEnabled>,
 }
 
-impl PartialCssLinter {
-    pub fn get_linter_configuration(&self) -> CssLinter {
-        CssLinter {
-            enabled: self.enabled.unwrap_or_default(),
-        }
+impl CssLinterConfiguration {
+    pub fn enabled_resolved(&self) -> bool {
+        self.enabled.unwrap_or_default().into()
     }
 }
 
 #[test]
 fn default_css() {
-    let css_configuration = CssFormatter::default();
+    let css_configuration = CssFormatterConfiguration::default();
 
-    assert!(!css_configuration.enabled);
+    assert!(!css_configuration.enabled_resolved());
     assert_eq!(css_configuration.indent_style, None);
     assert_eq!(css_configuration.indent_width, None);
     assert_eq!(css_configuration.line_ending, None);
     assert_eq!(css_configuration.line_width, None);
-    assert_eq!(css_configuration.quote_style, QuoteStyle::Double);
+    assert_eq!(css_configuration.quote_style, None);
 }

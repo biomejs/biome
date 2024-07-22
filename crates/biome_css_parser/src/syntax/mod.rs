@@ -590,7 +590,7 @@ pub(crate) fn try_parse<T, E>(
 
 #[cfg(test)]
 mod tests {
-    use crate::{parser::CssParser, CssParserOptions};
+    use crate::{parser::CssParser, CssParseOptions};
     use biome_css_syntax::{CssSyntaxKind, T};
     use biome_parser::prelude::ParsedSyntax::{Absent, Present};
     use biome_parser::Parser;
@@ -599,7 +599,7 @@ mod tests {
 
     #[test]
     fn try_parse_rewinds_to_checkpoint() {
-        let mut p = CssParser::new("width: blue;", CssParserOptions::default());
+        let mut p = CssParser::new("width: blue;", CssParseOptions::default());
 
         let pre_try_range = p.cur_range();
         let result = try_parse(&mut p, |p| {
@@ -624,7 +624,7 @@ mod tests {
 
     #[test]
     fn try_parse_preserves_position_on_success() {
-        let mut p = CssParser::new("width: 100;", CssParserOptions::default());
+        let mut p = CssParser::new("width: 100;", CssParseOptions::default());
 
         let pre_try_range = p.cur_range();
         let result = try_parse(&mut p, |p| {

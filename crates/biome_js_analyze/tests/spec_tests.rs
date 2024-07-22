@@ -1,7 +1,7 @@
 use biome_analyze::{AnalysisFilter, AnalyzerAction, ControlFlow, Never, RuleFilter};
 use biome_diagnostics::advice::CodeSuggestionAdvice;
 use biome_diagnostics::{DiagnosticExt, Severity};
-use biome_js_parser::{parse, JsParserOptions};
+use biome_js_parser::{parse, JsParseOptions};
 use biome_js_syntax::{JsFileSource, JsLanguage, ModuleKind};
 use biome_project::PackageType;
 use biome_rowan::AstNode;
@@ -56,7 +56,7 @@ fn run_test(input: &'static str, _: &str, _: &str, _: &str) {
                 file_name,
                 input_file,
                 CheckActionType::Lint,
-                JsParserOptions::default(),
+                JsParseOptions::default(),
             );
         }
 
@@ -73,7 +73,7 @@ fn run_test(input: &'static str, _: &str, _: &str, _: &str) {
             file_name,
             input_file,
             CheckActionType::Lint,
-            JsParserOptions::default(),
+            JsParseOptions::default(),
         )
     };
 
@@ -98,21 +98,21 @@ pub(crate) fn analyze_and_snap(
     file_name: &str,
     input_file: &Path,
     check_action_type: CheckActionType,
-    parser_options: JsParserOptions,
+    parse_options: JsParseOptions,
 ) -> usize {
     let mut diagnostics = Vec::new();
     let mut code_fixes = Vec::new();
     let manifest = load_manifest(input_file, &mut diagnostics);
 
     if let Some(manifest) = &manifest {
-        if manifest.r#type == Some(PackageType::Commonjs) && 
+        if manifest.r#type == Some(PackageType::Commonjs) &&
             // At the moment we treat JS and JSX at the same way
             (source_type.file_extension() == "js" || source_type.file_extension() == "jsx" )
         {
             source_type.set_module_kind(ModuleKind::Script)
         }
     }
-    let parsed = parse(input_code, source_type, parser_options.clone());
+    let parsed = parse(input_code, source_type, parse_options.clone());
     let root = parsed.tree();
 
     let options = create_analyzer_options(input_file, &mut diagnostics);
@@ -128,7 +128,7 @@ pub(crate) fn analyze_and_snap(
                                 input_code,
                                 source_type,
                                 &action,
-                                parser_options.clone(),
+                                parse_options.clone(),
                             );
                             diag = diag.add_code_suggestion(CodeSuggestionAdvice::from(action));
                         }
@@ -138,7 +138,7 @@ pub(crate) fn analyze_and_snap(
                             input_code,
                             source_type,
                             &action,
-                            parser_options.clone(),
+                            parse_options.clone(),
                         );
                         diag = diag.add_code_suggestion(CodeSuggestionAdvice::from(action));
                     }
@@ -157,7 +157,7 @@ pub(crate) fn analyze_and_snap(
                             input_code,
                             source_type,
                             &action,
-                            parser_options.clone(),
+                            parse_options.clone(),
                         );
                         code_fixes.push(code_fix_to_string(input_code, action));
                     }
@@ -167,7 +167,7 @@ pub(crate) fn analyze_and_snap(
                         input_code,
                         source_type,
                         &action,
-                        parser_options.clone(),
+                        parse_options.clone(),
                     );
                     code_fixes.push(code_fix_to_string(input_code, action));
                 }
@@ -196,7 +196,7 @@ fn check_code_action(
     source: &str,
     source_type: JsFileSource,
     action: &AnalyzerAction<JsLanguage>,
-    options: JsParserOptions,
+    options: JsParseOptions,
 ) {
     let (new_tree, text_edit) = match action
         .mutation
@@ -262,7 +262,7 @@ pub(crate) fn run_suppression_test(input: &'static str, _: &str, _: &str, _: &st
         file_name,
         input_file,
         CheckActionType::Suppression,
-        JsParserOptions::default(),
+        JsParseOptions::default(),
     );
 
     insta::with_settings!({

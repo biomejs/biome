@@ -59,7 +59,7 @@ use crate::{Deserialize, Serialize, WorkspaceError};
 use biome_analyze::ActionCategory;
 pub use biome_analyze::RuleCategories;
 use biome_configuration::linter::RuleSelector;
-use biome_configuration::PartialConfiguration;
+use biome_configuration::Configuration;
 use biome_console::{markup, Markup, MarkupBuf};
 use biome_diagnostics::CodeSuggestion;
 use biome_formatter::Printed;
@@ -160,49 +160,47 @@ impl FileFeaturesResult {
         file_source: &DocumentFileSource,
         path: &Path,
     ) -> Self {
-        let formatter_disabled =
-            if let Some(disabled) = settings.override_settings.formatter_disabled(path) {
-                disabled
-            } else if file_source.is_javascript_like() {
-                !settings.formatter().enabled || settings.javascript_formatter_disabled()
-            } else if file_source.is_json_like() {
-                !settings.formatter().enabled || settings.json_formatter_disabled()
-            } else if file_source.is_css_like() {
-                !settings.formatter().enabled || settings.css_formatter_disabled()
-            } else {
-                !settings.formatter().enabled
-            };
-        if formatter_disabled {
+        // formatter
+        let formatter_enabled = if file_source.is_javascript_like() {
+            settings.formatter_enabled_for_this_js_file_path(path)
+        } else if file_source.is_json_like() {
+            settings.formatter_enabled_for_this_json_file_path(path)
+        } else if file_source.is_css_like() {
+            settings.formatter_enabled_for_this_css_file_path(path)
+        } else {
+            settings.formatter_enabled_for_this_file_path(path)
+        };
+        if !formatter_enabled {
             self.features_supported
                 .insert(FeatureKind::Format, SupportKind::FeatureNotEnabled);
         }
-        // linter
-        let linter_disabled = {
-            if let Some(disabled) = settings.override_settings.linter_disabled(path) {
-                disabled
-            } else if file_source.is_javascript_like() {
-                !settings.linter().enabled || settings.javascript_linter_disabled()
-            } else if file_source.is_json_like() {
-                !settings.linter().enabled || settings.json_linter_disabled()
-            } else if file_source.is_css_like() {
-                !settings.linter().enabled || settings.css_linter_disabled()
-            } else {
-                !settings.linter().enabled
-            }
-        };
 
-        if linter_disabled {
+        // linter
+        let linter_enabled = if file_source.is_javascript_like() {
+            settings.linter_enabled_for_this_js_file_path(path)
+        } else if file_source.is_json_like() {
+            settings.linter_enabled_for_this_json_file_path(path)
+        } else if file_source.is_css_like() {
+            settings.linter_enabled_for_this_css_file_path(path)
+        } else {
+            settings.linter_enabled_for_this_file_path(path)
+        };
+        if !linter_enabled {
             self.features_supported
                 .insert(FeatureKind::Lint, SupportKind::FeatureNotEnabled);
         }
 
         // organize imports
-        if let Some(disabled) = settings.override_settings.organize_imports_disabled(path) {
-            if disabled {
-                self.features_supported
-                    .insert(FeatureKind::OrganizeImports, SupportKind::FeatureNotEnabled);
-            }
-        } else if !settings.organize_imports().enabled {
+        let organize_imports_enabled = if file_source.is_javascript_like() {
+            settings.organize_imports_enabled_for_this_js_file_path(path)
+        } else if file_source.is_json_like() {
+            settings.organize_imports_enabled_for_this_json_file_path(path)
+        } else if file_source.is_css_like() {
+            settings.organize_imports_enabled_for_this_css_file_path(path)
+        } else {
+            settings.organize_imports_enabled_for_this_file_path(path)
+        };
+        if !organize_imports_enabled {
             self.features_supported
                 .insert(FeatureKind::OrganizeImports, SupportKind::FeatureNotEnabled);
         }
@@ -447,7 +445,7 @@ impl FeaturesBuilder {
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub struct UpdateSettingsParams {
-    pub configuration: PartialConfiguration,
+    pub configuration: Configuration,
     // @ematipico TODO: have a better data structure for this
     pub vcs_base_path: Option<PathBuf>,
     // @ematipico TODO: have a better data structure for this

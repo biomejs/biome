@@ -28,7 +28,7 @@ use biome_formatter::Printed;
 use biome_fs::BiomePath;
 use biome_graphql_syntax::{GraphqlFileSource, GraphqlLanguage};
 use biome_grit_patterns::{GritQuery, GritQueryResult, GritTargetFile};
-use biome_js_parser::{parse, JsParserOptions};
+use biome_js_parser::{parse, JsParseOptions};
 use biome_js_syntax::{EmbeddingKind, JsFileSource, JsLanguage, Language, TextRange, TextSize};
 use biome_json_syntax::{JsonFileSource, JsonLanguage};
 use biome_parser::AnyParse;
@@ -37,6 +37,11 @@ use biome_rowan::{FileSourceError, NodeCache};
 pub use javascript::JsFormatterSettings;
 use std::ffi::OsStr;
 use std::path::Path;
+
+pub use crate::file_handlers::{
+    css::CssOrganizeImportsEnabled, javascript::JsOrganizeImportsEnabled,
+    json::JsonOrganizeImportsEnabled,
+};
 
 mod astro;
 mod css;
@@ -572,7 +577,7 @@ pub(crate) fn parse_lang_from_script_opening_tag(script_opening_tag: &str) -> La
     parse(
         script_opening_tag,
         JsFileSource::jsx(),
-        JsParserOptions::default(),
+        JsParseOptions::default(),
     )
     .try_tree()
     .and_then(|tree| {

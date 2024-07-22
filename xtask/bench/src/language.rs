@@ -2,16 +2,16 @@ use crate::test_case::TestCase;
 use biome_analyze::options::JsxRuntime;
 use biome_analyze::{AnalysisFilter, AnalyzerOptions, ControlFlow, Never, RuleCategoriesBuilder};
 use biome_css_formatter::context::{CssFormatContext, CssFormatOptions};
-use biome_css_parser::CssParserOptions;
+use biome_css_parser::CssParseOptions;
 use biome_css_syntax::{CssRoot, CssSyntaxNode};
 use biome_formatter::{FormatResult, Formatted, PrintResult, Printed};
 use biome_graphql_formatter::context::{GraphqlFormatContext, GraphqlFormatOptions};
 use biome_graphql_syntax::GraphqlSyntaxNode;
 use biome_js_formatter::context::{JsFormatContext, JsFormatOptions};
-use biome_js_parser::JsParserOptions;
+use biome_js_parser::JsParseOptions;
 use biome_js_syntax::{AnyJsRoot, JsFileSource, JsSyntaxNode};
 use biome_json_formatter::context::{JsonFormatContext, JsonFormatOptions};
-use biome_json_parser::JsonParserOptions;
+use biome_json_parser::JsonParseOptions;
 use biome_json_syntax::JsonSyntaxNode;
 use biome_parser::prelude::ParseDiagnostic;
 use biome_rowan::NodeCache;
@@ -40,16 +40,16 @@ impl<'a> Parse<'a> {
     pub fn parse(&self) -> Parsed {
         match self {
             Parse::JavaScript(source_type, code) => Parsed::JavaScript(
-                biome_js_parser::parse(code, *source_type, JsParserOptions::default()),
+                biome_js_parser::parse(code, *source_type, JsParseOptions::default()),
                 *source_type,
             ),
             Parse::Json(code) => Parsed::Json(biome_json_parser::parse_json(
                 code,
-                JsonParserOptions::default(),
+                JsonParseOptions::default(),
             )),
             Parse::Css(code) => Parsed::Css(biome_css_parser::parse_css(
                 code,
-                CssParserOptions::default()
+                CssParseOptions::default()
                     .allow_wrong_line_comments()
                     .allow_css_modules(),
             )),
@@ -63,7 +63,7 @@ impl<'a> Parse<'a> {
                 biome_js_parser::parse_js_with_cache(
                     code,
                     *source_type,
-                    JsParserOptions::default(),
+                    JsParseOptions::default(),
                     cache,
                 ),
                 *source_type,
@@ -71,12 +71,12 @@ impl<'a> Parse<'a> {
             Parse::Json(code) => Parsed::Json(biome_json_parser::parse_json_with_cache(
                 code,
                 cache,
-                JsonParserOptions::default(),
+                JsonParseOptions::default(),
             )),
             Parse::Css(code) => Parsed::Css(biome_css_parser::parse_css_with_cache(
                 code,
                 cache,
-                CssParserOptions::default()
+                CssParseOptions::default()
                     .allow_wrong_line_comments()
                     .allow_css_modules(),
             )),

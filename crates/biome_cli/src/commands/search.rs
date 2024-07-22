@@ -3,11 +3,9 @@ use crate::commands::{get_stdin, resolve_manifest, validate_configuration_diagno
 use crate::{
     execute_mode, setup_cli_subscriber, CliDiagnostic, CliSession, Execution, TraversalMode,
 };
-use biome_configuration::{vcs::PartialVcsConfiguration, PartialFilesConfiguration};
+use biome_configuration::{vcs::VcsConfiguration, FilesConfiguration};
 use biome_deserialize::Merge;
-use biome_service::configuration::{
-    load_configuration, LoadedConfiguration, PartialConfigurationExt,
-};
+use biome_service::configuration::{load_configuration, ConfigurationExt, LoadedConfiguration};
 use biome_service::workspace::{
     ParsePatternParams, RegisterProjectFolderParams, UpdateSettingsParams,
 };
@@ -15,11 +13,11 @@ use std::ffi::OsString;
 
 pub(crate) struct SearchCommandPayload {
     pub(crate) cli_options: CliOptions,
-    pub(crate) files_configuration: Option<PartialFilesConfiguration>,
+    pub(crate) files_configuration: Option<FilesConfiguration>,
     pub(crate) paths: Vec<OsString>,
     pub(crate) pattern: String,
     pub(crate) stdin_file_path: Option<String>,
-    pub(crate) vcs_configuration: Option<PartialVcsConfiguration>,
+    pub(crate) vcs_configuration: Option<VcsConfiguration>,
 }
 
 /// Handler for the "search" command of the Biome CLI

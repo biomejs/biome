@@ -1,5 +1,5 @@
 use biome_analyze::{AnalysisFilter, AnalyzerAction, ControlFlow, Never, RuleFilter};
-use biome_css_parser::{parse_css, CssParserOptions};
+use biome_css_parser::{parse_css, CssParseOptions};
 use biome_css_syntax::{CssFileSource, CssLanguage};
 use biome_diagnostics::advice::CodeSuggestionAdvice;
 use biome_diagnostics::{DiagnosticExt, Severity};
@@ -64,7 +64,7 @@ fn run_test(input: &'static str, _: &str, _: &str, _: &str) {
                 file_name,
                 input_file,
                 CheckActionType::Lint,
-                parser_options,
+                CssParseOptions::default(),
             );
         }
 
@@ -81,7 +81,7 @@ fn run_test(input: &'static str, _: &str, _: &str, _: &str) {
             file_name,
             input_file,
             CheckActionType::Lint,
-            parser_options,
+            CssParseOptions::default(),
         )
     };
 
@@ -106,9 +106,9 @@ pub(crate) fn analyze_and_snap(
     file_name: &str,
     input_file: &Path,
     check_action_type: CheckActionType,
-    parser_options: CssParserOptions,
+    parse_options: CssParseOptions,
 ) -> usize {
-    let parsed = parse_css(input_code, parser_options);
+    let parsed = parse_css(input_code, parse_options);
     let root = parsed.tree();
 
     let mut diagnostics = Vec::new();
@@ -125,12 +125,12 @@ pub(crate) fn analyze_and_snap(
                             input_code,
                             source_type,
                             &action,
-                            parser_options,
+                            parse_options,
                         );
                         diag = diag.add_code_suggestion(CodeSuggestionAdvice::from(action));
                     }
                 } else if !action.is_suppression() {
-                    check_code_action(input_file, input_code, source_type, &action, parser_options);
+                    check_code_action(input_file, input_code, source_type, &action, parse_options);
                     diag = diag.add_code_suggestion(CodeSuggestionAdvice::from(action));
                 }
             }
@@ -143,11 +143,11 @@ pub(crate) fn analyze_and_snap(
         for action in event.actions() {
             if check_action_type.is_suppression() {
                 if action.category.matches("quickfix.suppressRule") {
-                    check_code_action(input_file, input_code, source_type, &action, parser_options);
+                    check_code_action(input_file, input_code, source_type, &action, parse_options);
                     code_fixes.push(code_fix_to_string(input_code, action));
                 }
             } else if !action.category.matches("quickfix.suppressRule") {
-                check_code_action(input_file, input_code, source_type, &action, parser_options);
+                check_code_action(input_file, input_code, source_type, &action, parse_options);
                 code_fixes.push(code_fix_to_string(input_code, action));
             }
         }
@@ -175,7 +175,7 @@ fn check_code_action(
     source: &str,
     _source_type: CssFileSource,
     action: &AnalyzerAction<CssLanguage>,
-    options: CssParserOptions,
+    options: CssParseOptions,
 ) {
     let (new_tree, text_edit) = match action
         .mutation
@@ -231,7 +231,7 @@ pub(crate) fn run_suppression_test(input: &'static str, _: &str, _: &str, _: &st
         file_name,
         input_file,
         CheckActionType::Suppression,
-        CssParserOptions::default(),
+        CssParseOptions::default(),
     );
 
     insta::with_settings!({

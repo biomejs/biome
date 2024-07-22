@@ -35,12 +35,12 @@ pub struct JsParser<'source> {
     pub source_type: JsFileSource,
     context: ParserContext<JsSyntaxKind>,
     source: JsTokenSource<'source>,
-    options: JsParserOptions,
+    options: JsParseOptions,
 }
 
 impl<'source> JsParser<'source> {
     /// Creates a new parser that parses the `source`.
-    pub fn new(source: &'source str, source_type: JsFileSource, options: JsParserOptions) -> Self {
+    pub fn new(source: &'source str, source_type: JsFileSource, options: JsParseOptions) -> Self {
         let source = JsTokenSource::from_str(source);
 
         JsParser {
@@ -56,7 +56,7 @@ impl<'source> JsParser<'source> {
         &self.state
     }
 
-    pub(crate) fn options(&self) -> &JsParserOptions {
+    pub(crate) fn options(&self) -> &JsParseOptions {
         &self.options
     }
 
@@ -218,7 +218,7 @@ pub struct JsParserCheckpoint {
 #[cfg(test)]
 mod tests {
     use crate::prelude::*;
-    use crate::JsParserOptions;
+    use crate::JsParseOptions;
     use biome_js_syntax::{JsFileSource, JsSyntaxKind};
 
     #[test]
@@ -229,7 +229,7 @@ mod tests {
         let mut parser = JsParser::new(
             "'use strict'",
             JsFileSource::default(),
-            JsParserOptions::default(),
+            JsParseOptions::default(),
         );
 
         let _ = parser.start();
@@ -241,7 +241,7 @@ mod tests {
         let mut p = JsParser::new(
             "'use strict'",
             JsFileSource::default(),
-            JsParserOptions::default(),
+            JsParseOptions::default(),
         );
 
         let m = p.start();
@@ -254,7 +254,7 @@ mod tests {
         let mut p = JsParser::new(
             "'use strict'",
             JsFileSource::default(),
-            JsParserOptions::default(),
+            JsParseOptions::default(),
         );
 
         let m = p.start();

@@ -2,9 +2,11 @@
 //!
 //! The configuration is divided by "tool", and then it's possible to further customise it
 //! by language. The language might further options divided by tool.
+pub mod bool;
 pub mod css;
 pub mod diagnostics;
 pub mod editorconfig;
+pub mod file_size;
 pub mod formatter;
 pub mod generated;
 pub mod graphql;
@@ -15,41 +17,36 @@ pub mod organize_imports;
 mod overrides;
 pub mod vcs;
 
-use crate::css::CssLinter;
 pub use crate::diagnostics::BiomeDiagnostic;
 pub use crate::diagnostics::CantLoadExtendFile;
 pub use crate::generated::push_to_analyzer_rules;
-use crate::javascript::JavascriptLinter;
-use crate::json::JsonLinter;
-use crate::organize_imports::{partial_organize_imports, OrganizeImports, PartialOrganizeImports};
-use crate::vcs::{partial_vcs_configuration, PartialVcsConfiguration, VcsConfiguration};
+use crate::organize_imports::{organize_imports, OrganizeImports};
+use crate::vcs::{vcs_configuration, VcsConfiguration};
 use biome_deserialize::{Deserialized, StringSet};
-use biome_deserialize_macros::{Deserializable, Merge, Partial};
+use biome_deserialize_macros::{Deserializable, Merge};
+use bool::Bool;
 use bpaf::Bpaf;
 pub use css::{
-    partial_css_configuration, CssConfiguration, CssFormatter, PartialCssConfiguration,
-    PartialCssFormatter,
+    css_configuration, CssConfiguration, CssFormatterConfiguration, CssLinterConfiguration,
+    CssParserConfiguration,
 };
-pub use formatter::{
-    partial_formatter_configuration, FormatterConfiguration, PartialFormatterConfiguration,
-    PlainIndentStyle,
-};
+pub use file_size::FileSize;
+pub use formatter::{formatter_configuration, FormatterConfiguration, PlainIndentStyle};
 pub use graphql::{
-    partial_graphql_configuration, GraphqlConfiguration, GraphqlFormatter, GraphqlLinter,
-    PartialGraphqlConfiguration, PartialGraphqlFormatter, PartialGraphqlLinter,
+    graphql_configuration, GraphqlConfiguration, GraphqlFormatterConfiguration,
+    GraphqlLinterConfiguration,
 };
 pub use javascript::{
-    partial_javascript_configuration, JavascriptConfiguration, JavascriptFormatter,
-    PartialJavascriptConfiguration, PartialJavascriptFormatter,
+    js_configuration, JsConfiguration, JsFormatterConfiguration, JsLinterConfiguration,
+    JsParserConfiguration,
 };
 pub use json::{
-    partial_json_configuration, JsonConfiguration, JsonFormatter, PartialJsonConfiguration,
-    PartialJsonFormatter,
+    json_configuration, JsonConfiguration, JsonFormatterConfiguration, JsonLinterConfiguration,
+    JsonParserConfiguration,
 };
 pub use linter::{
-    partial_linter_configuration, LinterConfiguration, PartialLinterConfiguration,
-    RuleConfiguration, RuleFixConfiguration, RulePlainConfiguration, RuleWithFixOptions,
-    RuleWithOptions, Rules,
+    linter_configuration, LinterConfiguration, RuleConfiguration, RuleFixConfiguration,
+    RulePlainConfiguration, RuleWithFixOptions, RuleWithOptions, Rules,
 };
 pub use overrides::{
     OverrideFormatterConfiguration, OverrideLinterConfiguration,
@@ -57,83 +54,75 @@ pub use overrides::{
 };
 use serde::{Deserialize, Serialize};
 use std::fmt::Debug;
-use std::num::NonZeroU64;
 use std::path::PathBuf;
 
-/// Limit the size of files to 1.0 MiB by default
-pub const DEFAULT_FILE_SIZE_LIMIT: NonZeroU64 =
-    // SAFETY: This constant is initialized with a non-zero value
-    unsafe { NonZeroU64::new_unchecked(1024 * 1024) };
-
 /// The configuration that is contained inside the file `biome.json`
-#[derive(Clone, Debug, Default, Deserialize, Eq, Partial, PartialEq, Serialize)]
-#[partial(derive(Bpaf, Clone, Deserializable, Eq, Merge, PartialEq))]
-#[partial(cfg_attr(feature = "schema", derive(schemars::JsonSchema)))]
-#[partial(serde(deny_unknown_fields, rename_all = "camelCase"))]
+#[derive(
+    Bpaf, Clone, Debug, Default, Deserializable, Deserialize, Eq, Merge, PartialEq, Serialize,
+)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(deny_unknown_fields, rename_all = "camelCase")]
 pub struct Configuration {
     /// A field for the [JSON schema](https://json-schema.org/) specification
-    #[partial(serde(rename = "$schema"))]
-    #[partial(bpaf(hide))]
-    pub schema: String,
+    #[serde(rename = "$schema")]
+    #[bpaf(hide)]
+    pub schema: Option<String>,
 
     /// The configuration of the VCS integration
-    #[partial(type, bpaf(external(partial_vcs_configuration), optional, hide_usage))]
-    pub vcs: VcsConfiguration,
+    #[bpaf(external(vcs_configuration), optional, hide_usage)]
+    pub vcs: Option<VcsConfiguration>,
 
     /// The configuration of the filesystem
-    #[partial(
-        type,
-        bpaf(external(partial_files_configuration), optional, hide_usage)
-    )]
-    pub files: FilesConfiguration,
+    #[bpaf(external(files_configuration), optional, hide_usage)]
+    pub files: Option<FilesConfiguration>,
 
     /// The configuration of the formatter
-    #[partial(type, bpaf(external(partial_formatter_configuration), optional))]
-    pub formatter: FormatterConfiguration,
+    #[bpaf(external(formatter_configuration), optional)]
+    pub formatter: Option<FormatterConfiguration>,
 
     /// The configuration of the import sorting
-    #[partial(type, bpaf(external(partial_organize_imports), optional))]
-    pub organize_imports: OrganizeImports,
+    #[bpaf(external(organize_imports), optional)]
+    pub organize_imports: Option<OrganizeImports>,
 
     /// The configuration for the linter
-    #[partial(type, bpaf(external(partial_linter_configuration), optional))]
-    pub linter: LinterConfiguration,
+    #[bpaf(external(linter_configuration), optional)]
+    pub linter: Option<LinterConfiguration>,
 
     /// Specific configuration for the JavaScript language
-    #[partial(type, bpaf(external(partial_javascript_configuration), optional))]
-    pub javascript: JavascriptConfiguration,
+    #[bpaf(external(js_configuration), optional)]
+    pub javascript: Option<JsConfiguration>,
 
     /// Specific configuration for the Json language
-    #[partial(type, bpaf(external(partial_json_configuration), optional))]
-    pub json: JsonConfiguration,
+    #[bpaf(external(json_configuration), optional)]
+    pub json: Option<JsonConfiguration>,
 
     /// Specific configuration for the Css language
-    #[partial(type, bpaf(external(partial_css_configuration), optional))]
-    pub css: CssConfiguration,
+    #[bpaf(external(css_configuration), optional)]
+    pub css: Option<CssConfiguration>,
 
     /// Specific configuration for the GraphQL language
-    #[partial(type, bpaf(external(partial_graphql_configuration), optional))]
-    pub graphql: GraphqlConfiguration,
+    #[bpaf(external(graphql_configuration), optional)]
+    pub graphql: Option<GraphqlConfiguration>,
 
     /// A list of paths to other JSON files, used to extends the current configuration.
-    #[partial(bpaf(hide))]
-    pub extends: StringSet,
+    #[bpaf(hide)]
+    pub extends: Option<StringSet>,
 
     /// A list of granular patterns that should be applied only to a sub set of files
-    #[partial(bpaf(hide))]
-    pub overrides: Overrides,
+    #[bpaf(hide)]
+    pub overrides: Option<Overrides>,
 }
 
-impl PartialConfiguration {
+impl Configuration {
     /// Returns the initial configuration as generated by `biome init`.
     pub fn init() -> Self {
         Self {
-            organize_imports: Some(PartialOrganizeImports {
-                enabled: Some(true),
+            organize_imports: Some(OrganizeImports {
+                enabled: Some(true.into()),
                 ..Default::default()
             }),
-            linter: Some(PartialLinterConfiguration {
-                enabled: Some(true),
+            linter: Some(LinterConfiguration {
+                enabled: Some(true.into()),
                 rules: Some(Rules {
                     recommended: Some(true),
                     ..Default::default()
@@ -144,178 +133,171 @@ impl PartialConfiguration {
         }
     }
 
-    pub fn is_formatter_disabled(&self) -> bool {
-        self.formatter.as_ref().map_or(false, |f| f.is_disabled())
+    pub fn is_formatter_enabled(&self) -> bool {
+        self.formatter
+            .as_ref()
+            .and_then(|formatter| formatter.enabled)
+            .unwrap_or_default()
+            .into()
     }
 
     pub fn get_formatter_configuration(&self) -> FormatterConfiguration {
-        self.formatter
-            .as_ref()
-            .map(|f| f.get_formatter_configuration())
-            .unwrap_or_default()
+        self.formatter.clone().unwrap_or_default()
     }
 
-    pub fn get_javascript_formatter_configuration(&self) -> JavascriptFormatter {
-        self.javascript
+    pub fn is_linter_enabled(&self) -> bool {
+        self.linter
             .as_ref()
-            .map(|f| {
-                f.formatter
-                    .as_ref()
-                    .map(|f| f.get_formatter_configuration())
-                    .unwrap_or_default()
-            })
+            .and_then(|linter| linter.enabled)
             .unwrap_or_default()
-    }
-
-    pub fn get_javascript_linter_configuration(&self) -> JavascriptLinter {
-        self.javascript
-            .as_ref()
-            .map(|f| {
-                f.linter
-                    .as_ref()
-                    .map(|f| f.get_linter_configuration())
-                    .unwrap_or_default()
-            })
-            .unwrap_or_default()
-    }
-
-    pub fn get_json_formatter_configuration(&self) -> JsonFormatter {
-        self.json
-            .as_ref()
-            .map(|f| {
-                f.formatter
-                    .as_ref()
-                    .map(|f| f.get_formatter_configuration())
-                    .unwrap_or_default()
-            })
-            .unwrap_or_default()
-    }
-
-    pub fn get_json_linter_configuration(&self) -> JsonLinter {
-        self.json
-            .as_ref()
-            .map(|f| {
-                f.linter
-                    .as_ref()
-                    .map(|f| f.get_linter_configuration())
-                    .unwrap_or_default()
-            })
-            .unwrap_or_default()
-    }
-
-    pub fn get_css_formatter_configuration(&self) -> CssFormatter {
-        self.css
-            .as_ref()
-            .map(|f| {
-                f.formatter
-                    .as_ref()
-                    .map(|f| f.get_formatter_configuration())
-                    .unwrap_or_default()
-            })
-            .unwrap_or_default()
-    }
-
-    pub fn get_css_linter_configuration(&self) -> CssLinter {
-        self.css
-            .as_ref()
-            .map(|f| {
-                f.linter
-                    .as_ref()
-                    .map(|f| f.get_linter_configuration())
-                    .unwrap_or_default()
-            })
-            .unwrap_or_default()
-    }
-    pub fn get_graphql_linter_configuration(&self) -> GraphqlLinter {
-        self.graphql
-            .as_ref()
-            .map(|f| {
-                f.linter
-                    .as_ref()
-                    .map(|f| f.get_linter_configuration())
-                    .unwrap_or_default()
-            })
-            .unwrap_or_default()
-    }
-
-    pub fn get_graphql_formatter_configuration(&self) -> GraphqlFormatter {
-        self.graphql
-            .as_ref()
-            .map(|f| {
-                f.formatter
-                    .as_ref()
-                    .map(|f| f.get_formatter_configuration())
-                    .unwrap_or_default()
-            })
-            .unwrap_or_default()
-    }
-
-    pub fn is_linter_disabled(&self) -> bool {
-        self.linter.as_ref().map_or(false, |f| f.is_disabled())
+            .into()
     }
 
     pub fn get_linter_rules(&self) -> Rules {
         self.linter
             .as_ref()
-            .map(|f| f.get_rules())
+            .and_then(|linter| linter.rules.as_ref())
+            .cloned()
             .unwrap_or_default()
     }
 
-    pub fn is_organize_imports_disabled(&self) -> bool {
+    pub fn is_organize_imports_enabled(&self) -> bool {
         self.organize_imports
             .as_ref()
-            .map_or(false, |f| f.is_disabled())
-    }
-
-    pub fn is_vcs_disabled(&self) -> bool {
-        self.vcs.as_ref().map_or(true, |f| f.is_disabled())
+            .and_then(|organize_imports| organize_imports.enabled)
+            .unwrap_or_default()
+            .into()
     }
 
     pub fn is_vcs_enabled(&self) -> bool {
-        !self.is_vcs_disabled()
+        self.vcs
+            .as_ref()
+            .and_then(|vcs| vcs.enabled)
+            .unwrap_or_default()
+            .into()
+    }
+
+    pub fn get_javascript_parser_configuration(&self) -> JsParserConfiguration {
+        self.javascript
+            .as_ref()
+            .and_then(|lang| lang.parser.as_ref())
+            .cloned()
+            .unwrap_or_default()
+    }
+
+    pub fn get_javascript_formatter_configuration(&self) -> JsFormatterConfiguration {
+        self.javascript
+            .as_ref()
+            .and_then(|lang| lang.formatter.as_ref())
+            .cloned()
+            .unwrap_or_default()
+    }
+
+    pub fn get_javascript_linter_configuration(&self) -> JsLinterConfiguration {
+        self.javascript
+            .as_ref()
+            .and_then(|lang| lang.linter.as_ref())
+            .cloned()
+            .unwrap_or_default()
+    }
+
+    pub fn get_json_parser_configuration(&self) -> JsonParserConfiguration {
+        self.json
+            .as_ref()
+            .and_then(|lang| lang.parser.as_ref())
+            .cloned()
+            .unwrap_or_default()
+    }
+
+    pub fn get_json_formatter_configuration(&self) -> JsonFormatterConfiguration {
+        self.json
+            .as_ref()
+            .and_then(|lang| lang.formatter.as_ref())
+            .cloned()
+            .unwrap_or_default()
+    }
+
+    pub fn get_json_linter_configuration(&self) -> JsonLinterConfiguration {
+        self.json
+            .as_ref()
+            .and_then(|lang| lang.linter.as_ref())
+            .cloned()
+            .unwrap_or_default()
+    }
+
+    pub fn get_css_parser_configuration(&self) -> CssParserConfiguration {
+        self.css
+            .as_ref()
+            .and_then(|lang| lang.parser.as_ref())
+            .cloned()
+            .unwrap_or_default()
+    }
+
+    pub fn get_css_formatter_configuration(&self) -> CssFormatterConfiguration {
+        self.css
+            .as_ref()
+            .and_then(|lang| lang.formatter.as_ref())
+            .cloned()
+            .unwrap_or_default()
+    }
+
+    pub fn get_css_linter_configuration(&self) -> CssLinterConfiguration {
+        self.css
+            .as_ref()
+            .and_then(|lang| lang.linter.as_ref())
+            .cloned()
+            .unwrap_or_default()
+    }
+
+    pub fn get_graphql_formatter_configuration(&self) -> GraphqlFormatterConfiguration {
+        self.graphql
+            .as_ref()
+            .and_then(|lang| lang.formatter.as_ref())
+            .cloned()
+            .unwrap_or_default()
+    }
+
+    pub fn get_graphql_linter_configuration(&self) -> GraphqlLinterConfiguration {
+        self.graphql
+            .as_ref()
+            .and_then(|lang| lang.linter.as_ref())
+            .cloned()
+            .unwrap_or_default()
     }
 }
 
+pub type IgnoreUnknownEnabled = Bool<false>;
+
 /// The configuration of the filesystem
-#[derive(Clone, Debug, Deserialize, Eq, Partial, PartialEq, Serialize)]
-#[partial(derive(Bpaf, Clone, Deserializable, Eq, Merge, PartialEq))]
-#[partial(cfg_attr(feature = "schema", derive(schemars::JsonSchema)))]
-#[partial(serde(rename_all = "camelCase", default, deny_unknown_fields))]
+#[derive(
+    Bpaf, Clone, Debug, Default, Deserializable, Deserialize, Eq, Merge, PartialEq, Serialize,
+)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase", default, deny_unknown_fields)]
 pub struct FilesConfiguration {
     /// The maximum allowed size for source code files in bytes. Files above
     /// this limit will be ignored for performance reasons. Defaults to 1 MiB
-    #[partial(bpaf(long("files-max-size"), argument("NUMBER")))]
-    pub max_size: NonZeroU64,
+    #[bpaf(long("files-max-size"), argument("NUMBER"))]
+    pub max_size: Option<FileSize>,
 
     /// A list of Unix shell style patterns. Biome will ignore files/folders that will
     /// match these patterns.
-    #[partial(bpaf(hide))]
-    pub ignore: StringSet,
+    #[bpaf(hide)]
+    pub ignore: Option<StringSet>,
 
     /// A list of Unix shell style patterns. Biome will handle only those files/folders that will
     /// match these patterns.
-    #[partial(bpaf(hide))]
-    pub include: StringSet,
+    #[bpaf(hide)]
+    pub include: Option<StringSet>,
 
     /// Tells Biome to not emit diagnostics when handling files that doesn't know
-    #[partial(bpaf(long("files-ignore-unknown"), argument("true|false"), optional))]
-    pub ignore_unknown: bool,
-}
-
-impl Default for FilesConfiguration {
-    fn default() -> Self {
-        Self {
-            max_size: DEFAULT_FILE_SIZE_LIMIT,
-            ignore: Default::default(),
-            include: Default::default(),
-            ignore_unknown: false,
-        }
-    }
+    #[bpaf(long("files-ignore-unknown"), argument("true|false"))]
+    pub ignore_unknown: Option<IgnoreUnknownEnabled>,
 }
 
 pub struct ConfigurationPayload {
     /// The result of the deserialization
-    pub deserialized: Deserialized<PartialConfiguration>,
+    pub deserialized: Deserialized<Configuration>,
     /// The path of where the `biome.json` or `biome.jsonc` file was found. This contains the file name.
     pub configuration_file_path: PathBuf,
     /// The base path where the external configuration in a package should be resolved from

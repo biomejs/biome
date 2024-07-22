@@ -483,7 +483,7 @@ pub fn is_binding_react_stable(
 mod test {
     use super::*;
     use crate::react::hooks::is_react_hook_call;
-    use biome_js_parser::JsParserOptions;
+    use biome_js_parser::JsParseOptions;
     use biome_js_semantic::{semantic_model, SemanticModelOptions};
     use biome_js_syntax::JsFileSource;
 
@@ -493,7 +493,7 @@ mod test {
             let r = biome_js_parser::parse(
                 r#"useRef();"#,
                 JsFileSource::js_module(),
-                JsParserOptions::default(),
+                JsParseOptions::default(),
             );
             let node = r
                 .syntax()
@@ -509,7 +509,7 @@ mod test {
             let r = biome_js_parser::parse(
                 r#"userCredentials();"#,
                 JsFileSource::js_module(),
-                JsParserOptions::default(),
+                JsParseOptions::default(),
             );
             let node = r
                 .syntax()
@@ -530,7 +530,7 @@ mod test {
                 const ref = useRef();
             "#,
             JsFileSource::js_module(),
-            JsParserOptions::default(),
+            JsParseOptions::default(),
         );
         let node = r
             .syntax()
@@ -560,7 +560,7 @@ mod test {
                 const ref = React.useRef();
             "#,
             JsFileSource::js_module(),
-            JsParserOptions::default(),
+            JsParseOptions::default(),
         );
         let node = r
             .syntax()

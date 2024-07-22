@@ -7,7 +7,7 @@ use biome_formatter::{IndentStyle, IndentWidth};
 use biome_fs::{ConfigName, FileSystemExt, MemoryFileSystem};
 use biome_json_formatter::context::JsonFormatOptions;
 use biome_json_formatter::format_node;
-use biome_json_parser::{parse_json, JsonParserOptions};
+use biome_json_parser::{parse_json, JsonParseOptions};
 use lazy_static::lazy_static;
 use regex::Regex;
 use std::borrow::Cow;
@@ -62,7 +62,7 @@ impl CliSnapshot {
 
             let parsed = parse_json(
                 &redacted,
-                JsonParserOptions::default()
+                JsonParseOptions::default()
                     .with_allow_comments()
                     .with_allow_trailing_commas(),
             );

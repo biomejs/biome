@@ -2,7 +2,7 @@
 #[rustfmt::skip]
 mod tests;
 
-use crate::CssParserOptions;
+use crate::CssParseOptions;
 use biome_css_syntax::{CssSyntaxKind, CssSyntaxKind::*, TextLen, TextSize, T};
 use biome_parser::diagnostic::ParseDiagnostic;
 use biome_parser::lexer::{
@@ -88,7 +88,7 @@ pub(crate) struct CssLexer<'src> {
 
     diagnostics: Vec<ParseDiagnostic>,
 
-    options: CssParserOptions,
+    options: CssParseOptions,
 }
 
 impl<'src> Lexer<'src> for CssLexer<'src> {
@@ -209,11 +209,11 @@ impl<'src> CssLexer<'src> {
             current_flags: TokenFlags::empty(),
             position: 0,
             diagnostics: vec![],
-            options: CssParserOptions::default(),
+            options: CssParseOptions::default(),
         }
     }
 
-    pub(crate) fn with_options(self, options: CssParserOptions) -> Self {
+    pub(crate) fn with_options(self, options: CssParseOptions) -> Self {
         Self { options, ..self }
     }
 

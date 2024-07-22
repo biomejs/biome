@@ -3,12 +3,10 @@ use crate::cli_options::CliOptions;
 use crate::commands::{resolve_manifest, validate_configuration_diagnostics};
 use crate::execute::VcsTargeted;
 use crate::{execute_mode, setup_cli_subscriber, CliDiagnostic, CliSession, Execution};
-use biome_configuration::{organize_imports::PartialOrganizeImports, PartialConfiguration};
-use biome_configuration::{PartialFormatterConfiguration, PartialLinterConfiguration};
+use biome_configuration::{organize_imports::OrganizeImports, Configuration};
+use biome_configuration::{FormatterConfiguration, LinterConfiguration};
 use biome_deserialize::Merge;
-use biome_service::configuration::{
-    load_configuration, LoadedConfiguration, PartialConfigurationExt,
-};
+use biome_service::configuration::{load_configuration, ConfigurationExt, LoadedConfiguration};
 use biome_service::workspace::{RegisterProjectFolderParams, UpdateSettingsParams};
 use std::ffi::OsString;
 
@@ -17,7 +15,8 @@ pub(crate) struct CiCommandPayload {
     pub(crate) linter_enabled: Option<bool>,
     pub(crate) organize_imports_enabled: Option<bool>,
     pub(crate) paths: Vec<OsString>,
-    pub(crate) configuration: Option<PartialConfiguration>,
+    // TODO(zzwu): What's the purpose of this option?
+    pub(crate) configuration: Option<Configuration>,
     pub(crate) cli_options: CliOptions,
     pub(crate) changed: bool,
     pub(crate) since: Option<String>,
@@ -54,35 +53,36 @@ pub(crate) fn ci(session: CliSession, payload: CiCommandPayload) -> Result<(), C
     } = loaded_configuration;
     let formatter = fs_configuration
         .formatter
-        .get_or_insert_with(PartialFormatterConfiguration::default);
+        .get_or_insert_with(FormatterConfiguration::default);
 
     if formatter_enabled.is_some() {
-        formatter.enabled = formatter_enabled;
+        formatter.enabled = formatter_enabled.map(Into::into);
     }
 
     let linter = fs_configuration
         .linter
-        .get_or_insert_with(PartialLinterConfiguration::default);
+        .get_or_insert_with(LinterConfiguration::default);
 
     if linter_enabled.is_some() {
-        linter.enabled = linter_enabled;
+        linter.enabled = linter_enabled.map(Into::into);
     }
 
     let organize_imports = fs_configuration
         .organize_imports
-        .get_or_insert_with(PartialOrganizeImports::default);
+        .get_or_insert_with(OrganizeImports::default);
 
     if organize_imports_enabled.is_some() {
-        organize_imports.enabled = organize_imports_enabled;
+        organize_imports.enabled = organize_imports_enabled.map(Into::into);
     }
 
+    // TODO(zzwu): We shouldn't bail because overrides can re-enable these options
     // no point in doing the traversal if all the checks have been disabled
-    if fs_configuration.is_formatter_disabled()
-        && fs_configuration.is_linter_disabled()
-        && fs_configuration.is_organize_imports_disabled()
-    {
-        return Err(CliDiagnostic::incompatible_end_configuration("Formatter, linter and organize imports are disabled, can't perform the command. This is probably and error."));
-    }
+    // if !fs_configuration.is_formatter_enabled()
+    //     && !fs_configuration.is_linter_enabled()
+    //     && !fs_configuration.is_organize_imports_enabled()
+    // {
+    //     return Err(CliDiagnostic::incompatible_end_configuration("Formatter, linter and organize imports are disabled, can't perform the command. This is probably and error."));
+    // }
 
     if let Some(mut configuration) = configuration {
         if let Some(linter) = configuration.linter.as_mut() {

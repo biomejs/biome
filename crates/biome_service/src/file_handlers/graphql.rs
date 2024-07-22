@@ -7,7 +7,7 @@ use crate::file_handlers::{
     AnalyzerCapabilities, Capabilities, FormatterCapabilities, ParserCapabilities,
 };
 use crate::settings::{
-    FormatSettings, LanguageListSettings, LanguageSettings, LinterSettings, OverrideSettings,
+    FormatterSettings, LanguageListSettings, LanguageSettings, LinterSettings, OverrideSettings,
     ServiceLanguage, Settings, WorkspaceSettingsHandle,
 };
 use crate::workspace::{
@@ -18,6 +18,7 @@ use biome_analyze::{
     AnalysisFilter, AnalyzerConfiguration, AnalyzerOptions, ControlFlow, Never,
     RuleCategoriesBuilder, RuleCategory, RuleError,
 };
+use biome_configuration::graphql::{GraphqlFormatterEnabled, GraphqlLinterEnabled};
 use biome_diagnostics::{category, Applicability, Diagnostic, DiagnosticExt, Severity};
 use biome_formatter::{
     BracketSpacing, FormatError, IndentStyle, IndentWidth, LineEnding, LineWidth, Printed,
@@ -35,43 +36,27 @@ use biome_rowan::{AstNode, NodeCache, TokenAtOffset};
 use std::borrow::Cow;
 use tracing::{debug_span, error, info, trace, trace_span};
 
-#[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
+#[derive(Debug, Default, Clone, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub struct GraphqlFormatterSettings {
+    pub enabled: Option<GraphqlFormatterEnabled>,
     pub line_ending: Option<LineEnding>,
     pub line_width: Option<LineWidth>,
     pub indent_width: Option<IndentWidth>,
     pub indent_style: Option<IndentStyle>,
     pub quote_style: Option<QuoteStyle>,
     pub bracket_spacing: Option<BracketSpacing>,
-    pub enabled: Option<bool>,
 }
 
-impl Default for GraphqlFormatterSettings {
-    fn default() -> Self {
-        Self {
-            enabled: Some(false),
-            indent_style: Default::default(),
-            indent_width: Default::default(),
-            line_ending: Default::default(),
-            line_width: Default::default(),
-            quote_style: Default::default(),
-            bracket_spacing: Default::default(),
-        }
-    }
-}
-
-#[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
+#[derive(Debug, Clone, Default, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub struct GraphqlLinterSettings {
-    pub enabled: Option<bool>,
+    pub enabled: Option<GraphqlLinterEnabled>,
 }
 
-impl Default for GraphqlLinterSettings {
-    fn default() -> Self {
-        Self {
-            enabled: Some(false),
-        }
+impl GraphqlLinterSettings {
+    pub fn is_enabled(&self) -> bool {
+        self.enabled.unwrap_or_default().into()
     }
 }
 
@@ -88,7 +73,7 @@ impl ServiceLanguage for GraphqlLanguage {
     }
 
     fn resolve_format_options(
-        global: Option<&FormatSettings>,
+        global: Option<&FormatterSettings>,
         overrides: Option<&OverrideSettings>,
         language: Option<&Self::FormatterSettings>,
         path: &BiomePath,
@@ -135,7 +120,7 @@ impl ServiceLanguage for GraphqlLanguage {
         }
     }
 
-    fn resolve_analyzer_options(
+    fn resolve_analyze_options(
         _global: Option<&Settings>,
         _linter: Option<&LinterSettings>,
         _overrides: Option<&OverrideSettings>,
@@ -294,7 +279,7 @@ fn lint(params: LintParams) -> LintResults {
         move || {
             let workspace_settings = &params.workspace;
             let analyzer_options = workspace_settings
-                .analyzer_options::<GraphqlLanguage>(params.path, &params.language);
+                .analyze_options::<GraphqlLanguage>(params.path, &params.language);
             let tree = params.parse.tree();
             let mut diagnostics = params.parse.into_diagnostics();
 
@@ -441,13 +426,14 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
             let mut filter = AnalysisFilter::from_enabled_rules(filter.as_slice());
 
             let mut categories = RuleCategoriesBuilder::default().with_syntax().with_lint();
-            if settings.organize_imports.enabled {
+            //  TODO(zzwu): take overrides into consideration
+            if settings.organize_imports.enabled.unwrap_or_default().into() {
                 categories = categories.with_action();
             }
             filter.categories = categories.build();
             filter.range = Some(range);
 
-            let analyzer_options = workspace.analyzer_options::<GraphqlLanguage>(path, &language);
+            let analyzer_options = workspace.analyze_options::<GraphqlLanguage>(path, &language);
 
             let Some(_) = language.to_graphql_file_source() else {
                 error!("Could not determine the file source of the file");
@@ -516,7 +502,7 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
     let mut skipped_suggested_fixes = 0;
     let mut errors: u16 = 0;
     let analyzer_options =
-        workspace.analyzer_options::<GraphqlLanguage>(biome_path, &document_file_source);
+        workspace.analyze_options::<GraphqlLanguage>(biome_path, &document_file_source);
     loop {
         let (action, _) = analyze(&tree, filter, &analyzer_options, |signal| {
             let current_diagnostic = signal.diagnostic();

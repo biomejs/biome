@@ -10,7 +10,7 @@ use biome_formatter::{
 };
 use biome_fs::{FileSystem, OpenOptions};
 use biome_js_formatter::context::{ArrowParentheses, QuoteProperties, Semicolons, TrailingCommas};
-use biome_json_parser::JsonParserOptions;
+use biome_json_parser::JsonParseOptions;
 use biome_service::DynRef;
 use std::path::Path;
 
@@ -187,10 +187,10 @@ impl From<QuoteProps> for QuoteProperties {
     }
 }
 
-impl TryFrom<PrettierConfiguration> for biome_configuration::PartialConfiguration {
+impl TryFrom<PrettierConfiguration> for biome_configuration::Configuration {
     type Error = ParseFormatNumberError;
     fn try_from(value: PrettierConfiguration) -> Result<Self, Self::Error> {
-        let mut result = biome_configuration::PartialConfiguration::default();
+        let mut result = biome_configuration::Configuration::default();
 
         let line_width = LineWidth::try_from(value.print_width)?;
         let indent_width = IndentWidth::try_from(value.tab_width)?;
@@ -199,19 +199,19 @@ impl TryFrom<PrettierConfiguration> for biome_configuration::PartialConfiguratio
         } else {
             biome_configuration::PlainIndentStyle::Space
         };
-        let formatter = biome_configuration::PartialFormatterConfiguration {
+        let formatter = biome_configuration::FormatterConfiguration {
             indent_width: Some(indent_width),
             line_width: Some(line_width),
             indent_style: Some(indent_style),
             line_ending: Some(value.end_of_line.into()),
             attribute_position: Some(AttributePosition::default()),
-            format_with_errors: Some(false),
+            format_with_errors: Some(false.into()),
             ignore: None,
             include: None,
-            enabled: Some(true),
+            enabled: Some(true.into()),
             // editorconfig support is intentionally set to true, because prettier always reads the editorconfig file
             // see: https://github.com/prettier/prettier/issues/15255
-            use_editorconfig: Some(true),
+            use_editorconfig: Some(true.into()),
             // deprecated
             indent_size: None,
             bracket_spacing: Some(BracketSpacing::default()),
@@ -233,7 +233,7 @@ impl TryFrom<PrettierConfiguration> for biome_configuration::PartialConfiguratio
         } else {
             QuoteStyle::Double
         };
-        let js_formatter = biome_configuration::PartialJavascriptFormatter {
+        let js_formatter = biome_configuration::JsFormatterConfiguration {
             indent_width: None,
             line_width: None,
             indent_style: None,
@@ -243,7 +243,7 @@ impl TryFrom<PrettierConfiguration> for biome_configuration::PartialConfiguratio
             indent_size: None,
 
             // js ones
-            bracket_same_line: Some(value.bracket_line),
+            bracket_same_line: Some(value.bracket_line.into()),
             arrow_parentheses: Some(value.arrow_parens.into()),
             semicolons: Some(semicolons),
             trailing_commas: Some(value.trailing_comma.into()),
@@ -255,7 +255,7 @@ impl TryFrom<PrettierConfiguration> for biome_configuration::PartialConfiguratio
             jsx_quote_style: Some(jsx_quote_style),
             attribute_position: Some(AttributePosition::default()),
         };
-        let js_config = biome_configuration::PartialJavascriptConfiguration {
+        let js_config = biome_configuration::JsConfiguration {
             formatter: Some(js_formatter),
             ..Default::default()
         };
@@ -306,7 +306,7 @@ impl TryFrom<Override> for biome_configuration::OverridePattern {
                 indent_width,
                 line_width,
                 indent_style,
-                line_ending: options.end_of_line.map(|end_of_line| end_of_line.into()),
+                line_ending: options.end_of_line.map(Into::into),
                 ..Default::default()
             };
             result.formatter = Some(formatter);
@@ -345,19 +345,17 @@ impl TryFrom<Override> for biome_configuration::OverridePattern {
                 QuoteStyle::Double
             }
         });
-        let js_formatter = biome_configuration::PartialJavascriptFormatter {
-            bracket_same_line: options.bracket_line,
-            arrow_parentheses: options.arrow_parens.map(|arrow_parens| arrow_parens.into()),
+        let js_formatter = biome_configuration::JsFormatterConfiguration {
+            bracket_same_line: options.bracket_line.map(Into::into),
+            arrow_parentheses: options.arrow_parens.map(Into::into),
             semicolons,
-            trailing_commas: options
-                .trailing_comma
-                .map(|trailing_comma| trailing_comma.into()),
+            trailing_commas: options.trailing_comma.map(Into::into),
             quote_style,
-            quote_properties: options.quote_props.map(|quote_props| quote_props.into()),
+            quote_properties: options.quote_props.map(Into::into),
             jsx_quote_style,
             ..Default::default()
         };
-        let js_config = biome_configuration::PartialJavascriptConfiguration {
+        let js_config = biome_configuration::JsConfiguration {
             formatter: Some(js_formatter),
             ..Default::default()
         };
@@ -425,7 +423,7 @@ fn load_config(
             if path.file_name().is_some_and(|name| name == PACKAGE_JSON) {
                 let (deserialized, _) = deserialize_from_json_str::<PrettierPackageJson>(
                     &content,
-                    JsonParserOptions::default()
+                    JsonParseOptions::default()
                         .with_allow_trailing_commas()
                         .with_allow_comments(),
                     "",
@@ -438,7 +436,7 @@ fn load_config(
             } else {
                 deserialize_from_json_str::<PrettierConfiguration>(
                     &content,
-                    JsonParserOptions::default()
+                    JsonParseOptions::default()
                         .with_allow_trailing_commas()
                         .with_allow_comments(),
                     "",
@@ -450,7 +448,7 @@ fn load_config(
             let node::Resolution { content, .. } = node::load_config(&path.to_string_lossy())?;
             deserialize_from_json_str::<PrettierConfiguration>(
                 &content,
-                JsonParserOptions::default(),
+                JsonParseOptions::default(),
                 "",
             )
             .consume()
@@ -505,13 +503,13 @@ fn load_config(
 mod tests {
     use crate::execute::migrate::prettier::{PrettierConfiguration, PrettierTrailingComma};
     use biome_deserialize::json::deserialize_from_json_str;
-    use biome_json_parser::JsonParserOptions;
+    use biome_json_parser::JsonParseOptions;
 
     #[test]
     fn ok() {
         let configuration = deserialize_from_json_str::<PrettierConfiguration>(
             r#"{ "useTabs": true }"#,
-            JsonParserOptions::default(),
+            JsonParseOptions::default(),
             "",
         )
         .into_deserialized()
@@ -537,7 +535,7 @@ mod tests {
   "jsxSingleQuote": true
 }
             "#,
-            JsonParserOptions::default(),
+            JsonParseOptions::default(),
             "",
         )
         .into_deserialized()

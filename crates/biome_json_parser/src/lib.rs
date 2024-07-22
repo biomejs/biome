@@ -7,7 +7,7 @@ use biome_json_syntax::{JsonLanguage, JsonRoot, JsonSyntaxNode};
 pub use biome_parser::prelude::*;
 use biome_parser::{tree_sink::LosslessTreeSink, AnyParse};
 use biome_rowan::{AstNode, NodeCache};
-pub use parser::JsonParserOptions;
+pub use parser::JsonParseOptions;
 
 mod lexer;
 mod parser;
@@ -18,7 +18,7 @@ mod token_source;
 pub(crate) type JsonLosslessTreeSink<'source> =
     LosslessTreeSink<'source, JsonLanguage, JsonSyntaxFactory>;
 
-pub fn parse_json(source: &str, options: JsonParserOptions) -> JsonParse {
+pub fn parse_json(source: &str, options: JsonParseOptions) -> JsonParse {
     let mut cache = NodeCache::default();
     parse_json_with_cache(source, &mut cache, options)
 }
@@ -27,7 +27,7 @@ pub fn parse_json(source: &str, options: JsonParserOptions) -> JsonParse {
 pub fn parse_json_with_cache(
     source: &str,
     cache: &mut NodeCache,
-    config: JsonParserOptions,
+    config: JsonParseOptions,
 ) -> JsonParse {
     tracing::debug_span!("parse").in_scope(move || {
         let mut parser = JsonParser::new(source, config);
@@ -65,8 +65,8 @@ impl JsonParse {
     ///
     /// # fn main() -> Result<(), SyntaxError> {
     /// use biome_json_syntax::JsonSyntaxKind;
-    /// use biome_json_parser::JsonParserOptions;
-    /// let parse = parse_json(r#"["a", 1]"#, JsonParserOptions::default());
+    /// use biome_json_parser::JsonParseOptions;
+    /// let parse = parse_json(r#"["a", 1]"#, JsonParseOptions::default());
     ///
     /// // Get the root value
     /// let root_value = parse.tree().value()?;

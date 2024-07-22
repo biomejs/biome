@@ -4,8 +4,8 @@ use crate::{DynRef, WorkspaceError, VERSION};
 use biome_analyze::AnalyzerRules;
 use biome_configuration::diagnostics::{CantLoadExtendFile, EditorConfigDiagnostic};
 use biome_configuration::{
-    push_to_analyzer_rules, BiomeDiagnostic, ConfigurationPathHint, ConfigurationPayload,
-    PartialConfiguration,
+    push_to_analyzer_rules, BiomeDiagnostic, Configuration, ConfigurationPathHint,
+    ConfigurationPayload,
 };
 use biome_console::markup;
 use biome_css_analyze::metadata as css_lint_metadata;
@@ -15,7 +15,7 @@ use biome_diagnostics::{DiagnosticExt, Error, Severity};
 use biome_fs::{AutoSearchResult, ConfigName, FileSystem, OpenOptions};
 use biome_js_analyze::metadata as js_lint_metadata;
 use biome_json_formatter::context::JsonFormatOptions;
-use biome_json_parser::{parse_json, JsonParserOptions};
+use biome_json_parser::{parse_json, JsonParseOptions};
 use std::ffi::OsStr;
 use std::fmt::Debug;
 use std::io::ErrorKind;
@@ -33,7 +33,7 @@ pub struct LoadedConfiguration {
     /// If present, the path of the file where it was found
     pub file_path: Option<PathBuf>,
     /// The Deserialized configuration
-    pub configuration: PartialConfiguration,
+    pub configuration: Configuration,
     /// All diagnostics that were emitted during parsing and deserialization
     pub diagnostics: Vec<Error>,
 }
@@ -108,21 +108,21 @@ impl LoadedConfiguration {
             configuration_file_path,
             deserialized,
         } = value;
-        let (partial_configuration, mut diagnostics) = deserialized.consume();
+        let (configuration, mut diagnostics) = deserialized.consume();
 
         Ok(Self {
-            configuration: match partial_configuration {
-                Some(mut partial_configuration) => {
-                    partial_configuration.apply_extends(
+            configuration: match configuration {
+                Some(mut configuration) => {
+                    configuration.apply_extends(
                         fs,
                         &configuration_file_path,
                         &external_resolution_base_path,
                         &mut diagnostics,
                     )?;
-                    partial_configuration.migrate_deprecated_fields();
-                    partial_configuration
+                    configuration.migrate_deprecated_fields();
+                    configuration
                 }
-                None => PartialConfiguration::default(),
+                None => Configuration::default(),
             },
             diagnostics: diagnostics
                 .into_iter()
@@ -186,14 +186,14 @@ fn load_config(
     if let ConfigurationPathHint::FromUser(ref configuration_file_path) = base_path {
         if file_system.path_is_file(configuration_file_path) {
             let content = file_system.read_file_from_path(configuration_file_path)?;
-            let parser_options = match configuration_file_path.extension().and_then(OsStr::to_str) {
-                Some("json") => JsonParserOptions::default(),
-                _ => JsonParserOptions::default()
+            let parse_options = match configuration_file_path.extension().and_then(OsStr::to_str) {
+                Some("json") => JsonParseOptions::default(),
+                _ => JsonParseOptions::default()
                     .with_allow_comments()
                     .with_allow_trailing_commas(),
             };
             let deserialized =
-                deserialize_from_json_str::<PartialConfiguration>(&content, parser_options, "");
+                deserialize_from_json_str::<Configuration>(&content, parse_options, "");
             return Ok(Some(ConfigurationPayload {
                 deserialized,
                 configuration_file_path: PathBuf::from(configuration_file_path),
@@ -239,15 +239,14 @@ fn load_config(
     } {
         let AutoSearchResult { content, file_path } = auto_search_result;
 
-        let parser_options = match file_path.extension().and_then(OsStr::to_str) {
-            Some("json") => JsonParserOptions::default(),
-            _ => JsonParserOptions::default()
+        let parse_options = match file_path.extension().and_then(OsStr::to_str) {
+            Some("json") => JsonParseOptions::default(),
+            _ => JsonParseOptions::default()
                 .with_allow_comments()
                 .with_allow_trailing_commas(),
         };
 
-        let deserialized =
-            deserialize_from_json_str::<PartialConfiguration>(&content, parser_options, "");
+        let deserialized = deserialize_from_json_str::<Configuration>(&content, parse_options, "");
 
         Ok(Some(ConfigurationPayload {
             deserialized,
@@ -262,7 +261,7 @@ fn load_config(
 pub fn load_editorconfig(
     file_system: &DynRef<'_, dyn FileSystem>,
     workspace_root: PathBuf,
-) -> Result<(Option<PartialConfiguration>, Vec<EditorConfigDiagnostic>), WorkspaceError> {
+) -> Result<(Option<Configuration>, Vec<EditorConfigDiagnostic>), WorkspaceError> {
     // How .editorconfig is supposed to be resolved: https://editorconfig.org/#file-location
     // We currently don't support the `root` property, so we just search for the file like we do for biome.json
     if let Some(auto_search_result) =
@@ -311,7 +310,7 @@ pub fn load_editorconfig(
 /// - the program doesn't have the write rights
 pub fn create_config(
     fs: &mut DynRef<dyn FileSystem>,
-    mut configuration: PartialConfiguration,
+    mut configuration: Configuration,
     emit_jsonc: bool,
 ) -> Result<(), WorkspaceError> {
     let json_path = PathBuf::from(ConfigName::biome_json());
@@ -347,7 +346,7 @@ pub fn create_config(
     let contents = serde_json::to_string_pretty(&configuration)
         .map_err(|_| BiomeDiagnostic::new_serialization_error())?;
 
-    let parsed = parse_json(&contents, JsonParserOptions::default());
+    let parsed = parse_json(&contents, JsonParseOptions::default());
     let formatted =
         biome_json_formatter::format_node(JsonFormatOptions::default(), &parsed.syntax())?
             .print()
@@ -373,7 +372,7 @@ pub fn to_analyzer_rules(settings: &Settings, path: &Path) -> AnalyzerRules {
     overrides.override_analyzer_rules(path, analyzer_rules)
 }
 
-pub trait PartialConfigurationExt {
+pub trait ConfigurationExt {
     fn apply_extends(
         &mut self,
         fs: &DynRef<'_, dyn FileSystem>,
@@ -387,7 +386,7 @@ pub trait PartialConfigurationExt {
         fs: &DynRef<'_, dyn FileSystem>,
         relative_resolution_base_path: &Path,
         external_resolution_base_path: &Path,
-    ) -> Result<Vec<Deserialized<PartialConfiguration>>, WorkspaceError>;
+    ) -> Result<Vec<Deserialized<Configuration>>, WorkspaceError>;
 
     fn migrate_deprecated_fields(&mut self);
 
@@ -398,7 +397,7 @@ pub trait PartialConfigurationExt {
     ) -> Result<(Option<PathBuf>, Vec<String>), WorkspaceError>;
 }
 
-impl PartialConfigurationExt for PartialConfiguration {
+impl ConfigurationExt for Configuration {
     /// Mutates the configuration so that any fields that have not been configured explicitly are
     /// filled in with their values from configs listed in the `extends` field.
     ///
@@ -452,7 +451,7 @@ impl PartialConfigurationExt for PartialConfiguration {
         fs: &DynRef<'_, dyn FileSystem>,
         relative_resolution_base_path: &Path,
         external_resolution_base_path: &Path,
-    ) -> Result<Vec<Deserialized<PartialConfiguration>>, WorkspaceError> {
+    ) -> Result<Vec<Deserialized<Configuration>>, WorkspaceError> {
         let Some(extends) = &self.extends else {
             return Ok(Vec::new());
         };
@@ -507,14 +506,14 @@ impl PartialConfigurationExt for PartialConfiguration {
                 )
 
             })?;
-            let deserialized = deserialize_from_json_str::<PartialConfiguration>(
+            let deserialized = deserialize_from_json_str::<Configuration>(
                 content.as_str(),
                 match extend_configuration_file_path
                     .extension()
                     .and_then(OsStr::to_str)
                 {
-                    Some("json") => JsonParserOptions::default(),
-                    _ => JsonParserOptions::default()
+                    Some("json") => JsonParseOptions::default(),
+                    _ => JsonParseOptions::default()
                         .with_allow_comments()
                         .with_allow_trailing_commas(),
                 },
@@ -580,7 +579,7 @@ impl PartialConfigurationExt for PartialConfiguration {
                 (None, None) => return Err(WorkspaceError::vcs_disabled()),
             };
             if let Some(client_kind) = &vcs.client_kind {
-                if !vcs.ignore_file_disabled() {
+                if vcs.should_use_ignore_file() {
                     let result = file_system
                         .auto_search(&vcs_base_path, &[client_kind.ignore_file()], false)
                         .map_err(WorkspaceError::from)?;

@@ -7,16 +7,16 @@ use crate::execute::VcsTargeted;
 use crate::{
     execute_mode, setup_cli_subscriber, CliDiagnostic, CliSession, Execution, TraversalMode,
 };
-use biome_configuration::vcs::PartialVcsConfiguration;
+use biome_configuration::vcs::VcsConfiguration;
 use biome_configuration::{
-    PartialCssFormatter, PartialFilesConfiguration, PartialFormatterConfiguration,
-    PartialGraphqlFormatter, PartialJavascriptFormatter, PartialJsonFormatter,
+    CssFormatterConfiguration, FilesConfiguration, FormatterConfiguration,
+    GraphqlFormatterConfiguration, JsFormatterConfiguration, JsonFormatterConfiguration,
 };
 use biome_console::{markup, ConsoleExt};
 use biome_deserialize::Merge;
 use biome_diagnostics::PrintDiagnostic;
 use biome_service::configuration::{
-    load_configuration, load_editorconfig, LoadedConfiguration, PartialConfigurationExt,
+    load_configuration, load_editorconfig, ConfigurationExt, LoadedConfiguration,
 };
 use biome_service::workspace::{RegisterProjectFolderParams, UpdateSettingsParams};
 use std::ffi::OsString;
@@ -24,13 +24,13 @@ use std::ffi::OsString;
 use super::check_fix_incompatible_arguments;
 
 pub(crate) struct FormatCommandPayload {
-    pub(crate) javascript_formatter: Option<PartialJavascriptFormatter>,
-    pub(crate) json_formatter: Option<PartialJsonFormatter>,
-    pub(crate) css_formatter: Option<PartialCssFormatter>,
-    pub(crate) graphql_formatter: Option<PartialGraphqlFormatter>,
-    pub(crate) formatter_configuration: Option<PartialFormatterConfiguration>,
-    pub(crate) vcs_configuration: Option<PartialVcsConfiguration>,
-    pub(crate) files_configuration: Option<PartialFilesConfiguration>,
+    pub(crate) javascript_formatter: Option<JsFormatterConfiguration>,
+    pub(crate) json_formatter: Option<JsonFormatterConfiguration>,
+    pub(crate) css_formatter: Option<CssFormatterConfiguration>,
+    pub(crate) graphql_formatter: Option<GraphqlFormatterConfiguration>,
+    pub(crate) formatter_configuration: Option<FormatterConfiguration>,
+    pub(crate) vcs_configuration: Option<VcsConfiguration>,
+    pub(crate) files_configuration: Option<FilesConfiguration>,
     pub(crate) stdin_file_path: Option<String>,
     pub(crate) write: bool,
     pub(crate) fix: bool,
@@ -99,7 +99,8 @@ pub(crate) fn format(
                 .as_ref()
                 .and_then(|f| f.use_editorconfig)
                 .unwrap_or_default(),
-        );
+        )
+        .into();
     let mut fs_configuration = if should_use_editorconfig {
         let (editorconfig, editorconfig_diagnostics) = {
             let search_path = editorconfig_search_path.unwrap_or_else(|| {
@@ -185,14 +186,14 @@ pub(crate) fn format(
     if !configuration
         .formatter
         .as_ref()
-        .is_some_and(PartialFormatterConfiguration::is_disabled)
+        .is_some_and(FormatterConfiguration::is_disabled)
     {
         let formatter = configuration.formatter.get_or_insert_with(Default::default);
         if let Some(formatter_configuration) = formatter_configuration {
             formatter.merge_with(formatter_configuration);
         }
 
-        formatter.enabled = Some(true);
+        formatter.enabled = Some(true.into());
     }
     if css_formatter.is_some() {
         let css = configuration.css.get_or_insert_with(Default::default);

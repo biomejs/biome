@@ -4,21 +4,20 @@ use crate::diagnostics::{DeprecatedArgument, DeprecatedConfigurationFile};
 use crate::execute::Stdin;
 use crate::logging::LoggingKind;
 use crate::{CliDiagnostic, CliSession, LoggingLevel, VERSION};
-use biome_configuration::css::PartialCssLinter;
-use biome_configuration::javascript::PartialJavascriptLinter;
-use biome_configuration::json::PartialJsonLinter;
+use biome_configuration::css::CssLinterConfiguration;
+use biome_configuration::graphql::graphql_formatter_configuration;
+use biome_configuration::javascript::JsLinterConfiguration;
+use biome_configuration::json::JsonLinterConfiguration;
 use biome_configuration::linter::RuleSelector;
 use biome_configuration::{
-    css::partial_css_formatter, css::partial_css_linter, graphql::partial_graphql_formatter,
-    graphql::partial_graphql_linter, javascript::partial_javascript_formatter,
-    javascript::partial_javascript_linter, json::partial_json_formatter, json::partial_json_linter,
-    partial_configuration, partial_files_configuration, partial_formatter_configuration,
-    partial_linter_configuration, vcs::partial_vcs_configuration, vcs::PartialVcsConfiguration,
-    PartialCssFormatter, PartialFilesConfiguration, PartialFormatterConfiguration,
-    PartialGraphqlFormatter, PartialGraphqlLinter, PartialJavascriptFormatter,
-    PartialJsonFormatter, PartialLinterConfiguration,
+    configuration, css::css_formatter_configuration, css::css_linter_configuration,
+    files_configuration, formatter_configuration, javascript::js_formatter_configuration,
+    javascript::js_linter_configuration, json::json_formatter_configuration,
+    json::json_linter_configuration, linter_configuration, vcs::vcs_configuration,
+    vcs::VcsConfiguration, CssFormatterConfiguration, FilesConfiguration, FormatterConfiguration,
+    JsFormatterConfiguration, JsonFormatterConfiguration, LinterConfiguration,
 };
-use biome_configuration::{BiomeDiagnostic, PartialConfiguration};
+use biome_configuration::{BiomeDiagnostic, Configuration, GraphqlFormatterConfiguration};
 use biome_console::{markup, Console, ConsoleExt};
 use biome_diagnostics::{Diagnostic, PrintDiagnostic};
 use biome_fs::{BiomePath, FileSystem};
@@ -120,8 +119,8 @@ pub enum BiomeCommand {
             hide_usage
         )]
         organize_imports_enabled: Option<bool>,
-        #[bpaf(external(partial_configuration), hide_usage, optional)]
-        configuration: Option<PartialConfiguration>,
+        #[bpaf(external(configuration), hide_usage, optional)]
+        configuration: Option<Configuration>,
         #[bpaf(external, hide_usage)]
         cli_options: CliOptions,
         /// Use this option when you want to format code piped from `stdin`, and print the output to `stdout`.
@@ -174,26 +173,26 @@ pub enum BiomeCommand {
         #[bpaf(long("apply-unsafe"), switch, hide_usage)]
         apply_unsafe: bool,
 
-        #[bpaf(external(partial_linter_configuration), hide_usage, optional)]
-        linter_configuration: Option<PartialLinterConfiguration>,
+        #[bpaf(external(linter_configuration), hide_usage, optional)]
+        linter_configuration: Option<LinterConfiguration>,
 
-        #[bpaf(external(partial_vcs_configuration), optional, hide_usage)]
-        vcs_configuration: Option<PartialVcsConfiguration>,
+        #[bpaf(external(vcs_configuration), optional, hide_usage)]
+        vcs_configuration: Option<VcsConfiguration>,
 
-        #[bpaf(external(partial_files_configuration), optional, hide_usage)]
-        files_configuration: Option<PartialFilesConfiguration>,
+        #[bpaf(external(files_configuration), optional, hide_usage)]
+        files_configuration: Option<FilesConfiguration>,
 
-        #[bpaf(external(partial_javascript_linter), optional, hide_usage)]
-        javascript_linter: Option<PartialJavascriptLinter>,
+        #[bpaf(external(js_linter_configuration), optional, hide_usage)]
+        javascript_linter: Option<JsLinterConfiguration>,
 
-        #[bpaf(external(partial_json_linter), optional, hide_usage)]
-        json_linter: Option<PartialJsonLinter>,
+        #[bpaf(external(json_linter_configuration), optional, hide_usage)]
+        json_linter: Option<JsonLinterConfiguration>,
 
-        #[bpaf(external(partial_css_linter), optional, hide_usage, hide)]
-        css_linter: Option<PartialCssLinter>,
+        #[bpaf(external(css_linter_configuration), optional, hide_usage, hide)]
+        css_linter: Option<CssLinterConfiguration>,
 
-        #[bpaf(external(partial_graphql_linter), optional, hide_usage, hide)]
-        graphql_linter: Option<PartialGraphqlLinter>,
+        #[bpaf(external(graphql_linter_configuration), optional, hide_usage, hide)]
+        graphql_linter: Option<GraphqlLinterConfiguration>,
 
         #[bpaf(external, hide_usage)]
         cli_options: CliOptions,
@@ -239,26 +238,26 @@ pub enum BiomeCommand {
     /// Run the formatter on a set of files.
     #[bpaf(command)]
     Format {
-        #[bpaf(external(partial_formatter_configuration), optional, hide_usage)]
-        formatter_configuration: Option<PartialFormatterConfiguration>,
+        #[bpaf(external(formatter_configuration), optional, hide_usage)]
+        formatter_configuration: Option<FormatterConfiguration>,
 
-        #[bpaf(external(partial_javascript_formatter), optional, hide_usage)]
-        javascript_formatter: Option<PartialJavascriptFormatter>,
+        #[bpaf(external(js_formatter_configuration), optional, hide_usage)]
+        javascript_formatter: Option<JsFormatterConfiguration>,
 
-        #[bpaf(external(partial_json_formatter), optional, hide_usage)]
-        json_formatter: Option<PartialJsonFormatter>,
+        #[bpaf(external(json_formatter_configuration), optional, hide_usage)]
+        json_formatter: Option<JsonFormatterConfiguration>,
 
-        #[bpaf(external(partial_css_formatter), optional, hide_usage, hide)]
-        css_formatter: Option<PartialCssFormatter>,
+        #[bpaf(external(css_formatter_configuration), optional, hide_usage, hide)]
+        css_formatter: Option<CssFormatterConfiguration>,
 
-        #[bpaf(external(partial_graphql_formatter), optional, hide_usage, hide)]
-        graphql_formatter: Option<PartialGraphqlFormatter>,
+        #[bpaf(external(graphql_formatter_configuration), optional, hide_usage, hide)]
+        graphql_formatter: Option<GraphqlFormatterConfiguration>,
 
-        #[bpaf(external(partial_vcs_configuration), optional, hide_usage)]
-        vcs_configuration: Option<PartialVcsConfiguration>,
+        #[bpaf(external(vcs_configuration), optional, hide_usage)]
+        vcs_configuration: Option<VcsConfiguration>,
 
-        #[bpaf(external(partial_files_configuration), optional, hide_usage)]
-        files_configuration: Option<PartialFilesConfiguration>,
+        #[bpaf(external(files_configuration), optional, hide_usage)]
+        files_configuration: Option<FilesConfiguration>,
         /// Use this option when you want to format code piped from `stdin`, and print the output to `stdout`.
         ///
         /// The file doesn't need to exist on disk, what matters is the extension of the file. Based on the extension, Biome knows how to format the code.
@@ -312,8 +311,8 @@ pub enum BiomeCommand {
         #[bpaf(long("organize-imports-enabled"), argument("true|false"), optional)]
         organize_imports_enabled: Option<bool>,
 
-        #[bpaf(external(partial_configuration), hide_usage, optional)]
-        configuration: Option<PartialConfiguration>,
+        #[bpaf(external(configuration), hide_usage, optional)]
+        configuration: Option<Configuration>,
         #[bpaf(external, hide_usage)]
         cli_options: CliOptions,
 
@@ -374,11 +373,11 @@ pub enum BiomeCommand {
         #[bpaf(external, hide_usage)]
         cli_options: CliOptions,
 
-        #[bpaf(external(partial_files_configuration), optional, hide_usage)]
-        files_configuration: Option<PartialFilesConfiguration>,
+        #[bpaf(external(files_configuration), optional, hide_usage)]
+        files_configuration: Option<FilesConfiguration>,
 
-        #[bpaf(external(partial_vcs_configuration), optional, hide_usage)]
-        vcs_configuration: Option<PartialVcsConfiguration>,
+        #[bpaf(external(vcs_configuration), optional, hide_usage)]
+        vcs_configuration: Option<VcsConfiguration>,
 
         /// Use this option when you want to search through code piped from
         /// `stdin`, and print the output to `stdout`.
@@ -528,7 +527,7 @@ impl BiomeCommand {
     }
 }
 
-/// It accepts a [LoadedPartialConfiguration] and it prints the diagnostics emitted during parsing and deserialization.
+/// It accepts a [LoadedConfiguration] and it prints the diagnostics emitted during parsing and deserialization.
 ///
 /// If it contains errors, it return an error.
 pub(crate) fn validate_configuration_diagnostics(
@@ -625,7 +624,7 @@ fn get_files_to_process(
     changed: bool,
     staged: bool,
     fs: &DynRef<'_, dyn FileSystem>,
-    configuration: &PartialConfiguration,
+    configuration: &Configuration,
 ) -> Result<Option<Vec<OsString>>, CliDiagnostic> {
     if since.is_some() {
         if !changed {

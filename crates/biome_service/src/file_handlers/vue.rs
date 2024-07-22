@@ -10,7 +10,7 @@ use crate::workspace::{
 use crate::WorkspaceError;
 use biome_formatter::Printed;
 use biome_fs::BiomePath;
-use biome_js_parser::{parse_js_with_cache, JsParserOptions};
+use biome_js_parser::{parse_js_with_cache, JsParseOptions};
 use biome_js_syntax::{EmbeddingKind, JsFileSource, Language, TextRange, TextSize};
 use biome_parser::AnyParse;
 use biome_rowan::NodeCache;
@@ -124,7 +124,7 @@ fn parse(
 
     debug!("Parsing file with language {:?}", file_source);
 
-    let parse = parse_js_with_cache(script, file_source, JsParserOptions::default(), cache);
+    let parse = parse_js_with_cache(script, file_source, JsParseOptions::default(), cache);
 
     ParseResult {
         any_parse: parse.into(),

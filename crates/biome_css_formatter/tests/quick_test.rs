@@ -1,6 +1,6 @@
 use biome_css_formatter::format_node;
 use biome_css_formatter::{context::CssFormatOptions, CssFormatLanguage};
-use biome_css_parser::{parse_css, CssParserOptions};
+use biome_css_parser::{parse_css, CssParseOptions};
 use biome_formatter::{IndentStyle, LineWidth};
 use biome_formatter_test::check_reformat::CheckReformat;
 
@@ -19,7 +19,7 @@ fn quick_test() {
   }
 }
 "#;
-    let parse = parse_css(src, CssParserOptions::default());
+    let parse = parse_css(src, CssParseOptions::default());
     println!("{parse:#?}");
 
     let options = CssFormatOptions::default()

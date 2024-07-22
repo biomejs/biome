@@ -1,11 +1,11 @@
 use biome_analyze::options::{JsxRuntime, PreferredQuote};
 use biome_analyze::{AnalyzerAction, AnalyzerConfiguration, AnalyzerOptions, AnalyzerRules};
-use biome_configuration::PartialConfiguration;
+use biome_configuration::Configuration;
 use biome_console::fmt::{Formatter, Termcolor};
 use biome_console::markup;
 use biome_diagnostics::termcolor::Buffer;
 use biome_diagnostics::{DiagnosticExt, Error, PrintDiagnostic};
-use biome_json_parser::{JsonParserOptions, ParseDiagnostic};
+use biome_json_parser::{JsonParseOptions, ParseDiagnostic};
 use biome_project::PackageJson;
 use biome_rowan::{SyntaxKind, SyntaxNode, SyntaxSlot};
 use biome_service::configuration::to_analyzer_rules;
@@ -46,9 +46,9 @@ pub fn create_analyzer_options(
     };
     let options_file = input_file.with_extension("options.json");
     if let Ok(json) = std::fs::read_to_string(options_file.clone()) {
-        let deserialized = biome_deserialize::json::deserialize_from_json_str::<PartialConfiguration>(
+        let deserialized = biome_deserialize::json::deserialize_from_json_str::<Configuration>(
             json.as_str(),
-            JsonParserOptions::default(),
+            JsonParseOptions::default(),
             "",
         );
         if deserialized.has_errors() {
@@ -112,7 +112,7 @@ pub fn load_manifest(input_file: &Path, diagnostics: &mut Vec<String>) -> Option
     if let Ok(json) = std::fs::read_to_string(options_file.clone()) {
         let deserialized = biome_deserialize::json::deserialize_from_json_str::<PackageJson>(
             json.as_str(),
-            JsonParserOptions::default(),
+            JsonParseOptions::default(),
             "",
         );
         if deserialized.has_errors() {

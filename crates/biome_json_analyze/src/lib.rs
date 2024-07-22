@@ -113,7 +113,7 @@ mod tests {
     use biome_console::{markup, Markup};
     use biome_diagnostics::termcolor::NoColor;
     use biome_diagnostics::{Diagnostic, DiagnosticExt, PrintDiagnostic, Severity};
-    use biome_json_parser::{parse_json, JsonParserOptions};
+    use biome_json_parser::{parse_json, JsonParseOptions};
     use biome_json_syntax::{JsonFileSource, TextRange};
     use std::slice;
 
@@ -138,7 +138,7 @@ mod tests {
 	}
 "#;
 
-        let parsed = parse_json(SOURCE, JsonParserOptions::default());
+        let parsed = parse_json(SOURCE, JsonParseOptions::default());
 
         let mut error_ranges: Vec<TextRange> = Vec::new();
         let rule_filter = RuleFilter::Rule("nursery", "noDuplicateJsonKeys");

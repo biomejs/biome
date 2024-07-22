@@ -2,7 +2,7 @@ use crate::{
     grit_analysis_ext::GritAnalysisExt, grit_target_language::GritTargetParser,
     grit_tree::GritTargetTree,
 };
-use biome_js_parser::{parse, JsParserOptions};
+use biome_js_parser::{parse, JsParseOptions};
 use biome_js_syntax::JsFileSource;
 use biome_parser::AnyParse;
 use grit_util::{AnalysisLogs, FileOrigin, Parser, SnippetTree};
@@ -35,7 +35,7 @@ impl Parser for GritJsParser {
         logs: &mut AnalysisLogs,
         _old_tree: FileOrigin<'_, GritTargetTree>,
     ) -> Option<GritTargetTree> {
-        let parse_result = parse(body, JsFileSource::tsx(), JsParserOptions::default());
+        let parse_result = parse(body, JsFileSource::tsx(), JsParseOptions::default());
 
         for diagnostic in parse_result.diagnostics() {
             logs.push(diagnostic.to_log(path));
@@ -58,7 +58,7 @@ impl Parser for GritJsParser {
             |src: &str| src.len() as u32
         };
 
-        let parse_result = parse(&context, JsFileSource::tsx(), JsParserOptions::default());
+        let parse_result = parse(&context, JsFileSource::tsx(), JsParseOptions::default());
 
         SnippetTree {
             tree: GritTargetTree::new(parse_result.syntax().into()),
