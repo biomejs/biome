@@ -2896,8 +2896,10 @@ export interface FormatOnTypeParams {
 }
 export interface FixFileParams {
 	fix_file_mode: FixFileMode;
+	only: RuleCode[];
 	path: BiomePath;
 	should_format: boolean;
+	skip: RuleCode[];
 }
 /**
  * Which fixes should be applied during the analyzing phase
