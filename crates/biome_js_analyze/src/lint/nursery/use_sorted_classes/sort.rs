@@ -217,8 +217,8 @@ pub fn sort_class_name_range_offset(
     ignore_suffix: bool,
 ) -> (u32, u32) {
     let mut class_iter = class_name.split_whitespace();
-    let first_class_len = class_iter.next().map(|s| s.len()).unwrap_or(0) as u32;
-    let last_class_len = class_iter.rev().next().map(|s| s.len()).unwrap_or(0) as u32;
+    let first_class_len = class_iter.next().map_or(0, |s| s.len()) as u32;
+    let last_class_len = class_iter.next_back().map_or(0, |s| s.len()) as u32;
     let offset_prefix = if ignore_prefix { first_class_len } else { 0 };
     let offset_suffix = if ignore_suffix { last_class_len } else { 0 };
 
