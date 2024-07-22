@@ -1,6 +1,8 @@
 use biome_analyze::{AnalysisFilter, AnalyzerTransformation, ControlFlow, Never, RuleFilter};
-use biome_js_formatter::context::JsFormatOptions;
+use biome_formatter::prelude::Document;
+use biome_formatter::{FormatError, FormatResult};
 use biome_js_formatter::format_node;
+use biome_js_formatter::{context::JsFormatOptions, JsForeignLanguageFormatter};
 use biome_js_parser::{parse, JsParserOptions};
 use biome_js_syntax::{JsFileSource, JsLanguage};
 use biome_rowan::AstNode;
@@ -85,6 +87,19 @@ fn run_test(input: &'static str, _: &str, _: &str, _: &str) {
     }
 }
 
+#[derive(Debug, Clone)]
+struct FakeFormatter;
+
+impl JsForeignLanguageFormatter for FakeFormatter {
+    fn format(
+        &self,
+        _language: biome_js_formatter::JsForeignLanguage,
+        _content: &str,
+    ) -> FormatResult<Document> {
+        Err(FormatError::SyntaxError)
+    }
+}
+
 #[allow(clippy::too_many_arguments)]
 pub(crate) fn analyze_and_snap(
     snapshot: &mut String,
@@ -114,7 +129,8 @@ pub(crate) fn analyze_and_snap(
                 );
                 let node = transformation.mutation.commit();
 
-                let formatted = format_node(JsFormatOptions::new(source_type), &node).unwrap();
+                let formatted =
+                    format_node(JsFormatOptions::new(source_type), FakeFormatter, &node).unwrap();
 
                 transformations.push(formatted.print().unwrap().as_code().to_string());
             }

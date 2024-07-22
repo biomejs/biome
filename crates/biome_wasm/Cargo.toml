@@ -35,6 +35,7 @@ console_error_panic_hook = { version = "0.1.7", optional = true }
 
 
 [build-dependencies]
+biome_formatter    = { workspace = true }
 biome_js_factory   = { workspace = true }
 biome_js_formatter = { workspace = true }
 biome_rowan        = { workspace = true }
