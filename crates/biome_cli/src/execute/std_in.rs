@@ -108,12 +108,20 @@ pub(crate) fn run<'a>(
             return Ok(());
         };
 
+        let (only, skip) = if let TraversalMode::Lint { only, skip, .. } = mode.traversal_mode() {
+            (only.clone(), skip.clone())
+        } else {
+            (Vec::new(), Vec::new())
+        };
+
         if let Some(fix_file_mode) = mode.as_fix_file_mode() {
             if file_features.supports_lint() {
                 let fix_file_result = workspace.fix_file(FixFileParams {
                     fix_file_mode: *fix_file_mode,
                     path: biome_path.clone(),
                     should_format: mode.is_check() && file_features.supports_format(),
+                    only: only.clone(),
+                    skip: skip.clone(),
                 })?;
                 let code = fix_file_result.code;
                 let output = match biome_path.extension_as_str() {
@@ -156,11 +164,6 @@ pub(crate) fn run<'a>(
             }
         }
 
-        let (only, skip) = if let TraversalMode::Lint { only, skip, .. } = mode.traversal_mode() {
-            (only.clone(), skip.clone())
-        } else {
-            (Vec::new(), Vec::new())
-        };
         if !mode.is_check_apply_unsafe() {
             let result = workspace.pull_diagnostics(PullDiagnosticsParams {
                 categories: RuleCategoriesBuilder::default()
