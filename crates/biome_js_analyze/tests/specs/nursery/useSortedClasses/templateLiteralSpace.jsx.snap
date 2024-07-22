@@ -8,9 +8,9 @@ expression: templateLiteralSpace.jsx
 <>
 	<div class={`${variable} px-2 foo p-4 bar`}/>
 	<div class={`px-2 foo p-4 bar ${variable}`}/>
-	<div class={`bar-${variable} mx-2 m-5`}/>
-	<div class={`mx-2 m-5 bar-${variable}`}/>
-	<div class={`mx-2 m-5 bar-${variable} px-2 p-5`}/>
+	<div class={`${variable}px-2 foo p-4 bar`}/>
+	<div class={`px-2 foo p-4 bar${variable}`}/>
+	<div class={`bar-${variable} mx-2 m-5 bar-${variable} mx-1 m-5`}/>
 </>
 
 ```
@@ -25,7 +25,7 @@ templateLiteralSpace.jsx:2:26 lint/nursery/useSortedClasses  FIXABLE  ━━━�
   > 2 │ 	<div class={`${variable} px-2 foo p-4 bar`}/>
       │ 	                        ^^^^^^^^^^^^^^^^^
     3 │ 	<div class={`px-2 foo p-4 bar ${variable}`}/>
-    4 │ 	<div class={`bar-${variable} mx-2 m-5`}/>
+    4 │ 	<div class={`${variable}px-2 foo p-4 bar`}/>
   
   i Unsafe fix: Sort the classes.
   
@@ -33,7 +33,7 @@ templateLiteralSpace.jsx:2:26 lint/nursery/useSortedClasses  FIXABLE  ━━━�
     2   │ - → <div·class={`${variable}·px-2·foo·p-4·bar`}/>
       2 │ + → <div·class={`${variable}·foo·bar·p-4·px-2`}/>
     3 3 │   	<div class={`px-2 foo p-4 bar ${variable}`}/>
-    4 4 │   	<div class={`bar-${variable} mx-2 m-5`}/>
+    4 4 │   	<div class={`${variable}px-2 foo p-4 bar`}/>
   
 
 ```
@@ -47,17 +47,17 @@ templateLiteralSpace.jsx:3:15 lint/nursery/useSortedClasses  FIXABLE  ━━━�
     2 │ 	<div class={`${variable} px-2 foo p-4 bar`}/>
   > 3 │ 	<div class={`px-2 foo p-4 bar ${variable}`}/>
       │ 	             ^^^^^^^^^^^^^^^^^
-    4 │ 	<div class={`bar-${variable} mx-2 m-5`}/>
-    5 │ 	<div class={`mx-2 m-5 bar-${variable}`}/>
+    4 │ 	<div class={`${variable}px-2 foo p-4 bar`}/>
+    5 │ 	<div class={`px-2 foo p-4 bar${variable}`}/>
   
   i Unsafe fix: Sort the classes.
   
     1 1 │   <>
     2 2 │   	<div class={`${variable} px-2 foo p-4 bar`}/>
     3   │ - → <div·class={`px-2·foo·p-4·bar·${variable}`}/>
-      3 │ + → <div·class={`foo·p-4·px-2·bar·${variable}`}/>
-    4 4 │   	<div class={`bar-${variable} mx-2 m-5`}/>
-    5 5 │   	<div class={`mx-2 m-5 bar-${variable}`}/>
+      3 │ + → <div·class={`foo·bar·p-4·px-2·${variable}`}/>
+    4 4 │   	<div class={`${variable}px-2 foo p-4 bar`}/>
+    5 5 │   	<div class={`px-2 foo p-4 bar${variable}`}/>
   
 
 ```
@@ -69,19 +69,19 @@ templateLiteralSpace.jsx:4:30 lint/nursery/useSortedClasses  FIXABLE  ━━━�
   
     2 │ 	<div class={`${variable} px-2 foo p-4 bar`}/>
     3 │ 	<div class={`px-2 foo p-4 bar ${variable}`}/>
-  > 4 │ 	<div class={`bar-${variable} mx-2 m-5`}/>
-      │ 	                            ^^^^^^^^^
-    5 │ 	<div class={`mx-2 m-5 bar-${variable}`}/>
-    6 │ 	<div class={`mx-2 m-5 bar-${variable} px-2 p-5`}/>
+  > 4 │ 	<div class={`${variable}px-2 foo p-4 bar`}/>
+      │ 	                            ^^^^^^^^^^^^
+    5 │ 	<div class={`px-2 foo p-4 bar${variable}`}/>
+    6 │ 	<div class={`bar-${variable} mx-2 m-5 bar-${variable} mx-1 m-5`}/>
   
   i Unsafe fix: Sort the classes.
   
     2 2 │   	<div class={`${variable} px-2 foo p-4 bar`}/>
     3 3 │   	<div class={`px-2 foo p-4 bar ${variable}`}/>
-    4   │ - → <div·class={`bar-${variable}·mx-2·m-5`}/>
-      4 │ + → <div·class={`bar-${variable}·m-5·mx-2`}/>
-    5 5 │   	<div class={`mx-2 m-5 bar-${variable}`}/>
-    6 6 │   	<div class={`mx-2 m-5 bar-${variable} px-2 p-5`}/>
+    4   │ - → <div·class={`${variable}px-2·foo·p-4·bar`}/>
+      4 │ + → <div·class={`${variable}px-2·foo·bar·p-4`}/>
+    5 5 │   	<div class={`px-2 foo p-4 bar${variable}`}/>
+    6 6 │   	<div class={`bar-${variable} mx-2 m-5 bar-${variable} mx-1 m-5`}/>
   
 
 ```
@@ -92,42 +92,42 @@ templateLiteralSpace.jsx:5:15 lint/nursery/useSortedClasses  FIXABLE  ━━━�
   ! These CSS classes should be sorted.
   
     3 │ 	<div class={`px-2 foo p-4 bar ${variable}`}/>
-    4 │ 	<div class={`bar-${variable} mx-2 m-5`}/>
-  > 5 │ 	<div class={`mx-2 m-5 bar-${variable}`}/>
+    4 │ 	<div class={`${variable}px-2 foo p-4 bar`}/>
+  > 5 │ 	<div class={`px-2 foo p-4 bar${variable}`}/>
       │ 	             ^^^^^^^^^^^^^
-    6 │ 	<div class={`mx-2 m-5 bar-${variable} px-2 p-5`}/>
+    6 │ 	<div class={`bar-${variable} mx-2 m-5 bar-${variable} mx-1 m-5`}/>
     7 │ </>
   
   i Unsafe fix: Sort the classes.
   
     3 3 │   	<div class={`px-2 foo p-4 bar ${variable}`}/>
-    4 4 │   	<div class={`bar-${variable} mx-2 m-5`}/>
-    5   │ - → <div·class={`mx-2·m-5·bar-${variable}`}/>
-      5 │ + → <div·class={`m-5·mx-2·bar-${variable}`}/>
-    6 6 │   	<div class={`mx-2 m-5 bar-${variable} px-2 p-5`}/>
+    4 4 │   	<div class={`${variable}px-2 foo p-4 bar`}/>
+    5   │ - → <div·class={`px-2·foo·p-4·bar${variable}`}/>
+      5 │ + → <div·class={`foo·p-4·px-2·bar${variable}`}/>
+    6 6 │   	<div class={`bar-${variable} mx-2 m-5 bar-${variable} mx-1 m-5`}/>
     7 7 │   </>
   
 
 ```
 
 ```
-templateLiteralSpace.jsx:6:15 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+templateLiteralSpace.jsx:6:30 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! These CSS classes should be sorted.
   
-    4 │ 	<div class={`bar-${variable} mx-2 m-5`}/>
-    5 │ 	<div class={`mx-2 m-5 bar-${variable}`}/>
-  > 6 │ 	<div class={`mx-2 m-5 bar-${variable} px-2 p-5`}/>
-      │ 	             ^^^^^^^^^^^^^
+    4 │ 	<div class={`${variable}px-2 foo p-4 bar`}/>
+    5 │ 	<div class={`px-2 foo p-4 bar${variable}`}/>
+  > 6 │ 	<div class={`bar-${variable} mx-2 m-5 bar-${variable} mx-1 m-5`}/>
+      │ 	                            ^^^^^^^^^^
     7 │ </>
     8 │ 
   
   i Unsafe fix: Sort the classes.
   
-    4 4 │   	<div class={`bar-${variable} mx-2 m-5`}/>
-    5 5 │   	<div class={`mx-2 m-5 bar-${variable}`}/>
-    6   │ - → <div·class={`mx-2·m-5·bar-${variable}·px-2·p-5`}/>
-      6 │ + → <div·class={`m-5·mx-2·bar-${variable}·px-2·p-5`}/>
+    4 4 │   	<div class={`${variable}px-2 foo p-4 bar`}/>
+    5 5 │   	<div class={`px-2 foo p-4 bar${variable}`}/>
+    6   │ - → <div·class={`bar-${variable}·mx-2·m-5·bar-${variable}·mx-1·m-5`}/>
+      6 │ + → <div·class={`bar-${variable}·m-5·mx-2·bar-${variable}·mx-1·m-5`}/>
     7 7 │   </>
     8 8 │   
   
@@ -135,23 +135,23 @@ templateLiteralSpace.jsx:6:15 lint/nursery/useSortedClasses  FIXABLE  ━━━�
 ```
 
 ```
-templateLiteralSpace.jsx:6:39 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+templateLiteralSpace.jsx:6:55 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! These CSS classes should be sorted.
   
-    4 │ 	<div class={`bar-${variable} mx-2 m-5`}/>
-    5 │ 	<div class={`mx-2 m-5 bar-${variable}`}/>
-  > 6 │ 	<div class={`mx-2 m-5 bar-${variable} px-2 p-5`}/>
-      │ 	                                     ^^^^^^^^^
+    4 │ 	<div class={`${variable}px-2 foo p-4 bar`}/>
+    5 │ 	<div class={`px-2 foo p-4 bar${variable}`}/>
+  > 6 │ 	<div class={`bar-${variable} mx-2 m-5 bar-${variable} mx-1 m-5`}/>
+      │ 	                                                     ^^^^^^^^^
     7 │ </>
     8 │ 
   
   i Unsafe fix: Sort the classes.
   
-    4 4 │   	<div class={`bar-${variable} mx-2 m-5`}/>
-    5 5 │   	<div class={`mx-2 m-5 bar-${variable}`}/>
-    6   │ - → <div·class={`mx-2·m-5·bar-${variable}·px-2·p-5`}/>
-      6 │ + → <div·class={`mx-2·m-5·bar-${variable}·p-5·px-2`}/>
+    4 4 │   	<div class={`${variable}px-2 foo p-4 bar`}/>
+    5 5 │   	<div class={`px-2 foo p-4 bar${variable}`}/>
+    6   │ - → <div·class={`bar-${variable}·mx-2·m-5·bar-${variable}·mx-1·m-5`}/>
+      6 │ + → <div·class={`bar-${variable}·mx-2·m-5·bar-${variable}·m-5·mx-1`}/>
     7 7 │   </>
     8 8 │   
   

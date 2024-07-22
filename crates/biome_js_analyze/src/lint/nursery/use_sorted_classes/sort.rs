@@ -1,7 +1,9 @@
-use biome_rowan::TokenText;
+use biome_js_syntax::JsTemplateElement;
+use biome_rowan::{AstNode, TokenText};
 use std::cmp::Ordering;
 
 use super::{
+    any_class_string_like::AnyClassStringLike,
     class_info::{get_class_info, ClassInfo},
     sort_config::SortConfig,
 };
@@ -126,25 +128,29 @@ fn compare_classes(a: &ClassInfo, b: &ClassInfo) -> Ordering {
 }
 
 /// Sort the given class string according to the given sort config.
+/// ignore_prefix and ignore_suffix are used to ignore the first and last class respectively.
 pub fn sort_class_name(
     class_name: &TokenText,
     sort_config: &SortConfig,
-    ignore_last: bool,
+    ignore_prefix: bool,
+    ignore_suffix: bool,
 ) -> String {
     // Obtain classes by splitting the class string by whitespace.
-    let mut classes = class_name.split_whitespace().collect::<Vec<&str>>();
-    let classes_len = classes.len();
-
-    // If the last class should be ignored, store it and remove it from the classes list.
-    let last_class_strs = if ignore_last {
-        classes[classes_len - 1]
+    let mut classes_iter = class_name.split_whitespace();
+    let class_str_prefix = if ignore_prefix {
+        classes_iter.next()
     } else {
-        ""
+        None
+    };
+    let class_str_suffix = if ignore_suffix {
+        classes_iter.next_back()
+    } else {
+        None
     };
 
-    if ignore_last {
-        classes.pop();
-    }
+    // Collect the remaining classes into a vector if needed.
+    let classes: Vec<&str> = classes_iter.collect();
+    let classes_len = classes.len();
 
     // Separate custom classes from recognized classes, and compute the recognized classes' info.
     // Custom classes always go first, in the order that they appear in.
@@ -177,9 +183,14 @@ pub fn sort_class_name(
             .map(|class_info| class_info.text.as_str()),
     );
 
+    // Add the first class back if it was ignored.
+    if let Some(class_str_prefix) = class_str_prefix {
+        sorted_classes.insert(0, class_str_prefix);
+    }
+
     // Add the last class back if it was ignored.
-    if last_class_strs != "" {
-        sorted_classes.push(last_class_strs);
+    if let Some(class_str_suffix) = class_str_suffix {
+        sorted_classes.push(class_str_suffix);
     }
 
     let mut result = sorted_classes.join(" ");
@@ -197,4 +208,50 @@ pub fn sort_class_name(
     }
 
     result
+}
+
+// Returns the offset when sorting the class name.
+pub fn sort_class_name_range_offset(
+    class_name: &TokenText,
+    ignore_prefix: bool,
+    ignore_suffix: bool,
+) -> (u32, u32) {
+    let mut class_iter = class_name.split_whitespace();
+    let first_class_len = class_iter.next().map(|s| s.len()).unwrap_or(0) as u32;
+    let last_class_len = class_iter.rev().next().map(|s| s.len()).unwrap_or(0) as u32;
+    let offset_prefix = if ignore_prefix { first_class_len } else { 0 };
+    let offset_suffix = if ignore_suffix { last_class_len } else { 0 };
+
+    (offset_prefix, offset_suffix)
+}
+
+// Returns whether the given node should be ignored prefix or suffix when sorting.
+pub fn check_ignore(node: &AnyClassStringLike) -> (bool, bool) {
+    if let Some(value) = node.value() {
+        // For example, for <div class={`${variable}mx-2 m-5`} />, we should ignore "${variable}mx-2" as a sorting item because it is an indivisible whole.
+        let ignore_prefix = if let AnyClassStringLike::JsTemplateChunkElement(_template) = node {
+            !value.starts_with(' ')
+                && node
+                    .syntax()
+                    .prev_sibling()
+                    .map_or(false, |sibling| JsTemplateElement::can_cast(sibling.kind()))
+        } else {
+            false
+        };
+
+        // For example, for <div class={`mx-2 m-5${variable}`} />, we should ignore "m-5${variable}" as a sorting item because it is an indivisible whole.
+        let ignore_suffix = if let AnyClassStringLike::JsTemplateChunkElement(_template) = node {
+            !value.ends_with(' ')
+                && node
+                    .syntax()
+                    .next_sibling()
+                    .map_or(false, |sibling| JsTemplateElement::can_cast(sibling.kind()))
+        } else {
+            false
+        };
+
+        (ignore_prefix, ignore_suffix)
+    } else {
+        (false, false)
+    }
 }
