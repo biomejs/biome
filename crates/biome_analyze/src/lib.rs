@@ -806,7 +806,7 @@ impl<'a> RuleFilter<'a> {
         }
     }
     /// Return `true` if the group `G` matches this filter
-    fn match_group<G: RuleGroup>(self) -> bool {
+    pub fn match_group<G: RuleGroup>(self) -> bool {
         match self {
             RuleFilter::Group(group) => group == G::NAME,
             RuleFilter::Rule(group, _) => group == G::NAME,
@@ -814,7 +814,7 @@ impl<'a> RuleFilter<'a> {
     }
 
     /// Return `true` if the rule `R` matches this filter
-    fn match_rule<R>(self) -> bool
+    pub fn match_rule<R>(self) -> bool
     where
         R: Rule,
     {

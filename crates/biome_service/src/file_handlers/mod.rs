@@ -393,6 +393,7 @@ pub struct DebugCapabilities {
     pub(crate) debug_formatter_ir: Option<DebugFormatterIR>,
 }
 
+#[derive(Debug)]
 pub(crate) struct LintParams<'a> {
     pub(crate) parse: AnyParse,
     pub(crate) workspace: &'a WorkspaceSettingsHandle<'a>,
@@ -730,6 +731,286 @@ impl<'a> RegistryVisitor<GraphqlLanguage> for SyntaxVisitor<'a> {
             <R::Group as RuleGroup>::NAME,
             R::METADATA.name,
         ))
+    }
+}
+
+/// Type meant to register all the lint rules for each language supported by Biome
+///
+#[derive(Debug)]
+pub(crate) struct LintVisitor<'a, 'b> {
+    pub(crate) enabled_rules: Vec<RuleFilter<'a>>,
+    pub(crate) disabled_rules: Vec<RuleFilter<'a>>,
+    // lint_params: &'b LintParams<'a>,
+    only: &'b Vec<RuleSelector>,
+    skip: &'b Vec<RuleSelector>,
+    settings: Option<&'b Settings>,
+    path: &'b Path,
+}
+
+impl<'a, 'b> LintVisitor<'a, 'b> {
+    pub(crate) fn new(
+        only: &'b Vec<RuleSelector>,
+        skip: &'b Vec<RuleSelector>,
+        settings: Option<&'b Settings>,
+        path: &'b Path,
+    ) -> Self {
+        Self {
+            enabled_rules: vec![],
+            disabled_rules: vec![],
+            only,
+            skip,
+            settings,
+            path,
+        }
+    }
+
+    fn finish(mut self) -> (Vec<RuleFilter<'a>>, Vec<RuleFilter<'a>>) {
+        let has_only_filter = !self.only.is_empty();
+        let enabled_rules = if !has_only_filter {
+            self.settings
+                .and_then(|settings| settings.as_rules(self.path))
+                .as_ref()
+                .map(|rules| rules.as_enabled_rules())
+                .unwrap_or_default()
+                .into_iter()
+                .collect::<Vec<_>>()
+        } else {
+            vec![]
+        };
+        self.enabled_rules.extend(enabled_rules);
+        (self.enabled_rules, self.disabled_rules)
+    }
+
+    fn push_rule<R, L>(&mut self)
+    where
+        R: Rule<Options: Default, Query: Queryable<Language = L, Output: Clone>> + 'static,
+    {
+        // Do not report unused suppression comment diagnostics if:
+        // - it is a syntax-only analyzer pass, or
+        // - if a single rule is run.
+        for selector in self.only {
+            let filter = RuleFilter::from(selector);
+            if filter.match_rule::<R>() {
+                self.enabled_rules.push(filter)
+            }
+        }
+        for selector in self.skip {
+            let filter = RuleFilter::from(selector);
+            if filter.match_rule::<R>() {
+                self.disabled_rules.push(filter)
+            }
+        }
+    }
+}
+
+impl<'a, 'b> RegistryVisitor<JsLanguage> for LintVisitor<'a, 'b> {
+    fn record_category<C: GroupCategory<Language = JsLanguage>>(&mut self) {
+        if C::CATEGORY == RuleCategory::Lint {
+            C::record_groups(self)
+        }
+    }
+
+    fn record_group<G: RuleGroup<Language = JsLanguage>>(&mut self) {
+        for selector in self.only {
+            if RuleFilter::from(selector).match_group::<G>() {
+                G::record_rules(self)
+            }
+        }
+
+        for selector in self.skip {
+            if RuleFilter::from(selector).match_group::<G>() {
+                G::record_rules(self)
+            }
+        }
+    }
+
+    fn record_rule<R>(&mut self)
+    where
+        R: Rule<Options: Default, Query: Queryable<Language = JsLanguage, Output: Clone>> + 'static,
+    {
+        self.push_rule::<R, <R::Query as Queryable>::Language>()
+    }
+}
+impl<'a, 'b> RegistryVisitor<JsonLanguage> for LintVisitor<'a, 'b> {
+    fn record_category<C: GroupCategory<Language = JsonLanguage>>(&mut self) {
+        if C::CATEGORY == RuleCategory::Lint {
+            C::record_groups(self)
+        }
+    }
+
+    fn record_group<G: RuleGroup<Language = JsonLanguage>>(&mut self) {
+        for selector in self.only {
+            if RuleFilter::from(selector).match_group::<G>() {
+                G::record_rules(self)
+            }
+        }
+
+        for selector in self.skip {
+            if RuleFilter::from(selector).match_group::<G>() {
+                G::record_rules(self)
+            }
+        }
+    }
+
+    fn record_rule<R>(&mut self)
+    where
+        R: Rule<Options: Default, Query: Queryable<Language = JsonLanguage, Output: Clone>>
+            + 'static,
+    {
+        self.push_rule::<R, <R::Query as Queryable>::Language>()
+    }
+}
+
+impl<'a, 'b> RegistryVisitor<CssLanguage> for LintVisitor<'a, 'b> {
+    fn record_category<C: GroupCategory<Language = CssLanguage>>(&mut self) {
+        if C::CATEGORY == RuleCategory::Lint {
+            C::record_groups(self)
+        }
+    }
+
+    fn record_group<G: RuleGroup<Language = CssLanguage>>(&mut self) {
+        for selector in self.only {
+            if RuleFilter::from(selector).match_group::<G>() {
+                G::record_rules(self)
+            }
+        }
+
+        for selector in self.skip {
+            if RuleFilter::from(selector).match_group::<G>() {
+                G::record_rules(self)
+            }
+        }
+    }
+
+    fn record_rule<R>(&mut self)
+    where
+        R: Rule<Options: Default, Query: Queryable<Language = CssLanguage, Output: Clone>>
+            + 'static,
+    {
+        self.push_rule::<R, <R::Query as Queryable>::Language>()
+    }
+}
+
+impl<'a, 'b> RegistryVisitor<GraphqlLanguage> for LintVisitor<'a, 'b> {
+    fn record_category<C: GroupCategory<Language = GraphqlLanguage>>(&mut self) {
+        if C::CATEGORY == RuleCategory::Lint {
+            C::record_groups(self)
+        }
+    }
+
+    fn record_group<G: RuleGroup<Language = GraphqlLanguage>>(&mut self) {
+        for selector in self.only {
+            if RuleFilter::from(selector).match_group::<G>() {
+                G::record_rules(self)
+            }
+        }
+
+        for selector in self.skip {
+            if RuleFilter::from(selector).match_group::<G>() {
+                G::record_rules(self)
+            }
+        }
+    }
+
+    fn record_rule<R>(&mut self)
+    where
+        R: Rule<Options: Default, Query: Queryable<Language = GraphqlLanguage, Output: Clone>>
+            + 'static,
+    {
+        self.push_rule::<R, <R::Query as Queryable>::Language>()
+    }
+}
+
+struct ActionVisitor<'a, 'b> {
+    settings: Option<&'b Settings>,
+    rule_categories: &'b RuleCategories,
+    pub(crate) enabled_rules: Vec<RuleFilter<'a>>,
+    import_sorting: RuleFilter<'a>,
+}
+
+impl<'a, 'b> ActionVisitor<'a, 'b> {
+    pub(crate) fn new(settings: Option<&'b Settings>, rule_categories: &'b RuleCategories) -> Self {
+        Self {
+            enabled_rules: vec![],
+            settings,
+            rule_categories,
+            import_sorting: RuleFilter::Rule("correctness", "organizeImports"),
+        }
+    }
+}
+
+impl<'a, 'b> RegistryVisitor<JsLanguage> for ActionVisitor<'a, 'b> {
+    fn record_category<C: GroupCategory<Language = JsLanguage>>(&mut self) {
+        if C::CATEGORY == RuleCategory::Action {
+            C::record_groups(self)
+        }
+    }
+
+    fn record_rule<R>(&mut self)
+    where
+        R: Rule<Options: Default, Query: Queryable<Language = JsLanguage, Output: Clone>> + 'static,
+    {
+        let organize_imports_enabled = self
+            .settings
+            .map(|settings| settings.organize_imports.enabled)
+            .unwrap_or_default();
+        if organize_imports_enabled
+            && !self.rule_categories.is_syntax()
+            && self.import_sorting.match_rule::<R>()
+        {
+            self.enabled_rules.push(self.import_sorting);
+        }
+    }
+}
+
+impl<'a, 'b> RegistryVisitor<JsonLanguage> for ActionVisitor<'a, 'b> {
+    fn record_category<C: GroupCategory<Language = JsonLanguage>>(&mut self) {
+        if C::CATEGORY == RuleCategory::Action {
+            C::record_groups(self)
+        }
+    }
+
+    fn record_rule<R>(&mut self)
+    where
+        R: Rule<Options: Default, Query: Queryable<Language = JsonLanguage, Output: Clone>>
+            + 'static,
+    {
+        self.enabled_rules
+            .push(RuleFilter::Rule(R::Group::NAME, R::METADATA.name))
+    }
+}
+
+impl<'a, 'b> RegistryVisitor<CssLanguage> for ActionVisitor<'a, 'b> {
+    fn record_category<C: GroupCategory<Language = CssLanguage>>(&mut self) {
+        if C::CATEGORY == RuleCategory::Action {
+            C::record_groups(self)
+        }
+    }
+
+    fn record_rule<R>(&mut self)
+    where
+        R: Rule<Options: Default, Query: Queryable<Language = CssLanguage, Output: Clone>>
+            + 'static,
+    {
+        self.enabled_rules
+            .push(RuleFilter::Rule(R::Group::NAME, R::METADATA.name))
+    }
+}
+
+impl<'a, 'b> RegistryVisitor<GraphqlLanguage> for ActionVisitor<'a, 'b> {
+    fn record_category<C: GroupCategory<Language = GraphqlLanguage>>(&mut self) {
+        if C::CATEGORY == RuleCategory::Action {
+            C::record_groups(self)
+        }
+    }
+
+    fn record_rule<R>(&mut self)
+    where
+        R: Rule<Options: Default, Query: Queryable<Language = GraphqlLanguage, Output: Clone>>
+            + 'static,
+    {
+        self.enabled_rules
+            .push(RuleFilter::Rule(R::Group::NAME, R::METADATA.name))
     }
 }
 
