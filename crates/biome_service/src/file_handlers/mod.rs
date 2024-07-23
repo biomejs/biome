@@ -954,10 +954,11 @@ impl<'a, 'b> RegistryVisitor<JsLanguage> for ActionVisitor<'a, 'b> {
             .settings
             .map(|settings| settings.organize_imports.enabled)
             .unwrap_or_default();
-        if organize_imports_enabled && !self.rule_categories.is_syntax() {
-            if self.import_sorting.match_rule::<R>() {
-                self.enabled_rules.push(self.import_sorting);
-            }
+        if organize_imports_enabled
+            && !self.rule_categories.is_syntax()
+            && self.import_sorting.match_rule::<R>()
+        {
+            self.enabled_rules.push(self.import_sorting);
         }
     }
 }
