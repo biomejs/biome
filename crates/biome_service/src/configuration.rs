@@ -1,8 +1,9 @@
 use crate::matcher::Pattern;
 use crate::settings::Settings;
-use crate::{DynRef, WorkspaceError, VERSION};
+use crate::{DynRef, WorkspaceError};
 use biome_analyze::AnalyzerRules;
 use biome_configuration::diagnostics::{CantLoadExtendFile, EditorConfigDiagnostic};
+use biome_configuration::VERSION;
 use biome_configuration::{
     push_to_analyzer_rules, BiomeDiagnostic, ConfigurationPathHint, ConfigurationPayload,
     PartialConfiguration,
