@@ -10,10 +10,9 @@ flags/invalid ━━━━━━━━━━━━━━━━━━━━━━
   × Failed to parse CLI arguments.
     
     Caused by:
-      couldn't parse `asneed`: Value not supported for Semicolons. Supported values are 'as-needed' and 'always'.
+      couldn't parse `asneed`: Value not supported for Semicolons. Supported values are 'as-needed' and
+      'always'.
   
 
 
 ```
-
-
