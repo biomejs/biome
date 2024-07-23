@@ -2923,7 +2923,7 @@ pub struct Nursery {
         Option<RuleFixConfiguration<NoUselessUndefinedInitialization>>,
     #[doc = "Disallow use of @value rule in css modules."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_value_at_rule: Option<RuleConfiguration<NoValueAtRule>>,
+    pub no_value_at_rule: Option<RuleConfiguration<biome_css_analyze::options::NoValueAtRule>>,
     #[doc = "Disallow the use of yoda expressions."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_yoda_expression: Option<RuleFixConfiguration<NoYodaExpression>>,
@@ -2991,7 +2991,8 @@ pub struct Nursery {
     pub use_top_level_regex: Option<RuleConfiguration<UseTopLevelRegex>>,
     #[doc = "Enforce the use of String.trimStart() and String.trimEnd() over String.trimLeft() and String.trimRight()."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_trim_start_end: Option<RuleFixConfiguration<UseTrimStartEnd>>,
+    pub use_trim_start_end:
+        Option<RuleFixConfiguration<biome_js_analyze::options::UseTrimStartEnd>>,
     #[doc = "Use valid values for the autocomplete attribute on input elements."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_valid_autocomplete: Option<RuleConfiguration<UseValidAutocomplete>>,
