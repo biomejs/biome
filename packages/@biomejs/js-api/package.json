@@ -49,7 +49,7 @@
     "@biomejs/wasm-bundler": "link:../wasm-bundler",
     "@biomejs/wasm-nodejs": "link:../wasm-nodejs",
     "@biomejs/wasm-web": "link:../wasm-web",
-    "typescript": "5.5.3",
+    "typescript": "5.5.4",
     "vite": "5.3.4",
     "vitest": "1.6.0"
   },
