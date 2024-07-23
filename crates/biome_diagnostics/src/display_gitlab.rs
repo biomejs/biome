@@ -1,12 +1,9 @@
 use crate::display::frame::SourceFile;
 use crate::PrintDescription;
-use crate::{diagnostic::internal::AsDiagnostic, Diagnostic, Resource, Severity};
+use crate::{diagnostic::internal::AsDiagnostic, Diagnostic, Severity};
 use biome_console::fmt;
-use path_absolutize::Absolutize;
 use serde::Serialize;
-use std::hash::{DefaultHasher, Hash, Hasher};
 use std::io;
-use std::path::{Path, PathBuf};
 
 /// Helper struct for printing a diagnostic as markup into any formatter
 /// implementing [biome_console::fmt::Write].
@@ -38,49 +35,32 @@ pub struct GitLabDiagnostic<'a> {
     /// A unique name representing the static analysis check that emitted this issue.
     check_name: &'a str,
     /// A unique fingerprint to identify the code quality violation. For example, an MD5 hash.
-    pub fingerprint: u64,
+    fingerprint: String,
     /// A severity string (can be info, minor, major, critical, or blocker).
     severity: &'a str,
     /// The location where the code quality violation occurred.
-    location: Location,
+    location: Location<'a>,
 }
 
 impl<'a> GitLabDiagnostic<'a> {
     pub fn try_from_diagnostic<D: AsDiagnostic>(
-        diag: D,
-        relative_to: &Option<PathBuf>,
+        diag: &'a D,
+        path: &'a str,
+        fingerprint: u64,
     ) -> Option<Self> {
         let diagnostic = diag.as_diagnostic();
         let location = diagnostic.location();
-
         let span = location.span?;
         let source_code = location.source_code?;
-
-        let absolute_file_path = match &location.resource {
-            Some(Resource::File(file)) => *file,
-            _ => return None,
-        };
-
-        let relative_path = attempt_to_relativize(absolute_file_path, relative_to)
-            .unwrap_or(absolute_file_path.to_string());
-
-        let description = PrintDescription(&diag).to_string();
-
+        let description = PrintDescription(diag).to_string();
         let begin = match SourceFile::new(source_code).location(span.start()) {
             Ok(start) => start.line_number.get(),
             Err(_) => return None,
         };
-
         let check_name = diagnostic
             .category()
             .map(|category| category.name())
             .unwrap_or_default();
-
-        let fingerprint = calculate_hash(&Fingerprint {
-            check_name,
-            path: relative_path.as_str(),
-            code: &source_code.text[span],
-        });
 
         Some(GitLabDiagnostic {
             severity: match diagnostic.severity() {
@@ -92,35 +72,21 @@ impl<'a> GitLabDiagnostic<'a> {
             },
             description,
             check_name,
-            fingerprint,
+            // A u64 does not fit into a JSON number, so we serialize this as a
+            // string
+            fingerprint: fingerprint.to_string(),
             location: Location {
-                path: relative_path,
+                path,
                 lines: Lines { begin },
             },
         })
     }
 }
 
-fn attempt_to_relativize(subject: &str, maybe_base: &Option<PathBuf>) -> Option<String> {
-    let Some(base) = maybe_base else {
-        return None;
-    };
-
-    let Ok(resolved) = Path::new(subject).absolutize() else {
-        return None;
-    };
-
-    let Ok(relativized) = resolved.strip_prefix(base) else {
-        return None;
-    };
-
-    Some(relativized.to_path_buf().to_str()?.to_string())
-}
-
 #[derive(Serialize)]
-struct Location {
+struct Location<'a> {
     /// The relative path to the file containing the code quality violation.
-    path: String,
+    path: &'a str,
     lines: Lines,
 }
 
@@ -128,20 +94,4 @@ struct Location {
 struct Lines {
     /// The line on which the code quality violation occurred.
     begin: usize,
-}
-
-#[derive(Hash)]
-struct Fingerprint<'a> {
-    // Including the source code in our hash leads to more stable
-    // fingerprints. If you instead rely on e.g. the line number and change
-    // the first line of a file, all of its fingerprint would change.
-    code: &'a str,
-    check_name: &'a str,
-    path: &'a str,
-}
-
-fn calculate_hash<T: Hash>(t: &T) -> u64 {
-    let mut s = DefaultHasher::new();
-    t.hash(&mut s);
-    s.finish()
 }

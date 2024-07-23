@@ -1,10 +1,14 @@
 use crate::{DiagnosticsPayload, Execution, Reporter, ReporterVisitor, TraversalSummary};
 use biome_console::{markup, Console, ConsoleExt};
-use biome_diagnostics::display_gitlab::{GitLabDiagnostic, PrintGitLabDiagnostic};
+use biome_diagnostics::{
+    display_gitlab::{GitLabDiagnostic, PrintGitLabDiagnostic},
+    Error, Resource,
+};
+use path_absolutize::Absolutize;
 use std::{
     collections::HashSet,
     hash::{DefaultHasher, Hash, Hasher},
-    path::PathBuf,
+    path::{Path, PathBuf},
 };
 
 pub struct GitLabReporter {
@@ -50,6 +54,44 @@ impl<'a> GitLabReporterVisitor<'a> {
         self.fingerprints.insert(current);
         current
     }
+
+    fn attempt_to_relativize(&self, subject: &str) -> Option<PathBuf> {
+        let Some(base) = &self.repository_root else {
+            return None;
+        };
+
+        let Ok(resolved) = Path::new(subject).absolutize() else {
+            return None;
+        };
+
+        let Ok(relativized) = resolved.strip_prefix(base) else {
+            return None;
+        };
+
+        Some(relativized.to_path_buf())
+    }
+
+    fn compute_initial_fingerprint(&self, diagnostic: &Error, path: &str) -> u64 {
+        let location = diagnostic.location();
+        let code = match location.span {
+            Some(span) => match location.source_code {
+                Some(source_code) => &source_code.text[span],
+                None => "",
+            },
+            None => "",
+        };
+
+        let check_name = diagnostic
+            .category()
+            .map(|category| category.name())
+            .unwrap_or_default();
+
+        calculate_hash(&Fingerprint {
+            check_name,
+            path,
+            code,
+        })
+    }
 }
 
 impl<'a> ReporterVisitor for GitLabReporterVisitor<'a> {
@@ -71,14 +113,26 @@ impl<'a> ReporterVisitor for GitLabReporterVisitor<'a> {
                     continue;
                 }
 
-                let Some(mut gitlab_diagnostic) =
-                    GitLabDiagnostic::try_from_diagnostic(biome_diagnostic, &self.repository_root)
+                let absolute_path = match biome_diagnostic.location().resource {
+                    Some(Resource::File(file)) => Some(file),
+                    _ => None,
+                }
+                .unwrap_or_default();
+                let path_buf = self.attempt_to_relativize(absolute_path);
+                let path = match path_buf {
+                    Some(buf) => buf.to_str().unwrap_or(absolute_path).to_owned(),
+                    None => absolute_path.to_owned(),
+                };
+
+                let initial_fingerprint =
+                    self.compute_initial_fingerprint(&biome_diagnostic, &path);
+                let fingerprint = self.rehash_until_unique(initial_fingerprint);
+
+                let Some(gitlab_diagnostic) =
+                    GitLabDiagnostic::try_from_diagnostic(&biome_diagnostic, &path, fingerprint)
                 else {
                     continue;
                 };
-
-                gitlab_diagnostic.fingerprint =
-                    self.rehash_until_unique(gitlab_diagnostic.fingerprint);
 
                 self.console.log(markup!({
                     PrintGitLabDiagnostic {
@@ -91,4 +145,20 @@ impl<'a> ReporterVisitor for GitLabReporterVisitor<'a> {
         self.console.log(markup!("]"));
         Ok(())
     }
+}
+
+#[derive(Hash)]
+struct Fingerprint<'a> {
+    // Including the source code in our hash leads to more stable
+    // fingerprints. If you instead rely on e.g. the line number and change
+    // the first line of a file, all of its fingerprint would change.
+    code: &'a str,
+    check_name: &'a str,
+    path: &'a str,
+}
+
+fn calculate_hash<T: Hash>(t: &T) -> u64 {
+    let mut s = DefaultHasher::new();
+    t.hash(&mut s);
+    s.finish()
 }
