@@ -137,7 +137,7 @@ impl<'a> ReporterVisitor for GitLabReporterVisitor<'a> {
                 self.console.log(markup!({
                     PrintGitLabDiagnostic {
                         gitlab_diagnostic: &gitlab_diagnostic,
-                        is_last: index < total_diagnostics - 1,
+                        is_last: index >= total_diagnostics - 1,
                     }
                 }));
             }
