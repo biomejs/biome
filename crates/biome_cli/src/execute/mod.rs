@@ -10,7 +10,7 @@ use crate::diagnostics::ReportDiagnostic;
 use crate::execute::migrate::MigratePayload;
 use crate::execute::traverse::{traverse, TraverseResult};
 use crate::reporter::github::{GithubReporter, GithubReporterVisitor};
-use crate::reporter::gitlab::{GitLabDiagnosticBuilder, GitLabReporter, GitLabReporterVisitor};
+use crate::reporter::gitlab::{GitLabReporter, GitLabReporterVisitor};
 use crate::reporter::json::{JsonReporter, JsonReporterVisitor};
 use crate::reporter::junit::{JunitReporter, JunitReporterVisitor};
 use crate::reporter::summary::{SummaryReporter, SummaryReporterVisitor};
@@ -536,8 +536,8 @@ pub fn execute_mode(
                     execution: execution.clone(),
                 };
                 reporter.write(&mut GitLabReporterVisitor::new(
-                    GitLabDiagnosticBuilder::new(session.app.fs.borrow().working_directory()),
                     console,
+                    session.app.fs.borrow().working_directory(),
                 ))?;
             }
             ReportMode::Junit => {

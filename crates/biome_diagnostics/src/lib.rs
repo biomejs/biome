@@ -8,6 +8,7 @@ pub mod context;
 pub mod diagnostic;
 pub mod display;
 pub mod display_github;
+pub mod display_gitlab;
 pub mod error;
 pub mod location;
 pub mod panic;

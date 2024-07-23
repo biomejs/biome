@@ -1,65 +1,11 @@
 use crate::{DiagnosticsPayload, Execution, Reporter, ReporterVisitor, TraversalSummary};
 use biome_console::{markup, Console, ConsoleExt};
-use biome_diagnostics::{LineIndexBuf, PrintDescription};
-use path_absolutize::Absolutize;
-use serde::Serialize;
+use biome_diagnostics::display_gitlab::{GitLabDiagnostic, PrintGitLabDiagnostic};
 use std::{
-    cmp::max,
     collections::HashSet,
     hash::{DefaultHasher, Hash, Hasher},
-    path::{Path, PathBuf},
+    path::PathBuf,
 };
-
-/// An entry in the GitLab Code Quality report.
-/// See https://docs.gitlab.com/ee/ci/testing/code_quality.html#implement-a-custom-tool
-#[derive(Serialize)]
-pub(crate) struct GitLabDiagnostic {
-    /// A description of the code quality violation.
-    description: String,
-    /// A unique name representing the static analysis check that emitted this issue.
-    check_name: String,
-    /// A unique fingerprint to identify the code quality violation. For example, an MD5 hash.
-    fingerprint: String,
-    /// A severity string (can be info, minor, major, critical, or blocker).
-    severity: GitLabSeverity,
-    /// The location where the code quality violation occurred.
-    location: Location,
-}
-
-#[derive(Serialize)]
-struct Location {
-    /// The relative path to the file containing the code quality violation.
-    path: String,
-    lines: Lines,
-}
-
-#[derive(Serialize)]
-struct Lines {
-    /// The line on which the code quality violation occurred.
-    begin: u32,
-}
-
-#[derive(Serialize)]
-#[serde(rename_all = "snake_case")]
-enum GitLabSeverity {
-    Info,
-    Minor,
-    Major,
-    Critical,
-    Blocker,
-}
-
-impl From<biome_diagnostics::diagnostic::Severity> for GitLabSeverity {
-    fn from(value: biome_diagnostics::diagnostic::Severity) -> Self {
-        match value {
-            biome_diagnostics::Severity::Hint => Self::Info,
-            biome_diagnostics::Severity::Information => Self::Minor,
-            biome_diagnostics::Severity::Warning => Self::Major,
-            biome_diagnostics::Severity::Error => Self::Critical,
-            biome_diagnostics::Severity::Fatal => Self::Blocker,
-        }
-    }
-}
 
 pub struct GitLabReporter {
     pub execution: Execution,
@@ -75,12 +21,34 @@ impl Reporter for GitLabReporter {
 
 pub(crate) struct GitLabReporterVisitor<'a> {
     console: &'a mut dyn Console,
-    builder: GitLabDiagnosticBuilder,
+
+    repository_root: Option<PathBuf>,
+
+    /// A set of fingerprints (unique identifiers) to prevent collisions.
+    fingerprints: HashSet<u64>,
 }
 
 impl<'a> GitLabReporterVisitor<'a> {
-    pub fn new(builder: GitLabDiagnosticBuilder, console: &'a mut dyn Console) -> Self {
-        Self { builder, console }
+    pub fn new(console: &'a mut dyn Console, repository_root: Option<PathBuf>) -> Self {
+        Self {
+            console,
+            repository_root,
+            fingerprints: HashSet::new(),
+        }
+    }
+
+    /// Enforces uniqueness of generated fingerprints in the context of a
+    /// single report.
+    fn rehash_until_unique(&mut self, fingerprint: u64) -> u64 {
+        let mut current = fingerprint;
+        while self.fingerprints.contains(&current) {
+            let mut hasher = DefaultHasher::new();
+            current.hash(&mut hasher);
+            current = hasher.finish();
+        }
+
+        self.fingerprints.insert(current);
+        current
     }
 }
 
@@ -103,152 +71,24 @@ impl<'a> ReporterVisitor for GitLabReporterVisitor<'a> {
                     continue;
                 }
 
-                let diagnostic = self.builder.gitlab_diagnostic(biome_diagnostic);
-                let mut content = serde_json::to_string(&diagnostic)?;
-                if index < total_diagnostics - 1 {
-                    content.push(',')
-                }
+                let Some(mut gitlab_diagnostic) =
+                    GitLabDiagnostic::try_from_diagnostic(biome_diagnostic, &self.repository_root)
+                else {
+                    continue;
+                };
 
-                self.console.log(markup!({ content }));
+                gitlab_diagnostic.fingerprint =
+                    self.rehash_until_unique(gitlab_diagnostic.fingerprint);
+
+                self.console.log(markup!({
+                    PrintGitLabDiagnostic {
+                        gitlab_diagnostic: &gitlab_diagnostic,
+                        is_last: index < total_diagnostics - 1,
+                    }
+                }));
             }
         }
         self.console.log(markup!("]"));
         Ok(())
     }
-}
-
-pub(crate) struct GitLabDiagnosticBuilder {
-    /// The root of the Git repository.
-    /// Required for relativization of the reported absolute paths.
-    repository_root: Option<PathBuf>,
-    /// A set of fingerprints (unique identifiers) to prevent collisions.
-    fingerprints: HashSet<u64>,
-}
-
-impl GitLabDiagnosticBuilder {
-    pub fn new(repository_root: Option<PathBuf>) -> Self {
-        Self {
-            repository_root,
-            fingerprints: HashSet::new(),
-        }
-    }
-
-    /// Turns a biome diagnostic into one in the GitLab Code Quality report format.
-    pub fn gitlab_diagnostic(
-        &mut self,
-        value: biome_diagnostics::error::Error,
-    ) -> GitLabDiagnostic {
-        let check_name = self.check_name(&value).unwrap_or_default();
-        let path = self.path(&value).unwrap_or_default();
-        let line = self.line(&value).map_or(1, |line| max(line, 1));
-        let fingerprint = self
-            .ensure_fingerprint_uniqueness(
-                calculate_hash(&Fingerprint {
-                    check_name: check_name.as_str(),
-                    path: path.as_str(),
-                    code: self.source_code(&value).unwrap_or_default().as_str(),
-                }),
-                0,
-            )
-            .to_string();
-
-        GitLabDiagnostic {
-            severity: GitLabSeverity::from(value.severity()),
-            description: PrintDescription(&value).to_string(),
-            check_name,
-            fingerprint,
-            location: Location {
-                path,
-                lines: Lines { begin: line },
-            },
-        }
-    }
-
-    /// Extracts the name of the category as the check name.
-    fn check_name(&self, value: &biome_diagnostics::error::Error) -> Option<String> {
-        let category = value.category()?;
-        Some(category.name().to_string())
-    }
-
-    /// Extracts the source code generating the diagnostic.
-    fn source_code(&self, value: &biome_diagnostics::error::Error) -> Option<String> {
-        let location = value.location();
-        let source_code = location.source_code?;
-        let span = location.span?;
-
-        Some(source_code.text[span].to_string())
-    }
-
-    /// Enforces uniqueness of generated fingerprints in the context of a
-    /// single report.
-    fn ensure_fingerprint_uniqueness(&mut self, fingerprint: u64, salt: u64) -> u64 {
-        let mut current = fingerprint;
-        while self.fingerprints.contains(&current) {
-            let mut hasher = DefaultHasher::new();
-            current.hash(&mut hasher);
-            salt.hash(&mut hasher);
-            current = hasher.finish();
-        }
-
-        self.fingerprints.insert(current);
-        current
-    }
-
-    /// GitLab only cares about paths relative to the repository root.
-    /// This function attempts to relativize the absolute path from the
-    /// diagnostic, while falling back to the originally reported one.
-    fn path(&self, value: &biome_diagnostics::error::Error) -> Option<String> {
-        let path = match value.location().resource? {
-            biome_diagnostics::Resource::Argv => None,
-            biome_diagnostics::Resource::Memory => None,
-            biome_diagnostics::Resource::File(path) => Some(path.to_string()),
-        }?;
-
-        let Some(root) = &self.repository_root else {
-            return Some(path);
-        };
-
-        let Ok(resolved) = Path::new(path.as_str()).absolutize() else {
-            return Some(path);
-        };
-
-        let Ok(relativized) = resolved.strip_prefix(root) else {
-            return Some(path);
-        };
-
-        Some(relativized.to_str().unwrap_or(path.as_str()).to_string())
-    }
-
-    /// Extracts the line number from the diagnostic.
-    fn line(&self, value: &biome_diagnostics::error::Error) -> Option<u32> {
-        let location = value.location();
-        let buf = LineIndexBuf::from_source_text(location.source_code?.text);
-        let diagnostic_offset = location.span?.start();
-
-        buf.iter()
-            .enumerate()
-            .find(|(_, line_offset)| **line_offset >= diagnostic_offset)
-            .map(|(line_number, _)| match u32::try_from(line_number) {
-                Ok(number) => Some(number),
-                Err(_) => None,
-            })
-            .flatten()
-    }
-}
-
-#[derive(Hash)]
-struct Fingerprint<'a> {
-    // Including the source code in our hash leads to more stable
-    // fingerprints. If you instead rely on e.g. the line number and change
-    // the first line of a file, all of its fingerprint would change.
-    code: &'a str,
-    check_name: &'a str,
-    path: &'a str,
-    salt: u64,
-}
-
-fn calculate_hash<T: Hash>(t: &T) -> u64 {
-    let mut s = DefaultHasher::new();
-    t.hash(&mut s);
-    s.finish()
 }
