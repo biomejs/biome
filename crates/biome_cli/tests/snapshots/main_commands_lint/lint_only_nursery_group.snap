@@ -16,7 +16,8 @@ flags/invalid ━━━━━━━━━━━━━━━━━━━━━━
   × Failed to parse CLI arguments.
     
     Caused by:
-      couldn't parse `nursery`: The `nursery` group cannot be selected. Select a specific nursery rule instead.
+      couldn't parse `nursery`: The `nursery` group cannot be selected. Select a specific nursery rule
+      instead.
   
 
 
