@@ -69,7 +69,7 @@ where
                 "capabilities": {},
                 "clientInfo": {
                     "name": env!("CARGO_PKG_NAME"),
-                    "version": crate::VERSION
+                    "version": biome_configuration::VERSION
                 },
             }),
         )?;

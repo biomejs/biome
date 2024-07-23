@@ -73,7 +73,7 @@ impl LSPServer {
     async fn rage(&self, params: RageParams) -> LspResult<RageResult> {
         let mut entries = vec![
             RageEntry::section("Server"),
-            RageEntry::pair("Version", biome_service::VERSION),
+            RageEntry::pair("Version", biome_configuration::VERSION),
             RageEntry::pair("Name", env!("CARGO_PKG_NAME")),
             RageEntry::pair("CPU Architecture", std::env::consts::ARCH),
             RageEntry::pair("OS", std::env::consts::OS),
@@ -269,7 +269,7 @@ impl LanguageServer for LSPServer {
             capabilities: server_capabilities,
             server_info: Some(ServerInfo {
                 name: String::from(env!("CARGO_PKG_NAME")),
-                version: Some(biome_service::VERSION.to_string()),
+                version: Some(biome_configuration::VERSION.to_string()),
             }),
         };
 

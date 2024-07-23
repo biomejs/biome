@@ -11,8 +11,8 @@ Usage: lint [--write] [--unsafe] [--only=<GROUP|RULE>]... [--skip=<GROUP|RULE>].
 --changed] [--since=REF] [PATH]...
 
 Set of properties to integrate Biome with a VCS software.
-        --vcs-client-kind=<git>  The kind of client.
         --vcs-enabled=<true|false>  Whether Biome should integrate itself with the VCS client
+        --vcs-client-kind=<git>  The kind of client.
         --vcs-use-ignore-file=<true|false>  Whether Biome should use the VCS ignore file. When
                               [true], Biome will ignore the files specified in the ignore file.
         --vcs-root=PATH       The folder where Biome should check for VCS files. By default, Biome

@@ -15,7 +15,6 @@ use biome_json_syntax::{JsonFileSource, JsonRoot};
 use biome_migrate::{migrate_configuration, ControlFlow};
 use biome_rowan::{AstNode, NodeCache};
 use biome_service::workspace::{ChangeFileParams, FixAction, FormatFileParams, OpenFileParams};
-use biome_service::VERSION;
 use std::borrow::Cow;
 use std::ffi::OsStr;
 use std::path::PathBuf;
@@ -248,7 +247,7 @@ pub(crate) fn run(migrate_payload: MigratePayload) -> Result<(), CliDiagnostic> 
                 let (action, _) = migrate_configuration(
                     &tree,
                     configuration_file_path.as_path(),
-                    VERSION.to_string(),
+                    biome_configuration::VERSION.to_string(),
                     |signal| {
                         let current_diagnostic = signal.diagnostic();
                         if current_diagnostic.is_some() {
