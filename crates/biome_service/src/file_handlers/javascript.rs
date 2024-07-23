@@ -1,7 +1,7 @@
 use super::{
-    search, AnalyzerCapabilities, CodeActionsParams, DebugCapabilities, ExtensionHandler,
-    FormatterCapabilities, LintParams, LintResults, ParseResult, ParserCapabilities,
-    SearchCapabilities, SyntaxVisitor,
+    search, ActionVisitor, AnalyzerCapabilities, CodeActionsParams, DebugCapabilities,
+    ExtensionHandler, FormatterCapabilities, LintParams, LintResults, LintVisitor, ParseResult,
+    ParserCapabilities, SearchCapabilities, SyntaxVisitor,
 };
 use crate::configuration::to_analyzer_rules;
 use crate::diagnostics::extension_error;
@@ -416,48 +416,35 @@ pub(crate) fn lint(params: LintParams) -> LintResults {
                 };
             };
             let tree = params.parse.tree();
-            let mut diagnostics = params.parse.into_diagnostics();
             let analyzer_options = &params
                 .workspace
                 .analyzer_options::<JsLanguage>(params.path, &params.language);
 
-            let mut rules = None;
-            let mut organize_imports_enabled = true;
-            if let Some(settings) = params.workspace.settings() {
-                // Compute final rules (taking `overrides` into account)
-                rules = settings.as_rules(params.path.as_path());
-                organize_imports_enabled = settings.organize_imports.enabled;
-            }
+            let rules = params
+                .workspace
+                .settings()
+                .as_ref()
+                .and_then(|settings| settings.as_rules(params.path.as_path()));
 
-            let has_only_filter = !params.only.is_empty();
-            let mut enabled_rules = if has_only_filter {
-                params
-                    .only
-                    .into_iter()
-                    .map(|selector| selector.into())
-                    .collect::<Vec<_>>()
-            } else {
-                let mut enabled_rules = rules
-                    .as_ref()
-                    .map(|rules| rules.as_enabled_rules())
-                    .unwrap_or_default()
-                    .into_iter()
-                    .collect::<Vec<_>>();
-                if organize_imports_enabled && !params.categories.is_syntax() {
-                    enabled_rules.push(RuleFilter::Rule("correctness", "organizeImports"));
-                }
-                enabled_rules
-            };
-
+            let mut enabled_rules = vec![];
+            let mut disabled_rules = vec![];
             let mut syntax_visitor = SyntaxVisitor::default();
+            let mut lint_visitor = LintVisitor::new(
+                &params.only,
+                &params.skip,
+                params.workspace.settings(),
+                params.path.as_path(),
+            );
+            let mut action_visitor =
+                ActionVisitor::new(params.workspace.settings(), &params.categories);
             visit_registry(&mut syntax_visitor);
+            visit_registry(&mut lint_visitor);
+            visit_registry(&mut action_visitor);
             enabled_rules.extend(syntax_visitor.enabled_rules);
-
-            let disabled_rules = params
-                .skip
-                .into_iter()
-                .map(|selector| selector.into())
-                .collect::<Vec<_>>();
+            let (lint_enabled_rules, lint_disabled_rules) = lint_visitor.finish();
+            enabled_rules.extend(lint_enabled_rules);
+            disabled_rules.extend(lint_disabled_rules);
+            enabled_rules.extend(action_visitor.enabled_rules);
 
             let filter = AnalysisFilter {
                 categories: params.categories,
@@ -466,12 +453,10 @@ pub(crate) fn lint(params: LintParams) -> LintResults {
                 range: None,
             };
 
-            // Do not report unused suppression comment diagnostics if:
-            // - it is a syntax-only analyzer pass, or
-            // - if a single rule is run.
             let ignores_suppression_comment =
-                !filter.categories.contains(RuleCategory::Lint) || has_only_filter;
+                !filter.categories.contains(RuleCategory::Lint) || !params.only.is_empty();
 
+            let mut diagnostics = params.parse.into_diagnostics();
             let mut diagnostic_count = diagnostics.len() as u32;
             let mut errors = diagnostics
                 .iter()
@@ -669,25 +654,19 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
 
     // Compute final rules (taking `overrides` into account)
     let rules = settings.as_rules(params.biome_path.as_path());
-    let enabled_rules = if !params.only.is_empty() {
-        params
-            .only
-            .into_iter()
-            .map(|selector| selector.into())
-            .collect::<Vec<_>>()
-    } else {
-        rules
-            .as_ref()
-            .map(|rules| rules.as_enabled_rules())
-            .unwrap_or_default()
-            .into_iter()
-            .collect::<Vec<_>>()
-    };
-    let disabled_rules = params
-        .skip
-        .into_iter()
-        .map(|selector| selector.into())
-        .collect::<Vec<_>>();
+
+    let mut lint_visitor = LintVisitor::new(
+        &params.only,
+        &params.skip,
+        params.workspace.settings(),
+        params.biome_path.as_path(),
+    );
+    let mut syntax_visitor = SyntaxVisitor::default();
+    visit_registry(&mut lint_visitor);
+    visit_registry(&mut syntax_visitor);
+    let (mut enabled_rules, disabled_rules) = lint_visitor.finish();
+    enabled_rules.extend(syntax_visitor.enabled_rules);
+
     let filter = AnalysisFilter {
         categories: RuleCategoriesBuilder::default()
             .with_syntax()
