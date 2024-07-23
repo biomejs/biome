@@ -429,8 +429,14 @@ pub(crate) fn lint(params: LintParams) -> LintResults {
             let mut enabled_rules = vec![];
             let mut disabled_rules = vec![];
             let mut syntax_visitor = SyntaxVisitor::default();
-            let mut lint_visitor = LintVisitor::new(&params);
-            let mut action_visitor = ActionVisitor::new(&params);
+            let mut lint_visitor = LintVisitor::new(
+                &params.only,
+                &params.skip,
+                params.workspace.settings(),
+                params.path.as_path(),
+            );
+            let mut action_visitor =
+                ActionVisitor::new(params.workspace.settings(), &params.categories);
             visit_registry(&mut syntax_visitor);
             visit_registry(&mut lint_visitor);
             visit_registry(&mut action_visitor);
@@ -648,25 +654,19 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
 
     // Compute final rules (taking `overrides` into account)
     let rules = settings.as_rules(params.biome_path.as_path());
-    let enabled_rules = if !params.only.is_empty() {
-        params
-            .only
-            .into_iter()
-            .map(|selector| selector.into())
-            .collect::<Vec<_>>()
-    } else {
-        rules
-            .as_ref()
-            .map(|rules| rules.as_enabled_rules())
-            .unwrap_or_default()
-            .into_iter()
-            .collect::<Vec<_>>()
-    };
-    let disabled_rules = params
-        .skip
-        .into_iter()
-        .map(|selector| selector.into())
-        .collect::<Vec<_>>();
+
+    let mut lint_visitor = LintVisitor::new(
+        &params.only,
+        &params.skip,
+        params.workspace.settings(),
+        params.biome_path.as_path(),
+    );
+    let mut syntax_visitor = SyntaxVisitor::default();
+    visit_registry(&mut lint_visitor);
+    visit_registry(&mut syntax_visitor);
+    let (mut enabled_rules, disabled_rules) = lint_visitor.finish();
+    enabled_rules.extend(syntax_visitor.enabled_rules);
+
     let filter = AnalysisFilter {
         categories: RuleCategoriesBuilder::default()
             .with_syntax()

@@ -332,8 +332,14 @@ fn lint(params: LintParams) -> LintResults {
             let mut enabled_rules = vec![];
             let mut disabled_rules = vec![];
             let mut syntax_visitor = SyntaxVisitor::default();
-            let mut lint_visitor = LintVisitor::new(&params);
-            let mut action_visitor = ActionVisitor::new(&params);
+            let mut lint_visitor = LintVisitor::new(
+                &params.only,
+                &params.skip,
+                params.workspace.settings(),
+                params.path.as_path(),
+            );
+            let mut action_visitor =
+                ActionVisitor::new(params.workspace.settings(), &params.categories);
             visit_registry(&mut syntax_visitor);
             visit_registry(&mut lint_visitor);
             visit_registry(&mut action_visitor);

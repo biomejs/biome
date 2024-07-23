@@ -740,25 +740,35 @@ impl<'a> RegistryVisitor<GraphqlLanguage> for SyntaxVisitor<'a> {
 pub(crate) struct LintVisitor<'a, 'b> {
     pub(crate) enabled_rules: Vec<RuleFilter<'a>>,
     pub(crate) disabled_rules: Vec<RuleFilter<'a>>,
-    lint_params: &'b LintParams<'a>,
+    // lint_params: &'b LintParams<'a>,
+    only: &'b Vec<RuleSelector>,
+    skip: &'b Vec<RuleSelector>,
+    settings: Option<&'b Settings>,
+    path: &'b Path,
 }
 
 impl<'a, 'b> LintVisitor<'a, 'b> {
-    pub(crate) fn new(params: &'b LintParams<'a>) -> Self {
+    pub(crate) fn new(
+        only: &'b Vec<RuleSelector>,
+        skip: &'b Vec<RuleSelector>,
+        settings: Option<&'b Settings>,
+        path: &'b Path,
+    ) -> Self {
         Self {
             enabled_rules: vec![],
             disabled_rules: vec![],
-            lint_params: params,
+            only,
+            skip,
+            settings,
+            path,
         }
     }
 
     fn finish(mut self) -> (Vec<RuleFilter<'a>>, Vec<RuleFilter<'a>>) {
-        let has_only_filter = !&self.lint_params.only.is_empty();
+        let has_only_filter = !self.only.is_empty();
         let enabled_rules = if !has_only_filter {
-            self.lint_params
-                .workspace
-                .settings()
-                .and_then(|settings| settings.as_rules(self.lint_params.path.as_path()))
+            self.settings
+                .and_then(|settings| settings.as_rules(self.path))
                 .as_ref()
                 .map(|rules| rules.as_enabled_rules())
                 .unwrap_or_default()
@@ -778,13 +788,13 @@ impl<'a, 'b> LintVisitor<'a, 'b> {
         // Do not report unused suppression comment diagnostics if:
         // - it is a syntax-only analyzer pass, or
         // - if a single rule is run.
-        for selector in &self.lint_params.only {
+        for selector in self.only {
             let filter = RuleFilter::from(selector);
             if filter.match_rule::<R>() {
                 self.enabled_rules.push(filter)
             }
         }
-        for selector in &self.lint_params.skip {
+        for selector in self.skip {
             let filter = RuleFilter::from(selector);
             if filter.match_rule::<R>() {
                 self.disabled_rules.push(filter)
@@ -801,13 +811,13 @@ impl<'a, 'b> RegistryVisitor<JsLanguage> for LintVisitor<'a, 'b> {
     }
 
     fn record_group<G: RuleGroup<Language = JsLanguage>>(&mut self) {
-        for selector in &self.lint_params.only {
+        for selector in self.only {
             if RuleFilter::from(selector).match_group::<G>() {
                 G::record_rules(self)
             }
         }
 
-        for selector in &self.lint_params.skip {
+        for selector in self.skip {
             if RuleFilter::from(selector).match_group::<G>() {
                 G::record_rules(self)
             }
@@ -829,13 +839,13 @@ impl<'a, 'b> RegistryVisitor<JsonLanguage> for LintVisitor<'a, 'b> {
     }
 
     fn record_group<G: RuleGroup<Language = JsonLanguage>>(&mut self) {
-        for selector in &self.lint_params.only {
+        for selector in self.only {
             if RuleFilter::from(selector).match_group::<G>() {
                 G::record_rules(self)
             }
         }
 
-        for selector in &self.lint_params.skip {
+        for selector in self.skip {
             if RuleFilter::from(selector).match_group::<G>() {
                 G::record_rules(self)
             }
@@ -859,13 +869,13 @@ impl<'a, 'b> RegistryVisitor<CssLanguage> for LintVisitor<'a, 'b> {
     }
 
     fn record_group<G: RuleGroup<Language = CssLanguage>>(&mut self) {
-        for selector in &self.lint_params.only {
+        for selector in self.only {
             if RuleFilter::from(selector).match_group::<G>() {
                 G::record_rules(self)
             }
         }
 
-        for selector in &self.lint_params.skip {
+        for selector in self.skip {
             if RuleFilter::from(selector).match_group::<G>() {
                 G::record_rules(self)
             }
@@ -889,13 +899,13 @@ impl<'a, 'b> RegistryVisitor<GraphqlLanguage> for LintVisitor<'a, 'b> {
     }
 
     fn record_group<G: RuleGroup<Language = GraphqlLanguage>>(&mut self) {
-        for selector in &self.lint_params.only {
+        for selector in self.only {
             if RuleFilter::from(selector).match_group::<G>() {
                 G::record_rules(self)
             }
         }
 
-        for selector in &self.lint_params.skip {
+        for selector in self.skip {
             if RuleFilter::from(selector).match_group::<G>() {
                 G::record_rules(self)
             }
@@ -912,15 +922,19 @@ impl<'a, 'b> RegistryVisitor<GraphqlLanguage> for LintVisitor<'a, 'b> {
 }
 
 struct ActionVisitor<'a, 'b> {
-    lint_params: &'b LintParams<'a>,
+    settings: Option<&'b Settings>,
+    rule_categories: &'b RuleCategories,
     pub(crate) enabled_rules: Vec<RuleFilter<'a>>,
+    import_sorting: RuleFilter<'a>,
 }
 
 impl<'a, 'b> ActionVisitor<'a, 'b> {
-    pub(crate) fn new(params: &'b LintParams<'a>) -> Self {
+    pub(crate) fn new(settings: Option<&'b Settings>, rule_categories: &'b RuleCategories) -> Self {
         Self {
             enabled_rules: vec![],
-            lint_params: params,
+            settings,
+            rule_categories,
+            import_sorting: RuleFilter::Rule("correctness", "organizeImports"),
         }
     }
 }
@@ -937,14 +951,13 @@ impl<'a, 'b> RegistryVisitor<JsLanguage> for ActionVisitor<'a, 'b> {
         R: Rule<Options: Default, Query: Queryable<Language = JsLanguage, Output: Clone>> + 'static,
     {
         let organize_imports_enabled = self
-            .lint_params
-            .workspace
-            .settings()
+            .settings
             .map(|settings| settings.organize_imports.enabled)
             .unwrap_or_default();
-        if organize_imports_enabled && !self.lint_params.categories.is_syntax() {
-            self.enabled_rules
-                .push(RuleFilter::Rule("correctness", "organizeImports"));
+        if organize_imports_enabled && !self.rule_categories.is_syntax() {
+            if self.import_sorting.match_rule::<R>() {
+                self.enabled_rules.push(self.import_sorting);
+            }
         }
     }
 }
