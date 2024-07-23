@@ -20,6 +20,12 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 ### CLI
 
+#### Enhancements
+
+- `biome init` now generates a new config file with more options set.
+  This change intends to improve discoverability of the options and to set the more commonly used options to their default values.
+  Contributed by Conaclos
+
 #### Bug fixes
 
 - When a `--reporter` is provided, and it's different from the default one, the value provided by via `--max-diagnostics` is ignored and **the limit is lifted**. Contributed by @ematipico
