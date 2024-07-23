@@ -2,7 +2,6 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: typescript/comments/method_types.ts
 ---
-
 # Input
 
 ```ts
@@ -138,5 +137,3 @@ abstract class Test {
   abstract foo13 /* foo */(/* bar */); /* baz */
 }
 ```
-
-

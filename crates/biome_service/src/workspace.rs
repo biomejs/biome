@@ -608,6 +608,8 @@ pub struct FixFileParams {
     pub path: BiomePath,
     pub fix_file_mode: FixFileMode,
     pub should_format: bool,
+    pub only: Vec<RuleSelector>,
+    pub skip: Vec<RuleSelector>,
 }
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
@@ -1023,11 +1025,15 @@ impl<'app, W: Workspace + ?Sized> FileGuard<'app, W> {
         &self,
         fix_file_mode: FixFileMode,
         should_format: bool,
+        only: Vec<RuleSelector>,
+        skip: Vec<RuleSelector>,
     ) -> Result<FixFileResult, WorkspaceError> {
         self.workspace.fix_file(FixFileParams {
             path: self.path.clone(),
             fix_file_mode,
             should_format,
+            only,
+            skip,
         })
     }
 

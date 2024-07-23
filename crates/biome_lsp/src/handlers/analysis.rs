@@ -237,6 +237,8 @@ fn fix_all(
         path: biome_path,
         fix_file_mode: FixFileMode::SafeFixes,
         should_format,
+        only: vec![],
+        skip: vec![],
     })?;
 
     if fixed.actions.is_empty() {

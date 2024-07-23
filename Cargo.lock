@@ -340,7 +340,7 @@ dependencies = [
  "biome_json_parser",
  "biome_json_syntax",
  "biome_rowan",
- "bitflags 2.5.0",
+ "bitflags 2.6.0",
  "indexmap 2.2.6",
  "schemars",
  "serde",
@@ -370,7 +370,7 @@ dependencies = [
  "biome_rowan",
  "biome_text_edit",
  "biome_text_size",
- "bitflags 2.5.0",
+ "bitflags 2.6.0",
  "bpaf",
  "oxc_resolver",
  "schemars",
@@ -535,6 +535,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "biome_graphql_semantic"
+version = "0.0.0"
+dependencies = [
+ "biome_graphql_parser",
+ "biome_graphql_syntax",
+ "biome_rowan",
+ "rustc-hash",
+]
+
+[[package]]
 name = "biome_graphql_syntax"
 version = "0.1.0"
 dependencies = [
@@ -666,7 +676,7 @@ dependencies = [
  "biome_suppression",
  "biome_test_utils",
  "biome_unicode_table",
- "bitflags 2.5.0",
+ "bitflags 2.6.0",
  "bitvec",
  "enumflags2",
  "insta",
@@ -731,7 +741,7 @@ dependencies = [
  "biome_parser",
  "biome_rowan",
  "biome_unicode_table",
- "bitflags 2.5.0",
+ "bitflags 2.6.0",
  "drop_bomb",
  "expect-test",
  "indexmap 2.2.6",
@@ -925,7 +935,7 @@ dependencies = [
  "biome_diagnostics",
  "biome_rowan",
  "biome_unicode_table",
- "bitflags 2.5.0",
+ "bitflags 2.6.0",
  "drop_bomb",
  "unicode-bom",
 ]
@@ -1138,9 +1148,9 @@ checksum = "bef38d45163c2f1dde094a7dfd33ccf595c92905c8f8f4fdc18d06fb1037718a"
 
 [[package]]
 name = "bitflags"
-version = "2.5.0"
+version = "2.6.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "cf4b9d6a944f767f8e5e0db018570623c85f3d925ac718db4e06d0187adb21c1"
+checksum = "b048fb63fd8b5923fc5aa7b340d8e156aec7ec02f0c78fa8a6ddc2613f6f71de"
 
 [[package]]
 name = "bitmaps"
@@ -1930,7 +1940,7 @@ version = "0.19.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b903b73e45dc0c6c596f2d37eccece7c1c8bb6e4407b001096387c63d0d93724"
 dependencies = [
- "bitflags 2.5.0",
+ "bitflags 2.6.0",
  "libc",
  "libgit2-sys",
  "log",
@@ -1962,7 +1972,7 @@ version = "0.9.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "0bf760ebf69878d9fd8f110c89703d90ce35095324d1f1edcb595c63945ee757"
 dependencies = [
- "bitflags 2.5.0",
+ "bitflags 2.6.0",
  "ignore",
  "walkdir",
 ]
@@ -2229,9 +2239,9 @@ checksum = "9dbbfed4e59ba9750e15ba154fdfd9329cee16ff3df539c2666b70f58cc32105"
 
 [[package]]
 name = "lazy_static"
-version = "1.4.0"
+version = "1.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e2abad23fbc42b3700f2f279844dc832adb2b2eb069b2df918f455c4e18cc646"
+checksum = "bbd2bcb4c963f2ddae06a2efc7e9f3591312473c50c6685e1f298068316e66fe"
 
 [[package]]
 name = "libc"
@@ -2267,7 +2277,7 @@ version = "0.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "85c833ca1e66078851dba29046874e38f08b2c883700aa29a03ddd3b23814ee8"
 dependencies = [
- "bitflags 2.5.0",
+ "bitflags 2.6.0",
  "libc",
  "redox_syscall",
 ]
@@ -2745,7 +2755,7 @@ version = "0.10.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "76979bea66e7875e7509c4ec5300112b316af87fa7a252ca91c448b32dfe3993"
 dependencies = [
- "bitflags 2.5.0",
+ "bitflags 2.6.0",
  "getopts",
  "memchr",
  "pulldown-cmark-escape",
@@ -3455,6 +3465,7 @@ dependencies = [
 name = "tests_macros"
 version = "0.0.0"
 dependencies = [
+ "biome_string_case",
  "case",
  "globwalk",
  "proc-macro-error",
@@ -3571,9 +3582,9 @@ checksum = "1f3ccbac311fea05f86f61904b462b55fb3df8837a366dfc601a0161d0532f20"
 
 [[package]]
 name = "tokio"
-version = "1.38.0"
+version = "1.38.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ba4f4a02a7a80d6f274636f0aa95c7e383b912d41fe721a31f29e29698585a4a"
+checksum = "eb2caba9f80616f438e09748d5acda951967e1ea58508ef53d9c6402485a46df"
 dependencies = [
  "backtrace",
  "bytes",

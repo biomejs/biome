@@ -3,7 +3,7 @@ use crate::utils::{needs_binary_like_parentheses, AnyJsBinaryLikeExpression};
 
 use crate::parentheses::NeedsParentheses;
 
-use biome_js_syntax::{AnyJsStatement, JsForStatement, JsInExpression, JsSyntaxNode};
+use biome_js_syntax::{AnyJsStatement, JsInExpression, JsSyntaxNode};
 use biome_rowan::AstNode;
 
 #[derive(Debug, Clone, Default)]
@@ -31,29 +31,23 @@ impl NeedsParentheses for JsInExpression {
 
 /// Add parentheses if the `in` is inside of a `for` initializer (see tests).
 fn is_in_for_initializer(expression: &JsInExpression) -> bool {
-    let mut current = expression.clone().into_syntax();
-
-    while let Some(parent) = current.parent() {
-        current = match JsForStatement::try_cast(parent) {
-            Ok(for_statement) => {
-                return for_statement
-                    .initializer()
-                    .map(AstNode::into_syntax)
-                    .as_ref()
-                    == Some(&current);
-            }
-            Err(parent) => {
-                if AnyJsStatement::can_cast(parent.kind()) {
-                    // Don't cross statement boundaries
-                    break;
-                }
-
-                parent
-            }
-        }
+    let Some(statement) = expression
+        .syntax()
+        .ancestors()
+        .skip(1)
+        .find_map(AnyJsStatement::cast)
+    else {
+        return false;
+    };
+    match statement {
+        AnyJsStatement::JsForInStatement(for_in_statement) => for_in_statement
+            .initializer()
+            .is_ok_and(|initializer| initializer.range().contains(expression.range().start())),
+        AnyJsStatement::JsForStatement(for_statement) => for_statement
+            .initializer()
+            .is_some_and(|initializer| initializer.range().contains(expression.range().start())),
+        _ => false,
     }
-
-    false
 }
 
 #[cfg(test)]

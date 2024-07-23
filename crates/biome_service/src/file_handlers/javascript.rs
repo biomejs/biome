@@ -211,7 +211,7 @@ impl ServiceLanguage for JsLanguage {
                 .unwrap_or_default();
 
         let mut jsx_runtime = None;
-        let mut globals = vec![];
+        let mut globals = Vec::new();
 
         if let (Some(overrides), Some(global)) = (overrides, global) {
             jsx_runtime = Some(
@@ -411,7 +411,7 @@ pub(crate) fn lint(params: LintParams) -> LintResults {
             else {
                 return LintResults {
                     errors: 0,
-                    diagnostics: vec![],
+                    diagnostics: Vec::new(),
                     skipped_diagnostics: 0,
                 };
             };
@@ -430,33 +430,35 @@ pub(crate) fn lint(params: LintParams) -> LintResults {
             }
 
             let has_only_filter = !params.only.is_empty();
-            let enabled_rules = if has_only_filter {
+            let mut enabled_rules = if has_only_filter {
                 params
                     .only
                     .into_iter()
                     .map(|selector| selector.into())
                     .collect::<Vec<_>>()
             } else {
-                let mut rule_filter_list = rules
+                let mut enabled_rules = rules
                     .as_ref()
                     .map(|rules| rules.as_enabled_rules())
                     .unwrap_or_default()
                     .into_iter()
                     .collect::<Vec<_>>();
                 if organize_imports_enabled && !params.categories.is_syntax() {
-                    rule_filter_list.push(RuleFilter::Rule("correctness", "organizeImports"));
+                    enabled_rules.push(RuleFilter::Rule("correctness", "organizeImports"));
                 }
-                let mut syntax_visitor = SyntaxVisitor::default();
-                visit_registry(&mut syntax_visitor);
-                rule_filter_list.extend(syntax_visitor.enabled_rules);
-
-                rule_filter_list
+                enabled_rules
             };
+
+            let mut syntax_visitor = SyntaxVisitor::default();
+            visit_registry(&mut syntax_visitor);
+            enabled_rules.extend(syntax_visitor.enabled_rules);
+
             let disabled_rules = params
                 .skip
                 .into_iter()
                 .map(|selector| selector.into())
                 .collect::<Vec<_>>();
+
             let filter = AnalysisFilter {
                 categories: params.categories,
                 enabled_rules: Some(enabled_rules.as_slice()),
@@ -589,7 +591,7 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
                 workspace.analyzer_options::<JsLanguage>(params.path, &params.language);
             let rules = settings.as_rules(params.path);
             let mut actions = Vec::new();
-            let mut enabled_rules = vec![];
+            let mut enabled_rules = Vec::new();
             if settings.organize_imports.enabled {
                 enabled_rules.push(RuleFilter::Rule("correctness", "organizeImports"));
             }
@@ -621,7 +623,9 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
 
             let Some(source_type) = language.to_js_file_source() else {
                 error!("Could not determine the file source of the file");
-                return PullActionsResult { actions: vec![] };
+                return PullActionsResult {
+                    actions: Vec::new(),
+                };
             };
 
             trace!("Javascript runs the analyzer");
@@ -653,64 +657,68 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
 
 /// If applies all the safe fixes to the given syntax tree.
 pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceError> {
-    let FixAllParams {
-        parse,
-        // rules,
-        fix_file_mode,
-        should_format,
-        biome_path,
-        // mut filter,
-        manifest,
-        document_file_source,
-        workspace,
-    } = params;
-
-    let settings = workspace.settings();
-    let Some(settings) = settings else {
-        let tree: AnyJsRoot = parse.tree();
-
+    let mut tree: AnyJsRoot = params.parse.tree();
+    let Some(settings) = params.workspace.settings() else {
         return Ok(FixFileResult {
-            actions: vec![],
+            actions: Vec::new(),
             errors: 0,
             skipped_suggested_fixes: 0,
             code: tree.syntax().to_string(),
         });
     };
+
     // Compute final rules (taking `overrides` into account)
     let rules = settings.as_rules(params.biome_path.as_path());
-    let rule_filter_list = rules
-        .as_ref()
-        .map(|rules| rules.as_enabled_rules())
-        .unwrap_or_default()
-        .into_iter()
-        .collect::<Vec<_>>();
-    let mut filter = AnalysisFilter::from_enabled_rules(rule_filter_list.as_slice());
-
-    let Some(file_source) = document_file_source
-        .to_js_file_source()
-        .or(JsFileSource::try_from(biome_path.as_path()).ok())
-    else {
-        return Err(extension_error(biome_path));
+    let enabled_rules = if !params.only.is_empty() {
+        params
+            .only
+            .into_iter()
+            .map(|selector| selector.into())
+            .collect::<Vec<_>>()
+    } else {
+        rules
+            .as_ref()
+            .map(|rules| rules.as_enabled_rules())
+            .unwrap_or_default()
+            .into_iter()
+            .collect::<Vec<_>>()
     };
-    let mut tree: AnyJsRoot = parse.tree();
+    let disabled_rules = params
+        .skip
+        .into_iter()
+        .map(|selector| selector.into())
+        .collect::<Vec<_>>();
+    let filter = AnalysisFilter {
+        categories: RuleCategoriesBuilder::default()
+            .with_syntax()
+            .with_lint()
+            .build(),
+        enabled_rules: Some(enabled_rules.as_slice()),
+        disabled_rules: &disabled_rules,
+        range: None,
+    };
+
+    let Some(file_source) = params
+        .document_file_source
+        .to_js_file_source()
+        .or(JsFileSource::try_from(params.biome_path.as_path()).ok())
+    else {
+        return Err(extension_error(params.biome_path));
+    };
+
     let mut actions = Vec::new();
-
-    filter.categories = RuleCategoriesBuilder::default()
-        .with_syntax()
-        .with_lint()
-        .build();
-
     let mut skipped_suggested_fixes = 0;
     let mut errors: u16 = 0;
-    let analyzer_options =
-        workspace.analyzer_options::<JsLanguage>(biome_path, &document_file_source);
+    let analyzer_options = params
+        .workspace
+        .analyzer_options::<JsLanguage>(params.biome_path, &params.document_file_source);
     loop {
         let (action, _) = analyze(
             &tree,
             filter,
             &analyzer_options,
             file_source,
-            manifest.clone(),
+            params.manifest.clone(),
             |signal| {
                 let current_diagnostic = signal.diagnostic();
 
@@ -726,7 +734,7 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
                         continue;
                     }
 
-                    match fix_file_mode {
+                    match params.fix_file_mode {
                         FixFileMode::SafeFixes => {
                             if action.applicability == Applicability::MaybeIncorrect {
                                 skipped_suggested_fixes += 1;
@@ -778,9 +786,12 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
                 }
             }
             None => {
-                let code = if should_format {
+                let code = if params.should_format {
                     format_node(
-                        workspace.format_options::<JsLanguage>(biome_path, &document_file_source),
+                        params.workspace.format_options::<JsLanguage>(
+                            params.biome_path,
+                            &params.document_file_source,
+                        ),
                         tree.syntax(),
                     )?
                     .print()?

@@ -2,7 +2,6 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: typescript/intersection/consistent-with-flow/intersection-parens.ts
 ---
-
 # Input
 
 ```ts
@@ -142,5 +141,3 @@ type D4 = /*1*/ a & b;
 type D5 = /*1*/ a & b;
 type D6 /*0*/ = /*1*/ a & b;
 ```
-
-

@@ -45,9 +45,36 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 ### Formatter
 
+#### Enhancements
+
+- Add parentheses for nullcoalescing in ternaries.
+
+  This change aligns on [Prettier 3.3.3](https://github.com/prettier/prettier/blob/main/CHANGELOG.md#333).
+  This adds clarity to operator precedence.
+
+  ```diff
+  - foo ? bar ?? foo : baz;
+  + foo ? (bar ?? foo) : baz;
+  ```
+
+  Contributed by @Conaclos
+
 #### Bug fixes
 
 - Keep the parentheses around `infer` declarations in type unions and type intersections ([#3419](https://github.com/biomejs/biome/issues/3419)). Contributed by @Conaclos
+
+- Keep parentheses around a `yield` expression inside a type assertion.
+
+  Previously, Biome removed parentheses around some expressions that require them inside a type assertion.
+  For example, in the following code, Biome now preserves the parentheses.
+
+  ```ts
+  function* f() {
+    return <T>(yield 0);
+  }
+  ```
+
+  Contributed by @Conaclos
 
 ### JavaScript APIs
 
@@ -99,6 +126,14 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
   This change also fixes [#3353](https://github.com/biomejs/biome/issues/3353).
   Filenames consisting only of numbers are now accepted.
+
+  Contributed by @Conaclos
+
+- [useFilenamingConvention](https://biomejs.dev/linter/rules/use-filenaming-convention) now supports Next.js/Nuxt/Astro dynamic routes ([#3465](https://github.com/biomejs/biome/issues/3465)).
+
+  [Next.js](https://nextjs.org/docs/pages/building-your-application/routing/dynamic-routes#catch-all-segments), [SolidStart](https://docs.solidjs.com/solid-start/building-your-application/routing#renaming-index), [Nuxt](https://nuxt.com/docs/guide/directory-structure/server#catch-all-route), and [Astro](https://docs.astro.build/en/guides/routing/#rest-parameters) support dynamic routes such as `[...slug].js` and `[[...slug]].js`.
+
+  Biome now recognizes this syntax. `slug` must contain only alphanumeric characters.
 
   Contributed by @Conaclos
 

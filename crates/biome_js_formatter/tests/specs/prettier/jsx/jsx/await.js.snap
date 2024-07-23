@@ -2,7 +2,6 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: jsx/jsx/await.js
 ---
-
 # Input
 
 ```js
@@ -152,5 +151,3 @@ async function testFunction() {
    30:         hierarchyCriticismIncongruousCooperateMaterialEducationOriginalArticulateParameter,
    37:         hierarchyCriticismIncongruousCooperateMaterialEducationOriginalArticulateParameter
 ```
-
-

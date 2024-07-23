@@ -2,7 +2,6 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: typescript/assignment/issue-5370.ts
 ---
-
 # Input
 
 ```ts
@@ -56,5 +55,3 @@ issue-5370.ts:3:1 parse ━━━━━━━━━━━━━━━━━━�
   
 
 ```
-
-

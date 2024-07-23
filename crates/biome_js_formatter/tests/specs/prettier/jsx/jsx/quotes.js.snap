@@ -2,7 +2,6 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: jsx/jsx/quotes.js
 ---
-
 # Input
 
 ```js
@@ -130,5 +129,3 @@ info: jsx/jsx/quotes.js
   repeatedly please report this issue to the GitHub 12312312312312313{"  "}{" "}
 </p>;
 ```
-
-
