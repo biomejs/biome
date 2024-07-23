@@ -14,8 +14,8 @@ pub(crate) enum StringLiteralParentKind {
     Expression,
     /// Variant to track tokens that are inside a member
     Member,
-    /// Variant to track tokens that are inside an assert
-    Assert,
+    /// Variant to track tokens that are inside an import attribute
+    ImportAttribute,
     /// Variant used when the string literal is inside a directive. This will apply
     /// a simplified logic of normalisation
     Directive,
@@ -221,7 +221,7 @@ impl<'token> LiteralStringNormaliser<'token> {
                 self.normalise_string_literal(string_information)
             }
             StringLiteralParentKind::Directive => self.normalise_directive(&string_information),
-            StringLiteralParentKind::Assert => self.normalise_assert(string_information),
+            StringLiteralParentKind::ImportAttribute => self.normalise_import_attribute(string_information),
             StringLiteralParentKind::Member => {
                 self.normalise_type_member(string_information, file_source)
             }
@@ -232,14 +232,14 @@ impl<'token> LiteralStringNormaliser<'token> {
         self.token.token()
     }
 
-    fn normalise_assert(&mut self, string_information: StringInformation) -> Cow<'token, str> {
-        if self.can_remove_assert_quotes() {
+    fn normalise_import_attribute(&mut self, string_information: StringInformation) -> Cow<'token, str> {
+        if self.can_remove_import_attribute_quotes() {
             return Cow::Owned(self.raw_content().to_string());
         }
 
         self.normalise_string_literal(string_information)
     }
-    fn can_remove_assert_quotes(&self) -> bool {
+    fn can_remove_import_attribute_quotes(&self) -> bool {
         !self.is_preserve_quote_properties() && self.is_js_ident()
     }
 
