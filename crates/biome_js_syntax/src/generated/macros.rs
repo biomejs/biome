@@ -295,6 +295,10 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::JsGetterObjectMember::new_unchecked(node) };
                     $body
                 }
+                $crate::JsSyntaxKind::JS_GRIT_METAVARIABLE => {
+                    let $pattern = unsafe { $crate::JsGritMetavariable::new_unchecked(node) };
+                    $body
+                }
                 $crate::JsSyntaxKind::JS_IDENTIFIER_ASSIGNMENT => {
                     let $pattern = unsafe { $crate::JsIdentifierAssignment::new_unchecked(node) };
                     $body

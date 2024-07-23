@@ -369,7 +369,7 @@ pub fn generate_type<'a>(
             let current_module = AnyJsDeclaration::from(
                 make::ts_interface_declaration(
                     make::token(T![interface]),
-                    make::ts_identifier_binding(make::ident(name)),
+                    make::ts_identifier_binding(make::ident(name)).into(),
                     make::token(T!['{']),
                     make::ts_type_member_list(members),
                     make::token(T!['}']),
@@ -386,7 +386,7 @@ pub fn generate_type<'a>(
             let current_module = AnyJsDeclaration::from(
                 make::ts_type_alias_declaration(
                     make::token(T![type]),
-                    make::ts_identifier_binding(make::ident(name)),
+                    make::ts_identifier_binding(make::ident(name)).into(),
                     make::token(T![=]),
                     ts_type,
                 )

@@ -1,3 +1,4 @@
+use super::metavariable::{is_at_metavariable, is_nth_at_metavariable, parse_metavariable};
 use crate::prelude::*;
 use crate::span::Span;
 use crate::syntax::class::parse_initializer_clause;
@@ -31,7 +32,7 @@ pub(crate) fn is_at_identifier_binding(p: &mut JsParser) -> bool {
 
 #[inline]
 pub(crate) fn is_nth_at_identifier_binding(p: &mut JsParser, n: usize) -> bool {
-    is_nth_at_identifier(p, n)
+    is_nth_at_identifier(p, n) || is_nth_at_metavariable(p, n)
 }
 
 #[inline]
@@ -61,6 +62,10 @@ pub(crate) fn parse_binding(p: &mut JsParser) -> ParsedSyntax {
 /// * it is named "yield" inside of a generator function or in strict mode
 /// * it is named "await" inside of an async function
 pub(crate) fn parse_identifier_binding(p: &mut JsParser) -> ParsedSyntax {
+    if is_at_metavariable(p) {
+        return parse_metavariable(p);
+    }
+
     let parsed = parse_identifier(p, JS_IDENTIFIER_BINDING);
 
     parsed.map(|mut identifier| {
@@ -263,13 +268,18 @@ impl ParseObjectPattern for ObjectBindingPattern {
     // let { = "test" } = c
     // let { , d } = c
     fn parse_property_pattern(&self, p: &mut JsParser) -> ParsedSyntax {
-        if !is_at_object_member_name(p) && !p.at_ts(token_set![T![:], T![=]]) {
+        if !is_at_object_member_name(p)
+            && !is_at_metavariable(p)
+            && !p.at_ts(token_set![T![:], T![=]])
+        {
             return Absent;
         }
 
         let m = p.start();
 
-        let kind = if p.at(T![=]) || (is_at_identifier_binding(p) && !p.nth_at(1, T![:])) {
+        let kind = if p.at(T![=])
+            || ((is_at_identifier_binding(p) || is_at_metavariable(p)) && !p.nth_at(1, T![:]))
+        {
             parse_binding(p).or_add_diagnostic(p, expected_identifier);
             JS_OBJECT_BINDING_PATTERN_SHORTHAND_PROPERTY
         } else {

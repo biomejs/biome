@@ -326,7 +326,7 @@ impl<'src> CssLexer<'src> {
             UNI if self.options.is_grit_metavariable_enabled()
                 && self.is_grit_metavariable_start() =>
             {
-                self.consume_grit_metavariable()
+                self.consume_grit_metavariable(GRIT_METAVARIABLE)
             }
             IDT | UNI | BSL if self.is_ident_start() => self.consume_identifier(),
 
@@ -1319,58 +1319,6 @@ impl<'src> CssLexer<'src> {
 
             _ => false,
         }
-    }
-
-    /// Check if the lexer starts a grit metavariable
-    fn is_grit_metavariable_start(&mut self) -> bool {
-        let current_char = self.current_char_unchecked();
-        if current_char == 'μ' {
-            let current_char_length = current_char.len_utf8();
-            // μ[a-zA-Z_][a-zA-Z0-9_]*
-            if matches!(
-                self.byte_at(current_char_length),
-                Some(b'a'..=b'z' | b'A'..=b'Z' | b'_')
-            ) {
-                return true;
-            }
-
-            // μ...
-            if self.byte_at(current_char_length) == Some(b'.')
-                && self.byte_at(current_char_length + 1) == Some(b'.')
-                && self.byte_at(current_char_length + 2) == Some(b'.')
-            {
-                return true;
-            }
-        }
-        false
-    }
-
-    /// Consume a grit metavariable(μ[a-zA-Z_][a-zA-Z0-9_]*|μ...)
-    /// https://github.com/getgrit/gritql/blob/8f3f077d078ccaf0618510bba904a06309c2435e/resources/language-metavariables/tree-sitter-css/grammar.js#L388
-    fn consume_grit_metavariable(&mut self) -> CssSyntaxKind {
-        debug_assert!(self.is_grit_metavariable_start());
-
-        // SAFETY: We know the current character is μ.
-        let current_char = self.current_char_unchecked();
-        self.advance(current_char.len_utf8());
-
-        if self.current_byte() == Some(b'.') {
-            // SAFETY: We know that the current token is μ...
-            self.advance(3);
-        } else {
-            // μ[a-zA-Z_][a-zA-Z0-9_]*
-            self.advance(1);
-            while let Some(chr) = self.current_byte() {
-                match chr {
-                    b'a'..=b'z' | b'A'..=b'Z' | b'0'..=b'9' | b'_' => {
-                        self.advance(1);
-                    }
-                    _ => break,
-                }
-            }
-        }
-
-        GRIT_METAVARIABLE
     }
 }
 

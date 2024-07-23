@@ -178,6 +178,7 @@ pub const JS_KINDS_SRC: KindsSrc = KindsSrc {
         "COMMENT",
         "MULTILINE_COMMENT",
         "JS_SHEBANG",
+        "GRIT_METAVARIABLE",
     ],
     nodes: &[
         "JS_MODULE",

@@ -309,6 +309,7 @@ fn parse(
     cache: &mut NodeCache,
 ) -> ParseResult {
     let mut options = JsParserOptions {
+        grit_metavariables: false,
         parse_class_parameter_decorators: settings
             .map(|settings| {
                 settings

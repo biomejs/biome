@@ -9,6 +9,7 @@ impl FormatRule<AnyJsObjectMemberName> for FormatAnyJsObjectMemberName {
     fn fmt(&self, node: &AnyJsObjectMemberName, f: &mut JsFormatter) -> FormatResult<()> {
         match node {
             AnyJsObjectMemberName::JsComputedMemberName(node) => node.format().fmt(f),
+            AnyJsObjectMemberName::JsGritMetavariable(node) => node.format().fmt(f),
             AnyJsObjectMemberName::JsLiteralMemberName(node) => node.format().fmt(f),
         }
     }

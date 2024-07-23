@@ -153,8 +153,9 @@ impl Rule for NoStaticOnlyClass {
             .members()
             .iter()
             .filter_map(|member| match member {
-                AnyJsClassMember::JsBogusMember(_) => None,
-                AnyJsClassMember::JsEmptyClassMember(_) => None,
+                AnyJsClassMember::JsBogusMember(_)
+                | AnyJsClassMember::JsGritMetavariable(_)
+                | AnyJsClassMember::JsEmptyClassMember(_) => None,
                 AnyJsClassMember::JsConstructorClassMember(_) => Some(false), // See GH#4482: Constructors are not regarded as static
                 AnyJsClassMember::TsConstructorSignatureClassMember(_) => Some(false), // See GH#4482: Constructors are not regarded as static
                 AnyJsClassMember::JsGetterClassMember(m) => Some(m.has_static_modifier()),

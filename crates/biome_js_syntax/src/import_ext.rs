@@ -1,10 +1,13 @@
 use crate::{
-    inner_string_text, AnyJsBinding, AnyJsImportClause, AnyJsNamedImportSpecifier,
-    JsCallExpression, JsDefaultImportSpecifier, JsImport, JsImportAssertion,
-    JsImportCallExpression, JsModuleSource, JsNamedImportSpecifier, JsNamespaceImportSpecifier,
-    JsShorthandNamedImportSpecifier, JsSyntaxToken, TsExternalModuleDeclaration,
+    inner_string_text, AnyJsBinding, AnyJsImportClause, AnyJsModuleSource,
+    AnyJsNamedImportSpecifier, JsCallExpression, JsDefaultImportSpecifier, JsImport,
+    JsImportAssertion, JsImportCallExpression, JsModuleSource, JsNamedImportSpecifier,
+    JsNamespaceImportSpecifier, JsShorthandNamedImportSpecifier, JsSyntaxToken,
+    TsExternalModuleDeclaration,
 };
-use biome_rowan::{declare_node_union, AstNode, SyntaxNodeOptionExt, SyntaxResult, TokenText};
+use biome_rowan::{
+    declare_node_union, AstNode, SyntaxError, SyntaxNodeOptionExt, SyntaxResult, TokenText,
+};
 
 impl JsImport {
     /// It checks if the source of an import against the string `source_to_check`
@@ -59,13 +62,18 @@ impl AnyJsImportClause {
     /// assert_eq!(clause.source().unwrap().inner_string_text().unwrap().text(), "react");
     /// ```
     pub fn source(&self) -> SyntaxResult<JsModuleSource> {
-        match self {
+        let source = match self {
             Self::JsImportBareClause(clause) => clause.source(),
             Self::JsImportDefaultClause(clause) => clause.source(),
             Self::JsImportNamedClause(clause) => clause.source(),
             Self::JsImportNamespaceClause(clause) => clause.source(),
             Self::JsImportCombinedClause(clause) => clause.source(),
-        }
+        };
+
+        source.and_then(|source| match source {
+            AnyJsModuleSource::JsModuleSource(source) => Ok(source),
+            AnyJsModuleSource::JsGritMetavariable(_) => Err(SyntaxError::UnexpectedMetavariable),
+        })
     }
 
     /// Assertion of this import clause.

@@ -11,6 +11,7 @@ pub(crate) mod else_clause;
 pub(crate) mod expression_snipped;
 pub(crate) mod finally_clause;
 pub(crate) mod function_body;
+pub(crate) mod grit_metavariable;
 pub(crate) mod initializer_clause;
 pub(crate) mod label;
 pub(crate) mod module;

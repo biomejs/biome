@@ -9,6 +9,7 @@ impl FormatRule<AnyJsBinding> for FormatAnyJsBinding {
     fn fmt(&self, node: &AnyJsBinding, f: &mut JsFormatter) -> FormatResult<()> {
         match node {
             AnyJsBinding::JsBogusBinding(node) => node.format().fmt(f),
+            AnyJsBinding::JsGritMetavariable(node) => node.format().fmt(f),
             AnyJsBinding::JsIdentifierBinding(node) => node.format().fmt(f),
         }
     }

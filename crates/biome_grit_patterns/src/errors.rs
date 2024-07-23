@@ -15,6 +15,9 @@ pub enum CompileError {
     /// Used for missing syntax nodes.
     MissingSyntaxNode,
 
+    /// A metavariables was discovered in an unexpected context.
+    UnexpectedMetavariable,
+
     /// If a function or bubble pattern has multiple parameters with the same name.
     DuplicateParameters,
 
@@ -73,6 +76,9 @@ impl Diagnostic for CompileError {
             }
             CompileError::MissingSyntaxNode => {
                 fmt.write_markup(markup! { "A syntax node was missing" })
+            }
+            CompileError::UnexpectedMetavariable => {
+                fmt.write_markup(markup! { "Unexpected metavariable" })
             }
             CompileError::DuplicateParameters => {
                 fmt.write_markup(markup! { "Duplicate parameters" })
@@ -151,6 +157,7 @@ impl From<SyntaxError> for CompileError {
     fn from(error: SyntaxError) -> Self {
         match error {
             SyntaxError::MissingRequiredChild => Self::MissingSyntaxNode,
+            SyntaxError::UnexpectedMetavariable => Self::UnexpectedMetavariable,
         }
     }
 }

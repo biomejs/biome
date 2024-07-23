@@ -315,7 +315,7 @@ fn with_object_binding_pat_identifiers(
                 P::JsObjectBindingPatternShorthandProperty(p) => p
                     .identifier()
                     .map_or(false, |it| with_binding_identifier(it, f)),
-                P::JsBogusBinding(_) => false,
+                P::JsBogusBinding(_) | P::JsGritMetavariable(_) => false,
             }
         })
 }
@@ -344,7 +344,7 @@ fn with_binding_identifier(
 ) -> bool {
     match binding {
         AnyJsBinding::JsIdentifierBinding(id) => f(id),
-        AnyJsBinding::JsBogusBinding(_) => false,
+        AnyJsBinding::JsBogusBinding(_) | AnyJsBinding::JsGritMetavariable(_) => false,
     }
 }
 
