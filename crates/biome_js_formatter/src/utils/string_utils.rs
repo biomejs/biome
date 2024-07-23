@@ -14,6 +14,8 @@ pub(crate) enum StringLiteralParentKind {
     Expression,
     /// Variant to track tokens that are inside a member
     Member,
+    /// Variant to track tokens that are inside an import attribute
+    ImportAttribute,
     /// Variant used when the string literal is inside a directive. This will apply
     /// a simplified logic of normalisation
     Directive,
@@ -219,6 +221,9 @@ impl<'token> LiteralStringNormaliser<'token> {
                 self.normalise_string_literal(string_information)
             }
             StringLiteralParentKind::Directive => self.normalise_directive(&string_information),
+            StringLiteralParentKind::ImportAttribute => {
+                self.normalise_import_attribute(string_information)
+            }
             StringLiteralParentKind::Member => {
                 self.normalise_type_member(string_information, file_source)
             }
@@ -227,6 +232,20 @@ impl<'token> LiteralStringNormaliser<'token> {
 
     fn get_token(&self) -> &'token JsSyntaxToken {
         self.token.token()
+    }
+
+    fn normalise_import_attribute(
+        &mut self,
+        string_information: StringInformation,
+    ) -> Cow<'token, str> {
+        if self.can_remove_import_attribute_quotes() {
+            return Cow::Owned(self.raw_content().to_string());
+        }
+
+        self.normalise_string_literal(string_information)
+    }
+    fn can_remove_import_attribute_quotes(&self) -> bool {
+        !self.is_preserve_quote_properties() && self.is_js_ident()
     }
 
     fn normalise_directive(&mut self, string_information: &StringInformation) -> Cow<'token, str> {
@@ -240,12 +259,11 @@ impl<'token> LiteralStringNormaliser<'token> {
         }
     }
 
-    /// We can change the text only if there are alphanumeric or alphabetic characters, depending on the file source
-    fn can_remove_quotes(&self, file_source: SourceFileKind) -> bool {
-        if self.chosen_quote_properties == QuoteProperties::Preserve {
-            return false;
-        }
+    fn is_preserve_quote_properties(&self) -> bool {
+        self.chosen_quote_properties == QuoteProperties::Preserve
+    }
 
+    fn can_remove_number_quotes_by_file_type(&self, file_source: SourceFileKind) -> bool {
         let text_to_check = self.raw_content();
 
         if text_to_check
@@ -266,8 +284,23 @@ impl<'token> LiteralStringNormaliser<'token> {
 
             return false;
         }
+        false
+    }
 
+    fn is_js_ident(&self) -> bool {
+        let text_to_check = self.raw_content();
         is_js_ident(text_to_check)
+    }
+
+    /// We can change the text only if there are alphanumeric or alphabetic characters, depending on the file source
+    fn can_remove_quotes(&self, file_source: SourceFileKind) -> bool {
+        if self.is_preserve_quote_properties() {
+            return false;
+        }
+        if self.can_remove_number_quotes_by_file_type(file_source) {
+            return true;
+        }
+        self.is_js_ident()
     }
 
     fn normalise_type_member(
