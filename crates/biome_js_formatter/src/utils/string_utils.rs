@@ -221,7 +221,9 @@ impl<'token> LiteralStringNormaliser<'token> {
                 self.normalise_string_literal(string_information)
             }
             StringLiteralParentKind::Directive => self.normalise_directive(&string_information),
-            StringLiteralParentKind::ImportAttribute => self.normalise_import_attribute(string_information),
+            StringLiteralParentKind::ImportAttribute => {
+                self.normalise_import_attribute(string_information)
+            }
             StringLiteralParentKind::Member => {
                 self.normalise_type_member(string_information, file_source)
             }
@@ -232,7 +234,10 @@ impl<'token> LiteralStringNormaliser<'token> {
         self.token.token()
     }
 
-    fn normalise_import_attribute(&mut self, string_information: StringInformation) -> Cow<'token, str> {
+    fn normalise_import_attribute(
+        &mut self,
+        string_information: StringInformation,
+    ) -> Cow<'token, str> {
         if self.can_remove_import_attribute_quotes() {
             return Cow::Owned(self.raw_content().to_string());
         }
