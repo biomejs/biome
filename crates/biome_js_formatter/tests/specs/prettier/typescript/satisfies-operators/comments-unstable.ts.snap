@@ -2,7 +2,6 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: typescript/satisfies-operators/comments-unstable.ts
 ---
-
 # Input
 
 ```ts
@@ -43,5 +42,3 @@ const t1 = {
   // Comment
   Record<string, number>;
 ```
-
-

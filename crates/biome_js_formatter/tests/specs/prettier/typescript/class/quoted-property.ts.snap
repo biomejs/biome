@@ -2,7 +2,6 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: typescript/class/quoted-property.ts
 ---
-
 # Input
 
 ```ts
@@ -32,5 +31,3 @@ class User {
   username: string;
 }
 ```
-
-

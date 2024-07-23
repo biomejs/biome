@@ -2,7 +2,6 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: typescript/class/constructor.ts
 ---
-
 # Input
 
 ```ts
@@ -115,5 +114,3 @@ constructor.ts:15:14 parse ━━━━━━━━━━━━━━━━━�
   
 
 ```
-
-

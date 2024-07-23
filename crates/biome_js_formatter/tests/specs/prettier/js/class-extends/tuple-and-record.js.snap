@@ -2,7 +2,6 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: js/class-extends/tuple-and-record.js
 ---
-
 # Input
 
 ```js
@@ -201,5 +200,3 @@ tuple-and-record.js:5:21 parse ━━━━━━━━━━━━━━━━�
   
 
 ```
-
-

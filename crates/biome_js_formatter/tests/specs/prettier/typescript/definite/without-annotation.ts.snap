@@ -2,7 +2,6 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: typescript/definite/without-annotation.ts
 ---
-
 # Input
 
 ```ts
@@ -177,5 +176,3 @@ without-annotation.ts:12:17 parse ━━━━━━━━━━━━━━━�
   
 
 ```
-
-

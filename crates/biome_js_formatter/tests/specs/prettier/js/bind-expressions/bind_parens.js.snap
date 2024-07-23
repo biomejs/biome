@@ -2,7 +2,6 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: js/bind-expressions/bind_parens.js
 ---
-
 # Input
 
 ```js
@@ -963,5 +962,3 @@ bind_parens.js:34:4 parse ━━━━━━━━━━━━━━━━━━
   
 
 ```
-
-

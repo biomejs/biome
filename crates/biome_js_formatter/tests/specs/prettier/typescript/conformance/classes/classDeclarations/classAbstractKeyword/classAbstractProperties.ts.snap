@@ -2,7 +2,6 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: typescript/conformance/classes/classDeclarations/classAbstractKeyword/classAbstractProperties.ts
 ---
-
 # Input
 
 ```ts
@@ -121,5 +120,3 @@ classAbstractProperties.ts:12:5 parse ━━━━━━━━━━━━━━
   
 
 ```
-
-

@@ -2,7 +2,6 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: typescript/import-export/type-modifier.ts
 ---
-
 # Input
 
 ```ts
@@ -72,5 +71,3 @@ type-modifier.ts:15:8 parse ━━━━━━━━━━━━━━━━━�
   
 
 ```
-
-

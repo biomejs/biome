@@ -2,7 +2,6 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: js/pipeline-operator/hack_pipeline_operator.js
 ---
-
 # Input
 
 ```js
@@ -1398,5 +1397,3 @@ hack_pipeline_operator.js:44:16 parse ━━━━━━━━━━━━━━
   
 
 ```
-
-
