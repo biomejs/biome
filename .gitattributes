@@ -33,3 +33,4 @@ pnpm-lock.yaml linguist-generated=true text=auto eol=lf
 /crates/biome_js_formatter/tests/**/*.js.prettier-snap linguist-language=JavaScript
 /crates/biome_js_formatter/tests/**/*.ts.snap linguist-language=Markdown
 /crates/biome_js_formatter/tests/**/*.js.snap linguist-language=Markdown
+Dockerfile.benchmark linguist-language=Dockerfile
