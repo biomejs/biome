@@ -184,40 +184,6 @@ pub trait AstNode: Clone {
         }
     }
 
-    /// Tries to cast the AST `node` into this node.
-    ///
-    /// # Returns
-    /// * [Ok] if the passed node can be cast into this [AstNode]
-    /// * [Err] if the node is of another kind
-    /// ```
-    /// # use biome_rowan::AstNode;
-    /// # use biome_rowan::raw_language::{LiteralExpression, RawLanguageKind, RawLanguageRoot, RawSyntaxTreeBuilder};
-    ///
-    /// let mut builder = RawSyntaxTreeBuilder::new();
-    ///
-    /// builder.start_node(RawLanguageKind::ROOT);
-    /// builder.start_node(RawLanguageKind::LITERAL_EXPRESSION);
-    /// builder.token(RawLanguageKind::STRING_TOKEN, "'abcd'");
-    /// builder.finish_node();
-    /// builder.finish_node();
-    ///
-    /// let root_syntax = builder.finish();
-    /// let root = RawLanguageRoot::cast_ref(&root_syntax).expect("Root to be a raw language root");
-    ///
-    /// // Returns `OK` because syntax is a `RawLanguageRoot`
-    /// assert_eq!(RawLanguageRoot::try_cast_node(root.clone()), Ok(root.clone()));
-    ///
-    /// // Returns `Err` with the node passed to `try_cast_node` because `root` isn't a `LiteralExpression`
-    /// assert_eq!(LiteralExpression::try_cast_node(root.clone()), Err(root.clone()));
-    /// ```
-    fn try_cast_node<T: AstNode<Language = Self::Language>>(node: T) -> Result<Self, T> {
-        if Self::can_cast(node.syntax().kind()) {
-            Ok(Self::unwrap_cast(node.into_syntax()))
-        } else {
-            Err(node)
-        }
-    }
-
     /// Returns the underlying syntax node.
     fn syntax(&self) -> &SyntaxNode<Self::Language>;
 
