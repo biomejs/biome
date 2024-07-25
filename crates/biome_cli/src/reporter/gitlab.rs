@@ -1,10 +1,12 @@
 use crate::{DiagnosticsPayload, Execution, Reporter, ReporterVisitor, TraversalSummary};
+use biome_console::fmt::{Display, Formatter};
 use biome_console::{markup, Console, ConsoleExt};
 use biome_diagnostics::{
     display_gitlab::{GitLabDiagnostic, PrintGitLabDiagnostic},
     Error, Resource,
 };
 use path_absolutize::Absolutize;
+use std::sync::RwLock;
 use std::{
     collections::HashSet,
     hash::{DefaultHasher, Hash, Hasher},
@@ -25,11 +27,26 @@ impl Reporter for GitLabReporter {
 
 pub(crate) struct GitLabReporterVisitor<'a> {
     console: &'a mut dyn Console,
-
     repository_root: Option<PathBuf>,
+}
 
-    /// A set of fingerprints (unique identifiers) to prevent collisions.
-    fingerprints: HashSet<u64>,
+#[derive(Default)]
+struct GitlabHasher(HashSet<u64>);
+
+impl GitlabHasher {
+    /// Enforces uniqueness of generated fingerprints in the context of a
+    /// single report.
+    fn rehash_until_unique(&mut self, fingerprint: u64) -> u64 {
+        let mut current = fingerprint;
+        while self.0.contains(&current) {
+            let mut hasher = DefaultHasher::new();
+            current.hash(&mut hasher);
+            current = hasher.finish();
+        }
+
+        self.0.insert(current);
+        current
+    }
 }
 
 impl<'a> GitLabReporterVisitor<'a> {
@@ -37,26 +54,36 @@ impl<'a> GitLabReporterVisitor<'a> {
         Self {
             console,
             repository_root,
-            fingerprints: HashSet::new(),
         }
     }
+}
 
-    /// Enforces uniqueness of generated fingerprints in the context of a
-    /// single report.
-    fn rehash_until_unique(&mut self, fingerprint: u64) -> u64 {
-        let mut current = fingerprint;
-        while self.fingerprints.contains(&current) {
-            let mut hasher = DefaultHasher::new();
-            current.hash(&mut hasher);
-            current = hasher.finish();
-        }
-
-        self.fingerprints.insert(current);
-        current
+impl<'a> ReporterVisitor for GitLabReporterVisitor<'a> {
+    fn report_summary(&mut self, _: &Execution, _: TraversalSummary) -> std::io::Result<()> {
+        Ok(())
     }
 
+    fn report_diagnostics(
+        &mut self,
+        _execution: &Execution,
+        payload: DiagnosticsPayload,
+    ) -> std::io::Result<()> {
+        let hasher = RwLock::default();
+        let diagnostics = GitlabDiagnostics(payload, &hasher, self.repository_root.as_deref());
+        self.console.log(markup!({ diagnostics }));
+        Ok(())
+    }
+}
+
+struct GitlabDiagnostics<'a>(
+    DiagnosticsPayload,
+    &'a RwLock<GitlabHasher>,
+    Option<&'a Path>,
+);
+
+impl<'a> GitlabDiagnostics<'a> {
     fn attempt_to_relativize(&self, subject: &str) -> Option<PathBuf> {
-        let Some(base) = &self.repository_root else {
+        let Some(base) = self.2 else {
             return None;
         };
 
@@ -94,25 +121,31 @@ impl<'a> GitLabReporterVisitor<'a> {
     }
 }
 
-impl<'a> ReporterVisitor for GitLabReporterVisitor<'a> {
-    fn report_summary(&mut self, _: &Execution, _: TraversalSummary) -> std::io::Result<()> {
-        Ok(())
-    }
+impl<'a> Display for GitlabDiagnostics<'a> {
+    fn fmt(&self, fmt: &mut Formatter) -> std::io::Result<()> {
+        fmt.write_str("[")?;
 
-    fn report_diagnostics(
-        &mut self,
-        _execution: &Execution,
-        payload: DiagnosticsPayload,
-    ) -> std::io::Result<()> {
-        self.console.log(markup!("["));
+        let mut hasher = self.1.write().unwrap();
 
-        let total_diagnostics = payload.diagnostics.len();
-        for (index, biome_diagnostic) in payload.diagnostics.into_iter().enumerate() {
-            if biome_diagnostic.severity() >= payload.diagnostic_level {
-                if biome_diagnostic.tags().is_verbose() && !payload.verbose {
-                    continue;
+        let mut iter = self
+            .0
+            .diagnostics
+            .iter()
+            .filter(|d| d.severity() >= self.0.diagnostic_level)
+            .filter(|d| {
+                if self.0.verbose {
+                    if d.tags().is_verbose() {
+                        true
+                    } else {
+                        false
+                    }
+                } else {
+                    true
                 }
-
+            })
+            .peekable();
+        while let Some(biome_diagnostic) = iter.next() {
+            if biome_diagnostic.severity() >= self.0.diagnostic_level {
                 let absolute_path = match biome_diagnostic.location().resource {
                     Some(Resource::File(file)) => Some(file),
                     _ => None,
@@ -126,23 +159,26 @@ impl<'a> ReporterVisitor for GitLabReporterVisitor<'a> {
 
                 let initial_fingerprint =
                     self.compute_initial_fingerprint(&biome_diagnostic, &path);
-                let fingerprint = self.rehash_until_unique(initial_fingerprint);
+                let fingerprint = hasher.rehash_until_unique(initial_fingerprint);
 
                 let Some(gitlab_diagnostic) =
-                    GitLabDiagnostic::try_from_diagnostic(&biome_diagnostic, &path, fingerprint)
+                    GitLabDiagnostic::try_from_diagnostic(biome_diagnostic, &path, fingerprint)
                 else {
                     continue;
                 };
 
-                self.console.log(markup!({
+                fmt.write_markup(markup!({
                     PrintGitLabDiagnostic {
                         gitlab_diagnostic: &gitlab_diagnostic,
-                        is_last: index >= total_diagnostics - 1,
                     }
-                }));
+                }))?;
+
+                if !iter.peek().is_none() {
+                    fmt.write_str(",")?;
+                }
             }
         }
-        self.console.log(markup!("]"));
+        fmt.write_str("]")?;
         Ok(())
     }
 }

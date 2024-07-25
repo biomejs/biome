@@ -9,17 +9,11 @@ use std::io;
 /// implementing [biome_console::fmt::Write].
 pub struct PrintGitLabDiagnostic<'fmt> {
     pub gitlab_diagnostic: &'fmt GitLabDiagnostic<'fmt>,
-
-    /// Whether this is the last diagnostic to report in the run.
-    pub is_last: bool,
 }
 
 impl fmt::Display for PrintGitLabDiagnostic<'_> {
     fn fmt(&self, fmt: &mut fmt::Formatter<'_>) -> io::Result<()> {
-        let mut serialized = serde_json::to_string(self.gitlab_diagnostic)?;
-        if !self.is_last {
-            serialized.push(',')
-        }
+        let serialized = serde_json::to_string_pretty(self.gitlab_diagnostic)?;
         fmt.write_str(serialized.as_str())?;
 
         Ok(())
