@@ -346,7 +346,7 @@ pub(crate) fn get_expression_left_side(
                     })
                 }
                 expression => {
-                    return AnyJsBinaryLikeExpression::cast(expression.syntax().clone()).and_then(
+                    return AnyJsBinaryLikeExpression::cast_ref(expression.syntax()).and_then(
                         |binary_like| match binary_like.left().ok() {
                             Some(AnyJsBinaryLikeLeftExpression::AnyJsExpression(expression)) => {
                                 Some(AnyJsExpressionLeftSide::from(expression))

@@ -115,17 +115,19 @@ fn enclosing_function_if_call_is_at_top_level(
     let mut prev_node = None;
 
     for node in call.syntax().ancestors() {
-        if let Some(enclosing_function) = AnyJsFunctionOrMethod::cast_ref(&node) {
-            return Some(enclosing_function);
-        }
-
-        if let Some(prev_node) = prev_node {
-            if is_conditional_expression(&node, &prev_node) {
-                return None;
+        match AnyJsFunctionOrMethod::try_cast(node) {
+            Ok(enclosing_function) => {
+                return Some(enclosing_function);
+            }
+            Err(node) => {
+                if let Some(prev_node) = prev_node {
+                    if is_conditional_expression(&node, &prev_node) {
+                        return None;
+                    }
+                }
+                prev_node = Some(node);
             }
         }
-
-        prev_node = Some(node);
     }
 
     None

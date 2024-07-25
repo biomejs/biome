@@ -296,7 +296,7 @@ fn has_nan(expr: AnyJsExpression, model: &SemanticModel) -> bool {
             }
             reference
         } else {
-            let member_expr = AnyJsMemberExpression::cast_ref(expr.syntax())?;
+            let member_expr = AnyJsMemberExpression::cast(expr.into_syntax())?;
             if member_expr.member_name()?.text() != "NaN" {
                 return None;
             }

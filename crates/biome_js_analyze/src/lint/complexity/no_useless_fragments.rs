@@ -135,12 +135,11 @@ impl Rule for NoUselessFragments {
                                 if JsxExpressionAttributeValue::can_cast(parent.kind()) {
                                     in_jsx_attr_expr = true;
                                 }
-                                if let Some(parenthesized_expression) =
-                                    JsParenthesizedExpression::cast_ref(&parent)
-                                {
-                                    parenthesized_expression.syntax().parent()
-                                } else {
-                                    Some(parent)
+                                match JsParenthesizedExpression::try_cast(parent) {
+                                    Ok(parenthesized_expression) => {
+                                        parenthesized_expression.syntax().parent()
+                                    }
+                                    Err(parent) => Some(parent),
                                 }
                             })
                             .map_or(false, |parent| {

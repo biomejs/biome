@@ -64,7 +64,7 @@ impl Rule for NoPrototypeBuiltins {
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let call_expr = ctx.query();
         let callee = call_expr.callee().ok()?.omit_parentheses();
-        if let Some(member_expr) = AnyJsMemberExpression::cast_ref(callee.syntax()) {
+        if let Some(member_expr) = AnyJsMemberExpression::cast(callee.into_syntax()) {
             let member_name = member_expr.member_name()?;
             let member_name_text = member_name.text();
             return is_prototype_builtins(member_name_text).then_some(RuleState {

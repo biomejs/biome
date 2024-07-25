@@ -20284,9 +20284,12 @@ impl AstNode for AnyCssQueryFeatureValue {
             CSS_NUMBER => AnyCssQueryFeatureValue::CssNumber(CssNumber { syntax }),
             CSS_RATIO => AnyCssQueryFeatureValue::CssRatio(CssRatio { syntax }),
             _ => {
-                if let Some(any_css_dimension) = AnyCssDimension::cast(syntax.clone()) {
-                    return Some(AnyCssQueryFeatureValue::AnyCssDimension(any_css_dimension));
-                }
+                let syntax = match AnyCssDimension::try_cast(syntax) {
+                    Ok(any_css_dimension) => {
+                        return Some(AnyCssQueryFeatureValue::AnyCssDimension(any_css_dimension));
+                    }
+                    Err(syntax) => syntax,
+                };
                 if let Some(any_css_function) = AnyCssFunction::cast(syntax) {
                     return Some(AnyCssQueryFeatureValue::AnyCssFunction(any_css_function));
                 }
@@ -21682,9 +21685,12 @@ impl AstNode for AnyCssValue {
             CSS_STRING => AnyCssValue::CssString(CssString { syntax }),
             CSS_UNICODE_RANGE => AnyCssValue::CssUnicodeRange(CssUnicodeRange { syntax }),
             _ => {
-                if let Some(any_css_dimension) = AnyCssDimension::cast(syntax.clone()) {
-                    return Some(AnyCssValue::AnyCssDimension(any_css_dimension));
-                }
+                let syntax = match AnyCssDimension::try_cast(syntax) {
+                    Ok(any_css_dimension) => {
+                        return Some(AnyCssValue::AnyCssDimension(any_css_dimension));
+                    }
+                    Err(syntax) => syntax,
+                };
                 if let Some(any_css_function) = AnyCssFunction::cast(syntax) {
                     return Some(AnyCssValue::AnyCssFunction(any_css_function));
                 }

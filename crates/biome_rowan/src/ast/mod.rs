@@ -169,7 +169,7 @@ pub trait AstNode: Clone {
     /// builder.finish_node();
     ///
     /// let root_syntax = builder.finish();
-    /// let root = RawLanguageRoot::cast(root_syntax.clone()).expect("Root to be a raw language root");
+    /// let root = RawLanguageRoot::cast_ref(&root_syntax).expect("Root to be a raw language root");
     ///
     /// // Returns `OK` because syntax is a `RawLanguageRoot`
     /// assert_eq!(RawLanguageRoot::try_cast(root.syntax().clone()), Ok(root.clone()));
@@ -178,7 +178,7 @@ pub trait AstNode: Clone {
     /// ```
     fn try_cast(syntax: SyntaxNode<Self::Language>) -> Result<Self, SyntaxNode<Self::Language>> {
         if Self::can_cast(syntax.kind()) {
-            Ok(Self::cast(syntax).expect("Expected casted node because 'can_cast' returned true."))
+            Ok(Self::unwrap_cast(syntax))
         } else {
             Err(syntax)
         }
@@ -202,7 +202,7 @@ pub trait AstNode: Clone {
     /// builder.finish_node();
     ///
     /// let root_syntax = builder.finish();
-    /// let root = RawLanguageRoot::cast(root_syntax.clone()).expect("Root to be a raw language root");
+    /// let root = RawLanguageRoot::cast_ref(&root_syntax).expect("Root to be a raw language root");
     ///
     /// // Returns `OK` because syntax is a `RawLanguageRoot`
     /// assert_eq!(RawLanguageRoot::try_cast_node(root.clone()), Ok(root.clone()));
@@ -212,8 +212,7 @@ pub trait AstNode: Clone {
     /// ```
     fn try_cast_node<T: AstNode<Language = Self::Language>>(node: T) -> Result<Self, T> {
         if Self::can_cast(node.syntax().kind()) {
-            Ok(Self::cast(node.into_syntax())
-                .expect("Expected casted node because 'can_cast' returned true."))
+            Ok(Self::unwrap_cast(node.into_syntax()))
         } else {
             Err(node)
         }
