@@ -1,11 +1,10 @@
 use crate::{DiagnosticsPayload, Execution, Reporter, ReporterVisitor, TraversalSummary};
 use biome_console::fmt::{Display, Formatter};
 use biome_console::{markup, Console, ConsoleExt};
-use biome_diagnostics::{
-    display_gitlab::{GitLabDiagnostic, PrintGitLabDiagnostic},
-    Error, Resource,
-};
+use biome_diagnostics::display::SourceFile;
+use biome_diagnostics::{Error, PrintDescription, Resource, Severity};
 use path_absolutize::Absolutize;
+use serde::Serialize;
 use std::sync::RwLock;
 use std::{
     collections::HashSet,
@@ -83,15 +82,11 @@ struct GitlabDiagnostics<'a>(
 
 impl<'a> GitlabDiagnostics<'a> {
     fn attempt_to_relativize(&self, subject: &str) -> Option<PathBuf> {
-        let Some(base) = self.2 else {
-            return None;
-        };
-
         let Ok(resolved) = Path::new(subject).absolutize() else {
             return None;
         };
 
-        let Ok(relativized) = resolved.strip_prefix(base) else {
+        let Ok(relativized) = resolved.strip_prefix(self.2?) else {
             return None;
         };
 
@@ -123,29 +118,20 @@ impl<'a> GitlabDiagnostics<'a> {
 
 impl<'a> Display for GitlabDiagnostics<'a> {
     fn fmt(&self, fmt: &mut Formatter) -> std::io::Result<()> {
-        fmt.write_str("[")?;
-
         let mut hasher = self.1.write().unwrap();
-
-        let mut iter = self
+        let gitlab_diagnostics: Vec<_> = self
             .0
             .diagnostics
             .iter()
             .filter(|d| d.severity() >= self.0.diagnostic_level)
             .filter(|d| {
                 if self.0.verbose {
-                    if d.tags().is_verbose() {
-                        true
-                    } else {
-                        false
-                    }
+                    d.tags().is_verbose()
                 } else {
                     true
                 }
             })
-            .peekable();
-        while let Some(biome_diagnostic) = iter.next() {
-            if biome_diagnostic.severity() >= self.0.diagnostic_level {
+            .filter_map(|biome_diagnostic| {
                 let absolute_path = match biome_diagnostic.location().resource {
                     Some(Resource::File(file)) => Some(file),
                     _ => None,
@@ -157,30 +143,89 @@ impl<'a> Display for GitlabDiagnostics<'a> {
                     None => absolute_path.to_owned(),
                 };
 
-                let initial_fingerprint =
-                    self.compute_initial_fingerprint(&biome_diagnostic, &path);
+                let initial_fingerprint = self.compute_initial_fingerprint(biome_diagnostic, &path);
                 let fingerprint = hasher.rehash_until_unique(initial_fingerprint);
 
-                let Some(gitlab_diagnostic) =
-                    GitLabDiagnostic::try_from_diagnostic(biome_diagnostic, &path, fingerprint)
-                else {
-                    continue;
-                };
-
-                fmt.write_markup(markup!({
-                    PrintGitLabDiagnostic {
-                        gitlab_diagnostic: &gitlab_diagnostic,
-                    }
-                }))?;
-
-                if !iter.peek().is_none() {
-                    fmt.write_str(",")?;
-                }
-            }
-        }
-        fmt.write_str("]")?;
+                GitLabDiagnostic::try_from_diagnostic(
+                    biome_diagnostic,
+                    path.to_string(),
+                    fingerprint,
+                )
+            })
+            .collect();
+        let serialized = serde_json::to_string_pretty(&gitlab_diagnostics)?;
+        fmt.write_str(serialized.as_str())?;
         Ok(())
     }
+}
+
+/// An entry in the GitLab Code Quality report.
+/// See https://docs.gitlab.com/ee/ci/testing/code_quality.html#implement-a-custom-tool
+#[derive(Serialize)]
+pub struct GitLabDiagnostic<'a> {
+    /// A description of the code quality violation.
+    description: String,
+    /// A unique name representing the static analysis check that emitted this issue.
+    check_name: &'a str,
+    /// A unique fingerprint to identify the code quality violation. For example, an MD5 hash.
+    fingerprint: String,
+    /// A severity string (can be info, minor, major, critical, or blocker).
+    severity: &'a str,
+    /// The location where the code quality violation occurred.
+    location: Location,
+}
+
+impl<'a> GitLabDiagnostic<'a> {
+    pub fn try_from_diagnostic(
+        diagnostic: &'a Error,
+        path: String,
+        fingerprint: u64,
+    ) -> Option<Self> {
+        let location = diagnostic.location();
+        let span = location.span?;
+        let source_code = location.source_code?;
+        let description = PrintDescription(diagnostic).to_string();
+        let begin = match SourceFile::new(source_code).location(span.start()) {
+            Ok(start) => start.line_number.get(),
+            Err(_) => return None,
+        };
+        let check_name = diagnostic
+            .category()
+            .map(|category| category.name())
+            .unwrap_or_default();
+
+        Some(GitLabDiagnostic {
+            severity: match diagnostic.severity() {
+                Severity::Hint => "info",
+                Severity::Information => "minor",
+                Severity::Warning => "major",
+                Severity::Error => "critical",
+                Severity::Fatal => "blocker",
+            },
+            description,
+            check_name,
+            // A u64 does not fit into a JSON number, so we serialize this as a
+            // string
+            fingerprint: fingerprint.to_string(),
+            location: Location {
+                path,
+                lines: Lines { begin },
+            },
+        })
+    }
+}
+
+#[derive(Serialize)]
+struct Location {
+    /// The relative path to the file containing the code quality violation.
+    path: String,
+    lines: Lines,
+}
+
+#[derive(Serialize)]
+struct Lines {
+    /// The line on which the code quality violation occurred.
+    begin: usize,
 }
 
 #[derive(Hash)]
