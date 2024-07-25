@@ -501,8 +501,7 @@ mod test {
                 .filter(|x| x.text_trimmed() == "useRef()")
                 .last()
                 .unwrap();
-            let call = JsCallExpression::cast_ref(&node).unwrap();
-            assert!(is_react_hook_call(&call));
+            assert!(is_react_hook_call(&JsCallExpression::unwrap_cast(node)));
         }
 
         {

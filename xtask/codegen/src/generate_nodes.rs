@@ -416,12 +416,15 @@ pub fn generate_nodes(ast: &AstSrc, language_kind: LanguageKind) -> Result<Strin
                     let variant_name = format_ident!("{}", en);
                     let variable_name = format_ident!("{}", Case::Snake.convert(en.as_str()));
                     (
-                        // cast() code
+                        // try_cast() code
                         if i != variant_of_variants.len() - 1 {
                             quote! {
-                            if let Some(#variable_name) = #variant_name::cast(syntax.clone()) {
+                            let syntax = match #variant_name::try_cast(syntax) {
+                                Ok(#variable_name) => {
                                     return Some(#name::#variant_name(#variable_name));
-                            }}
+                                }
+                                Err(syntax) => syntax,
+                            };}
                         } else {
                             // if this is the last variant, do not clone syntax
                             quote! {

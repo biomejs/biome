@@ -933,7 +933,7 @@ impl AnyJsAssignmentLike {
                 let mut has_leading_comments = comments.has_leading_comments(union_type.syntax());
                 while is_nested_union_type(&union_type)? && !has_leading_comments {
                     if let Some(Ok(inner_union_type)) = union_type.types().last() {
-                        let inner_union_type = TsUnionType::cast_ref(inner_union_type.syntax());
+                        let inner_union_type = TsUnionType::cast(inner_union_type.into_syntax());
                         if let Some(inner_union_type) = inner_union_type {
                             has_leading_comments =
                                 comments.has_leading_comments(inner_union_type.syntax());

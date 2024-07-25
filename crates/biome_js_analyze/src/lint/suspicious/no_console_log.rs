@@ -53,7 +53,7 @@ impl Rule for NoConsoleLog {
         let call_expression = ctx.query();
         let model = ctx.model();
         let callee = call_expression.callee().ok()?;
-        let member_expression = AnyJsMemberExpression::cast_ref(callee.syntax())?;
+        let member_expression = AnyJsMemberExpression::cast(callee.into_syntax())?;
         if member_expression.member_name()?.text() != "log" {
             return None;
         }

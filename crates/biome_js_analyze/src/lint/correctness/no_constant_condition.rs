@@ -106,7 +106,7 @@ impl Rule for NoConstantCondition {
         // If the statement contains a valid yield expression returned from a `while`, `for`, or `do...while` statement,
         // we don't need to examine the statement's `test`.
         if let Some(any_js_stmt) = conditional_stmt.body() {
-            if conditional_stmt.is_in_generator_function().unwrap_or(false)
+            if conditional_stmt.is_in_generator_function()
                 && has_valid_yield_expression(&any_js_stmt).unwrap_or(false)
             {
                 return None;
@@ -158,15 +158,15 @@ impl ConditionalStatement {
         }
     }
     // Checks if the self statement is in a generator function
-    fn is_in_generator_function(&self) -> Option<bool> {
-        self.syntax().ancestors().find_map(|node| {
-            if let Some(func_decl) = JsFunctionDeclaration::cast_ref(&node) {
-                return Some(func_decl.star_token().is_some());
-            };
-            if let Some(func_expr) = JsFunctionExpression::cast(node) {
-                return Some(func_expr.star_token().is_some());
-            };
-            None
+    fn is_in_generator_function(&self) -> bool {
+        self.syntax().ancestors().any(|node| {
+            match JsFunctionDeclaration::try_cast(node) {
+                Ok(func_decl) => func_decl.star_token(),
+                Err(node) => {
+                    JsFunctionExpression::cast(node).and_then(|func_expr| func_expr.star_token())
+                }
+            }
+            .is_some()
         })
     }
 }
