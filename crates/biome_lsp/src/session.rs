@@ -310,6 +310,7 @@ impl Session {
         let file_features = self.workspace.file_features(SupportsFeatureParams {
             features: FeaturesBuilder::new()
                 .with_linter()
+                .with_assists()
                 .with_organize_imports()
                 .build(),
             path: biome_path.clone(),

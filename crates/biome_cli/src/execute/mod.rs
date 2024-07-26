@@ -69,6 +69,7 @@ impl Execution {
                 .with_organize_imports()
                 .with_formatter()
                 .with_linter()
+                .with_assists()
                 .build(),
             TraversalMode::Migrate { .. } => FeatureName::empty(),
             TraversalMode::Search { .. } => FeaturesBuilder::new().with_search().build(),

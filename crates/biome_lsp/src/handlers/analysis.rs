@@ -19,7 +19,7 @@ use std::ops::Sub;
 use tower_lsp::lsp_types::{
     self as lsp, CodeActionKind, CodeActionOrCommand, CodeActionParams, CodeActionResponse,
 };
-use tracing::{debug, trace};
+use tracing::{debug, info, trace};
 
 const FIX_ALL_CATEGORY: ActionCategory = ActionCategory::Source(SourceActionKind::FixAll);
 
@@ -45,6 +45,7 @@ pub(crate) fn code_actions(
         path: biome_path,
         features: FeaturesBuilder::new()
             .with_linter()
+            .with_assists()
             .with_organize_imports()
             .build(),
     })?;
@@ -53,7 +54,7 @@ pub(crate) fn code_actions(
         && !file_features.supports_organize_imports()
         && !file_features.supports_assists()
     {
-        debug!("Linter and organize imports are both disabled");
+        info!("Linter, assists and organize imports are disabled");
         return Ok(Some(Vec::new()));
     }
 

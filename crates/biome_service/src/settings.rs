@@ -480,13 +480,22 @@ pub struct OverrideOrganizeImportsSettings {
 }
 
 /// Linter settings for the entire workspace
-#[derive(Default, Debug)]
+#[derive(Debug)]
 pub struct AssistsSettings {
     /// Enabled by default
     pub enabled: bool,
 
     /// List of rules
     pub rules: Option<biome_configuration::analyzer::assists::Rules>,
+}
+
+impl Default for AssistsSettings {
+    fn default() -> Self {
+        Self {
+            enabled: true,
+            rules: Default::default(),
+        }
+    }
 }
 
 /// Assists settings for the entire workspace

@@ -457,6 +457,11 @@ impl FeaturesBuilder {
         self
     }
 
+    pub fn with_assists(mut self) -> Self {
+        self.0.insert(FeatureKind::Assists);
+        self
+    }
+
     pub fn build(self) -> FeatureName {
         FeatureName(self.0)
     }
