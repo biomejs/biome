@@ -36,7 +36,7 @@ impl NeedsParentheses for JsNewTargetExpression {
         false
     }
 
-    fn needs_parentheses_with_parent(&self, _parent: &JsSyntaxNode) -> bool {
+    fn needs_parentheses_with_parent(&self, _parent: JsSyntaxNode) -> bool {
         false
     }
 }

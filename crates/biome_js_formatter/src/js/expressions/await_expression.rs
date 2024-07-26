@@ -61,8 +61,8 @@ impl FormatNodeRule<JsAwaitExpression> for FormatJsAwaitExpression {
 }
 
 impl NeedsParentheses for JsAwaitExpression {
-    fn needs_parentheses_with_parent(&self, parent: &JsSyntaxNode) -> bool {
-        await_or_yield_needs_parens(parent, self.syntax())
+    fn needs_parentheses_with_parent(&self, parent: JsSyntaxNode) -> bool {
+        await_or_yield_needs_parens(&parent, self.syntax())
     }
 }
 

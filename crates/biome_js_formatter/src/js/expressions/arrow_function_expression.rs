@@ -821,7 +821,7 @@ impl ArrowFunctionLayout {
 }
 
 impl NeedsParentheses for JsArrowFunctionExpression {
-    fn needs_parentheses_with_parent(&self, parent: &JsSyntaxNode) -> bool {
+    fn needs_parentheses_with_parent(&self, parent: JsSyntaxNode) -> bool {
         match parent.kind() {
             JsSyntaxKind::TS_AS_EXPRESSION
             | JsSyntaxKind::TS_SATISFIES_EXPRESSION
@@ -830,9 +830,9 @@ impl NeedsParentheses for JsArrowFunctionExpression {
             | JsSyntaxKind::TS_TYPE_ASSERTION_EXPRESSION => true,
 
             _ => {
-                is_conditional_test(self.syntax(), parent)
-                    || update_or_lower_expression_needs_parentheses(self.syntax(), parent)
-                    || is_binary_like_left_or_right(self.syntax(), parent)
+                is_conditional_test(self.syntax(), &parent)
+                    || update_or_lower_expression_needs_parentheses(self.syntax(), &parent)
+                    || is_binary_like_left_or_right(self.syntax(), &parent)
             }
         }
     }

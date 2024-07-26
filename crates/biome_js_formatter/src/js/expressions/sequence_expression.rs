@@ -75,7 +75,7 @@ impl FormatNodeRule<JsSequenceExpression> for FormatJsSequenceExpression {
 }
 
 impl NeedsParentheses for JsSequenceExpression {
-    fn needs_parentheses_with_parent(&self, parent: &JsSyntaxNode) -> bool {
+    fn needs_parentheses_with_parent(&self, parent: JsSyntaxNode) -> bool {
         !matches!(
             parent.kind(),
             JsSyntaxKind::JS_RETURN_STATEMENT |

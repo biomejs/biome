@@ -44,9 +44,9 @@ impl FormatNodeRule<JsClassExpression> for FormatJsClassExpression {
 }
 
 impl NeedsParentheses for JsClassExpression {
-    fn needs_parentheses_with_parent(&self, parent: &JsSyntaxNode) -> bool {
+    fn needs_parentheses_with_parent(&self, parent: JsSyntaxNode) -> bool {
         (parent.kind() == JsSyntaxKind::JS_EXTENDS_CLAUSE && !self.decorators().is_empty())
-            || is_callee(self.syntax(), parent)
+            || is_callee(self.syntax(), &parent)
             || is_first_in_statement(
                 self.clone().into(),
                 FirstInStatementMode::ExpressionOrExportDefault,

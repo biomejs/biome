@@ -26,7 +26,7 @@ impl FormatNodeRule<TsConditionalType> for FormatTsConditionalType {
 }
 
 impl NeedsParentheses for TsConditionalType {
-    fn needs_parentheses_with_parent(&self, parent: &JsSyntaxNode) -> bool {
+    fn needs_parentheses_with_parent(&self, parent: JsSyntaxNode) -> bool {
         match parent.kind() {
             JsSyntaxKind::TS_CONDITIONAL_TYPE => {
                 let conditional = TsConditionalType::unwrap_cast(parent.clone());
@@ -37,12 +37,12 @@ impl NeedsParentheses for TsConditionalType {
                     .as_ref()
                     == Ok(self.syntax());
 
-                is_check_type(self.syntax(), parent) || is_extends_type
+                is_check_type(self.syntax(), &parent) || is_extends_type
             }
 
             _ => {
-                is_in_many_type_union_or_intersection_list(self.syntax(), parent)
-                    || operator_type_or_higher_needs_parens(self.syntax(), parent)
+                is_in_many_type_union_or_intersection_list(self.syntax(), &parent)
+                    || operator_type_or_higher_needs_parens(self.syntax(), &parent)
             }
         }
     }

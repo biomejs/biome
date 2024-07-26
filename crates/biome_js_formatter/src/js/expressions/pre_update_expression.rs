@@ -27,9 +27,9 @@ impl FormatNodeRule<JsPreUpdateExpression> for FormatJsPreUpdateExpression {
 }
 
 impl NeedsParentheses for JsPreUpdateExpression {
-    fn needs_parentheses_with_parent(&self, parent: &JsSyntaxNode) -> bool {
+    fn needs_parentheses_with_parent(&self, parent: JsSyntaxNode) -> bool {
         match_ast! {
-            match parent {
+            match &parent {
                 JsUnaryExpression(unary) => {
                     let parent_operator = unary.operator();
                     let operator = self.operator();
@@ -40,7 +40,7 @@ impl NeedsParentheses for JsPreUpdateExpression {
                             && operator == Ok(JsPreUpdateOperator::Decrement))
                 },
                 _ => {
-                    unary_like_expression_needs_parentheses(self.syntax(), parent)
+                    unary_like_expression_needs_parentheses(self.syntax(), &parent)
                 }
             }
         }

@@ -22,13 +22,14 @@ impl FormatNodeRule<JsIdentifierAssignment> for FormatJsIdentifierAssignment {
 
 impl NeedsParentheses for JsIdentifierAssignment {
     #[inline]
-    fn needs_parentheses_with_parent(&self, parent: &JsSyntaxNode) -> bool {
+    fn needs_parentheses_with_parent(&self, parent: JsSyntaxNode) -> bool {
         let Ok(name) = self.name_token() else {
             return false;
         };
         match name.text_trimmed() {
-            "async" => JsForOfStatement::cast_ref(parent)
-                .is_some_and(|for_of| for_of.await_token().is_none()),
+            "async" => {
+                JsForOfStatement::cast(parent).is_some_and(|for_of| for_of.await_token().is_none())
+            }
             "let" => parent.kind() == JsSyntaxKind::JS_FOR_OF_STATEMENT,
             _ => false,
         }

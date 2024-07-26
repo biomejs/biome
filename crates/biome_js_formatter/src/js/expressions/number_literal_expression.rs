@@ -24,8 +24,8 @@ impl FormatNodeRule<JsNumberLiteralExpression> for FormatJsNumberLiteralExpressi
 }
 
 impl NeedsParentheses for JsNumberLiteralExpression {
-    fn needs_parentheses_with_parent(&self, parent: &JsSyntaxNode) -> bool {
-        is_member_object(self.syntax(), parent)
+    fn needs_parentheses_with_parent(&self, parent: JsSyntaxNode) -> bool {
+        is_member_object(self.syntax(), &parent)
     }
 }
 

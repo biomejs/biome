@@ -56,13 +56,13 @@ pub trait NeedsParentheses: AstNode<Language = JsLanguage> {
     fn needs_parentheses(&self) -> bool {
         self.syntax()
             .parent()
-            .map_or(false, |parent| self.needs_parentheses_with_parent(&parent))
+            .map_or(false, |parent| self.needs_parentheses_with_parent(parent))
     }
 
     /// Returns `true` if this node requires parentheses to form valid syntax or improve readability.
     ///
     /// Returns `false` if the parentheses can be omitted safely without changing semantics.
-    fn needs_parentheses_with_parent(&self, parent: &JsSyntaxNode) -> bool;
+    fn needs_parentheses_with_parent(&self, parent: JsSyntaxNode) -> bool;
 }
 
 impl NeedsParentheses for AnyJsLiteralExpression {
@@ -87,7 +87,7 @@ impl NeedsParentheses for AnyJsLiteralExpression {
     }
 
     #[inline]
-    fn needs_parentheses_with_parent(&self, parent: &JsSyntaxNode) -> bool {
+    fn needs_parentheses_with_parent(&self, parent: JsSyntaxNode) -> bool {
         match self {
             AnyJsLiteralExpression::JsBigintLiteralExpression(big_int) => {
                 big_int.needs_parentheses_with_parent(parent)
@@ -166,7 +166,7 @@ impl NeedsParentheses for AnyJsExpression {
         }
     }
 
-    fn needs_parentheses_with_parent(&self, parent: &JsSyntaxNode) -> bool {
+    fn needs_parentheses_with_parent(&self, parent: JsSyntaxNode) -> bool {
         match self {
             AnyJsExpression::JsImportMetaExpression(meta) => {
                 meta.needs_parentheses_with_parent(parent)
@@ -278,7 +278,7 @@ declare_node_union! {
 }
 
 impl NeedsParentheses for AnyJsExpressionLeftSide {
-    fn needs_parentheses_with_parent(&self, parent: &JsSyntaxNode) -> bool {
+    fn needs_parentheses_with_parent(&self, parent: JsSyntaxNode) -> bool {
         match self {
             AnyJsExpressionLeftSide::AnyJsExpression(expression) => {
                 expression.needs_parentheses_with_parent(parent)
@@ -894,7 +894,7 @@ impl NeedsParentheses for AnyJsAssignment {
         }
     }
 
-    fn needs_parentheses_with_parent(&self, parent: &JsSyntaxNode) -> bool {
+    fn needs_parentheses_with_parent(&self, parent: JsSyntaxNode) -> bool {
         match self {
             AnyJsAssignment::JsComputedMemberAssignment(assignment) => {
                 assignment.needs_parentheses_with_parent(parent)
@@ -940,7 +940,7 @@ impl NeedsParentheses for AnyJsAssignmentPattern {
         }
     }
 
-    fn needs_parentheses_with_parent(&self, parent: &JsSyntaxNode) -> bool {
+    fn needs_parentheses_with_parent(&self, parent: JsSyntaxNode) -> bool {
         match self {
             AnyJsAssignmentPattern::AnyJsAssignment(assignment) => {
                 assignment.needs_parentheses_with_parent(parent)
@@ -996,7 +996,7 @@ impl NeedsParentheses for AnyTsType {
         }
     }
 
-    fn needs_parentheses_with_parent(&self, parent: &JsSyntaxNode) -> bool {
+    fn needs_parentheses_with_parent(&self, parent: JsSyntaxNode) -> bool {
         match self {
             AnyTsType::TsAnyType(ty) => ty.needs_parentheses_with_parent(parent),
             AnyTsType::TsArrayType(ty) => ty.needs_parentheses_with_parent(parent),

@@ -19,7 +19,7 @@ impl FormatNodeRule<TsSatisfiesAssignment> for FormatTsSatisfiesAssignment {
 }
 
 impl NeedsParentheses for TsSatisfiesAssignment {
-    fn needs_parentheses_with_parent(&self, parent: &JsSyntaxNode) -> bool {
+    fn needs_parentheses_with_parent(&self, parent: JsSyntaxNode) -> bool {
         TsAsOrSatisfiesAssignment::from(self.clone()).needs_parentheses_with_parent(parent)
     }
 }

@@ -35,7 +35,7 @@ impl FormatNodeRule<TsTypeofType> for FormatTsTypeofType {
 }
 
 impl NeedsParentheses for TsTypeofType {
-    fn needs_parentheses_with_parent(&self, parent: &JsSyntaxNode) -> bool {
+    fn needs_parentheses_with_parent(&self, parent: JsSyntaxNode) -> bool {
         match parent.kind() {
             JsSyntaxKind::TS_ARRAY_TYPE => true,
             // Typeof operators are parenthesized when used as an object type in an indexed access

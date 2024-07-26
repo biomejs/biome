@@ -23,7 +23,7 @@ impl NeedsParentheses for JsStaticMemberAssignment {
     }
 
     #[inline]
-    fn needs_parentheses_with_parent(&self, _: &JsSyntaxNode) -> bool {
+    fn needs_parentheses_with_parent(&self, _parent: JsSyntaxNode) -> bool {
         false
     }
 }

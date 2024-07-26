@@ -34,9 +34,9 @@ impl FormatNodeRule<JsFunctionExpression> for FormatJsFunctionExpression {
 }
 
 impl NeedsParentheses for JsFunctionExpression {
-    fn needs_parentheses_with_parent(&self, parent: &JsSyntaxNode) -> bool {
-        is_callee(self.syntax(), parent)
-            || is_tag(self.syntax(), parent)
+    fn needs_parentheses_with_parent(&self, parent: JsSyntaxNode) -> bool {
+        is_callee(self.syntax(), &parent)
+            || is_tag(self.syntax(), &parent)
             || is_first_in_statement(
                 self.clone().into(),
                 FirstInStatementMode::ExpressionOrExportDefault,

@@ -45,8 +45,8 @@ impl FormatNodeRule<TsConstructorType> for FormatTsConstructorType {
 }
 
 impl NeedsParentheses for TsConstructorType {
-    fn needs_parentheses_with_parent(&self, parent: &JsSyntaxNode) -> bool {
-        function_like_type_needs_parentheses(self.syntax(), parent)
+    fn needs_parentheses_with_parent(&self, parent: JsSyntaxNode) -> bool {
+        function_like_type_needs_parentheses(self.syntax(), &parent)
     }
 }
 

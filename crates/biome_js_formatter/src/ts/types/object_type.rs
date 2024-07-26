@@ -23,7 +23,7 @@ impl FormatNodeRule<TsObjectType> for FormatTsObjectType {
 }
 
 impl NeedsParentheses for TsObjectType {
-    fn needs_parentheses_with_parent(&self, _parent: &JsSyntaxNode) -> bool {
+    fn needs_parentheses_with_parent(&self, _parent: JsSyntaxNode) -> bool {
         false
     }
 }

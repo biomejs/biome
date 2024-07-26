@@ -20,12 +20,12 @@ impl FormatNodeRule<JsInExpression> for FormatJsInExpression {
 }
 
 impl NeedsParentheses for JsInExpression {
-    fn needs_parentheses_with_parent(&self, parent: &JsSyntaxNode) -> bool {
+    fn needs_parentheses_with_parent(&self, parent: JsSyntaxNode) -> bool {
         if is_in_for_initializer(self) {
             return true;
         }
 
-        needs_binary_like_parentheses(&AnyJsBinaryLikeExpression::from(self.clone()), parent)
+        needs_binary_like_parentheses(&AnyJsBinaryLikeExpression::from(self.clone()), &parent)
     }
 }
 

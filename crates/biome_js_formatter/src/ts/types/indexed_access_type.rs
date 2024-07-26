@@ -33,7 +33,7 @@ impl FormatNodeRule<TsIndexedAccessType> for FormatTsIndexedAccessType {
 }
 
 impl NeedsParentheses for TsIndexedAccessType {
-    fn needs_parentheses_with_parent(&self, _parent: &JsSyntaxNode) -> bool {
+    fn needs_parentheses_with_parent(&self, _parent: JsSyntaxNode) -> bool {
         false
     }
 }

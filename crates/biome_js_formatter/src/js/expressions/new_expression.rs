@@ -43,7 +43,7 @@ impl FormatNodeRule<JsNewExpression> for FormatJsNewExpression {
 }
 
 impl NeedsParentheses for JsNewExpression {
-    fn needs_parentheses_with_parent(&self, parent: &JsSyntaxNode) -> bool {
+    fn needs_parentheses_with_parent(&self, parent: JsSyntaxNode) -> bool {
         matches!(parent.kind(), JsSyntaxKind::JS_EXTENDS_CLAUSE)
     }
 }

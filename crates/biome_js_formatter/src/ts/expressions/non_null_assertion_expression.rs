@@ -29,8 +29,8 @@ impl FormatNodeRule<TsNonNullAssertionExpression> for FormatTsNonNullAssertionEx
 }
 
 impl NeedsParentheses for TsNonNullAssertionExpression {
-    fn needs_parentheses_with_parent(&self, parent: &JsSyntaxNode) -> bool {
+    fn needs_parentheses_with_parent(&self, parent: JsSyntaxNode) -> bool {
         matches!(parent.kind(), JsSyntaxKind::JS_EXTENDS_CLAUSE)
-            || member_chain_callee_needs_parens(self.clone().into(), parent)
+            || member_chain_callee_needs_parens(self.clone().into(), &parent)
     }
 }

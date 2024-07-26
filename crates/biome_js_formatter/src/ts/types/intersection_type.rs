@@ -32,10 +32,10 @@ impl FormatNodeRule<TsIntersectionType> for FormatTsIntersectionType {
 }
 
 impl NeedsParentheses for TsIntersectionType {
-    fn needs_parentheses_with_parent(&self, parent: &JsSyntaxNode) -> bool {
+    fn needs_parentheses_with_parent(&self, parent: JsSyntaxNode) -> bool {
         union_or_intersection_type_needs_parentheses(
             self.syntax(),
-            parent,
+            &parent,
             &TsIntersectionOrUnionTypeList::TsIntersectionTypeElementList(self.types()),
         )
     }

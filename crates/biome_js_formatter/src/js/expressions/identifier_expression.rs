@@ -23,7 +23,7 @@ impl FormatNodeRule<JsIdentifierExpression> for FormatJsIdentifierExpression {
 }
 
 impl NeedsParentheses for JsIdentifierExpression {
-    fn needs_parentheses_with_parent(&self, parent: &JsSyntaxNode) -> bool {
+    fn needs_parentheses_with_parent(&self, parent: JsSyntaxNode) -> bool {
         let Ok(name) = self.name().and_then(|x| x.value_token()) else {
             return false;
         };

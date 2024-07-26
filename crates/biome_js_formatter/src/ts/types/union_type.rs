@@ -156,10 +156,10 @@ impl FormatNodeRule<TsUnionType> for FormatTsUnionType {
 }
 
 impl NeedsParentheses for TsUnionType {
-    fn needs_parentheses_with_parent(&self, parent: &JsSyntaxNode) -> bool {
+    fn needs_parentheses_with_parent(&self, parent: JsSyntaxNode) -> bool {
         union_or_intersection_type_needs_parentheses(
             self.syntax(),
-            parent,
+            &parent,
             &TsIntersectionOrUnionTypeList::TsUnionTypeVariantList(self.types()),
         )
     }

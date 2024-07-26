@@ -23,7 +23,7 @@ impl FormatNodeRule<TsAsExpression> for FormatTsAsExpression {
 }
 
 impl NeedsParentheses for TsAsExpression {
-    fn needs_parentheses_with_parent(&self, parent: &JsSyntaxNode) -> bool {
+    fn needs_parentheses_with_parent(&self, parent: JsSyntaxNode) -> bool {
         TsAsOrSatisfiesExpression::from(self.clone()).needs_parentheses_with_parent(parent)
     }
 }
@@ -87,7 +87,7 @@ impl Format<JsFormatContext> for TsAsOrSatisfiesExpression {
 }
 
 impl NeedsParentheses for TsAsOrSatisfiesExpression {
-    fn needs_parentheses_with_parent(&self, parent: &JsSyntaxNode) -> bool {
+    fn needs_parentheses_with_parent(&self, parent: JsSyntaxNode) -> bool {
         match parent.kind() {
             JsSyntaxKind::JS_CONDITIONAL_EXPRESSION => true,
 
@@ -106,8 +106,8 @@ impl NeedsParentheses for TsAsOrSatisfiesExpression {
             }
 
             _ => {
-                type_cast_like_needs_parens(self.syntax(), parent)
-                    || is_binary_like_left_or_right(self.syntax(), parent)
+                type_cast_like_needs_parens(self.syntax(), &parent)
+                    || is_binary_like_left_or_right(self.syntax(), &parent)
             }
         }
     }
