@@ -20,7 +20,7 @@ impl FormatNodeRule<TsThisType> for FormatTsThisType {
 }
 
 impl NeedsParentheses for TsThisType {
-    fn needs_parentheses_with_parent(&self, _parent: &JsSyntaxNode) -> bool {
+    fn needs_parentheses_with_parent(&self, _parent: JsSyntaxNode) -> bool {
         false
     }
 }

@@ -24,8 +24,8 @@ impl FormatNodeRule<JsPostUpdateExpression> for FormatJsPostUpdateExpression {
 }
 
 impl NeedsParentheses for JsPostUpdateExpression {
-    fn needs_parentheses_with_parent(&self, parent: &JsSyntaxNode) -> bool {
-        unary_like_expression_needs_parentheses(self.syntax(), parent)
+    fn needs_parentheses_with_parent(&self, parent: JsSyntaxNode) -> bool {
+        unary_like_expression_needs_parentheses(self.syntax(), &parent)
     }
 }
 

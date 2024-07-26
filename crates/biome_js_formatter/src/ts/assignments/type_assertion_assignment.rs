@@ -38,7 +38,7 @@ impl FormatNodeRule<TsTypeAssertionAssignment> for FormatTsTypeAssertionAssignme
 }
 
 impl NeedsParentheses for TsTypeAssertionAssignment {
-    fn needs_parentheses_with_parent(&self, parent: &JsSyntaxNode) -> bool {
+    fn needs_parentheses_with_parent(&self, parent: JsSyntaxNode) -> bool {
         matches!(
             parent.kind(),
             JsSyntaxKind::JS_ASSIGNMENT_EXPRESSION

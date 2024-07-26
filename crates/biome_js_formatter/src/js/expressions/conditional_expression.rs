@@ -40,7 +40,7 @@ impl FormatNodeRule<JsConditionalExpression> for FormatJsConditionalExpression {
 }
 
 impl NeedsParentheses for JsConditionalExpression {
-    fn needs_parentheses_with_parent(&self, parent: &JsSyntaxNode) -> bool {
+    fn needs_parentheses_with_parent(&self, parent: JsSyntaxNode) -> bool {
         match parent.kind() {
             JsSyntaxKind::JS_UNARY_EXPRESSION
             | JsSyntaxKind::JS_AWAIT_EXPRESSION
@@ -49,10 +49,10 @@ impl NeedsParentheses for JsConditionalExpression {
             | JsSyntaxKind::TS_SATISFIES_EXPRESSION => true,
 
             _ => {
-                is_conditional_test(self.syntax(), parent)
-                    || update_or_lower_expression_needs_parentheses(self.syntax(), parent)
-                    || is_binary_like_left_or_right(self.syntax(), parent)
-                    || is_spread(self.syntax(), parent)
+                is_conditional_test(self.syntax(), &parent)
+                    || update_or_lower_expression_needs_parentheses(self.syntax(), &parent)
+                    || is_binary_like_left_or_right(self.syntax(), &parent)
+                    || is_spread(self.syntax(), &parent)
             }
         }
     }

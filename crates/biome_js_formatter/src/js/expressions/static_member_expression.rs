@@ -171,12 +171,12 @@ impl AnyJsStaticMemberLike {
 }
 
 impl NeedsParentheses for JsStaticMemberExpression {
-    fn needs_parentheses_with_parent(&self, parent: &JsSyntaxNode) -> bool {
+    fn needs_parentheses_with_parent(&self, parent: JsSyntaxNode) -> bool {
         if matches!(parent.kind(), JsSyntaxKind::JS_NEW_EXPRESSION) && self.is_optional_chain() {
             return true;
         }
 
-        member_chain_callee_needs_parens(self.clone().into(), parent)
+        member_chain_callee_needs_parens(self.clone().into(), &parent)
     }
 }
 

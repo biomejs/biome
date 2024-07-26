@@ -57,9 +57,9 @@ impl FormatNodeRule<JsUnaryExpression> for FormatJsUnaryExpression {
 }
 
 impl NeedsParentheses for JsUnaryExpression {
-    fn needs_parentheses_with_parent(&self, parent: &JsSyntaxNode) -> bool {
+    fn needs_parentheses_with_parent(&self, parent: JsSyntaxNode) -> bool {
         match_ast! {
-            match parent {
+            match &parent {
                 JsUnaryExpression(parent_unary) => {
                     let parent_operator = parent_unary.operator();
                     let operator = self.operator();
@@ -74,7 +74,7 @@ impl NeedsParentheses for JsUnaryExpression {
                 // so format to `(!foo) in bar` to what is really happening
                 JsInExpression(_) => true,
                 _ => {
-                    unary_like_expression_needs_parentheses(self.syntax(), parent)
+                    unary_like_expression_needs_parentheses(self.syntax(), &parent)
                 }
             }
         }

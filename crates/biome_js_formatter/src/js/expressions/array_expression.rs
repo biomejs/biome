@@ -129,7 +129,7 @@ impl NeedsParentheses for JsArrayExpression {
         false
     }
     #[inline(always)]
-    fn needs_parentheses_with_parent(&self, _parent: &JsSyntaxNode) -> bool {
+    fn needs_parentheses_with_parent(&self, _parent: JsSyntaxNode) -> bool {
         false
     }
 }

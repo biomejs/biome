@@ -109,7 +109,7 @@ pub fn should_expand(expression: &JsxTagExpression) -> bool {
 }
 
 impl NeedsParentheses for JsxTagExpression {
-    fn needs_parentheses_with_parent(&self, parent: &JsSyntaxNode) -> bool {
+    fn needs_parentheses_with_parent(&self, parent: JsSyntaxNode) -> bool {
         match parent.kind() {
             JsSyntaxKind::JS_BINARY_EXPRESSION => {
                 let binary = JsBinaryExpression::unwrap_cast(parent.clone());
@@ -129,7 +129,7 @@ impl NeedsParentheses for JsxTagExpression {
             | JsSyntaxKind::JS_SPREAD
             | JsSyntaxKind::JSX_SPREAD_ATTRIBUTE
             | JsSyntaxKind::JSX_SPREAD_CHILD => true,
-            _ => is_callee(self.syntax(), parent) || is_tag(self.syntax(), parent),
+            _ => is_callee(self.syntax(), &parent) || is_tag(self.syntax(), &parent),
         }
     }
 }

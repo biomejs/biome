@@ -22,8 +22,8 @@ impl FormatNodeRule<JsBinaryExpression> for FormatJsBinaryExpression {
 }
 
 impl NeedsParentheses for JsBinaryExpression {
-    fn needs_parentheses_with_parent(&self, parent: &JsSyntaxNode) -> bool {
-        needs_binary_like_parentheses(&AnyJsBinaryLikeExpression::from(self.clone()), parent)
+    fn needs_parentheses_with_parent(&self, parent: JsSyntaxNode) -> bool {
+        needs_binary_like_parentheses(&AnyJsBinaryLikeExpression::from(self.clone()), &parent)
     }
 }
 

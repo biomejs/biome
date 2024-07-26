@@ -60,8 +60,8 @@ impl FormatNodeRule<TsFunctionType> for FormatTsFunctionType {
 }
 
 impl NeedsParentheses for TsFunctionType {
-    fn needs_parentheses_with_parent(&self, parent: &JsSyntaxNode) -> bool {
-        function_like_type_needs_parentheses(self.syntax(), parent)
+    fn needs_parentheses_with_parent(&self, parent: JsSyntaxNode) -> bool {
+        function_like_type_needs_parentheses(self.syntax(), &parent)
     }
 }
 

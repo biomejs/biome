@@ -20,7 +20,7 @@ impl FormatNodeRule<TsNonPrimitiveType> for FormatTsNonPrimitiveType {
 }
 
 impl NeedsParentheses for TsNonPrimitiveType {
-    fn needs_parentheses_with_parent(&self, _parent: &JsSyntaxNode) -> bool {
+    fn needs_parentheses_with_parent(&self, _parent: JsSyntaxNode) -> bool {
         false
     }
 }

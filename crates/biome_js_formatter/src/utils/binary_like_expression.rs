@@ -552,7 +552,7 @@ impl From<AnyJsBinaryLikeExpression> for AnyJsExpression {
 }
 
 impl NeedsParentheses for AnyJsBinaryLikeExpression {
-    fn needs_parentheses_with_parent(&self, parent: &JsSyntaxNode) -> bool {
+    fn needs_parentheses_with_parent(&self, parent: JsSyntaxNode) -> bool {
         match self {
             AnyJsBinaryLikeExpression::JsLogicalExpression(expression) => {
                 expression.needs_parentheses_with_parent(parent)
@@ -666,7 +666,7 @@ impl NeedsParentheses for AnyJsBinaryLikeLeftExpression {
         }
     }
 
-    fn needs_parentheses_with_parent(&self, parent: &JsSyntaxNode) -> bool {
+    fn needs_parentheses_with_parent(&self, parent: JsSyntaxNode) -> bool {
         match self {
             AnyJsBinaryLikeLeftExpression::AnyJsExpression(expression) => {
                 expression.needs_parentheses_with_parent(parent)

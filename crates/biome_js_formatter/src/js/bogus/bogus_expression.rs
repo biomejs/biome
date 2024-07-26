@@ -14,7 +14,7 @@ impl NeedsParentheses for JsBogusExpression {
     }
 
     #[inline]
-    fn needs_parentheses_with_parent(&self, _parent: &JsSyntaxNode) -> bool {
+    fn needs_parentheses_with_parent(&self, _parent: JsSyntaxNode) -> bool {
         self.needs_parentheses()
     }
 }

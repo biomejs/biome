@@ -27,7 +27,7 @@ impl FormatNodeRule<JsObjectExpression> for FormatJsObjectExpression {
 }
 
 impl NeedsParentheses for JsObjectExpression {
-    fn needs_parentheses_with_parent(&self, parent: &JsSyntaxNode) -> bool {
+    fn needs_parentheses_with_parent(&self, parent: JsSyntaxNode) -> bool {
         matches!(parent.kind(), JsSyntaxKind::JS_EXTENDS_CLAUSE)
             || is_first_in_statement(
                 self.clone().into(),

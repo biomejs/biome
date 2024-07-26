@@ -34,7 +34,7 @@ impl NeedsParentheses for TsParenthesizedType {
     }
 
     #[inline]
-    fn needs_parentheses_with_parent(&self, _parent: &JsSyntaxNode) -> bool {
+    fn needs_parentheses_with_parent(&self, _parent: JsSyntaxNode) -> bool {
         false
     }
 }

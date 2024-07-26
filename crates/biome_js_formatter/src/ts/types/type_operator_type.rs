@@ -21,8 +21,8 @@ impl FormatNodeRule<TsTypeOperatorType> for FormatTsTypeOperatorType {
 }
 
 impl NeedsParentheses for TsTypeOperatorType {
-    fn needs_parentheses_with_parent(&self, parent: &JsSyntaxNode) -> bool {
-        operator_type_or_higher_needs_parens(self.syntax(), parent)
+    fn needs_parentheses_with_parent(&self, parent: JsSyntaxNode) -> bool {
+        operator_type_or_higher_needs_parens(self.syntax(), &parent)
     }
 }
 

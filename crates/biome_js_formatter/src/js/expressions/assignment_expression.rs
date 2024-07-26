@@ -27,15 +27,15 @@ impl FormatNodeRule<JsAssignmentExpression> for FormatJsAssignmentExpression {
 }
 
 impl NeedsParentheses for JsAssignmentExpression {
-    fn needs_parentheses_with_parent(&self, parent: &JsSyntaxNode) -> bool {
+    fn needs_parentheses_with_parent(&self, parent: JsSyntaxNode) -> bool {
         match_ast! {
-            match parent {
+            match &parent {
                 JsAssignmentExpression(_) => false,
                 // `[a = b]`
                 JsComputedMemberName(_) => false,
 
                 JsArrowFunctionExpression(_) => {
-                    is_arrow_function_body(self.syntax(), parent)
+                    is_arrow_function_body(self.syntax(), &parent)
                 },
 
                 JsForStatement(for_statement) => {

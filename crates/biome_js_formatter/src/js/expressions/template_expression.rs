@@ -91,9 +91,9 @@ impl AnyJsTemplate {
 
 /// `TemplateLiteral`'s are `PrimaryExpression's that never need parentheses.
 impl NeedsParentheses for JsTemplateExpression {
-    fn needs_parentheses_with_parent(&self, parent: &JsSyntaxNode) -> bool {
+    fn needs_parentheses_with_parent(&self, parent: JsSyntaxNode) -> bool {
         if self.tag().is_some() {
-            member_chain_callee_needs_parens(self.clone().into(), parent)
+            member_chain_callee_needs_parens(self.clone().into(), &parent)
         } else {
             false
         }

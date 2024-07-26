@@ -69,11 +69,11 @@ impl FormatNodeRule<TsTypeAssertionExpression> for FormatTsTypeAssertionExpressi
 }
 
 impl NeedsParentheses for TsTypeAssertionExpression {
-    fn needs_parentheses_with_parent(&self, parent: &JsSyntaxNode) -> bool {
+    fn needs_parentheses_with_parent(&self, parent: JsSyntaxNode) -> bool {
         match parent.kind() {
             JsSyntaxKind::TS_AS_EXPRESSION => true,
             JsSyntaxKind::TS_SATISFIES_EXPRESSION => true,
-            _ => type_cast_like_needs_parens(self.syntax(), parent),
+            _ => type_cast_like_needs_parens(self.syntax(), &parent),
         }
     }
 }

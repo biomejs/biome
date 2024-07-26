@@ -30,7 +30,7 @@ impl FormatNodeRule<TsInferType> for FormatTsInferType {
 }
 
 impl NeedsParentheses for TsInferType {
-    fn needs_parentheses_with_parent(&self, parent: &JsSyntaxNode) -> bool {
+    fn needs_parentheses_with_parent(&self, parent: JsSyntaxNode) -> bool {
         if parent.kind() == JsSyntaxKind::TS_REST_TUPLE_TYPE_ELEMENT {
             false
         } else if matches!(
@@ -40,7 +40,7 @@ impl NeedsParentheses for TsInferType {
         ) {
             true
         } else {
-            operator_type_or_higher_needs_parens(self.syntax(), parent)
+            operator_type_or_higher_needs_parens(self.syntax(), &parent)
         }
     }
 }

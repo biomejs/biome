@@ -47,7 +47,7 @@ impl FormatNodeRule<TsImportType> for FormatTsImportType {
 }
 
 impl NeedsParentheses for TsImportType {
-    fn needs_parentheses_with_parent(&self, _parent: &JsSyntaxNode) -> bool {
+    fn needs_parentheses_with_parent(&self, _parent: JsSyntaxNode) -> bool {
         false
     }
 }

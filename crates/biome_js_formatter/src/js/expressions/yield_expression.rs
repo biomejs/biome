@@ -25,9 +25,9 @@ impl FormatNodeRule<JsYieldExpression> for FormatJsYieldExpression {
 }
 
 impl NeedsParentheses for JsYieldExpression {
-    fn needs_parentheses_with_parent(&self, parent: &JsSyntaxNode) -> bool {
+    fn needs_parentheses_with_parent(&self, parent: JsSyntaxNode) -> bool {
         matches!(parent.kind(), JsSyntaxKind::JS_AWAIT_EXPRESSION)
-            || await_or_yield_needs_parens(parent, self.syntax())
+            || await_or_yield_needs_parens(&parent, self.syntax())
             || parent.kind() == JsSyntaxKind::TS_TYPE_ASSERTION_EXPRESSION
     }
 }
