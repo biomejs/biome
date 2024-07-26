@@ -438,7 +438,7 @@ pub struct AnalyzerCapabilities {
     pub(crate) fix_all: Option<FixAll>,
     /// It renames a binding inside a file
     pub(crate) rename: Option<Rename>,
-    /// It organize imports
+    /// It organizes imports
     pub(crate) organize_imports: Option<OrganizeImports>,
 }
 
@@ -768,7 +768,7 @@ impl<'a, 'b> LintVisitor<'a, 'b> {
         let has_only_filter = !self.only.is_empty();
         let enabled_rules = if !has_only_filter {
             self.settings
-                .and_then(|settings| settings.as_rules(self.path))
+                .and_then(|settings| settings.as_linter_rules(self.path))
                 .as_ref()
                 .map(|rules| rules.as_enabled_rules())
                 .unwrap_or_default()

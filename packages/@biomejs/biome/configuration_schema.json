@@ -316,10 +316,6 @@
 					"description": "Whether Biome should enable assists via LSP.",
 					"type": ["boolean", "null"]
 				},
-				"enforce": {
-					"description": "Whether Biome should fail in CLI if the assists were not applied to the code.",
-					"type": ["boolean", "null"]
-				},
 				"rules": {
 					"description": "Whether Biome should fail in CLI if the assists were not applied to the code.",
 					"anyOf": [{ "$ref": "#/definitions/Rules2" }, { "type": "null" }]
@@ -915,10 +911,25 @@
 			},
 			"additionalProperties": false
 		},
+		"CssAssists": {
+			"description": "Options that changes how the CSS assists behaves",
+			"type": "object",
+			"properties": {
+				"enabled": {
+					"description": "Control the assists for CSS files.",
+					"type": ["boolean", "null"]
+				}
+			},
+			"additionalProperties": false
+		},
 		"CssConfiguration": {
 			"description": "Options applied to CSS files",
 			"type": "object",
 			"properties": {
+				"assists": {
+					"description": "CSS assists options",
+					"anyOf": [{ "$ref": "#/definitions/CssAssists" }, { "type": "null" }]
+				},
 				"formatter": {
 					"description": "CSS formatter options",
 					"anyOf": [
@@ -976,7 +987,7 @@
 			"type": "object",
 			"properties": {
 				"enabled": {
-					"description": "Control the linter for CSS (and its super languages) files.",
+					"description": "Control the linter for CSS files.",
 					"type": ["boolean", "null"]
 				}
 			},
@@ -1296,10 +1307,28 @@
 			"additionalProperties": false
 		},
 		"IndentWidth": { "type": "integer", "format": "uint8", "minimum": 0.0 },
+		"JavascriptAssists": {
+			"description": "Linter options specific to the JavaScript linter",
+			"type": "object",
+			"properties": {
+				"enabled": {
+					"description": "Control the linter for JavaScript (and its super languages) files.",
+					"type": ["boolean", "null"]
+				}
+			},
+			"additionalProperties": false
+		},
 		"JavascriptConfiguration": {
 			"description": "A set of options applied to the JavaScript files",
 			"type": "object",
 			"properties": {
+				"assists": {
+					"description": "Assists options",
+					"anyOf": [
+						{ "$ref": "#/definitions/JavascriptAssists" },
+						{ "type": "null" }
+					]
+				},
 				"formatter": {
 					"description": "Formatting options",
 					"anyOf": [
@@ -1456,10 +1485,25 @@
 			},
 			"additionalProperties": false
 		},
+		"JsonAssists": {
+			"description": "Linter options specific to the JSON linter",
+			"type": "object",
+			"properties": {
+				"enabled": {
+					"description": "Control the linter for JSON (and its super languages) files.",
+					"type": ["boolean", "null"]
+				}
+			},
+			"additionalProperties": false
+		},
 		"JsonConfiguration": {
 			"description": "Options applied to JSON files",
 			"type": "object",
 			"properties": {
+				"assists": {
+					"description": "Assists options",
+					"anyOf": [{ "$ref": "#/definitions/JsonAssists" }, { "type": "null" }]
+				},
 				"formatter": {
 					"description": "Formatting options",
 					"anyOf": [

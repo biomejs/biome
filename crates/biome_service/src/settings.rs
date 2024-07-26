@@ -9,7 +9,7 @@ use biome_configuration::{
     JavascriptConfiguration, LinterConfiguration, OverrideFormatterConfiguration,
     OverrideLinterConfiguration, OverrideOrganizeImportsConfiguration, Overrides,
     PartialConfiguration, PartialCssConfiguration, PartialGraphqlConfiguration,
-    PartialJavascriptConfiguration, PartialJsonConfiguration, PlainIndentStyle, Rules,
+    PartialJavascriptConfiguration, PartialJsonConfiguration, PlainIndentStyle,
 };
 use biome_css_formatter::context::CssFormatOptions;
 use biome_css_parser::CssParserOptions;
@@ -162,8 +162,10 @@ pub struct Settings {
     pub languages: LanguageListSettings,
     /// Filesystem settings for the workspace
     pub files: FilesSettings,
-    /// Analyzer settings
+    /// Import sorting settings
     pub organize_imports: OrganizeImportsSettings,
+    /// Assists settings
+    pub assists: AssistsSettings,
     /// overrides
     pub override_settings: OverrideSettings,
 }
@@ -286,6 +288,11 @@ impl Settings {
         &self.organize_imports
     }
 
+    /// Retrieves the settings of the organize imports
+    pub fn assists(&self) -> &AssistsSettings {
+        &self.assists
+    }
+
     /// It retrieves the severity based on the `code` of the rule and the current configuration.
     ///
     /// The code of the has the following pattern: `{group}/{rule_name}`.
@@ -303,12 +310,39 @@ impl Settings {
         }
     }
 
-    /// Returns rules taking overrides into account.
-    pub fn as_rules(&self, path: &Path) -> Option<Cow<Rules>> {
+    /// Returns linter rules taking overrides into account.
+    pub fn as_linter_rules(
+        &self,
+        path: &Path,
+    ) -> Option<Cow<biome_configuration::analyzer::linter::Rules>> {
         let mut result = self.linter.rules.as_ref().map(Cow::Borrowed);
         let overrides = &self.override_settings;
         for pattern in overrides.patterns.iter() {
             let pattern_rules = pattern.linter.rules.as_ref();
+            if let Some(pattern_rules) = pattern_rules {
+                if pattern.include.matches_path(path) && !pattern.exclude.matches_path(path) {
+                    result = if let Some(mut result) = result.take() {
+                        // Override rules
+                        result.to_mut().merge_with(pattern_rules.clone());
+                        Some(result)
+                    } else {
+                        Some(Cow::Borrowed(pattern_rules))
+                    };
+                }
+            }
+        }
+        result
+    }
+
+    /// Returns assists rules taking overrides into account.
+    pub fn as_assists_rules(
+        &self,
+        path: &Path,
+    ) -> Option<Cow<biome_configuration::analyzer::assists::Rules>> {
+        let mut result = self.assists.rules.as_ref().map(Cow::Borrowed);
+        let overrides = &self.override_settings;
+        for pattern in overrides.patterns.iter() {
+            let pattern_rules = pattern.assists.rules.as_ref();
             if let Some(pattern_rules) = pattern_rules {
                 if pattern.include.matches_path(path) && !pattern.exclude.matches_path(path) {
                     result = if let Some(mut result) = result.take() {
@@ -385,7 +419,7 @@ pub struct LinterSettings {
     pub enabled: bool,
 
     /// List of rules
-    pub rules: Option<Rules>,
+    pub rules: Option<biome_configuration::analyzer::linter::Rules>,
 
     /// List of ignored paths/files to match
     pub ignored_files: Matcher,
@@ -398,7 +432,7 @@ impl Default for LinterSettings {
     fn default() -> Self {
         Self {
             enabled: true,
-            rules: Some(Rules::default()),
+            rules: Some(biome_configuration::analyzer::linter::Rules::default()),
             ignored_files: Matcher::empty(),
             included_files: Matcher::empty(),
         }
@@ -412,7 +446,7 @@ pub struct OverrideLinterSettings {
     pub enabled: Option<bool>,
 
     /// List of rules
-    pub rules: Option<Rules>,
+    pub rules: Option<biome_configuration::analyzer::linter::Rules>,
 }
 
 /// Linter settings for the entire workspace
@@ -438,11 +472,31 @@ impl Default for OrganizeImportsSettings {
     }
 }
 
-/// Linter settings for the entire workspace
+/// Organize imports settings for the entire workspace
 #[derive(Debug, Default)]
 pub struct OverrideOrganizeImportsSettings {
     /// Enabled by default
     pub enabled: Option<bool>,
+}
+
+/// Linter settings for the entire workspace
+#[derive(Default, Debug)]
+pub struct AssistsSettings {
+    /// Enabled by default
+    pub enabled: bool,
+
+    /// List of rules
+    pub rules: Option<biome_configuration::analyzer::assists::Rules>,
+}
+
+/// Assists settings for the entire workspace
+#[derive(Debug, Default)]
+pub struct OverrideAssistsSettings {
+    /// Enabled by default
+    pub enabled: Option<bool>,
+
+    /// List of rules
+    pub rules: Option<biome_configuration::analyzer::assists::Rules>,
 }
 
 /// Static map of language names to language-specific settings
@@ -987,6 +1041,19 @@ impl OverrideSettings {
             None
         })
     }
+
+    /// Scans the overrides and checks if there's an override that disable the assists for `path`
+    pub fn assists_disabled(&self, path: &Path) -> Option<bool> {
+        // Reverse the traversal as only the last override takes effect
+        self.patterns.iter().rev().find_map(|pattern| {
+            if let Some(enabled) = pattern.assists.enabled {
+                if pattern.include.matches_path(path) && !pattern.exclude.matches_path(path) {
+                    return Some(!enabled);
+                }
+            }
+            None
+        })
+    }
 }
 
 #[derive(Debug, Default)]
@@ -999,6 +1066,8 @@ pub struct OverrideSettingPattern {
     pub linter: OverrideLinterSettings,
     /// Linter settings applied to all files in the workspace
     pub organize_imports: OverrideOrganizeImportsSettings,
+    /// Linter settings applied to all files in the workspace
+    pub assists: OverrideAssistsSettings,
     /// Language specific settings
     pub languages: LanguageListSettings,
 

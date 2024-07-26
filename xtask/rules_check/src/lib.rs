@@ -11,6 +11,7 @@ use biome_console::{markup, Console};
 use biome_css_parser::CssParserOptions;
 use biome_css_syntax::CssLanguage;
 use biome_diagnostics::{Diagnostic, DiagnosticExt, PrintDiagnostic};
+use biome_graphql_syntax::GraphqlLanguage;
 use biome_js_parser::JsParserOptions;
 use biome_js_syntax::{EmbeddingKind, JsFileSource, JsLanguage};
 use biome_json_parser::JsonParserOptions;
@@ -39,9 +40,8 @@ pub fn check_rules() -> anyhow::Result<()> {
 
         fn record_rule<R>(&mut self)
         where
-            R: Rule + 'static,
-            R::Query: Queryable<Language = JsLanguage>,
-            <R::Query as Queryable>::Output: Clone,
+            R: Rule<Options: Default, Query: Queryable<Language = JsLanguage, Output: Clone>>
+                + 'static,
         {
             self.groups
                 .entry(<R::Group as RuleGroup>::NAME)
@@ -59,9 +59,8 @@ pub fn check_rules() -> anyhow::Result<()> {
 
         fn record_rule<R>(&mut self)
         where
-            R: Rule + 'static,
-            R::Query: Queryable<Language = JsonLanguage>,
-            <R::Query as Queryable>::Output: Clone,
+            R: Rule<Options: Default, Query: Queryable<Language = JsonLanguage, Output: Clone>>
+                + 'static,
         {
             self.groups
                 .entry(<R::Group as RuleGroup>::NAME)
@@ -79,9 +78,27 @@ pub fn check_rules() -> anyhow::Result<()> {
 
         fn record_rule<R>(&mut self)
         where
-            R: Rule + 'static,
-            R::Query: Queryable<Language = CssLanguage>,
-            <R::Query as Queryable>::Output: Clone,
+            R: Rule<Options: Default, Query: Queryable<Language = CssLanguage, Output: Clone>>
+                + 'static,
+        {
+            self.groups
+                .entry(<R::Group as RuleGroup>::NAME)
+                .or_default()
+                .insert(R::METADATA.name, R::METADATA);
+        }
+    }
+
+    impl RegistryVisitor<GraphqlLanguage> for LintRulesVisitor {
+        fn record_category<C: GroupCategory<Language = GraphqlLanguage>>(&mut self) {
+            if matches!(C::CATEGORY, RuleCategory::Lint) {
+                C::record_groups(self);
+            }
+        }
+
+        fn record_rule<R>(&mut self)
+        where
+            R: Rule<Options: Default, Query: Queryable<Language = GraphqlLanguage, Output: Clone>>
+                + 'static,
         {
             self.groups
                 .entry(<R::Group as RuleGroup>::NAME)
@@ -94,6 +111,7 @@ pub fn check_rules() -> anyhow::Result<()> {
     biome_js_analyze::visit_registry(&mut visitor);
     biome_json_analyze::visit_registry(&mut visitor);
     biome_css_analyze::visit_registry(&mut visitor);
+    biome_graphql_analyze::visit_registry(&mut visitor);
 
     let LintRulesVisitor { groups } = visitor;
 

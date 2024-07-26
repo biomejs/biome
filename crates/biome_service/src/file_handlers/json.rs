@@ -327,7 +327,7 @@ fn lint(params: LintParams) -> LintResults {
                 .workspace
                 .settings()
                 .as_ref()
-                .and_then(|settings| settings.as_rules(params.path.as_path()));
+                .and_then(|settings| settings.as_linter_rules(params.path.as_path()));
 
             let mut enabled_rules = vec![];
             let mut disabled_rules = vec![];
@@ -487,7 +487,7 @@ fn code_actions(params: CodeActionsParams) -> PullActionsResult {
         trace_span!("Parsed file", tree =? tree).in_scope(move || {
             let analyzer_options =
                 workspace.analyzer_options::<JsonLanguage>(params.path, &params.language);
-            let rules = settings.as_rules(params.path);
+            let rules = settings.as_linter_rules(params.path);
             let mut actions = Vec::new();
             let mut enabled_rules = vec![];
             // TODO: remove once the actions will be configurable via configuration

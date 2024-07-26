@@ -302,7 +302,7 @@ fn lint(params: LintParams) -> LintResults {
                 .workspace
                 .settings()
                 .as_ref()
-                .and_then(|settings| settings.as_rules(params.path.as_path()));
+                .and_then(|settings| settings.as_linter_rules(params.path.as_path()));
 
             let mut enabled_rules = vec![];
             let mut disabled_rules = vec![];
@@ -422,7 +422,7 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
     debug_span!("Code actions GraphQL", range =? range, path =? path).in_scope(move || {
         let tree = parse.tree();
         trace_span!("Parsed file", tree =? tree).in_scope(move || {
-            let rules = settings.as_rules(params.path.as_path());
+            let rules = settings.as_linter_rules(params.path.as_path());
             let filter = rules
                 .as_ref()
                 .map(|rules| rules.as_enabled_rules())
@@ -483,7 +483,7 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
     };
 
     // Compute final rules (taking `overrides` into account)
-    let rules = settings.as_rules(params.biome_path.as_path());
+    let rules = settings.as_linter_rules(params.biome_path.as_path());
 
     let mut lint_visitor = LintVisitor::new(
         &params.only,

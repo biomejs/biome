@@ -15,10 +15,6 @@ pub struct Assists {
     pub enabled: Option<bool>,
 
     /// Whether Biome should fail in CLI if the assists were not applied to the code.
-    #[partial(bpaf(long("assists-enforce"), argument("true|false")))]
-    pub enforce: Option<bool>,
-
-    /// Whether Biome should fail in CLI if the assists were not applied to the code.
     #[partial(bpaf(pure(Default::default()), optional, hide))]
     pub rules: Rules,
 }
@@ -27,7 +23,6 @@ impl Default for Assists {
     fn default() -> Self {
         Self {
             enabled: Some(false),
-            enforce: Some(false),
             rules: Rules::default(),
         }
     }

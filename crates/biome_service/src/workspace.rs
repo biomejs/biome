@@ -120,11 +120,12 @@ impl FileFeaturesResult {
     }
 
     /// By default, all features are not supported by a file.
-    const WORKSPACE_FEATURES: [(FeatureKind, SupportKind); 4] = [
+    const WORKSPACE_FEATURES: [(FeatureKind, SupportKind); 5] = [
         (FeatureKind::Lint, SupportKind::FileNotSupported),
         (FeatureKind::Format, SupportKind::FileNotSupported),
         (FeatureKind::OrganizeImports, SupportKind::FileNotSupported),
         (FeatureKind::Search, SupportKind::FileNotSupported),
+        (FeatureKind::Assists, SupportKind::FileNotSupported),
     ];
 
     pub fn new() -> Self {
@@ -146,6 +147,12 @@ impl FileFeaturesResult {
             self.features_supported
                 .insert(FeatureKind::OrganizeImports, SupportKind::Supported);
         }
+
+        if capabilities.analyzer.code_actions.is_some() {
+            self.features_supported
+                .insert(FeatureKind::Assists, SupportKind::Supported);
+        }
+
         if capabilities.search.search.is_some() {
             self.features_supported
                 .insert(FeatureKind::Search, SupportKind::Supported);
@@ -205,6 +212,17 @@ impl FileFeaturesResult {
         } else if !settings.organize_imports().enabled {
             self.features_supported
                 .insert(FeatureKind::OrganizeImports, SupportKind::FeatureNotEnabled);
+        }
+
+        // assists
+        if let Some(disabled) = settings.override_settings.assists_disabled(path) {
+            if disabled {
+                self.features_supported
+                    .insert(FeatureKind::Assists, SupportKind::FeatureNotEnabled);
+            }
+        } else if !settings.assists().enabled {
+            self.features_supported
+                .insert(FeatureKind::Assists, SupportKind::FeatureNotEnabled);
         }
 
         debug!(

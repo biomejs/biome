@@ -94,16 +94,16 @@ export interface PartialAssists {
 	/**
 	 * Whether Biome should fail in CLI if the assists were not applied to the code.
 	 */
-	enforce?: boolean;
-	/**
-	 * Whether Biome should fail in CLI if the assists were not applied to the code.
-	 */
 	rules?: Rules2;
 }
 /**
  * Options applied to CSS files
  */
 export interface PartialCssConfiguration {
+	/**
+	 * CSS assists options
+	 */
+	assists?: PartialCssAssists;
 	/**
 	 * CSS formatter options
 	 */
@@ -204,6 +204,10 @@ export interface PartialGraphqlConfiguration {
  */
 export interface PartialJavascriptConfiguration {
 	/**
+	 * Assists options
+	 */
+	assists?: PartialJavascriptAssists;
+	/**
 	 * Formatting options
 	 */
 	formatter?: PartialJavascriptFormatter;
@@ -231,6 +235,10 @@ If defined here, they should not emit diagnostics.
  * Options applied to JSON files
  */
 export interface PartialJsonConfiguration {
+	/**
+	 * Assists options
+	 */
+	assists?: PartialJsonAssists;
 	/**
 	 * Formatting options
 	 */
@@ -316,6 +324,15 @@ export interface Rules2 {
 	refactor?: Refactor;
 }
 /**
+ * Options that changes how the CSS assists behaves
+ */
+export interface PartialCssAssists {
+	/**
+	 * Control the assists for CSS files.
+	 */
+	enabled?: boolean;
+}
+/**
  * Options that changes how the CSS formatter behaves
  */
 export interface PartialCssFormatter {
@@ -349,7 +366,7 @@ export interface PartialCssFormatter {
  */
 export interface PartialCssLinter {
 	/**
-	 * Control the linter for CSS (and its super languages) files.
+	 * Control the linter for CSS files.
 	 */
 	enabled?: boolean;
 }
@@ -416,6 +433,15 @@ export interface PartialGraphqlFormatter {
 export interface PartialGraphqlLinter {
 	/**
 	 * Control the formatter for GraphQL files.
+	 */
+	enabled?: boolean;
+}
+/**
+ * Linter options specific to the JavaScript linter
+ */
+export interface PartialJavascriptAssists {
+	/**
+	 * Control the linter for JavaScript (and its super languages) files.
 	 */
 	enabled?: boolean;
 }
@@ -512,6 +538,15 @@ export interface PartialJavascriptParser {
 These decorators belong to an old proposal, and they are subject to change. 
 	 */
 	unsafeParameterDecoratorsEnabled?: boolean;
+}
+/**
+ * Linter options specific to the JSON linter
+ */
+export interface PartialJsonAssists {
+	/**
+	 * Control the linter for JSON (and its super languages) files.
+	 */
+	enabled?: boolean;
 }
 export interface PartialJsonFormatter {
 	/**
