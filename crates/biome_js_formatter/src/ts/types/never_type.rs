@@ -2,7 +2,7 @@ use crate::prelude::*;
 
 use crate::parentheses::NeedsParentheses;
 use biome_formatter::write;
-use biome_js_syntax::{JsSyntaxNode, TsNeverType, TsNeverTypeFields};
+use biome_js_syntax::{TsNeverType, TsNeverTypeFields};
 
 #[derive(Debug, Clone, Default)]
 pub struct FormatTsNeverType;
@@ -19,7 +19,7 @@ impl FormatNodeRule<TsNeverType> for FormatTsNeverType {
 }
 
 impl NeedsParentheses for TsNeverType {
-    fn needs_parentheses_with_parent(&self, _parent: JsSyntaxNode) -> bool {
+    fn needs_parentheses(&self) -> bool {
         false
     }
 }

@@ -2,7 +2,7 @@ use crate::prelude::*;
 
 use crate::parentheses::NeedsParentheses;
 use biome_formatter::{format_args, write};
-use biome_js_syntax::{AnyJsAssignment, AnyTsType, JsSyntaxKind, JsSyntaxNode, JsSyntaxToken};
+use biome_js_syntax::{AnyJsAssignment, AnyTsType, JsSyntaxKind, JsSyntaxToken};
 use biome_js_syntax::{TsAsAssignment, TsSatisfiesAssignment};
 use biome_rowan::{declare_node_union, SyntaxResult};
 
@@ -20,8 +20,8 @@ impl FormatNodeRule<TsAsAssignment> for FormatTsAsAssignment {
 }
 
 impl NeedsParentheses for TsAsAssignment {
-    fn needs_parentheses_with_parent(&self, parent: JsSyntaxNode) -> bool {
-        TsAsOrSatisfiesAssignment::from(self.clone()).needs_parentheses_with_parent(parent)
+    fn needs_parentheses(&self) -> bool {
+        TsAsOrSatisfiesAssignment::from(self.clone()).needs_parentheses()
     }
 }
 
@@ -46,16 +46,18 @@ impl Format<JsFormatContext> for TsAsOrSatisfiesAssignment {
 }
 
 impl NeedsParentheses for TsAsOrSatisfiesAssignment {
-    fn needs_parentheses_with_parent(&self, parent: JsSyntaxNode) -> bool {
-        matches!(
-            parent.kind(),
-            JsSyntaxKind::JS_ASSIGNMENT_EXPRESSION
-                | JsSyntaxKind::TS_NON_NULL_ASSERTION_ASSIGNMENT
-                | JsSyntaxKind::TS_TYPE_ASSERTION_ASSIGNMENT
-                | JsSyntaxKind::JS_PRE_UPDATE_EXPRESSION
-                | JsSyntaxKind::JS_POST_UPDATE_EXPRESSION
-                | JsSyntaxKind::JS_OBJECT_ASSIGNMENT_PATTERN_PROPERTY
-        )
+    fn needs_parentheses(&self) -> bool {
+        self.syntax().parent().is_some_and(|parent| {
+            matches!(
+                parent.kind(),
+                JsSyntaxKind::JS_ASSIGNMENT_EXPRESSION
+                    | JsSyntaxKind::TS_NON_NULL_ASSERTION_ASSIGNMENT
+                    | JsSyntaxKind::TS_TYPE_ASSERTION_ASSIGNMENT
+                    | JsSyntaxKind::JS_PRE_UPDATE_EXPRESSION
+                    | JsSyntaxKind::JS_POST_UPDATE_EXPRESSION
+                    | JsSyntaxKind::JS_OBJECT_ASSIGNMENT_PATTERN_PROPERTY
+            )
+        })
     }
 }
 

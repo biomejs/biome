@@ -5,7 +5,7 @@ use crate::parentheses::NeedsParentheses;
 use biome_formatter::{format_args, write};
 use biome_js_syntax::{
     AnyJsComputedMember, AnyJsExpression, AnyJsLiteralExpression, JsComputedMemberExpression,
-    JsSyntaxKind, JsSyntaxNode,
+    JsSyntaxKind,
 };
 
 #[derive(Debug, Clone, Default)]
@@ -74,12 +74,12 @@ impl Format<JsFormatContext> for FormatComputedMemberLookup<'_> {
 }
 
 impl NeedsParentheses for JsComputedMemberExpression {
-    fn needs_parentheses_with_parent(&self, parent: JsSyntaxNode) -> bool {
-        if matches!(parent.kind(), JsSyntaxKind::JS_NEW_EXPRESSION) && self.is_optional_chain() {
-            return true;
-        }
-
-        member_chain_callee_needs_parens(self.clone().into(), &parent)
+    fn needs_parentheses(&self) -> bool {
+        let Some(parent) = self.syntax().parent() else {
+            return false;
+        };
+        (parent.kind() == JsSyntaxKind::JS_NEW_EXPRESSION && self.is_optional_chain())
+            || member_chain_callee_needs_parens(self.clone().into(), &parent)
     }
 }
 

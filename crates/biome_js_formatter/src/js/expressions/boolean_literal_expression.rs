@@ -2,8 +2,8 @@ use crate::prelude::*;
 
 use crate::parentheses::NeedsParentheses;
 use biome_formatter::write;
+use biome_js_syntax::JsBooleanLiteralExpression;
 use biome_js_syntax::JsBooleanLiteralExpressionFields;
-use biome_js_syntax::{JsBooleanLiteralExpression, JsSyntaxNode};
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatJsBooleanLiteralExpression;
@@ -27,10 +27,6 @@ impl FormatNodeRule<JsBooleanLiteralExpression> for FormatJsBooleanLiteralExpres
 impl NeedsParentheses for JsBooleanLiteralExpression {
     #[inline(always)]
     fn needs_parentheses(&self) -> bool {
-        false
-    }
-    #[inline(always)]
-    fn needs_parentheses_with_parent(&self, _parent: JsSyntaxNode) -> bool {
         false
     }
 }

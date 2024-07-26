@@ -5,8 +5,8 @@ use crate::utils::{
     TsIntersectionOrUnionTypeList,
 };
 use biome_formatter::{format_args, write, Buffer};
+use biome_js_syntax::TsUnionTypeFields;
 use biome_js_syntax::{JsSyntaxKind, JsSyntaxToken, TsTupleTypeElementList, TsUnionType};
-use biome_js_syntax::{JsSyntaxNode, TsUnionTypeFields};
 use biome_rowan::SyntaxNodeOptionExt;
 
 #[derive(Debug, Clone, Default)]
@@ -156,10 +156,9 @@ impl FormatNodeRule<TsUnionType> for FormatTsUnionType {
 }
 
 impl NeedsParentheses for TsUnionType {
-    fn needs_parentheses_with_parent(&self, parent: JsSyntaxNode) -> bool {
+    fn needs_parentheses(&self) -> bool {
         union_or_intersection_type_needs_parentheses(
             self.syntax(),
-            &parent,
             &TsIntersectionOrUnionTypeList::TsUnionTypeVariantList(self.types()),
         )
     }

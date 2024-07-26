@@ -1,8 +1,9 @@
 use crate::prelude::*;
+use crate::utils::AnyJsBinaryLikeExpression;
 use biome_formatter::write;
 
 use crate::parentheses::{
-    is_binary_like_left_or_right, is_callee, is_conditional_test, is_member_object, is_spread,
+    is_callee, is_conditional_test, is_member_object, is_spread,
     update_or_lower_expression_needs_parentheses, NeedsParentheses,
 };
 
@@ -61,7 +62,10 @@ impl FormatNodeRule<JsAwaitExpression> for FormatJsAwaitExpression {
 }
 
 impl NeedsParentheses for JsAwaitExpression {
-    fn needs_parentheses_with_parent(&self, parent: JsSyntaxNode) -> bool {
+    fn needs_parentheses(&self) -> bool {
+        let Some(parent) = self.syntax().parent() else {
+            return false;
+        };
         await_or_yield_needs_parens(&parent, self.syntax())
     }
 }
@@ -71,18 +75,15 @@ pub(super) fn await_or_yield_needs_parens(parent: &JsSyntaxNode, node: &JsSyntax
         node.kind(),
         JsSyntaxKind::JS_AWAIT_EXPRESSION | JsSyntaxKind::JS_YIELD_EXPRESSION
     ));
-
     match parent.kind() {
         JsSyntaxKind::JS_UNARY_EXPRESSION
         | JsSyntaxKind::TS_AS_EXPRESSION
         | JsSyntaxKind::TS_SATISFIES_EXPRESSION => true,
-
         _ => {
-            let expression = node;
             is_conditional_test(node, parent)
-                || update_or_lower_expression_needs_parentheses(expression, parent)
-                || is_spread(expression, parent)
-                || is_binary_like_left_or_right(node, parent)
+                || update_or_lower_expression_needs_parentheses(node, parent)
+                || is_spread(node, parent)
+                || AnyJsBinaryLikeExpression::can_cast(parent.kind())
         }
     }
 }

@@ -1,12 +1,11 @@
 use crate::prelude::*;
-use crate::utils::{AnyJsConditional, ConditionalJsxChain};
+use crate::utils::{AnyJsBinaryLikeExpression, AnyJsConditional, ConditionalJsxChain};
 use biome_formatter::FormatRuleWithOptions;
 
 use crate::parentheses::{
-    is_binary_like_left_or_right, is_conditional_test, is_spread,
-    update_or_lower_expression_needs_parentheses, NeedsParentheses,
+    is_conditional_test, is_spread, update_or_lower_expression_needs_parentheses, NeedsParentheses,
 };
-use biome_js_syntax::{JsConditionalExpression, JsSyntaxKind, JsSyntaxNode};
+use biome_js_syntax::{JsConditionalExpression, JsSyntaxKind};
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatJsConditionalExpression {
@@ -40,18 +39,20 @@ impl FormatNodeRule<JsConditionalExpression> for FormatJsConditionalExpression {
 }
 
 impl NeedsParentheses for JsConditionalExpression {
-    fn needs_parentheses_with_parent(&self, parent: JsSyntaxNode) -> bool {
+    fn needs_parentheses(&self) -> bool {
+        let Some(parent) = self.syntax().parent() else {
+            return false;
+        };
         match parent.kind() {
             JsSyntaxKind::JS_UNARY_EXPRESSION
             | JsSyntaxKind::JS_AWAIT_EXPRESSION
             | JsSyntaxKind::TS_TYPE_ASSERTION_EXPRESSION
             | JsSyntaxKind::TS_AS_EXPRESSION
             | JsSyntaxKind::TS_SATISFIES_EXPRESSION => true,
-
             _ => {
                 is_conditional_test(self.syntax(), &parent)
                     || update_or_lower_expression_needs_parentheses(self.syntax(), &parent)
-                    || is_binary_like_left_or_right(self.syntax(), &parent)
+                    || AnyJsBinaryLikeExpression::can_cast(parent.kind())
                     || is_spread(self.syntax(), &parent)
             }
         }

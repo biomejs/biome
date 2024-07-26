@@ -3,9 +3,9 @@ use crate::prelude::*;
 use crate::utils::{FormatLiteralStringToken, StringLiteralParentKind};
 
 use crate::parentheses::NeedsParentheses;
+use biome_js_syntax::JsStringLiteralExpression;
 use biome_js_syntax::JsStringLiteralExpressionFields;
 use biome_js_syntax::{JsExpressionStatement, JsSyntaxKind};
-use biome_js_syntax::{JsStringLiteralExpression, JsSyntaxNode};
 use biome_rowan::AstNode;
 
 #[derive(Debug, Clone, Default)]
@@ -32,19 +32,20 @@ impl FormatNodeRule<JsStringLiteralExpression> for FormatJsStringLiteralExpressi
 }
 
 impl NeedsParentheses for JsStringLiteralExpression {
-    fn needs_parentheses_with_parent(&self, parent: JsSyntaxNode) -> bool {
-        if let Some(expression_statement) = JsExpressionStatement::cast(parent) {
-            return expression_statement
+    fn needs_parentheses(&self) -> bool {
+        if let Some(expression_statement) = self.parent::<JsExpressionStatement>() {
+            expression_statement
                 .syntax()
                 .parent()
-                .map_or(false, |grand_parent| {
+                .is_some_and(|grand_parent| {
                     matches!(
                         grand_parent.kind(),
                         JsSyntaxKind::JS_STATEMENT_LIST | JsSyntaxKind::JS_MODULE_ITEM_LIST
                     )
-                });
+                })
+        } else {
+            false
         }
-        false
     }
 }
 

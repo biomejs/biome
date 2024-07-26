@@ -1,14 +1,8 @@
+use crate::parentheses::{unary_like_expression_needs_parentheses, NeedsParentheses};
 use crate::prelude::*;
 use biome_formatter::{format_args, write};
-
-use crate::parentheses::{unary_like_expression_needs_parentheses, NeedsParentheses};
-
-use biome_js_syntax::JsSyntaxNode;
-use biome_js_syntax::JsUnaryExpression;
-use biome_js_syntax::{
-    JsInExpression, JsInstanceofExpression, JsUnaryExpressionFields, JsUnaryOperator,
-};
-use biome_rowan::match_ast;
+use biome_js_syntax::{AnyJsExpression, JsUnaryExpression};
+use biome_js_syntax::{JsUnaryExpressionFields, JsUnaryOperator};
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatJsUnaryExpression;
@@ -57,26 +51,22 @@ impl FormatNodeRule<JsUnaryExpression> for FormatJsUnaryExpression {
 }
 
 impl NeedsParentheses for JsUnaryExpression {
-    fn needs_parentheses_with_parent(&self, parent: JsSyntaxNode) -> bool {
-        match_ast! {
-            match &parent {
-                JsUnaryExpression(parent_unary) => {
-                    let parent_operator = parent_unary.operator();
-                    let operator = self.operator();
+    fn needs_parentheses(&self) -> bool {
+        match self.parent::<AnyJsExpression>() {
+            Some(AnyJsExpression::JsUnaryExpression(parent_unary)) => {
+                let parent_operator = parent_unary.operator();
+                let operator = self.operator();
 
-                    matches!(operator, Ok(JsUnaryOperator::Plus | JsUnaryOperator::Minus))
-                        && parent_operator == operator
-                },
-                // A user typing `!foo instanceof Bar` probably intended `!(foo instanceof Bar)`,
-                // so format to `(!foo) instance Bar` to what is really happening
-                JsInstanceofExpression(_) => true,
-                // A user typing `!foo in bar` probably intended `!(foo instanceof Bar)`,
-                // so format to `(!foo) in bar` to what is really happening
-                JsInExpression(_) => true,
-                _ => {
-                    unary_like_expression_needs_parentheses(self.syntax(), &parent)
-                }
+                matches!(operator, Ok(JsUnaryOperator::Plus | JsUnaryOperator::Minus))
+                    && parent_operator == operator
             }
+            // A user typing `!foo instanceof Bar` probably intended `!(foo instanceof Bar)`,
+            // so format to `(!foo) instance Bar` to what is really happening
+            Some(AnyJsExpression::JsInstanceofExpression(_)) => true,
+            // A user typing `!foo in bar` probably intended `!(foo instanceof Bar)`,
+            // so format to `(!foo) in bar` to what is really happening
+            Some(AnyJsExpression::JsInExpression(_)) => true,
+            _ => unary_like_expression_needs_parentheses(self.syntax()),
         }
     }
 }

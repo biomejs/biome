@@ -8,15 +8,15 @@ use std::iter::once;
 use crate::context::trailing_commas::FormatTrailingCommas;
 use crate::js::expressions::call_arguments::GroupedCallArgumentLayout;
 use crate::parentheses::{
-    is_binary_like_left_or_right, is_callee, is_conditional_test,
-    update_or_lower_expression_needs_parentheses, AnyJsExpressionLeftSide, NeedsParentheses,
+    is_callee, is_conditional_test, update_or_lower_expression_needs_parentheses,
+    AnyJsExpressionLeftSide, NeedsParentheses,
 };
 use crate::utils::function_body::{FormatMaybeCachedFunctionBody, FunctionBodyCacheMode};
-use crate::utils::{resolve_left_most_expression, AssignmentLikeLayout};
+use crate::utils::{resolve_left_most_expression, AnyJsBinaryLikeExpression, AssignmentLikeLayout};
 use biome_js_syntax::{
     is_test_call_argument, AnyJsArrowFunctionParameters, AnyJsBindingPattern, AnyJsExpression,
     AnyJsFormalParameter, AnyJsFunctionBody, AnyJsParameter, AnyJsTemplateElement,
-    JsArrowFunctionExpression, JsFormalParameter, JsSyntaxKind, JsSyntaxNode, JsTemplateExpression,
+    JsArrowFunctionExpression, JsFormalParameter, JsSyntaxKind, JsTemplateExpression,
 };
 use biome_rowan::{SyntaxNodeOptionExt, SyntaxResult};
 
@@ -369,7 +369,7 @@ fn should_add_parens(body: &AnyJsFunctionBody) -> bool {
             expression @ AnyJsExpression::JsConditionalExpression(_),
         ) => {
             let are_parentheses_mandatory = matches!(
-                resolve_left_most_expression(expression),
+                resolve_left_most_expression(expression.clone()),
                 AnyJsExpressionLeftSide::AnyJsExpression(
                     AnyJsExpression::JsObjectExpression(_)
                         | AnyJsExpression::JsFunctionExpression(_)
@@ -821,20 +821,20 @@ impl ArrowFunctionLayout {
 }
 
 impl NeedsParentheses for JsArrowFunctionExpression {
-    fn needs_parentheses_with_parent(&self, parent: JsSyntaxNode) -> bool {
-        match parent.kind() {
+    fn needs_parentheses(&self) -> bool {
+        let Some(parent) = self.syntax().parent() else {
+            return false;
+        };
+        matches!(
+            parent.kind(),
             JsSyntaxKind::TS_AS_EXPRESSION
-            | JsSyntaxKind::TS_SATISFIES_EXPRESSION
-            | JsSyntaxKind::JS_UNARY_EXPRESSION
-            | JsSyntaxKind::JS_AWAIT_EXPRESSION
-            | JsSyntaxKind::TS_TYPE_ASSERTION_EXPRESSION => true,
-
-            _ => {
-                is_conditional_test(self.syntax(), &parent)
-                    || update_or_lower_expression_needs_parentheses(self.syntax(), &parent)
-                    || is_binary_like_left_or_right(self.syntax(), &parent)
-            }
-        }
+                | JsSyntaxKind::TS_SATISFIES_EXPRESSION
+                | JsSyntaxKind::JS_UNARY_EXPRESSION
+                | JsSyntaxKind::JS_AWAIT_EXPRESSION
+                | JsSyntaxKind::TS_TYPE_ASSERTION_EXPRESSION
+        ) || is_conditional_test(self.syntax(), &parent)
+            || update_or_lower_expression_needs_parentheses(self.syntax(), &parent)
+            || AnyJsBinaryLikeExpression::can_cast(parent.kind())
     }
 }
 

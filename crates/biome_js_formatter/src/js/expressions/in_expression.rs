@@ -3,7 +3,7 @@ use crate::utils::{needs_binary_like_parentheses, AnyJsBinaryLikeExpression};
 
 use crate::parentheses::NeedsParentheses;
 
-use biome_js_syntax::{AnyJsStatement, JsInExpression, JsSyntaxNode};
+use biome_js_syntax::{AnyJsStatement, JsInExpression};
 use biome_rowan::AstNode;
 
 #[derive(Debug, Clone, Default)]
@@ -20,12 +20,11 @@ impl FormatNodeRule<JsInExpression> for FormatJsInExpression {
 }
 
 impl NeedsParentheses for JsInExpression {
-    fn needs_parentheses_with_parent(&self, parent: JsSyntaxNode) -> bool {
+    fn needs_parentheses(&self) -> bool {
         if is_in_for_initializer(self) {
             return true;
         }
-
-        needs_binary_like_parentheses(&AnyJsBinaryLikeExpression::from(self.clone()), &parent)
+        needs_binary_like_parentheses(&AnyJsBinaryLikeExpression::from(self.clone()))
     }
 }
 

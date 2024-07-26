@@ -3,9 +3,7 @@ use crate::prelude::*;
 use crate::parentheses::NeedsParentheses;
 use biome_formatter::{format_args, write};
 use biome_js_syntax::JsSyntaxKind::JS_SEQUENCE_EXPRESSION;
-use biome_js_syntax::{
-    JsSequenceExpression, JsSequenceExpressionFields, JsSyntaxKind, JsSyntaxNode,
-};
+use biome_js_syntax::{JsSequenceExpression, JsSequenceExpressionFields, JsSyntaxKind};
 use biome_rowan::AstNode;
 
 #[derive(Debug, Clone, Default)]
@@ -75,7 +73,10 @@ impl FormatNodeRule<JsSequenceExpression> for FormatJsSequenceExpression {
 }
 
 impl NeedsParentheses for JsSequenceExpression {
-    fn needs_parentheses_with_parent(&self, parent: JsSyntaxNode) -> bool {
+    fn needs_parentheses(&self) -> bool {
+        let Some(parent) = self.syntax().parent() else {
+            return false;
+        };
         !matches!(
             parent.kind(),
             JsSyntaxKind::JS_RETURN_STATEMENT |

@@ -2,7 +2,7 @@ use crate::prelude::*;
 
 use crate::parentheses::NeedsParentheses;
 use crate::ts::expressions::as_expression::TsAsOrSatisfiesExpression;
-use biome_js_syntax::{JsSyntaxNode, TsSatisfiesExpression};
+use biome_js_syntax::TsSatisfiesExpression;
 
 #[derive(Debug, Clone, Default)]
 pub struct FormatTsSatisfiesExpression;
@@ -18,8 +18,8 @@ impl FormatNodeRule<TsSatisfiesExpression> for FormatTsSatisfiesExpression {
 }
 
 impl NeedsParentheses for TsSatisfiesExpression {
-    fn needs_parentheses_with_parent(&self, parent: JsSyntaxNode) -> bool {
-        TsAsOrSatisfiesExpression::from(self.clone()).needs_parentheses_with_parent(parent)
+    fn needs_parentheses(&self) -> bool {
+        TsAsOrSatisfiesExpression::from(self.clone()).needs_parentheses()
     }
 }
 

@@ -9,7 +9,7 @@ use biome_formatter::write;
 use biome_js_syntax::{
     AnyJsAssignmentPattern, AnyJsForInitializer, JsArrowFunctionExpression, JsAssignmentExpression,
     JsComputedMemberName, JsExpressionStatement, JsForStatement, JsSequenceExpression,
-    JsSyntaxKind, JsSyntaxNode,
+    JsSyntaxKind,
 };
 use biome_rowan::{match_ast, AstNode};
 
@@ -27,7 +27,10 @@ impl FormatNodeRule<JsAssignmentExpression> for FormatJsAssignmentExpression {
 }
 
 impl NeedsParentheses for JsAssignmentExpression {
-    fn needs_parentheses_with_parent(&self, parent: JsSyntaxNode) -> bool {
+    fn needs_parentheses(&self) -> bool {
+        let Some(parent) = self.syntax().parent() else {
+            return false;
+        };
         match_ast! {
             match &parent {
                 JsAssignmentExpression(_) => false,
@@ -35,7 +38,7 @@ impl NeedsParentheses for JsAssignmentExpression {
                 JsComputedMemberName(_) => false,
 
                 JsArrowFunctionExpression(_) => {
-                    is_arrow_function_body(self.syntax(), &parent)
+                    is_arrow_function_body(self.syntax(), parent)
                 },
 
                 JsForStatement(for_statement) => {

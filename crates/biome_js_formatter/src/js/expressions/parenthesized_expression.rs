@@ -3,7 +3,7 @@ use biome_formatter::{format_args, write, CstFormatContext};
 
 use crate::parentheses::NeedsParentheses;
 use biome_js_syntax::{
-    AnyJsExpression, JsParenthesizedExpression, JsParenthesizedExpressionFields, JsSyntaxNode,
+    AnyJsExpression, JsParenthesizedExpression, JsParenthesizedExpressionFields,
 };
 
 #[derive(Debug, Clone, Default)]
@@ -60,11 +60,6 @@ impl FormatNodeRule<JsParenthesizedExpression> for FormatJsParenthesizedExpressi
 impl NeedsParentheses for JsParenthesizedExpression {
     #[inline(always)]
     fn needs_parentheses(&self) -> bool {
-        false
-    }
-
-    #[inline(always)]
-    fn needs_parentheses_with_parent(&self, _parent: JsSyntaxNode) -> bool {
         false
     }
 }

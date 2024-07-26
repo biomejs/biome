@@ -4,7 +4,7 @@ use crate::utils::jsx::{get_wrap_state, WrapState};
 use biome_formatter::{format_args, write};
 use biome_js_syntax::{
     JsArrowFunctionExpression, JsBinaryExpression, JsBinaryOperator, JsCallArgumentList,
-    JsCallExpression, JsSyntaxKind, JsSyntaxNode, JsxExpressionChild, JsxTagExpression,
+    JsCallExpression, JsSyntaxKind, JsxExpressionChild, JsxTagExpression,
 };
 use biome_rowan::AstNode;
 
@@ -109,7 +109,10 @@ pub fn should_expand(expression: &JsxTagExpression) -> bool {
 }
 
 impl NeedsParentheses for JsxTagExpression {
-    fn needs_parentheses_with_parent(&self, parent: JsSyntaxNode) -> bool {
+    fn needs_parentheses(&self) -> bool {
+        let Some(parent) = self.syntax().parent() else {
+            return false;
+        };
         match parent.kind() {
             JsSyntaxKind::JS_BINARY_EXPRESSION => {
                 let binary = JsBinaryExpression::unwrap_cast(parent.clone());

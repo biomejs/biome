@@ -3,7 +3,7 @@ use crate::prelude::*;
 use crate::parentheses::NeedsParentheses;
 use biome_formatter::write;
 use biome_js_syntax::assign_ext::AnyJsMemberAssignment;
-use biome_js_syntax::{AnyJsExpression, JsIdentifierExpression, JsSyntaxNode};
+use biome_js_syntax::{AnyJsExpression, JsIdentifierExpression};
 use biome_js_syntax::{JsIdentifierExpressionFields, JsSyntaxKind};
 use biome_rowan::SyntaxNodeOptionExt;
 
@@ -23,7 +23,10 @@ impl FormatNodeRule<JsIdentifierExpression> for FormatJsIdentifierExpression {
 }
 
 impl NeedsParentheses for JsIdentifierExpression {
-    fn needs_parentheses_with_parent(&self, parent: JsSyntaxNode) -> bool {
+    fn needs_parentheses(&self) -> bool {
+        let Some(parent) = self.syntax().parent() else {
+            return false;
+        };
         let Ok(name) = self.name().and_then(|x| x.value_token()) else {
             return false;
         };

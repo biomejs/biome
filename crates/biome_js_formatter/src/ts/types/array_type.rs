@@ -2,7 +2,7 @@ use crate::prelude::*;
 
 use crate::parentheses::NeedsParentheses;
 use biome_formatter::write;
-use biome_js_syntax::{JsSyntaxNode, TsArrayType, TsArrayTypeFields};
+use biome_js_syntax::{TsArrayType, TsArrayTypeFields};
 
 #[derive(Debug, Clone, Default)]
 pub struct FormatTsArrayType;
@@ -31,7 +31,7 @@ impl FormatNodeRule<TsArrayType> for FormatTsArrayType {
 
 impl NeedsParentheses for TsArrayType {
     #[inline]
-    fn needs_parentheses_with_parent(&self, _parent: JsSyntaxNode) -> bool {
+    fn needs_parentheses(&self) -> bool {
         false
     }
 }

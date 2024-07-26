@@ -2,8 +2,8 @@ use crate::prelude::*;
 
 use crate::parentheses::NeedsParentheses;
 use biome_formatter::write;
+use biome_js_syntax::TsParenthesizedType;
 use biome_js_syntax::TsParenthesizedTypeFields;
-use biome_js_syntax::{JsSyntaxNode, TsParenthesizedType};
 
 #[derive(Debug, Clone, Default)]
 pub struct FormatTsParenthesizedType;
@@ -30,11 +30,6 @@ impl FormatNodeRule<TsParenthesizedType> for FormatTsParenthesizedType {
 impl NeedsParentheses for TsParenthesizedType {
     #[inline]
     fn needs_parentheses(&self) -> bool {
-        false
-    }
-
-    #[inline]
-    fn needs_parentheses_with_parent(&self, _parent: JsSyntaxNode) -> bool {
         false
     }
 }

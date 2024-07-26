@@ -4,7 +4,7 @@ use crate::parentheses::NeedsParentheses;
 use crate::utils::FormatOptionalSemicolon;
 use biome_formatter::trivia::FormatLeadingComments;
 use biome_formatter::{format_args, write};
-use biome_js_syntax::{JsSyntaxNode, TsMappedType, TsMappedTypeFields};
+use biome_js_syntax::{TsMappedType, TsMappedTypeFields};
 use biome_rowan::Direction;
 
 #[derive(Debug, Clone, Default)]
@@ -96,7 +96,7 @@ impl FormatNodeRule<TsMappedType> for FormatTsMappedType {
 }
 
 impl NeedsParentheses for TsMappedType {
-    fn needs_parentheses_with_parent(&self, _parent: JsSyntaxNode) -> bool {
+    fn needs_parentheses(&self) -> bool {
         false
     }
 }

@@ -2,7 +2,7 @@ use crate::prelude::*;
 
 use crate::parentheses::NeedsParentheses;
 use biome_formatter::write;
-use biome_js_syntax::{JsSyntaxNode, TsUndefinedType, TsUndefinedTypeFields};
+use biome_js_syntax::{TsUndefinedType, TsUndefinedTypeFields};
 
 #[derive(Debug, Clone, Default)]
 pub struct FormatTsUndefinedType;
@@ -20,7 +20,7 @@ impl FormatNodeRule<TsUndefinedType> for FormatTsUndefinedType {
 }
 
 impl NeedsParentheses for TsUndefinedType {
-    fn needs_parentheses_with_parent(&self, _parent: JsSyntaxNode) -> bool {
+    fn needs_parentheses(&self) -> bool {
         false
     }
 }

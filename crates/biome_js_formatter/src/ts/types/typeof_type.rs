@@ -2,9 +2,7 @@ use crate::prelude::*;
 
 use crate::parentheses::NeedsParentheses;
 use biome_formatter::write;
-use biome_js_syntax::{
-    JsSyntaxKind, JsSyntaxNode, TsIndexedAccessType, TsTypeofType, TsTypeofTypeFields,
-};
+use biome_js_syntax::{JsSyntaxKind, TsIndexedAccessType, TsTypeofType, TsTypeofTypeFields};
 use biome_rowan::AstNode;
 
 #[derive(Debug, Clone, Default)]
@@ -35,7 +33,10 @@ impl FormatNodeRule<TsTypeofType> for FormatTsTypeofType {
 }
 
 impl NeedsParentheses for TsTypeofType {
-    fn needs_parentheses_with_parent(&self, parent: JsSyntaxNode) -> bool {
+    fn needs_parentheses(&self) -> bool {
+        let Some(parent) = self.syntax().parent() else {
+            return false;
+        };
         match parent.kind() {
             JsSyntaxKind::TS_ARRAY_TYPE => true,
             // Typeof operators are parenthesized when used as an object type in an indexed access

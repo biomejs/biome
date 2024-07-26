@@ -2,7 +2,7 @@ use crate::prelude::*;
 use crate::utils::{needs_binary_like_parentheses, AnyJsBinaryLikeExpression};
 
 use crate::parentheses::NeedsParentheses;
-use biome_js_syntax::{JsInstanceofExpression, JsSyntaxNode};
+use biome_js_syntax::JsInstanceofExpression;
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatJsInstanceofExpression;
@@ -22,8 +22,8 @@ impl FormatNodeRule<JsInstanceofExpression> for FormatJsInstanceofExpression {
 }
 
 impl NeedsParentheses for JsInstanceofExpression {
-    fn needs_parentheses_with_parent(&self, parent: JsSyntaxNode) -> bool {
-        needs_binary_like_parentheses(&AnyJsBinaryLikeExpression::from(self.clone()), &parent)
+    fn needs_parentheses(&self) -> bool {
+        needs_binary_like_parentheses(&AnyJsBinaryLikeExpression::from(self.clone()))
     }
 }
 

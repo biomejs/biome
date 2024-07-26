@@ -106,18 +106,20 @@ pub(crate) fn should_hug_type(ty: &AnyTsType, f: &Formatter<JsFormatContext>) ->
 
 pub(crate) fn union_or_intersection_type_needs_parentheses(
     node: &JsSyntaxNode,
-    parent: &JsSyntaxNode,
     types: &TsIntersectionOrUnionTypeList,
 ) -> bool {
+    let Some(parent) = node.parent() else {
+        return false;
+    };
     debug_assert!(matches!(
         node.kind(),
         JsSyntaxKind::TS_INTERSECTION_TYPE | JsSyntaxKind::TS_UNION_TYPE
     ));
 
-    if is_in_many_type_union_or_intersection_list(node, parent) {
+    if is_in_many_type_union_or_intersection_list(node, &parent) {
         types.len() > 1
     } else {
-        operator_type_or_higher_needs_parens(node, parent)
+        operator_type_or_higher_needs_parens(node, &parent)
     }
 }
 
