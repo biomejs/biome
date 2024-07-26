@@ -12,22 +12,22 @@ use serde::{Deserialize, Serialize};
 #[bitflags]
 #[repr(u8)]
 pub(crate) enum Types {
-    NULL = 1 << 0,
-    BOOL = 1 << 1,
-    NUMBER = 1 << 2,
-    STR = 1 << 3,
-    ARRAY = 1 << 4,
-    MAP = 1 << 5,
+    Null = 1 << 0,
+    Bool = 1 << 1,
+    Number = 1 << 2,
+    Str = 1 << 3,
+    Array = 1 << 4,
+    Map = 1 << 5,
 }
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
 pub struct VisitableType(BitFlags<Types>);
 impl VisitableType {
-    pub const NULL: Self = Self(make_bitflags!(Types::{NULL}));
-    pub const BOOL: Self = Self(make_bitflags!(Types::{BOOL}));
-    pub const NUMBER: Self = Self(make_bitflags!(Types::{NUMBER}));
-    pub const STR: Self = Self(make_bitflags!(Types::{STR}));
-    pub const ARRAY: Self = Self(make_bitflags!(Types::{ARRAY}));
-    pub const MAP: Self = Self(make_bitflags!(Types::{MAP}));
+    pub const NULL: Self = Self(make_bitflags!(Types::{Null}));
+    pub const BOOL: Self = Self(make_bitflags!(Types::{Bool}));
+    pub const NUMBER: Self = Self(make_bitflags!(Types::{Number}));
+    pub const STR: Self = Self(make_bitflags!(Types::{Str}));
+    pub const ARRAY: Self = Self(make_bitflags!(Types::{Array}));
+    pub const MAP: Self = Self(make_bitflags!(Types::{Map}));
     pub const fn all() -> Self {
         Self(BitFlags::ALL)
     }
@@ -45,7 +45,6 @@ impl VisitableType {
         self.0.is_empty()
     }
 }
-
 impl std::fmt::Display for VisitableType {
     fn fmt(&self, fmt: &mut std::fmt::Formatter) -> std::fmt::Result {
         if self.is_empty() {
@@ -56,12 +55,12 @@ impl std::fmt::Display for VisitableType {
                 write!(fmt, ", or ")?;
             }
             let expected_type = match expected_type {
-                Types::NULL => "null",
-                Types::BOOL => "a boolean",
-                Types::NUMBER => "a number",
-                Types::STR => "a string",
-                Types::ARRAY => "an array",
-                Types::MAP => "an object",
+                Types::Null => "null",
+                Types::Bool => "a boolean",
+                Types::Number => "a number",
+                Types::Str => "a string",
+                Types::Array => "an array",
+                Types::Map => "an object",
             };
             write!(fmt, "{expected_type}")?;
         }
