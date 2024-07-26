@@ -397,8 +397,59 @@ fn assert_lint(
                 });
             }
         }
+        DocumentFileSource::Graphql(..) => {
+            let parse = biome_graphql_parser::parse_graphql(code);
+
+            if parse.has_errors() {
+                for diag in parse.into_diagnostics() {
+                    let error = diag.with_file_path(&file_path).with_file_source_code(code);
+                    write_diagnostic(code, error)?;
+                }
+            } else {
+                let root = parse.tree();
+
+                let rule_filter = RuleFilter::Rule(group, rule);
+                let filter = AnalysisFilter {
+                    enabled_rules: Some(slice::from_ref(&rule_filter)),
+                    ..AnalysisFilter::default()
+                };
+
+                let options = AnalyzerOptions {
+                    file_path: PathBuf::from(&file_path),
+                    ..Default::default()
+                };
+                biome_graphql_analyze::analyze(&root, filter, &options, |signal| {
+                    if let Some(mut diag) = signal.diagnostic() {
+                        let category = diag.category().expect("linter diagnostic has no code");
+                        let severity = settings.get_current_settings().expect("project").get_severity_from_rule_code(category).expect(
+                            "If you see this error, it means you need to run cargo codegen-configuration",
+                        );
+
+                        for action in signal.actions() {
+                            if !action.is_suppression() {
+                                diag = diag.add_code_suggestion(action.into());
+                            }
+                        }
+
+                        let error = diag
+                            .with_severity(severity)
+                            .with_file_path(&file_path)
+                            .with_file_source_code(code);
+                        let res = write_diagnostic(code, error);
+
+                        // Abort the analysis on error
+                        if let Err(err) = res {
+                            eprintln!("Error: {err}");
+                            return ControlFlow::Break(err);
+                        }
+                    }
+
+                    ControlFlow::Continue(())
+                });
+            }
+        }
         // Unknown code blocks should be ignored by tests
-        DocumentFileSource::Unknown | DocumentFileSource::Graphql(_) => {}
+        DocumentFileSource::Unknown => {}
     }
 
     if test.expect_diagnostic {
