@@ -336,8 +336,6 @@ impl biome_console::fmt::Display for DocumentFileSource {
 
 pub struct FixAllParams<'a> {
     pub(crate) parse: AnyParse,
-    // pub(crate) rules: Option<&'a Rules>,
-    // pub(crate) filter: AnalysisFilter<'a>,
     pub(crate) fix_file_mode: FixFileMode,
     pub(crate) workspace: WorkspaceSettingsHandle<'a>,
     /// Whether it should format the code action
@@ -414,12 +412,14 @@ pub(crate) struct LintResults {
 
 pub(crate) struct CodeActionsParams<'a> {
     pub(crate) parse: AnyParse,
-    pub(crate) range: TextRange,
+    pub(crate) range: Option<TextRange>,
     pub(crate) workspace: &'a WorkspaceSettingsHandle<'a>,
     pub(crate) path: &'a BiomePath,
     pub(crate) manifest: Option<PackageJson>,
     pub(crate) language: DocumentFileSource,
     pub(crate) settings: &'a Settings,
+    pub(crate) only: Vec<RuleSelector>,
+    pub(crate) skip: Vec<RuleSelector>,
 }
 
 type Lint = fn(LintParams) -> LintResults;
@@ -923,19 +923,35 @@ impl<'a, 'b> RegistryVisitor<GraphqlLanguage> for LintVisitor<'a, 'b> {
 
 struct ActionVisitor<'a, 'b> {
     settings: Option<&'b Settings>,
-    rule_categories: &'b RuleCategories,
     pub(crate) enabled_rules: Vec<RuleFilter<'a>>,
     import_sorting: RuleFilter<'a>,
 }
 
 impl<'a, 'b> ActionVisitor<'a, 'b> {
-    pub(crate) fn new(settings: Option<&'b Settings>, rule_categories: &'b RuleCategories) -> Self {
+    pub(crate) fn new(settings: Option<&'b Settings>) -> Self {
         Self {
             enabled_rules: vec![],
             settings,
-            rule_categories,
-            import_sorting: RuleFilter::Rule("correctness", "organizeImports"),
+            import_sorting: RuleFilter::Rule("refactor", "organizeImports"),
         }
+    }
+
+    pub(crate) fn push_rule<R, L>(&mut self)
+    where
+        R: Rule<Options: Default, Query: Queryable<Language = L, Output: Clone>> + 'static,
+    {
+        let organize_imports_enabled = self
+            .settings
+            .map(|settings| settings.organize_imports.enabled)
+            .unwrap_or_default();
+        if organize_imports_enabled && self.import_sorting.match_rule::<R>() {
+            self.enabled_rules.push(self.import_sorting);
+            return;
+        }
+        self.enabled_rules.push(RuleFilter::Rule(
+            <R::Group as RuleGroup>::NAME,
+            R::METADATA.name,
+        ))
     }
 }
 
@@ -950,16 +966,7 @@ impl<'a, 'b> RegistryVisitor<JsLanguage> for ActionVisitor<'a, 'b> {
     where
         R: Rule<Options: Default, Query: Queryable<Language = JsLanguage, Output: Clone>> + 'static,
     {
-        let organize_imports_enabled = self
-            .settings
-            .map(|settings| settings.organize_imports.enabled)
-            .unwrap_or_default();
-        if organize_imports_enabled
-            && !self.rule_categories.is_syntax()
-            && self.import_sorting.match_rule::<R>()
-        {
-            self.enabled_rules.push(self.import_sorting);
-        }
+        self.push_rule::<R, <R::Query as Queryable>::Language>();
     }
 }
 
@@ -975,8 +982,7 @@ impl<'a, 'b> RegistryVisitor<JsonLanguage> for ActionVisitor<'a, 'b> {
         R: Rule<Options: Default, Query: Queryable<Language = JsonLanguage, Output: Clone>>
             + 'static,
     {
-        self.enabled_rules
-            .push(RuleFilter::Rule(R::Group::NAME, R::METADATA.name))
+        self.push_rule::<R, <R::Query as Queryable>::Language>();
     }
 }
 
@@ -992,8 +998,7 @@ impl<'a, 'b> RegistryVisitor<CssLanguage> for ActionVisitor<'a, 'b> {
         R: Rule<Options: Default, Query: Queryable<Language = CssLanguage, Output: Clone>>
             + 'static,
     {
-        self.enabled_rules
-            .push(RuleFilter::Rule(R::Group::NAME, R::METADATA.name))
+        self.push_rule::<R, <R::Query as Queryable>::Language>();
     }
 }
 
@@ -1009,8 +1014,7 @@ impl<'a, 'b> RegistryVisitor<GraphqlLanguage> for ActionVisitor<'a, 'b> {
         R: Rule<Options: Default, Query: Queryable<Language = GraphqlLanguage, Output: Clone>>
             + 'static,
     {
-        self.enabled_rules
-            .push(RuleFilter::Rule(R::Group::NAME, R::METADATA.name))
+        self.push_rule::<R, <R::Query as Queryable>::Language>();
     }
 }
 

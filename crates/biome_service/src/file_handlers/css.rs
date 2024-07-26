@@ -354,8 +354,7 @@ fn lint(params: LintParams) -> LintResults {
                 params.workspace.settings(),
                 params.path.as_path(),
             );
-            let mut action_visitor =
-                ActionVisitor::new(params.workspace.settings(), &params.categories);
+            let mut action_visitor = ActionVisitor::new(params.workspace.settings());
             visit_registry(&mut syntax_visitor);
             visit_registry(&mut lint_visitor);
             visit_registry(&mut action_visitor);
@@ -465,6 +464,8 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
         manifest: _,
         language,
         settings,
+        only: _,
+        skip: _,
     } = params;
     debug_span!("Code actions CSS", range =? range, path =? path).in_scope(move || {
         let tree = parse.tree();
@@ -484,7 +485,7 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
                 categories = categories.with_action();
             }
             filter.categories = categories.build();
-            filter.range = Some(range);
+            filter.range = range;
 
             let analyzer_options = workspace.analyzer_options::<CssLanguage>(path, &language);
 

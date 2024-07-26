@@ -112,7 +112,10 @@ pub(crate) fn code_actions(
     debug!("Cursor range {:?}", &cursor_range);
     let result = match session.workspace.pull_actions(PullActionsParams {
         path: biome_path.clone(),
-        range: cursor_range,
+        range: Some(cursor_range),
+        // TODO: compute skip and only based on configuration
+        skip: vec![],
+        only: vec![],
     }) {
         Ok(result) => result,
         Err(err) => {

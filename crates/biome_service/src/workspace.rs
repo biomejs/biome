@@ -578,7 +578,9 @@ pub struct PullDiagnosticsResult {
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub struct PullActionsParams {
     pub path: BiomePath,
-    pub range: TextRange,
+    pub range: Option<TextRange>,
+    pub only: Vec<RuleSelector>,
+    pub skip: Vec<RuleSelector>,
 }
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
@@ -1017,10 +1019,17 @@ impl<'app, W: Workspace + ?Sized> FileGuard<'app, W> {
         })
     }
 
-    pub fn pull_actions(&self, range: TextRange) -> Result<PullActionsResult, WorkspaceError> {
+    pub fn pull_actions(
+        &self,
+        range: Option<TextRange>,
+        only: Vec<RuleSelector>,
+        skip: Vec<RuleSelector>,
+    ) -> Result<PullActionsResult, WorkspaceError> {
         self.workspace.pull_actions(PullActionsParams {
             path: self.path.clone(),
             range,
+            only,
+            skip,
         })
     }
 

@@ -2,8 +2,9 @@ use super::process_file::{process_file, DiffKind, FileStatus, Message};
 use super::{Execution, TraversalMode};
 use crate::cli_options::CliOptions;
 use crate::execute::diagnostics::{
-    CIFormatDiffDiagnostic, CIOrganizeImportsDiffDiagnostic, ContentDiffAdvice,
-    FormatDiffDiagnostic, OrganizeImportsDiffDiagnostic, PanicDiagnostic,
+    AssistsDiffDiagnostic, CIAssistsDiffDiagnostic, CIFormatDiffDiagnostic,
+    CIOrganizeImportsDiffDiagnostic, ContentDiffAdvice, FormatDiffDiagnostic,
+    OrganizeImportsDiffDiagnostic, PanicDiagnostic,
 };
 use crate::reporter::TraversalSummary;
 use crate::{CliDiagnostic, CliSession};
@@ -450,6 +451,16 @@ impl<'ctx> DiagnosticsPrinter<'ctx> {
                                     };
                                     diagnostics_to_print.push(diag.with_severity(severity))
                                 }
+                                DiffKind::Assists => {
+                                    let diag = CIAssistsDiffDiagnostic {
+                                        file_name: file_name.clone(),
+                                        diff: ContentDiffAdvice {
+                                            old: old.clone(),
+                                            new: new.clone(),
+                                        },
+                                    };
+                                    diagnostics_to_print.push(diag.with_severity(severity))
+                                }
                             };
                         } else {
                             match diff_kind {
@@ -465,6 +476,16 @@ impl<'ctx> DiagnosticsPrinter<'ctx> {
                                 }
                                 DiffKind::OrganizeImports => {
                                     let diag = OrganizeImportsDiffDiagnostic {
+                                        file_name: file_name.clone(),
+                                        diff: ContentDiffAdvice {
+                                            old: old.clone(),
+                                            new: new.clone(),
+                                        },
+                                    };
+                                    diagnostics_to_print.push(diag.with_severity(severity))
+                                }
+                                DiffKind::Assists => {
+                                    let diag = AssistsDiffDiagnostic {
                                         file_name: file_name.clone(),
                                         diff: ContentDiffAdvice {
                                             old: old.clone(),

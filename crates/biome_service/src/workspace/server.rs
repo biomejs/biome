@@ -366,13 +366,11 @@ impl Workspace for WorkspaceServer {
 
         let file_name = path.file_name().and_then(|s| s.to_str());
         file_features = file_features.with_capabilities(&capabilities);
-        dbg!(&file_features);
         let Some(settings) = settings else {
             return Ok(file_features);
         };
         file_features = file_features.with_settings_and_language(settings, &language, path);
 
-        dbg!(&file_features);
         if settings.files.ignore_unknown
             && language == DocumentFileSource::Unknown
             && self.get_file_source(&params.path) == DocumentFileSource::Unknown
@@ -391,8 +389,6 @@ impl Workspace for WorkspaceServer {
                 }
             }
         }
-        dbg!(&file_features);
-
         // If the file is not ignored by at least one feature, then check that the file is not protected.
         //
         // Protected files must be ignored.
@@ -667,6 +663,8 @@ impl Workspace for WorkspaceServer {
             manifest,
             language,
             settings,
+            only: params.only,
+            skip: params.skip,
         }))
     }
 
