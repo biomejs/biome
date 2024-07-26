@@ -5,18 +5,44 @@ use biome_diagnostics::{
     Advices, Diagnostic, DiagnosticTags, LogCategory, MessageAndDescription, Severity, Visit,
 };
 use biome_rowan::{SyntaxError, TextRange};
-use bitflags::bitflags;
+use enumflags2::{bitflags, make_bitflags, BitFlags};
 use serde::{Deserialize, Serialize};
 
-bitflags! {
-    #[derive(Debug, Copy, Clone, Eq, PartialEq)]
-    pub struct VisitableType: u8 {
-        const NULL = 1 << 0;
-        const BOOL = 1 << 1;
-        const NUMBER = 1 << 2;
-        const STR = 1 << 3;
-        const ARRAY = 1 << 4;
-        const MAP = 1 << 5;
+#[derive(Debug, Copy, Clone, Eq, PartialEq)]
+#[bitflags]
+#[repr(u8)]
+pub(crate) enum Types {
+    NULL = 1 << 0,
+    BOOL = 1 << 1,
+    NUMBER = 1 << 2,
+    STR = 1 << 3,
+    ARRAY = 1 << 4,
+    MAP = 1 << 5,
+}
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+pub struct VisitableType(BitFlags<Types>);
+impl VisitableType {
+    pub const NULL: Self = Self(make_bitflags!(Types::{NULL}));
+    pub const BOOL: Self = Self(make_bitflags!(Types::{BOOL}));
+    pub const NUMBER: Self = Self(make_bitflags!(Types::{NUMBER}));
+    pub const STR: Self = Self(make_bitflags!(Types::{STR}));
+    pub const ARRAY: Self = Self(make_bitflags!(Types::{ARRAY}));
+    pub const MAP: Self = Self(make_bitflags!(Types::{MAP}));
+    pub const fn all() -> Self {
+        Self(BitFlags::ALL)
+    }
+    pub const fn empty() -> Self {
+        Self(BitFlags::EMPTY)
+    }
+    pub fn contains(&self, other: impl Into<VisitableType>) -> bool {
+        self.0.contains(other.into().0)
+    }
+    pub const fn union(mut self, other: Self) -> Self {
+        self.0 = self.0.union_c(other.0);
+        self
+    }
+    pub fn is_empty(&self) -> bool {
+        self.0.is_empty()
     }
 }
 
@@ -25,18 +51,17 @@ impl std::fmt::Display for VisitableType {
         if self.is_empty() {
             return write!(fmt, "no value");
         }
-        for (i, expected_type) in self.iter().enumerate() {
+        for (i, expected_type) in self.0.iter().enumerate() {
             if i != 0 {
                 write!(fmt, ", or ")?;
             }
             let expected_type = match expected_type {
-                VisitableType::NULL => "null",
-                VisitableType::BOOL => "a boolean",
-                VisitableType::NUMBER => "a number",
-                VisitableType::STR => "a string",
-                VisitableType::ARRAY => "an array",
-                VisitableType::MAP => "an object",
-                _ => unreachable!("Unhandled deserialization type."),
+                Types::NULL => "null",
+                Types::BOOL => "a boolean",
+                Types::NUMBER => "a number",
+                Types::STR => "a string",
+                Types::ARRAY => "an array",
+                Types::MAP => "an object",
             };
             write!(fmt, "{expected_type}")?;
         }

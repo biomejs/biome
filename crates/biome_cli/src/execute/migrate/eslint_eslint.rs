@@ -364,10 +364,8 @@ impl<T: Deserializable + 'static, U: Deserializable + 'static> Deserializable fo
                 Some(RuleConf::Spread(severity, spread))
             }
         }
-        if matches!(
-            value.visitable_type()?,
-            VisitableType::NUMBER | VisitableType::STR
-        ) {
+        let visitable_type = value.visitable_type()?;
+        if visitable_type == VisitableType::NUMBER || visitable_type == VisitableType::STR {
             Deserializable::deserialize(value, name, diagnostics).map(RuleConf::Severity)
         } else {
             value.deserialize(Visitor(PhantomData), name, diagnostics)
