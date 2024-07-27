@@ -1,5 +1,6 @@
 ---
 source: crates/biome_formatter_test/src/snapshot_builder.rs
+assertion_line: 212
 info: jsx/bracket_same_line/bracket_same_line.jsx
 ---
 # Input
@@ -8,21 +9,29 @@ info: jsx/bracket_same_line/bracket_same_line.jsx
 const a = <div></div>;
 
 <Foo
-    className={style}
-    reallyLongAttributeName1={longComplexValue}
-    reallyLongAttributeName2={anotherLongValue}
+	className={style}
+	reallyLongAttributeName1={longComplexValue}
+	reallyLongAttributeName2={anotherLongValue}
 />;
 
 <Foo
-    className={style}
-    reallyLongAttributeName1={longComplexValue}
-    reallyLongAttributeName2={anotherLongValue}
+		className={style}
+		reallyLongAttributeName1={longComplexValue}
+		reallyLongAttributeName2={anotherLongValue} // this is comment
+/>;
+
+<Foo
+		className={style}
+		reallyLongAttributeName1={longComplexValue}
+		reallyLongAttributeName2={anotherLongValue}
+		// this is comment
 >
-    Hi
+	Hi
 </Foo>;
 
 <div className="hi" />;
 <div className="hi"></div>;
+
 ```
 
 
@@ -60,7 +69,14 @@ const a = <div></div>;
 <Foo
 	className={style}
 	reallyLongAttributeName1={longComplexValue}
+	reallyLongAttributeName2={anotherLongValue} // this is comment
+/>;
+
+<Foo
+	className={style}
+	reallyLongAttributeName1={longComplexValue}
 	reallyLongAttributeName2={anotherLongValue}
+	// this is comment
 >
 	Hi
 </Foo>;
@@ -93,13 +109,20 @@ const a = <div></div>;
 <Foo
 	className={style}
 	reallyLongAttributeName1={longComplexValue}
-	reallyLongAttributeName2={anotherLongValue}
+	reallyLongAttributeName2={anotherLongValue}/>;
+
+<Foo
+	className={style}
+	reallyLongAttributeName1={longComplexValue}
+	reallyLongAttributeName2={anotherLongValue} // this is comment
 />;
 
 <Foo
 	className={style}
 	reallyLongAttributeName1={longComplexValue}
-	reallyLongAttributeName2={anotherLongValue}>
+	reallyLongAttributeName2={anotherLongValue}
+	// this is comment
+>
 	Hi
 </Foo>;
 
