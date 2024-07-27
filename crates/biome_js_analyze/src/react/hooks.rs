@@ -2,7 +2,7 @@ use crate::react::{is_react_call_api, ReactLibrary};
 
 use biome_console::markup;
 use biome_deserialize::{
-    DeserializableValue, DeserializationDiagnostic, DeserializationVisitor, DeserializableTypes,
+    DeserializableTypes, DeserializableValue, DeserializationDiagnostic, DeserializationVisitor,
 };
 use biome_diagnostics::Severity;
 use biome_js_semantic::{Capture, Closure, ClosureExtensions, SemanticModel};

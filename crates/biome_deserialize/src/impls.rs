@@ -2,8 +2,8 @@
 //!
 //! Tests of these implementations are available in [biome_deserialize::json::tests] module.
 use crate::{
-    diagnostics::DeserializableTypes, Deserializable, DeserializableValue, DeserializationDiagnostic,
-    DeserializationVisitor,
+    diagnostics::DeserializableTypes, Deserializable, DeserializableValue,
+    DeserializationDiagnostic, DeserializationVisitor,
 };
 use biome_rowan::{TextRange, TokenText};
 use indexmap::{IndexMap, IndexSet};

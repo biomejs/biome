@@ -1,6 +1,6 @@
 use biome_deserialize::{
-    Deserializable, DeserializableTypes, DeserializableValue, DeserializationDiagnostic,
-    DeserializationVisitor, DeserializableType, Merge
+    Deserializable, DeserializableType, DeserializableTypes, DeserializableValue,
+    DeserializationDiagnostic, DeserializationVisitor, Merge,
 };
 use biome_deserialize_macros::Deserializable;
 use biome_rowan::TextRange;
