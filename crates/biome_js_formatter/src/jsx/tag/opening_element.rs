@@ -87,7 +87,6 @@ impl Format<JsFormatContext> for AnyJsxOpeningElement {
                     let wants_bracket_same_line = attributes.is_empty() && !name_has_comments;
 
                     if self.is_self_closing() {
-                        println!("{}", self.syntax().to_string());
                         if force_bracket_same_line && !last_attribute_has_comments {
                             write!(f, [format_close])
                         } else {
