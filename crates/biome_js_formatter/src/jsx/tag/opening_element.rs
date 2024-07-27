@@ -87,6 +87,7 @@ impl Format<JsFormatContext> for AnyJsxOpeningElement {
                     let wants_bracket_same_line = attributes.is_empty() && !name_has_comments;
 
                     if self.is_self_closing() {
+                        println!("{}", self.syntax().to_string());
                         if force_bracket_same_line && !last_attribute_has_comments {
                             write!(f, [format_close])
                         } else {
@@ -266,12 +267,5 @@ fn has_last_attribute_comments(element: &AnyJsxOpeningElement, comments: &JsComm
         .map(|token| token.text().contains('>') && token.has_leading_comments())
         .any(|has_comment| has_comment);
 
-    // println!("syntax: {}", element.syntax().to_string());
-
-    // println!(
-    //     "has_comments_on_last_attribute: {}",
-    //     has_comments_on_last_attribute
-    // );
-    // println!("last_attribute_comments: {}", last_attribute_has_comments);
     has_comments_on_last_attribute || last_attribute_has_comments
 }
