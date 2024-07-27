@@ -1,6 +1,5 @@
 use crate::prelude::*;
 
-use crate::parentheses::NeedsParentheses;
 use biome_formatter::write;
 use biome_js_syntax::TsAssertsReturnType;
 use biome_js_syntax::TsAssertsReturnTypeFields;
@@ -25,16 +24,5 @@ impl FormatNodeRule<TsAssertsReturnType> for FormatTsAssertsReturnType {
                 predicate.format()
             ]
         ]
-    }
-
-    fn needs_parentheses(&self, item: &TsAssertsReturnType) -> bool {
-        item.needs_parentheses()
-    }
-}
-
-impl NeedsParentheses for TsAssertsReturnType {
-    #[inline]
-    fn needs_parentheses(&self) -> bool {
-        false
     }
 }

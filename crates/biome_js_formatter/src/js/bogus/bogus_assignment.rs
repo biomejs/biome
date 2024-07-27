@@ -1,4 +1,3 @@
-use crate::parentheses::NeedsParentheses;
 use crate::FormatBogusNodeRule;
 use biome_js_syntax::JsBogusAssignment;
 
@@ -6,10 +5,3 @@ use biome_js_syntax::JsBogusAssignment;
 pub(crate) struct FormatJsBogusAssignment;
 
 impl FormatBogusNodeRule<JsBogusAssignment> for FormatJsBogusAssignment {}
-
-impl NeedsParentheses for JsBogusAssignment {
-    #[inline]
-    fn needs_parentheses(&self) -> bool {
-        false
-    }
-}

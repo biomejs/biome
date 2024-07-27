@@ -1,7 +1,7 @@
 use crate::prelude::*;
 
-use crate::parentheses::NeedsParentheses;
 use biome_formatter::{format_args, write};
+use biome_js_syntax::parentheses::NeedsParentheses;
 use biome_js_syntax::JsSyntaxKind::JS_SEQUENCE_EXPRESSION;
 use biome_js_syntax::{JsSequenceExpression, JsSequenceExpressionFields, JsSyntaxKind};
 use biome_rowan::AstNode;
@@ -69,24 +69,6 @@ impl FormatNodeRule<JsSequenceExpression> for FormatJsSequenceExpression {
 
     fn needs_parentheses(&self, item: &JsSequenceExpression) -> bool {
         item.needs_parentheses()
-    }
-}
-
-impl NeedsParentheses for JsSequenceExpression {
-    fn needs_parentheses(&self) -> bool {
-        let Some(parent) = self.syntax().parent() else {
-            return false;
-        };
-        !matches!(
-            parent.kind(),
-            JsSyntaxKind::JS_RETURN_STATEMENT |
-            // There's a precedence for writing `x++, y++`
-            JsSyntaxKind::JS_FOR_STATEMENT |
-            JsSyntaxKind::JS_EXPRESSION_STATEMENT |
-            JsSyntaxKind::JS_SEQUENCE_EXPRESSION  |
-            // Handled as part of the arrow function formatting
-            JsSyntaxKind::JS_ARROW_FUNCTION_EXPRESSION
-        )
     }
 }
 

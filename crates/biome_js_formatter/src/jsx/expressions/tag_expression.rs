@@ -1,10 +1,11 @@
-use crate::parentheses::{is_callee, is_tag, NeedsParentheses};
 use crate::prelude::*;
 use crate::utils::jsx::{get_wrap_state, WrapState};
+
 use biome_formatter::{format_args, write};
+use biome_js_syntax::parentheses::NeedsParentheses;
 use biome_js_syntax::{
-    JsArrowFunctionExpression, JsBinaryExpression, JsBinaryOperator, JsCallArgumentList,
-    JsCallExpression, JsSyntaxKind, JsxExpressionChild, JsxTagExpression,
+    JsArrowFunctionExpression, JsCallArgumentList, JsCallExpression, JsxExpressionChild,
+    JsxTagExpression,
 };
 use biome_rowan::AstNode;
 
@@ -106,33 +107,4 @@ pub fn should_expand(expression: &JsxTagExpression) -> bool {
 
     call.parent()
         .map_or(false, |parent| JsxExpressionChild::can_cast(parent.kind()))
-}
-
-impl NeedsParentheses for JsxTagExpression {
-    fn needs_parentheses(&self) -> bool {
-        let Some(parent) = self.syntax().parent() else {
-            return false;
-        };
-        match parent.kind() {
-            JsSyntaxKind::JS_BINARY_EXPRESSION => {
-                let binary = JsBinaryExpression::unwrap_cast(parent.clone());
-
-                let is_left = binary.left().map(AstNode::into_syntax).as_ref() == Ok(self.syntax());
-                matches!(binary.operator(), Ok(JsBinaryOperator::LessThan)) && is_left
-            }
-            JsSyntaxKind::TS_AS_EXPRESSION
-            | JsSyntaxKind::TS_SATISFIES_EXPRESSION
-            | JsSyntaxKind::JS_AWAIT_EXPRESSION
-            | JsSyntaxKind::JS_EXTENDS_CLAUSE
-            | JsSyntaxKind::JS_STATIC_MEMBER_EXPRESSION
-            | JsSyntaxKind::JS_COMPUTED_MEMBER_EXPRESSION
-            | JsSyntaxKind::JS_SEQUENCE_EXPRESSION
-            | JsSyntaxKind::JS_UNARY_EXPRESSION
-            | JsSyntaxKind::TS_NON_NULL_ASSERTION_EXPRESSION
-            | JsSyntaxKind::JS_SPREAD
-            | JsSyntaxKind::JSX_SPREAD_ATTRIBUTE
-            | JsSyntaxKind::JSX_SPREAD_CHILD => true,
-            _ => is_callee(self.syntax(), &parent) || is_tag(self.syntax(), &parent),
-        }
-    }
 }

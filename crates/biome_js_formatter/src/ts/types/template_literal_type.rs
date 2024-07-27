@@ -1,6 +1,5 @@
 use crate::prelude::*;
 
-use crate::parentheses::NeedsParentheses;
 use biome_formatter::write;
 use biome_js_syntax::TsTemplateLiteralType;
 use biome_js_syntax::TsTemplateLiteralTypeFields;
@@ -24,15 +23,5 @@ impl FormatNodeRule<TsTemplateLiteralType> for FormatTsTemplateLiteralType {
                 r_tick_token.format(),
             ]
         ]
-    }
-
-    fn needs_parentheses(&self, item: &TsTemplateLiteralType) -> bool {
-        item.needs_parentheses()
-    }
-}
-
-impl NeedsParentheses for TsTemplateLiteralType {
-    fn needs_parentheses(&self) -> bool {
-        false
     }
 }

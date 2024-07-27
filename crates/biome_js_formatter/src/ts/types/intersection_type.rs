@@ -1,11 +1,8 @@
 use crate::prelude::*;
+use crate::utils::FormatTypeMemberSeparator;
 
-use crate::parentheses::NeedsParentheses;
-use crate::utils::{
-    union_or_intersection_type_needs_parentheses, FormatTypeMemberSeparator,
-    TsIntersectionOrUnionTypeList,
-};
 use biome_formatter::{format_args, write};
+use biome_js_syntax::parentheses::NeedsParentheses;
 use biome_js_syntax::{TsIntersectionType, TsIntersectionTypeFields};
 
 #[derive(Debug, Clone, Default)]
@@ -28,15 +25,6 @@ impl FormatNodeRule<TsIntersectionType> for FormatTsIntersectionType {
 
     fn needs_parentheses(&self, item: &TsIntersectionType) -> bool {
         item.needs_parentheses()
-    }
-}
-
-impl NeedsParentheses for TsIntersectionType {
-    fn needs_parentheses(&self) -> bool {
-        union_or_intersection_type_needs_parentheses(
-            self.syntax(),
-            &TsIntersectionOrUnionTypeList::TsIntersectionTypeElementList(self.types()),
-        )
     }
 }
 

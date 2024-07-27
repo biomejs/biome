@@ -1,6 +1,5 @@
 use crate::prelude::*;
 
-use crate::parentheses::NeedsParentheses;
 use biome_formatter::write;
 use biome_js_syntax::TsParenthesizedType;
 use biome_js_syntax::TsParenthesizedTypeFields;
@@ -20,16 +19,5 @@ impl FormatNodeRule<TsParenthesizedType> for FormatTsParenthesizedType {
             f,
             [l_paren_token.format(), &ty.format(), r_paren_token.format()]
         )
-    }
-
-    fn needs_parentheses(&self, item: &TsParenthesizedType) -> bool {
-        item.needs_parentheses()
-    }
-}
-
-impl NeedsParentheses for TsParenthesizedType {
-    #[inline]
-    fn needs_parentheses(&self) -> bool {
-        false
     }
 }

@@ -1,6 +1,5 @@
 use crate::prelude::*;
 
-use crate::parentheses::NeedsParentheses;
 use biome_formatter::write;
 use biome_js_syntax::{TsReferenceType, TsReferenceTypeFields};
 
@@ -15,15 +14,5 @@ impl FormatNodeRule<TsReferenceType> for FormatTsReferenceType {
         } = node.as_fields();
 
         write![f, [name.format(), type_arguments.format()]]
-    }
-
-    fn needs_parentheses(&self, item: &TsReferenceType) -> bool {
-        item.needs_parentheses()
-    }
-}
-
-impl NeedsParentheses for TsReferenceType {
-    fn needs_parentheses(&self) -> bool {
-        false
     }
 }

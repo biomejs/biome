@@ -1,5 +1,5 @@
-use crate::parentheses::NeedsParentheses;
 use crate::prelude::*;
+
 use biome_formatter::write;
 use biome_js_syntax::JsParenthesizedAssignment;
 use biome_js_syntax::JsParenthesizedAssignmentFields;
@@ -27,16 +27,5 @@ impl FormatNodeRule<JsParenthesizedAssignment> for FormatJsParenthesizedAssignme
                 r_paren_token.format(),
             ]
         ]
-    }
-
-    fn needs_parentheses(&self, item: &JsParenthesizedAssignment) -> bool {
-        item.needs_parentheses()
-    }
-}
-
-impl NeedsParentheses for JsParenthesizedAssignment {
-    #[inline]
-    fn needs_parentheses(&self) -> bool {
-        false
     }
 }

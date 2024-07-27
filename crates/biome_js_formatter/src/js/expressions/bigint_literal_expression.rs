@@ -1,12 +1,11 @@
-use biome_formatter::token::string::ToAsciiLowercaseCow;
-use biome_formatter::write;
-use std::borrow::Cow;
-
 use crate::prelude::*;
 
-use crate::parentheses::NeedsParentheses;
+use biome_formatter::token::string::ToAsciiLowercaseCow;
+use biome_formatter::write;
+use biome_js_syntax::parentheses::NeedsParentheses;
 use biome_js_syntax::JsBigintLiteralExpression;
 use biome_js_syntax::JsBigintLiteralExpressionFields;
+use std::borrow::Cow;
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatJsBigintLiteralExpression;
@@ -37,12 +36,5 @@ impl FormatNodeRule<JsBigintLiteralExpression> for FormatJsBigintLiteralExpressi
 
     fn needs_parentheses(&self, item: &JsBigintLiteralExpression) -> bool {
         item.needs_parentheses()
-    }
-}
-
-impl NeedsParentheses for JsBigintLiteralExpression {
-    #[inline(always)]
-    fn needs_parentheses(&self) -> bool {
-        false
     }
 }

@@ -1,6 +1,5 @@
 use crate::prelude::*;
 
-use crate::parentheses::NeedsParentheses;
 use biome_formatter::write;
 use biome_js_syntax::{TsVoidType, TsVoidTypeFields};
 
@@ -12,15 +11,5 @@ impl FormatNodeRule<TsVoidType> for FormatTsVoidType {
         let TsVoidTypeFields { void_token } = node.as_fields();
 
         write![f, [void_token.format()]]
-    }
-
-    fn needs_parentheses(&self, item: &TsVoidType) -> bool {
-        item.needs_parentheses()
-    }
-}
-
-impl NeedsParentheses for TsVoidType {
-    fn needs_parentheses(&self) -> bool {
-        false
     }
 }

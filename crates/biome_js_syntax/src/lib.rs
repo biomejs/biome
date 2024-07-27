@@ -5,19 +5,23 @@
 #[macro_use]
 mod generated;
 pub mod assign_ext;
+pub mod binary_like_expression;
 pub mod binding_ext;
 pub mod declaration_ext;
 pub mod directive_ext;
 pub mod export_ext;
 pub mod expr_ext;
+pub mod expression_left_side;
 pub mod file_source;
 pub mod function_ext;
 pub mod identifier_ext;
 pub mod import_ext;
 pub mod jsx_ext;
+pub mod misc_ext;
 pub mod modifier_ext;
 pub mod numbers;
 pub mod parameter_ext;
+pub mod parentheses;
 pub mod static_value;
 pub mod stmt_ext;
 mod syntax_node;

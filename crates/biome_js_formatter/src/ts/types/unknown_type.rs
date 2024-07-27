@@ -1,6 +1,5 @@
 use crate::prelude::*;
 
-use crate::parentheses::NeedsParentheses;
 use biome_formatter::write;
 use biome_js_syntax::{TsUnknownType, TsUnknownTypeFields};
 
@@ -12,15 +11,5 @@ impl FormatNodeRule<TsUnknownType> for FormatTsUnknownType {
         let TsUnknownTypeFields { unknown_token } = node.as_fields();
 
         write![f, [unknown_token.format()]]
-    }
-
-    fn needs_parentheses(&self, item: &TsUnknownType) -> bool {
-        item.needs_parentheses()
-    }
-}
-
-impl NeedsParentheses for TsUnknownType {
-    fn needs_parentheses(&self) -> bool {
-        false
     }
 }

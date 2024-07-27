@@ -1,6 +1,5 @@
 use crate::prelude::*;
 
-use crate::parentheses::NeedsParentheses;
 use biome_formatter::write;
 use biome_js_syntax::{TsNonPrimitiveType, TsNonPrimitiveTypeFields};
 
@@ -12,15 +11,5 @@ impl FormatNodeRule<TsNonPrimitiveType> for FormatTsNonPrimitiveType {
         let TsNonPrimitiveTypeFields { object_token } = node.as_fields();
 
         write![f, [object_token.format()]]
-    }
-
-    fn needs_parentheses(&self, item: &TsNonPrimitiveType) -> bool {
-        item.needs_parentheses()
-    }
-}
-
-impl NeedsParentheses for TsNonPrimitiveType {
-    fn needs_parentheses(&self) -> bool {
-        false
     }
 }

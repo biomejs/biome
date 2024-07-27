@@ -9,12 +9,11 @@ use crate::{
     JsCallExpression, JsComputedMemberAssignment, JsComputedMemberExpression,
     JsConditionalExpression, JsDoWhileStatement, JsForStatement, JsIfStatement,
     JsLiteralMemberName, JsLogicalExpression, JsNewExpression, JsNumberLiteralExpression,
-    JsObjectExpression, JsPostUpdateExpression, JsReferenceIdentifier, JsRegexLiteralExpression,
-    JsStaticMemberExpression, JsStringLiteralExpression, JsSyntaxKind, JsSyntaxNode, JsSyntaxToken,
-    JsTemplateChunkElement, JsTemplateExpression, JsUnaryExpression, JsWhileStatement,
-    OperatorPrecedence, TsStringLiteralType, T,
+    JsObjectExpression, JsPostUpdateExpression, JsPreUpdateExpression, JsReferenceIdentifier,
+    JsRegexLiteralExpression, JsStaticMemberExpression, JsStringLiteralExpression, JsSyntaxKind,
+    JsSyntaxNode, JsSyntaxToken, JsTemplateChunkElement, JsTemplateExpression, JsUnaryExpression,
+    JsWhileStatement, OperatorPrecedence, TsStringLiteralType, T,
 };
-use crate::{JsPreUpdateExpression, JsSyntaxKind::*};
 use biome_rowan::{
     declare_node_union, AstNode, AstNodeList, AstSeparatedList, NodeOrToken, SyntaxNodeCast,
     SyntaxResult, TextRange, TextSize, TokenText,
@@ -662,7 +661,7 @@ impl JsTemplateExpression {
         self.syntax()
             .children_with_tokens()
             .filter_map(NodeOrToken::into_token)
-            .filter(|t| t.kind() == TEMPLATE_CHUNK)
+            .filter(|t| t.kind() == JsSyntaxKind::TEMPLATE_CHUNK)
     }
 
     pub fn template_range(&self) -> Option<TextRange> {
@@ -670,7 +669,7 @@ impl JsTemplateExpression {
             .syntax()
             .children_with_tokens()
             .filter_map(|x| x.into_token())
-            .find(|tok| tok.kind() == BACKTICK)?;
+            .find(|tok| tok.kind() == JsSyntaxKind::BACKTICK)?;
         Some(TextRange::new(
             start.text_range().start(),
             self.syntax().text_range().end(),

@@ -1,9 +1,8 @@
 use crate::comments::is_type_comment;
-use crate::parentheses::AnyJsParenthesized;
 use biome_formatter::{TransformSourceMap, TransformSourceMapBuilder};
 use biome_js_syntax::{
-    AnyJsAssignment, AnyJsExpression, AnyJsOptionalChainExpression, AnyTsType, JsLanguage,
-    JsLogicalExpression, JsSyntaxKind, JsSyntaxNode, JsSyntaxTrivia,
+    misc_ext::AnyJsParenthesized, AnyJsAssignment, AnyJsExpression, AnyJsOptionalChainExpression,
+    AnyTsType, JsLanguage, JsLogicalExpression, JsSyntaxKind, JsSyntaxNode, JsSyntaxTrivia,
 };
 use biome_rowan::{
     chain_trivia_pieces, AstNode, SyntaxKind, SyntaxRewriter, SyntaxToken, TextSize,

@@ -1,6 +1,5 @@
 use crate::prelude::*;
 
-use crate::parentheses::NeedsParentheses;
 use biome_formatter::write;
 use biome_js_syntax::{TsArrayType, TsArrayTypeFields};
 
@@ -22,16 +21,5 @@ impl FormatNodeRule<TsArrayType> for FormatTsArrayType {
                 r_brack_token.format(),
             ]
         ]
-    }
-
-    fn needs_parentheses(&self, item: &TsArrayType) -> bool {
-        item.needs_parentheses()
-    }
-}
-
-impl NeedsParentheses for TsArrayType {
-    #[inline]
-    fn needs_parentheses(&self) -> bool {
-        false
     }
 }

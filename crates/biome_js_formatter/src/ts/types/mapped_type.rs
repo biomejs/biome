@@ -1,7 +1,6 @@
 use crate::prelude::*;
-
-use crate::parentheses::NeedsParentheses;
 use crate::utils::FormatOptionalSemicolon;
+
 use biome_formatter::trivia::FormatLeadingComments;
 use biome_formatter::{format_args, write};
 use biome_js_syntax::{TsMappedType, TsMappedTypeFields};
@@ -85,19 +84,9 @@ impl FormatNodeRule<TsMappedType> for FormatTsMappedType {
         )
     }
 
-    fn needs_parentheses(&self, item: &TsMappedType) -> bool {
-        item.needs_parentheses()
-    }
-
     fn fmt_dangling_comments(&self, _: &TsMappedType, _: &mut JsFormatter) -> FormatResult<()> {
         // Handled inside of `fmt_fields`
         Ok(())
-    }
-}
-
-impl NeedsParentheses for TsMappedType {
-    fn needs_parentheses(&self) -> bool {
-        false
     }
 }
 

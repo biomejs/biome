@@ -1,8 +1,8 @@
-use crate::{parentheses::NeedsParentheses, prelude::*};
+use crate::prelude::*;
+
 use biome_formatter::write;
-use biome_js_syntax::{
-    AnyJsMemberExpression, TsInstantiationExpression, TsInstantiationExpressionFields,
-};
+use biome_js_syntax::parentheses::NeedsParentheses;
+use biome_js_syntax::{TsInstantiationExpression, TsInstantiationExpressionFields};
 #[derive(Debug, Clone, Default)]
 pub struct FormatTsInstantiationExpression;
 impl FormatNodeRule<TsInstantiationExpression> for FormatTsInstantiationExpression {
@@ -21,17 +21,5 @@ impl FormatNodeRule<TsInstantiationExpression> for FormatTsInstantiationExpressi
 
     fn needs_parentheses(&self, item: &TsInstantiationExpression) -> bool {
         item.needs_parentheses()
-    }
-}
-
-impl NeedsParentheses for TsInstantiationExpression {
-    fn needs_parentheses(&self) -> bool {
-        self.parent::<AnyJsMemberExpression>()
-            .is_some_and(|member_expr| {
-                member_expr
-                    .object()
-                    .map(|object| object.syntax() == self.syntax())
-                    .unwrap_or(false)
-            })
     }
 }

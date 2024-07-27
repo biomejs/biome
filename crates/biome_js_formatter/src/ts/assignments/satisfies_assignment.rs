@@ -1,25 +1,25 @@
 use crate::prelude::*;
 
-use crate::parentheses::NeedsParentheses;
-use crate::ts::assignments::as_assignment::TsAsOrSatisfiesAssignment;
+use biome_js_syntax::parentheses::NeedsParentheses;
 use biome_js_syntax::TsSatisfiesAssignment;
+
+use super::as_assignment::format_as_or_satisfies_assignment;
 
 #[derive(Debug, Clone, Default)]
 pub struct FormatTsSatisfiesAssignment;
 
 impl FormatNodeRule<TsSatisfiesAssignment> for FormatTsSatisfiesAssignment {
     fn fmt_fields(&self, node: &TsSatisfiesAssignment, f: &mut JsFormatter) -> FormatResult<()> {
-        TsAsOrSatisfiesAssignment::from(node.clone()).fmt(f)
+        format_as_or_satisfies_assignment(
+            f,
+            node.assignment()?,
+            node.satisfies_token()?,
+            node.ty()?,
+        )
     }
 
     fn needs_parentheses(&self, item: &TsSatisfiesAssignment) -> bool {
         item.needs_parentheses()
-    }
-}
-
-impl NeedsParentheses for TsSatisfiesAssignment {
-    fn needs_parentheses(&self) -> bool {
-        TsAsOrSatisfiesAssignment::from(self.clone()).needs_parentheses()
     }
 }
 

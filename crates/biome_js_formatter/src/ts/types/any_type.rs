@@ -1,6 +1,5 @@
 use crate::prelude::*;
 
-use crate::parentheses::NeedsParentheses;
 use biome_formatter::write;
 use biome_js_syntax::{TsAnyType, TsAnyTypeFields};
 
@@ -12,16 +11,5 @@ impl FormatNodeRule<TsAnyType> for FormatTsAnyType {
         let TsAnyTypeFields { any_token } = node.as_fields();
 
         write![f, [any_token.format()]]
-    }
-
-    fn needs_parentheses(&self, item: &TsAnyType) -> bool {
-        item.needs_parentheses()
-    }
-}
-
-impl NeedsParentheses for TsAnyType {
-    #[inline]
-    fn needs_parentheses(&self) -> bool {
-        false
     }
 }

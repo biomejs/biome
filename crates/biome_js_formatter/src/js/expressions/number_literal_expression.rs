@@ -1,7 +1,7 @@
 use crate::prelude::*;
-use biome_formatter::token::number::format_number_token;
 
-use crate::parentheses::{is_member_object, NeedsParentheses};
+use biome_formatter::token::number::format_number_token;
+use biome_js_syntax::parentheses::NeedsParentheses;
 use biome_js_syntax::JsNumberLiteralExpression;
 use biome_js_syntax::JsNumberLiteralExpressionFields;
 
@@ -20,15 +20,6 @@ impl FormatNodeRule<JsNumberLiteralExpression> for FormatJsNumberLiteralExpressi
 
     fn needs_parentheses(&self, item: &JsNumberLiteralExpression) -> bool {
         item.needs_parentheses()
-    }
-}
-
-impl NeedsParentheses for JsNumberLiteralExpression {
-    fn needs_parentheses(&self) -> bool {
-        let Some(parent) = self.syntax().parent() else {
-            return false;
-        };
-        is_member_object(self.syntax(), &parent)
     }
 }
 

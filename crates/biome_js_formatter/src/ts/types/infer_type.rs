@@ -1,8 +1,8 @@
 use crate::prelude::*;
 
-use crate::parentheses::{operator_type_or_higher_needs_parens, NeedsParentheses};
 use biome_formatter::write;
-use biome_js_syntax::{JsSyntaxKind, TsInferType, TsInferTypeFields};
+use biome_js_syntax::parentheses::NeedsParentheses;
+use biome_js_syntax::{TsInferType, TsInferTypeFields};
 
 #[derive(Debug, Clone, Default)]
 pub struct FormatTsInferType;
@@ -26,25 +26,6 @@ impl FormatNodeRule<TsInferType> for FormatTsInferType {
 
     fn needs_parentheses(&self, item: &TsInferType) -> bool {
         item.needs_parentheses()
-    }
-}
-
-impl NeedsParentheses for TsInferType {
-    fn needs_parentheses(&self) -> bool {
-        let Some(parent) = self.syntax().parent() else {
-            return false;
-        };
-        if parent.kind() == JsSyntaxKind::TS_REST_TUPLE_TYPE_ELEMENT {
-            false
-        } else if matches!(
-            parent.kind(),
-            JsSyntaxKind::TS_INTERSECTION_TYPE_ELEMENT_LIST
-                | JsSyntaxKind::TS_UNION_TYPE_VARIANT_LIST
-        ) {
-            true
-        } else {
-            operator_type_or_higher_needs_parens(self.syntax(), &parent)
-        }
     }
 }
 

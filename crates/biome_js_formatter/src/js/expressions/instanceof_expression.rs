@@ -1,7 +1,7 @@
 use crate::prelude::*;
-use crate::utils::{needs_binary_like_parentheses, AnyJsBinaryLikeExpression};
 
-use crate::parentheses::NeedsParentheses;
+use biome_js_syntax::binary_like_expression::AnyJsBinaryLikeExpression;
+use biome_js_syntax::parentheses::NeedsParentheses;
 use biome_js_syntax::JsInstanceofExpression;
 
 #[derive(Debug, Clone, Default)]
@@ -18,12 +18,6 @@ impl FormatNodeRule<JsInstanceofExpression> for FormatJsInstanceofExpression {
 
     fn needs_parentheses(&self, item: &JsInstanceofExpression) -> bool {
         item.needs_parentheses()
-    }
-}
-
-impl NeedsParentheses for JsInstanceofExpression {
-    fn needs_parentheses(&self) -> bool {
-        needs_binary_like_parentheses(&AnyJsBinaryLikeExpression::from(self.clone()))
     }
 }
 
