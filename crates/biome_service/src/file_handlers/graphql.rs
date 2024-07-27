@@ -1,5 +1,5 @@
 use super::{
-    is_diagnostic_error, ActionVisitor, CodeActionsParams, DocumentFileSource, ExtensionHandler,
+    is_diagnostic_error, AssistsVisitor, CodeActionsParams, DocumentFileSource, ExtensionHandler,
     FixAllParams, LintParams, LintResults, LintVisitor, ParseResult, SearchCapabilities,
     SyntaxVisitor,
 };
@@ -313,7 +313,7 @@ fn lint(params: LintParams) -> LintResults {
                 params.workspace.settings(),
                 params.path.as_path(),
             );
-            let mut action_visitor = ActionVisitor::new(params.workspace.settings());
+            let mut action_visitor = AssistsVisitor::new(params.workspace.settings());
             visit_registry(&mut syntax_visitor);
             visit_registry(&mut lint_visitor);
             visit_registry(&mut action_visitor);

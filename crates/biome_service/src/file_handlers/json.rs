@@ -2,7 +2,7 @@ use std::borrow::Cow;
 use std::ffi::OsStr;
 
 use super::{
-    is_diagnostic_error, ActionVisitor, CodeActionsParams, DocumentFileSource, ExtensionHandler,
+    is_diagnostic_error, AssistsVisitor, CodeActionsParams, DocumentFileSource, ExtensionHandler,
     LintVisitor, ParseResult, SearchCapabilities, SyntaxVisitor,
 };
 use crate::configuration::to_analyzer_rules;
@@ -339,7 +339,7 @@ fn lint(params: LintParams) -> LintResults {
                 params.workspace.settings(),
                 params.path.as_path(),
             );
-            let mut action_visitor = ActionVisitor::new(params.workspace.settings());
+            let mut action_visitor = AssistsVisitor::new(params.workspace.settings());
             visit_registry(&mut syntax_visitor);
             visit_registry(&mut lint_visitor);
             visit_registry(&mut action_visitor);
@@ -446,124 +446,6 @@ fn lint(params: LintParams) -> LintResults {
         })
 }
 
-fn assists(params: LintParams) -> LintResults {
-    debug_span!("Apply JSON assists to file", path =? params.path, language =? params.language)
-        .in_scope(move || {
-            let Some(file_source) = params
-                .language
-                .to_json_file_source()
-                .or(JsonFileSource::try_from(params.path.as_path()).ok())
-            else {
-                return LintResults {
-                    errors: 0,
-                    diagnostics: vec![],
-                    skipped_diagnostics: 0,
-                };
-            };
-            let root: JsonRoot = params.parse.tree();
-
-            let analyzer_options = &params
-                .workspace
-                .analyzer_options::<JsonLanguage>(params.path, &params.language);
-
-            let has_only_filter = !params.only.is_empty();
-            let rules = params
-                .workspace
-                .settings()
-                .as_ref()
-                .and_then(|settings| settings.as_linter_rules(params.path.as_path()));
-
-            let mut enabled_rules = vec![];
-            let disabled_rules = vec![];
-            let mut syntax_visitor = SyntaxVisitor::default();
-            let mut action_visitor = ActionVisitor::new(params.workspace.settings());
-            visit_registry(&mut syntax_visitor);
-            visit_registry(&mut action_visitor);
-            enabled_rules.extend(syntax_visitor.enabled_rules);
-            enabled_rules.extend(action_visitor.enabled_rules);
-            let mut diagnostics = params.parse.into_diagnostics();
-
-            let filter = AnalysisFilter {
-                categories: params.categories,
-                enabled_rules: Some(enabled_rules.as_slice()),
-                disabled_rules: &disabled_rules,
-                range: None,
-            };
-
-            // Do not report unused suppression comment diagnostics if:
-            // - it is a syntax-only analyzer pass, or
-            // - if a single rule is run.
-            let ignores_suppression_comment =
-                !filter.categories.contains(RuleCategory::Action) || has_only_filter;
-
-            let mut diagnostic_count = diagnostics.len() as u32;
-            let mut errors = diagnostics
-                .iter()
-                .filter(|diag| diag.severity() <= Severity::Error)
-                .count();
-            let skipped_diagnostics = diagnostic_count - diagnostics.len() as u32;
-
-            let (_, analyze_diagnostics) =
-                analyze(&root, filter, analyzer_options, file_source, |signal| {
-                    if let Some(mut diagnostic) = signal.diagnostic() {
-                        if ignores_suppression_comment
-                            && diagnostic.category() == Some(category!("suppressions/unused"))
-                        {
-                            return ControlFlow::<Never>::Continue(());
-                        }
-
-                        diagnostic_count += 1;
-
-                        // We do now check if the severity of the diagnostics should be changed.
-                        // The configuration allows to change the severity of the diagnostics emitted by rules.
-                        let severity = diagnostic
-                            .category()
-                            .filter(|category| category.name().starts_with("lint/"))
-                            .map_or_else(
-                                || diagnostic.severity(),
-                                |category| {
-                                    rules
-                                        .as_ref()
-                                        .and_then(|rules| rules.get_severity_from_code(category))
-                                        .unwrap_or(Severity::Warning)
-                                },
-                            );
-
-                        if severity <= Severity::Error {
-                            errors += 1;
-                        }
-
-                        if diagnostic_count <= params.max_diagnostics {
-                            for action in signal.actions() {
-                                if !action.is_suppression() {
-                                    diagnostic = diagnostic.add_code_suggestion(action.into());
-                                }
-                            }
-
-                            let error = diagnostic.with_severity(severity);
-
-                            diagnostics.push(biome_diagnostics::serde::Diagnostic::new(error));
-                        }
-                    }
-
-                    ControlFlow::<Never>::Continue(())
-                });
-
-            diagnostics.extend(
-                analyze_diagnostics
-                    .into_iter()
-                    .map(biome_diagnostics::serde::Diagnostic::new)
-                    .collect::<Vec<_>>(),
-            );
-
-            LintResults {
-                diagnostics,
-                errors,
-                skipped_diagnostics,
-            }
-        })
-}
-
 fn code_actions(params: CodeActionsParams) -> PullActionsResult {
     let CodeActionsParams {
         parse,
@@ -585,10 +467,13 @@ fn code_actions(params: CodeActionsParams) -> PullActionsResult {
             let mut lint_visitor =
                 LintVisitor::new(&only, &skip, workspace.settings(), path.as_path());
             let mut syntax_visitor = SyntaxVisitor::default();
-            biome_js_analyze::visit_registry(&mut lint_visitor);
-            biome_js_analyze::visit_registry(&mut syntax_visitor);
+            let mut assists_visitor = AssistsVisitor::new(params.workspace.settings());
+            visit_registry(&mut lint_visitor);
+            visit_registry(&mut syntax_visitor);
+            visit_registry(&mut assists_visitor);
             let (mut enabled_rules, disabled_rules) = lint_visitor.finish();
             enabled_rules.extend(syntax_visitor.enabled_rules);
+            enabled_rules.extend(assists_visitor.enabled_rules);
 
             let filter = AnalysisFilter {
                 categories: RuleCategoriesBuilder::default()
@@ -647,7 +532,7 @@ fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceError> {
         params.biome_path.as_path(),
     );
     let mut syntax_visitor = SyntaxVisitor::default();
-    let mut action_visitor = ActionVisitor::new(params.workspace.settings());
+    let mut action_visitor = AssistsVisitor::new(params.workspace.settings());
     visit_registry(&mut lint_visitor);
     visit_registry(&mut syntax_visitor);
     visit_registry(&mut action_visitor);

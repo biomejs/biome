@@ -921,13 +921,13 @@ impl<'a, 'b> RegistryVisitor<GraphqlLanguage> for LintVisitor<'a, 'b> {
     }
 }
 
-struct ActionVisitor<'a, 'b> {
+struct AssistsVisitor<'a, 'b> {
     settings: Option<&'b Settings>,
     pub(crate) enabled_rules: Vec<RuleFilter<'a>>,
     import_sorting: RuleFilter<'a>,
 }
 
-impl<'a, 'b> ActionVisitor<'a, 'b> {
+impl<'a, 'b> AssistsVisitor<'a, 'b> {
     pub(crate) fn new(settings: Option<&'b Settings>) -> Self {
         Self {
             enabled_rules: vec![],
@@ -940,6 +940,11 @@ impl<'a, 'b> ActionVisitor<'a, 'b> {
     where
         R: Rule<Options: Default, Query: Queryable<Language = L, Output: Clone>> + 'static,
     {
+        // We deem refactors **safe**, other assists aren't safe
+        if R::Group::NAME != "refactor" {
+            return;
+        }
+
         let organize_imports_enabled = self
             .settings
             .map(|settings| settings.organize_imports.enabled)
@@ -955,7 +960,7 @@ impl<'a, 'b> ActionVisitor<'a, 'b> {
     }
 }
 
-impl<'a, 'b> RegistryVisitor<JsLanguage> for ActionVisitor<'a, 'b> {
+impl<'a, 'b> RegistryVisitor<JsLanguage> for AssistsVisitor<'a, 'b> {
     fn record_category<C: GroupCategory<Language = JsLanguage>>(&mut self) {
         if C::CATEGORY == RuleCategory::Action {
             C::record_groups(self)
@@ -970,7 +975,7 @@ impl<'a, 'b> RegistryVisitor<JsLanguage> for ActionVisitor<'a, 'b> {
     }
 }
 
-impl<'a, 'b> RegistryVisitor<JsonLanguage> for ActionVisitor<'a, 'b> {
+impl<'a, 'b> RegistryVisitor<JsonLanguage> for AssistsVisitor<'a, 'b> {
     fn record_category<C: GroupCategory<Language = JsonLanguage>>(&mut self) {
         if C::CATEGORY == RuleCategory::Action {
             C::record_groups(self)
@@ -986,7 +991,7 @@ impl<'a, 'b> RegistryVisitor<JsonLanguage> for ActionVisitor<'a, 'b> {
     }
 }
 
-impl<'a, 'b> RegistryVisitor<CssLanguage> for ActionVisitor<'a, 'b> {
+impl<'a, 'b> RegistryVisitor<CssLanguage> for AssistsVisitor<'a, 'b> {
     fn record_category<C: GroupCategory<Language = CssLanguage>>(&mut self) {
         if C::CATEGORY == RuleCategory::Action {
             C::record_groups(self)
@@ -1002,7 +1007,7 @@ impl<'a, 'b> RegistryVisitor<CssLanguage> for ActionVisitor<'a, 'b> {
     }
 }
 
-impl<'a, 'b> RegistryVisitor<GraphqlLanguage> for ActionVisitor<'a, 'b> {
+impl<'a, 'b> RegistryVisitor<GraphqlLanguage> for AssistsVisitor<'a, 'b> {
     fn record_category<C: GroupCategory<Language = GraphqlLanguage>>(&mut self) {
         if C::CATEGORY == RuleCategory::Action {
             C::record_groups(self)
