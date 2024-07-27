@@ -4,8 +4,8 @@ pub mod linter;
 pub use crate::analyzer::linter::*;
 use biome_analyze::options::RuleOptions;
 use biome_analyze::{FixKind, RuleFilter};
-use biome_deserialize::Deserializable;
-use biome_deserialize::{DeserializableValue, DeserializationDiagnostic, Merge, VisitableType};
+use biome_deserialize::{Deserializable, DeserializableType};
+use biome_deserialize::{DeserializableValue, DeserializationDiagnostic, Merge};
 use biome_deserialize_macros::Deserializable;
 use biome_diagnostics::Severity;
 #[cfg(feature = "schema")]
