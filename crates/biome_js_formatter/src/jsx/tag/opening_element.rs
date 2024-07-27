@@ -263,7 +263,7 @@ fn has_last_attribute_comments(element: &AnyJsxOpeningElement, comments: &JsComm
     let last_attribute_has_comments = element
         .syntax()
         .tokens()
-        .map(|token| token.text().contains(">") && token.has_leading_comments())
+        .map(|token| token.text().contains('>') && token.has_leading_comments())
         .any(|has_comment| has_comment);
 
     // println!("syntax: {}", element.syntax().to_string());
