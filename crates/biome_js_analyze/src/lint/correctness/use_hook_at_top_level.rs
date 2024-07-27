@@ -8,8 +8,8 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_deserialize::{
-    Deserializable, DeserializableValue, DeserializationDiagnostic, DeserializationVisitor, Text,
-    VisitableType,
+    Deserializable, DeserializableTypes, DeserializableValue, DeserializationDiagnostic,
+    DeserializationVisitor, Text,
 };
 use biome_js_semantic::{CallsExtensions, SemanticModel};
 use biome_js_syntax::{
@@ -569,7 +569,7 @@ struct DeprecatedHooksOptionsVisitor;
 impl DeserializationVisitor for DeprecatedHooksOptionsVisitor {
     type Output = DeprecatedHooksOptions;
 
-    const EXPECTED_TYPE: VisitableType = VisitableType::MAP;
+    const EXPECTED_TYPE: DeserializableTypes = DeserializableTypes::MAP;
 
     fn visit_map(
         self,

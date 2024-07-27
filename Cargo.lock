@@ -340,7 +340,7 @@ dependencies = [
  "biome_json_parser",
  "biome_json_syntax",
  "biome_rowan",
- "bitflags 2.6.0",
+ "enumflags2",
  "indexmap 2.2.6",
  "schemars",
  "serde",
