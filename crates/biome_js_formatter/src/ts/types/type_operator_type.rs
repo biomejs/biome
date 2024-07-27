@@ -2,7 +2,7 @@ use crate::prelude::*;
 
 use crate::parentheses::{operator_type_or_higher_needs_parens, NeedsParentheses};
 use biome_formatter::write;
-use biome_js_syntax::{JsSyntaxNode, TsTypeOperatorType, TsTypeOperatorTypeFields};
+use biome_js_syntax::{TsTypeOperatorType, TsTypeOperatorTypeFields};
 use biome_rowan::AstNode;
 
 #[derive(Debug, Clone, Default)]
@@ -21,7 +21,10 @@ impl FormatNodeRule<TsTypeOperatorType> for FormatTsTypeOperatorType {
 }
 
 impl NeedsParentheses for TsTypeOperatorType {
-    fn needs_parentheses_with_parent(&self, parent: JsSyntaxNode) -> bool {
+    fn needs_parentheses(&self) -> bool {
+        let Some(parent) = self.syntax().parent() else {
+            return false;
+        };
         operator_type_or_higher_needs_parens(self.syntax(), &parent)
     }
 }

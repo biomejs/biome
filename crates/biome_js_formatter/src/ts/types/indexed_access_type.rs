@@ -2,8 +2,8 @@ use crate::prelude::*;
 
 use crate::parentheses::NeedsParentheses;
 use biome_formatter::write;
+use biome_js_syntax::TsIndexedAccessType;
 use biome_js_syntax::TsIndexedAccessTypeFields;
-use biome_js_syntax::{JsSyntaxNode, TsIndexedAccessType};
 
 #[derive(Debug, Clone, Default)]
 pub struct FormatTsIndexedAccessType;
@@ -33,7 +33,7 @@ impl FormatNodeRule<TsIndexedAccessType> for FormatTsIndexedAccessType {
 }
 
 impl NeedsParentheses for TsIndexedAccessType {
-    fn needs_parentheses_with_parent(&self, _parent: JsSyntaxNode) -> bool {
+    fn needs_parentheses(&self) -> bool {
         false
     }
 }

@@ -60,15 +60,15 @@ impl FormatNodeRule<TsFunctionType> for FormatTsFunctionType {
 }
 
 impl NeedsParentheses for TsFunctionType {
-    fn needs_parentheses_with_parent(&self, parent: JsSyntaxNode) -> bool {
-        function_like_type_needs_parentheses(self.syntax(), &parent)
+    fn needs_parentheses(&self) -> bool {
+        function_like_type_needs_parentheses(self.syntax())
     }
 }
 
-pub(super) fn function_like_type_needs_parentheses(
-    node: &JsSyntaxNode,
-    parent: &JsSyntaxNode,
-) -> bool {
+pub(super) fn function_like_type_needs_parentheses(node: &JsSyntaxNode) -> bool {
+    let Some(parent) = node.parent() else {
+        return false;
+    };
     match parent.kind() {
         JsSyntaxKind::TS_RETURN_TYPE_ANNOTATION => {
             let grand_parent = parent.parent();
@@ -78,10 +78,10 @@ pub(super) fn function_like_type_needs_parentheses(
             })
         }
         _ => {
-            is_check_type(node, parent)
-                || is_includes_inferred_return_types_with_extends_constraints(node, parent)
-                || operator_type_or_higher_needs_parens(node, parent)
-                || is_in_many_type_union_or_intersection_list(node, parent)
+            is_check_type(node, &parent)
+                || is_includes_inferred_return_types_with_extends_constraints(node, &parent)
+                || operator_type_or_higher_needs_parens(node, &parent)
+                || is_in_many_type_union_or_intersection_list(node, &parent)
         }
     }
 }

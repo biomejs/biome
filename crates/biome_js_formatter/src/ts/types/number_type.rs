@@ -2,7 +2,7 @@ use crate::prelude::*;
 
 use crate::parentheses::NeedsParentheses;
 use biome_formatter::write;
-use biome_js_syntax::{JsSyntaxNode, TsNumberType, TsNumberTypeFields};
+use biome_js_syntax::{TsNumberType, TsNumberTypeFields};
 
 #[derive(Debug, Clone, Default)]
 pub struct FormatTsNumberType;
@@ -20,7 +20,7 @@ impl FormatNodeRule<TsNumberType> for FormatTsNumberType {
 }
 
 impl NeedsParentheses for TsNumberType {
-    fn needs_parentheses_with_parent(&self, _parent: JsSyntaxNode) -> bool {
+    fn needs_parentheses(&self) -> bool {
         false
     }
 }

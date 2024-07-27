@@ -5,7 +5,7 @@ use crate::prelude::*;
 use crate::parentheses::NeedsParentheses;
 use biome_formatter::token::string::ToAsciiLowercaseCow;
 use biome_formatter::write;
-use biome_js_syntax::{JsSyntaxNode, TsBigintLiteralType, TsBigintLiteralTypeFields};
+use biome_js_syntax::{TsBigintLiteralType, TsBigintLiteralTypeFields};
 
 #[derive(Debug, Clone, Default)]
 pub struct FormatTsBigintLiteralType;
@@ -40,7 +40,7 @@ impl FormatNodeRule<TsBigintLiteralType> for FormatTsBigintLiteralType {
 }
 
 impl NeedsParentheses for TsBigintLiteralType {
-    fn needs_parentheses_with_parent(&self, _parent: JsSyntaxNode) -> bool {
+    fn needs_parentheses(&self) -> bool {
         false
     }
 }

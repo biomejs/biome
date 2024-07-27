@@ -1,11 +1,10 @@
 use crate::prelude::*;
 
-use crate::parentheses::{
-    is_binary_like_left_or_right, is_callee, is_member_object, NeedsParentheses,
-};
+use crate::parentheses::{is_callee, is_member_object, NeedsParentheses};
 use crate::ts::expressions::type_assertion_expression::type_cast_like_needs_parens;
+use crate::utils::AnyJsBinaryLikeExpression;
 use biome_formatter::{format_args, write};
-use biome_js_syntax::{AnyJsExpression, JsSyntaxKind, JsSyntaxNode, JsSyntaxToken, TsAsExpression};
+use biome_js_syntax::{AnyJsExpression, JsSyntaxKind, JsSyntaxToken, TsAsExpression};
 use biome_js_syntax::{AnyTsType, TsSatisfiesExpression};
 use biome_rowan::{declare_node_union, SyntaxResult};
 
@@ -23,8 +22,8 @@ impl FormatNodeRule<TsAsExpression> for FormatTsAsExpression {
 }
 
 impl NeedsParentheses for TsAsExpression {
-    fn needs_parentheses_with_parent(&self, parent: JsSyntaxNode) -> bool {
-        TsAsOrSatisfiesExpression::from(self.clone()).needs_parentheses_with_parent(parent)
+    fn needs_parentheses(&self) -> bool {
+        TsAsOrSatisfiesExpression::from(self.clone()).needs_parentheses()
     }
 }
 
@@ -87,7 +86,10 @@ impl Format<JsFormatContext> for TsAsOrSatisfiesExpression {
 }
 
 impl NeedsParentheses for TsAsOrSatisfiesExpression {
-    fn needs_parentheses_with_parent(&self, parent: JsSyntaxNode) -> bool {
+    fn needs_parentheses(&self) -> bool {
+        let Some(parent) = self.syntax().parent() else {
+            return false;
+        };
         match parent.kind() {
             JsSyntaxKind::JS_CONDITIONAL_EXPRESSION => true,
 
@@ -107,7 +109,7 @@ impl NeedsParentheses for TsAsOrSatisfiesExpression {
 
             _ => {
                 type_cast_like_needs_parens(self.syntax(), &parent)
-                    || is_binary_like_left_or_right(self.syntax(), &parent)
+                    || AnyJsBinaryLikeExpression::can_cast(parent.kind())
             }
         }
     }

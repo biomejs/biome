@@ -2,7 +2,6 @@ use crate::prelude::*;
 
 use crate::parentheses::NeedsParentheses;
 use crate::ts::assignments::as_assignment::TsAsOrSatisfiesAssignment;
-use biome_js_syntax::JsSyntaxNode;
 use biome_js_syntax::TsSatisfiesAssignment;
 
 #[derive(Debug, Clone, Default)]
@@ -19,14 +18,13 @@ impl FormatNodeRule<TsSatisfiesAssignment> for FormatTsSatisfiesAssignment {
 }
 
 impl NeedsParentheses for TsSatisfiesAssignment {
-    fn needs_parentheses_with_parent(&self, parent: JsSyntaxNode) -> bool {
-        TsAsOrSatisfiesAssignment::from(self.clone()).needs_parentheses_with_parent(parent)
+    fn needs_parentheses(&self) -> bool {
+        TsAsOrSatisfiesAssignment::from(self.clone()).needs_parentheses()
     }
 }
 
 #[cfg(test)]
 mod tests {
-
     use crate::assert_needs_parentheses;
     use biome_js_syntax::TsSatisfiesAssignment;
 

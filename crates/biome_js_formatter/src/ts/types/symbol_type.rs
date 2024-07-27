@@ -2,7 +2,7 @@ use crate::prelude::*;
 
 use crate::parentheses::NeedsParentheses;
 use biome_formatter::write;
-use biome_js_syntax::{JsSyntaxNode, TsSymbolType, TsSymbolTypeFields};
+use biome_js_syntax::{TsSymbolType, TsSymbolTypeFields};
 
 #[derive(Debug, Clone, Default)]
 pub struct FormatTsSymbolType;
@@ -20,7 +20,7 @@ impl FormatNodeRule<TsSymbolType> for FormatTsSymbolType {
 }
 
 impl NeedsParentheses for TsSymbolType {
-    fn needs_parentheses_with_parent(&self, _parent: JsSyntaxNode) -> bool {
+    fn needs_parentheses(&self) -> bool {
         false
     }
 }

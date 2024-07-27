@@ -2,8 +2,8 @@ use crate::prelude::*;
 
 use crate::parentheses::NeedsParentheses;
 use biome_formatter::write;
+use biome_js_syntax::TsTemplateLiteralType;
 use biome_js_syntax::TsTemplateLiteralTypeFields;
-use biome_js_syntax::{JsSyntaxNode, TsTemplateLiteralType};
 
 #[derive(Debug, Clone, Default)]
 pub struct FormatTsTemplateLiteralType;
@@ -32,7 +32,7 @@ impl FormatNodeRule<TsTemplateLiteralType> for FormatTsTemplateLiteralType {
 }
 
 impl NeedsParentheses for TsTemplateLiteralType {
-    fn needs_parentheses_with_parent(&self, _parent: JsSyntaxNode) -> bool {
+    fn needs_parentheses(&self) -> bool {
         false
     }
 }

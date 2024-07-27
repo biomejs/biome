@@ -5,8 +5,8 @@ use std::borrow::Cow;
 use crate::prelude::*;
 
 use crate::parentheses::NeedsParentheses;
+use biome_js_syntax::JsBigintLiteralExpression;
 use biome_js_syntax::JsBigintLiteralExpressionFields;
-use biome_js_syntax::{JsBigintLiteralExpression, JsSyntaxNode};
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatJsBigintLiteralExpression;
@@ -43,11 +43,6 @@ impl FormatNodeRule<JsBigintLiteralExpression> for FormatJsBigintLiteralExpressi
 impl NeedsParentheses for JsBigintLiteralExpression {
     #[inline(always)]
     fn needs_parentheses(&self) -> bool {
-        false
-    }
-
-    #[inline(always)]
-    fn needs_parentheses_with_parent(&self, _parent: JsSyntaxNode) -> bool {
         false
     }
 }

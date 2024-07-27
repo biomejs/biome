@@ -2,7 +2,7 @@ use crate::parentheses::NeedsParentheses;
 use crate::prelude::*;
 use crate::utils::JsObjectLike;
 use biome_formatter::write;
-use biome_js_syntax::{JsSyntaxNode, TsObjectType};
+use biome_js_syntax::TsObjectType;
 
 #[derive(Debug, Clone, Default)]
 pub struct FormatTsObjectType;
@@ -23,7 +23,7 @@ impl FormatNodeRule<TsObjectType> for FormatTsObjectType {
 }
 
 impl NeedsParentheses for TsObjectType {
-    fn needs_parentheses_with_parent(&self, _parent: JsSyntaxNode) -> bool {
+    fn needs_parentheses(&self) -> bool {
         false
     }
 }

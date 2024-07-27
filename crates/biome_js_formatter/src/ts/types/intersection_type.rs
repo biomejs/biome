@@ -6,7 +6,7 @@ use crate::utils::{
     TsIntersectionOrUnionTypeList,
 };
 use biome_formatter::{format_args, write};
-use biome_js_syntax::{JsSyntaxNode, TsIntersectionType, TsIntersectionTypeFields};
+use biome_js_syntax::{TsIntersectionType, TsIntersectionTypeFields};
 
 #[derive(Debug, Clone, Default)]
 pub struct FormatTsIntersectionType;
@@ -32,10 +32,9 @@ impl FormatNodeRule<TsIntersectionType> for FormatTsIntersectionType {
 }
 
 impl NeedsParentheses for TsIntersectionType {
-    fn needs_parentheses_with_parent(&self, parent: JsSyntaxNode) -> bool {
+    fn needs_parentheses(&self) -> bool {
         union_or_intersection_type_needs_parentheses(
             self.syntax(),
-            &parent,
             &TsIntersectionOrUnionTypeList::TsIntersectionTypeElementList(self.types()),
         )
     }

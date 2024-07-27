@@ -104,9 +104,9 @@ impl Format<JsFormatContext> for AnyJsBinaryLikeExpression {
             }
         }
 
-        let should_not_indent = self.should_not_indent_if_parent_indents(parent.as_ref());
         let inline_logical_expression = self.should_inline_logical_expression();
         let should_indent_if_inlines = should_indent_if_parent_inlines(parent.as_ref());
+        let should_not_indent = self.should_not_indent_if_parent_indents(parent);
 
         let flattened = parts.len() > 2;
 
@@ -510,7 +510,7 @@ impl AnyJsBinaryLikeExpression {
     /// [Prettier applies]: https://github.com/prettier/prettier/blob/b0201e01ef99db799eb3716f15b7dfedb0a2e62b/src/language-js/print/binaryish.js#L122-L125
     fn should_not_indent_if_parent_indents(
         self: &AnyJsBinaryLikeExpression,
-        parent: Option<&JsSyntaxNode>,
+        parent: Option<JsSyntaxNode>,
     ) -> bool {
         parent.map_or(false, |parent| match parent.kind() {
             JsSyntaxKind::JS_RETURN_STATEMENT | JsSyntaxKind::JS_THROW_STATEMENT => true,
@@ -552,29 +552,27 @@ impl From<AnyJsBinaryLikeExpression> for AnyJsExpression {
 }
 
 impl NeedsParentheses for AnyJsBinaryLikeExpression {
-    fn needs_parentheses_with_parent(&self, parent: JsSyntaxNode) -> bool {
+    fn needs_parentheses(&self) -> bool {
         match self {
             AnyJsBinaryLikeExpression::JsLogicalExpression(expression) => {
-                expression.needs_parentheses_with_parent(parent)
+                expression.needs_parentheses()
             }
             AnyJsBinaryLikeExpression::JsBinaryExpression(expression) => {
-                expression.needs_parentheses_with_parent(parent)
+                expression.needs_parentheses()
             }
             AnyJsBinaryLikeExpression::JsInstanceofExpression(expression) => {
-                expression.needs_parentheses_with_parent(parent)
+                expression.needs_parentheses()
             }
-            AnyJsBinaryLikeExpression::JsInExpression(expression) => {
-                expression.needs_parentheses_with_parent(parent)
-            }
+            AnyJsBinaryLikeExpression::JsInExpression(expression) => expression.needs_parentheses(),
         }
     }
 }
 
 /// Implements the rules when a node needs parentheses that are common across all [AnyJsBinaryLikeExpression] nodes.
-pub(crate) fn needs_binary_like_parentheses(
-    node: &AnyJsBinaryLikeExpression,
-    parent: &JsSyntaxNode,
-) -> bool {
+pub(crate) fn needs_binary_like_parentheses(node: &AnyJsBinaryLikeExpression) -> bool {
+    let Some(parent) = node.syntax().parent() else {
+        return false;
+    };
     match parent.kind() {
         JsSyntaxKind::JS_EXTENDS_CLAUSE
         | JsSyntaxKind::TS_AS_EXPRESSION
@@ -634,10 +632,10 @@ pub(crate) fn needs_binary_like_parentheses(
         }
 
         _ => {
-            is_callee(node.syntax(), parent)
-                || is_tag(node.syntax(), parent)
-                || is_spread(node.syntax(), parent)
-                || is_member_object(node.syntax(), parent)
+            is_callee(node.syntax(), &parent)
+                || is_tag(node.syntax(), &parent)
+                || is_spread(node.syntax(), &parent)
+                || is_member_object(node.syntax(), &parent)
         }
     }
 }
@@ -661,15 +659,6 @@ impl NeedsParentheses for AnyJsBinaryLikeLeftExpression {
         match self {
             AnyJsBinaryLikeLeftExpression::AnyJsExpression(expression) => {
                 expression.needs_parentheses()
-            }
-            AnyJsBinaryLikeLeftExpression::JsPrivateName(_) => false,
-        }
-    }
-
-    fn needs_parentheses_with_parent(&self, parent: JsSyntaxNode) -> bool {
-        match self {
-            AnyJsBinaryLikeLeftExpression::AnyJsExpression(expression) => {
-                expression.needs_parentheses_with_parent(parent)
             }
             AnyJsBinaryLikeLeftExpression::JsPrivateName(_) => false,
         }

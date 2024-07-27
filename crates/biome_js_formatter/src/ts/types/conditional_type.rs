@@ -5,7 +5,7 @@ use crate::parentheses::{
     is_check_type, is_in_many_type_union_or_intersection_list,
     operator_type_or_higher_needs_parens, NeedsParentheses,
 };
-use biome_js_syntax::{JsSyntaxKind, JsSyntaxNode, TsConditionalType};
+use biome_js_syntax::{JsSyntaxKind, TsConditionalType};
 use biome_rowan::AstNode;
 
 #[derive(Debug, Clone, Default)]
@@ -26,7 +26,10 @@ impl FormatNodeRule<TsConditionalType> for FormatTsConditionalType {
 }
 
 impl NeedsParentheses for TsConditionalType {
-    fn needs_parentheses_with_parent(&self, parent: JsSyntaxNode) -> bool {
+    fn needs_parentheses(&self) -> bool {
+        let Some(parent) = self.syntax().parent() else {
+            return false;
+        };
         match parent.kind() {
             JsSyntaxKind::TS_CONDITIONAL_TYPE => {
                 let conditional = TsConditionalType::unwrap_cast(parent.clone());

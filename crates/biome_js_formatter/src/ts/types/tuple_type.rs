@@ -2,7 +2,7 @@ use crate::prelude::*;
 
 use crate::parentheses::NeedsParentheses;
 use biome_formatter::write;
-use biome_js_syntax::{JsSyntaxNode, TsTupleType, TsTupleTypeFields};
+use biome_js_syntax::{TsTupleType, TsTupleTypeFields};
 
 #[derive(Debug, Clone, Default)]
 pub struct FormatTsTupleType;
@@ -40,7 +40,7 @@ impl FormatNodeRule<TsTupleType> for FormatTsTupleType {
 }
 
 impl NeedsParentheses for TsTupleType {
-    fn needs_parentheses_with_parent(&self, _parent: JsSyntaxNode) -> bool {
+    fn needs_parentheses(&self) -> bool {
         false
     }
 }

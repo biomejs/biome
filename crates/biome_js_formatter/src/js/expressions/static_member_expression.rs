@@ -171,12 +171,12 @@ impl AnyJsStaticMemberLike {
 }
 
 impl NeedsParentheses for JsStaticMemberExpression {
-    fn needs_parentheses_with_parent(&self, parent: JsSyntaxNode) -> bool {
-        if matches!(parent.kind(), JsSyntaxKind::JS_NEW_EXPRESSION) && self.is_optional_chain() {
-            return true;
-        }
-
-        member_chain_callee_needs_parens(self.clone().into(), &parent)
+    fn needs_parentheses(&self) -> bool {
+        let Some(parent) = self.syntax().parent() else {
+            return false;
+        };
+        matches!(parent.kind(), JsSyntaxKind::JS_NEW_EXPRESSION) && self.is_optional_chain()
+            || member_chain_callee_needs_parens(self.clone().into(), &parent)
     }
 }
 
@@ -184,21 +184,20 @@ pub(crate) fn member_chain_callee_needs_parens(
     node: AnyJsExpression,
     parent: &JsSyntaxNode,
 ) -> bool {
-    use AnyJsExpression::*;
-
     match parent.kind() {
         // `new (test().a)
         JsSyntaxKind::JS_NEW_EXPRESSION => {
             let mut object_chain =
                 std::iter::successors(Some(node), |expression| match expression {
-                    JsStaticMemberExpression(member) => member.object().ok(),
-                    JsComputedMemberExpression(member) => member.object().ok(),
-                    JsTemplateExpression(template) => template.tag(),
-                    TsNonNullAssertionExpression(assertion) => assertion.expression().ok(),
+                    AnyJsExpression::JsStaticMemberExpression(member) => member.object().ok(),
+                    AnyJsExpression::JsComputedMemberExpression(member) => member.object().ok(),
+                    AnyJsExpression::JsTemplateExpression(template) => template.tag(),
+                    AnyJsExpression::TsNonNullAssertionExpression(assertion) => {
+                        assertion.expression().ok()
+                    }
                     _ => None,
                 });
-
-            object_chain.any(|object| matches!(object, JsCallExpression(_)))
+            object_chain.any(|object| matches!(object, AnyJsExpression::JsCallExpression(_)))
         }
         _ => false,
     }

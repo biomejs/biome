@@ -6,7 +6,7 @@ use crate::parentheses::{
 };
 
 use biome_formatter::FormatRuleWithOptions;
-use biome_js_syntax::{JsFunctionExpression, JsSyntaxNode};
+use biome_js_syntax::JsFunctionExpression;
 
 #[derive(Debug, Copy, Clone, Default)]
 pub(crate) struct FormatJsFunctionExpression {
@@ -34,7 +34,10 @@ impl FormatNodeRule<JsFunctionExpression> for FormatJsFunctionExpression {
 }
 
 impl NeedsParentheses for JsFunctionExpression {
-    fn needs_parentheses_with_parent(&self, parent: JsSyntaxNode) -> bool {
+    fn needs_parentheses(&self) -> bool {
+        let Some(parent) = self.syntax().parent() else {
+            return false;
+        };
         is_callee(self.syntax(), &parent)
             || is_tag(self.syntax(), &parent)
             || is_first_in_statement(

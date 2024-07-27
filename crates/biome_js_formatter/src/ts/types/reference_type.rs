@@ -2,7 +2,7 @@ use crate::prelude::*;
 
 use crate::parentheses::NeedsParentheses;
 use biome_formatter::write;
-use biome_js_syntax::{JsSyntaxNode, TsReferenceType, TsReferenceTypeFields};
+use biome_js_syntax::{TsReferenceType, TsReferenceTypeFields};
 
 #[derive(Debug, Clone, Default)]
 pub struct FormatTsReferenceType;
@@ -23,7 +23,7 @@ impl FormatNodeRule<TsReferenceType> for FormatTsReferenceType {
 }
 
 impl NeedsParentheses for TsReferenceType {
-    fn needs_parentheses_with_parent(&self, _parent: JsSyntaxNode) -> bool {
+    fn needs_parentheses(&self) -> bool {
         false
     }
 }
