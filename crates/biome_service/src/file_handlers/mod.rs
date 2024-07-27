@@ -345,6 +345,7 @@ pub struct FixAllParams<'a> {
     pub(crate) document_file_source: DocumentFileSource,
     pub(crate) only: Vec<RuleSelector>,
     pub(crate) skip: Vec<RuleSelector>,
+    pub(crate) rule_categories: RuleCategories,
 }
 
 #[derive(Default)]
@@ -417,7 +418,6 @@ pub(crate) struct CodeActionsParams<'a> {
     pub(crate) path: &'a BiomePath,
     pub(crate) manifest: Option<PackageJson>,
     pub(crate) language: DocumentFileSource,
-    pub(crate) settings: &'a Settings,
     pub(crate) only: Vec<RuleSelector>,
     pub(crate) skip: Vec<RuleSelector>,
 }

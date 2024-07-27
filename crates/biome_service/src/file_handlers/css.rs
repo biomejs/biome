@@ -35,7 +35,7 @@ use biome_parser::AnyParse;
 use biome_rowan::{AstNode, NodeCache};
 use biome_rowan::{TextRange, TextSize, TokenAtOffset};
 use std::borrow::Cow;
-use tracing::{debug_span, error, info, trace, trace_span};
+use tracing::{debug_span, error, info, trace_span};
 
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
@@ -463,32 +463,12 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
         path,
         manifest: _,
         language,
-        settings,
-        only: _,
-        skip: _,
+        only,
+        skip,
     } = params;
     debug_span!("Code actions CSS", range =? range, path =? path).in_scope(move || {
         let tree = parse.tree();
         trace_span!("Parsed file", tree =? tree).in_scope(move || {
-            let rules = settings.as_linter_rules(params.path.as_path());
-            let filter = rules
-                .as_ref()
-                .map(|rules| rules.as_enabled_rules())
-                .unwrap_or_default()
-                .into_iter()
-                .collect::<Vec<_>>();
-
-            let mut filter = AnalysisFilter::from_enabled_rules(filter.as_slice());
-
-            let mut categories = RuleCategoriesBuilder::default().with_syntax().with_lint();
-            if settings.organize_imports.enabled {
-                categories = categories.with_action();
-            }
-            filter.categories = categories.build();
-            filter.range = range;
-
-            let analyzer_options = workspace.analyzer_options::<CssLanguage>(path, &language);
-
             let Some(_) = language.to_css_file_source() else {
                 error!("Could not determine the file source of the file");
                 return PullActionsResult {
@@ -496,8 +476,28 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
                 };
             };
 
-            trace!("CSS runs the analyzer");
+            let analyzer_options = workspace.analyzer_options::<CssLanguage>(path, &language);
             let mut actions = Vec::new();
+            let mut lint_visitor =
+                LintVisitor::new(&only, &skip, workspace.settings(), path.as_path());
+            let mut syntax_visitor = SyntaxVisitor::default();
+            biome_js_analyze::visit_registry(&mut lint_visitor);
+            biome_js_analyze::visit_registry(&mut syntax_visitor);
+            let (mut enabled_rules, disabled_rules) = lint_visitor.finish();
+            enabled_rules.extend(syntax_visitor.enabled_rules);
+
+            let filter = AnalysisFilter {
+                categories: RuleCategoriesBuilder::default()
+                    .with_syntax()
+                    .with_lint()
+                    .with_action()
+                    .build(),
+                enabled_rules: Some(enabled_rules.as_slice()),
+                disabled_rules: &disabled_rules,
+                range,
+            };
+
+            info!("CSS runs the analyzer");
 
             analyze(&tree, filter, &analyzer_options, |signal| {
                 actions.extend(signal.actions().into_code_action_iter().map(|item| {

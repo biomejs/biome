@@ -3,6 +3,7 @@ use crate::execute::process_file::workspace_file::WorkspaceFile;
 use crate::execute::process_file::{
     DiffKind, FileResult, FileStatus, Message, SharedTraversalOptions,
 };
+use biome_analyze::RuleCategoriesBuilder;
 use biome_diagnostics::category;
 use biome_service::file_handlers::{AstroFileHandler, SvelteFileHandler, VueFileHandler};
 use biome_service::workspace::FixFileMode;
@@ -19,10 +20,16 @@ pub(crate) fn assists_with_guard<'ctx>(
             let skip = Vec::new();
             let fix_result = workspace_file
                 .guard()
-                .fix_file(FixFileMode::SafeFixes, false, only.clone(), skip.clone())
+                .fix_file(
+                    FixFileMode::SafeFixes,
+                    false,
+                    RuleCategoriesBuilder::default().with_action().build(),
+                    only.clone(),
+                    skip.clone(),
+                )
                 .with_file_path_and_code(
                     workspace_file.path.display().to_string(),
-                    category!("lint"),
+                    category!("assists"),
                 )?;
 
             ctx.push_message(Message::SkippedFixes {

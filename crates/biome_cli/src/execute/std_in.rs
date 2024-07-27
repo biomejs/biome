@@ -122,6 +122,10 @@ pub(crate) fn run<'a>(
                     should_format: mode.is_check() && file_features.supports_format(),
                     only: only.clone(),
                     skip: skip.clone(),
+                    rule_categories: RuleCategoriesBuilder::default()
+                        .with_syntax()
+                        .with_lint()
+                        .build(),
                 })?;
                 let code = fix_file_result.code;
                 let output = match biome_path.extension_as_str() {

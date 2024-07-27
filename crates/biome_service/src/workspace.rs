@@ -635,6 +635,7 @@ pub struct FixFileParams {
     pub should_format: bool,
     pub only: Vec<RuleSelector>,
     pub skip: Vec<RuleSelector>,
+    pub rule_categories: RuleCategories,
 }
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
@@ -1057,6 +1058,7 @@ impl<'app, W: Workspace + ?Sized> FileGuard<'app, W> {
         &self,
         fix_file_mode: FixFileMode,
         should_format: bool,
+        rule_categories: RuleCategories,
         only: Vec<RuleSelector>,
         skip: Vec<RuleSelector>,
     ) -> Result<FixFileResult, WorkspaceError> {
@@ -1066,6 +1068,7 @@ impl<'app, W: Workspace + ?Sized> FileGuard<'app, W> {
             should_format,
             only,
             skip,
+            rule_categories,
         })
     }
 

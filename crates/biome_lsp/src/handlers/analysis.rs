@@ -3,7 +3,7 @@ use crate::converters::line_index::LineIndex;
 use crate::session::Session;
 use crate::utils;
 use anyhow::{Context, Result};
-use biome_analyze::{ActionCategory, SourceActionKind};
+use biome_analyze::{ActionCategory, RuleCategoriesBuilder, SourceActionKind};
 use biome_diagnostics::Applicability;
 use biome_fs::BiomePath;
 use biome_rowan::{TextRange, TextSize};
@@ -243,6 +243,10 @@ fn fix_all(
         should_format,
         only: vec![],
         skip: vec![],
+        rule_categories: RuleCategoriesBuilder::default()
+            .with_syntax()
+            .with_lint()
+            .build(),
     })?;
 
     if fixed.actions.is_empty() {

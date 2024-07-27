@@ -474,7 +474,7 @@ fn assists(params: LintParams) -> LintResults {
                 .and_then(|settings| settings.as_linter_rules(params.path.as_path()));
 
             let mut enabled_rules = vec![];
-            let mut disabled_rules = vec![];
+            let disabled_rules = vec![];
             let mut syntax_visitor = SyntaxVisitor::default();
             let mut action_visitor = ActionVisitor::new(params.workspace.settings());
             visit_registry(&mut syntax_visitor);
@@ -572,7 +572,6 @@ fn code_actions(params: CodeActionsParams) -> PullActionsResult {
         path,
         manifest: _,
         language,
-        settings,
         skip,
         only,
     } = params;

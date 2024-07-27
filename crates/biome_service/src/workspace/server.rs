@@ -651,10 +651,6 @@ impl Workspace for WorkspaceServer {
         let workspace = self.workspace();
         let manifest = self.get_current_project()?.map(|pr| pr.manifest);
         let language = self.get_file_source(&params.path);
-        let settings = workspace.settings();
-        let Some(settings) = settings else {
-            return Ok(PullActionsResult { actions: vec![] });
-        };
         Ok(code_actions(CodeActionsParams {
             parse,
             range: params.range,
@@ -662,7 +658,6 @@ impl Workspace for WorkspaceServer {
             path: &params.path,
             manifest,
             language,
-            settings,
             only: params.only,
             skip: params.skip,
         }))
@@ -763,6 +758,7 @@ impl Workspace for WorkspaceServer {
             document_file_source: language,
             only: params.only,
             skip: params.skip,
+            rule_categories: params.rule_categories,
         })
     }
 
