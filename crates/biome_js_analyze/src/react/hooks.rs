@@ -2,7 +2,7 @@ use crate::react::{is_react_call_api, ReactLibrary};
 
 use biome_console::markup;
 use biome_deserialize::{
-    DeserializableValue, DeserializationDiagnostic, DeserializationVisitor, VisitableType,
+    DeserializableValue, DeserializationDiagnostic, DeserializationVisitor, DeserializableTypes,
 };
 use biome_diagnostics::Severity;
 use biome_js_semantic::{Capture, Closure, ClosureExtensions, SemanticModel};
@@ -331,9 +331,9 @@ struct StableResultVisitor;
 impl DeserializationVisitor for StableResultVisitor {
     type Output = StableHookResult;
 
-    const EXPECTED_TYPE: VisitableType = VisitableType::ARRAY
-        .union(VisitableType::BOOL)
-        .union(VisitableType::NUMBER);
+    const EXPECTED_TYPE: DeserializableTypes = DeserializableTypes::ARRAY
+        .union(DeserializableTypes::BOOL)
+        .union(DeserializableTypes::NUMBER);
 
     fn visit_array(
         self,
@@ -399,7 +399,7 @@ struct StableResultIndexVisitor;
 impl DeserializationVisitor for StableResultIndexVisitor {
     type Output = u8;
 
-    const EXPECTED_TYPE: VisitableType = VisitableType::NUMBER;
+    const EXPECTED_TYPE: DeserializableTypes = DeserializableTypes::NUMBER;
 
     fn visit_number(
         self,

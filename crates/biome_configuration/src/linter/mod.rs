@@ -4,8 +4,10 @@ mod rules;
 pub use crate::linter::rules::Rules;
 use biome_analyze::options::RuleOptions;
 use biome_analyze::{FixKind, RuleFilter};
-use biome_deserialize::{Deserializable, StringSet};
-use biome_deserialize::{DeserializableValue, DeserializationDiagnostic, Merge, VisitableType};
+use biome_deserialize::{
+    Deserializable, DeserializableType, DeserializableValue, DeserializationDiagnostic, Merge,
+    StringSet,
+};
 use biome_deserialize_macros::{Deserializable, Merge, Partial};
 use biome_diagnostics::Severity;
 use bpaf::Bpaf;
@@ -80,7 +82,7 @@ impl<T: Default + Deserializable> Deserializable for RuleConfiguration<T> {
         rule_name: &str,
         diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<Self> {
-        if value.visitable_type()? == VisitableType::STR {
+        if value.visitable_type()? == DeserializableType::Str {
             Deserializable::deserialize(value, rule_name, diagnostics).map(Self::Plain)
         } else {
             Deserializable::deserialize(value, rule_name, diagnostics)
@@ -163,7 +165,7 @@ impl<T: Default + Deserializable> Deserializable for RuleFixConfiguration<T> {
         rule_name: &str,
         diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<Self> {
-        if value.visitable_type()? == VisitableType::STR {
+        if value.visitable_type()? == DeserializableType::Str {
             Deserializable::deserialize(value, rule_name, diagnostics).map(Self::Plain)
         } else {
             Deserializable::deserialize(value, rule_name, diagnostics)

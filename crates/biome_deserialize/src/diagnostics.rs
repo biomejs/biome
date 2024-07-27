@@ -11,7 +11,7 @@ use serde::{Deserialize, Serialize};
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
 #[bitflags]
 #[repr(u8)]
-pub(crate) enum Types {
+pub enum DeserializableType {
     Null = 1 << 0,
     Bool = 1 << 1,
     Number = 1 << 2,
@@ -19,33 +19,48 @@ pub(crate) enum Types {
     Array = 1 << 4,
     Map = 1 << 5,
 }
+impl std::fmt::Display for DeserializableType {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter) -> std::fmt::Result {
+        write!(
+            fmt,
+            "{}",
+            match self {
+                DeserializableType::Null => "null",
+                DeserializableType::Bool => "a boolean",
+                DeserializableType::Number => "a number",
+                DeserializableType::Str => "a string",
+                DeserializableType::Array => "an array",
+                DeserializableType::Map => "an object",
+            }
+        )
+    }
+}
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
-pub struct VisitableType(BitFlags<Types>);
-impl VisitableType {
-    pub const NULL: Self = Self(make_bitflags!(Types::{Null}));
-    pub const BOOL: Self = Self(make_bitflags!(Types::{Bool}));
-    pub const NUMBER: Self = Self(make_bitflags!(Types::{Number}));
-    pub const STR: Self = Self(make_bitflags!(Types::{Str}));
-    pub const ARRAY: Self = Self(make_bitflags!(Types::{Array}));
-    pub const MAP: Self = Self(make_bitflags!(Types::{Map}));
+pub struct DeserializableTypes(BitFlags<DeserializableType>);
+impl DeserializableTypes {
+    pub const NULL: Self = Self(make_bitflags!(DeserializableType::{Null}));
+    pub const BOOL: Self = Self(make_bitflags!(DeserializableType::{Bool}));
+    pub const NUMBER: Self = Self(make_bitflags!(DeserializableType::{Number}));
+    pub const STR: Self = Self(make_bitflags!(DeserializableType::{Str}));
+    pub const ARRAY: Self = Self(make_bitflags!(DeserializableType::{Array}));
+    pub const MAP: Self = Self(make_bitflags!(DeserializableType::{Map}));
     pub const fn all() -> Self {
         Self(BitFlags::ALL)
     }
     pub const fn empty() -> Self {
         Self(BitFlags::EMPTY)
     }
-    pub fn contains(&self, other: impl Into<VisitableType>) -> bool {
+    pub fn contains(self, other: impl Into<DeserializableTypes>) -> bool {
         self.0.contains(other.into().0)
     }
-    pub const fn union(mut self, other: Self) -> Self {
-        self.0 = self.0.union_c(other.0);
-        self
+    pub const fn union(self, other: Self) -> Self {
+        Self(self.0.union_c(other.0))
     }
-    pub fn is_empty(&self) -> bool {
+    pub fn is_empty(self) -> bool {
         self.0.is_empty()
     }
 }
-impl std::fmt::Display for VisitableType {
+impl std::fmt::Display for DeserializableTypes {
     fn fmt(&self, fmt: &mut std::fmt::Formatter) -> std::fmt::Result {
         if self.is_empty() {
             return write!(fmt, "no value");
@@ -54,14 +69,6 @@ impl std::fmt::Display for VisitableType {
             if i != 0 {
                 write!(fmt, ", or ")?;
             }
-            let expected_type = match expected_type {
-                Types::Null => "null",
-                Types::Bool => "a boolean",
-                Types::Number => "a number",
-                Types::Str => "a string",
-                Types::Array => "an array",
-                Types::Map => "an object",
-            };
             write!(fmt, "{expected_type}")?;
         }
         Ok(())
@@ -98,8 +105,8 @@ impl DeserializationDiagnostic {
 
     /// Emitted when a generic node has an incorrect type
     pub fn new_incorrect_type(
-        actual_type: VisitableType,
-        expected_type: VisitableType,
+        actual_type: DeserializableType,
+        expected_type: DeserializableTypes,
         range: impl AsSpan,
     ) -> Self {
         Self::new(markup! {
@@ -110,8 +117,8 @@ impl DeserializationDiagnostic {
 
     /// Emitted when a generic node has an incorrect type
     pub fn new_incorrect_type_with_name(
-        actual_type: VisitableType,
-        expected_type: VisitableType,
+        actual_type: DeserializableType,
+        expected_type: DeserializableTypes,
         name: &str,
         range: impl AsSpan,
     ) -> Self {
@@ -264,14 +271,16 @@ mod test {
 
     #[test]
     fn test_visitable_type_fmt() {
-        assert_eq!(VisitableType::empty().to_string(), "no value");
-        assert_eq!(VisitableType::NULL.to_string(), "null");
+        assert_eq!(DeserializableTypes::empty().to_string(), "no value");
+        assert_eq!(DeserializableTypes::NULL.to_string(), "null");
         assert_eq!(
-            VisitableType::NULL.union(VisitableType::BOOL).to_string(),
+            DeserializableTypes::NULL
+                .union(DeserializableTypes::BOOL)
+                .to_string(),
             "null, or a boolean"
         );
         assert_eq!(
-            VisitableType::all().to_string(),
+            DeserializableTypes::all().to_string(),
             "null, or a boolean, or a number, or a string, or an array, or an object"
         );
     }

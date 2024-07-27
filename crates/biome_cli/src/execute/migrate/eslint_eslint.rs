@@ -1,7 +1,6 @@
-use biome_deserialize::Merge;
 use biome_deserialize::{
-    Deserializable, DeserializableValue, DeserializationDiagnostic, DeserializationVisitor,
-    VisitableType,
+    Deserializable, DeserializableTypes, DeserializableValue, DeserializationDiagnostic,
+    DeserializationVisitor, DeserializableType, Merge
 };
 use biome_deserialize_macros::Deserializable;
 use biome_rowan::TextRange;
@@ -189,7 +188,7 @@ impl Deserializable for GlobalConf {
         name: &str,
         diagnostics: &mut Vec<biome_deserialize::DeserializationDiagnostic>,
     ) -> Option<Self> {
-        if value.visitable_type()? == VisitableType::STR {
+        if value.visitable_type()? == DeserializableType::Str {
             Deserializable::deserialize(value, name, diagnostics).map(Self::Qualifier)
         } else {
             Deserializable::deserialize(value, name, diagnostics).map(Self::Flag)
@@ -255,7 +254,7 @@ impl<T: Deserializable> Deserializable for ShorthandVec<T> {
         diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<Self> {
         Some(ShorthandVec(
-            if value.visitable_type()? == VisitableType::ARRAY {
+            if value.visitable_type()? == DeserializableType::Array {
                 Deserializable::deserialize(value, name, diagnostics)?
             } else {
                 Vec::from_iter([Deserializable::deserialize(value, name, diagnostics)?])
@@ -316,7 +315,7 @@ impl<T: Deserializable + 'static, U: Deserializable + 'static> Deserializable fo
             for Visitor<T, U>
         {
             type Output = RuleConf<T, U>;
-            const EXPECTED_TYPE: VisitableType = VisitableType::ARRAY;
+            const EXPECTED_TYPE: DeserializableTypes = DeserializableTypes::ARRAY;
             fn visit_array(
                 self,
                 values: impl Iterator<Item = Option<impl DeserializableValue>>,
@@ -364,8 +363,10 @@ impl<T: Deserializable + 'static, U: Deserializable + 'static> Deserializable fo
                 Some(RuleConf::Spread(severity, spread))
             }
         }
-        let visitable_type = value.visitable_type()?;
-        if visitable_type == VisitableType::NUMBER || visitable_type == VisitableType::STR {
+        if matches!(
+            value.visitable_type()?,
+            DeserializableType::Number | DeserializableType::Str
+        ) {
             Deserializable::deserialize(value, name, diagnostics).map(RuleConf::Severity)
         } else {
             value.deserialize(Visitor(PhantomData), name, diagnostics)
@@ -420,7 +421,7 @@ impl Deserializable for NumberOrString {
         name: &str,
         diagnostics: &mut Vec<biome_deserialize::DeserializationDiagnostic>,
     ) -> Option<Self> {
-        Some(if value.visitable_type()? == VisitableType::STR {
+        Some(if value.visitable_type()? == DeserializableType::Str {
             Self::String(Deserializable::deserialize(value, name, diagnostics)?)
         } else {
             Self::Number(Deserializable::deserialize(value, name, diagnostics)?)
@@ -456,7 +457,7 @@ impl Deserializable for Rules {
         struct Visitor;
         impl DeserializationVisitor for Visitor {
             type Output = Rules;
-            const EXPECTED_TYPE: VisitableType = VisitableType::MAP;
+            const EXPECTED_TYPE: DeserializableTypes = DeserializableTypes::MAP;
             fn visit_map(
                 self,
                 members: impl Iterator<
@@ -542,7 +543,7 @@ impl Deserializable for NoRestrictedGlobal {
         name: &str,
         diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<Self> {
-        if value.visitable_type()? == VisitableType::STR {
+        if value.visitable_type()? == DeserializableType::Str {
             Deserializable::deserialize(value, name, diagnostics).map(NoRestrictedGlobal::Plain)
         } else {
             Deserializable::deserialize(value, name, diagnostics)

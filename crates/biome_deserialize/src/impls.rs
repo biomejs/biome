@@ -2,7 +2,7 @@
 //!
 //! Tests of these implementations are available in [biome_deserialize::json::tests] module.
 use crate::{
-    diagnostics::VisitableType, Deserializable, DeserializableValue, DeserializationDiagnostic,
+    diagnostics::DeserializableTypes, Deserializable, DeserializableValue, DeserializationDiagnostic,
     DeserializationVisitor,
 };
 use biome_rowan::{TextRange, TokenText};
@@ -69,7 +69,7 @@ impl Deserializable for Text {
         struct Visitor;
         impl DeserializationVisitor for Visitor {
             type Output = Text;
-            const EXPECTED_TYPE: VisitableType = VisitableType::STR;
+            const EXPECTED_TYPE: DeserializableTypes = DeserializableTypes::STR;
             fn visit_str(
                 self,
                 value: Text,
@@ -113,7 +113,7 @@ impl Deserializable for TextNumber {
         struct Visitor;
         impl DeserializationVisitor for Visitor {
             type Output = TextNumber;
-            const EXPECTED_TYPE: VisitableType = VisitableType::NUMBER;
+            const EXPECTED_TYPE: DeserializableTypes = DeserializableTypes::NUMBER;
             fn visit_number(
                 self,
                 value: TextNumber,
@@ -137,7 +137,7 @@ impl Deserializable for () {
         struct Visitor;
         impl DeserializationVisitor for Visitor {
             type Output = ();
-            const EXPECTED_TYPE: VisitableType = VisitableType::empty();
+            const EXPECTED_TYPE: DeserializableTypes = DeserializableTypes::empty();
         }
         value.deserialize(Visitor, name, diagnostics)
     }
@@ -152,7 +152,7 @@ impl Deserializable for bool {
         struct Visitor;
         impl DeserializationVisitor for Visitor {
             type Output = bool;
-            const EXPECTED_TYPE: VisitableType = VisitableType::BOOL;
+            const EXPECTED_TYPE: DeserializableTypes = DeserializableTypes::BOOL;
             fn visit_bool(
                 self,
                 value: bool,
@@ -537,7 +537,7 @@ impl<T: Deserializable> Deserializable for Vec<T> {
         struct Visitor<T>(PhantomData<T>);
         impl<T: Deserializable> DeserializationVisitor for Visitor<T> {
             type Output = Vec<T>;
-            const EXPECTED_TYPE: VisitableType = VisitableType::ARRAY;
+            const EXPECTED_TYPE: DeserializableTypes = DeserializableTypes::ARRAY;
             fn visit_array(
                 self,
                 values: impl Iterator<Item = Option<impl DeserializableValue>>,
@@ -566,7 +566,7 @@ impl<T: Deserializable, const L: usize> Deserializable for smallvec::SmallVec<[T
         struct Visitor<T, const L: usize>(PhantomData<T>);
         impl<T: Deserializable, const L: usize> DeserializationVisitor for Visitor<T, L> {
             type Output = smallvec::SmallVec<[T; L]>;
-            const EXPECTED_TYPE: VisitableType = VisitableType::ARRAY;
+            const EXPECTED_TYPE: DeserializableTypes = DeserializableTypes::ARRAY;
             fn visit_array(
                 self,
                 values: impl Iterator<Item = Option<impl DeserializableValue>>,
@@ -596,7 +596,7 @@ impl<T: Deserializable + Eq + Hash, S: BuildHasher + Default> Deserializable for
             for Visitor<T, S>
         {
             type Output = HashSet<T, S>;
-            const EXPECTED_TYPE: VisitableType = VisitableType::ARRAY;
+            const EXPECTED_TYPE: DeserializableTypes = DeserializableTypes::ARRAY;
             fn visit_array(
                 self,
                 values: impl Iterator<Item = Option<impl DeserializableValue>>,
@@ -624,7 +624,7 @@ impl<T: Hash + Eq + Deserializable> Deserializable for IndexSet<T> {
         struct Visitor<T>(PhantomData<T>);
         impl<T: Hash + Eq + Deserializable> DeserializationVisitor for Visitor<T> {
             type Output = IndexSet<T>;
-            const EXPECTED_TYPE: VisitableType = VisitableType::ARRAY;
+            const EXPECTED_TYPE: DeserializableTypes = DeserializableTypes::ARRAY;
             fn visit_array(
                 self,
                 values: impl Iterator<Item = Option<impl DeserializableValue>>,
@@ -656,7 +656,7 @@ impl<K: Hash + Eq + Deserializable, V: Deserializable, S: Default + BuildHasher>
             DeserializationVisitor for Visitor<K, V, S>
         {
             type Output = HashMap<K, V, S>;
-            const EXPECTED_TYPE: VisitableType = VisitableType::MAP;
+            const EXPECTED_TYPE: DeserializableTypes = DeserializableTypes::MAP;
             fn visit_map(
                 self,
                 members: impl Iterator<
@@ -690,7 +690,7 @@ impl<K: Ord + Deserializable, V: Deserializable> Deserializable for BTreeMap<K, 
         struct Visitor<K, V>(PhantomData<(K, V)>);
         impl<K: Ord + Deserializable, V: Deserializable> DeserializationVisitor for Visitor<K, V> {
             type Output = BTreeMap<K, V>;
-            const EXPECTED_TYPE: VisitableType = VisitableType::MAP;
+            const EXPECTED_TYPE: DeserializableTypes = DeserializableTypes::MAP;
             fn visit_map(
                 self,
                 members: impl Iterator<
@@ -728,7 +728,7 @@ impl<K: Hash + Eq + Deserializable, V: Deserializable, S: Default + BuildHasher>
             DeserializationVisitor for Visitor<K, V, S>
         {
             type Output = IndexMap<K, V, S>;
-            const EXPECTED_TYPE: VisitableType = VisitableType::MAP;
+            const EXPECTED_TYPE: DeserializableTypes = DeserializableTypes::MAP;
             fn visit_map(
                 self,
                 members: impl Iterator<
