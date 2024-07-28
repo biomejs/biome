@@ -1837,6 +1837,9 @@ export type RuleConfiguration_for_NoLabelWithoutControlOptions =
 export type RuleConfiguration_for_RestrictedImportsOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_RestrictedImportsOptions;
+export type RuleConfiguration_for_UseConsistentMemberAccessibilityOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_UseConsistentMemberAccessibilityOptions;
 export type RuleFixConfiguration_for_UseImportExtensionsOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_UseImportExtensionsOptions;
@@ -1946,6 +1949,16 @@ export interface RuleWithOptions_for_RestrictedImportsOptions {
 	 * Rule's options
 	 */
 	options: RestrictedImportsOptions;
+}
+export interface RuleWithOptions_for_UseConsistentMemberAccessibilityOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: UseConsistentMemberAccessibilityOptions;
 }
 export interface RuleWithFixOptions_for_UseImportExtensionsOptions {
 	/**
@@ -2085,6 +2098,9 @@ export interface RestrictedImportsOptions {
 	 * A list of names that should trigger the rule
 	 */
 	paths: {};
+}
+export interface UseConsistentMemberAccessibilityOptions {
+	accessibility: Accessibility;
 }
 export interface UseImportExtensionsOptions {
 	/**

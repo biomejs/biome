@@ -1,5 +1,5 @@
 use biome_analyze::{
-    context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic, RuleSource, RuleSourceKind,
+    context::RuleContext, declare_lint_rule, Ast, Rule, RuleDiagnostic, RuleSource, RuleSourceKind,
 };
 use biome_console::markup;
 use biome_deserialize_macros::Deserializable;
@@ -10,7 +10,7 @@ use biome_js_syntax::{
 use biome_rowan::{declare_node_union, AstNode, AstNodeList, TextRange};
 use serde::{Deserialize, Serialize};
 
-declare_rule! {
+declare_lint_rule! {
     /// Require consistent accessibility modifiers on class properties and methods.
     ///
     /// TypeScript allows placing explicit public, protected, and private accessibility modifiers in front of class members.

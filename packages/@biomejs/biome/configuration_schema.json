@@ -2620,6 +2620,23 @@
 			},
 			"additionalProperties": false
 		},
+		"RuleWithUseConsistentMemberAccessibilityOptions": {
+			"type": "object",
+			"required": ["level", "options"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [
+						{ "$ref": "#/definitions/UseConsistentMemberAccessibilityOptions" }
+					]
+				}
+			},
+			"additionalProperties": false
+		},
 		"RuleWithUseImportExtensionsOptions": {
 			"type": "object",
 			"required": ["level", "options"],
@@ -3574,6 +3591,22 @@
 					"enum": ["all"]
 				}
 			]
+		},
+		"UseConsistentMemberAccessibilityConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{
+					"$ref": "#/definitions/RuleWithUseConsistentMemberAccessibilityOptions"
+				}
+			]
+		},
+		"UseConsistentMemberAccessibilityOptions": {
+			"type": "object",
+			"required": ["accessibility"],
+			"properties": {
+				"accessibility": { "$ref": "#/definitions/Accessibility" }
+			},
+			"additionalProperties": false
 		},
 		"UseImportExtensionsConfiguration": {
 			"anyOf": [

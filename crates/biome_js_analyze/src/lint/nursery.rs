@@ -23,6 +23,7 @@ pub mod no_yoda_expression;
 pub mod use_adjacent_overload_signatures;
 pub mod use_consistent_builtin_instantiation;
 pub mod use_consistent_curly_braces;
+pub mod use_consistent_member_accessibility;
 pub mod use_date_now;
 pub mod use_default_switch_clause;
 pub mod use_error_message;
@@ -65,6 +66,7 @@ declare_lint_group! {
             self :: use_adjacent_overload_signatures :: UseAdjacentOverloadSignatures ,
             self :: use_consistent_builtin_instantiation :: UseConsistentBuiltinInstantiation ,
             self :: use_consistent_curly_braces :: UseConsistentCurlyBraces ,
+            self :: use_consistent_member_accessibility :: UseConsistentMemberAccessibility ,
             self :: use_date_now :: UseDateNow ,
             self :: use_default_switch_clause :: UseDefaultSwitchClause ,
             self :: use_error_message :: UseErrorMessage ,
