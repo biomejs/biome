@@ -2938,6 +2938,10 @@ pub struct Nursery {
     #[doc = "Disallows invalid named grid areas in CSS Grid Layouts."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_consistent_grid_areas: Option<RuleConfiguration<UseConsistentGridAreas>>,
+    #[doc = "Require consistent accessibility modifiers on class properties and methods."]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub use_consistent_member_accessibility:
+        Option<RuleConfiguration<UseConsistentMemberAccessibility>>,
     #[doc = "Use Date.now() to get the number of milliseconds since the Unix Epoch."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_date_now: Option<RuleFixConfiguration<UseDateNow>>,
@@ -3051,6 +3055,7 @@ impl Nursery {
         "useConsistentBuiltinInstantiation",
         "useConsistentCurlyBraces",
         "useConsistentGridAreas",
+        "useConsistentMemberAccessibility",
         "useDateNow",
         "useDefaultSwitchClause",
         "useDeprecatedReason",
@@ -3975,6 +3980,10 @@ impl Nursery {
                 .map(|conf| (conf.level(), conf.get_options())),
             "useConsistentGridAreas" => self
                 .use_consistent_grid_areas
+                .as_ref()
+                .map(|conf| (conf.level(), conf.get_options())),
+            "useConsistentMemberAccessibility" => self
+                .use_consistent_member_accessibility
                 .as_ref()
                 .map(|conf| (conf.level(), conf.get_options())),
             "useDateNow" => self

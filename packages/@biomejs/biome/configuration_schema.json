@@ -304,6 +304,10 @@
 			},
 			"additionalProperties": false
 		},
+		"Accessibility": {
+			"type": "string",
+			"enum": ["noPublic", "explicit", "none"]
+		},
 		"ArrowParentheses": { "type": "string", "enum": ["always", "asNeeded"] },
 		"AttributePosition": { "type": "string", "enum": ["auto", "multiline"] },
 		"BracketSpacing": { "type": "boolean" },
@@ -2039,6 +2043,15 @@
 					"description": "Disallows invalid named grid areas in CSS Grid Layouts.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useConsistentMemberAccessibility": {
+					"description": "Require consistent accessibility modifiers on class properties and methods.",
+					"anyOf": [
+						{
+							"$ref": "#/definitions/UseConsistentMemberAccessibilityConfiguration"
+						},
 						{ "type": "null" }
 					]
 				},

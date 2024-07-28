@@ -1214,6 +1214,10 @@ export interface Nursery {
 	 */
 	useConsistentGridAreas?: RuleConfiguration_for_Null;
 	/**
+	 * Require consistent accessibility modifiers on class properties and methods.
+	 */
+	useConsistentMemberAccessibility?: RuleConfiguration_for_UseConsistentMemberAccessibilityOptions;
+	/**
 	 * Use Date.now() to get the number of milliseconds since the Unix Epoch.
 	 */
 	useDateNow?: RuleFixConfiguration_for_Null;
@@ -2180,6 +2184,7 @@ For example, for React's `useRef()` hook the value would be `true`, while for `u
 	 */
 	stableResult: StableHookResult;
 }
+export type Accessibility = "noPublic" | "explicit" | "none";
 export type ConsistentArrayType = "shorthand" | "generic";
 export type FilenameCases = FilenameCase[];
 export interface Convention {
@@ -2559,6 +2564,7 @@ export type Category =
 	| "lint/nursery/useConsistentBuiltinInstantiation"
 	| "lint/nursery/useConsistentCurlyBraces"
 	| "lint/nursery/useConsistentGridAreas"
+	| "lint/nursery/useConsistentMemberAccessibility"
 	| "lint/nursery/useDateNow"
 	| "lint/nursery/useDefaultSwitchClause"
 	| "lint/nursery/useDeprecatedReason"
