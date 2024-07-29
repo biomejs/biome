@@ -10,7 +10,10 @@
 		},
 		"assists": {
 			"description": "Specific configuration for assists",
-			"anyOf": [{ "$ref": "#/definitions/Assists" }, { "type": "null" }]
+			"anyOf": [
+				{ "$ref": "#/definitions/AssistsConfiguration" },
+				{ "type": "null" }
+			]
 		},
 		"css": {
 			"description": "Specific configuration for the Css language",
@@ -309,12 +312,20 @@
 			"additionalProperties": false
 		},
 		"ArrowParentheses": { "type": "string", "enum": ["always", "asNeeded"] },
-		"Assists": {
+		"AssistsConfiguration": {
 			"type": "object",
 			"properties": {
 				"enabled": {
 					"description": "Whether Biome should enable assists via LSP.",
 					"type": ["boolean", "null"]
+				},
+				"ignore": {
+					"description": "A list of Unix shell style patterns. The formatter will ignore files/folders that will match these patterns.",
+					"anyOf": [{ "$ref": "#/definitions/StringSet" }, { "type": "null" }]
+				},
+				"include": {
+					"description": "A list of Unix shell style patterns. The formatter will include files/folders that will match these patterns.",
+					"anyOf": [{ "$ref": "#/definitions/StringSet" }, { "type": "null" }]
 				},
 				"rules": {
 					"description": "Whether Biome should fail in CLI if the assists were not applied to the code.",

@@ -1,15 +1,17 @@
 use crate::workspace::{DocumentFileSource, ProjectKey, WorkspaceData};
 use crate::{Matcher, WorkspaceError};
 use biome_analyze::{AnalyzerOptions, AnalyzerRules};
+use biome_configuration::analyzer::assists::AssistsConfiguration;
 use biome_configuration::diagnostics::InvalidIgnorePattern;
 use biome_configuration::javascript::JsxRuntime;
 use biome_configuration::organize_imports::OrganizeImports;
 use biome_configuration::{
     push_to_analyzer_rules, BiomeDiagnostic, FilesConfiguration, FormatterConfiguration,
-    JavascriptConfiguration, LinterConfiguration, OverrideFormatterConfiguration,
-    OverrideLinterConfiguration, OverrideOrganizeImportsConfiguration, Overrides,
-    PartialConfiguration, PartialCssConfiguration, PartialGraphqlConfiguration,
-    PartialJavascriptConfiguration, PartialJsonConfiguration, PlainIndentStyle,
+    JavascriptConfiguration, LinterConfiguration, OverrideAssistsConfiguration,
+    OverrideFormatterConfiguration, OverrideLinterConfiguration,
+    OverrideOrganizeImportsConfiguration, Overrides, PartialConfiguration, PartialCssConfiguration,
+    PartialGraphqlConfiguration, PartialJavascriptConfiguration, PartialJsonConfiguration,
+    PlainIndentStyle,
 };
 use biome_css_formatter::context::CssFormatOptions;
 use biome_css_parser::CssParserOptions;
@@ -192,6 +194,15 @@ impl Settings {
         if let Some(linter) = configuration.linter {
             self.linter =
                 to_linter_settings(working_directory.clone(), LinterConfiguration::from(linter))?;
+        }
+
+        // assists part
+        if let Some(assists) = configuration.assists {
+            self.assists = to_assists_settings(
+                working_directory.clone(),
+                AssistsConfiguration::from(assists),
+            )?;
+            dbg!(&self.assists);
         }
 
         // Filesystem settings
@@ -487,6 +498,12 @@ pub struct AssistsSettings {
 
     /// List of rules
     pub rules: Option<biome_configuration::analyzer::assists::Rules>,
+
+    /// List of ignored paths/files to match
+    pub ignored_files: Matcher,
+
+    /// List of included paths/files to match
+    pub included_files: Matcher,
 }
 
 impl Default for AssistsSettings {
@@ -494,6 +511,8 @@ impl Default for AssistsSettings {
         Self {
             enabled: true,
             rules: Default::default(),
+            included_files: Matcher::empty(),
+            ignored_files: Matcher::empty(),
         }
     }
 }
@@ -1637,6 +1656,31 @@ impl TryFrom<OverrideLinterConfiguration> for LinterSettings {
     type Error = WorkspaceError;
 
     fn try_from(conf: OverrideLinterConfiguration) -> Result<Self, Self::Error> {
+        Ok(Self {
+            enabled: conf.enabled.unwrap_or_default(),
+            rules: conf.rules,
+            ignored_files: Matcher::empty(),
+            included_files: Matcher::empty(),
+        })
+    }
+}
+
+pub fn to_assists_settings(
+    working_directory: Option<PathBuf>,
+    conf: AssistsConfiguration,
+) -> Result<AssistsSettings, WorkspaceError> {
+    Ok(AssistsSettings {
+        enabled: conf.enabled,
+        rules: Some(conf.rules),
+        ignored_files: to_matcher(working_directory.clone(), Some(&conf.ignore))?,
+        included_files: to_matcher(working_directory.clone(), Some(&conf.include))?,
+    })
+}
+
+impl TryFrom<OverrideAssistsConfiguration> for AssistsSettings {
+    type Error = WorkspaceError;
+
+    fn try_from(conf: OverrideAssistsConfiguration) -> Result<Self, Self::Error> {
         Ok(Self {
             enabled: conf.enabled.unwrap_or_default(),
             rules: conf.rules,

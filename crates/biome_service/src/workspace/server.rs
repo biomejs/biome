@@ -341,8 +341,11 @@ impl WorkspaceServer {
                     &organize_imports.ignored_files,
                 )
             }
+            FeatureKind::Assists => {
+                let assists = &settings.assists;
+                (&assists.included_files, &assists.ignored_files)
+            }
             // TODO: enable once the configuration is available
-            FeatureKind::Assists => return false,
             FeatureKind::Search => return false, // There is no search-specific config.
         };
         let is_feature_included = feature_included_files.is_empty()

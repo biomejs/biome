@@ -15,7 +15,9 @@ pub mod organize_imports;
 mod overrides;
 pub mod vcs;
 
-use crate::analyzer::assists::{partial_assists, Assists, PartialAssists};
+use crate::analyzer::assists::{
+    partial_assists_configuration, AssistsConfiguration, PartialAssistsConfiguration,
+};
 use crate::css::CssLinter;
 pub use crate::diagnostics::BiomeDiagnostic;
 pub use crate::diagnostics::CantLoadExtendFile;
@@ -54,7 +56,7 @@ pub use json::{
     PartialJsonFormatter,
 };
 pub use overrides::{
-    OverrideFormatterConfiguration, OverrideLinterConfiguration,
+    OverrideAssistsConfiguration, OverrideFormatterConfiguration, OverrideLinterConfiguration,
     OverrideOrganizeImportsConfiguration, OverridePattern, Overrides,
 };
 use serde::{Deserialize, Serialize};
@@ -132,8 +134,8 @@ pub struct Configuration {
     pub overrides: Overrides,
 
     /// Specific configuration for assists
-    #[partial(type, bpaf(external(partial_assists), optional))]
-    pub assists: Assists,
+    #[partial(type, bpaf(external(partial_assists_configuration), optional))]
+    pub assists: AssistsConfiguration,
 }
 
 impl PartialConfiguration {

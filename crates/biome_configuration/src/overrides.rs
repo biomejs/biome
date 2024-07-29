@@ -3,7 +3,7 @@ use super::json::PartialJsonConfiguration;
 use super::{PartialCssConfiguration, PartialGraphqlConfiguration};
 use crate::{
     partial_css_configuration, partial_graphql_configuration, partial_javascript_configuration,
-    partial_json_configuration, PlainIndentStyle, Rules,
+    partial_json_configuration, PlainIndentStyle,
 };
 use biome_deserialize::StringSet;
 use biome_deserialize_macros::{Deserializable, Merge};
@@ -156,8 +156,8 @@ pub struct OverrideLinterConfiguration {
 
     /// List of rules
     #[serde(skip_serializing_if = "Option::is_none")]
-    #[bpaf(pure(Rules::default()), optional, hide)]
-    pub rules: Option<Rules>,
+    #[bpaf(pure(crate::analyzer::linter::Rules::default()), optional, hide)]
+    pub rules: Option<crate::analyzer::linter::Rules>,
 }
 
 #[derive(
@@ -170,4 +170,21 @@ pub struct OverrideOrganizeImportsConfiguration {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[bpaf(hide)]
     pub enabled: Option<bool>,
+}
+
+#[derive(
+    Bpaf, Clone, Debug, Default, Deserialize, Deserializable, Eq, Merge, PartialEq, Serialize,
+)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase", default, deny_unknown_fields)]
+pub struct OverrideAssistsConfiguration {
+    /// if `false`, it disables the feature and the linter won't be executed. `true` by default
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[bpaf(hide)]
+    pub enabled: Option<bool>,
+
+    /// List of rules
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[bpaf(pure(crate::analyzer::assists::Rules::default()), optional, hide)]
+    pub rules: Option<crate::analyzer::assists::Rules>,
 }

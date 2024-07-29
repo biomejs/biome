@@ -40,7 +40,7 @@ export interface PartialConfiguration {
 	/**
 	 * Specific configuration for assists
 	 */
-	assists?: PartialAssists;
+	assists?: PartialAssistsConfiguration;
 	/**
 	 * Specific configuration for the Css language
 	 */
@@ -86,11 +86,19 @@ export interface PartialConfiguration {
 	 */
 	vcs?: PartialVcsConfiguration;
 }
-export interface PartialAssists {
+export interface PartialAssistsConfiguration {
 	/**
 	 * Whether Biome should enable assists via LSP.
 	 */
 	enabled?: boolean;
+	/**
+	 * A list of Unix shell style patterns. The formatter will ignore files/folders that will match these patterns.
+	 */
+	ignore?: StringSet;
+	/**
+	 * A list of Unix shell style patterns. The formatter will include files/folders that will match these patterns.
+	 */
+	include?: StringSet;
 	/**
 	 * Whether Biome should fail in CLI if the assists were not applied to the code.
 	 */
