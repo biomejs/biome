@@ -551,10 +551,13 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
             let mut lint_visitor =
                 LintVisitor::new(&only, &skip, workspace.settings(), path.as_path());
             let mut syntax_visitor = SyntaxVisitor::default();
+            let mut assist_visitor = AssistsVisitor::new(workspace.settings());
             visit_registry(&mut lint_visitor);
             visit_registry(&mut syntax_visitor);
+            visit_registry(&mut assist_visitor);
             let (mut enabled_rules, disabled_rules) = lint_visitor.finish();
             enabled_rules.extend(syntax_visitor.enabled_rules);
+            enabled_rules.extend(assist_visitor.enabled_rules);
 
             let filter = AnalysisFilter {
                 categories: RuleCategoriesBuilder::default()
@@ -868,7 +871,7 @@ pub(crate) fn organize_imports(parse: AnyParse) -> Result<OrganizeImportsResult,
     let mut tree: AnyJsRoot = parse.tree();
 
     let filter = AnalysisFilter {
-        enabled_rules: Some(&[RuleFilter::Rule("refactor", "organizeImports")]),
+        enabled_rules: Some(&[RuleFilter::Rule("source", "organizeImports")]),
         categories: RuleCategoriesBuilder::default().with_action().build(),
         ..AnalysisFilter::default()
     };

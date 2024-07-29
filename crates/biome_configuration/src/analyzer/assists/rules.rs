@@ -28,12 +28,12 @@ use serde::{Deserialize, Serialize};
 #[cfg_attr(feature = "schema", derive(JsonSchema))]
 #[serde(rename_all = "camelCase")]
 pub enum RuleGroup {
-    Refactor,
+    Source,
 }
 impl RuleGroup {
     pub const fn as_str(self) -> &'static str {
         match self {
-            Self::Refactor => Refactor::GROUP_NAME,
+            Self::Source => Source::GROUP_NAME,
         }
     }
 }
@@ -41,7 +41,7 @@ impl std::str::FromStr for RuleGroup {
     type Err = &'static str;
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s {
-            Refactor::GROUP_NAME => Ok(Self::Refactor),
+            Source::GROUP_NAME => Ok(Self::Source),
             _ => Err("This rule group doesn't exist."),
         }
     }
@@ -57,9 +57,9 @@ pub struct Rules {
     #[doc = r" It enables ALL rules. The rules that belong to `nursery` won't be enabled."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub all: Option<bool>,
-    #[deserializable(rename = "refactor")]
+    #[deserializable(rename = "source")]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub refactor: Option<Refactor>,
+    pub source: Option<Source>,
 }
 impl DeserializableValidator for Rules {
     fn validate(
@@ -80,7 +80,7 @@ impl Rules {
     #[doc = r" Usually the code is built like {group}/{rule_name}"]
     pub fn has_rule(group: RuleGroup, rule_name: &str) -> Option<&'static str> {
         match group {
-            RuleGroup::Refactor => Refactor::has_rule(rule_name),
+            RuleGroup::Source => Source::has_rule(rule_name),
         }
     }
     #[doc = r" Given a category coming from [Diagnostic](biome_diagnostics::Diagnostic), this function returns"]
@@ -97,14 +97,14 @@ impl Rules {
         let rule_name = split_code.next()?;
         let rule_name = Self::has_rule(group, rule_name)?;
         let severity = match group {
-            RuleGroup::Refactor => self
-                .refactor
+            RuleGroup::Source => self
+                .source
                 .as_ref()
                 .and_then(|group| group.get_rule_configuration(rule_name))
                 .filter(|conf| !matches!(conf, RuleAssistConfiguration::Off))
                 .map_or_else(
                     || {
-                        if Refactor::is_recommended_rule(rule_name) {
+                        if Source::is_recommended_rule(rule_name) {
                             Severity::Error
                         } else {
                             Severity::Warning
@@ -120,7 +120,7 @@ impl Rules {
         if self.all != Some(true) && self.recommended == Some(false) {
             self.recommended = Some(true)
         }
-        if let Some(group) = &mut self.refactor {
+        if let Some(group) = &mut self.source {
             group.recommended = None;
         }
     }
@@ -136,7 +136,7 @@ impl Rules {
     pub fn as_enabled_rules(&self) -> FxHashSet<RuleFilter<'static>> {
         let mut enabled_rules = FxHashSet::default();
         let mut disabled_rules = FxHashSet::default();
-        if let Some(group) = self.refactor.as_ref() {
+        if let Some(group) = self.source.as_ref() {
             group.collect_preset_rules(
                 self.is_all_true(),
                 !self.is_recommended_false(),
@@ -145,9 +145,9 @@ impl Rules {
             enabled_rules.extend(&group.get_enabled_rules());
             disabled_rules.extend(&group.get_disabled_rules());
         } else if self.is_all_true() {
-            enabled_rules.extend(Refactor::all_rules_as_filters());
+            enabled_rules.extend(Source::all_rules_as_filters());
         } else if !self.is_recommended_false() {
-            enabled_rules.extend(Refactor::recommended_rules_as_filters());
+            enabled_rules.extend(Source::recommended_rules_as_filters());
         }
         enabled_rules.difference(&disabled_rules).copied().collect()
     }
@@ -157,7 +157,7 @@ impl Rules {
 #[cfg_attr(feature = "schema", derive(JsonSchema))]
 #[serde(rename_all = "camelCase", default, deny_unknown_fields)]
 #[doc = r" A list of rules that belong to this group"]
-pub struct Refactor {
+pub struct Source {
     #[doc = r" It enables the recommended rules for this group"]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub recommended: Option<bool>,
@@ -168,7 +168,7 @@ pub struct Refactor {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_sorted_keys: Option<RuleAssistConfiguration>,
 }
-impl DeserializableValidator for Refactor {
+impl DeserializableValidator for Source {
     fn validate(
         &mut self,
         _name: &str,
@@ -182,8 +182,8 @@ impl DeserializableValidator for Refactor {
         true
     }
 }
-impl Refactor {
-    const GROUP_NAME: &'static str = "refactor";
+impl Source {
+    const GROUP_NAME: &'static str = "source";
     pub(crate) const GROUP_RULES: &'static [&'static str] = &["useSortedKeys"];
     const RECOMMENDED_RULES: &'static [&'static str] = &[];
     const RECOMMENDED_RULES_AS_FILTERS: &'static [RuleFilter<'static>] = &[];
@@ -261,7 +261,7 @@ impl Refactor {
 }
 #[test]
 fn test_order() {
-    for items in Refactor::GROUP_RULES.windows(2) {
+    for items in Source::GROUP_RULES.windows(2) {
         assert!(items[0] < items[1], "{} < {}", items[0], items[1]);
     }
 }

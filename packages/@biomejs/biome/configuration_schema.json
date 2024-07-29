@@ -2452,28 +2452,6 @@
 		},
 		"QuoteProperties": { "type": "string", "enum": ["asNeeded", "preserve"] },
 		"QuoteStyle": { "type": "string", "enum": ["double", "single"] },
-		"Refactor": {
-			"description": "A list of rules that belong to this group",
-			"type": "object",
-			"properties": {
-				"all": {
-					"description": "It enables ALL rules for this group.",
-					"type": ["boolean", "null"]
-				},
-				"recommended": {
-					"description": "It enables the recommended rules for this group",
-					"type": ["boolean", "null"]
-				},
-				"useSortedKeys": {
-					"description": "Sorts the keys of a JSON object in natural order",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleAssistConfiguration" },
-						{ "type": "null" }
-					]
-				}
-			},
-			"additionalProperties": false
-		},
 		"Regex": { "type": "string" },
 		"RestrictedGlobalsConfiguration": {
 			"anyOf": [
@@ -2824,8 +2802,8 @@
 					"description": "It enables the lint rules recommended by Biome. `true` by default.",
 					"type": ["boolean", "null"]
 				},
-				"refactor": {
-					"anyOf": [{ "$ref": "#/definitions/Refactor" }, { "type": "null" }]
+				"source": {
+					"anyOf": [{ "$ref": "#/definitions/Source" }, { "type": "null" }]
 				}
 			},
 			"additionalProperties": false
@@ -2886,6 +2864,28 @@
 			"additionalProperties": false
 		},
 		"Semicolons": { "type": "string", "enum": ["always", "asNeeded"] },
+		"Source": {
+			"description": "A list of rules that belong to this group",
+			"type": "object",
+			"properties": {
+				"all": {
+					"description": "It enables ALL rules for this group.",
+					"type": ["boolean", "null"]
+				},
+				"recommended": {
+					"description": "It enables the recommended rules for this group",
+					"type": ["boolean", "null"]
+				},
+				"useSortedKeys": {
+					"description": "Sorts the keys of a JSON object in natural order",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleAssistConfiguration" },
+						{ "type": "null" }
+					]
+				}
+			},
+			"additionalProperties": false
+		},
 		"StableHookResult": {
 			"oneOf": [
 				{

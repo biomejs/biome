@@ -2,13 +2,13 @@
 
 use biome_analyze::declare_assists_group;
 
-pub mod organize_imports;
+pub mod use_sorted_keys;
 
 declare_assists_group! {
-    pub Refactor {
-        name : "refactor" ,
+    pub Source {
+        name : "source" ,
         rules : [
-            self :: organize_imports :: OrganizeImports ,
+            self :: use_sorted_keys :: UseSortedKeys ,
         ]
      }
 }

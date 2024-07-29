@@ -321,7 +321,7 @@ export interface Rules2 {
 	 * It enables the lint rules recommended by Biome. `true` by default.
 	 */
 	recommended?: boolean;
-	refactor?: Refactor;
+	source?: Source;
 }
 /**
  * Options that changes how the CSS assists behaves
@@ -660,7 +660,7 @@ export type VcsClientKind = "git";
 /**
  * A list of rules that belong to this group
  */
-export interface Refactor {
+export interface Source {
 	/**
 	 * It enables ALL rules for this group.
 	 */

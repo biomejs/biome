@@ -932,7 +932,7 @@ impl<'a, 'b> AssistsVisitor<'a, 'b> {
         Self {
             enabled_rules: vec![],
             settings,
-            import_sorting: RuleFilter::Rule("refactor", "organizeImports"),
+            import_sorting: RuleFilter::Rule("source", "organizeImports"),
         }
     }
 
@@ -941,7 +941,7 @@ impl<'a, 'b> AssistsVisitor<'a, 'b> {
         R: Rule<Options: Default, Query: Queryable<Language = L, Output: Clone>> + 'static,
     {
         // We deem refactors **safe**, other assists aren't safe
-        if R::Group::NAME != "refactor" {
+        if R::Group::NAME != "source" {
             return;
         }
 

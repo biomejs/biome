@@ -246,6 +246,7 @@ fn fix_all(
         rule_categories: RuleCategoriesBuilder::default()
             .with_syntax()
             .with_lint()
+            .with_action()
             .build(),
     })?;
 
