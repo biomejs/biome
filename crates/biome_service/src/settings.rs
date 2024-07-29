@@ -202,7 +202,6 @@ impl Settings {
                 working_directory.clone(),
                 AssistsConfiguration::from(assists),
             )?;
-            dbg!(&self.assists);
         }
 
         // Filesystem settings

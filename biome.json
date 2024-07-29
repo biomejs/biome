@@ -1,5 +1,16 @@
 {
   "$schema": "./packages/@biomejs/biome/configuration_schema.json",
+  "assists": {
+    "enabled": false,
+    "ignore": [
+      "./packages/@biomejs/biome/configuration_schema.json"
+    ],
+    "rules": {
+      "source": {
+        "useSortedKeys": "off"
+      }
+    }
+  },
   "files": {
     "ignore": [
       "crates/**",
@@ -29,11 +40,6 @@
       "lineWidth": 1
     }
   },
-  "vcs": {
-    "clientKind": "git",
-    "enabled": true,
-    "useIgnoreFile": true
-  },
   "linter": {
     "enabled": true,
     "rules": {
@@ -46,11 +52,9 @@
   "organizeImports": {
     "enabled": true
   },
-  "assists": {
-    "rules": {
-      "refactor": {
-        "useSortedKeys": "off"
-      }
-    }
+  "vcs": {
+    "clientKind": "git",
+    "enabled": true,
+    "useIgnoreFile": true
   }
 }

@@ -655,7 +655,7 @@ fn test_svelte_script_lang() {
 /// When a new language is introduced, it must be implemented it. Syntax rules aren't negotiable via configuration, so it's safe
 /// to pull all of them.
 #[derive(Default, Debug)]
-pub(crate) struct SyntaxVisitor<'a> {
+struct SyntaxVisitor<'a> {
     pub(crate) enabled_rules: Vec<RuleFilter<'a>>,
 }
 
@@ -737,7 +737,7 @@ impl<'a> RegistryVisitor<GraphqlLanguage> for SyntaxVisitor<'a> {
 /// Type meant to register all the lint rules for each language supported by Biome
 ///
 #[derive(Debug)]
-pub(crate) struct LintVisitor<'a, 'b> {
+struct LintVisitor<'a, 'b> {
     pub(crate) enabled_rules: Vec<RuleFilter<'a>>,
     pub(crate) disabled_rules: Vec<RuleFilter<'a>>,
     // lint_params: &'b LintParams<'a>,
@@ -925,14 +925,21 @@ struct AssistsVisitor<'a, 'b> {
     settings: Option<&'b Settings>,
     pub(crate) enabled_rules: Vec<RuleFilter<'a>>,
     import_sorting: RuleFilter<'a>,
+    path: &'b Path,
 }
 
 impl<'a, 'b> AssistsVisitor<'a, 'b> {
-    pub(crate) fn new(settings: Option<&'b Settings>) -> Self {
+    pub(crate) fn new(
+        _only: &'b Vec<RuleSelector>,
+        _skip: &'b Vec<RuleSelector>,
+        settings: Option<&'b Settings>,
+        path: &'b Path,
+    ) -> Self {
         Self {
             enabled_rules: vec![],
             settings,
             import_sorting: RuleFilter::Rule("source", "organizeImports"),
+            path,
         }
     }
 
@@ -957,6 +964,19 @@ impl<'a, 'b> AssistsVisitor<'a, 'b> {
             <R::Group as RuleGroup>::NAME,
             R::METADATA.name,
         ))
+    }
+
+    fn finish(mut self) -> (Vec<RuleFilter<'a>>, Vec<RuleFilter<'a>>) {
+        let enabled_rules = self
+            .settings
+            .and_then(|settings| settings.as_assists_rules(self.path))
+            .as_ref()
+            .map(|rules| rules.as_enabled_rules())
+            .unwrap_or_default()
+            .into_iter()
+            .collect::<Vec<_>>();
+        self.enabled_rules.extend(enabled_rules);
+        (self.enabled_rules, vec![])
     }
 }
 
@@ -1020,6 +1040,86 @@ impl<'a, 'b> RegistryVisitor<GraphqlLanguage> for AssistsVisitor<'a, 'b> {
             + 'static,
     {
         self.push_rule::<R, <R::Query as Queryable>::Language>();
+    }
+}
+
+pub(crate) struct AnalyzerVisitorBuilder<'a, 'b> {
+    syntax: Option<SyntaxVisitor<'a>>,
+    lint: Option<LintVisitor<'a, 'b>>,
+    assists: Option<AssistsVisitor<'a, 'b>>,
+    settings: Option<&'b Settings>,
+}
+
+impl<'a, 'b> AnalyzerVisitorBuilder<'a, 'b> {
+    pub(crate) fn new(settings: Option<&'b Settings>) -> Self {
+        Self {
+            settings,
+            syntax: None,
+            lint: None,
+            assists: None,
+        }
+    }
+
+    #[must_use]
+    pub(crate) fn with_syntax_rules(mut self) -> Self {
+        self.syntax = Some(SyntaxVisitor::default());
+        self
+    }
+    #[must_use]
+    pub(crate) fn with_linter_rules(
+        mut self,
+        only: &'b Vec<RuleSelector>,
+        skip: &'b Vec<RuleSelector>,
+        path: &'b Path,
+    ) -> Self {
+        self.lint = Some(LintVisitor::new(only, skip, self.settings, path));
+        self
+    }
+
+    #[must_use]
+    pub(crate) fn with_assists_rules(
+        mut self,
+        only: &'b Vec<RuleSelector>,
+        skip: &'b Vec<RuleSelector>,
+        path: &'b Path,
+    ) -> Self {
+        self.assists = Some(AssistsVisitor::new(only, skip, self.settings, path));
+        self
+    }
+
+    #[must_use]
+    pub(crate) fn finish(self) -> (Vec<RuleFilter<'a>>, Vec<RuleFilter<'a>>) {
+        let mut disabled_rules = vec![];
+        let mut enabled_rules = vec![];
+        if let Some(mut syntax) = self.syntax {
+            biome_js_analyze::visit_registry(&mut syntax);
+            biome_css_analyze::visit_registry(&mut syntax);
+            biome_json_analyze::visit_registry(&mut syntax);
+            biome_graphql_analyze::visit_registry(&mut syntax);
+            enabled_rules.extend(syntax.enabled_rules);
+        }
+
+        if let Some(mut lint) = self.lint {
+            biome_js_analyze::visit_registry(&mut lint);
+            biome_css_analyze::visit_registry(&mut lint);
+            biome_json_analyze::visit_registry(&mut lint);
+            biome_graphql_analyze::visit_registry(&mut lint);
+            let (linter_enabled_rules, linter_disabled_rules) = lint.finish();
+            enabled_rules.extend(linter_enabled_rules);
+            disabled_rules.extend(linter_disabled_rules);
+        }
+
+        if let Some(mut assists) = self.assists {
+            biome_js_analyze::visit_registry(&mut assists);
+            biome_css_analyze::visit_registry(&mut assists);
+            biome_json_analyze::visit_registry(&mut assists);
+            biome_graphql_analyze::visit_registry(&mut assists);
+            let (assists_enabled_rules, assists_disabled_rules) = assists.finish();
+            enabled_rules.extend(assists_enabled_rules);
+            disabled_rules.extend(assists_disabled_rules);
+        }
+
+        (enabled_rules, disabled_rules)
     }
 }
 

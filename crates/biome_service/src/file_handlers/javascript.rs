@@ -1,7 +1,7 @@
 use super::{
-    search, AnalyzerCapabilities, AssistsVisitor, CodeActionsParams, DebugCapabilities,
-    ExtensionHandler, FormatterCapabilities, LintParams, LintResults, LintVisitor, ParseResult,
-    ParserCapabilities, SearchCapabilities, SyntaxVisitor,
+    search, AnalyzerCapabilities, AnalyzerVisitorBuilder, CodeActionsParams, DebugCapabilities,
+    ExtensionHandler, FormatterCapabilities, LintParams, LintResults, ParseResult,
+    ParserCapabilities, SearchCapabilities,
 };
 use crate::configuration::to_analyzer_rules;
 use crate::diagnostics::extension_error;
@@ -32,7 +32,7 @@ use biome_formatter::{
 };
 use biome_fs::BiomePath;
 use biome_js_analyze::utils::rename::{RenameError, RenameSymbolExtensions};
-use biome_js_analyze::{analyze, analyze_with_inspect_matcher, visit_registry, ControlFlowGraph};
+use biome_js_analyze::{analyze, analyze_with_inspect_matcher, ControlFlowGraph};
 use biome_js_formatter::context::trailing_commas::TrailingCommas;
 use biome_js_formatter::context::{
     ArrowParentheses, BracketSameLine, JsFormatOptions, QuoteProperties, Semicolons,
@@ -426,24 +426,12 @@ pub(crate) fn lint(params: LintParams) -> LintResults {
                 .as_ref()
                 .and_then(|settings| settings.as_linter_rules(params.path.as_path()));
 
-            let mut enabled_rules = vec![];
-            let mut disabled_rules = vec![];
-            let mut syntax_visitor = SyntaxVisitor::default();
-            let mut lint_visitor = LintVisitor::new(
-                &params.only,
-                &params.skip,
-                params.workspace.settings(),
-                params.path.as_path(),
-            );
-            let mut action_visitor = AssistsVisitor::new(params.workspace.settings());
-            visit_registry(&mut syntax_visitor);
-            visit_registry(&mut lint_visitor);
-            visit_registry(&mut action_visitor);
-            enabled_rules.extend(syntax_visitor.enabled_rules);
-            let (lint_enabled_rules, lint_disabled_rules) = lint_visitor.finish();
-            enabled_rules.extend(lint_enabled_rules);
-            disabled_rules.extend(lint_disabled_rules);
-            enabled_rules.extend(action_visitor.enabled_rules);
+            let (enabled_rules, disabled_rules) =
+                AnalyzerVisitorBuilder::new(params.workspace.settings())
+                    .with_syntax_rules()
+                    .with_linter_rules(&params.only, &params.skip, params.path.as_path())
+                    .with_assists_rules(&params.only, &params.skip, params.path.as_path())
+                    .finish();
 
             let filter = AnalysisFilter {
                 categories: params.categories,
@@ -548,16 +536,12 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
         trace_span!("Parsed file", tree =? tree).in_scope(move || {
             let analyzer_options = workspace.analyzer_options::<JsLanguage>(path, &language);
             let mut actions = Vec::new();
-            let mut lint_visitor =
-                LintVisitor::new(&only, &skip, workspace.settings(), path.as_path());
-            let mut syntax_visitor = SyntaxVisitor::default();
-            let mut assist_visitor = AssistsVisitor::new(workspace.settings());
-            visit_registry(&mut lint_visitor);
-            visit_registry(&mut syntax_visitor);
-            visit_registry(&mut assist_visitor);
-            let (mut enabled_rules, disabled_rules) = lint_visitor.finish();
-            enabled_rules.extend(syntax_visitor.enabled_rules);
-            enabled_rules.extend(assist_visitor.enabled_rules);
+            let (enabled_rules, disabled_rules) =
+                AnalyzerVisitorBuilder::new(params.workspace.settings())
+                    .with_syntax_rules()
+                    .with_linter_rules(&only, &skip, params.path.as_path())
+                    .with_assists_rules(&only, &skip, params.path.as_path())
+                    .finish();
 
             let filter = AnalysisFilter {
                 categories: RuleCategoriesBuilder::default()
@@ -619,17 +603,11 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
     // Compute final rules (taking `overrides` into account)
     let rules = settings.as_linter_rules(params.biome_path.as_path());
 
-    let mut lint_visitor = LintVisitor::new(
-        &params.only,
-        &params.skip,
-        params.workspace.settings(),
-        params.biome_path.as_path(),
-    );
-    let mut syntax_visitor = SyntaxVisitor::default();
-    visit_registry(&mut lint_visitor);
-    visit_registry(&mut syntax_visitor);
-    let (mut enabled_rules, disabled_rules) = lint_visitor.finish();
-    enabled_rules.extend(syntax_visitor.enabled_rules);
+    let (enabled_rules, disabled_rules) = AnalyzerVisitorBuilder::new(params.workspace.settings())
+        .with_syntax_rules()
+        .with_linter_rules(&params.only, &params.skip, params.biome_path.as_path())
+        .with_assists_rules(&params.only, &params.skip, params.biome_path.as_path())
+        .finish();
 
     let filter = AnalysisFilter {
         categories: params.rule_categories,
