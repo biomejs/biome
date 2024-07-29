@@ -45,5 +45,12 @@
   },
   "organizeImports": {
     "enabled": true
+  },
+  "assists": {
+    "rules": {
+      "refactor": {
+        "useSortedKeys": "off"
+      }
+    }
   }
 }

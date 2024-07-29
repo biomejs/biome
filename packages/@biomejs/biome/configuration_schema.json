@@ -2460,13 +2460,6 @@
 					"description": "It enables ALL rules for this group.",
 					"type": ["boolean", "null"]
 				},
-				"organizeImports": {
-					"description": "Provides a whole-source code action to sort the imports in the file using import groups and natural ordering.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleFixConfiguration" },
-						{ "type": "null" }
-					]
-				},
 				"recommended": {
 					"description": "It enables the recommended rules for this group",
 					"type": ["boolean", "null"]
@@ -2474,7 +2467,7 @@
 				"useSortedKeys": {
 					"description": "Sorts the keys of a JSON object in natural order",
 					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "$ref": "#/definitions/RuleAssistConfiguration" },
 						{ "type": "null" }
 					]
 				}
@@ -2524,6 +2517,7 @@
 			"type": "string",
 			"enum": ["abstract", "private", "protected", "readonly", "static"]
 		},
+		"RuleAssistConfiguration": { "type": "string", "enum": ["on", "off"] },
 		"RuleConfiguration": {
 			"anyOf": [
 				{ "$ref": "#/definitions/RulePlainConfiguration" },

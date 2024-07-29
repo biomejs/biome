@@ -194,6 +194,17 @@ impl From<RulePlainConfiguration> for Severity {
     }
 }
 
+impl From<RuleAssistConfiguration> for Severity {
+    fn from(conf: RuleAssistConfiguration) -> Self {
+        match conf {
+            RuleAssistConfiguration::On => Severity::Hint,
+            RuleAssistConfiguration::Off => {
+                unreachable!("the rule is turned off, it should not step in here")
+            }
+        }
+    }
+}
+
 #[derive(Clone, Copy, Debug, Default, Deserialize, Deserializable, Eq, PartialEq, Serialize)]
 #[cfg_attr(feature = "schema", derive(JsonSchema))]
 #[serde(rename_all = "camelCase")]
@@ -203,6 +214,31 @@ pub enum RulePlainConfiguration {
     Error,
     Info,
     Off,
+}
+
+#[derive(Clone, Copy, Debug, Default, Deserialize, Deserializable, Eq, PartialEq, Serialize)]
+#[cfg_attr(feature = "schema", derive(JsonSchema))]
+#[serde(rename_all = "camelCase")]
+pub enum RuleAssistConfiguration {
+    #[default]
+    On,
+    Off,
+}
+
+impl RuleAssistConfiguration {
+    pub const fn is_enabled(&self) -> bool {
+        matches!(self, Self::On)
+    }
+
+    pub const fn is_disabled(&self) -> bool {
+        matches!(self, Self::Off)
+    }
+}
+
+impl Merge for RuleAssistConfiguration {
+    fn merge_with(&mut self, other: Self) {
+        *self = other;
+    }
 }
 
 #[derive(Clone, Debug, Default, Deserialize, Deserializable, Eq, PartialEq, Serialize)]

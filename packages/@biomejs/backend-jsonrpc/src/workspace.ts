@@ -666,17 +666,13 @@ export interface Refactor {
 	 */
 	all?: boolean;
 	/**
-	 * Provides a whole-source code action to sort the imports in the file using import groups and natural ordering.
-	 */
-	organizeImports?: RuleFixConfiguration_for_Null;
-	/**
 	 * It enables the recommended rules for this group
 	 */
 	recommended?: boolean;
 	/**
 	 * Sorts the keys of a JSON object in natural order
 	 */
-	useSortedKeys?: RuleConfiguration_for_Null;
+	useSortedKeys?: RuleAssistConfiguration;
 }
 export type QuoteStyle = "double" | "single";
 export type ArrowParentheses = "always" | "asNeeded";
@@ -1898,6 +1894,7 @@ export interface OverrideOrganizeImportsConfiguration {
 	 */
 	enabled?: boolean;
 }
+export type RuleAssistConfiguration = "on" | "off";
 export type RuleFixConfiguration_for_Null =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_Null;
@@ -2784,6 +2781,7 @@ export type Category =
 	| "ci"
 	| "configuration"
 	| "organizeImports"
+	| "assists"
 	| "migrate"
 	| "deserialize"
 	| "project"
@@ -2900,8 +2898,10 @@ export interface BacktraceSymbol {
 	name?: string;
 }
 export interface PullActionsParams {
+	only: RuleCode[];
 	path: BiomePath;
-	range: TextRange;
+	range?: TextRange;
+	skip: RuleCode[];
 }
 export interface PullActionsResult {
 	actions: CodeAction[];
@@ -2988,6 +2988,7 @@ export interface FixFileParams {
 	fix_file_mode: FixFileMode;
 	only: RuleCode[];
 	path: BiomePath;
+	rule_categories: RuleCategories;
 	should_format: boolean;
 	skip: RuleCode[];
 }

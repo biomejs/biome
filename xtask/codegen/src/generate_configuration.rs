@@ -85,9 +85,8 @@ impl RegistryVisitor<GraphqlLanguage> for LintRulesVisitor {
 
     fn record_rule<R>(&mut self)
     where
-        R: Rule + 'static,
-        R::Query: Queryable<Language = GraphqlLanguage>,
-        <R::Query as Queryable>::Output: Clone,
+        R: Rule<Options: Default, Query: Queryable<Language = GraphqlLanguage, Output: Clone>>
+            + 'static,
     {
         self.groups
             .entry(<R::Group as RuleGroup>::NAME)
@@ -167,9 +166,8 @@ impl RegistryVisitor<GraphqlLanguage> for AssistsRulesVisitor {
 
     fn record_rule<R>(&mut self)
     where
-        R: Rule + 'static,
-        R::Query: Queryable<Language = GraphqlLanguage>,
-        <R::Query as Queryable>::Output: Clone,
+        R: Rule<Options: Default, Query: Queryable<Language = GraphqlLanguage, Output: Clone>>
+            + 'static,
     {
         self.groups
             .entry(<R::Group as RuleGroup>::NAME)
@@ -261,11 +259,88 @@ fn generate_for_groups(
         group_pascal_idents.push(group_pascal_ident);
         group_idents.push(group_ident);
         group_strings.push(Literal::string(group));
-        struct_groups.push(generate_struct(group, &rules));
+        struct_groups.push(generate_struct(group, &rules, kind));
     }
 
+    let severity_fn = if kind == RuleCategory::Action {
+        quote! {
+            /// Given a category coming from [Diagnostic](biome_diagnostics::Diagnostic), this function returns
+            /// the [Severity](biome_diagnostics::Severity) associated to the rule, if the configuration changed it.
+            /// If the severity is off or not set, then the function returns the default severity of the rule:
+            /// [Severity::Error] for recommended rules and [Severity::Warning] for other rules.
+            ///
+            /// If not, the function returns [None].
+            pub fn get_severity_from_code(&self, category: &Category) -> Option<Severity> {
+                let mut split_code = category.name().split('/');
+
+                let _lint = split_code.next();
+                debug_assert_eq!(_lint, Some("assists"));
+
+                let group = <RuleGroup as std::str::FromStr>::from_str(split_code.next()?).ok()?;
+                let rule_name = split_code.next()?;
+                let rule_name = Self::has_rule(group, rule_name)?;
+                let severity = match group {
+                    #(
+                        RuleGroup::#group_pascal_idents => self
+                            .#group_idents
+                            .as_ref()
+                            .and_then(|group| group.get_rule_configuration(rule_name))
+                            .filter(|conf| !matches!(conf, RuleAssistConfiguration::Off))
+                            .map_or_else(|| {
+                                if #group_pascal_idents::is_recommended_rule(rule_name) {
+                                    Severity::Error
+                                } else {
+                                    Severity::Warning
+                                }
+                            }, |conf| conf.into()),
+                    )*
+                };
+                Some(severity)
+            }
+
+        }
+    } else {
+        quote! {
+
+            /// Given a category coming from [Diagnostic](biome_diagnostics::Diagnostic), this function returns
+            /// the [Severity](biome_diagnostics::Severity) associated to the rule, if the configuration changed it.
+            /// If the severity is off or not set, then the function returns the default severity of the rule:
+            /// [Severity::Error] for recommended rules and [Severity::Warning] for other rules.
+            ///
+            /// If not, the function returns [None].
+            pub fn get_severity_from_code(&self, category: &Category) -> Option<Severity> {
+                let mut split_code = category.name().split('/');
+
+                let _lint = split_code.next();
+                debug_assert_eq!(_lint, Some("lint"));
+
+                let group = <RuleGroup as std::str::FromStr>::from_str(split_code.next()?).ok()?;
+                let rule_name = split_code.next()?;
+                let rule_name = Self::has_rule(group, rule_name)?;
+                let severity = match group {
+                    #(
+                        RuleGroup::#group_pascal_idents => self
+                            .#group_idents
+                            .as_ref()
+                            .and_then(|group| group.get_rule_configuration(rule_name))
+                            .filter(|(level, _)| !matches!(level, RulePlainConfiguration::Off))
+                            .map_or_else(|| {
+                                if #group_pascal_idents::is_recommended_rule(rule_name) {
+                                    Severity::Error
+                                } else {
+                                    Severity::Warning
+                                }
+                            }, |(level, _)| level.into()),
+                    )*
+                };
+                Some(severity)
+            }
+
+        }
+    };
+
     let groups = quote! {
-        use crate::analyzer::{RuleConfiguration, RulePlainConfiguration, RuleFixConfiguration};
+        use crate::analyzer::{RuleConfiguration, RulePlainConfiguration, RuleFixConfiguration, RuleAssistConfiguration};
         use biome_analyze::{options::RuleOptions, RuleFilter};
         use biome_console::markup;
         use biome_deserialize::{DeserializableValidator, DeserializationDiagnostic};
@@ -355,39 +430,7 @@ fn generate_for_groups(
                 }
             }
 
-            /// Given a category coming from [Diagnostic](biome_diagnostics::Diagnostic), this function returns
-            /// the [Severity](biome_diagnostics::Severity) associated to the rule, if the configuration changed it.
-            /// If the severity is off or not set, then the function returns the default severity of the rule:
-            /// [Severity::Error] for recommended rules and [Severity::Warning] for other rules.
-            ///
-            /// If not, the function returns [None].
-            pub fn get_severity_from_code(&self, category: &Category) -> Option<Severity> {
-                let mut split_code = category.name().split('/');
-
-                let _lint = split_code.next();
-                debug_assert_eq!(_lint, Some("lint"));
-
-                let group = <RuleGroup as std::str::FromStr>::from_str(split_code.next()?).ok()?;
-                let rule_name = split_code.next()?;
-                let rule_name = Self::has_rule(group, rule_name)?;
-                let severity = match group {
-                    #(
-                        RuleGroup::#group_pascal_idents => self
-                            .#group_idents
-                            .as_ref()
-                            .and_then(|group| group.get_rule_configuration(rule_name))
-                            .filter(|(level, _)| !matches!(level, RulePlainConfiguration::Off))
-                            .map_or_else(|| {
-                                if #group_pascal_idents::is_recommended_rule(rule_name) {
-                                    Severity::Error
-                                } else {
-                                    Severity::Warning
-                                }
-                            }, |(level, _)| level.into()),
-                    )*
-                };
-                Some(severity)
-            }
+            #severity_fn
 
             /// Ensure that `recommended` is set to `true` or implied.
             pub fn set_recommended(&mut self) {
@@ -466,22 +509,10 @@ fn generate_for_groups(
                 use biome_analyze::{AnalyzerRules, MetadataRegistry};
 
                 pub fn push_to_analyzer_assists(
-                    rules: &Rules,
-                    metadata: &MetadataRegistry,
-                    analyzer_rules: &mut AnalyzerRules,
-                ) {
-                    #(
-                        if let Some(rules) = rules.#group_idents.as_ref() {
-                            for rule_name in #group_pascal_idents::GROUP_RULES {
-                                if let Some((_, Some(rule_options))) = rules.get_rule_configuration(rule_name) {
-                                    if let Some(rule_key) = metadata.find_rule(#group_strings, rule_name) {
-                                        analyzer_rules.push_rule(rule_key, rule_options);
-                                    }
-                                }
-                            }
-                        }
-                    )*
-                }
+                    _rules: &Rules,
+                    _metadata: &MetadataRegistry,
+                    _analyzer_rules: &mut AnalyzerRules,
+                ) {}
             }
         }
         RuleCategory::Syntax | RuleCategory::Transformation => unimplemented!(),
@@ -507,7 +538,11 @@ fn generate_for_groups(
     Ok(())
 }
 
-fn generate_struct(group: &str, rules: &BTreeMap<&'static str, RuleMetadata>) -> TokenStream {
+fn generate_struct(
+    group: &str,
+    rules: &BTreeMap<&'static str, RuleMetadata>,
+    kind: RuleCategory,
+) -> TokenStream {
     let mut lines_recommended_rule = Vec::new();
     let mut lines_recommended_rule_as_filter = Vec::new();
     let mut lines_all_rule_as_filter = Vec::new();
@@ -517,7 +552,11 @@ fn generate_struct(group: &str, rules: &BTreeMap<&'static str, RuleMetadata>) ->
     let mut rule_disabled_check_line = Vec::new();
     let mut get_rule_configuration_line = Vec::new();
 
-    for (index, (rule, metadata)) in rules.iter().enumerate() {
+    for (index, (rule, metadata)) in rules
+        .iter()
+        .filter(|(rule, _)| **rule != "organizeImports")
+        .enumerate()
+    {
         let summary = {
             let mut docs = String::new();
             let parser = Parser::new(metadata.docs);
@@ -568,6 +607,8 @@ fn generate_struct(group: &str, rules: &BTreeMap<&'static str, RuleMetadata>) ->
             "{}",
             if metadata.fix_kind != FixKind::None {
                 "RuleFixConfiguration"
+            } else if kind == RuleCategory::Action {
+                "RuleAssistConfiguration"
             } else {
                 "RuleConfiguration"
             }
@@ -603,10 +644,17 @@ fn generate_struct(group: &str, rules: &BTreeMap<&'static str, RuleMetadata>) ->
             },
             _ => panic!("Language not supported"),
         };
+        let rule_option = if kind == RuleCategory::Action {
+            quote! { Option<#rule_config_type> }
+        } else {
+            quote! {
+                Option<#rule_config_type<#rule_option_type>>
+            }
+        };
         schema_lines_rules.push(quote! {
             #[doc = #summary]
             #[serde(skip_serializing_if = "Option::is_none")]
-            pub #rule_identifier: Option<#rule_config_type<#rule_option_type>>
+            pub #rule_identifier: #rule_option
         });
 
         rule_enabled_check_line.push(quote! {
@@ -630,12 +678,38 @@ fn generate_struct(group: &str, rules: &BTreeMap<&'static str, RuleMetadata>) ->
             }
         });
 
-        get_rule_configuration_line.push(quote! {
-            #rule => self.#rule_identifier.as_ref().map(|conf| (conf.level(), conf.get_options()))
-        });
+        if kind == RuleCategory::Action {
+            get_rule_configuration_line.push(quote! {
+                #rule => self.#rule_identifier.as_ref().copied()
+            });
+        } else {
+            get_rule_configuration_line.push(quote! {
+                #rule => self.#rule_identifier.as_ref().map(|conf| (conf.level(), conf.get_options()))
+            });
+        }
     }
 
     let group_pascal_ident = Ident::new(&to_capitalized(group), Span::call_site());
+
+    let get_configuration_function = if kind != RuleCategory::Action {
+        quote! {
+            pub(crate) fn get_rule_configuration(&self, rule_name: &str) -> Option<(RulePlainConfiguration, Option<RuleOptions>)> {
+                match rule_name {
+                    #( #get_rule_configuration_line ),*,
+                    _ => None
+                }
+            }
+        }
+    } else {
+        quote! {
+            pub(crate) fn get_rule_configuration(&self, rule_name: &str) -> Option<RuleAssistConfiguration> {
+                match rule_name {
+                    #( #get_rule_configuration_line ),*,
+                    _ => None
+                }
+            }
+        }
+    };
 
     quote! {
         #[derive(Clone, Debug, Default, Deserialize, Deserializable, Eq, Merge, PartialEq, Serialize)]
@@ -760,12 +834,7 @@ fn generate_struct(group: &str, rules: &BTreeMap<&'static str, RuleMetadata>) ->
                 }
             }
 
-            pub(crate) fn get_rule_configuration(&self, rule_name: &str) -> Option<(RulePlainConfiguration, Option<RuleOptions>)> {
-                match rule_name {
-                    #( #get_rule_configuration_line ),*,
-                    _ => None
-                }
-            }
+            #get_configuration_function
         }
     }
 }

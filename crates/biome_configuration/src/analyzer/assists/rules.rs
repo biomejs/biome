@@ -1,6 +1,8 @@
 //! Generated file, do not edit by hand, see `xtask/codegen`
 
-use crate::analyzer::{RuleConfiguration, RuleFixConfiguration, RulePlainConfiguration};
+use crate::analyzer::{
+    RuleAssistConfiguration, RuleConfiguration, RuleFixConfiguration, RulePlainConfiguration,
+};
 use biome_analyze::{options::RuleOptions, RuleFilter};
 use biome_console::markup;
 use biome_deserialize::{DeserializableValidator, DeserializationDiagnostic};
@@ -92,7 +94,7 @@ impl Rules {
     pub fn get_severity_from_code(&self, category: &Category) -> Option<Severity> {
         let mut split_code = category.name().split('/');
         let _lint = split_code.next();
-        debug_assert_eq!(_lint, Some("lint"));
+        debug_assert_eq!(_lint, Some("assists"));
         let group = <RuleGroup as std::str::FromStr>::from_str(split_code.next()?).ok()?;
         let rule_name = split_code.next()?;
         let rule_name = Self::has_rule(group, rule_name)?;
@@ -101,7 +103,7 @@ impl Rules {
                 .refactor
                 .as_ref()
                 .and_then(|group| group.get_rule_configuration(rule_name))
-                .filter(|(level, _)| !matches!(level, RulePlainConfiguration::Off))
+                .filter(|conf| !matches!(conf, RuleAssistConfiguration::Off))
                 .map_or_else(
                     || {
                         if Refactor::is_recommended_rule(rule_name) {
@@ -110,7 +112,7 @@ impl Rules {
                             Severity::Warning
                         }
                     },
-                    |(level, _)| level.into(),
+                    |conf| conf.into(),
                 ),
         };
         Some(severity)
@@ -164,12 +166,9 @@ pub struct Refactor {
     #[doc = r" It enables ALL rules for this group."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub all: Option<bool>,
-    #[doc = "Provides a whole-source code action to sort the imports in the file using import groups and natural ordering."]
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub organize_imports: Option<RuleFixConfiguration<biome_js_analyze::options::OrganizeImports>>,
     #[doc = "Sorts the keys of a JSON object in natural order"]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_sorted_keys: Option<RuleConfiguration<biome_json_analyze::options::UseSortedKeys>>,
+    pub use_sorted_keys: Option<RuleAssistConfiguration>,
 }
 impl DeserializableValidator for Refactor {
     fn validate(
@@ -187,13 +186,11 @@ impl DeserializableValidator for Refactor {
 }
 impl Refactor {
     const GROUP_NAME: &'static str = "refactor";
-    pub(crate) const GROUP_RULES: &'static [&'static str] = &["organizeImports", "useSortedKeys"];
+    pub(crate) const GROUP_RULES: &'static [&'static str] = &["useSortedKeys"];
     const RECOMMENDED_RULES: &'static [&'static str] = &[];
     const RECOMMENDED_RULES_AS_FILTERS: &'static [RuleFilter<'static>] = &[];
-    const ALL_RULES_AS_FILTERS: &'static [RuleFilter<'static>] = &[
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[0]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[1]),
-    ];
+    const ALL_RULES_AS_FILTERS: &'static [RuleFilter<'static>] =
+        &[RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[0])];
     #[doc = r" Retrieves the recommended rules"]
     pub(crate) fn is_recommended_true(&self) -> bool {
         matches!(self.recommended, Some(true))
@@ -209,28 +206,18 @@ impl Refactor {
     }
     pub(crate) fn get_enabled_rules(&self) -> FxHashSet<RuleFilter<'static>> {
         let mut index_set = FxHashSet::default();
-        if let Some(rule) = self.organize_imports.as_ref() {
-            if rule.is_enabled() {
-                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[0]));
-            }
-        }
         if let Some(rule) = self.use_sorted_keys.as_ref() {
             if rule.is_enabled() {
-                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[1]));
+                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[0]));
             }
         }
         index_set
     }
     pub(crate) fn get_disabled_rules(&self) -> FxHashSet<RuleFilter<'static>> {
         let mut index_set = FxHashSet::default();
-        if let Some(rule) = self.organize_imports.as_ref() {
-            if rule.is_disabled() {
-                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[0]));
-            }
-        }
         if let Some(rule) = self.use_sorted_keys.as_ref() {
             if rule.is_disabled() {
-                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[1]));
+                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[0]));
             }
         }
         index_set
@@ -267,16 +254,9 @@ impl Refactor {
     pub(crate) fn get_rule_configuration(
         &self,
         rule_name: &str,
-    ) -> Option<(RulePlainConfiguration, Option<RuleOptions>)> {
+    ) -> Option<RuleAssistConfiguration> {
         match rule_name {
-            "organizeImports" => self
-                .organize_imports
-                .as_ref()
-                .map(|conf| (conf.level(), conf.get_options())),
-            "useSortedKeys" => self
-                .use_sorted_keys
-                .as_ref()
-                .map(|conf| (conf.level(), conf.get_options())),
+            "useSortedKeys" => self.use_sorted_keys.as_ref().copied(),
             _ => None,
         }
     }
