@@ -33,7 +33,7 @@ pub struct AssistsConfiguration {
 impl Default for AssistsConfiguration {
     fn default() -> Self {
         Self {
-            enabled: false,
+            enabled: true,
             rules: Rules::default(),
             ignore: StringSet::default(),
             include: StringSet::default(),
