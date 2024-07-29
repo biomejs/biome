@@ -923,23 +923,29 @@ impl<'a, 'b> RegistryVisitor<GraphqlLanguage> for LintVisitor<'a, 'b> {
 
 struct AssistsVisitor<'a, 'b> {
     settings: Option<&'b Settings>,
-    pub(crate) enabled_rules: Vec<RuleFilter<'a>>,
+    enabled_rules: Vec<RuleFilter<'a>>,
+    disabled_rules: Vec<RuleFilter<'a>>,
     import_sorting: RuleFilter<'a>,
     path: &'b Path,
+    only: &'b Vec<RuleSelector>,
+    skip: &'b Vec<RuleSelector>,
 }
 
 impl<'a, 'b> AssistsVisitor<'a, 'b> {
     pub(crate) fn new(
-        _only: &'b Vec<RuleSelector>,
-        _skip: &'b Vec<RuleSelector>,
+        only: &'b Vec<RuleSelector>,
+        skip: &'b Vec<RuleSelector>,
         settings: Option<&'b Settings>,
         path: &'b Path,
     ) -> Self {
         Self {
             enabled_rules: vec![],
+            disabled_rules: vec![],
             settings,
             import_sorting: RuleFilter::Rule("source", "organizeImports"),
             path,
+            only,
+            skip,
         }
     }
 
@@ -960,10 +966,21 @@ impl<'a, 'b> AssistsVisitor<'a, 'b> {
             self.enabled_rules.push(self.import_sorting);
             return;
         }
-        self.enabled_rules.push(RuleFilter::Rule(
-            <R::Group as RuleGroup>::NAME,
-            R::METADATA.name,
-        ))
+        // Do not report unused suppression comment diagnostics if:
+        // - it is a syntax-only analyzer pass, or
+        // - if a single rule is run.
+        for selector in self.only {
+            let filter = RuleFilter::from(selector);
+            if filter.match_rule::<R>() {
+                self.enabled_rules.push(filter)
+            }
+        }
+        for selector in self.skip {
+            let filter = RuleFilter::from(selector);
+            if filter.match_rule::<R>() {
+                self.disabled_rules.push(filter)
+            }
+        }
     }
 
     fn finish(mut self) -> (Vec<RuleFilter<'a>>, Vec<RuleFilter<'a>>) {
@@ -976,7 +993,7 @@ impl<'a, 'b> AssistsVisitor<'a, 'b> {
             .into_iter()
             .collect::<Vec<_>>();
         self.enabled_rules.extend(enabled_rules);
-        (self.enabled_rules, vec![])
+        (self.enabled_rules, self.disabled_rules)
     }
 }
 
