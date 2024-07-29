@@ -203,7 +203,7 @@ declare_lint_rule! {
     pub UseConsistentMemberAccessibility {
         version: "1.8.0",
         name: "useConsistentMemberAccessibility",
-        language: "js",
+        language: "ts",
         sources: &[RuleSource::Eslint("explicit-member-accessibility")],
         recommended: false,
         source_kind: RuleSourceKind::Inspired,
