@@ -145,6 +145,16 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
   Contributed by @Conaclos
 
+- [useExportType](https://biomejs.dev/linter/rules/use-export-type/) no longer report empty `export` ([#3535](https://github.com/biomejs/biome/issues/3535)).
+
+  An empty `export {}` allows you to force TypeScript to consider a file with no imports and exports as an EcmaScript module.
+  While `export type {}` is valid, it is more common to use `export {}`.
+  Users may find it confusing that the linter asks them to convert it to `export type {}`.
+  Also, a bundler should be able to remove `export {}` as well as `export type {}`.
+  So it is not so useful to report `export {}`.
+
+  Contributed by @Conaclos
+
 #### Bug fixes
 
 - Don't request alt text for elements hidden from assistive technologies ([#3316](https://github.com/biomejs/biome/issues/3316)). Contributed by @robintown
