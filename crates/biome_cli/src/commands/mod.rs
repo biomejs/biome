@@ -120,6 +120,11 @@ pub enum BiomeCommand {
             hide_usage
         )]
         organize_imports_enabled: Option<bool>,
+
+        /// Allow to enable or disable the assists.
+        #[bpaf(long("organize-imports-enabled"), argument("true|false"), optional)]
+        assists_enabled: Option<bool>,
+
         #[bpaf(external(partial_configuration), hide_usage, optional)]
         configuration: Option<PartialConfiguration>,
         #[bpaf(external, hide_usage)]
@@ -311,6 +316,10 @@ pub enum BiomeCommand {
         /// Allow to enable or disable the organize imports.
         #[bpaf(long("organize-imports-enabled"), argument("true|false"), optional)]
         organize_imports_enabled: Option<bool>,
+
+        /// Allow to enable or disable the assists.
+        #[bpaf(long("organize-imports-enabled"), argument("true|false"), optional)]
+        assists_enabled: Option<bool>,
 
         #[bpaf(external(partial_configuration), hide_usage, optional)]
         configuration: Option<PartialConfiguration>,

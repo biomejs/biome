@@ -14,7 +14,18 @@ fn assist_emit_diagnostic() {
     let config = Path::new("biome.json");
     fs.insert(
         config.into(),
-        r#"{ "assists": { "enabled": true }, "formatter": { "enabled": false } }"#.as_bytes(),
+        r#"{ 
+            "assists": { 
+                "enabled": true,
+                "rules": {
+                  "source": {
+                    "useSortedKeys": "on"
+                  }
+                }
+            }, 
+            "formatter": { "enabled": false }
+        }"#
+        .as_bytes(),
     );
     let file = Path::new("file.json");
     fs.insert(
@@ -47,7 +58,18 @@ fn assist_writes() {
     let config = Path::new("biome.json");
     fs.insert(
         config.into(),
-        r#"{ "assists": { "enabled": true }, "formatter": { "enabled": false } }"#.as_bytes(),
+        r#"{ 
+            "assists": { 
+                "enabled": true,
+                "rules": {
+                  "source": {
+                    "useSortedKeys": "on"
+                  }
+                }
+            }, 
+            "formatter": { "enabled": false }
+        }"#
+        .as_bytes(),
     );
     let file = Path::new("file.json");
     fs.insert(

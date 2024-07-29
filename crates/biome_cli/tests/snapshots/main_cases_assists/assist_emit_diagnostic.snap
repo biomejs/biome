@@ -5,7 +5,17 @@ expression: content
 ## `biome.json`
 
 ```json
-{ "assists": { "enabled": true }, "formatter": { "enabled": false } }
+{
+  "assists": {
+    "enabled": true,
+    "rules": {
+      "source": {
+        "useSortedKeys": "on"
+      }
+    }
+  },
+  "formatter": { "enabled": false }
+}
 ```
 
 ## `file.json`

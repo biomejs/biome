@@ -7,7 +7,8 @@ expression: content
 ```block
 Runs formatter, linter and import sorting to the requested files.
 
-Usage: check [--write] [--unsafe] [--staged] [--changed] [--since=REF] [PATH]...
+Usage: check [--write] [--unsafe] [--organize-imports-enabled=<true|false>] [--staged] [--changed] [
+--since=REF] [PATH]...
 
 The configuration that is contained inside the file `biome.json`
         --vcs-enabled=<true|false>  Whether Biome should integrate itself with the VCS client
@@ -165,6 +166,7 @@ Available options:
         --formatter-enabled=<true|false>  Allow to enable or disable the formatter check.
         --linter-enabled=<true|false>  Allow to enable or disable the linter check.
         --organize-imports-enabled=<true|false>  Allow to enable or disable the organize imports.
+        --organize-imports-enabled=<true|false>  Allow to enable or disable the assists.
         --stdin-file-path=PATH  Use this option when you want to format code piped from `stdin`, and
                               print the output to `stdout`.
                               The file doesn't need to exist on disk, what matters is the extension
