@@ -339,9 +339,20 @@ fn generate_for_groups(
         }
     };
 
+    let use_rule_configuration = if kind == RuleCategory::Action {
+        quote! {
+            use crate::analyzer::RuleAssistConfiguration;
+            use biome_analyze::RuleFilter;
+        }
+    } else {
+        quote! {
+            use crate::analyzer::{RuleConfiguration, RulePlainConfiguration, RuleFixConfiguration};
+            use biome_analyze::{options::RuleOptions, RuleFilter};
+        }
+    };
+
     let groups = quote! {
-        use crate::analyzer::{RuleConfiguration, RulePlainConfiguration, RuleFixConfiguration, RuleAssistConfiguration};
-        use biome_analyze::{options::RuleOptions, RuleFilter};
+        #use_rule_configuration
         use biome_console::markup;
         use biome_deserialize::{DeserializableValidator, DeserializationDiagnostic};
         use biome_deserialize_macros::{Deserializable, Merge};

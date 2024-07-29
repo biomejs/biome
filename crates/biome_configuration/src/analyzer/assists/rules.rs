@@ -1,9 +1,7 @@
 //! Generated file, do not edit by hand, see `xtask/codegen`
 
-use crate::analyzer::{
-    RuleAssistConfiguration, RuleConfiguration, RuleFixConfiguration, RulePlainConfiguration,
-};
-use biome_analyze::{options::RuleOptions, RuleFilter};
+use crate::analyzer::RuleAssistConfiguration;
+use biome_analyze::RuleFilter;
 use biome_console::markup;
 use biome_deserialize::{DeserializableValidator, DeserializationDiagnostic};
 use biome_deserialize_macros::{Deserializable, Merge};
