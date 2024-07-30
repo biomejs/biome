@@ -1,6 +1,6 @@
 ## Overall Metrics
 
-**Average compatibility**: 96.74
+**Average compatibility**: 96.79
 
 <details>
     <summary>Definition</summary>
@@ -8,7 +8,7 @@
     $$average = \frac\{\sum_{file}^\{files}compatibility_\{file}}\{files}$$
 </details>
 
-**Compatible lines**: 98.05
+**Compatible lines**: 98.06
 
 <details>
     <summary>Definition</summary>
@@ -186,19 +186,6 @@
 ```
 
 **Prettier Similarity**: 0.00%
-
-
-### js/comments-closure-typecast/satisfies.js
-```diff
--module.exports = /** @satisfies {Record<string, string>} */ ({
-+module.exports = /** @satisfies {Record<string, string>} */ {
-   hello: 1337,
--});
-+};
-
-```
-
-**Prettier Similarity**: 33.33%
 
 
 ### js/comments/empty-statements.js

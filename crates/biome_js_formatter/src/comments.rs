@@ -1397,8 +1397,13 @@ pub(crate) fn is_type_comment(comment: &SyntaxTriviaPieceComments<JsLanguage>) -
     text.trim_start_matches("/**")
         .trim_end_matches("*/")
         .split_whitespace()
-        .any(|word| match word.strip_prefix("@type") {
-            Some(after) => after.is_empty() || after.starts_with('{'),
-            None => false,
+        .any(|word| {
+            match word
+                .strip_prefix("@type")
+                .or_else(|| word.strip_prefix("@satisfies"))
+            {
+                Some(after) => after.is_empty() || after.starts_with('{'),
+                None => false,
+            }
         })
 }

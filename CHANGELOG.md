@@ -107,6 +107,18 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
   Contributed by @Conaclos
 
+- Keep parentheses around objects preceded with a `@satisfies` comment.
+
+  In the following example, parentheses are no longer removed.
+
+  ```ts
+  export const PROPS = /** @satisfies {Record<string, string>} */ ({
+    prop: 0,
+  });
+  ```
+
+  Contributed by @Conaclos
+
 ### JavaScript APIs
 
 ### Linter
