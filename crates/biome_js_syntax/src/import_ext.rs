@@ -21,7 +21,7 @@ impl JsImport {
     /// let source = make::js_module_source(make::js_string_literal("react"));
     /// let binding = make::js_identifier_binding(make::ident("React"));
     /// let specifier = make::js_default_import_specifier(binding.into());
-    /// let clause = make::js_import_default_clause(specifier, make::token(T![from]), source).build();
+    /// let clause = make::js_import_default_clause(specifier, make::token(T![from]), source.into()).build();
     /// let import = make::js_import(make::token(T![import]), clause.into()).build();
     ///
     /// assert_eq!(import.source_text().unwrap().text(), "react");
@@ -57,9 +57,9 @@ impl AnyJsImportClause {
     /// let source = make::js_module_source(make::js_string_literal("react"));
     /// let binding = make::js_identifier_binding(make::ident("React"));
     /// let specifier = make::js_default_import_specifier(binding.into());
-    /// let clause = make::js_import_default_clause(specifier, make::token(T![from]), source).build();
+    /// let clause = make::js_import_default_clause(specifier, make::token(T![from]), source.into()).build();
     ///
-    /// assert_eq!(clause.source().unwrap().inner_string_text().unwrap().text(), "react");
+    /// assert_eq!(clause.source().unwrap().as_js_module_source().unwrap().inner_string_text().unwrap().text(), "react");
     /// ```
     pub fn source(&self) -> SyntaxResult<JsModuleSource> {
         let source = match self {
@@ -85,9 +85,9 @@ impl AnyJsImportClause {
     /// let source = make::js_module_source(make::js_string_literal("react"));
     /// let binding = make::js_identifier_binding(make::ident("React"));
     /// let specifier = make::js_default_import_specifier(binding.into());
-    /// let clause = make::js_import_default_clause(specifier, make::token(T![from]), source).build();
+    /// let clause = make::js_import_default_clause(specifier, make::token(T![from]), source.into()).build();
     ///
-    /// assert_eq!(clause.source().unwrap().inner_string_text().unwrap().text(), "react");
+    /// assert_eq!(clause.source().unwrap().as_js_module_source().unwrap().inner_string_text().unwrap().text(), "react");
     /// ```
     pub fn assertion(&self) -> Option<JsImportAssertion> {
         match self {
@@ -323,12 +323,12 @@ impl AnyJsImportLike {
     ///
     /// let module_token = JsSyntaxToken::new_detached(JsSyntaxKind::MODULE_KW, "module", [], []);
     /// let module_source = make::js_module_source(make::js_string_literal("foo"));
-    /// let module_declaration = make::ts_external_module_declaration(module_token, module_source).build();
-    /// let any_import_specifier = AnyJsImportLike::JsModuleSource(module_declaration.source().expect("module source"));
+    /// let module_declaration = make::ts_external_module_declaration(module_token, module_source.into()).build();
+    /// let any_import_specifier = AnyJsImportLike::JsModuleSource(module_declaration.source().unwrap().as_js_module_source().unwrap().clone());
     /// assert!(any_import_specifier.is_in_ts_module_declaration());
     ///
     /// let module_source = make::js_module_source(make::js_string_literal("bar"));
-    /// let any_import_specifier = AnyJsImportLike::JsModuleSource(module_source);
+    /// let any_import_specifier = AnyJsImportLike::JsModuleSource(module_source.into());
     /// assert!(!any_import_specifier.is_in_ts_module_declaration());
     /// ```
     pub fn is_in_ts_module_declaration(&self) -> bool {
