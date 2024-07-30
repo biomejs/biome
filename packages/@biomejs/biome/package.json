@@ -2,10 +2,7 @@
   "name": "@biomejs/biome",
   "version": "1.8.3",
   "bin": {
-    "biome": "bin/biome"
-  },
-  "scripts": {
-    "postinstall": "node scripts/postinstall.js"
+    "biome": "bin.sh"
   },
   "homepage": "https://biomejs.dev",
   "repository": {
@@ -18,8 +15,7 @@
   "bugs": "https://github.com/biomejs/biome/issues",
   "description": "Biome is a toolchain for the web: formatter, linter and more",
   "files": [
-    "bin/biome",
-    "scripts/postinstall.js",
+    "bin.sh",
     "configuration_schema.json",
     "README.md",
     "LICENSE-APACHE",
