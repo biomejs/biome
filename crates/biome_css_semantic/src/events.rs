@@ -4,7 +4,14 @@ use biome_rowan::TextRange;
 
 #[derive(Debug)]
 pub enum SemanticEvent {
-    SelectorDeclaration { range: TextRange },
+    SelectorDeclaration {
+        range: TextRange,
+    },
+    PropertyDeclaration {
+        rule_range: TextRange,
+        name: String,
+        value_range: TextRange,
+    },
 }
 
 #[derive(Default, Debug)]
@@ -19,6 +26,23 @@ impl SemanticEventExtractor {
                 self.stash.push_back(SemanticEvent::SelectorDeclaration {
                     range: node.text_range(),
                 });
+            }
+            biome_css_syntax::CssSyntaxKind::CSS_DECLARATION_OR_RULE_LIST => {
+                for block in node.children() {
+                    if let Some(decl) = block.first_child() {
+                        if let Some(property) = decl.first_child() {
+                            if let Some(property_name) = property.first_child() {
+                                if let Some(property_value) = property_name.next_sibling() {
+                                    self.stash.push_back(SemanticEvent::PropertyDeclaration {
+                                        rule_range: node.text_range(),
+                                        name: property_name.text().to_string(),
+                                        value_range: property_value.text_range(),
+                                    });
+                                }
+                            }
+                        }
+                    }
+                }
             }
             _ => {}
         }

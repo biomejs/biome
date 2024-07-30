@@ -19,6 +19,7 @@ pub struct SemanticModelBuilder {
     node_by_range: FxHashMap<TextRange, CssSyntaxNode>,
     selectors: Vec<CssSelectorList>,
     rules: Vec<AnyCssRule>,
+    properties: FxHashMap<TextRange, Vec<(String, TextRange)>>,
 }
 
 impl SemanticModelBuilder {
@@ -28,6 +29,7 @@ impl SemanticModelBuilder {
             node_by_range: FxHashMap::default(),
             selectors: Vec::new(),
             rules: Vec::new(),
+            properties: FxHashMap::default(),
         }
     }
 
@@ -37,6 +39,7 @@ impl SemanticModelBuilder {
             node_by_range: self.node_by_range,
             selectors: self.selectors,
             rules: self.rules,
+            properties: self.properties,
         };
         SemanticModel::new(data)
     }
@@ -46,7 +49,7 @@ impl SemanticModelBuilder {
         use CssSyntaxKind::*;
         if matches!(
             node.kind(),
-            CSS_QUALIFIED_RULE | CSS_SELECTOR_LIST | CSS_COMPOUND_SELECTOR
+            CSS_SELECTOR_LIST | CSS_DECLARATION | CSS_DECLARATION_OR_RULE_LIST
         ) {
             self.node_by_range.insert(node.text_range(), node.clone());
         }
@@ -59,6 +62,16 @@ impl SemanticModelBuilder {
                 let node = &self.node_by_range[&range];
                 self.selectors
                     .push(CssSelectorList::cast(node.clone()).unwrap());
+            }
+            SemanticEvent::PropertyDeclaration {
+                rule_range,
+                name,
+                value_range,
+            } => {
+                self.properties
+                    .entry(rule_range)
+                    .or_default()
+                    .push((name, value_range));
             }
         }
     }
