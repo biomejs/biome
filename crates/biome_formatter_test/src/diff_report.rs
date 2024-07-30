@@ -147,6 +147,8 @@ impl DiffReport {
             "js/deferred-import-evaluation/",
             // Experimental syntax: `import source`
             "js/source-phase-imports/",
+            "js/dynamic-import/import-phase.js",
+            "js/dynamic-import/template-literal.js",
             // Experimental syntax: `import module`
             "js/import-reflection/",
             // Experimental syntax: `throw` expressions
