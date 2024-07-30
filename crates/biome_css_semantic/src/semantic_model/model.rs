@@ -1,6 +1,6 @@
 use std::rc::Rc;
 
-use biome_css_syntax::{AnyCssRule, CssRoot, CssSelectorList, CssSyntaxNode};
+use biome_css_syntax::{CssRoot, CssSyntaxNode};
 use biome_rowan::TextRange;
 use rustc_hash::FxHashMap;
 
@@ -23,7 +23,6 @@ pub(crate) struct SemanticModelData {
     // Map to each by its range
     pub(crate) node_by_range: FxHashMap<TextRange, CssSyntaxNode>,
     pub(crate) selectors: FxHashMap<TextRange, Vec<(String, TextRange)>>,
-    pub(crate) rules: Vec<AnyCssRule>,
     pub(crate) properties: FxHashMap<TextRange, Vec<(String, TextRange)>>,
 }
 
@@ -33,7 +32,6 @@ impl SemanticModelData {
             root,
             node_by_range: FxHashMap::default(),
             selectors: FxHashMap::default(),
-            rules: Vec::new(),
             properties: FxHashMap::default(),
         }
     }

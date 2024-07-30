@@ -54,9 +54,6 @@ impl SemanticEventExtractor {
                         }
                     }
                 }
-                // self.stash.push_back(SemanticEvent::SelectorDeclaration {
-                //     range: node.text_range(),
-                // });
             }
             biome_css_syntax::CssSyntaxKind::CSS_DECLARATION_OR_RULE_LIST => {
                 for block in node.children() {

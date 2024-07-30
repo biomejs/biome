@@ -45,5 +45,7 @@ mod tests {
         let root = parse.tree();
         let model = super::semantic_model(&root);
         dbg!(&model);
+        dbg!(&model.data.selectors);
+        dbg!(&model.data.properties);
     }
 }
