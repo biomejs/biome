@@ -323,6 +323,10 @@ dependencies = [
 ]
 
 [[package]]
+name = "biome_css_semantic"
+version = "0.1.0"
+
+[[package]]
 name = "biome_css_syntax"
 version = "0.5.7"
 dependencies = [
