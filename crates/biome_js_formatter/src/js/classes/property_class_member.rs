@@ -139,7 +139,7 @@ fn needs_semicolon(property: &AnyJsPropertyClassMember) -> SyntaxResult<bool> {
         | AnyJsClassMember::JsGetterClassMember(_)
         | AnyJsClassMember::TsGetterSignatureClassMember(_)
         | AnyJsClassMember::TsSetterSignatureClassMember(_)
-        | AnyJsClassMember::JsSetterClassMember(_) 
+        | AnyJsClassMember::JsSetterClassMember(_)
         | AnyJsClassMember::JsGritMetavariable(_) => false,
 
         // Computed members may be misinterpreted as array accessors/array types
