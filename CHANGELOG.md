@@ -84,6 +84,29 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
   Contributed by @Conaclos
 
+- Remove parentheses around expressions that don't need them inside a decorator.
+
+  Biome now matches Prettier in the following cases:
+
+  ```diff
+    class {
+  -   @(decorator)
+  +   @decorator
+      method() {}
+    },
+    class {
+  -   @(decorator())
+  +   @decorator()
+      method() {}
+    },
+    class {
+      @(decorator?.())
+      method() {}
+    },
+  ```
+
+  Contributed by @Conaclos
+
 ### JavaScript APIs
 
 ### Linter

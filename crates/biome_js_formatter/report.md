@@ -1,6 +1,6 @@
 ## Overall Metrics
 
-**Average compatibility**: 96.70
+**Average compatibility**: 96.74
 
 <details>
     <summary>Definition</summary>
@@ -8,7 +8,7 @@
     $$average = \frac\{\sum_{file}^\{files}compatibility_\{file}}\{files}$$
 </details>
 
-**Compatible lines**: 98.03
+**Compatible lines**: 98.05
 
 <details>
     <summary>Definition</summary>
@@ -2246,80 +2246,8 @@
 
 
 ### js/decorators/member-expression.js
-```diff
- [
-   class {
--    @decorator
-+    @(decorator)
-     method() {}
-   },
-   class {
--    @decorator()
-+    @(decorator())
-     method() {}
-   },
-   class {
-     @(decorator?.())
-     method() {}
-   },
-   class {
-     @(decorators[0])
-     method() {}
-   },
-   class {
-     @decorators [0];
-     method() {}
-   },
-   class {
-     @(decorators?.[0])
-     method() {}
-   },
-   class {
-     @decorators.at(0)
-     method() {}
-   },
-   class {
-     @(decorators?.at(0))
-     method() {}
-   },
-   class {
--    @(decorators.at?.(0))
-+    @decorators.at?.(0)
-     method() {}
-   },
-   class {
-     @decorators.first
-     method() {}
-   },
-   class {
-     @(decorators?.first)
-     method() {}
-   },
-   class {
-     @(decorators[first])
-     method() {}
-   },
-   class {
-     @decorators [first];
-     method() {}
-   },
-   class {
-     @(decorators["first"])
-     method() {}
-   },
-   @(decorators[first])
-   class {
-     method() {}
-   },
-   @(decorators[0])
-   class {
-     method() {}
-   },
- ];
 
-```
-
-**Prettier Similarity**: 95.45%
+**Prettier Similarity**: 100.00%
 
 
 ### js/decorators/methods.js
@@ -2415,40 +2343,6 @@
 ### js/dynamic-import/assertions.js
 
 **Prettier Similarity**: 100.00%
-
-
-### js/dynamic-import/import-phase.js
-```diff
--(`data:text/javascript,
-+import.source(`data:text/javascript,
-     console.log("RUN");
- `);
- 
--(String.raw`data:text/javascript,
-+import.source(String.raw`data:text/javascript,
-     console.log("RUN");
- `);
-
-```
-
-**Prettier Similarity**: 71.43%
-
-
-### js/dynamic-import/template-literal.js
-```diff
--module = await (`data:text/javascript,
-+module = await import(`data:text/javascript,
-     console.log("RUN");
- `);
- 
--module = await (String.raw`data:text/javascript,
-+module = await import(String.raw`data:text/javascript,
-     console.log("RUN");
- `);
-
-```
-
-**Prettier Similarity**: 71.43%
 
 
 ### js/dynamic-import/test.js

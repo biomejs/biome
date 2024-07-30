@@ -141,11 +141,11 @@ impl JsFormatSyntaxRewriter {
                 // Keep parentheses around unknown expressions. Biome can't know the precedence.
                 if inner.kind().is_bogus()
                     // Don't remove parentheses if the expression is a decorator
-                    || inner.grand_parent().map_or(false, |node| node.kind() == JsSyntaxKind::JS_DECORATOR && decorator_expression_needs_parens(&inner))
+                    || inner.grand_parent().is_some_and(|node| node.kind() == JsSyntaxKind::JS_DECORATOR && decorator_expression_needs_parens(&inner))
                     // Don't remove parentheses if they have skipped trivia. We don't know for certain what the intended syntax is.
                     // Nor if there's a leading type cast comment
                     || has_type_cast_comment_or_skipped(&l_paren.leading_trivia())
-                    || prev_token.map_or(false, |prev_token| has_type_cast_comment_or_skipped(&prev_token.trailing_trivia()))
+                    || prev_token.is_some_and(|prev_token| has_type_cast_comment_or_skipped(&prev_token.trailing_trivia()))
                     || r_paren.leading_trivia().has_skipped()
                     // Don't remove parentheses if it is an optional chain inside a chain that doesn't start by an optional token
                     // (a?.b).c
@@ -406,16 +406,16 @@ impl JsFormatSyntaxRewriter {
 // TODO: This should be handled with a `NeedsParentheses` impl.
 fn decorator_expression_needs_parens(inner: &JsSyntaxNode) -> bool {
     match AnyJsExpression::cast_ref(inner) {
-        Some(AnyJsExpression::JsCallExpression(call)) => call
-            .callee()
-            .map(|callee| decorator_expression_needs_parens(callee.syntax()))
-            .unwrap_or(true),
+        Some(AnyJsExpression::JsCallExpression(call)) => call.callee().map_or(true, |callee| {
+            call.is_optional() || decorator_expression_needs_parens(callee.syntax())
+        }),
         Some(AnyJsExpression::JsStaticMemberExpression(static_expr)) => {
             static_expr.is_optional()
                 || static_expr.object().map_or(true, |object| {
                     object.syntax().kind() != JsSyntaxKind::JS_IDENTIFIER_EXPRESSION
                 })
         }
+        Some(AnyJsExpression::JsIdentifierExpression(_)) => false,
         _ => true,
     }
 }
