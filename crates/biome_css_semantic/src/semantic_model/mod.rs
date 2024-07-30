@@ -38,7 +38,7 @@ mod tests {
     fn test_semantic_model() {
         use biome_css_parser::CssParserOptions;
         let parse = parse_css(
-            r#".class .class { color: red; }"#,
+            r#".class .class { color: red; }; .foo .foo { color: green; }"#,
             CssParserOptions::default(),
         );
 

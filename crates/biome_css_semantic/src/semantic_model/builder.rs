@@ -1,5 +1,7 @@
-use biome_css_syntax::{AnyCssRule, AnyCssSelector, CssRoot, CssSyntaxKind, CssSyntaxNode};
-use biome_rowan::TextRange;
+use biome_css_syntax::{
+    AnyCssRule, AnyCssSelector, CssRoot, CssSelectorList, CssSyntaxKind, CssSyntaxNode,
+};
+use biome_rowan::{AstNode, TextRange};
 use rustc_hash::FxHashMap;
 
 use crate::events::SemanticEvent;
@@ -15,7 +17,7 @@ use super::model::{SemanticModel, SemanticModelData};
 pub struct SemanticModelBuilder {
     root: CssRoot,
     node_by_range: FxHashMap<TextRange, CssSyntaxNode>,
-    selectors: Vec<AnyCssSelector>,
+    selectors: Vec<CssSelectorList>,
     rules: Vec<AnyCssRule>,
 }
 
@@ -42,11 +44,22 @@ impl SemanticModelBuilder {
     #[inline]
     pub fn push_node(&mut self, node: &CssSyntaxNode) {
         use CssSyntaxKind::*;
-        if matches!(node.kind(), CSS_QUALIFIED_RULE | CSS_SELECTOR_LIST) {
+        if matches!(
+            node.kind(),
+            CSS_QUALIFIED_RULE | CSS_SELECTOR_LIST | CSS_COMPOUND_SELECTOR
+        ) {
             self.node_by_range.insert(node.text_range(), node.clone());
         }
     }
 
     #[inline]
-    pub fn push_event(&mut self, event: SemanticEvent) {}
+    pub fn push_event(&mut self, event: SemanticEvent) {
+        match event {
+            SemanticEvent::SelectorDeclaration { range } => {
+                let node = &self.node_by_range[&range];
+                self.selectors
+                    .push(CssSelectorList::cast(node.clone()).unwrap());
+            }
+        }
+    }
 }
