@@ -2,6 +2,8 @@ use biome_css_syntax::{AnyCssRule, AnyCssSelector, CssRoot, CssSyntaxKind, CssSy
 use biome_rowan::TextRange;
 use rustc_hash::FxHashMap;
 
+use crate::events::SemanticEvent;
+
 use super::model::{SemanticModel, SemanticModelData};
 
 /// Builds the [SemanticModel] consuming [SemanticEvent] and [GraphqlSyntaxNode].
@@ -44,4 +46,7 @@ impl SemanticModelBuilder {
             self.node_by_range.insert(node.text_range(), node.clone());
         }
     }
+
+    #[inline]
+    pub fn push_event(&mut self, event: SemanticEvent) {}
 }
