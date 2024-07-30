@@ -169,7 +169,7 @@ pub(crate) fn code_actions(
             }
 
             // Filter out the refactor.* actions when assists are disabled
-            if action.category.matches("refactor") && !file_features.supports_assists() {
+            if action.category.matches("source") && !file_features.supports_assists() {
                 return None;
             }
             // Remove actions that do not match the categories requested by the
