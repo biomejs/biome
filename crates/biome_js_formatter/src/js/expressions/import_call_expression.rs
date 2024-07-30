@@ -1,9 +1,9 @@
 use crate::prelude::*;
 
-use crate::parentheses::NeedsParentheses;
 use biome_formatter::write;
+use biome_js_syntax::parentheses::NeedsParentheses;
+use biome_js_syntax::JsImportCallExpression;
 use biome_js_syntax::JsImportCallExpressionFields;
-use biome_js_syntax::{JsImportCallExpression, JsSyntaxKind};
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatJsImportCallExpression;
@@ -20,13 +20,5 @@ impl FormatNodeRule<JsImportCallExpression> for FormatJsImportCallExpression {
 
     fn needs_parentheses(&self, item: &JsImportCallExpression) -> bool {
         item.needs_parentheses()
-    }
-}
-
-impl NeedsParentheses for JsImportCallExpression {
-    fn needs_parentheses(&self) -> bool {
-        self.syntax()
-            .parent()
-            .is_some_and(|parent| parent.kind() == JsSyntaxKind::JS_NEW_EXPRESSION)
     }
 }

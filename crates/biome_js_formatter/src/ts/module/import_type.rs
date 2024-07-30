@@ -1,7 +1,6 @@
 use crate::prelude::*;
 use crate::utils::{FormatLiteralStringToken, StringLiteralParentKind};
 
-use crate::parentheses::NeedsParentheses;
 use biome_formatter::write;
 use biome_js_syntax::TsImportType;
 use biome_js_syntax::TsImportTypeFields;
@@ -39,15 +38,5 @@ impl FormatNodeRule<TsImportType> for FormatTsImportType {
                 type_arguments.format(),
             ]
         ]
-    }
-
-    fn needs_parentheses(&self, item: &TsImportType) -> bool {
-        item.needs_parentheses()
-    }
-}
-
-impl NeedsParentheses for TsImportType {
-    fn needs_parentheses(&self) -> bool {
-        false
     }
 }

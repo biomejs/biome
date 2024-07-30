@@ -1,9 +1,9 @@
 use crate::prelude::*;
 
-use crate::parentheses::NeedsParentheses;
 use biome_formatter::write;
+use biome_js_syntax::parentheses::NeedsParentheses;
+use biome_js_syntax::JsNewExpression;
 use biome_js_syntax::JsNewExpressionFields;
-use biome_js_syntax::{JsNewExpression, JsSyntaxKind};
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatJsNewExpression;
@@ -39,13 +39,5 @@ impl FormatNodeRule<JsNewExpression> for FormatJsNewExpression {
 
     fn needs_parentheses(&self, item: &JsNewExpression) -> bool {
         item.needs_parentheses()
-    }
-}
-
-impl NeedsParentheses for JsNewExpression {
-    fn needs_parentheses(&self) -> bool {
-        self.syntax()
-            .parent()
-            .is_some_and(|node| node.kind() == JsSyntaxKind::JS_EXTENDS_CLAUSE)
     }
 }

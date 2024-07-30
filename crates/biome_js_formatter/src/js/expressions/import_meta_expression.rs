@@ -1,7 +1,7 @@
 use crate::prelude::*;
 
-use crate::parentheses::NeedsParentheses;
 use biome_formatter::write;
+use biome_js_syntax::parentheses::NeedsParentheses;
 use biome_js_syntax::JsImportMetaExpression;
 use biome_js_syntax::JsImportMetaExpressionFields;
 
@@ -28,11 +28,5 @@ impl FormatNodeRule<JsImportMetaExpression> for FormatJsImportMetaExpression {
 
     fn needs_parentheses(&self, item: &JsImportMetaExpression) -> bool {
         item.needs_parentheses()
-    }
-}
-
-impl NeedsParentheses for JsImportMetaExpression {
-    fn needs_parentheses(&self) -> bool {
-        false
     }
 }

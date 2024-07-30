@@ -1,6 +1,5 @@
 use crate::prelude::*;
 
-use crate::parentheses::NeedsParentheses;
 use biome_formatter::write;
 use biome_js_syntax::{TsBooleanType, TsBooleanTypeFields};
 
@@ -12,15 +11,5 @@ impl FormatNodeRule<TsBooleanType> for FormatTsBooleanType {
         let TsBooleanTypeFields { boolean_token } = node.as_fields();
 
         write![f, [boolean_token.format()]]
-    }
-
-    fn needs_parentheses(&self, item: &TsBooleanType) -> bool {
-        item.needs_parentheses()
-    }
-}
-
-impl NeedsParentheses for TsBooleanType {
-    fn needs_parentheses(&self) -> bool {
-        false
     }
 }

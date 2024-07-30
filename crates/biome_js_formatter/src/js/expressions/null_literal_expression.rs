@@ -1,7 +1,7 @@
 use crate::prelude::*;
 
-use crate::parentheses::NeedsParentheses;
 use biome_formatter::write;
+use biome_js_syntax::parentheses::NeedsParentheses;
 use biome_js_syntax::JsNullLiteralExpression;
 use biome_js_syntax::JsNullLiteralExpressionFields;
 
@@ -17,12 +17,5 @@ impl FormatNodeRule<JsNullLiteralExpression> for FormatJsNullLiteralExpression {
 
     fn needs_parentheses(&self, item: &JsNullLiteralExpression) -> bool {
         item.needs_parentheses()
-    }
-}
-
-impl NeedsParentheses for JsNullLiteralExpression {
-    #[inline(always)]
-    fn needs_parentheses(&self) -> bool {
-        false
     }
 }

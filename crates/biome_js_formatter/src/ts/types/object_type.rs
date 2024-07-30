@@ -1,6 +1,6 @@
-use crate::parentheses::NeedsParentheses;
 use crate::prelude::*;
 use crate::utils::JsObjectLike;
+
 use biome_formatter::write;
 use biome_js_syntax::TsObjectType;
 
@@ -12,18 +12,8 @@ impl FormatNodeRule<TsObjectType> for FormatTsObjectType {
         write!(f, [JsObjectLike::from(node.clone())])
     }
 
-    fn needs_parentheses(&self, item: &TsObjectType) -> bool {
-        item.needs_parentheses()
-    }
-
     fn fmt_dangling_comments(&self, _: &TsObjectType, _: &mut JsFormatter) -> FormatResult<()> {
         // Formatted inside of `JsObjectLike`
         Ok(())
-    }
-}
-
-impl NeedsParentheses for TsObjectType {
-    fn needs_parentheses(&self) -> bool {
-        false
     }
 }

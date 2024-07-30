@@ -1,6 +1,5 @@
 use crate::prelude::*;
 
-use crate::parentheses::NeedsParentheses;
 use biome_formatter::write;
 use biome_js_syntax::{TsBigintType, TsBigintTypeFields};
 
@@ -12,15 +11,5 @@ impl FormatNodeRule<TsBigintType> for FormatTsBigintType {
         let TsBigintTypeFields { bigint_token } = node.as_fields();
 
         write![f, [bigint_token.format()]]
-    }
-
-    fn needs_parentheses(&self, item: &TsBigintType) -> bool {
-        item.needs_parentheses()
-    }
-}
-
-impl NeedsParentheses for TsBigintType {
-    fn needs_parentheses(&self) -> bool {
-        false
     }
 }

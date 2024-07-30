@@ -1,9 +1,8 @@
 use crate::prelude::*;
 use biome_formatter::write;
 
-use crate::parentheses::NeedsParentheses;
-use biome_js_syntax::JsIdentifierAssignment;
-use biome_js_syntax::{JsForOfStatement, JsIdentifierAssignmentFields, JsSyntaxKind};
+use biome_js_syntax::parentheses::NeedsParentheses;
+use biome_js_syntax::{JsIdentifierAssignment, JsIdentifierAssignmentFields};
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatJsIdentifierAssignment;
@@ -17,25 +16,6 @@ impl FormatNodeRule<JsIdentifierAssignment> for FormatJsIdentifierAssignment {
 
     fn needs_parentheses(&self, item: &JsIdentifierAssignment) -> bool {
         item.needs_parentheses()
-    }
-}
-
-impl NeedsParentheses for JsIdentifierAssignment {
-    #[inline]
-    fn needs_parentheses(&self) -> bool {
-        let Ok(name) = self.name_token() else {
-            return false;
-        };
-        match name.text_trimmed() {
-            "async" => self
-                .parent::<JsForOfStatement>()
-                .is_some_and(|for_of| for_of.await_token().is_none()),
-            "let" => self
-                .syntax()
-                .parent()
-                .is_some_and(|parent| parent.kind() == JsSyntaxKind::JS_FOR_OF_STATEMENT),
-            _ => false,
-        }
     }
 }
 

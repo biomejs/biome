@@ -1,7 +1,6 @@
 use crate::prelude::*;
-use biome_formatter::token::number::format_number_token;
 
-use crate::parentheses::NeedsParentheses;
+use biome_formatter::token::number::format_number_token;
 use biome_formatter::write;
 use biome_js_syntax::{TsNumberLiteralType, TsNumberLiteralTypeFields};
 
@@ -18,15 +17,5 @@ impl FormatNodeRule<TsNumberLiteralType> for FormatTsNumberLiteralType {
             f,
             [minus_token.format(), format_number_token(&literal_token?)]
         ]
-    }
-
-    fn needs_parentheses(&self, item: &TsNumberLiteralType) -> bool {
-        item.needs_parentheses()
-    }
-}
-
-impl NeedsParentheses for TsNumberLiteralType {
-    fn needs_parentheses(&self) -> bool {
-        false
     }
 }

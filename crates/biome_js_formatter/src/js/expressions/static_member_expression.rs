@@ -1,12 +1,12 @@
 use crate::prelude::*;
-
-use crate::parentheses::NeedsParentheses;
 use crate::JsLabels;
+
 use biome_formatter::{format_args, write};
+use biome_js_syntax::parentheses::NeedsParentheses;
 use biome_js_syntax::{
     AnyJsAssignment, AnyJsAssignmentPattern, AnyJsComputedMember, AnyJsExpression, AnyJsName,
     JsAssignmentExpression, JsInitializerClause, JsStaticMemberAssignment,
-    JsStaticMemberExpression, JsSyntaxKind, JsSyntaxNode, JsSyntaxToken,
+    JsStaticMemberExpression, JsSyntaxToken,
 };
 use biome_rowan::{declare_node_union, AstNode, SyntaxResult};
 
@@ -170,42 +170,8 @@ impl AnyJsStaticMemberLike {
     }
 }
 
-impl NeedsParentheses for JsStaticMemberExpression {
-    fn needs_parentheses(&self) -> bool {
-        let Some(parent) = self.syntax().parent() else {
-            return false;
-        };
-        matches!(parent.kind(), JsSyntaxKind::JS_NEW_EXPRESSION) && self.is_optional_chain()
-            || member_chain_callee_needs_parens(self.clone().into(), &parent)
-    }
-}
-
-pub(crate) fn member_chain_callee_needs_parens(
-    node: AnyJsExpression,
-    parent: &JsSyntaxNode,
-) -> bool {
-    match parent.kind() {
-        // `new (test().a)
-        JsSyntaxKind::JS_NEW_EXPRESSION => {
-            let mut object_chain =
-                std::iter::successors(Some(node), |expression| match expression {
-                    AnyJsExpression::JsStaticMemberExpression(member) => member.object().ok(),
-                    AnyJsExpression::JsComputedMemberExpression(member) => member.object().ok(),
-                    AnyJsExpression::JsTemplateExpression(template) => template.tag(),
-                    AnyJsExpression::TsNonNullAssertionExpression(assertion) => {
-                        assertion.expression().ok()
-                    }
-                    _ => None,
-                });
-            object_chain.any(|object| matches!(object, AnyJsExpression::JsCallExpression(_)))
-        }
-        _ => false,
-    }
-}
-
 #[cfg(test)]
 mod tests {
-
     use crate::{assert_needs_parentheses, assert_not_needs_parentheses};
     use biome_js_syntax::JsStaticMemberExpression;
 

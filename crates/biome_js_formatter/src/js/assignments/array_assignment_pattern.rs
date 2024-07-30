@@ -1,6 +1,6 @@
-use crate::parentheses::NeedsParentheses;
 use crate::prelude::*;
 use biome_formatter::write;
+use biome_js_syntax::parentheses::NeedsParentheses;
 use biome_js_syntax::JsArrayAssignmentPattern;
 use biome_js_syntax::JsArrayAssignmentPatternFields;
 
@@ -40,12 +40,5 @@ impl FormatNodeRule<JsArrayAssignmentPattern> for FormatJsArrayAssignmentPattern
     ) -> FormatResult<()> {
         // Handled inside of `fmt_fields`
         Ok(())
-    }
-}
-
-impl NeedsParentheses for JsArrayAssignmentPattern {
-    #[inline]
-    fn needs_parentheses(&self) -> bool {
-        false
     }
 }

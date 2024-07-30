@@ -1,7 +1,7 @@
 use crate::prelude::*;
 
-use crate::parentheses::NeedsParentheses;
 use biome_formatter::write;
+use biome_js_syntax::parentheses::NeedsParentheses;
 use biome_js_syntax::TsNonNullAssertionAssignment;
 use biome_js_syntax::TsNonNullAssertionAssignmentFields;
 
@@ -23,12 +23,5 @@ impl FormatNodeRule<TsNonNullAssertionAssignment> for FormatTsNonNullAssertionAs
 
     fn needs_parentheses(&self, item: &TsNonNullAssertionAssignment) -> bool {
         item.needs_parentheses()
-    }
-}
-
-impl NeedsParentheses for TsNonNullAssertionAssignment {
-    #[inline]
-    fn needs_parentheses(&self) -> bool {
-        false
     }
 }

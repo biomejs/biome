@@ -1,6 +1,5 @@
 use crate::prelude::*;
 
-use crate::parentheses::NeedsParentheses;
 use biome_formatter::write;
 use biome_js_syntax::{TsNumberType, TsNumberTypeFields};
 
@@ -12,15 +11,5 @@ impl FormatNodeRule<TsNumberType> for FormatTsNumberType {
         let TsNumberTypeFields { number_token } = node.as_fields();
 
         write![f, [number_token.format()]]
-    }
-
-    fn needs_parentheses(&self, item: &TsNumberType) -> bool {
-        item.needs_parentheses()
-    }
-}
-
-impl NeedsParentheses for TsNumberType {
-    fn needs_parentheses(&self) -> bool {
-        false
     }
 }

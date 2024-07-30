@@ -1,7 +1,7 @@
 use crate::prelude::*;
-use biome_formatter::write;
 
-use crate::parentheses::NeedsParentheses;
+use biome_formatter::write;
+use biome_js_syntax::parentheses::NeedsParentheses;
 use biome_js_syntax::JsSuperExpression;
 use biome_js_syntax::JsSuperExpressionFields;
 
@@ -17,12 +17,5 @@ impl FormatNodeRule<JsSuperExpression> for FormatJsSuperExpression {
 
     fn needs_parentheses(&self, item: &JsSuperExpression) -> bool {
         item.needs_parentheses()
-    }
-}
-
-impl NeedsParentheses for JsSuperExpression {
-    #[inline(always)]
-    fn needs_parentheses(&self) -> bool {
-        false
     }
 }

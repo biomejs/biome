@@ -1,9 +1,8 @@
 use crate::prelude::*;
-use crate::utils::{needs_binary_like_parentheses, AnyJsBinaryLikeExpression};
 
-use crate::parentheses::NeedsParentheses;
+use biome_js_syntax::binary_like_expression::AnyJsBinaryLikeExpression;
+use biome_js_syntax::parentheses::NeedsParentheses;
 use biome_js_syntax::JsLogicalExpression;
-use biome_rowan::AstNode;
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatJsLogicalExpression;
@@ -19,16 +18,6 @@ impl FormatNodeRule<JsLogicalExpression> for FormatJsLogicalExpression {
 
     fn needs_parentheses(&self, item: &JsLogicalExpression) -> bool {
         item.needs_parentheses()
-    }
-}
-
-impl NeedsParentheses for JsLogicalExpression {
-    fn needs_parentheses(&self) -> bool {
-        if let Some(parent) = self.parent::<JsLogicalExpression>() {
-            parent.operator() != self.operator()
-        } else {
-            needs_binary_like_parentheses(&AnyJsBinaryLikeExpression::from(self.clone()))
-        }
     }
 }
 

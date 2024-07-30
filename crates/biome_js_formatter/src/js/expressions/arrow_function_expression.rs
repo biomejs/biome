@@ -1,24 +1,22 @@
+use crate::context::trailing_commas::FormatTrailingCommas;
 use crate::js::bindings::parameters::has_only_simple_parameters;
+use crate::js::expressions::call_arguments::GroupedCallArgumentLayout;
 use crate::prelude::*;
+use crate::utils::function_body::{FormatMaybeCachedFunctionBody, FunctionBodyCacheMode};
+use crate::utils::AssignmentLikeLayout;
+
 use biome_formatter::{
     format_args, write, CstFormatContext, FormatRuleWithOptions, RemoveSoftLinesBuffer,
 };
-use std::iter::once;
-
-use crate::context::trailing_commas::FormatTrailingCommas;
-use crate::js::expressions::call_arguments::GroupedCallArgumentLayout;
-use crate::parentheses::{
-    is_callee, is_conditional_test, update_or_lower_expression_needs_parentheses,
-    AnyJsExpressionLeftSide, NeedsParentheses,
-};
-use crate::utils::function_body::{FormatMaybeCachedFunctionBody, FunctionBodyCacheMode};
-use crate::utils::{resolve_left_most_expression, AnyJsBinaryLikeExpression, AssignmentLikeLayout};
+use biome_js_syntax::expression_left_side::AnyJsExpressionLeftSide;
+use biome_js_syntax::parentheses::NeedsParentheses;
 use biome_js_syntax::{
     is_test_call_argument, AnyJsArrowFunctionParameters, AnyJsBindingPattern, AnyJsExpression,
     AnyJsFormalParameter, AnyJsFunctionBody, AnyJsParameter, AnyJsTemplateElement,
     JsArrowFunctionExpression, JsFormalParameter, JsSyntaxKind, JsTemplateExpression,
 };
 use biome_rowan::{SyntaxNodeOptionExt, SyntaxResult};
+use std::iter::once;
 
 #[derive(Debug, Copy, Clone, Default)]
 pub(crate) struct FormatJsArrowFunctionExpression {
@@ -368,14 +366,15 @@ fn should_add_parens(body: &AnyJsFunctionBody) -> bool {
         AnyJsFunctionBody::AnyJsExpression(
             expression @ AnyJsExpression::JsConditionalExpression(_),
         ) => {
-            let are_parentheses_mandatory = matches!(
-                resolve_left_most_expression(expression.clone()),
+            let var_name = matches!(
+                AnyJsExpressionLeftSide::leftmost(expression.clone()),
                 AnyJsExpressionLeftSide::AnyJsExpression(
                     AnyJsExpression::JsObjectExpression(_)
                         | AnyJsExpression::JsFunctionExpression(_)
                         | AnyJsExpression::JsClassExpression(_)
                 )
             );
+            let are_parentheses_mandatory = var_name;
 
             !are_parentheses_mandatory
         }
@@ -504,9 +503,12 @@ impl Format<JsFormatContext> for ArrowChain {
         //        () => () =>
         //          a
         //      )();
-        let is_callee = head_parent
-            .as_ref()
-            .map_or(false, |parent| is_callee(head.syntax(), parent));
+        let is_callee = head_parent.as_ref().map_or(false, |parent| {
+            matches!(
+                parent.kind(),
+                JsSyntaxKind::JS_CALL_EXPRESSION | JsSyntaxKind::JS_NEW_EXPRESSION
+            )
+        });
 
         // With arrays, objects, sequence expressions, and block function bodies,
         // the opening brace gives a convenient boundary to insert a line break,
@@ -817,24 +819,6 @@ impl ArrowFunctionLayout {
         };
 
         Ok(result)
-    }
-}
-
-impl NeedsParentheses for JsArrowFunctionExpression {
-    fn needs_parentheses(&self) -> bool {
-        let Some(parent) = self.syntax().parent() else {
-            return false;
-        };
-        matches!(
-            parent.kind(),
-            JsSyntaxKind::TS_AS_EXPRESSION
-                | JsSyntaxKind::TS_SATISFIES_EXPRESSION
-                | JsSyntaxKind::JS_UNARY_EXPRESSION
-                | JsSyntaxKind::JS_AWAIT_EXPRESSION
-                | JsSyntaxKind::TS_TYPE_ASSERTION_EXPRESSION
-        ) || is_conditional_test(self.syntax(), &parent)
-            || update_or_lower_expression_needs_parentheses(self.syntax(), &parent)
-            || AnyJsBinaryLikeExpression::can_cast(parent.kind())
     }
 }
 

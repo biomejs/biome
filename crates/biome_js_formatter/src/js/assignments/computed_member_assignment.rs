@@ -1,6 +1,6 @@
 use crate::prelude::*;
 
-use crate::parentheses::NeedsParentheses;
+use biome_js_syntax::parentheses::NeedsParentheses;
 use biome_js_syntax::{AnyJsComputedMember, JsComputedMemberAssignment};
 
 #[derive(Debug, Clone, Default)]
@@ -17,12 +17,5 @@ impl FormatNodeRule<JsComputedMemberAssignment> for FormatJsComputedMemberAssign
 
     fn needs_parentheses(&self, item: &JsComputedMemberAssignment) -> bool {
         item.needs_parentheses()
-    }
-}
-
-impl NeedsParentheses for JsComputedMemberAssignment {
-    #[inline]
-    fn needs_parentheses(&self) -> bool {
-        false
     }
 }

@@ -1,6 +1,5 @@
 use crate::prelude::*;
 
-use crate::parentheses::NeedsParentheses;
 use biome_formatter::write;
 use biome_js_syntax::TsIndexedAccessType;
 use biome_js_syntax::TsIndexedAccessTypeFields;
@@ -25,15 +24,5 @@ impl FormatNodeRule<TsIndexedAccessType> for FormatTsIndexedAccessType {
                 r_brack_token.format()
             ]
         ]
-    }
-
-    fn needs_parentheses(&self, item: &TsIndexedAccessType) -> bool {
-        item.needs_parentheses()
-    }
-}
-
-impl NeedsParentheses for TsIndexedAccessType {
-    fn needs_parentheses(&self) -> bool {
-        false
     }
 }
