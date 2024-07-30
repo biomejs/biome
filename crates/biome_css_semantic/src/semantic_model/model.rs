@@ -22,7 +22,7 @@ pub(crate) struct SemanticModelData {
     pub(crate) root: CssRoot,
     // Map to each by its range
     pub(crate) node_by_range: FxHashMap<TextRange, CssSyntaxNode>,
-    pub(crate) selectors: Vec<CssSelectorList>,
+    pub(crate) selectors: FxHashMap<TextRange, Vec<(String, TextRange)>>,
     pub(crate) rules: Vec<AnyCssRule>,
     pub(crate) properties: FxHashMap<TextRange, Vec<(String, TextRange)>>,
 }
@@ -32,7 +32,7 @@ impl SemanticModelData {
         Self {
             root,
             node_by_range: FxHashMap::default(),
-            selectors: Vec::new(),
+            selectors: FxHashMap::default(),
             rules: Vec::new(),
             properties: FxHashMap::default(),
         }

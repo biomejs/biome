@@ -17,7 +17,7 @@ use super::model::{SemanticModel, SemanticModelData};
 pub struct SemanticModelBuilder {
     root: CssRoot,
     node_by_range: FxHashMap<TextRange, CssSyntaxNode>,
-    selectors: Vec<CssSelectorList>,
+    selectors: FxHashMap<TextRange, Vec<(String, TextRange)>>,
     rules: Vec<AnyCssRule>,
     properties: FxHashMap<TextRange, Vec<(String, TextRange)>>,
 }
@@ -27,7 +27,7 @@ impl SemanticModelBuilder {
         Self {
             root,
             node_by_range: FxHashMap::default(),
-            selectors: Vec::new(),
+            selectors: FxHashMap::default(),
             rules: Vec::new(),
             properties: FxHashMap::default(),
         }
@@ -58,10 +58,14 @@ impl SemanticModelBuilder {
     #[inline]
     pub fn push_event(&mut self, event: SemanticEvent) {
         match event {
-            SemanticEvent::SelectorDeclaration { range } => {
-                let node = &self.node_by_range[&range];
+            SemanticEvent::SelectorDeclaration {
+                selector_range,
+                name,
+            } => {
                 self.selectors
-                    .push(CssSelectorList::cast(node.clone()).unwrap());
+                    .entry(selector_range)
+                    .or_default()
+                    .push((name, selector_range));
             }
             SemanticEvent::PropertyDeclaration {
                 rule_range,

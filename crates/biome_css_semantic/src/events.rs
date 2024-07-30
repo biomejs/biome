@@ -1,11 +1,13 @@
 use std::collections::VecDeque;
 
-use biome_rowan::TextRange;
+use biome_css_syntax::AnyCssSelector;
+use biome_rowan::{AstNode, TextRange};
 
 #[derive(Debug)]
 pub enum SemanticEvent {
     SelectorDeclaration {
-        range: TextRange,
+        selector_range: TextRange,
+        name: String,
     },
     PropertyDeclaration {
         rule_range: TextRange,
@@ -23,9 +25,38 @@ impl SemanticEventExtractor {
     pub fn enter(&mut self, node: &biome_css_syntax::CssSyntaxNode) {
         match node.kind() {
             biome_css_syntax::CssSyntaxKind::CSS_SELECTOR_LIST => {
-                self.stash.push_back(SemanticEvent::SelectorDeclaration {
-                    range: node.text_range(),
-                });
+                for selector in node.children() {
+                    if let Some(s) = AnyCssSelector::cast(selector) {
+                        match s {
+                            AnyCssSelector::CssComplexSelector(s) => {
+                                if let Ok(l) = s.left() {
+                                    self.stash.push_back(SemanticEvent::SelectorDeclaration {
+                                        selector_range: node.text_range(),
+                                        name: l.text().to_string(),
+                                    });
+                                }
+
+                                if let Ok(r) = s.right() {
+                                    self.stash.push_back(SemanticEvent::SelectorDeclaration {
+                                        selector_range: node.text_range(),
+                                        name: r.text().to_string(),
+                                    });
+                                }
+                            }
+                            AnyCssSelector::CssCompoundSelector(selector) => {
+                                self.stash.push_back(SemanticEvent::SelectorDeclaration {
+                                    selector_range: node.text_range(),
+                                    name: selector.text().to_string(),
+                                });
+                            }
+                            AnyCssSelector::CssBogusSelector(_)
+                            | AnyCssSelector::CssGritMetavariable(_) => {}
+                        }
+                    }
+                }
+                // self.stash.push_back(SemanticEvent::SelectorDeclaration {
+                //     range: node.text_range(),
+                // });
             }
             biome_css_syntax::CssSyntaxKind::CSS_DECLARATION_OR_RULE_LIST => {
                 for block in node.children() {
