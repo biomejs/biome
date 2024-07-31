@@ -34,7 +34,7 @@ type Test<T> = T extends (new (
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,22 +1,25 @@
+@@ -1,13 +1,15 @@
  // #13275
  type Foo<T> = T extends ((...a: any[]) => infer R extends string) ? R : never;
 -type Foo<T> = T extends (new (...a: any[]) => infer R extends string)
@@ -52,11 +52,8 @@ type Test<T> = T extends (new (
 +) => token is infer U extends TSESTree.Token
    ? U
    : TSESTree.Token;
--type Test<T> = T extends ((
-+type Test<T> = T extends (
-   token: TSESTree.Token,
--) => asserts token is infer U extends TSESTree.Token)
-+) => asserts token is infer U extends TSESTree.Token
+ type Test<T> = T extends ((
+@@ -16,7 +18,8 @@
    ? U
    : TSESTree.Token;
  type Test<T> = T extends (new (
@@ -87,9 +84,9 @@ type Test<T> = T extends (
 ) => token is infer U extends TSESTree.Token
   ? U
   : TSESTree.Token;
-type Test<T> = T extends (
+type Test<T> = T extends ((
   token: TSESTree.Token,
-) => asserts token is infer U extends TSESTree.Token
+) => asserts token is infer U extends TSESTree.Token)
   ? U
   : TSESTree.Token;
 type Test<T> = T extends (new (
