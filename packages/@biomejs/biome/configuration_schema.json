@@ -2805,14 +2805,6 @@
 		"Rules2": {
 			"type": "object",
 			"properties": {
-				"all": {
-					"description": "It enables ALL rules. The rules that belong to `nursery` won't be enabled.",
-					"type": ["boolean", "null"]
-				},
-				"recommended": {
-					"description": "It enables the lint rules recommended by Biome. `true` by default.",
-					"type": ["boolean", "null"]
-				},
 				"source": {
 					"anyOf": [{ "$ref": "#/definitions/Source" }, { "type": "null" }]
 				}

@@ -321,14 +321,6 @@ If Biome can't find the configuration, it will attempt to use the current workin
 	useIgnoreFile?: boolean;
 }
 export interface Rules2 {
-	/**
-	 * It enables ALL rules. The rules that belong to `nursery` won't be enabled.
-	 */
-	all?: boolean;
-	/**
-	 * It enables the lint rules recommended by Biome. `true` by default.
-	 */
-	recommended?: boolean;
 	source?: Source;
 }
 /**
@@ -2778,7 +2770,7 @@ export type Category =
 	| "lint/suspicious/useIsArray"
 	| "lint/suspicious/useNamespaceKeyword"
 	| "lint/suspicious/useValidTypeof"
-	| "assists/nursery/useSortedKeys"
+	| "assists/source/useSortedKeys"
 	| "syntax/nursery/noTypeOnlyImportAttributes"
 	| "syntax/correctness/noSuperWithoutExtends"
 	| "syntax/correctness/noInitializerWithDefinite"
