@@ -122,7 +122,7 @@ pub enum BiomeCommand {
         organize_imports_enabled: Option<bool>,
 
         /// Allow to enable or disable the assists.
-        #[bpaf(long("organize-imports-enabled"), argument("true|false"), optional)]
+        #[bpaf(long("assists-enabled"), argument("true|false"), optional)]
         assists_enabled: Option<bool>,
 
         #[bpaf(external(partial_configuration), hide_usage, optional)]
