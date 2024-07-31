@@ -1,0 +1,105 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: invalid.css
+---
+# Input
+```css
+/**/
+
+/* */
+
+/*
+
+ */
+
+width: 100px; /* */
+
+/* */width: 100px;
+
+```
+
+# Diagnostics
+```
+invalid.css:1:1 lint/nursery/noEmptyComment ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Empty comment found.
+  
+  > 1 │ /**/
+      │ ^^^^
+    2 │ 
+    3 │ /* */
+  
+  i Replace the empty comment with Valid comment or remove it.
+  
+
+```
+
+```
+invalid.css:3:1 lint/nursery/noEmptyComment ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Empty comment found.
+  
+    1 │ /**/
+    2 │ 
+  > 3 │ /* */
+      │ ^^^^^
+    4 │ 
+    5 │ /*
+  
+  i Replace the empty comment with Valid comment or remove it.
+  
+
+```
+
+```
+invalid.css:5:1 lint/nursery/noEmptyComment ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Empty comment found.
+  
+    3 │ /* */
+    4 │ 
+  > 5 │ /*
+      │ ^^
+  > 6 │ 
+  > 7 │  */
+      │  ^^
+    8 │ 
+    9 │ width: 100px; /* */
+  
+  i Replace the empty comment with Valid comment or remove it.
+  
+
+```
+
+```
+invalid.css:9:15 lint/nursery/noEmptyComment ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Empty comment found.
+  
+     7 │  */
+     8 │ 
+   > 9 │ width: 100px; /* */
+       │               ^^^^^
+    10 │ 
+    11 │ /* */width: 100px;
+  
+  i Replace the empty comment with Valid comment or remove it.
+  
+
+```
+
+```
+invalid.css:11:1 lint/nursery/noEmptyComment ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Empty comment found.
+  
+     9 │ width: 100px; /* */
+    10 │ 
+  > 11 │ /* */width: 100px;
+       │ ^^^^^
+    12 │ 
+  
+  i Replace the empty comment with Valid comment or remove it.
+  
+
+```

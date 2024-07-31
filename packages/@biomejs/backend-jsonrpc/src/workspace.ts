@@ -1090,6 +1090,10 @@ export interface Nursery {
 	 */
 	noEmptyBlock?: RuleConfiguration_for_Null;
 	/**
+	 * Succinct description of the rule.
+	 */
+	noEmptyComment?: RuleConfiguration_for_Null;
+	/**
 	 * Disallow variables from evolving into any type through reassignments.
 	 */
 	noEvolvingTypes?: RuleConfiguration_for_Null;
@@ -2531,6 +2535,7 @@ export type Category =
 	| "lint/nursery/noDuplicatedFields"
 	| "lint/nursery/noDynamicNamespaceImportAccess"
 	| "lint/nursery/noEmptyBlock"
+	| "lint/nursery/noEmptyComment"
 	| "lint/nursery/noEvolvingTypes"
 	| "lint/nursery/noExportedImports"
 	| "lint/nursery/noImportantInKeyframe"
@@ -2543,8 +2548,8 @@ export type Category =
 	| "lint/nursery/noMissingGenericFamilyKeyword"
 	| "lint/nursery/noReactSpecificProps"
 	| "lint/nursery/noRestrictedImports"
-	| "lint/nursery/noStaticElementInteractions"
 	| "lint/nursery/noShorthandPropertyOverrides"
+	| "lint/nursery/noStaticElementInteractions"
 	| "lint/nursery/noSubstr"
 	| "lint/nursery/noUndeclaredDependencies"
 	| "lint/nursery/noUnknownFunction"
