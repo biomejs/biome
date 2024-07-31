@@ -8,12 +8,12 @@ JsModule {
             import_clause: JsImportDefaultClause {
                 type_token: missing (optional),
                 default_specifier: JsDefaultImportSpecifier {
-                    local_name: JsGritMetavariable {
+                    local_name: JsMetavariable {
                         value_token: GRIT_METAVARIABLE@7..23 "μdefaultImport" [] [Whitespace(" ")],
                     },
                 },
                 from_token: FROM_KW@23..28 "from" [] [Whitespace(" ")],
-                source: JsGritMetavariable {
+                source: JsMetavariable {
                     value_token: GRIT_METAVARIABLE@28..36 "μsource" [] [],
                 },
                 assertion: missing (optional),
@@ -29,14 +29,14 @@ JsModule {
                     specifiers: JsNamedImportSpecifierList [
                         JsShorthandNamedImportSpecifier {
                             type_token: missing (optional),
-                            local_name: JsGritMetavariable {
+                            local_name: JsMetavariable {
                                 value_token: GRIT_METAVARIABLE@47..60 "μnamedImport" [] [],
                             },
                         },
                         COMMA@60..62 "," [] [Whitespace(" ")],
                         JsShorthandNamedImportSpecifier {
                             type_token: TYPE_KW@62..67 "type" [] [Whitespace(" ")],
-                            local_name: JsGritMetavariable {
+                            local_name: JsMetavariable {
                                 value_token: GRIT_METAVARIABLE@67..79 "μnamedType" [] [Whitespace(" ")],
                             },
                         },
@@ -44,7 +44,7 @@ JsModule {
                     r_curly_token: R_CURLY@79..81 "}" [] [Whitespace(" ")],
                 },
                 from_token: FROM_KW@81..86 "from" [] [Whitespace(" ")],
-                source: JsGritMetavariable {
+                source: JsMetavariable {
                     value_token: GRIT_METAVARIABLE@86..94 "μsource" [] [],
                 },
                 assertion: missing (optional),
@@ -52,7 +52,7 @@ JsModule {
             semicolon_token: SEMICOLON@94..95 ";" [] [],
         },
         JsExpressionStatement {
-            expression: JsGritMetavariable {
+            expression: JsMetavariable {
                 value_token: GRIT_METAVARIABLE@95..108 "μstatement" [Newline("\n"), Newline("\n")] [],
             },
             semicolon_token: SEMICOLON@108..109 ";" [] [],
@@ -76,7 +76,7 @@ JsModule {
                 directives: JsDirectiveList [],
                 statements: JsStatementList [
                     JsExpressionStatement {
-                        expression: JsGritMetavariable {
+                        expression: JsMetavariable {
                             value_token: GRIT_METAVARIABLE@127..143 "μstatement" [Newline("\n"), Whitespace("    ")] [],
                         },
                         semicolon_token: SEMICOLON@143..144 ";" [] [],
@@ -93,7 +93,7 @@ JsModule {
                                     variable_annotation: missing (optional),
                                     initializer: JsInitializerClause {
                                         eq_token: EQ@159..161 "=" [] [Whitespace(" ")],
-                                        expression: JsGritMetavariable {
+                                        expression: JsMetavariable {
                                             value_token: GRIT_METAVARIABLE@161..173 "μexpression" [] [],
                                         },
                                     },
@@ -118,7 +118,7 @@ JsModule {
             implements_clause: missing (optional),
             l_curly_token: L_CURLY@188..189 "{" [] [],
             members: JsClassMemberList [
-                JsGritMetavariable {
+                JsMetavariable {
                     value_token: GRIT_METAVARIABLE@189..207 "μclassMember" [Newline("\n"), Whitespace("    ")] [],
                 },
                 JsEmptyClassMember {
@@ -137,7 +137,7 @@ JsModule {
                             l_curly_token: L_CURLY@218..220 "{" [] [Whitespace(" ")],
                             properties: JsObjectBindingPatternPropertyList [
                                 JsObjectBindingPatternProperty {
-                                    member: JsGritMetavariable {
+                                    member: JsMetavariable {
                                         value_token: GRIT_METAVARIABLE@220..225 "μkey" [] [],
                                     },
                                     colon_token: COLON@225..227 ":" [] [Whitespace(" ")],
@@ -156,11 +156,11 @@ JsModule {
                                 l_curly_token: L_CURLY@235..237 "{" [] [Whitespace(" ")],
                                 members: JsObjectMemberList [
                                     JsPropertyObjectMember {
-                                        name: JsGritMetavariable {
+                                        name: JsMetavariable {
                                             value_token: GRIT_METAVARIABLE@237..242 "μkey" [] [],
                                         },
                                         colon_token: COLON@242..244 ":" [] [Whitespace(" ")],
-                                        value: JsGritMetavariable {
+                                        value: JsMetavariable {
                                             value_token: GRIT_METAVARIABLE@244..252 "μvalue" [] [Whitespace(" ")],
                                         },
                                     },
@@ -177,7 +177,7 @@ JsModule {
             async_token: missing (optional),
             function_token: FUNCTION_KW@254..265 "function" [Newline("\n"), Newline("\n")] [Whitespace(" ")],
             star_token: missing (optional),
-            id: JsGritMetavariable {
+            id: JsMetavariable {
                 value_token: GRIT_METAVARIABLE@265..279 "μfunctionName" [] [],
             },
             type_parameters: missing (optional),
@@ -196,12 +196,12 @@ JsModule {
         },
         TsTypeAliasDeclaration {
             type_token: TYPE_KW@284..291 "type" [Newline("\n"), Newline("\n")] [Whitespace(" ")],
-            binding_identifier: JsGritMetavariable {
+            binding_identifier: JsMetavariable {
                 value_token: GRIT_METAVARIABLE@291..298 "μType" [] [Whitespace(" ")],
             },
             type_parameters: missing (optional),
             eq_token: EQ@298..300 "=" [] [Whitespace(" ")],
-            ty: JsGritMetavariable {
+            ty: JsMetavariable {
                 value_token: GRIT_METAVARIABLE@300..311 "μOtherType" [] [],
             },
             semicolon_token: SEMICOLON@311..312 ";" [] [],
@@ -220,10 +220,10 @@ JsModule {
       1: JS_IMPORT_DEFAULT_CLAUSE@7..36
         0: (empty)
         1: JS_DEFAULT_IMPORT_SPECIFIER@7..23
-          0: JS_GRIT_METAVARIABLE@7..23
+          0: JS_METAVARIABLE@7..23
             0: GRIT_METAVARIABLE@7..23 "μdefaultImport" [] [Whitespace(" ")]
         2: FROM_KW@23..28 "from" [] [Whitespace(" ")]
-        3: JS_GRIT_METAVARIABLE@28..36
+        3: JS_METAVARIABLE@28..36
           0: GRIT_METAVARIABLE@28..36 "μsource" [] []
         4: (empty)
       2: SEMICOLON@36..37 ";" [] []
@@ -236,21 +236,21 @@ JsModule {
           1: JS_NAMED_IMPORT_SPECIFIER_LIST@47..79
             0: JS_SHORTHAND_NAMED_IMPORT_SPECIFIER@47..60
               0: (empty)
-              1: JS_GRIT_METAVARIABLE@47..60
+              1: JS_METAVARIABLE@47..60
                 0: GRIT_METAVARIABLE@47..60 "μnamedImport" [] []
             1: COMMA@60..62 "," [] [Whitespace(" ")]
             2: JS_SHORTHAND_NAMED_IMPORT_SPECIFIER@62..79
               0: TYPE_KW@62..67 "type" [] [Whitespace(" ")]
-              1: JS_GRIT_METAVARIABLE@67..79
+              1: JS_METAVARIABLE@67..79
                 0: GRIT_METAVARIABLE@67..79 "μnamedType" [] [Whitespace(" ")]
           2: R_CURLY@79..81 "}" [] [Whitespace(" ")]
         2: FROM_KW@81..86 "from" [] [Whitespace(" ")]
-        3: JS_GRIT_METAVARIABLE@86..94
+        3: JS_METAVARIABLE@86..94
           0: GRIT_METAVARIABLE@86..94 "μsource" [] []
         4: (empty)
       2: SEMICOLON@94..95 ";" [] []
     2: JS_EXPRESSION_STATEMENT@95..109
-      0: JS_GRIT_METAVARIABLE@95..108
+      0: JS_METAVARIABLE@95..108
         0: GRIT_METAVARIABLE@95..108 "μstatement" [Newline("\n"), Newline("\n")] []
       1: SEMICOLON@108..109 ";" [] []
     3: JS_FUNCTION_DECLARATION@109..176
@@ -270,7 +270,7 @@ JsModule {
         1: JS_DIRECTIVE_LIST@127..127
         2: JS_STATEMENT_LIST@127..174
           0: JS_EXPRESSION_STATEMENT@127..144
-            0: JS_GRIT_METAVARIABLE@127..143
+            0: JS_METAVARIABLE@127..143
               0: GRIT_METAVARIABLE@127..143 "μstatement" [Newline("\n"), Whitespace("    ")] []
             1: SEMICOLON@143..144 ";" [] []
           1: JS_VARIABLE_STATEMENT@144..174
@@ -284,7 +284,7 @@ JsModule {
                   1: (empty)
                   2: JS_INITIALIZER_CLAUSE@159..173
                     0: EQ@159..161 "=" [] [Whitespace(" ")]
-                    1: JS_GRIT_METAVARIABLE@161..173
+                    1: JS_METAVARIABLE@161..173
                       0: GRIT_METAVARIABLE@161..173 "μexpression" [] []
             1: SEMICOLON@173..174 ";" [] []
         3: R_CURLY@174..176 "}" [Newline("\n")] []
@@ -299,7 +299,7 @@ JsModule {
       6: (empty)
       7: L_CURLY@188..189 "{" [] []
       8: JS_CLASS_MEMBER_LIST@189..208
-        0: JS_GRIT_METAVARIABLE@189..207
+        0: JS_METAVARIABLE@189..207
           0: GRIT_METAVARIABLE@189..207 "μclassMember" [Newline("\n"), Whitespace("    ")] []
         1: JS_EMPTY_CLASS_MEMBER@207..208
           0: SEMICOLON@207..208 ";" [] []
@@ -314,7 +314,7 @@ JsModule {
               0: L_CURLY@218..220 "{" [] [Whitespace(" ")]
               1: JS_OBJECT_BINDING_PATTERN_PROPERTY_LIST@220..231
                 0: JS_OBJECT_BINDING_PATTERN_PROPERTY@220..231
-                  0: JS_GRIT_METAVARIABLE@220..225
+                  0: JS_METAVARIABLE@220..225
                     0: GRIT_METAVARIABLE@220..225 "μkey" [] []
                   1: COLON@225..227 ":" [] [Whitespace(" ")]
                   2: JS_IDENTIFIER_BINDING@227..231
@@ -328,10 +328,10 @@ JsModule {
                 0: L_CURLY@235..237 "{" [] [Whitespace(" ")]
                 1: JS_OBJECT_MEMBER_LIST@237..252
                   0: JS_PROPERTY_OBJECT_MEMBER@237..252
-                    0: JS_GRIT_METAVARIABLE@237..242
+                    0: JS_METAVARIABLE@237..242
                       0: GRIT_METAVARIABLE@237..242 "μkey" [] []
                     1: COLON@242..244 ":" [] [Whitespace(" ")]
-                    2: JS_GRIT_METAVARIABLE@244..252
+                    2: JS_METAVARIABLE@244..252
                       0: GRIT_METAVARIABLE@244..252 "μvalue" [] [Whitespace(" ")]
                 2: R_CURLY@252..253 "}" [] []
       1: SEMICOLON@253..254 ";" [] []
@@ -339,7 +339,7 @@ JsModule {
       0: (empty)
       1: FUNCTION_KW@254..265 "function" [Newline("\n"), Newline("\n")] [Whitespace(" ")]
       2: (empty)
-      3: JS_GRIT_METAVARIABLE@265..279
+      3: JS_METAVARIABLE@265..279
         0: GRIT_METAVARIABLE@265..279 "μfunctionName" [] []
       4: (empty)
       5: JS_PARAMETERS@279..282
@@ -354,11 +354,11 @@ JsModule {
         3: R_CURLY@283..284 "}" [] []
     7: TS_TYPE_ALIAS_DECLARATION@284..312
       0: TYPE_KW@284..291 "type" [Newline("\n"), Newline("\n")] [Whitespace(" ")]
-      1: JS_GRIT_METAVARIABLE@291..298
+      1: JS_METAVARIABLE@291..298
         0: GRIT_METAVARIABLE@291..298 "μType" [] [Whitespace(" ")]
       2: (empty)
       3: EQ@298..300 "=" [] [Whitespace(" ")]
-      4: JS_GRIT_METAVARIABLE@300..311
+      4: JS_METAVARIABLE@300..311
         0: GRIT_METAVARIABLE@300..311 "μOtherType" [] []
       5: SEMICOLON@311..312 ";" [] []
   4: EOF@312..313 "" [Newline("\n")] []

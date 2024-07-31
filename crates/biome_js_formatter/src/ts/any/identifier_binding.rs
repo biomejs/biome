@@ -8,7 +8,7 @@ impl FormatRule<AnyTsIdentifierBinding> for FormatAnyTsIdentifierBinding {
     type Context = JsFormatContext;
     fn fmt(&self, node: &AnyTsIdentifierBinding, f: &mut JsFormatter) -> FormatResult<()> {
         match node {
-            AnyTsIdentifierBinding::JsGritMetavariable(node) => node.format().fmt(f),
+            AnyTsIdentifierBinding::JsMetavariable(node) => node.format().fmt(f),
             AnyTsIdentifierBinding::TsIdentifierBinding(node) => node.format().fmt(f),
         }
     }

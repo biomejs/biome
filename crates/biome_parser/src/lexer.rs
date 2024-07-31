@@ -266,7 +266,7 @@ pub trait Lexer<'src> {
     }
 
     /// Check if the lexer starts a grit metavariable
-    fn is_grit_metavariable_start(&mut self) -> bool {
+    fn is_metavariable_start(&mut self) -> bool {
         let current_char = self.current_char_unchecked();
         if current_char == 'μ' {
             let current_char_length = current_char.len_utf8();
@@ -291,8 +291,8 @@ pub trait Lexer<'src> {
 
     /// Consume a grit metavariable(μ[a-zA-Z_][a-zA-Z0-9_]*|μ...)
     /// https://github.com/getgrit/gritql/blob/8f3f077d078ccaf0618510bba904a06309c2435e/resources/language-metavariables/tree-sitter-css/grammar.js#L388
-    fn consume_grit_metavariable<T>(&mut self, kind: T) -> T {
-        debug_assert!(self.is_grit_metavariable_start());
+    fn consume_metavariable<T>(&mut self, kind: T) -> T {
+        debug_assert!(self.is_metavariable_start());
 
         // SAFETY: We know the current character is μ.
         let current_char = self.current_char_unchecked();

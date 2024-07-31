@@ -1896,12 +1896,6 @@ impl JsGetterObjectMemberBuilder {
         ))
     }
 }
-pub fn js_grit_metavariable(value_token: SyntaxToken) -> JsGritMetavariable {
-    JsGritMetavariable::unwrap_cast(SyntaxNode::new_detached(
-        JsSyntaxKind::JS_GRIT_METAVARIABLE,
-        [Some(SyntaxElement::Token(value_token))],
-    ))
-}
 pub fn js_identifier_assignment(name_token: SyntaxToken) -> JsIdentifierAssignment {
     JsIdentifierAssignment::unwrap_cast(SyntaxNode::new_detached(
         JsSyntaxKind::JS_IDENTIFIER_ASSIGNMENT,
@@ -2332,6 +2326,12 @@ pub fn js_logical_expression(
             Some(SyntaxElement::Token(operator_token_token)),
             Some(SyntaxElement::Node(right.into_syntax())),
         ],
+    ))
+}
+pub fn js_metavariable(value_token: SyntaxToken) -> JsMetavariable {
+    JsMetavariable::unwrap_cast(SyntaxNode::new_detached(
+        JsSyntaxKind::JS_METAVARIABLE,
+        [Some(SyntaxElement::Token(value_token))],
     ))
 }
 pub fn js_method_class_member(

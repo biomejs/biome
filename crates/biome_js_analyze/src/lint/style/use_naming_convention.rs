@@ -1216,7 +1216,7 @@ impl Selector {
             scope,
         } = match member {
             AnyJsClassMember::JsBogusMember(_)
-            | AnyJsClassMember::JsGritMetavariable(_)
+            | AnyJsClassMember::JsMetavariable(_)
             | AnyJsClassMember::JsConstructorClassMember(_)
             | AnyJsClassMember::TsConstructorSignatureClassMember(_)
             | AnyJsClassMember::JsEmptyClassMember(_)

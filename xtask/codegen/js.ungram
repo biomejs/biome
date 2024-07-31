@@ -325,7 +325,7 @@ AnyJsExpression =
 	// JSX
 	| JsxTagExpression
 	// Grit
-	| JsGritMetavariable
+	| JsMetavariable
 
 JsTemplateExpression =
 	tag: AnyJsExpression?
@@ -519,7 +519,7 @@ JsPostUpdateExpression =
 AnyJsObjectMemberName =
 	JsLiteralMemberName
 	| JsComputedMemberName
-	| JsGritMetavariable
+	| JsMetavariable
 
 JsObjectExpression =
 	'{'
@@ -632,7 +632,7 @@ AnyJsClassMemberName =
 	JsLiteralMemberName
 	| JsComputedMemberName
 	| JsPrivateClassMemberName
-	| JsGritMetavariable
+	| JsMetavariable
 
 AnyJsClassMember =
 	JsConstructorClassMember
@@ -650,7 +650,7 @@ AnyJsClassMember =
 	| TsIndexSignatureClassMember
 	| JsEmptyClassMember
 	| JsBogusMember
-	| JsGritMetavariable
+	| JsMetavariable
 
 JsStaticModifier = modifier: 'static'
 JsAccessorModifier = modifier: 'accessor'
@@ -1013,7 +1013,7 @@ JsObjectAssignmentPatternRest =
 AnyJsBinding =
 	JsIdentifierBinding
 	| JsBogusBinding
-	| JsGritMetavariable
+	| JsMetavariable
 
 // Binds a value to an identifier.
 // let x = OR function(test) {}
@@ -1063,7 +1063,7 @@ AnyJsObjectBindingPatternMember =
 	JsObjectBindingPatternProperty
 	| JsObjectBindingPatternRest
 	| JsObjectBindingPatternShorthandProperty
-	| JsGritMetavariable
+	| JsMetavariable
 	| JsBogusBinding
 
 // let { a: b.m } = {}
@@ -1501,7 +1501,7 @@ JsExportNamedFromClause =
 
 AnyJsModuleSource =
 	JsModuleSource
-	| JsGritMetavariable
+	| JsMetavariable
 
 JsExportNamedFromSpecifierList = (JsExportNamedFromSpecifier (',' JsExportNamedFromSpecifier)* ','?)
 
@@ -1714,7 +1714,7 @@ AnyTsType =
 	| TsConstructorType
 	| TsConditionalType
 	| TsBogusType
-	| JsGritMetavariable
+	| JsMetavariable
 
 // Predefined types
 TsAnyType = 'any'
@@ -1749,7 +1749,7 @@ TsTypeAliasDeclaration =
 
 AnyTsIdentifierBinding = 
 	TsIdentifierBinding
-	| JsGritMetavariable
+	| JsMetavariable
 
 // Binds a type identifier
 TsIdentifierBinding = name: 'ident'
@@ -2407,4 +2407,4 @@ JsxText = value: 'jsx_text_literal'
 JsxString = value: 'jsx_string_literal'
 
 // https://github.com/getgrit/gritql/blob/main/resources/language-metavariables/tree-sitter-typescript/common/define-grammar.js
-JsGritMetavariable = value: 'grit_metavariable'
+JsMetavariable = value: 'grit_metavariable'

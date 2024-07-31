@@ -323,10 +323,8 @@ impl<'src> CssLexer<'src> {
                 self.advance(1);
                 self.consume_byte(T!["$="])
             }
-            UNI if self.options.is_grit_metavariable_enabled()
-                && self.is_grit_metavariable_start() =>
-            {
-                self.consume_grit_metavariable(GRIT_METAVARIABLE)
+            UNI if self.options.is_metavariable_enabled() && self.is_metavariable_start() => {
+                self.consume_metavariable(GRIT_METAVARIABLE)
             }
             IDT | UNI | BSL if self.is_ident_start() => self.consume_identifier(),
 

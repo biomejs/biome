@@ -230,9 +230,9 @@ pub(crate) fn should_hug_function_parameters(
                             // always true for `[a]` or `{a}`
                             AnyJsBindingPattern::JsArrayBindingPattern(_)
                             | AnyJsBindingPattern::JsObjectBindingPattern(_)
-                            | AnyJsBindingPattern::AnyJsBinding(
-                                AnyJsBinding::JsGritMetavariable(_),
-                            ) => true,
+                            | AnyJsBindingPattern::AnyJsBinding(AnyJsBinding::JsMetavariable(_)) => {
+                                true
+                            }
                             // if the type parameter is an object type
                             // `a: { prop: string }`
                             // or parameter is an arrow function parameter

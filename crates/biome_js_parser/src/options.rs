@@ -16,7 +16,7 @@ pub struct JsParserOptions {
 
 impl JsParserOptions {
     /// Enables parsing of Grit metavariables.
-    pub fn with_grit_metavariables(mut self) -> Self {
+    pub fn with_metavariables(mut self) -> Self {
         self.grit_metavariables = true;
         self
     }
@@ -26,7 +26,7 @@ impl JsParserOptions {
         self
     }
 
-    pub fn should_parse_grit_metavariables(&self) -> bool {
+    pub fn should_parse_metavariables(&self) -> bool {
         self.grit_metavariables
     }
 

@@ -14,11 +14,11 @@ use crate::{
     JsBigintLiteralExpression, JsBinaryExpression, JsBinaryOperator, JsBooleanLiteralExpression,
     JsCallExpression, JsClassExpression, JsComputedMemberAssignment, JsComputedMemberExpression,
     JsComputedMemberName, JsConditionalExpression, JsExpressionStatement, JsForStatement,
-    JsFunctionExpression, JsGritMetavariable, JsIdentifierExpression, JsImportCallExpression,
-    JsImportMetaExpression, JsInExpression, JsInstanceofExpression, JsLogicalExpression,
-    JsNewExpression, JsNewTargetExpression, JsNullLiteralExpression, JsNumberLiteralExpression,
-    JsObjectExpression, JsParenthesizedExpression, JsPostUpdateExpression, JsPreUpdateExpression,
-    JsPreUpdateOperator, JsRegexLiteralExpression, JsSequenceExpression, JsStaticMemberExpression,
+    JsFunctionExpression, JsIdentifierExpression, JsImportCallExpression, JsImportMetaExpression,
+    JsInExpression, JsInstanceofExpression, JsLogicalExpression, JsMetavariable, JsNewExpression,
+    JsNewTargetExpression, JsNullLiteralExpression, JsNumberLiteralExpression, JsObjectExpression,
+    JsParenthesizedExpression, JsPostUpdateExpression, JsPreUpdateExpression, JsPreUpdateOperator,
+    JsRegexLiteralExpression, JsSequenceExpression, JsStaticMemberExpression,
     JsStringLiteralExpression, JsSuperExpression, JsSyntaxKind, JsSyntaxNode, JsTemplateExpression,
     JsThisExpression, JsUnaryExpression, JsUnaryOperator, JsYieldExpression, JsxTagExpression,
     TsAsExpression, TsInstantiationExpression, TsNonNullAssertionExpression, TsSatisfiesExpression,
@@ -43,7 +43,7 @@ impl NeedsParentheses for AnyJsExpression {
             Self::JsComputedMemberExpression(expr) => expr.needs_parentheses(),
             Self::JsConditionalExpression(expr) => expr.needs_parentheses(),
             Self::JsFunctionExpression(expr) => expr.needs_parentheses(),
-            Self::JsGritMetavariable(expr) => expr.needs_parentheses(),
+            Self::JsMetavariable(expr) => expr.needs_parentheses(),
             Self::JsIdentifierExpression(expr) => expr.needs_parentheses(),
             Self::JsImportCallExpression(expr) => expr.needs_parentheses(),
             Self::JsInExpression(expr) => expr.needs_parentheses(),
@@ -326,7 +326,7 @@ impl NeedsParentheses for JsFunctionExpression {
     }
 }
 
-impl NeedsParentheses for JsGritMetavariable {
+impl NeedsParentheses for JsMetavariable {
     fn needs_parentheses(&self) -> bool {
         false
     }

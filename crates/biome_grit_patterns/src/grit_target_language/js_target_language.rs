@@ -124,7 +124,7 @@ impl GritTargetLanguageImpl for JsTargetLanguage {
     }
 
     fn metavariable_kind() -> Self::Kind {
-        JsSyntaxKind::JS_GRIT_METAVARIABLE
+        JsSyntaxKind::JS_METAVARIABLE
     }
 
     fn is_alternative_metavariable_kind(kind: GritTargetSyntaxKind) -> bool {

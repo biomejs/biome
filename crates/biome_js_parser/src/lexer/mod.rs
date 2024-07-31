@@ -1910,10 +1910,8 @@ impl<'src> JsLexer<'src> {
                     }
                 }
 
-                if self.options.should_parse_grit_metavariables()
-                    && self.is_grit_metavariable_start()
-                {
-                    return self.consume_grit_metavariable(GRIT_METAVARIABLE);
+                if self.options.should_parse_metavariables() && self.is_metavariable_start() {
+                    return self.consume_metavariable(GRIT_METAVARIABLE);
                 }
 
                 let chr = self.current_char_unchecked();

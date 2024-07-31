@@ -72,7 +72,7 @@ impl AnyJsImportClause {
 
         source.and_then(|source| match source {
             AnyJsModuleSource::JsModuleSource(source) => Ok(source),
-            AnyJsModuleSource::JsGritMetavariable(_) => Err(SyntaxError::UnexpectedMetavariable),
+            AnyJsModuleSource::JsMetavariable(_) => Err(SyntaxError::UnexpectedMetavariable),
         })
     }
 

@@ -71,7 +71,7 @@ impl JsSyntaxKind {
     pub fn is_metavariable(&self) -> bool {
         matches!(
             self,
-            JsSyntaxKind::GRIT_METAVARIABLE | JsSyntaxKind::JS_GRIT_METAVARIABLE
+            JsSyntaxKind::GRIT_METAVARIABLE | JsSyntaxKind::JS_METAVARIABLE
         )
     }
 

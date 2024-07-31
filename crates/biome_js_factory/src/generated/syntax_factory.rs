@@ -2655,25 +2655,6 @@ impl SyntaxFactory for JsSyntaxFactory {
                 }
                 slots.into_node(JS_GETTER_OBJECT_MEMBER, children)
             }
-            JS_GRIT_METAVARIABLE => {
-                let mut elements = (&children).into_iter();
-                let mut slots: RawNodeSlots<1usize> = RawNodeSlots::default();
-                let mut current_element = elements.next();
-                if let Some(element) = &current_element {
-                    if element.kind() == GRIT_METAVARIABLE {
-                        slots.mark_present();
-                        current_element = elements.next();
-                    }
-                }
-                slots.next_slot();
-                if current_element.is_some() {
-                    return RawSyntaxNode::new(
-                        JS_GRIT_METAVARIABLE.to_bogus(),
-                        children.into_iter().map(Some),
-                    );
-                }
-                slots.into_node(JS_GRIT_METAVARIABLE, children)
-            }
             JS_IDENTIFIER_ASSIGNMENT => {
                 let mut elements = (&children).into_iter();
                 let mut slots: RawNodeSlots<1usize> = RawNodeSlots::default();
@@ -3385,6 +3366,25 @@ impl SyntaxFactory for JsSyntaxFactory {
                     );
                 }
                 slots.into_node(JS_LOGICAL_EXPRESSION, children)
+            }
+            JS_METAVARIABLE => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<1usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element {
+                    if element.kind() == GRIT_METAVARIABLE {
+                        slots.mark_present();
+                        current_element = elements.next();
+                    }
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        JS_METAVARIABLE.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(JS_METAVARIABLE, children)
             }
             JS_METHOD_CLASS_MEMBER => {
                 let mut elements = (&children).into_iter();

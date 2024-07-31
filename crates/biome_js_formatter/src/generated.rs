@@ -2393,46 +2393,6 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::JsGetterObjectMember {
         )
     }
 }
-impl FormatRule<biome_js_syntax::JsGritMetavariable>
-    for crate::js::auxiliary::grit_metavariable::FormatJsGritMetavariable
-{
-    type Context = JsFormatContext;
-    #[inline(always)]
-    fn fmt(
-        &self,
-        node: &biome_js_syntax::JsGritMetavariable,
-        f: &mut JsFormatter,
-    ) -> FormatResult<()> {
-        FormatNodeRule::<biome_js_syntax::JsGritMetavariable>::fmt(self, node, f)
-    }
-}
-impl AsFormat<JsFormatContext> for biome_js_syntax::JsGritMetavariable {
-    type Format<'a> = FormatRefWithRule<
-        'a,
-        biome_js_syntax::JsGritMetavariable,
-        crate::js::auxiliary::grit_metavariable::FormatJsGritMetavariable,
-    >;
-    fn format(&self) -> Self::Format<'_> {
-        #![allow(clippy::default_constructed_unit_structs)]
-        FormatRefWithRule::new(
-            self,
-            crate::js::auxiliary::grit_metavariable::FormatJsGritMetavariable::default(),
-        )
-    }
-}
-impl IntoFormat<JsFormatContext> for biome_js_syntax::JsGritMetavariable {
-    type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsGritMetavariable,
-        crate::js::auxiliary::grit_metavariable::FormatJsGritMetavariable,
-    >;
-    fn into_format(self) -> Self::Format {
-        #![allow(clippy::default_constructed_unit_structs)]
-        FormatOwnedWithRule::new(
-            self,
-            crate::js::auxiliary::grit_metavariable::FormatJsGritMetavariable::default(),
-        )
-    }
-}
 impl FormatRule<biome_js_syntax::JsIdentifierAssignment>
     for crate::js::assignments::identifier_assignment::FormatJsIdentifierAssignment
 {
@@ -3268,6 +3228,42 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::JsLogicalExpression {
         FormatOwnedWithRule::new(
             self,
             crate::js::expressions::logical_expression::FormatJsLogicalExpression::default(),
+        )
+    }
+}
+impl FormatRule<biome_js_syntax::JsMetavariable>
+    for crate::js::auxiliary::metavariable::FormatJsMetavariable
+{
+    type Context = JsFormatContext;
+    #[inline(always)]
+    fn fmt(&self, node: &biome_js_syntax::JsMetavariable, f: &mut JsFormatter) -> FormatResult<()> {
+        FormatNodeRule::<biome_js_syntax::JsMetavariable>::fmt(self, node, f)
+    }
+}
+impl AsFormat<JsFormatContext> for biome_js_syntax::JsMetavariable {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_js_syntax::JsMetavariable,
+        crate::js::auxiliary::metavariable::FormatJsMetavariable,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        #![allow(clippy::default_constructed_unit_structs)]
+        FormatRefWithRule::new(
+            self,
+            crate::js::auxiliary::metavariable::FormatJsMetavariable::default(),
+        )
+    }
+}
+impl IntoFormat<JsFormatContext> for biome_js_syntax::JsMetavariable {
+    type Format = FormatOwnedWithRule<
+        biome_js_syntax::JsMetavariable,
+        crate::js::auxiliary::metavariable::FormatJsMetavariable,
+    >;
+    fn into_format(self) -> Self::Format {
+        #![allow(clippy::default_constructed_unit_structs)]
+        FormatOwnedWithRule::new(
+            self,
+            crate::js::auxiliary::metavariable::FormatJsMetavariable::default(),
         )
     }
 }

@@ -3354,42 +3354,6 @@ pub struct JsGetterObjectMemberFields {
     pub body: SyntaxResult<JsFunctionBody>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
-pub struct JsGritMetavariable {
-    pub(crate) syntax: SyntaxNode,
-}
-impl JsGritMetavariable {
-    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
-    #[doc = r""]
-    #[doc = r" # Safety"]
-    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
-    #[doc = r" or a match on [SyntaxNode::kind]"]
-    #[inline]
-    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
-        Self { syntax }
-    }
-    pub fn as_fields(&self) -> JsGritMetavariableFields {
-        JsGritMetavariableFields {
-            value_token: self.value_token(),
-        }
-    }
-    pub fn value_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 0usize)
-    }
-}
-#[cfg(feature = "serde")]
-impl Serialize for JsGritMetavariable {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        self.as_fields().serialize(serializer)
-    }
-}
-#[cfg_attr(feature = "serde", derive(Serialize))]
-pub struct JsGritMetavariableFields {
-    pub value_token: SyntaxResult<SyntaxToken>,
-}
-#[derive(Clone, PartialEq, Eq, Hash)]
 pub struct JsIdentifierAssignment {
     pub(crate) syntax: SyntaxNode,
 }
@@ -4388,6 +4352,42 @@ pub struct JsLogicalExpressionFields {
     pub left: SyntaxResult<AnyJsExpression>,
     pub operator_token: SyntaxResult<SyntaxToken>,
     pub right: SyntaxResult<AnyJsExpression>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct JsMetavariable {
+    pub(crate) syntax: SyntaxNode,
+}
+impl JsMetavariable {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> JsMetavariableFields {
+        JsMetavariableFields {
+            value_token: self.value_token(),
+        }
+    }
+    pub fn value_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+}
+#[cfg(feature = "serde")]
+impl Serialize for JsMetavariable {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[cfg_attr(feature = "serde", derive(Serialize))]
+pub struct JsMetavariableFields {
+    pub value_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct JsMethodClassMember {
@@ -13682,8 +13682,8 @@ impl AnyJsAssignmentPattern {
 #[cfg_attr(feature = "serde", derive(Serialize))]
 pub enum AnyJsBinding {
     JsBogusBinding(JsBogusBinding),
-    JsGritMetavariable(JsGritMetavariable),
     JsIdentifierBinding(JsIdentifierBinding),
+    JsMetavariable(JsMetavariable),
 }
 impl AnyJsBinding {
     pub fn as_js_bogus_binding(&self) -> Option<&JsBogusBinding> {
@@ -13692,15 +13692,15 @@ impl AnyJsBinding {
             _ => None,
         }
     }
-    pub fn as_js_grit_metavariable(&self) -> Option<&JsGritMetavariable> {
-        match &self {
-            AnyJsBinding::JsGritMetavariable(item) => Some(item),
-            _ => None,
-        }
-    }
     pub fn as_js_identifier_binding(&self) -> Option<&JsIdentifierBinding> {
         match &self {
             AnyJsBinding::JsIdentifierBinding(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_js_metavariable(&self) -> Option<&JsMetavariable> {
+        match &self {
+            AnyJsBinding::JsMetavariable(item) => Some(item),
             _ => None,
         }
     }
@@ -13788,7 +13788,7 @@ pub enum AnyJsClassMember {
     JsConstructorClassMember(JsConstructorClassMember),
     JsEmptyClassMember(JsEmptyClassMember),
     JsGetterClassMember(JsGetterClassMember),
-    JsGritMetavariable(JsGritMetavariable),
+    JsMetavariable(JsMetavariable),
     JsMethodClassMember(JsMethodClassMember),
     JsPropertyClassMember(JsPropertyClassMember),
     JsSetterClassMember(JsSetterClassMember),
@@ -13826,9 +13826,9 @@ impl AnyJsClassMember {
             _ => None,
         }
     }
-    pub fn as_js_grit_metavariable(&self) -> Option<&JsGritMetavariable> {
+    pub fn as_js_metavariable(&self) -> Option<&JsMetavariable> {
         match &self {
-            AnyJsClassMember::JsGritMetavariable(item) => Some(item),
+            AnyJsClassMember::JsMetavariable(item) => Some(item),
             _ => None,
         }
     }
@@ -13909,8 +13909,8 @@ impl AnyJsClassMember {
 #[cfg_attr(feature = "serde", derive(Serialize))]
 pub enum AnyJsClassMemberName {
     JsComputedMemberName(JsComputedMemberName),
-    JsGritMetavariable(JsGritMetavariable),
     JsLiteralMemberName(JsLiteralMemberName),
+    JsMetavariable(JsMetavariable),
     JsPrivateClassMemberName(JsPrivateClassMemberName),
 }
 impl AnyJsClassMemberName {
@@ -13920,15 +13920,15 @@ impl AnyJsClassMemberName {
             _ => None,
         }
     }
-    pub fn as_js_grit_metavariable(&self) -> Option<&JsGritMetavariable> {
-        match &self {
-            AnyJsClassMemberName::JsGritMetavariable(item) => Some(item),
-            _ => None,
-        }
-    }
     pub fn as_js_literal_member_name(&self) -> Option<&JsLiteralMemberName> {
         match &self {
             AnyJsClassMemberName::JsLiteralMemberName(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_js_metavariable(&self) -> Option<&JsMetavariable> {
+        match &self {
+            AnyJsClassMemberName::JsMetavariable(item) => Some(item),
             _ => None,
         }
     }
@@ -14345,13 +14345,13 @@ pub enum AnyJsExpression {
     JsComputedMemberExpression(JsComputedMemberExpression),
     JsConditionalExpression(JsConditionalExpression),
     JsFunctionExpression(JsFunctionExpression),
-    JsGritMetavariable(JsGritMetavariable),
     JsIdentifierExpression(JsIdentifierExpression),
     JsImportCallExpression(JsImportCallExpression),
     JsImportMetaExpression(JsImportMetaExpression),
     JsInExpression(JsInExpression),
     JsInstanceofExpression(JsInstanceofExpression),
     JsLogicalExpression(JsLogicalExpression),
+    JsMetavariable(JsMetavariable),
     JsNewExpression(JsNewExpression),
     JsNewTargetExpression(JsNewTargetExpression),
     JsObjectExpression(JsObjectExpression),
@@ -14445,12 +14445,6 @@ impl AnyJsExpression {
             _ => None,
         }
     }
-    pub fn as_js_grit_metavariable(&self) -> Option<&JsGritMetavariable> {
-        match &self {
-            AnyJsExpression::JsGritMetavariable(item) => Some(item),
-            _ => None,
-        }
-    }
     pub fn as_js_identifier_expression(&self) -> Option<&JsIdentifierExpression> {
         match &self {
             AnyJsExpression::JsIdentifierExpression(item) => Some(item),
@@ -14484,6 +14478,12 @@ impl AnyJsExpression {
     pub fn as_js_logical_expression(&self) -> Option<&JsLogicalExpression> {
         match &self {
             AnyJsExpression::JsLogicalExpression(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_js_metavariable(&self) -> Option<&JsMetavariable> {
+        match &self {
+            AnyJsExpression::JsMetavariable(item) => Some(item),
             _ => None,
         }
     }
@@ -14911,13 +14911,13 @@ impl AnyJsModuleItem {
 #[derive(Clone, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "serde", derive(Serialize))]
 pub enum AnyJsModuleSource {
-    JsGritMetavariable(JsGritMetavariable),
+    JsMetavariable(JsMetavariable),
     JsModuleSource(JsModuleSource),
 }
 impl AnyJsModuleSource {
-    pub fn as_js_grit_metavariable(&self) -> Option<&JsGritMetavariable> {
+    pub fn as_js_metavariable(&self) -> Option<&JsMetavariable> {
         match &self {
-            AnyJsModuleSource::JsGritMetavariable(item) => Some(item),
+            AnyJsModuleSource::JsMetavariable(item) => Some(item),
             _ => None,
         }
     }
@@ -15023,7 +15023,7 @@ impl AnyJsObjectAssignmentPatternMember {
 #[cfg_attr(feature = "serde", derive(Serialize))]
 pub enum AnyJsObjectBindingPatternMember {
     JsBogusBinding(JsBogusBinding),
-    JsGritMetavariable(JsGritMetavariable),
+    JsMetavariable(JsMetavariable),
     JsObjectBindingPatternProperty(JsObjectBindingPatternProperty),
     JsObjectBindingPatternRest(JsObjectBindingPatternRest),
     JsObjectBindingPatternShorthandProperty(JsObjectBindingPatternShorthandProperty),
@@ -15035,9 +15035,9 @@ impl AnyJsObjectBindingPatternMember {
             _ => None,
         }
     }
-    pub fn as_js_grit_metavariable(&self) -> Option<&JsGritMetavariable> {
+    pub fn as_js_metavariable(&self) -> Option<&JsMetavariable> {
         match &self {
-            AnyJsObjectBindingPatternMember::JsGritMetavariable(item) => Some(item),
+            AnyJsObjectBindingPatternMember::JsMetavariable(item) => Some(item),
             _ => None,
         }
     }
@@ -15125,8 +15125,8 @@ impl AnyJsObjectMember {
 #[cfg_attr(feature = "serde", derive(Serialize))]
 pub enum AnyJsObjectMemberName {
     JsComputedMemberName(JsComputedMemberName),
-    JsGritMetavariable(JsGritMetavariable),
     JsLiteralMemberName(JsLiteralMemberName),
+    JsMetavariable(JsMetavariable),
 }
 impl AnyJsObjectMemberName {
     pub fn as_js_computed_member_name(&self) -> Option<&JsComputedMemberName> {
@@ -15135,15 +15135,15 @@ impl AnyJsObjectMemberName {
             _ => None,
         }
     }
-    pub fn as_js_grit_metavariable(&self) -> Option<&JsGritMetavariable> {
-        match &self {
-            AnyJsObjectMemberName::JsGritMetavariable(item) => Some(item),
-            _ => None,
-        }
-    }
     pub fn as_js_literal_member_name(&self) -> Option<&JsLiteralMemberName> {
         match &self {
             AnyJsObjectMemberName::JsLiteralMemberName(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_js_metavariable(&self) -> Option<&JsMetavariable> {
+        match &self {
+            AnyJsObjectMemberName::JsMetavariable(item) => Some(item),
             _ => None,
         }
     }
@@ -15790,13 +15790,13 @@ impl AnyTsExternalModuleDeclarationBody {
 #[derive(Clone, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "serde", derive(Serialize))]
 pub enum AnyTsIdentifierBinding {
-    JsGritMetavariable(JsGritMetavariable),
+    JsMetavariable(JsMetavariable),
     TsIdentifierBinding(TsIdentifierBinding),
 }
 impl AnyTsIdentifierBinding {
-    pub fn as_js_grit_metavariable(&self) -> Option<&JsGritMetavariable> {
+    pub fn as_js_metavariable(&self) -> Option<&JsMetavariable> {
         match &self {
-            AnyTsIdentifierBinding::JsGritMetavariable(item) => Some(item),
+            AnyTsIdentifierBinding::JsMetavariable(item) => Some(item),
             _ => None,
         }
     }
@@ -16148,7 +16148,7 @@ impl AnyTsTupleTypeElement {
 #[derive(Clone, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "serde", derive(Serialize))]
 pub enum AnyTsType {
-    JsGritMetavariable(JsGritMetavariable),
+    JsMetavariable(JsMetavariable),
     TsAnyType(TsAnyType),
     TsArrayType(TsArrayType),
     TsBigintLiteralType(TsBigintLiteralType),
@@ -16186,9 +16186,9 @@ pub enum AnyTsType {
     TsVoidType(TsVoidType),
 }
 impl AnyTsType {
-    pub fn as_js_grit_metavariable(&self) -> Option<&JsGritMetavariable> {
+    pub fn as_js_metavariable(&self) -> Option<&JsMetavariable> {
         match &self {
-            AnyTsType::JsGritMetavariable(item) => Some(item),
+            AnyTsType::JsMetavariable(item) => Some(item),
             _ => None,
         }
     }
@@ -19675,47 +19675,6 @@ impl From<JsGetterObjectMember> for SyntaxElement {
         n.syntax.into()
     }
 }
-impl AstNode for JsGritMetavariable {
-    type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> =
-        SyntaxKindSet::from_raw(RawSyntaxKind(JS_GRIT_METAVARIABLE as u16));
-    fn can_cast(kind: SyntaxKind) -> bool {
-        kind == JS_GRIT_METAVARIABLE
-    }
-    fn cast(syntax: SyntaxNode) -> Option<Self> {
-        if Self::can_cast(syntax.kind()) {
-            Some(Self { syntax })
-        } else {
-            None
-        }
-    }
-    fn syntax(&self) -> &SyntaxNode {
-        &self.syntax
-    }
-    fn into_syntax(self) -> SyntaxNode {
-        self.syntax
-    }
-}
-impl std::fmt::Debug for JsGritMetavariable {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("JsGritMetavariable")
-            .field(
-                "value_token",
-                &support::DebugSyntaxResult(self.value_token()),
-            )
-            .finish()
-    }
-}
-impl From<JsGritMetavariable> for SyntaxNode {
-    fn from(n: JsGritMetavariable) -> SyntaxNode {
-        n.syntax
-    }
-}
-impl From<JsGritMetavariable> for SyntaxElement {
-    fn from(n: JsGritMetavariable) -> SyntaxElement {
-        n.syntax.into()
-    }
-}
 impl AstNode for JsIdentifierAssignment {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -20681,6 +20640,47 @@ impl From<JsLogicalExpression> for SyntaxNode {
 }
 impl From<JsLogicalExpression> for SyntaxElement {
     fn from(n: JsLogicalExpression) -> SyntaxElement {
+        n.syntax.into()
+    }
+}
+impl AstNode for JsMetavariable {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(JS_METAVARIABLE as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == JS_METAVARIABLE
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for JsMetavariable {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("JsMetavariable")
+            .field(
+                "value_token",
+                &support::DebugSyntaxResult(self.value_token()),
+            )
+            .finish()
+    }
+}
+impl From<JsMetavariable> for SyntaxNode {
+    fn from(n: JsMetavariable) -> SyntaxNode {
+        n.syntax
+    }
+}
+impl From<JsMetavariable> for SyntaxElement {
+    fn from(n: JsMetavariable) -> SyntaxElement {
         n.syntax.into()
     }
 }
@@ -30187,34 +30187,34 @@ impl From<JsBogusBinding> for AnyJsBinding {
         AnyJsBinding::JsBogusBinding(node)
     }
 }
-impl From<JsGritMetavariable> for AnyJsBinding {
-    fn from(node: JsGritMetavariable) -> AnyJsBinding {
-        AnyJsBinding::JsGritMetavariable(node)
-    }
-}
 impl From<JsIdentifierBinding> for AnyJsBinding {
     fn from(node: JsIdentifierBinding) -> AnyJsBinding {
         AnyJsBinding::JsIdentifierBinding(node)
     }
 }
+impl From<JsMetavariable> for AnyJsBinding {
+    fn from(node: JsMetavariable) -> AnyJsBinding {
+        AnyJsBinding::JsMetavariable(node)
+    }
+}
 impl AstNode for AnyJsBinding {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> = JsBogusBinding::KIND_SET
-        .union(JsGritMetavariable::KIND_SET)
-        .union(JsIdentifierBinding::KIND_SET);
+        .union(JsIdentifierBinding::KIND_SET)
+        .union(JsMetavariable::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
         matches!(
             kind,
-            JS_BOGUS_BINDING | JS_GRIT_METAVARIABLE | JS_IDENTIFIER_BINDING
+            JS_BOGUS_BINDING | JS_IDENTIFIER_BINDING | JS_METAVARIABLE
         )
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
             JS_BOGUS_BINDING => AnyJsBinding::JsBogusBinding(JsBogusBinding { syntax }),
-            JS_GRIT_METAVARIABLE => AnyJsBinding::JsGritMetavariable(JsGritMetavariable { syntax }),
             JS_IDENTIFIER_BINDING => {
                 AnyJsBinding::JsIdentifierBinding(JsIdentifierBinding { syntax })
             }
+            JS_METAVARIABLE => AnyJsBinding::JsMetavariable(JsMetavariable { syntax }),
             _ => return None,
         };
         Some(res)
@@ -30222,15 +30222,15 @@ impl AstNode for AnyJsBinding {
     fn syntax(&self) -> &SyntaxNode {
         match self {
             AnyJsBinding::JsBogusBinding(it) => &it.syntax,
-            AnyJsBinding::JsGritMetavariable(it) => &it.syntax,
             AnyJsBinding::JsIdentifierBinding(it) => &it.syntax,
+            AnyJsBinding::JsMetavariable(it) => &it.syntax,
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
             AnyJsBinding::JsBogusBinding(it) => it.syntax,
-            AnyJsBinding::JsGritMetavariable(it) => it.syntax,
             AnyJsBinding::JsIdentifierBinding(it) => it.syntax,
+            AnyJsBinding::JsMetavariable(it) => it.syntax,
         }
     }
 }
@@ -30238,8 +30238,8 @@ impl std::fmt::Debug for AnyJsBinding {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             AnyJsBinding::JsBogusBinding(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsBinding::JsGritMetavariable(it) => std::fmt::Debug::fmt(it, f),
             AnyJsBinding::JsIdentifierBinding(it) => std::fmt::Debug::fmt(it, f),
+            AnyJsBinding::JsMetavariable(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
@@ -30247,8 +30247,8 @@ impl From<AnyJsBinding> for SyntaxNode {
     fn from(n: AnyJsBinding) -> SyntaxNode {
         match n {
             AnyJsBinding::JsBogusBinding(it) => it.into(),
-            AnyJsBinding::JsGritMetavariable(it) => it.into(),
             AnyJsBinding::JsIdentifierBinding(it) => it.into(),
+            AnyJsBinding::JsMetavariable(it) => it.into(),
         }
     }
 }
@@ -30496,9 +30496,9 @@ impl From<JsGetterClassMember> for AnyJsClassMember {
         AnyJsClassMember::JsGetterClassMember(node)
     }
 }
-impl From<JsGritMetavariable> for AnyJsClassMember {
-    fn from(node: JsGritMetavariable) -> AnyJsClassMember {
-        AnyJsClassMember::JsGritMetavariable(node)
+impl From<JsMetavariable> for AnyJsClassMember {
+    fn from(node: JsMetavariable) -> AnyJsClassMember {
+        AnyJsClassMember::JsMetavariable(node)
     }
 }
 impl From<JsMethodClassMember> for AnyJsClassMember {
@@ -30562,7 +30562,7 @@ impl AstNode for AnyJsClassMember {
         .union(JsConstructorClassMember::KIND_SET)
         .union(JsEmptyClassMember::KIND_SET)
         .union(JsGetterClassMember::KIND_SET)
-        .union(JsGritMetavariable::KIND_SET)
+        .union(JsMetavariable::KIND_SET)
         .union(JsMethodClassMember::KIND_SET)
         .union(JsPropertyClassMember::KIND_SET)
         .union(JsSetterClassMember::KIND_SET)
@@ -30581,7 +30581,7 @@ impl AstNode for AnyJsClassMember {
                 | JS_CONSTRUCTOR_CLASS_MEMBER
                 | JS_EMPTY_CLASS_MEMBER
                 | JS_GETTER_CLASS_MEMBER
-                | JS_GRIT_METAVARIABLE
+                | JS_METAVARIABLE
                 | JS_METHOD_CLASS_MEMBER
                 | JS_PROPERTY_CLASS_MEMBER
                 | JS_SETTER_CLASS_MEMBER
@@ -30607,9 +30607,7 @@ impl AstNode for AnyJsClassMember {
             JS_GETTER_CLASS_MEMBER => {
                 AnyJsClassMember::JsGetterClassMember(JsGetterClassMember { syntax })
             }
-            JS_GRIT_METAVARIABLE => {
-                AnyJsClassMember::JsGritMetavariable(JsGritMetavariable { syntax })
-            }
+            JS_METAVARIABLE => AnyJsClassMember::JsMetavariable(JsMetavariable { syntax }),
             JS_METHOD_CLASS_MEMBER => {
                 AnyJsClassMember::JsMethodClassMember(JsMethodClassMember { syntax })
             }
@@ -30669,7 +30667,7 @@ impl AstNode for AnyJsClassMember {
             AnyJsClassMember::JsConstructorClassMember(it) => &it.syntax,
             AnyJsClassMember::JsEmptyClassMember(it) => &it.syntax,
             AnyJsClassMember::JsGetterClassMember(it) => &it.syntax,
-            AnyJsClassMember::JsGritMetavariable(it) => &it.syntax,
+            AnyJsClassMember::JsMetavariable(it) => &it.syntax,
             AnyJsClassMember::JsMethodClassMember(it) => &it.syntax,
             AnyJsClassMember::JsPropertyClassMember(it) => &it.syntax,
             AnyJsClassMember::JsSetterClassMember(it) => &it.syntax,
@@ -30689,7 +30687,7 @@ impl AstNode for AnyJsClassMember {
             AnyJsClassMember::JsConstructorClassMember(it) => it.syntax,
             AnyJsClassMember::JsEmptyClassMember(it) => it.syntax,
             AnyJsClassMember::JsGetterClassMember(it) => it.syntax,
-            AnyJsClassMember::JsGritMetavariable(it) => it.syntax,
+            AnyJsClassMember::JsMetavariable(it) => it.syntax,
             AnyJsClassMember::JsMethodClassMember(it) => it.syntax,
             AnyJsClassMember::JsPropertyClassMember(it) => it.syntax,
             AnyJsClassMember::JsSetterClassMember(it) => it.syntax,
@@ -30711,7 +30709,7 @@ impl std::fmt::Debug for AnyJsClassMember {
             AnyJsClassMember::JsConstructorClassMember(it) => std::fmt::Debug::fmt(it, f),
             AnyJsClassMember::JsEmptyClassMember(it) => std::fmt::Debug::fmt(it, f),
             AnyJsClassMember::JsGetterClassMember(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsClassMember::JsGritMetavariable(it) => std::fmt::Debug::fmt(it, f),
+            AnyJsClassMember::JsMetavariable(it) => std::fmt::Debug::fmt(it, f),
             AnyJsClassMember::JsMethodClassMember(it) => std::fmt::Debug::fmt(it, f),
             AnyJsClassMember::JsPropertyClassMember(it) => std::fmt::Debug::fmt(it, f),
             AnyJsClassMember::JsSetterClassMember(it) => std::fmt::Debug::fmt(it, f),
@@ -30737,7 +30735,7 @@ impl From<AnyJsClassMember> for SyntaxNode {
             AnyJsClassMember::JsConstructorClassMember(it) => it.into(),
             AnyJsClassMember::JsEmptyClassMember(it) => it.into(),
             AnyJsClassMember::JsGetterClassMember(it) => it.into(),
-            AnyJsClassMember::JsGritMetavariable(it) => it.into(),
+            AnyJsClassMember::JsMetavariable(it) => it.into(),
             AnyJsClassMember::JsMethodClassMember(it) => it.into(),
             AnyJsClassMember::JsPropertyClassMember(it) => it.into(),
             AnyJsClassMember::JsSetterClassMember(it) => it.into(),
@@ -30763,14 +30761,14 @@ impl From<JsComputedMemberName> for AnyJsClassMemberName {
         AnyJsClassMemberName::JsComputedMemberName(node)
     }
 }
-impl From<JsGritMetavariable> for AnyJsClassMemberName {
-    fn from(node: JsGritMetavariable) -> AnyJsClassMemberName {
-        AnyJsClassMemberName::JsGritMetavariable(node)
-    }
-}
 impl From<JsLiteralMemberName> for AnyJsClassMemberName {
     fn from(node: JsLiteralMemberName) -> AnyJsClassMemberName {
         AnyJsClassMemberName::JsLiteralMemberName(node)
+    }
+}
+impl From<JsMetavariable> for AnyJsClassMemberName {
+    fn from(node: JsMetavariable) -> AnyJsClassMemberName {
+        AnyJsClassMemberName::JsMetavariable(node)
     }
 }
 impl From<JsPrivateClassMemberName> for AnyJsClassMemberName {
@@ -30781,15 +30779,15 @@ impl From<JsPrivateClassMemberName> for AnyJsClassMemberName {
 impl AstNode for AnyJsClassMemberName {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> = JsComputedMemberName::KIND_SET
-        .union(JsGritMetavariable::KIND_SET)
         .union(JsLiteralMemberName::KIND_SET)
+        .union(JsMetavariable::KIND_SET)
         .union(JsPrivateClassMemberName::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
         matches!(
             kind,
             JS_COMPUTED_MEMBER_NAME
-                | JS_GRIT_METAVARIABLE
                 | JS_LITERAL_MEMBER_NAME
+                | JS_METAVARIABLE
                 | JS_PRIVATE_CLASS_MEMBER_NAME
         )
     }
@@ -30798,12 +30796,10 @@ impl AstNode for AnyJsClassMemberName {
             JS_COMPUTED_MEMBER_NAME => {
                 AnyJsClassMemberName::JsComputedMemberName(JsComputedMemberName { syntax })
             }
-            JS_GRIT_METAVARIABLE => {
-                AnyJsClassMemberName::JsGritMetavariable(JsGritMetavariable { syntax })
-            }
             JS_LITERAL_MEMBER_NAME => {
                 AnyJsClassMemberName::JsLiteralMemberName(JsLiteralMemberName { syntax })
             }
+            JS_METAVARIABLE => AnyJsClassMemberName::JsMetavariable(JsMetavariable { syntax }),
             JS_PRIVATE_CLASS_MEMBER_NAME => {
                 AnyJsClassMemberName::JsPrivateClassMemberName(JsPrivateClassMemberName { syntax })
             }
@@ -30814,16 +30810,16 @@ impl AstNode for AnyJsClassMemberName {
     fn syntax(&self) -> &SyntaxNode {
         match self {
             AnyJsClassMemberName::JsComputedMemberName(it) => &it.syntax,
-            AnyJsClassMemberName::JsGritMetavariable(it) => &it.syntax,
             AnyJsClassMemberName::JsLiteralMemberName(it) => &it.syntax,
+            AnyJsClassMemberName::JsMetavariable(it) => &it.syntax,
             AnyJsClassMemberName::JsPrivateClassMemberName(it) => &it.syntax,
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
             AnyJsClassMemberName::JsComputedMemberName(it) => it.syntax,
-            AnyJsClassMemberName::JsGritMetavariable(it) => it.syntax,
             AnyJsClassMemberName::JsLiteralMemberName(it) => it.syntax,
+            AnyJsClassMemberName::JsMetavariable(it) => it.syntax,
             AnyJsClassMemberName::JsPrivateClassMemberName(it) => it.syntax,
         }
     }
@@ -30832,8 +30828,8 @@ impl std::fmt::Debug for AnyJsClassMemberName {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             AnyJsClassMemberName::JsComputedMemberName(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsClassMemberName::JsGritMetavariable(it) => std::fmt::Debug::fmt(it, f),
             AnyJsClassMemberName::JsLiteralMemberName(it) => std::fmt::Debug::fmt(it, f),
+            AnyJsClassMemberName::JsMetavariable(it) => std::fmt::Debug::fmt(it, f),
             AnyJsClassMemberName::JsPrivateClassMemberName(it) => std::fmt::Debug::fmt(it, f),
         }
     }
@@ -30842,8 +30838,8 @@ impl From<AnyJsClassMemberName> for SyntaxNode {
     fn from(n: AnyJsClassMemberName) -> SyntaxNode {
         match n {
             AnyJsClassMemberName::JsComputedMemberName(it) => it.into(),
-            AnyJsClassMemberName::JsGritMetavariable(it) => it.into(),
             AnyJsClassMemberName::JsLiteralMemberName(it) => it.into(),
+            AnyJsClassMemberName::JsMetavariable(it) => it.into(),
             AnyJsClassMemberName::JsPrivateClassMemberName(it) => it.into(),
         }
     }
@@ -31922,11 +31918,6 @@ impl From<JsFunctionExpression> for AnyJsExpression {
         AnyJsExpression::JsFunctionExpression(node)
     }
 }
-impl From<JsGritMetavariable> for AnyJsExpression {
-    fn from(node: JsGritMetavariable) -> AnyJsExpression {
-        AnyJsExpression::JsGritMetavariable(node)
-    }
-}
 impl From<JsIdentifierExpression> for AnyJsExpression {
     fn from(node: JsIdentifierExpression) -> AnyJsExpression {
         AnyJsExpression::JsIdentifierExpression(node)
@@ -31955,6 +31946,11 @@ impl From<JsInstanceofExpression> for AnyJsExpression {
 impl From<JsLogicalExpression> for AnyJsExpression {
     fn from(node: JsLogicalExpression) -> AnyJsExpression {
         AnyJsExpression::JsLogicalExpression(node)
+    }
+}
+impl From<JsMetavariable> for AnyJsExpression {
+    fn from(node: JsMetavariable) -> AnyJsExpression {
+        AnyJsExpression::JsMetavariable(node)
     }
 }
 impl From<JsNewExpression> for AnyJsExpression {
@@ -32066,13 +32062,13 @@ impl AstNode for AnyJsExpression {
         .union(JsComputedMemberExpression::KIND_SET)
         .union(JsConditionalExpression::KIND_SET)
         .union(JsFunctionExpression::KIND_SET)
-        .union(JsGritMetavariable::KIND_SET)
         .union(JsIdentifierExpression::KIND_SET)
         .union(JsImportCallExpression::KIND_SET)
         .union(JsImportMetaExpression::KIND_SET)
         .union(JsInExpression::KIND_SET)
         .union(JsInstanceofExpression::KIND_SET)
         .union(JsLogicalExpression::KIND_SET)
+        .union(JsMetavariable::KIND_SET)
         .union(JsNewExpression::KIND_SET)
         .union(JsNewTargetExpression::KIND_SET)
         .union(JsObjectExpression::KIND_SET)
@@ -32105,13 +32101,13 @@ impl AstNode for AnyJsExpression {
             | JS_COMPUTED_MEMBER_EXPRESSION
             | JS_CONDITIONAL_EXPRESSION
             | JS_FUNCTION_EXPRESSION
-            | JS_GRIT_METAVARIABLE
             | JS_IDENTIFIER_EXPRESSION
             | JS_IMPORT_CALL_EXPRESSION
             | JS_IMPORT_META_EXPRESSION
             | JS_IN_EXPRESSION
             | JS_INSTANCEOF_EXPRESSION
             | JS_LOGICAL_EXPRESSION
+            | JS_METAVARIABLE
             | JS_NEW_EXPRESSION
             | JS_NEW_TARGET_EXPRESSION
             | JS_OBJECT_EXPRESSION
@@ -32160,9 +32156,6 @@ impl AstNode for AnyJsExpression {
             JS_FUNCTION_EXPRESSION => {
                 AnyJsExpression::JsFunctionExpression(JsFunctionExpression { syntax })
             }
-            JS_GRIT_METAVARIABLE => {
-                AnyJsExpression::JsGritMetavariable(JsGritMetavariable { syntax })
-            }
             JS_IDENTIFIER_EXPRESSION => {
                 AnyJsExpression::JsIdentifierExpression(JsIdentifierExpression { syntax })
             }
@@ -32179,6 +32172,7 @@ impl AstNode for AnyJsExpression {
             JS_LOGICAL_EXPRESSION => {
                 AnyJsExpression::JsLogicalExpression(JsLogicalExpression { syntax })
             }
+            JS_METAVARIABLE => AnyJsExpression::JsMetavariable(JsMetavariable { syntax }),
             JS_NEW_EXPRESSION => AnyJsExpression::JsNewExpression(JsNewExpression { syntax }),
             JS_NEW_TARGET_EXPRESSION => {
                 AnyJsExpression::JsNewTargetExpression(JsNewTargetExpression { syntax })
@@ -32248,13 +32242,13 @@ impl AstNode for AnyJsExpression {
             AnyJsExpression::JsComputedMemberExpression(it) => &it.syntax,
             AnyJsExpression::JsConditionalExpression(it) => &it.syntax,
             AnyJsExpression::JsFunctionExpression(it) => &it.syntax,
-            AnyJsExpression::JsGritMetavariable(it) => &it.syntax,
             AnyJsExpression::JsIdentifierExpression(it) => &it.syntax,
             AnyJsExpression::JsImportCallExpression(it) => &it.syntax,
             AnyJsExpression::JsImportMetaExpression(it) => &it.syntax,
             AnyJsExpression::JsInExpression(it) => &it.syntax,
             AnyJsExpression::JsInstanceofExpression(it) => &it.syntax,
             AnyJsExpression::JsLogicalExpression(it) => &it.syntax,
+            AnyJsExpression::JsMetavariable(it) => &it.syntax,
             AnyJsExpression::JsNewExpression(it) => &it.syntax,
             AnyJsExpression::JsNewTargetExpression(it) => &it.syntax,
             AnyJsExpression::JsObjectExpression(it) => &it.syntax,
@@ -32290,13 +32284,13 @@ impl AstNode for AnyJsExpression {
             AnyJsExpression::JsComputedMemberExpression(it) => it.syntax,
             AnyJsExpression::JsConditionalExpression(it) => it.syntax,
             AnyJsExpression::JsFunctionExpression(it) => it.syntax,
-            AnyJsExpression::JsGritMetavariable(it) => it.syntax,
             AnyJsExpression::JsIdentifierExpression(it) => it.syntax,
             AnyJsExpression::JsImportCallExpression(it) => it.syntax,
             AnyJsExpression::JsImportMetaExpression(it) => it.syntax,
             AnyJsExpression::JsInExpression(it) => it.syntax,
             AnyJsExpression::JsInstanceofExpression(it) => it.syntax,
             AnyJsExpression::JsLogicalExpression(it) => it.syntax,
+            AnyJsExpression::JsMetavariable(it) => it.syntax,
             AnyJsExpression::JsNewExpression(it) => it.syntax,
             AnyJsExpression::JsNewTargetExpression(it) => it.syntax,
             AnyJsExpression::JsObjectExpression(it) => it.syntax,
@@ -32335,13 +32329,13 @@ impl std::fmt::Debug for AnyJsExpression {
             AnyJsExpression::JsComputedMemberExpression(it) => std::fmt::Debug::fmt(it, f),
             AnyJsExpression::JsConditionalExpression(it) => std::fmt::Debug::fmt(it, f),
             AnyJsExpression::JsFunctionExpression(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsExpression::JsGritMetavariable(it) => std::fmt::Debug::fmt(it, f),
             AnyJsExpression::JsIdentifierExpression(it) => std::fmt::Debug::fmt(it, f),
             AnyJsExpression::JsImportCallExpression(it) => std::fmt::Debug::fmt(it, f),
             AnyJsExpression::JsImportMetaExpression(it) => std::fmt::Debug::fmt(it, f),
             AnyJsExpression::JsInExpression(it) => std::fmt::Debug::fmt(it, f),
             AnyJsExpression::JsInstanceofExpression(it) => std::fmt::Debug::fmt(it, f),
             AnyJsExpression::JsLogicalExpression(it) => std::fmt::Debug::fmt(it, f),
+            AnyJsExpression::JsMetavariable(it) => std::fmt::Debug::fmt(it, f),
             AnyJsExpression::JsNewExpression(it) => std::fmt::Debug::fmt(it, f),
             AnyJsExpression::JsNewTargetExpression(it) => std::fmt::Debug::fmt(it, f),
             AnyJsExpression::JsObjectExpression(it) => std::fmt::Debug::fmt(it, f),
@@ -32379,13 +32373,13 @@ impl From<AnyJsExpression> for SyntaxNode {
             AnyJsExpression::JsComputedMemberExpression(it) => it.into(),
             AnyJsExpression::JsConditionalExpression(it) => it.into(),
             AnyJsExpression::JsFunctionExpression(it) => it.into(),
-            AnyJsExpression::JsGritMetavariable(it) => it.into(),
             AnyJsExpression::JsIdentifierExpression(it) => it.into(),
             AnyJsExpression::JsImportCallExpression(it) => it.into(),
             AnyJsExpression::JsImportMetaExpression(it) => it.into(),
             AnyJsExpression::JsInExpression(it) => it.into(),
             AnyJsExpression::JsInstanceofExpression(it) => it.into(),
             AnyJsExpression::JsLogicalExpression(it) => it.into(),
+            AnyJsExpression::JsMetavariable(it) => it.into(),
             AnyJsExpression::JsNewExpression(it) => it.into(),
             AnyJsExpression::JsNewTargetExpression(it) => it.into(),
             AnyJsExpression::JsObjectExpression(it) => it.into(),
@@ -33316,9 +33310,9 @@ impl From<AnyJsModuleItem> for SyntaxElement {
         node.into()
     }
 }
-impl From<JsGritMetavariable> for AnyJsModuleSource {
-    fn from(node: JsGritMetavariable) -> AnyJsModuleSource {
-        AnyJsModuleSource::JsGritMetavariable(node)
+impl From<JsMetavariable> for AnyJsModuleSource {
+    fn from(node: JsMetavariable) -> AnyJsModuleSource {
+        AnyJsModuleSource::JsMetavariable(node)
     }
 }
 impl From<JsModuleSource> for AnyJsModuleSource {
@@ -33329,15 +33323,13 @@ impl From<JsModuleSource> for AnyJsModuleSource {
 impl AstNode for AnyJsModuleSource {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
-        JsGritMetavariable::KIND_SET.union(JsModuleSource::KIND_SET);
+        JsMetavariable::KIND_SET.union(JsModuleSource::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
-        matches!(kind, JS_GRIT_METAVARIABLE | JS_MODULE_SOURCE)
+        matches!(kind, JS_METAVARIABLE | JS_MODULE_SOURCE)
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
-            JS_GRIT_METAVARIABLE => {
-                AnyJsModuleSource::JsGritMetavariable(JsGritMetavariable { syntax })
-            }
+            JS_METAVARIABLE => AnyJsModuleSource::JsMetavariable(JsMetavariable { syntax }),
             JS_MODULE_SOURCE => AnyJsModuleSource::JsModuleSource(JsModuleSource { syntax }),
             _ => return None,
         };
@@ -33345,13 +33337,13 @@ impl AstNode for AnyJsModuleSource {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            AnyJsModuleSource::JsGritMetavariable(it) => &it.syntax,
+            AnyJsModuleSource::JsMetavariable(it) => &it.syntax,
             AnyJsModuleSource::JsModuleSource(it) => &it.syntax,
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            AnyJsModuleSource::JsGritMetavariable(it) => it.syntax,
+            AnyJsModuleSource::JsMetavariable(it) => it.syntax,
             AnyJsModuleSource::JsModuleSource(it) => it.syntax,
         }
     }
@@ -33359,7 +33351,7 @@ impl AstNode for AnyJsModuleSource {
 impl std::fmt::Debug for AnyJsModuleSource {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            AnyJsModuleSource::JsGritMetavariable(it) => std::fmt::Debug::fmt(it, f),
+            AnyJsModuleSource::JsMetavariable(it) => std::fmt::Debug::fmt(it, f),
             AnyJsModuleSource::JsModuleSource(it) => std::fmt::Debug::fmt(it, f),
         }
     }
@@ -33367,7 +33359,7 @@ impl std::fmt::Debug for AnyJsModuleSource {
 impl From<AnyJsModuleSource> for SyntaxNode {
     fn from(n: AnyJsModuleSource) -> SyntaxNode {
         match n {
-            AnyJsModuleSource::JsGritMetavariable(it) => it.into(),
+            AnyJsModuleSource::JsMetavariable(it) => it.into(),
             AnyJsModuleSource::JsModuleSource(it) => it.into(),
         }
     }
@@ -33650,9 +33642,9 @@ impl From<JsBogusBinding> for AnyJsObjectBindingPatternMember {
         AnyJsObjectBindingPatternMember::JsBogusBinding(node)
     }
 }
-impl From<JsGritMetavariable> for AnyJsObjectBindingPatternMember {
-    fn from(node: JsGritMetavariable) -> AnyJsObjectBindingPatternMember {
-        AnyJsObjectBindingPatternMember::JsGritMetavariable(node)
+impl From<JsMetavariable> for AnyJsObjectBindingPatternMember {
+    fn from(node: JsMetavariable) -> AnyJsObjectBindingPatternMember {
+        AnyJsObjectBindingPatternMember::JsMetavariable(node)
     }
 }
 impl From<JsObjectBindingPatternProperty> for AnyJsObjectBindingPatternMember {
@@ -33673,7 +33665,7 @@ impl From<JsObjectBindingPatternShorthandProperty> for AnyJsObjectBindingPattern
 impl AstNode for AnyJsObjectBindingPatternMember {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> = JsBogusBinding::KIND_SET
-        .union(JsGritMetavariable::KIND_SET)
+        .union(JsMetavariable::KIND_SET)
         .union(JsObjectBindingPatternProperty::KIND_SET)
         .union(JsObjectBindingPatternRest::KIND_SET)
         .union(JsObjectBindingPatternShorthandProperty::KIND_SET);
@@ -33681,7 +33673,7 @@ impl AstNode for AnyJsObjectBindingPatternMember {
         matches!(
             kind,
             JS_BOGUS_BINDING
-                | JS_GRIT_METAVARIABLE
+                | JS_METAVARIABLE
                 | JS_OBJECT_BINDING_PATTERN_PROPERTY
                 | JS_OBJECT_BINDING_PATTERN_REST
                 | JS_OBJECT_BINDING_PATTERN_SHORTHAND_PROPERTY
@@ -33692,8 +33684,8 @@ impl AstNode for AnyJsObjectBindingPatternMember {
             JS_BOGUS_BINDING => {
                 AnyJsObjectBindingPatternMember::JsBogusBinding(JsBogusBinding { syntax })
             }
-            JS_GRIT_METAVARIABLE => {
-                AnyJsObjectBindingPatternMember::JsGritMetavariable(JsGritMetavariable { syntax })
+            JS_METAVARIABLE => {
+                AnyJsObjectBindingPatternMember::JsMetavariable(JsMetavariable { syntax })
             }
             JS_OBJECT_BINDING_PATTERN_PROPERTY => {
                 AnyJsObjectBindingPatternMember::JsObjectBindingPatternProperty(
@@ -33717,7 +33709,7 @@ impl AstNode for AnyJsObjectBindingPatternMember {
     fn syntax(&self) -> &SyntaxNode {
         match self {
             AnyJsObjectBindingPatternMember::JsBogusBinding(it) => &it.syntax,
-            AnyJsObjectBindingPatternMember::JsGritMetavariable(it) => &it.syntax,
+            AnyJsObjectBindingPatternMember::JsMetavariable(it) => &it.syntax,
             AnyJsObjectBindingPatternMember::JsObjectBindingPatternProperty(it) => &it.syntax,
             AnyJsObjectBindingPatternMember::JsObjectBindingPatternRest(it) => &it.syntax,
             AnyJsObjectBindingPatternMember::JsObjectBindingPatternShorthandProperty(it) => {
@@ -33728,7 +33720,7 @@ impl AstNode for AnyJsObjectBindingPatternMember {
     fn into_syntax(self) -> SyntaxNode {
         match self {
             AnyJsObjectBindingPatternMember::JsBogusBinding(it) => it.syntax,
-            AnyJsObjectBindingPatternMember::JsGritMetavariable(it) => it.syntax,
+            AnyJsObjectBindingPatternMember::JsMetavariable(it) => it.syntax,
             AnyJsObjectBindingPatternMember::JsObjectBindingPatternProperty(it) => it.syntax,
             AnyJsObjectBindingPatternMember::JsObjectBindingPatternRest(it) => it.syntax,
             AnyJsObjectBindingPatternMember::JsObjectBindingPatternShorthandProperty(it) => {
@@ -33741,7 +33733,7 @@ impl std::fmt::Debug for AnyJsObjectBindingPatternMember {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             AnyJsObjectBindingPatternMember::JsBogusBinding(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsObjectBindingPatternMember::JsGritMetavariable(it) => std::fmt::Debug::fmt(it, f),
+            AnyJsObjectBindingPatternMember::JsMetavariable(it) => std::fmt::Debug::fmt(it, f),
             AnyJsObjectBindingPatternMember::JsObjectBindingPatternProperty(it) => {
                 std::fmt::Debug::fmt(it, f)
             }
@@ -33758,7 +33750,7 @@ impl From<AnyJsObjectBindingPatternMember> for SyntaxNode {
     fn from(n: AnyJsObjectBindingPatternMember) -> SyntaxNode {
         match n {
             AnyJsObjectBindingPatternMember::JsBogusBinding(it) => it.into(),
-            AnyJsObjectBindingPatternMember::JsGritMetavariable(it) => it.into(),
+            AnyJsObjectBindingPatternMember::JsMetavariable(it) => it.into(),
             AnyJsObjectBindingPatternMember::JsObjectBindingPatternProperty(it) => it.into(),
             AnyJsObjectBindingPatternMember::JsObjectBindingPatternRest(it) => it.into(),
             AnyJsObjectBindingPatternMember::JsObjectBindingPatternShorthandProperty(it) => {
@@ -33914,25 +33906,25 @@ impl From<JsComputedMemberName> for AnyJsObjectMemberName {
         AnyJsObjectMemberName::JsComputedMemberName(node)
     }
 }
-impl From<JsGritMetavariable> for AnyJsObjectMemberName {
-    fn from(node: JsGritMetavariable) -> AnyJsObjectMemberName {
-        AnyJsObjectMemberName::JsGritMetavariable(node)
-    }
-}
 impl From<JsLiteralMemberName> for AnyJsObjectMemberName {
     fn from(node: JsLiteralMemberName) -> AnyJsObjectMemberName {
         AnyJsObjectMemberName::JsLiteralMemberName(node)
     }
 }
+impl From<JsMetavariable> for AnyJsObjectMemberName {
+    fn from(node: JsMetavariable) -> AnyJsObjectMemberName {
+        AnyJsObjectMemberName::JsMetavariable(node)
+    }
+}
 impl AstNode for AnyJsObjectMemberName {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> = JsComputedMemberName::KIND_SET
-        .union(JsGritMetavariable::KIND_SET)
-        .union(JsLiteralMemberName::KIND_SET);
+        .union(JsLiteralMemberName::KIND_SET)
+        .union(JsMetavariable::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
         matches!(
             kind,
-            JS_COMPUTED_MEMBER_NAME | JS_GRIT_METAVARIABLE | JS_LITERAL_MEMBER_NAME
+            JS_COMPUTED_MEMBER_NAME | JS_LITERAL_MEMBER_NAME | JS_METAVARIABLE
         )
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
@@ -33940,12 +33932,10 @@ impl AstNode for AnyJsObjectMemberName {
             JS_COMPUTED_MEMBER_NAME => {
                 AnyJsObjectMemberName::JsComputedMemberName(JsComputedMemberName { syntax })
             }
-            JS_GRIT_METAVARIABLE => {
-                AnyJsObjectMemberName::JsGritMetavariable(JsGritMetavariable { syntax })
-            }
             JS_LITERAL_MEMBER_NAME => {
                 AnyJsObjectMemberName::JsLiteralMemberName(JsLiteralMemberName { syntax })
             }
+            JS_METAVARIABLE => AnyJsObjectMemberName::JsMetavariable(JsMetavariable { syntax }),
             _ => return None,
         };
         Some(res)
@@ -33953,15 +33943,15 @@ impl AstNode for AnyJsObjectMemberName {
     fn syntax(&self) -> &SyntaxNode {
         match self {
             AnyJsObjectMemberName::JsComputedMemberName(it) => &it.syntax,
-            AnyJsObjectMemberName::JsGritMetavariable(it) => &it.syntax,
             AnyJsObjectMemberName::JsLiteralMemberName(it) => &it.syntax,
+            AnyJsObjectMemberName::JsMetavariable(it) => &it.syntax,
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
             AnyJsObjectMemberName::JsComputedMemberName(it) => it.syntax,
-            AnyJsObjectMemberName::JsGritMetavariable(it) => it.syntax,
             AnyJsObjectMemberName::JsLiteralMemberName(it) => it.syntax,
+            AnyJsObjectMemberName::JsMetavariable(it) => it.syntax,
         }
     }
 }
@@ -33969,8 +33959,8 @@ impl std::fmt::Debug for AnyJsObjectMemberName {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             AnyJsObjectMemberName::JsComputedMemberName(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsObjectMemberName::JsGritMetavariable(it) => std::fmt::Debug::fmt(it, f),
             AnyJsObjectMemberName::JsLiteralMemberName(it) => std::fmt::Debug::fmt(it, f),
+            AnyJsObjectMemberName::JsMetavariable(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
@@ -33978,8 +33968,8 @@ impl From<AnyJsObjectMemberName> for SyntaxNode {
     fn from(n: AnyJsObjectMemberName) -> SyntaxNode {
         match n {
             AnyJsObjectMemberName::JsComputedMemberName(it) => it.into(),
-            AnyJsObjectMemberName::JsGritMetavariable(it) => it.into(),
             AnyJsObjectMemberName::JsLiteralMemberName(it) => it.into(),
+            AnyJsObjectMemberName::JsMetavariable(it) => it.into(),
         }
     }
 }
@@ -35593,9 +35583,9 @@ impl From<AnyTsExternalModuleDeclarationBody> for SyntaxElement {
         node.into()
     }
 }
-impl From<JsGritMetavariable> for AnyTsIdentifierBinding {
-    fn from(node: JsGritMetavariable) -> AnyTsIdentifierBinding {
-        AnyTsIdentifierBinding::JsGritMetavariable(node)
+impl From<JsMetavariable> for AnyTsIdentifierBinding {
+    fn from(node: JsMetavariable) -> AnyTsIdentifierBinding {
+        AnyTsIdentifierBinding::JsMetavariable(node)
     }
 }
 impl From<TsIdentifierBinding> for AnyTsIdentifierBinding {
@@ -35606,15 +35596,13 @@ impl From<TsIdentifierBinding> for AnyTsIdentifierBinding {
 impl AstNode for AnyTsIdentifierBinding {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
-        JsGritMetavariable::KIND_SET.union(TsIdentifierBinding::KIND_SET);
+        JsMetavariable::KIND_SET.union(TsIdentifierBinding::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
-        matches!(kind, JS_GRIT_METAVARIABLE | TS_IDENTIFIER_BINDING)
+        matches!(kind, JS_METAVARIABLE | TS_IDENTIFIER_BINDING)
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
-            JS_GRIT_METAVARIABLE => {
-                AnyTsIdentifierBinding::JsGritMetavariable(JsGritMetavariable { syntax })
-            }
+            JS_METAVARIABLE => AnyTsIdentifierBinding::JsMetavariable(JsMetavariable { syntax }),
             TS_IDENTIFIER_BINDING => {
                 AnyTsIdentifierBinding::TsIdentifierBinding(TsIdentifierBinding { syntax })
             }
@@ -35624,13 +35612,13 @@ impl AstNode for AnyTsIdentifierBinding {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            AnyTsIdentifierBinding::JsGritMetavariable(it) => &it.syntax,
+            AnyTsIdentifierBinding::JsMetavariable(it) => &it.syntax,
             AnyTsIdentifierBinding::TsIdentifierBinding(it) => &it.syntax,
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            AnyTsIdentifierBinding::JsGritMetavariable(it) => it.syntax,
+            AnyTsIdentifierBinding::JsMetavariable(it) => it.syntax,
             AnyTsIdentifierBinding::TsIdentifierBinding(it) => it.syntax,
         }
     }
@@ -35638,7 +35626,7 @@ impl AstNode for AnyTsIdentifierBinding {
 impl std::fmt::Debug for AnyTsIdentifierBinding {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            AnyTsIdentifierBinding::JsGritMetavariable(it) => std::fmt::Debug::fmt(it, f),
+            AnyTsIdentifierBinding::JsMetavariable(it) => std::fmt::Debug::fmt(it, f),
             AnyTsIdentifierBinding::TsIdentifierBinding(it) => std::fmt::Debug::fmt(it, f),
         }
     }
@@ -35646,7 +35634,7 @@ impl std::fmt::Debug for AnyTsIdentifierBinding {
 impl From<AnyTsIdentifierBinding> for SyntaxNode {
     fn from(n: AnyTsIdentifierBinding) -> SyntaxNode {
         match n {
-            AnyTsIdentifierBinding::JsGritMetavariable(it) => it.into(),
+            AnyTsIdentifierBinding::JsMetavariable(it) => it.into(),
             AnyTsIdentifierBinding::TsIdentifierBinding(it) => it.into(),
         }
     }
@@ -36660,9 +36648,9 @@ impl From<AnyTsTupleTypeElement> for SyntaxElement {
         node.into()
     }
 }
-impl From<JsGritMetavariable> for AnyTsType {
-    fn from(node: JsGritMetavariable) -> AnyTsType {
-        AnyTsType::JsGritMetavariable(node)
+impl From<JsMetavariable> for AnyTsType {
+    fn from(node: JsMetavariable) -> AnyTsType {
+        AnyTsType::JsMetavariable(node)
     }
 }
 impl From<TsAnyType> for AnyTsType {
@@ -36842,7 +36830,7 @@ impl From<TsVoidType> for AnyTsType {
 }
 impl AstNode for AnyTsType {
     type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> = JsGritMetavariable::KIND_SET
+    const KIND_SET: SyntaxKindSet<Language> = JsMetavariable::KIND_SET
         .union(TsAnyType::KIND_SET)
         .union(TsArrayType::KIND_SET)
         .union(TsBigintLiteralType::KIND_SET)
@@ -36881,7 +36869,7 @@ impl AstNode for AnyTsType {
     fn can_cast(kind: SyntaxKind) -> bool {
         matches!(
             kind,
-            JS_GRIT_METAVARIABLE
+            JS_METAVARIABLE
                 | TS_ANY_TYPE
                 | TS_ARRAY_TYPE
                 | TS_BIGINT_LITERAL_TYPE
@@ -36921,7 +36909,7 @@ impl AstNode for AnyTsType {
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
-            JS_GRIT_METAVARIABLE => AnyTsType::JsGritMetavariable(JsGritMetavariable { syntax }),
+            JS_METAVARIABLE => AnyTsType::JsMetavariable(JsMetavariable { syntax }),
             TS_ANY_TYPE => AnyTsType::TsAnyType(TsAnyType { syntax }),
             TS_ARRAY_TYPE => AnyTsType::TsArrayType(TsArrayType { syntax }),
             TS_BIGINT_LITERAL_TYPE => {
@@ -36975,7 +36963,7 @@ impl AstNode for AnyTsType {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            AnyTsType::JsGritMetavariable(it) => &it.syntax,
+            AnyTsType::JsMetavariable(it) => &it.syntax,
             AnyTsType::TsAnyType(it) => &it.syntax,
             AnyTsType::TsArrayType(it) => &it.syntax,
             AnyTsType::TsBigintLiteralType(it) => &it.syntax,
@@ -37015,7 +37003,7 @@ impl AstNode for AnyTsType {
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            AnyTsType::JsGritMetavariable(it) => it.syntax,
+            AnyTsType::JsMetavariable(it) => it.syntax,
             AnyTsType::TsAnyType(it) => it.syntax,
             AnyTsType::TsArrayType(it) => it.syntax,
             AnyTsType::TsBigintLiteralType(it) => it.syntax,
@@ -37057,7 +37045,7 @@ impl AstNode for AnyTsType {
 impl std::fmt::Debug for AnyTsType {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            AnyTsType::JsGritMetavariable(it) => std::fmt::Debug::fmt(it, f),
+            AnyTsType::JsMetavariable(it) => std::fmt::Debug::fmt(it, f),
             AnyTsType::TsAnyType(it) => std::fmt::Debug::fmt(it, f),
             AnyTsType::TsArrayType(it) => std::fmt::Debug::fmt(it, f),
             AnyTsType::TsBigintLiteralType(it) => std::fmt::Debug::fmt(it, f),
@@ -37099,7 +37087,7 @@ impl std::fmt::Debug for AnyTsType {
 impl From<AnyTsType> for SyntaxNode {
     fn from(n: AnyTsType) -> SyntaxNode {
         match n {
-            AnyTsType::JsGritMetavariable(it) => it.into(),
+            AnyTsType::JsMetavariable(it) => it.into(),
             AnyTsType::TsAnyType(it) => it.into(),
             AnyTsType::TsArrayType(it) => it.into(),
             AnyTsType::TsBigintLiteralType(it) => it.into(),
@@ -38200,11 +38188,6 @@ impl std::fmt::Display for JsGetterObjectMember {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
-impl std::fmt::Display for JsGritMetavariable {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        std::fmt::Display::fmt(self.syntax(), f)
-    }
-}
 impl std::fmt::Display for JsIdentifierAssignment {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
@@ -38311,6 +38294,11 @@ impl std::fmt::Display for JsLiteralMemberName {
     }
 }
 impl std::fmt::Display for JsLogicalExpression {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for JsMetavariable {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
