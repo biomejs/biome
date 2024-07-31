@@ -1,6 +1,6 @@
 use std::collections::VecDeque;
 
-use biome_css_syntax::AnyCssSelector;
+use biome_css_syntax::{AnyCssSelector, CssQualifiedRule};
 use biome_rowan::{AstNode, TextRange};
 
 #[derive(Debug)]
@@ -22,11 +22,18 @@ pub enum SemanticEvent {
 #[derive(Default, Debug)]
 pub struct SemanticEventExtractor {
     stash: VecDeque<SemanticEvent>,
+    current_selector_range: Option<TextRange>,
 }
 
 impl SemanticEventExtractor {
     pub fn enter(&mut self, node: &biome_css_syntax::CssSyntaxNode) {
         match node.kind() {
+            biome_css_syntax::CssSyntaxKind::CSS_QUALIFIED_RULE => {
+                if let Some(qualified_rule) = CssQualifiedRule::cast(node.clone()) {
+                    self.current_selector_range =
+                        Some(qualified_rule.prelude().syntax().text_range());
+                }
+            }
             biome_css_syntax::CssSyntaxKind::CSS_SELECTOR_LIST => {
                 for selector in node.children() {
                     if let Some(s) = AnyCssSelector::cast(selector) {
@@ -63,18 +70,19 @@ impl SemanticEventExtractor {
             }
             biome_css_syntax::CssSyntaxKind::CSS_DECLARATION_OR_RULE_LIST => {
                 for block in node.children() {
-                    let ruleset_range = node.parent().unwrap().text_range();
-                    if let Some(decl) = block.first_child() {
-                        if let Some(property) = decl.first_child() {
-                            if let Some(property_name) = property.first_child() {
-                                if let Some(value) = property_name.next_sibling() {
-                                    self.stash.push_back(SemanticEvent::PropertyDeclaration {
-                                        ruleset_range,
-                                        property: property_name.text().to_string(),
-                                        property_range: property_name.text_range(),
-                                        value: value.text().to_string(),
-                                        value_range: value.text_range(),
-                                    });
+                    if let Some(ruleset_range) = self.current_selector_range {
+                        if let Some(decl) = block.first_child() {
+                            if let Some(property) = decl.first_child() {
+                                if let Some(property_name) = property.first_child() {
+                                    if let Some(value) = property_name.next_sibling() {
+                                        self.stash.push_back(SemanticEvent::PropertyDeclaration {
+                                            ruleset_range,
+                                            property: property_name.text().to_string(),
+                                            property_range: property_name.text_range(),
+                                            value: value.text().to_string(),
+                                            value_range: value.text_range(),
+                                        });
+                                    }
                                 }
                             }
                         }
@@ -85,7 +93,11 @@ impl SemanticEventExtractor {
         }
     }
 
-    pub fn leave(&mut self, _node: &biome_css_syntax::CssSyntaxNode) {}
+    pub fn leave(&mut self, node: &biome_css_syntax::CssSyntaxNode) {
+        if node.kind() == biome_css_syntax::CssSyntaxKind::CSS_QUALIFIED_RULE {
+            self.current_selector_range = None;
+        }
+    }
 
     pub fn pop(&mut self) -> Option<SemanticEvent> {
         self.stash.pop_front()
