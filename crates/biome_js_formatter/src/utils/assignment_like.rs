@@ -10,13 +10,14 @@ use biome_js_syntax::binary_like_expression::AnyJsBinaryLikeExpression;
 use biome_js_syntax::{
     AnyJsAssignmentPattern, AnyJsBindingPattern, AnyJsCallArgument, AnyJsClassMemberName,
     AnyJsExpression, AnyJsFunctionBody, AnyJsObjectAssignmentPatternMember,
-    AnyJsObjectBindingPatternMember, AnyJsObjectMemberName, AnyJsTemplateElement, AnyTsType,
-    AnyTsVariableAnnotation, JsAssignmentExpression, JsInitializerClause, JsLiteralMemberName,
-    JsObjectAssignmentPattern, JsObjectAssignmentPatternProperty, JsObjectBindingPattern,
-    JsPropertyClassMember, JsPropertyClassMemberFields, JsPropertyObjectMember, JsSyntaxKind,
-    JsVariableDeclarator, TsIdentifierBinding, TsInitializedPropertySignatureClassMember,
-    TsInitializedPropertySignatureClassMemberFields, TsPropertySignatureClassMember,
-    TsPropertySignatureClassMemberFields, TsTypeAliasDeclaration, TsTypeArguments, TsUnionType,
+    AnyJsObjectBindingPatternMember, AnyJsObjectMemberName, AnyJsTemplateElement,
+    AnyTsIdentifierBinding, AnyTsType, AnyTsVariableAnnotation, JsAssignmentExpression,
+    JsInitializerClause, JsLiteralMemberName, JsObjectAssignmentPattern,
+    JsObjectAssignmentPatternProperty, JsObjectBindingPattern, JsPropertyClassMember,
+    JsPropertyClassMemberFields, JsPropertyObjectMember, JsSyntaxKind, JsVariableDeclarator,
+    TsInitializedPropertySignatureClassMember, TsInitializedPropertySignatureClassMemberFields,
+    TsPropertySignatureClassMember, TsPropertySignatureClassMemberFields, TsTypeAliasDeclaration,
+    TsTypeArguments, TsUnionType,
 };
 use biome_js_syntax::{AnyJsLiteralExpression, JsUnaryExpression};
 use biome_rowan::{declare_node_union, AstNode, SyntaxNodeOptionExt, SyntaxResult};
@@ -39,7 +40,7 @@ declare_node_union! {
         AnyJsAssignmentPattern |
         AnyJsObjectMemberName |
         AnyJsBindingPattern |
-        TsIdentifierBinding |
+        AnyTsIdentifierBinding |
         JsLiteralMemberName |
         AnyJsClassMemberName
 }

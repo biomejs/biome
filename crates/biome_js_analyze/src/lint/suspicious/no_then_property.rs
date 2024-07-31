@@ -217,6 +217,7 @@ fn process_js_method_object_member(node: &JsMethodObjectMember) -> Option<RuleSt
                 });
             }
         }
+        _ => return None,
     }
     None
 }

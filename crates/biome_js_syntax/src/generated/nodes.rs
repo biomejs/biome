@@ -2184,7 +2184,7 @@ impl JsExportFromClause {
     pub fn from_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 3usize)
     }
-    pub fn source(&self) -> SyntaxResult<JsModuleSource> {
+    pub fn source(&self) -> SyntaxResult<AnyJsModuleSource> {
         support::required_node(&self.syntax, 4usize)
     }
     pub fn assertion(&self) -> Option<JsImportAssertion> {
@@ -2209,7 +2209,7 @@ pub struct JsExportFromClauseFields {
     pub star_token: SyntaxResult<SyntaxToken>,
     pub export_as: Option<JsExportAsClause>,
     pub from_token: SyntaxResult<SyntaxToken>,
-    pub source: SyntaxResult<JsModuleSource>,
+    pub source: SyntaxResult<AnyJsModuleSource>,
     pub assertion: Option<JsImportAssertion>,
     pub semicolon_token: Option<SyntaxToken>,
 }
@@ -2310,7 +2310,7 @@ impl JsExportNamedFromClause {
     pub fn from_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 4usize)
     }
-    pub fn source(&self) -> SyntaxResult<JsModuleSource> {
+    pub fn source(&self) -> SyntaxResult<AnyJsModuleSource> {
         support::required_node(&self.syntax, 5usize)
     }
     pub fn assertion(&self) -> Option<JsImportAssertion> {
@@ -2336,7 +2336,7 @@ pub struct JsExportNamedFromClauseFields {
     pub specifiers: JsExportNamedFromSpecifierList,
     pub r_curly_token: SyntaxResult<SyntaxToken>,
     pub from_token: SyntaxResult<SyntaxToken>,
-    pub source: SyntaxResult<JsModuleSource>,
+    pub source: SyntaxResult<AnyJsModuleSource>,
     pub assertion: Option<JsImportAssertion>,
     pub semicolon_token: Option<SyntaxToken>,
 }
@@ -3683,7 +3683,7 @@ impl JsImportBareClause {
             assertion: self.assertion(),
         }
     }
-    pub fn source(&self) -> SyntaxResult<JsModuleSource> {
+    pub fn source(&self) -> SyntaxResult<AnyJsModuleSource> {
         support::required_node(&self.syntax, 0usize)
     }
     pub fn assertion(&self) -> Option<JsImportAssertion> {
@@ -3701,7 +3701,7 @@ impl Serialize for JsImportBareClause {
 }
 #[cfg_attr(feature = "serde", derive(Serialize))]
 pub struct JsImportBareClauseFields {
-    pub source: SyntaxResult<JsModuleSource>,
+    pub source: SyntaxResult<AnyJsModuleSource>,
     pub assertion: Option<JsImportAssertion>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
@@ -3781,7 +3781,7 @@ impl JsImportCombinedClause {
     pub fn from_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 3usize)
     }
-    pub fn source(&self) -> SyntaxResult<JsModuleSource> {
+    pub fn source(&self) -> SyntaxResult<AnyJsModuleSource> {
         support::required_node(&self.syntax, 4usize)
     }
     pub fn assertion(&self) -> Option<JsImportAssertion> {
@@ -3803,7 +3803,7 @@ pub struct JsImportCombinedClauseFields {
     pub comma_token: SyntaxResult<SyntaxToken>,
     pub specifier: SyntaxResult<AnyJsCombinedSpecifier>,
     pub from_token: SyntaxResult<SyntaxToken>,
-    pub source: SyntaxResult<JsModuleSource>,
+    pub source: SyntaxResult<AnyJsModuleSource>,
     pub assertion: Option<JsImportAssertion>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
@@ -3838,7 +3838,7 @@ impl JsImportDefaultClause {
     pub fn from_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 2usize)
     }
-    pub fn source(&self) -> SyntaxResult<JsModuleSource> {
+    pub fn source(&self) -> SyntaxResult<AnyJsModuleSource> {
         support::required_node(&self.syntax, 3usize)
     }
     pub fn assertion(&self) -> Option<JsImportAssertion> {
@@ -3859,7 +3859,7 @@ pub struct JsImportDefaultClauseFields {
     pub type_token: Option<SyntaxToken>,
     pub default_specifier: SyntaxResult<JsDefaultImportSpecifier>,
     pub from_token: SyntaxResult<SyntaxToken>,
-    pub source: SyntaxResult<JsModuleSource>,
+    pub source: SyntaxResult<AnyJsModuleSource>,
     pub assertion: Option<JsImportAssertion>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
@@ -3940,7 +3940,7 @@ impl JsImportNamedClause {
     pub fn from_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 2usize)
     }
-    pub fn source(&self) -> SyntaxResult<JsModuleSource> {
+    pub fn source(&self) -> SyntaxResult<AnyJsModuleSource> {
         support::required_node(&self.syntax, 3usize)
     }
     pub fn assertion(&self) -> Option<JsImportAssertion> {
@@ -3961,7 +3961,7 @@ pub struct JsImportNamedClauseFields {
     pub type_token: Option<SyntaxToken>,
     pub named_specifiers: SyntaxResult<JsNamedImportSpecifiers>,
     pub from_token: SyntaxResult<SyntaxToken>,
-    pub source: SyntaxResult<JsModuleSource>,
+    pub source: SyntaxResult<AnyJsModuleSource>,
     pub assertion: Option<JsImportAssertion>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
@@ -3996,7 +3996,7 @@ impl JsImportNamespaceClause {
     pub fn from_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 2usize)
     }
-    pub fn source(&self) -> SyntaxResult<JsModuleSource> {
+    pub fn source(&self) -> SyntaxResult<AnyJsModuleSource> {
         support::required_node(&self.syntax, 3usize)
     }
     pub fn assertion(&self) -> Option<JsImportAssertion> {
@@ -4017,7 +4017,7 @@ pub struct JsImportNamespaceClauseFields {
     pub type_token: Option<SyntaxToken>,
     pub namespace_specifier: SyntaxResult<JsNamespaceImportSpecifier>,
     pub from_token: SyntaxResult<SyntaxToken>,
-    pub source: SyntaxResult<JsModuleSource>,
+    pub source: SyntaxResult<AnyJsModuleSource>,
     pub assertion: Option<JsImportAssertion>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
@@ -4352,6 +4352,42 @@ pub struct JsLogicalExpressionFields {
     pub left: SyntaxResult<AnyJsExpression>,
     pub operator_token: SyntaxResult<SyntaxToken>,
     pub right: SyntaxResult<AnyJsExpression>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct JsMetavariable {
+    pub(crate) syntax: SyntaxNode,
+}
+impl JsMetavariable {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> JsMetavariableFields {
+        JsMetavariableFields {
+            value_token: self.value_token(),
+        }
+    }
+    pub fn value_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+}
+#[cfg(feature = "serde")]
+impl Serialize for JsMetavariable {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[cfg_attr(feature = "serde", derive(Serialize))]
+pub struct JsMetavariableFields {
+    pub value_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct JsMethodClassMember {
@@ -9669,7 +9705,7 @@ impl TsExternalModuleDeclaration {
     pub fn module_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 0usize)
     }
-    pub fn source(&self) -> SyntaxResult<JsModuleSource> {
+    pub fn source(&self) -> SyntaxResult<AnyJsModuleSource> {
         support::required_node(&self.syntax, 1usize)
     }
     pub fn body(&self) -> Option<AnyTsExternalModuleDeclarationBody> {
@@ -9688,7 +9724,7 @@ impl Serialize for TsExternalModuleDeclaration {
 #[cfg_attr(feature = "serde", derive(Serialize))]
 pub struct TsExternalModuleDeclarationFields {
     pub module_token: SyntaxResult<SyntaxToken>,
-    pub source: SyntaxResult<JsModuleSource>,
+    pub source: SyntaxResult<AnyJsModuleSource>,
     pub body: Option<AnyTsExternalModuleDeclarationBody>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
@@ -9719,7 +9755,7 @@ impl TsExternalModuleReference {
     pub fn l_paren_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 1usize)
     }
-    pub fn source(&self) -> SyntaxResult<JsModuleSource> {
+    pub fn source(&self) -> SyntaxResult<AnyJsModuleSource> {
         support::required_node(&self.syntax, 2usize)
     }
     pub fn r_paren_token(&self) -> SyntaxResult<SyntaxToken> {
@@ -9739,7 +9775,7 @@ impl Serialize for TsExternalModuleReference {
 pub struct TsExternalModuleReferenceFields {
     pub require_token: SyntaxResult<SyntaxToken>,
     pub l_paren_token: SyntaxResult<SyntaxToken>,
-    pub source: SyntaxResult<JsModuleSource>,
+    pub source: SyntaxResult<AnyJsModuleSource>,
     pub r_paren_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
@@ -10627,7 +10663,7 @@ impl TsInterfaceDeclaration {
     pub fn interface_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 0usize)
     }
-    pub fn id(&self) -> SyntaxResult<TsIdentifierBinding> {
+    pub fn id(&self) -> SyntaxResult<AnyTsIdentifierBinding> {
         support::required_node(&self.syntax, 1usize)
     }
     pub fn type_parameters(&self) -> Option<TsTypeParameters> {
@@ -10658,7 +10694,7 @@ impl Serialize for TsInterfaceDeclaration {
 #[cfg_attr(feature = "serde", derive(Serialize))]
 pub struct TsInterfaceDeclarationFields {
     pub interface_token: SyntaxResult<SyntaxToken>,
-    pub id: SyntaxResult<TsIdentifierBinding>,
+    pub id: SyntaxResult<AnyTsIdentifierBinding>,
     pub type_parameters: Option<TsTypeParameters>,
     pub extends_clause: Option<TsExtendsClause>,
     pub l_curly_token: SyntaxResult<SyntaxToken>,
@@ -12804,7 +12840,7 @@ impl TsTypeAliasDeclaration {
     pub fn type_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 0usize)
     }
-    pub fn binding_identifier(&self) -> SyntaxResult<TsIdentifierBinding> {
+    pub fn binding_identifier(&self) -> SyntaxResult<AnyTsIdentifierBinding> {
         support::required_node(&self.syntax, 1usize)
     }
     pub fn type_parameters(&self) -> Option<TsTypeParameters> {
@@ -12832,7 +12868,7 @@ impl Serialize for TsTypeAliasDeclaration {
 #[cfg_attr(feature = "serde", derive(Serialize))]
 pub struct TsTypeAliasDeclarationFields {
     pub type_token: SyntaxResult<SyntaxToken>,
-    pub binding_identifier: SyntaxResult<TsIdentifierBinding>,
+    pub binding_identifier: SyntaxResult<AnyTsIdentifierBinding>,
     pub type_parameters: Option<TsTypeParameters>,
     pub eq_token: SyntaxResult<SyntaxToken>,
     pub ty: SyntaxResult<AnyTsType>,
@@ -13647,6 +13683,7 @@ impl AnyJsAssignmentPattern {
 pub enum AnyJsBinding {
     JsBogusBinding(JsBogusBinding),
     JsIdentifierBinding(JsIdentifierBinding),
+    JsMetavariable(JsMetavariable),
 }
 impl AnyJsBinding {
     pub fn as_js_bogus_binding(&self) -> Option<&JsBogusBinding> {
@@ -13658,6 +13695,12 @@ impl AnyJsBinding {
     pub fn as_js_identifier_binding(&self) -> Option<&JsIdentifierBinding> {
         match &self {
             AnyJsBinding::JsIdentifierBinding(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_js_metavariable(&self) -> Option<&JsMetavariable> {
+        match &self {
+            AnyJsBinding::JsMetavariable(item) => Some(item),
             _ => None,
         }
     }
@@ -13745,6 +13788,7 @@ pub enum AnyJsClassMember {
     JsConstructorClassMember(JsConstructorClassMember),
     JsEmptyClassMember(JsEmptyClassMember),
     JsGetterClassMember(JsGetterClassMember),
+    JsMetavariable(JsMetavariable),
     JsMethodClassMember(JsMethodClassMember),
     JsPropertyClassMember(JsPropertyClassMember),
     JsSetterClassMember(JsSetterClassMember),
@@ -13779,6 +13823,12 @@ impl AnyJsClassMember {
     pub fn as_js_getter_class_member(&self) -> Option<&JsGetterClassMember> {
         match &self {
             AnyJsClassMember::JsGetterClassMember(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_js_metavariable(&self) -> Option<&JsMetavariable> {
+        match &self {
+            AnyJsClassMember::JsMetavariable(item) => Some(item),
             _ => None,
         }
     }
@@ -13860,6 +13910,7 @@ impl AnyJsClassMember {
 pub enum AnyJsClassMemberName {
     JsComputedMemberName(JsComputedMemberName),
     JsLiteralMemberName(JsLiteralMemberName),
+    JsMetavariable(JsMetavariable),
     JsPrivateClassMemberName(JsPrivateClassMemberName),
 }
 impl AnyJsClassMemberName {
@@ -13872,6 +13923,12 @@ impl AnyJsClassMemberName {
     pub fn as_js_literal_member_name(&self) -> Option<&JsLiteralMemberName> {
         match &self {
             AnyJsClassMemberName::JsLiteralMemberName(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_js_metavariable(&self) -> Option<&JsMetavariable> {
+        match &self {
+            AnyJsClassMemberName::JsMetavariable(item) => Some(item),
             _ => None,
         }
     }
@@ -14294,6 +14351,7 @@ pub enum AnyJsExpression {
     JsInExpression(JsInExpression),
     JsInstanceofExpression(JsInstanceofExpression),
     JsLogicalExpression(JsLogicalExpression),
+    JsMetavariable(JsMetavariable),
     JsNewExpression(JsNewExpression),
     JsNewTargetExpression(JsNewTargetExpression),
     JsObjectExpression(JsObjectExpression),
@@ -14420,6 +14478,12 @@ impl AnyJsExpression {
     pub fn as_js_logical_expression(&self) -> Option<&JsLogicalExpression> {
         match &self {
             AnyJsExpression::JsLogicalExpression(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_js_metavariable(&self) -> Option<&JsMetavariable> {
+        match &self {
+            AnyJsExpression::JsMetavariable(item) => Some(item),
             _ => None,
         }
     }
@@ -14846,6 +14910,26 @@ impl AnyJsModuleItem {
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "serde", derive(Serialize))]
+pub enum AnyJsModuleSource {
+    JsMetavariable(JsMetavariable),
+    JsModuleSource(JsModuleSource),
+}
+impl AnyJsModuleSource {
+    pub fn as_js_metavariable(&self) -> Option<&JsMetavariable> {
+        match &self {
+            AnyJsModuleSource::JsMetavariable(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_js_module_source(&self) -> Option<&JsModuleSource> {
+        match &self {
+            AnyJsModuleSource::JsModuleSource(item) => Some(item),
+            _ => None,
+        }
+    }
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize))]
 pub enum AnyJsName {
     JsName(JsName),
     JsPrivateName(JsPrivateName),
@@ -14939,6 +15023,7 @@ impl AnyJsObjectAssignmentPatternMember {
 #[cfg_attr(feature = "serde", derive(Serialize))]
 pub enum AnyJsObjectBindingPatternMember {
     JsBogusBinding(JsBogusBinding),
+    JsMetavariable(JsMetavariable),
     JsObjectBindingPatternProperty(JsObjectBindingPatternProperty),
     JsObjectBindingPatternRest(JsObjectBindingPatternRest),
     JsObjectBindingPatternShorthandProperty(JsObjectBindingPatternShorthandProperty),
@@ -14947,6 +15032,12 @@ impl AnyJsObjectBindingPatternMember {
     pub fn as_js_bogus_binding(&self) -> Option<&JsBogusBinding> {
         match &self {
             AnyJsObjectBindingPatternMember::JsBogusBinding(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_js_metavariable(&self) -> Option<&JsMetavariable> {
+        match &self {
+            AnyJsObjectBindingPatternMember::JsMetavariable(item) => Some(item),
             _ => None,
         }
     }
@@ -15035,6 +15126,7 @@ impl AnyJsObjectMember {
 pub enum AnyJsObjectMemberName {
     JsComputedMemberName(JsComputedMemberName),
     JsLiteralMemberName(JsLiteralMemberName),
+    JsMetavariable(JsMetavariable),
 }
 impl AnyJsObjectMemberName {
     pub fn as_js_computed_member_name(&self) -> Option<&JsComputedMemberName> {
@@ -15046,6 +15138,12 @@ impl AnyJsObjectMemberName {
     pub fn as_js_literal_member_name(&self) -> Option<&JsLiteralMemberName> {
         match &self {
             AnyJsObjectMemberName::JsLiteralMemberName(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_js_metavariable(&self) -> Option<&JsMetavariable> {
+        match &self {
+            AnyJsObjectMemberName::JsMetavariable(item) => Some(item),
             _ => None,
         }
     }
@@ -15691,6 +15789,26 @@ impl AnyTsExternalModuleDeclarationBody {
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "serde", derive(Serialize))]
+pub enum AnyTsIdentifierBinding {
+    JsMetavariable(JsMetavariable),
+    TsIdentifierBinding(TsIdentifierBinding),
+}
+impl AnyTsIdentifierBinding {
+    pub fn as_js_metavariable(&self) -> Option<&JsMetavariable> {
+        match &self {
+            AnyTsIdentifierBinding::JsMetavariable(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_ts_identifier_binding(&self) -> Option<&TsIdentifierBinding> {
+        match &self {
+            AnyTsIdentifierBinding::TsIdentifierBinding(item) => Some(item),
+            _ => None,
+        }
+    }
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize))]
 pub enum AnyTsIndexSignatureModifier {
     JsStaticModifier(JsStaticModifier),
     TsReadonlyModifier(TsReadonlyModifier),
@@ -15753,13 +15871,13 @@ impl AnyTsMethodSignatureModifier {
 #[derive(Clone, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "serde", derive(Serialize))]
 pub enum AnyTsModuleName {
-    TsIdentifierBinding(TsIdentifierBinding),
+    AnyTsIdentifierBinding(AnyTsIdentifierBinding),
     TsQualifiedModuleName(TsQualifiedModuleName),
 }
 impl AnyTsModuleName {
-    pub fn as_ts_identifier_binding(&self) -> Option<&TsIdentifierBinding> {
+    pub fn as_any_ts_identifier_binding(&self) -> Option<&AnyTsIdentifierBinding> {
         match &self {
-            AnyTsModuleName::TsIdentifierBinding(item) => Some(item),
+            AnyTsModuleName::AnyTsIdentifierBinding(item) => Some(item),
             _ => None,
         }
     }
@@ -16030,6 +16148,7 @@ impl AnyTsTupleTypeElement {
 #[derive(Clone, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "serde", derive(Serialize))]
 pub enum AnyTsType {
+    JsMetavariable(JsMetavariable),
     TsAnyType(TsAnyType),
     TsArrayType(TsArrayType),
     TsBigintLiteralType(TsBigintLiteralType),
@@ -16067,6 +16186,12 @@ pub enum AnyTsType {
     TsVoidType(TsVoidType),
 }
 impl AnyTsType {
+    pub fn as_js_metavariable(&self) -> Option<&JsMetavariable> {
+        match &self {
+            AnyTsType::JsMetavariable(item) => Some(item),
+            _ => None,
+        }
+    }
     pub fn as_ts_any_type(&self) -> Option<&TsAnyType> {
         match &self {
             AnyTsType::TsAnyType(item) => Some(item),
@@ -20515,6 +20640,47 @@ impl From<JsLogicalExpression> for SyntaxNode {
 }
 impl From<JsLogicalExpression> for SyntaxElement {
     fn from(n: JsLogicalExpression) -> SyntaxElement {
+        n.syntax.into()
+    }
+}
+impl AstNode for JsMetavariable {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(JS_METAVARIABLE as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == JS_METAVARIABLE
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for JsMetavariable {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("JsMetavariable")
+            .field(
+                "value_token",
+                &support::DebugSyntaxResult(self.value_token()),
+            )
+            .finish()
+    }
+}
+impl From<JsMetavariable> for SyntaxNode {
+    fn from(n: JsMetavariable) -> SyntaxNode {
+        n.syntax
+    }
+}
+impl From<JsMetavariable> for SyntaxElement {
+    fn from(n: JsMetavariable) -> SyntaxElement {
         n.syntax.into()
     }
 }
@@ -30026,12 +30192,21 @@ impl From<JsIdentifierBinding> for AnyJsBinding {
         AnyJsBinding::JsIdentifierBinding(node)
     }
 }
+impl From<JsMetavariable> for AnyJsBinding {
+    fn from(node: JsMetavariable) -> AnyJsBinding {
+        AnyJsBinding::JsMetavariable(node)
+    }
+}
 impl AstNode for AnyJsBinding {
     type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> =
-        JsBogusBinding::KIND_SET.union(JsIdentifierBinding::KIND_SET);
+    const KIND_SET: SyntaxKindSet<Language> = JsBogusBinding::KIND_SET
+        .union(JsIdentifierBinding::KIND_SET)
+        .union(JsMetavariable::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
-        matches!(kind, JS_BOGUS_BINDING | JS_IDENTIFIER_BINDING)
+        matches!(
+            kind,
+            JS_BOGUS_BINDING | JS_IDENTIFIER_BINDING | JS_METAVARIABLE
+        )
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
@@ -30039,6 +30214,7 @@ impl AstNode for AnyJsBinding {
             JS_IDENTIFIER_BINDING => {
                 AnyJsBinding::JsIdentifierBinding(JsIdentifierBinding { syntax })
             }
+            JS_METAVARIABLE => AnyJsBinding::JsMetavariable(JsMetavariable { syntax }),
             _ => return None,
         };
         Some(res)
@@ -30047,12 +30223,14 @@ impl AstNode for AnyJsBinding {
         match self {
             AnyJsBinding::JsBogusBinding(it) => &it.syntax,
             AnyJsBinding::JsIdentifierBinding(it) => &it.syntax,
+            AnyJsBinding::JsMetavariable(it) => &it.syntax,
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
             AnyJsBinding::JsBogusBinding(it) => it.syntax,
             AnyJsBinding::JsIdentifierBinding(it) => it.syntax,
+            AnyJsBinding::JsMetavariable(it) => it.syntax,
         }
     }
 }
@@ -30061,6 +30239,7 @@ impl std::fmt::Debug for AnyJsBinding {
         match self {
             AnyJsBinding::JsBogusBinding(it) => std::fmt::Debug::fmt(it, f),
             AnyJsBinding::JsIdentifierBinding(it) => std::fmt::Debug::fmt(it, f),
+            AnyJsBinding::JsMetavariable(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
@@ -30069,6 +30248,7 @@ impl From<AnyJsBinding> for SyntaxNode {
         match n {
             AnyJsBinding::JsBogusBinding(it) => it.into(),
             AnyJsBinding::JsIdentifierBinding(it) => it.into(),
+            AnyJsBinding::JsMetavariable(it) => it.into(),
         }
     }
 }
@@ -30316,6 +30496,11 @@ impl From<JsGetterClassMember> for AnyJsClassMember {
         AnyJsClassMember::JsGetterClassMember(node)
     }
 }
+impl From<JsMetavariable> for AnyJsClassMember {
+    fn from(node: JsMetavariable) -> AnyJsClassMember {
+        AnyJsClassMember::JsMetavariable(node)
+    }
+}
 impl From<JsMethodClassMember> for AnyJsClassMember {
     fn from(node: JsMethodClassMember) -> AnyJsClassMember {
         AnyJsClassMember::JsMethodClassMember(node)
@@ -30377,6 +30562,7 @@ impl AstNode for AnyJsClassMember {
         .union(JsConstructorClassMember::KIND_SET)
         .union(JsEmptyClassMember::KIND_SET)
         .union(JsGetterClassMember::KIND_SET)
+        .union(JsMetavariable::KIND_SET)
         .union(JsMethodClassMember::KIND_SET)
         .union(JsPropertyClassMember::KIND_SET)
         .union(JsSetterClassMember::KIND_SET)
@@ -30395,6 +30581,7 @@ impl AstNode for AnyJsClassMember {
                 | JS_CONSTRUCTOR_CLASS_MEMBER
                 | JS_EMPTY_CLASS_MEMBER
                 | JS_GETTER_CLASS_MEMBER
+                | JS_METAVARIABLE
                 | JS_METHOD_CLASS_MEMBER
                 | JS_PROPERTY_CLASS_MEMBER
                 | JS_SETTER_CLASS_MEMBER
@@ -30420,6 +30607,7 @@ impl AstNode for AnyJsClassMember {
             JS_GETTER_CLASS_MEMBER => {
                 AnyJsClassMember::JsGetterClassMember(JsGetterClassMember { syntax })
             }
+            JS_METAVARIABLE => AnyJsClassMember::JsMetavariable(JsMetavariable { syntax }),
             JS_METHOD_CLASS_MEMBER => {
                 AnyJsClassMember::JsMethodClassMember(JsMethodClassMember { syntax })
             }
@@ -30479,6 +30667,7 @@ impl AstNode for AnyJsClassMember {
             AnyJsClassMember::JsConstructorClassMember(it) => &it.syntax,
             AnyJsClassMember::JsEmptyClassMember(it) => &it.syntax,
             AnyJsClassMember::JsGetterClassMember(it) => &it.syntax,
+            AnyJsClassMember::JsMetavariable(it) => &it.syntax,
             AnyJsClassMember::JsMethodClassMember(it) => &it.syntax,
             AnyJsClassMember::JsPropertyClassMember(it) => &it.syntax,
             AnyJsClassMember::JsSetterClassMember(it) => &it.syntax,
@@ -30498,6 +30687,7 @@ impl AstNode for AnyJsClassMember {
             AnyJsClassMember::JsConstructorClassMember(it) => it.syntax,
             AnyJsClassMember::JsEmptyClassMember(it) => it.syntax,
             AnyJsClassMember::JsGetterClassMember(it) => it.syntax,
+            AnyJsClassMember::JsMetavariable(it) => it.syntax,
             AnyJsClassMember::JsMethodClassMember(it) => it.syntax,
             AnyJsClassMember::JsPropertyClassMember(it) => it.syntax,
             AnyJsClassMember::JsSetterClassMember(it) => it.syntax,
@@ -30519,6 +30709,7 @@ impl std::fmt::Debug for AnyJsClassMember {
             AnyJsClassMember::JsConstructorClassMember(it) => std::fmt::Debug::fmt(it, f),
             AnyJsClassMember::JsEmptyClassMember(it) => std::fmt::Debug::fmt(it, f),
             AnyJsClassMember::JsGetterClassMember(it) => std::fmt::Debug::fmt(it, f),
+            AnyJsClassMember::JsMetavariable(it) => std::fmt::Debug::fmt(it, f),
             AnyJsClassMember::JsMethodClassMember(it) => std::fmt::Debug::fmt(it, f),
             AnyJsClassMember::JsPropertyClassMember(it) => std::fmt::Debug::fmt(it, f),
             AnyJsClassMember::JsSetterClassMember(it) => std::fmt::Debug::fmt(it, f),
@@ -30544,6 +30735,7 @@ impl From<AnyJsClassMember> for SyntaxNode {
             AnyJsClassMember::JsConstructorClassMember(it) => it.into(),
             AnyJsClassMember::JsEmptyClassMember(it) => it.into(),
             AnyJsClassMember::JsGetterClassMember(it) => it.into(),
+            AnyJsClassMember::JsMetavariable(it) => it.into(),
             AnyJsClassMember::JsMethodClassMember(it) => it.into(),
             AnyJsClassMember::JsPropertyClassMember(it) => it.into(),
             AnyJsClassMember::JsSetterClassMember(it) => it.into(),
@@ -30574,6 +30766,11 @@ impl From<JsLiteralMemberName> for AnyJsClassMemberName {
         AnyJsClassMemberName::JsLiteralMemberName(node)
     }
 }
+impl From<JsMetavariable> for AnyJsClassMemberName {
+    fn from(node: JsMetavariable) -> AnyJsClassMemberName {
+        AnyJsClassMemberName::JsMetavariable(node)
+    }
+}
 impl From<JsPrivateClassMemberName> for AnyJsClassMemberName {
     fn from(node: JsPrivateClassMemberName) -> AnyJsClassMemberName {
         AnyJsClassMemberName::JsPrivateClassMemberName(node)
@@ -30583,11 +30780,15 @@ impl AstNode for AnyJsClassMemberName {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> = JsComputedMemberName::KIND_SET
         .union(JsLiteralMemberName::KIND_SET)
+        .union(JsMetavariable::KIND_SET)
         .union(JsPrivateClassMemberName::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
         matches!(
             kind,
-            JS_COMPUTED_MEMBER_NAME | JS_LITERAL_MEMBER_NAME | JS_PRIVATE_CLASS_MEMBER_NAME
+            JS_COMPUTED_MEMBER_NAME
+                | JS_LITERAL_MEMBER_NAME
+                | JS_METAVARIABLE
+                | JS_PRIVATE_CLASS_MEMBER_NAME
         )
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
@@ -30598,6 +30799,7 @@ impl AstNode for AnyJsClassMemberName {
             JS_LITERAL_MEMBER_NAME => {
                 AnyJsClassMemberName::JsLiteralMemberName(JsLiteralMemberName { syntax })
             }
+            JS_METAVARIABLE => AnyJsClassMemberName::JsMetavariable(JsMetavariable { syntax }),
             JS_PRIVATE_CLASS_MEMBER_NAME => {
                 AnyJsClassMemberName::JsPrivateClassMemberName(JsPrivateClassMemberName { syntax })
             }
@@ -30609,6 +30811,7 @@ impl AstNode for AnyJsClassMemberName {
         match self {
             AnyJsClassMemberName::JsComputedMemberName(it) => &it.syntax,
             AnyJsClassMemberName::JsLiteralMemberName(it) => &it.syntax,
+            AnyJsClassMemberName::JsMetavariable(it) => &it.syntax,
             AnyJsClassMemberName::JsPrivateClassMemberName(it) => &it.syntax,
         }
     }
@@ -30616,6 +30819,7 @@ impl AstNode for AnyJsClassMemberName {
         match self {
             AnyJsClassMemberName::JsComputedMemberName(it) => it.syntax,
             AnyJsClassMemberName::JsLiteralMemberName(it) => it.syntax,
+            AnyJsClassMemberName::JsMetavariable(it) => it.syntax,
             AnyJsClassMemberName::JsPrivateClassMemberName(it) => it.syntax,
         }
     }
@@ -30625,6 +30829,7 @@ impl std::fmt::Debug for AnyJsClassMemberName {
         match self {
             AnyJsClassMemberName::JsComputedMemberName(it) => std::fmt::Debug::fmt(it, f),
             AnyJsClassMemberName::JsLiteralMemberName(it) => std::fmt::Debug::fmt(it, f),
+            AnyJsClassMemberName::JsMetavariable(it) => std::fmt::Debug::fmt(it, f),
             AnyJsClassMemberName::JsPrivateClassMemberName(it) => std::fmt::Debug::fmt(it, f),
         }
     }
@@ -30634,6 +30839,7 @@ impl From<AnyJsClassMemberName> for SyntaxNode {
         match n {
             AnyJsClassMemberName::JsComputedMemberName(it) => it.into(),
             AnyJsClassMemberName::JsLiteralMemberName(it) => it.into(),
+            AnyJsClassMemberName::JsMetavariable(it) => it.into(),
             AnyJsClassMemberName::JsPrivateClassMemberName(it) => it.into(),
         }
     }
@@ -31742,6 +31948,11 @@ impl From<JsLogicalExpression> for AnyJsExpression {
         AnyJsExpression::JsLogicalExpression(node)
     }
 }
+impl From<JsMetavariable> for AnyJsExpression {
+    fn from(node: JsMetavariable) -> AnyJsExpression {
+        AnyJsExpression::JsMetavariable(node)
+    }
+}
 impl From<JsNewExpression> for AnyJsExpression {
     fn from(node: JsNewExpression) -> AnyJsExpression {
         AnyJsExpression::JsNewExpression(node)
@@ -31857,6 +32068,7 @@ impl AstNode for AnyJsExpression {
         .union(JsInExpression::KIND_SET)
         .union(JsInstanceofExpression::KIND_SET)
         .union(JsLogicalExpression::KIND_SET)
+        .union(JsMetavariable::KIND_SET)
         .union(JsNewExpression::KIND_SET)
         .union(JsNewTargetExpression::KIND_SET)
         .union(JsObjectExpression::KIND_SET)
@@ -31895,6 +32107,7 @@ impl AstNode for AnyJsExpression {
             | JS_IN_EXPRESSION
             | JS_INSTANCEOF_EXPRESSION
             | JS_LOGICAL_EXPRESSION
+            | JS_METAVARIABLE
             | JS_NEW_EXPRESSION
             | JS_NEW_TARGET_EXPRESSION
             | JS_OBJECT_EXPRESSION
@@ -31959,6 +32172,7 @@ impl AstNode for AnyJsExpression {
             JS_LOGICAL_EXPRESSION => {
                 AnyJsExpression::JsLogicalExpression(JsLogicalExpression { syntax })
             }
+            JS_METAVARIABLE => AnyJsExpression::JsMetavariable(JsMetavariable { syntax }),
             JS_NEW_EXPRESSION => AnyJsExpression::JsNewExpression(JsNewExpression { syntax }),
             JS_NEW_TARGET_EXPRESSION => {
                 AnyJsExpression::JsNewTargetExpression(JsNewTargetExpression { syntax })
@@ -32034,6 +32248,7 @@ impl AstNode for AnyJsExpression {
             AnyJsExpression::JsInExpression(it) => &it.syntax,
             AnyJsExpression::JsInstanceofExpression(it) => &it.syntax,
             AnyJsExpression::JsLogicalExpression(it) => &it.syntax,
+            AnyJsExpression::JsMetavariable(it) => &it.syntax,
             AnyJsExpression::JsNewExpression(it) => &it.syntax,
             AnyJsExpression::JsNewTargetExpression(it) => &it.syntax,
             AnyJsExpression::JsObjectExpression(it) => &it.syntax,
@@ -32075,6 +32290,7 @@ impl AstNode for AnyJsExpression {
             AnyJsExpression::JsInExpression(it) => it.syntax,
             AnyJsExpression::JsInstanceofExpression(it) => it.syntax,
             AnyJsExpression::JsLogicalExpression(it) => it.syntax,
+            AnyJsExpression::JsMetavariable(it) => it.syntax,
             AnyJsExpression::JsNewExpression(it) => it.syntax,
             AnyJsExpression::JsNewTargetExpression(it) => it.syntax,
             AnyJsExpression::JsObjectExpression(it) => it.syntax,
@@ -32119,6 +32335,7 @@ impl std::fmt::Debug for AnyJsExpression {
             AnyJsExpression::JsInExpression(it) => std::fmt::Debug::fmt(it, f),
             AnyJsExpression::JsInstanceofExpression(it) => std::fmt::Debug::fmt(it, f),
             AnyJsExpression::JsLogicalExpression(it) => std::fmt::Debug::fmt(it, f),
+            AnyJsExpression::JsMetavariable(it) => std::fmt::Debug::fmt(it, f),
             AnyJsExpression::JsNewExpression(it) => std::fmt::Debug::fmt(it, f),
             AnyJsExpression::JsNewTargetExpression(it) => std::fmt::Debug::fmt(it, f),
             AnyJsExpression::JsObjectExpression(it) => std::fmt::Debug::fmt(it, f),
@@ -32162,6 +32379,7 @@ impl From<AnyJsExpression> for SyntaxNode {
             AnyJsExpression::JsInExpression(it) => it.into(),
             AnyJsExpression::JsInstanceofExpression(it) => it.into(),
             AnyJsExpression::JsLogicalExpression(it) => it.into(),
+            AnyJsExpression::JsMetavariable(it) => it.into(),
             AnyJsExpression::JsNewExpression(it) => it.into(),
             AnyJsExpression::JsNewTargetExpression(it) => it.into(),
             AnyJsExpression::JsObjectExpression(it) => it.into(),
@@ -33092,6 +33310,66 @@ impl From<AnyJsModuleItem> for SyntaxElement {
         node.into()
     }
 }
+impl From<JsMetavariable> for AnyJsModuleSource {
+    fn from(node: JsMetavariable) -> AnyJsModuleSource {
+        AnyJsModuleSource::JsMetavariable(node)
+    }
+}
+impl From<JsModuleSource> for AnyJsModuleSource {
+    fn from(node: JsModuleSource) -> AnyJsModuleSource {
+        AnyJsModuleSource::JsModuleSource(node)
+    }
+}
+impl AstNode for AnyJsModuleSource {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        JsMetavariable::KIND_SET.union(JsModuleSource::KIND_SET);
+    fn can_cast(kind: SyntaxKind) -> bool {
+        matches!(kind, JS_METAVARIABLE | JS_MODULE_SOURCE)
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        let res = match syntax.kind() {
+            JS_METAVARIABLE => AnyJsModuleSource::JsMetavariable(JsMetavariable { syntax }),
+            JS_MODULE_SOURCE => AnyJsModuleSource::JsModuleSource(JsModuleSource { syntax }),
+            _ => return None,
+        };
+        Some(res)
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        match self {
+            AnyJsModuleSource::JsMetavariable(it) => &it.syntax,
+            AnyJsModuleSource::JsModuleSource(it) => &it.syntax,
+        }
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        match self {
+            AnyJsModuleSource::JsMetavariable(it) => it.syntax,
+            AnyJsModuleSource::JsModuleSource(it) => it.syntax,
+        }
+    }
+}
+impl std::fmt::Debug for AnyJsModuleSource {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            AnyJsModuleSource::JsMetavariable(it) => std::fmt::Debug::fmt(it, f),
+            AnyJsModuleSource::JsModuleSource(it) => std::fmt::Debug::fmt(it, f),
+        }
+    }
+}
+impl From<AnyJsModuleSource> for SyntaxNode {
+    fn from(n: AnyJsModuleSource) -> SyntaxNode {
+        match n {
+            AnyJsModuleSource::JsMetavariable(it) => it.into(),
+            AnyJsModuleSource::JsModuleSource(it) => it.into(),
+        }
+    }
+}
+impl From<AnyJsModuleSource> for SyntaxElement {
+    fn from(n: AnyJsModuleSource) -> SyntaxElement {
+        let node: SyntaxNode = n.into();
+        node.into()
+    }
+}
 impl From<JsName> for AnyJsName {
     fn from(node: JsName) -> AnyJsName {
         AnyJsName::JsName(node)
@@ -33364,6 +33642,11 @@ impl From<JsBogusBinding> for AnyJsObjectBindingPatternMember {
         AnyJsObjectBindingPatternMember::JsBogusBinding(node)
     }
 }
+impl From<JsMetavariable> for AnyJsObjectBindingPatternMember {
+    fn from(node: JsMetavariable) -> AnyJsObjectBindingPatternMember {
+        AnyJsObjectBindingPatternMember::JsMetavariable(node)
+    }
+}
 impl From<JsObjectBindingPatternProperty> for AnyJsObjectBindingPatternMember {
     fn from(node: JsObjectBindingPatternProperty) -> AnyJsObjectBindingPatternMember {
         AnyJsObjectBindingPatternMember::JsObjectBindingPatternProperty(node)
@@ -33382,6 +33665,7 @@ impl From<JsObjectBindingPatternShorthandProperty> for AnyJsObjectBindingPattern
 impl AstNode for AnyJsObjectBindingPatternMember {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> = JsBogusBinding::KIND_SET
+        .union(JsMetavariable::KIND_SET)
         .union(JsObjectBindingPatternProperty::KIND_SET)
         .union(JsObjectBindingPatternRest::KIND_SET)
         .union(JsObjectBindingPatternShorthandProperty::KIND_SET);
@@ -33389,6 +33673,7 @@ impl AstNode for AnyJsObjectBindingPatternMember {
         matches!(
             kind,
             JS_BOGUS_BINDING
+                | JS_METAVARIABLE
                 | JS_OBJECT_BINDING_PATTERN_PROPERTY
                 | JS_OBJECT_BINDING_PATTERN_REST
                 | JS_OBJECT_BINDING_PATTERN_SHORTHAND_PROPERTY
@@ -33398,6 +33683,9 @@ impl AstNode for AnyJsObjectBindingPatternMember {
         let res = match syntax.kind() {
             JS_BOGUS_BINDING => {
                 AnyJsObjectBindingPatternMember::JsBogusBinding(JsBogusBinding { syntax })
+            }
+            JS_METAVARIABLE => {
+                AnyJsObjectBindingPatternMember::JsMetavariable(JsMetavariable { syntax })
             }
             JS_OBJECT_BINDING_PATTERN_PROPERTY => {
                 AnyJsObjectBindingPatternMember::JsObjectBindingPatternProperty(
@@ -33421,6 +33709,7 @@ impl AstNode for AnyJsObjectBindingPatternMember {
     fn syntax(&self) -> &SyntaxNode {
         match self {
             AnyJsObjectBindingPatternMember::JsBogusBinding(it) => &it.syntax,
+            AnyJsObjectBindingPatternMember::JsMetavariable(it) => &it.syntax,
             AnyJsObjectBindingPatternMember::JsObjectBindingPatternProperty(it) => &it.syntax,
             AnyJsObjectBindingPatternMember::JsObjectBindingPatternRest(it) => &it.syntax,
             AnyJsObjectBindingPatternMember::JsObjectBindingPatternShorthandProperty(it) => {
@@ -33431,6 +33720,7 @@ impl AstNode for AnyJsObjectBindingPatternMember {
     fn into_syntax(self) -> SyntaxNode {
         match self {
             AnyJsObjectBindingPatternMember::JsBogusBinding(it) => it.syntax,
+            AnyJsObjectBindingPatternMember::JsMetavariable(it) => it.syntax,
             AnyJsObjectBindingPatternMember::JsObjectBindingPatternProperty(it) => it.syntax,
             AnyJsObjectBindingPatternMember::JsObjectBindingPatternRest(it) => it.syntax,
             AnyJsObjectBindingPatternMember::JsObjectBindingPatternShorthandProperty(it) => {
@@ -33443,6 +33733,7 @@ impl std::fmt::Debug for AnyJsObjectBindingPatternMember {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             AnyJsObjectBindingPatternMember::JsBogusBinding(it) => std::fmt::Debug::fmt(it, f),
+            AnyJsObjectBindingPatternMember::JsMetavariable(it) => std::fmt::Debug::fmt(it, f),
             AnyJsObjectBindingPatternMember::JsObjectBindingPatternProperty(it) => {
                 std::fmt::Debug::fmt(it, f)
             }
@@ -33459,6 +33750,7 @@ impl From<AnyJsObjectBindingPatternMember> for SyntaxNode {
     fn from(n: AnyJsObjectBindingPatternMember) -> SyntaxNode {
         match n {
             AnyJsObjectBindingPatternMember::JsBogusBinding(it) => it.into(),
+            AnyJsObjectBindingPatternMember::JsMetavariable(it) => it.into(),
             AnyJsObjectBindingPatternMember::JsObjectBindingPatternProperty(it) => it.into(),
             AnyJsObjectBindingPatternMember::JsObjectBindingPatternRest(it) => it.into(),
             AnyJsObjectBindingPatternMember::JsObjectBindingPatternShorthandProperty(it) => {
@@ -33619,12 +33911,21 @@ impl From<JsLiteralMemberName> for AnyJsObjectMemberName {
         AnyJsObjectMemberName::JsLiteralMemberName(node)
     }
 }
+impl From<JsMetavariable> for AnyJsObjectMemberName {
+    fn from(node: JsMetavariable) -> AnyJsObjectMemberName {
+        AnyJsObjectMemberName::JsMetavariable(node)
+    }
+}
 impl AstNode for AnyJsObjectMemberName {
     type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> =
-        JsComputedMemberName::KIND_SET.union(JsLiteralMemberName::KIND_SET);
+    const KIND_SET: SyntaxKindSet<Language> = JsComputedMemberName::KIND_SET
+        .union(JsLiteralMemberName::KIND_SET)
+        .union(JsMetavariable::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
-        matches!(kind, JS_COMPUTED_MEMBER_NAME | JS_LITERAL_MEMBER_NAME)
+        matches!(
+            kind,
+            JS_COMPUTED_MEMBER_NAME | JS_LITERAL_MEMBER_NAME | JS_METAVARIABLE
+        )
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
@@ -33634,6 +33935,7 @@ impl AstNode for AnyJsObjectMemberName {
             JS_LITERAL_MEMBER_NAME => {
                 AnyJsObjectMemberName::JsLiteralMemberName(JsLiteralMemberName { syntax })
             }
+            JS_METAVARIABLE => AnyJsObjectMemberName::JsMetavariable(JsMetavariable { syntax }),
             _ => return None,
         };
         Some(res)
@@ -33642,12 +33944,14 @@ impl AstNode for AnyJsObjectMemberName {
         match self {
             AnyJsObjectMemberName::JsComputedMemberName(it) => &it.syntax,
             AnyJsObjectMemberName::JsLiteralMemberName(it) => &it.syntax,
+            AnyJsObjectMemberName::JsMetavariable(it) => &it.syntax,
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
             AnyJsObjectMemberName::JsComputedMemberName(it) => it.syntax,
             AnyJsObjectMemberName::JsLiteralMemberName(it) => it.syntax,
+            AnyJsObjectMemberName::JsMetavariable(it) => it.syntax,
         }
     }
 }
@@ -33656,6 +33960,7 @@ impl std::fmt::Debug for AnyJsObjectMemberName {
         match self {
             AnyJsObjectMemberName::JsComputedMemberName(it) => std::fmt::Debug::fmt(it, f),
             AnyJsObjectMemberName::JsLiteralMemberName(it) => std::fmt::Debug::fmt(it, f),
+            AnyJsObjectMemberName::JsMetavariable(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
@@ -33664,6 +33969,7 @@ impl From<AnyJsObjectMemberName> for SyntaxNode {
         match n {
             AnyJsObjectMemberName::JsComputedMemberName(it) => it.into(),
             AnyJsObjectMemberName::JsLiteralMemberName(it) => it.into(),
+            AnyJsObjectMemberName::JsMetavariable(it) => it.into(),
         }
     }
 }
@@ -35277,6 +35583,68 @@ impl From<AnyTsExternalModuleDeclarationBody> for SyntaxElement {
         node.into()
     }
 }
+impl From<JsMetavariable> for AnyTsIdentifierBinding {
+    fn from(node: JsMetavariable) -> AnyTsIdentifierBinding {
+        AnyTsIdentifierBinding::JsMetavariable(node)
+    }
+}
+impl From<TsIdentifierBinding> for AnyTsIdentifierBinding {
+    fn from(node: TsIdentifierBinding) -> AnyTsIdentifierBinding {
+        AnyTsIdentifierBinding::TsIdentifierBinding(node)
+    }
+}
+impl AstNode for AnyTsIdentifierBinding {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        JsMetavariable::KIND_SET.union(TsIdentifierBinding::KIND_SET);
+    fn can_cast(kind: SyntaxKind) -> bool {
+        matches!(kind, JS_METAVARIABLE | TS_IDENTIFIER_BINDING)
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        let res = match syntax.kind() {
+            JS_METAVARIABLE => AnyTsIdentifierBinding::JsMetavariable(JsMetavariable { syntax }),
+            TS_IDENTIFIER_BINDING => {
+                AnyTsIdentifierBinding::TsIdentifierBinding(TsIdentifierBinding { syntax })
+            }
+            _ => return None,
+        };
+        Some(res)
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        match self {
+            AnyTsIdentifierBinding::JsMetavariable(it) => &it.syntax,
+            AnyTsIdentifierBinding::TsIdentifierBinding(it) => &it.syntax,
+        }
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        match self {
+            AnyTsIdentifierBinding::JsMetavariable(it) => it.syntax,
+            AnyTsIdentifierBinding::TsIdentifierBinding(it) => it.syntax,
+        }
+    }
+}
+impl std::fmt::Debug for AnyTsIdentifierBinding {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            AnyTsIdentifierBinding::JsMetavariable(it) => std::fmt::Debug::fmt(it, f),
+            AnyTsIdentifierBinding::TsIdentifierBinding(it) => std::fmt::Debug::fmt(it, f),
+        }
+    }
+}
+impl From<AnyTsIdentifierBinding> for SyntaxNode {
+    fn from(n: AnyTsIdentifierBinding) -> SyntaxNode {
+        match n {
+            AnyTsIdentifierBinding::JsMetavariable(it) => it.into(),
+            AnyTsIdentifierBinding::TsIdentifierBinding(it) => it.into(),
+        }
+    }
+}
+impl From<AnyTsIdentifierBinding> for SyntaxElement {
+    fn from(n: AnyTsIdentifierBinding) -> SyntaxElement {
+        let node: SyntaxNode = n.into();
+        node.into()
+    }
+}
 impl From<JsStaticModifier> for AnyTsIndexSignatureModifier {
     fn from(node: JsStaticModifier) -> AnyTsIndexSignatureModifier {
         AnyTsIndexSignatureModifier::JsStaticModifier(node)
@@ -35453,11 +35821,6 @@ impl From<AnyTsMethodSignatureModifier> for SyntaxElement {
         node.into()
     }
 }
-impl From<TsIdentifierBinding> for AnyTsModuleName {
-    fn from(node: TsIdentifierBinding) -> AnyTsModuleName {
-        AnyTsModuleName::TsIdentifierBinding(node)
-    }
-}
 impl From<TsQualifiedModuleName> for AnyTsModuleName {
     fn from(node: TsQualifiedModuleName) -> AnyTsModuleName {
         AnyTsModuleName::TsQualifiedModuleName(node)
@@ -35466,39 +35829,47 @@ impl From<TsQualifiedModuleName> for AnyTsModuleName {
 impl AstNode for AnyTsModuleName {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
-        TsIdentifierBinding::KIND_SET.union(TsQualifiedModuleName::KIND_SET);
+        AnyTsIdentifierBinding::KIND_SET.union(TsQualifiedModuleName::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
-        matches!(kind, TS_IDENTIFIER_BINDING | TS_QUALIFIED_MODULE_NAME)
+        match kind {
+            TS_QUALIFIED_MODULE_NAME => true,
+            k if AnyTsIdentifierBinding::can_cast(k) => true,
+            _ => false,
+        }
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
-            TS_IDENTIFIER_BINDING => {
-                AnyTsModuleName::TsIdentifierBinding(TsIdentifierBinding { syntax })
-            }
             TS_QUALIFIED_MODULE_NAME => {
                 AnyTsModuleName::TsQualifiedModuleName(TsQualifiedModuleName { syntax })
             }
-            _ => return None,
+            _ => {
+                if let Some(any_ts_identifier_binding) = AnyTsIdentifierBinding::cast(syntax) {
+                    return Some(AnyTsModuleName::AnyTsIdentifierBinding(
+                        any_ts_identifier_binding,
+                    ));
+                }
+                return None;
+            }
         };
         Some(res)
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            AnyTsModuleName::TsIdentifierBinding(it) => &it.syntax,
             AnyTsModuleName::TsQualifiedModuleName(it) => &it.syntax,
+            AnyTsModuleName::AnyTsIdentifierBinding(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            AnyTsModuleName::TsIdentifierBinding(it) => it.syntax,
             AnyTsModuleName::TsQualifiedModuleName(it) => it.syntax,
+            AnyTsModuleName::AnyTsIdentifierBinding(it) => it.into_syntax(),
         }
     }
 }
 impl std::fmt::Debug for AnyTsModuleName {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            AnyTsModuleName::TsIdentifierBinding(it) => std::fmt::Debug::fmt(it, f),
+            AnyTsModuleName::AnyTsIdentifierBinding(it) => std::fmt::Debug::fmt(it, f),
             AnyTsModuleName::TsQualifiedModuleName(it) => std::fmt::Debug::fmt(it, f),
         }
     }
@@ -35506,7 +35877,7 @@ impl std::fmt::Debug for AnyTsModuleName {
 impl From<AnyTsModuleName> for SyntaxNode {
     fn from(n: AnyTsModuleName) -> SyntaxNode {
         match n {
-            AnyTsModuleName::TsIdentifierBinding(it) => it.into(),
+            AnyTsModuleName::AnyTsIdentifierBinding(it) => it.into(),
             AnyTsModuleName::TsQualifiedModuleName(it) => it.into(),
         }
     }
@@ -36277,6 +36648,11 @@ impl From<AnyTsTupleTypeElement> for SyntaxElement {
         node.into()
     }
 }
+impl From<JsMetavariable> for AnyTsType {
+    fn from(node: JsMetavariable) -> AnyTsType {
+        AnyTsType::JsMetavariable(node)
+    }
+}
 impl From<TsAnyType> for AnyTsType {
     fn from(node: TsAnyType) -> AnyTsType {
         AnyTsType::TsAnyType(node)
@@ -36454,7 +36830,8 @@ impl From<TsVoidType> for AnyTsType {
 }
 impl AstNode for AnyTsType {
     type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> = TsAnyType::KIND_SET
+    const KIND_SET: SyntaxKindSet<Language> = JsMetavariable::KIND_SET
+        .union(TsAnyType::KIND_SET)
         .union(TsArrayType::KIND_SET)
         .union(TsBigintLiteralType::KIND_SET)
         .union(TsBigintType::KIND_SET)
@@ -36492,7 +36869,8 @@ impl AstNode for AnyTsType {
     fn can_cast(kind: SyntaxKind) -> bool {
         matches!(
             kind,
-            TS_ANY_TYPE
+            JS_METAVARIABLE
+                | TS_ANY_TYPE
                 | TS_ARRAY_TYPE
                 | TS_BIGINT_LITERAL_TYPE
                 | TS_BIGINT_TYPE
@@ -36531,6 +36909,7 @@ impl AstNode for AnyTsType {
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
+            JS_METAVARIABLE => AnyTsType::JsMetavariable(JsMetavariable { syntax }),
             TS_ANY_TYPE => AnyTsType::TsAnyType(TsAnyType { syntax }),
             TS_ARRAY_TYPE => AnyTsType::TsArrayType(TsArrayType { syntax }),
             TS_BIGINT_LITERAL_TYPE => {
@@ -36584,6 +36963,7 @@ impl AstNode for AnyTsType {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
+            AnyTsType::JsMetavariable(it) => &it.syntax,
             AnyTsType::TsAnyType(it) => &it.syntax,
             AnyTsType::TsArrayType(it) => &it.syntax,
             AnyTsType::TsBigintLiteralType(it) => &it.syntax,
@@ -36623,6 +37003,7 @@ impl AstNode for AnyTsType {
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
+            AnyTsType::JsMetavariable(it) => it.syntax,
             AnyTsType::TsAnyType(it) => it.syntax,
             AnyTsType::TsArrayType(it) => it.syntax,
             AnyTsType::TsBigintLiteralType(it) => it.syntax,
@@ -36664,6 +37045,7 @@ impl AstNode for AnyTsType {
 impl std::fmt::Debug for AnyTsType {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
+            AnyTsType::JsMetavariable(it) => std::fmt::Debug::fmt(it, f),
             AnyTsType::TsAnyType(it) => std::fmt::Debug::fmt(it, f),
             AnyTsType::TsArrayType(it) => std::fmt::Debug::fmt(it, f),
             AnyTsType::TsBigintLiteralType(it) => std::fmt::Debug::fmt(it, f),
@@ -36705,6 +37087,7 @@ impl std::fmt::Debug for AnyTsType {
 impl From<AnyTsType> for SyntaxNode {
     fn from(n: AnyTsType) -> SyntaxNode {
         match n {
+            AnyTsType::JsMetavariable(it) => it.into(),
             AnyTsType::TsAnyType(it) => it.into(),
             AnyTsType::TsArrayType(it) => it.into(),
             AnyTsType::TsBigintLiteralType(it) => it.into(),
@@ -37270,6 +37653,11 @@ impl std::fmt::Display for AnyJsModuleItem {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
+impl std::fmt::Display for AnyJsModuleSource {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
 impl std::fmt::Display for AnyJsName {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
@@ -37376,6 +37764,11 @@ impl std::fmt::Display for AnyTsEnumMemberName {
     }
 }
 impl std::fmt::Display for AnyTsExternalModuleDeclarationBody {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for AnyTsIdentifierBinding {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
@@ -37901,6 +38294,11 @@ impl std::fmt::Display for JsLiteralMemberName {
     }
 }
 impl std::fmt::Display for JsLogicalExpression {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for JsMetavariable {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }

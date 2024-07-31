@@ -26,6 +26,7 @@ impl FormatRule<AnyJsExpression> for FormatAnyJsExpression {
             AnyJsExpression::JsInExpression(node) => node.format().fmt(f),
             AnyJsExpression::JsInstanceofExpression(node) => node.format().fmt(f),
             AnyJsExpression::JsLogicalExpression(node) => node.format().fmt(f),
+            AnyJsExpression::JsMetavariable(node) => node.format().fmt(f),
             AnyJsExpression::JsNewExpression(node) => node.format().fmt(f),
             AnyJsExpression::JsNewTargetExpression(node) => node.format().fmt(f),
             AnyJsExpression::JsObjectExpression(node) => node.format().fmt(f),

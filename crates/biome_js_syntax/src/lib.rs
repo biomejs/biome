@@ -66,6 +66,15 @@ impl JsSyntaxKind {
             && (self as u16) >= (JsSyntaxKind::BREAK_KW as u16)
     }
 
+    /// Returns `true` for any kind representing a Grit metavariable.
+    #[inline]
+    pub fn is_metavariable(&self) -> bool {
+        matches!(
+            self,
+            JsSyntaxKind::GRIT_METAVARIABLE | JsSyntaxKind::JS_METAVARIABLE
+        )
+    }
+
     /// Returns `true` for contextual keywords (excluding strict mode contextual keywords)
     #[inline]
     pub const fn is_contextual_keyword(self) -> bool {

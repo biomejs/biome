@@ -15,7 +15,7 @@ use crate::{
     JsCallExpression, JsClassExpression, JsComputedMemberAssignment, JsComputedMemberExpression,
     JsComputedMemberName, JsConditionalExpression, JsExpressionStatement, JsForStatement,
     JsFunctionExpression, JsIdentifierExpression, JsImportCallExpression, JsImportMetaExpression,
-    JsInExpression, JsInstanceofExpression, JsLogicalExpression, JsNewExpression,
+    JsInExpression, JsInstanceofExpression, JsLogicalExpression, JsMetavariable, JsNewExpression,
     JsNewTargetExpression, JsNullLiteralExpression, JsNumberLiteralExpression, JsObjectExpression,
     JsParenthesizedExpression, JsPostUpdateExpression, JsPreUpdateExpression, JsPreUpdateOperator,
     JsRegexLiteralExpression, JsSequenceExpression, JsStaticMemberExpression,
@@ -43,6 +43,7 @@ impl NeedsParentheses for AnyJsExpression {
             Self::JsComputedMemberExpression(expr) => expr.needs_parentheses(),
             Self::JsConditionalExpression(expr) => expr.needs_parentheses(),
             Self::JsFunctionExpression(expr) => expr.needs_parentheses(),
+            Self::JsMetavariable(expr) => expr.needs_parentheses(),
             Self::JsIdentifierExpression(expr) => expr.needs_parentheses(),
             Self::JsImportCallExpression(expr) => expr.needs_parentheses(),
             Self::JsInExpression(expr) => expr.needs_parentheses(),
@@ -322,6 +323,12 @@ impl NeedsParentheses for JsFunctionExpression {
             self.syntax(),
             FirstInStatementMode::ExpressionOrExportDefault,
         )
+    }
+}
+
+impl NeedsParentheses for JsMetavariable {
+    fn needs_parentheses(&self) -> bool {
+        false
     }
 }
 

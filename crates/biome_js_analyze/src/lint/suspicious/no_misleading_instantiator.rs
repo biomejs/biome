@@ -150,7 +150,12 @@ impl Rule for NoMisleadingInstantiator {
 
 /// Checks if the interface has a misleading constructor or new method.
 fn check_interface_methods(decl: &TsInterfaceDeclaration) -> Option<RuleState> {
-    let interface_ident = decl.id().ok()?.name_token().ok()?;
+    let interface_ident = decl
+        .id()
+        .ok()?
+        .as_ts_identifier_binding()?
+        .name_token()
+        .ok()?;
     for member in decl.members() {
         match member {
             AnyTsTypeMember::TsConstructSignatureTypeMember(construct)

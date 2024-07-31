@@ -18,6 +18,8 @@ use biome_js_syntax::{JsSyntaxKind::*, *};
 use biome_parser::diagnostic::expected_any;
 use biome_rowan::AstNode;
 
+use super::metavariable::is_at_metavariable;
+
 // test js assignment_target
 // foo += bar = b ??= 3;
 // a.foo -= bar;
@@ -289,7 +291,9 @@ impl ParseObjectPattern for ObjectAssignmentPattern {
     fn parse_property_pattern(&self, p: &mut JsParser) -> ParsedSyntax {
         let m = p.start();
 
-        let kind = if (is_at_identifier(p) || p.at(T![=])) && !p.nth_at(1, T![:]) {
+        let kind = if (is_at_identifier(p) || is_at_metavariable(p) || p.at(T![=]))
+            && !p.nth_at(1, T![:])
+        {
             parse_assignment(
                 p,
                 AssignmentExprPrecedence::Conditional,

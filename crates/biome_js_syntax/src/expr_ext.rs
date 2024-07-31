@@ -934,7 +934,9 @@ impl AnyJsExpression {
                 }
             }
 
-            AnyJsExpression::JsBogusExpression(_) => OperatorPrecedence::lowest(),
+            AnyJsExpression::JsBogusExpression(_) | AnyJsExpression::JsMetavariable(_) => {
+                OperatorPrecedence::lowest()
+            }
             AnyJsExpression::JsParenthesizedExpression(_) => OperatorPrecedence::highest(),
         };
 
@@ -1527,6 +1529,7 @@ impl AnyJsObjectMemberName {
                 }
             }
             AnyJsObjectMemberName::JsLiteralMemberName(expr) => expr.value().ok()?,
+            AnyJsObjectMemberName::JsMetavariable(_) => return None,
         };
         Some(inner_string_text(&token))
     }
@@ -1660,6 +1663,7 @@ impl AnyJsClassMemberName {
                     &expr.id_token().ok()?,
                 )));
             }
+            AnyJsClassMemberName::JsMetavariable(_) => return None,
         };
         Some(ClassMemberName::Public(inner_string_text(&token)))
     }
