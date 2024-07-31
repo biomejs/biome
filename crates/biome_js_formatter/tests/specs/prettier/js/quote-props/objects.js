@@ -96,8 +96,7 @@ Object.entries({
   "-1.5": null,
 }
 
-// FIXME: reformat issue
-//a = {
-//  "\a": 1,
-//  "b": 2
-//}
+a = {
+  "\a": 1,
+  "b": 2
+}
