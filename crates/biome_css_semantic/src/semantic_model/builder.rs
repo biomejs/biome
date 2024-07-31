@@ -4,7 +4,7 @@ use rustc_hash::FxHashMap;
 
 use crate::events::SemanticEvent;
 
-use super::model::{SemanticModel, SemanticModelData};
+use super::model::{Declaration, SemanticModel, SemanticModelData};
 
 /// Builds the [SemanticModel] consuming [SemanticEvent] and [GraphqlSyntaxNode].
 /// For a good example on how to use it see [semantic_model].
@@ -16,7 +16,7 @@ pub struct SemanticModelBuilder {
     root: CssRoot,
     node_by_range: FxHashMap<TextRange, CssSyntaxNode>,
     selectors: FxHashMap<TextRange, Vec<(String, TextRange)>>,
-    properties: FxHashMap<TextRange, Vec<(String, TextRange)>>,
+    declarations: FxHashMap<TextRange, Vec<Declaration>>,
 }
 
 impl SemanticModelBuilder {
@@ -25,7 +25,7 @@ impl SemanticModelBuilder {
             root,
             node_by_range: FxHashMap::default(),
             selectors: FxHashMap::default(),
-            properties: FxHashMap::default(),
+            declarations: FxHashMap::default(),
         }
     }
 
@@ -34,7 +34,7 @@ impl SemanticModelBuilder {
             root: self.root,
             node_by_range: self.node_by_range,
             selectors: self.selectors,
-            properties: self.properties,
+            declarations: self.declarations,
         };
         SemanticModel::new(data)
     }
@@ -64,14 +64,21 @@ impl SemanticModelBuilder {
                     .push((name, selector_range));
             }
             SemanticEvent::PropertyDeclaration {
-                rule_range,
-                name,
+                ruleset_range,
+                property,
+                property_range,
+                value,
                 value_range,
             } => {
-                self.properties
-                    .entry(rule_range)
+                self.declarations
+                    .entry(ruleset_range)
                     .or_default()
-                    .push((name, value_range));
+                    .push(Declaration {
+                        property,
+                        value,
+                        property_range,
+                        value_range,
+                    });
             }
         }
     }

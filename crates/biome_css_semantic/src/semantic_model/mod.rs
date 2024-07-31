@@ -46,6 +46,6 @@ mod tests {
         let model = super::semantic_model(&root);
         dbg!(&model);
         dbg!(&model.data.selectors);
-        dbg!(&model.data.properties);
+        dbg!(&model.data.declarations);
     }
 }
