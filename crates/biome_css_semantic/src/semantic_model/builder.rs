@@ -54,11 +54,12 @@ impl SemanticModelBuilder {
     pub fn push_event(&mut self, event: SemanticEvent) {
         match event {
             SemanticEvent::SelectorDeclaration {
-                selector_range,
+                range,
                 name,
+                selector_range,
             } => {
                 self.selectors
-                    .entry(selector_range)
+                    .entry(range)
                     .or_default()
                     .push((name, selector_range));
             }

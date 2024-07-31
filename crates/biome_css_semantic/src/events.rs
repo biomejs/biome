@@ -6,8 +6,9 @@ use biome_rowan::{AstNode, TextRange};
 #[derive(Debug)]
 pub enum SemanticEvent {
     SelectorDeclaration {
-        selector_range: TextRange,
+        range: TextRange,
         name: String,
+        selector_range: TextRange,
     },
     PropertyDeclaration {
         rule_range: TextRange,
@@ -31,22 +32,25 @@ impl SemanticEventExtractor {
                             AnyCssSelector::CssComplexSelector(s) => {
                                 if let Ok(l) = s.left() {
                                     self.stash.push_back(SemanticEvent::SelectorDeclaration {
-                                        selector_range: node.text_range(),
+                                        range: node.text_range(),
+                                        selector_range: l.range(),
                                         name: l.text().to_string(),
                                     });
                                 }
 
                                 if let Ok(r) = s.right() {
                                     self.stash.push_back(SemanticEvent::SelectorDeclaration {
-                                        selector_range: node.text_range(),
+                                        range: node.text_range(),
+                                        selector_range: r.range(),
                                         name: r.text().to_string(),
                                     });
                                 }
                             }
                             AnyCssSelector::CssCompoundSelector(selector) => {
                                 self.stash.push_back(SemanticEvent::SelectorDeclaration {
-                                    selector_range: node.text_range(),
+                                    range: node.text_range(),
                                     name: selector.text().to_string(),
+                                    selector_range: selector.range(),
                                 });
                             }
                             AnyCssSelector::CssBogusSelector(_)
