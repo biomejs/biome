@@ -2,11 +2,8 @@
 
 use crate::analyzer::RuleAssistConfiguration;
 use biome_analyze::RuleFilter;
-use biome_console::markup;
-use biome_deserialize::{DeserializableValidator, DeserializationDiagnostic};
 use biome_deserialize_macros::{Deserializable, Merge};
 use biome_diagnostics::{Category, Severity};
-use biome_rowan::TextRange;
 use rustc_hash::FxHashSet;
 #[cfg(feature = "schema")]
 use schemars::JsonSchema;
@@ -47,33 +44,12 @@ impl std::str::FromStr for RuleGroup {
     }
 }
 #[derive(Clone, Debug, Default, Deserialize, Deserializable, Eq, Merge, PartialEq, Serialize)]
-#[deserializable(with_validator)]
 #[cfg_attr(feature = "schema", derive(JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct Rules {
-    #[doc = r" It enables the lint rules recommended by Biome. `true` by default."]
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub recommended: Option<bool>,
-    #[doc = r" It enables ALL rules. The rules that belong to `nursery` won't be enabled."]
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub all: Option<bool>,
     #[deserializable(rename = "source")]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub source: Option<Source>,
-}
-impl DeserializableValidator for Rules {
-    fn validate(
-        &mut self,
-        _name: &str,
-        range: TextRange,
-        diagnostics: &mut Vec<DeserializationDiagnostic>,
-    ) -> bool {
-        if self.recommended == Some(true) && self.all == Some(true) {
-            diagnostics . push (DeserializationDiagnostic :: new (markup ! (< Emphasis > "'recommended'" < / Emphasis > " and " < Emphasis > "'all'" < / Emphasis > " can't be both " < Emphasis > "'true'" < / Emphasis > ". You should choose only one of them.")) . with_range (range) . with_note (markup ! ("Biome will fallback to its defaults for this section."))) ;
-            return false;
-        }
-        true
-    }
 }
 impl Rules {
     #[doc = r" Checks if the code coming from [biome_diagnostics::Diagnostic] corresponds to a rule."]
@@ -96,39 +72,14 @@ impl Rules {
         let group = <RuleGroup as std::str::FromStr>::from_str(split_code.next()?).ok()?;
         let rule_name = split_code.next()?;
         let rule_name = Self::has_rule(group, rule_name)?;
-        let severity = match group {
+        match group {
             RuleGroup::Source => self
                 .source
                 .as_ref()
                 .and_then(|group| group.get_rule_configuration(rule_name))
                 .filter(|conf| !matches!(conf, RuleAssistConfiguration::Off))
-                .map_or_else(
-                    || {
-                        if Source::is_recommended_rule(rule_name) {
-                            Severity::Error
-                        } else {
-                            Severity::Warning
-                        }
-                    },
-                    |conf| conf.into(),
-                ),
-        };
-        Some(severity)
-    }
-    #[doc = r" Ensure that `recommended` is set to `true` or implied."]
-    pub fn set_recommended(&mut self) {
-        if self.all != Some(true) && self.recommended == Some(false) {
-            self.recommended = Some(true)
+                .map(|conf| conf.into()),
         }
-        if let Some(group) = &mut self.source {
-            group.recommended = None;
-        }
-    }
-    pub(crate) const fn is_recommended_false(&self) -> bool {
-        matches!(self.recommended, Some(false))
-    }
-    pub(crate) const fn is_all_true(&self) -> bool {
-        matches!(self.all, Some(true))
     }
     #[doc = r" It returns the enabled rules by default."]
     #[doc = r""]
@@ -137,23 +88,13 @@ impl Rules {
         let mut enabled_rules = FxHashSet::default();
         let mut disabled_rules = FxHashSet::default();
         if let Some(group) = self.source.as_ref() {
-            group.collect_preset_rules(
-                self.is_all_true(),
-                !self.is_recommended_false(),
-                &mut enabled_rules,
-            );
             enabled_rules.extend(&group.get_enabled_rules());
             disabled_rules.extend(&group.get_disabled_rules());
-        } else if self.is_all_true() {
-            enabled_rules.extend(Source::all_rules_as_filters());
-        } else if !self.is_recommended_false() {
-            enabled_rules.extend(Source::recommended_rules_as_filters());
         }
         enabled_rules.difference(&disabled_rules).copied().collect()
     }
 }
 #[derive(Clone, Debug, Default, Deserialize, Deserializable, Eq, Merge, PartialEq, Serialize)]
-#[deserializable(with_validator)]
 #[cfg_attr(feature = "schema", derive(JsonSchema))]
 #[serde(rename_all = "camelCase", default, deny_unknown_fields)]
 #[doc = r" A list of rules that belong to this group"]
@@ -168,40 +109,9 @@ pub struct Source {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_sorted_keys: Option<RuleAssistConfiguration>,
 }
-impl DeserializableValidator for Source {
-    fn validate(
-        &mut self,
-        _name: &str,
-        range: TextRange,
-        diagnostics: &mut Vec<DeserializationDiagnostic>,
-    ) -> bool {
-        if self.recommended == Some(true) && self.all == Some(true) {
-            diagnostics . push (DeserializationDiagnostic :: new (markup ! (< Emphasis > "'recommended'" < / Emphasis > " and " < Emphasis > "'all'" < / Emphasis > " can't be both " < Emphasis > "'true'" < / Emphasis > ". You should choose only one of them.")) . with_range (range) . with_note (markup ! ("Biome will fallback to its defaults for this section."))) ;
-            return false;
-        }
-        true
-    }
-}
 impl Source {
     const GROUP_NAME: &'static str = "source";
     pub(crate) const GROUP_RULES: &'static [&'static str] = &["useSortedKeys"];
-    const RECOMMENDED_RULES: &'static [&'static str] = &[];
-    const RECOMMENDED_RULES_AS_FILTERS: &'static [RuleFilter<'static>] = &[];
-    const ALL_RULES_AS_FILTERS: &'static [RuleFilter<'static>] =
-        &[RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[0])];
-    #[doc = r" Retrieves the recommended rules"]
-    pub(crate) fn is_recommended_true(&self) -> bool {
-        matches!(self.recommended, Some(true))
-    }
-    pub(crate) fn is_recommended_unset(&self) -> bool {
-        self.recommended.is_none()
-    }
-    pub(crate) fn is_all_true(&self) -> bool {
-        matches!(self.all, Some(true))
-    }
-    pub(crate) fn is_all_unset(&self) -> bool {
-        self.all.is_none()
-    }
     pub(crate) fn get_enabled_rules(&self) -> FxHashSet<RuleFilter<'static>> {
         let mut index_set = FxHashSet::default();
         if let Some(rule) = self.use_sorted_keys.as_ref() {
@@ -223,31 +133,6 @@ impl Source {
     #[doc = r" Checks if, given a rule name, matches one of the rules contained in this category"]
     pub(crate) fn has_rule(rule_name: &str) -> Option<&'static str> {
         Some(Self::GROUP_RULES[Self::GROUP_RULES.binary_search(&rule_name).ok()?])
-    }
-    #[doc = r" Checks if, given a rule name, it is marked as recommended"]
-    pub(crate) fn is_recommended_rule(rule_name: &str) -> bool {
-        Self::RECOMMENDED_RULES.contains(&rule_name)
-    }
-    pub(crate) fn recommended_rules_as_filters() -> &'static [RuleFilter<'static>] {
-        Self::RECOMMENDED_RULES_AS_FILTERS
-    }
-    pub(crate) fn all_rules_as_filters() -> &'static [RuleFilter<'static>] {
-        Self::ALL_RULES_AS_FILTERS
-    }
-    #[doc = r" Select preset rules"]
-    pub(crate) fn collect_preset_rules(
-        &self,
-        parent_is_all: bool,
-        parent_is_recommended: bool,
-        enabled_rules: &mut FxHashSet<RuleFilter<'static>>,
-    ) {
-        if self.is_all_true() || self.is_all_unset() && parent_is_all {
-            enabled_rules.extend(Self::all_rules_as_filters());
-        } else if self.is_recommended_true()
-            || self.is_recommended_unset() && self.is_all_unset() && parent_is_recommended
-        {
-            enabled_rules.extend(Self::recommended_rules_as_filters());
-        }
     }
     pub(crate) fn get_rule_configuration(
         &self,

@@ -1670,7 +1670,7 @@ pub fn to_assists_settings(
 ) -> Result<AssistsSettings, WorkspaceError> {
     Ok(AssistsSettings {
         enabled: conf.enabled,
-        rules: Some(conf.rules),
+        rules: Some(conf.actions),
         ignored_files: to_matcher(working_directory.clone(), Some(&conf.ignore))?,
         included_files: to_matcher(working_directory.clone(), Some(&conf.include))?,
     })

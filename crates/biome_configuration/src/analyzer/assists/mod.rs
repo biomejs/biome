@@ -17,7 +17,7 @@ pub struct AssistsConfiguration {
 
     /// Whether Biome should fail in CLI if the assists were not applied to the code.
     #[partial(bpaf(pure(Default::default()), optional, hide))]
-    pub rules: Rules,
+    pub actions: Rules,
 
     /// A list of Unix shell style patterns. The formatter will ignore files/folders that will
     /// match these patterns.
@@ -34,7 +34,7 @@ impl Default for AssistsConfiguration {
     fn default() -> Self {
         Self {
             enabled: true,
-            rules: Rules::default(),
+            actions: Rules::default(),
             ignore: StringSet::default(),
             include: StringSet::default(),
         }

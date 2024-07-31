@@ -315,6 +315,10 @@
 		"AssistsConfiguration": {
 			"type": "object",
 			"properties": {
+				"actions": {
+					"description": "Whether Biome should fail in CLI if the assists were not applied to the code.",
+					"anyOf": [{ "$ref": "#/definitions/Rules2" }, { "type": "null" }]
+				},
 				"enabled": {
 					"description": "Whether Biome should enable assists via LSP.",
 					"type": ["boolean", "null"]
@@ -326,10 +330,6 @@
 				"include": {
 					"description": "A list of Unix shell style patterns. The formatter will include files/folders that will match these patterns.",
 					"anyOf": [{ "$ref": "#/definitions/StringSet" }, { "type": "null" }]
-				},
-				"rules": {
-					"description": "Whether Biome should fail in CLI if the assists were not applied to the code.",
-					"anyOf": [{ "$ref": "#/definitions/Rules2" }, { "type": "null" }]
 				}
 			},
 			"additionalProperties": false

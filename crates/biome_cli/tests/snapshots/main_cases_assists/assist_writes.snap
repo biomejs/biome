@@ -8,7 +8,7 @@ expression: content
 {
   "assists": {
     "enabled": true,
-    "rules": {
+    "actions": {
       "source": {
         "useSortedKeys": "on"
       }

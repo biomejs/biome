@@ -17,7 +17,7 @@ fn assist_emit_diagnostic() {
         r#"{ 
             "assists": { 
                 "enabled": true,
-                "rules": {
+                "actions": {
                   "source": {
                     "useSortedKeys": "on"
                   }
@@ -61,7 +61,7 @@ fn assist_writes() {
         r#"{ 
             "assists": { 
                 "enabled": true,
-                "rules": {
+                "actions": {
                   "source": {
                     "useSortedKeys": "on"
                   }

@@ -284,7 +284,7 @@ define_categories! {
     "lint/suspicious/useValidTypeof": "https://biomejs.dev/linter/rules/use-valid-typeof",
     // end lint rules
     // start assists rules
-    "assists/nursery/useSortedKeys": "https://biomejs.dev/linter/rules/use-valid-typeof",
+    "assists/source/useSortedKeys": "https://biomejs.dev/linter/actions/use-sorted-keys",
     // end assists rules
     ; // start syntax rules
     "syntax/nursery/noTypeOnlyImportAttributes",

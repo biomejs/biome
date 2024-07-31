@@ -88,6 +88,10 @@ export interface PartialConfiguration {
 }
 export interface PartialAssistsConfiguration {
 	/**
+	 * Whether Biome should fail in CLI if the assists were not applied to the code.
+	 */
+	actions?: Rules2;
+	/**
 	 * Whether Biome should enable assists via LSP.
 	 */
 	enabled?: boolean;
@@ -99,10 +103,6 @@ export interface PartialAssistsConfiguration {
 	 * A list of Unix shell style patterns. The formatter will include files/folders that will match these patterns.
 	 */
 	include?: StringSet;
-	/**
-	 * Whether Biome should fail in CLI if the assists were not applied to the code.
-	 */
-	rules?: Rules2;
 }
 /**
  * Options applied to CSS files
