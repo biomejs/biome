@@ -376,6 +376,20 @@ pub(crate) fn migrate_eslint_any_rule(
             let rule = group.no_double_equals.get_or_insert(Default::default());
             rule.set_level(rule_severity.into());
         }
+        "explicit-member-accessibility" => {
+            if !options.include_inspired {
+                results.has_inspired_rules = true;
+                return false;
+            }
+            if !options.include_nursery {
+                return false;
+            }
+            let group = rules.nursery.get_or_insert_with(Default::default);
+            let rule = group
+                .use_consistent_member_accessibility
+                .get_or_insert(Default::default());
+            rule.set_level(rule_severity.into());
+        }
         "for-direction" => {
             let group = rules.correctness.get_or_insert_with(Default::default);
             let rule = group

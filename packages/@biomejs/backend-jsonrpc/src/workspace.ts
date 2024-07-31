@@ -1214,6 +1214,10 @@ export interface Nursery {
 	 */
 	useConsistentGridAreas?: RuleConfiguration_for_Null;
 	/**
+	 * Require consistent accessibility modifiers on class properties and methods.
+	 */
+	useConsistentMemberAccessibility?: RuleConfiguration_for_UseConsistentMemberAccessibilityOptions;
+	/**
 	 * Use Date.now() to get the number of milliseconds since the Unix Epoch.
 	 */
 	useDateNow?: RuleFixConfiguration_for_Null;
@@ -1833,6 +1837,9 @@ export type RuleConfiguration_for_NoLabelWithoutControlOptions =
 export type RuleConfiguration_for_RestrictedImportsOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_RestrictedImportsOptions;
+export type RuleConfiguration_for_UseConsistentMemberAccessibilityOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_UseConsistentMemberAccessibilityOptions;
 export type RuleFixConfiguration_for_UseImportExtensionsOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_UseImportExtensionsOptions;
@@ -1942,6 +1949,16 @@ export interface RuleWithOptions_for_RestrictedImportsOptions {
 	 * Rule's options
 	 */
 	options: RestrictedImportsOptions;
+}
+export interface RuleWithOptions_for_UseConsistentMemberAccessibilityOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: UseConsistentMemberAccessibilityOptions;
 }
 export interface RuleWithFixOptions_for_UseImportExtensionsOptions {
 	/**
@@ -2082,6 +2099,9 @@ export interface RestrictedImportsOptions {
 	 */
 	paths: {};
 }
+export interface UseConsistentMemberAccessibilityOptions {
+	accessibility: Accessibility;
+}
 export interface UseImportExtensionsOptions {
 	/**
 	 * A map of custom import extension mappings, where the key is the inspected file extension, and the value is a pair of `module` extension and `component` import extension
@@ -2180,6 +2200,7 @@ For example, for React's `useRef()` hook the value would be `true`, while for `u
 	 */
 	stableResult: StableHookResult;
 }
+export type Accessibility = "noPublic" | "explicit" | "none";
 export type ConsistentArrayType = "shorthand" | "generic";
 export type FilenameCases = FilenameCase[];
 export interface Convention {
@@ -2559,6 +2580,7 @@ export type Category =
 	| "lint/nursery/useConsistentBuiltinInstantiation"
 	| "lint/nursery/useConsistentCurlyBraces"
 	| "lint/nursery/useConsistentGridAreas"
+	| "lint/nursery/useConsistentMemberAccessibility"
 	| "lint/nursery/useDateNow"
 	| "lint/nursery/useDefaultSwitchClause"
 	| "lint/nursery/useDeprecatedReason"

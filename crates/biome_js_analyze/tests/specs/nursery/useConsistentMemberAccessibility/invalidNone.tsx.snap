@@ -1,0 +1,328 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidNone.tsx
+---
+# Input
+```tsx
+class InvalidNone {
+  public constructor(public foo: string) {}
+}
+
+class InvalidNone2 {
+  public constructor(private readonly foo: string) {}
+}
+
+class InvalidNone3 {
+  public constructor(protected foo: string) {}
+}
+
+class InvalidNone4 {
+  protected name: string;
+  private x: number;
+  public getX() {
+    return this.x;
+  }
+}
+
+class InvalidNone5 {
+  protected name: string;
+  protected foo?: string;
+  public 'foo-bar'?: string;
+}
+
+class InvalidNone6 {
+  public constructor({ x, y }: { x: number; y: number }) {}
+}
+
+class InvalidNone7 {
+  protected name: string;
+  protected x?: string;
+  public getX() {
+    return this.x;
+  }
+}
+
+class InvalidNone8 {
+  private x = 2;
+}
+
+```
+
+# Diagnostics
+```
+invalidNone.tsx:2:3 lint/nursery/useConsistentMemberAccessibility ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Missing accessibility modifier on member.
+  
+    1 │ class InvalidNone {
+  > 2 │   public constructor(public foo: string) {}
+      │   ^^^^^^
+    3 │ }
+    4 │ 
+  
+  i Accessibility modifier cannot be used.
+  
+
+```
+
+```
+invalidNone.tsx:2:22 lint/nursery/useConsistentMemberAccessibility ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Missing accessibility modifier on member.
+  
+    1 │ class InvalidNone {
+  > 2 │   public constructor(public foo: string) {}
+      │                      ^^^^^^
+    3 │ }
+    4 │ 
+  
+  i Accessibility modifier cannot be used.
+  
+
+```
+
+```
+invalidNone.tsx:6:3 lint/nursery/useConsistentMemberAccessibility ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Missing accessibility modifier on member.
+  
+    5 │ class InvalidNone2 {
+  > 6 │   public constructor(private readonly foo: string) {}
+      │   ^^^^^^
+    7 │ }
+    8 │ 
+  
+  i Accessibility modifier cannot be used.
+  
+
+```
+
+```
+invalidNone.tsx:6:22 lint/nursery/useConsistentMemberAccessibility ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Missing accessibility modifier on member.
+  
+    5 │ class InvalidNone2 {
+  > 6 │   public constructor(private readonly foo: string) {}
+      │                      ^^^^^^^
+    7 │ }
+    8 │ 
+  
+  i Accessibility modifier cannot be used.
+  
+
+```
+
+```
+invalidNone.tsx:10:3 lint/nursery/useConsistentMemberAccessibility ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Missing accessibility modifier on member.
+  
+     9 │ class InvalidNone3 {
+  > 10 │   public constructor(protected foo: string) {}
+       │   ^^^^^^
+    11 │ }
+    12 │ 
+  
+  i Accessibility modifier cannot be used.
+  
+
+```
+
+```
+invalidNone.tsx:10:22 lint/nursery/useConsistentMemberAccessibility ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Missing accessibility modifier on member.
+  
+     9 │ class InvalidNone3 {
+  > 10 │   public constructor(protected foo: string) {}
+       │                      ^^^^^^^^^
+    11 │ }
+    12 │ 
+  
+  i Accessibility modifier cannot be used.
+  
+
+```
+
+```
+invalidNone.tsx:14:3 lint/nursery/useConsistentMemberAccessibility ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Missing accessibility modifier on member.
+  
+    13 │ class InvalidNone4 {
+  > 14 │   protected name: string;
+       │   ^^^^^^^^^
+    15 │   private x: number;
+    16 │   public getX() {
+  
+  i Accessibility modifier cannot be used.
+  
+
+```
+
+```
+invalidNone.tsx:15:3 lint/nursery/useConsistentMemberAccessibility ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Missing accessibility modifier on member.
+  
+    13 │ class InvalidNone4 {
+    14 │   protected name: string;
+  > 15 │   private x: number;
+       │   ^^^^^^^
+    16 │   public getX() {
+    17 │     return this.x;
+  
+  i Accessibility modifier cannot be used.
+  
+
+```
+
+```
+invalidNone.tsx:16:3 lint/nursery/useConsistentMemberAccessibility ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Missing accessibility modifier on member.
+  
+    14 │   protected name: string;
+    15 │   private x: number;
+  > 16 │   public getX() {
+       │   ^^^^^^
+    17 │     return this.x;
+    18 │   }
+  
+  i Accessibility modifier cannot be used.
+  
+
+```
+
+```
+invalidNone.tsx:22:3 lint/nursery/useConsistentMemberAccessibility ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Missing accessibility modifier on member.
+  
+    21 │ class InvalidNone5 {
+  > 22 │   protected name: string;
+       │   ^^^^^^^^^
+    23 │   protected foo?: string;
+    24 │   public 'foo-bar'?: string;
+  
+  i Accessibility modifier cannot be used.
+  
+
+```
+
+```
+invalidNone.tsx:23:3 lint/nursery/useConsistentMemberAccessibility ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Missing accessibility modifier on member.
+  
+    21 │ class InvalidNone5 {
+    22 │   protected name: string;
+  > 23 │   protected foo?: string;
+       │   ^^^^^^^^^
+    24 │   public 'foo-bar'?: string;
+    25 │ }
+  
+  i Accessibility modifier cannot be used.
+  
+
+```
+
+```
+invalidNone.tsx:24:3 lint/nursery/useConsistentMemberAccessibility ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Missing accessibility modifier on member.
+  
+    22 │   protected name: string;
+    23 │   protected foo?: string;
+  > 24 │   public 'foo-bar'?: string;
+       │   ^^^^^^
+    25 │ }
+    26 │ 
+  
+  i Accessibility modifier cannot be used.
+  
+
+```
+
+```
+invalidNone.tsx:28:3 lint/nursery/useConsistentMemberAccessibility ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Missing accessibility modifier on member.
+  
+    27 │ class InvalidNone6 {
+  > 28 │   public constructor({ x, y }: { x: number; y: number }) {}
+       │   ^^^^^^
+    29 │ }
+    30 │ 
+  
+  i Accessibility modifier cannot be used.
+  
+
+```
+
+```
+invalidNone.tsx:32:3 lint/nursery/useConsistentMemberAccessibility ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Missing accessibility modifier on member.
+  
+    31 │ class InvalidNone7 {
+  > 32 │   protected name: string;
+       │   ^^^^^^^^^
+    33 │   protected x?: string;
+    34 │   public getX() {
+  
+  i Accessibility modifier cannot be used.
+  
+
+```
+
+```
+invalidNone.tsx:33:3 lint/nursery/useConsistentMemberAccessibility ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Missing accessibility modifier on member.
+  
+    31 │ class InvalidNone7 {
+    32 │   protected name: string;
+  > 33 │   protected x?: string;
+       │   ^^^^^^^^^
+    34 │   public getX() {
+    35 │     return this.x;
+  
+  i Accessibility modifier cannot be used.
+  
+
+```
+
+```
+invalidNone.tsx:34:3 lint/nursery/useConsistentMemberAccessibility ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Missing accessibility modifier on member.
+  
+    32 │   protected name: string;
+    33 │   protected x?: string;
+  > 34 │   public getX() {
+       │   ^^^^^^
+    35 │     return this.x;
+    36 │   }
+  
+  i Accessibility modifier cannot be used.
+  
+
+```
+
+```
+invalidNone.tsx:40:3 lint/nursery/useConsistentMemberAccessibility ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Missing accessibility modifier on member.
+  
+    39 │ class InvalidNone8 {
+  > 40 │   private x = 2;
+       │   ^^^^^^^
+    41 │ }
+    42 │ 
+  
+  i Accessibility modifier cannot be used.
+  
+
+```
