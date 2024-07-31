@@ -15,6 +15,22 @@ impl SemanticModel {
             data: Rc::new(data),
         }
     }
+
+    pub fn root(&self) -> &CssRoot {
+        &self.data.root
+    }
+
+    pub fn node_by_range(&self, range: TextRange) -> Option<&CssSyntaxNode> {
+        self.data.node_by_range.get(&range)
+    }
+
+    pub fn selectors(&self, range: TextRange) -> Option<&Vec<(String, TextRange)>> {
+        self.data.selectors.get(&range)
+    }
+
+    pub fn declarations(&self, range: TextRange) -> Option<&Vec<Declaration>> {
+        self.data.declarations.get(&range)
+    }
 }
 
 #[derive(Debug)]
@@ -32,15 +48,4 @@ pub struct Declaration {
     pub value: String,
     pub property_range: TextRange,
     pub value_range: TextRange,
-}
-
-impl SemanticModelData {
-    pub(crate) fn new(root: CssRoot) -> Self {
-        Self {
-            root,
-            node_by_range: FxHashMap::default(),
-            selectors: FxHashMap::default(),
-            declarations: FxHashMap::default(),
-        }
-    }
 }

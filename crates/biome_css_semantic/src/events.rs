@@ -11,7 +11,7 @@ pub enum SemanticEvent {
         selector_range: TextRange,
     },
     PropertyDeclaration {
-        ruleset_range: TextRange,
+        selector_range: TextRange,
         property: String,
         property_range: TextRange,
         value: String,
@@ -70,13 +70,13 @@ impl SemanticEventExtractor {
             }
             biome_css_syntax::CssSyntaxKind::CSS_DECLARATION_OR_RULE_LIST => {
                 for block in node.children() {
-                    if let Some(ruleset_range) = self.current_selector_range {
+                    if let Some(selector_range) = self.current_selector_range {
                         if let Some(decl) = block.first_child() {
                             if let Some(property) = decl.first_child() {
                                 if let Some(property_name) = property.first_child() {
                                     if let Some(value) = property_name.next_sibling() {
                                         self.stash.push_back(SemanticEvent::PropertyDeclaration {
-                                            ruleset_range,
+                                            selector_range,
                                             property: property_name.text().to_string(),
                                             property_range: property_name.text_range(),
                                             value: value.text().to_string(),

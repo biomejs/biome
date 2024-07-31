@@ -64,14 +64,14 @@ impl SemanticModelBuilder {
                     .push((name, selector_range));
             }
             SemanticEvent::PropertyDeclaration {
-                ruleset_range,
+                selector_range,
                 property,
                 property_range,
                 value,
                 value_range,
             } => {
                 self.declarations
-                    .entry(ruleset_range)
+                    .entry(selector_range)
                     .or_default()
                     .push(Declaration {
                         property,
