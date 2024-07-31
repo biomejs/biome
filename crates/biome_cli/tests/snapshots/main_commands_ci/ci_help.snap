@@ -9,7 +9,7 @@ Command to use in CI environments. Runs formatter, linter and import sorting to 
 Files won't be modified, the command is a read-only operation.
 
 Usage: ci [--formatter-enabled=<true|false>] [--linter-enabled=<true|false>] [
---organize-imports-enabled=<true|false>] [--organize-imports-enabled=<true|false>] [--changed] [
+--organize-imports-enabled=<true|false>] [--assists-imports-enabled=<true|false>] [--changed] [
 --since=REF] [PATH]...
 
 The configuration that is contained inside the file `biome.json`
@@ -161,7 +161,7 @@ Available options:
         --formatter-enabled=<true|false>  Allow to enable or disable the formatter check.
         --linter-enabled=<true|false>  Allow to enable or disable the linter check.
         --organize-imports-enabled=<true|false>  Allow to enable or disable the organize imports.
-        --organize-imports-enabled=<true|false>  Allow to enable or disable the assists.
+        --assists-imports-enabled=<true|false>  Allow to enable or disable the assists.
         --changed             When set to true, only the files that have been changed compared to
                               your `defaultBranch` configuration will be linted.
         --since=REF           Use this to specify the base branch to compare against when you're
