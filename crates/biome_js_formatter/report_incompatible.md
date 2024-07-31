@@ -1,6 +1,6 @@
 ## Overall Metrics
 
-**Average compatibility**: 96.88
+**Average compatibility**: 97.04
 
 <details>
     <summary>Definition</summary>
@@ -8,7 +8,7 @@
     $$average = \frac\{\sum_{file}^\{files}compatibility_\{file}}\{files}$$
 </details>
 
-**Compatible lines**: 98.07
+**Compatible lines**: 98.09
 
 <details>
     <summary>Definition</summary>
@@ -1533,16 +1533,6 @@
 **Prettier Similarity**: 66.67%
 
 
-### js/optional-chaining-assignment/valid-parenthesized.js
-```diff
--a?.b = c;
-+(a?.b) = c;
-
-```
-
-**Prettier Similarity**: 0.00%
-
-
 ### js/preserve-line/member-chain.js
 ```diff
  fooBar
@@ -2994,32 +2984,6 @@
 ```
 
 **Prettier Similarity**: 92.31%
-
-
-### typescript/conformance/classes/constructorDeclarations/constructorParameters/readonlyReadonly.ts
-```diff
- class C {
--  readonly x: number;
--  constructor(readonly y: number) {}
-+  readonly readonly x: number;
-+  constructor(readonly readonly y: number) {}
- }
-
-```
-
-**Prettier Similarity**: 50.00%
-
-
-### typescript/conformance/parser/ecmascript5/Statements/parserES5ForOfStatement21.ts
-```diff
- //@target: ES5
--for (var of of) {
--}
-+for (var of of) { }
-
-```
-
-**Prettier Similarity**: 33.33%
 
 
 ### typescript/custom/abstract/abstractProperties.ts
