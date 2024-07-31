@@ -1,6 +1,6 @@
 ## Overall Metrics
 
-**Average compatibility**: 96.79
+**Average compatibility**: 96.88
 
 <details>
     <summary>Definition</summary>
@@ -8,7 +8,7 @@
     $$average = \frac\{\sum_{file}^\{files}compatibility_\{file}}\{files}$$
 </details>
 
-**Compatible lines**: 98.06
+**Compatible lines**: 98.07
 
 <details>
     <summary>Definition</summary>
@@ -6915,11 +6915,9 @@
 +) => token is infer U extends TSESTree.Token
    ? U
    : TSESTree.Token;
--type Test<T> = T extends ((
-+type Test<T> = T extends (
+ type Test<T> = T extends ((
    token: TSESTree.Token,
--) => asserts token is infer U extends TSESTree.Token)
-+) => asserts token is infer U extends TSESTree.Token
+ ) => asserts token is infer U extends TSESTree.Token)
    ? U
    : TSESTree.Token;
  type Test<T> = T extends (new (
@@ -6934,7 +6932,7 @@
 
 ```
 
-**Prettier Similarity**: 56.00%
+**Prettier Similarity**: 64.00%
 
 
 ### typescript/conformance/ambient/ambientDeclarations.ts
@@ -9675,13 +9673,8 @@
 
 
 ### typescript/type-arguments-bit-shift-left-like/1.ts
-```diff
--f << (<T>x);
-+f << <T>x;
 
-```
-
-**Prettier Similarity**: 0.00%
+**Prettier Similarity**: 100.00%
 
 
 ### typescript/type-arguments-bit-shift-left-like/2.ts

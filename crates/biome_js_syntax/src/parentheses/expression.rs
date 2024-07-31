@@ -732,6 +732,10 @@ impl NeedsParentheses for TsTypeAssertionExpression {
         match parent.kind() {
             JsSyntaxKind::TS_AS_EXPRESSION => true,
             JsSyntaxKind::TS_SATISFIES_EXPRESSION => true,
+            JsSyntaxKind::JS_BINARY_EXPRESSION => {
+                JsBinaryExpression::unwrap_cast(parent).operator()
+                    == Ok(JsBinaryOperator::LeftShift)
+            }
             _ => type_cast_like_needs_parens(self.syntax(), parent),
         }
     }

@@ -160,12 +160,14 @@ fn function_like_type_needs_parentheses(node: &JsSyntaxNode) -> bool {
             if is_not_extends_type {
                 return false;
             }
-            let ret_type = AnyTsFunctionType::unwrap_cast(node.clone()).return_type();
-            // Tests if `node` includes inferred return types with extends constraints
-            if let Ok(AnyTsReturnType::AnyTsType(AnyTsType::TsInferType(infer_type))) = ret_type {
-                infer_type.constraint().is_some()
-            } else {
-                false
+            match AnyTsFunctionType::unwrap_cast(node.clone()).return_type() {
+                Ok(AnyTsReturnType::AnyTsType(AnyTsType::TsInferType(infer_type))) => {
+                    infer_type.constraint().is_some()
+                }
+                Ok(AnyTsReturnType::TsAssertsReturnType(asserts_type)) => {
+                    asserts_type.predicate().is_some()
+                }
+                _ => false,
             }
         }
         JsSyntaxKind::TS_UNION_TYPE_VARIANT_LIST => {
