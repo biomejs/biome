@@ -31,12 +31,19 @@ use std::{
     time::{Duration, Instant},
 };
 
+pub(crate) struct TraverseResult {
+    pub(crate) summary: TraversalSummary,
+    pub(crate) evaluated_paths: Vec<PathBuf>,
+    pub(crate) fixed_paths: Vec<PathBuf>,
+    pub(crate) diagnostics: Vec<Error>,
+}
+
 pub(crate) fn traverse(
     execution: &Execution,
     session: &mut CliSession,
     cli_options: &CliOptions,
     mut inputs: Vec<OsString>,
-) -> Result<(TraversalSummary, Vec<PathBuf>, Vec<PathBuf>, Vec<Error>), CliDiagnostic> {
+) -> Result<TraverseResult, CliDiagnostic> {
     init_thread_pool();
 
     if inputs.is_empty() {
@@ -128,8 +135,8 @@ pub(crate) fn traverse(
     let skipped = skipped.load(Ordering::Relaxed);
     let suggested_fixes_skipped = printer.skipped_fixes();
     let diagnostics_not_printed = printer.not_printed_diagnostics();
-    Ok((
-        TraversalSummary {
+    Ok(TraverseResult {
+        summary: TraversalSummary {
             changed,
             unchanged,
             duration,
@@ -139,10 +146,11 @@ pub(crate) fn traverse(
             suggested_fixes_skipped,
             diagnostics_not_printed,
         },
+
         evaluated_paths,
         fixed_paths,
         diagnostics,
-    ))
+    })
 }
 
 /// This function will setup the global Rayon thread pool the first time it's called
@@ -176,7 +184,7 @@ fn traverse_inputs(
 
     fs.traversal(Box::new(|scope: &dyn TraversalScope| {
         for path in paths.clone() {
-            scope.handle(ctx, path.to_path_buf());
+            scope.handle(ctx, path.clone());
         }
     }));
 

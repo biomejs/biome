@@ -8,7 +8,7 @@ use crate::cli_options::{CliOptions, CliReporter};
 use crate::commands::MigrateSubCommand;
 use crate::diagnostics::ReportDiagnostic;
 use crate::execute::migrate::MigratePayload;
-use crate::execute::traverse::traverse;
+use crate::execute::traverse::{traverse, TraverseResult};
 use crate::reporter::github::{GithubReporter, GithubReporterVisitor};
 use crate::reporter::json::{JsonReporter, JsonReporterVisitor};
 use crate::reporter::junit::{JunitReporter, JunitReporterVisitor};
@@ -431,19 +431,23 @@ pub fn execute_mode(
         };
         migrate::run(payload)
     } else {
-        let (summary_result, evaluated_paths, fixed_paths, diagnostics) =
-            traverse(&execution, &mut session, cli_options, paths)?;
+        let TraverseResult {
+            summary,
+            evaluated_paths,
+            fixed_paths,
+            diagnostics,
+        } = traverse(&execution, &mut session, cli_options, paths)?;
         let console = session.app.console;
-        let errors = summary_result.errors;
-        let skipped = summary_result.skipped;
-        let processed = summary_result.changed + summary_result.unchanged;
-        let should_exit_on_warnings = summary_result.warnings > 0 && cli_options.error_on_warnings;
+        let errors = summary.errors;
+        let skipped = summary.skipped;
+        let processed = summary.changed + summary.unchanged;
+        let should_exit_on_warnings = summary.warnings > 0 && cli_options.error_on_warnings;
 
         match execution.report_mode {
             ReportMode::Terminal { with_summary } => {
                 if with_summary {
                     let reporter = SummaryReporter {
-                        summary: summary_result,
+                        summary,
                         diagnostics_payload: DiagnosticsPayload {
                             verbose: cli_options.verbose,
                             diagnostic_level: cli_options.diagnostic_level,
@@ -454,7 +458,7 @@ pub fn execute_mode(
                     reporter.write(&mut SummaryReporterVisitor(console))?;
                 } else {
                     let reporter = ConsoleReporter {
-                        summary: summary_result,
+                        summary,
                         diagnostics_payload: DiagnosticsPayload {
                             verbose: cli_options.verbose,
                             diagnostic_level: cli_options.diagnostic_level,
@@ -472,7 +476,7 @@ pub fn execute_mode(
                     <Warn>"The "<Emphasis>"--json"</Emphasis>" option is "<Underline>"unstable/experimental"</Underline>" and its output might change between patches/minor releases."</Warn>
                 });
                 let reporter = JsonReporter {
-                    summary: summary_result,
+                    summary,
                     diagnostics: DiagnosticsPayload {
                         verbose: cli_options.verbose,
                         diagnostic_level: cli_options.diagnostic_level,
@@ -480,7 +484,7 @@ pub fn execute_mode(
                     },
                     execution: execution.clone(),
                 };
-                let mut buffer = JsonReporterVisitor::new(summary_result);
+                let mut buffer = JsonReporterVisitor::new(summary);
                 reporter.write(&mut buffer)?;
                 if pretty {
                     let content = serde_json::to_string(&buffer).map_err(|error| {
@@ -520,7 +524,7 @@ pub fn execute_mode(
             }
             ReportMode::Junit => {
                 let reporter = JunitReporter {
-                    summary: summary_result,
+                    summary,
                     diagnostics_payload: DiagnosticsPayload {
                         verbose: cli_options.verbose,
                         diagnostic_level: cli_options.diagnostic_level,

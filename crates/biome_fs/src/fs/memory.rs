@@ -518,6 +518,7 @@ mod tests {
         struct TestContext {
             interner: PathInterner,
             visited: Mutex<Vec<PathBuf>>,
+            changed: Mutex<Vec<PathBuf>>,
         }
 
         impl TraversalContext for TestContext {
@@ -534,7 +535,7 @@ mod tests {
             }
 
             fn handle_path(&self, path: &Path) {
-                self.visited.lock().push(path.into())
+                self.changed.lock().push(path.into())
             }
 
             fn store_path(&self, path: &Path) {
@@ -545,12 +546,18 @@ mod tests {
                 let lock = self.visited.lock();
                 lock.to_vec()
             }
+
+            fn fixed_paths(&self) -> Vec<PathBuf> {
+                let lock = self.changed.lock();
+                lock.to_vec()
+            }
         }
 
         let (interner, _) = PathInterner::new();
         let mut ctx = TestContext {
             interner,
             visited: Mutex::default(),
+            changed: Mutex::default(),
         };
 
         // Traverse a directory

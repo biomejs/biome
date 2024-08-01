@@ -71,16 +71,6 @@ impl FileSystem for OsFileSystem {
         })
     }
 
-    // fn for_each_path(&self,  func: ForEachPath) {
-    //     let paths = self.paths.0.read();
-    //     let iter = paths.iter();
-    //     for path in iter {
-    //         OsTraversalScope::with(|_| {
-    //             func(path.as_path())
-    //         })
-    //     }
-    // }
-
     fn working_directory(&self) -> Option<PathBuf> {
         self.working_directory.clone()
     }
