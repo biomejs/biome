@@ -215,6 +215,17 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 - [useNamingConvention](https://biomejs.dev/linter/rules/use-naming-convention/) now accepts applying custom convention on abstract classes. Contributed by @Conaclos
 
+- [useNamingConvention](https://biomejs.dev/linter/rules/use-naming-convention/) no longer suggests an empty fix when a name doesn't match strict Pascal case ([#3561](https://github.com/biomejs/biome/issues/3561)).
+
+  Previously the following code led `useNamingConvention` to suggest an empty fix.
+  The rule no longer provides a fix for this case.
+
+  ```ts
+  type AAb = any
+  ```
+
+  Contributed by @Conaclos
+
 ### Parser
 
 #### Bug fixes
