@@ -363,7 +363,7 @@ impl EvaluatedPath {
     }
 
     pub fn is_fixed(&self) -> bool {
-        self.1 == true
+        self.1
     }
 
     pub fn as_path(&self) -> &Path {
@@ -371,7 +371,7 @@ impl EvaluatedPath {
     }
 
     pub fn to_bath_buf(&self) -> PathBuf {
-        self.0.to_path_buf()
+        self.0.clone()
     }
 }
 

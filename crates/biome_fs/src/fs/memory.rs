@@ -351,8 +351,9 @@ mod tests {
 
     use biome_diagnostics::Error;
     use parking_lot::Mutex;
+    use rustc_hash::FxHashSet;
 
-    use crate::{fs::FileSystemExt, OpenOptions};
+    use crate::{fs::FileSystemExt, EvaluatedPath, OpenOptions};
     use crate::{BiomePath, FileSystem, MemoryFileSystem, PathInterner, TraversalContext};
 
     #[test]
@@ -517,8 +518,7 @@ mod tests {
 
         struct TestContext {
             interner: PathInterner,
-            visited: Mutex<Vec<PathBuf>>,
-            changed: Mutex<Vec<PathBuf>>,
+            visited: Mutex<FxHashSet<EvaluatedPath>>,
         }
 
         impl TraversalContext for TestContext {
@@ -535,21 +535,18 @@ mod tests {
             }
 
             fn handle_path(&self, path: &Path) {
-                self.changed.lock().push(path.into())
+                self.visited
+                    .lock()
+                    .insert(EvaluatedPath::new_evaluated(path));
             }
 
             fn store_path(&self, path: &Path) {
-                self.visited.lock().push(path.into())
+                self.visited.lock().insert(path.into());
             }
 
-            fn evaluated_paths(&self) -> Vec<PathBuf> {
+            fn evaluated_paths(&self) -> FxHashSet<EvaluatedPath> {
                 let lock = self.visited.lock();
-                lock.to_vec()
-            }
-
-            fn fixed_paths(&self) -> Vec<PathBuf> {
-                let lock = self.changed.lock();
-                lock.to_vec()
+                lock.clone()
             }
         }
 
@@ -557,7 +554,6 @@ mod tests {
         let mut ctx = TestContext {
             interner,
             visited: Mutex::default(),
-            changed: Mutex::default(),
         };
 
         // Traverse a directory
@@ -565,22 +561,22 @@ mod tests {
             scope.evaluate(&ctx, PathBuf::from("dir1"));
         }));
 
-        let mut visited = Vec::new();
+        let mut visited = FxHashSet::default();
         swap(&mut visited, ctx.visited.get_mut());
 
         assert_eq!(visited.len(), 2);
-        assert!(visited.contains(&PathBuf::from("dir1/file1")));
-        assert!(visited.contains(&PathBuf::from("dir1/file2")));
+        assert!(visited.contains(&EvaluatedPath::from("dir1/file1")));
+        assert!(visited.contains(&EvaluatedPath::from("dir1/file2")));
 
         // Traverse a single file
         fs.traversal(Box::new(|scope| {
             scope.evaluate(&ctx, PathBuf::from("dir2/file2"));
         }));
 
-        let mut visited = Vec::new();
+        let mut visited = FxHashSet::default();
         swap(&mut visited, ctx.visited.get_mut());
 
         assert_eq!(visited.len(), 1);
-        assert!(visited.contains(&PathBuf::from("dir2/file2")));
+        assert!(visited.contains(&EvaluatedPath::from("dir2/file2")));
     }
 }
