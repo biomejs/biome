@@ -4,13 +4,14 @@ use biome_configuration::diagnostics::{ConfigurationDiagnostic, EditorConfigDiag
 use biome_configuration::{BiomeDiagnostic, CantLoadExtendFile};
 use biome_console::fmt::Bytes;
 use biome_console::markup;
-use biome_diagnostics::serde::Diagnostic as SerdeDiagnostic;
+use biome_css_parser::ParseDiagnostic;
 use biome_diagnostics::{
-    category, Advices, Category, Diagnostic, DiagnosticTags, Location, LogCategory, Severity, Visit,
+    category, Advices, Category, Diagnostic, DiagnosticTags, Location, LogCategory,
+    MessageAndDescription, Severity, Visit,
 };
 use biome_formatter::{FormatError, PrintError};
 use biome_fs::{BiomePath, FileSystemDiagnostic};
-use biome_grit_patterns::{CompileError, ParsePatternError};
+use biome_grit_patterns::CompileError;
 use biome_js_analyze::utils::rename::RenameError;
 use serde::{Deserialize, Serialize};
 use std::error::Error;
@@ -336,7 +337,17 @@ pub enum SearchError {
 
 #[derive(Debug, Deserialize, Diagnostic, Serialize)]
 pub struct PatternCompilationError {
-    pub diagnostics: Vec<SerdeDiagnostic>,
+    #[message]
+    #[description]
+    message: MessageAndDescription,
+}
+
+impl From<ParseDiagnostic> for PatternCompilationError {
+    fn from(diagnostic: ParseDiagnostic) -> Self {
+        Self {
+            message: diagnostic.message,
+        }
+    }
 }
 
 #[derive(Debug, Serialize, Deserialize, Diagnostic)]
@@ -463,18 +474,10 @@ impl From<VcsDiagnostic> for WorkspaceError {
 
 impl From<CompileError> for WorkspaceError {
     fn from(value: CompileError) -> Self {
-        match &value {
-            CompileError::ParsePatternError(ParsePatternError { diagnostics }) => {
-                Self::SearchError(SearchError::PatternCompilationError(
-                    PatternCompilationError {
-                        diagnostics: diagnostics
-                            .iter()
-                            .cloned()
-                            .map(SerdeDiagnostic::new)
-                            .collect(),
-                    },
-                ))
-            }
+        match value {
+            CompileError::ParsePatternError(diagnostic) => Self::SearchError(
+                SearchError::PatternCompilationError(PatternCompilationError::from(diagnostic)),
+            ),
             // FIXME: This really needs proper diagnostics
             _ => Self::SearchError(SearchError::QueryError(QueryDiagnostic(format!(
                 "{value:?}"

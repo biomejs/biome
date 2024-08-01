@@ -81,7 +81,7 @@ impl Rule for NoForEach {
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
         let member_expression =
-            AnyJsMemberExpression::cast_ref(node.callee().ok()?.omit_parentheses().syntax())?;
+            AnyJsMemberExpression::cast(node.callee().ok()?.omit_parentheses().into_syntax())?;
         if member_expression.member_name()?.text() != "forEach" {
             return None;
         }

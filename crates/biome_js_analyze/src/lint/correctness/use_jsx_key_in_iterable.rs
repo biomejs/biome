@@ -257,7 +257,7 @@ fn handle_potential_react_component(
     }
 
     if is_inside_jsx {
-        if let Some(node) = ReactComponentExpression::cast_ref(node.syntax()) {
+        if let Some(node) = ReactComponentExpression::cast(node.into_syntax()) {
             let range = handle_react_component(node, model)?;
             Some(range)
         } else {
@@ -265,7 +265,7 @@ fn handle_potential_react_component(
         }
     } else {
         let range =
-            handle_react_component(ReactComponentExpression::cast_ref(node.syntax())?, model)?;
+            handle_react_component(ReactComponentExpression::cast(node.into_syntax())?, model)?;
         Some(range)
     }
 }
@@ -291,7 +291,7 @@ fn handle_react_component(
 /// ```
 fn handle_jsx_tag(node: &JsxTagExpression, model: &SemanticModel) -> Option<Vec<TextRange>> {
     let tag = node.tag().ok()?;
-    let tag = AnyJsxChild::cast_ref(tag.syntax())?;
+    let tag = AnyJsxChild::cast(tag.into_syntax())?;
     handle_jsx_child(&tag, model)
 }
 

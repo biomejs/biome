@@ -35,7 +35,7 @@ declare_lint_rule! {
     ///
     /// ### Valid
     ///
-    /// ```js
+    /// ```jsx
     /// <>
     ///     <Foo>Hello world</Foo>
     ///     <Foo foo="bar" />

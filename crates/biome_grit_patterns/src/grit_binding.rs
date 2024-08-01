@@ -178,7 +178,7 @@ impl<'a> Binding<'a, GritQueryContext> for GritBinding<'a> {
 
     fn list_items(&self) -> Option<impl Iterator<Item = GritTargetNode<'a>> + Clone> {
         match self {
-            Self::Node(node) if node.is_list() => Some(node.children()),
+            Self::Node(node) if node.is_list() => Some(node.named_children()),
             _ => None,
         }
     }

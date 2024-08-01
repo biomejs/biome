@@ -1,8 +1,9 @@
-use crate::parentheses::{is_first_in_statement, FirstInStatementMode, NeedsParentheses};
 use crate::prelude::*;
 use crate::utils::JsObjectLike;
+
 use biome_formatter::write;
-use biome_js_syntax::{JsObjectExpression, JsSyntaxKind, JsSyntaxNode};
+use biome_js_syntax::parentheses::NeedsParentheses;
+use biome_js_syntax::JsObjectExpression;
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatJsObjectExpression;
@@ -23,16 +24,6 @@ impl FormatNodeRule<JsObjectExpression> for FormatJsObjectExpression {
     ) -> FormatResult<()> {
         // Formatted inside of `JsObjectLike`
         Ok(())
-    }
-}
-
-impl NeedsParentheses for JsObjectExpression {
-    fn needs_parentheses_with_parent(&self, parent: &JsSyntaxNode) -> bool {
-        matches!(parent.kind(), JsSyntaxKind::JS_EXTENDS_CLAUSE)
-            || is_first_in_statement(
-                self.clone().into(),
-                FirstInStatementMode::ExpressionStatementOrArrow,
-            )
     }
 }
 

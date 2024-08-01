@@ -12,6 +12,7 @@ impl FormatRule<AnyJsClassMember> for FormatAnyJsClassMember {
             AnyJsClassMember::JsConstructorClassMember(node) => node.format().fmt(f),
             AnyJsClassMember::JsEmptyClassMember(node) => node.format().fmt(f),
             AnyJsClassMember::JsGetterClassMember(node) => node.format().fmt(f),
+            AnyJsClassMember::JsMetavariable(node) => node.format().fmt(f),
             AnyJsClassMember::JsMethodClassMember(node) => node.format().fmt(f),
             AnyJsClassMember::JsPropertyClassMember(node) => node.format().fmt(f),
             AnyJsClassMember::JsSetterClassMember(node) => node.format().fmt(f),

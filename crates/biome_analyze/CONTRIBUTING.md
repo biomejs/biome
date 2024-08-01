@@ -256,12 +256,12 @@ declare_lint_rule! {
 
 ##### Biome lint rules inspired by other lint rules
 
-If a **lint** rule is inspired by an existing rule from other ecosystems (ESLint, ESLint plugins, clippy, etc.), you can add a new metadata to the macro called `source`. Its value is `Source`, which is an `enum` that contains various variants.
+If a **lint** rule is inspired by an existing rule from other ecosystems (ESLint, ESLint plugins, clippy, etc.), you can add a new metadata to the macro called `source`. Its value is `&'static [RuleSource]`, which is a reference to a slice of `RuleSource` elements, each representing a different source.
 
 If you're implementing a lint rule that matches the behaviour of the ESLint rule `no-debugger`, you'll use the variant `::ESLint` and pass the name of the rule:
 
 ```rust
-use biome_analyze::{declare_lint_rule, Source};
+use biome_analyze::{declare_lint_rule, RuleSource};
 
 declare_lint_rule! {
     /// Documentation
@@ -270,15 +270,15 @@ declare_lint_rule! {
         name: "myRuleName",
         language: "js",
         recommended: false,
-        source: Source::Eslint("no-debugger"),
+        sources: &[RuleSource::Eslint("no-debugger")],
     }
 }
 ```
 
-If the rule you're implementing has a different behaviour or option, you can add the `source_kind` metadata and use the `SourceKind::Inspired` type.
+If the rule you're implementing has a different behaviour or option, you can add the `source_kind` metadata and use the `RuleSourceKind::Inspired` type. If there are multiple sources, we assume that each source has the same `source_kind`.
 
 ```rust
-use biome_analyze::{declare_lint_rule, Source, SourceKind};
+use biome_analyze::{declare_lint_rule, RuleSource, RuleSourceKind};
 
 declare_lint_rule! {
     /// Documentation
@@ -287,12 +287,13 @@ declare_lint_rule! {
         name: "myRuleName",
         language: "js",
         recommended: false,
-        source: Source::Eslint("no-debugger"),
-        source_kind: SourceKind::Inspired,
+        sources: &[RuleSource::Eslint("no-debugger")],
+        source_kind: RuleSourceKind::Inspired,
     }
 }
 ```
-By default, `source_kind` is always `SourceKind::Same`.
+
+By default, `source_kind` is always `RuleSourceKind::SameLogic`.
 
 #### Category Macro
 
@@ -613,7 +614,7 @@ impl Rule for UseYield {
 
 A swift way to test your rule is to go inside the `biome_js_analyze/src/lib.rs` file (this will change based on where you're implementing the rule) and modify the `quick_test` function.
 
-Usually this test is ignored, so remove _comment_ the macro `#[ignore]` macro, change the `let SOURCE` variable to whatever source code you need to test.  Then update the rule filter, and add your rule:
+Usually this test is ignored, so remove _comment_ the macro `#[ignore]` macro, change the `let SOURCE` variable to whatever source code you need to test. Then update the rule filter, and add your rule:
 
 ```rust
 let rule_filter = RuleFilter::Rule("nursery", "useAwesomeTrick");

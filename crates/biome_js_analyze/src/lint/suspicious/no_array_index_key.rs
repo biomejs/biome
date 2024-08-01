@@ -263,7 +263,7 @@ fn is_array_method_index(
     call_expression: &JsCallExpression,
 ) -> Option<bool> {
     let member_expression =
-        AnyJsMemberExpression::cast_ref(call_expression.callee().ok()?.syntax())?;
+        AnyJsMemberExpression::cast(call_expression.callee().ok()?.into_syntax())?;
     let name = member_expression.member_name()?;
     let name = name.text();
     if matches!(

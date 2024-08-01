@@ -2,7 +2,6 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: typescript/union/consistent-with-flow/prettier-ignore.ts
 ---
-
 # Input
 
 ```ts
@@ -96,5 +95,3 @@ export type c =
   // qux
   | (qux1 & qux2);
 ```
-
-

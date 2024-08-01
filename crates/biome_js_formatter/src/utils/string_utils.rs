@@ -14,6 +14,8 @@ pub(crate) enum StringLiteralParentKind {
     Expression,
     /// Variant to track tokens that are inside a member
     Member,
+    /// Variant to track tokens that are inside an import attribute
+    ImportAttribute,
     /// Variant used when the string literal is inside a directive. This will apply
     /// a simplified logic of normalisation
     Directive,
@@ -219,6 +221,9 @@ impl<'token> LiteralStringNormaliser<'token> {
                 self.normalise_string_literal(string_information)
             }
             StringLiteralParentKind::Directive => self.normalise_directive(&string_information),
+            StringLiteralParentKind::ImportAttribute => {
+                self.normalise_import_attribute(string_information)
+            }
             StringLiteralParentKind::Member => {
                 self.normalise_type_member(string_information, file_source)
             }
@@ -227,6 +232,20 @@ impl<'token> LiteralStringNormaliser<'token> {
 
     fn get_token(&self) -> &'token JsSyntaxToken {
         self.token.token()
+    }
+
+    fn normalise_import_attribute(
+        &mut self,
+        string_information: StringInformation,
+    ) -> Cow<'token, str> {
+        if self.can_remove_import_attribute_quotes() {
+            return Cow::Owned(self.raw_content().to_string());
+        }
+
+        self.normalise_string_literal(string_information)
+    }
+    fn can_remove_import_attribute_quotes(&self) -> bool {
+        !self.is_preserve_quote_properties() && self.is_js_ident()
     }
 
     fn normalise_directive(&mut self, string_information: &StringInformation) -> Cow<'token, str> {
@@ -240,12 +259,11 @@ impl<'token> LiteralStringNormaliser<'token> {
         }
     }
 
-    /// We can change the text only if there are alphanumeric or alphabetic characters, depending on the file source
-    fn can_remove_quotes(&self, file_source: SourceFileKind) -> bool {
-        if self.chosen_quote_properties == QuoteProperties::Preserve {
-            return false;
-        }
+    fn is_preserve_quote_properties(&self) -> bool {
+        self.chosen_quote_properties == QuoteProperties::Preserve
+    }
 
+    fn can_remove_number_quotes_by_file_type(&self, file_source: SourceFileKind) -> bool {
         let text_to_check = self.raw_content();
 
         if text_to_check
@@ -266,7 +284,11 @@ impl<'token> LiteralStringNormaliser<'token> {
 
             return false;
         }
+        false
+    }
 
+    fn is_js_ident(&self) -> bool {
+        let text_to_check = self.raw_content();
         is_js_ident(text_to_check)
     }
 
@@ -275,10 +297,15 @@ impl<'token> LiteralStringNormaliser<'token> {
         string_information: StringInformation,
         file_source: SourceFileKind,
     ) -> Cow<'token, str> {
-        if self.can_remove_quotes(file_source) {
-            return Cow::Owned(self.raw_content().to_string());
+        let normalised = self.normalise_string_literal(string_information);
+        let quoteless = &normalised[1..normalised.len() - 1];
+        let can_remove_quotes = !self.is_preserve_quote_properties()
+            && (self.can_remove_number_quotes_by_file_type(file_source) || is_js_ident(quoteless));
+        if can_remove_quotes {
+            Cow::Owned(quoteless.to_string())
+        } else {
+            normalised
         }
-        self.normalise_string_literal(string_information)
     }
 
     fn normalise_string_literal(&self, string_information: StringInformation) -> Cow<'token, str> {
@@ -286,13 +313,7 @@ impl<'token> LiteralStringNormaliser<'token> {
         let polished_raw_content = self.normalize_string(&string_information);
 
         match polished_raw_content {
-            Cow::Borrowed(raw_content) => {
-                let final_content = self.swap_quotes(raw_content, &string_information);
-                match final_content {
-                    Cow::Borrowed(final_content) => Cow::Borrowed(final_content),
-                    Cow::Owned(final_content) => Cow::Owned(final_content),
-                }
-            }
+            Cow::Borrowed(raw_content) => self.swap_quotes(raw_content, &string_information),
             Cow::Owned(s) => {
                 // content is owned, meaning we allocated a new string,
                 // so we force replacing quotes, regardless
@@ -322,6 +343,7 @@ impl<'token> LiteralStringNormaliser<'token> {
         )
     }
 
+    /// Returns the string without its quotes.
     fn raw_content(&self) -> &'token str {
         let content = self.get_token().text_trimmed();
         &content[1..content.len() - 1]

@@ -2,6 +2,7 @@
 
 pub(crate) mod enum_member_name;
 pub(crate) mod external_module_declaration_body;
+pub(crate) mod identifier_binding;
 pub(crate) mod index_signature_modifier;
 pub(crate) mod method_signature_modifier;
 pub(crate) mod module_name;

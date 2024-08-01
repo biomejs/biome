@@ -2100,42 +2100,6 @@ pub struct CssGenericPropertyFields {
     pub value: CssGenericComponentValueList,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
-pub struct CssGritMetavariable {
-    pub(crate) syntax: SyntaxNode,
-}
-impl CssGritMetavariable {
-    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
-    #[doc = r""]
-    #[doc = r" # Safety"]
-    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
-    #[doc = r" or a match on [SyntaxNode::kind]"]
-    #[inline]
-    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
-        Self { syntax }
-    }
-    pub fn as_fields(&self) -> CssGritMetavariableFields {
-        CssGritMetavariableFields {
-            value_token: self.value_token(),
-        }
-    }
-    pub fn value_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 0usize)
-    }
-}
-#[cfg(feature = "serde")]
-impl Serialize for CssGritMetavariable {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        self.as_fields().serialize(serializer)
-    }
-}
-#[cfg_attr(feature = "serde", derive(Serialize))]
-pub struct CssGritMetavariableFields {
-    pub value_token: SyntaxResult<SyntaxToken>,
-}
-#[derive(Clone, PartialEq, Eq, Hash)]
 pub struct CssIdSelector {
     pub(crate) syntax: SyntaxNode,
 }
@@ -3383,6 +3347,42 @@ impl Serialize for CssMediaTypeQuery {
 pub struct CssMediaTypeQueryFields {
     pub modifier: Option<SyntaxToken>,
     pub ty: SyntaxResult<CssMediaType>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct CssMetavariable {
+    pub(crate) syntax: SyntaxNode,
+}
+impl CssMetavariable {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> CssMetavariableFields {
+        CssMetavariableFields {
+            value_token: self.value_token(),
+        }
+    }
+    pub fn value_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+}
+#[cfg(feature = "serde")]
+impl Serialize for CssMetavariable {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[cfg_attr(feature = "serde", derive(Serialize))]
+pub struct CssMetavariableFields {
+    pub value_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct CssNamedNamespacePrefix {
@@ -7331,7 +7331,7 @@ pub enum AnyCssDeclarationOrRule {
     AnyCssRule(AnyCssRule),
     CssBogus(CssBogus),
     CssDeclarationWithSemicolon(CssDeclarationWithSemicolon),
-    CssGritMetavariable(CssGritMetavariable),
+    CssMetavariable(CssMetavariable),
 }
 impl AnyCssDeclarationOrRule {
     pub fn as_any_css_rule(&self) -> Option<&AnyCssRule> {
@@ -7352,9 +7352,9 @@ impl AnyCssDeclarationOrRule {
             _ => None,
         }
     }
-    pub fn as_css_grit_metavariable(&self) -> Option<&CssGritMetavariable> {
+    pub fn as_css_metavariable(&self) -> Option<&CssMetavariable> {
         match &self {
-            AnyCssDeclarationOrRule::CssGritMetavariable(item) => Some(item),
+            AnyCssDeclarationOrRule::CssMetavariable(item) => Some(item),
             _ => None,
         }
     }
@@ -7889,8 +7889,8 @@ impl AnyCssMediaOrCombinableCondition {
 pub enum AnyCssMediaQuery {
     AnyCssMediaTypeQuery(AnyCssMediaTypeQuery),
     CssBogusMediaQuery(CssBogusMediaQuery),
-    CssGritMetavariable(CssGritMetavariable),
     CssMediaConditionQuery(CssMediaConditionQuery),
+    CssMetavariable(CssMetavariable),
 }
 impl AnyCssMediaQuery {
     pub fn as_any_css_media_type_query(&self) -> Option<&AnyCssMediaTypeQuery> {
@@ -7905,15 +7905,15 @@ impl AnyCssMediaQuery {
             _ => None,
         }
     }
-    pub fn as_css_grit_metavariable(&self) -> Option<&CssGritMetavariable> {
-        match &self {
-            AnyCssMediaQuery::CssGritMetavariable(item) => Some(item),
-            _ => None,
-        }
-    }
     pub fn as_css_media_condition_query(&self) -> Option<&CssMediaConditionQuery> {
         match &self {
             AnyCssMediaQuery::CssMediaConditionQuery(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_metavariable(&self) -> Option<&CssMetavariable> {
+        match &self {
+            AnyCssMediaQuery::CssMetavariable(item) => Some(item),
             _ => None,
         }
     }
@@ -8508,7 +8508,7 @@ pub enum AnyCssSelector {
     CssBogusSelector(CssBogusSelector),
     CssComplexSelector(CssComplexSelector),
     CssCompoundSelector(CssCompoundSelector),
-    CssGritMetavariable(CssGritMetavariable),
+    CssMetavariable(CssMetavariable),
 }
 impl AnyCssSelector {
     pub fn as_css_bogus_selector(&self) -> Option<&CssBogusSelector> {
@@ -8529,9 +8529,9 @@ impl AnyCssSelector {
             _ => None,
         }
     }
-    pub fn as_css_grit_metavariable(&self) -> Option<&CssGritMetavariable> {
+    pub fn as_css_metavariable(&self) -> Option<&CssMetavariable> {
         match &self {
-            AnyCssSelector::CssGritMetavariable(item) => Some(item),
+            AnyCssSelector::CssMetavariable(item) => Some(item),
             _ => None,
         }
     }
@@ -8836,8 +8836,8 @@ pub enum AnyCssValue {
     CssColor(CssColor),
     CssCustomIdentifier(CssCustomIdentifier),
     CssDashedIdentifier(CssDashedIdentifier),
-    CssGritMetavariable(CssGritMetavariable),
     CssIdentifier(CssIdentifier),
+    CssMetavariable(CssMetavariable),
     CssNumber(CssNumber),
     CssRatio(CssRatio),
     CssString(CssString),
@@ -8880,15 +8880,15 @@ impl AnyCssValue {
             _ => None,
         }
     }
-    pub fn as_css_grit_metavariable(&self) -> Option<&CssGritMetavariable> {
-        match &self {
-            AnyCssValue::CssGritMetavariable(item) => Some(item),
-            _ => None,
-        }
-    }
     pub fn as_css_identifier(&self) -> Option<&CssIdentifier> {
         match &self {
             AnyCssValue::CssIdentifier(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_metavariable(&self) -> Option<&CssMetavariable> {
+        match &self {
+            AnyCssValue::CssMetavariable(item) => Some(item),
             _ => None,
         }
     }
@@ -11007,47 +11007,6 @@ impl From<CssGenericProperty> for SyntaxElement {
         n.syntax.into()
     }
 }
-impl AstNode for CssGritMetavariable {
-    type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> =
-        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_GRIT_METAVARIABLE as u16));
-    fn can_cast(kind: SyntaxKind) -> bool {
-        kind == CSS_GRIT_METAVARIABLE
-    }
-    fn cast(syntax: SyntaxNode) -> Option<Self> {
-        if Self::can_cast(syntax.kind()) {
-            Some(Self { syntax })
-        } else {
-            None
-        }
-    }
-    fn syntax(&self) -> &SyntaxNode {
-        &self.syntax
-    }
-    fn into_syntax(self) -> SyntaxNode {
-        self.syntax
-    }
-}
-impl std::fmt::Debug for CssGritMetavariable {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssGritMetavariable")
-            .field(
-                "value_token",
-                &support::DebugSyntaxResult(self.value_token()),
-            )
-            .finish()
-    }
-}
-impl From<CssGritMetavariable> for SyntaxNode {
-    fn from(n: CssGritMetavariable) -> SyntaxNode {
-        n.syntax
-    }
-}
-impl From<CssGritMetavariable> for SyntaxElement {
-    fn from(n: CssGritMetavariable) -> SyntaxElement {
-        n.syntax.into()
-    }
-}
 impl AstNode for CssIdSelector {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -12258,6 +12217,47 @@ impl From<CssMediaTypeQuery> for SyntaxNode {
 }
 impl From<CssMediaTypeQuery> for SyntaxElement {
     fn from(n: CssMediaTypeQuery) -> SyntaxElement {
+        n.syntax.into()
+    }
+}
+impl AstNode for CssMetavariable {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_METAVARIABLE as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == CSS_METAVARIABLE
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for CssMetavariable {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("CssMetavariable")
+            .field(
+                "value_token",
+                &support::DebugSyntaxResult(self.value_token()),
+            )
+            .finish()
+    }
+}
+impl From<CssMetavariable> for SyntaxNode {
+    fn from(n: CssMetavariable) -> SyntaxNode {
+        n.syntax
+    }
+}
+impl From<CssMetavariable> for SyntaxElement {
+    fn from(n: CssMetavariable) -> SyntaxElement {
         n.syntax.into()
     }
 }
@@ -17173,9 +17173,9 @@ impl From<CssDeclarationWithSemicolon> for AnyCssDeclarationOrRule {
         AnyCssDeclarationOrRule::CssDeclarationWithSemicolon(node)
     }
 }
-impl From<CssGritMetavariable> for AnyCssDeclarationOrRule {
-    fn from(node: CssGritMetavariable) -> AnyCssDeclarationOrRule {
-        AnyCssDeclarationOrRule::CssGritMetavariable(node)
+impl From<CssMetavariable> for AnyCssDeclarationOrRule {
+    fn from(node: CssMetavariable) -> AnyCssDeclarationOrRule {
+        AnyCssDeclarationOrRule::CssMetavariable(node)
     }
 }
 impl AstNode for AnyCssDeclarationOrRule {
@@ -17183,10 +17183,10 @@ impl AstNode for AnyCssDeclarationOrRule {
     const KIND_SET: SyntaxKindSet<Language> = AnyCssRule::KIND_SET
         .union(CssBogus::KIND_SET)
         .union(CssDeclarationWithSemicolon::KIND_SET)
-        .union(CssGritMetavariable::KIND_SET);
+        .union(CssMetavariable::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
         match kind {
-            CSS_BOGUS | CSS_DECLARATION_WITH_SEMICOLON | CSS_GRIT_METAVARIABLE => true,
+            CSS_BOGUS | CSS_DECLARATION_WITH_SEMICOLON | CSS_METAVARIABLE => true,
             k if AnyCssRule::can_cast(k) => true,
             _ => false,
         }
@@ -17199,8 +17199,8 @@ impl AstNode for AnyCssDeclarationOrRule {
                     syntax,
                 })
             }
-            CSS_GRIT_METAVARIABLE => {
-                AnyCssDeclarationOrRule::CssGritMetavariable(CssGritMetavariable { syntax })
+            CSS_METAVARIABLE => {
+                AnyCssDeclarationOrRule::CssMetavariable(CssMetavariable { syntax })
             }
             _ => {
                 if let Some(any_css_rule) = AnyCssRule::cast(syntax) {
@@ -17215,7 +17215,7 @@ impl AstNode for AnyCssDeclarationOrRule {
         match self {
             AnyCssDeclarationOrRule::CssBogus(it) => &it.syntax,
             AnyCssDeclarationOrRule::CssDeclarationWithSemicolon(it) => &it.syntax,
-            AnyCssDeclarationOrRule::CssGritMetavariable(it) => &it.syntax,
+            AnyCssDeclarationOrRule::CssMetavariable(it) => &it.syntax,
             AnyCssDeclarationOrRule::AnyCssRule(it) => it.syntax(),
         }
     }
@@ -17223,7 +17223,7 @@ impl AstNode for AnyCssDeclarationOrRule {
         match self {
             AnyCssDeclarationOrRule::CssBogus(it) => it.syntax,
             AnyCssDeclarationOrRule::CssDeclarationWithSemicolon(it) => it.syntax,
-            AnyCssDeclarationOrRule::CssGritMetavariable(it) => it.syntax,
+            AnyCssDeclarationOrRule::CssMetavariable(it) => it.syntax,
             AnyCssDeclarationOrRule::AnyCssRule(it) => it.into_syntax(),
         }
     }
@@ -17234,7 +17234,7 @@ impl std::fmt::Debug for AnyCssDeclarationOrRule {
             AnyCssDeclarationOrRule::AnyCssRule(it) => std::fmt::Debug::fmt(it, f),
             AnyCssDeclarationOrRule::CssBogus(it) => std::fmt::Debug::fmt(it, f),
             AnyCssDeclarationOrRule::CssDeclarationWithSemicolon(it) => std::fmt::Debug::fmt(it, f),
-            AnyCssDeclarationOrRule::CssGritMetavariable(it) => std::fmt::Debug::fmt(it, f),
+            AnyCssDeclarationOrRule::CssMetavariable(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
@@ -17244,7 +17244,7 @@ impl From<AnyCssDeclarationOrRule> for SyntaxNode {
             AnyCssDeclarationOrRule::AnyCssRule(it) => it.into(),
             AnyCssDeclarationOrRule::CssBogus(it) => it.into(),
             AnyCssDeclarationOrRule::CssDeclarationWithSemicolon(it) => it.into(),
-            AnyCssDeclarationOrRule::CssGritMetavariable(it) => it.into(),
+            AnyCssDeclarationOrRule::CssMetavariable(it) => it.into(),
         }
     }
 }
@@ -18910,25 +18910,25 @@ impl From<CssBogusMediaQuery> for AnyCssMediaQuery {
         AnyCssMediaQuery::CssBogusMediaQuery(node)
     }
 }
-impl From<CssGritMetavariable> for AnyCssMediaQuery {
-    fn from(node: CssGritMetavariable) -> AnyCssMediaQuery {
-        AnyCssMediaQuery::CssGritMetavariable(node)
-    }
-}
 impl From<CssMediaConditionQuery> for AnyCssMediaQuery {
     fn from(node: CssMediaConditionQuery) -> AnyCssMediaQuery {
         AnyCssMediaQuery::CssMediaConditionQuery(node)
+    }
+}
+impl From<CssMetavariable> for AnyCssMediaQuery {
+    fn from(node: CssMetavariable) -> AnyCssMediaQuery {
+        AnyCssMediaQuery::CssMetavariable(node)
     }
 }
 impl AstNode for AnyCssMediaQuery {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> = AnyCssMediaTypeQuery::KIND_SET
         .union(CssBogusMediaQuery::KIND_SET)
-        .union(CssGritMetavariable::KIND_SET)
-        .union(CssMediaConditionQuery::KIND_SET);
+        .union(CssMediaConditionQuery::KIND_SET)
+        .union(CssMetavariable::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
         match kind {
-            CSS_BOGUS_MEDIA_QUERY | CSS_GRIT_METAVARIABLE | CSS_MEDIA_CONDITION_QUERY => true,
+            CSS_BOGUS_MEDIA_QUERY | CSS_MEDIA_CONDITION_QUERY | CSS_METAVARIABLE => true,
             k if AnyCssMediaTypeQuery::can_cast(k) => true,
             _ => false,
         }
@@ -18938,12 +18938,10 @@ impl AstNode for AnyCssMediaQuery {
             CSS_BOGUS_MEDIA_QUERY => {
                 AnyCssMediaQuery::CssBogusMediaQuery(CssBogusMediaQuery { syntax })
             }
-            CSS_GRIT_METAVARIABLE => {
-                AnyCssMediaQuery::CssGritMetavariable(CssGritMetavariable { syntax })
-            }
             CSS_MEDIA_CONDITION_QUERY => {
                 AnyCssMediaQuery::CssMediaConditionQuery(CssMediaConditionQuery { syntax })
             }
+            CSS_METAVARIABLE => AnyCssMediaQuery::CssMetavariable(CssMetavariable { syntax }),
             _ => {
                 if let Some(any_css_media_type_query) = AnyCssMediaTypeQuery::cast(syntax) {
                     return Some(AnyCssMediaQuery::AnyCssMediaTypeQuery(
@@ -18958,16 +18956,16 @@ impl AstNode for AnyCssMediaQuery {
     fn syntax(&self) -> &SyntaxNode {
         match self {
             AnyCssMediaQuery::CssBogusMediaQuery(it) => &it.syntax,
-            AnyCssMediaQuery::CssGritMetavariable(it) => &it.syntax,
             AnyCssMediaQuery::CssMediaConditionQuery(it) => &it.syntax,
+            AnyCssMediaQuery::CssMetavariable(it) => &it.syntax,
             AnyCssMediaQuery::AnyCssMediaTypeQuery(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
             AnyCssMediaQuery::CssBogusMediaQuery(it) => it.syntax,
-            AnyCssMediaQuery::CssGritMetavariable(it) => it.syntax,
             AnyCssMediaQuery::CssMediaConditionQuery(it) => it.syntax,
+            AnyCssMediaQuery::CssMetavariable(it) => it.syntax,
             AnyCssMediaQuery::AnyCssMediaTypeQuery(it) => it.into_syntax(),
         }
     }
@@ -18977,8 +18975,8 @@ impl std::fmt::Debug for AnyCssMediaQuery {
         match self {
             AnyCssMediaQuery::AnyCssMediaTypeQuery(it) => std::fmt::Debug::fmt(it, f),
             AnyCssMediaQuery::CssBogusMediaQuery(it) => std::fmt::Debug::fmt(it, f),
-            AnyCssMediaQuery::CssGritMetavariable(it) => std::fmt::Debug::fmt(it, f),
             AnyCssMediaQuery::CssMediaConditionQuery(it) => std::fmt::Debug::fmt(it, f),
+            AnyCssMediaQuery::CssMetavariable(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
@@ -18987,8 +18985,8 @@ impl From<AnyCssMediaQuery> for SyntaxNode {
         match n {
             AnyCssMediaQuery::AnyCssMediaTypeQuery(it) => it.into(),
             AnyCssMediaQuery::CssBogusMediaQuery(it) => it.into(),
-            AnyCssMediaQuery::CssGritMetavariable(it) => it.into(),
             AnyCssMediaQuery::CssMediaConditionQuery(it) => it.into(),
+            AnyCssMediaQuery::CssMetavariable(it) => it.into(),
         }
     }
 }
@@ -20284,9 +20282,12 @@ impl AstNode for AnyCssQueryFeatureValue {
             CSS_NUMBER => AnyCssQueryFeatureValue::CssNumber(CssNumber { syntax }),
             CSS_RATIO => AnyCssQueryFeatureValue::CssRatio(CssRatio { syntax }),
             _ => {
-                if let Some(any_css_dimension) = AnyCssDimension::cast(syntax.clone()) {
-                    return Some(AnyCssQueryFeatureValue::AnyCssDimension(any_css_dimension));
-                }
+                let syntax = match AnyCssDimension::try_cast(syntax) {
+                    Ok(any_css_dimension) => {
+                        return Some(AnyCssQueryFeatureValue::AnyCssDimension(any_css_dimension));
+                    }
+                    Err(syntax) => syntax,
+                };
                 if let Some(any_css_function) = AnyCssFunction::cast(syntax) {
                     return Some(AnyCssQueryFeatureValue::AnyCssFunction(any_css_function));
                 }
@@ -20661,9 +20662,9 @@ impl From<CssCompoundSelector> for AnyCssSelector {
         AnyCssSelector::CssCompoundSelector(node)
     }
 }
-impl From<CssGritMetavariable> for AnyCssSelector {
-    fn from(node: CssGritMetavariable) -> AnyCssSelector {
-        AnyCssSelector::CssGritMetavariable(node)
+impl From<CssMetavariable> for AnyCssSelector {
+    fn from(node: CssMetavariable) -> AnyCssSelector {
+        AnyCssSelector::CssMetavariable(node)
     }
 }
 impl AstNode for AnyCssSelector {
@@ -20671,14 +20672,11 @@ impl AstNode for AnyCssSelector {
     const KIND_SET: SyntaxKindSet<Language> = CssBogusSelector::KIND_SET
         .union(CssComplexSelector::KIND_SET)
         .union(CssCompoundSelector::KIND_SET)
-        .union(CssGritMetavariable::KIND_SET);
+        .union(CssMetavariable::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
         matches!(
             kind,
-            CSS_BOGUS_SELECTOR
-                | CSS_COMPLEX_SELECTOR
-                | CSS_COMPOUND_SELECTOR
-                | CSS_GRIT_METAVARIABLE
+            CSS_BOGUS_SELECTOR | CSS_COMPLEX_SELECTOR | CSS_COMPOUND_SELECTOR | CSS_METAVARIABLE
         )
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
@@ -20690,9 +20688,7 @@ impl AstNode for AnyCssSelector {
             CSS_COMPOUND_SELECTOR => {
                 AnyCssSelector::CssCompoundSelector(CssCompoundSelector { syntax })
             }
-            CSS_GRIT_METAVARIABLE => {
-                AnyCssSelector::CssGritMetavariable(CssGritMetavariable { syntax })
-            }
+            CSS_METAVARIABLE => AnyCssSelector::CssMetavariable(CssMetavariable { syntax }),
             _ => return None,
         };
         Some(res)
@@ -20702,7 +20698,7 @@ impl AstNode for AnyCssSelector {
             AnyCssSelector::CssBogusSelector(it) => &it.syntax,
             AnyCssSelector::CssComplexSelector(it) => &it.syntax,
             AnyCssSelector::CssCompoundSelector(it) => &it.syntax,
-            AnyCssSelector::CssGritMetavariable(it) => &it.syntax,
+            AnyCssSelector::CssMetavariable(it) => &it.syntax,
         }
     }
     fn into_syntax(self) -> SyntaxNode {
@@ -20710,7 +20706,7 @@ impl AstNode for AnyCssSelector {
             AnyCssSelector::CssBogusSelector(it) => it.syntax,
             AnyCssSelector::CssComplexSelector(it) => it.syntax,
             AnyCssSelector::CssCompoundSelector(it) => it.syntax,
-            AnyCssSelector::CssGritMetavariable(it) => it.syntax,
+            AnyCssSelector::CssMetavariable(it) => it.syntax,
         }
     }
 }
@@ -20720,7 +20716,7 @@ impl std::fmt::Debug for AnyCssSelector {
             AnyCssSelector::CssBogusSelector(it) => std::fmt::Debug::fmt(it, f),
             AnyCssSelector::CssComplexSelector(it) => std::fmt::Debug::fmt(it, f),
             AnyCssSelector::CssCompoundSelector(it) => std::fmt::Debug::fmt(it, f),
-            AnyCssSelector::CssGritMetavariable(it) => std::fmt::Debug::fmt(it, f),
+            AnyCssSelector::CssMetavariable(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
@@ -20730,7 +20726,7 @@ impl From<AnyCssSelector> for SyntaxNode {
             AnyCssSelector::CssBogusSelector(it) => it.into(),
             AnyCssSelector::CssComplexSelector(it) => it.into(),
             AnyCssSelector::CssCompoundSelector(it) => it.into(),
-            AnyCssSelector::CssGritMetavariable(it) => it.into(),
+            AnyCssSelector::CssMetavariable(it) => it.into(),
         }
     }
 }
@@ -21602,14 +21598,14 @@ impl From<CssDashedIdentifier> for AnyCssValue {
         AnyCssValue::CssDashedIdentifier(node)
     }
 }
-impl From<CssGritMetavariable> for AnyCssValue {
-    fn from(node: CssGritMetavariable) -> AnyCssValue {
-        AnyCssValue::CssGritMetavariable(node)
-    }
-}
 impl From<CssIdentifier> for AnyCssValue {
     fn from(node: CssIdentifier) -> AnyCssValue {
         AnyCssValue::CssIdentifier(node)
+    }
+}
+impl From<CssMetavariable> for AnyCssValue {
+    fn from(node: CssMetavariable) -> AnyCssValue {
+        AnyCssValue::CssMetavariable(node)
     }
 }
 impl From<CssNumber> for AnyCssValue {
@@ -21640,8 +21636,8 @@ impl AstNode for AnyCssValue {
         .union(CssColor::KIND_SET)
         .union(CssCustomIdentifier::KIND_SET)
         .union(CssDashedIdentifier::KIND_SET)
-        .union(CssGritMetavariable::KIND_SET)
         .union(CssIdentifier::KIND_SET)
+        .union(CssMetavariable::KIND_SET)
         .union(CssNumber::KIND_SET)
         .union(CssRatio::KIND_SET)
         .union(CssString::KIND_SET)
@@ -21652,8 +21648,8 @@ impl AstNode for AnyCssValue {
             | CSS_COLOR
             | CSS_CUSTOM_IDENTIFIER
             | CSS_DASHED_IDENTIFIER
-            | CSS_GRIT_METAVARIABLE
             | CSS_IDENTIFIER
+            | CSS_METAVARIABLE
             | CSS_NUMBER
             | CSS_RATIO
             | CSS_STRING
@@ -21673,18 +21669,19 @@ impl AstNode for AnyCssValue {
             CSS_DASHED_IDENTIFIER => {
                 AnyCssValue::CssDashedIdentifier(CssDashedIdentifier { syntax })
             }
-            CSS_GRIT_METAVARIABLE => {
-                AnyCssValue::CssGritMetavariable(CssGritMetavariable { syntax })
-            }
             CSS_IDENTIFIER => AnyCssValue::CssIdentifier(CssIdentifier { syntax }),
+            CSS_METAVARIABLE => AnyCssValue::CssMetavariable(CssMetavariable { syntax }),
             CSS_NUMBER => AnyCssValue::CssNumber(CssNumber { syntax }),
             CSS_RATIO => AnyCssValue::CssRatio(CssRatio { syntax }),
             CSS_STRING => AnyCssValue::CssString(CssString { syntax }),
             CSS_UNICODE_RANGE => AnyCssValue::CssUnicodeRange(CssUnicodeRange { syntax }),
             _ => {
-                if let Some(any_css_dimension) = AnyCssDimension::cast(syntax.clone()) {
-                    return Some(AnyCssValue::AnyCssDimension(any_css_dimension));
-                }
+                let syntax = match AnyCssDimension::try_cast(syntax) {
+                    Ok(any_css_dimension) => {
+                        return Some(AnyCssValue::AnyCssDimension(any_css_dimension));
+                    }
+                    Err(syntax) => syntax,
+                };
                 if let Some(any_css_function) = AnyCssFunction::cast(syntax) {
                     return Some(AnyCssValue::AnyCssFunction(any_css_function));
                 }
@@ -21699,8 +21696,8 @@ impl AstNode for AnyCssValue {
             AnyCssValue::CssColor(it) => &it.syntax,
             AnyCssValue::CssCustomIdentifier(it) => &it.syntax,
             AnyCssValue::CssDashedIdentifier(it) => &it.syntax,
-            AnyCssValue::CssGritMetavariable(it) => &it.syntax,
             AnyCssValue::CssIdentifier(it) => &it.syntax,
+            AnyCssValue::CssMetavariable(it) => &it.syntax,
             AnyCssValue::CssNumber(it) => &it.syntax,
             AnyCssValue::CssRatio(it) => &it.syntax,
             AnyCssValue::CssString(it) => &it.syntax,
@@ -21715,8 +21712,8 @@ impl AstNode for AnyCssValue {
             AnyCssValue::CssColor(it) => it.syntax,
             AnyCssValue::CssCustomIdentifier(it) => it.syntax,
             AnyCssValue::CssDashedIdentifier(it) => it.syntax,
-            AnyCssValue::CssGritMetavariable(it) => it.syntax,
             AnyCssValue::CssIdentifier(it) => it.syntax,
+            AnyCssValue::CssMetavariable(it) => it.syntax,
             AnyCssValue::CssNumber(it) => it.syntax,
             AnyCssValue::CssRatio(it) => it.syntax,
             AnyCssValue::CssString(it) => it.syntax,
@@ -21735,8 +21732,8 @@ impl std::fmt::Debug for AnyCssValue {
             AnyCssValue::CssColor(it) => std::fmt::Debug::fmt(it, f),
             AnyCssValue::CssCustomIdentifier(it) => std::fmt::Debug::fmt(it, f),
             AnyCssValue::CssDashedIdentifier(it) => std::fmt::Debug::fmt(it, f),
-            AnyCssValue::CssGritMetavariable(it) => std::fmt::Debug::fmt(it, f),
             AnyCssValue::CssIdentifier(it) => std::fmt::Debug::fmt(it, f),
+            AnyCssValue::CssMetavariable(it) => std::fmt::Debug::fmt(it, f),
             AnyCssValue::CssNumber(it) => std::fmt::Debug::fmt(it, f),
             AnyCssValue::CssRatio(it) => std::fmt::Debug::fmt(it, f),
             AnyCssValue::CssString(it) => std::fmt::Debug::fmt(it, f),
@@ -21753,8 +21750,8 @@ impl From<AnyCssValue> for SyntaxNode {
             AnyCssValue::CssColor(it) => it.into(),
             AnyCssValue::CssCustomIdentifier(it) => it.into(),
             AnyCssValue::CssDashedIdentifier(it) => it.into(),
-            AnyCssValue::CssGritMetavariable(it) => it.into(),
             AnyCssValue::CssIdentifier(it) => it.into(),
+            AnyCssValue::CssMetavariable(it) => it.into(),
             AnyCssValue::CssNumber(it) => it.into(),
             AnyCssValue::CssRatio(it) => it.into(),
             AnyCssValue::CssString(it) => it.into(),
@@ -22678,11 +22675,6 @@ impl std::fmt::Display for CssGenericProperty {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
-impl std::fmt::Display for CssGritMetavariable {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        std::fmt::Display::fmt(self.syntax(), f)
-    }
-}
 impl std::fmt::Display for CssIdSelector {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
@@ -22824,6 +22816,11 @@ impl std::fmt::Display for CssMediaType {
     }
 }
 impl std::fmt::Display for CssMediaTypeQuery {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for CssMetavariable {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }

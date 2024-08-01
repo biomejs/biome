@@ -2,7 +2,6 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: js/ignore/issue-11077.js
 ---
-
 # Input
 
 ```js
@@ -79,5 +78,3 @@ function HelloWorld(x) {
   ).call(null)
 }
 ```
-
-

@@ -759,6 +759,8 @@ impl Workspace for WorkspaceServer {
             biome_path: &params.path,
             manifest,
             document_file_source: language,
+            only: params.only,
+            skip: params.skip,
         })
     }
 

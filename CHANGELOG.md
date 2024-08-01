@@ -22,7 +22,20 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 #### New features
 
-- Add `--graphql-linter-enabled` option, to control whether the linter should enabled or not for GraphQL files. Contributed by @ematipico
+- Add `--graphql-linter-enabled` option, to control whether the linter should be enabled or not for GraphQL files. Contributed by @ematipico
+- The option `--max-diagnostics` now accept a `none` value, which lifts the limit of diagnostics shown. Contributed by @ematipico
+
+#### Enhancements
+
+- When a `--reporter` is provided, and it's different from the default one, the value provided by via `--max-diagnostics` is ignored and **the limit is lifted**. Contributed by @ematipico
+
+- `biome init` now generates a new config file with more options set.
+  This change intends to improve discoverability of the options and to set the more commonly used options to their default values.
+  Contributed by Conaclos
+
+#### Bug fixes
+
+- `biome lint --write` now takes `--only` and `--skip` into account ([#3470](https://github.com/biomejs/biome/issues/3470)). Contributed by Conaclos
 
 ### Configuration
 
@@ -40,6 +53,72 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 ### Formatter
 
+#### Enhancements
+
+- Add parentheses for nullcoalescing in ternaries.
+
+  This change aligns on [Prettier 3.3.3](https://github.com/prettier/prettier/blob/main/CHANGELOG.md#333).
+  This adds clarity to operator precedence.
+
+  ```diff
+  - foo ? bar ?? foo : baz;
+  + foo ? (bar ?? foo) : baz;
+  ```
+
+  Contributed by @Conaclos
+
+#### Bug fixes
+
+- Keep the parentheses around `infer` declarations in type unions and type intersections ([#3419](https://github.com/biomejs/biome/issues/3419)). Contributed by @Conaclos
+
+- Keep parentheses around a `yield` expression inside a type assertion.
+
+  Previously, Biome removed parentheses around some expressions that require them inside a type assertion.
+  For example, in the following code, Biome now preserves the parentheses.
+
+  ```ts
+  function* f() {
+    return <T>(yield 0);
+  }
+  ```
+
+  Contributed by @Conaclos
+
+- Remove parentheses around expressions that don't need them inside a decorator.
+
+  Biome now matches Prettier in the following cases:
+
+  ```diff
+    class {
+  -   @(decorator)
+  +   @decorator
+      method() {}
+    },
+    class {
+  -   @(decorator())
+  +   @decorator()
+      method() {}
+    },
+    class {
+      @(decorator?.())
+      method() {}
+    },
+  ```
+
+  Contributed by @Conaclos
+
+- Keep parentheses around objects preceded with a `@satisfies` comment.
+
+  In the following example, parentheses are no longer removed.
+
+  ```ts
+  export const PROPS = /** @satisfies {Record<string, string>} */ ({
+    prop: 0,
+  });
+  ```
+
+  Contributed by @Conaclos
+
 ### JavaScript APIs
 
 ### Linter
@@ -48,7 +127,7 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 - Add support for GraphQL linting. Contributed by @ematipico
 - Add [nursery/noDynamicNamespaceImportAccess](https://biomejs.dev/linter/no-dynamic-namespace-import-access/). Contributed by @minht11
-- [noUndeclaredVariables](https://biomejs.dev/linter/rules/no-undeclared-variables/) n longer report a direct reference to an enum member ([#2974](https://github.com/biomejs/biome/issues/2974)).
+- [noUndeclaredVariables](https://biomejs.dev/linter/rules/no-undeclared-variables/) no longer reports a direct reference to an enum member ([#2974](https://github.com/biomejs/biome/issues/2974)).
 
   In the following code, the `A` reference is no longer reported as an undeclared variable.
 
@@ -63,6 +142,7 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 - Add [nursery/noIrregularWhitespace](https://biomejs.dev/linter/rules/no-irregular-whitespace). Contributed by @michellocana
 - Implement `noIrreguluarWhitespace` for CSS. Contributed by @DerTimonius
+- Add [nursery/useTrimStartEnd](https://biomejs.dev/linter/rules/use-trim-start-end/). Contributed by @chansuke
 
 #### Enhancements
 
@@ -93,11 +173,47 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
   Contributed by @Conaclos
 
+- [useFilenamingConvention](https://biomejs.dev/linter/rules/use-filenaming-convention) now supports Next.js/Nuxt/Astro dynamic routes ([#3465](https://github.com/biomejs/biome/issues/3465)).
+
+  [Next.js](https://nextjs.org/docs/pages/building-your-application/routing/dynamic-routes#catch-all-segments), [SolidStart](https://docs.solidjs.com/solid-start/building-your-application/routing#renaming-index), [Nuxt](https://nuxt.com/docs/guide/directory-structure/server#catch-all-route), and [Astro](https://docs.astro.build/en/guides/routing/#rest-parameters) support dynamic routes such as `[...slug].js` and `[[...slug]].js`.
+
+  Biome now recognizes this syntax. `slug` must contain only alphanumeric characters.
+
+  Contributed by @Conaclos
+
+- [useExportType](https://biomejs.dev/linter/rules/use-export-type/) no longer report empty `export` ([#3535](https://github.com/biomejs/biome/issues/3535)).
+
+  An empty `export {}` allows you to force TypeScript to consider a file with no imports and exports as an EcmaScript module.
+  While `export type {}` is valid, it is more common to use `export {}`.
+  Users may find it confusing that the linter asks them to convert it to `export type {}`.
+  Also, a bundler should be able to remove `export {}` as well as `export type {}`.
+  So it is not so useful to report `export {}`.
+
+  Contributed by @Conaclos
+
 #### Bug fixes
 
 - Don't request alt text for elements hidden from assistive technologies ([#3316](https://github.com/biomejs/biome/issues/3316)). Contributed by @robintown
 - Fix [[#3149](https://github.com/biomejs/biome/issues/3149)] crashes that occurred when applying the `noUselessFragments` unsafe fixes in certain scenarios. Contributed by @unvalley
 - `noExcessiveNestedTestSuites`: Fix another edge case where the rule would alert on heavily nested zod schemas. Contributed by @dyc3
+
+- `noExtraNonNullAssertion` no longer reports a single non-null assertion enclosed in parentheses ([#3352](https://github.com/biomejs/biome/issues/3352)). Contributed by @Conaclos
+
+- `useAdjacentOverloadSignatures` no longer reports a `#private` class member and a public class member that share the same name ([#3309](https://github.com/biomejs/biome/issues/3309)).
+
+  The following code is no longer reported:
+
+  ```js
+  class C {
+    #f() {}
+    g() {}
+    f() {}
+  }
+  ```
+
+  Contributed by @Conaclos
+
+- [useNamingConvention](https://biomejs.dev/linter/rules/use-naming-convention/) now accepts applying custom convention on abstract classes. Contributed by @Conaclos
 
 ### Parser
 
@@ -112,7 +228,7 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
   }
 }
 ```
-- Fix [#3410](https://github.com/biomejs/biome/issues/3410) by correctly parsing break statements containing keywords. 
+- Fix [#3410](https://github.com/biomejs/biome/issues/3410) by correctly parsing break statements containing keywords.
   ```js
   out: while (true) {
     break out;

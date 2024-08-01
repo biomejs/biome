@@ -806,7 +806,7 @@ impl<'a> RuleFilter<'a> {
         }
     }
     /// Return `true` if the group `G` matches this filter
-    fn match_group<G: RuleGroup>(self) -> bool {
+    pub fn match_group<G: RuleGroup>(self) -> bool {
         match self {
             RuleFilter::Group(group) => group == G::NAME,
             RuleFilter::Rule(group, _) => group == G::NAME,
@@ -814,7 +814,7 @@ impl<'a> RuleFilter<'a> {
     }
 
     /// Return `true` if the rule `R` matches this filter
-    fn match_rule<R>(self) -> bool
+    pub fn match_rule<R>(self) -> bool
     where
         R: Rule,
     {
@@ -921,12 +921,12 @@ pub enum Never {}
 
 /// Type alias of [ops::ControlFlow] with the `B` generic type defaulting to [Never]
 ///
-/// By default the analysis loop never breaks, so it behaves mostly like
+/// By default, the analysis loop never breaks, so it behaves mostly like
 /// `let b = loop {};` and has a "break type" of `!` (the `!` type isn't stable
-/// yet so I'm using an empty enum instead but they're identical for this
+/// yet, so I'm using an empty enum instead, but they're identical for this
 /// purpose)
 ///
-/// In practice it's not really a `loop` but a `for` because it's iterating on
+/// In practice, it's not really a `loop` but a `for` because it's iterating on
 /// all nodes in the syntax tree, so when it reaches the end of the iterator
 /// the loop will exit but without producing a value of type `B`: for this
 /// reason the `analyze` function returns an `Option<B>` that's set to

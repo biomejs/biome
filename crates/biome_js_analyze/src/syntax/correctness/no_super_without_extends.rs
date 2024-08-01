@@ -33,19 +33,23 @@ impl Rule for NoSuperWithoutExtends {
         let node = ctx.query();
 
         for syntax in node.syntax().ancestors() {
-            // ancestor is class declaration
-            if let Some(class_declaration) = JsClassDeclaration::cast_ref(&syntax) {
-                if class_declaration.extends_clause().is_none() {
-                    return Some(());
+            match JsClassDeclaration::try_cast(syntax) {
+                Ok(class_declaration) => {
+                    // ancestor is class declaration
+                    if class_declaration.extends_clause().is_none() {
+                        return Some(());
+                    }
+                    return None;
                 }
-                return None;
-            }
-            // ancestor is class expression
-            else if let Some(class_expression) = JsClassExpression::cast_ref(&syntax) {
-                if class_expression.extends_clause().is_none() {
-                    return Some(());
+                Err(syntax) => {
+                    // ancestor is class expression
+                    if let Some(class_expression) = JsClassExpression::cast(syntax) {
+                        if class_expression.extends_clause().is_none() {
+                            return Some(());
+                        }
+                        return None;
+                    }
                 }
-                return None;
             }
         }
 

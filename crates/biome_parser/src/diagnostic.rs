@@ -26,7 +26,7 @@ pub struct ParseDiagnostic {
     span: Option<TextRange>,
     #[message]
     #[description]
-    message: MessageAndDescription,
+    pub message: MessageAndDescription,
     #[advice]
     advice: ParserAdvice,
 }

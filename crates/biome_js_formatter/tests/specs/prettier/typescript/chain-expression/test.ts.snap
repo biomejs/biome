@@ -2,7 +2,6 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: typescript/chain-expression/test.ts
 ---
-
 # Input
 
 ```ts
@@ -38,5 +37,3 @@ a?.()!.b;
 a?.b!.c;
 a?.()!.b;
 ```
-
-

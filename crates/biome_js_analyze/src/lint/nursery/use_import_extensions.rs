@@ -8,8 +8,8 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_deserialize_macros::Deserializable;
 use biome_js_factory::make;
-use biome_js_syntax::{inner_string_text, AnyJsImportLike, JsLanguage};
-use biome_rowan::{BatchMutationExt, SyntaxToken};
+use biome_js_syntax::{inner_string_text, AnyJsImportLike, JsSyntaxToken};
+use biome_rowan::BatchMutationExt;
 
 use crate::JsRuleAction;
 
@@ -203,7 +203,7 @@ impl Rule for UseImportExtensions {
 
 pub struct UseImportExtensionsState {
     suggestion: Option<(String, String)>,
-    module_name_token: SyntaxToken<JsLanguage>,
+    module_name_token: JsSyntaxToken,
 }
 
 fn get_extensionless_import(

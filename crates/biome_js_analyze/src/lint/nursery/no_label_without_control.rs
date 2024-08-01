@@ -212,24 +212,25 @@ fn has_for_attribute(jsx_tag: &AnyJsxTag) -> Option<bool> {
 /// Returns whether the passed `AnyJsxTag` have a child that is considered an input component
 /// according to the passed `input_components` parameter
 fn has_nested_control(jsx_tag: &AnyJsxTag, input_components: &[String]) -> bool {
-    jsx_tag.syntax().descendants().any(|descendant| {
-        match (
-            JsxName::cast(descendant.clone()),
-            JsxReferenceIdentifier::cast(descendant.clone()),
-        ) {
-            (Some(jsx_name), _) => {
+    jsx_tag
+        .syntax()
+        .descendants()
+        .any(|descendant| match JsxName::try_cast(descendant) {
+            Ok(jsx_name) => {
                 let attribute_name = jsx_name.text();
                 input_components.contains(&attribute_name)
                     || DEFAULT_INPUT_COMPONENTS.contains(&attribute_name.as_str())
             }
-            (_, Some(jsx_reference_identifier)) => {
-                let attribute_name = jsx_reference_identifier.text();
-                input_components.contains(&attribute_name)
-                    || DEFAULT_INPUT_COMPONENTS.contains(&attribute_name.as_str())
+            Err(descendant) => {
+                if let Some(jsx_reference_identifier) = JsxReferenceIdentifier::cast(descendant) {
+                    let attribute_name = jsx_reference_identifier.text();
+                    input_components.contains(&attribute_name)
+                        || DEFAULT_INPUT_COMPONENTS.contains(&attribute_name.as_str())
+                } else {
+                    false
+                }
             }
-            _ => false,
-        }
-    })
+        })
 }
 
 /// Returns whether the passed `AnyJsxTag` meets one of the following conditions:
@@ -241,7 +242,9 @@ fn has_accessible_label(jsx_tag: &AnyJsxTag, label_attributes: &[String]) -> boo
     let mut has_accessible_attribute = false;
 
     for descendant in jsx_tag.syntax().descendants() {
-        if let Some(jsx_attribute) = JsxAttribute::cast(descendant.clone()) {
+        has_text = has_text || JsxText::can_cast(descendant.kind());
+
+        if let Some(jsx_attribute) = JsxAttribute::cast(descendant) {
             if let (Some(jsx_name), Some(jsx_attribute_value)) = (
                 jsx_attribute.name().ok(),
                 jsx_attribute
@@ -258,10 +261,6 @@ fn has_accessible_label(jsx_tag: &AnyJsxTag, label_attributes: &[String]) -> boo
                     has_accessible_attribute = true
                 }
             }
-        }
-
-        if JsxText::cast(descendant.clone()).is_some() {
-            has_text = true;
         }
     }
 

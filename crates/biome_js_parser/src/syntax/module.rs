@@ -40,6 +40,7 @@ use rustc_hash::FxHashMap;
 
 use super::auxiliary::{is_nth_at_declaration_clause, parse_declaration_clause};
 use super::js_parse_error::{expected_named_import, expected_namespace_import};
+use super::metavariable::{is_at_metavariable, parse_metavariable};
 
 // test js module
 // import a from "b";
@@ -1510,7 +1511,7 @@ fn parse_ts_export_declare_clause(p: &mut JsParser, stmt_start: TextSize) -> Par
 fn is_nth_at_literal_export_name(p: &mut JsParser, n: usize) -> bool {
     match p.nth(n) {
         JS_STRING_LITERAL | T![ident] => true,
-        t if t.is_keyword() => true,
+        t if t.is_keyword() || t.is_metavariable() => true,
         _ => false,
     }
 }
@@ -1527,16 +1528,19 @@ fn parse_literal_export_name(p: &mut JsParser) -> ParsedSyntax {
             p.bump_remap(T![ident]);
             Present(m.complete(p, JS_LITERAL_EXPORT_NAME))
         }
+        t if t.is_metavariable() => parse_metavariable(p),
         _ => Absent,
     }
 }
 
 pub(crate) fn parse_module_source(p: &mut JsParser) -> ParsedSyntax {
-    if !p.at(JS_STRING_LITERAL) {
-        Absent
-    } else {
+    if p.at(JS_STRING_LITERAL) {
         let m = p.start();
         p.bump_any();
         Present(m.complete(p, JS_MODULE_SOURCE))
+    } else if is_at_metavariable(p) {
+        parse_metavariable(p)
+    } else {
+        Absent
     }
 }

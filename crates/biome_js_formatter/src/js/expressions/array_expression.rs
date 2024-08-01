@@ -1,11 +1,11 @@
 use crate::prelude::*;
 
-use crate::parentheses::NeedsParentheses;
 use biome_formatter::{write, FormatRuleWithOptions};
+use biome_js_syntax::parentheses::NeedsParentheses;
+use biome_js_syntax::JsArrayExpression;
 use biome_js_syntax::{
     AnyJsArrayElement, AnyJsExpression, JsArrayElementList, JsArrayExpressionFields,
 };
-use biome_js_syntax::{JsArrayExpression, JsSyntaxNode};
 use biome_rowan::SyntaxResult;
 
 #[derive(Debug, Clone, Default)]
@@ -120,16 +120,5 @@ fn should_break(elements: &JsArrayElementList) -> SyntaxResult<bool> {
         }
 
         Ok(true)
-    }
-}
-
-impl NeedsParentheses for JsArrayExpression {
-    #[inline(always)]
-    fn needs_parentheses(&self) -> bool {
-        false
-    }
-    #[inline(always)]
-    fn needs_parentheses_with_parent(&self, _parent: &JsSyntaxNode) -> bool {
-        false
     }
 }

@@ -2,7 +2,6 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: js/conditional/comments.js
 ---
-
 # Input
 
 ```js
@@ -288,5 +287,3 @@ c */
    33: const extractTextPluginOptions3 = shouldUseRelativeAssetPaths // Making sure that the publicPath goes back to to build folder.
    89:       A newline will be added after this comment, unfortunately – but it can be removed manually, see next statement.
 ```
-
-

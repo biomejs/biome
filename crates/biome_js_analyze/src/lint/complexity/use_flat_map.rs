@@ -70,7 +70,7 @@ impl Rule for UseFlatMap {
             }
         }
         let flat_member_expression =
-            AnyJsMemberExpression::cast_ref(flat_call.callee().ok()?.syntax())?;
+            AnyJsMemberExpression::cast(flat_call.callee().ok()?.into_syntax())?;
         if flat_member_expression.member_name()?.text() == "flat" {
             let Ok(AnyJsExpression::JsCallExpression(map_call)) = flat_member_expression.object()
             else {
@@ -78,7 +78,7 @@ impl Rule for UseFlatMap {
             };
             let map_call_arguments = map_call.arguments().ok()?.args();
             let map_member_expression =
-                AnyJsMemberExpression::cast_ref(map_call.callee().ok()?.syntax())?;
+                AnyJsMemberExpression::cast(map_call.callee().ok()?.into_syntax())?;
             if map_member_expression.member_name()?.text() == "map" && map_call_arguments.len() == 1
             {
                 return Some(map_call);

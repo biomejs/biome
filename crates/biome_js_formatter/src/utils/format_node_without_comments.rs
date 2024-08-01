@@ -1,3 +1,4 @@
+use crate::js::auxiliary::metavariable::FormatJsMetavariable;
 use crate::js::bogus::bogus_expression::FormatJsBogusExpression;
 use crate::js::expressions::array_expression::FormatJsArrayExpression;
 use crate::js::expressions::arrow_function_expression::FormatJsArrowFunctionExpression;
@@ -92,6 +93,7 @@ impl FormatRule<AnyJsExpression> for FormatAnyJsExpressionWithoutComments {
             AnyJsExpression::JsFunctionExpression(node) => {
                 FormatJsFunctionExpression::default().fmt_node(node, f)
             }
+            AnyJsExpression::JsMetavariable(node) => FormatJsMetavariable.fmt_node(node, f),
             AnyJsExpression::JsIdentifierExpression(node) => {
                 FormatJsIdentifierExpression.fmt_node(node, f)
             }

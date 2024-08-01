@@ -2,7 +2,8 @@ use std::borrow::Cow;
 use std::ffi::OsStr;
 
 use super::{
-    CodeActionsParams, DocumentFileSource, ExtensionHandler, ParseResult, SearchCapabilities,
+    ActionVisitor, CodeActionsParams, DocumentFileSource, ExtensionHandler, LintVisitor,
+    ParseResult, SearchCapabilities, SyntaxVisitor,
 };
 use crate::configuration::to_analyzer_rules;
 use crate::file_handlers::DebugCapabilities;
@@ -28,8 +29,7 @@ use biome_deserialize::json::deserialize_from_json_ast;
 use biome_diagnostics::{category, Diagnostic, DiagnosticExt, Severity};
 use biome_formatter::{FormatError, IndentStyle, IndentWidth, LineEnding, LineWidth, Printed};
 use biome_fs::{BiomePath, ConfigName, ROME_JSON};
-use biome_json_analyze::analyze;
-use biome_json_analyze::visit_registry;
+use biome_json_analyze::{analyze, visit_registry};
 use biome_json_formatter::context::{JsonFormatOptions, TrailingCommas};
 use biome_json_formatter::format_node;
 use biome_json_parser::JsonParserOptions;
@@ -317,8 +317,38 @@ fn lint(params: LintParams) -> LintResults {
                 };
             };
             let root: JsonRoot = params.parse.tree();
-            let mut diagnostics = params.parse.into_diagnostics();
 
+            let analyzer_options = &params
+                .workspace
+                .analyzer_options::<JsonLanguage>(params.path, &params.language);
+
+            let has_only_filter = !params.only.is_empty();
+            let rules = params
+                .workspace
+                .settings()
+                .as_ref()
+                .and_then(|settings| settings.as_rules(params.path.as_path()));
+
+            let mut enabled_rules = vec![];
+            let mut disabled_rules = vec![];
+            let mut syntax_visitor = SyntaxVisitor::default();
+            let mut lint_visitor = LintVisitor::new(
+                &params.only,
+                &params.skip,
+                params.workspace.settings(),
+                params.path.as_path(),
+            );
+            let mut action_visitor =
+                ActionVisitor::new(params.workspace.settings(), &params.categories);
+            visit_registry(&mut syntax_visitor);
+            visit_registry(&mut lint_visitor);
+            visit_registry(&mut action_visitor);
+            enabled_rules.extend(syntax_visitor.enabled_rules);
+            let (lint_enabled_rules, lint_disabled_rules) = lint_visitor.finish();
+            enabled_rules.extend(lint_enabled_rules);
+            disabled_rules.extend(lint_disabled_rules);
+            enabled_rules.extend(action_visitor.enabled_rules);
+            let mut diagnostics = params.parse.into_diagnostics();
             // if we're parsing the `biome.json` file, we deserialize it, so we can emit diagnostics for
             // malformed configuration
             if params.path.ends_with(ROME_JSON)
@@ -334,36 +364,6 @@ fn lint(params: LintParams) -> LintResults {
                         .collect::<Vec<_>>(),
                 );
             }
-
-            let analyzer_options = &params
-                .workspace
-                .analyzer_options::<JsonLanguage>(params.path, &params.language);
-
-            let mut rules = None;
-            if let Some(settings) = params.workspace.settings() {
-                rules = settings.as_rules(params.path.as_path());
-            }
-
-            let has_only_filter = !params.only.is_empty();
-            let enabled_rules = if has_only_filter {
-                params
-                    .only
-                    .into_iter()
-                    .map(|selector| selector.into())
-                    .collect::<Vec<_>>()
-            } else {
-                rules
-                    .as_ref()
-                    .map(|rules| rules.as_enabled_rules())
-                    .unwrap_or_default()
-                    .into_iter()
-                    .collect::<Vec<_>>()
-            };
-            let disabled_rules = params
-                .skip
-                .into_iter()
-                .map(|selector| selector.into())
-                .collect::<Vec<_>>();
             let filter = AnalysisFilter {
                 categories: params.categories,
                 enabled_rules: Some(enabled_rules.as_slice()),

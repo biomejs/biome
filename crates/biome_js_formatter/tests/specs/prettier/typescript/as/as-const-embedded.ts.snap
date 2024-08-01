@@ -2,7 +2,6 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: typescript/as/as-const-embedded.ts
 ---
-
 # Input
 
 ```ts
@@ -59,5 +58,3 @@ const HTML_WITH_CONST = /* HTML */ `
 </div>
 ` as const;
 ```
-
-

@@ -7,11 +7,11 @@ use biome_console::markup;
 use biome_js_factory::make;
 use biome_js_syntax::{
     AnyJsImportClause, AnyJsModuleItem, AnyJsNamedImportSpecifier, JsImport, JsLanguage, JsModule,
-    JsSyntaxToken, TextRange, TriviaPieceKind, T,
+    JsSyntaxToken, JsSyntaxTrivia, TextRange, TriviaPieceKind, T,
 };
 use biome_rowan::{
-    chain_trivia_pieces, syntax::SyntaxTrivia, AstNode, AstNodeExt, AstNodeList, AstSeparatedList,
-    BatchMutationExt, SyntaxTriviaPiece, TokenText, TriviaPiece,
+    chain_trivia_pieces, AstNode, AstNodeExt, AstNodeList, AstSeparatedList, BatchMutationExt,
+    SyntaxTriviaPiece, TokenText, TriviaPiece,
 };
 
 use crate::JsRuleAction;
@@ -667,7 +667,7 @@ fn is_ascii_whitespace(piece: &SyntaxTriviaPiece<JsLanguage>) -> bool {
 }
 
 /// Returns true if the provided trivia contains an empty line (two consecutive newline pieces, ignoring whitespace)
-fn has_empty_line(trivia: &SyntaxTrivia<JsLanguage>) -> bool {
+fn has_empty_line(trivia: &JsSyntaxTrivia) -> bool {
     let mut was_newline = false;
     trivia
         .pieces()

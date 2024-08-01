@@ -11328,11 +11328,14 @@ impl AstNode for AnyGritPredicateMatchSubject {
         }
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
-        if let Some(any_grit_container) = AnyGritContainer::cast(syntax.clone()) {
-            return Some(AnyGritPredicateMatchSubject::AnyGritContainer(
-                any_grit_container,
-            ));
-        }
+        let syntax = match AnyGritContainer::try_cast(syntax) {
+            Ok(any_grit_container) => {
+                return Some(AnyGritPredicateMatchSubject::AnyGritContainer(
+                    any_grit_container,
+                ));
+            }
+            Err(syntax) => syntax,
+        };
         if let Some(any_grit_literal) = AnyGritLiteral::cast(syntax) {
             return Some(AnyGritPredicateMatchSubject::AnyGritLiteral(
                 any_grit_literal,

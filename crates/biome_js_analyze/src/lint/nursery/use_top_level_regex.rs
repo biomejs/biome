@@ -64,23 +64,30 @@ impl Rule for UseTopLevelRegex {
         if flags.contains('g') || flags.contains('y') {
             return None;
         }
-        let found_all_allowed = regex.syntax().ancestors().all(|node| {
-            if let Some(node) = AnyJsControlFlowRoot::cast_ref(&node) {
-                matches!(
-                    node,
-                    AnyJsControlFlowRoot::JsStaticInitializationBlockClassMember(_)
-                        | AnyJsControlFlowRoot::TsModuleDeclaration(_)
-                        | AnyJsControlFlowRoot::JsModule(_)
-                        | AnyJsControlFlowRoot::JsScript(_)
-                )
-            } else if let Some(node) = JsPropertyClassMember::cast_ref(&node) {
-                node.modifiers()
-                    .iter()
-                    .any(|modifier| matches!(modifier, AnyJsPropertyModifier::JsStaticModifier(_)))
-            } else {
-                true
-            }
-        });
+        let found_all_allowed =
+            regex
+                .syntax()
+                .ancestors()
+                .all(|node| match AnyJsControlFlowRoot::try_cast(node) {
+                    Ok(node) => {
+                        matches!(
+                            node,
+                            AnyJsControlFlowRoot::JsStaticInitializationBlockClassMember(_)
+                                | AnyJsControlFlowRoot::TsModuleDeclaration(_)
+                                | AnyJsControlFlowRoot::JsModule(_)
+                                | AnyJsControlFlowRoot::JsScript(_)
+                        )
+                    }
+                    Err(node) => {
+                        if let Some(node) = JsPropertyClassMember::cast(node) {
+                            node.modifiers().iter().any(|modifier| {
+                                matches!(modifier, AnyJsPropertyModifier::JsStaticModifier(_))
+                            })
+                        } else {
+                            true
+                        }
+                    }
+                });
         if found_all_allowed {
             None
         } else {

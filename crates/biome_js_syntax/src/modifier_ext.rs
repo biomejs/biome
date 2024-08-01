@@ -34,12 +34,9 @@ impl Modifier {
             | Self::Public as u16,
         BitFlags::CONST_TOKEN,
     );
-    pub const CLASS_MEMBER: BitFlags<Self> =
+    pub const CLASS_MEMBER_ONLY: BitFlags<Self> =
         Self::ACCESSIBILITY.union_c(BitFlags::<Self>::from_bits_truncate_c(
-            Self::Abstract as u16
-                | Self::Static as u16
-                | Self::Override as u16
-                | Self::Accessor as u16,
+            Self::Static as u16 | Self::Override as u16 | Self::Accessor as u16,
             BitFlags::CONST_TOKEN,
         ));
     pub const CLASS_TYPE_PROPERTY: BitFlags<Self> = BitFlags::<Self>::from_bits_truncate_c(

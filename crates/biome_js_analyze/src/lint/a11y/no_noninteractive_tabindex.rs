@@ -195,7 +195,7 @@ fn attribute_has_negative_tabindex(
         AnyJsxAttributeValue::JsxExpressionAttributeValue(value) => {
             let expression = value.expression().ok()?;
             let expression_value =
-                AnyNumberLikeExpression::cast_ref(expression.syntax())?.value()?;
+                AnyNumberLikeExpression::cast(expression.into_syntax())?.value()?;
             Some(is_negative_tabindex(&expression_value))
         }
         _ => None,

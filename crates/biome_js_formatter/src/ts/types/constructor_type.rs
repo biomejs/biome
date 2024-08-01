@@ -1,10 +1,9 @@
 use crate::prelude::*;
 
-use crate::parentheses::NeedsParentheses;
-use crate::ts::types::function_type::function_like_type_needs_parentheses;
 use biome_formatter::write;
+use biome_js_syntax::parentheses::NeedsParentheses;
+use biome_js_syntax::TsConstructorType;
 use biome_js_syntax::TsConstructorTypeFields;
-use biome_js_syntax::{JsSyntaxNode, TsConstructorType};
 
 #[derive(Debug, Clone, Default)]
 pub struct FormatTsConstructorType;
@@ -44,15 +43,8 @@ impl FormatNodeRule<TsConstructorType> for FormatTsConstructorType {
     }
 }
 
-impl NeedsParentheses for TsConstructorType {
-    fn needs_parentheses_with_parent(&self, parent: &JsSyntaxNode) -> bool {
-        function_like_type_needs_parentheses(self.syntax(), parent)
-    }
-}
-
 #[cfg(test)]
 mod tests {
-
     use crate::{assert_needs_parentheses, assert_not_needs_parentheses};
     use biome_js_syntax::TsConstructorType;
 

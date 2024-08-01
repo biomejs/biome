@@ -194,3 +194,54 @@ import { FC, memo, useCallback } from "react";
         result,
     ));
 }
+
+#[test]
+fn max_diagnostics_are_lifted() {
+    let mut fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    for i in 0..u8::MAX {
+        let file_path = PathBuf::from(format!("src/file_{i}.js"));
+        fs.insert(file_path, UNFORMATTED.as_bytes());
+    }
+
+    let file_path = PathBuf::from("file.js".to_string());
+    fs.insert(
+        file_path.clone(),
+        "debugger;".repeat(u8::MAX as usize * 2).as_bytes(),
+    );
+
+    let result = run_cli(
+        DynRef::Borrowed(&mut fs),
+        &mut console,
+        Args::from(
+            [
+                ("ci"),
+                ("--max-diagnostics"),
+                ("none"),
+                file_path.as_os_str().to_str().unwrap(),
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+
+    for i in 0..u8::MAX {
+        let file_path = PathBuf::from(format!("src/file_{i}.js"));
+        fs.remove(&file_path);
+    }
+
+    let messages = &console.out_buffer;
+
+    let errors = format!("{}", u8::MAX as usize * 2 + 1);
+
+    assert!(messages
+        .iter()
+        .filter(|m| m.level == LogLevel::Log)
+        .any(|m| {
+            let content = format!("{:?}", m.content);
+
+            content.contains(&errors)
+        }));
+}

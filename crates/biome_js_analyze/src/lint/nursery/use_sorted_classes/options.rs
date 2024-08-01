@@ -1,6 +1,6 @@
 use biome_deserialize::{
-    Deserializable, DeserializableValue, DeserializationDiagnostic, DeserializationVisitor, Text,
-    VisitableType,
+    Deserializable, DeserializableTypes, DeserializableValue, DeserializationDiagnostic,
+    DeserializationVisitor, Text,
 };
 use biome_rowan::TextRange;
 #[cfg(feature = "schemars")]
@@ -69,7 +69,7 @@ struct UtilityClassSortingOptionsVisitor;
 impl DeserializationVisitor for UtilityClassSortingOptionsVisitor {
     type Output = UtilityClassSortingOptions;
 
-    const EXPECTED_TYPE: VisitableType = VisitableType::MAP;
+    const EXPECTED_TYPE: DeserializableTypes = DeserializableTypes::MAP;
 
     fn visit_map(
         self,

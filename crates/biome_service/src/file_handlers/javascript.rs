@@ -1,7 +1,7 @@
 use super::{
-    search, AnalyzerCapabilities, CodeActionsParams, DebugCapabilities, ExtensionHandler,
-    FormatterCapabilities, LintParams, LintResults, ParseResult, ParserCapabilities,
-    SearchCapabilities,
+    search, ActionVisitor, AnalyzerCapabilities, CodeActionsParams, DebugCapabilities,
+    ExtensionHandler, FormatterCapabilities, LintParams, LintResults, LintVisitor, ParseResult,
+    ParserCapabilities, SearchCapabilities, SyntaxVisitor,
 };
 use crate::configuration::to_analyzer_rules;
 use crate::diagnostics::extension_error;
@@ -211,7 +211,7 @@ impl ServiceLanguage for JsLanguage {
                 .unwrap_or_default();
 
         let mut jsx_runtime = None;
-        let mut globals = vec![];
+        let mut globals = Vec::new();
 
         if let (Some(overrides), Some(global)) = (overrides, global) {
             jsx_runtime = Some(
@@ -309,6 +309,7 @@ fn parse(
     cache: &mut NodeCache,
 ) -> ParseResult {
     let mut options = JsParserOptions {
+        grit_metavariables: false,
         parse_class_parameter_decorators: settings
             .map(|settings| {
                 settings
@@ -411,55 +412,41 @@ pub(crate) fn lint(params: LintParams) -> LintResults {
             else {
                 return LintResults {
                     errors: 0,
-                    diagnostics: vec![],
+                    diagnostics: Vec::new(),
                     skipped_diagnostics: 0,
                 };
             };
             let tree = params.parse.tree();
-            let mut diagnostics = params.parse.into_diagnostics();
             let analyzer_options = &params
                 .workspace
                 .analyzer_options::<JsLanguage>(params.path, &params.language);
 
-            let mut rules = None;
-            let mut organize_imports_enabled = true;
-            if let Some(settings) = params.workspace.settings() {
-                // Compute final rules (taking `overrides` into account)
-                rules = settings.as_rules(params.path.as_path());
-                organize_imports_enabled = settings.organize_imports.enabled;
-            }
+            let rules = params
+                .workspace
+                .settings()
+                .as_ref()
+                .and_then(|settings| settings.as_rules(params.path.as_path()));
 
-            let has_only_filter = !params.only.is_empty();
-            let enabled_rules = if has_only_filter {
-                params
-                    .only
-                    .into_iter()
-                    .map(|selector| selector.into())
-                    .collect::<Vec<_>>()
-            } else {
-                let mut rule_filter_list = rules
-                    .as_ref()
-                    .map(|rules| rules.as_enabled_rules())
-                    .unwrap_or_default()
-                    .into_iter()
-                    .collect::<Vec<_>>();
-                if organize_imports_enabled && !params.categories.is_syntax() {
-                    rule_filter_list.push(RuleFilter::Rule("correctness", "organizeImports"));
-                }
-                rule_filter_list.push(RuleFilter::Rule(
-                    "correctness",
-                    "noDuplicatePrivateClassMembers",
-                ));
-                rule_filter_list.push(RuleFilter::Rule("correctness", "noInitializerWithDefinite"));
-                rule_filter_list.push(RuleFilter::Rule("correctness", "noSuperWithoutExtends"));
-                rule_filter_list.push(RuleFilter::Rule("nursery", "noSuperWithoutExtends"));
-                rule_filter_list
-            };
-            let disabled_rules = params
-                .skip
-                .into_iter()
-                .map(|selector| selector.into())
-                .collect::<Vec<_>>();
+            let mut enabled_rules = vec![];
+            let mut disabled_rules = vec![];
+            let mut syntax_visitor = SyntaxVisitor::default();
+            let mut lint_visitor = LintVisitor::new(
+                &params.only,
+                &params.skip,
+                params.workspace.settings(),
+                params.path.as_path(),
+            );
+            let mut action_visitor =
+                ActionVisitor::new(params.workspace.settings(), &params.categories);
+            visit_registry(&mut syntax_visitor);
+            visit_registry(&mut lint_visitor);
+            visit_registry(&mut action_visitor);
+            enabled_rules.extend(syntax_visitor.enabled_rules);
+            let (lint_enabled_rules, lint_disabled_rules) = lint_visitor.finish();
+            enabled_rules.extend(lint_enabled_rules);
+            disabled_rules.extend(lint_disabled_rules);
+            enabled_rules.extend(action_visitor.enabled_rules);
+
             let filter = AnalysisFilter {
                 categories: params.categories,
                 enabled_rules: Some(enabled_rules.as_slice()),
@@ -467,12 +454,10 @@ pub(crate) fn lint(params: LintParams) -> LintResults {
                 range: None,
             };
 
-            // Do not report unused suppression comment diagnostics if:
-            // - it is a syntax-only analyzer pass, or
-            // - if a single rule is run.
             let ignores_suppression_comment =
-                !filter.categories.contains(RuleCategory::Lint) || has_only_filter;
+                !filter.categories.contains(RuleCategory::Lint) || !params.only.is_empty();
 
+            let mut diagnostics = params.parse.into_diagnostics();
             let mut diagnostic_count = diagnostics.len() as u32;
             let mut errors = diagnostics
                 .iter()
@@ -592,7 +577,7 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
                 workspace.analyzer_options::<JsLanguage>(params.path, &params.language);
             let rules = settings.as_rules(params.path);
             let mut actions = Vec::new();
-            let mut enabled_rules = vec![];
+            let mut enabled_rules = Vec::new();
             if settings.organize_imports.enabled {
                 enabled_rules.push(RuleFilter::Rule("correctness", "organizeImports"));
             }
@@ -624,7 +609,9 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
 
             let Some(source_type) = language.to_js_file_source() else {
                 error!("Could not determine the file source of the file");
-                return PullActionsResult { actions: vec![] };
+                return PullActionsResult {
+                    actions: Vec::new(),
+                };
             };
 
             trace!("Javascript runs the analyzer");
@@ -656,64 +643,62 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
 
 /// If applies all the safe fixes to the given syntax tree.
 pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceError> {
-    let FixAllParams {
-        parse,
-        // rules,
-        fix_file_mode,
-        should_format,
-        biome_path,
-        // mut filter,
-        manifest,
-        document_file_source,
-        workspace,
-    } = params;
-
-    let settings = workspace.settings();
-    let Some(settings) = settings else {
-        let tree: AnyJsRoot = parse.tree();
-
+    let mut tree: AnyJsRoot = params.parse.tree();
+    let Some(settings) = params.workspace.settings() else {
         return Ok(FixFileResult {
-            actions: vec![],
+            actions: Vec::new(),
             errors: 0,
             skipped_suggested_fixes: 0,
             code: tree.syntax().to_string(),
         });
     };
+
     // Compute final rules (taking `overrides` into account)
     let rules = settings.as_rules(params.biome_path.as_path());
-    let rule_filter_list = rules
-        .as_ref()
-        .map(|rules| rules.as_enabled_rules())
-        .unwrap_or_default()
-        .into_iter()
-        .collect::<Vec<_>>();
-    let mut filter = AnalysisFilter::from_enabled_rules(rule_filter_list.as_slice());
 
-    let Some(file_source) = document_file_source
-        .to_js_file_source()
-        .or(JsFileSource::try_from(biome_path.as_path()).ok())
-    else {
-        return Err(extension_error(biome_path));
+    let mut lint_visitor = LintVisitor::new(
+        &params.only,
+        &params.skip,
+        params.workspace.settings(),
+        params.biome_path.as_path(),
+    );
+    let mut syntax_visitor = SyntaxVisitor::default();
+    visit_registry(&mut lint_visitor);
+    visit_registry(&mut syntax_visitor);
+    let (mut enabled_rules, disabled_rules) = lint_visitor.finish();
+    enabled_rules.extend(syntax_visitor.enabled_rules);
+
+    let filter = AnalysisFilter {
+        categories: RuleCategoriesBuilder::default()
+            .with_syntax()
+            .with_lint()
+            .build(),
+        enabled_rules: Some(enabled_rules.as_slice()),
+        disabled_rules: &disabled_rules,
+        range: None,
     };
-    let mut tree: AnyJsRoot = parse.tree();
+
+    let Some(file_source) = params
+        .document_file_source
+        .to_js_file_source()
+        .or(JsFileSource::try_from(params.biome_path.as_path()).ok())
+    else {
+        return Err(extension_error(params.biome_path));
+    };
+
     let mut actions = Vec::new();
-
-    filter.categories = RuleCategoriesBuilder::default()
-        .with_syntax()
-        .with_lint()
-        .build();
-
     let mut skipped_suggested_fixes = 0;
     let mut errors: u16 = 0;
-    let analyzer_options =
-        workspace.analyzer_options::<JsLanguage>(biome_path, &document_file_source);
+    let analyzer_options = params
+        .workspace
+        .analyzer_options::<JsLanguage>(params.biome_path, &params.document_file_source);
     loop {
         let (action, _) = analyze(
             &tree,
             filter,
             &analyzer_options,
             file_source,
-            manifest.clone(),
+            params.manifest.clone(),
             |signal| {
                 let current_diagnostic = signal.diagnostic();
 
@@ -729,7 +714,7 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
                         continue;
                     }
 
-                    match fix_file_mode {
+                    match params.fix_file_mode {
                         FixFileMode::SafeFixes => {
                             if action.applicability == Applicability::MaybeIncorrect {
                                 skipped_suggested_fixes += 1;
@@ -781,9 +766,12 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
                 }
             }
             None => {
-                let code = if should_format {
+                let code = if params.should_format {
                     format_node(
-                        workspace.format_options::<JsLanguage>(biome_path, &document_file_source),
+                        params.workspace.format_options::<JsLanguage>(
+                            params.biome_path,
+                            &params.document_file_source,
+                        ),
                         tree.syntax(),
                     )?
                     .print()?

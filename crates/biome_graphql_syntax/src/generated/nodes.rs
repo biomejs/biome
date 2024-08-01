@@ -6044,13 +6044,14 @@ impl AstNode for AnyGraphqlDefinition {
                 AnyGraphqlDefinition::GraphqlSelectionSet(GraphqlSelectionSet { syntax })
             }
             _ => {
-                if let Some(any_graphql_type_definition) =
-                    AnyGraphqlTypeDefinition::cast(syntax.clone())
-                {
-                    return Some(AnyGraphqlDefinition::AnyGraphqlTypeDefinition(
-                        any_graphql_type_definition,
-                    ));
-                }
+                let syntax = match AnyGraphqlTypeDefinition::try_cast(syntax) {
+                    Ok(any_graphql_type_definition) => {
+                        return Some(AnyGraphqlDefinition::AnyGraphqlTypeDefinition(
+                            any_graphql_type_definition,
+                        ));
+                    }
+                    Err(syntax) => syntax,
+                };
                 if let Some(any_graphql_type_extension) = AnyGraphqlTypeExtension::cast(syntax) {
                     return Some(AnyGraphqlDefinition::AnyGraphqlTypeExtension(
                         any_graphql_type_extension,

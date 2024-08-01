@@ -182,7 +182,7 @@ fn collect_control_characters_from_expression(
         let raw_pattern = args
             .next()
             .and_then(|arg| arg.ok())
-            .and_then(|arg| JsStringLiteralExpression::cast_ref(arg.syntax()))
+            .and_then(|arg| JsStringLiteralExpression::cast(arg.into_syntax()))
             .and_then(|js_string_literal| js_string_literal.inner_string_text().ok())?
             .to_string();
 
@@ -191,7 +191,7 @@ fn collect_control_characters_from_expression(
         let regexp_flags = args
             .next()
             .and_then(|arg| arg.ok())
-            .and_then(|arg| JsStringLiteralExpression::cast_ref(arg.syntax()))
+            .and_then(|arg| JsStringLiteralExpression::cast(arg.into_syntax()))
             .map(|js_string_literal| js_string_literal.text())
             .unwrap_or_default();
 
