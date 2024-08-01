@@ -820,6 +820,9 @@ impl Rule for UseNamingConvention {
             new_name.push_str(&name[..(name_range.start as _)]);
             new_name.push_str(&new_name_part);
             new_name.push_str(&name[(name_range.end as _)..]);
+            if name == new_name {
+                return None;
+            }
             let mut mutation = ctx.root().begin();
             let renamed = mutation.rename_any_renamable_node(model, &renamable, &new_name[..]);
             if renamed {
