@@ -140,32 +140,46 @@ impl FormatLiteralStringToken<'_> {
     /// Like this, we reduced the number of escaped quotes.
     fn compute_string_information(&self, chosen_quote: QuoteStyle) -> StringInformation {
         let literal = self.token().text_trimmed();
-        let alternate = chosen_quote.other();
+        let alternate_quote = chosen_quote.other();
+        let chosen_quote_byte = chosen_quote.as_byte();
+        let alternate_quote_byte = alternate_quote.as_byte();
 
-        let char_count = literal.chars().count();
+        debug_assert!(
+            literal
+                .bytes()
+                .next()
+                .is_some_and(|c| c == chosen_quote_byte || c == alternate_quote_byte),
+            "string must start with a quote"
+        );
+        debug_assert!(
+            literal
+                .bytes()
+                .last()
+                .is_some_and(|c| c == chosen_quote_byte || c == alternate_quote_byte),
+            "string must end with a quote"
+        );
 
-        let (preferred_quotes_count, alternate_quotes_count) = literal.chars().enumerate().fold(
-            (0, 0),
-            |(preferred_quotes_counter, alternate_quotes_counter), (index, current_character)| {
-                if index == 0 || index == char_count - 1 {
-                    (preferred_quotes_counter, alternate_quotes_counter)
-                } else if current_character == chosen_quote.as_char() {
-                    (preferred_quotes_counter + 1, alternate_quotes_counter)
-                } else if current_character == alternate.as_char() {
-                    (preferred_quotes_counter, alternate_quotes_counter + 1)
+        let quoteless = &literal[1..literal.len() - 1];
+        let (chosen_quote_count, alternate_quote_count) = quoteless.bytes().fold(
+            (0u32, 0u32),
+            |(chosen_quote_count, alternate_quote_count), current_character| {
+                if current_character == chosen_quote_byte {
+                    (chosen_quote_count + 1, alternate_quote_count)
+                } else if current_character == alternate_quote_byte {
+                    (chosen_quote_count, alternate_quote_count + 1)
                 } else {
-                    (preferred_quotes_counter, alternate_quotes_counter)
+                    (chosen_quote_count, alternate_quote_count)
                 }
             },
         );
 
         StringInformation {
-            raw_content_has_quotes: preferred_quotes_count > 0 || alternate_quotes_count > 0,
-            preferred_quote: if preferred_quotes_count > alternate_quotes_count {
-                alternate
+            preferred_quote: if chosen_quote_count > alternate_quote_count {
+                alternate_quote
             } else {
                 chosen_quote
             },
+            raw_content_has_quotes: chosen_quote_count > 0 || alternate_quote_count > 0,
         }
     }
 }
@@ -213,20 +227,14 @@ impl<'token> LiteralStringNormaliser<'token> {
     }
 
     fn normalise_text(&mut self, file_source: SourceFileKind) -> Cow<'token, str> {
-        let string_information = self
+        let str_info = self
             .token
             .compute_string_information(self.chosen_quote_style);
         match self.token.parent_kind {
-            StringLiteralParentKind::Expression => {
-                self.normalise_string_literal(string_information)
-            }
-            StringLiteralParentKind::Directive => self.normalise_directive(&string_information),
-            StringLiteralParentKind::ImportAttribute => {
-                self.normalise_import_attribute(string_information)
-            }
-            StringLiteralParentKind::Member => {
-                self.normalise_type_member(string_information, file_source)
-            }
+            StringLiteralParentKind::Expression => self.normalise_string_literal(str_info),
+            StringLiteralParentKind::Directive => self.normalise_directive(&str_info),
+            StringLiteralParentKind::ImportAttribute => self.normalise_import_attribute(str_info),
+            StringLiteralParentKind::Member => self.normalise_type_member(str_info, file_source),
         }
     }
 
@@ -238,24 +246,30 @@ impl<'token> LiteralStringNormaliser<'token> {
         &mut self,
         string_information: StringInformation,
     ) -> Cow<'token, str> {
-        if self.can_remove_import_attribute_quotes() {
-            return Cow::Owned(self.raw_content().to_string());
+        let normalised = self.normalise_string_literal(string_information);
+        let quoteless = &normalised[1..normalised.len() - 1];
+        let can_remove_quotes = !self.is_preserve_quote_properties() && is_js_ident(quoteless);
+        if can_remove_quotes {
+            Cow::Owned(quoteless.to_string())
+        } else {
+            normalised
         }
-
-        self.normalise_string_literal(string_information)
-    }
-    fn can_remove_import_attribute_quotes(&self) -> bool {
-        !self.is_preserve_quote_properties() && self.is_js_ident()
     }
 
     fn normalise_directive(&mut self, string_information: &StringInformation) -> Cow<'token, str> {
-        let content = self.normalize_string(string_information);
-        match content {
-            Cow::Borrowed(content) => self.swap_quotes(content, string_information),
-            Cow::Owned(content) => Cow::Owned(
-                self.swap_quotes(content.as_ref(), string_information)
-                    .into_owned(),
-            ),
+        // In diretcives, unnecessary escapes should be preserved.
+        // See https://github.com/prettier/prettier/issues/1555
+        // Thus we don't normalise the string.
+        //
+        // Since the string is not normalised, we should not change the quotes,
+        // if the directive contains some quotes.
+        //
+        // Note that we could change the quotes if the preferred quote is escaped.
+        // However, Prettier doesn't go that far.
+        if string_information.raw_content_has_quotes {
+            Cow::Borrowed(self.get_token().text_trimmed())
+        } else {
+            self.swap_quotes(self.raw_content(), string_information)
         }
     }
 
@@ -287,11 +301,6 @@ impl<'token> LiteralStringNormaliser<'token> {
         false
     }
 
-    fn is_js_ident(&self) -> bool {
-        let text_to_check = self.raw_content();
-        is_js_ident(text_to_check)
-    }
-
     fn normalise_type_member(
         &mut self,
         string_information: StringInformation,
@@ -314,30 +323,20 @@ impl<'token> LiteralStringNormaliser<'token> {
 
         match polished_raw_content {
             Cow::Borrowed(raw_content) => self.swap_quotes(raw_content, &string_information),
-            Cow::Owned(s) => {
+            Cow::Owned(mut s) => {
                 // content is owned, meaning we allocated a new string,
                 // so we force replacing quotes, regardless
-                let final_content = std::format!(
-                    "{}{}{}",
-                    preferred_quote.as_char(),
-                    s.as_str(),
-                    preferred_quote.as_char()
-                );
-
-                Cow::Owned(final_content)
+                s.insert(0, preferred_quote.as_char());
+                s.push(preferred_quote.as_char());
+                Cow::Owned(s)
             }
         }
     }
 
     fn normalize_string(&self, string_information: &StringInformation) -> Cow<'token, str> {
-        let raw_content = self.raw_content();
-        let is_escape_preserved = matches!(self.token.token.kind(), JSX_STRING_LITERAL);
-
-        if matches!(self.token.parent_kind, StringLiteralParentKind::Directive) {
-            return Cow::Borrowed(raw_content);
-        }
+        let is_escape_preserved = self.token.token.kind() == JSX_STRING_LITERAL;
         normalize_string(
-            raw_content,
+            self.raw_content(),
             string_information.preferred_quote.into(),
             is_escape_preserved,
         )
@@ -352,25 +351,20 @@ impl<'token> LiteralStringNormaliser<'token> {
     fn swap_quotes(
         &self,
         content_to_use: &'token str,
-        string_information: &StringInformation,
+        str_info: &StringInformation,
     ) -> Cow<'token, str> {
-        let original_content = self.get_token().text_trimmed();
-        let preferred_quote = string_information.preferred_quote;
-        let other_quote = preferred_quote.other().as_char();
+        let preferred_quote = str_info.preferred_quote.as_char();
+        let original = self.get_token().text_trimmed();
 
-        let raw_content_has_quotes = string_information.raw_content_has_quotes;
-
-        if raw_content_has_quotes {
-            Cow::Borrowed(original_content)
-        } else if original_content.starts_with(other_quote) {
+        if original.starts_with(preferred_quote) {
+            Cow::Borrowed(original)
+        } else {
             Cow::Owned(std::format!(
                 "{}{}{}",
-                preferred_quote.as_char(),
+                preferred_quote,
                 content_to_use,
-                preferred_quote.as_char()
+                preferred_quote,
             ))
-        } else {
-            Cow::Borrowed(original_content)
         }
     }
 }
@@ -503,6 +497,7 @@ mod tests {
             (r#"" content ''''' \" ""#, r#"" content ''''' \" ""#),
             (r#"" content \'\' \" ""#, r#"" content '' \" ""#),
             (r#"" content \\' \" ""#, r#"" content \\' \" ""#),
+            (r#""\"''""#, r#""\"''""#),
         ];
         for (input, output) in inputs {
             assert_owned_token(
