@@ -5,10 +5,15 @@
     "ignore": [
       "./packages/@biomejs/biome/configuration_schema.json"
     ],
-    "rules": {
+    "actions": {
       "source": {
         "useSortedKeys": "off"
       }
+    }
+  },
+  "css": {
+    "linter": {
+      "enabled": true
     }
   },
   "files": {
