@@ -8,6 +8,7 @@ use crate::execute::Execution;
 use biome_diagnostics::{Error, Severity};
 use serde::Serialize;
 use std::io;
+use std::path::PathBuf;
 use std::time::Duration;
 
 pub struct DiagnosticsPayload {
@@ -46,6 +47,17 @@ pub trait ReporterVisitor {
         execution: &Execution,
         summary: TraversalSummary,
     ) -> io::Result<()>;
+
+    /// Writes the paths that were handled during a run.
+    /// The fist list represents the paths that were evaluated, the second list represents the paths that were fixed
+    fn report_handled_paths(
+        &mut self,
+        evaluated_paths: Vec<PathBuf>,
+        fixed_paths: Vec<PathBuf>,
+    ) -> io::Result<()> {
+        let _ = (evaluated_paths, fixed_paths);
+        Ok(())
+    }
 
     /// Writes a diagnostics
     fn report_diagnostics(

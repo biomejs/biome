@@ -10,7 +10,7 @@ use std::sync::Arc;
 use biome_diagnostics::{Error, Severity};
 use parking_lot::{lock_api::ArcMutexGuard, Mutex, RawMutex, RwLock};
 
-use crate::fs::{ForEachPath, OpenOptions};
+use crate::fs::OpenOptions;
 use crate::{BiomePath, FileSystem, TraversalContext, TraversalScope};
 
 use super::{BoxedTraversal, ErrorKind, File, FileSystemDiagnostic};
@@ -236,10 +236,6 @@ impl FileSystem for MemoryFileSystem {
     ) -> Result<Resolution, ResolveError> {
         todo!()
     }
-
-    fn check<'scope>(&'scope self, func: BoxedTraversal<'_, 'scope>) {
-        func(&MemoryTraversalScope { fs: self })
-    }
 }
 
 struct MemoryFile {
@@ -293,7 +289,7 @@ pub struct MemoryTraversalScope<'scope> {
 }
 
 impl<'scope> TraversalScope<'scope> for MemoryTraversalScope<'scope> {
-    fn spawn(&self, ctx: &'scope dyn TraversalContext, base: PathBuf) {
+    fn evaluate(&self, ctx: &'scope dyn TraversalContext, base: PathBuf) {
         // Traversal is implemented by iterating on all keys, and matching on
         // those that are prefixed with the provided `base` path
         {
@@ -545,7 +541,7 @@ mod tests {
                 self.visited.lock().push(path.into())
             }
 
-            fn paths(&self) -> Vec<PathBuf> {
+            fn evaluated_paths(&self) -> Vec<PathBuf> {
                 let lock = self.visited.lock();
                 lock.to_vec()
             }
@@ -559,7 +555,7 @@ mod tests {
 
         // Traverse a directory
         fs.traversal(Box::new(|scope| {
-            scope.spawn(&ctx, PathBuf::from("dir1"));
+            scope.evaluate(&ctx, PathBuf::from("dir1"));
         }));
 
         let mut visited = Vec::new();
@@ -571,7 +567,7 @@ mod tests {
 
         // Traverse a single file
         fs.traversal(Box::new(|scope| {
-            scope.spawn(&ctx, PathBuf::from("dir2/file2"));
+            scope.evaluate(&ctx, PathBuf::from("dir2/file2"));
         }));
 
         let mut visited = Vec::new();

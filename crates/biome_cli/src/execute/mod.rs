@@ -431,7 +431,8 @@ pub fn execute_mode(
         };
         migrate::run(payload)
     } else {
-        let (summary_result, diagnostics) = traverse(&execution, &mut session, cli_options, paths)?;
+        let (summary_result, evaluated_paths, fixed_paths, diagnostics) =
+            traverse(&execution, &mut session, cli_options, paths)?;
         let console = session.app.console;
         let errors = summary_result.errors;
         let skipped = summary_result.skipped;
@@ -460,6 +461,8 @@ pub fn execute_mode(
                             diagnostics,
                         },
                         execution: execution.clone(),
+                        evaluated_paths,
+                        fixed_paths,
                     };
                     reporter.write(&mut ConsoleReporterVisitor(console))?;
                 }

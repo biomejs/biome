@@ -1,4 +1,4 @@
-use super::process_file::{process_file, process_file, DiffKind, FileResult, FileStatus, Message};
+use super::process_file::{process_file, DiffKind, FileResult, FileStatus, Message};
 use super::{Execution, TraversalMode};
 use crate::cli_options::CliOptions;
 use crate::execute::diagnostics::{
@@ -36,7 +36,7 @@ pub(crate) fn traverse(
     session: &mut CliSession,
     cli_options: &CliOptions,
     mut inputs: Vec<OsString>,
-) -> Result<(TraversalSummary, Vec<Error>), CliDiagnostic> {
+) -> Result<(TraversalSummary, Vec<PathBuf>, Vec<PathBuf>, Vec<Error>), CliDiagnostic> {
     init_thread_pool();
 
     if inputs.is_empty() {
@@ -83,7 +83,7 @@ pub(crate) fn traverse(
         .with_diagnostic_level(cli_options.diagnostic_level)
         .with_max_diagnostics(max_diagnostics);
 
-    let (duration, diagnostics) = thread::scope(|s| {
+    let (duration, evaluated_paths, fixed_paths, diagnostics) = thread::scope(|s| {
         let handler = thread::Builder::new()
             .name(String::from("biome::console"))
             .spawn_scoped(s, || printer.run(receiver, recv_files))
@@ -91,7 +91,7 @@ pub(crate) fn traverse(
 
         // The traversal context is scoped to ensure all the channels it
         // contains are properly closed once the traversal finishes
-        let elapsed = traverse_inputs(
+        let (elapsed, evaluated_paths, fixed_paths) = traverse_inputs(
             fs,
             inputs,
             &TraversalOptions {
@@ -104,13 +104,14 @@ pub(crate) fn traverse(
                 skipped: &skipped,
                 messages: sender,
                 remaining_diagnostics: &remaining_diagnostics,
-                paths: RwLock::default(),
+                evaluated_paths: RwLock::default(),
+                fixed_paths: RwLock::default(),
             },
         );
         // wait for the main thread to finish
         let diagnostics = handler.join().unwrap();
 
-        (elapsed, diagnostics)
+        (elapsed, evaluated_paths, fixed_paths, diagnostics)
     });
 
     // Make sure patterns are always cleaned up at the end of traversal.
@@ -138,6 +139,8 @@ pub(crate) fn traverse(
             suggested_fixes_skipped,
             diagnostics_not_printed,
         },
+        evaluated_paths,
+        fixed_paths,
         diagnostics,
     ))
 }
@@ -157,22 +160,27 @@ fn init_thread_pool() {
 
 /// Initiate the filesystem traversal tasks with the provided input paths and
 /// run it to completion, returning the duration of the process
-fn traverse_inputs(fs: &dyn FileSystem, inputs: Vec<OsString>, ctx: &TraversalOptions) -> Duration {
+fn traverse_inputs(
+    fs: &dyn FileSystem,
+    inputs: Vec<OsString>,
+    ctx: &TraversalOptions,
+) -> (Duration, Vec<PathBuf>, Vec<PathBuf>) {
     let start = Instant::now();
     fs.traversal(Box::new(move |scope: &dyn TraversalScope| {
         for input in inputs {
-            scope.spawn(ctx, PathBuf::from(input));
+            scope.evaluate(ctx, PathBuf::from(input));
         }
     }));
 
-    let paths = ctx.paths();
-    fs.check(Box::new(move |scope: &dyn TraversalScope| {
-        for path in paths {
+    let paths = ctx.evaluated_paths();
+
+    fs.traversal(Box::new(|scope: &dyn TraversalScope| {
+        for path in paths.clone() {
             scope.handle(ctx, path.to_path_buf());
         }
     }));
 
-    start.elapsed()
+    (start.elapsed(), paths, ctx.fixed_paths())
 }
 
 // struct DiagnosticsReporter<'ctx> {}
@@ -495,12 +503,17 @@ pub(crate) struct TraversalOptions<'ctx, 'app> {
     pub(crate) remaining_diagnostics: &'ctx AtomicU32,
 
     /// List of paths that should be processed
-    pub(crate) paths: RwLock<Vec<PathBuf>>,
+    pub(crate) evaluated_paths: RwLock<Vec<PathBuf>>,
+
+    /// List of paths that were fixed by Biome
+    pub(crate) fixed_paths: RwLock<Vec<PathBuf>>,
 }
 
 impl<'ctx, 'app> TraversalOptions<'ctx, 'app> {
-    pub(crate) fn increment_changed(&self) {
+    pub(crate) fn increment_changed(&self, path: impl Into<PathBuf>) {
         self.changed.fetch_add(1, Ordering::Relaxed);
+        let mut fixed_paths = self.fixed_paths.write().unwrap();
+        fixed_paths.push(path.into());
     }
     pub(crate) fn increment_unchanged(&self) {
         self.unchanged.fetch_add(1, Ordering::Relaxed);
@@ -531,8 +544,12 @@ impl<'ctx, 'app> TraversalContext for TraversalOptions<'ctx, 'app> {
         &self.interner
     }
 
-    fn paths(&self) -> &[PathBuf] {
-        self.paths.read().unwrap().as_slice()
+    fn evaluated_paths(&self) -> Vec<PathBuf> {
+        self.evaluated_paths.read().unwrap().clone()
+    }
+
+    fn fixed_paths(&self) -> Vec<PathBuf> {
+        self.fixed_paths.read().unwrap().clone()
     }
 
     fn push_diagnostic(&self, error: Error) {
@@ -610,7 +627,10 @@ impl<'ctx, 'app> TraversalContext for TraversalOptions<'ctx, 'app> {
     }
 
     fn store_path(&self, path: &Path) {
-        self.paths.write().unwrap().push(path.to_path_buf())
+        self.evaluated_paths
+            .write()
+            .unwrap()
+            .push(path.to_path_buf())
     }
 }
 
@@ -623,12 +643,11 @@ where
 {
     match catch_unwind(move || func(ctx, path)) {
         Ok(Ok(FileStatus::Changed)) => {
-            ctx.increment_changed();
+            ctx.increment_changed(path);
         }
         Ok(Ok(FileStatus::Unchanged)) => {
             ctx.increment_unchanged();
         }
-        Ok(Ok(FileStatus::Stored)) => {}
         Ok(Ok(FileStatus::Message(msg))) => {
             ctx.increment_unchanged();
             ctx.push_message(msg);

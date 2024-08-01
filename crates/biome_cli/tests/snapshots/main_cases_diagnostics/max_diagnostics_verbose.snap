@@ -70,18 +70,6 @@ src/folder_6/package-lock.json project  VERBOSE  ━━━━━━━━━━�
 ```
 
 ```block
-src/file.js format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × File content differs from formatting output
-  
-    1   │ - ··statement(··)··
-      1 │ + statement();
-      2 │ + 
-  
-
-```
-
-```block
 src/folder_7/package-lock.json project  VERBOSE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i The file src/folder_7/package-lock.json is protected because is handled by another tool. Biome won't process it.
@@ -126,6 +114,18 @@ src/folder_0/package-lock.json project  VERBOSE  ━━━━━━━━━━�
   
     i You can hide this diagnostic by using --diagnostic-level=warn to increase the diagnostic level shown by CLI.
     
+
+```
+
+```block
+src/file.js format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × File content differs from formatting output
+  
+    1   │ - ··statement(··)··
+      1 │ + statement();
+      2 │ + 
+  
 
 ```
 
