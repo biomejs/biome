@@ -6,9 +6,10 @@ pub(crate) mod terminal;
 
 use crate::execute::Execution;
 use biome_diagnostics::{Error, Severity};
+use biome_fs::EvaluatedPath;
+use rustc_hash::FxHashSet;
 use serde::Serialize;
 use std::io;
-use std::path::PathBuf;
 use std::time::Duration;
 
 pub struct DiagnosticsPayload {
@@ -52,10 +53,9 @@ pub trait ReporterVisitor {
     /// The fist list represents the paths that were evaluated, the second list represents the paths that were fixed
     fn report_handled_paths(
         &mut self,
-        evaluated_paths: Vec<PathBuf>,
-        fixed_paths: Vec<PathBuf>,
+        evaluated_paths: FxHashSet<EvaluatedPath>,
     ) -> io::Result<()> {
-        let _ = (evaluated_paths, fixed_paths);
+        let _ = evaluated_paths;
         Ok(())
     }
 

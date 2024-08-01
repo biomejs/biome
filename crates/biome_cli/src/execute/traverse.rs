@@ -9,7 +9,7 @@ use crate::reporter::TraversalSummary;
 use crate::{CliDiagnostic, CliSession};
 use biome_diagnostics::DiagnosticTags;
 use biome_diagnostics::{category, DiagnosticExt, Error, Resource, Severity};
-use biome_fs::{BiomePath, FileSystem, PathInterner};
+use biome_fs::{BiomePath, EvaluatedPath, FileSystem, PathInterner};
 use biome_fs::{TraversalContext, TraversalScope};
 use biome_service::workspace::{DropPatternParams, IsPathIgnoredParams};
 use biome_service::{extension_error, workspace::SupportsFeatureParams, Workspace, WorkspaceError};
@@ -33,8 +33,7 @@ use std::{
 
 pub(crate) struct TraverseResult {
     pub(crate) summary: TraversalSummary,
-    pub(crate) evaluated_paths: Vec<PathBuf>,
-    pub(crate) fixed_paths: Vec<PathBuf>,
+    pub(crate) evaluated_paths: FxHashSet<EvaluatedPath>,
     pub(crate) diagnostics: Vec<Error>,
 }
 
@@ -90,7 +89,7 @@ pub(crate) fn traverse(
         .with_diagnostic_level(cli_options.diagnostic_level)
         .with_max_diagnostics(max_diagnostics);
 
-    let (duration, evaluated_paths, fixed_paths, diagnostics) = thread::scope(|s| {
+    let (duration, evaluated_paths, diagnostics) = thread::scope(|s| {
         let handler = thread::Builder::new()
             .name(String::from("biome::console"))
             .spawn_scoped(s, || printer.run(receiver, recv_files))
@@ -98,7 +97,7 @@ pub(crate) fn traverse(
 
         // The traversal context is scoped to ensure all the channels it
         // contains are properly closed once the traversal finishes
-        let (elapsed, evaluated_paths, fixed_paths) = traverse_inputs(
+        let (elapsed, evaluated_paths) = traverse_inputs(
             fs,
             inputs,
             &TraversalOptions {
@@ -112,13 +111,12 @@ pub(crate) fn traverse(
                 messages: sender,
                 remaining_diagnostics: &remaining_diagnostics,
                 evaluated_paths: RwLock::default(),
-                fixed_paths: RwLock::default(),
             },
         );
         // wait for the main thread to finish
         let diagnostics = handler.join().unwrap();
 
-        (elapsed, evaluated_paths, fixed_paths, diagnostics)
+        (elapsed, evaluated_paths, diagnostics)
     });
 
     // Make sure patterns are always cleaned up at the end of traversal.
@@ -146,9 +144,7 @@ pub(crate) fn traverse(
             suggested_fixes_skipped,
             diagnostics_not_printed,
         },
-
         evaluated_paths,
-        fixed_paths,
         diagnostics,
     })
 }
@@ -172,7 +168,7 @@ fn traverse_inputs(
     fs: &dyn FileSystem,
     inputs: Vec<OsString>,
     ctx: &TraversalOptions,
-) -> (Duration, Vec<PathBuf>, Vec<PathBuf>) {
+) -> (Duration, FxHashSet<EvaluatedPath>) {
     let start = Instant::now();
     fs.traversal(Box::new(move |scope: &dyn TraversalScope| {
         for input in inputs {
@@ -184,11 +180,11 @@ fn traverse_inputs(
 
     fs.traversal(Box::new(|scope: &dyn TraversalScope| {
         for path in paths.clone() {
-            scope.handle(ctx, path.clone());
+            scope.handle(ctx, path.to_bath_buf());
         }
     }));
 
-    (start.elapsed(), paths, ctx.fixed_paths())
+    (start.elapsed(), paths)
 }
 
 // struct DiagnosticsReporter<'ctx> {}
@@ -511,17 +507,14 @@ pub(crate) struct TraversalOptions<'ctx, 'app> {
     pub(crate) remaining_diagnostics: &'ctx AtomicU32,
 
     /// List of paths that should be processed
-    pub(crate) evaluated_paths: RwLock<Vec<PathBuf>>,
-
-    /// List of paths that were fixed by Biome
-    pub(crate) fixed_paths: RwLock<Vec<PathBuf>>,
+    pub(crate) evaluated_paths: RwLock<FxHashSet<EvaluatedPath>>,
 }
 
 impl<'ctx, 'app> TraversalOptions<'ctx, 'app> {
-    pub(crate) fn increment_changed(&self, path: impl Into<PathBuf>) {
+    pub(crate) fn increment_changed(&self, path: &Path) {
         self.changed.fetch_add(1, Ordering::Relaxed);
-        let mut fixed_paths = self.fixed_paths.write().unwrap();
-        fixed_paths.push(path.into());
+        let mut evaluated_paths = self.evaluated_paths.write().unwrap();
+        evaluated_paths.replace(EvaluatedPath::new_evaluated(path));
     }
     pub(crate) fn increment_unchanged(&self) {
         self.unchanged.fetch_add(1, Ordering::Relaxed);
@@ -552,12 +545,8 @@ impl<'ctx, 'app> TraversalContext for TraversalOptions<'ctx, 'app> {
         &self.interner
     }
 
-    fn evaluated_paths(&self) -> Vec<PathBuf> {
+    fn evaluated_paths(&self) -> FxHashSet<EvaluatedPath> {
         self.evaluated_paths.read().unwrap().clone()
-    }
-
-    fn fixed_paths(&self) -> Vec<PathBuf> {
-        self.fixed_paths.read().unwrap().clone()
     }
 
     fn push_diagnostic(&self, error: Error) {
@@ -635,10 +624,7 @@ impl<'ctx, 'app> TraversalContext for TraversalOptions<'ctx, 'app> {
     }
 
     fn store_path(&self, path: &Path) {
-        self.evaluated_paths
-            .write()
-            .unwrap()
-            .push(path.to_path_buf())
+        self.evaluated_paths.write().unwrap().insert(path.into());
     }
 }
 

@@ -4,8 +4,10 @@ use biome_diagnostics::{Error, Severity};
 pub use memory::{ErrorEntry, MemoryFileSystem};
 pub use os::OsFileSystem;
 use oxc_resolver::{Resolution, ResolveError};
+use rustc_hash::FxHashSet;
 use serde::{Deserialize, Serialize};
-use std::fmt::{Display, Formatter};
+use std::fmt::{Debug, Display, Formatter};
+use std::hash::{Hash, Hasher};
 use std::panic::RefUnwindSafe;
 use std::path::{Path, PathBuf};
 use std::sync::Arc;
@@ -337,10 +339,52 @@ pub trait TraversalContext: Sync {
     fn store_path(&self, path: &Path);
 
     /// Returns the paths that should be handled
-    fn evaluated_paths(&self) -> Vec<PathBuf>;
+    fn evaluated_paths(&self) -> FxHashSet<EvaluatedPath>;
+}
 
-    /// Returns the paths that were fixed/changed
-    fn fixed_paths(&self) -> Vec<PathBuf>;
+#[derive(Debug, Eq, Clone)]
+pub struct EvaluatedPath(PathBuf, bool);
+
+impl PartialEq for EvaluatedPath {
+    fn eq(&self, other: &Self) -> bool {
+        self.0.eq(&other.0)
+    }
+}
+
+impl Hash for EvaluatedPath {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        self.0.hash(state)
+    }
+}
+
+impl EvaluatedPath {
+    pub fn new_evaluated(path: impl Into<PathBuf>) -> Self {
+        Self(path.into(), true)
+    }
+
+    pub fn is_fixed(&self) -> bool {
+        self.1 == true
+    }
+
+    pub fn as_path(&self) -> &Path {
+        self.0.as_path()
+    }
+
+    pub fn to_bath_buf(&self) -> PathBuf {
+        self.0.to_path_buf()
+    }
+}
+
+impl AsRef<Path> for EvaluatedPath {
+    fn as_ref(&self) -> &Path {
+        self.as_path()
+    }
+}
+
+impl<T: Into<PathBuf>> From<T> for EvaluatedPath {
+    fn from(value: T) -> Self {
+        Self(value.into(), false)
+    }
 }
 
 impl<T> FileSystem for Arc<T>

@@ -434,7 +434,6 @@ pub fn execute_mode(
         let TraverseResult {
             summary,
             evaluated_paths,
-            fixed_paths,
             diagnostics,
         } = traverse(&execution, &mut session, cli_options, paths)?;
         let console = session.app.console;
@@ -466,7 +465,6 @@ pub fn execute_mode(
                         },
                         execution: execution.clone(),
                         evaluated_paths,
-                        fixed_paths,
                     };
                     reporter.write(&mut ConsoleReporterVisitor(console))?;
                 }

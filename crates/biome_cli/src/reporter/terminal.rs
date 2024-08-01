@@ -5,16 +5,16 @@ use biome_console::fmt::Formatter;
 use biome_console::{fmt, markup, Console, ConsoleExt};
 use biome_diagnostics::advice::ListAdvice;
 use biome_diagnostics::{Diagnostic, PrintDiagnostic};
+use biome_fs::EvaluatedPath;
+use rustc_hash::FxHashSet;
 use std::io;
-use std::path::PathBuf;
 use std::time::Duration;
 
 pub(crate) struct ConsoleReporter {
     pub(crate) summary: TraversalSummary,
     pub(crate) diagnostics_payload: DiagnosticsPayload,
     pub(crate) execution: Execution,
-    pub(crate) evaluated_paths: Vec<PathBuf>,
-    pub(crate) fixed_paths: Vec<PathBuf>,
+    pub(crate) evaluated_paths: FxHashSet<EvaluatedPath>,
 }
 
 impl Reporter for ConsoleReporter {
@@ -23,7 +23,7 @@ impl Reporter for ConsoleReporter {
         visitor.report_diagnostics(&self.execution, self.diagnostics_payload)?;
         visitor.report_summary(&self.execution, self.summary)?;
         if verbose {
-            visitor.report_handled_paths(self.evaluated_paths, self.fixed_paths)?;
+            visitor.report_handled_paths(self.evaluated_paths)?;
         }
         Ok(())
     }
@@ -82,23 +82,23 @@ impl<'a> ReporterVisitor for ConsoleReporterVisitor<'a> {
 
     fn report_handled_paths(
         &mut self,
-        evaluated_paths: Vec<PathBuf>,
-        fixed_paths: Vec<PathBuf>,
+        evaluated_paths: FxHashSet<EvaluatedPath>,
     ) -> io::Result<()> {
         let evaluated_paths_diagnostic = EvaluatedPathsDiagnostic {
             list: ListAdvice {
                 list: evaluated_paths
-                    .into_iter()
-                    .map(|p| p.display().to_string())
+                    .iter()
+                    .map(|p| p.as_ref().display().to_string())
                     .collect(),
             },
         };
 
         let fixed_paths_diagnostic = FixedPathsDiagnostic {
             list: ListAdvice {
-                list: fixed_paths
-                    .into_iter()
-                    .map(|p| p.display().to_string())
+                list: evaluated_paths
+                    .iter()
+                    .filter(|p| p.is_fixed())
+                    .map(|p| p.as_ref().display().to_string())
                     .collect(),
             },
         };
