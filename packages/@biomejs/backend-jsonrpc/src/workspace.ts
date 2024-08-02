@@ -1206,6 +1206,10 @@ export interface Nursery {
 	 */
 	useAdjacentOverloadSignatures?: RuleConfiguration_for_Null;
 	/**
+	 * React components should be separated into different modules.
+	 */
+	useComponentsOnlyModule?: RuleConfiguration_for_UseComponentsOnlyModuleOptions;
+	/**
 	 * Enforce the use of new for all builtins, except String, Number, Boolean, Symbol and BigInt.
 	 */
 	useConsistentBuiltinInstantiation?: RuleFixConfiguration_for_Null;
@@ -1837,6 +1841,9 @@ export type RuleConfiguration_for_NoLabelWithoutControlOptions =
 export type RuleConfiguration_for_RestrictedImportsOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_RestrictedImportsOptions;
+export type RuleConfiguration_for_UseComponentsOnlyModuleOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_UseComponentsOnlyModuleOptions;
 export type RuleFixConfiguration_for_UseImportExtensionsOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_UseImportExtensionsOptions;
@@ -1946,6 +1953,16 @@ export interface RuleWithOptions_for_RestrictedImportsOptions {
 	 * Rule's options
 	 */
 	options: RestrictedImportsOptions;
+}
+export interface RuleWithOptions_for_UseComponentsOnlyModuleOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: UseComponentsOnlyModuleOptions;
 }
 export interface RuleWithFixOptions_for_UseImportExtensionsOptions {
 	/**
@@ -2085,6 +2102,11 @@ export interface RestrictedImportsOptions {
 	 * A list of names that should trigger the rule
 	 */
 	paths: {};
+}
+export interface UseComponentsOnlyModuleOptions {
+	allowConstantExport: boolean;
+	allowExportNames: string[];
+	checkJs: boolean;
 }
 export interface UseImportExtensionsOptions {
 	/**
@@ -2543,8 +2565,8 @@ export type Category =
 	| "lint/nursery/noMissingGenericFamilyKeyword"
 	| "lint/nursery/noReactSpecificProps"
 	| "lint/nursery/noRestrictedImports"
-	| "lint/nursery/noStaticElementInteractions"
 	| "lint/nursery/noShorthandPropertyOverrides"
+	| "lint/nursery/noStaticElementInteractions"
 	| "lint/nursery/noSubstr"
 	| "lint/nursery/noUndeclaredDependencies"
 	| "lint/nursery/noUnknownFunction"
@@ -2561,6 +2583,7 @@ export type Category =
 	| "lint/nursery/noYodaExpression"
 	| "lint/nursery/useAdjacentOverloadSignatures"
 	| "lint/nursery/useBiomeSuppressionComment"
+	| "lint/nursery/useComponentsOnlyModule"
 	| "lint/nursery/useConsistentBuiltinInstantiation"
 	| "lint/nursery/useConsistentCurlyBraces"
 	| "lint/nursery/useConsistentGridAreas"

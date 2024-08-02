@@ -2028,6 +2028,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useComponentsOnlyModule": {
+					"description": "React components should be separated into different modules.",
+					"anyOf": [
+						{ "$ref": "#/definitions/UseComponentsOnlyModuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useConsistentBuiltinInstantiation": {
 					"description": "Enforce the use of new for all builtins, except String, Number, Boolean, Symbol and BigInt.",
 					"anyOf": [
@@ -2610,6 +2617,21 @@
 				"options": {
 					"description": "Rule's options",
 					"allOf": [{ "$ref": "#/definitions/RestrictedImportsOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
+		"RuleWithUseComponentsOnlyModuleOptions": {
+			"type": "object",
+			"required": ["level", "options"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/UseComponentsOnlyModuleOptions" }]
 				}
 			},
 			"additionalProperties": false
@@ -3568,6 +3590,21 @@
 					"enum": ["all"]
 				}
 			]
+		},
+		"UseComponentsOnlyModuleConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithUseComponentsOnlyModuleOptions" }
+			]
+		},
+		"UseComponentsOnlyModuleOptions": {
+			"type": "object",
+			"properties": {
+				"allowConstantExport": { "type": "boolean" },
+				"allowExportNames": { "type": "array", "items": { "type": "string" } },
+				"checkJs": { "type": "boolean" }
+			},
+			"additionalProperties": false
 		},
 		"UseImportExtensionsConfiguration": {
 			"anyOf": [
