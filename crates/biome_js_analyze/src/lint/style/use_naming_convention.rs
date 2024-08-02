@@ -18,10 +18,10 @@ use biome_deserialize_macros::Deserializable;
 use biome_js_semantic::{CanBeImportedExported, SemanticModel};
 use biome_js_syntax::{
     binding_ext::AnyJsBindingDeclaration, AnyJsClassMember, AnyJsObjectMember,
-    AnyJsVariableDeclaration, AnyTsTypeMember, JsIdentifierBinding, JsLiteralExportName,
-    JsLiteralMemberName, JsMethodModifierList, JsPrivateClassMemberName, JsPropertyModifierList,
-    JsSyntaxKind, JsSyntaxToken, JsVariableDeclarator, JsVariableKind, Modifier,
-    TsIdentifierBinding, TsLiteralEnumMemberName, TsMethodSignatureModifierList,
+    AnyJsVariableDeclaration, AnyTsTypeMember, JsFileSource, JsIdentifierBinding,
+    JsLiteralExportName, JsLiteralMemberName, JsMethodModifierList, JsPrivateClassMemberName,
+    JsPropertyModifierList, JsSyntaxKind, JsSyntaxToken, JsVariableDeclarator, JsVariableKind,
+    Modifier, TsIdentifierBinding, TsLiteralEnumMemberName, TsMethodSignatureModifierList,
     TsPropertySignatureModifierList, TsTypeParameterName,
 };
 use biome_rowan::{
@@ -804,8 +804,23 @@ impl Rule for UseNamingConvention {
         else {
             return None;
         };
-        let node = ctx.query();
         let model = ctx.model();
+        // A declaration file without exports and imports is a global declaration file.
+        // All types are available in every files of the project.
+        // Thus, it is not safe to suggest renaming.
+        //
+        // Note that we don't check if the file has imports.
+        // Indeed, it is a fair assumption to assume that a declaration file without exports,
+        // is certainly a file without imports.
+        let is_global_declaration_file = !model.has_exports()
+            && ctx
+                .source_type::<JsFileSource>()
+                .language()
+                .is_definition_file();
+        if is_global_declaration_file {
+            return None;
+        }
+        let node = ctx.query();
         if let Some(renamable) = renamable(node, model) {
             let node = ctx.query();
             let name_token = &node.name_token().ok()?;
