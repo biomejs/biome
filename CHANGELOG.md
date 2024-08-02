@@ -191,6 +191,13 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
   Contributed by @Conaclos
 
+- [noUnusedVariables](https://biomejs.dev/linter/rules/no-unused-variables/) now checks TypeScript declaration files.
+
+  This allows to report a type that is unused because it isn't exported.
+  Global declarations files (declarations files without exports and imports) are still ignored.
+
+  Contributed by @Conaclos
+
 #### Bug fixes
 
 - Don't request alt text for elements hidden from assistive technologies ([#3316](https://github.com/biomejs/biome/issues/3316)). Contributed by @robintown
@@ -223,6 +230,14 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
   ```ts
   type AAb = any
   ```
+
+  Contributed by @Conaclos
+
+- [useNamingConvention](https://biomejs.dev/linter/rules/use-naming-convention/) no longer provides fixes for global TypeScript declaration files.
+
+  Global TypeScript declaration files have no epxorts and no imports.
+  All the declared types are available in all files of the project.
+  Thus, it is not safe to propose renaming only in the declaration file.
 
   Contributed by @Conaclos
 
