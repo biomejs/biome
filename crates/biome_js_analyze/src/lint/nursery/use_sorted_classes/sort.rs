@@ -137,11 +137,7 @@ pub fn sort_class_name(
 ) -> String {
     // Obtain classes by splitting the class string by whitespace.
     let mut classes_iter = class_name.split_whitespace();
-    let class_str_prefix = if ignore_prefix {
-        classes_iter.next()
-    } else {
-        None
-    };
+    let class_str_prefix = ignore_prefix.and_then_some(classes_iter.next());
     let class_str_suffix =  ignore_prefix.and_then_some(classes_iter.next_back());
 
     // Collect the remaining classes into a vector if needed.
