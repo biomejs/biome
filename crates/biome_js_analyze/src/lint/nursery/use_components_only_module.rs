@@ -240,11 +240,6 @@ impl Rule for UseComponentsOnlyModule {
                     {
                         continue;
                     }
-                    println!(
-                        ">>>>{:?} {:?}",
-                        exported_item.clone(),
-                        is_exported_react_component(&exported_item)
-                    );
                     if is_exported_react_component(&exported_item) {
                         exported_component_ids.push(exported_item);
                     } else {
@@ -261,12 +256,6 @@ impl Rule for UseComponentsOnlyModule {
                 None
             }
         });
-
-        println!(
-            "{:?} {:?}",
-            exported_component_ids,
-            local_component_ids.clone().collect::<Vec<TextRange>>()
-        );
 
         if !exported_component_ids.is_empty() {
             return exported_non_component_ids
