@@ -207,19 +207,18 @@ fn pattern_from_node(
     range_map: &BTreeMap<ByteRange, ByteRange>,
     context: &mut NodeCompilationContext,
     is_rhs: bool,
-) -> anyhow::Result<Pattern<GritQueryContext>, CompileError> {
+) -> Result<Pattern<GritQueryContext>, CompileError> {
     let metavariable = metavariable_descendent(node, context_range, range_map, context, is_rhs)?;
     if let Some(metavariable) = metavariable {
         return Ok(metavariable);
     }
 
-    if !node.has_children() {
+    if node.slots().is_none() {
         let content = node.text();
         let lang = &context.compilation.lang;
         let pattern = if let Some(regex_pattern) = lang
             .matches_replaced_metavariable(content)
             .then(|| implicit_metavariable_regex(node, context_range, range_map, context))
-            .transpose()?
             .flatten()
         {
             Pattern::Regex(Box::new(regex_pattern))
@@ -292,7 +291,7 @@ fn implicit_metavariable_regex(
     context_range: ByteRange,
     range_map: &BTreeMap<ByteRange, ByteRange>,
     context: &mut NodeCompilationContext,
-) -> Result<Option<RegexPattern<GritQueryContext>>, CompileError> {
+) -> Option<RegexPattern<GritQueryContext>> {
     let source = node.text();
     let capture_string = "(.*)";
     let uncapture_string = ".*";
@@ -305,9 +304,9 @@ fn implicit_metavariable_regex(
         let range = ByteRange::new(m.start(), m.end());
         last = range.end;
         let name = m.as_str();
-        let variable = text_to_var(name, range, context_range, range_map, context)?;
+        let variable = text_to_var(name, range, context_range, range_map, context).ok()?;
         match variable {
-            SnippetValues::Dots => return Ok(None),
+            SnippetValues::Dots => return None,
             SnippetValues::Underscore => regex_string.push_str(uncapture_string),
             SnippetValues::Variable(var) => {
                 regex_string.push_str(capture_string);
@@ -321,7 +320,7 @@ fn implicit_metavariable_regex(
     }
     let regex = regex_string.to_string();
     let regex = RegexLike::Regex(regex);
-    Ok(Some(RegexPattern::new(regex, variables)))
+    Some(RegexPattern::new(regex, variables))
 }
 
 fn metavariable_descendent(
@@ -347,27 +346,20 @@ fn metavariable_descendent(
     text_to_var(name, range, context_range, range_map, context).map(|s| Some(s.into()))
 }
 
-// assumes that metavariable substitute is 1 byte larger than the original. eg.
-// len(µ) = 2 bytes, len($) = 1 byte
 fn metavariable_range_mapping(
     node: &GritTargetNode,
     lang: &GritTargetLanguage,
 ) -> BTreeMap<ByteRange, ByteRange> {
     let mut ranges = metavariable_ranges(node, lang);
-    let snippet_start = node.text().chars().next().unwrap_or_default() as usize;
+    let snippet_start = node.start_byte() as usize;
 
     // assumes metavariable ranges do not enclose one another
     ranges.sort_by_key(|r| r.start);
 
-    let mut byte_offset = snippet_start;
     let mut map = BTreeMap::new();
     for range in ranges {
-        let start_byte = range.start - byte_offset;
-        if !cfg!(target_arch = "wasm32") {
-            byte_offset += 1;
-        }
-
-        let end_byte = range.end - byte_offset;
+        let start_byte = range.start - snippet_start;
+        let end_byte = range.end - snippet_start;
         let new_range = ByteRange::new(start_byte, end_byte);
         map.insert(range, new_range);
     }
@@ -620,13 +612,25 @@ mod tests {
                                                 args: [
                                                     GritNodePatternArg {
                                                         slot_index: 0,
-                                                        pattern: AstLeafNode(
-                                                            GritLeafNodePattern {
+                                                        pattern: AstNode(
+                                                            GritNodePattern {
                                                                 kind: JsSyntaxKind(
                                                                     JS_REFERENCE_IDENTIFIER,
                                                                 ),
-                                                                equivalence_class: None,
-                                                                text: "console",
+                                                                args: [
+                                                                    GritNodePatternArg {
+                                                                        slot_index: 0,
+                                                                        pattern: AstLeafNode(
+                                                                            GritLeafNodePattern {
+                                                                                kind: JsSyntaxKind(
+                                                                                    IDENT,
+                                                                                ),
+                                                                                equivalence_class: None,
+                                                                                text: "console",
+                                                                            },
+                                                                        ),
+                                                                    },
+                                                                ],
                                                             },
                                                         ),
                                                     },
@@ -648,13 +652,25 @@ mod tests {
                                     },
                                     GritNodePatternArg {
                                         slot_index: 2,
-                                        pattern: AstLeafNode(
-                                            GritLeafNodePattern {
+                                        pattern: AstNode(
+                                            GritNodePattern {
                                                 kind: JsSyntaxKind(
                                                     JS_NAME,
                                                 ),
-                                                equivalence_class: None,
-                                                text: "log",
+                                                args: [
+                                                    GritNodePatternArg {
+                                                        slot_index: 0,
+                                                        pattern: AstLeafNode(
+                                                            GritLeafNodePattern {
+                                                                kind: JsSyntaxKind(
+                                                                    IDENT,
+                                                                ),
+                                                                equivalence_class: None,
+                                                                text: "log",
+                                                            },
+                                                        ),
+                                                    },
+                                                ],
                                             },
                                         ),
                                     },
@@ -715,31 +731,43 @@ mod tests {
                                         pattern: List(
                                             List {
                                                 patterns: [
-                                                    AstLeafNode(
-                                                        GritLeafNodePattern {
+                                                    AstNode(
+                                                        GritNodePattern {
                                                             kind: JsSyntaxKind(
                                                                 JS_STRING_LITERAL_EXPRESSION,
                                                             ),
-                                                            equivalence_class: Some(
-                                                                LeafEquivalenceClass {
-                                                                    representative: "hello",
-                                                                    class: [
-                                                                        LeafNormalizer {
+                                                            args: [
+                                                                GritNodePatternArg {
+                                                                    slot_index: 0,
+                                                                    pattern: AstLeafNode(
+                                                                        GritLeafNodePattern {
                                                                             kind: JsSyntaxKind(
                                                                                 JS_STRING_LITERAL,
                                                                             ),
-                                                                            normalizer: [address redacted],
-                                                                        },
-                                                                        LeafNormalizer {
-                                                                            kind: JsSyntaxKind(
-                                                                                JS_STRING_LITERAL_EXPRESSION,
+                                                                            equivalence_class: Some(
+                                                                                LeafEquivalenceClass {
+                                                                                    representative: "hello",
+                                                                                    class: [
+                                                                                        LeafNormalizer {
+                                                                                            kind: JsSyntaxKind(
+                                                                                                JS_STRING_LITERAL,
+                                                                                            ),
+                                                                                            normalizer: [address redacted],
+                                                                                        },
+                                                                                        LeafNormalizer {
+                                                                                            kind: JsSyntaxKind(
+                                                                                                JS_STRING_LITERAL_EXPRESSION,
+                                                                                            ),
+                                                                                            normalizer: [address redacted],
+                                                                                        },
+                                                                                    ],
+                                                                                },
                                                                             ),
-                                                                            normalizer: [address redacted],
+                                                                            text: "'hello'",
                                                                         },
-                                                                    ],
+                                                                    ),
                                                                 },
-                                                            ),
-                                                            text: "'hello'",
+                                                            ],
                                                         },
                                                     ),
                                                 ],
