@@ -142,11 +142,7 @@ pub fn sort_class_name(
     } else {
         None
     };
-    let class_str_suffix = if ignore_suffix {
-        classes_iter.next_back()
-    } else {
-        None
-    };
+    let class_str_suffix =  ignore_prefix.and_then_some(classes_iter.next_back());
 
     // Collect the remaining classes into a vector if needed.
     let classes: Vec<&str> = classes_iter.collect();
