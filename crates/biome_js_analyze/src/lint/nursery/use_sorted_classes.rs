@@ -177,18 +177,16 @@ impl Rule for UseSortedClasses {
         let node = ctx.query();
 
         // Calculate the range offset to account for the ignored prefix and suffix.
-        let range_offset = if let Some(value) = node.value() {
+        let sort_range = if let Some(value) = node.value() {
             let (ignore_prefix, ignore_suffix) = check_ignore(node);
-            sort_class_name_range_offset(&value, ignore_prefix, ignore_suffix)
+            let range_offset = sort_class_name_range_offset(&value, ignore_prefix, ignore_suffix);
+            TextRange::new(
+        	    range.start() + TextSize::from(range_offset.0),
+    	        range.end() - TextSize::from(range_offset.1),
+	        )
         } else {
-            (0, 0)
+            ctx.query().range()
         };
-
-        let range = ctx.query().range();
-        let sort_range = TextRange::new(
-            range.start() + TextSize::from(range_offset.0),
-            range.end() - TextSize::from(range_offset.1),
-        );
 
         Some(RuleDiagnostic::new(
             rule_category!(),
