@@ -1,6 +1,7 @@
 use std::io;
 
 use biome_console::{fmt, markup, MarkupBuf};
+use biome_rowan::TextSize;
 use biome_text_edit::TextEdit;
 use biome_text_size::TextRange;
 use serde::{
@@ -72,6 +73,14 @@ impl Diagnostic {
             tags,
             source,
         }
+    }
+
+    pub fn with_offset(mut self, offset: TextSize) -> Self {
+        self.location.span = self
+            .location
+            .span
+            .map(|span| TextRange::new(span.start() + offset, span.end() + offset));
+        self
     }
 }
 
