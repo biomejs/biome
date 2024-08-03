@@ -52,8 +52,8 @@ impl SemanticEventExtractor {
                     if let Some(property_name) = property.first_child() {
                         if let Some(value) = property_name.next_sibling() {
                             self.stash.push_back(SemanticEvent::PropertyDeclaration {
-                                property: property_name.text().to_string(),
-                                value: value.text().to_string(),
+                                property: property_name.text_trimmed().to_string(),
+                                value: value.text_trimmed().to_string(),
                                 property_range: property_name.text_range(),
                                 value_range: value.text_range(),
                             });
@@ -69,10 +69,10 @@ impl SemanticEventExtractor {
         match selector {
             AnyCssSelector::CssComplexSelector(s) => {
                 if let Ok(l) = s.left() {
-                    self.add_selector_event(l.text().to_string(), l.range());
+                    self.add_selector_event(l.text(), l.range());
                 }
                 if let Ok(r) = s.right() {
-                    self.add_selector_event(r.text().to_string(), r.range());
+                    self.add_selector_event(r.text(), r.range());
                 }
             }
             AnyCssSelector::CssCompoundSelector(selector) => {
@@ -86,7 +86,7 @@ impl SemanticEventExtractor {
         self.stash.push_back(SemanticEvent::SelectorDeclaration {
             name,
             range,
-            specificity: Specificity(0, 0, 0), // TODO: Implement calculate_specificity
+            specificity: Specificity(0, 0, 0), // TODO: Implement this
         });
     }
 

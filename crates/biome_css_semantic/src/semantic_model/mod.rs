@@ -38,7 +38,46 @@ mod tests {
     #[test]
     fn test_simple_ruleset() {
         let parse = parse_css(
-            r#"a { b, c { color: pink; } }"#,
+            r#"p {
+  font-family: verdana;
+  font-size: 20px;
+}"#,
+            CssParserOptions::default(),
+        );
+
+        let root = parse.tree();
+        let model = super::semantic_model(&root);
+        let rule = model.rules().first().unwrap();
+
+        assert_eq!(rule.selectors.len(), 1);
+        assert_eq!(rule.declarations.len(), 2);
+    }
+    #[test]
+    fn test_nested_selector() {
+        let parse = parse_css(
+            r#".parent {
+  color: blue;
+
+  .child {
+    color: red;
+  }
+}"#,
+            CssParserOptions::default(),
+        );
+
+        let root = parse.tree();
+        let model = super::semantic_model(&root);
+        let rule = model.rules().first().unwrap();
+
+        assert_eq!(rule.selectors.len(), 1);
+        assert_eq!(rule.declarations.len(), 1);
+        assert_eq!(rule.children.len(), 1);
+    }
+
+    #[test]
+    fn debug() {
+        let parse = parse_css(
+            r#"[a="b"i], [ a="b"i], [ a ="b"i], [ a = "b"i], [ a = "b" i], [ a = "b" i ] {}"#,
             CssParserOptions::default(),
         );
 

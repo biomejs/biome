@@ -60,5 +60,5 @@ pub struct Selector {
     pub specificity: Specificity,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Default)]
 pub struct Specificity(pub u32, pub u32, pub u32);
