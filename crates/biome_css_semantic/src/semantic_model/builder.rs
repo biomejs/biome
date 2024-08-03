@@ -2,21 +2,14 @@ use biome_css_syntax::{CssRoot, CssSyntaxKind, CssSyntaxNode};
 use biome_rowan::TextRange;
 use rustc_hash::FxHashMap;
 
+use super::model::{Declaration, Rule, Selector, SemanticModel, SemanticModelData};
 use crate::events::SemanticEvent;
 
-use super::model::{Declaration, SemanticModel, SemanticModelData};
-
-/// Builds the [SemanticModel] consuming [SemanticEvent] and [GraphqlSyntaxNode].
-/// For a good example on how to use it see [semantic_model].
-///
-/// [SemanticModelBuilder] consumes all the [SemanticEvent] and build all the
-/// data necessary to build a semantic model, that is allocated with an
-/// [std::rc::Rc] and stored inside the [SemanticModel].
 pub struct SemanticModelBuilder {
     root: CssRoot,
     node_by_range: FxHashMap<TextRange, CssSyntaxNode>,
-    selectors: FxHashMap<TextRange, Vec<(String, TextRange)>>,
-    declarations: FxHashMap<TextRange, Vec<Declaration>>,
+    rules: Vec<Rule>,
+    current_rule_stack: Vec<Rule>,
 }
 
 impl SemanticModelBuilder {
@@ -24,8 +17,8 @@ impl SemanticModelBuilder {
         Self {
             root,
             node_by_range: FxHashMap::default(),
-            selectors: FxHashMap::default(),
-            declarations: FxHashMap::default(),
+            rules: Vec::new(),
+            current_rule_stack: Vec::new(),
         }
     }
 
@@ -33,8 +26,7 @@ impl SemanticModelBuilder {
         let data = SemanticModelData {
             root: self.root,
             node_by_range: self.node_by_range,
-            selectors: self.selectors,
-            declarations: self.declarations,
+            rules: self.rules,
         };
         SemanticModel::new(data)
     }
@@ -44,7 +36,7 @@ impl SemanticModelBuilder {
         use CssSyntaxKind::*;
         if matches!(
             node.kind(),
-            CSS_SELECTOR_LIST | CSS_DECLARATION | CSS_DECLARATION_OR_RULE_LIST
+            CSS_SELECTOR_LIST | CSS_DECLARATION | CSS_DECLARATION_OR_RULE_LIST | CSS_QUALIFIED_RULE
         ) {
             self.node_by_range.insert(node.text_range(), node.clone());
         }
@@ -53,32 +45,51 @@ impl SemanticModelBuilder {
     #[inline]
     pub fn push_event(&mut self, event: SemanticEvent) {
         match event {
+            SemanticEvent::RuleStart(range) => {
+                let new_rule = Rule {
+                    selectors: Vec::new(),
+                    declarations: Vec::new(),
+                    children: Vec::new(),
+                    range,
+                };
+                self.current_rule_stack.push(new_rule);
+            }
+            SemanticEvent::RuleEnd => {
+                if let Some(completed_rule) = self.current_rule_stack.pop() {
+                    if let Some(parent_rule) = self.current_rule_stack.last_mut() {
+                        parent_rule.children.push(completed_rule);
+                    } else {
+                        self.rules.push(completed_rule);
+                    }
+                }
+            }
             SemanticEvent::SelectorDeclaration {
-                range,
                 name,
-                selector_range,
+                range,
+                specificity,
             } => {
-                self.selectors
-                    .entry(range)
-                    .or_default()
-                    .push((name, selector_range));
+                if let Some(current_rule) = self.current_rule_stack.last_mut() {
+                    current_rule.selectors.push(Selector {
+                        name,
+                        range,
+                        specificity,
+                    });
+                }
             }
             SemanticEvent::PropertyDeclaration {
-                selector_range,
                 property,
-                property_range,
                 value,
+                property_range,
                 value_range,
             } => {
-                self.declarations
-                    .entry(selector_range)
-                    .or_default()
-                    .push(Declaration {
+                if let Some(current_rule) = self.current_rule_stack.last_mut() {
+                    current_rule.declarations.push(Declaration {
                         property,
                         value,
                         property_range,
                         value_range,
                     });
+                }
             }
         }
     }

@@ -24,12 +24,8 @@ impl SemanticModel {
         self.data.node_by_range.get(&range)
     }
 
-    pub fn selectors(&self, range: TextRange) -> Option<&Vec<(String, TextRange)>> {
-        self.data.selectors.get(&range)
-    }
-
-    pub fn declarations(&self, range: TextRange) -> Option<&Vec<Declaration>> {
-        self.data.declarations.get(&range)
+    pub fn rules(&self) -> &[Rule] {
+        &self.data.rules
     }
 }
 
@@ -38,14 +34,31 @@ pub(crate) struct SemanticModelData {
     pub(crate) root: CssRoot,
     // Map to each by its range
     pub(crate) node_by_range: FxHashMap<TextRange, CssSyntaxNode>,
-    pub(crate) selectors: FxHashMap<TextRange, Vec<(String, TextRange)>>,
-    pub(crate) declarations: FxHashMap<TextRange, Vec<Declaration>>,
+    pub(crate) rules: Vec<Rule>,
 }
 
 #[derive(Debug)]
+pub struct Rule {
+    pub selectors: Vec<Selector>,
+    pub declarations: Vec<Declaration>,
+    pub children: Vec<Rule>,
+    pub range: TextRange,
+}
+
+#[derive(Debug, Clone)]
 pub struct Declaration {
     pub property: String,
     pub value: String,
     pub property_range: TextRange,
     pub value_range: TextRange,
 }
+
+#[derive(Debug, Clone)]
+pub struct Selector {
+    pub name: String,
+    pub range: TextRange,
+    pub specificity: Specificity,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
+pub struct Specificity(pub u32, pub u32, pub u32);
