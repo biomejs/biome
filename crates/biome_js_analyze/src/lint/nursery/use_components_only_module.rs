@@ -5,8 +5,7 @@ use biome_console::markup;
 use biome_deserialize_macros::Deserializable;
 use biome_js_syntax::{
     export_ext::{AnyJsExported, ExportedItem},
-    AnyJsBindingPattern, AnyJsExpression, AnyJsLiteralExpression, AnyJsModuleItem, AnyJsStatement,
-    JsModule, JsUnaryOperator,
+    AnyJsBindingPattern, AnyJsExpression, AnyJsModuleItem, AnyJsStatement, JsModule,
 };
 use biome_rowan::{AstNode, TextRange};
 use biome_string_case::Case;
@@ -233,7 +232,7 @@ impl Rule for UseComponentsOnlyModule {
                             .clone()
                             .is_some_and(|partof| match partof {
                                 AnyJsExported::AnyJsExpression(expr) => {
-                                    is_literal_expression(&expr).unwrap_or(false)
+                                    expr.is_literal_expression()
                                 }
                                 _ => false,
                             })
@@ -321,43 +320,6 @@ impl Rule for UseComponentsOnlyModule {
                 }),
             )
         }
-    }
-}
-
-// [TODO]: Comonaize no_yoda_expression
-fn is_literal_expression(expression: &AnyJsExpression) -> Option<bool> {
-    match expression {
-        // Any literal: 1, true, null, etc
-        AnyJsExpression::AnyJsLiteralExpression(_) => Some(true),
-
-        // Static template literals: `foo`
-        AnyJsExpression::JsTemplateExpression(template_expression) => Some(
-            template_expression
-                .elements()
-                .into_iter()
-                .all(|element| element.as_js_template_chunk_element().is_some()),
-        ),
-
-        // Negative numeric literal: -1
-        AnyJsExpression::JsUnaryExpression(unary_expression) => {
-            let is_minus_operator =
-                matches!(unary_expression.operator(), Ok(JsUnaryOperator::Minus));
-            let is_number_expression = matches!(
-                unary_expression.argument(),
-                Ok(AnyJsExpression::AnyJsLiteralExpression(
-                    AnyJsLiteralExpression::JsNumberLiteralExpression(_)
-                ))
-            );
-
-            Some(is_minus_operator && is_number_expression)
-        }
-
-        // Parenthesized expression: (1)
-        AnyJsExpression::JsParenthesizedExpression(parenthesized_expression) => {
-            is_literal_expression(&parenthesized_expression.expression().ok()?)
-        }
-
-        _ => Some(false),
     }
 }
 
