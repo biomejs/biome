@@ -15,9 +15,7 @@ use biome_rowan::{
     AstNodeList, AstNodeListIterator, AstNodeSlotMap, AstSeparatedList,
     AstSeparatedListNodesIterator,
 };
-#[cfg(feature = "serde")]
 use serde::ser::SerializeSeq;
-#[cfg(feature = "serde")]
 use serde::{Serialize, Serializer};
 use std::fmt::{Debug, Formatter};
 #[doc = r" Sentinel value indicating a missing element in a dynamic node, where"]
@@ -47,7 +45,6 @@ impl YamlArray {
         support::list(&self.syntax, 0usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for YamlArray {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -56,7 +53,7 @@ impl Serialize for YamlArray {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct YamlArrayFields {
     pub items: YamlArrayItemList,
 }
@@ -91,7 +88,6 @@ impl YamlArrayInline {
         support::required_token(&self.syntax, 2usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for YamlArrayInline {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -100,7 +96,7 @@ impl Serialize for YamlArrayInline {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct YamlArrayInlineFields {
     pub l_brack_token: SyntaxResult<SyntaxToken>,
     pub items: YamlArrayInlineList,
@@ -133,7 +129,6 @@ impl YamlArrayItem {
         support::required_node(&self.syntax, 1usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for YamlArrayItem {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -142,7 +137,7 @@ impl Serialize for YamlArrayItem {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct YamlArrayItemFields {
     pub minus_token: SyntaxResult<SyntaxToken>,
     pub item: SyntaxResult<AnyYamlValue>,
@@ -174,7 +169,6 @@ impl YamlBlockFolded {
         support::required_node(&self.syntax, 1usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for YamlBlockFolded {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -183,7 +177,7 @@ impl Serialize for YamlBlockFolded {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct YamlBlockFoldedFields {
     pub r_angle_token: SyntaxResult<SyntaxToken>,
     pub value: SyntaxResult<YamlBlockValue>,
@@ -215,7 +209,6 @@ impl YamlBlockLiteral {
         support::required_node(&self.syntax, 1usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for YamlBlockLiteral {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -224,7 +217,7 @@ impl Serialize for YamlBlockLiteral {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct YamlBlockLiteralFields {
     pub bitwise_or_token: SyntaxResult<SyntaxToken>,
     pub value: SyntaxResult<YamlBlockValue>,
@@ -252,7 +245,6 @@ impl YamlBlockValue {
         support::required_token(&self.syntax, 0usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for YamlBlockValue {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -261,7 +253,7 @@ impl Serialize for YamlBlockValue {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct YamlBlockValueFields {
     pub yaml_block_value_token: SyntaxResult<SyntaxToken>,
 }
@@ -288,7 +280,6 @@ impl YamlBooleanValue {
         support::required_token(&self.syntax, 0usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for YamlBooleanValue {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -297,7 +288,7 @@ impl Serialize for YamlBooleanValue {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct YamlBooleanValueFields {
     pub value_token: SyntaxResult<SyntaxToken>,
 }
@@ -332,7 +323,6 @@ impl YamlDocument {
         support::token(&self.syntax, 2usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for YamlDocument {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -341,7 +331,7 @@ impl Serialize for YamlDocument {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct YamlDocumentFields {
     pub dashdashdash_token: Option<SyntaxToken>,
     pub body: SyntaxResult<AnyYamlValue>,
@@ -370,7 +360,6 @@ impl YamlIdentifier {
         support::required_token(&self.syntax, 0usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for YamlIdentifier {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -379,7 +368,7 @@ impl Serialize for YamlIdentifier {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct YamlIdentifierFields {
     pub value_token: SyntaxResult<SyntaxToken>,
 }
@@ -406,7 +395,6 @@ impl YamlNullValue {
         support::required_token(&self.syntax, 0usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for YamlNullValue {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -415,7 +403,7 @@ impl Serialize for YamlNullValue {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct YamlNullValueFields {
     pub value_token: SyntaxResult<SyntaxToken>,
 }
@@ -442,7 +430,6 @@ impl YamlNumberValue {
         support::required_token(&self.syntax, 0usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for YamlNumberValue {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -451,7 +438,7 @@ impl Serialize for YamlNumberValue {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct YamlNumberValueFields {
     pub value_token: SyntaxResult<SyntaxToken>,
 }
@@ -478,7 +465,6 @@ impl YamlObject {
         support::list(&self.syntax, 0usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for YamlObject {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -487,7 +473,7 @@ impl Serialize for YamlObject {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct YamlObjectFields {
     pub members: YamlObjectMemberList,
 }
@@ -522,7 +508,6 @@ impl YamlObjectMember {
         support::required_node(&self.syntax, 2usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for YamlObjectMember {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -531,7 +516,7 @@ impl Serialize for YamlObjectMember {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct YamlObjectMemberFields {
     pub key: SyntaxResult<YamlIdentifier>,
     pub colon_token: SyntaxResult<SyntaxToken>,
@@ -568,7 +553,6 @@ impl YamlRoot {
         support::required_token(&self.syntax, 2usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for YamlRoot {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -577,7 +561,7 @@ impl Serialize for YamlRoot {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct YamlRootFields {
     pub bom_token: Option<SyntaxToken>,
     pub documents: YamlDocumentList,
@@ -606,7 +590,6 @@ impl YamlStringValue {
         support::required_token(&self.syntax, 0usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for YamlStringValue {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -615,12 +598,11 @@ impl Serialize for YamlStringValue {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct YamlStringValueFields {
     pub value_token: SyntaxResult<SyntaxToken>,
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyYamlScalar {
     YamlBooleanValue(YamlBooleanValue),
     YamlNullValue(YamlNullValue),
@@ -653,8 +635,7 @@ impl AnyYamlScalar {
         }
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyYamlValue {
     AnyYamlScalar(AnyYamlScalar),
     YamlArray(YamlArray),
@@ -1586,8 +1567,7 @@ impl std::fmt::Display for YamlStringValue {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub struct YamlBogus {
     syntax: SyntaxNode,
 }
@@ -1643,8 +1623,7 @@ impl From<YamlBogus> for SyntaxElement {
         n.syntax.into()
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub struct YamlBogusValue {
     syntax: SyntaxNode,
 }
@@ -1740,7 +1719,6 @@ impl AstNode for YamlArrayInlineList {
         self.syntax_list.into_node()
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for YamlArrayInlineList {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -1823,7 +1801,6 @@ impl AstNode for YamlArrayItemList {
         self.syntax_list.into_node()
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for YamlArrayItemList {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -1906,7 +1883,6 @@ impl AstNode for YamlDocumentList {
         self.syntax_list.into_node()
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for YamlDocumentList {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -1989,7 +1965,6 @@ impl AstNode for YamlObjectMemberList {
         self.syntax_list.into_node()
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for YamlObjectMemberList {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where

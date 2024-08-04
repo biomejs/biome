@@ -156,15 +156,15 @@ type LoadConfig = Result<Option<ConfigurationPayload>, WorkspaceError>;
 /// The configuration file will be read from the `file_system`. A [path hint](ConfigurationPathHint) should be provided.
 ///
 /// - If the path hint is a path to a file that is provided by the user, the function will try to load that file or error.
-/// The name doesn't have to be `biome.json` or `biome.jsonc`. And if it doesn't end with `.json`, Biome will try to
-/// deserialize it as a `.jsonc` file.
+///     The name doesn't have to be `biome.json` or `biome.jsonc`. And if it doesn't end with `.json`, Biome will try to
+///     deserialize it as a `.jsonc` file.
 ///
 /// - If the path hint is a path to a directory which is provided by the user, the function will try to find a `biome.json`
-/// or `biome.jsonc` file in order in that directory. And If it cannot find one, it will error.
+///     or `biome.jsonc` file in order in that directory. And If it cannot find one, it will error.
 ///
 /// - Otherwise, the function will try to traverse upwards the file system until it finds a `biome.json` or `biome.jsonc`
-/// file, or there aren't directories anymore. In this case, the function will not error but return an `Ok(None)`, which
-/// means Biome will use the default configuration.
+///     file, or there aren't directories anymore. In this case, the function will not error but return an `Ok(None)`, which
+///     means Biome will use the default configuration.
 fn load_config(
     file_system: &DynRef<'_, dyn FileSystem>,
     base_path: ConfigurationPathHint,

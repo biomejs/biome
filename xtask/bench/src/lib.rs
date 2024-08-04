@@ -9,10 +9,10 @@ use biome_formatter::Printed;
 use biome_rowan::NodeCache;
 use criterion::measurement::WallTime;
 
-#[cfg(not(codspeed))]
+#[cfg(not(feature = "codspeed"))]
 pub use criterion::*;
 
-#[cfg(codspeed)]
+#[cfg(feature = "codspeed")]
 pub use codspeed_criterion_compat::*;
 
 pub fn run_format(format_node: &FormatNode) -> Printed {
