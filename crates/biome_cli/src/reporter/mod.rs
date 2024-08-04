@@ -6,6 +6,8 @@ pub(crate) mod terminal;
 
 use crate::execute::Execution;
 use biome_diagnostics::{Error, Severity};
+use biome_fs::EvaluatedPath;
+use rustc_hash::FxHashSet;
 use serde::Serialize;
 use std::io;
 use std::time::Duration;
@@ -46,6 +48,15 @@ pub trait ReporterVisitor {
         execution: &Execution,
         summary: TraversalSummary,
     ) -> io::Result<()>;
+
+    /// Writes the paths that were handled during a run.
+    fn report_handled_paths(
+        &mut self,
+        evaluated_paths: FxHashSet<EvaluatedPath>,
+    ) -> io::Result<()> {
+        let _ = evaluated_paths;
+        Ok(())
+    }
 
     /// Writes a diagnostics
     fn report_diagnostics(

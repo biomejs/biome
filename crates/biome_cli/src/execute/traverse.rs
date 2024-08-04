@@ -9,13 +9,14 @@ use crate::reporter::TraversalSummary;
 use crate::{CliDiagnostic, CliSession};
 use biome_diagnostics::DiagnosticTags;
 use biome_diagnostics::{category, DiagnosticExt, Error, Resource, Severity};
-use biome_fs::{BiomePath, FileSystem, PathInterner};
+use biome_fs::{BiomePath, EvaluatedPath, FileSystem, PathInterner};
 use biome_fs::{TraversalContext, TraversalScope};
 use biome_service::workspace::{DropPatternParams, IsPathIgnoredParams};
 use biome_service::{extension_error, workspace::SupportsFeatureParams, Workspace, WorkspaceError};
 use crossbeam::channel::{unbounded, Receiver, Sender};
 use rustc_hash::FxHashSet;
 use std::sync::atomic::AtomicU32;
+use std::sync::RwLock;
 use std::{
     env::current_dir,
     ffi::OsString,
@@ -29,12 +30,18 @@ use std::{
     time::{Duration, Instant},
 };
 
+pub(crate) struct TraverseResult {
+    pub(crate) summary: TraversalSummary,
+    pub(crate) evaluated_paths: FxHashSet<EvaluatedPath>,
+    pub(crate) diagnostics: Vec<Error>,
+}
+
 pub(crate) fn traverse(
     execution: &Execution,
     session: &mut CliSession,
     cli_options: &CliOptions,
     mut inputs: Vec<OsString>,
-) -> Result<(TraversalSummary, Vec<Error>), CliDiagnostic> {
+) -> Result<TraverseResult, CliDiagnostic> {
     init_thread_pool();
 
     if inputs.is_empty() {
@@ -81,7 +88,7 @@ pub(crate) fn traverse(
         .with_diagnostic_level(cli_options.diagnostic_level)
         .with_max_diagnostics(max_diagnostics);
 
-    let (duration, diagnostics) = thread::scope(|s| {
+    let (duration, evaluated_paths, diagnostics) = thread::scope(|s| {
         let handler = thread::Builder::new()
             .name(String::from("biome::console"))
             .spawn_scoped(s, || printer.run(receiver, recv_files))
@@ -89,7 +96,7 @@ pub(crate) fn traverse(
 
         // The traversal context is scoped to ensure all the channels it
         // contains are properly closed once the traversal finishes
-        let elapsed = traverse_inputs(
+        let (elapsed, evaluated_paths) = traverse_inputs(
             fs,
             inputs,
             &TraversalOptions {
@@ -102,12 +109,13 @@ pub(crate) fn traverse(
                 skipped: &skipped,
                 messages: sender,
                 remaining_diagnostics: &remaining_diagnostics,
+                evaluated_paths: RwLock::default(),
             },
         );
         // wait for the main thread to finish
         let diagnostics = handler.join().unwrap();
 
-        (elapsed, diagnostics)
+        (elapsed, evaluated_paths, diagnostics)
     });
 
     // Make sure patterns are always cleaned up at the end of traversal.
@@ -124,8 +132,8 @@ pub(crate) fn traverse(
     let skipped = skipped.load(Ordering::Relaxed);
     let suggested_fixes_skipped = printer.skipped_fixes();
     let diagnostics_not_printed = printer.not_printed_diagnostics();
-    Ok((
-        TraversalSummary {
+    Ok(TraverseResult {
+        summary: TraversalSummary {
             changed,
             unchanged,
             duration,
@@ -135,8 +143,9 @@ pub(crate) fn traverse(
             suggested_fixes_skipped,
             diagnostics_not_printed,
         },
+        evaluated_paths,
         diagnostics,
-    ))
+    })
 }
 
 /// This function will setup the global Rayon thread pool the first time it's called
@@ -154,15 +163,27 @@ fn init_thread_pool() {
 
 /// Initiate the filesystem traversal tasks with the provided input paths and
 /// run it to completion, returning the duration of the process
-fn traverse_inputs(fs: &dyn FileSystem, inputs: Vec<OsString>, ctx: &TraversalOptions) -> Duration {
+fn traverse_inputs(
+    fs: &dyn FileSystem,
+    inputs: Vec<OsString>,
+    ctx: &TraversalOptions,
+) -> (Duration, FxHashSet<EvaluatedPath>) {
     let start = Instant::now();
     fs.traversal(Box::new(move |scope: &dyn TraversalScope| {
         for input in inputs {
-            scope.spawn(ctx, PathBuf::from(input));
+            scope.evaluate(ctx, PathBuf::from(input));
         }
     }));
 
-    start.elapsed()
+    let paths = ctx.evaluated_paths();
+
+    fs.traversal(Box::new(|scope: &dyn TraversalScope| {
+        for path in paths.clone() {
+            scope.handle(ctx, path.to_path_buf());
+        }
+    }));
+
+    (start.elapsed(), paths)
 }
 
 // struct DiagnosticsReporter<'ctx> {}
@@ -483,11 +504,16 @@ pub(crate) struct TraversalOptions<'ctx, 'app> {
     /// The approximate number of diagnostics the console will print before
     /// folding the rest into the "skipped diagnostics" counter
     pub(crate) remaining_diagnostics: &'ctx AtomicU32,
+
+    /// List of paths that should be processed
+    pub(crate) evaluated_paths: RwLock<FxHashSet<EvaluatedPath>>,
 }
 
 impl<'ctx, 'app> TraversalOptions<'ctx, 'app> {
-    pub(crate) fn increment_changed(&self) {
+    pub(crate) fn increment_changed(&self, path: &Path) {
         self.changed.fetch_add(1, Ordering::Relaxed);
+        let mut evaluated_paths = self.evaluated_paths.write().unwrap();
+        evaluated_paths.replace(EvaluatedPath::new_evaluated(path));
     }
     pub(crate) fn increment_unchanged(&self) {
         self.unchanged.fetch_add(1, Ordering::Relaxed);
@@ -516,6 +542,10 @@ impl<'ctx, 'app> TraversalOptions<'ctx, 'app> {
 impl<'ctx, 'app> TraversalContext for TraversalOptions<'ctx, 'app> {
     fn interner(&self) -> &PathInterner {
         &self.interner
+    }
+
+    fn evaluated_paths(&self) -> FxHashSet<EvaluatedPath> {
+        self.evaluated_paths.read().unwrap().clone()
     }
 
     fn push_diagnostic(&self, error: Error) {
@@ -588,8 +618,12 @@ impl<'ctx, 'app> TraversalContext for TraversalOptions<'ctx, 'app> {
         }
     }
 
-    fn handle_file(&self, path: &Path) {
+    fn handle_path(&self, path: &Path) {
         handle_file(self, path)
+    }
+
+    fn store_path(&self, path: &Path) {
+        self.evaluated_paths.write().unwrap().insert(path.into());
     }
 }
 
@@ -599,7 +633,7 @@ impl<'ctx, 'app> TraversalContext for TraversalOptions<'ctx, 'app> {
 fn handle_file(ctx: &TraversalOptions, path: &Path) {
     match catch_unwind(move || process_file(ctx, path)) {
         Ok(Ok(FileStatus::Changed)) => {
-            ctx.increment_changed();
+            ctx.increment_changed(path);
         }
         Ok(Ok(FileStatus::Unchanged)) => {
             ctx.increment_unchanged();
