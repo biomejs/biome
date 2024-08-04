@@ -31,7 +31,28 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 - `biome init` now generates a new config file with more options set.
   This change intends to improve discoverability of the options and to set the more commonly used options to their default values.
-  Contributed by Conaclos
+  Contributed by @Conaclos
+- The `--verbose` flag how reports the list of files that were evaluated, and the list of files that were fixed.
+  The **evaluated** files are the those files that can be handled by Biome, files that are ignored, don't have an extension or have an extension that Biome can't evaluate are excluded by this list.
+  The **fixed** files are those files that were handled by Biome and *changed*. Files that stays the same after the process are excluded from this list.
+
+  ```shell
+   VERBOSE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+    ℹ Files processed:
+
+    - biome/biome.json
+    - biome/packages/@biomejs/cli-win32-arm64/package.json
+    - biome/packages/tailwindcss-config-analyzer/package.json
+
+   VERBOSE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+    ℹ Files fixed:
+
+    - biome/biome/packages/tailwindcss-config-analyzer/src/generate-tailwind-preset.ts
+  ```
+
+  Contributed by @ematipico
 
 #### Bug fixes
 
