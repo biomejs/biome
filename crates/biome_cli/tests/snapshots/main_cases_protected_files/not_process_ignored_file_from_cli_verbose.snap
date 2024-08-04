@@ -53,7 +53,7 @@ Found 1 error.
 ```block
  VERBOSE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i List of files that were evaluated:
+  i Files processed:
   
   - other.json
   
@@ -63,7 +63,7 @@ Found 1 error.
 ```block
  VERBOSE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i List of files that were fixed:
+  i Files fixed:
   
   ! The list is empty.
   

@@ -33,7 +33,7 @@ impl Reporter for ConsoleReporter {
 #[diagnostic(
     tags(VERBOSE),
     severity = Information,
-    message = "List of files that were evaluated:"
+    message = "Files processed:"
 )]
 struct EvaluatedPathsDiagnostic {
     #[advice]
@@ -44,7 +44,7 @@ struct EvaluatedPathsDiagnostic {
 #[diagnostic(
     tags(VERBOSE),
     severity = Information,
-    message = "List of files that were fixed:"
+    message = "Files fixed:"
 )]
 struct FixedPathsDiagnostic {
     #[advice]

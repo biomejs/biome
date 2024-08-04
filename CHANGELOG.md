@@ -39,7 +39,7 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
   ```shell
    VERBOSE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-    ℹ List of files that were evaluated
+    ℹ Files processed:
 
     - biome/biome.json
     - biome/packages/@biomejs/cli-win32-arm64/package.json
@@ -47,7 +47,7 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
    VERBOSE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-    ℹ List of files that were fixed
+    ℹ Files fixed:
 
     - biome/biome/packages/tailwindcss-config-analyzer/src/generate-tailwind-preset.ts
   ```

@@ -137,7 +137,7 @@ Found 1 error.
 ```block
  VERBOSE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i List of files that were evaluated:
+  i Files processed:
   
   - src/file.js
   
@@ -147,7 +147,7 @@ Found 1 error.
 ```block
  VERBOSE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i List of files that were fixed:
+  i Files fixed:
   
   ! The list is empty.
   

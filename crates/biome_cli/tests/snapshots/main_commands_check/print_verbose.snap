@@ -72,7 +72,7 @@ Found 3 errors.
 ```block
  VERBOSE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i List of files that were evaluated:
+  i Files processed:
   
   - check.js
   
@@ -82,7 +82,7 @@ Found 3 errors.
 ```block
  VERBOSE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i List of files that were fixed:
+  i Files fixed:
   
   ! The list is empty.
   

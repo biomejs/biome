@@ -343,35 +343,41 @@ pub trait TraversalContext: Sync {
 }
 
 #[derive(Debug, Eq, Clone)]
-pub struct EvaluatedPath(PathBuf, bool);
+pub struct EvaluatedPath {
+    path: PathBuf,
+    is_fixed: bool,
+}
 
 impl PartialEq for EvaluatedPath {
     fn eq(&self, other: &Self) -> bool {
-        self.0.eq(&other.0)
+        self.path.eq(&other.path)
     }
 }
 
 impl Hash for EvaluatedPath {
     fn hash<H: Hasher>(&self, state: &mut H) {
-        self.0.hash(state)
+        self.path.hash(state)
     }
 }
 
 impl EvaluatedPath {
     pub fn new_evaluated(path: impl Into<PathBuf>) -> Self {
-        Self(path.into(), true)
+        Self {
+            path: path.into(),
+            is_fixed: true,
+        }
     }
 
     pub fn is_fixed(&self) -> bool {
-        self.1
+        self.is_fixed
     }
 
     pub fn as_path(&self) -> &Path {
-        self.0.as_path()
+        self.path.as_path()
     }
 
-    pub fn to_bath_buf(&self) -> PathBuf {
-        self.0.clone()
+    pub fn to_path_buf(&self) -> PathBuf {
+        self.path.clone()
     }
 }
 
@@ -383,7 +389,10 @@ impl AsRef<Path> for EvaluatedPath {
 
 impl<T: Into<PathBuf>> From<T> for EvaluatedPath {
     fn from(value: T) -> Self {
-        Self(value.into(), false)
+        Self {
+            path: value.into(),
+            is_fixed: false,
+        }
     }
 }
 

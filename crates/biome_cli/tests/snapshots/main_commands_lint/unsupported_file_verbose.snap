@@ -42,7 +42,7 @@ Found 1 warning.
 ```block
  VERBOSE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i List of files that were evaluated:
+  i Files processed:
   
   ! The list is empty.
   
@@ -52,7 +52,7 @@ Found 1 warning.
 ```block
  VERBOSE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i List of files that were fixed:
+  i Files fixed:
   
   ! The list is empty.
   

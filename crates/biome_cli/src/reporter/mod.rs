@@ -50,7 +50,6 @@ pub trait ReporterVisitor {
     ) -> io::Result<()>;
 
     /// Writes the paths that were handled during a run.
-    /// The fist list represents the paths that were evaluated, the second list represents the paths that were fixed
     fn report_handled_paths(
         &mut self,
         evaluated_paths: FxHashSet<EvaluatedPath>,
