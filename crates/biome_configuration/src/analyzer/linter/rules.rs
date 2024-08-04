@@ -3,13 +3,9 @@
 use crate::analyzer::{RuleConfiguration, RuleFixConfiguration, RulePlainConfiguration};
 use biome_analyze::{options::RuleOptions, RuleFilter};
 use biome_console::markup;
-use biome_css_analyze::options::*;
 use biome_deserialize::{DeserializableValidator, DeserializationDiagnostic};
 use biome_deserialize_macros::{Deserializable, Merge};
 use biome_diagnostics::{Category, Severity};
-use biome_graphql_analyze::options::*;
-use biome_js_analyze::options::*;
-use biome_json_analyze::options::*;
 use biome_rowan::TextRange;
 use rustc_hash::FxHashSet;
 #[cfg(feature = "schema")]
@@ -436,97 +432,115 @@ pub struct A11y {
     pub all: Option<bool>,
     #[doc = "Enforce that the accessKey attribute is not used on any HTML element."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_access_key: Option<RuleFixConfiguration<NoAccessKey>>,
+    pub no_access_key: Option<RuleFixConfiguration<biome_js_analyze::options::NoAccessKey>>,
     #[doc = "Enforce that aria-hidden=\"true\" is not set on focusable elements."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_aria_hidden_on_focusable: Option<RuleFixConfiguration<NoAriaHiddenOnFocusable>>,
+    pub no_aria_hidden_on_focusable:
+        Option<RuleFixConfiguration<biome_js_analyze::options::NoAriaHiddenOnFocusable>>,
     #[doc = "Enforce that elements that do not support ARIA roles, states, and properties do not have those attributes."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_aria_unsupported_elements: Option<RuleFixConfiguration<NoAriaUnsupportedElements>>,
+    pub no_aria_unsupported_elements:
+        Option<RuleFixConfiguration<biome_js_analyze::options::NoAriaUnsupportedElements>>,
     #[doc = "Enforce that autoFocus prop is not used on elements."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_autofocus: Option<RuleFixConfiguration<NoAutofocus>>,
+    pub no_autofocus: Option<RuleFixConfiguration<biome_js_analyze::options::NoAutofocus>>,
     #[doc = "Disallow target=\"_blank\" attribute without rel=\"noreferrer\""]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_blank_target: Option<RuleFixConfiguration<NoBlankTarget>>,
+    pub no_blank_target: Option<RuleFixConfiguration<biome_js_analyze::options::NoBlankTarget>>,
     #[doc = "Enforces that no distracting elements are used."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_distracting_elements: Option<RuleFixConfiguration<NoDistractingElements>>,
+    pub no_distracting_elements:
+        Option<RuleFixConfiguration<biome_js_analyze::options::NoDistractingElements>>,
     #[doc = "The scope prop should be used only on \\<th> elements."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_header_scope: Option<RuleFixConfiguration<NoHeaderScope>>,
+    pub no_header_scope: Option<RuleFixConfiguration<biome_js_analyze::options::NoHeaderScope>>,
     #[doc = "Enforce that non-interactive ARIA roles are not assigned to interactive HTML elements."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_interactive_element_to_noninteractive_role:
-        Option<RuleFixConfiguration<NoInteractiveElementToNoninteractiveRole>>,
+    pub no_interactive_element_to_noninteractive_role: Option<
+        RuleFixConfiguration<biome_js_analyze::options::NoInteractiveElementToNoninteractiveRole>,
+    >,
     #[doc = "Enforce that interactive ARIA roles are not assigned to non-interactive HTML elements."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_noninteractive_element_to_interactive_role:
-        Option<RuleFixConfiguration<NoNoninteractiveElementToInteractiveRole>>,
+    pub no_noninteractive_element_to_interactive_role: Option<
+        RuleFixConfiguration<biome_js_analyze::options::NoNoninteractiveElementToInteractiveRole>,
+    >,
     #[doc = "Enforce that tabIndex is not assigned to non-interactive HTML elements."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_noninteractive_tabindex: Option<RuleFixConfiguration<NoNoninteractiveTabindex>>,
+    pub no_noninteractive_tabindex:
+        Option<RuleFixConfiguration<biome_js_analyze::options::NoNoninteractiveTabindex>>,
     #[doc = "Prevent the usage of positive integers on tabIndex property"]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_positive_tabindex: Option<RuleFixConfiguration<NoPositiveTabindex>>,
+    pub no_positive_tabindex:
+        Option<RuleFixConfiguration<biome_js_analyze::options::NoPositiveTabindex>>,
     #[doc = "Enforce img alt prop does not contain the word \"image\", \"picture\", or \"photo\"."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_redundant_alt: Option<RuleConfiguration<NoRedundantAlt>>,
+    pub no_redundant_alt: Option<RuleConfiguration<biome_js_analyze::options::NoRedundantAlt>>,
     #[doc = "Enforce explicit role property is not the same as implicit/default role property on an element."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_redundant_roles: Option<RuleFixConfiguration<NoRedundantRoles>>,
+    pub no_redundant_roles:
+        Option<RuleFixConfiguration<biome_js_analyze::options::NoRedundantRoles>>,
     #[doc = "Enforces the usage of the title element for the svg element."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_svg_without_title: Option<RuleConfiguration<NoSvgWithoutTitle>>,
+    pub no_svg_without_title:
+        Option<RuleConfiguration<biome_js_analyze::options::NoSvgWithoutTitle>>,
     #[doc = "Enforce that all elements that require alternative text have meaningful information to relay back to the end user."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_alt_text: Option<RuleConfiguration<UseAltText>>,
+    pub use_alt_text: Option<RuleConfiguration<biome_js_analyze::options::UseAltText>>,
     #[doc = "Enforce that anchors have content and that the content is accessible to screen readers."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_anchor_content: Option<RuleFixConfiguration<UseAnchorContent>>,
+    pub use_anchor_content:
+        Option<RuleFixConfiguration<biome_js_analyze::options::UseAnchorContent>>,
     #[doc = "Enforce that tabIndex is assigned to non-interactive HTML elements with aria-activedescendant."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_aria_activedescendant_with_tabindex:
-        Option<RuleFixConfiguration<UseAriaActivedescendantWithTabindex>>,
+    pub use_aria_activedescendant_with_tabindex: Option<
+        RuleFixConfiguration<biome_js_analyze::options::UseAriaActivedescendantWithTabindex>,
+    >,
     #[doc = "Enforce that elements with ARIA roles must have all required ARIA attributes for that role."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_aria_props_for_role: Option<RuleConfiguration<UseAriaPropsForRole>>,
+    pub use_aria_props_for_role:
+        Option<RuleConfiguration<biome_js_analyze::options::UseAriaPropsForRole>>,
     #[doc = "Enforces the usage of the attribute type for the element button"]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_button_type: Option<RuleConfiguration<UseButtonType>>,
+    pub use_button_type: Option<RuleConfiguration<biome_js_analyze::options::UseButtonType>>,
     #[doc = "Enforce that heading elements (h1, h2, etc.) have content and that the content is accessible to screen readers. Accessible means that it is not hidden using the aria-hidden prop."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_heading_content: Option<RuleConfiguration<UseHeadingContent>>,
+    pub use_heading_content:
+        Option<RuleConfiguration<biome_js_analyze::options::UseHeadingContent>>,
     #[doc = "Enforce that html element has lang attribute."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_html_lang: Option<RuleConfiguration<UseHtmlLang>>,
+    pub use_html_lang: Option<RuleConfiguration<biome_js_analyze::options::UseHtmlLang>>,
     #[doc = "Enforces the usage of the attribute title for the element iframe."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_iframe_title: Option<RuleConfiguration<UseIframeTitle>>,
+    pub use_iframe_title: Option<RuleConfiguration<biome_js_analyze::options::UseIframeTitle>>,
     #[doc = "Enforce onClick is accompanied by at least one of the following: onKeyUp, onKeyDown, onKeyPress."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_key_with_click_events: Option<RuleConfiguration<UseKeyWithClickEvents>>,
+    pub use_key_with_click_events:
+        Option<RuleConfiguration<biome_js_analyze::options::UseKeyWithClickEvents>>,
     #[doc = "Enforce onMouseOver / onMouseOut are accompanied by onFocus / onBlur."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_key_with_mouse_events: Option<RuleConfiguration<UseKeyWithMouseEvents>>,
+    pub use_key_with_mouse_events:
+        Option<RuleConfiguration<biome_js_analyze::options::UseKeyWithMouseEvents>>,
     #[doc = "Enforces that audio and video elements must have a track for captions."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_media_caption: Option<RuleConfiguration<UseMediaCaption>>,
+    pub use_media_caption: Option<RuleConfiguration<biome_js_analyze::options::UseMediaCaption>>,
     #[doc = "Enforce that all anchors are valid, and they are navigable elements."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_valid_anchor: Option<RuleConfiguration<UseValidAnchor>>,
+    pub use_valid_anchor: Option<RuleConfiguration<biome_js_analyze::options::UseValidAnchor>>,
     #[doc = "Ensures that ARIA properties aria-* are all valid."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_valid_aria_props: Option<RuleFixConfiguration<UseValidAriaProps>>,
+    pub use_valid_aria_props:
+        Option<RuleFixConfiguration<biome_js_analyze::options::UseValidAriaProps>>,
     #[doc = "Elements with ARIA roles must use a valid, non-abstract ARIA role."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_valid_aria_role: Option<RuleFixConfiguration<UseValidAriaRole>>,
+    pub use_valid_aria_role:
+        Option<RuleFixConfiguration<biome_js_analyze::options::UseValidAriaRole>>,
     #[doc = "Enforce that ARIA state and property values are valid."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_valid_aria_values: Option<RuleConfiguration<UseValidAriaValues>>,
+    pub use_valid_aria_values:
+        Option<RuleConfiguration<biome_js_analyze::options::UseValidAriaValues>>,
     #[doc = "Ensure that the attribute passed to the lang attribute is a correct ISO language and/or country."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_valid_lang: Option<RuleConfiguration<UseValidLang>>,
+    pub use_valid_lang: Option<RuleConfiguration<biome_js_analyze::options::UseValidLang>>,
 }
 impl DeserializableValidator for A11y {
     fn validate(
@@ -1165,94 +1179,113 @@ pub struct Complexity {
     pub all: Option<bool>,
     #[doc = "Disallow primitive type aliases and misleading types."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_banned_types: Option<RuleFixConfiguration<NoBannedTypes>>,
+    pub no_banned_types: Option<RuleFixConfiguration<biome_js_analyze::options::NoBannedTypes>>,
     #[doc = "Disallow empty type parameters in type aliases and interfaces."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_empty_type_parameters: Option<RuleConfiguration<NoEmptyTypeParameters>>,
+    pub no_empty_type_parameters:
+        Option<RuleConfiguration<biome_js_analyze::options::NoEmptyTypeParameters>>,
     #[doc = "Disallow functions that exceed a given Cognitive Complexity score."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_excessive_cognitive_complexity:
-        Option<RuleConfiguration<NoExcessiveCognitiveComplexity>>,
+        Option<RuleConfiguration<biome_js_analyze::options::NoExcessiveCognitiveComplexity>>,
     #[doc = "This rule enforces a maximum depth to nested describe() in test files."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_excessive_nested_test_suites: Option<RuleConfiguration<NoExcessiveNestedTestSuites>>,
+    pub no_excessive_nested_test_suites:
+        Option<RuleConfiguration<biome_js_analyze::options::NoExcessiveNestedTestSuites>>,
     #[doc = "Disallow unnecessary boolean casts"]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_extra_boolean_cast: Option<RuleFixConfiguration<NoExtraBooleanCast>>,
+    pub no_extra_boolean_cast:
+        Option<RuleFixConfiguration<biome_js_analyze::options::NoExtraBooleanCast>>,
     #[doc = "Prefer for...of statement instead of Array.forEach."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_for_each: Option<RuleConfiguration<NoForEach>>,
+    pub no_for_each: Option<RuleConfiguration<biome_js_analyze::options::NoForEach>>,
     #[doc = "Disallow unclear usage of consecutive space characters in regular expression literals"]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_multiple_spaces_in_regular_expression_literals:
-        Option<RuleFixConfiguration<NoMultipleSpacesInRegularExpressionLiterals>>,
+    pub no_multiple_spaces_in_regular_expression_literals: Option<
+        RuleFixConfiguration<
+            biome_js_analyze::options::NoMultipleSpacesInRegularExpressionLiterals,
+        >,
+    >,
     #[doc = "This rule reports when a class has no non-static members, such as for a class used exclusively as a static namespace."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_static_only_class: Option<RuleConfiguration<NoStaticOnlyClass>>,
+    pub no_static_only_class:
+        Option<RuleConfiguration<biome_js_analyze::options::NoStaticOnlyClass>>,
     #[doc = "Disallow this and super in static contexts."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_this_in_static: Option<RuleFixConfiguration<NoThisInStatic>>,
+    pub no_this_in_static: Option<RuleFixConfiguration<biome_js_analyze::options::NoThisInStatic>>,
     #[doc = "Disallow unnecessary catch clauses."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_useless_catch: Option<RuleConfiguration<NoUselessCatch>>,
+    pub no_useless_catch: Option<RuleConfiguration<biome_js_analyze::options::NoUselessCatch>>,
     #[doc = "Disallow unnecessary constructors."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_useless_constructor: Option<RuleFixConfiguration<NoUselessConstructor>>,
+    pub no_useless_constructor:
+        Option<RuleFixConfiguration<biome_js_analyze::options::NoUselessConstructor>>,
     #[doc = "Disallow empty exports that don't change anything in a module file."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_useless_empty_export: Option<RuleFixConfiguration<NoUselessEmptyExport>>,
+    pub no_useless_empty_export:
+        Option<RuleFixConfiguration<biome_js_analyze::options::NoUselessEmptyExport>>,
     #[doc = "Disallow unnecessary fragments"]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_useless_fragments: Option<RuleFixConfiguration<NoUselessFragments>>,
+    pub no_useless_fragments:
+        Option<RuleFixConfiguration<biome_js_analyze::options::NoUselessFragments>>,
     #[doc = "Disallow unnecessary labels."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_useless_label: Option<RuleFixConfiguration<NoUselessLabel>>,
+    pub no_useless_label: Option<RuleFixConfiguration<biome_js_analyze::options::NoUselessLabel>>,
     #[doc = "Disallow unnecessary nested block statements."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_useless_lone_block_statements:
-        Option<RuleFixConfiguration<NoUselessLoneBlockStatements>>,
+        Option<RuleFixConfiguration<biome_js_analyze::options::NoUselessLoneBlockStatements>>,
     #[doc = "Disallow renaming import, export, and destructured assignments to the same name."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_useless_rename: Option<RuleFixConfiguration<NoUselessRename>>,
+    pub no_useless_rename: Option<RuleFixConfiguration<biome_js_analyze::options::NoUselessRename>>,
     #[doc = "Disallow useless case in switch statements."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_useless_switch_case: Option<RuleFixConfiguration<NoUselessSwitchCase>>,
+    pub no_useless_switch_case:
+        Option<RuleFixConfiguration<biome_js_analyze::options::NoUselessSwitchCase>>,
     #[doc = "Disallow ternary operators when simpler alternatives exist."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_useless_ternary: Option<RuleFixConfiguration<NoUselessTernary>>,
+    pub no_useless_ternary:
+        Option<RuleFixConfiguration<biome_js_analyze::options::NoUselessTernary>>,
     #[doc = "Disallow useless this aliasing."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_useless_this_alias: Option<RuleFixConfiguration<NoUselessThisAlias>>,
+    pub no_useless_this_alias:
+        Option<RuleFixConfiguration<biome_js_analyze::options::NoUselessThisAlias>>,
     #[doc = "Disallow using any or unknown as type constraint."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_useless_type_constraint: Option<RuleFixConfiguration<NoUselessTypeConstraint>>,
+    pub no_useless_type_constraint:
+        Option<RuleFixConfiguration<biome_js_analyze::options::NoUselessTypeConstraint>>,
     #[doc = "Disallow the use of void operators, which is not a familiar operator."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_void: Option<RuleConfiguration<NoVoid>>,
+    pub no_void: Option<RuleConfiguration<biome_js_analyze::options::NoVoid>>,
     #[doc = "Disallow with statements in non-strict contexts."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_with: Option<RuleConfiguration<NoWith>>,
+    pub no_with: Option<RuleConfiguration<biome_js_analyze::options::NoWith>>,
     #[doc = "Use arrow functions over function expressions."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_arrow_function: Option<RuleFixConfiguration<UseArrowFunction>>,
+    pub use_arrow_function:
+        Option<RuleFixConfiguration<biome_js_analyze::options::UseArrowFunction>>,
     #[doc = "Promotes the use of .flatMap() when map().flat() are used together."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_flat_map: Option<RuleFixConfiguration<UseFlatMap>>,
+    pub use_flat_map: Option<RuleFixConfiguration<biome_js_analyze::options::UseFlatMap>>,
     #[doc = "Enforce the usage of a literal access to properties over computed property access."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_literal_keys: Option<RuleFixConfiguration<UseLiteralKeys>>,
+    pub use_literal_keys: Option<RuleFixConfiguration<biome_js_analyze::options::UseLiteralKeys>>,
     #[doc = "Enforce using concise optional chain instead of chained logical expressions."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_optional_chain: Option<RuleFixConfiguration<UseOptionalChain>>,
+    pub use_optional_chain:
+        Option<RuleFixConfiguration<biome_js_analyze::options::UseOptionalChain>>,
     #[doc = "Enforce the use of the regular expression literals instead of the RegExp constructor if possible."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_regex_literals: Option<RuleFixConfiguration<UseRegexLiterals>>,
+    pub use_regex_literals:
+        Option<RuleFixConfiguration<biome_js_analyze::options::UseRegexLiterals>>,
     #[doc = "Disallow number literal object member names which are not base10 or uses underscore as separator"]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_simple_number_keys: Option<RuleFixConfiguration<UseSimpleNumberKeys>>,
+    pub use_simple_number_keys:
+        Option<RuleFixConfiguration<biome_js_analyze::options::UseSimpleNumberKeys>>,
     #[doc = "Discard redundant terms from logical expressions."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_simplified_logic_expression: Option<RuleFixConfiguration<UseSimplifiedLogicExpression>>,
+    pub use_simplified_logic_expression:
+        Option<RuleFixConfiguration<biome_js_analyze::options::UseSimplifiedLogicExpression>>,
 }
 impl DeserializableValidator for Complexity {
     fn validate(
@@ -1873,127 +1906,153 @@ pub struct Correctness {
     pub all: Option<bool>,
     #[doc = "Prevent passing of children as props."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_children_prop: Option<RuleConfiguration<NoChildrenProp>>,
+    pub no_children_prop: Option<RuleConfiguration<biome_js_analyze::options::NoChildrenProp>>,
     #[doc = "Prevents from having const variables being re-assigned."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_const_assign: Option<RuleFixConfiguration<NoConstAssign>>,
+    pub no_const_assign: Option<RuleFixConfiguration<biome_js_analyze::options::NoConstAssign>>,
     #[doc = "Disallow constant expressions in conditions"]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_constant_condition: Option<RuleConfiguration<NoConstantCondition>>,
+    pub no_constant_condition:
+        Option<RuleConfiguration<biome_js_analyze::options::NoConstantCondition>>,
     #[doc = "Disallow the use of Math.min and Math.max to clamp a value where the result itself is constant."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_constant_math_min_max_clamp: Option<RuleFixConfiguration<NoConstantMathMinMaxClamp>>,
+    pub no_constant_math_min_max_clamp:
+        Option<RuleFixConfiguration<biome_js_analyze::options::NoConstantMathMinMaxClamp>>,
     #[doc = "Disallow returning a value from a constructor."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_constructor_return: Option<RuleConfiguration<NoConstructorReturn>>,
+    pub no_constructor_return:
+        Option<RuleConfiguration<biome_js_analyze::options::NoConstructorReturn>>,
     #[doc = "Disallow empty character classes in regular expression literals."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_empty_character_class_in_regex: Option<RuleConfiguration<NoEmptyCharacterClassInRegex>>,
+    pub no_empty_character_class_in_regex:
+        Option<RuleConfiguration<biome_js_analyze::options::NoEmptyCharacterClassInRegex>>,
     #[doc = "Disallows empty destructuring patterns."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_empty_pattern: Option<RuleConfiguration<NoEmptyPattern>>,
+    pub no_empty_pattern: Option<RuleConfiguration<biome_js_analyze::options::NoEmptyPattern>>,
     #[doc = "Disallow to use unnecessary callback on flatMap."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_flat_map_identity: Option<RuleFixConfiguration<NoFlatMapIdentity>>,
+    pub no_flat_map_identity:
+        Option<RuleFixConfiguration<biome_js_analyze::options::NoFlatMapIdentity>>,
     #[doc = "Disallow calling global object properties as functions"]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_global_object_calls: Option<RuleConfiguration<NoGlobalObjectCalls>>,
+    pub no_global_object_calls:
+        Option<RuleConfiguration<biome_js_analyze::options::NoGlobalObjectCalls>>,
     #[doc = "Disallow function and var declarations that are accessible outside their block."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_inner_declarations: Option<RuleConfiguration<NoInnerDeclarations>>,
+    pub no_inner_declarations:
+        Option<RuleConfiguration<biome_js_analyze::options::NoInnerDeclarations>>,
     #[doc = "Prevents the incorrect use of super() inside classes. It also checks whether a call super() is missing from classes that extends other constructors."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_invalid_constructor_super: Option<RuleConfiguration<NoInvalidConstructorSuper>>,
+    pub no_invalid_constructor_super:
+        Option<RuleConfiguration<biome_js_analyze::options::NoInvalidConstructorSuper>>,
     #[doc = "Disallow new operators with global non-constructor functions."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_invalid_new_builtin: Option<RuleFixConfiguration<NoInvalidNewBuiltin>>,
+    pub no_invalid_new_builtin:
+        Option<RuleFixConfiguration<biome_js_analyze::options::NoInvalidNewBuiltin>>,
     #[doc = "Disallow the use of variables and function parameters before their declaration"]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_invalid_use_before_declaration: Option<RuleConfiguration<NoInvalidUseBeforeDeclaration>>,
+    pub no_invalid_use_before_declaration:
+        Option<RuleConfiguration<biome_js_analyze::options::NoInvalidUseBeforeDeclaration>>,
     #[doc = "Disallow new operators with the Symbol object."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_new_symbol: Option<RuleFixConfiguration<NoNewSymbol>>,
+    pub no_new_symbol: Option<RuleFixConfiguration<biome_js_analyze::options::NoNewSymbol>>,
     #[doc = "Forbid the use of Node.js builtin modules."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_nodejs_modules: Option<RuleConfiguration<NoNodejsModules>>,
+    pub no_nodejs_modules: Option<RuleConfiguration<biome_js_analyze::options::NoNodejsModules>>,
     #[doc = "Disallow \\8 and \\9 escape sequences in string literals."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_nonoctal_decimal_escape: Option<RuleFixConfiguration<NoNonoctalDecimalEscape>>,
+    pub no_nonoctal_decimal_escape:
+        Option<RuleFixConfiguration<biome_js_analyze::options::NoNonoctalDecimalEscape>>,
     #[doc = "Disallow literal numbers that lose precision"]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_precision_loss: Option<RuleConfiguration<NoPrecisionLoss>>,
+    pub no_precision_loss: Option<RuleConfiguration<biome_js_analyze::options::NoPrecisionLoss>>,
     #[doc = "Prevent the usage of the return value of React.render."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_render_return_value: Option<RuleConfiguration<NoRenderReturnValue>>,
+    pub no_render_return_value:
+        Option<RuleConfiguration<biome_js_analyze::options::NoRenderReturnValue>>,
     #[doc = "Disallow assignments where both sides are exactly the same."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_self_assign: Option<RuleConfiguration<NoSelfAssign>>,
+    pub no_self_assign: Option<RuleConfiguration<biome_js_analyze::options::NoSelfAssign>>,
     #[doc = "Disallow returning a value from a setter"]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_setter_return: Option<RuleConfiguration<NoSetterReturn>>,
+    pub no_setter_return: Option<RuleConfiguration<biome_js_analyze::options::NoSetterReturn>>,
     #[doc = "Disallow comparison of expressions modifying the string case with non-compliant value."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_string_case_mismatch: Option<RuleFixConfiguration<NoStringCaseMismatch>>,
+    pub no_string_case_mismatch:
+        Option<RuleFixConfiguration<biome_js_analyze::options::NoStringCaseMismatch>>,
     #[doc = "Disallow lexical declarations in switch clauses."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_switch_declarations: Option<RuleFixConfiguration<NoSwitchDeclarations>>,
+    pub no_switch_declarations:
+        Option<RuleFixConfiguration<biome_js_analyze::options::NoSwitchDeclarations>>,
     #[doc = "Prevents the usage of variables that haven't been declared inside the document."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_undeclared_variables: Option<RuleConfiguration<NoUndeclaredVariables>>,
+    pub no_undeclared_variables:
+        Option<RuleConfiguration<biome_js_analyze::options::NoUndeclaredVariables>>,
     #[doc = "Avoid using unnecessary continue."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_unnecessary_continue: Option<RuleFixConfiguration<NoUnnecessaryContinue>>,
+    pub no_unnecessary_continue:
+        Option<RuleFixConfiguration<biome_js_analyze::options::NoUnnecessaryContinue>>,
     #[doc = "Disallow unreachable code"]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_unreachable: Option<RuleConfiguration<NoUnreachable>>,
+    pub no_unreachable: Option<RuleConfiguration<biome_js_analyze::options::NoUnreachable>>,
     #[doc = "Ensures the super() constructor is called exactly once on every code  path in a class constructor before this is accessed if the class has a superclass"]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_unreachable_super: Option<RuleConfiguration<NoUnreachableSuper>>,
+    pub no_unreachable_super:
+        Option<RuleConfiguration<biome_js_analyze::options::NoUnreachableSuper>>,
     #[doc = "Disallow control flow statements in finally blocks."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_unsafe_finally: Option<RuleConfiguration<NoUnsafeFinally>>,
+    pub no_unsafe_finally: Option<RuleConfiguration<biome_js_analyze::options::NoUnsafeFinally>>,
     #[doc = "Disallow the use of optional chaining in contexts where the undefined value is not allowed."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_unsafe_optional_chaining: Option<RuleConfiguration<NoUnsafeOptionalChaining>>,
+    pub no_unsafe_optional_chaining:
+        Option<RuleConfiguration<biome_js_analyze::options::NoUnsafeOptionalChaining>>,
     #[doc = "Disallow unused imports."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_unused_imports: Option<RuleFixConfiguration<NoUnusedImports>>,
+    pub no_unused_imports: Option<RuleFixConfiguration<biome_js_analyze::options::NoUnusedImports>>,
     #[doc = "Disallow unused labels."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_unused_labels: Option<RuleFixConfiguration<NoUnusedLabels>>,
+    pub no_unused_labels: Option<RuleFixConfiguration<biome_js_analyze::options::NoUnusedLabels>>,
     #[doc = "Disallow unused private class members"]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_unused_private_class_members: Option<RuleFixConfiguration<NoUnusedPrivateClassMembers>>,
+    pub no_unused_private_class_members:
+        Option<RuleFixConfiguration<biome_js_analyze::options::NoUnusedPrivateClassMembers>>,
     #[doc = "Disallow unused variables."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_unused_variables: Option<RuleFixConfiguration<NoUnusedVariables>>,
+    pub no_unused_variables:
+        Option<RuleFixConfiguration<biome_js_analyze::options::NoUnusedVariables>>,
     #[doc = "This rules prevents void elements (AKA self-closing elements) from having children."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_void_elements_with_children: Option<RuleFixConfiguration<NoVoidElementsWithChildren>>,
+    pub no_void_elements_with_children:
+        Option<RuleFixConfiguration<biome_js_analyze::options::NoVoidElementsWithChildren>>,
     #[doc = "Disallow returning a value from a function with the return type 'void'"]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_void_type_return: Option<RuleConfiguration<NoVoidTypeReturn>>,
+    pub no_void_type_return: Option<RuleConfiguration<biome_js_analyze::options::NoVoidTypeReturn>>,
     #[doc = "Disallow Array constructors."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_array_literals: Option<RuleFixConfiguration<UseArrayLiterals>>,
+    pub use_array_literals:
+        Option<RuleFixConfiguration<biome_js_analyze::options::UseArrayLiterals>>,
     #[doc = "Enforce all dependencies are correctly specified in a React hook."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_exhaustive_dependencies: Option<RuleConfiguration<UseExhaustiveDependencies>>,
+    pub use_exhaustive_dependencies:
+        Option<RuleConfiguration<biome_js_analyze::options::UseExhaustiveDependencies>>,
     #[doc = "Enforce that all React hooks are being called from the Top Level component functions."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_hook_at_top_level: Option<RuleConfiguration<UseHookAtTopLevel>>,
+    pub use_hook_at_top_level:
+        Option<RuleConfiguration<biome_js_analyze::options::UseHookAtTopLevel>>,
     #[doc = "Require calls to isNaN() when checking for NaN."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_is_nan: Option<RuleFixConfiguration<UseIsNan>>,
+    pub use_is_nan: Option<RuleFixConfiguration<biome_js_analyze::options::UseIsNan>>,
     #[doc = "Disallow missing key props in iterators/collection literals."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_jsx_key_in_iterable: Option<RuleConfiguration<UseJsxKeyInIterable>>,
+    pub use_jsx_key_in_iterable:
+        Option<RuleConfiguration<biome_js_analyze::options::UseJsxKeyInIterable>>,
     #[doc = "Enforce \"for\" loop update clause moving the counter in the right direction."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_valid_for_direction: Option<RuleConfiguration<UseValidForDirection>>,
+    pub use_valid_for_direction:
+        Option<RuleConfiguration<biome_js_analyze::options::UseValidForDirection>>,
     #[doc = "Require generator functions to contain yield."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_yield: Option<RuleConfiguration<UseYield>>,
+    pub use_yield: Option<RuleConfiguration<biome_js_analyze::options::UseYield>>,
 }
 impl DeserializableValidator for Correctness {
     fn validate(
@@ -2812,190 +2871,229 @@ pub struct Nursery {
     pub all: Option<bool>,
     #[doc = "Disallow the use of console."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_console: Option<RuleFixConfiguration<NoConsole>>,
+    pub no_console: Option<RuleFixConfiguration<biome_js_analyze::options::NoConsole>>,
     #[doc = "Disallow using a callback in asynchronous tests and hooks."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_done_callback: Option<RuleConfiguration<NoDoneCallback>>,
+    pub no_done_callback: Option<RuleConfiguration<biome_js_analyze::options::NoDoneCallback>>,
     #[doc = "Disallow duplicate @import rules."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_duplicate_at_import_rules: Option<RuleConfiguration<NoDuplicateAtImportRules>>,
+    pub no_duplicate_at_import_rules:
+        Option<RuleConfiguration<biome_css_analyze::options::NoDuplicateAtImportRules>>,
     #[doc = "Disallow duplicate conditions in if-else-if chains"]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_duplicate_else_if: Option<RuleConfiguration<NoDuplicateElseIf>>,
+    pub no_duplicate_else_if:
+        Option<RuleConfiguration<biome_js_analyze::options::NoDuplicateElseIf>>,
     #[doc = "Disallow duplicate names within font families."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_duplicate_font_names: Option<RuleConfiguration<NoDuplicateFontNames>>,
+    pub no_duplicate_font_names:
+        Option<RuleConfiguration<biome_css_analyze::options::NoDuplicateFontNames>>,
     #[doc = "Disallow two keys with the same name inside a JSON object."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_duplicate_json_keys: Option<RuleConfiguration<NoDuplicateJsonKeys>>,
+    pub no_duplicate_json_keys:
+        Option<RuleConfiguration<biome_json_analyze::options::NoDuplicateJsonKeys>>,
     #[doc = "Disallow duplicate selectors within keyframe blocks."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_duplicate_selectors_keyframe_block:
-        Option<RuleConfiguration<NoDuplicateSelectorsKeyframeBlock>>,
+        Option<RuleConfiguration<biome_css_analyze::options::NoDuplicateSelectorsKeyframeBlock>>,
     #[doc = "No duplicated fields in GraphQL operations."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_duplicated_fields: Option<RuleConfiguration<NoDuplicatedFields>>,
+    pub no_duplicated_fields:
+        Option<RuleConfiguration<biome_graphql_analyze::options::NoDuplicatedFields>>,
     #[doc = "Disallow accessing namespace imports dynamically."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_dynamic_namespace_import_access:
-        Option<RuleConfiguration<NoDynamicNamespaceImportAccess>>,
+        Option<RuleConfiguration<biome_js_analyze::options::NoDynamicNamespaceImportAccess>>,
     #[doc = "Disallow CSS empty blocks."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_empty_block: Option<RuleConfiguration<NoEmptyBlock>>,
+    pub no_empty_block: Option<RuleConfiguration<biome_css_analyze::options::NoEmptyBlock>>,
     #[doc = "Disallow variables from evolving into any type through reassignments."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_evolving_types: Option<RuleConfiguration<NoEvolvingTypes>>,
+    pub no_evolving_types: Option<RuleConfiguration<biome_js_analyze::options::NoEvolvingTypes>>,
     #[doc = "Disallow exporting an imported variable."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_exported_imports: Option<RuleConfiguration<NoExportedImports>>,
+    pub no_exported_imports:
+        Option<RuleConfiguration<biome_js_analyze::options::NoExportedImports>>,
     #[doc = "Disallow invalid !important within keyframe declarations"]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_important_in_keyframe: Option<RuleConfiguration<NoImportantInKeyframe>>,
+    pub no_important_in_keyframe:
+        Option<RuleConfiguration<biome_css_analyze::options::NoImportantInKeyframe>>,
     #[doc = "Disallow non-standard direction values for linear gradient functions."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_invalid_direction_in_linear_gradient:
-        Option<RuleConfiguration<NoInvalidDirectionInLinearGradient>>,
+        Option<RuleConfiguration<biome_css_analyze::options::NoInvalidDirectionInLinearGradient>>,
     #[doc = "Disallow the use of @import at-rules in invalid positions."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_invalid_position_at_import_rule:
-        Option<RuleConfiguration<NoInvalidPositionAtImportRule>>,
+        Option<RuleConfiguration<biome_css_analyze::options::NoInvalidPositionAtImportRule>>,
     #[doc = "Disallows the use of irregular whitespace characters."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_irregular_whitespace: Option<RuleConfiguration<NoIrregularWhitespace>>,
+    pub no_irregular_whitespace:
+        Option<RuleConfiguration<biome_js_analyze::options::NoIrregularWhitespace>>,
     #[doc = "Disallows the use of irregular whitespace."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_irregular_whitespace_css: Option<RuleConfiguration<NoIrregularWhitespaceCss>>,
+    pub no_irregular_whitespace_css:
+        Option<RuleConfiguration<biome_css_analyze::options::NoIrregularWhitespaceCss>>,
     #[doc = "Enforce that a label element or component has a text label and an associated input."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_label_without_control: Option<RuleConfiguration<NoLabelWithoutControl>>,
+    pub no_label_without_control:
+        Option<RuleConfiguration<biome_js_analyze::options::NoLabelWithoutControl>>,
     #[doc = "Checks that the assertion function, for example expect, is placed inside an it() function call."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_misplaced_assertion: Option<RuleConfiguration<NoMisplacedAssertion>>,
+    pub no_misplaced_assertion:
+        Option<RuleConfiguration<biome_js_analyze::options::NoMisplacedAssertion>>,
     #[doc = "Prevents React-specific JSX properties from being used."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_react_specific_props: Option<RuleFixConfiguration<NoReactSpecificProps>>,
+    pub no_react_specific_props:
+        Option<RuleFixConfiguration<biome_js_analyze::options::NoReactSpecificProps>>,
     #[doc = "Disallow specified modules when loaded by import or require."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_restricted_imports: Option<RuleConfiguration<NoRestrictedImports>>,
+    pub no_restricted_imports:
+        Option<RuleConfiguration<biome_js_analyze::options::NoRestrictedImports>>,
     #[doc = "Disallow shorthand properties that override related longhand properties."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_shorthand_property_overrides: Option<RuleConfiguration<NoShorthandPropertyOverrides>>,
+    pub no_shorthand_property_overrides:
+        Option<RuleConfiguration<biome_css_analyze::options::NoShorthandPropertyOverrides>>,
     #[doc = "Enforce that static, visible elements (such as \\<div>) that have click handlers use the valid role attribute."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_static_element_interactions: Option<RuleConfiguration<NoStaticElementInteractions>>,
+    pub no_static_element_interactions:
+        Option<RuleConfiguration<biome_js_analyze::options::NoStaticElementInteractions>>,
     #[doc = "Enforce the use of String.slice() over String.substr() and String.substring()."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_substr: Option<RuleFixConfiguration<NoSubstr>>,
+    pub no_substr: Option<RuleFixConfiguration<biome_js_analyze::options::NoSubstr>>,
     #[doc = "Disallow the use of dependencies that aren't specified in the package.json."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_undeclared_dependencies: Option<RuleConfiguration<NoUndeclaredDependencies>>,
+    pub no_undeclared_dependencies:
+        Option<RuleConfiguration<biome_js_analyze::options::NoUndeclaredDependencies>>,
     #[doc = "Disallow unknown CSS value functions."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_unknown_function: Option<RuleConfiguration<NoUnknownFunction>>,
+    pub no_unknown_function:
+        Option<RuleConfiguration<biome_css_analyze::options::NoUnknownFunction>>,
     #[doc = "Disallow unknown media feature names."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_unknown_media_feature_name: Option<RuleConfiguration<NoUnknownMediaFeatureName>>,
+    pub no_unknown_media_feature_name:
+        Option<RuleConfiguration<biome_css_analyze::options::NoUnknownMediaFeatureName>>,
     #[doc = "Disallow unknown properties."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_unknown_property: Option<RuleConfiguration<NoUnknownProperty>>,
+    pub no_unknown_property:
+        Option<RuleConfiguration<biome_css_analyze::options::NoUnknownProperty>>,
     #[doc = "Disallow unknown pseudo-class selectors."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_unknown_pseudo_class_selector: Option<RuleConfiguration<NoUnknownPseudoClassSelector>>,
+    pub no_unknown_pseudo_class_selector:
+        Option<RuleConfiguration<biome_css_analyze::options::NoUnknownPseudoClassSelector>>,
     #[doc = "Disallow unknown pseudo-element selectors."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_unknown_selector_pseudo_element:
-        Option<RuleConfiguration<NoUnknownSelectorPseudoElement>>,
+        Option<RuleConfiguration<biome_css_analyze::options::NoUnknownSelectorPseudoElement>>,
     #[doc = "Disallow unknown CSS units."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_unknown_unit: Option<RuleConfiguration<NoUnknownUnit>>,
+    pub no_unknown_unit: Option<RuleConfiguration<biome_css_analyze::options::NoUnknownUnit>>,
     #[doc = "Disallow unmatchable An+B selectors."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_unmatchable_anb_selector: Option<RuleConfiguration<NoUnmatchableAnbSelector>>,
+    pub no_unmatchable_anb_selector:
+        Option<RuleConfiguration<biome_css_analyze::options::NoUnmatchableAnbSelector>>,
     #[doc = "Disallow unused function parameters."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_unused_function_parameters: Option<RuleFixConfiguration<NoUnusedFunctionParameters>>,
+    pub no_unused_function_parameters:
+        Option<RuleFixConfiguration<biome_js_analyze::options::NoUnusedFunctionParameters>>,
     #[doc = "Disallow unnecessary concatenation of string or template literals."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_useless_string_concat: Option<RuleFixConfiguration<NoUselessStringConcat>>,
+    pub no_useless_string_concat:
+        Option<RuleFixConfiguration<biome_js_analyze::options::NoUselessStringConcat>>,
     #[doc = "Disallow initializing variables to undefined."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_useless_undefined_initialization:
-        Option<RuleFixConfiguration<NoUselessUndefinedInitialization>>,
+        Option<RuleFixConfiguration<biome_js_analyze::options::NoUselessUndefinedInitialization>>,
     #[doc = "Disallow use of @value rule in css modules."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_value_at_rule: Option<RuleConfiguration<biome_css_analyze::options::NoValueAtRule>>,
     #[doc = "Disallow the use of yoda expressions."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_yoda_expression: Option<RuleFixConfiguration<NoYodaExpression>>,
+    pub no_yoda_expression:
+        Option<RuleFixConfiguration<biome_js_analyze::options::NoYodaExpression>>,
     #[doc = "Disallow the use of overload signatures that are not next to each other."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_adjacent_overload_signatures: Option<RuleConfiguration<UseAdjacentOverloadSignatures>>,
+    pub use_adjacent_overload_signatures:
+        Option<RuleConfiguration<biome_js_analyze::options::UseAdjacentOverloadSignatures>>,
     #[doc = "Enforce the use of new for all builtins, except String, Number, Boolean, Symbol and BigInt."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_consistent_builtin_instantiation:
-        Option<RuleFixConfiguration<UseConsistentBuiltinInstantiation>>,
+        Option<RuleFixConfiguration<biome_js_analyze::options::UseConsistentBuiltinInstantiation>>,
     #[doc = "This rule enforces consistent use of curly braces inside JSX attributes and JSX children."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_consistent_curly_braces: Option<RuleFixConfiguration<UseConsistentCurlyBraces>>,
+    pub use_consistent_curly_braces:
+        Option<RuleFixConfiguration<biome_js_analyze::options::UseConsistentCurlyBraces>>,
     #[doc = "Disallows invalid named grid areas in CSS Grid Layouts."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_consistent_grid_areas: Option<RuleConfiguration<UseConsistentGridAreas>>,
+    pub use_consistent_grid_areas:
+        Option<RuleConfiguration<biome_css_analyze::options::UseConsistentGridAreas>>,
     #[doc = "Use Date.now() to get the number of milliseconds since the Unix Epoch."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_date_now: Option<RuleFixConfiguration<UseDateNow>>,
+    pub use_date_now: Option<RuleFixConfiguration<biome_js_analyze::options::UseDateNow>>,
     #[doc = "Require the default clause in switch statements."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_default_switch_clause: Option<RuleConfiguration<UseDefaultSwitchClause>>,
+    pub use_default_switch_clause:
+        Option<RuleConfiguration<biome_js_analyze::options::UseDefaultSwitchClause>>,
     #[doc = "Require specifying the reason argument when using @deprecated directive"]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_deprecated_reason: Option<RuleConfiguration<UseDeprecatedReason>>,
+    pub use_deprecated_reason:
+        Option<RuleConfiguration<biome_graphql_analyze::options::UseDeprecatedReason>>,
     #[doc = "Enforce passing a message value when creating a built-in error."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_error_message: Option<RuleConfiguration<UseErrorMessage>>,
+    pub use_error_message: Option<RuleConfiguration<biome_js_analyze::options::UseErrorMessage>>,
     #[doc = "Enforce explicitly comparing the length, size, byteLength or byteOffset property of a value."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_explicit_length_check: Option<RuleFixConfiguration<UseExplicitLengthCheck>>,
+    pub use_explicit_length_check:
+        Option<RuleFixConfiguration<biome_js_analyze::options::UseExplicitLengthCheck>>,
     #[doc = "Elements with an interactive role and interaction handlers must be focusable."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_focusable_interactive: Option<RuleConfiguration<UseFocusableInteractive>>,
+    pub use_focusable_interactive:
+        Option<RuleConfiguration<biome_js_analyze::options::UseFocusableInteractive>>,
     #[doc = "Disallow a missing generic family keyword within font families."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_generic_font_names: Option<RuleConfiguration<UseGenericFontNames>>,
+    pub use_generic_font_names:
+        Option<RuleConfiguration<biome_css_analyze::options::UseGenericFontNames>>,
     #[doc = "Enforce file extensions for relative imports."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_import_extensions: Option<RuleFixConfiguration<UseImportExtensions>>,
+    pub use_import_extensions:
+        Option<RuleFixConfiguration<biome_js_analyze::options::UseImportExtensions>>,
     #[doc = "Disallows package private imports."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_import_restrictions: Option<RuleConfiguration<UseImportRestrictions>>,
+    pub use_import_restrictions:
+        Option<RuleConfiguration<biome_js_analyze::options::UseImportRestrictions>>,
     #[doc = "Enforce using the digits argument with Number#toFixed()."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_number_to_fixed_digits_argument:
-        Option<RuleFixConfiguration<UseNumberToFixedDigitsArgument>>,
+        Option<RuleFixConfiguration<biome_js_analyze::options::UseNumberToFixedDigitsArgument>>,
     #[doc = "It detects the use of role attributes in JSX elements and suggests using semantic elements instead."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_semantic_elements: Option<RuleConfiguration<UseSemanticElements>>,
+    pub use_semantic_elements:
+        Option<RuleConfiguration<biome_js_analyze::options::UseSemanticElements>>,
     #[doc = "Enforce the sorting of CSS utility classes."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_sorted_classes: Option<RuleFixConfiguration<UseSortedClasses>>,
+    pub use_sorted_classes:
+        Option<RuleFixConfiguration<biome_js_analyze::options::UseSortedClasses>>,
     #[doc = "Enforce the use of the directive \"use strict\" in script files."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_strict_mode: Option<RuleFixConfiguration<UseStrictMode>>,
+    pub use_strict_mode: Option<RuleFixConfiguration<biome_js_analyze::options::UseStrictMode>>,
     #[doc = "Require new when throwing an error."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_throw_new_error: Option<RuleFixConfiguration<UseThrowNewError>>,
+    pub use_throw_new_error:
+        Option<RuleFixConfiguration<biome_js_analyze::options::UseThrowNewError>>,
     #[doc = "Disallow throwing non-Error values."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_throw_only_error: Option<RuleConfiguration<UseThrowOnlyError>>,
+    pub use_throw_only_error:
+        Option<RuleConfiguration<biome_js_analyze::options::UseThrowOnlyError>>,
     #[doc = "Require regex literals to be declared at the top level."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_top_level_regex: Option<RuleConfiguration<UseTopLevelRegex>>,
+    pub use_top_level_regex: Option<RuleConfiguration<biome_js_analyze::options::UseTopLevelRegex>>,
     #[doc = "Enforce the use of String.trimStart() and String.trimEnd() over String.trimLeft() and String.trimRight()."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_trim_start_end:
         Option<RuleFixConfiguration<biome_js_analyze::options::UseTrimStartEnd>>,
     #[doc = "Use valid values for the autocomplete attribute on input elements."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_valid_autocomplete: Option<RuleConfiguration<UseValidAutocomplete>>,
+    pub use_valid_autocomplete:
+        Option<RuleConfiguration<biome_js_analyze::options::UseValidAutocomplete>>,
 }
 impl DeserializableValidator for Nursery {
     fn validate(
@@ -4086,16 +4184,17 @@ pub struct Performance {
     pub all: Option<bool>,
     #[doc = "Disallow the use of spread (...) syntax on accumulators."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_accumulating_spread: Option<RuleConfiguration<NoAccumulatingSpread>>,
+    pub no_accumulating_spread:
+        Option<RuleConfiguration<biome_js_analyze::options::NoAccumulatingSpread>>,
     #[doc = "Disallow the use of barrel file."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_barrel_file: Option<RuleConfiguration<NoBarrelFile>>,
+    pub no_barrel_file: Option<RuleConfiguration<biome_js_analyze::options::NoBarrelFile>>,
     #[doc = "Disallow the use of the delete operator."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_delete: Option<RuleFixConfiguration<NoDelete>>,
+    pub no_delete: Option<RuleFixConfiguration<biome_js_analyze::options::NoDelete>>,
     #[doc = "Avoid re-export all."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_re_export_all: Option<RuleConfiguration<NoReExportAll>>,
+    pub no_re_export_all: Option<RuleConfiguration<biome_js_analyze::options::NoReExportAll>>,
 }
 impl DeserializableValidator for Performance {
     fn validate(
@@ -4259,14 +4358,15 @@ pub struct Security {
     pub all: Option<bool>,
     #[doc = "Prevent the usage of dangerous JSX props"]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_dangerously_set_inner_html: Option<RuleConfiguration<NoDangerouslySetInnerHtml>>,
+    pub no_dangerously_set_inner_html:
+        Option<RuleConfiguration<biome_js_analyze::options::NoDangerouslySetInnerHtml>>,
     #[doc = "Report when a DOM element or a component uses both children and dangerouslySetInnerHTML prop."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_dangerously_set_inner_html_with_children:
-        Option<RuleConfiguration<NoDangerouslySetInnerHtmlWithChildren>>,
+        Option<RuleConfiguration<biome_js_analyze::options::NoDangerouslySetInnerHtmlWithChildren>>,
     #[doc = "Disallow the use of global eval()."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_global_eval: Option<RuleConfiguration<NoGlobalEval>>,
+    pub no_global_eval: Option<RuleConfiguration<biome_js_analyze::options::NoGlobalEval>>,
 }
 impl DeserializableValidator for Security {
     fn validate(
@@ -4419,133 +4519,163 @@ pub struct Style {
     pub all: Option<bool>,
     #[doc = "Disallow the use of arguments."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_arguments: Option<RuleConfiguration<NoArguments>>,
+    pub no_arguments: Option<RuleConfiguration<biome_js_analyze::options::NoArguments>>,
     #[doc = "Disallow comma operator."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_comma_operator: Option<RuleConfiguration<NoCommaOperator>>,
+    pub no_comma_operator: Option<RuleConfiguration<biome_js_analyze::options::NoCommaOperator>>,
     #[doc = "Disallow default exports."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_default_export: Option<RuleConfiguration<NoDefaultExport>>,
+    pub no_default_export: Option<RuleConfiguration<biome_js_analyze::options::NoDefaultExport>>,
     #[doc = "Disallow implicit true values on JSX boolean attributes"]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_implicit_boolean: Option<RuleFixConfiguration<NoImplicitBoolean>>,
+    pub no_implicit_boolean:
+        Option<RuleFixConfiguration<biome_js_analyze::options::NoImplicitBoolean>>,
     #[doc = "Disallow type annotations for variables, parameters, and class properties initialized with a literal expression."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_inferrable_types: Option<RuleFixConfiguration<NoInferrableTypes>>,
+    pub no_inferrable_types:
+        Option<RuleFixConfiguration<biome_js_analyze::options::NoInferrableTypes>>,
     #[doc = "Disallow the use of TypeScript's namespaces."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_namespace: Option<RuleConfiguration<NoNamespace>>,
+    pub no_namespace: Option<RuleConfiguration<biome_js_analyze::options::NoNamespace>>,
     #[doc = "Disallow the use of namespace imports."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_namespace_import: Option<RuleConfiguration<NoNamespaceImport>>,
+    pub no_namespace_import:
+        Option<RuleConfiguration<biome_js_analyze::options::NoNamespaceImport>>,
     #[doc = "Disallow negation in the condition of an if statement if it has an else clause."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_negation_else: Option<RuleFixConfiguration<NoNegationElse>>,
+    pub no_negation_else: Option<RuleFixConfiguration<biome_js_analyze::options::NoNegationElse>>,
     #[doc = "Disallow non-null assertions using the ! postfix operator."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_non_null_assertion: Option<RuleFixConfiguration<NoNonNullAssertion>>,
+    pub no_non_null_assertion:
+        Option<RuleFixConfiguration<biome_js_analyze::options::NoNonNullAssertion>>,
     #[doc = "Disallow reassigning function parameters."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_parameter_assign: Option<RuleConfiguration<NoParameterAssign>>,
+    pub no_parameter_assign:
+        Option<RuleConfiguration<biome_js_analyze::options::NoParameterAssign>>,
     #[doc = "Disallow the use of parameter properties in class constructors."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_parameter_properties: Option<RuleConfiguration<NoParameterProperties>>,
+    pub no_parameter_properties:
+        Option<RuleConfiguration<biome_js_analyze::options::NoParameterProperties>>,
     #[doc = "This rule allows you to specify global variable names that you don’t want to use in your application."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_restricted_globals: Option<RuleConfiguration<NoRestrictedGlobals>>,
+    pub no_restricted_globals:
+        Option<RuleConfiguration<biome_js_analyze::options::NoRestrictedGlobals>>,
     #[doc = "Disallow the use of constants which its value is the upper-case version of its name."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_shouty_constants: Option<RuleFixConfiguration<NoShoutyConstants>>,
+    pub no_shouty_constants:
+        Option<RuleFixConfiguration<biome_js_analyze::options::NoShoutyConstants>>,
     #[doc = "Disallow template literals if interpolation and special-character handling are not needed"]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_unused_template_literal: Option<RuleFixConfiguration<NoUnusedTemplateLiteral>>,
+    pub no_unused_template_literal:
+        Option<RuleFixConfiguration<biome_js_analyze::options::NoUnusedTemplateLiteral>>,
     #[doc = "Disallow else block when the if block breaks early."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_useless_else: Option<RuleFixConfiguration<NoUselessElse>>,
+    pub no_useless_else: Option<RuleFixConfiguration<biome_js_analyze::options::NoUselessElse>>,
     #[doc = "Disallow the use of var"]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_var: Option<RuleFixConfiguration<NoVar>>,
+    pub no_var: Option<RuleFixConfiguration<biome_js_analyze::options::NoVar>>,
     #[doc = "Enforce the use of as const over literal type and type annotation."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_as_const_assertion: Option<RuleFixConfiguration<UseAsConstAssertion>>,
+    pub use_as_const_assertion:
+        Option<RuleFixConfiguration<biome_js_analyze::options::UseAsConstAssertion>>,
     #[doc = "Requires following curly brace conventions."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_block_statements: Option<RuleFixConfiguration<UseBlockStatements>>,
+    pub use_block_statements:
+        Option<RuleFixConfiguration<biome_js_analyze::options::UseBlockStatements>>,
     #[doc = "Enforce using else if instead of nested if in else clauses."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_collapsed_else_if: Option<RuleFixConfiguration<UseCollapsedElseIf>>,
+    pub use_collapsed_else_if:
+        Option<RuleFixConfiguration<biome_js_analyze::options::UseCollapsedElseIf>>,
     #[doc = "Require consistently using either T\\[] or Array\\<T>"]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_consistent_array_type: Option<RuleFixConfiguration<UseConsistentArrayType>>,
+    pub use_consistent_array_type:
+        Option<RuleFixConfiguration<biome_js_analyze::options::UseConsistentArrayType>>,
     #[doc = "Require const declarations for variables that are only assigned once."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_const: Option<RuleFixConfiguration<UseConst>>,
+    pub use_const: Option<RuleFixConfiguration<biome_js_analyze::options::UseConst>>,
     #[doc = "Enforce default function parameters and optional function parameters to be last."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_default_parameter_last: Option<RuleFixConfiguration<UseDefaultParameterLast>>,
+    pub use_default_parameter_last:
+        Option<RuleFixConfiguration<biome_js_analyze::options::UseDefaultParameterLast>>,
     #[doc = "Require that each enum member value be explicitly initialized."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_enum_initializers: Option<RuleFixConfiguration<UseEnumInitializers>>,
+    pub use_enum_initializers:
+        Option<RuleFixConfiguration<biome_js_analyze::options::UseEnumInitializers>>,
     #[doc = "Disallow the use of Math.pow in favor of the ** operator."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_exponentiation_operator: Option<RuleFixConfiguration<UseExponentiationOperator>>,
+    pub use_exponentiation_operator:
+        Option<RuleFixConfiguration<biome_js_analyze::options::UseExponentiationOperator>>,
     #[doc = "Promotes the use of export type for types."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_export_type: Option<RuleFixConfiguration<UseExportType>>,
+    pub use_export_type: Option<RuleFixConfiguration<biome_js_analyze::options::UseExportType>>,
     #[doc = "Enforce naming conventions for JavaScript and TypeScript filenames."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_filenaming_convention: Option<RuleConfiguration<UseFilenamingConvention>>,
+    pub use_filenaming_convention:
+        Option<RuleConfiguration<biome_js_analyze::options::UseFilenamingConvention>>,
     #[doc = "This rule recommends a for-of loop when in a for loop, the index used to extract an item from the iterated array."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_for_of: Option<RuleConfiguration<UseForOf>>,
+    pub use_for_of: Option<RuleConfiguration<biome_js_analyze::options::UseForOf>>,
     #[doc = "This rule enforces the use of \\<>...\\</> over \\<Fragment>...\\</Fragment>."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_fragment_syntax: Option<RuleFixConfiguration<UseFragmentSyntax>>,
+    pub use_fragment_syntax:
+        Option<RuleFixConfiguration<biome_js_analyze::options::UseFragmentSyntax>>,
     #[doc = "Promotes the use of import type for types."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_import_type: Option<RuleFixConfiguration<UseImportType>>,
+    pub use_import_type: Option<RuleFixConfiguration<biome_js_analyze::options::UseImportType>>,
     #[doc = "Require all enum members to be literal values."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_literal_enum_members: Option<RuleConfiguration<UseLiteralEnumMembers>>,
+    pub use_literal_enum_members:
+        Option<RuleConfiguration<biome_js_analyze::options::UseLiteralEnumMembers>>,
     #[doc = "Enforce naming conventions for everything across a codebase."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_naming_convention: Option<RuleFixConfiguration<UseNamingConvention>>,
+    pub use_naming_convention:
+        Option<RuleFixConfiguration<biome_js_analyze::options::UseNamingConvention>>,
     #[doc = "Promotes the usage of node:assert/strict over node:assert."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_node_assert_strict: Option<RuleFixConfiguration<UseNodeAssertStrict>>,
+    pub use_node_assert_strict:
+        Option<RuleFixConfiguration<biome_js_analyze::options::UseNodeAssertStrict>>,
     #[doc = "Enforces using the node: protocol for Node.js builtin modules."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_nodejs_import_protocol: Option<RuleFixConfiguration<UseNodejsImportProtocol>>,
+    pub use_nodejs_import_protocol:
+        Option<RuleFixConfiguration<biome_js_analyze::options::UseNodejsImportProtocol>>,
     #[doc = "Use the Number properties instead of global ones."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_number_namespace: Option<RuleFixConfiguration<UseNumberNamespace>>,
+    pub use_number_namespace:
+        Option<RuleFixConfiguration<biome_js_analyze::options::UseNumberNamespace>>,
     #[doc = "Disallow parseInt() and Number.parseInt() in favor of binary, octal, and hexadecimal literals"]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_numeric_literals: Option<RuleFixConfiguration<UseNumericLiterals>>,
+    pub use_numeric_literals:
+        Option<RuleFixConfiguration<biome_js_analyze::options::UseNumericLiterals>>,
     #[doc = "Prevent extra closing tags for components without children"]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_self_closing_elements: Option<RuleFixConfiguration<UseSelfClosingElements>>,
+    pub use_self_closing_elements:
+        Option<RuleFixConfiguration<biome_js_analyze::options::UseSelfClosingElements>>,
     #[doc = "When expressing array types, this rule promotes the usage of T\\[] shorthand instead of Array\\<T>."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_shorthand_array_type: Option<RuleFixConfiguration<UseShorthandArrayType>>,
+    pub use_shorthand_array_type:
+        Option<RuleFixConfiguration<biome_js_analyze::options::UseShorthandArrayType>>,
     #[doc = "Require assignment operator shorthand where possible."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_shorthand_assign: Option<RuleFixConfiguration<UseShorthandAssign>>,
+    pub use_shorthand_assign:
+        Option<RuleFixConfiguration<biome_js_analyze::options::UseShorthandAssign>>,
     #[doc = "Enforce using function types instead of object type with call signatures."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_shorthand_function_type: Option<RuleFixConfiguration<UseShorthandFunctionType>>,
+    pub use_shorthand_function_type:
+        Option<RuleFixConfiguration<biome_js_analyze::options::UseShorthandFunctionType>>,
     #[doc = "Enforces switch clauses have a single statement, emits a quick fix wrapping the statements in a block."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_single_case_statement: Option<RuleFixConfiguration<UseSingleCaseStatement>>,
+    pub use_single_case_statement:
+        Option<RuleFixConfiguration<biome_js_analyze::options::UseSingleCaseStatement>>,
     #[doc = "Disallow multiple variable declarations in the same variable statement"]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_single_var_declarator: Option<RuleFixConfiguration<UseSingleVarDeclarator>>,
+    pub use_single_var_declarator:
+        Option<RuleFixConfiguration<biome_js_analyze::options::UseSingleVarDeclarator>>,
     #[doc = "Prefer template literals over string concatenation."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_template: Option<RuleFixConfiguration<UseTemplate>>,
+    pub use_template: Option<RuleFixConfiguration<biome_js_analyze::options::UseTemplate>>,
     #[doc = "Enforce the use of while loops instead of for loops when the initializer and update expressions are not needed."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_while: Option<RuleFixConfiguration<UseWhile>>,
+    pub use_while: Option<RuleFixConfiguration<biome_js_analyze::options::UseWhile>>,
 }
 impl DeserializableValidator for Style {
     fn validate(
@@ -5381,170 +5511,196 @@ pub struct Suspicious {
     #[doc = "Use standard constants instead of approximated literals."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_approximative_numeric_constant:
-        Option<RuleFixConfiguration<NoApproximativeNumericConstant>>,
+        Option<RuleFixConfiguration<biome_js_analyze::options::NoApproximativeNumericConstant>>,
     #[doc = "Discourage the usage of Array index in keys."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_array_index_key: Option<RuleConfiguration<NoArrayIndexKey>>,
+    pub no_array_index_key: Option<RuleConfiguration<biome_js_analyze::options::NoArrayIndexKey>>,
     #[doc = "Disallow assignments in expressions."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_assign_in_expressions: Option<RuleConfiguration<NoAssignInExpressions>>,
+    pub no_assign_in_expressions:
+        Option<RuleConfiguration<biome_js_analyze::options::NoAssignInExpressions>>,
     #[doc = "Disallows using an async function as a Promise executor."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_async_promise_executor: Option<RuleConfiguration<NoAsyncPromiseExecutor>>,
+    pub no_async_promise_executor:
+        Option<RuleConfiguration<biome_js_analyze::options::NoAsyncPromiseExecutor>>,
     #[doc = "Disallow reassigning exceptions in catch clauses."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_catch_assign: Option<RuleConfiguration<NoCatchAssign>>,
+    pub no_catch_assign: Option<RuleConfiguration<biome_js_analyze::options::NoCatchAssign>>,
     #[doc = "Disallow reassigning class members."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_class_assign: Option<RuleConfiguration<NoClassAssign>>,
+    pub no_class_assign: Option<RuleConfiguration<biome_js_analyze::options::NoClassAssign>>,
     #[doc = "Prevent comments from being inserted as text nodes"]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_comment_text: Option<RuleFixConfiguration<NoCommentText>>,
+    pub no_comment_text: Option<RuleFixConfiguration<biome_js_analyze::options::NoCommentText>>,
     #[doc = "Disallow comparing against -0"]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_compare_neg_zero: Option<RuleFixConfiguration<NoCompareNegZero>>,
+    pub no_compare_neg_zero:
+        Option<RuleFixConfiguration<biome_js_analyze::options::NoCompareNegZero>>,
     #[doc = "Disallow labeled statements that are not loops."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_confusing_labels: Option<RuleConfiguration<NoConfusingLabels>>,
+    pub no_confusing_labels:
+        Option<RuleConfiguration<biome_js_analyze::options::NoConfusingLabels>>,
     #[doc = "Disallow void type outside of generic or return types."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_confusing_void_type: Option<RuleFixConfiguration<NoConfusingVoidType>>,
+    pub no_confusing_void_type:
+        Option<RuleFixConfiguration<biome_js_analyze::options::NoConfusingVoidType>>,
     #[doc = "Disallow the use of console.log"]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_console_log: Option<RuleFixConfiguration<NoConsoleLog>>,
+    pub no_console_log: Option<RuleFixConfiguration<biome_js_analyze::options::NoConsoleLog>>,
     #[doc = "Disallow TypeScript const enum"]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_const_enum: Option<RuleFixConfiguration<NoConstEnum>>,
+    pub no_const_enum: Option<RuleFixConfiguration<biome_js_analyze::options::NoConstEnum>>,
     #[doc = "Prevents from having control characters and some escape sequences that match control characters in regular expressions."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_control_characters_in_regex: Option<RuleConfiguration<NoControlCharactersInRegex>>,
+    pub no_control_characters_in_regex:
+        Option<RuleConfiguration<biome_js_analyze::options::NoControlCharactersInRegex>>,
     #[doc = "Disallow the use of debugger"]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_debugger: Option<RuleFixConfiguration<NoDebugger>>,
+    pub no_debugger: Option<RuleFixConfiguration<biome_js_analyze::options::NoDebugger>>,
     #[doc = "Require the use of === and !=="]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_double_equals: Option<RuleFixConfiguration<NoDoubleEquals>>,
+    pub no_double_equals: Option<RuleFixConfiguration<biome_js_analyze::options::NoDoubleEquals>>,
     #[doc = "Disallow duplicate case labels."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_duplicate_case: Option<RuleConfiguration<NoDuplicateCase>>,
+    pub no_duplicate_case: Option<RuleConfiguration<biome_js_analyze::options::NoDuplicateCase>>,
     #[doc = "Disallow duplicate class members."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_duplicate_class_members: Option<RuleConfiguration<NoDuplicateClassMembers>>,
+    pub no_duplicate_class_members:
+        Option<RuleConfiguration<biome_js_analyze::options::NoDuplicateClassMembers>>,
     #[doc = "Prevents JSX properties to be assigned multiple times."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_duplicate_jsx_props: Option<RuleConfiguration<NoDuplicateJsxProps>>,
+    pub no_duplicate_jsx_props:
+        Option<RuleConfiguration<biome_js_analyze::options::NoDuplicateJsxProps>>,
     #[doc = "Prevents object literals having more than one property declaration for the same name."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_duplicate_object_keys: Option<RuleFixConfiguration<NoDuplicateObjectKeys>>,
+    pub no_duplicate_object_keys:
+        Option<RuleFixConfiguration<biome_js_analyze::options::NoDuplicateObjectKeys>>,
     #[doc = "Disallow duplicate function parameter name."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_duplicate_parameters: Option<RuleConfiguration<NoDuplicateParameters>>,
+    pub no_duplicate_parameters:
+        Option<RuleConfiguration<biome_js_analyze::options::NoDuplicateParameters>>,
     #[doc = "A describe block should not contain duplicate hooks."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_duplicate_test_hooks: Option<RuleConfiguration<NoDuplicateTestHooks>>,
+    pub no_duplicate_test_hooks:
+        Option<RuleConfiguration<biome_js_analyze::options::NoDuplicateTestHooks>>,
     #[doc = "Disallow empty block statements and static blocks."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_empty_block_statements: Option<RuleConfiguration<NoEmptyBlockStatements>>,
+    pub no_empty_block_statements:
+        Option<RuleConfiguration<biome_js_analyze::options::NoEmptyBlockStatements>>,
     #[doc = "Disallow the declaration of empty interfaces."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_empty_interface: Option<RuleFixConfiguration<NoEmptyInterface>>,
+    pub no_empty_interface:
+        Option<RuleFixConfiguration<biome_js_analyze::options::NoEmptyInterface>>,
     #[doc = "Disallow the any type usage."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_explicit_any: Option<RuleConfiguration<NoExplicitAny>>,
+    pub no_explicit_any: Option<RuleConfiguration<biome_js_analyze::options::NoExplicitAny>>,
     #[doc = "Disallow using export or module.exports in files containing tests"]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_exports_in_test: Option<RuleConfiguration<NoExportsInTest>>,
+    pub no_exports_in_test: Option<RuleConfiguration<biome_js_analyze::options::NoExportsInTest>>,
     #[doc = "Prevents the wrong usage of the non-null assertion operator (!) in TypeScript files."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_extra_non_null_assertion: Option<RuleFixConfiguration<NoExtraNonNullAssertion>>,
+    pub no_extra_non_null_assertion:
+        Option<RuleFixConfiguration<biome_js_analyze::options::NoExtraNonNullAssertion>>,
     #[doc = "Disallow fallthrough of switch clauses."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_fallthrough_switch_clause: Option<RuleConfiguration<NoFallthroughSwitchClause>>,
+    pub no_fallthrough_switch_clause:
+        Option<RuleConfiguration<biome_js_analyze::options::NoFallthroughSwitchClause>>,
     #[doc = "Disallow focused tests."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_focused_tests: Option<RuleFixConfiguration<NoFocusedTests>>,
+    pub no_focused_tests: Option<RuleFixConfiguration<biome_js_analyze::options::NoFocusedTests>>,
     #[doc = "Disallow reassigning function declarations."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_function_assign: Option<RuleConfiguration<NoFunctionAssign>>,
+    pub no_function_assign: Option<RuleConfiguration<biome_js_analyze::options::NoFunctionAssign>>,
     #[doc = "Disallow assignments to native objects and read-only global variables."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_global_assign: Option<RuleConfiguration<NoGlobalAssign>>,
+    pub no_global_assign: Option<RuleConfiguration<biome_js_analyze::options::NoGlobalAssign>>,
     #[doc = "Use Number.isFinite instead of global isFinite."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_global_is_finite: Option<RuleFixConfiguration<NoGlobalIsFinite>>,
+    pub no_global_is_finite:
+        Option<RuleFixConfiguration<biome_js_analyze::options::NoGlobalIsFinite>>,
     #[doc = "Use Number.isNaN instead of global isNaN."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_global_is_nan: Option<RuleFixConfiguration<NoGlobalIsNan>>,
+    pub no_global_is_nan: Option<RuleFixConfiguration<biome_js_analyze::options::NoGlobalIsNan>>,
     #[doc = "Disallow use of implicit any type on variable declarations."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_implicit_any_let: Option<RuleConfiguration<NoImplicitAnyLet>>,
+    pub no_implicit_any_let: Option<RuleConfiguration<biome_js_analyze::options::NoImplicitAnyLet>>,
     #[doc = "Disallow assigning to imported bindings"]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_import_assign: Option<RuleConfiguration<NoImportAssign>>,
+    pub no_import_assign: Option<RuleConfiguration<biome_js_analyze::options::NoImportAssign>>,
     #[doc = "Disallow labels that share a name with a variable"]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_label_var: Option<RuleConfiguration<NoLabelVar>>,
+    pub no_label_var: Option<RuleConfiguration<biome_js_analyze::options::NoLabelVar>>,
     #[doc = "Disallow characters made with multiple code points in character class syntax."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_misleading_character_class: Option<RuleFixConfiguration<NoMisleadingCharacterClass>>,
+    pub no_misleading_character_class:
+        Option<RuleFixConfiguration<biome_js_analyze::options::NoMisleadingCharacterClass>>,
     #[doc = "Enforce proper usage of new and constructor."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_misleading_instantiator: Option<RuleConfiguration<NoMisleadingInstantiator>>,
+    pub no_misleading_instantiator:
+        Option<RuleConfiguration<biome_js_analyze::options::NoMisleadingInstantiator>>,
     #[doc = "Disallow shorthand assign when variable appears on both sides."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_misrefactored_shorthand_assign:
-        Option<RuleFixConfiguration<NoMisrefactoredShorthandAssign>>,
+        Option<RuleFixConfiguration<biome_js_analyze::options::NoMisrefactoredShorthandAssign>>,
     #[doc = "Disallow direct use of Object.prototype builtins."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_prototype_builtins: Option<RuleConfiguration<NoPrototypeBuiltins>>,
+    pub no_prototype_builtins:
+        Option<RuleConfiguration<biome_js_analyze::options::NoPrototypeBuiltins>>,
     #[doc = "Disallow variable, function, class, and type redeclarations in the same scope."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_redeclare: Option<RuleConfiguration<NoRedeclare>>,
+    pub no_redeclare: Option<RuleConfiguration<biome_js_analyze::options::NoRedeclare>>,
     #[doc = "Prevents from having redundant \"use strict\"."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_redundant_use_strict: Option<RuleFixConfiguration<NoRedundantUseStrict>>,
+    pub no_redundant_use_strict:
+        Option<RuleFixConfiguration<biome_js_analyze::options::NoRedundantUseStrict>>,
     #[doc = "Disallow comparisons where both sides are exactly the same."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_self_compare: Option<RuleConfiguration<NoSelfCompare>>,
+    pub no_self_compare: Option<RuleConfiguration<biome_js_analyze::options::NoSelfCompare>>,
     #[doc = "Disallow identifiers from shadowing restricted names."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_shadow_restricted_names: Option<RuleConfiguration<NoShadowRestrictedNames>>,
+    pub no_shadow_restricted_names:
+        Option<RuleConfiguration<biome_js_analyze::options::NoShadowRestrictedNames>>,
     #[doc = "Disallow disabled tests."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_skipped_tests: Option<RuleFixConfiguration<NoSkippedTests>>,
+    pub no_skipped_tests: Option<RuleFixConfiguration<biome_js_analyze::options::NoSkippedTests>>,
     #[doc = "Disallow sparse arrays"]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_sparse_array: Option<RuleFixConfiguration<NoSparseArray>>,
+    pub no_sparse_array: Option<RuleFixConfiguration<biome_js_analyze::options::NoSparseArray>>,
     #[doc = "It detects possible \"wrong\" semicolons inside JSX elements."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_suspicious_semicolon_in_jsx: Option<RuleConfiguration<NoSuspiciousSemicolonInJsx>>,
+    pub no_suspicious_semicolon_in_jsx:
+        Option<RuleConfiguration<biome_js_analyze::options::NoSuspiciousSemicolonInJsx>>,
     #[doc = "Disallow then property."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_then_property: Option<RuleConfiguration<NoThenProperty>>,
+    pub no_then_property: Option<RuleConfiguration<biome_js_analyze::options::NoThenProperty>>,
     #[doc = "Disallow unsafe declaration merging between interfaces and classes."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_unsafe_declaration_merging: Option<RuleConfiguration<NoUnsafeDeclarationMerging>>,
+    pub no_unsafe_declaration_merging:
+        Option<RuleConfiguration<biome_js_analyze::options::NoUnsafeDeclarationMerging>>,
     #[doc = "Disallow using unsafe negation."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_unsafe_negation: Option<RuleFixConfiguration<NoUnsafeNegation>>,
+    pub no_unsafe_negation:
+        Option<RuleFixConfiguration<biome_js_analyze::options::NoUnsafeNegation>>,
     #[doc = "Ensure async functions utilize await."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_await: Option<RuleConfiguration<UseAwait>>,
+    pub use_await: Option<RuleConfiguration<biome_js_analyze::options::UseAwait>>,
     #[doc = "Enforce default clauses in switch statements to be last"]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_default_switch_clause_last: Option<RuleConfiguration<UseDefaultSwitchClauseLast>>,
+    pub use_default_switch_clause_last:
+        Option<RuleConfiguration<biome_js_analyze::options::UseDefaultSwitchClauseLast>>,
     #[doc = "Enforce get methods to always return a value."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_getter_return: Option<RuleConfiguration<UseGetterReturn>>,
+    pub use_getter_return: Option<RuleConfiguration<biome_js_analyze::options::UseGetterReturn>>,
     #[doc = "Use Array.isArray() instead of instanceof Array."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_is_array: Option<RuleFixConfiguration<UseIsArray>>,
+    pub use_is_array: Option<RuleFixConfiguration<biome_js_analyze::options::UseIsArray>>,
     #[doc = "Require using the namespace keyword over the module keyword to declare TypeScript namespaces."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_namespace_keyword: Option<RuleFixConfiguration<UseNamespaceKeyword>>,
+    pub use_namespace_keyword:
+        Option<RuleFixConfiguration<biome_js_analyze::options::UseNamespaceKeyword>>,
     #[doc = "This rule verifies the result of typeof $expr unary expressions is being compared to valid values, either string literals containing valid type names or other typeof expressions"]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_valid_typeof: Option<RuleFixConfiguration<UseValidTypeof>>,
+    pub use_valid_typeof: Option<RuleFixConfiguration<biome_js_analyze::options::UseValidTypeof>>,
 }
 impl DeserializableValidator for Suspicious {
     fn validate(
