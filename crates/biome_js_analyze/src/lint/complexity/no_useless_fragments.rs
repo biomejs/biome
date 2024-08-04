@@ -165,7 +165,15 @@ impl Rule for NoUselessFragments {
 
                 for child in child_list.iter() {
                     match child.syntax().kind() {
-                        JsSyntaxKind::JSX_SELF_CLOSING_ELEMENT | JsSyntaxKind::JSX_ELEMENT => {
+                        JsSyntaxKind::JSX_SELF_CLOSING_ELEMENT
+                        | JsSyntaxKind::JSX_ELEMENT
+                        | JsSyntaxKind::JSX_EXPRESSION_CHILD
+                        | JsSyntaxKind::JSX_TEXT => {
+                            if child.syntax().kind() == JsSyntaxKind::JSX_TEXT
+                                && child_list.len() > 1
+                            {
+                                continue;
+                            }
                             self_closing_or_element_count += 1;
                         }
                         _ => {}
