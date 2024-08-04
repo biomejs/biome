@@ -175,7 +175,7 @@ quickcheck         = "1.0.3"
 quickcheck_macros  = "1.0.0"
 quote              = "1.0.36"
 rayon              = "1.10.0"
-regex              = "1.10.5"
+regex              = "1.10.6"
 rustc-hash         = "1.1.0"
 schemars           = { version = "0.8.21", features = ["indexmap2", "smallvec"] }
 serde              = { version = "1.0.204", features = ["derive"] }
