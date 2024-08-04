@@ -125,6 +125,7 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 #### New features
 
+- Add [nursery/noRestrictedTypes](https://biomejs.dev/linter/no-restricted-types/). Contributed by @minht11
 - Add support for GraphQL linting. Contributed by @ematipico
 - Add [nursery/noDynamicNamespaceImportAccess](https://biomejs.dev/linter/no-dynamic-namespace-import-access/). Contributed by @minht11
 - [noUndeclaredVariables](https://biomejs.dev/linter/rules/no-undeclared-variables/) no longer reports a direct reference to an enum member ([#2974](https://github.com/biomejs/biome/issues/2974)).
