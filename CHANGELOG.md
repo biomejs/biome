@@ -24,6 +24,26 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 - Add `--graphql-linter-enabled` option, to control whether the linter should be enabled or not for GraphQL files. Contributed by @ematipico
 - The option `--max-diagnostics` now accept a `none` value, which lifts the limit of diagnostics shown. Contributed by @ematipico
+  - Add a new reporter `--reporter=gitlab`, that emits diagnostics for using the [GitLab Code Quality report](https://docs.gitlab.com/ee/ci/testing/code_quality.html#implement-a-custom-tool).
+
+    ```json
+    [
+      {
+        "description": "Use === instead of ==. == is only allowed when comparing against `null`",
+        "check_name": "lint/suspicious/noDoubleEquals",
+        "fingerprint": "6143155163249580709",
+        "severity": "critical",
+        "location": {
+          "path": "main.ts",
+          "lines": {
+            "begin": 4
+          }
+        }
+      }
+    ]
+    ```
+
+    Contributed by @NiclasvanEyk
 
 #### Enhancements
 
