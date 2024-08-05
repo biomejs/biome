@@ -1161,6 +1161,48 @@ impl AnyJsExpression {
             None => None,
         }
     }
+
+    /// Determining if an expression is literal
+    /// - Any literal: 1, true, null, etc
+    /// - Static template literals: `foo`
+    /// - Negative numeric literal: -1
+    /// - Parenthesized expression: (1)
+    pub fn is_literal_expression(&self) -> bool {
+        match self {
+            // Any literal: 1, true, null, etc
+            AnyJsExpression::AnyJsLiteralExpression(_) => true,
+
+            // Static template literals: `foo`
+            AnyJsExpression::JsTemplateExpression(template_expression) => template_expression
+                .elements()
+                .into_iter()
+                .all(|element| element.as_js_template_chunk_element().is_some()),
+
+            // Negative numeric literal: -1
+            AnyJsExpression::JsUnaryExpression(unary_expression) => {
+                let is_minus_operator =
+                    matches!(unary_expression.operator(), Ok(JsUnaryOperator::Minus));
+                let is_number_expression = matches!(
+                    unary_expression.argument(),
+                    Ok(AnyJsExpression::AnyJsLiteralExpression(
+                        AnyJsLiteralExpression::JsNumberLiteralExpression(_)
+                    ))
+                );
+
+                is_minus_operator && is_number_expression
+            }
+
+            // Parenthesized expression: (1)
+            AnyJsExpression::JsParenthesizedExpression(parenthesized_expression) => {
+                parenthesized_expression
+                    .expression()
+                    .ok()
+                    .map_or(false, |expression| expression.is_literal_expression())
+            }
+
+            _ => false,
+        }
+    }
 }
 
 /// Iterator that returns the callee names in "top down order".

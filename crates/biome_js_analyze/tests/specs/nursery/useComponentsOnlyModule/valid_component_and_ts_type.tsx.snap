@@ -1,0 +1,12 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 84
+expression: valid_component_and_ts_type.tsx
+---
+# Input
+```tsx
+export const SampleComponent = () => <></>
+export type SampleType = string
+export type sampleType = string
+
+```

@@ -1,0 +1,27 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 84
+expression: invalid_component_and_default_class.jsx
+---
+# Input
+```jsx
+export const SampleComponent = () => <></>
+export default class hoge {
+}
+```
+
+# Diagnostics
+```
+invalid_component_and_default_class.jsx:2:22 lint/nursery/useComponentsOnlyModule ━━━━━━━━━━━━━━━━━━
+
+  ! Export Non-Component with components are not allowed.
+  
+    1 │ export const SampleComponent = () => <></>
+  > 2 │ export default class hoge {
+      │                      ^^^^
+    3 │ }
+  
+  i Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components. If it is not a component, it may not be following the variable naming conventions.
+  
+
+```

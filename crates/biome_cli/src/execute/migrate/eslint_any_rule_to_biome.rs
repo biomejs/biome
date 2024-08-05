@@ -1255,6 +1255,20 @@ pub(crate) fn migrate_eslint_any_rule(
                 .get_or_insert(Default::default());
             rule.set_level(rule_severity.into());
         }
+        "react-refresh/only-export-components" => {
+            if !options.include_inspired {
+                results.has_inspired_rules = true;
+                return false;
+            }
+            if !options.include_nursery {
+                return false;
+            }
+            let group = rules.nursery.get_or_insert_with(Default::default);
+            let rule = group
+                .use_components_only_module
+                .get_or_insert(Default::default());
+            rule.set_level(rule_severity.into());
+        }
         "react/button-has-type" => {
             let group = rules.a11y.get_or_insert_with(Default::default);
             let rule = group.use_button_type.get_or_insert(Default::default());

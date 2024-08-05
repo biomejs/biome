@@ -1,0 +1,28 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid_component_and_export_non_in_ignore_export_names.jsx
+---
+# Input
+```jsx
+export const loader = () => {}
+export const Bar = () => {}
+export const foo = () => {}
+
+```
+
+# Diagnostics
+```
+invalid_component_and_export_non_in_ignore_export_names.jsx:3:14 lint/nursery/useComponentsOnlyModule ━━━━━━━━━━
+
+  ! Export Non-Component with components are not allowed.
+  
+    1 │ export const loader = () => {}
+    2 │ export const Bar = () => {}
+  > 3 │ export const foo = () => {}
+      │              ^^^
+    4 │ 
+  
+  i Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components. If it is not a component, it may not be following the variable naming conventions.
+  
+
+```
