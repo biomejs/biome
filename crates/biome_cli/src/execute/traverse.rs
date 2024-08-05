@@ -439,7 +439,10 @@ impl<'ctx> DiagnosticsPrinter<'ctx> {
                                             new: new.clone(),
                                         },
                                     };
-                                    diagnostics_to_print.push(diag.with_severity(severity));
+                                    diagnostics_to_print.push(
+                                        diag.with_severity(severity)
+                                            .with_file_source_code(old.clone()),
+                                    );
                                 }
                                 DiffKind::OrganizeImports => {
                                     let diag = CIOrganizeImportsDiffDiagnostic {
@@ -449,7 +452,10 @@ impl<'ctx> DiagnosticsPrinter<'ctx> {
                                             new: new.clone(),
                                         },
                                     };
-                                    diagnostics_to_print.push(diag.with_severity(severity))
+                                    diagnostics_to_print.push(
+                                        diag.with_severity(severity)
+                                            .with_file_source_code(old.clone()),
+                                    );
                                 }
                                 DiffKind::Assists => {
                                     let diag = CIAssistsDiffDiagnostic {
@@ -459,7 +465,10 @@ impl<'ctx> DiagnosticsPrinter<'ctx> {
                                             new: new.clone(),
                                         },
                                     };
-                                    diagnostics_to_print.push(diag.with_severity(severity))
+                                    diagnostics_to_print.push(
+                                        diag.with_severity(severity)
+                                            .with_file_source_code(old.clone()),
+                                    )
                                 }
                             };
                         } else {
@@ -472,7 +481,10 @@ impl<'ctx> DiagnosticsPrinter<'ctx> {
                                             new: new.clone(),
                                         },
                                     };
-                                    diagnostics_to_print.push(diag.with_severity(severity))
+                                    diagnostics_to_print.push(
+                                        diag.with_severity(severity)
+                                            .with_file_source_code(old.clone()),
+                                    )
                                 }
                                 DiffKind::OrganizeImports => {
                                     let diag = OrganizeImportsDiffDiagnostic {
@@ -482,7 +494,10 @@ impl<'ctx> DiagnosticsPrinter<'ctx> {
                                             new: new.clone(),
                                         },
                                     };
-                                    diagnostics_to_print.push(diag.with_severity(severity))
+                                    diagnostics_to_print.push(
+                                        diag.with_severity(severity)
+                                            .with_file_source_code(old.clone()),
+                                    )
                                 }
                                 DiffKind::Assists => {
                                     let diag = AssistsDiffDiagnostic {
@@ -492,7 +507,10 @@ impl<'ctx> DiagnosticsPrinter<'ctx> {
                                             new: new.clone(),
                                         },
                                     };
-                                    diagnostics_to_print.push(diag.with_severity(severity))
+                                    diagnostics_to_print.push(
+                                        diag.with_severity(severity)
+                                            .with_file_source_code(old.clone()),
+                                    )
                                 }
                             };
                         }
