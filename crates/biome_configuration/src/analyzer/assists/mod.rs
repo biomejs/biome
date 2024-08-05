@@ -1,6 +1,6 @@
-mod rules;
+mod actions;
 
-pub use crate::analyzer::assists::rules::*;
+pub use crate::analyzer::assists::actions::*;
 use biome_deserialize::StringSet;
 use biome_deserialize_macros::{Deserializable, Merge, Partial};
 use bpaf::Bpaf;
@@ -17,7 +17,7 @@ pub struct AssistsConfiguration {
 
     /// Whether Biome should fail in CLI if the assists were not applied to the code.
     #[partial(bpaf(pure(Default::default()), optional, hide))]
-    pub actions: Rules,
+    pub actions: Actions,
 
     /// A list of Unix shell style patterns. The formatter will ignore files/folders that will
     /// match these patterns.
@@ -34,7 +34,7 @@ impl Default for AssistsConfiguration {
     fn default() -> Self {
         Self {
             enabled: true,
-            actions: Rules::default(),
+            actions: Actions::default(),
             ignore: StringSet::default(),
             include: StringSet::default(),
         }

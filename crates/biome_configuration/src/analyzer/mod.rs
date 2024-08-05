@@ -281,8 +281,8 @@ impl<T: Default> Merge for RuleWithFixOptions<T> {
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq, Hash)]
 pub enum RuleSelector {
-    Group(RuleGroup),
-    Rule(RuleGroup, &'static str),
+    Group(linter::RuleGroup),
+    Rule(linter::RuleGroup, &'static str),
 }
 
 impl From<RuleSelector> for RuleFilter<'static> {
@@ -308,16 +308,16 @@ impl FromStr for RuleSelector {
     fn from_str(selector: &str) -> Result<Self, Self::Err> {
         let selector = selector.strip_prefix("lint/").unwrap_or(selector);
         if let Some((group_name, rule_name)) = selector.split_once('/') {
-            let group = RuleGroup::from_str(group_name)?;
+            let group = linter::RuleGroup::from_str(group_name)?;
             if let Some(rule_name) = Rules::has_rule(group, rule_name) {
                 Ok(RuleSelector::Rule(group, rule_name))
             } else {
                 Err("This rule doesn't exist.")
             }
         } else {
-            match RuleGroup::from_str(selector) {
+            match linter::RuleGroup::from_str(selector) {
                 Ok(group) => {
-                    if matches!(group, RuleGroup::Nursery) {
+                    if matches!(group, linter::RuleGroup::Nursery) {
                         Err("The `nursery` group cannot be selected. Select a specific nursery rule instead.")
                     } else {
                         Ok(RuleSelector::Group(group))

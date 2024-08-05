@@ -389,7 +389,7 @@ fn generate_for_groups(
             #[derive(Clone, Debug, Default, Deserialize, Deserializable, Eq, Merge, PartialEq, Serialize)]
             #[cfg_attr(feature = "schema", derive(JsonSchema))]
             #[serde(rename_all = "camelCase", deny_unknown_fields)]
-            pub struct Rules {
+            pub struct Actions {
                 #(
                     #[deserializable(rename = #group_strings)]
                     #[serde(skip_serializing_if = "Option::is_none")]
@@ -397,7 +397,7 @@ fn generate_for_groups(
                 )*
             }
 
-            impl Rules {
+            impl Actions {
                 /// Checks if the code coming from [biome_diagnostics::Diagnostic] corresponds to a rule.
                 /// Usually the code is built like {group}/{rule_name}
                 pub fn has_rule(
@@ -607,7 +607,7 @@ fn generate_for_groups(
                 use biome_analyze::{AnalyzerRules, MetadataRegistry};
 
                 pub fn push_to_analyzer_assists(
-                    _rules: &Rules,
+                    _rules: &Actions,
                     _metadata: &MetadataRegistry,
                     _analyzer_rules: &mut AnalyzerRules,
                 ) {}
@@ -625,12 +625,12 @@ fn generate_for_groups(
         RuleCategory::Syntax | RuleCategory::Transformation => unimplemented!(),
     };
 
-    update(
-        &root.join("rules.rs"),
-        &xtask::reformat(configuration)?,
-        mode,
-    )?;
-
+    let path = if kind == RuleCategory::Action {
+        &root.join("actions.rs")
+    } else {
+        &root.join("rules.rs")
+    };
+    update(path, &xtask::reformat(configuration)?, mode)?;
     update(file_name, &xtask::reformat(push_rules)?, mode)?;
 
     Ok(())
@@ -816,13 +816,6 @@ fn generate_group_struct(
             #[serde(rename_all = "camelCase", default, deny_unknown_fields)]
             /// A list of rules that belong to this group
             pub struct #group_pascal_ident {
-                /// It enables the recommended rules for this group
-                #[serde(skip_serializing_if = "Option::is_none")]
-                pub recommended: Option<bool>,
-
-                /// It enables ALL rules for this group.
-                #[serde(skip_serializing_if = "Option::is_none")]
-                pub all: Option<bool>,
 
                 #( #schema_lines_rules ),*
             }

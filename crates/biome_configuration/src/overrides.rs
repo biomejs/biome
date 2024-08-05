@@ -185,6 +185,6 @@ pub struct OverrideAssistsConfiguration {
 
     /// List of rules
     #[serde(skip_serializing_if = "Option::is_none")]
-    #[bpaf(pure(crate::analyzer::assists::Rules::default()), optional, hide)]
-    pub rules: Option<crate::analyzer::assists::Rules>,
+    #[bpaf(pure(crate::analyzer::assists::Actions::default()), optional, hide)]
+    pub rules: Option<crate::analyzer::assists::Actions>,
 }

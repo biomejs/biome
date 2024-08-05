@@ -3,7 +3,7 @@
 use crate::analyzer::assists::*;
 use biome_analyze::{AnalyzerRules, MetadataRegistry};
 pub fn push_to_analyzer_assists(
-    _rules: &Rules,
+    _rules: &Actions,
     _metadata: &MetadataRegistry,
     _analyzer_rules: &mut AnalyzerRules,
 ) {

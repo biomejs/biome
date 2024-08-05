@@ -46,12 +46,12 @@ impl std::str::FromStr for RuleGroup {
 #[derive(Clone, Debug, Default, Deserialize, Deserializable, Eq, Merge, PartialEq, Serialize)]
 #[cfg_attr(feature = "schema", derive(JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
-pub struct Rules {
+pub struct Actions {
     #[deserializable(rename = "source")]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub source: Option<Source>,
 }
-impl Rules {
+impl Actions {
     #[doc = r" Checks if the code coming from [biome_diagnostics::Diagnostic] corresponds to a rule."]
     #[doc = r" Usually the code is built like {group}/{rule_name}"]
     pub fn has_rule(group: RuleGroup, rule_name: &str) -> Option<&'static str> {
@@ -99,12 +99,6 @@ impl Rules {
 #[serde(rename_all = "camelCase", default, deny_unknown_fields)]
 #[doc = r" A list of rules that belong to this group"]
 pub struct Source {
-    #[doc = r" It enables the recommended rules for this group"]
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub recommended: Option<bool>,
-    #[doc = r" It enables ALL rules for this group."]
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub all: Option<bool>,
     #[doc = "Sorts the keys of a JSON object in natural order"]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_sorted_keys: Option<RuleAssistConfiguration>,

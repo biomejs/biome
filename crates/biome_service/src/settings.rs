@@ -348,11 +348,11 @@ impl Settings {
     pub fn as_assists_rules(
         &self,
         path: &Path,
-    ) -> Option<Cow<biome_configuration::analyzer::assists::Rules>> {
-        let mut result = self.assists.rules.as_ref().map(Cow::Borrowed);
+    ) -> Option<Cow<biome_configuration::analyzer::assists::Actions>> {
+        let mut result = self.assists.actions.as_ref().map(Cow::Borrowed);
         let overrides = &self.override_settings;
         for pattern in overrides.patterns.iter() {
-            let pattern_rules = pattern.assists.rules.as_ref();
+            let pattern_rules = pattern.assists.actions.as_ref();
             if let Some(pattern_rules) = pattern_rules {
                 if pattern.include.matches_path(path) && !pattern.exclude.matches_path(path) {
                     result = if let Some(mut result) = result.take() {
@@ -496,7 +496,7 @@ pub struct AssistsSettings {
     pub enabled: bool,
 
     /// List of rules
-    pub rules: Option<biome_configuration::analyzer::assists::Rules>,
+    pub actions: Option<biome_configuration::analyzer::assists::Actions>,
 
     /// List of ignored paths/files to match
     pub ignored_files: Matcher,
@@ -509,7 +509,7 @@ impl Default for AssistsSettings {
     fn default() -> Self {
         Self {
             enabled: true,
-            rules: Default::default(),
+            actions: Default::default(),
             included_files: Matcher::empty(),
             ignored_files: Matcher::empty(),
         }
@@ -523,7 +523,7 @@ pub struct OverrideAssistsSettings {
     pub enabled: Option<bool>,
 
     /// List of rules
-    pub rules: Option<biome_configuration::analyzer::assists::Rules>,
+    pub actions: Option<biome_configuration::analyzer::assists::Actions>,
 }
 
 /// Static map of language names to language-specific settings
@@ -1670,7 +1670,7 @@ pub fn to_assists_settings(
 ) -> Result<AssistsSettings, WorkspaceError> {
     Ok(AssistsSettings {
         enabled: conf.enabled,
-        rules: Some(conf.actions),
+        actions: Some(conf.actions),
         ignored_files: to_matcher(working_directory.clone(), Some(&conf.ignore))?,
         included_files: to_matcher(working_directory.clone(), Some(&conf.include))?,
     })
@@ -1682,7 +1682,7 @@ impl TryFrom<OverrideAssistsConfiguration> for AssistsSettings {
     fn try_from(conf: OverrideAssistsConfiguration) -> Result<Self, Self::Error> {
         Ok(Self {
             enabled: conf.enabled.unwrap_or_default(),
-            rules: conf.rules,
+            actions: conf.rules,
             ignored_files: Matcher::empty(),
             included_files: Matcher::empty(),
         })
