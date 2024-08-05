@@ -1572,7 +1572,7 @@ JsPrivateName =
 AnyJsName =
 	JsName
 	| JsPrivateName
-
+	| JsMetavariable
 
 AnyJsFunction =
 	JsFunctionExpression

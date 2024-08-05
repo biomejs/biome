@@ -14608,10 +14608,17 @@ impl AnyJsModuleSource {
 }
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyJsName {
+    JsMetavariable(JsMetavariable),
     JsName(JsName),
     JsPrivateName(JsPrivateName),
 }
 impl AnyJsName {
+    pub fn as_js_metavariable(&self) -> Option<&JsMetavariable> {
+        match &self {
+            AnyJsName::JsMetavariable(item) => Some(item),
+            _ => None,
+        }
+    }
     pub fn as_js_name(&self) -> Option<&JsName> {
         match &self {
             AnyJsName::JsName(item) => Some(item),
@@ -33008,6 +33015,11 @@ impl From<AnyJsModuleSource> for SyntaxElement {
         node.into()
     }
 }
+impl From<JsMetavariable> for AnyJsName {
+    fn from(node: JsMetavariable) -> AnyJsName {
+        AnyJsName::JsMetavariable(node)
+    }
+}
 impl From<JsName> for AnyJsName {
     fn from(node: JsName) -> AnyJsName {
         AnyJsName::JsName(node)
@@ -33020,12 +33032,15 @@ impl From<JsPrivateName> for AnyJsName {
 }
 impl AstNode for AnyJsName {
     type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> = JsName::KIND_SET.union(JsPrivateName::KIND_SET);
+    const KIND_SET: SyntaxKindSet<Language> = JsMetavariable::KIND_SET
+        .union(JsName::KIND_SET)
+        .union(JsPrivateName::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
-        matches!(kind, JS_NAME | JS_PRIVATE_NAME)
+        matches!(kind, JS_METAVARIABLE | JS_NAME | JS_PRIVATE_NAME)
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
+            JS_METAVARIABLE => AnyJsName::JsMetavariable(JsMetavariable { syntax }),
             JS_NAME => AnyJsName::JsName(JsName { syntax }),
             JS_PRIVATE_NAME => AnyJsName::JsPrivateName(JsPrivateName { syntax }),
             _ => return None,
@@ -33034,12 +33049,14 @@ impl AstNode for AnyJsName {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
+            AnyJsName::JsMetavariable(it) => &it.syntax,
             AnyJsName::JsName(it) => &it.syntax,
             AnyJsName::JsPrivateName(it) => &it.syntax,
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
+            AnyJsName::JsMetavariable(it) => it.syntax,
             AnyJsName::JsName(it) => it.syntax,
             AnyJsName::JsPrivateName(it) => it.syntax,
         }
@@ -33048,6 +33065,7 @@ impl AstNode for AnyJsName {
 impl std::fmt::Debug for AnyJsName {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
+            AnyJsName::JsMetavariable(it) => std::fmt::Debug::fmt(it, f),
             AnyJsName::JsName(it) => std::fmt::Debug::fmt(it, f),
             AnyJsName::JsPrivateName(it) => std::fmt::Debug::fmt(it, f),
         }
@@ -33056,6 +33074,7 @@ impl std::fmt::Debug for AnyJsName {
 impl From<AnyJsName> for SyntaxNode {
     fn from(n: AnyJsName) -> SyntaxNode {
         match n {
+            AnyJsName::JsMetavariable(it) => it.into(),
             AnyJsName::JsName(it) => it.into(),
             AnyJsName::JsPrivateName(it) => it.into(),
         }

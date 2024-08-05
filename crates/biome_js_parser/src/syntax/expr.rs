@@ -1034,6 +1034,7 @@ pub(super) fn parse_private_name(p: &mut JsParser) -> ParsedSyntax {
 pub(super) fn parse_any_name(p: &mut JsParser) -> ParsedSyntax {
     match p.cur() {
         T![#] => parse_private_name(p),
+        t if t.is_metavariable() => parse_metavariable(p),
         _ => parse_name(p),
     }
 }
@@ -1304,6 +1305,7 @@ fn parse_primary_expression(p: &mut JsParser, context: ExpressionContext) -> Par
     }
 
     let complete = match p.cur() {
+        t if t.is_metavariable() => return parse_metavariable(p),
         T![this] => {
             // test js this_expr
             // this
@@ -1490,8 +1492,6 @@ fn parse_primary_expression(p: &mut JsParser, context: ExpressionContext) -> Par
         // test ts ts_type_assertion
         // let a = <number>b;
         T![<] if Jsx.is_supported(p) => return parse_jsx_tag_expression(p),
-
-        t if t.is_metavariable() => return parse_metavariable(p),
 
         // test_err js primary_expr_invalid_recovery
         // let a = \; foo();

@@ -306,9 +306,9 @@ fn implicit_metavariable_regex(
         let name = m.as_str();
         let variable = text_to_var(name, range, context_range, range_map, context).ok()?;
         match variable {
-            SnippetValues::Dots => return None,
-            SnippetValues::Underscore => regex_string.push_str(uncapture_string),
-            SnippetValues::Variable(var) => {
+            SnippetValue::Dots => return None,
+            SnippetValue::Underscore => regex_string.push_str(uncapture_string),
+            SnippetValue::Variable(var) => {
                 regex_string.push_str(capture_string);
                 variables.push(var);
             }
@@ -318,8 +318,7 @@ fn implicit_metavariable_regex(
     if last < source.len() {
         regex_string.push_str(&regex::escape(&source[last..]));
     }
-    let regex = regex_string.to_string();
-    let regex = RegexLike::Regex(regex);
+    let regex = RegexLike::Regex(regex_string);
     Some(RegexPattern::new(regex, variables))
 }
 
@@ -425,18 +424,19 @@ pub fn split_snippet<'a>(snippet: &'a str, lang: &impl Language) -> Vec<(ByteRan
     ranges_and_metavars
 }
 
-enum SnippetValues {
+#[derive(Debug)]
+enum SnippetValue {
     Dots,
     Underscore,
     Variable(Variable),
 }
 
-impl From<SnippetValues> for Pattern<GritQueryContext> {
-    fn from(value: SnippetValues) -> Self {
+impl From<SnippetValue> for Pattern<GritQueryContext> {
+    fn from(value: SnippetValue) -> Self {
         match value {
-            SnippetValues::Dots => Pattern::Dots,
-            SnippetValues::Underscore => Pattern::Underscore,
-            SnippetValues::Variable(v) => Pattern::Variable(v),
+            SnippetValue::Dots => Pattern::Dots,
+            SnippetValue::Underscore => Pattern::Underscore,
+            SnippetValue::Variable(v) => Pattern::Variable(v),
         }
     }
 }
@@ -447,21 +447,21 @@ fn text_to_var(
     context_range: ByteRange,
     range_map: &BTreeMap<ByteRange, ByteRange>,
     context: &mut NodeCompilationContext,
-) -> Result<SnippetValues, CompileError> {
-    let name = context
+) -> Result<SnippetValue, CompileError> {
+    let meta_value = context
         .compilation
         .lang
         .snippet_metavariable_to_grit_metavariable(name)
         .ok_or_else(|| CompileError::MetavariableNotFound(name.to_string()))?;
-    match name {
-        GritMetaValue::Dots => Ok(SnippetValues::Dots),
-        GritMetaValue::Underscore => Ok(SnippetValues::Underscore),
+    match meta_value {
+        GritMetaValue::Dots => Ok(SnippetValue::Dots),
+        GritMetaValue::Underscore => Ok(SnippetValue::Underscore),
         GritMetaValue::Variable(name) => {
             let range = *range_map
                 .get(&range)
                 .ok_or(CompileError::InvalidMetavariableRange(range))?;
             let var = context.register_variable(name, range + context_range.start);
-            Ok(SnippetValues::Variable(var))
+            Ok(SnippetValue::Variable(var))
         }
     }
 }
@@ -791,6 +791,543 @@ mod tests {
                         ),
                     },
                 ],
+            },
+        )
+        "###);
+    }
+
+    #[test]
+    fn test_pattern_with_metavariables_from_node() {
+        let compilation_context =
+            CompilationContext::new(None, GritTargetLanguage::JsTargetLanguage(JsTargetLanguage));
+        let mut vars = BTreeMap::new();
+        let mut vars_array = vec![Vec::new()];
+        let mut global_vars = BTreeMap::new();
+        let mut diagnostics = Vec::new();
+        let mut context = NodeCompilationContext::new(
+            &compilation_context,
+            &mut vars,
+            &mut vars_array,
+            &mut global_vars,
+            &mut diagnostics,
+        );
+
+        let snippet_source = "µfn && µfn()";
+        let range = ByteRange::new(0, snippet_source.len());
+        let pattern = parse_snippet_content(snippet_source, range, &mut context, false)
+            .expect("cannot parse snippet");
+        let formatted = format!("{pattern:#?}");
+        let snapshot = Regex::new("normalizer: 0x[0-9a-f]{16}")
+            .unwrap()
+            .replace_all(&formatted, "normalizer: [address redacted]");
+
+        insta::assert_snapshot!(&snapshot, @r###"
+        CodeSnippet(
+            GritCodeSnippet {
+                patterns: [
+                    (
+                        JsSyntaxKind(
+                            JS_PROPERTY_OBJECT_MEMBER,
+                        ),
+                        AstNode(
+                            GritNodePattern {
+                                kind: JsSyntaxKind(
+                                    JS_PROPERTY_OBJECT_MEMBER,
+                                ),
+                                args: [
+                                    GritNodePatternArg {
+                                        slot_index: 0,
+                                        pattern: Variable(
+                                            Variable {
+                                                scope: 0,
+                                                index: 0,
+                                            },
+                                        ),
+                                    },
+                                    GritNodePatternArg {
+                                        slot_index: 1,
+                                        pattern: Dynamic(
+                                            Snippet(
+                                                DynamicSnippet {
+                                                    parts: [
+                                                        String(
+                                                            "",
+                                                        ),
+                                                    ],
+                                                },
+                                            ),
+                                        ),
+                                    },
+                                    GritNodePatternArg {
+                                        slot_index: 2,
+                                        pattern: AstNode(
+                                            GritNodePattern {
+                                                kind: JsSyntaxKind(
+                                                    JS_LOGICAL_EXPRESSION,
+                                                ),
+                                                args: [
+                                                    GritNodePatternArg {
+                                                        slot_index: 0,
+                                                        pattern: Dynamic(
+                                                            Snippet(
+                                                                DynamicSnippet {
+                                                                    parts: [
+                                                                        String(
+                                                                            "",
+                                                                        ),
+                                                                    ],
+                                                                },
+                                                            ),
+                                                        ),
+                                                    },
+                                                    GritNodePatternArg {
+                                                        slot_index: 1,
+                                                        pattern: AstLeafNode(
+                                                            GritLeafNodePattern {
+                                                                kind: JsSyntaxKind(
+                                                                    AMP2,
+                                                                ),
+                                                                equivalence_class: None,
+                                                                text: "&&",
+                                                            },
+                                                        ),
+                                                    },
+                                                    GritNodePatternArg {
+                                                        slot_index: 2,
+                                                        pattern: AstNode(
+                                                            GritNodePattern {
+                                                                kind: JsSyntaxKind(
+                                                                    JS_CALL_EXPRESSION,
+                                                                ),
+                                                                args: [
+                                                                    GritNodePatternArg {
+                                                                        slot_index: 0,
+                                                                        pattern: Variable(
+                                                                            Variable {
+                                                                                scope: 0,
+                                                                                index: 0,
+                                                                            },
+                                                                        ),
+                                                                    },
+                                                                    GritNodePatternArg {
+                                                                        slot_index: 1,
+                                                                        pattern: Dynamic(
+                                                                            Snippet(
+                                                                                DynamicSnippet {
+                                                                                    parts: [
+                                                                                        String(
+                                                                                            "",
+                                                                                        ),
+                                                                                    ],
+                                                                                },
+                                                                            ),
+                                                                        ),
+                                                                    },
+                                                                    GritNodePatternArg {
+                                                                        slot_index: 2,
+                                                                        pattern: Dynamic(
+                                                                            Snippet(
+                                                                                DynamicSnippet {
+                                                                                    parts: [
+                                                                                        String(
+                                                                                            "",
+                                                                                        ),
+                                                                                    ],
+                                                                                },
+                                                                            ),
+                                                                        ),
+                                                                    },
+                                                                    GritNodePatternArg {
+                                                                        slot_index: 3,
+                                                                        pattern: AstNode(
+                                                                            GritNodePattern {
+                                                                                kind: JsSyntaxKind(
+                                                                                    JS_CALL_ARGUMENTS,
+                                                                                ),
+                                                                                args: [
+                                                                                    GritNodePatternArg {
+                                                                                        slot_index: 0,
+                                                                                        pattern: AstLeafNode(
+                                                                                            GritLeafNodePattern {
+                                                                                                kind: JsSyntaxKind(
+                                                                                                    L_PAREN,
+                                                                                                ),
+                                                                                                equivalence_class: None,
+                                                                                                text: "(",
+                                                                                            },
+                                                                                        ),
+                                                                                    },
+                                                                                    GritNodePatternArg {
+                                                                                        slot_index: 1,
+                                                                                        pattern: List(
+                                                                                            List {
+                                                                                                patterns: [],
+                                                                                            },
+                                                                                        ),
+                                                                                    },
+                                                                                    GritNodePatternArg {
+                                                                                        slot_index: 2,
+                                                                                        pattern: AstLeafNode(
+                                                                                            GritLeafNodePattern {
+                                                                                                kind: JsSyntaxKind(
+                                                                                                    R_PAREN,
+                                                                                                ),
+                                                                                                equivalence_class: None,
+                                                                                                text: ")",
+                                                                                            },
+                                                                                        ),
+                                                                                    },
+                                                                                ],
+                                                                            },
+                                                                        ),
+                                                                    },
+                                                                ],
+                                                            },
+                                                        ),
+                                                    },
+                                                ],
+                                            },
+                                        ),
+                                    },
+                                ],
+                            },
+                        ),
+                    ),
+                    (
+                        JsSyntaxKind(
+                            JS_LOGICAL_EXPRESSION,
+                        ),
+                        AstNode(
+                            GritNodePattern {
+                                kind: JsSyntaxKind(
+                                    JS_LOGICAL_EXPRESSION,
+                                ),
+                                args: [
+                                    GritNodePatternArg {
+                                        slot_index: 0,
+                                        pattern: Variable(
+                                            Variable {
+                                                scope: 0,
+                                                index: 0,
+                                            },
+                                        ),
+                                    },
+                                    GritNodePatternArg {
+                                        slot_index: 1,
+                                        pattern: AstLeafNode(
+                                            GritLeafNodePattern {
+                                                kind: JsSyntaxKind(
+                                                    AMP2,
+                                                ),
+                                                equivalence_class: None,
+                                                text: "&&",
+                                            },
+                                        ),
+                                    },
+                                    GritNodePatternArg {
+                                        slot_index: 2,
+                                        pattern: AstNode(
+                                            GritNodePattern {
+                                                kind: JsSyntaxKind(
+                                                    JS_CALL_EXPRESSION,
+                                                ),
+                                                args: [
+                                                    GritNodePatternArg {
+                                                        slot_index: 0,
+                                                        pattern: Variable(
+                                                            Variable {
+                                                                scope: 0,
+                                                                index: 0,
+                                                            },
+                                                        ),
+                                                    },
+                                                    GritNodePatternArg {
+                                                        slot_index: 1,
+                                                        pattern: Dynamic(
+                                                            Snippet(
+                                                                DynamicSnippet {
+                                                                    parts: [
+                                                                        String(
+                                                                            "",
+                                                                        ),
+                                                                    ],
+                                                                },
+                                                            ),
+                                                        ),
+                                                    },
+                                                    GritNodePatternArg {
+                                                        slot_index: 2,
+                                                        pattern: Dynamic(
+                                                            Snippet(
+                                                                DynamicSnippet {
+                                                                    parts: [
+                                                                        String(
+                                                                            "",
+                                                                        ),
+                                                                    ],
+                                                                },
+                                                            ),
+                                                        ),
+                                                    },
+                                                    GritNodePatternArg {
+                                                        slot_index: 3,
+                                                        pattern: AstNode(
+                                                            GritNodePattern {
+                                                                kind: JsSyntaxKind(
+                                                                    JS_CALL_ARGUMENTS,
+                                                                ),
+                                                                args: [
+                                                                    GritNodePatternArg {
+                                                                        slot_index: 0,
+                                                                        pattern: AstLeafNode(
+                                                                            GritLeafNodePattern {
+                                                                                kind: JsSyntaxKind(
+                                                                                    L_PAREN,
+                                                                                ),
+                                                                                equivalence_class: None,
+                                                                                text: "(",
+                                                                            },
+                                                                        ),
+                                                                    },
+                                                                    GritNodePatternArg {
+                                                                        slot_index: 1,
+                                                                        pattern: List(
+                                                                            List {
+                                                                                patterns: [],
+                                                                            },
+                                                                        ),
+                                                                    },
+                                                                    GritNodePatternArg {
+                                                                        slot_index: 2,
+                                                                        pattern: AstLeafNode(
+                                                                            GritLeafNodePattern {
+                                                                                kind: JsSyntaxKind(
+                                                                                    R_PAREN,
+                                                                                ),
+                                                                                equivalence_class: None,
+                                                                                text: ")",
+                                                                            },
+                                                                        ),
+                                                                    },
+                                                                ],
+                                                            },
+                                                        ),
+                                                    },
+                                                ],
+                                            },
+                                        ),
+                                    },
+                                ],
+                            },
+                        ),
+                    ),
+                    (
+                        JsSyntaxKind(
+                            JSX_TEXT,
+                        ),
+                        AstNode(
+                            GritNodePattern {
+                                kind: JsSyntaxKind(
+                                    JSX_TEXT,
+                                ),
+                                args: [
+                                    GritNodePatternArg {
+                                        slot_index: 0,
+                                        pattern: AstLeafNode(
+                                            GritLeafNodePattern {
+                                                kind: JsSyntaxKind(
+                                                    JSX_TEXT_LITERAL,
+                                                ),
+                                                equivalence_class: None,
+                                                text: "µfn && µfn()",
+                                            },
+                                        ),
+                                    },
+                                ],
+                            },
+                        ),
+                    ),
+                    (
+                        JsSyntaxKind(
+                            JS_PROPERTY_OBJECT_MEMBER,
+                        ),
+                        AstNode(
+                            GritNodePattern {
+                                kind: JsSyntaxKind(
+                                    JS_PROPERTY_OBJECT_MEMBER,
+                                ),
+                                args: [
+                                    GritNodePatternArg {
+                                        slot_index: 0,
+                                        pattern: Variable(
+                                            Variable {
+                                                scope: 0,
+                                                index: 0,
+                                            },
+                                        ),
+                                    },
+                                    GritNodePatternArg {
+                                        slot_index: 1,
+                                        pattern: Dynamic(
+                                            Snippet(
+                                                DynamicSnippet {
+                                                    parts: [
+                                                        String(
+                                                            "",
+                                                        ),
+                                                    ],
+                                                },
+                                            ),
+                                        ),
+                                    },
+                                    GritNodePatternArg {
+                                        slot_index: 2,
+                                        pattern: AstNode(
+                                            GritNodePattern {
+                                                kind: JsSyntaxKind(
+                                                    JS_LOGICAL_EXPRESSION,
+                                                ),
+                                                args: [
+                                                    GritNodePatternArg {
+                                                        slot_index: 0,
+                                                        pattern: Dynamic(
+                                                            Snippet(
+                                                                DynamicSnippet {
+                                                                    parts: [
+                                                                        String(
+                                                                            "",
+                                                                        ),
+                                                                    ],
+                                                                },
+                                                            ),
+                                                        ),
+                                                    },
+                                                    GritNodePatternArg {
+                                                        slot_index: 1,
+                                                        pattern: AstLeafNode(
+                                                            GritLeafNodePattern {
+                                                                kind: JsSyntaxKind(
+                                                                    AMP2,
+                                                                ),
+                                                                equivalence_class: None,
+                                                                text: "&&",
+                                                            },
+                                                        ),
+                                                    },
+                                                    GritNodePatternArg {
+                                                        slot_index: 2,
+                                                        pattern: AstNode(
+                                                            GritNodePattern {
+                                                                kind: JsSyntaxKind(
+                                                                    JS_CALL_EXPRESSION,
+                                                                ),
+                                                                args: [
+                                                                    GritNodePatternArg {
+                                                                        slot_index: 0,
+                                                                        pattern: Variable(
+                                                                            Variable {
+                                                                                scope: 0,
+                                                                                index: 0,
+                                                                            },
+                                                                        ),
+                                                                    },
+                                                                    GritNodePatternArg {
+                                                                        slot_index: 1,
+                                                                        pattern: Dynamic(
+                                                                            Snippet(
+                                                                                DynamicSnippet {
+                                                                                    parts: [
+                                                                                        String(
+                                                                                            "",
+                                                                                        ),
+                                                                                    ],
+                                                                                },
+                                                                            ),
+                                                                        ),
+                                                                    },
+                                                                    GritNodePatternArg {
+                                                                        slot_index: 2,
+                                                                        pattern: Dynamic(
+                                                                            Snippet(
+                                                                                DynamicSnippet {
+                                                                                    parts: [
+                                                                                        String(
+                                                                                            "",
+                                                                                        ),
+                                                                                    ],
+                                                                                },
+                                                                            ),
+                                                                        ),
+                                                                    },
+                                                                    GritNodePatternArg {
+                                                                        slot_index: 3,
+                                                                        pattern: AstNode(
+                                                                            GritNodePattern {
+                                                                                kind: JsSyntaxKind(
+                                                                                    JS_CALL_ARGUMENTS,
+                                                                                ),
+                                                                                args: [
+                                                                                    GritNodePatternArg {
+                                                                                        slot_index: 0,
+                                                                                        pattern: AstLeafNode(
+                                                                                            GritLeafNodePattern {
+                                                                                                kind: JsSyntaxKind(
+                                                                                                    L_PAREN,
+                                                                                                ),
+                                                                                                equivalence_class: None,
+                                                                                                text: "(",
+                                                                                            },
+                                                                                        ),
+                                                                                    },
+                                                                                    GritNodePatternArg {
+                                                                                        slot_index: 1,
+                                                                                        pattern: List(
+                                                                                            List {
+                                                                                                patterns: [],
+                                                                                            },
+                                                                                        ),
+                                                                                    },
+                                                                                    GritNodePatternArg {
+                                                                                        slot_index: 2,
+                                                                                        pattern: AstLeafNode(
+                                                                                            GritLeafNodePattern {
+                                                                                                kind: JsSyntaxKind(
+                                                                                                    R_PAREN,
+                                                                                                ),
+                                                                                                equivalence_class: None,
+                                                                                                text: ")",
+                                                                                            },
+                                                                                        ),
+                                                                                    },
+                                                                                ],
+                                                                            },
+                                                                        ),
+                                                                    },
+                                                                ],
+                                                            },
+                                                        ),
+                                                    },
+                                                ],
+                                            },
+                                        ),
+                                    },
+                                ],
+                            },
+                        ),
+                    ),
+                ],
+                source: "µfn && µfn()",
+                dynamic_snippet: Some(
+                    Snippet(
+                        DynamicSnippet {
+                            parts: [
+                                String(
+                                    "µfn && µfn()",
+                                ),
+                            ],
+                        },
+                    ),
+                ),
             },
         )
         "###);
