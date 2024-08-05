@@ -167,13 +167,12 @@ impl Rule for UseNumberNamespace {
                 )
             }
             AnyJsExpression::JsStaticMemberExpression(expression) => {
-                let name = expression.member().ok()?;
-                let name_str = name.text().clone();
+                let name = expression.member().ok()?.text();
 
-                if !GLOBAL_NUMBER_PROPERTIES.contains(&name_str.as_str()) {
+                if !GLOBAL_NUMBER_PROPERTIES.contains(&name.as_str()) {
                     return None;
                 }
-                let (old_node, replacement) = match name_str.as_str() {
+                let (old_node, replacement) = match name.as_str() {
                     "Infinity" => {
                         if let Some(parent) = node.parent::<JsUnaryExpression>() {
                             match parent.operator().ok()? {
@@ -191,7 +190,7 @@ impl Rule for UseNumberNamespace {
                             (node.clone(), "POSITIVE_INFINITY")
                         }
                     }
-                    _ => (node.clone(), name_str.as_str()),
+                    _ => (node.clone(), name.as_str()),
                 };
                 (
                     old_node,
