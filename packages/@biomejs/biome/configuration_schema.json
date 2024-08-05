@@ -975,6 +975,15 @@
 			},
 			"additionalProperties": false
 		},
+		"CustomRestrictedType": {
+			"type": "object",
+			"required": ["message"],
+			"properties": {
+				"fixWith": { "type": ["string", "null"] },
+				"message": { "type": "string" }
+			},
+			"additionalProperties": false
+		},
 		"DeprecatedHooksConfiguration": {
 			"anyOf": [
 				{ "$ref": "#/definitions/RulePlainConfiguration" },
@@ -1750,6 +1759,26 @@
 			},
 			"additionalProperties": false
 		},
+		"NoRestrictedTypesConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithNoRestrictedTypesOptions" }
+			]
+		},
+		"NoRestrictedTypesOptions": {
+			"type": "object",
+			"required": ["types"],
+			"properties": {
+				"extendDefaults": { "type": ["boolean", "null"] },
+				"types": {
+					"type": "object",
+					"additionalProperties": {
+						"$ref": "#/definitions/CustomRestrictedType"
+					}
+				}
+			},
+			"additionalProperties": false
+		},
 		"Nursery": {
 			"description": "A list of rules that belong to this group",
 			"type": "object",
@@ -1902,6 +1931,13 @@
 					"description": "Disallow specified modules when loaded by import or require.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RestrictedImportsConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noRestrictedTypes": {
+					"description": "Disallow primitive type aliases, misleading or user defined types.",
+					"anyOf": [
+						{ "$ref": "#/definitions/NoRestrictedTypesConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -2580,6 +2616,25 @@
 				"level": {
 					"description": "The severity of the emitted diagnostics by the rule",
 					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				}
+			},
+			"additionalProperties": false
+		},
+		"RuleWithNoRestrictedTypesOptions": {
+			"type": "object",
+			"required": ["level", "options"],
+			"properties": {
+				"fix": {
+					"description": "The kind of the code actions emitted by the rule",
+					"anyOf": [{ "$ref": "#/definitions/FixKind" }, { "type": "null" }]
+				},
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/NoRestrictedTypesOptions" }]
 				}
 			},
 			"additionalProperties": false

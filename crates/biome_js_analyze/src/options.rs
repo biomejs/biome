@@ -174,6 +174,8 @@ pub type NoRestrictedGlobals =
     <lint::style::no_restricted_globals::NoRestrictedGlobals as biome_analyze::Rule>::Options;
 pub type NoRestrictedImports =
     <lint::nursery::no_restricted_imports::NoRestrictedImports as biome_analyze::Rule>::Options;
+pub type NoRestrictedTypes =
+    <lint::nursery::no_restricted_types::NoRestrictedTypes as biome_analyze::Rule>::Options;
 pub type NoSelfAssign =
     <lint::correctness::no_self_assign::NoSelfAssign as biome_analyze::Rule>::Options;
 pub type NoSelfCompare =
