@@ -653,6 +653,8 @@ name = "biome_html_syntax"
 version = "0.5.7"
 dependencies = [
  "biome_rowan",
+ "schemars",
+ "serde",
 ]
 
 [[package]]
