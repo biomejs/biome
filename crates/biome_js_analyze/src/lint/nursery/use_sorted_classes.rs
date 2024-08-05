@@ -15,7 +15,7 @@ use biome_js_factory::make::{
     js_literal_member_name, js_string_literal, js_string_literal_expression,
     js_string_literal_single_quotes, js_template_chunk, js_template_chunk_element, jsx_string,
 };
-use biome_rowan::{AstNode, BatchMutationExt, TextRange, TextSize};
+use biome_rowan::{AstNode, BatchMutationExt};
 use lazy_static::lazy_static;
 use presets::get_config_preset;
 
@@ -23,8 +23,9 @@ use crate::JsRuleAction;
 
 pub use self::options::UtilityClassSortingOptions;
 use self::{
-    any_class_string_like::AnyClassStringLike, presets::UseSortedClassesPreset, sort::check_ignore,
-    sort::sort_class_name, sort::sort_class_name_range_offset, sort_config::SortConfig,
+    any_class_string_like::AnyClassStringLike, presets::UseSortedClassesPreset,
+    sort::get_sort_class_name_range, sort::should_ignore_postfix, sort::should_ignore_prefix,
+    sort::sort_class_name, sort_config::SortConfig,
 };
 
 declare_lint_rule! {
@@ -162,9 +163,10 @@ impl Rule for UseSortedClasses {
         if node.should_visit(options)? {
             if let Some(value) = node.value() {
                 // Check if the class should be ignored.
-                let (ignore_prefix, ignore_suffix) = check_ignore(node);
+                let ignore_prefix = should_ignore_prefix(node);
+                let ignore_postfix = should_ignore_postfix(node);
                 let sorted_value =
-                    sort_class_name(&value, &SORT_CONFIG, ignore_prefix, ignore_suffix);
+                    sort_class_name(&value, &SORT_CONFIG, ignore_prefix, ignore_postfix);
                 if value.text() != sorted_value {
                     return Some(sorted_value);
                 }
@@ -176,16 +178,16 @@ impl Rule for UseSortedClasses {
     fn diagnostic(ctx: &RuleContext<Self>, _: &Self::State) -> Option<RuleDiagnostic> {
         let node = ctx.query();
 
-        // Calculate the range offset to account for the ignored prefix and suffix.
+        // Calculate the range offset to account for the ignored prefix and postfix.
         let sort_range = if let Some(value) = node.value() {
-            let (ignore_prefix, ignore_suffix) = check_ignore(node);
-            let range_offset = sort_class_name_range_offset(&value, ignore_prefix, ignore_suffix);
-            TextRange::new(
-        	    range.start() + TextSize::from(range_offset.0),
-    	        range.end() - TextSize::from(range_offset.1),
-	        )
+            let range = node.range();
+            let ignore_prefix = should_ignore_prefix(node);
+            let ignore_postfix = should_ignore_postfix(node);
+            let real_sort_range =
+                get_sort_class_name_range(&value, &range, ignore_prefix, ignore_postfix);
+            real_sort_range.unwrap_or(range)
         } else {
-            ctx.query().range()
+            node.range()
         };
 
         Some(RuleDiagnostic::new(
