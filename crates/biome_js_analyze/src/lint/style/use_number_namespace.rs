@@ -97,12 +97,27 @@ impl Rule for UseNumberNamespace {
 
     fn diagnostic(ctx: &RuleContext<Self>, global_ident: &Self::State) -> Option<RuleDiagnostic> {
         let node = ctx.query();
+        let equivalent_property = match global_ident.text() {
+            "Infinity" => {
+                if let Some(parent) = node.parent::<JsUnaryExpression>() {
+                    match parent.operator().ok()? {
+                        JsUnaryOperator::Minus => "NEGATIVE_INFINITY",
+                        JsUnaryOperator::Plus => "POSITIVE_INFINITY",
+                        _ => return None,
+                    }
+                } else {
+                    "POSITIVE_INFINITY"
+                }
+            }
+            other => other,
+        };
+
         Some(
             RuleDiagnostic::new(
                 rule_category!(),
                 node.range(),
                 markup! {
-                    "Use "<Emphasis>"Number."{global_ident.text()}</Emphasis>" instead of the equivalent global."
+                    "Use "<Emphasis>"Number."{equivalent_property}</Emphasis>" instead of the equivalent global."
                 },
             )
             .note(markup! {
@@ -151,19 +166,46 @@ impl Rule for UseNumberNamespace {
                     ),
                 )
             }
-            AnyJsExpression::JsStaticMemberExpression(expression) => (
-                node.clone(),
-                make::js_static_member_expression(
+            AnyJsExpression::JsStaticMemberExpression(expression) => {
+                let name = expression.member().ok()?.text();
+
+                if !GLOBAL_NUMBER_PROPERTIES.contains(&name.as_str()) {
+                    return None;
+                }
+                let (old_node, replacement) = match name.as_str() {
+                    "Infinity" => {
+                        if let Some(parent) = node.parent::<JsUnaryExpression>() {
+                            match parent.operator().ok()? {
+                                JsUnaryOperator::Minus => (
+                                    AnyJsExpression::JsUnaryExpression(parent),
+                                    "NEGATIVE_INFINITY",
+                                ),
+                                JsUnaryOperator::Plus => (
+                                    AnyJsExpression::JsUnaryExpression(parent),
+                                    "POSITIVE_INFINITY",
+                                ),
+                                _ => return None,
+                            }
+                        } else {
+                            (node.clone(), "POSITIVE_INFINITY")
+                        }
+                    }
+                    _ => (node.clone(), name.as_str()),
+                };
+                (
+                    old_node,
                     make::js_static_member_expression(
-                        expression.object().ok()?,
-                        make::token(T![.]),
-                        make::js_name(make::ident("Number")).into(),
-                    )
-                    .into(),
-                    expression.operator_token().ok()?,
-                    expression.member().ok()?,
-                ),
-            ),
+                        make::js_static_member_expression(
+                            expression.object().ok()?,
+                            make::token(T![.]),
+                            make::js_name(make::ident("Number")).into(),
+                        )
+                        .into(),
+                        expression.operator_token().ok()?,
+                        make::js_name(make::ident(replacement)).into(),
+                    ),
+                )
+            }
             AnyJsExpression::JsComputedMemberExpression(expression) => {
                 let object = expression.object().ok()?;
                 (
@@ -179,11 +221,26 @@ impl Rule for UseNumberNamespace {
         };
         let mut mutation = ctx.root().begin();
         mutation.replace_node(old_node, new_node.into());
+        let equivalent_property = match global_ident.text() {
+            "Infinity" => {
+                if let Some(parent) = node.parent::<JsUnaryExpression>() {
+                    match parent.operator().ok()? {
+                        JsUnaryOperator::Minus => "NEGATIVE_INFINITY",
+                        JsUnaryOperator::Plus => "POSITIVE_INFINITY",
+                        _ => return None,
+                    }
+                } else {
+                    "POSITIVE_INFINITY"
+                }
+            }
+            other => other,
+        };
+
         Some(JsRuleAction::new(
             ActionCategory::QuickFix,
             ctx.metadata().applicability(),
             markup! {
-                "Use "<Emphasis>"Number."{global_ident.text()}</Emphasis>" instead."
+                "Use "<Emphasis>"Number."{equivalent_property}</Emphasis>" instead."
             }
             .to_owned(),
             mutation,
