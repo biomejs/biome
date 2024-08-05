@@ -170,7 +170,7 @@ dependencies = [
  "crossbeam",
  "dashmap",
  "hdrhistogram",
- "indexmap 2.2.6",
+ "indexmap 2.3.0",
  "insta",
  "lazy_static",
  "libc",
@@ -214,7 +214,7 @@ dependencies = [
  "biome_json_syntax",
  "biome_rowan",
  "bpaf",
- "indexmap 2.2.6",
+ "indexmap 2.3.0",
  "insta",
  "oxc_resolver",
  "rustc-hash",
@@ -341,7 +341,7 @@ dependencies = [
  "biome_json_syntax",
  "biome_rowan",
  "enumflags2",
- "indexmap 2.2.6",
+ "indexmap 2.3.0",
  "schemars",
  "serde",
  "serde_json",
@@ -419,7 +419,7 @@ dependencies = [
  "cfg-if",
  "countme",
  "drop_bomb",
- "indexmap 2.2.6",
+ "indexmap 2.3.0",
  "insta",
  "rustc-hash",
  "schemars",
@@ -455,7 +455,7 @@ dependencies = [
  "biome_diagnostics",
  "crossbeam",
  "directories",
- "indexmap 2.2.6",
+ "indexmap 2.3.0",
  "oxc_resolver",
  "parking_lot",
  "rayon",
@@ -744,7 +744,7 @@ dependencies = [
  "bitflags 2.6.0",
  "drop_bomb",
  "expect-test",
- "indexmap 2.2.6",
+ "indexmap 2.3.0",
  "quickcheck",
  "quickcheck_macros",
  "rustc-hash",
@@ -1018,7 +1018,7 @@ dependencies = [
  "enumflags2",
  "getrandom 0.2.15",
  "ignore",
- "indexmap 2.2.6",
+ "indexmap 2.3.0",
  "insta",
  "lazy_static",
  "oxc_resolver",
@@ -2108,9 +2108,9 @@ dependencies = [
 
 [[package]]
 name = "indexmap"
-version = "2.2.6"
+version = "2.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "168fb715dda47215e360912c096649d23d58bf392ac62f73919e831745e40f26"
+checksum = "de3fc2e30ba82dd1b3911c8de1ffc143c74a914a14e99514d7637e3099df5ea0"
 dependencies = [
  "equivalent",
  "hashbrown 0.14.3",
@@ -2775,7 +2775,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "cfc1a6a5406a114913df2df8507998c755311b55b78584bed5f6e88f6417c4d4"
 dependencies = [
  "chrono",
- "indexmap 2.2.6",
+ "indexmap 2.3.0",
  "newtype-uuid",
  "quick-xml",
  "strip-ansi-escapes",
@@ -3144,7 +3144,7 @@ checksum = "09c024468a378b7e36765cd36702b7a90cc3cba11654f6685c8f233408e89e92"
 dependencies = [
  "dyn-clone",
  "indexmap 1.9.3",
- "indexmap 2.2.6",
+ "indexmap 2.3.0",
  "schemars_derive",
  "serde",
  "serde_json",
@@ -3228,7 +3228,7 @@ version = "1.0.121"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "4ab380d7d9f22ef3f21ad3e6c1ebe8e4fc7a2000ccba2e4d71fc96f15b2cb609"
 dependencies = [
- "indexmap 2.2.6",
+ "indexmap 2.3.0",
  "itoa",
  "memchr",
  "ryu",
@@ -3270,7 +3270,7 @@ version = "0.9.34+deprecated"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "6a8b1a1a2ebf674015cc02edccce75287f1a0130d394307b36743c2f5d504b47"
 dependencies = [
- "indexmap 2.2.6",
+ "indexmap 2.3.0",
  "itoa",
  "ryu",
  "serde",
@@ -3641,7 +3641,7 @@ version = "0.22.12"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d3328d4f68a705b2a4498da1d580585d39a6510f98318a2cec3018a7ec61ddef"
 dependencies = [
- "indexmap 2.2.6",
+ "indexmap 2.3.0",
  "serde",
  "serde_spanned",
  "toml_datetime",
@@ -3836,7 +3836,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e7cc416eaf05297012ead9d192226fe9a92e9a20f64f8780efb9085aaae9b590"
 dependencies = [
  "clean-path",
- "indexmap 2.2.6",
+ "indexmap 2.3.0",
  "rustc-hash",
  "serde",
  "serde_json",
