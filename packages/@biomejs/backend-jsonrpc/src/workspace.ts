@@ -90,7 +90,7 @@ export interface PartialAssistsConfiguration {
 	/**
 	 * Whether Biome should fail in CLI if the assists were not applied to the code.
 	 */
-	actions?: Rules2;
+	actions?: Actions;
 	/**
 	 * Whether Biome should enable assists via LSP.
 	 */
@@ -320,7 +320,7 @@ If Biome can't find the configuration, it will attempt to use the current workin
 	 */
 	useIgnoreFile?: boolean;
 }
-export interface Rules2 {
+export interface Actions {
 	source?: Source;
 }
 /**
@@ -661,14 +661,6 @@ export type VcsClientKind = "git";
  * A list of rules that belong to this group
  */
 export interface Source {
-	/**
-	 * It enables ALL rules for this group.
-	 */
-	all?: boolean;
-	/**
-	 * It enables the recommended rules for this group
-	 */
-	recommended?: boolean;
 	/**
 	 * Sorts the keys of a JSON object in natural order
 	 */
