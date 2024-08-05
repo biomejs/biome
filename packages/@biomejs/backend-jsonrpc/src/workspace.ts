@@ -38,6 +38,10 @@ export interface PartialConfiguration {
 	 */
 	$schema?: string;
 	/**
+	 * Specific configuration for assists
+	 */
+	assists?: PartialAssistsConfiguration;
+	/**
 	 * Specific configuration for the Css language
 	 */
 	css?: PartialCssConfiguration;
@@ -82,10 +86,32 @@ export interface PartialConfiguration {
 	 */
 	vcs?: PartialVcsConfiguration;
 }
+export interface PartialAssistsConfiguration {
+	/**
+	 * Whether Biome should fail in CLI if the assists were not applied to the code.
+	 */
+	actions?: Actions;
+	/**
+	 * Whether Biome should enable assists via LSP.
+	 */
+	enabled?: boolean;
+	/**
+	 * A list of Unix shell style patterns. The formatter will ignore files/folders that will match these patterns.
+	 */
+	ignore?: StringSet;
+	/**
+	 * A list of Unix shell style patterns. The formatter will include files/folders that will match these patterns.
+	 */
+	include?: StringSet;
+}
 /**
  * Options applied to CSS files
  */
 export interface PartialCssConfiguration {
+	/**
+	 * CSS assists options
+	 */
+	assists?: PartialCssAssists;
 	/**
 	 * CSS formatter options
 	 */
@@ -186,6 +212,10 @@ export interface PartialGraphqlConfiguration {
  */
 export interface PartialJavascriptConfiguration {
 	/**
+	 * Assists options
+	 */
+	assists?: PartialJavascriptAssists;
+	/**
 	 * Formatting options
 	 */
 	formatter?: PartialJavascriptFormatter;
@@ -213,6 +243,10 @@ If defined here, they should not emit diagnostics.
  * Options applied to JSON files
  */
 export interface PartialJsonConfiguration {
+	/**
+	 * Assists options
+	 */
+	assists?: PartialJsonAssists;
 	/**
 	 * Formatting options
 	 */
@@ -286,6 +320,18 @@ If Biome can't find the configuration, it will attempt to use the current workin
 	 */
 	useIgnoreFile?: boolean;
 }
+export interface Actions {
+	source?: Source;
+}
+/**
+ * Options that changes how the CSS assists behaves
+ */
+export interface PartialCssAssists {
+	/**
+	 * Control the assists for CSS files.
+	 */
+	enabled?: boolean;
+}
 /**
  * Options that changes how the CSS formatter behaves
  */
@@ -320,7 +366,7 @@ export interface PartialCssFormatter {
  */
 export interface PartialCssLinter {
 	/**
-	 * Control the linter for CSS (and its super languages) files.
+	 * Control the linter for CSS files.
 	 */
 	enabled?: boolean;
 }
@@ -387,6 +433,15 @@ export interface PartialGraphqlFormatter {
 export interface PartialGraphqlLinter {
 	/**
 	 * Control the formatter for GraphQL files.
+	 */
+	enabled?: boolean;
+}
+/**
+ * Linter options specific to the JavaScript linter
+ */
+export interface PartialJavascriptAssists {
+	/**
+	 * Control the linter for JavaScript (and its super languages) files.
 	 */
 	enabled?: boolean;
 }
@@ -483,6 +538,15 @@ export interface PartialJavascriptParser {
 These decorators belong to an old proposal, and they are subject to change. 
 	 */
 	unsafeParameterDecoratorsEnabled?: boolean;
+}
+/**
+ * Linter options specific to the JSON linter
+ */
+export interface PartialJsonAssists {
+	/**
+	 * Control the linter for JSON (and its super languages) files.
+	 */
+	enabled?: boolean;
 }
 export interface PartialJsonFormatter {
 	/**
@@ -593,6 +657,15 @@ export interface OverridePattern {
 	organizeImports?: OverrideOrganizeImportsConfiguration;
 }
 export type VcsClientKind = "git";
+/**
+ * A list of rules that belong to this group
+ */
+export interface Source {
+	/**
+	 * Sorts the keys of a JSON object in natural order
+	 */
+	useSortedKeys?: RuleAssistConfiguration;
+}
 export type QuoteStyle = "double" | "single";
 export type ArrowParentheses = "always" | "asNeeded";
 export type QuoteProperties = "asNeeded" | "preserve";
@@ -1813,6 +1886,7 @@ export interface OverrideOrganizeImportsConfiguration {
 	 */
 	enabled?: boolean;
 }
+export type RuleAssistConfiguration = "on" | "off";
 export type RuleFixConfiguration_for_Null =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_Null;
@@ -2688,7 +2762,7 @@ export type Category =
 	| "lint/suspicious/useIsArray"
 	| "lint/suspicious/useNamespaceKeyword"
 	| "lint/suspicious/useValidTypeof"
-	| "assists/nursery/useSortedKeys"
+	| "assists/source/useSortedKeys"
 	| "syntax/nursery/noTypeOnlyImportAttributes"
 	| "syntax/correctness/noSuperWithoutExtends"
 	| "syntax/correctness/noInitializerWithDefinite"
@@ -2699,6 +2773,7 @@ export type Category =
 	| "ci"
 	| "configuration"
 	| "organizeImports"
+	| "assists"
 	| "migrate"
 	| "deserialize"
 	| "project"
@@ -2815,8 +2890,10 @@ export interface BacktraceSymbol {
 	name?: string;
 }
 export interface PullActionsParams {
+	only: RuleCode[];
 	path: BiomePath;
-	range: TextRange;
+	range?: TextRange;
+	skip: RuleCode[];
 }
 export interface PullActionsResult {
 	actions: CodeAction[];
@@ -2903,6 +2980,7 @@ export interface FixFileParams {
 	fix_file_mode: FixFileMode;
 	only: RuleCode[];
 	path: BiomePath;
+	rule_categories: RuleCategories;
 	should_format: boolean;
 	skip: RuleCode[];
 }

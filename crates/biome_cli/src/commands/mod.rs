@@ -4,10 +4,10 @@ use crate::diagnostics::{DeprecatedArgument, DeprecatedConfigurationFile};
 use crate::execute::Stdin;
 use crate::logging::LoggingKind;
 use crate::{CliDiagnostic, CliSession, LoggingLevel, VERSION};
+use biome_configuration::analyzer::RuleSelector;
 use biome_configuration::css::PartialCssLinter;
 use biome_configuration::javascript::PartialJavascriptLinter;
 use biome_configuration::json::PartialJsonLinter;
-use biome_configuration::linter::RuleSelector;
 use biome_configuration::{
     css::partial_css_formatter, css::partial_css_linter, graphql::partial_graphql_formatter,
     graphql::partial_graphql_linter, javascript::partial_javascript_formatter,
@@ -120,6 +120,11 @@ pub enum BiomeCommand {
             hide_usage
         )]
         organize_imports_enabled: Option<bool>,
+
+        /// Allow to enable or disable the assists.
+        #[bpaf(long("assists-enabled"), argument("true|false"), optional)]
+        assists_enabled: Option<bool>,
+
         #[bpaf(external(partial_configuration), hide_usage, optional)]
         configuration: Option<PartialConfiguration>,
         #[bpaf(external, hide_usage)]
@@ -311,6 +316,10 @@ pub enum BiomeCommand {
         /// Allow to enable or disable the organize imports.
         #[bpaf(long("organize-imports-enabled"), argument("true|false"), optional)]
         organize_imports_enabled: Option<bool>,
+
+        /// Allow to enable or disable the assists.
+        #[bpaf(long("assists-enabled"), argument("true|false"), optional)]
+        assists_enabled: Option<bool>,
 
         #[bpaf(external(partial_configuration), hide_usage, optional)]
         configuration: Option<PartialConfiguration>,

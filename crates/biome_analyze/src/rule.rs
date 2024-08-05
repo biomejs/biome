@@ -494,7 +494,7 @@ macro_rules! declare_rule {
 /// Check [crate](module documentation) for a better
 /// understanding of how the macro works
 #[macro_export]
-macro_rules! declare_refactor_rule {
+macro_rules! declare_source_rule {
     ( $( #[doc = $doc:literal] )+ $vis:vis $id:ident {
         version: $version:literal,
         name: $name:tt,
@@ -515,7 +515,7 @@ macro_rules! declare_refactor_rule {
         /// This macro returns the corresponding [ActionCategory] to use inside the [RuleAction]
         #[allow(unused_macros)]
         macro_rules! rule_action_category {
-            () => { ActionCategory::Refactor(RefactorKind::Other(Cow::Borrowed(concat!($language, ".", $name) )))  };
+            () => { ActionCategory::Source(SourceActionKind::Other(Cow::Borrowed(concat!($language, ".", $name) )))  };
         }
     };
 }

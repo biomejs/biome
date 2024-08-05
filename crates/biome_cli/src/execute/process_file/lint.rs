@@ -32,7 +32,16 @@ pub(crate) fn lint_with_guard<'ctx>(
             if let Some(fix_mode) = ctx.execution.as_fix_file_mode() {
                 let fix_result = workspace_file
                     .guard()
-                    .fix_file(*fix_mode, false, only.clone(), skip.clone())
+                    .fix_file(
+                        *fix_mode,
+                        false,
+                        RuleCategoriesBuilder::default()
+                            .with_syntax()
+                            .with_lint()
+                            .build(),
+                        only.clone(),
+                        skip.clone(),
+                    )
                     .with_file_path_and_code(
                         workspace_file.path.display().to_string(),
                         category!("lint"),

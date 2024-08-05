@@ -4,19 +4,30 @@
 /crates/biome_cli/src/execute/migrate/eslint_any_rule_to_biome.rs linguist-generated=true text=auto eol=lf
 /crates/biome_configuration/src/generated.rs linguist-generated=true text=auto eol=lf
 /crates/biome_configuration/src/linter/rules.rs linguist-generated=true text=auto eol=lf
+/crates/biome_configuration/src/assists/rules.rs linguist-generated=true text=auto eol=lf
 /crates/biome_configuration/src/parse/json/rules.rs linguist-generated=true text=auto eol=lf
-/crates/biome_css_analyze/src/lint.rs linguist-generated=true text=auto eol=lf
-/crates/biome_css_analyze/src/lint/*.rs linguist-generated=true text=auto eol=lf
+# GraphQL
+/crates/biome_graphql_analyze/src/{lint,assists,syntax}.rs linguist-generated=true text=auto eol=lf
+/crates/biome_graphql_analyze/src/{lint,assists,syntax}/*.rs linguist-generated=true text=auto eol=lf
+/crates/biome_graphql_analyze/src/options.rs linguist-generated=true text=auto eol=lf
+/crates/biome_graphql_analyze/src/registry.rs linguist-generated=true text=auto eol=lf
+# CSS
+/crates/biome_css_analyze/src/{lint,assists,syntax}.rs linguist-generated=true text=auto eol=lf
+/crates/biome_css_analyze/src/{lint,assists,syntax}/*.rs linguist-generated=true text=auto eol=lf
 /crates/biome_css_analyze/src/options.rs linguist-generated=true text=auto eol=lf
 /crates/biome_css_analyze/src/registry.rs linguist-generated=true text=auto eol=lf
-/crates/biome_js_analyze/src/assists.rs linguist-generated=true text=auto eol=lf
-/crates/biome_js_analyze/src/assists/*.rs linguist-generated=true text=auto eol=lf
-/crates/biome_js_analyze/src/lint.rs linguist-generated=true text=auto eol=lf
-/crates/biome_js_analyze/src/lint/*.rs linguist-generated=true text=auto eol=lf
+# JSON
+/crates/biome_json_analyze/src/{lint,assists,syntax}.rs linguist-generated=true text=auto eol=lf
+/crates/biome_json_analyze/src/{lint,assists,syntax}/*.rs linguist-generated=true text=auto eol=lf
 /crates/biome_js_analyze/src/options.rs linguist-generated=true text=auto eol=lf
 /crates/biome_js_analyze/src/registry.rs linguist-generated=true text=auto eol=lf
-/crates/biome_js_analyze/src/syntax.rs linguist-generated=true text=auto eol=lf
-/crates/biome_js_analyze/src/syntax/*.rs linguist-generated=true text=auto eol=lf
+# JS
+/crates/biome_js_analyze/src/{lint,assists,syntax}.rs linguist-generated=true text=auto eol=lf
+/crates/biome_js_analyze/src/{lint,assists,syntax}/*.rs linguist-generated=true text=auto eol=lf
+/crates/biome_js_analyze/src/options.rs linguist-generated=true text=auto eol=lf
+/crates/biome_js_analyze/src/registry.rs linguist-generated=true text=auto eol=lf
+
+# Other
 /crates/biome_unicode_table/src/tables.rs linguist-generated=true text=auto eol=lf
 /packages/@biomejs/backend-jsonrpc/src/workspace.ts linguist-generated=true text=auto eol=lf
 /packages/@biomejs/biome/configuration_schema.json linguist-generated=true text=auto eol=lf

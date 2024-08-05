@@ -8,6 +8,13 @@
 			"description": "A field for the [JSON schema](https://json-schema.org/) specification",
 			"type": ["string", "null"]
 		},
+		"assists": {
+			"description": "Specific configuration for assists",
+			"anyOf": [
+				{ "$ref": "#/definitions/AssistsConfiguration" },
+				{ "type": "null" }
+			]
+		},
 		"css": {
 			"description": "Specific configuration for the Css language",
 			"anyOf": [
@@ -304,7 +311,38 @@
 			},
 			"additionalProperties": false
 		},
+		"Actions": {
+			"type": "object",
+			"properties": {
+				"source": {
+					"anyOf": [{ "$ref": "#/definitions/Source" }, { "type": "null" }]
+				}
+			},
+			"additionalProperties": false
+		},
 		"ArrowParentheses": { "type": "string", "enum": ["always", "asNeeded"] },
+		"AssistsConfiguration": {
+			"type": "object",
+			"properties": {
+				"actions": {
+					"description": "Whether Biome should fail in CLI if the assists were not applied to the code.",
+					"anyOf": [{ "$ref": "#/definitions/Actions" }, { "type": "null" }]
+				},
+				"enabled": {
+					"description": "Whether Biome should enable assists via LSP.",
+					"type": ["boolean", "null"]
+				},
+				"ignore": {
+					"description": "A list of Unix shell style patterns. The formatter will ignore files/folders that will match these patterns.",
+					"anyOf": [{ "$ref": "#/definitions/StringSet" }, { "type": "null" }]
+				},
+				"include": {
+					"description": "A list of Unix shell style patterns. The formatter will include files/folders that will match these patterns.",
+					"anyOf": [{ "$ref": "#/definitions/StringSet" }, { "type": "null" }]
+				}
+			},
+			"additionalProperties": false
+		},
 		"AttributePosition": { "type": "string", "enum": ["auto", "multiline"] },
 		"BracketSpacing": { "type": "boolean" },
 		"Complexity": {
@@ -893,10 +931,25 @@
 			},
 			"additionalProperties": false
 		},
+		"CssAssists": {
+			"description": "Options that changes how the CSS assists behaves",
+			"type": "object",
+			"properties": {
+				"enabled": {
+					"description": "Control the assists for CSS files.",
+					"type": ["boolean", "null"]
+				}
+			},
+			"additionalProperties": false
+		},
 		"CssConfiguration": {
 			"description": "Options applied to CSS files",
 			"type": "object",
 			"properties": {
+				"assists": {
+					"description": "CSS assists options",
+					"anyOf": [{ "$ref": "#/definitions/CssAssists" }, { "type": "null" }]
+				},
 				"formatter": {
 					"description": "CSS formatter options",
 					"anyOf": [
@@ -954,7 +1007,7 @@
 			"type": "object",
 			"properties": {
 				"enabled": {
-					"description": "Control the linter for CSS (and its super languages) files.",
+					"description": "Control the linter for CSS files.",
 					"type": ["boolean", "null"]
 				}
 			},
@@ -1274,10 +1327,28 @@
 			"additionalProperties": false
 		},
 		"IndentWidth": { "type": "integer", "format": "uint8", "minimum": 0.0 },
+		"JavascriptAssists": {
+			"description": "Linter options specific to the JavaScript linter",
+			"type": "object",
+			"properties": {
+				"enabled": {
+					"description": "Control the linter for JavaScript (and its super languages) files.",
+					"type": ["boolean", "null"]
+				}
+			},
+			"additionalProperties": false
+		},
 		"JavascriptConfiguration": {
 			"description": "A set of options applied to the JavaScript files",
 			"type": "object",
 			"properties": {
+				"assists": {
+					"description": "Assists options",
+					"anyOf": [
+						{ "$ref": "#/definitions/JavascriptAssists" },
+						{ "type": "null" }
+					]
+				},
 				"formatter": {
 					"description": "Formatting options",
 					"anyOf": [
@@ -1434,10 +1505,25 @@
 			},
 			"additionalProperties": false
 		},
+		"JsonAssists": {
+			"description": "Linter options specific to the JSON linter",
+			"type": "object",
+			"properties": {
+				"enabled": {
+					"description": "Control the linter for JSON (and its super languages) files.",
+					"type": ["boolean", "null"]
+				}
+			},
+			"additionalProperties": false
+		},
 		"JsonConfiguration": {
 			"description": "Options applied to JSON files",
 			"type": "object",
 			"properties": {
+				"assists": {
+					"description": "Assists options",
+					"anyOf": [{ "$ref": "#/definitions/JsonAssists" }, { "type": "null" }]
+				},
 				"formatter": {
 					"description": "Formatting options",
 					"anyOf": [
@@ -2429,6 +2515,7 @@
 			"type": "string",
 			"enum": ["abstract", "private", "protected", "readonly", "static"]
 		},
+		"RuleAssistConfiguration": { "type": "string", "enum": ["on", "off"] },
 		"RuleConfiguration": {
 			"anyOf": [
 				{ "$ref": "#/definitions/RulePlainConfiguration" },
@@ -2780,6 +2867,20 @@
 			"additionalProperties": false
 		},
 		"Semicolons": { "type": "string", "enum": ["always", "asNeeded"] },
+		"Source": {
+			"description": "A list of rules that belong to this group",
+			"type": "object",
+			"properties": {
+				"useSortedKeys": {
+					"description": "Sorts the keys of a JSON object in natural order",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleAssistConfiguration" },
+						{ "type": "null" }
+					]
+				}
+			},
+			"additionalProperties": false
+		},
 		"StableHookResult": {
 			"oneOf": [
 				{

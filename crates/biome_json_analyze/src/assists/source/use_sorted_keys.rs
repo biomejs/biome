@@ -1,7 +1,7 @@
 use crate::JsonRuleAction;
 use biome_analyze::{
-    context::RuleContext, declare_refactor_rule, ActionCategory, Ast, RefactorKind, Rule,
-    RuleAction,
+    context::RuleContext, declare_source_rule, ActionCategory, Ast, Rule, RuleAction,
+    SourceActionKind,
 };
 use biome_console::markup;
 use biome_diagnostics::Applicability;
@@ -12,7 +12,7 @@ use std::borrow::Cow;
 use std::cmp::Ordering;
 use std::collections::BTreeSet;
 
-declare_refactor_rule! {
+declare_source_rule! {
     /// Sorts the keys of a JSON object in natural order
     pub UseSortedKeys {
         version: "next",

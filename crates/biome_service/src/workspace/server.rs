@@ -341,8 +341,11 @@ impl WorkspaceServer {
                     &organize_imports.ignored_files,
                 )
             }
+            FeatureKind::Assists => {
+                let assists = &settings.assists;
+                (&assists.included_files, &assists.ignored_files)
+            }
             // TODO: enable once the configuration is available
-            FeatureKind::Assists => return false,
             FeatureKind::Search => return false, // There is no search-specific config.
         };
         let is_feature_included = feature_included_files.is_empty()
@@ -389,13 +392,13 @@ impl Workspace for WorkspaceServer {
                 }
             }
         }
-
         // If the file is not ignored by at least one feature, then check that the file is not protected.
         //
         // Protected files must be ignored.
         if !file_features.is_not_processed() && FileFeaturesResult::is_protected_file(path) {
             file_features.set_protected_for_all_features();
         }
+
         Ok(file_features)
     }
     fn is_path_ignored(&self, params: IsPathIgnoredParams) -> Result<bool, WorkspaceError> {
@@ -651,10 +654,6 @@ impl Workspace for WorkspaceServer {
         let workspace = self.workspace();
         let manifest = self.get_current_project()?.map(|pr| pr.manifest);
         let language = self.get_file_source(&params.path);
-        let settings = workspace.settings();
-        let Some(settings) = settings else {
-            return Ok(PullActionsResult { actions: vec![] });
-        };
         Ok(code_actions(CodeActionsParams {
             parse,
             range: params.range,
@@ -662,7 +661,8 @@ impl Workspace for WorkspaceServer {
             path: &params.path,
             manifest,
             language,
-            settings,
+            only: params.only,
+            skip: params.skip,
         }))
     }
 
@@ -761,6 +761,7 @@ impl Workspace for WorkspaceServer {
             document_file_source: language,
             only: params.only,
             skip: params.skip,
+            rule_categories: params.rule_categories,
         })
     }
 

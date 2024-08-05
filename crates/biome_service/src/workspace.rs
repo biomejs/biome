@@ -58,7 +58,7 @@ use crate::settings::Settings;
 use crate::{Deserialize, Serialize, WorkspaceError};
 use biome_analyze::ActionCategory;
 pub use biome_analyze::RuleCategories;
-use biome_configuration::linter::RuleSelector;
+use biome_configuration::analyzer::RuleSelector;
 use biome_configuration::PartialConfiguration;
 use biome_console::{markup, Markup, MarkupBuf};
 use biome_diagnostics::CodeSuggestion;
@@ -120,11 +120,12 @@ impl FileFeaturesResult {
     }
 
     /// By default, all features are not supported by a file.
-    const WORKSPACE_FEATURES: [(FeatureKind, SupportKind); 4] = [
+    const WORKSPACE_FEATURES: [(FeatureKind, SupportKind); 5] = [
         (FeatureKind::Lint, SupportKind::FileNotSupported),
         (FeatureKind::Format, SupportKind::FileNotSupported),
         (FeatureKind::OrganizeImports, SupportKind::FileNotSupported),
         (FeatureKind::Search, SupportKind::FileNotSupported),
+        (FeatureKind::Assists, SupportKind::FileNotSupported),
     ];
 
     pub fn new() -> Self {
@@ -146,6 +147,12 @@ impl FileFeaturesResult {
             self.features_supported
                 .insert(FeatureKind::OrganizeImports, SupportKind::Supported);
         }
+
+        if capabilities.analyzer.code_actions.is_some() {
+            self.features_supported
+                .insert(FeatureKind::Assists, SupportKind::Supported);
+        }
+
         if capabilities.search.search.is_some() {
             self.features_supported
                 .insert(FeatureKind::Search, SupportKind::Supported);
@@ -205,6 +212,17 @@ impl FileFeaturesResult {
         } else if !settings.organize_imports().enabled {
             self.features_supported
                 .insert(FeatureKind::OrganizeImports, SupportKind::FeatureNotEnabled);
+        }
+
+        // assists
+        if let Some(disabled) = settings.override_settings.assists_disabled(path) {
+            if disabled {
+                self.features_supported
+                    .insert(FeatureKind::Assists, SupportKind::FeatureNotEnabled);
+            }
+        } else if !settings.assists().enabled {
+            self.features_supported
+                .insert(FeatureKind::Assists, SupportKind::FeatureNotEnabled);
         }
 
         debug!(
@@ -439,6 +457,11 @@ impl FeaturesBuilder {
         self
     }
 
+    pub fn with_assists(mut self) -> Self {
+        self.0.insert(FeatureKind::Assists);
+        self
+    }
+
     pub fn build(self) -> FeatureName {
         FeatureName(self.0)
     }
@@ -555,7 +578,9 @@ pub struct PullDiagnosticsResult {
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub struct PullActionsParams {
     pub path: BiomePath,
-    pub range: TextRange,
+    pub range: Option<TextRange>,
+    pub only: Vec<RuleSelector>,
+    pub skip: Vec<RuleSelector>,
 }
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
@@ -610,6 +635,7 @@ pub struct FixFileParams {
     pub should_format: bool,
     pub only: Vec<RuleSelector>,
     pub skip: Vec<RuleSelector>,
+    pub rule_categories: RuleCategories,
 }
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
@@ -994,10 +1020,17 @@ impl<'app, W: Workspace + ?Sized> FileGuard<'app, W> {
         })
     }
 
-    pub fn pull_actions(&self, range: TextRange) -> Result<PullActionsResult, WorkspaceError> {
+    pub fn pull_actions(
+        &self,
+        range: Option<TextRange>,
+        only: Vec<RuleSelector>,
+        skip: Vec<RuleSelector>,
+    ) -> Result<PullActionsResult, WorkspaceError> {
         self.workspace.pull_actions(PullActionsParams {
             path: self.path.clone(),
             range,
+            only,
+            skip,
         })
     }
 
@@ -1025,6 +1058,7 @@ impl<'app, W: Workspace + ?Sized> FileGuard<'app, W> {
         &self,
         fix_file_mode: FixFileMode,
         should_format: bool,
+        rule_categories: RuleCategories,
         only: Vec<RuleSelector>,
         skip: Vec<RuleSelector>,
     ) -> Result<FixFileResult, WorkspaceError> {
@@ -1034,6 +1068,7 @@ impl<'app, W: Workspace + ?Sized> FileGuard<'app, W> {
             should_format,
             only,
             skip,
+            rule_categories,
         })
     }
 

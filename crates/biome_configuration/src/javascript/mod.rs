@@ -24,6 +24,10 @@ pub struct JavascriptConfiguration {
     #[partial(type, bpaf(external(partial_javascript_linter), optional))]
     pub linter: JavascriptLinter,
 
+    /// Assists options
+    #[partial(type, bpaf(external(partial_javascript_assists), optional))]
+    pub assists: JavascriptAssists,
+
     /// Parsing options
     #[partial(type, bpaf(external(partial_javascript_parser), optional))]
     pub parser: JavascriptParser,
@@ -116,6 +120,31 @@ impl Default for JavascriptLinter {
 impl PartialJavascriptLinter {
     pub fn get_linter_configuration(&self) -> JavascriptLinter {
         JavascriptLinter {
+            enabled: self.enabled.unwrap_or_default(),
+        }
+    }
+}
+
+/// Linter options specific to the JavaScript linter
+#[derive(Clone, Debug, Deserialize, Eq, Partial, PartialEq, Serialize)]
+#[partial(derive(Bpaf, Clone, Deserializable, Eq, Merge, PartialEq))]
+#[partial(cfg_attr(feature = "schema", derive(schemars::JsonSchema)))]
+#[partial(serde(rename_all = "camelCase", default, deny_unknown_fields))]
+pub struct JavascriptAssists {
+    /// Control the linter for JavaScript (and its super languages) files.
+    #[partial(bpaf(long("javascript-assists-enabled"), argument("true|false"), optional))]
+    pub enabled: bool,
+}
+
+impl Default for JavascriptAssists {
+    fn default() -> Self {
+        Self { enabled: true }
+    }
+}
+
+impl PartialJavascriptAssists {
+    pub fn get_linter_configuration(&self) -> JavascriptAssists {
+        JavascriptAssists {
             enabled: self.enabled.unwrap_or_default(),
         }
     }

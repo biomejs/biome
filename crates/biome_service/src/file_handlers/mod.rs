@@ -18,7 +18,7 @@ use biome_analyze::{
     AnalyzerDiagnostic, GroupCategory, Queryable, RegistryVisitor, Rule, RuleCategories,
     RuleCategory, RuleFilter, RuleGroup,
 };
-use biome_configuration::linter::RuleSelector;
+use biome_configuration::analyzer::RuleSelector;
 use biome_configuration::Rules;
 use biome_console::fmt::Formatter;
 use biome_console::markup;
@@ -336,8 +336,6 @@ impl biome_console::fmt::Display for DocumentFileSource {
 
 pub struct FixAllParams<'a> {
     pub(crate) parse: AnyParse,
-    // pub(crate) rules: Option<&'a Rules>,
-    // pub(crate) filter: AnalysisFilter<'a>,
     pub(crate) fix_file_mode: FixFileMode,
     pub(crate) workspace: WorkspaceSettingsHandle<'a>,
     /// Whether it should format the code action
@@ -347,6 +345,7 @@ pub struct FixAllParams<'a> {
     pub(crate) document_file_source: DocumentFileSource,
     pub(crate) only: Vec<RuleSelector>,
     pub(crate) skip: Vec<RuleSelector>,
+    pub(crate) rule_categories: RuleCategories,
 }
 
 #[derive(Default)]
@@ -414,12 +413,13 @@ pub(crate) struct LintResults {
 
 pub(crate) struct CodeActionsParams<'a> {
     pub(crate) parse: AnyParse,
-    pub(crate) range: TextRange,
+    pub(crate) range: Option<TextRange>,
     pub(crate) workspace: &'a WorkspaceSettingsHandle<'a>,
     pub(crate) path: &'a BiomePath,
     pub(crate) manifest: Option<PackageJson>,
     pub(crate) language: DocumentFileSource,
-    pub(crate) settings: &'a Settings,
+    pub(crate) only: Vec<RuleSelector>,
+    pub(crate) skip: Vec<RuleSelector>,
 }
 
 type Lint = fn(LintParams) -> LintResults;
@@ -438,7 +438,7 @@ pub struct AnalyzerCapabilities {
     pub(crate) fix_all: Option<FixAll>,
     /// It renames a binding inside a file
     pub(crate) rename: Option<Rename>,
-    /// It organize imports
+    /// It organizes imports
     pub(crate) organize_imports: Option<OrganizeImports>,
 }
 
@@ -655,7 +655,7 @@ fn test_svelte_script_lang() {
 /// When a new language is introduced, it must be implemented it. Syntax rules aren't negotiable via configuration, so it's safe
 /// to pull all of them.
 #[derive(Default, Debug)]
-pub(crate) struct SyntaxVisitor<'a> {
+struct SyntaxVisitor<'a> {
     pub(crate) enabled_rules: Vec<RuleFilter<'a>>,
 }
 
@@ -737,7 +737,7 @@ impl<'a> RegistryVisitor<GraphqlLanguage> for SyntaxVisitor<'a> {
 /// Type meant to register all the lint rules for each language supported by Biome
 ///
 #[derive(Debug)]
-pub(crate) struct LintVisitor<'a, 'b> {
+struct LintVisitor<'a, 'b> {
     pub(crate) enabled_rules: Vec<RuleFilter<'a>>,
     pub(crate) disabled_rules: Vec<RuleFilter<'a>>,
     // lint_params: &'b LintParams<'a>,
@@ -768,7 +768,7 @@ impl<'a, 'b> LintVisitor<'a, 'b> {
         let has_only_filter = !self.only.is_empty();
         let enabled_rules = if !has_only_filter {
             self.settings
-                .and_then(|settings| settings.as_rules(self.path))
+                .and_then(|settings| settings.as_linter_rules(self.path))
                 .as_ref()
                 .map(|rules| rules.as_enabled_rules())
                 .unwrap_or_default()
@@ -921,25 +921,83 @@ impl<'a, 'b> RegistryVisitor<GraphqlLanguage> for LintVisitor<'a, 'b> {
     }
 }
 
-struct ActionVisitor<'a, 'b> {
+struct AssistsVisitor<'a, 'b> {
     settings: Option<&'b Settings>,
-    rule_categories: &'b RuleCategories,
-    pub(crate) enabled_rules: Vec<RuleFilter<'a>>,
+    enabled_rules: Vec<RuleFilter<'a>>,
+    disabled_rules: Vec<RuleFilter<'a>>,
     import_sorting: RuleFilter<'a>,
+    path: &'b Path,
+    only: &'b Vec<RuleSelector>,
+    skip: &'b Vec<RuleSelector>,
 }
 
-impl<'a, 'b> ActionVisitor<'a, 'b> {
-    pub(crate) fn new(settings: Option<&'b Settings>, rule_categories: &'b RuleCategories) -> Self {
+impl<'a, 'b> AssistsVisitor<'a, 'b> {
+    pub(crate) fn new(
+        only: &'b Vec<RuleSelector>,
+        skip: &'b Vec<RuleSelector>,
+        settings: Option<&'b Settings>,
+        path: &'b Path,
+    ) -> Self {
         Self {
             enabled_rules: vec![],
+            disabled_rules: vec![],
             settings,
-            rule_categories,
-            import_sorting: RuleFilter::Rule("correctness", "organizeImports"),
+            import_sorting: RuleFilter::Rule("source", "organizeImports"),
+            path,
+            only,
+            skip,
         }
+    }
+
+    pub(crate) fn push_rule<R, L>(&mut self)
+    where
+        R: Rule<Options: Default, Query: Queryable<Language = L, Output: Clone>> + 'static,
+    {
+        // We deem refactors **safe**, other assists aren't safe
+        if R::Group::NAME != "source" {
+            return;
+        }
+
+        let organize_imports_enabled = self
+            .settings
+            .map(|settings| settings.organize_imports.enabled)
+            .unwrap_or_default();
+        if organize_imports_enabled && self.import_sorting.match_rule::<R>() {
+            self.enabled_rules.push(self.import_sorting);
+            return;
+        }
+        // Do not report unused suppression comment diagnostics if:
+        // - it is a syntax-only analyzer pass, or
+        // - if a single rule is run.
+        for selector in self.only {
+            let filter = RuleFilter::from(selector);
+            if filter.match_rule::<R>() {
+                self.enabled_rules.push(filter)
+            }
+        }
+        for selector in self.skip {
+            let filter = RuleFilter::from(selector);
+            if filter.match_rule::<R>() {
+                self.disabled_rules.push(filter)
+            }
+        }
+    }
+
+    fn finish(mut self) -> (Vec<RuleFilter<'a>>, Vec<RuleFilter<'a>>) {
+        let enabled_rules = self
+            .settings
+            .and_then(|settings| settings.as_assists_rules(self.path))
+            .as_ref()
+            .map(|rules| rules.as_enabled_rules())
+            .unwrap_or_default()
+            .into_iter()
+            .collect::<Vec<_>>();
+        self.enabled_rules.extend(enabled_rules);
+        (self.enabled_rules, self.disabled_rules)
     }
 }
 
-impl<'a, 'b> RegistryVisitor<JsLanguage> for ActionVisitor<'a, 'b> {
+impl<'a, 'b> RegistryVisitor<JsLanguage> for AssistsVisitor<'a, 'b> {
     fn record_category<C: GroupCategory<Language = JsLanguage>>(&mut self) {
         if C::CATEGORY == RuleCategory::Action {
             C::record_groups(self)
@@ -950,20 +1008,11 @@ impl<'a, 'b> RegistryVisitor<JsLanguage> for ActionVisitor<'a, 'b> {
     where
         R: Rule<Options: Default, Query: Queryable<Language = JsLanguage, Output: Clone>> + 'static,
     {
-        let organize_imports_enabled = self
-            .settings
-            .map(|settings| settings.organize_imports.enabled)
-            .unwrap_or_default();
-        if organize_imports_enabled
-            && !self.rule_categories.is_syntax()
-            && self.import_sorting.match_rule::<R>()
-        {
-            self.enabled_rules.push(self.import_sorting);
-        }
+        self.push_rule::<R, <R::Query as Queryable>::Language>();
     }
 }
 
-impl<'a, 'b> RegistryVisitor<JsonLanguage> for ActionVisitor<'a, 'b> {
+impl<'a, 'b> RegistryVisitor<JsonLanguage> for AssistsVisitor<'a, 'b> {
     fn record_category<C: GroupCategory<Language = JsonLanguage>>(&mut self) {
         if C::CATEGORY == RuleCategory::Action {
             C::record_groups(self)
@@ -975,12 +1024,11 @@ impl<'a, 'b> RegistryVisitor<JsonLanguage> for ActionVisitor<'a, 'b> {
         R: Rule<Options: Default, Query: Queryable<Language = JsonLanguage, Output: Clone>>
             + 'static,
     {
-        self.enabled_rules
-            .push(RuleFilter::Rule(R::Group::NAME, R::METADATA.name))
+        self.push_rule::<R, <R::Query as Queryable>::Language>();
     }
 }
 
-impl<'a, 'b> RegistryVisitor<CssLanguage> for ActionVisitor<'a, 'b> {
+impl<'a, 'b> RegistryVisitor<CssLanguage> for AssistsVisitor<'a, 'b> {
     fn record_category<C: GroupCategory<Language = CssLanguage>>(&mut self) {
         if C::CATEGORY == RuleCategory::Action {
             C::record_groups(self)
@@ -992,12 +1040,11 @@ impl<'a, 'b> RegistryVisitor<CssLanguage> for ActionVisitor<'a, 'b> {
         R: Rule<Options: Default, Query: Queryable<Language = CssLanguage, Output: Clone>>
             + 'static,
     {
-        self.enabled_rules
-            .push(RuleFilter::Rule(R::Group::NAME, R::METADATA.name))
+        self.push_rule::<R, <R::Query as Queryable>::Language>();
     }
 }
 
-impl<'a, 'b> RegistryVisitor<GraphqlLanguage> for ActionVisitor<'a, 'b> {
+impl<'a, 'b> RegistryVisitor<GraphqlLanguage> for AssistsVisitor<'a, 'b> {
     fn record_category<C: GroupCategory<Language = GraphqlLanguage>>(&mut self) {
         if C::CATEGORY == RuleCategory::Action {
             C::record_groups(self)
@@ -1009,8 +1056,87 @@ impl<'a, 'b> RegistryVisitor<GraphqlLanguage> for ActionVisitor<'a, 'b> {
         R: Rule<Options: Default, Query: Queryable<Language = GraphqlLanguage, Output: Clone>>
             + 'static,
     {
-        self.enabled_rules
-            .push(RuleFilter::Rule(R::Group::NAME, R::METADATA.name))
+        self.push_rule::<R, <R::Query as Queryable>::Language>();
+    }
+}
+
+pub(crate) struct AnalyzerVisitorBuilder<'a, 'b> {
+    syntax: Option<SyntaxVisitor<'a>>,
+    lint: Option<LintVisitor<'a, 'b>>,
+    assists: Option<AssistsVisitor<'a, 'b>>,
+    settings: Option<&'b Settings>,
+}
+
+impl<'a, 'b> AnalyzerVisitorBuilder<'a, 'b> {
+    pub(crate) fn new(settings: Option<&'b Settings>) -> Self {
+        Self {
+            settings,
+            syntax: None,
+            lint: None,
+            assists: None,
+        }
+    }
+
+    #[must_use]
+    pub(crate) fn with_syntax_rules(mut self) -> Self {
+        self.syntax = Some(SyntaxVisitor::default());
+        self
+    }
+    #[must_use]
+    pub(crate) fn with_linter_rules(
+        mut self,
+        only: &'b Vec<RuleSelector>,
+        skip: &'b Vec<RuleSelector>,
+        path: &'b Path,
+    ) -> Self {
+        self.lint = Some(LintVisitor::new(only, skip, self.settings, path));
+        self
+    }
+
+    #[must_use]
+    pub(crate) fn with_assists_rules(
+        mut self,
+        only: &'b Vec<RuleSelector>,
+        skip: &'b Vec<RuleSelector>,
+        path: &'b Path,
+    ) -> Self {
+        self.assists = Some(AssistsVisitor::new(only, skip, self.settings, path));
+        self
+    }
+
+    #[must_use]
+    pub(crate) fn finish(self) -> (Vec<RuleFilter<'a>>, Vec<RuleFilter<'a>>) {
+        let mut disabled_rules = vec![];
+        let mut enabled_rules = vec![];
+        if let Some(mut syntax) = self.syntax {
+            biome_js_analyze::visit_registry(&mut syntax);
+            biome_css_analyze::visit_registry(&mut syntax);
+            biome_json_analyze::visit_registry(&mut syntax);
+            biome_graphql_analyze::visit_registry(&mut syntax);
+            enabled_rules.extend(syntax.enabled_rules);
+        }
+
+        if let Some(mut lint) = self.lint {
+            biome_js_analyze::visit_registry(&mut lint);
+            biome_css_analyze::visit_registry(&mut lint);
+            biome_json_analyze::visit_registry(&mut lint);
+            biome_graphql_analyze::visit_registry(&mut lint);
+            let (linter_enabled_rules, linter_disabled_rules) = lint.finish();
+            enabled_rules.extend(linter_enabled_rules);
+            disabled_rules.extend(linter_disabled_rules);
+        }
+
+        if let Some(mut assists) = self.assists {
+            biome_js_analyze::visit_registry(&mut assists);
+            biome_css_analyze::visit_registry(&mut assists);
+            biome_json_analyze::visit_registry(&mut assists);
+            biome_graphql_analyze::visit_registry(&mut assists);
+            let (assists_enabled_rules, assists_disabled_rules) = assists.finish();
+            enabled_rules.extend(assists_enabled_rules);
+            disabled_rules.extend(assists_disabled_rules);
+        }
+
+        (enabled_rules, disabled_rules)
     }
 }
 
