@@ -9,14 +9,8 @@
           "options": {
             "paths": {
               "eslint": {
-                "message": "Importing Eslint is forbidden"
-              },
-              "lodash": {
-                "message": "It's not recommended to use lodash"
-              },
-              "antd": {
-                "message": "It's not recommended to use any submodule of antd",
-                "includeAllSubmodules": true
+                "message": "Importing Eslint is forbidden",
+                "allowedFrom": ["noRestrictedImports"]
               }
             }
           }
