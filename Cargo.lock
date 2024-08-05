@@ -119,7 +119,7 @@ dependencies = [
  "biome_diagnostics",
  "biome_rowan",
  "enumflags2",
- "rustc-hash",
+ "rustc-hash 1.1.0",
  "schemars",
  "serde",
  "tracing",
@@ -130,7 +130,7 @@ name = "biome_aria"
 version = "0.5.7"
 dependencies = [
  "biome_aria_metadata",
- "rustc-hash",
+ "rustc-hash 1.1.0",
 ]
 
 [[package]]
@@ -168,7 +168,7 @@ dependencies = [
  "biome_text_edit",
  "bpaf",
  "crossbeam",
- "dashmap",
+ "dashmap 5.5.3",
  "hdrhistogram",
  "indexmap 2.3.0",
  "insta",
@@ -178,7 +178,7 @@ dependencies = [
  "quick-junit",
  "rayon",
  "regex",
- "rustc-hash",
+ "rustc-hash 1.1.0",
  "serde",
  "serde_json",
  "smallvec",
@@ -217,7 +217,7 @@ dependencies = [
  "indexmap 2.3.0",
  "insta",
  "oxc_resolver",
- "rustc-hash",
+ "rustc-hash 1.1.0",
  "schemars",
  "serde",
  "serde_ini",
@@ -243,7 +243,7 @@ name = "biome_control_flow"
 version = "0.5.7"
 dependencies = [
  "biome_rowan",
- "rustc-hash",
+ "rustc-hash 1.1.0",
 ]
 
 [[package]]
@@ -263,7 +263,7 @@ dependencies = [
  "insta",
  "lazy_static",
  "regex",
- "rustc-hash",
+ "rustc-hash 1.1.0",
  "schemars",
  "serde",
  "tests_macros",
@@ -421,7 +421,7 @@ dependencies = [
  "drop_bomb",
  "indexmap 2.3.0",
  "insta",
- "rustc-hash",
+ "rustc-hash 1.1.0",
  "schemars",
  "serde",
  "tracing",
@@ -459,7 +459,7 @@ dependencies = [
  "oxc_resolver",
  "parking_lot",
  "rayon",
- "rustc-hash",
+ "rustc-hash 1.1.0",
  "schemars",
  "serde",
  "tracing",
@@ -541,7 +541,7 @@ dependencies = [
  "biome_graphql_parser",
  "biome_graphql_syntax",
  "biome_rowan",
- "rustc-hash",
+ "rustc-hash 1.1.0",
 ]
 
 [[package]]
@@ -607,7 +607,7 @@ dependencies = [
  "insta",
  "path-absolutize",
  "regex",
- "rustc-hash",
+ "rustc-hash 1.1.0",
  "serde",
  "tests_macros",
 ]
@@ -686,7 +686,7 @@ dependencies = [
  "natord",
  "regex",
  "roaring",
- "rustc-hash",
+ "rustc-hash 1.1.0",
  "schemars",
  "serde",
  "smallvec",
@@ -749,7 +749,7 @@ dependencies = [
  "indexmap 2.3.0",
  "quickcheck",
  "quickcheck_macros",
- "rustc-hash",
+ "rustc-hash 1.1.0",
  "schemars",
  "serde",
  "serde_json",
@@ -768,7 +768,7 @@ dependencies = [
  "biome_js_syntax",
  "biome_rowan",
  "rust-lapper",
- "rustc-hash",
+ "rustc-hash 1.1.0",
 ]
 
 [[package]]
@@ -815,7 +815,7 @@ dependencies = [
  "insta",
  "lazy_static",
  "natord",
- "rustc-hash",
+ "rustc-hash 1.1.0",
  "tests_macros",
 ]
 
@@ -892,7 +892,7 @@ dependencies = [
  "biome_service",
  "biome_text_edit",
  "futures",
- "rustc-hash",
+ "rustc-hash 1.1.0",
  "serde",
  "serde_json",
  "tokio",
@@ -925,7 +925,7 @@ dependencies = [
  "biome_test_utils",
  "insta",
  "lazy_static",
- "rustc-hash",
+ "rustc-hash 1.1.0",
  "tests_macros",
 ]
 
@@ -957,7 +957,7 @@ dependencies = [
  "biome_text_size",
  "insta",
  "node-semver",
- "rustc-hash",
+ "rustc-hash 1.1.0",
  "serde",
  "tests_macros",
 ]
@@ -973,7 +973,7 @@ dependencies = [
  "iai",
  "quickcheck",
  "quickcheck_macros",
- "rustc-hash",
+ "rustc-hash 1.1.0",
  "serde",
  "serde_json",
  "tracing",
@@ -1016,7 +1016,7 @@ dependencies = [
  "biome_rowan",
  "biome_text_edit",
  "bpaf",
- "dashmap",
+ "dashmap 5.5.3",
  "enumflags2",
  "getrandom 0.2.15",
  "ignore",
@@ -1025,7 +1025,7 @@ dependencies = [
  "lazy_static",
  "oxc_resolver",
  "regex",
- "rustc-hash",
+ "rustc-hash 1.1.0",
  "schemars",
  "serde",
  "serde_json",
@@ -1329,12 +1329,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "cd7cc57abe963c6d3b9d8be5b06ba7c8957a930305ca90304f24ef040aa6f961"
 
 [[package]]
-name = "clean-path"
-version = "0.2.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "aaa6b4b263a5d737e9bf6b7c09b72c41a5480aec4d7219af827f6564e950b6a5"
-
-[[package]]
 name = "codspeed"
 version = "2.6.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1395,9 +1389,9 @@ version = "3.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7704b5fdd17b18ae31c4c1da5a2e0305a2bf17b5249300a9ee9ed7b72114c636"
 dependencies = [
- "dashmap",
+ "dashmap 5.5.3",
  "once_cell",
- "rustc-hash",
+ "rustc-hash 1.1.0",
 ]
 
 [[package]]
@@ -1554,6 +1548,20 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "978747c1d849a7d2ee5e8adc0159961c48fb7e5db2f06af6723b80123bb53856"
 dependencies = [
  "cfg-if",
+ "hashbrown 0.14.3",
+ "lock_api",
+ "once_cell",
+ "parking_lot_core",
+]
+
+[[package]]
+name = "dashmap"
+version = "6.0.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "804c8821570c3f8b70230c2ba75ffa5c0f9a4189b9a432b6656c536712acae28"
+dependencies = [
+ "cfg-if",
+ "crossbeam-utils",
  "hashbrown 0.14.3",
  "lock_api",
  "once_cell",
@@ -2526,20 +2534,20 @@ checksum = "c1b04fb49957986fdce4d6ee7a65027d55d4b6d2265e5848bbb507b58ccfdb6f"
 
 [[package]]
 name = "oxc_resolver"
-version = "1.8.1"
+version = "1.10.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ebd177c1f521d3c6631fa96abb6d97220ce4bed102e1e0172b11496ed9442fae"
+checksum = "b5f862ee8e1ba728378ac7e007de195ae00fbb21337ef152380c052cc07e2ee2"
 dependencies = [
- "dashmap",
+ "dashmap 6.0.1",
  "dunce",
+ "indexmap 2.3.0",
  "json-strip-comments",
  "once_cell",
- "rustc-hash",
+ "rustc-hash 2.0.0",
  "serde",
  "serde_json",
  "thiserror",
  "tracing",
- "typescript_tsconfig_json",
 ]
 
 [[package]]
@@ -3063,6 +3071,12 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "08d43f7aa6b08d49f382cde6a7982047c3426db949b1424bc4b7ec9ae12c6ce2"
 
 [[package]]
+name = "rustc-hash"
+version = "2.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "583034fd73374156e66797ed8e5b0d5690409c9226b22d87cb7f19821c05d152"
+
+[[package]]
 name = "rustix"
 version = "0.37.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3454,18 +3468,18 @@ dependencies = [
 
 [[package]]
 name = "thiserror"
-version = "1.0.59"
+version = "1.0.63"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f0126ad08bff79f29fc3ae6a55cc72352056dfff61e3ff8bb7129476d44b23aa"
+checksum = "c0342370b38b6a11b6cc11d6a805569958d54cfa061a29969c3b5ce2ea405724"
 dependencies = [
  "thiserror-impl",
 ]
 
 [[package]]
 name = "thiserror-impl"
-version = "1.0.59"
+version = "1.0.63"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d1cd413b5d558b4c5bf3680e324a6fa5014e7b7c067a51e69dbdf47eb7148b66"
+checksum = "a4558b58466b9ad7ca0f102865eccc95938dca1a74a856f2b57b6629050da261"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -3665,7 +3679,7 @@ dependencies = [
  "async-trait",
  "auto_impl",
  "bytes",
- "dashmap",
+ "dashmap 5.5.3",
  "futures",
  "httparse",
  "lsp-types",
@@ -3814,19 +3828,6 @@ name = "typenum"
 version = "1.17.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "42ff0bf0c66b8238c6f3b578df37d0b7848e55df8577b3f74f92a69acceeb825"
-
-[[package]]
-name = "typescript_tsconfig_json"
-version = "0.1.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e7cc416eaf05297012ead9d192226fe9a92e9a20f64f8780efb9085aaae9b590"
-dependencies = [
- "clean-path",
- "indexmap 2.3.0",
- "rustc-hash",
- "serde",
- "serde_json",
-]
 
 [[package]]
 name = "unicase"
