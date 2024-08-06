@@ -16,3 +16,17 @@ function add(a: any, b: any): any {
 add(1, 1);
 
 function id(a = id(null)) { return a }
+
+// parameters are ignored
+{(function (a) { })}
+{(function ({a}) { })}
+{(function ([a]) { })}
+(function (a, b) {
+    console.log(b);
+});
+(function (a, b) {
+    console.log(a);
+});
+(function ({ a, b }) {
+	console.info(b);
+});

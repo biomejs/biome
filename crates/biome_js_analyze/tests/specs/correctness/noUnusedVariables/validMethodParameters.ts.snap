@@ -1,0 +1,12 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: validMethodParameters.ts
+---
+# Input
+```ts
+export class D {
+	constructor(a: number) {}
+	f(a: number) {}
+	set a(a: number) {}
+}
+```

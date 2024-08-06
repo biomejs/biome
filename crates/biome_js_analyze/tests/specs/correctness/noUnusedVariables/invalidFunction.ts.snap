@@ -19,19 +19,6 @@ function f3() {
     g();
 }
 
-// parameter a is not used
-{(function (a) { })}
-{(function ({a}) { })}
-{(function ([a]) { })}
-(function (a, b) {
-    console.log(b);
-})
-
-// parameter b is not used
-(function (a, b) {
-    console.log(a);
-})
-
 // f5 is not used
 const f5 = () => { };
 
@@ -94,195 +81,74 @@ invalidFunction.ts:9:10 lint/correctness/noUnusedVariables ━━━━━━━
 ```
 
 ```
-invalidFunction.ts:17:13 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! This parameter is unused.
-  
-    16 │ // parameter a is not used
-  > 17 │ {(function (a) { })}
-       │             ^
-    18 │ {(function ({a}) { })}
-    19 │ {(function ([a]) { })}
-  
-  i Unused variables usually are result of incomplete refactoring, typos and other source of bugs.
-  
-  i Unsafe fix: If this is intentional, prepend a with an underscore.
-  
-    15 15 │   
-    16 16 │   // parameter a is not used
-    17    │ - {(function·(a)·{·})}
-       17 │ + {(function·(_a)·{·})}
-    18 18 │   {(function ({a}) { })}
-    19 19 │   {(function ([a]) { })}
-  
-
-```
-
-```
-invalidFunction.ts:18:14 lint/correctness/noUnusedVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalidFunction.ts:17:7 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This variable is unused.
   
-    16 │ // parameter a is not used
-    17 │ {(function (a) { })}
-  > 18 │ {(function ({a}) { })}
-       │              ^
-    19 │ {(function ([a]) { })}
-    20 │ (function (a, b) {
-  
-  i Unused variables usually are result of incomplete refactoring, typos and other source of bugs.
-  
-
-```
-
-```
-invalidFunction.ts:19:14 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! This variable is unused.
-  
-    17 │ {(function (a) { })}
-    18 │ {(function ({a}) { })}
-  > 19 │ {(function ([a]) { })}
-       │              ^
-    20 │ (function (a, b) {
-    21 │     console.log(b);
-  
-  i Unused variables usually are result of incomplete refactoring, typos and other source of bugs.
-  
-  i Unsafe fix: If this is intentional, prepend a with an underscore.
-  
-    17 17 │   {(function (a) { })}
-    18 18 │   {(function ({a}) { })}
-    19    │ - {(function·([a])·{·})}
-       19 │ + {(function·([_a])·{·})}
-    20 20 │   (function (a, b) {
-    21 21 │       console.log(b);
-  
-
-```
-
-```
-invalidFunction.ts:20:12 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! This parameter is unused.
-  
-    18 │ {(function ({a}) { })}
-    19 │ {(function ([a]) { })}
-  > 20 │ (function (a, b) {
-       │            ^
-    21 │     console.log(b);
-    22 │ })
-  
-  i Unused variables usually are result of incomplete refactoring, typos and other source of bugs.
-  
-  i Unsafe fix: If this is intentional, prepend a with an underscore.
-  
-    18 18 │   {(function ({a}) { })}
-    19 19 │   {(function ([a]) { })}
-    20    │ - (function·(a,·b)·{
-       20 │ + (function·(_a,·b)·{
-    21 21 │       console.log(b);
-    22 22 │   })
-  
-
-```
-
-```
-invalidFunction.ts:25:15 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! This parameter is unused.
-  
-    24 │ // parameter b is not used
-  > 25 │ (function (a, b) {
-       │               ^
-    26 │     console.log(a);
-    27 │ })
-  
-  i Unused variables usually are result of incomplete refactoring, typos and other source of bugs.
-  
-  i Unsafe fix: If this is intentional, prepend b with an underscore.
-  
-    23 23 │   
-    24 24 │   // parameter b is not used
-    25    │ - (function·(a,·b)·{
-       25 │ + (function·(a,·_b)·{
-    26 26 │       console.log(a);
-    27 27 │   })
-  
-
-```
-
-```
-invalidFunction.ts:30:7 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! This variable is unused.
-  
-    29 │ // f5 is not used
-  > 30 │ const f5 = () => { };
+    16 │ // f5 is not used
+  > 17 │ const f5 = () => { };
        │       ^^
-    31 │ 
-    32 │ // f6 is recursive, but never called
+    18 │ 
+    19 │ // f6 is recursive, but never called
   
   i Unused variables usually are result of incomplete refactoring, typos and other source of bugs.
   
   i Unsafe fix: If this is intentional, prepend f5 with an underscore.
   
-    28 28 │   
-    29 29 │   // f5 is not used
-    30    │ - const·f5·=·()·=>·{·};
-       30 │ + const·_f5·=·()·=>·{·};
-    31 31 │   
-    32 32 │   // f6 is recursive, but never called
+    15 15 │   
+    16 16 │   // f5 is not used
+    17    │ - const·f5·=·()·=>·{·};
+       17 │ + const·_f5·=·()·=>·{·};
+    18 18 │   
+    19 19 │   // f6 is recursive, but never called
   
 
 ```
 
 ```
-invalidFunction.ts:33:7 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalidFunction.ts:20:7 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This variable is unused.
   
-    32 │ // f6 is recursive, but never called
-  > 33 │ const f6 = () => { f6() };
+    19 │ // f6 is recursive, but never called
+  > 20 │ const f6 = () => { f6() };
        │       ^^
-    34 │ 
-    35 │ // e is not used
+    21 │ 
+    22 │ // e is not used
   
   i Unused variables usually are result of incomplete refactoring, typos and other source of bugs.
   
   i Unsafe fix: If this is intentional, prepend f6 with an underscore.
   
-    31 31 │   
-    32 32 │   // f6 is recursive, but never called
-    33    │ - const·f6·=·()·=>·{·f6()·};
-       33 │ + const·_f6·=·()·=>·{·_f6()·};
-    34 34 │   
-    35 35 │   // e is not used
+    18 18 │   
+    19 19 │   // f6 is recursive, but never called
+    20    │ - const·f6·=·()·=>·{·f6()·};
+       20 │ + const·_f6·=·()·=>·{·_f6()·};
+    21 21 │   
+    22 22 │   // e is not used
   
 
 ```
 
 ```
-invalidFunction.ts:36:16 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalidFunction.ts:23:16 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This variable is unused.
   
-    35 │ // e is not used
-  > 36 │ try { } catch (e) { }
+    22 │ // e is not used
+  > 23 │ try { } catch (e) { }
        │                ^
-    37 │ 
+    24 │ 
   
   i Unused variables usually are result of incomplete refactoring, typos and other source of bugs.
   
   i Unsafe fix: If this is intentional, prepend e with an underscore.
   
-    34 34 │   
-    35 35 │   // e is not used
-    36    │ - try·{·}·catch·(e)·{·}
-       36 │ + try·{·}·catch·(_e)·{·}
-    37 37 │   
+    21 21 │   
+    22 22 │   // e is not used
+    23    │ - try·{·}·catch·(e)·{·}
+       23 │ + try·{·}·catch·(_e)·{·}
+    24 24 │   
   
 
 ```
-
-
