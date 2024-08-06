@@ -48,16 +48,14 @@ impl SemanticEventExtractor {
                     .for_each(|s| self.process_selector(s));
             }
             CSS_DECLARATION => {
-                if let Some(property) = node.first_child() {
-                    if let Some(property_name) = property.first_child() {
-                        if let Some(value) = property_name.next_sibling() {
-                            self.stash.push_back(SemanticEvent::PropertyDeclaration {
-                                property: property_name.text_trimmed().to_string(),
-                                value: value.text_trimmed().to_string(),
-                                property_range: property_name.text_range(),
-                                value_range: value.text_range(),
-                            });
-                        }
+                if let Some(property_name) = node.first_child().and_then(|p| p.first_child()) {
+                    if let Some(value) = property_name.next_sibling() {
+                        self.stash.push_back(SemanticEvent::PropertyDeclaration {
+                            property: property_name.text_trimmed().to_string(),
+                            value: value.text_trimmed().to_string(),
+                            property_range: property_name.text_range(),
+                            value_range: value.text_range(),
+                        });
                     }
                 }
             }

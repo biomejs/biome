@@ -2,7 +2,7 @@
 [package]
 authors.workspace    = true
 categories.workspace = true
-description          = "<DESCRIPTION>"
+description          = "Biome's semantic model for CSS"
 edition.workspace    = true
 homepage.workspace   = true
 keywords.workspace   = true
