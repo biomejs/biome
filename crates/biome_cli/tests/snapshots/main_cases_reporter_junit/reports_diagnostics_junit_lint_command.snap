@@ -48,9 +48,7 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
 <testsuites name="Biome" tests="12" failures="12" errors="12" time="<TIME>">
     <testsuite name="main.ts" tests="1" disabled="0" errors="0" failures="1" package="org.biome">
         <testcase name="org.biome.lint.suspicious.noDoubleEquals" line="4" column="3">
-            <failure message="Use === instead of ==.
-== is only allowed when comparing against `null`">line 3, col 2, Use === instead of ==.
-== is only allowed when comparing against `null`</failure>
+            <failure message="Use === instead of ==. == is only allowed when comparing against `null`">line 3, col 2, Use === instead of ==. == is only allowed when comparing against `null`</failure>
         </testcase>
     </testsuite>
     <testsuite name="main.ts" tests="1" disabled="0" errors="0" failures="1" package="org.biome">
@@ -80,9 +78,7 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
     </testsuite>
     <testsuite name="index.ts" tests="1" disabled="0" errors="0" failures="1" package="org.biome">
         <testcase name="org.biome.lint.suspicious.noDoubleEquals" line="4" column="3">
-            <failure message="Use === instead of ==.
-== is only allowed when comparing against `null`">line 3, col 2, Use === instead of ==.
-== is only allowed when comparing against `null`</failure>
+            <failure message="Use === instead of ==. == is only allowed when comparing against `null`">line 3, col 2, Use === instead of ==. == is only allowed when comparing against `null`</failure>
         </testcase>
     </testsuite>
     <testsuite name="index.ts" tests="1" disabled="0" errors="0" failures="1" package="org.biome">
