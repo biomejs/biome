@@ -3038,7 +3038,7 @@ export interface Workspace {
 	registerProjectFolder(
 		params: RegisterProjectFolderParams,
 	): Promise<ProjectKey>;
-	updateCurrentProject(params: UpdateProjectParams): Promise<void>;
+	updateCurrentManifest(params: UpdateProjectParams): Promise<void>;
 	openProject(params: OpenProjectParams): Promise<void>;
 	openFile(params: OpenFileParams): Promise<void>;
 	changeFile(params: ChangeFileParams): Promise<void>;
@@ -3072,8 +3072,8 @@ export function createWorkspace(transport: Transport): Workspace {
 		registerProjectFolder(params) {
 			return transport.request("biome/register_project_folder", params);
 		},
-		updateCurrentProject(params) {
-			return transport.request("biome/update_current_project", params);
+		updateCurrentManifest(params) {
+			return transport.request("biome/update_current_manifest", params);
 		},
 		openProject(params) {
 			return transport.request("biome/open_project", params);
