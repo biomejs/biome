@@ -62,6 +62,10 @@ pub struct WorkspaceSettings {
 }
 
 impl WorkspaceSettings {
+    pub fn get_current_project_key(&self) -> ProjectKey {
+        self.current_project
+    }
+
     /// Retrieves the settings of the current workspace folder
     pub fn get_current_settings(&self) -> Option<&Settings> {
         trace!("Current key {:?}", self.current_project);

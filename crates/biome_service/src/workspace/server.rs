@@ -36,10 +36,10 @@ use dashmap::{mapref::entry::Entry, DashMap};
 use indexmap::IndexSet;
 use std::ffi::OsStr;
 use std::fs;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicUsize, Ordering};
 use std::{panic::RefUnwindSafe, sync::RwLock};
-use tracing::{debug, info, info_span};
+use tracing::{debug, info, info_span, trace};
 
 pub(super) struct WorkspaceServer {
     /// features available throughout the application
@@ -144,33 +144,36 @@ impl WorkspaceServer {
         }
     }
 
-    /// Returns the current project. The information of this project depend on path set by [WorkspaceServer::update_current_project]
+    /// Returns the current project. The information of this project depend on path set by [WorkspaceServer::set_current_project]
     ///
     /// ## Errors
     ///
     /// - If no document is found in the workspace. Usually, you'll have to call [WorkspaceServer::open_project] to store said document.
+    #[tracing::instrument(level = "trace", skip(self))]
     fn get_current_project(&self) -> Result<Option<NodeJsProject>, WorkspaceError> {
-        let path = self.current_project_path.read().unwrap();
+        let path = self.get_current_project_path();
+        trace!("Current project folder: {:?} ", path);
         if let Some(path) = path.as_ref() {
             match self.manifests.entry(path.clone()) {
                 Entry::Occupied(entry) => Ok(Some(entry.get().clone())),
                 Entry::Vacant(entry) => {
                     let path = entry.key();
-                    let mut document = self
-                        .documents
-                        .get_mut(path)
-                        .ok_or_else(WorkspaceError::not_found)?;
-                    let document = &mut *document;
-                    let parsed = parse_json_with_cache(
-                        document.content.as_str(),
-                        &mut document.node_cache,
-                        JsonParserOptions::default(),
-                    );
+                    let mut document = self.documents.get_mut(path);
+                    if let Some(document) = document.as_deref_mut() {
+                        // let document = &mut *document;
+                        let parsed = parse_json_with_cache(
+                            document.content.as_str(),
+                            &mut document.node_cache,
+                            JsonParserOptions::default(),
+                        );
 
-                    let mut node_js_project = NodeJsProject::default();
-                    node_js_project.from_root(&parsed.tree());
+                        let mut node_js_project = NodeJsProject::default();
+                        node_js_project.from_root(&parsed.tree());
 
-                    Ok(Some(entry.insert(node_js_project).clone()))
+                        Ok(Some(entry.insert(node_js_project).clone()))
+                    } else {
+                        Ok(None)
+                    }
                 }
             }
         } else {
@@ -189,14 +192,33 @@ impl WorkspaceServer {
         index
     }
 
+    /// Retrieves the current project path
+    fn get_current_project_path(&self) -> Option<BiomePath> {
+        self.current_project_path.read().unwrap().as_ref().cloned()
+    }
+
+    /// Updates the current project path
+    fn set_current_project_path(&self, path: BiomePath) {
+        let mut current_project_path = self.current_project_path.write().unwrap();
+        let _ = current_project_path.insert(path);
+    }
+
     /// Updates the current project of the current workspace
-    fn update_current_project(&self, project_key: ProjectKey) {
+    fn register_project(&self, path: PathBuf) -> ProjectKey {
+        let mut workspace = self.workspaces_mut();
+        let workspace_mut = workspace.as_mut();
+        workspace_mut.insert_project(path.clone())
+    }
+    /// Updates the current project of the current workspace
+    fn set_current_project(&self, project_key: ProjectKey) {
         let mut workspace = self.workspaces_mut();
         let workspace_mut = workspace.as_mut();
         workspace_mut.set_current_project(project_key);
     }
 
-    /// Checks whether, if the current path belongs to the current project
+    /// Checks whether, if the current path belongs to the current project.
+    ///
+    /// If there's a match, and the match **isn't** the current project, it returns the new key.
     fn path_belongs_to_current_workspace(&self, path: &BiomePath) -> Option<ProjectKey> {
         let workspace = self.workspace();
         workspace.as_ref().path_belongs_to_current_workspace(path)
@@ -425,6 +447,7 @@ impl Workspace for WorkspaceServer {
         Ok(())
     }
     /// Add a new file to the workspace
+    #[tracing::instrument(level = "trace", skip(self))]
     fn open_file(&self, params: OpenFileParams) -> Result<(), WorkspaceError> {
         let mut source = params
             .document_file_source
@@ -451,7 +474,7 @@ impl Workspace for WorkspaceServer {
             },
         );
         if let Some(project_key) = self.path_belongs_to_current_workspace(&params.path) {
-            self.update_current_project(project_key);
+            self.set_current_project(project_key);
         }
 
         Ok(())
@@ -475,13 +498,25 @@ impl Workspace for WorkspaceServer {
         &self,
         params: RegisterProjectFolderParams,
     ) -> Result<ProjectKey, WorkspaceError> {
-        let mut workspace = self.workspaces_mut();
-        let workspace_mut = workspace.as_mut();
-        let key = workspace_mut.insert_project(params.path.unwrap_or_default());
-        if params.set_as_current_workspace {
-            workspace_mut.register_current_project(key);
+        let current_project_path = self.get_current_project_path();
+        debug!(
+            "Compare the current project with the new one {:?} {:?} {:?}",
+            current_project_path.as_deref(),
+            params.path.as_ref(),
+            current_project_path.as_deref() != params.path.as_ref()
+        );
+
+        if current_project_path.as_deref() != params.path.as_ref() {
+            let path = params.path.unwrap_or_default();
+            let key = self.register_project(path.clone());
+            if params.set_as_current_workspace {
+                self.set_current_project(key);
+                self.set_current_project_path(BiomePath::new(path));
+            }
+            Ok(key)
+        } else {
+            Ok(self.workspace().as_ref().get_current_project_key())
         }
-        Ok(key)
     }
 
     fn unregister_project_folder(
@@ -494,8 +529,7 @@ impl Workspace for WorkspaceServer {
     }
 
     fn update_current_project(&self, params: UpdateProjectParams) -> Result<(), WorkspaceError> {
-        let mut current_project_path = self.current_project_path.write().unwrap();
-        let _ = current_project_path.insert(params.path);
+        self.set_current_project_path(params.path);
         Ok(())
     }
 
