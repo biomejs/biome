@@ -580,7 +580,7 @@ impl Session {
                         }
                         let result = self
                             .workspace
-                            .update_current_project(UpdateProjectParams { path: biome_path });
+                            .update_current_manifest(UpdateProjectParams { path: biome_path });
                         if let Err(err) = result {
                             error!("{}", err);
                         }

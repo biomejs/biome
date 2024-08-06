@@ -54,6 +54,8 @@ pub(super) struct WorkspaceServer {
     manifests: DashMap<BiomePath, NodeJsProject>,
     /// The current focused project
     current_project_path: RwLock<Option<BiomePath>>,
+    /// The path of the manifest
+    current_manifest_path: RwLock<Option<BiomePath>>,
     /// Stores the document sources used across the workspace
     file_sources: RwLock<IndexSet<DocumentFileSource>>,
     /// Stores patterns to search for.
@@ -92,6 +94,7 @@ impl WorkspaceServer {
             syntax: DashMap::default(),
             manifests: DashMap::default(),
             current_project_path: RwLock::default(),
+            current_manifest_path: RwLock::default(),
             file_sources: RwLock::default(),
             patterns: Default::default(),
         }
@@ -150,8 +153,8 @@ impl WorkspaceServer {
     ///
     /// - If no document is found in the workspace. Usually, you'll have to call [WorkspaceServer::open_project] to store said document.
     #[tracing::instrument(level = "trace", skip(self))]
-    fn get_current_project(&self) -> Result<Option<NodeJsProject>, WorkspaceError> {
-        let path = self.get_current_project_path();
+    fn get_current_manifest(&self) -> Result<Option<NodeJsProject>, WorkspaceError> {
+        let path = self.get_current_manifest_path();
         trace!("Current project folder: {:?} ", path);
         if let Some(path) = path.as_ref() {
             match self.manifests.entry(path.clone()) {
@@ -201,6 +204,16 @@ impl WorkspaceServer {
     fn set_current_project_path(&self, path: BiomePath) {
         let mut current_project_path = self.current_project_path.write().unwrap();
         let _ = current_project_path.insert(path);
+    }
+
+    /// Retrieves the current project path
+    fn get_current_manifest_path(&self) -> Option<BiomePath> {
+        self.current_manifest_path.read().unwrap().as_ref().cloned()
+    }
+
+    fn set_current_manifest_path(&self, path: BiomePath) {
+        let mut current_manifest_path = self.current_manifest_path.write().unwrap();
+        let _ = current_manifest_path.insert(path);
     }
 
     /// Updates the current project of the current workspace
@@ -452,7 +465,7 @@ impl Workspace for WorkspaceServer {
         let mut source = params
             .document_file_source
             .unwrap_or(DocumentFileSource::from_path(&params.path));
-        let manifest = self.get_current_project()?.map(|pr| pr.manifest);
+        let manifest = self.get_current_manifest()?.map(|pr| pr.manifest);
 
         if let DocumentFileSource::Js(js) = &mut source {
             if let Some(manifest) = manifest {
@@ -499,7 +512,6 @@ impl Workspace for WorkspaceServer {
         params: RegisterProjectFolderParams,
     ) -> Result<ProjectKey, WorkspaceError> {
         let current_project_path = self.get_current_project_path();
-        dbg!("CALLED THIS");
         debug!(
             "Compare the current project with the new one {:?} {:?} {:?}",
             current_project_path.as_deref(),
@@ -534,8 +546,8 @@ impl Workspace for WorkspaceServer {
         Ok(())
     }
 
-    fn update_current_project(&self, params: UpdateProjectParams) -> Result<(), WorkspaceError> {
-        self.set_current_project_path(params.path);
+    fn update_current_manifest(&self, params: UpdateProjectParams) -> Result<(), WorkspaceError> {
+        self.set_current_manifest_path(params.path);
         Ok(())
     }
 
@@ -634,7 +646,7 @@ impl Workspace for WorkspaceServer {
         params: PullDiagnosticsParams,
     ) -> Result<PullDiagnosticsResult, WorkspaceError> {
         let parse = self.get_parse(params.path.clone())?;
-        let manifest = self.get_current_project()?.map(|pr| pr.manifest);
+        let manifest = self.get_current_manifest()?.map(|pr| pr.manifest);
         let (diagnostics, errors, skipped_diagnostics) =
             if let Some(lint) = self.get_file_capabilities(&params.path).analyzer.lint {
                 info_span!("Pulling diagnostics", categories =? params.categories).in_scope(|| {
@@ -692,7 +704,7 @@ impl Workspace for WorkspaceServer {
 
         let parse = self.get_parse(params.path.clone())?;
         let workspace = self.workspace();
-        let manifest = self.get_current_project()?.map(|pr| pr.manifest);
+        let manifest = self.get_current_manifest()?.map(|pr| pr.manifest);
         let language = self.get_file_source(&params.path);
         Ok(code_actions(CodeActionsParams {
             parse,
@@ -787,7 +799,7 @@ impl Workspace for WorkspaceServer {
             .ok_or_else(self.build_capability_error(&params.path))?;
         let parse = self.get_parse(params.path.clone())?;
 
-        let manifest = self.get_current_project()?.map(|pr| pr.manifest);
+        let manifest = self.get_current_manifest()?.map(|pr| pr.manifest);
         let language = self.get_file_source(&params.path);
         fix_all(FixAllParams {
             parse,
