@@ -246,7 +246,7 @@ pub fn should_ignore_prefix(node: &AnyClassStringLike) -> bool {
         } else {
             false
         };
-        return ignore_prefix;
+        ignore_prefix
     } else {
         false
     }
@@ -265,7 +265,7 @@ pub fn should_ignore_postfix(node: &AnyClassStringLike) -> bool {
         } else {
             false
         };
-        return ignore_postfix;
+        ignore_postfix
     } else {
         false
     }
