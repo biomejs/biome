@@ -598,7 +598,7 @@ fn resolve_manifest(cli_session: &CliSession) -> Result<(), WorkspaceError> {
             content: result.content,
             version: 0,
         })?;
-        workspace.update_current_project(UpdateProjectParams { path: biome_path })?;
+        workspace.update_current_manifest(UpdateProjectParams { path: biome_path })?;
     }
 
     Ok(())

@@ -863,7 +863,7 @@ pub trait Workspace: Send + Sync + RefUnwindSafe {
     ) -> Result<(), WorkspaceError>;
 
     /// Sets the current project path
-    fn update_current_project(&self, params: UpdateProjectParams) -> Result<(), WorkspaceError>;
+    fn update_current_manifest(&self, params: UpdateProjectParams) -> Result<(), WorkspaceError>;
 
     // Return a textual, debug representation of the syntax tree for a given document
     fn get_syntax_tree(
