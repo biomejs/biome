@@ -1255,6 +1255,10 @@ export interface Nursery {
 	 */
 	noUnusedFunctionParameters?: RuleFixConfiguration_for_Null;
 	/**
+	 * Disallow unnecessary escape sequence in regular expression literals.
+	 */
+	noUselessEscapeInRegex?: RuleFixConfiguration_for_Null;
+	/**
 	 * Disallow unnecessary concatenation of string or template literals.
 	 */
 	noUselessStringConcat?: RuleFixConfiguration_for_Null;
@@ -2617,8 +2621,8 @@ export type Category =
 	| "lint/nursery/noMissingGenericFamilyKeyword"
 	| "lint/nursery/noReactSpecificProps"
 	| "lint/nursery/noRestrictedImports"
-	| "lint/nursery/noStaticElementInteractions"
 	| "lint/nursery/noShorthandPropertyOverrides"
+	| "lint/nursery/noStaticElementInteractions"
 	| "lint/nursery/noSubstr"
 	| "lint/nursery/noUndeclaredDependencies"
 	| "lint/nursery/noUnknownFunction"
@@ -2629,6 +2633,7 @@ export type Category =
 	| "lint/nursery/noUnknownUnit"
 	| "lint/nursery/noUnmatchableAnbSelector"
 	| "lint/nursery/noUnusedFunctionParameters"
+	| "lint/nursery/noUselessEscapeInRegex"
 	| "lint/nursery/noUselessStringConcat"
 	| "lint/nursery/noUselessUndefinedInitialization"
 	| "lint/nursery/noValueAtRule"
