@@ -499,6 +499,7 @@ impl Workspace for WorkspaceServer {
         params: RegisterProjectFolderParams,
     ) -> Result<ProjectKey, WorkspaceError> {
         let current_project_path = self.get_current_project_path();
+        dbg!("CALLED THIS");
         debug!(
             "Compare the current project with the new one {:?} {:?} {:?}",
             current_project_path.as_deref(),
@@ -506,7 +507,12 @@ impl Workspace for WorkspaceServer {
             current_project_path.as_deref() != params.path.as_ref()
         );
 
-        if current_project_path.as_deref() != params.path.as_ref() {
+        let is_new_path = match (current_project_path.as_deref(), params.path.as_ref()) {
+            (Some(current_project_path), Some(params_path)) => current_project_path != params_path,
+            _ => true,
+        };
+
+        if is_new_path {
             let path = params.path.unwrap_or_default();
             let key = self.register_project(path.clone());
             if params.set_as_current_workspace {
