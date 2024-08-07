@@ -177,7 +177,7 @@ Available options:
                               prepared to be committed) will be linted. This option should be used
                               when working locally.
         --changed             When set to true, only the files that have been changed compared to
-                              your `defaultBranch` configuration will be linted. This options should
+                              your `defaultBranch` configuration will be linted. This option should
                               be used in CI environments.
         --since=REF           Use this to specify the base branch to compare against when you're
                               using the --changed flag and the `defaultBranch` is not set in your

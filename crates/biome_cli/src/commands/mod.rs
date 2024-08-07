@@ -143,7 +143,7 @@ pub enum BiomeCommand {
         staged: bool,
 
         /// When set to true, only the files that have been changed compared to your `defaultBranch`
-        /// configuration will be linted. This options should be used in CI environments.
+        /// configuration will be linted. This option should be used in CI environments.
         #[bpaf(long("changed"), switch)]
         changed: bool,
 
