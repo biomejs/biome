@@ -2075,6 +2075,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noUselessEscapeInRegex": {
+					"description": "Disallow unnecessary escape sequence in regular expression literals.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleFixConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noUselessStringConcat": {
 					"description": "Disallow unnecessary concatenation of string or template literals.",
 					"anyOf": [

@@ -229,6 +229,7 @@ pub type NoUselessConstructor = < lint :: complexity :: no_useless_constructor :
 pub type NoUselessElse =
     <lint::style::no_useless_else::NoUselessElse as biome_analyze::Rule>::Options;
 pub type NoUselessEmptyExport = < lint :: complexity :: no_useless_empty_export :: NoUselessEmptyExport as biome_analyze :: Rule > :: Options ;
+pub type NoUselessEscapeInRegex = < lint :: nursery :: no_useless_escape_in_regex :: NoUselessEscapeInRegex as biome_analyze :: Rule > :: Options ;
 pub type NoUselessFragments =
     <lint::complexity::no_useless_fragments::NoUselessFragments as biome_analyze::Rule>::Options;
 pub type NoUselessLabel =

@@ -290,7 +290,7 @@ pub trait Lexer<'src> {
     }
 
     /// Consume a grit metavariable(µ[a-zA-Z_][a-zA-Z0-9_]*|µ...)
-    /// https://github.com/getgrit/gritql/blob/8f3f077d078ccaf0618510bba904a06309c2435e/resources/language-metavariables/tree-sitter-css/grammar.js#L388
+    /// <https://github.com/getgrit/gritql/blob/8f3f077d078ccaf0618510bba904a06309c2435e/resources/language-metavariables/tree-sitter-css/grammar.js#L388>
     fn consume_metavariable<T>(&mut self, kind: T) -> T {
         debug_assert!(self.is_metavariable_start());
 
