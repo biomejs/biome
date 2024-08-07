@@ -1,5 +1,6 @@
 use crate::converters::from_proto;
 use crate::converters::line_index::LineIndex;
+use crate::diagnostics::LspError;
 use crate::session::Session;
 use crate::utils;
 use anyhow::{Context, Result};
@@ -37,7 +38,7 @@ fn fix_all_kind() -> CodeActionKind {
 pub(crate) fn code_actions(
     session: &Session,
     params: CodeActionParams,
-) -> Result<Option<CodeActionResponse>> {
+) -> Result<Option<CodeActionResponse>, LspError> {
     let url = params.text_document.uri.clone();
     let biome_path = session.file_path(&url)?;
 

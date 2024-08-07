@@ -136,8 +136,8 @@ where
         self.request("biome/unregister_project_folder", params)
     }
 
-    fn update_current_project(&self, params: UpdateProjectParams) -> Result<(), WorkspaceError> {
-        self.request("biome/update_current_project", params)
+    fn update_current_manifest(&self, params: UpdateProjectParams) -> Result<(), WorkspaceError> {
+        self.request("biome/update_current_manifest", params)
     }
 
     fn get_syntax_tree(
