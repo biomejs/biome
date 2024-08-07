@@ -138,17 +138,17 @@ pub enum BiomeCommand {
         stdin_file_path: Option<String>,
 
         /// When set to true, only the files that have been staged (the ones prepared to be committed)
-        /// will be linted.
+        /// will be linted. This option should be used when working locally.
         #[bpaf(long("staged"), switch)]
         staged: bool,
 
         /// When set to true, only the files that have been changed compared to your `defaultBranch`
-        /// configuration will be linted.
+        /// configuration will be linted. This option should be used in CI environments.
         #[bpaf(long("changed"), switch)]
         changed: bool,
 
         /// Use this to specify the base branch to compare against when you're using the --changed
-        /// flag and the `defaultBranch` is not set in your biome.json
+        /// flag and the `defaultBranch` is not set in your `biome.json`
         #[bpaf(long("since"), argument("REF"))]
         since: Option<String>,
 

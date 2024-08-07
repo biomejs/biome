@@ -5,8 +5,8 @@ use biome_console::markup;
 use biome_css_syntax::{CssFunction, CssParameter};
 use biome_rowan::AstNode;
 use biome_rowan::AstSeparatedList;
-use lazy_static::lazy_static;
 use regex::Regex;
+use std::sync::LazyLock;
 
 use crate::utils::vendor_prefixed;
 
@@ -50,23 +50,21 @@ declare_lint_rule! {
     }
 }
 
-lazy_static! {
-    // It is necessary to find case-insensitive string.
-    // Also Check if 'in' is a word boundary.
-    // For examples,`to top in srgb` is valid but `to top insrgb` is not valid.
-    pub static ref IN_KEYWORD: Regex = Regex::new(r"(?i)\bin\b").unwrap();
+// It is necessary to find case-insensitive string.
+// Also Check if 'in' is a word boundary.
+// For examples,`to top in srgb` is valid but `to top insrgb` is not valid.
+pub static IN_KEYWORD: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"(?i)\bin\b").unwrap());
 
-    // This regex checks if a string consists of a number immediately followed by a unit, with no space between them.
-    // For examples, `45deg`, `45grad` is valid but `45 deg`, `45de` is not valid.
-    pub static ref ANGLE: Regex = Regex::new(r"^[\d.]+(?:deg|grad|rad|turn)$").unwrap();
+// This regex checks if a string consists of a number immediately followed by a unit, with no space between them.
+// For examples, `45deg`, `45grad` is valid but `45 deg`, `45de` is not valid.
+pub static ANGLE: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r"^[\d.]+(?:deg|grad|rad|turn)$").unwrap());
 
-    // This need for capture `side-or-corner` keyword from linear-gradient function.
-    // Ensure starts `side-or-corner` keyword `to` and ends with the keyword `side-or-corner`.
-    pub static ref DIRECTION_WITHOUT_TO: Regex = Regex::new(&format!(
-        r"(?i)^({0})(?: ({0}))?$",
-        "top|left|bottom|right"
-    )).unwrap();
-}
+// This need for capture `side-or-corner` keyword from linear-gradient function.
+// Ensure starts `side-or-corner` keyword `to` and ends with the keyword `side-or-corner`.
+pub static DIRECTION_WITHOUT_TO: LazyLock<Regex> = LazyLock::new(|| {
+    Regex::new(&format!(r"(?i)^({0})(?: ({0}))?$", "top|left|bottom|right")).unwrap()
+});
 
 impl Rule for NoInvalidDirectionInLinearGradient {
     type Query = Ast<CssFunction>;

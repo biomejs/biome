@@ -24,7 +24,6 @@ use biome_formatter::{
 use biome_fs::BiomePath;
 use biome_graphql_formatter::context::GraphqlFormatOptions;
 use biome_graphql_syntax::GraphqlLanguage;
-use biome_js_analyze::metadata;
 use biome_js_formatter::context::JsFormatOptions;
 use biome_js_parser::JsParserOptions;
 use biome_js_syntax::{JsFileSource, JsLanguage};
@@ -35,6 +34,7 @@ use ignore::gitignore::{Gitignore, GitignoreBuilder};
 use indexmap::IndexSet;
 use rustc_hash::FxHashMap;
 use std::borrow::Cow;
+use std::ops::Deref;
 use std::path::{Path, PathBuf};
 use std::sync::RwLockWriteGuard;
 use std::{
@@ -1027,7 +1027,26 @@ impl OverrideSettings {
         for pattern in self.patterns.iter() {
             if !pattern.exclude.matches_path(path) && pattern.include.matches_path(path) {
                 if let Some(rules) = pattern.linter.rules.as_ref() {
-                    push_to_analyzer_rules(rules, metadata(), &mut analyzer_rules);
+                    push_to_analyzer_rules(
+                        rules,
+                        biome_js_analyze::METADATA.deref(),
+                        &mut analyzer_rules,
+                    );
+                    push_to_analyzer_rules(
+                        rules,
+                        biome_json_analyze::METADATA.deref(),
+                        &mut analyzer_rules,
+                    );
+                    push_to_analyzer_rules(
+                        rules,
+                        biome_css_analyze::METADATA.deref(),
+                        &mut analyzer_rules,
+                    );
+                    push_to_analyzer_rules(
+                        rules,
+                        biome_graphql_analyze::METADATA.deref(),
+                        &mut analyzer_rules,
+                    );
                 }
             }
         }
