@@ -10,7 +10,7 @@ use biome_rowan::{AstNode, TextRange, WalkEvent};
 /// The [SemanticServices] types can be used as a queryable to get an instance
 /// of the whole [SemanticModel] without matching on a specific AST node
 ///
-/// ```rust
+/// ```ignore
 /// impl Rule for SampleCssLintRule {
 ///    type Query = SemanticServices;
 ///    type State = ();
@@ -147,9 +147,9 @@ impl QueryMatch for SemanticModelEvent {
     }
 }
 
-/// Query type usable by lint rules **that uses the semantic model** to match on specific [AstNode] types
+/// The [Semantic] type usable by lint rules **that uses the semantic model** to match on specific [AstNode] types
 ///
-/// ```rust
+/// ```ignore
 /// impl Rule for SampleCssLintRule {
 ///    type Query = Semantic<CssGenericProperty>;
 ///    type State = ();
