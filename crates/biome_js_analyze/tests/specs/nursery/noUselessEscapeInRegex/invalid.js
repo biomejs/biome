@@ -47,3 +47,6 @@
 
 // Unlike ESLint, we report `\k` when it is not in a unicode-aware regex
 /(?<a>)\k<a>/;
+
+// A test with unicode characters that take more than one byte
+/😀\😀/

@@ -84,7 +84,7 @@ impl Rule for NoUselessEscapeInRegex {
                         // quantrifiers
                         | b'*' | b'+' | b'?' | b'{' | b'}'
                         // Backreferences
-                        | b'1'..b'9'
+                        | b'1'..=b'9'
                         // Groups
                         | b'(' | b')'
                         // Alternation
