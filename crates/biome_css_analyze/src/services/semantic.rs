@@ -7,6 +7,25 @@ use biome_css_semantic::{model::SemanticModel, SemanticEventExtractor};
 use biome_css_syntax::{CssLanguage, CssRoot, CssSyntaxNode};
 use biome_rowan::{AstNode, TextRange, WalkEvent};
 
+/// The [SemanticServices] types can be used as a queryable to get an instance
+/// of the whole [SemanticModel] without matching on a specific AST node
+///
+/// ```rust
+/// impl Rule for SampleCssLintRule {
+///    type Query = SemanticServices;
+///    type State = ();
+///    type Signals = Option<Self::State>;
+///    type Options = ();
+
+///    fn run(ctx: &RuleContext<Self>) -> Self::Signals {
+///     let node = ctx.query();
+///     for n in node.rules() {
+///       // Do something with the rules
+///     }
+///     //.....//
+///    }
+/// }
+/// ```
 pub struct SemanticServices {
     model: SemanticModel,
 }
@@ -99,14 +118,6 @@ impl Visitor for SemanticModelBuilderVisitor {
     }
 }
 
-pub struct SemanticModelEvent(TextRange);
-
-impl QueryMatch for SemanticModelEvent {
-    fn text_range(&self) -> TextRange {
-        self.0
-    }
-}
-
 pub struct SemanticModelVisitor;
 
 impl Visitor for SemanticModelVisitor {
@@ -128,7 +139,34 @@ impl Visitor for SemanticModelVisitor {
     }
 }
 
+pub struct SemanticModelEvent(TextRange);
+
+impl QueryMatch for SemanticModelEvent {
+    fn text_range(&self) -> TextRange {
+        self.0
+    }
+}
+
 /// Query type usable by lint rules **that uses the semantic model** to match on specific [AstNode] types
+///
+/// ```rust
+/// impl Rule for SampleCssLintRule {
+///    type Query = Semantic<CssGenericProperty>;
+///    type State = ();
+///    type Signals = Option<Self::State>;
+///    type Options = ();
+
+///    fn run(ctx: &RuleContext<Self>) -> Self::Signals {
+///     let node = ctx.query();
+///     // The model holds all information about the semantic.
+///     let model = ctx.model();
+///     for n in model.rules() {
+///       // Do something with the rules
+///     }
+///     //.....//
+///    }
+/// }
+/// ```
 #[derive(Clone)]
 pub struct Semantic<N>(pub N);
 
