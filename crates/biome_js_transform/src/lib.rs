@@ -15,7 +15,7 @@ use std::convert::Infallible;
 use std::ops::Deref;
 use std::sync::LazyLock;
 
-static METADATA: LazyLock<MetadataRegistry> = LazyLock::new(|| {
+pub static METADATA: LazyLock<MetadataRegistry> = LazyLock::new(|| {
     let mut metadata = MetadataRegistry::default();
     visit_transformation_registry(&mut metadata);
     metadata

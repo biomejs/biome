@@ -10,6 +10,7 @@ use biome_test_utils::{
     write_transformation_snapshot,
 };
 
+use std::ops::Deref;
 use std::{ffi::OsStr, fs::read_to_string, path::Path, slice};
 
 tests_macros::gen_tests! {"tests/specs/**/*.{cjs,js,jsx,tsx,ts,json,jsonc}", crate::run_test, "module"}
@@ -26,7 +27,8 @@ fn run_test(input: &'static str, _: &str, _: &str, _: &str) {
     if rule == "specs" {
         panic!("the test file must be placed in the {rule}/<group-name>/<rule-name>/ directory");
     }
-    if biome_js_transform::metadata()
+    if biome_js_transform::METADATA
+        .deref()
         .find_rule("transformations", rule)
         .is_none()
     {
