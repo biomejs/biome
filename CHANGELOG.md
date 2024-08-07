@@ -17,6 +17,8 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 - Implement [css suppression action](https://github.com/biomejs/biome/issues/3278). Contributed by @togami2864
 - Add support of comments in `turbo.json`. Contributed by @Netail
+- Implement [semantic model for css](https://github.com/biomejs/biome/pull/3546). Contributed by @togami2864
+- Integrate css semantic model into the analyzer. Contributed by @togami2864
 
 ### CLI
 
