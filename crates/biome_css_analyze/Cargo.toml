@@ -16,6 +16,7 @@ version              = "0.5.7"
 biome_analyze            = { workspace = true }
 biome_console            = { workspace = true }
 biome_css_syntax         = { workspace = true }
+biome_css_semantic       = { workspace = true }
 biome_deserialize        = { workspace = true }
 biome_deserialize_macros = { workspace = true }
 biome_diagnostics        = { workspace = true }
