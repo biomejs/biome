@@ -71,10 +71,11 @@ Let's say we want to create a new **lint** rule called `useMyRuleName`, follow t
    Among the other files, you'll find a file called `use_my_new_rule_name.rs` inside the `biome_js_analyze/lib/src/lint/nursery` folder. You'll implement your rule in this file.
 
    If you want to create a _CSS_ lint rule, run this script. It will generate a new lint rule in `biome_css_analyze`
+
    ```shell
    just new-css-lintrule useMyRuleName
    ```
-1.
+
 1. The `Ast` query type allows you to query the CST of a program.
 1. The `State` type doesn't have to be used, so it can be considered optional. However, it has to be defined as `type State = ()`.
 1. Implement the `run` function:
@@ -111,6 +112,7 @@ Let's say we want to create a new **lint** rule called `useMyRuleName`, follow t
 
    It may return zero or one code action.
    Rules can return a code action that can be **safe** or **unsafe**. If a rule returns a code action, you must add `fix_kind` to the macro `declare_lint_rule`.
+
    ```rust
    use biome_analyze::FixKind;
    declare_lint_rule!{
@@ -334,6 +336,7 @@ When navigating the nodes and tokens of certain nodes, you will notice straight 
 Generally, you will end up navigating the CST inside the `run` function, and this function will usually return an `Option` or a `Vec`.
 
 - If the `run` function returns an `Option`, you're encouraged to transform the `Result` into an `Option` and use the try operator `?`. This will make your coding way easier:
+
   ```rust
   fn run() -> Self::Signals {
     let prev_val = js_object_member.value().ok()?;
@@ -427,6 +430,7 @@ To achieve that you can change Signals type from `Option<()>` to `Vec<()>`.
 This will call the diagnostic/action function for every item of the vec.
 
 Taking previous example and modifying it a bit we can apply diagnostic for each item easily.
+
 ```rust
 impl Rule for ForLoopCountReferences {
     type Query = Semantic<JsForStatement>;
