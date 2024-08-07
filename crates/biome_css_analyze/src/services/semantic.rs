@@ -1,11 +1,11 @@
 use biome_analyze::{
-    FromServices, MissingServicesDiagnostic, Phase, Phases, QueryMatch, Queryable, RuleKey,
-    ServiceBag, Visitor, VisitorContext, VisitorFinishContext,
+    AddVisitor, FromServices, MissingServicesDiagnostic, Phase, Phases, QueryKey, QueryMatch,
+    Queryable, RuleKey, ServiceBag, SyntaxVisitor, Visitor, VisitorContext, VisitorFinishContext,
 };
 use biome_css_semantic::builder::SemanticModelBuilder;
 use biome_css_semantic::{model::SemanticModel, SemanticEventExtractor};
 use biome_css_syntax::{CssLanguage, CssRoot, CssSyntaxNode};
-use biome_rowan::{TextRange, WalkEvent};
+use biome_rowan::{AstNode, TextRange, WalkEvent};
 
 pub struct SemanticServices {
     model: SemanticModel,
@@ -125,5 +125,33 @@ impl Visitor for SemanticModelVisitor {
 
         let text_range = root.text_range();
         ctx.match_query(SemanticModelEvent(text_range));
+    }
+}
+
+/// Query type usable by lint rules **that uses the semantic model** to match on specific [AstNode] types
+#[derive(Clone)]
+pub struct Semantic<N>(pub N);
+
+impl<N> Queryable for Semantic<N>
+where
+    N: AstNode<Language = CssLanguage> + 'static,
+{
+    type Input = CssSyntaxNode;
+    type Output = N;
+
+    type Language = CssLanguage;
+    type Services = SemanticServices;
+
+    fn build_visitor(analyzer: &mut impl AddVisitor<CssLanguage>, root: &CssRoot) {
+        analyzer.add_visitor(Phases::Syntax, || SemanticModelBuilderVisitor::new(root));
+        analyzer.add_visitor(Phases::Semantic, SyntaxVisitor::default);
+    }
+
+    fn key() -> QueryKey<Self::Language> {
+        QueryKey::Syntax(N::KIND_SET)
+    }
+
+    fn unwrap_match(_: &ServiceBag, node: &Self::Input) -> Self::Output {
+        N::unwrap_cast(node.clone())
     }
 }
