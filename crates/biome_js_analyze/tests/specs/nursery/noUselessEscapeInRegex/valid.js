@@ -16,10 +16,11 @@
 
 // https://github.com/eslint/eslint/issues/7472
 /\0/; // null character
-/\\1/; // \x01 character (octal literal)
-/(a)\\1/; // backreference
-/(a)\\12/; // backreference
-/[\\0]/; // null character in character class
+/\1/; // \x01 character (octal literal)
+/(a)\1/; // backreference
+/(a)\12/; // backreference
+/(a)\9/; // backreference
+/[\0]/; // null character in character class
 
 // https://github.com/eslint/eslint/issues/7789
 /]/;
@@ -31,7 +32,7 @@
 // ES2018
 /\]/u;
 // /(?<a>)\k<a>/; // Unlike ESLint, we report `\k` when it is not in a unicode-aware regex
-/(\\?<a>)/;
+/(\?<a>)/;
 /\p{ASCII}/u;
 /\P{ASCII}/u;
 /[\p{ASCII}]/u;
@@ -67,7 +68,7 @@
 /[\>>]/v;
 /[\??]/v;
 /[\@@]/v;
-/[\\``]/v;
+/[\``]/v;
 /[\~~]/v;
 /[^\^^]/v;
 /[_\^^]/v;
@@ -87,7 +88,7 @@
 /[>\>]/v;
 /[?\?]/v;
 /[@\@]/v;
-/[`\\`]/v;
+/[`\`]/v;
 /[~\~]/v;
 /[^^\^]/v;
 /[_^\^]/v;

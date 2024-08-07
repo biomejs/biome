@@ -53,6 +53,9 @@ expression: invalid.js
 
 // Unlike ESLint, we report `\k` when it is not in a unicode-aware regex
 /(?<a>)\k<a>/;
+
+// A test with unicode characters that take more than one byte
+/😀\😀/
 ```
 
 # Diagnostics
@@ -991,6 +994,8 @@ invalid.js:49:8 lint/nursery/noUselessEscapeInRegex  FIXABLE  ━━━━━━
     48 │ // Unlike ESLint, we report `\k` when it is not in a unicode-aware regex
   > 49 │ /(?<a>)\k<a>/;
        │        ^^
+    50 │ 
+    51 │ // A test with unicode characters that take more than one byte
   
   i The escape sequence is only useful if the regular expression is unicode-aware. To be unicode-aware, the `u` or `v` flag should be used.
   
@@ -998,5 +1003,21 @@ invalid.js:49:8 lint/nursery/noUselessEscapeInRegex  FIXABLE  ━━━━━━
   
     49 │ /(?<a>)\k<a>/;
        │        -      
+
+```
+
+```
+invalid.js:52:3 lint/nursery/noUselessEscapeInRegex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The character doesn't need to be escaped.
+  
+    51 │ // A test with unicode characters that take more than one byte
+  > 52 │ /😀\😀/
+       │    ^^^
+  
+  i Safe fix: Unescape the character.
+  
+    52 │ /😀\😀/
+       │    -   
 
 ```
