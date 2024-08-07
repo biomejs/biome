@@ -329,7 +329,7 @@ dependencies = [
  "biome_css_parser",
  "biome_css_syntax",
  "biome_rowan",
- "rustc-hash",
+ "rustc-hash 1.1.0",
 ]
 
 [[package]]
