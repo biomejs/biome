@@ -74,7 +74,7 @@ Let's say we want to create a new **lint** rule called `useMyRuleName`, follow t
    ```shell
    just new-css-lintrule useMyRuleName
    ```
-1.
+
 1. The `Ast` query type allows you to query the CST of a program.
 1. The `State` type doesn't have to be used, so it can be considered optional. However, it has to be defined as `type State = ()`.
 1. Implement the `run` function:
