@@ -5,13 +5,13 @@ on:
     branches:
       - main
     paths: # Only run when changes are made to rust code or root Cargo
-      - 'crates/**'
-      - 'fuzz/**'
-      - 'xtask/**'
-      - 'Cargo.toml'
-      - 'Cargo.lock'
-      - 'rust-toolchain.toml'
-      - 'rustfmt.toml'
+      - "crates/**"
+      - "fuzz/**"
+      - "xtask/**"
+      - "Cargo.toml"
+      - "Cargo.lock"
+      - "rust-toolchain.toml"
+      - "rustfmt.toml"
 
 # Cancel jobs when the PR is updated
 concurrency:
@@ -184,5 +184,6 @@ jobs:
         run: |
           if [[ `git status --porcelain` ]]; then
             git status
+            git diff
             exit 1
           fi
