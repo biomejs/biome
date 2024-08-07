@@ -323,6 +323,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "biome_css_semantic"
+version = "0.0.0"
+dependencies = [
+ "biome_css_parser",
+ "biome_css_syntax",
+ "biome_rowan",
+ "rustc-hash 1.1.0",
+]
+
+[[package]]
 name = "biome_css_syntax"
 version = "0.5.7"
 dependencies = [
