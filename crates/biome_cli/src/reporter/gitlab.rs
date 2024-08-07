@@ -30,9 +30,9 @@ pub(crate) struct GitLabReporterVisitor<'a> {
 }
 
 #[derive(Default)]
-struct GitlabHasher(HashSet<u64>);
+struct GitLabHasher(HashSet<u64>);
 
-impl GitlabHasher {
+impl GitLabHasher {
     /// Enforces uniqueness of generated fingerprints in the context of a
     /// single report.
     fn rehash_until_unique(&mut self, fingerprint: u64) -> u64 {
@@ -68,19 +68,19 @@ impl<'a> ReporterVisitor for GitLabReporterVisitor<'a> {
         payload: DiagnosticsPayload,
     ) -> std::io::Result<()> {
         let hasher = RwLock::default();
-        let diagnostics = GitlabDiagnostics(payload, &hasher, self.repository_root.as_deref());
+        let diagnostics = GitLabDiagnostics(payload, &hasher, self.repository_root.as_deref());
         self.console.log(markup!({ diagnostics }));
         Ok(())
     }
 }
 
-struct GitlabDiagnostics<'a>(
+struct GitLabDiagnostics<'a>(
     DiagnosticsPayload,
-    &'a RwLock<GitlabHasher>,
+    &'a RwLock<GitLabHasher>,
     Option<&'a Path>,
 );
 
-impl<'a> GitlabDiagnostics<'a> {
+impl<'a> GitLabDiagnostics<'a> {
     fn attempt_to_relativize(&self, subject: &str) -> Option<PathBuf> {
         let Ok(resolved) = Path::new(subject).absolutize() else {
             return None;
@@ -116,7 +116,7 @@ impl<'a> GitlabDiagnostics<'a> {
     }
 }
 
-impl<'a> Display for GitlabDiagnostics<'a> {
+impl<'a> Display for GitLabDiagnostics<'a> {
     fn fmt(&self, fmt: &mut Formatter) -> std::io::Result<()> {
         let mut hasher = self.1.write().unwrap();
         let gitlab_diagnostics: Vec<_> = self
