@@ -9,20 +9,21 @@ use biome_configuration::{
     PartialConfiguration,
 };
 use biome_console::markup;
-use biome_css_analyze::metadata as css_lint_metadata;
+use biome_css_analyze::METADATA as css_lint_metadata;
 use biome_deserialize::json::deserialize_from_json_str;
 use biome_deserialize::{Deserialized, Merge};
 use biome_diagnostics::{DiagnosticExt, Error, Severity};
 use biome_fs::{AutoSearchResult, ConfigName, FileSystem, OpenOptions};
-use biome_graphql_analyze::metadata as graphql_lint_metadata;
-use biome_js_analyze::metadata as js_lint_metadata;
-use biome_json_analyze::metadata as json_lint_metadata;
+use biome_graphql_analyze::METADATA as graphql_lint_metadata;
+use biome_js_analyze::METADATA as js_lint_metadata;
+use biome_json_analyze::METADATA as json_lint_metadata;
 use biome_json_formatter::context::JsonFormatOptions;
 use biome_json_parser::{parse_json, JsonParserOptions};
 use std::ffi::OsStr;
 use std::fmt::Debug;
 use std::io::ErrorKind;
 use std::iter::FusedIterator;
+use std::ops::Deref;
 use std::path::{Path, PathBuf};
 
 /// Information regarding the configuration that was found.
@@ -369,10 +370,10 @@ pub fn to_analyzer_rules(settings: &Settings, path: &Path) -> AnalyzerRules {
     let overrides = &settings.override_settings;
     let mut analyzer_rules = AnalyzerRules::default();
     if let Some(rules) = linter_settings.rules.as_ref() {
-        push_to_analyzer_rules(rules, js_lint_metadata(), &mut analyzer_rules);
-        push_to_analyzer_rules(rules, css_lint_metadata(), &mut analyzer_rules);
-        push_to_analyzer_rules(rules, json_lint_metadata(), &mut analyzer_rules);
-        push_to_analyzer_rules(rules, graphql_lint_metadata(), &mut analyzer_rules);
+        push_to_analyzer_rules(rules, js_lint_metadata.deref(), &mut analyzer_rules);
+        push_to_analyzer_rules(rules, css_lint_metadata.deref(), &mut analyzer_rules);
+        push_to_analyzer_rules(rules, json_lint_metadata.deref(), &mut analyzer_rules);
+        push_to_analyzer_rules(rules, graphql_lint_metadata.deref(), &mut analyzer_rules);
     }
 
     overrides.override_analyzer_rules(path, analyzer_rules)

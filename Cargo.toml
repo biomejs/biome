@@ -167,7 +167,6 @@ getrandom          = "0.2.15"
 ignore             = "0.4.22"
 indexmap           = { version = "2.3.0", features = ["serde"] }
 insta              = "1.39.0"
-lazy_static        = "1.5.0"
 natord             = "1.0.9"
 oxc_resolver       = "1.10.2"
 proc-macro2        = "1.0.86"

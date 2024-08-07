@@ -42,7 +42,6 @@ crossbeam                = { workspace = true }
 dashmap                  = { workspace = true }
 hdrhistogram             = { version = "7.5.4", default-features = false }
 indexmap                 = { workspace = true }
-lazy_static              = { workspace = true }
 path-absolutize          = { version = "3.1.1", optional = false, features = ["use_unix_paths_on_wasm"] }
 quick-junit              = "0.4.0"
 rayon                    = { workspace = true }

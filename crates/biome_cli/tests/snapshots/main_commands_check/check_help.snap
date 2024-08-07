@@ -174,12 +174,14 @@ Available options:
                               code.
                               Example: `echo 'let a;' | biome check --stdin-file-path=file.js`
         --staged              When set to true, only the files that have been staged (the ones
-                              prepared to be committed) will be linted.
+                              prepared to be committed) will be linted. This option should be used
+                              when working locally.
         --changed             When set to true, only the files that have been changed compared to
-                              your `defaultBranch` configuration will be linted.
+                              your `defaultBranch` configuration will be linted. This options should
+                              be used in CI environments.
         --since=REF           Use this to specify the base branch to compare against when you're
                               using the --changed flag and the `defaultBranch` is not set in your
-                              biome.json
+                              `biome.json`
     -h, --help                Prints help information
 
 ```

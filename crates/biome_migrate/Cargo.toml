@@ -21,7 +21,6 @@ biome_json_analyze = { workspace = true }
 biome_json_factory = { workspace = true }
 biome_json_syntax  = { workspace = true }
 biome_rowan        = { workspace = true }
-lazy_static        = { workspace = true }
 rustc-hash         = { workspace = true }
 
 [dev-dependencies]

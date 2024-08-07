@@ -7,12 +7,11 @@ use biome_console::markup;
 use biome_js_factory::make;
 use biome_js_syntax::{AnyJsxChild, JsSyntaxKind, JsSyntaxToken, JsxText};
 use biome_rowan::{AstNode, BatchMutationExt};
-use lazy_static::lazy_static;
 use regex::Regex;
+use std::sync::LazyLock;
 
-lazy_static! {
-    static ref COMMENT_REGEX: Regex = Regex::new(r"//.*|/\*[\s\S]*?\*/").unwrap();
-}
+static COMMENT_REGEX: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r"//.*|/\*[\s\S]*?\*/").unwrap());
 
 declare_lint_rule! {
     /// Prevent comments from being inserted as text nodes
