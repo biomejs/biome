@@ -84,7 +84,7 @@ invalid.js:2:3 lint/nursery/noUselessEscapeInRegex  FIXABLE  ━━━━━━�
     3 │ /[ab\?]/;
     4 │ /[ab\.]/;
   
-  i The character must be escaped only when it appears in the niddle of the character class.
+  i The character should only be escaped if it appears in the middle of the character class or under the `v` flag.
   
   i Safe fix: Unescape the character.
   
@@ -105,7 +105,7 @@ invalid.js:3:5 lint/nursery/noUselessEscapeInRegex  FIXABLE  ━━━━━━�
     4 │ /[ab\.]/;
     5 │ /[a\|b]/;
   
-  i The character must only be escaped when it is outside of a characvter class.
+  i The character should only be escaped if it is outside a character class.
   
   i Safe fix: Unescape the character.
   
@@ -126,7 +126,7 @@ invalid.js:4:5 lint/nursery/noUselessEscapeInRegex  FIXABLE  ━━━━━━�
     5 │ /[a\|b]/;
     6 │ /\-/;
   
-  i The character must only be escaped when it is outside of a characvter class.
+  i The character should only be escaped if it is outside a character class.
   
   i Safe fix: Unescape the character.
   
@@ -146,6 +146,8 @@ invalid.js:5:4 lint/nursery/noUselessEscapeInRegex  FIXABLE  ━━━━━━�
       │    ^^
     6 │ /\-/;
     7 │ /[\-]/;
+  
+  i The character should only be escaped if it is outside a character class or under the `v` flag.
   
   i Safe fix: Unescape the character.
   
@@ -185,7 +187,7 @@ invalid.js:7:3 lint/nursery/noUselessEscapeInRegex  FIXABLE  ━━━━━━�
     8 │ /[\-]/;
     9 │ /[\(paren]/;
   
-  i The character must be escaped only when it appears in the niddle of the character class.
+  i The character should only be escaped if it appears in the middle of the character class or under the `v` flag.
   
   i Safe fix: Unescape the character.
   
@@ -206,7 +208,7 @@ invalid.js:8:3 lint/nursery/noUselessEscapeInRegex  FIXABLE  ━━━━━━�
      9 │ /[\(paren]/;
     10 │ /[\[]/;
   
-  i The character must be escaped only when it appears in the niddle of the character class.
+  i The character should only be escaped if it appears in the middle of the character class or under the `v` flag.
   
   i Safe fix: Unescape the character.
   
@@ -227,7 +229,7 @@ invalid.js:9:3 lint/nursery/noUselessEscapeInRegex  FIXABLE  ━━━━━━�
     10 │ /[\[]/;
     11 │ /[\/]/; // A character class containing '/'
   
-  i The character must only be escaped when it is outside of a characvter class.
+  i The character should only be escaped if it is outside a character class or under the `v` flag.
   
   i Safe fix: Unescape the character.
   
@@ -248,7 +250,7 @@ invalid.js:10:3 lint/nursery/noUselessEscapeInRegex  FIXABLE  ━━━━━━
     11 │ /[\/]/; // A character class containing '/'
     12 │ /[\B]/;
   
-  i The character must only be escaped when it is outside of a characvter class.
+  i The character should only be escaped if it is outside a character class or under the `v` flag.
   
   i Safe fix: Unescape the character.
   
@@ -269,6 +271,8 @@ invalid.js:11:3 lint/nursery/noUselessEscapeInRegex  FIXABLE  ━━━━━━
     12 │ /[\B]/;
     13 │ /[a][\-b]/;
   
+  i The character should only be escaped if it is outside a character class or under the `v` flag.
+  
   i Safe fix: Unescape the character.
   
     11 │ /[\/]/;·//·A·character·class·containing·'/'
@@ -288,7 +292,7 @@ invalid.js:12:3 lint/nursery/noUselessEscapeInRegex  FIXABLE  ━━━━━━
     13 │ /[a][\-b]/;
     14 │ /\-[]/;
   
-  i The escape sequence has only a meaning outside of a characvter class.
+  i The escape sequence only has meaning outside a character class.
   
   i Safe fix: Unescape the character.
   
@@ -309,7 +313,7 @@ invalid.js:13:6 lint/nursery/noUselessEscapeInRegex  FIXABLE  ━━━━━━
     14 │ /\-[]/;
     15 │ /[a\^]/;
   
-  i The character must be escaped only when it appears in the niddle of the character class.
+  i The character should only be escaped if it appears in the middle of the character class or under the `v` flag.
   
   i Safe fix: Unescape the character.
   
@@ -349,7 +353,7 @@ invalid.js:15:4 lint/nursery/noUselessEscapeInRegex  FIXABLE  ━━━━━━
     16 │ /[^\^]/;
     17 │ /[^\^]/u;
   
-  i The character must only be escaped when it is the first character of the class.
+  i The character should only be escaped if it is the first character of the class.
   
   i Safe fix: Unescape the character.
   
@@ -370,7 +374,7 @@ invalid.js:16:4 lint/nursery/noUselessEscapeInRegex  FIXABLE  ━━━━━━
     17 │ /[^\^]/u;
     18 │ /[\$]/v;
   
-  i The character must only be escaped when it is the first character of the class.
+  i The character should only be escaped if it is the first character of the class.
   
   i Safe fix: Unescape the character.
   
@@ -391,7 +395,7 @@ invalid.js:17:4 lint/nursery/noUselessEscapeInRegex  FIXABLE  ━━━━━━
     18 │ /[\$]/v;
     19 │ /[\&\&]/v;
   
-  i The character must only be escaped when it is the first character of the class.
+  i The character should only be escaped if it is the first character of the class.
   
   i Safe fix: Unescape the character.
   
@@ -412,7 +416,7 @@ invalid.js:18:3 lint/nursery/noUselessEscapeInRegex  FIXABLE  ━━━━━━
     19 │ /[\&\&]/v;
     20 │ /[\!\!]/v;
   
-  i The character must only be escaped when it is outside of a characvter class.
+  i The character should only be escaped if it is outside a character class.
   
   i Safe fix: Unescape the character.
   
@@ -509,7 +513,7 @@ invalid.js:23:3 lint/nursery/noUselessEscapeInRegex  FIXABLE  ━━━━━━
     24 │ /[\+\+]/v;
     25 │ /[\,\,]/v;
   
-  i The character must only be escaped when it is outside of a characvter class.
+  i The character should only be escaped if it is outside a character class.
   
   i Safe fix: Unescape the character.
   
@@ -530,7 +534,7 @@ invalid.js:24:3 lint/nursery/noUselessEscapeInRegex  FIXABLE  ━━━━━━
     25 │ /[\,\,]/v;
     26 │ /[\,\,]/v;
   
-  i The character must only be escaped when it is outside of a characvter class.
+  i The character should only be escaped if it is outside a character class.
   
   i Safe fix: Unescape the character.
   
@@ -684,7 +688,7 @@ invalid.js:32:3 lint/nursery/noUselessEscapeInRegex  FIXABLE  ━━━━━━
     33 │ /[\@\@]/v;
     34 │ /[\`\`]/v;
   
-  i The character must only be escaped when it is outside of a characvter class.
+  i The character should only be escaped if it is outside a character class.
   
   i Safe fix: Unescape the character.
   
@@ -762,7 +766,7 @@ invalid.js:36:4 lint/nursery/noUselessEscapeInRegex  FIXABLE  ━━━━━━
     37 │ /[_\^\^]/v;
     38 │ /[\&\&&\&]/v;
   
-  i The character must only be escaped when it is the first character of the class.
+  i The character should only be escaped if it is the first character of the class.
   
   i Safe fix: Unescape the character.
   
@@ -783,7 +787,7 @@ invalid.js:37:4 lint/nursery/noUselessEscapeInRegex  FIXABLE  ━━━━━━
     38 │ /[\&\&&\&]/v;
     39 │ /[\p{ASCII}--\.]/v;
   
-  i The character must only be escaped when it is the first character of the class.
+  i The character should only be escaped if it is the first character of the class.
   
   i Safe fix: Unescape the character.
   
@@ -823,7 +827,7 @@ invalid.js:39:14 lint/nursery/noUselessEscapeInRegex  FIXABLE  ━━━━━�
     40 │ /[\p{ASCII}&&\.]/v;
     41 │ /[\.--[.&]]/v;
   
-  i The character must only be escaped when it is outside of a characvter class.
+  i The character should only be escaped if it is outside a character class.
   
   i Safe fix: Unescape the character.
   
@@ -844,7 +848,7 @@ invalid.js:40:14 lint/nursery/noUselessEscapeInRegex  FIXABLE  ━━━━━�
     41 │ /[\.--[.&]]/v;
     42 │ /[\.&&[.&]]/v;
   
-  i The character must only be escaped when it is outside of a characvter class.
+  i The character should only be escaped if it is outside a character class.
   
   i Safe fix: Unescape the character.
   
@@ -865,7 +869,7 @@ invalid.js:41:3 lint/nursery/noUselessEscapeInRegex  FIXABLE  ━━━━━━
     42 │ /[\.&&[.&]]/v;
     43 │ /[\.--\.--\.]/v;
   
-  i The character must only be escaped when it is outside of a characvter class.
+  i The character should only be escaped if it is outside a character class.
   
   i Safe fix: Unescape the character.
   
@@ -886,7 +890,7 @@ invalid.js:42:3 lint/nursery/noUselessEscapeInRegex  FIXABLE  ━━━━━━
     43 │ /[\.--\.--\.]/v;
     44 │ /[\.&&\.&&\.]/v;
   
-  i The character must only be escaped when it is outside of a characvter class.
+  i The character should only be escaped if it is outside a character class.
   
   i Safe fix: Unescape the character.
   
@@ -907,7 +911,7 @@ invalid.js:43:3 lint/nursery/noUselessEscapeInRegex  FIXABLE  ━━━━━━
     44 │ /[\.&&\.&&\.]/v;
     45 │ /[[\.&]--[\.&]]/v;
   
-  i The character must only be escaped when it is outside of a characvter class.
+  i The character should only be escaped if it is outside a character class.
   
   i Safe fix: Unescape the character.
   
@@ -928,7 +932,7 @@ invalid.js:44:3 lint/nursery/noUselessEscapeInRegex  FIXABLE  ━━━━━━
     45 │ /[[\.&]--[\.&]]/v;
     46 │ /[[\.&]&&[\.&]]/v;
   
-  i The character must only be escaped when it is outside of a characvter class.
+  i The character should only be escaped if it is outside a character class.
   
   i Safe fix: Unescape the character.
   
@@ -949,7 +953,7 @@ invalid.js:45:4 lint/nursery/noUselessEscapeInRegex  FIXABLE  ━━━━━━
     46 │ /[[\.&]&&[\.&]]/v;
     47 │ 
   
-  i The character must only be escaped when it is outside of a characvter class.
+  i The character should only be escaped if it is outside a character class.
   
   i Safe fix: Unescape the character.
   
@@ -970,7 +974,7 @@ invalid.js:46:4 lint/nursery/noUselessEscapeInRegex  FIXABLE  ━━━━━━
     47 │ 
     48 │ // Unlike ESLint, we report `\k` when it is not in a unicode-aware regex
   
-  i The character must only be escaped when it is outside of a characvter class.
+  i The character should only be escaped if it is outside a character class.
   
   i Safe fix: Unescape the character.
   
@@ -988,7 +992,7 @@ invalid.js:49:8 lint/nursery/noUselessEscapeInRegex  FIXABLE  ━━━━━━
   > 49 │ /(?<a>)\k<a>/;
        │        ^^
   
-  i The escape sequence is only useful when the Regular Expression is unicode-aware. To be unicode-aware, the `u` or `v` flag must be used.
+  i The escape sequence is only useful if the regular expression is unicode-aware. To be unicode-aware, the `u` or `v` flag should be used.
   
   i Safe fix: Unescape the character.
   

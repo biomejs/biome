@@ -1,6 +1,6 @@
 use biome_analyze::{
     context::RuleContext, declare_lint_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic,
-    RuleSource, RuleSourceKind,
+    RuleSource,
 };
 use biome_console::markup;
 use biome_js_syntax::{JsRegexLiteralExpression, JsSyntaxKind, JsSyntaxToken};
@@ -12,7 +12,7 @@ declare_lint_rule! {
     /// Disallow unnecessary escape sequence in regular expression literals.
     ///
     /// Escaping non-special characters in regular expression literals doesn't have any effect.
-    /// However, they may confuse a reader.
+    /// Hence, they may confuse a reader.
     ///
     /// ## Examples
     ///
@@ -227,20 +227,23 @@ impl Rule for NoUselessEscapeInRegex {
             },
         );
         Some(if matches!(escaped, b'p' | b'P' | b'k') {
-            diag.note("The escape sequence is only useful when the Regular Expression is unicode-aware. To be unicode-aware, the `u` or `v` flag must be used.")
+            diag.note("The escape sequence is only useful if the regular expression is unicode-aware. To be unicode-aware, the `u` or `v` flag should be used.")
         } else if *in_char_class {
             match escaped {
                 b'^' => {
-                    diag.note("The character must only be escaped when it is the first character of the class.")
+                    diag.note("The character should only be escaped if it is the first character of the class.")
                 }
                 b'B' => {
-                    diag.note("The escape sequence has only a meaning outside of a characvter class.")
+                    diag.note("The escape sequence only has meaning outside a character class.")
                 }
-                b'.' | b'$' | b'*' | b'+' | b'?' | b'{' | b'}' | b'[' | b'(' | b')' => {
-                    diag.note("The character must only be escaped when it is outside of a characvter class.")
+                b'(' | b')' | b'[' | b'{' | b'}' | b'/' | b'|' => {
+                    diag.note("The character should only be escaped if it is outside a character class or under the `v` flag.")
+                }
+                b'.' | b'$' | b'*' | b'+' | b'?' => {
+                    diag.note("The character should only be escaped if it is outside a character class.")
                 }
                 b'-' => {
-                    diag.note("The character must be escaped only when it appears in the niddle of the character class.")
+                    diag.note("The character should only be escaped if it appears in the middle of the character class or under the `v` flag.")
                 }
                 _ => diag,
             }
@@ -258,7 +261,10 @@ impl Rule for NoUselessEscapeInRegex {
         let node = ctx.query();
         let value_token = node.value_token().ok()?;
         let regex_text = value_token.text_trimmed();
-        debug_assert!(regex_text.as_bytes().get(adjusted_backslash_index) == Some(&b'\\'));
+        debug_assert!(
+            regex_text.as_bytes().get(adjusted_backslash_index) == Some(&b'\\'),
+            "backslash_index should points to a backslash."
+        );
         let new_regex = JsSyntaxToken::new_detached(
             JsSyntaxKind::JS_REGEX_LITERAL,
             &format!(
