@@ -97,6 +97,7 @@ biome_css_analyze            = { version = "0.5.7", path = "./crates/biome_css_a
 biome_css_factory            = { version = "0.5.7", path = "./crates/biome_css_factory" }
 biome_css_formatter          = { version = "0.5.7", path = "./crates/biome_css_formatter" }
 biome_css_parser             = { version = "0.5.7", path = "./crates/biome_css_parser" }
+biome_css_semantic           = { version = "0.0.0", path = "./crates/biome_css_semantic" }
 biome_css_syntax             = { version = "0.5.7", path = "./crates/biome_css_syntax" }
 biome_deserialize            = { version = "0.6.0", path = "./crates/biome_deserialize" }
 biome_deserialize_macros     = { version = "0.6.0", path = "./crates/biome_deserialize_macros" }
