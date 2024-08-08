@@ -179,7 +179,7 @@ export interface PartialFormatterConfiguration {
 	/**
 	 * The indent style.
 	 */
-	indentStyle?: PlainIndentStyle;
+	indentStyle?: IndentStyle;
 	/**
 	 * The size of the indentation, 2 by default
 	 */
@@ -343,7 +343,7 @@ export interface PartialCssFormatter {
 	/**
 	 * The indent style applied to CSS (and its super languages) files.
 	 */
-	indentStyle?: PlainIndentStyle;
+	indentStyle?: IndentStyle;
 	/**
 	 * The size of the indentation applied to CSS (and its super languages) files. Default to 2.
 	 */
@@ -386,7 +386,7 @@ export interface PartialCssParser {
 export type AttributePosition = "auto" | "multiline";
 export type BracketSpacing = boolean;
 export type IndentWidth = number;
-export type PlainIndentStyle = "tab" | "space";
+export type IndentStyle = "tab" | "space";
 export type LineEnding = "lf" | "crlf" | "cr";
 /**
 	* Validated value for the `line_width` formatter options
@@ -409,7 +409,7 @@ export interface PartialGraphqlFormatter {
 	/**
 	 * The indent style applied to GraphQL files.
 	 */
-	indentStyle?: PlainIndentStyle;
+	indentStyle?: IndentStyle;
 	/**
 	 * The size of the indentation applied to GraphQL files. Default to 2.
 	 */
@@ -476,7 +476,7 @@ export interface PartialJavascriptFormatter {
 	/**
 	 * The indent style applied to JavaScript (and its super languages) files.
 	 */
-	indentStyle?: PlainIndentStyle;
+	indentStyle?: IndentStyle;
 	/**
 	 * The size of the indentation applied to JavaScript (and its super languages) files. Default to 2.
 	 */
@@ -560,7 +560,7 @@ export interface PartialJsonFormatter {
 	/**
 	 * The indent style applied to JSON (and its super languages) files.
 	 */
-	indentStyle?: PlainIndentStyle;
+	indentStyle?: IndentStyle;
 	/**
 	 * The size of the indentation applied to JSON (and its super languages) files. Default to 2.
 	 */
@@ -1860,7 +1860,7 @@ export interface OverrideFormatterConfiguration {
 	/**
 	 * The indent style.
 	 */
-	indentStyle?: PlainIndentStyle;
+	indentStyle?: IndentStyle;
 	/**
 	 * The size of the indentation, 2 by default
 	 */

@@ -1,6 +1,5 @@
-use crate::PlainIndentStyle;
 use biome_deserialize_macros::{Deserializable, Merge, Partial};
-use biome_formatter::{IndentWidth, LineEnding, LineWidth, QuoteStyle};
+use biome_formatter::{IndentStyle, IndentWidth, LineEnding, LineWidth, QuoteStyle};
 use bpaf::Bpaf;
 use serde::{Deserialize, Serialize};
 
@@ -54,7 +53,7 @@ pub struct CssFormatter {
 
     /// The indent style applied to CSS (and its super languages) files.
     #[partial(bpaf(long("css-formatter-indent-style"), argument("tab|space"), optional))]
-    pub indent_style: Option<PlainIndentStyle>,
+    pub indent_style: Option<IndentStyle>,
 
     /// The size of the indentation applied to CSS (and its super languages) files. Default to 2.
     #[partial(bpaf(long("css-formatter-indent-width"), argument("NUMBER"), optional))]

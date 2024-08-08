@@ -3,11 +3,13 @@ use super::json::PartialJsonConfiguration;
 use super::{PartialCssConfiguration, PartialGraphqlConfiguration};
 use crate::{
     partial_css_configuration, partial_graphql_configuration, partial_javascript_configuration,
-    partial_json_configuration, PlainIndentStyle,
+    partial_json_configuration,
 };
 use biome_deserialize::StringSet;
 use biome_deserialize_macros::{Deserializable, Merge};
-use biome_formatter::{AttributePosition, BracketSpacing, IndentWidth, LineEnding, LineWidth};
+use biome_formatter::{
+    AttributePosition, BracketSpacing, IndentStyle, IndentWidth, LineEnding, LineWidth,
+};
 use bpaf::Bpaf;
 use serde::{Deserialize, Serialize};
 use std::str::FromStr;
@@ -109,7 +111,7 @@ pub struct OverrideFormatterConfiguration {
     /// The indent style.
     #[serde(skip_serializing_if = "Option::is_none")]
     #[bpaf(long("indent-style"), argument("tab|space"), optional)]
-    pub indent_style: Option<PlainIndentStyle>,
+    pub indent_style: Option<IndentStyle>,
 
     /// The size of the indentation, 2 by default (deprecated, use `indent-width`)
     #[serde(skip_serializing_if = "Option::is_none")]

@@ -11,7 +11,6 @@ use biome_configuration::{
     OverrideFormatterConfiguration, OverrideLinterConfiguration,
     OverrideOrganizeImportsConfiguration, Overrides, PartialConfiguration, PartialCssConfiguration,
     PartialGraphqlConfiguration, PartialJavascriptConfiguration, PartialJsonConfiguration,
-    PlainIndentStyle,
 };
 use biome_css_formatter::context::CssFormatOptions;
 use biome_css_parser::CssParserOptions;
@@ -1444,9 +1443,7 @@ pub fn to_override_settings(
                 format_with_errors: formatter
                     .format_with_errors
                     .unwrap_or(current_settings.formatter.format_with_errors),
-                indent_style: formatter
-                    .indent_style
-                    .map(|indent_style| indent_style.into()),
+                indent_style: formatter.indent_style,
                 indent_width: formatter.indent_width,
                 line_ending: formatter.line_ending,
                 line_width: formatter.line_width,
@@ -1612,10 +1609,7 @@ pub fn to_format_settings(
     working_directory: Option<PathBuf>,
     conf: FormatterConfiguration,
 ) -> Result<FormatSettings, WorkspaceError> {
-    let indent_style = match conf.indent_style {
-        PlainIndentStyle::Tab => IndentStyle::Tab,
-        PlainIndentStyle::Space => IndentStyle::Space,
-    };
+    let indent_style = conf.indent_style;
     let indent_width = conf.indent_width;
 
     Ok(FormatSettings {
@@ -1637,8 +1631,8 @@ impl TryFrom<OverrideFormatterConfiguration> for FormatSettings {
 
     fn try_from(conf: OverrideFormatterConfiguration) -> Result<Self, Self::Error> {
         let indent_style = match conf.indent_style {
-            Some(PlainIndentStyle::Tab) => IndentStyle::Tab,
-            Some(PlainIndentStyle::Space) => IndentStyle::Space,
+            Some(IndentStyle::Tab) => IndentStyle::Tab,
+            Some(IndentStyle::Space) => IndentStyle::Space,
             None => IndentStyle::default(),
         };
         let indent_width = conf
