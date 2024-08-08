@@ -137,7 +137,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub UseComponentsOnlyModule {
-        version: "1.8.0",
+        version: "next",
         name: "useComponentsOnlyModule",
         language: "jsx",
         sources: &[RuleSource::EslintReactRefresh("only-export-components")],
