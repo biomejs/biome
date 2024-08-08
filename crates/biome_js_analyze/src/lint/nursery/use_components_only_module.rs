@@ -319,8 +319,8 @@ fn is_exported_react_component(any_exported_item: &ExportedItem) -> bool {
     if let Some(AnyJsExported::AnyJsExpression(AnyJsExpression::JsCallExpression(f))) =
         any_exported_item.exported.clone()
     {
-        if let Ok(AnyJsExpression::JsIdentifierExpression(funcname)) = f.callee() {
-            if REACT_HOOKS.contains(&funcname.text().as_str()) {
+        if let Ok(AnyJsExpression::JsIdentifierExpression(fn_name)) = f.callee() {
+            if REACT_HOOKS.contains(&fn_name.text().as_str()) {
                 return true;
             }
         }
