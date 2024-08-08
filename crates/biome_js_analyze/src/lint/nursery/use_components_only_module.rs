@@ -48,7 +48,7 @@ declare_lint_rule! {
     ///
     /// ### allowConstantExport
     ///
-    /// Some frameworks, such as Vite, allow exporting constants along with components. By enabling the following, you can avoid warnings.
+    /// Some tools, such as Vite, allow exporting constants along with components. By enabling the following, the rule will support the pattern.
     ///
     /// ```json
     /// {
