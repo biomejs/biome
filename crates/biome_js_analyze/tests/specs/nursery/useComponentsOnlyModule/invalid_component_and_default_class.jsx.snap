@@ -14,14 +14,18 @@ export default class hoge {
 ```
 invalid_component_and_default_class.jsx:2:22 lint/nursery/useComponentsOnlyModule ━━━━━━━━━━━━━━━━━━
 
-  ! Export Non-Component with components are not allowed.
+  ! Exporting a non-component with components is not allowed.
   
     1 │ export const SampleComponent = () => <></>
   > 2 │ export default class hoge {
       │                      ^^^^
     3 │ }
   
-  i Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components. If it is not a component, it may not be following the variable naming conventions.
+  i Fast Refresh only works when a file only exports components.
+  
+  i Consider separating non-component exports into a new file.
+  
+  i If it is a component, it may not be following the variable naming conventions.
   
 
 ```

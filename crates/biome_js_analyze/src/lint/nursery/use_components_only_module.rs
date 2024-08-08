@@ -12,92 +12,20 @@ use biome_string_case::Case;
 use serde::{Deserialize, Serialize};
 
 declare_lint_rule! {
-    /// React components should be separated into different modules.
+    /// Enforce declaring components only within modules that export React Components exclusively.
     ///
-    /// This is necessary to enable the `Fast Refresh` feature, which improves development efficiency.
+    /// This is necessary to enable the [`React Fast Refresh`] feature, which improves development efficiency.
     /// The determination of whether something is a component depends on naming conventions.
-    /// Components should be written in PascalCase and regular functions in camelCase.
+    /// Components should be written in [`PascalCase`] and regular functions in [`camelCase`].
     /// If the framework already has established conventions, consider optionally specifying exceptions.
     ///
-    /// ## Easy Examples
+    /// ## Examples
     ///
     /// ### Invalid
     ///
     /// ```jsx,expect_diagnostic
-    /// export const SampleComponentA = () => <></>
-    /// export const SampleComponentB = () => <></>
-    /// export function hoge () {
-    ///   return 100
-    /// }
-    /// ```
-    ///
-    /// ### Valid
-    ///
-    /// ```jsx
-    /// export const SampleComponentA = () => <></>
-    /// export const SampleComponentB = () => <></>
-    /// ```
-    ///
-    /// ```js
-    /// export function hoge() {
-    ///   return 100
-    /// }
-    /// ```
-    ///
-    /// ## Options
-    ///
-    /// ### `allowConstantExport`
-    ///
-    /// Some tools, such as Vite, allow exporting constants along with components. By enabling the following, the rule will support the pattern.
-    ///
-    /// ```json
-    /// {
-    ///     "//": "...",
-    ///     "options":{
-    ///         "allowConstantExport" : true
-    ///     }
-    /// }
-    /// ```
-    ///
-    /// ### `allowExportNames`
-    ///
-    /// If you use a framework that handles HMR of some specific exports, you can use this option to avoid warning for them.
-    ///
-    /// Example for [Remix](https://remix.run/docs/en/main/discussion/hot-module-replacement#supported-exports):
-    /// ```json
-    /// {
-    ///     "//": "...",
-    ///     "options":{
-    ///         "allowExportNames": ["json", "loader", "headers", "meta", "links", "scripts"]
-    ///     }
-    /// }
-    /// ```
-    ///
-    /// ### checkJS
-    ///
-    /// If you are using JSX within .js files, you can apply the following to enable it for .js files as well. However, this is generally not recommended.
-    ///
-    /// ```json
-    /// {
-    ///     "//": "...",
-    ///     "options":{
-    ///         "checkJS" : true
-    ///     }
-    /// }
-    /// ```
-    ///
-    /// ## More Example
-    ///
-    /// ### invalid
-    ///
-    /// ```jsx,expect_diagnostic
     /// export const foo = () => {};
     /// export const Bar = () => <></>;
-    /// ```
-    ///
-    /// ```jsx,expect_diagnostic
-    /// export default function () {};
-    /// export default compose()(MainComponent);
     /// ```
     ///
     /// ```jsx,expect_diagnostic
@@ -110,7 +38,7 @@ declare_lint_rule! {
     /// createRoot(document.getElementById("root")).render(<App />);
     /// ```
     ///
-    /// ### valid
+    /// ### Valid
     ///
     /// ```jsx
     /// export default function Foo() {
@@ -136,6 +64,52 @@ declare_lint_rule! {
     /// export default memo(Component);
     /// ```
     ///
+    /// ## Options
+    ///
+    /// ### `allowConstantExport`
+    ///
+    /// Some tools, such as Vite, allow exporting constants along with components. By enabling the following, the rule will support the pattern.
+    ///
+    /// ```json
+    /// {
+    ///     "//": "...",
+    ///     "options":{
+    ///         "allowConstantExport" : true
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// ### `allowExportNames`
+    ///
+    /// If you use a framework that handles [Hot Mudule Replacement(HMR)] of some specific exports, you can use this option to avoid warning for them.
+    ///
+    /// Example for [Remix](https://remix.run/docs/en/main/discussion/hot-module-replacement#supported-exports):
+    /// ```json
+    /// {
+    ///     "//": "...",
+    ///     "options":{
+    ///         "allowExportNames": ["json", "loader", "headers", "meta", "links", "scripts"]
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// ### checkJS
+    ///
+    /// If you are using JSX within .js files, you can apply the following to enable it for .js files as well. However, this is generally not recommended.
+    ///
+    /// ```json
+    /// {
+    ///     "//": "...",
+    ///     "options":{
+    ///         "checkJS" : true
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// [Hot Mudule Replacement(HMR)]: https://remix.run/docs/en/main/discussion/hot-module-replacement
+    /// [`React Fast Refresh`]: https://github.com/facebook/react/tree/main/packages/react-refresh
+    /// [`camelCase`]: https://en.wikipedia.org/wiki/Camel_case
+    /// [`PascalCase`]: https://en.wikipedia.org/wiki/Camel_case
     pub UseComponentsOnlyModule {
         version: "next",
         name: "useComponentsOnlyModule",
@@ -288,11 +262,17 @@ impl Rule for UseComponentsOnlyModule {
                     rule_category!(),
                     state.range,
                     markup! {
-                        "Exporting a  non-component with components is not allowed."
+                        "Exporting a non-component with components is not allowed."
                     },
                 )
                 .note(markup! {
-                    "Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components. If it is not a component, it may not be following the variable naming conventions."
+                    <Hyperlink href="https://github.com/facebook/react/tree/main/packages/react-refresh">"Fast Refresh"</Hyperlink>" only works when a file only exports components."
+                })
+                .note(markup! {
+                    "Consider separating non-component exports into a new file."
+                })
+                .note(markup! {
+                    "If it is a component, it may not be following the variable naming conventions."
                 }),
             ),
             ErrorType::UnexportedComponent => Some(
@@ -304,8 +284,14 @@ impl Rule for UseComponentsOnlyModule {
                     },
                 )
                 .note(markup! {
-                    "Fast refresh only works when a file only exports components. Move your component(s) to a separate file. If it is not a component, it may not be following the variable naming conventions."
-                }),
+                    <Hyperlink href="https://github.com/facebook/react/tree/main/packages/react-refresh">"Fast Refresh"</Hyperlink>" only works when a file only exports components."
+                })
+                .note(markup! {
+                    "Consider separating components into a new file."
+                })
+                .note(markup! {
+                    "If it is not a component, it may not be following the variable naming conventions."
+                })
             ),
             ErrorType::NoExport => Some(
                 RuleDiagnostic::new(
@@ -316,7 +302,13 @@ impl Rule for UseComponentsOnlyModule {
                     },
                 )
                 .note(markup! {
-                    "Fast refresh only works when a file has exports. Move your component(s) to a separate file. If it is not a component, it may not be following the variable naming conventions."
+                    <Hyperlink href="https://github.com/facebook/react/tree/main/packages/react-refresh">"Fast Refresh"</Hyperlink>" only works when a file only exports components."
+                })
+                .note(markup! {
+                    "Consider separating component exports into a new file."
+                })
+                .note(markup! {
+                    "If it is not a component, it may not be following the variable naming conventions."
                 }),
             )
         }

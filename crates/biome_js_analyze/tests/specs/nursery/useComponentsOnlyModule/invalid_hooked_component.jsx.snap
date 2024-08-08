@@ -21,7 +21,11 @@ invalid_hooked_component.jsx:1:7 lint/nursery/useComponentsOnlyModule ━━━�
     2 │ export default hoge(Fuga)
     3 │ 
   
-  i Fast refresh only works when a file has exports. Move your component(s) to a separate file. If it is not a component, it may not be following the variable naming conventions.
+  i Fast Refresh only works when a file only exports components.
+  
+  i Consider separating component exports into a new file.
+  
+  i If it is not a component, it may not be following the variable naming conventions.
   
 
 ```

@@ -1206,7 +1206,7 @@ export interface Nursery {
 	 */
 	useAdjacentOverloadSignatures?: RuleConfiguration_for_Null;
 	/**
-	 * React components should be separated into different modules.
+	 * Enforce declaring components only within modules that export React Components exclusively.
 	 */
 	useComponentsOnlyModule?: RuleConfiguration_for_UseComponentsOnlyModuleOptions;
 	/**

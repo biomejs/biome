@@ -2931,7 +2931,7 @@ pub struct Nursery {
     #[doc = "Disallow the use of overload signatures that are not next to each other."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_adjacent_overload_signatures: Option<RuleConfiguration<UseAdjacentOverloadSignatures>>,
-    #[doc = "React components should be separated into different modules."]
+    #[doc = "Enforce declaring components only within modules that export React Components exclusively."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_components_only_module: Option<RuleConfiguration<UseComponentsOnlyModule>>,
     #[doc = "Enforce the use of new for all builtins, except String, Number, Boolean, Symbol and BigInt."]

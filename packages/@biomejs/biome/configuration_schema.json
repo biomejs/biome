@@ -2029,7 +2029,7 @@
 					]
 				},
 				"useComponentsOnlyModule": {
-					"description": "React components should be separated into different modules.",
+					"description": "Enforce declaring components only within modules that export React Components exclusively.",
 					"anyOf": [
 						{ "$ref": "#/definitions/UseComponentsOnlyModuleConfiguration" },
 						{ "type": "null" }
