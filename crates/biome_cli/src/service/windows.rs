@@ -63,12 +63,17 @@ async fn try_connect() -> io::Result<NamedPipeClient> {
     }
 }
 
-/// Process creationg flag from the Win32 API, ensures the process is created
+/// Process creation flag from the Win32 API, ensures the process is created
 /// in its own group and will not be killed when the parent process exits
 const CREATE_NEW_PROCESS_GROUP: u32 = 0x00000200;
 
 /// Spawn the daemon server process in the background
-fn spawn_daemon(stop_on_disconnect: bool, config_path: Option<PathBuf>) -> io::Result<()> {
+fn spawn_daemon(
+    stop_on_disconnect: bool,
+    config_path: Option<PathBuf>,
+    log_path: Option<PathBuf>,
+    log_file_name_prefix: Option<String>,
+) -> io::Result<()> {
     let binary = env::current_exe()?;
 
     let mut cmd = Command::new(binary);
@@ -81,7 +86,12 @@ fn spawn_daemon(stop_on_disconnect: bool, config_path: Option<PathBuf>) -> io::R
     if let Some(config_path) = config_path {
         cmd.arg(format!("--config-path={}", config_path.display()));
     }
-
+    if let Some(log_path) = log_path {
+        cmd.arg(format!("--log-path={}", log_path.display()));
+    }
+    if let Some(log_file_name_prefix) = log_file_name_prefix {
+        cmd.arg(format!("--log-prefix-name={}", log_file_name_prefix));
+    }
     cmd.creation_flags(CREATE_NEW_PROCESS_GROUP);
 
     cmd.spawn()?;
@@ -176,6 +186,8 @@ impl AsyncWrite for ClientWriteHalf {
 pub(crate) async fn ensure_daemon(
     stop_on_disconnect: bool,
     config_path: Option<PathBuf>,
+    log_path: Option<PathBuf>,
+    log_file_name_prefix: Option<String>,
 ) -> io::Result<bool> {
     let mut did_spawn = false;
 
@@ -183,7 +195,12 @@ pub(crate) async fn ensure_daemon(
         match open_socket().await {
             Ok(Some(_)) => break,
             Ok(None) => {
-                spawn_daemon(stop_on_disconnect, config_path.clone())?;
+                spawn_daemon(
+                    stop_on_disconnect,
+                    config_path.clone(),
+                    log_path.clone(),
+                    log_file_name_prefix.clone(),
+                )?;
                 did_spawn = true;
                 time::sleep(Duration::from_millis(50)).await;
             }
@@ -197,7 +214,7 @@ pub(crate) async fn ensure_daemon(
 /// Ensure the server daemon is running and ready to receive connections and
 /// print the global pipe name in the standard output
 pub(crate) async fn print_socket() -> io::Result<()> {
-    ensure_daemon(true, None).await?;
+    ensure_daemon(true, None, None, None).await?;
     println!("{}", get_pipe_name());
     Ok(())
 }
