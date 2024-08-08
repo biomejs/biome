@@ -14,7 +14,7 @@ use serde::{Deserialize, Serialize};
 declare_lint_rule! {
     /// React components should be separated into different modules.
     ///
-    /// This is necessary to enable the Fast Refresh feature, which improves development efficiency.
+    /// This is necessary to enable the `Fast Refresh` feature, which improves development efficiency.
     /// The determination of whether something is a component depends on naming conventions.
     /// Please write components in PascalCase and regular functions in camelCase.
     /// If the framework already has established conventions, consider optionally specifying exceptions.
