@@ -46,7 +46,7 @@ declare_lint_rule! {
     ///
     /// ## Options
     ///
-    /// ### allowConstantExport
+    /// ### `allowConstantExport`
     ///
     /// Some tools, such as Vite, allow exporting constants along with components. By enabling the following, the rule will support the pattern.
     ///
