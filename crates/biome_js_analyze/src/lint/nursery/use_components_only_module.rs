@@ -135,6 +135,8 @@ pub struct UseComponentsOnlyModuleState {
     range: TextRange,
 }
 
+const JSX_FILE_EXT: [&str; 2] = [".jsx", ".tsx"];
+
 impl Rule for UseComponentsOnlyModule {
     type Query = Ast<JsModule>;
     type State = UseComponentsOnlyModuleState;
@@ -142,6 +144,11 @@ impl Rule for UseComponentsOnlyModule {
     type Options = UseComponentsOnlyModuleOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
+        if let Some(file_name) = ctx.file_path().file_name().and_then(|x| x.to_str()) {
+            if !JSX_FILE_EXT.iter().any(|ext| file_name.ends_with(ext)) {
+                return vec![];
+            }
+        }
         let root = ctx.query();
         let mut local_declaration_ids = Vec::new();
         let mut exported_component_ids = Vec::new();
