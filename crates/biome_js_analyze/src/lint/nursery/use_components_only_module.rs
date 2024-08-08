@@ -59,7 +59,7 @@ declare_lint_rule! {
     /// }
     /// ```
     ///
-    /// ### allowExportNames
+    /// ### `allowExportNames`
     ///
     /// If you use a framework that handles HMR of some specific exports, you can use this option to avoid warning for them.
     ///
