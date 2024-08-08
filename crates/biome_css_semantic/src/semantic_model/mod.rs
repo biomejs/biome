@@ -1,5 +1,5 @@
-mod builder;
-pub(crate) mod model;
+pub mod builder;
+pub mod model;
 
 use biome_css_syntax::CssRoot;
 use biome_rowan::AstNode;

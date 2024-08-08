@@ -2,6 +2,7 @@ mod keywords;
 mod lint;
 pub mod options;
 mod registry;
+mod services;
 mod suppression_action;
 mod utils;
 
@@ -164,7 +165,7 @@ mod tests {
         :popover-open {}
         .test::-webkit-scrollbar-button:horizontal:decrement {}
         @page :first { }
-       
+
         /* invalid */
         a:unknown { }
         a:pseudo-class { }
