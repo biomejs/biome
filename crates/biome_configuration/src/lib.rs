@@ -33,7 +33,7 @@ pub use analyzer::{
 };
 use biome_deserialize::{Deserialized, StringSet};
 use biome_deserialize_macros::{Deserializable, Merge, Partial};
-use biome_formatter::QuoteStyle;
+use biome_formatter::{IndentStyle, QuoteStyle};
 use bpaf::Bpaf;
 pub use css::{
     partial_css_configuration, CssConfiguration, CssFormatter, PartialCssConfiguration,
@@ -41,7 +41,6 @@ pub use css::{
 };
 pub use formatter::{
     partial_formatter_configuration, FormatterConfiguration, PartialFormatterConfiguration,
-    PlainIndentStyle,
 };
 pub use graphql::{
     partial_graphql_configuration, GraphqlConfiguration, GraphqlFormatter, GraphqlLinter,
@@ -156,7 +155,7 @@ impl PartialConfiguration {
             }),
             formatter: Some(PartialFormatterConfiguration {
                 enabled: Some(true),
-                indent_style: Some(PlainIndentStyle::Tab),
+                indent_style: Some(IndentStyle::Tab),
                 ..Default::default()
             }),
             organize_imports: Some(PartialOrganizeImports {

@@ -79,12 +79,12 @@ use std::num::ParseIntError;
 use std::str::FromStr;
 use token::string::Quote;
 
-#[derive(Debug, Eq, PartialEq, Clone, Copy, Hash)]
+#[derive(Debug, Default, Clone, Copy, Deserializable, Eq, Hash, Merge, PartialEq)]
 #[cfg_attr(
     feature = "serde",
-    derive(serde::Serialize, serde::Deserialize, schemars::JsonSchema)
+    derive(serde::Serialize, serde::Deserialize, schemars::JsonSchema),
+    serde(rename_all = "camelCase")
 )]
-#[derive(Default)]
 pub enum IndentStyle {
     /// Tab
     #[default]
@@ -112,10 +112,10 @@ impl FromStr for IndentStyle {
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s {
-            "tab" | "Tabs" => Ok(Self::Tab),
-            "space" | "Spaces" => Ok(Self::Space),
+            "tab" => Ok(Self::Tab),
+            "space" => Ok(Self::Space),
             // TODO: replace this error with a diagnostic
-            _ => Err("Value not supported for IndentStyle"),
+            _ => Err("Unsupported value for this option"),
         }
     }
 }
