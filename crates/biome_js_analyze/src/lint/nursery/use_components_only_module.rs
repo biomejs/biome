@@ -230,11 +230,12 @@ impl Rule for UseComponentsOnlyModule {
             return exported_non_component_ids
                 .iter()
                 .filter_map(|id| {
-                    let range = id.identifier.clone().map(|x| x.range())?;
-                    Some(UseComponentsOnlyModuleState {
-                        error: ErrorType::ExportedNonComponentWithComponent,
-                        range,
-                    })
+                    id.identifier
+                        .as_ref()
+                        .map(|identifier| UseComponentsOnlyModuleState {
+                            error: ErrorType::ExportedNonComponentWithComponent,
+                            range: identifier.range(),
+                        })
                 })
                 .collect::<Vec<UseComponentsOnlyModuleState>>();
         }
