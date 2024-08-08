@@ -288,7 +288,7 @@ impl Rule for UseComponentsOnlyModule {
                     rule_category!(),
                     state.range,
                     markup! {
-                        "Export Non-Component with components are not allowed."
+                        "Exporting a  non-component with components is not allowed."
                     },
                 )
                 .note(markup! {
