@@ -120,19 +120,15 @@ declare_lint_rule! {
     }
 }
 
-fn is_default<T: Default + Eq>(value: &T) -> bool {
-    value == &T::default()
-}
-
 #[derive(Debug, Clone, Deserialize, Deserializable, Eq, PartialEq, Serialize, Default)]
 #[cfg_attr(feature = "schemars", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct UseComponentsOnlyModuleOptions {
-    #[serde(default, skip_serializing_if = "is_default")]
+    #[serde(default)]
     allow_constant_export: bool,
-    #[serde(default, skip_serializing_if = "is_default")]
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
     allow_export_names: Vec<String>,
-    #[serde(default, skip_serializing_if = "is_default")]
+    #[serde(default)]
     check_js: bool,
 }
 
