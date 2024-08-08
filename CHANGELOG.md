@@ -296,6 +296,13 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
   Contributed by @Conaclos
 
+- [suspicious/noControlCharactersInRegex](https://www.biomejs.dev/linter/rules/no-control-characters-in-regex) now corretcly handle `\u` escapes in unicode-aware regexes.
+
+  Previously, the rule didn't consider regex with the `v` flags as unicode-aware regexes.
+  Moreover, `\uhhhh` was not handled in unicode-aware regexes.
+
+  Contributed by @Conaclos
+
 ### Parser
 
 #### Bug fixes
