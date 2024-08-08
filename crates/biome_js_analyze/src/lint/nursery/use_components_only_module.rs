@@ -68,7 +68,7 @@ declare_lint_rule! {
     ///
     /// ### `allowConstantExport`
     ///
-    /// Some tools, such as Vite, allow exporting constants along with components. By enabling the following, the rule will support the pattern.
+    /// Some tools, such as [Vite], allow exporting constants along with components. By enabling the following, the rule will support the pattern.
     ///
     /// ```json
     /// {
@@ -93,8 +93,11 @@ declare_lint_rule! {
     /// }
     /// ```
     ///
+    /// [`meta` in Remix]: https://remix.run/docs/en/main/route/meta
     /// [Hot Mudule Replacement(HMR)]: https://remix.run/docs/en/main/discussion/hot-module-replacement
     /// [`React Fast Refresh`]: https://github.com/facebook/react/tree/main/packages/react-refresh
+    /// [Remix]: https://remix.run/
+    /// [Vite]: https://vitejs.dev/
     /// [`camelCase`]: https://en.wikipedia.org/wiki/Camel_case
     /// [`PascalCase`]: https://en.wikipedia.org/wiki/Camel_case
     pub UseComponentsOnlyModule {
@@ -111,8 +114,12 @@ declare_lint_rule! {
 #[cfg_attr(feature = "schemars", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct UseComponentsOnlyModuleOptions {
+    // Allow the export of constants.
+    // (This option is for environments that support it, such as [Vite])
     #[serde(default)]
     allow_constant_export: bool,
+    // Exceptionally allowed export names.
+    // (This option is for exports that do not hinder [React Fast Refresh], such as [`meta` in Remix])
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     allow_export_names: Vec<String>,
 }
