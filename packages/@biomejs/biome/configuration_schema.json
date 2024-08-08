@@ -3600,9 +3600,8 @@
 		"UseComponentsOnlyModuleOptions": {
 			"type": "object",
 			"properties": {
-				"allowConstantExport": { "type": "boolean" },
-				"allowExportNames": { "type": "array", "items": { "type": "string" } },
-				"checkJs": { "type": "boolean" }
+				"allowConstantExport": { "default": false, "type": "boolean" },
+				"allowExportNames": { "type": "array", "items": { "type": "string" } }
 			},
 			"additionalProperties": false
 		},

@@ -93,19 +93,6 @@ declare_lint_rule! {
     /// }
     /// ```
     ///
-    /// ### checkJS
-    ///
-    /// If you are using JSX within .js files, you can apply the following to enable it for .js files as well. However, this is generally not recommended.
-    ///
-    /// ```json
-    /// {
-    ///     "//": "...",
-    ///     "options":{
-    ///         "checkJS" : true
-    ///     }
-    /// }
-    /// ```
-    ///
     /// [Hot Mudule Replacement(HMR)]: https://remix.run/docs/en/main/discussion/hot-module-replacement
     /// [`React Fast Refresh`]: https://github.com/facebook/react/tree/main/packages/react-refresh
     /// [`camelCase`]: https://en.wikipedia.org/wiki/Camel_case
@@ -128,8 +115,6 @@ pub struct UseComponentsOnlyModuleOptions {
     allow_constant_export: bool,
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     allow_export_names: Vec<String>,
-    #[serde(default)]
-    check_js: bool,
 }
 
 enum ErrorType {
@@ -143,8 +128,6 @@ pub struct UseComponentsOnlyModuleState {
     range: TextRange,
 }
 
-const JSX_FILE_EXT: [&str; 2] = [".jsx", ".tsx"];
-
 impl Rule for UseComponentsOnlyModule {
     type Query = Ast<JsModule>;
     type State = UseComponentsOnlyModuleState;
@@ -152,13 +135,6 @@ impl Rule for UseComponentsOnlyModule {
     type Options = UseComponentsOnlyModuleOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
-        let file_name = ctx.file_path().file_name().and_then(|x| x.to_str());
-        if let Some(file_name2) = file_name {
-            if !ctx.options().check_js && !JSX_FILE_EXT.iter().any(|ext| file_name2.ends_with(ext))
-            {
-                return vec![];
-            }
-        }
         let root = ctx.query();
         let mut local_declaration_ids = Vec::new();
         let mut exported_component_ids = Vec::new();

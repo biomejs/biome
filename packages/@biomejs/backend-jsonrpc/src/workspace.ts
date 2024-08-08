@@ -2104,9 +2104,8 @@ export interface RestrictedImportsOptions {
 	paths: {};
 }
 export interface UseComponentsOnlyModuleOptions {
-	allowConstantExport: boolean;
+	allowConstantExport?: boolean;
 	allowExportNames: string[];
-	checkJs: boolean;
 }
 export interface UseImportExtensionsOptions {
 	/**
