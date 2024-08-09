@@ -14,6 +14,9 @@ use biome_js_syntax::{
 };
 use biome_rowan::{AstNode, AstNodeList, BatchMutationExt, TriviaPieceKind};
 
+use biome_deserialize_macros::Deserializable;
+use serde::{Deserialize, Serialize};
+
 declare_lint_rule! {
     /// Disallow `target="_blank"` attribute without `rel="noreferrer"`
     ///
@@ -66,7 +69,7 @@ impl Rule for NoBlankTarget {
     /// 2. The attribute `rel=`, if present
     type State = (JsxAttribute, Option<JsxAttribute>);
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = AllowDomainOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
@@ -76,8 +79,17 @@ impl Rule for NoBlankTarget {
             return None;
         }
 
+        let href_attribute = node.find_attribute_by_name("href")?;
         let target_attribute = node.find_attribute_by_name("target")?;
         let rel_attribute = node.find_attribute_by_name("rel");
+
+        if let Some(href_value) = href_attribute.as_static_value() {
+            let href = href_value.text();
+            let options = ctx.options();
+            if is_allowed_domain(href, &options.allow_domains) {
+                return None;
+            }
+        }
 
         if target_attribute.as_static_value()?.text() == "_blank" {
             match rel_attribute {
@@ -176,4 +188,18 @@ impl Rule for NoBlankTarget {
             }
         ))
     }
+}
+
+#[derive(Clone, Debug, Default, Deserialize, Deserializable, Eq, PartialEq, Serialize)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct AllowDomainOptions {
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub allow_domains: Vec<String>,
+}
+
+fn is_allowed_domain(href: &str, allow_domains: &[String]) -> bool {
+    allow_domains
+        .iter()
+        .any(|allowed| href.starts_with(allowed) || href.contains(allowed))
 }
