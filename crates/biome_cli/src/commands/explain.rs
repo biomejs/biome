@@ -3,7 +3,7 @@ use biome_console::{markup, ConsoleExt};
 use biome_flags::biome_env;
 use biome_service::documentation::Doc;
 
-use crate::commands::daemon::default_biome_log_dir;
+use crate::commands::daemon::default_biome_log_path;
 use crate::{CliDiagnostic, CliSession};
 
 fn print_rule(session: CliSession, metadata: &RuleMetadata) {
@@ -47,9 +47,9 @@ pub(crate) fn explain(session: CliSession, doc: Doc) -> Result<(), CliDiagnostic
         }
         Doc::DaemonLogs => {
             let cache_dir = biome_env()
-                .biome_log_dir
+                .biome_log_path
                 .value()
-                .unwrap_or(default_biome_log_dir().display().to_string());
+                .unwrap_or(default_biome_log_path().display().to_string());
             session.app.console.error(markup! {
                 <Info>"The daemon logs are available in the directory: \n"</Info>
             });

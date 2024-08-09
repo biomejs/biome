@@ -234,10 +234,10 @@ impl<'app> CliSession<'app> {
             BiomeCommand::Init(emit_jsonc) => commands::init::init(self, emit_jsonc),
             BiomeCommand::LspProxy {
                 config_path,
-                log_path: log_dir,
+                log_path,
                 log_prefix_name,
                 ..
-            } => commands::daemon::lsp_proxy(config_path, Some(log_dir), Some(log_prefix_name)),
+            } => commands::daemon::lsp_proxy(config_path, Some(log_path), Some(log_prefix_name)),
             BiomeCommand::Migrate {
                 cli_options,
                 write,
