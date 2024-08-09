@@ -66,3 +66,32 @@ class StaticConstants1 {
 }
 
 class Empty {}
+
+class Environment {
+	type: string;
+
+	constructor(type: string) {
+		this.type = type;
+	}
+
+	getType(): string {
+		return this.type;
+	}
+}
+
+class Application extends Environment {
+	private static environment: Environment;
+
+	static initialize(type: string): void {
+		if (!this.environment) {
+			this.environment = new Environment(type);
+		}
+	}
+
+	static getEnvironment(): string {
+		if (!this.environment) {
+			throw new Error("Application not initialized.");
+		}
+		return this.environment.getType();
+	}
+}
