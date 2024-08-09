@@ -23,7 +23,9 @@ declare_lint_rule! {
     /// ## Examples
     ///
     /// ### Invalid
+    ///
     /// The following patterns are considered incorrect code with the default options `noPublic`:
+    ///
     /// ```jsx,ignore
     /// class Animal {
     ///   public constructor(
@@ -49,6 +51,7 @@ declare_lint_rule! {
     /// ```
     ///
     /// The following patterns are considered incorrect code with the accessibility set to `explicit`:
+    ///
     /// ```jsx,ignore
     /// class Animal {
     ///   // Constructor is not set accessibility modifier
@@ -75,6 +78,7 @@ declare_lint_rule! {
     /// ```
     ///
     /// The following patterns are considered incorrect code with the accessibility set to `none`:
+    ///
     /// ```jsx,ignore
     /// class Animal {
     ///   constructor(
@@ -103,7 +107,9 @@ declare_lint_rule! {
     /// ```
     ///
     /// ### Valid
+    ///
     /// The following patterns are considered correct code with the default options `noPublic`:
+    ///
     /// ```jsx,ignore
     /// class Animal {
     ///   constructor(
@@ -129,6 +135,7 @@ declare_lint_rule! {
     /// ```
     ///
     /// The following patterns are considered correct code with the accessibility set to `explicit`:
+    ///
     /// ```jsx,ignore
     /// class Animal {
     ///   public constructor(
@@ -154,6 +161,7 @@ declare_lint_rule! {
     /// ```
     ///
     /// The following patterns are considered correct code with the accessibility set to `none`:
+    ///
     /// ```jsx,ignore
     /// class Animal {
     ///   constructor(
@@ -192,6 +200,7 @@ declare_lint_rule! {
     /// ```
     ///
     /// ### `accessibility`
+    ///
     /// This option determines the required accessibility modifiers on class properties and methods.
     /// It can be set to one of the following values:
     /// - `noPublic` - forbid the use of public (a safe fix will remove it).
@@ -306,7 +315,7 @@ impl Rule for UseConsistentMemberAccessibility {
 declare_node_union! {
     pub AnyJsMemberWithAccessibility = JsConstructorClassMember | JsPropertyClassMember | JsMethodClassMember | TsPropertyParameter | JsGetterClassMember | JsSetterClassMember
     | TsConstructorSignatureClassMember | TsMethodSignatureClassMember | TsPropertySignatureClassMember | TsGetterSignatureClassMember | TsSetterSignatureClassMember
-	| TsPropertyParameter
+    | TsPropertyParameter
 }
 
 impl AnyMember {
