@@ -79,19 +79,21 @@ impl Rule for NoBlankTarget {
             return None;
         }
 
-        let href_attribute = node.find_attribute_by_name("href")?;
         let target_attribute = node.find_attribute_by_name("target")?;
         let rel_attribute = node.find_attribute_by_name("rel");
 
-        if let Some(href_value) = href_attribute.as_static_value() {
-            let href = href_value.text();
-            let options = ctx.options();
-            if is_allowed_domain(href, &options.allow_domains) {
-                return None;
-            }
-        }
-
         if target_attribute.as_static_value()?.text() == "_blank" {
+            if !ctx.options().allow_domains.is_empty() {
+                let href_attribute = node.find_attribute_by_name("href")?;
+                if let Some(href_value) = href_attribute.as_static_value() {
+                    let href = href_value.text();
+                    let options = ctx.options();
+                    if is_allowed_domain(href, &options.allow_domains) {
+                        return None;
+                    }
+                }
+            }
+
             match rel_attribute {
                 None => {
                     if !node.has_trailing_spread_prop(&target_attribute) {
