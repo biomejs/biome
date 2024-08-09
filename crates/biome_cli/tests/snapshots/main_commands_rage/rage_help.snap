@@ -44,9 +44,8 @@ Global options applied to all commands
 
 Available options:
         --daemon-logs         Prints the Biome daemon server logs
-        --formatter           Prints the Biome configuration that the applied formatter
-                              configuration
-        --linter              Prints the Biome configuration that the applied linter configuration
+        --formatter           Prints the formatter options applied
+        --linter              Prints the linter options applied
     -h, --help                Prints help information
 
 ```

@@ -58,10 +58,10 @@ pub enum BiomeCommand {
         /// Prints the Biome daemon server logs
         #[bpaf(long("daemon-logs"), switch)]
         bool,
-        /// Prints the Biome configuration that the applied formatter configuration
+        /// Prints the formatter options applied
         #[bpaf(long("formatter"), switch)]
         bool,
-        /// Prints the Biome configuration that the applied linter configuration
+        /// Prints the linter options applied
         #[bpaf(long("linter"), switch)]
         bool,
     ),

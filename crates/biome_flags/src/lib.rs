@@ -42,7 +42,10 @@ impl BiomeEnv {
 }
 
 pub struct BiomeEnvVariable {
+    /// The name of the environment variable
     name: &'static str,
+    /// The description of the variable.
+    // This field will be used in the website to automate its generation
     description: &'static str,
 }
 
