@@ -79,7 +79,7 @@ impl Rule for NoMisrefactoredShorthandAssign {
         let binary_expression = match right {
             AnyJsExpression::JsBinaryExpression(binary_expression) => binary_expression,
             AnyJsExpression::JsParenthesizedExpression(param) => {
-                JsBinaryExpression::cast_ref(param.expression().ok()?.syntax())?
+                JsBinaryExpression::cast(param.expression().ok()?.into_syntax())?
             }
             _ => return None,
         };

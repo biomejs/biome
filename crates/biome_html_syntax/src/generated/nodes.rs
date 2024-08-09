@@ -15,9 +15,7 @@ use biome_rowan::{
     AstNodeList, AstNodeListIterator, AstNodeSlotMap, AstSeparatedList,
     AstSeparatedListNodesIterator,
 };
-#[cfg(feature = "serde")]
 use serde::ser::SerializeSeq;
-#[cfg(feature = "serde")]
 use serde::{Serialize, Serializer};
 use std::fmt::{Debug, Formatter};
 #[doc = r" Sentinel value indicating a missing element in a dynamic node, where"]
@@ -51,7 +49,6 @@ impl HtmlAttribute {
         support::node(&self.syntax, 1usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for HtmlAttribute {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -60,7 +57,7 @@ impl Serialize for HtmlAttribute {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct HtmlAttributeFields {
     pub name: SyntaxResult<HtmlName>,
     pub initializer: Option<HtmlAttributeInitializerClause>,
@@ -92,7 +89,6 @@ impl HtmlAttributeInitializerClause {
         support::required_node(&self.syntax, 1usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for HtmlAttributeInitializerClause {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -101,7 +97,7 @@ impl Serialize for HtmlAttributeInitializerClause {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct HtmlAttributeInitializerClauseFields {
     pub eq_token: SyntaxResult<SyntaxToken>,
     pub value: SyntaxResult<HtmlString>,
@@ -141,7 +137,6 @@ impl HtmlClosingElement {
         support::required_token(&self.syntax, 3usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for HtmlClosingElement {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -150,7 +145,7 @@ impl Serialize for HtmlClosingElement {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct HtmlClosingElementFields {
     pub l_angle_token: SyntaxResult<SyntaxToken>,
     pub slash_token: SyntaxResult<SyntaxToken>,
@@ -180,7 +175,6 @@ impl HtmlContent {
         support::required_token(&self.syntax, 0usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for HtmlContent {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -189,7 +183,7 @@ impl Serialize for HtmlContent {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct HtmlContentFields {
     pub value_token: SyntaxResult<SyntaxToken>,
 }
@@ -244,7 +238,6 @@ impl HtmlDirective {
         support::required_token(&self.syntax, 7usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for HtmlDirective {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -253,7 +246,7 @@ impl Serialize for HtmlDirective {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct HtmlDirectiveFields {
     pub l_angle_token: SyntaxResult<SyntaxToken>,
     pub excl_token: SyntaxResult<SyntaxToken>,
@@ -295,7 +288,6 @@ impl HtmlElement {
         support::required_node(&self.syntax, 2usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for HtmlElement {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -304,7 +296,7 @@ impl Serialize for HtmlElement {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct HtmlElementFields {
     pub opening_element: SyntaxResult<HtmlOpeningElement>,
     pub children: HtmlElementList,
@@ -333,7 +325,6 @@ impl HtmlName {
         support::required_token(&self.syntax, 0usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for HtmlName {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -342,7 +333,7 @@ impl Serialize for HtmlName {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct HtmlNameFields {
     pub value_token: SyntaxResult<SyntaxToken>,
 }
@@ -381,7 +372,6 @@ impl HtmlOpeningElement {
         support::required_token(&self.syntax, 3usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for HtmlOpeningElement {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -390,7 +380,7 @@ impl Serialize for HtmlOpeningElement {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct HtmlOpeningElementFields {
     pub l_angle_token: SyntaxResult<SyntaxToken>,
     pub name: SyntaxResult<HtmlName>,
@@ -432,7 +422,6 @@ impl HtmlRoot {
         support::required_token(&self.syntax, 3usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for HtmlRoot {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -441,7 +430,7 @@ impl Serialize for HtmlRoot {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct HtmlRootFields {
     pub bom_token: Option<SyntaxToken>,
     pub directive: Option<HtmlDirective>,
@@ -487,7 +476,6 @@ impl HtmlSelfClosingElement {
         support::required_token(&self.syntax, 4usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for HtmlSelfClosingElement {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -496,7 +484,7 @@ impl Serialize for HtmlSelfClosingElement {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct HtmlSelfClosingElementFields {
     pub l_angle_token: SyntaxResult<SyntaxToken>,
     pub name: SyntaxResult<HtmlName>,
@@ -527,7 +515,6 @@ impl HtmlString {
         support::required_token(&self.syntax, 0usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for HtmlString {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -536,12 +523,11 @@ impl Serialize for HtmlString {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct HtmlStringFields {
     pub value_token: SyntaxResult<SyntaxToken>,
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyHtmlAttribute {
     HtmlAttribute(HtmlAttribute),
     HtmlBogusAttribute(HtmlBogusAttribute),
@@ -560,8 +546,7 @@ impl AnyHtmlAttribute {
         }
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyHtmlElement {
     HtmlBogusElement(HtmlBogusElement),
     HtmlContent(HtmlContent),
@@ -1319,8 +1304,7 @@ impl std::fmt::Display for HtmlString {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub struct HtmlBogus {
     syntax: SyntaxNode,
 }
@@ -1376,8 +1360,7 @@ impl From<HtmlBogus> for SyntaxElement {
         n.syntax.into()
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub struct HtmlBogusAttribute {
     syntax: SyntaxNode,
 }
@@ -1433,8 +1416,7 @@ impl From<HtmlBogusAttribute> for SyntaxElement {
         n.syntax.into()
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub struct HtmlBogusElement {
     syntax: SyntaxNode,
 }
@@ -1530,7 +1512,6 @@ impl AstNode for HtmlAttributeList {
         self.syntax_list.into_node()
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for HtmlAttributeList {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -1613,7 +1594,6 @@ impl AstNode for HtmlElementList {
         self.syntax_list.into_node()
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for HtmlElementList {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where

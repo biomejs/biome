@@ -9,17 +9,17 @@ pub(crate) struct SemanticModelScopeData {
     // The scope range
     pub(crate) range: TextRange,
     // The parent scope of this scope
-    pub(crate) parent: Option<u32>,
+    pub(crate) parent: Option<ScopeId>,
     // All children scope of this scope
-    pub(crate) children: Vec<u32>,
+    pub(crate) children: Vec<ScopeId>,
     // All bindings of this scope (points to SemanticModelData::bindings)
-    pub(crate) bindings: Vec<u32>,
+    pub(crate) bindings: Vec<BindingId>,
     // Map pointing to the [bindings] vec of each bindings by its name
-    pub(crate) bindings_by_name: FxHashMap<TokenText, u32>,
+    pub(crate) bindings_by_name: FxHashMap<TokenText, BindingId>,
     // All read references of a scope
-    pub(crate) read_references: Vec<SemanticModelScopeReference>,
+    pub(crate) read_references: Vec<ReferenceId>,
     // All write references of a scope
-    pub(crate) write_references: Vec<SemanticModelScopeReference>,
+    pub(crate) write_references: Vec<ReferenceId>,
     // Identify if this scope is from a closure or not
     pub(crate) is_closure: bool,
 }
@@ -29,7 +29,7 @@ pub(crate) struct SemanticModelScopeData {
 #[derive(Clone, Debug)]
 pub struct Scope {
     pub(crate) data: Rc<SemanticModelData>,
-    pub(crate) id: u32,
+    pub(crate) id: ScopeId,
 }
 
 impl PartialEq for Scope {
@@ -63,9 +63,9 @@ impl Scope {
     pub fn parent(&self) -> Option<Scope> {
         // id will always be a valid scope because
         // it was created by [SemanticModel::scope] method.
-        debug_assert!((self.id as usize) < self.data.scopes.len());
+        debug_assert!((self.id.index()) < self.data.scopes.len());
 
-        let parent = self.data.scopes[self.id as usize].parent?;
+        let parent = self.data.scopes[self.id.index()].parent?;
         Some(Scope {
             data: self.data.clone(),
             id: parent,
@@ -85,14 +85,14 @@ impl Scope {
     /// Returns a binding by its name, like it appears on code.  It **does
     /// not** returns bindings of parent scopes.
     pub fn get_binding(&self, name: impl AsRef<str>) -> Option<Binding> {
-        let data = &self.data.scopes[self.id as usize];
+        let data = &self.data.scopes[self.id.index()];
 
         let name = name.as_ref();
-        let id = data.bindings_by_name.get(name)?;
+        let id = *data.bindings_by_name.get(name)?;
 
         Some(Binding {
             data: self.data.clone(),
-            index: (*id).into(),
+            id,
         })
     }
 
@@ -107,12 +107,12 @@ impl Scope {
         other.ancestors().any(|s| s == *self)
     }
 
-    pub fn range(&self) -> &TextRange {
-        &self.data.scopes[self.id as usize].range
+    pub fn range(&self) -> TextRange {
+        self.data.scopes[self.id.index()].range
     }
 
     pub fn syntax(&self) -> &JsSyntaxNode {
-        &self.data.scope_node_by_range[self.range()]
+        &self.data.scope_node_by_range[&self.range()]
     }
 
     /// Return the [Closure] associated with this scope if
@@ -123,19 +123,10 @@ impl Scope {
     }
 }
 
-/// Represents a reference inside a scope.
-#[derive(Clone, Debug, Hash, PartialEq, Eq)]
-pub(crate) struct SemanticModelScopeReference {
-    // Points to [SemanticModel]::bindings vec
-    pub(crate) binding_id: u32,
-    // Points do [SemanticModelBinding]::references vec
-    pub(crate) reference_id: u32,
-}
-
 /// Iterate all descendents scopes of the specified scope in breadth-first order.
 pub struct ScopeDescendentsIter {
     data: Rc<SemanticModelData>,
-    q: VecDeque<u32>,
+    q: VecDeque<ScopeId>,
 }
 
 impl Iterator for ScopeDescendentsIter {
@@ -143,7 +134,7 @@ impl Iterator for ScopeDescendentsIter {
 
     fn next(&mut self) -> Option<Self::Item> {
         if let Some(id) = self.q.pop_front() {
-            let scope = &self.data.scopes[id as usize];
+            let scope = &self.data.scopes[id.index()];
             self.q.extend(scope.children.iter());
             Some(Scope {
                 data: self.data.clone(),
@@ -162,7 +153,7 @@ impl FusedIterator for ScopeDescendentsIter {}
 #[derive(Debug)]
 pub struct ScopeBindingsIter {
     data: Rc<SemanticModelData>,
-    scope_id: u32,
+    scope_id: ScopeId,
     binding_index: u32,
 }
 
@@ -172,9 +163,9 @@ impl Iterator for ScopeBindingsIter {
     fn next(&mut self) -> Option<Self::Item> {
         // scope_id will always be a valid scope because
         // it was created by [Scope::bindings] method.
-        debug_assert!((self.scope_id as usize) < self.data.scopes.len());
+        debug_assert!(self.scope_id.index() < self.data.scopes.len());
 
-        let id = self.data.scopes[self.scope_id as usize]
+        let id = *self.data.scopes[self.scope_id.index()]
             .bindings
             .get(self.binding_index as usize)?;
 
@@ -182,7 +173,7 @@ impl Iterator for ScopeBindingsIter {
 
         Some(Binding {
             data: self.data.clone(),
-            index: (*id).into(),
+            id,
         })
     }
 }
@@ -191,9 +182,9 @@ impl ExactSizeIterator for ScopeBindingsIter {
     fn len(&self) -> usize {
         // scope_id will always be a valid scope because
         // it was created by [Scope::bindings] method.
-        debug_assert!((self.scope_id as usize) < self.data.scopes.len());
+        debug_assert!(self.scope_id.index() < self.data.scopes.len());
 
-        self.data.scopes[self.scope_id as usize].bindings.len()
+        self.data.scopes[self.scope_id.index()].bindings.len()
     }
 }
 

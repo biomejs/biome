@@ -1,14 +1,10 @@
+use crate::js::declarations::function_declaration::should_group_function_parameters;
 use crate::prelude::*;
 
-use crate::js::declarations::function_declaration::should_group_function_parameters;
-use crate::parentheses::{
-    is_check_type, is_in_many_type_union_or_intersection_list,
-    is_includes_inferred_return_types_with_extends_constraints,
-    operator_type_or_higher_needs_parens, NeedsParentheses,
-};
 use biome_formatter::write;
+use biome_js_syntax::parentheses::NeedsParentheses;
+use biome_js_syntax::TsFunctionType;
 use biome_js_syntax::TsFunctionTypeFields;
-use biome_js_syntax::{JsSyntaxKind, JsSyntaxNode, TsFunctionType};
 
 #[derive(Debug, Clone, Default)]
 pub struct FormatTsFunctionType;
@@ -59,36 +55,8 @@ impl FormatNodeRule<TsFunctionType> for FormatTsFunctionType {
     }
 }
 
-impl NeedsParentheses for TsFunctionType {
-    fn needs_parentheses_with_parent(&self, parent: &JsSyntaxNode) -> bool {
-        function_like_type_needs_parentheses(self.syntax(), parent)
-    }
-}
-
-pub(super) fn function_like_type_needs_parentheses(
-    node: &JsSyntaxNode,
-    parent: &JsSyntaxNode,
-) -> bool {
-    match parent.kind() {
-        JsSyntaxKind::TS_RETURN_TYPE_ANNOTATION => {
-            let grand_parent = parent.parent();
-
-            grand_parent.map_or(false, |grand_parent| {
-                grand_parent.kind() == JsSyntaxKind::JS_ARROW_FUNCTION_EXPRESSION
-            })
-        }
-        _ => {
-            is_check_type(node, parent)
-                || is_includes_inferred_return_types_with_extends_constraints(node, parent)
-                || operator_type_or_higher_needs_parens(node, parent)
-                || is_in_many_type_union_or_intersection_list(node, parent)
-        }
-    }
-}
-
 #[cfg(test)]
 mod tests {
-
     use crate::{assert_needs_parentheses, assert_not_needs_parentheses};
     use biome_js_syntax::TsFunctionType;
 

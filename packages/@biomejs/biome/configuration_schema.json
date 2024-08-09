@@ -8,6 +8,13 @@
 			"description": "A field for the [JSON schema](https://json-schema.org/) specification",
 			"type": ["string", "null"]
 		},
+		"assists": {
+			"description": "Specific configuration for assists",
+			"anyOf": [
+				{ "$ref": "#/definitions/AssistsConfiguration" },
+				{ "type": "null" }
+			]
+		},
 		"css": {
 			"description": "Specific configuration for the Css language",
 			"anyOf": [
@@ -304,7 +311,38 @@
 			},
 			"additionalProperties": false
 		},
+		"Actions": {
+			"type": "object",
+			"properties": {
+				"source": {
+					"anyOf": [{ "$ref": "#/definitions/Source" }, { "type": "null" }]
+				}
+			},
+			"additionalProperties": false
+		},
 		"ArrowParentheses": { "type": "string", "enum": ["always", "asNeeded"] },
+		"AssistsConfiguration": {
+			"type": "object",
+			"properties": {
+				"actions": {
+					"description": "Whether Biome should fail in CLI if the assists were not applied to the code.",
+					"anyOf": [{ "$ref": "#/definitions/Actions" }, { "type": "null" }]
+				},
+				"enabled": {
+					"description": "Whether Biome should enable assists via LSP.",
+					"type": ["boolean", "null"]
+				},
+				"ignore": {
+					"description": "A list of Unix shell style patterns. The formatter will ignore files/folders that will match these patterns.",
+					"anyOf": [{ "$ref": "#/definitions/StringSet" }, { "type": "null" }]
+				},
+				"include": {
+					"description": "A list of Unix shell style patterns. The formatter will include files/folders that will match these patterns.",
+					"anyOf": [{ "$ref": "#/definitions/StringSet" }, { "type": "null" }]
+				}
+			},
+			"additionalProperties": false
+		},
 		"AttributePosition": { "type": "string", "enum": ["auto", "multiline"] },
 		"BracketSpacing": { "type": "boolean" },
 		"Complexity": {
@@ -893,10 +931,25 @@
 			},
 			"additionalProperties": false
 		},
+		"CssAssists": {
+			"description": "Options that changes how the CSS assists behaves",
+			"type": "object",
+			"properties": {
+				"enabled": {
+					"description": "Control the assists for CSS files.",
+					"type": ["boolean", "null"]
+				}
+			},
+			"additionalProperties": false
+		},
 		"CssConfiguration": {
 			"description": "Options applied to CSS files",
 			"type": "object",
 			"properties": {
+				"assists": {
+					"description": "CSS assists options",
+					"anyOf": [{ "$ref": "#/definitions/CssAssists" }, { "type": "null" }]
+				},
 				"formatter": {
 					"description": "CSS formatter options",
 					"anyOf": [
@@ -925,10 +978,7 @@
 				},
 				"indentStyle": {
 					"description": "The indent style applied to CSS (and its super languages) files.",
-					"anyOf": [
-						{ "$ref": "#/definitions/PlainIndentStyle" },
-						{ "type": "null" }
-					]
+					"anyOf": [{ "$ref": "#/definitions/IndentStyle" }, { "type": "null" }]
 				},
 				"indentWidth": {
 					"description": "The size of the indentation applied to CSS (and its super languages) files. Default to 2.",
@@ -954,7 +1004,7 @@
 			"type": "object",
 			"properties": {
 				"enabled": {
-					"description": "Control the linter for CSS (and its super languages) files.",
+					"description": "Control the linter for CSS files.",
 					"type": ["boolean", "null"]
 				}
 			},
@@ -1134,10 +1184,7 @@
 				},
 				"indentStyle": {
 					"description": "The indent style.",
-					"anyOf": [
-						{ "$ref": "#/definitions/PlainIndentStyle" },
-						{ "type": "null" }
-					]
+					"anyOf": [{ "$ref": "#/definitions/IndentStyle" }, { "type": "null" }]
 				},
 				"indentWidth": {
 					"description": "The size of the indentation, 2 by default",
@@ -1195,10 +1242,7 @@
 				},
 				"indentStyle": {
 					"description": "The indent style applied to GraphQL files.",
-					"anyOf": [
-						{ "$ref": "#/definitions/PlainIndentStyle" },
-						{ "type": "null" }
-					]
+					"anyOf": [{ "$ref": "#/definitions/IndentStyle" }, { "type": "null" }]
 				},
 				"indentWidth": {
 					"description": "The size of the indentation applied to GraphQL files. Default to 2.",
@@ -1273,11 +1317,35 @@
 			},
 			"additionalProperties": false
 		},
+		"IndentStyle": {
+			"oneOf": [
+				{ "description": "Tab", "type": "string", "enum": ["tab"] },
+				{ "description": "Space", "type": "string", "enum": ["space"] }
+			]
+		},
 		"IndentWidth": { "type": "integer", "format": "uint8", "minimum": 0.0 },
+		"JavascriptAssists": {
+			"description": "Linter options specific to the JavaScript linter",
+			"type": "object",
+			"properties": {
+				"enabled": {
+					"description": "Control the linter for JavaScript (and its super languages) files.",
+					"type": ["boolean", "null"]
+				}
+			},
+			"additionalProperties": false
+		},
 		"JavascriptConfiguration": {
 			"description": "A set of options applied to the JavaScript files",
 			"type": "object",
 			"properties": {
+				"assists": {
+					"description": "Assists options",
+					"anyOf": [
+						{ "$ref": "#/definitions/JavascriptAssists" },
+						{ "type": "null" }
+					]
+				},
 				"formatter": {
 					"description": "Formatting options",
 					"anyOf": [
@@ -1355,10 +1423,7 @@
 				},
 				"indentStyle": {
 					"description": "The indent style applied to JavaScript (and its super languages) files.",
-					"anyOf": [
-						{ "$ref": "#/definitions/PlainIndentStyle" },
-						{ "type": "null" }
-					]
+					"anyOf": [{ "$ref": "#/definitions/IndentStyle" }, { "type": "null" }]
 				},
 				"indentWidth": {
 					"description": "The size of the indentation applied to JavaScript (and its super languages) files. Default to 2.",
@@ -1434,10 +1499,25 @@
 			},
 			"additionalProperties": false
 		},
+		"JsonAssists": {
+			"description": "Linter options specific to the JSON linter",
+			"type": "object",
+			"properties": {
+				"enabled": {
+					"description": "Control the linter for JSON (and its super languages) files.",
+					"type": ["boolean", "null"]
+				}
+			},
+			"additionalProperties": false
+		},
 		"JsonConfiguration": {
 			"description": "Options applied to JSON files",
 			"type": "object",
 			"properties": {
+				"assists": {
+					"description": "Assists options",
+					"anyOf": [{ "$ref": "#/definitions/JsonAssists" }, { "type": "null" }]
+				},
 				"formatter": {
 					"description": "Formatting options",
 					"anyOf": [
@@ -1469,10 +1549,7 @@
 				},
 				"indentStyle": {
 					"description": "The indent style applied to JSON (and its super languages) files.",
-					"anyOf": [
-						{ "$ref": "#/definitions/PlainIndentStyle" },
-						{ "type": "null" }
-					]
+					"anyOf": [{ "$ref": "#/definitions/IndentStyle" }, { "type": "null" }]
 				},
 				"indentWidth": {
 					"description": "The size of the indentation applied to JSON (and its super languages) files. Default to 2.",
@@ -1863,6 +1940,20 @@
 						{ "type": "null" }
 					]
 				},
+				"noIrregularWhitespace": {
+					"description": "Disallows the use of irregular whitespace characters.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noIrregularWhitespaceCss": {
+					"description": "Disallows the use of irregular whitespace.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noLabelWithoutControl": {
 					"description": "Enforce that a label element or component has a text label and an associated input.",
 					"anyOf": [
@@ -1893,6 +1984,13 @@
 				},
 				"noShorthandPropertyOverrides": {
 					"description": "Disallow shorthand properties that override related longhand properties.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noStaticElementInteractions": {
+					"description": "Enforce that static, visible elements (such as \\<div>) that have click handlers use the valid role attribute.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
@@ -1968,6 +2066,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noUselessEscapeInRegex": {
+					"description": "Disallow unnecessary escape sequence in regular expression literals.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleFixConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noUselessStringConcat": {
 					"description": "Disallow unnecessary concatenation of string or template literals.",
 					"anyOf": [
@@ -1979,6 +2084,13 @@
 					"description": "Disallow initializing variables to undefined.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleFixConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noValueAtRule": {
+					"description": "Disallow use of @value rule in css modules.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -2002,6 +2114,13 @@
 				},
 				"useConsistentBuiltinInstantiation": {
 					"description": "Enforce the use of new for all builtins, except String, Number, Boolean, Symbol and BigInt.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleFixConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useConsistentCurlyBraces": {
+					"description": "This rule enforces consistent use of curly braces inside JSX attributes and JSX children.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleFixConfiguration" },
 						{ "type": "null" }
@@ -2098,6 +2217,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useStrictMode": {
+					"description": "Enforce the use of the directive \"use strict\" in script files.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleFixConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useThrowNewError": {
 					"description": "Require new when throwing an error.",
 					"anyOf": [
@@ -2116,6 +2242,13 @@
 					"description": "Require regex literals to be declared at the top level.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useTrimStartEnd": {
+					"description": "Enforce the use of String.trimStart() and String.trimEnd() over String.trimLeft() and String.trimRight().",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleFixConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -2175,10 +2308,7 @@
 				},
 				"indentStyle": {
 					"description": "The indent style.",
-					"anyOf": [
-						{ "$ref": "#/definitions/PlainIndentStyle" },
-						{ "type": "null" }
-					]
+					"anyOf": [{ "$ref": "#/definitions/IndentStyle" }, { "type": "null" }]
 				},
 				"indentWidth": {
 					"description": "The size of the indentation, 2 by default",
@@ -2329,12 +2459,6 @@
 			},
 			"additionalProperties": false
 		},
-		"PlainIndentStyle": {
-			"oneOf": [
-				{ "description": "Tab", "type": "string", "enum": ["tab"] },
-				{ "description": "Space", "type": "string", "enum": ["space"] }
-			]
-		},
 		"QuoteProperties": { "type": "string", "enum": ["asNeeded", "preserve"] },
 		"QuoteStyle": { "type": "string", "enum": ["double", "single"] },
 		"Regex": { "type": "string" },
@@ -2380,6 +2504,7 @@
 			"type": "string",
 			"enum": ["abstract", "private", "protected", "readonly", "static"]
 		},
+		"RuleAssistConfiguration": { "type": "string", "enum": ["on", "off"] },
 		"RuleConfiguration": {
 			"anyOf": [
 				{ "$ref": "#/definitions/RulePlainConfiguration" },
@@ -2731,6 +2856,20 @@
 			"additionalProperties": false
 		},
 		"Semicolons": { "type": "string", "enum": ["always", "asNeeded"] },
+		"Source": {
+			"description": "A list of rules that belong to this group",
+			"type": "object",
+			"properties": {
+				"useSortedKeys": {
+					"description": "Sorts the keys of a JSON object in natural order",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleAssistConfiguration" },
+						{ "type": "null" }
+					]
+				}
+			},
+			"additionalProperties": false
+		},
 		"StableHookResult": {
 			"oneOf": [
 				{

@@ -204,6 +204,14 @@ versioned_files = ["crates/biome_graphql_formatter/Cargo.toml"]
 changelog       = "crates/biome_graphql_analyze/CHANGELOG.md"
 versioned_files = ["crates/biome_graphql_analyze/Cargo.toml"]
 
+[packages.biome_graphql_semantic]
+changelog       = "crates/biome_graphql_semantic/CHANGELOG.md"
+versioned_files = ["crates/biome_graphql_semantic/Cargo.toml"]
+
+[packages.biome_css_semantic]
+changelog       = "crates/biome_css_semantic/CHANGELOG.md"
+versioned_files = ["crates/biome_css_semantic/Cargo.toml"]
+
 ## End of crates. DO NOT CHANGE!
 
 # Workflow to create a changeset
@@ -212,7 +220,7 @@ name = "document-change"
 
 [[workflows.steps]]
 type = "CreateChangeFile"
-
+# end-workflow
 
 # Workflow that creates a PR via GitHub actions. This PR will contain all the changes for a release: changelogs, version numbers, etc.
 # Refernce: https://knope.tech/recipes/1-preview-releases-with-pull-requests/#prepare-release-workflow
@@ -239,6 +247,7 @@ type = "Command"
 command = "git commit -m \"chore: prepare release\""
 
 [[workflows.steps]]
+# WARNING: if you change the name of the branch, update `prepare_release.yml` too
 command = "git push --force-with-lease --set-upstream origin release/automated-ci"
 type    = "Command"
 
@@ -250,7 +259,8 @@ type = "CreatePullRequest"
 template = "chore: prepare release"
 
 [workflows.steps.body]
-template = "This PR was created by Knope. Merging it will create a new release"
+template = "This PR was automatically created via workflow. Merging it will create a new release of the Biome packages and crates."
+# end-workflow
 
 # The release workflow that will run in CI. It is triggered when the prepare-release PR is merged
 [[workflows]]
@@ -258,7 +268,7 @@ name = "release"
 
 [[workflows.steps]]
 # The script will add most up-to-date optional dependencies to the manifest of @biomejs/biome and @biomejs/backend-jsonrpc
-command = "node packages/@biomejs/biome/scripts/generate-packages.mjs"
+command = "node scripts/generate-packages.mjs"
 type    = "Command"
 
 [[workflows.steps]]
@@ -268,3 +278,4 @@ type = "Release"
 [github]
 owner = "biomejs"
 repo  = "biome"
+# end-workflow

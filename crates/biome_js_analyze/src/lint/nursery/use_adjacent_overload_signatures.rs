@@ -4,7 +4,7 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_js_syntax::{
     AnyJsModuleItem, JsClassDeclaration, JsFunctionDeclaration, JsModule, JsModuleItemList,
-    TsDeclareStatement, TsInterfaceDeclaration, TsTypeAliasDeclaration,
+    TsDeclareStatement, TsInterfaceDeclaration, TsTypeAliasDeclaration, TsTypeMemberList,
 };
 use biome_rowan::{declare_node_union, AstNode, TextRange, TokenText};
 use rustc_hash::FxHashSet;
@@ -104,40 +104,36 @@ impl Rule for UseAdjacentOverloadSignatures {
     type Options = ();
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
-        let node = ctx.query();
-        let mut methods: Vec<(TokenText, TextRange)> = Vec::new();
-        let mut seen_methods = FxHashSet::default();
-        let mut last_method = None;
-
-        match node {
+        let methods = match ctx.query() {
             // Handle export function foo() {} in declare namespace Foo {}
             DeclarationOrModuleNode::TsDeclareStatement(node) => {
                 let declaration = node.declaration().ok()?;
                 let items = declaration.as_ts_module_declaration()?.body().ok()?.items();
-                collect_exports(&items, &mut methods, &mut seen_methods, &mut last_method);
+                collect_exports(&items)
             }
             // Handle interface Foo {}
             DeclarationOrModuleNode::TsInterfaceDeclaration(node) => {
-                collect_interface(node, &mut methods, &mut seen_methods, &mut last_method);
+                collect_type_member_list(&node.members())
             }
             // Handle type Foo = {}
             DeclarationOrModuleNode::TsTypeAliasDeclaration(node) => {
-                collect_type(node, &mut methods, &mut seen_methods, &mut last_method);
+                let members = node
+                    .ty()
+                    .ok()
+                    .and_then(|ty| ty.as_ts_object_type().cloned())?
+                    .members();
+                collect_type_member_list(&members)
             }
             // Handle class Foo {}
-            DeclarationOrModuleNode::JsClassDeclaration(node) => {
-                collect_class(node, &mut methods, &mut seen_methods, &mut last_method);
-            }
+            DeclarationOrModuleNode::JsClassDeclaration(node) => collect_class(node),
             // Handle export function foo() {}
-            DeclarationOrModuleNode::JsFunctionDeclaration(node) => {
-                collect_function(node, &mut methods, &mut seen_methods, &mut last_method);
-            }
+            DeclarationOrModuleNode::JsFunctionDeclaration(node) => collect_function(node),
             // Handle export function foo() {}
             DeclarationOrModuleNode::JsModule(node) => {
                 let items = node.items();
-                collect_exports(&items, &mut methods, &mut seen_methods, &mut last_method);
+                collect_exports(&items)
             }
-        }
+        };
 
         if !methods.is_empty() {
             Some(methods)
@@ -169,57 +165,33 @@ impl Rule for UseAdjacentOverloadSignatures {
     }
 }
 
-fn collect_interface(
-    node: &TsInterfaceDeclaration,
-    methods: &mut Vec<(TokenText, TextRange)>,
-    seen_methods: &mut FxHashSet<TokenText>,
-    last_method: &mut Option<TokenText>,
-) {
-    let members = node.members();
-    for member in members {
+fn collect_type_member_list(node: &TsTypeMemberList) -> Vec<(TokenText, TextRange)> {
+    let mut methods: Vec<(TokenText, TextRange)> = Vec::new();
+    let mut seen_methods = FxHashSet::default();
+    let mut last_method = None;
+    for member in node {
         if let Some(ts_method_signature) = member.as_ts_method_signature_type_member() {
             if let Ok(method_member) = ts_method_signature.name() {
                 if let Some(text) = method_member.name() {
                     let range = method_member.range();
-                    check_method(text, range, methods, seen_methods, last_method);
+                    check_method(
+                        text,
+                        range,
+                        &mut methods,
+                        &mut seen_methods,
+                        &mut last_method,
+                    );
                 }
             }
         }
     }
+    methods
 }
 
-fn collect_type(
-    node: &TsTypeAliasDeclaration,
-    methods: &mut Vec<(TokenText, TextRange)>,
-    seen_methods: &mut FxHashSet<TokenText>,
-    last_method: &mut Option<TokenText>,
-) {
-    let ty = node
-        .ty()
-        .ok()
-        .and_then(|ty| ty.as_ts_object_type().cloned());
-    if let Some(ts_object) = ty {
-        let members = ts_object.members();
-        for member in members {
-            if let Some(method_member) = member
-                .as_ts_method_signature_type_member()
-                .and_then(|m| m.name().ok())
-            {
-                if let Some(text) = method_member.name() {
-                    let range = method_member.range();
-                    check_method(text, range, methods, seen_methods, last_method);
-                }
-            }
-        }
-    }
-}
-
-fn collect_class(
-    node: &JsClassDeclaration,
-    methods: &mut Vec<(TokenText, TextRange)>,
-    seen_methods: &mut FxHashSet<TokenText>,
-    last_method: &mut Option<TokenText>,
-) {
+fn collect_class(node: &JsClassDeclaration) -> Vec<(TokenText, TextRange)> {
+    let mut methods: Vec<(TokenText, TextRange)> = Vec::new();
+    let mut seen_methods = FxHashSet::default();
+    let mut last_method = None;
     let members = node.members();
     for member in members {
         if let Some(method_class) = member
@@ -229,26 +201,37 @@ fn collect_class(
             if let Ok(method_member) = method_class.name() {
                 if let Some(text) = method_member.name() {
                     let range = method_member.range();
-                    check_method(text, range, methods, seen_methods, last_method);
+                    check_method(
+                        text,
+                        range,
+                        &mut methods,
+                        &mut seen_methods,
+                        &mut last_method,
+                    );
                 }
             }
         } else if let Some(method_class) = member.as_ts_method_signature_class_member() {
             if let Ok(method_member) = method_class.name() {
                 if let Some(text) = method_member.name() {
                     let range = method_member.range();
-                    check_method(text, range, methods, seen_methods, last_method);
+                    check_method(
+                        text,
+                        range,
+                        &mut methods,
+                        &mut seen_methods,
+                        &mut last_method,
+                    );
                 }
             }
         }
     }
+    methods
 }
 
-fn collect_function(
-    node: &JsFunctionDeclaration,
-    methods: &mut Vec<(TokenText, TextRange)>,
-    seen_methods: &mut FxHashSet<TokenText>,
-    last_method: &mut Option<TokenText>,
-) {
+fn collect_function(node: &JsFunctionDeclaration) -> Vec<(TokenText, TextRange)> {
+    let mut methods: Vec<(TokenText, TextRange)> = Vec::new();
+    let mut seen_methods = FxHashSet::default();
+    let mut last_method = None;
     if let Some(return_type_annotation) = node.return_type_annotation() {
         if let Some(ty) = return_type_annotation
             .ty()
@@ -264,21 +247,26 @@ fn collect_function(
                     {
                         if let Some(text) = method_member.name() {
                             let range = method_member.range();
-                            check_method(text, range, methods, seen_methods, last_method);
+                            check_method(
+                                text,
+                                range,
+                                &mut methods,
+                                &mut seen_methods,
+                                &mut last_method,
+                            );
                         }
                     }
                 }
             }
         }
     }
+    methods
 }
 
-fn collect_exports(
-    items: &JsModuleItemList,
-    methods: &mut Vec<(TokenText, TextRange)>,
-    seen_methods: &mut FxHashSet<TokenText>,
-    last_method: &mut Option<TokenText>,
-) {
+fn collect_exports(items: &JsModuleItemList) -> Vec<(TokenText, TextRange)> {
+    let mut methods: Vec<(TokenText, TextRange)> = Vec::new();
+    let mut seen_methods = FxHashSet::default();
+    let mut last_method = None;
     for item in items {
         if let AnyJsModuleItem::JsExport(node) = item {
             if let Ok(export) = node.export_clause() {
@@ -292,26 +280,33 @@ fn collect_exports(
                         }) {
                             let text = name_token.token_text_trimmed();
                             let range = name_token.text_range();
-                            check_method(text, range, methods, seen_methods, last_method);
+                            check_method(
+                                text,
+                                range,
+                                &mut methods,
+                                &mut seen_methods,
+                                &mut last_method,
+                            );
                         }
                     }
                 }
             }
         }
     }
+    methods
 }
 
 // Check if the method is already seen and add it to the list of methods
-fn check_method(
-    text: TokenText,
+fn check_method<T: Clone + Eq + std::hash::Hash + Into<TokenText>>(
+    text: T,
     range: TextRange,
     methods: &mut Vec<(TokenText, TextRange)>,
-    seen_methods: &mut FxHashSet<TokenText>,
-    last_method: &mut Option<TokenText>,
+    seen_methods: &mut FxHashSet<T>,
+    last_method: &mut Option<T>,
 ) {
     if let Some(last) = last_method {
         if last != &text && seen_methods.contains(&text) {
-            methods.push((text.clone(), range));
+            methods.push((text.clone().into(), range));
         } else {
             seen_methods.insert(text.clone());
         }

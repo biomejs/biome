@@ -1,9 +1,9 @@
 use crate::prelude::*;
 
-use crate::parentheses::{is_callee, is_member_object, is_spread, is_tag, NeedsParentheses};
 use biome_formatter::{format_args, write};
-use biome_js_syntax::{AnyJsExpression, JsSyntaxNode};
-use biome_js_syntax::{JsSyntaxKind, TsTypeAssertionExpression, TsTypeAssertionExpressionFields};
+use biome_js_syntax::parentheses::NeedsParentheses;
+use biome_js_syntax::AnyJsExpression;
+use biome_js_syntax::{TsTypeAssertionExpression, TsTypeAssertionExpressionFields};
 
 #[derive(Debug, Clone, Default)]
 pub struct FormatTsTypeAssertionExpression;
@@ -65,41 +65,6 @@ impl FormatNodeRule<TsTypeAssertionExpression> for FormatTsTypeAssertionExpressi
 
     fn needs_parentheses(&self, item: &TsTypeAssertionExpression) -> bool {
         item.needs_parentheses()
-    }
-}
-
-impl NeedsParentheses for TsTypeAssertionExpression {
-    fn needs_parentheses_with_parent(&self, parent: &JsSyntaxNode) -> bool {
-        match parent.kind() {
-            JsSyntaxKind::TS_AS_EXPRESSION => true,
-            JsSyntaxKind::TS_SATISFIES_EXPRESSION => true,
-            _ => type_cast_like_needs_parens(self.syntax(), parent),
-        }
-    }
-}
-
-pub(super) fn type_cast_like_needs_parens(node: &JsSyntaxNode, parent: &JsSyntaxNode) -> bool {
-    debug_assert!(matches!(
-        node.kind(),
-        JsSyntaxKind::TS_TYPE_ASSERTION_EXPRESSION
-            | JsSyntaxKind::TS_AS_EXPRESSION
-            | JsSyntaxKind::TS_SATISFIES_EXPRESSION
-    ));
-
-    match parent.kind() {
-        JsSyntaxKind::JS_EXPORT_DEFAULT_EXPRESSION_CLAUSE
-        | JsSyntaxKind::JS_EXTENDS_CLAUSE
-        | JsSyntaxKind::TS_TYPE_ASSERTION_EXPRESSION
-        | JsSyntaxKind::JS_UNARY_EXPRESSION
-        | JsSyntaxKind::JS_AWAIT_EXPRESSION
-        | JsSyntaxKind::TS_NON_NULL_ASSERTION_EXPRESSION => true,
-
-        _ => {
-            is_callee(node, parent)
-                || is_tag(node, parent)
-                || is_spread(node, parent)
-                || is_member_object(node, parent)
-        }
     }
 }
 

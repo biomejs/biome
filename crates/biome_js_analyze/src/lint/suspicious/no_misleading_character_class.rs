@@ -131,7 +131,7 @@ impl Rule for NoMisleadingCharacterClass {
                     let raw_regex_pattern = args
                         .next()
                         .and_then(|arg| arg.ok())
-                        .and_then(|arg| JsStringLiteralExpression::cast_ref(arg.syntax()))
+                        .and_then(|arg| JsStringLiteralExpression::cast(arg.into_syntax()))
                         .and_then(|js_string_literal| js_string_literal.inner_string_text().ok())?
                         .to_string();
 
@@ -139,7 +139,7 @@ impl Rule for NoMisleadingCharacterClass {
                     let regexp_flags = args
                         .next()
                         .and_then(|arg| arg.ok())
-                        .and_then(|arg| JsStringLiteralExpression::cast_ref(arg.syntax()))
+                        .and_then(|arg| JsStringLiteralExpression::cast(arg.into_syntax()))
                         .map(|js_string_literal| js_string_literal.text())
                         .unwrap_or_default();
 
@@ -157,7 +157,7 @@ impl Rule for NoMisleadingCharacterClass {
                     let raw_regex_pattern = args
                         .next()
                         .and_then(|arg| arg.ok())
-                        .and_then(|arg| JsStringLiteralExpression::cast_ref(arg.syntax()))
+                        .and_then(|arg| JsStringLiteralExpression::cast(arg.into_syntax()))
                         .and_then(|js_string_literal| js_string_literal.inner_string_text().ok())?
                         .to_string();
 
@@ -166,7 +166,7 @@ impl Rule for NoMisleadingCharacterClass {
                     let regexp_flags = args
                         .next()
                         .and_then(|arg| arg.ok())
-                        .and_then(|arg| JsStringLiteralExpression::cast_ref(arg.syntax()))
+                        .and_then(|arg| JsStringLiteralExpression::cast(arg.into_syntax()))
                         .map(|js_string_literal| js_string_literal.text())
                         .unwrap_or_default();
 
@@ -496,7 +496,7 @@ fn has_surrogate_pair(s: &str) -> bool {
 /// - unicode escape sequences: \u{XXXX}
 /// - unicode escape sequences without parenthesis: \uXXXX
 /// - surrogate pair: \uXXXX\uXXXX
-/// If the unicode escape sequence is not valid, it will be treated as a simple string.
+///     If the unicode escape sequence is not valid, it will be treated as a simple string.
 ///
 /// ```example
 /// \uD83D\uDC4D -> 👍

@@ -52,6 +52,7 @@ use std::slice::Iter;
 
 use super::function::LineBreak;
 use super::js_parse_error::unexpected_body_inside_ambient_context;
+use super::metavariable::{is_at_metavariable, parse_metavariable};
 use super::typescript::ts_parse_error::{self, unexpected_abstract_member_with_body};
 use super::typescript::{
     expect_ts_index_signature_member, is_at_ts_index_signature_member, MemberParent,
@@ -517,6 +518,10 @@ impl ParseNodeList for ClassMembersList {
 //  static async *foo() {}
 // }
 fn parse_class_member(p: &mut JsParser, inside_abstract_class: bool) -> ParsedSyntax {
+    if is_at_metavariable(p) {
+        return parse_metavariable(p);
+    }
+
     let member_marker = p.start();
     // test js class_empty_element
     // class foo { ;;;;;;;;;; get foo() {};;;;}

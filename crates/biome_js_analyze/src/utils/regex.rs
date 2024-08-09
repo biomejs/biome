@@ -105,7 +105,10 @@ fn is_restricted_regex(pattern: &str) -> Result<(), regex::Error> {
                             | b'r'
                             | b't'
                             | b'v'
+                            | b'\\'
                     ) {
+                        // SAFETY: safe because of the match
+                        let c = unsafe { char::from_u32_unchecked(c as u32) };
                         // Escape sequences https://docs.rs/regex/latest/regex/#escape-sequences
                         // and Perl char classes https://docs.rs/regex/latest/regex/#perl-character-classes-unicode-friendly
                         return Err(regex::Error::Syntax(format!(
@@ -120,9 +123,10 @@ fn is_restricted_regex(pattern: &str) -> Result<(), regex::Error> {
             }
             b'^' | b'$' if !is_in_char_class => {
                 // Anchors are implicit and always present in a restricted regex
-                return Err(regex::Error::Syntax(format!(
-                    "The anchor \\{c} is not supported. It is implciitly present."
-                )));
+                return Err(regex::Error::Syntax(
+                    "Anchors `^` and `$` are not supported. They are implciitly present."
+                        .to_string(),
+                ));
             }
             b'[' if is_in_char_class => {
                 return Err(regex::Error::Syntax(
@@ -137,9 +141,9 @@ fn is_restricted_regex(pattern: &str) -> Result<(), regex::Error> {
             }
             b'&' | b'~' | b'-' if is_in_char_class => {
                 if it.next() == Some(c) {
-                    return Err(regex::Error::Syntax(format!(
-                        "Character class operator {c}{c} is not supported."
-                    )));
+                    return Err(regex::Error::Syntax(
+                        "Character class operator `&&`, `~~`, `--` are not supported.".to_string(),
+                    ));
                 }
             }
             b'(' if !is_in_char_class => match it.next() {
@@ -155,9 +159,10 @@ fn is_restricted_regex(pattern: &str) -> Result<(), regex::Error> {
                                 "Named groups `(?<NAME>)` are not supported.".to_string(),
                             ))
                         } else {
-                            Err(regex::Error::Syntax(format!(
-                                "Assertions `(?{c})` are not supported."
-                            )))
+                            Err(regex::Error::Syntax(
+                                "Assertions `(?P)`, `(?=)`, `(?!)`,`(?<)` are not supported."
+                                    .to_string(),
+                            ))
                         };
                     }
                     Some(b':') => {}

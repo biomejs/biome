@@ -15,9 +15,7 @@ use biome_rowan::{
     AstNodeList, AstNodeListIterator, AstNodeSlotMap, AstSeparatedList,
     AstSeparatedListNodesIterator,
 };
-#[cfg(feature = "serde")]
 use serde::ser::SerializeSeq;
-#[cfg(feature = "serde")]
 use serde::{Serialize, Serializer};
 use std::fmt::{Debug, Formatter};
 #[doc = r" Sentinel value indicating a missing element in a dynamic node, where"]
@@ -51,7 +49,6 @@ impl CssAtRule {
         support::required_node(&self.syntax, 1usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for CssAtRule {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -60,7 +57,7 @@ impl Serialize for CssAtRule {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct CssAtRuleFields {
     pub at_token: SyntaxResult<SyntaxToken>,
     pub rule: SyntaxResult<AnyCssAtRule>,
@@ -96,7 +93,6 @@ impl CssAttributeMatcher {
         support::token(&self.syntax, 2usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for CssAttributeMatcher {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -105,7 +101,7 @@ impl Serialize for CssAttributeMatcher {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct CssAttributeMatcherFields {
     pub operator: SyntaxResult<SyntaxToken>,
     pub value: SyntaxResult<CssAttributeMatcherValue>,
@@ -132,7 +128,6 @@ impl CssAttributeMatcherValue {
         support::required_node(&self.syntax, 0usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for CssAttributeMatcherValue {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -141,7 +136,7 @@ impl Serialize for CssAttributeMatcherValue {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct CssAttributeMatcherValueFields {
     pub name: SyntaxResult<AnyCssAttributeMatcherValue>,
 }
@@ -172,7 +167,6 @@ impl CssAttributeName {
         support::required_node(&self.syntax, 1usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for CssAttributeName {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -181,7 +175,7 @@ impl Serialize for CssAttributeName {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct CssAttributeNameFields {
     pub namespace: Option<CssNamespace>,
     pub name: SyntaxResult<CssIdentifier>,
@@ -221,7 +215,6 @@ impl CssAttributeSelector {
         support::required_token(&self.syntax, 3usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for CssAttributeSelector {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -230,7 +223,7 @@ impl Serialize for CssAttributeSelector {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct CssAttributeSelectorFields {
     pub l_brack_token: SyntaxResult<SyntaxToken>,
     pub name: SyntaxResult<CssAttributeName>,
@@ -268,7 +261,6 @@ impl CssBinaryExpression {
         support::required_node(&self.syntax, 2usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for CssBinaryExpression {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -277,7 +269,7 @@ impl Serialize for CssBinaryExpression {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct CssBinaryExpressionFields {
     pub left: SyntaxResult<AnyCssExpression>,
     pub operator_token: SyntaxResult<SyntaxToken>,
@@ -314,7 +306,6 @@ impl CssBracketedValue {
         support::required_token(&self.syntax, 2usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for CssBracketedValue {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -323,7 +314,7 @@ impl Serialize for CssBracketedValue {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct CssBracketedValueFields {
     pub l_brack_token: SyntaxResult<SyntaxToken>,
     pub items: CssBracketedValueList,
@@ -360,7 +351,6 @@ impl CssCharsetAtRule {
         support::required_token(&self.syntax, 2usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for CssCharsetAtRule {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -369,7 +359,7 @@ impl Serialize for CssCharsetAtRule {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct CssCharsetAtRuleFields {
     pub charset_token: SyntaxResult<SyntaxToken>,
     pub encoding: SyntaxResult<CssString>,
@@ -402,7 +392,6 @@ impl CssClassSelector {
         support::required_node(&self.syntax, 1usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for CssClassSelector {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -411,7 +400,7 @@ impl Serialize for CssClassSelector {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct CssClassSelectorFields {
     pub dot_token: SyntaxResult<SyntaxToken>,
     pub name: SyntaxResult<CssCustomIdentifier>,
@@ -443,7 +432,6 @@ impl CssColor {
         support::required_token(&self.syntax, 1usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for CssColor {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -452,7 +440,7 @@ impl Serialize for CssColor {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct CssColorFields {
     pub hash_token: SyntaxResult<SyntaxToken>,
     pub value_token: SyntaxResult<SyntaxToken>,
@@ -488,7 +476,6 @@ impl CssColorProfileAtRule {
         support::required_node(&self.syntax, 2usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for CssColorProfileAtRule {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -497,7 +484,7 @@ impl Serialize for CssColorProfileAtRule {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct CssColorProfileAtRuleFields {
     pub color_profile_token: SyntaxResult<SyntaxToken>,
     pub name: SyntaxResult<CssCustomIdentifier>,
@@ -534,7 +521,6 @@ impl CssComplexSelector {
         support::required_node(&self.syntax, 2usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for CssComplexSelector {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -543,7 +529,7 @@ impl Serialize for CssComplexSelector {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct CssComplexSelectorFields {
     pub left: SyntaxResult<AnyCssSelector>,
     pub combinator: SyntaxResult<SyntaxToken>,
@@ -576,7 +562,6 @@ impl CssComposesImportSpecifier {
         support::required_node(&self.syntax, 1usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for CssComposesImportSpecifier {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -585,7 +570,7 @@ impl Serialize for CssComposesImportSpecifier {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct CssComposesImportSpecifierFields {
     pub from_token: SyntaxResult<SyntaxToken>,
     pub source: SyntaxResult<AnyCssComposesImportSource>,
@@ -621,7 +606,6 @@ impl CssComposesProperty {
         support::required_node(&self.syntax, 2usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for CssComposesProperty {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -630,7 +614,7 @@ impl Serialize for CssComposesProperty {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct CssComposesPropertyFields {
     pub name: SyntaxResult<CssIdentifier>,
     pub colon_token: SyntaxResult<SyntaxToken>,
@@ -663,7 +647,6 @@ impl CssComposesPropertyValue {
         support::node(&self.syntax, 1usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for CssComposesPropertyValue {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -672,7 +655,7 @@ impl Serialize for CssComposesPropertyValue {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct CssComposesPropertyValueFields {
     pub classes: CssComposesClassList,
     pub specifier: Option<CssComposesImportSpecifier>,
@@ -708,7 +691,6 @@ impl CssCompoundSelector {
         support::list(&self.syntax, 2usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for CssCompoundSelector {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -717,7 +699,7 @@ impl Serialize for CssCompoundSelector {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct CssCompoundSelectorFields {
     pub nesting_selectors: CssNestedSelectorList,
     pub simple_selector: Option<AnyCssSimpleSelector>,
@@ -754,7 +736,6 @@ impl CssContainerAndQuery {
         support::required_node(&self.syntax, 2usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for CssContainerAndQuery {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -763,7 +744,7 @@ impl Serialize for CssContainerAndQuery {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct CssContainerAndQueryFields {
     pub left: SyntaxResult<AnyCssContainerQueryInParens>,
     pub and_token: SyntaxResult<SyntaxToken>,
@@ -804,7 +785,6 @@ impl CssContainerAtRule {
         support::required_node(&self.syntax, 3usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for CssContainerAtRule {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -813,7 +793,7 @@ impl Serialize for CssContainerAtRule {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct CssContainerAtRuleFields {
     pub container_token: SyntaxResult<SyntaxToken>,
     pub name: Option<CssCustomIdentifier>,
@@ -847,7 +827,6 @@ impl CssContainerNotQuery {
         support::required_node(&self.syntax, 1usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for CssContainerNotQuery {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -856,7 +835,7 @@ impl Serialize for CssContainerNotQuery {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct CssContainerNotQueryFields {
     pub not_token: SyntaxResult<SyntaxToken>,
     pub query: SyntaxResult<AnyCssContainerQueryInParens>,
@@ -892,7 +871,6 @@ impl CssContainerOrQuery {
         support::required_node(&self.syntax, 2usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for CssContainerOrQuery {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -901,7 +879,7 @@ impl Serialize for CssContainerOrQuery {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct CssContainerOrQueryFields {
     pub left: SyntaxResult<AnyCssContainerQueryInParens>,
     pub or_token: SyntaxResult<SyntaxToken>,
@@ -938,7 +916,6 @@ impl CssContainerQueryInParens {
         support::required_token(&self.syntax, 2usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for CssContainerQueryInParens {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -947,7 +924,7 @@ impl Serialize for CssContainerQueryInParens {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct CssContainerQueryInParensFields {
     pub l_paren_token: SyntaxResult<SyntaxToken>,
     pub query: SyntaxResult<AnyCssContainerQuery>,
@@ -984,7 +961,6 @@ impl CssContainerSizeFeatureInParens {
         support::required_token(&self.syntax, 2usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for CssContainerSizeFeatureInParens {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -993,7 +969,7 @@ impl Serialize for CssContainerSizeFeatureInParens {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct CssContainerSizeFeatureInParensFields {
     pub l_paren_token: SyntaxResult<SyntaxToken>,
     pub feature: SyntaxResult<AnyCssQueryFeature>,
@@ -1030,7 +1006,6 @@ impl CssContainerStyleAndQuery {
         support::required_node(&self.syntax, 2usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for CssContainerStyleAndQuery {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -1039,7 +1014,7 @@ impl Serialize for CssContainerStyleAndQuery {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct CssContainerStyleAndQueryFields {
     pub left: SyntaxResult<CssContainerStyleInParens>,
     pub and_token: SyntaxResult<SyntaxToken>,
@@ -1076,7 +1051,6 @@ impl CssContainerStyleInParens {
         support::required_token(&self.syntax, 2usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for CssContainerStyleInParens {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -1085,7 +1059,7 @@ impl Serialize for CssContainerStyleInParens {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct CssContainerStyleInParensFields {
     pub l_paren_token: SyntaxResult<SyntaxToken>,
     pub query: SyntaxResult<AnyCssContainerStyleInParens>,
@@ -1118,7 +1092,6 @@ impl CssContainerStyleNotQuery {
         support::required_node(&self.syntax, 1usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for CssContainerStyleNotQuery {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -1127,7 +1100,7 @@ impl Serialize for CssContainerStyleNotQuery {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct CssContainerStyleNotQueryFields {
     pub not_token: SyntaxResult<SyntaxToken>,
     pub query: SyntaxResult<CssContainerStyleInParens>,
@@ -1163,7 +1136,6 @@ impl CssContainerStyleOrQuery {
         support::required_node(&self.syntax, 2usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for CssContainerStyleOrQuery {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -1172,7 +1144,7 @@ impl Serialize for CssContainerStyleOrQuery {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct CssContainerStyleOrQueryFields {
     pub left: SyntaxResult<CssContainerStyleInParens>,
     pub or_token: SyntaxResult<SyntaxToken>,
@@ -1213,7 +1185,6 @@ impl CssContainerStyleQueryInParens {
         support::required_token(&self.syntax, 3usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for CssContainerStyleQueryInParens {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -1222,7 +1193,7 @@ impl Serialize for CssContainerStyleQueryInParens {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct CssContainerStyleQueryInParensFields {
     pub style_token: SyntaxResult<SyntaxToken>,
     pub l_paren_token: SyntaxResult<SyntaxToken>,
@@ -1260,7 +1231,6 @@ impl CssCounterStyleAtRule {
         support::required_node(&self.syntax, 2usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for CssCounterStyleAtRule {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -1269,7 +1239,7 @@ impl Serialize for CssCounterStyleAtRule {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct CssCounterStyleAtRuleFields {
     pub counter_style_token: SyntaxResult<SyntaxToken>,
     pub name: SyntaxResult<CssCustomIdentifier>,
@@ -1298,7 +1268,6 @@ impl CssCustomIdentifier {
         support::required_token(&self.syntax, 0usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for CssCustomIdentifier {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -1307,7 +1276,7 @@ impl Serialize for CssCustomIdentifier {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct CssCustomIdentifierFields {
     pub value_token: SyntaxResult<SyntaxToken>,
 }
@@ -1334,7 +1303,6 @@ impl CssDashedIdentifier {
         support::required_token(&self.syntax, 0usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for CssDashedIdentifier {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -1343,7 +1311,7 @@ impl Serialize for CssDashedIdentifier {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct CssDashedIdentifierFields {
     pub value_token: SyntaxResult<SyntaxToken>,
 }
@@ -1374,7 +1342,6 @@ impl CssDeclaration {
         support::node(&self.syntax, 1usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for CssDeclaration {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -1383,7 +1350,7 @@ impl Serialize for CssDeclaration {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct CssDeclarationFields {
     pub property: SyntaxResult<AnyCssProperty>,
     pub important: Option<CssDeclarationImportant>,
@@ -1419,7 +1386,6 @@ impl CssDeclarationBlock {
         support::required_token(&self.syntax, 2usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for CssDeclarationBlock {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -1428,7 +1394,7 @@ impl Serialize for CssDeclarationBlock {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct CssDeclarationBlockFields {
     pub l_curly_token: SyntaxResult<SyntaxToken>,
     pub declarations: CssDeclarationList,
@@ -1461,7 +1427,6 @@ impl CssDeclarationImportant {
         support::required_token(&self.syntax, 1usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for CssDeclarationImportant {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -1470,7 +1435,7 @@ impl Serialize for CssDeclarationImportant {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct CssDeclarationImportantFields {
     pub excl_token: SyntaxResult<SyntaxToken>,
     pub important_token: SyntaxResult<SyntaxToken>,
@@ -1506,7 +1471,6 @@ impl CssDeclarationOrAtRuleBlock {
         support::required_token(&self.syntax, 2usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for CssDeclarationOrAtRuleBlock {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -1515,7 +1479,7 @@ impl Serialize for CssDeclarationOrAtRuleBlock {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct CssDeclarationOrAtRuleBlockFields {
     pub l_curly_token: SyntaxResult<SyntaxToken>,
     pub items: CssDeclarationOrAtRuleList,
@@ -1552,7 +1516,6 @@ impl CssDeclarationOrRuleBlock {
         support::required_token(&self.syntax, 2usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for CssDeclarationOrRuleBlock {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -1561,7 +1524,7 @@ impl Serialize for CssDeclarationOrRuleBlock {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct CssDeclarationOrRuleBlockFields {
     pub l_curly_token: SyntaxResult<SyntaxToken>,
     pub items: CssDeclarationOrRuleList,
@@ -1594,7 +1557,6 @@ impl CssDeclarationWithSemicolon {
         support::token(&self.syntax, 1usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for CssDeclarationWithSemicolon {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -1603,7 +1565,7 @@ impl Serialize for CssDeclarationWithSemicolon {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct CssDeclarationWithSemicolonFields {
     pub declaration: SyntaxResult<CssDeclaration>,
     pub semicolon_token: Option<SyntaxToken>,
@@ -1639,7 +1601,6 @@ impl CssDocumentAtRule {
         support::required_node(&self.syntax, 2usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for CssDocumentAtRule {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -1648,7 +1609,7 @@ impl Serialize for CssDocumentAtRule {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct CssDocumentAtRuleFields {
     pub document_token: SyntaxResult<SyntaxToken>,
     pub matchers: CssDocumentMatcherList,
@@ -1689,7 +1650,6 @@ impl CssDocumentCustomMatcher {
         support::required_token(&self.syntax, 3usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for CssDocumentCustomMatcher {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -1698,7 +1658,7 @@ impl Serialize for CssDocumentCustomMatcher {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct CssDocumentCustomMatcherFields {
     pub name: SyntaxResult<SyntaxToken>,
     pub l_paren_token: SyntaxResult<SyntaxToken>,
@@ -1732,7 +1692,6 @@ impl CssFontFaceAtRule {
         support::required_node(&self.syntax, 1usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for CssFontFaceAtRule {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -1741,7 +1700,7 @@ impl Serialize for CssFontFaceAtRule {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct CssFontFaceAtRuleFields {
     pub font_face_token: SyntaxResult<SyntaxToken>,
     pub block: SyntaxResult<AnyCssDeclarationBlock>,
@@ -1769,7 +1728,6 @@ impl CssFontFamilyName {
         support::list(&self.syntax, 0usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for CssFontFamilyName {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -1778,7 +1736,7 @@ impl Serialize for CssFontFamilyName {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct CssFontFamilyNameFields {
     pub names: CssCustomIdentifierList,
 }
@@ -1813,7 +1771,6 @@ impl CssFontFeatureValuesAtRule {
         support::required_node(&self.syntax, 2usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for CssFontFeatureValuesAtRule {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -1822,7 +1779,7 @@ impl Serialize for CssFontFeatureValuesAtRule {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct CssFontFeatureValuesAtRuleFields {
     pub font_feature_values_token: SyntaxResult<SyntaxToken>,
     pub names: CssFontFamilyNameList,
@@ -1859,7 +1816,6 @@ impl CssFontFeatureValuesBlock {
         support::required_token(&self.syntax, 2usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for CssFontFeatureValuesBlock {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -1868,7 +1824,7 @@ impl Serialize for CssFontFeatureValuesBlock {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct CssFontFeatureValuesBlockFields {
     pub l_curly_token: SyntaxResult<SyntaxToken>,
     pub items: CssFontFeatureValuesItemList,
@@ -1905,7 +1861,6 @@ impl CssFontFeatureValuesItem {
         support::required_node(&self.syntax, 2usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for CssFontFeatureValuesItem {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -1914,7 +1869,7 @@ impl Serialize for CssFontFeatureValuesItem {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct CssFontFeatureValuesItemFields {
     pub at_token: SyntaxResult<SyntaxToken>,
     pub name: SyntaxResult<SyntaxToken>,
@@ -1951,7 +1906,6 @@ impl CssFontPaletteValuesAtRule {
         support::required_node(&self.syntax, 2usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for CssFontPaletteValuesAtRule {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -1960,7 +1914,7 @@ impl Serialize for CssFontPaletteValuesAtRule {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct CssFontPaletteValuesAtRuleFields {
     pub font_palette_values_token: SyntaxResult<SyntaxToken>,
     pub name: SyntaxResult<CssDashedIdentifier>,
@@ -2001,7 +1955,6 @@ impl CssFunction {
         support::required_token(&self.syntax, 3usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for CssFunction {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -2010,7 +1963,7 @@ impl Serialize for CssFunction {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct CssFunctionFields {
     pub name: SyntaxResult<CssIdentifier>,
     pub l_paren_token: SyntaxResult<SyntaxToken>,
@@ -2040,7 +1993,6 @@ impl CssGenericDelimiter {
         support::required_token(&self.syntax, 0usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for CssGenericDelimiter {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -2049,7 +2001,7 @@ impl Serialize for CssGenericDelimiter {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct CssGenericDelimiterFields {
     pub value: SyntaxResult<SyntaxToken>,
 }
@@ -2084,7 +2036,6 @@ impl CssGenericProperty {
         support::list(&self.syntax, 2usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for CssGenericProperty {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -2093,47 +2044,11 @@ impl Serialize for CssGenericProperty {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct CssGenericPropertyFields {
     pub name: SyntaxResult<AnyCssDeclarationName>,
     pub colon_token: SyntaxResult<SyntaxToken>,
     pub value: CssGenericComponentValueList,
-}
-#[derive(Clone, PartialEq, Eq, Hash)]
-pub struct CssGritMetavariable {
-    pub(crate) syntax: SyntaxNode,
-}
-impl CssGritMetavariable {
-    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
-    #[doc = r""]
-    #[doc = r" # Safety"]
-    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
-    #[doc = r" or a match on [SyntaxNode::kind]"]
-    #[inline]
-    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
-        Self { syntax }
-    }
-    pub fn as_fields(&self) -> CssGritMetavariableFields {
-        CssGritMetavariableFields {
-            value_token: self.value_token(),
-        }
-    }
-    pub fn value_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 0usize)
-    }
-}
-#[cfg(feature = "serde")]
-impl Serialize for CssGritMetavariable {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        self.as_fields().serialize(serializer)
-    }
-}
-#[cfg_attr(feature = "serde", derive(Serialize))]
-pub struct CssGritMetavariableFields {
-    pub value_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct CssIdSelector {
@@ -2162,7 +2077,6 @@ impl CssIdSelector {
         support::required_node(&self.syntax, 1usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for CssIdSelector {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -2171,7 +2085,7 @@ impl Serialize for CssIdSelector {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct CssIdSelectorFields {
     pub hash_token: SyntaxResult<SyntaxToken>,
     pub name: SyntaxResult<CssCustomIdentifier>,
@@ -2199,7 +2113,6 @@ impl CssIdentifier {
         support::required_token(&self.syntax, 0usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for CssIdentifier {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -2208,7 +2121,7 @@ impl Serialize for CssIdentifier {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct CssIdentifierFields {
     pub value_token: SyntaxResult<SyntaxToken>,
 }
@@ -2235,7 +2148,6 @@ impl CssImportAnonymousLayer {
         support::required_token(&self.syntax, 0usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for CssImportAnonymousLayer {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -2244,7 +2156,7 @@ impl Serialize for CssImportAnonymousLayer {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct CssImportAnonymousLayerFields {
     pub layer_token: SyntaxResult<SyntaxToken>,
 }
@@ -2291,7 +2203,6 @@ impl CssImportAtRule {
         support::required_token(&self.syntax, 5usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for CssImportAtRule {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -2300,7 +2211,7 @@ impl Serialize for CssImportAtRule {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct CssImportAtRuleFields {
     pub import_token: SyntaxResult<SyntaxToken>,
     pub url: SyntaxResult<AnyCssImportUrl>,
@@ -2344,7 +2255,6 @@ impl CssImportNamedLayer {
         support::required_token(&self.syntax, 3usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for CssImportNamedLayer {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -2353,7 +2263,7 @@ impl Serialize for CssImportNamedLayer {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct CssImportNamedLayerFields {
     pub layer_token: SyntaxResult<SyntaxToken>,
     pub l_paren_token: SyntaxResult<SyntaxToken>,
@@ -2395,7 +2305,6 @@ impl CssImportSupports {
         support::required_token(&self.syntax, 3usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for CssImportSupports {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -2404,7 +2313,7 @@ impl Serialize for CssImportSupports {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct CssImportSupportsFields {
     pub supports_token: SyntaxResult<SyntaxToken>,
     pub l_paren_token: SyntaxResult<SyntaxToken>,
@@ -2442,7 +2351,6 @@ impl CssKeyframesAtRule {
         support::required_node(&self.syntax, 2usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for CssKeyframesAtRule {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -2451,7 +2359,7 @@ impl Serialize for CssKeyframesAtRule {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct CssKeyframesAtRuleFields {
     pub keyframes_token: SyntaxResult<SyntaxToken>,
     pub name: SyntaxResult<AnyCssKeyframesName>,
@@ -2488,7 +2396,6 @@ impl CssKeyframesBlock {
         support::required_token(&self.syntax, 2usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for CssKeyframesBlock {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -2497,7 +2404,7 @@ impl Serialize for CssKeyframesBlock {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct CssKeyframesBlockFields {
     pub l_curly_token: SyntaxResult<SyntaxToken>,
     pub items: CssKeyframesItemList,
@@ -2526,7 +2433,6 @@ impl CssKeyframesIdentSelector {
         support::required_token(&self.syntax, 0usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for CssKeyframesIdentSelector {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -2535,7 +2441,7 @@ impl Serialize for CssKeyframesIdentSelector {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct CssKeyframesIdentSelectorFields {
     pub selector: SyntaxResult<SyntaxToken>,
 }
@@ -2566,7 +2472,6 @@ impl CssKeyframesItem {
         support::required_node(&self.syntax, 1usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for CssKeyframesItem {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -2575,7 +2480,7 @@ impl Serialize for CssKeyframesItem {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct CssKeyframesItemFields {
     pub selectors: CssKeyframesSelectorList,
     pub block: SyntaxResult<AnyCssDeclarationBlock>,
@@ -2603,7 +2508,6 @@ impl CssKeyframesPercentageSelector {
         support::required_node(&self.syntax, 0usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for CssKeyframesPercentageSelector {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -2612,7 +2516,7 @@ impl Serialize for CssKeyframesPercentageSelector {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct CssKeyframesPercentageSelectorFields {
     pub selector: SyntaxResult<CssPercentage>,
 }
@@ -2651,7 +2555,6 @@ impl CssKeyframesScopeFunction {
         support::required_token(&self.syntax, 3usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for CssKeyframesScopeFunction {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -2660,7 +2563,7 @@ impl Serialize for CssKeyframesScopeFunction {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct CssKeyframesScopeFunctionFields {
     pub scope: SyntaxResult<SyntaxToken>,
     pub l_paren_token: SyntaxResult<SyntaxToken>,
@@ -2694,7 +2597,6 @@ impl CssKeyframesScopePrefix {
         support::required_node(&self.syntax, 1usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for CssKeyframesScopePrefix {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -2703,7 +2605,7 @@ impl Serialize for CssKeyframesScopePrefix {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct CssKeyframesScopePrefixFields {
     pub scope: SyntaxResult<SyntaxToken>,
     pub name: SyntaxResult<AnyCssKeyframesIdentifier>,
@@ -2735,7 +2637,6 @@ impl CssKeyframesScopedName {
         support::required_node(&self.syntax, 1usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for CssKeyframesScopedName {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -2744,7 +2645,7 @@ impl Serialize for CssKeyframesScopedName {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct CssKeyframesScopedNameFields {
     pub colon_token: SyntaxResult<SyntaxToken>,
     pub scope: SyntaxResult<AnyCssKeyframesScope>,
@@ -2776,7 +2677,6 @@ impl CssLayerAtRule {
         support::required_node(&self.syntax, 1usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for CssLayerAtRule {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -2785,7 +2685,7 @@ impl Serialize for CssLayerAtRule {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct CssLayerAtRuleFields {
     pub layer_token: SyntaxResult<SyntaxToken>,
     pub layer: SyntaxResult<AnyCssLayer>,
@@ -2817,7 +2717,6 @@ impl CssLayerDeclaration {
         support::required_node(&self.syntax, 1usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for CssLayerDeclaration {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -2826,7 +2725,7 @@ impl Serialize for CssLayerDeclaration {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct CssLayerDeclarationFields {
     pub references: CssLayerReferenceList,
     pub block: SyntaxResult<AnyCssConditionalBlock>,
@@ -2858,7 +2757,6 @@ impl CssLayerReference {
         support::required_token(&self.syntax, 1usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for CssLayerReference {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -2867,7 +2765,7 @@ impl Serialize for CssLayerReference {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct CssLayerReferenceFields {
     pub references: CssLayerReferenceList,
     pub semicolon_token: SyntaxResult<SyntaxToken>,
@@ -2895,7 +2793,6 @@ impl CssListOfComponentValuesExpression {
         support::list(&self.syntax, 0usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for CssListOfComponentValuesExpression {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -2904,7 +2801,7 @@ impl Serialize for CssListOfComponentValuesExpression {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct CssListOfComponentValuesExpressionFields {
     pub css_component_value_list: CssComponentValueList,
 }
@@ -2939,7 +2836,6 @@ impl CssMarginAtRule {
         support::required_node(&self.syntax, 2usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for CssMarginAtRule {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -2948,7 +2844,7 @@ impl Serialize for CssMarginAtRule {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct CssMarginAtRuleFields {
     pub at_token: SyntaxResult<SyntaxToken>,
     pub name: SyntaxResult<SyntaxToken>,
@@ -2985,7 +2881,6 @@ impl CssMediaAndCondition {
         support::required_node(&self.syntax, 2usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for CssMediaAndCondition {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -2994,7 +2889,7 @@ impl Serialize for CssMediaAndCondition {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct CssMediaAndConditionFields {
     pub left: SyntaxResult<AnyCssMediaInParens>,
     pub and_token: SyntaxResult<SyntaxToken>,
@@ -3031,7 +2926,6 @@ impl CssMediaAndTypeQuery {
         support::required_node(&self.syntax, 2usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for CssMediaAndTypeQuery {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -3040,7 +2934,7 @@ impl Serialize for CssMediaAndTypeQuery {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct CssMediaAndTypeQueryFields {
     pub left: SyntaxResult<CssMediaTypeQuery>,
     pub and_token: SyntaxResult<SyntaxToken>,
@@ -3077,7 +2971,6 @@ impl CssMediaAtRule {
         support::required_node(&self.syntax, 2usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for CssMediaAtRule {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -3086,7 +2979,7 @@ impl Serialize for CssMediaAtRule {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct CssMediaAtRuleFields {
     pub media_token: SyntaxResult<SyntaxToken>,
     pub queries: CssMediaQueryList,
@@ -3123,7 +3016,6 @@ impl CssMediaConditionInParens {
         support::required_token(&self.syntax, 2usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for CssMediaConditionInParens {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -3132,7 +3024,7 @@ impl Serialize for CssMediaConditionInParens {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct CssMediaConditionInParensFields {
     pub l_paren_token: SyntaxResult<SyntaxToken>,
     pub condition: SyntaxResult<AnyCssMediaCondition>,
@@ -3161,7 +3053,6 @@ impl CssMediaConditionQuery {
         support::required_node(&self.syntax, 0usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for CssMediaConditionQuery {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -3170,7 +3061,7 @@ impl Serialize for CssMediaConditionQuery {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct CssMediaConditionQueryFields {
     pub condition: SyntaxResult<AnyCssMediaCondition>,
 }
@@ -3205,7 +3096,6 @@ impl CssMediaFeatureInParens {
         support::required_token(&self.syntax, 2usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for CssMediaFeatureInParens {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -3214,7 +3104,7 @@ impl Serialize for CssMediaFeatureInParens {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct CssMediaFeatureInParensFields {
     pub l_paren_token: SyntaxResult<SyntaxToken>,
     pub feature: SyntaxResult<AnyCssQueryFeature>,
@@ -3247,7 +3137,6 @@ impl CssMediaNotCondition {
         support::required_node(&self.syntax, 1usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for CssMediaNotCondition {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -3256,7 +3145,7 @@ impl Serialize for CssMediaNotCondition {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct CssMediaNotConditionFields {
     pub not_token: SyntaxResult<SyntaxToken>,
     pub condition: SyntaxResult<AnyCssMediaInParens>,
@@ -3292,7 +3181,6 @@ impl CssMediaOrCondition {
         support::required_node(&self.syntax, 2usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for CssMediaOrCondition {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -3301,7 +3189,7 @@ impl Serialize for CssMediaOrCondition {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct CssMediaOrConditionFields {
     pub left: SyntaxResult<AnyCssMediaInParens>,
     pub or_token: SyntaxResult<SyntaxToken>,
@@ -3330,7 +3218,6 @@ impl CssMediaType {
         support::required_node(&self.syntax, 0usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for CssMediaType {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -3339,7 +3226,7 @@ impl Serialize for CssMediaType {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct CssMediaTypeFields {
     pub value: SyntaxResult<CssIdentifier>,
 }
@@ -3370,7 +3257,6 @@ impl CssMediaTypeQuery {
         support::required_node(&self.syntax, 1usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for CssMediaTypeQuery {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -3379,10 +3265,45 @@ impl Serialize for CssMediaTypeQuery {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct CssMediaTypeQueryFields {
     pub modifier: Option<SyntaxToken>,
     pub ty: SyntaxResult<CssMediaType>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct CssMetavariable {
+    pub(crate) syntax: SyntaxNode,
+}
+impl CssMetavariable {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> CssMetavariableFields {
+        CssMetavariableFields {
+            value_token: self.value_token(),
+        }
+    }
+    pub fn value_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+}
+impl Serialize for CssMetavariable {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct CssMetavariableFields {
+    pub value_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct CssNamedNamespacePrefix {
@@ -3405,7 +3326,6 @@ impl CssNamedNamespacePrefix {
         support::required_node(&self.syntax, 0usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for CssNamedNamespacePrefix {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -3414,7 +3334,7 @@ impl Serialize for CssNamedNamespacePrefix {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct CssNamedNamespacePrefixFields {
     pub name: SyntaxResult<CssIdentifier>,
 }
@@ -3445,7 +3365,6 @@ impl CssNamespace {
         support::required_token(&self.syntax, 1usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for CssNamespace {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -3454,7 +3373,7 @@ impl Serialize for CssNamespace {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct CssNamespaceFields {
     pub prefix: Option<AnyCssNamespacePrefix>,
     pub bitwise_or_token: SyntaxResult<SyntaxToken>,
@@ -3494,7 +3413,6 @@ impl CssNamespaceAtRule {
         support::required_token(&self.syntax, 3usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for CssNamespaceAtRule {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -3503,7 +3421,7 @@ impl Serialize for CssNamespaceAtRule {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct CssNamespaceAtRuleFields {
     pub namespace_token: SyntaxResult<SyntaxToken>,
     pub prefix: Option<CssIdentifier>,
@@ -3537,7 +3455,6 @@ impl CssNestedQualifiedRule {
         support::required_node(&self.syntax, 1usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for CssNestedQualifiedRule {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -3546,7 +3463,7 @@ impl Serialize for CssNestedQualifiedRule {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct CssNestedQualifiedRuleFields {
     pub prelude: CssRelativeSelectorList,
     pub block: SyntaxResult<AnyCssDeclarationOrRuleBlock>,
@@ -3574,7 +3491,6 @@ impl CssNestedSelector {
         support::required_token(&self.syntax, 0usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for CssNestedSelector {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -3583,7 +3499,7 @@ impl Serialize for CssNestedSelector {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct CssNestedSelectorFields {
     pub amp_token: SyntaxResult<SyntaxToken>,
 }
@@ -3614,7 +3530,6 @@ impl CssNthOffset {
         support::required_node(&self.syntax, 1usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for CssNthOffset {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -3623,7 +3538,7 @@ impl Serialize for CssNthOffset {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct CssNthOffsetFields {
     pub sign: SyntaxResult<SyntaxToken>,
     pub value: SyntaxResult<CssNumber>,
@@ -3651,7 +3566,6 @@ impl CssNumber {
         support::required_token(&self.syntax, 0usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for CssNumber {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -3660,7 +3574,7 @@ impl Serialize for CssNumber {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct CssNumberFields {
     pub value_token: SyntaxResult<SyntaxToken>,
 }
@@ -3695,7 +3609,6 @@ impl CssPageAtRule {
         support::required_node(&self.syntax, 2usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for CssPageAtRule {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -3704,7 +3617,7 @@ impl Serialize for CssPageAtRule {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct CssPageAtRuleFields {
     pub page_token: SyntaxResult<SyntaxToken>,
     pub selectors: CssPageSelectorList,
@@ -3741,7 +3654,6 @@ impl CssPageAtRuleBlock {
         support::required_token(&self.syntax, 2usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for CssPageAtRuleBlock {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -3750,7 +3662,7 @@ impl Serialize for CssPageAtRuleBlock {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct CssPageAtRuleBlockFields {
     pub l_curly_token: SyntaxResult<SyntaxToken>,
     pub items: CssPageAtRuleItemList,
@@ -3783,7 +3695,6 @@ impl CssPageSelector {
         support::list(&self.syntax, 1usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for CssPageSelector {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -3792,7 +3703,7 @@ impl Serialize for CssPageSelector {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct CssPageSelectorFields {
     pub ty: Option<CssCustomIdentifier>,
     pub pseudos: CssPageSelectorPseudoList,
@@ -3824,7 +3735,6 @@ impl CssPageSelectorPseudo {
         support::required_token(&self.syntax, 1usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for CssPageSelectorPseudo {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -3833,7 +3743,7 @@ impl Serialize for CssPageSelectorPseudo {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct CssPageSelectorPseudoFields {
     pub colon_token: SyntaxResult<SyntaxToken>,
     pub selector: SyntaxResult<SyntaxToken>,
@@ -3861,7 +3771,6 @@ impl CssParameter {
         support::required_node(&self.syntax, 0usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for CssParameter {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -3870,7 +3779,7 @@ impl Serialize for CssParameter {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct CssParameterFields {
     pub any_css_expression: SyntaxResult<AnyCssExpression>,
 }
@@ -3905,7 +3814,6 @@ impl CssParenthesizedExpression {
         support::required_token(&self.syntax, 2usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for CssParenthesizedExpression {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -3914,7 +3822,7 @@ impl Serialize for CssParenthesizedExpression {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct CssParenthesizedExpressionFields {
     pub l_paren_token: SyntaxResult<SyntaxToken>,
     pub expression: Option<AnyCssExpression>,
@@ -3947,7 +3855,6 @@ impl CssPercentage {
         support::required_token(&self.syntax, 1usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for CssPercentage {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -3956,7 +3863,7 @@ impl Serialize for CssPercentage {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct CssPercentageFields {
     pub value_token: SyntaxResult<SyntaxToken>,
     pub percent_token: SyntaxResult<SyntaxToken>,
@@ -3992,7 +3899,6 @@ impl CssPropertyAtRule {
         support::required_node(&self.syntax, 2usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for CssPropertyAtRule {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -4001,7 +3907,7 @@ impl Serialize for CssPropertyAtRule {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct CssPropertyAtRuleFields {
     pub property_token: SyntaxResult<SyntaxToken>,
     pub name: SyntaxResult<CssDashedIdentifier>,
@@ -4042,7 +3948,6 @@ impl CssPseudoClassFunctionCompoundSelector {
         support::required_token(&self.syntax, 3usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for CssPseudoClassFunctionCompoundSelector {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -4051,7 +3956,7 @@ impl Serialize for CssPseudoClassFunctionCompoundSelector {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct CssPseudoClassFunctionCompoundSelectorFields {
     pub name: SyntaxResult<SyntaxToken>,
     pub l_paren_token: SyntaxResult<SyntaxToken>,
@@ -4093,7 +3998,6 @@ impl CssPseudoClassFunctionCompoundSelectorList {
         support::required_token(&self.syntax, 3usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for CssPseudoClassFunctionCompoundSelectorList {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -4102,7 +4006,7 @@ impl Serialize for CssPseudoClassFunctionCompoundSelectorList {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct CssPseudoClassFunctionCompoundSelectorListFields {
     pub name: SyntaxResult<SyntaxToken>,
     pub l_paren_token: SyntaxResult<SyntaxToken>,
@@ -4144,7 +4048,6 @@ impl CssPseudoClassFunctionIdentifier {
         support::required_token(&self.syntax, 3usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for CssPseudoClassFunctionIdentifier {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -4153,7 +4056,7 @@ impl Serialize for CssPseudoClassFunctionIdentifier {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct CssPseudoClassFunctionIdentifierFields {
     pub name_token: SyntaxResult<SyntaxToken>,
     pub l_paren_token: SyntaxResult<SyntaxToken>,
@@ -4195,7 +4098,6 @@ impl CssPseudoClassFunctionNth {
         support::required_token(&self.syntax, 3usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for CssPseudoClassFunctionNth {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -4204,7 +4106,7 @@ impl Serialize for CssPseudoClassFunctionNth {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct CssPseudoClassFunctionNthFields {
     pub name: SyntaxResult<SyntaxToken>,
     pub l_paren_token: SyntaxResult<SyntaxToken>,
@@ -4246,7 +4148,6 @@ impl CssPseudoClassFunctionRelativeSelectorList {
         support::required_token(&self.syntax, 3usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for CssPseudoClassFunctionRelativeSelectorList {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -4255,7 +4156,7 @@ impl Serialize for CssPseudoClassFunctionRelativeSelectorList {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct CssPseudoClassFunctionRelativeSelectorListFields {
     pub name_token: SyntaxResult<SyntaxToken>,
     pub l_paren_token: SyntaxResult<SyntaxToken>,
@@ -4297,7 +4198,6 @@ impl CssPseudoClassFunctionSelector {
         support::required_token(&self.syntax, 3usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for CssPseudoClassFunctionSelector {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -4306,7 +4206,7 @@ impl Serialize for CssPseudoClassFunctionSelector {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct CssPseudoClassFunctionSelectorFields {
     pub name: SyntaxResult<SyntaxToken>,
     pub l_paren_token: SyntaxResult<SyntaxToken>,
@@ -4348,7 +4248,6 @@ impl CssPseudoClassFunctionSelectorList {
         support::required_token(&self.syntax, 3usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for CssPseudoClassFunctionSelectorList {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -4357,7 +4256,7 @@ impl Serialize for CssPseudoClassFunctionSelectorList {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct CssPseudoClassFunctionSelectorListFields {
     pub name: SyntaxResult<SyntaxToken>,
     pub l_paren_token: SyntaxResult<SyntaxToken>,
@@ -4399,7 +4298,6 @@ impl CssPseudoClassFunctionValueList {
         support::required_token(&self.syntax, 3usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for CssPseudoClassFunctionValueList {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -4408,7 +4306,7 @@ impl Serialize for CssPseudoClassFunctionValueList {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct CssPseudoClassFunctionValueListFields {
     pub name_token: SyntaxResult<SyntaxToken>,
     pub l_paren_token: SyntaxResult<SyntaxToken>,
@@ -4436,7 +4334,6 @@ impl CssPseudoClassIdentifier {
         support::required_node(&self.syntax, 0usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for CssPseudoClassIdentifier {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -4445,7 +4342,7 @@ impl Serialize for CssPseudoClassIdentifier {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct CssPseudoClassIdentifierFields {
     pub name: SyntaxResult<CssIdentifier>,
 }
@@ -4484,7 +4381,6 @@ impl CssPseudoClassNth {
         support::node(&self.syntax, 3usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for CssPseudoClassNth {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -4493,7 +4389,7 @@ impl Serialize for CssPseudoClassNth {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct CssPseudoClassNthFields {
     pub sign: Option<SyntaxToken>,
     pub value: Option<CssNumber>,
@@ -4523,7 +4419,6 @@ impl CssPseudoClassNthIdentifier {
         support::required_token(&self.syntax, 0usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for CssPseudoClassNthIdentifier {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -4532,7 +4427,7 @@ impl Serialize for CssPseudoClassNthIdentifier {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct CssPseudoClassNthIdentifierFields {
     pub value: SyntaxResult<SyntaxToken>,
 }
@@ -4563,7 +4458,6 @@ impl CssPseudoClassNthNumber {
         support::required_node(&self.syntax, 1usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for CssPseudoClassNthNumber {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -4572,7 +4466,7 @@ impl Serialize for CssPseudoClassNthNumber {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct CssPseudoClassNthNumberFields {
     pub sign: Option<SyntaxToken>,
     pub value: SyntaxResult<CssNumber>,
@@ -4604,7 +4498,6 @@ impl CssPseudoClassNthSelector {
         support::node(&self.syntax, 1usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for CssPseudoClassNthSelector {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -4613,7 +4506,7 @@ impl Serialize for CssPseudoClassNthSelector {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct CssPseudoClassNthSelectorFields {
     pub nth: SyntaxResult<AnyCssPseudoClassNth>,
     pub of_selector: Option<CssPseudoClassOfNthSelector>,
@@ -4645,7 +4538,6 @@ impl CssPseudoClassOfNthSelector {
         support::list(&self.syntax, 1usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for CssPseudoClassOfNthSelector {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -4654,7 +4546,7 @@ impl Serialize for CssPseudoClassOfNthSelector {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct CssPseudoClassOfNthSelectorFields {
     pub of_token: SyntaxResult<SyntaxToken>,
     pub selectors: CssSelectorList,
@@ -4686,7 +4578,6 @@ impl CssPseudoClassSelector {
         support::required_node(&self.syntax, 1usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for CssPseudoClassSelector {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -4695,7 +4586,7 @@ impl Serialize for CssPseudoClassSelector {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct CssPseudoClassSelectorFields {
     pub colon_token: SyntaxResult<SyntaxToken>,
     pub class: SyntaxResult<AnyCssPseudoClass>,
@@ -4735,7 +4626,6 @@ impl CssPseudoElementFunctionIdentifier {
         support::required_token(&self.syntax, 3usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for CssPseudoElementFunctionIdentifier {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -4744,7 +4634,7 @@ impl Serialize for CssPseudoElementFunctionIdentifier {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct CssPseudoElementFunctionIdentifierFields {
     pub name: SyntaxResult<SyntaxToken>,
     pub l_paren_token: SyntaxResult<SyntaxToken>,
@@ -4786,7 +4676,6 @@ impl CssPseudoElementFunctionSelector {
         support::required_token(&self.syntax, 3usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for CssPseudoElementFunctionSelector {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -4795,7 +4684,7 @@ impl Serialize for CssPseudoElementFunctionSelector {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct CssPseudoElementFunctionSelectorFields {
     pub name: SyntaxResult<CssIdentifier>,
     pub l_paren_token: SyntaxResult<SyntaxToken>,
@@ -4823,7 +4712,6 @@ impl CssPseudoElementIdentifier {
         support::required_node(&self.syntax, 0usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for CssPseudoElementIdentifier {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -4832,7 +4720,7 @@ impl Serialize for CssPseudoElementIdentifier {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct CssPseudoElementIdentifierFields {
     pub name: SyntaxResult<CssIdentifier>,
 }
@@ -4863,7 +4751,6 @@ impl CssPseudoElementSelector {
         support::required_node(&self.syntax, 1usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for CssPseudoElementSelector {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -4872,7 +4759,7 @@ impl Serialize for CssPseudoElementSelector {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct CssPseudoElementSelectorFields {
     pub double_colon_token: SyntaxResult<SyntaxToken>,
     pub element: SyntaxResult<AnyCssPseudoElement>,
@@ -4904,7 +4791,6 @@ impl CssQualifiedRule {
         support::required_node(&self.syntax, 1usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for CssQualifiedRule {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -4913,7 +4799,7 @@ impl Serialize for CssQualifiedRule {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct CssQualifiedRuleFields {
     pub prelude: CssSelectorList,
     pub block: SyntaxResult<AnyCssDeclarationOrRuleBlock>,
@@ -4939,7 +4825,6 @@ impl CssQueryFeatureBoolean {
         support::required_node(&self.syntax, 0usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for CssQueryFeatureBoolean {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -4948,7 +4833,7 @@ impl Serialize for CssQueryFeatureBoolean {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct CssQueryFeatureBooleanFields {
     pub name: SyntaxResult<CssIdentifier>,
 }
@@ -4983,7 +4868,6 @@ impl CssQueryFeaturePlain {
         support::required_node(&self.syntax, 2usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for CssQueryFeaturePlain {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -4992,7 +4876,7 @@ impl Serialize for CssQueryFeaturePlain {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct CssQueryFeaturePlainFields {
     pub name: SyntaxResult<CssIdentifier>,
     pub colon_token: SyntaxResult<SyntaxToken>,
@@ -5029,7 +4913,6 @@ impl CssQueryFeatureRange {
         support::required_node(&self.syntax, 2usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for CssQueryFeatureRange {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -5038,7 +4921,7 @@ impl Serialize for CssQueryFeatureRange {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct CssQueryFeatureRangeFields {
     pub left: SyntaxResult<CssIdentifier>,
     pub comparison: SyntaxResult<CssQueryFeatureRangeComparison>,
@@ -5067,7 +4950,6 @@ impl CssQueryFeatureRangeComparison {
         support::required_token(&self.syntax, 0usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for CssQueryFeatureRangeComparison {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -5076,7 +4958,7 @@ impl Serialize for CssQueryFeatureRangeComparison {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct CssQueryFeatureRangeComparisonFields {
     pub operator: SyntaxResult<SyntaxToken>,
 }
@@ -5119,7 +5001,6 @@ impl CssQueryFeatureRangeInterval {
         support::required_node(&self.syntax, 4usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for CssQueryFeatureRangeInterval {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -5128,7 +5009,7 @@ impl Serialize for CssQueryFeatureRangeInterval {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct CssQueryFeatureRangeIntervalFields {
     pub left: SyntaxResult<AnyCssQueryFeatureValue>,
     pub left_comparison: SyntaxResult<CssQueryFeatureRangeComparison>,
@@ -5167,7 +5048,6 @@ impl CssQueryFeatureReverseRange {
         support::required_node(&self.syntax, 2usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for CssQueryFeatureReverseRange {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -5176,7 +5056,7 @@ impl Serialize for CssQueryFeatureReverseRange {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct CssQueryFeatureReverseRangeFields {
     pub left: SyntaxResult<AnyCssQueryFeatureValue>,
     pub comparison: SyntaxResult<CssQueryFeatureRangeComparison>,
@@ -5213,7 +5093,6 @@ impl CssRatio {
         support::required_node(&self.syntax, 2usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for CssRatio {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -5222,7 +5101,7 @@ impl Serialize for CssRatio {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct CssRatioFields {
     pub numerator: SyntaxResult<CssNumber>,
     pub slash_token: SyntaxResult<SyntaxToken>,
@@ -5255,7 +5134,6 @@ impl CssRegularDimension {
         support::required_token(&self.syntax, 1usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for CssRegularDimension {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -5264,7 +5142,7 @@ impl Serialize for CssRegularDimension {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct CssRegularDimensionFields {
     pub value_token: SyntaxResult<SyntaxToken>,
     pub unit_token: SyntaxResult<SyntaxToken>,
@@ -5296,7 +5174,6 @@ impl CssRelativeSelector {
         support::required_node(&self.syntax, 1usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for CssRelativeSelector {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -5305,7 +5182,7 @@ impl Serialize for CssRelativeSelector {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct CssRelativeSelectorFields {
     pub combinator: Option<SyntaxToken>,
     pub selector: SyntaxResult<AnyCssSelector>,
@@ -5341,7 +5218,6 @@ impl CssRoot {
         support::required_token(&self.syntax, 2usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for CssRoot {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -5350,7 +5226,7 @@ impl Serialize for CssRoot {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct CssRootFields {
     pub bom_token: Option<SyntaxToken>,
     pub rules: CssRuleList,
@@ -5387,7 +5263,6 @@ impl CssRuleBlock {
         support::required_token(&self.syntax, 2usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for CssRuleBlock {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -5396,7 +5271,7 @@ impl Serialize for CssRuleBlock {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct CssRuleBlockFields {
     pub l_curly_token: SyntaxResult<SyntaxToken>,
     pub rules: CssRuleList,
@@ -5433,7 +5308,6 @@ impl CssScopeAtRule {
         support::required_node(&self.syntax, 2usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for CssScopeAtRule {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -5442,7 +5316,7 @@ impl Serialize for CssScopeAtRule {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct CssScopeAtRuleFields {
     pub scope_token: SyntaxResult<SyntaxToken>,
     pub range: Option<AnyCssScopeRange>,
@@ -5479,7 +5353,6 @@ impl CssScopeEdge {
         support::required_token(&self.syntax, 2usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for CssScopeEdge {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -5488,7 +5361,7 @@ impl Serialize for CssScopeEdge {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct CssScopeEdgeFields {
     pub l_paren_token: SyntaxResult<SyntaxToken>,
     pub selectors: CssSelectorList,
@@ -5521,7 +5394,6 @@ impl CssScopeRangeEnd {
         support::required_node(&self.syntax, 1usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for CssScopeRangeEnd {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -5530,7 +5402,7 @@ impl Serialize for CssScopeRangeEnd {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct CssScopeRangeEndFields {
     pub to_token: SyntaxResult<SyntaxToken>,
     pub end: SyntaxResult<CssScopeEdge>,
@@ -5566,7 +5438,6 @@ impl CssScopeRangeInterval {
         support::required_node(&self.syntax, 2usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for CssScopeRangeInterval {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -5575,7 +5446,7 @@ impl Serialize for CssScopeRangeInterval {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct CssScopeRangeIntervalFields {
     pub start: SyntaxResult<CssScopeEdge>,
     pub to_token: SyntaxResult<SyntaxToken>,
@@ -5604,7 +5475,6 @@ impl CssScopeRangeStart {
         support::required_node(&self.syntax, 0usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for CssScopeRangeStart {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -5613,7 +5483,7 @@ impl Serialize for CssScopeRangeStart {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct CssScopeRangeStartFields {
     pub start: SyntaxResult<CssScopeEdge>,
 }
@@ -5644,7 +5514,6 @@ impl CssStartingStyleAtRule {
         support::required_node(&self.syntax, 1usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for CssStartingStyleAtRule {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -5653,7 +5522,7 @@ impl Serialize for CssStartingStyleAtRule {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct CssStartingStyleAtRuleFields {
     pub starting_style_token: SyntaxResult<SyntaxToken>,
     pub block: SyntaxResult<AnyCssStartingStyleBlock>,
@@ -5681,7 +5550,6 @@ impl CssString {
         support::required_token(&self.syntax, 0usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for CssString {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -5690,7 +5558,7 @@ impl Serialize for CssString {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct CssStringFields {
     pub value_token: SyntaxResult<SyntaxToken>,
 }
@@ -5725,7 +5593,6 @@ impl CssSupportsAndCondition {
         support::required_node(&self.syntax, 2usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for CssSupportsAndCondition {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -5734,7 +5601,7 @@ impl Serialize for CssSupportsAndCondition {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct CssSupportsAndConditionFields {
     pub left: SyntaxResult<AnyCssSupportsInParens>,
     pub and_token: SyntaxResult<SyntaxToken>,
@@ -5771,7 +5638,6 @@ impl CssSupportsAtRule {
         support::required_node(&self.syntax, 2usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for CssSupportsAtRule {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -5780,7 +5646,7 @@ impl Serialize for CssSupportsAtRule {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct CssSupportsAtRuleFields {
     pub supports_token: SyntaxResult<SyntaxToken>,
     pub condition: SyntaxResult<AnyCssSupportsCondition>,
@@ -5817,7 +5683,6 @@ impl CssSupportsConditionInParens {
         support::required_token(&self.syntax, 2usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for CssSupportsConditionInParens {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -5826,7 +5691,7 @@ impl Serialize for CssSupportsConditionInParens {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct CssSupportsConditionInParensFields {
     pub l_paren_token: SyntaxResult<SyntaxToken>,
     pub condition: SyntaxResult<AnyCssSupportsCondition>,
@@ -5863,7 +5728,6 @@ impl CssSupportsFeatureDeclaration {
         support::required_token(&self.syntax, 2usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for CssSupportsFeatureDeclaration {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -5872,7 +5736,7 @@ impl Serialize for CssSupportsFeatureDeclaration {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct CssSupportsFeatureDeclarationFields {
     pub l_paren_token: SyntaxResult<SyntaxToken>,
     pub declaration: SyntaxResult<CssDeclaration>,
@@ -5913,7 +5777,6 @@ impl CssSupportsFeatureSelector {
         support::required_token(&self.syntax, 3usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for CssSupportsFeatureSelector {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -5922,7 +5785,7 @@ impl Serialize for CssSupportsFeatureSelector {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct CssSupportsFeatureSelectorFields {
     pub selector_token: SyntaxResult<SyntaxToken>,
     pub l_paren_token: SyntaxResult<SyntaxToken>,
@@ -5956,7 +5819,6 @@ impl CssSupportsNotCondition {
         support::required_node(&self.syntax, 1usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for CssSupportsNotCondition {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -5965,7 +5827,7 @@ impl Serialize for CssSupportsNotCondition {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct CssSupportsNotConditionFields {
     pub not_token: SyntaxResult<SyntaxToken>,
     pub query: SyntaxResult<AnyCssSupportsInParens>,
@@ -6001,7 +5863,6 @@ impl CssSupportsOrCondition {
         support::required_node(&self.syntax, 2usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for CssSupportsOrCondition {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -6010,7 +5871,7 @@ impl Serialize for CssSupportsOrCondition {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct CssSupportsOrConditionFields {
     pub left: SyntaxResult<AnyCssSupportsInParens>,
     pub or_token: SyntaxResult<SyntaxToken>,
@@ -6043,7 +5904,6 @@ impl CssTypeSelector {
         support::required_node(&self.syntax, 1usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for CssTypeSelector {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -6052,7 +5912,7 @@ impl Serialize for CssTypeSelector {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct CssTypeSelectorFields {
     pub namespace: Option<CssNamespace>,
     pub ident: SyntaxResult<CssIdentifier>,
@@ -6080,7 +5940,6 @@ impl CssUnicodeCodepoint {
         support::required_token(&self.syntax, 0usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for CssUnicodeCodepoint {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -6089,7 +5948,7 @@ impl Serialize for CssUnicodeCodepoint {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct CssUnicodeCodepointFields {
     pub value_token: SyntaxResult<SyntaxToken>,
 }
@@ -6120,7 +5979,6 @@ impl CssUnicodeRange {
         support::required_node(&self.syntax, 1usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for CssUnicodeRange {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -6129,7 +5987,7 @@ impl Serialize for CssUnicodeRange {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct CssUnicodeRangeFields {
     pub prefix_token: SyntaxResult<SyntaxToken>,
     pub value: SyntaxResult<AnyCssUnicodeValue>,
@@ -6165,7 +6023,6 @@ impl CssUnicodeRangeInterval {
         support::required_node(&self.syntax, 2usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for CssUnicodeRangeInterval {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -6174,7 +6031,7 @@ impl Serialize for CssUnicodeRangeInterval {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct CssUnicodeRangeIntervalFields {
     pub start: SyntaxResult<CssUnicodeCodepoint>,
     pub minus_token: SyntaxResult<SyntaxToken>,
@@ -6203,7 +6060,6 @@ impl CssUnicodeRangeWildcard {
         support::required_token(&self.syntax, 0usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for CssUnicodeRangeWildcard {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -6212,7 +6068,7 @@ impl Serialize for CssUnicodeRangeWildcard {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct CssUnicodeRangeWildcardFields {
     pub value_token: SyntaxResult<SyntaxToken>,
 }
@@ -6239,7 +6095,6 @@ impl CssUniversalNamespacePrefix {
         support::required_token(&self.syntax, 0usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for CssUniversalNamespacePrefix {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -6248,7 +6103,7 @@ impl Serialize for CssUniversalNamespacePrefix {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct CssUniversalNamespacePrefixFields {
     pub star_token: SyntaxResult<SyntaxToken>,
 }
@@ -6279,7 +6134,6 @@ impl CssUniversalSelector {
         support::required_token(&self.syntax, 1usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for CssUniversalSelector {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -6288,7 +6142,7 @@ impl Serialize for CssUniversalSelector {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct CssUniversalSelectorFields {
     pub namespace: Option<CssNamespace>,
     pub star_token: SyntaxResult<SyntaxToken>,
@@ -6324,7 +6178,6 @@ impl CssUnknownBlockAtRule {
         support::required_node(&self.syntax, 2usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for CssUnknownBlockAtRule {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -6333,7 +6186,7 @@ impl Serialize for CssUnknownBlockAtRule {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct CssUnknownBlockAtRuleFields {
     pub name: SyntaxResult<CssIdentifier>,
     pub components: SyntaxResult<CssUnknownAtRuleComponentList>,
@@ -6366,7 +6219,6 @@ impl CssUnknownDimension {
         support::required_token(&self.syntax, 1usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for CssUnknownDimension {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -6375,7 +6227,7 @@ impl Serialize for CssUnknownDimension {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct CssUnknownDimensionFields {
     pub value_token: SyntaxResult<SyntaxToken>,
     pub unit_token: SyntaxResult<SyntaxToken>,
@@ -6411,7 +6263,6 @@ impl CssUnknownValueAtRule {
         support::required_token(&self.syntax, 2usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for CssUnknownValueAtRule {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -6420,7 +6271,7 @@ impl Serialize for CssUnknownValueAtRule {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct CssUnknownValueAtRuleFields {
     pub name: SyntaxResult<CssIdentifier>,
     pub components: SyntaxResult<CssUnknownAtRuleComponentList>,
@@ -6465,7 +6316,6 @@ impl CssUrlFunction {
         support::required_token(&self.syntax, 4usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for CssUrlFunction {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -6474,7 +6324,7 @@ impl Serialize for CssUrlFunction {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct CssUrlFunctionFields {
     pub name: SyntaxResult<SyntaxToken>,
     pub l_paren_token: SyntaxResult<SyntaxToken>,
@@ -6505,7 +6355,6 @@ impl CssUrlValueRaw {
         support::required_token(&self.syntax, 0usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for CssUrlValueRaw {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -6514,7 +6363,7 @@ impl Serialize for CssUrlValueRaw {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct CssUrlValueRawFields {
     pub value_token: SyntaxResult<SyntaxToken>,
 }
@@ -6549,7 +6398,6 @@ impl CssValueAtRule {
         support::required_token(&self.syntax, 2usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for CssValueAtRule {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -6558,7 +6406,7 @@ impl Serialize for CssValueAtRule {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct CssValueAtRuleFields {
     pub value_token: SyntaxResult<SyntaxToken>,
     pub clause: SyntaxResult<AnyCssValueAtRuleClause>,
@@ -6587,7 +6435,6 @@ impl CssValueAtRuleDeclarationClause {
         support::list(&self.syntax, 0usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for CssValueAtRuleDeclarationClause {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -6596,7 +6443,7 @@ impl Serialize for CssValueAtRuleDeclarationClause {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct CssValueAtRuleDeclarationClauseFields {
     pub properties: CssValueAtRulePropertyList,
 }
@@ -6631,7 +6478,6 @@ impl CssValueAtRuleGenericProperty {
         support::required_node(&self.syntax, 2usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for CssValueAtRuleGenericProperty {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -6640,7 +6486,7 @@ impl Serialize for CssValueAtRuleGenericProperty {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct CssValueAtRuleGenericPropertyFields {
     pub name: SyntaxResult<AnyCssDeclarationName>,
     pub colon_token: SyntaxResult<SyntaxToken>,
@@ -6677,7 +6523,6 @@ impl CssValueAtRuleImportClause {
         support::required_node(&self.syntax, 2usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for CssValueAtRuleImportClause {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -6686,7 +6531,7 @@ impl Serialize for CssValueAtRuleImportClause {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct CssValueAtRuleImportClauseFields {
     pub specifiers: CssValueAtRuleImportSpecifierList,
     pub from_token: SyntaxResult<SyntaxToken>,
@@ -6713,7 +6558,6 @@ impl CssValueAtRuleImportSpecifier {
         support::required_node(&self.syntax, 0usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for CssValueAtRuleImportSpecifier {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -6722,7 +6566,7 @@ impl Serialize for CssValueAtRuleImportSpecifier {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct CssValueAtRuleImportSpecifierFields {
     pub name: SyntaxResult<CssIdentifier>,
 }
@@ -6757,7 +6601,6 @@ impl CssValueAtRuleNamedImportSpecifier {
         support::required_node(&self.syntax, 2usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for CssValueAtRuleNamedImportSpecifier {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -6766,14 +6609,13 @@ impl Serialize for CssValueAtRuleNamedImportSpecifier {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct CssValueAtRuleNamedImportSpecifierFields {
     pub name: SyntaxResult<CssIdentifier>,
     pub as_token: SyntaxResult<SyntaxToken>,
     pub local_name: SyntaxResult<CssIdentifier>,
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyCssAtRule {
     CssBogusAtRule(CssBogusAtRule),
     CssCharsetAtRule(CssCharsetAtRule),
@@ -6932,8 +6774,7 @@ impl AnyCssAtRule {
         }
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyCssAttributeMatcherValue {
     CssIdentifier(CssIdentifier),
     CssString(CssString),
@@ -6952,8 +6793,7 @@ impl AnyCssAttributeMatcherValue {
         }
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyCssComposesImportSource {
     CssIdentifier(CssIdentifier),
     CssString(CssString),
@@ -6972,8 +6812,7 @@ impl AnyCssComposesImportSource {
         }
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyCssCompoundSelector {
     CssBogusSelector(CssBogusSelector),
     CssCompoundSelector(CssCompoundSelector),
@@ -6992,8 +6831,7 @@ impl AnyCssCompoundSelector {
         }
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyCssConditionalBlock {
     CssBogusBlock(CssBogusBlock),
     CssDeclarationOrRuleBlock(CssDeclarationOrRuleBlock),
@@ -7019,8 +6857,7 @@ impl AnyCssConditionalBlock {
         }
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyCssContainerAndCombinableQuery {
     AnyCssContainerQueryInParens(AnyCssContainerQueryInParens),
     CssContainerAndQuery(CssContainerAndQuery),
@@ -7039,8 +6876,7 @@ impl AnyCssContainerAndCombinableQuery {
         }
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyCssContainerOrCombinableQuery {
     AnyCssContainerQueryInParens(AnyCssContainerQueryInParens),
     CssContainerOrQuery(CssContainerOrQuery),
@@ -7059,8 +6895,7 @@ impl AnyCssContainerOrCombinableQuery {
         }
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyCssContainerQuery {
     AnyCssContainerQueryInParens(AnyCssContainerQueryInParens),
     CssContainerAndQuery(CssContainerAndQuery),
@@ -7093,8 +6928,7 @@ impl AnyCssContainerQuery {
         }
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyCssContainerQueryInParens {
     CssContainerQueryInParens(CssContainerQueryInParens),
     CssContainerSizeFeatureInParens(CssContainerSizeFeatureInParens),
@@ -7124,8 +6958,7 @@ impl AnyCssContainerQueryInParens {
         }
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyCssContainerStyleAndCombinableQuery {
     CssContainerStyleAndQuery(CssContainerStyleAndQuery),
     CssContainerStyleInParens(CssContainerStyleInParens),
@@ -7144,8 +6977,7 @@ impl AnyCssContainerStyleAndCombinableQuery {
         }
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyCssContainerStyleInParens {
     AnyCssContainerStyleQuery(AnyCssContainerStyleQuery),
     CssDeclaration(CssDeclaration),
@@ -7164,8 +6996,7 @@ impl AnyCssContainerStyleInParens {
         }
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyCssContainerStyleOrCombinableQuery {
     CssContainerStyleInParens(CssContainerStyleInParens),
     CssContainerStyleOrQuery(CssContainerStyleOrQuery),
@@ -7184,8 +7015,7 @@ impl AnyCssContainerStyleOrCombinableQuery {
         }
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyCssContainerStyleQuery {
     CssContainerStyleAndQuery(CssContainerStyleAndQuery),
     CssContainerStyleInParens(CssContainerStyleInParens),
@@ -7225,8 +7055,7 @@ impl AnyCssContainerStyleQuery {
         }
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyCssCustomIdentifier {
     CssBogusCustomIdentifier(CssBogusCustomIdentifier),
     CssCustomIdentifier(CssCustomIdentifier),
@@ -7245,8 +7074,7 @@ impl AnyCssCustomIdentifier {
         }
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyCssDeclarationBlock {
     CssBogusBlock(CssBogusBlock),
     CssDeclarationBlock(CssDeclarationBlock),
@@ -7265,8 +7093,7 @@ impl AnyCssDeclarationBlock {
         }
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyCssDeclarationName {
     CssDashedIdentifier(CssDashedIdentifier),
     CssIdentifier(CssIdentifier),
@@ -7285,8 +7112,7 @@ impl AnyCssDeclarationName {
         }
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyCssDeclarationOrAtRule {
     CssAtRule(CssAtRule),
     CssDeclarationWithSemicolon(CssDeclarationWithSemicolon),
@@ -7305,8 +7131,7 @@ impl AnyCssDeclarationOrAtRule {
         }
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyCssDeclarationOrAtRuleBlock {
     CssBogusBlock(CssBogusBlock),
     CssDeclarationOrAtRuleBlock(CssDeclarationOrAtRuleBlock),
@@ -7325,13 +7150,12 @@ impl AnyCssDeclarationOrAtRuleBlock {
         }
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyCssDeclarationOrRule {
     AnyCssRule(AnyCssRule),
     CssBogus(CssBogus),
     CssDeclarationWithSemicolon(CssDeclarationWithSemicolon),
-    CssGritMetavariable(CssGritMetavariable),
+    CssMetavariable(CssMetavariable),
 }
 impl AnyCssDeclarationOrRule {
     pub fn as_any_css_rule(&self) -> Option<&AnyCssRule> {
@@ -7352,15 +7176,14 @@ impl AnyCssDeclarationOrRule {
             _ => None,
         }
     }
-    pub fn as_css_grit_metavariable(&self) -> Option<&CssGritMetavariable> {
+    pub fn as_css_metavariable(&self) -> Option<&CssMetavariable> {
         match &self {
-            AnyCssDeclarationOrRule::CssGritMetavariable(item) => Some(item),
+            AnyCssDeclarationOrRule::CssMetavariable(item) => Some(item),
             _ => None,
         }
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyCssDeclarationOrRuleBlock {
     CssBogusBlock(CssBogusBlock),
     CssDeclarationOrRuleBlock(CssDeclarationOrRuleBlock),
@@ -7379,8 +7202,7 @@ impl AnyCssDeclarationOrRuleBlock {
         }
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyCssDimension {
     CssPercentage(CssPercentage),
     CssRegularDimension(CssRegularDimension),
@@ -7406,8 +7228,7 @@ impl AnyCssDimension {
         }
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyCssDocumentMatcher {
     CssBogusDocumentMatcher(CssBogusDocumentMatcher),
     CssDocumentCustomMatcher(CssDocumentCustomMatcher),
@@ -7433,8 +7254,7 @@ impl AnyCssDocumentMatcher {
         }
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyCssExpression {
     CssBinaryExpression(CssBinaryExpression),
     CssListOfComponentValuesExpression(CssListOfComponentValuesExpression),
@@ -7462,8 +7282,7 @@ impl AnyCssExpression {
         }
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyCssFontFamilyName {
     CssBogusFontFamilyName(CssBogusFontFamilyName),
     CssFontFamilyName(CssFontFamilyName),
@@ -7489,8 +7308,7 @@ impl AnyCssFontFamilyName {
         }
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyCssFontFeatureValuesBlock {
     CssBogusBlock(CssBogusBlock),
     CssFontFeatureValuesBlock(CssFontFeatureValuesBlock),
@@ -7509,8 +7327,7 @@ impl AnyCssFontFeatureValuesBlock {
         }
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyCssFontFeatureValuesItem {
     CssBogusFontFeatureValuesItem(CssBogusFontFeatureValuesItem),
     CssFontFeatureValuesItem(CssFontFeatureValuesItem),
@@ -7529,8 +7346,7 @@ impl AnyCssFontFeatureValuesItem {
         }
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyCssFunction {
     CssFunction(CssFunction),
     CssUrlFunction(CssUrlFunction),
@@ -7549,8 +7365,7 @@ impl AnyCssFunction {
         }
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyCssGenericComponentValue {
     AnyCssValue(AnyCssValue),
     CssGenericDelimiter(CssGenericDelimiter),
@@ -7569,8 +7384,7 @@ impl AnyCssGenericComponentValue {
         }
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyCssImportLayer {
     CssImportAnonymousLayer(CssImportAnonymousLayer),
     CssImportNamedLayer(CssImportNamedLayer),
@@ -7589,8 +7403,7 @@ impl AnyCssImportLayer {
         }
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyCssImportSupportsCondition {
     AnyCssSupportsCondition(AnyCssSupportsCondition),
     CssDeclaration(CssDeclaration),
@@ -7609,8 +7422,7 @@ impl AnyCssImportSupportsCondition {
         }
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyCssImportUrl {
     CssString(CssString),
     CssUrlFunction(CssUrlFunction),
@@ -7629,8 +7441,7 @@ impl AnyCssImportUrl {
         }
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyCssKeyframesBlock {
     CssBogusBlock(CssBogusBlock),
     CssKeyframesBlock(CssKeyframesBlock),
@@ -7649,8 +7460,7 @@ impl AnyCssKeyframesBlock {
         }
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyCssKeyframesIdentifier {
     CssCustomIdentifier(CssCustomIdentifier),
     CssString(CssString),
@@ -7669,8 +7479,7 @@ impl AnyCssKeyframesIdentifier {
         }
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyCssKeyframesItem {
     CssBogusKeyframesItem(CssBogusKeyframesItem),
     CssKeyframesItem(CssKeyframesItem),
@@ -7689,8 +7498,7 @@ impl AnyCssKeyframesItem {
         }
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyCssKeyframesName {
     AnyCssKeyframesIdentifier(AnyCssKeyframesIdentifier),
     CssBogusKeyframesName(CssBogusKeyframesName),
@@ -7716,8 +7524,7 @@ impl AnyCssKeyframesName {
         }
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyCssKeyframesScope {
     CssKeyframesScopeFunction(CssKeyframesScopeFunction),
     CssKeyframesScopePrefix(CssKeyframesScopePrefix),
@@ -7736,8 +7543,7 @@ impl AnyCssKeyframesScope {
         }
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyCssKeyframesSelector {
     CssBogusSelector(CssBogusSelector),
     CssKeyframesIdentSelector(CssKeyframesIdentSelector),
@@ -7763,8 +7569,7 @@ impl AnyCssKeyframesSelector {
         }
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyCssLayer {
     CssBogusLayer(CssBogusLayer),
     CssLayerDeclaration(CssLayerDeclaration),
@@ -7790,8 +7595,7 @@ impl AnyCssLayer {
         }
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyCssMediaAndCombinableCondition {
     AnyCssMediaInParens(AnyCssMediaInParens),
     CssMediaAndCondition(CssMediaAndCondition),
@@ -7810,8 +7614,7 @@ impl AnyCssMediaAndCombinableCondition {
         }
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyCssMediaCondition {
     AnyCssMediaInParens(AnyCssMediaInParens),
     CssMediaAndCondition(CssMediaAndCondition),
@@ -7844,8 +7647,7 @@ impl AnyCssMediaCondition {
         }
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyCssMediaInParens {
     CssMediaConditionInParens(CssMediaConditionInParens),
     CssMediaFeatureInParens(CssMediaFeatureInParens),
@@ -7864,8 +7666,7 @@ impl AnyCssMediaInParens {
         }
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyCssMediaOrCombinableCondition {
     AnyCssMediaInParens(AnyCssMediaInParens),
     CssMediaOrCondition(CssMediaOrCondition),
@@ -7884,13 +7685,12 @@ impl AnyCssMediaOrCombinableCondition {
         }
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyCssMediaQuery {
     AnyCssMediaTypeQuery(AnyCssMediaTypeQuery),
     CssBogusMediaQuery(CssBogusMediaQuery),
-    CssGritMetavariable(CssGritMetavariable),
     CssMediaConditionQuery(CssMediaConditionQuery),
+    CssMetavariable(CssMetavariable),
 }
 impl AnyCssMediaQuery {
     pub fn as_any_css_media_type_query(&self) -> Option<&AnyCssMediaTypeQuery> {
@@ -7905,21 +7705,20 @@ impl AnyCssMediaQuery {
             _ => None,
         }
     }
-    pub fn as_css_grit_metavariable(&self) -> Option<&CssGritMetavariable> {
-        match &self {
-            AnyCssMediaQuery::CssGritMetavariable(item) => Some(item),
-            _ => None,
-        }
-    }
     pub fn as_css_media_condition_query(&self) -> Option<&CssMediaConditionQuery> {
         match &self {
             AnyCssMediaQuery::CssMediaConditionQuery(item) => Some(item),
             _ => None,
         }
     }
+    pub fn as_css_metavariable(&self) -> Option<&CssMetavariable> {
+        match &self {
+            AnyCssMediaQuery::CssMetavariable(item) => Some(item),
+            _ => None,
+        }
+    }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyCssMediaTypeCondition {
     AnyCssMediaInParens(AnyCssMediaInParens),
     CssMediaAndCondition(CssMediaAndCondition),
@@ -7945,8 +7744,7 @@ impl AnyCssMediaTypeCondition {
         }
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyCssMediaTypeQuery {
     CssMediaAndTypeQuery(CssMediaAndTypeQuery),
     CssMediaTypeQuery(CssMediaTypeQuery),
@@ -7965,8 +7763,7 @@ impl AnyCssMediaTypeQuery {
         }
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyCssNamespacePrefix {
     CssNamedNamespacePrefix(CssNamedNamespacePrefix),
     CssUniversalNamespacePrefix(CssUniversalNamespacePrefix),
@@ -7985,8 +7782,7 @@ impl AnyCssNamespacePrefix {
         }
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyCssNamespaceUrl {
     CssString(CssString),
     CssUrlFunction(CssUrlFunction),
@@ -8005,8 +7801,7 @@ impl AnyCssNamespaceUrl {
         }
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyCssPageAtRuleBlock {
     CssBogusBlock(CssBogusBlock),
     CssPageAtRuleBlock(CssPageAtRuleBlock),
@@ -8025,8 +7820,7 @@ impl AnyCssPageAtRuleBlock {
         }
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyCssPageAtRuleItem {
     CssAtRule(CssAtRule),
     CssDeclarationWithSemicolon(CssDeclarationWithSemicolon),
@@ -8052,8 +7846,7 @@ impl AnyCssPageAtRuleItem {
         }
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyCssPageSelector {
     CssBogusSelector(CssBogusSelector),
     CssPageSelector(CssPageSelector),
@@ -8072,8 +7865,7 @@ impl AnyCssPageSelector {
         }
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyCssPageSelectorPseudo {
     CssBogusPageSelectorPseudo(CssBogusPageSelectorPseudo),
     CssPageSelectorPseudo(CssPageSelectorPseudo),
@@ -8092,8 +7884,7 @@ impl AnyCssPageSelectorPseudo {
         }
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyCssProperty {
     CssBogusProperty(CssBogusProperty),
     CssComposesProperty(CssComposesProperty),
@@ -8119,8 +7910,7 @@ impl AnyCssProperty {
         }
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyCssPseudoClass {
     CssBogusPseudoClass(CssBogusPseudoClass),
     CssPseudoClassFunctionCompoundSelector(CssPseudoClassFunctionCompoundSelector),
@@ -8207,8 +7997,7 @@ impl AnyCssPseudoClass {
         }
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyCssPseudoClassNth {
     CssPseudoClassNth(CssPseudoClassNth),
     CssPseudoClassNthIdentifier(CssPseudoClassNthIdentifier),
@@ -8234,8 +8023,7 @@ impl AnyCssPseudoClassNth {
         }
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyCssPseudoClassNthSelector {
     CssBogusSelector(CssBogusSelector),
     CssPseudoClassNthSelector(CssPseudoClassNthSelector),
@@ -8254,8 +8042,7 @@ impl AnyCssPseudoClassNthSelector {
         }
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyCssPseudoElement {
     CssBogusPseudoElement(CssBogusPseudoElement),
     CssPseudoElementFunctionIdentifier(CssPseudoElementFunctionIdentifier),
@@ -8292,8 +8079,7 @@ impl AnyCssPseudoElement {
         }
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyCssPseudoValue {
     CssIdentifier(CssIdentifier),
     CssString(CssString),
@@ -8312,8 +8098,7 @@ impl AnyCssPseudoValue {
         }
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyCssQueryFeature {
     CssQueryFeatureBoolean(CssQueryFeatureBoolean),
     CssQueryFeaturePlain(CssQueryFeaturePlain),
@@ -8353,8 +8138,7 @@ impl AnyCssQueryFeature {
         }
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyCssQueryFeatureValue {
     AnyCssDimension(AnyCssDimension),
     AnyCssFunction(AnyCssFunction),
@@ -8394,8 +8178,7 @@ impl AnyCssQueryFeatureValue {
         }
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyCssRelativeSelector {
     CssBogusSelector(CssBogusSelector),
     CssRelativeSelector(CssRelativeSelector),
@@ -8414,8 +8197,7 @@ impl AnyCssRelativeSelector {
         }
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyCssRule {
     CssAtRule(CssAtRule),
     CssBogusRule(CssBogusRule),
@@ -8448,8 +8230,7 @@ impl AnyCssRule {
         }
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyCssRuleBlock {
     CssBogusBlock(CssBogusBlock),
     CssRuleBlock(CssRuleBlock),
@@ -8468,8 +8249,7 @@ impl AnyCssRuleBlock {
         }
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyCssScopeRange {
     CssBogusScopeRange(CssBogusScopeRange),
     CssScopeRangeEnd(CssScopeRangeEnd),
@@ -8502,13 +8282,12 @@ impl AnyCssScopeRange {
         }
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyCssSelector {
     CssBogusSelector(CssBogusSelector),
     CssComplexSelector(CssComplexSelector),
     CssCompoundSelector(CssCompoundSelector),
-    CssGritMetavariable(CssGritMetavariable),
+    CssMetavariable(CssMetavariable),
 }
 impl AnyCssSelector {
     pub fn as_css_bogus_selector(&self) -> Option<&CssBogusSelector> {
@@ -8529,15 +8308,14 @@ impl AnyCssSelector {
             _ => None,
         }
     }
-    pub fn as_css_grit_metavariable(&self) -> Option<&CssGritMetavariable> {
+    pub fn as_css_metavariable(&self) -> Option<&CssMetavariable> {
         match &self {
-            AnyCssSelector::CssGritMetavariable(item) => Some(item),
+            AnyCssSelector::CssMetavariable(item) => Some(item),
             _ => None,
         }
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyCssSimpleSelector {
     CssTypeSelector(CssTypeSelector),
     CssUniversalSelector(CssUniversalSelector),
@@ -8556,8 +8334,7 @@ impl AnyCssSimpleSelector {
         }
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyCssStartingStyleBlock {
     CssBogusBlock(CssBogusBlock),
     CssDeclarationBlock(CssDeclarationBlock),
@@ -8583,8 +8360,7 @@ impl AnyCssStartingStyleBlock {
         }
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyCssSubSelector {
     CssAttributeSelector(CssAttributeSelector),
     CssBogusSubSelector(CssBogusSubSelector),
@@ -8631,8 +8407,7 @@ impl AnyCssSubSelector {
         }
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyCssSupportsAndCombinableCondition {
     AnyCssSupportsInParens(AnyCssSupportsInParens),
     CssSupportsAndCondition(CssSupportsAndCondition),
@@ -8651,8 +8426,7 @@ impl AnyCssSupportsAndCombinableCondition {
         }
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyCssSupportsCondition {
     AnyCssSupportsInParens(AnyCssSupportsInParens),
     CssSupportsAndCondition(CssSupportsAndCondition),
@@ -8685,8 +8459,7 @@ impl AnyCssSupportsCondition {
         }
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyCssSupportsInParens {
     AnyCssValue(AnyCssValue),
     CssFunction(CssFunction),
@@ -8726,8 +8499,7 @@ impl AnyCssSupportsInParens {
         }
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyCssSupportsOrCombinableCondition {
     AnyCssSupportsInParens(AnyCssSupportsInParens),
     CssSupportsOrCondition(CssSupportsOrCondition),
@@ -8746,8 +8518,7 @@ impl AnyCssSupportsOrCombinableCondition {
         }
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyCssUnicodeValue {
     CssBogusUnicodeRangeValue(CssBogusUnicodeRangeValue),
     CssUnicodeCodepoint(CssUnicodeCodepoint),
@@ -8780,8 +8551,7 @@ impl AnyCssUnicodeValue {
         }
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyCssUrlModifier {
     CssBogusUrlModifier(CssBogusUrlModifier),
     CssFunction(CssFunction),
@@ -8807,8 +8577,7 @@ impl AnyCssUrlModifier {
         }
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyCssUrlValue {
     CssString(CssString),
     CssUrlValueRaw(CssUrlValueRaw),
@@ -8827,8 +8596,7 @@ impl AnyCssUrlValue {
         }
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyCssValue {
     AnyCssDimension(AnyCssDimension),
     AnyCssFunction(AnyCssFunction),
@@ -8836,8 +8604,8 @@ pub enum AnyCssValue {
     CssColor(CssColor),
     CssCustomIdentifier(CssCustomIdentifier),
     CssDashedIdentifier(CssDashedIdentifier),
-    CssGritMetavariable(CssGritMetavariable),
     CssIdentifier(CssIdentifier),
+    CssMetavariable(CssMetavariable),
     CssNumber(CssNumber),
     CssRatio(CssRatio),
     CssString(CssString),
@@ -8880,15 +8648,15 @@ impl AnyCssValue {
             _ => None,
         }
     }
-    pub fn as_css_grit_metavariable(&self) -> Option<&CssGritMetavariable> {
-        match &self {
-            AnyCssValue::CssGritMetavariable(item) => Some(item),
-            _ => None,
-        }
-    }
     pub fn as_css_identifier(&self) -> Option<&CssIdentifier> {
         match &self {
             AnyCssValue::CssIdentifier(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_metavariable(&self) -> Option<&CssMetavariable> {
+        match &self {
+            AnyCssValue::CssMetavariable(item) => Some(item),
             _ => None,
         }
     }
@@ -8917,8 +8685,7 @@ impl AnyCssValue {
         }
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyCssValueAtRuleClause {
     CssValueAtRuleDeclarationClause(CssValueAtRuleDeclarationClause),
     CssValueAtRuleImportClause(CssValueAtRuleImportClause),
@@ -8939,8 +8706,7 @@ impl AnyCssValueAtRuleClause {
         }
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyCssValueAtRuleImportSource {
     CssIdentifier(CssIdentifier),
     CssString(CssString),
@@ -8959,8 +8725,7 @@ impl AnyCssValueAtRuleImportSource {
         }
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyCssValueAtRuleImportSpecifier {
     CssValueAtRuleImportSpecifier(CssValueAtRuleImportSpecifier),
     CssValueAtRuleNamedImportSpecifier(CssValueAtRuleNamedImportSpecifier),
@@ -8983,8 +8748,7 @@ impl AnyCssValueAtRuleImportSpecifier {
         }
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyCssValueAtRuleProperty {
     CssBogusProperty(CssBogusProperty),
     CssValueAtRuleGenericProperty(CssValueAtRuleGenericProperty),
@@ -11007,47 +10771,6 @@ impl From<CssGenericProperty> for SyntaxElement {
         n.syntax.into()
     }
 }
-impl AstNode for CssGritMetavariable {
-    type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> =
-        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_GRIT_METAVARIABLE as u16));
-    fn can_cast(kind: SyntaxKind) -> bool {
-        kind == CSS_GRIT_METAVARIABLE
-    }
-    fn cast(syntax: SyntaxNode) -> Option<Self> {
-        if Self::can_cast(syntax.kind()) {
-            Some(Self { syntax })
-        } else {
-            None
-        }
-    }
-    fn syntax(&self) -> &SyntaxNode {
-        &self.syntax
-    }
-    fn into_syntax(self) -> SyntaxNode {
-        self.syntax
-    }
-}
-impl std::fmt::Debug for CssGritMetavariable {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssGritMetavariable")
-            .field(
-                "value_token",
-                &support::DebugSyntaxResult(self.value_token()),
-            )
-            .finish()
-    }
-}
-impl From<CssGritMetavariable> for SyntaxNode {
-    fn from(n: CssGritMetavariable) -> SyntaxNode {
-        n.syntax
-    }
-}
-impl From<CssGritMetavariable> for SyntaxElement {
-    fn from(n: CssGritMetavariable) -> SyntaxElement {
-        n.syntax.into()
-    }
-}
 impl AstNode for CssIdSelector {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -12258,6 +11981,47 @@ impl From<CssMediaTypeQuery> for SyntaxNode {
 }
 impl From<CssMediaTypeQuery> for SyntaxElement {
     fn from(n: CssMediaTypeQuery) -> SyntaxElement {
+        n.syntax.into()
+    }
+}
+impl AstNode for CssMetavariable {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_METAVARIABLE as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == CSS_METAVARIABLE
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for CssMetavariable {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("CssMetavariable")
+            .field(
+                "value_token",
+                &support::DebugSyntaxResult(self.value_token()),
+            )
+            .finish()
+    }
+}
+impl From<CssMetavariable> for SyntaxNode {
+    fn from(n: CssMetavariable) -> SyntaxNode {
+        n.syntax
+    }
+}
+impl From<CssMetavariable> for SyntaxElement {
+    fn from(n: CssMetavariable) -> SyntaxElement {
         n.syntax.into()
     }
 }
@@ -17173,9 +16937,9 @@ impl From<CssDeclarationWithSemicolon> for AnyCssDeclarationOrRule {
         AnyCssDeclarationOrRule::CssDeclarationWithSemicolon(node)
     }
 }
-impl From<CssGritMetavariable> for AnyCssDeclarationOrRule {
-    fn from(node: CssGritMetavariable) -> AnyCssDeclarationOrRule {
-        AnyCssDeclarationOrRule::CssGritMetavariable(node)
+impl From<CssMetavariable> for AnyCssDeclarationOrRule {
+    fn from(node: CssMetavariable) -> AnyCssDeclarationOrRule {
+        AnyCssDeclarationOrRule::CssMetavariable(node)
     }
 }
 impl AstNode for AnyCssDeclarationOrRule {
@@ -17183,10 +16947,10 @@ impl AstNode for AnyCssDeclarationOrRule {
     const KIND_SET: SyntaxKindSet<Language> = AnyCssRule::KIND_SET
         .union(CssBogus::KIND_SET)
         .union(CssDeclarationWithSemicolon::KIND_SET)
-        .union(CssGritMetavariable::KIND_SET);
+        .union(CssMetavariable::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
         match kind {
-            CSS_BOGUS | CSS_DECLARATION_WITH_SEMICOLON | CSS_GRIT_METAVARIABLE => true,
+            CSS_BOGUS | CSS_DECLARATION_WITH_SEMICOLON | CSS_METAVARIABLE => true,
             k if AnyCssRule::can_cast(k) => true,
             _ => false,
         }
@@ -17199,8 +16963,8 @@ impl AstNode for AnyCssDeclarationOrRule {
                     syntax,
                 })
             }
-            CSS_GRIT_METAVARIABLE => {
-                AnyCssDeclarationOrRule::CssGritMetavariable(CssGritMetavariable { syntax })
+            CSS_METAVARIABLE => {
+                AnyCssDeclarationOrRule::CssMetavariable(CssMetavariable { syntax })
             }
             _ => {
                 if let Some(any_css_rule) = AnyCssRule::cast(syntax) {
@@ -17215,7 +16979,7 @@ impl AstNode for AnyCssDeclarationOrRule {
         match self {
             AnyCssDeclarationOrRule::CssBogus(it) => &it.syntax,
             AnyCssDeclarationOrRule::CssDeclarationWithSemicolon(it) => &it.syntax,
-            AnyCssDeclarationOrRule::CssGritMetavariable(it) => &it.syntax,
+            AnyCssDeclarationOrRule::CssMetavariable(it) => &it.syntax,
             AnyCssDeclarationOrRule::AnyCssRule(it) => it.syntax(),
         }
     }
@@ -17223,7 +16987,7 @@ impl AstNode for AnyCssDeclarationOrRule {
         match self {
             AnyCssDeclarationOrRule::CssBogus(it) => it.syntax,
             AnyCssDeclarationOrRule::CssDeclarationWithSemicolon(it) => it.syntax,
-            AnyCssDeclarationOrRule::CssGritMetavariable(it) => it.syntax,
+            AnyCssDeclarationOrRule::CssMetavariable(it) => it.syntax,
             AnyCssDeclarationOrRule::AnyCssRule(it) => it.into_syntax(),
         }
     }
@@ -17234,7 +16998,7 @@ impl std::fmt::Debug for AnyCssDeclarationOrRule {
             AnyCssDeclarationOrRule::AnyCssRule(it) => std::fmt::Debug::fmt(it, f),
             AnyCssDeclarationOrRule::CssBogus(it) => std::fmt::Debug::fmt(it, f),
             AnyCssDeclarationOrRule::CssDeclarationWithSemicolon(it) => std::fmt::Debug::fmt(it, f),
-            AnyCssDeclarationOrRule::CssGritMetavariable(it) => std::fmt::Debug::fmt(it, f),
+            AnyCssDeclarationOrRule::CssMetavariable(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
@@ -17244,7 +17008,7 @@ impl From<AnyCssDeclarationOrRule> for SyntaxNode {
             AnyCssDeclarationOrRule::AnyCssRule(it) => it.into(),
             AnyCssDeclarationOrRule::CssBogus(it) => it.into(),
             AnyCssDeclarationOrRule::CssDeclarationWithSemicolon(it) => it.into(),
-            AnyCssDeclarationOrRule::CssGritMetavariable(it) => it.into(),
+            AnyCssDeclarationOrRule::CssMetavariable(it) => it.into(),
         }
     }
 }
@@ -18910,25 +18674,25 @@ impl From<CssBogusMediaQuery> for AnyCssMediaQuery {
         AnyCssMediaQuery::CssBogusMediaQuery(node)
     }
 }
-impl From<CssGritMetavariable> for AnyCssMediaQuery {
-    fn from(node: CssGritMetavariable) -> AnyCssMediaQuery {
-        AnyCssMediaQuery::CssGritMetavariable(node)
-    }
-}
 impl From<CssMediaConditionQuery> for AnyCssMediaQuery {
     fn from(node: CssMediaConditionQuery) -> AnyCssMediaQuery {
         AnyCssMediaQuery::CssMediaConditionQuery(node)
+    }
+}
+impl From<CssMetavariable> for AnyCssMediaQuery {
+    fn from(node: CssMetavariable) -> AnyCssMediaQuery {
+        AnyCssMediaQuery::CssMetavariable(node)
     }
 }
 impl AstNode for AnyCssMediaQuery {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> = AnyCssMediaTypeQuery::KIND_SET
         .union(CssBogusMediaQuery::KIND_SET)
-        .union(CssGritMetavariable::KIND_SET)
-        .union(CssMediaConditionQuery::KIND_SET);
+        .union(CssMediaConditionQuery::KIND_SET)
+        .union(CssMetavariable::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
         match kind {
-            CSS_BOGUS_MEDIA_QUERY | CSS_GRIT_METAVARIABLE | CSS_MEDIA_CONDITION_QUERY => true,
+            CSS_BOGUS_MEDIA_QUERY | CSS_MEDIA_CONDITION_QUERY | CSS_METAVARIABLE => true,
             k if AnyCssMediaTypeQuery::can_cast(k) => true,
             _ => false,
         }
@@ -18938,12 +18702,10 @@ impl AstNode for AnyCssMediaQuery {
             CSS_BOGUS_MEDIA_QUERY => {
                 AnyCssMediaQuery::CssBogusMediaQuery(CssBogusMediaQuery { syntax })
             }
-            CSS_GRIT_METAVARIABLE => {
-                AnyCssMediaQuery::CssGritMetavariable(CssGritMetavariable { syntax })
-            }
             CSS_MEDIA_CONDITION_QUERY => {
                 AnyCssMediaQuery::CssMediaConditionQuery(CssMediaConditionQuery { syntax })
             }
+            CSS_METAVARIABLE => AnyCssMediaQuery::CssMetavariable(CssMetavariable { syntax }),
             _ => {
                 if let Some(any_css_media_type_query) = AnyCssMediaTypeQuery::cast(syntax) {
                     return Some(AnyCssMediaQuery::AnyCssMediaTypeQuery(
@@ -18958,16 +18720,16 @@ impl AstNode for AnyCssMediaQuery {
     fn syntax(&self) -> &SyntaxNode {
         match self {
             AnyCssMediaQuery::CssBogusMediaQuery(it) => &it.syntax,
-            AnyCssMediaQuery::CssGritMetavariable(it) => &it.syntax,
             AnyCssMediaQuery::CssMediaConditionQuery(it) => &it.syntax,
+            AnyCssMediaQuery::CssMetavariable(it) => &it.syntax,
             AnyCssMediaQuery::AnyCssMediaTypeQuery(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
             AnyCssMediaQuery::CssBogusMediaQuery(it) => it.syntax,
-            AnyCssMediaQuery::CssGritMetavariable(it) => it.syntax,
             AnyCssMediaQuery::CssMediaConditionQuery(it) => it.syntax,
+            AnyCssMediaQuery::CssMetavariable(it) => it.syntax,
             AnyCssMediaQuery::AnyCssMediaTypeQuery(it) => it.into_syntax(),
         }
     }
@@ -18977,8 +18739,8 @@ impl std::fmt::Debug for AnyCssMediaQuery {
         match self {
             AnyCssMediaQuery::AnyCssMediaTypeQuery(it) => std::fmt::Debug::fmt(it, f),
             AnyCssMediaQuery::CssBogusMediaQuery(it) => std::fmt::Debug::fmt(it, f),
-            AnyCssMediaQuery::CssGritMetavariable(it) => std::fmt::Debug::fmt(it, f),
             AnyCssMediaQuery::CssMediaConditionQuery(it) => std::fmt::Debug::fmt(it, f),
+            AnyCssMediaQuery::CssMetavariable(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
@@ -18987,8 +18749,8 @@ impl From<AnyCssMediaQuery> for SyntaxNode {
         match n {
             AnyCssMediaQuery::AnyCssMediaTypeQuery(it) => it.into(),
             AnyCssMediaQuery::CssBogusMediaQuery(it) => it.into(),
-            AnyCssMediaQuery::CssGritMetavariable(it) => it.into(),
             AnyCssMediaQuery::CssMediaConditionQuery(it) => it.into(),
+            AnyCssMediaQuery::CssMetavariable(it) => it.into(),
         }
     }
 }
@@ -20284,9 +20046,12 @@ impl AstNode for AnyCssQueryFeatureValue {
             CSS_NUMBER => AnyCssQueryFeatureValue::CssNumber(CssNumber { syntax }),
             CSS_RATIO => AnyCssQueryFeatureValue::CssRatio(CssRatio { syntax }),
             _ => {
-                if let Some(any_css_dimension) = AnyCssDimension::cast(syntax.clone()) {
-                    return Some(AnyCssQueryFeatureValue::AnyCssDimension(any_css_dimension));
-                }
+                let syntax = match AnyCssDimension::try_cast(syntax) {
+                    Ok(any_css_dimension) => {
+                        return Some(AnyCssQueryFeatureValue::AnyCssDimension(any_css_dimension));
+                    }
+                    Err(syntax) => syntax,
+                };
                 if let Some(any_css_function) = AnyCssFunction::cast(syntax) {
                     return Some(AnyCssQueryFeatureValue::AnyCssFunction(any_css_function));
                 }
@@ -20661,9 +20426,9 @@ impl From<CssCompoundSelector> for AnyCssSelector {
         AnyCssSelector::CssCompoundSelector(node)
     }
 }
-impl From<CssGritMetavariable> for AnyCssSelector {
-    fn from(node: CssGritMetavariable) -> AnyCssSelector {
-        AnyCssSelector::CssGritMetavariable(node)
+impl From<CssMetavariable> for AnyCssSelector {
+    fn from(node: CssMetavariable) -> AnyCssSelector {
+        AnyCssSelector::CssMetavariable(node)
     }
 }
 impl AstNode for AnyCssSelector {
@@ -20671,14 +20436,11 @@ impl AstNode for AnyCssSelector {
     const KIND_SET: SyntaxKindSet<Language> = CssBogusSelector::KIND_SET
         .union(CssComplexSelector::KIND_SET)
         .union(CssCompoundSelector::KIND_SET)
-        .union(CssGritMetavariable::KIND_SET);
+        .union(CssMetavariable::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
         matches!(
             kind,
-            CSS_BOGUS_SELECTOR
-                | CSS_COMPLEX_SELECTOR
-                | CSS_COMPOUND_SELECTOR
-                | CSS_GRIT_METAVARIABLE
+            CSS_BOGUS_SELECTOR | CSS_COMPLEX_SELECTOR | CSS_COMPOUND_SELECTOR | CSS_METAVARIABLE
         )
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
@@ -20690,9 +20452,7 @@ impl AstNode for AnyCssSelector {
             CSS_COMPOUND_SELECTOR => {
                 AnyCssSelector::CssCompoundSelector(CssCompoundSelector { syntax })
             }
-            CSS_GRIT_METAVARIABLE => {
-                AnyCssSelector::CssGritMetavariable(CssGritMetavariable { syntax })
-            }
+            CSS_METAVARIABLE => AnyCssSelector::CssMetavariable(CssMetavariable { syntax }),
             _ => return None,
         };
         Some(res)
@@ -20702,7 +20462,7 @@ impl AstNode for AnyCssSelector {
             AnyCssSelector::CssBogusSelector(it) => &it.syntax,
             AnyCssSelector::CssComplexSelector(it) => &it.syntax,
             AnyCssSelector::CssCompoundSelector(it) => &it.syntax,
-            AnyCssSelector::CssGritMetavariable(it) => &it.syntax,
+            AnyCssSelector::CssMetavariable(it) => &it.syntax,
         }
     }
     fn into_syntax(self) -> SyntaxNode {
@@ -20710,7 +20470,7 @@ impl AstNode for AnyCssSelector {
             AnyCssSelector::CssBogusSelector(it) => it.syntax,
             AnyCssSelector::CssComplexSelector(it) => it.syntax,
             AnyCssSelector::CssCompoundSelector(it) => it.syntax,
-            AnyCssSelector::CssGritMetavariable(it) => it.syntax,
+            AnyCssSelector::CssMetavariable(it) => it.syntax,
         }
     }
 }
@@ -20720,7 +20480,7 @@ impl std::fmt::Debug for AnyCssSelector {
             AnyCssSelector::CssBogusSelector(it) => std::fmt::Debug::fmt(it, f),
             AnyCssSelector::CssComplexSelector(it) => std::fmt::Debug::fmt(it, f),
             AnyCssSelector::CssCompoundSelector(it) => std::fmt::Debug::fmt(it, f),
-            AnyCssSelector::CssGritMetavariable(it) => std::fmt::Debug::fmt(it, f),
+            AnyCssSelector::CssMetavariable(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
@@ -20730,7 +20490,7 @@ impl From<AnyCssSelector> for SyntaxNode {
             AnyCssSelector::CssBogusSelector(it) => it.into(),
             AnyCssSelector::CssComplexSelector(it) => it.into(),
             AnyCssSelector::CssCompoundSelector(it) => it.into(),
-            AnyCssSelector::CssGritMetavariable(it) => it.into(),
+            AnyCssSelector::CssMetavariable(it) => it.into(),
         }
     }
 }
@@ -21602,14 +21362,14 @@ impl From<CssDashedIdentifier> for AnyCssValue {
         AnyCssValue::CssDashedIdentifier(node)
     }
 }
-impl From<CssGritMetavariable> for AnyCssValue {
-    fn from(node: CssGritMetavariable) -> AnyCssValue {
-        AnyCssValue::CssGritMetavariable(node)
-    }
-}
 impl From<CssIdentifier> for AnyCssValue {
     fn from(node: CssIdentifier) -> AnyCssValue {
         AnyCssValue::CssIdentifier(node)
+    }
+}
+impl From<CssMetavariable> for AnyCssValue {
+    fn from(node: CssMetavariable) -> AnyCssValue {
+        AnyCssValue::CssMetavariable(node)
     }
 }
 impl From<CssNumber> for AnyCssValue {
@@ -21640,8 +21400,8 @@ impl AstNode for AnyCssValue {
         .union(CssColor::KIND_SET)
         .union(CssCustomIdentifier::KIND_SET)
         .union(CssDashedIdentifier::KIND_SET)
-        .union(CssGritMetavariable::KIND_SET)
         .union(CssIdentifier::KIND_SET)
+        .union(CssMetavariable::KIND_SET)
         .union(CssNumber::KIND_SET)
         .union(CssRatio::KIND_SET)
         .union(CssString::KIND_SET)
@@ -21652,8 +21412,8 @@ impl AstNode for AnyCssValue {
             | CSS_COLOR
             | CSS_CUSTOM_IDENTIFIER
             | CSS_DASHED_IDENTIFIER
-            | CSS_GRIT_METAVARIABLE
             | CSS_IDENTIFIER
+            | CSS_METAVARIABLE
             | CSS_NUMBER
             | CSS_RATIO
             | CSS_STRING
@@ -21673,18 +21433,19 @@ impl AstNode for AnyCssValue {
             CSS_DASHED_IDENTIFIER => {
                 AnyCssValue::CssDashedIdentifier(CssDashedIdentifier { syntax })
             }
-            CSS_GRIT_METAVARIABLE => {
-                AnyCssValue::CssGritMetavariable(CssGritMetavariable { syntax })
-            }
             CSS_IDENTIFIER => AnyCssValue::CssIdentifier(CssIdentifier { syntax }),
+            CSS_METAVARIABLE => AnyCssValue::CssMetavariable(CssMetavariable { syntax }),
             CSS_NUMBER => AnyCssValue::CssNumber(CssNumber { syntax }),
             CSS_RATIO => AnyCssValue::CssRatio(CssRatio { syntax }),
             CSS_STRING => AnyCssValue::CssString(CssString { syntax }),
             CSS_UNICODE_RANGE => AnyCssValue::CssUnicodeRange(CssUnicodeRange { syntax }),
             _ => {
-                if let Some(any_css_dimension) = AnyCssDimension::cast(syntax.clone()) {
-                    return Some(AnyCssValue::AnyCssDimension(any_css_dimension));
-                }
+                let syntax = match AnyCssDimension::try_cast(syntax) {
+                    Ok(any_css_dimension) => {
+                        return Some(AnyCssValue::AnyCssDimension(any_css_dimension));
+                    }
+                    Err(syntax) => syntax,
+                };
                 if let Some(any_css_function) = AnyCssFunction::cast(syntax) {
                     return Some(AnyCssValue::AnyCssFunction(any_css_function));
                 }
@@ -21699,8 +21460,8 @@ impl AstNode for AnyCssValue {
             AnyCssValue::CssColor(it) => &it.syntax,
             AnyCssValue::CssCustomIdentifier(it) => &it.syntax,
             AnyCssValue::CssDashedIdentifier(it) => &it.syntax,
-            AnyCssValue::CssGritMetavariable(it) => &it.syntax,
             AnyCssValue::CssIdentifier(it) => &it.syntax,
+            AnyCssValue::CssMetavariable(it) => &it.syntax,
             AnyCssValue::CssNumber(it) => &it.syntax,
             AnyCssValue::CssRatio(it) => &it.syntax,
             AnyCssValue::CssString(it) => &it.syntax,
@@ -21715,8 +21476,8 @@ impl AstNode for AnyCssValue {
             AnyCssValue::CssColor(it) => it.syntax,
             AnyCssValue::CssCustomIdentifier(it) => it.syntax,
             AnyCssValue::CssDashedIdentifier(it) => it.syntax,
-            AnyCssValue::CssGritMetavariable(it) => it.syntax,
             AnyCssValue::CssIdentifier(it) => it.syntax,
+            AnyCssValue::CssMetavariable(it) => it.syntax,
             AnyCssValue::CssNumber(it) => it.syntax,
             AnyCssValue::CssRatio(it) => it.syntax,
             AnyCssValue::CssString(it) => it.syntax,
@@ -21735,8 +21496,8 @@ impl std::fmt::Debug for AnyCssValue {
             AnyCssValue::CssColor(it) => std::fmt::Debug::fmt(it, f),
             AnyCssValue::CssCustomIdentifier(it) => std::fmt::Debug::fmt(it, f),
             AnyCssValue::CssDashedIdentifier(it) => std::fmt::Debug::fmt(it, f),
-            AnyCssValue::CssGritMetavariable(it) => std::fmt::Debug::fmt(it, f),
             AnyCssValue::CssIdentifier(it) => std::fmt::Debug::fmt(it, f),
+            AnyCssValue::CssMetavariable(it) => std::fmt::Debug::fmt(it, f),
             AnyCssValue::CssNumber(it) => std::fmt::Debug::fmt(it, f),
             AnyCssValue::CssRatio(it) => std::fmt::Debug::fmt(it, f),
             AnyCssValue::CssString(it) => std::fmt::Debug::fmt(it, f),
@@ -21753,8 +21514,8 @@ impl From<AnyCssValue> for SyntaxNode {
             AnyCssValue::CssColor(it) => it.into(),
             AnyCssValue::CssCustomIdentifier(it) => it.into(),
             AnyCssValue::CssDashedIdentifier(it) => it.into(),
-            AnyCssValue::CssGritMetavariable(it) => it.into(),
             AnyCssValue::CssIdentifier(it) => it.into(),
+            AnyCssValue::CssMetavariable(it) => it.into(),
             AnyCssValue::CssNumber(it) => it.into(),
             AnyCssValue::CssRatio(it) => it.into(),
             AnyCssValue::CssString(it) => it.into(),
@@ -22678,11 +22439,6 @@ impl std::fmt::Display for CssGenericProperty {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
-impl std::fmt::Display for CssGritMetavariable {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        std::fmt::Display::fmt(self.syntax(), f)
-    }
-}
 impl std::fmt::Display for CssIdSelector {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
@@ -22824,6 +22580,11 @@ impl std::fmt::Display for CssMediaType {
     }
 }
 impl std::fmt::Display for CssMediaTypeQuery {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for CssMetavariable {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
@@ -23218,8 +22979,7 @@ impl std::fmt::Display for CssValueAtRuleNamedImportSpecifier {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub struct CssBogus {
     syntax: SyntaxNode,
 }
@@ -23275,8 +23035,7 @@ impl From<CssBogus> for SyntaxElement {
         n.syntax.into()
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub struct CssBogusAtRule {
     syntax: SyntaxNode,
 }
@@ -23332,8 +23091,7 @@ impl From<CssBogusAtRule> for SyntaxElement {
         n.syntax.into()
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub struct CssBogusBlock {
     syntax: SyntaxNode,
 }
@@ -23389,8 +23147,7 @@ impl From<CssBogusBlock> for SyntaxElement {
         n.syntax.into()
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub struct CssBogusCustomIdentifier {
     syntax: SyntaxNode,
 }
@@ -23446,8 +23203,7 @@ impl From<CssBogusCustomIdentifier> for SyntaxElement {
         n.syntax.into()
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub struct CssBogusDeclarationItem {
     syntax: SyntaxNode,
 }
@@ -23503,8 +23259,7 @@ impl From<CssBogusDeclarationItem> for SyntaxElement {
         n.syntax.into()
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub struct CssBogusDocumentMatcher {
     syntax: SyntaxNode,
 }
@@ -23560,8 +23315,7 @@ impl From<CssBogusDocumentMatcher> for SyntaxElement {
         n.syntax.into()
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub struct CssBogusFontFamilyName {
     syntax: SyntaxNode,
 }
@@ -23617,8 +23371,7 @@ impl From<CssBogusFontFamilyName> for SyntaxElement {
         n.syntax.into()
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub struct CssBogusFontFeatureValuesItem {
     syntax: SyntaxNode,
 }
@@ -23674,8 +23427,7 @@ impl From<CssBogusFontFeatureValuesItem> for SyntaxElement {
         n.syntax.into()
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub struct CssBogusKeyframesItem {
     syntax: SyntaxNode,
 }
@@ -23731,8 +23483,7 @@ impl From<CssBogusKeyframesItem> for SyntaxElement {
         n.syntax.into()
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub struct CssBogusKeyframesName {
     syntax: SyntaxNode,
 }
@@ -23788,8 +23539,7 @@ impl From<CssBogusKeyframesName> for SyntaxElement {
         n.syntax.into()
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub struct CssBogusLayer {
     syntax: SyntaxNode,
 }
@@ -23845,8 +23595,7 @@ impl From<CssBogusLayer> for SyntaxElement {
         n.syntax.into()
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub struct CssBogusMediaQuery {
     syntax: SyntaxNode,
 }
@@ -23902,8 +23651,7 @@ impl From<CssBogusMediaQuery> for SyntaxElement {
         n.syntax.into()
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub struct CssBogusPageSelectorPseudo {
     syntax: SyntaxNode,
 }
@@ -23959,8 +23707,7 @@ impl From<CssBogusPageSelectorPseudo> for SyntaxElement {
         n.syntax.into()
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub struct CssBogusParameter {
     syntax: SyntaxNode,
 }
@@ -24016,8 +23763,7 @@ impl From<CssBogusParameter> for SyntaxElement {
         n.syntax.into()
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub struct CssBogusProperty {
     syntax: SyntaxNode,
 }
@@ -24073,8 +23819,7 @@ impl From<CssBogusProperty> for SyntaxElement {
         n.syntax.into()
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub struct CssBogusPropertyValue {
     syntax: SyntaxNode,
 }
@@ -24130,8 +23875,7 @@ impl From<CssBogusPropertyValue> for SyntaxElement {
         n.syntax.into()
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub struct CssBogusPseudoClass {
     syntax: SyntaxNode,
 }
@@ -24187,8 +23931,7 @@ impl From<CssBogusPseudoClass> for SyntaxElement {
         n.syntax.into()
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub struct CssBogusPseudoElement {
     syntax: SyntaxNode,
 }
@@ -24244,8 +23987,7 @@ impl From<CssBogusPseudoElement> for SyntaxElement {
         n.syntax.into()
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub struct CssBogusRule {
     syntax: SyntaxNode,
 }
@@ -24301,8 +24043,7 @@ impl From<CssBogusRule> for SyntaxElement {
         n.syntax.into()
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub struct CssBogusScopeRange {
     syntax: SyntaxNode,
 }
@@ -24358,8 +24099,7 @@ impl From<CssBogusScopeRange> for SyntaxElement {
         n.syntax.into()
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub struct CssBogusSelector {
     syntax: SyntaxNode,
 }
@@ -24415,8 +24155,7 @@ impl From<CssBogusSelector> for SyntaxElement {
         n.syntax.into()
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub struct CssBogusSubSelector {
     syntax: SyntaxNode,
 }
@@ -24472,8 +24211,7 @@ impl From<CssBogusSubSelector> for SyntaxElement {
         n.syntax.into()
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub struct CssBogusUnicodeRangeValue {
     syntax: SyntaxNode,
 }
@@ -24529,8 +24267,7 @@ impl From<CssBogusUnicodeRangeValue> for SyntaxElement {
         n.syntax.into()
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub struct CssBogusUrlModifier {
     syntax: SyntaxNode,
 }
@@ -24586,8 +24323,7 @@ impl From<CssBogusUrlModifier> for SyntaxElement {
         n.syntax.into()
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub struct CssUnknownAtRuleComponentList {
     syntax: SyntaxNode,
 }
@@ -24643,8 +24379,7 @@ impl From<CssUnknownAtRuleComponentList> for SyntaxElement {
         n.syntax.into()
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub struct CssValueAtRuleGenericValue {
     syntax: SyntaxNode,
 }
@@ -24740,7 +24475,6 @@ impl AstNode for CssBracketedValueList {
         self.syntax_list.into_node()
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for CssBracketedValueList {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -24823,7 +24557,6 @@ impl AstNode for CssComponentValueList {
         self.syntax_list.into_node()
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for CssComponentValueList {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -24906,7 +24639,6 @@ impl AstNode for CssComposesClassList {
         self.syntax_list.into_node()
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for CssComposesClassList {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -24989,7 +24721,6 @@ impl AstNode for CssCompoundSelectorList {
         self.syntax_list.into_node()
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for CssCompoundSelectorList {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -25072,7 +24803,6 @@ impl AstNode for CssCustomIdentifierList {
         self.syntax_list.into_node()
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for CssCustomIdentifierList {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -25155,7 +24885,6 @@ impl AstNode for CssDeclarationList {
         self.syntax_list.into_node()
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for CssDeclarationList {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -25238,7 +24967,6 @@ impl AstNode for CssDeclarationOrAtRuleList {
         self.syntax_list.into_node()
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for CssDeclarationOrAtRuleList {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -25321,7 +25049,6 @@ impl AstNode for CssDeclarationOrRuleList {
         self.syntax_list.into_node()
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for CssDeclarationOrRuleList {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -25404,7 +25131,6 @@ impl AstNode for CssDocumentMatcherList {
         self.syntax_list.into_node()
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for CssDocumentMatcherList {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -25487,7 +25213,6 @@ impl AstNode for CssFontFamilyNameList {
         self.syntax_list.into_node()
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for CssFontFamilyNameList {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -25570,7 +25295,6 @@ impl AstNode for CssFontFeatureValuesItemList {
         self.syntax_list.into_node()
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for CssFontFeatureValuesItemList {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -25653,7 +25377,6 @@ impl AstNode for CssGenericComponentValueList {
         self.syntax_list.into_node()
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for CssGenericComponentValueList {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -25736,7 +25459,6 @@ impl AstNode for CssKeyframesItemList {
         self.syntax_list.into_node()
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for CssKeyframesItemList {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -25819,7 +25541,6 @@ impl AstNode for CssKeyframesSelectorList {
         self.syntax_list.into_node()
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for CssKeyframesSelectorList {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -25902,7 +25623,6 @@ impl AstNode for CssLayerNameList {
         self.syntax_list.into_node()
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for CssLayerNameList {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -25985,7 +25705,6 @@ impl AstNode for CssLayerReferenceList {
         self.syntax_list.into_node()
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for CssLayerReferenceList {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -26068,7 +25787,6 @@ impl AstNode for CssMediaQueryList {
         self.syntax_list.into_node()
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for CssMediaQueryList {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -26151,7 +25869,6 @@ impl AstNode for CssNestedSelectorList {
         self.syntax_list.into_node()
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for CssNestedSelectorList {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -26234,7 +25951,6 @@ impl AstNode for CssPageAtRuleItemList {
         self.syntax_list.into_node()
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for CssPageAtRuleItemList {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -26317,7 +26033,6 @@ impl AstNode for CssPageSelectorList {
         self.syntax_list.into_node()
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for CssPageSelectorList {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -26400,7 +26115,6 @@ impl AstNode for CssPageSelectorPseudoList {
         self.syntax_list.into_node()
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for CssPageSelectorPseudoList {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -26483,7 +26197,6 @@ impl AstNode for CssParameterList {
         self.syntax_list.into_node()
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for CssParameterList {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -26566,7 +26279,6 @@ impl AstNode for CssPseudoValueList {
         self.syntax_list.into_node()
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for CssPseudoValueList {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -26649,7 +26361,6 @@ impl AstNode for CssRelativeSelectorList {
         self.syntax_list.into_node()
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for CssRelativeSelectorList {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -26732,7 +26443,6 @@ impl AstNode for CssRuleList {
         self.syntax_list.into_node()
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for CssRuleList {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -26815,7 +26525,6 @@ impl AstNode for CssSelectorList {
         self.syntax_list.into_node()
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for CssSelectorList {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -26898,7 +26607,6 @@ impl AstNode for CssSubSelectorList {
         self.syntax_list.into_node()
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for CssSubSelectorList {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -26981,7 +26689,6 @@ impl AstNode for CssUrlModifierList {
         self.syntax_list.into_node()
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for CssUrlModifierList {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -27065,7 +26772,6 @@ impl AstNode for CssValueAtRuleImportSpecifierList {
         self.syntax_list.into_node()
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for CssValueAtRuleImportSpecifierList {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -27148,7 +26854,6 @@ impl AstNode for CssValueAtRulePropertyList {
         self.syntax_list.into_node()
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for CssValueAtRulePropertyList {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where

@@ -35,7 +35,11 @@ impl Parser for GritJsParser {
         logs: &mut AnalysisLogs,
         _old_tree: FileOrigin<'_, GritTargetTree>,
     ) -> Option<GritTargetTree> {
-        let parse_result = parse(body, JsFileSource::tsx(), JsParserOptions::default());
+        let parse_result = parse(
+            body,
+            JsFileSource::tsx(),
+            JsParserOptions::default().with_metavariables(),
+        );
 
         for diagnostic in parse_result.diagnostics() {
             logs.push(diagnostic.to_log(path));
@@ -58,7 +62,11 @@ impl Parser for GritJsParser {
             |src: &str| src.len() as u32
         };
 
-        let parse_result = parse(&context, JsFileSource::tsx(), JsParserOptions::default());
+        let parse_result = parse(
+            &context,
+            JsFileSource::tsx(),
+            JsParserOptions::default().with_metavariables(),
+        );
 
         SnippetTree {
             tree: GritTargetTree::new(parse_result.syntax().into()),

@@ -138,12 +138,11 @@ impl Rule for NoPositiveTabindex {
             }
             TabindexProp::JsPropertyObjectMember(js_object_member) => {
                 let expression = js_object_member.value().ok()?;
-                let expression_syntax_node = expression.syntax();
+                let range = expression.range();
                 let expression_value =
-                    AnyNumberLikeExpression::cast_ref(expression_syntax_node)?.value()?;
-
+                    AnyNumberLikeExpression::cast(expression.into_syntax())?.value()?;
                 if !is_tabindex_valid(&expression_value) {
-                    return Some(expression_syntax_node.text_trimmed_range());
+                    return Some(range);
                 }
             }
         }
@@ -214,7 +213,7 @@ fn attribute_has_valid_tabindex(jsx_any_attribute_value: &AnyJsxAttributeValue) 
         AnyJsxAttributeValue::JsxExpressionAttributeValue(value) => {
             let expression = value.expression().ok()?;
             let expression_value =
-                AnyNumberLikeExpression::cast_ref(expression.syntax())?.value()?;
+                AnyNumberLikeExpression::cast(expression.into_syntax())?.value()?;
 
             Some(is_tabindex_valid(&expression_value))
         }

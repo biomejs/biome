@@ -195,9 +195,9 @@ impl TryFrom<PrettierConfiguration> for biome_configuration::PartialConfiguratio
         let line_width = LineWidth::try_from(value.print_width)?;
         let indent_width = IndentWidth::try_from(value.tab_width)?;
         let indent_style = if value.use_tabs {
-            biome_configuration::PlainIndentStyle::Tab
+            biome_formatter::IndentStyle::Tab
         } else {
-            biome_configuration::PlainIndentStyle::Space
+            biome_formatter::IndentStyle::Space
         };
         let formatter = biome_configuration::PartialFormatterConfiguration {
             indent_width: Some(indent_width),
@@ -297,9 +297,9 @@ impl TryFrom<Override> for biome_configuration::OverridePattern {
             };
             let indent_style = options.use_tabs.map(|use_tabs| {
                 if use_tabs {
-                    biome_configuration::PlainIndentStyle::Tab
+                    biome_formatter::IndentStyle::Tab
                 } else {
-                    biome_configuration::PlainIndentStyle::Space
+                    biome_formatter::IndentStyle::Space
                 }
             });
             let formatter = biome_configuration::OverrideFormatterConfiguration {

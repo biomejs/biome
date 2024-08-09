@@ -2,12 +2,13 @@ use crate::{
     grit_context::GritQueryContext, grit_target_language::GritTargetLanguage,
     grit_target_node::GritTargetNode, source_location_ext::SourceFileExt, util::TextRangeGritExt,
 };
+use anyhow::bail;
 use biome_diagnostics::{display::SourceFile, SourceCode};
 use biome_rowan::TextRange;
 use grit_pattern_matcher::{
     binding::Binding, constant::Constant, effects::Effect, pattern::FileRegistry,
 };
-use grit_util::{AnalysisLogs, AstNode, ByteRange, CodeRange, Range};
+use grit_util::{AnalysisLogBuilder, AnalysisLogs, AstNode, ByteRange, CodeRange, Range};
 use std::{borrow::Cow, collections::HashMap, path::Path};
 
 #[derive(Clone, Debug, PartialEq)]
@@ -50,8 +51,6 @@ impl<'a> Binding<'a, GritQueryContext> for GritBinding<'a> {
 
     /// Returns the only node bound by this binding.
     ///
-    /// This includes list bindings that only match a single child.
-    ///
     /// Returns `None` if the binding has no associated node, or if there is
     /// more than one associated node.
     fn singleton(&self) -> Option<GritTargetNode<'a>> {
@@ -69,7 +68,7 @@ impl<'a> Binding<'a, GritQueryContext> for GritBinding<'a> {
         match self {
             Self::Node(node) => {
                 let source = SourceFile::new(SourceCode {
-                    text: node.text(),
+                    text: node.source(),
                     line_starts: None,
                 });
                 source.to_grit_range(node.text_trimmed_range())
@@ -101,8 +100,25 @@ impl<'a> Binding<'a, GritQueryContext> for GritBinding<'a> {
         }
     }
 
-    fn is_equivalent_to(&self, _other: &Self, _language: &GritTargetLanguage) -> bool {
-        todo!()
+    fn is_equivalent_to(&self, other: &Self, language: &GritTargetLanguage) -> bool {
+        match self {
+            Self::Node(node1) => match other {
+                Self::Node(node2) => are_equivalent(node1, node2),
+                Self::Range(range, source) => self
+                    .text(language)
+                    .is_ok_and(|t| t == source[range.start().into()..range.end().into()]),
+                Self::File(_) | Self::Empty(..) | Self::Constant(_) => false,
+            },
+            Self::Empty(node1, sort1) => match other {
+                Self::Empty(node2, sort2) => node1.kind() == node2.kind() && sort1 == sort2,
+                Self::Range(..) | Self::File(_) | Self::Node(..) | Self::Constant(_) => false,
+            },
+            Self::Constant(c1) => other.as_constant().map_or(false, |c2| *c1 == c2),
+            Self::Range(range, source) => other
+                .text(language)
+                .is_ok_and(|t| t == source[range.start().into()..range.end().into()]),
+            Self::File(path1) => other.as_filename().map_or(false, |path2| *path1 == path2),
+        }
     }
 
     fn is_suppressed(&self, _language: &GritTargetLanguage, _current_name: Option<&str>) -> bool {
@@ -115,7 +131,7 @@ impl<'a> Binding<'a, GritQueryContext> for GritBinding<'a> {
         _is_first: bool,
         _language: &GritTargetLanguage,
     ) -> Option<String> {
-        todo!()
+        None // TODO: Implement insertion padding
     }
 
     fn linearized_text(
@@ -127,7 +143,7 @@ impl<'a> Binding<'a, GritQueryContext> for GritBinding<'a> {
         _distributed_indent: Option<usize>,
         _logs: &mut AnalysisLogs,
     ) -> anyhow::Result<Cow<'a, str>> {
-        todo!()
+        bail!("Not implemented") // TODO: Implement rewriting
     }
 
     fn text(&self, _language: &GritTargetLanguage) -> anyhow::Result<Cow<'a, str>> {
@@ -178,13 +194,17 @@ impl<'a> Binding<'a, GritQueryContext> for GritBinding<'a> {
 
     fn list_items(&self) -> Option<impl Iterator<Item = GritTargetNode<'a>> + Clone> {
         match self {
-            Self::Node(node) if node.is_list() => Some(node.children()),
+            Self::Node(node) if node.is_list() => Some(node.named_children()),
             _ => None,
         }
     }
 
     fn parent_node(&self) -> Option<GritTargetNode<'a>> {
-        todo!()
+        match self {
+            GritBinding::Node(node) => node.parent(),
+            GritBinding::Empty(node, _) => Some(node.clone()),
+            GritBinding::File(_) | GritBinding::Range(_, _) | GritBinding::Constant(_) => None,
+        }
     }
 
     fn is_truthy(&self) -> bool {
@@ -206,8 +226,91 @@ impl<'a> Binding<'a, GritQueryContext> for GritBinding<'a> {
     fn log_empty_field_rewrite_error(
         &self,
         _language: &GritTargetLanguage,
-        _logs: &mut grit_util::AnalysisLogs,
+        logs: &mut grit_util::AnalysisLogs,
     ) -> anyhow::Result<()> {
-        todo!()
+        if let Self::Empty(node, slot) = self {
+            let range = Range::from_byte_range(node.source(), node.byte_range());
+            let log = AnalysisLogBuilder::default()
+                .level(441_u16)
+                .source(node.source())
+                .position(range.start)
+                .range(range)
+                .message(format!(
+                    "Error: failed to rewrite binding, cannot derive range of empty slot {slot} of node with kind {:?}",
+                    node.kind()
+                ))
+                .build()?;
+            logs.push(log);
+        }
+
+        Ok(())
     }
+}
+
+/// Checks whether two nodes are equivalent.
+///
+/// We define two nodes to be equivalent if they have the same sort (kind) and
+/// equivalent named fields.
+///
+/// TODO: Improve performance. Equivalence checks happen often so we want them to
+/// be fast. The current implementation requires a traversal of the tree on all
+/// named fields, which can be slow for large nodes. It also creates a cursor
+/// at each traversal step.
+///
+/// Potential improvements:
+/// 1. Use cursors that are passed as arguments -- not clear if this would be faster.
+/// 2. Precompute hashes on all nodes, which define the equivalence relation. The check then becomes O(1).
+pub fn are_equivalent(node1: &GritTargetNode, node2: &GritTargetNode) -> bool {
+    // If the source is identical, we consider the nodes equivalent.
+    // This covers most cases of constant nodes.
+    // We may want a more precise check here eventually, but this is a good start.
+    if node1.text() == node2.text() {
+        return true;
+    }
+
+    // If the node kinds are different, then the nodes are not equivalent.
+    // But if one of them is a list with a single node, we may still find a
+    // match against that node.
+    if node1.kind() != node2.kind() {
+        return if node1.is_list() {
+            let mut children1 = node1.named_children();
+            match (children1.next(), children1.next()) {
+                (Some(only_child), None) => are_equivalent(&only_child, node2),
+                _ => false,
+            }
+        } else if node2.is_list() {
+            let mut children2 = node2.named_children();
+            match (children2.next(), children2.next()) {
+                (Some(only_child), None) => are_equivalent(node1, &only_child),
+                _ => false,
+            }
+        } else {
+            false
+        };
+    }
+
+    // If the node kinds are the same, then we need to check the named fields.
+    let named_fields1 = node1.named_children();
+    let mut named_fields2 = node2.named_children();
+
+    // If there are no children, this is effectively a leaf node. If two leaf
+    // nodes have different sources (see above), then they are not equivalent.
+    // If they do not have the same sources, we consider them different.
+    let mut is_empty = true;
+
+    // Recurse through the named fields to find the first mismatch.
+    for child1 in named_fields1 {
+        is_empty = false;
+
+        match named_fields2.next() {
+            Some(child2) => {
+                if !are_equivalent(&child1, &child2) {
+                    return false;
+                }
+            }
+            None => return false,
+        }
+    }
+
+    named_fields2.next().is_none() && !is_empty
 }

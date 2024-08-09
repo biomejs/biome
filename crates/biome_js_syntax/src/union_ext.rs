@@ -106,7 +106,7 @@ impl AnyJsClassMember {
             AnyJsClassMember::JsPropertyClassMember(property) => property.name().map(Some),
             AnyJsClassMember::JsSetterClassMember(setter) => setter.name().map(Some),
             AnyJsClassMember::JsStaticInitializationBlockClassMember(_) => Ok(None),
-            AnyJsClassMember::JsBogusMember(_) => Ok(None),
+            AnyJsClassMember::JsBogusMember(_) | AnyJsClassMember::JsMetavariable(_) => Ok(None),
             AnyJsClassMember::TsConstructorSignatureClassMember(constructor) => constructor
                 .name()
                 .map(|name| Some(AnyJsClassMemberName::from(name))),

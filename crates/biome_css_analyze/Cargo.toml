@@ -15,13 +15,13 @@ version              = "0.5.7"
 [dependencies]
 biome_analyze            = { workspace = true }
 biome_console            = { workspace = true }
+biome_css_semantic       = { workspace = true }
 biome_css_syntax         = { workspace = true }
 biome_deserialize        = { workspace = true }
 biome_deserialize_macros = { workspace = true }
 biome_diagnostics        = { workspace = true }
 biome_rowan              = { workspace = true }
 biome_suppression        = { workspace = true }
-lazy_static              = { workspace = true }
 regex                    = { workspace = true }
 rustc-hash               = { workspace = true }
 schemars                 = { workspace = true, optional = true }

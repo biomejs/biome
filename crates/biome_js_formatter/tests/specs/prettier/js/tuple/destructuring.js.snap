@@ -2,7 +2,6 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: js/tuple/destructuring.js
 ---
-
 # Input
 
 ```js
@@ -167,5 +166,3 @@ destructuring.js:5:23 parse ━━━━━━━━━━━━━━━━━�
   
 
 ```
-
-

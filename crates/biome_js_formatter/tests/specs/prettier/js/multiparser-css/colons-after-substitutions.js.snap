@@ -2,7 +2,6 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: js/multiparser-css/colons-after-substitutions.js
 ---
-
 # Input
 
 ```js
@@ -74,5 +73,3 @@ const Icon = styled.div`
   ${media.smallDown}::before {}
 `;
 ```
-
-

@@ -2,7 +2,6 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: js/export-default/export-default-from/export.js
 ---
-
 # Input
 
 ```js
@@ -424,5 +423,3 @@ export.js:7:17 parse ━━━━━━━━━━━━━━━━━━━�
 ```
    16: export { fooooooooooooooooooooooooooooooooooooooooooooooooo } from "fooooooooooooooooooooooooooooo";
 ```
-
-

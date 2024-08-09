@@ -737,12 +737,6 @@ pub fn css_generic_property(
         ],
     ))
 }
-pub fn css_grit_metavariable(value_token: SyntaxToken) -> CssGritMetavariable {
-    CssGritMetavariable::unwrap_cast(SyntaxNode::new_detached(
-        CssSyntaxKind::CSS_GRIT_METAVARIABLE,
-        [Some(SyntaxElement::Token(value_token))],
-    ))
-}
 pub fn css_id_selector(hash_token: SyntaxToken, name: CssCustomIdentifier) -> CssIdSelector {
     CssIdSelector::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_ID_SELECTOR,
@@ -1127,6 +1121,12 @@ impl CssMediaTypeQueryBuilder {
             ],
         ))
     }
+}
+pub fn css_metavariable(value_token: SyntaxToken) -> CssMetavariable {
+    CssMetavariable::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_METAVARIABLE,
+        [Some(SyntaxElement::Token(value_token))],
+    ))
 }
 pub fn css_named_namespace_prefix(name: CssIdentifier) -> CssNamedNamespacePrefix {
     CssNamedNamespacePrefix::unwrap_cast(SyntaxNode::new_detached(

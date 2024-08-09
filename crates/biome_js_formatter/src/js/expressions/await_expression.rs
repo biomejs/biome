@@ -1,12 +1,8 @@
 use crate::prelude::*;
+
 use biome_formatter::write;
-
-use crate::parentheses::{
-    is_binary_like_left_or_right, is_callee, is_conditional_test, is_member_object, is_spread,
-    update_or_lower_expression_needs_parentheses, NeedsParentheses,
-};
-
-use biome_js_syntax::{JsAwaitExpression, JsSyntaxNode};
+use biome_js_syntax::parentheses::NeedsParentheses;
+use biome_js_syntax::{AnyJsComputedMember, JsAwaitExpression};
 use biome_js_syntax::{JsAwaitExpressionFields, JsSyntaxKind};
 
 #[derive(Debug, Clone, Default)]
@@ -25,7 +21,18 @@ impl FormatNodeRule<JsAwaitExpression> for FormatJsAwaitExpression {
         let parent = node.syntax().parent();
 
         if let Some(parent) = parent {
-            if is_callee(node.syntax(), &parent) || is_member_object(node.syntax(), &parent) {
+            let is_callee_or_object = match parent.kind() {
+                // Callee
+                JsSyntaxKind::JS_CALL_EXPRESSION
+                | JsSyntaxKind::JS_NEW_EXPRESSION
+                // Static member
+                | JsSyntaxKind::JS_STATIC_MEMBER_EXPRESSION
+                | JsSyntaxKind::JS_STATIC_MEMBER_ASSIGNMENT => true,
+                _ => AnyJsComputedMember::cast_ref(&parent)
+                    .and_then(|member| member.object().ok())
+                    .is_some_and(|object| object.syntax() == node.syntax()),
+            };
+            if is_callee_or_object {
                 let ancestor_await_or_block = parent.ancestors().skip(1).find(|ancestor| {
                     matches!(
                         ancestor.kind(),
@@ -57,33 +64,6 @@ impl FormatNodeRule<JsAwaitExpression> for FormatJsAwaitExpression {
 
     fn needs_parentheses(&self, item: &JsAwaitExpression) -> bool {
         item.needs_parentheses()
-    }
-}
-
-impl NeedsParentheses for JsAwaitExpression {
-    fn needs_parentheses_with_parent(&self, parent: &JsSyntaxNode) -> bool {
-        await_or_yield_needs_parens(parent, self.syntax())
-    }
-}
-
-pub(super) fn await_or_yield_needs_parens(parent: &JsSyntaxNode, node: &JsSyntaxNode) -> bool {
-    debug_assert!(matches!(
-        node.kind(),
-        JsSyntaxKind::JS_AWAIT_EXPRESSION | JsSyntaxKind::JS_YIELD_EXPRESSION
-    ));
-
-    match parent.kind() {
-        JsSyntaxKind::JS_UNARY_EXPRESSION
-        | JsSyntaxKind::TS_AS_EXPRESSION
-        | JsSyntaxKind::TS_SATISFIES_EXPRESSION => true,
-
-        _ => {
-            let expression = node;
-            is_conditional_test(node, parent)
-                || update_or_lower_expression_needs_parentheses(expression, parent)
-                || is_spread(expression, parent)
-                || is_binary_like_left_or_right(node, parent)
-        }
     }
 }
 

@@ -7,6 +7,7 @@ mod value;
 mod variable;
 use crate::token_source::GraphqlTokenSource;
 use biome_graphql_syntax::GraphqlSyntaxKind::{self, *};
+use biome_graphql_syntax::T;
 use biome_parser::diagnostic::merge_diagnostics;
 use biome_parser::event::Event;
 use biome_parser::parse_lists::ParseNodeList;
@@ -19,7 +20,7 @@ use self::value::{is_at_string, parse_string};
 
 /// Graphql allow keywords to be used as names
 const GRAPHQL_POTENTIAL_NAME_SET: TokenSet<GraphqlSyntaxKind> = token_set![
-    GRAPHQL_NAME,
+    T![ident],
     TRUE_KW,
     FALSE_KW,
     QUERY_KW,
@@ -123,14 +124,36 @@ pub(crate) fn parse_root(p: &mut GraphqlParser) -> CompletedMarker {
 }
 
 #[inline]
-fn parse_name(p: &mut GraphqlParser) -> ParsedSyntax {
+fn parse_literal_name(p: &mut GraphqlParser) -> ParsedSyntax {
     if !is_nth_at_name(p, 0) {
         return Absent;
     }
 
     let m = p.start();
-    p.bump_remap(GRAPHQL_NAME);
-    Present(m.complete(p, GRAPHQL_NAME))
+    p.bump_remap(T![ident]);
+    Present(m.complete(p, GRAPHQL_LITERAL_NAME))
+}
+
+#[inline]
+fn parse_binding(p: &mut GraphqlParser) -> ParsedSyntax {
+    if !is_nth_at_name(p, 0) {
+        return Absent;
+    }
+
+    let m = p.start();
+    p.bump_remap(T![ident]);
+    Present(m.complete(p, GRAPHQL_NAME_BINDING))
+}
+
+#[inline]
+fn parse_reference(p: &mut GraphqlParser) -> ParsedSyntax {
+    if !is_nth_at_name(p, 0) {
+        return Absent;
+    }
+
+    let m = p.start();
+    p.bump_remap(T![ident]);
+    Present(m.complete(p, GRAPHQL_NAME_REFERENCE))
 }
 
 #[inline]
@@ -153,5 +176,5 @@ fn is_nth_at_name(p: &mut GraphqlParser, n: usize) -> bool {
 
 #[inline]
 fn is_nth_at_non_kw_name(p: &mut GraphqlParser, n: usize) -> bool {
-    p.nth_at(n, GRAPHQL_NAME)
+    p.nth_at(n, T![ident])
 }

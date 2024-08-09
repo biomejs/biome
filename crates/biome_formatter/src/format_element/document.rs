@@ -1,3 +1,4 @@
+#![allow(clippy::mutable_key_type)]
 use super::tag::Tag;
 use crate::format_element::tag::DedentMode;
 use crate::prelude::tag::GroupMode;
@@ -128,7 +129,7 @@ impl Document {
         }
 
         let mut enclosing: Vec<Enclosing> = Vec::new();
-        let mut interned: FxHashMap<&Interned, bool> = FxHashMap::default();
+        let mut interned = FxHashMap::default();
         propagate_expands(self, &mut enclosing, &mut interned);
     }
 }

@@ -7,11 +7,11 @@
   "author": "Dani Guardiola",
   "type": "module",
   "dependencies": {
-    "tailwindcss": "^3.4.4"
+    "tailwindcss": "^3.4.7"
   },
   "devDependencies": {
     "@types/bun": "1.1.6",
     "read-package-up": "11.0.0",
-    "typescript": "5.5.3"
+    "typescript": "5.5.4"
   }
 }

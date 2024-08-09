@@ -1,8 +1,8 @@
 use crate::parser::{
     directive::DirectiveList,
-    parse_description,
+    parse_binding, parse_description,
     parse_error::{expected_input_object_extension, expected_name},
-    parse_name, GraphqlParser,
+    parse_reference, GraphqlParser,
 };
 use biome_graphql_syntax::{
     GraphqlSyntaxKind::{self, *},
@@ -24,7 +24,7 @@ pub(crate) fn parse_input_object_type_definition(p: &mut GraphqlParser) -> Parse
 
     p.bump(T![input]);
 
-    parse_name(p).or_add_diagnostic(p, expected_name);
+    parse_binding(p).or_add_diagnostic(p, expected_name);
 
     DirectiveList.parse_list(p);
 
@@ -42,7 +42,7 @@ pub(crate) fn parse_input_object_type_extension(p: &mut GraphqlParser) -> Parsed
     p.bump(T![extend]);
     p.expect(T![input]);
 
-    parse_name(p).or_add_diagnostic(p, expected_name);
+    parse_reference(p).or_add_diagnostic(p, expected_name);
 
     let directive_list = DirectiveList.parse_list(p);
     let directive_empty = directive_list.range(p).is_empty();

@@ -1,8 +1,8 @@
 use crate::parser::{
     directive::DirectiveList,
-    is_nth_at_name, is_nth_at_non_kw_name, parse_description,
+    is_nth_at_name, is_nth_at_non_kw_name, parse_binding, parse_description,
     parse_error::{expected_name, expected_named_type, expected_union_extension},
-    parse_name,
+    parse_reference,
     r#type::parse_named_type,
     GraphqlParser,
 };
@@ -29,7 +29,7 @@ pub(crate) fn parse_union_type_definition(p: &mut GraphqlParser) -> ParsedSyntax
 
     p.bump(T![union]);
 
-    parse_name(p).or_add_diagnostic(p, expected_name);
+    parse_binding(p).or_add_diagnostic(p, expected_name);
 
     DirectiveList.parse_list(p);
 
@@ -47,7 +47,7 @@ pub(super) fn parse_union_type_extension(p: &mut GraphqlParser) -> ParsedSyntax 
     p.bump(T![extend]);
     p.bump(T![union]);
 
-    parse_name(p).or_add_diagnostic(p, expected_name);
+    parse_reference(p).or_add_diagnostic(p, expected_name);
 
     let directive_list = DirectiveList.parse_list(p);
     let directive_empty = directive_list.range(p).is_empty();

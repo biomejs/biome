@@ -1,0 +1,68 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: content
+---
+## `index.ts`
+
+```ts
+import { z} from "z"
+import { z, b , a} from "lodash"
+
+a ==b
+a ==b
+a ==b
+a ==b
+
+debugger
+debugger
+debugger
+debugger
+
+let f;
+let f;
+let f;
+		let f;
+		let f;
+		let f;
+```
+
+## `main.ts`
+
+```ts
+import { z} from "z"
+import { z, b , a} from "lodash"
+
+a ==b
+a ==b
+a ==b
+a ==b
+
+debugger
+debugger
+debugger
+debugger
+
+let f;
+let f;
+let f;
+		let f;
+		let f;
+		let f;
+```
+
+# Termination Message
+
+```block
+format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Some errors were emitted while running checks.
+  
+
+
+```
+
+# Emitted Messages
+
+```block
+[]
+```

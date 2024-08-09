@@ -86,8 +86,6 @@ use biome_rowan::AstNode;
     ///
     /// Try to stay consistent with the descriptions of implemented rules.
     ///
-    /// Add a link to the corresponding ESLint rule (if any):
-    ///
     /// ## Examples
     ///
     /// ### Invalid
@@ -104,7 +102,7 @@ use biome_rowan::AstNode;
     /// ```
     ///
     pub {rule_name_upper_camel} {{
-        version: "1.8.0",
+        version: "next",
         name: "{rule_name_lower_camel}",
         language: "js",
         recommended: false,

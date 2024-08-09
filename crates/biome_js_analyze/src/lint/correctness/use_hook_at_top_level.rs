@@ -8,15 +8,15 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_deserialize::{
-    Deserializable, DeserializableValue, DeserializationDiagnostic, DeserializationVisitor, Text,
-    VisitableType,
+    Deserializable, DeserializableTypes, DeserializableValue, DeserializationDiagnostic,
+    DeserializationVisitor, Text,
 };
 use biome_js_semantic::{CallsExtensions, SemanticModel};
 use biome_js_syntax::{
     AnyFunctionLike, AnyJsBinding, AnyJsExpression, AnyJsFunction, AnyJsObjectMemberName,
     JsArrayAssignmentPatternElement, JsArrayBindingPatternElement, JsCallExpression,
     JsConditionalExpression, JsIfStatement, JsLanguage, JsLogicalExpression, JsMethodObjectMember,
-    JsObjectBindingPatternShorthandProperty, JsReturnStatement, JsSyntaxKind,
+    JsObjectBindingPatternShorthandProperty, JsReturnStatement, JsSyntaxKind, JsSyntaxNode,
     JsTryFinallyStatement, TextRange,
 };
 use biome_rowan::{declare_node_union, AstNode, Language, SyntaxNode, WalkEvent};
@@ -115,17 +115,19 @@ fn enclosing_function_if_call_is_at_top_level(
     let mut prev_node = None;
 
     for node in call.syntax().ancestors() {
-        if let Some(enclosing_function) = AnyJsFunctionOrMethod::cast_ref(&node) {
-            return Some(enclosing_function);
-        }
-
-        if let Some(prev_node) = prev_node {
-            if is_conditional_expression(&node, &prev_node) {
-                return None;
+        match AnyJsFunctionOrMethod::try_cast(node) {
+            Ok(enclosing_function) => {
+                return Some(enclosing_function);
+            }
+            Err(node) => {
+                if let Some(prev_node) = prev_node {
+                    if is_conditional_expression(&node, &prev_node) {
+                        return None;
+                    }
+                }
+                prev_node = Some(node);
             }
         }
-
-        prev_node = Some(node);
     }
 
     None
@@ -148,10 +150,7 @@ fn enclosing_function_if_call_is_at_top_level(
 /// // ^^^^^^^^---------------------------- This node is always executed.
 /// //            ^^^^^^^^^^---^^^^^^^^^--- These nodes are conditionally executed.
 /// ```
-fn is_conditional_expression(
-    parent_node: &SyntaxNode<JsLanguage>,
-    node: &SyntaxNode<JsLanguage>,
-) -> bool {
+fn is_conditional_expression(parent_node: &JsSyntaxNode, node: &JsSyntaxNode) -> bool {
     if let Some(assignment_with_default) = JsArrayAssignmentPatternElement::cast_ref(parent_node) {
         return assignment_with_default
             .init()
@@ -570,7 +569,7 @@ struct DeprecatedHooksOptionsVisitor;
 impl DeserializationVisitor for DeprecatedHooksOptionsVisitor {
     type Output = DeprecatedHooksOptions;
 
-    const EXPECTED_TYPE: VisitableType = VisitableType::MAP;
+    const EXPECTED_TYPE: DeserializableTypes = DeserializableTypes::MAP;
 
     fn visit_map(
         self,

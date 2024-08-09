@@ -112,7 +112,7 @@ impl Display for RunningRomeServer {
         };
 
         for version in versions {
-            if version == biome_service::VERSION {
+            if version == biome_configuration::VERSION {
                 let runtime = Runtime::new()?;
                 match service::open_transport(runtime) {
                     Ok(None) => {

@@ -4,10 +4,10 @@ use crate::diagnostics::{DeprecatedArgument, DeprecatedConfigurationFile};
 use crate::execute::Stdin;
 use crate::logging::LoggingKind;
 use crate::{CliDiagnostic, CliSession, LoggingLevel, VERSION};
+use biome_configuration::analyzer::RuleSelector;
 use biome_configuration::css::PartialCssLinter;
 use biome_configuration::javascript::PartialJavascriptLinter;
 use biome_configuration::json::PartialJsonLinter;
-use biome_configuration::linter::RuleSelector;
 use biome_configuration::{
     css::partial_css_formatter, css::partial_css_linter, graphql::partial_graphql_formatter,
     graphql::partial_graphql_linter, javascript::partial_javascript_formatter,
@@ -120,6 +120,11 @@ pub enum BiomeCommand {
             hide_usage
         )]
         organize_imports_enabled: Option<bool>,
+
+        /// Allow to enable or disable the assists.
+        #[bpaf(long("assists-enabled"), argument("true|false"), optional)]
+        assists_enabled: Option<bool>,
+
         #[bpaf(external(partial_configuration), hide_usage, optional)]
         configuration: Option<PartialConfiguration>,
         #[bpaf(external, hide_usage)]
@@ -133,17 +138,17 @@ pub enum BiomeCommand {
         stdin_file_path: Option<String>,
 
         /// When set to true, only the files that have been staged (the ones prepared to be committed)
-        /// will be linted.
+        /// will be linted. This option should be used when working locally.
         #[bpaf(long("staged"), switch)]
         staged: bool,
 
         /// When set to true, only the files that have been changed compared to your `defaultBranch`
-        /// configuration will be linted.
+        /// configuration will be linted. This option should be used in CI environments.
         #[bpaf(long("changed"), switch)]
         changed: bool,
 
         /// Use this to specify the base branch to compare against when you're using the --changed
-        /// flag and the `defaultBranch` is not set in your biome.json
+        /// flag and the `defaultBranch` is not set in your `biome.json`
         #[bpaf(long("since"), argument("REF"))]
         since: Option<String>,
 
@@ -311,6 +316,10 @@ pub enum BiomeCommand {
         /// Allow to enable or disable the organize imports.
         #[bpaf(long("organize-imports-enabled"), argument("true|false"), optional)]
         organize_imports_enabled: Option<bool>,
+
+        /// Allow to enable or disable the assists.
+        #[bpaf(long("assists-enabled"), argument("true|false"), optional)]
+        assists_enabled: Option<bool>,
 
         #[bpaf(external(partial_configuration), hide_usage, optional)]
         configuration: Option<PartialConfiguration>,
@@ -589,7 +598,7 @@ fn resolve_manifest(cli_session: &CliSession) -> Result<(), WorkspaceError> {
             content: result.content,
             version: 0,
         })?;
-        workspace.update_current_project(UpdateProjectParams { path: biome_path })?;
+        workspace.update_current_manifest(UpdateProjectParams { path: biome_path })?;
     }
 
     Ok(())

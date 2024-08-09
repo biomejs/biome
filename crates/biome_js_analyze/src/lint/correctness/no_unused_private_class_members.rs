@@ -265,22 +265,22 @@ impl AnyMember {
                     AnyJsClassMember::JsGetterClassMember(member) => member
                         .modifiers()
                         .iter()
-                        .filter_map(|x| TsAccessibilityModifier::cast_ref(x.syntax()))
+                        .filter_map(|x| TsAccessibilityModifier::cast(x.into_syntax()))
                         .any(|accessibility| accessibility.is_private()),
                     AnyJsClassMember::JsMethodClassMember(member) => member
                         .modifiers()
                         .iter()
-                        .filter_map(|x| TsAccessibilityModifier::cast_ref(x.syntax()))
+                        .filter_map(|x| TsAccessibilityModifier::cast(x.into_syntax()))
                         .any(|accessibility| accessibility.is_private()),
                     AnyJsClassMember::JsPropertyClassMember(member) => member
                         .modifiers()
                         .iter()
-                        .filter_map(|x| TsAccessibilityModifier::cast_ref(x.syntax()))
+                        .filter_map(|x| TsAccessibilityModifier::cast(x.into_syntax()))
                         .any(|accessibility| accessibility.is_private()),
                     AnyJsClassMember::JsSetterClassMember(member) => member
                         .modifiers()
                         .iter()
-                        .filter_map(|x| TsAccessibilityModifier::cast_ref(x.syntax()))
+                        .filter_map(|x| TsAccessibilityModifier::cast(x.into_syntax()))
                         .any(|accessibility| accessibility.is_private()),
                     _ => false,
                 };
@@ -291,7 +291,7 @@ impl AnyMember {
                 param
                     .modifiers()
                     .iter()
-                    .filter_map(|x| TsAccessibilityModifier::cast_ref(x.syntax()))
+                    .filter_map(|x| TsAccessibilityModifier::cast(x.into_syntax()))
                     .any(|accessibility| accessibility.is_private()),
             ),
         }

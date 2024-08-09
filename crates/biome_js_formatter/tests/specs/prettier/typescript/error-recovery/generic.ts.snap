@@ -2,7 +2,6 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: typescript/error-recovery/generic.ts
 ---
-
 # Input
 
 ```ts
@@ -240,5 +239,3 @@ generic.ts:18:10 parse ━━━━━━━━━━━━━━━━━━━
   
 
 ```
-
-

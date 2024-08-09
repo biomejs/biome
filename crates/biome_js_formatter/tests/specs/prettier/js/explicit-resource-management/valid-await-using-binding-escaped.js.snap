@@ -2,7 +2,6 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: js/explicit-resource-management/valid-await-using-binding-escaped.js
 ---
-
 # Input
 
 ```js
@@ -32,5 +31,3 @@ async function f() {
   await using \u0061b = c;
 }
 ```
-
-

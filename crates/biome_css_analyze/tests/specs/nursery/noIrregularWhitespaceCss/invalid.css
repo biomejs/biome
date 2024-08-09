@@ -1,0 +1,97 @@
+/* \u{b}    */
+@import 'a.css';
+/* \u{c}    */
+@layermodule, state;
+/* \u{feff} */
+.firstClass﻿.secondClass {
+	padding: 10px;
+}
+/* \u{a0}   */
+.firstClass .secondClass {
+	padding: 10px;
+}
+/* \u{1680} */
+.firstClass .secondClass {
+	padding: 10px;
+}
+/* \u{2000} */
+.firstClass .secondClass {
+	padding: 10px;
+}
+/* \u{2001} */
+.firstClass .secondClass {
+	flex: 1 1 100px;
+}
+/* \u{2002} */
+.firstClass.secondClass {
+	padding: 10px;
+}
+/* \u{2003} */
+.firstClass .secondClass  {
+	padding: 10px;
+}
+/* \u{2004} */
+.firstClass .secondClass {
+	padding: 10px;
+}
+/* \u{2005} */
+.firstClass .secondClass {
+	padding: 10px;
+}
+/* \u{2006} */
+.firstClass .secondClass {
+	padding: 10px;
+}
+/* \u{2007} */
+.firstClass .secondClass {
+	padding: 10px;
+}
+/* \u{2008} */
+@view-transition {
+  navigation: auto;
+}
+/* \u{2009} */
+@layer state {
+	body {
+		padding: 10px;
+	}
+}
+/* \u{200a} */
+@layer state {
+	body {
+		padding: 10px;
+	}
+}
+/* \u{200b} */
+@keyframes slidein {
+	from​{
+		transform: translateX(0%);
+	}
+
+	to {
+		transform: translateX(100%);
+	}
+}
+/* \u{202f} */
+@font-face {
+  font-family: "Trickster";
+  src:
+    local("Trickster"),
+    url("trickster-COLRv1.otf") format("opentype") tech(color-COLRv1),
+    url("trickster-outline.otf") format("opentype"),
+    url("trickster-outline.woff") format("woff");
+}
+/* \u{205f} */
+@keyframes slidein {
+	from {
+		transform: translateX(0%);
+	}
+
+	to {
+		transform: translateX(100%);
+	}
+}
+/* \u{3000} */
+@container　(width < 15rem) {
+	color: blue;
+}

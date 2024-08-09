@@ -1,13 +1,7 @@
 use crate::prelude::*;
 use biome_formatter::CstFormatContext;
-use biome_js_syntax::{
-    AnyTsType, JsSyntaxKind, JsSyntaxNode, TsIntersectionTypeElementList, TsUnionTypeVariantList,
-};
+use biome_js_syntax::AnyTsType;
 use biome_rowan::AstSeparatedList;
-
-use crate::parentheses::{
-    is_in_many_type_union_or_intersection_list, operator_type_or_higher_needs_parens,
-};
 
 /// Utility function that checks if the current type is object like type
 /// ```ts
@@ -101,36 +95,5 @@ pub(crate) fn should_hug_type(ty: &AnyTsType, f: &Formatter<JsFormatContext>) ->
             || successful.count() == 1
     } else {
         false
-    }
-}
-
-pub(crate) fn union_or_intersection_type_needs_parentheses(
-    node: &JsSyntaxNode,
-    parent: &JsSyntaxNode,
-    types: &TsIntersectionOrUnionTypeList,
-) -> bool {
-    debug_assert!(matches!(
-        node.kind(),
-        JsSyntaxKind::TS_INTERSECTION_TYPE | JsSyntaxKind::TS_UNION_TYPE
-    ));
-
-    if is_in_many_type_union_or_intersection_list(node, parent) {
-        types.len() > 1
-    } else {
-        operator_type_or_higher_needs_parens(node, parent)
-    }
-}
-
-pub(crate) enum TsIntersectionOrUnionTypeList {
-    TsIntersectionTypeElementList(TsIntersectionTypeElementList),
-    TsUnionTypeVariantList(TsUnionTypeVariantList),
-}
-
-impl TsIntersectionOrUnionTypeList {
-    fn len(&self) -> usize {
-        match self {
-            TsIntersectionOrUnionTypeList::TsIntersectionTypeElementList(list) => list.len(),
-            TsIntersectionOrUnionTypeList::TsUnionTypeVariantList(list) => list.len(),
-        }
     }
 }

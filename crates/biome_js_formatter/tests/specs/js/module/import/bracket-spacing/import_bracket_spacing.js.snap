@@ -71,7 +71,7 @@ import { named } from "foo" assert { type: "json" };
 
 import "very_long_import_very_long_import_very" assert {
 	// something good is here
-	"type": /****/ "json",
+	type: /****/ "json",
 };
 
 // Single named alias import
@@ -119,7 +119,7 @@ import {named} from "foo" assert {type: "json"};
 
 import "very_long_import_very_long_import_very" assert {
 	// something good is here
-	"type": /****/ "json",
+	type: /****/ "json",
 };
 
 // Single named alias import

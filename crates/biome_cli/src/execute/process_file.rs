@@ -1,3 +1,4 @@
+mod assists;
 mod check;
 mod format;
 mod lint;
@@ -18,7 +19,6 @@ use search::search;
 use std::marker::PhantomData;
 use std::ops::Deref;
 use std::path::Path;
-
 #[derive(Debug)]
 pub(crate) enum FileStatus {
     /// File changed and it was a success
@@ -72,6 +72,7 @@ impl Message {
 pub(crate) enum DiffKind {
     Format,
     OrganizeImports,
+    Assists,
 }
 
 impl<D> From<D> for Message
@@ -150,38 +151,7 @@ pub(crate) fn process_file(ctx: &TraversalOptions, path: &Path) -> FileResult {
 
         // then we pick the specific features for this file
         let unsupported_reason = match ctx.execution.traversal_mode() {
-            TraversalMode::Check { .. } => file_features
-                .support_kind_for(&FeatureKind::Lint)
-                .and_then(|support_kind| {
-                    if support_kind.is_not_enabled() {
-                        Some(support_kind)
-                    } else {
-                        None
-                    }
-                })
-                .and(
-                    file_features
-                        .support_kind_for(&FeatureKind::Format)
-                        .and_then(|support_kind| {
-                            if support_kind.is_not_enabled() {
-                                Some(support_kind)
-                            } else {
-                                None
-                            }
-                        }),
-                )
-                .and(
-                    file_features
-                        .support_kind_for(&FeatureKind::OrganizeImports)
-                        .and_then(|support_kind| {
-                            if support_kind.is_not_enabled() {
-                                Some(support_kind)
-                            } else {
-                                None
-                            }
-                        }),
-                ),
-            TraversalMode::CI { .. } => file_features
+            TraversalMode::Check { .. } | TraversalMode::CI { .. } => file_features
                 .support_kind_for(&FeatureKind::Lint)
                 .and_then(|support_kind| {
                     if support_kind.is_not_enabled() {

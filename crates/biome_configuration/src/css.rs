@@ -1,6 +1,5 @@
-use crate::PlainIndentStyle;
 use biome_deserialize_macros::{Deserializable, Merge, Partial};
-use biome_formatter::{IndentWidth, LineEnding, LineWidth, QuoteStyle};
+use biome_formatter::{IndentStyle, IndentWidth, LineEnding, LineWidth, QuoteStyle};
 use bpaf::Bpaf;
 use serde::{Deserialize, Serialize};
 
@@ -21,6 +20,10 @@ pub struct CssConfiguration {
     /// CSS linter options
     #[partial(type, bpaf(external(partial_css_linter), optional))]
     pub linter: CssLinter,
+
+    /// CSS assists options
+    #[partial(type, bpaf(external(partial_css_assists), optional))]
+    pub assists: CssAssists,
 }
 
 /// Options that changes how the CSS parser behaves
@@ -50,7 +53,7 @@ pub struct CssFormatter {
 
     /// The indent style applied to CSS (and its super languages) files.
     #[partial(bpaf(long("css-formatter-indent-style"), argument("tab|space"), optional))]
-    pub indent_style: Option<PlainIndentStyle>,
+    pub indent_style: Option<IndentStyle>,
 
     /// The size of the indentation applied to CSS (and its super languages) files. Default to 2.
     #[partial(bpaf(long("css-formatter-indent-width"), argument("NUMBER"), optional))]
@@ -88,7 +91,7 @@ impl PartialCssFormatter {
 #[partial(cfg_attr(feature = "schema", derive(schemars::JsonSchema)))]
 #[partial(serde(rename_all = "camelCase", default, deny_unknown_fields))]
 pub struct CssLinter {
-    /// Control the linter for CSS (and its super languages) files.
+    /// Control the linter for CSS files.
     #[partial(bpaf(long("css-linter-enabled"), argument("true|false"), optional))]
     pub enabled: bool,
 }
@@ -99,6 +102,17 @@ impl PartialCssLinter {
             enabled: self.enabled.unwrap_or_default(),
         }
     }
+}
+
+/// Options that changes how the CSS assists behaves
+#[derive(Clone, Debug, Deserialize, Eq, Partial, PartialEq, Default, Serialize)]
+#[partial(derive(Bpaf, Clone, Deserializable, Eq, Merge, PartialEq))]
+#[partial(cfg_attr(feature = "schema", derive(schemars::JsonSchema)))]
+#[partial(serde(rename_all = "camelCase", default, deny_unknown_fields))]
+pub struct CssAssists {
+    /// Control the assists for CSS files.
+    #[partial(bpaf(long("css-assists-enabled"), argument("true|false"), optional))]
+    pub enabled: bool,
 }
 
 #[test]

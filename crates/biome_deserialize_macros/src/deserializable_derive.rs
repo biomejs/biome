@@ -488,7 +488,7 @@ fn generate_deserializable_struct(
                 impl #generics biome_deserialize::DeserializationVisitor for Visitor #generics #trait_bounds {
                     type Output = #ident #generics;
 
-                    const EXPECTED_TYPE: biome_deserialize::VisitableType = biome_deserialize::VisitableType::MAP;
+                    const EXPECTED_TYPE: biome_deserialize::DeserializableTypes = biome_deserialize::DeserializableTypes::MAP;
 
                     fn visit_map(
                         self,

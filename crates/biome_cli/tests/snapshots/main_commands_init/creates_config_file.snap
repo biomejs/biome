@@ -6,6 +6,20 @@ expression: content
 
 ```json
 {
+  "$schema": "https://biomejs.dev/schemas/0.0.0/schema.json",
+  "vcs": {
+    "enabled": false,
+    "clientKind": "git",
+    "useIgnoreFile": false
+  },
+  "files": {
+    "ignoreUnknown": false,
+    "ignore": []
+  },
+  "formatter": {
+    "enabled": true,
+    "indentStyle": "tab"
+  },
   "organizeImports": {
     "enabled": true
   },
@@ -13,6 +27,11 @@ expression: content
     "enabled": true,
     "rules": {
       "recommended": true
+    }
+  },
+  "javascript": {
+    "formatter": {
+      "quoteStyle": "double"
     }
   }
 }

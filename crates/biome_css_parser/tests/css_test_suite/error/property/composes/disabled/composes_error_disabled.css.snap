@@ -1,5 +1,6 @@
 ---
 source: crates/biome_css_parser/tests/spec_test.rs
+assertion_line: 169
 expression: snapshot
 ---
 ## Input
@@ -266,7 +267,7 @@ composes_error_disabled.css:2:2 parse ━━━━━━━━━━━━━━
     3 │ }
     4 │ 
   
-  i You can enable `composes` declaration parsing by setting the `css_modules` option to `true` in your configuration file.
+  i You can enable `composes` declaration parsing by setting the `css.parser.cssModules` option to `true` in your configuration file.
   
 composes_error_disabled.css:6:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -278,7 +279,7 @@ composes_error_disabled.css:6:2 parse ━━━━━━━━━━━━━━
     7 │ }
     8 │ 
   
-  i You can enable `composes` declaration parsing by setting the `css_modules` option to `true` in your configuration file.
+  i You can enable `composes` declaration parsing by setting the `css.parser.cssModules` option to `true` in your configuration file.
   
 composes_error_disabled.css:10:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -290,6 +291,6 @@ composes_error_disabled.css:10:2 parse ━━━━━━━━━━━━━�
     11 │ }
     12 │ 
   
-  i You can enable `composes` declaration parsing by setting the `css_modules` option to `true` in your configuration file.
+  i You can enable `composes` declaration parsing by setting the `css.parser.cssModules` option to `true` in your configuration file.
   
 ```

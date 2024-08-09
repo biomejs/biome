@@ -2,7 +2,6 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: js/do/call-arguments.js
 ---
-
 # Input
 
 ```js
@@ -408,5 +407,3 @@ call-arguments.js:40:3 parse ━━━━━━━━━━━━━━━━━
   
 
 ```
-
-

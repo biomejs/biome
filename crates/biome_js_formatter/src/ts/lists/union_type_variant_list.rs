@@ -1,4 +1,3 @@
-use crate::prelude::*;
 use crate::ts::bogus::bogus_type::FormatTsBogusType;
 use crate::ts::module::import_type::FormatTsImportType;
 use crate::ts::types::any_type::FormatTsAnyType;
@@ -35,6 +34,7 @@ use crate::ts::types::union_type::FormatTsUnionType;
 use crate::ts::types::unknown_type::FormatTsUnknownType;
 use crate::ts::types::void_type::FormatTsVoidType;
 use crate::JsCommentStyle;
+use crate::{js::auxiliary::metavariable::FormatJsMetavariable, prelude::*};
 use biome_formatter::{comments::CommentStyle, write, FormatRuleWithOptions};
 use biome_js_syntax::{AnyTsType, JsLanguage, TsUnionType, TsUnionTypeVariantList};
 use biome_rowan::{AstSeparatedElement, AstSeparatedList};
@@ -134,6 +134,7 @@ impl Format<JsFormatContext> for FormatTypeVariant<'_> {
                     AnyTsType::TsUnknownType(ty) => FormatTsUnknownType.fmt_node(ty, f),
                     AnyTsType::TsVoidType(ty) => FormatTsVoidType.fmt_node(ty, f),
                     AnyTsType::TsBogusType(ty) => FormatTsBogusType.fmt(ty, f),
+                    AnyTsType::JsMetavariable(ty) => FormatJsMetavariable.fmt_node(ty, f),
                 }
             }
         });

@@ -152,7 +152,7 @@ fn list_initializer_references(
         .all_references(model)
         .filter_map(|reference| {
             // We only want references within this block / for body
-            if reference.range().start() < body_range.start() {
+            if reference.range_start() < body_range.start() {
                 return None;
             }
 

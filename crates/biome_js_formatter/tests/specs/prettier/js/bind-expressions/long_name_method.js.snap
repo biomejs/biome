@@ -2,7 +2,6 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: js/bind-expressions/long_name_method.js
 ---
-
 # Input
 
 ```js
@@ -73,5 +72,3 @@ long_name_method.js:3:54 parse ━━━━━━━━━━━━━━━━�
   
 
 ```
-
-

@@ -1,0 +1,20 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidGlobal.d.ts
+---
+# Input
+```ts
+interface camelCase {}
+```
+
+# Diagnostics
+```
+invalidGlobal.d.ts:1:11 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This interface name should be in PascalCase.
+  
+  > 1 │ interface camelCase {}
+      │           ^^^^^^^^^
+  
+
+```

@@ -1,10 +1,8 @@
 use crate::prelude::*;
-use crate::utils::{needs_binary_like_parentheses, AnyJsBinaryLikeExpression};
 
-use crate::parentheses::NeedsParentheses;
-
-use biome_js_syntax::{AnyJsStatement, JsForStatement, JsInExpression, JsSyntaxNode};
-use biome_rowan::AstNode;
+use biome_js_syntax::binary_like_expression::AnyJsBinaryLikeExpression;
+use biome_js_syntax::parentheses::NeedsParentheses;
+use biome_js_syntax::JsInExpression;
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatJsInExpression;
@@ -17,43 +15,6 @@ impl FormatNodeRule<JsInExpression> for FormatJsInExpression {
     fn needs_parentheses(&self, item: &JsInExpression) -> bool {
         item.needs_parentheses()
     }
-}
-
-impl NeedsParentheses for JsInExpression {
-    fn needs_parentheses_with_parent(&self, parent: &JsSyntaxNode) -> bool {
-        if is_in_for_initializer(self) {
-            return true;
-        }
-
-        needs_binary_like_parentheses(&AnyJsBinaryLikeExpression::from(self.clone()), parent)
-    }
-}
-
-/// Add parentheses if the `in` is inside of a `for` initializer (see tests).
-fn is_in_for_initializer(expression: &JsInExpression) -> bool {
-    let mut current = expression.clone().into_syntax();
-
-    while let Some(parent) = current.parent() {
-        current = match JsForStatement::try_cast(parent) {
-            Ok(for_statement) => {
-                return for_statement
-                    .initializer()
-                    .map(AstNode::into_syntax)
-                    .as_ref()
-                    == Some(&current);
-            }
-            Err(parent) => {
-                if AnyJsStatement::can_cast(parent.kind()) {
-                    // Don't cross statement boundaries
-                    break;
-                }
-
-                parent
-            }
-        }
-    }
-
-    false
 }
 
 #[cfg(test)]

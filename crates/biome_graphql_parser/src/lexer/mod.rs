@@ -302,7 +302,7 @@ impl<'src> GraphqlLexer<'src> {
             b"ENUM_VALUE" => ENUM_VALUE_KW,
             b"INPUT_OBJECT" => INPUT_OBJECT_KW,
             b"INPUT_FIELD_DEFINITION" => INPUT_FIELD_DEFINITION_KW,
-            _ => GRAPHQL_NAME,
+            _ => T![ident],
         }
     }
 

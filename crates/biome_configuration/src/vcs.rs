@@ -13,14 +13,14 @@ const GIT_IGNORE_FILE_NAME: &str = ".gitignore";
 #[partial(cfg_attr(feature = "schema", derive(schemars::JsonSchema)))]
 #[partial(serde(deny_unknown_fields, rename_all = "camelCase"))]
 pub struct VcsConfiguration {
+    /// Whether Biome should integrate itself with the VCS client
+    #[partial(bpaf(long("vcs-enabled"), argument("true|false")))]
+    pub enabled: bool,
+
     /// The kind of client.
     #[partial(bpaf(long("vcs-client-kind"), argument("git"), optional))]
     #[partial(deserializable(bail_on_error))]
     pub client_kind: VcsClientKind,
-
-    /// Whether Biome should integrate itself with the VCS client
-    #[partial(bpaf(long("vcs-enabled"), argument("true|false")))]
-    pub enabled: bool,
 
     /// Whether Biome should use the VCS ignore file. When [true], Biome will ignore the files
     /// specified in the ignore file.

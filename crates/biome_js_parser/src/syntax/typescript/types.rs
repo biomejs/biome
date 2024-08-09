@@ -15,6 +15,7 @@ use crate::syntax::js_parse_error::{
     expected_parameters, expected_property_or_signature, modifier_already_seen,
     modifier_must_precede_modifier,
 };
+use crate::syntax::metavariable::parse_metavariable;
 use crate::syntax::object::{
     is_at_object_member_name, is_nth_at_type_member_name, parse_object_member_name,
 };
@@ -883,6 +884,7 @@ fn parse_ts_non_array_type(p: &mut JsParser, context: TypeContext) -> ParsedSynt
             }
         }
         T![import] => parse_ts_import_type(p, context),
+        t if t.is_metavariable() => parse_metavariable(p),
         _ => {
             if !p.nth_at(1, T![.]) {
                 let mapping = match p.cur() {
