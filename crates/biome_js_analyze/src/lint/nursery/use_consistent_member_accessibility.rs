@@ -201,7 +201,7 @@ declare_lint_rule! {
     /// Default: `noPublic`.
     ///
     pub UseConsistentMemberAccessibility {
-        version: "1.8.0",
+        version: "next",
         name: "useConsistentMemberAccessibility",
         language: "ts",
         sources: &[RuleSource::Eslint("explicit-member-accessibility")],
