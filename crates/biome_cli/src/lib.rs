@@ -6,7 +6,7 @@
 //! to parse commands and arguments, redirect the execution of the commands and
 //! execute the traversal of directory and files, based on the command that were passed.
 
-use biome_console::{ColorMode, Console};
+use biome_console::{markup, ColorMode, Console, ConsoleExt};
 use biome_fs::OsFileSystem;
 use biome_service::{App, DynRef, Workspace, WorkspaceRef};
 use commands::search::SearchCommandPayload;
@@ -35,9 +35,6 @@ pub use execute::{execute_mode, Execution, TraversalMode, VcsTargeted};
 pub use panic::setup_panic_handler;
 pub use reporter::{DiagnosticsPayload, Reporter, ReporterVisitor, TraversalSummary};
 pub use service::{open_transport, SocketTransport};
-
-#[cfg(debug_assertions)]
-pub use crate::commands::daemon::biome_log_dir;
 
 pub(crate) const VERSION: &str = match option_env!("BIOME_VERSION") {
     Some(version) => version,
@@ -70,6 +67,12 @@ impl<'app> CliSession<'app> {
         if has_metrics {
             crate::metrics::init_metrics();
         }
+        // TODO: remove in Biome v2
+        if env::var_os("BIOME_LOG_DIR").is_some() {
+            self.app.console.log(markup! {
+                <Warn>"The use of BIOME_LOG_DIR is deprecated. Use BIOME_LOG_PATH instead."</Warn>
+            });
+        }
 
         let result = match command {
             BiomeCommand::Version(_) => commands::version::full_version(self),
@@ -77,7 +80,11 @@ impl<'app> CliSession<'app> {
                 commands::rage::rage(self, daemon_logs, formatter, linter)
             }
             BiomeCommand::Clean => commands::clean::clean(self),
-            BiomeCommand::Start(config_path) => commands::daemon::start(self, config_path),
+            BiomeCommand::Start {
+                config_path,
+                log_path,
+                log_prefix_name,
+            } => commands::daemon::start(self, config_path, Some(log_path), Some(log_prefix_name)),
             BiomeCommand::Stop => commands::daemon::stop(self),
             BiomeCommand::Check {
                 apply,
@@ -225,7 +232,12 @@ impl<'app> CliSession<'app> {
             ),
             BiomeCommand::Explain { doc } => commands::explain::explain(self, doc),
             BiomeCommand::Init(emit_jsonc) => commands::init::init(self, emit_jsonc),
-            BiomeCommand::LspProxy(config_path, _) => commands::daemon::lsp_proxy(config_path),
+            BiomeCommand::LspProxy {
+                config_path,
+                log_path,
+                log_prefix_name,
+                ..
+            } => commands::daemon::lsp_proxy(config_path, Some(log_path), Some(log_prefix_name)),
             BiomeCommand::Migrate {
                 cli_options,
                 write,
@@ -253,7 +265,14 @@ impl<'app> CliSession<'app> {
             BiomeCommand::RunServer {
                 stop_on_disconnect,
                 config_path,
-            } => commands::daemon::run_server(stop_on_disconnect, config_path),
+                log_path,
+                log_prefix_name,
+            } => commands::daemon::run_server(
+                stop_on_disconnect,
+                config_path,
+                Some(log_path),
+                Some(log_prefix_name),
+            ),
             BiomeCommand::PrintSocket => commands::daemon::print_socket(),
         };
 

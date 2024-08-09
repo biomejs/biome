@@ -58,21 +58,41 @@ pub enum BiomeCommand {
         /// Prints the Biome daemon server logs
         #[bpaf(long("daemon-logs"), switch)]
         bool,
-        /// Prints the Biome configuration that the applied formatter configuration
+        /// Prints the formatter options applied
         #[bpaf(long("formatter"), switch)]
         bool,
-        /// Prints the Biome configuration that the applied linter configuration
+        /// Prints the linter options applied
         #[bpaf(long("linter"), switch)]
         bool,
     ),
     /// Start the Biome daemon server process
     #[bpaf(command)]
-    Start(
+    Start {
+        /// Allows to change the prefix applied to the file name of the logs.
+        #[bpaf(
+            env("BIOME_LOG_PREFIX_NAME"),
+            long("log-prefix-name"),
+            argument("STRING"),
+            hide_usage,
+            fallback(String::from("server.log")),
+            display_fallback
+        )]
+        log_prefix_name: String,
+
+        /// Allows to change the folder where logs are stored.
+        #[bpaf(
+            env("BIOME_LOG_PATH"),
+            long("log-path"),
+            argument("PATH"),
+            hide_usage,
+            fallback(biome_fs::ensure_cache_dir().join("biome-logs")),
+        )]
+        log_path: PathBuf,
         /// Allows to set a custom file path to the configuration file,
         /// or a custom directory path to find `biome.json` or `biome.jsonc`
         #[bpaf(env("BIOME_CONFIG_PATH"), long("config-path"), argument("PATH"))]
-        Option<PathBuf>,
-    ),
+        config_path: Option<PathBuf>,
+    },
 
     /// Stop the Biome daemon server process
     #[bpaf(command)]
@@ -350,15 +370,34 @@ pub enum BiomeCommand {
     ),
     /// Acts as a server for the Language Server Protocol over stdin/stdout
     #[bpaf(command("lsp-proxy"))]
-    LspProxy(
+    LspProxy {
+        /// Allows to change the prefix applied to the file name of the logs.
+        #[bpaf(
+            env("BIOME_LOG_PREFIX_NAME"),
+            long("log-prefix-name"),
+            argument("STRING"),
+            hide_usage,
+            fallback(String::from("server.log")),
+            display_fallback
+        )]
+        log_prefix_name: String,
+        /// Allows to change the folder where logs are stored.
+        #[bpaf(
+            env("BIOME_LOG_PATH"),
+            long("log-path"),
+            argument("PATH"),
+            hide_usage,
+            fallback(biome_fs::ensure_cache_dir().join("biome-logs")),
+        )]
+        log_path: PathBuf,
         /// Allows to set a custom file path to the configuration file,
         /// or a custom directory path to find `biome.json` or `biome.jsonc`
         #[bpaf(env("BIOME_CONFIG_PATH"), long("config-path"), argument("PATH"))]
-        Option<PathBuf>,
+        config_path: Option<PathBuf>,
         /// Bogus argument to make the command work with vscode-languageclient
         #[bpaf(long("stdio"), hide, hide_usage, switch)]
-        bool,
-    ),
+        stdio: bool,
+    },
     /// It updates the configuration when there are breaking changes
     #[bpaf(command)]
     Migrate {
@@ -435,6 +474,26 @@ pub enum BiomeCommand {
 
     #[bpaf(command("__run_server"), hide)]
     RunServer {
+        /// Allows to change the prefix applied to the file name of the logs.
+        #[bpaf(
+            env("BIOME_LOG_PREFIX_NAME"),
+            long("log-prefix-name"),
+            argument("STRING"),
+            hide_usage,
+            fallback(String::from("server.log")),
+            display_fallback
+        )]
+        log_prefix_name: String,
+        /// Allows to change the folder where logs are stored.
+        #[bpaf(
+            env("BIOME_LOG_PATH"),
+            long("log-path"),
+            argument("PATH"),
+            hide_usage,
+            fallback(biome_fs::ensure_cache_dir().join("biome-logs")),
+        )]
+        log_path: PathBuf,
+
         #[bpaf(long("stop-on-disconnect"), hide_usage)]
         stop_on_disconnect: bool,
         /// Allows to set a custom file path to the configuration file,
@@ -480,8 +539,8 @@ impl BiomeCommand {
             | BiomeCommand::Format { cli_options, .. }
             | BiomeCommand::Migrate { cli_options, .. }
             | BiomeCommand::Search { cli_options, .. } => Some(cli_options),
-            BiomeCommand::LspProxy(_, _)
-            | BiomeCommand::Start(_)
+            BiomeCommand::LspProxy { .. }
+            | BiomeCommand::Start { .. }
             | BiomeCommand::Stop
             | BiomeCommand::Init(_)
             | BiomeCommand::Explain { .. }

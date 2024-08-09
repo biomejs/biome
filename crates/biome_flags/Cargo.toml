@@ -15,6 +15,7 @@ version              = "0.0.0"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+biome_console = { workspace = true }
 
 [lints]
 workspace = true

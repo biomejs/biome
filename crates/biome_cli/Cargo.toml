@@ -25,6 +25,7 @@ biome_console            = { workspace = true }
 biome_deserialize        = { workspace = true }
 biome_deserialize_macros = { workspace = true }
 biome_diagnostics        = { workspace = true }
+biome_flags              = { workspace = true }
 biome_formatter          = { workspace = true }
 biome_fs                 = { workspace = true }
 biome_js_analyze         = { workspace = true }
