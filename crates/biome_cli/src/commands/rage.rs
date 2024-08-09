@@ -362,10 +362,7 @@ struct BiomeServerLog;
 impl Display for BiomeServerLog {
     fn fmt(&self, fmt: &mut Formatter) -> io::Result<()> {
         if let Ok(Some(log)) = read_most_recent_log_file(
-            biome_env()
-                .biome_log_dir
-                .value()
-                .map(|value| PathBuf::from(value)),
+            biome_env().biome_log_dir.value().map(PathBuf::from),
             biome_env()
                 .biome_log_prefix
                 .value()

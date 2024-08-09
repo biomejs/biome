@@ -9,8 +9,7 @@ pub fn clean(_cli_session: CliSession) -> Result<(), CliDiagnostic> {
     let logs_dir = biome_env()
         .biome_log_dir
         .value()
-        .map(PathBuf::from)
-        .unwrap_or(default_biome_log_dir());
+        .map_or(default_biome_log_dir(), PathBuf::from);
     remove_dir_all(logs_dir.clone()).and_then(|_| create_dir(logs_dir))?;
     Ok(())
 }

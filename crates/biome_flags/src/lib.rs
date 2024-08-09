@@ -56,7 +56,7 @@ impl BiomeEnvVariable {
 
     /// It attempts to read the value of the variable
     pub fn value(&self) -> Option<String> {
-        env::var(&self.name).ok()
+        env::var(self.name).ok()
     }
 
     /// It returns the description of the variable
@@ -71,7 +71,7 @@ impl BiomeEnvVariable {
 }
 
 pub fn biome_env() -> &'static BiomeEnv {
-    BIOME_ENV.get_or_init(|| BiomeEnv::new())
+    BIOME_ENV.get_or_init(BiomeEnv::new)
 }
 
 impl Display for BiomeEnv {
