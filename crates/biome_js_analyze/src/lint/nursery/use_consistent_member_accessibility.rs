@@ -206,7 +206,6 @@ declare_lint_rule! {
         language: "ts",
         sources: &[RuleSource::Eslint("explicit-member-accessibility")],
         recommended: false,
-        source_kind: RuleSourceKind::Inspired,
     }
 }
 
