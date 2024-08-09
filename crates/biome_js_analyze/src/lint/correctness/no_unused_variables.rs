@@ -6,9 +6,7 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_js_semantic::ReferencesExtensions;
-use biome_js_syntax::binding_ext::{
-    AnyJsBindingDeclaration, AnyJsIdentifierBinding, AnyJsParameterParentFunction,
-};
+use biome_js_syntax::binding_ext::{AnyJsBindingDeclaration, AnyJsIdentifierBinding};
 use biome_js_syntax::declaration_ext::is_in_ambient_context;
 use biome_js_syntax::{
     AnyJsExpression, JsClassExpression, JsFileSource, JsForStatement, JsFunctionExpression,
@@ -113,31 +111,6 @@ pub enum SuggestedFix {
     PrefixUnderscore,
 }
 
-fn is_function_that_is_ok_parameter_not_be_used(
-    parent_function: &Option<AnyJsParameterParentFunction>,
-) -> bool {
-    matches!(
-        parent_function,
-        Some(
-            // bindings in signatures are ok to not be used
-            AnyJsParameterParentFunction::TsMethodSignatureClassMember(_)
-            | AnyJsParameterParentFunction::TsCallSignatureTypeMember(_)
-            | AnyJsParameterParentFunction::TsConstructSignatureTypeMember(_)
-            | AnyJsParameterParentFunction::TsConstructorSignatureClassMember(_)
-            | AnyJsParameterParentFunction::TsMethodSignatureTypeMember(_)
-            | AnyJsParameterParentFunction::TsSetterSignatureClassMember(_)
-            | AnyJsParameterParentFunction::TsSetterSignatureTypeMember(_)
-            | AnyJsParameterParentFunction::TsIndexSignatureClassMember(_)
-            // bindings in function types are ok to not be used
-            | AnyJsParameterParentFunction::TsFunctionType(_)
-            | AnyJsParameterParentFunction::TsConstructorType(_)
-            // binding in declare are ok to not be used
-            | AnyJsParameterParentFunction::TsDeclareFunctionDeclaration(_)
-            | AnyJsParameterParentFunction::TsDeclareFunctionExportDefaultDeclaration(_)
-        )
-    )
-}
-
 fn suggestion_for_binding(binding: &AnyJsIdentifierBinding) -> Option<SuggestedFix> {
     if binding.is_under_object_pattern_binding()? {
         Some(SuggestedFix::NoSuggestion)
@@ -176,27 +149,12 @@ fn suggested_fix_if_unused(binding: &AnyJsIdentifierBinding) -> Option<Suggested
         | AnyJsBindingDeclaration::JsFunctionExpression(_)
         | AnyJsBindingDeclaration::TsIndexSignatureParameter(_)
         | AnyJsBindingDeclaration::TsMappedType(_)
-        | AnyJsBindingDeclaration::TsEnumMember(_) => None,
-
-        // Some parameters are ok to not be used
-        AnyJsBindingDeclaration::JsArrowFunctionExpression(_) => {
-            suggestion_for_binding(binding)
-        }
-        AnyJsBindingDeclaration::TsPropertyParameter(_) => None,
-        AnyJsBindingDeclaration::JsFormalParameter(parameter) => {
-            if is_function_that_is_ok_parameter_not_be_used(&parameter.parent_function()) {
-                None
-            } else {
-                suggestion_for_binding(binding)
-            }
-        }
-        AnyJsBindingDeclaration::JsRestParameter(parameter) => {
-            if is_function_that_is_ok_parameter_not_be_used(&parameter.parent_function()) {
-                None
-            } else {
-                suggestion_for_binding(binding)
-            }
-        }
+        | AnyJsBindingDeclaration::TsEnumMember(_)
+        // Unused parameters are reported by `noUnusedFunctionParameters`
+        | AnyJsBindingDeclaration::JsArrowFunctionExpression(_)
+        | AnyJsBindingDeclaration::TsPropertyParameter(_)
+        | AnyJsBindingDeclaration::JsFormalParameter(_)
+        | AnyJsBindingDeclaration::JsRestParameter(_)  => None,
         // declarations need to be check if they are under `declare`
         AnyJsBindingDeclaration::JsArrayBindingPatternElement(_)
         | AnyJsBindingDeclaration::JsArrayBindingPatternRestElement(_)
@@ -305,6 +263,7 @@ impl Rule for NoUnusedVariables {
         }
 
         // Ignore expressions
+        // e.e. `f` is "unused" in `export const g = function f(){}`.
         if binding.parent::<JsFunctionExpression>().is_some()
             || binding.parent::<JsClassExpression>().is_some()
         {
