@@ -160,9 +160,28 @@ impl Rule for NoUselessFragments {
 
                 let child_list = fragment.children();
 
+                let mut self_closing_or_element_count = 0;
+
+                for child in child_list.iter() {
+                    match child.syntax().kind() {
+                        JsSyntaxKind::JSX_SELF_CLOSING_ELEMENT
+                        | JsSyntaxKind::JSX_ELEMENT
+                        | JsSyntaxKind::JSX_EXPRESSION_CHILD
+                        | JsSyntaxKind::JSX_TEXT => {
+                            if child.syntax().kind() == JsSyntaxKind::JSX_TEXT
+                                && child_list.len() > 1
+                            {
+                                continue;
+                            }
+                            self_closing_or_element_count += 1;
+                        }
+                        _ => {}
+                    }
+                }
+
                 if !parents_where_fragments_must_be_preserved {
                     match child_list.first() {
-                        Some(first) if child_list.len() == 1 => {
+                        Some(first) if self_closing_or_element_count == 1 => {
                             if JsxText::can_cast(first.syntax().kind()) && in_jsx_attr_expr {
                                 return None;
                             }
