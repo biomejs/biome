@@ -304,7 +304,9 @@ impl Rule for UseConsistentMemberAccessibility {
 }
 
 declare_node_union! {
-    pub AnyMember = JsConstructorClassMember | JsPropertyClassMember | JsMethodClassMember | TsPropertyParameter | JsGetterClassMember | JsSetterClassMember
+    pub AnyJsMemberWithAccessibility = JsConstructorClassMember | JsPropertyClassMember | JsMethodClassMember | TsPropertyParameter | JsGetterClassMember | JsSetterClassMember
+    | TsConstructorSignatureClassMember | TsMethodSignatureClassMember | TsPropertySignatureClassMember | TsGetterSignatureClassMember | TsSetterSignatureClassMember
+	| TsPropertyParameter
 }
 
 impl AnyMember {
