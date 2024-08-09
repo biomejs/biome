@@ -1112,11 +1112,7 @@ fn parse_ts_mapped_type_optional_modifier_clause(p: &mut JsParser) -> ParsedSynt
 }
 
 // test ts ts_import_type
-// type A = typeof import("test");
-// type B = import("test");
-// type C = typeof import("test").a.b.c.d.e.f;
-// type D = import("test")<string>;
-// type E = import("test").C<string>;
+// type F = typeof import("test", { with: { 'resolution-mode': 'import' } });
 fn parse_ts_import_type(p: &mut JsParser, context: TypeContext) -> ParsedSyntax {
     if !p.at(T![typeof]) && !p.at(T![import]) {
         return Absent;
@@ -1127,6 +1123,10 @@ fn parse_ts_import_type(p: &mut JsParser, context: TypeContext) -> ParsedSyntax 
     p.expect(T![import]);
     p.expect(T!['(']);
     p.expect(JS_STRING_LITERAL);
+    if p.at(T![,]) {
+        p.bump(T![,]);
+        parse_ts_object_type(p, context).or_add_diagnostic(p, expected_identifier);
+    }
     p.expect(T![')']);
 
     if p.at(T![.]) {
@@ -1149,6 +1149,10 @@ fn parse_ts_import_type(p: &mut JsParser, context: TypeContext) -> ParsedSyntax 
 // 	a: string
 //  b: number
 // }
+// type E = {
+//  with: { 'resolution-mode': 'import' }
+// }
+//
 fn parse_ts_object_type(p: &mut JsParser, context: TypeContext) -> ParsedSyntax {
     if !p.at(T!['{']) {
         return Absent;
