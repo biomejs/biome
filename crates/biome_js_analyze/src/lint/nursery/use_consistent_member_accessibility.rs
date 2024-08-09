@@ -13,7 +13,7 @@ use serde::{Deserialize, Serialize};
 declare_lint_rule! {
     /// Require consistent accessibility modifiers on class properties and methods.
     ///
-    /// TypeScript allows placing explicit public, protected, and private accessibility modifiers in front of class members.
+    /// TypeScript allows placing explicit `public`, `protected`, and `private` accessibility modifiers in front of class members.
     /// The modifiers exist solely in the type system and just serve to describe who is allowed to access those members.
     /// Leaving off accessibility modifiers makes for less code to read and write. Members are public by default.
     ///
