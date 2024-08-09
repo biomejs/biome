@@ -125,7 +125,7 @@
 				"noBlankTarget": {
 					"description": "Disallow target=\"_blank\" attribute without rel=\"noreferrer\"",
 					"anyOf": [
-						{ "$ref": "#/definitions/RuleFixConfiguration" },
+						{ "$ref": "#/definitions/AllowDomainConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -317,6 +317,20 @@
 				"source": {
 					"anyOf": [{ "$ref": "#/definitions/Source" }, { "type": "null" }]
 				}
+			},
+			"additionalProperties": false
+		},
+		"AllowDomainConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithAllowDomainOptions" }
+			]
+		},
+		"AllowDomainOptions": {
+			"type": "object",
+			"required": ["allowDomains"],
+			"properties": {
+				"allowDomains": { "type": "array", "items": { "type": "string" } }
 			},
 			"additionalProperties": false
 		},
@@ -2520,6 +2534,25 @@
 		"RulePlainConfiguration": {
 			"type": "string",
 			"enum": ["warn", "error", "info", "off"]
+		},
+		"RuleWithAllowDomainOptions": {
+			"type": "object",
+			"required": ["level", "options"],
+			"properties": {
+				"fix": {
+					"description": "The kind of the code actions emitted by the rule",
+					"anyOf": [{ "$ref": "#/definitions/FixKind" }, { "type": "null" }]
+				},
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/AllowDomainOptions" }]
+				}
+			},
+			"additionalProperties": false
 		},
 		"RuleWithComplexityOptions": {
 			"type": "object",
