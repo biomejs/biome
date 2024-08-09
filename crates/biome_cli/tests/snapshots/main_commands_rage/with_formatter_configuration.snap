@@ -61,7 +61,7 @@ Platform:
   OS:                           **PLACEHOLDER**
 
 Environment:
-  BIOME_LOG_DIR:                **PLACEHOLDER**
+  BIOME_LOG_PATH:               **PLACEHOLDER**
   BIOME_LOG_PREFIX_NAME:        unset
   BIOME_CONFIG_PATH:            unset
   NO_COLOR:                     **PLACEHOLDER**
