@@ -83,15 +83,15 @@ class Application extends Environment {
 	private static environment: Environment;
 
 	static initialize(type: string): void {
-		if (!Application.environment) {
-			Application.environment = new Environment(type);
+		if (!this.environment) {
+			this.environment = new Environment(type);
 		}
 	}
 
 	static getEnvironment(): string {
-		if (!Application.environment) {
+		if (!this.environment) {
 			throw new Error("Application not initialized.");
 		}
-		return Application.environment.getType();
+		return this.environment.getType();
 	}
 }
