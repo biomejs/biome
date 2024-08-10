@@ -26,7 +26,7 @@ pub struct ExportedItem {
 }
 
 impl JsExport {
-    /// Returns the pair of id and entity of the exported object
+    /// Returns a list of the exported items.
     /// ## Example
     /// When a named export is made, it returns a list of them.
     /// ```js
