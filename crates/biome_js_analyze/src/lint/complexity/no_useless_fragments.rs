@@ -186,6 +186,9 @@ impl Rule for NoUselessFragments {
                             }
                             _ => {}
                         }
+                        if significant_children > 1 {
+                            break;
+                        }
                     }
 
                     match significant_children {
