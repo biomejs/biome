@@ -75,6 +75,54 @@ mod tests {
     }
 
     #[test]
+    fn test_nested_sub_selector() {
+        let parse = parse_css(
+            r#"a {
+        &:hover {
+            color: orange;
+        }
+}"#,
+            CssParserOptions::default(),
+        );
+
+        let root = parse.tree();
+        let model = super::semantic_model(&root);
+        let rule = model.rules().first().unwrap();
+
+        assert_eq!(rule.selectors.len(), 1);
+        assert_eq!(rule.declarations.len(), 0);
+        assert_eq!(rule.children.len(), 1);
+
+        let child = rule.children.first().unwrap();
+        assert_eq!(child.selectors.len(), 1);
+        assert_eq!(child.declarations.len(), 1);
+    }
+
+    #[test]
+    fn test_nested_at_media() {
+        let parse = parse_css(
+            r#"a {
+        @media {
+            color: orange;
+        }
+}"#,
+            CssParserOptions::default(),
+        );
+
+        let root = parse.tree();
+        let model = super::semantic_model(&root);
+        let rule = model.rules().first().unwrap();
+
+        assert_eq!(rule.selectors.len(), 1);
+        assert_eq!(rule.declarations.len(), 0);
+        assert_eq!(rule.children.len(), 1);
+
+        let child = rule.children.first().unwrap();
+        assert_eq!(child.selectors.len(), 0);
+        assert_eq!(child.declarations.len(), 1);
+    }
+
+    #[test]
     fn debug() {
         let parse = parse_css(
             r#"[a="b"i], [ a="b"i], [ a ="b"i], [ a = "b"i], [ a = "b" i], [ a = "b" i ] {}"#,
