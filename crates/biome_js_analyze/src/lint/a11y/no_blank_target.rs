@@ -4,6 +4,7 @@ use biome_analyze::{
     declare_lint_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic, RuleSource,
 };
 use biome_console::markup;
+use biome_deserialize_macros::Deserializable;
 use biome_js_factory::make::{
     jsx_attribute, jsx_attribute_initializer_clause, jsx_attribute_list, jsx_ident, jsx_name,
     jsx_string, jsx_string_literal, token,
@@ -13,8 +14,6 @@ use biome_js_syntax::{
     AnyJsxAttribute, AnyJsxAttributeName, AnyJsxAttributeValue, JsxAttribute, JsxAttributeList, T,
 };
 use biome_rowan::{AstNode, AstNodeList, BatchMutationExt, TriviaPieceKind};
-
-use biome_deserialize_macros::Deserializable;
 use serde::{Deserialize, Serialize};
 
 declare_lint_rule! {
@@ -87,8 +86,13 @@ impl Rule for NoBlankTarget {
                 let href_attribute = node.find_attribute_by_name("href")?;
                 if let Some(href_value) = href_attribute.as_static_value() {
                     let href = href_value.text();
-                    let options = ctx.options();
-                    if is_allowed_domain(href, &options.allow_domains) {
+                    let allow_domains: Vec<&str> = ctx
+                        .options()
+                        .allow_domains
+                        .iter()
+                        .map(AsRef::as_ref)
+                        .collect();
+                    if is_allowed_domain(href, &allow_domains) {
                         return None;
                     }
                 }
@@ -200,7 +204,7 @@ pub struct AllowDomainOptions {
     pub allow_domains: Vec<String>,
 }
 
-fn is_allowed_domain(href: &str, allow_domains: &[String]) -> bool {
+fn is_allowed_domain<'a>(href: &str, allow_domains: &[&'a str]) -> bool {
     allow_domains
         .iter()
         .any(|allowed| href.starts_with(allowed) || href.contains(allowed))
