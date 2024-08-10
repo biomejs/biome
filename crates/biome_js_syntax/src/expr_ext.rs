@@ -1167,6 +1167,48 @@ impl AnyJsExpression {
     /// - Static template literals: `foo`
     /// - Negative numeric literal: -1
     /// - Parenthesized expression: (1)
+    ///
+    /// ```
+    /// use biome_js_factory::make;
+    /// use biome_js_syntax::{
+    ///     AnyJsExpression, AnyJsLiteralExpression, AnyJsTemplateElement, JsSyntaxToken, JsUnaryOperator, T
+    /// };
+    ///
+    /// // Any literal: 1, true, null, etc
+    /// let number_literal = AnyJsExpression::AnyJsLiteralExpression(
+    ///     AnyJsLiteralExpression::from(make::js_number_literal_expression(make::js_number_literal("1")))
+    /// );
+    /// assert_eq!(number_literal.is_literal_expression(), true);
+    ///
+    /// // Static template literals: `foo`
+    /// let template = AnyJsExpression::JsTemplateExpression(
+    ///     make::js_template_expression(
+    ///         make::token(T!['`']),
+    ///         make::js_template_element_list(
+    ///             vec![
+    ///                 AnyJsTemplateElement::from(make::js_template_chunk_element(
+    ///                     make::js_template_chunk("foo"),
+    ///                 ))
+    ///             ]
+    ///         ),
+    ///         make::token(T!['`']),
+    ///     )
+    ///     .build()
+    /// );
+    /// assert_eq!(template.is_literal_expression(), true);
+    ///
+    /// // Negative numeric literal: -1
+    /// let negative_numeric_literal = AnyJsExpression::JsUnaryExpression(
+    ///     make::js_unary_expression(make::token(T![-]), number_literal.clone())
+    /// );
+    /// assert_eq!(negative_numeric_literal.is_literal_expression(), true);
+    ///
+    /// // Parenthesized expression: (1)
+    /// let parenthesized = AnyJsExpression::JsParenthesizedExpression(
+    ///     make::js_parenthesized_expression(make::token(T!['(']), number_literal, make::token(T![')']))
+    /// );
+    /// assert_eq!(parenthesized.is_literal_expression(), true);
+    /// ```
     pub fn is_literal_expression(&self) -> bool {
         match self {
             // Any literal: 1, true, null, etc
