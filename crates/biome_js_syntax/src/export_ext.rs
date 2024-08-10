@@ -17,13 +17,52 @@ declare_node_union! {
 
 #[derive(Clone, Debug)]
 pub struct ExportedItem {
+    // The identifier of the exported object
     pub identifier: Option<AnyIdentifier>,
+    // The exported object
     pub exported: Option<AnyJsExported>,
+    // Whether it is default exported or not
     pub is_default: bool,
 }
 
 impl JsExport {
     /// Returns the pair of id and entity of the exported object
+    /// ## Example
+    /// When a named export is made, it returns a list of them.
+    /// ```js
+    /// export {foo, bar as baz};
+    /// ```
+    /// will return
+    /// ```js
+    /// [
+    ///     ExportedItem { identifier: Some(AnyIdentifier::JsLiteralExportName("foo")), exported: None, is_default: false },
+    ///     ExportedItem { identifier: Some(AnyIdentifier::JsLiteralExportName("baz")), exported: None, is_default: false },
+    /// ]
+    /// ```
+    ///
+    ///
+    /// When multiple variables are exported, it returns the list of those variables.
+    ///
+    /// ```js
+    /// export const x = 100, y = 200;
+    /// ```
+    /// will return
+    /// ```js
+    /// [
+    ///     ExportedItem { identifier: Some(AnyIdentifier::AnyJsBindingPattern("x")), exported: Some(AnyJsExported::AnyJsExpression(100)), is_default: false },
+    ///     ExportedItem { identifier: Some(AnyIdentifier::AnyJsBindingPattern("y")), exported: Some(AnyJsExported::AnyJsExpression(200)), is_default: false },
+    /// ]
+    /// ```
+    /// When a function is exported, it returns the function name. It also checks whether it is a default export.
+    /// ```js
+    /// export default function foo() {};
+    /// ```
+    /// will return
+    /// ```js
+    /// [
+    ///     ExportedItem { identifier: Some(AnyIdentifier::AnyJsBindingPattern("foo")), exported: None, is_default: true },
+    /// ]
+    /// ```
     pub fn get_exported_items(&self) -> Vec<ExportedItem> {
         self.export_clause()
             .ok()
@@ -31,6 +70,7 @@ impl JsExport {
                 // export const x = 100;
                 AnyJsExportClause::AnyJsDeclarationClause(declaration_clause) => {
                     match declaration_clause {
+                        // export function foo() {}
                         AnyJsDeclarationClause::JsFunctionDeclaration(
                             function_declaration_clause,
                         ) => function_declaration_clause.id().ok().map(|function_id| {
@@ -42,6 +82,7 @@ impl JsExport {
                                 is_default: false,
                             }]
                         }),
+                        // export const x = 100;
                         AnyJsDeclarationClause::JsVariableDeclarationClause(
                             variable_declaration_clause,
                         ) => variable_declaration_clause.declaration().ok().map(
@@ -67,6 +108,7 @@ impl JsExport {
                                     .collect()
                             },
                         ),
+                        // export enum X {}
                         AnyJsDeclarationClause::TsEnumDeclaration(ts_enum_declaration) => {
                             ts_enum_declaration.id().ok().map(|enum_id| {
                                 vec![ExportedItem {
@@ -80,6 +122,7 @@ impl JsExport {
                                 }]
                             })
                         }
+                        // export type X = number;
                         AnyJsDeclarationClause::TsTypeAliasDeclaration(
                             ts_type_alias_declaration,
                         ) => ts_type_alias_declaration.binding_identifier().ok().map(
@@ -252,5 +295,191 @@ impl AnyJsExportNamedSpecifier {
             }
             Self::JsExportNamedSpecifier(specifier) => specifier.with_type_token(type_token).into(),
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use biome_js_factory::syntax::{JsExport, JsSyntaxKind::*};
+    use biome_js_factory::JsSyntaxTreeBuilder;
+    use biome_rowan::AstNode;
+
+    #[test]
+    fn test_get_exported_items() {
+        let mut tree_builder = JsSyntaxTreeBuilder::new();
+        //export {foo, bar as baz}
+        tree_builder.start_node(JS_EXPORT);
+        tree_builder.token(EXPORT_KW, "export");
+        tree_builder.start_node(JS_EXPORT_NAMED_CLAUSE);
+        tree_builder.token(L_CURLY, "{");
+        tree_builder.start_node(JS_EXPORT_NAMED_SPECIFIER_LIST);
+        // foo
+        tree_builder.start_node(JS_EXPORT_NAMED_SHORTHAND_SPECIFIER);
+        tree_builder.start_node(JS_REFERENCE_IDENTIFIER);
+        tree_builder.token(IDENT, "foo");
+        tree_builder.finish_node(); // JS_REFERENCE_IDENTIFIER
+        tree_builder.finish_node(); // JS_EXPORT_NAMED_SHORTHAND_SPECIFIER
+        tree_builder.token(COMMA, ",");
+        // bar as baz
+        tree_builder.start_node(JS_EXPORT_NAMED_SPECIFIER);
+        tree_builder.start_node(JS_REFERENCE_IDENTIFIER);
+        tree_builder.token(IDENT, "bar");
+        tree_builder.finish_node(); // JS_REFERENCE_IDENTIFIER
+        tree_builder.token(AS_KW, "as");
+        tree_builder.start_node(JS_LITERAL_EXPORT_NAME);
+        tree_builder.token(IDENT, "baz");
+        tree_builder.finish_node(); // JS_LITERAL_EXPORT_NAME
+        tree_builder.finish_node(); // JS_EXPORT_NAMED_SPECIFIER
+
+        tree_builder.finish_node(); // JS_EXPORT_NAMED_SPECIFIER_LIST
+        tree_builder.token(R_CURLY, "}");
+        tree_builder.finish_node(); // JS_EXPORT_NAMED_CLAUSE
+        tree_builder.finish_node(); // JS_EXPORT
+
+        let node = tree_builder.finish();
+
+        let export = JsExport::cast(node).unwrap();
+        let exported_items = export.get_exported_items();
+        assert_eq!(exported_items.len(), 2);
+        assert_eq!(
+            exported_items[0].identifier.as_ref().unwrap().to_string(),
+            "foo"
+        );
+        assert_eq!(
+            exported_items[1].identifier.as_ref().unwrap().to_string(),
+            "baz"
+        );
+        assert!(exported_items[0].exported.is_none());
+        assert!(exported_items[1].exported.is_none());
+        assert!(!exported_items[0].is_default);
+        assert!(!exported_items[1].is_default);
+    }
+
+    #[test]
+    fn test_get_exported_items_default() {
+        let mut tree_builder = JsSyntaxTreeBuilder::new();
+        // export default foo;
+        tree_builder.start_node(JS_EXPORT);
+        tree_builder.token(EXPORT_KW, "export");
+        tree_builder.start_node(JS_EXPORT_DEFAULT_EXPRESSION_CLAUSE);
+        tree_builder.token(DEFAULT_KW, "default");
+        tree_builder.start_node(JS_IDENTIFIER_EXPRESSION);
+        tree_builder.start_node(JS_REFERENCE_IDENTIFIER);
+        tree_builder.token(IDENT, "foo");
+        tree_builder.finish_node(); // JS_REFERENCE_IDENTIFIER
+        tree_builder.finish_node(); // JS_IDENTIFIER_EXPRESSION
+        tree_builder.finish_node(); // JS_EXPORT_DEFAULT_EXPRESSION_CLAUSE
+        tree_builder.finish_node(); // JS_EXPORT
+
+        let node = tree_builder.finish();
+        let export = JsExport::cast(node).unwrap();
+        let exported_items = export.get_exported_items();
+
+        assert_eq!(exported_items.len(), 1);
+        assert_eq!(
+            exported_items[0].identifier.as_ref().unwrap().to_string(),
+            "foo"
+        );
+        assert!(exported_items[0].exported.is_none());
+        assert!(exported_items[0].is_default);
+    }
+
+    #[test]
+    fn test_get_exported_items_variable_declaration() {
+        let mut tree_builder = JsSyntaxTreeBuilder::new();
+        // export const x = 100, y = 200;
+        tree_builder.start_node(JS_EXPORT);
+        tree_builder.token(EXPORT_KW, "export");
+        tree_builder.start_node(JS_VARIABLE_DECLARATION_CLAUSE);
+        tree_builder.start_node(JS_VARIABLE_DECLARATION);
+        tree_builder.token(CONST_KW, "const");
+        tree_builder.start_node(JS_VARIABLE_DECLARATOR_LIST);
+        tree_builder.start_node(JS_VARIABLE_DECLARATOR);
+        tree_builder.start_node(JS_IDENTIFIER_BINDING);
+        tree_builder.token(IDENT, "x");
+        tree_builder.finish_node(); // JS_IDENTIFIER_BINDING
+        tree_builder.start_node(JS_INITIALIZER_CLAUSE);
+        tree_builder.token(EQ, "=");
+        tree_builder.start_node(JS_NUMBER_LITERAL_EXPRESSION);
+        tree_builder.token(JS_NUMBER_LITERAL, "100");
+        tree_builder.finish_node(); // JS_NUMBER_LITERAL_EXPRESSION
+        tree_builder.finish_node(); // JS_INITIALIZER_CLAUSE
+        tree_builder.finish_node(); // JS_VARIABLE_DECLARATOR
+        tree_builder.token(COMMA, ",");
+        tree_builder.start_node(JS_VARIABLE_DECLARATOR);
+        tree_builder.start_node(JS_IDENTIFIER_BINDING);
+        tree_builder.token(IDENT, "y");
+        tree_builder.finish_node(); // JS_IDENTIFIER_BINDING
+        tree_builder.start_node(JS_INITIALIZER_CLAUSE);
+        tree_builder.token(EQ, "=");
+        tree_builder.start_node(JS_NUMBER_LITERAL_EXPRESSION);
+        tree_builder.token(JS_NUMBER_LITERAL, "200");
+        tree_builder.finish_node(); // JS_NUMBER_LITERAL_EXPRESSION
+        tree_builder.finish_node(); // JS_INITIALIZER_CLAUSE
+        tree_builder.finish_node(); // JS_VARIABLE_DECLARATOR
+        tree_builder.finish_node(); // JS_VARIABLE_DECLARATION
+        tree_builder.finish_node(); // JS_VARIABLE_DECLARATION_LIST
+        tree_builder.finish_node(); // JS_VARIABLE_DECLARATION_CLAUSE
+        tree_builder.finish_node(); // JS_EXPORT
+
+        let node = tree_builder.finish();
+        let export = JsExport::cast(node).unwrap();
+        let exported_items = export.get_exported_items();
+
+        assert_eq!(exported_items.len(), 2);
+        assert_eq!(
+            exported_items[0].identifier.as_ref().unwrap().to_string(),
+            "x"
+        );
+        assert_eq!(
+            exported_items[1].identifier.as_ref().unwrap().to_string(),
+            "y"
+        );
+        assert_eq!(
+            exported_items[0].exported.clone().unwrap().to_string(),
+            "100"
+        );
+        assert_eq!(
+            exported_items[1].exported.clone().unwrap().to_string(),
+            "200"
+        );
+        assert!(!exported_items[0].is_default);
+        assert!(!exported_items[1].is_default);
+    }
+
+    #[test]
+    fn test_get_exported_items_function_declaration() {
+        let mut tree_builder = JsSyntaxTreeBuilder::new();
+        // export function foo() {}
+        tree_builder.start_node(JS_EXPORT);
+        tree_builder.token(EXPORT_KW, "export");
+
+        tree_builder.start_node(JS_FUNCTION_DECLARATION);
+        tree_builder.token(FUNCTION_KW, "function");
+        tree_builder.start_node(JS_IDENTIFIER_BINDING);
+        tree_builder.token(IDENT, "foo");
+        tree_builder.finish_node(); // JS_IDENTIFIER_BINDING
+        tree_builder.start_node(JS_PARAMETERS);
+        tree_builder.token(L_PAREN, "(");
+        tree_builder.token(R_PAREN, ")");
+        tree_builder.finish_node(); // JS_PARAMETERS
+        tree_builder.start_node(JS_FUNCTION_BODY);
+        tree_builder.token(L_CURLY, "{");
+        tree_builder.token(R_CURLY, "}");
+        tree_builder.finish_node(); // JS_FUNCTION_BODY
+        tree_builder.finish_node(); // JS_FUNCTION_DECLARATION
+        tree_builder.finish_node(); // JS_EXPORT
+
+        let node = tree_builder.finish();
+        let export = JsExport::cast(node).unwrap();
+        let exported_items = export.get_exported_items();
+
+        assert_eq!(exported_items.len(), 1);
+        assert_eq!(
+            exported_items[0].identifier.as_ref().unwrap().to_string(),
+            "foo"
+        );
+        assert!(exported_items[0].exported.is_none());
+        assert!(!exported_items[0].is_default);
     }
 }
