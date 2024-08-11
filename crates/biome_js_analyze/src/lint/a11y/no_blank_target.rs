@@ -204,7 +204,7 @@ pub struct AllowDomainOptions {
     pub allow_domains: Vec<String>,
 }
 
-fn is_allowed_domain<'a>(href: &str, allow_domains: &[&'a str]) -> bool {
+fn is_allowed_domain(href: &str, allow_domains: &[&str]) -> bool {
     allow_domains
         .iter()
         .any(|allowed| href.starts_with(allowed) || href.contains(allowed))
