@@ -1,4 +1,3 @@
-use crate::utils::unescape_string;
 use biome_analyze::{
     context::RuleContext, declare_lint_rule, Ast, Rule, RuleDiagnostic, RuleSource,
 };
@@ -8,7 +7,7 @@ use biome_js_syntax::{
     JsStringLiteralExpression,
 };
 use biome_rowan::{declare_node_union, AstNode, AstSeparatedList};
-use std::{iter::Peekable, str::Chars};
+use std::str::Chars;
 
 declare_lint_rule! {
     /// Prevents from having control characters and some escape sequences that match control characters in regular expressions.
@@ -73,51 +72,40 @@ declare_node_union! {
     pub RegexExpressionLike = JsNewExpression | JsCallExpression | JsRegexLiteralExpression
 }
 
-fn decode_hex_character_to_code_point(iter: &mut Peekable<Chars>) -> Option<(String, i64)> {
+fn decode_hex_character_to_code_point(iter: &mut Chars) -> Option<(String, u32)> {
+    let digits: String = iter.take(2).collect();
+    let code_point = u32::from_str_radix(&digits, 16).ok()?;
+    Some((digits, code_point))
+}
+
+fn decode_unicode_escape_to_code_point(iter: &mut Chars) -> Option<(String, u32)> {
+    let digits: String = iter.take(4).collect();
+    let code_point = u32::from_str_radix(&digits, 16).ok()?;
+    Some((digits, code_point))
+}
+
+fn decode_escaped_code_point_to_code_point(iter: &mut Chars) -> Option<(String, u32)> {
     let first = iter.next()?;
-    let second = iter.next()?;
-    let digits = format!("{first}{second}");
-    let code_point = i64::from_str_radix(&digits, 16).ok()?;
-    Some((digits, code_point))
-}
-
-fn decode_unicode_escape_to_code_point(iter: &mut Peekable<Chars>) -> Option<(String, i64)> {
-    let mut digits = String::new();
-    // Loop 4 times as unicode escape sequence has exactly 4 hexadecimal digits
-    for _ in 0..4 {
-        if let Some(&c) = iter.peek() {
-            match c {
-                '0'..='9' | 'a'..='f' | 'A'..='F' => digits.push(iter.next()?),
-                _ => continue,
-            }
-        }
+    if first == '{' {
+        // `\u{hh...}`
+        let digits: String = iter.take_while(|c| c != &'}').collect();
+        let code_point = u32::from_str_radix(&digits, 16).ok()?;
+        Some((format!("{{{digits}}}"), code_point))
+    } else {
+        // `\uhhhh`
+        let mut digits = String::new();
+        digits.push(first);
+        digits.extend(iter.take(3));
+        let code_point = u32::from_str_radix(&digits, 16).ok()?;
+        Some((digits, code_point))
     }
-    let code_point = i64::from_str_radix(digits.as_str(), 16).ok()?;
-    Some((digits, code_point))
-}
-
-fn decode_escaped_code_point_to_code_point(iter: &mut Peekable<Chars>) -> Option<(String, i64)> {
-    let mut digits = String::new();
-    if iter.peek() == Some(&'{') {
-        iter.next();
-        while let Some(&c) = iter.peek() {
-            if c == '}' {
-                iter.next();
-                let code_point = i64::from_str_radix(&digits, 16).ok()?;
-                return Some((format!("{{{digits}}}"), code_point));
-            } else {
-                digits.push(iter.next()?);
-            }
-        }
-    }
-    None
 }
 
 fn add_control_character_to_vec(
     prefix: &str,
-    iter: &mut Peekable<Chars>,
+    iter: &mut Chars,
     control_characters: &mut Vec<String>,
-    decode: fn(&mut Peekable<Chars>) -> Option<(String, i64)>,
+    decode: fn(&mut Chars) -> Option<(String, u32)>,
 ) {
     if let Some((s, code_point)) = decode(iter) {
         // ASCII control characters are represented by code points from 0 to 31
@@ -135,8 +123,8 @@ fn add_control_character_to_vec(
 /// - Unescaped raw characters from U+0000 to U+001F.
 fn collect_control_characters(pattern: &str, flags: &str) -> Option<Vec<String>> {
     let mut control_characters: Vec<String> = Vec::new();
-    let is_unicode_flag_set = flags.contains('u');
-    let mut iter = pattern.chars().peekable();
+    let is_unicode_flag_set = flags.contains('u') || flags.contains('v');
+    let mut iter = pattern.chars();
 
     while let Some(c) = iter.next() {
         match c {
@@ -186,16 +174,16 @@ fn collect_control_characters_from_expression(
             .and_then(|js_string_literal| js_string_literal.inner_string_text().ok())?
             .to_string();
 
-        let pattern = unescape_string(&raw_pattern).unwrap_or(raw_pattern);
+        let unescaped_pattern = raw_pattern.replace(r"\\", r"\");
 
-        let regexp_flags = args
+        let flags = args
             .next()
             .and_then(|arg| arg.ok())
             .and_then(|arg| JsStringLiteralExpression::cast(arg.into_syntax()))
             .map(|js_string_literal| js_string_literal.text())
             .unwrap_or_default();
 
-        return collect_control_characters(&pattern, &regexp_flags);
+        return collect_control_characters(&unescaped_pattern, &flags);
     }
     None
 }

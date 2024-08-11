@@ -68,11 +68,11 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
 ```
 
 ```block
-
+::error title=organizeImports,file=main.ts,line=1,endLine=1,col=2,endColumn=2::Import statements could be sorted:
 ```
 
 ```block
-
+::error title=format,file=main.ts,line=1,endLine=1,col=2,endColumn=2::Formatter would have printed the following content:
 ```
 
 ```block
@@ -100,9 +100,9 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
 ```
 
 ```block
-
+::error title=organizeImports,file=index.ts,line=1,endLine=1,col=2,endColumn=2::Import statements could be sorted:
 ```
 
 ```block
-
+::error title=format,file=index.ts,line=1,endLine=1,col=2,endColumn=2::Formatter would have printed the following content:
 ```

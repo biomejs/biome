@@ -7,10 +7,10 @@
 //!
 //! * [Format]: Implemented by objects that can be formatted.
 //! * [FormatRule]: Rule that knows how to format an object of another type. Necessary in the situation where
-//!  it's necessary to implement [Format] on an object from another crate. This module defines the
-//!  [FormatRefWithRule] and [FormatOwnedWithRule] structs to pass an item with its corresponding rule.
+//!     it's necessary to implement [Format] on an object from another crate. This module defines the
+//!     [FormatRefWithRule] and [FormatOwnedWithRule] structs to pass an item with its corresponding rule.
 //! * [FormatWithRule] implemented by objects that know how to format another type. Useful for implementing
-//!  some reusable formatting logic inside of this module if the type itself doesn't implement [Format]
+//!     some reusable formatting logic inside of this module if the type itself doesn't implement [Format]
 //!
 //! ## Formatting Macros
 //!
@@ -79,12 +79,12 @@ use std::num::ParseIntError;
 use std::str::FromStr;
 use token::string::Quote;
 
-#[derive(Debug, Eq, PartialEq, Clone, Copy, Hash)]
+#[derive(Debug, Default, Clone, Copy, Deserializable, Eq, Hash, Merge, PartialEq)]
 #[cfg_attr(
     feature = "serde",
-    derive(serde::Serialize, serde::Deserialize, schemars::JsonSchema)
+    derive(serde::Serialize, serde::Deserialize, schemars::JsonSchema),
+    serde(rename_all = "camelCase")
 )]
-#[derive(Default)]
 pub enum IndentStyle {
     /// Tab
     #[default]
@@ -112,10 +112,10 @@ impl FromStr for IndentStyle {
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s {
-            "tab" | "Tabs" => Ok(Self::Tab),
-            "space" | "Spaces" => Ok(Self::Space),
+            "tab" => Ok(Self::Tab),
+            "space" => Ok(Self::Space),
             // TODO: replace this error with a diagnostic
-            _ => Err("Value not supported for IndentStyle"),
+            _ => Err("Unsupported value for this option"),
         }
     }
 }
@@ -496,22 +496,7 @@ impl QuoteStyle {
         }
     }
 
-    pub fn as_string(&self) -> &str {
-        match self {
-            QuoteStyle::Double => "\"",
-            QuoteStyle::Single => "'",
-        }
-    }
-
-    /// Returns the quote, prepended with a backslash (escaped)
-    pub fn as_escaped(&self) -> &str {
-        match self {
-            QuoteStyle::Double => "\\\"",
-            QuoteStyle::Single => "\\'",
-        }
-    }
-
-    pub fn as_bytes(&self) -> u8 {
+    pub fn as_byte(&self) -> u8 {
         self.as_char() as u8
     }
 

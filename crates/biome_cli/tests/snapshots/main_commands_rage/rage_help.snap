@@ -28,8 +28,8 @@ Global options applied to all commands
                               processed during the execution of the command.
         --error-on-warnings   Tell Biome to exit with an error code if some diagnostics emit
                               warnings.
-        --reporter=<json|json-pretty|github|junit|summary>  Allows to change how diagnostics and
-                              summary are reported.
+        --reporter=<json|json-pretty|github|junit|summary|gitlab>  Allows to change how diagnostics
+                              and summary are reported.
         --log-level=<none|debug|info|warn|error>  The level of logging. In order, from the most
                               verbose to the least verbose: debug, info, warn, error.
                               The value `none` won't show any logging.
@@ -44,9 +44,8 @@ Global options applied to all commands
 
 Available options:
         --daemon-logs         Prints the Biome daemon server logs
-        --formatter           Prints the Biome configuration that the applied formatter
-                              configuration
-        --linter              Prints the Biome configuration that the applied linter configuration
+        --formatter           Prints the formatter options applied
+        --linter              Prints the linter options applied
     -h, --help                Prints help information
 
 ```

@@ -95,7 +95,7 @@ impl<L: Language> RegistryVisitor<L> for MetadataRegistry {
 /// we have:
 /// - Syntax Phase: No services are offered, thus its rules can be run immediately;
 /// - Semantic Phase: Offers the semantic model, thus these rules can only run
-/// after the "SemanticModel" is ready, which demands a whole transverse of the parsed tree.
+///     after the "SemanticModel" is ready, which demands a whole transverse of the parsed tree.
 pub struct RuleRegistry<L: Language> {
     /// Holds a collection of rules for each phase.
     phase_rules: [PhaseRules<L>; 2],
@@ -207,7 +207,7 @@ impl<L: Language + Default + 'static> RegistryVisitor<L> for RuleRegistryBuilder
                     .entry(key)
                     .or_insert_with(|| TypeRules::TypeRules { rules: Vec::new() })
                 else {
-                    unreachable!("the query type has already been registered as a SyntaxRules instead of a TypeRules, this is generally ca used by an implementation of `Queryable::key` returning a `QueryKey::TypeId` with the type ID of `SyntaxNode`")
+                    unreachable!("the query type has already been registered as a SyntaxRules instead of a TypeRules, this is generally caused by an implementation of `Queryable::key` returning a `QueryKey::TypeId` with the type ID of `SyntaxNode`")
                 };
 
                 rules.push(rule);

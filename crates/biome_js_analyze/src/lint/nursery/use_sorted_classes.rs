@@ -16,8 +16,8 @@ use biome_js_factory::make::{
     js_string_literal_single_quotes, js_template_chunk, js_template_chunk_element, jsx_string,
 };
 use biome_rowan::{AstNode, BatchMutationExt};
-use lazy_static::lazy_static;
 use presets::get_config_preset;
+use std::sync::LazyLock;
 
 use crate::JsRuleAction;
 
@@ -144,10 +144,8 @@ declare_lint_rule! {
     }
 }
 
-lazy_static! {
-    static ref SORT_CONFIG: SortConfig =
-        SortConfig::new(&get_config_preset(&UseSortedClassesPreset::default()));
-}
+static SORT_CONFIG: LazyLock<SortConfig> =
+    LazyLock::new(|| SortConfig::new(&get_config_preset(&UseSortedClassesPreset::default())));
 
 impl Rule for UseSortedClasses {
     type Query = Ast<AnyClassStringLike>;

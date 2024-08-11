@@ -7,7 +7,8 @@ expression: content
 ```block
 Runs formatter, linter and import sorting to the requested files.
 
-Usage: check [--write] [--unsafe] [--staged] [--changed] [--since=REF] [PATH]...
+Usage: check [--write] [--unsafe] [--assists-enabled=<true|false>] [--staged] [--changed] [--since=
+REF] [PATH]...
 
 The configuration that is contained inside the file `biome.json`
         --vcs-enabled=<true|false>  Whether Biome should integrate itself with the VCS client
@@ -71,6 +72,8 @@ The configuration that is contained inside the file `biome.json`
                               elements. Defaults to auto.
         --javascript-linter-enabled=<true|false>  Control the linter for JavaScript (and its super
                               languages) files.
+        --javascript-assists-enabled=<true|false>  Control the linter for JavaScript (and its super
+                              languages) files.
         --json-formatter-enabled=<true|false>  Control the formatter for JSON (and its super
                               languages) files.
         --json-formatter-indent-style=<tab|space>  The indent style applied to JSON (and its super
@@ -87,6 +90,8 @@ The configuration that is contained inside the file `biome.json`
                               multi-line comma-separated syntactic structures. Defaults to "none".
         --json-linter-enabled=<true|false>  Control the linter for JSON (and its super languages)
                               files.
+        --json-assists-enabled=<true|false>  Control the linter for JSON (and its super languages)
+                              files.
         --css-formatter-enabled=<true|false>  Control the formatter for CSS (and its super
                               languages) files.
         --css-formatter-indent-style=<tab|space>  The indent style applied to CSS (and its super
@@ -99,8 +104,8 @@ The configuration that is contained inside the file `biome.json`
                               super languages) files. Defaults to 80.
         --css-formatter-quote-style=<double|single>  The type of quotes used in CSS code. Defaults
                               to double.
-        --css-linter-enabled=<true|false>  Control the linter for CSS (and its super languages)
-                              files.
+        --css-linter-enabled=<true|false>  Control the linter for CSS files.
+        --css-assists-enabled=<true|false>  Control the assists for CSS files.
         --graphql-formatter-enabled=<true|false>  Control the formatter for GraphQL files.
         --graphql-formatter-indent-style=<tab|space>  The indent style applied to GraphQL files.
         --graphql-formatter-indent-width=NUMBER  The size of the indentation applied to GraphQL
@@ -112,6 +117,7 @@ The configuration that is contained inside the file `biome.json`
         --graphql-formatter-quote-style=<double|single>  The type of quotes used in GraphQL code.
                               Defaults to double.
         --graphql-linter-enabled=<true|false>  Control the formatter for GraphQL files.
+        --assists-enabled=<true|false>  Whether Biome should enable assists via LSP.
 
 Global options applied to all commands
         --colors=<off|force>  Set the formatting mode for markup: "off" prints everything as plain
@@ -132,8 +138,8 @@ Global options applied to all commands
                               processed during the execution of the command.
         --error-on-warnings   Tell Biome to exit with an error code if some diagnostics emit
                               warnings.
-        --reporter=<json|json-pretty|github|junit|summary>  Allows to change how diagnostics and
-                              summary are reported.
+        --reporter=<json|json-pretty|github|junit|summary|gitlab>  Allows to change how diagnostics
+                              and summary are reported.
         --log-level=<none|debug|info|warn|error>  The level of logging. In order, from the most
                               verbose to the least verbose: debug, info, warn, error.
                               The value `none` won't show any logging.
@@ -160,6 +166,7 @@ Available options:
         --formatter-enabled=<true|false>  Allow to enable or disable the formatter check.
         --linter-enabled=<true|false>  Allow to enable or disable the linter check.
         --organize-imports-enabled=<true|false>  Allow to enable or disable the organize imports.
+        --assists-enabled=<true|false>  Allow to enable or disable the assists.
         --stdin-file-path=PATH  Use this option when you want to format code piped from `stdin`, and
                               print the output to `stdout`.
                               The file doesn't need to exist on disk, what matters is the extension
@@ -167,12 +174,14 @@ Available options:
                               code.
                               Example: `echo 'let a;' | biome check --stdin-file-path=file.js`
         --staged              When set to true, only the files that have been staged (the ones
-                              prepared to be committed) will be linted.
+                              prepared to be committed) will be linted. This option should be used
+                              when working locally.
         --changed             When set to true, only the files that have been changed compared to
-                              your `defaultBranch` configuration will be linted.
+                              your `defaultBranch` configuration will be linted. This option should
+                              be used in CI environments.
         --since=REF           Use this to specify the base branch to compare against when you're
                               using the --changed flag and the `defaultBranch` is not set in your
-                              biome.json
+                              `biome.json`
     -h, --help                Prints help information
 
 ```

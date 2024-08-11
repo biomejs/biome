@@ -36,10 +36,10 @@ use dashmap::{mapref::entry::Entry, DashMap};
 use indexmap::IndexSet;
 use std::ffi::OsStr;
 use std::fs;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicUsize, Ordering};
 use std::{panic::RefUnwindSafe, sync::RwLock};
-use tracing::{debug, info, info_span};
+use tracing::{debug, info, info_span, trace};
 
 pub(super) struct WorkspaceServer {
     /// features available throughout the application
@@ -54,6 +54,8 @@ pub(super) struct WorkspaceServer {
     manifests: DashMap<BiomePath, NodeJsProject>,
     /// The current focused project
     current_project_path: RwLock<Option<BiomePath>>,
+    /// The path of the manifest
+    current_manifest_path: RwLock<Option<BiomePath>>,
     /// Stores the document sources used across the workspace
     file_sources: RwLock<IndexSet<DocumentFileSource>>,
     /// Stores patterns to search for.
@@ -92,6 +94,7 @@ impl WorkspaceServer {
             syntax: DashMap::default(),
             manifests: DashMap::default(),
             current_project_path: RwLock::default(),
+            current_manifest_path: RwLock::default(),
             file_sources: RwLock::default(),
             patterns: Default::default(),
         }
@@ -144,33 +147,36 @@ impl WorkspaceServer {
         }
     }
 
-    /// Returns the current project. The information of this project depend on path set by [WorkspaceServer::update_current_project]
+    /// Returns the current project. The information of this project depend on path set by [WorkspaceServer::set_current_project]
     ///
     /// ## Errors
     ///
     /// - If no document is found in the workspace. Usually, you'll have to call [WorkspaceServer::open_project] to store said document.
-    fn get_current_project(&self) -> Result<Option<NodeJsProject>, WorkspaceError> {
-        let path = self.current_project_path.read().unwrap();
+    #[tracing::instrument(level = "trace", skip(self))]
+    fn get_current_manifest(&self) -> Result<Option<NodeJsProject>, WorkspaceError> {
+        let path = self.get_current_manifest_path();
+        trace!("Current project folder: {:?} ", path);
         if let Some(path) = path.as_ref() {
             match self.manifests.entry(path.clone()) {
                 Entry::Occupied(entry) => Ok(Some(entry.get().clone())),
                 Entry::Vacant(entry) => {
                     let path = entry.key();
-                    let mut document = self
-                        .documents
-                        .get_mut(path)
-                        .ok_or_else(WorkspaceError::not_found)?;
-                    let document = &mut *document;
-                    let parsed = parse_json_with_cache(
-                        document.content.as_str(),
-                        &mut document.node_cache,
-                        JsonParserOptions::default(),
-                    );
+                    let mut document = self.documents.get_mut(path);
+                    if let Some(document) = document.as_deref_mut() {
+                        // let document = &mut *document;
+                        let parsed = parse_json_with_cache(
+                            document.content.as_str(),
+                            &mut document.node_cache,
+                            JsonParserOptions::default(),
+                        );
 
-                    let mut node_js_project = NodeJsProject::default();
-                    node_js_project.from_root(&parsed.tree());
+                        let mut node_js_project = NodeJsProject::default();
+                        node_js_project.from_root(&parsed.tree());
 
-                    Ok(Some(entry.insert(node_js_project).clone()))
+                        Ok(Some(entry.insert(node_js_project).clone()))
+                    } else {
+                        Ok(None)
+                    }
                 }
             }
         } else {
@@ -189,14 +195,43 @@ impl WorkspaceServer {
         index
     }
 
+    /// Retrieves the current project path
+    fn get_current_project_path(&self) -> Option<BiomePath> {
+        self.current_project_path.read().unwrap().as_ref().cloned()
+    }
+
+    /// Updates the current project path
+    fn set_current_project_path(&self, path: BiomePath) {
+        let mut current_project_path = self.current_project_path.write().unwrap();
+        let _ = current_project_path.insert(path);
+    }
+
+    /// Retrieves the current project path
+    fn get_current_manifest_path(&self) -> Option<BiomePath> {
+        self.current_manifest_path.read().unwrap().as_ref().cloned()
+    }
+
+    fn set_current_manifest_path(&self, path: BiomePath) {
+        let mut current_manifest_path = self.current_manifest_path.write().unwrap();
+        let _ = current_manifest_path.insert(path);
+    }
+
     /// Updates the current project of the current workspace
-    fn update_current_project(&self, project_key: ProjectKey) {
+    fn register_project(&self, path: PathBuf) -> ProjectKey {
+        let mut workspace = self.workspaces_mut();
+        let workspace_mut = workspace.as_mut();
+        workspace_mut.insert_project(path.clone())
+    }
+    /// Updates the current project of the current workspace
+    fn set_current_project(&self, project_key: ProjectKey) {
         let mut workspace = self.workspaces_mut();
         let workspace_mut = workspace.as_mut();
         workspace_mut.set_current_project(project_key);
     }
 
-    /// Checks whether, if the current path belongs to the current project
+    /// Checks whether, if the current path belongs to the current project.
+    ///
+    /// If there's a match, and the match **isn't** the current project, it returns the new key.
     fn path_belongs_to_current_workspace(&self, path: &BiomePath) -> Option<ProjectKey> {
         let workspace = self.workspace();
         workspace.as_ref().path_belongs_to_current_workspace(path)
@@ -341,8 +376,11 @@ impl WorkspaceServer {
                     &organize_imports.ignored_files,
                 )
             }
+            FeatureKind::Assists => {
+                let assists = &settings.assists;
+                (&assists.included_files, &assists.ignored_files)
+            }
             // TODO: enable once the configuration is available
-            FeatureKind::Assists => return false,
             FeatureKind::Search => return false, // There is no search-specific config.
         };
         let is_feature_included = feature_included_files.is_empty()
@@ -389,13 +427,13 @@ impl Workspace for WorkspaceServer {
                 }
             }
         }
-
-        // If the file is not ignored by at least one feature,
-        // then check that the file is not protected.
+        // If the file is not ignored by at least one feature, then check that the file is not protected.
+        //
         // Protected files must be ignored.
         if !file_features.is_not_processed() && FileFeaturesResult::is_protected_file(path) {
             file_features.set_protected_for_all_features();
         }
+
         Ok(file_features)
     }
     fn is_path_ignored(&self, params: IsPathIgnoredParams) -> Result<bool, WorkspaceError> {
@@ -422,11 +460,12 @@ impl Workspace for WorkspaceServer {
         Ok(())
     }
     /// Add a new file to the workspace
+    #[tracing::instrument(level = "trace", skip(self))]
     fn open_file(&self, params: OpenFileParams) -> Result<(), WorkspaceError> {
         let mut source = params
             .document_file_source
             .unwrap_or(DocumentFileSource::from_path(&params.path));
-        let manifest = self.get_current_project()?.map(|pr| pr.manifest);
+        let manifest = self.get_current_manifest()?.map(|pr| pr.manifest);
 
         if let DocumentFileSource::Js(js) = &mut source {
             if let Some(manifest) = manifest {
@@ -448,7 +487,7 @@ impl Workspace for WorkspaceServer {
             },
         );
         if let Some(project_key) = self.path_belongs_to_current_workspace(&params.path) {
-            self.update_current_project(project_key);
+            self.set_current_project(project_key);
         }
 
         Ok(())
@@ -472,13 +511,30 @@ impl Workspace for WorkspaceServer {
         &self,
         params: RegisterProjectFolderParams,
     ) -> Result<ProjectKey, WorkspaceError> {
-        let mut workspace = self.workspaces_mut();
-        let workspace_mut = workspace.as_mut();
-        let key = workspace_mut.insert_project(params.path.unwrap_or_default());
-        if params.set_as_current_workspace {
-            workspace_mut.register_current_project(key);
+        let current_project_path = self.get_current_project_path();
+        debug!(
+            "Compare the current project with the new one {:?} {:?} {:?}",
+            current_project_path.as_deref(),
+            params.path.as_ref(),
+            current_project_path.as_deref() != params.path.as_ref()
+        );
+
+        let is_new_path = match (current_project_path.as_deref(), params.path.as_ref()) {
+            (Some(current_project_path), Some(params_path)) => current_project_path != params_path,
+            _ => true,
+        };
+
+        if is_new_path {
+            let path = params.path.unwrap_or_default();
+            let key = self.register_project(path.clone());
+            if params.set_as_current_workspace {
+                self.set_current_project(key);
+                self.set_current_project_path(BiomePath::new(path));
+            }
+            Ok(key)
+        } else {
+            Ok(self.workspace().as_ref().get_current_project_key())
         }
-        Ok(key)
     }
 
     fn unregister_project_folder(
@@ -490,9 +546,8 @@ impl Workspace for WorkspaceServer {
         Ok(())
     }
 
-    fn update_current_project(&self, params: UpdateProjectParams) -> Result<(), WorkspaceError> {
-        let mut current_project_path = self.current_project_path.write().unwrap();
-        let _ = current_project_path.insert(params.path);
+    fn update_current_manifest(&self, params: UpdateProjectParams) -> Result<(), WorkspaceError> {
+        self.set_current_manifest_path(params.path);
         Ok(())
     }
 
@@ -591,7 +646,7 @@ impl Workspace for WorkspaceServer {
         params: PullDiagnosticsParams,
     ) -> Result<PullDiagnosticsResult, WorkspaceError> {
         let parse = self.get_parse(params.path.clone())?;
-        let manifest = self.get_current_project()?.map(|pr| pr.manifest);
+        let manifest = self.get_current_manifest()?.map(|pr| pr.manifest);
         let (diagnostics, errors, skipped_diagnostics) =
             if let Some(lint) = self.get_file_capabilities(&params.path).analyzer.lint {
                 info_span!("Pulling diagnostics", categories =? params.categories).in_scope(|| {
@@ -649,12 +704,8 @@ impl Workspace for WorkspaceServer {
 
         let parse = self.get_parse(params.path.clone())?;
         let workspace = self.workspace();
-        let manifest = self.get_current_project()?.map(|pr| pr.manifest);
+        let manifest = self.get_current_manifest()?.map(|pr| pr.manifest);
         let language = self.get_file_source(&params.path);
-        let settings = workspace.settings();
-        let Some(settings) = settings else {
-            return Ok(PullActionsResult { actions: vec![] });
-        };
         Ok(code_actions(CodeActionsParams {
             parse,
             range: params.range,
@@ -662,7 +713,8 @@ impl Workspace for WorkspaceServer {
             path: &params.path,
             manifest,
             language,
-            settings,
+            only: params.only,
+            skip: params.skip,
         }))
     }
 
@@ -747,7 +799,7 @@ impl Workspace for WorkspaceServer {
             .ok_or_else(self.build_capability_error(&params.path))?;
         let parse = self.get_parse(params.path.clone())?;
 
-        let manifest = self.get_current_project()?.map(|pr| pr.manifest);
+        let manifest = self.get_current_manifest()?.map(|pr| pr.manifest);
         let language = self.get_file_source(&params.path);
         fix_all(FixAllParams {
             parse,
@@ -761,6 +813,7 @@ impl Workspace for WorkspaceServer {
             document_file_source: language,
             only: params.only,
             skip: params.skip,
+            rule_categories: params.rule_categories,
         })
     }
 

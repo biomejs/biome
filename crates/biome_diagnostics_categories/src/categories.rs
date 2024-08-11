@@ -149,6 +149,7 @@ define_categories! {
     "lint/nursery/noUnknownUnit": "https://biomejs.dev/linter/rules/no-unknown-unit",
     "lint/nursery/noUnmatchableAnbSelector": "https://biomejs.dev/linter/rules/no-unmatchable-anb-selector",
     "lint/nursery/noUnusedFunctionParameters": "https://biomejs.dev/linter/rules/no-unused-function-parameters",
+    "lint/nursery/noUselessEscapeInRegex": "https://biomejs.dev/linter/rules/no-useless-escape-in-regex",
     "lint/nursery/noUselessStringConcat": "https://biomejs.dev/linter/rules/no-useless-string-concat",
     "lint/nursery/noUselessUndefinedInitialization": "https://biomejs.dev/linter/rules/no-useless-undefined-initialization",
     "lint/nursery/noValueAtRule": "https://biomejs.dev/linter/rules/no-value-at-rule",
@@ -285,7 +286,7 @@ define_categories! {
     "lint/suspicious/useValidTypeof": "https://biomejs.dev/linter/rules/use-valid-typeof",
     // end lint rules
     // start assists rules
-    "assists/nursery/useSortedKeys": "https://biomejs.dev/linter/rules/use-valid-typeof",
+    "assists/source/useSortedKeys": "https://biomejs.dev/linter/actions/use-sorted-keys",
     // end assists rules
     ; // start syntax rules
     "syntax/nursery/noTypeOnlyImportAttributes",
@@ -301,6 +302,7 @@ define_categories! {
     "ci",
     "configuration",
     "organizeImports",
+    "assists",
     "migrate",
     "deserialize",
     "project",

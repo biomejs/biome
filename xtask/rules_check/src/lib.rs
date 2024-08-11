@@ -11,6 +11,7 @@ use biome_console::{markup, Console};
 use biome_css_parser::CssParserOptions;
 use biome_css_syntax::CssLanguage;
 use biome_diagnostics::{Diagnostic, DiagnosticExt, PrintDiagnostic};
+use biome_graphql_syntax::GraphqlLanguage;
 use biome_js_parser::JsParserOptions;
 use biome_js_syntax::{EmbeddingKind, JsFileSource, JsLanguage};
 use biome_json_parser::JsonParserOptions;
@@ -39,9 +40,8 @@ pub fn check_rules() -> anyhow::Result<()> {
 
         fn record_rule<R>(&mut self)
         where
-            R: Rule + 'static,
-            R::Query: Queryable<Language = JsLanguage>,
-            <R::Query as Queryable>::Output: Clone,
+            R: Rule<Options: Default, Query: Queryable<Language = JsLanguage, Output: Clone>>
+                + 'static,
         {
             self.groups
                 .entry(<R::Group as RuleGroup>::NAME)
@@ -59,9 +59,8 @@ pub fn check_rules() -> anyhow::Result<()> {
 
         fn record_rule<R>(&mut self)
         where
-            R: Rule + 'static,
-            R::Query: Queryable<Language = JsonLanguage>,
-            <R::Query as Queryable>::Output: Clone,
+            R: Rule<Options: Default, Query: Queryable<Language = JsonLanguage, Output: Clone>>
+                + 'static,
         {
             self.groups
                 .entry(<R::Group as RuleGroup>::NAME)
@@ -79,9 +78,27 @@ pub fn check_rules() -> anyhow::Result<()> {
 
         fn record_rule<R>(&mut self)
         where
-            R: Rule + 'static,
-            R::Query: Queryable<Language = CssLanguage>,
-            <R::Query as Queryable>::Output: Clone,
+            R: Rule<Options: Default, Query: Queryable<Language = CssLanguage, Output: Clone>>
+                + 'static,
+        {
+            self.groups
+                .entry(<R::Group as RuleGroup>::NAME)
+                .or_default()
+                .insert(R::METADATA.name, R::METADATA);
+        }
+    }
+
+    impl RegistryVisitor<GraphqlLanguage> for LintRulesVisitor {
+        fn record_category<C: GroupCategory<Language = GraphqlLanguage>>(&mut self) {
+            if matches!(C::CATEGORY, RuleCategory::Lint) {
+                C::record_groups(self);
+            }
+        }
+
+        fn record_rule<R>(&mut self)
+        where
+            R: Rule<Options: Default, Query: Queryable<Language = GraphqlLanguage, Output: Clone>>
+                + 'static,
         {
             self.groups
                 .entry(<R::Group as RuleGroup>::NAME)
@@ -94,6 +111,7 @@ pub fn check_rules() -> anyhow::Result<()> {
     biome_js_analyze::visit_registry(&mut visitor);
     biome_json_analyze::visit_registry(&mut visitor);
     biome_css_analyze::visit_registry(&mut visitor);
+    biome_graphql_analyze::visit_registry(&mut visitor);
 
     let LintRulesVisitor { groups } = visitor;
 
@@ -379,8 +397,59 @@ fn assert_lint(
                 });
             }
         }
+        DocumentFileSource::Graphql(..) => {
+            let parse = biome_graphql_parser::parse_graphql(code);
+
+            if parse.has_errors() {
+                for diag in parse.into_diagnostics() {
+                    let error = diag.with_file_path(&file_path).with_file_source_code(code);
+                    write_diagnostic(code, error)?;
+                }
+            } else {
+                let root = parse.tree();
+
+                let rule_filter = RuleFilter::Rule(group, rule);
+                let filter = AnalysisFilter {
+                    enabled_rules: Some(slice::from_ref(&rule_filter)),
+                    ..AnalysisFilter::default()
+                };
+
+                let options = AnalyzerOptions {
+                    file_path: PathBuf::from(&file_path),
+                    ..Default::default()
+                };
+                biome_graphql_analyze::analyze(&root, filter, &options, |signal| {
+                    if let Some(mut diag) = signal.diagnostic() {
+                        let category = diag.category().expect("linter diagnostic has no code");
+                        let severity = settings.get_current_settings().expect("project").get_severity_from_rule_code(category).expect(
+                            "If you see this error, it means you need to run cargo codegen-configuration",
+                        );
+
+                        for action in signal.actions() {
+                            if !action.is_suppression() {
+                                diag = diag.add_code_suggestion(action.into());
+                            }
+                        }
+
+                        let error = diag
+                            .with_severity(severity)
+                            .with_file_path(&file_path)
+                            .with_file_source_code(code);
+                        let res = write_diagnostic(code, error);
+
+                        // Abort the analysis on error
+                        if let Err(err) = res {
+                            eprintln!("Error: {err}");
+                            return ControlFlow::Break(err);
+                        }
+                    }
+
+                    ControlFlow::Continue(())
+                });
+            }
+        }
         // Unknown code blocks should be ignored by tests
-        DocumentFileSource::Unknown | DocumentFileSource::Graphql(_) => {}
+        DocumentFileSource::Unknown => {}
     }
 
     if test.expect_diagnostic {

@@ -496,7 +496,7 @@ fn has_surrogate_pair(s: &str) -> bool {
 /// - unicode escape sequences: \u{XXXX}
 /// - unicode escape sequences without parenthesis: \uXXXX
 /// - surrogate pair: \uXXXX\uXXXX
-/// If the unicode escape sequence is not valid, it will be treated as a simple string.
+///     If the unicode escape sequence is not valid, it will be treated as a simple string.
 ///
 /// ```example
 /// \uD83D\uDC4D -> 👍

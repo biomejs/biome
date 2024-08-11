@@ -1,72 +1,17 @@
-#[rustfmt::skip]
-mod rules;
+pub mod assists;
+pub mod linter;
 
-pub use crate::linter::rules::Rules;
+pub use crate::analyzer::linter::*;
 use biome_analyze::options::RuleOptions;
 use biome_analyze::{FixKind, RuleFilter};
-use biome_deserialize::{
-    Deserializable, DeserializableType, DeserializableValue, DeserializationDiagnostic, Merge,
-    StringSet,
-};
-use biome_deserialize_macros::{Deserializable, Merge, Partial};
+use biome_deserialize::{Deserializable, DeserializableType};
+use biome_deserialize::{DeserializableValue, DeserializationDiagnostic, Merge};
+use biome_deserialize_macros::Deserializable;
 use biome_diagnostics::Severity;
-use bpaf::Bpaf;
-pub use rules::*;
 #[cfg(feature = "schema")]
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 use std::str::FromStr;
-
-#[derive(Clone, Debug, Deserialize, Eq, Partial, PartialEq, Serialize)]
-#[partial(derive(Bpaf, Clone, Deserializable, Eq, Merge, PartialEq))]
-#[partial(cfg_attr(feature = "schema", derive(schemars::JsonSchema)))]
-#[partial(serde(rename_all = "camelCase", default, deny_unknown_fields))]
-pub struct LinterConfiguration {
-    /// if `false`, it disables the feature and the linter won't be executed. `true` by default
-    #[partial(bpaf(hide))]
-    pub enabled: bool,
-
-    /// List of rules
-    #[partial(bpaf(pure(Default::default()), optional, hide))]
-    pub rules: Rules,
-
-    /// A list of Unix shell style patterns. The formatter will ignore files/folders that will
-    /// match these patterns.
-    #[partial(bpaf(hide))]
-    pub ignore: StringSet,
-
-    /// A list of Unix shell style patterns. The formatter will include files/folders that will
-    /// match these patterns.
-    #[partial(bpaf(hide))]
-    pub include: StringSet,
-}
-
-impl LinterConfiguration {
-    pub const fn is_disabled(&self) -> bool {
-        !self.enabled
-    }
-}
-
-impl Default for LinterConfiguration {
-    fn default() -> Self {
-        Self {
-            enabled: true,
-            rules: Default::default(),
-            ignore: Default::default(),
-            include: Default::default(),
-        }
-    }
-}
-
-impl PartialLinterConfiguration {
-    pub const fn is_disabled(&self) -> bool {
-        matches!(self.enabled, Some(false))
-    }
-
-    pub fn get_rules(&self) -> Rules {
-        self.rules.as_ref().unwrap_or(&Rules::default()).clone()
-    }
-}
 
 #[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
 #[cfg_attr(feature = "schema", derive(JsonSchema))]
@@ -249,6 +194,17 @@ impl From<RulePlainConfiguration> for Severity {
     }
 }
 
+impl From<RuleAssistConfiguration> for Severity {
+    fn from(conf: RuleAssistConfiguration) -> Self {
+        match conf {
+            RuleAssistConfiguration::On => Severity::Hint,
+            RuleAssistConfiguration::Off => {
+                unreachable!("the rule is turned off, it should not step in here")
+            }
+        }
+    }
+}
+
 #[derive(Clone, Copy, Debug, Default, Deserialize, Deserializable, Eq, PartialEq, Serialize)]
 #[cfg_attr(feature = "schema", derive(JsonSchema))]
 #[serde(rename_all = "camelCase")]
@@ -258,6 +214,31 @@ pub enum RulePlainConfiguration {
     Error,
     Info,
     Off,
+}
+
+#[derive(Clone, Copy, Debug, Default, Deserialize, Deserializable, Eq, PartialEq, Serialize)]
+#[cfg_attr(feature = "schema", derive(JsonSchema))]
+#[serde(rename_all = "camelCase")]
+pub enum RuleAssistConfiguration {
+    #[default]
+    On,
+    Off,
+}
+
+impl RuleAssistConfiguration {
+    pub const fn is_enabled(&self) -> bool {
+        matches!(self, Self::On)
+    }
+
+    pub const fn is_disabled(&self) -> bool {
+        matches!(self, Self::Off)
+    }
+}
+
+impl Merge for RuleAssistConfiguration {
+    fn merge_with(&mut self, other: Self) {
+        *self = other;
+    }
 }
 
 #[derive(Clone, Debug, Default, Deserialize, Deserializable, Eq, PartialEq, Serialize)]
@@ -300,8 +281,8 @@ impl<T: Default> Merge for RuleWithFixOptions<T> {
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq, Hash)]
 pub enum RuleSelector {
-    Group(RuleGroup),
-    Rule(RuleGroup, &'static str),
+    Group(linter::RuleGroup),
+    Rule(linter::RuleGroup, &'static str),
 }
 
 impl From<RuleSelector> for RuleFilter<'static> {
@@ -327,16 +308,16 @@ impl FromStr for RuleSelector {
     fn from_str(selector: &str) -> Result<Self, Self::Err> {
         let selector = selector.strip_prefix("lint/").unwrap_or(selector);
         if let Some((group_name, rule_name)) = selector.split_once('/') {
-            let group = RuleGroup::from_str(group_name)?;
+            let group = linter::RuleGroup::from_str(group_name)?;
             if let Some(rule_name) = Rules::has_rule(group, rule_name) {
                 Ok(RuleSelector::Rule(group, rule_name))
             } else {
                 Err("This rule doesn't exist.")
             }
         } else {
-            match RuleGroup::from_str(selector) {
+            match linter::RuleGroup::from_str(selector) {
                 Ok(group) => {
-                    if matches!(group, RuleGroup::Nursery) {
+                    if matches!(group, linter::RuleGroup::Nursery) {
                         Err("The `nursery` group cannot be selected. Select a specific nursery rule instead.")
                     } else {
                         Ok(RuleSelector::Group(group))

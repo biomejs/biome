@@ -10,6 +10,7 @@ use biome_test_utils::{
     has_bogus_nodes_or_empty_slots, load_manifest, parse_test_path, register_leak_checker,
     scripts_from_json, write_analyzer_snapshot, CheckActionType,
 };
+use std::ops::Deref;
 use std::{ffi::OsStr, fs::read_to_string, path::Path, slice};
 
 tests_macros::gen_tests! {"tests/specs/**/*.{cjs,js,jsx,tsx,ts,json,jsonc,svelte}", crate::run_test, "module"}
@@ -28,7 +29,8 @@ fn run_test(input: &'static str, _: &str, _: &str, _: &str) {
     if group == "specs" || group == "suppression" {
         panic!("the test file must be placed in the {group}/{rule}/<rule-name>/ directory");
     }
-    if biome_js_analyze::metadata()
+    if biome_js_analyze::METADATA
+        .deref()
         .find_rule(group, rule)
         .is_none()
     {
@@ -105,7 +107,7 @@ pub(crate) fn analyze_and_snap(
     let manifest = load_manifest(input_file, &mut diagnostics);
 
     if let Some(manifest) = &manifest {
-        if manifest.r#type == Some(PackageType::Commonjs) && 
+        if manifest.r#type == Some(PackageType::Commonjs) &&
             // At the moment we treat JS and JSX at the same way
             (source_type.file_extension() == "js" || source_type.file_extension() == "jsx" )
         {

@@ -9,18 +9,21 @@ use biome_configuration::{
     PartialConfiguration,
 };
 use biome_console::markup;
-use biome_css_analyze::metadata as css_lint_metadata;
+use biome_css_analyze::METADATA as css_lint_metadata;
 use biome_deserialize::json::deserialize_from_json_str;
 use biome_deserialize::{Deserialized, Merge};
 use biome_diagnostics::{DiagnosticExt, Error, Severity};
 use biome_fs::{AutoSearchResult, ConfigName, FileSystem, OpenOptions};
-use biome_js_analyze::metadata as js_lint_metadata;
+use biome_graphql_analyze::METADATA as graphql_lint_metadata;
+use biome_js_analyze::METADATA as js_lint_metadata;
+use biome_json_analyze::METADATA as json_lint_metadata;
 use biome_json_formatter::context::JsonFormatOptions;
 use biome_json_parser::{parse_json, JsonParserOptions};
 use std::ffi::OsStr;
 use std::fmt::Debug;
 use std::io::ErrorKind;
 use std::iter::FusedIterator;
+use std::ops::Deref;
 use std::path::{Path, PathBuf};
 
 /// Information regarding the configuration that was found.
@@ -156,15 +159,15 @@ type LoadConfig = Result<Option<ConfigurationPayload>, WorkspaceError>;
 /// The configuration file will be read from the `file_system`. A [path hint](ConfigurationPathHint) should be provided.
 ///
 /// - If the path hint is a path to a file that is provided by the user, the function will try to load that file or error.
-/// The name doesn't have to be `biome.json` or `biome.jsonc`. And if it doesn't end with `.json`, Biome will try to
-/// deserialize it as a `.jsonc` file.
+///     The name doesn't have to be `biome.json` or `biome.jsonc`. And if it doesn't end with `.json`, Biome will try to
+///     deserialize it as a `.jsonc` file.
 ///
 /// - If the path hint is a path to a directory which is provided by the user, the function will try to find a `biome.json`
-/// or `biome.jsonc` file in order in that directory. And If it cannot find one, it will error.
+///     or `biome.jsonc` file in order in that directory. And If it cannot find one, it will error.
 ///
 /// - Otherwise, the function will try to traverse upwards the file system until it finds a `biome.json` or `biome.jsonc`
-/// file, or there aren't directories anymore. In this case, the function will not error but return an `Ok(None)`, which
-/// means Biome will use the default configuration.
+///     file, or there aren't directories anymore. In this case, the function will not error but return an `Ok(None)`, which
+///     means Biome will use the default configuration.
 fn load_config(
     file_system: &DynRef<'_, dyn FileSystem>,
     base_path: ConfigurationPathHint,
@@ -367,8 +370,10 @@ pub fn to_analyzer_rules(settings: &Settings, path: &Path) -> AnalyzerRules {
     let overrides = &settings.override_settings;
     let mut analyzer_rules = AnalyzerRules::default();
     if let Some(rules) = linter_settings.rules.as_ref() {
-        push_to_analyzer_rules(rules, js_lint_metadata(), &mut analyzer_rules);
-        push_to_analyzer_rules(rules, css_lint_metadata(), &mut analyzer_rules);
+        push_to_analyzer_rules(rules, js_lint_metadata.deref(), &mut analyzer_rules);
+        push_to_analyzer_rules(rules, css_lint_metadata.deref(), &mut analyzer_rules);
+        push_to_analyzer_rules(rules, json_lint_metadata.deref(), &mut analyzer_rules);
+        push_to_analyzer_rules(rules, graphql_lint_metadata.deref(), &mut analyzer_rules);
     }
 
     overrides.override_analyzer_rules(path, analyzer_rules)

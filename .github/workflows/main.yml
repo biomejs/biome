@@ -29,7 +29,7 @@ jobs:
       - name: Free Disk Space
         uses: ./.github/actions/free-disk-space
       - name: Install toolchain
-        uses: moonrepo/setup-rust@d8048d4fdff0633123678b093726e6d7c8ad6de5 # v1.2.0
+        uses: moonrepo/setup-rust@e013866c4215f77c925f42f60257dec7dd18836e # v1.2.1
         with:
           components: rustfmt
           bins: taplo-cli
@@ -48,7 +48,7 @@ jobs:
       - name: Free Disk Space
         uses: ./.github/actions/free-disk-space
       - name: Install toolchain
-        uses: moonrepo/setup-rust@d8048d4fdff0633123678b093726e6d7c8ad6de5 # v1.2.0
+        uses: moonrepo/setup-rust@e013866c4215f77c925f42f60257dec7dd18836e # v1.2.1
         with:
           components: clippy
           cache-base: main
@@ -66,7 +66,7 @@ jobs:
       - name: Free Disk Space
         uses: ./.github/actions/free-disk-space
       - name: Install toolchain
-        uses: moonrepo/setup-rust@d8048d4fdff0633123678b093726e6d7c8ad6de5 # v1.2.0
+        uses: moonrepo/setup-rust@e013866c4215f77c925f42f60257dec7dd18836e # v1.2.1
         with:
           channel: nightly
           cache: false
@@ -90,7 +90,7 @@ jobs:
       - name: Free Disk Space
         uses: ./.github/actions/free-disk-space
       - name: Install toolchain
-        uses: moonrepo/setup-rust@d8048d4fdff0633123678b093726e6d7c8ad6de5 # v1.2.0
+        uses: moonrepo/setup-rust@e013866c4215f77c925f42f60257dec7dd18836e # v1.2.1
         with:
           bins: cargo-nextest
           cache-base: main
@@ -118,7 +118,7 @@ jobs:
       - name: Free Disk Space
         uses: ./.github/actions/free-disk-space
       - name: Install toolchain
-        uses: moonrepo/setup-rust@d8048d4fdff0633123678b093726e6d7c8ad6de5 # v1.2.0
+        uses: moonrepo/setup-rust@e013866c4215f77c925f42f60257dec7dd18836e # v1.2.1
         with:
           cache-target: release
           cache-base: main

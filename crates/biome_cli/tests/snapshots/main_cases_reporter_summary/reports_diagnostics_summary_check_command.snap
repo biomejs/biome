@@ -87,6 +87,12 @@ lint/suspicious/noDebugger                              8 (8 error(s), 0 warning
 ```
 
 ```block
+Skipped 2 suggested fixes.
+If you wish to apply the suggested (unsafe) fixes, use the command biome check --write --unsafe
+
+```
+
+```block
 Checked 2 files in <TIME>. No fixes applied.
 Found 44 errors.
 ```

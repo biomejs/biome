@@ -125,8 +125,8 @@ impl SuppressionAction for JsSuppressionAction {
     /// There are some edge cases:
     /// - JSX elements might have newlines in their content;
     /// - JS templates are an exception to the rule. JS templates might contain expressions inside their
-    /// content, and those expressions can contain diagnostics. The function uses the token `${` as boundary
-    /// and tries to place the suppression comment after it;
+    ///     content, and those expressions can contain diagnostics. The function uses the token `${` as boundary
+    ///     and tries to place the suppression comment after it;
     fn apply_suppression(
         &self,
         mutation: &mut BatchMutation<Self::Language>,

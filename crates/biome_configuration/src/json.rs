@@ -1,6 +1,5 @@
-use crate::PlainIndentStyle;
 use biome_deserialize_macros::{Deserializable, Merge, Partial};
-use biome_formatter::{IndentWidth, LineEnding, LineWidth};
+use biome_formatter::{IndentStyle, IndentWidth, LineEnding, LineWidth};
 use biome_json_formatter::context::TrailingCommas;
 use bpaf::Bpaf;
 use serde::{Deserialize, Serialize};
@@ -22,6 +21,10 @@ pub struct JsonConfiguration {
     /// Linting options
     #[partial(type, bpaf(external(partial_json_linter), optional))]
     pub linter: JsonLinter,
+
+    /// Assists options
+    #[partial(type, bpaf(external(partial_json_assists), optional))]
+    pub assists: JsonAssists,
 }
 
 /// Options that changes how the JSON parser behaves
@@ -50,7 +53,7 @@ pub struct JsonFormatter {
 
     /// The indent style applied to JSON (and its super languages) files.
     #[partial(bpaf(long("json-formatter-indent-style"), argument("tab|space"), optional))]
-    pub indent_style: Option<PlainIndentStyle>,
+    pub indent_style: Option<IndentStyle>,
 
     /// The size of the indentation applied to JSON (and its super languages) files. Default to 2.
     #[partial(bpaf(long("json-formatter-indent-width"), argument("NUMBER"), optional))]
@@ -102,6 +105,14 @@ impl Default for JsonFormatter {
     }
 }
 
+impl PartialJsonFormatter {
+    pub fn get_linter_configuration(&self) -> JsonLinter {
+        JsonLinter {
+            enabled: self.enabled.unwrap_or_default(),
+        }
+    }
+}
+
 /// Linter options specific to the JSON linter
 #[derive(Clone, Debug, Deserialize, Eq, Partial, PartialEq, Serialize)]
 #[partial(derive(Bpaf, Clone, Deserializable, Eq, Merge, PartialEq))]
@@ -111,14 +122,6 @@ pub struct JsonLinter {
     /// Control the linter for JSON (and its super languages) files.
     #[partial(bpaf(long("json-linter-enabled"), argument("true|false"), optional))]
     pub enabled: bool,
-}
-
-impl PartialJsonFormatter {
-    pub fn get_linter_configuration(&self) -> JsonLinter {
-        JsonLinter {
-            enabled: self.enabled.unwrap_or_default(),
-        }
-    }
 }
 
 impl Default for JsonLinter {
@@ -132,5 +135,22 @@ impl PartialJsonLinter {
         JsonLinter {
             enabled: self.enabled.unwrap_or_default(),
         }
+    }
+}
+
+/// Linter options specific to the JSON linter
+#[derive(Clone, Debug, Deserialize, Eq, Partial, PartialEq, Serialize)]
+#[partial(derive(Bpaf, Clone, Deserializable, Eq, Merge, PartialEq))]
+#[partial(cfg_attr(feature = "schema", derive(schemars::JsonSchema)))]
+#[partial(serde(rename_all = "camelCase", default, deny_unknown_fields))]
+pub struct JsonAssists {
+    /// Control the linter for JSON (and its super languages) files.
+    #[partial(bpaf(long("json-assists-enabled"), argument("true|false"), optional))]
+    pub enabled: bool,
+}
+
+impl Default for JsonAssists {
+    fn default() -> Self {
+        Self { enabled: true }
     }
 }

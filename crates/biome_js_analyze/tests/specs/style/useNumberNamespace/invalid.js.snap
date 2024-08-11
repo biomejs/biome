@@ -218,7 +218,7 @@ invalid.js:11:10 lint/style/useNumberNamespace  FIXABLE  ━━━━━━━�
 ```
 invalid.js:13:13 lint/style/useNumberNamespace  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use Number.Infinity instead of the equivalent global.
+  ! Use Number.POSITIVE_INFINITY instead of the equivalent global.
   
     11 │ foo = { [NaN]: 1 };
     12 │ 
@@ -229,7 +229,7 @@ invalid.js:13:13 lint/style/useNumberNamespace  FIXABLE  ━━━━━━━�
   
   i ES2015 moved some globals into the Number namespace for consistency.
   
-  i Safe fix: Use Number.Infinity instead.
+  i Safe fix: Use Number.POSITIVE_INFINITY instead.
   
     11 11 │   foo = { [NaN]: 1 };
     12 12 │   
@@ -244,7 +244,7 @@ invalid.js:13:13 lint/style/useNumberNamespace  FIXABLE  ━━━━━━━�
 ```
 invalid.js:15:20 lint/style/useNumberNamespace  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use Number.Infinity instead of the equivalent global.
+  ! Use Number.POSITIVE_INFINITY instead of the equivalent global.
   
     13 │ const foo = Infinity;
     14 │ 
@@ -255,7 +255,7 @@ invalid.js:15:20 lint/style/useNumberNamespace  FIXABLE  ━━━━━━━�
   
   i ES2015 moved some globals into the Number namespace for consistency.
   
-  i Safe fix: Use Number.Infinity instead.
+  i Safe fix: Use Number.POSITIVE_INFINITY instead.
   
     13 13 │   const foo = Infinity;
     14 14 │   
@@ -270,7 +270,7 @@ invalid.js:15:20 lint/style/useNumberNamespace  FIXABLE  ━━━━━━━�
 ```
 invalid.js:18:17 lint/style/useNumberNamespace  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use Number.Infinity instead of the equivalent global.
+  ! Use Number.POSITIVE_INFINITY instead of the equivalent global.
   
     16 │ }
     17 │ 
@@ -281,7 +281,7 @@ invalid.js:18:17 lint/style/useNumberNamespace  FIXABLE  ━━━━━━━�
   
   i ES2015 moved some globals into the Number namespace for consistency.
   
-  i Safe fix: Use Number.Infinity instead.
+  i Safe fix: Use Number.POSITIVE_INFINITY instead.
   
     16 16 │   }
     17 17 │   
@@ -296,7 +296,7 @@ invalid.js:18:17 lint/style/useNumberNamespace  FIXABLE  ━━━━━━━�
 ```
 invalid.js:22:25 lint/style/useNumberNamespace  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use Number.Infinity instead of the equivalent global.
+  ! Use Number.POSITIVE_INFINITY instead of the equivalent global.
   
     20 │ const foo = { Infinity };
     21 │ 
@@ -307,7 +307,7 @@ invalid.js:22:25 lint/style/useNumberNamespace  FIXABLE  ━━━━━━━�
   
   i ES2015 moved some globals into the Number namespace for consistency.
   
-  i Safe fix: Use Number.Infinity instead.
+  i Safe fix: Use Number.POSITIVE_INFINITY instead.
   
     20 20 │   const foo = { Infinity };
     21 21 │   
@@ -322,7 +322,7 @@ invalid.js:22:25 lint/style/useNumberNamespace  FIXABLE  ━━━━━━━�
 ```
 invalid.js:24:16 lint/style/useNumberNamespace  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use Number.Infinity instead of the equivalent global.
+  ! Use Number.POSITIVE_INFINITY instead of the equivalent global.
   
     22 │ const foo = { Infinity: Infinity };
     23 │ 
@@ -333,7 +333,7 @@ invalid.js:24:16 lint/style/useNumberNamespace  FIXABLE  ━━━━━━━�
   
   i ES2015 moved some globals into the Number namespace for consistency.
   
-  i Safe fix: Use Number.Infinity instead.
+  i Safe fix: Use Number.POSITIVE_INFINITY instead.
   
     22 22 │   const foo = { Infinity: Infinity };
     23 23 │   
@@ -348,7 +348,7 @@ invalid.js:24:16 lint/style/useNumberNamespace  FIXABLE  ━━━━━━━�
 ```
 invalid.js:24:28 lint/style/useNumberNamespace  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use Number.Infinity instead of the equivalent global.
+  ! Use Number.NEGATIVE_INFINITY instead of the equivalent global.
   
     22 │ const foo = { Infinity: Infinity };
     23 │ 
@@ -359,7 +359,7 @@ invalid.js:24:28 lint/style/useNumberNamespace  FIXABLE  ━━━━━━━�
   
   i ES2015 moved some globals into the Number namespace for consistency.
   
-  i Safe fix: Use Number.Infinity instead.
+  i Safe fix: Use Number.NEGATIVE_INFINITY instead.
   
     22 22 │   const foo = { Infinity: Infinity };
     23 23 │   
@@ -374,7 +374,7 @@ invalid.js:24:28 lint/style/useNumberNamespace  FIXABLE  ━━━━━━━�
 ```
 invalid.js:26:17 lint/style/useNumberNamespace  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use Number.Infinity instead of the equivalent global.
+  ! Use Number.NEGATIVE_INFINITY instead of the equivalent global.
   
     24 │ const foo = { [Infinity]: -Infinity };
     25 │ 
@@ -385,7 +385,7 @@ invalid.js:26:17 lint/style/useNumberNamespace  FIXABLE  ━━━━━━━�
   
   i ES2015 moved some globals into the Number namespace for consistency.
   
-  i Safe fix: Use Number.Infinity instead.
+  i Safe fix: Use Number.NEGATIVE_INFINITY instead.
   
     24 24 │   const foo = { [Infinity]: -Infinity };
     25 25 │   
@@ -400,7 +400,7 @@ invalid.js:26:17 lint/style/useNumberNamespace  FIXABLE  ━━━━━━━�
 ```
 invalid.js:26:28 lint/style/useNumberNamespace  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use Number.Infinity instead of the equivalent global.
+  ! Use Number.POSITIVE_INFINITY instead of the equivalent global.
   
     24 │ const foo = { [Infinity]: -Infinity };
     25 │ 
@@ -411,7 +411,7 @@ invalid.js:26:28 lint/style/useNumberNamespace  FIXABLE  ━━━━━━━�
   
   i ES2015 moved some globals into the Number namespace for consistency.
   
-  i Safe fix: Use Number.Infinity instead.
+  i Safe fix: Use Number.POSITIVE_INFINITY instead.
   
     24 24 │   const foo = { [Infinity]: -Infinity };
     25 25 │   
@@ -426,7 +426,7 @@ invalid.js:26:28 lint/style/useNumberNamespace  FIXABLE  ━━━━━━━�
 ```
 invalid.js:28:26 lint/style/useNumberNamespace  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use Number.Infinity instead of the equivalent global.
+  ! Use Number.NEGATIVE_INFINITY instead of the equivalent global.
   
     26 │ const foo = { [-Infinity]: Infinity };
     27 │ 
@@ -437,7 +437,7 @@ invalid.js:28:26 lint/style/useNumberNamespace  FIXABLE  ━━━━━━━�
   
   i ES2015 moved some globals into the Number namespace for consistency.
   
-  i Safe fix: Use Number.Infinity instead.
+  i Safe fix: Use Number.NEGATIVE_INFINITY instead.
   
     26 26 │   const foo = { [-Infinity]: Infinity };
     27 27 │   
@@ -452,7 +452,7 @@ invalid.js:28:26 lint/style/useNumberNamespace  FIXABLE  ━━━━━━━�
 ```
 invalid.js:30:15 lint/style/useNumberNamespace  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use Number.Infinity instead of the equivalent global.
+  ! Use Number.POSITIVE_INFINITY instead of the equivalent global.
   
     28 │ const foo = { Infinity: -Infinity };
     29 │ 
@@ -463,7 +463,7 @@ invalid.js:30:15 lint/style/useNumberNamespace  FIXABLE  ━━━━━━━�
   
   i ES2015 moved some globals into the Number namespace for consistency.
   
-  i Safe fix: Use Number.Infinity instead.
+  i Safe fix: Use Number.POSITIVE_INFINITY instead.
   
     28 28 │   const foo = { Infinity: -Infinity };
     29 29 │   
@@ -478,7 +478,7 @@ invalid.js:30:15 lint/style/useNumberNamespace  FIXABLE  ━━━━━━━�
 ```
 invalid.js:32:16 lint/style/useNumberNamespace  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use Number.Infinity instead of the equivalent global.
+  ! Use Number.NEGATIVE_INFINITY instead of the equivalent global.
   
     30 │ const { foo = Infinity } = {};
     31 │ 
@@ -489,7 +489,7 @@ invalid.js:32:16 lint/style/useNumberNamespace  FIXABLE  ━━━━━━━�
   
   i ES2015 moved some globals into the Number namespace for consistency.
   
-  i Safe fix: Use Number.Infinity instead.
+  i Safe fix: Use Number.NEGATIVE_INFINITY instead.
   
     30 30 │   const { foo = Infinity } = {};
     31 31 │   
@@ -504,7 +504,7 @@ invalid.js:32:16 lint/style/useNumberNamespace  FIXABLE  ━━━━━━━�
 ```
 invalid.js:34:13 lint/style/useNumberNamespace  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use Number.Infinity instead of the equivalent global.
+  ! Use Number.POSITIVE_INFINITY instead of the equivalent global.
   
     32 │ const { foo = -Infinity } = {};
     33 │ 
@@ -515,7 +515,7 @@ invalid.js:34:13 lint/style/useNumberNamespace  FIXABLE  ━━━━━━━�
   
   i ES2015 moved some globals into the Number namespace for consistency.
   
-  i Safe fix: Use Number.Infinity instead.
+  i Safe fix: Use Number.POSITIVE_INFINITY instead.
   
     32 32 │   const { foo = -Infinity } = {};
     33 33 │   
@@ -530,7 +530,7 @@ invalid.js:34:13 lint/style/useNumberNamespace  FIXABLE  ━━━━━━━�
 ```
 invalid.js:36:14 lint/style/useNumberNamespace  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use Number.Infinity instead of the equivalent global.
+  ! Use Number.POSITIVE_INFINITY instead of the equivalent global.
   
     34 │ const foo = Infinity.toString();
     35 │ 
@@ -541,7 +541,7 @@ invalid.js:36:14 lint/style/useNumberNamespace  FIXABLE  ━━━━━━━�
   
   i ES2015 moved some globals into the Number namespace for consistency.
   
-  i Safe fix: Use Number.Infinity instead.
+  i Safe fix: Use Number.POSITIVE_INFINITY instead.
   
     34 34 │   const foo = Infinity.toString();
     35 35 │   
@@ -556,7 +556,7 @@ invalid.js:36:14 lint/style/useNumberNamespace  FIXABLE  ━━━━━━━�
 ```
 invalid.js:38:15 lint/style/useNumberNamespace  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use Number.Infinity instead of the equivalent global.
+  ! Use Number.NEGATIVE_INFINITY instead of the equivalent global.
   
     36 │ const foo = -Infinity.toString();
     37 │ 
@@ -567,7 +567,7 @@ invalid.js:38:15 lint/style/useNumberNamespace  FIXABLE  ━━━━━━━�
   
   i ES2015 moved some globals into the Number namespace for consistency.
   
-  i Safe fix: Use Number.Infinity instead.
+  i Safe fix: Use Number.NEGATIVE_INFINITY instead.
   
     36 36 │   const foo = -Infinity.toString();
     37 37 │   
@@ -582,7 +582,7 @@ invalid.js:38:15 lint/style/useNumberNamespace  FIXABLE  ━━━━━━━�
 ```
 invalid.js:40:14 lint/style/useNumberNamespace  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use Number.Infinity instead of the equivalent global.
+  ! Use Number.POSITIVE_INFINITY instead of the equivalent global.
   
     38 │ const foo = (-Infinity).toString();
     39 │ 
@@ -593,7 +593,7 @@ invalid.js:40:14 lint/style/useNumberNamespace  FIXABLE  ━━━━━━━�
   
   i ES2015 moved some globals into the Number namespace for consistency.
   
-  i Safe fix: Use Number.Infinity instead.
+  i Safe fix: Use Number.POSITIVE_INFINITY instead.
   
     38 38 │   const foo = (-Infinity).toString();
     39 39 │   
@@ -608,7 +608,7 @@ invalid.js:40:14 lint/style/useNumberNamespace  FIXABLE  ━━━━━━━�
 ```
 invalid.js:42:15 lint/style/useNumberNamespace  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use Number.Infinity instead of the equivalent global.
+  ! Use Number.NEGATIVE_INFINITY instead of the equivalent global.
   
     40 │ const foo = +Infinity;
     41 │ 
@@ -619,7 +619,7 @@ invalid.js:42:15 lint/style/useNumberNamespace  FIXABLE  ━━━━━━━�
   
   i ES2015 moved some globals into the Number namespace for consistency.
   
-  i Safe fix: Use Number.Infinity instead.
+  i Safe fix: Use Number.NEGATIVE_INFINITY instead.
   
     40 40 │   const foo = +Infinity;
     41 41 │   
@@ -634,7 +634,7 @@ invalid.js:42:15 lint/style/useNumberNamespace  FIXABLE  ━━━━━━━�
 ```
 invalid.js:44:14 lint/style/useNumberNamespace  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use Number.Infinity instead of the equivalent global.
+  ! Use Number.NEGATIVE_INFINITY instead of the equivalent global.
   
     42 │ const foo = +-Infinity;
     43 │ 
@@ -645,7 +645,7 @@ invalid.js:44:14 lint/style/useNumberNamespace  FIXABLE  ━━━━━━━�
   
   i ES2015 moved some globals into the Number namespace for consistency.
   
-  i Safe fix: Use Number.Infinity instead.
+  i Safe fix: Use Number.NEGATIVE_INFINITY instead.
   
     42 42 │   const foo = +-Infinity;
     43 43 │   
@@ -660,7 +660,7 @@ invalid.js:44:14 lint/style/useNumberNamespace  FIXABLE  ━━━━━━━�
 ```
 invalid.js:46:16 lint/style/useNumberNamespace  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use Number.Infinity instead of the equivalent global.
+  ! Use Number.NEGATIVE_INFINITY instead of the equivalent global.
   
     44 │ const foo = -Infinity;
     45 │ 
@@ -671,7 +671,7 @@ invalid.js:46:16 lint/style/useNumberNamespace  FIXABLE  ━━━━━━━�
   
   i ES2015 moved some globals into the Number namespace for consistency.
   
-  i Safe fix: Use Number.Infinity instead.
+  i Safe fix: Use Number.NEGATIVE_INFINITY instead.
   
     44 44 │   const foo = -Infinity;
     45 45 │   
@@ -686,7 +686,7 @@ invalid.js:46:16 lint/style/useNumberNamespace  FIXABLE  ━━━━━━━�
 ```
 invalid.js:48:17 lint/style/useNumberNamespace  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use Number.Infinity instead of the equivalent global.
+  ! Use Number.POSITIVE_INFINITY instead of the equivalent global.
   
     46 │ const foo = -(-Infinity);
     47 │ 
@@ -697,7 +697,7 @@ invalid.js:48:17 lint/style/useNumberNamespace  FIXABLE  ━━━━━━━�
   
   i ES2015 moved some globals into the Number namespace for consistency.
   
-  i Safe fix: Use Number.Infinity instead.
+  i Safe fix: Use Number.POSITIVE_INFINITY instead.
   
     46 46 │   const foo = -(-Infinity);
     47 47 │   
@@ -712,7 +712,7 @@ invalid.js:48:17 lint/style/useNumberNamespace  FIXABLE  ━━━━━━━�
 ```
 invalid.js:50:18 lint/style/useNumberNamespace  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use Number.Infinity instead of the equivalent global.
+  ! Use Number.NEGATIVE_INFINITY instead of the equivalent global.
   
     48 │ const foo = 1 - Infinity;
     49 │ 
@@ -723,7 +723,7 @@ invalid.js:50:18 lint/style/useNumberNamespace  FIXABLE  ━━━━━━━�
   
   i ES2015 moved some globals into the Number namespace for consistency.
   
-  i Safe fix: Use Number.Infinity instead.
+  i Safe fix: Use Number.NEGATIVE_INFINITY instead.
   
     48 48 │   const foo = 1 - Infinity;
     49 49 │   
@@ -738,7 +738,7 @@ invalid.js:50:18 lint/style/useNumberNamespace  FIXABLE  ━━━━━━━�
 ```
 invalid.js:52:64 lint/style/useNumberNamespace  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use Number.Infinity instead of the equivalent global.
+  ! Use Number.POSITIVE_INFINITY instead of the equivalent global.
   
     50 │ const foo = 1 - -Infinity;
     51 │ 
@@ -749,7 +749,7 @@ invalid.js:52:64 lint/style/useNumberNamespace  FIXABLE  ━━━━━━━�
   
   i ES2015 moved some globals into the Number namespace for consistency.
   
-  i Safe fix: Use Number.Infinity instead.
+  i Safe fix: Use Number.POSITIVE_INFINITY instead.
   
     50 50 │   const foo = 1 - -Infinity;
     51 51 │   
@@ -764,7 +764,7 @@ invalid.js:52:64 lint/style/useNumberNamespace  FIXABLE  ━━━━━━━�
 ```
 invalid.js:54:65 lint/style/useNumberNamespace  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use Number.Infinity instead of the equivalent global.
+  ! Use Number.NEGATIVE_INFINITY instead of the equivalent global.
   
     52 │ const isPositiveZero = (value) => value === 0 && 1 / value === Infinity;
     53 │ 
@@ -775,7 +775,7 @@ invalid.js:54:65 lint/style/useNumberNamespace  FIXABLE  ━━━━━━━�
   
   i ES2015 moved some globals into the Number namespace for consistency.
   
-  i Safe fix: Use Number.Infinity instead.
+  i Safe fix: Use Number.NEGATIVE_INFINITY instead.
   
     52 52 │   const isPositiveZero = (value) => value === 0 && 1 / value === Infinity;
     53 53 │   
@@ -998,7 +998,7 @@ invalid.js:66:19 lint/style/useNumberNamespace  FIXABLE  ━━━━━━━�
 ```
 invalid.js:69:10 lint/style/useNumberNamespace  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use Number.Infinity instead of the equivalent global.
+  ! Use Number.NEGATIVE_INFINITY instead of the equivalent global.
   
     68 │ function foo() {
   > 69 │ 	return -Infinity;
@@ -1008,7 +1008,7 @@ invalid.js:69:10 lint/style/useNumberNamespace  FIXABLE  ━━━━━━━�
   
   i ES2015 moved some globals into the Number namespace for consistency.
   
-  i Safe fix: Use Number.Infinity instead.
+  i Safe fix: Use Number.NEGATIVE_INFINITY instead.
   
     67 67 │   
     68 68 │   function foo() {
@@ -1099,7 +1099,7 @@ invalid.js:82:1 lint/style/useNumberNamespace  FIXABLE  ━━━━━━━━
 ```
 invalid.js:82:18 lint/style/useNumberNamespace  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use Number.Infinity instead of the equivalent global.
+  ! Use Number.POSITIVE_INFINITY instead of the equivalent global.
   
     80 │ // self.parseFloat(foo);
     81 │ 
@@ -1109,15 +1109,13 @@ invalid.js:82:18 lint/style/useNumberNamespace  FIXABLE  ━━━━━━━�
   
   i ES2015 moved some globals into the Number namespace for consistency.
   
-  i Safe fix: Use Number.Infinity instead.
+  i Safe fix: Use Number.POSITIVE_INFINITY instead.
   
     80 80 │   // self.parseFloat(foo);
     81 81 │   
     82    │ - globalThis.NaN·-·globalThis.Infinity;
-       82 │ + globalThis.NaN·-·globalThis.Number.Infinity;
+       82 │ + globalThis.NaN·-·globalThis.Number.POSITIVE_INFINITY;
     83 83 │   
   
 
 ```
-
-

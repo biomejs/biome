@@ -394,8 +394,7 @@ fn is_binary_expr_length_check(
 /// - `!!x`
 /// - `!x`
 /// - `!(x)`
-/// - `!(!x)`
-/// and combination of them nested
+/// - `!(!x)` and combination of them nested
 /// ```js
 /// !(Boolean(!(!x)))
 /// ```

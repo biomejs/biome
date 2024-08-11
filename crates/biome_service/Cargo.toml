@@ -52,7 +52,6 @@ enumflags2               = { workspace = true, features = ["serde"] }
 getrandom                = { workspace = true, features = ["js"] }
 ignore                   = { workspace = true }
 indexmap                 = { workspace = true, features = ["serde"] }
-lazy_static              = { workspace = true }
 oxc_resolver             = { workspace = true }
 regex                    = { workspace = true }
 rustc-hash               = { workspace = true }

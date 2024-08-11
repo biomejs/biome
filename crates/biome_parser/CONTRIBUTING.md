@@ -240,10 +240,10 @@ The parse rules will guide you in how to write your implementation and the parse
 
 * Optional token `'ident'?`: Use `p.eat(token)`. It eats the next token if it matches the passed-in token.
 * Required token `'ident'`: Use`p.expect(token)`. It eats the next token if it matches the passed-in token.
-It adds an `Expected 'x' but found 'y' instead` error and a missing marker if the token isn't present in the source code.
+  It adds an `Expected 'x' but found 'y' instead` error and a missing marker if the token isn't present in the source code.
 * Optional node `body: JsBlockStatement?`: Use`parse_block_statement(p).ok(p)`. It parses the block if it is present in the source code and adds a missing marker if it isn't.
 * Required node `body: JsBlockStatement`: Use `parse_block_statement(p).or_add_diagnostic(p, error_builder)`:
-it parses the block statement if it is present in the source code and adds a missing marker and an error if not.
+  it parses the block statement if it is present in the source code and adds a missing marker and an error if not.
 
 Using the above-described rules result in the following implementation for the `if` statement rule.
 

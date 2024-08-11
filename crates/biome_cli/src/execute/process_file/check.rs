@@ -1,3 +1,4 @@
+use crate::execute::process_file::assists::assists_with_guard;
 use crate::execute::process_file::format::format_with_guard;
 use crate::execute::process_file::lint::lint_with_guard;
 use crate::execute::process_file::organize_imports::organize_imports_with_guard;
@@ -36,9 +37,31 @@ pub(crate) fn check_file<'ctx>(
                     }
                 }
             }
+
             if file_features.supports_organize_imports() {
                 let organize_imports_result = organize_imports_with_guard(ctx, &mut workspace_file);
                 match organize_imports_result {
+                    Ok(status) => {
+                        if status.is_changed() {
+                            changed = true
+                        }
+                        if let FileStatus::Message(msg) = status {
+                            if msg.is_failure() {
+                                has_failures = true;
+                            }
+                            ctx.push_message(msg);
+                        }
+                    }
+                    Err(err) => {
+                        ctx.push_message(err);
+                        has_failures = true;
+                    }
+                }
+            }
+
+            if file_features.supports_assists() {
+                let assists_result = assists_with_guard(ctx, &mut workspace_file);
+                match assists_result {
                     Ok(status) => {
                         if status.is_changed() {
                             changed = true
