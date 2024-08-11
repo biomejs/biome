@@ -5,7 +5,8 @@ use biome_console::markup;
 use biome_deserialize_macros::Deserializable;
 use biome_js_syntax::{
     export_ext::{AnyJsExported, ExportedItem},
-    AnyJsBindingPattern, AnyJsExpression, AnyJsModuleItem, AnyJsStatement, JsModule,
+    AnyJsBindingPattern, AnyJsCallArgument, AnyJsExpression, AnyJsModuleItem, AnyJsStatement,
+    JsModule,
 };
 use biome_rowan::{AstNode, TextRange};
 use biome_string_case::Case;
@@ -220,14 +221,19 @@ impl Rule for UseComponentsOnlyModule {
             return exported_non_component_ids
                 .iter()
                 .filter_map(|id| {
-                    id.identifier
-                        .as_ref()
-                        .map(|identifier| UseComponentsOnlyModuleState {
-                            error: ErrorType::ExportedNonComponentWithComponent,
-                            range: identifier.range(),
-                        })
+                    let range = if let Some(identifier) = id.identifier.clone() {
+                        identifier.range()
+                    } else if let Some(exported) = id.exported.clone() {
+                        exported.range()
+                    } else {
+                        return None;
+                    };
+                    Some(UseComponentsOnlyModuleState {
+                        error: ErrorType::ExportedNonComponentWithComponent,
+                        range,
+                    })
                 })
-                .collect::<Vec<UseComponentsOnlyModuleState>>();
+                .collect();
         }
 
         local_component_ids
@@ -310,9 +316,29 @@ fn is_exported_react_component(any_exported_item: &ExportedItem) -> bool {
         any_exported_item.exported.clone()
     {
         if let Ok(AnyJsExpression::JsIdentifierExpression(fn_name)) = f.callee() {
-            if REACT_HOOKS.contains(&fn_name.text().as_str()) {
-                return true;
+            if !REACT_HOOKS.contains(&fn_name.text().as_str()) {
+                return false;
             }
+            let Ok(args) = f.arguments() else {
+                return false;
+            };
+            let itr = args
+                .args()
+                .into_iter()
+                .filter_map(Result::ok)
+                .collect::<Vec<_>>();
+            if itr.len() != 1 {
+                return false;
+            }
+            let AnyJsCallArgument::AnyJsExpression(AnyJsExpression::JsIdentifierExpression(arg)) =
+                &itr[0]
+            else {
+                return false;
+            };
+            let Ok(arg_name) = arg.name() else {
+                return false;
+            };
+            return Case::identify(&arg_name.text(), false) == Case::Pascal;
         }
     }
     let Some(exported_item_id) = any_exported_item.identifier.clone() else {
