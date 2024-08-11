@@ -6,8 +6,8 @@ use biome_js_syntax::{
     AnyJsExpression, JsCallArguments, JsCallExpression, JsNewExpression, JsRegexLiteralExpression,
     JsStringLiteralExpression,
 };
-use biome_rowan::{declare_node_union, AstNode, AstSeparatedList};
-use std::str::Chars;
+use biome_rowan::{declare_node_union, AstNode, AstSeparatedList, TextRange, TextSize};
+use core::str;
 
 declare_lint_rule! {
     /// Prevents from having control characters and some escape sequences that match control characters in regular expressions.
@@ -72,47 +72,10 @@ declare_node_union! {
     pub RegexExpressionLike = JsNewExpression | JsCallExpression | JsRegexLiteralExpression
 }
 
-fn decode_hex_character_to_code_point(iter: &mut Chars) -> Option<(String, u32)> {
-    let digits: String = iter.take(2).collect();
-    let code_point = u32::from_str_radix(&digits, 16).ok()?;
-    Some((digits, code_point))
-}
-
-fn decode_unicode_escape_to_code_point(iter: &mut Chars) -> Option<(String, u32)> {
-    let digits: String = iter.take(4).collect();
-    let code_point = u32::from_str_radix(&digits, 16).ok()?;
-    Some((digits, code_point))
-}
-
-fn decode_escaped_code_point_to_code_point(iter: &mut Chars) -> Option<(String, u32)> {
-    let first = iter.next()?;
-    if first == '{' {
-        // `\u{hh...}`
-        let digits: String = iter.take_while(|c| c != &'}').collect();
-        let code_point = u32::from_str_radix(&digits, 16).ok()?;
-        Some((format!("{{{digits}}}"), code_point))
-    } else {
-        // `\uhhhh`
-        let mut digits = String::new();
-        digits.push(first);
-        digits.extend(iter.take(3));
-        let code_point = u32::from_str_radix(&digits, 16).ok()?;
-        Some((digits, code_point))
-    }
-}
-
-fn add_control_character_to_vec(
-    prefix: &str,
-    iter: &mut Chars,
-    control_characters: &mut Vec<String>,
-    decode: fn(&mut Chars) -> Option<(String, u32)>,
-) {
-    if let Some((s, code_point)) = decode(iter) {
-        // ASCII control characters are represented by code points from 0 to 31
-        if (0..=31).contains(&code_point) {
-            control_characters.push(format!("{prefix}{s}"));
-        }
-    }
+fn decode_hex(digits: &[u8]) -> Option<u32> {
+    str::from_utf8(digits)
+        .ok()
+        .and_then(|digits| u32::from_str_radix(digits, 16).ok())
 }
 
 /// Collecting control characters for regex. The following characters in regular expression patterns are considered as control characters:
@@ -121,138 +84,157 @@ fn add_control_character_to_vec(
 /// - Unicode code point escapes range from `\u{0}` to `\u{1F}`.
 ///     - The Unicode flag must be set as true in order for these Unicode code point escapes to work: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/RegExp/unicode.
 /// - Unescaped raw characters from U+0000 to U+001F.
-fn collect_control_characters(pattern: &str, flags: &str) -> Option<Vec<String>> {
-    let mut control_characters: Vec<String> = Vec::new();
+fn collect_control_characters(
+    pattern_index: TextSize,
+    pattern: &str,
+    flags: &str,
+    is_pattern_in_str: bool,
+) -> Option<Vec<TextRange>> {
+    let mut control_chars: Vec<TextRange> = Vec::new();
     let is_unicode_flag_set = flags.contains('u') || flags.contains('v');
-    let mut iter = pattern.chars();
+    let bytes = pattern.as_bytes();
+    let mut iter = pattern.bytes().enumerate();
 
-    while let Some(c) = iter.next() {
-        match c {
-            '\\' => match iter.next() {
-                Some('x') => add_control_character_to_vec(
-                    "\\x",
-                    &mut iter,
-                    &mut control_characters,
-                    decode_hex_character_to_code_point,
-                ),
-                Some('u') if is_unicode_flag_set => add_control_character_to_vec(
-                    "\\u",
-                    &mut iter,
-                    &mut control_characters,
-                    decode_escaped_code_point_to_code_point,
-                ),
-                Some('u') => add_control_character_to_vec(
-                    "\\u",
-                    &mut iter,
-                    &mut control_characters,
-                    decode_unicode_escape_to_code_point,
-                ),
-                Some('\\') => continue,
-                _ => break,
-            },
-            _ => continue,
+    while let Some((index, c)) = iter.next() {
+        let decoded = match c {
+            b'\\' => {
+                let Some((escaped_index, c)) = iter.next() else {
+                    break;
+                };
+                let (is_str_escape_seq, escaped_index, c) = if c == b'\\' && is_pattern_in_str {
+                    let Some((escaped_index, c)) = iter.next() else {
+                        break;
+                    };
+                    (false, escaped_index, c)
+                } else {
+                    (is_pattern_in_str, escaped_index, c)
+                };
+                let hex_index = escaped_index + 1;
+                match c {
+                    b'x' => (
+                        decode_hex(&bytes[hex_index..(hex_index + 2)]),
+                        hex_index + 2,
+                    ),
+                    b'u' if is_str_escape_seq || is_unicode_flag_set => {
+                        if matches!(iter.next(), Some((_, b'{'))) {
+                            let hex_index = hex_index + 1;
+                            let Some((end, _)) = iter.find(|(_, c)| c == &b'}') else {
+                                continue;
+                            };
+                            (decode_hex(&bytes[hex_index..end]), end + 1)
+                        } else {
+                            (
+                                decode_hex(&bytes[hex_index..(hex_index + 4)]),
+                                hex_index + 4,
+                            )
+                        }
+                    }
+                    b'u' => (
+                        decode_hex(&bytes[hex_index..(hex_index + 4)]),
+                        hex_index + 4,
+                    ),
+                    // Control character in code source
+                    0..=31 => (Some(c as u32), escaped_index + 1),
+                    _ => {
+                        continue;
+                    }
+                }
+            }
+            // Control character in code source
+            0..=31 => (Some(c as u32), index + 1),
+            _ => {
+                continue;
+            }
+        };
+        let (Some(control_char), end) = decoded else {
+            continue;
+        };
+        if matches!(control_char, 0..=31) {
+            let range = TextRange::new(
+                pattern_index + TextSize::from(index as u32),
+                pattern_index + TextSize::from(end as u32),
+            );
+            control_chars.push(range);
         }
     }
-
-    if !control_characters.is_empty() {
-        Some(control_characters)
-    } else {
-        None
-    }
+    Some(control_chars)
 }
 
 fn collect_control_characters_from_expression(
     callee: &AnyJsExpression,
     js_call_arguments: &JsCallArguments,
-) -> Option<Vec<String>> {
-    if callee.as_js_reference_identifier()?.has_name("RegExp") {
+) -> Vec<TextRange> {
+    if callee
+        .as_js_reference_identifier()
+        .is_some_and(|name| name.has_name("RegExp"))
+    {
         let mut args = js_call_arguments.args().iter();
-        let raw_pattern = args
+        let Some(js_string_literal) = args
             .next()
             .and_then(|arg| arg.ok())
             .and_then(|arg| JsStringLiteralExpression::cast(arg.into_syntax()))
-            .and_then(|js_string_literal| js_string_literal.inner_string_text().ok())?
-            .to_string();
-
-        let unescaped_pattern = raw_pattern.replace(r"\\", r"\");
-
+        else {
+            return Default::default();
+        };
+        let Ok(pattern) = js_string_literal.inner_string_text() else {
+            return Default::default();
+        };
+        let pattern_start = js_string_literal.range().start() + TextSize::from(1);
         let flags = args
             .next()
             .and_then(|arg| arg.ok())
             .and_then(|arg| JsStringLiteralExpression::cast(arg.into_syntax()))
             .map(|js_string_literal| js_string_literal.text())
             .unwrap_or_default();
-
-        return collect_control_characters(&unescaped_pattern, &flags);
+        collect_control_characters(pattern_start, &pattern, &flags, true).unwrap_or_default()
+    } else {
+        Vec::new()
     }
-    None
 }
 
 impl Rule for NoControlCharactersInRegex {
     type Query = Ast<RegexExpressionLike>;
-    type State = Vec<String>;
-    type Signals = Option<Self::State>;
+    type State = TextRange;
+    type Signals = Vec<Self::State>;
     type Options = ();
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
         match node {
-            RegexExpressionLike::JsNewExpression(js_new_expression) => {
-                collect_control_characters_from_expression(
-                    &js_new_expression.callee().ok()?,
-                    &js_new_expression.arguments()?,
-                )
+            RegexExpressionLike::JsNewExpression(new_expr) => {
+                let (Ok(callee), Some(args)) = (new_expr.callee(), new_expr.arguments()) else {
+                    return Default::default();
+                };
+                collect_control_characters_from_expression(&callee, &args)
             }
-            RegexExpressionLike::JsCallExpression(js_call_expression) => {
-                collect_control_characters_from_expression(
-                    &js_call_expression.callee().ok()?,
-                    &js_call_expression.arguments().ok()?,
-                )
+            RegexExpressionLike::JsCallExpression(call_expr) => {
+                let (Ok(callee), Ok(args)) = (call_expr.callee(), call_expr.arguments()) else {
+                    return Default::default();
+                };
+                collect_control_characters_from_expression(&callee, &args)
             }
-            RegexExpressionLike::JsRegexLiteralExpression(js_regex_literal_expression) => {
-                let (pattern, flags) = js_regex_literal_expression.decompose().ok()?;
-                collect_control_characters(pattern.text(), flags.text())
+            RegexExpressionLike::JsRegexLiteralExpression(regex_literal_expr) => {
+                let Ok((pattern, flags)) = regex_literal_expr.decompose() else {
+                    return Default::default();
+                };
+                let pattern_start = regex_literal_expr.range().start() + TextSize::from(1);
+                collect_control_characters(pattern_start, pattern.text(), flags.text(), false)
+                    .unwrap_or_default()
             }
         }
     }
 
-    fn diagnostic(ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
+    fn diagnostic(_: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
         Some(RuleDiagnostic::new(
             rule_category!(),
-            ctx.query().range(),
+            state,
             markup! {
-                "Unexpected control character(s) in regular expression: "<Emphasis>{state.join(", ")}</Emphasis>""
+                "Unexpected control character in a regular expression."
             },
         ).note(
             markup! {
                 "Control characters are unusual and potentially incorrect inputs, so they are disallowed."
             }
         ))
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn test_collect_control_characters() {
-        assert_eq!(
-            collect_control_characters("\\x00\\x0F\\u0010\\u001F", ""),
-            Some(vec![
-                String::from("\\x00"),
-                String::from("\\x0F"),
-                String::from("\\u0010"),
-                String::from("\\u001F")
-            ])
-        );
-        assert_eq!(
-            collect_control_characters("\\u{0}\\u{1F}", "u"),
-            Some(vec![String::from("\\u{0}"), String::from("\\u{1F}")])
-        );
-        assert_eq!(
-            collect_control_characters("\\x20\\u0020\\u{20}\\t\\n", ""),
-            None
-        );
     }
 }
