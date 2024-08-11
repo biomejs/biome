@@ -144,7 +144,7 @@ jobs:
 
       # Upload the CLI binary as a build artifact
       - name: Upload CLI artifact
-        uses: actions/upload-artifact@89ef406dd8d7e03cfd12d9e0a4a378f454709029 # v4.3.5
+        uses: actions/upload-artifact@834a144ee995460fba8ed112a2fc961b36a5ec5a # v4.3.6
         with:
           name: cli-${{ matrix.target }}
           path: ./dist/biome-*
@@ -169,7 +169,7 @@ jobs:
         run: wasm-pack build --out-dir ../../packages/@biomejs/wasm-web --target web --release --scope biomejs crates/biome_wasm
 
       - name: Upload WASM artifact
-        uses: actions/upload-artifact@89ef406dd8d7e03cfd12d9e0a4a378f454709029 # v4.3.5
+        uses: actions/upload-artifact@834a144ee995460fba8ed112a2fc961b36a5ec5a # v4.3.6
         with:
           name: wasm-${{ matrix.target }}
           path: |
