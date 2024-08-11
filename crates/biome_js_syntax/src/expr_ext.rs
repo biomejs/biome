@@ -1168,6 +1168,8 @@ impl AnyJsExpression {
     /// - Negative numeric literal: -1
     /// - Parenthesized expression: (1)
     ///
+    /// ## Example
+    /// 
     /// ```
     /// use biome_js_factory::make;
     /// use biome_js_syntax::{
