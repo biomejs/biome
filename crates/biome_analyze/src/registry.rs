@@ -207,7 +207,7 @@ impl<L: Language + Default + 'static> RegistryVisitor<L> for RuleRegistryBuilder
                     .entry(key)
                     .or_insert_with(|| TypeRules::TypeRules { rules: Vec::new() })
                 else {
-                    unreachable!("the query type has already been registered as a SyntaxRules instead of a TypeRules, this is generally ca used by an implementation of `Queryable::key` returning a `QueryKey::TypeId` with the type ID of `SyntaxNode`")
+                    unreachable!("the query type has already been registered as a SyntaxRules instead of a TypeRules, this is generally caused by an implementation of `Queryable::key` returning a `QueryKey::TypeId` with the type ID of `SyntaxNode`")
                 };
 
                 rules.push(rule);
