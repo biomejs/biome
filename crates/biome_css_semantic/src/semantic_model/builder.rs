@@ -76,19 +76,11 @@ impl SemanticModelBuilder {
                     });
                 }
             }
-            SemanticEvent::PropertyDeclaration {
-                property,
-                value,
-                property_range,
-                value_range,
-            } => {
+            SemanticEvent::PropertyDeclaration { property, value } => {
                 if let Some(current_rule) = self.current_rule_stack.last_mut() {
-                    current_rule.declarations.push(Declaration {
-                        property,
-                        value,
-                        property_range,
-                        value_range,
-                    });
+                    current_rule
+                        .declarations
+                        .push(Declaration { property, value });
                 }
             }
         }

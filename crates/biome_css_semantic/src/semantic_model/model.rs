@@ -42,13 +42,28 @@ impl SemanticModel {
 #[derive(Debug)]
 pub(crate) struct SemanticModelData {
     pub(crate) root: CssRoot,
-    // Map to each by its range
+    /// Map to each by its range
     pub(crate) node_by_range: FxHashMap<TextRange, CssSyntaxNode>,
-    // List of all the rules
+    /// List of all the css rules
     pub(crate) rules: Vec<Rule>,
 }
 
-/// Represents a CSS rule, including its selectors, declarations, and nested rules.
+/// Represents a CSS rule set, including its selectors, declarations, and nested rules.
+///
+/// ┌─ Rule Set ──────────────────────────┐
+/// │                                     │
+/// │  p {                ← Selector      │
+/// │    color: red;      ← Declaration   │
+/// │     │       │                       │
+/// │     │       └─ Value                │
+/// │     └─ Property                     |
+/// |                                     |
+/// │    .child {         ← children      │
+/// │      color: blue;                   |
+/// |    }                                |
+/// │  }                                  │
+/// └─────────────────────────────────────┘
+///
 #[derive(Debug)]
 pub struct Rule {
     /// The selectors associated with this rule.
@@ -62,16 +77,24 @@ pub struct Rule {
 }
 
 /// Represents a CSS declaration (property-value pair).
-#[derive(Debug, Clone)]
+#[derive(Debug)]
 pub struct Declaration {
     /// The property name.
-    pub property: String,
+    pub property: CssProperty,
     /// The property value.
+    pub value: CssValue,
+}
+
+#[derive(Debug)]
+pub struct CssProperty {
+    pub name: String,
+    pub range: TextRange,
+}
+
+#[derive(Debug)]
+pub struct CssValue {
     pub value: String,
-    /// The text range of the property in the source document.
-    pub property_range: TextRange,
-    /// The text range of the value in the source document.
-    pub value_range: TextRange,
+    pub range: TextRange,
 }
 
 /// Represents a CSS selector.

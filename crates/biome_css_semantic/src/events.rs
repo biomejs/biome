@@ -3,7 +3,10 @@ use std::collections::VecDeque;
 use biome_css_syntax::{AnyCssSelector, CssRelativeSelector, CssSyntaxKind::*};
 use biome_rowan::{AstNode, TextRange};
 
-use crate::semantic_model::model::Specificity;
+use crate::{
+    model::{CssProperty, CssValue},
+    semantic_model::model::Specificity,
+};
 
 #[derive(Debug)]
 pub enum SemanticEvent {
@@ -15,10 +18,8 @@ pub enum SemanticEvent {
         specificity: Specificity,
     },
     PropertyDeclaration {
-        property: String,
-        value: String,
-        property_range: TextRange,
-        value_range: TextRange,
+        property: CssProperty,
+        value: CssValue,
     },
 }
 
@@ -65,10 +66,14 @@ impl SemanticEventExtractor {
                 if let Some(property_name) = node.first_child().and_then(|p| p.first_child()) {
                     if let Some(value) = property_name.next_sibling() {
                         self.stash.push_back(SemanticEvent::PropertyDeclaration {
-                            property: property_name.text_trimmed().to_string(),
-                            value: value.text_trimmed().to_string(),
-                            property_range: property_name.text_range(),
-                            value_range: value.text_range(),
+                            property: CssProperty {
+                                name: property_name.text_trimmed().to_string(),
+                                range: property_name.text_range(),
+                            },
+                            value: CssValue {
+                                value: value.text_trimmed().to_string(),
+                                range: value.text_range(),
+                            },
                         });
                     }
                 }
