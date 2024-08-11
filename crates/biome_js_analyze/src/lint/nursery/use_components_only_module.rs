@@ -249,62 +249,42 @@ impl Rule for UseComponentsOnlyModule {
     }
 
     fn diagnostic(_ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
-        match state.error {
-            ErrorType::ExportedNonComponentWithComponent => Some(
-                RuleDiagnostic::new(
-                    rule_category!(),
-                    state.range,
-                    markup! {
-                        "Exporting a non-component with components is not allowed."
-                    },
-                )
-                .note(markup! {
-                    <Hyperlink href="https://github.com/facebook/react/tree/main/packages/react-refresh">"Fast Refresh"</Hyperlink>" only works when a file only exports components."
-                })
-                .note(markup! {
-                    "Consider separating non-component exports into a new file."
-                })
-                .note(markup! {
-                    "If it is a component, it may not be following the variable naming conventions."
-                }),
+        let (message, suggestion, error_item) = match state.error {
+            ErrorType::ExportedNonComponentWithComponent => (
+                "Exporting a non-component with components is not allowed.",
+                "Consider separating non-component exports into a new file.",
+                "a component",
             ),
-            ErrorType::UnexportedComponent => Some(
-                RuleDiagnostic::new(
-                    rule_category!(),
-                    state.range,
-                    markup! {
-                        "Unexported components are not allowed."
-                    },
-                )
-                .note(markup! {
-                    <Hyperlink href="https://github.com/facebook/react/tree/main/packages/react-refresh">"Fast Refresh"</Hyperlink>" only works when a file only exports components."
-                })
-                .note(markup! {
-                    "Consider separating components into a new file."
-                })
-                .note(markup! {
-                    "If it is not a component, it may not be following the variable naming conventions."
-                })
+            ErrorType::UnexportedComponent => (
+                "Unexported components are not allowed.",
+                "Consider separating component exports into a new file.",
+                "not a component",
             ),
-            ErrorType::NoExport => Some(
-                RuleDiagnostic::new(
-                    rule_category!(),
-                    state.range,
-                    markup! {
-                        "Components should be exported."
-                    },
-                )
-                .note(markup! {
-                    <Hyperlink href="https://github.com/facebook/react/tree/main/packages/react-refresh">"Fast Refresh"</Hyperlink>" only works when a file only exports components."
-                })
-                .note(markup! {
-                    "Consider separating component exports into a new file."
-                })
-                .note(markup! {
-                    "If it is not a component, it may not be following the variable naming conventions."
-                }),
+            ErrorType::NoExport => (
+                "Components should be exported.",
+                "Consider separating component exports into a new file.",
+                "not a component",
+            ),
+        };
+
+        Some(
+            RuleDiagnostic::new(
+                rule_category!(),
+                state.range,
+                markup! {
+                    {message}
+                },
             )
-        }
+            .note(markup! {
+                <Hyperlink href="https://github.com/facebook/react/tree/main/packages/react-refresh">"Fast Refresh"</Hyperlink>" only works when a file only exports components."
+            })
+            .note(markup! {
+                {suggestion}
+            })
+            .note(markup! {
+                "If it is "{error_item}", it may not be following the variable naming conventions."
+            }),
+        )
     }
 }
 
