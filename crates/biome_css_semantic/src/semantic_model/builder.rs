@@ -2,13 +2,14 @@ use biome_css_syntax::{CssRoot, CssSyntaxKind, CssSyntaxNode};
 use biome_rowan::TextRange;
 use rustc_hash::FxHashMap;
 
-use super::model::{Declaration, Rule, Selector, SemanticModel, SemanticModelData};
+use super::model::{CssVariable, Declaration, Rule, Selector, SemanticModel, SemanticModelData};
 use crate::events::SemanticEvent;
 
 pub struct SemanticModelBuilder {
     root: CssRoot,
     node_by_range: FxHashMap<TextRange, CssSyntaxNode>,
     rules: Vec<Rule>,
+    global_css_variables: FxHashMap<String, CssVariable>,
     current_rule_stack: Vec<Rule>,
 }
 
@@ -19,6 +20,7 @@ impl SemanticModelBuilder {
             node_by_range: FxHashMap::default(),
             rules: Vec::new(),
             current_rule_stack: Vec::new(),
+            global_css_variables: FxHashMap::default(),
         }
     }
 
@@ -27,6 +29,7 @@ impl SemanticModelBuilder {
             root: self.root,
             node_by_range: self.node_by_range,
             rules: self.rules,
+            global_css_variables: self.global_css_variables,
         };
         SemanticModel::new(data)
     }

@@ -46,6 +46,8 @@ pub(crate) struct SemanticModelData {
     pub(crate) node_by_range: FxHashMap<TextRange, CssSyntaxNode>,
     /// List of all the css rules
     pub(crate) rules: Vec<Rule>,
+    /// Map of CSS variables declared in the `:root` selector or using the @property rule.
+    pub(crate) global_css_variables: FxHashMap<String, CssVariable>,
 }
 
 /// Represents a CSS rule set, including its selectors, declarations, and nested rules.
@@ -95,6 +97,22 @@ pub struct CssProperty {
 pub struct CssValue {
     pub value: String,
     pub range: TextRange,
+}
+
+#[derive(Debug)]
+pub struct CssVariable {
+    pub name: CssProperty,
+    pub value: CssValue,
+    pub range: TextRange,
+    pub source: CssVariableSource,
+}
+
+#[derive(Debug)]
+pub enum CssVariableSource {
+    /// :root
+    Root,
+    /// @property
+    AtProperty,
 }
 
 /// Represents a CSS selector.
