@@ -106,7 +106,7 @@ expression: invalid.css
 
 # Diagnostics
 ```
-invalid.css:2:2 lint/nursery/noIrregularWhitespaceCss ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:2:2 lint/nursery/noIrregularWhitespace ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Irregular whitespace found.
   
@@ -122,7 +122,7 @@ invalid.css:2:2 lint/nursery/noIrregularWhitespaceCss ━━━━━━━━�
 ```
 
 ```
-invalid.css:4:2 lint/nursery/noIrregularWhitespaceCss ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:4:2 lint/nursery/noIrregularWhitespace ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Irregular whitespace found.
   
@@ -139,7 +139,7 @@ invalid.css:4:2 lint/nursery/noIrregularWhitespaceCss ━━━━━━━━�
 ```
 
 ```
-invalid.css:6:12 lint/nursery/noIrregularWhitespaceCss ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:6:12 lint/nursery/noIrregularWhitespace ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Irregular whitespace found.
   
@@ -156,7 +156,7 @@ invalid.css:6:12 lint/nursery/noIrregularWhitespaceCss ━━━━━━━━�
 ```
 
 ```
-invalid.css:18:12 lint/nursery/noIrregularWhitespaceCss ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:18:12 lint/nursery/noIrregularWhitespace ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Irregular whitespace found.
   
@@ -173,7 +173,7 @@ invalid.css:18:12 lint/nursery/noIrregularWhitespaceCss ━━━━━━━━
 ```
 
 ```
-invalid.css:23:9 lint/nursery/noIrregularWhitespaceCss ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:23:9 lint/nursery/noIrregularWhitespace ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Irregular whitespace found.
   
@@ -190,7 +190,7 @@ invalid.css:23:9 lint/nursery/noIrregularWhitespaceCss ━━━━━━━━�
 ```
 
 ```
-invalid.css:30:25 lint/nursery/noIrregularWhitespaceCss ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:30:25 lint/nursery/noIrregularWhitespace ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Irregular whitespace found.
   
@@ -207,7 +207,7 @@ invalid.css:30:25 lint/nursery/noIrregularWhitespaceCss ━━━━━━━━
 ```
 
 ```
-invalid.css:34:12 lint/nursery/noIrregularWhitespaceCss ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:34:12 lint/nursery/noIrregularWhitespace ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Irregular whitespace found.
   
@@ -224,7 +224,7 @@ invalid.css:34:12 lint/nursery/noIrregularWhitespaceCss ━━━━━━━━
 ```
 
 ```
-invalid.css:38:12 lint/nursery/noIrregularWhitespaceCss ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:38:12 lint/nursery/noIrregularWhitespace ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Irregular whitespace found.
   
@@ -241,7 +241,7 @@ invalid.css:38:12 lint/nursery/noIrregularWhitespaceCss ━━━━━━━━
 ```
 
 ```
-invalid.css:42:12 lint/nursery/noIrregularWhitespaceCss ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:42:12 lint/nursery/noIrregularWhitespace ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Irregular whitespace found.
   
@@ -258,7 +258,7 @@ invalid.css:42:12 lint/nursery/noIrregularWhitespaceCss ━━━━━━━━
 ```
 
 ```
-invalid.css:46:12 lint/nursery/noIrregularWhitespaceCss ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:46:12 lint/nursery/noIrregularWhitespace ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Irregular whitespace found.
   
@@ -275,7 +275,7 @@ invalid.css:46:12 lint/nursery/noIrregularWhitespaceCss ━━━━━━━━
 ```
 
 ```
-invalid.css:51:14 lint/nursery/noIrregularWhitespaceCss ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:51:14 lint/nursery/noIrregularWhitespace ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Irregular whitespace found.
   
@@ -292,7 +292,7 @@ invalid.css:51:14 lint/nursery/noIrregularWhitespaceCss ━━━━━━━━
 ```
 
 ```
-invalid.css:56:11 lint/nursery/noIrregularWhitespaceCss ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:56:11 lint/nursery/noIrregularWhitespace ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Irregular whitespace found.
   
@@ -309,7 +309,7 @@ invalid.css:56:11 lint/nursery/noIrregularWhitespaceCss ━━━━━━━━
 ```
 
 ```
-invalid.css:56:11 lint/nursery/noIrregularWhitespaceCss ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:56:11 lint/nursery/noIrregularWhitespace ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Irregular whitespace found.
   
@@ -326,7 +326,7 @@ invalid.css:56:11 lint/nursery/noIrregularWhitespaceCss ━━━━━━━━
 ```
 
 ```
-invalid.css:60:7 lint/nursery/noIrregularWhitespaceCss ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:60:7 lint/nursery/noIrregularWhitespace ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Irregular whitespace found.
   
@@ -343,7 +343,7 @@ invalid.css:60:7 lint/nursery/noIrregularWhitespaceCss ━━━━━━━━�
 ```
 
 ```
-invalid.css:67:6 lint/nursery/noIrregularWhitespaceCss ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:67:6 lint/nursery/noIrregularWhitespace ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Irregular whitespace found.
   
@@ -360,7 +360,7 @@ invalid.css:67:6 lint/nursery/noIrregularWhitespaceCss ━━━━━━━━�
 ```
 
 ```
-invalid.css:76:11 lint/nursery/noIrregularWhitespaceCss ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:76:11 lint/nursery/noIrregularWhitespace ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Irregular whitespace found.
   
@@ -377,7 +377,7 @@ invalid.css:76:11 lint/nursery/noIrregularWhitespaceCss ━━━━━━━━
 ```
 
 ```
-invalid.css:85:11 lint/nursery/noIrregularWhitespaceCss ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:85:11 lint/nursery/noIrregularWhitespace ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Irregular whitespace found.
   
@@ -394,7 +394,7 @@ invalid.css:85:11 lint/nursery/noIrregularWhitespaceCss ━━━━━━━━
 ```
 
 ```
-invalid.css:95:11 lint/nursery/noIrregularWhitespaceCss ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:95:11 lint/nursery/noIrregularWhitespace ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Irregular whitespace found.
   

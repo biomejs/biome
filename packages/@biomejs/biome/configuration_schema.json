@@ -1947,13 +1947,6 @@
 						{ "type": "null" }
 					]
 				},
-				"noIrregularWhitespaceCss": {
-					"description": "Disallows the use of irregular whitespace.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
-						{ "type": "null" }
-					]
-				},
 				"noLabelWithoutControl": {
 					"description": "Enforce that a label element or component has a text label and an associated input.",
 					"anyOf": [
