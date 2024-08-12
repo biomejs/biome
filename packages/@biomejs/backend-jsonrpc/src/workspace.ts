@@ -1187,10 +1187,6 @@ export interface Nursery {
 	 */
 	noIrregularWhitespace?: RuleConfiguration_for_Null;
 	/**
-	 * Disallows the use of irregular whitespace.
-	 */
-	noIrregularWhitespaceCss?: RuleConfiguration_for_Null;
-	/**
 	 * Enforce that a label element or component has a text label and an associated input.
 	 */
 	noLabelWithoutControl?: RuleConfiguration_for_NoLabelWithoutControlOptions;

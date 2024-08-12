@@ -9,7 +9,7 @@ pub mod no_empty_block;
 pub mod no_important_in_keyframe;
 pub mod no_invalid_direction_in_linear_gradient;
 pub mod no_invalid_position_at_import_rule;
-pub mod no_irregular_whitespace_css;
+pub mod no_irregular_whitespace;
 pub mod no_shorthand_property_overrides;
 pub mod no_unknown_function;
 pub mod no_unknown_media_feature_name;
@@ -33,7 +33,7 @@ declare_lint_group! {
             self :: no_important_in_keyframe :: NoImportantInKeyframe ,
             self :: no_invalid_direction_in_linear_gradient :: NoInvalidDirectionInLinearGradient ,
             self :: no_invalid_position_at_import_rule :: NoInvalidPositionAtImportRule ,
-            self :: no_irregular_whitespace_css :: NoIrregularWhitespaceCss ,
+            self :: no_irregular_whitespace :: NoIrregularWhitespace ,
             self :: no_shorthand_property_overrides :: NoShorthandPropertyOverrides ,
             self :: no_unknown_function :: NoUnknownFunction ,
             self :: no_unknown_media_feature_name :: NoUnknownMediaFeatureName ,
