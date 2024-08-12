@@ -20,11 +20,11 @@ declare_lint_rule! {
     /// ### Invalid
     ///
     /// ```js,expect_diagnostic
-    /// constcount;
+    /// letcount;
     /// ```
     ///
     /// ```js,expect_diagnostic
-    /// const foo;
+    /// let foo;
     /// ```
     ///
     /// ### Valid
