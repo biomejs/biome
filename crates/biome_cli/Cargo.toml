@@ -55,7 +55,7 @@ tokio                    = { workspace = true, features = ["io-std", "io-util", 
 tracing                  = { workspace = true }
 tracing-appender         = "0.2.3"
 tracing-subscriber       = { workspace = true, features = ["env-filter", "json"] }
-tracing-tree             = "0.3.1"
+tracing-tree             = "0.4.0"
 
 [target.'cfg(unix)'.dependencies]
 libc  = "0.2.154"
@@ -65,7 +65,7 @@ tokio = { workspace = true, features = ["process"] }
 mimalloc = "0.1.43"
 
 [target.'cfg(all(target_family="unix", not(all(target_arch = "aarch64", target_env = "musl"))))'.dependencies]
-tikv-jemallocator = "0.5.1"
+tikv-jemallocator = "0.6.0"
 
 [dev-dependencies]
 biome_css_formatter  = { workspace = true }
