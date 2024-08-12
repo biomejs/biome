@@ -1,7 +1,9 @@
-use biome_rowan::TokenText;
+use biome_js_syntax::JsTemplateElement;
+use biome_rowan::{AstNode, TextRange, TextSize, TokenText};
 use std::cmp::Ordering;
 
 use super::{
+    any_class_string_like::AnyClassStringLike,
     class_info::{get_class_info, ClassInfo},
     sort_config::SortConfig,
 };
@@ -126,9 +128,28 @@ fn compare_classes(a: &ClassInfo, b: &ClassInfo) -> Ordering {
 }
 
 /// Sort the given class string according to the given sort config.
-pub fn sort_class_name(class_name: &TokenText, sort_config: &SortConfig) -> String {
+/// ignore_prefix and ignore_postfix are used to ignore the first and last class respectively.
+pub fn sort_class_name(
+    class_name: &TokenText,
+    sort_config: &SortConfig,
+    ignore_prefix: bool,
+    ignore_postfix: bool,
+) -> String {
     // Obtain classes by splitting the class string by whitespace.
-    let classes = class_name.split_whitespace().collect::<Vec<&str>>();
+    let mut classes_iter = class_name.split_whitespace();
+    let class_str_prefix = if ignore_prefix {
+        classes_iter.next()
+    } else {
+        None
+    };
+    let class_str_postfix = if ignore_postfix {
+        classes_iter.next_back()
+    } else {
+        None
+    };
+
+    // Collect the remaining classes into a vector if needed.
+    let classes: Vec<&str> = classes_iter.collect();
     let classes_len = classes.len();
 
     // Separate custom classes from recognized classes, and compute the recognized classes' info.
@@ -162,7 +183,18 @@ pub fn sort_class_name(class_name: &TokenText, sort_config: &SortConfig) -> Stri
             .map(|class_info| class_info.text.as_str()),
     );
 
+    // Add the first class back if it was ignored.
+    if let Some(class_str_prefix) = class_str_prefix {
+        sorted_classes.insert(0, class_str_prefix);
+    }
+
+    // Add the last class back if it was ignored.
+    if let Some(class_str_postfix) = class_str_postfix {
+        sorted_classes.push(class_str_postfix);
+    }
+
     let mut result = sorted_classes.join(" ");
+
     if classes_len > 0 {
         // restore front space
         if class_name.starts_with(' ') {
@@ -176,4 +208,65 @@ pub fn sort_class_name(class_name: &TokenText, sort_config: &SortConfig) -> Stri
     }
 
     result
+}
+
+// Get the range of the class name to be sorted.
+pub fn get_sort_class_name_range(
+    class_name: &TokenText,
+    range: &TextRange,
+    ignore_prefix: bool,
+    ignore_postfix: bool,
+) -> Option<TextRange> {
+    let mut class_iter = class_name.split_whitespace();
+    let first_class_len = class_iter.next().map_or(0, |s| s.len()) as u32;
+    let last_class_len = class_iter.next_back().map_or(0, |s| s.len()) as u32;
+    let offset_prefix = if ignore_prefix { first_class_len } else { 0 };
+    let offset_postfix = if ignore_postfix { last_class_len } else { 0 };
+
+    let start = range.start() + TextSize::from(offset_prefix);
+    let end = range.end() - TextSize::from(offset_postfix);
+
+    if end < start {
+        return None;
+    }
+
+    Some(TextRange::new(start, end))
+}
+
+// Returns whether the given node should be ignored prefix when sorting.
+pub fn should_ignore_prefix(node: &AnyClassStringLike) -> bool {
+    if let Some(value) = node.value() {
+        // For example, for <div class={`${variable}mx-2 m-5`} />, we should ignore "${variable}mx-2" as a sorting item because it is an indivisible whole.
+        let ignore_prefix = if let AnyClassStringLike::JsTemplateChunkElement(_template) = node {
+            !value.starts_with(' ')
+                && node
+                    .syntax()
+                    .prev_sibling()
+                    .map_or(false, |sibling| JsTemplateElement::can_cast(sibling.kind()))
+        } else {
+            false
+        };
+        ignore_prefix
+    } else {
+        false
+    }
+}
+
+// Returns whether the given node should be ignored postfix when sorting.
+pub fn should_ignore_postfix(node: &AnyClassStringLike) -> bool {
+    if let Some(value) = node.value() {
+        // For example, for <div class={`mx-2 m-5${variable}`} />, we should ignore "m-5${variable}" as a sorting item because it is an indivisible whole.
+        let ignore_postfix = if let AnyClassStringLike::JsTemplateChunkElement(_template) = node {
+            !value.ends_with(' ')
+                && node
+                    .syntax()
+                    .next_sibling()
+                    .map_or(false, |sibling| JsTemplateElement::can_cast(sibling.kind()))
+        } else {
+            false
+        };
+        ignore_postfix
+    } else {
+        false
+    }
 }

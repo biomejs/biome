@@ -310,6 +310,8 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
   Contributed by @Conaclos
 
+- [useSortedClasses](https://biomejs.dev/linter/rules/use-sorted-classes/) lint error with Template literals ([#3394](https://github.com/biomejs/biome/issues/3394)). Contributed by @hangaoke1
+
 ### Parser
 
 #### Bug fixes
