@@ -92,12 +92,9 @@ jobs:
       - name: Install toolchain
         uses: moonrepo/setup-rust@e013866c4215f77c925f42f60257dec7dd18836e # v1.2.1
         with:
-          bins: cargo-nextest
           cache-base: main
       - name: Run tests
-        run: cargo nextest run --workspace --verbose
-      - name: Run doctests
-        run: cargo test --doc
+        run: cargo test --workspace
 
   test-node-api:
     name: Test node.js API

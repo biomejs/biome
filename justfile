@@ -11,12 +11,12 @@ alias qt := test-quick
 # Installs the tools needed to develop
 install-tools:
 	cargo install cargo-binstall
-	cargo binstall cargo-insta cargo-nextest taplo-cli wasm-pack wasm-tools knope
+	cargo binstall cargo-insta taplo-cli wasm-pack wasm-tools knope
 
 # Upgrades the tools needed to develop
 upgrade-tools:
 	cargo install cargo-binstall --force
-	cargo binstall cargo-insta cargo-nextest taplo-cli wasm-pack wasm-tools knope --force
+	cargo binstall cargo-insta taplo-cli wasm-pack wasm-tools knope --force
 
 # Generate all files across crates and tools. You rarely want to use it locally.
 gen-all:
@@ -109,11 +109,11 @@ _touch file:
 
 # Run tests of all crates
 test:
-	cargo nextest run --no-fail-fast
+	cargo test run --no-fail-fast
 
 # Run tests for the crate passed as argument e.g. just test-create biome_cli
 test-crate name:
-	cargo nextest run -E 'package({{name}})' --no-fail-fast
+	cargo test run -p {{name}} --no-fail-fast
 
 # Run doc tests
 test-doc:

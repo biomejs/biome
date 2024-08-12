@@ -1,8 +1,7 @@
-
 # This workflow run when something is pushed on main and it does:
-  # - normal checks like in the normal PRs
-  # - expand the test suite to be run on multiple OS
-  # - runs the coverage and prints in the command line
+# - normal checks like in the normal PRs
+# - expand the test suite to be run on multiple OS
+# - runs the coverage and prints in the command line
 name: CI on main
 on:
   workflow_dispatch:
@@ -92,12 +91,9 @@ jobs:
       - name: Install toolchain
         uses: moonrepo/setup-rust@e013866c4215f77c925f42f60257dec7dd18836e # v1.2.1
         with:
-          bins: cargo-nextest
           cache-base: main
       - name: Run tests on ${{ matrix.os }}
-        run: cargo nextest run --workspace --verbose
-      - name: Clean cache
-        run: cargo cache --autoclean
+        run: cargo test --workspace
 
   coverage:
     name: Test262 Coverage
@@ -105,7 +101,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [windows-latest, ubuntu-latest]
+        os: [ windows-latest, ubuntu-latest ]
     steps:
       # ref: https://github.com/orgs/community/discussions/26952
       - name: Support longpaths
