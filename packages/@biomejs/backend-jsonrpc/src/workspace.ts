@@ -1187,10 +1187,6 @@ export interface Nursery {
 	 */
 	noIrregularWhitespace?: RuleConfiguration_for_Null;
 	/**
-	 * Disallows the use of irregular whitespace.
-	 */
-	noIrregularWhitespaceCss?: RuleConfiguration_for_Null;
-	/**
 	 * Enforce that a label element or component has a text label and an associated input.
 	 */
 	noLabelWithoutControl?: RuleConfiguration_for_NoLabelWithoutControlOptions;
@@ -2635,7 +2631,6 @@ export type Category =
 	| "lint/nursery/noInvalidDirectionInLinearGradient"
 	| "lint/nursery/noInvalidPositionAtImportRule"
 	| "lint/nursery/noIrregularWhitespace"
-	| "lint/nursery/noIrregularWhitespaceCss"
 	| "lint/nursery/noLabelWithoutControl"
 	| "lint/nursery/noMisplacedAssertion"
 	| "lint/nursery/noMissingGenericFamilyKeyword"

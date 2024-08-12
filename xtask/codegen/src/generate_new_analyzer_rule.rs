@@ -177,7 +177,7 @@ use biome_rowan::AstNode;
     /// ```
     ///
     pub {rule_name_upper_camel} {{
-        version: "1.8.0",
+        version: "next",
         name: "{rule_name_lower_camel}",
         language: "css",
         recommended: false,
@@ -257,6 +257,7 @@ use biome_rowan::AstNode;
     pub {rule_name_upper_camel} {{
         version: "next",
         name: "{rule_name_lower_camel}",
+        language: "json",
         recommended: false,
     }}
 }}

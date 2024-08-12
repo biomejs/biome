@@ -31,12 +31,26 @@ pub struct SemanticEventExtractor {
 impl SemanticEventExtractor {
     pub fn enter(&mut self, node: &biome_css_syntax::CssSyntaxNode) {
         match node.kind() {
-            kind if kind == CSS_QUALIFIED_RULE || kind == CSS_NESTED_QUALIFIED_RULE => {
+            // Begin a new CSS rule context
+            // This tracks the hierarchical structure of rules, including:
+            // 1. Standard rulesets
+            //    Example: p { color: red; }
+            // 2. Nested selectors
+            //    Example: .parent { .child { font-size: 14px; } }
+            // 3. At-rules like media queries
+            //    Example: @media (min-width: 600px) { header { padding: 20px; } }
+            //
+            // Each rule start is pushed onto a stack to maintain parent-child relationships,
+            // allowing for proper scoping and inheritance of styles.
+            kind if kind == CSS_QUALIFIED_RULE
+                || kind == CSS_NESTED_QUALIFIED_RULE
+                || kind == CSS_MEDIA_AT_RULE =>
+            {
                 let range = node.text_range();
                 self.stash.push_back(SemanticEvent::RuleStart(range));
                 self.current_rule_stack.push(range);
             }
-            CSS_SELECTOR_LIST => {
+            kind if kind == CSS_SELECTOR_LIST || kind == CSS_SUB_SELECTOR_LIST => {
                 node.children()
                     .filter_map(AnyCssSelector::cast)
                     .for_each(|s| self.process_selector(s));
@@ -91,8 +105,7 @@ impl SemanticEventExtractor {
     pub fn leave(&mut self, node: &biome_css_syntax::CssSyntaxNode) {
         if matches!(
             node.kind(),
-            biome_css_syntax::CssSyntaxKind::CSS_QUALIFIED_RULE
-                | biome_css_syntax::CssSyntaxKind::CSS_NESTED_QUALIFIED_RULE
+            CSS_QUALIFIED_RULE | CSS_NESTED_QUALIFIED_RULE | CSS_MEDIA_AT_RULE
         ) {
             self.current_rule_stack.pop();
             self.stash.push_back(SemanticEvent::RuleEnd);

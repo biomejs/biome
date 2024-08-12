@@ -93,7 +93,6 @@ just install-tools
 This command will install:
 - `cargo-binstall`, to install binary extensions for `cargo`.
 - `cargo-insta`, a `cargo` extension to manage snapshot testing inside the repository.
-- `cargo-nextest`, a `cargo` extension to for optionally running tests faster.
 - `taplo-cli`, a small tool for formatting TOML files.
 - `wasm-pack` and `wasm-tools` for managing the WASM build of Biome.
 

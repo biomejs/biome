@@ -47,6 +47,13 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
     Contributed by @NiclasvanEyk
 
+- Add new options to the `lsp-proxy` and `start` commands:
+  - `--log-path`: a directory where to store the daemon logs. The commands also accepts the environment variable `BIOME_LOG_PATH`.
+  - `--log-prefix-name`: a prefix that's added to the file name of the logs. It defaults to `server.log`. The commands also accepts the environment variable `BIOME_LOG_PREFIX_NAME`.
+
+  @Contributed by @ematipico
+   
+
 #### Enhancements
 
 - When a `--reporter` is provided, and it's different from the default one, the value provided by via `--max-diagnostics` is ignored and **the limit is lifted**. Contributed by @ematipico
@@ -323,6 +330,8 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
   Moreover, `\uhhhh` was not handled in unicode-aware regexes.
 
   Contributed by @Conaclos
+
+- [useSortedClasses](https://biomejs.dev/linter/rules/use-sorted-classes/) lint error with Template literals ([#3394](https://github.com/biomejs/biome/issues/3394)). Contributed by @hangaoke1
 
 ### Parser
 

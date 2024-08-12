@@ -1,12 +1,17 @@
 use biome_configuration::{ConfigurationPathHint, Rules};
 use biome_console::fmt::{Display, Formatter};
-use biome_console::{fmt, markup, ConsoleExt, HorizontalLine, Markup, Padding, SOFT_LINE};
+use biome_console::{
+    fmt, markup, ConsoleExt, DebugDisplay, DebugDisplayOption, HorizontalLine, KeyValuePair,
+    Padding, SOFT_LINE,
+};
 use biome_diagnostics::termcolor::{ColorChoice, WriteColor};
 use biome_diagnostics::{termcolor, PrintDescription};
+use biome_flags::biome_env;
 use biome_fs::FileSystem;
 use biome_service::configuration::{load_configuration, LoadedConfiguration};
 use biome_service::workspace::{client, RageEntry, RageParams};
 use biome_service::{DynRef, Workspace};
+use std::path::PathBuf;
 use std::{env, io, ops::Deref};
 use tokio::runtime::Runtime;
 
@@ -25,6 +30,8 @@ pub(crate) fn rage(
         .buffer()
         .supports_color();
 
+    let biome_env = biome_env();
+
     session.app.console.log(markup!("CLI:\n"
     {KeyValuePair("Version", markup!({VERSION}))}
     {KeyValuePair("Color support", markup!({DebugDisplay(terminal_supports_colors)}))}
@@ -32,9 +39,8 @@ pub(crate) fn rage(
     {Section("Platform")}
     {KeyValuePair("CPU Architecture", markup!({std::env::consts::ARCH}))}
     {KeyValuePair("OS", markup!({std::env::consts::OS}))}
-
     {Section("Environment")}
-    {EnvVarOs("BIOME_LOG_DIR")}
+    {biome_env}
     {EnvVarOs("NO_COLOR")}
     {EnvVarOs("TERM")}
     {EnvVarOs("JS_RUNTIME_VERSION")}
@@ -331,33 +337,6 @@ impl Display for RageConfigurationLintRules<'_> {
     }
 }
 
-struct DebugDisplay<T>(T);
-
-impl<T> Display for DebugDisplay<T>
-where
-    T: std::fmt::Debug,
-{
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> io::Result<()> {
-        write!(f, "{:?}", self.0)
-    }
-}
-
-struct DebugDisplayOption<T>(Option<T>);
-
-impl<T> Display for DebugDisplayOption<T>
-where
-    T: std::fmt::Debug,
-{
-    fn fmt(&self, fmt: &mut Formatter) -> io::Result<()> {
-        if let Some(value) = &self.0 {
-            markup!({ DebugDisplay(value) }).fmt(fmt)?;
-        } else {
-            markup!(<Dim>"unset"</Dim>).fmt(fmt)?;
-        }
-        Ok(())
-    }
-}
-
 struct EnvVarOs(&'static str);
 
 impl fmt::Display for EnvVarOs {
@@ -378,30 +357,17 @@ impl Display for Section<'_> {
     }
 }
 
-struct KeyValuePair<'a>(&'a str, Markup<'a>);
-
-impl Display for KeyValuePair<'_> {
-    fn fmt(&self, fmt: &mut Formatter) -> io::Result<()> {
-        let KeyValuePair(key, value) = self;
-        write!(fmt, "  {key}:")?;
-
-        let padding_width = 30usize.saturating_sub(key.len() + 1);
-
-        for _ in 0..padding_width {
-            fmt.write_str(" ")?;
-        }
-
-        value.fmt(fmt)?;
-
-        fmt.write_str("\n")
-    }
-}
-
 struct BiomeServerLog;
 
 impl Display for BiomeServerLog {
     fn fmt(&self, fmt: &mut Formatter) -> io::Result<()> {
-        if let Ok(Some(log)) = read_most_recent_log_file() {
+        if let Ok(Some(log)) = read_most_recent_log_file(
+            biome_env().biome_log_path.value().map(PathBuf::from),
+            biome_env()
+                .biome_log_prefix
+                .value()
+                .unwrap_or("server.log".to_string()),
+        ) {
             markup!("\n"<Emphasis><Underline>"Biome Server Log:"</Underline></Emphasis>"
 
 "<Warn>"\u{26a0} Please review the content of the log file before sharing it publicly as it may contain sensitive information:
