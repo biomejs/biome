@@ -2,7 +2,6 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: typescript/prettier-ignore/prettier-ignore-nested-unions.ts
 ---
-
 # Input
 
 ```ts
@@ -104,5 +103,3 @@ export type b =
   // baz
   | (baz1 & baz2);
 ```
-
-

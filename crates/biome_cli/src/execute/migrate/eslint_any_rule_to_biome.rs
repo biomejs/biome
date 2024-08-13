@@ -1168,6 +1168,16 @@ pub(crate) fn migrate_eslint_any_rule(
                 .get_or_insert(Default::default());
             rule.set_level(rule_severity.into());
         }
+        "no-useless-escape" => {
+            if !options.include_nursery {
+                return false;
+            }
+            let group = rules.nursery.get_or_insert_with(Default::default);
+            let rule = group
+                .no_useless_escape_in_regex
+                .get_or_insert(Default::default());
+            rule.set_level(rule_severity.into());
+        }
         "no-useless-rename" => {
             let group = rules.complexity.get_or_insert_with(Default::default);
             let rule = group.no_useless_rename.get_or_insert(Default::default());
@@ -1486,6 +1496,14 @@ pub(crate) fn migrate_eslint_any_rule(
             }
             let group = rules.nursery.get_or_insert_with(Default::default);
             let rule = group.no_substr.get_or_insert(Default::default());
+            rule.set_level(rule_severity.into());
+        }
+        "unicorn/prefer-string-trim-start-end" => {
+            if !options.include_nursery {
+                return false;
+            }
+            let group = rules.nursery.get_or_insert_with(Default::default);
+            let rule = group.use_trim_start_end.get_or_insert(Default::default());
             rule.set_level(rule_severity.into());
         }
         "unicorn/require-number-to-fixed-digits-argument" => {

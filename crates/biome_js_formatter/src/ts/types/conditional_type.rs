@@ -1,12 +1,8 @@
 use crate::prelude::*;
 use crate::utils::AnyJsConditional;
 
-use crate::parentheses::{
-    is_check_type, is_in_many_type_union_or_intersection_list,
-    operator_type_or_higher_needs_parens, NeedsParentheses,
-};
-use biome_js_syntax::{JsSyntaxKind, JsSyntaxNode, TsConditionalType};
-use biome_rowan::AstNode;
+use biome_js_syntax::parentheses::NeedsParentheses;
+use biome_js_syntax::TsConditionalType;
 
 #[derive(Debug, Clone, Default)]
 pub struct FormatTsConditionalType;
@@ -25,32 +21,8 @@ impl FormatNodeRule<TsConditionalType> for FormatTsConditionalType {
     }
 }
 
-impl NeedsParentheses for TsConditionalType {
-    fn needs_parentheses_with_parent(&self, parent: &JsSyntaxNode) -> bool {
-        match parent.kind() {
-            JsSyntaxKind::TS_CONDITIONAL_TYPE => {
-                let conditional = TsConditionalType::unwrap_cast(parent.clone());
-
-                let is_extends_type = conditional
-                    .extends_type()
-                    .map(AstNode::into_syntax)
-                    .as_ref()
-                    == Ok(self.syntax());
-
-                is_check_type(self.syntax(), parent) || is_extends_type
-            }
-
-            _ => {
-                is_in_many_type_union_or_intersection_list(self.syntax(), parent)
-                    || operator_type_or_higher_needs_parens(self.syntax(), parent)
-            }
-        }
-    }
-}
-
 #[cfg(test)]
 mod tests {
-
     use crate::{assert_needs_parentheses, assert_not_needs_parentheses};
     use biome_js_syntax::TsConditionalType;
 

@@ -1,7 +1,7 @@
-use crate::parentheses::NeedsParentheses;
 use crate::prelude::*;
 use crate::utils::member_chain::chain_member::ChainMember;
 use biome_formatter::write;
+use biome_js_syntax::parentheses::NeedsParentheses;
 use std::cell::RefCell;
 
 #[derive(Default)]

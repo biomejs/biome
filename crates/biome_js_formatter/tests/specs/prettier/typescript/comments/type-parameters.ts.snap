@@ -2,7 +2,6 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: typescript/comments/type-parameters.ts
 ---
-
 # Input
 
 ```ts
@@ -277,5 +276,3 @@ type-parameters.ts:29:1 parse ━━━━━━━━━━━━━━━━�
   
 
 ```
-
-

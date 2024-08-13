@@ -1,11 +1,9 @@
 use crate::prelude::*;
-use biome_formatter::write;
-
-use crate::parentheses::{resolve_left_most_expression, NeedsParentheses};
 use crate::utils::member_chain::MemberChain;
-use biome_js_syntax::{
-    AnyJsExpression, JsCallExpression, JsCallExpressionFields, JsSyntaxKind, JsSyntaxNode,
-};
+
+use biome_formatter::write;
+use biome_js_syntax::parentheses::NeedsParentheses;
+use biome_js_syntax::{AnyJsExpression, JsCallExpression, JsCallExpressionFields};
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatJsCallExpression;
@@ -57,25 +55,6 @@ impl FormatNodeRule<JsCallExpression> for FormatJsCallExpression {
 
     fn needs_parentheses(&self, item: &JsCallExpression) -> bool {
         item.needs_parentheses()
-    }
-}
-
-impl NeedsParentheses for JsCallExpression {
-    fn needs_parentheses_with_parent(&self, parent: &JsSyntaxNode) -> bool {
-        matches!(parent.kind(), JsSyntaxKind::JS_NEW_EXPRESSION)
-            || (parent.kind() == JsSyntaxKind::JS_EXPORT_DEFAULT_EXPRESSION_CLAUSE
-                && self.callee().map_or(true, |callee| {
-                    let leftmost = resolve_left_most_expression(&callee);
-                    let leftmost = leftmost.syntax();
-                    // require parens for iife and
-                    // when the leftmost expression is not a class expression or a function expression
-                    callee.syntax() != leftmost
-                        && matches!(
-                            leftmost.kind(),
-                            JsSyntaxKind::JS_CLASS_EXPRESSION
-                                | JsSyntaxKind::JS_FUNCTION_EXPRESSION
-                        )
-                }))
     }
 }
 

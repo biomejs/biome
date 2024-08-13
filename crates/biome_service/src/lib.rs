@@ -22,10 +22,6 @@ pub use crate::diagnostics::{TransportError, WorkspaceError};
 pub use crate::file_handlers::JsFormatterSettings;
 pub use crate::workspace::Workspace;
 pub use diagnostics::extension_error;
-pub const VERSION: &str = match option_env!("BIOME_VERSION") {
-    Some(version) => version,
-    None => "0.0.0",
-};
 
 /// This is the main entrypoint of the application.
 pub struct App<'app> {

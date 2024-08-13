@@ -4,67 +4,236 @@ expression: invalid.tsx
 ---
 # Input
 ```tsx
-const a3 = <div>// comment</div>;
-const a4 = <div>/* comment */</div>;
-const a5 = <div>/** comment */</div>;
+<>
+    <div>// comment</div>
+    <div>/* comment */</div>
+    <div>/** comment */</div>
+    <div>text /* comment */</div>
+    <div>/* comment */ text</div>
+    <div>
+        text
+        // comment
+    </div>
+    <div>
+        /* comment */
+        text
+    </div>
+    <div>
+        // comment
+        text
+    </div>
+    <div>
+        /* comment
+        comment */
+    </div>
+</>
+
 ```
 
 # Diagnostics
 ```
-invalid.tsx:1:17 lint/suspicious/noCommentText  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.tsx:2:10 lint/suspicious/noCommentText  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Wrap comments inside children within braces.
   
-  > 1 │ const a3 = <div>// comment</div>;
-      │                 ^^^^^^^^^^
-    2 │ const a4 = <div>/* comment */</div>;
-    3 │ const a5 = <div>/** comment */</div>;
+    1 │ <>
+  > 2 │     <div>// comment</div>
+      │          ^^^^^^^^^^
+    3 │     <div>/* comment */</div>
+    4 │     <div>/** comment */</div>
   
   i Unsafe fix: Wrap the comments with braces
   
-    1   │ - const·a3·=·<div>//·comment</div>;
-      1 │ + const·a3·=·<div>{/*·comment*/}</div>;
-    2 2 │   const a4 = <div>/* comment */</div>;
-    3 3 │   const a5 = <div>/** comment */</div>;
+     1  1 │   <>
+     2    │ - ····<div>//·comment</div>
+        2 │ + ····<div>{/*·comment·*/}</div>
+     3  3 │       <div>/* comment */</div>
+     4  4 │       <div>/** comment */</div>
   
 
 ```
 
 ```
-invalid.tsx:2:17 lint/suspicious/noCommentText  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.tsx:3:10 lint/suspicious/noCommentText  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Wrap comments inside children within braces.
   
-    1 │ const a3 = <div>// comment</div>;
-  > 2 │ const a4 = <div>/* comment */</div>;
-      │                 ^^^^^^^^^^^^^
-    3 │ const a5 = <div>/** comment */</div>;
+    1 │ <>
+    2 │     <div>// comment</div>
+  > 3 │     <div>/* comment */</div>
+      │          ^^^^^^^^^^^^^
+    4 │     <div>/** comment */</div>
+    5 │     <div>text /* comment */</div>
   
   i Unsafe fix: Wrap the comments with braces
   
-    2 │ const·a4·=·<div>{/*·comment·*/}</div>;
-      │                 +             +       
+    3 │ ····<div>{/*·comment·*/}</div>
+      │          +             +      
 
 ```
 
 ```
-invalid.tsx:3:17 lint/suspicious/noCommentText  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.tsx:4:10 lint/suspicious/noCommentText  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Wrap comments inside children within braces.
   
-    1 │ const a3 = <div>// comment</div>;
-    2 │ const a4 = <div>/* comment */</div>;
-  > 3 │ const a5 = <div>/** comment */</div>;
-      │                 ^^^^^^^^^^^^^^
+    2 │     <div>// comment</div>
+    3 │     <div>/* comment */</div>
+  > 4 │     <div>/** comment */</div>
+      │          ^^^^^^^^^^^^^^
+    5 │     <div>text /* comment */</div>
+    6 │     <div>/* comment */ text</div>
   
   i Unsafe fix: Wrap the comments with braces
   
-    1 1 │   const a3 = <div>// comment</div>;
-    2 2 │   const a4 = <div>/* comment */</div>;
-    3   │ - const·a5·=·<div>/**·comment·*/</div>;
-      3 │ + const·a5·=·<div>{/*·comment·*/}</div>;
+    4 │ ····<div>{/**·comment·*/}</div>
+      │          +              +      
+
+```
+
+```
+invalid.tsx:5:10 lint/suspicious/noCommentText  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Wrap comments inside children within braces.
+  
+    3 │     <div>/* comment */</div>
+    4 │     <div>/** comment */</div>
+  > 5 │     <div>text /* comment */</div>
+      │          ^^^^^^^^^^^^^^^^^^
+    6 │     <div>/* comment */ text</div>
+    7 │     <div>
+  
+  i Unsafe fix: Wrap the comments with braces
+  
+    5 │ ····<div>text·{/*·comment·*/}</div>
+      │               +             +      
+
+```
+
+```
+invalid.tsx:6:10 lint/suspicious/noCommentText  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Wrap comments inside children within braces.
+  
+    4 │     <div>/** comment */</div>
+    5 │     <div>text /* comment */</div>
+  > 6 │     <div>/* comment */ text</div>
+      │          ^^^^^^^^^^^^^^^^^^
+    7 │     <div>
+    8 │         text
+  
+  i Unsafe fix: Wrap the comments with braces
+  
+    6 │ ····<div>{/*·comment·*/}·text</div>
+      │          +             +           
+
+```
+
+```
+invalid.tsx:7:10 lint/suspicious/noCommentText  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Wrap comments inside children within braces.
+  
+     5 │     <div>text /* comment */</div>
+     6 │     <div>/* comment */ text</div>
+   > 7 │     <div>
+       │          
+   > 8 │         text
+   > 9 │         // comment
+  > 10 │     </div>
+       │     
+    11 │     <div>
+    12 │         /* comment */
+  
+  i Unsafe fix: Wrap the comments with braces
+  
+     7  7 │       <div>
+     8  8 │           text
+     9    │ - ········//·comment
+        9 │ + ········{/*·comment·*/}
+    10 10 │       </div>
+    11 11 │       <div>
   
 
 ```
 
+```
+invalid.tsx:11:10 lint/suspicious/noCommentText  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
+  ! Wrap comments inside children within braces.
+  
+     9 │         // comment
+    10 │     </div>
+  > 11 │     <div>
+       │          
+  > 12 │         /* comment */
+  > 13 │         text
+  > 14 │     </div>
+       │     
+    15 │     <div>
+    16 │         // comment
+  
+  i Unsafe fix: Wrap the comments with braces
+  
+    12 │ ········{/*·comment·*/}
+       │         +             +
+
+```
+
+```
+invalid.tsx:15:10 lint/suspicious/noCommentText  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Wrap comments inside children within braces.
+  
+    13 │         text
+    14 │     </div>
+  > 15 │     <div>
+       │          
+  > 16 │         // comment
+  > 17 │         text
+  > 18 │     </div>
+       │     
+    19 │     <div>
+    20 │         /* comment
+  
+  i Unsafe fix: Wrap the comments with braces
+  
+    14 14 │       </div>
+    15 15 │       <div>
+    16    │ - ········//·comment
+       16 │ + ········{/*·comment·*/}
+    17 17 │           text
+    18 18 │       </div>
+  
+
+```
+
+```
+invalid.tsx:19:10 lint/suspicious/noCommentText  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Wrap comments inside children within braces.
+  
+    17 │         text
+    18 │     </div>
+  > 19 │     <div>
+       │          
+  > 20 │         /* comment
+  > 21 │         comment */
+  > 22 │     </div>
+       │     
+    23 │ </>
+    24 │ 
+  
+  i Unsafe fix: Wrap the comments with braces
+  
+    18 18 │       </div>
+    19 19 │       <div>
+    20    │ - ········/*·comment
+    21    │ - ········comment·*/
+       20 │ + ········{/*·comment
+       21 │ + ········comment·*/}
+    22 22 │       </div>
+    23 23 │   </>
+  
+
+```

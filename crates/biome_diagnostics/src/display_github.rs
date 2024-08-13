@@ -1,6 +1,7 @@
 use crate::display::frame::SourceFile;
 use crate::{diagnostic::internal::AsDiagnostic, Diagnostic, Resource, Severity};
 use biome_console::{fmt, markup, MarkupBuf};
+use biome_text_size::{TextRange, TextSize};
 use std::io;
 
 /// Helper struct for printing a diagnostic as markup into any formatter
@@ -14,10 +15,11 @@ impl<D: AsDiagnostic + ?Sized> fmt::Display for PrintGitHubDiagnostic<'_, D> {
 
         // Docs:
         // https://docs.github.com/en/actions/using-workflows/workflow-commands-for-github-actions
+        let span = location
+            .span
+            // We fall back to 1:1. This usually covers diagnostics that belong to the formatter or organize imports
+            .unwrap_or(TextRange::new(TextSize::from(1), TextSize::from(1)));
 
-        let Some(span) = location.span else {
-            return Ok(());
-        };
         let Some(source_code) = location.source_code else {
             return Ok(());
         };

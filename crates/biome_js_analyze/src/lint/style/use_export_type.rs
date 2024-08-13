@@ -86,7 +86,12 @@ impl Rule for UseExportType {
         }
         let mut exports_only_types = true;
         let mut specifiers_requiring_type_marker = Vec::new();
-        for specifier in export_named_clause.specifiers() {
+        let specifiers = export_named_clause.specifiers();
+        if specifiers.is_empty() {
+            // Don't report `export {}`
+            return None;
+        }
+        for specifier in specifiers {
             let Ok((ref_name, specifier)) =
                 specifier.and_then(|specifier| Ok((specifier.local_name()?, specifier)))
             else {

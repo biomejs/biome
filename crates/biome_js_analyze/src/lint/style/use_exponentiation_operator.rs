@@ -72,7 +72,7 @@ impl Rule for UseExponentiationOperator {
         let node = ctx.query();
         let model = ctx.model();
         let callee = node.callee().ok()?.omit_parentheses();
-        let member_expr = AnyJsMemberExpression::cast_ref(callee.syntax())?;
+        let member_expr = AnyJsMemberExpression::cast(callee.into_syntax())?;
         if member_expr.member_name()?.text() != "pow" {
             return None;
         }

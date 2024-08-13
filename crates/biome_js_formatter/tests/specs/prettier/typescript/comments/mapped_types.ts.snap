@@ -2,7 +2,6 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: typescript/comments/mapped_types.ts
 ---
-
 # Input
 
 ```ts
@@ -116,5 +115,3 @@ type L = { [l in L /* commentL */]: string };
 
 type M = { [m in M] /* commentG */ : string };
 ```
-
-

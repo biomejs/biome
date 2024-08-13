@@ -184,7 +184,7 @@ impl StringCase {
             return None;
         }
         let callee = call.callee().ok()?;
-        let member_expr = AnyJsMemberExpression::cast_ref(callee.syntax())?;
+        let member_expr = AnyJsMemberExpression::cast(callee.into_syntax())?;
         let member_name = member_expr.member_name()?;
         let member_name = member_name.text();
         if member_name == "toLowerCase" {

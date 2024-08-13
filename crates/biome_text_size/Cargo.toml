@@ -15,7 +15,7 @@ schemars = { workspace = true, optional = true }
 serde    = { workspace = true, optional = true }
 
 [dev-dependencies]
-serde_test        = "1.0.176"
+serde_test        = "1.0.177"
 static_assertions = "1.1"
 
 [[test]]

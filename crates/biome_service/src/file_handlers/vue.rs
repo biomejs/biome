@@ -14,8 +14,8 @@ use biome_js_parser::{parse_js_with_cache, JsParserOptions};
 use biome_js_syntax::{EmbeddingKind, JsFileSource, Language, TextRange, TextSize};
 use biome_parser::AnyParse;
 use biome_rowan::NodeCache;
-use lazy_static::lazy_static;
 use regex::{Match, Regex};
+use std::sync::LazyLock;
 use tracing::debug;
 
 use super::{parse_lang_from_script_opening_tag, SearchCapabilities};
@@ -23,13 +23,10 @@ use super::{parse_lang_from_script_opening_tag, SearchCapabilities};
 #[derive(Debug, Default, PartialEq, Eq)]
 pub struct VueFileHandler;
 
-lazy_static! {
-    // https://regex101.com/r/E4n4hh/6
-    pub static ref VUE_FENCE: Regex = Regex::new(
-        r#"(?ixs)(?<opening><script(?:\s.*?)?>)\r?\n(?<script>(?U:.*))</script>"#
-    )
-    .unwrap();
-}
+// https://regex101.com/r/E4n4hh/6
+pub static VUE_FENCE: LazyLock<Regex> = LazyLock::new(|| {
+    Regex::new(r#"(?ixs)(?<opening><script(?:\s.*?)?>)\r?\n(?<script>(?U:.*))</script>"#).unwrap()
+});
 
 impl VueFileHandler {
     /// It extracts the JavaScript/TypeScript code contained in the script block of a Vue file

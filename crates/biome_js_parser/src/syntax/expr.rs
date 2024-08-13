@@ -3,6 +3,7 @@
 //!
 //! See the [ECMAScript spec](https://www.ecma-international.org/ecma-262/5.1/#sec-11).
 
+use super::metavariable::{is_at_metavariable, parse_metavariable};
 use super::typescript::*;
 use crate::lexer::{JsLexContext, JsReLexContext};
 use crate::parser::rewrite_parser::{RewriteMarker, RewriteParser};
@@ -1033,6 +1034,7 @@ pub(super) fn parse_private_name(p: &mut JsParser) -> ParsedSyntax {
 pub(super) fn parse_any_name(p: &mut JsParser) -> ParsedSyntax {
     match p.cur() {
         T![#] => parse_private_name(p),
+        t if t.is_metavariable() => parse_metavariable(p),
         _ => parse_name(p),
     }
 }
@@ -1210,6 +1212,10 @@ fn parse_parenthesized_expression(p: &mut JsParser) -> ParsedSyntax {
 
 /// A general expression.
 pub(crate) fn parse_expression(p: &mut JsParser, context: ExpressionContext) -> ParsedSyntax {
+    if is_at_metavariable(p) {
+        return parse_metavariable(p);
+    }
+
     let first = parse_assignment_expression_or_higher(p, context);
 
     if p.at(T![,]) {
@@ -1299,6 +1305,7 @@ fn parse_primary_expression(p: &mut JsParser, context: ExpressionContext) -> Par
     }
 
     let complete = match p.cur() {
+        t if t.is_metavariable() => return parse_metavariable(p),
         T![this] => {
             // test js this_expr
             // this
@@ -1544,6 +1551,10 @@ pub(crate) fn is_nth_at_reference_identifier(p: &mut JsParser, n: usize) -> bool
 /// * It is named `await` inside of an async function
 /// * It is named `yield` inside of a generator function or in strict mode
 pub(super) fn parse_identifier(p: &mut JsParser, kind: JsSyntaxKind) -> ParsedSyntax {
+    if is_at_metavariable(p) {
+        return parse_metavariable(p);
+    }
+
     if !is_at_identifier(p) {
         return Absent;
     }

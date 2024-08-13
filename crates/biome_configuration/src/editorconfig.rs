@@ -12,13 +12,13 @@
 use std::{collections::HashMap, str::FromStr};
 
 use biome_diagnostics::{adapters::IniError, Error};
-use biome_formatter::{IndentWidth, LineEnding, LineWidth};
+use biome_formatter::{IndentStyle, IndentWidth, LineEnding, LineWidth};
 use serde::{Deserialize, Deserializer};
 
 use crate::{
     diagnostics::{EditorConfigDiagnostic, ParseFailedDiagnostic},
     OverrideFormatterConfiguration, OverridePattern, Overrides, PartialConfiguration,
-    PartialFormatterConfiguration, PlainIndentStyle,
+    PartialFormatterConfiguration,
 };
 
 pub fn parse_str(s: &str) -> Result<EditorConfig, EditorConfigDiagnostic> {
@@ -83,7 +83,7 @@ impl EditorConfig {
 #[derive(Debug, Clone, Deserialize, Default)]
 #[serde(default)]
 pub struct EditorConfigOptions {
-    indent_style: Option<PlainIndentStyle>,
+    indent_style: Option<IndentStyle>,
     #[serde(deserialize_with = "deserialize_optional_indent_width_from_string")]
     indent_size: Option<IndentWidth>,
     end_of_line: Option<LineEnding>,
@@ -389,7 +389,7 @@ max_line_length = 80
         let (conf, _) = conf.to_biome();
         let conf = conf.expect("Failed to convert editorconfig to biome");
         let formatter = conf.formatter.expect("Formatter not set");
-        assert_eq!(formatter.indent_style, Some(PlainIndentStyle::Space));
+        assert_eq!(formatter.indent_style, Some(IndentStyle::Space));
         assert_eq!(formatter.indent_width.unwrap().value(), 4);
         assert_eq!(formatter.line_ending, Some(LineEnding::Crlf));
         assert_eq!(formatter.line_width.map(|v| v.value()), Some(80));

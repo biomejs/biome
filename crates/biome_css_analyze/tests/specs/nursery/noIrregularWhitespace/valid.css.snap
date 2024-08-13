@@ -1,0 +1,18 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: valid.css
+---
+# Input
+```css
+/* should not generate diagnostics */
+.firstClass .secondClass {
+	padding: 10px;
+}
+
+.firstClass .secondClass {
+	/* whitespace can be in comments */
+	padding: 10px;
+}
+
+
+```

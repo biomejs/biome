@@ -57,21 +57,7 @@ impl Iterator for AllFiles {
 }
 
 fn transform_file_name(input: &str) -> String {
-    let mut result = String::new();
-    for char in input.chars() {
-        match char {
-            '-' | '.' | '@' | '+' => {
-                result.push('_');
-            }
-            char if char.is_uppercase() => {
-                result.push('_');
-                result.extend(char.to_lowercase());
-            }
-            char => {
-                result.push(char);
-            }
-        }
-    }
+    let mut result = biome_string_case::Case::Snake.convert(input);
 
     let is_keyword = matches!(
         result.as_str(),
@@ -97,18 +83,10 @@ fn transform_file_name(input: &str) -> String {
             | "const"
     );
 
-    let is_number = result
-        .chars()
-        .next()
-        .unwrap()
-        .to_string()
-        .parse::<u32>()
-        .is_ok();
-
     if is_keyword {
         result.push('_');
-    } else if is_number {
-        result = "_".to_string() + &result;
+    } else if matches!(result.bytes().next(), Some(b'0'..=b'9')) {
+        result.insert(0, '_');
     }
 
     result

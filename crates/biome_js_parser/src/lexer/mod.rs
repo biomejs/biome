@@ -32,6 +32,8 @@ use biome_unicode_table::{
 };
 use bitflags::bitflags;
 
+use crate::JsParserOptions;
+
 use self::errors::invalid_digits_after_unicode_escape_sequence;
 
 // The first utf8 byte of every valid unicode whitespace char, used for short circuiting whitespace checks
@@ -131,6 +133,8 @@ pub(crate) struct JsLexer<'src> {
     current_flags: TokenFlags,
 
     diagnostics: Vec<ParseDiagnostic>,
+
+    options: JsParserOptions,
 }
 
 impl<'src> Lexer<'src> for JsLexer<'src> {
@@ -309,7 +313,12 @@ impl<'src> JsLexer<'src> {
             current_flags: TokenFlags::empty(),
             position: 0,
             diagnostics: vec![],
+            options: JsParserOptions::default(),
         }
+    }
+
+    pub(crate) fn with_options(self, options: JsParserOptions) -> Self {
+        Self { options, ..self }
     }
 
     fn re_lex_binary_operator(&mut self) -> JsSyntaxKind {
@@ -1891,15 +1900,20 @@ impl<'src> JsLexer<'src> {
             PIP => self.resolve_pipe(),
             TLD => self.eat_byte(T![~]),
 
-            // A BOM can only appear at the start of a file, so if we haven't advanced at all yet,
-            // perform the check. At any other position, the BOM is just considered plain whitespace.
             UNI => {
+                // A BOM can only appear at the start of a file, so if we haven't advanced at all yet,
+                // perform the check. At any other position, the BOM is just considered plain whitespace.
                 if self.position == 0 {
                     if let Some((bom, bom_size)) = self.consume_potential_bom(UNICODE_BOM) {
                         self.unicode_bom_length = bom_size;
                         return bom;
                     }
                 }
+
+                if self.options.should_parse_metavariables() && self.is_metavariable_start() {
+                    return self.consume_metavariable(GRIT_METAVARIABLE);
+                }
+
                 let chr = self.current_char_unchecked();
                 if is_linebreak(chr)
                     || (UNICODE_WHITESPACE_STARTS.contains(&byte) && UNICODE_SPACES.contains(&chr))

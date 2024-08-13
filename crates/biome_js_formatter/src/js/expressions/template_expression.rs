@@ -1,10 +1,9 @@
-use crate::prelude::*;
-use biome_formatter::write;
-
-use crate::js::expressions::static_member_expression::member_chain_callee_needs_parens;
 use crate::js::lists::template_element_list::FormatJsTemplateElementListOptions;
-use crate::parentheses::NeedsParentheses;
-use biome_js_syntax::{AnyJsExpression, JsSyntaxNode, JsTemplateExpression, TsTemplateLiteralType};
+use crate::prelude::*;
+
+use biome_formatter::write;
+use biome_js_syntax::parentheses::NeedsParentheses;
+use biome_js_syntax::{AnyJsExpression, JsTemplateExpression, TsTemplateLiteralType};
 use biome_js_syntax::{JsSyntaxToken, TsTypeArguments};
 use biome_rowan::{declare_node_union, SyntaxResult};
 
@@ -85,17 +84,6 @@ impl AnyJsTemplate {
         match self {
             AnyJsTemplate::JsTemplateExpression(template) => template.r_tick_token(),
             AnyJsTemplate::TsTemplateLiteralType(template) => template.r_tick_token(),
-        }
-    }
-}
-
-/// `TemplateLiteral`'s are `PrimaryExpression's that never need parentheses.
-impl NeedsParentheses for JsTemplateExpression {
-    fn needs_parentheses_with_parent(&self, parent: &JsSyntaxNode) -> bool {
-        if self.tag().is_some() {
-            member_chain_callee_needs_parens(self.clone().into(), parent)
-        } else {
-            false
         }
     }
 }

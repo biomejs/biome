@@ -21,5 +21,7 @@ var regex = /FOO\\\x1fFOO\\x1f/;
 var regex = /(?<a>\\x1f)/;
 var regex = /(?<\u{1d49c}>.)\x1f/;
 var regex = /\u{1111}*\x1F/u;
+var regex = /\u{1111}*\x1F/v;
 var regex = /\u{1F}/u;
 var regex = /\u{1F}/gui;
+var regex = /\u000C\n/u;

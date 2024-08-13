@@ -2,7 +2,6 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: js/multiparser-css/issue-11797.js
 ---
-
 # Input
 
 ```js
@@ -59,5 +58,3 @@ const paragraph3 = css`
 ```
     3:   transform: ${vert ? "translateY" : "translateX"}(${translation + handleOffset}px);
 ```
-
-

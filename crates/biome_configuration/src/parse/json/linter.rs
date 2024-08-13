@@ -4,8 +4,8 @@ use crate::linter::{RulePlainConfiguration, RuleWithOptions};
 use crate::LinterConfiguration;
 use crate::RuleConfiguration;
 use biome_deserialize::{
-    Deserializable, DeserializableValue, DeserializationDiagnostic, DeserializationVisitor, Text,
-    VisitableType,
+    Deserializable, DeserializableTypes, DeserializableValue, DeserializationDiagnostic,
+    DeserializationVisitor, Text,
 };
 use biome_rowan::TextRange;
 
@@ -23,7 +23,7 @@ struct LinterConfigurationVisitor;
 impl DeserializationVisitor for LinterConfigurationVisitor {
     type Output = LinterConfiguration;
 
-    const EXPECTED_TYPE: VisitableType = VisitableType::MAP;
+    const EXPECTED_TYPE: DeserializableTypes = DeserializableTypes::MAP;
 
     fn visit_map(
         self,
@@ -80,7 +80,8 @@ struct RuleConfigurationVisitor<T>(PhantomData<T>);
 impl<T: Deserializable + Default> DeserializationVisitor for RuleConfigurationVisitor<T> {
     type Output = RuleConfiguration<T>;
 
-    const EXPECTED_TYPE: VisitableType = VisitableType::STR.union(VisitableType::MAP);
+    const EXPECTED_TYPE: DeserializableTypes =
+        DeserializableTypes::STR.union(DeserializableTypes::MAP);
 
     fn visit_str(
         self,

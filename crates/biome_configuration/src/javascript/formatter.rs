@@ -1,7 +1,6 @@
-use crate::PlainIndentStyle;
 use biome_deserialize_macros::{Deserializable, Merge, Partial};
 use biome_formatter::{
-    AttributePosition, BracketSpacing, IndentWidth, LineEnding, LineWidth, QuoteStyle,
+    AttributePosition, BracketSpacing, IndentStyle, IndentWidth, LineEnding, LineWidth, QuoteStyle,
 };
 use biome_js_formatter::context::{
     trailing_commas::TrailingCommas, ArrowParentheses, QuoteProperties, Semicolons,
@@ -55,7 +54,7 @@ pub struct JavascriptFormatter {
         argument("tab|space"),
         optional
     ))]
-    pub indent_style: Option<PlainIndentStyle>,
+    pub indent_style: Option<IndentStyle>,
 
     // TODO: Remove in 2.0.0
     /// The size of the indentation applied to JavaScript (and its super languages) files. Default to 2.

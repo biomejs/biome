@@ -17,6 +17,7 @@ pub mod no_static_element_interactions;
 pub mod no_substr;
 pub mod no_undeclared_dependencies;
 pub mod no_unused_function_parameters;
+pub mod no_useless_escape_in_regex;
 pub mod no_useless_string_concat;
 pub mod no_useless_undefined_initialization;
 pub mod no_yoda_expression;
@@ -37,6 +38,7 @@ pub mod use_strict_mode;
 pub mod use_throw_new_error;
 pub mod use_throw_only_error;
 pub mod use_top_level_regex;
+pub mod use_trim_start_end;
 pub mod use_valid_autocomplete;
 
 declare_lint_group! {
@@ -58,6 +60,7 @@ declare_lint_group! {
             self :: no_substr :: NoSubstr ,
             self :: no_undeclared_dependencies :: NoUndeclaredDependencies ,
             self :: no_unused_function_parameters :: NoUnusedFunctionParameters ,
+            self :: no_useless_escape_in_regex :: NoUselessEscapeInRegex ,
             self :: no_useless_string_concat :: NoUselessStringConcat ,
             self :: no_useless_undefined_initialization :: NoUselessUndefinedInitialization ,
             self :: no_yoda_expression :: NoYodaExpression ,
@@ -78,6 +81,7 @@ declare_lint_group! {
             self :: use_throw_new_error :: UseThrowNewError ,
             self :: use_throw_only_error :: UseThrowOnlyError ,
             self :: use_top_level_regex :: UseTopLevelRegex ,
+            self :: use_trim_start_end :: UseTrimStartEnd ,
             self :: use_valid_autocomplete :: UseValidAutocomplete ,
         ]
      }

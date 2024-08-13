@@ -14,20 +14,20 @@ use biome_js_parser::{parse_js_with_cache, JsParserOptions};
 use biome_js_syntax::{JsFileSource, TextRange, TextSize};
 use biome_parser::AnyParse;
 use biome_rowan::NodeCache;
-use lazy_static::lazy_static;
 use regex::{Matches, Regex, RegexBuilder};
+use std::sync::LazyLock;
 
 use super::SearchCapabilities;
 
 #[derive(Debug, Default, PartialEq, Eq)]
 pub struct AstroFileHandler;
 
-lazy_static! {
-    pub static ref ASTRO_FENCE: Regex = RegexBuilder::new(r#"^---\s*$"#)
+pub static ASTRO_FENCE: LazyLock<Regex> = LazyLock::new(|| {
+    RegexBuilder::new(r#"^---\s*$"#)
         .multi_line(true)
         .build()
-        .unwrap();
-}
+        .unwrap()
+});
 
 impl AstroFileHandler {
     /// It extracts the JavaScript code contained in the frontmatter of an Astro file

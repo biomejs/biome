@@ -38,7 +38,9 @@ mod validator;
 
 use biome_diagnostics::{Error, Severity};
 pub use biome_rowan::TextRange;
-pub use diagnostics::{DeserializationAdvice, DeserializationDiagnostic, VisitableType};
+pub use diagnostics::{
+    DeserializableType, DeserializableTypes, DeserializationAdvice, DeserializationDiagnostic,
+};
 pub use impls::*;
 pub use merge::Merge;
 use std::fmt::Debug;
@@ -104,7 +106,7 @@ pub trait DeserializableValue: Sized {
     ) -> Option<V::Output>;
 
     /// Returns the type of this value.
-    fn visitable_type(&self) -> Option<VisitableType>;
+    fn visitable_type(&self) -> Option<DeserializableType>;
 }
 
 /// This trait represents a visitor that walks through a [DeserializableValue].
@@ -127,7 +129,7 @@ pub trait DeserializableValue: Sized {
 /// ## Examples
 ///
 /// ```
-/// use biome_deserialize::{DeserializationDiagnostic, Deserializable, DeserializableValue, DeserializationVisitor, Text, VisitableType};
+/// use biome_deserialize::{DeserializationDiagnostic, Deserializable, DeserializableValue, DeserializationVisitor, Text, DeserializableTypes};
 /// use biome_rowan::TextRange;
 ///
 /// #[derive(Debug, Eq, PartialEq)]
@@ -148,7 +150,7 @@ pub trait DeserializableValue: Sized {
 /// struct PersonVisitor;
 /// impl DeserializationVisitor for PersonVisitor {
 ///     type Output = Person;
-///     const EXPECTED_TYPE: VisitableType = VisitableType::MAP;
+///     const EXPECTED_TYPE: DeserializableTypes = DeserializableTypes::MAP;
 ///
 ///     fn visit_map(
 ///         self,
@@ -190,7 +192,7 @@ pub trait DeserializableValue: Sized {
 /// ```
 ///
 /// ```
-/// use biome_deserialize::{DeserializationDiagnostic, Deserializable, DeserializableValue, DeserializationVisitor, Text, VisitableType};
+/// use biome_deserialize::{DeserializationDiagnostic, Deserializable, DeserializableValue, DeserializationVisitor, Text, DeserializableTypes};
 /// use biome_rowan::TextRange;
 ///
 /// #[derive(Debug, Eq, PartialEq)]
@@ -212,7 +214,7 @@ pub trait DeserializableValue: Sized {
 /// struct UnionVisitor;
 /// impl DeserializationVisitor for UnionVisitor {
 ///     type Output = Union;
-///     const EXPECTED_TYPE: VisitableType = VisitableType::BOOL.union(VisitableType::STR);
+///     const EXPECTED_TYPE: DeserializableTypes = DeserializableTypes::BOOL.union(DeserializableTypes::STR);
 ///
 ///     fn visit_bool(
 ///         self,
@@ -253,7 +255,7 @@ pub trait DeserializationVisitor: Sized {
     type Output;
 
     /// The expected type of the visited value.
-    const EXPECTED_TYPE: VisitableType;
+    const EXPECTED_TYPE: DeserializableTypes;
 
     /// The visited value is `null`.
     ///
@@ -266,11 +268,11 @@ pub trait DeserializationVisitor: Sized {
         diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<Self::Output> {
         debug_assert!(
-            !Self::EXPECTED_TYPE.contains(VisitableType::NULL),
+            !Self::EXPECTED_TYPE.contains(DeserializableTypes::NULL),
             "This method should be implemented because the expected type is null."
         );
         diagnostics.push(DeserializationDiagnostic::new_incorrect_type_with_name(
-            VisitableType::NULL,
+            DeserializableType::Null,
             Self::EXPECTED_TYPE,
             name,
             range,
@@ -290,11 +292,11 @@ pub trait DeserializationVisitor: Sized {
         diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<Self::Output> {
         debug_assert!(
-            !Self::EXPECTED_TYPE.contains(VisitableType::BOOL),
+            !Self::EXPECTED_TYPE.contains(DeserializableTypes::BOOL),
             "This method should be implemented because the expected type is bool."
         );
         diagnostics.push(DeserializationDiagnostic::new_incorrect_type_with_name(
-            VisitableType::BOOL,
+            DeserializableType::Bool,
             Self::EXPECTED_TYPE,
             name,
             range,
@@ -315,11 +317,11 @@ pub trait DeserializationVisitor: Sized {
         diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<Self::Output> {
         debug_assert!(
-            !Self::EXPECTED_TYPE.contains(VisitableType::NUMBER),
+            !Self::EXPECTED_TYPE.contains(DeserializableTypes::NUMBER),
             "This method should be implemented because the expected type is number."
         );
         diagnostics.push(DeserializationDiagnostic::new_incorrect_type_with_name(
-            VisitableType::NUMBER,
+            DeserializableType::Number,
             Self::EXPECTED_TYPE,
             name,
             range,
@@ -339,11 +341,11 @@ pub trait DeserializationVisitor: Sized {
         diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<Self::Output> {
         debug_assert!(
-            !Self::EXPECTED_TYPE.contains(VisitableType::STR),
+            !Self::EXPECTED_TYPE.contains(DeserializableTypes::STR),
             "This method should be implemented because the expected type is str."
         );
         diagnostics.push(DeserializationDiagnostic::new_incorrect_type_with_name(
-            VisitableType::STR,
+            DeserializableType::Str,
             Self::EXPECTED_TYPE,
             name,
             range,
@@ -363,11 +365,11 @@ pub trait DeserializationVisitor: Sized {
         diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<Self::Output> {
         debug_assert!(
-            !Self::EXPECTED_TYPE.contains(VisitableType::ARRAY),
+            !Self::EXPECTED_TYPE.contains(DeserializableTypes::ARRAY),
             "This method should be implemented because the expected type is array."
         );
         diagnostics.push(DeserializationDiagnostic::new_incorrect_type_with_name(
-            VisitableType::ARRAY,
+            DeserializableType::Array,
             Self::EXPECTED_TYPE,
             name,
             range,
@@ -387,11 +389,11 @@ pub trait DeserializationVisitor: Sized {
         diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<Self::Output> {
         debug_assert!(
-            !Self::EXPECTED_TYPE.contains(VisitableType::MAP),
+            !Self::EXPECTED_TYPE.contains(DeserializableTypes::MAP),
             "This method should be implemented because the expected type is map."
         );
         diagnostics.push(DeserializationDiagnostic::new_incorrect_type_with_name(
-            VisitableType::MAP,
+            DeserializableType::Map,
             Self::EXPECTED_TYPE,
             name,
             range,

@@ -1,6 +1,7 @@
-use crate::PlainIndentStyle;
 use biome_deserialize_macros::{Deserializable, Merge, Partial};
-use biome_formatter::{BracketSpacing, IndentWidth, LineEnding, LineWidth, QuoteStyle};
+use biome_formatter::{
+    BracketSpacing, IndentStyle, IndentWidth, LineEnding, LineWidth, QuoteStyle,
+};
 use bpaf::Bpaf;
 use serde::{Deserialize, Serialize};
 
@@ -35,7 +36,7 @@ pub struct GraphqlFormatter {
         argument("tab|space"),
         optional
     ))]
-    pub indent_style: Option<PlainIndentStyle>,
+    pub indent_style: Option<IndentStyle>,
 
     /// The size of the indentation applied to GraphQL files. Default to 2.
     #[partial(bpaf(long("graphql-formatter-indent-width"), argument("NUMBER"), optional))]

@@ -2,7 +2,6 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: typescript/interface2/break/break.ts
 ---
-
 # Input
 
 ```ts
@@ -260,5 +259,3 @@ break.ts:16:1 parse ━━━━━━━━━━━━━━━━━━━━
   
 
 ```
-
-

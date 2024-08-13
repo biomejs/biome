@@ -168,7 +168,7 @@ fn get_callee(expr: &JsCallExpression, model: &SemanticModel) -> Option<&'static
         }
         return None;
     }
-    let callee = AnyJsMemberExpression::cast_ref(callee.syntax())?;
+    let callee = AnyJsMemberExpression::cast(callee.into_syntax())?;
     if callee.member_name()?.text() != "parseInt" {
         return None;
     }

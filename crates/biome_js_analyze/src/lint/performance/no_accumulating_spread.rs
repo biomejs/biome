@@ -127,7 +127,7 @@ fn is_known_accumulator(node: &JsSpread, model: &SemanticModel) -> Option<bool> 
     }
 
     let callee = call_expression.callee().ok()?;
-    let member_expression = AnyJsMemberExpression::cast_ref(callee.syntax())?;
+    let member_expression = AnyJsMemberExpression::cast(callee.into_syntax())?;
 
     // We only care about `.reduce` and `.reduceRight`.
     let member_name = member_expression.member_name()?;

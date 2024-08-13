@@ -28,7 +28,7 @@ pub struct FormatterConfiguration {
 
     /// The indent style.
     #[partial(bpaf(long("indent-style"), argument("tab|space"), optional))]
-    pub indent_style: PlainIndentStyle,
+    pub indent_style: IndentStyle,
 
     /// The size of the indentation, 2 by default (deprecated, use `indent-width`)
     #[partial(bpaf(long("indent-size"), argument("NUMBER"), optional))]
@@ -96,7 +96,7 @@ impl Default for FormatterConfiguration {
             format_with_errors: false,
             indent_size: IndentWidth::default(),
             indent_width: IndentWidth::default(),
-            indent_style: PlainIndentStyle::default(),
+            indent_style: IndentStyle::default(),
             line_ending: LineEnding::default(),
             line_width: LineWidth::default(),
             attribute_position: AttributePosition::default(),
@@ -115,39 +115,5 @@ impl FromStr for FormatterConfiguration {
 
     fn from_str(_s: &str) -> Result<Self, Self::Err> {
         Ok(Self::default())
-    }
-}
-
-impl From<PlainIndentStyle> for IndentStyle {
-    fn from(value: PlainIndentStyle) -> Self {
-        match value {
-            PlainIndentStyle::Tab => IndentStyle::Tab,
-            PlainIndentStyle::Space => IndentStyle::Space,
-        }
-    }
-}
-
-#[derive(
-    Clone, Copy, Debug, Default, Deserialize, Deserializable, Eq, Merge, PartialEq, Serialize,
-)]
-#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
-#[serde(rename_all = "camelCase")]
-pub enum PlainIndentStyle {
-    /// Tab
-    #[default]
-    Tab,
-    /// Space
-    Space,
-}
-
-impl FromStr for PlainIndentStyle {
-    type Err = &'static str;
-
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        match s {
-            "tab" => Ok(PlainIndentStyle::Tab),
-            "space" => Ok(PlainIndentStyle::Space),
-            _ => Err("Unsupported value for this option"),
-        }
     }
 }

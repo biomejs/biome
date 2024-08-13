@@ -26,7 +26,7 @@ biome_graphql_analyze    = { workspace = true }
 biome_graphql_syntax     = { workspace = true }
 biome_js_analyze         = { workspace = true }
 biome_js_formatter       = { workspace = true, features = ["serde"] }
-biome_js_syntax          = { workspace = true, features = ["serde", "schema"] }
+biome_js_syntax          = { workspace = true, features = ["schema"] }
 biome_json_analyze       = { workspace = true }
 biome_json_formatter     = { workspace = true, features = ["serde"] }
 biome_json_parser        = { workspace = true }

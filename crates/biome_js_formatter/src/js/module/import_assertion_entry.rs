@@ -25,8 +25,8 @@ impl FormatNodeRule<JsImportAssertionEntry> for FormatJsImportAssertionEntry {
                     f,
                     [FormatLiteralStringToken::new(
                         &key,
-                        StringLiteralParentKind::Expression
-                    )]
+                        StringLiteralParentKind::ImportAttribute
+                    ),]
                 )?;
             }
             _ => {

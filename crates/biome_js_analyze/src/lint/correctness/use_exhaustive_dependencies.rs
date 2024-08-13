@@ -657,34 +657,35 @@ fn determine_unstable_dependency(
     }
 }
 
-fn into_member_vec(node: &JsSyntaxNode) -> Vec<String> {
+fn into_member_iter(node: &JsSyntaxNode) -> impl Iterator<Item = String> {
     let mut vec = vec![];
     let mut next = Some(node.clone());
 
-    while let Some(node) = &next {
-        match AnyJsMemberExpression::cast_ref(node) {
-            Some(member_expr) => {
+    while let Some(node) = next {
+        match AnyJsMemberExpression::try_cast(node) {
+            Ok(member_expr) => {
                 let member_name = member_expr
                     .member_name()
                     .and_then(|it| it.as_string_constant().map(|it| it.to_owned()));
                 if let Some(member_name) = member_name {
-                    vec.insert(0, member_name);
+                    vec.push(member_name);
                 }
                 next = member_expr.object().ok().map(AstNode::into_syntax);
             }
-            None => {
-                vec.insert(0, node.text_trimmed().to_string());
+            Err(node) => {
+                vec.push(node.text_trimmed().to_string());
                 break;
             }
         }
     }
 
-    vec
+    // elemnsts are inserted in reverse, thus we have to reverse the iteration.
+    vec.into_iter().rev()
 }
 
 fn compare_member_depth(a: &JsSyntaxNode, b: &JsSyntaxNode) -> (bool, bool) {
-    let mut a_member_iter = into_member_vec(a).into_iter();
-    let mut b_member_iter = into_member_vec(b).into_iter();
+    let mut a_member_iter = into_member_iter(a);
+    let mut b_member_iter = into_member_iter(b);
 
     loop {
         let a_member = a_member_iter.next();

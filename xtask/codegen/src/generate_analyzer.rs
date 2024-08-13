@@ -61,28 +61,45 @@ fn generate_graphql_analyzer() -> Result<()> {
 
 fn generate_options(base_path: &Path) -> Result<()> {
     let mut rules_options = BTreeMap::new();
+    let mut crates = vec![];
     let nl = Punct::new('\n', Spacing::Alone);
-    let category_path = base_path.join("lint");
-    let category_name = format_ident!("{}", filename(&category_path)?);
-    for group_path in list_entry_paths(&category_path)?.filter(|path| path.is_dir()) {
-        let group_name = format_ident!("{}", filename(&group_path)?.to_string());
-        for rule_path in list_entry_paths(&group_path)?.filter(|path| !path.is_dir()) {
-            let rule_filename = filename(&rule_path)?;
-            let rule_name = Case::Pascal.convert(rule_filename);
-            let rule_module_name = format_ident!("{}", rule_filename);
-            let rule_name = format_ident!("{}", rule_name);
-            rules_options.insert(rule_filename.to_string(), quote! {
+    for category in ["lint", "assists"] {
+        let category_path = base_path.join(category);
+        if !category_path.exists() {
+            continue;
+        }
+        let category_name = format_ident!("{}", filename(&category_path)?);
+        for group_path in list_entry_paths(&category_path)?.filter(|path| path.is_dir()) {
+            let group_name = format_ident!("{}", filename(&group_path)?.to_string());
+            for rule_path in list_entry_paths(&group_path)?.filter(|path| !path.is_dir()) {
+                let rule_filename = filename(&rule_path)?;
+                let rule_name = Case::Pascal.convert(rule_filename);
+                let rule_module_name = format_ident!("{}", rule_filename);
+                let rule_name = format_ident!("{}", rule_name);
+                rules_options.insert(rule_filename.to_string(), quote! {
                     pub type #rule_name = <#category_name::#group_name::#rule_module_name::#rule_name as biome_analyze::Rule>::Options;
                 });
+            }
+        }
+        if category == "lint" {
+            crates.push(quote! {
+                use crate::lint; #nl
+            })
+        } else if category == "assists" {
+            crates.push(quote! {
+                use crate::assists; #nl
+            })
         }
     }
     let rules_options = rules_options.values();
     let tokens = xtask::reformat(quote! {
-        use crate::lint; #nl #nl
+        #( #crates )*
+        #nl
 
         #( #rules_options )*
     })?;
     fs2::write(base_path.join("options.rs"), tokens)?;
+
     Ok(())
 }
 

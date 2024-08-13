@@ -147,7 +147,7 @@ fn get_math_min_or_max_call(
     model: &SemanticModel,
 ) -> Option<MathMinOrMaxCall> {
     let callee = call_expression.callee().ok()?.omit_parentheses();
-    let member_expr = AnyJsMemberExpression::cast_ref(callee.syntax())?;
+    let member_expr = AnyJsMemberExpression::cast(callee.into_syntax())?;
 
     let member_name = member_expr.member_name()?;
     let member_name = member_name.text();

@@ -2,7 +2,6 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: jsx/template/styled-components.js
 ---
-
 # Input
 
 ```js
@@ -70,5 +69,3 @@ info: jsx/template/styled-components.js
   `}
 </style>;
 ```
-
-

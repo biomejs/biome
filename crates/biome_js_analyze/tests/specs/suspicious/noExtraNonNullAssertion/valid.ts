@@ -14,3 +14,7 @@ function case5(key: string | null) {
   const obj = {};
   return obj?.[key!];
 }
+
+function issue3419(value: string | null): string {
+  return (value!);
+}

@@ -2,7 +2,6 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: js/comments/tagged-template-literal.js
 ---
-
 # Input
 
 ```js
@@ -61,5 +60,3 @@ foo /* comment */`
 foo /* comment */`
 `;
 ```
-
-
