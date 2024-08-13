@@ -51,6 +51,18 @@ declare_lint_rule! {
     /// ```jsx
     /// <a href='http://external.link' target='_blank' rel="noopener" {...props}>child</a>
     /// ```
+    /// ## Options
+    ///
+    /// Use the options to allow specific domains to use `target="_blank"` without `rel="noreferrer"`.
+    ///
+    /// ```json
+    /// {
+    ///     "//": "...",
+    ///     "options": {
+    ///         "allowDomains": ["example.com", "example.org"]
+    ///     }
+    /// }
+    /// ```
     pub NoBlankTarget {
         version: "1.0.0",
         name: "noBlankTarget",
@@ -201,6 +213,7 @@ impl Rule for NoBlankTarget {
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct AllowDomainOptions {
     #[serde(skip_serializing_if = "Vec::is_empty")]
+    /// List of domains to allow `target="_blank"` without `rel="noreferrer"`
     pub allow_domains: Vec<String>,
 }
 

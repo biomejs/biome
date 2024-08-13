@@ -330,7 +330,11 @@
 			"type": "object",
 			"required": ["allowDomains"],
 			"properties": {
-				"allowDomains": { "type": "array", "items": { "type": "string" } }
+				"allowDomains": {
+					"description": "List of domains to allow `target=\"_blank\"` without `rel=\"noreferrer\"`",
+					"type": "array",
+					"items": { "type": "string" }
+				}
 			},
 			"additionalProperties": false
 		},

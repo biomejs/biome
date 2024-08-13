@@ -2129,6 +2129,9 @@ export interface RuleWithFixOptions_for_NamingConventionOptions {
  */
 export type FixKind = "none" | "safe" | "unsafe";
 export interface AllowDomainOptions {
+	/**
+	 * List of domains to allow `target="_blank"` without `rel="noreferrer"`
+	 */
 	allowDomains: string[];
 }
 export interface ValidAriaRoleOptions {
