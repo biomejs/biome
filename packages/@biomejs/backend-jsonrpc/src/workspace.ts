@@ -1163,6 +1163,10 @@ export interface Nursery {
 	 */
 	noEmptyBlock?: RuleConfiguration_for_Null;
 	/**
+	 * Disallow TypeScript enum.
+	 */
+	noEnum?: RuleConfiguration_for_Null;
+	/**
 	 * Disallow variables from evolving into any type through reassignments.
 	 */
 	noEvolvingTypes?: RuleConfiguration_for_Null;
@@ -2605,6 +2609,7 @@ export type Category =
 	| "lint/nursery/noDuplicatedFields"
 	| "lint/nursery/noDynamicNamespaceImportAccess"
 	| "lint/nursery/noEmptyBlock"
+	| "lint/nursery/noEnum"
 	| "lint/nursery/noEvolvingTypes"
 	| "lint/nursery/noExportedImports"
 	| "lint/nursery/noImportantInKeyframe"

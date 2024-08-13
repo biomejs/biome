@@ -125,6 +125,7 @@ define_categories! {
     "lint/nursery/noDuplicatedFields": "https://biomejs.dev/linter/rules/no-duplicated-fields",
     "lint/nursery/noDynamicNamespaceImportAccess": "https://biomejs.dev/linter/rules/no-dynamic-namespace-import-access",
     "lint/nursery/noEmptyBlock": "https://biomejs.dev/linter/rules/no-empty-block",
+    "lint/nursery/noEnum": "https://biomejs.dev/linter/rules/no-enum",
     "lint/nursery/noEvolvingTypes": "https://biomejs.dev/linter/rules/no-evolving-types",
     "lint/nursery/noExportedImports": "https://biomejs.dev/linter/rules/no-exported-imports",
     "lint/nursery/noImportantInKeyframe": "https://biomejs.dev/linter/rules/no-important-in-keyframe",

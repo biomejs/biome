@@ -1,0 +1,29 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.ts
+---
+# Input
+```ts
+enum MyEnum {
+	A = 123
+}
+
+```
+
+# Diagnostics
+```
+invalid.ts:1:1 lint/nursery/noEnum ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Variable is read here.
+  
+  > 1 │ enum MyEnum {
+      │ ^^^^^^^^^^^^^
+  > 2 │ 	A = 123
+  > 3 │ }
+      │ ^
+    4 │ 
+  
+  i Prefer using TypeScript's unions over enums.
+  
+
+```

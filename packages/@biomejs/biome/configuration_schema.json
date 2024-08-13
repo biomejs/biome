@@ -1905,6 +1905,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noEnum": {
+					"description": "Disallow TypeScript enum.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noEvolvingTypes": {
 					"description": "Disallow variables from evolving into any type through reassignments.",
 					"anyOf": [
