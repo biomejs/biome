@@ -14,7 +14,7 @@ enum MyEnum {
 ```
 invalid.ts:1:1 lint/nursery/noEnum ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Variable is read here.
+  ! Don't use enum
   
   > 1 │ enum MyEnum {
       │ ^^^^^^^^^^^^^
@@ -23,7 +23,7 @@ invalid.ts:1:1 lint/nursery/noEnum ━━━━━━━━━━━━━━━
       │ ^
     4 │ 
   
-  i Prefer using TypeScript's unions over enums.
+  i Usage of enum is disallowed.
   
 
 ```
