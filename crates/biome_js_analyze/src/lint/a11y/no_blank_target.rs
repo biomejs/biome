@@ -54,16 +54,26 @@ declare_lint_rule! {
     ///
     /// ## Options
     ///
-    /// Use the options to allow specific domains to use `target="_blank"` without `rel="noreferrer"`.
+    /// The option `allowDomains` allows specific domains to use `target="_blank"` without `rel="noreferrer"`.
+    /// In the following configuration, it's allowed to use the domains `https://example.com` and `example.org`:
     ///
-    /// ```json
+    /// ```json,ignore
     /// {
     ///     "//": "...",
     ///     "options": {
-    ///         "allowDomains": ["example.com", "example.org"]
+    ///         "allowDomains": ["https://example.com", "example.org"]
     ///     }
     /// }
     /// ```
+    ///
+    /// ```jsx,ignore
+    /// <>
+    ///   <a target="_blank" href="https://example.com"></a>
+    ///   <a target="_blank" href="example.org"></a>
+    /// </>
+    /// ```
+    ///
+    /// Biome doesn't check if the list contains valid URLs.
     pub NoBlankTarget {
         version: "1.0.0",
         name: "noBlankTarget",
